@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html  xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head th:include="_header_include::frag('表单')"></head>
+<body>
+	<div id="pageTable">
+
+         <el-table :data="tableData3" height="650" style="width: 100%"> 
+          <el-table-column prop="area" label="区域" width="180"> </el-table-column> 
+          <el-table-column prop="name" label="姓名" width="180"> </el-table-column> 
+          <el-table-column prop="address" label="地址"> </el-table-column> 
+         </el-table> 
+
+         <table-pagination :pager="pager" @change="getQuery"></table-pagination>
+	</div>
+
+<!-- import common js-->
+<div th:include="_footer_include :: #jsLib"></div>
+
+<script th:src="@{/js/common/pagination.js}"></script>
+
+
+<script>
+
+ var vm = new Vue({
+     el:'#pageTable',
+     data:{
+    	tableData3:[],
+    	pager:{
+    		total: 0,
+    		currentPage: 1,
+    	    pageSize: 10,
+    	}
+     },
+     methods:{
+    	 getQuery(){
+    		 this.initTableData();
+    	 },
+    	 initTableData(){
+             var pageSize = this.pager.pageSize;
+             var pageNum = this.pager.currentPage;
+             var param = {};
+             axios.post('/demo/listTableByPageNum2?pageNum='+pageNum+"&pageSize="+pageSize,param)
+                 .then(function (response) {
+                     var data =  response.data
+                     vm.tableData3= data.data;
+                     
+                     vm.pager.total= data.total;
+                     vm.pager.currentPage = data.currentPage;
+                     vm.pager.pageSize = data.pageSize;
+                    
+                 })
+                 .catch(function (error) {
+                   console.log(error);
+                 })
+                 .then(function () {
+                   // always executed
+                 });  
+         }
+        
+     },
+     created(){
+       this.getQuery();
+     },
+     mounted(){
+        console.info("mounted method");
+     }
+     
+ });
+ 
+</script>
+</body>
+</html>
