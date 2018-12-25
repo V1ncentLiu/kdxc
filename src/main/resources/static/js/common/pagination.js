@@ -1,13 +1,3 @@
-
-var pageTable = {
-  template: '<div>A custom component!,{{name}}</div>'
-}
-Vue.component('table-pagination',{
-    template:pageTable.template,
-    props:['name']
-   
-});
-
 var paginationTempate= '<div>' 
      +  '<el-pagination @size-change="handleSizeChange" '
      +  '        @current-change="handleCurrentChange" :current-page="pager.currentPage" '
