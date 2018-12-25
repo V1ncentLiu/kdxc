@@ -1,42 +1,48 @@
- new Vue({
-  el: '#app',
-  data: function() {
-    return { 
-      isCollapse: true,//侧导航是否展开
-      
-    }
-  },
-  methods: {
-    handleOpen(key, keyPath) {
-      // console.log(key, keyPath);
-    },
-    handleClose(key, keyPath) {
-      // console.log(key, keyPath);
-    },
-    toogleClick(){
-      if(this.isCollapse){
-        this.isCollapse=false
-      }else{
-        this.isCollapse=true
-      }          
-    },
-    menuClick(){//菜单点击事件
-      console.log(0)     
-      
-    }
-  }
+new Vue({
+  	el: '#app',
+  	data: function() {
+	    return { 
+	      	isCollapse: false,//侧导航是否展开
+	      	isActive:true,
+		   	items:[
+		     	/*{ifreamUrl:'a.html',index:'1-1',name:"数据演示1"},
+		     	{ifreamUrl:'b.html',index:'1-2',name:"数据演示2"}*/
+		   	]
+	    }
+	},
+ 	methods: {
+	    handleOpen(key, keyPath) {
+	      	// console.log(key, keyPath);
+	    },
+	    handleClose(key, keyPath) {
+	      	// console.log(key, keyPath);
+	    },
+	    toogleClick(){
+	      	if(this.isCollapse){
+	        	this.isCollapse=false
+	        	this.isActive=true
+	      	}else{
+	        	this.isCollapse=true
+	        	this.isActive=false
+	      	}          
+	    },
+	    menuClick:function(ifreamUrl){
+	    	console.log(this)
+	     	this.$refs.iframeBox.src=ifreamUrl //给ifream的src赋值
+	   	}
+  	}
 })
 // 点击导航赋值ifream的src值
 $(function () { 
-  var mainBoxH=$(".mainBoxId").height()-40;
-  // 设置ifream高度
-  $("#iframeBox").height(mainBoxH)
-  $(document).on('click','.menu',function(){
-    console.log(0)
-    console.log($(this).attr("data-url"))
-    var dataUrl=$(this).attr("data-url");
-    $("#iframeBox").attr({
-      "src":dataUrl //设置ifream地址
-    });  
-  })
+	var mainBoxH=$(".mainBoxId").height()-40;
+	// 设置ifream高度
+	$("#iframeBox").height(mainBoxH)
+	$(document).on('click','.menu',function(){
+	    // console.log(0)
+	    // console.log($(this).attr("data-url"))
+	    var dataUrl=$(this).attr("data-url");
+	    $("#iframeBox").attr({
+	      "src":dataUrl //设置ifream地址
+	    });  
+	})
 });
