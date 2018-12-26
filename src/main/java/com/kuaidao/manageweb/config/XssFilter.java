@@ -7,6 +7,7 @@ import javax.servlet.*;
 import javax.servlet.annotation.WebFilter;
 import javax.servlet.annotation.WebInitParam;
 import javax.servlet.http.HttpServletRequest;
+import javax.xml.soap.MimeHeader;
 import java.io.IOException;
 import java.util.ArrayList;
 
@@ -33,6 +34,11 @@ public class XssFilter implements Filter {
                 break;
             }
         }
+        
+  /*      String method = req.getMethod();
+        if("POST".equalsIgnoreCase(method)) {
+            
+        }*/
         if (falg){
             filterChain.doFilter(servletRequest,servletResponse);
         }else {
