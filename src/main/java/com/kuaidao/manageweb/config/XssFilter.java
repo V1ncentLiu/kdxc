@@ -26,7 +26,6 @@ public class XssFilter implements Filter {
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
         HttpServletRequest req = (HttpServletRequest) servletRequest;
-//        logger.info("【请求路径】" + req.getServletPath());
         boolean falg = false;
         for(String reU:excludedPageArray){
             if (reU.equals(req.getServletPath())){

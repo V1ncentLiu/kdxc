@@ -1,6 +1,5 @@
 package com.kuaidao.manageweb.config;
 
-import org.apache.commons.lang.StringUtils;
 import org.springframework.web.util.HtmlUtils;
 import com.kuaidao.manageweb.util.XssUtil;
 import javax.servlet.http.HttpServletRequest;
