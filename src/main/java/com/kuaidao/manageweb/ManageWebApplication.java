@@ -16,6 +16,8 @@ import feign.Logger;
 @EnableCircuitBreaker
 public class ManageWebApplication 
 {
+
+
     public static void main( String[] args )
     {
     	SpringApplication.run(ManageWebApplication.class, args);
