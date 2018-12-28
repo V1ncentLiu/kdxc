@@ -20,10 +20,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.thymeleaf.expression.Lists;
+import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.manageweb.demo.DTO.AddressReqDTO;
 import com.kuaidao.manageweb.demo.DTO.PageTable;
 import com.kuaidao.manageweb.demo.entity.Activity;
 import com.kuaidao.manageweb.demo.entity.Address;
+import com.kuaidao.manageweb.feign.SysFeign;
 
 
 @RestController
@@ -164,8 +166,6 @@ public class DemoController {
 		return pageTable;
 	}
 	
-	
-
 	
 
 }

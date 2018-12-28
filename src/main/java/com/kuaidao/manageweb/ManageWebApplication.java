@@ -5,6 +5,9 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.client.circuitbreaker.EnableCircuitBreaker;
 import org.springframework.cloud.netflix.eureka.EnableEurekaClient;
 import org.springframework.cloud.netflix.feign.EnableFeignClients;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Profile;
+import feign.Logger;
 
 
 @SpringBootApplication
@@ -17,4 +20,5 @@ public class ManageWebApplication
     {
     	SpringApplication.run(ManageWebApplication.class, args);
     }
+    
 }
