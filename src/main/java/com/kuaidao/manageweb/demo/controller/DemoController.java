@@ -21,18 +21,21 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.thymeleaf.expression.Lists;
 import com.kuaidao.common.entity.JSONResult;
+import com.kuaidao.manageweb.config.SnowflakeArgs;
 import com.kuaidao.manageweb.demo.DTO.AddressReqDTO;
 import com.kuaidao.manageweb.demo.DTO.PageTable;
 import com.kuaidao.manageweb.demo.entity.Activity;
 import com.kuaidao.manageweb.demo.entity.Address;
 import com.kuaidao.manageweb.feign.SysFeign;
+import com.kuaidao.manageweb.util.IdUtil;
 
 
 @RestController
 @RequestMapping("/demo")
 public class DemoController {
 	private static final Logger logger = LoggerFactory.getLogger(DemoController.class);
-	
+	@Autowired
+	SnowflakeArgs  snowflakeArgs;
 	//@PostConstruct
 	public void initData() {
 		String sql = "INSERT INTO address_test (area, name, address) VALUES (?, ?,?);";
@@ -48,7 +51,9 @@ public class DemoController {
 
 	@RequestMapping("/get")
 	public String  get() {
+	    logger.info("{{}},{{}}",snowflakeArgs.getWorkerId(),snowflakeArgs.getDatacenterId());
 		logger.info("dddddddddddddd");
+		System.out.println(IdUtil.getUUID());
 		return "success";
 	}
 	
