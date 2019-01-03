@@ -19,7 +19,7 @@ public class CustomFieldController {
      */
     @RequestMapping("/customFieldMenuPage")
     public String customFieldMenuPage() {
-        return "";
+        return "customfield/customFieldMenuPage";
     }
     
     
