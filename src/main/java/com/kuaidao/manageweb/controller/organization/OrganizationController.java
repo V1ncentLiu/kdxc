@@ -4,7 +4,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
-import com.github.pagehelper.PageHelper;
 import com.kuaidao.common.entity.IdEntity;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
@@ -14,14 +13,8 @@ import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
 import com.kuaidao.sys.dto.organization.OrganitionRespDTO;
 import com.kuaidao.sys.dto.organization.OrganizationAddAndUpdateDTO;
 import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
-import java.lang.reflect.InvocationTargetException;
-import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import javax.validation.Valid;
-import org.apache.commons.beanutils.BeanUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,6 +50,7 @@ public class OrganizationController {
         if (result.hasErrors()) {
             return CommonUtil.validateParam(result);
         }
+        orgDTO.setCreateUser(1111);
         return organizationFeignClient.save(orgDTO);
     }
 
@@ -100,7 +94,7 @@ public class OrganizationController {
     }
 
     /**
-     * 查询组织信息 
+     * 分页 查询组织信息 
      * @param queryDTO
      * @return
      */

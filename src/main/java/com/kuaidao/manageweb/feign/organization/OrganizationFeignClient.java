@@ -1,12 +1,10 @@
 package com.kuaidao.manageweb.feign.organization;
 
 import java.util.List;
-import javax.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.netflix.feign.FeignClient;
 import org.springframework.stereotype.Component;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,6 +18,12 @@ import com.kuaidao.sys.dto.organization.OrganitionRespDTO;
 import com.kuaidao.sys.dto.organization.OrganizationAddAndUpdateDTO;
 import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
 
+/**
+ * 组织机构
+ * @author: Chen Chengxue
+ * @date: 2019年1月3日 下午5:06:53   
+ * @version V1.0
+ */
 @FeignClient(name = "sys-service",path="/sys/organization/organization",fallback = OrganizationFeignClient.HystrixClientFallback.class)
 public interface OrganizationFeignClient {
 
