@@ -26,7 +26,6 @@ import com.kuaidao.manageweb.demo.DTO.AddressReqDTO;
 import com.kuaidao.manageweb.demo.DTO.PageTable;
 import com.kuaidao.manageweb.demo.entity.Activity;
 import com.kuaidao.manageweb.demo.entity.Address;
-import com.kuaidao.manageweb.feign.SysFeign;
 import com.kuaidao.manageweb.util.IdUtil;
 
 
