@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<head th:include="_header_include::frag(~{::title},~{},~{})">
+    <title>自定义字段</title>
+</head>
+<body>
+	<div id="roleManagerld">
+
+		<el-form :inline="true" :model="customFieldQuery" class="demo-form-inline" ref="customFieldQueryForm"> 
+	       	<el-row>
+		     <el-button type="info">添加</el-button>
+		     <el-button type="info" @click="dialogBatchVisible = true">批量添加</el-button>
+		     <el-button type="info">编辑</el-button>
+		     <el-button type="info">删除</el-button>
+		     <el-form-item  prop="fieldName"> 
+		        <el-input v-model="customFieldQuery.fieldName" placeholder="请输入字段名称"></el-input>
+		     </el-form-item> 
+		     <el-form-item>
+		       	<el-button type="info" @click="queryCustomFieldList">搜索</el-button> 
+		     </el-form-item> 
+		     </el-row>
+	     </el-form>
+
+
+        <div>
+	       <el-table id="customerTable" ref="customFieldTable" :data="customFieldList"
+	                tooltip-effect="dark"  style="width: 100%,height:750px"
+	                  @selection-change="handleSelectionChange">
+	            <el-table-column type="selection" width="55" > </el-table-column>
+	            <el-table-column prop="name" label="角色名称" width="180"> </el-table-column> 
+	            <el-table-column prop="userCount" label="角色内成员(人)"> </el-table-column> 
+	      </el-table>
+        </div>
+        
+        <!-- 添加自定义字段弹窗 start -->
+	        <el-dialog title="批量添加" :visible.sync="dialogBatchVisible">
+	           <el-row>
+	                             下载批量上传模版: <a href="#">页面自定义字段模板</a>
+	           
+	           </el-row>
+		       <el-row>
+		          <el-upload
+					  class="upload-demo"
+					  ref="upload"
+					  :multiple="false"
+					  accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+					  action="https://jsonplaceholder.typicode.com/posts/"
+					  :file-list="fileList"
+					  :on-change="handleChange"
+					  :before-upload="beforeUpload"
+					  :on-success="uploadSuccess"
+					  :auto-upload="false">
+					  <el-button slot="trigger" size="small" type="primary">选取文件</el-button>
+					  <div slot="tip" class="el-upload__tip">只能上传xlsx文件，且不超过500kb</div>
+					</el-upload>
+		       
+		       
+		       </el-row>
+			  <div slot="footer" class="dialog-footer">
+			    <el-button type="primary" @click="submitUpload">确 定</el-button>
+			    <el-button @click="dialogBatchVisible = false">取 消</el-button>
+			  </div>
+			</el-dialog>
+      
+		    <!-- 添加自定义字段弹窗 end -->
+		 
+	</div>
+<!-- import common js-->
+<div th:include="_footer_include :: #jsLib"></div>
+
+	<script>
+
+var customFieldVM = new Vue({
+    el:'#roleManagerld',
+    data:{
+    	formLabelWidth:'120px',
+    	customFieldQuery: {
+    		fieldName: ''
+        },
+        customFieldList:[],
+        multipleSelection:[],
+       /* pager:{
+            total: 0,
+            currentPage: 1,
+            pageSize: 10,
+        },*/
+        dialogAddFormVisible:false,//添加 dialog 是否显示标志
+        dialogBatchVisible:false,
+        customField:{
+        	
+        },
+        form:{
+        	 name: '',
+             region: '',
+        },
+        fileList:[]
+    },
+    methods:{
+         onSubmit() {
+         
+          },
+          handleSelectionChange(val) {
+            this.multipleSelection = val;
+            console.info(this.multipleSelection );
+          },
+          queryCustomFieldList(){//查询按钮
+        	  var param = this.customFieldQuery; 
+        	  var pageSize = this.pager.pageSize;
+              var pageNum = this.pager.currentPage;
+              axios.post('/role/roleManager/queryRoleList',param)
+              .then(function (response) {
+                  var data =  response.data
+                  customFieldVM.customFieldList= data.data;
+                  //3.分页组件
+                  customFieldVM.pager.total= data.total;
+                  customFieldVM.pager.currentPage = data.currentPage;
+                  customFieldVM.pager.pageSize = data.pageSize;
+                 
+              })
+              .catch(function (error) {
+                console.log(error);
+              })
+              .then(function () {
+                // always executed
+              });  
+              
+          },
+          submitUpload() {
+              this.$refs.upload.submit();
+              console.info("upload");
+        	 
+            },
+            handleChange(files,fileList){
+            	  this.fileList = fileList.slice(-1);
+            },
+            beforeUpload(file){
+            	console.info(file);
+            	var isTextComputer = file.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+            	if(!isTextComputer){
+            		this.$message.error('文件格式错误');
+            		return false;
+            	}
+            },
+            uploadSuccess(response, file, fileList){
+            	 this.dialogBatchVisible = false
+            }
+    },
+    created(){
+    	console.info("init created");
+    	this.queryCustomFieldList();//初始化table 
+    },
+    mounted(){
+    }
+    
+    
+});
+
+ 
+</script>
+</body>
+</html>
