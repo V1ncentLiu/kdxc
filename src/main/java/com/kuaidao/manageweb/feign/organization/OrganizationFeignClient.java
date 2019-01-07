@@ -7,16 +7,16 @@ import org.springframework.cloud.netflix.feign.FeignClient;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.IdEntity;
+import com.kuaidao.common.entity.IdListReq;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.common.entity.TreeData;
-import com.kuaidao.sys.dto.organization.OrganitionRespDTO;
 import com.kuaidao.sys.dto.organization.OrganizationAddAndUpdateDTO;
+import com.kuaidao.sys.dto.organization.OrganizationDTO;
 import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
+import com.kuaidao.sys.dto.organization.OrganizationRespDTO;
 
 /**
  * 组织机构
@@ -33,22 +33,34 @@ public interface OrganizationFeignClient {
     @PostMapping("/update")
     public JSONResult update(@RequestBody OrganizationAddAndUpdateDTO orgDTO);   
     
-    @RequestMapping(method = RequestMethod.POST, value = "/delete")
-    public JSONResult delete(@RequestBody IdEntity idEntity);
+    @PostMapping("/delete")
+    public JSONResult delete(@RequestBody IdListReq idListReq);
     
     @PostMapping("/queryOrgDataByParam")
-    public JSONResult<PageBean<OrganitionRespDTO>> queryOrgDataByParam(@RequestBody OrganizationQueryDTO queryDTO);
+    public JSONResult<PageBean<OrganizationRespDTO>> queryOrgDataByParam(@RequestBody OrganizationQueryDTO queryDTO);
     
     @PostMapping("/queryOrgByParam")
-    public JSONResult<List<OrganitionRespDTO>> queryOrgByParam( @RequestBody OrganizationQueryDTO queryDTO);
+    public JSONResult<List<OrganizationRespDTO>> queryOrgByParam( @RequestBody OrganizationQueryDTO queryDTO);
+    
     
     /**
-     * 查询组织机构数
+     * 查询组织机构 树
      * @param queryDTO
      * @return
      */
     @PostMapping("/query")
-    JSONResult<TreeData> query();
+    JSONResult<List<TreeData>> query();
+    
+    /**
+     * 查询组织机构下是否由下级
+     * @param idListReq
+     * @return
+     */
+    @PostMapping("/queryOrgByParentId")
+    JSONResult<Boolean> queryOrgByParentId(IdListReq idListReq);
+    
+    @PostMapping("/queryOrgById")
+    JSONResult<OrganizationDTO> queryOrgById(@RequestBody IdEntity idEntity);
     
     @Component
     static class HystrixClientFallback implements  OrganizationFeignClient{
@@ -76,27 +88,43 @@ public interface OrganizationFeignClient {
 
 
         @Override
-        public JSONResult delete(IdEntity idEntity) {
+        public JSONResult delete(IdListReq idListReq) {
             return fallBackError("删除组织机构");
         }
 
 
         @Override
-        public JSONResult<PageBean<OrganitionRespDTO>> queryOrgDataByParam(OrganizationQueryDTO queryDTO) {
+        public JSONResult<PageBean<OrganizationRespDTO>> queryOrgDataByParam(OrganizationQueryDTO queryDTO) {
             return fallBackError("查询组织机构数据，分页");
         }
 
 
         @Override
-        public JSONResult<List<OrganitionRespDTO>> queryOrgByParam(OrganizationQueryDTO queryDTO) {
+        public JSONResult<List<OrganizationRespDTO>> queryOrgByParam(OrganizationQueryDTO queryDTO) {
             return fallBackError("查询组织机构");
         }
 
 
         @Override
-        public JSONResult<TreeData> query() {
+        public JSONResult<List<TreeData>> query() {
             return fallBackError("查询组织机构树");
         }
+
+
+        @Override
+        public JSONResult<Boolean> queryOrgByParentId(IdListReq idListReq) {
+            return fallBackError("查询组织机构是否有下级");
+        }
+
+
+        @Override
+        public JSONResult<OrganizationDTO> queryOrgById(IdEntity idEntity) {
+            return fallBackError("根据ID查询组织机构信息");
+        }
     }
+
+   
+
+  
 
 }

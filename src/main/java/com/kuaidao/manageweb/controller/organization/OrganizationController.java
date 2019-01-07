@@ -4,16 +4,24 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.IdEntity;
+import com.kuaidao.common.entity.IdListReq;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.common.entity.TreeData;
 import com.kuaidao.common.util.CommonUtil;
 import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
-import com.kuaidao.sys.dto.organization.OrganitionRespDTO;
+import com.kuaidao.sys.dto.organization.OrganizationRespDTO;
 import com.kuaidao.sys.dto.organization.OrganizationAddAndUpdateDTO;
+import com.kuaidao.sys.dto.organization.OrganizationDTO;
 import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
+import lombok.val;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,18 +48,35 @@ public class OrganizationController {
      * @return
      */
     @RequestMapping("/organizationPage")
-    public String organizationPage() {
+    public String organizationPage(HttpServletRequest request) {
+        JSONResult<List<TreeData>> treeJsonRes = organizationFeignClient.query();
+        if(treeJsonRes!=null&& JSONResult.SUCCESS.equals(treeJsonRes.getCode()) && treeJsonRes.getData()!=null) {
+            request.setAttribute("orgData",treeJsonRes.getData());
+        }else {
+            logger.error("query organization tree,res{{}}",treeJsonRes);
+        }
         return "organization/organizationPage";
     }
 
-    @PostMapping("/save")
+    @PostMapping("/saveOrUpdate")
+    @ResponseBody
     public JSONResult save(@Valid @RequestBody OrganizationAddAndUpdateDTO orgDTO,
             BindingResult result) throws Exception {
         if (result.hasErrors()) {
             return CommonUtil.validateParam(result);
         }
-        orgDTO.setCreateUser(1111);
-        return organizationFeignClient.save(orgDTO);
+      //TODO devin
+        orgDTO.setSystemCode("huiju");
+        
+        Long id = orgDTO.getId();
+        if(id!=null) {
+            return organizationFeignClient.update(orgDTO);
+        }else {
+            //TODO devin
+            orgDTO.setCreateUser(1111);
+            return organizationFeignClient.save(orgDTO);
+        }
+
     }
 
 
@@ -61,6 +86,7 @@ public class OrganizationController {
      * @return
      */
     @PostMapping("/update")
+    @ResponseBody
     public JSONResult update(@Valid @RequestBody OrganizationAddAndUpdateDTO orgDTO,
             BindingResult result) {
         if (result.hasErrors()) {
@@ -77,16 +103,25 @@ public class OrganizationController {
      */
     @PostMapping("/delete")
     @ResponseBody
-    public JSONResult delete(@RequestBody IdEntity idEntity) {
-        String id = idEntity.getId();
-        logger.info("delete organization by id{{}}", id);
-        return organizationFeignClient.delete(idEntity);
+    public JSONResult delete(@RequestBody IdListReq idListReq) {
+        List<String> idList = idListReq.getIdList();
+        if(idList==null || idList.size()==0) {
+            return new JSONResult().fail(SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getCode(), SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getMessage()); 
+        }
+        logger.info("delete organization by id{{}}", idList);
+        return organizationFeignClient.delete(idListReq);
     }
 
-
+    /**
+     * 分页 查询组织信息 
+     * @param pageNum
+     * @param pageSize
+     * @param queryDTO
+     * @return
+     */
     @PostMapping("/queryOrgDataByParam")
     @ResponseBody
-    public JSONResult<PageBean<OrganitionRespDTO>> queryOrgDataByParam(int pageNum, int pageSize,
+    public JSONResult<PageBean<OrganizationRespDTO>> queryOrgDataByParam(int pageNum, int pageSize,
             @RequestBody OrganizationQueryDTO queryDTO) {
         queryDTO.setPageNum(pageNum);
         queryDTO.setPageSize(pageSize);
@@ -94,21 +129,63 @@ public class OrganizationController {
     }
 
     /**
-     * 分页 查询组织信息 
+     * 查询组织信息 根据组织机构代码，组织名称，父级ID
      * @param queryDTO
      * @return
      */
     @PostMapping("/queryOrgByParam")
-    public JSONResult<List<OrganitionRespDTO>> queryOrgByParam(
+    @ResponseBody
+    public JSONResult<Boolean> queryOrgByParam(
             @RequestBody OrganizationQueryDTO queryDTO) {
-        return organizationFeignClient.queryOrgByParam(queryDTO);
+        //TODO devin
+        queryDTO.setSystemCode("huiju");
+        JSONResult<List<OrganizationRespDTO>> orgList = organizationFeignClient.queryOrgByParam(queryDTO);
+        if(orgList!=null && JSONResult.SUCCESS.equals(orgList.getCode())) {
+            List<OrganizationRespDTO> data = orgList.getData();
+            if(data!=null &&data.size()!=0) {
+               return new JSONResult<Boolean>().success(true);
+            }
+        }else {
+            
+        }
+        return new JSONResult<Boolean>().success(false) ;
     }
     
+    /**
+     * 查询组织机构树
+     * @return
+     */
     @PostMapping("/query")
     @ResponseBody
-    public JSONResult<TreeData> query(){
-        return null;
+    public JSONResult<List<TreeData>> query(){
+        return  organizationFeignClient.query();
     }
+    
+    
+    /**
+     * 查询组织机构下是否由下级
+     * @param idListReq  组织ID list
+     * @return
+     */
+    @PostMapping("/queryOrgByParentId")
+    @ResponseBody
+    public JSONResult<Boolean> queryOrgByParentId(@RequestBody IdListReq idListReq){
+        return organizationFeignClient.queryOrgByParentId(idListReq);
+    }
+    
+    /**
+     * 根据Id 查询组织结构
+     * @param idListReq  组织ID list
+     * @return
+     */
+    @PostMapping("/queryOrgById")
+    @ResponseBody
+    public JSONResult<OrganizationDTO> queryOrgById(@RequestBody IdEntity idEntity){
+        
+       return organizationFeignClient.queryOrgById(idEntity);
+      
+    }
+    
     
 
 }
