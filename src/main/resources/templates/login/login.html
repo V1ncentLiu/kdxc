@@ -9,7 +9,14 @@
     <link rel="stylesheet" href="css/login.css">
 </head>
 <body>
-    <div class="loginbox">
+    <div id="Loading">
+        <div class="loader-inner ball-beat">
+            <div></div>
+            <div></div>
+            <div></div>
+        </div>
+    </div>
+    <div id="loginbox" class="loginbox">
         <div class="loginform">
             <div class="control-group normal_text">
                 <img src="images/loginLogo.png" alt="Logo">
@@ -17,17 +24,31 @@
             <div class="control-group">
                 <div class="controls">
                     <div class="main_input_box whiteBg">
-                        <span class="ico"><img src="images/loginIco01.jpg" alt=""></span>
-                        <input type="text" placeholder="用户名" id="username" name="username" value="" required="" onblur="userNameBlur()">
+                        <el-row>
+                            <el-col :span="4">
+                                <span class="ico"><img src="images/loginIco01.jpg" alt=""></span>
+                            </el-col>
+                            <el-col :span="20">
+                                <el-input v-model="nameInput" placeholder="用户名"></el-input>
+                            </el-col>
+                        </el-row> 
                     </div>
                 </div>
             </div>
             <div class="control-group">
                 <div class="controls">
                     <div class="main_input_box whiteBg">
-                        <span class="ico"><img src="images/loginIco02.jpg" alt=""></span>
-                        <input type="password" placeholder="密码" name="password" value="" required="">
-                        <span class="ico icoRight"><img src="images/loginIco04.jpg" alt=""></span>
+                        <el-row>
+                            <el-col :span="4">
+                                <span class="ico"><img src="images/loginIco02.jpg" alt=""></span>
+                            </el-col>
+                            <el-col :span="16">
+                                <el-input v-model="pswInput" placeholder="密码"></el-input>
+                            </el-col>
+                            <el-col :span="4">
+                                <span class="ico icoRight"><img src="images/loginIco04.jpg" alt=""></span>
+                            </el-col>
+                        </el-row>                        
                     </div>
                 </div>
             </div>          
@@ -35,10 +56,16 @@
                 <div class="controls">
                     <div class="main_input_box">
                         <div class="codeIptBox">
-                            <span class="ico"><img src="images/loginIco03.jpg" alt=""></span>
-                            <input type="text" placeholder="输入验证码" name="smsCheckCode" value="" required="">
+                            <el-row>
+                                <el-col :span="7">
+                                    <span class="ico"><img src="images/loginIco03.jpg" alt=""></span>
+                                </el-col>
+                                <el-col :span="17">
+                                    <el-input v-model="codeInput" placeholder="输入验证码"></el-input>
+                                </el-col>
+                            </el-row>
                         </div>
-                        <input class="codeBtn" type="button" id="btn" value="获取语音验证码" onclick="settime(2)">
+                        <el-button type="primary" class="codeBtn">获取语音验证码</el-button>
                     </div>                  
                 </div>
             </div>
@@ -53,7 +80,9 @@
             <div class="control-group">
                 <!-- 提示语 -->
                 <div class="tipCntBox"><span id="errorSpan" style="display: none;"></span></div>
-                <div class="loginBtnBox"><a type="submit" href="javascript:checkUserForm()" class="loginBtn">登&nbsp;&nbsp;录</a></div>
+                <div class="loginBtnBox">
+                    <el-button type="primary" class="loginBtn">登&nbsp;&nbsp;录</el-button>
+                </div>
                 <a href="javascript:checkUserPhone(username.value)" class="pswForgetBtn">忘记密码</a>
             </div>
             <!-- 图形验证码弹窗 移除hideBox则显示-->
@@ -61,17 +90,19 @@
                 <div class="closeBtn">×</div> 
                 <div class="title">请输入下面的图形验证码</div>
                 <div class="codeImgBox"><img id="codeImg" src="images/code.jpg"></div>
-                <div class="whiteIptBox"><input id="code" type="text"></div>
+                <div class="whiteIptBox">
+                    <el-input v-model="imgcodeInput" placeholder=""></el-input>
+                </div>
                 <div class="tip" id="codeImgMsg" style="display: none">请输入正确的验证码</div>
-                <button type="button" class="blueSubmitBtn" onclick="settime()">提交</button>
+                <el-button type="primary" class="blueSubmitBtn">提&nbsp;&nbsp;交</el-button>
             </div>
             <!-- 下线通知 移除hideBox则显示-->   
             <div id="logoutBoxDiv" class="logoutBox f-dn">
                 <div class="box">
                     <div class="title">下线通知</div>
-                    <div class="cnt">您的账户在另一设备登录，您被迫下线。如不是本人操作，您的密码可能已经泄漏，建议您<a href="javascript:hideLogoutBoxDiv(1)">修改密码</a></div>
-                    <button type="button" onclick="hideLogoutBoxDiv(2)" class="blueSubmitBtn floatLeft">重新登录</button>
-                    <button type="button" onclick="hideLogoutBoxDiv(2)" class="blueSubmitBtn floatRight">确定</button>
+                    <div class="cnt">您的账户在另一设备登录，您被迫下线。如不是本人操作，您的密码可能已经泄漏，建议您<a href="">修改密码</a></div>
+                    <el-button type="primary" class="blueSubmitBtn floatLeft">重新登录</el-button>
+                    <el-button type="primary" class="blueSubmitBtn floatRight">确定</el-button>
                 </div>                  
             </div>
         </div>
@@ -82,4 +113,23 @@
 <script src="js/vue-router.js"></script>
 <script src="js/element-ui.js"></script>
 <script src="js/jquery-3.2.1.min.js"></script>
+<script>
+    new Vue({
+        el: '#loginbox',
+        data: function() {
+            return {
+                nameInput: '',
+                pswInput:'',
+                codeInput:'',
+                imgcodeInput:''
+            }             
+        },
+        methods: {
+            
+        },
+        created() {  
+            document.body.removeChild(document.getElementById('Loading'))   
+        }
+    })
+</script>
 </html>
