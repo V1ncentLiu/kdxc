@@ -1,4 +1,4 @@
-package com.kuaidao.manageweb.feign;
+package com.kuaidao.manageweb.feign.role;
 
 import java.util.List;
 
