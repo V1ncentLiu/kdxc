@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <!-- import CSS -->
+    <link rel="stylesheet" href="css/element-ui.css">
+    <link rel="stylesheet" href="css/base.css">
+    <style>
+        .userManage .leftBox{/*width: 200px;*/height: auto;border:1px solid #ebeef5;min-height: 480px;}
+        .userManage .leftTitle{background:#ebeef5;text-indent: 20px;height: 40px;line-height: 40px;}
+        .userManage .leftTree{padding:10px;}
+        .userManage .rightTitle{background:#ebeef5;text-indent: 20px;height: 40px;line-height: 40px;}
+    </style>
+</head>
+<body>
+<div id="userManage" class="userManage mainPadding">  
+    <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
+        <el-breadcrumb-item>Home</el-breadcrumb-item>
+        <el-breadcrumb-item>系统管理</el-breadcrumb-item>
+        <el-breadcrumb-item><a href="JavaScript:void(0)" data-url="c.html">页面自定义字段</a></el-breadcrumb-item>
+    </el-breadcrumb>
+    <el-row class="marginB10">
+        <el-button type="primary" @click="dialogFormVisible = true"><i class="el-icon-plus"></i> 添加</el-button>
+        <el-button type="primary" @click="dialogFormAdd = true">批量添加</el-button>
+        <el-button type="primary">编辑</el-button>
+        <el-button type="primary" @click="deleteFun">删除</el-button>
+    </el-row>
+    <el-row class="marginB10 greybg padding20">
+        <el-col :span="6" :offset="18">
+            <el-input placeholder="请输入字段名称" class="input-with-select">
+            <el-button slot="append" icon="el-icon-search">搜索</el-button>
+            </el-input>
+        </el-col>
+    </el-row>
+    <el-row>
+        <el-table 
+            ref="multipleTable"
+            tooltip-effect="dark"
+            style="width: 100%"
+            border
+            :data="dataTable" 
+            >
+            <el-table-column align="center" type="selection" width="55"></el-table-column>
+            <el-table-column align="center" prop="number" label="序号"></el-table-column>
+            <el-table-column align="center" prop="code" label="字段编码"></el-table-column>
+            <el-table-column align="center" prop="fieldName" label="字段名称"></el-table-column>
+            <el-table-column align="center" prop="outlookName" label="外显名称"></el-table-column>
+            <el-table-column align="center" prop="fieldType" label="字段类型"></el-table-column>
+            <el-table-column align="center" prop="fieldWidth" label="宽度"></el-table-column>
+            <el-table-column align="center" prop="isUse" label="是否使用"></el-table-column>
+        </el-table>
+    </el-row>
+    <!-- dialog -->
+    <el-dialog title="新建字段" :visible.sync="dialogFormVisible">
+        <el-form :model="form">
+            <div class="marginB20 fs16"><em class="redcolor">*</em>必填项</div>
+            <div class="borderbox paddingL20 paddingR20 paddingT10">
+                <el-row>
+                    <el-col :span="12">
+                        <el-form-item label="菜单代码：" :label-width="formLabelWidth">
+                            dxgl
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="12">
+                        <el-form-item label="菜单名称：" :label-width="formLabelWidth">
+                            电销管理
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="12">
+                        <el-form-item label="字段编码：" :label-width="formLabelWidth">
+                            <el-input v-model="form.code" autocomplete="off"></el-input>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="12">
+                        <el-form-item label="字段名称：" :label-width="formLabelWidth">
+                            <el-input v-model="form.name" autocomplete="off"></el-input>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="12">
+                        <el-form-item label="外显名称：" :label-width="formLabelWidth">
+                            <el-input v-model="form.code" autocomplete="off"></el-input>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="12">
+                        <el-form-item label="字段类型：" :label-width="formLabelWidth">
+                            <el-select v-model="value" placeholder="请选择">
+                                <el-option
+                                    v-for="item in options"
+                                    :key="item.value"
+                                    :label="item.label"
+                                    :value="item.value">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+            </div>
+            <div class="marginB20 fs16 paddingT20">选填项</div>
+            <div class="borderbox padding20">
+                <el-row>
+                    <el-col :span="12">
+                        <el-form-item label="序号：" :label-width="formLabelWidth">
+                            <el-input v-model="form.code" autocomplete="off"></el-input>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="12">
+                        <el-form-item label="宽度：" :label-width="formLabelWidth">
+                            <el-input v-model="form.code" autocomplete="off"></el-input>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="12">
+                        <el-form-item label="Bean名：" :label-width="formLabelWidth">
+                            tg011
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="12">
+                        <el-form-item label="是否实用：" :label-width="formLabelWidth">
+                            <el-select v-model="value" placeholder="请选择">
+                                <el-option
+                                    v-for="item in options"
+                                    :key="item.value"
+                                    :label="item.label"
+                                    :value="item.value">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="12">
+                        <el-form-item label="备注：" :label-width="formLabelWidth">
+                            <el-input v-model="form.code" autocomplete="off"></el-input>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+            </div>
+        </el-form>
+        <div slot="footer" class="dialog-footer">            
+            <el-button type="primary" @click="dialogFormVisible = false">提交</el-button>
+            <el-button @click="dialogFormVisible = false">取 消</el-button>
+        </div>
+    </el-dialog>
+    <el-dialog title="批量添加" :visible.sync="dialogFormAdd">
+        <el-form :model="form">            
+            <el-form-item label="下载批量上传模板：">
+                页面自定义模板
+            </el-form-item>
+            <el-upload
+                class="upload-demo"
+                action="https://jsonplaceholder.typicode.com/posts/"                
+                multiple
+                :limit="1">
+                <el-button size="small" type="primary">点击上传</el-button>
+            </el-upload>
+        </el-form>
+        <div slot="footer" class="dialog-footer">            
+            <el-button type="primary" @click="dialogFormAdd = false">确定</el-button>
+            <el-button @click="dialogFormAdd = false">取 消</el-button>
+        </div>
+    </el-dialog>   
+</div>
+</body>
+<!-- import Vue before Element -->
+<script src="js/vue.js"></script>
+<script src="js/vue-router.js"></script>
+<!-- import JavaScript -->
+<script src="js/element-ui.js"></script>
+<script src="js/jquery-3.2.1.min.js"></script>
+<script>
+    new Vue({
+        el: '#userManage',
+        data: function() {
+            return {
+                dialogFormVisible: false,
+                dialogFormAdd: false,
+                form: {
+                    code:'',
+                    name:'',
+                    beanName:''
+                },
+                formLabelWidth: '100px',
+                dataTable: [{
+                        number:'1',
+                        code:'编码1',
+                        fieldName:'字段名称1',
+                        outlookName:'外显名称1',
+                        fieldType:'字段类型1',
+                        fieldWidth:'宽度1',
+                        isUse:'是'
+                    },
+                    {
+                        number:'2',
+                        code:'编码2',
+                        fieldName:'字段名称2',
+                        outlookName:'外显名称2',
+                        fieldType:'字段类型2',
+                        fieldWidth:'宽度2',
+                        isUse:'否'
+                    }
+                ],
+                options: [{
+                    value: '选项1',
+                    label: '黄金糕'
+                }, {
+                    value: '选项2',
+                    label: '双皮奶'
+                }, {
+                    value: '选项3',
+                    label: '蚵仔煎'
+                }, {
+                    value: '选项4',
+                    label: '龙须面'
+                }, {
+                    value: '选项5',
+                    label: '北京烤鸭'
+                }],
+                value: ''
+            }        	  
+        },
+        methods: {
+            deleteFun() {
+                this.$confirm('确定要删除【字段名称】【字段名称】字段吗？', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }).then(() => {
+                    this.$message({
+                        type: 'success',
+                        message: '删除成功!'
+                    });
+                }).catch(() => {
+                    this.$message({
+                        type: 'info',
+                        message: '已取消删除'
+                    });          
+                });
+            }
+        }
+    })
+</script>
+</html>

@@ -30,11 +30,15 @@ new Vue({
 	    	console.log(this)
 	     	this.$refs.iframeBox.src=ifreamUrl //给ifream的src赋值
 	   	}
-  	}
+  	},
+   	created() {  
+   		document.body.removeChild(document.getElementById('Loading'))   
+	}
 })
 // 点击导航赋值ifream的src值
 $(function () { 
-	var mainBoxH=$(".mainBoxId").height()-40;
+	var mainBoxH=$(".elMain").height()-4;
+	console.log($(".elMain").height())
 	// 设置ifream高度
 	$("#iframeBox").height(mainBoxH)
 	$(document).on('click','.menu',function(){
