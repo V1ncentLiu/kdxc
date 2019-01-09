@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.kuaidao.common.entity.JSONResult;
-import com.kuaidao.manageweb.feign.RoleManagerFeignClient;
+import com.kuaidao.manageweb.feign.role.RoleManagerFeignClient;
 import com.kuaidao.sys.dto.customfield.CustomFieldMenuRespDTO;
 import com.kuaidao.sys.dto.role.RoleInfoDTO;
 import com.kuaidao.sys.dto.role.RoleQueryDTO;
