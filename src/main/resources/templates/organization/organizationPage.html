@@ -60,7 +60,15 @@
                     <el-table-column align="center" type="selection" width="55"></el-table-column> 
                      <!-- <el-table-column prop="date" label="全选" width="180"></el-table-column>  -->
                     <el-table-column align="center" prop="name" label="组织名称"></el-table-column>
-                    <el-table-column align="center" prop="staffNum" label="组内成员（人）"></el-table-column>
+                    <el-table-column align="center" prop="staffNum" label="组内成员（人）">
+                    
+                    <template slot-scope="scope">
+				        <!-- <a >{{ scope.row.staffNum }}</a> -->
+				        <el-button type="text" @click="dialogStaffNumVisible = true">{{ scope.row.staffNum }}</el-button>
+				        
+				      </template>
+				   
+                    </el-table-column>
                     <el-table-column align="center" prop="remark" label="备注"></el-table-column>
                 </el-table>
                  <table-pagination :pager="pager" @change="getQuery"></table-pagination>
@@ -92,6 +100,56 @@
             <el-button type="primary" @click="submitForm('ruleForm')">确 定</el-button>
         </div>
     </el-dialog>
+    
+    
+    <el-dialog title="组内成员" :visible.sync="dialogStaffNumVisible">
+        <el-row>
+		 <el-form :inline="true" :model="staffNumSearch" class="demo-form-inline"ref="staffNumSearch"> 
+		      <el-form-item label="">
+                  <el-input v-model="staffNumSearch.name" placeholder="姓名"></el-input> 
+              </el-form-item> 
+               <el-form-item label=""> 
+                 <el-input v-model="staffNumSearch.username" placeholder="登录名"></el-input> 
+              </el-form-item>
+               <el-form-item label=""> 
+                 <el-input v-model="staffNumSearch.phone" placeholder="手机号"></el-input> 
+              </el-form-item>
+              <el-form-item>
+                <el-button type="primary" >查询</el-button> 
+              </el-form-item> 
+         </el-form>
+        </el-row>
+             <el-row>
+                <el-table 
+                    ref="multipleTable"
+                    tooltip-effect="dark"
+                    empty-text="当前组织无下级组织"
+                    style="width: 100%"
+                    @selection-change="handleSelectionChange"
+                    border
+                    :data="dataTable" 
+                    >
+                    <el-table-column align="center" type="selection" width="55"></el-table-column> 
+                     <!-- <el-table-column prop="date" label="全选" width="180"></el-table-column>  -->
+                    <el-table-column align="center" prop="name" label="组织名称"></el-table-column>
+                    <el-table-column align="center" prop="staffNum" label="组内成员（人）">
+                    
+                    <template slot-scope="scope">
+                        <!-- <a >{{ scope.row.staffNum }}</a> -->
+                        <el-button type="text" @click="dialogStaffNumVisible = true">{{ scope.row.staffNum }}</el-button>
+                        
+                      </template>
+                   
+                    </el-table-column>
+                    <el-table-column align="center" prop="remark" label="备注"></el-table-column>
+                </el-table>
+                 <table-pagination :pager="pager" @change="getQuery"></table-pagination>
+            </el-row>
+         
+         
+      </el-dialog>
+    
+    
 </div>
 </body>
 <!-- import common js-->
@@ -108,11 +166,17 @@
                 dataTable:[],
                 multipleSelection: [],
                 dialogFormVisible: false,
-                form: {
+                dialogStaffNumVisible:false,
+                form: {//添加组织机构dialog
                     name: '',
                     remark: '',
                     parentName:'',
                     id:''
+                },
+                staffNumSearch:{//组内组成搜索框
+                	name:'',
+                	userName:'',
+                	phone:''
                 },
                 oldName:'',//旧的组织机构，更新时使用 
                 formLabelWidth: '120px',
@@ -128,7 +192,7 @@
                          { validator:function(rule,value,callback){
                         	 var id = orgVM.form.id;
                         	 var name = orgVM.oldName;
-                        	 if(id&& value==name){
+                        	 if(id && value==name){
                         		 callback();
                         	 }
                                var param = {'name':value};
@@ -262,12 +326,9 @@
                 .then(function () {
                   // always executed
                 });
-                
-            	
-            	
             
             },
-            clickOrgNode(data,node,obj){
+            clickOrgNode(data,node,obj){//点击左侧节点
             	this.selectedNode = data;
             	this.form.parentName=data.label;
             	this.getQuery();
@@ -275,7 +336,7 @@
             getQuery(){
                 this.initTableData();
             },
-            initTableData(){
+            initTableData(){// 查询 table 需要数据
                 var pageSize = this.pager.pageSize;
                 var pageNum = this.pager.currentPage;
                 var param = {};
@@ -410,6 +471,16 @@
                   
                   this.dialogFormVisible = true;
             	 
+              },
+              getFormatterText(row, column, cellValue, index){
+            	  var valueText ="";
+                  if(cellValue==0){
+                      valueText="0";
+                  }else {
+                	  valueText="<a>"+cellValue+"</a>";
+                  }
+                  return valueText;
+            	  
               }
               
               

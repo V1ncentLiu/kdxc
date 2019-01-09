@@ -1,17 +1,15 @@
 <!DOCTYPE html>
 <html>
-<head>
-    <meta charset="UTF-8">
-    <!-- import CSS -->
-    <link rel="stylesheet" href="css/element-ui.css">
-    <link rel="stylesheet" href="css/base.css">
-    <style>
+<head th:include="_header_include::frag(~{::title},~{},~{})">
+    <title>页面自定义字段</title>
+ <style>
         .userManage .leftBox{/*width: 200px;*/height: auto;border:1px solid #ebeef5;min-height: 480px;}
         .userManage .leftTitle{background:#ebeef5;text-indent: 20px;height: 40px;line-height: 40px;}
         .userManage .leftTree{padding:10px;}
         .userManage .rightTitle{background:#ebeef5;text-indent: 20px;height: 40px;line-height: 40px;}
     </style>
 </head>
+
 <body>
 <div id="userManage" class="userManage mainPadding">  
     <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
@@ -21,14 +19,14 @@
     </el-breadcrumb>
     <el-row class="marginB10">
         <el-button type="primary" @click="dialogFormVisible = true"><i class="el-icon-plus"></i> 添加</el-button>
-        <el-button type="primary" @click="dialogFormAdd = true">批量添加</el-button>
-        <el-button type="primary">编辑</el-button>
+        <el-button type="primary" @click="dialogBatchVisible = true">批量添加</el-button>
+        <el-button type="primary"  @click="modifyFiled">编辑</el-button>
         <el-button type="primary" @click="deleteFun">删除</el-button>
     </el-row>
     <el-row class="marginB10 greybg padding20">
         <el-col :span="6" :offset="18">
-            <el-input placeholder="请输入字段名称" class="input-with-select">
-            <el-button slot="append" icon="el-icon-search">搜索</el-button>
+            <el-input placeholder="请输入字段名称" class="input-with-select" v-model="inputFieldName">
+            <el-button slot="append" icon="el-icon-search" @click="getQuery">搜索</el-button>
             </el-input>
         </el-col>
     </el-row>
@@ -38,56 +36,58 @@
             tooltip-effect="dark"
             style="width: 100%"
             border
+             @selection-change="handleSelectionChange"
             :data="dataTable" 
             >
             <el-table-column align="center" type="selection" width="55"></el-table-column>
-            <el-table-column align="center" prop="number" label="序号"></el-table-column>
-            <el-table-column align="center" prop="code" label="字段编码"></el-table-column>
+            <el-table-column align="center" prop="sortNum" label="序号"></el-table-column>
+            <el-table-column align="center" prop="fieldCode" label="字段编码"></el-table-column>
             <el-table-column align="center" prop="fieldName" label="字段名称"></el-table-column>
-            <el-table-column align="center" prop="outlookName" label="外显名称"></el-table-column>
-            <el-table-column align="center" prop="fieldType" label="字段类型"></el-table-column>
-            <el-table-column align="center" prop="fieldWidth" label="宽度"></el-table-column>
-            <el-table-column align="center" prop="isUse" label="是否使用"></el-table-column>
+            <el-table-column align="center" prop="displayName" label="外显名称"></el-table-column>
+            <el-table-column align="center" prop="fieldType" label="字段类型" :formatter="getFieldTypeText"></el-table-column>
+            <el-table-column align="center" prop="width" label="宽度"></el-table-column>
+            <el-table-column align="center" prop="isUsed" label="是否使用" :formatter="getIsUsed"></el-table-column>
         </el-table>
+        <table-pagination :pager="pager" @change="getQuery"></table-pagination>
     </el-row>
     <!-- dialog -->
-    <el-dialog title="新建字段" :visible.sync="dialogFormVisible">
-        <el-form :model="form">
+    <el-dialog title="新建字段" :visible.sync="dialogFormVisible" @close="closeAddDialog">
+        <el-form :model="form" ref="fieldForm" :rules="rules">
             <div class="marginB20 fs16"><em class="redcolor">*</em>必填项</div>
             <div class="borderbox paddingL20 paddingR20 paddingT10">
                 <el-row>
                     <el-col :span="12">
                         <el-form-item label="菜单代码：" :label-width="formLabelWidth">
-                            dxgl
+                            {{fieldMenu.menuCode}}
                         </el-form-item>
                     </el-col>
                     <el-col :span="12">
                         <el-form-item label="菜单名称：" :label-width="formLabelWidth">
-                            电销管理
+                             {{fieldMenu.menuName}}
                         </el-form-item>
                     </el-col>
                 </el-row>
                 <el-row>
                     <el-col :span="12">
-                        <el-form-item label="字段编码：" :label-width="formLabelWidth">
-                            <el-input v-model="form.code" autocomplete="off"></el-input>
+                        <el-form-item label="字段编码：" :label-width="formLabelWidth" prop="fieldCode">
+                            <el-input v-model="form.fieldCode" autocomplete="off"  maxlength="50"></el-input>
                         </el-form-item>
                     </el-col>
                     <el-col :span="12">
-                        <el-form-item label="字段名称：" :label-width="formLabelWidth">
-                            <el-input v-model="form.name" autocomplete="off"></el-input>
+                        <el-form-item label="字段名称：" :label-width="formLabelWidth" prop="fieldName">
+                            <el-input v-model="form.fieldName" autocomplete="off"  maxlength="50"></el-input>
                         </el-form-item>
                     </el-col>
                 </el-row>
                 <el-row>
                     <el-col :span="12">
-                        <el-form-item label="外显名称：" :label-width="formLabelWidth">
-                            <el-input v-model="form.code" autocomplete="off"></el-input>
+                        <el-form-item label="外显名称：" :label-width="formLabelWidth" prop="displayName">
+                            <el-input v-model="form.displayName" autocomplete="off"  maxlength="50"></el-input>
                         </el-form-item>
                     </el-col>
                     <el-col :span="12">
-                        <el-form-item label="字段类型：" :label-width="formLabelWidth">
-                            <el-select v-model="value" placeholder="请选择">
+                        <el-form-item label="字段类型：" :label-width="formLabelWidth" prop="fieldType">
+                            <el-select v-model="form.fieldType" placeholder="请选择">
                                 <el-option
                                     v-for="item in options"
                                     :key="item.value"
@@ -103,28 +103,28 @@
             <div class="borderbox padding20">
                 <el-row>
                     <el-col :span="12">
-                        <el-form-item label="序号：" :label-width="formLabelWidth">
-                            <el-input v-model="form.code" autocomplete="off"></el-input>
+                        <el-form-item label="序号：" :label-width="formLabelWidth" prop="sortNum">
+                            <el-input v-model="form.sortNum" autocomplete="off"  maxlength="5"></el-input>
                         </el-form-item>
                     </el-col>
                     <el-col :span="12">
-                        <el-form-item label="宽度：" :label-width="formLabelWidth">
-                            <el-input v-model="form.code" autocomplete="off"></el-input>
+                        <el-form-item label="宽度：" :label-width="formLabelWidth" prop="width">
+                            <el-input v-model="form.width" autocomplete="off" mix="0" max="1000"></el-input>
                         </el-form-item>
                     </el-col>
                 </el-row>
                 <el-row>
                     <el-col :span="12">
                         <el-form-item label="Bean名：" :label-width="formLabelWidth">
-                            tg011
+                            {{fieldMenu.beanName}}
                         </el-form-item>
                     </el-col>
                     <el-col :span="12">
-                        <el-form-item label="是否实用：" :label-width="formLabelWidth">
-                            <el-select v-model="value" placeholder="请选择">
+                        <el-form-item label="是否实用：" :label-width="formLabelWidth" prop="isUsed">
+                            <el-select v-model="form.isUsed" placeholder="请选择">
                                 <el-option
-                                    v-for="item in options"
-                                    :key="item.value"
+                                    v-for="item in isUsedOps"
+                                    :key="item.value" 
                                     :label="item.label"
                                     :value="item.value">
                                 </el-option>
@@ -134,114 +134,424 @@
                 </el-row>
                 <el-row>
                     <el-col :span="12">
-                        <el-form-item label="备注：" :label-width="formLabelWidth">
-                            <el-input v-model="form.code" autocomplete="off"></el-input>
+                        <el-form-item label="备注：" :label-width="formLabelWidth" prop="remark">
+                            <el-input v-model="form.remark" autocomplete="off"></el-input>
                         </el-form-item>
                     </el-col>
                 </el-row>
             </div>
         </el-form>
         <div slot="footer" class="dialog-footer">            
-            <el-button type="primary" @click="dialogFormVisible = false">提交</el-button>
-            <el-button @click="dialogFormVisible = false">取 消</el-button>
+            <el-button type="primary" @click="saveField('fieldForm')">提交</el-button>
+            <el-button @click="cancelForm('fieldForm')">取 消</el-button>
         </div>
     </el-dialog>
-    <el-dialog title="批量添加" :visible.sync="dialogFormAdd">
-        <el-form :model="form">            
-            <el-form-item label="下载批量上传模板：">
-                页面自定义模板
-            </el-form-item>
-            <el-upload
-                class="upload-demo"
-                action="https://jsonplaceholder.typicode.com/posts/"                
-                multiple
-                :limit="1">
-                <el-button size="small" type="primary">点击上传</el-button>
-            </el-upload>
-        </el-form>
-        <div slot="footer" class="dialog-footer">            
-            <el-button type="primary" @click="dialogFormAdd = false">确定</el-button>
-            <el-button @click="dialogFormAdd = false">取 消</el-button>
-        </div>
-    </el-dialog>   
+    
+    
+     <!-- 批量添加 自定义字段弹窗 start -->
+            <el-dialog title="批量添加" :visible.sync="dialogBatchVisible" @close="closeUploadFileDialog">
+               <el-row>
+                                 <!-- 下载批量上传模版: <a href="/excel-templates/custom-field-template.xlsx" download="页面自定义字段导入模板">页面自定义字段模板</a> -->
+                                 下载批量上传模版: <a href="/customfield/customField/download">页面自定义字段模板</a>
+               
+               </el-row>
+               <el-row>
+                  <el-upload
+                      class="upload-demo"
+                      ref="upload"
+                      :multiple="false"
+                      accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                      action="/customfield/customField/uploadCustomField"
+                      :file-list="fileList"
+                      :on-change="handleChange"
+                      :before-upload="beforeUpload"
+                      :on-success="uploadSuccess"
+                      :data="paramData"
+                      :auto-upload="false">
+                      <el-button slot="trigger" size="small" type="primary">选取文件</el-button>
+                      <div slot="tip" class="el-upload__tip">只能上传xlsx文件</div>
+                    </el-upload>
+               
+               
+               </el-row>
+              <div slot="footer" class="dialog-footer">
+                <el-button type="primary" @click="submitUpload">确 定</el-button>
+                <el-button @click="dialogBatchVisible = false">取 消</el-button>
+              </div>
+            </el-dialog>
+      
+            <!-- 批量添加 自定义字段弹窗 end -->
 </div>
 </body>
-<!-- import Vue before Element -->
-<script src="js/vue.js"></script>
-<script src="js/vue-router.js"></script>
-<!-- import JavaScript -->
-<script src="js/element-ui.js"></script>
-<script src="js/jquery-3.2.1.min.js"></script>
-<script>
-    new Vue({
+<div th:include="_footer_include :: #jsLib"></div>
+<script th:inline="javascript">
+
+    var fieldMenu=[[${fieldMenu}]];//当前字段所属的菜单组
+    var fieldVM =  new Vue({
         el: '#userManage',
         data: function() {
             return {
                 dialogFormVisible: false,
-                dialogFormAdd: false,
-                form: {
-                    code:'',
-                    name:'',
-                    beanName:''
+                dialogBatchVisible: false,//上传文件弹窗控制
+                fileList:[],//上传文件列表
+                pager:{
+                    total: 0,
+                    currentPage: 1,
+                    pageSize: 20,
                 },
+                multipleSelection: [],
+                form: {
+                	id:'',
+                    fieldCode:'',
+                    fieldName:'',
+                    displayName:'',
+                    fieldType:'',
+                    sortNum:'',
+                    width:'',
+                    isUsed:'',
+                    remark:'',
+                    menuId:fieldMenu.id
+                },
+                paramData:{
+                	id:fieldMenu.id
+                },//上传文件携带的参数
+                inputFieldName:'',//搜索输入框
+                fieldMenu:fieldMenu,//字段菜单信息 
                 formLabelWidth: '100px',
-                dataTable: [{
-                        number:'1',
-                        code:'编码1',
-                        fieldName:'字段名称1',
-                        outlookName:'外显名称1',
-                        fieldType:'字段类型1',
-                        fieldWidth:'宽度1',
-                        isUse:'是'
-                    },
-                    {
-                        number:'2',
-                        code:'编码2',
-                        fieldName:'字段名称2',
-                        outlookName:'外显名称2',
-                        fieldType:'字段类型2',
-                        fieldWidth:'宽度2',
-                        isUse:'否'
-                    }
-                ],
+                dataTable: [],
                 options: [{
-                    value: '选项1',
-                    label: '黄金糕'
+                    value: '1',
+                    label: '文本'
                 }, {
-                    value: '选项2',
-                    label: '双皮奶'
+                    value: '2',
+                    label: '时间'
                 }, {
-                    value: '选项3',
-                    label: '蚵仔煎'
-                }, {
-                    value: '选项4',
-                    label: '龙须面'
-                }, {
-                    value: '选项5',
-                    label: '北京烤鸭'
+                    value: '3',
+                    label: '下拉列表'
                 }],
-                value: ''
+                isUsedOps:[{
+                    value: '1',
+                    label: '是'
+                }, {
+                    value: '0',
+                    label: '否'
+                }],
+                rules:{
+                	fieldCode:[
+                		 { required: true, message: '字段编码不能为空',trigger:'blur'},
+                		 {validator:function(rule,value,callback){
+                             
+                              var param = {};
+                              param.fieldCode=value;
+                              param.menuId=fieldVM.form.menuId;
+                              axios.post('/customfield/customField/query',param)
+                              .then(function (response) {
+                                  var data =  response.data;
+                                  if(data.code=='0'){
+                                      var resData = data.data;
+                                      if(resData){
+                                          callback(new Error("此字段编码已存在，请修改后提交"));
+                                      }else{
+                                          callback();
+                                      }
+                                      
+                                  }else{
+                                       callback(new Error("查询字段编码是否唯一报错"));
+                                  }
+                              })
+                              .catch(function (error) {
+                                console.log(error);
+                              })
+                              .then(function () {
+                                // always executed
+                              });
+                            
+                        },trigger:'blur'}
+                	],
+                	fieldName:[
+                		{required: true, message: '字段名称不能为空',trigger:'blur'},
+                		 {validator:function(rule,value,callback){
+                             var param = {};
+                             param.fieldName=value;
+                             param.menuId=fieldVM.form.menuId;
+                             axios.post('/customfield/customField/query',param)
+                             .then(function (response) {
+                                 var data =  response.data;
+                                 if(data.code=='0'){
+                                     var resData = data.data;
+                                     if(resData){
+                                         callback(new Error("此字段名称已存在，请修改后提交"));
+                                     }else{
+                                         callback();
+                                     }
+                                     
+                                 }else{
+                                      callback(new Error("查询字段名称是否唯一报错"));
+                                 }
+                             })
+                             .catch(function (error) {
+                               console.log(error);
+                             })
+                             .then(function () {
+                               // always executed
+                             });
+                           
+                       },trigger:'blur'}
+                	],
+                	displayName:[
+                        {required: true, message: '外显名称不能为空',trigger:'blur'},
+                         {validator:function(rule,value,callback){
+                             var param = {};
+                             param.displayName=value;
+                             param.menuId=fieldVM.form.menuId;
+                             axios.post('/customfield/customField/query',param)
+                             .then(function (response) {
+                                 var data =  response.data;
+                                 if(data.code=='0'){
+                                     var resData = data.data;
+                                     if(resData){
+                                         callback(new Error("此外显名称已存在，请修改后提交"));
+                                     }else{
+                                         callback();
+                                     }
+                                     
+                                 }else{
+                                      callback(new Error("查询外显名称是否唯一报错"));
+                                 }
+                             })
+                             .catch(function (error) {
+                               console.log(error);
+                             })
+                             .then(function () {
+                               // always executed
+                             });
+                           
+                       },trigger:'blur'}
+                    ],
+                
+                }
             }        	  
         },
         methods: {
             deleteFun() {
-                this.$confirm('确定要删除【字段名称】【字段名称】字段吗？', '提示', {
+            	
+                var rows = this.multipleSelection;
+                if(rows.length==0){
+                    this.$message({
+                       message: '请选择一条数据进行修改',
+                       type: 'warning'
+                     });
+                    return;
+                }
+                var rowNames = [];//字段名称
+                var rowIds = [];//字段ID
+                for(var i=0;i<rows.length;i++){
+                    var curRow = rows[i];
+                    rowIds.push(curRow.id);
+                    rowNames.push("["+curRow.fieldName+"]");
+                }
+                var fieldName = rowNames.join(" ");
+            	
+            	
+                this.$confirm('确定要删除'+fieldName+' 字段吗？', '提示', {
                     confirmButtonText: '确定',
                     cancelButtonText: '取消',
                     type: 'warning'
                 }).then(() => {
-                    this.$message({
-                        type: 'success',
-                        message: '删除成功!'
+                	
+                    var param  = {idList:rowIds};
+                    axios.post('/customfield/customField/delete',param)
+                    .then(function (response) {
+                        var data =  response.data;
+                        if(data.code=='0'){
+                            fieldVM.$message({
+                                type: 'info',
+                                message: '删除成功'
+                            });   
+                            
+                        }else{
+                            fieldVM.$message({
+                                message: "接口调用失败",
+                                type: 'warning'
+                              }); 
+                        }
+                    })
+                    .catch(function (error) {
+                      console.log(error);
+                    })
+                    .then(function () {
+                        fieldVM.getQuery();
                     });
+                    
+                    
+                	
+              
+                	
+                	
                 }).catch(() => {
                     this.$message({
                         type: 'info',
                         message: '已取消删除'
                     });          
                 });
-            }
-        }
+            },
+            cancelForm(formName){
+            	this.$refs[formName].resetFields();
+            },
+            saveField(formName){//保存自定义字段
+            	 this.$refs[formName].validate((valid) => {
+                     if (valid) {
+                        var param=this.form;
+                       axios.post('/customfield/customField/saveOrUpdate', param)
+                       .then(function (response) {
+                           var resData = response.data;
+                           if(resData.code=='0'){
+                               fieldVM.$message('操作成功');
+                               fieldVM.cancelForm(formName);
+                               fieldVM.dialogFormVisible = false;
+                               fieldVM.getQuery();
+                           }else{
+                               fieldVM.$message('操作失败');
+                               console.error(resData);
+                           }
+                       
+                       })
+                       .catch(function (error) {
+                            console.log(error);
+                       });
+                        
+                     } else {
+                       return false;
+                     }
+                   });
+                 
+            	
+            },
+            getQuery(){//查询table 数据
+            	 var pageSize = this.pager.pageSize;
+                 var pageNum = this.pager.currentPage;
+                 var param = {};
+                 param.menuId=this.form.menuId;
+                 param.fieldName=this.inputFieldName;
+                 axios.post('/customfield/customField/listCustomFieldPage?pageNum='+pageNum+"&pageSize="+pageSize,param)
+                     .then(function (response) {
+                         var data =  response.data;
+                         if(data.code=='0'){
+                             var resData = data.data;
+                             fieldVM.dataTable= resData.data;
+                             //3.分页组件
+                             fieldVM.pager.total= resData.total;
+                             fieldVM.pager.currentPage = resData.currentPage;
+                             fieldVM.pager.pageSize = resData.pageSize;
+                         }else{
+                             console.error(resData);
+                         }
+                        
+                     })
+                     .catch(function (error) {
+                       console.log(error);
+                     })
+                     .then(function () {
+                       // always executed
+                     }); 
+            },
+            handleSelectionChange(val){
+            	  this.multipleSelection = val;
+            },
+            getFieldTypeText(row, column, cellValue, index){//字段類型的文本
+                   var valueText ="";
+            	   if(cellValue==1){
+            		   valueText="文本";
+            	   }else if(cellValue==2){
+            		   valueText="时间";
+            	   }else if(cellValue==3){
+            		   valueText="下拉列表";
+            	   }
+            	   return valueText;
+            },
+            getIsUsed(row, column, cellValue, index){//是否使用文本
+            	var valueText ="";
+                if(cellValue==0){
+                    valueText="否";
+                }else if(cellValue==1){
+                    valueText="是";
+                }
+                return valueText;
+            	
+            },
+            modifyFiled(){//点击编辑按钮
+            	   var rows = this.multipleSelection;
+                   if(rows.length!=1){
+                       this.$message({
+                          message: '请选择一条数据进行修改',
+                          type: 'warning'
+                        });
+                       return;
+                   }
+                   
+                   var param={id:rows[0].id};
+                   //根据id获取数据
+                   axios.post('/customfield/customField/query',param)
+                   .then(function (response) {
+                       var data =  response.data;
+                       if(data.code=='0'){
+                           fieldVM.form= data.data;
+                           //把当前的值存在临时变量里，当修改时，旧值和新值对比
+                          // fieldVM.oldMenuCode = data.data.menuCode;
+                           //fieldVM.oldMenuName = data.data.menuName;
+                       }else{
+                           console.error(data);
+                       }
+                       
+                      
+                   })
+                   .catch(function (error) {
+                     console.log(error);
+                   })
+                   .then(function () {
+                     // always executed
+                   }); 
+                   
+                   
+                   this.dialogFormVisible = true;
+                   
+                   
+            },
+            submitUpload() {//提交文件
+                this.$refs.upload.submit();
+              },
+              handleChange(files,fileList){//只允许选择一个文件
+                    this.fileList = fileList.slice(-1);
+              },
+              beforeUpload(file){//上传之前 文件校验
+                  console.info(file);
+                  var isTextComputer = file.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+                  if(!isTextComputer){
+                      this.$message.error('文件格式错误');
+                      return false;
+                  }
+              },
+              uploadSuccess(response, file, fileList){//上传成功后
+            	  //清空文件里列表
+            	  this.$refs.upload.clearFiles();
+                  this.dialogBatchVisible = false;
+              },
+              closeAddDialog(){//关闭添加自定义字段dialog
+            	  this.$refs['fieldForm'].resetFields();
+              },
+              closeUploadFileDialog(){//关闭上传文件 dialog
+            	  this.$refs.upload.clearFiles();
+              }
+              
+            
+            
+            
+            
+        },
+        created(){
+        	this.getQuery();
+        },
+        
     })
 </script>
 </html>

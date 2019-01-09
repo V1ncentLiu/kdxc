@@ -1,11 +1,8 @@
 <!DOCTYPE html>
 <html>
-<head>
-    <meta charset="UTF-8">
-    <!-- import CSS -->
-    <link rel="stylesheet" href="css/element-ui.css">
-    <link rel="stylesheet" href="css/base.css">
-    <style>
+<head th:include="_header_include::frag(~{::title},~{},~{})">
+    <title>页面自定义菜单</title>
+     <style>
         .userManage .leftBox{/*width: 200px;*/height: auto;border:1px solid #ebeef5;min-height: 480px;}
         .userManage .leftTitle{background:#ebeef5;text-indent: 20px;height: 40px;line-height: 40px;}
         .userManage .leftTree{padding:10px;}
@@ -21,13 +18,13 @@
     </el-breadcrumb>
     <el-row class="marginB10">
         <el-button type="primary" @click="dialogFormVisible = true"><i class="el-icon-plus"></i> 添加菜单页面</el-button>
-        <el-button type="primary">修改菜单页面</el-button>
-        <el-button type="primary" @click="deleteFun">删除菜单页面</el-button>
+        <el-button type="primary" @click="modifyFiledMenu">修改菜单页面</el-button>
+        <el-button type="primary" @click="deleteFieldMenu">删除菜单页面</el-button>
     </el-row>
     <el-row class="marginB10 greybg padding20">
         <el-col :span="6" :offset="18">
-            <el-input placeholder="请输入菜单名称进行查询" class="input-with-select">
-            <el-button slot="append" icon="el-icon-search">搜索</el-button>
+            <el-input placeholder="请输入菜单名称进行查询" class="input-with-select" v-model="inputMenuName">
+            <el-button slot="append" icon="el-icon-search" @click="initCustomFiledMenu">搜索</el-button>
             </el-input>
         </el-col>
     </el-row>
@@ -37,94 +34,315 @@
             tooltip-effect="dark"
             style="width: 100%"
             border
+             @selection-change="handleSelectionChange"
             :data="dataTable" 
             >
             <el-table-column align="center" type="selection" width="55"></el-table-column>
-            <el-table-column align="center" prop="code" label="菜单代码"></el-table-column>
-            <el-table-column align="center" prop="name" label="菜单名称"></el-table-column>
+            <el-table-column align="center" prop="menuCode" label="菜单代码"></el-table-column>
+            <el-table-column align="center" prop="menuName" label="菜单名称"></el-table-column>
             <el-table-column align="center" prop="beanName" label="Bean名称"></el-table-column>
             <el-table-column align="center" label="操作">
                 <template slot-scope="scope">
-                    <a href="d.html" target="_blank" class="buttonText">页面字段设置</a>
+                    <a href="javascript:void(0)" @click="goToFieldSettingPage(scope.row)" target="_blank" class="buttonText">页面字段设置</a>
                 </template>
             </el-table-column>
+            
         </el-table>
+        <table-pagination :pager="pager" @change="initCustomFiledMenu"></table-pagination>
     </el-row>
     <!-- dialog -->
     <el-dialog title="添加页面菜单" :visible.sync="dialogFormVisible">
-        <el-form :model="form">
-            <el-form-item label="*菜单代码：" :label-width="formLabelWidth">
-                <el-input v-model="form.code" autocomplete="off"></el-input>
+        <el-form :model="form" ref="customMenuForm" :rules="rules">
+            <el-form-item label="菜单代码：" :label-width="formLabelWidth" prop="menuCode">
+                <el-input v-model="form.menuCode" autocomplete="off" placeholder="输入菜单代码" maxlength="50"></el-input>
             </el-form-item>
-            <el-form-item label="*菜单名称：" :label-width="formLabelWidth">
-                <el-input v-model="form.name" autocomplete="off"></el-input>
+            <el-form-item label="菜单名称：" :label-width="formLabelWidth" prop="menuName">
+                <el-input v-model="form.menuName" autocomplete="off" placeholder="输入菜单名称" maxlength="50"></el-input>
             </el-form-item>
-            <el-form-item label="Bean名称：" :label-width="formLabelWidth">
-                <el-input v-model="form.beanName" autocomplete="off"></el-input>
+            <el-form-item label="Bean名称：" :label-width="formLabelWidth" prop="beanName">
+                <el-input v-model="form.beanName" autocomplete="off" placeholder="输入Bean名称" maxlength="50"></el-input>
             </el-form-item>
         </el-form>
         <div slot="footer" class="dialog-footer">
-            <el-button @click="dialogFormVisible = false">取 消</el-button>
-            <el-button type="primary" @click="dialogFormVisible = false">确 定</el-button>
+            <el-button @click="cancelForm('customMenuForm')">取 消</el-button>
+            <el-button type="primary" @click="saveFieldMenu('customMenuForm')">确 定</el-button>
         </div>
     </el-dialog>
 </div>
 </body>
-<!-- import Vue before Element -->
-<script src="js/vue.js"></script>
-<script src="js/vue-router.js"></script>
-<!-- import JavaScript -->
-<script src="js/element-ui.js"></script>
-<script src="js/jquery-3.2.1.min.js"></script>
+<!-- import common js-->
+<div th:include="_footer_include :: #jsLib"></div>
 <script>
-    new Vue({
+  var fieldMenuVM = new Vue({
         el: '#userManage',
         data: function() {
             return {
+                dataTable:[],
+                pager:{
+                    total: 0,
+                    currentPage: 1,
+                    pageSize: 20,
+                },
+                multipleSelection: [],
                 dialogFormVisible: false,
                 form: {
-                    code:'',
-                    name:'',
+                	id:'',
+                    menuCode:'',
+                    menuName:'',
                     beanName:''
                 },
+                oldMenuCode:'',//旧 菜单吗
+                oldMenuName:'',//旧 菜单名称
                 formLabelWidth: '150px',
-                dataTable: [{
-                        code:'代码',
-                        name:'名称',
-                        beanName:'bean名称'
-                    },
-                    {
-                        code:'代码',
-                        name:'名称',
-                        beanName:'bean名称'
-                    },
-                    {
-                        code:'代码',
-                        name:'名称',
-                        beanName:'bean名称'
-                    }
-                ]
+                inputMenuName:'',//菜单搜索框
+                rules:{
+                	menuCode:[
+                		{ required: true, message: '菜单代码不能为空',trigger:'blur'},
+                		{validator:function(rule,value,callback){
+                			  var id = fieldMenuVM.form.id;
+                              var name = fieldMenuVM.oldMenuCode;
+                              if(id && value==name){
+                                  callback();
+                              }
+                			
+                		     var param = {'menuCode':value};
+                             axios.post('/customfield/customField/isExistsFieldMenu',param)
+                             .then(function (response) {
+                                 var data =  response.data;
+                                 if(data.code=='0'){
+                                     var resData = data.data;
+                                     if(resData){
+                                         callback(new Error("此菜单代码已存在，请修改后提交"));
+                                     }else{
+                                         callback();
+                                     }
+                                     
+                                 }else{
+                                      callback(new Error("查询菜单代码是否唯一报错"));
+                                 }
+                             })
+                             .catch(function (error) {
+                               console.log(error);
+                             })
+                             .then(function () {
+                               // always executed
+                             });
+                			
+                		},trigger:'blur'}
+                		],
+                	menuName:[
+                		  { required: true, message: '菜单名称不能为空',trigger:'blur'},
+                		  {validator:function(rule,value,callback){
+                			     var id = fieldMenuVM.form.id;
+                                 var name = fieldMenuVM.oldMenuName;
+                                 if(id && value==name){
+                                     callback();
+                                 }
+                			    var param = {'menuName':value};
+                                axios.post('/customfield/customField/isExistsFieldMenu',param)
+                                .then(function (response) {
+                                    var data =  response.data;
+                                    if(data.code=='0'){
+                                        var resData = data.data;
+                                        if(resData){
+                                            callback(new Error("此菜单菜单名称已存在，请修改后提交"));
+                                        }else{
+                                            callback();
+                                        }
+                                        
+                                    }else{
+                                         callback(new Error("查询菜单菜单名称是否唯一报错"));
+                                    }
+                                })
+                                .catch(function (error) {
+                                  console.log(error);
+                                })
+                                .then(function () {
+                                  // always executed
+                                });
+                			  
+                		  },trigger:'blur'}
+                		
+                		
+                	]
+                
+                		
+                	
+                }//rules end
             }        	  
         },
         methods: {
-            deleteFun() {
-                this.$confirm('确定要删除【菜单名】【菜单名】菜单吗？', '提示', {
+        	cancelForm(formName) {
+                this.$refs[formName].resetFields();
+            },
+            deleteFieldMenu() {
+            	
+            	   var rows = this.multipleSelection;
+                   if(rows.length==0){
+                       this.$message({
+                          message: '请选择一条数据进行修改',
+                          type: 'warning'
+                        });
+                       return;
+                   }
+                   var rowNames = [];
+                   var rowIds = [];
+                   for(var i=0;i<rows.length;i++){
+                	   var curRow = rows[i];
+                       rowIds.push(curRow.id);
+                       rowNames.push("["+curRow.menuName+"]");
+                   }
+                   
+                   
+                   var menuName = rowNames.join(" ");
+                this.$confirm('确定要删除 '+menuName+' 菜单吗？', '提示', {
                     confirmButtonText: '确定',
                     cancelButtonText: '取消',
                     type: 'warning'
                 }).then(() => {
-                    this.$message({
-                        type: 'success',
-                        message: '删除成功!'
+                	  //删除
+                	var param  = {idList:rowIds};
+                    axios.post('/customfield/customField/deleteMenu',param)
+                    .then(function (response) {
+                        var data =  response.data;
+                        if(data.code=='0'){
+                        	fieldMenuVM.$message({
+                                type: 'info',
+                                message: '删除成功'
+                            });   
+                            
+                        }else{
+                        	fieldMenuVM.$message({
+                                message: "接口调用失败",
+                                type: 'warning'
+                              }); 
+                        }
+                    })
+                    .catch(function (error) {
+                      console.log(error);
+                    })
+                    .then(function () {
+                    	fieldMenuVM.initCustomFiledMenu();
                     });
+                	
+                	
+                   
                 }).catch(() => {
-                    this.$message({
-                        type: 'info',
-                        message: '已取消删除'
-                    });          
+                       
                 });
+            },
+            saveFieldMenu(formName){//保存自定义字段
+                this.$refs[formName].validate((valid) => {
+                    if (valid) {
+                       var param=this.form;
+                      axios.post('/customfield/customField/saveOrUpdateMenu', param)
+                      .then(function (response) {
+                          var resData = response.data;
+                          if(resData.code=='0'){
+                              fieldMenuVM.$message('操作成功');
+                              fieldMenuVM.cancelForm(formName);
+                              fieldMenuVM.dialogFormVisible = false;
+                              fieldMenuVM.initCustomFiledMenu();
+                          }else{
+                              fieldMenuVM.$message('操作失败');
+                              console.error(resData);
+                          }
+                      
+                      })
+                      .catch(function (error) {
+                           console.log(error);
+                      });
+                       
+                    } else {
+                      return false;
+                    }
+                  });
+            	
+            	
+            	
+            	this.dialogFormVisible = true;
+            },// method end
+            handleSelectionChange(val) {
+                this.multipleSelection = val;
+            },
+            modifyFiledMenu(){//点击修改菜单页面按钮
+            	var rows = this.multipleSelection;
+                if(rows.length!=1){
+                    this.$message({
+                       message: '请选择一条数据进行修改',
+                       type: 'warning'
+                     });
+                    return;
+                }
+                
+                
+                var param={id:rows[0].id};
+                //根据id获取数据
+                axios.post('/customfield/customField/queryFieldMenuById',param)
+                .then(function (response) {
+                    var data =  response.data;
+                    if(data.code=='0'){
+                    	fieldMenuVM.form= data.data;
+                        //把当前的值存在临时变量里，当修改时，旧值和新值对比
+                        fieldMenuVM.oldMenuCode = data.data.menuCode;
+                        fieldMenuVM.oldMenuName = data.data.menuName;
+                    }else{
+                    	console.error(data);
+                    }
+                    
+                   
+                })
+                .catch(function (error) {
+                  console.log(error);
+                })
+                .then(function () {
+                  // always executed
+                }); 
+                
+                
+                this.dialogFormVisible = true;
+            	
+            	
+            },//end
+            initCustomFiledMenu(){//初始化table 表格
+            	 var pageSize = this.pager.pageSize;
+                 var pageNum = this.pager.currentPage;
+                 var param = {};
+                 param.menuName=this.inputMenuName;
+                 axios.post('/customfield/customField/listMenuPage?pageNum='+pageNum+"&pageSize="+pageSize,param)
+                     .then(function (response) {
+                         var data =  response.data;
+                         if(data.code=='0'){
+                             var resData = data.data;
+                             fieldMenuVM.dataTable= resData.data;
+                             //3.分页组件
+                             fieldMenuVM.pager.total= resData.total;
+                             fieldMenuVM.pager.currentPage = resData.currentPage;
+                             fieldMenuVM.pager.pageSize = resData.pageSize;
+                         }else{
+                        	 console.error(resData);
+                         }
+                        
+                     })
+                     .catch(function (error) {
+                       console.log(error);
+                     })
+                     .then(function () {
+                       // always executed
+                     }); 
+            },
+            goToFieldSettingPage(row){
+            	console.info(row);
+            	var id = row.id;
+            	location.href= "/customfield/customField/customFieldPage?id="+id;
             }
+            
+            
+        },//methods end
+        created(){
+        	this.initCustomFiledMenu();
         }
+      
     })
 </script>
 </html>

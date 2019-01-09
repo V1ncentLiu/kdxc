@@ -1,5 +1,6 @@
 package com.kuaidao.manageweb.feign.customfield;
 
+import java.util.List;
 import javax.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.IdEntity;
+import com.kuaidao.common.entity.IdListReq;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.sys.dto.customfield.CustomFieldAddAndUpdateDTO;
@@ -49,7 +51,7 @@ public interface CustomFieldFeignClient {
      * @return
      */
     @PostMapping("/deleteMenu")
-    public JSONResult deleteMenu(@RequestBody IdEntity idEntity);
+    public JSONResult deleteMenu(@RequestBody IdListReq idListReq);
     
     /**
      * 查询自定义字段菜单   分页 
@@ -89,7 +91,7 @@ public interface CustomFieldFeignClient {
      * @return
      */
     @PostMapping("/delete")
-    public JSONResult delete(@RequestBody IdEntity idEntity);
+    public JSONResult delete(@RequestBody IdListReq idListReq);
     
     /**
      * 查询菜单下自定义字段
@@ -107,7 +109,20 @@ public interface CustomFieldFeignClient {
     @PostMapping("/listCustomFieldPage")
     public JSONResult<PageBean<CustomFieldRespDTO>> listCustomFieldPage(@RequestBody CustomFieldQueryDTO queryDTO);
     
+    /**
+     * 根据菜单名成或菜单代码查询 菜单 是否存在
+     * @param queryDTO
+     */
+    @PostMapping("/isExistsFieldMenu")
+    public JSONResult<Boolean> isExistsFieldMenu(@RequestBody CustomFieldMenuQueryDTO queryDTO);
     
+    /**
+     * 批量上传自定义字段
+     * @param dataList
+     */
+    @PostMapping("/saveBatchCustomField")
+    public JSONResult saveBatchCustomField(@RequestBody List<CustomFieldAddAndUpdateDTO> dataList);
+
     
     @Component
     static class HystrixClientFallback implements  CustomFieldFeignClient{
@@ -134,7 +149,7 @@ public interface CustomFieldFeignClient {
 
 
         @Override
-        public JSONResult deleteMenu(IdEntity idEntity) {
+        public JSONResult deleteMenu(IdListReq idListReq) {
             return fallBackError("自定义字段-删除菜单组");
         }
 
@@ -165,7 +180,7 @@ public interface CustomFieldFeignClient {
 
 
         @Override
-        public JSONResult delete(IdEntity idEntity) {
+        public JSONResult delete(IdListReq idListReq) {
             return fallBackError("删除自定义字段");
         }
 
@@ -182,7 +197,19 @@ public interface CustomFieldFeignClient {
             return fallBackError("分页查询自定义字段");
         }
 
+        @Override
+        public JSONResult<Boolean> isExistsFieldMenu(CustomFieldMenuQueryDTO queryDTO) {
+            return fallBackError("是否存在自定义菜单组");
+        }
+
+        @Override
+        public JSONResult saveBatchCustomField(List<CustomFieldAddAndUpdateDTO> dataList) {
+            return fallBackError("批量上传自定义字段");
+        }
+
 
     }
+
+
 
 }

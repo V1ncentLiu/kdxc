@@ -21,7 +21,7 @@ Vue.component('table-pagination',{
        total() { 
          // 存在记录但未获取到数据时, 重新请求 
           if (this.initBack) { 
-             this.pager.currentPage -= 1; this.$emit('change');
+            // this.pager.currentPage -= 1; this.$emit('change');
            } 
        },
      },
