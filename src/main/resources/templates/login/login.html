@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"  xmlns:th="http://www.thymeleaf.org">
+<head th:replace="_header_include::frag(~{::title},~{::link},~{})">
+    <title>后台管理系统</title>
+    <link rel="stylesheet" th:href="@{/css/custom/login/login.css}">
+</head>
+<body>
+    <div id="Loading">
+        <div class="loader-inner ball-beat">
+            <div></div>
+            <div></div>
+            <div></div>
+        </div>
+    </div>
+    <div id="loginbox" class="loginbox">
+        <div class="loginform">
+            <div class="control-group normal_text">
+                <img src="images/loginLogo.png" alt="Logo">
+            </div>
+            <div class="control-group">
+                <div class="controls">
+                    <div class="main_input_box whiteBg">
+                        <el-row>
+                            <el-col :span="4">
+                                <span class="ico"><img src="images/loginIco01.jpg" alt=""></span>
+                            </el-col>
+                            <el-col :span="20">
+                                <el-input v-model="nameInput" placeholder="用户名"></el-input>
+                            </el-col>
+                        </el-row> 
+                    </div>
+                </div>
+            </div>
+            <div class="control-group">
+                <div class="controls">
+                    <div class="main_input_box whiteBg">
+                        <el-row>
+                            <el-col :span="4">
+                                <span class="ico"><img src="images/loginIco02.jpg" alt=""></span>
+                            </el-col>
+                            <el-col :span="16">
+                                <el-input v-model="pswInput" placeholder="密码"></el-input>
+                            </el-col>
+                            <el-col :span="4">
+                                <span class="ico icoRight"><img src="images/loginIco04.jpg" alt=""></span>
+                            </el-col>
+                        </el-row>                        
+                    </div>
+                </div>
+            </div>          
+            <div class="control-group" id="smsCheckCodeDiv">
+                <div class="controls">
+                    <div class="main_input_box">
+                        <div class="codeIptBox">
+                            <el-row>
+                                <el-col :span="7">
+                                    <span class="ico"><img src="images/loginIco03.jpg" alt=""></span>
+                                </el-col>
+                                <el-col :span="17">
+                                    <el-input v-model="codeInput" placeholder="输入验证码"></el-input>
+                                </el-col>
+                            </el-row>
+                        </div>
+                        <el-button type="primary" class="codeBtn">获取语音验证码</el-button>
+                    </div>                  
+                </div>
+            </div>
+            <div class="control-group">
+                <div id="codeTipDiv" class="codeTip">
+                    未收到验证码，使用<span class="link"><a id="msgHref" type="submit" href="javascript:settime(1);">短信验证码</a></span>                    
+                </div>              
+            </div>
+            <!-- //登录后是否显示修改密码  2-不显示 1-显示 -->
+            <input type="hidden" id="isUpdatePassword" name="isUpdatePassword" value="2">
+
+            <div class="control-group">
+                <!-- 提示语 -->
+                <div class="tipCntBox"><span id="errorSpan" style="display: none;"></span></div>
+                <div class="loginBtnBox">
+                    <el-button type="primary" class="loginBtn">登&nbsp;&nbsp;录</el-button>
+                </div>
+                <a href="javascript:checkUserPhone(username.value)" class="pswForgetBtn">忘记密码</a>
+            </div>
+            <!-- 图形验证码弹窗 移除hideBox则显示-->
+            <div id="passwordForgetBoxDiv" class="passwordForgetBox f-dn">
+                <div class="closeBtn">×</div> 
+                <div class="title">请输入下面的图形验证码</div>
+                <div class="codeImgBox"><img id="codeImg" src="images/code.jpg"></div>
+                <div class="whiteIptBox">
+                    <el-input v-model="imgcodeInput" placeholder=""></el-input>
+                </div>
+                <div class="tip" id="codeImgMsg" style="display: none">请输入正确的验证码</div>
+                <el-button type="primary" class="blueSubmitBtn">提&nbsp;&nbsp;交</el-button>
+            </div>
+            <!-- 下线通知 移除hideBox则显示-->   
+            <div id="logoutBoxDiv" class="logoutBox f-dn">
+                <div class="box">
+                    <div class="title">下线通知</div>
+                    <div class="cnt">您的账户在另一设备登录，您被迫下线。如不是本人操作，您的密码可能已经泄漏，建议您<a href="">修改密码</a></div>
+                    <el-button type="primary" class="blueSubmitBtn floatLeft">重新登录</el-button>
+                    <el-button type="primary" class="blueSubmitBtn floatRight">确定</el-button>
+                </div>                  
+            </div>
+        </div>
+    </div>
+</body>
+<!-- import common js-->
+<div th:include="_footer_include :: #jsLib"></div>
+<script>
+    new Vue({
+        el: '#loginbox',
+        data: function() {
+            return {
+                nameInput: '',
+                pswInput:'',
+                codeInput:'',
+                imgcodeInput:''
+            }             
+        },
+        methods: {
+            
+        },
+        created() {  
+            document.body.removeChild(document.getElementById('Loading'))   
+        }
+    })
+</script>
+</html>
