@@ -11,9 +11,9 @@
 		<el-tab-pane  label="访问IP库" name="first"> 
 	     <el-form :inline="true" :model="iprepositoryForm" class="demo-form-inline" ref="iprepositoryForm">
 		 <el-row>
-		   <el-button type="info" @click="dialogVisible = true"  >添加</el-button> 
+		   <el-button type="info" @click="dialogIpVisible = true"  >添加</el-button> 
 		   <el-button type="info">修改</el-button>
-		   <el-button type="info">删除</el-button>
+		   <el-button type="info" @click="delIpGroup" >删除</el-button>
 		   <el-form-item prop="ipAddress"> 
 		     <el-input v-model="iprepositoryForm.ipAddress" placeholder="输入包含IP查询"></el-input> 
 		   </el-form-item>
@@ -22,19 +22,19 @@
 		   </el-form-item> 
 		  </el-row>
 	     </el-form>
-		  <el-table border  id="ipManagerTable" ref="customFieldTable" :data="ipTableData" tooltip-effect="dark" tyle="width: 100%,height:750px"> 
-		   <el-table-column type="selection" width="55"> </el-table-column> 
+		  <el-table border  id="ipManagerTable" ref="customFieldTable" :data="ipTableData" tooltip-effect="dark" tyle="width: 100%,height:750px" @selection-change="changeIpTableFun"> 
+		   <el-table-column type="selection" width="55" prop="id" @selection-change="changeIpTableFun"> </el-table-column> 
 		   <el-table-column prop="ipAddress" label="ip地址" width="180"> </el-table-column> 
-		   <el-table-column prop="createTime" :formatter="dateFormat" label="创建时间"> </el-table-column> 
+		   <el-table-column prop="createTime" :formatter="dateFormat" label="创建时间" width="300"> </el-table-column> 
 		  </el-table>
 		    <table-pagination :pager="ippager" @change="queryIpDataList"></table-pagination> 
 		</el-tab-pane> 
 		<el-tab-pane label="访问Ip包" name="second"> 
 	    <el-form :inline="true" :model="ippackageForm" class="demo-form-inline" ref="customFieldQueryForm">
 		  <el-row>
-		   <el-button type="info">添加</el-button> 
+		   <el-button type="info" @click="addIpPackageVisible=true">添加</el-button> 
 		   <el-button type="info">修改</el-button>
-		   <el-button type="info">删除</el-button>
+		   <el-button type="info" @click="delpackageGroup" >删除</el-button>
 		   <el-form-item prop="ipAddress"> 
 		     <el-input v-model="ippackageForm.ipPackageName" placeholder="输入IP包名查询"></el-input> 
 		   </el-form-item>
@@ -46,8 +46,8 @@
 		   </el-form-item> 
 		   </el-row>
 	     </el-form>
-		<el-table id="ipManagerTable" border ref="customFieldTable" :data="packageTableData" tooltip-effect="dark" style="width: 100%,height:750px">
-		  <el-table-column type="selection" width="55"> </el-table-column>
+		<el-table id="ipPackageTable" border ref="customFieldTable" :data="packageTableData" tooltip-effect="dark" style="width: 535,height:750px"  @selection-change="changePackageTableFun">
+		  <el-table-column type="selection" prop="id" width="55" @selection-change="changePackageTableFun" > </el-table-column>
 		  <el-table-column prop="name" label="包名" width="180"> </el-table-column>
 		  <el-table-column prop="ipAddress" label="ip地址" width="500"> </el-table-column> 
 		  <el-table-column prop="createTime" :formatter="dateFormat" label="创建时间"> </el-table-column>
@@ -56,20 +56,63 @@
 	   </el-tab-pane>
 	 </el-tabs>
 	 <div>
-	 
-	   <el-dialog title="提示" :visible.sync="dialogVisible" width="30%":before-close="handleClose">
+	  <!-- 添加IP库弹框 -->
+	  <el-dialog title="添加IP" :visible.sync="dialogIpVisible" width="30%":before-close="handleClose" @close='closeIpAddDialog'>
 	    <el-form :inline="true" :model="ipAddForm" class="demo-form-inline" ref="ipAddForm">
-	    <el-form-item label="活动名称" prop="ipAddress">
+	     <el-form-item label="IP地址" prop="ipAddress">
             <el-input v-model="ipAddForm.ipAddress"></el-input>
-         </el-form-item> 
-		    <span slot="footer" class="dialog-footer">
-		      <el-button @click="dialogVisible = false">取 消</el-button> 
-		      <el-button type="primary" @click="submitipAddForm('ipAddForm')">确 定</el-button>
-			</span> 
-		  </el-form>
-		</el-dialog>
+          </el-form-item> 
+        </el-form>
+		 <span slot="footer" class="dialog-footer">
+		   <el-button @click="dialogIpVisible = false">取 消</el-button> 
+		    <el-button type="primary" @click="submitipAddForm('ipAddForm')">确 定</el-button>
+		 </span> 
+	 </el-dialog>
 	</div>
-	</template>
+	 <div>
+	  <!-- 添加IP包弹框 -->
+	    <el-dialog  width="70%"  height="1000" title="创建IP包" :visible.sync="addIpPackageVisible">
+	     <el-form :inline="false" :model="ipPackageAddForm" class="demo-form-inline" ref="ipPackageAddForm" label-width="100px">
+	      <el-form-item   label="IP包名称:"  >
+              <el-input v-model="ipPackageAddForm.name"></el-input>
+          </el-form-item> 
+          <el-form-item label="已选IP列表:">
+             <el-button type="primary" @click="addPackageIPSelectVisible=true">选择IP</el-button>
+          </el-form-item>
+           <el-table border  id="packAddIpTable" ref="packAddIpTable" :data="packAddIpTable" tooltip-effect="dark" tyle="width: 80%"  > 
+		     <el-table-column type="index" label="序号" header-align="center" align="center"></el-table-column>
+		     <el-table-column  prop="id" label="ID" width="0" > </el-table-column> 
+		     <el-table-column  prop="ipAddress" label="ip地址" width="180"></el-table-column> 
+		     <el-table-column  prop="operation" label="操作" width="55"> </el-table-column> 
+		  </el-table> 
+	     </el-form>
+		 <el-dialog width="60%" title="选择IP" :visible.sync="addPackageIPSelectVisible" @opened="packgeSelectIpOpen">
+		  <el-form :inline="true" :model="packageAddSelectForm" class="demo-form-inline" ref="packageAddSelectForm">
+		   <el-row>
+		    <el-form-item prop="ipAddress"> 
+		       <el-input v-model="packageAddSelectForm.ipAddress" placeholder="输入IP查询"></el-input> 
+		    </el-form-item>
+		    <el-form-item>
+		      <el-button type="info" @click="packgeSelectIpOpen">搜索</el-button>
+		   </el-form-item> 
+		   </el-row>
+	      </el-form>
+		   <el-table border  id="packSelectIpTable" ref="customFieldTable" :data="packSelectIpTable" tooltip-effect="dark" tyle="width: 100%,height:300px" @selection-change="changeSelectIpFun"> 
+		    <el-table-column type="selection" width="55" prop="id" @selection-change="changeIpTableFun"> </el-table-column> 
+		    <el-table-column prop="ipAddress" label="ip地址" width="180"> </el-table-column> 
+		  </el-table>
+		   <div slot="footer" class="dialog-footer"> 
+			   <el-button @click="addPackageIPSelectVisible =false">取 消</el-button>
+			   <el-button type="primary" @click="packageSelectIpSubmit">确定</el-button>
+		   </div>
+		 </el-dialog>
+		 <div slot="footer" class="dialog-footer"> 
+			 <el-button @click="outerVisible = false">取 消</el-button>
+			  <el-button type="primary" @click="saveIpPackageData">确定</el-button>
+		  </div>
+		 </el-dialog>
+	</div>
+    </template>
 	</div>
 	<div th:include="_footer_include :: #jsLib"></div>
 	<script>
@@ -80,7 +123,10 @@
 	        ipTableData:[] ,
 	        packageTableData:[],
 	        ipManager:"first",
-	        dialogVisible: false,
+	        dialogIpVisible:false,
+	        dialogPackgeVisible:false,
+	        addIpPackageVisible:false,
+	        addPackageIPSelectVisible:false,
 	        ippager:{
 	            total: 0,
 	            currentPage: 1,
@@ -99,22 +145,32 @@
 	           ipAddress:''
 	        },
 	        ipAddForm:{
-	         ipAddress:'';
+	          ipAddress:''
 	        },
+	        ipPackageAddForm:{
+	           name:''
+	        },
+	        packageAddSelectForm:{
+	          ipAddress: ''	
+	        },
+	        packAddIpTable:[],
+	        multipleIpSelection:[],
+	        packSelectIpTable:[],
+	        multipleAddPackageIpSelection:[],
+	        multiplePackageTable:[],
 	    },
 	    methods:{ 
 	    	//切换页签方法
 	    	 handleClick(tab, event){
-	    		  var _val = tab.index; 
-		    	  if(_val==0){
-		    		 this.queryIpDataList();  
-		    	  }else{
-		    		 this.queryPackageDataList(); 
-		    	 }
+	    	  var _val = tab.index; 
+		    	 if(_val==0){
+		    	 this.queryIpDataList();  
+		       }else{
+		          this.queryPackageDataList(); 
+		    	}
 	    	 }, 
 	    	  //查询ip库列表方法
 	    	  queryIpDataList(){ 
-	    		 debugger;
 		      	   var param = {}; 
 		           var pageSize = this.ippager.pageSize;
 	               var pageNum = this.ippager.currentPage;
@@ -186,6 +242,16 @@
 		            .then(function () {
 		            });	
 	    	},
+	    	//IP多选获取值
+	    	changeIpTableFun(val) {
+	    	     this.multipleIpSelection = val;
+	    	 },
+	    	 changeSelectIpFun(val){
+	    		this.multipleAddPackageIpSelection = val; 
+	    	 },
+	    	 changePackageTableFun(val){
+	    		 this.multiplePackageTable=val;
+	    	 },
 	    	//日期数据格式化方法
 	        dateFormat:function(row, column) {
 	             var date = row[column.property];
@@ -203,10 +269,124 @@
 	         //新增Ip提交
 	         submitipAddForm(formName){
 	        	var param={};
-	        	param.ipAddress=ipAddForm.ipAddress;
-	        	
+	        	param.ipAddress=ipManagerVM.ipAddForm.ipAddress;
+	        	axios.post('/ip/ipAccess/saveIpRepository',param).then(function (response) {
+	        		refreshIpTableData(response);
+		    	});
 	        	  
-	         }
+	         },
+	         //批量删除Ip数据
+	          delIpGroup() {
+	        	var deleIpInfo= ipManagerVM.multipleIpSelection;
+	        	var ids=[];
+	            if(null!=deleIpInfo){
+	             for ( var i = 0; i <deleIpInfo.length; i++){
+	            	ids.push(deleIpInfo[i].id);
+	             }
+	             var param={};
+	             param.deleteIds=ids;
+	             axios.post('/ip/ipAccess/deleteIpRepository',param).then(function (response) {
+	            	 refreshIpTableData(response);	
+	             });
+	             }
+	           },
+	           delpackageGroup() {
+	        	   //批量删除ip库数据
+	        	  var deleIpInfo=ipManagerVM.multiplePackageTable;
+	        	  var ids=[];
+		            if(null!=deleIpInfo){
+		             for ( var i = 0; i <deleIpInfo.length; i++){
+		            	ids.push(deleIpInfo[i].id);
+		             }
+		             var param={};
+		             param.deleteIds=ids;
+		             axios.post('/ip/ipAccess/deleteIppackage',param).then(function (response) {
+		            	 ipManagerVM.queryPackageDataList(); 
+		             });
+	              } 
+	           },
+	          packgeSelectIpOpen(){
+	        	  //ip包添加选择Ip数据 
+	        	 var ipAddress = this.packageAddSelectForm.ipAddress;
+		      	 var param = {}; 
+		      	 param.ipAddress=ipAddress;
+		          axios.post('/ip/ipAccess/queryRepositoryList',param).then(function (response) {
+		               if(null==response){
+			                 alert("返回异常");
+			                 return ;
+			             }
+			            var resobj= response.data;
+			            if(null==resobj){
+			            	 alert("返回异常");
+			                 return ;
+			            } 
+			            if(resobj.code!='0'){
+			            	alert(response.data.message);
+			            	return ;
+			            }
+			             var pageData=resobj.data;
+			           	 ipManagerVM.packSelectIpTable =pageData.data; 	
+		            })
+		            .catch(function (error) {
+		              console.log(error);
+		            })
+		            .then(function () {
+		            });  
+	        	 
+	         },
+	         packageSelectIpSubmit(){
+	           //添加包选择Ip返回
+	           ipManagerVM.packAddIpTable=ipManagerVM.multipleAddPackageIpSelection;
+	         },
+	          saveIpPackageData(){
+	          //保存IP包数据	 
+	        	 var savepackageIp= ipManagerVM.packAddIpTable; 
+	         	 var packageName= ipManagerVM.ipPackageAddForm.name; 
+	         	 var param={};
+	         	 param.name=packageName;
+	         	 param.ipRepositorys=savepackageIp;
+	             axios.post('/ip/ipAccess/saveIpPackage',param).then(function (response) {
+		               if(null==response){
+			                 alert("返回异常");
+			                 return ;
+			             }
+			            var resobj= response.data;
+			            if(null==resobj){
+			            	 alert("返回异常");
+			                 return ;
+			            } 
+			            if(resobj.code!='0'){
+			            	alert(response.data.message);
+			            	return ;
+			            }
+			            ipManagerVM.addPackageIPSelectVisible=false;
+			            ipManagerVM.queryPackageDataList(); 
+		            })
+	         	 
+	         	 
+	        	 
+	         },
+	          refreshIpTableData(response){
+	        	//修改新增Ip后刷新IP列表
+	      	   if(null==response){
+	                 alert("返回异常");
+	                 return ;
+	             }
+	            var resobj= response.data;
+	            if(null==resobj){
+	            	 alert("返回异常");
+	                 return ;
+	            }        		
+  		        if(resobj.code=='0'){
+  			     ipManagerVM.queryIpDataList();	
+	            }else{
+	        	  alert("返回异常");
+	         	   return;
+	           }	  
+	         },
+             closeIpAddDialog(){
+	        	 
+	         },
 	      },
 	     created(){
 	    	 //初始化数据列表
