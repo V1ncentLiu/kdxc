@@ -6,8 +6,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.swing.plaf.basic.BasicComboBoxUI.FocusHandler;
 import javax.validation.Valid;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -28,7 +26,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
-import com.google.common.base.Strings;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.IdEntity;
 import com.kuaidao.common.entity.IdListReq;
@@ -296,14 +293,15 @@ public class CustomFieldController {
     public ResponseEntity<InputStreamResource> downloadFile(HttpServletRequest request)
             throws IOException {
         // 获取文件路径
-        File file2 = ResourceUtils.getFile(
+        File filePath = ResourceUtils.getFile(
                 ResourceUtils.CLASSPATH_URL_PREFIX + "excel-templates/custom-field-template.xlsx");
 
-        FileSystemResource file = new FileSystemResource(file2);
+        FileSystemResource file = new FileSystemResource(filePath);
         HttpHeaders headers = new HttpHeaders();
         headers.add("Cache-Control", "no-cache, no-store, must-revalidate");
+        String fileName  =new String("自定义字段导入模板.xlsx".getBytes(),"iso-8859-1");
         headers.add("Content-Disposition",
-                String.format("attachment; filename=\"%s\"", file2.getName()));
+                String.format("attachment; filename=\"%s\"",fileName));
         headers.add("Pragma", "no-cache");
         headers.add("Expires", "0");
 
@@ -324,10 +322,11 @@ public class CustomFieldController {
         logger.info("upload size:{{}}" , excelDataList.size());
 
         if (excelDataList == null || excelDataList.size() == 0) {
-
+            return  new JSONResult<>().fail(SysErrorCodeEnum.ERR_EXCLE_DATA.getCode(),SysErrorCodeEnum.ERR_EXCLE_DATA.getMessage());
         }
         if (excelDataList.size() > 1000) {
-            logger.error("批量导入评论,大于1000条，条数{{}}", excelDataList.size());
+            logger.error("上传自定义字段,大于1000条，条数{{}}", excelDataList.size());
+            return  new JSONResult<>().fail(SysErrorCodeEnum.ERR_EXCLE_OUT_SIZE.getCode(),"导入数据过多，已超过1000条！");
         }
 
         //存放合法的数据

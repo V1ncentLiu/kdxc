@@ -24,14 +24,14 @@
                 <el-button type="primary" class="messageBtn f-fl">消息中心<em class="redcolor">&nbsp;(&nbsp;2&nbsp;)</em></el-button>
                 <i class="iconfont icon-touxiang headerImg f-fl"></i>
                 <!-- 下拉 -->
-                <el-dropdown trigger="click">
+                <el-dropdown trigger="click"  @command="handleCommand">
                     <div class="elDropdownBtn">
                         <span>王小虎 — 在线</span> 
                         <i class="el-icon-caret-bottom"></i>
                     </div>            
                     <el-dropdown-menu slot="dropdown">
-                        <el-dropdown-item>修改密码</el-dropdown-item>
-                        <el-dropdown-item>退出登录</el-dropdown-item>
+                        <el-dropdown-item command="modifyPwd">修改密码</el-dropdown-item>
+                        <el-dropdown-item command="logout">退出登录</el-dropdown-item>
                     </el-dropdown-menu>
                 </el-dropdown>
             </div>
@@ -97,19 +97,37 @@
             </el-main>
         </el-container>
     </el-container>
+    
+     <!-- 修改密码 dialog start -->
+     <el-dialog title="修改密码" :visible.sync="dialogModifyPwdVisible">
+        <el-form :model="modifyForm" ref="modifyForm" :rules="modifyFormRules">
+            <el-form-item label="当前密码：" :label-width="formLabelWidth" prop="curPwd">
+                <el-input v-model="modifyForm.curPwd" autocomplete="off" minlength="6" maxlength="30"></el-input>
+            </el-form-item>
+            <el-form-item label="新密码：" :label-width="formLabelWidth" prop="newPwd">
+                <el-input v-model="modifyForm.newPwd" autocomplete="off"  maxlength="30"></el-input>
+            </el-form-item>
+            <el-form-item label="确认密码：" :label-width="formLabelWidth" prop="confirmPwd">
+                <el-input v-model="modifyForm.confirmPwd" autocomplete="off"  maxlength="30"></el-input>
+            </el-form-item>
+        </el-form>
+        <div slot="footer" class="dialog-footer" center="true">
+            <el-button type="primary" @click="saveModifyForm('modifyForm')">保存</el-button>
+            <el-button @click="cancelModifyForm('modifyForm')">取 消</el-button>
+        </div>
+    </el-dialog>
+ <!-- 修改密码 dialog end -->
+ <!-- 退出登录 dialog start -->
+	 <el-dialog title="提示" :visible.sync="dialogLogoutVisible" width="30%">
+	  <span>确认退出系统吗？</span>
+	  <span slot="footer" class="dialog-footer">
+	    <el-button type="primary" @click="confirmLogout">确认</el-button>
+	  </span>
+</el-dialog>
+ <!-- 退出登录 dialog start -->
+ 
 </div>  
-<!-- 分頁table組件 -->
-<template>
-    <el-table :data="tableData3" height="650" style="width: 100%"> 
-        <el-table-column prop="area" label="区域" width="180"> </el-table-column> 
-        <el-table-column prop="name" label="姓名" width="180"> </el-table-column> 
-        <el-table-column prop="address" label="地址"> </el-table-column> 
-    </el-table> 
-    <el-pagination @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page="currentPage"
-        :page-sizes="[10, 20, 30, 40]" :page-size="pageSize"
-        layout="total, sizes, prev, pager, next, jumper" :total="total">
-    </el-pagination>    
-</template>
+
 </body>
 <!-- import common js-->
 <div th:include="_footer_include :: #jsLib"></div>

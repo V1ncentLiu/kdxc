@@ -4,7 +4,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+import com.google.common.collect.Multimap;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
+import com.kuaidao.common.constant.SystemCodeConstant;
 import com.kuaidao.common.entity.IdEntity;
 import com.kuaidao.common.entity.IdListReq;
 import com.kuaidao.common.entity.JSONResult;
@@ -13,10 +15,15 @@ import com.kuaidao.common.entity.TreeData;
 import com.kuaidao.common.util.CommonUtil;
 import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
 import com.kuaidao.sys.dto.organization.OrganizationRespDTO;
+import com.kuaidao.sys.dto.user.OrgUserReqDTO;
+import com.kuaidao.sys.dto.user.UserAndRoleRespDTO;
 import com.kuaidao.sys.dto.organization.OrganizationAddAndUpdateDTO;
 import com.kuaidao.sys.dto.organization.OrganizationDTO;
 import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import org.slf4j.Logger;
@@ -61,8 +68,7 @@ public class OrganizationController {
         if (result.hasErrors()) {
             return CommonUtil.validateParam(result);
         }
-      //TODO devin
-        orgDTO.setSystemCode("huiju");
+        orgDTO.setSystemCode(SystemCodeConstant.HUI_JU);
         
         Long id = orgDTO.getId();
         if(id!=null) {
@@ -133,8 +139,7 @@ public class OrganizationController {
     @ResponseBody
     public JSONResult<Boolean> queryOrgByParam(
             @RequestBody OrganizationQueryDTO queryDTO) {
-        //TODO devin
-        queryDTO.setSystemCode("huiju");
+        queryDTO.setSystemCode(SystemCodeConstant.HUI_JU);
         JSONResult<List<OrganizationRespDTO>> orgList = organizationFeignClient.queryOrgByParam(queryDTO);
         if(orgList!=null && JSONResult.SUCCESS.equals(orgList.getCode())) {
             List<OrganizationRespDTO> data = orgList.getData();
@@ -182,6 +187,20 @@ public class OrganizationController {
       
     }
     
-    
+    /**
+     * 查询组织机构下，用户信息
+     * @param reqDTO
+     * @param result
+     * @return
+     */
+    @PostMapping("/listOrgUserInfo")
+    @ResponseBody
+    public JSONResult<PageBean<UserAndRoleRespDTO>> listOrgUserInfo(
+            @Valid @RequestBody OrgUserReqDTO reqDTO, BindingResult result) {
+        if (result.hasErrors()) {
+            return CommonUtil.validateParam(result);
+        }
+        return organizationFeignClient.listOrgUserInfo(reqDTO);
+    }
 
 }

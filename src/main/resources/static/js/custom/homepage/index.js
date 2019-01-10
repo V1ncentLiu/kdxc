@@ -1,13 +1,47 @@
-new Vue({
+var homePageVM=new Vue({
   	el: '#app',
   	data: function() {
+  		var validatePass = (rule, value, callback) => {
+            if (value !== this.modifyForm.newPwd) {
+                callback(new Error('确认密码与新密码不一致，请重新输入'));
+            } else {
+                callback();
+            }
+        };
+  		
 	    return { 
+	    	formLabelWidth:'120px',
 	      	isCollapse: false,//侧导航是否展开
 	      	isActive:true,
+	      	dialogModifyPwdVisible:false,//修改密码dialog 是否显示
+	      	dialogLogoutVisible:false,//退出登录 dialog
+	      	modifyForm:{
+	      		'curPwd':'',
+	      		'newPwd':'',
+	      		'confirmPwd':''
+	      	},
 		   	items:[
 		     	/*{ifreamUrl:'a.html',index:'1-1',name:"数据演示1"},
 		     	{ifreamUrl:'b.html',index:'1-2',name:"数据演示2"}*/
-		   	]
+		   	],
+		   	modifyFormRules:{
+		   		curPwd:[
+		   		    { required: true, message: '当前密码不能为空',trigger:'blur'},
+		   		    { min: 6, max: 30, message: '长度在 6 到 30个字符', trigger: 'blur' },
+		   		    {pattern:'/^[0-9a-zA-Z]*$/',message:'只允许输入字母/数字',trigger:'blur'}	
+		   		  ],
+		   		 newPwd:[
+		   			{ required: true, message: '新密码不能为空',trigger:'blur'},
+		   		    { min: 6, max: 30, message: '长度在 6 到 30个字符', trigger: 'blur' },
+		   		    {pattern:'/^[0-9a-zA-Z]*$/',message:'只允许输入字母/数字',trigger:'blur'}	
+		   		 ],
+		   		 confirmPwd:[
+		   			{ required: true, message: '确认密码不能为空',trigger:'blur'},
+		   		    { min: 6, max: 30, message: '长度在 6 到 30个字符', trigger: 'blur' },
+		   		    { validator: validatePass, trigger: 'blur' }
+		   		 ]
+		   		
+		   	}
 	    }
 	},
  	methods: {
@@ -29,7 +63,69 @@ new Vue({
 	    menuClick:function(ifreamUrl){
 	    	console.log(this)
 	     	this.$refs.iframeBox.src=ifreamUrl //给ifream的src赋值
-	   	}
+	   	},  
+	   	handleCommand(command) {//点击下拉菜单
+	        if(command=='modifyPwd'){//修改密码
+	        	this.modifyPwd();
+	        }else if(command=='logout'){//退出
+	        	this.logout();
+	        }
+	     },
+	     modifyPwd(){//修改密码
+	    	 this.dialogModifyPwdVisible=true;
+	     },
+	     logout(){
+	    	 this.dialogLogoutVisible=true;
+	     },
+	     cancelModifyForm(formName){
+         	this.$refs[formName].resetFields();
+         },
+         saveModifyForm(formName){//保存
+        	 this.$refs[formName].validate((valid) => {
+                 if (valid) {
+                    var param=this.form;
+                   axios.post('/customfield/customField/saveOrUpdate', param)
+                   .then(function (response) {
+                       var resData = response.data;
+                       if(resData.code=='0'){
+                    	   homePageVM.$message('请使用新密码重新登录的提示框');
+                    	   homePageVM.cancelForm(formName);
+                    	   homePageVM.dialogModifyPwdVisible = false;
+                       }else{
+                    	   homePageVM.$message('操作失败');
+                           console.error(resData);
+                       }
+                   
+                   })
+                   .catch(function (error) {
+                        console.log(error);
+                   });
+                    
+                 } else {
+                   return false;
+                 }
+               });
+         },
+         confirmLogout(){//确认退出系统
+             axios.post('/customfield/customField/saveOrUpdate', param)
+             .then(function (response) {
+                 var resData = response.data;
+                 if(resData.code=='0'){
+              	   homePageVM.$message('请使用新密码重新登录的提示框');
+              	   homePageVM.cancelForm(formName);
+              	   homePageVM.dialogModifyPwdVisible = false;
+                 }else{
+              	   homePageVM.$message('操作失败');
+                     console.error(resData);
+                 }
+             
+             })
+             .catch(function (error) {
+                  console.log(error);
+             });
+        }
+         
+         
   	},
    	created() {  
    		document.body.removeChild(document.getElementById('Loading'))   
