@@ -1,4 +1,4 @@
-package com.kuaidao.manageweb.feign;
+package com.kuaidao.manageweb.feign.role;
 
 import java.util.List;
 
@@ -20,11 +20,7 @@ public interface RoleManagerFeignClient {
 
 	@RequestMapping(method = RequestMethod.POST, value = "/queryRoleList")
 	public JSONResult<List<RoleInfoDTO>> queryRoleList(RoleQueryDTO dto);
-	
-	
-	
-	
-
+ 
 	@Component
 	static class HystrixClientFallback implements RoleManagerFeignClient {
 
