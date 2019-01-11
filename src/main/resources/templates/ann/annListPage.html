@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head th:include="_header_include::frag(~{::title},~{},~{})">
+    <title>公告管理</title>
+</head>
+<body>
+
+<div id="queryForm" class="mainPadding">
+    <el-row class="row-bg" justify="end">
+        <el-form :inline="true" :model="annForm" class="demo-form-inline" ref="queryForm" >
+
+            <el-col :span="8">
+                <el-form-item>
+                    <el-button type="primary" @click="publishAnnPage">发布公告</el-button>
+                </el-form-item>
+            </el-col>
+            <el-col :span="4">
+                <el-form-item label="" prop="content">
+                    <el-input v-model="annForm.content" placeholder="公告内容"></el-input>
+                </el-form-item>
+            </el-col>
+            <el-col :span="12">
+                <el-form-item label="发布时间">
+                    <!--<el-date-picker v-model="annForm.time" type="datetimerange" align="right" start-placeholder="开始日期" end-placeholder="结束日期" :default-time="['00:00:00', '23:59:59']">-->
+                    <!--</el-date-picker>-->
+                    <el-date-picker v-model="annForm.date1" type="datetime" placeholder="选择日期时间"></el-date-picker>
+                    <span>到</span>
+                    <el-date-picker v-model="annForm.date2" type="datetime" placeholder="选择日期时间"></el-date-picker>
+                </el-form-item>
+                <el-form-item>
+                    <el-button type="primary" @click="onSubmit">查询</el-button>
+                </el-form-item>
+            </el-col>
+
+        </el-form>
+    </el-row>
+</div>
+
+<div id="pagination">
+    <template>
+        <el-table :data="tableData3" height="650" style="width: 100%" tooltip-effect="dark"  ref="multipleTable" @row-dblclick="rowDblClick()">
+            <el-table-column prop="xh" label="序号" width="180" align="center"  type="index">
+            </el-table-column>
+            <el-table-column prop="title" label="标题" width="180"></el-table-column>
+            <el-table-column prop="content" label="消息内容" width="500"></el-table-column>
+            <el-table-column prop="orgId" label="接收范围" width="180"></el-table-column>
+            <el-table-column prop="publishTime" label="发布时间" ></el-table-column>
+        </el-table>
+    </template>
+
+    <template>
+        <div class="block">
+            <el-pagination @size-change="handleSizeChange"
+                           @current-change="handleCurrentChange" :current-page="currentPage"
+                           :page-sizes="[10, 20, 30, 40]" :page-size="pageSize"
+                           layout="total, sizes, prev, pager, next, jumper" :total="total">
+            </el-pagination>
+        </div>
+    </template>
+</div>
+
+<!-- import common js-->
+<div th:include="_footer_include :: #jsLib"></div>
+
+<script>
+    // 查询 模块
+    var queryFormVM = new Vue({
+        el: '#queryForm',
+        data: {
+            annForm: {
+                content: '',
+                date1: '',
+                date2: ''
+            }
+        },
+        methods: {
+            publishAnnPage:function(){
+                window.location.href = '/ann/annPublishPage'
+            },
+            onSubmit() {
+                console.log('submit!');
+                var param = queryFormVM.annForm;
+                param.pageSize = paginationVm.pageSize;
+                param.pageNum = paginationVm.pageNum;
+                console.info(param);
+                axios.post("/ann/queryAnnList", param)
+                    .then(function (response) {
+
+                        if(response.data.code==-1){
+                            queryFormVM.$message.error(response.data.msg)
+                            return false ;
+                        }
+
+                        var data = response.data.data;
+                        paginationVm.tableData3 = data.data;
+                        console.info(data);
+                        paginationVm.total = data.total;
+                        paginationVm.currentPage = data.currentPage;
+                    })
+                    .catch(function (error) {
+                        console.log(error);
+                    });
+
+            },
+            resetForm(formName) {
+                console.info(this.$refs[formName]);
+                queryFormVM.$refs[formName].resetFields();
+                this.$refs[formName].resetFields();
+            }
+        }
+
+
+    });
+
+    //带分页的table
+    var paginationVm = new Vue({
+        el: '#pagination',
+        data: {
+            tableData3: [],
+            multipleSelection:[],
+            currentPage: 1,
+            total: 0,
+            pageNum: 1,
+            pageSize: 10
+        },
+        methods: {
+            formatDate(row, column) {
+                let date = new Date(parseInt(row.publishTime) * 1000);
+                let Y = date.getFullYear() + '-';
+                let M = date.getMonth() + 1 < 10 ? '0' + (date.getMonth() + 1) + '-' : date.getMonth() + 1 + '-';
+                let D = date.getDate() < 10 ? '0' + date.getDate() + ' ' : date.getDate() + ' ';
+                let h = date.getHours() < 10 ? '0' + date.getHours() + ':' : date.getHours() + ':';
+                let m = date.getMinutes()  < 10 ? '0' + date.getMinutes() + ':' : date.getMinutes() + ':';
+                let s = date.getSeconds() < 10 ? '0' + date.getSeconds() : date.getSeconds();
+
+                return Y + M + D + h + m + s;
+            },
+            rowDblClick(row, event){
+                // alert("行双击事件")
+            },
+            selectRow(row){
+            },
+            handleSelectionChange(val) {
+                console.info(val);
+                this.multipleSelection = val;
+            },
+            handleSizeChange(val) {
+                //下拉框  每页 10,20条切换 调用
+                console.log(`每页 ${val} 条`);
+                this.pageSize = val;
+                this.initTableData(1);
+            },
+            handleCurrentChange(val) {
+                //点击 页码
+                console.log(`当前页: ${val}`);
+                this.initTableData(val);
+            },
+            initTableData(v_pageNum) {
+                var param = queryFormVM.annForm;
+                console.log(param);
+                param.pageSize =  this.pageSize;
+                param.pageNum = v_pageNum;
+                axios.post("/ann/queryAnnList", param)
+                    .then(function (response) {
+                        var data = response.data.data
+                        console.info(data);
+                        paginationVm.tableData3 = data.data;
+                        paginationVm.total = data.total;
+                        paginationVm.currentPage = data.currentPage;
+                    })
+                    .catch(function (error) {
+                        console.log(error);
+                    })
+                    .then(function () {
+                        // always executed
+                    });
+            }
+        },
+
+        created() {
+            console.info("create method");
+            this.initTableData(1);
+
+        },
+        mounted() {
+            console.info("mounted method");
+        }
+
+    });
+
+</script>
+</body>
+</html>
