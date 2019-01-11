@@ -2,7 +2,7 @@ var homePageVM=new Vue({
   	el: '#app',
   	data: function() {
   		var validatePass = (rule, value, callback) => {
-            if (value !== this.modifyForm.newPwd) {
+            if (value !== this.modifyForm.newPassword) {
                 callback(new Error('确认密码与新密码不一致，请重新输入'));
             } else {
                 callback();
@@ -16,21 +16,22 @@ var homePageVM=new Vue({
 	      	dialogModifyPwdVisible:false,//修改密码dialog 是否显示
 	      	dialogLogoutVisible:false,//退出登录 dialog
 	      	modifyForm:{
-	      		'curPwd':'',
-	      		'newPwd':'',
+	      		'oldPassword':'',
+	      		'newPassword':'',
 	      		'confirmPwd':''
 	      	},
-		   	items:[
+		   	items:menuList
 		     	/*{ifreamUrl:'a.html',index:'1-1',name:"数据演示1"},
 		     	{ifreamUrl:'b.html',index:'1-2',name:"数据演示2"}*/
-		   	],
+		       ,
+		    defaultOpeneds:["0"],//默认打开菜单索引
 		   	modifyFormRules:{
-		   		curPwd:[
+		   		oldPassword:[
 		   		    { required: true, message: '当前密码不能为空',trigger:'blur'},
 		   		    { min: 6, max: 30, message: '长度在 6 到 30个字符', trigger: 'blur' },
 		   		    {pattern:'/^[0-9a-zA-Z]*$/',message:'只允许输入字母/数字',trigger:'blur'}	
 		   		  ],
-		   		 newPwd:[
+		   		newPassword:[
 		   			{ required: true, message: '新密码不能为空',trigger:'blur'},
 		   		    { min: 6, max: 30, message: '长度在 6 到 30个字符', trigger: 'blur' },
 		   		    {pattern:'/^[0-9a-zA-Z]*$/',message:'只允许输入字母/数字',trigger:'blur'}	
@@ -84,15 +85,17 @@ var homePageVM=new Vue({
         	 this.$refs[formName].validate((valid) => {
                  if (valid) {
                     var param=this.form;
-                   axios.post('/customfield/customField/saveOrUpdate', param)
+                   axios.post('/user/userManager/updatePassword', param)
                    .then(function (response) {
                        var resData = response.data;
                        if(resData.code=='0'){
                     	   homePageVM.$message('请使用新密码重新登录的提示框');
                     	   homePageVM.cancelForm(formName);
                     	   homePageVM.dialogModifyPwdVisible = false;
+                    	   
+                    	   setTimeout('gotoHomePage',2000);
                        }else{
-                    	   homePageVM.$message('操作失败');
+                    	   homePageVM.$message(resData.msg);
                            console.error(resData);
                        }
                    
@@ -123,6 +126,9 @@ var homePageVM=new Vue({
              .catch(function (error) {
                   console.log(error);
              });
+        },
+        gotoHomePage(){
+        	location.href='/homePage/index';
         }
          
          
@@ -134,7 +140,6 @@ var homePageVM=new Vue({
 // 点击导航赋值ifream的src值
 $(function () { 
 	var mainBoxH=$(".elMain").height()-4;
-	console.log($(".elMain").height())
 	// 设置ifream高度
 	$("#iframeBox").height(mainBoxH)
 	$(document).on('click','.menu',function(){

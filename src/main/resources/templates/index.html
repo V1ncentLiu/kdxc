@@ -47,51 +47,31 @@
                     @open="handleOpen" 
                     @close="handleClose" 
                     :collapse="isCollapse" 
+                    :default-openeds="defaultOpeneds"
                     background-color="rgb(48, 65, 86)" 
-                    text-color="#fff">            
-                    <el-submenu index="1">
+                    text-color="#fff">   
+                    
+                    <!-- foreach menuList start -->
+                      <el-submenu :index="index+''" :key="index"  v-for="(item,index) in items">
                         <template slot="title">
                             <i class="iconfont icon-menu1"></i>
-                            <span slot="title">导航一</span>
+                            <span slot="title">{{item.menuGroup}}</span>
                         </template>
-                        <el-menu-item class="menu" data-url="/path/a.html" index="1-1" @click="menuClick">数据演示1</el-menu-item>
-                        <el-menu-item class="menu" data-url="/path/b.html" index="1-2" @click="menuClick">数据演示2</el-menu-item>
-                        <!--  <el-menu-item class="menu" v-for="list in items" @click="menuClick(list.ifreamUrl)" :data-url="list.ifreamUrl" :index="list.index">{{list.name}}</el-menu-item> -->
-                    </el-submenu>              
-                    <el-submenu index="2">
-                        <template slot="title">
-                            <i class="iconfont icon-menu2"></i>
-                            <span slot="title">导航二</span>
-                        </template>
-                        <!--   <el-menu-item class="menu" data-url="/path/" index="2-1" @click="menuClick">数据演示1</el-menu-item>
-                        <el-menu-item class="menu" data-url="b.html" index="2-2" @click="menuClick">数据演示2</el-menu-item> -->
-                        <el-menu-item class="menu" data-url="/path/brandList" index="1-1">form+table演示</el-menu-item>
-                        <el-menu-item class="menu" data-url="/path/tableOpt" index="1-2">可操作table</el-menu-item>
-                        <el-menu-item class="menu" data-url="/path/form" index="1-3">表单操作</el-menu-item>
-                        <el-menu-item class="menu" data-url="/path/dynamic_column_table" index="1-4">table自定义列</el-menu-item>
-                        <el-menu-item class="menu" data-url="/path/table_page" index="1-5">分頁组件封装</el-menu-item>
+                        
+                        
+                        <el-menu-item class="menu" :key="index+subIndex" :data-url="subItem.url" :index="index+'-'+subIndex" @click="menuClick(subItem.url)" 
+                                v-for="(subItem,subIndex) in item.subList">
+                                         {{subItem.name}}
+                        </el-menu-item>
                     </el-submenu> 
-                    <el-submenu index="3">
-                        <template slot="title">
-                            <i class="iconfont icon-menu3"></i>
-                            <span slot="title">导航三</span>
-                        </template>
-                        <el-menu-item class="menu" ref="menu" data-url="a.html" index="3-1" @click="menuClick">数据演示1</el-menu-item>
-                        <el-menu-item class="menu" ref="menu" data-url="b.html" index="3-2" @click="menuClick">数据演示2</el-menu-item>
-                    </el-submenu> 
-                    <el-submenu index="4">
-                        <template slot="title">
-                            <i class="iconfont icon-menu1"></i>
-                            <span slot="title">导航三</span>
-                        </template>
-                        <el-menu-item class="menu" data-url="a.html" index="4-1" @click="menuClick">数据演示1</el-menu-item>
-                        <el-menu-item class="menu" data-url="b.html" index="4-2" @click="menuClick">数据演示2</el-menu-item>
-                    </el-submenu>                   
+                    
+                    <!-- foreach menuList end -->
+                                      
                 </el-menu>
             </el-aside>
             <!-- 右侧内容区 -->
             <el-main class="elMain">
-                <iframe src ="a.html" id="iframeBox" name='iframe' frameborder="0" width="100%" height="100%">
+                <iframe src ="a.html" id="iframeBox" ref="iframeBox" name='iframe' frameborder="0" width="100%" height="100%">
                     <p>Your browser does not support iframes.</p>
                 </iframe>
             </el-main>
@@ -101,11 +81,11 @@
      <!-- 修改密码 dialog start -->
      <el-dialog title="修改密码" :visible.sync="dialogModifyPwdVisible">
         <el-form :model="modifyForm" ref="modifyForm" :rules="modifyFormRules">
-            <el-form-item label="当前密码：" :label-width="formLabelWidth" prop="curPwd">
-                <el-input v-model="modifyForm.curPwd" autocomplete="off" minlength="6" maxlength="30"></el-input>
+            <el-form-item label="当前密码：" :label-width="formLabelWidth" prop="oldPassword">
+                <el-input v-model="modifyForm.oldPassword" autocomplete="off" minlength="6" maxlength="30"></el-input>
             </el-form-item>
-            <el-form-item label="新密码：" :label-width="formLabelWidth" prop="newPwd">
-                <el-input v-model="modifyForm.newPwd" autocomplete="off"  maxlength="30"></el-input>
+            <el-form-item label="新密码：" :label-width="formLabelWidth" prop="newPassword">
+                <el-input v-model="modifyForm.newPassword" autocomplete="off"  maxlength="30"></el-input>
             </el-form-item>
             <el-form-item label="确认密码：" :label-width="formLabelWidth" prop="confirmPwd">
                 <el-input v-model="modifyForm.confirmPwd" autocomplete="off"  maxlength="30"></el-input>
@@ -131,5 +111,9 @@
 </body>
 <!-- import common js-->
 <div th:include="_footer_include :: #jsLib"></div>
+<script th:inline="javascript">
+    var menuList=[[${menuList}]];
+</script>
+
 <script th:src="@{/js/custom/homepage/index.js}"></script>
 </html>

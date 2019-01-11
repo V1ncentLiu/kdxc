@@ -123,9 +123,9 @@
                         
                         orgVM.$alert(msgInfo, '消息提醒', {
                             confirmButtonText: btnText,
-                            showClose:false,
+                            showClose:true,
                              callback: action => {
-                                   if(isDelete){
+                                   if(isDelete & action=='confirm'){
                                        //删除
                                 	   axios.post('/organization/organization/delete',param)
                                        .then(function (response) {
@@ -265,6 +265,7 @@
               },
               cancelForm(formName) {
                   this.$refs[formName].resetFields();
+                  this.dialogFormVisible = false;
               },
               initOrgTree(){//刷新根节点tree
             	  axios.post('/organization/organization/query',{})

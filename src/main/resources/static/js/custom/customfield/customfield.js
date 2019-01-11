@@ -99,6 +99,7 @@ var fieldMenuVM = new Vue({
         methods: {
         	cancelForm(formName) {
                 this.$refs[formName].resetFields();
+            	this.dialogFormVisible = false;
             },
             deleteFieldMenu() {
             	
@@ -166,7 +167,6 @@ var fieldMenuVM = new Vue({
                           if(resData.code=='0'){
                               fieldMenuVM.$message('操作成功');
                               fieldMenuVM.cancelForm(formName);
-                              fieldMenuVM.dialogFormVisible = false;
                               fieldMenuVM.initCustomFiledMenu();
                           }else{
                               fieldMenuVM.$message('操作失败');
@@ -183,9 +183,7 @@ var fieldMenuVM = new Vue({
                     }
                   });
             	
-            	
-            	
-            	this.dialogFormVisible = true;
+
             },// method end
             handleSelectionChange(val) {
                 this.multipleSelection = val;

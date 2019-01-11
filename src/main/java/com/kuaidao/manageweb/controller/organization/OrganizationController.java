@@ -4,7 +4,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
-import com.google.common.collect.Multimap;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.constant.SystemCodeConstant;
 import com.kuaidao.common.entity.IdEntity;
@@ -20,12 +19,11 @@ import com.kuaidao.sys.dto.user.UserAndRoleRespDTO;
 import com.kuaidao.sys.dto.organization.OrganizationAddAndUpdateDTO;
 import com.kuaidao.sys.dto.organization.OrganizationDTO;
 import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+import org.apache.shiro.authz.annotation.Logical;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,6 +59,8 @@ public class OrganizationController {
         return "organization/organizationPage";
     }
 
+    
+    @RequiresPermissions(value= {"organization:save","organization:update"},logical=Logical.OR)
     @PostMapping("/saveOrUpdate")
     @ResponseBody
     public JSONResult save(@Valid @RequestBody OrganizationAddAndUpdateDTO orgDTO,
@@ -87,6 +87,7 @@ public class OrganizationController {
      * @param orgDTO
      * @return
      */
+    @RequiresPermissions("organization:update")
     @PostMapping("/update")
     @ResponseBody
     public JSONResult update(@Valid @RequestBody OrganizationAddAndUpdateDTO orgDTO,
@@ -103,6 +104,7 @@ public class OrganizationController {
      * @param orgDTO
      * @return
      */
+    @RequiresPermissions("organization:delete")
     @PostMapping("/delete")
     @ResponseBody
     public JSONResult delete(@RequestBody IdListReq idListReq) {

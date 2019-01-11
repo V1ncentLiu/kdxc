@@ -16,12 +16,18 @@
                     fieldCode:'',
                     fieldName:'',
                     displayName:'',
-                    fieldType:'',
+                    fieldType:1,
                     sortNum:'',
                     width:'',
-                    isUsed:'',
+                    isUsed:1,
                     remark:'',
-                    menuId:fieldMenu.id
+                    //menuId:fieldMenu.id
+                },
+                menuId:fieldMenu.id,//该字段设置属于菜单组
+                oldFieldForm:{//存放旧的form 数据，提交时比对
+                	fieldCode:'',
+                	fieldName:'',
+                	displayName:''
                 },
                 paramData:{
                 	id:fieldMenu.id
@@ -31,30 +37,35 @@
                 formLabelWidth: '100px',
                 dataTable: [],
                 options: [{
-                    value: '1',
+                    value: 1,
                     label: '文本'
                 }, {
-                    value: '2',
+                    value: 2,
                     label: '时间'
                 }, {
-                    value: '3',
+                    value: 3,
                     label: '下拉列表'
                 }],
                 isUsedOps:[{
-                    value: '1',
+                    value: 1,
                     label: '是'
                 }, {
-                    value: '0',
+                    value: 0,
                     label: '否'
                 }],
                 rules:{
                 	fieldCode:[
                 		 { required: true, message: '字段编码不能为空',trigger:'blur'},
                 		 {validator:function(rule,value,callback){
-                             
+                			 var id = fieldVM.form.id;
+                        	 var fieldCode = fieldVM.oldFieldForm.fieldCode;
+                        	 if(id && value==fieldCode){
+                        		 callback();
+                        	 }
+                			 
                               var param = {};
                               param.fieldCode=value;
-                              param.menuId=fieldVM.form.menuId;
+                              param.menuId=fieldVM.menuId;
                               axios.post('/customfield/customField/query',param)
                               .then(function (response) {
                                   var data =  response.data;
@@ -82,9 +93,15 @@
                 	fieldName:[
                 		{required: true, message: '字段名称不能为空',trigger:'blur'},
                 		 {validator:function(rule,value,callback){
+                			 var id = fieldVM.form.id;
+                        	 var fieldName = fieldVM.oldFieldForm.fieldName;
+                        	 if(id && value==fieldName){
+                        		 callback();
+                        	 }
+                			 
                              var param = {};
                              param.fieldName=value;
-                             param.menuId=fieldVM.form.menuId;
+                             param.menuId=fieldVM.menuId;
                              axios.post('/customfield/customField/query',param)
                              .then(function (response) {
                                  var data =  response.data;
@@ -112,9 +129,15 @@
                 	displayName:[
                         {required: true, message: '外显名称不能为空',trigger:'blur'},
                          {validator:function(rule,value,callback){
+                        	 var id = fieldVM.form.id;
+                        	 var displayName = fieldVM.oldFieldForm.displayName;
+                        	 if(id && value==displayName){
+                        		 callback();
+                        	 }
+                        	 
                              var param = {};
                              param.displayName=value;
-                             param.menuId=fieldVM.form.menuId;
+                             param.menuId=fieldVM.menuId;
                              axios.post('/customfield/customField/query',param)
                              .then(function (response) {
                                  var data =  response.data;
@@ -208,17 +231,18 @@
             },
             cancelForm(formName){
             	this.$refs[formName].resetFields();
+            	this.dialogFormVisible=false;
             },
             saveField(formName){//保存自定义字段
             	 this.$refs[formName].validate((valid) => {
                      if (valid) {
                         var param=this.form;
+                        param.menuId=fieldVM.menuId;
                        axios.post('/customfield/customField/saveOrUpdate', param)
                        .then(function (response) {
                            var resData = response.data;
                            if(resData.code=='0'){
                                fieldVM.$message('操作成功');
-                               fieldVM.cancelForm(formName);
                                fieldVM.dialogFormVisible = false;
                                fieldVM.getQuery();
                            }else{
@@ -242,7 +266,7 @@
             	 var pageSize = this.pager.pageSize;
                  var pageNum = this.pager.currentPage;
                  var param = {};
-                 param.menuId=this.form.menuId;
+                 param.menuId=this.menuId;
                  param.fieldName=this.inputFieldName;
                  axios.post('/customfield/customField/listCustomFieldPage?pageNum='+pageNum+"&pageSize="+pageSize,param)
                      .then(function (response) {
@@ -255,6 +279,7 @@
                              fieldVM.pager.currentPage = resData.currentPage;
                              fieldVM.pager.pageSize = resData.pageSize;
                          }else{
+                        	 fieldVM.$message('查询失败');
                              console.error(resData);
                          }
                         
@@ -291,6 +316,7 @@
             	
             },
             modifyFiled(){//点击编辑按钮
+            	   this.form.id='';
             	   var rows = this.multipleSelection;
                    if(rows.length!=1){
                        this.$message({
@@ -306,11 +332,12 @@
                    .then(function (response) {
                        var data =  response.data;
                        if(data.code=='0'){
-                           fieldVM.form= data.data;
+                    	   var resData = data.data;
+                           fieldVM.form= resData;
                            //把当前的值存在临时变量里，当修改时，旧值和新值对比
-                          // fieldVM.oldMenuCode = data.data.menuCode;
-                           //fieldVM.oldMenuName = data.data.menuName;
+                           fieldVM.oldFieldForm=resData;
                        }else{
+                    	   fieldVM.$message('查询失败');
                            console.error(data);
                        }
                        
@@ -335,7 +362,6 @@
                     this.fileList = fileList.slice(-1);
               },
               beforeUpload(file){//上传之前 文件校验
-                  console.info(file);
                   var isTextComputer = file.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
                   if(!isTextComputer){
                       this.$message.error('文件格式错误');
@@ -343,12 +369,18 @@
                   }
               },
               uploadSuccess(response, file, fileList){//上传成功后
-            	  //清空文件里列表
-            	  this.$refs.upload.clearFiles();
-                  this.dialogBatchVisible = false;
+            	  if(response.code=='0'){
+            		  //清空文件里列表
+                	  this.$refs.upload.clearFiles();
+                      this.dialogBatchVisible = false;
+                      this.$message('上传成功');
+            	  }else{
+            		  this.$message('上传失败');
+            	  }
+            	
               },
               closeAddDialog(){//关闭添加自定义字段dialog
-            	  this.$refs['fieldForm'].resetFields();
+            	  this.$refs.fieldForm.resetFields();
               },
               closeUploadFileDialog(){//关闭上传文件 dialog
             	  this.$refs.upload.clearFiles();
