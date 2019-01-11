@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:th="http://www.thymeleaf.org">
+<head th:include="_header_include::frag(~{::title},~{},~{})">
+    <title>模块管理</title>
+    <style>
+        .addModule{width: 70%;}
+    </style>
+</head>
+<body>
+<div id="addModule" class="addModule mainPadding">  
+    <div class="fs16 marginB20"><div class="titleBorderL">添加模块</div></div>
+    <el-form :model="form" :rules="rules" ref="form">
+        <div class="marginB20 fs16"><em class="redcolor">*</em>必填项</div>
+        <div class="borderbox paddingL20 paddingR20 paddingT10">
+            <el-row>
+                <el-col :span="12">
+                    <el-form-item label="模块名称：" prop="moduleName" :label-width="formLabelWidth">
+                        <el-input v-model="form.moduleName" autocomplete="off"></el-input>
+                    </el-form-item>
+                </el-col>
+                <el-col :span="12">
+                    <el-form-item label="URL：" prop="moduleUrl" :label-width="formLabelWidth">
+                        <el-input v-model="form.moduleUrl" autocomplete="off" placeholder="以#,/或者http开头"></el-input>
+                    </el-form-item>
+                </el-col>
+            </el-row>
+            <el-row>
+                <el-col :span="12">
+                    <el-form-item label="授权名称：" prop="remarks" :label-width="formLabelWidth">
+                        <el-input v-model="form.remarks" autocomplete="off"></el-input>
+                    </el-form-item>
+                </el-col>
+                <el-col :span="12">
+                    <el-form-item label="优先级：" prop="rank" :label-width="formLabelWidth">
+                        <el-input v-model="form.rank" autocomplete="off"></el-input>
+                    </el-form-item>
+                </el-col>
+            </el-row>
+            <el-row>
+                <el-col :span="21">
+                    <el-form-item label="授权操作权限：" prop="type">
+                        <el-checkbox-group v-model="form.type">
+                            <el-checkbox label="增" name="type"></el-checkbox>
+                            <el-checkbox label="删" name="type"></el-checkbox>
+                            <el-checkbox label="改" name="type"></el-checkbox>
+                            <el-checkbox label="查" name="type"></el-checkbox>
+                        </el-checkbox-group>
+                    </el-form-item>
+                </el-col>
+                <el-col :span="3">
+                    <el-button type="primary" size="medium" @click="dialogFormVisible = true">新增操作</el-button>
+                </el-col>
+            </el-row>
+        </div>
+        <div class="marginB20 fs16 paddingT20">选填项</div>
+        <div class="borderbox padding20">
+            <el-row>
+                <el-col :span="12">
+                    <el-form-item label="模块类名：" :label-width="formLabelWidth">
+                        <el-input v-model="form.code" autocomplete="off"></el-input>
+                    </el-form-item>
+                </el-col>
+                <el-col :span="12">
+                    <el-form-item label="图标名称：" :label-width="formLabelWidth">
+                        <el-input v-model="form.code" autocomplete="off"></el-input>
+                    </el-form-item>
+                </el-col>
+            </el-row>
+            <el-row>
+                <el-col :span="24">
+                    <el-form-item label="描述：" :label-width="formLabelWidth">
+                        <el-input type="textarea" :rows="3"  placeholder="限制200字" v-model="form.desc"></el-input>
+                    </el-form-item>
+                </el-col>
+            </el-row>
+        </div>
+        <div class="padding20 f-tac">            
+            <el-button type="primary" @click="submitForm('form')">提交</el-button>
+            <el-button>取 消</el-button>
+        </div> 
+    </el-form>  
+    <!-- dialog -->
+    <el-dialog title="新增操作" :visible.sync="dialogFormVisible">
+        <el-form :model="dialogForm" :rules="dialogRules" ref="dialogForm">
+            <el-form-item label="操作名称：" prop="handleName" :label-width="formLabelWidth">
+                <el-input v-model="dialogForm.handleName" autocomplete="off"></el-input>
+            </el-form-item>
+            <el-form-item label="操作编码名称：" prop="handleCode" :label-width="formLabelWidth">
+                <el-input v-model="dialogForm.handleCode" autocomplete="off"></el-input>
+            </el-form-item>
+            <el-form-item label="特殊条件：" :label-width="formLabelWidth">
+                <el-select v-model="value" placeholder="选择页面菜单">
+                    <el-option
+                        v-for="item in options"
+                        :key="item.value"
+                        :label="item.label"
+                        :value="item.value">
+                    </el-option>
+                </el-select>
+                <el-select v-model="value1" placeholder="选择页面字段">
+                    <el-option
+                        v-for="item in options1"
+                        :key="item.value"
+                        :label="item.label"
+                        :value="item.value">
+                    </el-option>
+                </el-select>
+                <el-input v-model="form.fieldValue" placeholder="设置字段值 例：‘A’，‘B’" autocomplete="off"></el-input>
+                <div class="redcolor">用来满足某用户查看跨组织数据</div>
+            </el-form-item>
+        </el-form>
+        <div slot="footer" class="f-tac">            
+            <el-button type="primary" @click="submitDialogForm('dialogForm')">确 定</el-button>
+            <el-button @click="dialogFormVisible = false">取 消</el-button>
+        </div>
+    </el-dialog>    
+</div><!-- import common js-->
+<div th:include="_footer_include :: #jsLib"></div>
+</body>
+<script>
+    new Vue({
+        el: '#addModule',
+        data: function() {
+            return {
+                dialogFormVisible: false,
+                form: {
+                    moduleName:'',
+                    moduleUrl:'',
+                    remarks:'',
+                    rank:'',
+                    type: []
+                },
+                formLabelWidth: '120px',
+                rules:{
+                    moduleName: [
+                        { required: true, message: '请输入模块名称', trigger: 'blur' }
+                    ],
+                    moduleUrl: [
+                        { required: true, message: '请输入URL', trigger: 'blur' }
+                    ],
+                    remarks: [
+                        { required: true, message: '请输入授权名称', trigger: 'blur' }
+                    ],
+                    rank: [
+                        { required: true, message: '请输入优先级', trigger: 'blur' }
+                    ],
+                    type: [
+                        { type: 'array', required: true, message: '请至少选择一个授权操作权限', trigger: 'change' }
+                    ],
+                },
+                options: [{
+                    value: '0',
+                    label: '推广列表'
+                }, {
+                    value: '1',
+                    label: '电销列表'
+                }],
+                options1: [{
+                    value: '0',
+                    label: '电销组'
+                }, {
+                    value: '1',
+                    label: '媒介'
+                }],
+                value:'',//特殊条件默认值
+                value1:'',//特殊条件默认值
+                dialogForm: {
+                    handleName:'',
+                    handleCode:''
+                },
+                dialogRules:{
+                    handleName: [
+                        { required: true, message: '请输入操作名称', trigger: 'blur' }
+                    ],
+                    handleCode: [
+                        { required: true, message: '请输入操作编码名称', trigger: 'blur' }
+                    ]
+                },
+            }        	  
+        },
+        methods: {
+            submitForm(formName) {
+                this.$refs[formName].validate((valid) => {
+                    if (valid) {
+                        alert('submit!');
+                    } else {
+                        console.log('error submit!!');
+                        return false;
+                    }
+                });
+            },
+            submitDialogForm(formName) {
+                this.$refs[formName].validate((valid) => {
+                    if (valid) {
+                        alert('submit!');
+                    } else {
+                        console.log('error submit!!');
+                        return false;
+                    }
+                });
+            }
+        }
+    })
+</script>
+</html>
