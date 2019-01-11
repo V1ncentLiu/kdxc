@@ -2,13 +2,30 @@ package com.kuaidao.manageweb.config;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import org.apache.shiro.mgt.SecurityManager;
+import org.apache.shiro.spring.LifecycleBeanPostProcessor;
+import org.apache.shiro.spring.security.interceptor.AuthorizationAttributeSourceAdvisor;
 import org.apache.shiro.spring.web.ShiroFilterFactoryBean;
 import org.apache.shiro.web.mgt.DefaultWebSecurityManager;
+import org.apache.shiro.web.session.mgt.DefaultWebSessionManager;
+import org.crazycake.shiro.RedisCacheManager;
+import org.crazycake.shiro.RedisManager;
+import org.crazycake.shiro.RedisSessionDAO;
+import org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class ShiroConfig {
+
+    @Value("${spring.redis.host}")
+    private String host;
+    @Value("${spring.redis.port}")
+    private int port;
+    @Value("${spring.redis.timeout}")
+    private int timeout;
+
     @Bean
     public ShiroFilterFactoryBean shirFilter(org.apache.shiro.mgt.SecurityManager securityManager) {
         System.out.println("ShiroConfiguration.shirFilter()");
@@ -40,16 +57,111 @@ public class ShiroConfig {
     }
 
     @Bean
+    public SecurityManager securityManager() {
+        DefaultWebSecurityManager securityManager = new DefaultWebSecurityManager();
+        // 设置realm.
+        securityManager.setRealm(myShiroRealm());
+        // 自定义缓存实现 使用redis
+        securityManager.setCacheManager(cacheManager());
+        // 自定义session管理 使用redis
+        securityManager.setSessionManager(sessionManager());
+        return securityManager;
+    }
+
+    /**
+     * 身份认证realm; (这个需要自己写，账号密码校验；权限等)
+     *
+     * @return
+     */
+    @Bean
     public MyShiroRealm myShiroRealm() {
         MyShiroRealm myShiroRealm = new MyShiroRealm();
         return myShiroRealm;
     }
 
+    /**
+     * cacheManager 缓存 redis实现 使用的是shiro-redis开源插件
+     *
+     * @return
+     */
+    public RedisCacheManager cacheManager() {
+        RedisCacheManager redisCacheManager = new RedisCacheManager();
+        redisCacheManager.setRedisManager(redisManager());
+        return redisCacheManager;
+    }
 
+    /**
+     * 配置shiro redisManager 使用的是shiro-redis开源插件
+     *
+     * @return
+     */
+    public RedisManager redisManager() {
+        RedisManager redisManager = new RedisManager();
+        redisManager.setHost("192.168.13.12");
+        redisManager.setPort(6379);
+        // redisManager.setExpire(1800);// 配置缓存过期时间
+        redisManager.setTimeout(timeout);
+        // redisManager.setPassword(password);
+        return redisManager;
+    }
+
+    /**
+     * Session Manager 使用的是shiro-redis开源插件
+     */
     @Bean
-    public org.apache.shiro.mgt.SecurityManager securityManager() {
-        DefaultWebSecurityManager securityManager = new DefaultWebSecurityManager();
-        securityManager.setRealm(myShiroRealm());
-        return securityManager;
+    public DefaultWebSessionManager sessionManager() {
+        DefaultWebSessionManager sessionManager = new DefaultWebSessionManager();
+        sessionManager.setSessionDAO(redisSessionDAO());
+        return sessionManager;
+    }
+
+    /**
+     * RedisSessionDAO shiro sessionDao层的实现 通过redis 使用的是shiro-redis开源插件
+     */
+    @Bean
+    public RedisSessionDAO redisSessionDAO() {
+        RedisSessionDAO redisSessionDAO = new RedisSessionDAO();
+        redisSessionDAO.setRedisManager(redisManager());
+        return redisSessionDAO;
+    }
+
+
+
+    /***
+     * 授权所用配置
+     *
+     * @return
+     */
+    @Bean
+    public DefaultAdvisorAutoProxyCreator getDefaultAdvisorAutoProxyCreator() {
+        DefaultAdvisorAutoProxyCreator defaultAdvisorAutoProxyCreator =
+                new DefaultAdvisorAutoProxyCreator();
+        defaultAdvisorAutoProxyCreator.setProxyTargetClass(true);
+        return defaultAdvisorAutoProxyCreator;
+    }
+
+    /***
+     * 使授权注解起作用不如不想配置可以在pom文件中加入 <dependency> <groupId>org.springframework.boot</groupId>
+     * <artifactId>spring-boot-starter-aop</artifactId> </dependency>
+     * 
+     * @param securityManager
+     * @return
+     */
+    @Bean
+    public AuthorizationAttributeSourceAdvisor authorizationAttributeSourceAdvisor(
+            SecurityManager securityManager) {
+        AuthorizationAttributeSourceAdvisor authorizationAttributeSourceAdvisor =
+                new AuthorizationAttributeSourceAdvisor();
+        authorizationAttributeSourceAdvisor.setSecurityManager(securityManager);
+        return authorizationAttributeSourceAdvisor;
+    }
+
+    /**
+     * Shiro生命周期处理器
+     *
+     */
+    @Bean
+    public LifecycleBeanPostProcessor getLifecycleBeanPostProcessor() {
+        return new LifecycleBeanPostProcessor();
     }
 }

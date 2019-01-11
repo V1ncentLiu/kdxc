@@ -14,6 +14,7 @@ import javax.imageio.ImageIO;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.AuthenticationException;
@@ -30,6 +31,8 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -39,8 +42,10 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import com.google.code.kaptcha.impl.DefaultKaptcha;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.JSONResult;
+import com.kuaidao.common.entity.PhoneEntity;
 import com.kuaidao.common.util.CommonUtil;
 import com.kuaidao.common.util.DateUtil;
+import com.kuaidao.common.util.MD5Util;
 import com.kuaidao.manageweb.constant.Constants;
 import com.kuaidao.manageweb.constant.ManagerWebErrorCodeEnum;
 import com.kuaidao.manageweb.entity.LoginReq;
@@ -54,17 +59,15 @@ import com.kuaidao.msgpush.dto.SmsCodeAndMobileValidReq;
 import com.kuaidao.msgpush.dto.SmsCodeSendReq;
 import com.kuaidao.msgpush.dto.SmsVoiceCodeReq;
 import com.kuaidao.sys.constant.SysConstant;
+import com.kuaidao.sys.constant.UserErrorCodeEnum;
 import com.kuaidao.sys.dto.user.LoginRecordDTO;
 import com.kuaidao.sys.dto.user.LoginRecordReq;
 import com.kuaidao.sys.dto.user.SysSettingDTO;
 import com.kuaidao.sys.dto.user.SysSettingReq;
+import com.kuaidao.sys.dto.user.UpdateUserPasswordReq;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import com.kuaidao.sys.dto.user.UserInfoReq;
 
-/**
- * @author gpc
- *
- */
 
 /**
  * 登录
@@ -121,14 +124,15 @@ public class LoginController {
      * 
      * @return
      */
-    @RequestMapping("/resetPwd")
+    @RequestMapping("/login/resetPwd")
     public String resetPwd() {
 
         return "login/resetPwd";
     }
 
-    @RequestMapping(value = "/index", method = {RequestMethod.POST})
-    public String login(@RequestBody LoginReq loginReq, HttpServletRequest request, Model model,
+    @RequestMapping(value = "/login/index", method = {RequestMethod.POST})
+    @ResponseBody
+    public JSONResult login(@RequestBody LoginReq loginReq, HttpServletRequest request, Model model,
             RedirectAttributes redirectAttributes) throws Exception {
         String username = loginReq.getUsername();
         String password = loginReq.getPassword();
@@ -142,8 +146,7 @@ public class LoginController {
         // 查询用户信息
         JSONResult<UserInfoDTO> getbyUserName = userInfoFeignClient.getbyUserName(userInfoReq);
         if (!JSONResult.SUCCESS.equals(getbyUserName.getCode())) {
-            redirectAttributes.addFlashAttribute("error", "登录用户名未注册");
-            return "redirect:/login";
+            return getbyUserName;
         }
         UserInfoDTO user = getbyUserName.getData();
         Date date = new Date();
@@ -152,10 +155,9 @@ public class LoginController {
         loginRecord.setUsername(username);
         loginRecord.setIp(ipAddr);
         loginRecord.setLoginTime(date);
-        UsernamePasswordToken token = new UsernamePasswordToken(username, password);
         // * 校验验证码
         SmsCodeAndMobileValidReq smsCodeAndMobileValidReq = new SmsCodeAndMobileValidReq();
-        smsCodeAndMobileValidReq.setCode(loginReq.getSmsCheckCode());
+        smsCodeAndMobileValidReq.setCode(loginReq.getCode());
         smsCodeAndMobileValidReq.setMobile(user.getPhone());
         String msgId = redisTemplate.opsForValue().get(Constants.MSG_ID + user.getId());
         smsCodeAndMobileValidReq.setMsgId(msgId);
@@ -169,11 +171,10 @@ public class LoginController {
                     // 判断账号是否锁定
                     if (SysConstant.USER_STATUS_DISABLE.equals(user.getStatus())) {
                         errorMessage = "账号锁定，请联系管理员修改！";
-                        redirectAttributes.addFlashAttribute("error", errorMessage);
-                        return "redirect:/login";
+                        return new JSONResult<>().fail("1", errorMessage);
                     }
                     // 判断密码是否过期。
-                    String passwordExpires = getSysSetting(Constants.PASSWORD_EXPIRES);
+                    String passwordExpires = getSysSetting(SysConstant.PASSWORD_EXPIRES);
                     if (StringUtils.isNotBlank(passwordExpires)) {
                         long pwdTime = Long.parseLong(passwordExpires);
                         if (isRepwdNotify(user, pwdTime)) {// 是否到密码提醒修改日期
@@ -186,18 +187,20 @@ public class LoginController {
                         if (date.getTime() - resetpwdTime.getTime() > pwdTime * 24 * 60 * 60
                                 * 1000) {
                             errorMessage = "账号过期，请忘记密码方式找回！";
-                            redirectAttributes.addFlashAttribute("error", errorMessage);
-                            return "redirect:/login";
+                            return new JSONResult<>().fail("1", errorMessage);
                         }
                     }
                 }
                 // 用户登陆
+                UsernamePasswordToken token = new UsernamePasswordToken(username,
+                        MD5Util.StringToMd5(MD5Util.StringToMd5(password + user.getSalt())));
                 Subject subject = SecurityUtils.getSubject();
                 subject.login(token);
                 SecurityUtils.getSubject().getSession().setTimeout(sessionTimeOut);
                 SecurityUtils.getSubject().getSession().setAttribute("userId", "" + user.getId());
                 SecurityUtils.getSubject().getSession().setAttribute("userName",
                         "" + user.getUsername());
+                request.getSession().setAttribute("user", user);
                 // 登录成功，保存登录状态
                 userInfoReq.setId(user.getId());
                 userInfoReq.setIsLogin(Constants.IS_LOGIN_UP);
@@ -248,8 +251,7 @@ public class LoginController {
                     lock.setStatus(SysConstant.USER_STATUS_LOCK);
                     userInfoFeignClient.update(lock);
                     errorMessage = "账号锁定，请联系管理员修改！";
-                    redirectAttributes.addFlashAttribute("error", errorMessage);
-                    return "redirect:/login";
+                    return new JSONResult<>().fail("1", errorMessage);
                 }
                 List<LoginRecordDTO> findList2 =
                         findLoginRecordList(username, null, new Date(date.getTime() - 600000), date,
@@ -262,8 +264,7 @@ public class LoginController {
                     lock.setStatus(SysConstant.USER_STATUS_LOCK);
                     userInfoFeignClient.update(lock);
                     errorMessage = "账号锁定，请联系管理员修改！";
-                    redirectAttributes.addFlashAttribute("error", errorMessage);
-                    return "redirect:/login";
+                    return new JSONResult<>().fail("1", errorMessage);
                 }
                 SecurityUtils.getSubject().getSession().setAttribute("isUpdatePassword",
                         loginReq.getIsUpdatePassword());
@@ -271,7 +272,7 @@ public class LoginController {
                 request.getSession().setAttribute("wsUrlHttps", wsUrlHttps);
                 request.getSession().setAttribute("mqUserName", mqUserName);
                 request.getSession().setAttribute("mqPassword", mqPassword);
-                return "redirect:/management/index";
+                return new JSONResult<>().success(null);
 
             } catch (UnknownAccountException uae) {
                 errorMessage = "账号没有权限";// 产品要求账号不存在是展示"账号没有权限"
@@ -330,8 +331,7 @@ public class LoginController {
                         SysConstant.YES.toString(), 1, TimeUnit.DAYS);
             }
         }
-        redirectAttributes.addFlashAttribute("error", errorMessage);
-        return "redirect:/login";
+        return new JSONResult<>().fail("1", errorMessage);
     }
 
     /**
@@ -343,19 +343,19 @@ public class LoginController {
      * @return
      * @throws Exception
      */
-    @RequestMapping(value = "/sendmsg", method = {RequestMethod.POST})
+    @RequestMapping(value = "/login/sendmsg", method = {RequestMethod.POST})
     @ResponseBody
     public JSONResult sendMsg(@RequestBody LoginReq loginReq, HttpServletRequest request)
             throws Exception {
         String msg = "";
         // 当前访问http的IP地址，获取真实的IP，越过各种代理
         String ip = CommonUtil.getIpAddr(request);
-        if (StringUtils.isNotBlank(loginReq.getSmsCheckCode())) {
+        if (StringUtils.isNotBlank(loginReq.getCode())) {
             String value = (String) request.getSession().getAttribute("captchaCode");
             if (value != null) {
                 String string = redisTemplate.opsForValue().get(Constants.CAPTCHA_CODE + value);
                 if (string != null) {
-                    if (loginReq.getSmsCheckCode().equals(string)) {
+                    if (loginReq.getCode().equals(string)) {
                         // 输入正确后下次不再需要图形验证码
                         redisTemplate.opsForValue().set(Constants.SHOW_CAPTCHA + ip,
                                 SysConstant.NO.toString(), 1, TimeUnit.DAYS);
@@ -385,32 +385,105 @@ public class LoginController {
         JSONResult<UserInfoDTO> getbyUserName = userInfoFeignClient.getbyUserName(userInfoReq);
         if (getbyUserName.getData() == null) {
             msg = "用户不存在！";
+            return new JSONResult<>().fail(SysErrorCodeEnum.ERR_SYSTEM.getCode(), msg);
         }
         UserInfoDTO user = getbyUserName.getData();
         if (SysConstant.USER_STATUS_LOCK.equals(user.getStatus())) {
             msg = "账号锁定，请联系管理员！";
+            return new JSONResult<>().fail(SysErrorCodeEnum.ERR_SYSTEM.getCode(), msg);
         }
         if (SysConstant.USER_STATUS_DISABLE.equals(user.getStatus())) {
             msg = "账号不可用，请联系管理员！";
-        }
-        if (!msg.equals("")) {
             return new JSONResult<>().fail(SysErrorCodeEnum.ERR_SYSTEM.getCode(), msg);
         }
-        JSONResult<String> jsonResult = null;
-        if ("1".equals(loginReq.getType())) {
-            // 发送短信验证码
-            SmsCodeSendReq smsCodeSendReq = new SmsCodeSendReq();
-            smsCodeSendReq.setMobile(user.getPhone());
-            jsonResult = msgPushFeignClient.sendCode(smsCodeSendReq);
-            // msg = "发送短信验证成功";
-        } else {
-            // 发送语音验证码
-            SmsVoiceCodeReq voiceCodeReq = new SmsVoiceCodeReq();
-            voiceCodeReq.setMobile(user.getPhone());
-            jsonResult = msgPushFeignClient.sendVoiceCode(voiceCodeReq);
-            // msg = "请注意接听语音来电获取验证码！";
+        if (!user.getPassword().equals(MD5Util
+                .StringToMd5(MD5Util.StringToMd5(loginReq.getPassword() + user.getSalt())))) {
+            msg = "登录密码错误，请重新输入";
+            return new JSONResult<>().fail(SysErrorCodeEnum.ERR_SYSTEM.getCode(), msg);
         }
-        return jsonResult;
+        return send(loginReq.getType(), user);
+
+    }
+
+    /**
+     * 发送短信或语音验证码验证
+     * 
+     * @param dataPackage
+     * @param jsonResult
+     * @param request
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(value = "/login/sendmsgPwd", method = {RequestMethod.POST})
+    @ResponseBody
+    public JSONResult sendmsgPwd(@RequestBody LoginReq loginReq, HttpServletRequest request)
+            throws Exception {
+        String msg = "";
+
+        PhoneEntity phone = new PhoneEntity();
+        phone.setPhone(loginReq.getPhone());
+        // 查询用户信息
+        JSONResult<UserInfoDTO> getbyUserName = userInfoFeignClient.getbyPhone(phone);
+        if (getbyUserName.getData() == null) {
+            msg = "此手机号未注册。";
+            return new JSONResult<>().fail(SysErrorCodeEnum.ERR_SYSTEM.getCode(), msg);
+        }
+        UserInfoDTO user = getbyUserName.getData();
+        if (SysConstant.USER_STATUS_LOCK.equals(user.getStatus())) {
+            msg = "帐号锁定，请联系管理员。不允许再继续进行找回密码的操作啦。";
+            return new JSONResult<>().fail(SysErrorCodeEnum.ERR_SYSTEM.getCode(), msg);
+        }
+        if (SysConstant.USER_STATUS_DISABLE.equals(user.getStatus())) {
+            msg = "帐号已禁用，请联系管理员。不允许再继续进行找回密码的操作啦。";
+            return new JSONResult<>().fail(SysErrorCodeEnum.ERR_SYSTEM.getCode(), msg);
+        }
+        // 发送验证码
+        return send(loginReq.getType(), user);
+
+    }
+
+    /**
+     * 忘记密码
+     * 
+     * @param orgDTO
+     * @return
+     */
+    @PostMapping("/login/updatePassword")
+    @ResponseBody
+    public JSONResult updateMenu(@Valid @RequestBody UpdateUserPasswordReq updateUserPasswordReq,
+            BindingResult result) {
+
+        if (result.hasErrors()) {
+            return CommonUtil.validateParam(result);
+        }
+        PhoneEntity phone = new PhoneEntity();
+        phone.setPhone(updateUserPasswordReq.getPhone());
+        // 查询用户信息
+        JSONResult<UserInfoDTO> jsonResult = userInfoFeignClient.getbyPhone(phone);
+
+        UserInfoDTO data = jsonResult.getData();
+        if (JSONResult.SUCCESS.equals(jsonResult.getCode()) && data != null) {
+            // * 校验验证码
+            SmsCodeAndMobileValidReq smsCodeAndMobileValidReq = new SmsCodeAndMobileValidReq();
+            smsCodeAndMobileValidReq.setCode(updateUserPasswordReq.getCode());
+            smsCodeAndMobileValidReq.setMobile(updateUserPasswordReq.getPhone());
+            String msgId = redisTemplate.opsForValue().get(Constants.MSG_ID + data.getId());
+            smsCodeAndMobileValidReq.setMsgId(msgId);
+            JSONResult validCodeAndMobile =
+                    msgPushFeignClient.validCodeAndMobile(smsCodeAndMobileValidReq);
+            if (!JSONResult.SUCCESS.equals(validCodeAndMobile.getCode())) {
+                return new JSONResult<>().fail(ManagerWebErrorCodeEnum.ERR_CODE_ERROR.getCode(),
+                        ManagerWebErrorCodeEnum.ERR_CODE_ERROR.getMessage());
+            }
+            UserInfoReq userInfoReq = new UserInfoReq();
+            userInfoReq.setId(data.getId());
+            userInfoReq.setPassword(updateUserPasswordReq.getOldPassword());
+            // 修改密码
+            return userInfoFeignClient.update(userInfoReq);
+        } else {
+            return new JSONResult().fail(UserErrorCodeEnum.ERR_PHONE_NOT_REGIST.getCode(),
+                    UserErrorCodeEnum.ERR_PHONE_NOT_REGIST.getMessage());
+        }
 
     }
 
@@ -421,7 +494,7 @@ public class LoginController {
      * @return
      * @throws Exception
      */
-    @RequestMapping(value = "/getCaptcha", method = RequestMethod.GET,
+    @RequestMapping(value = "/login/getCaptcha", method = RequestMethod.GET,
             produces = MediaType.IMAGE_PNG_VALUE)
     public ModelAndView getCaptcha(HttpServletRequest request, HttpServletResponse response)
             throws Exception {
@@ -446,6 +519,29 @@ public class LoginController {
             out.close();
         }
         return null;
+    }
+
+    @RequestMapping("/logout")
+    public String logout(String type, Model model, HttpServletRequest request) throws Exception {
+        Subject subject = SecurityUtils.getSubject();
+        Object attribute = request.getSession().getAttribute("user");
+        System.out.println(attribute instanceof UserInfoDTO);
+        System.out.println(attribute.getClass());
+        UserInfoDTO user = (UserInfoDTO) subject.getSession().getAttribute("user");
+        if (subject.isAuthenticated()) {
+            subject.logout();
+        }
+        if (!"1".equals(type)) {
+            // 退出成功，保存退出状态
+            UserInfoReq update = new UserInfoReq();
+            update.setId(user.getId());
+            update.setIsLogin(Constants.IS_LOGIN_DOWN);
+            userInfoFeignClient.update(update);
+        } else {
+            SecurityUtils.getSubject().getSession().setAttribute("isShowLogoutBox", type);
+        }
+
+        return "redirect:/login";
     }
 
     /**
@@ -492,6 +588,36 @@ public class LoginController {
     }
 
     /**
+     * 发送验证码
+     * 
+     * @param code
+     * @return
+     */
+    private JSONResult<String> send(String type, UserInfoDTO user) {
+        JSONResult<String> jsonResult = null;
+        if ("1".equals(type)) {
+            // 发送短信验证码
+            SmsCodeSendReq smsCodeSendReq = new SmsCodeSendReq();
+            smsCodeSendReq.setMobile(user.getPhone());
+            jsonResult = msgPushFeignClient.sendCode(smsCodeSendReq);
+            // msg = "发送短信验证成功";
+        } else {
+            // 发送语音验证码
+            SmsVoiceCodeReq voiceCodeReq = new SmsVoiceCodeReq();
+            voiceCodeReq.setMobile(user.getPhone());
+            voiceCodeReq.setTtl(60);
+            jsonResult = msgPushFeignClient.sendVoiceCode(voiceCodeReq);
+            // msg = "请注意接听语音来电获取验证码！";
+        }
+        if (JSONResult.SUCCESS.equals(jsonResult.getCode())) {
+            redisTemplate.opsForValue().set(Constants.MSG_ID + user.getId(), jsonResult.getData(),
+                    60 * 5, TimeUnit.SECONDS);
+        }
+        return jsonResult;
+    }
+
+
+    /**
      * 是否提醒修改密码
      * 
      * @param code
@@ -499,7 +625,7 @@ public class LoginController {
      */
     private boolean isRepwdNotify(UserInfoDTO loginUser, long pwdTime) {
         SysSettingReq sysSettingReq = new SysSettingReq();
-        sysSettingReq.setCode(Constants.REMINDER_TIME);
+        sysSettingReq.setCode(SysConstant.REMINDER_TIME);
         JSONResult<SysSettingDTO> byCode = sysSettingFeignClient.getByCode(sysSettingReq);
         if (byCode != null && JSONResult.SUCCESS.equals(byCode.getCode())) {
             String value = byCode.getData().getValue();

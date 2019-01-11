@@ -57,7 +57,7 @@ public class UserController {
     @RequestMapping("/initUserList")
     public String initUserList() {
 
-        return "user/userList";
+        return "user/userManagePage";
     }
 
     /***

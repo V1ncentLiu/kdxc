@@ -18,10 +18,6 @@ public class Constants {
     public static Integer IS_LOGIN_UP = 1;
     // 是否已登录 2-未登录
     public static Integer IS_LOGIN_DOWN = 2;
-    // 密码最大期限
-    public static String PASSWORD_EXPIRES = "password_expires";
-    // 密码提醒时间
-    public static String REMINDER_TIME = "reminder_time";
     // redis前缀 验证码
     public static String CAPTCHA_CODE = "huiju:sys:captchaCode:";
     // redis前缀 是否展示验证码
