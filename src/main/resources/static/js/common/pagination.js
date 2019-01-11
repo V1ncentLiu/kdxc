@@ -21,7 +21,7 @@ Vue.component('table-pagination',{
        total() { 
          // 存在记录但未获取到数据时, 重新请求 
           if (this.initBack) { 
-             this.pager.currentPage -= 1; this.$emit('change');
+            // this.pager.currentPage -= 1; this.$emit('change');
            } 
        },
      },
@@ -29,7 +29,6 @@ Vue.component('table-pagination',{
     methods:{
         handleSizeChange(val) {
              //下拉框  每页 10,20条切换 调用
-             console.log(`每页 ${val} 条`);
              this.pager.currentPage = 1;
              this.pager.pageSize=val;
              this.$emit('change');

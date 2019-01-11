@@ -17,6 +17,8 @@ import com.kuaidao.sys.dto.organization.OrganizationAddAndUpdateDTO;
 import com.kuaidao.sys.dto.organization.OrganizationDTO;
 import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
 import com.kuaidao.sys.dto.organization.OrganizationRespDTO;
+import com.kuaidao.sys.dto.user.OrgUserReqDTO;
+import com.kuaidao.sys.dto.user.UserAndRoleRespDTO;
 
 /**
  * 组织机构
@@ -59,8 +61,23 @@ public interface OrganizationFeignClient {
     @PostMapping("/queryOrgByParentId")
     JSONResult<Boolean> queryOrgByParentId(IdListReq idListReq);
     
+    /**
+     * 根据组织机构ID ,查询组织机构信息
+     * @param idEntity
+     * @return
+     */
     @PostMapping("/queryOrgById")
     JSONResult<OrganizationDTO> queryOrgById(@RequestBody IdEntity idEntity);
+    
+    
+    /**
+     * 查询组织机构下的所有用户
+     * @param reqDTO
+     * @return
+     */
+    @PostMapping("/listOrgUserInfo")
+    JSONResult<PageBean<UserAndRoleRespDTO>> listOrgUserInfo(@RequestBody OrgUserReqDTO reqDTO);
+
     
     @Component
     static class HystrixClientFallback implements  OrganizationFeignClient{
@@ -121,8 +138,15 @@ public interface OrganizationFeignClient {
         public JSONResult<OrganizationDTO> queryOrgById(IdEntity idEntity) {
             return fallBackError("根据ID查询组织机构信息");
         }
+
+
+        @Override
+        public JSONResult<PageBean<UserAndRoleRespDTO>> listOrgUserInfo(OrgUserReqDTO reqDTO) {
+            return fallBackError("查询组织机构下的用户信息");
+        }
     }
 
+    
    
 
   

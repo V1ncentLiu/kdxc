@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
+import com.kuaidao.common.constant.SystemCodeConstant;
 import com.kuaidao.common.entity.IdEntity;
 import com.kuaidao.common.entity.IdListReq;
 import com.kuaidao.common.entity.JSONResult;
@@ -13,16 +14,16 @@ import com.kuaidao.common.entity.TreeData;
 import com.kuaidao.common.util.CommonUtil;
 import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
 import com.kuaidao.sys.dto.organization.OrganizationRespDTO;
+import com.kuaidao.sys.dto.user.OrgUserReqDTO;
+import com.kuaidao.sys.dto.user.UserAndRoleRespDTO;
 import com.kuaidao.sys.dto.organization.OrganizationAddAndUpdateDTO;
 import com.kuaidao.sys.dto.organization.OrganizationDTO;
 import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
-import lombok.val;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+import org.apache.shiro.authz.annotation.Logical;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,6 +59,8 @@ public class OrganizationController {
         return "organization/organizationPage";
     }
 
+    
+    @RequiresPermissions(value= {"organization:save","organization:update"},logical=Logical.OR)
     @PostMapping("/saveOrUpdate")
     @ResponseBody
     public JSONResult save(@Valid @RequestBody OrganizationAddAndUpdateDTO orgDTO,
@@ -65,8 +68,7 @@ public class OrganizationController {
         if (result.hasErrors()) {
             return CommonUtil.validateParam(result);
         }
-      //TODO devin
-        orgDTO.setSystemCode("huiju");
+        orgDTO.setSystemCode(SystemCodeConstant.HUI_JU);
         
         Long id = orgDTO.getId();
         if(id!=null) {
@@ -85,6 +87,7 @@ public class OrganizationController {
      * @param orgDTO
      * @return
      */
+    @RequiresPermissions("organization:update")
     @PostMapping("/update")
     @ResponseBody
     public JSONResult update(@Valid @RequestBody OrganizationAddAndUpdateDTO orgDTO,
@@ -101,6 +104,7 @@ public class OrganizationController {
      * @param orgDTO
      * @return
      */
+    @RequiresPermissions("organization:delete")
     @PostMapping("/delete")
     @ResponseBody
     public JSONResult delete(@RequestBody IdListReq idListReq) {
@@ -137,8 +141,7 @@ public class OrganizationController {
     @ResponseBody
     public JSONResult<Boolean> queryOrgByParam(
             @RequestBody OrganizationQueryDTO queryDTO) {
-        //TODO devin
-        queryDTO.setSystemCode("huiju");
+        queryDTO.setSystemCode(SystemCodeConstant.HUI_JU);
         JSONResult<List<OrganizationRespDTO>> orgList = organizationFeignClient.queryOrgByParam(queryDTO);
         if(orgList!=null && JSONResult.SUCCESS.equals(orgList.getCode())) {
             List<OrganizationRespDTO> data = orgList.getData();
@@ -186,6 +189,20 @@ public class OrganizationController {
       
     }
     
-    
+    /**
+     * 查询组织机构下，用户信息
+     * @param reqDTO
+     * @param result
+     * @return
+     */
+    @PostMapping("/listOrgUserInfo")
+    @ResponseBody
+    public JSONResult<PageBean<UserAndRoleRespDTO>> listOrgUserInfo(
+            @Valid @RequestBody OrgUserReqDTO reqDTO, BindingResult result) {
+        if (result.hasErrors()) {
+            return CommonUtil.validateParam(result);
+        }
+        return organizationFeignClient.listOrgUserInfo(reqDTO);
+    }
 
 }
