@@ -30,20 +30,18 @@ import com.kuaidao.sys.dto.role.RoleQueryDTO;
  */
 @Controller
 @RequestMapping("/role/roleManager")
-public class RoleController {
+public class RoleManagerController {
 
     @Autowired
     private RoleManagerFeignClient roleManagerFeignClient;
 
     /***
-     * 自定义字段 首页
      * 
      * @return
      */
     @RequestMapping("/initRoleInfo")
     public String initRoleInfo() {
-
-        return "role/roleList";
+        return "role/roleManagePage";
     }
 
     /***
