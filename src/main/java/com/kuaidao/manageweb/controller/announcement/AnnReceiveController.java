@@ -1,0 +1,113 @@
+package com.kuaidao.manageweb.controller.announcement;
+
+import com.kuaidao.common.constant.SysErrorCodeEnum;
+import com.kuaidao.common.entity.IdEntity;
+import com.kuaidao.common.entity.JSONResult;
+import com.kuaidao.common.entity.PageBean;
+import com.kuaidao.manageweb.feign.announcement.AnnReceiveFeignClient;
+import com.kuaidao.manageweb.feign.announcement.AnnouncementFeignClient;
+import com.kuaidao.sys.dto.announcement.AnnouncementAddAndUpdateDTO;
+import com.kuaidao.sys.dto.announcement.AnnouncementQueryDTO;
+import com.kuaidao.sys.dto.announcement.AnnouncementRespDTO;
+import com.kuaidao.sys.dto.announcement.annReceive.AnnReceiveQueryDTO;
+import com.kuaidao.sys.dto.announcement.annReceive.AnnReceiveRespDTO;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.ObjectError;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import javax.validation.Valid;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+
+/**
+ * @Auther: admin
+ * @Date: 2019/1/2 15:14
+ * @Description:
+ *      系统公告
+ */
+
+@Controller
+@RequestMapping("/annReceive")
+public class AnnReceiveController {
+
+    private static Logger logger = LoggerFactory.getLogger(AnnReceiveController.class);
+
+    @Autowired
+    AnnReceiveFeignClient annReceiveFeignClient;
+
+
+
+    /**
+     * 带参数查询
+     * @return
+     */
+    @RequestMapping("/list")
+    @ResponseBody
+    public JSONResult<PageBean<AnnReceiveRespDTO>> queryOne(@RequestBody AnnReceiveQueryDTO dto){
+
+        Date date1 = dto.getDate1();
+        Date date2 = dto.getDate2();
+
+        if(date1!=null && date2!=null ){
+            if(date1.getTime()>date2.getTime()){
+                return new JSONResult().fail("-1","时间选项，开始时间大于结束时间!");
+            }
+        }
+
+        return annReceiveFeignClient.queryReceive(dto);
+    }
+    /**
+     * 通过主键查询
+     * @return
+     */
+    @RequestMapping("/one")
+    @ResponseBody
+    public JSONResult<AnnReceiveRespDTO> queryOne(@RequestBody IdEntity idEntity){
+        JSONResult<AnnReceiveRespDTO> bussReceiveRespDTOJSONResult = annReceiveFeignClient.queryReceiveOne(idEntity);
+        return bussReceiveRespDTOJSONResult;
+    }
+    /**
+     * 批量更新状态
+     * @return
+     */
+    @RequestMapping("/batchUpdate")
+    @ResponseBody
+    public JSONResult<Void> batchUpdate(@RequestBody Map<String, String> map){
+        JSONResult ids = annReceiveFeignClient.updateReceives(map.get("ids"));
+        return ids;
+    }
+
+    @RequestMapping("/unreadCount")
+    @ResponseBody
+    public JSONResult<Void> unreadCount(){
+        JSONResult ids = annReceiveFeignClient.updateReceives();
+        return ids;
+    }
+
+
+
+    @RequestMapping("/messageCenter")
+    public String listPage(){
+        logger.info("--------------------------------------跳转到消息中心页面-----------------------------------------------");
+        return "messageCenter/messageCenter";
+    }
+    /**
+     * 错误参数检验
+     * @param result
+     * @return
+     */
+    private JSONResult validateParam(BindingResult result) {
+        List<ObjectError> list = result.getAllErrors();
+        for (ObjectError error : list) {
+            logger.error("参数校验失败：{},错误信息：{}", error.getArguments(), error.getDefaultMessage());
+        }
+        return new JSONResult().fail(SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getCode(), SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getMessage());
+    }
+}
