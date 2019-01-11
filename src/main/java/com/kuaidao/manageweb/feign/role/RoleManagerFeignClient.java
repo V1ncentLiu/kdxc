@@ -36,7 +36,6 @@ public interface RoleManagerFeignClient {
 		@SuppressWarnings("unchecked")
 		@Override
 		public JSONResult<List<RoleInfoDTO>> queryRoleList(RoleQueryDTO dto) {
-
 			return fallBackError("查询角色列表数据失败");
 		}
 

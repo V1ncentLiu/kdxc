@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:th="http://www.thymeleaf.org">
+<head th:include="_header_include::frag(~{::title},~{},~{})">
+    <title>模块管理</title>
+    <style>
+        .moduleManage .leftBox{/*width: 200px;*/height: auto;border:1px solid #ebeef5;min-height: 480px;}
+        .moduleManage .leftTitle{background:#ebeef5;text-indent: 20px;height: 40px;line-height: 40px;}
+        .moduleManage .leftTree{padding:10px;}
+        .moduleManage .rightTitle{background:#ebeef5;text-indent: 20px;height: 40px;line-height: 40px;}
+        button a{color:#fff!important;display: block;}
+    </style>
+</head>
+<body>
+<div id="moduleManage" class="moduleManage mainPadding">  
+    <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
+        <el-breadcrumb-item>Home</el-breadcrumb-item>
+        <el-breadcrumb-item>系统管理</el-breadcrumb-item>
+        <el-breadcrumb-item><a href="JavaScript:void(0)">模块管理</a></el-breadcrumb-item>
+    </el-breadcrumb>
+    <el-row :gutter="20">
+        <el-col :xs="12" :sm="7" :md="5" :lg="3" :xl="3">
+            <div class="leftBox">
+                <div class="leftTitle fs16">模块列表</div>
+                <el-tree
+                    :data="dataTree"              
+                    node-key="id"
+                    :default-expanded-keys="[1,2,3]"
+                    ref="tree"
+                    highlight-current
+                    class="leftTree">
+                </el-tree>
+            </div>            
+        </el-col>
+        <el-col :xs="12" :sm="17" :md="19" :lg="21" :xl="21">
+            <el-row class="marginB10">
+                <el-col :xs="12" :sm="16" :md="16" :lg="18" :xl="12">
+                    <el-button type="primary"><a href="addModulePage.html"><i class="el-icon-plus"></i> 添加下级模块</a></el-button>
+                    <el-button type="primary">修改</el-button>
+                    <el-button type="primary" @click="deleteFun">删除</el-button>
+                </el-col>
+                <el-col :xs="12" :sm="8" :md="8" :lg="6" :xl="12">
+                    <el-input placeholder="请输入模块名称进行查询" class="input-with-select">                        
+                    <el-button slot="append" icon="el-icon-search">搜索</el-button>
+                    </el-input>
+                </el-col>
+            </el-row>
+            <el-row>
+                <el-table 
+                    ref="multipleTable"
+                    tooltip-effect="dark"
+                    style="width: 100%"
+                    @selection-change="handleSelectionChange"
+                    border
+                    :data="dataTable" 
+                    >
+                    <el-table-column align="center" type="selection" width="55"></el-table-column>
+                    <el-table-column align="center" prop="moduleName" label="模块名称"></el-table-column>
+                    <el-table-column align="center" prop="rank" label="优先级"></el-table-column>
+                    <el-table-column align="center" prop="remarks" label="授权名称"></el-table-column>
+                    <el-table-column align="center" prop="iconName" label="图标名称"></el-table-column>
+                    <el-table-column align="center" prop="iconAddress" label="图标地址"></el-table-column>
+                    <el-table-column align="center" prop="moduleAddress" label="模块地址"></el-table-column>
+                </el-table>
+            </el-row>
+        </el-col>
+    </el-row>
+</div>
+<!-- import common js-->
+<div th:include="_footer_include :: #jsLib"></div>
+</body>
+<script>
+    new Vue({
+        el: '#moduleManage',
+        data: function() {
+            return {
+                dataTree: [{
+                    id: 0,
+                    label: '根目录',
+                    children: [{
+                        id: 1,
+                        label: '推广中心',
+                        children: [{
+                            id: 4,
+                            label: '推广客服',
+                            children: [{
+                                id: 9,
+                                label: '客服一组'
+                            }, {
+                                id: 10,
+                                label: '客服二组'
+                            }]
+                        }]
+                        }, {
+                        id: 2,
+                        label: '招商中心',
+                        children: [{
+                            id: 5,
+                            label: '秦皇岛招商中心'
+                        }, {
+                            id: 6,
+                            label: '石家庄招商中心'
+                        }]
+                        }, {
+                        id: 3,
+                        label: '商务中心',
+                        children: [{
+                            id: 7,
+                            label: '商务一'
+                        }, {
+                            id: 8,
+                            label: '商务二'
+                        }]
+                    }]
+                }],
+                dataTable: [{
+                        moduleName:'推广管理',
+                        rank:'优先级1',
+                        remarks:'授权名称1',
+                        iconName:'图标名称1',
+                        iconAddress:'图标地址1',
+                        moduleAddress:'模块地址1'
+                    }, {
+                        moduleName:'话务管理',
+                        rank:'优先级2',
+                        remarks:'授权名称2',
+                        iconName:'图标名称2',
+                        iconAddress:'图标地址2',
+                        moduleAddress:'模块地址2'
+                    }, {
+                        moduleName:'话务管理',
+                        rank:'优先级3',
+                        remarks:'授权名称3',
+                        iconName:'图标名称3',
+                        iconAddress:'图标地址3',
+                        moduleAddress:'模块地址3'
+                    }],
+                multipleSelection: [],
+                dialogFormVisible: false,
+                form: {
+                    name: '',
+                    remark: '',
+                    delivery: false,
+                    type: []
+                },
+                formLabelWidth: '120px'
+            }             
+        },
+        methods: {
+            toggleSelection(rows) {
+                if (rows) {
+                    rows.forEach(row => {
+                        this.$refs.multipleTable.toggleRowSelection(row);
+                    });
+                } else {
+                  this.$refs.multipleTable.clearSelection();
+                }
+            },
+            handleSelectionChange(val) {
+                this.multipleSelection = val;
+            },
+            deleteFun() {
+                this.$confirm('确定要删除【模块名称1】【模块名称2】模块吗？', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }).then(() => {
+                    this.$message({
+                        type: 'success',
+                        message: '删除成功!'
+                    });
+                }).catch(() => {
+                    this.$message({
+                        type: 'info',
+                        message: '已取消删除'
+                    });          
+                });
+            }
+        }
+    })
+</script>
+</html>

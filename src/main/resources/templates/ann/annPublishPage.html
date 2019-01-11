@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html  xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head th:include="_header_include::frag(~{::title},~{},~{})">
+    <title>发布公告</title>
+</head>
+
+<body>
+<div id="form" class="mainPadding">
+    <!--<p style="text-indent: 2em;line-height: 20px">发布公告</p>-->
+    <el-form :model="annForm"  :rules="rules" ref="annForm" label-width="100px" class="demo-annForm" >
+        <el-form-item label="公告标题" prop="title"  style="width: 30%;">
+            <el-input v-model="annForm.title" type="text"  size="small"></el-input>
+        </el-form-item>
+
+        <el-form-item label="公告接收" prop="type" >
+            <el-checkbox-group v-model="annForm.type">
+                <el-checkbox label="1" name="type">站内公告通知</el-checkbox>
+                <el-checkbox label="2" name="type">短信</el-checkbox>
+            </el-checkbox-group>
+        </el-form-item>
+
+        <el-form-item  label="接收范围">
+                <el-col :span="5">
+                    <el-form-item  prop="redio" >
+                    <el-radio-group v-model="annForm.radio" @change="redioChange">
+                    <el-radio  label="0">系统全用户</el-radio>
+                    <el-radio  label="1">指定组织</el-radio>
+                    </el-radio-group>
+                    </el-form-item>
+                </el-col>
+                <el-col :span="5">
+                    <el-form-item prop="org" >
+                    <el-input v-model="annForm.org"  size="small"  readonly=true placeholder="请选择指定组织">
+                        <el-button slot="append" icon="el-icon-search" @click="selectOrgs"></el-button>
+                    </el-input>
+                    </el-form-item>
+                </el-col>
+        </el-form-item>
+
+        <el-form-item label="公告内容" prop="content" style="width: 60%;">
+            <el-input type="textarea" v-model="annForm.content"
+                      :autosize="{ minRows: 10, maxRows: 50}"></el-input>
+        </el-form-item>
+
+        <el-form-item>
+            <el-button type="primary" @click="submitForm('annForm')">提交</el-button>
+            <el-button @click="reListPage">取消</el-button>
+        </el-form-item>
+    </el-form>
+</div>
+
+<div th:include="_footer_include :: #jsLib"></div>
+
+<script>
+
+    var vm = new Vue({
+        el:'#form',
+        data:{
+            annForm: {
+                title: "",
+                type: ["1","2"],
+                content:"",
+                radio:"0",
+                org:""
+            },
+            rules: {
+                title: [
+                    { required: true, message: '标题不能为空', trigger: 'blur' },
+                    { min: 1, max: 100, message: '长度在 1 到  100 个字符', trigger: 'blur' }
+                ],
+                type: [
+                    { type: 'array', required: true, message: '请至少选择一个接收方式', trigger: 'change' }
+                ],
+                redio: [ // 默认选中则一定不会为空
+                ],
+                content: [
+                    { required: true, message: '公告内容不能为空', trigger: 'blur' },
+                    { min: 1, max: 500, message: '长度在 1 到 500 个字符', trigger: 'blur' }
+                ]
+            },
+
+        },
+        methods:{
+            reListPage:function(){
+                window.location.href = '/ann/annPublishPage'
+            },
+            selectOrgs:function(){
+                console.log("--------选择组织结构---多选-------------")
+                if(vm.annForm.radio!=1){
+                    vm.$message( {type: 'warning',message:'接收范围为：指定组织，才能选择组织机构！'});
+                }
+            //  打开 组织机构多选框
+
+            },
+            redioChange:function(val){
+                if(val==0){//全体用户
+                    console.log("选择了全体用户")
+
+                }else{//指定组织:多选
+                    console.log("选择了指定组织")
+                }
+            },
+            submitForm(formName) {
+                console.log()
+                if(vm.annForm.radio==1&&vm.annForm.org==""){
+                    vm.$message.error('请选择指定组织');
+                    return false;
+                }
+                this.$refs[formName].validate((valid) => {
+                    if (valid) {
+                        var formData = vm.annForm;
+                        var param={};
+                        param.title = formData.title;
+                        param.content = formData.content;
+                        if(formData.radio==0){
+                            param.orgId = 0;
+                        }else{
+                            param.orgId = formData.org;
+                        }
+                        if(formData.type.length == 2){
+                            param.type = 0;
+                        }else{
+                            param.type = formData.type[0];
+                        }
+
+                        console.log("=---P----_---P----=")
+                        console.log(param)
+                        axios.post("/ann/publishAnn", param)
+                            .then(function (response) {
+                                if(response.data.code==0){
+                                    vm.$message({type: 'success',message:'提交成功'});
+                                    window.location.href = '/ann/annlistPage'
+                                }else{
+                                    vm.$message.error(response.data.msg);
+                                }
+                            })
+                            .catch(function (error) {
+                                console.log(error);
+                            });
+
+                    } else {
+                        console.log('数据未通过校验！');
+                        return false;
+                    }
+                });
+            },
+            resetForm(formName) {
+                this.$refs[formName].resetFields();
+            }
+
+        },
+        created(){
+            console.info("create method");
+           // this.getFormData();
+
+        },
+        mounted(){
+            console.info("mounted method");
+        }
+
+    });
+
+</script>
+</body>
+
+</html>

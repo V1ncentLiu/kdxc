@@ -22,7 +22,7 @@ public interface IpAccessFeignClient   {
 	@RequestMapping(method = RequestMethod.POST, value = "/querytIpPageList")
 	public JSONResult<PageBean<IpRepositoryInfoDTO>> querytIpPageList(@RequestBody IpAccessManagerQueryDTO queryDTO);
 	
-	@RequestMapping(method = RequestMethod.POST, value = "/saveIpRepository")
+	@RequestMapping(method = RequestMethod.POST, value = "/querytPackagePageList")
 	public JSONResult<PageBean<IpPackageInfoDTO>> querytPackagePageList(@RequestBody IpAccessManagerQueryDTO dto);
 	
 	@RequestMapping(method = RequestMethod.POST, value = "/saveIpRepository")
