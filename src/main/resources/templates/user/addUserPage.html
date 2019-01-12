@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml"  xmlns:th="http://www.thymeleaf.org">
-<head th:replace="_header_include::frag(~{::title},~{::link},~{})">
+<head th:replace="_header_include::frag(~{::title},~{},~{})">
     <title>后台管理系统</title>
     <style>
         .userManage .leftBox{/*width: 200px;*/height: auto;border:1px solid #ebeef5;min-height: 480px;}
@@ -18,37 +18,37 @@
     </el-breadcrumb>
 
     <el-row :gutter="20">
-        <el-form :model="form">
+        <el-form :model="form" :rules="rules" ref="form">
             <el-row>
                 <el-col :span="6">
-                    <el-form-item label="姓名：" :label-width="formLabelWidth1">
+                    <el-form-item label="姓名：" :label-width="formLabelWidth1" prop="name">
                         <el-input v-model="form.name" autocomplete="off"></el-input>
                     </el-form-item>
                 </el-col>
                 <el-col :span="6">
-                    <el-form-item label="登录用户名：" :label-width="formLabelWidth1">
-                        <el-input v-model="form.loginName" autocomplete="off"></el-input>
+                    <el-form-item label="登录用户名：" :label-width="formLabelWidth1" prop="username">
+                        <el-input v-model="form.username" autocomplete="off"></el-input>
                     </el-form-item>
                 </el-col>
             </el-row>
             <el-row>
                 <el-col :span="6">
-                    <el-form-item label="手机号：" :label-width="formLabelWidth1">
+                    <el-form-item label="手机号：" :label-width="formLabelWidth1" prop="phone">
                         <el-input v-model="form.phone" autocomplete="off"></el-input>
                     </el-form-item>
                 </el-col>
                 <el-col :span="6">
-                    <el-form-item label="登录密码：" :label-width="formLabelWidth1">
-                        <el-input v-model="form.psw" autocomplete="off"></el-input>
+                    <el-form-item label="登录密码：" :label-width="formLabelWidth1" prop="password">
+                        <el-input v-model="form.password" autocomplete="off"></el-input>
                     </el-form-item>
                 </el-col>
             </el-row>
             <el-row>
                 <el-col :span="6">
-                    <el-form-item label="所属角色：" :label-width="formLabelWidth1">
+                    <el-form-item label="所属角色：" :label-width="formLabelWidth1" prop="roleId">
                         <el-row>
                             <el-col :span="12">
-                                <el-input v-model="form.role" autocomplete="off"></el-input>                                
+                                <el-input v-model="form.roleName" autocomplete="off"></el-input>                                
                             </el-col>
                             <el-col :span="10">
                                 <el-button type="primary" size="small" @click="dialogFormChooseRole = true">选择角色</el-button>
@@ -57,10 +57,10 @@
                     </el-form-item>
                 </el-col>
                 <el-col :span="6">
-                    <el-form-item label="所属组织：" :label-width="formLabelWidth1">
+                    <el-form-item label="所属组织：" :label-width="formLabelWidth1" prop="orgId">
                         <el-row>
                             <el-col :span="12">
-                                <el-input v-model="form.org" autocomplete="off"></el-input>                                
+                                <el-input v-model="form.orgName" autocomplete="off"></el-input>                                
                             </el-col>
                             <el-col :span="10">
                                 <el-button type="primary" size="small" @click="dialogFormChooseOrg = true">选择组织</el-button>
@@ -72,9 +72,9 @@
             <el-row>
                 <el-col :span="6">
                     <el-form-item label="用户状态：" :label-width="formLabelWidth1">
-                        <el-select v-model="value" placeholder="请选择">
+                        <el-select v-model="form.status" placeholder="请选择">
                             <el-option
-                                v-for="item in options"
+                                v-for="item in statusOptions"
                                 :key="item.value"
                                 :label="item.label"
                                 :value="item.value">
@@ -86,7 +86,7 @@
             <el-row>
                 <el-col :span="6" :offset="6">
                     <el-form-item>
-                        <el-button type="primary" @click="onSubmit">立即创建</el-button>
+                        <el-button type="primary" @click="onSubmit('form')">立即创建</el-button>
                         <el-button>取消</el-button>
                     </el-form-item>
                 </el-col>
@@ -95,7 +95,6 @@
     </el-row>
 
     <el-dialog title="选择角色" :visible.sync="dialogFormChooseRole"s>
-        <el-form :model="form">
             <el-table 
             ref="multipleTable"
             tooltip-effect="dark"
@@ -108,16 +107,14 @@
             >
             <el-table-column align="center" width="55" label="选择">
                 <template scope="scope">
-                    <el-radio :label="scope.$index" v-model="tableRadio">&nbsp;</el-radio>
+                    <el-radio :label="scope.$index"  v-model="tableRadio" @change="selectRole(scope.row.id,scope.row.name)">&nbsp;</el-radio>
                 </template>
             </el-table-column>
             <el-table-column align="center" prop="name" label="角色名称"></el-table-column>
-            <el-table-column align="center" prop="describe" label="角色描述"></el-table-column>
+            <el-table-column align="center" prop="description" label="角色描述"></el-table-column>
         </el-table>
-        </el-form>        
     </el-dialog>
     <el-dialog title="选择组织" :visible.sync="dialogFormChooseOrg" append-to-body>
-        <el-form :model="form">
             <el-tree
                 :data="dataTree"              
                 node-key="id"
@@ -126,14 +123,29 @@
                 highlight-current
                 class="leftTree">
             </el-tree>
-        </el-form>        
     </el-dialog>
 </div>
 <!-- import common js-->
 <div th:include="_footer_include :: #jsLib"></div>
 </body>
-<script>
-    new Vue({
+<script th:inline="javascript">
+var orgData=[[${orgData}]];
+
+var expandedKeys =[];//默认展开节点
+for(var i=0;i<orgData.length;i++){
+	var curNode = orgData[i];
+	expandedKeys.push(curNode.id);
+	var childs = curNode.children;
+	if(childs){
+		for(var j=0;j<childs.length;j++){
+			var curChildNode = childs[j];
+			expandedKeys.push(curChildNode.id);
+		}
+	}
+	
+}
+var roleList=[[${roleList}]];//当前字段所属的菜单组
+   var addUserVm= new Vue({
         el: '#userManage',
         data: function() {
             return {
@@ -142,75 +154,48 @@
                 dialogFormChooseOrg: false,
                 form: {
                     name: '',
-                    loginName: '',
+                    username: '',
                     phone: '',
-                    psw:'',
-                    role: '',
-                    org: ''
+                    password:'',
+                    roleId: '',
+                    roleName: '',
+                    orgId: '',
+                    orgName: '',
+                    status: '1'
+                    
                 },
+                rules: {
+                	name: [
+                      { required: true, message: '姓名不能为空', trigger: 'blur' },
+                      {  max: 30, message: '最大30个字符', trigger: 'blur' }
+                    ],
+                    username: [
+                      { required: true, message: '登录用户名不能为空', trigger: 'blur' },
+                      {  max: 30, message: '最大30个字符', trigger: 'blur' }
+                    ],
+                    phone: [
+                      { required: true, message: '手机号不能为空', trigger: 'change' },
+                      {  max: 30, message: '最大30个字符', trigger: 'blur' }
+                    ],
+                    password: [
+                      { required: true, message: '密码不能为空', trigger: 'change' },
+                      { min:6 , max: 30, message: '最大30个字符', trigger: 'blur' }
+                    ],
+                  },
                 formLabelWidth: '150px',
                 formLabelWidth1: '120px',
-                dataTree: [{
-                    id: 0,
-                    label: '根目录',
-                    children: [{
-                        id: 1,
-                        label: '推广中心',
-                        children: [{
-                            id: 4,
-                            label: '推广客服',
-                            children: [{
-                                id: 9,
-                                label: '客服一组'
-                            }, {
-                                id: 10,
-                                label: '客服二组'
-                            }]
-                        }]
-                        }, {
-                        id: 2,
-                        label: '招商中心',
-                        children: [{
-                            id: 5,
-                            label: '秦皇岛招商中心'
-                        }, {
-                            id: 6,
-                            label: '石家庄招商中心'
-                        }]
-                        }, {
-                        id: 3,
-                        label: '商务中心',
-                        children: [{
-                            id: 7,
-                            label: '商务一'
-                        }, {
-                            id: 8,
-                            label: '商务二'
-                        }]
-                    }]
-                }],
-                dataTableRole:[
-                    {
-                        name:"推广客服",
-                        describe:'推广客服描述',
-                        index:0
-                    },{
-                        name:"推广内勤文员",
-                        describe:'推广内勤文员描述',
-                        index:1
-                    }
-                ],
-                options: [{
-                    value: '0',
+                dataTree: orgData,
+                dataTableRole:roleList,
+                statusOptions: [{
+                    value: '1',
                     label: '启用'
                 }, {
-                    value: '1',
+                    value: '2',
                     label: '禁用'
                 },{
-                    value: '2',
+                    value: '3',
                     label: '锁定'
-                }],
-                value: '0'
+                }]
             }        	  
         },
         methods: {
@@ -227,8 +212,45 @@
             getCurrentRow(val){
                 console.log(val)
             },
-            onSubmit() {
-                console.log('submit!');
+            //选择角色
+            selectRole(id,name){
+            	addUserVm.form.roleId=id;
+            	addUserVm.form.roleName=name;
+            	addUserVm.dialogFormChooseRole=false;
+            },
+            onSubmit(formName) {
+            	 this.$refs[formName].validate((valid) => {
+          	       if (valid) {
+       	             var formData = addUserVm.form;
+       	             var param={};
+       	             param.name= formData.name;
+       	             param.username= formData.username;
+       	             param.password = formData.password;
+       	             param.phone = formData.phone;
+       	             param.status = formData.status;
+       	             console.info(param);
+       	             param.roleList=new Array();
+       	             
+       	            axios.post("/user/userManager/saveUser", param)
+       	            .then(function (response) {
+       	            	console.info(response);
+       	            	var data =response.data;
+       	            	if(data.code!="0"){
+       	            		addUserVm.$message('新增失败');
+       	            	}else{
+       	            		addUserVm.$message('新增成功');
+       	                	document.location.href='/user/userManager/initUserList';
+       	            	}
+       	            })
+       	            .catch(function (error) {
+       	                 console.log(error);
+       	            });
+       	             
+          	          } else {
+          	        	console.log('数据未通过校验！');
+          	            return false;
+          	          }
+          	        });
             }
         }
     })
