@@ -19,7 +19,7 @@
 	    <el-row class="marginB10">
 		    <el-form-item>
 		        <el-button type="primary" @click="toAddUser"><i class="el-icon-plus"></i>添加用户</el-button>
-		        <el-button type="primary"><a href="editUserPage.html">编辑用户</a></el-button>
+		        <el-button type="primary" @click="toUpdateUser">编辑用户</el-button>
 		        <el-button type="primary" class="f-fr" @click="dialogFormVisible = true">密码安全设置</el-button>
 	    	</el-form-item>
 	    </el-row>
@@ -85,7 +85,7 @@
     
     
     <el-row>
-        <el-table  ref="multipleTable" tooltip-effect="dark"
+        <el-table  ref="multipleTable" tooltip-effect="dark" @selection-change="handleSelectionChange"
             style="width: 100%"  :data="dataTable" >
             <el-table-column align="center" type="selection" width="55"></el-table-column>
             <!-- <el-table-column prop="date" label="全选" width="180"></el-table-column> -->
@@ -187,6 +187,7 @@ var userVM = new Vue({
 	                currentPage: 1,
 	                pageSize: 20,
 	            },
+	            multipleSelection:[],
                 radio:'',
                 dialogFormVisible: false,
                 dialogFormAdd: false,
@@ -261,9 +262,25 @@ var userVM = new Vue({
                   this.$refs[formName].resetFields();
                   this.$refs[formName].resetFields();
               },
+              //选择行
+              handleSelectionChange(val) {
+                  this.multipleSelection = val;
+              },
               //跳转新增用户页
               toAddUser() {
             	  document.location.href='/user/userManager/initCreateUser';
+              },
+              //跳转新增用户页
+              toUpdateUser() {
+            	  var rows = this.multipleSelection;
+                  if(rows.length!=1){
+                      this.$message({
+                         message: '请选择一条数据进行修改',
+                         type: 'warning'
+                       });
+                      return;
+                  }
+            	  document.location.href='/user/userManager/initUpdateUser?id='+rows[0].id;
               },
               //修改状态
               updateStatus(id,status,msg) {
