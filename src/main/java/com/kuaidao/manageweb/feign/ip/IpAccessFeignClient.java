@@ -25,6 +25,9 @@ public interface IpAccessFeignClient   {
 	@RequestMapping(method = RequestMethod.POST, value = "/querytPackagePageList")
 	public JSONResult<PageBean<IpPackageInfoDTO>> querytPackagePageList(@RequestBody IpAccessManagerQueryDTO dto);
 	
+	@RequestMapping(method = RequestMethod.POST, value = "/querytAllPackageList")
+	public JSONResult<PageBean<IpPackageInfoDTO>> querytAllPackageList();
+	
 	@RequestMapping(method = RequestMethod.POST, value = "/saveIpRepository")
 	public JSONResult<String> saveIpRepository(@RequestBody IpRepositoryInfoDTO dto) ;
 	
@@ -96,6 +99,15 @@ public interface IpAccessFeignClient   {
 		public JSONResult<String> deleteIppackage(IpPackageInfoDTO dto) {
 			return fallBackError("删除IP包列表数据失败");
 		}
+
+		@SuppressWarnings("unchecked")
+		@Override
+		public JSONResult<PageBean<IpPackageInfoDTO>> querytAllPackageList() {
+			// TODO Auto-generated method stub
+			return fallBackError("查询所有IP包列表数据失败");
+		}
+		
+		
 		
 		
         

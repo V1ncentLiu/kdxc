@@ -2,6 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml"
     xmlns:th="http://www.thymeleaf.org">
 <head th:include="_header_include::frag(~{::title},~{},~{})">
+	<title>角色列表</title>
     <style>
         button a{color:#fff!important;}
     </style>
@@ -15,13 +16,13 @@
     </el-breadcrumb>
     <el-row class="marginB10">
         <el-col :xs="12" :sm="16" :md="16" :lg="18" :xl="12">
-            <el-button type="primary"><a href="addRolePage.html"><i class="el-icon-plus"></i> 添加</a></el-button>
+            <el-button type="primary"><a href="/role/roleManager/addRolePre"><i class="el-icon-plus"></i> 添加</a></el-button>
             <el-button type="primary">修改</el-button>
             <el-button type="primary" @click="deleteFun">删除</el-button>
         </el-col>
         <el-col :xs="12" :sm="8" :md="8" :lg="6" :xl="12">
-            <el-input placeholder="请输入角色名称" class="input-with-select">                        
-            <el-button slot="append" icon="el-icon-search">搜索</el-button>
+            <el-input  v-model="roleListQuery.roleName" placeholder="请输入角色名称" class="input-with-select">                        
+            <el-button slot="append" @click="queryRoleDataList" icon="el-icon-search">搜索</el-button>
             </el-input>
         </el-col>
     </el-row>
@@ -34,9 +35,9 @@
             border
             :data="dataTable" 
             >
-            <el-table-column align="center" type="selection" width="55"></el-table-column>
+            <el-table-column align="center" prop="id" type="selection" width="55"></el-table-column>
             <el-table-column align="center" prop="name" label="角色名称"></el-table-column>
-            <el-table-column align="center" prop="number" label="角色成员（人）">
+            <el-table-column align="center" prop="userCount" label="角色成员（人）">
                 <template slot-scope="scope">
                     <span class="bluecolor cursorP" @click="dialogFormVisible = true">{{ scope.row.number }}</span>
                 </template>
@@ -58,7 +59,7 @@
                         <el-input v-model="searchInput" placeholder="手机号"></el-input>
                     </el-col>
                     <el-col :span="2">
-                        <el-button type="primary" size="medium" icon="el-icon-search">搜索</el-button>
+                        <el-button type="primary" size="medium"  @click="queryRoleDataList" icon="el-icon-search">搜索</el-button>
                     </el-col>
                 </el-row>
             </el-row>
@@ -90,7 +91,7 @@
 </body>
 <div th:include="_footer_include :: #jsLib"></div>
 <script>
-    new Vue({
+var roleListVM =new Vue({
         el: '#roleManage',
         data: function() {
             return {
@@ -121,20 +122,10 @@
                         phone:'15140361114',
                         org:'组织1'
                 }],
-                dataTable: [
-                    {
-                        name: '王小虎1',
-                        number:'29'
-                    }, {
-                        name: '王小虎2',
-                        number:'30'
-                    }, {
-                        name: '王小虎3',
-                        number:'31'
-                    }, {
-                        name: '王小虎4',
-                        number:'32'
-                }],
+                roleListQuery:{
+                	roleName:'',
+                },
+                dataTable: [],
                 multipleSelection: [],
                 dialogFormVisible: false,
                 form: {
@@ -153,7 +144,24 @@
             },
             handleSelectionChange(val) {
                 this.multipleSelection = val;
-            },
+            },	
+             queryRoleDataList(){//查询按钮
+            	 var param = this.roleListQuery;
+                  axios.post('/role/roleManager/queryRoleList',param).then(function (response) {
+                    if(null===response||response.data==null||response.data.code!='0'){
+                          alert(response.data.message);
+                        return ;
+                    }else{
+                      roleListVM.dataTable =response.data.data; 
+                    }
+                  })
+                  .catch(function (error) {
+                    console.log(error);
+                  })
+                  .then(function () {
+                  });  
+                  
+              },
             // 删除
             deleteFun() {
                 this.$confirm('删除后此角色信息将不存在，确认删除吗？', '消息提醒', {
@@ -179,7 +187,15 @@
             handleCurrentChange(val) {
                 console.log(`当前页: ${val}`);
             }
+         },
+         created(){
+       	 //初始化数据列表
+        	this.queryRoleDataList();
+         },
+        mounted(){
+       	  
         }
+        
     })
 </script>
 </html>
