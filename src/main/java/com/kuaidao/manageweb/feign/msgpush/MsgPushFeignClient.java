@@ -1,5 +1,6 @@
 package com.kuaidao.manageweb.feign.msgpush;
 
+import com.kuaidao.msgpush.dto.SmsTemplateCodeReq;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.netflix.feign.FeignClient;
@@ -54,6 +55,9 @@ public interface MsgPushFeignClient {
     public JSONResult<String> sendVoiceCode(@RequestBody SmsVoiceCodeReq voiceCodeReq);
 
 
+    @PostMapping("/sendTempSms")
+    public JSONResult<String> sendTempSms(@RequestBody SmsTemplateCodeReq smsTemplateCodeReq);
+
     @Component
     static class HystrixClientFallback implements MsgPushFeignClient {
 
@@ -85,6 +89,10 @@ public interface MsgPushFeignClient {
             return fallBackError("发送语音验证码");
         }
 
+        @Override
+        public JSONResult<String> sendTempSms(SmsTemplateCodeReq smsTemplateCodeReq) {
+            return fallBackError("发送模板短信");
+        }
 
 
     }
