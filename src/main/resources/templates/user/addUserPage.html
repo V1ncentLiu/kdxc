@@ -48,7 +48,7 @@
                     <el-form-item label="所属角色：" :label-width="formLabelWidth1" prop="roleId">
                         <el-row>
                             <el-col :span="12">
-                                <el-input v-model="form.roleName" autocomplete="off"></el-input>                                
+                                <el-input v-model="form.roleName" autocomplete="off" prop="roleName"></el-input>                                
                             </el-col>
                             <el-col :span="10">
                                 <el-button type="primary" size="small" @click="dialogFormChooseRole = true">选择角色</el-button>
@@ -60,7 +60,7 @@
                     <el-form-item label="所属组织：" :label-width="formLabelWidth1" prop="orgId">
                         <el-row>
                             <el-col :span="12">
-                                <el-input v-model="form.orgName" autocomplete="off"></el-input>                                
+                                <el-input v-model="form.orgName" autocomplete="off" prop="orgName"></el-input>                                
                             </el-col>
                             <el-col :span="10">
                                 <el-button type="primary" size="small" @click="dialogFormChooseOrg = true">选择组织</el-button>
@@ -103,7 +103,6 @@
             :data="dataTableRole"
             highlight-current-row
             @current-change="handleCurrentChange"
-            @row-click = "showRow" 
             >
             <el-table-column align="center" width="55" label="选择">
                 <template scope="scope">
@@ -118,9 +117,10 @@
             <el-tree
                 :data="dataTree"              
                 node-key="id"
-                :default-expanded-keys="[1,2,3]"
+                :default-expanded-keys="expandedKeys"
                 ref="tree"
                 highlight-current
+                @node-click="clickOrgNode"
                 class="leftTree">
             </el-tree>
     </el-dialog>
@@ -184,6 +184,7 @@ var roleList=[[${roleList}]];//当前字段所属的菜单组
                   },
                 formLabelWidth: '150px',
                 formLabelWidth1: '120px',
+                expandedKeys:expandedKeys,//树形结构  默认展开的
                 dataTree: orgData,
                 dataTableRole:roleList,
                 statusOptions: [{
@@ -218,6 +219,14 @@ var roleList=[[${roleList}]];//当前字段所属的菜单组
             	addUserVm.form.roleName=name;
             	addUserVm.dialogFormChooseRole=false;
             },
+            //选择机构
+            clickOrgNode(data,node,obj){//点击左侧节点
+                if(data.children==null){
+                	addUserVm.form.orgId=data.id;
+                	addUserVm.form.orgName=data.label;
+                	addUserVm.dialogFormChooseOrg=false;
+                }
+            },
             onSubmit(formName) {
             	 this.$refs[formName].validate((valid) => {
           	       if (valid) {
@@ -228,9 +237,11 @@ var roleList=[[${roleList}]];//当前字段所属的菜单组
        	             param.password = formData.password;
        	             param.phone = formData.phone;
        	             param.status = formData.status;
+       	             param.orgId = formData.orgId;
        	             console.info(param);
-       	             param.roleList=new Array();
-       	             
+       	             var roleList=new Array();
+       	          	 roleList.push(formData.roleId);
+       	             param.roleList=roleList;
        	            axios.post("/user/userManager/saveUser", param)
        	            .then(function (response) {
        	            	console.info(response);

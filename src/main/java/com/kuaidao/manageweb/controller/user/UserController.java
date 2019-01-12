@@ -18,6 +18,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.IdEntityLong;
@@ -78,9 +79,7 @@ public class UserController {
     @RequestMapping("/initCreateUser")
     public String initCreateUser(HttpServletRequest request) {
 
-        JSONResult<List<RoleInfoDTO>> list = userInfoFeignClient.roleList(new RoleQueryDTO());
-
-        request.setAttribute("roleList", list.getData());
+        // 查询组织机构树
         JSONResult<List<TreeData>> treeJsonRes = organizationFeignClient.query();
         if (treeJsonRes != null && JSONResult.SUCCESS.equals(treeJsonRes.getCode())
                 && treeJsonRes.getData() != null) {
@@ -88,6 +87,10 @@ public class UserController {
         } else {
             logger.error("query organization tree,res{{}}", treeJsonRes);
         }
+        // 查询角色列表
+        JSONResult<List<RoleInfoDTO>> list = userInfoFeignClient.roleList(new RoleQueryDTO());
+
+        request.setAttribute("roleList", list.getData());
         return "user/addUserPage";
     }
 
@@ -97,19 +100,24 @@ public class UserController {
      * @return
      */
     @RequestMapping("/initUpdateUser")
-    public String initUpdateUser(UserInfoReq user, HttpServletRequest request) {
+    public String initUpdateUser(@RequestParam long id, HttpServletRequest request) {
         JSONResult<List<TreeData>> treeJsonRes = organizationFeignClient.query();
+        // 查询用户信息
+        JSONResult<UserInfoDTO> jsonResult = userInfoFeignClient.get(new IdEntityLong(id));
+        request.setAttribute("user", jsonResult.getData());
+        // 查询组织机构树
         if (treeJsonRes != null && JSONResult.SUCCESS.equals(treeJsonRes.getCode())
                 && treeJsonRes.getData() != null) {
             request.setAttribute("orgData", treeJsonRes.getData());
         } else {
             logger.error("query organization tree,res{{}}", treeJsonRes);
         }
+        // 查询角色列表
         JSONResult<List<RoleInfoDTO>> list = userInfoFeignClient.roleList(new RoleQueryDTO());
 
         request.setAttribute("roleList", list.getData());
 
-        return "user/userManagePage";
+        return "user/editUserPage";
     }
 
     /***
