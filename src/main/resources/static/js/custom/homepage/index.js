@@ -111,26 +111,13 @@ var homePageVM=new Vue({
                });
          },
          confirmLogout(){//确认退出系统
-         /*    axios.post('/logout', param)
-             .then(function (response) {
-                 var resData = response.data;
-                 if(resData.code=='0'){
-              	   homePageVM.$message('请使用新密码重新登录的提示框');
-              	   homePageVM.cancelForm(formName);
-              	   homePageVM.dialogModifyPwdVisible = false;
-                 }else{
-              	   homePageVM.$message('操作失败');
-                     console.error(resData);
-                 }
-             
-             })
-             .catch(function (error) {
-                  console.log(error);
-             });*/
         	 location.href="/logout";
         },
-        gotoHomePage(){
+        gotoHomePage(){//首页跳转
         	location.href='/login';
+        },
+        gotoMsgCenterPage(){//消息中心跳转
+        	location.href='/messagecenter/messagecenter';
         }
          
          
