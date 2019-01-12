@@ -29,15 +29,15 @@
                     </el-form-item>
                 </el-col>
                 <el-col :span="5">
-                    <el-form-item prop="org" >
-                    <el-input v-model="annForm.org"  size="small"  readonly=true placeholder="请选择指定组织">
+                    <el-form-item prop="org" id="org" style="display: none">
+                    <el-input v-model="annForm.org"   size="small"  readonly placeholder="请选择指定组织">
                         <el-button slot="append" icon="el-icon-search" @click="selectOrgs"></el-button>
                     </el-input>
                     </el-form-item>
                 </el-col>
         </el-form-item>
 
-        <el-form-item label="公告内容" prop="content" style="width: 60%;">
+        <el-form-item label="公告内容" prop="content"  style="width: 60%;">
             <el-input type="textarea" v-model="annForm.content"
                       :autosize="{ minRows: 10, maxRows: 50}"></el-input>
         </el-form-item>
@@ -47,6 +47,25 @@
             <el-button @click="reListPage">取消</el-button>
         </el-form-item>
     </el-form>
+    <el-dialog :visible.sync="OraTreeMuliCheckDialog" title="选择组织结构"  width="30%" >
+        <div style="height: 300px;overflow-y:auto;overflow-x:auto;">
+            <el-tree
+                    :data="dataTree"
+                    node-key="id"
+                    :default-expanded-keys="expandedKeys"
+                    ref="tree"
+                    show-checkbox
+                    highlight-current
+                    :expand-on-click-node=false
+                    @check="handleSelectionChange"
+                    class="leftTree">
+            </el-tree>
+        </div>
+        <span slot="footer" class="dialog-footer">
+            <el-button @click="closeOraTreeMultiCheck">取 消</el-button>
+            <el-button type="primary" @click="returnCheckNodekeys">确 定</el-button>
+        </span>
+    </el-dialog>
 </div>
 
 <div th:include="_footer_include :: #jsLib"></div>
@@ -56,6 +75,11 @@
     var vm = new Vue({
         el:'#form',
         data:{
+            expandedKeys:[],
+            dataTree:[],
+            OraTreeMuliCheckDialog: false,
+            multipleSelection:[],
+            multipleSelectionName:[],
             annForm: {
                 title: "",
                 type: ["1","2"],
@@ -88,15 +112,56 @@
                 console.log("--------选择组织结构---多选-------------")
                 if(vm.annForm.radio!=1){
                     vm.$message( {type: 'warning',message:'接收范围为：指定组织，才能选择组织机构！'});
+                    return false
                 }
             //  打开 组织机构多选框
-
+                vm.OraTreeMuliCheckDialog = true;
+                var param = {};
+                axios.post("/organization/organization/query", param).then(function (response) {
+                    console.log(response.data)
+                    vm.expandedKeys = [];
+                    vm.dataTree = response.data.data;
+                    for(var i=0;i<vm.dataTree.length;i++){
+                        var curNode = vm.dataTree[i];
+                        vm.expandedKeys.push(curNode.id);
+                        var childs = curNode.children;
+                        if(childs){
+                            for(var j=0;j<childs.length;j++){
+                                var curChildNode = childs[j];
+                                vm.expandedKeys.push(curChildNode.id);
+                            }
+                        }
+                    }
+                }).catch(function (error) { console.log(error);});
+            },
+            handleSelectionChange(currentNode,allCheckNodes) {//选择节点的事件
+                this.multipleSelection = allCheckNodes.checkedKeys;
+                var nodes = allCheckNodes.checkedNodes;
+                this.multipleSelectionName = [];
+                for(var i = 0 ; i < nodes.length ; i++){
+                    this.multipleSelectionName.push(nodes[i].label)
+                }
+            },
+            returnCheckNodekeys(){
+                console.log(this.multipleSelection.length)
+                if( this.multipleSelection.length ==0){
+                    this.$message({type:"warning",message:"请选择组织结构"})
+                    return false;
+                }
+                var names = this.multipleSelectionName.join(',')
+                console.log(names)
+                vm.annForm.org = names
+                this.OraTreeMuliCheckDialog = false
             },
             redioChange:function(val){
+
                 if(val==0){//全体用户
                     console.log("选择了全体用户")
-
+                    document.getElementById("org").setAttribute('style', 'display:none');
+                    vm.multipleSelection =[];
+                    vm.multipleSelectionName = [];
                 }else{//指定组织:多选
+                    document.getElementById("org").setAttribute('style', 'display:block');
                     console.log("选择了指定组织")
                 }
             },
@@ -115,8 +180,10 @@
                         if(formData.radio==0){
                             param.orgId = 0;
                         }else{
-                            param.orgId = formData.org;
+                            param.orgId = 1;
+                            param.orgids = this.multipleSelection;
                         }
+
                         if(formData.type.length == 2){
                             param.type = 0;
                         }else{
@@ -146,21 +213,33 @@
             },
             resetForm(formName) {
                 this.$refs[formName].resetFields();
+            },
+            closeOraTreeMultiCheck(){
+                this.OraTreeMuliCheckDialog = false
             }
-
         },
         created(){
             console.info("create method");
            // this.getFormData();
-
         },
         mounted(){
             console.info("mounted method");
         }
-
     });
 
 </script>
+<style>
+    .el-button{
+        background: #cccccc;
+    }
+    .el-button--primary {
+        background-color: #6f7180;
+        border: #6f7180;
+    }
+    .el-dialog__header {
+        background-color: #cccccc;
+    }
+</style>
 </body>
 
 </html>
