@@ -35,7 +35,7 @@ public class MyShiroRealm extends AuthorizingRealm {
 
         // 添加角色和权限
         SimpleAuthorizationInfo simpleAuthorizationInfo = new SimpleAuthorizationInfo();
-        // simpleAuthorizationInfo.addRoles(roleStr);
+        // simpleAuthorizationInfo.addRoles(roles);
         // simpleAuthorizationInfo.addStringPermissions(permissions);
         return simpleAuthorizationInfo;
 

@@ -1,5 +1,6 @@
 package com.kuaidao.manageweb.feign.user;
 
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.netflix.feign.FeignClient;
@@ -11,6 +12,8 @@ import com.kuaidao.common.entity.IdEntityLong;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.common.entity.PhoneEntity;
+import com.kuaidao.sys.dto.role.RoleInfoDTO;
+import com.kuaidao.sys.dto.role.RoleQueryDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import com.kuaidao.sys.dto.user.UserInfoPageParam;
 import com.kuaidao.sys.dto.user.UserInfoReq;
@@ -79,6 +82,15 @@ public interface UserInfoFeignClient {
     @PostMapping("/create")
     public JSONResult<String> create(@RequestBody UserInfoReq req);
 
+    /**
+     * 角色列表
+     * 
+     * @param queryDTO
+     * @return
+     */
+    @PostMapping("/roleList")
+    public JSONResult<List<RoleInfoDTO>> roleList(@RequestBody RoleQueryDTO roleQueryDTO);
+
 
     @Component
     static class HystrixClientFallback implements UserInfoFeignClient {
@@ -125,8 +137,14 @@ public interface UserInfoFeignClient {
             return fallBackError("查询用户集合");
         }
 
+        @Override
+        public JSONResult<List<RoleInfoDTO>> roleList(@RequestBody RoleQueryDTO roleQueryDTO) {
+            return fallBackError("查询角色列表");
+        }
+
 
 
     }
+
 
 }

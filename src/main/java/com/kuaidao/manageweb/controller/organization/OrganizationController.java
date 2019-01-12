@@ -41,6 +41,7 @@ import org.springframework.validation.BindingResult;
 public class OrganizationController {
 
     private static Logger logger = LoggerFactory.getLogger(OrganizationController.class);
+
     @Autowired
     OrganizationFeignClient organizationFeignClient;
 

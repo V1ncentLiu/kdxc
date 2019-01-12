@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head th:include="_header_include::frag(~{::title},~{},~{})">
+    <title>公告管理</title>
+</head>
+
+<body>
+<div id="addDialog" class="mainPadding">
+    <template>
+        <el-tabs v-model="activeName" type="card" @tab-click="handleClick">
+            <el-tab-pane label="业务消息(1)" name="business" ref="business" >
+                <template>
+                    <el-form :inline="true" :model="businessForm" class="demo-form-inline">
+                        <el-form-item label=""><el-input v-model="businessForm.content" placeholder="消息内容"></el-input></el-form-item>
+                        <el-form-item label="">
+                            <el-select v-model="businessForm.status" placeholder="请选择" width="100">
+                                <el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value"></el-option>
+                            </el-select>
+                        </el-form-item>
+                        <el-form-item label="接收时间">
+                            <el-date-picker v-model="businessForm.date1" type="datetime" placeholder="选择日期时间"></el-date-picker>
+                            <span>到</span>
+                            <el-date-picker v-model="businessForm.date2" type="datetime" placeholder="选择日期时间"></el-date-picker>
+                        </el-form-item>
+                        <el-form-item>
+                            <el-button type="primary" @click="onBussSubmit">查询</el-button>
+                            <el-button type="primary" @click="changeBussState">标记已读</el-button>
+                        </el-form-item>
+                    </el-form>
+                </template>
+                <template>
+                    <el-table :data="businessData" height="650" border  @selection-change="handleSelectionChange">
+                        <el-table-column type="selection" width="55"></el-table-column>
+                        <el-table-column property="title" stripe label="标题" width="150"  > <!--:formatter="formatTitle"-->
+                            <template slot-scope="scope">
+                                <span class="span"  v-if="scope.row.status==0"><li class="tip"></li>{{ scope.row.title }}</span>
+                                <span class="span" style="color: #cccccc" v-else><li class="tip1"></li>{{ scope.row.title }}</span>
+                            </template>
+                        </el-table-column>
+                        <el-table-column property="content" label="消息内容" >
+                            <template slot-scope="scope">
+                                <span v-if="scope.row.status==0">{{ scope.row.content }}</span>
+                                <span style="color: #cccccc" v-else>{{ scope.row.content }}</span>
+                            </template>
+                        </el-table-column> <!--:formatter="formatContent"-->
+                        <el-table-column property="receiveTime" label="接收时间"  width="200"></el-table-column>
+                        <el-table-column property="status" label="消息状态" :formatter="formatStatus"></el-table-column>
+                    </el-table>
+                </template>
+
+                <template>
+                    <div class="block">
+                        <el-pagination @size-change="handleSizeChange"
+                                       @current-change="handleCurrentChange" :current-page="currentPage"
+                                       :page-sizes="[10, 20, 30, 40]" :page-size="pageSize"
+                                       layout="total, sizes, prev, pager, next, jumper" :total="total">
+                        </el-pagination>
+                    </div>
+                </template>
+            </el-tab-pane>
+            <el-tab-pane label="公告通知(1)"  name="announcement"  ref="announcement">
+
+                <template>
+                    <el-form :inline="true" :model="annForm" class="demo-form-inline">
+                        <el-form-item label="">
+                            <el-input v-model="annForm.content" placeholder="消息内容"></el-input>
+                        </el-form-item>
+                        <el-form-item label="">
+                            <el-select v-model="annForm.status" placeholder="请选择" width="100">
+                                <el-option
+                                        v-for="item in options"
+                                        :key="item.value"
+                                        :label="item.label"
+                                        :value="item.value">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+                        <el-form-item label="接收时间">
+                            <el-date-picker v-model="annForm.date1" type="datetime" placeholder="选择日期时间"></el-date-picker>
+                            <span>到</span>
+                            <el-date-picker v-model="annForm.date2" type="datetime" placeholder="选择日期时间"></el-date-picker>
+                        </el-form-item>
+                        <el-form-item>
+                            <el-button type="primary" @click="onAnnSubmit">查询</el-button>
+                            <el-button type="primary" @click="changeAnnState">标记已读</el-button>
+                        </el-form-item>
+                    </el-form>
+                </template>
+
+                <template>
+                    <el-table :data="annData" height="650" border  @selection-change="handleSelectionChange" >
+                        <el-table-column type="selection" width="55"></el-table-column>
+                        <el-table-column property="title" label="标题" width="150" >
+                            <template slot-scope="scope">
+                                <span class="span"  v-if="scope.row.status==0"><li class="tip"></li>{{ scope.row.title }}</span>
+                                <span class="span" style="color: #cccccc" v-else><li class="tip1"></li>{{ scope.row.title }}</span>
+                            </template>
+                        </el-table-column>  <!--:formatter="formatTitle"-->
+                        <el-table-column property="content" label="消息内容"  >
+                            <template slot-scope="scope">
+                                <span v-if="scope.row.status==0">{{ scope.row.content }}</span>
+                                <span style="color: #cccccc" v-else>{{ scope.row.content }}</span>
+                            </template>
+                        </el-table-column>  <!--:formatter="formatContent"-->
+                        <el-table-column property="receiveTime" label="接收时间" width="200"></el-table-column>
+                        <el-table-column property="status" label="消息状态"  :formatter="formatStatus"></el-table-column>
+                    </el-table>
+                </template>
+
+                <template>
+                    <div class="block">
+                        <el-pagination @size-change="handleSizeChange"
+                                       @current-change="handleCurrentChange" :current-page="currentPage"
+                                       :page-sizes="[10, 20, 30, 40]" :page-size="pageSize"
+                                       layout="total, sizes, prev, pager, next, jumper" :total="total">
+                        </el-pagination>
+                    </div>
+                </template>
+            </el-tab-pane>
+        </el-tabs>
+    </template>
+</div>
+<style>
+    .span {
+        position:relative;
+        padding:5px;
+    }
+    .tip {
+        display:block;
+        background:#f00;
+        border-radius:50%;
+        width:12px;
+        height:12px;
+        top:10px;left:-10px;
+        position:absolute;
+    }
+    .tip1 {
+        display:block;
+        background:#cccccc;
+        border-radius:50%;
+        width:12px;
+        height:12px;
+        top:15px;
+        left:-10px;
+        position:absolute;
+    }
+</style>
+<!-- import common js-->
+<div th:include="_footer_include :: #jsLib"></div>
+
+<script>
+    var vm = new Vue({
+        el:"#addDialog",
+        data:{
+            activeName: 'business',
+            businessForm:{
+                content:"",
+                status:"",
+                date1:"",
+                date2:""
+            },
+            annForm:{
+                content:"",
+                status:"",
+                time:"",
+                date1:"",
+                date2:""
+            },
+            businessData: [],
+            annData: [],
+
+            multipleSelection:[],
+            currentPage: 1,
+            total: 0,
+            pageNum: 1,
+            pageSize: 10,
+
+            options: [{
+                value: "",
+                label: '全部'
+            }, {
+                value: '0',
+                label: '未读'
+            }, {
+                value: '1',
+                label: '已读'
+            }],
+
+        },
+        methods: {
+            onAnnSubmit(){
+                var param = this.annForm;
+                param.pageSize =  this.pageSize;
+                param.pageNum = this.pageNum;
+                console.log(param)
+                axios.post("/annReceive/list", param)
+                    .then(function (response) {
+
+                        if(response.data.code==-1){
+                            vm.$message.error(response.data.msg)
+                            return false ;
+                        }
+
+                        var data = response.data.data
+                        vm.annData = data.data;
+                        console.log(vm.businessData)
+                        vm.total = data.total;
+                        vm.currentPage = data.currentPage;
+                    })
+                    .catch(function (error) {
+                        console.log(error);
+                    })
+                    .then(function () {
+                    });
+            },
+            changeAnnState(){
+            },
+            onBussSubmit(){
+                var param = this.businessForm;
+                param.pageSize =  this.pageSize;
+                param.pageNum = this.pageNum;
+                console.log(param)
+                axios.post("/bussReceive/list", param)
+                .then(function (response) {
+                    if(response.data.code==-1){
+                        vm.$message.error(response.data.msg)
+                        return false ;
+                    }
+
+                    var data = response.data.data
+                    vm.businessData = data.data;
+                    console.log(vm.businessData)
+                    vm.total = data.total;
+                    vm.currentPage = data.currentPage;
+                })
+                .catch(function (error) {
+                    console.log(error);
+                })
+                .then(function () {
+                });
+            },
+            changeBussState(){
+                var rows = this.multipleSelection;
+                if(rows.length<1){
+                    this.$message({type:"warning",message:"没有勾选消息"})
+                }else{
+                    var rowIds = [];
+                    for(var i=0;i<rows.length;i++){
+                        rowIds.push(rows[i].id)
+                    }
+                    //调用后台数据删除操作。
+                    var param={};
+                    param.ids = rowIds.join(",");
+                    axios.post('/bussReceive/batchUpdate', param)
+                        .then(function (response) {
+                            vm.initBussTableData(1);
+                            vm.$message({type: 'success', message: '更新完成!'});
+                        })
+                        .catch(function (error) {
+                            queryFormVM.$message.error(error);
+                            console.log(error);
+                        });
+                }
+
+            },
+            handleSelectionChange(val) {
+                console.info(val);
+                this.multipleSelection = val;
+            },
+            formatStatus(row, column){
+                return row.status == 0 ? "未读" : "已读";
+            },
+            formatTitle(row,column){
+               return row.status == 0? "<span class='span'> <i class=\"tip\"></i> "+row.title+"</span>" : "<span class='span'><i class=\"tip1\"></i> "+row.title+"</span>"
+            },
+            handleClick(tab, event) {
+                console.log(tab, event);
+                // console.log(tab.name)
+                // tab.label="babbababab"
+                if(tab.name=="announcement"){
+                    console.log("------------------announcement-----------------------")
+                    this.initAnnTableData(1,10);
+                }else{//business
+                    console.log("------------------business-----------------------")
+                    this.initBussTableData(1,10);
+                }
+            },
+            handleSizeChange(val) {
+                //下拉框  每页 10,20条切换 调用
+                console.log(`每页 ${val} 条`);
+                this.pageSize = val;
+                this.initBussTableData(1);
+            },
+            handleCurrentChange(val) {
+                //点击 页码
+                console.log(`当前页: ${val}`);
+                this.initBussTableData(val);
+            },
+            initBussTableData(v_pageNum,v_pageSize) {
+                var param = this.businessForm;
+                if(v_pageSize){
+                    param.pageSize =  v_pageSize
+                }else{
+                    param.pageSize =  this.pageSize;
+                }
+
+                param.pageNum = v_pageNum;
+                console.log(param)
+                axios.post("/bussReceive/list", param)
+                    .then(function (response) {
+                        var data = response.data.data
+                        vm.businessData = data.data;
+                        console.log(vm.businessData)
+                        vm.total = data.total;
+                        vm.pageSize = data.pageSize;
+                        vm.currentPage = data.currentPage;
+                    })
+                    .catch(function (error) {
+                        console.log(error);
+                    })
+                    .then(function () {
+                    });
+            },
+            initAnnTableData(v_pageNum,v_pageSize) {
+                var param = this.annForm;
+                if(v_pageSize){
+                    param.pageSize =  v_pageSize
+                }else{
+                    param.pageSize =  this.pageSize;
+                }
+                param.pageNum = v_pageNum;
+
+                console.log(param)
+                axios.post("/annReceive/list", param)
+                    .then(function (response) {
+                        var data = response.data.data
+
+                        vm.annData = data.data;
+                        console.log(vm.businessData)
+                        vm.total = data.total;
+                        vm.pageSize = data.pageSize;
+                        vm.currentPage = data.currentPage;
+                    })
+                    .catch(function (error) {
+                        console.log(error);
+                    })
+                    .then(function () {
+                    });
+            }
+        },
+        created() {
+            console.info("create method");
+            this.initBussTableData(1);
+
+        },
+        mounted() {
+            console.info("mounted method");
+        },
+        updated(){
+            console.info("updated method");
+            var param = {};
+            axios.post("/annReceive/unreadCount", param).then(function (response) {
+                var data = response.data.data
+                var str ="";
+                if(data&&data!=0){
+                    str = "("+data+")"
+                }
+                document.getElementById("tab-announcement").innerHTML =  "公告通知<span style='color: red'>"+str+"</span>";
+
+            })
+            axios.post("/bussReceive/unreadCount", param).then(function (response) {
+                var data = response.data.data
+                var str ="";
+                if(data&&data!=0){
+                    str = "("+data+")"
+                }
+                document.getElementById("tab-business").innerHTML =  "业务消息<span style='color: red'>"+str+"</span>";
+            })
+
+
+        }
+
+    });
+</script>
+</body>
+</html>

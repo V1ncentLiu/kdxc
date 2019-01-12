@@ -29,8 +29,17 @@ public interface SysSettingFeignClient {
      * @param menuDTO
      * @return
      */
-    @PostMapping("/getByCode")
+    @PostMapping("/getbyCode")
     public JSONResult<SysSettingDTO> getByCode(@RequestBody SysSettingReq sysSettingReq);
+
+    /**
+     * 修改系统参数
+     * 
+     * @param menuDTO
+     * @return
+     */
+    @PostMapping("/update")
+    public JSONResult<Void> update(@RequestBody SysSettingReq sysSettingReq);
 
 
 
@@ -51,6 +60,11 @@ public interface SysSettingFeignClient {
         @Override
         public JSONResult<SysSettingDTO> getByCode(@RequestBody SysSettingReq sysSettingReq) {
             return fallBackError("查询系统参数");
+        }
+
+        @Override
+        public JSONResult<Void> update(@RequestBody SysSettingReq sysSettingReq) {
+            return fallBackError("修改系统参数");
         }
 
 

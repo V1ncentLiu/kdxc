@@ -52,7 +52,7 @@ public class RoleManagerController {
     @RequestMapping("/addRolePre")
     public String addRolePre() {
 
-        return "role/addRole";
+        return "role/addRolePage";
     }
 
     /***

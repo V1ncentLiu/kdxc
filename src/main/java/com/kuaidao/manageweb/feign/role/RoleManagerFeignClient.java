@@ -14,13 +14,21 @@ import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.sys.dto.role.RoleInfoDTO;
 import com.kuaidao.sys.dto.role.RoleQueryDTO;
 
-@FeignClient(name = "sys-service",path="/sys/role/roleManager", fallback = RoleManagerFeignClient.HystrixClientFallback.class)
+@FeignClient(name = "sys-service", path = "/sys/role/roleManager", fallback = RoleManagerFeignClient.HystrixClientFallback.class)
 public interface RoleManagerFeignClient {
-	
 
 	@RequestMapping(method = RequestMethod.POST, value = "/queryRoleList")
 	public JSONResult<List<RoleInfoDTO>> queryRoleList(RoleQueryDTO dto);
- 
+
+	@RequestMapping(method = RequestMethod.POST, value = "/saveRoleInfo")
+	public JSONResult<String> saveRoleInfo(RoleInfoDTO dto);
+
+	@RequestMapping(method = RequestMethod.POST, value = "/updateRoleInfo")
+	public JSONResult<String> updateRoleInfo(RoleInfoDTO dto);
+
+	@RequestMapping(method = RequestMethod.POST, value = "/deleteRoleInfo")
+	public JSONResult<String> deleteRoleInfo(RoleInfoDTO dto);
+
 	@Component
 	static class HystrixClientFallback implements RoleManagerFeignClient {
 
@@ -37,6 +45,27 @@ public interface RoleManagerFeignClient {
 		@Override
 		public JSONResult<List<RoleInfoDTO>> queryRoleList(RoleQueryDTO dto) {
 			return fallBackError("查询角色列表数据失败");
+		}
+
+		@SuppressWarnings("unchecked")
+		@Override
+		public JSONResult<String> saveRoleInfo(RoleInfoDTO dto) {
+			// TODO Auto-generated method stub
+			return fallBackError("保存角色列表数据失败");
+		}
+
+		@SuppressWarnings("unchecked")
+		@Override
+		public JSONResult<String> updateRoleInfo(RoleInfoDTO dto) {
+			// TODO Auto-generated method stub
+			return fallBackError("修改角色列表数据失败");
+		}
+
+		@SuppressWarnings("unchecked")
+		@Override
+		public JSONResult<String> deleteRoleInfo(RoleInfoDTO dto) {
+			// TODO Auto-generated method stub
+			return fallBackError("删除角色列表数据失败");
 		}
 
 	}

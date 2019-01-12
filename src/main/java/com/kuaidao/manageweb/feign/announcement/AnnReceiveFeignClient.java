@@ -2,6 +2,7 @@ package com.kuaidao.manageweb.feign.announcement;
 
 import com.kuaidao.common.entity.IdEntity;
 import com.kuaidao.common.entity.JSONResult;
+import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.sys.dto.announcement.AnnouncementAddAndUpdateDTO;
 import com.kuaidao.sys.dto.announcement.AnnouncementQueryDTO;
 import com.kuaidao.sys.dto.announcement.annReceive.AnnReceiveQueryDTO;
@@ -22,11 +23,11 @@ import java.util.List;
  * @auther: yangbiao
  * @date: 2019/1/8 17:35
  */
-@FeignClient(name = "sys-service",path="/sys/busBussReceive",fallback = AnnReceiveFeignClient.HystrixClientFallback.class)
+@FeignClient(name = "sys-service",path="/sys/annoReceive",fallback = AnnReceiveFeignClient.HystrixClientFallback.class)
 public interface AnnReceiveFeignClient {
 
     @PostMapping("/queryAnnReceive")
-    public JSONResult<List<AnnReceiveRespDTO>> queryReceive(@RequestBody AnnReceiveQueryDTO queryDTO);
+    public JSONResult<PageBean<AnnReceiveRespDTO>> queryReceive(@RequestBody AnnReceiveQueryDTO queryDTO);
 
     @PostMapping("/updateState")
     public JSONResult updateReceive(@RequestBody IdEntity idEntity);
@@ -34,11 +35,17 @@ public interface AnnReceiveFeignClient {
     @PostMapping("/queryAnnReceives")
     public JSONResult updateReceives(@RequestBody String ids);
 
+    @PostMapping("/queryAnnReceiveOne")
+    JSONResult<AnnReceiveRespDTO> queryReceiveOne(IdEntity idEntity);
+
+    @PostMapping("/unreadCount")
+    public JSONResult updateReceives();
+
     @Component
     static class HystrixClientFallback implements AnnReceiveFeignClient {
 
         @Override
-        public JSONResult<List<AnnReceiveRespDTO>> queryReceive(AnnReceiveQueryDTO queryDTO) {
+        public JSONResult<PageBean<AnnReceiveRespDTO>> queryReceive(AnnReceiveQueryDTO queryDTO) {
             return null;
         }
 
@@ -49,6 +56,16 @@ public interface AnnReceiveFeignClient {
 
         @Override
         public JSONResult updateReceives(String ids) {
+            return null;
+        }
+
+        @Override
+        public JSONResult<AnnReceiveRespDTO> queryReceiveOne(IdEntity idEntity) {
+            return null;
+        }
+
+        @Override
+        public JSONResult updateReceives() {
             return null;
         }
     }
