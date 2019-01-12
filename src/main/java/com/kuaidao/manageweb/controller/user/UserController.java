@@ -4,6 +4,7 @@
 package com.kuaidao.manageweb.controller.user;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
@@ -23,6 +24,8 @@ import com.kuaidao.common.util.MD5Util;
 import com.kuaidao.manageweb.feign.role.RoleManagerFeignClient;
 import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
 import com.kuaidao.sys.constant.UserErrorCodeEnum;
+import com.kuaidao.sys.dto.role.RoleInfoDTO;
+import com.kuaidao.sys.dto.role.RoleQueryDTO;
 import com.kuaidao.sys.dto.user.UpdateUserPasswordReq;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import com.kuaidao.sys.dto.user.UserInfoPageParam;
@@ -55,7 +58,11 @@ public class UserController {
      * @return
      */
     @RequestMapping("/initUserList")
-    public String initUserList() {
+    public String initUserList(HttpServletRequest request) {
+
+        JSONResult<List<RoleInfoDTO>> list = userInfoFeignClient.roleList(new RoleQueryDTO());
+
+        request.setAttribute("roleList", list.getData());
 
         return "user/userManagePage";
     }

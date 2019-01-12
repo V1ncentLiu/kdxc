@@ -97,8 +97,8 @@ public class ShiroConfig {
      */
     public RedisManager redisManager() {
         RedisManager redisManager = new RedisManager();
-        redisManager.setHost("192.168.13.12");
-        redisManager.setPort(6379);
+        redisManager.setHost(host);
+        redisManager.setPort(port);
         // redisManager.setExpire(1800);// 配置缓存过期时间
         redisManager.setTimeout(timeout);
         // redisManager.setPassword(password);
@@ -161,7 +161,7 @@ public class ShiroConfig {
      *
      */
     @Bean
-    public LifecycleBeanPostProcessor getLifecycleBeanPostProcessor() {
+    public static LifecycleBeanPostProcessor getLifecycleBeanPostProcessor() {
         return new LifecycleBeanPostProcessor();
     }
 }
