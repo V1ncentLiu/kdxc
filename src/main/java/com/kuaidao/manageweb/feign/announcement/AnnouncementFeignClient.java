@@ -1,5 +1,6 @@
 package com.kuaidao.manageweb.feign.announcement;
 
+import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.IdEntity;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
@@ -8,6 +9,8 @@ import com.kuaidao.sys.dto.announcement.AnnouncementQueryDTO;
 import com.kuaidao.sys.dto.announcement.AnnouncementRespDTO;
 import com.kuaidao.sys.dto.dictionary.DictionaryAddAndUpdateDTO;
 import com.kuaidao.sys.dto.dictionary.DictionaryRespDTO;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.cloud.netflix.feign.FeignClient;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.BindingResult;
@@ -41,20 +44,29 @@ public interface AnnouncementFeignClient {
     @Component
     static class HystrixClientFallback implements AnnouncementFeignClient {
 
+        private static Logger logger = LoggerFactory.getLogger(HystrixClientFallback.class);
+
+        @SuppressWarnings("rawtypes")
+        private JSONResult fallBackError(String name) {
+            logger.error(name + "接口调用失败：无法获取目标服务");
+            return new JSONResult().fail(SysErrorCodeEnum.ERR_REST_FAIL.getCode(),
+                    SysErrorCodeEnum.ERR_REST_FAIL.getMessage());
+        }
+
         @Override
         public JSONResult publishAnnouncement(AnnouncementAddAndUpdateDTO dto) {
-            return null;
+            return fallBackError("公告发布失败");
         }
 
         @Override
         public JSONResult<PageBean<AnnouncementRespDTO>> queryAnnouncement(AnnouncementQueryDTO queryDTO) {
-            return null;
+            return fallBackError("公告查询失败");
         }
 
 
         @Override
         public JSONResult findByPrimaryKeyAnnouncement(IdEntity idEntity) {
-            return null;
+            return fallBackError("公告详细信息获取失败");
         }
 
 

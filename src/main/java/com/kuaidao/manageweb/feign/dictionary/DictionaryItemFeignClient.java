@@ -1,12 +1,14 @@
 package com.kuaidao.manageweb.feign.dictionary;
 
+import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.IdEntity;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
-import com.kuaidao.sys.dto.dictionary.DictionaryAddAndUpdateDTO;
 import com.kuaidao.sys.dto.dictionary.DictionaryItemAddAndUpdateDTO;
 import com.kuaidao.sys.dto.dictionary.DictionaryItemQueryDTO;
 import com.kuaidao.sys.dto.dictionary.DictionaryItemRespDTO;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.cloud.netflix.feign.FeignClient;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.BindingResult;
@@ -25,6 +27,7 @@ import java.util.List;
  */
 @FeignClient(name = "sys-service",path="/sys/DictionaryItem",fallback = DictionaryItemFeignClient.HystrixClientFallback.class)
 public interface DictionaryItemFeignClient {
+
 
 
     @PostMapping("/saveDictionaryItem")
@@ -49,36 +52,44 @@ public interface DictionaryItemFeignClient {
     @Component
     static class HystrixClientFallback implements DictionaryItemFeignClient {
 
+        private static Logger logger = LoggerFactory.getLogger(HystrixClientFallback.class);
+
+        @SuppressWarnings("rawtypes")
+        private JSONResult fallBackError(String name) {
+            logger.error(name + "接口调用失败：无法获取目标服务");
+            return new JSONResult().fail(SysErrorCodeEnum.ERR_REST_FAIL.getCode(),
+                    SysErrorCodeEnum.ERR_REST_FAIL.getMessage());
+        }
 
         @Override
         public JSONResult saveDictionaryItem(DictionaryItemAddAndUpdateDTO DictionaryDTO) {
-            return null;
+            return fallBackError("新增词条失败");
         }
 
         @Override
         public JSONResult updateDictionaryItem(DictionaryItemAddAndUpdateDTO DictionaryItemDTO) {
-            return null;
+            return fallBackError("更新词条失败");
         }
 
         @Override
         public JSONResult deleteDictionaryItem(IdEntity idEntity) {
-            return null;
+            return fallBackError("删除词条失败");
         }
 
         @Override
         public JSONResult deleteDictionaryItem(String ids) {
-            return null;
+            return fallBackError("批量删除词条失败");
         }
 
         @Override
         public JSONResult<PageBean<DictionaryItemRespDTO>> queryDictionaryItem(DictionaryItemQueryDTO queryDTO) {
-            return null;
+            return fallBackError("查询词条失败");
         }
 
 
         @Override
         public JSONResult<DictionaryItemRespDTO> queryDictionaryOneItem(IdEntity idEntity) {
-            return null;
+            return fallBackError("获取词条详细信息失败");
         }
     }
 

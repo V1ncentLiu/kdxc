@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.validation.Valid;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -87,17 +88,12 @@ public class AnnReceiveController {
     @RequestMapping("/unreadCount")
     @ResponseBody
     public JSONResult<Void> unreadCount(){
-        JSONResult ids = annReceiveFeignClient.updateReceives();
+        Map map = new HashMap();
+        map.put("receiveUser","123456");
+        JSONResult ids = annReceiveFeignClient.annUnreadCount(map);
         return ids;
     }
 
-
-
-    @RequestMapping("/messageCenter")
-    public String listPage(){
-        logger.info("--------------------------------------跳转到消息中心页面-----------------------------------------------");
-        return "messageCenter/messageCenter";
-    }
     /**
      * 错误参数检验
      * @param result
