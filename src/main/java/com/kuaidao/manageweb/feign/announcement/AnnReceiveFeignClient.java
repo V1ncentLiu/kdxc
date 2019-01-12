@@ -1,5 +1,6 @@
 package com.kuaidao.manageweb.feign.announcement;
 
+import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.IdEntity;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
@@ -8,12 +9,15 @@ import com.kuaidao.sys.dto.announcement.AnnouncementQueryDTO;
 import com.kuaidao.sys.dto.announcement.annReceive.AnnReceiveQueryDTO;
 import com.kuaidao.sys.dto.announcement.annReceive.AnnReceiveRespDTO;
 import com.kuaidao.sys.dto.dictionary.DictionaryRespDTO;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.cloud.netflix.feign.FeignClient;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -39,34 +43,43 @@ public interface AnnReceiveFeignClient {
     JSONResult<AnnReceiveRespDTO> queryReceiveOne(IdEntity idEntity);
 
     @PostMapping("/unreadCount")
-    public JSONResult updateReceives();
+    public JSONResult annUnreadCount(@RequestBody Map map);
 
     @Component
     static class HystrixClientFallback implements AnnReceiveFeignClient {
 
+        private static Logger logger = LoggerFactory.getLogger(AnnReceiveFeignClient.HystrixClientFallback.class);
+
+        @SuppressWarnings("rawtypes")
+        private JSONResult fallBackError(String name) {
+            logger.error(name + "接口调用失败：无法获取目标服务");
+            return new JSONResult().fail(SysErrorCodeEnum.ERR_REST_FAIL.getCode(),
+                    SysErrorCodeEnum.ERR_REST_FAIL.getMessage());
+        }
+
         @Override
         public JSONResult<PageBean<AnnReceiveRespDTO>> queryReceive(AnnReceiveQueryDTO queryDTO) {
-            return null;
+            return fallBackError("公告记录获取失败");
         }
 
         @Override
         public JSONResult updateReceive(IdEntity idEntity) {
-            return null;
+            return fallBackError("公告记录，更新状态失败");
         }
 
         @Override
         public JSONResult updateReceives(String ids) {
-            return null;
+            return fallBackError("公告记录，批量更新状态事变");
         }
 
         @Override
         public JSONResult<AnnReceiveRespDTO> queryReceiveOne(IdEntity idEntity) {
-            return null;
+            return fallBackError("公告记录，详细信息获取失败");
         }
 
         @Override
-        public JSONResult updateReceives() {
-            return null;
+        public JSONResult annUnreadCount(Map map) {
+            return fallBackError("公告记录，未读信息数量获取失败");
         }
     }
 

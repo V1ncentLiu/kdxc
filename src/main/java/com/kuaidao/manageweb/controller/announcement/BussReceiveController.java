@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.validation.Valid;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -85,8 +86,10 @@ public class BussReceiveController {
     @RequestMapping("/unreadCount")
     @ResponseBody
     public JSONResult<Void> unreadCount(){
-        JSONResult ids = busReceiveFeignClient.updateReceives();
-        return ids;
+        Map map = new HashMap();
+        map.put("receiveUser","123456");
+        JSONResult result = busReceiveFeignClient.unreadCount(map);
+        return result;
     }
 
     /**

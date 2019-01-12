@@ -8,8 +8,7 @@ var homePageVM=new Vue({
                 callback();
             }
         };
-  		
-	    return { 
+	    return {
 	    	formLabelWidth:'120px',
 	      	isCollapse: false,//侧导航是否展开
 	      	isActive:true,
@@ -129,12 +128,51 @@ var homePageVM=new Vue({
         },
         gotoHomePage(){
         	location.href='/homePage/index';
-        }
-         
-         
+        },
+		async messageCout(){
+			var bussCout = 0 ;
+			var annCount = 0 ;
+			var param = {};
+			await axios.post("/annReceive/unreadCount", param).then(function (response) {
+				var data = response.data.data
+				if(data&&data!=0){
+					annCount = data;
+				}
+				console.log(annCount)
+			})
+
+			await axios.post("/bussReceive/unreadCount", param).then(function (response) {
+				var data = response.data.data
+				if(data&&data!=0){
+					bussCout = data;
+				}
+				console.log(bussCout)
+			})
+
+
+		},
+		messageCount(){
+			var param = {};
+			axios.post("/messagecenter/unreadCount", param).then(function (response) {
+				var data = response.data.data
+				var annCount = 0;
+				if(data&&data!=0){
+					annCount = data;
+				}
+				document.getElementById("messageCount").innerHTML="&nbsp;(&nbsp;"+(annCount)+"&nbsp;)"
+			})
+		},
+		openMessageCenter(){
+	    	var dataUrl = "/messagecenter/messageCenter";
+			$("#iframeBox").attr({
+				"src":dataUrl //设置ifream地址
+			});
+		}
   	},
-   	created() {  
-   		document.body.removeChild(document.getElementById('Loading'))   
+   	created() {
+  		console.log("created method")
+   		document.body.removeChild(document.getElementById('Loading'))
+		this.messageCount();
 	}
 })
 // 点击导航赋值ifream的src值
