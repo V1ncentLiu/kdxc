@@ -5,7 +5,6 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
-import com.kuaidao.common.entity.TreeData;
 import lombok.Data;
 
 @Controller
@@ -18,7 +17,7 @@ public class HomePageController {
      */
     @RequestMapping("/index")
     public String index(HttpServletRequest request) {
-        List<MenuData> list = new ArrayList<>();
+     /*   List<MenuData> list = new ArrayList<>();
         for (int i = 0; i < 2; i++) {
             MenuData menuData = new MenuData();
             menuData.setMenuGroup("菜单组-"+i);
@@ -35,40 +34,8 @@ public class HomePageController {
         }
         
         
-       request.setAttribute("menuList",list);
+       request.setAttribute("menuList",list);*/
        return "index";
     }
 
-}
-
-@Data
-class MenuData{
-    /**
-     * 菜單組名稱
-     */
-    private String menuGroup;
-    /**
-     * 菜单组下的菜单
-     */
-    private List<Menu> subList;
-    
-    
-}
-
-@Data
-class Menu {
-    /**
-     * 菜单url
-     */
-    
-    String url;
-    
-    /**
-     * 菜单 名称
-     */
-    
-    String name;
-    
-    
-    
 }
