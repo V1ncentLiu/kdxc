@@ -1,8 +1,7 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml"
     xmlns:th="http://www.thymeleaf.org">
-<head th:include="_header_include::frag(~{::title},~{},~{})">
-    <title>模块管理</title>
+<head th:include="_header_include::frag(~{::title},~{},~{::style})">
     <style>
         .addModule{width: 70%;}
     </style>
@@ -40,11 +39,12 @@
             <el-row>
                 <el-col :span="21">
                     <el-form-item label="授权操作权限：" prop="type">
-                        <el-checkbox-group v-model="form.type">
-                            <el-checkbox label="增" name="type"></el-checkbox>
+                        <el-checkbox-group v-model="form.type" @change="handleCheckedChange">
+                            <!-- <el-checkbox label="增" name="type"></el-checkbox>
                             <el-checkbox label="删" name="type"></el-checkbox>
                             <el-checkbox label="改" name="type"></el-checkbox>
-                            <el-checkbox label="查" name="type"></el-checkbox>
+                            <el-checkbox label="查" name="type"></el-checkbox> -->
+                            <el-checkbox v-for="item in items" :label="item" :key="item">{{item}}</el-checkbox>
                         </el-checkbox-group>
                     </el-form-item>
                 </el-col>
@@ -115,14 +115,17 @@
             <el-button @click="dialogFormVisible = false">取 消</el-button>
         </div>
     </el-dialog>    
-</div><!-- import common js-->
-<div th:include="_footer_include :: #jsLib"></div>
+</div>
 </body>
+<!-- import common js-->
+<div th:include="_footer_include :: #jsLib"></div>
 <script>
+    var checkOptions = ['增（add）', '删（delete）', '改（edit）', '查（view）'];
     new Vue({
         el: '#addModule',
         data: function() {
             return {
+                items: checkOptions,
                 dialogFormVisible: false,
                 form: {
                     moduleName:'',
@@ -177,11 +180,11 @@
                         { required: true, message: '请输入操作编码名称', trigger: 'blur' }
                     ]
                 },
-            }        	  
+            }             
         },
         methods: {
-            submitForm(formName) {
-                this.$refs[formName].validate((valid) => {
+            submitForm(form) {
+                this.$refs[form].validate((valid) => {
                     if (valid) {
                         alert('submit!');
                     } else {
@@ -190,15 +193,23 @@
                     }
                 });
             },
-            submitDialogForm(formName) {
-                this.$refs[formName].validate((valid) => {
+            submitDialogForm(dialogForm) {
+                this.$refs[dialogForm].validate((valid) => {
                     if (valid) {
-                        alert('submit!');
+                        console.log('submit!!');
+                        // 关闭弹窗
+                        this.dialogFormVisible = false;  
+                        this.items.push(this.dialogForm.handleName+'('+this.dialogForm.handleCode+')');
                     } else {
                         console.log('error submit!!');
                         return false;
                     }
                 });
+            },
+            handleCheckedChange(value) {
+                let checkedCount = value.length;
+                this.checkAll = checkedCount === this.items.length;
+                this.isIndeterminate = checkedCount > 0 && checkedCount < this.items.length;
             }
         }
     })

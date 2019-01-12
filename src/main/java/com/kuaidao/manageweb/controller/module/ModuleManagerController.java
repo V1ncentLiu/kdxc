@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
@@ -20,7 +21,7 @@ import com.kuaidao.sys.dto.module.ModuleInfoDTO;
 import com.kuaidao.sys.dto.module.ModuleQueryDTO;
 
 @Controller
-@RequestMapping("/module/roleManager")
+@RequestMapping("/module/moduleManager")
 public class ModuleManagerController {
 	private static Logger logger = LoggerFactory.getLogger(ModuleManagerController.class);
 
@@ -55,9 +56,20 @@ public class ModuleManagerController {
 	 */
 	@PostMapping("/queryModuleDataByPage")
 	@ResponseBody
-	public JSONResult<PageBean<ModuleInfoDTO>> queryModuleDataByPage(ModuleQueryDTO dto) {
+	public JSONResult<PageBean<ModuleInfoDTO>> queryModuleDataByPage(@RequestBody ModuleQueryDTO dto) {
 		JSONResult<PageBean<ModuleInfoDTO>> pageJson = moduleManagerFeignClient.queryModulePageList(dto);
 		return pageJson;
+	}
+
+	/***
+	 * 添加下级菜单
+	 * 
+	 * @return
+	 */
+	@RequestMapping("/addModulePre")
+	public String addModulePre() {
+
+		return "module/addModulePage";
 	}
 
 	/**
@@ -70,7 +82,7 @@ public class ModuleManagerController {
 	 */
 	@PostMapping("/saveModuleInfo")
 	@ResponseBody
-	public JSONResult<String> saveModuleInfo(ModuleInfoDTO dto) {
+	public JSONResult<String> saveModuleInfo(@RequestBody ModuleInfoDTO dto) {
 		JSONResult<String> pageJson = moduleManagerFeignClient.saveModuleInfo(dto);
 		return pageJson;
 	}
@@ -85,7 +97,7 @@ public class ModuleManagerController {
 	 */
 	@PostMapping("/updateModuleInfo")
 	@ResponseBody
-	public JSONResult<String> updateModuleInfo(ModuleInfoDTO dto) {
+	public JSONResult<String> updateModuleInfo(@RequestBody ModuleInfoDTO dto) {
 		JSONResult<String> pageJson = moduleManagerFeignClient.updateModuleInfo(dto);
 		return pageJson;
 	}
@@ -100,7 +112,7 @@ public class ModuleManagerController {
 	 */
 	@PostMapping("/deleteModuleInfo")
 	@ResponseBody
-	public JSONResult<String> deleteModuleInfo(ModuleInfoDTO dto) {
+	public JSONResult<String> deleteModuleInfo(@RequestBody ModuleInfoDTO dto) {
 		JSONResult<String> pageJson = moduleManagerFeignClient.deleteModuleInfo(dto);
 		return pageJson;
 	}
@@ -115,7 +127,7 @@ public class ModuleManagerController {
 	 */
 	@PostMapping("/queryModuleById")
 	@ResponseBody
-	public JSONResult<ModuleInfoDTO> queryModuleById(ModuleQueryDTO dto) {
+	public JSONResult<ModuleInfoDTO> queryModuleById(@RequestBody ModuleQueryDTO dto) {
 		JSONResult<ModuleInfoDTO> pageJson = moduleManagerFeignClient.queryModuleById(dto);
 		return pageJson;
 	}

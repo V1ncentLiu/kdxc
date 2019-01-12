@@ -1,9 +1,12 @@
 package com.kuaidao.manageweb.feign.dictionary;
 
+import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.*;
 import com.kuaidao.sys.dto.dictionary.DictionaryAddAndUpdateDTO;
 import com.kuaidao.sys.dto.dictionary.DictionaryQueryDTO;
 import com.kuaidao.sys.dto.dictionary.DictionaryRespDTO;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.cloud.netflix.feign.FeignClient;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -43,34 +46,43 @@ public interface DictionaryFeignClient {
     @Component
     static class HystrixClientFallback implements DictionaryFeignClient {
 
+        private static Logger logger = LoggerFactory.getLogger(HystrixClientFallback.class);
+
+        @SuppressWarnings("rawtypes")
+        private JSONResult fallBackError(String name) {
+            logger.error(name + "接口调用失败：无法获取目标服务");
+            return new JSONResult().fail(SysErrorCodeEnum.ERR_REST_FAIL.getCode(),
+                    SysErrorCodeEnum.ERR_REST_FAIL.getMessage());
+        }
+
         @Override
         public JSONResult saveDictionary(DictionaryAddAndUpdateDTO DictionaryDTO) {
-            return null;
+            return fallBackError("新增数据字典失败");
         }
 
         @Override
         public JSONResult updateDictionary(DictionaryAddAndUpdateDTO DictionaryDTO) {
-            return null;
+            return fallBackError("更新数据字典失败");
         }
 
         @Override
         public JSONResult findByPrimaryKeyDictionary(IdEntity idEntity) {
-            return null;
+            return fallBackError("查询数据字典失败");
         }
 
         @Override
         public JSONResult deleteDictionary(IdEntity idEntity) {
-            return null;
+            return fallBackError("删除数据字典失败");
         }
 
         @Override
         public JSONResult deleteDictionarys(String ids) {
-            return null;
+            return fallBackError("批量删除数据字典失败");
         }
 
         @Override
         public JSONResult<PageBean<DictionaryRespDTO>> queryDictionary(DictionaryQueryDTO queryDTO) {
-            return null;
+            return fallBackError("查询数据字典失败");
         }
     }
 

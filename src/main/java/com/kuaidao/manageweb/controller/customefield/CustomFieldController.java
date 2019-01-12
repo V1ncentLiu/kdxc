@@ -8,8 +8,10 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.Logical;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
+import org.apache.shiro.subject.Subject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,6 +45,7 @@ import com.kuaidao.sys.dto.customfield.CustomFieldMenuQueryDTO;
 import com.kuaidao.sys.dto.customfield.CustomFieldMenuRespDTO;
 import com.kuaidao.sys.dto.customfield.CustomFieldQueryDTO;
 import com.kuaidao.sys.dto.customfield.CustomFieldRespDTO;
+import com.kuaidao.sys.dto.user.UserInfoDTO;
 
 
 /**
@@ -105,8 +108,9 @@ public class CustomFieldController {
         }
         Long id = menuDTO.getId();
         if (id == null) {
-            // TODO devin
-            menuDTO.setCreateUser(1111L);
+            Subject subject = SecurityUtils.getSubject();
+            UserInfoDTO user = (UserInfoDTO) subject.getSession().getAttribute("user");
+            menuDTO.setCreateUser(user.getId());
             return customFieldFeignClient.saveMenu(menuDTO);
         }
 
@@ -213,8 +217,9 @@ public class CustomFieldController {
 
         Long id = customDTO.getId();
         if (id == null) {
-            // TODO devin
-            customDTO.setCreateUser(1111L);
+            Subject subject = SecurityUtils.getSubject();
+            UserInfoDTO user = (UserInfoDTO) subject.getSession().getAttribute("user");
+            customDTO.setCreateUser(user.getId());
             return customFieldFeignClient.save(customDTO);
         }
 

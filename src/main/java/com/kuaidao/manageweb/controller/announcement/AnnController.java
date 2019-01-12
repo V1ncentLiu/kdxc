@@ -6,12 +6,20 @@ import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.manageweb.controller.dictionary.DictionaryController;
 import com.kuaidao.manageweb.feign.SysFeign;
+import com.kuaidao.manageweb.feign.announcement.AnnReceiveFeignClient;
 import com.kuaidao.manageweb.feign.announcement.AnnouncementFeignClient;
+import com.kuaidao.manageweb.feign.msgpush.MsgPushFeignClient;
+import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
 import com.kuaidao.sys.dto.announcement.AnnouncementAddAndUpdateDTO;
 import com.kuaidao.sys.dto.announcement.AnnouncementQueryDTO;
 import com.kuaidao.sys.dto.announcement.AnnouncementRespDTO;
+import com.kuaidao.sys.dto.user.UserInfoDTO;
+import com.kuaidao.sys.dto.user.UserInfoPageParam;
+import com.rabbitmq.http.client.domain.UserInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.amqp.core.AmqpTemplate;
+import org.springframework.amqp.core.Message;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
@@ -22,6 +30,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.validation.Valid;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -41,11 +50,59 @@ public class AnnController {
     @Autowired
     AnnouncementFeignClient announcementFeignClient;
 
+    @Autowired
+    UserInfoFeignClient userInfoFeignClient;
+
+    @Autowired
+    AnnReceiveFeignClient annReceiveFeignClient;
+
+    @Autowired
+    private MsgPushFeignClient msgPushFeignClient;
+
+    @Autowired
+    private AmqpTemplate amqpTemplate;
+
     @RequestMapping("/publishAnn")
     @ResponseBody
     public JSONResult saveAnn(@Valid @RequestBody AnnouncementAddAndUpdateDTO dto  , BindingResult result){
         if (result.hasErrors()) return validateParam(result);
         JSONResult jsonResult = announcementFeignClient.publishAnnouncement(dto);
+        if(jsonResult.getCode().equals(0)){
+
+            Long orgId = dto.getOrgId();
+
+            List<UserInfoDTO> list = new ArrayList();
+
+            if(orgId==0){ //全部用户
+                UserInfoPageParam param = new UserInfoPageParam();
+                JSONResult<PageBean<UserInfoDTO>> list1 = userInfoFeignClient.list(param);
+                list = list1.getData().getData();
+            }else{//指定组织结构下的数据。
+
+            }
+
+            Integer type = dto.getType();
+            if(type==1||type==0){ //站内公告通知
+//                annReceiveFeignClient.batchInsert();
+//              消息通知
+                /**
+                 * void send(Message message) throwsAmqpException;
+                 * void send(String routingKey, Message message) throwsAmqpException;
+                 * void send(String exchange, String routingKey, Message message) throwsAmqpException;
+                 */
+
+//                amqpTemplate.convertAndSend("","",new Message());
+            }
+            if(type==2||type==0){ //短信
+                for(UserInfoDTO userInfo:list){
+//                  获取电话：发送短信
+//                  构建短信模板
+                    String phone = userInfo.getPhone();
+//                    msgPushFeignClient.setMessage();
+                }
+            }
+
+        }
         return jsonResult;
     }
 
