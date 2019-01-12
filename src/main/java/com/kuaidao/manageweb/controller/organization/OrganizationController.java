@@ -16,14 +16,17 @@ import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
 import com.kuaidao.sys.dto.organization.OrganizationRespDTO;
 import com.kuaidao.sys.dto.user.OrgUserReqDTO;
 import com.kuaidao.sys.dto.user.UserAndRoleRespDTO;
+import com.kuaidao.sys.dto.user.UserInfoDTO;
 import com.kuaidao.sys.dto.organization.OrganizationAddAndUpdateDTO;
 import com.kuaidao.sys.dto.organization.OrganizationDTO;
 import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.Logical;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
+import org.apache.shiro.subject.Subject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -75,8 +78,9 @@ public class OrganizationController {
         if(id!=null) {
             return organizationFeignClient.update(orgDTO);
         }else {
-            //TODO devin
-            orgDTO.setCreateUser(1111);
+            Subject subject = SecurityUtils.getSubject();
+            UserInfoDTO user = (UserInfoDTO) subject.getSession().getAttribute("user");
+            orgDTO.setCreateUser(user.getId());
             return organizationFeignClient.save(orgDTO);
         }
 

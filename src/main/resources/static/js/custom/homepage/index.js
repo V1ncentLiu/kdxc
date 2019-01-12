@@ -24,6 +24,7 @@ var homePageVM=new Vue({
 		     	/*{ifreamUrl:'a.html',index:'1-1',name:"数据演示1"},
 		     	{ifreamUrl:'b.html',index:'1-2',name:"数据演示2"}*/
 		       ,
+		    user:null,//用戶信息
 		    defaultOpeneds:["0"],//默认打开菜单索引
 		   	modifyFormRules:{
 		   		oldPassword:[
@@ -80,6 +81,7 @@ var homePageVM=new Vue({
 	     },
 	     cancelModifyForm(formName){
          	this.$refs[formName].resetFields();
+         	 homePageVM.dialogModifyPwdVisible = false;
          },
          saveModifyForm(formName){//保存
         	 this.$refs[formName].validate((valid) => {
@@ -91,7 +93,6 @@ var homePageVM=new Vue({
                        if(resData.code=='0'){
                     	   homePageVM.$message('请使用新密码重新登录的提示框');
                     	   homePageVM.cancelForm(formName);
-                    	   homePageVM.dialogModifyPwdVisible = false;
                     	   
                     	   setTimeout('gotoHomePage',2000);
                        }else{
@@ -110,7 +111,7 @@ var homePageVM=new Vue({
                });
          },
          confirmLogout(){//确认退出系统
-             axios.post('/customfield/customField/saveOrUpdate', param)
+         /*    axios.post('/logout', param)
              .then(function (response) {
                  var resData = response.data;
                  if(resData.code=='0'){
@@ -125,10 +126,11 @@ var homePageVM=new Vue({
              })
              .catch(function (error) {
                   console.log(error);
-             });
+             });*/
+        	 location.href="/logout";
         },
         gotoHomePage(){
-        	location.href='/homePage/index';
+        	location.href='/login';
         }
          
          
