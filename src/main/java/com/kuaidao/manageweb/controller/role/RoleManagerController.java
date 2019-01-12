@@ -16,56 +16,46 @@ import com.kuaidao.manageweb.feign.role.RoleManagerFeignClient;
 import com.kuaidao.sys.dto.role.RoleInfoDTO;
 import com.kuaidao.sys.dto.role.RoleQueryDTO;
 
-/**
- * @author gpc
- *
- */
-
-/**
- * 自定义字段
- * 
- * @author: Chen Chengxue
- * @date: 2018年12月28日 下午1:45:12
- * @version V1.0
- */
 @Controller
 @RequestMapping("/role/roleManager")
 public class RoleManagerController {
 
-    @Autowired
-    private RoleManagerFeignClient roleManagerFeignClient;
+	@Autowired
+	private RoleManagerFeignClient roleManagerFeignClient;
 
-    /***
-     * 
-     * @return
-     */
-    @RequestMapping("/initRoleInfo")
-    public String initRoleInfo() {
-        return "role/roleManagePage";
-    }
+	/***
+	 * 
+	 * @return
+	 */
+	@RequestMapping("/initRoleInfo")
+	public String initRoleInfo() {
+		return "role/roleManagePage";
+	}
 
-    /***
-     * 自定义字段 首页
-     * 
-     * @return
-     */
-    @RequestMapping("/addRolePre")
-    public String addRolePre() {
+	/***
+	 * 添加角色
+	 * 
+	 * @return
+	 */
+	@RequestMapping("/addRolePre")
+	public String addRolePre() {
 
-        return "role/addRolePage";
-    }
+		return "role/addRolePage";
+	}
 
-    /***
-     * 自定义字段 首页
-     * 
-     * @return
-     */
-    @RequestMapping("/queryRoleList")
-    @ResponseBody
-    public JSONResult<List<RoleInfoDTO>> queryRoleList(@RequestBody RoleQueryDTO dto,
-            HttpServletRequest request, HttpServletResponse response) {
-        return roleManagerFeignClient.queryRoleList(dto);
-    }
-
+	/**
+	 * 查询角色列表
+	 * 
+	 * @param dto
+	 * @param request
+	 * @param response
+	 * @return
+	 */
+	@RequestMapping("/queryRoleList")
+	@ResponseBody
+	public JSONResult<List<RoleInfoDTO>> queryRoleList(@RequestBody RoleQueryDTO dto, HttpServletRequest request,
+			HttpServletResponse response) {
+		return roleManagerFeignClient.queryRoleList(dto);
+	}
 
 }
