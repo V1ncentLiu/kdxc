@@ -13,6 +13,7 @@ import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.common.entity.TreeData;
+import com.kuaidao.sys.dto.module.IndexModuleDTO;
 import com.kuaidao.sys.dto.module.ModuleInfoDTO;
 import com.kuaidao.sys.dto.module.ModuleQueryDTO;
 
@@ -36,6 +37,9 @@ public interface ModuleManagerFeignClient {
 
 	@RequestMapping(method = RequestMethod.POST, value = "/queryModuleById")
 	public JSONResult<ModuleInfoDTO> queryModuleById(ModuleQueryDTO dto);
+
+	@RequestMapping(method = RequestMethod.POST, value = "/queryModuleShow")
+	public JSONResult<List<IndexModuleDTO>> queryModuleShow(String systemCode);
 
 	@Component
 	static class HystrixClientFallback implements ModuleManagerFeignClient {
@@ -88,6 +92,13 @@ public interface ModuleManagerFeignClient {
 		@Override
 		public JSONResult<ModuleInfoDTO> queryModuleById(ModuleQueryDTO dto) {
 			return fallBackError("查询修改菜单数据失败");
+		}
+
+		@SuppressWarnings("unchecked")
+		@Override
+		public JSONResult<List<IndexModuleDTO>> queryModuleShow(String systemCode) {
+			// TODO Auto-generated method stub
+			return fallBackError("查询菜单操作数据失败");
 		}
 
 	}

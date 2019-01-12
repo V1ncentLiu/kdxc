@@ -1,5 +1,7 @@
 package com.kuaidao.manageweb.controller.ip;
 
+import java.util.List;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -15,6 +17,8 @@ import com.kuaidao.manageweb.feign.ip.IpAccessFeignClient;
 import com.kuaidao.sys.dto.ip.IpAccessManagerQueryDTO;
 import com.kuaidao.sys.dto.ip.IpPackageInfoDTO;
 import com.kuaidao.sys.dto.ip.IpRepositoryInfoDTO;
+import com.kuaidao.sys.dto.role.RoleInfoDTO;
+import com.kuaidao.sys.dto.role.RoleQueryDTO;
 
 @Controller
 @RequestMapping("/ip/ipAccess")
@@ -94,6 +98,22 @@ public class IpAccessController {
 		return ipAccessFeignClient.deleteIppackage(dto);
 
 	}
+	
+	/**
+	 * 查询角色列表
+	 * 
+	 * @param dto
+	 * @param request
+	 * @param response
+	 * @return
+	 */
+	@RequestMapping("/queryAllPackageList")
+	@ResponseBody
+	public JSONResult<PageBean<IpPackageInfoDTO>> queryAllPackageList(HttpServletRequest request,
+			HttpServletResponse response) {
+		return ipAccessFeignClient.querytAllPackageList();
+	}
+
 	 
 
 }
