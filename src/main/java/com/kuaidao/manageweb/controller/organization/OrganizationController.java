@@ -144,7 +144,7 @@ public class OrganizationController {
      */
     @PostMapping("/queryOrgByParam")
     @ResponseBody
-    public JSONResult<Boolean> queryOrgByParam(
+    public JSONResult queryOrgByParam(
             @RequestBody OrganizationQueryDTO queryDTO) {
         queryDTO.setSystemCode(SystemCodeConstant.HUI_JU);
         JSONResult<List<OrganizationRespDTO>> orgList = organizationFeignClient.queryOrgByParam(queryDTO);
@@ -154,9 +154,9 @@ public class OrganizationController {
                return new JSONResult<Boolean>().success(true);
             }
         }else {
-            
+            return new JSONResult<>().fail(orgList.getCode(), orgList.getMsg());
         }
-        return new JSONResult<Boolean>().success(false) ;
+        return new JSONResult().success(false) ;
     }
     
     /**

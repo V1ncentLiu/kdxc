@@ -8,6 +8,8 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
+import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.subject.Subject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +27,7 @@ import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.common.entity.TreeData;
 import com.kuaidao.common.util.CommonUtil;
 import com.kuaidao.common.util.MD5Util;
+import com.kuaidao.manageweb.constant.Constants;
 import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
 import com.kuaidao.manageweb.feign.role.RoleManagerFeignClient;
 import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
@@ -41,13 +44,6 @@ import com.kuaidao.sys.dto.user.UserInfoReq;
  *
  */
 
-/**
- * 用户信息
- * 
- * @author: Chen Chengxue
- * @date: 2018年12月28日 下午1:45:12
- * @version V1.0
- */
 @Controller
 @RequestMapping("/user/userManager")
 public class UserController {
@@ -210,7 +206,21 @@ public class UserController {
                 userInfoReq.setId(id);
                 userInfoReq.setPassword(updateUserPasswordReq.getNewPassword());
                 // 修改密码
-                return userInfoFeignClient.update(userInfoReq);
+                JSONResult<String> updatePwdRes = userInfoFeignClient.update(userInfoReq);
+                if(updatePwdRes!=null && JSONResult.SUCCESS.equals(updatePwdRes.getCode())) {
+                    
+                    Subject subject = SecurityUtils.getSubject();
+                    UserInfoDTO user = (UserInfoDTO) subject.getSession().getAttribute("user");
+                    if (subject.isAuthenticated()) {
+                        subject.logout();
+                    }
+                    // 退出成功，保存退出状态
+                    UserInfoReq update = new UserInfoReq();
+                    update.setId(user.getId());
+                    update.setIsLogin(Constants.IS_LOGIN_DOWN);
+                    userInfoFeignClient.update(update);
+                }
+                return updatePwdRes;
             } else {
                 return new JSONResult().fail(UserErrorCodeEnum.ERR_WRONG_PHONE_PASSWORD.getCode(),
                         UserErrorCodeEnum.ERR_WRONG_PHONE_PASSWORD.getMessage());

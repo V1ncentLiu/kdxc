@@ -43,8 +43,8 @@
             <el-table-column prop="xh" label="序号" width="180" align="center"  type="index">
             </el-table-column>
             <el-table-column prop="title" label="标题" width="180"></el-table-column>
-            <el-table-column prop="content" label="消息内容" width="500"></el-table-column>
-            <el-table-column prop="orgId" label="接收范围" width="180"></el-table-column>
+            <el-table-column prop="content" label="公告内容" width="500"></el-table-column>
+            <el-table-column prop="orgId" label="接收范围" width="180" :formatter="formatOrgId"></el-table-column>
             <el-table-column prop="publishTime" label="发布时间" ></el-table-column>
         </el-table>
     </template>
@@ -125,6 +125,9 @@
             pageSize: 10
         },
         methods: {
+            formatOrgId(row, column){
+                return row.orgId == 0 ? "系统全用户" : row.orgnames;
+            },
             formatDate(row, column) {
                 let date = new Date(parseInt(row.publishTime) * 1000);
                 let Y = date.getFullYear() + '-';
@@ -190,5 +193,11 @@
     });
 
 </script>
+<style>
+    .el-button--primary {
+        background-color: #6f7180;
+        border: #6f7180;
+    }
+</style>
 </body>
 </html>
