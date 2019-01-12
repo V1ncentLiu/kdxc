@@ -8,6 +8,8 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
@@ -19,8 +21,10 @@ import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.IdEntityLong;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
+import com.kuaidao.common.entity.TreeData;
 import com.kuaidao.common.util.CommonUtil;
 import com.kuaidao.common.util.MD5Util;
+import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
 import com.kuaidao.manageweb.feign.role.RoleManagerFeignClient;
 import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
 import com.kuaidao.sys.constant.UserErrorCodeEnum;
@@ -46,11 +50,14 @@ import com.kuaidao.sys.dto.user.UserInfoReq;
 @Controller
 @RequestMapping("/user/userManager")
 public class UserController {
+    private static Logger logger = LoggerFactory.getLogger(UserController.class);
     @Autowired
     private RoleManagerFeignClient roleManagerFeignClient;
 
     @Autowired
     private UserInfoFeignClient userInfoFeignClient;
+    @Autowired
+    private OrganizationFeignClient organizationFeignClient;
 
     /***
      * 用户列表页
@@ -60,6 +67,48 @@ public class UserController {
     @RequestMapping("/initUserList")
     public String initUserList(HttpServletRequest request) {
 
+        JSONResult<List<RoleInfoDTO>> list = userInfoFeignClient.roleList(new RoleQueryDTO());
+
+        request.setAttribute("roleList", list.getData());
+
+        return "user/userManagePage";
+    }
+
+    /***
+     * 新增用户页
+     * 
+     * @return
+     */
+    @RequestMapping("/initCreateUser")
+    public String initCreateUser(HttpServletRequest request) {
+
+        JSONResult<List<RoleInfoDTO>> list = userInfoFeignClient.roleList(new RoleQueryDTO());
+
+        request.setAttribute("roleList", list.getData());
+        JSONResult<List<TreeData>> treeJsonRes = organizationFeignClient.query();
+        if (treeJsonRes != null && JSONResult.SUCCESS.equals(treeJsonRes.getCode())
+                && treeJsonRes.getData() != null) {
+            request.setAttribute("orgData", treeJsonRes.getData());
+        } else {
+            logger.error("query organization tree,res{{}}", treeJsonRes);
+        }
+        return "user/addUserPage";
+    }
+
+    /***
+     * 编辑用户页
+     * 
+     * @return
+     */
+    @RequestMapping("/initUpdateUser")
+    public String initUpdateUser(UserInfoReq user, HttpServletRequest request) {
+        JSONResult<List<TreeData>> treeJsonRes = organizationFeignClient.query();
+        if (treeJsonRes != null && JSONResult.SUCCESS.equals(treeJsonRes.getCode())
+                && treeJsonRes.getData() != null) {
+            request.setAttribute("orgData", treeJsonRes.getData());
+        } else {
+            logger.error("query organization tree,res{{}}", treeJsonRes);
+        }
         JSONResult<List<RoleInfoDTO>> list = userInfoFeignClient.roleList(new RoleQueryDTO());
 
         request.setAttribute("roleList", list.getData());
