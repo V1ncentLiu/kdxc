@@ -24,7 +24,7 @@ var homePageVM=new Vue({
 		     	/*{ifreamUrl:'a.html',index:'1-1',name:"数据演示1"},
 		     	{ifreamUrl:'b.html',index:'1-2',name:"数据演示2"}*/
 		       ,
-		    user:null,//用戶信息
+		    user:user,//用戶信息
 		    defaultOpeneds:["0"],//默认打开菜单索引
 		   	modifyFormRules:{
 		   		oldPassword:[

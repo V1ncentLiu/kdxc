@@ -200,7 +200,7 @@ public class LoginController {
                 SecurityUtils.getSubject().getSession().setAttribute("userId", "" + user.getId());
                 SecurityUtils.getSubject().getSession().setAttribute("userName",
                         "" + user.getUsername());
-                request.getSession().setAttribute("user", user);
+                SecurityUtils.getSubject().getSession().setAttribute("user", user);
                 // 登录成功，保存登录状态
                 userInfoReq.setId(user.getId());
                 userInfoReq.setIsLogin(Constants.IS_LOGIN_UP);
@@ -209,7 +209,7 @@ public class LoginController {
                 loginRecord.setLoginStatus(Constants.LOGIN_STATUS_SUCCESS);
                 loginRecord.setIsChangeMachine(SysConstant.NO);
                 // 判断是否是踢下线操作
-                String sessionid = request.getSession().getId();
+                String sessionid = SecurityUtils.getSubject().getSession().getId().toString();
                 String string =
                         redisTemplate.opsForValue().get(Constants.SESSION_ID + user.getId());
                 if (Constants.IS_LOGIN_UP.equals(user.getIsLogin())) {
@@ -238,7 +238,8 @@ public class LoginController {
                 }
                 SecurityUtils.getSubject().getSession().setAttribute("sessionid", "" + sessionid);
                 redisTemplate.opsForValue().set(Constants.SESSION_ID + user.getId(),
-                        request.getSession().getId(), 1, TimeUnit.DAYS);
+                        SecurityUtils.getSubject().getSession().getId().toString(), 1,
+                        TimeUnit.DAYS);
                 loginRecordFeignClient.create(loginRecord);
                 List<LoginRecordDTO> findList =
                         findLoginRecordList(username, null, new Date(date.getTime() - 60000), date,
@@ -268,10 +269,10 @@ public class LoginController {
                 }
                 SecurityUtils.getSubject().getSession().setAttribute("isUpdatePassword",
                         loginReq.getIsUpdatePassword());
-                request.getSession().setAttribute("wsUrlHttp", wsUrlHttp);
-                request.getSession().setAttribute("wsUrlHttps", wsUrlHttps);
-                request.getSession().setAttribute("mqUserName", mqUserName);
-                request.getSession().setAttribute("mqPassword", mqPassword);
+                SecurityUtils.getSubject().getSession().setAttribute("wsUrlHttp", wsUrlHttp);
+                SecurityUtils.getSubject().getSession().setAttribute("wsUrlHttps", wsUrlHttps);
+                SecurityUtils.getSubject().getSession().setAttribute("mqUserName", mqUserName);
+                SecurityUtils.getSubject().getSession().setAttribute("mqPassword", mqPassword);
                 return new JSONResult<>().success(null);
 
             } catch (UnknownAccountException uae) {
@@ -351,7 +352,8 @@ public class LoginController {
         // 当前访问http的IP地址，获取真实的IP，越过各种代理
         String ip = CommonUtil.getIpAddr(request);
         if (StringUtils.isNotBlank(loginReq.getCode())) {
-            String value = (String) request.getSession().getAttribute("captchaCode");
+            String value =
+                    (String) SecurityUtils.getSubject().getSession().getAttribute("captchaCode");
             if (value != null) {
                 String string = redisTemplate.opsForValue().get(Constants.CAPTCHA_CODE + value);
                 if (string != null) {
@@ -508,7 +510,7 @@ public class LoginController {
         String uuid = UUID.randomUUID().toString();
         redisTemplate.opsForValue().set(Constants.CAPTCHA_CODE + uuid, capText, 60 * 5,
                 TimeUnit.SECONDS);
-        request.getSession().setAttribute("captchaCode", uuid);
+        SecurityUtils.getSubject().getSession().setAttribute("captchaCode", uuid);
 
         BufferedImage bi = captchaProducer.createImage(capText);
         ServletOutputStream out = response.getOutputStream();
@@ -524,9 +526,7 @@ public class LoginController {
     @RequestMapping("/logout")
     public String logout(String type, Model model, HttpServletRequest request) throws Exception {
         Subject subject = SecurityUtils.getSubject();
-        Object attribute = request.getSession().getAttribute("user");
-        System.out.println(attribute instanceof UserInfoDTO);
-        System.out.println(attribute.getClass());
+        Object attribute = SecurityUtils.getSubject().getSession().getAttribute("user");
         UserInfoDTO user = (UserInfoDTO) subject.getSession().getAttribute("user");
         if (subject.isAuthenticated()) {
             subject.logout();
