@@ -20,7 +20,7 @@ import com.kuaidao.sys.dto.module.ModuleInfoDTO;
 import com.kuaidao.sys.dto.module.ModuleQueryDTO;
 
 @Controller
-@RequestMapping("/module/roleManager")
+@RequestMapping("/module/moduleManager")
 public class ModuleManagerController {
 	private static Logger logger = LoggerFactory.getLogger(ModuleManagerController.class);
 
