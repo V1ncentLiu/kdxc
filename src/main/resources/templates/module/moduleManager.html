@@ -28,6 +28,7 @@
                     :default-expanded-keys="[1,2,3]"
                     ref="tree"
                     highlight-current
+                     @node-click="clickModuleNode"
                     class="leftTree">
                 </el-tree>
             </div>            
@@ -35,13 +36,13 @@
         <el-col :xs="12" :sm="17" :md="19" :lg="21" :xl="21">
             <el-row class="marginB10">
                 <el-col :xs="12" :sm="16" :md="16" :lg="18" :xl="12">
-                    <el-button type="primary"><a href="addModulePage.html"><i class="el-icon-plus"></i> 添加下级模块</a></el-button>
+                    <el-button type="primary"><a href="/module/moduleManager/addModulePre"><i class="el-icon-plus"></i> 添加下级模块</a></el-button>
                     <el-button type="primary">修改</el-button>
                     <el-button type="primary" @click="deleteFun">删除</el-button>
                 </el-col>
                 <el-col :xs="12" :sm="8" :md="8" :lg="6" :xl="12">
-                    <el-input placeholder="请输入模块名称进行查询" class="input-with-select">                        
-                    <el-button slot="append" icon="el-icon-search">搜索</el-button>
+                    <el-input placeholder="请输入模块名称进行查询" v-model="inputModuleName"  class="input-with-select">                        
+                    <el-button slot="append" icon="el-icon-search" @click="getQuery" >搜索</el-button>
                     </el-input>
                 </el-col>
             </el-row>
@@ -51,90 +52,46 @@
                     tooltip-effect="dark"
                     style="width: 100%"
                     @selection-change="handleSelectionChange"
+                    empty-text="此菜单无下级菜单"
                     border
                     :data="dataTable" 
                     >
-                    <el-table-column align="center" type="selection" width="55"></el-table-column>
-                    <el-table-column align="center" prop="moduleName" label="模块名称"></el-table-column>
-                    <el-table-column align="center" prop="rank" label="优先级"></el-table-column>
-                    <el-table-column align="center" prop="remarks" label="授权名称"></el-table-column>
+                    <el-table-column align="center" type="selection" prop="id" width="55"></el-table-column>
+                    <el-table-column align="center" prop="name" label="模块名称"></el-table-column>
+                    <el-table-column align="center" prop="sortNo" label="优先级"></el-table-column>
+                    <el-table-column align="center" prop="authCode" label="授权名称"></el-table-column>
                     <el-table-column align="center" prop="iconName" label="图标名称"></el-table-column>
-                    <el-table-column align="center" prop="iconAddress" label="图标地址"></el-table-column>
-                    <el-table-column align="center" prop="moduleAddress" label="模块地址"></el-table-column>
+                    <el-table-column align="center" prop="iconUrl" label="图标地址"></el-table-column>
+                    <el-table-column align="center" prop="url" label="模块地址"></el-table-column>
                 </el-table>
+                  <table-pagination :pager="pager" @change=""></table-pagination>
             </el-row>
         </el-col>
     </el-row>
 </div>
+</body>
 <!-- import common js-->
 <div th:include="_footer_include :: #jsLib"></div>
-</body>
-<script>
-    new Vue({
+<script th:inline="javascript">
+var moduleData=[[${moduleData}]];
+var expandedKeys =[];//默认展开节点
+for(var i=0;i<moduleData.length;i++){
+	var curNode = moduleData[i];
+	expandedKeys.push(curNode.id);
+	var childs = curNode.children;
+	if(childs){
+		for(var j=0;j<childs.length;j++){
+			var curChildNode = childs[j];
+			expandedKeys.push(curChildNode.id);
+		}
+	}
+ }
+  var moduleVM=new Vue({
         el: '#moduleManage',
         data: function() {
             return {
-                dataTree: [{
-                    id: 0,
-                    label: '根目录',
-                    children: [{
-                        id: 1,
-                        label: '推广中心',
-                        children: [{
-                            id: 4,
-                            label: '推广客服',
-                            children: [{
-                                id: 9,
-                                label: '客服一组'
-                            }, {
-                                id: 10,
-                                label: '客服二组'
-                            }]
-                        }]
-                        }, {
-                        id: 2,
-                        label: '招商中心',
-                        children: [{
-                            id: 5,
-                            label: '秦皇岛招商中心'
-                        }, {
-                            id: 6,
-                            label: '石家庄招商中心'
-                        }]
-                        }, {
-                        id: 3,
-                        label: '商务中心',
-                        children: [{
-                            id: 7,
-                            label: '商务一'
-                        }, {
-                            id: 8,
-                            label: '商务二'
-                        }]
-                    }]
-                }],
-                dataTable: [{
-                        moduleName:'推广管理',
-                        rank:'优先级1',
-                        remarks:'授权名称1',
-                        iconName:'图标名称1',
-                        iconAddress:'图标地址1',
-                        moduleAddress:'模块地址1'
-                    }, {
-                        moduleName:'话务管理',
-                        rank:'优先级2',
-                        remarks:'授权名称2',
-                        iconName:'图标名称2',
-                        iconAddress:'图标地址2',
-                        moduleAddress:'模块地址2'
-                    }, {
-                        moduleName:'话务管理',
-                        rank:'优先级3',
-                        remarks:'授权名称3',
-                        iconName:'图标名称3',
-                        iconAddress:'图标地址3',
-                        moduleAddress:'模块地址3'
-                    }],
+                dataTree:moduleData,
+                dataTable: [],
                 multipleSelection: [],
                 dialogFormVisible: false,
                 form: {
@@ -143,7 +100,14 @@
                     delivery: false,
                     type: []
                 },
-                formLabelWidth: '120px'
+                pager:{//组织列表pager
+                    total: 0,
+                    currentPage: 1,
+                    pageSize: 20,
+                },
+                selectedNode:null,
+                formLabelWidth: '120px',
+                inputModuleName:''
             }             
         },
         methods: {
@@ -158,6 +122,48 @@
             },
             handleSelectionChange(val) {
                 this.multipleSelection = val;
+            },
+            //选中菜单数据节点
+            clickModuleNode(data,node,obj){
+              this.selectedNode = data;
+              this.getQuery();
+            },
+            getQuery(){
+                this.initTableData();
+            },
+            initTableData(){
+            	// 查询 table 需要数据
+                var pageSize = this.pager.pageSize;
+                var pageNum = this.pager.currentPage;
+                var param = {};
+                var parentId = this.selectedNode.id;
+                param.parentId = parentId;
+                param.name = this.inputModuleName;
+                param.systemCode='huiju';
+                param.pageNum=pageSize;
+                param.pageSize=pageNum;
+                axios.post('/module/moduleManager/queryModuleDataByPage?pageNum='+pageNum+"&pageSize="+pageSize,param)
+                    .then(function (response) {
+                        var data =  response.data
+                        if(data.code=='0'){
+                        	var resData = data.data;
+                        	moduleVM.dataTable= resData.data;
+                            //3.分页组件
+                            moduleVM.pager.total= resData.total;
+                            moduleVM.pager.currentPage = resData.currentPage;
+                            moduleVM.pager.pageSize = resData.pageSize;
+                        }else{
+                        	console.error(data);
+                        }
+                        
+                       
+                    })
+                    .catch(function (error) {
+                      console.log(error);
+                    })
+                    .then(function () {
+                      // always executed
+                    });  
             },
             deleteFun() {
                 this.$confirm('确定要删除【模块名称1】【模块名称2】模块吗？', '提示', {
@@ -175,7 +181,7 @@
                         message: '已取消删除'
                     });          
                 });
-            }
+            },
         }
     })
 </script>

@@ -15,25 +15,25 @@
         <div class="borderbox paddingL20 paddingR20 paddingT10">
             <el-row>
                 <el-col :span="12">
-                    <el-form-item label="模块名称：" prop="moduleName" :label-width="formLabelWidth">
-                        <el-input v-model="form.moduleName" autocomplete="off"></el-input>
+                    <el-form-item label="菜单名称：" prop="name" :label-width="formLabelWidth">
+                        <el-input v-model="form.name" autocomplete="off"></el-input>
                     </el-form-item>
                 </el-col>
                 <el-col :span="12">
-                    <el-form-item label="URL：" prop="moduleUrl" :label-width="formLabelWidth">
-                        <el-input v-model="form.moduleUrl" autocomplete="off" placeholder="以#,/或者http开头"></el-input>
+                    <el-form-item label="URL：" prop="url" :label-width="formLabelWidth">
+                        <el-input v-model="form.url" autocomplete="off" placeholder="以#,/或者http开头"></el-input>
                     </el-form-item>
                 </el-col>
             </el-row>
             <el-row>
                 <el-col :span="12">
-                    <el-form-item label="授权名称：" prop="remarks" :label-width="formLabelWidth">
-                        <el-input v-model="form.remarks" autocomplete="off"></el-input>
+                    <el-form-item label="授权名称：" prop="authCode" :label-width="formLabelWidth">
+                        <el-input v-model="form.authCode" autocomplete="off"></el-input>
                     </el-form-item>
                 </el-col>
                 <el-col :span="12">
-                    <el-form-item label="优先级：" prop="rank" :label-width="formLabelWidth">
-                        <el-input v-model="form.rank" autocomplete="off"></el-input>
+                    <el-form-item label="优先级：" prop="sortNo" :label-width="formLabelWidth">
+                        <el-input v-model="form.sortNo" autocomplete="off"></el-input>
                     </el-form-item>
                 </el-col>
             </el-row>
@@ -57,20 +57,27 @@
         <div class="borderbox padding20">
             <el-row>
                 <el-col :span="12">
-                    <el-form-item label="模块类名：" :label-width="formLabelWidth">
-                        <el-input v-model="form.code" autocomplete="off"></el-input>
+                    <el-form-item label="菜单类名：" :label-width="formLabelWidth">
+                        <el-input v-model="form.className" autocomplete="off"></el-input>
                     </el-form-item>
                 </el-col>
                 <el-col :span="12">
                     <el-form-item label="图标名称：" :label-width="formLabelWidth">
-                        <el-input v-model="form.code" autocomplete="off"></el-input>
+                        <el-input v-model="form.iconName" autocomplete="off"></el-input>
+                    </el-form-item>
+                </el-col>
+            </el-row>
+              <el-row>
+                <el-col :span="12">
+                    <el-form-item label="图标地址：" :label-width="formLabelWidth">
+                        <el-input v-model="form.iconUrl" autocomplete="off"></el-input>
                     </el-form-item>
                 </el-col>
             </el-row>
             <el-row>
                 <el-col :span="24">
                     <el-form-item label="描述：" :label-width="formLabelWidth">
-                        <el-input type="textarea" :rows="3"  placeholder="限制200字" v-model="form.desc"></el-input>
+                        <el-input type="textarea"  v-model="form.description"  :rows="3"  placeholder="限制200字" ></el-input>
                     </el-form-item>
                 </el-col>
             </el-row>
@@ -89,6 +96,7 @@
             <el-form-item label="操作编码名称：" prop="handleCode" :label-width="formLabelWidth">
                 <el-input v-model="dialogForm.handleCode" autocomplete="off"></el-input>
             </el-form-item>
+            <!--  
             <el-form-item label="特殊条件：" :label-width="formLabelWidth">
                 <el-select v-model="value" placeholder="选择页面菜单">
                     <el-option
@@ -109,6 +117,7 @@
                 <el-input v-model="form.fieldValue" placeholder="设置字段值 例：‘A’，‘B’" autocomplete="off"></el-input>
                 <div class="redcolor">用来满足某用户查看跨组织数据</div>
             </el-form-item>
+            -->
         </el-form>
         <div slot="footer" class="f-tac">            
             <el-button type="primary" @click="submitDialogForm('dialogForm')">确 定</el-button>
@@ -119,30 +128,34 @@
 <div th:include="_footer_include :: #jsLib"></div>
 </body>
 <script>
-    new Vue({
+ var moduleSave=new Vue({
         el: '#addModule',
         data: function() {
             return {
                 dialogFormVisible: false,
                 form: {
-                    moduleName:'',
-                    moduleUrl:'',
-                    remarks:'',
-                    rank:'',
-                    type: []
+                    name:'',
+                    url:'',
+                    authCode:'',
+                    sortNo:'',
+                    type: [],
+                    className:'',
+                    iconName:'',
+                    iconUrl:'',
+                    description:''
                 },
                 formLabelWidth: '120px',
                 rules:{
-                    moduleName: [
+                	name: [
                         { required: true, message: '请输入模块名称', trigger: 'blur' }
                     ],
-                    moduleUrl: [
+                    url: [
                         { required: true, message: '请输入URL', trigger: 'blur' }
                     ],
-                    remarks: [
+                    authCode: [
                         { required: true, message: '请输入授权名称', trigger: 'blur' }
                     ],
-                    rank: [
+                    sortNo: [
                         { required: true, message: '请输入优先级', trigger: 'blur' }
                     ],
                     type: [
@@ -182,7 +195,10 @@
         methods: {
             submitForm(formName) {
                 this.$refs[formName].validate((valid) => {
+                	
                     if (valid) {
+                    	var  subObject=moduleSave.form;
+                    	debugger;
                         alert('submit!');
                     } else {
                         console.log('error submit!!');
