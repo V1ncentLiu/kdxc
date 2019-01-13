@@ -27,7 +27,7 @@
                 </el-col>
                 <el-col :span="6">
                     <el-form-item label="登录用户名：" :label-width="formLabelWidth1" prop="username">
-                        <el-input v-model="form.username" autocomplete="off" :disabled="true"></el-input>
+                        <el-input v-model="form.username" autocomplete="off"></el-input>
                     </el-form-item>
                 </el-col>
             </el-row>
@@ -38,7 +38,14 @@
                     </el-form-item>
                 </el-col>
                 <el-col :span="6">
-                    <el-form-item label="所属角色：" :label-width="formLabelWidth1">
+                    <el-form-item label="登录密码：" :label-width="formLabelWidth1" prop="password">
+                        <el-input v-model="form.password" autocomplete="off"></el-input>
+                    </el-form-item>
+                </el-col>
+            </el-row>
+            <el-row>
+                <el-col :span="6">
+                    <el-form-item label="所属角色：" :label-width="formLabelWidth1" prop="roleId">
                         <el-row>
                             <el-col :span="12">
                                 <el-input v-model="form.roleName" autocomplete="off" prop="roleName"></el-input>                                
@@ -49,10 +56,8 @@
                         </el-row>
                     </el-form-item>
                 </el-col>
-            </el-row>
-            <el-row>
                 <el-col :span="6">
-                    <el-form-item label="所属组织：" :label-width="formLabelWidth1">
+                    <el-form-item label="所属组织：" :label-width="formLabelWidth1" prop="orgId">
                         <el-row>
                             <el-col :span="12">
                                 <el-input v-model="form.orgName" autocomplete="off" prop="orgName"></el-input>                                
@@ -63,6 +68,8 @@
                         </el-row>
                     </el-form-item>
                 </el-col>
+            </el-row>
+            <el-row>
                 <el-col :span="6">
                     <el-form-item label="用户状态：" :label-width="formLabelWidth1">
                         <el-select v-model="form.status" placeholder="请选择">
@@ -77,17 +84,9 @@
                 </el-col>
             </el-row>
             <el-row>
-                <el-col :span="6">
-                    <el-form-item label="用户资源处理：" :label-width="formLabelWidth1">
-                        <el-radio v-model="statusRadio" label="0">不带资源走</el-radio>
-                        <el-radio v-model="statusRadio" label="1">带资源走</el-radio>
-                    </el-form-item>
-                </el-col>
-            </el-row>
-            <el-row>
                 <el-col :span="6" :offset="6">
                     <el-form-item>
-                        <el-button type="primary" @click="onSubmit('form')">提交</el-button>
+                        <el-button type="primary" @click="onSubmit('form')">立即创建</el-button>
                         <el-button>取消</el-button>
                     </el-form-item>
                 </el-col>
@@ -96,7 +95,6 @@
     </el-row>
 
     <el-dialog title="选择角色" :visible.sync="dialogFormChooseRole"s>
-        <el-form :model="form">
             <el-table 
             ref="multipleTable"
             tooltip-effect="dark"
@@ -108,25 +106,23 @@
             >
             <el-table-column align="center" width="55" label="选择">
                 <template scope="scope">
-                    <el-radio :label="scope.row.id" v-model="tableRadio"  @change="selectRole(scope.row.id,scope.row.name)">&nbsp;</el-radio>
+                    <el-radio :label="scope.$index"  v-model="tableRadio" @change="selectRole(scope.row.id,scope.row.name)">&nbsp;</el-radio>
                 </template>
             </el-table-column>
             <el-table-column align="center" prop="name" label="角色名称"></el-table-column>
             <el-table-column align="center" prop="description" label="角色描述"></el-table-column>
         </el-table>
-        </el-form>        
     </el-dialog>
     <el-dialog title="选择组织" :visible.sync="dialogFormChooseOrg" append-to-body>
-        <el-form :model="form">
             <el-tree
                 :data="dataTree"              
+                node-key="id"
                 :default-expanded-keys="expandedKeys"
                 ref="tree"
                 highlight-current
                 @node-click="clickOrgNode"
                 class="leftTree">
             </el-tree>
-        </el-form>        
     </el-dialog>
 </div>
 <!-- import common js-->
@@ -149,24 +145,24 @@ for(var i=0;i<orgData.length;i++){
 	
 }
 var roleList=[[${roleList}]];//当前字段所属的菜单组
-var user=[[${user}]];//当前字段所属的菜单组
-var updateUserVm= new Vue({
+   var addUserVm= new Vue({
         el: '#userManage',
         data: function() {
             return {
-                statusRadio:'0',
-                tableRadio:user.roleList[0].id,
+                tableRadio:'',
                 dialogFormChooseRole: false,
                 dialogFormChooseOrg: false,
                 form: {
-                	name: user.name,
-                    username: user.username,
-                    phone: user.phone,
-                    roleId: user.roleList[0].id,
-                    roleName: user.roleList[0].name,
-                    orgId: user.orgId,
-                    orgName: user.orgName,
-                    status: user.status
+                    name: '',
+                    username: '',
+                    phone: '',
+                    password:'',
+                    roleId: '',
+                    roleName: '',
+                    orgId: '',
+                    orgName: '',
+                    status: '1'
+                    
                 },
                 rules: {
                 	name: [
@@ -207,7 +203,7 @@ var updateUserVm= new Vue({
             //row-click    当某一行被点击时会触发该事件 row, event, column
             showRow(row){
             //赋值给radio
-                this.radio = this.dataTableRole.indexOf(row);
+                this.tableRadio = this.dataTableRole.indexOf(row);
             },
             /* urrent-change    当表格的当前行发生变化的时候会触发该事件，如果要高亮当前行，请打开表格的 highlight-current-row 属性    currentRow, oldCurrentRow */
             handleCurrentChange(val,index) {
@@ -217,26 +213,25 @@ var updateUserVm= new Vue({
             getCurrentRow(val){
                 console.log(val)
             },
-          //选择角色
+            //选择角色
             selectRole(id,name){
-            	updateUserVm.form.roleId=id;
-            	updateUserVm.form.roleName=name;
-            	updateUserVm.dialogFormChooseRole=false;
+            	addUserVm.form.roleId=id;
+            	addUserVm.form.roleName=name;
+            	addUserVm.dialogFormChooseRole=false;
             },
             //选择机构
             clickOrgNode(data,node,obj){//点击左侧节点
                 if(data.children==null){
-                	updateUserVm.form.orgId=data.id;
-                	updateUserVm.form.orgName=data.label;
-                	updateUserVm.dialogFormChooseOrg=false;
+                	addUserVm.form.orgId=data.id;
+                	addUserVm.form.orgName=data.label;
+                	addUserVm.dialogFormChooseOrg=false;
                 }
             },
             onSubmit(formName) {
             	 this.$refs[formName].validate((valid) => {
           	       if (valid) {
-       	             var formData = updateUserVm.form;
+       	             var formData = addUserVm.form;
        	             var param={};
-       	             param.id= user.id;
        	             param.name= formData.name;
        	             param.username= formData.username;
        	             param.password = formData.password;
@@ -247,14 +242,14 @@ var updateUserVm= new Vue({
        	             var roleList=new Array();
        	          	 roleList.push(formData.roleId);
        	             param.roleList=roleList;
-       	            axios.post("/user/userManager/updateUser", param)
+       	            axios.post("/user/userManager/saveUser", param)
        	            .then(function (response) {
        	            	console.info(response);
        	            	var data =response.data;
        	            	if(data.code!="0"){
-       	            		updateUserVm.$message('修改失败');
+       	            		addUserVm.$message('新增失败');
        	            	}else{
-       	            		updateUserVm.$message('修改成功');
+       	            		addUserVm.$message('新增成功');
        	                	document.location.href='/user/userManager/initUserList';
        	            	}
        	            })

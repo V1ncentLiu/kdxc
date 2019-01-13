@@ -124,11 +124,11 @@
     </el-row>
     <!-- dialog -->
     <el-dialog title="密码安全设置" :visible.sync="dialogFormVisible">
-        <el-form :model="form">
+        <el-form :model="form" :rules="rules" ref="form">
             <el-row :gutter="20">
                 <el-col :span="12">
-                    <el-form-item label="密码最长使用期限：" :label-width="formLabelWidth">
-                        <el-input v-model="form.name" autocomplete="off"></el-input>
+                    <el-form-item label="密码最长使用期限：" :label-width="formLabelWidth" prop="maxDay">
+                        <el-input v-model="form.maxDay" autocomplete="off"></el-input>
                     </el-form-item>
                 </el-col>
                 <el-col :span="4">
@@ -171,6 +171,8 @@
 </body>
 <script th:inline="javascript">
 var roleList=[[${roleList}]];//当前字段所属的菜单组
+var passwordExpires=[[${passwordExpires}]];//密码最大使用时间
+var reminderTime=[[${reminderTime}]];//密码到期提醒时间
 var userVM = new Vue({
         el: '#userManage',
         data: {
@@ -188,16 +190,22 @@ var userVM = new Vue({
 	                pageSize: 20,
 	            },
 	            multipleSelection:[],
+	            passwordExpires:passwordExpires,
+	            reminderTime:reminderTime,
                 radio:'',
                 dialogFormVisible: false,
                 dialogFormAdd: false,
                 dialogFormChooseRole: false,
                 dialogFormChooseOrg: false,
                 form: {
-                    name: '',
-                    delivery: false,
-                    type: []
+                	maxDay: passwordExpires
                 },
+                rules: {
+                	maxDay: [
+                      { required: true, message: '密码最长使用期限不能为空。', trigger: 'blur' },
+                      {  max: 3, message: '最大3个字符', trigger: 'blur' }
+                    ]
+                  },
                 formLabelWidth: '150px',
                 formLabelWidth1: '120px',
                 statusOptions: [{
