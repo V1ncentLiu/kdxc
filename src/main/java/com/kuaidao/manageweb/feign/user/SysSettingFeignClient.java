@@ -41,6 +41,15 @@ public interface SysSettingFeignClient {
     @PostMapping("/update")
     public JSONResult<Void> update(@RequestBody SysSettingReq sysSettingReq);
 
+    /**
+     * 修改系统参数
+     * 
+     * @param menuDTO
+     * @return
+     */
+    @PostMapping("/updateByCode")
+    public JSONResult<Void> updateByCode(@RequestBody SysSettingReq sysSettingReq);
+
 
 
     @Component
@@ -64,6 +73,11 @@ public interface SysSettingFeignClient {
 
         @Override
         public JSONResult<Void> update(@RequestBody SysSettingReq sysSettingReq) {
+            return fallBackError("修改系统参数");
+        }
+
+        @Override
+        public JSONResult<Void> updateByCode(@RequestBody SysSettingReq sysSettingReq) {
             return fallBackError("修改系统参数");
         }
 

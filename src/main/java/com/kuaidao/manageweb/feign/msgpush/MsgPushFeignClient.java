@@ -1,6 +1,5 @@
 package com.kuaidao.manageweb.feign.msgpush;
 
-import com.kuaidao.msgpush.dto.SmsTemplateCodeReq;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.netflix.feign.FeignClient;
@@ -11,6 +10,7 @@ import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.msgpush.dto.SmsCodeAndMobileValidReq;
 import com.kuaidao.msgpush.dto.SmsCodeSendReq;
+import com.kuaidao.msgpush.dto.SmsTemplateCodeReq;
 import com.kuaidao.msgpush.dto.SmsVoiceCodeReq;
 
 /**
