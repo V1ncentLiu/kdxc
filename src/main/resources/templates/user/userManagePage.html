@@ -135,7 +135,7 @@
                     <el-form-item>天</el-form-item>
                 </el-col>
             </el-row>
-            <el-form-item label="到期提醒通知设置：" :label-width="formLabelWidth">
+            <!-- <el-form-item label="到期提醒通知设置：" :label-width="formLabelWidth">
                 <el-button type="primary" size="medium" class="marginB10">添加</el-button>
                 <el-row :gutter="20" class="marginB10">
                     <el-col :span="8">
@@ -159,10 +159,34 @@
                         <el-form-item><el-button type="primary" size="mini">删除</el-button></el-form-item>
                     </el-col>
                 </el-row>
+            </el-form-item> -->
+            <el-form-item label="到期提醒通知设置：" :label-width="formLabelWidth">
+                <el-button type="primary" size="medium" class="marginB10" @click="addDomain">添加</el-button>
+                <el-form-item
+                    v-for="(domain, index) in form.domains"
+                    :key="domain.key"
+                    :prop="'domains.' + index + '.value'"
+                    :rules="{
+                      required: true, message: '到期提醒通知天数不能为空', trigger: 'change'
+                    }"
+                    style="margin-bottom: 20px;"
+                >
+                    <el-row :gutter="20">
+                        <el-col :span="8">
+                            <el-input v-model="domain.value"></el-input>
+                        </el-col>
+                        <el-col :span="2">
+                            <el-form-item>天</el-form-item>
+                        </el-col>
+                        <el-col :span="4">
+                            <el-button @click.prevent="removeDomain(domain)">删除</el-button>
+                        </el-col>
+                    </el-row>
+                </el-form-item>
             </el-form-item>
         </el-form>
         <div slot="footer" class="dialog-footer">
-            <el-button type="primary" @click="dialogFormVisible = false">确 定</el-button>
+            <el-button type="primary" @click="submitForm('form')">确 定</el-button>
         </div>
     </el-dialog>
 </div>
@@ -198,6 +222,9 @@ var userVM = new Vue({
                 dialogFormChooseRole: false,
                 dialogFormChooseOrg: false,
                 form: {
+                  domains: [{
+                        value: ''
+                  }],
                 	maxDay: passwordExpires
                 },
                 rules: {
@@ -335,18 +362,42 @@ var userVM = new Vue({
   	               return "";
   	           }
   	           return moment(cellValue).format("YYYY-MM-DD HH:mm:ss");
-  	         },
-              handleSizeChange(val) {
-                  //下拉框  每页 10,20条切换 调用
-                     console.log(`每页 ${val} 条`);
-                  this.pageSize = val;
-                  this.initTableData(1);
-               },
-               handleCurrentChange(val) {
-                   //点击 页码
-                 console.log(`当前页: ${val}`);
-                 this.initTableData(val);
-               }
+  	        },
+            handleSizeChange(val) {
+                //下拉框  每页 10,20条切换 调用
+                   console.log(`每页 ${val} 条`);
+                this.pageSize = val;
+                this.initTableData(1);
+             },
+             handleCurrentChange(val) {
+                 //点击 页码
+               console.log(`当前页: ${val}`);
+               this.initTableData(val);
+             },
+             // 提交弹窗
+             submitForm(formName) {
+              this.$refs[formName].validate((valid) => {
+                  if (valid) {
+                      alert('submit!');
+                      console.log(this.form.domains)//
+                  } else {
+                      console.log('error submit!!');
+                      return false;
+                  }
+              });
+            },
+            removeDomain(item) {
+                var index = this.form.domains.indexOf(item)
+                if (index !== -1) {
+                    this.form.domains.splice(index, 1)
+                }
+            },
+            addDomain() {
+                this.form.domains.push({
+                    value: '',
+                    key: Date.now()
+                });
+            }
         },
         created(){
             console.info("create method");
