@@ -129,6 +129,7 @@
                                        //删除
                                 	   axios.post('/organization/organization/delete',param)
                                        .then(function (response) {
+                                    	   console.info(response);
                                            var data =  response.data;
                                            if(data.code=='0'){
                                                var resData = data.data;
@@ -155,7 +156,10 @@
                                          console.log(error);
                                        })
                                        .then(function () {
-                                    	  
+                                    	   orgVM.$message({
+                                               message: "系统错误",
+                                               type: 'error'
+                                             }); 
                                        });
                                        
                                    }
