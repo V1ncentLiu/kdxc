@@ -64,6 +64,13 @@ public class OrganizationController {
     }
 
     
+    /**
+     * 保存或更新组织机构信息
+     * @param orgDTO
+     * @param result
+     * @return
+     * @throws Exception
+     */
     @RequiresPermissions(value= {"organization:save","organization:update"},logical=Logical.OR)
     @PostMapping("/saveOrUpdate")
     @ResponseBody
