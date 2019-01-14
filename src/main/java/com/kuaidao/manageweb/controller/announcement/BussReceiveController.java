@@ -11,6 +11,9 @@ import com.kuaidao.sys.dto.announcement.AnnouncementQueryDTO;
 import com.kuaidao.sys.dto.announcement.AnnouncementRespDTO;
 import com.kuaidao.sys.dto.announcement.bussReceive.BussReceiveQueryDTO;
 import com.kuaidao.sys.dto.announcement.bussReceive.BussReceiveRespDTO;
+import com.kuaidao.sys.dto.user.UserInfoDTO;
+import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.subject.Subject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,7 +62,9 @@ public class BussReceiveController {
                 return new JSONResult().fail("-1","时间选项，开始时间大于结束时间!");
             }
         }
-
+        Subject subject = SecurityUtils.getSubject();
+        UserInfoDTO user = (UserInfoDTO) subject.getSession().getAttribute("user");
+        dto.setReceiveUser(user.getId());
         return busReceiveFeignClient.queryReceive(dto);
     }
     /**
@@ -87,7 +92,9 @@ public class BussReceiveController {
     @ResponseBody
     public JSONResult<Void> unreadCount(){
         Map map = new HashMap();
-        map.put("receiveUser","123456");
+        Subject subject = SecurityUtils.getSubject();
+        UserInfoDTO user = (UserInfoDTO) subject.getSession().getAttribute("user");
+        map.put("receiveUser",user.getId());
         JSONResult result = busReceiveFeignClient.unreadCount(map);
         return result;
     }

@@ -3,6 +3,7 @@ package com.kuaidao.manageweb.demo.controller;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -12,13 +13,15 @@ import javax.annotation.PostConstruct;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.amqp.core.AmqpTemplate;
+import org.springframework.amqp.core.Binding;
+import org.springframework.amqp.core.Queue;
+import org.springframework.amqp.core.TopicExchange;
+import org.springframework.amqp.rabbit.core.RabbitAdmin;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.jdbc.JdbcTemplateAutoConfiguration;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.thymeleaf.expression.Lists;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.manageweb.config.SnowflakeArgs;
@@ -146,6 +149,7 @@ public class DemoController {
 	    List<Address> list = new ArrayList<Address>();
         for (int i = 0; i < 100; i++) {
             Address address = new Address();
+			address.setId((i+""+1));
             address.setArea("区域-"+i);
             address.setName("姓名-"+i);
             address.setAddress("北京-"+i);
@@ -169,8 +173,33 @@ public class DemoController {
 		logger.info(pageTable.toString());
 		return pageTable;
 	}
-	
-	
+
+	@Autowired
+	private AmqpTemplate template;
+
+	/**
+	 *  消息队列测试
+	 *  使用topic进行消息通知？
+	 */
+	@GetMapping("/send/{message}")
+	public String send(@PathVariable String message){
+		RabbitAdmin admin = new RabbitAdmin(((RabbitTemplate)template).getConnectionFactory());
+//		admin.declareExchange(new TopicExchange("topicExchange1",true,false));
+//		admin.declareQueue(new Queue("uuserid"));
+//		admin.declareBinding(new Binding("uuserid",Binding.DestinationType.QUEUE,
+//				"topicExchange1","test.1",new HashMap()));
+//		admin.getRabbitTemplate().convertAndSend("","");
+
+		admin.getRabbitTemplate().convertAndSend("amq.topic","3424.123456",message);
+		return "success";
+	}
+
+	@GetMapping("/receive")
+	public String receive(){
+		String str = (String)template.receiveAndConvert();
+
+		return "success";
+	}
 
 }
 
