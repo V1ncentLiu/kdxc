@@ -89,6 +89,7 @@ public class RoleManagerController {
 	@PostMapping("/saveRoleInfo")
 	@ResponseBody
 	public JSONResult<String> saveRoleInfo(@RequestBody RoleInfoDTO dto) {
+		dto.setSystemCode("huiju");
 		JSONResult<String> pageJson = roleManagerFeignClient.saveRoleInfo(dto);
 		return pageJson;
 	}
