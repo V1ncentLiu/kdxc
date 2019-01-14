@@ -38,12 +38,12 @@
                 </div>
                 <el-row>
                     <el-form-item  prop="pswInput1">
-                        <el-input v-model="resetPwdForm.pswInput1" placeholder="新密码（8-20位，数字和字母组合）"></el-input>
+                        <el-input type="password" v-model="resetPwdForm.pswInput1" placeholder="新密码（8-20位，数字和字母组合）"></el-input>
                     </el-form-item>
                 </el-row>
                 <el-row>
                     <el-form-item  prop="pswInput2">
-                        <el-input v-model="resetPwdForm.pswInput2" placeholder="确认新密码"></el-input>
+                        <el-input type="password" v-model="resetPwdForm.pswInput2" placeholder="确认新密码"></el-input>
                     </el-form-item>
                 </el-row>
             </el-form>
@@ -74,20 +74,62 @@ var vm =  new Vue({
             },
             rules: {
             	phoneInput: [
-                  { required: true, message: '手机号不能为空', trigger: 'blur' },
-                  {  max: 11, message: '最大11个字符', trigger: 'blur' }
+                    { required: true, message: '手机号不能为空', trigger: 'blur' },
+                    {  max: 11, message: '最大11个字符', trigger: 'blur' },
+                    { validator:function(rule,value,callback){                 
+                        if(/^1[34578]\d{9}$/.test(value) == false){
+                           callback(new Error("请输入正确格式的手机号"));
+                        }else{
+                           callback();
+                        } 
+                        console.log("这是自定义校验");                      
+                        callback();                      
+                   }, trigger: 'change'}
                 ],
                 pswInput1: [
                   { required: true, message: '密码不能为空', trigger: 'change' },
-                  {  max: 30, message: '最大30个字符', trigger: 'blur' }
+                  {  max: 30, message: '最大30个字符', trigger: 'blur' },
+                  { validator:function(rule,value,callback){
+                 
+                    if(/^[A-Za-z0-9]+$/.test(value) == false){
+                       callback(new Error("请输入数字和字母"));
+                    }else{
+                       callback();
+                    } 
+                    console.log("这是自定义校验");
+                    callback();
+                      
+                    }, trigger: 'change'}
                 ],
                 pswInput2: [
                   { required: true, message: '密码不能为空', trigger: 'change' },
-                  {  max: 30, message: '最大30个字符', trigger: 'blur' }
+                  {  max: 30, message: '最大30个字符', trigger: 'blur' },
+                  { validator:function(rule,value,callback){
+                 
+                    if(/^[A-Za-z0-9]+$/.test(value) == false){
+                       callback(new Error("请输入数字和字母"));
+                    }else{
+                       callback();
+                    } 
+                    console.log("这是自定义校验");
+                    callback();
+                      
+                    }, trigger: 'change'}
                 ],
                 codeInput: [
                   { required: true, message: '验证码不能为空', trigger: 'change' },
-                  {  max: 6, message: '最大6个字符', trigger: 'blur' }
+                  {  max: 6, message: '最大6个字符', trigger: 'blur' },
+                  { validator:function(rule,value,callback){
+                 
+                    if(/^[0-9]*$/.test(value) == false){
+                       callback(new Error("请输入数字"));
+                    }else{
+                       callback();
+                    } 
+                    console.log("这是自定义校验");
+                    callback();
+                      
+                   }, trigger: 'change'}
                 ],
               },         
         },
