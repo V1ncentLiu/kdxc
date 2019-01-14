@@ -154,12 +154,13 @@
                                        })
                                        .catch(function (error) {
                                          console.log(error);
+                                         orgVM.$message({
+                                             message: "系统错误",
+                                             type: 'error'
+                                           }); 
                                        })
                                        .then(function () {
-                                    	   orgVM.$message({
-                                               message: "系统错误",
-                                               type: 'error'
-                                             }); 
+                                    	   
                                        });
                                        
                                    }
