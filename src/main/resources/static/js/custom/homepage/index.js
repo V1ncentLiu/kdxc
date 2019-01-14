@@ -113,17 +113,30 @@ var homePageVM=new Vue({
          confirmLogout(){//确认退出系统
         	 location.href="/logout";
         },
-        gotoHomePage(){//首页跳转
-        	location.href='/login';
-        },
-        gotoMsgCenterPage(){//消息中心跳转
-        	location.href='/messagecenter/messagecenter';
+		messageCount(){
+	    	console.log("请求消息中心未读条数")
+			var param = {};
+			axios.post("/messagecenter/unreadCount", param).then(function (response) {
+				var data = response.data.data
+				var annCount = 0;
+				if(data&&data!=0){
+					annCount = data;
+				}
+				document.getElementById("messageCount").innerHTML="&nbsp;(&nbsp;"+(annCount)+"&nbsp;)"
+			})
+		},
+		openMessageCenter(){
+	    	console.log("跳转消息中心")
+	    	var dataUrl = "/messagecenter/messageCenter";
+			$("#iframeBox").attr({
+				"src":dataUrl //设置ifream地址
+			});
         }
-         
-         
   	},
-   	created() {  
-   		document.body.removeChild(document.getElementById('Loading'))   
+   	created() {
+  		console.log("created method")
+   		document.body.removeChild(document.getElementById('Loading'))
+		this.messageCount();
 	}
 })
 // 点击导航赋值ifream的src值
