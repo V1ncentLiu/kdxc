@@ -385,8 +385,9 @@ public class CustomFieldController {
                 }
             }//inner foreach end
             
-            //TODO  devin
-            rowDto.setCreateUser(111L);
+            Subject subject = SecurityUtils.getSubject();
+            UserInfoDTO user = (UserInfoDTO) subject.getSession().getAttribute("user");
+            rowDto.setCreateUser(user.getId());
             rowDto.setFieldType(SysConstant.FieldType.TEXT);
             rowDto.setMenuId(menuId);
             dataList.add(rowDto);
