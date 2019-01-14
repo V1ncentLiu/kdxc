@@ -21,6 +21,8 @@ import com.kuaidao.sys.dto.user.UserInfoDTO;
 import com.kuaidao.sys.dto.user.UserInfoPageParam;
 import com.rabbitmq.http.client.domain.UserInfo;
 import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.authz.annotation.Logical;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.apache.shiro.subject.Subject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -134,25 +136,25 @@ public class AnnController {
                     amqpTemplate.convertAndSend("amq.topic",userInfo.getOrgId()+"."+userInfo.getId(),"announce,"+annId);
                 }
             }
-////
-//            if(type==2||type==0){ //短信
-//                for(UserInfoDTO userInfo:list){
-////                  获取电话：发送短信
-////                  构建短信模板
-//                    String phone = userInfo.getPhone();
-//                    Map map = new HashMap();
-//                    map.put("","");
-//                    SmsTemplateCodeReq smsTemplateCodeReq = new SmsTemplateCodeReq();
-//                    smsTemplateCodeReq.setMobile(phone);
-//                    smsTemplateCodeReq.setTempId(tempId);
-//                    smsTemplateCodeReq.setTempPara(map);
-////                    msgPushFeignClient.sendTempSms(smsTemplateCodeReq);
-////                  以后使用上面的东西进行替换.
-//                    SmsCodeSendReq smsCodeSendReq = new SmsCodeSendReq();
-//                    smsCodeSendReq.setMobile(phone);
-//                    msgPushFeignClient.sendCode(smsCodeSendReq);
-//                }
-//            }
+//
+            if(type==2||type==0){ //短信
+                for(UserInfoDTO userInfo:list){
+//                  获取电话：发送短信
+//                  构建短信模板
+                    String phone = userInfo.getPhone();
+                    Map map = new HashMap();
+                    map.put("","");
+                    SmsTemplateCodeReq smsTemplateCodeReq = new SmsTemplateCodeReq();
+                    smsTemplateCodeReq.setMobile(phone);
+                    smsTemplateCodeReq.setTempId(tempId);
+                    smsTemplateCodeReq.setTempPara(map);
+//                    msgPushFeignClient.sendTempSms(smsTemplateCodeReq);
+//                  以后使用上面的东西进行替换.
+                    SmsCodeSendReq smsCodeSendReq = new SmsCodeSendReq();
+                    smsCodeSendReq.setMobile(phone);
+                    msgPushFeignClient.sendCode(smsCodeSendReq);
+                }
+            }
 
         }
         return jsonResult;
@@ -188,6 +190,7 @@ public class AnnController {
         return "ann/annListPage";
     }
 
+    @RequiresPermissions("announce:publishAnn")
     @RequestMapping("/annPublishPage")
     public String itemListPage(){
         logger.info("--------------------------------------跳转到公告页面-----------------------------------------------");

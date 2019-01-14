@@ -6,6 +6,7 @@ import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
 import com.kuaidao.sys.dto.dictionary.*;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -73,6 +74,7 @@ public class DictionaryItemController {
     /**
      *  web端进行的是非业务逻辑。
      */
+    @RequiresPermissions("dictionary:update")
     @RequestMapping("/saveDictionaryItem")
     @ResponseBody
     public JSONResult saveDictionary(@Valid @RequestBody DictionaryItemAddAndUpdateDTO dictionaryItemDTO  , BindingResult result){
@@ -80,6 +82,7 @@ public class DictionaryItemController {
         return  dictionaryItemFeignClient.saveDictionaryItem(dictionaryItemDTO);
     }
 
+    @RequiresPermissions("dictionary:update")
     @RequestMapping("/updateDictionaryItem")
     @ResponseBody
     public JSONResult updateDictionary(@Valid @RequestBody DictionaryItemAddAndUpdateDTO dictionaryDTO , BindingResult result){
@@ -93,6 +96,7 @@ public class DictionaryItemController {
         return dictionaryItemFeignClient.queryDictionaryOneItem(idEntity);
     }
 
+    @RequiresPermissions("dictionary:update")
     @RequestMapping("/deleteItemDictionarys")
     @ResponseBody
     public JSONResult deleteDictionarys(@RequestBody Map<String, String> map){
