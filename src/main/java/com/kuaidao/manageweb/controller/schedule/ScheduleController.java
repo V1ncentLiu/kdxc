@@ -9,6 +9,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
@@ -58,8 +59,13 @@ public class ScheduleController {
      * @return
      */
     @RequestMapping("/initCreateSchedule")
-    public String initCreateSchedule(HttpServletRequest request) {
-
+    public String initCreateSchedule(@RequestParam(required = false) String id,
+            HttpServletRequest request) {
+        // 查询用户信息
+        if (id != null) {
+            JSONResult<QrtzJob> job = scheduleFeignClient.getJob(id);
+            request.setAttribute("schedule", job.getData());
+        }
         return "schedule/addSchedulePage";
     }
 
@@ -102,14 +108,19 @@ public class ScheduleController {
      * @throws InvocationTargetException
      * @throws IllegalAccessException
      */
-    @PostMapping("/create")
+    @PostMapping("/createOrUpdate")
     @ResponseBody
-    public JSONResult create(@Valid @RequestBody JobCreateReq jobCreateReq, BindingResult result) {
+    public JSONResult create(@Valid @RequestBody JobUpdateReq jobUpdateReq, BindingResult result) {
         if (result.hasErrors()) {
             return CommonUtil.validateParam(result);
         }
-
-        return scheduleFeignClient.create(jobCreateReq);
+        if (jobUpdateReq.getJobId() != null) {
+            return scheduleFeignClient.update(jobUpdateReq);
+        } else {
+            JobCreateReq jobCreateReq = new JobCreateReq();
+            BeanUtils.copyProperties(jobUpdateReq, jobCreateReq);
+            return scheduleFeignClient.create(jobCreateReq);
+        }
     }
 
     /**
