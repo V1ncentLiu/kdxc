@@ -297,7 +297,7 @@ public class CustomFieldController {
 
 
     /**
-     * 下载导入文件模板
+     * 下载导入 自定义字段文件模板
      * @param request
      * @return
      * @throws IOException

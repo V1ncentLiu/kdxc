@@ -28,12 +28,17 @@ import com.kuaidao.common.entity.TreeData;
 import com.kuaidao.common.util.CommonUtil;
 import com.kuaidao.common.util.MD5Util;
 import com.kuaidao.manageweb.constant.Constants;
+import com.kuaidao.manageweb.entity.UpdatePasswordSettingReq;
 import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
 import com.kuaidao.manageweb.feign.role.RoleManagerFeignClient;
+import com.kuaidao.manageweb.feign.user.SysSettingFeignClient;
 import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
+import com.kuaidao.sys.constant.SysConstant;
 import com.kuaidao.sys.constant.UserErrorCodeEnum;
 import com.kuaidao.sys.dto.role.RoleInfoDTO;
 import com.kuaidao.sys.dto.role.RoleQueryDTO;
+import com.kuaidao.sys.dto.user.SysSettingDTO;
+import com.kuaidao.sys.dto.user.SysSettingReq;
 import com.kuaidao.sys.dto.user.UpdateUserPasswordReq;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import com.kuaidao.sys.dto.user.UserInfoPageParam;
@@ -55,6 +60,8 @@ public class UserController {
     private UserInfoFeignClient userInfoFeignClient;
     @Autowired
     private OrganizationFeignClient organizationFeignClient;
+    @Autowired
+    private SysSettingFeignClient sysSettingFeignClient;
 
     /***
      * 用户列表页
@@ -67,6 +74,12 @@ public class UserController {
         JSONResult<List<RoleInfoDTO>> list = userInfoFeignClient.roleList(new RoleQueryDTO());
 
         request.setAttribute("roleList", list.getData());
+
+        String passwordExpires = getSysSetting(SysConstant.PASSWORD_EXPIRES);
+        String reminderTime = getSysSetting(SysConstant.REMINDER_TIME);
+        request.setAttribute("passwordExpires", passwordExpires);
+
+        request.setAttribute("reminderTime", reminderTime.split(","));
 
         return "user/userManagePage";
     }
@@ -207,8 +220,8 @@ public class UserController {
                 userInfoReq.setPassword(updateUserPasswordReq.getNewPassword());
                 // 修改密码
                 JSONResult<String> updatePwdRes = userInfoFeignClient.update(userInfoReq);
-                if(updatePwdRes!=null && JSONResult.SUCCESS.equals(updatePwdRes.getCode())) {
-                    
+                if (updatePwdRes != null && JSONResult.SUCCESS.equals(updatePwdRes.getCode())) {
+
                     Subject subject = SecurityUtils.getSubject();
                     UserInfoDTO user = (UserInfoDTO) subject.getSession().getAttribute("user");
                     if (subject.isAuthenticated()) {
@@ -245,6 +258,60 @@ public class UserController {
         return userInfoFeignClient.get(idEntity);
     }
 
+    /**
+     * 修改密码安全设置
+     * 
+     * @param orgDTO
+     * @return
+     */
+    @PostMapping("/updatePasswordSetting")
+    @ResponseBody
+    public JSONResult updatePasswordSetting(
+            @Valid @RequestBody UpdatePasswordSettingReq updatePasswordSettingReq,
+            BindingResult result) {
+
+        if (result.hasErrors()) {
+            return CommonUtil.validateParam(result);
+        }
+        // 更新密码最大使用时间
+        SysSettingReq sysSettingReq = new SysSettingReq();
+        sysSettingReq.setCode(SysConstant.PASSWORD_EXPIRES);
+        sysSettingReq.setValue(updatePasswordSettingReq.getPasswordExpires());
+        sysSettingFeignClient.updateByCode(sysSettingReq);
+
+        // 更新密码到期提醒时间
+        sysSettingReq.setCode(SysConstant.REMINDER_TIME);
+        StringBuffer stringBuffer = new StringBuffer();
+        List<String> reminderTimeList = updatePasswordSettingReq.getReminderTime();
+        for (String string : reminderTimeList) {
+            if (stringBuffer.length() == 0) {
+                stringBuffer.append(string);
+            } else {
+                stringBuffer.append(",");
+                stringBuffer.append(string);
+            }
+        }
+        sysSettingReq.setValue(stringBuffer.toString());
+        sysSettingFeignClient.updateByCode(sysSettingReq);
+
+        return new JSONResult().success(null);
+    }
+
+    /**
+     * 查询系统参数
+     * 
+     * @param code
+     * @return
+     */
+    private String getSysSetting(String code) {
+        SysSettingReq sysSettingReq = new SysSettingReq();
+        sysSettingReq.setCode(code);
+        JSONResult<SysSettingDTO> byCode = sysSettingFeignClient.getByCode(sysSettingReq);
+        if (byCode != null && JSONResult.SUCCESS.equals(byCode.getCode())) {
+            return byCode.getData().getValue();
+        }
+        return null;
+    }
 
 
 }
