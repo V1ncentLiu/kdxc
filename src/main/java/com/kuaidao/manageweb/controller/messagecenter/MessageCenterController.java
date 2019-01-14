@@ -4,6 +4,9 @@ import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.manageweb.feign.announcement.AnnReceiveFeignClient;
 import com.kuaidao.manageweb.feign.announcement.BusReceiveFeignClient;
 import com.kuaidao.manageweb.feign.messageCenter.MessageCenterFeignClient;
+import com.kuaidao.sys.dto.user.UserInfoDTO;
+import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.subject.Subject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,11 +38,12 @@ public class MessageCenterController {
     @ResponseBody
     public JSONResult<Void> unreadCount(){
         Map map = new HashMap();
-        map.put("receiveUser","123456");
+        Subject subject = SecurityUtils.getSubject();
+        UserInfoDTO user = (UserInfoDTO) subject.getSession().getAttribute("user");
+        map.put("receiveUser",user.getId());
         JSONResult result = messageCenterFeignClient.unreadCount(map);
         return result;
     }
-
 
     @RequestMapping("/messageCenter")
     public String listPage(){
