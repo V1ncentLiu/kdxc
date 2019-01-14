@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:th="http://www.thymeleaf.org">
 <head th:include="_header_include::frag(~{::title},~{},~{})">
-    <title>公告管理</title>
+    <title>消息中心</title>
 </head>
 
 <body>
@@ -215,6 +215,27 @@
                     });
             },
             changeAnnState(){
+                var rows = this.multipleSelection;
+                if(rows.length<1){
+                    this.$message({type:"warning",message:"没有勾选消息"})
+                }else {
+                    var rowIds = [];
+                    for (var i = 0; i < rows.length; i++) {
+                        rowIds.push(rows[i].id)
+                    }
+                    //调用后台数据删除操作。
+                    var param = {};
+                    param.ids = rowIds.join(",");
+                    axios.post('/annReceive/batchUpdate', param)
+                        .then(function (response) {
+                            vm.initAnnTableData(1);
+                            vm.$message({type: 'success', message: '更新完成!'});
+                        })
+                        .catch(function (error) {
+                            queryFormVM.$message.error(error);
+                            console.log(error);
+                        });
+                }
             },
             onBussSubmit(){
                 var param = this.businessForm;
@@ -290,12 +311,21 @@
                 //下拉框  每页 10,20条切换 调用
                 console.log(`每页 ${val} 条`);
                 this.pageSize = val;
-                this.initBussTableData(1);
+                if(this.activeName=="business"){
+                    this.initBussTableData(1);
+                }else{
+                    this.initAnnTableData(1);
+                }
+
             },
             handleCurrentChange(val) {
                 //点击 页码
                 console.log(`当前页: ${val}`);
-                this.initBussTableData(val);
+                if(this.activeName=="business"){
+                    this.initBussTableData(val);
+                }else{
+                    this.initAnnTableData(val);
+                }
             },
             initBussTableData(v_pageNum,v_pageSize) {
                 var param = this.businessForm;
@@ -369,7 +399,6 @@
                     str = "("+data+")"
                 }
                 document.getElementById("tab-announcement").innerHTML =  "公告通知<span style='color: red'>"+str+"</span>";
-
             })
             axios.post("/bussReceive/unreadCount", param).then(function (response) {
                 var data = response.data.data
@@ -379,7 +408,8 @@
                 }
                 document.getElementById("tab-business").innerHTML =  "业务消息<span style='color: red'>"+str+"</span>";
             })
-            window.parent.homePageVM.messageCount()
+
+            // window.parent.homePageVM.messageCount()
         }
     });
 

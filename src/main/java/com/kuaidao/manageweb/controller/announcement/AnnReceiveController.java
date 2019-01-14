@@ -89,7 +89,7 @@ public class AnnReceiveController {
     @ResponseBody
     public JSONResult<Void> unreadCount(){
         Map map = new HashMap();
-        map.put("receiveUser","123456");
+        map.put("receiveUser","");
         JSONResult ids = annReceiveFeignClient.annUnreadCount(map);
         return ids;
     }

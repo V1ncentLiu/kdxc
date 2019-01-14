@@ -4,7 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
+
+import com.rabbitmq.http.client.domain.UserInfo;
 import org.apache.logging.log4j.core.config.plugins.validation.constraints.Required;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import com.kuaidao.manageweb.demo.entity.Address;
@@ -12,10 +15,29 @@ import com.kuaidao.manageweb.demo.entity.Address;
 @Controller
 @RequestMapping("/path")
 public class PathController {
-	
+
+	@Value("${ws_url_http}")
+	private String wsUrlHttp;
+	@Value("${mq_username}")
+	private String mqUserName;
+	@Value("${mq_password}")
+	private String mqPassword;
+	@Value("${ws_url_https}")
+	private String wsUrlHttps;
+
 	@RequestMapping("/index")
-	public  String index() {
+	public  String index(HttpServletRequest request) {
+
+		UserInfo userinfo = new UserInfo();
+		userinfo.setName("yangbiao");
+		request.setAttribute("user",userinfo);
+		request.setAttribute("wsUrlHttp",wsUrlHttp);
+		request.setAttribute("mqUserName",mqUserName);
+		request.setAttribute("mqPassword",mqPassword);
+		request.setAttribute("wsUrlHttps",wsUrlHttps);
+		request.setAttribute("userId","123456");
 		return "index";
+
 	}
 	
 	/**
@@ -33,7 +55,22 @@ public class PathController {
 	public String form() {
 		return "demo/form";
 	}
-	
+
+	@RequestMapping("/demo")
+	public String demo() {
+		return "demo/demo";
+	}
+
+	@RequestMapping("/test")
+	public String test() {
+		return "demo/test";
+	}
+
+	@RequestMapping("/innser")
+	public String innser() {
+		return "demo/innser";
+	}
+
 	@RequestMapping("/tablePage")
 	public String tablePage() {
 		return "tablePage";
