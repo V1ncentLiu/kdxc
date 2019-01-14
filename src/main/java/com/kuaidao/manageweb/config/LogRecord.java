@@ -19,9 +19,10 @@ import java.lang.annotation.RetentionPolicy;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface LogRecord {
   /**
-   * 更新；添加；删除；导出；推送；
+   * 更新；LOGIN:登录； LOGINOUT:退出登录；     INSERT:添加  UPDATE:编辑     DELETE:删除；
+   * EXPORT:导出；PUSH：推送；DISTRIBUTION：分配； RELEASE:释放；   TRANSFER:转移
    */
-  public enum OperationType{LOGIN,LOGINOUT,UPDATE,INSERT,DELETE,EXPORT,PUSH}
+  public enum OperationType{LOGIN,LOGINOUT,UPDATE,INSERT,DELETE,EXPORT,PUSH,IMPORTS,DISTRIBUTION,TRANSFER,RELEASE}
   /**
    * 对该请求的描述
    */
