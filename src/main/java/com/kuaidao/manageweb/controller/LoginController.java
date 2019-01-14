@@ -163,6 +163,7 @@ public class LoginController {
         smsCodeAndMobileValidReq.setMsgId(msgId);
         JSONResult result = msgPushFeignClient.validCodeAndMobile(smsCodeAndMobileValidReq);
         if (!JSONResult.SUCCESS.equals(result.getCode())) {
+            logger.error(result.getMsg());
             errorMessage = "验证码错误";
             loginRecord.setLoginStatus(Constants.LOGIN_STATUS_PASSWORD_ERROR);
         } else {
