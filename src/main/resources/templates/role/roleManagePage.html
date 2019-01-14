@@ -35,7 +35,7 @@
             border
             :data="dataTable" 
             >
-            <el-table-column align="center" prop="id" type="selection" width="55"></el-table-column>
+            <el-table-column align="center" prop="id"   @selection-change="handleSelectionChange"  type="selection" width="55"></el-table-column>
             <el-table-column align="center" prop="name" label="角色名称"></el-table-column>
             <el-table-column align="center" prop="userCount" label="角色成员（人）">
                 <template slot-scope="scope">
@@ -169,10 +169,30 @@ var roleListVM =new Vue({
                     cancelButtonText: '取消',
                     type: 'warning'
                 }).then(() => {
-                    this.$message({
-                        type: 'success',
-                        message: '删除成功!'
-                    });
+                	//删除角色
+                	var deleIpInfo= roleListVM.multipleSelection;
+    	        	var ids=[];
+    	            if(null!=deleIpInfo){
+    	             for ( var i = 0; i <deleIpInfo.length; i++){
+    	            	ids.push(deleIpInfo[i].id);
+    	              }
+    	            }
+    	             var param={};
+    	             param.deleteIds=ids;
+                     axios.post('/role/roleManager/deleteRoleInfo',param).then(function (response) {
+                       if(null===response||response.data==null||response.data.code!='0'){
+                             alert(response.data.message);
+                            return ;
+                       } 
+                       roleListVM.queryRoleDataList();
+                     })
+                     .catch(function (error) {
+                       console.log(error);
+                     })
+                     .then(function () {
+                    	
+                     });  
+                 
                 }).catch(() => {
                     this.$message({
                         type: 'info',

@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:th="http://www.thymeleaf.org">
 <head th:include="_header_include::frag(~{::title},~{},~{})">
-    <title>公告管理</title>
+    <title>消息中心</title>
 </head>
 
 <body>
@@ -30,7 +30,7 @@
                     </el-form>
                 </template>
                 <template>
-                    <el-table :data="businessData" height="650" border  @selection-change="handleSelectionChange">
+                    <el-table :data="businessData" height="650" border  @selection-change="handleSelectionChange" @row-dblclick="showBussMx">
                         <el-table-column type="selection" width="55"></el-table-column>
                         <el-table-column property="title" stripe label="标题" width="150"  > <!--:formatter="formatTitle"-->
                             <template slot-scope="scope">
@@ -89,7 +89,7 @@
                 </template>
 
                 <template>
-                    <el-table :data="annData" height="650" border  @selection-change="handleSelectionChange" >
+                    <el-table :data="annData" height="650" border  @selection-change="handleSelectionChange"  @row-dblclick="showAnnMx">
                         <el-table-column type="selection" width="55"></el-table-column>
                         <el-table-column property="title" label="标题" width="150" >
                             <template slot-scope="scope">
@@ -99,7 +99,7 @@
                         </el-table-column>  <!--:formatter="formatTitle"-->
                         <el-table-column property="content" label="消息内容"  >
                             <template slot-scope="scope">
-                                <span v-if="scope.row.status==0">{{ scope.row.content }}</span>
+                                <span v-if="scope.row.status==0">{{scope.row.content }}</span>
                                 <span style="color: #cccccc" v-else>{{ scope.row.content }}</span>
                             </template>
                         </el-table-column>  <!--:formatter="formatContent"-->
@@ -121,6 +121,26 @@
         </el-tabs>
     </template>
 </div>
+
+<div id="anndialog">
+    <el-dialog
+            title="公告通知"
+            :visible.sync="anndialogVisible" width="30%">
+        <p id="annTitle" style="margin-bottom: 10px;padding-top: 0px;text-align: center;font-size:18px;font-weight: bolder">标题</p>
+        <p id="annBody" style="font-size: 14px;text-indent: 2em">这是一段内容</p>
+    </el-dialog>
+</div>
+
+<div id="bussdialog">
+    <el-dialog
+            title="公告通知"
+            :visible.sync="bussdialogVisible" width="30%">
+        <p id="bussTitle" style="margin-bottom: 10px;padding-top: 0px;text-align: center;font-size:18px;font-weight: bolder">标题</p>
+        <p id="bussBody" style="font-size: 14px;text-indent: 2em">这是一段内容</p>
+    </el-dialog>
+</div>
+
+
 <style>
     .span {
         position:relative;
@@ -148,6 +168,55 @@
 </style>
 <!-- import common js-->
 <div th:include="_footer_include :: #jsLib"></div>
+
+<script>
+    var annDialogVm = new Vue({
+        el: '#anndialog',
+        data:{
+            anndialogVisible:false,
+            title:"",
+            content:""
+        },
+        methods:{
+            initDialogData(){
+                document.getElementById("annTitle").innerHTML=this.title;
+                document.getElementById("annBody").innerHTML=this.content;
+            },
+            showOutVisiable:function(){
+                this.dialogVisible = true
+            }
+        },
+        created() {
+        },
+        updated() {
+            this.initDialogData()
+        },
+    });
+
+    var bussDialogVm = new Vue({
+        el: '#bussdialog',
+        data:{
+            bussdialogVisible:false,
+            title:"",
+            content:""
+        },
+        methods:{
+            initDialogData(){
+                document.getElementById("bussTitle").innerHTML=this.title;
+                document.getElementById("bussBody").innerHTML=this.content;
+            },
+            showOutVisiable:function(){
+                this.bussdialogVisible = true
+            }
+        },
+        created() {
+        },
+        updated() {
+            this.initDialogData()
+        },
+    });
+</script>
+
 
 <script>
     var vm = new Vue({
@@ -189,6 +258,16 @@
 
         },
         methods: {
+            showAnnMx(row, event){
+                annDialogVm.title = row.title;
+                annDialogVm.content = row.content;
+                annDialogVm.anndialogVisible = true;
+            },
+            showBussMx(row, event){
+                bussDialogVm.title = row.title;
+                bussDialogVm.content = row.content;
+                bussDialogVm.bussdialogVisible = true;
+            },
             onAnnSubmit(){
                 var param = this.annForm;
                 param.pageSize =  this.pageSize;
@@ -215,6 +294,29 @@
                     });
             },
             changeAnnState(){
+                var rows = this.multipleSelection;
+                if(rows.length<1){
+                    this.$message({type:"warning",message:"没有勾选消息"})
+                }else {
+                    var rowIds = [];
+                    for (var i = 0; i < rows.length; i++) {
+                        rowIds.push(rows[i].id)
+                    }
+                    //调用后台数据删除操作。
+                    var param = {};
+                    param.ids = rowIds.join(",");
+                    axios.post('/annReceive/batchUpdate', param)
+                        .then(function (response) {
+
+                            vm.$message({type: 'success', message: '更新完成!',duration:2000,onClose:function(){
+                                    vm.initAnnTableData(1);
+                                }});
+                        })
+                        .catch(function (error) {
+                            queryFormVM.$message.error(error);
+                            console.log(error);
+                        });
+                }
             },
             onBussSubmit(){
                 var param = this.businessForm;
@@ -254,15 +356,15 @@
                     param.ids = rowIds.join(",");
                     axios.post('/bussReceive/batchUpdate', param)
                         .then(function (response) {
-                            vm.initBussTableData(1);
-                            vm.$message({type: 'success', message: '更新完成!'});
+                            vm.$message({type: 'success', message: '更新完成!',duration:2000,onClose:function(){
+                                    vm.initBussTableData(1);
+                                }});
                         })
                         .catch(function (error) {
                             queryFormVM.$message.error(error);
                             console.log(error);
                         });
                 }
-
             },
             handleSelectionChange(val) {
                 console.info(val);
@@ -290,12 +392,21 @@
                 //下拉框  每页 10,20条切换 调用
                 console.log(`每页 ${val} 条`);
                 this.pageSize = val;
-                this.initBussTableData(1);
+                if(this.activeName=="business"){
+                    this.initBussTableData(1);
+                }else{
+                    this.initAnnTableData(1);
+                }
+
             },
             handleCurrentChange(val) {
                 //点击 页码
                 console.log(`当前页: ${val}`);
-                this.initBussTableData(val);
+                if(this.activeName=="business"){
+                    this.initBussTableData(val);
+                }else{
+                    this.initAnnTableData(val);
+                }
             },
             initBussTableData(v_pageNum,v_pageSize) {
                 var param = this.businessForm;
@@ -369,7 +480,6 @@
                     str = "("+data+")"
                 }
                 document.getElementById("tab-announcement").innerHTML =  "公告通知<span style='color: red'>"+str+"</span>";
-
             })
             axios.post("/bussReceive/unreadCount", param).then(function (response) {
                 var data = response.data.data
@@ -379,7 +489,8 @@
                 }
                 document.getElementById("tab-business").innerHTML =  "业务消息<span style='color: red'>"+str+"</span>";
             })
-            window.parent.homePageVM.messageCount()
+
+            // window.parent.homePageVM.messageCount()
         }
     });
 

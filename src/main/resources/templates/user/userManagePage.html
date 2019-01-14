@@ -136,33 +136,32 @@
                 </el-col>
             </el-row>
             <el-form-item label="到期提醒通知设置：" :label-width="formLabelWidth">
-                <el-button type="primary" size="medium" class="marginB10">添加</el-button>
-                <el-row :gutter="20" class="marginB10">
-                    <el-col :span="8">
-                        <el-input v-model="form.name" autocomplete="off"></el-input>
-                    </el-col>
-                    <el-col :span="2">
-                        <el-form-item>天</el-form-item>
-                    </el-col>
-                    <el-col :span="4">
-                        <el-form-item><el-button type="primary" size="mini">删除</el-button></el-form-item>
-                    </el-col>
-                </el-row>
-                <el-row :gutter="20" class="marginB10">
-                    <el-col :span="8">
-                        <el-input v-model="form.name" autocomplete="off"></el-input>
-                    </el-col>
-                    <el-col :span="2">
-                        <el-form-item>天</el-form-item>
-                    </el-col>
-                    <el-col :span="4">
-                        <el-form-item><el-button type="primary" size="mini">删除</el-button></el-form-item>
-                    </el-col>
-                </el-row>
+                <el-button type="primary" size="medium" class="marginB10" @click="addDomain">添加</el-button>
+                <el-form-item
+                    v-for="(domain, index) in form.domains"
+                    :key="domain.key"
+                    :prop="'domains.' + index + '.value'"
+                    :rules="{
+                      required: true, message: '到期提醒通知天数不能为空', trigger: 'change'
+                    }"
+                    style="margin-bottom: 20px;"
+                >
+                    <el-row :gutter="20">
+                        <el-col :span="8">
+                            <el-input v-model="domain.value"></el-input>
+                        </el-col>
+                        <el-col :span="2">
+                            <el-form-item>天</el-form-item>
+                        </el-col>
+                        <el-col :span="4">
+                            <el-button @click.prevent="removeDomain(domain)">删除</el-button>
+                        </el-col>
+                    </el-row>
+                </el-form-item>
             </el-form-item>
         </el-form>
         <div slot="footer" class="dialog-footer">
-            <el-button type="primary" @click="dialogFormVisible = false">确 定</el-button>
+            <el-button type="primary" @click="submitForm('form')">确 定</el-button>
         </div>
     </el-dialog>
 </div>
@@ -173,6 +172,12 @@
 var roleList=[[${roleList}]];//当前字段所属的菜单组
 var passwordExpires=[[${passwordExpires}]];//密码最大使用时间
 var reminderTime=[[${reminderTime}]];//密码到期提醒时间
+var domains =[];
+for(var i=0;i<reminderTime.length;i++){
+	var domain = {};
+	domain.value=reminderTime[i];
+	domains.push(domain);
+}
 var userVM = new Vue({
         el: '#userManage',
         data: {
@@ -198,6 +203,7 @@ var userVM = new Vue({
                 dialogFormChooseRole: false,
                 dialogFormChooseOrg: false,
                 form: {
+                  	domains: domains,
                 	maxDay: passwordExpires
                 },
                 rules: {
@@ -212,13 +218,13 @@ var userVM = new Vue({
                     value: '',
                     label: '全部'
                 }, {
-                    value: '1',
+                    value: 1,
                     label: '启用'
                 }, {
-                    value: '2',
+                    value: 2,
                     label: '禁用'
                 }, {
-                    value: '3',
+                    value: 3,
                     label: '锁定'
                 }],
                 roleOptions: roleList,
@@ -229,8 +235,8 @@ var userVM = new Vue({
                     value: '2',
                     label: '姓名'
                 }, {
-                    value: '手机号',
-                    label: '禁用'
+                    value: '3',
+                    label: '手机号'
                 }],
                 value: '2'//下拉选项默认值
         },
@@ -335,18 +341,63 @@ var userVM = new Vue({
   	               return "";
   	           }
   	           return moment(cellValue).format("YYYY-MM-DD HH:mm:ss");
-  	         },
-              handleSizeChange(val) {
-                  //下拉框  每页 10,20条切换 调用
-                     console.log(`每页 ${val} 条`);
-                  this.pageSize = val;
-                  this.initTableData(1);
-               },
-               handleCurrentChange(val) {
-                   //点击 页码
-                 console.log(`当前页: ${val}`);
-                 this.initTableData(val);
-               }
+  	        },
+            handleSizeChange(val) {
+                //下拉框  每页 10,20条切换 调用
+                   console.log(`每页 ${val} 条`);
+                this.pageSize = val;
+                this.initTableData(1);
+             },
+             handleCurrentChange(val) {
+                 //点击 页码
+               console.log(`当前页: ${val}`);
+               this.initTableData(val);
+             },
+             // 提交弹窗
+             submitForm(formName) {
+              this.$refs[formName].validate((valid) => {
+                  if (valid) {
+                      console.log(this.form.domains)//
+                      var domains =this.form.domains;
+                      var array= new Array();
+                      var reminderTime=[[${reminderTime}]];//密码到期提醒时间
+                      for(var i=0;i<domains.length;i++){
+                    	  array.push(domains[i].value);
+                      }
+                      var param = {};
+                	  param.passwordExpires=this.form.maxDay;
+                	  param.reminderTime=array;
+                	  axios.post('/user/userManager/updatePasswordSetting', param)
+                      .then(function (response) {
+                            var result =  response.data;
+                            if(result.code=="0"){
+                            	userVM.$message.success("设置成功");
+                            	userVM.dialogFormVisible=false;
+                            }else{
+                            	userVM.$message.error(result.msg);
+                            }
+                      })
+                      .catch(function (error) {
+                           console.log(error);
+                      });
+                  } else {
+                      console.log('error submit!!');
+                      return false;
+                  }
+              });
+            },
+            removeDomain(item) {
+                var index = this.form.domains.indexOf(item)
+                if (index !== -1) {
+                    this.form.domains.splice(index, 1)
+                }
+            },
+            addDomain() {
+                this.form.domains.push({
+                    value: '',
+                    key: Date.now()
+                });
+            }
         },
         created(){
             console.info("create method");
