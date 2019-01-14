@@ -117,7 +117,7 @@ var homePageVM=new Vue({
         	location.href='/login';
         },
         gotoMsgCenterPage(){//消息中心跳转
-        	location.href='/messagecenter/messagecenter';
+        	location.href='/messagecenter/messageCenter';
         }
          
          
