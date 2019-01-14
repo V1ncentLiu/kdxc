@@ -333,7 +333,7 @@ public class CustomFieldController {
     @ResponseBody
     public JSONResult uploadCustomField(@RequestParam("file") MultipartFile file,@RequestParam("id") long menuId) throws Exception {
         List<List<Object>> excelDataList = ExcelUtil.read2007Excel(file.getInputStream());
-        logger.info("upload size:{{}}" , excelDataList.size());
+        logger.info("customfield upload size:{{}}" , excelDataList.size());
 
         if (excelDataList == null || excelDataList.size() == 0) {
             return  new JSONResult<>().fail(SysErrorCodeEnum.ERR_EXCLE_DATA.getCode(),SysErrorCodeEnum.ERR_EXCLE_DATA.getMessage());

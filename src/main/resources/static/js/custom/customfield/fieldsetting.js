@@ -198,15 +198,14 @@
                     .then(function (response) {
                         var data =  response.data;
                         if(data.code=='0'){
-                            fieldVM.$message({
-                                type: 'info',
-                                message: '删除成功'
-                            });   
+                        	fieldVM.$message({message:'刪除成功',type:'success',duration:2000,onClose:function(){
+                        		fieldVM.getQuery();
+                    	    }});  
                             
                         }else{
                             fieldVM.$message({
                                 message: "接口调用失败",
-                                type: 'warning'
+                                type: 'error'
                               }); 
                         }
                     })
@@ -214,7 +213,6 @@
                       console.log(error);
                     })
                     .then(function () {
-                        fieldVM.getQuery();
                     });
                     
                     
@@ -243,8 +241,11 @@
                            var resData = response.data;
                            if(resData.code=='0'){
                                fieldVM.$message('操作成功');
+                               fieldVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
+                            	   	fieldVM.getQuery();
+                       	        }});
+                               
                                fieldVM.dialogFormVisible = false;
-                               fieldVM.getQuery();
                            }else{
                                fieldVM.$message('操作失败');
                                console.error(resData);
@@ -356,6 +357,11 @@
                    
             },
             submitUpload() {//提交文件
+            	var fileList = this.fileList;
+            	if(!fileList || fileList.length!=1){
+            		this.$message.error({message:'请选择一个文件',type:'error'});
+            		return false;
+            	}
                 this.$refs.upload.submit();
               },
               handleChange(files,fileList){//只允许选择一个文件
@@ -373,7 +379,9 @@
             		  //清空文件里列表
                 	  this.$refs.upload.clearFiles();
                       this.dialogBatchVisible = false;
-                      this.$message('上传成功');
+                      this.$message({message:'上传成功',type:'success',duration:2000,onClose:function(){
+              	         fieldVM.getQuery();
+              	      }});
             	  }else{
             		  this.$message('上传失败');
             	  }
@@ -384,6 +392,9 @@
               },
               closeUploadFileDialog(){//关闭上传文件 dialog
             	  this.$refs.upload.clearFiles();
+              },
+              uploadError(){//上傳失敗
+            	  this.$message({message:'上传失败',type:'error'});
               }
               
             

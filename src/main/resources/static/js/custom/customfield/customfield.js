@@ -132,15 +132,15 @@ var fieldMenuVM = new Vue({
                     .then(function (response) {
                         var data =  response.data;
                         if(data.code=='0'){
-                        	fieldMenuVM.$message({
-                                type: 'info',
-                                message: '删除成功'
-                            });   
+                        	
+                        	fieldMenuVM.$message({message:'删除成功',type:'success',duration:2000,onClose:function(){
+                        		fieldMenuVM.initCustomFiledMenu();
+                    	    }});
                             
                         }else{
                         	fieldMenuVM.$message({
                                 message: "接口调用失败",
-                                type: 'warning'
+                                type: 'error'
                               }); 
                         }
                     })
@@ -148,7 +148,7 @@ var fieldMenuVM = new Vue({
                       console.log(error);
                     })
                     .then(function () {
-                    	fieldMenuVM.initCustomFiledMenu();
+                    	
                     });
                 	
                 	
@@ -165,9 +165,11 @@ var fieldMenuVM = new Vue({
                       .then(function (response) {
                           var resData = response.data;
                           if(resData.code=='0'){
-                              fieldMenuVM.$message('操作成功');
-                              fieldMenuVM.cancelForm(formName);
-                              fieldMenuVM.initCustomFiledMenu();
+                        	  fieldMenuVM.cancelForm(formName);
+                        	  fieldMenuVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
+                        		  fieldMenuVM.initCustomFiledMenu();
+                        	    }});
+                              
                           }else{
                               fieldMenuVM.$message('操作失败');
                               console.error(resData);

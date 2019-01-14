@@ -139,10 +139,10 @@
                                                    delText="删除失败"
                                                }
                                                
-                                               orgVM.$message({
-                                                   message: delText,
-                                                   type: 'warning'
-                                                 });
+                                             orgVM.$message({message:delText,type:'success',duration:2000,onClose:function(){
+                                            	 orgVM.initOrgTree();
+                                                 orgVM.getQuery();
+                                       	    }});
                                                
                                            }else{
                                         	   orgVM.$message({
@@ -155,8 +155,7 @@
                                          console.log(error);
                                        })
                                        .then(function () {
-                                    	   orgVM.initOrgTree();
-                                           orgVM.getQuery();
+                                    	  
                                        });
                                        
                                    }
@@ -242,11 +241,13 @@
                     .then(function (response) {
                     	var resData = response.data;
                     	if(resData.code=='0'){
-                    	    orgVM.$message('操作成功');
+                    	    orgVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
+                    	        orgVM.initOrgTree();
+                         	    orgVM.getQuery();
+                    	    }});
                     	    orgVM.cancelForm(formName);
                     	    orgVM.dialogFormVisible = false;
-                    	    orgVM.initOrgTree();
-                    	    orgVM.getQuery();
+                    	   
                     	}else{
                     		orgVM.$message('操作失败');
                     	}
