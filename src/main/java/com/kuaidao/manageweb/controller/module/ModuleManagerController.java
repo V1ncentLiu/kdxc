@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -67,8 +68,11 @@ public class ModuleManagerController {
 	 * @return
 	 */
 	@RequestMapping("/addModulePre")
-	public String addModulePre() {
-
+	public String addModulePre(HttpServletRequest request, Model model) {
+		String moduleId = request.getParameter("moduleId");
+		String levle = request.getParameter("level");
+		model.addAttribute("moduleId", moduleId);
+		model.addAttribute("levle", levle);
 		return "module/addModulePage";
 	}
 
@@ -83,6 +87,7 @@ public class ModuleManagerController {
 	@PostMapping("/saveModuleInfo")
 	@ResponseBody
 	public JSONResult<String> saveModuleInfo(@RequestBody ModuleInfoDTO dto) {
+		dto.setSystemCode("huiju");
 		JSONResult<String> pageJson = moduleManagerFeignClient.saveModuleInfo(dto);
 		return pageJson;
 	}

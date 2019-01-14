@@ -73,7 +73,7 @@
                 <el-col :span="6" :offset="6">
                     <el-form-item>
                         <el-button type="primary" @click="onSubmit('form')">提交</el-button>
-                        <el-button>取消</el-button>
+                        <el-button @click="toScheduleList">取消</el-button>
                     </el-form-item>
                 </el-col>
             </el-row>
@@ -86,7 +86,7 @@
 <div th:include="_footer_include :: #jsLib"></div>
 </body>
 <script th:inline="javascript">
-
+var schedule=[[${schedule}]];
    var addUserVm= new Vue({
         el: '#userManage',
         data: function() {
@@ -100,7 +100,7 @@
                     cronExpression: '',
                     params:'',
                     url: '',
-                    method: '1'
+                    method: 1
                     
                 },
                 rules: {
@@ -128,15 +128,19 @@
                 formLabelWidth: '150px',
                 formLabelWidth1: '120px',
                 methodOptions: [{
-                    value: '1',
+                    value: 1,
                     label: 'POST'
                 }, {
-                    value: '2',
+                    value: 2,
                     label: 'GET'
                 }]
             }        	  
         },
         methods: {
+        	//跳转任务列表页
+            toScheduleList() {
+          	  document.location.href='/schedule/scheduleManager/initScheduleList';
+            },
             onSubmit(formName) {
             	 this.$refs[formName].validate((valid) => {
           	       if (valid) {
@@ -148,18 +152,25 @@
        	             param.params = formData.params;
        	             param.url = formData.url;
        	             param.method = formData.method;
-       	             param.dataMap.params = formData.params;
-       	             param.dataMap.url = formData.url;
-       	             param.dataMap.method = formData.method;
+       	             var dataMap={};
+       	          	 dataMap.params = formData.params;
+       	      		 dataMap.url = formData.url;
+       	  			 dataMap.method = formData.method;
+       	             param.dataMap= dataMap;
+       	             var msg="新增";
+	       	         if(schedule!=null){
+       	             	param.jobId= schedule.jobId;
+       	             	msg="修改";
+	       	         }
        	             console.info(param);
-       	            axios.post("/schedule/scheduleManager/create", param)
+       	            axios.post("/schedule/scheduleManager/createOrUpdate", param)
        	            .then(function (response) {
        	            	console.info(response);
        	            	var data =response.data;
        	            	if(data.code!="0"){
-       	            		addUserVm.$message('新增失败');
+       	            		addUserVm.$message(response.msg);
        	            	}else{
-       	            		addUserVm.$message('新增成功');
+       	            		addUserVm.$message(msg+'成功');
        	                	document.location.href='/schedule/scheduleManager/initScheduleList';
        	            	}
        	            })
@@ -173,6 +184,18 @@
           	          }
           	        });
             }
+        },
+        created(){
+            console.info("create method");
+            if(schedule!=null){
+	            this.form.jobName= schedule.jobName;
+	            this.form.groupId= schedule.groupId;
+	            this.form.cronExpression = schedule.cronExpression;
+	            this.form.params = schedule.params;
+	            this.form.url = schedule.url;
+	            this.form.method = schedule.method;
+            }
+           
         }
     })
 </script>

@@ -16,7 +16,7 @@
     
     <el-row class="marginB10">
 		        <el-button type="primary" @click="toAddUser">增加任务</el-button>
-		        <el-button type="primary" @click="toUpdateUser">删除任务</el-button>
+		        <el-button type="primary" @click="deleteSchedule">删除任务</el-button>
 		        <el-button type="primary"  @click="toUpdateUser">修改任务</el-button>
 	    </el-row>
     <el-row>
@@ -106,7 +106,7 @@ var userVM = new Vue({
                        });
                       return;
                   }
-            	  document.location.href='/schedule/scheduleManager/initUpdateSchedule?id='+rows[0].id;
+            	  document.location.href='/schedule/scheduleManager/initCreateSchedule?id='+rows[0].jobId;
               },
               //修改状态
               updateStatus(id,status,msg) {
@@ -127,6 +127,33 @@ var userVM = new Vue({
                        console.log(error);
                   });
               },
+              //删除任务
+              deleteSchedule() {
+            	  var rows = this.multipleSelection;
+                  if(rows.length!=1){
+                      this.$message({
+                         message: '请选择一条数据进行删除',
+                         type: 'warning'
+                       });
+                      return;
+                  }
+            	  var param = {};
+            	  param.jobId=rows[0].jobId;
+            	  param.type=3;
+            	  axios.post('/schedule/scheduleManager/setStatus', param)
+                  .then(function (response) {
+                        var result =  response.data;
+                        if(result.code=="0"){
+                        	userVM.$message.success("删除成功");
+                        	userVM.searchTable();
+                        }else{
+                        	userVM.$message.error(result.msg);
+                        }
+                  })
+                  .catch(function (error) {
+                       console.log(error);
+                  });
+              },
               //状态转换方法
               transformStatus(row, column, cellValue, index) {
             	  var text="";
@@ -140,9 +167,9 @@ var userVM = new Vue({
               //状态转换方法
               transformMethod(row, column, cellValue, index) {
             	  var text="";
-                  if(cellValue=="1"){
+                  if(cellValue=="2"){
                 	  text="GET"
-                  }else if(cellValue=="2"){
+                  }else if(cellValue=="1"){
                 	  text="POST"
                   }
                   return text;
