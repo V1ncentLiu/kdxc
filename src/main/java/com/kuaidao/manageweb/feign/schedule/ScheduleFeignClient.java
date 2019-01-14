@@ -23,7 +23,7 @@ import com.kuaidao.schedule.entity.QrtzJob;
  * @date: 2019年1月4日
  * @version V1.0
  */
-@FeignClient(name = "schedule-service", path = "/schedule/v1.0/job",
+@FeignClient(name = "schedule-service-zhang", path = "/schedule/v1.0/job",
         fallback = ScheduleFeignClient.HystrixClientFallback.class)
 public interface ScheduleFeignClient {
 
