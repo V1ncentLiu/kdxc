@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:th="http://www.thymeleaf.org">
+<head th:include="_header_include::frag(~{::title},~{},~{})">
+    <title>日志管理</title>
+    <style>
+        .organizationManage .leftBox{/*width: 200px;*/height: auto;border:1px solid #ebeef5;min-height: 480px;}
+        .organizationManage .leftTitle{background:#ebeef5;text-indent: 20px;height: 40px;line-height: 40px;}
+        .organizationManage .leftTree{padding:10px;}
+        .organizationManage .rightTitle{background:#ebeef5;text-indent: 20px;height: 40px;line-height: 40px;}
+    </style>
+</head>
+<body>
+<div id="organizationManage" class="organizationManage mainPadding">  
+    <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
+        <el-breadcrumb-item>Home</el-breadcrumb-item>
+        <el-breadcrumb-item>系统管理</el-breadcrumb-item>
+        <el-breadcrumb-item><a href="JavaScript:void(0)" data-url="b.html">日志管理</a></el-breadcrumb-item>
+    </el-breadcrumb>
+    <el-row :gutter="20">
+        <el-col :xs="12" :sm="7" :md="5" :lg="3" :xl="3">
+            <div class="leftBox">
+                <div class="leftTitle fs16"></div>
+               
+            </div>            
+        </el-col>
+        <el-col :xs="12" :sm="17" :md="19" :lg="21" :xl="21">
+            <el-row class="marginB10">
+               <el-tabs v-model="activeName" @tab-click="handleClick" >
+			    <el-tab-pane label="访问日志" name="first"></el-tab-pane>
+			    <el-tab-pane label="操作日志" name="second"></el-tab-pane>
+			  </el-tabs>
+				<div class="block">
+					<span class="demonstration">操作时间</span>
+					<el-date-picker value-format="yyyy-MM-dd" v-model="beginTime" type="date" placeholder="选择日期">
+					</el-date-picker>
+					<span class="demonstration" style="margin-left: 20px;">结束</span>
+					<el-date-picker value-format="yyyy-MM-dd" v-model="endTime" type="date" placeholder="选择日期">
+					</el-date-picker>
+					<el-input style="width:15%;"  v-model="content" placeholder="日志内容"></el-input>
+					<el-select v-model="queryType" placeholder="请选择">
+					    <el-option
+					      v-for="item in options"
+					      :key="item.value"
+					      :label="item.label"
+					      :value="item.value">
+					    </el-option>
+  					</el-select>
+  					<el-input style="width:15%;"  v-model="searchContent" placeholder="请输入查询内容"></el-input>
+  					<el-button type="primary" @click="queryLogDataList">查询</el-button>
+				</div>
+                
+            </el-row>
+            <el-row>
+                <el-table 
+                    ref="multipleTable"
+                    tooltip-effect="dark"
+                    empty-text="无数据"
+                    style="width: 100%"
+                    border
+                    :data="dataTable" 
+                    >
+                    <el-table-column align="center" type="index" prop="name" label="序号"></el-table-column>
+                     <!-- <el-table-column prop="date" label="全选" width="180"></el-table-column>  -->
+                    <el-table-column align="center" prop="userName" label="登陆名称"></el-table-column>
+                    <el-table-column align="center" prop="name" label="姓名"></el-table-column>
+                    <el-table-column align="center" prop="phone" label="登陆手机号"></el-table-column>
+                    <el-table-column align="center" prop="remoteIP" label="登录IP"></el-table-column>
+                    <el-table-column align="center" prop="menuName" label="日志内容"></el-table-column>
+                    <el-table-column align="center" prop="reqStartTime" label="操作时间"></el-table-column>
+                </el-table>
+                 <table-pagination :pager="pager" ></table-pagination>
+            </el-row>
+        </el-col>
+    </el-row>
+  
+</div>
+</body>
+<!-- import common js-->
+<div th:include="_footer_include :: #jsLib"></div>
+<script th:inline="javascript">
+
+    var orgData=[[${orgData}]];
+
+   var orgVM =  new Vue({
+        el: '#organizationManage',
+        data: {
+            	activeName: 'first',
+            	beginTime:"",
+            	endTime:"",
+            	queryType:"1",
+            	content:"",
+            	searchContent:"",
+                dataTree: orgData,//组织结构tree
+                dataTable:[],
+                multipleSelection: [],
+                dialogFormVisible: false,
+                options: [{
+                	value: '1',
+                    label: '登陆名称'	
+                	},
+                	{
+                   	value: '2',
+                    label: '姓名'	
+                   	}
+                ],
+                pager:{
+                    total: 0,
+                    currentPage: 1,
+                    pageSize: 20,
+                },
+             
+        },
+        methods: {
+        	queryLogDataList(){//查询按钮
+            	  var param = {}; 
+            	  var pageSize = this.pager.pageSize;
+                  var pageNum = this.pager.currentPage;
+                  param.pageNum = pageNum;
+                  param.pageSize = pageSize;
+                  param.beginTime=this.beginTime;
+                  param.endTime=this.endTime;
+                  param.content=this.content;
+                  param.queryType=this.queryType;
+                  param.searchContent=this.searchContent;
+                  param.visitType = 1;
+                  console.log(param);
+                  axios.post('/log/log/queryLogDataList',param).then(function (response) {
+                  	  console.log(response);
+                             if(null===response||response.data==null||response.data.code!='0'){
+                          	  alert(response.data.message);
+                          	  return ;
+                             }else{
+                            	 orgVM.dataTable =response.data.data.data; 
+                            	 orgVM.pager.currentPage= response.data.data.currentPage;
+                            	 orgVM.pager.total= response.data.data.total;
+                             }
+                  })
+                  .catch(function (error) {
+                    console.log(error);
+                  })
+                  .then(function () {
+                  });  
+                  
+              } ,
+              handleClick(tab, event) {
+                if(tab.name=='first'){
+                	window.location.href="/log/log/visitLog";
+                }else{
+                	window.location.href="/log/log/operationLog";
+                }
+              },
+        },
+        created(){
+        	this.queryLogDataList();
+        	
+        }//created方法 结束
+    })
+</script>
+</html>
