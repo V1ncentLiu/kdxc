@@ -224,6 +224,7 @@
                     });  
             },
             addChildOrg(){
+            	this.form.id='';
             	var curData = this.selectedNode;
             	if(!curData){
             		this.$message({
