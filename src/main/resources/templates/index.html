@@ -21,7 +21,7 @@
                 <img th:href="@{/images/logoimg.png}" alt="">
             </div>   
             <div class="f-fr">
-                <el-button type="primary" class="messageBtn f-fl" @click="gotoMsgCenterPage">消息中心<em class="redcolor">&nbsp;(&nbsp;2&nbsp;)</em></el-button>
+                <el-button type="primary" class="messageBtn f-fl" @click="openMessageCenter">消息中心<em class="redcolor">&nbsp;(&nbsp;2&nbsp;)</em></el-button>
                 <i class="iconfont icon-touxiang headerImg f-fl"></i>
                 <!-- 下拉 -->
                 <el-dropdown trigger="click"  @command="handleCommand">
@@ -105,9 +105,19 @@
 	  </span>
 </el-dialog>
  <!-- 退出登录 dialog start -->
- 
-</div>  
+</div>
 
+<!--<div id="anndialog">-->
+<!--<el-dialog-->
+        <!--title="提示"-->
+        <!--:visible.sync="anndialogVisible" width="30%" :before-close="handleClose">-->
+    <!--<p id="annTitle">标题</p>-->
+    <!--<p id="annBody">这是一段内容</p>-->
+    <!--<span slot="footer" class="dialog-footer">-->
+        <!--<el-button type="primary" @click="dialogVisible = false">我知道了</el-button>-->
+   <!--</span>-->
+<!--</el-dialog>-->
+<!--</div>-->
 </body>
 <!-- import common js-->
 <div th:include="_footer_include :: #jsLib"></div>
@@ -116,6 +126,94 @@
     var user=[[${user}]];
 </script>
 
-<script th:src="@{/js/custom/homepage/index.js}"></script>
+<!--<script>-->
+    <!--var annDialogVm = new Vue({-->
+        <!--el: '#anndialog',-->
+        <!--data:{-->
+            <!--anndialogVisible:false,-->
+            <!--id:""-->
+        <!--},-->
+        <!--methods:{-->
+            <!--initDialogData(){-->
+                <!--var param = {};-->
+                <!--param.id = this.id;-->
+                <!--axios.post('/ann/queryOneAnn', param)-->
+                    <!--.then(function (response) {-->
+                        <!--console.log(response.data)-->
+                        <!--if(response.data.code==0){-->
+                            <!--document.getElementById("annTitle").innerText=response.data.data.title;-->
+                            <!--document.getElementById("annBody").innerText=response.data.data.content;-->
+                        <!--}-->
+                    <!--})-->
+                    <!--.catch(function (error) {-->
+                        <!--console.log(error);-->
+                    <!--});-->
+            <!--},-->
+            <!--showOutVisiable:function(){-->
+                <!--this.dialogVisible = true-->
+            <!--}-->
+        <!--},-->
+        <!--created() {-->
+            <!--console.info("create method");-->
+            <!--this.initDialogData();-->
+        <!--},-->
 
+    <!--});-->
+<!--</script>-->
+
+<script th:src="@{/js/custom/homepage/index.js}"></script>
+<script th:src="@{/js/rabbitmq/stomp.js}"></script>
+<script th:src="@{/js/rabbitmq/sockjs.js}"></script>
+<!--<script type="text/javascript">-->
+    <!--var client;-->
+    <!--var ws_url = '[[${wsUrlHttp}]]';-->
+    <!--var ws_url_https = '[[${wsUrlHttps}]]';-->
+    <!--var mqUserName = '[[${mqUserName}]]';-->
+    <!--var mqPassword = '[[${mqPassword}]]';-->
+
+    <!--// var userId = '[[${userId}]]'-->
+    <!--// var sessionid = '[[${sessionid}]]'-->
+    <!--var urlpath = window.location.href;-->
+    <!--//判断访问地址是否为htts协议-->
+    <!--if(urlpath.indexOf("https://")!=-1){-->
+        <!--ws_url=ws_url_https;-->
+    <!--}-->
+    <!--var ws=null ;-->
+    <!--var numberopt=0;-->
+    <!--function connectMQ() {-->
+        <!--if (location.search == '?ws') {-->
+            <!--ws = new WebSocket(ws_url+'/ws');-->
+        <!--} else {-->
+            <!--ws = new SockJS(ws_url+'/stomp');-->
+        <!--}-->
+        <!--client = Stomp.over(ws);-->
+        <!--client.heartbeat.outgoing = 30000;//客户端会发送心跳每30000ms-->
+        <!--client.heartbeat.incoming = 0;-->
+
+        <!--var on_connect = function(x) {-->
+            <!--//只有在登录的时候才能够接收到消息，其他的别的时候是接收不到消息提醒的。-->
+            <!--client.subscribe("/topic/#."+userId, function(data) {-->
+                <!--var msg = data.body;-->
+                <!--if(msg.indexOf("announce") != -1){-->
+                    <!--var annid = msg.split(",")[1];-->
+                    <!--annDialogVm.showOutVisiable();-->
+                <!--}-->
+            <!--});-->
+        <!--};-->
+
+        <!--var on_error =  function(data) {-->
+            <!--console.log('error');-->
+            <!--if(data.body){data = data.body;}-->
+            <!--//链接一段时间后：链接会断开，断开后自动重连-->
+            <!--if(numberopt==0 && data.indexOf("Whoops! Lost connection")==0) {-->
+                <!--// connectMQ();-->
+                <!--// numberopt=1;-->
+                <!--// var param = {"data" : data};-->
+                <!--//$.ajax({type: 'POST', url:rootPath+"/management/index/webSocketLog", contentType : 'application/json', data : JSON.stringify(param), dataType:"json", cache: false, success: function(result){},});-->
+            <!--}-->
+        <!--};-->
+        <!--client.connect(mqUserName, mqPassword, on_connect, on_error, '/');-->
+    <!--}-->
+    <!--connectMQ();-->
+<!--</script>-->
 </html>
