@@ -99,9 +99,9 @@ public class LoginController {
 
     @Value("${ws_url_http}")
     private String wsUrlHttp;
-    @Value("${mq_username}")
+    @Value("${spring.rabbitmq.username}")
     private String mqUserName;
-    @Value("${mq_password}")
+    @Value("${spring.rabbitmq.password}")
     private String mqPassword;
     @Value("${ws_url_https}")
     private String wsUrlHttps;
