@@ -23,6 +23,10 @@ public class ManageWebApplication {
         SpringApplication.run(ManageWebApplication.class, args);
     }
 
+    /**
+     * @responsebody 返回json的数据中，把 Long 类型转为 String(因 浏览器会对Long类型的数据截断)
+     * @return
+     */
     @Bean("jackson2ObjectMapperBuilderCustomizer")
     public Jackson2ObjectMapperBuilderCustomizer jackson2ObjectMapperBuilderCustomizer() {
         Jackson2ObjectMapperBuilderCustomizer customizer =
