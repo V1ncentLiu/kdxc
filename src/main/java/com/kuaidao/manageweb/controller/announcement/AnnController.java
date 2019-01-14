@@ -20,6 +20,8 @@ import com.kuaidao.sys.dto.announcement.annReceive.AnnReceiveAddAndUpdateDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import com.kuaidao.sys.dto.user.UserInfoPageParam;
 import com.rabbitmq.http.client.domain.UserInfo;
+import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.subject.Subject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.AmqpException;
@@ -74,6 +76,15 @@ public class AnnController {
     @ResponseBody
     public JSONResult saveAnn(@Valid @RequestBody AnnouncementAddAndUpdateDTO dto  , BindingResult result){
         if (result.hasErrors()) return validateParam(result);
+
+        Subject subject = SecurityUtils.getSubject();
+        UserInfoDTO user = (UserInfoDTO) subject.getSession().getAttribute("user");
+        if(user==null){
+            dto.setCreateUser(123456L);
+        }else{
+            dto.setCreateUser(user.getId());
+        }
+
         long annId = IdUtil.getUUID();
         dto.setId(annId);  //公告ID
         JSONResult jsonResult = announcementFeignClient.publishAnnouncement(dto);
@@ -104,24 +115,21 @@ public class AnnController {
             }
             annReceiveFeignClient.batchInsert(annrList);
 
-//            list = new ArrayList();
-//            if(list.size()==0){
-//                UserInfoDTO user = new UserInfoDTO();
-//                user.setId(123456L);
-//                user.setUsername("yangbiao");
-//                user.setPhone("18210470854");
-//                user.setOrgId(3453453L);
-//                list.add(user);
-//            }
+
+        /*
+            list = new ArrayList();
+            if(list.size()==0){
+                UserInfoDTO user = new UserInfoDTO();
+                user.setId(123456L);
+                user.setUsername("yangbiao");
+                user.setPhone("18210470854");
+                user.setOrgId(3453453L);
+                list.add(user);
+            }
+        */
+
             Integer type = dto.getType();
             if(type==1||type==0){ //站内公告通知
-//              消息通知
-                /**
-                 * void send(Message message) throwsAmqpException;
-                 * void send(String routingKey, Message message) throwsAmqpException;
-                 * void send(String exchange, String routingKey, Message message) throwsAmqpException;
-                 */
-//                amqpTemplate.convertAndSend("","",new Message());
                 for(UserInfoDTO userInfo:list){
                     amqpTemplate.convertAndSend("amq.topic",userInfo.getOrgId()+"."+userInfo.getId(),"announce,"+annId);
                 }
