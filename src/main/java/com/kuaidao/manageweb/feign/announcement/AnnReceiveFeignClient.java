@@ -6,6 +6,7 @@ import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.sys.dto.announcement.AnnouncementAddAndUpdateDTO;
 import com.kuaidao.sys.dto.announcement.AnnouncementQueryDTO;
+import com.kuaidao.sys.dto.announcement.annReceive.AnnReceiveAddAndUpdateDTO;
 import com.kuaidao.sys.dto.announcement.annReceive.AnnReceiveQueryDTO;
 import com.kuaidao.sys.dto.announcement.annReceive.AnnReceiveRespDTO;
 import com.kuaidao.sys.dto.dictionary.DictionaryRespDTO;
@@ -45,6 +46,9 @@ public interface AnnReceiveFeignClient {
     @PostMapping("/unreadCount")
     public JSONResult annUnreadCount(@RequestBody Map map);
 
+    @PostMapping("/batchInsert")
+    public JSONResult batchInsert(@RequestBody List<AnnReceiveAddAndUpdateDTO> list);
+
     @Component
     static class HystrixClientFallback implements AnnReceiveFeignClient {
 
@@ -80,6 +84,11 @@ public interface AnnReceiveFeignClient {
         @Override
         public JSONResult annUnreadCount(Map map) {
             return fallBackError("公告记录，未读信息数量获取失败");
+        }
+
+        @Override
+        public JSONResult batchInsert(List<AnnReceiveAddAndUpdateDTO> list) {
+            return fallBackError("公告记录：站内通知-批量插入失败");
         }
     }
 

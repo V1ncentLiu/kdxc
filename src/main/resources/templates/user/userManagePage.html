@@ -19,7 +19,7 @@
 	    <el-row class="marginB10">
 		    <el-form-item>
 		        <el-button type="primary" @click="toAddUser"><i class="el-icon-plus"></i>添加用户</el-button>
-		        <el-button type="primary"><a href="editUserPage.html">编辑用户</a></el-button>
+		        <el-button type="primary" @click="toUpdateUser">编辑用户</el-button>
 		        <el-button type="primary" class="f-fr" @click="dialogFormVisible = true">密码安全设置</el-button>
 	    	</el-form-item>
 	    </el-row>
@@ -85,7 +85,7 @@
     
     
     <el-row>
-        <el-table  ref="multipleTable" tooltip-effect="dark"
+        <el-table  ref="multipleTable" tooltip-effect="dark" @selection-change="handleSelectionChange"
             style="width: 100%"  :data="dataTable" >
             <el-table-column align="center" type="selection" width="55"></el-table-column>
             <!-- <el-table-column prop="date" label="全选" width="180"></el-table-column> -->
@@ -124,11 +124,11 @@
     </el-row>
     <!-- dialog -->
     <el-dialog title="密码安全设置" :visible.sync="dialogFormVisible">
-        <el-form :model="form">
+        <el-form :model="form" :rules="rules" ref="form">
             <el-row :gutter="20">
                 <el-col :span="12">
-                    <el-form-item label="密码最长使用期限：" :label-width="formLabelWidth">
-                        <el-input v-model="form.name" autocomplete="off"></el-input>
+                    <el-form-item label="密码最长使用期限：" :label-width="formLabelWidth" prop="maxDay">
+                        <el-input v-model="form.maxDay" autocomplete="off"></el-input>
                     </el-form-item>
                 </el-col>
                 <el-col :span="4">
@@ -171,6 +171,8 @@
 </body>
 <script th:inline="javascript">
 var roleList=[[${roleList}]];//当前字段所属的菜单组
+var passwordExpires=[[${passwordExpires}]];//密码最大使用时间
+var reminderTime=[[${reminderTime}]];//密码到期提醒时间
 var userVM = new Vue({
         el: '#userManage',
         data: {
@@ -187,16 +189,23 @@ var userVM = new Vue({
 	                currentPage: 1,
 	                pageSize: 20,
 	            },
+	            multipleSelection:[],
+	            passwordExpires:passwordExpires,
+	            reminderTime:reminderTime,
                 radio:'',
                 dialogFormVisible: false,
                 dialogFormAdd: false,
                 dialogFormChooseRole: false,
                 dialogFormChooseOrg: false,
                 form: {
-                    name: '',
-                    delivery: false,
-                    type: []
+                	maxDay: passwordExpires
                 },
+                rules: {
+                	maxDay: [
+                      { required: true, message: '密码最长使用期限不能为空。', trigger: 'blur' },
+                      {  max: 3, message: '最大3个字符', trigger: 'blur' }
+                    ]
+                  },
                 formLabelWidth: '150px',
                 formLabelWidth1: '120px',
                 statusOptions: [{
@@ -261,9 +270,25 @@ var userVM = new Vue({
                   this.$refs[formName].resetFields();
                   this.$refs[formName].resetFields();
               },
+              //选择行
+              handleSelectionChange(val) {
+                  this.multipleSelection = val;
+              },
               //跳转新增用户页
               toAddUser() {
             	  document.location.href='/user/userManager/initCreateUser';
+              },
+              //跳转新增用户页
+              toUpdateUser() {
+            	  var rows = this.multipleSelection;
+                  if(rows.length!=1){
+                      this.$message({
+                         message: '请选择一条数据进行修改',
+                         type: 'warning'
+                       });
+                      return;
+                  }
+            	  document.location.href='/user/userManager/initUpdateUser?id='+rows[0].id;
               },
               //修改状态
               updateStatus(id,status,msg) {

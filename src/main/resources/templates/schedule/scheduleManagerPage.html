@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"  xmlns:th="http://www.thymeleaf.org">
+<head th:replace="_header_include::frag(~{::title},~{},~{})">
+    <title>后台管理系统</title>
+    <style>
+        button a{color:#fff!important;}
+    </style>
+</head>
+<body>
+<div id="userManage" class="userManage mainPadding">  
+    <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
+        <el-breadcrumb-item>Home</el-breadcrumb-item>
+        <el-breadcrumb-item>系统管理</el-breadcrumb-item>
+        <el-breadcrumb-item><a href="JavaScript:void(0)" data-url="a.html">任务管理</a></el-breadcrumb-item>
+    </el-breadcrumb>
+    
+    <el-row class="marginB10">
+		        <el-button type="primary" @click="toAddUser">增加任务</el-button>
+		        <el-button type="primary" @click="toUpdateUser">删除任务</el-button>
+		        <el-button type="primary"  @click="toUpdateUser">修改任务</el-button>
+	    </el-row>
+    <el-row>
+        <el-table  ref="multipleTable" tooltip-effect="dark" @selection-change="handleSelectionChange"
+            style="width: 100%"  :data="dataTable" >
+            <el-table-column align="center" type="selection" width="55"></el-table-column>
+            <!-- <el-table-column prop="date" label="全选" width="180"></el-table-column> -->
+            <el-table-column align="center" prop="jobName" label="任务名称"></el-table-column>
+            <el-table-column align="center" prop="groupId" label="任务组ID"></el-table-column>
+            <el-table-column align="center" prop="cronExpression" label="时间格式"></el-table-column>
+            <el-table-column align="center" prop="url" label="地址URL"></el-table-column>
+            <el-table-column align="center" prop="method" label="方法（GET/POST）" :formatter="transformRole"></el-table-column>
+           <el-table-column align="center" prop="params" label="参数JSON格式"  :formatter="dateFormat" ></el-table-column>
+            <el-table-column align="center" prop="jobState" label="任务状态" :formatter="transformStatus"></el-table-column>
+            <el-table-column align="center" label="操作">
+                <template slot-scope="scope">
+	                <div v-if="scope.row.jobState == 1">
+	                    <el-button  @click="updateStatus(scope.row.jobId,2,'启动')" type="text"  size="small">
+	                     		   启动
+	                    </el-button>
+					</div>
+	                <div v-else-if="scope.row.jobState == 2">
+	                    <el-button @click="updateStatus(scope.row.jobId,1,'停止')"  type="text"  size="small">
+	                     		   停止
+	                    </el-button>
+					</div>
+                </template>
+            </el-table-column>
+        </el-table>
+        <table-pagination :pager="pager" @change="searchTable"></table-pagination>
+    </el-row>
+    
+</div>
+<!-- import common js-->
+<div th:include="_footer_include :: #jsLib"></div>
+</body>
+<script th:inline="javascript">
+var userVM = new Vue({
+        el: '#userManage',
+        data: {
+	            dataTable:[],
+	            pager:{
+	                total: 0,
+	                currentPage: 1,
+	                pageSize: 20,
+	            },
+	            multipleSelection:[],
+                formLabelWidth: '150px',
+                formLabelWidth1: '120px'
+        },
+        methods: {
+        	searchTable() {
+                var param ={};
+                
+                param.pageSize = this.pager.pageSize;
+                param.pageNum = this.pager.currentPage;
+                console.info(param);
+                axios.post('/schedule/scheduleManager/list', param)
+                .then(function (response) {
+                      var result =  response.data;
+                      console.info(result);
+                      var table=result.data;
+                      userVM.dataTable= table.data;
+                      userVM.pager.total =  table.total;
+                      userVM.pager.currentPage = table.currentPage;
+                })
+                .catch(function (error) {
+                     console.log(error);
+                });
+                
+              },
+              //选择行
+              handleSelectionChange(val) {
+                  this.multipleSelection = val;
+              },
+              //跳转新增用户页
+              toAddUser() {
+            	  document.location.href='/schedule/scheduleManager/initCreateSchedule';
+              },
+              //跳转新增用户页
+              toUpdateUser() {
+            	  var rows = this.multipleSelection;
+                  if(rows.length!=1){
+                      this.$message({
+                         message: '请选择一条数据进行修改',
+                         type: 'warning'
+                       });
+                      return;
+                  }
+            	  document.location.href='/schedule/scheduleManager/initUpdateSchedule?id='+rows[0].id;
+              },
+              //修改状态
+              updateStatus(id,status,msg) {
+            	  var param = {};
+            	  param.jobId=id;
+            	  param.type=status;
+            	  axios.post('/schedule/scheduleManager/setStatus', param)
+                  .then(function (response) {
+                        var result =  response.data;
+                        if(result.code=="0"){
+                        	userVM.$message.success(msg+"成功");
+                        	userVM.searchTable();
+                        }else{
+                        	userVM.$message.error(msg+"失败");
+                        }
+                  })
+                  .catch(function (error) {
+                       console.log(error);
+                  });
+              },
+              //状态转换方法
+              transformStatus(row, column, cellValue, index) {
+            	  var text="";
+                  if(cellValue=="1"){
+                	  text="停止"
+                  }else if(cellValue=="2"){
+                	  text="启动"
+                  }
+                  return text;
+              },
+              //状态转换方法
+              transformRole(row, column, cellValue, index) {
+            	  var text="";
+                  if(cellValue=="1"){
+                	  text="GET"
+                  }else if(cellValue=="2"){
+                	  text="POST"
+                  }
+                  return text;
+              },
+              handleSizeChange(val) {
+                  //下拉框  每页 10,20条切换 调用
+                     console.log(`每页 ${val} 条`);
+                  this.pageSize = val;
+                  this.initTableData(1);
+               },
+               handleCurrentChange(val) {
+                   //点击 页码
+                 console.log(`当前页: ${val}`);
+                 this.initTableData(val);
+               }
+        },
+        created(){
+            console.info("create method");
+            this.searchTable();
+           
+        },
+        mounted(){
+           console.info("mounted method");
+        }
+    })
+    
+</script>
+</html>
