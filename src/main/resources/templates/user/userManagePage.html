@@ -135,31 +135,6 @@
                     <el-form-item>天</el-form-item>
                 </el-col>
             </el-row>
-            <!-- <el-form-item label="到期提醒通知设置：" :label-width="formLabelWidth">
-                <el-button type="primary" size="medium" class="marginB10">添加</el-button>
-                <el-row :gutter="20" class="marginB10">
-                    <el-col :span="8">
-                        <el-input v-model="form.name" autocomplete="off"></el-input>
-                    </el-col>
-                    <el-col :span="2">
-                        <el-form-item>天</el-form-item>
-                    </el-col>
-                    <el-col :span="4">
-                        <el-form-item><el-button type="primary" size="mini">删除</el-button></el-form-item>
-                    </el-col>
-                </el-row>
-                <el-row :gutter="20" class="marginB10">
-                    <el-col :span="8">
-                        <el-input v-model="form.name" autocomplete="off"></el-input>
-                    </el-col>
-                    <el-col :span="2">
-                        <el-form-item>天</el-form-item>
-                    </el-col>
-                    <el-col :span="4">
-                        <el-form-item><el-button type="primary" size="mini">删除</el-button></el-form-item>
-                    </el-col>
-                </el-row>
-            </el-form-item> -->
             <el-form-item label="到期提醒通知设置：" :label-width="formLabelWidth">
                 <el-button type="primary" size="medium" class="marginB10" @click="addDomain">添加</el-button>
                 <el-form-item
@@ -197,6 +172,12 @@
 var roleList=[[${roleList}]];//当前字段所属的菜单组
 var passwordExpires=[[${passwordExpires}]];//密码最大使用时间
 var reminderTime=[[${reminderTime}]];//密码到期提醒时间
+var domains =[];
+for(var i=0;i<reminderTime.length;i++){
+	var domain = {};
+	domain.value=reminderTime[i];
+	domains.push(domain);
+}
 var userVM = new Vue({
         el: '#userManage',
         data: {
@@ -222,9 +203,7 @@ var userVM = new Vue({
                 dialogFormChooseRole: false,
                 dialogFormChooseOrg: false,
                 form: {
-                  domains: [{
-                        value: ''
-                  }],
+                  	domains: domains,
                 	maxDay: passwordExpires
                 },
                 rules: {
@@ -378,8 +357,29 @@ var userVM = new Vue({
              submitForm(formName) {
               this.$refs[formName].validate((valid) => {
                   if (valid) {
-                      alert('submit!');
                       console.log(this.form.domains)//
+                      var domains =this.form.domains;
+                      var array= new Array();
+                      var reminderTime=[[${reminderTime}]];//密码到期提醒时间
+                      for(var i=0;i<domains.length;i++){
+                    	  array.push(domains[i].value);
+                      }
+                      var param = {};
+                	  param.passwordExpires=this.form.maxDay;
+                	  param.reminderTime=array;
+                	  axios.post('/user/userManager/updatePasswordSetting', param)
+                      .then(function (response) {
+                            var result =  response.data;
+                            if(result.code=="0"){
+                            	userVM.$message.success("设置成功");
+                            	userVM.dialogFormVisible=false;
+                            }else{
+                            	userVM.$message.error(result.msg);
+                            }
+                      })
+                      .catch(function (error) {
+                           console.log(error);
+                      });
                   } else {
                       console.log('error submit!!');
                       return false;
