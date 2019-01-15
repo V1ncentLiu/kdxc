@@ -89,7 +89,7 @@
                 </template>
 
                 <template>
-                    <el-table :data="annData" height="650" border  @selection-change="handleSelectionChange"  @row-dblclick="showAnnMx">
+                    <el-table :data="annData" height="650" border  @selection-change="handleSelectionChange"  @row-dblclick="showAnnMx" >
                         <el-table-column type="selection" width="55"></el-table-column>
                         <el-table-column property="title" label="标题" width="150" >
                             <template slot-scope="scope">
@@ -97,7 +97,7 @@
                                 <span class="span" style="color: #cccccc" v-else><li class="tip1"></li>{{ scope.row.title }}</span>
                             </template>
                         </el-table-column>  <!--:formatter="formatTitle"-->
-                        <el-table-column property="content" label="消息内容"  >
+                        <el-table-column property="content" label="消息内容"  fit="false">
                             <template slot-scope="scope">
                                 <span v-if="scope.row.status==0">{{scope.row.content }}</span>
                                 <span style="color: #cccccc" v-else>{{ scope.row.content }}</span>
@@ -126,17 +126,25 @@
     <el-dialog
             title="公告通知"
             :visible.sync="anndialogVisible" width="30%">
-        <p id="annTitle" style="margin-bottom: 10px;padding-top: 0px;text-align: center;font-size:18px;font-weight: bolder">标题</p>
-        <p id="annBody" style="font-size: 14px;text-indent: 2em">这是一段内容</p>
+        <template>
+            <el-table
+                    :data="AnnDialogTableData"
+                    style="width: 100%">
+                <template v-for="(col ,index) in cols">
+                    <el-table-column :prop="col.prop" :label="col.label" header-align="center"></el-table-column>
+                </template>
+            </el-table>
+        </template>
     </el-dialog>
 </div>
 
 <div id="bussdialog">
     <el-dialog
             title="公告通知"
-            :visible.sync="bussdialogVisible" width="30%">
-        <p id="bussTitle" style="margin-bottom: 10px;padding-top: 0px;text-align: center;font-size:18px;font-weight: bolder">标题</p>
-        <p id="bussBody" style="font-size: 14px;text-indent: 2em">这是一段内容</p>
+            :visible.sync="bussdialogVisible" width="100%">
+            <template v-for="(col ,index) in cols">
+                <el-table-column :prop="col.prop" :label="col.label" header-align="center"></el-table-column>
+            </template>
     </el-dialog>
 </div>
 
@@ -165,6 +173,9 @@
         left:-10px;
         position:absolute;
     }
+    .el-dialog__body{
+        padding-top: 3px;
+    }
 </style>
 <!-- import common js-->
 <div th:include="_footer_include :: #jsLib"></div>
@@ -175,12 +186,12 @@
         data:{
             anndialogVisible:false,
             title:"",
-            content:""
+            content:"",
+            AnnDialogTableData:[],
+            cols: []
         },
         methods:{
             initDialogData(){
-                document.getElementById("annTitle").innerHTML=this.title;
-                document.getElementById("annBody").innerHTML=this.content;
             },
             showOutVisiable:function(){
                 this.dialogVisible = true
@@ -189,7 +200,7 @@
         created() {
         },
         updated() {
-            this.initDialogData()
+            // this.initDialogData()
         },
     });
 
@@ -198,12 +209,14 @@
         data:{
             bussdialogVisible:false,
             title:"",
-            content:""
+            content:"",
+            AnnDialogTableData:[],
+            cols: []
         },
         methods:{
             initDialogData(){
-                document.getElementById("bussTitle").innerHTML=this.title;
-                document.getElementById("bussBody").innerHTML=this.content;
+                // document.getElementById("bussTitle").innerHTML=this.title;
+                // document.getElementById("bussBody").innerHTML=this.content;
             },
             showOutVisiable:function(){
                 this.bussdialogVisible = true
@@ -261,11 +274,16 @@
             showAnnMx(row, event){
                 annDialogVm.title = row.title;
                 annDialogVm.content = row.content;
+                annDialogVm.AnnDialogTableData = [{content_:row.content}]
+                annDialogVm.cols =[{ label: row.title, prop: "content_", type: "normal" }];
                 annDialogVm.anndialogVisible = true;
             },
+
             showBussMx(row, event){
                 bussDialogVm.title = row.title;
                 bussDialogVm.content = row.content;
+                bussDialogVm.AnnDialogTableData = [{content_:row.content}]
+                bussDialogVm.cols =[{ label: row.title, prop: "content_", type: "normal" }];
                 bussDialogVm.bussdialogVisible = true;
             },
             onAnnSubmit(){
@@ -489,7 +507,6 @@
                 }
                 document.getElementById("tab-business").innerHTML =  "业务消息<span style='color: red'>"+str+"</span>";
             })
-
              window.parent.homePageVM.messageCount()
         }
     });
