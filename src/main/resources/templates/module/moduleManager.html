@@ -37,7 +37,7 @@
             <el-row class="marginB10">
                 <el-col :xs="12" :sm="16" :md="16" :lg="18" :xl="12">
                     <el-button type="primary"><a @click="clickAddModule"><i class="el-icon-plus"></i> 添加下级模块</a></el-button>
-                    <el-button type="primary">修改</el-button>
+                    <el-button type="primary" @click="modifyChildModule" >修改</el-button>
                     <el-button type="primary" @click="deleteFun">删除</el-button>
                 </el-col>
                 <el-col :xs="12" :sm="8" :md="8" :lg="6" :xl="12">
@@ -171,6 +171,19 @@ for(var i=0;i<moduleData.length;i++){
                       // always executed
                     });  
             },
+             modifyChildModule(){
+              //修改菜单数据	
+            	var rows = this.multipleSelection;
+                if(rows.length!=1){
+                    this.$message({
+                       message: '请选择一条数据进行修改',
+                       type: 'warning'
+                     });
+                    return;
+                }
+                debugger;
+                window.location.href="/module/moduleManager/queryModuleById?moduleId="+rows[0].id; 
+             },
             deleteFun() {
                 this.$confirm('确定要删除【模块名称1】【模块名称2】模块吗？', '提示', {
                     confirmButtonText: '确定',
@@ -184,7 +197,7 @@ for(var i=0;i<moduleData.length;i++){
   	        	    var ids=[];
   		            if(null!=deleInfo){
   		             for ( var i = 0; i <deleInfo.length; i++){
-  		            	ids.push(deleInfo[i].id);
+  		            	ids.push(d[i].id);
   		             }
   		             var param={};
   		             param.deleteById=ids;
