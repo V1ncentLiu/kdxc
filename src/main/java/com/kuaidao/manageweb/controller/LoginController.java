@@ -130,7 +130,7 @@ public class LoginController {
      */
     @RequestMapping("/login")
     public String login() {
-
+        SecurityUtils.getSubject().getSession().removeAttribute("isShowLogoutBox");
         return "login/login";
     }
 
@@ -141,7 +141,6 @@ public class LoginController {
      */
     @RequestMapping("/login/resetPwd")
     public String resetPwd() {
-
         return "login/resetPwd";
     }
 
@@ -363,6 +362,8 @@ public class LoginController {
      */
     @RequestMapping(value = "/login/sendmsg", method = {RequestMethod.POST})
     @ResponseBody
+    @LogRecord(description = "获取验证码", operationType = OperationType.PUSH,
+            menuName = MenuEnum.GET_CODE)
     public JSONResult sendMsg(@RequestBody LoginReq loginReq, HttpServletRequest request)
             throws Exception {
         String msg = "";
@@ -435,6 +436,8 @@ public class LoginController {
      */
     @RequestMapping(value = "/login/sendmsgPwd", method = {RequestMethod.POST})
     @ResponseBody
+    @LogRecord(description = "获取验证码", operationType = OperationType.PUSH,
+            menuName = MenuEnum.GET_CODE)
     public JSONResult sendmsgPwd(@RequestBody LoginReq loginReq, HttpServletRequest request)
             throws Exception {
         String msg = "";
@@ -469,6 +472,8 @@ public class LoginController {
      */
     @PostMapping("/login/updatePassword")
     @ResponseBody
+    @LogRecord(description = "修改密码", operationType = OperationType.UPDATE,
+            menuName = MenuEnum.UPDATE_PASSWORD)
     public JSONResult updateMenu(@Valid @RequestBody UpdateUserPasswordReq updateUserPasswordReq,
             BindingResult result) {
 

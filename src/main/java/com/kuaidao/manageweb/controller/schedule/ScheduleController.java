@@ -7,6 +7,8 @@ import java.lang.reflect.InvocationTargetException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
+import org.apache.shiro.authz.annotation.Logical;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
@@ -22,6 +24,9 @@ import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.common.util.CommonUtil;
+import com.kuaidao.manageweb.config.LogRecord;
+import com.kuaidao.manageweb.config.LogRecord.OperationType;
+import com.kuaidao.manageweb.constant.MenuEnum;
 import com.kuaidao.manageweb.feign.schedule.ScheduleFeignClient;
 import com.kuaidao.schedule.dto.JobCreateReq;
 import com.kuaidao.schedule.dto.JobListReq;
@@ -47,6 +52,7 @@ public class ScheduleController {
      * @return
      */
     @RequestMapping("/initScheduleList")
+    @RequiresPermissions("sys:scheduleManager:view")
     public String initScheduleList(HttpServletRequest request) {
 
 
@@ -59,6 +65,7 @@ public class ScheduleController {
      * @return
      */
     @RequestMapping("/initCreateSchedule")
+    @RequiresPermissions("sys:scheduleManager:add")
     public String initCreateSchedule(@RequestParam(required = false) String id,
             HttpServletRequest request) {
         // 查询用户信息
@@ -75,6 +82,7 @@ public class ScheduleController {
      * @return
      */
     @RequestMapping("/initUpdateSchedule")
+    @RequiresPermissions("sys:scheduleManager:edit")
     public String initUpdateSchedule(@RequestParam String id, HttpServletRequest request) {
         // 查询用户信息
         JSONResult<QrtzJob> job = scheduleFeignClient.getJob(id);
@@ -90,6 +98,7 @@ public class ScheduleController {
      */
     @PostMapping("/list")
     @ResponseBody
+    @RequiresPermissions("sys:scheduleManager:view")
     public JSONResult<PageBean<QrtzJob>> list(@RequestBody JobListReq jobListReq,
             HttpServletRequest request, HttpServletResponse response) {
 
@@ -110,6 +119,10 @@ public class ScheduleController {
      */
     @PostMapping("/createOrUpdate")
     @ResponseBody
+    @RequiresPermissions(value = {"sys:scheduleManager:edit", "sys:scheduleManager:add"},
+            logical = Logical.OR)
+    @LogRecord(description = "新增或修改定时任务", operationType = OperationType.INSERT,
+            menuName = MenuEnum.SCHEDULE_MANAGEMENT)
     public JSONResult create(@Valid @RequestBody JobUpdateReq jobUpdateReq, BindingResult result) {
         if (result.hasErrors()) {
             return CommonUtil.validateParam(result);
@@ -124,30 +137,6 @@ public class ScheduleController {
     }
 
     /**
-     * 修改用户信息
-     * 
-     * @param orgDTO
-     * @return
-     */
-    @PostMapping("/update")
-    @ResponseBody
-    public JSONResult update(@Valid @RequestBody JobUpdateReq jobUpdateReq, BindingResult result) {
-
-        if (result.hasErrors()) {
-            return CommonUtil.validateParam(result);
-        }
-
-        String jobId = jobUpdateReq.getJobId();
-        if (jobId == null) {
-            return new JSONResult().fail(SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getCode(),
-                    SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getMessage());
-        }
-
-        return scheduleFeignClient.update(jobUpdateReq);
-    }
-
-
-    /**
      * 修改定时任务状态
      * 
      * @param orgDTO
@@ -155,6 +144,9 @@ public class ScheduleController {
      */
     @PostMapping("/setStatus")
     @ResponseBody
+    @RequiresPermissions("sys:scheduleManager:edit")
+    @LogRecord(description = "修改定时任务状态", operationType = OperationType.UPDATE,
+            menuName = MenuEnum.SCHEDULE_MANAGEMENT)
     public JSONResult setStatus(@Valid @RequestBody JobStatusSetReq jobStatusSetReq,
             BindingResult result) {
 
