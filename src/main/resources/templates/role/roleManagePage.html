@@ -38,28 +38,32 @@
             <el-table-column align="center" prop="id"   @selection-change="handleSelectionChange"  type="selection" width="55"></el-table-column>
             <el-table-column align="center" prop="name" label="角色名称"></el-table-column>
             <el-table-column align="center" prop="userCount" label="角色成员（人）">
-                <template slot-scope="scope">
-                    <span class="bluecolor cursorP" @click="dialogFormVisible = true">{{ scope.row.number }}</span>
+                <template slot-scope="scope" v-if="scope.row.userCount!=0" >
+                    <span class="bluecolor cursorP" @click="openUserInfoTable(scope.row.id)">{{ scope.row.userCount }}</span>
                 </template>
+                  <template slot-scope="scope">
+                        <el-button v-if="scope.row.userCount!=0" type="text" @click="openUserInfoTable(scope.row.id)">{{ scope.row.userCount }}</el-button>
+                        <span v-else>0</span>
+                      </template>
             </el-table-column>
         </el-table>
     </el-row>
     <!-- dialog -->
     <el-dialog title="角色内成员" :visible.sync="dialogFormVisible">
-        <el-form :model="form">
+        <el-form :model="userForm">
             <el-row class="marginB10 greybg padding20">
                 <el-row :gutter="20">
                     <el-col :span="6">
-                        <el-input v-model="searchInput" placeholder="姓名"></el-input>
+                        <el-input v-model="userForm.name" placeholder="姓名"></el-input>
                     </el-col>
                     <el-col :span="6">
-                        <el-input v-model="searchInput" placeholder="登录名"></el-input>
+                        <el-input v-model="userForm.username" placeholder="登录名"></el-input>
                     </el-col>
                     <el-col :span="6">
-                        <el-input v-model="searchInput" placeholder="手机号"></el-input>
+                        <el-input v-model="userForm.phone" placeholder="手机号"></el-input>
                     </el-col>
                     <el-col :span="2">
-                        <el-button type="primary" size="medium"  @click="queryRoleDataList" icon="el-icon-search">搜索</el-button>
+                        <el-button type="primary" size="medium"  @click="queryUserDataList" icon="el-icon-search">搜索</el-button>
                     </el-col>
                 </el-row>
             </el-row>
@@ -67,23 +71,15 @@
                 tooltip-effect="dark"
                 style="width: 100%"
                 border
-                :data="dataTableRole" 
+                :data="dataTableUserRole" 
                 class="marginB10">
                 <el-table-column align="center" prop="num" label="序号" width="55"></el-table-column>
                 <el-table-column align="center" prop="name" label="姓名"></el-table-column>
                 <el-table-column align="center" prop="userName" label="登录名"></el-table-column>
                 <el-table-column align="center" prop="phone" label="手机号"></el-table-column>
-                <el-table-column align="center" prop="org" label="所属组织"></el-table-column>
+                <el-table-column align="center" prop="orgName" label="所属组织"></el-table-column>
             </el-table>
-            <el-pagination
-                @size-change="handleSizeChange"
-                @current-change="handleCurrentChange"
-                :current-page="currentPage"
-                :page-sizes="[10, 20, 30, 40]"
-                :page-size="10"
-                layout="total, sizes, prev, pager, next, jumper"
-                :total="40">
-            </el-pagination>
+            <table-pagination :pager="userpager" @change="queryUserDataList"></table-pagination>
         </el-form>
         
     </el-dialog>
@@ -96,46 +92,32 @@ var roleListVM =new Vue({
         data: function() {
             return {
                 searchInput:'',
-                dataTableRole: [
-                    {
-                        num:'1',
-                        name:'推广管理',
-                        userName:'一级',
-                        phone:'15140361111',
-                        org:'组织1'
-                    }, {
-                        num:'2',
-                        name:'推广管理2',
-                        userName:'一级',
-                        phone:'15140361112',
-                        org:'组织2'
-                    }, {
-                        num:'3',
-                        name:'推广管理3',
-                        userName:'一级',
-                        phone:'15140361113',
-                        org:'组织1'
-                    }, {
-                        num:'4',
-                        name:'推广管理4',
-                        userName:'一级',
-                        phone:'15140361114',
-                        org:'组织1'
-                }],
+                dataTableUserRole: [],
                 roleListQuery:{
                 	roleName:'',
                 },
                 dataTable: [],
                 multipleSelection: [],
                 dialogFormVisible: false,
+                curRoleId:'',
                 form: {
                     name: '',
                     remark: '',
                     delivery: false,
                     type: []
                 },
+                userForm:{
+                  username:'',	
+                  name:'',	
+                  phone:'',	
+                },
                 formLabelWidth: '120px',
-                currentPage: 1//默认第一页
+                currentPage: 1,//默认第一页 
+                userpager:{
+                    total: 0,
+    	            currentPage: 1,
+    	            pageSize: 20,
+                }
             }             
         },
         methods: {
@@ -161,6 +143,41 @@ var roleListVM =new Vue({
                   .then(function () {
                   });  
                   
+              },
+              openUserInfoTable(roleId){
+            	 //打开角色下的成员信息 
+            	 roleListVM.dialogFormVisible = true;
+            	 roleListVM.curRoleId=roleId;
+            	  this.queryUserDataList();
+              },
+              queryUserDataList(){
+            	  //查询角色下用户成员
+            	  var  param={};
+            	  param.username=roleListVM.userForm.username;
+            	  param.name=roleListVM.userForm.name;
+              	  param.phone=roleListVM.userForm.phone;
+                  param.roleId=roleListVM.curRoleId;
+                  param.pageSize=roleListVM.userpager.pageSize ;
+                  param.pageNum=roleListVM.userpager.currentPage ;
+                  axios.post('/role/roleManager/queryUserList',param).then(function (response) {
+                      if(null===response||response.data==null||response.data.code!='0'){
+                            alert(response.data.message);
+                          return ;
+                      }
+                    
+                          var resobj= response.data;
+                          var pageData=resobj.data;
+                          roleListVM.userpager.total= pageData.total;
+                          roleListVM.userpager.currentPage = pageData.pageSizes;
+                          roleListVM.userpager.pageSize = pageData.pageSize;
+                          roleListVM.dataTableUserRole =pageData.data; 
+                     
+                    })
+                    .catch(function (error) {
+                      console.log(error);
+                    })
+                    .then(function () {
+                    });  
               },
             // 删除
             deleteFun() {
