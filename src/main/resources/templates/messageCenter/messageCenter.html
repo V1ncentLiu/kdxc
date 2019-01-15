@@ -34,14 +34,14 @@
                         <el-table-column type="selection" width="55"></el-table-column>
                         <el-table-column property="title" stripe label="标题" width="150"  > <!--:formatter="formatTitle"-->
                             <template slot-scope="scope">
-                                <span class="span"  v-if="scope.row.status==0"><li class="tip"></li>{{ scope.row.title }}</span>
-                                <span class="span" style="color: #cccccc" v-else><li class="tip1"></li>{{ scope.row.title }}</span>
+                                <span class="span"  style="white-space: pre"  v-if="scope.row.status==0"><li class="tip"></li>{{ scope.row.title }}</span>
+                                <span class="span" style="color: #cccccc;white-space: pre;" v-else><li class="tip1"></li>{{ scope.row.title }}</span>
                             </template>
                         </el-table-column>
                         <el-table-column property="content" label="消息内容" >
                             <template slot-scope="scope">
-                                <span v-if="scope.row.status==0">{{ scope.row.content }}</span>
-                                <span style="color: #cccccc" v-else>{{ scope.row.content }}</span>
+                                <span  style="white-space: pre" v-if="scope.row.status==0">{{ scope.row.content }}</span>
+                                <span style="color: #cccccc;white-space: pre;" v-else>{{ scope.row.content }}</span>
                             </template>
                         </el-table-column> <!--:formatter="formatContent"-->
                         <el-table-column property="receiveTime" label="接收时间"  width="200"></el-table-column>
@@ -89,18 +89,18 @@
                 </template>
 
                 <template>
-                    <el-table :data="annData" height="650" border  @selection-change="handleSelectionChange"  @row-dblclick="showAnnMx" >
+                    <el-table :data="annData" height="650" border style=""  @selection-change="handleSelectionChange"  @row-dblclick="showAnnMx"  tooltip-effect="light"  :cell-style="cellStyle">
                         <el-table-column type="selection" width="55"></el-table-column>
-                        <el-table-column property="title" label="标题" width="150" >
+                        <el-table-column property="title" label="标题" width="200" >
                             <template slot-scope="scope">
-                                <span class="span"  v-if="scope.row.status==0"><li class="tip"></li>{{ scope.row.title }}</span>
-                                <span class="span" style="color: #cccccc" v-else><li class="tip1"></li>{{ scope.row.title }}</span>
+                                <span class="span" style="white-space: pre"  v-if="scope.row.status==0"><li class="tip"></li>{{ scope.row.title }}</span>
+                                <span class="span" style="color: #cccccc;white-space: pre" v-else><li class="tip1"></li>{{ scope.row.title }}</span>
                             </template>
                         </el-table-column>  <!--:formatter="formatTitle"-->
-                        <el-table-column property="content" label="消息内容"  fit="false">
+                        <el-table-column property="content" label="消息内容"  >
                             <template slot-scope="scope">
-                                <span v-if="scope.row.status==0">{{scope.row.content }}</span>
-                                <span style="color: #cccccc" v-else>{{ scope.row.content }}</span>
+                                <span style="white-space: pre" v-if="scope.row.status==0">{{scope.row.content }}</span>
+                                <span style="color: #cccccc;white-space: pre;" v-else>{{ scope.row.content }}</span>
                             </template>
                         </el-table-column>  <!--:formatter="formatContent"-->
                         <el-table-column property="receiveTime" label="接收时间" width="200"></el-table-column>
@@ -121,7 +121,8 @@
         </el-tabs>
     </template>
 </div>
-
+<style>
+</style>
 <div id="anndialog">
     <el-dialog
             title="公告通知"
@@ -271,6 +272,14 @@
 
         },
         methods: {
+            cellStyle(row, column, rowIndex, columnIndex){
+                if(row.column.label === "消息内容"){
+                    // return 'font-weight:bold'
+                     return 'white-space: nowrap'
+                }else{
+                    return ''
+                }
+            },
             showAnnMx(row, event){
                 annDialogVm.title = row.title;
                 annDialogVm.content = row.content;
