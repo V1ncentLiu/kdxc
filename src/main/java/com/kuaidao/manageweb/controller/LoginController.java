@@ -130,7 +130,7 @@ public class LoginController {
      */
     @RequestMapping("/login")
     public String login() {
-
+        SecurityUtils.getSubject().getSession().removeAttribute("isShowLogoutBox");
         return "login/login";
     }
 
@@ -141,7 +141,6 @@ public class LoginController {
      */
     @RequestMapping("/login/resetPwd")
     public String resetPwd() {
-
         return "login/resetPwd";
     }
 
