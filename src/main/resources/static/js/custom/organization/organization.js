@@ -129,6 +129,7 @@
                                        //删除
                                 	   axios.post('/organization/organization/delete',param)
                                        .then(function (response) {
+                                    	   console.info(response);
                                            var data =  response.data;
                                            if(data.code=='0'){
                                                var resData = data.data;
@@ -139,10 +140,10 @@
                                                    delText="删除失败"
                                                }
                                                
-                                               orgVM.$message({
-                                                   message: delText,
-                                                   type: 'warning'
-                                                 });
+                                             orgVM.$message({message:delText,type:'success',duration:2000,onClose:function(){
+                                            	 orgVM.initOrgTree();
+                                                 orgVM.getQuery();
+                                       	    }});
                                                
                                            }else{
                                         	   orgVM.$message({
@@ -153,10 +154,13 @@
                                        })
                                        .catch(function (error) {
                                          console.log(error);
+                                         orgVM.$message({
+                                             message: "系统错误",
+                                             type: 'error'
+                                           }); 
                                        })
                                        .then(function () {
-                                    	   orgVM.initOrgTree();
-                                           orgVM.getQuery();
+                                    	   
                                        });
                                        
                                    }
@@ -220,6 +224,7 @@
                     });  
             },
             addChildOrg(){
+            	this.form.id='';
             	var curData = this.selectedNode;
             	if(!curData){
             		this.$message({
@@ -242,11 +247,13 @@
                     .then(function (response) {
                     	var resData = response.data;
                     	if(resData.code=='0'){
-                    	    orgVM.$message('操作成功');
+                    	    orgVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
+                    	        orgVM.initOrgTree();
+                         	    orgVM.getQuery();
+                    	    }});
                     	    orgVM.cancelForm(formName);
                     	    orgVM.dialogFormVisible = false;
-                    	    orgVM.initOrgTree();
-                    	    orgVM.getQuery();
+                    	   
                     	}else{
                     		orgVM.$message('操作失败');
                     	}

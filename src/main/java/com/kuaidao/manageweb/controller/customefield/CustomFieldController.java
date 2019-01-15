@@ -98,7 +98,7 @@ public class CustomFieldController {
      * @throws InvocationTargetException 
      * @throws IllegalAccessException 
      */
-    @RequiresPermissions(value= {"customfield:saveMenu","customfield:updateMenu"},logical=Logical.OR)
+   // @RequiresPermissions(value= {"customfield:saveMenu","customfield:updateMenu"},logical=Logical.OR)
     @PostMapping("/saveOrUpdateMenu")
     @ResponseBody
     public JSONResult saveMenu(@Valid @RequestBody CustomFieldMenuAddAndUpdateDTO menuDTO,
@@ -122,7 +122,7 @@ public class CustomFieldController {
      * @param orgDTO
      * @return
      */
-    @RequiresPermissions("customfield:updateMenu")
+    //@RequiresPermissions("customfield:updateMenu")
     @PostMapping("/updateMenu")
     @ResponseBody
     public JSONResult updateMenu(@Valid @RequestBody CustomFieldMenuAddAndUpdateDTO menuDTO,
@@ -146,7 +146,7 @@ public class CustomFieldController {
      * @param orgDTO
      * @return
      */
-    @RequiresPermissions("customfield:deleteMenu")
+   // @RequiresPermissions("customfield:deleteMenu")
     @PostMapping("/deleteMenu")
     @ResponseBody
     public JSONResult deleteMenu(@RequestBody IdListReq idListReq) {
@@ -206,7 +206,7 @@ public class CustomFieldController {
      * @throws InvocationTargetException 
      * @throws IllegalAccessException 
      */
-    @RequiresPermissions(value= {"customfield:saveField","customfield:updateField"},logical=Logical.OR)
+    //@RequiresPermissions(value= {"customfield:saveField","customfield:updateField"},logical=Logical.OR)
     @PostMapping("/saveOrUpdate")
     @ResponseBody
     public JSONResult save(@Valid @RequestBody CustomFieldAddAndUpdateDTO customDTO,
@@ -231,7 +231,7 @@ public class CustomFieldController {
      * @param orgDTO
      * @return
      */
-    @RequiresPermissions("customfield:updateField")
+    //@RequiresPermissions("customfield:updateField")
     @PostMapping("/update")
     @ResponseBody
     public JSONResult update(@Valid @RequestBody CustomFieldAddAndUpdateDTO customDTO,
@@ -254,7 +254,7 @@ public class CustomFieldController {
      * @param orgDTO
      * @return
      */
-    @RequiresPermissions("customfield:deleteField")
+    //@RequiresPermissions("customfield:deleteField")
     @PostMapping("/delete")
     @ResponseBody
     public JSONResult delete(@RequestBody IdListReq idListReq) {
@@ -328,12 +328,12 @@ public class CustomFieldController {
      * @param result
      * @return
      */
-    @RequiresPermissions("customfield:batchSaveField")
+   // @RequiresPermissions("customfield:batchSaveField")
     @PostMapping("/uploadCustomField")
     @ResponseBody
     public JSONResult uploadCustomField(@RequestParam("file") MultipartFile file,@RequestParam("id") long menuId) throws Exception {
         List<List<Object>> excelDataList = ExcelUtil.read2007Excel(file.getInputStream());
-        logger.info("upload size:{{}}" , excelDataList.size());
+        logger.info("customfield upload size:{{}}" , excelDataList.size());
 
         if (excelDataList == null || excelDataList.size() == 0) {
             return  new JSONResult<>().fail(SysErrorCodeEnum.ERR_EXCLE_DATA.getCode(),SysErrorCodeEnum.ERR_EXCLE_DATA.getMessage());
@@ -385,8 +385,9 @@ public class CustomFieldController {
                 }
             }//inner foreach end
             
-            //TODO  devin
-            rowDto.setCreateUser(111L);
+            Subject subject = SecurityUtils.getSubject();
+            UserInfoDTO user = (UserInfoDTO) subject.getSession().getAttribute("user");
+            rowDto.setCreateUser(user.getId());
             rowDto.setFieldType(SysConstant.FieldType.TEXT);
             rowDto.setMenuId(menuId);
             dataList.add(rowDto);

@@ -111,7 +111,10 @@ var homePageVM=new Vue({
                });
          },
          confirmLogout(){//确认退出系统
-        	 location.href="/logout";
+        	 location.href="/index/logout";
+        },
+        gotoHomePage(){//首页跳转
+        	location.href='/login';
         },
 		messageCount(){
 	    	console.log("请求消息中心未读条数")
@@ -132,10 +135,10 @@ var homePageVM=new Vue({
 				"src":dataUrl //设置ifream地址
 			});
         }
+         
   	},
-   	created() {
-  		console.log("created method")
-   		document.body.removeChild(document.getElementById('Loading'))
+   	created() {  
+   		document.body.removeChild(document.getElementById('Loading'));
 		this.messageCount();
 	}
 })

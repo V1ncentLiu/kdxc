@@ -4,8 +4,11 @@ import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.IdEntity;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
+import com.kuaidao.manageweb.config.LogRecord;
+import com.kuaidao.manageweb.constant.MenuEnum;
 import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
 import com.kuaidao.sys.dto.dictionary.*;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -73,13 +76,16 @@ public class DictionaryItemController {
     /**
      *  web端进行的是非业务逻辑。
      */
+    @LogRecord(description = "新增词条",operationType = LogRecord.OperationType.INSERT,menuName = MenuEnum.DICTIONARY_MANAGEMENT)
+    @RequiresPermissions("dictionary:update")
     @RequestMapping("/saveDictionaryItem")
     @ResponseBody
     public JSONResult saveDictionary(@Valid @RequestBody DictionaryItemAddAndUpdateDTO dictionaryItemDTO  , BindingResult result){
         if (result.hasErrors()) return validateParam(result);
         return  dictionaryItemFeignClient.saveDictionaryItem(dictionaryItemDTO);
     }
-
+    @LogRecord(description = "更新词条",operationType = LogRecord.OperationType.UPDATE,menuName = MenuEnum.DICTIONARY_MANAGEMENT)
+    @RequiresPermissions("dictionary:update")
     @RequestMapping("/updateDictionaryItem")
     @ResponseBody
     public JSONResult updateDictionary(@Valid @RequestBody DictionaryItemAddAndUpdateDTO dictionaryDTO , BindingResult result){
@@ -93,6 +99,8 @@ public class DictionaryItemController {
         return dictionaryItemFeignClient.queryDictionaryOneItem(idEntity);
     }
 
+    @LogRecord(description = "删除词条",operationType = LogRecord.OperationType.DELETE,menuName = MenuEnum.DICTIONARY_MANAGEMENT)
+    @RequiresPermissions("dictionary:update")
     @RequestMapping("/deleteItemDictionarys")
     @ResponseBody
     public JSONResult deleteDictionarys(@RequestBody Map<String, String> map){

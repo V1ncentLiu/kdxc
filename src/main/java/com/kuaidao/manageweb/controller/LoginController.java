@@ -32,6 +32,7 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -46,8 +47,11 @@ import com.kuaidao.common.entity.PhoneEntity;
 import com.kuaidao.common.util.CommonUtil;
 import com.kuaidao.common.util.DateUtil;
 import com.kuaidao.common.util.MD5Util;
+import com.kuaidao.manageweb.config.LogRecord;
+import com.kuaidao.manageweb.config.LogRecord.OperationType;
 import com.kuaidao.manageweb.constant.Constants;
 import com.kuaidao.manageweb.constant.ManagerWebErrorCodeEnum;
+import com.kuaidao.manageweb.constant.MenuEnum;
 import com.kuaidao.manageweb.entity.LoginReq;
 import com.kuaidao.manageweb.feign.msgpush.MsgPushFeignClient;
 import com.kuaidao.manageweb.feign.role.RoleManagerFeignClient;
@@ -113,6 +117,17 @@ public class LoginController {
      * 
      * @return
      */
+    @GetMapping("/")
+    public String loginPage() {
+
+        return "login/login";
+    }
+
+    /***
+     * 登录页
+     * 
+     * @return
+     */
     @RequestMapping("/login")
     public String login() {
 
@@ -132,6 +147,7 @@ public class LoginController {
 
     @RequestMapping(value = "/login/index", method = {RequestMethod.POST})
     @ResponseBody
+    @LogRecord(description = "登录", operationType = OperationType.LOGIN, menuName = MenuEnum.LOGIN)
     public JSONResult login(@RequestBody LoginReq loginReq, HttpServletRequest request, Model model,
             RedirectAttributes redirectAttributes) throws Exception {
         String username = loginReq.getUsername();
@@ -163,6 +179,7 @@ public class LoginController {
         smsCodeAndMobileValidReq.setMsgId(msgId);
         JSONResult result = msgPushFeignClient.validCodeAndMobile(smsCodeAndMobileValidReq);
         if (!JSONResult.SUCCESS.equals(result.getCode())) {
+            logger.error(result.getMsg());
             errorMessage = "验证码错误";
             loginRecord.setLoginStatus(Constants.LOGIN_STATUS_PASSWORD_ERROR);
         } else {
@@ -523,7 +540,9 @@ public class LoginController {
         return null;
     }
 
-    @RequestMapping("/logout")
+    @RequestMapping("/index/logout")
+    @LogRecord(description = "退出登录", operationType = OperationType.LOGINOUT,
+            menuName = MenuEnum.LOGINOUT)
     public String logout(String type, Model model, HttpServletRequest request) throws Exception {
         Subject subject = SecurityUtils.getSubject();
         Object attribute = SecurityUtils.getSubject().getSession().getAttribute("user");

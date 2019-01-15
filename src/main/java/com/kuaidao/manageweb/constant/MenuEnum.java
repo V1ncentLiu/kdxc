@@ -14,6 +14,7 @@ public enum MenuEnum {
      * 系统管理菜单
      */
     ACCOUNT_MANAGEMENT("账号管理"), ROLE_MANAGEMENT("角色管理"), AUTHORITY_MANAGEMENT("权限管理"), ACCOUNT_SUMMARY("账号汇总"), RESOURCE_MANAGEMENT("资源管理"),
+    DICTIONARY_MANAGEMENT("字典管理"), ANNOUNCE_MANAGEMENT("公告管理"), MESSAGE_CENTER("消息中心"),
     /**
      * 标签管理
      */

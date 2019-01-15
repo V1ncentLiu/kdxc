@@ -4,6 +4,8 @@ import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.IdEntity;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
+import com.kuaidao.manageweb.config.LogRecord;
+import com.kuaidao.manageweb.constant.MenuEnum;
 import com.kuaidao.manageweb.controller.dictionary.DictionaryController;
 import com.kuaidao.manageweb.feign.SysFeign;
 import com.kuaidao.manageweb.feign.announcement.AnnReceiveFeignClient;
@@ -20,6 +22,10 @@ import com.kuaidao.sys.dto.announcement.annReceive.AnnReceiveAddAndUpdateDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import com.kuaidao.sys.dto.user.UserInfoPageParam;
 import com.rabbitmq.http.client.domain.UserInfo;
+import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.authz.annotation.Logical;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
+import org.apache.shiro.subject.Subject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.AmqpException;
@@ -74,24 +80,35 @@ public class AnnController {
     @ResponseBody
     public JSONResult saveAnn(@Valid @RequestBody AnnouncementAddAndUpdateDTO dto  , BindingResult result){
         if (result.hasErrors()) return validateParam(result);
+
+        Subject subject = SecurityUtils.getSubject();
+        UserInfoDTO user = (UserInfoDTO) subject.getSession().getAttribute("user");
+        if(user==null){
+            dto.setCreateUser(123456L);
+        }else{
+            dto.setCreateUser(user.getId());
+        }
+
         long annId = IdUtil.getUUID();
         dto.setId(annId);  //公告ID
         JSONResult jsonResult = announcementFeignClient.publishAnnouncement(dto);
 
-        if(jsonResult.getCode().equals(0)){
+        if(jsonResult.getCode().equals(jsonResult.SUCCESS)){
             Long orgId = dto.getOrgId();
             List<UserInfoDTO> list = new ArrayList();
             UserInfoPageParam param = new UserInfoPageParam();
+            param.setPageNum(1);
+            param.setPageSize(100000);
             if(orgId==0){ //全部用户
                 param.setStatus(1); //
             }else{//指定组织结构下的数据。
 //                获取多个组织下的用户，通过组织ID进行获取。
                 List<Long> orgids = dto.getOrgids();
-
+                param.setStatus(1);
+                param.setOrgIdList(orgids);
             }
             JSONResult<PageBean<UserInfoDTO>> list1 = userInfoFeignClient.list(param);
             list = list1.getData().getData();
-
 
             List<AnnReceiveAddAndUpdateDTO> annrList = new ArrayList<AnnReceiveAddAndUpdateDTO>();
             for(UserInfoDTO userinfo :list){
@@ -101,19 +118,25 @@ public class AnnController {
                 annrList.add(annDto);
             }
             annReceiveFeignClient.batchInsert(annrList);
-//
+
+
+        /*
+            list = new ArrayList();
+            if(list.size()==0){
+                UserInfoDTO user = new UserInfoDTO();
+                user.setId(123456L);
+                user.setUsername("yangbiao");
+                user.setPhone("18210470854");
+                user.setOrgId(3453453L);
+                list.add(user);
+            }
+        */
 
             Integer type = dto.getType();
             if(type==1||type==0){ //站内公告通知
-//              消息通知
-                /**
-                 * void send(Message message) throwsAmqpException;
-                 * void send(String routingKey, Message message) throwsAmqpException;
-                 * void send(String exchange, String routingKey, Message message) throwsAmqpException;
-                 */
-//                amqpTemplate.convertAndSend("","",new Message());
-//                
-                amqpTemplate.convertAndSend("","","测试消息");
+                for(UserInfoDTO userInfo:list){
+                    amqpTemplate.convertAndSend("amq.topic",userInfo.getOrgId()+"."+userInfo.getId(),"announce,"+annId);
+                }
             }
 //
             if(type==2||type==0){ //短信
@@ -169,6 +192,8 @@ public class AnnController {
         return "ann/annListPage";
     }
 
+    @LogRecord(description = "公告发布",operationType = LogRecord.OperationType.INSERT,menuName = MenuEnum.ANNOUNCE_MANAGEMENT)
+    @RequiresPermissions("announce:publishAnn")
     @RequestMapping("/annPublishPage")
     public String itemListPage(){
         logger.info("--------------------------------------跳转到公告页面-----------------------------------------------");

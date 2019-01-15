@@ -4,11 +4,14 @@ import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.IdEntity;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
+import com.kuaidao.manageweb.config.LogRecord;
+import com.kuaidao.manageweb.constant.MenuEnum;
 import com.kuaidao.manageweb.feign.SysFeign;
 import com.kuaidao.manageweb.feign.dictionary.DictionaryFeignClient;
 import com.kuaidao.sys.dto.dictionary.DictionaryAddAndUpdateDTO;
 import com.kuaidao.sys.dto.dictionary.DictionaryQueryDTO;
 import com.kuaidao.sys.dto.dictionary.DictionaryRespDTO;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,6 +62,7 @@ public class DictionaryController {
     /**
      *  web端进行的是非业务逻辑。
      */
+    @RequiresPermissions("dictionary:add")
     @RequestMapping("/saveDictionary")
     @ResponseBody
     public JSONResult saveDictionary(@Valid @RequestBody DictionaryAddAndUpdateDTO dictionaryDTO  , BindingResult result){
@@ -66,6 +70,9 @@ public class DictionaryController {
         return  dictionaryFeignClient.saveDictionary(dictionaryDTO);
     }
 
+
+    @RequiresPermissions("dictionary:update")
+    @LogRecord(description = "字典更新",operationType = LogRecord.OperationType.UPDATE,menuName = MenuEnum.DICTIONARY_MANAGEMENT)
     @RequestMapping("/updateDictionary")
     @ResponseBody
     public JSONResult updateDictionary(@Valid @RequestBody DictionaryAddAndUpdateDTO dictionaryDTO , BindingResult result){
@@ -79,12 +86,15 @@ public class DictionaryController {
         return dictionaryFeignClient.findByPrimaryKeyDictionary(idEntity);
     }
 
+    @LogRecord(description = "字典删除",operationType = LogRecord.OperationType.DELETE,menuName = MenuEnum.DICTIONARY_MANAGEMENT)
     @RequestMapping("/deleteDictionary")
     @ResponseBody
     public JSONResult deleteDictionary(@RequestBody IdEntity idEntity){
         return dictionaryFeignClient.deleteDictionary(idEntity);
     }
 
+    @LogRecord(description = "字典删除-批量删除",operationType = LogRecord.OperationType.DELETE,menuName = MenuEnum.DICTIONARY_MANAGEMENT)
+    @RequiresPermissions("dictionary:delete")
     @RequestMapping("/deleteDictionarys")
     @ResponseBody
     public JSONResult deleteDictionarys(@RequestBody Map<String, String> map){
