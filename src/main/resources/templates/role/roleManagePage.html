@@ -17,7 +17,7 @@
     <el-row class="marginB10">
         <el-col :xs="12" :sm="16" :md="16" :lg="18" :xl="12">
             <el-button type="primary"><a href="/role/roleManager/addRolePre"><i class="el-icon-plus"></i> 添加</a></el-button>
-            <el-button type="primary">修改</el-button>
+            <el-button type="primary" @click="updateRoleInfo" >修改</el-button>
             <el-button type="primary" @click="deleteFun">删除</el-button>
         </el-col>
         <el-col :xs="12" :sm="8" :md="8" :lg="6" :xl="12">
@@ -36,7 +36,7 @@
             :data="dataTable" 
             >
             <el-table-column align="center" prop="id"   @selection-change="handleSelectionChange"  type="selection" width="55"></el-table-column>
-            <el-table-column align="center" prop="name" label="角色名称"></el-table-column>
+            <el-table-column align="center" prop="roleName" label="角色名称"></el-table-column>
             <el-table-column align="center" prop="userCount" label="角色成员（人）">
                 <template slot-scope="scope" v-if="scope.row.userCount!=0" >
                     <span class="bluecolor cursorP" @click="openUserInfoTable(scope.row.id)">{{ scope.row.userCount }}</span>
@@ -178,6 +178,19 @@ var roleListVM =new Vue({
                     })
                     .then(function () {
                     });  
+              },
+               updateRoleInfo(){
+            	//修改角色  
+              	var rows = this.multipleSelection;
+                  if(rows.length!=1){
+                      this.$message({
+                         message: '请选择一条数据进行修改',
+                         type: 'warning'
+                       });
+                      return;
+                  }
+                  window.location.href="/role/roleManager/updateRolePre?roleId="+rows[0].id; 
+            	  
               },
             // 删除
             deleteFun() {

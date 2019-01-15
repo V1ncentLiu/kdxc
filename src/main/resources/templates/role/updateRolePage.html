@@ -226,7 +226,10 @@
 </body>
 <div th:include="_footer_include :: #jsLib"></div>
 <script th:inline="javascript" >
-var moduleData=[[${moduleData}]];
+   var moduleData=[[${moduleData}]];
+   var ipListTable=[[${ipListTable}]];
+   var  roleInfo=[[${roleInfo}]];
+   var  iplimit=roleInfo.isIpLimit+"";
    var  fieldOptions = ['阶段', '创建日期', '编码', '资源项目','搜索词','广告位','媒介','电销总监','电销组'];
    var  addRoleVM=new Vue({
          el: '#addRole',
@@ -236,8 +239,8 @@ var moduleData=[[${moduleData}]];
                 fields: fieldOptions,
                 dataList:moduleData,
                 addRoleValidateForm: {
-                    roleName: '',
-                    visitLimitRadio:'0'
+                    roleName: roleInfo.roleName,
+                    visitLimitRadio:iplimit,
                 },
                 rules:{
                     roleName:[{ required: true, message: '角色名称不能为空'}]
@@ -254,9 +257,7 @@ var moduleData=[[${moduleData}]];
 
                 },
                 searchInput:'',
-                ipListTable: [
-                  
-                ],
+                ipListTable: ipListTable,
                 dataTableIP: [],
                 multipleSelection: [],
                 dialogFormChooseIP: false,
@@ -300,9 +301,8 @@ var moduleData=[[${moduleData}]];
                              		  if(null!=checkedCities){
                              			 //循环选中操作
                              			for(var m=0; m<checkedCities.length;m++)  {
-                             				debugger;
                              				var operation={};
-                             				 operation.id=checkedCities[m];
+                             				 operation.id=checkedCities[m]
                                 			 operationArry.push(operation);  
                                 		 }
                              		   }
@@ -317,7 +317,8 @@ var moduleData=[[${moduleData}]];
                          param.isIpLimit=addRoleVM.addRoleValidateForm.visitLimitRadio;
                          param.operations=operationArry;
                          param.ipPackages=ipListTable;
-                         axios.post('/role/roleManager/saveRoleInfo',param).then(function (response) {
+                         param.id=roleInfo.id;
+                         axios.post('/role/roleManager/updateRoleInfo',param).then(function (response) {
           		           if(null==response){
           		                 alert("返回异常");
           		                 return ;

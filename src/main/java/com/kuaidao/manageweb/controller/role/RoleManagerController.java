@@ -3,6 +3,7 @@
  */
 package com.kuaidao.manageweb.controller.role;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -12,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,6 +25,8 @@ import com.kuaidao.manageweb.feign.module.ModuleManagerFeignClient;
 import com.kuaidao.manageweb.feign.role.RoleManagerFeignClient;
 import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
 import com.kuaidao.sys.dto.module.IndexModuleDTO;
+import com.kuaidao.sys.dto.module.ModuleInfoDTO;
+import com.kuaidao.sys.dto.module.OperationInfoDTO;
 import com.kuaidao.sys.dto.role.RoleInfoDTO;
 import com.kuaidao.sys.dto.role.RoleQueryDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
@@ -36,12 +40,12 @@ public class RoleManagerController {
 
 	@Autowired
 	private RoleManagerFeignClient roleManagerFeignClient;
-	
+
 	@Autowired
-	private   ModuleManagerFeignClient   moduleManagerFeignClient;
-	
+	private ModuleManagerFeignClient moduleManagerFeignClient;
+
 	@Autowired
-	private  UserInfoFeignClient userInfoFeignClient;
+	private UserInfoFeignClient userInfoFeignClient;
 
 	/***
 	 * 
@@ -51,22 +55,19 @@ public class RoleManagerController {
 	public String initRoleInfo() {
 		return "role/roleManagePage";
 	}
-	
-	
-	
-	
-    /**
-     * 查询用户集合
-     * 
-     * @param menuDTO
-     * @return
-     */
-    @PostMapping("/queryUserList")
+
+	/**
+	 * 查询用户集合
+	 * 
+	 * @param menuDTO
+	 * @return
+	 */
+	@PostMapping("/queryUserList")
 	@ResponseBody
-    public JSONResult<PageBean<UserInfoDTO>> queryUserList(@RequestBody UserInfoPageParam param){
-    	return userInfoFeignClient.list(param);
-    	
-    }
+	public JSONResult<PageBean<UserInfoDTO>> queryUserList(@RequestBody UserInfoPageParam param) {
+		return userInfoFeignClient.list(param);
+
+	}
 
 	/***
 	 * 添加角色
@@ -75,7 +76,7 @@ public class RoleManagerController {
 	 */
 	@RequestMapping("/addRolePre")
 	public String addRolePre(HttpServletRequest request) {
-	 
+
 		JSONResult<List<IndexModuleDTO>> treeJsonRes = moduleManagerFeignClient.queryModuleShow("huiju");
 		if (treeJsonRes != null && JSONResult.SUCCESS.equals(treeJsonRes.getCode()) && treeJsonRes.getData() != null) {
 			request.setAttribute("moduleData", treeJsonRes.getData());
@@ -85,7 +86,73 @@ public class RoleManagerController {
 		return "role/addRolePage";
 	}
 
-    
+	/***
+	 * 修改角色
+	 * 
+	 * @return
+	 */
+	@RequestMapping("/updateRolePre")
+	public String updateRolePre(HttpServletRequest request, Model model) {
+		String roleId = request.getParameter("roleId");
+		RoleQueryDTO dto = new RoleQueryDTO();
+		dto.setId(new Long(roleId));
+		dto.setRoleName(roleId);
+		JSONResult<RoleInfoDTO> roleJsonRes = roleManagerFeignClient.qeuryRoleById(dto);
+		RoleInfoDTO roledto = null;
+		if (roleJsonRes != null && JSONResult.SUCCESS.equals(roleJsonRes.getCode()) && roleJsonRes.getData() != null) {
+			roledto = roleJsonRes.getData();
+			if (null != roledto) {
+
+				model.addAttribute("ipListTable", roledto.getIpPackages());
+				
+				model.addAttribute("roleInfo", roledto);
+			}
+		}
+		JSONResult<List<IndexModuleDTO>> treeJsonRes = moduleManagerFeignClient.queryModuleShow("huiju");
+
+		if (treeJsonRes != null && JSONResult.SUCCESS.equals(treeJsonRes.getCode()) && treeJsonRes.getData() != null) {
+
+			List<IndexModuleDTO> moduledtoList = treeJsonRes.getData();
+
+			if (null != moduledtoList && moduledtoList.size() > 0) {
+
+				for (IndexModuleDTO indexMoudel : moduledtoList) {
+
+					List<ModuleInfoDTO> moduleList = indexMoudel.getSubList();
+
+					for (ModuleInfoDTO module : moduleList) {
+						
+						List<String>  checkedCities=new ArrayList<String>();
+						List<OperationInfoDTO> operationInfos = module.getOperationInfos();
+						for (OperationInfoDTO operation : operationInfos) {
+							if (null != roledto) {
+								List<OperationInfoDTO> roleOperations = roledto.getOperations();
+								for (OperationInfoDTO  roleOpe : roleOperations) {
+									
+									if(roleOpe.getId().equals(operation.getId())){
+										
+										checkedCities.add(operation.getId()+"");
+										break;
+									}
+									
+									
+									
+								}
+
+							}
+
+						}
+						module.setCheckedCities(checkedCities);
+					}
+				}
+			}
+
+			request.setAttribute("moduleData", treeJsonRes.getData());
+		} else {
+			logger.error("query module tree,res{{}}", treeJsonRes);
+		}
+		return "role/updateRolePage";
+	}
 
 	/**
 	 * 查询角色列表
@@ -101,8 +168,7 @@ public class RoleManagerController {
 			HttpServletResponse response) {
 		return roleManagerFeignClient.queryRoleList(dto);
 	}
-	
-	
+
 	/**
 	 * 保存角色数据
 	 * 
@@ -118,8 +184,7 @@ public class RoleManagerController {
 		JSONResult<String> pageJson = roleManagerFeignClient.saveRoleInfo(dto);
 		return pageJson;
 	}
-	
-	
+
 	/**
 	 * 修改角色数据
 	 * 
@@ -134,7 +199,7 @@ public class RoleManagerController {
 		JSONResult<String> pageJson = roleManagerFeignClient.updateRoleInfo(dto);
 		return pageJson;
 	}
-	
+
 	/**
 	 * 修改角色数据
 	 * 
@@ -149,7 +214,5 @@ public class RoleManagerController {
 		JSONResult<String> pageJson = roleManagerFeignClient.deleteRoleInfo(dto);
 		return pageJson;
 	}
-	
- 
 
 }
