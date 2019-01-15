@@ -108,17 +108,17 @@ public class AnnController {
                 param.setOrgIdList(orgids);
             }
             JSONResult<PageBean<UserInfoDTO>> list1 = userInfoFeignClient.list(param);
-            list = list1.getData().getData();
-
-            List<AnnReceiveAddAndUpdateDTO> annrList = new ArrayList<AnnReceiveAddAndUpdateDTO>();
-            for(UserInfoDTO userinfo :list){
-                AnnReceiveAddAndUpdateDTO annDto = new AnnReceiveAddAndUpdateDTO();
-                annDto.setReceiveUser(userinfo.getId());
-                annDto.setAnnouncementId(annId);
-                annrList.add(annDto);
+            if(list1.getCode().equals("0")){
+                list = list1.getData().getData();
+                List<AnnReceiveAddAndUpdateDTO> annrList = new ArrayList<AnnReceiveAddAndUpdateDTO>();
+                for(UserInfoDTO userinfo :list){
+                    AnnReceiveAddAndUpdateDTO annDto = new AnnReceiveAddAndUpdateDTO();
+                    annDto.setReceiveUser(userinfo.getId());
+                    annDto.setAnnouncementId(annId);
+                    annrList.add(annDto);
+                }
+                annReceiveFeignClient.batchInsert(annrList);
             }
-            annReceiveFeignClient.batchInsert(annrList);
-
 
         /*
             list = new ArrayList();
@@ -193,7 +193,7 @@ public class AnnController {
     }
 
     @LogRecord(description = "公告发布",operationType = LogRecord.OperationType.INSERT,menuName = MenuEnum.ANNOUNCE_MANAGEMENT)
-    @RequiresPermissions("announce:publishAnn")
+//    @RequiresPermissions("announce:publishAnn")
     @RequestMapping("/annPublishPage")
     public String itemListPage(){
         logger.info("--------------------------------------跳转到公告页面-----------------------------------------------");
