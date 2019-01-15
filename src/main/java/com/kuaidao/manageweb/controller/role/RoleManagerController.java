@@ -18,11 +18,15 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.kuaidao.common.entity.JSONResult;
+import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.manageweb.feign.module.ModuleManagerFeignClient;
 import com.kuaidao.manageweb.feign.role.RoleManagerFeignClient;
+import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
 import com.kuaidao.sys.dto.module.IndexModuleDTO;
 import com.kuaidao.sys.dto.role.RoleInfoDTO;
 import com.kuaidao.sys.dto.role.RoleQueryDTO;
+import com.kuaidao.sys.dto.user.UserInfoDTO;
+import com.kuaidao.sys.dto.user.UserInfoPageParam;
 
 @Controller
 @RequestMapping("/role/roleManager")
@@ -35,6 +39,9 @@ public class RoleManagerController {
 	
 	@Autowired
 	private   ModuleManagerFeignClient   moduleManagerFeignClient;
+	
+	@Autowired
+	private  UserInfoFeignClient userInfoFeignClient;
 
 	/***
 	 * 
@@ -44,6 +51,22 @@ public class RoleManagerController {
 	public String initRoleInfo() {
 		return "role/roleManagePage";
 	}
+	
+	
+	
+	
+    /**
+     * 查询用户集合
+     * 
+     * @param menuDTO
+     * @return
+     */
+    @PostMapping("/queryUserList")
+	@ResponseBody
+    public JSONResult<PageBean<UserInfoDTO>> queryUserList(@RequestBody UserInfoPageParam param){
+    	return userInfoFeignClient.list(param);
+    	
+    }
 
 	/***
 	 * 添加角色
@@ -61,6 +84,8 @@ public class RoleManagerController {
 		}
 		return "role/addRolePage";
 	}
+
+    
 
 	/**
 	 * 查询角色列表
