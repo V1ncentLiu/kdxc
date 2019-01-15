@@ -52,7 +52,7 @@ public class ScheduleController {
      * @return
      */
     @RequestMapping("/initScheduleList")
-    @RequiresPermissions("sys:scheduleManager:show")
+    @RequiresPermissions("sys:scheduleManager:view")
     public String initScheduleList(HttpServletRequest request) {
 
 
@@ -98,7 +98,7 @@ public class ScheduleController {
      */
     @PostMapping("/list")
     @ResponseBody
-    @RequiresPermissions("sys:scheduleManager:show")
+    @RequiresPermissions("sys:scheduleManager:view")
     public JSONResult<PageBean<QrtzJob>> list(@RequestBody JobListReq jobListReq,
             HttpServletRequest request, HttpServletResponse response) {
 
