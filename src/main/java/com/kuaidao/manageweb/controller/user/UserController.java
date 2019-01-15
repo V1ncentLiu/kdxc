@@ -9,6 +9,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.apache.shiro.subject.Subject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,7 +28,10 @@ import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.common.entity.TreeData;
 import com.kuaidao.common.util.CommonUtil;
 import com.kuaidao.common.util.MD5Util;
+import com.kuaidao.manageweb.config.LogRecord;
+import com.kuaidao.manageweb.config.LogRecord.OperationType;
 import com.kuaidao.manageweb.constant.Constants;
+import com.kuaidao.manageweb.constant.MenuEnum;
 import com.kuaidao.manageweb.entity.UpdatePasswordSettingReq;
 import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
 import com.kuaidao.manageweb.feign.role.RoleManagerFeignClient;
@@ -69,6 +73,7 @@ public class UserController {
      * @return
      */
     @RequestMapping("/initUserList")
+    @RequiresPermissions("sys:userManager:view")
     public String initUserList(HttpServletRequest request) {
 
         JSONResult<List<RoleInfoDTO>> list = userInfoFeignClient.roleList(new RoleQueryDTO());
@@ -90,6 +95,7 @@ public class UserController {
      * @return
      */
     @RequestMapping("/initCreateUser")
+    @RequiresPermissions("sys:userManager:create")
     public String initCreateUser(HttpServletRequest request) {
 
         // 查询组织机构树
@@ -113,6 +119,7 @@ public class UserController {
      * @return
      */
     @RequestMapping("/initUpdateUser")
+    @RequiresPermissions("sys:userManager:edit")
     public String initUpdateUser(@RequestParam long id, HttpServletRequest request) {
         JSONResult<List<TreeData>> treeJsonRes = organizationFeignClient.query();
         // 查询用户信息
@@ -140,6 +147,7 @@ public class UserController {
      */
     @PostMapping("/list")
     @ResponseBody
+    @RequiresPermissions("sys:userManager:view")
     public JSONResult<PageBean<UserInfoDTO>> queryRoleList(
             @RequestBody UserInfoPageParam userInfoPageParam, HttpServletRequest request,
             HttpServletResponse response) {
@@ -161,6 +169,9 @@ public class UserController {
      */
     @PostMapping("/saveUser")
     @ResponseBody
+    @RequiresPermissions("sys:userManager:add")
+    @LogRecord(description = "新增用户", operationType = OperationType.INSERT,
+            menuName = MenuEnum.USER_MANAGEMENT)
     public JSONResult saveMenu(@Valid @RequestBody UserInfoReq userInfoReq, BindingResult result) {
         if (result.hasErrors()) {
             return CommonUtil.validateParam(result);
@@ -177,6 +188,9 @@ public class UserController {
      */
     @PostMapping("/updateUser")
     @ResponseBody
+    @RequiresPermissions("sys:userManager:edit")
+    @LogRecord(description = "修改用户信息", operationType = OperationType.UPDATE,
+            menuName = MenuEnum.USER_MANAGEMENT)
     public JSONResult updateMenu(@Valid @RequestBody UserInfoReq userInfoReq,
             BindingResult result) {
 
@@ -201,6 +215,8 @@ public class UserController {
      */
     @PostMapping("/updatePassword")
     @ResponseBody
+    @LogRecord(description = "修改密码", operationType = OperationType.UPDATE,
+            menuName = MenuEnum.UPDATE_PASSWORD)
     public JSONResult updateMenu(@Valid @RequestBody UpdateUserPasswordReq updateUserPasswordReq,
             BindingResult result) {
 
@@ -266,6 +282,9 @@ public class UserController {
      */
     @PostMapping("/updatePasswordSetting")
     @ResponseBody
+    @RequiresPermissions("sys:userManager:edit")
+    @LogRecord(description = "修改密码安全设置", operationType = OperationType.UPDATE,
+            menuName = MenuEnum.USER_MANAGEMENT)
     public JSONResult updatePasswordSetting(
             @Valid @RequestBody UpdatePasswordSettingReq updatePasswordSettingReq,
             BindingResult result) {

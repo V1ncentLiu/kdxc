@@ -1,5 +1,6 @@
 package com.kuaidao.manageweb.controller.module;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -20,6 +21,7 @@ import com.kuaidao.common.entity.TreeData;
 import com.kuaidao.manageweb.feign.module.ModuleManagerFeignClient;
 import com.kuaidao.sys.dto.module.ModuleInfoDTO;
 import com.kuaidao.sys.dto.module.ModuleQueryDTO;
+import com.kuaidao.sys.dto.module.OperationInfoDTO;
 
 @Controller
 @RequestMapping("/module/moduleManager")
@@ -95,7 +97,7 @@ public class ModuleManagerController {
 	/**
 	 * 修改菜单数据
 	 * 
-	 * @param pageNum
+	 * @param pageN1um
 	 * @param pageSize
 	 * @param queryDTO
 	 * @return
@@ -130,11 +132,34 @@ public class ModuleManagerController {
 	 * @param queryDTO
 	 * @return
 	 */
-	@PostMapping("/queryModuleById")
-	@ResponseBody
-	public JSONResult<ModuleInfoDTO> queryModuleById(@RequestBody ModuleQueryDTO dto) {
-		JSONResult<ModuleInfoDTO> pageJson = moduleManagerFeignClient.queryModuleById(dto);
-		return pageJson;
+	@RequestMapping("/queryModuleById")
+	public String queryModuleById(HttpServletRequest request, Model model) {
+		String moduleId = request.getParameter("moduleId");
+		ModuleQueryDTO dto = new ModuleQueryDTO();
+		dto.setId(new Long(moduleId));
+		JSONResult<ModuleInfoDTO> dtoJson = moduleManagerFeignClient.queryModuleById(dto);
+
+		if (dtoJson.getCode().equals(JSONResult.SUCCESS)) {
+			ModuleInfoDTO moduleDto = dtoJson.getData();
+			List<String> checkModuleId = new ArrayList<String>();
+			List<String> checkOptions = new ArrayList<String>();
+			if (null != moduleDto.getOperationInfos() && moduleDto.getOperationInfos().size() > 0) {
+				for (OperationInfoDTO opt : moduleDto.getOperationInfos()) {
+					checkModuleId.add(opt.getName() + "(" + opt.getCode() + ")");
+					checkOptions.add(opt.getName() + "(" + opt.getCode() + ")");
+
+				}
+
+			}
+
+			moduleDto.setType(checkModuleId);
+
+			model.addAttribute("checkOptions", checkOptions);
+
+			model.addAttribute("dtoJson", moduleDto);
+		}
+
+		return "module/updateModulePage";
 	}
 
 }
