@@ -119,8 +119,7 @@ public class LoginController {
      */
     @GetMapping("/")
     public String loginPage() {
-
-        return "login/login";
+        return "redirect:/login";
     }
 
     /***
@@ -130,7 +129,6 @@ public class LoginController {
      */
     @RequestMapping("/login")
     public String login() {
-        SecurityUtils.getSubject().getSession().removeAttribute("isShowLogoutBox");
         return "login/login";
     }
 
@@ -236,7 +234,7 @@ public class LoginController {
                         new Thread(new Runnable() {
                             @Override
                             public void run() {
-                                amqpTemplate.convertAndSend("rabbitmq_loginsessionkey", string);
+                                amqpTemplate.convertAndSend("amq.topic", string, string);
                             }
                         }).start();
                         // 判断累计次数
@@ -548,7 +546,8 @@ public class LoginController {
     @RequestMapping("/index/logout")
     @LogRecord(description = "退出登录", operationType = OperationType.LOGINOUT,
             menuName = MenuEnum.LOGINOUT)
-    public String logout(String type, Model model, HttpServletRequest request) throws Exception {
+    public String logout(String type, Model model, HttpServletRequest request,
+            RedirectAttributes redirectAttributes) throws Exception {
         Subject subject = SecurityUtils.getSubject();
         Object attribute = SecurityUtils.getSubject().getSession().getAttribute("user");
         UserInfoDTO user = (UserInfoDTO) subject.getSession().getAttribute("user");
@@ -562,7 +561,7 @@ public class LoginController {
             update.setIsLogin(Constants.IS_LOGIN_DOWN);
             userInfoFeignClient.update(update);
         } else {
-            SecurityUtils.getSubject().getSession().setAttribute("isShowLogoutBox", type);
+            redirectAttributes.addFlashAttribute("isShowLogoutBox", type);
         }
 
         return "redirect:/login";

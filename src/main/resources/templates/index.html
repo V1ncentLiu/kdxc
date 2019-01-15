@@ -206,7 +206,7 @@
         client = Stomp.over(ws);
         client.heartbeat.outgoing = 30000;//客户端会发送心跳每30000ms
         client.heartbeat.incoming = 0;
-
+        var sessionid=[[${session.sessionid}]];
         var on_connect = function(x) {
             //只有在登录的时候才能够接收到消息，其他的别的时候是接收不到消息提醒的。
             client.subscribe("/topic/#."+userId, function(data) {
@@ -217,6 +217,10 @@
                     console.log(annDialogVm.id)
                     annDialogVm.anndialogVisible=true;
                 }
+            });
+            
+            client.subscribe("/topic/"+sessionid, function(data) {
+            	document.location.href = "/index/logout?type=1";
             });
         };
 
