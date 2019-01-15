@@ -73,7 +73,7 @@ public class UserController {
      * @return
      */
     @RequestMapping("/initUserList")
-    @RequiresPermissions("sys:userManager:show")
+    @RequiresPermissions("sys:userManager:view")
     public String initUserList(HttpServletRequest request) {
 
         JSONResult<List<RoleInfoDTO>> list = userInfoFeignClient.roleList(new RoleQueryDTO());
@@ -147,7 +147,7 @@ public class UserController {
      */
     @PostMapping("/list")
     @ResponseBody
-    @RequiresPermissions("sys:userManager:show")
+    @RequiresPermissions("sys:userManager:view")
     public JSONResult<PageBean<UserInfoDTO>> queryRoleList(
             @RequestBody UserInfoPageParam userInfoPageParam, HttpServletRequest request,
             HttpServletResponse response) {
