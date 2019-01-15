@@ -110,11 +110,20 @@
 <div id="anndialog">
 <el-dialog
         title="公告通知"
-        :visible.sync="anndialogVisible" width="30%">
-    <p id="annTitle" style="margin-bottom: 10px;padding-top: 0px;text-align: center;font-size:18px;font-weight: bolder">标题</p>
-    <p id="annBody" style="font-size: 14px;text-indent: 2em">这是一段内容</p>
+        :visible.sync="anndialogVisible" width="60%">
+        <el-table
+                :data="AnnDialogTableData"
+                style="width: 100%">
+            <template v-for="(col ,index) in cols">
+                <el-table-column :prop="col.prop" :label="col.label" header-align="center">
+                    <template slot-scope="scope">
+                        <span style="white-space: pre">{{scope.row.content_ }}</span>
+                    </template>
+                </el-table-column>
+            </template>
+        </el-table>
     <span slot="footer" class="dialog-footer" >
-        <el-button type="primary" @click="anndialogVisible = false">我知道了</el-button>
+        <el-button type="primary" @click="updateStatusAnn">我知道了</el-button>
     </span>
 </el-dialog>
 </div>
@@ -140,18 +149,31 @@
         el: '#anndialog',
         data:{
             anndialogVisible:false,
-            id:"1084034513090117632"
+            id:"1084034513090117632",
+            AnnDialogTableData:[],
+            cols:[]
         },
         methods:{
-            initDialogData(){
+             updateStatusAnn(){
+                 var param = {};
+                 param.ids = this.id;
+                 axios.post('/annReceive/batchUpdate', param)
+                     .then(function (response) {
+                         vm.$message({type: 'success', message: '更新完成!',duration:2000,onClose:function(){
+                                 homePageVM.messageCount();
+                         }});
+                     }).catch(function (error) {console.log(error);});
+                 annDialogVm.anndialogVisible = false;
+             }
+            ,initDialogData(){
                 var param = {};
                 param.id = this.id;
                 axios.post('/ann/queryOneAnn', param)
                     .then(function (response) {
                         console.log(response.data)
                         if(response.data.code==0){
-                            document.getElementById("annTitle").innerHTML=response.data.data.title;
-                            document.getElementById("annBody").innerHTML=response.data.data.content;
+                            annDialogVm.AnnDialogTableData = [{content_:response.data.data.content}]
+                            annDialogVm.cols =[{ label: response.data.data.title, prop: "content_", type: "normal" }];
                         }
                     })
                     .catch(function (error) {
@@ -168,7 +190,7 @@
         },
         updated() {
             console.info("updated method");
-            this.initDialogData();
+            // this.initDialogData();
         },
     });
 </script>
@@ -206,16 +228,20 @@
         client = Stomp.over(ws);
         client.heartbeat.outgoing = 30000;//客户端会发送心跳每30000ms
         client.heartbeat.incoming = 0;
-        var sessionid=[[${session.sessionid}]];
+        var sessionid='[[${session.sessionid}]]';
         var on_connect = function(x) {
             //只有在登录的时候才能够接收到消息，其他的别的时候是接收不到消息提醒的。
             client.subscribe("/topic/#."+userId, function(data) {
                 var msg = data.body;
                 if(msg.indexOf("announce") != -1){
                     var annid = msg.split(",")[1];
+
+                    homePageVM.messageCount();
+
                     annDialogVm.id = annid;
                     console.log(annDialogVm.id)
                     annDialogVm.anndialogVisible=true;
+                    annDialogVm.initDialogData();
                 }
             });
             

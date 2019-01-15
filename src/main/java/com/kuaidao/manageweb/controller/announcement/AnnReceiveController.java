@@ -68,6 +68,9 @@ public class AnnReceiveController {
         }
         Subject subject = SecurityUtils.getSubject();
         UserInfoDTO user = (UserInfoDTO) subject.getSession().getAttribute("user");
+        if(user == null){
+            return new JSONResult().fail("-1","用户未登录");
+        }
         dto.setReceiveUser(user.getId());
         return annReceiveFeignClient.queryReceive(dto);
     }
