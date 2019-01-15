@@ -4,6 +4,8 @@ import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.IdEntity;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
+import com.kuaidao.manageweb.config.LogRecord;
+import com.kuaidao.manageweb.constant.MenuEnum;
 import com.kuaidao.manageweb.feign.announcement.AnnouncementFeignClient;
 import com.kuaidao.manageweb.feign.announcement.BusReceiveFeignClient;
 import com.kuaidao.sys.dto.announcement.AnnouncementAddAndUpdateDTO;
@@ -81,6 +83,7 @@ public class BussReceiveController {
      * 批量更新状态
      * @return
      */
+    @LogRecord(description = "消息状态更新",operationType = LogRecord.OperationType.UPDATE,menuName = MenuEnum.MESSAGE_CENTER)
     @RequestMapping("/batchUpdate")
     @ResponseBody
     public JSONResult<Void> batchUpdate(@RequestBody Map<String, String> map){

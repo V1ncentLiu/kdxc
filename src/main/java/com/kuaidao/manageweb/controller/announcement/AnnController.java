@@ -4,6 +4,8 @@ import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.IdEntity;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
+import com.kuaidao.manageweb.config.LogRecord;
+import com.kuaidao.manageweb.constant.MenuEnum;
 import com.kuaidao.manageweb.controller.dictionary.DictionaryController;
 import com.kuaidao.manageweb.feign.SysFeign;
 import com.kuaidao.manageweb.feign.announcement.AnnReceiveFeignClient;
@@ -190,6 +192,7 @@ public class AnnController {
         return "ann/annListPage";
     }
 
+    @LogRecord(description = "公告发布",operationType = LogRecord.OperationType.INSERT,menuName = MenuEnum.ANNOUNCE_MANAGEMENT)
     @RequiresPermissions("announce:publishAnn")
     @RequestMapping("/annPublishPage")
     public String itemListPage(){
