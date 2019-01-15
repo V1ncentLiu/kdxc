@@ -193,7 +193,7 @@ public class AnnController {
     }
 
     @LogRecord(description = "公告发布",operationType = LogRecord.OperationType.INSERT,menuName = MenuEnum.ANNOUNCE_MANAGEMENT)
-//    @RequiresPermissions("announce:publishAnn")
+    @RequiresPermissions("announce:publishAnn")
     @RequestMapping("/annPublishPage")
     public String itemListPage(){
         logger.info("--------------------------------------跳转到公告页面-----------------------------------------------");
