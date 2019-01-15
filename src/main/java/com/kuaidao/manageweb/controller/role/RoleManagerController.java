@@ -21,9 +21,12 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
+import com.kuaidao.manageweb.feign.customfield.CustomFieldFeignClient;
 import com.kuaidao.manageweb.feign.module.ModuleManagerFeignClient;
 import com.kuaidao.manageweb.feign.role.RoleManagerFeignClient;
 import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
+import com.kuaidao.sys.dto.customfield.CustomFieldQueryDTO;
+import com.kuaidao.sys.dto.customfield.CustomFieldRespDTO;
 import com.kuaidao.sys.dto.module.IndexModuleDTO;
 import com.kuaidao.sys.dto.module.ModuleInfoDTO;
 import com.kuaidao.sys.dto.module.OperationInfoDTO;
@@ -46,6 +49,9 @@ public class RoleManagerController {
 
 	@Autowired
 	private UserInfoFeignClient userInfoFeignClient;
+
+	@Autowired
+	private CustomFieldFeignClient customFieldFeignClient;
 
 	/***
 	 * 
@@ -104,7 +110,7 @@ public class RoleManagerController {
 			if (null != roledto) {
 
 				model.addAttribute("ipListTable", roledto.getIpPackages());
-				
+
 				model.addAttribute("roleInfo", roledto);
 			}
 		}
@@ -121,22 +127,20 @@ public class RoleManagerController {
 					List<ModuleInfoDTO> moduleList = indexMoudel.getSubList();
 
 					for (ModuleInfoDTO module : moduleList) {
-						
-						List<String>  checkedCities=new ArrayList<String>();
+
+						List<String> checkedCities = new ArrayList<String>();
 						List<OperationInfoDTO> operationInfos = module.getOperationInfos();
 						for (OperationInfoDTO operation : operationInfos) {
 							if (null != roledto) {
 								List<OperationInfoDTO> roleOperations = roledto.getOperations();
-								for (OperationInfoDTO  roleOpe : roleOperations) {
-									
-									if(roleOpe.getId().equals(operation.getId())){
-										
-										checkedCities.add(operation.getId()+"");
+								for (OperationInfoDTO roleOpe : roleOperations) {
+
+									if (roleOpe.getId().equals(operation.getId())) {
+
+										checkedCities.add(operation.getId() + "");
 										break;
 									}
-									
-									
-									
+
 								}
 
 							}
@@ -167,6 +171,21 @@ public class RoleManagerController {
 	public JSONResult<List<RoleInfoDTO>> queryRoleList(@RequestBody RoleQueryDTO dto, HttpServletRequest request,
 			HttpServletResponse response) {
 		return roleManagerFeignClient.queryRoleList(dto);
+	}
+
+	/**
+	 * 查询角色列表
+	 * 
+	 * @param dto
+	 * @param request
+	 * @param response
+	 * @return
+	 */
+	@RequestMapping("/queryCustomField")
+	@ResponseBody
+	public JSONResult<List<CustomFieldRespDTO>> queryCustomField(@RequestBody CustomFieldQueryDTO dto,
+			HttpServletRequest request, HttpServletResponse response) {
+		return customFieldFeignClient.queryCustomField(dto.getMenuCode());
 	}
 
 	/**

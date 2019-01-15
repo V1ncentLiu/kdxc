@@ -162,7 +162,7 @@
                             </el-checkbox-group>
                         </div>
                         <div class="handle">
-                            <el-button type="primary" size="small" class="marginL20" @click="openDialogLimitData(subList.authCode)">设置</el-button>
+                            <el-button type="primary" size="small" class="marginL20" @click="openDialogLimitData(subList.authCode,subList.id)">设置</el-button>
                         </div> 
                         <div class="line"></div>                        
                     </li>
@@ -213,11 +213,11 @@
         <el-form :model="chooseLimitform" ref="chooseLimitform">
             <el-row class="marginB20">
                 <el-checkbox-group v-model="chooseLimitCheck">
-                    <el-checkbox v-for="field in fields" :label="field" :key="field" style="margin-left: 0;margin-right: 10px;margin-bottom: 10px;">{{field}}</el-checkbox>
+                    <el-checkbox v-for="field in fields"  :label="field.id" :key="field.id" style="margin-left: 0;margin-right: 10px;margin-bottom: 10px;">{{field.fieldName}}</el-checkbox>
                 </el-checkbox-group>
             </el-row>            
             <el-form-item class="f-tac">
-                <el-button type="primary" @click="submitForm('chooseLimitform')">提交</el-button>
+                <el-button type="primary" @click="submitFormField('chooseLimitform')">提交</el-button>
                 <el-button @click="dialogFormSetting = false">取消</el-button>
             </el-form-item>
         </el-form>        
@@ -227,13 +227,14 @@
 <div th:include="_footer_include :: #jsLib"></div>
 <script th:inline="javascript" >
 var moduleData=[[${moduleData}]];
-   var  fieldOptions = ['阶段', '创建日期', '编码', '资源项目','搜索词','广告位','媒介','电销总监','电销组'];
+   //var  fieldOptions = ['阶段', '创建日期', '编码', '资源项目','搜索词','广告位','媒介','电销总监','电销组'];
+   //var  fieldOptions = [{id:'1',name:'阶段'}];
    var  addRoleVM=new Vue({
          el: '#addRole',
          data: function() {
             return {
-                chooseLimitCheck: fieldOptions,//默认选中
-                fields: fieldOptions,
+                chooseLimitCheck: [],//默认选中
+                fields: [],
                 dataList:moduleData,
                 addRoleValidateForm: {
                     roleName: '',
@@ -261,6 +262,8 @@ var moduleData=[[${moduleData}]];
                 multipleSelection: [],
                 dialogFormChooseIP: false,
                 dialogFormSetting: false,
+                feildMenuId:'',
+                checkBoxFieldArr:{},
                 form: {
                     name: '',
                     remark: '',
@@ -300,7 +303,6 @@ var moduleData=[[${moduleData}]];
                              		  if(null!=checkedCities){
                              			 //循环选中操作
                              			for(var m=0; m<checkedCities.length;m++)  {
-                             				debugger;
                              				var operation={};
                              				 operation.id=checkedCities[m];
                                 			 operationArry.push(operation);  
@@ -310,6 +312,22 @@ var moduleData=[[${moduleData}]];
                                  } 	 
                     		 }
                          }
+                    	//获取菜单的数据列
+                    	var  fieldMap=addRoleVM.checkBoxFieldArr;
+                    	var fieldSaveArray=[];
+                    	if(null!=fieldMap){
+                    	  for(var key in fieldMap)  {
+                    		var value=fieldMap[key];
+                    		 if(null!=value){
+                            for (var i=0;i<value.length;i++ ) {
+                            	 var field={};
+                            	 field.customFieldId=value[i];  
+                            	 fieldSaveArray.push(field);	
+                            	}
+                              }	   
+                    		   
+                    		} 
+                    	}
                          //处理角色对应的Ip包数据
                     	 var ipListTable=addRoleVM.ipListTable;
                          var  param={};
@@ -317,6 +335,7 @@ var moduleData=[[${moduleData}]];
                          param.isIpLimit=addRoleVM.addRoleValidateForm.visitLimitRadio;
                          param.operations=operationArry;
                          param.ipPackages=ipListTable;
+                         param.customFieldMenus=fieldSaveArray;
                          axios.post('/role/roleManager/saveRoleInfo',param).then(function (response) {
           		           if(null==response){
           		                 alert("返回异常");
@@ -407,13 +426,52 @@ var moduleData=[[${moduleData}]];
 	              }
 	           });
 	           },
-	          
-	           openDialogLimitData(moduleCode){
+	            openDialogLimitData(moduleCode ,id){
 	        	//打开数据权限界面
 	            addRoleVM.dialogFormSetting=true;
-	           },
-            // 删除
-            deleteFun() {
+	             var  param={};
+	        	 param.menuCode=moduleCode;
+	        	 addRoleVM.feildMenuId=id;
+	             axios.post('/role/roleManager/queryCustomField',param).then(function (response) {
+			           if(null==response){
+			                 alert("返回异常");
+			                 return ;
+			            }
+			            var resobj= response.data;
+			            if(null==resobj){
+			            	 alert("返回异常");
+			                 return ;
+			            } 
+			            if(resobj.code!='0'){
+			            	alert(response.data.message);
+			            	return ;
+			            }
+			             addRoleVM.fields=resobj.data;
+			              var  fieldAray= resobj.data;
+			              var fArray=[];
+			              for(var i=0;i<fieldAray.length;i++){
+			            	   fArray.push(fieldAray[i].id);
+			             }
+			             addRoleVM.chooseLimitCheck=fArray;
+			             
+			            })
+			            .catch(function (error) {
+			              console.log(error);
+			            })
+			            .then(function () {
+			            });	 
+	            },
+	            //提交数据权限
+	            submitFormField(form){
+	            	//var  fieldData={};
+	            	//fieldData.moduleId=addRoleVM.feildMenuId;
+	            	//fieldData.field=addRoleVM.chooseLimitCheck
+	            	//addRoleVM.checkBoxFieldArr.push(fieldData);
+	            	Vue.set(this.checkBoxFieldArr,addRoleVM.feildMenuId,addRoleVM.chooseLimitCheck);
+	                addRoleVM.dialogFormSetting=false;	
+	            },
+             // 删除
+             deleteFun() {
                 this.$confirm('删除后此角色信息将不存在，确认删除吗？', '消息提醒', {
                     confirmButtonText: '确定',
                     cancelButtonText: '取消',
