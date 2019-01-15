@@ -71,7 +71,7 @@ public class OrganizationController {
      * @return
      * @throws Exception
      */
-    @RequiresPermissions(value= {"organization:save","organization:update"},logical=Logical.OR)
+   // @RequiresPermissions(value= {"organization:save","organization:update"},logical=Logical.OR)
     @PostMapping("/saveOrUpdate")
     @ResponseBody
     public JSONResult save(@Valid @RequestBody OrganizationAddAndUpdateDTO orgDTO,
@@ -99,7 +99,7 @@ public class OrganizationController {
      * @param orgDTO
      * @return
      */
-    @RequiresPermissions("organization:update")
+    //@RequiresPermissions("organization:update")
     @PostMapping("/update")
     @ResponseBody
     public JSONResult update(@Valid @RequestBody OrganizationAddAndUpdateDTO orgDTO,
@@ -116,7 +116,7 @@ public class OrganizationController {
      * @param orgDTO
      * @return
      */
-    @RequiresPermissions("organization:delete")
+    //@RequiresPermissions("organization:delete")
     @PostMapping("/delete")
     @ResponseBody
     public JSONResult delete(@RequestBody IdListReq idListReq) {

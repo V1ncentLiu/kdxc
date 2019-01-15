@@ -111,7 +111,7 @@ var homePageVM=new Vue({
                });
          },
          confirmLogout(){//确认退出系统
-        	 location.href="/logout";
+        	 location.href="/index/logout";
         },
         gotoHomePage(){//首页跳转
         	location.href='/login';
