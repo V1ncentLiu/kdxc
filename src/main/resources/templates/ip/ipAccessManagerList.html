@@ -22,8 +22,7 @@ xmlns:th="http://www.thymeleaf.org">
 				<el-form :inline="true" :model="iprepositoryForm" class="demo-form-inline" ref="iprepositoryForm">
 					<el-row>
 						<el-col :span="20">
-							<el-button type="primary" @click="openIpAddData">添加</el-button>
-							<el-button type="primary">修改</el-button>
+							<el-button type="primary" @click="openIpAddData">添加IP</el-button>
 							<el-button type="primary" @click="delIpGroup">删除</el-button>
 						</el-col>
 						<el-col :span="4">
@@ -44,7 +43,7 @@ xmlns:th="http://www.thymeleaf.org">
 				</el-form>
 				<el-table border  id="ipManagerTable" ref="customFieldTable" :data="ipTableData" tooltip-effect="dark" tyle="width: 100%,height:750px" @selection-change="changeIpTableFun" class="marginB20"> 
 					<el-table-column type="selection" width="55" prop="id" @selection-change="changeIpTableFun" align="center"> </el-table-column> 
-					<el-table-column prop="ipAddress" label="ip地址" align="center"> </el-table-column> 
+					<el-table-column prop="ipAddress" label="IP地址" align="center"> </el-table-column> 
 					<el-table-column prop="createTime" :formatter="dateFormat" label="创建时间" align="center"> </el-table-column> 
 				</el-table>
 				<table-pagination :pager="ippager" @change="queryIpDataList"></table-pagination> 
@@ -53,8 +52,8 @@ xmlns:th="http://www.thymeleaf.org">
 				<el-form :inline="true" :model="ippackageForm" class="demo-form-inline" ref="customFieldQueryForm">
 					<el-row>
 						<el-col :span="12">
-							<el-button type="primary" @click="openAddIpPackage">添加</el-button> 
-							<el-button type="primary">修改</el-button>
+							<el-button type="primary" @click="openAddIpPackage">创建IP包</el-button> 
+							<el-button type="primary">修改IP包</el-button>
 							<el-button type="primary" @click="delpackageGroup" >删除</el-button>
 						</el-col>
 						<el-col :span="12" style="text-align: right;">
@@ -73,7 +72,7 @@ xmlns:th="http://www.thymeleaf.org">
 				<el-table id="ipPackageTable" border ref="customFieldTable" :data="packageTableData" tooltip-effect="dark"  @selection-change="changePackageTableFun" class="marginB20">
 					<el-table-column align="center" type="selection" prop="id" width="55" @selection-change="changePackageTableFun" > </el-table-column>
 					<el-table-column align="center" prop="name" label="包名" width="180"> </el-table-column>
-					<el-table-column align="center" prop="ipAddress" label="ip地址" width="500"> </el-table-column> 
+					<el-table-column align="center" prop="ipAddress" label="IP地址" width="500"> </el-table-column> 
 					<el-table-column align="center" prop="createTime" :formatter="dateFormat" label="创建时间"> </el-table-column>
 				</el-table> 
 				<table-pagination :pager="packpager" @change="queryPackageDataList"></table-pagination>
@@ -315,13 +314,15 @@ var ipManagerVM = new Vue({
 			var param={};
 			param.ipAddress=ipManagerVM.ipAddForm.ipAddress;
 			axios.post('/ip/ipAccess/saveIpRepository',param).then(function (response) {
-				ipManagerVM.refreshIpTableData(response);
+				ipManagerVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
+					ipManagerVM.refreshIpTableData(response);
+        	    }});
 			});
 			ipManagerVM.dialogIpVisible=false;
 		},
 		//批量删除Ip数据
 		delIpGroup() {
-			this.$confirm('删除后此角色信息将不存在，确认删除吗？', '消息提醒', {
+			this.$confirm('确认删除吗？', '消息提醒', {
                 confirmButtonText: '确定',
                 cancelButtonText: '取消',
                 type: 'warning'
@@ -351,7 +352,7 @@ var ipManagerVM = new Vue({
             });
 		},
 		delpackageGroup() {
-			this.$confirm('删除后此角色信息将不存在，确认删除吗？', '消息提醒', {
+			this.$confirm('确认删除吗？', '消息提醒', {
                 confirmButtonText: '确定',
                 cancelButtonText: '取消',
                 type: 'warning'
@@ -424,7 +425,28 @@ var ipManagerVM = new Vue({
 			var param={};
 			param.name=packageName;
 			param.ipRepositorys=savepackageIp;
-			axios.post('/ip/ipAccess/saveIpPackage',param).then(function (response) {
+            axios.post('/ip/ipAccess/queryIpPackageByParam',param)
+            .then(function (response) { 
+              if(null==response){
+	                 alert("返回异常");
+	                 return ;
+	               }
+	               var resobj= response.data;
+	               if(null==resobj){
+	            	   alert("返回异常");
+	                   return ;
+	               } 
+	               if(resobj.code!='0'){
+	            	alert(response.data.message);
+	            	return ;
+	                }
+	              //校验模块名称是否已存在
+	              var checkName=response.data.data;
+             	if(null!=checkName&&checkName.length>0) {
+           		 alert("模块名称已存在");
+           	     return ;
+             	}
+			   axios.post('/ip/ipAccess/saveIpPackage',param).then(function (response) {
 				if(null==response){
 					alert("返回异常");
 					return ;
@@ -443,7 +465,8 @@ var ipManagerVM = new Vue({
 				ipManagerVM.queryPackageDataList(); 
 			//  });
 			// }
-			 });
+			  });
+            });
 		},
 		refreshIpTableData(response){
 			//修改新增Ip后刷新IP列表

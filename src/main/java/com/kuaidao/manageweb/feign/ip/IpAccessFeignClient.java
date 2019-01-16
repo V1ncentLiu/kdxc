@@ -1,5 +1,7 @@
 package com.kuaidao.manageweb.feign.ip;
 
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.netflix.feign.FeignClient;
@@ -43,6 +45,10 @@ public interface IpAccessFeignClient   {
 	
 	@RequestMapping(method = RequestMethod.POST, value = "/deleteIppackage")
 	public JSONResult<String> deleteIppackage(@RequestBody IpPackageInfoDTO dto) ;
+	
+
+	@RequestMapping(method = RequestMethod.POST, value = "/queryIpPackageByParam")
+	public JSONResult<List<IpPackageInfoDTO>> queryIpPackageByParam(IpAccessManagerQueryDTO dto);
  
 	
     @Component
@@ -105,6 +111,13 @@ public interface IpAccessFeignClient   {
 		public JSONResult<PageBean<IpPackageInfoDTO>> querytAllPackageList() {
 			// TODO Auto-generated method stub
 			return fallBackError("查询所有IP包列表数据失败");
+		}
+
+		@SuppressWarnings("unchecked")
+		@Override
+		public JSONResult<List<IpPackageInfoDTO>> queryIpPackageByParam(IpAccessManagerQueryDTO dto) {
+			 
+			return fallBackError("查询所有IP包数据失败");
 		}
 		
 		

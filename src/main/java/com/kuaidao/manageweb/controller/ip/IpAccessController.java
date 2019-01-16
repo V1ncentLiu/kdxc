@@ -1,5 +1,7 @@
 package com.kuaidao.manageweb.controller.ip;
 
+import java.util.List;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -110,6 +112,18 @@ public class IpAccessController {
 		return ipAccessFeignClient.querytAllPackageList();
 	}
 
-	 
+	/**
+	 * 查询角色列表
+	 * 
+	 * @param dto
+	 * @param request
+	 * @param response
+	 * @return
+	 */
+	@RequestMapping("/queryIpPackageByParam")
+	@ResponseBody
+	public JSONResult<List<IpPackageInfoDTO>> queryIpPackageByParam(@RequestBody IpAccessManagerQueryDTO dto) {
+		return ipAccessFeignClient.queryIpPackageByParam(dto);
+	} 
 
 }
