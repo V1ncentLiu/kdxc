@@ -20,9 +20,9 @@ import java.lang.annotation.RetentionPolicy;
 public @interface LogRecord {
   /**
    * 更新；LOGIN:登录； LOGINOUT:退出登录；     INSERT:添加  UPDATE:编辑     DELETE:删除；
-   * EXPORT:导出；PUSH：推送；DISTRIBUTION：分配； RELEASE:释放；   TRANSFER:转移
+   * EXPORT:导出；PUSH：推送；DISTRIBUTION：分配； RELEASE:释放；   TRANSFER:转移  DISABLE:禁用  ENABLE:启用  IMPORTS：导入
    */
-  public enum OperationType{LOGIN,LOGINOUT,UPDATE,INSERT,DELETE,EXPORT,PUSH,IMPORTS,DISTRIBUTION,TRANSFER,RELEASE}
+  public enum OperationType{LOGIN,LOGINOUT,UPDATE,INSERT,DELETE,EXPORT,PUSH,IMPORTS,DISTRIBUTION,TRANSFER,RELEASE,DISABLE,ENABLE}
   /**
    * 对该请求的描述
    */
