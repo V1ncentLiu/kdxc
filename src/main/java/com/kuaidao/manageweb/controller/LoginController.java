@@ -402,7 +402,7 @@ public class LoginController {
         // 查询用户信息
         JSONResult<UserInfoDTO> getbyUserName = userInfoFeignClient.getbyUserName(userInfoReq);
         if (getbyUserName.getData() == null) {
-            msg = "用户不存在！";
+            msg = "登录用户名未注册。";
             return new JSONResult<>().fail(SysErrorCodeEnum.ERR_SYSTEM.getCode(), msg);
         }
         UserInfoDTO user = getbyUserName.getData();
