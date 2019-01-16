@@ -42,7 +42,7 @@ public class AccesssLogRecordAop {
     @Autowired
     LogService logService;
 
-    @Pointcut("execution(public * com.kuaidao.manageweb.*.*.*(..))")
+    @Pointcut("execution(public * com.kuaidao.manageweb.controller..*.*(..))")
     public void pointCut() {}
 
     @Pointcut("@annotation(com.kuaidao.manageweb.config.LogRecord)")
@@ -77,7 +77,19 @@ public class AccesssLogRecordAop {
                 getRequestParam(logRecord, request);
             }
             getRespParam(logRecord, obj);
+            if ("0".equals(logRecord.getResCode())) {
+                if ((OperationType.LOGIN.toString()).equals(logRecord.getOperationType())) {
+                    logRecord.setContent("登录成功");
+                }
+                if ((OperationType.LOGINOUT.toString()).equals(logRecord.getOperationType())) {
+                    logRecord.setContent("退出成功");
+                }
+            } else {
+                if ((OperationType.LOGIN.toString()).equals(logRecord.getOperationType())) {
+                    logRecord.setContent("登录失败");
+                }
 
+            }
             logRecord.setReqEndTime(DateUtil.convert2String(new Date(), DateUtil.ymdhms));
         } catch (Throwable throwable) {
             logRecord.setResCode(FAIL_CODE);
@@ -127,7 +139,6 @@ public class AccesssLogRecordAop {
         UserInfoDTO user =
                 (UserInfoDTO) SecurityUtils.getSubject().getSession().getAttribute("user");
         if (user != null) {
-
             logRecord.setUserName(user.getUsername());
             logRecord.setName(user.getName());
             logRecord.setPhone(user.getPhone());

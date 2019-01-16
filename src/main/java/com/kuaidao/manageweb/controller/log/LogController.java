@@ -38,7 +38,6 @@ public class LogController {
      * @return
      */
     @RequestMapping("/visitLog")
-    @LogRecord(description = "登录", operationType = OperationType.LOGIN, menuName = MenuEnum.LOGIN)
     public String visitLog(HttpServletRequest request) {
 
         return "log/logPage";
@@ -50,8 +49,6 @@ public class LogController {
      * @return
      */
     @RequestMapping("/operationLog")
-    @LogRecord(description = "退出", operationType = OperationType.INSERT,
-            menuName = MenuEnum.USER_MANAGEMENT)
     public String operationLog(HttpServletRequest request) {
         return "log/operationLog";
     }
