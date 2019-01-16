@@ -96,6 +96,8 @@ public class AnnController {
         if(jsonResult.getCode().equals(jsonResult.SUCCESS)){
             Long orgId = dto.getOrgId();
             List<UserInfoDTO> list = new ArrayList();
+            List<Long> idsList = new ArrayList<>();
+
             UserInfoPageParam param = new UserInfoPageParam();
             param.setPageNum(1);
             param.setPageSize(100000);
@@ -113,6 +115,9 @@ public class AnnController {
                 List<AnnReceiveAddAndUpdateDTO> annrList = new ArrayList<AnnReceiveAddAndUpdateDTO>();
                 for(UserInfoDTO userinfo :list){
                     AnnReceiveAddAndUpdateDTO annDto = new AnnReceiveAddAndUpdateDTO();
+                    long annRecId = IdUtil.getUUID();
+                    idsList.add(annRecId);
+                    annDto.setId(annRecId);
                     annDto.setReceiveUser(userinfo.getId());
                     annDto.setAnnouncementId(annId);
                     annrList.add(annDto);
@@ -134,8 +139,11 @@ public class AnnController {
 
             Integer type = dto.getType();
             if(type==1||type==0){ //站内公告通知
-                for(UserInfoDTO userInfo:list){
-                    amqpTemplate.convertAndSend("amq.topic",userInfo.getOrgId()+"."+userInfo.getId(),"announce,"+annId);
+//                for(UserInfoDTO userInfo:list){
+                for(int i = 0 ; i < list.size();i++){
+                    Long aLong = idsList.get(i);
+                    UserInfoDTO userInfo =  list.get(i);
+                    amqpTemplate.convertAndSend("amq.topic",userInfo.getOrgId()+"."+userInfo.getId(),"announce,"+annId+","+aLong);
                 }
             }
 
