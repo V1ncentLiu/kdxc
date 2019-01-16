@@ -95,7 +95,7 @@ public class UserController {
      * @return
      */
     @RequestMapping("/initCreateUser")
-    @RequiresPermissions("sys:userManager:create")
+    @RequiresPermissions("sys:userManager:add")
     public String initCreateUser(HttpServletRequest request) {
 
         // 查询组织机构树
