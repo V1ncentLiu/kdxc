@@ -99,7 +99,7 @@
         <el-form-item label="访问IP限制：">
             <el-radio v-model="addRoleValidateForm.visitLimitRadio" label="0">开放访问</el-radio>
             <el-radio v-model="addRoleValidateForm.visitLimitRadio" label="1">限制IP访问</el-radio>
-            <el-button type="primary" size="medium" class="marginL20" @click="dialogFormChooseIP = true">选择访问IP包</el-button>
+            <el-button type="primary" size="medium" class="marginL20" @click="openIpPackDilog">选择访问IP包</el-button>
             <!-- <el-button type="primary" size="medium" class="marginL20" @click="dialogFormSetting = true">设置</el-button> -->
         </el-form-item>
         <div class="fs16 marginB20"><div class="titleBorderL">已选访问IP包</div></div>
@@ -171,7 +171,7 @@
         </ul>
         <el-form-item style="text-align: center;">
             <el-button type="primary" @click="submitFormRole('addRoleValidateForm')">提交</el-button>
-            <el-button>取消</el-button>
+            <el-button  @click="reBackRoleInfo"  >取消</el-button>
         </el-form-item>
     </el-form>
     
@@ -286,6 +286,15 @@ var moduleData=[[${moduleData}]];
                         return false;
                     }
                 });
+            },
+            openIpPackDilog(){
+            	//打开IP包
+            	 addRoleVM.dialogFormChooseIP = true;
+            	 addRoleVM.chooseIpform.ipPackageName='';
+            	 addRoleVM.chooseIpform.searchHasIp='';
+            },
+            reBackRoleInfo(){
+            	 window.location.href="/role/roleManager/initRoleInfo"; 	
             },
             submitFormRole(formName) {
                 this.$refs[formName].validate((valid) => {
