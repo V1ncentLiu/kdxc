@@ -144,16 +144,19 @@
 <div id="bussdialog">
     <el-dialog
             title="业务消息"
-            :visible.sync="bussdialogVisible" width="100%">
+            :visible.sync="bussdialogVisible" width="60%">
             <el-table :data="bussDialogTableData" style="width: 100%">
             <template v-for="(col ,index) in cols">
                 <el-table-column :prop="col.prop" :label="col.label" header-align="center">
                     <template slot-scope="scope">
-                         <span style="white-space: pre">{{scope.row.content }}</span>
+                         <span style="white-space: pre">{{scope.row.content_ }}</span>
                     </template>
                 </el-table-column>
             </template>
             </el-table>
+            <span slot="footer" class="dialog-footer" >
+                <el-button type="primary" @click="updateStatusBuss">我知道了</el-button>
+            </span>
     </el-dialog>
 </div>
 
@@ -184,6 +187,9 @@
     }
     .el-dialog__body{
         padding-top: 3px;
+    }
+    .el-dialog__footer {
+        text-align: center;
     }
 </style>
 <!-- import common js-->
@@ -238,6 +244,8 @@
         el: '#bussdialog',
         data:{
             bussdialogVisible:false,
+            id:"",
+            status:"",
             title:"",
             content:"",
             bussDialogTableData:[],
@@ -247,6 +255,21 @@
             initDialogData(){
                 // document.getElementById("bussTitle").innerHTML=this.title;
                 // document.getElementById("bussBody").innerHTML=this.content;
+            },
+            updateStatusBuss(){
+                if(bussDialogVm.status==1){
+                    bussDialogVm.bussdialogVisible = false
+                    return false;
+                }
+                var param = {};
+                param.ids = bussDialogVm.id;
+                axios.post('/bussReceive/batchUpdate', param)
+                    .then(function (response) {
+                        bussDialogVm.$message({type: 'success', message: '消息已读!',duration:2000,onClose:function(){
+                                bussDialogVm.bussdialogVisible = false
+                                vm.initBussTableData(1);
+                            }});
+                    }).catch(function (error) {queryFormVM.$message.error(error);});
             },
             showOutVisiable:function(){
                 this.bussdialogVisible = true
@@ -320,9 +343,11 @@
             },
 
             showBussMx(row, event){
+                bussDialogVm.id = row.id;
                 bussDialogVm.title = row.title;
                 bussDialogVm.content = row.content;
-                bussDialogVm.AnnDialogTableData = [{content_:row.content}]
+                bussDialogVm.status = row.status;
+                bussDialogVm.bussDialogTableData = [{content_:row.content}]
                 bussDialogVm.cols =[{ label: row.title, prop: "content_", type: "normal" }];
                 bussDialogVm.bussdialogVisible = true;
             },
