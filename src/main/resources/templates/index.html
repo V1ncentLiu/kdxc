@@ -150,13 +150,14 @@
         data:{
             anndialogVisible:false,
             id:"1084034513090117632",
+            annRevid:"",
             AnnDialogTableData:[],
             cols:[]
         },
         methods:{
              updateStatusAnn(){
                  var param = {};
-                 param.ids = this.id;
+                 param.ids = this.annRevid;
                  axios.post('/annReceive/batchUpdate', param)
                      .then(function (response) {
                          vm.$message({type: 'success', message: '更新完成!',duration:2000,onClose:function(){
@@ -172,6 +173,7 @@
                     .then(function (response) {
                         console.log(response.data)
                         if(response.data.code==0){
+                            console.log( response.data.data)
                             annDialogVm.AnnDialogTableData = [{content_:response.data.data.content}]
                             annDialogVm.cols =[{ label: response.data.data.title, prop: "content_", type: "normal" }];
                         }
@@ -235,10 +237,11 @@
                 var msg = data.body;
                 if(msg.indexOf("announce") != -1){
                     var annid = msg.split(",")[1];
-
+                    var annRevid = msg.split(",")[2];
                     homePageVM.messageCount();
 
                     annDialogVm.id = annid;
+                    annDialogVm.annRevid =annRevid
                     console.log(annDialogVm.id)
                     annDialogVm.anndialogVisible=true;
                     annDialogVm.initDialogData();
