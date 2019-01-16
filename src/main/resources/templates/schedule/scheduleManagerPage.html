@@ -11,7 +11,7 @@
     <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
         <el-breadcrumb-item>Home</el-breadcrumb-item>
         <el-breadcrumb-item>系统管理</el-breadcrumb-item>
-        <el-breadcrumb-item><a href="JavaScript:void(0)" data-url="a.html">任务管理</a></el-breadcrumb-item>
+        <el-breadcrumb-item><a >任务管理</a></el-breadcrumb-item>
     </el-breadcrumb>
     
     <el-row class="marginB10">
@@ -38,20 +38,22 @@
            <el-table-column align="center" prop="params" label="参数JSON格式" ></el-table-column>
             <el-table-column align="center" prop="jobState" label="任务状态" :formatter="transformStatus"></el-table-column>
             <el-table-column align="center" label="操作">
-            	<shiro:hasPermission name="sys:scheduleManager:edit">
                 <template slot-scope="scope">
-	                <div v-if="scope.row.jobState == 1">
+	                <div v-if="scope.row.jobState == 1  || scope.row.jobState == 0">
+		            	<shiro:hasPermission name="sys:scheduleManager:edit">
 	                    <el-button  @click="updateStatus(scope.row.jobId,1,'停止')" type="text"  size="small">
 	                     		   停止
 	                    </el-button>
+		                </shiro:hasPermission>
 					</div>
 	                <div v-else-if="scope.row.jobState == 2">
+            			<shiro:hasPermission name="sys:scheduleManager:edit">
 	                    <el-button @click="updateStatus(scope.row.jobId,2,'启动')"  type="text"  size="small">
 	                     		   启动
 	                    </el-button>
+		                </shiro:hasPermission>
 					</div>
                 </template>
-                </shiro:hasPermission>
             </el-table-column>
         </el-table>
         <table-pagination :pager="pager" @change="searchTable"></table-pagination>
@@ -137,35 +139,48 @@ var userVM = new Vue({
               },
               //删除任务
               deleteSchedule() {
-            	  var rows = this.multipleSelection;
-                  if(rows.length!=1){
+                	  var rows = this.multipleSelection;
+                      if(rows.length!=1){
+                          this.$message({
+                             message: '请选择一条数据进行删除',
+                             type: 'warning'
+                           });
+                          return;
+                      }
+            	  this.$confirm('确定要删除【'+rows[0].jobName+'】，任务吗？', '提示', {
+                      confirmButtonText: '确定',
+                      cancelButtonText: '取消',
+                      type: 'warning'
+                  }).then(() => {
+                	  var param = {};
+                	  param.jobId=rows[0].jobId;
+                	  param.type=3;
+                	  axios.post('/schedule/scheduleManager/setStatus', param)
+                      .then(function (response) {
+                            var result =  response.data;
+                            if(result.code=="0"){
+                            	userVM.$message.success("删除成功");
+                            	userVM.searchTable();
+                            }else{
+                            	userVM.$message.error(result.msg);
+                            }
+                      })
+                      .catch(function (error) {
+                           console.log(error);
+                      }); 
+                   
+                  }).catch(() => {
                       this.$message({
-                         message: '请选择一条数据进行删除',
-                         type: 'warning'
-                       });
-                      return;
-                  }
-            	  var param = {};
-            	  param.jobId=rows[0].jobId;
-            	  param.type=3;
-            	  axios.post('/schedule/scheduleManager/setStatus', param)
-                  .then(function (response) {
-                        var result =  response.data;
-                        if(result.code=="0"){
-                        	userVM.$message.success("删除成功");
-                        	userVM.searchTable();
-                        }else{
-                        	userVM.$message.error(result.msg);
-                        }
-                  })
-                  .catch(function (error) {
-                       console.log(error);
+                          type: 'info',
+                          message: '已取消删除'
+                      });          
                   });
+            	  
               },
               //状态转换方法
               transformStatus(row, column, cellValue, index) {
             	  var text="";
-                  if(cellValue=="1"){
+                  if(cellValue=="1" ||cellValue=="0" ){
                 	  text="启动"
                   }else if(cellValue=="2"){
                 	  text="停止"

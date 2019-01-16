@@ -140,6 +140,9 @@ var homePageVM=new Vue({
    	created() {  
    		document.body.removeChild(document.getElementById('Loading'));
 		this.messageCount();
+		if(isUpdatePassword=="1"){
+			this.dialogModifyPwdVisible=true;
+		}
 	}
 })
 // 点击导航赋值ifream的src值

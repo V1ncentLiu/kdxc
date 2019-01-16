@@ -16,7 +16,9 @@
         <el-breadcrumb-item>系统管理</el-breadcrumb-item>
         <el-breadcrumb-item><a href="JavaScript:void(0)" data-url="a.html">用户管理</a></el-breadcrumb-item>
     </el-breadcrumb>
-
+ 	<el-row :gutter="20">
+ 		新建用户
+ 	</el-row>
     <el-row :gutter="20">
         <el-form :model="form" :rules="rules" ref="form">
             <el-row>
@@ -45,7 +47,7 @@
             </el-row>
             <el-row>
                 <el-col :span="6">
-                    <el-form-item label="所属角色：" :label-width="formLabelWidth1" prop="roleId">
+                    <el-form-item label="所属角色：" :label-width="formLabelWidth1" prop="roleName">
                         <el-row>
                             <el-col :span="12">
                                 <el-input v-model="form.roleName" autocomplete="off" prop="roleName"></el-input>                                
@@ -57,7 +59,7 @@
                     </el-form-item>
                 </el-col>
                 <el-col :span="6">
-                    <el-form-item label="所属组织：" :label-width="formLabelWidth1" prop="orgId">
+                    <el-form-item label="所属组织：" :label-width="formLabelWidth1" prop="orgName">
                         <el-row>
                             <el-col :span="12">
                                 <el-input v-model="form.orgName" autocomplete="off" prop="orgName"></el-input>                                
@@ -71,7 +73,7 @@
             </el-row>
             <el-row>
                 <el-col :span="6">
-                    <el-form-item label="用户状态：" :label-width="formLabelWidth1">
+                    <el-form-item label="用户状态：" :label-width="formLabelWidth1" prop="status">
                         <el-select v-model="form.status" placeholder="请选择">
                             <el-option
                                 v-for="item in statusOptions"
@@ -86,7 +88,7 @@
             <el-row>
                 <el-col :span="6" :offset="6">
                     <el-form-item>
-                        <el-button type="primary" @click="onSubmit('form')">立即创建</el-button>
+                        <el-button type="primary" @click="onSubmit('form')">提交</el-button>
                         <el-button>取消</el-button>
                     </el-form-item>
                 </el-col>
@@ -109,7 +111,7 @@
                     <el-radio :label="scope.$index"  v-model="tableRadio" @change="selectRole(scope.row.id,scope.row.name)">&nbsp;</el-radio>
                 </template>
             </el-table-column>
-            <el-table-column align="center" prop="name" label="角色名称"></el-table-column>
+            <el-table-column align="center" prop="roleName" label="角色名称"></el-table-column>
             <el-table-column align="center" prop="description" label="角色描述"></el-table-column>
         </el-table>
     </el-dialog>
@@ -215,6 +217,9 @@ var roleList=[[${roleList}]];//当前字段所属的菜单组
                     ],
                     orgName: [
                       { required: true, message: '密码不能为空', trigger: 'change' }
+                    ],
+                    status: [
+                      { required: true, message: '状态不能为空', trigger: 'change' }
                     ],
                     roleName: [
                       { required: true, message: '密码不能为空', trigger: 'change' }
