@@ -18,7 +18,7 @@
     <el-row type="flex" class="row-bg" justify="start">
         <el-button @click="openAddDialog()">添加字典主题</el-button>
         <el-button @click="openUpdateDialog()">编辑字典主题</el-button>
-        <el-button @click="deleteDic()">删除字典主题</el-button>
+        <el-button @click="deleteDic()">删除数据字典主题</el-button>
     </el-row>
 
     <el-row type="flex" class="row-bg" justify="end">
@@ -59,7 +59,7 @@
         <div class="block">
             <el-pagination @size-change="handleSizeChange"
                            @current-change="handleCurrentChange" :current-page="currentPage"
-                           :page-sizes="[10, 20, 30, 40]" :page-size="pageSize"
+                           :page-sizes="[20, 50, 100]" :page-size="pageSize"
                            layout="total, sizes, prev, pager, next, jumper" :total="total">
             </el-pagination>
         </div>
@@ -224,21 +224,27 @@
             },
             saveOneDictionary:function(){
                 var param = addDialogVm.add;
-                axios.post('/dictionary/Dictionary/saveDictionary', param)
-                    .then(function (response) {
-
-                        if(response.data.code==0){
-                            addDialogVm.$message({type: 'success', message: '插入成功!'});
-                            addDialogVm.dialogFormVisible = false;
-                            paginationVm.initTableData(1);
-                        }else{
-                            console.log(response.data)
-                            addDialogVm.$message.error(response.data.msg);
-                        }
-                    })
-                    .catch(function (error) {
-                        console.log(error);
-                    });
+                this.$refs['add'].validate((valid) => {
+                    if (valid) {
+                        axios.post('/dictionary/Dictionary/saveDictionary', param)
+                            .then(function (response) {
+                                if (response.data.code == 0) {
+                                    addDialogVm.$message({type: 'success', message: '插入成功!'});
+                                    addDialogVm.dialogFormVisible = false;
+                                    paginationVm.initTableData(1);
+                                } else {
+                                    console.log(response.data)
+                                    addDialogVm.$message.error(response.data.msg);
+                                }
+                            })
+                            .catch(function (error) {
+                                console.log(error);
+                            });
+                    } else {
+                        console.log('数据未通过校验！');
+                        return false;
+                    }
+                });
             },
         }
     });
@@ -341,7 +347,7 @@
             currentPage: 1,
             total: 0,
             pageNum: 1,
-            pageSize: 10
+            pageSize: 20
         },
         methods: {
             inDicItemPage(row){
