@@ -65,7 +65,7 @@ button a {
 			empty-text="此菜单无下级菜单" border :data="dataTable">
 		<el-table-column align="center" type="selection" prop="id" width="55"
 			@selection-change="handleSelectionChange"></el-table-column> <el-table-column
-			align="center" prop="name" label="模块名称"></el-table-column> <el-table-column
+			align="center" prop="name" label="菜单名称"></el-table-column> <el-table-column
 			align="center" prop="sortNo" label="优先级"></el-table-column> <el-table-column
 			align="center" prop="authCode" label="授权名称"></el-table-column> <el-table-column
 			align="center" prop="iconName" label="图标名称"></el-table-column> <el-table-column
@@ -152,7 +152,6 @@ for(var i=0;i<moduleData.length;i++){
                 var parentId = this.selectedNode.id;
                 param.parentId = parentId;
                 param.name = this.inputModuleName;
-                param.systemCode='huiju';
                 param.pageNum=pageNum;
                 param.pageSize=pageSize;
                 axios.post('/module/moduleManager/queryModuleDataByPage?pageNum='+pageNum+"&pageSize="+pageSize,param)
@@ -191,13 +190,19 @@ for(var i=0;i<moduleData.length;i++){
                 window.location.href="/module/moduleManager/queryModuleById?moduleId="+rows[0].id; 
              },
             deleteFun() {
-                this.$confirm('确定要删除【模块名称1】【模块名称2】模块吗？', '提示', {
+               var deleInfo=moduleVM.multipleSelection;
+ 	            var moduleName="";
+ 	           if(null!=deleInfo){
+ 	 		       for ( var i = 0; i <deleInfo.length; i++){
+ 	 		    	  moduleName+="【"+deleInfo[i].name+"】";
+ 	 		        }
+ 	           }
+                this.$confirm("确定要删除模块"+moduleName+"模块吗?", '提示', {
                     confirmButtonText: '确定',
                     cancelButtonText: '取消',
                     type: 'warning'
                 }).then(() => {
                    	// 查询 table 需要数据
-                   	  debugger;
                     var param = {};
                     var deleInfo=moduleVM.multipleSelection;
   	        	    var ids=[];
@@ -211,15 +216,13 @@ for(var i=0;i<moduleData.length;i++){
                         .then(function (response) {
                             var data =  response.data
                             if(data.code=='0'){
-                            	this.$message({
-                                    type: 'success',
-                                     message: '删除成功!'
-                                 });
-                            	 this.initTableData();
+                               orgVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
+                                 moduleVM.getQuery();
+                        	  }});
+                            	
                             }else{
                             	console.error(data);
                             }
-                           
                         })
                         .catch(function (error) {
                           console.log(error);

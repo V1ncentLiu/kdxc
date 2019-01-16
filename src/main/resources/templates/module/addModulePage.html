@@ -81,7 +81,7 @@
         </div>
         <div class="padding20 f-tac">            
             <el-button type="primary" @click="submitForm('form')">提交</el-button>
-            <el-button>取 消</el-button>
+            <el-button  @click="reBackModule" >取 消</el-button>
         </div> 
     </el-form>  
     <!-- dialog -->
@@ -149,7 +149,7 @@
                 formLabelWidth: '120px',
                 rules:{
                    	name: [
-                           { required: true, message: '请输入模块名称', trigger: 'blur' }
+                           { required: true, message: '请输入菜单名称', trigger: 'blur' }
                        ],
                        url: [
                            { required: true, message: '请输入URL', trigger: 'blur' }
@@ -216,23 +216,47 @@
                            opeArr.push(saveope);
                         }
                         submitData.operationInfos=opeArr;
-                        axios.post('/module/moduleManager/saveModuleInfo',submitData)
-                        .then(function (response) {
-                            var data =  response.data
-                            if(data.code=='0'){
-                            	  window.location.href="/module/moduleManager/initModuleInfo"; 
-                            	 
-                            }else{
-                            	console.error(data);
-                            }
-                           
-                        })
-                        .catch(function (error) {
-                          console.log(error);
-                        })
-                        .then(function () {
-                          // always executed
-                        });  
+                        axios.post('/module/moduleManager/queryModuleByParam',submitData)
+                        .then(function (response) { 
+                        	
+                          if(null==response){
+       		                 alert("返回异常");
+       		                 return ;
+       		               }
+       		               var resobj= response.data;
+       		               if(null==resobj){
+       		            	   alert("返回异常");
+       		                   return ;
+       		               } 
+       		               if(resobj.code!='0'){
+       		            	alert(response.data.message);
+       		            	return ;
+       		                }
+       		              //校验模块名称是否已存在
+       		              var checkName=response.data.data;
+                         	if(null!=checkName&&checkName.length>0) {
+                       		 alert("模块名称已存在");
+                       	     return ;
+                         	}
+                            axios.post('/module/moduleManager/saveModuleInfo',submitData)
+                            .then(function (response) {
+                                var data =  response.data
+                                if(data.code=='0'){
+                                	  window.location.href="/module/moduleManager/initModuleInfo"; 
+                                	 
+                                }else{
+                                	console.error(data);
+                                }
+                               
+                            })
+                            .catch(function (error) {
+                              console.log(error);
+                            })
+                            .then(function () {
+                              // always executed
+                            });  
+                        	
+                        });
                         
                     } else {
                         console.log('error submit!!');

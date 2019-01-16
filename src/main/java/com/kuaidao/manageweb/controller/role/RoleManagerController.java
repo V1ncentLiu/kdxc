@@ -233,5 +233,13 @@ public class RoleManagerController {
 		JSONResult<String> pageJson = roleManagerFeignClient.deleteRoleInfo(dto);
 		return pageJson;
 	}
+	
+	@PostMapping("/qeuryRoleByName")
+	@ResponseBody
+	public JSONResult<List<RoleInfoDTO>> qeuryRoleByName(@RequestBody RoleQueryDTO roleDTO){
+		
+		return  roleManagerFeignClient.qeuryRoleByName(roleDTO);
+	}
+	
 
 }
