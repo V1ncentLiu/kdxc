@@ -273,6 +273,7 @@ var moduleData=[[${moduleData}]];
                 formLabelWidth: '120px',
                 currentPage: 1,//默认第一页,
                 multipleIpSelection:[],
+                feildMenuId:'',
             }             
         },
         methods: {
@@ -291,7 +292,8 @@ var moduleData=[[${moduleData}]];
                     if (valid) {
                     	//处理角色对应操作项数据
                        var submitData=addRoleVM.dataList;
-                    	var  operationArry=[];
+                       var  operationArry=[];
+                       var  menuArry=[];
                     	if(null!=submitData){
                     		//循环一级菜单
                     	  for(var i=0; i<submitData.length;i++)  {
@@ -301,7 +303,9 @@ var moduleData=[[${moduleData}]];
                     			  for(var j=0; j<subList.length;j++)  {
                              		  var checkedCities= subList[j].checkedCities; 
                              		  if(null!=checkedCities){
-                             			 //循环选中操作
+                             			 //二级菜单Id
+                             			 menuArry.push(subList[j].id);
+                             			//循环选中操作
                              			for(var m=0; m<checkedCities.length;m++)  {
                              				var operation={};
                              				 operation.id=checkedCities[m];
@@ -315,19 +319,21 @@ var moduleData=[[${moduleData}]];
                     	//获取菜单的数据列
                     	var  fieldMap=addRoleVM.checkBoxFieldArr;
                     	var fieldSaveArray=[];
+                    	var menuSaveArray=[];
                     	if(null!=fieldMap){
                     	  for(var key in fieldMap)  {
                     		var value=fieldMap[key];
-                    		 if(null!=value){
-                            for (var i=0;i<value.length;i++ ) {
+                    		if(null!=value){
+                    	      menuSaveArray.push(key); 
+                               for (var i=0;i<value.length;i++ ) {
                             	 var field={};
                             	 field.customFieldId=value[i];  
                             	 fieldSaveArray.push(field);	
                             	}
-                              }	   
+                              } 
                     		   
                     		} 
-                    	}
+                    	  }
                          //处理角色对应的Ip包数据
                     	 var ipListTable=addRoleVM.ipListTable;
                          var  param={};
@@ -336,6 +342,8 @@ var moduleData=[[${moduleData}]];
                          param.operations=operationArry;
                          param.ipPackages=ipListTable;
                          param.customFieldMenus=fieldSaveArray;
+                         param.menuIds=menuArry;
+                         param.selectMenuIds=menuSaveArray;
                          axios.post('/role/roleManager/saveRoleInfo',param).then(function (response) {
           		           if(null==response){
           		                 alert("返回异常");
@@ -449,11 +457,12 @@ var moduleData=[[${moduleData}]];
 			             addRoleVM.fields=resobj.data;
 			              var  fieldAray= resobj.data;
 			              var fArray=[];
-			              for(var i=0;i<fieldAray.length;i++){
-			            	   fArray.push(fieldAray[i].id);
-			             }
-			             addRoleVM.chooseLimitCheck=fArray;
-			             
+			              if(null!=fieldAray){
+			            	for(var i=0;i<fieldAray.length;i++){
+					             fArray.push(fieldAray[i].id);
+					           }
+					           addRoleVM.chooseLimitCheck=fArray;
+			            	 }
 			            })
 			            .catch(function (error) {
 			              console.log(error);
