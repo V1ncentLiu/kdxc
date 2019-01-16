@@ -126,7 +126,7 @@
 <div id="anndialog">
     <el-dialog
             title="公告通知"
-            :visible.sync="anndialogVisible" width="60%">
+            :visible.sync="anndialogVisible" width="60%" :before-close="handleClose">
         <template>
             <el-table :data="AnnDialogTableData" style="width: 100%">
                 <template v-for="(col ,index) in cols">
@@ -194,12 +194,33 @@
         el: '#anndialog',
         data:{
             anndialogVisible:false,
+            id:"",
+            status:"",
             title:"",
             content:"",
             AnnDialogTableData:[],
             cols: []
         },
         methods:{
+            handleClose(done){
+                if(annDialogVm.status==1){
+                    done();
+                    return false;
+                }
+                var param = {};
+                param.ids = annDialogVm.id;
+                axios.post('/annReceive/batchUpdate', param)
+                    .then(function (response) {
+                        vm.$message({type: 'success', message: '公告已读!',duration:2000,onClose:function(){
+                            done();
+                            vm.initAnnTableData(1);
+                        }});
+                    })
+                    .catch(function (error) {
+                        queryFormVM.$message.error(error);
+                        console.log(error);
+                    });
+            },
             initDialogData(){
             },
             showOutVisiable:function(){
@@ -289,8 +310,10 @@
                 }
             },
             showAnnMx(row, event){
+                annDialogVm.id = row.id;
                 annDialogVm.title = row.title;
                 annDialogVm.content = row.content;
+                annDialogVm.status = row.status;
                 annDialogVm.AnnDialogTableData = [{content_:row.content}]
                 annDialogVm.cols =[{ label: row.title, prop: "content_", type: "normal" }];
                 annDialogVm.anndialogVisible = true;
