@@ -138,15 +138,23 @@ public class ModuleManagerController {
 		ModuleQueryDTO dto = new ModuleQueryDTO();
 		dto.setId(new Long(moduleId));
 		JSONResult<ModuleInfoDTO> dtoJson = moduleManagerFeignClient.queryModuleById(dto);
-
+ 
 		if (dtoJson.getCode().equals(JSONResult.SUCCESS)) {
 			ModuleInfoDTO moduleDto = dtoJson.getData();
 			List<String> checkModuleId = new ArrayList<String>();
 			List<String> checkOptions = new ArrayList<String>();
+			checkOptions.add("增(add)");
+			checkOptions.add("删(delete)");
+			checkOptions.add("改(edit)");
+			checkOptions.add("查(view)");
 			if (null != moduleDto.getOperationInfos() && moduleDto.getOperationInfos().size() > 0) {
 				for (OperationInfoDTO opt : moduleDto.getOperationInfos()) {
 					checkModuleId.add(opt.getName() + "(" + opt.getCode() + ")");
-					checkOptions.add(opt.getName() + "(" + opt.getCode() + ")");
+					String dataInfo=opt.getName() + "(" + opt.getCode() + ")";
+					if(!checkOptions.contains(dataInfo)){
+						checkOptions.add(opt.getName() + "(" + opt.getCode() + ")");
+					}
+					
 
 				}
 
