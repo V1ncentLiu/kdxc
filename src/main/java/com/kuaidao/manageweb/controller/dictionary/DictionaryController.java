@@ -62,7 +62,7 @@ public class DictionaryController {
     /**
      *  web端进行的是非业务逻辑。
      */
-    @RequiresPermissions("dictionary:add")
+//    @RequiresPermissions("dictionary:add")
     @RequestMapping("/saveDictionary")
     @ResponseBody
     public JSONResult saveDictionary(@Valid @RequestBody DictionaryAddAndUpdateDTO dictionaryDTO  , BindingResult result){

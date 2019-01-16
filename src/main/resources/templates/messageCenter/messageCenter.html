@@ -24,28 +24,28 @@
                             <el-date-picker v-model="businessForm.date2" type="datetime" placeholder="选择日期时间"></el-date-picker>
                         </el-form-item>
                         <el-form-item>
-                            <el-button type="primary" @click="onBussSubmit">查询</el-button>
+                            <el-button type="primary" @click="onBussSubmit">搜索</el-button>
                             <el-button type="primary" @click="changeBussState">标记已读</el-button>
                         </el-form-item>
                     </el-form>
                 </template>
                 <template>
-                    <el-table :data="businessData" height="650" border  @selection-change="handleSelectionChange" @row-dblclick="showBussMx">
+                    <el-table :data="businessData" height="650" border  @selection-change="handleSelectionChange" @row-dblclick="showBussMx" tooltip-effect="light" >
                         <el-table-column type="selection" width="55"></el-table-column>
-                        <el-table-column property="title" stripe label="标题" width="150"  > <!--:formatter="formatTitle"-->
+                        <el-table-column property="title" stripe label="标题" width="150"  show-overflow-tooltip  align="center"> <!--:formatter="formatTitle"-->
                             <template slot-scope="scope">
                                 <span class="span"  style="white-space: nowrap"  v-if="scope.row.status==0"><li class="tip"></li>{{ scope.row.title }}</span>
                                 <span class="span" style="color: #cccccc;white-space: nowrap;" v-else><li class="tip1"></li>{{ scope.row.title }}</span>
                             </template>
                         </el-table-column>
-                        <el-table-column property="content" label="消息内容" >
+                        <el-table-column property="content" label="消息内容" show-overflow-tooltip align="center">
                             <template slot-scope="scope">
                                 <span  style="white-space: nowrap" v-if="scope.row.status==0">{{ scope.row.content }}</span>
                                 <span style="color: #cccccc;white-space: nowrap;" v-else>{{ scope.row.content }}</span>
                             </template>
                         </el-table-column> <!--:formatter="formatContent"-->
-                        <el-table-column property="receiveTime" label="接收时间"  width="200"></el-table-column>
-                        <el-table-column property="status" label="消息状态" :formatter="formatStatus"></el-table-column>
+                        <el-table-column property="receiveTime" label="接收时间"  width="200" align="center"></el-table-column>
+                        <el-table-column property="status" label="消息状态" :formatter="formatStatus" align="center"></el-table-column>
                     </el-table>
                 </template>
 
@@ -53,7 +53,7 @@
                     <div class="block">
                         <el-pagination @size-change="handleSizeChange"
                                        @current-change="handleCurrentChange" :current-page="currentPage"
-                                       :page-sizes="[10, 20, 30, 40]" :page-size="pageSize"
+                                       :page-sizes="[20, 50, 100]" :page-size="pageSize"
                                        layout="total, sizes, prev, pager, next, jumper" :total="total">
                         </el-pagination>
                     </div>
@@ -82,7 +82,7 @@
                             <el-date-picker v-model="annForm.date2" type="datetime" placeholder="选择日期时间"></el-date-picker>
                         </el-form-item>
                         <el-form-item>
-                            <el-button type="primary" @click="onAnnSubmit">查询</el-button>
+                            <el-button type="primary" @click="onAnnSubmit">搜索</el-button>
                             <el-button type="primary" @click="changeAnnState">标记已读</el-button>
                         </el-form-item>
                     </el-form>
@@ -91,20 +91,20 @@
                 <template>
                     <el-table :data="annData" height="650" border style=""  @selection-change="handleSelectionChange"  @row-dblclick="showAnnMx"  tooltip-effect="light"  :cell-style="cellStyle">
                         <el-table-column type="selection" width="55"></el-table-column>
-                        <el-table-column property="title" label="标题" width="200" >
+                        <el-table-column property="title" label="标题" width="200" show-overflow-tooltip align="center">
                             <template slot-scope="scope">
                                 <span class="span" style="white-space: nowrap"  v-if="scope.row.status==0"><li class="tip"></li>{{ scope.row.title }}</span>
                                 <span class="span" style="color: #cccccc;white-space: nowrap" v-else><li class="tip1"></li>{{ scope.row.title }}</span>
                             </template>
                         </el-table-column>  <!--:formatter="formatTitle"-->
-                        <el-table-column property="content" label="消息内容"  >
+                        <el-table-column property="content" label="消息内容"  show-overflow-tooltip align="center">
                             <template slot-scope="scope">
                                 <span style="white-space: nowrap" v-if="scope.row.status==0">{{scope.row.content }}</span>
                                 <span style="color: #cccccc;white-space: nowrap;" v-else>{{ scope.row.content }}</span>
                             </template>
                         </el-table-column>  <!--:formatter="formatContent"-->
-                        <el-table-column property="receiveTime" label="接收时间" width="200"></el-table-column>
-                        <el-table-column property="status" label="消息状态"  :formatter="formatStatus"></el-table-column>
+                        <el-table-column property="receiveTime" label="接收时间" width="200" align="center"></el-table-column>
+                        <el-table-column property="status" label="消息状态"  :formatter="formatStatus" align="center"></el-table-column>
                     </el-table>
                 </template>
 
@@ -112,7 +112,7 @@
                     <div class="block">
                         <el-pagination @size-change="handleSizeChange"
                                        @current-change="handleCurrentChange" :current-page="currentPage"
-                                       :page-sizes="[10, 20, 30, 40]" :page-size="pageSize"
+                                       :page-sizes="[ 20, 50, 100]" :page-size="pageSize"
                                        layout="total, sizes, prev, pager, next, jumper" :total="total">
                         </el-pagination>
                     </div>
@@ -125,12 +125,12 @@
 </style>
 <div id="anndialog">
     <el-dialog
-            title="公告通知"
+            title="详细信息"
             :visible.sync="anndialogVisible" width="60%" :before-close="handleClose">
         <template>
-            <el-table :data="AnnDialogTableData" style="width: 100%">
+            <el-table :data="AnnDialogTableData" style="width: 100%" >
                 <template v-for="(col ,index) in cols">
-                    <el-table-column :prop="col.prop" :label="col.label" header-align="center">
+                    <el-table-column :prop="col.prop" :label="col.label" header-align="center" >
                         <template slot-scope="scope">
                             <span style="white-space: pre">{{scope.row.content_ }}</span>
                         </template>
@@ -143,7 +143,7 @@
 
 <div id="bussdialog">
     <el-dialog
-            title="业务消息"
+            title="详细信息"
             :visible.sync="bussdialogVisible" width="60%">
             <el-table :data="bussDialogTableData" style="width: 100%">
             <template v-for="(col ,index) in cols">
@@ -190,6 +190,9 @@
     }
     .el-dialog__footer {
         text-align: center;
+    }
+    .el-table th {
+        font-weight: bolder;
     }
 </style>
 <!-- import common js-->
@@ -291,13 +294,13 @@
             activeName: 'business',
             businessForm:{
                 content:"",
-                status:"",
+                status:"0",
                 date1:"",
                 date2:""
             },
             annForm:{
                 content:"",
-                status:"",
+                status:"0",
                 time:"",
                 date1:"",
                 date2:""
@@ -309,10 +312,10 @@
             currentPage: 1,
             total: 0,
             pageNum: 1,
-            pageSize: 10,
+            pageSize: 20,
 
             options: [{
-                value: "",
+                value: '-1',
                 label: '全部'
             }, {
                 value: '0',
@@ -463,10 +466,10 @@
                 // tab.label="babbababab"
                 if(tab.name=="announcement"){
                     console.log("------------------announcement-----------------------")
-                    this.initAnnTableData(1,10);
+                    this.initAnnTableData(1,20);
                 }else{//business
                     console.log("------------------business-----------------------")
-                    this.initBussTableData(1,10);
+                    this.initBussTableData(1,20);
                 }
             },
             handleSizeChange(val) {
