@@ -9,7 +9,7 @@
 <div id="addDialog" class="mainPadding">
     <template>
         <el-tabs v-model="activeName" type="card" @tab-click="handleClick">
-            <el-tab-pane label="业务消息(1)" name="business" ref="business" >
+            <el-tab-pane label="业务消息" name="business" ref="business" >
                 <template>
                     <el-form :inline="true" :model="businessForm" class="demo-form-inline">
                         <el-form-item label=""><el-input v-model="businessForm.content" placeholder="消息内容"></el-input></el-form-item>
@@ -59,7 +59,7 @@
                     </div>
                 </template>
             </el-tab-pane>
-            <el-tab-pane label="公告通知(1)"  name="announcement"  ref="announcement">
+            <el-tab-pane label="公告通知"  name="announcement"  ref="announcement">
 
                 <template>
                     <el-form :inline="true" :model="annForm" class="demo-form-inline">
@@ -126,7 +126,7 @@
 <div id="anndialog">
     <el-dialog
             title="详细信息"
-            :visible.sync="anndialogVisible" width="60%" :before-close="handleClose">
+            :visible.sync="anndialogVisible" width="60%"  :before-close="handleClose"  >
         <template>
             <el-table :data="AnnDialogTableData" style="width: 100%" >
                 <template v-for="(col ,index) in cols">
@@ -145,6 +145,7 @@
     <el-dialog
             title="详细信息"
             :visible.sync="bussdialogVisible" width="60%">
+        <template>
             <el-table :data="bussDialogTableData" style="width: 100%">
             <template v-for="(col ,index) in cols">
                 <el-table-column :prop="col.prop" :label="col.label" header-align="center">
@@ -157,6 +158,7 @@
             <span slot="footer" class="dialog-footer" >
                 <el-button type="primary" @click="updateStatusBuss">我知道了</el-button>
             </span>
+        </template>
     </el-dialog>
 </div>
 
@@ -181,7 +183,7 @@
         border-radius:50%;
         width:12px;
         height:12px;
-        top:15px;
+        top:10px;
         left:-10px;
         position:absolute;
     }
@@ -207,6 +209,7 @@
             status:"",
             title:"",
             content:"",
+            flag:1,
             AnnDialogTableData:[],
             cols: []
         },
@@ -217,12 +220,18 @@
                     return false;
                 }
                 var param = {};
+                if(annDialogVm.flag!=1){
+                    return false;
+                }else{
+                    annDialogVm.flag  = 0;
+                }
                 param.ids = annDialogVm.id;
                 axios.post('/annReceive/batchUpdate', param)
                     .then(function (response) {
                         vm.$message({type: 'success', message: '公告已读!',duration:2000,onClose:function(){
                             done();
                             vm.initAnnTableData(1);
+                            annDialogVm.flag  = 1;
                         }});
                     })
                     .catch(function (error) {
@@ -307,7 +316,7 @@
             },
             businessData: [],
             annData: [],
-
+            falg:0,
             multipleSelection:[],
             currentPage: 1,
             total: 0,
@@ -549,12 +558,16 @@
         created() {
             console.info("create method");
             this.initBussTableData(1);
-
+            this.initAnnTableData(1);
         },
         mounted() {
             console.info("mounted method");
         },
         updated(){
+            if(vm.businessData.length==0&&vm.falg==0){
+                vm.falg=1;
+                vm.activeName='announcement';
+            }
             console.info("updated method");
             var param = {};
             axios.post("/annReceive/unreadCount", param).then(function (response) {
