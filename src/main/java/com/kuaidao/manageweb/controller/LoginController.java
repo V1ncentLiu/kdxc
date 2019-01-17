@@ -32,6 +32,7 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -46,8 +47,11 @@ import com.kuaidao.common.entity.PhoneEntity;
 import com.kuaidao.common.util.CommonUtil;
 import com.kuaidao.common.util.DateUtil;
 import com.kuaidao.common.util.MD5Util;
+import com.kuaidao.manageweb.config.LogRecord;
+import com.kuaidao.manageweb.config.LogRecord.OperationType;
 import com.kuaidao.manageweb.constant.Constants;
 import com.kuaidao.manageweb.constant.ManagerWebErrorCodeEnum;
+import com.kuaidao.manageweb.constant.MenuEnum;
 import com.kuaidao.manageweb.entity.LoginReq;
 import com.kuaidao.manageweb.feign.msgpush.MsgPushFeignClient;
 import com.kuaidao.manageweb.feign.role.RoleManagerFeignClient;
@@ -113,9 +117,18 @@ public class LoginController {
      * 
      * @return
      */
+    @GetMapping("/")
+    public String loginPage() {
+        return "redirect:/login";
+    }
+
+    /***
+     * 登录页
+     * 
+     * @return
+     */
     @RequestMapping("/login")
     public String login() {
-
         return "login/login";
     }
 
@@ -126,12 +139,12 @@ public class LoginController {
      */
     @RequestMapping("/login/resetPwd")
     public String resetPwd() {
-
         return "login/resetPwd";
     }
 
     @RequestMapping(value = "/login/index", method = {RequestMethod.POST})
     @ResponseBody
+    @LogRecord(description = "登录", operationType = OperationType.LOGIN, menuName = MenuEnum.LOGIN)
     public JSONResult login(@RequestBody LoginReq loginReq, HttpServletRequest request, Model model,
             RedirectAttributes redirectAttributes) throws Exception {
         String username = loginReq.getUsername();
@@ -221,7 +234,7 @@ public class LoginController {
                         new Thread(new Runnable() {
                             @Override
                             public void run() {
-                                amqpTemplate.convertAndSend("rabbitmq_loginsessionkey", string);
+                                amqpTemplate.convertAndSend("amq.topic", string, string);
                             }
                         }).start();
                         // 判断累计次数
@@ -347,6 +360,8 @@ public class LoginController {
      */
     @RequestMapping(value = "/login/sendmsg", method = {RequestMethod.POST})
     @ResponseBody
+    @LogRecord(description = "获取验证码", operationType = OperationType.PUSH,
+            menuName = MenuEnum.GET_CODE)
     public JSONResult sendMsg(@RequestBody LoginReq loginReq, HttpServletRequest request)
             throws Exception {
         String msg = "";
@@ -387,7 +402,7 @@ public class LoginController {
         // 查询用户信息
         JSONResult<UserInfoDTO> getbyUserName = userInfoFeignClient.getbyUserName(userInfoReq);
         if (getbyUserName.getData() == null) {
-            msg = "用户不存在！";
+            msg = "登录用户名未注册。";
             return new JSONResult<>().fail(SysErrorCodeEnum.ERR_SYSTEM.getCode(), msg);
         }
         UserInfoDTO user = getbyUserName.getData();
@@ -419,6 +434,8 @@ public class LoginController {
      */
     @RequestMapping(value = "/login/sendmsgPwd", method = {RequestMethod.POST})
     @ResponseBody
+    @LogRecord(description = "获取验证码", operationType = OperationType.PUSH,
+            menuName = MenuEnum.GET_CODE)
     public JSONResult sendmsgPwd(@RequestBody LoginReq loginReq, HttpServletRequest request)
             throws Exception {
         String msg = "";
@@ -453,6 +470,8 @@ public class LoginController {
      */
     @PostMapping("/login/updatePassword")
     @ResponseBody
+    @LogRecord(description = "修改密码", operationType = OperationType.UPDATE,
+            menuName = MenuEnum.UPDATE_PASSWORD)
     public JSONResult updateMenu(@Valid @RequestBody UpdateUserPasswordReq updateUserPasswordReq,
             BindingResult result) {
 
@@ -524,8 +543,11 @@ public class LoginController {
         return null;
     }
 
-    @RequestMapping("/logout")
-    public String logout(String type, Model model, HttpServletRequest request) throws Exception {
+    @RequestMapping("/index/logout")
+    @LogRecord(description = "退出登录", operationType = OperationType.LOGINOUT,
+            menuName = MenuEnum.LOGINOUT)
+    public String logout(String type, Model model, HttpServletRequest request,
+            RedirectAttributes redirectAttributes) throws Exception {
         Subject subject = SecurityUtils.getSubject();
         Object attribute = SecurityUtils.getSubject().getSession().getAttribute("user");
         UserInfoDTO user = (UserInfoDTO) subject.getSession().getAttribute("user");
@@ -539,7 +561,7 @@ public class LoginController {
             update.setIsLogin(Constants.IS_LOGIN_DOWN);
             userInfoFeignClient.update(update);
         } else {
-            SecurityUtils.getSubject().getSession().setAttribute("isShowLogoutBox", type);
+            redirectAttributes.addFlashAttribute("isShowLogoutBox", type);
         }
 
         return "redirect:/login";

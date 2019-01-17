@@ -7,6 +7,9 @@
         .userManage .leftTitle{background:#ebeef5;text-indent: 20px;height: 40px;line-height: 40px;}
         .userManage .leftTree{padding:10px;}
         .userManage .rightTitle{background:#ebeef5;text-indent: 20px;height: 40px;line-height: 40px;}
+        /*去掉type为number的箭头*/
+        input::-webkit-outer-spin-button,input::-webkit-inner-spin-button {-webkit-appearance: none;}       
+        input[type="number"] {-moz-appearance: textfield;}
     </style>
 </head>
 <body>
@@ -16,7 +19,9 @@
         <el-breadcrumb-item>系统管理</el-breadcrumb-item>
         <el-breadcrumb-item><a href="JavaScript:void(0)" data-url="a.html">用户管理</a></el-breadcrumb-item>
     </el-breadcrumb>
-
+ 	<el-row :gutter="20">
+ 		新建用户
+ 	</el-row>
     <el-row :gutter="20">
         <el-form :model="form" :rules="rules" ref="form">
             <el-row>
@@ -34,7 +39,7 @@
             <el-row>
                 <el-col :span="6">
                     <el-form-item label="手机号：" :label-width="formLabelWidth1" prop="phone">
-                        <el-input v-model="form.phone"  maxlength="11"  autocomplete="off"></el-input>
+                        <el-input type="number" v-model="form.phone"  maxlength="11"  autocomplete="off"></el-input>
                     </el-form-item>
                 </el-col>
                 <el-col :span="6">
@@ -45,7 +50,7 @@
             </el-row>
             <el-row>
                 <el-col :span="6">
-                    <el-form-item label="所属角色：" :label-width="formLabelWidth1" prop="roleId">
+                    <el-form-item label="所属角色：" :label-width="formLabelWidth1" prop="roleName">
                         <el-row>
                             <el-col :span="12">
                                 <el-input v-model="form.roleName" autocomplete="off" prop="roleName"></el-input>                                
@@ -57,7 +62,7 @@
                     </el-form-item>
                 </el-col>
                 <el-col :span="6">
-                    <el-form-item label="所属组织：" :label-width="formLabelWidth1" prop="orgId">
+                    <el-form-item label="所属组织：" :label-width="formLabelWidth1" prop="orgName">
                         <el-row>
                             <el-col :span="12">
                                 <el-input v-model="form.orgName" autocomplete="off" prop="orgName"></el-input>                                
@@ -71,7 +76,7 @@
             </el-row>
             <el-row>
                 <el-col :span="6">
-                    <el-form-item label="用户状态：" :label-width="formLabelWidth1">
+                    <el-form-item label="用户状态：" :label-width="formLabelWidth1" prop="status">
                         <el-select v-model="form.status" placeholder="请选择">
                             <el-option
                                 v-for="item in statusOptions"
@@ -86,7 +91,7 @@
             <el-row>
                 <el-col :span="6" :offset="6">
                     <el-form-item>
-                        <el-button type="primary" @click="onSubmit('form')">立即创建</el-button>
+                        <el-button type="primary" @click="onSubmit('form')">提交</el-button>
                         <el-button>取消</el-button>
                     </el-form-item>
                 </el-col>
@@ -106,10 +111,10 @@
             >
             <el-table-column align="center" width="55" label="选择">
                 <template scope="scope">
-                    <el-radio :label="scope.$index"  v-model="tableRadio" @change="selectRole(scope.row.id,scope.row.name)">&nbsp;</el-radio>
+                    <el-radio :label="scope.$index"  v-model="tableRadio" @change="selectRole(scope.row.id,scope.row.jobName)">&nbsp;</el-radio>
                 </template>
             </el-table-column>
-            <el-table-column align="center" prop="name" label="角色名称"></el-table-column>
+            <el-table-column align="center" prop="roleName" label="角色名称"></el-table-column>
             <el-table-column align="center" prop="description" label="角色描述"></el-table-column>
         </el-table>
     </el-dialog>
@@ -169,7 +174,7 @@ var roleList=[[${roleList}]];//当前字段所属的菜单组
                         { required: true, message: '姓名不能为空', trigger: 'blur' },
                         {  max: 30, message: '最大30个字符', trigger: 'blur' },
                         { validator:function(rule,value,callback){
-                            if(/[^\a-\z\A-\Z0-9\u4E00-\u9FA5]/g.test(value) == false){
+                            if(/^[A-Za-z0-9\u4e00-\u9fa5]+$/.test(value) == false){
                                callback(new Error("请输入汉字、字母或数字"));
                             }else{
                                callback();
@@ -181,7 +186,7 @@ var roleList=[[${roleList}]];//当前字段所属的菜单组
                         { required: true, message: '登录用户名不能为空', trigger: 'blur' },
                         {  max: 30, message: '最大30个字符', trigger: 'blur' },
                         { validator:function(rule,value,callback){
-                            if(/[^\a-\z\A-\Z0-9\u4E00-\u9FA5]/g.test(value) == false){
+                            if(/^[A-Za-z0-9\u4e00-\u9fa5]+$/.test(value) == false){
                                callback(new Error("请输入汉字、字母或数字"));
                             }else{
                                callback();
@@ -214,10 +219,13 @@ var roleList=[[${roleList}]];//当前字段所属的菜单组
                         }, trigger: 'change'}
                     ],
                     orgName: [
-                      { required: true, message: '密码不能为空', trigger: 'change' }
-                    ]
+                      { required: true, message: '组织不能为空', trigger: 'change' }
+                    ],
+                    status: [
+                      { required: true, message: '状态不能为空', trigger: 'change' }
+                    ],
                     roleName: [
-                      { required: true, message: '密码不能为空', trigger: 'change' }
+                      { required: true, message: '角色不能为空', trigger: 'change' }
                     ]
                   },
                 formLabelWidth: '150px',

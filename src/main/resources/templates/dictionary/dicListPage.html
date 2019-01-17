@@ -18,7 +18,7 @@
     <el-row type="flex" class="row-bg" justify="start">
         <el-button @click="openAddDialog()">添加字典主题</el-button>
         <el-button @click="openUpdateDialog()">编辑字典主题</el-button>
-        <el-button @click="deleteDic()">删除字典主题</el-button>
+        <el-button @click="deleteDic()">删除数据字典主题</el-button>
     </el-row>
 
     <el-row type="flex" class="row-bg" justify="end">
@@ -39,10 +39,10 @@
                   @row-dblclick="rowDblClick()"
                   @selection-change="handleSelectionChange" >
             <el-table-column type="selection" width="55" prop="id"> </el-table-column>
-            <el-table-column prop="name" label="名称" width="180"></el-table-column>
-            <el-table-column prop="code" label="编码" width="180"></el-table-column>
-            <el-table-column prop="description" label="描述" width="300"></el-table-column>
-            <el-table-column  label="操作">
+            <el-table-column prop="name" label="名称" width="180" align="center"></el-table-column>
+            <el-table-column prop="code" label="编码" width="180" align="center"></el-table-column>
+            <el-table-column prop="description" label="描述" width="300" align="center"></el-table-column>
+            <el-table-column  label="操作" align="center">
                 <template slot-scope="scope">
                     <el-button
                             @click="inDicItemPage(scope.row)"
@@ -59,7 +59,7 @@
         <div class="block">
             <el-pagination @size-change="handleSizeChange"
                            @current-change="handleCurrentChange" :current-page="currentPage"
-                           :page-sizes="[10, 20, 30, 40]" :page-size="pageSize"
+                           :page-sizes="[20, 50, 100]" :page-size="pageSize"
                            layout="total, sizes, prev, pager, next, jumper" :total="total">
             </el-pagination>
         </div>
@@ -69,7 +69,7 @@
 <!--添加弹窗-->
 <div id="addDialog">
     <template>
-        <el-dialog title="添加数据字典"  :visible.sync="dialogFormVisible"  width="30%">
+        <el-dialog title="添加字典"  :visible.sync="dialogFormVisible"  width="30%">
             <el-form :model="add" ref="add" :rules="rules">
                 <el-form-item label="名称"  :label-width="formLabelWidth"  prop="name">
                     <el-input v-model="add.name" autocomplete="off"  ></el-input>
@@ -92,7 +92,7 @@
 
 <div id="updateDialog">
     <template>
-        <el-dialog title="编辑数据字典"  :visible.sync="updateDialogFormVisible"  width="30%">
+        <el-dialog title="编辑字典"  :visible.sync="updateDialogFormVisible"  width="30%">
             <el-form :model="add" ref="add" :rules="rules">
                 <el-form-item label="名称"  :label-width="formLabelWidth" prop="name">
                     <el-input v-model="add.name" autocomplete="off"  ></el-input>
@@ -224,21 +224,27 @@
             },
             saveOneDictionary:function(){
                 var param = addDialogVm.add;
-                axios.post('/dictionary/Dictionary/saveDictionary', param)
-                    .then(function (response) {
-
-                        if(response.data.code==0){
-                            addDialogVm.$message({type: 'success', message: '插入成功!'});
-                            addDialogVm.dialogFormVisible = false;
-                            paginationVm.initTableData(1);
-                        }else{
-                            console.log(response.data)
-                            addDialogVm.$message.error(response.data.msg);
-                        }
-                    })
-                    .catch(function (error) {
-                        console.log(error);
-                    });
+                this.$refs['add'].validate((valid) => {
+                    if (valid) {
+                        axios.post('/dictionary/Dictionary/saveDictionary', param)
+                            .then(function (response) {
+                                if (response.data.code == 0) {
+                                    addDialogVm.$message({type: 'success', message: '插入成功!'});
+                                    addDialogVm.dialogFormVisible = false;
+                                    paginationVm.initTableData(1);
+                                } else {
+                                    console.log(response.data)
+                                    addDialogVm.$message.error(response.data.msg);
+                                }
+                            })
+                            .catch(function (error) {
+                                console.log(error);
+                            });
+                    } else {
+                        console.log('数据未通过校验！');
+                        return false;
+                    }
+                });
             },
         }
     });
@@ -341,7 +347,7 @@
             currentPage: 1,
             total: 0,
             pageNum: 1,
-            pageSize: 10
+            pageSize: 20
         },
         methods: {
             inDicItemPage(row){
@@ -404,6 +410,10 @@
     .el-button--primary {
         background-color: #6f7180;
         border: #6f7180;
+    }
+
+    .el-table th {
+        font-weight: bolder;
     }
 </style>
 </body>

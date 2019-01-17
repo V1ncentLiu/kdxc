@@ -1,8 +1,18 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml"  xmlns:th="http://www.thymeleaf.org">
-<head th:replace="_header_include::frag(~{::title},~{::link},~{})">
+<head th:replace="_header_include::frag(~{::title},~{::link},~{::style})">
     <title>后台管理系统</title>
     <link rel="stylesheet" th:href="@{/css/custom/login/login.css}">
+    <style>
+      /*去掉type为number的箭头*/
+      input::-webkit-outer-spin-button,
+      input::-webkit-inner-spin-button {
+          -webkit-appearance: none;
+      }       
+      input[type="number"] {
+          -moz-appearance: textfield;
+      }
+    </style>
 </head>
 <body>
     <div id="Loading">
@@ -14,23 +24,24 @@
     </div>
     <div id="loginbox" class="loginbox">
             <div class="control-group normal_text">
-                <img src="images/loginLogo.png" alt="Logo">
+                <!-- <img src="images/loginLogo.png" alt="Logo"> -->
+                慧聚-登录
             </div>
             <el-form :model="loginForm" :rules="rules" ref="loginForm" class="demo-loginForm" >
                 <el-row>
                     <el-form-item  prop="nameInput">
-                        <el-input v-model="loginForm.nameInput" placeholder="用户名"></el-input>
+                        <el-input v-model="loginForm.nameInput" maxlength="30" placeholder="登录用户名"></el-input>
                     </el-form-item>
                 </el-row>
                 <el-row>
                     <el-form-item  prop="pswInput">
-                        <el-input type="password" v-model="loginForm.pswInput" placeholder="密码"></el-input>
+                        <el-input type="password" v-model="loginForm.pswInput"  maxlength="30"  placeholder="登录密码"></el-input>
                     </el-form-item>
                 </el-row>
                 <el-row>
                     <el-col :span="14">
                         <el-form-item  prop="codeInput">
-                            <el-input v-model="loginForm.codeInput" placeholder="输入验证码"></el-input>
+                            <el-input type="number" v-model="loginForm.codeInput" maxlength="60"  placeholder="输入验证码"></el-input>
                         </el-form-item>
                     </el-col>
                     <el-col :span="10">
@@ -67,9 +78,9 @@
             <div id="logoutBoxDiv" class="logoutBox f-dn">
                 <div class="box">
                     <div class="title">下线通知</div>
-                    <div class="cnt">您的账户在另一设备登录，您被迫下线。如不是本人操作，您的密码可能已经泄漏，建议您<a href="">修改密码</a></div>
-                    <el-button type="primary" class="blueSubmitBtn floatLeft">重新登录</el-button>
-                    <el-button type="primary" class="blueSubmitBtn floatRight">确定</el-button>
+                    <div class="cnt">您的账户在另一设备登录，您被迫下线。如不是本人操作，您的密码可能已经泄漏，建议您<a href="" @click="resetLogin('1')">>修改密码</a></div>
+                    <el-button type="primary" class="blueSubmitBtn floatLeft"  @click="resetLogin()">>重新登录</el-button>
+                    <el-button type="primary" class="blueSubmitBtn floatRight" @click="resetLogin()">确定</el-button>
                 </div>                  
             </div>
         </div>
@@ -86,7 +97,8 @@ var vm =  new Vue({
             	nameInput: '',
                 pswInput:'',
                 codeInput:'',
-                imgcodeInput:''
+                imgcodeInput:'',
+                isUpdatePassword:'2'
             },
             rules: {
             	nameInput: [
@@ -99,7 +111,6 @@ var vm =  new Vue({
                     }else{
                        callback();
                     } 
-                    console.log("这是自定义校验");
                     callback();
                       
                     }, trigger: 'change'}
@@ -107,6 +118,7 @@ var vm =  new Vue({
                 pswInput: [
                   { required: true, message: '密码不能为空', trigger: 'change' },
                   {  max: 30, message: '最大30个字符', trigger: 'blur' },
+                  {  min: 8, message: '最少8个字符', trigger: 'blur' },
                   { validator:function(rule,value,callback){
                  
                     if(/^[A-Za-z0-9]+$/.test(value) == false){
@@ -114,7 +126,6 @@ var vm =  new Vue({
                     }else{
                        callback();
                     } 
-                    console.log("这是自定义校验");
                     callback();
                       
                    }, trigger: 'change'}
@@ -129,7 +140,6 @@ var vm =  new Vue({
                     }else{
                        callback();
                     } 
-                    console.log("这是自定义校验");
                     callback();
                       
                    }, trigger: 'change'}
@@ -146,6 +156,7 @@ var vm =  new Vue({
     	             param.username= formData.nameInput;
     	             param.password = formData.pswInput;
     	             param.code = formData.codeInput;
+    	             param.isUpdatePassword = formData.isUpdatePassword;
     	             console.info(param);
     	             
     	            axios.post("/login/index", param)
@@ -231,11 +242,19 @@ var vm =  new Vue({
        	      },
        	   	  toResetPwd() {
        	    	document.location.href='/login/resetPwd';
+       	      },
+       	   	  resetLogin(isUpdatePassword) {
+       	    	$("#logoutBoxDiv").addClass("f-dn");
+       	    	this.loginForm.isUpdatePassword=isUpdatePassword;
        	      }
         },
         created() {  
             document.body.removeChild(document.getElementById('Loading'));
-            
+            var isShowLogoutBox =[[${isShowLogoutBox}]];
+    		if("1"==isShowLogoutBox){
+    			$("#logoutBoxDiv").removeClass("f-dn");
+    			isShowLogoutBox="2";
+    		}
         }
     })
 </script>

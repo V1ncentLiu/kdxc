@@ -4,6 +4,8 @@ import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.IdEntity;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
+import com.kuaidao.manageweb.config.LogRecord;
+import com.kuaidao.manageweb.constant.MenuEnum;
 import com.kuaidao.manageweb.feign.announcement.AnnReceiveFeignClient;
 import com.kuaidao.manageweb.feign.announcement.AnnouncementFeignClient;
 import com.kuaidao.sys.dto.announcement.AnnouncementAddAndUpdateDTO;
@@ -66,6 +68,9 @@ public class AnnReceiveController {
         }
         Subject subject = SecurityUtils.getSubject();
         UserInfoDTO user = (UserInfoDTO) subject.getSession().getAttribute("user");
+        if(user == null){
+            return new JSONResult().fail("-1","用户未登录");
+        }
         dto.setReceiveUser(user.getId());
         return annReceiveFeignClient.queryReceive(dto);
     }
@@ -83,6 +88,7 @@ public class AnnReceiveController {
      * 批量更新状态
      * @return
      */
+    @LogRecord(description = "公告状态更新",operationType = LogRecord.OperationType.UPDATE,menuName = MenuEnum.MESSAGE_CENTER)
     @RequestMapping("/batchUpdate")
     @ResponseBody
     public JSONResult<Void> batchUpdate(@RequestBody Map<String, String> map){

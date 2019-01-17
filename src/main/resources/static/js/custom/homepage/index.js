@@ -111,7 +111,7 @@ var homePageVM=new Vue({
                });
          },
          confirmLogout(){//确认退出系统
-        	 location.href="/logout";
+        	 location.href="/index/logout";
         },
         gotoHomePage(){//首页跳转
         	location.href='/login';
@@ -122,10 +122,12 @@ var homePageVM=new Vue({
 			axios.post("/messagecenter/unreadCount", param).then(function (response) {
 				var data = response.data.data
 				var annCount = 0;
+				var str = "";
 				if(data&&data!=0){
 					annCount = data;
+					str = "&nbsp;(&nbsp;"+(annCount)+"&nbsp;)"
 				}
-				document.getElementById("messageCount").innerHTML="&nbsp;(&nbsp;"+(annCount)+"&nbsp;)"
+				document.getElementById("messageCount").innerHTML= str;
 			})
 		},
 		openMessageCenter(){
@@ -140,6 +142,9 @@ var homePageVM=new Vue({
    	created() {  
    		document.body.removeChild(document.getElementById('Loading'));
 		this.messageCount();
+		if(isUpdatePassword=="1"){
+			this.dialogModifyPwdVisible=true;
+		}
 	}
 })
 // 点击导航赋值ifream的src值

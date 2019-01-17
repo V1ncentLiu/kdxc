@@ -1,74 +1,78 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml"
-    xmlns:th="http://www.thymeleaf.org">
+	xmlns:th="http://www.thymeleaf.org">
 <head th:include="_header_include::frag(~{::title},~{},~{::style})">
-    <title>模块管理</title>
-    <style>
-        .moduleManage .leftBox{/*width: 200px;*/height: auto;border:1px solid #ebeef5;min-height: 480px;}
-        .moduleManage .leftTitle{background:#ebeef5;text-indent: 20px;height: 40px;line-height: 40px;}
-        .moduleManage .leftTree{padding:10px;}
-        .moduleManage .rightTitle{background:#ebeef5;text-indent: 20px;height: 40px;line-height: 40px;}
-        button a{color:#fff!important;display: block;}
-    </style>
+<title>模块管理</title>
+<style>
+.moduleManage .leftBox { /*width: 200px;*/
+	height: auto;
+	border: 1px solid #ebeef5;
+	min-height: 480px;
+}
+
+.moduleManage .leftTitle {
+	background: #ebeef5;
+	text-indent: 20px;
+	height: 40px;
+	line-height: 40px;
+}
+
+.moduleManage .leftTree {
+	padding: 10px;
+}
+
+.moduleManage .rightTitle {
+	background: #ebeef5;
+	text-indent: 20px;
+	height: 40px;
+	line-height: 40px;
+}
+
+button a {
+	color: #fff !important;
+	display: block;
+}
+</style>
 </head>
 <body>
-<div id="moduleManage" class="moduleManage mainPadding">  
-    <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
-        <el-breadcrumb-item>Home</el-breadcrumb-item>
-        <el-breadcrumb-item>系统管理</el-breadcrumb-item>
-        <el-breadcrumb-item><a href="JavaScript:void(0)">模块管理</a></el-breadcrumb-item>
-    </el-breadcrumb>
-    <el-row :gutter="20">
-        <el-col :xs="12" :sm="7" :md="5" :lg="3" :xl="3">
-            <div class="leftBox">
-                <div class="leftTitle fs16">模块列表</div>
-                <el-tree
-                    :data="dataTree"              
-                    node-key="id"
-                    :default-expanded-keys="[1,2,3]"
-                    ref="tree"
-                    highlight-current
+	<div id="moduleManage" class="moduleManage mainPadding">
+		<el-breadcrumb separator="/" class="elBreadcrumb marginB20">
+		<el-breadcrumb-item>Home</el-breadcrumb-item> <el-breadcrumb-item>系统管理</el-breadcrumb-item>
+		<el-breadcrumb-item>
+		<a href="JavaScript:void(0)">菜单管理</a></el-breadcrumb-item> </el-breadcrumb>
+		<el-row :gutter="20"> <el-col :xs="12" :sm="7" :md="5"
+			:lg="3" :xl="3">
+		<div class="leftBox">
+			<div class="leftTitle fs16">菜单列表</div>
+			<el-tree :data="dataTree" node-key="id"
+				:default-expanded-keys="[1,2,3]" ref="tree"
+				highlight-current
                      @node-click="clickModuleNode"
-                    class="leftTree">
-                </el-tree>
-            </div>            
-        </el-col>
-        <el-col :xs="12" :sm="17" :md="19" :lg="21" :xl="21">
-            <el-row class="marginB10">
-                <el-col :xs="12" :sm="16" :md="16" :lg="18" :xl="12">
-                    <el-button type="primary"><a @click="clickAddModule"><i class="el-icon-plus"></i> 添加下级模块</a></el-button>
-                    <el-button type="primary">修改</el-button>
-                    <el-button type="primary" @click="deleteFun">删除</el-button>
-                </el-col>
-                <el-col :xs="12" :sm="8" :md="8" :lg="6" :xl="12">
-                    <el-input placeholder="请输入模块名称进行查询" v-model="inputModuleName"  class="input-with-select">                        
-                    <el-button slot="append" icon="el-icon-search" @click="getQuery" >搜索</el-button>
-                    </el-input>
-                </el-col>
-            </el-row>
-            <el-row>
-                <el-table 
-                    ref="multipleTable"
-                    tooltip-effect="dark"
-                    style="width: 100%"
-                    @selection-change="handleSelectionChange"
-                    empty-text="此菜单无下级菜单"
-                    border
-                    :data="dataTable" 
-                    >
-                    <el-table-column align="center" type="selection" prop="id" width="55" @selection-change="handleSelectionChange" ></el-table-column>
-                    <el-table-column align="center" prop="name" label="模块名称"></el-table-column>
-                    <el-table-column align="center" prop="sortNo" label="优先级"></el-table-column>
-                    <el-table-column align="center" prop="authCode" label="授权名称"></el-table-column>
-                    <el-table-column align="center" prop="iconName" label="图标名称"></el-table-column>
-                    <el-table-column align="center" prop="iconUrl" label="图标地址"></el-table-column>
-                    <el-table-column align="center" prop="url" label="模块地址"></el-table-column>
-                </el-table>
-                  <table-pagination :pager="pager" @change=""></table-pagination>
-            </el-row>
-        </el-col>
-    </el-row>
-</div>
+				class="leftTree"> </el-tree>
+		</div>
+		</el-col> <el-col :xs="12" :sm="17" :md="19" :lg="21" :xl="21"> <el-row
+			class="marginB10"> <el-col :xs="12" :sm="16" :md="16"
+			:lg="18" :xl="12"> <el-button type="primary">
+		<a @click="clickAddModule"><i class="el-icon-plus"></i> 添加下级菜单</a></el-button> <el-button
+			type="primary" @click="modifyChildModule">编辑</el-button> <el-button
+			type="primary" @click="deleteFun">删除</el-button> </el-col> <el-col :xs="12"
+			:sm="8" :md="8" :lg="6" :xl="12"> <el-input
+			placeholder="请输入菜单名称进行查询" v-model="inputModuleName"
+			class="input-with-select"> <el-button slot="append"
+			icon="el-icon-search" @click="getQuery">搜索</el-button> </el-input> </el-col> </el-row> <el-row>
+		<el-table ref="multipleTable" tooltip-effect="dark"
+			style="width: 100%" @selection-change="handleSelectionChange"
+			empty-text="此菜单无下级菜单" border :data="dataTable">
+		<el-table-column align="center" type="selection" prop="id" width="55"
+			@selection-change="handleSelectionChange"></el-table-column> <el-table-column
+			align="center" prop="name" label="菜单名称"></el-table-column> <el-table-column
+			align="center" prop="sortNo" label="优先级"></el-table-column> <el-table-column
+			align="center" prop="authCode" label="授权名称"></el-table-column> <el-table-column
+			align="center" prop="iconName" label="图标名称"></el-table-column> <el-table-column
+			align="center" prop="iconUrl" label="图标地址"></el-table-column> <el-table-column
+			align="center" prop="url" label="模块地址"></el-table-column> </el-table> <table-pagination
+			:pager="pager" @change="initTableData"></table-pagination> </el-row> </el-col> </el-row>
+	</div>
 </body>
 <!-- import common js-->
 <div th:include="_footer_include :: #jsLib"></div>
@@ -141,13 +145,15 @@ for(var i=0;i<moduleData.length;i++){
             	// 查询 table 需要数据
                 var pageSize = this.pager.pageSize;
                 var pageNum = this.pager.currentPage;
+            	if(0==pageNum){
+            		pageNum=1;	
+            	}
                 var param = {};
                 var parentId = this.selectedNode.id;
                 param.parentId = parentId;
                 param.name = this.inputModuleName;
-                param.systemCode='huiju';
-                param.pageNum=pageSize;
-                param.pageSize=pageNum;
+                param.pageNum=pageNum;
+                param.pageSize=pageSize;
                 axios.post('/module/moduleManager/queryModuleDataByPage?pageNum='+pageNum+"&pageSize="+pageSize,param)
                     .then(function (response) {
                         var data =  response.data
@@ -171,13 +177,31 @@ for(var i=0;i<moduleData.length;i++){
                       // always executed
                     });  
             },
+             modifyChildModule(){
+              //修改菜单数据	
+            	var rows = this.multipleSelection;
+                if(rows.length!=1){
+                    this.$message({
+                       message: '请选择一条数据进行修改',
+                       type: 'warning'
+                     });
+                    return;
+                }
+                window.location.href="/module/moduleManager/queryModuleById?moduleId="+rows[0].id; 
+             },
             deleteFun() {
-                this.$confirm('确定要删除【模块名称1】【模块名称2】模块吗？', '提示', {
+               var deleInfo=moduleVM.multipleSelection;
+ 	            var moduleName="";
+ 	           if(null!=deleInfo){
+ 	 		       for ( var i = 0; i <deleInfo.length; i++){
+ 	 		    	  moduleName+="【"+deleInfo[i].name+"】";
+ 	 		        }
+ 	           }
+                this.$confirm("确定要删除模块"+moduleName+"模块吗?", '提示', {
                     confirmButtonText: '确定',
                     cancelButtonText: '取消',
                     type: 'warning'
                 }).then(() => {
-                    debugger;
                    	// 查询 table 需要数据
                     var param = {};
                     var deleInfo=moduleVM.multipleSelection;
@@ -192,15 +216,13 @@ for(var i=0;i<moduleData.length;i++){
                         .then(function (response) {
                             var data =  response.data
                             if(data.code=='0'){
-                            	this.$message({
-                                    type: 'success',
-                                     message: '删除成功!'
-                                 });
-                            	 this.initTableData();
+                               orgVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
+                                 moduleVM.getQuery();
+                        	  }});
+                            	
                             }else{
                             	console.error(data);
                             }
-                           
                         })
                         .catch(function (error) {
                           console.log(error);

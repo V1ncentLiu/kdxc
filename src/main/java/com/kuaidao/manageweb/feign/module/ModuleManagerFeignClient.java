@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.netflix.feign.FeignClient;
 import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
@@ -40,6 +41,10 @@ public interface ModuleManagerFeignClient {
 
 	@RequestMapping(method = RequestMethod.POST, value = "/queryModuleShow")
 	public JSONResult<List<IndexModuleDTO>> queryModuleShow(String systemCode);
+	
+	@RequestMapping(method = RequestMethod.POST, value = "/queryModuleByParam")
+	public JSONResult<List<ModuleInfoDTO>> queryModuleByParam(ModuleQueryDTO dto);
+	
 
 	@Component
 	static class HystrixClientFallback implements ModuleManagerFeignClient {
@@ -101,6 +106,13 @@ public interface ModuleManagerFeignClient {
 			return fallBackError("查询菜单操作数据失败");
 		}
 
+		@SuppressWarnings("unchecked")
+		@Override
+		public JSONResult<List<ModuleInfoDTO>> queryModuleByParam(ModuleQueryDTO dto) {
+			// TODO Auto-generated method stub
+			return fallBackError("查询菜单数据失败");
+		}
+       
 	}
 
 }

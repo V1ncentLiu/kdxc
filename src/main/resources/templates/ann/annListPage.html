@@ -39,13 +39,17 @@
 
 <div id="pagination">
     <template>
-        <el-table :data="tableData3" height="650" style="width: 100%" tooltip-effect="dark"  ref="multipleTable" @row-dblclick="rowDblClick()">
-            <el-table-column prop="xh" label="序号" width="180" align="center"  type="index">
+        <el-table :data="tableData3" height="650" style="width: 100%"   ref="multipleTable" @row-dblclick="rowDblClick()" tooltip-effect="light">
+            <el-table-column prop="xh" label="序号" width="180" align="center"  type="index" >
             </el-table-column>
-            <el-table-column prop="title" label="标题" width="180"></el-table-column>
-            <el-table-column prop="content" label="公告内容" width="500"></el-table-column>
-            <el-table-column prop="orgId" label="接收范围" width="180" :formatter="formatOrgId"></el-table-column>
-            <el-table-column prop="publishTime" label="发布时间" ></el-table-column>
+            <el-table-column prop="title" label="标题" width="180" show-overflow-tooltip align="center"></el-table-column>
+            <el-table-column prop="content" label="公告内容" width="500"  show-overflow-tooltip align="center">
+                <template slot-scope="scope">
+                    <span style="white-space: nowrap;">{{ scope.row.content }}</span>
+                </template>
+            </el-table-column>
+            <el-table-column prop="orgId" label="接收范围" width="180" :formatter="formatOrgId" show-overflow-tooltip align="center"></el-table-column>
+            <el-table-column prop="publishTime" label="发布时间" align="center"></el-table-column>
         </el-table>
     </template>
 
@@ -53,17 +57,52 @@
         <div class="block">
             <el-pagination @size-change="handleSizeChange"
                            @current-change="handleCurrentChange" :current-page="currentPage"
-                           :page-sizes="[10, 20, 30, 40]" :page-size="pageSize"
+                           :page-sizes="[20, 50, 100]" :page-size="pageSize"
                            layout="total, sizes, prev, pager, next, jumper" :total="total">
             </el-pagination>
         </div>
     </template>
 </div>
 
+<!--<div id="bussdialog">-->
+    <!--<el-dialog title="公告通知" :visible.sync="bussdialogVisible" width="100%">-->
+
+        <!--<el-table :data="bussDialogTableData" style="width: 100%">-->
+            <!--<template v-for="(col ,index) in cols">-->
+                <!--<el-table-column :prop="col.prop" :label="col.label" header-align="center"></el-table-column>-->
+            <!--</template>-->
+        <!--</el-table>-->
+
+    <!--</el-dialog>-->
+<!--</div>-->
+
 <!-- import common js-->
 <div th:include="_footer_include :: #jsLib"></div>
 
 <script>
+    // var annDialogVm = new Vue({
+    //     el: '#anndialog',
+    //     data:{
+    //         anndialogVisible:false,
+    //         title:"",
+    //         content:"",
+    //         AnnDialogTableData:[],
+    //         cols: []
+    //     },
+    //     methods:{
+    //         initDialogData(){
+    //         },
+    //         showOutVisiable:function(){
+    //             this.dialogVisible = true
+    //         }
+    //     },
+    //     created() {
+    //     },
+    //     updated() {
+    //         // this.initDialogData()
+    //     },
+    // });
+
     // 查询 模块
     var queryFormVM = new Vue({
         el: '#queryForm',
@@ -122,7 +161,7 @@
             currentPage: 1,
             total: 0,
             pageNum: 1,
-            pageSize: 10
+            pageSize: 20
         },
         methods: {
             formatOrgId(row, column){
@@ -197,6 +236,9 @@
     .el-button--primary {
         background-color: #6f7180;
         border: #6f7180;
+    }
+    .el-table th {
+        font-weight: bolder;
     }
 </style>
 </body>

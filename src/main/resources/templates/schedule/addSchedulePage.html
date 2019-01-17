@@ -21,35 +21,35 @@
         <el-form :model="form" :rules="rules" ref="form">
             <el-row>
                 <el-col :span="6">
-                    <el-form-item label="任务名称：" :label-width="formLabelWidth1" prop="name">
+                    <el-form-item label="任务名称：" :label-width="formLabelWidth1" prop="jobName">
                         <el-input v-model="form.jobName" maxlength="50" autocomplete="off"></el-input>
                     </el-form-item>
                 </el-col>
             </el-row>
             <el-row>
                 <el-col :span="6">
-                    <el-form-item label="任务组ID：" :label-width="formLabelWidth1" prop="phone">
+                    <el-form-item label="任务组ID：" :label-width="formLabelWidth1" prop="groupId">
                         <el-input v-model="form.groupId" maxlength="50" autocomplete="off"></el-input>
                     </el-form-item>
                 </el-col>
             </el-row>
             <el-row>
                 <el-col :span="6">
-                    <el-form-item label="时间格式：" :label-width="formLabelWidth1" prop="phone">
+                    <el-form-item label="时间格式：" :label-width="formLabelWidth1" prop="cronExpression">
                         <el-input v-model="form.cronExpression" maxlength="50" autocomplete="off"></el-input>
                     </el-form-item>
                 </el-col>
             </el-row>
             <el-row>
                 <el-col :span="6">
-                    <el-form-item label="地址URL：" :label-width="formLabelWidth1" prop="phone">
+                    <el-form-item label="地址URL：" :label-width="formLabelWidth1" prop="url">
                         <el-input v-model="form.url" maxlength="100" autocomplete="off"></el-input>
                     </el-form-item>
                 </el-col>
             </el-row>
             <el-row>
                 <el-col :span="6">
-                    <el-form-item label="参数JSON格式：" :label-width="formLabelWidth1" prop="phone">
+                    <el-form-item label="参数JSON格式：" :label-width="formLabelWidth1" prop="params">
                         <el-input v-model="form.params" maxlength="50" autocomplete="off"></el-input>
                     </el-form-item>
                 </el-col>
@@ -57,7 +57,7 @@
             
             <el-row>
                 <el-col :span="6">
-                    <el-form-item label="方法：" :label-width="formLabelWidth1">
+                    <el-form-item label="方法：" :label-width="formLabelWidth1" prop="method">
                         <el-select v-model="form.method" placeholder="请选择">
                             <el-option
                                 v-for="item in methodOptions"
@@ -120,6 +120,9 @@ var schedule=[[${schedule}]];
                       { required: true, message: '地址URL不能为空', trigger: 'change' },
                       {  max: 100, message: '最大100个字符', trigger: 'blur' }
                     ],
+                    method: [
+                      { required: true, message: '方法不能为空', trigger: 'change' },
+                    ],
                     params: [
                       { required: true, message: '参数不能为空', trigger: 'change' },
                       { max: 50, message: '最大50个字符', trigger: 'blur' }
@@ -168,7 +171,7 @@ var schedule=[[${schedule}]];
        	            	console.info(response);
        	            	var data =response.data;
        	            	if(data.code!="0"){
-       	            		addUserVm.$message(response.msg);
+       	            		addUserVm.$message(data.msg);
        	            	}else{
        	            		addUserVm.$message(msg+'成功');
        	                	document.location.href='/schedule/scheduleManager/initScheduleList';
