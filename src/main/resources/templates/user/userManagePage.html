@@ -367,29 +367,41 @@ var userVM = new Vue({
              submitForm(formName) {
               this.$refs[formName].validate((valid) => {
                   if (valid) {
-                      console.log(this.form.domains)//
-                      var domains =this.form.domains;
-                      var array= new Array();
-                      var reminderTime=[[${reminderTime}]];//密码到期提醒时间
-                      for(var i=0;i<domains.length;i++){
-                    	  array.push(domains[i].value);
-                      }
-                      var param = {};
-                	  param.passwordExpires=this.form.maxDay;
-                	  param.reminderTime=array;
-                	  axios.post('/user/userManager/updatePasswordSetting', param)
-                      .then(function (response) {
-                            var result =  response.data;
-                            if(result.code=="0"){
-                            	userVM.$message.success("设置成功");
-                            	userVM.dialogFormVisible=false;
-                            }else{
-                            	userVM.$message.error(result.msg);
-                            }
-                      })
-                      .catch(function (error) {
-                           console.log(error);
+                	  this.$confirm('确定要'+msg+'【'+name+'】，任务吗？', '提示', {
+                          confirmButtonText: '确定',
+                          cancelButtonText: '取消',
+                          type: 'warning'
+                      }).then(() => {
+                    	  console.log(this.form.domains)//
+                          var domains =this.form.domains;
+                          var array= new Array();
+                          var reminderTime=[[${reminderTime}]];//密码到期提醒时间
+                          for(var i=0;i<domains.length;i++){
+                        	  array.push(domains[i].value);
+                          }
+                          var param = {};
+                    	  param.passwordExpires=this.form.maxDay;
+                    	  param.reminderTime=array;
+                    	  axios.post('/user/userManager/updatePasswordSetting', param)
+                          .then(function (response) {
+                                var result =  response.data;
+                                if(result.code=="0"){
+                                	userVM.$message.success("设置成功");
+                                	userVM.dialogFormVisible=false;
+                                }else{
+                                	userVM.$message.error(result.msg);
+                                }
+                          })
+                          .catch(function (error) {
+                               console.log(error);
+                          });
+                      }).catch(() => {
+                          this.$message({
+                              type: 'info',
+                              message: '已取消'+msg
+                          });          
                       });
+                      
                   } else {
                       console.log('error submit!!');
                       return false;
