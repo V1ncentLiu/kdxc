@@ -78,14 +78,7 @@
                     <el-table-column align="center" prop="operationType" :formatter="transformStatus" label="操作类型"></el-table-column>
                     <el-table-column align="center" prop="requestParam" label="日志内容">
 	                    <template slot-scope="scope" >
-						<el-popover
-						    placement="top-start"
-						    title="详细日志"
-						    width="200"
-						    trigger="hover"
-						    content="">
-						    <el-button slot="reference">{{scope.row.description}}：{{scope.row.logId}}</el-button>
-						  </el-popover>                		
+	                    <el-button type="text" @click="open(scope.row.requestParam)">{{scope.row.description}}：{{scope.row.logId}}</el-button>
 						</template>
 
                     </el-table-column>
@@ -261,7 +254,14 @@
                 	  text="导入"
                   }
                   return text;
+              }, 
+              open(param){
+        	         this.$alert(param, '日志详情', { 
+         	           confirmButtonText: '确定'
+         	         
+        	         })
               }
+         	
         },
         created(){
         	this.queryLogDataList();

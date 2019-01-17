@@ -97,9 +97,11 @@
             <el-input v-model="addRoleValidateForm.roleName"  maxlength="30" autocomplete="off"></el-input>
         </el-form-item>
         <el-form-item label="访问IP限制：">
-            <el-radio v-model="addRoleValidateForm.visitLimitRadio" label="0">开放访问</el-radio>
-            <el-radio v-model="addRoleValidateForm.visitLimitRadio" label="1">限制IP访问</el-radio>
-            <el-button type="primary" size="medium" class="marginL20" @click="openIpPackDilog">选择访问IP包</el-button>
+            <el-radio-group v-model="addRoleValidateForm.visitLimitRadio" @change="visitLimitRadioChange">
+                <el-radio label="0">开放访问</el-radio>
+                <el-radio label="1">限制IP访问</el-radio>
+            </el-radio-group>
+            <el-button type="primary" size="medium" class="marginL20" @click="openIpPackDilog" :disabled="isDisabled">选择访问IP包</el-button>
             <!-- <el-button type="primary" size="medium" class="marginL20" @click="dialogFormSetting = true">设置</el-button> -->
         </el-form-item>
         <div class="fs16 marginB20"><div class="titleBorderL">已选访问IP包</div></div>
@@ -233,6 +235,7 @@ var moduleData=[[${moduleData}]];
          el: '#addRole',
          data: function() {
             return {
+                isDisabled: false,
                 chooseLimitCheck: [],//默认选中
                 fields: [],
                 dataList:moduleData,
@@ -663,6 +666,13 @@ var moduleData=[[${moduleData}]];
                 }
 
                 item.checkedCities = event.target.checked ? arr : [];
+            },
+            visitLimitRadioChange(value) {
+                if(value==1){
+                    this.isDisabled=true
+                }else{
+                    this.isDisabled=false
+                }
             }
         }
     })
