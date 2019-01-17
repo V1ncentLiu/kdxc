@@ -108,24 +108,50 @@
 </div>
 
 <div id="anndialog">
-<el-dialog
-        title="公告通知"
-        :visible.sync="anndialogVisible" width="60%">
-        <el-table
-                :data="AnnDialogTableData"
-                style="width: 100%">
-            <template v-for="(col ,index) in cols">
-                <el-table-column :prop="col.prop" :label="col.label" header-align="center">
-                    <template slot-scope="scope">
-                        <span style="white-space: pre-wrap">{{scope.row.content_ }}</span>
+    <template>
+        <el-dialog
+                title="公告通知"
+                :visible.sync="anndialogVisible" width="60%">
+                <el-table
+                        :data="AnnDialogTableData"
+                        style="width: 100%">
+                    <template v-for="(col ,index) in cols">
+                        <el-table-column :prop="col.prop" :label="col.label" header-align="center">
+                            <template slot-scope="scope">
+                                <span style="white-space: pre-wrap">{{scope.row.content_ }}</span>
+                            </template>
+                        </el-table-column>
                     </template>
-                </el-table-column>
-            </template>
-        </el-table>
-    <span slot="footer" class="dialog-footer" >
-        <el-button type="primary" @click="updateStatusAnn">我知道了</el-button>
-    </span>
-</el-dialog>
+                </el-table>
+            <span slot="footer" class="dialog-footer" >
+                <el-button type="primary" @click="updateStatusAnn">我知道了</el-button>
+            </span>
+        </el-dialog>
+    </template>
+</div>
+
+
+<div id="bussdialog">
+    <template>
+        <el-dialog
+                title="消息提醒"
+                :visible.sync="bussdialogVisible" width="60%">
+            <el-table
+                    :data="bussDialogTableData"
+                    style="width: 100%">
+                <template v-for="(col ,index) in cols">
+                    <el-table-column :prop="col.prop" :label="col.label" header-align="center">
+                        <template slot-scope="scope">
+                            <span style="white-space: pre-wrap">{{scope.row.content_ }}</span>
+                        </template>
+                    </el-table-column>
+                </template>
+            </el-table>
+            <span slot="footer" class="dialog-footer" >
+            <el-button type="primary" @click="updateStatusAnn">我知道了</el-button>
+        </span>
+        </el-dialog>
+    </template>
 </div>
 </body>
 <!-- import common js-->
@@ -184,22 +210,42 @@
                     });
             },
             showOutVisiable:function(){
-                this.dialogVisible = true
             }
-        },
-        closed() {
-            console.info("colsed method-=====================")
-            console.info("colsed method");
-        },
-        created() {
-            console.info("create method");
-            // this.initDialogData();
-        },
-        updated() {
-            console.info("updated method");
-            // this.initDialogData();
-        },
+        }
     });
+
+
+    var bussDialogVm = new Vue({
+        el: '#bussdialog',
+        data:{
+            bussdialogVisible:false,
+            title:"",
+            content:"",
+            bussRevid:"",
+            bussDialogTableData:[],
+            cols:[]
+        },
+        methods:{
+            updateStatusAnn(){
+                var param = {};
+                param.ids = this.bussRevid;
+                axios.post('/bussReceive/batchUpdate', param)
+                    .then(function (response) {
+                        bussDialogVm.$message({type: 'success', message: '更新完成!',duration:2000,onClose:function(){
+                                homePageVM.messageCount();
+                            }});
+                    }).catch(function (error) {console.log(error);});
+                bussDialogVm.anndialogVisible = false;
+            }
+            ,initDialogData(){
+                bussDialogVm.AnnDialogTableData = [{content_:this.content}]
+                bussDialogVm.cols =[{ label: this.title, prop: "content_", type: "normal" }];
+            },
+            showOutVisiable:function(){
+            }
+        }
+    });
+
 </script>
 
 <script th:src="@{/js/custom/homepage/index.js}"></script>
@@ -250,6 +296,16 @@
                     console.log(annDialogVm.id)
                     annDialogVm.anndialogVisible=true;
                     annDialogVm.initDialogData();
+                }else   if(msg.indexOf("business") != -1){
+                    var bussRevid = msg.split(",")[1];
+                    var title = msg.split(",")[2];
+                    var ccontent = msg.split(",")[3];
+                    homePageVM.messageCount();
+                    bussDialogVm.id = bussRevid;
+                    bussDialogVm.annRevid =annRevid
+                    console.log(annDialogVm.id)
+                    bussDialogVm.bussdialogVisible=true;
+                    bussDialogVm.initDialogData();
                 }
             });
             
