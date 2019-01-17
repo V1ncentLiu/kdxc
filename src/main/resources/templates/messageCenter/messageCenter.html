@@ -207,6 +207,7 @@
             status:"",
             title:"",
             content:"",
+            flag:1,
             AnnDialogTableData:[],
             cols: []
         },
@@ -217,12 +218,18 @@
                     return false;
                 }
                 var param = {};
+                if(annDialogVm.flag!=1){
+                    return false;
+                }else{
+                    annDialogVm.flag  = 0;
+                }
                 param.ids = annDialogVm.id;
                 axios.post('/annReceive/batchUpdate', param)
                     .then(function (response) {
                         vm.$message({type: 'success', message: '公告已读!',duration:2000,onClose:function(){
                             done();
                             vm.initAnnTableData(1);
+                            annDialogVm.flag  = 1;
                         }});
                     })
                     .catch(function (error) {
