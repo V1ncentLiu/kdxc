@@ -45,11 +45,14 @@
                         </el-form-item>
                     </el-col>
                     <el-col :span="10">
-                    	<el-button type="primary" class="codeBtn" style="float: right;padding: 12px 5px;" @click="sendCode('loginForm','2');">获取语音验证码</el-button>
+                    	<el-button type="primary" class="codeBtn" style="float: right;padding: 12px 5px;width: 110px;" @click="sendCode('loginForm','2');" :disabled="isDisabled">{{buttonName}}</el-button>
                     </el-col>
                 </el-row>
                 <div id="codeTipDiv" class="codeTip">
-                    未收到验证码，使用<span class="link"><a id="msgHref" type="submit" @click="sendCode('loginForm','1');">短信验证码</a></span>                    
+                    未收到验证码，使用<span class="link">
+                      <el-button class="msgBtn" type="submit" id="msgHref" :disabled="isDisabled" @click="sendCode('loginForm','1');">短信验证码</el-button>
+                      <!-- <a id="msgHref" type="submit" @click="sendCode('loginForm','1');">短信验证码</a> -->
+                    </span>                    
                		<a type="submit"  @click="toResetPwd();" class="pswForgetBtn">忘记密码</a>
                 </div>  
                 <!-- //登录后是否显示修改密码  2-不显示 1-显示 -->
@@ -93,6 +96,9 @@ var disType="";
 var vm =  new Vue({
         el: '#loginbox',
         data: {
+            buttonName: "获取语音验证码",
+            isDisabled: false,
+            time: 60,
             loginForm: {
             	nameInput: '',
                 pswInput:'',
@@ -189,9 +195,10 @@ var vm =  new Vue({
 	       	      }
    	            });
 	       	 	if (valid) {
-	 	            if(type){
-	    				disType=type;
-	    			}
+              this.cutDown();//倒计时
+	 	          if(type){
+  	    				disType=type;
+  	    			}
 	    		    var code = $("#imgcodeInput").val();
 	    		    var formData = vm.loginForm;
 		            var param={};
@@ -246,7 +253,22 @@ var vm =  new Vue({
        	   	  resetLogin(isUpdatePassword) {
        	    	$("#logoutBoxDiv").addClass("f-dn");
        	    	this.loginForm.isUpdatePassword=isUpdatePassword;
-       	      }
+       	      },
+              cutDown() {
+                var me = this;
+                me.isDisabled = true;
+                var interval = window.setInterval(function() {
+                  me.buttonName = me.time + '秒后重新发送';
+                  --me.time;
+                  if(me.time < 0) {
+                    me.buttonName = "重新发送";
+                    me.time = 60;
+                    me.isDisabled = false;
+                    window.clearInterval(interval);
+                  }
+                }, 1000);
+       
+              }
         },
         created() {  
             document.body.removeChild(document.getElementById('Loading'));
