@@ -38,9 +38,19 @@ public interface OrganizationFeignClient {
     @PostMapping("/delete")
     public JSONResult delete(@RequestBody IdListReq idListReq);
     
+    /***
+     *  组织机构 数据查询  分页 
+     * @param queryDTO
+     * @return
+     */
     @PostMapping("/queryOrgDataByParam")
     public JSONResult<PageBean<OrganizationRespDTO>> queryOrgDataByParam(@RequestBody OrganizationQueryDTO queryDTO);
     
+    /**
+     * 查询组织机构
+     * @param queryDTO
+     * @return
+     */
     @PostMapping("/queryOrgByParam")
     public JSONResult<List<OrganizationRespDTO>> queryOrgByParam( @RequestBody OrganizationQueryDTO queryDTO);
     

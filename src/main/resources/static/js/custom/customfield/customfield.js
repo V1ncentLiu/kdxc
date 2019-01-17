@@ -20,6 +20,7 @@ var fieldMenuVM = new Vue({
                 oldMenuName:'',//旧 菜单名称
                 formLabelWidth: '150px',
                 inputMenuName:'',//菜单搜索框
+                addOrModifyDialogTitle:'',
                 rules:{
                 	menuCode:[
                 		{ required: true, message: '菜单代码不能为空',trigger:'blur'},
@@ -70,13 +71,13 @@ var fieldMenuVM = new Vue({
                                     if(data.code=='0'){
                                         var resData = data.data;
                                         if(resData){
-                                            callback(new Error("此菜单菜单名称已存在，请修改后提交"));
+                                            callback(new Error("此菜单名称已存在，请修改后提交"));
                                         }else{
                                             callback();
                                         }
                                         
                                     }else{
-                                         callback(new Error("查询菜单菜单名称是否唯一报错"));
+                                         callback(new Error("查询菜单名称是否唯一报错"));
                                     }
                                 })
                                 .catch(function (error) {
@@ -106,7 +107,7 @@ var fieldMenuVM = new Vue({
             	   var rows = this.multipleSelection;
                    if(rows.length==0){
                        this.$message({
-                          message: '请选择一条数据进行修改',
+                          message: '请选择一条数据进行刪除',
                           type: 'warning'
                         });
                        return;
@@ -199,7 +200,7 @@ var fieldMenuVM = new Vue({
                      });
                     return;
                 }
-                
+                this.addOrModifyDialogTitle="修改菜单页面";
                 
                 var param={id:rows[0].id};
                 //根据id获取数据
@@ -267,6 +268,7 @@ var fieldMenuVM = new Vue({
             addFieldMenu(){//点击弹出新增dialog
             	this.form.id='';
             	this.dialogFormVisible = true;
+            	this.addOrModifyDialogTitle="添加菜单页面";
             }
             
             
