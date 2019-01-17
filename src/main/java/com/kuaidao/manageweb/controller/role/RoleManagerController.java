@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.kuaidao.common.constant.SystemCodeConstant;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.manageweb.feign.customfield.CustomFieldFeignClient;
@@ -83,7 +84,7 @@ public class RoleManagerController {
 	@RequestMapping("/addRolePre")
 	public String addRolePre(HttpServletRequest request) {
 
-		JSONResult<List<IndexModuleDTO>> treeJsonRes = moduleManagerFeignClient.queryModuleShow("huiju");
+		JSONResult<List<IndexModuleDTO>> treeJsonRes = moduleManagerFeignClient.queryModuleShow(SystemCodeConstant.HUI_JU);
 		if (treeJsonRes != null && JSONResult.SUCCESS.equals(treeJsonRes.getCode()) && treeJsonRes.getData() != null) {
 			request.setAttribute("moduleData", treeJsonRes.getData());
 		} else {
@@ -114,7 +115,7 @@ public class RoleManagerController {
 				model.addAttribute("roleInfo", roledto);
 			}
 		}
-		JSONResult<List<IndexModuleDTO>> treeJsonRes = moduleManagerFeignClient.queryModuleShow("huiju");
+		JSONResult<List<IndexModuleDTO>> treeJsonRes = moduleManagerFeignClient.queryModuleShow(SystemCodeConstant.HUI_JU);
 
 		if (treeJsonRes != null && JSONResult.SUCCESS.equals(treeJsonRes.getCode()) && treeJsonRes.getData() != null) {
 
@@ -199,7 +200,7 @@ public class RoleManagerController {
 	@PostMapping("/saveRoleInfo")
 	@ResponseBody
 	public JSONResult<String> saveRoleInfo(@RequestBody RoleInfoDTO dto) {
-		dto.setSystemCode("huiju");
+		dto.setSystemCode(SystemCodeConstant.HUI_JU);
 		JSONResult<String> pageJson = roleManagerFeignClient.saveRoleInfo(dto);
 		return pageJson;
 	}
@@ -233,5 +234,13 @@ public class RoleManagerController {
 		JSONResult<String> pageJson = roleManagerFeignClient.deleteRoleInfo(dto);
 		return pageJson;
 	}
+	
+	@PostMapping("/qeuryRoleByName")
+	@ResponseBody
+	public JSONResult<List<RoleInfoDTO>> qeuryRoleByName(@RequestBody RoleQueryDTO roleDTO){
+		
+		return  roleManagerFeignClient.qeuryRoleByName(roleDTO);
+	}
+	
 
 }

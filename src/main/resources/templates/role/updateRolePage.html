@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml"
     xmlns:th="http://www.thymeleaf.org">
 <head th:include="_header_include::frag(~{::title},~{},~{::style})">
-	<title>添加角色</title>
+	<title>修改角色</title>
     <style>
         .role-table {
             border: 1px solid #e0e0e0;
@@ -88,8 +88,8 @@
         <el-breadcrumb-item>系统管理</el-breadcrumb-item>
         <el-breadcrumb-item><a href="JavaScript:void(0)" data-url="roleManagePage.html">角色管理</a></el-breadcrumb-item>
     </el-breadcrumb>
-    <div class="fs16 marginB20"><div class="titleBorderL">添加角色</div></div>
-    <el-form :model="addRoleValidateForm" :rules="rules" ref="addRoleValidateForm" label-width="100px" class="demo-ruleForm">
+    <div class="fs16 marginB20"><div class="titleBorderL">修改角色</div></div>
+    <el-form :model="addRoleValidateForm" :rules="rules"   maxlength="30" ref="addRoleValidateForm" label-width="100px" class="demo-ruleForm">
         <el-form-item
             label="角色名称："
             prop="roleName"
@@ -97,9 +97,11 @@
             <el-input v-model="addRoleValidateForm.roleName" autocomplete="off"></el-input>
         </el-form-item>
         <el-form-item label="访问IP限制：">
-            <el-radio v-model="addRoleValidateForm.visitLimitRadio" label="0">开放访问</el-radio>
-            <el-radio v-model="addRoleValidateForm.visitLimitRadio" label="1">限制IP访问</el-radio>
-            <el-button type="primary" size="medium" class="marginL20" @click="dialogFormChooseIP = true">选择访问IP包</el-button>
+            <el-radio-group v-model="addRoleValidateForm.visitLimitRadio" @change="visitLimitRadioChange">
+                <el-radio label="0">开放访问</el-radio>
+                <el-radio label="1">限制IP访问</el-radio>
+            </el-radio-group>
+            <el-button type="primary" size="medium" class="marginL20" @click="openIpPackDilog" v-show="isDisabled">选择访问IP包</el-button>
             <!-- <el-button type="primary" size="medium" class="marginL20" @click="dialogFormSetting = true">设置</el-button> -->
         </el-form-item>
         <div class="fs16 marginB20"><div class="titleBorderL">已选访问IP包</div></div>
@@ -171,7 +173,7 @@
         </ul>
         <el-form-item style="text-align: center;">
             <el-button type="primary" @click="submitFormRole('addRoleValidateForm')">提交</el-button>
-            <el-button>取消</el-button>
+            <el-button @click="reBackRoleInfo">取消</el-button>
         </el-form-item>
     </el-form>
     
@@ -235,6 +237,7 @@
          el: '#addRole',
          data: function() {
             return {
+                isDisabled: false,
                 chooseLimitCheck: [],//默认选中
                 fields: [],
                 dataList:moduleData,
@@ -284,6 +287,15 @@
                         return false;
                     }
                 });
+            },
+            reBackRoleInfo(){
+            	 window.location.href="/role/roleManager/initRoleInfo"; 	
+            },
+            openIpPackDilog(){
+            	//打开IP包
+            	 addRoleVM.dialogFormChooseIP;
+            	 addRoleVM.chooseIpform.ipPackageName='';
+                 addRoleVM.chooseIpform.searchHasIp='';
             },
             submitFormRole(formName) {
                 this.$refs[formName].validate((valid) => {
@@ -345,6 +357,26 @@
                          param.customFieldMenus=fieldSaveArray;
                          param.menuIds=menuArry;
                          param.selectMenuIds=menuSaveArray;
+                         axios.post('/role/roleManager/qeuryRoleByName',param).then(function (response) {
+                         	if(null==response){
+         		                 alert("返回异常");
+         		                 return ;
+         		            }
+         		            var resobj= response.data;
+         		            if(null==resobj){
+         		            	 alert("返回异常");
+         		                 return ;
+         		            } 
+         		            if(resobj.code!='0'){
+         		            	alert(response.data.message);
+         		            	return ;
+         		            }
+         		            //校验角色名称是否已存在
+         		            var checkName=response.data.data;
+                         	if(null!=checkName&&checkName.length>0) {
+                         		alert("角色名称已存在");
+                         	   return ;
+                         	}
                          axios.post('/role/roleManager/updateRoleInfo',param).then(function (response) {
           		           if(null==response){
           		                 alert("返回异常");
@@ -365,7 +397,8 @@
           		              console.log(error);
           		            })
           		            .then(function () {
-          		            });	
+          		           });
+                         });
                     } else {
                         console.log('error submit!!');
                         return false;
@@ -641,6 +674,13 @@
                 }
 
                 item.checkedCities = event.target.checked ? arr : [];
+            },
+            visitLimitRadioChange(value) {
+                if(value==1){
+                    this.isDisabled=true
+                }else{
+                    this.isDisabled=false
+                }
             }
         }
     })

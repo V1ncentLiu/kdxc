@@ -1,5 +1,7 @@
 package com.kuaidao.manageweb.feign.ip;
 
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.netflix.feign.FeignClient;
@@ -15,47 +17,48 @@ import com.kuaidao.sys.dto.ip.IpAccessManagerQueryDTO;
 import com.kuaidao.sys.dto.ip.IpPackageInfoDTO;
 import com.kuaidao.sys.dto.ip.IpRepositoryInfoDTO;
 
-@FeignClient(name = "sys-service",path="/sys/ip/accessManager", fallback = IpAccessFeignClient.HystrixClientFallback.class)
+@FeignClient(name = "sys-service", path = "/sys/ip/accessManager", fallback = IpAccessFeignClient.HystrixClientFallback.class)
 
-public interface IpAccessFeignClient   {
-	
+public interface IpAccessFeignClient {
+
 	@RequestMapping(method = RequestMethod.POST, value = "/querytIpPageList")
 	public JSONResult<PageBean<IpRepositoryInfoDTO>> querytIpPageList(@RequestBody IpAccessManagerQueryDTO queryDTO);
-	
+
 	@RequestMapping(method = RequestMethod.POST, value = "/querytPackagePageList")
 	public JSONResult<PageBean<IpPackageInfoDTO>> querytPackagePageList(@RequestBody IpAccessManagerQueryDTO dto);
-	
+
 	@RequestMapping(method = RequestMethod.POST, value = "/querytAllPackageList")
 	public JSONResult<PageBean<IpPackageInfoDTO>> querytAllPackageList();
-	
+
 	@RequestMapping(method = RequestMethod.POST, value = "/saveIpRepository")
-	public JSONResult<String> saveIpRepository(@RequestBody IpRepositoryInfoDTO dto) ;
-	
+	public JSONResult<String> saveIpRepository(@RequestBody IpRepositoryInfoDTO dto);
+
 	@RequestMapping(method = RequestMethod.POST, value = "/deleteIpRepository")
-	public JSONResult<String> deleteIpRepository(@RequestBody IpRepositoryInfoDTO dto) ;
-	
+	public JSONResult<String> deleteIpRepository(@RequestBody IpRepositoryInfoDTO dto);
+
 	@RequestMapping(method = RequestMethod.POST, value = "/saveIpPackage")
 	public JSONResult<String> saveIpPackage(@RequestBody IpPackageInfoDTO dto);
-	
+
 	@RequestMapping(method = RequestMethod.POST, value = "/updateIpPackage")
 	public JSONResult<String> updateIpPackage(@RequestBody IpPackageInfoDTO dto);
-	
-	
+
 	@RequestMapping(method = RequestMethod.POST, value = "/deleteIppackage")
-	public JSONResult<String> deleteIppackage(@RequestBody IpPackageInfoDTO dto) ;
- 
-	
-    @Component
-    static class HystrixClientFallback implements  IpAccessFeignClient{
-    	
-        private static Logger logger = LoggerFactory.getLogger(IpAccessFeignClient.class);	
-        
+	public JSONResult<String> deleteIppackage(@RequestBody IpPackageInfoDTO dto);
+
+	@RequestMapping(method = RequestMethod.POST, value = "/queryIpPackageByParam")
+	public JSONResult<List<IpPackageInfoDTO>> queryIpPackageByParam(IpAccessManagerQueryDTO dto);
+
+	@Component
+	static class HystrixClientFallback implements IpAccessFeignClient {
+
+		private static Logger logger = LoggerFactory.getLogger(IpAccessFeignClient.class);
+
 		@SuppressWarnings("rawtypes")
 		private JSONResult fallBackError(String name) {
-            logger.error(name + "接口调用失败：无法获取目标服务");
-            return new JSONResult().fail(SysErrorCodeEnum.ERR_REST_FAIL.getCode(),
-                    SysErrorCodeEnum.ERR_REST_FAIL.getMessage());
-        }
+			logger.error(name + "接口调用失败：无法获取目标服务");
+			return new JSONResult().fail(SysErrorCodeEnum.ERR_REST_FAIL.getCode(),
+					SysErrorCodeEnum.ERR_REST_FAIL.getMessage());
+		}
 
 		@SuppressWarnings("unchecked")
 		@Override
@@ -68,7 +71,7 @@ public interface IpAccessFeignClient   {
 		public JSONResult<PageBean<IpRepositoryInfoDTO>> querytIpPageList(IpAccessManagerQueryDTO queryDTO) {
 			return fallBackError("查询IP库列表数据失败");
 		}
-		
+
 		@SuppressWarnings("unchecked")
 		@Override
 		public JSONResult<String> saveIpRepository(IpRepositoryInfoDTO dto) {
@@ -80,7 +83,6 @@ public interface IpAccessFeignClient   {
 		public JSONResult<String> deleteIpRepository(IpRepositoryInfoDTO dto) {
 			return fallBackError("删除IP库列表数据失败");
 		}
-	 
 
 		@SuppressWarnings("unchecked")
 		@Override
@@ -106,11 +108,13 @@ public interface IpAccessFeignClient   {
 			// TODO Auto-generated method stub
 			return fallBackError("查询所有IP包列表数据失败");
 		}
-		
-		
-		
-		
-        
-        
-    }
+
+		@SuppressWarnings("unchecked")
+		@Override
+		public JSONResult<List<IpPackageInfoDTO>> queryIpPackageByParam(IpAccessManagerQueryDTO dto) {
+
+			return fallBackError("查询所有IP包数据失败");
+		}
+
+	}
 }
