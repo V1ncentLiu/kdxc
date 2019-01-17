@@ -122,10 +122,12 @@ var homePageVM=new Vue({
 			axios.post("/messagecenter/unreadCount", param).then(function (response) {
 				var data = response.data.data
 				var annCount = 0;
+				var str = "";
 				if(data&&data!=0){
 					annCount = data;
+					str = "&nbsp;(&nbsp;"+(annCount)+"&nbsp;)"
 				}
-				document.getElementById("messageCount").innerHTML="&nbsp;(&nbsp;"+(annCount)+"&nbsp;)"
+				document.getElementById("messageCount").innerHTML= str;
 			})
 		},
 		openMessageCenter(){
