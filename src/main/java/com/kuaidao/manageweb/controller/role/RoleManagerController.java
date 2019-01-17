@@ -115,7 +115,7 @@ public class RoleManagerController {
 				model.addAttribute("roleInfo", roledto);
 			}
 		}
-		JSONResult<List<IndexModuleDTO>> treeJsonRes = moduleManagerFeignClient.queryModuleShow("huiju");
+		JSONResult<List<IndexModuleDTO>> treeJsonRes = moduleManagerFeignClient.queryModuleShow(SystemCodeConstant.HUI_JU);
 
 		if (treeJsonRes != null && JSONResult.SUCCESS.equals(treeJsonRes.getCode()) && treeJsonRes.getData() != null) {
 
@@ -200,7 +200,7 @@ public class RoleManagerController {
 	@PostMapping("/saveRoleInfo")
 	@ResponseBody
 	public JSONResult<String> saveRoleInfo(@RequestBody RoleInfoDTO dto) {
-		dto.setSystemCode("huiju");
+		dto.setSystemCode(SystemCodeConstant.HUI_JU);
 		JSONResult<String> pageJson = roleManagerFeignClient.saveRoleInfo(dto);
 		return pageJson;
 	}
