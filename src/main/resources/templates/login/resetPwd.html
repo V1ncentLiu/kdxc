@@ -27,13 +27,16 @@
                         </el-form-item>
                     </el-col>
                     <el-col :span="10">
-                    	<el-button type="primary" class="codeBtn" style="float: right;padding: 12px 5px;"@click="sendCode('resetPwdForm','2');">获取语音验证码</el-button>
+                    	<el-button type="primary" class="codeBtn" style="float: right;padding: 12px 5px;"@click="sendCode('resetPwdForm','2');" :disabled="isDisabled">{{buttonName}}</el-button>
                     </el-col>
                 </el-row>
                         
                 <div class="control-group">
                     <div class="codeTip">
-                        未收到验证码，使用<span class="link"><a id="msgHref" type="submit" @click="sendCode('resetPwdForm','1');">短信验证码</a></span>
+                        未收到验证码，使用<span class="link">
+                          <el-button class="msgBtn" type="submit" id="msgHref" :disabled="isDisabled" @click="sendCode('resetPwdForm','1');">短信验证码</el-button>
+                          <!-- <a id="msgHref" type="submit" @click="sendCode('resetPwdForm','1');">短信验证码</a> -->
+                        </span>
                     </div>              
                 </div>
                 <el-row>
@@ -72,6 +75,9 @@
 var vm =  new Vue({
         el: '#loginbox',
         data: {
+          buttonName: "获取语音验证码",
+          isDisabled: false,
+          time: 60,
         	resetPwdForm: {
             	phoneInput: '',
                 codeInput:'',
@@ -180,12 +186,13 @@ var vm =  new Vue({
        	   	  sendCode(formName,type) {
        	    	var valid=true;
 	       	  	this.$refs[formName].validateField(["phoneInput"],(error) => {
-	    	      if (error) {
-	    	    	  valid=false;
+  	    	      if (error) {
+  	    	    	  valid=false;
 	       	      }
-   	            });
-	       	 	if (valid) {
-	    		    var formData = vm.resetPwdForm;
+   	          });
+  	       	 	if (valid) {
+                this.cutDown();//倒计时
+  	    		    var formData = vm.resetPwdForm;
 		            var param={};
 		            param.phone= formData.phoneInput;
 		            param.type = type;
@@ -217,7 +224,22 @@ var vm =  new Vue({
        	      },
        	   	  toLogin() {
        	    	document.location.href='/login';
-       	      }
+       	      },
+              cutDown() {
+                var me = this;
+                me.isDisabled = true;
+                var interval = window.setInterval(function() {
+                  me.buttonName = me.time + '秒后重新发送';
+                  --me.time;
+                  if(me.time < 0) {
+                    me.buttonName = "重新发送";
+                    me.time = 60;
+                    me.isDisabled = false;
+                    window.clearInterval(interval);
+                  }
+                }, 1000);
+       
+              }
         },
         created() {  
             document.body.removeChild(document.getElementById('Loading'));
