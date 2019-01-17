@@ -24,28 +24,28 @@
                             <el-date-picker v-model="businessForm.date2" type="datetime" placeholder="选择日期时间"></el-date-picker>
                         </el-form-item>
                         <el-form-item>
-                            <el-button type="primary" @click="onBussSubmit">查询</el-button>
+                            <el-button type="primary" @click="onBussSubmit">搜索</el-button>
                             <el-button type="primary" @click="changeBussState">标记已读</el-button>
                         </el-form-item>
                     </el-form>
                 </template>
                 <template>
-                    <el-table :data="businessData" height="650" border  @selection-change="handleSelectionChange" @row-dblclick="showBussMx">
+                    <el-table :data="businessData" height="650" border  @selection-change="handleSelectionChange" @row-dblclick="showBussMx" tooltip-effect="light" >
                         <el-table-column type="selection" width="55"></el-table-column>
-                        <el-table-column property="title" stripe label="标题" width="150"  > <!--:formatter="formatTitle"-->
+                        <el-table-column property="title" stripe label="标题" width="150"  show-overflow-tooltip  align="center"> <!--:formatter="formatTitle"-->
                             <template slot-scope="scope">
                                 <span class="span"  style="white-space: nowrap"  v-if="scope.row.status==0"><li class="tip"></li>{{ scope.row.title }}</span>
                                 <span class="span" style="color: #cccccc;white-space: nowrap;" v-else><li class="tip1"></li>{{ scope.row.title }}</span>
                             </template>
                         </el-table-column>
-                        <el-table-column property="content" label="消息内容" >
+                        <el-table-column property="content" label="消息内容" show-overflow-tooltip align="center">
                             <template slot-scope="scope">
                                 <span  style="white-space: nowrap" v-if="scope.row.status==0">{{ scope.row.content }}</span>
                                 <span style="color: #cccccc;white-space: nowrap;" v-else>{{ scope.row.content }}</span>
                             </template>
                         </el-table-column> <!--:formatter="formatContent"-->
-                        <el-table-column property="receiveTime" label="接收时间"  width="200"></el-table-column>
-                        <el-table-column property="status" label="消息状态" :formatter="formatStatus"></el-table-column>
+                        <el-table-column property="receiveTime" label="接收时间"  width="200" align="center"></el-table-column>
+                        <el-table-column property="status" label="消息状态" :formatter="formatStatus" align="center"></el-table-column>
                     </el-table>
                 </template>
 
@@ -53,7 +53,7 @@
                     <div class="block">
                         <el-pagination @size-change="handleSizeChange"
                                        @current-change="handleCurrentChange" :current-page="currentPage"
-                                       :page-sizes="[10, 20, 30, 40]" :page-size="pageSize"
+                                       :page-sizes="[20, 50, 100]" :page-size="pageSize"
                                        layout="total, sizes, prev, pager, next, jumper" :total="total">
                         </el-pagination>
                     </div>
@@ -82,7 +82,7 @@
                             <el-date-picker v-model="annForm.date2" type="datetime" placeholder="选择日期时间"></el-date-picker>
                         </el-form-item>
                         <el-form-item>
-                            <el-button type="primary" @click="onAnnSubmit">查询</el-button>
+                            <el-button type="primary" @click="onAnnSubmit">搜索</el-button>
                             <el-button type="primary" @click="changeAnnState">标记已读</el-button>
                         </el-form-item>
                     </el-form>
@@ -91,20 +91,20 @@
                 <template>
                     <el-table :data="annData" height="650" border style=""  @selection-change="handleSelectionChange"  @row-dblclick="showAnnMx"  tooltip-effect="light"  :cell-style="cellStyle">
                         <el-table-column type="selection" width="55"></el-table-column>
-                        <el-table-column property="title" label="标题" width="200" >
+                        <el-table-column property="title" label="标题" width="200" show-overflow-tooltip align="center">
                             <template slot-scope="scope">
                                 <span class="span" style="white-space: nowrap"  v-if="scope.row.status==0"><li class="tip"></li>{{ scope.row.title }}</span>
                                 <span class="span" style="color: #cccccc;white-space: nowrap" v-else><li class="tip1"></li>{{ scope.row.title }}</span>
                             </template>
                         </el-table-column>  <!--:formatter="formatTitle"-->
-                        <el-table-column property="content" label="消息内容"  >
+                        <el-table-column property="content" label="消息内容"  show-overflow-tooltip align="center">
                             <template slot-scope="scope">
                                 <span style="white-space: nowrap" v-if="scope.row.status==0">{{scope.row.content }}</span>
                                 <span style="color: #cccccc;white-space: nowrap;" v-else>{{ scope.row.content }}</span>
                             </template>
                         </el-table-column>  <!--:formatter="formatContent"-->
-                        <el-table-column property="receiveTime" label="接收时间" width="200"></el-table-column>
-                        <el-table-column property="status" label="消息状态"  :formatter="formatStatus"></el-table-column>
+                        <el-table-column property="receiveTime" label="接收时间" width="200" align="center"></el-table-column>
+                        <el-table-column property="status" label="消息状态"  :formatter="formatStatus" align="center"></el-table-column>
                     </el-table>
                 </template>
 
@@ -112,7 +112,7 @@
                     <div class="block">
                         <el-pagination @size-change="handleSizeChange"
                                        @current-change="handleCurrentChange" :current-page="currentPage"
-                                       :page-sizes="[10, 20, 30, 40]" :page-size="pageSize"
+                                       :page-sizes="[ 20, 50, 100]" :page-size="pageSize"
                                        layout="total, sizes, prev, pager, next, jumper" :total="total">
                         </el-pagination>
                     </div>
@@ -125,12 +125,12 @@
 </style>
 <div id="anndialog">
     <el-dialog
-            title="公告通知"
-            :visible.sync="anndialogVisible" width="60%">
+            title="详细信息"
+            :visible.sync="anndialogVisible" width="60%" :before-close="handleClose">
         <template>
-            <el-table :data="AnnDialogTableData" style="width: 100%">
+            <el-table :data="AnnDialogTableData" style="width: 100%" >
                 <template v-for="(col ,index) in cols">
-                    <el-table-column :prop="col.prop" :label="col.label" header-align="center">
+                    <el-table-column :prop="col.prop" :label="col.label" header-align="center" >
                         <template slot-scope="scope">
                             <span style="white-space: pre">{{scope.row.content_ }}</span>
                         </template>
@@ -143,17 +143,20 @@
 
 <div id="bussdialog">
     <el-dialog
-            title="业务消息"
-            :visible.sync="bussdialogVisible" width="100%">
+            title="详细信息"
+            :visible.sync="bussdialogVisible" width="60%">
             <el-table :data="bussDialogTableData" style="width: 100%">
             <template v-for="(col ,index) in cols">
                 <el-table-column :prop="col.prop" :label="col.label" header-align="center">
                     <template slot-scope="scope">
-                         <span style="white-space: pre">{{scope.row.content }}</span>
+                         <span style="white-space: pre">{{scope.row.content_ }}</span>
                     </template>
                 </el-table-column>
             </template>
             </el-table>
+            <span slot="footer" class="dialog-footer" >
+                <el-button type="primary" @click="updateStatusBuss">我知道了</el-button>
+            </span>
     </el-dialog>
 </div>
 
@@ -185,6 +188,12 @@
     .el-dialog__body{
         padding-top: 3px;
     }
+    .el-dialog__footer {
+        text-align: center;
+    }
+    .el-table th {
+        font-weight: bolder;
+    }
 </style>
 <!-- import common js-->
 <div th:include="_footer_include :: #jsLib"></div>
@@ -194,12 +203,33 @@
         el: '#anndialog',
         data:{
             anndialogVisible:false,
+            id:"",
+            status:"",
             title:"",
             content:"",
             AnnDialogTableData:[],
             cols: []
         },
         methods:{
+            handleClose(done){
+                if(annDialogVm.status==1){
+                    done();
+                    return false;
+                }
+                var param = {};
+                param.ids = annDialogVm.id;
+                axios.post('/annReceive/batchUpdate', param)
+                    .then(function (response) {
+                        vm.$message({type: 'success', message: '公告已读!',duration:2000,onClose:function(){
+                            done();
+                            vm.initAnnTableData(1);
+                        }});
+                    })
+                    .catch(function (error) {
+                        queryFormVM.$message.error(error);
+                        console.log(error);
+                    });
+            },
             initDialogData(){
             },
             showOutVisiable:function(){
@@ -217,6 +247,8 @@
         el: '#bussdialog',
         data:{
             bussdialogVisible:false,
+            id:"",
+            status:"",
             title:"",
             content:"",
             bussDialogTableData:[],
@@ -226,6 +258,21 @@
             initDialogData(){
                 // document.getElementById("bussTitle").innerHTML=this.title;
                 // document.getElementById("bussBody").innerHTML=this.content;
+            },
+            updateStatusBuss(){
+                if(bussDialogVm.status==1){
+                    bussDialogVm.bussdialogVisible = false
+                    return false;
+                }
+                var param = {};
+                param.ids = bussDialogVm.id;
+                axios.post('/bussReceive/batchUpdate', param)
+                    .then(function (response) {
+                        bussDialogVm.$message({type: 'success', message: '消息已读!',duration:2000,onClose:function(){
+                                bussDialogVm.bussdialogVisible = false
+                                vm.initBussTableData(1);
+                            }});
+                    }).catch(function (error) {queryFormVM.$message.error(error);});
             },
             showOutVisiable:function(){
                 this.bussdialogVisible = true
@@ -247,13 +294,13 @@
             activeName: 'business',
             businessForm:{
                 content:"",
-                status:"",
+                status:"0",
                 date1:"",
                 date2:""
             },
             annForm:{
                 content:"",
-                status:"",
+                status:"0",
                 time:"",
                 date1:"",
                 date2:""
@@ -265,10 +312,10 @@
             currentPage: 1,
             total: 0,
             pageNum: 1,
-            pageSize: 10,
+            pageSize: 20,
 
             options: [{
-                value: "",
+                value: '-1',
                 label: '全部'
             }, {
                 value: '0',
@@ -289,17 +336,21 @@
                 }
             },
             showAnnMx(row, event){
+                annDialogVm.id = row.id;
                 annDialogVm.title = row.title;
                 annDialogVm.content = row.content;
+                annDialogVm.status = row.status;
                 annDialogVm.AnnDialogTableData = [{content_:row.content}]
                 annDialogVm.cols =[{ label: row.title, prop: "content_", type: "normal" }];
                 annDialogVm.anndialogVisible = true;
             },
 
             showBussMx(row, event){
+                bussDialogVm.id = row.id;
                 bussDialogVm.title = row.title;
                 bussDialogVm.content = row.content;
-                bussDialogVm.AnnDialogTableData = [{content_:row.content}]
+                bussDialogVm.status = row.status;
+                bussDialogVm.bussDialogTableData = [{content_:row.content}]
                 bussDialogVm.cols =[{ label: row.title, prop: "content_", type: "normal" }];
                 bussDialogVm.bussdialogVisible = true;
             },
@@ -415,10 +466,10 @@
                 // tab.label="babbababab"
                 if(tab.name=="announcement"){
                     console.log("------------------announcement-----------------------")
-                    this.initAnnTableData(1,10);
+                    this.initAnnTableData(1,20);
                 }else{//business
                     console.log("------------------business-----------------------")
-                    this.initBussTableData(1,10);
+                    this.initBussTableData(1,20);
                 }
             },
             handleSizeChange(val) {

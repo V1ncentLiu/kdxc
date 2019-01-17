@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.kuaidao.common.constant.SystemCodeConstant;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.common.entity.TreeData;
@@ -39,7 +40,7 @@ public class ModuleManagerController {
 	@RequestMapping("/initModuleInfo")
 	public String initModuleInfo(HttpServletRequest request) {
 		ModuleQueryDTO dto = new ModuleQueryDTO();
-		dto.setSystemCode("huiju");
+		dto.setSystemCode(SystemCodeConstant.HUI_JU);
 		JSONResult<List<TreeData>> treeJsonRes = moduleManagerFeignClient.queryModuleTree(dto);
 		if (treeJsonRes != null && JSONResult.SUCCESS.equals(treeJsonRes.getCode()) && treeJsonRes.getData() != null) {
 			request.setAttribute("moduleData", treeJsonRes.getData());
@@ -60,6 +61,7 @@ public class ModuleManagerController {
 	@PostMapping("/queryModuleDataByPage")
 	@ResponseBody
 	public JSONResult<PageBean<ModuleInfoDTO>> queryModuleDataByPage(@RequestBody ModuleQueryDTO dto) {
+		dto.setSystemCode(SystemCodeConstant.HUI_JU);
 		JSONResult<PageBean<ModuleInfoDTO>> pageJson = moduleManagerFeignClient.queryModulePageList(dto);
 		return pageJson;
 	}
@@ -89,7 +91,7 @@ public class ModuleManagerController {
 	@PostMapping("/saveModuleInfo")
 	@ResponseBody
 	public JSONResult<String> saveModuleInfo(@RequestBody ModuleInfoDTO dto) {
-		dto.setSystemCode("huiju");
+		dto.setSystemCode(SystemCodeConstant.HUI_JU);
 		JSONResult<String> pageJson = moduleManagerFeignClient.saveModuleInfo(dto);
 		return pageJson;
 	}
@@ -138,15 +140,23 @@ public class ModuleManagerController {
 		ModuleQueryDTO dto = new ModuleQueryDTO();
 		dto.setId(new Long(moduleId));
 		JSONResult<ModuleInfoDTO> dtoJson = moduleManagerFeignClient.queryModuleById(dto);
-
+ 
 		if (dtoJson.getCode().equals(JSONResult.SUCCESS)) {
 			ModuleInfoDTO moduleDto = dtoJson.getData();
 			List<String> checkModuleId = new ArrayList<String>();
 			List<String> checkOptions = new ArrayList<String>();
+			checkOptions.add("增(add)");
+			checkOptions.add("删(delete)");
+			checkOptions.add("改(edit)");
+			checkOptions.add("查(view)");
 			if (null != moduleDto.getOperationInfos() && moduleDto.getOperationInfos().size() > 0) {
 				for (OperationInfoDTO opt : moduleDto.getOperationInfos()) {
 					checkModuleId.add(opt.getName() + "(" + opt.getCode() + ")");
-					checkOptions.add(opt.getName() + "(" + opt.getCode() + ")");
+					String dataInfo=opt.getName() + "(" + opt.getCode() + ")";
+					if(!checkOptions.contains(dataInfo)){
+						checkOptions.add(opt.getName() + "(" + opt.getCode() + ")");
+					}
+					
 
 				}
 
@@ -161,5 +171,10 @@ public class ModuleManagerController {
 
 		return "module/updateModulePage";
 	}
-
+	
+	@PostMapping("/queryModuleByParam")
+	@ResponseBody
+	public JSONResult<List<ModuleInfoDTO>> queryModuleByParam(@RequestBody ModuleQueryDTO dto){
+		return moduleManagerFeignClient.queryModuleByParam(dto);
+	}
 }

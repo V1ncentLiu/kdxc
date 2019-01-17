@@ -13,17 +13,17 @@
         </div>
     </div>
     <div id="loginbox" class="loginbox">
-            <div class="control-group normal_text">忘记密码</div>
+            <div class="control-group normal_text">忘记密码-找回密码</div>
             <el-form :model="resetPwdForm" :rules="rules" ref="resetPwdForm" class="demo-resetPwdForm" >
                 <el-row>
                     <el-form-item  prop="phoneInput">
-                        <el-input v-model="resetPwdForm.phoneInput" placeholder="输入已注册手机号"></el-input>
+                        <el-input v-model="resetPwdForm.phoneInput" maxlength="11"  placeholder="输入已注册手机号"></el-input>
                      </el-form-item>
                 </el-row>
                 <el-row>
                     <el-col :span="14">
                         <el-form-item  prop="codeInput">
-                            <el-input v-model="resetPwdForm.codeInput" placeholder="输入验证码"></el-input>
+                            <el-input v-model="resetPwdForm.codeInput" maxlength="6"  placeholder="输入验证码"></el-input>
                         </el-form-item>
                     </el-col>
                     <el-col :span="10">
@@ -38,12 +38,12 @@
                 </div>
                 <el-row>
                     <el-form-item  prop="pswInput1">
-                        <el-input type="password" v-model="resetPwdForm.pswInput1" placeholder="新密码（8-20位，数字和字母组合）"></el-input>
+                        <el-input type="password" v-model="resetPwdForm.pswInput1" maxlength="30"  placeholder="新密码（6-30位，数字和字母组合）"></el-input>
                     </el-form-item>
                 </el-row>
                 <el-row>
                     <el-form-item  prop="pswInput2">
-                        <el-input type="password" v-model="resetPwdForm.pswInput2" placeholder="确认新密码"></el-input>
+                        <el-input type="password" v-model="resetPwdForm.pswInput2" maxlength="30"  placeholder="确认新密码"></el-input>
                     </el-form-item>
                 </el-row>
             </el-form>
@@ -54,8 +54,14 @@
                 </div>              
                 <!-- 提示语结束 -->
                 <div class="loginBtnBox">
-                    <el-button type="primary" class="loginBtn" @click="submitForm('resetPwdForm')">提&nbsp;&nbsp;交</el-button>
-                    <el-button type="primary" class="loginBtn" @click="toLogin()">取&nbsp;&nbsp;消</el-button>
+                  <el-row :gutter="20">
+                    <el-col :span="14">
+                      <el-button style="width: 100%;" type="primary" @click="submitForm('resetPwdForm')">提&nbsp;&nbsp;交</el-button>
+                    </el-col>
+                    <el-col :span="10">
+                      <el-button style="width: 100%;" @click="toLogin()">取&nbsp;&nbsp;消</el-button>
+                    </el-col>
+                  </el-row>
                 </div>
             </div>
     </div>
@@ -76,19 +82,20 @@ var vm =  new Vue({
             	phoneInput: [
                     { required: true, message: '手机号不能为空', trigger: 'blur' },
                     {  max: 11, message: '最大11个字符', trigger: 'blur' },
+                    {  min: 11, message: '输入手机号格式错误。', trigger: 'blur' },
                     { validator:function(rule,value,callback){                 
                         if(/^1[34578]\d{9}$/.test(value) == false){
-                           callback(new Error("请输入正确格式的手机号"));
+                           callback(new Error("输入手机号格式错误。"));
                         }else{
                            callback();
                         } 
-                        console.log("这是自定义校验");                      
                         callback();                      
                    }, trigger: 'change'}
                 ],
                 pswInput1: [
                   { required: true, message: '密码不能为空', trigger: 'change' },
                   {  max: 30, message: '最大30个字符', trigger: 'blur' },
+                  {  min: 6, message: '最少6个字符', trigger: 'blur' },
                   { validator:function(rule,value,callback){
                  
                     if(/^[A-Za-z0-9]+$/.test(value) == false){
@@ -96,7 +103,6 @@ var vm =  new Vue({
                     }else{
                        callback();
                     } 
-                    console.log("这是自定义校验");
                     callback();
                       
                     }, trigger: 'change'}
@@ -104,6 +110,7 @@ var vm =  new Vue({
                 pswInput2: [
                   { required: true, message: '密码不能为空', trigger: 'change' },
                   {  max: 30, message: '最大30个字符', trigger: 'blur' },
+                  {  min: 6, message: '最少6个字符', trigger: 'blur' },
                   { validator:function(rule,value,callback){
                  
                     if(/^[A-Za-z0-9]+$/.test(value) == false){
@@ -216,7 +223,10 @@ var vm =  new Vue({
         },
         created() {  
             document.body.removeChild(document.getElementById('Loading'));
-            
+            this.resetPwdForm.phoneInput="";
+            this.resetPwdForm.codeInput="";
+            this.resetPwdForm.pswInput1="";
+            this.resetPwdForm.pswInput2="";
         }
     })
 </script>

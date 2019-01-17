@@ -2,33 +2,33 @@
 <html xmlns="http://www.w3.org/1999/xhtml"
     xmlns:th="http://www.thymeleaf.org">
 <head th:include="_header_include::frag(~{::title},~{},~{::style})">
-	<title>添加模块</title>
+	<title>修改模块</title>
     <style>
         .addModule{width: 70%;}
     </style>
 </head>
 <body>
 <div id="addModule" class="addModule mainPadding">  
-    <div class="fs16 marginB20"><div class="titleBorderL">添加模块</div></div>
+    <div class="fs16 marginB20"><div class="titleBorderL">编辑菜单</div></div>
     <el-form :model="form" :rules="rules" ref="form">
         <div class="marginB20 fs16"><em class="redcolor">*</em>必填项</div>
         <div class="borderbox paddingL20 paddingR20 paddingT10">
             <el-row>
                 <el-col :span="12">
                     <el-form-item label="菜单名称：" maxlength="50"  prop="name" :label-width="formLabelWidth">
-                        <el-input v-model="form.name" autocomplete="off"></el-input>
+                        <el-input  maxlength="50"  v-model="form.name" autocomplete="off"></el-input>
                     </el-form-item>
                 </el-col>
                 <el-col :span="12">
-                    <el-form-item label="URL：" maxlength="100"  prop="url" :label-width="formLabelWidth">
-                        <el-input v-model="form.url" autocomplete="off" placeholder="以#,/或者http开头"></el-input>
+                    <el-form-item label="URL："   prop="url" :label-width="formLabelWidth">
+                        <el-input v-model="form.url" maxlength="100" autocomplete="off" placeholder="以#,/或者http开头"></el-input>
                     </el-form-item>
                 </el-col>
             </el-row>
             <el-row>
                 <el-col :span="12">
-                    <el-form-item label="授权名称："  maxlength="50"  prop="authCode" :label-width="formLabelWidth">
-                        <el-input v-model="form.authCode" autocomplete="off"></el-input>
+                    <el-form-item label="授权名称："   prop="authCode" :label-width="formLabelWidth">
+                        <el-input v-model="form.authCode"   maxlength="50" autocomplete="off"></el-input>
                     </el-form-item>
                 </el-col>
                 <el-col :span="12">
@@ -46,7 +46,7 @@
                     </el-form-item>
                 </el-col>
                 <el-col :span="3">
-                    <el-button type="primary" size="medium" @click="dialogFormVisible = true">新增操作</el-button>
+                    <el-button type="primary" size="medium" @click="openOperationInfo">新增操作</el-button>
                 </el-col>
             </el-row>
         </div>
@@ -54,34 +54,34 @@
         <div class="borderbox padding20">
             <el-row>
                 <el-col :span="12">
-                    <el-form-item label="菜单类名：" prop="className"    :label-width="formLabelWidth">
-                        <el-input v-model="form.className"   autocomplete="off"></el-input>
+                    <el-form-item label="菜单类名：" prop="className"   :label-width="formLabelWidth">
+                        <el-input v-model="form.className"   maxlength="50"   autocomplete="off"></el-input>
                     </el-form-item>
                 </el-col>
                 <el-col :span="12">
                     <el-form-item label="图标名称：" prop="iconName" :label-width="formLabelWidth">
-                        <el-input v-model="form.iconName" autocomplete="off"></el-input>
+                        <el-input v-model="form.iconName"  maxlength="50"   autocomplete="off"></el-input>
                     </el-form-item>
                 </el-col>
             </el-row>
            <el-row>
                 <el-col :span="12">
                     <el-form-item label="图标地址：" prop="iconUrl"  :label-width="formLabelWidth">
-                        <el-input v-model="form.iconUrl" autocomplete="off"></el-input>
+                        <el-input v-model="form.iconUrl" maxlength="100"   autocomplete="off"></el-input>
                     </el-form-item>
                 </el-col>
             </el-row>
             <el-row>
                 <el-col :span="24">
                     <el-form-item label="描述："  prop="description" :label-width="formLabelWidth">
-                        <el-input type="textarea" :rows="3"  placeholder="限制200字" v-model="form.description"></el-input>
+                        <el-input type="textarea" :rows="3" maxlength="200"  placeholder="限制200字" v-model="form.description"></el-input>
                     </el-form-item>
                 </el-col>
             </el-row>
         </div>
         <div class="padding20 f-tac">            
             <el-button type="primary" @click="submitForm('form')">提交</el-button>
-            <el-button>取 消</el-button>
+            <el-button  @click="reBackModule">取 消</el-button>
         </div> 
     </el-form>  
     <!-- dialog -->
@@ -129,6 +129,7 @@
  //  var checkOptions = ['增(add)', '删(delete)', '改(edit)', '查(view)'];
     var checkOptions=[[${checkOptions}]];
     var moduleData=[[${dtoJson}]];
+    var type=moduleData.type;
     var addModuleVM= new Vue({
         el: '#addModule',
         data: function() {
@@ -139,7 +140,7 @@
                 formLabelWidth: '120px',
                 rules:{
                    	name: [
-                           { required: true, message: '请输入模块名称', trigger: 'blur' }
+                           { required: true, message: '请输入菜单名称', trigger: 'blur' }
                        ],
                        url: [
                            { required: true, message: '请输入URL', trigger: 'blur' }
@@ -217,6 +218,28 @@
                         param.iconName=submitData.iconName;
                         param.iconUrl=submitData.iconUrl;
                         param.description=submitData.description;
+                        axios.post('/module/moduleManager/queryModuleByParam',submitData)
+                        .then(function (response) { 
+                        	if(null==response){
+            		                 alert("返回异常");
+            		                 return ;
+            		        }
+            		         var resobj= response.data;
+            		          if(null==resobj){
+            		             alert("返回异常");
+            		             return ;
+            		           } 
+            		         if(resobj.code!='0'){
+            		            alert(response.data.message);
+            		            return ;
+            		           }
+            		         
+            		         //校验模块名称是否已存在
+          		              var checkName=response.data.data;
+                            	if(null!=checkName&&checkName.length>0) {
+                          		 alert("模块名称已存在");
+                          	     return ;
+                            }
                         axios.post('/module/moduleManager/updateModuleInfo',param)
                         .then(function (response) {
                             var data =  response.data
@@ -233,13 +256,23 @@
                         })
                         .then(function () {
                           // always executed
-                        });  
+                           });  
+                       });
                         
                     } else {
                         console.log('error submit!!');
                         return false;
                     }
                 });
+            },
+            //取消回退
+            reBackModule(){
+            	 window.location.href="/module/moduleManager/initModuleInfo"; 
+            },
+            openOperationInfo(){
+            	addModuleVM.dialogFormVisible = true
+            	addModuleVM.dialogForm.handleName='';
+            	addModuleVM.dialogForm.handleCode='';
             },
             submitDialogForm(dialogForm) {
                 this.$refs[dialogForm].validate((valid) => {

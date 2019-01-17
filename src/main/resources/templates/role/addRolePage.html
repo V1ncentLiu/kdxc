@@ -94,12 +94,12 @@
             label="角色名称："
             prop="roleName"
             style="width:400px;">
-            <el-input v-model="addRoleValidateForm.roleName" autocomplete="off"></el-input>
+            <el-input v-model="addRoleValidateForm.roleName"  maxlength="30" autocomplete="off"></el-input>
         </el-form-item>
         <el-form-item label="访问IP限制：">
             <el-radio v-model="addRoleValidateForm.visitLimitRadio" label="0">开放访问</el-radio>
             <el-radio v-model="addRoleValidateForm.visitLimitRadio" label="1">限制IP访问</el-radio>
-            <el-button type="primary" size="medium" class="marginL20" @click="dialogFormChooseIP = true">选择访问IP包</el-button>
+            <el-button type="primary" size="medium" class="marginL20" @click="openIpPackDilog">选择访问IP包</el-button>
             <!-- <el-button type="primary" size="medium" class="marginL20" @click="dialogFormSetting = true">设置</el-button> -->
         </el-form-item>
         <div class="fs16 marginB20"><div class="titleBorderL">已选访问IP包</div></div>
@@ -171,7 +171,7 @@
         </ul>
         <el-form-item style="text-align: center;">
             <el-button type="primary" @click="submitFormRole('addRoleValidateForm')">提交</el-button>
-            <el-button>取消</el-button>
+            <el-button  @click="reBackRoleInfo" >取消</el-button>
         </el-form-item>
     </el-form>
     
@@ -273,6 +273,7 @@ var moduleData=[[${moduleData}]];
                 formLabelWidth: '120px',
                 currentPage: 1,//默认第一页,
                 multipleIpSelection:[],
+                feildMenuId:'',
             }             
         },
         methods: {
@@ -286,12 +287,22 @@ var moduleData=[[${moduleData}]];
                     }
                 });
             },
+            openIpPackDilog(){
+            	//打开IP包
+            	 addRoleVM.dialogFormChooseIP = true;
+            	 addRoleVM.chooseIpform.ipPackageName='';
+            	 addRoleVM.chooseIpform.searchHasIp='';
+            },
+            reBackRoleInfo(){
+            	 window.location.href="/role/roleManager/initRoleInfo"; 	
+            },
             submitFormRole(formName) {
                 this.$refs[formName].validate((valid) => {
                     if (valid) {
                     	//处理角色对应操作项数据
                        var submitData=addRoleVM.dataList;
-                    	var  operationArry=[];
+                       var  operationArry=[];
+                       var  menuArry=[];
                     	if(null!=submitData){
                     		//循环一级菜单
                     	  for(var i=0; i<submitData.length;i++)  {
@@ -301,7 +312,9 @@ var moduleData=[[${moduleData}]];
                     			  for(var j=0; j<subList.length;j++)  {
                              		  var checkedCities= subList[j].checkedCities; 
                              		  if(null!=checkedCities){
-                             			 //循环选中操作
+                             			 //二级菜单Id
+                             			 menuArry.push(subList[j].id);
+                             			//循环选中操作
                              			for(var m=0; m<checkedCities.length;m++)  {
                              				var operation={};
                              				 operation.id=checkedCities[m];
@@ -315,19 +328,21 @@ var moduleData=[[${moduleData}]];
                     	//获取菜单的数据列
                     	var  fieldMap=addRoleVM.checkBoxFieldArr;
                     	var fieldSaveArray=[];
+                    	var menuSaveArray=[];
                     	if(null!=fieldMap){
                     	  for(var key in fieldMap)  {
                     		var value=fieldMap[key];
-                    		 if(null!=value){
-                            for (var i=0;i<value.length;i++ ) {
+                    		if(null!=value){
+                    	      menuSaveArray.push(key); 
+                               for (var i=0;i<value.length;i++ ) {
                             	 var field={};
                             	 field.customFieldId=value[i];  
                             	 fieldSaveArray.push(field);	
                             	}
-                              }	   
+                              } 
                     		   
                     		} 
-                    	}
+                    	  }
                          //处理角色对应的Ip包数据
                     	 var ipListTable=addRoleVM.ipListTable;
                          var  param={};
@@ -336,27 +351,49 @@ var moduleData=[[${moduleData}]];
                          param.operations=operationArry;
                          param.ipPackages=ipListTable;
                          param.customFieldMenus=fieldSaveArray;
-                         axios.post('/role/roleManager/saveRoleInfo',param).then(function (response) {
-          		           if(null==response){
-          		                 alert("返回异常");
-          		                 return ;
-          		            }
-          		            var resobj= response.data;
-          		            if(null==resobj){
-          		            	 alert("返回异常");
-          		                 return ;
-          		            } 
-          		            if(resobj.code!='0'){
-          		            	alert(response.data.message);
-          		            	return ;
-          		            }
-          		             window.location.href="/role/roleManager/initRoleInfo"; 
-          		            })
-          		            .catch(function (error) {
-          		              console.log(error);
-          		            })
-          		            .then(function () {
-          		            });	
+                         param.menuIds=menuArry;
+                         param.selectMenuIds=menuSaveArray;
+                         axios.post('/role/roleManager/qeuryRoleByName',param).then(function (response) {
+                        	if(null==response){
+        		                 alert("返回异常");
+        		                 return ;
+        		            }
+        		            var resobj= response.data;
+        		            if(null==resobj){
+        		            	 alert("返回异常");
+        		                 return ;
+        		            } 
+        		            if(resobj.code!='0'){
+        		            	alert(response.data.message);
+        		            	return ;
+        		            }
+        		            //校验角色名称是否已存在
+        		            var checkName=response.data.data;
+                        	if(null!=checkName&&checkName.length>0) {
+                        		alert("角色名称已存在");
+                        	   return ;
+                        	}
+                            axios.post('/role/roleManager/saveRoleInfo',param).then(function (response) {
+                		           if(null==response){
+                		                 alert("返回异常");
+                		                 return ;
+                		            }
+                		            var resobj= response.data;
+                		            if(null==resobj){
+                		            	 alert("返回异常");
+                		                 return ;
+                		            } 
+                		            if(resobj.code!='0'){
+                		            	alert(response.data.message);
+                		            	return ;
+                		            }
+                		             window.location.href="/role/roleManager/initRoleInfo"; 
+                		            }).catch(function (error) {
+                		              console.log(error);
+                		            }).then(function () {
+                		            });	
+                         });
+                         
                     } else {
                         console.log('error submit!!');
                         return false;
@@ -449,11 +486,12 @@ var moduleData=[[${moduleData}]];
 			             addRoleVM.fields=resobj.data;
 			              var  fieldAray= resobj.data;
 			              var fArray=[];
-			              for(var i=0;i<fieldAray.length;i++){
-			            	   fArray.push(fieldAray[i].id);
-			             }
-			             addRoleVM.chooseLimitCheck=fArray;
-			             
+			              if(null!=fieldAray){
+			            	for(var i=0;i<fieldAray.length;i++){
+					             fArray.push(fieldAray[i].id);
+					           }
+					           addRoleVM.chooseLimitCheck=fArray;
+			            	 }
 			            })
 			            .catch(function (error) {
 			              console.log(error);
@@ -534,7 +572,7 @@ var moduleData=[[${moduleData}]];
                         item.isIndeterminate = true;
                         for (var a = 0; a < item.subList.length; a++) {
                             if (item.subList[a].checkAll) {
-                                break
+                                break;
                             } else {
                                 item.isIndeterminate = false;
                                 item.firstCheckAll = false;

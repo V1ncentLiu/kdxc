@@ -43,7 +43,7 @@
         </el-form-item>
 
         <el-form-item>
-            <el-button type="primary" @click="submitForm('annForm')">提交</el-button>
+            <el-button type="primary" @click="submitForm('annForm')" :disabled="isDisabled">提交</el-button>
             <el-button @click="reListPage">取消</el-button>
         </el-form-item>
     </el-form>
@@ -75,6 +75,7 @@
     var vm = new Vue({
         el:'#form',
         data:{
+            isDisabled:false,
             expandedKeys:[],
             dataTree:[],
             OraTreeMuliCheckDialog: false,
@@ -82,7 +83,7 @@
             multipleSelectionName:[],
             annForm: {
                 title: "",
-                type: ["1","2"],
+                type: ["1"],
                 content:"",
                 radio:"0",
                 org:""
@@ -173,6 +174,7 @@
                 }
                 this.$refs[formName].validate((valid) => {
                     if (valid) {
+                        vm.isDisabled = true;
                         var formData = vm.annForm;
                         var param={};
                         param.title = formData.title;
@@ -183,7 +185,8 @@
                             param.orgId = 1;
                             param.orgids = this.multipleSelection;
                         }
-
+                        console.log(formData.type.length)
+                        console.log(formData.type)
                         if(formData.type.length == 2){
                             param.type = 0;
                         }else{
@@ -192,6 +195,8 @@
 
                         console.log("=---P----_---P----=")
                         console.log(param)
+
+
                         axios.post("/ann/publishAnn", param)
                             .then(function (response) {
                                 if(response.data.code==0){

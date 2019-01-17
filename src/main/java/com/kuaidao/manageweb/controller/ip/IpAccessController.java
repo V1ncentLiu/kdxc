@@ -17,8 +17,6 @@ import com.kuaidao.manageweb.feign.ip.IpAccessFeignClient;
 import com.kuaidao.sys.dto.ip.IpAccessManagerQueryDTO;
 import com.kuaidao.sys.dto.ip.IpPackageInfoDTO;
 import com.kuaidao.sys.dto.ip.IpRepositoryInfoDTO;
-import com.kuaidao.sys.dto.role.RoleInfoDTO;
-import com.kuaidao.sys.dto.role.RoleQueryDTO;
 
 @Controller
 @RequestMapping("/ip/ipAccess")
@@ -114,6 +112,18 @@ public class IpAccessController {
 		return ipAccessFeignClient.querytAllPackageList();
 	}
 
-	 
+	/**
+	 * 查询角色列表
+	 * 
+	 * @param dto
+	 * @param request
+	 * @param response
+	 * @return
+	 */
+	@RequestMapping("/queryIpPackageByParam")
+	@ResponseBody
+	public JSONResult<List<IpPackageInfoDTO>> queryIpPackageByParam(@RequestBody IpAccessManagerQueryDTO dto) {
+		return ipAccessFeignClient.queryIpPackageByParam(dto);
+	} 
 
 }
