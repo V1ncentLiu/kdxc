@@ -387,9 +387,7 @@ var ipManagerVM = new Vue({
     				var param={};
     				param.deleteIds=ids;
     				axios.post('/ip/ipAccess/deleteIpRepository',param).then(function (response) {
-    				ipManagerVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
-    						ipManagerVM.refreshIpTableData(response);
-                  	   }});
+    					ipManagerVM.refreshIpTableData(response);	
     				});
     			}else{
   				  this.$message({
@@ -420,9 +418,7 @@ var ipManagerVM = new Vue({
 				var param={};
 				param.deleteIds=ids;
 				axios.post('/ip/ipAccess/deleteIppackage',param).then(function (response) {
-					ipManagerVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
-						ipManagerVM.queryPackageDataList(); 
-	        	    }});
+					ipManagerVM.queryPackageDataList(); 
 				});
 			}else{
 				  this.$message({
@@ -472,54 +468,6 @@ var ipManagerVM = new Vue({
 			ipManagerVM.addPackageIPSelectVisible=false;
 		},
 		saveIpPackageData(formName){
-			//保存IP包数据	 
-			var savepackageIp= ipManagerVM.packAddIpTable; 
-			var packageName= ipManagerVM.ipPackageAddForm.name; 
-			var param={};
-			param.name=packageName;
-			param.ipRepositorys=savepackageIp;
-            axios.post('/ip/ipAccess/queryIpPackageByParam',param)
-            .then(function (response) { 
-              if(null==response){
-	                 alert("返回异常");
-	                 return ;
-	               }
-	               var resobj= response.data;
-	               if(null==resobj){
-	            	   alert("返回异常");
-	                   return ;
-	               } 
-	               if(resobj.code!='0'){
-	            	alert(response.data.message);
-	            	return ;
-	                }
-	              //校验模块名称是否已存在
-	              var checkName=response.data.data;
-             	if(null!=checkName&&checkName.length>0) {
-           		  alert("IP包名称名称已存在");
-           	     return ;
-             	}
-			   axios.post('/ip/ipAccess/saveIpPackage',param).then(function (response) {
-				if(null==response){
-					alert("返回异常");
-					return ;
-				}
-				var resobj= response.data;
-				if(null==resobj){
-					alert("返回异常");
-					return ;
-				} 
-				if(resobj.code!='0'){
-					alert(response.data.message);
-					return ;
-				}
-				ipManagerVM.addIpPackageVisible=false;
-				ipManagerVM.addPackageIPSelectVisible=false;
-				ipManagerVM.queryPackageDataList(); 
-			//  });
-			// }
-			  });
-            });
 		    this.$refs[formName].validate((valid) => {
                 if (valid) {
                     //保存IP包数据	 
