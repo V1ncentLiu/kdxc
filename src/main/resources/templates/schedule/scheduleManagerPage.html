@@ -18,17 +18,11 @@
     		<shiro:hasPermission name="sys:scheduleManager:add">
 		        <el-button type="primary" @click="toAddUser">增加任务</el-button>
 		    </shiro:hasPermission>
-    		<shiro:hasPermission name="sys:scheduleManager:delete">
-		        <el-button type="primary" @click="deleteSchedule">删除任务</el-button>
-		    </shiro:hasPermission>
-    		<shiro:hasPermission name="sys:scheduleManager:edit">
-		        <el-button type="primary"  @click="toUpdateUser">修改任务</el-button>
-		    </shiro:hasPermission>
 	</el-row>
     <el-row>
         <el-table  ref="multipleTable" tooltip-effect="dark" @selection-change="handleSelectionChange"
             style="width: 100%"  :data="dataTable" >
-            <el-table-column align="center" type="selection" width="55"></el-table-column>
+            <!-- <el-table-column align="center" type="selection" width="55"></el-table-column> -->
             <!-- <el-table-column prop="date" label="全选" width="180"></el-table-column> -->
             <el-table-column align="center" prop="jobName" label="任务名称"></el-table-column>
             <el-table-column align="center" prop="groupId" label="任务组ID"></el-table-column>
@@ -41,17 +35,25 @@
                 <template slot-scope="scope">
 	                <div v-if="scope.row.jobState == 1  || scope.row.jobState == 0">
 		            	<shiro:hasPermission name="sys:scheduleManager:edit">
-	                    <el-button  @click="updateStatus(scope.row.jobId,1,'停止')" type="text"  size="small">
+	                    <el-button  @click="updateStatus(scope.row.jobId,scope.row.jobName,1,'停止')" style="color:red" type="text"  size="small">
 	                     		   停止
 	                    </el-button>
 		                </shiro:hasPermission>
 					</div>
 	                <div v-else-if="scope.row.jobState == 2">
             			<shiro:hasPermission name="sys:scheduleManager:edit">
-	                    <el-button @click="updateStatus(scope.row.jobId,2,'启动')"  type="text"  size="small">
-	                     		   启动
-	                    </el-button>
+		                    <el-button @click="updateStatus(scope.row.jobId,scope.row.jobName,2,'启动')" style="color:green"  type="text"  size="small">
+		                     		   启动
+		                    </el-button>
+		                    <el-button @click="toUpdateUser(scope.row.jobId)"  type="text"  size="small">
+		                     		   修改
+		                    </el-button>
 		                </shiro:hasPermission>
+		                <shiro:hasPermission name="sys:scheduleManager:delete">
+		                    <el-button @click="updateStatus(scope.row.jobId,scope.row.jobName,3,'删除')"  type="text"  size="small">
+		                     		   删除
+		                    </el-button>
+	                    </shiro:hasPermission>
 					</div>
                 </template>
             </el-table-column>
@@ -107,75 +109,40 @@ var userVM = new Vue({
             	  document.location.href='/schedule/scheduleManager/initCreateSchedule';
               },
               //跳转修改任务页
-              toUpdateUser() {
-            	  var rows = this.multipleSelection;
-                  if(rows.length!=1){
-                      this.$message({
-                         message: '请选择一条数据进行修改',
-                         type: 'warning'
-                       });
-                      return;
-                  }
-            	  document.location.href='/schedule/scheduleManager/initCreateSchedule?id='+rows[0].jobId;
+              toUpdateUser(id) {
+            	  document.location.href='/schedule/scheduleManager/initCreateSchedule?id='+id;
               },
               //修改状态
-              updateStatus(id,status,msg) {
-            	  var param = {};
-            	  param.jobId=id;
-            	  param.type=status;
-            	  axios.post('/schedule/scheduleManager/setStatus', param)
-                  .then(function (response) {
-                        var result =  response.data;
-                        if(result.code=="0"){
-                        	userVM.$message.success(msg+"成功");
-                        	userVM.searchTable();
-                        }else{
-                        	userVM.$message.error(msg+"失败");
-                        }
-                  })
-                  .catch(function (error) {
-                       console.log(error);
-                  });
-              },
-              //删除任务
-              deleteSchedule() {
-                	  var rows = this.multipleSelection;
-                      if(rows.length!=1){
-                          this.$message({
-                             message: '请选择一条数据进行删除',
-                             type: 'warning'
-                           });
-                          return;
-                      }
-            	  this.$confirm('确定要删除【'+rows[0].jobName+'】，任务吗？', '提示', {
+              updateStatus(id,name,status,msg) {
+            	  this.$confirm('确定要'+msg+'【'+name+'】任务吗？', '提示', {
                       confirmButtonText: '确定',
                       cancelButtonText: '取消',
                       type: 'warning'
                   }).then(() => {
                 	  var param = {};
-                	  param.jobId=rows[0].jobId;
-                	  param.type=3;
+                	  param.jobId=id;
+                	  param.type=status;
                 	  axios.post('/schedule/scheduleManager/setStatus', param)
                       .then(function (response) {
                             var result =  response.data;
                             if(result.code=="0"){
-                            	userVM.$message.success("删除成功");
+                            	userVM.$message.success(msg+"成功");
                             	userVM.searchTable();
                             }else{
-                            	userVM.$message.error(result.msg);
+                            	userVM.$message.error(msg+"失败");
                             }
                       })
                       .catch(function (error) {
                            console.log(error);
-                      }); 
+                      });
                    
                   }).catch(() => {
                       this.$message({
                           type: 'info',
-                          message: '已取消删除'
+                          message: '已取消'+msg
                       });          
                   });
-            	  
+            	 
               },
               //状态转换方法
               transformStatus(row, column, cellValue, index) {

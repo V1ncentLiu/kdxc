@@ -62,7 +62,8 @@ public class DictionaryController {
     /**
      *  web端进行的是非业务逻辑。
      */
-//    @RequiresPermissions("dictionary:add")
+    @RequiresPermissions("dictionary:add")
+    @LogRecord(description = "字典新增",operationType = LogRecord.OperationType.INSERT,menuName = MenuEnum.DICTIONARY_MANAGEMENT)
     @RequestMapping("/saveDictionary")
     @ResponseBody
     public JSONResult saveDictionary(@Valid @RequestBody DictionaryAddAndUpdateDTO dictionaryDTO  , BindingResult result){

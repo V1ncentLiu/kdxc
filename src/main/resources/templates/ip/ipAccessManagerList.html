@@ -198,6 +198,12 @@ var ipManagerVM = new Vue({
                 {  min: 1, message: '最少1个字符', trigger: 'blur' }
 	    	]
         },
+    	ipAddForm:{
+			ipAddress:'',
+			ipAddress2:'',
+			ipAddress3:'',
+			ipAddress4:''
+		},
 		packpager:{
 			total: 0,
 			currentPage: 1,
@@ -209,12 +215,6 @@ var ipManagerVM = new Vue({
 		ippackageForm:{
 			ipPackageName:'',
 			ipAddress:''
-		},
-		ipAddForm:{
-			ipAddress:'',
-			ipAddress2:'',
-			ipAddress3:'',
-			ipAddress4:''
 		},
 		ipPackageAddForm:{
 			name:''
@@ -241,7 +241,7 @@ var ipManagerVM = new Vue({
 		},
 		 openIpAddData(){
 		   ipManagerVM.dialogIpVisible =true;	
-		   ipAddForm.ipAddress='';
+		   ipManagerVM.ipAddForm.ipAddress='';
 		},
 		 deleteRow(index, rows) {
             rows.splice(index, 1);
@@ -354,7 +354,11 @@ var ipManagerVM = new Vue({
 			this.$refs[formName].validate((valid) => {
                 if (valid) {
                     var param={};
-					param.ipAddress=ipManagerVM.ipAddForm.ipAddress;
+					 var ip1=ipManagerVM.ipAddForm.ipAddress;
+					 var ip2=ipManagerVM.ipAddForm.ipAddress2;
+					 var ip3=ipManagerVM.ipAddForm.ipAddress3;
+					 var ip4=ipManagerVM.ipAddForm.ipAddress4;
+					 param.ipAddress=ip1+"."+ip2+"."+ip3+"."+ip4;
 					axios.post('/ip/ipAccess/saveIpRepository',param).then(function (response) {
 						ipManagerVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
 							ipManagerVM.refreshIpTableData(response);
