@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml"
     xmlns:th="http://www.thymeleaf.org">
 <head th:include="_header_include::frag(~{::title},~{},~{::style})">
-	<title>添加角色</title>
+	<title>修改角色</title>
     <style>
         .role-table {
             border: 1px solid #e0e0e0;
@@ -88,7 +88,7 @@
         <el-breadcrumb-item>系统管理</el-breadcrumb-item>
         <el-breadcrumb-item><a href="JavaScript:void(0)" data-url="roleManagePage.html">角色管理</a></el-breadcrumb-item>
     </el-breadcrumb>
-    <div class="fs16 marginB20"><div class="titleBorderL">添加角色</div></div>
+    <div class="fs16 marginB20"><div class="titleBorderL">修改角色</div></div>
     <el-form :model="addRoleValidateForm" :rules="rules"   maxlength="30" ref="addRoleValidateForm" label-width="100px" class="demo-ruleForm">
         <el-form-item
             label="角色名称："
@@ -97,9 +97,11 @@
             <el-input v-model="addRoleValidateForm.roleName" autocomplete="off"></el-input>
         </el-form-item>
         <el-form-item label="访问IP限制：">
-            <el-radio v-model="addRoleValidateForm.visitLimitRadio" label="0">开放访问</el-radio>
-            <el-radio v-model="addRoleValidateForm.visitLimitRadio" label="1">限制IP访问</el-radio>
-            <el-button type="primary" size="medium" class="marginL20" @click="openIpPackDilog">选择访问IP包</el-button>
+            <el-radio-group v-model="addRoleValidateForm.visitLimitRadio" @change="visitLimitRadioChange">
+                <el-radio label="0">开放访问</el-radio>
+                <el-radio label="1">限制IP访问</el-radio>
+            </el-radio-group>
+            <el-button type="primary" size="medium" class="marginL20" @click="openIpPackDilog" :disabled="isDisabled">选择访问IP包</el-button>
             <!-- <el-button type="primary" size="medium" class="marginL20" @click="dialogFormSetting = true">设置</el-button> -->
         </el-form-item>
         <div class="fs16 marginB20"><div class="titleBorderL">已选访问IP包</div></div>
@@ -235,6 +237,7 @@
          el: '#addRole',
          data: function() {
             return {
+                isDisabled: false,
                 chooseLimitCheck: [],//默认选中
                 fields: [],
                 dataList:moduleData,
@@ -671,6 +674,13 @@
                 }
 
                 item.checkedCities = event.target.checked ? arr : [];
+            },
+            visitLimitRadioChange(value) {
+                if(value==1){
+                    this.isDisabled=true
+                }else{
+                    this.isDisabled=false
+                }
             }
         }
     })
