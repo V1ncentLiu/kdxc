@@ -263,6 +263,10 @@ var fieldMenuVM = new Vue({
             },
             closeAddCustomFieldDialog(){//关闭添加自定义字段dialog
           	  this.$refs['customMenuForm'].resetFields();
+            },
+            addFieldMenu(){//点击弹出新增dialog
+            	this.form.id='';
+            	this.dialogFormVisible = true;
             }
             
             
