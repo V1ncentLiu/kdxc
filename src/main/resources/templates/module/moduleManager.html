@@ -45,7 +45,7 @@ button a {
 		<div class="leftBox">
 			<div class="leftTitle fs16">菜单列表</div>
 			<el-tree :data="dataTree" node-key="id"
-				:default-expanded-keys="[1,2,3]" ref="tree"
+				:default-expanded-keys="expandedKeys" ref="tree"
 				highlight-current
                      @node-click="clickModuleNode"
 				class="leftTree"> </el-tree>
@@ -95,6 +95,7 @@ for(var i=0;i<moduleData.length;i++){
         data: function() {
             return {
                 dataTree:moduleData,
+                expandedKeys:expandedKeys,
                 dataTable: [],
                 multipleSelection: [],
                 dialogFormVisible: false,
@@ -191,7 +192,14 @@ for(var i=0;i<moduleData.length;i++){
              },
             deleteFun() {
                var deleInfo=moduleVM.multipleSelection;
- 	            var moduleName="";
+ 	           if(deleInfo.length <1){
+                   this.$message({
+                      message: '请选择删除数据',
+                      type: 'warning'
+                    });
+                   return;
+               }
+ 	          var moduleName="";
  	           if(null!=deleInfo){
  	 		       for ( var i = 0; i <deleInfo.length; i++){
  	 		    	  moduleName+="【"+deleInfo[i].name+"】";
@@ -219,7 +227,6 @@ for(var i=0;i<moduleData.length;i++){
                                orgVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
                                  moduleVM.getQuery();
                         	  }});
-                            	
                             }else{
                             	console.error(data);
                             }
