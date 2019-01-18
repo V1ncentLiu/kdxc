@@ -83,8 +83,9 @@ public class UserController {
         String passwordExpires = getSysSetting(SysConstant.PASSWORD_EXPIRES);
         String reminderTime = getSysSetting(SysConstant.REMINDER_TIME);
         request.setAttribute("passwordExpires", passwordExpires);
-
-        request.setAttribute("reminderTime", reminderTime.split(","));
+        if (reminderTime != null) {
+            request.setAttribute("reminderTime", reminderTime.split(","));
+        }
 
         return "user/userManagePage";
     }

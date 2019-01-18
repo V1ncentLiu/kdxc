@@ -104,7 +104,7 @@
                     rowIds.push(rows[i].id)
                 }
                 var param  = {idList:rowIds}
-                axios.post('/organization/organization/queryOrgByParentId',param)
+                axios.post('/organization/organization/queryOrgStaffByParentId',param)
                 .then(function (response) {
                     var data =  response.data;
                     var msgInfo = "";
@@ -382,7 +382,7 @@
               
         },
         created(){
-        	
+        	this.clickOrgNode(this.dataTree[0],null,null);
         	
         }//created方法 结束
     })

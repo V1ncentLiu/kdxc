@@ -19,6 +19,8 @@ import com.kuaidao.common.constant.SystemCodeConstant;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.common.entity.TreeData;
+import com.kuaidao.manageweb.config.LogRecord;
+import com.kuaidao.manageweb.constant.MenuEnum;
 import com.kuaidao.manageweb.feign.module.ModuleManagerFeignClient;
 import com.kuaidao.sys.dto.module.ModuleInfoDTO;
 import com.kuaidao.sys.dto.module.ModuleQueryDTO;
@@ -89,6 +91,7 @@ public class ModuleManagerController {
 	 * @return
 	 */
 	@PostMapping("/saveModuleInfo")
+	@LogRecord(description = "菜单新增",operationType = LogRecord.OperationType.INSERT,menuName = MenuEnum.AUTHORITY_MANAGEMENT)
 	@ResponseBody
 	public JSONResult<String> saveModuleInfo(@RequestBody ModuleInfoDTO dto) {
 		dto.setSystemCode(SystemCodeConstant.HUI_JU);
@@ -105,6 +108,7 @@ public class ModuleManagerController {
 	 * @return
 	 */
 	@PostMapping("/updateModuleInfo")
+	@LogRecord(description = "菜单修改",operationType = LogRecord.OperationType.UPDATE,menuName = MenuEnum.AUTHORITY_MANAGEMENT)
 	@ResponseBody
 	public JSONResult<String> updateModuleInfo(@RequestBody ModuleInfoDTO dto) {
 		JSONResult<String> pageJson = moduleManagerFeignClient.updateModuleInfo(dto);
@@ -120,6 +124,7 @@ public class ModuleManagerController {
 	 * @return
 	 */
 	@PostMapping("/deleteModuleInfo")
+	@LogRecord(description = "菜单删除",operationType = LogRecord.OperationType.DELETE,menuName = MenuEnum.AUTHORITY_MANAGEMENT)
 	@ResponseBody
 	public JSONResult<String> deleteModuleInfo(@RequestBody ModuleInfoDTO dto) {
 		JSONResult<String> pageJson = moduleManagerFeignClient.deleteModuleInfo(dto);

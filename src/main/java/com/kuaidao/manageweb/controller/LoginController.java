@@ -128,7 +128,10 @@ public class LoginController {
      * @return
      */
     @RequestMapping("/login")
-    public String login() {
+    public String login(RedirectAttributes redirectAttributes) {
+        Object isShowLogoutBox =
+                SecurityUtils.getSubject().getSession().getAttribute("isShowLogoutBox");
+        redirectAttributes.addAttribute("isShowLogoutBox", isShowLogoutBox);
         return "login/login";
     }
 
@@ -549,7 +552,6 @@ public class LoginController {
     public String logout(String type, Model model, HttpServletRequest request,
             RedirectAttributes redirectAttributes) throws Exception {
         Subject subject = SecurityUtils.getSubject();
-        Object attribute = SecurityUtils.getSubject().getSession().getAttribute("user");
         UserInfoDTO user = (UserInfoDTO) subject.getSession().getAttribute("user");
         if (subject.isAuthenticated()) {
             subject.logout();
@@ -561,7 +563,7 @@ public class LoginController {
             update.setIsLogin(Constants.IS_LOGIN_DOWN);
             userInfoFeignClient.update(update);
         } else {
-            redirectAttributes.addFlashAttribute("isShowLogoutBox", type);
+            subject.getSession().setAttribute("isShowLogoutBox", type);
         }
 
         return "redirect:/login";
