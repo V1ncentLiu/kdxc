@@ -202,7 +202,7 @@ public class OrganizationController {
     }
     
     /**
-     * 查询组织机构下，用户信息
+     * 查询组织机构下，用户信息    分页
      * @param reqDTO
      * @param result
      * @return
@@ -215,6 +215,17 @@ public class OrganizationController {
             return CommonUtil.validateParam(result);
         }
         return organizationFeignClient.listOrgUserInfo(reqDTO);
+    }
+    
+    /**
+     *   查询组织机构下是否有员工 (包括下级的下级)
+     * @param idEntity
+     * @return
+     */
+    @PostMapping("/queryOrgStaffByParentId")
+    @ResponseBody
+    public JSONResult<Boolean> queryOrgStaffByParentId(@RequestBody IdListReq idListReq) {
+        return organizationFeignClient.queryOrgStaffByParentId(idListReq);
     }
 
 }
