@@ -15,27 +15,27 @@
     </el-breadcrumb>
     <el-row class="marginB10">
         <el-col :xs="12" :sm="16" :md="16" :lg="18" :xl="12">
-            <el-button type="primary"><a href="/role/roleManager/addRolePre"><i class="el-icon-plus"></i> 添加</a></el-button>
-            <el-button type="primary" >修改</el-button>
-            <el-button type="primary" >删除</el-button>
-            <el-button type="primary" >导入</el-button>
+            <el-button type="primary"><a href="/invitearea/addInviteArea"><i class="el-icon-plus"></i> 添加</a></el-button>
+            <el-button type="primary" @click="updateButton">修改</el-button>
+            <el-button type="primary" @click="deleButton">删除</el-button>
+            <el-button type="primary" @click="exportButton">导入</el-button>
         </el-col>
 
         <el-col :xs="12" :sm="8" :md="8" :lg="6" :xl="12">
             <el-row class="marginB10">
               
 				<div class="block">
-					<el-select v-model="queryType" placeholder="请选择商务小组">
+					<el-select v-model="businessGroupId" placeholder="请选择商务小组">
 					    <el-option
-					      v-for="item in options"
+					      v-for="item in businessGroups"
 					      :key="item.value"
 					      :label="item.label"
 					      :value="item.value">
 					    </el-option>
   					</el-select>
-  					<el-select v-model="queryType" placeholder="请选择电销组">
+  					<el-select v-model="telemarketingTeamId" placeholder="请选择电销组">
 					    <el-option
-					      v-for="item in options"
+					      v-for="item in telemarketingTeams"
 					      :key="item.value"
 					      :label="item.label"
 					      :value="item.value">
@@ -65,7 +65,13 @@
             </el-row>
       
     </el-row>
-  
+  <el-dialog :title="addOrModifyDialogTitle" :visible.sync="dialogFormVisible" @close="closeAddCustomFieldDialog">
+       
+        <div slot="footer" class="dialog-footer">
+            <el-button @click="cancelForm('customMenuForm')">取 消</el-button>
+            <el-button type="primary" @click="saveFieldMenu('customMenuForm')">确 定</el-button>
+        </div>
+    </el-dialog>
 </div>
 </body>
 <!-- import common js-->
@@ -77,6 +83,33 @@
    var orgVM =  new Vue({
         el: '#organizationManage',
         data: {
+        	
+        	
+        	telemarketingTeamId:"",
+        	businessGroupId:"",
+        	addOrModifyDialogTitle:"",
+        	businessGroups:[{
+            	value: '1',
+                label: '登陆名称'	
+            	},
+            	{
+               	value: '2',
+                label: '姓名'	
+               	}
+            ],
+            telemarketingTeams:[{
+            	value: '1',
+                label: '登陆名称'	
+            	},
+            	{
+               	value: '2',
+                label: '姓名'	
+               	}
+            ],
+        	
+        	
+        	
+        	
             	activeName: 'first',
             	beginTime:"",
             	endTime:"",
@@ -87,7 +120,7 @@
                 dataTable:[],
                 multipleSelection: [],
                 dialogFormVisible: false,
-                options: [{
+                businessGroups: [{
                 	value: '1',
                     label: '登陆名称'	
                 	},
@@ -142,6 +175,51 @@
                 }else{
                 	window.location.href="/log/log/operationLog";
                 }
+              },
+              updateButton(){
+            	  //修改菜单数据	
+              	var rows = this.multipleSelection;
+                  if(rows.length!=1){
+                      this.$message({
+                         message: '请选择一条数据进行修改',
+                         type: 'warning'
+                       });
+                      return;
+                  }
+              },
+              deleButton(){
+            	  var rows = this.multipleSelection;
+                  if(rows.length!=1){
+                      this.$message({
+                         message: '请选择一条数据进行修改',
+                         type: 'warning'
+                       });
+                      return;
+                  }
+                  axios.post('/log/log/queryLogDataList',param).then(function (response) {
+                  	  console.log(response);
+                              if(null===response||response.data==null||response.data.code!='0'){
+                          	  alert(response.data.message);
+                          	  return ;
+                             }else{
+                            	 window.location.href="/invitearea/inviteAreaList"; 
+                             } 
+                  })
+            	  
+              },
+              exportButton(){
+            	  window.location.href="/module/moduleManager/exportInviteArea?moduleId="+rows[0].id; 
+              },
+              showExport(){//点击弹出新增dialog
+              	this.dialogFormVisible = true;
+              	this.addOrModifyDialogTitle="添加菜单页面";
+              },
+              closeAddCustomFieldDialog(){//关闭添加自定义字段dialog
+              	  this.$refs['customMenuForm'].resetFields();
+              },
+              cancelForm(formName) {
+                  this.$refs[formName].resetFields();
+              	this.dialogFormVisible = false;
               },
         },
         created(){
