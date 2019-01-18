@@ -381,6 +381,9 @@
               
               
         },
+       mounted(){
+           document.getElementById('organizationManage').style.display = 'block';
+       },
         created(){
         	this.clickOrgNode(this.dataTree[0],null,null);
         	

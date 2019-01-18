@@ -21,12 +21,26 @@ import com.kuaidao.sys.dto.ip.IpRepositoryInfoDTO;
 
 public interface IpAccessFeignClient {
 
+	/**
+	 * IP库分页查询
+	 * @param queryDTO
+	 * @return
+	 */
 	@RequestMapping(method = RequestMethod.POST, value = "/querytIpPageList")
 	public JSONResult<PageBean<IpRepositoryInfoDTO>> querytIpPageList(@RequestBody IpAccessManagerQueryDTO queryDTO);
 
+	/**
+	 * IP包分页查询
+	 * @param dto
+	 * @return
+	 */
 	@RequestMapping(method = RequestMethod.POST, value = "/querytPackagePageList")
 	public JSONResult<PageBean<IpPackageInfoDTO>> querytPackagePageList(@RequestBody IpAccessManagerQueryDTO dto);
 
+	/**
+	 * 查询所有IP包供角色使用
+	 * @return
+	 */
 	@RequestMapping(method = RequestMethod.POST, value = "/querytAllPackageList")
 	public JSONResult<PageBean<IpPackageInfoDTO>> querytAllPackageList();
 
@@ -45,8 +59,31 @@ public interface IpAccessFeignClient {
 	@RequestMapping(method = RequestMethod.POST, value = "/deleteIppackage")
 	public JSONResult<String> deleteIppackage(@RequestBody IpPackageInfoDTO dto);
 
+	/**
+	 * IP包重名判断
+	 * @param dto
+	 * @return
+	 */
 	@RequestMapping(method = RequestMethod.POST, value = "/queryIpPackageByParam")
 	public JSONResult<List<IpPackageInfoDTO>> queryIpPackageByParam(IpAccessManagerQueryDTO dto);
+
+	/**
+	 * 删除IP时判断是否有IP包对应
+	 * 
+	 * @param dto
+	 * @return
+	 */
+	@RequestMapping(method = RequestMethod.POST, value = "/findListByRepository")
+	public JSONResult<List<IpRepositoryInfoDTO>> findListByRepository(IpAccessManagerQueryDTO dto);
+
+	/**
+	 * 修改IP包数据查询
+	 * 
+	 * @param dto
+	 * @return
+	 */
+	@RequestMapping(method = RequestMethod.POST, value = "/findPackageById")
+	public JSONResult<IpPackageInfoDTO> findPackageById(@RequestBody IpAccessManagerQueryDTO dto);
 
 	@Component
 	static class HystrixClientFallback implements IpAccessFeignClient {
@@ -115,6 +152,21 @@ public interface IpAccessFeignClient {
 
 			return fallBackError("查询所有IP包数据失败");
 		}
+
+		@SuppressWarnings("unchecked")
+		@Override
+		public JSONResult<List<IpRepositoryInfoDTO>> findListByRepository(IpAccessManagerQueryDTO dto) {
+			// TODO Auto-generated method stub
+			return fallBackError("查询所有IP库数据失败");
+		}
+
+		@SuppressWarnings("unchecked")
+		@Override
+		public JSONResult<IpPackageInfoDTO> findPackageById(IpAccessManagerQueryDTO dto) {
+			// TODO Auto-generated method stub
+			return fallBackError("查询所有IP包数据失败");
+		}
+		
 
 	}
 }
