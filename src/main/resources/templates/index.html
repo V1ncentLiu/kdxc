@@ -18,7 +18,7 @@
         <el-header class="elHeader">        
             <div class="logoimg f-fl">
                 <!-- <img src="../static/images/logoimg.png" alt=""> -->
-                <img th:href="@{/images/logoimg.png}" alt="">
+                <img th:src="@{/images/logoimg.png}" alt="">
             </div>   
             <div class="f-fr">
                 <el-button type="primary" class="messageBtn f-fl" @click="openMessageCenter">消息中心<em class="redcolor" id="messageCount"></em></el-button>
@@ -71,7 +71,7 @@
             </el-aside>
             <!-- 右侧内容区 -->
             <el-main class="elMain">
-                <iframe  id="iframeBox" ref="iframeBox" name='iframe' frameborder="0" width="100%" height="100%">
+                <iframe  :src="initUrl" id="iframeBox" ref="iframeBox" name='iframe' frameborder="0" width="100%" height="100%">
                     <p>Your browser does not support iframes.</p>
                 </iframe>
             </el-main>
@@ -79,16 +79,16 @@
     </el-container>
     
      <!-- 修改密码 dialog start -->
-     <el-dialog title="修改密码" :visible.sync="dialogModifyPwdVisible">
+     <el-dialog title="修改密码" :visible.sync="dialogModifyPwdVisible" @close="closeModifyPwdDialog">
         <el-form :model="modifyForm" ref="modifyForm" :rules="modifyFormRules">
             <el-form-item label="当前密码：" :label-width="formLabelWidth" prop="oldPassword">
-                <el-input v-model="modifyForm.oldPassword" autocomplete="off" minlength="6" maxlength="30"></el-input>
+                <el-input type="password" v-model="modifyForm.oldPassword" autocomplete="off" maxlength="30"></el-input>
             </el-form-item>
             <el-form-item label="新密码：" :label-width="formLabelWidth" prop="newPassword">
-                <el-input v-model="modifyForm.newPassword" autocomplete="off"  maxlength="30"></el-input>
+                <el-input  type="password" v-model="modifyForm.newPassword" autocomplete="off"  maxlength="30"></el-input>
             </el-form-item>
             <el-form-item label="确认密码：" :label-width="formLabelWidth" prop="confirmPwd">
-                <el-input v-model="modifyForm.confirmPwd" autocomplete="off"  maxlength="30"></el-input>
+                <el-input type="password" v-model="modifyForm.confirmPwd" autocomplete="off"  maxlength="30"></el-input>
             </el-form-item>
         </el-form>
         <div slot="footer" class="dialog-footer" center="true">
@@ -160,6 +160,7 @@
     var menuList=[[${menuList}]];
     var user=[[${user}]];
     var isUpdatePassword=[[${isUpdatePassword}]];
+    var showMenuUrl = menuList[0].subList[0].url;//进首页默认展示页面
 </script>
 <style>
     .el-dialog__footer {

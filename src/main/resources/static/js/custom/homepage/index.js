@@ -26,16 +26,17 @@ var homePageVM=new Vue({
 		       ,
 		    user:user,//用戶信息
 		    defaultOpeneds:["0"],//默认打开菜单索引
+		    initUrl:showMenuUrl,//默认展示页面
 		   	modifyFormRules:{
 		   		oldPassword:[
 		   		    { required: true, message: '当前密码不能为空',trigger:'blur'},
-		   		    { min: 6, max: 30, message: '长度在 6 到 30个字符', trigger: 'blur' },
-		   		    {pattern:'/^[0-9a-zA-Z]*$/',message:'只允许输入字母/数字',trigger:'blur'}	
+		   		    { min: 6, max: 30, message: '长度在 6 到 30个字符' },
+		   		    {pattern:/^[0-9a-zA-Z]*$/,message:'只允许输入字母/数字',trigger:'blur'}	
 		   		  ],
 		   		newPassword:[
 		   			{ required: true, message: '新密码不能为空',trigger:'blur'},
 		   		    { min: 6, max: 30, message: '长度在 6 到 30个字符', trigger: 'blur' },
-		   		    {pattern:'/^[0-9a-zA-Z]*$/',message:'只允许输入字母/数字',trigger:'blur'}	
+		   		    {pattern:/^[0-9a-zA-Z]*$/,message:'只允许输入字母/数字',trigger:'blur'}	
 		   		 ],
 		   		 confirmPwd:[
 		   			{ required: true, message: '确认密码不能为空',trigger:'blur'},
@@ -74,12 +75,14 @@ var homePageVM=new Vue({
 	        }
 	     },
 	     modifyPwd(){//修改密码
+	    	 //重置表单
 	    	 this.dialogModifyPwdVisible=true;
+	    
 	     },
 	     logout(){
 	    	 this.dialogLogoutVisible=true;
 	     },
-	     cancelModifyForm(formName){
+	     cancelModifyForm(formName){//取消修改密码
          	this.$refs[formName].resetFields();
          	 homePageVM.dialogModifyPwdVisible = false;
          },
@@ -92,7 +95,7 @@ var homePageVM=new Vue({
                        var resData = response.data;
                        if(resData.code=='0'){
                     	   homePageVM.$message('请使用新密码重新登录的提示框');
-                    	   homePageVM.cancelForm(formName);
+                    	   homePageVM.cancelModifyForm(formName);
                     	   
                     	   setTimeout('gotoHomePage',2000);
                        }else{
@@ -136,6 +139,9 @@ var homePageVM=new Vue({
 			$("#iframeBox").attr({
 				"src":dataUrl //设置ifream地址
 			});
+        },
+        closeModifyPwdDialog(){
+         	this.$refs.modifyForm.resetFields();
         }
          
   	},

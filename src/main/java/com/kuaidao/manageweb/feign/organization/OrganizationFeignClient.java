@@ -87,6 +87,14 @@ public interface OrganizationFeignClient {
      */
     @PostMapping("/listOrgUserInfo")
     JSONResult<PageBean<UserAndRoleRespDTO>> listOrgUserInfo(@RequestBody OrgUserReqDTO reqDTO);
+    
+    /**
+     *     查询组织机构下是否有员工 (包括下级的下级...)
+     * @param idEntity
+     * @return
+     */
+    @PostMapping("/queryOrgStaffByParentId")
+    JSONResult<Boolean> queryOrgStaffByParentId(@RequestBody IdListReq idListReq);
 
     
     @Component
@@ -154,11 +162,13 @@ public interface OrganizationFeignClient {
         public JSONResult<PageBean<UserAndRoleRespDTO>> listOrgUserInfo(OrgUserReqDTO reqDTO) {
             return fallBackError("查询组织机构下的用户信息");
         }
+
+
+        @Override
+        public JSONResult<Boolean> queryOrgStaffByParentId(IdListReq idListReq) {
+            return fallBackError("查询组织机构下是否有下级员工");
+        }
     }
-
-    
-   
-
   
 
 }
