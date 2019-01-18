@@ -26,7 +26,7 @@
 		        	<el-button type="primary" @click="toUpdateUser">编辑用户</el-button>
 		        </shiro:hasPermission>
 		        <shiro:hasPermission name="sys:userManager:edit" class="f-fr" >
-		        	<el-button type="primary" @click="dialogFormVisible = true">密码安全设置</el-button>
+		        	<el-button type="primary" @click="showDialogFormVisible">密码安全设置</el-button>
 		        </shiro:hasPermission>
 	    	</el-form-item>
 	    </el-row>
@@ -137,7 +137,7 @@
     <el-dialog title="密码安全设置" :visible.sync="dialogFormVisible">
         <el-form :model="form" :rules="rules" ref="form">
             <el-row :gutter="20">
-                <el-col :span="12">
+                <el-col :span="16">
                     <el-form-item label="密码最长使用期限：" :label-width="formLabelWidth" prop="maxDay">
                         <el-input v-model="form.maxDay" autocomplete="off"></el-input>
                     </el-form-item>
@@ -189,6 +189,7 @@ for(var i=0;i<reminderTime.length;i++){
 	domain.value=reminderTime[i];
 	domains.push(domain);
 }
+var oldDomains=domains;
 var userVM = new Vue({
         el: '#userManage',
         data: {
@@ -367,18 +368,27 @@ var userVM = new Vue({
              submitForm(formName) {
               this.$refs[formName].validate((valid) => {
                   if (valid) {
-                	  this.$confirm('确定要'+msg+'【'+name+'】，任务吗？', '提示', {
+                   	  console.log(this.form.domains)//
+                      var domainsList =this.form.domains;
+                      var array= new Array();
+                      var newReminderTime="";
+                      for(var i=0;i<domainsList.length;i++){
+                    	  array.push(domainsList[i].value);
+                    	  if(i==0){
+                    		  newReminderTime=newReminderTime+domainsList[i].value;
+                    	  }else{
+                    		  newReminderTime=newReminderTime+","+domainsList[i].value;
+                    	  }
+                      }
+                      if(passwordExpires==this.form.maxDay&&reminderTime==newReminderTime){
+                    	  userVM.dialogFormVisible=false;
+                    	  return;
+                      }
+                	  this.$confirm('确定更新保存并执行操作？', '提示', {
                           confirmButtonText: '确定',
                           cancelButtonText: '取消',
                           type: 'warning'
                       }).then(() => {
-                    	  console.log(this.form.domains)//
-                          var domains =this.form.domains;
-                          var array= new Array();
-                          var reminderTime=[[${reminderTime}]];//密码到期提醒时间
-                          for(var i=0;i<domains.length;i++){
-                        	  array.push(domains[i].value);
-                          }
                           var param = {};
                     	  param.passwordExpires=this.form.maxDay;
                     	  param.reminderTime=array;
@@ -388,6 +398,8 @@ var userVM = new Vue({
                                 if(result.code=="0"){
                                 	userVM.$message.success("设置成功");
                                 	userVM.dialogFormVisible=false;
+                                	passwordExpires=this.form.maxDay;
+                                	reminderTime=newReminderTime;
                                 }else{
                                 	userVM.$message.error(result.msg);
                                 }
@@ -398,7 +410,7 @@ var userVM = new Vue({
                       }).catch(() => {
                           this.$message({
                               type: 'info',
-                              message: '已取消'+msg
+                              message: '已取消'
                           });          
                       });
                       
@@ -407,6 +419,11 @@ var userVM = new Vue({
                       return false;
                   }
               });
+            },
+            showDialogFormVisible() {
+                this.form.domains=oldDomains;
+                this.form.maxDay=passwordExpires;
+                this.dialogFormVisible=true;
             },
             removeDomain(item) {
                 var index = this.form.domains.indexOf(item)
