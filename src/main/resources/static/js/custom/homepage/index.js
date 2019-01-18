@@ -27,6 +27,7 @@ var homePageVM=new Vue({
 		    user:user,//用戶信息
 		    defaultOpeneds:["0"],//默认打开菜单索引
 		    initUrl:showMenuUrl,//默认展示页面
+	        defaultActive:'0-0',//默认激活菜单
 		   	modifyFormRules:{
 		   		oldPassword:[
 		   		    { required: true, message: '当前密码不能为空',trigger:'blur'},

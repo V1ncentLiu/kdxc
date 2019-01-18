@@ -37,6 +37,9 @@ import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.common.util.CommonUtil;
 import com.kuaidao.common.util.ExcelUtil;
+import com.kuaidao.manageweb.config.LogRecord;
+import com.kuaidao.manageweb.config.LogRecord.OperationType;
+import com.kuaidao.manageweb.constant.MenuEnum;
 import com.kuaidao.manageweb.feign.customfield.CustomFieldFeignClient;
 import com.kuaidao.sys.constant.SysConstant;
 import com.kuaidao.sys.dto.customfield.CustomFieldAddAndUpdateDTO;
@@ -101,6 +104,7 @@ public class CustomFieldController {
    // @RequiresPermissions(value= {"customfield:saveMenu","customfield:updateMenu"},logical=Logical.OR)
     @PostMapping("/saveOrUpdateMenu")
     @ResponseBody
+    @LogRecord(description="添加或修改自定义字段菜单",operationType=OperationType.INSERT,menuName=MenuEnum.CUSTOM_FIELD)
     public JSONResult saveMenu(@Valid @RequestBody CustomFieldMenuAddAndUpdateDTO menuDTO,
             BindingResult result) {
         if (result.hasErrors()) {
@@ -125,6 +129,7 @@ public class CustomFieldController {
     //@RequiresPermissions("customfield:updateMenu")
     @PostMapping("/updateMenu")
     @ResponseBody
+    @LogRecord(description="修改自定义字段菜单",operationType=OperationType.UPDATE,menuName=MenuEnum.CUSTOM_FIELD)
     public JSONResult updateMenu(@Valid @RequestBody CustomFieldMenuAddAndUpdateDTO menuDTO,
             BindingResult result) {
 
@@ -149,6 +154,7 @@ public class CustomFieldController {
    // @RequiresPermissions("customfield:deleteMenu")
     @PostMapping("/deleteMenu")
     @ResponseBody
+    @LogRecord(description="删除自定义字段菜单",operationType=OperationType.DELETE,menuName=MenuEnum.CUSTOM_FIELD)
     public JSONResult deleteMenu(@RequestBody IdListReq idListReq) {
         List<String> idList = idListReq.getIdList();
         if (idList == null || idList.size() == 0) {
@@ -209,6 +215,7 @@ public class CustomFieldController {
     //@RequiresPermissions(value= {"customfield:saveField","customfield:updateField"},logical=Logical.OR)
     @PostMapping("/saveOrUpdate")
     @ResponseBody
+    @LogRecord(description="添加或修改自定义字段",operationType=OperationType.INSERT,menuName=MenuEnum.CUSTOM_FIELD)
     public JSONResult save(@Valid @RequestBody CustomFieldAddAndUpdateDTO customDTO,
             BindingResult result) throws IllegalAccessException, InvocationTargetException {
         if (result.hasErrors()) {
@@ -234,6 +241,7 @@ public class CustomFieldController {
     //@RequiresPermissions("customfield:updateField")
     @PostMapping("/update")
     @ResponseBody
+    @LogRecord(description="修改自定义字段",operationType=OperationType.INSERT,menuName=MenuEnum.CUSTOM_FIELD)
     public JSONResult update(@Valid @RequestBody CustomFieldAddAndUpdateDTO customDTO,
             BindingResult result) throws IllegalAccessException, InvocationTargetException {
         if (result.hasErrors()) {
@@ -257,6 +265,7 @@ public class CustomFieldController {
     //@RequiresPermissions("customfield:deleteField")
     @PostMapping("/delete")
     @ResponseBody
+    @LogRecord(description="删除自定义字段",operationType=OperationType.INSERT,menuName=MenuEnum.CUSTOM_FIELD)
     public JSONResult delete(@RequestBody IdListReq idListReq) {
         List<String> idList = idListReq.getIdList();
         if (idList == null || idList.size() == 0) {
@@ -295,34 +304,6 @@ public class CustomFieldController {
         return customFieldFeignClient.listCustomFieldPage(queryDTO);
     }
 
-
-    /**
-     * 下载导入 自定义字段文件模板
-     * @param request
-     * @return
-     * @throws IOException
-     */
-    @RequestMapping(value = "/download", method = RequestMethod.GET)
-    public ResponseEntity<InputStreamResource> downloadFile(HttpServletRequest request)
-            throws IOException {
-        // 获取文件路径
-        File filePath = ResourceUtils.getFile(
-                ResourceUtils.CLASSPATH_URL_PREFIX + "excel-templates/custom-field-template.xlsx");
-
-        FileSystemResource file = new FileSystemResource(filePath);
-        HttpHeaders headers = new HttpHeaders();
-        headers.add("Cache-Control", "no-cache, no-store, must-revalidate");
-        String fileName  =new String("自定义字段导入模板.xlsx".getBytes(),"iso-8859-1");
-        headers.add("Content-Disposition",
-                String.format("attachment; filename=\"%s\"",fileName));
-        headers.add("Pragma", "no-cache");
-        headers.add("Expires", "0");
-
-        return ResponseEntity.ok().headers(headers).contentLength(file.contentLength())
-                .contentType(MediaType.parseMediaType("application/octet-stream"))
-                .body(new InputStreamResource(file.getInputStream()));
-    }
-
     /**
      * 上传自定义字段
      * @param result
@@ -331,6 +312,7 @@ public class CustomFieldController {
    // @RequiresPermissions("customfield:batchSaveField")
     @PostMapping("/uploadCustomField")
     @ResponseBody
+    @LogRecord(description="上传自定义字段",operationType=OperationType.IMPORTS,menuName=MenuEnum.CUSTOM_FIELD)
     public JSONResult uploadCustomField(@RequestParam("file") MultipartFile file,@RequestParam("id") long menuId) throws Exception {
         List<List<Object>> excelDataList = ExcelUtil.read2007Excel(file.getInputStream());
         logger.info("customfield upload size:{{}}" , excelDataList.size());

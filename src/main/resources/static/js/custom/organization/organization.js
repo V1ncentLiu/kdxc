@@ -211,6 +211,10 @@
                             orgVM.pager.currentPage = resData.currentPage;
                             orgVM.pager.pageSize = resData.pageSize;
                         }else{
+                        	 orgVM.$message({
+                                 message: "接口调用失败",
+                                 type: 'error'
+                               }); 
                         	console.error(data);
                         }
                         
@@ -381,6 +385,9 @@
               
               
         },
+       mounted(){
+           document.getElementById('organizationManage').style.display = 'block';
+       },
         created(){
         	this.clickOrgNode(this.dataTree[0],null,null);
         	
