@@ -244,9 +244,11 @@
                 axios.post('/dictionary/DictionaryItem/saveDictionaryItem', param)
                     .then(function (response) {
                         if(response.data.code==0){
-                            addDialogVm.$message({type: 'success', message: '插入成功!'});
+                            addDialogVm.$message({type: 'success', message: '插入成功!',duration:2000,onClose:function(){
+                                    paginationVm.initTableData(1);
+                                }});
                             addDialogVm.dialogFormVisible = false;
-                            paginationVm.initTableData(1);
+
                         }else{
                             console.log(response.data)
                             addDialogVm.$message.error(response.data.msg);
@@ -320,8 +322,9 @@
                         param.ids = rowIds.join(",");
                         axios.post('/dictionary/DictionaryItem/deleteItemDictionarys', param)
                         .then(function (response) {
-                            paginationVm.initTableData(1);
-                            queryFormVM.$message({type: 'success', message: '确定删除!'});
+                            queryFormVM.$message({type: 'success', message: '确定删除!',duration:2000,onClose:function(){
+                                paginationVm.initTableData(1);
+                            }});
                         })
                         .catch(function (error) {
                             queryFormVM.$message.error(error);
