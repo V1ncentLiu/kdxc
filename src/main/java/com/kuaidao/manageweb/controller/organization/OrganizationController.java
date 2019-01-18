@@ -12,6 +12,9 @@ import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.common.entity.TreeData;
 import com.kuaidao.common.util.CommonUtil;
+import com.kuaidao.manageweb.config.LogRecord;
+import com.kuaidao.manageweb.config.LogRecord.OperationType;
+import com.kuaidao.manageweb.constant.MenuEnum;
 import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
 import com.kuaidao.sys.dto.organization.OrganizationRespDTO;
 import com.kuaidao.sys.dto.user.OrgUserReqDTO;
@@ -74,6 +77,7 @@ public class OrganizationController {
    // @RequiresPermissions(value= {"organization:save","organization:update"},logical=Logical.OR)
     @PostMapping("/saveOrUpdate")
     @ResponseBody
+    //@LogRecord(description="添加或修改组织机构信息",operationType=OperationType.INSERT,menuName=MenuEnum.)
     public JSONResult save(@Valid @RequestBody OrganizationAddAndUpdateDTO orgDTO,
             BindingResult result) throws Exception {
         if (result.hasErrors()) {
