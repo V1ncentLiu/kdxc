@@ -23,6 +23,7 @@
                     remark:'',
                     //menuId:fieldMenu.id
                 },
+                addAndUpdateDialog:'',//添加或修改 字段dialog 标题
                 menuId:fieldMenu.id,//该字段设置属于菜单组
                 oldFieldForm:{//存放旧的form 数据，提交时比对
                 	fieldCode:'',
@@ -162,6 +163,33 @@
                            
                        },trigger:'blur'}
                     ],
+                    sortNum:[
+                    	{            
+                    	    validator(rule,value,callback){               
+                    	      if(Number.isInteger(Number(value)) && Number(value) > 0){                
+                    	        callback();
+                    	      }else{                 
+                    	        callback(new Error("只可以输入正整数,不超过5位字符"));               
+                    	      }             
+                    	    },             
+                    	    trigger: 'blur',           
+                    	  }
+                    	
+                    ],
+                    width:[
+                      	{            
+                    	    validator(rule,value,callback){               
+                    	      if(Number.isInteger(Number(value)) && (Number(value) > 0 || Number(value) <1000)){                
+                    	        callback();
+                    	      }else{                 
+                    	        callback(new Error("只可以输入正整数,且不大于1000"));               
+                    	      }             
+                    	    },             
+                    	    trigger: 'blur',           
+                    	  }
+                    ]
+                
+                    
                 
                 }
             }        	  
@@ -172,7 +200,7 @@
                 var rows = this.multipleSelection;
                 if(rows.length==0){
                     this.$message({
-                       message: '请选择一条数据进行修改',
+                       message: '请选择一条数据进行删除',
                        type: 'warning'
                      });
                     return;
@@ -326,7 +354,7 @@
                         });
                        return;
                    }
-                   
+                   this.addAndUpdateDialog="修改字段";
                    var param={id:rows[0].id};
                    //根据id获取数据
                    axios.post('/customfield/customField/query',param)
@@ -395,7 +423,13 @@
               },
               uploadError(){//上傳失敗
             	  this.$message({message:'上传失败',type:'error'});
+              },
+              addFieldSetting(){//添加字段dialog
+            	  this.dialogFormVisible = true;
+            	  this.form.id='';
+            	  this.addAndUpdateDialog="新建字段";
               }
+              
               
             
             
