@@ -165,12 +165,17 @@
                     ],
                     sortNum:[
                     	{            
-                    	    validator(rule,value,callback){               
-                    	      if(Number.isInteger(Number(value)) && Number(value) > 0){                
-                    	        callback();
-                    	      }else{                 
-                    	        callback(new Error("只可以输入正整数,不超过5位字符"));               
-                    	      }             
+                    	    validator(rule,value,callback){ 
+                    	    	if(value){
+                    	    		  if(Number.isInteger(Number(value)) && Number(value) > 0){                
+                              	        callback();
+                              	      }else{                 
+                              	        callback(new Error("只可以输入正整数,不超过5位字符"));               
+                              	      } 
+                    	    	}else{
+                    	    		callback();
+                    	    	}
+                    	                
                     	    },             
                     	    trigger: 'blur',           
                     	  }
@@ -178,12 +183,17 @@
                     ],
                     width:[
                       	{            
-                    	    validator(rule,value,callback){               
-                    	      if(Number.isInteger(Number(value)) && (Number(value) > 0 || Number(value) <1000)){                
-                    	        callback();
-                    	      }else{                 
-                    	        callback(new Error("只可以输入正整数,且不大于1000"));               
-                    	      }             
+                    	    validator(rule,value,callback){ 
+                    	    	if(value){
+                    	    		if(Number.isInteger(Number(value)) && (Number(value) > 0 || Number(value) <1000)){                
+                            	        callback();
+                            	      }else{                 
+                            	        callback(new Error("只可以输入正整数,且不大于1000"));               
+                            	      }    
+                    	    	}else{
+                    	    		callback();
+                    	    	}
+                    	               
                     	    },             
                     	    trigger: 'blur',           
                     	  }
@@ -262,6 +272,7 @@
             saveField(formName){//保存自定义字段
             	 this.$refs[formName].validate((valid) => {
                      if (valid) {
+                    	fieldVM.$refs.submitBtn.disabled=true; //禁用提交按钮
                         var param=this.form;
                         param.menuId=fieldVM.menuId;
                        axios.post('/customfield/customField/saveOrUpdate', param)
@@ -282,6 +293,8 @@
                        })
                        .catch(function (error) {
                             console.log(error);
+                       }).then(function(){
+                    	   fieldVM.$refs.submitBtn.disabled=false; 
                        });
                         
                      } else {

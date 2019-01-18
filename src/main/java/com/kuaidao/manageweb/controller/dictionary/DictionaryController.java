@@ -62,7 +62,7 @@ public class DictionaryController {
     /**
      *  web端进行的是非业务逻辑。
      */
-    @RequiresPermissions("dictionary:add")
+//    @RequiresPermissions("dictionary:add")
     @LogRecord(description = "字典新增",operationType = LogRecord.OperationType.INSERT,menuName = MenuEnum.DICTIONARY_MANAGEMENT)
     @RequestMapping("/saveDictionary")
     @ResponseBody
@@ -72,7 +72,7 @@ public class DictionaryController {
     }
 
 
-    @RequiresPermissions("dictionary:update")
+//    @RequiresPermissions("dictionary:update")
     @LogRecord(description = "字典更新",operationType = LogRecord.OperationType.UPDATE,menuName = MenuEnum.DICTIONARY_MANAGEMENT)
     @RequestMapping("/updateDictionary")
     @ResponseBody
@@ -95,7 +95,7 @@ public class DictionaryController {
     }
 
     @LogRecord(description = "字典删除-批量删除",operationType = LogRecord.OperationType.DELETE,menuName = MenuEnum.DICTIONARY_MANAGEMENT)
-    @RequiresPermissions("dictionary:delete")
+//    @RequiresPermissions("dictionary:delete")
     @RequestMapping("/deleteDictionarys")
     @ResponseBody
     public JSONResult deleteDictionarys(@RequestBody Map<String, String> map){
