@@ -22,6 +22,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.kuaidao.common.constant.SystemCodeConstant;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
+import com.kuaidao.manageweb.config.LogRecord;
+import com.kuaidao.manageweb.constant.MenuEnum;
 import com.kuaidao.manageweb.feign.customfield.CustomFieldFeignClient;
 import com.kuaidao.manageweb.feign.module.ModuleManagerFeignClient;
 import com.kuaidao.manageweb.feign.role.RoleManagerFeignClient;
@@ -198,6 +200,7 @@ public class RoleManagerController {
 	 * @return
 	 */
 	@PostMapping("/saveRoleInfo")
+    @LogRecord(description = "角色新增",operationType = LogRecord.OperationType.INSERT,menuName = MenuEnum.ROLE_MANAGEMENT)
 	@ResponseBody
 	public JSONResult<String> saveRoleInfo(@RequestBody RoleInfoDTO dto) {
 		dto.setSystemCode(SystemCodeConstant.HUI_JU);
@@ -214,6 +217,7 @@ public class RoleManagerController {
 	 * @return
 	 */
 	@PostMapping("/updateRoleInfo")
+    @LogRecord(description = "角色修改",operationType = LogRecord.OperationType.UPDATE,menuName = MenuEnum.ROLE_MANAGEMENT)
 	@ResponseBody
 	public JSONResult<String> updateRoleInfo(@RequestBody RoleInfoDTO dto) {
 		JSONResult<String> pageJson = roleManagerFeignClient.updateRoleInfo(dto);
@@ -221,7 +225,7 @@ public class RoleManagerController {
 	}
 
 	/**
-	 * 修改角色数据
+	 * 删除角色数据
 	 * 
 	 * @param pageNum
 	 * @param pageSize
@@ -229,6 +233,7 @@ public class RoleManagerController {
 	 * @return
 	 */
 	@PostMapping("/deleteRoleInfo")
+	@LogRecord(description = "角色删除",operationType = LogRecord.OperationType.DELETE,menuName = MenuEnum.ROLE_MANAGEMENT)
 	@ResponseBody
 	public JSONResult<String> deleteRoleInfo(@RequestBody RoleInfoDTO dto) {
 		JSONResult<String> pageJson = roleManagerFeignClient.deleteRoleInfo(dto);

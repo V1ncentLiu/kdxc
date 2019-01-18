@@ -33,7 +33,7 @@
                 </el-col>
                 <el-col :span="12">
                     <el-form-item label="优先级：" prop="sortNo" :label-width="formLabelWidth">
-                        <el-input-number v-model="form.sortNo"   :min="1" :max="99999999999" label="描述文字"></el-input-number>
+                        <el-input-number v-model="form.sortNo"  maxlength="3"  :min="1"   label="描述文字"></el-input-number>
                     </el-form-item>
                 </el-col>
             </el-row>
@@ -88,10 +88,10 @@
     <el-dialog title="新增操作" :visible.sync="dialogFormVisible">
         <el-form :model="dialogForm" :rules="dialogRules" ref="dialogForm">
             <el-form-item label="操作名称：" prop="handleName" :label-width="formLabelWidth">
-                <el-input v-model="dialogForm.handleName" autocomplete="off"></el-input>
+                <el-input v-model="dialogForm.handleName" maxlength="10"  autocomplete="off"></el-input>
             </el-form-item>
             <el-form-item label="操作编码名称：" prop="handleCode" :label-width="formLabelWidth">
-                <el-input v-model="dialogForm.handleCode" autocomplete="off"></el-input>
+                <el-input v-model="dialogForm.handleCode" maxlength="50"  autocomplete="off"></el-input>
             </el-form-item>
             <!--  
             <el-form-item label="特殊条件：" :label-width="formLabelWidth">
@@ -149,7 +149,32 @@
                 formLabelWidth: '150px',
                 rules:{
                    	name: [
-                           { required: true, message: '请输入菜单名称', trigger: 'blur' }
+                           { required: true, message: '请输入菜单名称', trigger: 'blur' },
+                           {validator:function(rule,value,callback){
+              			    var param = {'name':value};
+                              axios.post('/module/moduleManager/queryModuleByParam',param)
+                              .then(function (response) {
+                                  var data =  response.data;
+                                  if(data.code=='0'){
+                                      var resData = data.data;
+                                      if(resData.length>0){
+                                          callback(new Error("此菜单名称已存在，请修改后提交"));
+                                      }else{
+                                          callback();
+                                      }
+                                      
+                                  }else{
+                                       callback(new Error("查询菜单名称是否唯一报错"));
+                                  }
+                              })
+                              .catch(function (error) {
+                                console.log(error);
+                              })
+                              .then(function () {
+                                // always executed
+                              });
+              			  
+              		  },trigger:'blur'}
                        ],
                        url: [
                            { required: true, message: '请输入URL', trigger: 'blur' }
@@ -216,29 +241,7 @@
                            opeArr.push(saveope);
                         }
                         submitData.operationInfos=opeArr;
-                        axios.post('/module/moduleManager/queryModuleByParam',submitData)
-                        .then(function (response) { 
-                        	
-                          if(null==response){
-       		                 alert("返回异常");
-       		                 return ;
-       		               }
-       		               var resobj= response.data;
-       		               if(null==resobj){
-       		            	   alert("返回异常");
-       		                   return ;
-       		               } 
-       		               if(resobj.code!='0'){
-       		            	alert(response.data.message);
-       		            	return ;
-       		                }
-       		              //校验模块名称是否已存在
-       		              var checkName=response.data.data;
-                         	if(null!=checkName&&checkName.length>0) {
-                       		 alert("模块名称已存在");
-                       	     return ;
-                         	}
-                            axios.post('/module/moduleManager/saveModuleInfo',submitData)
+                        axios.post('/module/moduleManager/saveModuleInfo',submitData)
                             .then(function (response) {
                                 var data =  response.data
                                 if(data.code=='0'){
@@ -255,8 +258,7 @@
                             .then(function () {
                               // always executed
                             });  
-                        	
-                        });
+                    
                         
                     } else {
                         console.log('error submit!!');

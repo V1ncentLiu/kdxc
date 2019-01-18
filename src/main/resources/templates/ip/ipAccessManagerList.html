@@ -57,12 +57,12 @@ xmlns:th="http://www.thymeleaf.org">
 				</el-table>
 				<table-pagination :pager="ippager" @change="queryIpDataList"></table-pagination> 
 			</el-tab-pane> 
-			<el-tab-pane label="访问Ip包" name="second"> 
+			<el-tab-pane label="访问IP包" name="second"> 
 				<el-form :inline="true" :model="ippackageForm" class="demo-form-inline" ref="customFieldQueryForm">
 					<el-row>
 						<el-col :span="12">
 							<el-button type="primary" @click="openAddIpPackage">创建IP包</el-button> 
-							<el-button type="primary">修改IP包</el-button>
+							<el-button type="primary" @click="openUpdateIpPackage">修改IP包</el-button>
 							<el-button type="primary" @click="delpackageGroup" >删除</el-button>
 						</el-col>
 						<el-col :span="12" style="text-align: right;">
@@ -88,7 +88,7 @@ xmlns:th="http://www.thymeleaf.org">
 			</el-tab-pane>
 		</el-tabs>
 		<!-- 添加IP库弹框 -->
-		<el-dialog title="添加IP" :visible.sync="dialogIpVisible" width="30%":before-close="handleClose" @close='closeIpAddDialog'>
+		<el-dialog title="添加IP" :visible.sync="dialogIpVisible" width="30%":before-close="handleClose" >
 			<el-form :inline="true" :model="ipAddForm" class="demo-form-inline" ref="ipAddForm" :rules="rulesAdd">
 				<el-form-item label="IP地址" prop="ipAddress">
 					<el-input type="number" maxlength="3" v-model="ipAddForm.ipAddress" style="width: 80px;"></el-input><span>&nbsp;.&nbsp;</span>	
@@ -117,9 +117,9 @@ xmlns:th="http://www.thymeleaf.org">
 				<el-form-item label="已选IP列表:">
 					<el-button type="primary" @click="addPackageIPSelectVisible=true">选择IP</el-button>
 				</el-form-item>
-				<el-table border  id="packAddIpTable" ref="packAddIpTable" :data="packAddIpTable" tooltip-effect="dark"> 
+				<el-table border  id="packUpdateIpTable" ref="packUpdateIpTable" :data="packUpdateIpTable" tooltip-effect="dark"> 
 					<el-table-column type="index" label="序号" prop="id"  header-align="center" align="center"  width="55" ></el-table-column>
-					<el-table-column align="center" prop="ipAddress" label="ip地址"></el-table-column> 
+					<el-table-column align="center" prop="ipAddress" label="IP地址"></el-table-column> 
 					<el-table-column align="center" prop="operation" label="操作"> 
 					 <template slot-scope="scope">
                         <el-button @click.native.prevent="deleteRow(scope.$index, packAddIpTable)"
@@ -130,7 +130,32 @@ xmlns:th="http://www.thymeleaf.org">
 			</el-form>
 			<div slot="footer" class="dialog-footer"> 
 				<el-button @click="addIpPackageVisible = false">取 消</el-button>
-				<el-button type="primary" @click="saveIpPackageData('ipPackageAddForm')">确定</el-button>
+				<el-button type="primary" @click="saveIpPackageData('ipPackageAddForm')">提交</el-button>
+			</div>
+		</el-dialog>
+		 <!--修改IP包弹框 -->
+		<el-dialog  title="修改IP包" :visible.sync="updateIpPackageVisible">
+			<el-form :inline="false" :model="ipPackageUpdateForm" :rules="rules" class="demo-form-inline" ref="ipPackageUpdateForm" label-width="100px">
+				<el-form-item  label="IP包名称:" prop="name">
+					<el-input v-model="ipPackageUpdateForm.name" maxlength="100" style="width: 250px;"></el-input>
+				</el-form-item> 
+				<el-form-item label="已选IP列表:">
+					<el-button type="primary" @click="addPackageIPSelectVisible=true">选择IP</el-button>
+				</el-form-item>
+				<el-table border  id="packAddIpTable" ref="packAddIpTable" :data="packAddIpTable" tooltip-effect="dark"> 
+					<el-table-column type="index" label="序号" prop="id"  header-align="center" align="center"  width="55" ></el-table-column>
+					<el-table-column align="center" prop="ipAddress" label="IP地址"></el-table-column> 
+					<el-table-column align="center" prop="operation" label="操作"> 
+					 <template slot-scope="scope">
+                        <el-button @click.native.prevent="deleteRow(scope.$index, packAddIpTable)"
+                            type="text">删除</el-button>
+                    </template>
+					</el-table-column> 
+				</el-table> 
+			</el-form>
+			<div slot="footer" class="dialog-footer"> 
+				<el-button @click="addIpPackageVisible = false">取 消</el-button>
+				<el-button type="primary" @click="saveIpPackageData('ipPackageAddForm')">提交</el-button>
 			</div>
 		</el-dialog>
 		<el-dialog title="选择IP" :visible.sync="addPackageIPSelectVisible" @opened="packgeSelectIpOpen" class="chooseDialog">
@@ -146,11 +171,11 @@ xmlns:th="http://www.thymeleaf.org">
 			</el-form>
 			<el-table border  id="packSelectIpTable" ref="customFieldTable" :data="packSelectIpTable" tooltip-effect="dark" @selection-change="changeSelectIpFun"> 
 				<el-table-column align="center" type="selection" width="55" prop="id" @selection-change="changeIpTableFun"> </el-table-column> 
-				<el-table-column align="center" prop="ipAddress" label="ip地址"> </el-table-column> 
+				<el-table-column align="center" prop="ipAddress" label="IP地址"> </el-table-column> 
 			</el-table>
 			<div slot="footer" class="dialog-footer"> 
 				<el-button @click="addPackageIPSelectVisible =false">取 消</el-button>
-				<el-button type="primary" @click="packageSelectIpSubmit">确定</el-button>
+				<el-button type="primary" @click="packageSelectIpSubmit">提交</el-button>
 			</div>
 		</el-dialog>
 	</template>
@@ -168,36 +193,68 @@ var ipManagerVM = new Vue({
 		dialogPackgeVisible:false,
 		addIpPackageVisible:false,
 		addPackageIPSelectVisible:false,
+		updateIpPackageVisible:false,
 		ippager:{
 			total: 0,
 			currentPage: 1,
 			pageSize: 20,
 		},
 	    rules:{
-	    	name:[{ required: true, message: '角色名称不能为空'}]
+	    	name:[{ required: true, message: 'IP包名称不能为空'},
+                  {validator:function(rule,value,callback){
+     			    var param = {'ipPackageName':value};
+                     axios.post('/ip/ipAccess/queryIpPackageByParam',param)
+                     .then(function (response) {
+                         var data =  response.data;
+                         if(data.code=='0'){
+                             var resData = data.data;
+                             if(resData.length>0){
+                                 callback(new Error("此IP包名称已存在，请修改后提交"));
+                             }else{
+                                 callback();
+                             }
+                             
+                         }else{
+                              callback(new Error("查询IP包名称是否唯一报错"));
+                         }
+                     })
+                     .catch(function (error) {
+                       console.log(error);
+                     })
+                     .then(function () {
+                       // always executed
+                     });
+     			  
+     		  },trigger:'blur'}]
         },
         rulesAdd:{
 	    	ipAddress:[
 	    		{ required: true, message: '不能为空'},
-	    		{  max: 3, message: '最大3个字符', trigger: 'blur' },
-                {  min: 1, message: '最少1个字符', trigger: 'blur' }
+	    		{  max: 3, message: '最大3个字符', trigger: 'change' },
+                {  min: 1, message: '最少1个字符', trigger: 'change' }
 	    	],
 	    	ipAddress2:[
 	    		{ required: true, message: '不能为空'},
-	    		{  max: 3, message: '最大3个字符', trigger: 'blur' },
-                {  min: 1, message: '最少1个字符', trigger: 'blur' }
+	    		{  max: 3, message: '最大3个字符', trigger: 'change' },
+                {  min: 1, message: '最少1个字符', trigger: 'change' }
 	    	],
 	    	ipAddress3:[
 	    		{ required: true, message: '不能为空'},
-	    		{  max: 3, message: '最大3个字符', trigger: 'blur' },
-                {  min: 1, message: '最少1个字符', trigger: 'blur' }
+	    		{  max: 3, message: '最大3个字符', trigger: 'change' },
+                {  min: 1, message: '最少1个字符', trigger: 'change' }
 	    	],
 	    	ipAddress4:[
 	    		{ required: true, message: '不能为空'},
-	    		{  max: 3, message: '最大3个字符', trigger: 'blur' },
-                {  min: 1, message: '最少1个字符', trigger: 'blur' }
+	    		{  max: 3, message: '最大3个字符', trigger: 'change' },
+                {  min: 1, message: '最少1个字符', trigger: 'change' }
 	    	]
         },
+    	ipAddForm:{
+			ipAddress:'',
+			ipAddress2:'',
+			ipAddress3:'',
+			ipAddress4:''
+		},
 		packpager:{
 			total: 0,
 			currentPage: 1,
@@ -210,14 +267,11 @@ var ipManagerVM = new Vue({
 			ipPackageName:'',
 			ipAddress:''
 		},
-		ipAddForm:{
-			ipAddress:'',
-			ipAddress2:'',
-			ipAddress3:'',
-			ipAddress4:''
-		},
 		ipPackageAddForm:{
-			name:''
+		  name:''
+		},
+		ipPackageUpdateForm:{
+		name:''
 		},
 		packageAddSelectForm:{
 			ipAddress: ''	
@@ -227,6 +281,7 @@ var ipManagerVM = new Vue({
 		packSelectIpTable:[],
 		multipleAddPackageIpSelection:[],
 		multiplePackageTable:[],
+		packUpdateIpTable:[],
 		outerVisible:false,
 	},
 	methods:{ 
@@ -239,12 +294,25 @@ var ipManagerVM = new Vue({
 				this.queryPackageDataList(); 
 			}
 		},
+		handleClose(){
+
+		},
 		 openIpAddData(){
+		   ipManagerVM.ipAddForm.ipAddress='';
+		   ipManagerVM.ipAddForm.ipAddress2='';
+		   ipManagerVM.ipAddForm.ipAddress3='';
+		   ipManagerVM.ipAddForm.ipAddress4='';
 		   ipManagerVM.dialogIpVisible =true;	
-		   ipAddForm.ipAddress='';
+		
 		},
 		 deleteRow(index, rows) {
-            rows.splice(index, 1);
+			this.$confirm('确认删除'+rows[0].ipAddress+"IP地址吗?", '消息提醒', {
+                confirmButtonText: '确定',
+                cancelButtonText: '取消',
+                type: 'warning'
+            }).then(() => {
+            	 rows.splice(index, 1);	
+            });
         },
         openAddIpPackage(){
           //打开添加IP包窗口
@@ -288,6 +356,22 @@ var ipManagerVM = new Vue({
 			});  
 
 		} ,
+		 openUpdateIpPackage(){
+		    var updateInfo=ipManagerVM.multiplePackageTable;
+ 	        if(updateInfo.length!=1){
+               this.$message({
+                      message: '请选择一条数据进行修改',
+                      type: 'warning'
+                 });
+                 return;
+             }
+		  //打开修改Ip包
+		  ipManagerVM.updateIpPackageVisible=true;
+		  
+		  updateInfo[0].id
+		  
+		  
+		},
 		//查询Ip包列表方法
 		queryPackageDataList(){ 
 			var param = {}; 
@@ -343,18 +427,16 @@ var ipManagerVM = new Vue({
           	}
            	return moment(date).format("YYYY-MM-DD HH:mm:ss");
 		},
-		handleClose:function(done) {
-			this.$confirm('确认关闭？')
-			.then(_ => {
-				done();
-			}) .catch(_ => {});
-		},
 		//新增Ip提交
 		submitipAddForm(formName){
 			this.$refs[formName].validate((valid) => {
                 if (valid) {
                     var param={};
-					param.ipAddress=ipManagerVM.ipAddForm.ipAddress;
+					 var ip1=ipManagerVM.ipAddForm.ipAddress;
+					 var ip2=ipManagerVM.ipAddForm.ipAddress2;
+					 var ip3=ipManagerVM.ipAddForm.ipAddress3;
+					 var ip4=ipManagerVM.ipAddForm.ipAddress4;
+					 param.ipAddress=ip1+"."+ip2+"."+ip3+"."+ip4;
 					axios.post('/ip/ipAccess/saveIpRepository',param).then(function (response) {
 						ipManagerVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
 							ipManagerVM.refreshIpTableData(response);
@@ -369,7 +451,21 @@ var ipManagerVM = new Vue({
 		},
 		//批量删除Ip数据
 		delIpGroup() {
-			this.$confirm('确认删除吗？', '消息提醒', {
+			var deleIpInfo=ipManagerVM.multipleIpSelection;
+	       if(deleIpInfo.length <1){
+                   this.$message({
+                      message: '请选择删除数据',
+                      type: 'warning'
+                    });
+                 return;
+             }
+	         var packageName="";
+	        if(null!=deleIpInfo){
+	 		    for ( var i = 0; i <deleIpInfo.length; i++){
+	 		    	packageName+="【"+deleIpInfo[i].ipAddress+"】";
+	 		     }
+	           }
+			this.$confirm('确认删除吗'+packageName+"IP地址吗?", '消息提醒', {
                 confirmButtonText: '确定',
                 cancelButtonText: '取消',
                 type: 'warning'
@@ -383,7 +479,9 @@ var ipManagerVM = new Vue({
     				var param={};
     				param.deleteIds=ids;
     				axios.post('/ip/ipAccess/deleteIpRepository',param).then(function (response) {
-    					ipManagerVM.refreshIpTableData(response);	
+    				 ipManagerVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
+    						ipManagerVM.refreshIpTableData(response);
+    	        	  }});	
     				});
     			}else{
   				  this.$message({
@@ -399,7 +497,22 @@ var ipManagerVM = new Vue({
             });
 		},
 		delpackageGroup() {
-			this.$confirm('确认删除吗？', '消息提醒', {
+	   //删除IP包数据
+		var deleInfo=ipManagerVM.multiplePackageTable;
+	     if(deleInfo.length <1){
+                   this.$message({
+                      message: '请选择删除数据',
+                      type: 'warning'
+                    });
+                 return;
+             }
+	        var packageName="";
+	        if(null!=deleInfo){
+	 		   for ( var i = 0; i <deleInfo.length; i++){
+	 		      packageName+="【"+deleInfo[i].name+"】";
+	 		    }
+	           }
+			this.$confirm('确认要删除'+packageName+"IP包吗?", '消息提醒', {
                 confirmButtonText: '确定',
                 cancelButtonText: '取消',
                 type: 'warning'
@@ -414,7 +527,9 @@ var ipManagerVM = new Vue({
 				var param={};
 				param.deleteIds=ids;
 				axios.post('/ip/ipAccess/deleteIppackage',param).then(function (response) {
+			    ipManagerVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
 					ipManagerVM.queryPackageDataList(); 
+			      }});	
 				});
 			}else{
 				  this.$message({
@@ -472,28 +587,7 @@ var ipManagerVM = new Vue({
 					var param={};
 					param.name=packageName;
 					param.ipRepositorys=savepackageIp;
-			        axios.post('/ip/ipAccess/queryIpPackageByParam',param)
-			        .then(function (response) { 
-			          if(null==response){
-			                 alert("返回异常");
-			                 return ;
-			               }
-			               var resobj= response.data;
-			               if(null==resobj){
-			            	   alert("返回异常");
-			                   return ;
-			               } 
-			               if(resobj.code!='0'){
-			            	alert(response.data.message);
-			            	return ;
-			                }
-			              //校验模块名称是否已存在
-			              var checkName=response.data.data;
-			         	if(null!=checkName&&checkName.length>0) {
-			       		 alert("模块名称已存在");
-			       	     return ;
-			         	}
-					   axios.post('/ip/ipAccess/saveIpPackage',param).then(function (response) {
+					axios.post('/ip/ipAccess/saveIpPackage',param).then(function (response) {
 						if(null==response){
 							alert("返回异常");
 							return ;
@@ -509,9 +603,10 @@ var ipManagerVM = new Vue({
 						}
 						ipManagerVM.addIpPackageVisible=false;
 						ipManagerVM.addPackageIPSelectVisible=false;
-						ipManagerVM.queryPackageDataList(); 
+						ipManagerVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
+						  ipManagerVM.queryPackageDataList(); 
+						 }});	
 					  });
-			        });
                 } else {
                     console.log('error submit!!');
                     return false;
