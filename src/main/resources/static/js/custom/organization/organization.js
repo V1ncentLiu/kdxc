@@ -211,6 +211,10 @@
                             orgVM.pager.currentPage = resData.currentPage;
                             orgVM.pager.pageSize = resData.pageSize;
                         }else{
+                        	 orgVM.$message({
+                                 message: "接口调用失败",
+                                 type: 'error'
+                               }); 
                         	console.error(data);
                         }
                         

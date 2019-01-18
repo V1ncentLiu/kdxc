@@ -77,7 +77,7 @@ public class OrganizationController {
    // @RequiresPermissions(value= {"organization:save","organization:update"},logical=Logical.OR)
     @PostMapping("/saveOrUpdate")
     @ResponseBody
-    //@LogRecord(description="添加或修改组织机构信息",operationType=OperationType.INSERT,menuName=MenuEnum.)
+    @LogRecord(description="添加或修改组织机构信息",operationType=OperationType.INSERT,menuName=MenuEnum.ORGANIZATION_MANAGEMENT)
     public JSONResult save(@Valid @RequestBody OrganizationAddAndUpdateDTO orgDTO,
             BindingResult result) throws Exception {
         if (result.hasErrors()) {
@@ -106,6 +106,7 @@ public class OrganizationController {
     //@RequiresPermissions("organization:update")
     @PostMapping("/update")
     @ResponseBody
+    @LogRecord(description="修改组织机构信息",operationType=OperationType.UPDATE,menuName=MenuEnum.ORGANIZATION_MANAGEMENT)
     public JSONResult update(@Valid @RequestBody OrganizationAddAndUpdateDTO orgDTO,
             BindingResult result) {
         if (result.hasErrors()) {
@@ -123,6 +124,7 @@ public class OrganizationController {
     //@RequiresPermissions("organization:delete")
     @PostMapping("/delete")
     @ResponseBody
+    @LogRecord(description="删除组织机构信息",operationType=OperationType.DELETE,menuName=MenuEnum.ORGANIZATION_MANAGEMENT)
     public JSONResult delete(@RequestBody IdListReq idListReq) {
         List<String> idList = idListReq.getIdList();
         if(idList==null || idList.size()==0) {
