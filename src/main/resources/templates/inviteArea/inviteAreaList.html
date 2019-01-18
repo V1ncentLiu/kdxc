@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:th="http://www.thymeleaf.org">
+<head th:include="_header_include::frag(~{::title},~{},~{})">
+    <title>日志管理</title>
+    <style>
+    </style>
+</head>
+<body>
+<div id="organizationManage" class="organizationManage mainPadding" >  
+    <el-breadcrumb separator="/" class="elBreadcrumb marginB20" >
+        <el-breadcrumb-item>Home</el-breadcrumb-item>
+        <el-breadcrumb-item>业务设置</el-breadcrumb-item>
+        <el-breadcrumb-item><a href="/invitearea/inviteAreaList" data-url="b.html">邀约区域管理</a></el-breadcrumb-item>
+    </el-breadcrumb>
+    <el-row class="marginB10">
+        <el-col :xs="12" :sm="16" :md="16" :lg="18" :xl="12">
+            <el-button type="primary"><a href="/role/roleManager/addRolePre"><i class="el-icon-plus"></i> 添加</a></el-button>
+            <el-button type="primary" >修改</el-button>
+            <el-button type="primary" >删除</el-button>
+            <el-button type="primary" >导入</el-button>
+        </el-col>
+
+        <el-col :xs="12" :sm="8" :md="8" :lg="6" :xl="12">
+            <el-row class="marginB10">
+              
+				<div class="block">
+					<el-select v-model="queryType" placeholder="请选择商务小组">
+					    <el-option
+					      v-for="item in options"
+					      :key="item.value"
+					      :label="item.label"
+					      :value="item.value">
+					    </el-option>
+  					</el-select>
+  					<el-select v-model="queryType" placeholder="请选择电销组">
+					    <el-option
+					      v-for="item in options"
+					      :key="item.value"
+					      :label="item.label"
+					      :value="item.value">
+					    </el-option>
+  					</el-select>
+  					<el-button type="primary" @click="queryLogDataList">查询</el-button>
+				</div>
+                  </el-col>
+            </el-row>
+            <el-row>
+                <el-table 
+                    ref="multipleTable"
+                    tooltip-effect="dark"
+                    empty-text="无数据"
+                    style="width: 100%"
+                    border
+                    :data="dataTable" 
+                    >
+                     <el-table-column align="center" type="selection" width="55"></el-table-column> 
+                     <!-- <el-table-column prop="date" label="全选" width="180"></el-table-column>  -->
+                    <el-table-column align="center" prop="userName" label="商务小组"></el-table-column>
+                    <el-table-column align="center" prop="name" label="区域"></el-table-column>
+                    <el-table-column align="center" prop="phone" label="电销组"></el-table-column>
+                    <el-table-column align="center" prop="remoteIP" label="签约项目"></el-table-column>
+                </el-table>
+                 <table-pagination :pager="pager"  @change="queryLogDataList"></table-pagination>
+            </el-row>
+      
+    </el-row>
+  
+</div>
+</body>
+<!-- import common js-->
+<div th:include="_footer_include :: #jsLib"></div>
+<script th:inline="javascript">
+
+    var orgData=[[${orgData}]];
+
+   var orgVM =  new Vue({
+        el: '#organizationManage',
+        data: {
+            	activeName: 'first',
+            	beginTime:"",
+            	endTime:"",
+            	queryType:"1",
+            	content:"",
+            	searchContent:"",
+                dataTree: orgData,//组织结构tree
+                dataTable:[],
+                multipleSelection: [],
+                dialogFormVisible: false,
+                options: [{
+                	value: '1',
+                    label: '登陆名称'	
+                	},
+                	{
+                   	value: '2',
+                    label: '姓名'	
+                   	}
+                ],
+                pager:{
+                    total: 0,
+                    currentPage: 1,
+                    pageSize: 20,
+                },
+                loading:true
+             
+        },
+        methods: {
+        	queryLogDataList(){//查询按钮
+            	  var param = {}; 
+            	  var pageSize = this.pager.pageSize;
+                  var pageNum = this.pager.currentPage;
+                  param.pageNum = pageNum;
+                  param.pageSize = pageSize;
+                  param.beginTime=this.beginTime;
+                  param.endTime=this.endTime;
+                  param.content=this.content;
+                  param.queryType=this.queryType;
+                  param.searchContent=this.searchContent;
+                  param.visitType = 1;
+                  console.log(param);
+                  axios.post('/log/log/queryLogDataList',param).then(function (response) {
+                  	  console.log(response);
+                             /* if(null===response||response.data==null||response.data.code!='0'){
+                          	  alert(response.data.message);
+                          	  return ;
+                             }else{
+                            	 orgVM.dataTable =response.data.data.data; 
+                            	 orgVM.pager.currentPage= response.data.data.currentPage;
+                            	 orgVM.pager.total= response.data.data.total;
+                             } */
+                  })
+                  .catch(function (error) {
+                    console.log(error);
+                  })
+                  .then(function () {
+                  });  
+                  
+              } ,
+              handleClick(tab, event) {
+                if(tab.name=='first'){
+                	window.location.href="/log/log/visitLog";
+                }else{
+                	window.location.href="/log/log/operationLog";
+                }
+              },
+        },
+        created(){
+        	this.loading=false;
+        	
+        }//created方法 结束
+    })
+</script>
+</html>
