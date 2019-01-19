@@ -73,9 +73,9 @@
                 border
                 :data="dataTableUserRole" 
                 class="marginB10">
-                <el-table-column align="center" prop="num" label="序号" width="55"></el-table-column>
+                <el-table-column align="center" prop="id" type="index" label="序号" width="55"></el-table-column>
                 <el-table-column align="center" prop="name" label="姓名"></el-table-column>
-                <el-table-column align="center" prop="userName" label="登录名"></el-table-column>
+                <el-table-column align="center" prop="username" label="登录名"></el-table-column>
                 <el-table-column align="center" prop="phone" label="手机号"></el-table-column>
                 <el-table-column align="center" prop="orgName" label="所属组织"></el-table-column>
             </el-table>
@@ -148,7 +148,10 @@ var roleListVM =new Vue({
             	 //打开角色下的成员信息 
             	 roleListVM.dialogFormVisible = true;
             	 roleListVM.curRoleId=roleId;
-            	  this.queryUserDataList();
+            	 roleListVM.userForm.username='';	
+            	 roleListVM.userForm.name='';	
+            	 roleListVM.userForm.phone='';
+            	 this.queryUserDataList();
               },
               queryUserDataList(){
             	  //查询角色下用户成员
@@ -165,13 +168,12 @@ var roleListVM =new Vue({
                           return ;
                       }
                     
-                          var resobj= response.data;
-                          var pageData=resobj.data;
-                          roleListVM.userpager.total= pageData.total;
-                          roleListVM.userpager.currentPage = pageData.pageSizes;
-                          roleListVM.userpager.pageSize = pageData.pageSize;
-                          roleListVM.dataTableUserRole =pageData.data; 
-                     
+                       var resobj= response.data;
+                       var pageData=resobj.data;
+                       roleListVM.userpager.total= pageData.total;
+                       roleListVM.userpager.currentPage = pageData.currentPage;
+                       roleListVM.userpager.pageSize = pageData.pageSize;
+                       roleListVM.dataTableUserRole =pageData.data; 
                     })
                     .catch(function (error) {
                       console.log(error);
