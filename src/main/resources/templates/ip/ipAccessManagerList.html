@@ -33,6 +33,7 @@ xmlns:th="http://www.thymeleaf.org">
 						<el-col :span="20">
 							<el-button type="primary" @click="openIpAddData">添加IP</el-button>
 							<el-button type="primary" @click="delIpGroup">删除</el-button>
+							<el-button type="primary" @click="ipTabCreatePackage">创建IP包</el-button>
 						</el-col>
 						<el-col :span="4">
 							<!-- <el-form-item prop="ipAddress"> 
@@ -363,6 +364,12 @@ var ipManagerVM = new Vue({
 			});  
 
 		} ,
+		 ipTabCreatePackage(){
+		  //通过IP库页签打开添加IP包窗口
+	       ipManagerVM.addIpPackageVisible=true;
+	       ipManagerVM.ipPackageAddForm.name='';
+	       ipManagerVM.packAddIpTable=ipManagerVM.multipleIpSelection;;
+		 },
 		 openUpdateIpPackage(){
 		    var updateInfo=ipManagerVM.multiplePackageTable;
  	        if(updateInfo.length!=1){
@@ -390,7 +397,6 @@ var ipManagerVM = new Vue({
 					alert(response.data.message);
 					return ;
 				}
-				debugger;
 				var packInfoData=resobj.data;
 				ipManagerVM.ipPackageUpdateForm.name=packInfoData.name;
 				ipManagerVM.oldPackageName=packInfoData.name;
@@ -603,7 +609,7 @@ var ipManagerVM = new Vue({
 		packageSelectIpSubmit(){
 			//添加包选择Ip返回
 			if(ipManagerVM.selectIpType=='1'){
-				ipManagerVM.packAddIpTable=ipManagerVM.packAddIpTableip.concat(ManagerVM.multipleAddPackageIpSelection);	
+				ipManagerVM.packAddIpTable=ipManagerVM.packAddIpTable.concat(ipManagerVM.multipleAddPackageIpSelection);	
 			}else{
 				 ipManagerVM.packUpdateIpTable=ipManagerVM.packUpdateIpTable.concat(ipManagerVM.multipleAddPackageIpSelection);
 			}
@@ -636,6 +642,7 @@ var ipManagerVM = new Vue({
 						ipManagerVM.addIpPackageVisible=false;
 						ipManagerVM.addPackageIPSelectVisible=false;
 						ipManagerVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
+						  ipManagerVM.ipManager="second";
 						  ipManagerVM.queryPackageDataList(); 
 						 }});	
 					  });
