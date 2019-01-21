@@ -53,7 +53,7 @@
         <div class="block">
             <el-pagination @size-change="handleSizeChange"
                            @current-change="handleCurrentChange" :current-page="currentPage"
-                           :page-sizes="[10, 20, 30, 40]" :page-size="pageSize"
+                           :page-sizes="[20, 50, 100]" :page-size="pageSize"
                            layout="total, sizes, prev, pager, next, jumper" :total="total">
             </el-pagination>
         </div>
@@ -117,9 +117,9 @@
             callback(new Error('必须输入'))
         }
         value = Number(value)
-        if (typeof value === 'number' && !isNaN(value)) {
-            if (value < 0 || value > 100) {
-                callback(new Error('输入的值在 0 至  之间'))
+        if (value!='e' && typeof value === 'number' && !isNaN(value)) {
+            if (value < 0 || value > 999) {
+                callback(new Error('输入的值在 0 至 999之间'))
             } else {
                 callback()
             }
@@ -171,22 +171,31 @@
             },  update(){
                 var param =  updateDialogVm.add;
                 param.id =  paginationVm.multipleSelection[0].id;
-
-                axios.post('/dictionary/DictionaryItem/updateDictionaryItem', param)
-                    .then(function (response) {
-                        console.log(response.data)
-                        if(response.data.code==0){
-                            updateDialogVm.updateDialogFormVisible=false;
-                            updateDialogVm.$message({type: 'success', message: '更新成功!',duration:2000,onClose:function(){
-                                paginationVm.initTableData(paginationVm.pageNum);
-                            }});
-                        }else{
-                            updateDialogVm.$message.error(response.data.msg);
-                        }
-                    })
-                    .catch(function (error) {
-                        console.log(error);
-                    });
+                param.dicId = paginationVm.dicid;
+                this.$refs['add'].validate((valid) => {
+                    if (valid) {
+                        axios.post('/dictionary/DictionaryItem/updateDictionaryItem', param)
+                            .then(function (response) {
+                                console.log(response.data)
+                                if (response.data.code == 0) {
+                                    updateDialogVm.updateDialogFormVisible = false;
+                                    updateDialogVm.$message({
+                                        type: 'success', message: '更新成功!', duration: 2000, onClose: function () {
+                                            paginationVm.initTableData(paginationVm.pageNum);
+                                        }
+                                    });
+                                } else {
+                                    updateDialogVm.$message.error(response.data.msg);
+                                }
+                            })
+                            .catch(function (error) {
+                                console.log(error);
+                            });
+                    } else {
+                        console.log('数据未通过校验！');
+                        return false;
+                    }
+                })
             },
             showOutVisiable:function(){
                 this.updateDialogFormVisible = true
@@ -241,22 +250,29 @@
                 param.groupCode = paginationVm.groupCode;
                 console.log("---------------------------------")
                 console.log(param)
-                axios.post('/dictionary/DictionaryItem/saveDictionaryItem', param)
-                    .then(function (response) {
-                        if(response.data.code==0){
-                            addDialogVm.$message({type: 'success', message: '插入成功!',duration:2000,onClose:function(){
-                                    paginationVm.initTableData(1);
-                                }});
-                            addDialogVm.dialogFormVisible = false;
+                this.$refs['add'].validate((valid) => {
+                    if (valid) {
+                        axios.post('/dictionary/DictionaryItem/saveDictionaryItem', param)
+                            .then(function (response) {
+                                if(response.data.code==0){
+                                    addDialogVm.$message({type: 'success', message: '插入成功!',duration:2000,onClose:function(){
+                                            paginationVm.initTableData(1);
+                                        }});
+                                    addDialogVm.dialogFormVisible = false;
 
-                        }else{
-                            console.log(response.data)
-                            addDialogVm.$message.error(response.data.msg);
-                        }
-                    })
-                    .catch(function (error) {
-                        console.log(error);
-                    });
+                                }else{
+                                    console.log(response.data)
+                                    addDialogVm.$message.error(response.data.msg);
+                                }
+                            })
+                            .catch(function (error) {
+                                console.log(error);
+                            });
+                    } else {
+                        console.log('数据未通过校验！');
+                        return false;
+                    }
+                })
             },
             resetForm(formName) {
                 if(addDialogVm.$refs[formName])
@@ -375,7 +391,7 @@
             currentPage: 1,
             total: 0,
             pageNum: 1,
-            pageSize: 10
+            pageSize: 20
         },
         methods: {
             selectRow(row){
