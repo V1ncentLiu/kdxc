@@ -161,6 +161,7 @@ var fieldMenuVM = new Vue({
             saveFieldMenu(formName){//保存自定义字段
                 this.$refs[formName].validate((valid) => {
                     if (valid) {
+                    	fieldMenuVM.$refs.confirmBtn.disabled=true;
                        var param=this.form;
                       axios.post('/customfield/customField/saveOrUpdateMenu', param)
                       .then(function (response) {
@@ -178,7 +179,10 @@ var fieldMenuVM = new Vue({
                       
                       })
                       .catch(function (error) {
+                    	
                            console.log(error);
+                      }).then(function(){
+                    		fieldMenuVM.$refs.confirmBtn.disabled=false;
                       });
                        
                     } else {
