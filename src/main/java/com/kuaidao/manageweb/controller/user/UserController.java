@@ -332,6 +332,61 @@ public class UserController {
         }
         return null;
     }
+    
+    /**
+     *    首页 修改密码
+     * 
+     * @param orgDTO
+     * @return
+     */
+    @PostMapping("/updatePwd")
+    @ResponseBody
+    @LogRecord(description = "首页-修改密码", operationType = OperationType.UPDATE,
+            menuName = MenuEnum.UPDATE_PASSWORD)
+    public JSONResult updatePwd(@Valid @RequestBody UpdateUserPasswordReq updateUserPasswordReq,
+            BindingResult result) {
+
+        if (result.hasErrors()) {
+            return CommonUtil.validateParam(result);
+        }
+        
+        Subject subject = SecurityUtils.getSubject();
+        UserInfoDTO user = (UserInfoDTO) subject.getSession().getAttribute("user");
+        Long id = user.getId();
+        // 查询用户信息
+        JSONResult<UserInfoDTO> jsonResult = userInfoFeignClient.get(new IdEntityLong(id));
+        UserInfoDTO data = jsonResult.getData();
+        if (JSONResult.SUCCESS.equals(jsonResult.getCode()) && data != null) {
+            // 判断密码是否正确
+            if (data.getPassword().equals(MD5Util.StringToMd5(MD5Util
+                    .StringToMd5(updateUserPasswordReq.getOldPassword() + data.getSalt())))) {
+                UserInfoReq userInfoReq = new UserInfoReq();
+                userInfoReq.setId(id);
+                userInfoReq.setPassword(updateUserPasswordReq.getNewPassword());
+                // 修改密码
+                JSONResult<String> updatePwdRes = userInfoFeignClient.update(userInfoReq);
+                if (updatePwdRes != null && JSONResult.SUCCESS.equals(updatePwdRes.getCode())) {
+
+                    if (subject.isAuthenticated()) {
+                        subject.logout();
+                    }
+                    // 退出成功，保存退出状态
+                    UserInfoReq update = new UserInfoReq();
+                    update.setId(user.getId());
+                    update.setIsLogin(Constants.IS_LOGIN_DOWN);
+                    userInfoFeignClient.update(update);
+                }
+                return updatePwdRes;
+            } else {
+                return new JSONResult().fail(UserErrorCodeEnum.ERR_WRONG_PHONE_PASSWORD.getCode(),
+                        "当前密码错误，请重新输入");
+            }
+        } else {
+            return new JSONResult().fail(UserErrorCodeEnum.ERR_ACCOUNT_NOT_EXIST.getCode(),
+                    UserErrorCodeEnum.ERR_ACCOUNT_NOT_EXIST.getMessage());
+        }
+
+    }
 
 
 }
