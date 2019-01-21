@@ -74,6 +74,8 @@ public class AbnormalController {
     @ResponseBody
     public JSONResult insertOne(@Valid @RequestBody AbnomalUserAddAndUpdateDTO dto  , BindingResult result){
         if (result.hasErrors()) return  CommonUtil.validateParam(result);
+        dto.setCreateTime(new Date());
+        dto.setCreateUser(123456L);
         return  abnormalUserFeignClient.saveAbnomalUser(dto);
 }
 

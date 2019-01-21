@@ -8,6 +8,7 @@ import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.common.util.CommonUtil;
 import com.kuaidao.manageweb.feign.deptcallset.DeptCallSetFeignClient;
+import com.kuaidao.manageweb.util.IdUtil;
 import com.kuaidao.sys.dto.dictionary.DictionaryAddAndUpdateDTO;
 import com.kuaidao.sys.dto.dictionary.DictionaryQueryDTO;
 import com.kuaidao.sys.dto.dictionary.DictionaryRespDTO;
@@ -22,6 +23,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.validation.Valid;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -51,12 +54,18 @@ public class DeptCallSetController {
     @ResponseBody
     public JSONResult insertOne(@Valid @RequestBody DeptCallSetAddAndUpdateDTO dto , BindingResult result){
         if (result.hasErrors()) return  CommonUtil.validateParam(result);
+
+        dto.setCreateTime(new Date());
+        dto.setCreateUser(123456L);
+
         return deptCallSetFeignClient.saveDeptCallSet(dto);
 }
 
     @RequestMapping("/updateAbnoramlUser")
     @ResponseBody
     public JSONResult updateAbnoramlUser(@RequestBody DeptCallSetAddAndUpdateDTO dto){
+        dto.setUpdateTime(new Date());
+        dto.setUpdateUser(123456L);
         return deptCallSetFeignClient.updateDeptCallSets(dto);
     }
 
@@ -69,7 +78,22 @@ public class DeptCallSetController {
     @PostMapping("/import")
     @ResponseBody
     public JSONResult<PageBean<DeptCallSetRespDTO>> queryDictionary(@RequestBody List<DeptCallSetAddAndUpdateDTO> list){
-        return deptCallSetFeignClient.importDeptCallSets(list);
+        /**
+         * 进行数据简单
+         */
+        List<DeptCallSetAddAndUpdateDTO> insertList = new ArrayList();
+        for(DeptCallSetAddAndUpdateDTO dto:list){
+
+//          进行数据长度检验
+//          进行组织机构检验
+
+
+            dto.setId(IdUtil.getUUID());
+            dto.setCreateUser(123456L);
+            dto.setCreateTime(new Date());
+            insertList.add(dto);
+        }
+        return deptCallSetFeignClient.importDeptCallSets(insertList);
     }
 
 }
