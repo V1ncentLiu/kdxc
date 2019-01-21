@@ -54,13 +54,6 @@ public class DeptCallSetController {
         return new JSONResult();
     }
 
-    @RequestMapping("/deleteAbnoramlUser")
-    @ResponseBody
-    public JSONResult deleteAbnoramlUser(@RequestBody List ids){
-//        return abnormalFeignClient.deleteDictionary(idEntity);
-        return new JSONResult();
-    }
-
     @PostMapping("/queryAbnoramlUsers")
     @ResponseBody
     public JSONResult<PageBean<DictionaryRespDTO>> queryDictionary(@RequestBody DictionaryQueryDTO queryDTO){

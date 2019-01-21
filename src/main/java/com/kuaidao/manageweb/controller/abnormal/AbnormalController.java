@@ -56,7 +56,7 @@ public class AbnormalController {
 
     @RequestMapping("/abnormalUserPage")
     public String pageIndex(){
-        return "abnormal/abnormalUserList.html";
+        return "abnormal/abnormalUserList";
     }
 
 
@@ -72,13 +72,6 @@ public class AbnormalController {
     @RequestMapping("/deleteAbnoramlUser")
     @ResponseBody
     public JSONResult deleteAbnoramlUser(@RequestBody IdEntity idEntity){
-//        return abnormalFeignClient.deleteDictionary(idEntity);
-        return new JSONResult();
-    }
-
-    @RequestMapping("/deleteAbnoramlUser")
-    @ResponseBody
-    public JSONResult deleteAbnoramlUser(@RequestBody List ids){
 //        return abnormalFeignClient.deleteDictionary(idEntity);
         return new JSONResult();
     }
