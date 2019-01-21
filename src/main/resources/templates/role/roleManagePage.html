@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml"
     xmlns:th="http://www.thymeleaf.org">
-<head th:include="_header_include::frag(~{::title},~{},~{})">
+<head th:include="_header_include::frag(~{::title},~{::style},~{})">
 	<title>角色列表</title>
     <style>
         button a{color:#fff!important;}
@@ -196,6 +196,14 @@ var roleListVM =new Vue({
               },
             // 删除
             deleteFun() {
+                var rows = this.multipleSelection;
+                if(rows.length!=1){
+                    this.$message({
+                       message: '请选择一条数据进行删除',
+                       type: 'warning'
+                     });
+                    return;
+                }
                 this.$confirm('删除后此角色信息将不存在，确认删除吗？', '消息提醒', {
                     confirmButtonText: '确定',
                     cancelButtonText: '取消',
