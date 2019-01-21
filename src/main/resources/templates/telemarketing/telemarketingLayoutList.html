@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:th="http://www.thymeleaf.org">
+<head th:include="_header_include::frag(~{::title},~{},~{})">
+    <title>电销布局管理</title>
+    <style>
+	    
+    </style>
+</head>
+<body>
+<div id="organizationManage" class="organizationManage mainPadding" >  
+    <el-breadcrumb separator="/" class="elBreadcrumb marginB20" >
+        <el-breadcrumb-item>Home</el-breadcrumb-item>
+        <el-breadcrumb-item>业务设置</el-breadcrumb-item>
+        <el-breadcrumb-item><a href="/invitearea/inviteAreaList" data-url="b.html">电销布局管理</a></el-breadcrumb-item>
+    </el-breadcrumb>
+    <el-row class="marginB10">
+        <el-col :xs="12" :sm="16" :md="16" :lg="18" :xl="12">
+            <el-button type="primary"  @click="addFieldMenu"><i class="el-icon-plus"></i> 新建电销布局</el-button>
+            <el-button type="primary" @click="deleButton">删除</el-button>
+            <el-button type="primary" @click="exportButton">导入</el-button>
+                        <el-button type="primary" @click="updateButton">编辑电销布局</el-button>
+        </el-col>
+</el-row>
+        
+            <el-row class="marginB10">
+            	<div class="block">
+            	<el-select v-model="telemarketingTeamId" placeholder="请选择电销组">
+					    <el-option
+					      v-for="item in telemarketingTeams"
+					      :key="item.value"
+					      :label="item.label"
+					      :value="item.value">
+					    </el-option>
+  					</el-select>
+  					<el-select v-model="projects" placeholder="项目">
+					    <el-option
+					      v-for="item in projects"
+					      :key="item.value"
+					      :label="item.label"
+					      :value="item.value">
+					    </el-option>
+  					</el-select>
+					<span class="demonstration">操作时间</span>
+					<el-date-picker value-format="yyyy-MM-dd HH:mm:ss" v-model="beginTime" type="datetime" placeholder="选择日期">
+					</el-date-picker>
+					<span class="demonstration" style="margin-left: 20px;">结束</span>
+					<el-date-picker value-format="yyyy-MM-dd HH:mm:ss" v-model="endTime" type="datetime" placeholder="选择日期">
+					</el-date-picker>
+  					<el-button type="primary" @click="queryLogDataList">查询</el-button>
+				</div>
+            </el-row>
+            <el-row>
+                <el-table 
+                    ref="multipleTable"
+                    tooltip-effect="dark"
+                    empty-text="无数据"
+                    style="width: 100%"
+                    border
+                    :data="dataTable" 
+                    >
+                     <el-table-column align="center" type="selection" width="55"></el-table-column> 
+                     <!-- <el-table-column prop="date" label="全选" width="180"></el-table-column>  -->
+                    <el-table-column align="center" prop="userName" label="商务小组"></el-table-column>
+                    <el-table-column align="center" prop="name" label="区域"></el-table-column>
+                    <el-table-column align="center" prop="phone" label="电销组"></el-table-column>
+                    <el-table-column align="center" prop="remoteIP" label="签约项目"></el-table-column>
+                </el-table>
+                 <table-pagination :pager="pager"  @change="queryLogDataList"></table-pagination>
+            </el-row>
+     
+    </el-row>
+  <el-dialog width="30%" :title="addOrModifyDialogTitle" :visible.sync="dialogFormVisible" @close="closeAddCustomFieldDialog">
+       <el-form :model="form" ref="customMenuForm" :rules="rules">
+       <div id="checkContent"></div>
+              <el-form-item label="项目：" :label-width="formLabelWidth"  prop="projectIds">
+			    <el-select @change="projectChange" width="60%" v-model="form.projectIds" placeholder="项目">
+			      <el-option label="区域一" value="shanghai"></el-option>
+			      <el-option label="区域二" value="beijing"></el-option>
+			    </el-select><el-button >添加</el-button>
+			  </el-form-item>
+			  <el-form-item label="电销组：" :label-width="formLabelWidth"  prop="telemarketingTeamId">
+			    <el-select  width="60%" v-model="form.telemarketingTeamId" placeholder="电销组">
+			      <el-option label="区域一" value="shanghai"></el-option>
+			      <el-option label="区域二" value="beijing"></el-option>
+			    </el-select>
+			  </el-form-item>
+            <el-form-item label="开始时间：" :label-width="formLabelWidth"  prop="beginTime">
+                <el-date-picker style="width:60%;" value-format="yyyy-MM-dd" v-model="form.beginTime" type="date" placeholder="选择日期">
+					</el-date-picker>
+            </el-form-item>
+            <el-form-item label="结束时间：" :label-width="formLabelWidth"  prop="endTime">
+                <el-date-picker style="width:60%;" value-format="yyyy-MM-dd" v-model="form.endTime" type="date" placeholder="选择日期">
+					</el-date-picker>
+            </el-form-item>
+            <el-form-item label="启用状态：" :label-width="formLabelWidth">
+            	<el-select  width="60%" v-model="form.status">
+			      <el-option label="启用" value="0"></el-option>
+			      <el-option label="停用" value="1"></el-option>
+			    </el-select>
+			  </el-form-item>
+        </el-form>
+        <div slot="footer" class="dialog-footer">
+            <el-button @click="cancelForm('customMenuForm')">取 消</el-button>
+            <el-button type="primary" @click="saveFieldTelemarket('customMenuForm')">确 定</el-button>
+        </div>
+    </el-dialog>
+</div>
+</body>
+<!-- import common js-->
+<div th:include="_footer_include :: #jsLib"></div>
+<script th:inline="javascript">
+
+    var orgData=[[${orgData}]];
+
+   var orgVM =  new Vue({
+        el: '#organizationManage',
+        data: {
+        	
+        	dataTable:[],
+        	telemarketingTeamId:"",
+        	businessGroupId:"",
+        	addOrModifyDialogTitle:"",
+        	dialogFormVisible: false,
+        	formLabelWidth: '150px',
+        	form: {
+            	id:'',
+            	projectIds:'',
+            	telemarketingTeamId:'',
+            	beginTime:'',
+            	endTime:'',
+            	status:'0'
+            },
+        	projects:[{
+            	value: '1',
+                label: '登陆名称'	
+            	},
+            	{
+               	value: '2',
+                label: '姓名'	
+               	}
+            ],
+            telemarketingTeams:[{
+            	value: '1',
+                label: '登陆名称'	
+            	},
+            	{
+               	value: '2',
+                label: '姓名'	
+               	}
+            ],
+        	
+            rules:{
+            	projectIds:[
+            		{ required: true, message: '请选择项目',trigger:'blur'},
+            	],
+            	telemarketingTeamId:[
+            		{ required: true, message: '请选择电销组',trigger:'blur'},
+            	],
+            	beginTime:[
+	        		{ required: true, message: '请选择开始时间',trigger:'blur'},
+	        	],
+           		endTime:[
+               		{ required: true, message: '请选择结束时间',trigger:'blur'},
+               	]
+        		
+            }//rules end
+        	,
+        	
+            	beginTime:"",
+            	endTime:"",
+              
+                pager:{
+                    total: 0,
+                    currentPage: 1,
+                    pageSize: 20,
+                },
+                loading:true
+             
+        },
+        methods: {
+        	projectChange(){
+        		
+        	},
+        	queryLogDataList(){//查询按钮
+            	  var param = {}; 
+            	  var pageSize = this.pager.pageSize;
+                  var pageNum = this.pager.currentPage;
+                  param.pageNum = pageNum;
+                  param.pageSize = pageSize;
+                  param.beginTime=this.beginTime;
+                  param.endTime=this.endTime;
+                  param.content=this.content;
+                  param.queryType=this.queryType;
+                  param.searchContent=this.searchContent;
+                  param.visitType = 1;
+                  console.log(param);
+                  axios.post('/log/log/queryLogDataList',param).then(function (response) {
+                  	  console.log(response);
+                             /* if(null===response||response.data==null||response.data.code!='0'){
+                          	  alert(response.data.message);
+                          	  return ;
+                             }else{
+                            	 orgVM.dataTable =response.data.data.data; 
+                            	 orgVM.pager.currentPage= response.data.data.currentPage;
+                            	 orgVM.pager.total= response.data.data.total;
+                             } */
+                  })
+                  .catch(function (error) {
+                    console.log(error);
+                  })
+                  .then(function () {
+                  });  
+                  
+              } ,
+              handleClick(tab, event) {
+                if(tab.name=='first'){
+                	window.location.href="/log/log/visitLog";
+                }else{
+                	window.location.href="/log/log/operationLog";
+                }
+              },
+              updateButton(){
+            	  //修改菜单数据	
+              	var rows = this.multipleSelection;
+                  if(rows.length!=1){
+                      this.$message({
+                         message: '请选择一条数据进行修改',
+                         type: 'warning'
+                       });
+                      return;
+                  }
+              },
+              deleButton(){
+            	  var rows = this.multipleSelection;
+                  if(rows.length!=1){
+                      this.$message({
+                         message: '请选择一条数据进行修改',
+                         type: 'warning'
+                       });
+                      return;
+                  }
+                  axios.post('/log/log/queryLogDataList',param).then(function (response) {
+                  	  console.log(response);
+                              if(null===response||response.data==null||response.data.code!='0'){
+                          	  alert(response.data.message);
+                          	  return ;
+                             }else{
+                            	 window.location.href="/invitearea/inviteAreaList"; 
+                             } 
+                  })
+            	  
+              },
+              exportButton(){
+            	  window.location.href="/module/moduleManager/exportInviteArea?moduleId="+rows[0].id; 
+              },
+              showExport(){//点击弹出新增dialog
+              	this.dialogFormVisible = true;
+              	this.addOrModifyDialogTitle="添加电销布局";
+              },
+              closeAddCustomFieldDialog(){//关闭添加自定义字段dialog
+              	  this.$refs['customMenuForm'].resetFields();
+              },
+              cancelForm(formName) {
+                  this.$refs[formName].resetFields();
+              	this.dialogFormVisible = false;
+              }
+              ,
+              addFieldMenu(){//点击弹出新增dialog
+              	this.form.id='';
+              	this.dialogFormVisible = true;
+              	this.addOrModifyDialogTitle="添加电销布局";
+              },
+              saveFieldTelemarket(formName){
+            	  alert(1);
+            	  this.$refs[formName].validate((valid) => {
+            		  
+            	  })
+              },
+        },
+        created(){
+        	this.loading=false;
+        	
+        }//created方法 结束
+    })
+</script>
+</html>
