@@ -65,5 +65,9 @@ public class LogController {
             HttpServletResponse response) {
         return logMgtFeignClient.queryLogRecord(logReqDTO);
     }
+    
+  public static void main(String[] args) {
+	
+}
 
 }
