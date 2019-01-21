@@ -14,6 +14,7 @@
                 dialogFormVisible: false,
                 dialogStaffNumVisible:false,
                 addOrModifyDialogTitle:'',//条件或修改组织机构标题
+                submitUrl:'',//添加组织机构 url
                 form: {//添加组织机构dialog
                     name: '',
                     remark: '',
@@ -239,6 +240,7 @@
                      return;
             	}
                 this.addOrModifyDialogTitle="添加下级组织";
+                this.submitUrl = 'save';
             	this.dialogFormVisible = true;
             	
             },
@@ -249,7 +251,7 @@
                      param.parentId=this.selectedNode.id;
                  
                      
-                    axios.post('/organization/organization/saveOrUpdate', param)
+                    axios.post('/organization/organization/'+this.submitUrl, param)
                     .then(function (response) {
                     	var resData = response.data;
                     	if(resData.code=='0'){
@@ -312,6 +314,7 @@
                       return;
                   }
                   this.addOrModifyDialogTitle="修改组织信息";
+                  this.submitUrl = 'update';
                   
                  var parentName =  orgVM.form.parentName;
                   var param={id:rows[0].id};
