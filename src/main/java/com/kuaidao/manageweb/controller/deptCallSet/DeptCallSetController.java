@@ -1,14 +1,19 @@
 package com.kuaidao.manageweb.controller.deptCallSet;
 
+import com.kuaidao.aggregation.dto.deptCallSet.DeptCallSetAddAndUpdateDTO;
+import com.kuaidao.aggregation.dto.deptCallSet.DeptCallSetQueryDTO;
+import com.kuaidao.aggregation.dto.deptCallSet.DeptCallSetRespDTO;
 import com.kuaidao.common.entity.IdEntity;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.common.util.CommonUtil;
+import com.kuaidao.manageweb.feign.deptcallset.DeptCallSetFeignClient;
 import com.kuaidao.sys.dto.dictionary.DictionaryAddAndUpdateDTO;
 import com.kuaidao.sys.dto.dictionary.DictionaryQueryDTO;
 import com.kuaidao.sys.dto.dictionary.DictionaryRespDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -23,7 +28,7 @@ import java.util.List;
  * @Auther: admin
  * @Date: 2019/1/2 15:14
  * @Description:
- *      系统公告
+ *      部门呼叫设置
  */
 
 @Controller
@@ -31,6 +36,10 @@ import java.util.List;
 public class DeptCallSetController {
 
     private static Logger logger = LoggerFactory.getLogger(DeptCallSetController.class);
+
+
+    @Autowired
+    DeptCallSetFeignClient deptCallSetFeignClient;
 
     @RequestMapping("/deptcallsetPage")
     public String pageIndex(){
@@ -40,24 +49,27 @@ public class DeptCallSetController {
 
     @RequestMapping("/saveOne")
     @ResponseBody
-    public JSONResult insertOne(@Valid @RequestBody DictionaryAddAndUpdateDTO dictionaryDTO  , BindingResult result){
+    public JSONResult insertOne(@Valid @RequestBody DeptCallSetAddAndUpdateDTO dto , BindingResult result){
         if (result.hasErrors()) return  CommonUtil.validateParam(result);
-
-//        return  abnormalFeignClient.saveDictionary(dictionaryDTO);
-        return new JSONResult();
+        return deptCallSetFeignClient.saveDeptCallSet(dto);
 }
 
-    @RequestMapping("/deleteAbnoramlUser")
+    @RequestMapping("/updateAbnoramlUser")
     @ResponseBody
-    public JSONResult deleteAbnoramlUser(@RequestBody IdEntity idEntity){
-//        return abnormalFeignClient.deleteDictionary(idEntity);
-        return new JSONResult();
+    public JSONResult updateAbnoramlUser(@RequestBody DeptCallSetAddAndUpdateDTO dto){
+        return deptCallSetFeignClient.updateDeptCallSets(dto);
     }
 
     @PostMapping("/queryAbnoramlUsers")
     @ResponseBody
-    public JSONResult<PageBean<DictionaryRespDTO>> queryDictionary(@RequestBody DictionaryQueryDTO queryDTO){
-//        JSONResult<PageBean<DictionaryRespDTO>> listJSONResult = dictionaryFeignClient.queryDictionary(queryDTO);
-        return new JSONResult();
+    public JSONResult<PageBean<DeptCallSetRespDTO>> queryDictionary(@RequestBody DeptCallSetQueryDTO dto){
+        return deptCallSetFeignClient.queryDeptCallSetList(dto);
     }
+
+    @PostMapping("/import")
+    @ResponseBody
+    public JSONResult<PageBean<DeptCallSetRespDTO>> queryDictionary(@RequestBody List<DeptCallSetAddAndUpdateDTO> list){
+        return deptCallSetFeignClient.importDeptCallSets(list);
+    }
+
 }

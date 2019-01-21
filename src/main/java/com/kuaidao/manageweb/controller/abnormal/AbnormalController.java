@@ -1,5 +1,8 @@
 package com.kuaidao.manageweb.controller.abnormal;
 
+import com.kuaidao.aggregation.dto.abnormal.AbnomalUserAddAndUpdateDTO;
+import com.kuaidao.aggregation.dto.abnormal.AbnomalUserQueryDTO;
+import com.kuaidao.aggregation.dto.abnormal.AbnomalUserRespDTO;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.IdEntity;
 import com.kuaidao.common.entity.JSONResult;
@@ -7,6 +10,7 @@ import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.common.util.CommonUtil;
 import com.kuaidao.manageweb.config.LogRecord;
 import com.kuaidao.manageweb.constant.MenuEnum;
+import com.kuaidao.manageweb.feign.abnormal.AbnormalUserFeignClient;
 import com.kuaidao.manageweb.feign.announcement.AnnReceiveFeignClient;
 import com.kuaidao.manageweb.feign.announcement.AnnouncementFeignClient;
 import com.kuaidao.manageweb.feign.msgpush.MsgPushFeignClient;
@@ -40,12 +44,13 @@ import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @Auther: admin
  * @Date: 2019/1/2 15:14
  * @Description:
- *      系统公告
+ *      标记异常客户
  */
 
 @Controller
@@ -53,6 +58,11 @@ import java.util.List;
 public class AbnormalController {
 
     private static Logger logger = LoggerFactory.getLogger(AbnormalController.class);
+
+
+    @Autowired
+    AbnormalUserFeignClient abnormalUserFeignClient;
+
 
     @RequestMapping("/abnormalUserPage")
     public String pageIndex(){
@@ -62,24 +72,20 @@ public class AbnormalController {
 
     @RequestMapping("/saveOne")
     @ResponseBody
-    public JSONResult insertOne(@Valid @RequestBody DictionaryAddAndUpdateDTO dictionaryDTO  , BindingResult result){
+    public JSONResult insertOne(@Valid @RequestBody AbnomalUserAddAndUpdateDTO dto  , BindingResult result){
         if (result.hasErrors()) return  CommonUtil.validateParam(result);
-
-//        return  abnormalFeignClient.saveDictionary(dictionaryDTO);
-        return new JSONResult();
+        return  abnormalUserFeignClient.saveAbnomalUser(dto);
 }
 
     @RequestMapping("/deleteAbnoramlUser")
     @ResponseBody
-    public JSONResult deleteAbnoramlUser(@RequestBody IdEntity idEntity){
-//        return abnormalFeignClient.deleteDictionary(idEntity);
-        return new JSONResult();
+    public JSONResult deleteAbnoramlUser(@RequestBody Map map){
+        return abnormalUserFeignClient.deleteAbnomalUsers((List<Long>)map.get("ids"));
     }
 
     @PostMapping("/queryAbnoramlUsers")
     @ResponseBody
-    public JSONResult<PageBean<DictionaryRespDTO>> queryDictionary(@RequestBody DictionaryQueryDTO queryDTO){
-//        JSONResult<PageBean<DictionaryRespDTO>> listJSONResult = dictionaryFeignClient.queryDictionary(queryDTO);
-        return new JSONResult();
+    public JSONResult<PageBean<AbnomalUserRespDTO>> queryDictionary(@RequestBody AbnomalUserQueryDTO dto){
+        return abnormalUserFeignClient.queryAbnomalUserList(dto);
     }
 }
