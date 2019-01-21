@@ -1,180 +1,205 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml"  xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
 <head th:replace="_header_include::frag(~{::title},~{::style},~{})">
-    <title>后台管理系统</title>
-    <style>
-        button a{color:#fff!important;}
-        .formItem,.formItem .el-form-item__content{width:100%}
-    </style>
+  <title>后台管理系统</title>
+  <style>
+  button a{color:#fff!important;}
+  .formItem,.formItem .el-form-item__content{width:100%}
+  .orgSelectOopover{width:100%;text-align: left;position: relative;}
+  .orgSelectOopover:hover{background-color: #fff;border-color: #c0c4cc;}
+  .orgSelectInput{position: absolute;left: 0;top: 0;width: 90%;}
+  .orgSelectInput input{border: none;background: none;}
+  .orgSelectInput input:hover{cursor: pointer;}
+</style>
 </head>
 <body>
-<div id="userManage" class="userManage mainPadding">  
+  <div id="userManage" class="userManage mainPadding">  
     <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
-        <el-breadcrumb-item>Home</el-breadcrumb-item>
-        <el-breadcrumb-item>系统管理</el-breadcrumb-item>
-        <el-breadcrumb-item><a href="JavaScript:void(0)" data-url="a.html">用户管理</a></el-breadcrumb-item>
+      <el-breadcrumb-item>Home</el-breadcrumb-item>
+      <el-breadcrumb-item>系统管理</el-breadcrumb-item>
+      <el-breadcrumb-item><a href="JavaScript:void(0)" data-url="a.html">用户管理</a></el-breadcrumb-item>
     </el-breadcrumb>
-    
-    
+
+
     <el-form :inline="true" :model="userSearchForm" class="demo-form-inline" ref="userSearchForm"> 
-	    <el-row class="marginB10">
-		    <el-form-item class="formItem">
-		    	<shiro:hasPermission name="sys:userManager:add">
-		        	<el-button type="primary" @click="toAddUser"><i class="el-icon-plus"></i>添加用户</el-button>
-		        </shiro:hasPermission>
-		        <shiro:hasPermission name="sys:userManager:edit">
-		        	<el-button type="primary" @click="toUpdateUser">编辑用户</el-button>
-		        </shiro:hasPermission>
-		        <shiro:hasPermission name="sys:userManager:edit" class="f-fr" >
-		        	<el-button type="primary" @click="showDialogFormVisible">密码安全设置</el-button>
-		        </shiro:hasPermission>
-	    	</el-form-item>
-	    </el-row>
-	    <el-row class="marginB10 greybg padding20" style="padding-bottom: 0;">
-	        <el-row :gutter="20">
-	            <el-col :span="4">
-		            <el-form-item  prop="orgId">
-		                <el-select v-model="userSearchForm.orgId"  placeholder="选择所属组织">
-		                    <el-option v-for="item in searchTypeOptions"
-				                        :key="item.value"
-				                        :label="item.label"
-				                        :value="item.value">
-		                    </el-option>
-		                </el-select>
-		            </el-form-item>
-	            </el-col>
-	            <el-col :span="4">
-	            	<el-form-item  prop="roleId">
-		                <el-select v-model="userSearchForm.roleId" placeholder="角色选择">
-		                    <el-option
-		                        v-for="item in roleOptions"
-		                        :key="item.id"
-		                        :label="item.roleName"
-		                        :value="item.id">
-		                    </el-option>
-		                </el-select>
-	                </el-form-item>
-	            </el-col>
-	            <el-col :span="4">
-	            	<el-form-item  prop="status">
-		                <el-select v-model="userSearchForm.status" placeholder="全部状态">
-		                    <el-option
-		                        v-for="item in statusOptions"
-		                        :key="item.value"
-		                        :label="item.label"
-		                        :value="item.value">
-		                    </el-option>
-		                </el-select>
-	                </el-form-item>
-	            </el-col>
-	            <el-col :span="4">
-	            	<el-form-item  prop="searchType">
-		                <el-select v-model="userSearchForm.searchType" >
-		                    <el-option
-		                        v-for="item in searchTypeOptions"
-		                        :key="item.value"
-		                        :label="item.label"
-		                        :value="item.value">
-		                    </el-option>
-		                </el-select>
-	                </el-form-item>
-	            </el-col>
-	            <el-col :span="5">
-	            	<el-form-item  prop="searchText">
-		                <el-input v-model="userSearchForm.searchText" placeholder="输入查询内容" class="input-with-select">
-		                	<el-button slot="append" icon="el-icon-search" type="primary" @click="searchTable()"></el-button>
-		                </el-input>
-	                </el-form-item>
-	            </el-col>
-	        </el-row>
-	    </el-row>
-  	</el-form>
-    
-    
-    <el-row>
-        <el-table  ref="multipleTable" tooltip-effect="dark" @selection-change="handleSelectionChange"
-            style="width: 100%"  :data="dataTable" >
-            <el-table-column align="center" type="selection" width="55"></el-table-column>
-            <!-- <el-table-column prop="date" label="全选" width="180"></el-table-column> -->
-            <el-table-column align="center" prop="username" label="登录用户名"></el-table-column>
-            <el-table-column align="center" prop="phone" label="手机号"></el-table-column>
-            <el-table-column align="center" prop="name" label="姓名"></el-table-column>
-            <el-table-column align="center" prop="orgName" label="所在组织"></el-table-column>
-            <el-table-column align="center" prop="roleList" label="角色" :formatter="transformRole"></el-table-column>
-            <el-table-column align="center" prop="createTime" label="创建时间"  :formatter="dateFormat" ></el-table-column>
-            <el-table-column align="center" prop="duration" label="密码使用时长（天）" ></el-table-column>
-            <el-table-column align="center" prop="status" label="状态" :formatter="transformStatus"></el-table-column>
-            <el-table-column align="center" label="操作">
-                <template slot-scope="scope">
-                <shiro:hasPermission name="sys:userManager:edit">
-	                <div v-if="scope.row.status === 1">
-	                    <el-button  @click="updateStatus(scope.row.id,2,'禁用')" type="text"  size="small">
-	                     		   禁用
-	                    </el-button>
-	                    <el-button  @click="updateStatus(scope.row.id,3,'锁定')" type="text"  size="small">
-	                     		   锁定
-	                    </el-button>
-					</div>
-				
-	                <div v-else-if="scope.row.status === 2">
-	                    <el-button @click="updateStatus(scope.row.id,1,'启用')"  type="text"  size="small">
-	                     		   启用
-	                    </el-button>
-					</div>
-	                <div v-else-if="scope.row.status === 3">
-	                    <el-button @click="updateStatus(scope.row.id,1,'解锁')"  type="text"  size="small">
-	                     		   解锁
-	                    </el-button>
-					</div>
-                </shiro:hasPermission>
-                </template>
-                
-            </el-table-column>
-        </el-table>
-        <table-pagination :pager="pager" @change="searchTable"></table-pagination>
+      <el-row class="marginB10">
+        <el-form-item class="formItem">
+          <shiro:hasPermission name="sys:userManager:add">
+          <el-button type="primary" @click="toAddUser"><i class="el-icon-plus"></i>添加用户</el-button>
+        </shiro:hasPermission>
+        <shiro:hasPermission name="sys:userManager:edit">
+        <el-button type="primary" @click="toUpdateUser">编辑用户</el-button>
+      </shiro:hasPermission>
+      <shiro:hasPermission name="sys:userManager:edit">
+      <el-button type="primary" class="f-fr" @click="showDialogFormVisible">密码安全设置</el-button>
+    </shiro:hasPermission>
+  </el-form-item>
+</el-row>
+<el-row class="marginB10 greybg padding20" style="padding-bottom: 0;">
+  <el-row :gutter="20">
+    <el-col :span="4">
+<!-- <el-form-item  prop="orgId">
+<el-select v-model="userSearchForm.orgId"  placeholder="选择所属组织">
+<el-option v-for="item in searchTypeOptions"
+:key="item.value"
+:label="item.label"
+:value="item.value">
+</el-option>
+</el-select>
+</el-form-item> -->
+<el-popover
+placement="bottom"
+width="200"
+trigger="click"
+v-model="isShow">                    
+<el-tree
+:data="dataTree"              
+node-key="id"
+:default-expanded-keys="[]"
+ref="tree"
+highlight-current
+@node-click="treeNodeClick">
+</el-tree> 
+<el-button slot="reference" class="orgSelectOopover">
+  <el-input v-model="userSearchForm.orgName" placeholder="选择所属组织" class="orgSelectInput" readonly></el-input>
+  <i class="el-icon-arrow-down" style="float: right;margin-right: -12px;color: #c0c4cc;"></i>
+</el-button>            
+</el-popover>
+</el-col>
+<el-col :span="4">
+  <el-form-item class="formItem"  prop="roleId" style="width: 100%;">
+    <el-select v-model="userSearchForm.roleId" placeholder="角色选择" style="width: 100%;">
+      <el-option
+      v-for="item in roleOptions"
+      :key="item.id"
+      :label="item.roleName"
+      :value="item.id">
+    </el-option>
+  </el-select>
+</el-form-item>
+</el-col>
+<el-col :span="4">
+  <el-form-item class="formItem"  prop="status" style="width: 100%;">
+    <el-select v-model="userSearchForm.status" placeholder="全部状态" style="width: 100%;">
+      <el-option
+      v-for="item in statusOptions"
+      :key="item.value"
+      :label="item.label"
+      :value="item.value">
+    </el-option>
+  </el-select>
+</el-form-item>
+</el-col>
+<el-col :span="4">
+  <el-form-item class="formItem"  prop="searchType" style="width: 100%;">
+    <el-select v-model="userSearchForm.searchType" style="width: 100%;">
+      <el-option
+      v-for="item in searchTypeOptions"
+      :key="item.value"
+      :label="item.label"
+      :value="item.value">
+    </el-option>
+  </el-select>
+</el-form-item>
+</el-col>
+<el-col :span="5">
+  <el-form-item class="formItem" prop="searchText">
+    <el-input v-model="userSearchForm.searchText" placeholder="输入查询内容" class="input-with-select"></el-input>
+  </el-form-item>
+</el-col>
+<el-col :span="3">
+    <el-button type="primary" @click="searchTable()">搜索</el-button>
+</el-col>
+</el-row>
+</el-row>
+</el-form>
+
+
+<el-row>
+  <el-table  ref="multipleTable" tooltip-effect="dark" @selection-change="handleSelectionChange"
+  style="width: 100%"  :data="dataTable" >
+  <el-table-column align="center" type="selection" width="55"></el-table-column>
+  <!-- <el-table-column prop="date" label="全选" width="180"></el-table-column> -->
+  <el-table-column align="center" prop="username" label="登录用户名"></el-table-column>
+  <el-table-column align="center" prop="phone" label="手机号"></el-table-column>
+  <el-table-column align="center" prop="name" label="姓名"></el-table-column>
+  <el-table-column align="center" prop="orgName" label="所在组织"></el-table-column>
+  <el-table-column align="center" prop="roleList" label="角色" :formatter="transformRole"></el-table-column>
+  <el-table-column align="center" prop="createTime" label="创建时间"  :formatter="dateFormat" ></el-table-column>
+  <el-table-column align="center" prop="duration" label="密码使用时长（天）" ></el-table-column>
+  <el-table-column align="center" prop="status" label="状态" :formatter="transformStatus"></el-table-column>
+  <el-table-column align="center" label="操作">
+    <template slot-scope="scope">
+      <shiro:hasPermission name="sys:userManager:edit">
+      <div v-if="scope.row.status === 1">
+        <el-button  @click="updateStatus(scope.row.id,2,'禁用')" type="text"  size="small">
+          禁用
+        </el-button>
+        <el-button  @click="updateStatus(scope.row.id,3,'锁定')" type="text"  size="small">
+          锁定
+        </el-button>
+      </div>
+
+      <div v-else-if="scope.row.status === 2">
+        <el-button @click="updateStatus(scope.row.id,1,'启用')"  type="text"  size="small">
+          启用
+        </el-button>
+      </div>
+      <div v-else-if="scope.row.status === 3">
+        <el-button @click="updateStatus(scope.row.id,1,'解锁')"  type="text"  size="small">
+          解锁
+        </el-button>
+      </div>
+    </shiro:hasPermission>
+  </template>
+
+</el-table-column>
+</el-table>
+<table-pagination :pager="pager" @change="searchTable"></table-pagination>
+</el-row>
+<!-- dialog -->
+<el-dialog title="密码安全设置" :visible.sync="dialogFormVisible">
+  <el-form :model="form" :rules="rules" ref="form">
+    <el-row :gutter="20">
+      <el-col :span="16">
+        <el-form-item label="密码最长使用期限：" :label-width="formLabelWidth" prop="maxDay">
+          <el-input v-model="form.maxDay" autocomplete="off"></el-input>
+        </el-form-item>
+      </el-col>
+      <el-col :span="4">
+        <el-form-item>天</el-form-item>
+      </el-col>
     </el-row>
-    <!-- dialog -->
-    <el-dialog title="密码安全设置" :visible.sync="dialogFormVisible">
-        <el-form :model="form" :rules="rules" ref="form">
-            <el-row :gutter="20">
-                <el-col :span="16">
-                    <el-form-item label="密码最长使用期限：" :label-width="formLabelWidth" prop="maxDay">
-                        <el-input v-model="form.maxDay" autocomplete="off"></el-input>
-                    </el-form-item>
-                </el-col>
-                <el-col :span="4">
-                    <el-form-item>天</el-form-item>
-                </el-col>
-            </el-row>
-            <el-form-item label="到期提醒通知设置：" :label-width="formLabelWidth">
-                <el-button type="primary" size="medium" class="marginB10" @click="addDomain">添加</el-button>
-                <el-form-item
-                    v-for="(domain, index) in form.domains"
-                    :key="domain.key"
-                    :prop="'domains.' + index + '.value'"
-                    :rules="{
-                      required: true, message: '到期提醒通知天数不能为空', trigger: 'change'
-                    }"
-                    style="margin-bottom: 20px;"
-                >
-                    <el-row :gutter="20">
-                        <el-col :span="8">
-                            <el-input v-model="domain.value"></el-input>
-                        </el-col>
-                        <el-col :span="2">
-                            <el-form-item>天</el-form-item>
-                        </el-col>
-                        <el-col :span="4">
-                            <el-button @click.prevent="removeDomain(domain)">删除</el-button>
-                        </el-col>
-                    </el-row>
-                </el-form-item>
-            </el-form-item>
-        </el-form>
-        <div slot="footer" class="dialog-footer">
-            <el-button type="primary" @click="submitForm('form')">确 定</el-button>
-        </div>
-    </el-dialog>
+    <el-form-item label="到期提醒通知设置：" :label-width="formLabelWidth">
+      <el-button type="primary" size="medium" class="marginB10" @click="addDomain">添加</el-button>
+      <el-form-item
+      v-for="(domain, index) in form.domains"
+      :key="domain.key"
+      :prop="'domains.' + index + '.value'"
+      :rules="{
+      required: true, message: '到期提醒通知天数不能为空', trigger: 'change'
+    }"
+    style="margin-bottom: 20px;"
+    >
+    <el-row :gutter="20">
+      <el-col :span="8">
+        <!-- <el-input v-model="domain.value"></el-input> -->
+        <el-input-number v-model="domain.value" controls-position="right" @change="handleChange" :min="1" style="line-height: 37px;"></el-input-number>
+      </el-col>
+      <el-col :span="2">
+        <el-form-item>天</el-form-item>
+      </el-col>
+      <el-col :span="4">
+        <el-button @click.prevent="removeDomain(domain)">删除</el-button>
+      </el-col>
+    </el-row>
+  </el-form-item>
+</el-form-item>
+</el-form>
+<div slot="footer" class="dialog-footer">
+  <el-button type="primary" @click="submitForm('form')">确 定</el-button>
+</div>
+</el-dialog>
 </div>
 <!-- import common js-->
 <div th:include="_footer_include :: #jsLib"></div>
@@ -185,268 +210,317 @@ var passwordExpires=[[${passwordExpires}]];//密码最大使用时间
 var reminderTime=[[${reminderTime}]];//密码到期提醒时间
 var domains =[];
 for(var i=0;i<reminderTime.length;i++){
-	var domain = {};
-	domain.value=reminderTime[i];
-	domains.push(domain);
+  var domain = {};
+  domain.value=reminderTime[i];
+  domains.push(domain);
 }
 var oldDomains=domains;
 var userVM = new Vue({
-        el: '#userManage',
-        data: {
-	        	userSearchForm: {
-	                orgId: '',
-	                roleId: '',
-	                status: '',
-	                searchType: 2,
-	                searchText: ''
-	            },
-	            dataTable:[],
-	            pager:{
-	                total: 0,
-	                currentPage: 1,
-	                pageSize: 20,
-	            },
-	            multipleSelection:[],
-	            passwordExpires:passwordExpires,
-	            reminderTime:reminderTime,
-                radio:'',
-                dialogFormVisible: false,
-                dialogFormAdd: false,
-                dialogFormChooseRole: false,
-                dialogFormChooseOrg: false,
-                form: {
-                  	domains: domains,
-                	maxDay: passwordExpires
-                },
-                rules: {
-                	maxDay: [
-                      { required: true, message: '密码最长使用期限不能为空。', trigger: 'blur' },
-                      {  max: 3, message: '最大3个字符', trigger: 'blur' }
-                    ]
-                  },
-                formLabelWidth: '150px',
-                formLabelWidth1: '120px',
-                statusOptions: [{
-                    value: '',
-                    label: '全部'
-                }, {
-                    value: 1,
-                    label: '启用'
-                }, {
-                    value: 2,
-                    label: '禁用'
-                }, {
-                    value: 3,
-                    label: '锁定'
-                }],
-                roleOptions: roleList,
-                searchTypeOptions: [{
-                    value: 1,
-                    label: '登录名'
-                }, {
-                    value: 2,
-                    label: '姓名'
-                }, {
-                    value: 3,
-                    label: '手机号'
-                }]
-        },
-        methods: {
-        	searchTable() {
-                var param ={};
-                
-                param.orgId = this.userSearchForm.orgId;
-                param.roleId = this.userSearchForm.roleId;
-                param.status = this.userSearchForm.status;
-                if(this.userSearchForm.searchType=="1"){
-	                param.username = this.userSearchForm.searchText;
-                }else if(this.userSearchForm.searchType=="2"){
-	                param.name = this.userSearchForm.searchText;
-                }else if(this.userSearchForm.searchType=="3"){
-	                param.phone = this.userSearchForm.searchText;
-                }
-                param.pageSize = this.pager.pageSize;
-                param.pageNum = this.pager.currentPage;
-                console.info(param);
-                axios.post('/user/userManager/list', param)
-                .then(function (response) {
-                      var result =  response.data;
-                      console.info(result);
-                      var table=result.data;
-                      userVM.dataTable= table.data;
-                      userVM.pager.total =  table.total;
-                      userVM.pager.currentPage = table.currentPage;
-                })
-                .catch(function (error) {
-                     console.log(error);
-                });
-                
-              },
-              resetForm(formName) {
-                  console.info(this.$refs[formName]);
-                  this.$refs[formName].resetFields();
-                  this.$refs[formName].resetFields();
-              },
-              //选择行
-              handleSelectionChange(val) {
-                  this.multipleSelection = val;
-              },
-              //跳转新增用户页
-              toAddUser() {
-            	  document.location.href='/user/userManager/initCreateUser';
-              },
-              //跳转新增用户页
-              toUpdateUser() {
-            	  var rows = this.multipleSelection;
-                  if(rows.length!=1){
-                      this.$message({
-                         message: '请选择一条数据进行修改',
-                         type: 'warning'
-                       });
-                      return;
-                  }
-            	  document.location.href='/user/userManager/initUpdateUser?id='+rows[0].id;
-              },
-              //修改状态
-              updateStatus(id,status,msg) {
-            	  var param = {};
-            	  param.id=id;
-            	  param.status=status;
-            	  axios.post('/user/userManager/updateUser', param)
-                  .then(function (response) {
-                        var result =  response.data;
-                        if(result.code=="0"){
-                        	userVM.$message.success(msg+"成功");
-                        	userVM.searchTable();
-                        }else{
-                        	userVM.$message.error(msg+"失败");
-                        }
-                  })
-                  .catch(function (error) {
-                       console.log(error);
-                  });
-              },
-              //状态转换方法
-              transformStatus(row, column, cellValue, index) {
-            	  var text="";
-                  if(cellValue=="1"){
-                	  text="启用"
-                  }else if(cellValue=="2"){
-                	  text="禁用"
-                  }else if(cellValue=="3"){
-                	  text="锁定"
-                  }
-                  return text;
-              },
-              //角色转换方法
-              transformRole(row, column, cellValue, index) {
-            	  var text="";
-                  if(cellValue!=undefined&&cellValue[0]!=undefined){
-                	  text=cellValue[0].roleName;
-                  }
-                  return text;
-              },
-            //日期数据格式化方法
-  	        dateFormat(row, column, cellValue, index) {
-  	           if (cellValue == undefined) {
-  	               return "";
-  	           }
-  	           return moment(cellValue).format("YYYY-MM-DD HH:mm:ss");
-  	        },
-            handleSizeChange(val) {
-                //下拉框  每页 10,20条切换 调用
-                   console.log(`每页 ${val} 条`);
-                this.pageSize = val;
-                this.initTableData(1);
-             },
-             handleCurrentChange(val) {
-                 //点击 页码
-               console.log(`当前页: ${val}`);
-               this.initTableData(val);
-             },
-             // 提交弹窗
-             submitForm(formName) {
-              this.$refs[formName].validate((valid) => {
-                  if (valid) {
-                   	  console.log(this.form.domains)//
-                      var domainsList =this.form.domains;
-                      var array= new Array();
-                      var newReminderTime="";
-                      for(var i=0;i<domainsList.length;i++){
-                    	  array.push(domainsList[i].value);
-                    	  if(i==0){
-                    		  newReminderTime=newReminderTime+domainsList[i].value;
-                    	  }else{
-                    		  newReminderTime=newReminderTime+","+domainsList[i].value;
-                    	  }
-                      }
-                      if(passwordExpires==this.form.maxDay&&reminderTime==newReminderTime){
-                    	  userVM.dialogFormVisible=false;
-                    	  return;
-                      }
-                	  this.$confirm('确定更新保存并执行操作？', '提示', {
-                          confirmButtonText: '确定',
-                          cancelButtonText: '取消',
-                          type: 'warning'
-                      }).then(() => {
-                          var param = {};
-                    	  param.passwordExpires=this.form.maxDay;
-                    	  param.reminderTime=array;
-                    	  axios.post('/user/userManager/updatePasswordSetting', param)
-                          .then(function (response) {
-                                var result =  response.data;
-                                if(result.code=="0"){
-                                	userVM.$message.success("设置成功");
-                                	userVM.dialogFormVisible=false;
-                                	passwordExpires=this.form.maxDay;
-                                	reminderTime=newReminderTime;
-                                }else{
-                                	userVM.$message.error(result.msg);
-                                }
-                          })
-                          .catch(function (error) {
-                               console.log(error);
-                          });
-                      }).catch(() => {
-                          this.$message({
-                              type: 'info',
-                              message: '已取消'
-                          });          
-                      });
-                      
-                  } else {
-                      console.log('error submit!!');
-                      return false;
-                  }
-              });
-            },
-            showDialogFormVisible() {
-                this.form.domains=oldDomains;
-                this.form.maxDay=passwordExpires;
-                this.dialogFormVisible=true;
-            },
-            removeDomain(item) {
-                var index = this.form.domains.indexOf(item)
-                if (index !== -1) {
-                    this.form.domains.splice(index, 1)
-                }
-            },
-            addDomain() {
-                this.form.domains.push({
-                    value: '',
-                    key: Date.now()
-                });
-            }
-        },
-        created(){
-            console.info("create method");
-            this.searchTable();
-           
-        },
-        mounted(){
-           console.info("mounted method");
+  el: '#userManage',
+  data: {
+    isShow:false,
+    userSearchForm: {
+      orgId: '',
+      roleId: '',
+      status: '',
+      searchType: 2,
+      searchText: '',
+      orgName:''
+    },
+    dataTable:[],
+    pager:{
+      total: 0,
+      currentPage: 1,
+      pageSize: 20,
+    },
+    multipleSelection:[],
+    passwordExpires:passwordExpires,
+    reminderTime:reminderTime,
+    radio:'',
+    dialogFormVisible: false,
+    dialogFormAdd: false,
+    dialogFormChooseRole: false,
+    dialogFormChooseOrg: false,
+    form: {
+      domains: domains,
+      maxDay: passwordExpires
+    },
+    rules: {
+      maxDay: [
+      { required: true, message: '密码最长使用期限不能为空。', trigger: 'blur' },
+      {  max: 3, message: '最大3个字符', trigger: 'blur' }
+      ]
+    },
+    formLabelWidth: '150px',
+    formLabelWidth1: '120px',
+    statusOptions: [{
+      value: '',
+      label: '全部'
+    }, {
+      value: 1,
+      label: '启用'
+    }, {
+      value: 2,
+      label: '禁用'
+    }, {
+      value: 3,
+      label: '锁定'
+    }],
+    roleOptions: roleList,
+    searchTypeOptions: [{
+      value: 1,
+      label: '登录名'
+    }, {
+      value: 2,
+      label: '姓名'
+    }, {
+      value: 3,
+      label: '手机号'
+    }],
+    dataTree: [{
+      id: 0,
+      label: '根目录',
+      children: [{
+        id: 1,
+        label: '推广中心',
+        children: [{
+          id: 4,
+          label: '推广客服',
+          children: [{
+            id: 9,
+            label: '客服一组'
+          }, {
+            id: 10,
+            label: '客服二组'
+          }]
+        }]
+      }, {
+        id: 2,
+        label: '招商中心',
+        children: [{
+          id: 5,
+          label: '秦皇岛招商中心'
+        }, {
+          id: 6,
+          label: '石家庄招商中心'
+        }]
+      }, {
+        id: 3,
+        label: '商务中心',
+        children: [{
+          id: 7,
+          label: '商务一'
+        }, {
+          id: 8,
+          label: '商务二'
+        }]
+      }]
+    }]
+  },
+  methods: {
+    searchTable() {
+      var param ={};
+
+      param.orgId = this.userSearchForm.orgId;
+      param.roleId = this.userSearchForm.roleId;
+      param.status = this.userSearchForm.status;
+      if(this.userSearchForm.searchType=="1"){
+        param.username = this.userSearchForm.searchText;
+      }else if(this.userSearchForm.searchType=="2"){
+        param.name = this.userSearchForm.searchText;
+      }else if(this.userSearchForm.searchType=="3"){
+        param.phone = this.userSearchForm.searchText;
+      }
+      param.pageSize = this.pager.pageSize;
+      param.pageNum = this.pager.currentPage;
+      console.info(param);
+      axios.post('/user/userManager/list', param)
+      .then(function (response) {
+        var result =  response.data;
+        console.info(result);
+        var table=result.data;
+        userVM.dataTable= table.data;
+        userVM.pager.total =  table.total;
+        userVM.pager.currentPage = table.currentPage;
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
+
+    },
+    resetForm(formName) {
+      console.info(this.$refs[formName]);
+      this.$refs[formName].resetFields();
+      this.$refs[formName].resetFields();
+    },
+    //选择行
+    handleSelectionChange(val) {
+      this.multipleSelection = val;
+    },
+    //跳转新增用户页
+    toAddUser() {
+      document.location.href='/user/userManager/initCreateUser';
+    },
+    //跳转新增用户页
+    toUpdateUser() {
+      var rows = this.multipleSelection;
+      if(rows.length!=1){
+        this.$message({
+          message: '请选择一条数据进行修改',
+          type: 'warning'
+        });
+        return;
+      }
+      document.location.href='/user/userManager/initUpdateUser?id='+rows[0].id;
+    },
+    //修改状态
+    updateStatus(id,status,msg) {
+      var param = {};
+      param.id=id;
+      param.status=status;
+      axios.post('/user/userManager/updateUser', param)
+      .then(function (response) {
+        var result =  response.data;
+        if(result.code=="0"){
+          userVM.$message.success(msg+"成功");
+          userVM.searchTable();
+        }else{
+          userVM.$message.error(msg+"失败");
         }
-    })
-    
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
+    },
+    //状态转换方法
+    transformStatus(row, column, cellValue, index) {
+      var text="";
+      if(cellValue=="1"){
+        text="启用"
+      }else if(cellValue=="2"){
+        text="禁用"
+      }else if(cellValue=="3"){
+        text="锁定"
+      }
+      return text;
+    },
+    //角色转换方法
+    transformRole(row, column, cellValue, index) {
+      var text="";
+      if(cellValue!=undefined&&cellValue[0]!=undefined){
+        text=cellValue[0].name;
+      }
+      return text;
+    },
+    //日期数据格式化方法
+    dateFormat(row, column, cellValue, index) {
+      if (cellValue == undefined) {
+         return "";
+      }
+      return moment(cellValue).format("YYYY-MM-DD HH:mm:ss");
+    },
+    handleSizeChange(val) {
+        //下拉框  每页 10,20条切换 调用
+        console.log(`每页 ${val} 条`);
+        this.pageSize = val;
+        this.initTableData(1);
+    },
+    handleCurrentChange(val) {
+        //点击 页码
+        console.log(`当前页: ${val}`);
+        this.initTableData(val);
+    },
+    // 提交弹窗
+    submitForm(formName) {
+      this.$refs[formName].validate((valid) => {
+        if (valid) {
+        console.log(this.form.domains)//
+        var domainsList =this.form.domains;
+        var array= new Array();
+        var newReminderTime="";
+        for(var i=0;i<domainsList.length;i++){
+          array.push(domainsList[i].value);
+          if(i==0){
+            newReminderTime=newReminderTime+domainsList[i].value;
+          }else{
+            newReminderTime=newReminderTime+","+domainsList[i].value;
+          }
+        }
+        if(passwordExpires==this.form.maxDay&&reminderTime==newReminderTime){
+          userVM.dialogFormVisible=false;
+          return;
+        }
+        this.$confirm('确定更新保存并执行操作？', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          var param = {};
+          param.passwordExpires=this.form.maxDay;
+          param.reminderTime=array;
+          axios.post('/user/userManager/updatePasswordSetting', param)
+          .then(function (response) {
+            var result =  response.data;
+            if(result.code=="0"){
+              userVM.$message.success("设置成功");
+              userVM.dialogFormVisible=false;
+              passwordExpires=this.form.maxDay;
+              reminderTime=newReminderTime;
+            }else{
+              userVM.$message.error(result.msg);
+            }
+          })
+          .catch(function (error) {
+            console.log(error);
+          });
+        }).catch(() => {
+          this.$message({
+            type: 'info',
+            message: '已取消'
+          });          
+        });
+        } else {
+          console.log('error submit!!');
+          return false;
+        }
+      });
+    },
+    showDialogFormVisible() {
+      this.form.domains=oldDomains;
+      this.form.maxDay=passwordExpires;
+      this.dialogFormVisible=true;
+    },
+    removeDomain(item) {
+      var index = this.form.domains.indexOf(item)
+      if (index !== -1) {
+        this.form.domains.splice(index, 1)
+      }
+    },
+    addDomain() {
+      this.form.domains.push({
+        value: '',
+        key: Date.now()
+      });
+    },
+    treeNodeClick(data,node,obj){
+      if(data.children==null){
+          this.userSearchForm.orgName=data.label;
+          this.isShow=false
+      }
+    },
+    handleChange(value) {
+      console.log(value);
+    }
+  },
+  created(){
+    console.info("create method");
+    this.searchTable();
+
+  },
+  mounted(){
+    console.info("mounted method");
+  }
+})
+
 </script>
 </html>
