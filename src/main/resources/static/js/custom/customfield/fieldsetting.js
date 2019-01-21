@@ -25,6 +25,7 @@
                 },
                 addAndUpdateDialog:'',//添加或修改 字段dialog 标题
                 menuId:fieldMenu.id,//该字段设置属于菜单组
+                submitBrnDisabled:true,
                 oldFieldForm:{//存放旧的form 数据，提交时比对
                 	fieldCode:'',
                 	fieldName:'',
@@ -185,7 +186,7 @@
                       	{            
                     	    validator(rule,value,callback){ 
                     	    	if(value){
-                    	    		if(Number.isInteger(Number(value)) && (Number(value) > 0 || Number(value) <1000)){                
+                    	    		if(Number.isInteger(Number(value)) && Number(value) > 0 && Number(value) <1000){                
                             	        callback();
                             	      }else{                 
                             	        callback(new Error("只可以输入正整数,且不大于1000"));               
@@ -272,14 +273,14 @@
             saveField(formName){//保存自定义字段
             	 this.$refs[formName].validate((valid) => {
                      if (valid) {
-                    	fieldVM.$refs.submitBtn.disabled=true; //禁用提交按钮
+                    	//fieldVM.$refs.submitBtn.disabled=true; //禁用提交按钮
+                    	fieldVM.submitBrnDisabled=true;
                         var param=this.form;
                         param.menuId=fieldVM.menuId;
                        axios.post('/customfield/customField/saveOrUpdate', param)
                        .then(function (response) {
                            var resData = response.data;
                            if(resData.code=='0'){
-                               fieldVM.$message('操作成功');
                                fieldVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
                             	   	fieldVM.getQuery();
                        	        }});
@@ -294,7 +295,8 @@
                        .catch(function (error) {
                             console.log(error);
                        }).then(function(){
-                    	   fieldVM.$refs.submitBtn.disabled=false; 
+                    	  // fieldVM.$refs.submitBtn.disabled=false; 
+                    	   fieldVM.submitBrnDisabled=false;
                        });
                         
                      } else {
@@ -377,7 +379,9 @@
                     	   var resData = data.data;
                            fieldVM.form= resData;
                            //把当前的值存在临时变量里，当修改时，旧值和新值对比
-                           fieldVM.oldFieldForm=resData;
+                           fieldVM.oldFieldForm.fieldCode=resData.fieldCode;
+                           fieldVM.oldFieldForm.fieldName=resData.fieldName;
+                           fieldVM.oldFieldForm.displayName=resData.displayName;
                        }else{
                     	   fieldVM.$message('查询失败');
                            console.error(data);
@@ -424,7 +428,8 @@
               	         fieldVM.getQuery();
               	      }});
             	  }else{
-            		  this.$message('上传失败');
+            		  this.$message({message:'上传失败',type:'error'});
+            		  this.$refs.upload.clearFiles();
             	  }
             	
               },
@@ -436,6 +441,7 @@
               },
               uploadError(){//上傳失敗
             	  this.$message({message:'上传失败',type:'error'});
+            	  this.$refs.upload.clearFiles();
               },
               addFieldSetting(){//添加字段dialog
             	  this.dialogFormVisible = true;
