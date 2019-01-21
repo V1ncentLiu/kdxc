@@ -21,6 +21,7 @@ var fieldMenuVM = new Vue({
                 formLabelWidth: '150px',
                 inputMenuName:'',//菜单搜索框
                 addOrModifyDialogTitle:'',
+                confirmBtnDisabled:false,//提交按钮 是否禁用
                 rules:{
                 	menuCode:[
                 		{ required: true, message: '菜单代码不能为空',trigger:'blur'},
@@ -161,7 +162,8 @@ var fieldMenuVM = new Vue({
             saveFieldMenu(formName){//保存自定义字段
                 this.$refs[formName].validate((valid) => {
                     if (valid) {
-                    	fieldMenuVM.$refs.confirmBtn.disabled=true;
+                    	//fieldMenuVM.$refs.confirmBtn.disabled=true;
+                    	fieldMenuVM.confirmBtnDisabled=true;//禁用提交按钮
                        var param=this.form;
                       axios.post('/customfield/customField/saveOrUpdateMenu', param)
                       .then(function (response) {
@@ -182,7 +184,8 @@ var fieldMenuVM = new Vue({
                     	
                            console.log(error);
                       }).then(function(){
-                    		fieldMenuVM.$refs.confirmBtn.disabled=false;
+                    		//fieldMenuVM.$refs.confirmBtn.disabled=false;
+                    		fieldMenuVM.confirmBtnDisabled=false;//启用提交按钮
                       });
                        
                     } else {

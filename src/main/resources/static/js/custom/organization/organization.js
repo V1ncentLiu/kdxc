@@ -13,6 +13,7 @@
                   },
                 dialogFormVisible: false,
                 dialogStaffNumVisible:false,
+                addOrModifyDialogTitle:'',//条件或修改组织机构标题
                 form: {//添加组织机构dialog
                     name: '',
                     remark: '',
@@ -54,7 +55,7 @@
                                     if(data.code=='0'){
                                         var resData = data.data;
                                         if(resData){
-                                        	callback(new Error("组织名称已存在"));
+                                        	callback(new Error("组织名称已存在，请更改"));
                                         }else{
                                         	callback();
                                         }
@@ -116,7 +117,7 @@
                             msgInfo='本组织已经关联到用户，需要将组织下用户转移后，方可进行组织的删除操作！';
                             btnText="知道了"
                         }else{
-                           msgInfo='删除组织后此组织信息将不存在，确认删除吗';
+                           msgInfo='删除后此组织信息将不存在，确认删除吗？';
                            btnText="确认";
                            isDelete=true;
                         }
@@ -237,8 +238,9 @@
                       });
                      return;
             	}
-            
+                this.addOrModifyDialogTitle="添加下级组织";
             	this.dialogFormVisible = true;
+            	
             },
             submitForm(formName) {
                 this.$refs[formName].validate((valid) => {
@@ -309,6 +311,8 @@
                        });
                       return;
                   }
+                  this.addOrModifyDialogTitle="修改组织信息";
+                  
                  var parentName =  orgVM.form.parentName;
                   var param={id:rows[0].id};
                   //根据id获取数据
