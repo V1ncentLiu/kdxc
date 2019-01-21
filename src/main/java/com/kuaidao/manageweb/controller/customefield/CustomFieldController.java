@@ -359,6 +359,7 @@ public class CustomFieldController {
                         isValid = false;
                         break;
                     }
+                    fieldCodeSet.add(value);
                     rowDto.setFieldCode(value);
                 }else if(j==1) {//字段名称
                     if(!validFiled(value)) {

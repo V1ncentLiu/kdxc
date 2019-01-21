@@ -65,7 +65,6 @@ var homePageVM=new Vue({
 	      	}          
 	    },
 	    menuClick:function(ifreamUrl){
-	    	console.log(this)
 	     	this.$refs.iframeBox.src=ifreamUrl //给ifream的src赋值
 	   	},  
 	   	handleCommand(command) {//点击下拉菜单
@@ -90,15 +89,17 @@ var homePageVM=new Vue({
          saveModifyForm(formName){//保存
         	 this.$refs[formName].validate((valid) => {
                  if (valid) {
-                    var param=this.form;
-                   axios.post('/user/userManager/updatePassword', param)
+                    var param=this.modifyForm;
+                   axios.post('/user/userManager/updatePwd', param)
                    .then(function (response) {
                        var resData = response.data;
                        if(resData.code=='0'){
-                    	   homePageVM.$message('请使用新密码重新登录的提示框');
+                    	   homePageVM.$message({message:'请使用新密码重新登录',type:'success'});
                     	   homePageVM.cancelModifyForm(formName);
                     	   
-                    	   setTimeout('gotoHomePage',2000);
+                    	   setTimeout(function(){//去登录页
+                    		   homePageVM.gotoHomePage();
+                    	   },2000);
                        }else{
                     	   homePageVM.$message(resData.msg);
                            console.error(resData);
@@ -107,6 +108,10 @@ var homePageVM=new Vue({
                    })
                    .catch(function (error) {
                         console.log(error);
+                        homePageVM.$message({
+                            message: "系统出错",
+                            type: 'error'
+                        }); 
                    });
                     
                  } else {
