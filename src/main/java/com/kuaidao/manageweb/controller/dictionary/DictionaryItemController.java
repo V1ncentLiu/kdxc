@@ -76,7 +76,7 @@ public class DictionaryItemController {
     /**
      *  web端进行的是非业务逻辑。
      */
-    @LogRecord(description = "新增词条",operationType = LogRecord.OperationType.INSERT,menuName = MenuEnum.DICTIONARY_MANAGEMENT)
+    @LogRecord(description = "新增词条",operationType = LogRecord.OperationType.INSERT,menuName = MenuEnum.DICTIONARY_MANAGEMENT_ITEM)
     @RequiresPermissions("dictionary:update")
     @RequestMapping("/saveDictionaryItem")
     @ResponseBody
@@ -84,7 +84,7 @@ public class DictionaryItemController {
         if (result.hasErrors()) return validateParam(result);
         return  dictionaryItemFeignClient.saveDictionaryItem(dictionaryItemDTO);
     }
-    @LogRecord(description = "更新词条",operationType = LogRecord.OperationType.UPDATE,menuName = MenuEnum.DICTIONARY_MANAGEMENT)
+    @LogRecord(description = "更新词条",operationType = LogRecord.OperationType.UPDATE,menuName = MenuEnum.DICTIONARY_MANAGEMENT_ITEM)
     @RequiresPermissions("dictionary:update")
     @RequestMapping("/updateDictionaryItem")
     @ResponseBody
@@ -99,7 +99,7 @@ public class DictionaryItemController {
         return dictionaryItemFeignClient.queryDictionaryOneItem(idEntity);
     }
 
-    @LogRecord(description = "删除词条",operationType = LogRecord.OperationType.DELETE,menuName = MenuEnum.DICTIONARY_MANAGEMENT)
+    @LogRecord(description = "删除词条",operationType = LogRecord.OperationType.DELETE,menuName = MenuEnum.DICTIONARY_MANAGEMENT_ITEM)
     @RequiresPermissions("dictionary:update")
     @RequestMapping("/deleteItemDictionarys")
     @ResponseBody
