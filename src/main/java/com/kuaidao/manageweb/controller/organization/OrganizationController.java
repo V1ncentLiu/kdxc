@@ -75,9 +75,9 @@ public class OrganizationController {
      * @throws Exception
      */
    // @RequiresPermissions(value= {"organization:save","organization:update"},logical=Logical.OR)
-    @PostMapping("/saveOrUpdate")
+    @PostMapping("/save")
     @ResponseBody
-    @LogRecord(description="添加或修改组织机构信息",operationType=OperationType.INSERT,menuName=MenuEnum.ORGANIZATION_MANAGEMENT)
+    @LogRecord(description="添加组织机构信息",operationType=OperationType.INSERT,menuName=MenuEnum.ORGANIZATION_MANAGEMENT)
     public JSONResult save(@Valid @RequestBody OrganizationAddAndUpdateDTO orgDTO,
             BindingResult result) throws Exception {
         if (result.hasErrors()) {

@@ -105,9 +105,9 @@ public class CustomFieldController {
      * @throws IllegalAccessException 
      */
    // @RequiresPermissions(value= {"customfield:saveMenu","customfield:updateMenu"},logical=Logical.OR)
-    @PostMapping("/saveOrUpdateMenu")
+    @PostMapping("/saveMenu")
     @ResponseBody
-    @LogRecord(description="添加或修改自定义字段菜单",operationType=OperationType.INSERT,menuName=MenuEnum.CUSTOM_FIELD)
+    @LogRecord(description="添加自定义字段菜单",operationType=OperationType.INSERT,menuName=MenuEnum.CUSTOM_FIELD)
     public JSONResult saveMenu(@Valid @RequestBody CustomFieldMenuAddAndUpdateDTO menuDTO,
             BindingResult result) {
         if (result.hasErrors()) {
@@ -216,9 +216,9 @@ public class CustomFieldController {
      * @throws IllegalAccessException 
      */
     //@RequiresPermissions(value= {"customfield:saveField","customfield:updateField"},logical=Logical.OR)
-    @PostMapping("/saveOrUpdate")
+    @PostMapping("/save")
     @ResponseBody
-    @LogRecord(description="添加或修改自定义字段",operationType=OperationType.INSERT,menuName=MenuEnum.CUSTOM_FIELD)
+    @LogRecord(description="添加自定义字段",operationType=OperationType.INSERT,menuName=MenuEnum.CUSTOM_FIELD)
     public JSONResult save(@Valid @RequestBody CustomFieldAddAndUpdateDTO customDTO,
             BindingResult result) throws IllegalAccessException, InvocationTargetException {
         if (result.hasErrors()) {
@@ -244,7 +244,7 @@ public class CustomFieldController {
     //@RequiresPermissions("customfield:updateField")
     @PostMapping("/update")
     @ResponseBody
-    @LogRecord(description="修改自定义字段",operationType=OperationType.INSERT,menuName=MenuEnum.CUSTOM_FIELD)
+    @LogRecord(description="修改自定义字段",operationType=OperationType.UPDATE,menuName=MenuEnum.CUSTOM_FIELD)
     public JSONResult update(@Valid @RequestBody CustomFieldAddAndUpdateDTO customDTO,
             BindingResult result) throws IllegalAccessException, InvocationTargetException {
         if (result.hasErrors()) {
@@ -374,6 +374,9 @@ public class CustomFieldController {
                     }
                     rowDto.setDisplayName(value);
                 }else if(j==3) {//序号
+                    if(StringUtils.isBlank(value)) {
+                        continue;
+                    }
                     if(!StringUtils.isNumeric(value) || value.length()>5) {
                         isValid = false;
                         break;
@@ -381,6 +384,9 @@ public class CustomFieldController {
                     rowDto.setSortNum(Integer.parseInt(value));
                     
                 }else if(j==4){//宽度
+                    if(StringUtils.isBlank(value)) {
+                        continue;
+                    }
                     if(!StringUtils.isNumeric(value)) {
                         isValid = false;
                         break;
