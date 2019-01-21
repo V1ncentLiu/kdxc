@@ -83,7 +83,17 @@ public interface IpAccessFeignClient {
 	 * @return
 	 */
 	@RequestMapping(method = RequestMethod.POST, value = "/findPackageById")
-	public JSONResult<IpPackageInfoDTO> findPackageById(@RequestBody IpAccessManagerQueryDTO dto);
+	public JSONResult<IpPackageInfoDTO> findPackageById(IpAccessManagerQueryDTO dto);
+	
+	/**
+	 * 修改IP包数据查询
+	 * 
+	 * @param dto
+	 * @return
+	 */
+	@RequestMapping(method = RequestMethod.POST, value = "/findListByPackage")
+	public JSONResult<List<IpPackageInfoDTO>> findListByPackage(IpAccessManagerQueryDTO dto);
+	
 
 	@Component
 	static class HystrixClientFallback implements IpAccessFeignClient {
@@ -142,6 +152,13 @@ public interface IpAccessFeignClient {
 		@SuppressWarnings("unchecked")
 		@Override
 		public JSONResult<PageBean<IpPackageInfoDTO>> querytAllPackageList() {
+			// TODO Auto-generated method stub
+			return fallBackError("查询所有IP包列表数据失败");
+		}
+
+		@SuppressWarnings("unchecked")
+		@Override
+		public JSONResult<List<IpPackageInfoDTO>> findListByPackage(IpAccessManagerQueryDTO dto) {
 			// TODO Auto-generated method stub
 			return fallBackError("查询所有IP包列表数据失败");
 		}

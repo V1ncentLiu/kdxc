@@ -91,7 +91,7 @@ public class ModuleManagerController {
 	 * @return
 	 */
 	@PostMapping("/saveModuleInfo")
-	@LogRecord(description = "菜单新增",operationType = LogRecord.OperationType.INSERT,menuName = MenuEnum.AUTHORITY_MANAGEMENT)
+	@LogRecord(description = "菜单新增",operationType = LogRecord.OperationType.INSERT,menuName =MenuEnum.MODULE_MANAGEMENT)
 	@ResponseBody
 	public JSONResult<String> saveModuleInfo(@RequestBody ModuleInfoDTO dto) {
 		dto.setSystemCode(SystemCodeConstant.HUI_JU);
@@ -108,7 +108,7 @@ public class ModuleManagerController {
 	 * @return
 	 */
 	@PostMapping("/updateModuleInfo")
-	@LogRecord(description = "菜单修改",operationType = LogRecord.OperationType.UPDATE,menuName = MenuEnum.AUTHORITY_MANAGEMENT)
+	@LogRecord(description = "菜单修改",operationType = LogRecord.OperationType.UPDATE,menuName = MenuEnum.MODULE_MANAGEMENT)
 	@ResponseBody
 	public JSONResult<String> updateModuleInfo(@RequestBody ModuleInfoDTO dto) {
 		JSONResult<String> pageJson = moduleManagerFeignClient.updateModuleInfo(dto);
@@ -124,7 +124,7 @@ public class ModuleManagerController {
 	 * @return
 	 */
 	@PostMapping("/deleteModuleInfo")
-	@LogRecord(description = "菜单删除",operationType = LogRecord.OperationType.DELETE,menuName = MenuEnum.AUTHORITY_MANAGEMENT)
+	@LogRecord(description = "菜单删除",operationType = LogRecord.OperationType.DELETE,menuName = MenuEnum.MODULE_MANAGEMENT)
 	@ResponseBody
 	public JSONResult<String> deleteModuleInfo(@RequestBody ModuleInfoDTO dto) {
 		JSONResult<String> pageJson = moduleManagerFeignClient.deleteModuleInfo(dto);

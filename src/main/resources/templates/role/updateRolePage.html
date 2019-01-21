@@ -96,6 +96,12 @@
             style="width:400px;">
             <el-input v-model="addRoleValidateForm.roleName" autocomplete="off"></el-input>
         </el-form-item>
+        <el-form-item
+            label="角色编码："
+            prop="roleCode"
+            style="width:400px;">
+            <el-input v-model="addRoleValidateForm.roleCode" disabled="disabled"   maxlength="30" autocomplete="off"></el-input>
+        </el-form-item>
         <el-form-item label="访问IP限制：">
             <el-radio-group v-model="addRoleValidateForm.visitLimitRadio" @change="visitLimitRadioChange">
                 <el-radio label="0">开放访问</el-radio>
@@ -243,6 +249,7 @@
                 dataList:moduleData,
                 addRoleValidateForm: {
                     roleName: roleInfo.roleName,
+                    roleCode:roleInfo.roleCode,
                     visitLimitRadio:iplimit,
                 },
                 rules:{
@@ -346,10 +353,9 @@
                      		   
                      		} 
                      	}
-                         
-                         
                          var  param={};
                          param.roleName=addRoleVM.addRoleValidateForm.roleName;
+                         param.roleCode=addRoleVM.addRoleValidateForm.roleCode;
                          param.isIpLimit=addRoleVM.addRoleValidateForm.visitLimitRadio;
                          param.operations=operationArry;
                          param.ipPackages=ipListTable;
@@ -426,6 +432,14 @@
              	//param.pageNum=pageNum;
              	param.ipPackageName=ipPackageName;
              	param.ipAddress=ipAddress;
+              	var deleId=[];
+            	var ipListTable=addRoleVM.ipListTable;
+            	if(null!=ipListTable&&ipListTable.length>0){
+            	for (var i=0;i<ipListTable.length;i++ ) {
+            		  deleId.push(ipListTable[i].id);  
+            	 }
+                }
+             	param.deleId=deleId;
 		        axios.post('/ip/ipAccess/queryPackageList',param).then(function (response) {
 		           if(null==response){
 		                 alert("返回异常");
@@ -682,7 +696,14 @@
                     this.isDisabled=false
                 }
             }
-        }
+        },
+        mounted(){
+          if(iplimit=="1"){
+            addRoleVM.isDisabled=true;
+          }
+          
+     },
+       
     })
 </script>
 </html>
