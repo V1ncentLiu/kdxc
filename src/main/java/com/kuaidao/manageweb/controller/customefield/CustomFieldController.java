@@ -4,7 +4,9 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import org.apache.commons.lang3.StringUtils;
@@ -49,6 +51,7 @@ import com.kuaidao.sys.dto.customfield.CustomFieldMenuRespDTO;
 import com.kuaidao.sys.dto.customfield.CustomFieldQueryDTO;
 import com.kuaidao.sys.dto.customfield.CustomFieldRespDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
+import groovy.transform.builder.InitializerStrategy.SET;
 
 
 /**
@@ -314,8 +317,13 @@ public class CustomFieldController {
     @ResponseBody
     @LogRecord(description="上传自定义字段",operationType=OperationType.IMPORTS,menuName=MenuEnum.CUSTOM_FIELD)
     public JSONResult uploadCustomField(@RequestParam("file") MultipartFile file,@RequestParam("id") long menuId) throws Exception {
+        //获取当前的用户信息
+        Subject subject = SecurityUtils.getSubject();
+        UserInfoDTO user = (UserInfoDTO) subject.getSession().getAttribute("user");
+        long userId = user.getId();
+        
         List<List<Object>> excelDataList = ExcelUtil.read2007Excel(file.getInputStream());
-        logger.info("customfield upload size:{{}}" , excelDataList.size());
+        logger.info("userid{{}} custom field upload size:{{}}" ,userId, excelDataList.size());
 
         if (excelDataList == null || excelDataList.size() == 0) {
             return  new JSONResult<>().fail(SysErrorCodeEnum.ERR_EXCLE_DATA.getCode(),SysErrorCodeEnum.ERR_EXCLE_DATA.getMessage());
@@ -327,63 +335,78 @@ public class CustomFieldController {
 
         //存放合法的数据
         List<CustomFieldAddAndUpdateDTO> dataList = new ArrayList<CustomFieldAddAndUpdateDTO>();
-
+        //存放 字段编码 ，只存放最早的 合法的一条
+        Set<String> fieldCodeSet  = new HashSet<>();
+      
         for (int i = 1; i < excelDataList.size(); i++) {
             List<Object> rowList = excelDataList.get(i);
             CustomFieldAddAndUpdateDTO rowDto = new CustomFieldAddAndUpdateDTO();
+            boolean isValid = true;//是否验证通过 ，默认 true 通过
+            if(i==1) {
+                //记录上传列数
+                int rowSize = rowList.size();
+                logger.info("upload custom field,userId{{}},upload rows num{{}}",userId,rowSize);  
+            }
             for (int j = 0; j < rowList.size(); j++) {
                 Object object = rowList.get(j);
                 String value = (String)object;
                 if(j==0) {//字段编码
                     if(!validFiled(value)) {
+                        isValid = false;
+                        break;
+                    }
+                    if(fieldCodeSet.contains(value)) {
+                        isValid = false;
                         break;
                     }
                     rowDto.setFieldCode(value);
                 }else if(j==1) {//字段名称
                     if(!validFiled(value)) {
+                        isValid = false;
                         break;
                     }
                     rowDto.setFieldName(value);
                 }else if(j==2) {//外显名称
                     if(!validFiled(value)) {
+                        isValid = false;
                         break;
                     }
                     rowDto.setDisplayName(value);
                 }else if(j==3) {//序号
                     if(!StringUtils.isNumeric(value) || value.length()>5) {
+                        isValid = false;
                         break;
                     }
                     rowDto.setSortNum(Integer.parseInt(value));
                     
                 }else if(j==4){//宽度
                     if(!StringUtils.isNumeric(value)) {
+                        isValid = false;
                         break;
                     }
                     int widthInt = Integer.parseInt(value);
-                    if(widthInt<0 || widthInt>1000) {
+                    if(widthInt<=0 || widthInt>1000) {
+                        isValid = false;
                         break;
                     }
                     rowDto.setWidth(widthInt);
                 }
             }//inner foreach end
-            
-            Subject subject = SecurityUtils.getSubject();
-            UserInfoDTO user = (UserInfoDTO) subject.getSession().getAttribute("user");
-            rowDto.setCreateUser(user.getId());
-            rowDto.setFieldType(SysConstant.FieldType.TEXT);
-            rowDto.setMenuId(menuId);
-            dataList.add(rowDto);
+            if (isValid) {
+                rowDto.setCreateUser(userId);
+                rowDto.setFieldType(SysConstant.FieldType.TEXT);
+                rowDto.setMenuId(menuId);
+                dataList.add(rowDto);
+            }
+     
         }//outer foreach end
-        logger.info("upload custom filed, valid success num{{}}",dataList.size());
+        logger.info("upload custom filed, valid success num{{}},userId{{}}",dataList.size(),userId);
         if(dataList.size()==0) {
-            return new JSONResult<>().success(true);
+            return  new JSONResult<>().fail(SysErrorCodeEnum.ERR_EXCLE_DATA.getCode(),SysErrorCodeEnum.ERR_EXCLE_DATA.getMessage());
         }
-        JSONResult uploadRs = customFieldFeignClient.saveBatchCustomField(dataList);
-        if(uploadRs==null || !JSONResult.SUCCESS.equals(uploadRs.getCode())) {
-            return  uploadRs;
-        }
-
-        return new JSONResult<>().success(true);
+        
+        return customFieldFeignClient.saveBatchCustomField(dataList);
+        
     }
     
     /**
