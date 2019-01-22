@@ -35,6 +35,7 @@ public interface DeptCallSetFeignClient {
     @PostMapping("/queryDeptCallSetList")
     public JSONResult<PageBean<DeptCallSetRespDTO>> queryDeptCallSetList(@RequestBody DeptCallSetQueryDTO dto);
 
+    @PostMapping("/updateDeptCallSets")
     public JSONResult updateDeptCallSets(@RequestBody  DeptCallSetAddAndUpdateDTO dto);
 
     @PostMapping("/import")
