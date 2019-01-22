@@ -66,6 +66,7 @@ public class AbnormalController {
 
     @RequestMapping("/abnormalUserPage")
     public String pageIndex(){
+        logger.info("====================跳转列表页面==================");
         return "abnormal/abnormalUserList";
     }
 
@@ -88,6 +89,7 @@ public class AbnormalController {
     @PostMapping("/queryAbnoramlUsers")
     @ResponseBody
     public JSONResult<PageBean<AbnomalUserRespDTO>> queryDictionary(@RequestBody AbnomalUserQueryDTO dto){
+        logger.info("====================列表查询==================");
         return abnormalUserFeignClient.queryAbnomalUserList(dto);
     }
 }
