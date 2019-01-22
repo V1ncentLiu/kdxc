@@ -33,7 +33,17 @@ public interface RoleManagerFeignClient {
 	public JSONResult<RoleInfoDTO> qeuryRoleById(RoleQueryDTO roleDTO);
 
 	@RequestMapping(method = RequestMethod.POST, value = "/qeuryRoleByName")
-	public JSONResult<List<RoleInfoDTO>> qeuryRoleByName( RoleQueryDTO roleDTO);
+	public JSONResult<List<RoleInfoDTO>> qeuryRoleByName(RoleQueryDTO roleDTO);
+
+	/**
+	 * 删除角色时判断是否有用户关联
+	 * 
+	 * @param roleDTO
+	 * @return
+	 */
+	@RequestMapping(method = RequestMethod.POST, value = "/qeuryRoleByUserId")
+	public JSONResult<List<RoleInfoDTO>> qeuryRoleByUserId(RoleQueryDTO roleDTO);
+
 	@Component
 	static class HystrixClientFallback implements RoleManagerFeignClient {
 
@@ -83,6 +93,12 @@ public interface RoleManagerFeignClient {
 		@SuppressWarnings("unchecked")
 		@Override
 		public JSONResult<List<RoleInfoDTO>> qeuryRoleByName(RoleQueryDTO roleDTO) {
+			// TODO Auto-generated method stub
+			return fallBackError("查询角色数据失败");
+		}
+
+		@Override
+		public JSONResult<List<RoleInfoDTO>> qeuryRoleByUserId(RoleQueryDTO roleDTO) {
 			// TODO Auto-generated method stub
 			return fallBackError("查询角色数据失败");
 		}
