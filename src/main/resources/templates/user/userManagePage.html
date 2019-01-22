@@ -55,7 +55,7 @@ v-model="isShow">
 <el-tree
 :data="dataTree"              
 node-key="id"
-:default-expanded-keys="[]"
+:default-expanded-keys="expandedKeys"
 ref="tree"
 highlight-current
 @node-click="treeNodeClick">
@@ -209,17 +209,32 @@ highlight-current
 var roleList=[[${roleList}]];//当前字段所属的菜单组
 var passwordExpires=[[${passwordExpires}]];//密码最大使用时间
 var reminderTime=[[${reminderTime}]];//密码到期提醒时间
+var orgData=[[${orgData}]];
 var domains =[];
+
+var expandedKeys =[];//默认展开节点
+for(var i=0;i<orgData.length;i++){
+	var curNode = orgData[i];
+	expandedKeys.push(curNode.id);
+	var childs = curNode.children;
+	if(childs){
+		for(var j=0;j<childs.length;j++){
+			var curChildNode = childs[j];
+			expandedKeys.push(curChildNode.id);
+		}
+	}
+	
+}
 var userVM = new Vue({
   el: '#userManage',
   data: {
     isShow:false,
     userSearchForm: {
-      orgId: '',
       roleId: '',
       status: '',
       searchType: 2,
       searchText: '',
+      orgId: '',
       orgName:''
     },
     dataTable:[],
@@ -272,45 +287,8 @@ var userVM = new Vue({
       value: 3,
       label: '手机号'
     }],
-    dataTree: [{
-      id: 0,
-      label: '根目录',
-      children: [{
-        id: 1,
-        label: '推广中心',
-        children: [{
-          id: 4,
-          label: '推广客服',
-          children: [{
-            id: 9,
-            label: '客服一组'
-          }, {
-            id: 10,
-            label: '客服二组'
-          }]
-        }]
-      }, {
-        id: 2,
-        label: '招商中心',
-        children: [{
-          id: 5,
-          label: '秦皇岛招商中心'
-        }, {
-          id: 6,
-          label: '石家庄招商中心'
-        }]
-      }, {
-        id: 3,
-        label: '商务中心',
-        children: [{
-          id: 7,
-          label: '商务一'
-        }, {
-          id: 8,
-          label: '商务二'
-        }]
-      }]
-    }]
+    expandedKeys:expandedKeys,//树形结构  默认展开的
+    dataTree: orgData
   },
   methods: {
     searchTable() {
@@ -513,6 +491,7 @@ var userVM = new Vue({
     treeNodeClick(data,node,obj){
       if(data.children==null){
           this.userSearchForm.orgName=data.label;
+          this.userSearchForm.orgId=data.id;
           this.isShow=false
       }
     }
