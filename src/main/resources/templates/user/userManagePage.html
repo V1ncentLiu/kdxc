@@ -164,7 +164,7 @@ highlight-current
       <el-col :span="10">
         <el-form-item label="密码最长使用期限：" :label-width="formLabelWidth" prop="maxDay">
           <!-- <el-input v-model="form.maxDay" autocomplete="off"></el-input> -->
-          <el-input-number v-model="form.maxDay" controls-position="right" :min="1" :max="999" style="line-height: 37px;"></el-input-number>
+          <el-input-number v-model="form.maxDay" controls-position="right" :min="1" :max="999" style="line-height: 37px;" :precision="0"></el-input-number>
         </el-form-item>
       </el-col>
       <el-col :span="4">
@@ -185,7 +185,7 @@ highlight-current
     <el-row :gutter="20">
       <el-col :span="7">
         <!-- <el-input v-model="domain.value"></el-input> -->
-        <el-input-number v-model="domain.value" controls-position="right" @change="handleChange" :min="1" style="line-height: 37px;"></el-input-number>
+        <el-input-number v-model="domain.value" controls-position="right" :min="1" style="line-height: 37px;" :precision="0"></el-input-number>
       </el-col>
       <el-col :span="2">
         <el-form-item>天</el-form-item>
@@ -210,12 +210,6 @@ var roleList=[[${roleList}]];//当前字段所属的菜单组
 var passwordExpires=[[${passwordExpires}]];//密码最大使用时间
 var reminderTime=[[${reminderTime}]];//密码到期提醒时间
 var domains =[];
-for(var i=0;i<reminderTime.length;i++){
-  var domain = {};
-  domain.value=reminderTime[i];
-  domains.push(domain);
-}
-var oldDomains=domains;
 var userVM = new Vue({
   el: '#userManage',
   data: {
@@ -383,8 +377,10 @@ var userVM = new Vue({
       .then(function (response) {
         var result =  response.data;
         if(result.code=="0"){
-          userVM.$message.success(msg+"成功");
-          userVM.searchTable();
+          userVM.$message({message:'操作成功',type:'success',duration:1000,onClose:function(){
+        	  userVM.searchTable();
+  	      }});
+          
         }else{
           userVM.$message.error(msg+"失败");
         }
@@ -409,7 +405,7 @@ var userVM = new Vue({
     transformRole(row, column, cellValue, index) {
       var text="";
       if(cellValue!=undefined&&cellValue[0]!=undefined){
-        text=cellValue[0].name;
+        text=cellValue[0].roleName;
       }
       return text;
     },
@@ -465,7 +461,7 @@ var userVM = new Vue({
             if(result.code=="0"){
               userVM.$message.success("设置成功");
               userVM.dialogFormVisible=false;
-              passwordExpires=this.form.maxDay;
+              passwordExpires=userVM.form.maxDay;
               reminderTime=newReminderTime;
             }else{
               userVM.$message.error(result.msg);
@@ -487,7 +483,18 @@ var userVM = new Vue({
       });
     },
     showDialogFormVisible() {
-      this.form.domains=oldDomains;
+    	if (this.$refs['form']!==undefined) {
+    		this.$refs['form'].resetFields();
+    	}
+    	var newDomains =[];
+    	var reminderTimeList=reminderTime.split(",");
+    	for(var i=0;i<reminderTimeList.length;i++){
+    	  var domain = {};
+    	  domain.value=reminderTimeList[i];
+    	  newDomains.push(domain);
+    	}
+    	domains=newDomains;
+      this.form.domains=domains;
       this.form.maxDay=passwordExpires;
       this.dialogFormVisible=true;
     },
@@ -508,9 +515,6 @@ var userVM = new Vue({
           this.userSearchForm.orgName=data.label;
           this.isShow=false
       }
-    },
-    handleChange(value) {
-      console.log(value);
     }
   },
   created(){

@@ -84,7 +84,7 @@ public class UserController {
         String reminderTime = getSysSetting(SysConstant.REMINDER_TIME);
         request.setAttribute("passwordExpires", passwordExpires);
         if (reminderTime != null) {
-            request.setAttribute("reminderTime", reminderTime.split(","));
+            request.setAttribute("reminderTime", reminderTime);
         }
 
         return "user/userManagePage";
@@ -332,9 +332,9 @@ public class UserController {
         }
         return null;
     }
-    
+
     /**
-     *    首页 修改密码
+     * 首页 修改密码
      * 
      * @param orgDTO
      * @return
@@ -349,7 +349,7 @@ public class UserController {
         if (result.hasErrors()) {
             return CommonUtil.validateParam(result);
         }
-        
+
         Subject subject = SecurityUtils.getSubject();
         UserInfoDTO user = (UserInfoDTO) subject.getSession().getAttribute("user");
         Long id = user.getId();
