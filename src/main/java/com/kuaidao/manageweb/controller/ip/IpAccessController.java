@@ -24,11 +24,7 @@ public class IpAccessController {
 	@Autowired
 	private IpAccessFeignClient ipAccessFeignClient;
 
-	/***
-	 * 自定义字段 首页
-	 * 
-	 * @return
-	 */
+ 
 	@RequestMapping("/initIpAccess")
 	public String initRoleInfo() {
 		return "ip/ipAccessManagerList";
