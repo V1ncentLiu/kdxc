@@ -41,7 +41,7 @@
                 <el-row>
                     <el-col :span="14">
                         <el-form-item  prop="codeInput">
-                            <el-input type="number" v-model="loginForm.codeInput" maxlength="60"  placeholder="输入验证码"></el-input>
+                            <el-input type="number" v-model="loginForm.codeInput" maxlength="6"  placeholder="输入验证码"></el-input>
                         </el-form-item>
                     </el-col>
                     <el-col :span="10">
@@ -67,9 +67,8 @@
                 </div>
                 <!-- 图形验证码弹窗 移除hideBox则显示-->
                 <div id="passwordForgetBoxDiv" class="passwordForgetBox f-dn">
-                    <div class="closeBtn">×</div> 
                     <div class="title">请输入下面的图形验证码</div>
-                    <div class="codeImgBox"><img id="codeImg" src="images/code.jpg"></div>
+                    <div class="codeImgBox"><img id="codeImg" @click="toCodeImg" src="images/code.jpg"></div>
                     <div class="whiteIptBox">
                         <el-input v-model="loginForm.imgcodeInput" placeholder=""></el-input>
                     </div>
@@ -124,7 +123,7 @@ var vm =  new Vue({
                 pswInput: [
                   { required: true, message: '密码不能为空', trigger: 'change' },
                   {  max: 30, message: '最大30个字符', trigger: 'blur' },
-                  {  min: 8, message: '最少8个字符', trigger: 'blur' },
+                  {  min: 6, message: '最少6个字符', trigger: 'blur' },
                   { validator:function(rule,value,callback){
                  
                     if(/^[A-Za-z0-9]+$/.test(value) == false){
@@ -249,6 +248,9 @@ var vm =  new Vue({
        	      },
        	   	  toResetPwd() {
        	    	document.location.href='/login/resetPwd';
+       	      },
+       	   	  toCodeImg() {
+       	    	document.getElementById("codeImg").src = "/login/getCaptcha?"+Math.random();
        	      },
        	   	  resetLogin(isUpdatePassword) {
        	    	$("#logoutBoxDiv").addClass("f-dn");

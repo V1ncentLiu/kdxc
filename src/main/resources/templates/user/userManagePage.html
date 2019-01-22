@@ -209,12 +209,6 @@ var roleList=[[${roleList}]];//当前字段所属的菜单组
 var passwordExpires=[[${passwordExpires}]];//密码最大使用时间
 var reminderTime=[[${reminderTime}]];//密码到期提醒时间
 var domains =[];
-for(var i=0;i<reminderTime.length;i++){
-  var domain = {};
-  domain.value=reminderTime[i];
-  domains.push(domain);
-}
-var oldDomains=domains;
 var userVM = new Vue({
   el: '#userManage',
   data: {
@@ -382,8 +376,10 @@ var userVM = new Vue({
       .then(function (response) {
         var result =  response.data;
         if(result.code=="0"){
-          userVM.$message.success(msg+"成功");
-          userVM.searchTable();
+          userVM.$message({message:'操作成功',type:'success',duration:1000,onClose:function(){
+        	  userVM.searchTable();
+  	      }});
+          
         }else{
           userVM.$message.error(msg+"失败");
         }
@@ -408,7 +404,7 @@ var userVM = new Vue({
     transformRole(row, column, cellValue, index) {
       var text="";
       if(cellValue!=undefined&&cellValue[0]!=undefined){
-        text=cellValue[0].name;
+        text=cellValue[0].roleName;
       }
       return text;
     },
@@ -464,7 +460,7 @@ var userVM = new Vue({
             if(result.code=="0"){
               userVM.$message.success("设置成功");
               userVM.dialogFormVisible=false;
-              passwordExpires=this.form.maxDay;
+              passwordExpires=userVM.form.maxDay;
               reminderTime=newReminderTime;
             }else{
               userVM.$message.error(result.msg);
@@ -486,7 +482,18 @@ var userVM = new Vue({
       });
     },
     showDialogFormVisible() {
-      this.form.domains=oldDomains;
+    	if (this.$refs['form']!==undefined) {
+    		this.$refs['form'].resetFields();
+    	}
+    	var newDomains =[];
+    	var reminderTimeList=reminderTime.split(",");
+    	for(var i=0;i<reminderTimeList.length;i++){
+    	  var domain = {};
+    	  domain.value=reminderTimeList[i];
+    	  newDomains.push(domain);
+    	}
+    	domains=newDomains;
+      this.form.domains=domains;
       this.form.maxDay=passwordExpires;
       this.dialogFormVisible=true;
     },
