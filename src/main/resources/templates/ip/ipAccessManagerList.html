@@ -95,21 +95,19 @@ input[type="number"] {
 			:model="ipAddForm" class="demo-form-inline" ref="ipAddForm"
 			:rules="rulesAdd"> 
 				<el-form-item label="IP地址" prop="ipAddress"> 
-					<el-input @keyup.native="number" maxlength="3" v-model="ipAddForm.ipAddress" style="width: 80px;"></el-input>
+					<el-input @keyup.native="number" maxlength="3" v-model="ipAddForm.ipAddress" oninput="if(value.length > 3)value = value.slice(0, 3)" style="width: 80px;"></el-input>
 					<span>&nbsp;.&nbsp;</span> 
 				</el-form-item> 
 				<el-form-item label="" prop="ipAddress2">
-					<el-input @keyup.native="number2" maxlength="3" v-model="ipAddForm.ipAddress2"
-						style="width: 80px;"></el-input>
+					<el-input @keyup.native="number2" maxlength="3" v-model="ipAddForm.ipAddress2" oninput="if(value.length > 3)value = value.slice(0, 3)" style="width: 80px;"></el-input>
 					<span>&nbsp;.&nbsp;</span> 
 				</el-form-item> 
 				<el-form-item label="" prop="ipAddress3">
-					<el-input @keyup.native="number3" maxlength="3" v-model="ipAddForm.ipAddress3"
-						style="width: 80px;"></el-input>
+					<el-input @keyup.native="number3" maxlength="3" v-model="ipAddForm.ipAddress3" oninput="if(value.length > 3)value = value.slice(0, 3)" style="width: 80px;"></el-input>
 					<span>&nbsp;.&nbsp;</span> 
 				</el-form-item> 
 				<el-form-item label="" prop="ipAddress4">
-					<el-input @keyup.native="number4" maxlength="3" v-model="ipAddForm.ipAddress4" style="width: 80px;"></el-input> 
+					<el-input @keyup.native="number4" maxlength="3" v-model="ipAddForm.ipAddress4" oninput="if(value.length > 3)value = value.slice(0, 3)" style="width: 80px;"></el-input> 
 				</el-form-item> 
 			</el-form> 
 			<span slot="footer" class="dialog-footer"> 
@@ -240,22 +238,55 @@ var ipManagerVM = new Vue({
 	    	ipAddress:[
 	    		{ required: true, message: '不能为空'},
 	    		{  max: 3, message: '最大3个字符', trigger: 'change' },
-                {  min: 1, message: '最少1个字符', trigger: 'change' }
+                {  min: 1, message: '最少1个字符', trigger: 'blur' },
+                { validator:function(rule,value,callback){                 
+                    if(/^[0-9]*$/.test(value) == false){
+                       callback(new Error("请输入数字"));
+                    }else{
+                       callback();
+                    } 
+                    callback();
+                }, trigger: 'change'}
 	    	],
 	    	ipAddress2:[
 	    		{ required: true, message: '不能为空'},
 	    		{  max: 3, message: '最大3个字符', trigger: 'change' },
-                {  min: 1, message: '最少1个字符', trigger: 'change' }
+                {  min: 1, message: '最少1个字符', trigger: 'blur' },
+                { validator:function(rule,value,callback){                 
+                    if(/^[0-9]*$/.test(value) == false){
+                       callback(new Error("请输入数字"));
+                    }else{
+                       callback();
+                    } 
+                    callback();
+                }, trigger: 'change'}
 	    	],
 	    	ipAddress3:[
 	    		{ required: true, message: '不能为空'},
 	    		{  max: 3, message: '最大3个字符', trigger: 'change' },
-                {  min: 1, message: '最少1个字符', trigger: 'change' }
+                {  min: 1, message: '最少1个字符', trigger: 'blur' },
+                { validator:function(rule,value,callback){                 
+                    if(/^[0-9]*$/.test(value) == false){
+                       callback(new Error("请输入数字"));
+                    }else{
+                       callback();
+                    } 
+                    callback();
+                }, trigger: 'change'}
 	    	],
 	    	ipAddress4:[
 	    		{ required: true, message: '不能为空'},
 	    		{  max: 3, message: '最大3个字符', trigger: 'change' },
-                {  min: 1, message: '最少1个字符', trigger: 'change' }
+                {  min: 1, message: '最少1个字符', trigger: 'blur' },
+                { validator:function(rule,value,callback){
+                 
+                    if(/^[0-9]*$/.test(value) == false){
+                       callback(new Error("请输入数字"));
+                    }else{
+                       callback();
+                    } 
+                    callback();
+                }, trigger: 'change'}
 	    	]
         },
     	ipAddForm:{
