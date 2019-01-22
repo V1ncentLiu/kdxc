@@ -53,8 +53,6 @@ public class DemoController {
 
 	@RequestMapping("/get")
 	public String  get() {
-	    logger.info("{{}},{{}}",snowflakeArgs.getWorkerId(),snowflakeArgs.getDatacenterId());
-		logger.info("dddddddddddddd");
 		System.out.println(IdUtil.getUUID());
 		return "success";
 	}

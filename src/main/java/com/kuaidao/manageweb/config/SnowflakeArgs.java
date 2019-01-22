@@ -1,9 +1,9 @@
 package com.kuaidao.manageweb.config;
 
+import lombok.Data;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
-import lombok.Data;
 
 /**
  * 雪花算法参数，项目启动时传递参数  
@@ -18,10 +18,10 @@ import lombok.Data;
 public class SnowflakeArgs {
     
     /**
-     * @param workerId 终端ID
+     * @param hostname 容器名
      */
-    @Value("${workerId}")
-    private Long workerId;
+    @Value("${HOSTNAME}")
+    private String hostname;
     
     /**
      * @param datacenterId 数据中心ID
