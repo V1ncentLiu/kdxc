@@ -95,12 +95,15 @@ public class AccesssLogRecordAop {
                	 LoginReq loginReq = (LoginReq) args[0];
                     userInfoReq.setUsername(loginReq.getUsername());
                    JSONResult<UserInfoDTO> getbyUserName = userInfoFeignClient.getbyUserName(userInfoReq);
-                   logRecord.setUserName(getbyUserName.getData().getUsername());
-                   logRecord.setName(getbyUserName.getData().getName());
-                   logRecord.setPhone(getbyUserName.getData().getPhone());
-                   logRecord.setRequestURL(request.getRequestURI());
-                   logRecord.setRemoteIP(CommonUtil.getIpAddr(request));
-                    logRecord.setContent("登录系统失败");
+                   if(getbyUserName !=null && getbyUserName.getData() !=null) {
+                	   logRecord.setUserName(getbyUserName.getData().getUsername());
+                       logRecord.setName(getbyUserName.getData().getName());
+                       logRecord.setPhone(getbyUserName.getData().getPhone());
+                       logRecord.setRequestURL(request.getRequestURI());
+                       logRecord.setRemoteIP(CommonUtil.getIpAddr(request));
+                        logRecord.setContent("登录系统失败");
+                   }
+                   
                 }
 
             }
@@ -169,9 +172,9 @@ public class AccesssLogRecordAop {
             logRecord.setUserName(user.getUsername());
             logRecord.setName(user.getName());
             logRecord.setPhone(user.getPhone());
-            logRecord.setRequestURL(request.getRequestURI());
-            logRecord.setRemoteIP(CommonUtil.getIpAddr(request));
         }
+        logRecord.setRequestURL(request.getRequestURI());
+        logRecord.setRemoteIP(CommonUtil.getIpAddr(request));
     }
 
     /**
