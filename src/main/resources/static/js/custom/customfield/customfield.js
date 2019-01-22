@@ -22,6 +22,7 @@ var fieldMenuVM = new Vue({
                 inputMenuName:'',//菜单搜索框
                 addOrModifyDialogTitle:'',
                 confirmBtnDisabled:false,//提交按钮 是否禁用
+                submitUrl:'',//提交时url
                 rules:{
                 	menuCode:[
                 		{ required: true, message: '菜单代码不能为空',trigger:'blur'},
@@ -165,7 +166,7 @@ var fieldMenuVM = new Vue({
                     	//fieldMenuVM.$refs.confirmBtn.disabled=true;
                     	fieldMenuVM.confirmBtnDisabled=true;//禁用提交按钮
                        var param=this.form;
-                      axios.post('/customfield/customField/saveOrUpdateMenu', param)
+                      axios.post('/customfield/customField/'+this.submitUrl, param)
                       .then(function (response) {
                           var resData = response.data;
                           if(resData.code=='0'){
@@ -207,6 +208,10 @@ var fieldMenuVM = new Vue({
                      });
                     return;
                 }
+                if (this.$refs['customMenuForm']!==undefined) {
+            		this.$refs['customMenuForm'].resetFields();
+            	}
+                this.submitUrl='updateMenu';
                 this.addOrModifyDialogTitle="修改菜单页面";
                 
                 var param={id:rows[0].id};
@@ -275,13 +280,20 @@ var fieldMenuVM = new Vue({
             addFieldMenu(){//点击弹出新增dialog
             	this.form.id='';
             	this.dialogFormVisible = true;
+            	this.submitUrl='saveMenu';
             	this.addOrModifyDialogTitle="添加菜单页面";
+            	if (this.$refs['customMenuForm']!==undefined) {
+            		this.$refs['customMenuForm'].resetFields();
+            	}
             }
             
             
         },//methods end
         created(){
         	this.initCustomFiledMenu();
-        }
+        },
+        mounted(){
+        	document.getElementById('userManage').style.display = 'block';
+        },
       
     })

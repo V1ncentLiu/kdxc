@@ -25,7 +25,8 @@
                 },
                 addAndUpdateDialog:'',//添加或修改 字段dialog 标题
                 menuId:fieldMenu.id,//该字段设置属于菜单组
-                submitBrnDisabled:true,
+                submitBrnDisabled:false,
+                submitUrl:'',//提交url
                 oldFieldForm:{//存放旧的form 数据，提交时比对
                 	fieldCode:'',
                 	fieldName:'',
@@ -277,7 +278,7 @@
                     	fieldVM.submitBrnDisabled=true;
                         var param=this.form;
                         param.menuId=fieldVM.menuId;
-                       axios.post('/customfield/customField/saveOrUpdate', param)
+                       axios.post('/customfield/customField/'+this.submitUrl, param)
                        .then(function (response) {
                            var resData = response.data;
                            if(resData.code=='0'){
@@ -369,6 +370,10 @@
                         });
                        return;
                    }
+                   if (this.$refs['fieldForm']!==undefined) {
+                 		this.$refs['fieldForm'].resetFields();
+                   }
+                   this.submitUrl='update';
                    this.addAndUpdateDialog="修改字段";
                    var param={id:rows[0].id};
                    //根据id获取数据
@@ -420,7 +425,7 @@
                   }
               },
               uploadSuccess(response, file, fileList){//上传成功后
-            	  if(response.code=='0'){
+            	  if(response.code=='0' && response.data){
             		  //清空文件里列表
                 	  this.$refs.upload.clearFiles();
                       this.dialogBatchVisible = false;
@@ -428,6 +433,7 @@
               	         fieldVM.getQuery();
               	      }});
             	  }else{
+            		  console.log(response);
             		  this.$message({message:'上传失败',type:'error'});
             		  this.$refs.upload.clearFiles();
             	  }
@@ -446,7 +452,11 @@
               addFieldSetting(){//添加字段dialog
             	  this.dialogFormVisible = true;
             	  this.form.id='';
+            	  this.submitUrl='save';
             	  this.addAndUpdateDialog="新建字段";
+            	  if (this.$refs['fieldForm']!==undefined) {
+              		this.$refs['fieldForm'].resetFields();
+              	  }
               }
               
               
@@ -458,5 +468,8 @@
         created(){
         	this.getQuery();
         },
+        mounted(){
+            document.getElementById('userManage').style.display = 'block';
+        }
         
     })

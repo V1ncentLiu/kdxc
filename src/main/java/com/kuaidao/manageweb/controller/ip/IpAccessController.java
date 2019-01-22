@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
+import com.kuaidao.manageweb.config.LogRecord;
+import com.kuaidao.manageweb.constant.MenuEnum;
 import com.kuaidao.manageweb.feign.ip.IpAccessFeignClient;
 import com.kuaidao.sys.dto.ip.IpAccessManagerQueryDTO;
 import com.kuaidao.sys.dto.ip.IpPackageInfoDTO;
@@ -46,22 +48,25 @@ public class IpAccessController {
 		return ipAccessFeignClient.querytIpPageList(queryDTO);
 
 	}
-	
+
 	@RequestMapping("/saveIpRepository")
+	@LogRecord(description = "IP库新增", operationType = LogRecord.OperationType.INSERT, menuName = MenuEnum.IP_MANAGEMENT)
 	@ResponseBody
-	public JSONResult<String> saveIpRepository(@RequestBody IpRepositoryInfoDTO dto,
-			HttpServletRequest request, HttpServletResponse response) {
+	public JSONResult<String> saveIpRepository(@RequestBody IpRepositoryInfoDTO dto, HttpServletRequest request,
+			HttpServletResponse response) {
 		return ipAccessFeignClient.saveIpRepository(dto);
 
 	}
+
 	@RequestMapping("/deleteIpRepository")
+	@LogRecord(description = "IP库删除", operationType = LogRecord.OperationType.DELETE, menuName = MenuEnum.IP_MANAGEMENT)
 	@ResponseBody
-	public JSONResult<String> deleteIpRepository(@RequestBody IpRepositoryInfoDTO dto,
-			HttpServletRequest request, HttpServletResponse response) {
+	public JSONResult<String> deleteIpRepository(@RequestBody IpRepositoryInfoDTO dto, HttpServletRequest request,
+			HttpServletResponse response) {
 		return ipAccessFeignClient.deleteIpRepository(dto);
 
 	}
-	
+
 	/***
 	 * 展现Ip包页面
 	 * 
@@ -74,29 +79,34 @@ public class IpAccessController {
 		return ipAccessFeignClient.querytPackagePageList(queryDTO);
 
 	}
-	
+
 	@RequestMapping("/saveIpPackage")
+	@LogRecord(description = "IP包新增", operationType = LogRecord.OperationType.INSERT, menuName = MenuEnum.IPPACKAGE_MANAGEMENT)
 	@ResponseBody
-	public JSONResult<String> saveIpPackage(@RequestBody IpPackageInfoDTO dto,
-			HttpServletRequest request, HttpServletResponse response) {
+	public JSONResult<String> saveIpPackage(@RequestBody IpPackageInfoDTO dto, HttpServletRequest request,
+			HttpServletResponse response) {
 		return ipAccessFeignClient.saveIpPackage(dto);
 
 	}
+
 	@RequestMapping("/updateIpPackage")
 	@ResponseBody
-	public JSONResult<String> updateIpPackage(@RequestBody IpPackageInfoDTO dto,
-			HttpServletRequest request, HttpServletResponse response) {
+	@LogRecord(description = "IP包修改", operationType = LogRecord.OperationType.UPDATE, menuName = MenuEnum.IPPACKAGE_MANAGEMENT)
+	public JSONResult<String> updateIpPackage(@RequestBody IpPackageInfoDTO dto, HttpServletRequest request,
+			HttpServletResponse response) {
 		return ipAccessFeignClient.updateIpPackage(dto);
 
 	}
+
 	@RequestMapping("/deleteIppackage")
 	@ResponseBody
-	public JSONResult<String> deleteIppackage(@RequestBody IpPackageInfoDTO dto,
-			HttpServletRequest request, HttpServletResponse response) {
+	@LogRecord(description = "IP包删除", operationType = LogRecord.OperationType.DELETE, menuName = MenuEnum.IPPACKAGE_MANAGEMENT)
+	public JSONResult<String> deleteIppackage(@RequestBody IpPackageInfoDTO dto, HttpServletRequest request,
+			HttpServletResponse response) {
 		return ipAccessFeignClient.deleteIppackage(dto);
 
 	}
-	
+
 	/**
 	 * 查询角色列表
 	 * 
@@ -123,7 +133,8 @@ public class IpAccessController {
 	@ResponseBody
 	public JSONResult<List<IpPackageInfoDTO>> queryIpPackageByParam(@RequestBody IpAccessManagerQueryDTO dto) {
 		return ipAccessFeignClient.queryIpPackageByParam(dto);
-	} 
+	}
+
 	/**
 	 * 
 	 * @param dto
@@ -135,8 +146,8 @@ public class IpAccessController {
 	@ResponseBody
 	public JSONResult<IpPackageInfoDTO> findPackageById(@RequestBody IpAccessManagerQueryDTO dto) {
 		return ipAccessFeignClient.findPackageById(dto);
-	} 
-	
+	}
+
 	/**
 	 * 
 	 * @param dto
@@ -148,8 +159,19 @@ public class IpAccessController {
 	@ResponseBody
 	public JSONResult<List<IpRepositoryInfoDTO>> findListByRepository(@RequestBody IpAccessManagerQueryDTO dto) {
 		return ipAccessFeignClient.findListByRepository(dto);
-	} 
+	}
 
-
+	/**
+	 * 
+	 * @param dto
+	 * @param request
+	 * @param response
+	 * @return
+	 */
+	@RequestMapping("/findListByPackage")
+	@ResponseBody
+	public JSONResult<List<IpPackageInfoDTO>> findListByPackage(@RequestBody IpAccessManagerQueryDTO dto) {
+		return ipAccessFeignClient.findListByPackage(dto);
+	}
 
 }

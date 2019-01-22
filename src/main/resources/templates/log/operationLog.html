@@ -1,17 +1,14 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml"
     xmlns:th="http://www.thymeleaf.org">
-<head th:include="_header_include::frag(~{::title},~{},~{})">
+<head th:include="_header_include::frag(~{::title},~{::style},~{})">
     <title>日志管理</title>
     <style>
-        .organizationManage .leftBox{/*width: 200px;*/height: auto;border:1px solid #ebeef5;min-height: 480px;}
-        .organizationManage .leftTitle{background:#ebeef5;text-indent: 20px;height: 40px;line-height: 40px;}
-        .organizationManage .leftTree{padding:10px;}
-        .organizationManage .rightTitle{background:#ebeef5;text-indent: 20px;height: 40px;line-height: 40px;}
+    	.el-message-box{width:800px;}
     </style>
 </head>
 <body>
-<div id="organizationManage" class="organizationManage mainPadding">  
+<div id="organizationManage" class="organizationManage mainPadding" style="display: none;">  
     <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
         <el-breadcrumb-item>Home</el-breadcrumb-item>
         <el-breadcrumb-item>系统管理</el-breadcrumb-item>
@@ -55,7 +52,7 @@
 					    </el-option>
   					</el-select>
   					<el-input style="width:15%;"  v-model="searchContent" placeholder="请输入查询内容"></el-input>
-  					<el-button type="primary" @click="queryLogDataList">查询</el-button>
+  					<el-button type="primary" @click="queryLogDataList">搜索</el-button>
 				</div>
                 
             </el-row>
@@ -201,6 +198,14 @@
                 param.operationType=this.operationType;
                 param.operationType=this.operationType;
                 param.visitType = 2;
+                if(this.beginTime>this.endTime){
+                	this.$alert("开始时间不能大于结束时间", '详情', { 
+          	           confirmButtonText: '确定'
+          	         
+         	         })
+         	         return;
+                }
+                
                 console.log(param);
                   axios.post('/log/log/queryLogDataList',param).then(function (response) {
                   	//  console.log(response);
@@ -233,7 +238,7 @@
                   if(cellValue=="INSERT"){
                 	  text="添加"
                   }else if(cellValue=="UPDATE"){
-                	  text="编辑"
+                	  text="修改"
                   }else if(cellValue=="DELETE"){
                 	  text="删除"
                   }else if(cellValue=="EXPORT"){
@@ -266,7 +271,10 @@
         created(){
         	this.queryLogDataList();
         	
-        }//created方法 结束
+        },//created方法 结束
+        mounted(){
+            document.getElementById('organizationManage').style.display = 'block';
+        }
     })
 </script>
 </html>

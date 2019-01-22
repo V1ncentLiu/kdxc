@@ -82,7 +82,7 @@
     </style>
 </head>
 <body>
-<div id="addRole" class="mainPadding">  
+<div id="addRole" class="mainPadding" style="display: none;">  
     <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
         <el-breadcrumb-item>Home</el-breadcrumb-item>
         <el-breadcrumb-item>系统管理</el-breadcrumb-item>
@@ -95,6 +95,12 @@
             prop="roleName"
             style="width:400px;">
             <el-input v-model="addRoleValidateForm.roleName"  maxlength="30" autocomplete="off"></el-input>
+        </el-form-item>
+        <el-form-item
+            label="角色编码："
+            prop="roleCode"
+            style="width:400px;">
+            <el-input v-model="addRoleValidateForm.roleCode"  maxlength="30" autocomplete="off"></el-input>
         </el-form-item>
         <el-form-item label="访问IP限制：">
             <el-radio-group v-model="addRoleValidateForm.visitLimitRadio" @change="visitLimitRadioChange">
@@ -235,16 +241,18 @@ var moduleData=[[${moduleData}]];
          el: '#addRole',
          data: function() {
             return {
-                isDisabled: false,
+                isDisabled: true,
                 chooseLimitCheck: [],//默认选中
                 fields: [],
                 dataList:moduleData,
                 addRoleValidateForm: {
                     roleName: '',
-                    visitLimitRadio:'0'
+                    visitLimitRadio:'1',
+                    roleName:''
                 },
                 rules:{
-                    roleName:[{ required: true, message: '角色名称不能为空'}]
+                    roleName:[{ required: true, message: '角色名称不能为空'}],
+                    roleCode:[{ required: true, message: '角色编码不能为空'}]
                 },
                 chooseIpform: {
                 	ipPackageName: '',
@@ -350,6 +358,7 @@ var moduleData=[[${moduleData}]];
                     	 var ipListTable=addRoleVM.ipListTable;
                          var  param={};
                          param.roleName=addRoleVM.addRoleValidateForm.roleName;
+                         param.roleCode= addRoleVM.addRoleValidateForm.roleCode;
                          param.isIpLimit=addRoleVM.addRoleValidateForm.visitLimitRadio;
                          param.operations=operationArry;
                          param.ipPackages=ipListTable;
@@ -424,6 +433,14 @@ var moduleData=[[${moduleData}]];
              	//param.pageNum=pageNum;
              	param.ipPackageName=ipPackageName;
              	param.ipAddress=ipAddress;
+            	var ipListTable=addRoleVM.ipListTable;
+            	var deleId=[];
+            	if(null!=ipListTable&&ipListTable.length>0){
+            	for (var i=0;i<ipListTable.length;i++ ) {
+            		  deleId.push(ipListTable[i].id);  
+            	 }
+                }
+             	param.deleId=deleId;
 		        axios.post('/ip/ipAccess/queryPackageList',param).then(function (response) {
 		           if(null==response){
 		                 alert("返回异常");
@@ -674,6 +691,9 @@ var moduleData=[[${moduleData}]];
                     this.isDisabled=false
                 }
             }
+        },
+        mounted(){
+            document.getElementById('addRole').style.display = 'block';
         }
     })
 </script>

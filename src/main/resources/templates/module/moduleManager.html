@@ -52,8 +52,8 @@ button a {
 		</div>
 		</el-col> <el-col :xs="12" :sm="17" :md="19" :lg="21" :xl="21"> <el-row
 			class="marginB10"> <el-col :xs="12" :sm="16" :md="16"
-			:lg="18" :xl="12"> <el-button type="primary">
-		<a @click="clickAddModule"><i class="el-icon-plus"></i> 添加下级菜单</a></el-button> <el-button
+			:lg="18" :xl="12"> <el-button type="primary" @click="clickAddModule">
+		  <i class="el-icon-plus"></i> 添加下级菜单</el-button> <el-button
 			type="primary" @click="modifyChildModule">编辑</el-button> <el-button
 			type="primary" @click="deleteFun">删除</el-button> </el-col> <el-col :xs="12"
 			:sm="8" :md="8" :lg="6" :xl="12"> <el-input
@@ -78,6 +78,7 @@ button a {
 <div th:include="_footer_include :: #jsLib"></div>
 <script th:inline="javascript">
 var moduleData=[[${moduleData}]];
+var selectModule=[[${selectModule}]];
 var expandedKeys =[];//默认展开节点
 for(var i=0;i<moduleData.length;i++){
 	var curNode = moduleData[i];
@@ -246,6 +247,45 @@ for(var i=0;i<moduleData.length;i++){
                 });
             },
         }
+        ,
+        created(){
+          	if(null!=selectModule&&selectModule){
+            	// 查询 table 需要数据
+                var pageSize = this.pager.pageSize;
+                var pageNum = this.pager.currentPage;
+            	if(0==pageNum){
+            		pageNum=1;	
+            	}
+                var param = {};
+                var parentId = selectModule;
+                param.parentId = parentId;
+                param.name = this.inputModuleName;
+                param.pageNum=pageNum;
+                param.pageSize=pageSize;
+                axios.post('/module/moduleManager/queryModuleDataByPage?pageNum='+pageNum+"&pageSize="+pageSize,param)
+                    .then(function (response) {
+                        var data =  response.data
+                        if(data.code=='0'){
+                        	var resData = data.data;
+                        	moduleVM.dataTable= resData.data;
+                            //3.分页组件
+                            moduleVM.pager.total= resData.total;
+                            moduleVM.pager.currentPage = resData.currentPage;
+                            moduleVM.pager.pageSize = resData.pageSize;
+                        }else{
+                        	console.error(data);
+                        }
+                        
+                       
+                    })
+                    .catch(function (error) {
+                      console.log(error);
+                    })
+                    .then(function () {
+                      // always executed
+                    });  
+              }
+          	}  
     })
 </script>
 </html>
