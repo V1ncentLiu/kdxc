@@ -31,7 +31,7 @@ import java.util.List;
  * @auther: yangbiao
  * @date: 2019/1/8 17:35
  */
-@FeignClient(name = "aggregation-service",path="/aggregation/abnormaluser",fallback = AbnormalUserFeignClient.HystrixClientFallback.class)
+@FeignClient(name = "aggregation-service-ooo1",path="/aggregation/abnormaluser",fallback = AbnormalUserFeignClient.HystrixClientFallback.class)
 public interface AbnormalUserFeignClient {
 
     @PostMapping("/saveAbnomalUser")

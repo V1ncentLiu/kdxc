@@ -26,7 +26,7 @@ import java.util.List;
  * @auther: yangbiao
  * @date: 2019/1/8 17:35
  */
-@FeignClient(name = "aggregation-service",path="/aggregation/deptcallset",fallback = DeptCallSetFeignClient.HystrixClientFallback.class)
+@FeignClient(name = "aggregation-service-ooo1",path="/aggregation/deptcallset",fallback = DeptCallSetFeignClient.HystrixClientFallback.class)
 public interface DeptCallSetFeignClient {
 
     @PostMapping("/saveDeptCallSet")
