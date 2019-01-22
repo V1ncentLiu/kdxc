@@ -49,6 +49,9 @@ public interface DictionaryItemFeignClient {
     @PostMapping("/queryDictionaryItem")
     public JSONResult<DictionaryItemRespDTO> queryDictionaryOneItem(@RequestBody IdEntity idEntity);
 
+    @PostMapping("/queryDictionaryItemsByGroupCode")
+    public JSONResult queryDicItemsByGroupCode(String groupCode);
+
     @Component
     static class HystrixClientFallback implements DictionaryItemFeignClient {
 
@@ -90,6 +93,11 @@ public interface DictionaryItemFeignClient {
         @Override
         public JSONResult<DictionaryItemRespDTO> queryDictionaryOneItem(IdEntity idEntity) {
             return fallBackError("获取词条详细信息失败");
+        }
+
+        @Override
+        public JSONResult<DictionaryItemRespDTO> queryDicItemsByGroupCode(String groupCode) {
+            return fallBackError("通过GroupCode获取词条");
         }
     }
 
