@@ -86,7 +86,15 @@ public class UserController {
         if (reminderTime != null) {
             request.setAttribute("reminderTime", reminderTime);
         }
-
+        // 查询组织机构树
+        JSONResult<List<TreeData>> treeJsonRes = organizationFeignClient.query();
+        // 查询组织机构树
+        if (treeJsonRes != null && JSONResult.SUCCESS.equals(treeJsonRes.getCode())
+                && treeJsonRes.getData() != null) {
+            request.setAttribute("orgData", treeJsonRes.getData());
+        } else {
+            logger.error("query organization tree,res{{}}", treeJsonRes);
+        }
         return "user/userManagePage";
     }
 
