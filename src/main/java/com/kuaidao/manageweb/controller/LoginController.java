@@ -185,8 +185,13 @@ public class LoginController {
         } else {
             try {
                 if (null != user) {
-                    // 判断账号是否锁定
+                    // 判断账号是否禁用
                     if (SysConstant.USER_STATUS_DISABLE.equals(user.getStatus())) {
+                        errorMessage = "帐号已禁用，请联系管理员修改！";
+                        return new JSONResult<>().fail("1", errorMessage);
+                    }
+                    // 判断账号是否锁定
+                    if (SysConstant.USER_STATUS_LOCK.equals(user.getStatus())) {
                         errorMessage = "账号锁定，请联系管理员修改！";
                         return new JSONResult<>().fail("1", errorMessage);
                     }

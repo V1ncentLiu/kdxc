@@ -30,18 +30,18 @@
             <el-form :model="loginForm" :rules="rules" ref="loginForm" class="demo-loginForm" >
                 <el-row>
                     <el-form-item  prop="nameInput">
-                        <el-input v-model="loginForm.nameInput" maxlength="30" placeholder="登录用户名"></el-input>
+                        <el-input v-model="loginForm.nameInput" @keyup.native="checkLogin('loginForm')" maxlength="30" placeholder="登录用户名"></el-input>
                     </el-form-item>
                 </el-row>
                 <el-row>
                     <el-form-item  prop="pswInput">
-                        <el-input type="password" v-model="loginForm.pswInput"  maxlength="30"  placeholder="登录密码"></el-input>
+                        <el-input type="password" v-model="loginForm.pswInput" @keyup.native="checkLogin('loginForm')"  maxlength="30"  placeholder="登录密码"></el-input>
                     </el-form-item>
                 </el-row>
                 <el-row>
                     <el-col :span="14">
                         <el-form-item  prop="codeInput">
-                            <el-input type="number" v-model="loginForm.codeInput" maxlength="6"  placeholder="输入验证码"></el-input>
+                            <el-input type="number" v-model="loginForm.codeInput" @keyup.native="checkLogin('loginForm')" maxlength="6"  placeholder="输入验证码"></el-input>
                         </el-form-item>
                     </el-col>
                     <el-col :span="10">
@@ -62,7 +62,7 @@
                     <!-- 提示语 -->
                     <div class="tipCntBox"><span id="errorSpan"  style="display: none;"></span></div>
                     <el-form-item>
-                        <el-button type="primary" class="loginBtn" @click="submitForm('loginForm')">登&nbsp;&nbsp;录</el-button>
+                        <el-button type="primary" class="loginBtn" :disabled="loginDisabled" @click="submitForm('loginForm')">登&nbsp;&nbsp;录</el-button>
                     <el-form-item>
                 </div>
                 <!-- 图形验证码弹窗 移除hideBox则显示-->
@@ -97,6 +97,7 @@ var vm =  new Vue({
         data: {
             buttonName: "获取语音验证码",
             isDisabled: false,
+            loginDisabled: true,
             time: 60,
             loginForm: {
             	nameInput: '',
@@ -220,12 +221,12 @@ var vm =  new Vue({
 	    						$("#codeImgMsg").show();
 	    						$("#code").val("");
 	    					}else if(data.code=="0"){
-                  this.cutDown();//倒计时
- 	            		if(disType=="1"){
- 	            			msg="发送短信验证成功";
- 	            		}else{
- 	            			msg="请注意接听语音来电获取验证码！";
- 	            		}
+			                  	this.cutDown();//倒计时
+		 	            		if(disType=="1"){
+		 	            			msg="发送短信验证成功";
+		 	            		}else{
+		 	            			msg="请注意接听语音来电获取验证码！";
+		 	            		}
 	    						$("#passwordForgetBoxDiv").addClass("f-dn");
 	    						$("#codeImgMsg").hide();
 	    						$("#code").val("");
@@ -248,6 +249,14 @@ var vm =  new Vue({
        	      },
        	   	  toResetPwd() {
        	    	document.location.href='/login/resetPwd';
+       	      },
+       	   	  checkLogin(formName) {
+       	    	 var formData = this.loginForm;
+       	    	  if(formData.nameInput!=""&&formData.pswInput!=""&&formData.codeInput!=""){
+         	        this.loginDisabled=false;
+       	    	  }else{
+         	        this.loginDisabled=true;
+       	    	  }
        	      },
        	   	  toCodeImg() {
        	    	document.getElementById("codeImg").src = "/login/getCaptcha?"+Math.random();
