@@ -43,9 +43,12 @@ public class ModuleManagerController {
 	public String initModuleInfo(HttpServletRequest request) {
 		ModuleQueryDTO dto = new ModuleQueryDTO();
 		dto.setSystemCode(SystemCodeConstant.HUI_JU);
+		String moduleId= request.getParameter("moduleId");
+		
 		JSONResult<List<TreeData>> treeJsonRes = moduleManagerFeignClient.queryModuleTree(dto);
 		if (treeJsonRes != null && JSONResult.SUCCESS.equals(treeJsonRes.getCode()) && treeJsonRes.getData() != null) {
 			request.setAttribute("moduleData", treeJsonRes.getData());
+			request.setAttribute("selectModule", moduleId);
 		} else {
 			logger.error("query module tree,res{{}}", treeJsonRes);
 		}
