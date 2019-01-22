@@ -468,5 +468,8 @@
         created(){
         	this.getQuery();
         },
+        mounted(){
+            document.getElementById('userManage').style.display = 'block';
+        }
         
     })
