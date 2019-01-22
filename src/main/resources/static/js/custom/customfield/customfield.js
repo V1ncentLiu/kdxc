@@ -291,6 +291,9 @@ var fieldMenuVM = new Vue({
         },//methods end
         created(){
         	this.initCustomFiledMenu();
-        }
+        },
+        mounted(){
+        	document.getElementById('userManage').style.display = 'block';
+        },
       
     })

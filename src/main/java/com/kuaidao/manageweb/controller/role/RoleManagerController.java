@@ -86,7 +86,8 @@ public class RoleManagerController {
 	@RequestMapping("/addRolePre")
 	public String addRolePre(HttpServletRequest request) {
 
-		JSONResult<List<IndexModuleDTO>> treeJsonRes = moduleManagerFeignClient.queryModuleShow(SystemCodeConstant.HUI_JU);
+		JSONResult<List<IndexModuleDTO>> treeJsonRes = moduleManagerFeignClient
+				.queryModuleShow(SystemCodeConstant.HUI_JU);
 		if (treeJsonRes != null && JSONResult.SUCCESS.equals(treeJsonRes.getCode()) && treeJsonRes.getData() != null) {
 			request.setAttribute("moduleData", treeJsonRes.getData());
 		} else {
@@ -117,7 +118,8 @@ public class RoleManagerController {
 				model.addAttribute("roleInfo", roledto);
 			}
 		}
-		JSONResult<List<IndexModuleDTO>> treeJsonRes = moduleManagerFeignClient.queryModuleShow(SystemCodeConstant.HUI_JU);
+		JSONResult<List<IndexModuleDTO>> treeJsonRes = moduleManagerFeignClient
+				.queryModuleShow(SystemCodeConstant.HUI_JU);
 
 		if (treeJsonRes != null && JSONResult.SUCCESS.equals(treeJsonRes.getCode()) && treeJsonRes.getData() != null) {
 
@@ -200,7 +202,7 @@ public class RoleManagerController {
 	 * @return
 	 */
 	@PostMapping("/saveRoleInfo")
-    @LogRecord(description = "角色新增",operationType = LogRecord.OperationType.INSERT,menuName = MenuEnum.ROLE_MANAGEMENT)
+	@LogRecord(description = "角色新增", operationType = LogRecord.OperationType.INSERT, menuName = MenuEnum.ROLE_MANAGEMENT)
 	@ResponseBody
 	public JSONResult<String> saveRoleInfo(@RequestBody RoleInfoDTO dto) {
 		dto.setSystemCode(SystemCodeConstant.HUI_JU);
@@ -217,9 +219,10 @@ public class RoleManagerController {
 	 * @return
 	 */
 	@PostMapping("/updateRoleInfo")
-    @LogRecord(description = "角色修改",operationType = LogRecord.OperationType.UPDATE,menuName = MenuEnum.ROLE_MANAGEMENT)
+	@LogRecord(description = "角色修改", operationType = LogRecord.OperationType.UPDATE, menuName = MenuEnum.ROLE_MANAGEMENT)
 	@ResponseBody
 	public JSONResult<String> updateRoleInfo(@RequestBody RoleInfoDTO dto) {
+		dto.setSystemCode(SystemCodeConstant.HUI_JU);
 		JSONResult<String> pageJson = roleManagerFeignClient.updateRoleInfo(dto);
 		return pageJson;
 	}
@@ -233,19 +236,29 @@ public class RoleManagerController {
 	 * @return
 	 */
 	@PostMapping("/deleteRoleInfo")
-	@LogRecord(description = "角色删除",operationType = LogRecord.OperationType.DELETE,menuName = MenuEnum.ROLE_MANAGEMENT)
+	@LogRecord(description = "角色删除", operationType = LogRecord.OperationType.DELETE, menuName = MenuEnum.ROLE_MANAGEMENT)
 	@ResponseBody
 	public JSONResult<String> deleteRoleInfo(@RequestBody RoleInfoDTO dto) {
 		JSONResult<String> pageJson = roleManagerFeignClient.deleteRoleInfo(dto);
 		return pageJson;
 	}
-	
+
 	@PostMapping("/qeuryRoleByName")
 	@ResponseBody
-	public JSONResult<List<RoleInfoDTO>> qeuryRoleByName(@RequestBody RoleQueryDTO roleDTO){
-		
-		return  roleManagerFeignClient.qeuryRoleByName(roleDTO);
+	public JSONResult<List<RoleInfoDTO>> qeuryRoleByName(@RequestBody RoleQueryDTO roleDTO) {
+		return roleManagerFeignClient.qeuryRoleByName(roleDTO);
 	}
-	
+	/**
+	 * 删除角色时判断是否有用户关联
+	 * 
+	 * @param roleDTO
+	 * @return
+	 */
+
+	@PostMapping("/qeuryRoleByUserId")
+	@ResponseBody
+	public JSONResult<List<RoleInfoDTO>> qeuryRoleByUserId(@RequestBody RoleQueryDTO roleDTO) {
+		return roleManagerFeignClient.qeuryRoleByUserId(roleDTO);
+	}
 
 }
