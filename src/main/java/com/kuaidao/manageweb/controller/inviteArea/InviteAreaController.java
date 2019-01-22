@@ -1,10 +1,20 @@
-package com.kuaidao.manageweb.controller.announcement;
+package com.kuaidao.manageweb.controller.inviteArea;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.kuaidao.aggregation.dto.invitearea.InviteAreaDTO;
+import com.kuaidao.common.entity.JSONResult;
+import com.kuaidao.common.entity.PageBean;
+import com.kuaidao.logmgt.dto.AccessLogReqDTO;
+import com.kuaidao.manageweb.config.LogRecord;
+import com.kuaidao.manageweb.constant.MenuEnum;
+import com.kuaidao.manageweb.feign.invitearea.InviteareaFeignClient;
 import com.kuaidao.manageweb.util.DownFile;
 
 import java.io.File;
@@ -17,23 +27,35 @@ import javax.servlet.http.HttpServletResponse;
  * @Auther: admin
  * @Date: 2019/1/2 15:14
  * @Description:
- *      电销管理
+ *      y邀约区域
  */
 
 @Controller
-@RequestMapping("/telemarketing")
-public class TelemarketingController {
+@RequestMapping("/invitearea")
+public class InviteAreaController {
 
-    private static Logger logger = LoggerFactory.getLogger(TelemarketingController.class);
-
+    private static Logger logger = LoggerFactory.getLogger(InviteAreaController.class);
+    @Autowired
+    InviteareaFeignClient inviteareaFeignClient;
     /**
-     * 电销布局列表
+     * 邀约记录列表
      * 
      * @return
      */
-    @RequestMapping("/telemarketingLayoutList")
+    @RequestMapping("/inviteAreaList")
     public String inviteAreaList(HttpServletRequest request) {
-        return "telemarketing/telemarketingLayoutList";
+        return "inviteArea/inviteAreaList";
+    }
+    
+    /**
+     * 邀约记录列表
+     * 
+     * @return
+     */
+    @RequestMapping("/inviteAreaListPage")
+    @ResponseBody
+    public JSONResult<PageBean<InviteAreaDTO>> inviteAreaListPage(HttpServletRequest request,@RequestBody InviteAreaDTO inviteAreaDTO) {
+    	return inviteareaFeignClient.inviteAreaListPage(inviteAreaDTO);
     }
     
     /**
@@ -51,9 +73,10 @@ public class TelemarketingController {
      * @return
      */
     @RequestMapping("/deleInviteArea")
-    public String deleInviteArea(HttpServletRequest request) {
-    	String id = request.getParameter("id");
-        return "inviteArea/addInviteArea";
+    @LogRecord(description = "删除邀约区域",operationType = LogRecord.OperationType.DELETE,menuName = MenuEnum.INVITEAREA)
+    @ResponseBody
+    public JSONResult deleInviteArea(@RequestBody InviteAreaDTO inviteAreaDTO) {
+    	return inviteareaFeignClient.deleInviteArea(inviteAreaDTO);
     }
     
     /**

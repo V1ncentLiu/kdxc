@@ -13,6 +13,7 @@ public enum MenuEnum {
      * 系统管理菜单
      */
     USER_MANAGEMENT("用户管理"), SCHEDULE_MANAGEMENT("任务管理"), ROLE_MANAGEMENT("角色管理"), AUTHORITY_MANAGEMENT("权限管理"), ACCOUNT_SUMMARY("账号汇总"), RESOURCE_MANAGEMENT("资源管理"), DICTIONARY_MANAGEMENT("字典管理"), ANNOUNCE_MANAGEMENT("公告管理"), MESSAGE_CENTER("消息中心"),
+    INVITEAREA("邀约区域管理"),TELEMARKTINGLAYOUT("电销布局管理"),
 
     
     /**
