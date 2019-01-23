@@ -1,5 +1,7 @@
 package com.kuaidao.manageweb.controller.assignrule;
 
+import java.util.List;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -11,9 +13,13 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.kuaidao.aggregation.dto.assignrule.InfoAssignDTO;
 import com.kuaidao.aggregation.dto.assignrule.InfoAssignQueryDTO;
+import com.kuaidao.common.constant.OrgTypeConstant;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.manageweb.feign.assignrule.InfoAssignFeignClient;
+import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
+import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
+import com.kuaidao.sys.dto.organization.OrganizationRespDTO;
 
 @Controller
 @RequestMapping("/assignrule/infoAssign")
@@ -22,6 +28,9 @@ public class InfoAssignContoller {
 	@Autowired
 	private InfoAssignFeignClient infoAssignFeignClient;
 
+	@Autowired
+	private OrganizationFeignClient organizationFeignClient;
+
 	/***
 	 * 初始化信息流分配页面
 	 * 
@@ -29,7 +38,13 @@ public class InfoAssignContoller {
 	 */
 	@RequestMapping("/initinfoAssign")
 	public String initinfoAssign() {
-		return "assignrule/";
+
+		OrganizationQueryDTO orgDto = new OrganizationQueryDTO();
+		orgDto.setOrgType(OrgTypeConstant.DXZ);
+
+		JSONResult<List<OrganizationRespDTO>> dto = organizationFeignClient.queryOrgByParam(orgDto);
+
+		return "assignrule/infoAssignRule";
 	}
 
 	/***
