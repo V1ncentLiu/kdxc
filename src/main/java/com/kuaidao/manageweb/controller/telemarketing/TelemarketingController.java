@@ -82,6 +82,17 @@ public class TelemarketingController {
     	return telemarketingLayoutFeignClient.getTelemarketingLayoutList(telemarketingLayoutDTO);
     }
     /**
+     * 根据id查询电销布局
+     * 
+     * @return
+     */
+    @RequestMapping("/findTelemarketingById")
+    @ResponseBody
+    public JSONResult<TelemarketingLayoutDTO> findTelemarketingById(HttpServletRequest request,@RequestBody TelemarketingLayoutDTO telemarketingLayoutDTO) {
+    	return telemarketingLayoutFeignClient.findTelemarketingById(telemarketingLayoutDTO);
+    }
+    
+    /**
      * 添加电销布局
      * 
      * @return
