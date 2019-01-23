@@ -37,7 +37,7 @@ import com.kuaidao.sys.dto.user.UserInfoDTO;
 
 /**
  * 坐席管理 controller 
- * @author: Chen
+ * @author  Chen
  * @date: 2019年1月22日 下午2:30:05   
  * @version V1.0
  */
@@ -49,8 +49,25 @@ public class ClientController {
     @Autowired
     ClientFeignClient clientFeignClient;
 
-    
+    /**
+     *  跳转天润坐席页面
+     * @return
+     */
+    @RequestMapping("/trClientIndex")
+    public String trClientIndex() {
+        
+        return "client/trClientPage";
+    }
 
+    
+    /**
+     *  跳转七陌坐席页面
+     * @return
+     */
+    @RequestMapping("/qimoClientIndex")
+    public String qimoClientIndex() {
+        return "client/qimoClientPage";
+    }
     /**
      *  添加天润坐席
      * @param reqDTO

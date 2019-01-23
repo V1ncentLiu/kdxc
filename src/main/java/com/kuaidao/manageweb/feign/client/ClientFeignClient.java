@@ -1,6 +1,5 @@
 package com.kuaidao.manageweb.feign.client;
 
-import javax.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.netflix.feign.FeignClient;
@@ -26,11 +25,11 @@ import com.kuaidao.common.entity.PageBean;
 /**
  *  坐席管理
  * 
- * @author: Chen Chengxue
+ * @author Chen Chengxue
  * @date: 2019年1月3日 下午5:06:37
  * @version V1.0
  */
-@FeignClient(name = "aggregation-service", path = "/aggregation/client/client", fallback = ClientFeignClient.HystrixClientFallback.class)
+@FeignClient(name = "aggregation-service-chen", path = "/aggregation/client/client", fallback = ClientFeignClient.HystrixClientFallback.class)
 public interface ClientFeignClient {
     
     /**

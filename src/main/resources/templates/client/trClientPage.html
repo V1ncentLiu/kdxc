@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+<head th:include="_header_include::frag(~{::title},~{},~{})">
+    <title>天润坐席管理</title>
+     <style>
+        .trClientManage .leftBox{/*width: 200px;*/height: auto;border:1px solid #ebeef5;min-height: 480px;}
+        .trClientManage .leftTitle{background:#ebeef5;text-indent: 20px;height: 40px;line-height: 40px;}
+        .trClientManage .leftTree{padding:10px;}
+        .trClientManage .rightTitle{background:#ebeef5;text-indent: 20px;height: 40px;line-height: 40px;}
+    </style>
+</head>
+<body>
+<div id="trClientManage" class="trClientManage mainPadding">  
+    <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
+        <el-breadcrumb-item>Home</el-breadcrumb-item>
+        <el-breadcrumb-item>系统管理</el-breadcrumb-item>
+        <el-breadcrumb-item><a href="JavaScript:void(0)" data-url="c.html">天润坐席管理</a></el-breadcrumb-item>
+    </el-breadcrumb>
+    <el-row class="marginB10">
+        <el-button type="primary" @click="addClientDialog"><i class="el-icon-plus"></i> 添加坐席</el-button>
+        <el-button type="primary" @click="modifyClientDialog">编辑坐席</el-button>
+        <el-button type="primary" @click="">删除坐席</el-button>
+        <el-button type="primary" @click="">导入坐席</el-button>
+    </el-row>
+    <el-row class="marginB10 greybg padding20">
+        
+         <el-row :gutter="20">
+                 <el-col :span="4">
+                         <el-input placeholder="请输入坐席编号" v-model="searchForm.clientNo">
+                </el-col> 
+                <el-col :span="4">
+                         <el-input placeholder="请输入坐席编号"  v-model="searchForm.clientNo">
+                </el-col> 
+                <el-col :span="4">
+                     <el-input placeholder="绑定电话号"  v-model="searchForm.bindPhone">
+                </el-col>
+                <el-col :span="4">
+                     <el-input placeholder="外显手机号"  v-model="searchForm.displayPhone">
+                </el-col>
+                
+                <el-col :span="3">
+                         <el-button   icon="el-icon-search" type="info" @click="" plain>搜索</el-button>
+                    </el-form-item>
+                </el-col>
+            </el-row>
+        
+    </el-row>
+    <el-row>
+        <el-table 
+            ref="multipleTable"
+            tooltip-effect="dark"
+            style="width: 100%"
+            border
+             @selection-change="handleSelectionChange"
+            :data="clientData" 
+            >
+            <el-table-column align="center" type="selection" width="55"></el-table-column>
+            <el-table-column align="center" prop="clientNo" label="坐席编号"></el-table-column>
+            <el-table-column align="center" prop="bindPhone" label="A(呼叫号)"></el-table-column>
+            <el-table-column align="center" prop="displayPhone" label="外显手机号"></el-table-column>
+            <el-table-column align="center" prop="phoneMark" label="外呼好标记记录 (类型+次数)"></el-table-column>
+            <el-table-column align="center" prop="orgName" label="电销组"></el-table-column>
+            <el-table-column align="center" label="回呼配置">
+                <template slot-scope="scope">
+                    <a href="javascript:void(0)" @click="goToFieldSettingPage(scope.row)" target="_blank" class="buttonText" style="color:blue">页面字段设置</a>
+                </template>
+            </el-table-column>
+            
+        </el-table>
+        <table-pagination :pager="pager" @change=""></table-pagination>
+    </el-row>
+    
+    <el-dialog :title="addOrModifyDialogTitle" :visible.sync="dialogFormVisible" @close="closeAddClientDialog">
+        <el-form :model="form" ref="clientForm" :rules="rules">
+            <el-form-item label="坐席编号：" :label-width="formLabelWidth" prop="clientNo">
+                <el-input v-model="form.clientNo" autocomplete="off"  maxlength="11"></el-input>
+            </el-form-item>
+            <el-form-item label="绑定电话号：" :label-width="formLabelWidth" prop="bindPhone">
+                <el-input v-model="form.bindPhone" autocomplete="off"  maxlength="11"></el-input>
+            </el-form-item>
+            <el-form-item label="外显手机号：" :label-width="formLabelWidth" prop="displayPhone">
+                <el-input v-model="form.displayPhone" autocomplete="off"  maxlength="11"></el-input>
+            </el-form-item>
+            <el-row :gutter="20">
+                <el-col :span="12">
+                  <el-form-item label="所在组织" :label-width="formLabelWidth" prop="orgName">
+	                <el-input v-model="form.orgName" autocomplete="off"  maxlength="50" :disabled="true" ></el-input>
+	                <!-- -->
+	            </el-form-item>
+                </el-col>
+                 <el-col :span="12">
+                     <el-button @click="selectOrg">选择组织</el-button>
+                </el-col>
+                
+            </el-row>
+          
+              <el-form-item label="回呼配置" :label-width="formLabelWidth" prop="callbackPhone">
+                <el-input v-model="form.callbackPhone" autocomplete="off"   maxlength="11"></el-input>
+            </el-form-item>
+        </el-form>
+        <div slot="footer" class="dialog-footer">
+            <el-button type="primary" @click="saveClient('clientForm')" :disabled="confirmBtnDisabled">提交</el-button>
+            <el-button @click="cancelForm('clientForm')">取 消</el-button>
+        </div>
+    </el-dialog>
+    
+    <el-dialog
+	  title="选择组织"
+	  :visible.sync="orgDialogVisible"
+	  width="30%">
+	  
+        <el-tree
+             :data="orgTreeData"              
+             node-key="id"
+             show-checkbox
+             default-expand-all
+             highlight-current
+             check-strictly
+             @check="selecedNode"
+             class="leftTree">
+         </el-tree>
+
+	  
+	</el-dialog>
+
+</div>
+</body>
+<!-- import common js-->
+<div th:include="_footer_include :: #jsLib"></div>
+<!-- 当前页面的js -->
+<script th:src="@{/js/custom/client/tr_client.js?v=1.0.0}"></script>
+</html>
