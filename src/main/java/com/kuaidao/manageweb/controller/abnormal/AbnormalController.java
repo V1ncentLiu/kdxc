@@ -13,6 +13,7 @@ import com.kuaidao.manageweb.constant.MenuEnum;
 import com.kuaidao.manageweb.feign.abnormal.AbnormalUserFeignClient;
 import com.kuaidao.manageweb.feign.announcement.AnnReceiveFeignClient;
 import com.kuaidao.manageweb.feign.announcement.AnnouncementFeignClient;
+import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
 import com.kuaidao.manageweb.feign.msgpush.MsgPushFeignClient;
 import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
 import com.kuaidao.manageweb.util.IdUtil;
@@ -21,6 +22,7 @@ import com.kuaidao.sys.dto.announcement.AnnouncementQueryDTO;
 import com.kuaidao.sys.dto.announcement.AnnouncementRespDTO;
 import com.kuaidao.sys.dto.announcement.annReceive.AnnReceiveAddAndUpdateDTO;
 import com.kuaidao.sys.dto.dictionary.DictionaryAddAndUpdateDTO;
+import com.kuaidao.sys.dto.dictionary.DictionaryItemRespDTO;
 import com.kuaidao.sys.dto.dictionary.DictionaryQueryDTO;
 import com.kuaidao.sys.dto.dictionary.DictionaryRespDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
@@ -63,22 +65,31 @@ public class AbnormalController {
     @Autowired
     AbnormalUserFeignClient abnormalUserFeignClient;
 
+    @Autowired
+    DictionaryItemFeignClient dictionaryItemFeignClient;
 
-    @RequestMapping("/abnormalUserPage")
-    public String pageIndex(){
-        logger.info("====================跳转列表页面==================");
-        return "abnormal/abnormalUserList";
+    @Autowired
+    UserInfoFeignClient userInfoFeignClient;
+    
+    
+    
+
+    @RequestMapping("/AbnoramlType")
+    @ResponseBody
+    public JSONResult<List<DictionaryItemRespDTO>> AbnoramlType(){
+        JSONResult result = dictionaryItemFeignClient.queryDicItemsByGroupCode("AbnormalType");
+        return result;
     }
-
 
     @RequestMapping("/saveOne")
     @ResponseBody
     public JSONResult insertOne(@Valid @RequestBody AbnomalUserAddAndUpdateDTO dto  , BindingResult result){
         if (result.hasErrors()) return  CommonUtil.validateParam(result);
         dto.setCreateTime(new Date());
-        dto.setCreateUser(123456L);
+        dto.setCreateUser(1084621842175623168L);
+        dto.setStatus(0);
         return  abnormalUserFeignClient.saveAbnomalUser(dto);
-}
+    }
 
     @RequestMapping("/deleteAbnoramlUser")
     @ResponseBody
@@ -88,8 +99,56 @@ public class AbnormalController {
 
     @PostMapping("/queryAbnoramlUsers")
     @ResponseBody
-    public JSONResult<PageBean<AbnomalUserRespDTO>> queryDictionary(@RequestBody AbnomalUserQueryDTO dto){
+    public JSONResult<PageBean<AbnomalUserRespDTO>> queryAbnoramlUsers(@RequestBody AbnomalUserQueryDTO dto){
         logger.info("====================列表查询==================");
-        return abnormalUserFeignClient.queryAbnomalUserList(dto);
+        Date date1 = dto.getTime1();
+        Date date2 = dto.getTime2();
+        if(date1!=null && date2!=null ){
+            if(date1.getTime()>date2.getTime()){
+                return new JSONResult().fail("-1","时间选项，开始时间大于结束时间!");
+            }
+        }
+
+//      这里需要添加权限验证。
+        if("".equals("")){
+
+        }
+
+        JSONResult<PageBean<AbnomalUserRespDTO>> resList = abnormalUserFeignClient.queryAbnomalUserList(dto);
+        List<AbnomalUserRespDTO> resdata = resList.getData().getData();
+
+        UserInfoPageParam param = new UserInfoPageParam();
+        param.setPageNum(1);
+        param.setPageSize(99999);
+        JSONResult<PageBean<UserInfoDTO>> userlist = userInfoFeignClient.list(param);
+        List<UserInfoDTO> userData = userlist.getData().getData();
+
+        JSONResult<List<DictionaryItemRespDTO>> abnoramlType = AbnoramlType();
+        List<DictionaryItemRespDTO> abnoramlTypeData = abnoramlType.getData();
+
+        List<AbnomalUserRespDTO> list2 = new ArrayList<>();
+        for(int i = 0 ; i < resdata.size() ; i++){
+            AbnomalUserRespDTO tempDto = resdata.get(i);
+            for(UserInfoDTO userInfo:userData){
+                if(userInfo.getId().equals(tempDto.getCreateUser())){
+                    tempDto.setCreateUserName(userInfo.getUsername());
+                }
+            }
+            for(DictionaryItemRespDTO abnType:abnoramlTypeData){
+                if(abnType.getValue().equals(tempDto.getType().toString())){
+                    tempDto.setTypeName(abnType.getName());
+                }
+            }
+            list2.add(tempDto);
+        }
+        resList.getData().setData(list2);
+        return resList;
     }
+
+    @RequestMapping("/abnormalUserPage")
+    public String pageIndex(){
+        logger.info("====================跳转列表页面==================");
+        return "abnormal/abnormalUserList";
+    }
+
 }

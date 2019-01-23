@@ -56,7 +56,7 @@ public class DeptCallSetController {
         if (result.hasErrors()) return  CommonUtil.validateParam(result);
 
         dto.setCreateTime(new Date());
-        dto.setCreateUser(123456L);
+        dto.setCreateUser(1084621842175623168L);
 
         return deptCallSetFeignClient.saveDeptCallSet(dto);
 }
@@ -65,7 +65,7 @@ public class DeptCallSetController {
     @ResponseBody
     public JSONResult updateAbnoramlUser(@RequestBody DeptCallSetAddAndUpdateDTO dto){
         dto.setUpdateTime(new Date());
-        dto.setUpdateUser(123456L);
+        dto.setUpdateUser(1084621842175623168L);
         return deptCallSetFeignClient.updateDeptCallSets(dto);
     }
 
@@ -89,7 +89,7 @@ public class DeptCallSetController {
 
 
             dto.setId(IdUtil.getUUID());
-            dto.setCreateUser(123456L);
+            dto.setCreateUser(1084621842175623168L);
             dto.setCreateTime(new Date());
             insertList.add(dto);
         }
