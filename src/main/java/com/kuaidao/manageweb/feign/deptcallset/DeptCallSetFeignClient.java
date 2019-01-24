@@ -7,6 +7,7 @@ import com.kuaidao.aggregation.dto.deptCallSet.DeptCallSetAddAndUpdateDTO;
 import com.kuaidao.aggregation.dto.deptCallSet.DeptCallSetQueryDTO;
 import com.kuaidao.aggregation.dto.deptCallSet.DeptCallSetRespDTO;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
+import com.kuaidao.common.entity.IdEntity;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
 import org.slf4j.Logger;
@@ -26,7 +27,7 @@ import java.util.List;
  * @auther: yangbiao
  * @date: 2019/1/8 17:35
  */
-@FeignClient(name = "aggregation-service-ooo1",path="/aggregation/deptcallset",fallback = DeptCallSetFeignClient.HystrixClientFallback.class)
+@FeignClient(name = "aggregation-service",path="/aggregation/deptcallset",fallback = DeptCallSetFeignClient.HystrixClientFallback.class)
 public interface DeptCallSetFeignClient {
 
     @PostMapping("/saveDeptCallSet")
@@ -35,8 +36,14 @@ public interface DeptCallSetFeignClient {
     @PostMapping("/queryDeptCallSetList")
     public JSONResult<PageBean<DeptCallSetRespDTO>> queryDeptCallSetList(@RequestBody DeptCallSetQueryDTO dto);
 
-    @PostMapping("/updateDeptCallSets")
+    @PostMapping("/queryOne")
+    public JSONResult<DeptCallSetRespDTO> queryOne(@RequestBody IdEntity idEntity);
+
+    @PostMapping("/upateDeptCallSet")
     public JSONResult updateDeptCallSets(@RequestBody  DeptCallSetAddAndUpdateDTO dto);
+
+    @PostMapping("/upateDeptCallSetForNotNull")
+    public JSONResult updateDeptCallSetsForNotNull(@RequestBody  DeptCallSetAddAndUpdateDTO dto);
 
     @PostMapping("/import")
     public JSONResult importDeptCallSets(@RequestBody List<DeptCallSetAddAndUpdateDTO> list);
@@ -64,8 +71,18 @@ public interface DeptCallSetFeignClient {
         }
 
         @Override
+        public JSONResult<DeptCallSetRespDTO> queryOne(IdEntity idEntity) {
+            return fallBackError("查询部门呼叫设置详细信息");
+        }
+
+        @Override
         public JSONResult updateDeptCallSets(DeptCallSetAddAndUpdateDTO dto) {
             return fallBackError("更新部门呼叫设置");
+        }
+
+        @Override
+        public JSONResult updateDeptCallSetsForNotNull(DeptCallSetAddAndUpdateDTO dto) {
+            return fallBackError("更新部门呼叫设置-更新不为空的字段");
         }
 
         @Override
