@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+xmlns:th="http://www.thymeleaf.org">
+<head th:include="_header_include::frag(~{::title},~{},~{})" >
+	<title>信息流分配规则</title>
+ 
+</head>
+<body>
+<div id="informationAllot" class="informationAllot mainPadding">  
+    <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
+        <el-breadcrumb-item>Home</el-breadcrumb-item>
+        <el-breadcrumb-item>业务设置</el-breadcrumb-item>
+        <el-breadcrumb-item><a href="JavaScript:void(0)">信息流分配电销组规则</a></el-breadcrumb-item>
+    </el-breadcrumb>
+    <el-row class="marginB10">
+        <el-button type="primary" @click="openAddRuleDialog"><i class="el-icon-plus"></i>添加</el-button>
+        <el-button type="primary"><i class="el-icon-edit"></i>编辑</el-button>
+        <el-button type="primary" @click="deleteDialog"><i class="el-icon-delete"></i>删除</el-button>
+    </el-row>
+    <el-row class="marginB10 greybg padding20">
+        <el-row :gutter="20">
+            <el-form>
+                <el-col :span="4">
+                    <el-select v-model="telemarketingId" placeholder="选择电销组" style="width: 100%;">
+                        <el-option
+                            v-for="item in orgOption"
+                            :key="item.id"
+                            :label="item.name"
+                            :value="item.id">
+                        </el-option>
+                    </el-select>
+                </el-col>
+                <el-col :span="4">
+                    <el-select v-model="projectId" placeholder="项目" style="width: 100%;">
+                        <el-option
+                            v-for="item in proOption"
+                            :key="item.id"
+                            :label="item.projectName"
+                            :value="item.id">
+                        </el-option>
+                    </el-select>
+                </el-col>
+                <el-col :span="5">
+                    <el-input v-model="assignName"    placeholder="规则名称" class="input-with-select"></el-input>
+                </el-col>
+                <el-col :span="3">
+                    <el-button type="primary"  @click="initTableData" >搜索</el-button>
+                </el-col>
+            </el-form>
+        </el-row>
+    </el-row>
+    <el-row>
+        <el-table 
+            ref="multipleTable"
+            tooltip-effect="dark"
+            style="width: 100%"
+            @selection-change="handleSelectionChange"
+            border
+            :data="dataTable" 
+            >
+            <el-table-column align="center" type="selection" prop="id" @selection-change="handleSelectionChange"  width="55"></el-table-column>
+            <el-table-column align="center" prop="assignName" label="规则名称"></el-table-column>
+            <el-table-column align="center" prop="releAssignId" label="规则ID"></el-table-column>
+            <el-table-column align="center" prop="projectName" label="项目名称"></el-table-column>
+            <el-table-column align="center" prop="telemarketingName" label="电销组"></el-table-column>
+            <el-table-column align="center" prop="telemarketingDirectorName" label="电销总监名称"></el-table-column>
+        </el-table>
+         <table-pagination :pager="pager" @change="initTableData"></table-pagination> 
+    </el-row>
+    <!-- dialog -->
+    <el-dialog title="添加规则" :visible.sync="dialogFormVisible" @close="closeAddRuleDialog" >
+        <el-form :model="form" ref="form" :rules="rules" class="width500">
+            <el-form-item label="项目：" :label-width="formLabelWidth" prop="valueMultiple">
+                <el-select v-model="form.valueMultiple" multiple placeholder="选择项目" style="width: 100%;">
+                    <el-option
+                        v-for="item in proOption"
+                        :key="item.id"
+                        :label="item.projectName"
+                        :value="item.id">
+                    </el-option>
+                </el-select>
+            </el-form-item>
+            <el-form-item label="电销组：" :label-width="formLabelWidth" prop="value">
+                <el-select v-model="form.value" placeholder="选择电销组" style="width: 100%;">
+                    <el-option
+                        v-for="item in orgOption"
+                        :key="item.id"
+                        :label="item.name"
+                        :value="item.id">
+                    </el-option>
+                </el-select>
+            </el-form-item>
+            <el-form-item label="规则名称：" :label-width="formLabelWidth" prop="ruleName">
+                <el-input v-model="form.ruleName"></el-input>
+            </el-form-item>
+            <el-form-item label="规则ID："  :label-width="formLabelWidth" prop="ruleID">
+                <el-input v-model="form.ruleID"></el-input>
+            </el-form-item>
+        </el-form>
+        <div slot="footer" class="dialog-footer">
+            <el-button type="primary" @click="submitForm('form')">确 定</el-button>
+            <el-button @click="dialogFormVisible= false">取消</el-button>
+        </div>
+    </el-dialog>
+</div>
+<!-- import common js-->
+<div th:include="_footer_include :: #jsLib"></div>
+</body>
+<script th:inline="javascript"  >
+//下拉机构数据
+var orgSelect=[[${orgSelect}]];
+//下拉项目数据
+var proSelect=[[${proSelect}]];
+  var ruleVm=new Vue({
+        el: '#informationAllot',
+        data: function() {
+            return {
+                dialogFormVisible: false,
+                form: {
+                    value:'',
+                    ruleName:'',
+                    ruleID:'',
+                    valueMultiple:[]
+                },
+                formLabelWidth: '100px',
+                dataTable: [],
+                pager:{//组织列表pager
+                    total: 0,
+                    currentPage: 1,
+                    pageSize: 20,
+                },
+                proOption: proSelect,
+                orgOption:orgSelect,
+                telemarketingId: '电销组',//下拉选项默认值
+                projectId: '项目',//下拉选项默认值
+                assignName:'',
+                valueMultiple:[],
+                multseleSelection:[],
+                rules: {
+                    valueMultiple: [
+                        { required: true, message: '请选择项目', trigger: 'change' }
+                    ],
+                    value: [
+                        { required: true, message: '请选择电销组', trigger: 'change' }
+                    ],
+                    ruleName: [
+                        { required: true, message: '请输入规则名称', trigger: 'blur' }
+                    ],
+                    ruleID: [
+                        { required: true, message: '请输入规则ID', trigger: 'blur' }
+                    ]
+                }
+               
+
+            }        	  
+        },
+        methods: {
+        	initTableData(){
+        	 //初始化列表	
+                // 查询 table 需要数据
+                 var pageSize = this.pager.pageSize;
+                 var pageNum = this.pager.currentPage;
+                 var teleId= this.telemarketingId;
+                 if(teleId=='电销组'){
+                	 teleId=''; 
+                  }
+                 var proId= this.projectId;
+                 if(proId=='项目'){
+                	 proId=''; 
+                 }
+                 var assignName=this.assignName
+             	 if(0==pageNum){
+             		pageNum=1;	
+             	 }
+                 var param = {};
+                 param.telemarketingId = teleId;
+                 param.projectId = proId;
+                 param.assignName = assignName;
+                 param.pageNum=pageNum;
+                 param.pageSize=pageSize;
+     		    axios.post('/assignrule/infoAssign/queryInfoAssignList',param).then(function (response) {
+     				if(null==response){
+     					alert("返回异常");
+     					return ;
+     				}
+     				var resobj= response.data;
+     				if(null==resobj){
+     					alert("返回异常");
+     					return ;
+     				} 
+     				if(resobj.code!='0'){
+     					alert(response.data.message);
+     					return ;
+     				}
+     				var pageData=resobj.data;
+     				ruleVm.pager.total=pageData.total;
+     				ruleVm.pager.currentPage = pageData.currentPage;
+     				ruleVm.pager.pageSize = pageData.pageSize;
+     				ruleVm.dataTable =pageData.data; 	
+     			})
+         		
+        	},
+        	//添加提交
+            submitForm(formName) {
+                this.dialogFormVisible=false;
+                this.$refs[formName].validate((valid) => {
+                  if (valid) {
+                   var param={};
+                   var  projectArray= ruleVm.form.valueMultiple;
+                   var proIdArry=[];
+                   for(var i=0;i<projectArray.length;i++) {
+                	    var pro={};
+                	    pro.projectId=parseInt(projectArray[i]);
+                	    proIdArry.push(pro);
+                    }
+                    param.infoAssignProject=proIdArry;
+                    param.assignName=ruleVm.form.ruleName;
+                    param.telemarketingId=ruleVm.form.value;
+                    param.releAssignId=ruleVm.form.ruleID;
+                   axios.post('/assignrule/infoAssign/saveInfoAssign',param)
+                       .then(function (response) {
+                    	ruleVm.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
+                    		ruleVm.initTableData();
+    		        	}});
+                      });
+           } else {
+                 console.log('error submit!!');
+                 return false;
+             }
+          });
+            },
+            //添加规则
+            openAddRuleDialog(){
+              this.dialogFormVisible=true;
+              var param ={};
+              //查询电销组
+            //  axios.post('/assignrule/infoAssign/querySelectOrg',param)
+            //  .then(function (response) {
+            //	  ruleVm.options=response.data.data;
+            	  
+            //  });
+            //  axios.post('/assignrule/infoAssign/querySelecProject',param)
+            //  .then(function (response) {
+            //	  ruleVm.options1=response.data.data;
+          	  
+            //   });
+            },
+            handleSelectionChange(val) {
+                this.multseleSelection = val;
+            },
+            deleteDialog(){
+            	//选择删除数据
+               var deleteData=this.multseleSelection;
+               var deleId=[];
+               var deleName="";
+               if(null!=deleteData&&deleteData.length>0){
+            	   for(var i=0;i<deleteData.length;i++){
+            		   deleId.push(deleteData[i].id);  
+            		   deleName+="【"+deleteData[i].assignName+"】";
+            	 }
+                }
+                this.$confirm('确定要删除'+deleName+'规则？', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }).then(() => {
+                	
+                var  param={};
+                param.deleInfo=deleId;
+                 axios.post('/assignrule/infoAssign/deleteInfoAssign',param)
+                    .then(function (response) {
+                        var data =  response.data
+                        if(data.code=='0'){
+                        	ruleVm.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
+                        	ruleVm.initTableData();
+                    	  }});
+                        }else{
+                        	console.error(data);
+                        }
+                    })
+                }).catch(() => {
+                    this.$message({
+                        type: 'info',
+                        message: '已取消删除'
+                    });          
+                });
+            },
+            closeAddRuleDialog(){//关闭添加自定义字段dialog
+              this.$refs['form'].resetFields();
+            }, 
+        },
+    	 created(){
+    		//初始化数据列表
+    		this.initTableData();
+    	}
+    })
+</script>
+</html>
