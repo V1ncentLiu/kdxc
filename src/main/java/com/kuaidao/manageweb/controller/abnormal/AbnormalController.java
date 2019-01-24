@@ -32,6 +32,7 @@ import com.kuaidao.sys.dto.role.RoleQueryDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import com.kuaidao.sys.dto.user.UserInfoPageParam;
 import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.apache.shiro.subject.Subject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -108,6 +109,8 @@ public class AbnormalController {
     }
 
 
+    @RequiresPermissions("AbnormalUser:add")
+    @LogRecord(description = "标记异常客户新增",operationType = LogRecord.OperationType.INSERT,menuName = MenuEnum.ABNORMALUSER_MANAGENT)
     @RequestMapping("/saveOne")
     @ResponseBody
     public JSONResult insertOne(@Valid @RequestBody AbnomalUserAddAndUpdateDTO dto  , BindingResult result){
@@ -120,12 +123,17 @@ public class AbnormalController {
         return  abnormalUserFeignClient.saveAbnomalUser(dto);
     }
 
+
+    @RequiresPermissions("AbnormalUser:delete")
+    @LogRecord(description = "标记异常客户-删除",operationType = LogRecord.OperationType.DELETE,menuName = MenuEnum.ABNORMALUSER_MANAGENT)
     @RequestMapping("/deleteAbnoramlUser")
     @ResponseBody
     public JSONResult deleteAbnoramlUser(@RequestBody Map map){
         return abnormalUserFeignClient.deleteAbnomalUsers((List<Long>)map.get("ids"));
     }
 
+
+    @RequiresPermissions("AbnormalUser:view")
     @PostMapping("/queryAbnoramlUsers")
     @ResponseBody
     public JSONResult<PageBean<AbnomalUserRespDTO>> queryAbnoramlUsers(@RequestBody AbnomalUserQueryDTO dto){

@@ -9,6 +9,8 @@ import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.common.util.CommonUtil;
 import com.kuaidao.common.util.ExcelUtil;
+import com.kuaidao.manageweb.config.LogRecord;
+import com.kuaidao.manageweb.constant.MenuEnum;
 import com.kuaidao.manageweb.feign.deptcallset.DeptCallSetFeignClient;
 import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
 import com.kuaidao.manageweb.util.IdUtil;
@@ -21,6 +23,7 @@ import com.kuaidao.sys.dto.organization.OrganizationRespDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.apache.shiro.subject.Subject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -87,7 +90,8 @@ public class DeptCallSetController {
         return "deptCellSet/deptCallSetList";
     }
 
-
+    @RequiresPermissions("DeptCallSet:add")
+    @LogRecord(description = "部门呼叫设置-新增",operationType = LogRecord.OperationType.INSERT,menuName = MenuEnum.DEPTCALLSET_MANAGENT)
     @RequestMapping("/saveOne")
     @ResponseBody
     public JSONResult insertOne(@Valid @RequestBody DeptCallSetAddAndUpdateDTO dto , BindingResult result){
@@ -99,6 +103,8 @@ public class DeptCallSetController {
         return deptCallSetFeignClient.saveDeptCallSet(dto);
     }
 
+    @RequiresPermissions("DeptCallSet:update")
+    @LogRecord(description = "部门呼叫设置-更新",operationType = LogRecord.OperationType.UPDATE,menuName = MenuEnum.DEPTCALLSET_MANAGENT)
     @RequestMapping("/updateDeptcallset")
     @ResponseBody
     public JSONResult updateDeptcallset(@Valid @RequestBody DeptCallSetAddAndUpdateDTO dto , BindingResult result){
@@ -110,6 +116,8 @@ public class DeptCallSetController {
         return deptCallSetFeignClient.updateDeptCallSets(dto);
     }
 
+    @RequiresPermissions("DeptCallSet:update")
+    @LogRecord(description = "部门呼叫设置-更新",operationType = LogRecord.OperationType.UPDATE,menuName = MenuEnum.DEPTCALLSET_MANAGENT)
     @RequestMapping("/updateDeptcallsetForNotNull")
     @ResponseBody
     public JSONResult updateDeptCallSetsForNotNull(@RequestBody DeptCallSetAddAndUpdateDTO dto){
@@ -120,6 +128,7 @@ public class DeptCallSetController {
         return deptCallSetFeignClient.updateDeptCallSetsForNotNull(dto);
     }
 
+    @RequiresPermissions("DeptCallSet:view")
     @PostMapping("/queryDeptcallset")
     @ResponseBody
     public JSONResult<PageBean<DeptCallSetRespDTO>> queryDeptcallset(@RequestBody DeptCallSetQueryDTO dto){
@@ -148,8 +157,8 @@ public class DeptCallSetController {
     }
 
 
-
-
+    @RequiresPermissions("DeptCallSet:import")
+    @LogRecord(description = "部门呼叫设置-批量导入",operationType = LogRecord.OperationType.IMPORTS,menuName = MenuEnum.DEPTCALLSET_MANAGENT)
     @PostMapping("/import")
     @ResponseBody
     public JSONResult uploadDeptCallSet(@RequestParam("file") MultipartFile file, @RequestParam("importFlag") String importFlag) throws Exception {
