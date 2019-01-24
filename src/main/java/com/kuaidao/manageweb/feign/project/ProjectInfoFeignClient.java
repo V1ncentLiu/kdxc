@@ -15,6 +15,7 @@ import com.kuaidao.aggregation.dto.project.ProjectInfoPageParam;
 import com.kuaidao.aggregation.dto.project.ProjectInfoReq;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.IdEntityLong;
+import com.kuaidao.common.entity.IdListLongReq;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
 
@@ -81,7 +82,7 @@ public interface ProjectInfoFeignClient {
      * @return
      */
     @PostMapping("/delete")
-    public JSONResult delete(@RequestBody IdEntityLong req);
+    public JSONResult delete(@RequestBody IdListLongReq idList);
 
     /**
      * 品牌库品类列表
@@ -99,7 +100,8 @@ public interface ProjectInfoFeignClient {
      * @return
      */
     @PostMapping("/getBrandList")
-    public JSONResult<List<BrandListDTO>> getBrandList(@RequestBody BrandListPageParam pageParam);
+    public JSONResult<PageBean<BrandListDTO>> getBrandList(
+            @RequestBody BrandListPageParam pageParam);
 
 
     @Component
@@ -130,7 +132,7 @@ public interface ProjectInfoFeignClient {
         }
 
         @Override
-        public JSONResult delete(@RequestBody IdEntityLong req) {
+        public JSONResult delete(@RequestBody IdListLongReq idList) {
             return fallBackError("删除项目");
         }
 
@@ -152,7 +154,7 @@ public interface ProjectInfoFeignClient {
         }
 
         @Override
-        public JSONResult<List<BrandListDTO>> getBrandList(
+        public JSONResult<PageBean<BrandListDTO>> getBrandList(
                 @RequestBody BrandListPageParam pageParam) {
             return fallBackError("查询品牌库列表");
         }

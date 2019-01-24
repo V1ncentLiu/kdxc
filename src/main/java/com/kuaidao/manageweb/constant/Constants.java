@@ -34,5 +34,14 @@ public class Constants {
     //天润坐席 reids key 
     public static  String TR_CLIENT_KEY= "huiju:aggregation:client:tr";
 
+    // 品类字典Code
+    public static String PROJECT_CLASSIFICATION = "classification";
+    // 类别字典Code
+    public static String PROJECT_CATEGORY = "project_category";
+    // 店型字典Code
+    public static String PROJECT_SHOPTYPE = "project_shopType";
+    // 项目归属字典Code
+    public static String PROJECT_ATTRIBUTIVE = "project_attributive";
+
 
 }
