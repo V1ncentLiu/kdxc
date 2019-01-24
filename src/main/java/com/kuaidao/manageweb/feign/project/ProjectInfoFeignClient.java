@@ -15,6 +15,7 @@ import com.kuaidao.aggregation.dto.project.ProjectInfoPageParam;
 import com.kuaidao.aggregation.dto.project.ProjectInfoReq;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.IdEntityLong;
+import com.kuaidao.common.entity.IdListLongReq;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
 
@@ -25,7 +26,7 @@ import com.kuaidao.common.entity.PageBean;
  * @date: 2019年1月4日
  * @version V1.0
  */
-@FeignClient(name = "aggregation-service", path = "/aggregation/projectInfo",
+@FeignClient(name = "aggregation-service-zhang", path = "/aggregation/projectInfo",
         fallback = ProjectInfoFeignClient.HystrixClientFallback.class)
 public interface ProjectInfoFeignClient {
     /**
@@ -81,7 +82,7 @@ public interface ProjectInfoFeignClient {
      * @return
      */
     @PostMapping("/delete")
-    public JSONResult delete(@RequestBody IdEntityLong req);
+    public JSONResult delete(@RequestBody IdListLongReq idList);
 
     /**
      * 品牌库品类列表
@@ -130,7 +131,7 @@ public interface ProjectInfoFeignClient {
         }
 
         @Override
-        public JSONResult delete(@RequestBody IdEntityLong req) {
+        public JSONResult delete(@RequestBody IdListLongReq idList) {
             return fallBackError("删除项目");
         }
 
