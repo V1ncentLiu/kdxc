@@ -8,7 +8,7 @@
 <body>
 
 <div id="mainDiv"  class="mainPadding">
-
+    <template>
     <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
         <el-breadcrumb-item>Home</el-breadcrumb-item>
         <el-breadcrumb-item>业务设置</el-breadcrumb-item>
@@ -50,7 +50,7 @@
         </el-form>
     </el-row>
 
-    <template>
+
         <el-table :data="tableData" height="650" style="width: 100%" tooltip-effect="dark"  ref="multipleTable"
                   @selection-change="handleSelectionChange" >
             <el-table-column type="selection" width="55" prop="id"> </el-table-column>
@@ -165,7 +165,7 @@
             initList() {
                 var param = this.queryForm;
                 param.pageSize = this.pager.pageSize;
-                param.pageNum = this.pager.pageNum;
+                param.pageNum = this.pager.currentPage;
                 console.log(param)
                 axios.post('/abnoramluser/queryAbnoramlUsers',param).then(function (response) {
                     console.log(response.data)
@@ -191,6 +191,10 @@
                     }else{
                         var datas = response.data.data;
                         mainDivVM.abnorMalType = datas
+                        mainDivVM.abnorMalType.unshift({
+                            value:"",
+                            name:"异常类型"
+                        })
                     }
                 })
             },

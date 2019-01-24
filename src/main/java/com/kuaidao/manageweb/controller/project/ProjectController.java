@@ -19,6 +19,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import com.kuaidao.aggregation.dto.project.BrandListDTO;
+import com.kuaidao.aggregation.dto.project.BrandListPageParam;
+import com.kuaidao.aggregation.dto.project.CategoryDTO;
+import com.kuaidao.aggregation.dto.project.CompanyInfoDTO;
+import com.kuaidao.aggregation.dto.project.CompanyInfoPageParam;
 import com.kuaidao.aggregation.dto.project.ProjectInfoDTO;
 import com.kuaidao.aggregation.dto.project.ProjectInfoPageParam;
 import com.kuaidao.aggregation.dto.project.ProjectInfoReq;
@@ -68,7 +73,7 @@ public class ProjectController {
         request.setAttribute("classificationList",
                 getDictionaryByCode(Constants.PROJECT_CLASSIFICATION));
         // 查询字典店型集合
-        request.setAttribute("shoptypeList", getDictionaryByCode(Constants.PROJECT_SHOPTYPE));
+        request.setAttribute("shopTypeList", getDictionaryByCode(Constants.PROJECT_SHOPTYPE));
         return "project/projectManagerPage";
     }
 
@@ -86,12 +91,18 @@ public class ProjectController {
         request.setAttribute("classificationList",
                 getDictionaryByCode(Constants.PROJECT_CLASSIFICATION));
         // 查询字典店型集合
-        request.setAttribute("shoptypeList", getDictionaryByCode(Constants.PROJECT_SHOPTYPE));
+        request.setAttribute("shopTypeList", getDictionaryByCode(Constants.PROJECT_SHOPTYPE));
+        // 查询字典项目归属集合
+        request.setAttribute("projectAttributiveList",
+                getDictionaryByCode(Constants.PROJECT_ATTRIBUTIVE));
         // 查询公司列表
-        JSONResult<List<ProjectInfoDTO>> listNoPage =
-                projectInfoFeignClient.listNoPage(new ProjectInfoPageParam());
+        JSONResult<List<CompanyInfoDTO>> listNoPage =
+                companyInfoFeignClient.listNoPage(new CompanyInfoPageParam());
 
         request.setAttribute("companyList", listNoPage.getData());
+        // 查询品牌品类集合
+        JSONResult<List<CategoryDTO>> categoryList = projectInfoFeignClient.getCategoryList();
+        request.setAttribute("brandCategoryList", categoryList.getData());
         return "project/addProjectPage";
     }
 
@@ -107,8 +118,8 @@ public class ProjectController {
         JSONResult<ProjectInfoDTO> jsonResult = projectInfoFeignClient.get(new IdEntityLong(id));
         request.setAttribute("project", jsonResult.getData());
         // 查询公司列表
-        JSONResult<List<ProjectInfoDTO>> listNoPage =
-                projectInfoFeignClient.listNoPage(new ProjectInfoPageParam());
+        JSONResult<List<CompanyInfoDTO>> listNoPage =
+                companyInfoFeignClient.listNoPage(new CompanyInfoPageParam());
 
         request.setAttribute("companyList", listNoPage.getData());
         // 查询字典品类集合
@@ -117,8 +128,14 @@ public class ProjectController {
         request.setAttribute("classificationList",
                 getDictionaryByCode(Constants.PROJECT_CLASSIFICATION));
         // 查询字典店型集合
-        request.setAttribute("shoptypeList", getDictionaryByCode(Constants.PROJECT_SHOPTYPE));
-        return "project/editProjectPage";
+        request.setAttribute("shopTypeList", getDictionaryByCode(Constants.PROJECT_SHOPTYPE));
+        // 查询字典项目归属集合
+        request.setAttribute("projectAttributiveList",
+                getDictionaryByCode(Constants.PROJECT_ATTRIBUTIVE));
+        // 查询品牌品类集合
+        JSONResult<List<CategoryDTO>> categoryList = projectInfoFeignClient.getCategoryList();
+        request.setAttribute("brandCategoryList", categoryList.getData());
+        return "project/addProjectPage";
     }
 
     /***
@@ -134,6 +151,22 @@ public class ProjectController {
 
         JSONResult<PageBean<ProjectInfoDTO>> list =
                 projectInfoFeignClient.list(projectInfoPageParam);
+
+        return list;
+    }
+
+    /***
+     * 品牌库列表
+     * 
+     * @return
+     */
+    @PostMapping("/brandList")
+    @ResponseBody
+    public JSONResult<PageBean<BrandListDTO>> list(
+            @RequestBody BrandListPageParam brandListPageParam, HttpServletRequest request) {
+
+        JSONResult<PageBean<BrandListDTO>> list =
+                projectInfoFeignClient.getBrandList(brandListPageParam);
 
         return list;
     }

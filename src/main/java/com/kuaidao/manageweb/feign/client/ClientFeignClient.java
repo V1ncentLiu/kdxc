@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import com.kuaidao.aggregation.dto.client.AddOrUpdateQimoClientDTO;
 import com.kuaidao.aggregation.dto.client.AddOrUpdateTrClientDTO;
+import com.kuaidao.aggregation.dto.client.ImportQimoClientDTO;
 import com.kuaidao.aggregation.dto.client.ImportTrClientDTO;
 import com.kuaidao.aggregation.dto.client.QimoClientQueryDTO;
 import com.kuaidao.aggregation.dto.client.QimoClientRespDTO;
@@ -136,8 +137,22 @@ public interface ClientFeignClient {
     @PostMapping("/uploadTrClientData")
     JSONResult<List<ImportTrClientDTO>> uploadTrClientData( @RequestBody UploadTrClientDataDTO reqClientDataDTO);
     
+    /**
+     * 更新天润回呼
+     * @param reqDTO
+     * @return
+     */
     @PostMapping("/updateCallbackPhone")
     JSONResult<Boolean> updateCallbackPhone(@RequestBody AddOrUpdateTrClientDTO reqDTO);
+    
+    /**
+     * 上传七陌坐席数据
+     * @param reqClientDataDTO
+     * @return
+     */
+    @PostMapping("/uploadQimoClientData")
+    JSONResult<List<ImportQimoClientDTO>> uploadQimoClientData(
+            UploadTrClientDataDTO<ImportQimoClientDTO> reqClientDataDTO);
 
 	@Component
 	static class HystrixClientFallback implements ClientFeignClient {
@@ -224,7 +239,15 @@ public interface ClientFeignClient {
             return fallBackError("更新回呼手机号");
         }
 
+        @Override
+        public JSONResult<List<ImportQimoClientDTO>> uploadQimoClientData(
+                UploadTrClientDataDTO<ImportQimoClientDTO> reqClientDataDTO) {
+            return fallBackError("上传七陌坐席数据");
+        }
+
 	}
+
+   
 
 
 }

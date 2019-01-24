@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 import com.kuaidao.aggregation.dto.client.AddOrUpdateQimoClientDTO;
 import com.kuaidao.aggregation.dto.client.AddOrUpdateTrClientDTO;
+import com.kuaidao.aggregation.dto.client.ImportQimoClientDTO;
 import com.kuaidao.aggregation.dto.client.ImportTrClientDTO;
 import com.kuaidao.aggregation.dto.client.QimoClientQueryDTO;
 import com.kuaidao.aggregation.dto.client.QimoClientRespDTO;
@@ -42,6 +43,7 @@ import com.kuaidao.common.util.CommonUtil;
 import com.kuaidao.common.util.ExcelUtil;
 import com.kuaidao.manageweb.config.LogRecord;
 import com.kuaidao.manageweb.config.LogRecord.OperationType;
+import com.kuaidao.manageweb.constant.Constants;
 import com.kuaidao.manageweb.constant.MenuEnum;
 import com.kuaidao.manageweb.feign.client.ClientFeignClient;
 import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
@@ -91,7 +93,15 @@ public class ClientController {
      * @return
      */
     @RequestMapping("/qimoClientIndex")
-    public String qimoClientIndex() {
+    public String qimoClientIndex(HttpServletRequest request) {
+        OrganizationQueryDTO queryDTO = new OrganizationQueryDTO();
+        queryDTO.setSystemCode(SystemCodeConstant.HUI_JU);
+        JSONResult<List<OrganizationRespDTO>>  orgListJr = organizationFeignClient.queryOrgByParam(queryDTO);
+        if(orgListJr==null || !JSONResult.SUCCESS.equals(orgListJr.getCode())) {
+            logger.error("跳转七陌坐席时，查询组织机构列表报错,res{{}}",orgListJr);
+        }else {
+            request.setAttribute("orgList",orgListJr.getData());
+        }
         return "client/qimoClientPage";
     }
     /**
@@ -310,8 +320,7 @@ public class ClientController {
         
         excelDataList = null;
         
-        //TODO devin 临时 key
-        redisTemplate.opsForValue().set("HUIJU:client:temp_tr_client"+userId, dataList,10*60,TimeUnit.SECONDS);
+        redisTemplate.opsForValue().set(Constants.TR_CLIENT_KEY+userId, dataList,10*60,TimeUnit.SECONDS);
         Map<String, Object> resMap = new HashMap<>();
         resMap.put("num", dataList.size());
         resMap.put("data", dataList);
@@ -323,14 +332,14 @@ public class ClientController {
      * @param result
      * @return
      */
-    @LogRecord(description="上传坐席",operationType=OperationType.IMPORTS,menuName=MenuEnum.TR_CLIENT_MANAGEMENT)
+    @LogRecord(description="上传天润坐席",operationType=OperationType.IMPORTS,menuName=MenuEnum.TR_CLIENT_MANAGEMENT)
     @ResponseBody
     @PostMapping("/submitTrClientData")
     public JSONResult<List<ImportTrClientDTO>> submitTrClientData() {
         //TODO deivn userID
         long userId = 111L;
-        List<ImportTrClientDTO> dataList = (List<ImportTrClientDTO>)redisTemplate.opsForValue().get("HUIJU:client:temp_tr_client"+userId);
-        UploadTrClientDataDTO reqClientDataDTO = new UploadTrClientDataDTO();
+        List<ImportTrClientDTO> dataList = (List<ImportTrClientDTO>)redisTemplate.opsForValue().get(Constants.TR_CLIENT_KEY+userId);
+        UploadTrClientDataDTO<ImportTrClientDTO> reqClientDataDTO = new UploadTrClientDataDTO<ImportTrClientDTO>();
         reqClientDataDTO.setCreateUser(userId);
         reqClientDataDTO.setList(dataList);
         return clientFeignClient.uploadTrClientData(reqClientDataDTO);
@@ -450,9 +459,101 @@ public class ClientController {
     @ResponseBody
     public JSONResult<PageBean<QimoDataRespDTO>> listQimoClientPage(
             @RequestBody QueryQimoDTO queryClientDTO) {
-
+        String userName = queryClientDTO.getUserName();
+        //TODO devin 根据userName 查询用户的Id
+        
+        
         return clientFeignClient.listQimoClientPage(queryClientDTO);
     }
+    
+    
+    /***
+     * 上传文件
+     * @param result
+     * @return
+     */
+    @PostMapping("/uploadQimoClient")
+    @ResponseBody
+    public JSONResult uploadQimoClient(@RequestParam("file") MultipartFile file) throws Exception {
+        //获取当前的用户信息
+       //TODO devin
+        long userId = 111L;
+        
+        List<List<Object>> excelDataList = ExcelUtil.read2007Excel(file.getInputStream());
+        logger.info("userid{{}} qimo_client upload size:{{}}" ,userId, excelDataList.size());
+
+        if (excelDataList == null || excelDataList.size() == 0) {
+            return  new JSONResult<>().fail(SysErrorCodeEnum.ERR_EXCLE_DATA.getCode(),SysErrorCodeEnum.ERR_EXCLE_DATA.getMessage());
+        }
+        if (excelDataList.size() > 1000) {
+            logger.error("上传七陌坐席,大于1000条，条数{{}}", excelDataList.size());
+            return  new JSONResult<>().fail(SysErrorCodeEnum.ERR_EXCLE_OUT_SIZE.getCode(),"导入数据过多，已超过1000条！");
+        }
+        
+        //存放合法的数据
+        List<ImportQimoClientDTO> dataList = new ArrayList<ImportQimoClientDTO>();
+        for (int i = 1; i < excelDataList.size(); i++) {
+            List<Object> rowList = excelDataList.get(i);
+            ImportQimoClientDTO rowDto = new ImportQimoClientDTO();
+            if(i==1) {
+                //记录上传列数
+                int rowSize = rowList.size();
+                logger.info("upload qimo client,userId{{}},upload rows num{{}}",userId,rowSize);  
+            }
+            for (int j = 0; j < rowList.size(); j++) {
+                Object object = rowList.get(j);
+                String value = (String)object;
+                if(j==0) {
+                   rowDto.setName(value); 
+                }else if(j==1) {//登录坐席
+                    rowDto.setLoginClient(value);
+                }else if(j==2) {//坐席编号
+                   rowDto.setClientNo(value);
+                }else if(j==3) {//账号编号
+                   rowDto.setAccountNo(value);
+                }else if(j==4){//秘钥
+                    rowDto.setSecretKey(value);
+                }else if(j==5) {
+                    rowDto.setPhone1(value);
+                }else if(j==6) {
+                    rowDto.setPhone2(value);            
+                }else if(j==7) {
+                    rowDto.setProxyurl(value);
+                }
+            }
+            dataList.add(rowDto);
+          }
+        
+        excelDataList = null;
+        
+        redisTemplate.opsForValue().set(Constants.QIMO_CLIENT_KEY+userId, dataList,10*60,TimeUnit.SECONDS);
+        Map<String, Object> resMap = new HashMap<>();
+        resMap.put("num", dataList.size());
+        resMap.put("data", dataList);
+        return new JSONResult<>().success(resMap);
+    }
+    
+    
+    /**
+     * 
+     * @param result
+     * @return
+     */
+    @LogRecord(description="上传七陌坐席",operationType=OperationType.IMPORTS,menuName=MenuEnum.QIMO_CLIENT_MANAGEMENT)
+    @ResponseBody
+    @PostMapping("/submitQimoClientData")
+    public JSONResult<List<ImportQimoClientDTO>> submitQimoClientData() {
+        //TODO deivn userID
+        long userId = 111L;
+        List<ImportQimoClientDTO> dataList = (List<ImportQimoClientDTO>)redisTemplate.opsForValue().get(Constants.QIMO_CLIENT_KEY+userId);
+        UploadTrClientDataDTO<ImportQimoClientDTO> reqClientDataDTO = new UploadTrClientDataDTO<ImportQimoClientDTO>();
+        reqClientDataDTO.setCreateUser(userId);
+        reqClientDataDTO.setList(dataList);
+        JSONResult<List<ImportQimoClientDTO>> uploadTrClientData = clientFeignClient.uploadQimoClientData(reqClientDataDTO);
+        redisTemplate.delete(Constants.QIMO_CLIENT_KEY+userId);
+        return uploadTrClientData;
+    }
+    
 
 
 }
