@@ -12,6 +12,7 @@ import com.kuaidao.aggregation.dto.project.CompanyInfoPageParam;
 import com.kuaidao.aggregation.dto.project.CompanyInfoReq;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.IdEntityLong;
+import com.kuaidao.common.entity.IdListLongReq;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.sys.dto.role.RoleInfoDTO;
@@ -43,7 +44,7 @@ public interface CompanyInfoFeignClient {
      * @return
      */
     @PostMapping("/delete")
-    public JSONResult delete(@RequestBody IdEntityLong id);
+    public JSONResult delete(@RequestBody IdListLongReq idList);
 
     /**
      * 查询公司集合
@@ -109,7 +110,7 @@ public interface CompanyInfoFeignClient {
         }
 
         @Override
-        public JSONResult delete(@RequestBody IdEntityLong id) {
+        public JSONResult delete(@RequestBody IdListLongReq idList) {
             return fallBackError("删除公司信息");
         }
 

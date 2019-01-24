@@ -29,5 +29,12 @@ public class Constants {
     // redis前缀 验证码MsgID
     public static String MSG_ID = "huiju:sys:msgid:";
 
+    // 品类字典Code
+    public static String PROJECT_CLASSIFICATION = "classification";
+    // 类别字典Code
+    public static String PROJECT_CATEGORY = "project_category";
+    // 店型字典Code
+    public static String PROJECT_SHOPTYPE = "project_shopType";
+
 
 }
