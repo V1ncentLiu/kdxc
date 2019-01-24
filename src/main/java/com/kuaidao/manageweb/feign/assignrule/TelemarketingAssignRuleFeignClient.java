@@ -13,7 +13,7 @@ import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
 
-@FeignClient(name = "aggregation-service", path = "/assignrule/telemarketingAssignRule", fallback = TelemarketingAssignRuleFeignClient.HystrixClientFallback.class)
+@FeignClient(name = "aggregation-service", path = "/aggregation/assignrule/telemarketingAssignRule", fallback = TelemarketingAssignRuleFeignClient.HystrixClientFallback.class)
 public interface TelemarketingAssignRuleFeignClient {
 
 	@RequestMapping(method = RequestMethod.POST, value = "/queryTeleAssignRulePage")
