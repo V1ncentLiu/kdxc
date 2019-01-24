@@ -100,7 +100,8 @@ public interface ProjectInfoFeignClient {
      * @return
      */
     @PostMapping("/getBrandList")
-    public JSONResult<List<BrandListDTO>> getBrandList(@RequestBody BrandListPageParam pageParam);
+    public JSONResult<PageBean<BrandListDTO>> getBrandList(
+            @RequestBody BrandListPageParam pageParam);
 
 
     @Component
@@ -153,7 +154,7 @@ public interface ProjectInfoFeignClient {
         }
 
         @Override
-        public JSONResult<List<BrandListDTO>> getBrandList(
+        public JSONResult<PageBean<BrandListDTO>> getBrandList(
                 @RequestBody BrandListPageParam pageParam) {
             return fallBackError("查询品牌库列表");
         }

@@ -35,6 +35,8 @@ public class Constants {
     public static String PROJECT_CATEGORY = "project_category";
     // 店型字典Code
     public static String PROJECT_SHOPTYPE = "project_shopType";
+    // 项目归属字典Code
+    public static String PROJECT_ATTRIBUTIVE = "project_attributive";
 
 
 }
