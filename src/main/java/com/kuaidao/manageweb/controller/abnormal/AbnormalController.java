@@ -117,6 +117,7 @@ public class AbnormalController {
         JSONResult<PageBean<AbnomalUserRespDTO>> resList = abnormalUserFeignClient.queryAbnomalUserList(dto);
         List<AbnomalUserRespDTO> resdata = resList.getData().getData();
 
+
         UserInfoPageParam param = new UserInfoPageParam();
         param.setPageNum(1);
         param.setPageSize(99999);
