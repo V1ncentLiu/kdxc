@@ -58,19 +58,56 @@
         <div class="borderbox padding20">
             <el-row>
                 <el-col :span="12">
-                    <el-form-item label="包含搜索词：" :label-width="formLabelWidth">
-                        <el-col :span="17">
-                            <el-input v-model="form.searchWord" autocomplete="off"  maxlength="50"></el-input>
-                        </el-col>
+                    <el-form-item label="" :label-width="formLabelWidth">
+                        <el-tag
+                            v-for="tag in tags"
+                            :key="tag"
+                            closable
+                            @close="handleClose(tag)"
+                            style="margin-right: 10px;">
+                            {{tag}}
+                        </el-tag>
                     </el-form-item>
-
                 </el-col>
                 <el-col :span="12">
-                    <el-form-item label="地区：" :label-width="formLabelWidth">
-                        <el-col :span="17">
-                            <el-input v-model="form.area" autocomplete="off"  maxlength="50"></el-input>
-                        </el-col>
+                    <el-form-item label="" :label-width="formLabelWidth">
+                        <el-tag
+                            v-for="tag in areaTags"
+                            :key="tag"
+                            closable
+                            @close="handleCloseArea(tag)"
+                            style="margin-right: 10px;">
+                            {{tag}}
+                        </el-tag>
                     </el-form-item>
+                </el-col>
+            </el-row>
+            <el-row>
+                <el-col :span="12">
+                    <el-col :span="11">
+                        <el-form-item label="包含搜索词：" :label-width="formLabelWidth">
+                            <el-input v-model="form.searchWord" autocomplete="off"  maxlength="50"></el-input>                            
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="1">&nbsp;</el-col>
+                    <el-col :span="3">
+                        <el-form-item>
+                            <el-button type="primary" @click="handleInputConfirm">添加</el-button>                        
+                        </el-form-item>
+                    </el-col>
+                </el-col>
+                <el-col :span="12">
+                    <el-col :span="11">
+                        <el-form-item label="地区：" :label-width="formLabelWidth">
+                            <el-input v-model="form.area" autocomplete="off"  maxlength="50"></el-input>                            
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="1">&nbsp;</el-col>
+                    <el-col :span="3">
+                        <el-form-item>
+                            <el-button type="primary" @click="handleInputConfirmArea">添加</el-button>                        
+                        </el-form-item>
+                    </el-col>
                 </el-col>
             </el-row>
             <el-form-item label="是否启用：" prop="status" :label-width="formLabelWidth">
@@ -84,7 +121,7 @@
                 </el-select>
             </el-form-item>
             <el-form-item label="设定组内人员：" prop="choosePerson" :label-width="formLabelWidth">
-                <el-button type="primary">添加人员</el-button>
+                <el-button type="primary" @click="addDomain">添加人员</el-button>
             </el-form-item>
             <el-table :data="tableData" style="width: 100%" border>
                 <el-table-column align="center" prop="id" label="序号" width="55"></el-table-column>
@@ -185,10 +222,10 @@
                 }],
                 tableData: [{
                     rank: '1'
-                }, {
-                    rank: '2'
                 }],
                 personOptions:orgUserList,
+                tags: [],
+                areaTags:[]
             }        	  
         },
         methods: {
@@ -220,9 +257,40 @@
                     }
                 });
             },
-            deleteRow(index, rows) {
+            deleteRow(index, rows) {//删除一行表格
                 rows.splice(index, 1);
+            },
+            handleInputConfirm() {//添加搜索词
+                let searchWord = this.form.searchWord;
+                if (searchWord) {
+                    this.tags.push(searchWord);
+                }
+                this.form.searchWord = '';
+                console.log(searchWord)
+                console.log(this.tags)
+            },
+            handleClose(tag) {//删除搜索词
+                this.tags.splice(this.tags.indexOf(tag), 1);
+            },
+            handleInputConfirmArea() {//添加地区
+                let area = this.form.area;
+                if (area) {
+                    this.areaTags.push(area);
+                }
+                this.form.area = '';
+                console.log(area)
+                console.log(this.areaTags)
+            },
+            handleCloseArea(tag) {//删除地区
+                this.areaTags.splice(this.areaTags.indexOf(tag), 1);
+            },
+            addDomain() {
+                this.tableData.push({
+                  rank: '',
+                  key: Date.now()
+                });
             }
+
         },
         created(){
            //初始资源类别数据
