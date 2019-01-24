@@ -16,6 +16,7 @@ import com.kuaidao.sys.dto.role.RoleInfoDTO;
 import com.kuaidao.sys.dto.role.RoleQueryDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import com.kuaidao.sys.dto.user.UserInfoPageParam;
+import com.kuaidao.sys.dto.user.UserInfoParamListReqDTO;
 import com.kuaidao.sys.dto.user.UserInfoReq;
 
 /**
@@ -90,6 +91,13 @@ public interface UserInfoFeignClient {
      */
     @PostMapping("/roleList")
     public JSONResult<List<RoleInfoDTO>> roleList(@RequestBody RoleQueryDTO roleQueryDTO);
+    
+    
+    /**
+     * 根据状态列表或用户名称查询 用户  精确匹配
+     */
+    @PostMapping("/listUserInfoByParam")
+    JSONResult<List<UserInfoDTO>> listUserInfoByParam(@RequestBody UserInfoParamListReqDTO reqDTO);
 
 
     @Component
@@ -140,6 +148,11 @@ public interface UserInfoFeignClient {
         @Override
         public JSONResult<List<RoleInfoDTO>> roleList(@RequestBody RoleQueryDTO roleQueryDTO) {
             return fallBackError("查询角色列表");
+        }
+
+        @Override
+        public JSONResult<List<UserInfoDTO>> listUserInfoByParam(UserInfoParamListReqDTO reqDTO) {
+            return fallBackError("根据状态列表或用户名称查询 用户");
         }
 
 
