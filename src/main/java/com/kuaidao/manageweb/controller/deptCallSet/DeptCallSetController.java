@@ -92,24 +92,31 @@ public class DeptCallSetController {
     @ResponseBody
     public JSONResult insertOne(@Valid @RequestBody DeptCallSetAddAndUpdateDTO dto , BindingResult result){
         if (result.hasErrors()) return  CommonUtil.validateParam(result);
+        Subject subject = SecurityUtils.getSubject();
+        UserInfoDTO user = (UserInfoDTO) subject.getSession().getAttribute("user");
         dto.setCreateTime(new Date());
-        dto.setCreateUser(1084621842175623168L);
+        dto.setCreateUser(user.getId());
         return deptCallSetFeignClient.saveDeptCallSet(dto);
     }
 
     @RequestMapping("/updateDeptcallset")
     @ResponseBody
-    public JSONResult updateDeptcallset(@RequestBody DeptCallSetAddAndUpdateDTO dto){
+    public JSONResult updateDeptcallset(@Valid @RequestBody DeptCallSetAddAndUpdateDTO dto , BindingResult result){
+
+        Subject subject = SecurityUtils.getSubject();
+        UserInfoDTO user = (UserInfoDTO) subject.getSession().getAttribute("user");
         dto.setUpdateTime(new Date());
-        dto.setUpdateUser(1084621842175623168L);
+        dto.setUpdateUser(user.getId());
         return deptCallSetFeignClient.updateDeptCallSets(dto);
     }
 
     @RequestMapping("/updateDeptcallsetForNotNull")
     @ResponseBody
     public JSONResult updateDeptCallSetsForNotNull(@RequestBody DeptCallSetAddAndUpdateDTO dto){
+        Subject subject = SecurityUtils.getSubject();
+        UserInfoDTO user = (UserInfoDTO) subject.getSession().getAttribute("user");
         dto.setUpdateTime(new Date());
-        dto.setUpdateUser(1084621842175623168L);
+        dto.setUpdateUser(user.getId());
         return deptCallSetFeignClient.updateDeptCallSetsForNotNull(dto);
     }
 
@@ -219,8 +226,10 @@ public class DeptCallSetController {
 //            UserInfoDTO user = (UserInfoDTO) subject.getSession().getAttribute("user");
 //            rowDto.setCreateUser(user.getId());
             if(dataFalg){
+                Subject subject = SecurityUtils.getSubject();
+                UserInfoDTO user = (UserInfoDTO) subject.getSession().getAttribute("user");
                 rowDto.setId(IdUtil.getUUID());
-                rowDto.setCreateUser(1234567L);
+                rowDto.setCreateUser(user.getId());
                 rowDto.setCreateTime(new Date());
                 dataList.add(rowDto);
             }else{
@@ -276,28 +285,6 @@ public class DeptCallSetController {
             showList.add(showRowDto);
         }
         return new JSONResult().success(showList);
-    }
-
-
-    @PostMapping("/importData")
-    @ResponseBody
-    public JSONResult<PageBean<DeptCallSetRespDTO>> importDatas(@RequestBody List<DeptCallSetAddAndUpdateDTO> list){
-        /**
-         * 进行数据简单
-         */
-        List<DeptCallSetAddAndUpdateDTO> insertList = new ArrayList();
-        for(DeptCallSetAddAndUpdateDTO dto:list){
-
-//          进行数据长度检验
-//          进行组织机构检验
-
-
-            dto.setId(IdUtil.getUUID());
-            dto.setCreateUser(1084621842175623168L);
-            dto.setCreateTime(new Date());
-            insertList.add(dto);
-        }
-        return deptCallSetFeignClient.importDeptCallSets(insertList);
     }
 
 

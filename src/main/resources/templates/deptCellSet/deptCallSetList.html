@@ -200,10 +200,10 @@
         </template>
     </el-dialog>
 
-    <el-dialog :visible.sync="showTableDateDialog" title="预览数据"  width="70%" :close-on-click-modal="false">
+    <el-dialog :visible.sync="showTableDateDialog" title="预览数据"  @opened="showTableOpen" width="70%" :close-on-click-modal="false">
         <template>
             <el-row class="marginB20">
-                预览数据,共 20 条资源
+                预览数据,共 <span id="importNum"></span> 条资源
             </el-row>
             <el-row>
                 <el-table :data="tableData1" height="650" style="width: 100%" tooltip-effect="light"  ref="showTable">
@@ -360,6 +360,10 @@
                         return ;
                     }else{
                         mainDivVM.orgOptions = response.data.data;
+                        mainDivVM.orgOptions.unshift({
+                            id:"",
+                            name:"请选择组织"
+                        })
                     }
                 })
             },
@@ -484,6 +488,9 @@
                     this.$message.error('文件格式错误');
                     return false;
                 }
+            },
+            showTableOpen(){
+                document.getElementById("importNum").innerText=this.tableData1.length
             },
             uploadSuccess(response, file, fileList){//上传成功后
                 console.log( response.data)
