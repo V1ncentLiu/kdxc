@@ -15,7 +15,7 @@
     </el-breadcrumb>
     <el-row class="marginB10">
         <el-col :xs="12" :sm="16" :md="16" :lg="18" :xl="12">
-            <el-button type="primary"><a href="/invitearea/addInviteArea"><i class="el-icon-plus"></i> 添加</a></el-button>
+            <el-button type="primary" @click="dialogFormVisible=true">新建电销布局</el-button>
             <el-button type="primary" @click="updateButton">修改</el-button>
             <el-button type="primary" @click="deleButton">删除</el-button>
             <el-button type="primary" @click="exportButton">导入</el-button>
@@ -28,18 +28,18 @@
 					
   					<el-select v-model="telemarketingTeamId" placeholder="请选择电销组">
 					    <el-option
-					      v-for="item in telemarketingTeams"
-					      :key="item.value"
-					      :label="item.label"
-					      :value="item.value">
+					      v-for="item in dzList"
+					      :key="item.id"
+					      :label="item.name"
+					      :value="item.id">
 					    </el-option>
   					</el-select>
-  					<el-select v-model="businessGroupId" placeholder="项目">
+  					<el-select v-model="projectId" placeholder="项目">
 					    <el-option
-					      v-for="item in businessGroups"
-					      :key="item.value"
-					      :label="item.label"
-					      :value="item.value">
+					      v-for="item in projectList"
+					      :key="item.id"
+					      :label="item.name"
+					      :value="item.id">
 					    </el-option>
   					</el-select>
   					<span class="demonstration">操作时间</span>
@@ -71,10 +71,42 @@
             </el-row>
       
     </el-row>
-  <el-dialog :title="addOrModifyDialogTitle" :visible.sync="dialogFormVisible" @close="closeAddCustomFieldDialog">
-        <div slot="footer" class="dialog-footer">
-            <el-button @click="cancelForm('customMenuForm')">取 消</el-button>
-            <el-button type="primary" @click="saveFieldMenu('customMenuForm')">确 定</el-button>
+   <!-- dialog -->
+    <el-dialog title="添加规则" :visible.sync="dialogFormVisible">
+        <el-form :model="form" ref="form" :rules="rules" class="width500">
+            <el-form-item label="项目：" :label-width="formLabelWidth" prop="projectIds">
+                <el-select v-model="form.projectIds" multiple placeholder="选择项目" style="width: 100%;">
+                    <el-option
+                        v-for="item in projectList"
+                        :key="item.id"
+                        :label="item.projectName"
+                        :value="item.id">
+                    </el-option>
+                </el-select>
+            </el-form-item>
+            <el-form-item label="电销组：" :label-width="formLabelWidth" prop="telemarketingTeamId">
+                <el-select v-model="form.telemarketingTeamId" placeholder="选择电销组" style="width: 100%;">
+                    <el-option
+                        v-for="item in dzList"
+                        :key="item.id"
+                        :label="item.name"
+                        :value="item.id">
+                    </el-option>
+                </el-select>
+            </el-form-item>
+					
+            <el-form-item label="开始时间：" :label-width="formLabelWidth" prop="beginTime">
+                <el-date-picker value-format="yyyy-MM-dd" v-model="form.beginTime" type="date" placeholder="选择日期">
+					</el-date-picker>
+            </el-form-item>
+            <el-form-item label="结束时间："  :label-width="formLabelWidth" prop="endTime">
+                <el-date-picker value-format="yyyy-MM-dd" v-model="form.endTime" type="date" placeholder="选择日期">
+					</el-date-picker>
+            </el-form-item>
+        </el-form>
+        <div slot="footer" style="text-align: center" class="dialog-footer">
+            <el-button type="primary" @click="submitForm('form')">提交</el-button>
+            <el-button @click="dialogFormVisible= false">取消</el-button>
         </div>
     </el-dialog>
 </div>
@@ -83,11 +115,13 @@
 <div th:include="_footer_include :: #jsLib"></div>
 <script th:inline="javascript">
 
-    var orgData=[[${orgData}]];
-
+    var dzList=[[${dzList}]];
+	var projectList = [[${projectList}]];
    var orgVM =  new Vue({
         el: '#organizationManage',
         data: {
+        	formLabelWidth: '100px',
+        	dialogFormVisible: false,
         	telemarketingTeamId:"",
         	businessGroupId:"",
         	beginTime:"",
@@ -96,30 +130,35 @@
         	dialogFormVisible:false,
         	dataTable:[],
         	multipleSelection: [],
-        	businessGroups:[{
-            	value: '1',
-                label: '登陆名称'	
-            	},
-            	{
-               	value: '2',
-                label: '姓名'	
-               	}
-            ],
-            telemarketingTeams:[{
-            	value: '1',
-                label: '登陆名称'	
-            	},
-            	{
-               	value: '2',
-                label: '姓名'	
-               	}
-            ],
+        	dzList:dzList,
+        	projectList:projectList,
+        	projectId:"",
+        	form:{
+        	 projectIds: '',
+        	 telemarketingTeamId: '',
+        	 beginTime:'',
+        	 endTime:''
+        },
             pager:{
                 total: 0,
                 currentPage: 1,
                 pageSize: 20,
             },
-            loading:true
+            loading:true,
+            rules: {
+            	projectIds: [
+                    { required: true, message: '请选择项目', trigger: 'change' }
+                ],
+                telemarketingTeamId: [
+                    { required: true, message: '请选择电销组', trigger: 'change' }
+                ],
+                beginTime: [
+                    { required: true, message: '请选择开始时间', trigger: 'blur' }
+                ],
+                endTime: [
+                    { required: true, message: '请选择结束时间', trigger: 'blur' }
+                ]
+            }
              
         },
         methods: {
@@ -154,6 +193,7 @@
               } ,
             
               updateButton(){
+            	 
             	  //修改菜单数据	
               	var rows = this.multipleSelection;
                   if(rows.length!=1){
@@ -163,6 +203,30 @@
                        });
                       return;
                   }
+                  this.dialogFormVisible = true;
+                  var param ={};
+                  var str = "";
+                  for ( var i = 0; i <rows.length; i++){
+                	  str = rows[i].id
+                  }
+                  param.id = str;
+                  axios.post('/telemarketing/findTelemarketingById',param).then(function (response) {
+                  	  console.log(response);
+                      if(null !==response && response.data !=null && response.data.code=='0'){
+                    	  var telemarketing = response.data.data;
+                    	  orgVM.form.telemarketingTeamId = telemarketing.telemarketingTeamId;
+                    	  orgVM.form.beginTime = telemarketing.beginTime;
+                    	  orgVM.form.endTime = telemarketing.endTime;
+                     }else{
+                    	 alert(response.data.data.message);
+	                  	  	return ;
+                     } 
+                  }).catch(function (error) {
+                      console.log(error);
+                  })
+                  .then(function () {
+                    // always executed
+                  });  
               },
               deleButton(){
             	  var rows = this.multipleSelection;
@@ -256,9 +320,53 @@
             	     if (date == undefined) { 
             	       return ""; 
             	     } 
-            	     return moment(new Date(date)).format("YYYY-MM-DD HH:mm:ss"); 
-            	} 
-                 ,  
+            	     return moment(new Date(date)).format("YYYY-MM-DD"); 
+            	} ,
+             submitForm(formName) {
+                    this.$refs[formName].validate((valid) => {
+                        if (valid) {
+                          var formData = this.form;
+                          var param={};
+                          param.projectIds = formData.projectIds;
+                          var strs ="";
+                          for ( var i = 0; i <formData.projectIds.length; i++){
+                        	   if(strs !=""){
+                        		   strs = strs+","+formData.projectIds[i];
+                        	   }else{
+                        		   strs = formData.projectIds[i];
+                        	   }
+                        	}
+                          param.projectIds = strs;
+                          param.telemarketingTeamId = formData.telemarketingTeamId;
+                          param.beginTime = formData.beginTime;
+                          param.endTime = formData.endTime;
+                          var str = "";
+                          var rows = this.multipleSelection;
+                          for ( var i = 0; i <rows.length; i++){
+                        	  str = rows[i].id
+                          }
+                          param.id = str;
+                          
+                       	  axios.post('/telemarketing/addTelemarketingLayout',param).then(function (response) {
+       	                  	  console.log(response);
+       	                      if(null !==response && response.data !=null && response.data.code=='0'){
+       	                    	  window.location.href="/telemarketing/telemarketingLayoutList"; 
+       	                     }else{
+       	                    	 alert(response.data.data.message);
+        	                  	  	return ;
+       	                     } 
+       	                  }).catch(function (error) {
+                                 console.log(error);
+                             })
+                             .then(function () {
+                               // always executed
+                             });  
+                        } else {
+                            console.log('error submit!!');
+                            return false;
+                        }
+                    });
+                },
         },
         created(){
         	this.inviteAreaListPage();

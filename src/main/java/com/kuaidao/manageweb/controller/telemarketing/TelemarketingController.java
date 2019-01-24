@@ -9,17 +9,25 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.kuaidao.aggregation.dto.invitearea.InviteAreaDTO;
+import com.kuaidao.aggregation.dto.project.ProjectInfoDTO;
+import com.kuaidao.aggregation.dto.project.ProjectInfoPageParam;
 import com.kuaidao.aggregation.dto.telemarkting.TelemarketingLayoutDTO;
+import com.kuaidao.common.constant.OrgTypeConstant;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.manageweb.config.LogRecord;
 import com.kuaidao.manageweb.constant.MenuEnum;
 import com.kuaidao.manageweb.feign.invitearea.InviteareaFeignClient;
+import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
+import com.kuaidao.manageweb.feign.project.ProjectInfoFeignClient;
 import com.kuaidao.manageweb.feign.telemarketing.TelemarketingLayoutFeignClient;
 import com.kuaidao.manageweb.util.DownFile;
+import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
+import com.kuaidao.sys.dto.organization.OrganizationRespDTO;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -39,6 +47,11 @@ public class TelemarketingController {
     @Autowired
     TelemarketingLayoutFeignClient telemarketingLayoutFeignClient;
 
+    @Autowired
+    private ProjectInfoFeignClient projectInfoFeignClient;
+    
+    @Autowired
+	private OrganizationFeignClient organizationFeignClient;
     /**
      * 电销布局列表
      * 
@@ -46,7 +59,17 @@ public class TelemarketingController {
      */
     @RequestMapping("/telemarketingLayoutList")
     public String inviteAreaList(HttpServletRequest request) {
-        return "telemarketing/telemarketingLayoutList";
+    	// 查询项目列表
+        JSONResult<List<ProjectInfoDTO>> listNoPage =
+                projectInfoFeignClient.listNoPage(new ProjectInfoPageParam());
+        
+        OrganizationQueryDTO orgDto = new OrganizationQueryDTO();
+		orgDto.setOrgType(OrgTypeConstant.DXZ);
+		//商务小组
+		JSONResult<List<OrganizationRespDTO>> dzList = organizationFeignClient.queryOrgByParam(orgDto);
+		request.setAttribute("dzList", dzList.getData());
+		request.setAttribute("projectList", listNoPage.getData());
+		return "telemarketing/telemarketingLayoutList";
     }
     /**
      * 电销布局列表
@@ -58,6 +81,17 @@ public class TelemarketingController {
     public JSONResult<PageBean<TelemarketingLayoutDTO>> getTelemarketingLayoutList(HttpServletRequest request,@RequestBody TelemarketingLayoutDTO telemarketingLayoutDTO) {
     	return telemarketingLayoutFeignClient.getTelemarketingLayoutList(telemarketingLayoutDTO);
     }
+    /**
+     * 根据id查询电销布局
+     * 
+     * @return
+     */
+    @RequestMapping("/findTelemarketingById")
+    @ResponseBody
+    public JSONResult<TelemarketingLayoutDTO> findTelemarketingById(HttpServletRequest request,@RequestBody TelemarketingLayoutDTO telemarketingLayoutDTO) {
+    	return telemarketingLayoutFeignClient.findTelemarketingById(telemarketingLayoutDTO);
+    }
+    
     /**
      * 添加电销布局
      * 

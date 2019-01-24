@@ -25,20 +25,20 @@
             <el-row class="marginB10">
               
 				<div class="block">
-					<el-select v-model="businessGroupId" placeholder="请选择商务小组">
+					<el-select v-model="businessGroupId" placeholder="请选择商务小组" >
 					    <el-option
-					      v-for="item in businessGroups"
-					      :key="item.value"
-					      :label="item.label"
-					      :value="item.value">
+					      v-for="item in dxList"
+					      :key="item.id"
+					      :label="item.name"
+					      :value="item.id">
 					    </el-option>
   					</el-select>
   					<el-select v-model="telemarketingTeamId" placeholder="请选择电销组">
 					    <el-option
-					      v-for="item in telemarketingTeams"
-					      :key="item.value"
-					      :label="item.label"
-					      :value="item.value">
+					      v-for="item in swList"
+					      :key="item.id"
+					      :label="item.name"
+					      :value="item.id">
 					    </el-option>
   					</el-select>
   					<el-button type="primary" @click="inviteAreaListPage">搜索</el-button>
@@ -77,8 +77,8 @@
 <div th:include="_footer_include :: #jsLib"></div>
 <script th:inline="javascript">
 
-    var orgData=[[${orgData}]];
-
+    var swList=[[${swList}]];
+    var dxList=[[${dxList}]];
    var orgVM =  new Vue({
         el: '#organizationManage',
         data: {
@@ -88,6 +88,8 @@
         	dialogFormVisible:false,
         	dataTable:[],
         	multipleSelection: [],
+        	dxList:dxList,
+        	swList:swList,
         	businessGroups:[{
             	value: '1',
                 label: '登陆名称'	
@@ -229,7 +231,7 @@
               },
               handleSelectionChange(val) {
                   this.multipleSelection = val;
-              },
+              }
         },
         created(){
         	this.inviteAreaListPage();

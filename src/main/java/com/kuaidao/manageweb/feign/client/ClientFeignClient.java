@@ -1,6 +1,6 @@
 package com.kuaidao.manageweb.feign.client;
 
-import javax.validation.Valid;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.netflix.feign.FeignClient;
@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import com.kuaidao.aggregation.dto.client.AddOrUpdateQimoClientDTO;
 import com.kuaidao.aggregation.dto.client.AddOrUpdateTrClientDTO;
+import com.kuaidao.aggregation.dto.client.ImportTrClientDTO;
 import com.kuaidao.aggregation.dto.client.QimoClientQueryDTO;
 import com.kuaidao.aggregation.dto.client.QimoClientRespDTO;
 import com.kuaidao.aggregation.dto.client.QimoDataRespDTO;
@@ -17,6 +18,7 @@ import com.kuaidao.aggregation.dto.client.QueryTrClientDTO;
 import com.kuaidao.aggregation.dto.client.TrClientDataRespDTO;
 import com.kuaidao.aggregation.dto.client.TrClientQueryDTO;
 import com.kuaidao.aggregation.dto.client.TrClientRespDTO;
+import com.kuaidao.aggregation.dto.client.UploadTrClientDataDTO;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.IdEntity;
 import com.kuaidao.common.entity.IdListReq;
@@ -26,7 +28,7 @@ import com.kuaidao.common.entity.PageBean;
 /**
  *  坐席管理
  * 
- * @author: Chen Chengxue
+ * @author Chen Chengxue
  * @date: 2019年1月3日 下午5:06:37
  * @version V1.0
  */
@@ -60,8 +62,8 @@ public interface ClientFeignClient {
      * @param idEntity
      * @return
      */
-    @PostMapping("/queryTrClient")
-    JSONResult<TrClientRespDTO> queryTrClient(@RequestBody IdEntity idEntity);
+    @PostMapping("/queryTrClientById")
+    JSONResult<TrClientRespDTO> queryTrClientById(@RequestBody IdEntity idEntity);
     
     /**
      *  根据参数查询数据 精确匹配
@@ -130,6 +132,12 @@ public interface ClientFeignClient {
      */
     @PostMapping("/listQimoClientPage")
     JSONResult<PageBean<QimoDataRespDTO>> listQimoClientPage( @RequestBody QueryQimoDTO queryClientDTO);
+    
+    @PostMapping("/uploadTrClientData")
+    JSONResult<List<ImportTrClientDTO>> uploadTrClientData( @RequestBody UploadTrClientDataDTO reqClientDataDTO);
+    
+    @PostMapping("/updateCallbackPhone")
+    JSONResult<Boolean> updateCallbackPhone(@RequestBody AddOrUpdateTrClientDTO reqDTO);
 
 	@Component
 	static class HystrixClientFallback implements ClientFeignClient {
@@ -159,7 +167,7 @@ public interface ClientFeignClient {
         }
 
         @Override
-        public JSONResult<TrClientRespDTO> queryTrClient(IdEntity idEntity) {
+        public JSONResult<TrClientRespDTO> queryTrClientById(IdEntity idEntity) {
             return fallBackError("根据Id查询天润坐席");
         }
 
@@ -205,6 +213,18 @@ public interface ClientFeignClient {
             return fallBackError("分页查询七陌坐席");
         }
 
+        @Override
+        public JSONResult<List<ImportTrClientDTO>> uploadTrClientData(
+                UploadTrClientDataDTO reqClientDataDTO) {
+            return fallBackError("上传天润坐席数据");
+        }
+
+        @Override
+        public JSONResult<Boolean> updateCallbackPhone(AddOrUpdateTrClientDTO reqDTO) {
+            return fallBackError("更新回呼手机号");
+        }
+
 	}
+
 
 }

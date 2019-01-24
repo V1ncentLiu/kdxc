@@ -9,16 +9,23 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.kuaidao.aggregation.dto.invitearea.InviteAreaDTO;
+import com.kuaidao.common.constant.OrgTypeConstant;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.logmgt.dto.AccessLogReqDTO;
 import com.kuaidao.manageweb.config.LogRecord;
 import com.kuaidao.manageweb.constant.MenuEnum;
+import com.kuaidao.manageweb.feign.area.SysRegionFeignClient;
 import com.kuaidao.manageweb.feign.invitearea.InviteareaFeignClient;
+import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
 import com.kuaidao.manageweb.util.DownFile;
+import com.kuaidao.sys.dto.area.SysRegionDTO;
+import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
+import com.kuaidao.sys.dto.organization.OrganizationRespDTO;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -37,13 +44,27 @@ public class InviteAreaController {
     private static Logger logger = LoggerFactory.getLogger(InviteAreaController.class);
     @Autowired
     InviteareaFeignClient inviteareaFeignClient;
+    
+    @Autowired
+    SysRegionFeignClient sysRegionFeignClient;
+    @Autowired
+	private OrganizationFeignClient organizationFeignClient;
     /**
-     * 邀约记录列表
+     * 邀约记录列表页面
      * 
      * @return
      */
     @RequestMapping("/inviteAreaList")
     public String inviteAreaList(HttpServletRequest request) {
+    	OrganizationQueryDTO orgDto = new OrganizationQueryDTO();
+		orgDto.setOrgType(OrgTypeConstant.SWZ);
+		//商务小组
+		JSONResult<List<OrganizationRespDTO>> swList = organizationFeignClient.queryOrgByParam(orgDto);
+		orgDto.setOrgType(OrgTypeConstant.DXZ);
+		//电销小组
+		JSONResult<List<OrganizationRespDTO>> dxList = organizationFeignClient.queryOrgByParam(orgDto);
+		request.setAttribute("swList", swList.getData());
+		request.setAttribute("dxList", dxList.getData());
         return "inviteArea/inviteAreaList";
     }
     
@@ -59,13 +80,37 @@ public class InviteAreaController {
     }
     
     /**
+     * 添加邀约区域页面
+     * 
+     * @return
+     */
+    @RequestMapping("/addInviteAreaPage")
+    public String addInviteArea(HttpServletRequest request) {
+    	List<SysRegionDTO> list = sysRegionFeignClient.getproviceList().getData();
+        return "inviteArea/addInviteAreaPage";
+    }
+    /**
      * 添加邀约区域
      * 
      * @return
      */
     @RequestMapping("/addInviteArea")
-    public String addInviteArea(HttpServletRequest request) {
-        return "inviteArea/addInviteArea";
+    @LogRecord(description = "添加邀约区域",operationType = LogRecord.OperationType.INSERT,menuName = MenuEnum.INVITEAREA)
+    @ResponseBody
+    public JSONResult addInviteAreaMes(@RequestBody InviteAreaDTO inviteAreaDTO) {
+    	return inviteareaFeignClient.addOrUpdateInviteArea(inviteAreaDTO);
+    }
+    
+    /**
+     * 修改邀约区域
+     * 
+     * @return
+     */
+    @RequestMapping("/updateInviteArea")
+    @LogRecord(description = "修改邀约区域",operationType = LogRecord.OperationType.UPDATE,menuName = MenuEnum.INVITEAREA)
+    @ResponseBody
+    public JSONResult updateInviteAreaMes(@RequestBody InviteAreaDTO inviteAreaDTO) {
+    	return inviteareaFeignClient.addOrUpdateInviteArea(inviteAreaDTO);
     }
     /**
      * 删除邀约区域

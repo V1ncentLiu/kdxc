@@ -28,7 +28,11 @@ public interface InviteareaFeignClient {
 	@RequestMapping(method = RequestMethod.POST, value = "/deleInviteArea")
 	public JSONResult deleInviteArea(@RequestBody InviteAreaDTO queryDTO);
 	
+	@RequestMapping(method = RequestMethod.POST, value = "/addOrUpdateInviteArea")
+	public JSONResult addOrUpdateInviteArea(@RequestBody InviteAreaDTO queryDTO);
 
+	@RequestMapping(method = RequestMethod.POST, value = "/addInviteAreaList")
+	public JSONResult addInviteAreaList(@RequestBody List<InviteAreaDTO> queryDTO);
 	@Component
 	static class HystrixClientFallback implements InviteareaFeignClient {
 
@@ -51,6 +55,18 @@ public interface InviteareaFeignClient {
 		public JSONResult deleInviteArea(InviteAreaDTO queryDTO) {
 			// TODO Auto-generated method stub
 			return fallBackError("删除邀约区域列表失败");
+		}
+
+		@Override
+		public JSONResult addOrUpdateInviteArea(InviteAreaDTO queryDTO) {
+			// TODO Auto-generated method stub
+			return fallBackError("添加或者修改邀约区域列表失败");
+		}
+
+		@Override
+		public JSONResult addInviteAreaList(List<InviteAreaDTO> queryDTO) {
+			// TODO Auto-generated method stub
+			return fallBackError("批量插入邀约区域列表失败");
 		}
 	}
 }
