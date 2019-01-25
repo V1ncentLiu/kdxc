@@ -10,17 +10,25 @@
     </style>
 </head>
 <body>
-<div id="trClientManage" class="trClientManage mainPadding">  
+<div id="trClientManage" class="trClientManage mainPadding" style="display:none">  
     <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
         <el-breadcrumb-item>Home</el-breadcrumb-item>
         <el-breadcrumb-item>系统管理</el-breadcrumb-item>
         <el-breadcrumb-item><a href="JavaScript:void(0)" data-url="c.html">天润坐席管理</a></el-breadcrumb-item>
     </el-breadcrumb>
     <el-row class="marginB10">
-        <el-button type="primary" @click="addClientDialog"><i class="el-icon-plus"></i> 添加坐席</el-button>
-        <el-button type="primary" @click="modifyClientDialog">编辑坐席</el-button>
-        <el-button type="primary" @click="deleteClientDialog">删除坐席</el-button>
-        <el-button type="primary" @click="addBatchClient">导入坐席</el-button>
+         <shiro:hasPermission name="aggregation:trClient:add">
+             <el-button type="primary" @click="addClientDialog"><i class="el-icon-plus"></i> 添加坐席</el-button>
+         </shiro:hasPermission>
+         <shiro:hasPermission name="aggregation:trClient:edit">
+           <el-button type="primary" @click="modifyClientDialog">编辑坐席</el-button>
+         </shiro:hasPermission>
+         <shiro:hasPermission name="aggregation:trClient:delete">
+            <el-button type="primary" @click="deleteClientDialog">删除坐席</el-button>
+         </shiro:hasPermission>
+        <shiro:hasPermission name="aggregation:trClient:import">
+            <el-button type="primary" @click="addBatchClient">导入坐席</el-button>
+        </shiro:hasPermission>
     </el-row>
     <el-row class="marginB10 greybg padding20">
         
@@ -46,7 +54,7 @@
                 </el-col>
                 
                 <el-col :span="3">
-                         <el-button   icon="el-icon-search" type="info" @click="initClientData" plain>搜索</el-button>
+                         <el-button   icon="el-icon-search" type="primary" @click="initClientData" >搜索</el-button>
                     </el-form-item>
                 </el-col>
             </el-row>
@@ -120,6 +128,7 @@
 	  width="30%">
 	  
         <el-tree
+             ref="orgTree"
              :data="orgTreeData"              
              node-key="id"
              show-checkbox
@@ -246,5 +255,5 @@
 </script>
 
 <!-- 当前页面的js -->
-<script th:src="@{/js/custom/client/tr_client.js?v=1.0.0}"></script>
+<script th:src="@{/js/custom/client/tr_client.js?v=1.0.1}"></script>
 </html>

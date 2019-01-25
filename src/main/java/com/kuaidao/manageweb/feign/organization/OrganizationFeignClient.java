@@ -88,7 +88,13 @@ public interface OrganizationFeignClient {
     @PostMapping("/listOrgUserInfo")
     JSONResult<PageBean<UserAndRoleRespDTO>> listOrgUserInfo(@RequestBody OrgUserReqDTO reqDTO);
 
-    
+    /**
+     * 根据 系统代码 ，父级Id 和父级级别 查询所有的下级(子+孙)
+     * @param reqDto
+     * @return
+     */
+    @PostMapping("/listDescenDantByParentId")
+    JSONResult<List<OrganizationDTO>> listDescenDantByParentId(@RequestBody OrganizationQueryDTO reqDto);
     @Component
     static class HystrixClientFallback implements  OrganizationFeignClient{
         
@@ -153,6 +159,13 @@ public interface OrganizationFeignClient {
         @Override
         public JSONResult<PageBean<UserAndRoleRespDTO>> listOrgUserInfo(OrgUserReqDTO reqDTO) {
             return fallBackError("查询组织机构下的用户信息");
+        }
+
+
+        @Override
+        public JSONResult<List<OrganizationDTO>> listDescenDantByParentId(
+                OrganizationQueryDTO reqDto) {
+            return fallBackError("根据 系统代码 ，父级Id 和父级级别 查询所有的下级(子+孙)");
         }
     }
 

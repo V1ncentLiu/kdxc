@@ -278,6 +278,12 @@ var clientVm = new Vue({
              .catch(function (error) {
                   console.log(error);
              }).then(function(){
+            	var selectedOrgId =  clientVm.form.orgId;
+            	if(selectedOrgId){
+            		var array = new Array();
+            		array.push(selectedOrgId);
+            		clientVm.$refs.orgTree.setCheckedKeys(array);
+            	}
              });
          },
          selecedNode(checkedNodes,checkedKeys,halfCheckedNodes,halfCheckedKeys){//选择组织
@@ -441,5 +447,8 @@ var clientVm = new Vue({
      },
      created(){
           this.initClientData();
-     }
+     },
+     mounted(){
+      	document.getElementById('trClientManage').style.display = 'block';
+      },
 })

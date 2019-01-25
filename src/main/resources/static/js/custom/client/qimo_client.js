@@ -113,7 +113,7 @@ var clientVm = new Vue({
                         		   if(data.id==clientVm.form.id){
                         			   callback();
                         		   }else{
-                        			   callback(new Error("坐席编号已存在"));
+                        			   callback(new Error("此坐席编号已存在，请修改后提交"));
                         		   }
                         		   
                         	   }else{
@@ -518,14 +518,26 @@ var clientVm = new Vue({
         	   var valueText ="";
         	   if(cellValue==1){
         		   valueText="可用";
-        	   }else if(cellValue==2){
+        	   }else if(cellValue==0){
         		   valueText="不可用";
         	   }
         	   return valueText;
+           },
+           getFormatDateText(row, column, cellValue, index){
+        	   var valueText="";
+        	   if(cellValue){
+        		   valueText =  moment(cellValue).format("YYYY-MM-DD HH:MM:SS");
+        	   }
+        	   
+        	   return valueText;
+        	   
            }
          
      },
      created(){
           this.initClientData();
-     }
+     },
+     mounted(){
+     	document.getElementById('trClientManage').style.display = 'block';
+     },
 })
