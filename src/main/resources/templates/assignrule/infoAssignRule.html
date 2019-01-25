@@ -13,9 +13,15 @@ xmlns:th="http://www.thymeleaf.org">
         <el-breadcrumb-item><a href="JavaScript:void(0)">信息流分配电销组规则</a></el-breadcrumb-item>
     </el-breadcrumb>
     <el-row class="marginB10">
-        <el-button type="primary" @click="openAddRuleDialog"><i class="el-icon-plus"></i>添加</el-button>
+       <shiro:hasPermission name="infoAssign:add">
+           <el-button type="primary" @click="openAddRuleDialog"><i class="el-icon-plus"></i>添加</el-button>
+        </shiro:hasPermission>
+           <shiro:hasPermission name="infoAssign:edit">
         <el-button type="primary"  @click="openUpdateRuleDialog" ><i class="el-icon-edit"></i>编辑</el-button>
-        <el-button type="primary" @click="deleteDialog"><i class="el-icon-delete"></i>删除</el-button>
+        </shiro:hasPermission>
+       <shiro:hasPermission name="infoAssign:delete">
+         <el-button type="primary" @click="deleteDialog"><i class="el-icon-delete"></i>删除</el-button>
+        </shiro:hasPermission>
     </el-row>
     <el-row class="marginB10 greybg padding20">
         <el-row :gutter="20">
@@ -68,10 +74,11 @@ xmlns:th="http://www.thymeleaf.org">
          <table-pagination :pager="pager" @change="initTableData"></table-pagination> 
     </el-row>
     <!-- dialog -->
+    <!--  
     <el-dialog title="添加规则" :visible.sync="dialogFormVisible" @close="closeAddRuleDialog" >
         <el-form :model="form" ref="form" :rules="rules" class="width500">
             <el-form-item label="项目：" :label-width="formLabelWidth" prop="valueMultiple1">
-                <el-select v-model="form.valueMultiple" multiple placeholder="选择项目" style="width: 100%;">
+                <el-select v-model="form.valueMultiple1" multiple placeholder="选择项目" style="width: 100%;">
                     <el-option
                         v-for="item in proOption"
                         :key="item.id"
@@ -81,7 +88,7 @@ xmlns:th="http://www.thymeleaf.org">
                 </el-select>
             </el-form-item>
             <el-form-item label="电销组：" :label-width="formLabelWidth" prop="value1">
-                <el-select v-model="form.value" placeholder="选择电销组" style="width: 100%;">
+                <el-select v-model="form.value1" placeholder="选择电销组" style="width: 100%;">
                     <el-option
                         v-for="item in orgOption"
                         :key="item.id"
@@ -91,10 +98,10 @@ xmlns:th="http://www.thymeleaf.org">
                 </el-select>
             </el-form-item>
             <el-form-item label="规则名称：" :label-width="formLabelWidth" prop="ruleName1">
-                <el-input v-model="form.ruleName"></el-input>
+                <el-input v-model="form.ruleName1" maxlength="50" ></el-input>
             </el-form-item>
-            <el-form-item label="规则ID："  :label-width="formLabelWidth" prop="ruleID1">
-                <el-input v-model="form.ruleID"></el-input>
+            <el-form-item label="规则ID："    :label-width="formLabelWidth" prop="ruleID1">
+                <el-input v-model="form.ruleID1" type="number" maxlength="20" ></el-input>
             </el-form-item>
         </el-form>
         <div slot="footer" class="dialog-footer">
@@ -102,8 +109,8 @@ xmlns:th="http://www.thymeleaf.org">
             <el-button @click="dialogFormVisible= false">取消</el-button>
         </div>
     </el-dialog>
-  
-    <el-dialog title="修改规则" :visible.sync="updateDialogFormVisible"   >
+  -->
+    <el-dialog  :title="dailogTitleType+'规则'" :visible.sync="updateDialogFormVisible"   >
         <el-form :model="updateForm" ref="updateForm" :rules="rules" class="width500">
             <el-form-item label="项目：" :label-width="formLabelWidth" prop="valueMultiple">
                 <el-select v-model="updateForm.valueMultiple" multiple placeholder="选择项目" style="width: 100%;">
@@ -126,10 +133,10 @@ xmlns:th="http://www.thymeleaf.org">
                 </el-select>
             </el-form-item>
             <el-form-item label="规则名称：" :label-width="formLabelWidth" prop="ruleName">
-                <el-input v-model="updateForm.ruleName"></el-input>
+                <el-input v-model="updateForm.ruleName"   maxlength="50" ></el-input>
             </el-form-item>
-            <el-form-item label="规则ID："  :label-width="formLabelWidth" prop="ruleID">
-                <el-input v-model="updateForm.ruleID"></el-input>
+            <el-form-item label="规则ID："  type="number"   :label-width="formLabelWidth" prop="ruleID">
+                <el-input v-model="updateForm.ruleID"   maxlength="20" ></el-input>
             </el-form-item>
         </el-form>
         <div slot="footer" class="dialog-footer">
@@ -153,10 +160,10 @@ var proSelect=[[${proSelect}]];
                 dialogFormVisible: false,
                 updateDialogFormVisible:false,
                 form: {
-                    value:'',
-                    ruleName:'',
-                    ruleID:'',
-                    valueMultiple:[]
+                    value1:'',
+                    ruleName1:'',
+                    ruleID1:'',
+                    valueMultiple1:[]
                 },
                 updateForm: {
                     value:'',
@@ -166,6 +173,7 @@ var proSelect=[[${proSelect}]];
                 },
                 formLabelWidth: '100px',
                 dataTable: [],
+                dailogTitleType:'新增',
                 pager:{ 
                     total: 0,
                     currentPage: 1,
@@ -185,9 +193,15 @@ var proSelect=[[${proSelect}]];
                     valueMultiple: [
                         { required: true, message: '请选择项目', trigger: 'change' }
                     ],
+                    valueMultiple1: [
+                          { required: true, message: '请选择项目', trigger: 'change' }
+                     ],
                     value: [
-                        { required: true, message: '请选择电销组', trigger: 'change' }
+                        { required: true, message: '请选择电销组', trigger: 'change' },
                     ],
+                    value1: [
+                            { required: true, message: '请选择电销组', trigger: 'change' },
+                        ],
                     ruleName: [
                         { required: true, message: '请输入规则名称', trigger: 'blur' },
                         {validator:function(rule,value,callback){
@@ -219,8 +233,40 @@ var proSelect=[[${proSelect}]];
              			  
              		  },trigger:'blur'}
                     ],
+                    ruleName1: [
+                               { required: true, message: '请输入规则名称', trigger: 'blur' },
+                               {validator:function(rule,value,callback){
+                               	if(ruleVm.oldruleName==value&&ruleVm.oldruleId){
+                               		   callback();
+                               	}
+                    			    var param = {'assignName':value};
+                                    axios.post('/assignrule/infoAssign/findListInfoAssignByName',param)
+                                    .then(function (response) {
+                                        var data =  response.data;
+                                        if(data.code=='0'){
+                                            var resData = data.data;
+                                            if(resData.length>0){
+                                                callback(new Error("此分配规则名称已存在，请修改后提交"));
+                                            }else{
+                                                callback();
+                                            }
+                                            
+                                        }else{
+                                             callback(new Error("查询分配规名称是否唯一报错"));
+                                        }
+                                    })
+                                    .catch(function (error) {
+                                      console.log(error);
+                                    })
+                                    .then(function () {
+                                      // always executed
+                                    });
+                    			  
+                    		  },trigger:'blur'}
+                           ],
                     ruleID: [
                         { required: true, message: '请输入规则ID', trigger: 'blur' },
+                        {  max: 19, message: '最大19个字符', trigger: 'change' },
                         {validator:function(rule,value,callback){
                         	if(ruleVm.oldruleRefId==value&&ruleVm.oldruleId){
                         		   callback();
@@ -249,7 +295,39 @@ var proSelect=[[${proSelect}]];
                              });
              			  
              		  },trigger:'blur'}
-                    ]
+                    ],
+                    ruleID1: [
+                             { required: true, message: '请输入规则ID', trigger: 'blur' },
+                             {  max: 19, message: '最大19个字符', trigger: 'change' },
+                             {validator:function(rule,value,callback){
+                             	if(ruleVm.oldruleRefId==value&&ruleVm.oldruleId){
+                             		   callback();
+                             	}
+                  			    var param = {'releAssignId':value};
+                                  axios.post('/assignrule/infoAssign/findListInfoAssignByName',param)
+                                  .then(function (response) {
+                                      var data =  response.data;
+                                      if(data.code=='0'){
+                                          var resData = data.data;
+                                          if(resData.length>0){
+                                              callback(new Error("此分配规则关联ID已存在，请修改后提交"));
+                                          }else{
+                                              callback();
+                                          }
+                                          
+                                      }else{
+                                           callback(new Error("此分配规则关联ID是否唯一报错"));
+                                      }
+                                  })
+                                  .catch(function (error) {
+                                    console.log(error);
+                                  })
+                                  .then(function () {
+                                    // always executed
+                                  });
+                  			  
+                  		  },trigger:'blur'}
+                         ] 
                 }
                
 
@@ -307,7 +385,7 @@ var proSelect=[[${proSelect}]];
                 this.$refs[formName].validate((valid) => {
                   if (valid) {
                    var param={};
-                   var  projectArray= ruleVm.form.valueMultiple;
+                   var  projectArray= ruleVm.form.valueMultiple1;
                    var proIdArry=[];
                    for(var i=0;i<projectArray.length;i++) {
                 	    var pro={};
@@ -315,9 +393,9 @@ var proSelect=[[${proSelect}]];
                 	    proIdArry.push(pro);
                     }
                     param.infoAssignProject=proIdArry;
-                    param.assignName=ruleVm.form.ruleName;
-                    param.telemarketingId=ruleVm.form.value;
-                    param.releAssignId=ruleVm.form.ruleID;
+                    param.assignName=ruleVm.form.ruleName1;
+                    param.telemarketingId=ruleVm.form.value1;
+                    param.releAssignId=ruleVm.form.ruleID1;
                    axios.post('/assignrule/infoAssign/saveInfoAssign',param)
                        .then(function (response) {
                     	ruleVm.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
@@ -327,9 +405,9 @@ var proSelect=[[${proSelect}]];
            } else {
                  console.log('error submit!!');
                  return false;
-             }
-          });
-            },
+                 }
+           });
+          },
         	//修改提交
             submitUpdateForm(formName) {
                 this. updateDialogFormVisible=false;
@@ -359,18 +437,19 @@ var proSelect=[[${proSelect}]];
            } else {
                  console.log('error submit!!');
                  return false;
-             }
-          });
+               }
+           });
             },
             //添加规则
             openAddRuleDialog(){
-              this.dialogFormVisible=true;
+              this.updateDialogFormVisible=true;
         
             },
             //修改规则
             openUpdateRuleDialog(){
                 var param ={};
                 //修改菜单数据	
+                this.dailogTitleType="修改";
             	var rows = this.multseleSelection;
                 if(rows.length!=1){
                     this.$message({

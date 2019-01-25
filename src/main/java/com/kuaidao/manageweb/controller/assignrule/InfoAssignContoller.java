@@ -6,6 +6,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.apache.shiro.subject.Subject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -61,6 +62,7 @@ public class InfoAssignContoller {
 	 * @return
 	 */
 	@RequestMapping("/initinfoAssign")
+    @RequiresPermissions("infoAssign:view")
 	public String initinfoAssign(HttpServletRequest request, Model model) {
 
 		OrganizationQueryDTO orgDto = new OrganizationQueryDTO();
@@ -91,6 +93,36 @@ public class InfoAssignContoller {
 	@ResponseBody
 	public JSONResult<PageBean<InfoAssignDTO>> queryInfoAssignList(@RequestBody InfoAssignQueryDTO queryDTO,
 			HttpServletRequest request, HttpServletResponse response) {
+
+		// 数据权限处理
+		Subject subject = SecurityUtils.getSubject();
+		UserInfoDTO user = (UserInfoDTO) subject.getSession().getAttribute("user");
+		if (null != user.getRoleList() && user.getRoleList().size() > 0) {
+			// String roleCode = user.getRoleList().get(0).getRoleCode();
+			if (null != user.getRoleList().get(0).getId()) {
+				RoleQueryDTO roleDTO = new RoleQueryDTO();
+				roleDTO.setId(user.getRoleList().get(0).getId());
+				JSONResult<RoleInfoDTO> roleJson = roleManagerFeignClient.qeuryRoleById(roleDTO);
+				if (roleJson.getCode().equals(JSONResult.SUCCESS)) {
+					RoleInfoDTO roleInfo = roleJson.getData();
+					if (null != roleInfo && null != roleInfo.getRoleCode()) {
+						String roleCode = roleInfo.getRoleCode();
+						if (roleCode.equals(RoleCodeEnum.GLY.name())) {
+							// 管理员查看所有
+
+						} else if (roleCode.equals(RoleCodeEnum.YHZG.name())) {
+							// 管理员优化主管查看自己创建的
+							queryDTO.setCreateUser(user.getId());
+						} else {
+							queryDTO.setOther("1!=1");
+
+						}
+					}
+				}
+
+			}
+		}
+
 		return infoAssignFeignClient.queryInfoAssignPage(queryDTO);
 	}
 
@@ -133,7 +165,7 @@ public class InfoAssignContoller {
 	 * @return
 	 */
 	@RequestMapping("/saveInfoAssign")
-    @LogRecord(description = "信息流分配规则",operationType = LogRecord.OperationType.INSERT,menuName = MenuEnum.ASSIGNRULE_INFO)
+	@LogRecord(description = "信息流分配规则", operationType = LogRecord.OperationType.INSERT, menuName = MenuEnum.ASSIGNRULE_INFO)
 	@ResponseBody
 	public JSONResult<String> saveInfoAssign(@RequestBody InfoAssignDTO dto, HttpServletRequest request,
 			HttpServletResponse response) {
@@ -168,6 +200,22 @@ public class InfoAssignContoller {
 		return infoAssignFeignClient.saveInfoAssign(dto);
 	}
 
+	/**
+	 * 名称排重问题处理
+	 * 
+	 * @param queryDto
+	 * @param request
+	 * @param response
+	 * @return
+	 */
+
+	@RequestMapping("/findListInfoAssignByName")
+	@ResponseBody
+	public JSONResult<List<InfoAssignDTO>> findListInfoAssignByName(@RequestBody InfoAssignQueryDTO queryDto,
+			HttpServletRequest request, HttpServletResponse response) {
+		return infoAssignFeignClient.findListInfoAssignByName(queryDto);
+	}
+
 	/***
 	 * 修改信息流分配规则
 	 * 
@@ -175,7 +223,7 @@ public class InfoAssignContoller {
 	 */
 	@RequestMapping("/updateInfoAssign")
 	@ResponseBody
-    @LogRecord(description = "信息流分配规则",operationType = LogRecord.OperationType.UPDATE,menuName = MenuEnum.ASSIGNRULE_INFO)
+	@LogRecord(description = "信息流分配规则", operationType = LogRecord.OperationType.UPDATE, menuName = MenuEnum.ASSIGNRULE_INFO)
 	public JSONResult<String> updateInfoAssign(@RequestBody InfoAssignDTO dto, HttpServletRequest request,
 			HttpServletResponse response) {
 		return infoAssignFeignClient.saveInfoAssign(dto);
@@ -188,7 +236,7 @@ public class InfoAssignContoller {
 	 */
 	@RequestMapping("/deleteInfoAssign")
 	@ResponseBody
-    @LogRecord(description = "信息流分配规则",operationType = LogRecord.OperationType.DELETE,menuName = MenuEnum.ASSIGNRULE_INFO)
+	@LogRecord(description = "信息流分配规则", operationType = LogRecord.OperationType.DELETE, menuName = MenuEnum.ASSIGNRULE_INFO)
 	public JSONResult<String> deleteInfoAssign(@RequestBody InfoAssignDTO dto, HttpServletRequest request,
 			HttpServletResponse response) {
 		return infoAssignFeignClient.delteInfoAssign(dto);
