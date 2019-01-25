@@ -342,6 +342,7 @@ public class ClientController {
         UploadTrClientDataDTO<ImportTrClientDTO> reqClientDataDTO = new UploadTrClientDataDTO<ImportTrClientDTO>();
         reqClientDataDTO.setCreateUser(userId);
         reqClientDataDTO.setList(dataList);
+        redisTemplate.delete(Constants.TR_CLIENT_KEY+userId);
         return clientFeignClient.uploadTrClientData(reqClientDataDTO);
     }
     
@@ -459,9 +460,6 @@ public class ClientController {
     @ResponseBody
     public JSONResult<PageBean<QimoDataRespDTO>> listQimoClientPage(
             @RequestBody QueryQimoDTO queryClientDTO) {
-        String userName = queryClientDTO.getUserName();
-        //TODO devin 根据userName 查询用户的Id
-        
         
         return clientFeignClient.listQimoClientPage(queryClientDTO);
     }
@@ -549,8 +547,9 @@ public class ClientController {
         UploadTrClientDataDTO<ImportQimoClientDTO> reqClientDataDTO = new UploadTrClientDataDTO<ImportQimoClientDTO>();
         reqClientDataDTO.setCreateUser(userId);
         reqClientDataDTO.setList(dataList);
-        JSONResult<List<ImportQimoClientDTO>> uploadTrClientData = clientFeignClient.uploadQimoClientData(reqClientDataDTO);
+        //remove redis 临时数据
         redisTemplate.delete(Constants.QIMO_CLIENT_KEY+userId);
+        JSONResult<List<ImportQimoClientDTO>> uploadTrClientData = clientFeignClient.uploadQimoClientData(reqClientDataDTO);
         return uploadTrClientData;
     }
     
