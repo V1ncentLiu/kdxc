@@ -121,6 +121,7 @@ var clientVm = new Vue({
         	 this.addOrModifyDialogTitle='添加坐席';
         	 this.dialogFormVisible=true;
         	 this.submitClientUrl ='saveTrClient';
+        	 this.form.orgId='';
         	 if (this.$refs['clientForm']!==undefined) {
          		this.$refs['clientForm'].resetFields();
          	}
@@ -262,6 +263,10 @@ var clientVm = new Vue({
         	 
          },
          selectOrg(){//选择组织
+        	
+        	 this.$nextTick(() => {
+        		 clientVm.$refs.orgTree.setCheckedKeys([]);//清空tree
+        		});
         	 this.orgDialogVisible=true;
         	 axios.post('/organization/organization/query',{})
              .then(function (response) {
@@ -283,6 +288,8 @@ var clientVm = new Vue({
             		var array = new Array();
             		array.push(selectedOrgId);
             		clientVm.$refs.orgTree.setCheckedKeys(array);
+            	}else{
+            		clientVm.$refs.orgTree.setCheckedKeys([]);//清空tree
             	}
              });
          },
@@ -290,6 +297,7 @@ var clientVm = new Vue({
         	 this.form.orgId=checkedNodes.id;
         	 this.form.orgName=checkedNodes.label;
         	 this.orgDialogVisible=false;
+        	 this.$refs.orgTree.setCheckedKeys([]);//清空tree
          },
          initClientData(){
         	 var param = this.searchForm;
