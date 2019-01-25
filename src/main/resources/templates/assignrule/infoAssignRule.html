@@ -70,7 +70,7 @@ xmlns:th="http://www.thymeleaf.org">
     <!-- dialog -->
     <el-dialog title="添加规则" :visible.sync="dialogFormVisible" @close="closeAddRuleDialog" >
         <el-form :model="form" ref="form" :rules="rules" class="width500">
-            <el-form-item label="项目：" :label-width="formLabelWidth" prop="valueMultiple">
+            <el-form-item label="项目：" :label-width="formLabelWidth" prop="valueMultiple1">
                 <el-select v-model="form.valueMultiple" multiple placeholder="选择项目" style="width: 100%;">
                     <el-option
                         v-for="item in proOption"
@@ -80,7 +80,7 @@ xmlns:th="http://www.thymeleaf.org">
                     </el-option>
                 </el-select>
             </el-form-item>
-            <el-form-item label="电销组：" :label-width="formLabelWidth" prop="value">
+            <el-form-item label="电销组：" :label-width="formLabelWidth" prop="value1">
                 <el-select v-model="form.value" placeholder="选择电销组" style="width: 100%;">
                     <el-option
                         v-for="item in orgOption"
@@ -90,10 +90,10 @@ xmlns:th="http://www.thymeleaf.org">
                     </el-option>
                 </el-select>
             </el-form-item>
-            <el-form-item label="规则名称：" :label-width="formLabelWidth" prop="ruleName">
+            <el-form-item label="规则名称：" :label-width="formLabelWidth" prop="ruleName1">
                 <el-input v-model="form.ruleName"></el-input>
             </el-form-item>
-            <el-form-item label="规则ID："  :label-width="formLabelWidth" prop="ruleID">
+            <el-form-item label="规则ID："  :label-width="formLabelWidth" prop="ruleID1">
                 <el-input v-model="form.ruleID"></el-input>
             </el-form-item>
         </el-form>
@@ -178,6 +178,9 @@ var proSelect=[[${proSelect}]];
                 assignName:'',
                 valueMultiple:[],
                 multseleSelection:[],
+                oldruleId:'',
+                oldruleName:'',
+                oldruleRefId:'',
                 rules: {
                     valueMultiple: [
                         { required: true, message: '请选择项目', trigger: 'change' }
@@ -186,10 +189,66 @@ var proSelect=[[${proSelect}]];
                         { required: true, message: '请选择电销组', trigger: 'change' }
                     ],
                     ruleName: [
-                        { required: true, message: '请输入规则名称', trigger: 'blur' }
+                        { required: true, message: '请输入规则名称', trigger: 'blur' },
+                        {validator:function(rule,value,callback){
+                        	if(ruleVm.oldruleName==value&&ruleVm.oldruleId){
+                        		   callback();
+                        	}
+             			    var param = {'assignName':value};
+                             axios.post('/assignrule/infoAssign/findListInfoAssignByName',param)
+                             .then(function (response) {
+                                 var data =  response.data;
+                                 if(data.code=='0'){
+                                     var resData = data.data;
+                                     if(resData.length>0){
+                                         callback(new Error("此分配规则名称已存在，请修改后提交"));
+                                     }else{
+                                         callback();
+                                     }
+                                     
+                                 }else{
+                                      callback(new Error("查询分配规名称是否唯一报错"));
+                                 }
+                             })
+                             .catch(function (error) {
+                               console.log(error);
+                             })
+                             .then(function () {
+                               // always executed
+                             });
+             			  
+             		  },trigger:'blur'}
                     ],
                     ruleID: [
-                        { required: true, message: '请输入规则ID', trigger: 'blur' }
+                        { required: true, message: '请输入规则ID', trigger: 'blur' },
+                        {validator:function(rule,value,callback){
+                        	if(ruleVm.oldruleRefId==value&&ruleVm.oldruleId){
+                        		   callback();
+                        	}
+             			    var param = {'releAssignId':value};
+                             axios.post('/assignrule/infoAssign/findListInfoAssignByName',param)
+                             .then(function (response) {
+                                 var data =  response.data;
+                                 if(data.code=='0'){
+                                     var resData = data.data;
+                                     if(resData.length>0){
+                                         callback(new Error("此分配规则关联ID已存在，请修改后提交"));
+                                     }else{
+                                         callback();
+                                     }
+                                     
+                                 }else{
+                                      callback(new Error("此分配规则关联ID是否唯一报错"));
+                                 }
+                             })
+                             .catch(function (error) {
+                               console.log(error);
+                             })
+                             .then(function () {
+                               // always executed
+                             });
+             			  
+             		  },trigger:'blur'}
                     ]
                 }
                
@@ -288,6 +347,9 @@ var proSelect=[[${proSelect}]];
                     param.assignName=ruleVm.updateForm.ruleName;
                     param.telemarketingId=ruleVm.updateForm.value;
                     param.releAssignId=ruleVm.updateForm.ruleID;
+                    ruleVm.oldruleId='';
+                    ruleVm.oldruleName='';
+                    ruleVm.oldruleRefId='';
                    axios.post('/assignrule/infoAssign/updateInfoAssign',param)
                        .then(function (response) {
                     	ruleVm.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
@@ -327,8 +389,11 @@ var proSelect=[[${proSelect}]];
                        var updateData= response.data.data;
                        var valueMultiple=[];
                        ruleVm.updateForm.ruleName=updateData.assignName;
+                       ruleVm.oldruleId=updateData.id;
+                       ruleVm.oldruleName=updateData.assignName;
                        ruleVm.updateForm.value=updateData.telemarketingId;
                        ruleVm.updateForm.ruleID=updateData.releAssignId;
+                       ruleVm.oldruleRefId=updateData.releAssignId;
                        var assignPro=updateData.infoAssignProject;
                        if(null!=assignPro&&assignPro.length>0) {
                     	   for(var i=0;i<assignPro.length;i++){

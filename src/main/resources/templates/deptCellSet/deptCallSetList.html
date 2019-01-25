@@ -149,7 +149,7 @@
             :visible.sync="importDialogVisible"  width="30%">
         <template>
             <el-row class="marginB20">
-                下载批量上传模版：<a href="/excel-templates/dept-call-setting.xlsx" download="部门呼叫设置模板"><span style="color:#409EFF;text-decoration:underline;">部门呼叫设置模板</span></a>
+                下载批量上传模版：<a href="/deptcallset/download"><span style="color:#409EFF;text-decoration:underline;">部门呼叫设置模板</span></a>
             </el-row>
             <el-row>
                 <el-upload
@@ -490,10 +490,11 @@
                 }
             },
             showTableOpen(){
-                document.getElementById("importNum").innerText=this.tableData1.length
+                if(this.tableData1)
+                    document.getElementById("importNum").innerText=this.tableData1.length
             },
             uploadSuccess(response, file, fileList){//上传成功后
-                console.log( response.data)
+                console.log( response)
                 console.log(mainDivVM.paramData.importFlag)
                 if(mainDivVM.paramData.importFlag=="show"){
                     this.tableData1 = response.data
@@ -517,7 +518,10 @@
                             mainDivVM.showErrTableDateDialog = true;
                         }
                     }else{
-                        this.$message('上传失败');
+                        this.$refs.upload.clearFiles();
+                        this.importDialogVisible = false;
+                        this.showTableDateDialog = false;
+                        this.$message('上传失败,'+response.msg);
                     }
                 }
             },

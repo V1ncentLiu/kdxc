@@ -133,8 +133,8 @@ public class AbnormalController {
          *    其他的只能够看见自己创建的数据
          */
         if(roleList!=null&&roleList.get(0)!=null){
-            if( roleList.get(0).getRoleCode().equals(RoleCodeEnum.GLY.name())){
-            }else if( roleList.get(0).getRoleCode().equals(RoleCodeEnum.DXZJ.name())){
+            if(RoleCodeEnum.GLY.name().equals(roleList.get(0).getRoleCode())){
+            }else if(RoleCodeEnum.DXZJ.name().equals(roleList.get(0).getRoleCode())){
                 dxList = dxcygws();
                 dxList.add(user.getId());
                 dto.setCreateUserList(dxList);
@@ -172,7 +172,7 @@ public class AbnormalController {
         UserInfoDTO user =  CommUtil.getCurLoginUser();
         JSONResult<List<RoleInfoDTO>> roleJson = roleManagerFeignClient.qeuryRoleByName(query);
         ArrayList resList = new ArrayList();
-        if (roleJson.getCode().equals(JSONResult.SUCCESS)) {
+        if (JSONResult.SUCCESS.equals(roleJson.getCode())) {
             List<RoleInfoDTO> roleList = roleJson.getData();
             if (null != roleList && roleList.size() > 0) {
                 RoleInfoDTO roleDto = roleList.get(0);
@@ -182,7 +182,7 @@ public class AbnormalController {
                 param.setPageSize(10000);
                 param.setPageNum(1);
                 JSONResult<PageBean<UserInfoDTO>> userListJson = userInfoFeignClient.list(param);
-                if (userListJson.getCode().equals(JSONResult.SUCCESS)) {
+                if (JSONResult.SUCCESS.equals(userListJson.getCode())) {
                     PageBean<UserInfoDTO> pageList = userListJson.getData();
                     List<UserInfoDTO> userList = pageList.getData();
                     for(UserInfoDTO dto:userList){
@@ -197,7 +197,7 @@ public class AbnormalController {
     private Map<String,String> DicMap(){
         JSONResult<List<DictionaryItemRespDTO>> res = AbnoramlType();
         Map map = new HashMap();
-        if(res.getCode().equals("0")){
+        if(JSONResult.SUCCESS.equals(res.getCode())){
             List<DictionaryItemRespDTO> data = res.getData();
             for(DictionaryItemRespDTO dto:data){
                 map.put(dto.getValue(),dto.getName());
@@ -212,7 +212,7 @@ public class AbnormalController {
         param.setPageSize(99999);
         JSONResult<PageBean<UserInfoDTO>> userlist = userInfoFeignClient.list(param);
         Map map = new HashMap();
-        if(userlist.getCode().equals("0")){
+        if(JSONResult.SUCCESS.equals(userlist.getCode())){
             List<UserInfoDTO> userData = userlist.getData().getData();
             for(UserInfoDTO dto:userData){
                 map.put(dto.getId(),dto.getUsername());

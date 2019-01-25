@@ -78,9 +78,11 @@ public class DeptCallSetController {
     private Map<String,Long> orgNameToId(){
         Map<String,Long> map = new HashMap();
         JSONResult<List<OrganizationRespDTO>> orgsRes = allOrgs();
-        List<OrganizationRespDTO> dataList = orgsRes.getData();
-        for(OrganizationRespDTO dto : dataList){
-            map.put(dto.getName(),dto.getId());
+        if(JSONResult.SUCCESS.equals(orgsRes.getCode())) {
+            List<OrganizationRespDTO> dataList = orgsRes.getData();
+            for (OrganizationRespDTO dto : dataList) {
+                map.put(dto.getName(), dto.getId());
+            }
         }
         return map;
     }
@@ -88,9 +90,11 @@ public class DeptCallSetController {
     private Map<Long,String> orgIdToName(){
         Map<Long,String> map = new HashMap();
         JSONResult<List<OrganizationRespDTO>> orgsRes = allOrgs();
-        List<OrganizationRespDTO> dataList = orgsRes.getData();
-        for(OrganizationRespDTO dto : dataList){
-            map.put(dto.getId(),dto.getName());
+        if(JSONResult.SUCCESS.equals(orgsRes.getCode())){
+            List<OrganizationRespDTO> dataList = orgsRes.getData();
+            for(OrganizationRespDTO dto : dataList){
+                map.put(dto.getId(),dto.getName());
+            }
         }
         return map;
     }
@@ -114,7 +118,7 @@ public class DeptCallSetController {
         return deptCallSetFeignClient.saveDeptCallSet(dto);
     }
 
-    @RequiresPermissions("DeptCallSet:update")
+    @RequiresPermissions("DeptCallSet:edit")
     @LogRecord(description = "部门呼叫设置-更新",operationType = LogRecord.OperationType.UPDATE,menuName = MenuEnum.DEPTCALLSET_MANAGENT)
     @RequestMapping("/updateDeptcallset")
     @ResponseBody
@@ -126,7 +130,7 @@ public class DeptCallSetController {
         return deptCallSetFeignClient.updateDeptCallSets(dto);
     }
 
-    @RequiresPermissions("DeptCallSet:update")
+    @RequiresPermissions("DeptCallSet:edit")
     @LogRecord(description = "部门呼叫设置-更新",operationType = LogRecord.OperationType.UPDATE,menuName = MenuEnum.DEPTCALLSET_MANAGENT)
     @RequestMapping("/updateDeptcallsetForNotNull")
     @ResponseBody
@@ -142,15 +146,17 @@ public class DeptCallSetController {
     @ResponseBody
     public JSONResult<PageBean<DeptCallSetRespDTO>> queryDeptcallset(@RequestBody DeptCallSetQueryDTO dto){
         JSONResult<PageBean<DeptCallSetRespDTO>> list = deptCallSetFeignClient.queryDeptCallSetList(dto);
-        List<DeptCallSetRespDTO> data = list.getData().getData();
-        Map<Long, String> orgMap = orgIdToName();
-        List<DeptCallSetRespDTO> resList = new ArrayList();
-        for(int i = 0 ; i<data.size() ; i++ ){
-            DeptCallSetRespDTO tempDto = data.get(i);
-            tempDto.setOrgName(orgMap.get(tempDto.getOrgId()));
-            resList.add(tempDto);
+        if(JSONResult.SUCCESS.equals(list.getCode())){
+            List<DeptCallSetRespDTO> data = list.getData().getData();
+            Map<Long, String> orgMap = orgIdToName();
+            List<DeptCallSetRespDTO> resList = new ArrayList();
+            for(int i = 0 ; i<data.size() ; i++ ){
+                DeptCallSetRespDTO tempDto = data.get(i);
+                tempDto.setOrgName(orgMap.get(tempDto.getOrgId()));
+                resList.add(tempDto);
+            }
+            list.getData().setData(resList);
         }
-        list.getData().setData(resList);
         return  list;
     }
 
@@ -166,7 +172,7 @@ public class DeptCallSetController {
     }
 
 
-    @RequiresPermissions("DeptCallSet:import")
+        @RequiresPermissions("DeptCallSet:import")
     @LogRecord(description = "部门呼叫设置-批量导入",operationType = LogRecord.OperationType.IMPORTS,menuName = MenuEnum.DEPTCALLSET_MANAGENT)
     @PostMapping("/import")
     @ResponseBody
