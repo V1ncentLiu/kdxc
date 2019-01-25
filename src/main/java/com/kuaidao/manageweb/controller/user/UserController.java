@@ -4,6 +4,7 @@
 package com.kuaidao.manageweb.controller.user;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -46,6 +47,7 @@ import com.kuaidao.sys.dto.user.SysSettingReq;
 import com.kuaidao.sys.dto.user.UpdateUserPasswordReq;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import com.kuaidao.sys.dto.user.UserInfoPageParam;
+import com.kuaidao.sys.dto.user.UserInfoParamListReqDTO;
 import com.kuaidao.sys.dto.user.UserInfoReq;
 
 /**
@@ -339,6 +341,21 @@ public class UserController {
             return byCode.getData().getValue();
         }
         return null;
+    }
+    
+    
+    /**
+     * 根据状态列表或用户名称查询 用户  精确匹配
+     */
+    @PostMapping("/listUserInfoByParam")
+    @ResponseBody
+    public  JSONResult<List<UserInfoDTO>> listUserInfoByParam() {
+        UserInfoParamListReqDTO reqDTO = new UserInfoParamListReqDTO();
+        List<Integer> statusList = new ArrayList<Integer>();
+        statusList.add(SysConstant.USER_STATUS_ENABLE);
+        statusList.add(SysConstant.USER_STATUS_LOCK);
+        reqDTO.setStatusList(statusList);
+        return userInfoFeignClient.listUserInfoByParam(reqDTO);
     }
 
     /**
