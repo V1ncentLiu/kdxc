@@ -22,6 +22,8 @@ import com.kuaidao.common.constant.OrgTypeConstant;
 import com.kuaidao.common.constant.RoleCodeEnum;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
+import com.kuaidao.manageweb.config.LogRecord;
+import com.kuaidao.manageweb.constant.MenuEnum;
 import com.kuaidao.manageweb.feign.assignrule.InfoAssignFeignClient;
 import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
 import com.kuaidao.manageweb.feign.project.ProjectInfoFeignClient;
@@ -131,6 +133,7 @@ public class InfoAssignContoller {
 	 * @return
 	 */
 	@RequestMapping("/saveInfoAssign")
+    @LogRecord(description = "信息流分配规则",operationType = LogRecord.OperationType.INSERT,menuName = MenuEnum.ASSIGNRULE_INFO)
 	@ResponseBody
 	public JSONResult<String> saveInfoAssign(@RequestBody InfoAssignDTO dto, HttpServletRequest request,
 			HttpServletResponse response) {
@@ -172,6 +175,7 @@ public class InfoAssignContoller {
 	 */
 	@RequestMapping("/updateInfoAssign")
 	@ResponseBody
+    @LogRecord(description = "信息流分配规则",operationType = LogRecord.OperationType.UPDATE,menuName = MenuEnum.ASSIGNRULE_INFO)
 	public JSONResult<String> updateInfoAssign(@RequestBody InfoAssignDTO dto, HttpServletRequest request,
 			HttpServletResponse response) {
 		return infoAssignFeignClient.saveInfoAssign(dto);
@@ -184,6 +188,7 @@ public class InfoAssignContoller {
 	 */
 	@RequestMapping("/deleteInfoAssign")
 	@ResponseBody
+    @LogRecord(description = "信息流分配规则",operationType = LogRecord.OperationType.DELETE,menuName = MenuEnum.ASSIGNRULE_INFO)
 	public JSONResult<String> deleteInfoAssign(@RequestBody InfoAssignDTO dto, HttpServletRequest request,
 			HttpServletResponse response) {
 		return infoAssignFeignClient.delteInfoAssign(dto);

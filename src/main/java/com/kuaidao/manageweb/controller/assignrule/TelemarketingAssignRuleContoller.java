@@ -20,6 +20,8 @@ import com.kuaidao.common.constant.OrgTypeConstant;
 import com.kuaidao.common.constant.RoleCodeEnum;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
+import com.kuaidao.manageweb.config.LogRecord;
+import com.kuaidao.manageweb.constant.MenuEnum;
 import com.kuaidao.manageweb.feign.assignrule.TelemarketingAssignRuleFeignClient;
 import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
 import com.kuaidao.manageweb.feign.role.RoleManagerFeignClient;
@@ -121,7 +123,7 @@ public class TelemarketingAssignRuleContoller {
 	}
 
 	/***
-	 * 新增打开页面
+	 * 修改打开页面
 	 * 
 	 * @return
 	 */
@@ -171,6 +173,7 @@ public class TelemarketingAssignRuleContoller {
 	 */
 	@RequestMapping("/saveTeleAssignRule")
 	@ResponseBody
+    @LogRecord(description = "电销分配规则",operationType = LogRecord.OperationType.INSERT,menuName = MenuEnum.ASSIGNRULE_TELE)
 	public JSONResult<String> saveTeleAssignRule(@RequestBody TelemarketingAssignRuleDTO dto,
 			HttpServletRequest request, HttpServletResponse response) {
 		Subject subject = SecurityUtils.getSubject();
@@ -187,6 +190,7 @@ public class TelemarketingAssignRuleContoller {
 	 */
 	@RequestMapping("/updateTeleAssignRule")
 	@ResponseBody
+    @LogRecord(description = "电销分配规则",operationType = LogRecord.OperationType.UPDATE,menuName = MenuEnum.ASSIGNRULE_TELE)
 	public JSONResult<String> updateTeleAssignRule(@RequestBody TelemarketingAssignRuleDTO dto,
 			HttpServletRequest request, HttpServletResponse response) {
 		return telemarketingAssignRuleFeignClient.updateTeleAssignRule(dto);
@@ -198,6 +202,7 @@ public class TelemarketingAssignRuleContoller {
 	 * @return
 	 */
 	@RequestMapping("/deleteTeleAssignRule")
+    @LogRecord(description = "电销分配规则",operationType = LogRecord.OperationType.DELETE,menuName = MenuEnum.ASSIGNRULE_TELE)
 	@ResponseBody
 	public JSONResult<String> deleteTeleAssignRule(@RequestBody TelemarketingAssignRuleDTO dto,
 			HttpServletRequest request, HttpServletResponse response) {
@@ -211,6 +216,7 @@ public class TelemarketingAssignRuleContoller {
 	 */
 	@RequestMapping("/updateTeleAssignRuleStatus")
 	@ResponseBody
+    @LogRecord(description = "电销分配规则",operationType = LogRecord.OperationType.DISABLE,menuName = MenuEnum.ASSIGNRULE_TELE)
 	public JSONResult<String> updateTeleAssignRuleStatus(@RequestBody TelemarketingAssignRuleDTO dto,
 			HttpServletRequest request, HttpServletResponse response) {
 		return telemarketingAssignRuleFeignClient.updateTeleAssignRuleStatus(dto);
