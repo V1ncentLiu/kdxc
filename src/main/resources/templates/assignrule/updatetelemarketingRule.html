@@ -125,12 +125,13 @@
             <el-form-item label="设定组内人员：" prop="choosePerson" :label-width="formLabelWidth">
                 <el-button type="primary" @click="addDomain">添加人员</el-button>
             </el-form-item>
-            <el-table :data="tableData" style="width: 100%" border>
+            <el-table :data="form.tableData" style="width: 100%" border>
                 <el-table-column align="center" prop="id" type="index" label="序号" width="55"></el-table-column>
                 <el-table-column align="center" prop="name" label="姓名">
                     <template slot-scope="scope">
-                        <el-form-item prop="person">
-                            <el-select v-model="tableData[scope.$index].person" placeholder="请选择">
+                        <!-- <el-form-item prop="person"> -->
+                        <el-form-item :prop="'tableData.' + scope.$index + '.person'" :rules='rules.person' style="width: 200px;margin:0 auto;height: 57px;">
+                            <el-select v-model="scope.row.person" placeholder="请选择">
                                 <el-option
                                     v-for="item in personOptions"
                                     :key="item.id"
@@ -143,14 +144,15 @@
                 </el-table-column>
                 <el-table-column align="center" prop="num" label="资源条数">
                     <template slot-scope="scope">
-                        <el-form-item prop="num" style="width: 200px;margin:0 auto;height: 57px;">
-                            <el-input v-model="tableData[scope.$index].num"></el-input>
+                        <!-- <el-form-item prop="num" style="width: 200px;margin:0 auto;height: 57px;"> -->
+                        <el-form-item :prop="'tableData.' + scope.$index + '.num'" :rules='rules.num' style="width: 200px;margin:0 auto;height: 57px;">
+                            <el-input @keyup.native.prevent="number(scope.$index, form.tableData)" v-model="scope.row.num"></el-input>
                         </el-form-item>
                     </template>
                 </el-table-column>
                 <el-table-column align="center" label="操作" width="120">
                     <template slot-scope="scope">
-                        <el-button @click.native.prevent="deleteRow(scope.$index, tableData)" type="text" size="small">移除</el-button>
+                        <el-button @click.native.prevent="deleteRow(scope.$index, form.tableData)" type="text" size="small">移除</el-button>
                     </template>
             </el-table-column>
           </el-table>
@@ -184,9 +186,9 @@
                     category:updateRule.category.split(","),
                     status:updateRule.status+'',//默认value值，启用
                     person:'',
-                   searchWord:updateRule.searchWord,
-                   area:updateRule.area,
-                    
+                    searchWord:updateRule.searchWord,
+                    area:updateRule.area,
+                    tableData: []                    
                 },
                 formLabelWidth: '150px',
                 rules:{
@@ -208,12 +210,12 @@
                     status: [
                         { required: true, required: true, message: '请选择是否启用', trigger: 'change' }
                     ],
-                 //   num: [
-                  //      { required: true, required: true, message: '请添加资源条数', trigger: 'change' }
-                  //  ],
-                   // person: [
-                   //     { required: true, required: true, message: '请选择组内人员', trigger: 'change' }
-                   // ]
+                    num: [
+                       { required: true, required: true, message: '请添加资源条数', trigger: 'change' }
+                    ],
+                    person: [
+                       { required: true, required: true, message: '请选择组内人员', trigger: 'change' }
+                    ]
                 },
                 options: [{
                     value: '1',
@@ -222,7 +224,7 @@
                     value: '0',
                     label: '禁用'
                 }],
-                tableData: [],
+                // tableData: [],
                 personOptions:orgUserList,
                 tags: [],
                 areaTags:[]
@@ -234,7 +236,7 @@
                     if (valid) {
                     //规则成员数据	
                     var saveMemner=[];
-                    var memberArry=this.tableData ;
+                    var memberArry=this.form.tableData ;
                     if(null!=memberArry&&memberArry.length>0) {
                       for(var i=0;i<memberArry.length;i++) {
                     		var save={};
@@ -323,11 +325,19 @@
                 this.areaTags.splice(this.areaTags.indexOf(tag), 1);
             },
             addDomain() {
-                this.tableData.push({
+                this.form.tableData.push({
                   name: '',
                   num: ''
                 });
-            }
+            },
+            number(index, rows){
+                // console.log(rows)
+                // console.log(rows.num)
+                for(var i=0;i<rows.length;i++){                    
+        　　        rows[i].num=rows[i].num.replace(/[^\.\d]/g,'');
+                    rows[i].num=rows[i].num.replace('.','');                    
+                }
+        　　}
 
         },
         created(){
@@ -346,11 +356,11 @@
            var  memberArr=updateRule.teleAssignRuleMember;
            if(null!=memberArr&&memberArr.length>0) {
         	   for(var i=0;i<memberArr.length;i++) {
-                 this.tableData.push({
+                 this.form.tableData.push({
                    name: memberArr[i].memberId+"",
                    num: memberArr[i].resourceLimit,
                  });
-                 this.tableData[i].person=memberArr[i].memberId ;
+                 this.form.tableData[i].person=memberArr[i].memberId ;
         	   }
               }
         	   
