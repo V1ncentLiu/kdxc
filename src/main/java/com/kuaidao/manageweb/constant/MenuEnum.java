@@ -18,7 +18,9 @@ public enum MenuEnum {
     /**
      * 电销管理 -业务设置
      */
-    TR_CLIENT_MANAGEMENT("天润坐席管理"), QIMO_CLIENT_MANAGEMENT("七陌坐席管理"), COMPANY_MANAGEMENT("公司管理"), PROJECT_MANAGEMENT("项目管理");
+    TR_CLIENT_MANAGEMENT("天润坐席管理"), QIMO_CLIENT_MANAGEMENT("七陌坐席管理"), COMPANY_MANAGEMENT("公司管理"), PROJECT_MANAGEMENT("项目管理"),
+    ABNORMALUSER_MANAGENT("标记异常客户"),DEPTCALLSET_MANAGENT("部门呼叫设置"), ASSIGNRULE_INFO("信息流分配规则"), ASSIGNRULE_TELE("电销分配规则");
+
 
 
     private String name;

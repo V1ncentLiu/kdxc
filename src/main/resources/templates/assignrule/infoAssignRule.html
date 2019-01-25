@@ -14,7 +14,7 @@ xmlns:th="http://www.thymeleaf.org">
     </el-breadcrumb>
     <el-row class="marginB10">
         <el-button type="primary" @click="openAddRuleDialog"><i class="el-icon-plus"></i>添加</el-button>
-        <el-button type="primary"><i class="el-icon-edit"></i>编辑</el-button>
+        <el-button type="primary"  @click="openUpdateRuleDialog" ><i class="el-icon-edit"></i>编辑</el-button>
         <el-button type="primary" @click="deleteDialog"><i class="el-icon-delete"></i>删除</el-button>
     </el-row>
     <el-row class="marginB10 greybg padding20">
@@ -102,6 +102,41 @@ xmlns:th="http://www.thymeleaf.org">
             <el-button @click="dialogFormVisible= false">取消</el-button>
         </div>
     </el-dialog>
+  
+    <el-dialog title="修改规则" :visible.sync="updateDialogFormVisible"   >
+        <el-form :model="updateForm" ref="updateForm" :rules="rules" class="width500">
+            <el-form-item label="项目：" :label-width="formLabelWidth" prop="valueMultiple">
+                <el-select v-model="updateForm.valueMultiple" multiple placeholder="选择项目" style="width: 100%;">
+                    <el-option
+                        v-for="item in proOption"
+                        :key="item.id"
+                        :label="item.projectName"
+                        :value="item.id">
+                    </el-option>
+                </el-select>
+            </el-form-item>
+            <el-form-item label="电销组：" :label-width="formLabelWidth" prop="value">
+                <el-select v-model="updateForm.value" placeholder="选择电销组" style="width: 100%;">
+                    <el-option
+                        v-for="item in orgOption"
+                        :key="item.id"
+                        :label="item.name"
+                        :value="item.id">
+                    </el-option>
+                </el-select>
+            </el-form-item>
+            <el-form-item label="规则名称：" :label-width="formLabelWidth" prop="ruleName">
+                <el-input v-model="updateForm.ruleName"></el-input>
+            </el-form-item>
+            <el-form-item label="规则ID："  :label-width="formLabelWidth" prop="ruleID">
+                <el-input v-model="updateForm.ruleID"></el-input>
+            </el-form-item>
+        </el-form>
+        <div slot="footer" class="dialog-footer">
+            <el-button type="primary" @click="submitUpdateForm('updateForm')">确 定</el-button>
+            <el-button @click="updateDialogFormVisible=false">取消</el-button>
+        </div>
+    </el-dialog>
 </div>
 <!-- import common js-->
 <div th:include="_footer_include :: #jsLib"></div>
@@ -116,7 +151,14 @@ var proSelect=[[${proSelect}]];
         data: function() {
             return {
                 dialogFormVisible: false,
+                updateDialogFormVisible:false,
                 form: {
+                    value:'',
+                    ruleName:'',
+                    ruleID:'',
+                    valueMultiple:[]
+                },
+                updateForm: {
                     value:'',
                     ruleName:'',
                     ruleID:'',
@@ -124,7 +166,7 @@ var proSelect=[[${proSelect}]];
                 },
                 formLabelWidth: '100px',
                 dataTable: [],
-                pager:{//组织列表pager
+                pager:{ 
                     total: 0,
                     currentPage: 1,
                     pageSize: 20,
@@ -229,21 +271,72 @@ var proSelect=[[${proSelect}]];
              }
           });
             },
+        	//修改提交
+            submitUpdateForm(formName) {
+                this. updateDialogFormVisible=false;
+                this.$refs[formName].validate((valid) => {
+                  if (valid) {
+                   var param={};
+                   var  projectArray= ruleVm.updateForm.valueMultiple;
+                   var proIdArry=[];
+                   for(var i=0;i<projectArray.length;i++) {
+                	    var pro={};
+                	    pro.projectId=parseInt(projectArray[i]);
+                	    proIdArry.push(pro);
+                    }
+                    param.infoAssignProject=proIdArry;
+                    param.assignName=ruleVm.updateForm.ruleName;
+                    param.telemarketingId=ruleVm.updateForm.value;
+                    param.releAssignId=ruleVm.updateForm.ruleID;
+                   axios.post('/assignrule/infoAssign/updateInfoAssign',param)
+                       .then(function (response) {
+                    	ruleVm.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
+                    		ruleVm.initTableData();
+    		        	}});
+                      });
+           } else {
+                 console.log('error submit!!');
+                 return false;
+             }
+          });
+            },
             //添加规则
             openAddRuleDialog(){
               this.dialogFormVisible=true;
-              var param ={};
-              //查询电销组
-            //  axios.post('/assignrule/infoAssign/querySelectOrg',param)
-            //  .then(function (response) {
-            //	  ruleVm.options=response.data.data;
-            	  
-            //  });
-            //  axios.post('/assignrule/infoAssign/querySelecProject',param)
-            //  .then(function (response) {
-            //	  ruleVm.options1=response.data.data;
-          	  
-            //   });
+        
+            },
+            //修改规则
+            openUpdateRuleDialog(){
+                var param ={};
+                //修改菜单数据	
+            	var rows = this.multseleSelection;
+                if(rows.length!=1){
+                    this.$message({
+                       message: '请选择一条数据进行修改',
+                       type: 'warning'
+                     });
+                    return;
+                }
+                this.updateDialogFormVisible=true;
+                var param={};
+                param.id=rows[0].id;
+                axios.post('/assignrule/infoAssign/queryInfoAssignById',param)
+                .then(function (response) {
+                    var data =  response.data
+                    if(data.code=='0'){
+                       var updateData= response.data.data;
+                       var valueMultiple=[];
+                       ruleVm.updateForm.ruleName=updateData.assignName;
+                       ruleVm.updateForm.value=updateData.telemarketingId;
+                       ruleVm.updateForm.ruleID=updateData.releAssignId;
+                       var assignPro=updateData.infoAssignProject;
+                       if(null!=assignPro&&assignPro.length>0) {
+                    	   for(var i=0;i<assignPro.length;i++){
+                    	       valueMultiple.push(assignPro[i].id+"");
+                    	     }
+                    	   }
+                       ruleVm.updateForm.valueMultiple=valueMultiple;
+                	  }});
             },
             handleSelectionChange(val) {
                 this.multseleSelection = val;

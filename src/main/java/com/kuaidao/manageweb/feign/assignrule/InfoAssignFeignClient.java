@@ -14,11 +14,11 @@ import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
 
-@FeignClient(name = "aggregation-service", path = "/assignrule/infoAssign", fallback = InfoAssignFeignClient.HystrixClientFallback.class)
+@FeignClient(name = "aggregation-service", path = "/aggregation/assignrule/infoAssign", fallback = InfoAssignFeignClient.HystrixClientFallback.class)
 public interface InfoAssignFeignClient {
 
-	@RequestMapping(method = RequestMethod.POST, value = "/querInfoAssignPage")
-	JSONResult<PageBean<InfoAssignDTO>> querInfoAssignPage(InfoAssignQueryDTO queryDTO);
+	@RequestMapping(method = RequestMethod.POST, value = "/queryInfoAssignPage")
+	JSONResult<PageBean<InfoAssignDTO>> queryInfoAssignPage(InfoAssignQueryDTO queryDTO);
 
 	@RequestMapping(method = RequestMethod.POST, value = "/saveInfoAssign")
 	JSONResult<String> saveInfoAssign(InfoAssignDTO queryDTO);
@@ -44,7 +44,7 @@ public interface InfoAssignFeignClient {
 		}
 
 		@Override
-		public JSONResult<PageBean<InfoAssignDTO>> querInfoAssignPage(InfoAssignQueryDTO queryDTO) {
+		public JSONResult<PageBean<InfoAssignDTO>> queryInfoAssignPage(InfoAssignQueryDTO queryDTO) {
 			// TODO Auto-generated method stub
 			return fallBackError("分页查询信息流分配规则表数据失败");
 		}

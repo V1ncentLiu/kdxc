@@ -8,7 +8,7 @@
 </head>
 <body>
 <div id="addModule" class="addModule mainPadding">  
-    <div class="fs16 marginB20"><div class="titleBorderL">新建分配规则</div></div>
+    <div class="fs16 marginB20"><div class="titleBorderL">修改分配规则</div></div>
     <el-form :model="form" :rules="rules" ref="form">
         <div class="marginB20 fs16"><em class="redcolor">*</em>必填项</div>
         <div class="borderbox paddingL20 paddingR20 paddingT10">
@@ -16,7 +16,7 @@
                 <el-col :span="12">
                     <el-form-item label="规则名称：" prop="assignName" :label-width="formLabelWidth">
                         <el-col :span="17">
-                            <el-input v-model="form.assignName" autocomplete="off"  style="width: 100%;" maxlength="50"></el-input>
+                            <el-input v-model="form.assignName" disabled="true"  autocomplete="off"  style="width: 100%;" maxlength="50"></el-input>
                         </el-col>
                     </el-form-item>
                 </el-col>
@@ -40,14 +40,14 @@
             <el-row>
                 <el-col :span="12">
                     <el-form-item label="资源类别：" prop="category" :label-width="formLabelWidth">
-                        <el-checkbox-group v-model="form.category">
+                        <el-checkbox-group v-model="form.category" disabled="true" >
                             <el-checkbox v-for="item in categoryArr" :label="item.value" :key="item.value">{{item.name}}</el-checkbox>
                         </el-checkbox-group>
                     </el-form-item>
                 </el-col>
                 <el-col :span="12">
                     <el-form-item label="资源类型：" prop="type" :label-width="formLabelWidth">
-                        <el-checkbox-group v-model="form.type">
+                        <el-checkbox-group v-model="form.type" disabled="true" >
                             <el-checkbox v-for="item in typeArr" :label="item.value" :key="item.value">{{item.name}}</el-checkbox>
                         </el-checkbox-group>
                     </el-form-item>
@@ -86,27 +86,29 @@
                 <el-col :span="12">
                     <el-col :span="11">
                         <el-form-item label="包含搜索词：" :label-width="formLabelWidth">
-                            <el-input v-model="form.searchWord" autocomplete="off"  maxlength="50"></el-input>                            
+                            <el-input v-model="form.searchWord" disabled="true"   autocomplete="off"  maxlength="50"></el-input>                            
                         </el-form-item>
                     </el-col>
                     <el-col :span="1">&nbsp;</el-col>
                     <el-col :span="3">
-                        <el-form-item>
+                       <!-- <el-form-item>
                             <el-button type="primary" @click="handleInputConfirm">添加</el-button>                        
-                        </el-form-item>
+                        </el-form-item>   -->
                     </el-col>
                 </el-col>
                 <el-col :span="12">
                     <el-col :span="11">
                         <el-form-item label="地区：" :label-width="formLabelWidth">
-                            <el-input v-model="form.area" autocomplete="off"  maxlength="50"></el-input>                            
+                            <el-input   disabled="true"  v-model="form.area" autocomplete="off"  maxlength="50"></el-input>                            
                         </el-form-item>
                     </el-col>
                     <el-col :span="1">&nbsp;</el-col>
                     <el-col :span="3">
+                    <!-- <el-form-item>
                         <el-form-item>
-                            <el-button type="primary" @click="handleInputConfirmArea">添加</el-button>                        
+                            <el-button  disabled="true"  type="primary" @click="handleInputConfirmArea">添加</el-button>                        
                         </el-form-item>
+                         -->
                     </el-col>
                 </el-col>
             </el-row>
@@ -167,24 +169,23 @@
     var categoryItemsVal = ['留言', '在线', '免电'];
     //下拉列表电销顾问数据
     var orgUserList=[[${orgUserList}]];
-    
-   var  AddRuleVM= new Vue({
+    var updateRule=[[${updateRule}]];
+    var  AddRuleVM= new Vue({
         el: '#addModule',
         data: function() {
             return {
             	categoryArr:[],
             	typeArr:[],
                 form: {
-                	assignName:'',
-                    startTime:'',
-                    endTime:'',
-                    type:[],
-                    category:[],
-                    status:'1',//默认value值，启用
+                	assignName:updateRule.assignName,
+                    startTime:updateRule.startTime,
+                    endTime:updateRule.endTime,
+                    type:updateRule.type.split(","),
+                    category:updateRule.category.split(","),
+                    status:updateRule.status+'',//默认value值，启用
                     person:'',
-                   searchWord:'',
-                   status:'',
-                   area:''
+                   searchWord:updateRule.searchWord,
+                   area:updateRule.area,
                     
                 },
                 formLabelWidth: '150px',
@@ -261,27 +262,28 @@
                     var param={};
                     
                     param.teleAssignRuleMember=saveMemner;
-                    param.assignName=assignName;
+                   // param.assignName=assignName;
                     param.startTime=startTime;
+                    param.id=updateRule.id;
                     param.endTime=endTime;
                     if(null!=category&&category.length>0){
                     	
-                    	param.category=category.join(",");
+                    //	param.category=category.join(",");
                    }
                     if(null!=type&&type.length>0){
                     	
-                    	param.type=type.join(",");
+                   // 	param.type=type.join(",");
                    }
                    if(null!=searchWord&&searchWord.length>0){
                     	
-                    	param.searchWord=searchWord.join(",");
+                    //	param.searchWord=searchWord.join(",");
                    }
                    if(null!=area&&area.length>0){
                    	
-                    	param.area=area.join(",");
+                    //	param.area=area.join(",");
                   }
                    param.status=status; 
-                   axios.post('/assignrule/teleAssignRule/saveTeleAssignRule',param)
+                   axios.post('/assignrule/teleAssignRule/updateTeleAssignRule',param)
                    .then(function (response) {
                 	   AddRuleVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
                 		 window.location.href="/assignrule/teleAssignRule/initteleAssignRule"; 
@@ -341,7 +343,22 @@
            axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {  
          	AddRuleVM.typeArr=response.data.data;
             });
-          }
+           var  memberArr=updateRule.teleAssignRuleMember;
+           if(null!=memberArr&&memberArr.length>0) {
+        	   for(var i=0;i<memberArr.length;i++) {
+                 this.tableData.push({
+                   name: memberArr[i].memberId+"",
+                   num: memberArr[i].resourceLimit,
+                 });
+                 this.tableData[i].person=memberArr[i].memberId ;
+        	   }
+              }
+        	   
+        	   
+        	}
+           
+           
+   
     })
 </script>
 </html>

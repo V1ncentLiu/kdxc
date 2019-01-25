@@ -40,7 +40,8 @@ public class DictionaryItemController {
     DictionaryItemFeignClient dictionaryItemFeignClient;
 
 
-    @PostMapping("/dicItemsByGroupCode")
+    @SuppressWarnings("unchecked")
+	@PostMapping("/dicItemsByGroupCode")
     @ResponseBody
     public JSONResult<List<DictionaryItemRespDTO>> itemsByGroupCode(@RequestBody DictionaryItemQueryDTO queryDTO){
         JSONResult result = dictionaryItemFeignClient.queryDicItemsByGroupCode(queryDTO.getGroupCode());
