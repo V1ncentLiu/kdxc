@@ -100,12 +100,12 @@
             <el-table-column align="center" prop="handle" label="操作">
                 <template slot-scope="scope">
                     <div v-if="scope.row.status === 1">
-                        <el-button  @click="updateStatus(scope.row.id,2,'停用')" type="danger"  size="small">
+                        <el-button  @click="updateStatus(scope.row.id,0,'停用')" type="danger"  size="small">
                                    停用
                         </el-button>
                     </div>
                 
-                    <div v-else-if="scope.row.status === 2">
+                    <div v-else-if="scope.row.status === 0">
                         <el-button @click="updateStatus(scope.row.id,1,'启用')"  type="success"  size="small">
                                    启用
                         </el-button>
@@ -280,28 +280,31 @@
                 var text="";
                 if(cellValue=="1"){
                   text="启用"
-                }else if(cellValue=="2"){
+                }else if(cellValue=="0"){
                   text="停用"
                 }
                 return text;
             },
             updateStatus(id,status,msg) {
-                // var param = {};
-                // param.id=id;
-                // param.status=status;
-                // axios.post('/user/userManager/updateUser', param)
-                // .then(function (response) {
-                //     var result =  response.data;
-                //     if(result.code=="0"){
-                //         userVM.$message.success(msg+"成功");
-                //         userVM.searchTable();
-                //     }else{
-                //         userVM.$message.error(msg+"失败");
-                //     }
-                // })
-                // .catch(function (error) {
-                //     console.log(error);
-                // });  
+              	//状态调整
+               var param={};
+                param.id=id;
+                param.status=status;
+                var  operation="停用成功";
+                if(status=='1') {
+                	operation="启用成功"
+                }
+                axios.post('/assignrule/teleAssignRule/updateTeleAssignRuleStatus',param)
+                .then(function (response) {
+                    var data =  response.data
+                    if(data.code=='0'){
+                    	teleRuleVM.$message({message:operation,type:'success',duration:2000,onClose:function(){
+                    	teleRuleVM.initTableData();
+                	  }});
+                    }else{
+                    	console.error(data);
+                    }
+                })
             },
             openAddPage(){
             	window.location.href='/assignrule/teleAssignRule/preSaveTeleAssignRule';
