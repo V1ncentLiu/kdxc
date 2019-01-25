@@ -226,7 +226,7 @@ public class InfoAssignContoller {
 	@LogRecord(description = "信息流分配规则", operationType = LogRecord.OperationType.UPDATE, menuName = MenuEnum.ASSIGNRULE_INFO)
 	public JSONResult<String> updateInfoAssign(@RequestBody InfoAssignDTO dto, HttpServletRequest request,
 			HttpServletResponse response) {
-		return infoAssignFeignClient.saveInfoAssign(dto);
+		return infoAssignFeignClient.updateInfoAssign(dto);
 	}
 
 	/***
