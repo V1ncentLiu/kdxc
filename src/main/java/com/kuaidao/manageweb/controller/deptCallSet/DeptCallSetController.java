@@ -13,6 +13,8 @@ import com.kuaidao.manageweb.config.LogRecord;
 import com.kuaidao.manageweb.constant.MenuEnum;
 import com.kuaidao.manageweb.feign.deptcallset.DeptCallSetFeignClient;
 import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
+import com.kuaidao.manageweb.util.CommUtil;
+import com.kuaidao.manageweb.util.DownFile;
 import com.kuaidao.manageweb.util.IdUtil;
 import com.kuaidao.sys.constant.SysConstant;
 import com.kuaidao.sys.dto.dictionary.DictionaryAddAndUpdateDTO;
@@ -28,12 +30,22 @@ import org.apache.shiro.subject.Subject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.ResourceUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
+import java.io.File;
+import java.io.IOException;
 import java.util.*;
 
 /**
@@ -66,9 +78,11 @@ public class DeptCallSetController {
     private Map<String,Long> orgNameToId(){
         Map<String,Long> map = new HashMap();
         JSONResult<List<OrganizationRespDTO>> orgsRes = allOrgs();
-        List<OrganizationRespDTO> dataList = orgsRes.getData();
-        for(OrganizationRespDTO dto : dataList){
-            map.put(dto.getName(),dto.getId());
+        if(JSONResult.SUCCESS.equals(orgsRes.getCode())) {
+            List<OrganizationRespDTO> dataList = orgsRes.getData();
+            for (OrganizationRespDTO dto : dataList) {
+                map.put(dto.getName(), dto.getId());
+            }
         }
         return map;
     }
@@ -76,9 +90,11 @@ public class DeptCallSetController {
     private Map<Long,String> orgIdToName(){
         Map<Long,String> map = new HashMap();
         JSONResult<List<OrganizationRespDTO>> orgsRes = allOrgs();
-        List<OrganizationRespDTO> dataList = orgsRes.getData();
-        for(OrganizationRespDTO dto : dataList){
-            map.put(dto.getId(),dto.getName());
+        if(JSONResult.SUCCESS.equals(orgsRes.getCode())){
+            List<OrganizationRespDTO> dataList = orgsRes.getData();
+            for(OrganizationRespDTO dto : dataList){
+                map.put(dto.getId(),dto.getName());
+            }
         }
         return map;
     }
@@ -96,33 +112,30 @@ public class DeptCallSetController {
     @ResponseBody
     public JSONResult insertOne(@Valid @RequestBody DeptCallSetAddAndUpdateDTO dto , BindingResult result){
         if (result.hasErrors()) return  CommonUtil.validateParam(result);
-        Subject subject = SecurityUtils.getSubject();
-        UserInfoDTO user = (UserInfoDTO) subject.getSession().getAttribute("user");
+        UserInfoDTO user = CommUtil.getCurLoginUser();
         dto.setCreateTime(new Date());
         dto.setCreateUser(user.getId());
         return deptCallSetFeignClient.saveDeptCallSet(dto);
     }
 
-    @RequiresPermissions("DeptCallSet:update")
+    @RequiresPermissions("DeptCallSet:edit")
     @LogRecord(description = "部门呼叫设置-更新",operationType = LogRecord.OperationType.UPDATE,menuName = MenuEnum.DEPTCALLSET_MANAGENT)
     @RequestMapping("/updateDeptcallset")
     @ResponseBody
     public JSONResult updateDeptcallset(@Valid @RequestBody DeptCallSetAddAndUpdateDTO dto , BindingResult result){
 
-        Subject subject = SecurityUtils.getSubject();
-        UserInfoDTO user = (UserInfoDTO) subject.getSession().getAttribute("user");
+        UserInfoDTO user = CommUtil.getCurLoginUser();
         dto.setUpdateTime(new Date());
         dto.setUpdateUser(user.getId());
         return deptCallSetFeignClient.updateDeptCallSets(dto);
     }
 
-    @RequiresPermissions("DeptCallSet:update")
+    @RequiresPermissions("DeptCallSet:edit")
     @LogRecord(description = "部门呼叫设置-更新",operationType = LogRecord.OperationType.UPDATE,menuName = MenuEnum.DEPTCALLSET_MANAGENT)
     @RequestMapping("/updateDeptcallsetForNotNull")
     @ResponseBody
     public JSONResult updateDeptCallSetsForNotNull(@RequestBody DeptCallSetAddAndUpdateDTO dto){
-        Subject subject = SecurityUtils.getSubject();
-        UserInfoDTO user = (UserInfoDTO) subject.getSession().getAttribute("user");
+        UserInfoDTO user = CommUtil.getCurLoginUser();
         dto.setUpdateTime(new Date());
         dto.setUpdateUser(user.getId());
         return deptCallSetFeignClient.updateDeptCallSetsForNotNull(dto);
@@ -133,15 +146,17 @@ public class DeptCallSetController {
     @ResponseBody
     public JSONResult<PageBean<DeptCallSetRespDTO>> queryDeptcallset(@RequestBody DeptCallSetQueryDTO dto){
         JSONResult<PageBean<DeptCallSetRespDTO>> list = deptCallSetFeignClient.queryDeptCallSetList(dto);
-        List<DeptCallSetRespDTO> data = list.getData().getData();
-        Map<Long, String> orgMap = orgIdToName();
-        List<DeptCallSetRespDTO> resList = new ArrayList();
-        for(int i = 0 ; i<data.size() ; i++ ){
-            DeptCallSetRespDTO tempDto = data.get(i);
-            tempDto.setOrgName(orgMap.get(tempDto.getOrgId()));
-            resList.add(tempDto);
+        if(JSONResult.SUCCESS.equals(list.getCode())){
+            List<DeptCallSetRespDTO> data = list.getData().getData();
+            Map<Long, String> orgMap = orgIdToName();
+            List<DeptCallSetRespDTO> resList = new ArrayList();
+            for(int i = 0 ; i<data.size() ; i++ ){
+                DeptCallSetRespDTO tempDto = data.get(i);
+                tempDto.setOrgName(orgMap.get(tempDto.getOrgId()));
+                resList.add(tempDto);
+            }
+            list.getData().setData(resList);
         }
-        list.getData().setData(resList);
         return  list;
     }
 
@@ -157,7 +172,7 @@ public class DeptCallSetController {
     }
 
 
-    @RequiresPermissions("DeptCallSet:import")
+        @RequiresPermissions("DeptCallSet:import")
     @LogRecord(description = "部门呼叫设置-批量导入",operationType = LogRecord.OperationType.IMPORTS,menuName = MenuEnum.DEPTCALLSET_MANAGENT)
     @PostMapping("/import")
     @ResponseBody
@@ -229,14 +244,9 @@ public class DeptCallSetController {
                     rowDto.setOrgName(value);
                 }
             }
-//            插入数据时候，数据的唯一性检验
-//            失败的放到:errList
-//            Subject subject = SecurityUtils.getSubject();
-//            UserInfoDTO user = (UserInfoDTO) subject.getSession().getAttribute("user");
-//            rowDto.setCreateUser(user.getId());
+
             if(dataFalg){
-                Subject subject = SecurityUtils.getSubject();
-                UserInfoDTO user = (UserInfoDTO) subject.getSession().getAttribute("user");
+                UserInfoDTO user = CommUtil.getCurLoginUser();
                 rowDto.setId(IdUtil.getUUID());
                 rowDto.setCreateUser(user.getId());
                 rowDto.setCreateTime(new Date());
@@ -296,11 +306,36 @@ public class DeptCallSetController {
         return new JSONResult().success(showList);
     }
 
-
     private boolean validFiled(String field) {
         if(StringUtils.isBlank(field) || field.length()>50) {
             return false;
         }
         return true;
     }
+
+    /**
+     * 模板下载
+     * @param request
+     * @throws Exception
+     */
+    @RequestMapping(value = "/download", method = RequestMethod.GET)
+    public ResponseEntity<InputStreamResource> downloadFile(HttpServletRequest request)
+            throws IOException {
+        // 获取文件路径
+        File filePath = ResourceUtils.getFile(
+                ResourceUtils.CLASSPATH_URL_PREFIX + "excel-templates/dept-call-setting.xlsx");
+
+        FileSystemResource file = new FileSystemResource(filePath);
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Cache-Control", "no-cache, no-store, must-revalidate");
+        String fileName  =new String("部门呼叫设置批量导入模板.xlsx".getBytes(),"iso-8859-1");
+        headers.add("Content-Disposition",
+                String.format("attachment; filename=\"%s\"",fileName));
+        headers.add("Pragma", "no-cache");
+        headers.add("Expires", "0");
+        return ResponseEntity.ok().headers(headers).contentLength(file.contentLength())
+                .contentType(MediaType.parseMediaType("application/octet-stream"))
+                .body(new InputStreamResource(file.getInputStream()));
+    }
+
 }

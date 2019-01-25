@@ -3,6 +3,7 @@ package com.kuaidao.manageweb.controller.abnormal;
 import com.kuaidao.aggregation.dto.abnormal.AbnomalUserAddAndUpdateDTO;
 import com.kuaidao.aggregation.dto.abnormal.AbnomalUserQueryDTO;
 import com.kuaidao.aggregation.dto.abnormal.AbnomalUserRespDTO;
+import com.kuaidao.common.constant.DicCodeEnum;
 import com.kuaidao.common.constant.RoleCodeEnum;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.IdEntity;
@@ -18,6 +19,7 @@ import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
 import com.kuaidao.manageweb.feign.msgpush.MsgPushFeignClient;
 import com.kuaidao.manageweb.feign.role.RoleManagerFeignClient;
 import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
+import com.kuaidao.manageweb.util.CommUtil;
 import com.kuaidao.manageweb.util.IdUtil;
 import com.kuaidao.sys.dto.announcement.AnnouncementAddAndUpdateDTO;
 import com.kuaidao.sys.dto.announcement.AnnouncementQueryDTO;
@@ -63,7 +65,6 @@ public class AbnormalController {
 
     private static Logger logger = LoggerFactory.getLogger(AbnormalController.class);
 
-
     @Autowired
     AbnormalUserFeignClient abnormalUserFeignClient;
 
@@ -81,33 +82,9 @@ public class AbnormalController {
     @RequestMapping("/AbnoramlType")
     @ResponseBody
     public JSONResult<List<DictionaryItemRespDTO>> AbnoramlType(){
-        JSONResult result = dictionaryItemFeignClient.queryDicItemsByGroupCode("AbnormalType");
+        JSONResult result = dictionaryItemFeignClient.queryDicItemsByGroupCode( DicCodeEnum.DIC_ABNORMALUSER.getCode());
         return result;
     }
-
-    private Map<String,String> DicMap(){
-        JSONResult<List<DictionaryItemRespDTO>> res = AbnoramlType();
-        List<DictionaryItemRespDTO> data = res.getData();
-        Map map = new HashMap();
-        for(DictionaryItemRespDTO dto:data){
-            map.put(dto.getValue(),dto.getName());
-        }
-        return map;
-    }
-    private Map<Long,String> userMap(){
-        UserInfoPageParam param = new UserInfoPageParam();
-        param.setPageNum(1);
-        param.setPageSize(99999);
-        JSONResult<PageBean<UserInfoDTO>> userlist = userInfoFeignClient.list(param);
-        List<UserInfoDTO> userData = userlist.getData().getData();
-
-        Map map = new HashMap();
-        for(UserInfoDTO dto:userData){
-            map.put(dto.getId(),dto.getUsername());
-        }
-        return map;
-    }
-
 
     @RequiresPermissions("AbnormalUser:add")
     @LogRecord(description = "标记异常客户新增",operationType = LogRecord.OperationType.INSERT,menuName = MenuEnum.ABNORMALUSER_MANAGENT)
@@ -115,8 +92,7 @@ public class AbnormalController {
     @ResponseBody
     public JSONResult insertOne(@Valid @RequestBody AbnomalUserAddAndUpdateDTO dto  , BindingResult result){
         if (result.hasErrors()) return  CommonUtil.validateParam(result);
-        Subject subject = SecurityUtils.getSubject();
-        UserInfoDTO user = (UserInfoDTO) subject.getSession().getAttribute("user");
+        UserInfoDTO user = CommUtil.getCurLoginUser();
         dto.setCreateTime(new Date());
         dto.setCreateUser(user.getId());
         dto.setStatus(0);
@@ -145,10 +121,7 @@ public class AbnormalController {
                 return new JSONResult().fail("-1","时间选项，开始时间大于结束时间!");
             }
         }
-
-
-        Subject subject = SecurityUtils.getSubject();
-        UserInfoDTO user = (UserInfoDTO) subject.getSession().getAttribute("user");
+        UserInfoDTO user =  CommUtil.getCurLoginUser();
         List<RoleInfoDTO> roleList = user.getRoleList();
         List dxList = new ArrayList();
         /**
@@ -160,8 +133,8 @@ public class AbnormalController {
          *    其他的只能够看见自己创建的数据
          */
         if(roleList!=null&&roleList.get(0)!=null){
-            if( roleList.get(0).getRoleCode().equals(RoleCodeEnum.GLY.name())){
-            }else if( roleList.get(0).getRoleCode().equals(RoleCodeEnum.DXZJ.name())){
+            if(RoleCodeEnum.GLY.name().equals(roleList.get(0).getRoleCode())){
+            }else if(RoleCodeEnum.DXZJ.name().equals(roleList.get(0).getRoleCode())){
                 dxList = dxcygws();
                 dxList.add(user.getId());
                 dto.setCreateUserList(dxList);
@@ -170,8 +143,9 @@ public class AbnormalController {
                 dto.setCreateUserList(dxList);
             }
         }
-
         JSONResult<PageBean<AbnomalUserRespDTO>> resList = abnormalUserFeignClient.queryAbnomalUserList(dto);
+
+//      数据转换
         List<AbnomalUserRespDTO> resdata = resList.getData().getData();
         Map<String, String> dicMap = DicMap();
         Map<Long, String> vuserMap = userMap();
@@ -192,15 +166,13 @@ public class AbnormalController {
         return "abnormal/abnormalUserList";
     }
 
-
     private List dxcygws(){
         RoleQueryDTO query = new RoleQueryDTO();
         query.setRoleCode(RoleCodeEnum.DXCYGW.name());
-        Subject subject = SecurityUtils.getSubject();
-        UserInfoDTO user = (UserInfoDTO) subject.getSession().getAttribute("user");
+        UserInfoDTO user =  CommUtil.getCurLoginUser();
         JSONResult<List<RoleInfoDTO>> roleJson = roleManagerFeignClient.qeuryRoleByName(query);
         ArrayList resList = new ArrayList();
-        if (roleJson.getCode().equals(JSONResult.SUCCESS)) {
+        if (JSONResult.SUCCESS.equals(roleJson.getCode())) {
             List<RoleInfoDTO> roleList = roleJson.getData();
             if (null != roleList && roleList.size() > 0) {
                 RoleInfoDTO roleDto = roleList.get(0);
@@ -210,7 +182,7 @@ public class AbnormalController {
                 param.setPageSize(10000);
                 param.setPageNum(1);
                 JSONResult<PageBean<UserInfoDTO>> userListJson = userInfoFeignClient.list(param);
-                if (userListJson.getCode().equals(JSONResult.SUCCESS)) {
+                if (JSONResult.SUCCESS.equals(userListJson.getCode())) {
                     PageBean<UserInfoDTO> pageList = userListJson.getData();
                     List<UserInfoDTO> userList = pageList.getData();
                     for(UserInfoDTO dto:userList){
@@ -222,5 +194,31 @@ public class AbnormalController {
         return resList;
     }
 
+    private Map<String,String> DicMap(){
+        JSONResult<List<DictionaryItemRespDTO>> res = AbnoramlType();
+        Map map = new HashMap();
+        if(JSONResult.SUCCESS.equals(res.getCode())){
+            List<DictionaryItemRespDTO> data = res.getData();
+            for(DictionaryItemRespDTO dto:data){
+                map.put(dto.getValue(),dto.getName());
+            }
+        }
+        return map;
+    }
+
+    private Map<Long,String> userMap(){
+        UserInfoPageParam param = new UserInfoPageParam();
+        param.setPageNum(1);
+        param.setPageSize(99999);
+        JSONResult<PageBean<UserInfoDTO>> userlist = userInfoFeignClient.list(param);
+        Map map = new HashMap();
+        if(JSONResult.SUCCESS.equals(userlist.getCode())){
+            List<UserInfoDTO> userData = userlist.getData().getData();
+            for(UserInfoDTO dto:userData){
+                map.put(dto.getId(),dto.getUsername());
+            }
+        }
+        return map;
+    }
 
 }
