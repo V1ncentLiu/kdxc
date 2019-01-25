@@ -25,23 +25,23 @@
             <el-row class="marginB10">
               
 				<div class="block">
-					<el-select v-model="businessGroupId" placeholder="请选择商务小组">
+					<el-select v-model="businessGroupId" placeholder="请选择商务小组" >
 					    <el-option
-					      v-for="item in businessGroups"
-					      :key="item.value"
-					      :label="item.label"
-					      :value="item.value">
+					      v-for="item in dxList"
+					      :key="item.id"
+					      :label="item.name"
+					      :value="item.id">
 					    </el-option>
   					</el-select>
   					<el-select v-model="telemarketingTeamId" placeholder="请选择电销组">
 					    <el-option
-					      v-for="item in telemarketingTeams"
-					      :key="item.value"
-					      :label="item.label"
-					      :value="item.value">
+					      v-for="item in swList"
+					      :key="item.id"
+					      :label="item.name"
+					      :value="item.id">
 					    </el-option>
   					</el-select>
-  					<el-button type="primary" @click="queryLogDataList">查询</el-button>
+  					<el-button type="primary" @click="inviteAreaListPage">搜索</el-button>
 				</div>
                   </el-col>
             </el-row>
@@ -52,16 +52,15 @@
                     empty-text="无数据"
                     style="width: 100%"
                     border
-                    :data="dataTable" 
-                    >
-                     <el-table-column align="center" type="selection" width="55"></el-table-column> 
+                    :data="dataTable"  @selection-change="handleSelectionChange">
+                     <el-table-column align="center" prop="id" type="selection" width="55"></el-table-column> 
                      <!-- <el-table-column prop="date" label="全选" width="180"></el-table-column>  -->
-                    <el-table-column align="center" prop="userName" label="商务小组"></el-table-column>
-                    <el-table-column align="center" prop="name" label="区域"></el-table-column>
-                    <el-table-column align="center" prop="phone" label="电销组"></el-table-column>
-                    <el-table-column align="center" prop="remoteIP" label="签约项目"></el-table-column>
+                    <el-table-column align="center" prop="businessGroup" label="商务小组"></el-table-column>
+                    <el-table-column align="center" prop="provinces" label="区域"></el-table-column>
+                    <el-table-column align="center" prop="telemarketingTeam" label="电销组"></el-table-column>
+                    <el-table-column align="center" prop="projects" label="签约项目"></el-table-column>
                 </el-table>
-                 <table-pagination :pager="pager"  @change="queryLogDataList"></table-pagination>
+                 <table-pagination :pager="pager"  @change="inviteAreaListPage"></table-pagination>
             </el-row>
       
     </el-row>
@@ -78,16 +77,19 @@
 <div th:include="_footer_include :: #jsLib"></div>
 <script th:inline="javascript">
 
-    var orgData=[[${orgData}]];
-
+    var swList=[[${swList}]];
+    var dxList=[[${dxList}]];
    var orgVM =  new Vue({
         el: '#organizationManage',
         data: {
-        	
-        	
         	telemarketingTeamId:"",
         	businessGroupId:"",
         	addOrModifyDialogTitle:"",
+        	dialogFormVisible:false,
+        	dataTable:[],
+        	multipleSelection: [],
+        	dxList:dxList,
+        	swList:swList,
         	businessGroups:[{
             	value: '1',
                 label: '登陆名称'	
@@ -106,61 +108,34 @@
                 label: '姓名'	
                	}
             ],
-        	
-        	
-        	
-        	
-            	activeName: 'first',
-            	beginTime:"",
-            	endTime:"",
-            	queryType:"1",
-            	content:"",
-            	searchContent:"",
-                dataTree: orgData,//组织结构tree
-                dataTable:[],
-                multipleSelection: [],
-                dialogFormVisible: false,
-                businessGroups: [{
-                	value: '1',
-                    label: '登陆名称'	
-                	},
-                	{
-                   	value: '2',
-                    label: '姓名'	
-                   	}
-                ],
-                pager:{
-                    total: 0,
-                    currentPage: 1,
-                    pageSize: 20,
-                },
-                loading:true
+            pager:{
+                total: 0,
+                currentPage: 1,
+                pageSize: 20,
+            },
+            loading:true
              
         },
         methods: {
-        	queryLogDataList(){//查询按钮
+        	inviteAreaListPage(){//查询按钮
             	  var param = {}; 
             	  var pageSize = this.pager.pageSize;
                   var pageNum = this.pager.currentPage;
                   param.pageNum = pageNum;
                   param.pageSize = pageSize;
-                  param.beginTime=this.beginTime;
-                  param.endTime=this.endTime;
-                  param.content=this.content;
-                  param.queryType=this.queryType;
-                  param.searchContent=this.searchContent;
-                  param.visitType = 1;
+                  param.businessGroupId=this.businessGroupId;
+                  param.telemarketingTeamId=this.telemarketingTeamId;
                   console.log(param);
-                  axios.post('/log/log/queryLogDataList',param).then(function (response) {
+                  axios.post('/invitearea/inviteAreaListPage',param).then(function (response) {
                   	  console.log(response);
-                             /* if(null===response||response.data==null||response.data.code!='0'){
-                          	  alert(response.data.message);
-                          	  return ;
-                             }else{
-                            	 orgVM.dataTable =response.data.data.data; 
-                            	 orgVM.pager.currentPage= response.data.data.currentPage;
-                            	 orgVM.pager.total= response.data.data.total;
-                             } */
+                      if(null===response||response.data==null||response.data.code!='0'){
+	                  	  alert(response.data.message);
+	                  	  return ;
+                     }else{
+                    	 orgVM.dataTable =response.data.data.data; 
+                    	 orgVM.pager.currentPage= response.data.data.currentPage;
+                    	 orgVM.pager.total= response.data.data.total;
+                     } 
                   })
                   .catch(function (error) {
                     console.log(error);
@@ -169,13 +144,7 @@
                   });  
                   
               } ,
-              handleClick(tab, event) {
-                if(tab.name=='first'){
-                	window.location.href="/log/log/visitLog";
-                }else{
-                	window.location.href="/log/log/operationLog";
-                }
-              },
+            
               updateButton(){
             	  //修改菜单数据	
               	var rows = this.multipleSelection;
@@ -189,23 +158,62 @@
               },
               deleButton(){
             	  var rows = this.multipleSelection;
-                  if(rows.length!=1){
+                  if(rows.length <1){
                       this.$message({
                          message: '请选择一条数据进行修改',
                          type: 'warning'
                        });
                       return;
                   }
-                  axios.post('/log/log/queryLogDataList',param).then(function (response) {
-                  	  console.log(response);
-                              if(null===response||response.data==null||response.data.code!='0'){
-                          	  alert(response.data.message);
-                          	  return ;
-                             }else{
-                            	 window.location.href="/invitearea/inviteAreaList"; 
-                             } 
-                  })
-            	  
+                  var moduleName="";
+    	           if(null!=rows){
+    	 		       for ( var i = 0; i <rows.length; i++){
+    	 		    	  moduleName+="【"+rows[i].businessGroup+"】";
+    	 		        }
+    	           }
+    	           this.$confirm("确定要删除"+moduleName+"邀约区域吗?", '提示', {
+                       confirmButtonText: '确定',
+                       cancelButtonText: '取消',
+                       type: 'warning'
+                   }).then(() => {
+                      	// 查询 table 需要数据
+                       var param = {};
+                       var deleInfo=this.multipleSelection;
+     	        	    var ids="";
+     		            if(null!=deleInfo){
+     		             for ( var i = 0; i <deleInfo.length; i++){
+     		            	if("" == ids){
+     		            		ids = deleInfo[i].id
+     		            	}else{
+     		            		ids = ids+","+deleInfo[i].id
+     		            	}
+     		             }
+     		             var param={};
+     		             param.ids=ids;
+    	                 axios.post('/invitearea/deleInviteArea',param).then(function (response) {
+    	                  	  console.log(response);
+    	                      if(null !==response && response.data !=null && response.data.code=='0'){
+    	                    	  window.location.href="/invitearea/inviteAreaList"; 
+    	                     }else{
+    	                    	 alert(response.data.data.message);
+     	                  	  	return ;
+    	                     } 
+    	                  }).catch(function (error) {
+                              console.log(error);
+                          })
+                          .then(function () {
+                            // always executed
+                          });  
+     	              
+                     }
+                   }).catch(() => {
+                       this.$message({
+                           type: 'info',
+                           message: '已取消删除'
+                       });          
+                   });
+    	           
+    	     
               },
               exportButton(){
             	  window.location.href="/module/moduleManager/exportInviteArea?moduleId="+rows[0].id; 
@@ -221,9 +229,12 @@
                   this.$refs[formName].resetFields();
               	this.dialogFormVisible = false;
               },
+              handleSelectionChange(val) {
+                  this.multipleSelection = val;
+              }
         },
         created(){
-        	this.loading=false;
+        	this.inviteAreaListPage();
         	
         }//created方法 结束
     })
