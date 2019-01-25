@@ -3,6 +3,7 @@ package com.kuaidao.manageweb.controller.abnormal;
 import com.kuaidao.aggregation.dto.abnormal.AbnomalUserAddAndUpdateDTO;
 import com.kuaidao.aggregation.dto.abnormal.AbnomalUserQueryDTO;
 import com.kuaidao.aggregation.dto.abnormal.AbnomalUserRespDTO;
+import com.kuaidao.common.constant.DicCodeEnum;
 import com.kuaidao.common.constant.RoleCodeEnum;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.IdEntity;
@@ -81,7 +82,7 @@ public class AbnormalController {
     @RequestMapping("/AbnoramlType")
     @ResponseBody
     public JSONResult<List<DictionaryItemRespDTO>> AbnoramlType(){
-        JSONResult result = dictionaryItemFeignClient.queryDicItemsByGroupCode("AbnormalType");
+        JSONResult result = dictionaryItemFeignClient.queryDicItemsByGroupCode(DicCodeEnum.DIC_ABNORMALUSER.getCode());
         return result;
     }
 
