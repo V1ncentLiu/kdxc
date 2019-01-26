@@ -1,5 +1,6 @@
 package com.kuaidao.manageweb.controller.telemarketing;
 
+import org.apache.shiro.SecurityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,9 +32,12 @@ import com.kuaidao.manageweb.util.IdUtil;
 import com.kuaidao.sys.dto.area.SysRegionDTO;
 import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
 import com.kuaidao.sys.dto.organization.OrganizationRespDTO;
+import com.kuaidao.sys.dto.user.UserInfoDTO;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -110,6 +114,9 @@ public class TelemarketingController {
     @LogRecord(description = "添加电销布局",operationType = LogRecord.OperationType.INSERT,menuName = MenuEnum.TELEMARKTINGLAYOUT)
     @ResponseBody
     public JSONResult addTelemarketingLayout(@RequestBody TelemarketingLayoutDTO telemarketingLayoutDTO) {
+    	UserInfoDTO user =
+                (UserInfoDTO) SecurityUtils.getSubject().getSession().getAttribute("user");
+    	telemarketingLayoutDTO.setCreateUser(user.getId());
     	return telemarketingLayoutFeignClient.addOrUpdateTelemarketingLayout(telemarketingLayoutDTO);
     }
     
@@ -193,12 +200,16 @@ public class TelemarketingController {
      * 导入电销布局
      * 
      * @return
+     * @throws Exception 
      */
     @RequestMapping("/importInvitearea")
     @LogRecord(description = "导入电销布局",operationType = LogRecord.OperationType.IMPORTS,menuName = MenuEnum.TELEMARKTINGLAYOUT)
     @ResponseBody
-    public JSONResult importInvitearea(@RequestBody TelemarketingLayoutDTO telemarketingLayoutDTO) {
+    public JSONResult importInvitearea(@RequestBody TelemarketingLayoutDTO telemarketingLayoutDTO) throws Exception {
+    	UserInfoDTO user =
+                (UserInfoDTO) SecurityUtils.getSubject().getSession().getAttribute("user");
     	List<TelemarketingLayoutDTO> list = telemarketingLayoutDTO.getList();
+    	SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     	//存放合法的数据
         List<TelemarketingLayoutDTO> dataList = new ArrayList<TelemarketingLayoutDTO>();
       //存放非法的数据
@@ -214,6 +225,7 @@ public class TelemarketingController {
         
       
     	if(list !=null && list.size()>0) {
+    		
     		for (TelemarketingLayoutDTO telemarketingLayoutDTO2 : list) {
     			boolean islegal = true;//true合法 false不合法
     			String projectIds = "";
@@ -250,29 +262,20 @@ public class TelemarketingController {
 					}
 				}
 				
-				if(islegal && telemarketingLayoutDTO2.getBeginTime() !=null) {
-					String[] projects = telemarketingLayoutDTO2.getProjects().split(",");
-					for (int i = 0; i < projects.length; i++) {
-						int isCanUser = 1 ;//是否能用0 可用  1不可用
-						for (ProjectInfoDTO projectInfoDTO : listNoPage.getData()) {
-							if(projectInfoDTO.getProjectName().equals(projects[i].trim())) {
-								if("".equals(projectIds)) {
-									projectIds = projectInfoDTO.getId()+"";
-								}else {
-									projectIds = projectIds+","+projectInfoDTO.getId()+"";
-								}
-								isCanUser = 0;
-								break;
-							}
-						}
-						if(isCanUser ==1) {
-							islegal = false;
-							break ;
-						}
-					}
+				if(islegal && (telemarketingLayoutDTO2.getBeginTime() ==null || islegal && telemarketingLayoutDTO2.getEndTime() ==null)) {
+					islegal = false;
+				}else if(islegal && format.parse(telemarketingLayoutDTO2.getBeginTime()).getTime()  >  format.parse(telemarketingLayoutDTO2.getEndTime()).getTime() ){
+					islegal = false;
+				}else if(islegal &&  new Date().getTime() > format.parse(telemarketingLayoutDTO2.getEndTime()).getTime() ){
+					islegal = false;
+				}
+				
+				if(islegal && telemarketingLayoutDTO2.getEndTime() ==null) {
+					islegal = false;
 				}
 				
 				if(islegal) {
+					telemarketingLayoutDTO2.setCreateUser(user.getId());
 					telemarketingLayoutDTO2.setProjectIds(projectIds);
 					telemarketingLayoutDTO2.setCreateTime(new Date());
 					telemarketingLayoutDTO2.setId(IdUtil.getUUID());

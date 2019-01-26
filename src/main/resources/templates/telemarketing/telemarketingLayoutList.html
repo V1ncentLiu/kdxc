@@ -15,7 +15,7 @@
     </el-breadcrumb>
     <el-row class="marginB10">
         <el-col :xs="12" :sm="16" :md="16" :lg="18" :xl="12">
-            <el-button type="primary" @click="dialogFormVisible=true">新建电销布局</el-button>
+            <el-button type="primary" @click="addbutton">新建电销布局</el-button>
             <el-button type="primary" @click="updateButton">修改</el-button>
             <el-button type="primary" @click="deleButton">删除</el-button>
             <el-button type="primary" @click="dialogBatchVisible = true">导入</el-button>
@@ -38,7 +38,7 @@
 					    <el-option
 					      v-for="item in projectList"
 					      :key="item.id"
-					      :label="item.name"
+					      :label="item.projectName"
 					      :value="item.id">
 					    </el-option>
   					</el-select>
@@ -103,6 +103,16 @@
                 <el-date-picker value-format="yyyy-MM-dd" v-model="form.endTime" type="date" placeholder="选择日期">
 					</el-date-picker>
             </el-form-item>
+            <el-form-item label="启用状态：" :label-width="formLabelWidth" >
+                <el-select filterable v-model="form.status" placeholder="启用状态" style="width: 100%;">
+                    <el-option
+                        v-for="item in statusList"
+                        :key="item.value"
+                        :label="item.label"
+                        :value="item.value">
+                    </el-option>
+                </el-select>
+            </el-form-item>
         </el-form>
         <div slot="footer" style="text-align: center" class="dialog-footer">
             <el-button type="primary" @click="submitForm('form')">提交</el-button>
@@ -162,10 +172,11 @@
             </el-form>
             <div slot="footer" class="dialog-footer">
             <el-button @click="exportFormVisible = false">取 消</el-button>
-            <el-button @click="submitExport">确定</el-button>
+            <el-button show  @click="submitExport">确定</el-button>
             </div>
         </el-dialog>
 </div>
+<input id="addOrUpdate" type="hidden" >
 </body>
 <!-- import common js-->
 <div th:include="_footer_include :: #jsLib"></div>
@@ -197,8 +208,20 @@
         	 projectIds: '',
         	 telemarketingTeamId: '',
         	 beginTime:'',
-        	 endTime:''
-        },
+        	 endTime:'',
+        	 status:'0'
+        	
+        	},
+        	 statusList:[
+        		 {
+               		value: '0',
+                   label: '启用'	
+               	},
+               	{
+                  value: '1',
+                   label: '禁用'	
+                  }
+        	  ],
             pager:{
                 total: 0,
                 currentPage: 1,
@@ -230,9 +253,13 @@
                   param.pageSize = pageSize;
                   param.beginTime=this.beginTime;
                   param.endTime=this.endTime;
-                  param.projectIds=this.projectIds;
+                  param.projectIds=this.projectId;
                   param.telemarketingTeamId=this.telemarketingTeamId;
                   console.log(param);
+                  if(this.beginTime>this.endTime){
+                	  this.$message("开始时间不能大于结束时间");
+           	         return;
+                  }
                   axios.post('/telemarketing/getTelemarketingLayoutList',param).then(function (response) {
                   	  console.log(response);
                       if(null===response||response.data==null||response.data.code!='0'){
@@ -253,7 +280,7 @@
               } ,
             
               updateButton(){
-            	 
+            	  $("#addOrUpdate").val(2);
             	  //修改菜单数据	
               	var rows = this.multipleSelection;
                   if(rows.length!=1){
@@ -278,6 +305,7 @@
                     	  orgVM.form.telemarketingTeamId = telemarketing.telemarketingTeamId;
                     	  orgVM.form.beginTime = telemarketing.beginTime;
                     	  orgVM.form.endTime = telemarketing.endTime;
+                    	  orgVM.form.status = telemarketing.status+"";
                     	  var projects = telemarketing.projectIds;
                     	  var valueMultiple=[];
                     	  var obj = projects.split(',');
@@ -410,14 +438,23 @@
                           param.telemarketingTeamId = formData.telemarketingTeamId;
                           param.beginTime = formData.beginTime;
                           param.endTime = formData.endTime;
+                          param.status = formData.status;
                           var str = "";
                           var rows = this.multipleSelection;
                           for ( var i = 0; i <rows.length; i++){
                         	  str = rows[i].id
                           }
                           param.id = str;
-                          
-                       	  axios.post('/telemarketing/addTelemarketingLayout',param).then(function (response) {
+                          if(formData.beginTime>formData.endTime){
+                        	  this.$message("开始时间不能大于结束时间");
+                   	         return;
+                          }
+                          var url = "/telemarketing/addTelemarketingLayout";
+                          if($("#addOrUpdate").val() ==2){
+                        	  url = "/telemarketing/updateTelemarketingLayout"
+                          }
+                         
+                       	  axios.post(url,param).then(function (response) {
        	                  	  console.log(response);
        	                      if(null !==response && response.data !=null && response.data.code=='0'){
        	                    	  window.location.href="/telemarketing/telemarketingLayoutList"; 
@@ -487,7 +524,7 @@
               	  var param = {};
               	  this.loading = true;
               	  param.list = orgVM.exportdataTable;
-              	  axios.post('/invitearea/importInvitearea',param).then(function (response) {
+              	  axios.post('/telemarketing/importInvitearea',param).then(function (response) {
                     	  console.log(response);
                         if(null !==response && response.data !=null && response.data.code=='0'){
                       	  if(response.data.data !=null){
@@ -496,7 +533,7 @@
                       		  orgVM.exportFormVisible = true;
                       		  orgVM.exportdataTable =response.data.data; 
                       	  }else{
-                      		  window.location.href="/invitearea/inviteAreaList"; 
+                      		  window.location.href="/telemarketing/telemarketingLayoutList"; 
                       	  }
                       	
                        }else{
@@ -509,6 +546,16 @@
                     .then(function () {
                       // always executed
                     }); 
+                },
+                addbutton(){
+                	addOrUpdate
+                	$("#addOrUpdate").val(1);
+                	this.dialogFormVisible=true;
+                	this.form.beginTime = "";
+                	this.form.endTime = "";
+                	this.form.projectIds = [];
+                	this.form.telemarketingTeamId = "";
+                	this.form.status= '0';
                 }
         },
         created(){

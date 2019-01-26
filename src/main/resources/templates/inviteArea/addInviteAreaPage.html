@@ -10,7 +10,7 @@
     </style>
 </head>
 <body>
-<div id="userManage" class="userManage mainPadding">  
+<div v-loading="loading" id="userManage" class="userManage mainPadding">  
     <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
         <el-breadcrumb-item>Home</el-breadcrumb-item>
         <el-breadcrumb-item>业务设置</el-breadcrumb-item>
@@ -103,6 +103,7 @@
         el: '#userManage',
         data: function() {
             return {
+            	loading:false,
                 tableRadio:'',
                 dialogFormChooseRole: false,
                 dialogFormChooseOrg: false,
@@ -179,16 +180,26 @@
 	                	  for(var j =0;j<this.proviceslist.length;j++){
 	                		  if(formData.provincesIds[i] ==this.proviceslist[j].id){
 	                			  if(procinceNames ==""){
-	                				  procinceNames = this.proviceslist[j].name
+	                				  if(formData.provincesIds[i] !=0){
+	                					  procinceNames = this.proviceslist[j].name
+	                				  }
 	                			  }else{
-	                				  procinceNames =procinceNames+"," +this.proviceslist[j].name
+	                				  if(formData.provincesIds[i] !=0){
+	                					  procinceNames =procinceNames+"," +this.proviceslist[j].name
+	                				  }
 	                			  }
 	                		  }
 	                	  }
 	                	   if(provincestrs !=""){
-	                		   provincestrs = provincestrs+","+formData.provincesIds[i];
+	                		   if(formData.provincesIds[i] !=0){
+	                			   provincestrs = provincestrs+","+formData.provincesIds[i];
+	                		   }
+	                		   
 	                	   }else{
-	                		   provincestrs = formData.provincesIds[i];
+	                		   if(formData.provincesIds[i] !=0){
+	                			   provincestrs = formData.provincesIds[i];
+	                		   }
+	                		   
 	                	   }
 	                	}
 	                  param.projectIds= projectstrs;
@@ -198,12 +209,14 @@
 	                  provinceobj = this.proviceslist.find((item)=>{
 	                     // return (','+provincestrs+',').includes('选项0')item.id === param.telemarketingTeamId;
 	                  });
+	                  this.loading =true;
 	      	             console.info(param);
 	      	            axios.post("/invitearea/addInviteArea", param)
 	      	            .then(function (response) {
 	      	            	console.info(response);
 	      	            	var data =response.data;
 	      	            	if(data.code!="0"){
+	      	            		addUserVm.loading =false;
 	      	            		addUserVm.$message(data.msg);
 	      	            	}else{
 	      	                	document.location.href='/invitearea/inviteAreaList';

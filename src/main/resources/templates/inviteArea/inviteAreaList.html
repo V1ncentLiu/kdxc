@@ -14,18 +14,18 @@
         <el-breadcrumb-item><a href="/invitearea/inviteAreaList" data-url="b.html">邀约区域管理</a></el-breadcrumb-item>
     </el-breadcrumb>
     <el-row class="marginB10">
-        <el-col :xs="12" :sm="16" :md="16" :lg="18" :xl="12">
+        <el-col :xs="12" :sm="16" :md="16" :lg="10" :xl="12">
             <el-button type="primary"><a href="/invitearea/addInviteAreaPage"><i class="el-icon-plus"></i> 添加</a></el-button>
             <el-button type="primary" @click="updateButton">修改</el-button>
             <el-button type="primary" @click="deleButton">删除</el-button>
             <el-button type="primary" @click="dialogBatchVisible = true">导入</el-button>
         </el-col>
 
-        <el-col :xs="12" :sm="8" :md="8" :lg="6" :xl="12">
+        <el-col :xs="12" :sm="8" :md="8" :lg="10" :xl="12">
             <el-row class="marginB10">
               
 				<div class="block">
-					<el-select v-model="businessGroupId" placeholder="请选择商务小组" >
+					<el-select filterable v-model="businessGroupId" placeholder="请选择商务小组" >
 					    <el-option
 					      v-for="item in swList"
 					      :key="item.id"
@@ -33,7 +33,7 @@
 					      :value="item.id">
 					    </el-option>
   					</el-select>
-  					<el-select v-model="telemarketingTeamId" placeholder="请选择电销组">
+  					<el-select filterable v-model="telemarketingTeamId" placeholder="请选择电销组">
 					    <el-option
 					      v-for="item in dxList"
 					      :key="item.id"
@@ -107,6 +107,7 @@
             
           <el-dialog :title="addOrModifyDialogTitle" :visible.sync="exportFormVisible"  width="50%">
             <el-form>
+            	 <el-row ><span id="totalNumId"></span></el-row>
                  <el-row>
                 <el-table 
                     ref="multipleTable"
@@ -124,8 +125,31 @@
             </el-row>
             </el-form>
             <div slot="footer" class="dialog-footer">
-            <el-button @click="exportFormVisible = false">取 消</el-button>
-            <el-button @click="submitExport">确定</el-button>
+            <el-button @click="submitExport">导入</el-button>
+            </div>
+        </el-dialog>
+        
+         <el-dialog title="部分导入失败" :visible.sync="errorexportFormVisible"  width="50%">
+            <el-form>
+            	 <el-row ><span id="totalNumId"></span></el-row>
+                 <el-row>
+                <el-table 
+                    ref="multipleTable"
+                    tooltip-effect="dark"
+                    empty-text="无数据"
+                    style="width: 100%"
+                    border
+                    :data="errorexportdataTable"  >
+                    <el-table-column align="center" prop="serialNumber" label="序号"></el-table-column>
+                    <el-table-column align="center" prop="businessGroup" label="商务小组"></el-table-column>
+                    <el-table-column align="center" prop="provinces" label="区域"></el-table-column>
+                    <el-table-column align="center" prop="telemarketingTeam" label="电销组"></el-table-column>
+                    <el-table-column align="center" prop="projects" label="签约项目"></el-table-column>
+                </el-table>
+            </el-row>
+            </el-form>
+            <div slot="footer" class="dialog-footer">
+            <el-button @click="knowButton">知道了</el-button>
             </div>
         </el-dialog>
 </div>
@@ -140,6 +164,7 @@
         el: '#organizationManage',
         data: {
         	loading:false,
+        	errorexportFormVisible:false,
         	fileList:[],//上传文件列表
         	dialogBatchVisible:false,
         	telemarketingTeamId:"",
@@ -149,6 +174,7 @@
         	exportFormVisible:false,
         	dataTable:[],
         	exportdataTable:[],
+        	errorexportdataTable:[],
         	multipleSelection: [],
         	dxList:dxList,
         	swList:swList,
@@ -326,7 +352,7 @@
               	  this.$refs.upload.clearFiles();
                     this.dialogBatchVisible = false;
                     this.$message({message:'上传中',type:'success',duration:2000,onClose:function(){
-                    	orgVM.exportdataTable =response.data; 
+                    	orgVM.exportdataTable =response.data;
                     	orgVM.loading = false;
                     	orgVM.exportFormVisible = true;
             	      }});
@@ -360,9 +386,8 @@
                       if(null !==response && response.data !=null && response.data.code=='0'){
                     	  if(response.data.data !=null){
                     		  orgVM.loading = false;
-                    		  orgVM.addOrModifyDialogTitle="部分导入失败";
-                    		  orgVM.exportFormVisible = true;
-                    		  orgVM.exportdataTable =response.data.data; 
+                    		  orgVM.errorexportFormVisible = true;
+                    		  orgVM.errorexportdataTable =response.data.data; 
                     	  }else{
                     		  window.location.href="/invitearea/inviteAreaList"; 
                     	  }
@@ -377,6 +402,9 @@
                   .then(function () {
                     // always executed
                   }); 
+              },
+              knowButton(){
+            	  window.location.href="/invitearea/inviteAreaList";  
               }
         },
         created(){

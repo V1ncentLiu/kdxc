@@ -220,6 +220,9 @@ public class InviteAreaController {
     @ResponseBody
     public JSONResult addInviteAreaMes(@RequestBody InviteAreaDTO inviteAreaDTO) {
     	inviteAreaDTO.setStatus(0);
+    	UserInfoDTO user =
+                (UserInfoDTO) SecurityUtils.getSubject().getSession().getAttribute("user");
+    	inviteAreaDTO.setCreateUser(user.getId());
     	return inviteareaFeignClient.addOrUpdateInviteArea(inviteAreaDTO);
     }
     
