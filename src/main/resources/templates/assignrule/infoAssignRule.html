@@ -73,43 +73,6 @@ xmlns:th="http://www.thymeleaf.org">
         </el-table>
          <table-pagination :pager="pager" @change="initTableData"></table-pagination> 
     </el-row>
-    <!-- dialog -->
-    <!--  
-    <el-dialog title="添加规则" :visible.sync="dialogFormVisible" @close="closeAddRuleDialog" >
-        <el-form :model="form" ref="form" :rules="rules" class="width500">
-            <el-form-item label="项目：" :label-width="formLabelWidth" prop="valueMultiple1">
-                <el-select v-model="form.valueMultiple1" multiple placeholder="选择项目" style="width: 100%;">
-                    <el-option
-                        v-for="item in proOption"
-                        :key="item.id"
-                        :label="item.projectName"
-                        :value="item.id">
-                    </el-option>
-                </el-select>
-            </el-form-item>
-            <el-form-item label="电销组：" :label-width="formLabelWidth" prop="value1">
-                <el-select v-model="form.value1" placeholder="选择电销组" style="width: 100%;">
-                    <el-option
-                        v-for="item in orgOption"
-                        :key="item.id"
-                        :label="item.name"
-                        :value="item.id">
-                    </el-option>
-                </el-select>
-            </el-form-item>
-            <el-form-item label="规则名称：" :label-width="formLabelWidth" prop="ruleName1">
-                <el-input v-model="form.ruleName1" maxlength="50" ></el-input>
-            </el-form-item>
-            <el-form-item label="规则ID："    :label-width="formLabelWidth" prop="ruleID1">
-                <el-input v-model="form.ruleID1" type="number" maxlength="20" ></el-input>
-            </el-form-item>
-        </el-form>
-        <div slot="footer" class="dialog-footer">
-            <el-button type="primary" @click="submitForm('form')">确 定</el-button>
-            <el-button @click="dialogFormVisible= false">取消</el-button>
-        </div>
-    </el-dialog>
-  -->
     <el-dialog  :title="dailogTitleType+'规则'" :visible.sync="updateDialogFormVisible"   >
         <el-form :model="form" ref="form" :rules="rules" class="width500">
             <el-form-item label="项目：" :label-width="formLabelWidth" prop="valueMultiple">
@@ -355,7 +318,7 @@ var proSelect=[[${proSelect}]];
                    var proIdArry=[];
                    for(var i=0;i<projectArray.length;i++) {
                 	    var pro={};
-                	    pro.projectId=parseInt(projectArray[i]);
+                	    pro.projectId=projectArray[i];
                 	    proIdArry.push(pro);
                     }
                     param.infoAssignProject=proIdArry;
@@ -363,9 +326,6 @@ var proSelect=[[${proSelect}]];
                     param.telemarketingId=ruleVm.form.value;
                     param.releAssignId=ruleVm.form.ruleID;
                     param.id=ruleVm.oldruleId;
-                    ruleVm.oldruleId='';
-                    ruleVm.oldruleName='';
-                    ruleVm.oldruleRefId='';
                    axios.post('/assignrule/infoAssign/updateInfoAssign',param)
                        .then(function (response) {
                     	ruleVm.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
@@ -401,6 +361,9 @@ var proSelect=[[${proSelect}]];
                     return;
                 }
                 this.updateDialogFormVisible=true;
+             	 if (this.$refs['form']!==undefined) {
+                		this.$refs['form'].resetFields();
+                 }
                 var param={};
                 param.id=rows[0].id;
                 axios.post('/assignrule/infoAssign/queryInfoAssignById',param)
@@ -418,7 +381,7 @@ var proSelect=[[${proSelect}]];
                        var assignPro=updateData.infoAssignProject;
                        if(null!=assignPro&&assignPro.length>0) {
                     	   for(var i=0;i<assignPro.length;i++){
-                    	       valueMultiple.push(assignPro[i].id+"");
+                    	       valueMultiple.push(assignPro[i].projectId);
                     	     }
                     	   }
                        ruleVm.form.valueMultiple=valueMultiple;
