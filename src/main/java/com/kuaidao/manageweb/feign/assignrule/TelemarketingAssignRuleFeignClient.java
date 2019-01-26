@@ -1,5 +1,7 @@
 package com.kuaidao.manageweb.feign.assignrule;
 
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.netflix.feign.FeignClient;
@@ -33,6 +35,9 @@ public interface TelemarketingAssignRuleFeignClient {
 
 	@RequestMapping(method = RequestMethod.POST, value = "/queryTeleAssignRuleById")
 	JSONResult<TelemarketingAssignRuleDTO> queryTeleAssignRuleById(TeleAssignRuleQueryDTO dto);
+
+	@RequestMapping(method = RequestMethod.POST, value = "/queryTeleAssignRuleByName")
+	public JSONResult<List<TelemarketingAssignRuleDTO>> queryTeleAssignRuleByName(TeleAssignRuleQueryDTO queryDto);
 
 	@Component
 	static class HystrixClientFallback implements TelemarketingAssignRuleFeignClient {
@@ -80,6 +85,12 @@ public interface TelemarketingAssignRuleFeignClient {
 		public JSONResult<TelemarketingAssignRuleDTO> queryTeleAssignRuleById(TeleAssignRuleQueryDTO dto) {
 			// TODO Auto-generated method stub
 			return fallBackError("根据主键查询电销分配规则数据失败");
+		}
+
+		@Override
+		public JSONResult<List<TelemarketingAssignRuleDTO>> queryTeleAssignRuleByName(TeleAssignRuleQueryDTO queryDto) {
+			// TODO Auto-generated method stub
+			return fallBackError("根据名称查询电销分配规则数据失败");
 		}
 
 	}
