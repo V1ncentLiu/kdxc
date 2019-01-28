@@ -355,6 +355,8 @@ public class InviteAreaController {
 						}
 					}
 					
+				}else {
+					islegal = false;
 				}
 				if(islegal && inviteAreaDTO2.getBusinessGroup() !=null) {
 					islegal = false;
@@ -365,6 +367,8 @@ public class InviteAreaController {
 							break;
 						}
 					}
+				}else {
+					islegal = false;
 				}
 				if(islegal && inviteAreaDTO2.getTelemarketingTeam() !=null) {
 					islegal = false;
@@ -375,6 +379,8 @@ public class InviteAreaController {
 							break;
 						}
 					}
+				}else {
+					islegal = false;
 				}
 				
 				if(islegal && inviteAreaDTO2.getProjects() !=null) {
@@ -397,6 +403,8 @@ public class InviteAreaController {
 							break ;
 						}
 					}
+				}else {
+					islegal = false;
 				}
 				if(islegal) {
 					inviteAreaDTO2.setProjectIds(projectIds);
