@@ -72,7 +72,6 @@ public class CustomFieldController {
      *  自定义字段 首页
      * @return
      */
-    @RequiresPermissions("fieldSetting:view")
     @RequestMapping("/customFieldPage")
     public String customFieldPage(@RequestParam Long id, HttpServletRequest request) {
         IdEntity idEntity = new IdEntity(id + "");
@@ -206,7 +205,7 @@ public class CustomFieldController {
      * @throws InvocationTargetException 
      * @throws IllegalAccessException 
      */
-    @RequiresPermissions("fieldSetting:add")
+    @RequiresPermissions("customfield:addField")
     @PostMapping("/save")
     @ResponseBody
     @LogRecord(description="添加自定义字段",operationType=OperationType.INSERT,menuName=MenuEnum.CUSTOM_FIELD)
@@ -232,7 +231,7 @@ public class CustomFieldController {
      * @param orgDTO
      * @return
      */
-    @RequiresPermissions("fieldSetting:edit")
+    @RequiresPermissions("customfield:editField")
     @PostMapping("/update")
     @ResponseBody
     @LogRecord(description="修改自定义字段",operationType=OperationType.UPDATE,menuName=MenuEnum.CUSTOM_FIELD)
@@ -256,7 +255,7 @@ public class CustomFieldController {
      * @param orgDTO
      * @return
      */
-    @RequiresPermissions("fieldSetting:delete")
+    @RequiresPermissions("customfield:delField")
     @PostMapping("/delete")
     @ResponseBody
     @LogRecord(description="删除自定义字段",operationType=OperationType.INSERT,menuName=MenuEnum.CUSTOM_FIELD)
@@ -303,7 +302,7 @@ public class CustomFieldController {
      * @param result
      * @return
      */
-    @RequiresPermissions("fieldSetting:import")
+    @RequiresPermissions("customfield:imField")
     @PostMapping("/uploadCustomField")
     @ResponseBody
     @LogRecord(description="上传自定义字段",operationType=OperationType.IMPORTS,menuName=MenuEnum.CUSTOM_FIELD)
