@@ -402,9 +402,11 @@ var ipManagerVM = new Vue({
 		 ipTabCreatePackage(){
 		  //通过IP库页签打开添加IP包窗口
 	       ipManagerVM.addIpPackageVisible=true;
-	       ipManagerVM.ipPackageAddForm.name='';
 	       ipManagerVM.packAddIpTable=ipManagerVM.multipleIpSelection;
 	       ipManagerVM.selectIpType="1";
+	       if (this.$refs['ipPackageAddForm']) {
+       	    this.$refs['ipPackageAddForm'].resetFields();
+           }
 		 },
 		 openUpdateIpPackage(){
 		    var updateInfo=ipManagerVM.multiplePackageTable;
@@ -415,8 +417,8 @@ var ipManagerVM = new Vue({
                  });
                  return;
              }
- 	       if (this.$refs['ipPackageAddForm']) {
-        	    this.$refs['ipPackageAddForm'].resetFields();
+ 	       if (this.$refs['ipPackageUpdateForm']) {
+        	    this.$refs['ipPackageUpdateForm'].resetFields();
             }
  	       ipManagerVM.updateIpPackageVisible=true;
 		  //打开修改Ip包
@@ -648,10 +650,33 @@ var ipManagerVM = new Vue({
             });
 		},
 		packgeSelectIpOpen(){
+			debugger;
 			//ip包添加选择Ip数据 
 			var ipAddress = this.packageAddSelectForm.ipAddress;
 			var param = {}; 
 			param.ipAddress=ipAddress;
+			var type=ipManagerVM.selectIpType;
+			var notInAddress=[];
+			//新增
+			if(type=="1"){
+			 var updateTable=ipManagerVM.packAddIpTable;
+				 if(null!=updateTable&&updateTable.length>0){
+					 for ( var i = 0; i <updateTable.length; i++){
+						 notInAddress.push(updateTable[i].ipAddress);
+					 }  
+				  }
+				
+			}else{
+			  var updateTable=ipManagerVM.packUpdateIpTable;
+			  if(null!=updateTable&&updateTable.length>0){
+				 for ( var i = 0; i <updateTable.length; i++){
+					 notInAddress.push(updateTable[i].ipAddress);
+				 }  
+			  }
+			}
+			if(null!=notInAddress&&notInAddress.length>0) {
+				param.notInAddress=	notInAddress.join(",");	
+		    }
 			axios.post('/ip/ipAccess/queryRepositoryList',param).then(function (response) {
 				if(null==response){
 					alert("返回异常");
