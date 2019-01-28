@@ -209,7 +209,7 @@ public class TelemarketingController {
     	UserInfoDTO user =
                 (UserInfoDTO) SecurityUtils.getSubject().getSession().getAttribute("user");
     	List<TelemarketingLayoutDTO> list = telemarketingLayoutDTO.getList();
-    	SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    	SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
     	//存放合法的数据
         List<TelemarketingLayoutDTO> dataList = new ArrayList<TelemarketingLayoutDTO>();
       //存放非法的数据

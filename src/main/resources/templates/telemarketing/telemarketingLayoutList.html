@@ -42,7 +42,7 @@
 					      :value="item.id">
 					    </el-option>
   					</el-select>
-  					<span class="demonstration">操作时间</span>
+  					<span class="demonstration">开始时间</span>
 					<el-date-picker value-format="yyyy-MM-dd" v-model="beginTime" type="date" placeholder="选择日期">
 					</el-date-picker>
 					<span class="demonstration" style="margin-left: 20px;">结束</span>
@@ -171,8 +171,7 @@
             </el-row>
             </el-form>
             <div slot="footer" class="dialog-footer">
-            <el-button @click="exportFormVisible = false">取 消</el-button>
-            <el-button show  @click="submitExport">确定</el-button>
+            <el-button show  @click="submitExport"><span data="1" id="showButton">导入</span></el-button>
             </div>
         </el-dialog>
 </div>
@@ -251,15 +250,22 @@
                   var pageNum = this.pager.currentPage;
                   param.pageNum = pageNum;
                   param.pageSize = pageSize;
-                  param.beginTime=this.beginTime;
-                  param.endTime=this.endTime;
                   param.projectIds=this.projectId;
                   param.telemarketingTeamId=this.telemarketingTeamId;
                   console.log(param);
-                  if(this.beginTime>this.endTime){
-                	  this.$message("开始时间不能大于结束时间");
-           	         return;
+                  if(this.beginTime !=null && this.endTime !=null && this.beginTime !='' && this.endTime != ''){
+                	  if(this.beginTime>this.endTime){
+                    	  this.$message("开始时间不能大于结束时间");
+               	         return;
+                      } 
                   }
+                  if(this.beginTime !=null && this.beginTime !=''){
+                	  param.beginTime=this.beginTime+" 00:00:00";
+                  }
+                  if(this.endTime !=null && this.endTime !=''){
+                	  param.endTime=this.endTime+" 23:59:59";
+                  }
+                 
                   axios.post('/telemarketing/getTelemarketingLayoutList',param).then(function (response) {
                   	  console.log(response);
                       if(null===response||response.data==null||response.data.code!='0'){
@@ -520,14 +526,25 @@
                 },
                 
                 submitExport(){
-              	  this.exportFormVisible = false;
+                  if($("#showButton").attr("data") ==2){
+                	  window.location.href="/telemarketing/telemarketingLayoutList"; 
+                	  return;
+                  }
               	  var param = {};
               	  this.loading = true;
               	  param.list = orgVM.exportdataTable;
+              	  if(param.list !=null && param.list.length==0){
+              		  this.loading = false;
+              		  this.$message({message:'无要上传的数据',type:'error'});
+              		  return;
+              	  }
+              	 this.exportFormVisible = false;
               	  axios.post('/telemarketing/importInvitearea',param).then(function (response) {
                     	  console.log(response);
                         if(null !==response && response.data !=null && response.data.code=='0'){
                       	  if(response.data.data !=null){
+                      		  $("#showButton").html("知道了");
+                      		  $("#showButton").attr("data",2);
                       		  orgVM.loading = false;
                       		  orgVM.addOrModifyDialogTitle="部分导入失败";
                       		  orgVM.exportFormVisible = true;
