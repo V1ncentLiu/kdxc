@@ -396,7 +396,7 @@ public class ClientController {
      * @param result
      * @return
      */
-    @RequiresPermissions("qimoClient:edit")
+    @RequiresPermissions("aggregation:qimoClient:edit")
     @PostMapping("/updateQimoClient")
     @ResponseBody
     @LogRecord(operationType = OperationType.UPDATE, description = "修改七陌坐席",

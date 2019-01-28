@@ -27,7 +27,6 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import org.apache.shiro.SecurityUtils;
-import org.apache.shiro.authz.annotation.Logical;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.apache.shiro.subject.Subject;
 import org.slf4j.Logger;
@@ -55,6 +54,7 @@ public class OrganizationController {
      * 组织机构首页
      * @return
      */
+    @RequiresPermissions("organization:view")
     @RequestMapping("/organizationPage")
     public String organizationPage(HttpServletRequest request) {
         JSONResult<List<TreeData>> treeJsonRes = organizationFeignClient.query();
@@ -74,7 +74,7 @@ public class OrganizationController {
      * @return
      * @throws Exception
      */
-   // @RequiresPermissions(value= {"organization:save","organization:update"},logical=Logical.OR)
+    @RequiresPermissions(value= "organization:add")
     @PostMapping("/save")
     @ResponseBody
     @LogRecord(description="添加组织机构信息",operationType=OperationType.INSERT,menuName=MenuEnum.ORGANIZATION_MANAGEMENT)
@@ -103,7 +103,7 @@ public class OrganizationController {
      * @param orgDTO
      * @return
      */
-    //@RequiresPermissions("organization:update")
+    @RequiresPermissions("organization:edit")
     @PostMapping("/update")
     @ResponseBody
     @LogRecord(description="修改组织机构信息",operationType=OperationType.UPDATE,menuName=MenuEnum.ORGANIZATION_MANAGEMENT)
@@ -121,7 +121,7 @@ public class OrganizationController {
      * @param orgDTO
      * @return
      */
-    //@RequiresPermissions("organization:delete")
+    @RequiresPermissions("organization:delete")
     @PostMapping("/delete")
     @ResponseBody
     @LogRecord(description="删除组织机构信息",operationType=OperationType.DELETE,menuName=MenuEnum.ORGANIZATION_MANAGEMENT)
