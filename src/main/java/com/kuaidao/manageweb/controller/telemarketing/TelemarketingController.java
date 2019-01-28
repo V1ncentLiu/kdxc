@@ -238,6 +238,8 @@ public class TelemarketingController {
 							break;
 						}
 					}
+				}else {
+					islegal = false;
 				}
 				
 				if(islegal && telemarketingLayoutDTO2.getProjects() !=null) {
@@ -260,6 +262,8 @@ public class TelemarketingController {
 							break ;
 						}
 					}
+				}else {
+					islegal = false;
 				}
 				
 				if(islegal && (telemarketingLayoutDTO2.getBeginTime() ==null || islegal && telemarketingLayoutDTO2.getEndTime() ==null)) {
