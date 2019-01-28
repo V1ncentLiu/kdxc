@@ -17,7 +17,7 @@ import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.sys.dto.area.SysRegionDTO;
 
-@FeignClient(name = "sys-service", path = "/area/sysregion", fallback = SysRegionFeignClient.HystrixClientFallback.class)
+@FeignClient(name = "sys-service", path = "/sys/area/sysregion", fallback = SysRegionFeignClient.HystrixClientFallback.class)
 public interface SysRegionFeignClient {
 
 	@RequestMapping(method = RequestMethod.POST, value = "/getproviceList")

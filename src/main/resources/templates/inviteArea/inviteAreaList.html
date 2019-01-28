@@ -7,35 +7,35 @@
     </style>
 </head>
 <body>
-<div id="organizationManage" class="organizationManage mainPadding" >  
+<div v-loading="loading" id="organizationManage" class="organizationManage mainPadding" >  
     <el-breadcrumb separator="/" class="elBreadcrumb marginB20" >
         <el-breadcrumb-item>Home</el-breadcrumb-item>
         <el-breadcrumb-item>业务设置</el-breadcrumb-item>
         <el-breadcrumb-item><a href="/invitearea/inviteAreaList" data-url="b.html">邀约区域管理</a></el-breadcrumb-item>
     </el-breadcrumb>
     <el-row class="marginB10">
-        <el-col :xs="12" :sm="16" :md="16" :lg="18" :xl="12">
-            <el-button type="primary"><a href="/invitearea/addInviteArea"><i class="el-icon-plus"></i> 添加</a></el-button>
+        <el-col :xs="12" :sm="16" :md="16" :lg="10" :xl="12">
+            <el-button type="primary"><a href="/invitearea/addInviteAreaPage"><i class="el-icon-plus"></i> 添加</a></el-button>
             <el-button type="primary" @click="updateButton">修改</el-button>
             <el-button type="primary" @click="deleButton">删除</el-button>
-            <el-button type="primary" @click="exportButton">导入</el-button>
+            <el-button type="primary" @click="dialogBatchVisible = true">导入</el-button>
         </el-col>
 
-        <el-col :xs="12" :sm="8" :md="8" :lg="6" :xl="12">
+        <el-col :xs="12" :sm="8" :md="8" :lg="10" :xl="12">
             <el-row class="marginB10">
               
 				<div class="block">
-					<el-select v-model="businessGroupId" placeholder="请选择商务小组" >
+					<el-select filterable v-model="businessGroupId" placeholder="请选择商务小组" >
 					    <el-option
-					      v-for="item in dxList"
+					      v-for="item in swList"
 					      :key="item.id"
 					      :label="item.name"
 					      :value="item.id">
 					    </el-option>
   					</el-select>
-  					<el-select v-model="telemarketingTeamId" placeholder="请选择电销组">
+  					<el-select filterable v-model="telemarketingTeamId" placeholder="请选择电销组">
 					    <el-option
-					      v-for="item in swList"
+					      v-for="item in dxList"
 					      :key="item.id"
 					      :label="item.name"
 					      :value="item.id">
@@ -45,7 +45,7 @@
 				</div>
                   </el-col>
             </el-row>
-            <el-row>
+            <el-row >
                 <el-table 
                     ref="multipleTable"
                     tooltip-effect="dark"
@@ -71,6 +71,87 @@
             <el-button type="primary" @click="saveFieldMenu('customMenuForm')">确 定</el-button>
         </div>
     </el-dialog>
+    
+         <!-- 批量添加 自定义字段弹窗 start -->
+            <el-dialog title="批量添加" :visible.sync="dialogBatchVisible" @close="closeUploadFileDialog">
+               <el-row class="marginB20">
+                                 <!-- 下载批量上传模版: <a href="" download="页面自定义字段导入模板">页面自定义字段模板</a> -->
+                                 下载批量上传模版：<a href="/excel-templates/area-division.xlsx" download="邀约区域模板"><span style="color:#409EFF">邀约区域模板下载</span></a>
+               
+               </el-row>
+               <el-row>
+                  <el-upload
+                      class="upload-demo"
+                      ref="upload"
+                      :multiple="false"
+                      accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                      action="/invitearea/uploadCustomField"
+                      :file-list="fileList"
+                      :on-change="handleChange"
+                      :before-upload="beforeUpload"
+                      :on-success="uploadSuccess"
+                     :on-error="uploadError"
+                      
+                      :auto-upload="false">
+                      <el-button slot="trigger" size="small" type="primary" style="margin-right: 10px;">上传文件</el-button>
+                      <span slot="tip" class="el-upload__tip">只能上传xlsx文件</span>
+                    </el-upload>
+               
+               
+               </el-row>
+              <div slot="footer" class="dialog-footer">
+                <el-button type="primary" @click="submitUpload">确 定</el-button>
+                <el-button @click="dialogBatchVisible = false">取 消</el-button>
+              </div>
+            </el-dialog>
+            
+          <el-dialog :title="addOrModifyDialogTitle" :visible.sync="exportFormVisible"  width="50%">
+            <el-form>
+            	 <el-row ><span id="totalNumId"></span></el-row>
+                 <el-row>
+                <el-table 
+                    ref="multipleTable"
+                    tooltip-effect="dark"
+                    empty-text="无数据"
+                    style="width: 100%"
+                    border
+                    :data="exportdataTable"  >
+                    <el-table-column align="center" prop="serialNumber" label="序号"></el-table-column>
+                    <el-table-column align="center" prop="businessGroup" label="商务小组"></el-table-column>
+                    <el-table-column align="center" prop="provinces" label="区域"></el-table-column>
+                    <el-table-column align="center" prop="telemarketingTeam" label="电销组"></el-table-column>
+                    <el-table-column align="center" prop="projects" label="签约项目"></el-table-column>
+                </el-table>
+            </el-row>
+            </el-form>
+            <div slot="footer" class="dialog-footer">
+            <el-button @click="submitExport">导入</el-button>
+            </div>
+        </el-dialog>
+        
+         <el-dialog title="部分导入失败" :visible.sync="errorexportFormVisible"  width="50%">
+            <el-form>
+            	 <el-row ><span id="totalNumId"></span></el-row>
+                 <el-row>
+                <el-table 
+                    ref="multipleTable"
+                    tooltip-effect="dark"
+                    empty-text="无数据"
+                    style="width: 100%"
+                    border
+                    :data="errorexportdataTable"  >
+                    <el-table-column align="center" prop="serialNumber" label="序号"></el-table-column>
+                    <el-table-column align="center" prop="businessGroup" label="商务小组"></el-table-column>
+                    <el-table-column align="center" prop="provinces" label="区域"></el-table-column>
+                    <el-table-column align="center" prop="telemarketingTeam" label="电销组"></el-table-column>
+                    <el-table-column align="center" prop="projects" label="签约项目"></el-table-column>
+                </el-table>
+            </el-row>
+            </el-form>
+            <div slot="footer" class="dialog-footer">
+            <el-button @click="knowButton">知道了</el-button>
+            </div>
+        </el-dialog>
 </div>
 </body>
 <!-- import common js-->
@@ -82,11 +163,18 @@
    var orgVM =  new Vue({
         el: '#organizationManage',
         data: {
+        	loading:false,
+        	errorexportFormVisible:false,
+        	fileList:[],//上传文件列表
+        	dialogBatchVisible:false,
         	telemarketingTeamId:"",
         	businessGroupId:"",
         	addOrModifyDialogTitle:"",
         	dialogFormVisible:false,
+        	exportFormVisible:false,
         	dataTable:[],
+        	exportdataTable:[],
+        	errorexportdataTable:[],
         	multipleSelection: [],
         	dxList:dxList,
         	swList:swList,
@@ -113,7 +201,6 @@
                 currentPage: 1,
                 pageSize: 20,
             },
-            loading:true
              
         },
         methods: {
@@ -148,13 +235,24 @@
               updateButton(){
             	  //修改菜单数据	
               	var rows = this.multipleSelection;
-                  if(rows.length!=1){
+                  if(rows.length<1){
                       this.$message({
                          message: '请选择一条数据进行修改',
                          type: 'warning'
                        });
                       return;
                   }
+                var ids="";
+	            if(null!=rows){
+	             for ( var i = 0; i <rows.length; i++){
+	            	if("" == ids){
+	            		ids = rows[i].id
+	            	}else{
+	            		ids = ids+","+rows[i].id
+	            	}
+	             }
+	            }
+	            window.location.href="/invitearea/updateInviteAreaPage?ids="+ids; 
               },
               deleButton(){
             	  var rows = this.multipleSelection;
@@ -231,6 +329,82 @@
               },
               handleSelectionChange(val) {
                   this.multipleSelection = val;
+              }
+              ,
+              closeUploadFileDialog(){//关闭上传文件 dialog
+            	  this.$refs.upload.clearFiles();
+              },
+              handleChange(files,fileList){//只允许选择一个文件
+                  this.fileList = fileList.slice(-1);
+            },
+            beforeUpload(file){//上传之前 文件校验
+                var isTextComputer = file.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+                if(!isTextComputer){
+                    this.$message.error('文件格式错误');
+                    return false;
+                }
+            },
+            uploadSuccess(response, file, fileList){//上传成功后
+            	
+          	  if(response.code=='0'){
+          		this.addOrModifyDialogTitle="预览数据";
+          		  //清空文件里列表
+              	  this.$refs.upload.clearFiles();
+                    this.dialogBatchVisible = false;
+                    this.$message({message:'上传中',type:'success',duration:2000,onClose:function(){
+                    	orgVM.exportdataTable =response.data;
+                    	orgVM.loading = false;
+                    	orgVM.exportFormVisible = true;
+            	      }});
+          	  }else{
+          		orgVM.loading = false;
+          		  this.$message('上传失败');
+          	  }
+          	
+            },
+            uploadError(){//上傳失敗
+              this.loading = false;
+          	  this.$message({message:'上传失败',type:'error'});
+            }
+            , submitUpload() {//提交文件
+            	this.loading = true;
+            	var fileList = this.fileList;
+            	if(!fileList || fileList.length!=1){
+            		this.$message.error({message:'请选择一个文件',type:'error'});
+            		return false;
+            	}
+                this.$refs.upload.submit();
+              },
+              
+              submitExport(){
+            	  this.exportFormVisible = false;
+            	  var param = {};
+            	  this.loading = true;
+            	  param.list = orgVM.exportdataTable;
+            	  axios.post('/invitearea/importInvitearea',param).then(function (response) {
+                  	  console.log(response);
+                      if(null !==response && response.data !=null && response.data.code=='0'){
+                    	  if(response.data.data !=null){
+                    		  orgVM.loading = false;
+                    		  orgVM.errorexportFormVisible = true;
+                    		  orgVM.errorexportdataTable =response.data.data; 
+                    	  }else{
+                    		  window.location.href="/invitearea/inviteAreaList"; 
+                    	  }
+                    	
+                     }else{
+                    	 alert(response.data.data.message);
+	                  	  	return ;
+                     } 
+                  }).catch(function (error) {
+                      console.log(error);
+                  })
+                  .then(function () {
+                    // always executed
+                  }); 
+              },
+              knowButton(){
+            	  window.location.href="/invitearea/inviteAreaList";  
               }
         },
         created(){

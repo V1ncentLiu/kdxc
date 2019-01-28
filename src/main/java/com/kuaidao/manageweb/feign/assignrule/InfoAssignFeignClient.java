@@ -1,5 +1,7 @@
 package com.kuaidao.manageweb.feign.assignrule;
 
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.netflix.feign.FeignClient;
@@ -31,6 +33,9 @@ public interface InfoAssignFeignClient {
 
 	@RequestMapping(method = RequestMethod.POST, value = "/queryInfoAssignById")
 	JSONResult<InfoAssignDTO> queryInfoAssignById(@RequestBody InfoAssignQueryDTO dto);
+
+	@RequestMapping(method = RequestMethod.POST, value = "/findListInfoAssignByName")
+	public JSONResult<List<InfoAssignDTO>> findListInfoAssignByName(InfoAssignQueryDTO queryDto);
 
 	@Component
 	static class HystrixClientFallback implements InfoAssignFeignClient {
@@ -70,7 +75,13 @@ public interface InfoAssignFeignClient {
 		@Override
 		public JSONResult<InfoAssignDTO> queryInfoAssignById(InfoAssignQueryDTO dto) {
 			// TODO Auto-generated method stub
-			return null;
+			return fallBackError("根据主键查询信息流分配规则数据失败");
+		}
+
+		@Override
+		public JSONResult<List<InfoAssignDTO>> findListInfoAssignByName(InfoAssignQueryDTO queryDto) {
+			// TODO Auto-generated method stub
+			return fallBackError("根据名称查询信息流分配规则数据失败");
 		}
 
 	}
