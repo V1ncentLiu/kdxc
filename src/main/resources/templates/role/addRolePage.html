@@ -189,10 +189,14 @@
             <el-row class="marginB10 greybg padding20">
                 <el-row :gutter="20">
                     <el-col :span="6">
+                   <el-form-item prop="ipPackageName">
                         <el-input v-model="chooseIpform.ipPackageName" placeholder="输入IP包名查询"></el-input>
+                     </el-form-item>
                     </el-col>
                     <el-col :span="6">
-                        <el-input v-model="chooseIpform.ipAddress" placeholder="输入包含IP查询"></el-input>
+                     <el-form-item prop="searchHasIp">
+                         <el-input v-model="chooseIpform.searchHasIp" placeholder="输入包含IP查询"></el-input>
+                      </el-form-item>
                     </el-col>
                     <el-col :span="2">
                         <el-button type="primary" size="medium"  @click="queryIpPackgeData" icon="el-icon-search">搜索</el-button>
@@ -206,7 +210,7 @@
                 :data="dataTableIP"
                 @selection-change="changeIpTableFun"
                 class="marginB10">
-                <el-table-column align="center" v-model="chooseIpform.type" prop="id"  @selection-change="changeIpTableFun" type="selection" name="type" width="55"></el-table-column>
+                <el-table-column align="center" v-model="chooseIpform.type" prop="id"  @selection-change="changeIpTableFun" type="selection" width="55"></el-table-column>
                 <el-table-column align="center" prop="name" label="IP包名" width="155"></el-table-column>
                 <el-table-column align="center" prop="ipAddress" label="IP地址"></el-table-column>
             </el-table>
@@ -235,8 +239,6 @@
 <div th:include="_footer_include :: #jsLib"></div>
 <script th:inline="javascript" >
 var moduleData=[[${moduleData}]];
-   //var  fieldOptions = ['阶段', '创建日期', '编码', '资源项目','搜索词','广告位','媒介','电销总监','电销组'];
-   //var  fieldOptions = [{id:'1',name:'阶段'}];
    var  addRoleVM=new Vue({
          el: '#addRole',
          data: function() {
@@ -251,8 +253,58 @@ var moduleData=[[${moduleData}]];
                     roleName:''
                 },
                 rules:{
-                    roleName:[{ required: true, message: '角色名称不能为空'}],
-                    roleCode:[{ required: true, message: '角色编码不能为空'}]
+                    roleName:[{ required: true, message: '角色名称不能为空'},
+                     {validator:function(rule,value,callback){
+                   			    var param = {'roleName':value};
+                                   axios.post('/role/roleManager/qeuryRoleByName',param)
+                                   .then(function (response) {
+                                       var data =  response.data;
+                                       if(data.code=='0'){
+                                           var resData = data.data;
+                                           if(resData.length>0){
+                                               callback(new Error("此角色名称已存在，请修改后提交"));
+                                           }else{
+                                               callback();
+                                           }
+                                           
+                                       }else{
+                                            callback(new Error("查询角色名称是否唯一报错"));
+                                       }
+                                   })
+                                   .catch(function (error) {
+                                     console.log(error);
+                                   })
+                                   .then(function () {
+                                     // always executed
+                                   });
+                   			  
+                   		  },trigger:'blur'}],
+                      roleCode:[{ required: true, message: '角色编码不能为空'},
+                      {validator:function(rule,value,callback){
+                     			    var param = {'roleCode':value};
+                                     axios.post('/role/roleManager/qeuryRoleByName',param)
+                                     .then(function (response) {
+                                         var data =  response.data;
+                                         if(data.code=='0'){
+                                             var resData = data.data;
+                                             if(resData.length>0){
+                                                 callback(new Error("此角色编码已存在，请修改后提交"));
+                                             }else{
+                                                 callback();
+                                             }
+                                             
+                                         }else{
+                                              callback(new Error("查询角色编码是否唯一报错"));
+                                         }
+                                     })
+                                     .catch(function (error) {
+                                       console.log(error);
+                                     })
+                                     .then(function () {
+                                       // always executed
+                                     });
+                     			  
+                     		  },trigger:'blur'}]
                 },
                 chooseIpform: {
                 	ipPackageName: '',
@@ -262,25 +314,15 @@ var moduleData=[[${moduleData}]];
                 rulesChooseIp:{
                     type:[{ type: 'array', required: true, message: '请至少选择一个IP包', trigger: 'change' }]
                 },
-                chooseLimitform:{
-
-                },
+                chooseLimitform:{},
                 searchInput:'',
-                ipListTable: [
-                  
-                ],
+                ipListTable: [],
                 dataTableIP: [],
                 multipleSelection: [],
                 dialogFormChooseIP: false,
                 dialogFormSetting: false,
                 feildMenuId:'',
                 checkBoxFieldArr:{},
-                form: {
-                    name: '',
-                    remark: '',
-                    delivery: false,
-                    type: []
-                },
                 formLabelWidth: '120px',
                 currentPage: 1,//默认第一页,
                 multipleIpSelection:[],
@@ -299,10 +341,10 @@ var moduleData=[[${moduleData}]];
                 });
             },
             openIpPackDilog(){
-            	//打开IP包
             	 addRoleVM.dialogFormChooseIP = true;
-            	 addRoleVM.chooseIpform.ipPackageName='';
-            	 addRoleVM.chooseIpform.searchHasIp='';
+               	 if (this.$refs['chooseIpform']) {
+               		this.$refs['chooseIpform'].resetFields();
+              }
             },
             reBackRoleInfo(){
             	 window.location.href="/role/roleManager/initRoleInfo"; 	
@@ -313,6 +355,7 @@ var moduleData=[[${moduleData}]];
                     	//处理角色对应操作项数据
                        var submitData=addRoleVM.dataList;
                        var  operationArry=[];
+                       //设置操作权限菜单
                        var  menuArry=[];
                     	if(null!=submitData){
                     		//循环一级菜单
@@ -338,73 +381,43 @@ var moduleData=[[${moduleData}]];
                          }
                     	//获取菜单的数据列
                     	var  fieldMap=addRoleVM.checkBoxFieldArr;
-                    	var fieldSaveArray=[];
-                    	var menuSaveArray=[];
-                    	if(null!=fieldMap){
-                    	  for(var key in fieldMap)  {
-                    		var value=fieldMap[key];
-                    		if(null!=value){
-                    	      menuSaveArray.push(key); 
-                               for (var i=0;i<value.length;i++ ) {
-                            	 var field={};
-                            	 field.customFieldId=value[i];  
-                            	 fieldSaveArray.push(field);	
-                            	}
-                              } 
-                    		   
-                    		} 
-                    	  }
                          //处理角色对应的Ip包数据
-                    	 var ipListTable=addRoleVM.ipListTable;
                          var  param={};
                          param.roleName=addRoleVM.addRoleValidateForm.roleName;
                          param.roleCode= addRoleVM.addRoleValidateForm.roleCode;
                          param.isIpLimit=addRoleVM.addRoleValidateForm.visitLimitRadio;
                          param.operations=operationArry;
-                         param.ipPackages=ipListTable;
-                         param.customFieldMenus=fieldSaveArray;
+                         param.ipPackages=addRoleVM.ipListTable;
                          param.menuIds=menuArry;
-                         param.selectMenuIds=menuSaveArray;
-                         axios.post('/role/roleManager/qeuryRoleByName',param).then(function (response) {
-                        	if(null==response){
-        		                 alert("返回异常");
-        		                 return ;
-        		            }
-        		            var resobj= response.data;
-        		            if(null==resobj){
-        		            	 alert("返回异常");
-        		                 return ;
-        		            } 
-        		            if(resobj.code!='0'){
-        		            	alert(response.data.message);
-        		            	return ;
-        		            }
-        		            //校验角色名称是否已存在
-        		            var checkName=response.data.data;
-                        	if(null!=checkName&&checkName.length>0) {
-                        		alert("角色名称已存在");
-                        	   return ;
-                        	}
-                            axios.post('/role/roleManager/saveRoleInfo',param).then(function (response) {
+                         param.menuFileds=fieldMap;
+                         axios.post('/role/roleManager/saveRoleInfo',param).then(function (response) {
                 		           if(null==response){
-                		                 alert("返回异常");
+                		        		addRoleVM.$message({
+                                            message: "接口调用失败",
+                                            type: 'error'
+                                          }); 
                 		                 return ;
                 		            }
                 		            var resobj= response.data;
                 		            if(null==resobj){
-                		            	 alert("返回异常");
+                		            	addRoleVM.$message({
+                                            message: "接口调用失败",
+                                            type: 'error'
+                                          }); 
                 		                 return ;
                 		            } 
                 		            if(resobj.code!='0'){
-                		            	alert(response.data.message);
+                		            	addRoleVM.$message({
+                                            message: "接口调用失败",
+                                            type: 'error'
+                                          }); 
                 		            	return ;
                 		            }
                 		             window.location.href="/role/roleManager/initRoleInfo"; 
                 		            }).catch(function (error) {
-                		              console.log(error);
+                   		              console.log(error);
                 		            }).then(function () {
-                		            });	
-                         });
+                		       });	
                          
                     } else {
                         console.log('error submit!!');
@@ -425,12 +438,8 @@ var moduleData=[[${moduleData}]];
             queryIpPackgeData(){
              //查询Ip包数据
                 var param={};
-            	//var pageSize = this.packpager.pageSize;
-	            //var pageNum = this.packpager.currentPage;
-	            var ipAddress = this.chooseIpform.ipAddress;
+	            var ipAddress = this.chooseIpform.searchHasIp;
 	            var ipPackageName = this.chooseIpform.ipPackageName;
-	         	//param.pageSize=pageSize;
-             	//param.pageNum=pageNum;
              	param.ipPackageName=ipPackageName;
              	param.ipAddress=ipAddress;
             	var ipListTable=addRoleVM.ipListTable;
@@ -443,22 +452,28 @@ var moduleData=[[${moduleData}]];
              	param.deleId=deleId;
 		        axios.post('/ip/ipAccess/queryPackageList',param).then(function (response) {
 		           if(null==response){
-		                 alert("返回异常");
+		        		addRoleVM.$message({
+                            message: "接口调用失败",
+                            type: 'error'
+                          }); 
 		                 return ;
 		            }
 		            var resobj= response.data;
 		            if(null==resobj){
-		            	 alert("返回异常");
+		            	addRoleVM.$message({
+                            message: "接口调用失败",
+                            type: 'error'
+                          }); 
 		                 return ;
 		            } 
 		            if(resobj.code!='0'){
-		            	alert(response.data.message);
+		            	addRoleVM.$message({
+                            message: "接口调用失败",
+                            type: 'error'
+                          }); 
 		            	return ;
 		            }
 		             var pageData=resobj.data;
-		             //ipManagerVM.packpager.total= pageData.total;
-		             //ipManagerVM.packpager.currentPage = pageData.currentPage;
-		             //ipManagerVM.packpager.pageSize = pageData.pageSize;
 		           	 addRoleVM.dataTableIP =pageData.data; 
 		            })
 		            .catch(function (error) {
@@ -491,27 +506,46 @@ var moduleData=[[${moduleData}]];
 	        	 addRoleVM.feildMenuId=id;
 	             axios.post('/role/roleManager/queryCustomField',param).then(function (response) {
 			           if(null==response){
-			                 alert("返回异常");
-			                 return ;
+			             
 			            }
 			            var resobj= response.data;
 			            if(null==resobj){
-			            	 alert("返回异常");
-			                 return ;
+			            	addRoleVM.$message({
+                                message: "接口调用失败",
+                                type: 'error'
+                              }); 
+			               	return ;
 			            } 
 			            if(resobj.code!='0'){
-			            	alert(response.data.message);
+			            	addRoleVM.$message({
+                                message: "接口调用失败",
+                                type: 'error'
+                              }); 
 			            	return ;
 			            }
 			             addRoleVM.fields=resobj.data;
 			              var  fieldAray= resobj.data;
 			              var fArray=[];
-			              if(null!=fieldAray){
-			            	for(var i=0;i<fieldAray.length;i++){
-					             fArray.push(fieldAray[i].id);
-					           }
-					           addRoleVM.chooseLimitCheck=fArray;
-			            	 }
+			            //获取菜单是否已选择
+	                    var  fieldMap=addRoleVM.checkBoxFieldArr;
+	                    if(null!=fieldMap){
+	                     for(var key in fieldMap){
+	                      	var value=fieldMap[key];
+	                      	if(key==id&&value.length>0){
+	                      	//如果做过选择选择上次选中数据
+	                          fArray=value; 
+	                      	  } 
+	                       } 
+	                      } 
+	                     if(fArray.length<1){
+	                     //默认全部选中
+	                       if(null!=fieldAray){
+	  			             for(var i=0;i<fieldAray.length;i++){
+	  					        fArray.push(fieldAray[i].id);
+	  					      }
+	  					     addRoleVM.chooseLimitCheck=fArray;
+	  			            }  
+	                      }
 			            })
 			            .catch(function (error) {
 			              console.log(error);
@@ -521,10 +555,7 @@ var moduleData=[[${moduleData}]];
 	            },
 	            //提交数据权限
 	            submitFormField(form){
-	            	//var  fieldData={};
-	            	//fieldData.moduleId=addRoleVM.feildMenuId;
-	            	//fieldData.field=addRoleVM.chooseLimitCheck
-	            	//addRoleVM.checkBoxFieldArr.push(fieldData);
+	            	//选择数据权限合并(菜单对应Map ,菜单Id,当前被选择的数据)
 	            	Vue.set(this.checkBoxFieldArr,addRoleVM.feildMenuId,addRoleVM.chooseLimitCheck);
 	                addRoleVM.dialogFormSetting=false;	
 	            },
