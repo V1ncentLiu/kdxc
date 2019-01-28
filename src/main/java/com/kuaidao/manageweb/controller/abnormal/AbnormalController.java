@@ -153,7 +153,7 @@ public class AbnormalController {
         for(int i = 0 ; i < resdata.size() ; i++){
             AbnomalUserRespDTO tempDto = resdata.get(i);
             tempDto.setCreateUserName(vuserMap.get(tempDto.getCreateUser()));
-            tempDto.setTypeName(dicMap.get(tempDto.getType().toString()));
+            tempDto.setTypeName(dicMap.get(tempDto.getType()));
             list2.add(tempDto);
         }
         resList.getData().setData(list2);
