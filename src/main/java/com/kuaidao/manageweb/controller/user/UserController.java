@@ -4,6 +4,7 @@
 package com.kuaidao.manageweb.controller.user;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -46,6 +47,7 @@ import com.kuaidao.sys.dto.user.SysSettingReq;
 import com.kuaidao.sys.dto.user.UpdateUserPasswordReq;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import com.kuaidao.sys.dto.user.UserInfoPageParam;
+import com.kuaidao.sys.dto.user.UserInfoParamListReqDTO;
 import com.kuaidao.sys.dto.user.UserInfoReq;
 
 /**
@@ -84,9 +86,17 @@ public class UserController {
         String reminderTime = getSysSetting(SysConstant.REMINDER_TIME);
         request.setAttribute("passwordExpires", passwordExpires);
         if (reminderTime != null) {
-            request.setAttribute("reminderTime", reminderTime.split(","));
+            request.setAttribute("reminderTime", reminderTime);
         }
-
+        // 查询组织机构树
+        JSONResult<List<TreeData>> treeJsonRes = organizationFeignClient.query();
+        // 查询组织机构树
+        if (treeJsonRes != null && JSONResult.SUCCESS.equals(treeJsonRes.getCode())
+                && treeJsonRes.getData() != null) {
+            request.setAttribute("orgData", treeJsonRes.getData());
+        } else {
+            logger.error("query organization tree,res{{}}", treeJsonRes);
+        }
         return "user/userManagePage";
     }
 
@@ -333,8 +343,23 @@ public class UserController {
         return null;
     }
     
+    
     /**
-     *    首页 修改密码
+     * 根据状态列表或用户名称查询 用户  精确匹配
+     */
+    @PostMapping("/listUserInfoByParam")
+    @ResponseBody
+    public  JSONResult<List<UserInfoDTO>> listUserInfoByParam() {
+        UserInfoParamListReqDTO reqDTO = new UserInfoParamListReqDTO();
+        List<Integer> statusList = new ArrayList<Integer>();
+        statusList.add(SysConstant.USER_STATUS_ENABLE);
+        statusList.add(SysConstant.USER_STATUS_LOCK);
+        reqDTO.setStatusList(statusList);
+        return userInfoFeignClient.listUserInfoByParam(reqDTO);
+    }
+
+    /**
+     * 首页 修改密码
      * 
      * @param orgDTO
      * @return
@@ -349,7 +374,7 @@ public class UserController {
         if (result.hasErrors()) {
             return CommonUtil.validateParam(result);
         }
-        
+
         Subject subject = SecurityUtils.getSubject();
         UserInfoDTO user = (UserInfoDTO) subject.getSession().getAttribute("user");
         Long id = user.getId();

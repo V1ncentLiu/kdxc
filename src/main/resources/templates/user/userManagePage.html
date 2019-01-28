@@ -28,7 +28,7 @@
           <el-button type="primary" @click="toAddUser"><i class="el-icon-plus"></i>添加用户</el-button>
         </shiro:hasPermission>
         <shiro:hasPermission name="sys:userManager:edit">
-        <el-button type="primary" @click="toUpdateUser">编辑用户</el-button>
+        <el-button type="success" @click="toUpdateUser"><i class="el-icon-edit"></i>编辑用户</el-button>
       </shiro:hasPermission>
       <shiro:hasPermission name="sys:userManager:edit">
       <el-button type="primary" class="f-fr" @click="showDialogFormVisible">密码安全设置</el-button>
@@ -55,7 +55,7 @@ v-model="isShow">
 <el-tree
 :data="dataTree"              
 node-key="id"
-:default-expanded-keys="[]"
+:default-expanded-keys="expandedKeys"
 ref="tree"
 highlight-current
 @node-click="treeNodeClick">
@@ -116,8 +116,8 @@ highlight-current
 
 
 <el-row>
-  <el-table  ref="multipleTable" tooltip-effect="dark" @selection-change="handleSelectionChange"
-  style="width: 100%"  :data="dataTable" >
+  <el-table  ref="multipleTable" tooltip-effect="dark" border @selection-change="handleSelectionChange"
+  style="width: 100%"  :data="dataTable" class="marginB20">
   <el-table-column align="center" type="selection" width="55"></el-table-column>
   <!-- <el-table-column prop="date" label="全选" width="180"></el-table-column> -->
   <el-table-column align="center" prop="username" label="登录用户名"></el-table-column>
@@ -132,21 +132,21 @@ highlight-current
     <template slot-scope="scope">
       <shiro:hasPermission name="sys:userManager:edit">
       <div v-if="scope.row.status === 1">
-        <el-button  @click="updateStatus(scope.row.id,2,'禁用')" type="text"  size="small">
+        <el-button  @click="updateStatus(scope.row.id,2,'禁用')" type="danger"  size="small">
           禁用
         </el-button>
-        <el-button  @click="updateStatus(scope.row.id,3,'锁定')" type="text"  size="small">
+        <el-button  @click="updateStatus(scope.row.id,3,'锁定')" type="warning"  size="small">
           锁定
         </el-button>
       </div>
 
       <div v-else-if="scope.row.status === 2">
-        <el-button @click="updateStatus(scope.row.id,1,'启用')"  type="text"  size="small">
+        <el-button @click="updateStatus(scope.row.id,1,'启用')"  type="success"  size="small">
           启用
         </el-button>
       </div>
       <div v-else-if="scope.row.status === 3">
-        <el-button @click="updateStatus(scope.row.id,1,'解锁')"  type="text"  size="small">
+        <el-button @click="updateStatus(scope.row.id,1,'解锁')"  type="primary"  size="small">
           解锁
         </el-button>
       </div>
@@ -164,7 +164,7 @@ highlight-current
       <el-col :span="10">
         <el-form-item label="密码最长使用期限：" :label-width="formLabelWidth" prop="maxDay">
           <!-- <el-input v-model="form.maxDay" autocomplete="off"></el-input> -->
-          <el-input-number v-model="form.maxDay" controls-position="right" :min="1" :max="999" style="line-height: 37px;"></el-input-number>
+          <el-input-number v-model="form.maxDay" controls-position="right" :min="1" :max="999" style="line-height: 37px;" :precision="0"></el-input-number>
         </el-form-item>
       </el-col>
       <el-col :span="4">
@@ -185,7 +185,7 @@ highlight-current
     <el-row :gutter="20">
       <el-col :span="7">
         <!-- <el-input v-model="domain.value"></el-input> -->
-        <el-input-number v-model="domain.value" controls-position="right" @change="handleChange" :min="1" style="line-height: 37px;"></el-input-number>
+        <el-input-number v-model="domain.value" controls-position="right" :min="1" style="line-height: 37px;" :precision="0"></el-input-number>
       </el-col>
       <el-col :span="2">
         <el-form-item>天</el-form-item>
@@ -209,23 +209,32 @@ highlight-current
 var roleList=[[${roleList}]];//当前字段所属的菜单组
 var passwordExpires=[[${passwordExpires}]];//密码最大使用时间
 var reminderTime=[[${reminderTime}]];//密码到期提醒时间
+var orgData=[[${orgData}]];
 var domains =[];
-for(var i=0;i<reminderTime.length;i++){
-  var domain = {};
-  domain.value=reminderTime[i];
-  domains.push(domain);
+
+var expandedKeys =[];//默认展开节点
+for(var i=0;i<orgData.length;i++){
+	var curNode = orgData[i];
+	expandedKeys.push(curNode.id);
+	var childs = curNode.children;
+	if(childs){
+		for(var j=0;j<childs.length;j++){
+			var curChildNode = childs[j];
+			expandedKeys.push(curChildNode.id);
+		}
+	}
+	
 }
-var oldDomains=domains;
 var userVM = new Vue({
   el: '#userManage',
   data: {
     isShow:false,
     userSearchForm: {
-      orgId: '',
       roleId: '',
       status: '',
       searchType: 2,
       searchText: '',
+      orgId: '',
       orgName:''
     },
     dataTable:[],
@@ -278,45 +287,8 @@ var userVM = new Vue({
       value: 3,
       label: '手机号'
     }],
-    dataTree: [{
-      id: 0,
-      label: '根目录',
-      children: [{
-        id: 1,
-        label: '推广中心',
-        children: [{
-          id: 4,
-          label: '推广客服',
-          children: [{
-            id: 9,
-            label: '客服一组'
-          }, {
-            id: 10,
-            label: '客服二组'
-          }]
-        }]
-      }, {
-        id: 2,
-        label: '招商中心',
-        children: [{
-          id: 5,
-          label: '秦皇岛招商中心'
-        }, {
-          id: 6,
-          label: '石家庄招商中心'
-        }]
-      }, {
-        id: 3,
-        label: '商务中心',
-        children: [{
-          id: 7,
-          label: '商务一'
-        }, {
-          id: 8,
-          label: '商务二'
-        }]
-      }]
-    }]
+    expandedKeys:expandedKeys,//树形结构  默认展开的
+    dataTree: orgData
   },
   methods: {
     searchTable() {
@@ -383,8 +355,10 @@ var userVM = new Vue({
       .then(function (response) {
         var result =  response.data;
         if(result.code=="0"){
-          userVM.$message.success(msg+"成功");
-          userVM.searchTable();
+          userVM.$message({message:'操作成功',type:'success',duration:1000,onClose:function(){
+        	  userVM.searchTable();
+  	      }});
+          
         }else{
           userVM.$message.error(msg+"失败");
         }
@@ -409,7 +383,7 @@ var userVM = new Vue({
     transformRole(row, column, cellValue, index) {
       var text="";
       if(cellValue!=undefined&&cellValue[0]!=undefined){
-        text=cellValue[0].name;
+        text=cellValue[0].roleName;
       }
       return text;
     },
@@ -465,7 +439,7 @@ var userVM = new Vue({
             if(result.code=="0"){
               userVM.$message.success("设置成功");
               userVM.dialogFormVisible=false;
-              passwordExpires=this.form.maxDay;
+              passwordExpires=userVM.form.maxDay;
               reminderTime=newReminderTime;
             }else{
               userVM.$message.error(result.msg);
@@ -487,7 +461,18 @@ var userVM = new Vue({
       });
     },
     showDialogFormVisible() {
-      this.form.domains=oldDomains;
+    	if (this.$refs['form']!==undefined) {
+    		this.$refs['form'].resetFields();
+    	}
+    	var newDomains =[];
+    	var reminderTimeList=reminderTime.split(",");
+    	for(var i=0;i<reminderTimeList.length;i++){
+    	  var domain = {};
+    	  domain.value=reminderTimeList[i];
+    	  newDomains.push(domain);
+    	}
+    	domains=newDomains;
+      this.form.domains=domains;
       this.form.maxDay=passwordExpires;
       this.dialogFormVisible=true;
     },
@@ -506,11 +491,9 @@ var userVM = new Vue({
     treeNodeClick(data,node,obj){
       if(data.children==null){
           this.userSearchForm.orgName=data.label;
+          this.userSearchForm.orgId=data.id;
           this.isShow=false
       }
-    },
-    handleChange(value) {
-      console.log(value);
     }
   },
   created(){

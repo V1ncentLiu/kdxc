@@ -39,6 +39,16 @@ public class DictionaryItemController {
     @Autowired
     DictionaryItemFeignClient dictionaryItemFeignClient;
 
+
+    @SuppressWarnings("unchecked")
+	@PostMapping("/dicItemsByGroupCode")
+    @ResponseBody
+    public JSONResult<List<DictionaryItemRespDTO>> itemsByGroupCode(@RequestBody DictionaryItemQueryDTO queryDTO){
+        JSONResult result = dictionaryItemFeignClient.queryDicItemsByGroupCode(queryDTO.getGroupCode());
+        return result;
+    }
+
+
     @RequestMapping("/itemListPage")
     public String itemListPage(HttpServletRequest request){
         logger.info("--------------------------------------跳转到词条页面-----------------------------------------------");
@@ -58,8 +68,6 @@ public class DictionaryItemController {
         request.setAttribute("groupCode",groupCode);
         return "dictionary/dicItemListPage";
     }
-
-
 
     /**
      * 数据字典-列表查询
