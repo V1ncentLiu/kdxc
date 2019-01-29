@@ -20,30 +20,68 @@ import java.util.List;
 /**
  *
  * 功能描述: 
- *      数据字典
- * @auther: yangbiao
+ *      部门呼叫设置
+ * @author  yangbiao
  * @date: 2019/1/8 17:35
  */
 @FeignClient(name = "aggregation-service",path="/aggregation/deptcallset",fallback = DeptCallSetFeignClient.HystrixClientFallback.class)
 public interface DeptCallSetFeignClient {
 
+    /**
+     * 插入
+     * @param dto
+     * @return
+     */
     @PostMapping("/saveDeptCallSet")
     public JSONResult saveDeptCallSet(@RequestBody DeptCallSetAddAndUpdateDTO dto);
 
+    /**
+     * 分页查询
+     * @param dto
+     * @return
+     */
     @PostMapping("/queryDeptCallSetList")
     public JSONResult<PageBean<DeptCallSetRespDTO>> queryDeptCallSetList(@RequestBody DeptCallSetQueryDTO dto);
 
+    /**
+     * 查询明细
+     * @param idEntity
+     * @return
+     */
     @PostMapping("/queryOne")
     public JSONResult<DeptCallSetRespDTO> queryOne(@RequestBody IdEntity idEntity);
 
+    /**
+     * 更新全部
+     * @param dto
+     * @return
+     */
     @PostMapping("/upateDeptCallSet")
     public JSONResult updateDeptCallSets(@RequestBody  DeptCallSetAddAndUpdateDTO dto);
 
+    /**
+     * 更新不为空的字段
+     * @param dto
+     * @return
+     */
     @PostMapping("/upateDeptCallSetForNotNull")
     public JSONResult updateDeptCallSetsForNotNull(@RequestBody  DeptCallSetAddAndUpdateDTO dto);
 
+    /**
+     * 导入
+     * @param list
+     * @return
+     */
     @PostMapping("/import")
     public JSONResult importDeptCallSets(@RequestBody List<DeptCallSetAddAndUpdateDTO> list);
+
+    /**
+     * 通过组织机构ID获取部门呼叫设置
+     * @param orgid
+     * @return
+     */
+    @PostMapping("/queryByOrgid")
+    public JSONResult queryByOrgid(@RequestBody IdEntity orgid);
 
     @Component
     static class HystrixClientFallback implements DeptCallSetFeignClient {
@@ -85,6 +123,11 @@ public interface DeptCallSetFeignClient {
         @Override
         public JSONResult importDeptCallSets(List<DeptCallSetAddAndUpdateDTO> list) {
             return fallBackError("批量导入部门呼叫设置");
+        }
+
+        @Override
+        public JSONResult queryByOrgid(IdEntity orgid) {
+            return fallBackError("组织机构ID查询部门呼叫设置");
         }
     }
 
