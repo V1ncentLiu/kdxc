@@ -108,7 +108,7 @@
           <el-dialog :title="addOrModifyDialogTitle" :visible.sync="exportFormVisible"  width="50%">
             <el-form>
             	
-            	 <div id="totalNumId" class="marginB10">预览数据，共{{dataNum}}条数据</div>
+            	 <div id="totalNumId" class="marginB10">{{dataNum}}</div>
                  <el-row>
                 <el-table 
                     ref="multipleTable"
@@ -141,7 +141,7 @@
    var orgVM =  new Vue({
         el: '#organizationManage',
         data: {
-          dataNum:"",
+            dataNum:"",
         	loading:false,
         	fileList:[],//上传文件列表
         	dialogBatchVisible:false,
@@ -337,7 +337,7 @@
                     	num = orgVM.exportdataTable.length;
                     	// alert("11 "+num);
                       // $("#totalNumId").html("预览数据，共"+num+"条数据");
-                    	orgVM.dataNum=num
+                    	orgVM.dataNum="预览数据，共"+num+"条数据"
             	      }});
                     
                     
@@ -381,10 +381,11 @@
                     	  if(response.data.data !=null){
                     		  $("#showButton").html("知道了");
                       		  $("#showButton").attr("data",2);
-                      		orgVM.addOrModifyDialogTitle="部分数据导入失败";
-                      		 orgVM.exportFormVisible = true;
+                      		  orgVM.addOrModifyDialogTitle="部分数据导入失败";
+                      		  orgVM.exportFormVisible = true;
                       		  orgVM.loading = false;
-                      		 orgVM.exportdataTable =response.data.data;
+                      		  orgVM.exportdataTable =response.data.data;
+                      		  orgVM.dataNum="以下内容导入失败，请重新导入"
                     	  }else{
                     		  window.location.href="/invitearea/inviteAreaList"; 
                     	  }

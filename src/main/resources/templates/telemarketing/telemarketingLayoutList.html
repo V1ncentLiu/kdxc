@@ -154,6 +154,7 @@
             
             <el-dialog :title="addOrModifyDialogTitle" :visible.sync="exportFormVisible"  width="50%">
             <el-form>
+            <div id="totalNumId" class="marginB10">{{dataNum}}</div>
                  <el-row>
                 <el-table 
                     ref="multipleTable"
@@ -186,6 +187,7 @@
    var orgVM =  new Vue({
         el: '#organizationManage',
         data: {
+        	dataNum:"",
         	exportFormVisible:false,
         	dialogBatchVisible:false,
         	formLabelWidth: '100px',
@@ -504,6 +506,7 @@
                       	orgVM.exportdataTable =response.data; 
                       	orgVM.loading = false;
                       	orgVM.exportFormVisible = true;
+                      	orgVM.dataNum="预览数据，共"+orgVM.exportdataTable.length+"条数据"
               	      }});
             	  }else{
             		orgVM.loading = false;
@@ -549,6 +552,7 @@
                       		  orgVM.addOrModifyDialogTitle="部分导入失败";
                       		  orgVM.exportFormVisible = true;
                       		  orgVM.exportdataTable =response.data.data; 
+                      		  orgVM.dataNum="以下内容导入失败，请重新导入"
                       	  }else{
                       		  window.location.href="/telemarketing/telemarketingLayoutList"; 
                       	  }
