@@ -53,7 +53,7 @@ import javax.validation.Valid;
 import java.util.*;
 
 /**
- * @Auther: admin
+ * @author  yangbiao
  * @Date: 2019/1/2 15:14
  * @Description:
  *      标记异常客户
@@ -76,22 +76,33 @@ public class AbnormalController {
 
     @Autowired
     RoleManagerFeignClient roleManagerFeignClient;
-    
-    
 
+
+    /**
+     * 获取数据字典异常类型
+     * @return
+     */
     @RequestMapping("/AbnoramlType")
     @ResponseBody
-    public JSONResult<List<DictionaryItemRespDTO>> AbnoramlType(){
+    public JSONResult<List<DictionaryItemRespDTO>> abnoramlType(){
         JSONResult result = dictionaryItemFeignClient.queryDicItemsByGroupCode( DicCodeEnum.DIC_ABNORMALUSER.getCode());
         return result;
     }
 
+    /**
+     * 标记异常客户新增
+     * @param dto
+     * @param result
+     * @return
+     */
     @RequiresPermissions("AbnormalUser:add")
     @LogRecord(description = "标记异常客户新增",operationType = LogRecord.OperationType.INSERT,menuName = MenuEnum.ABNORMALUSER_MANAGENT)
     @RequestMapping("/saveOne")
     @ResponseBody
     public JSONResult insertOne(@Valid @RequestBody AbnomalUserAddAndUpdateDTO dto  , BindingResult result){
-        if (result.hasErrors()) return  CommonUtil.validateParam(result);
+        if (result.hasErrors()){
+            return  CommonUtil.validateParam(result);
+        }
         UserInfoDTO user = CommUtil.getCurLoginUser();
         dto.setCreateTime(new Date());
         dto.setCreateUser(user.getId());
@@ -100,6 +111,11 @@ public class AbnormalController {
     }
 
 
+    /**
+     * 标记异常客户删除
+     * @param map
+     * @return
+     */
     @RequiresPermissions("AbnormalUser:delete")
     @LogRecord(description = "标记异常客户-删除",operationType = LogRecord.OperationType.DELETE,menuName = MenuEnum.ABNORMALUSER_MANAGENT)
     @RequestMapping("/deleteAbnoramlUser")
@@ -109,6 +125,11 @@ public class AbnormalController {
     }
 
 
+    /**
+     * 异常客户分页查询
+     * @param dto
+     * @return
+     */
     @RequiresPermissions("AbnormalUser:view")
     @PostMapping("/queryAbnoramlUsers")
     @ResponseBody
@@ -147,7 +168,7 @@ public class AbnormalController {
 
 //      数据转换
         List<AbnomalUserRespDTO> resdata = resList.getData().getData();
-        Map<String, String> dicMap = DicMap();
+        Map<String, String> dicMap = dicMap();
         Map<Long, String> vuserMap = userMap();
         List<AbnomalUserRespDTO> list2 = new ArrayList<>();
         for(int i = 0 ; i < resdata.size() ; i++){
@@ -160,12 +181,20 @@ public class AbnormalController {
         return resList;
     }
 
+    /**
+     * 跳转标记异常客户页面
+     * @return
+     */
     @RequestMapping("/abnormalUserPage")
     public String pageIndex(){
         logger.info("====================跳转列表页面==================");
         return "abnormal/abnormalUserList";
     }
 
+    /**
+     * 组内电销顾问查询
+     * @return
+     */
     private List dxcygws(){
         RoleQueryDTO query = new RoleQueryDTO();
         query.setRoleCode(RoleCodeEnum.DXCYGW.name());
@@ -194,9 +223,13 @@ public class AbnormalController {
         return resList;
     }
 
-    private Map<String,String> DicMap(){
-        JSONResult<List<DictionaryItemRespDTO>> res = AbnoramlType();
-        Map map = new HashMap();
+    /**
+     * 数据映射map
+     * @return
+     */
+    private Map<String,String> dicMap(){
+        JSONResult<List<DictionaryItemRespDTO>> res = abnoramlType();
+        Map map = new HashMap(10);
         if(JSONResult.SUCCESS.equals(res.getCode())){
             List<DictionaryItemRespDTO> data = res.getData();
             for(DictionaryItemRespDTO dto:data){
@@ -206,12 +239,16 @@ public class AbnormalController {
         return map;
     }
 
+    /**
+     * 数据映射map
+     * @return
+     */
     private Map<Long,String> userMap(){
         UserInfoPageParam param = new UserInfoPageParam();
         param.setPageNum(1);
         param.setPageSize(99999);
         JSONResult<PageBean<UserInfoDTO>> userlist = userInfoFeignClient.list(param);
-        Map map = new HashMap();
+        Map map = new HashMap(10);
         if(JSONResult.SUCCESS.equals(userlist.getCode())){
             List<UserInfoDTO> userData = userlist.getData().getData();
             for(UserInfoDTO dto:userData){

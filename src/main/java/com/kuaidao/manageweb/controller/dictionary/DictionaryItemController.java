@@ -24,7 +24,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * @Auther: yangbiao
+ * @author  yangbiao
  * @Date: 2019/1/2 15:14
  * @Description:
  *      数据字典-词条

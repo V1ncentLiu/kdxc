@@ -1,8 +1,8 @@
-package com.kuaidao.manageweb.controller.deptCallSet;
+package com.kuaidao.manageweb.controller.deptcallset;
 
-import com.kuaidao.aggregation.dto.deptCallSet.DeptCallSetAddAndUpdateDTO;
-import com.kuaidao.aggregation.dto.deptCallSet.DeptCallSetQueryDTO;
-import com.kuaidao.aggregation.dto.deptCallSet.DeptCallSetRespDTO;
+import com.kuaidao.aggregation.dto.deptcallset.DeptCallSetAddAndUpdateDTO;
+import com.kuaidao.aggregation.dto.deptcallset.DeptCallSetQueryDTO;
+import com.kuaidao.aggregation.dto.deptcallset.DeptCallSetRespDTO;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.IdEntity;
 import com.kuaidao.common.entity.JSONResult;
@@ -14,19 +14,12 @@ import com.kuaidao.manageweb.constant.MenuEnum;
 import com.kuaidao.manageweb.feign.deptcallset.DeptCallSetFeignClient;
 import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
 import com.kuaidao.manageweb.util.CommUtil;
-import com.kuaidao.manageweb.util.DownFile;
 import com.kuaidao.manageweb.util.IdUtil;
-import com.kuaidao.sys.constant.SysConstant;
-import com.kuaidao.sys.dto.dictionary.DictionaryAddAndUpdateDTO;
-import com.kuaidao.sys.dto.dictionary.DictionaryQueryDTO;
-import com.kuaidao.sys.dto.dictionary.DictionaryRespDTO;
 import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
 import com.kuaidao.sys.dto.organization.OrganizationRespDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
-import org.apache.shiro.subject.Subject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,14 +35,13 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
 
 /**
- * @Auther: admin
+ * @author  yangbiao
  * @Date: 2019/1/2 15:14
  * @Description:
  *      部门呼叫设置
@@ -68,6 +60,10 @@ public class DeptCallSetController {
     @Autowired
     OrganizationFeignClient organizationFeignClient;
 
+    /**
+     * 获取所有组织机构
+     * @return
+     */
     @RequestMapping("/allOrgs")
     @ResponseBody
     public JSONResult<List<OrganizationRespDTO>> allOrgs(){
@@ -75,6 +71,10 @@ public class DeptCallSetController {
        return organizationFeignClient.queryOrgByParam(dto);
     }
 
+    /**
+     * 组织机构名称与ID做映射
+     * @return
+     */
     private Map<String,Long> orgNameToId(){
         Map<String,Long> map = new HashMap();
         JSONResult<List<OrganizationRespDTO>> orgsRes = allOrgs();
@@ -87,6 +87,10 @@ public class DeptCallSetController {
         return map;
     }
 
+    /**
+     * 组织机构ID 和 名称 做映射
+     * @return
+     */
     private Map<Long,String> orgIdToName(){
         Map<Long,String> map = new HashMap();
         JSONResult<List<OrganizationRespDTO>> orgsRes = allOrgs();
@@ -100,24 +104,41 @@ public class DeptCallSetController {
     }
 
 
-
+    /**
+     * 跳转部门呼叫设置首页
+     * @return
+     */
     @RequestMapping("/deptcallsetPage")
     public String pageIndex(){
         return "deptCellSet/deptCallSetList";
     }
 
+    /**
+     * 新增
+     * @param dto
+     * @param result
+     * @return
+     */
     @RequiresPermissions("DeptCallSet:add")
     @LogRecord(description = "部门呼叫设置-新增",operationType = LogRecord.OperationType.INSERT,menuName = MenuEnum.DEPTCALLSET_MANAGENT)
     @RequestMapping("/saveOne")
     @ResponseBody
     public JSONResult insertOne(@Valid @RequestBody DeptCallSetAddAndUpdateDTO dto , BindingResult result){
-        if (result.hasErrors()) return  CommonUtil.validateParam(result);
+        if (result.hasErrors()){
+            return  CommonUtil.validateParam(result);
+        }
         UserInfoDTO user = CommUtil.getCurLoginUser();
         dto.setCreateTime(new Date());
         dto.setCreateUser(user.getId());
         return deptCallSetFeignClient.saveDeptCallSet(dto);
     }
 
+    /**
+     * 更新
+     * @param dto
+     * @param result
+     * @return
+     */
     @RequiresPermissions("DeptCallSet:edit")
     @LogRecord(description = "部门呼叫设置-更新",operationType = LogRecord.OperationType.UPDATE,menuName = MenuEnum.DEPTCALLSET_MANAGENT)
     @RequestMapping("/updateDeptcallset")
@@ -130,6 +151,11 @@ public class DeptCallSetController {
         return deptCallSetFeignClient.updateDeptCallSets(dto);
     }
 
+    /**
+     * 更新
+     * @param dto
+     * @return
+     */
     @RequiresPermissions("DeptCallSet:edit")
     @LogRecord(description = "部门呼叫设置-更新",operationType = LogRecord.OperationType.UPDATE,menuName = MenuEnum.DEPTCALLSET_MANAGENT)
     @RequestMapping("/updateDeptcallsetForNotNull")
@@ -141,6 +167,11 @@ public class DeptCallSetController {
         return deptCallSetFeignClient.updateDeptCallSetsForNotNull(dto);
     }
 
+    /**
+     * 分页查询
+     * @param dto
+     * @return
+     */
     @RequiresPermissions("DeptCallSet:view")
     @PostMapping("/queryDeptcallset")
     @ResponseBody
@@ -161,6 +192,11 @@ public class DeptCallSetController {
     }
 
 
+    /**
+     * 查询明细
+     * @param idEntity
+     * @return
+     */
     @PostMapping("/queryOne")
     @ResponseBody
     public JSONResult<DeptCallSetRespDTO> queryOne(@RequestBody  IdEntity idEntity){
@@ -172,7 +208,14 @@ public class DeptCallSetController {
     }
 
 
-        @RequiresPermissions("DeptCallSet:import")
+    /**
+     * 导入方法
+     * @param file
+     * @param importFlag
+     * @return
+     * @throws Exception
+     */
+    @RequiresPermissions("DeptCallSet:import")
     @LogRecord(description = "部门呼叫设置-批量导入",operationType = LogRecord.OperationType.IMPORTS,menuName = MenuEnum.DEPTCALLSET_MANAGENT)
     @PostMapping("/import")
     @ResponseBody
@@ -306,6 +349,11 @@ public class DeptCallSetController {
         return new JSONResult().success(showList);
     }
 
+    /**
+     * 检验方法
+     * @param field
+     * @return
+     */
     private boolean validFiled(String field) {
         if(StringUtils.isBlank(field) || field.length()>50) {
             return false;
