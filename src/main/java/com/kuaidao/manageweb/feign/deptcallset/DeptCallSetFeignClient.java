@@ -1,11 +1,8 @@
 package com.kuaidao.manageweb.feign.deptcallset;
 
-import com.kuaidao.aggregation.dto.abnormal.AbnomalUserAddAndUpdateDTO;
-import com.kuaidao.aggregation.dto.abnormal.AbnomalUserQueryDTO;
-import com.kuaidao.aggregation.dto.abnormal.AbnomalUserRespDTO;
-import com.kuaidao.aggregation.dto.deptCallSet.DeptCallSetAddAndUpdateDTO;
-import com.kuaidao.aggregation.dto.deptCallSet.DeptCallSetQueryDTO;
-import com.kuaidao.aggregation.dto.deptCallSet.DeptCallSetRespDTO;
+import com.kuaidao.aggregation.dto.deptcallset.DeptCallSetAddAndUpdateDTO;
+import com.kuaidao.aggregation.dto.deptcallset.DeptCallSetQueryDTO;
+import com.kuaidao.aggregation.dto.deptcallset.DeptCallSetRespDTO;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.IdEntity;
 import com.kuaidao.common.entity.JSONResult;
