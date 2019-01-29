@@ -107,7 +107,8 @@
             
           <el-dialog :title="addOrModifyDialogTitle" :visible.sync="exportFormVisible"  width="50%">
             <el-form>
-            	 <el-row ><span id="totalNumId"></span></el-row>
+            	
+            	 <div id="totalNumId" class="marginB10">{{dataNum}}</div>
                  <el-row>
                 <el-table 
                     ref="multipleTable"
@@ -125,33 +126,10 @@
             </el-row>
             </el-form>
             <div slot="footer" class="dialog-footer">
-            <el-button @click="submitExport">导入</el-button>
+            <el-button @click="submitExport"><span data="1" id="showButton">导入</span></el-button>
             </div>
         </el-dialog>
         
-         <el-dialog title="部分导入失败" :visible.sync="errorexportFormVisible"  width="50%">
-            <el-form>
-            	 <el-row ><span id="totalNumId"></span></el-row>
-                 <el-row>
-                <el-table 
-                    ref="multipleTable"
-                    tooltip-effect="dark"
-                    empty-text="无数据"
-                    style="width: 100%"
-                    border
-                    :data="errorexportdataTable"  >
-                    <el-table-column align="center" prop="serialNumber" label="序号"></el-table-column>
-                    <el-table-column align="center" prop="businessGroup" label="商务小组"></el-table-column>
-                    <el-table-column align="center" prop="provinces" label="区域"></el-table-column>
-                    <el-table-column align="center" prop="telemarketingTeam" label="电销组"></el-table-column>
-                    <el-table-column align="center" prop="projects" label="签约项目"></el-table-column>
-                </el-table>
-            </el-row>
-            </el-form>
-            <div slot="footer" class="dialog-footer">
-            <el-button @click="knowButton">知道了</el-button>
-            </div>
-        </el-dialog>
 </div>
 </body>
 <!-- import common js-->
@@ -163,8 +141,8 @@
    var orgVM =  new Vue({
         el: '#organizationManage',
         data: {
+            dataNum:"",
         	loading:false,
-        	errorexportFormVisible:false,
         	fileList:[],//上传文件列表
         	dialogBatchVisible:false,
         	telemarketingTeamId:"",
@@ -347,6 +325,7 @@
             uploadSuccess(response, file, fileList){//上传成功后
             	
           	  if(response.code=='0'){
+          		var num = 0;
           		this.addOrModifyDialogTitle="预览数据";
           		  //清空文件里列表
               	  this.$refs.upload.clearFiles();
@@ -355,7 +334,13 @@
                     	orgVM.exportdataTable =response.data;
                     	orgVM.loading = false;
                     	orgVM.exportFormVisible = true;
+                    	num = orgVM.exportdataTable.length;
+                    	// alert("11 "+num);
+                      // $("#totalNumId").html("预览数据，共"+num+"条数据");
+                    	orgVM.dataNum="预览数据，共"+num+"条数据"
             	      }});
+                    
+                    
           	  }else{
           		orgVM.loading = false;
           		  this.$message('上传失败');
@@ -377,17 +362,30 @@
               },
               
               submitExport(){
-            	  this.exportFormVisible = false;
+            	  if($("#showButton").attr("data") ==2){
+                	  window.location.href="/invitearea/inviteAreaList"; 
+                	  return;
+                  }
             	  var param = {};
             	  this.loading = true;
             	  param.list = orgVM.exportdataTable;
+            	  if(param.list !=null && param.list.length==0){
+              		  this.loading = false;
+              		  this.$message({message:'无要上传的数据',type:'error'});
+              		  return;
+              	  }
+            	 this.exportFormVisible = false;
             	  axios.post('/invitearea/importInvitearea',param).then(function (response) {
                   	  console.log(response);
                       if(null !==response && response.data !=null && response.data.code=='0'){
                     	  if(response.data.data !=null){
-                    		  orgVM.loading = false;
-                    		  orgVM.errorexportFormVisible = true;
-                    		  orgVM.errorexportdataTable =response.data.data; 
+                    		  $("#showButton").html("知道了");
+                      		  $("#showButton").attr("data",2);
+                      		  orgVM.addOrModifyDialogTitle="部分数据导入失败";
+                      		  orgVM.exportFormVisible = true;
+                      		  orgVM.loading = false;
+                      		  orgVM.exportdataTable =response.data.data;
+                      		  orgVM.dataNum="以下内容导入失败，请重新导入"
                     	  }else{
                     		  window.location.href="/invitearea/inviteAreaList"; 
                     	  }
@@ -402,9 +400,6 @@
                   .then(function () {
                     // always executed
                   }); 
-              },
-              knowButton(){
-            	  window.location.href="/invitearea/inviteAreaList";  
               }
         },
         created(){
