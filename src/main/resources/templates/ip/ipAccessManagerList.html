@@ -25,14 +25,10 @@ input[type="number"] {
 	-moz-appearance: textfield;
 }
 
-.chooseDialog .el-dialog {
-	max-height: 600px;
-	overflow-y: auto;
-}
 </style>
 </head>
 <body>
-	<div id="app" class="mainPadding">
+	<div id="app" class="mainPadding" style="display: none;">
 		<el-breadcrumb separator="/" class="elBreadcrumb marginB20">
 		<el-breadcrumb-item>Home</el-breadcrumb-item> <el-breadcrumb-item>系统管理</el-breadcrumb-item>
 		<el-breadcrumb-item>
@@ -42,10 +38,10 @@ input[type="number"] {
 			name="first"> <el-form :inline="true"
 			:model="iprepositoryForm" class="demo-form-inline"
 			ref="iprepositoryForm"> <el-row> <el-col
-			:span="20"> <el-button type="primary" @click="openIpAddData">添加IP</el-button>
-		<el-button type="primary" @click="delIpGroup">删除</el-button> <el-button
-			type="primary" @click="ipTabCreatePackage">创建IP包</el-button> </el-col> <el-col
-			:span="4"> <!-- <el-form-item prop="ipAddress"> 
+			:span="18"> <el-button type="primary" @click="openIpAddData"><i class="el-icon-plus"></i>添加IP</el-button>
+		<el-button type="danger" @click="delIpGroup"><i class="el-icon-delete"></i>删除</el-button> <el-button
+			type="success" @click="ipTabCreatePackage"><i class="el-icon-plus"></i>创建IP包</el-button> </el-col> <el-col
+			:span="6"> <!-- <el-form-item prop="ipAddress"> 
 								<el-input v-model="iprepositoryForm.ipAddress" placeholder="输入包含IP查询"></el-input> 
 							</el-form-item>
 							<el-form-item>
@@ -68,9 +64,9 @@ input[type="number"] {
 			:model="ippackageForm" class="demo-form-inline"
 			ref="customFieldQueryForm"> <el-row> <el-col
 			:span="12"> <el-button type="primary"
-			@click="openAddIpPackage">创建IP包</el-button> <el-button type="primary"
-			@click="openUpdateIpPackage">修改IP包</el-button> <el-button
-			type="primary" @click="delpackageGroup">删除</el-button> </el-col> <el-col
+			@click="openAddIpPackage"><i class="el-icon-plus"></i>创建IP包</el-button> <el-button type="success"
+			@click="openUpdateIpPackage"><i class="el-icon-edit"></i>修改IP包</el-button> <el-button
+			type="danger" @click="delpackageGroup"><i class="el-icon-delete"></i>删除</el-button> </el-col> <el-col
 			:span="12" style="text-align: right;"> <el-form-item
 			prop="ipAddress"> <el-input
 			v-model="ippackageForm.ipPackageName" placeholder="输入IP包名查询"></el-input>
@@ -90,7 +86,7 @@ input[type="number"] {
 		</el-table-column> </el-table> <table-pagination :pager="packpager" @change="queryPackageDataList"></table-pagination>
 		</el-tab-pane> </el-tabs> <!-- 添加IP库弹框 --> 
 		<!-- <el-dialog title="添加IP" :visible.sync="dialogIpVisible" width="30%" :before-close="handleClose">  -->
-		<el-dialog title="添加IP" :visible.sync="dialogIpVisible" width="30%"> 
+		<el-dialog title="添加IP" :visible.sync="dialogIpVisible" width="530px"> 
 			<el-form :inline="true"
 			:model="ipAddForm" class="demo-form-inline" ref="ipAddForm"
 			:rules="rulesAdd"> 
@@ -99,13 +95,11 @@ input[type="number"] {
 					<span>&nbsp;.&nbsp;</span> 
 				</el-form-item> 
 				<el-form-item label="" prop="ipAddress2">
-					<el-input @keyup.native="number2" maxlength="3" v-model="ipAddForm.ipAddress2"
-						style="width: 80px;"></el-input>
+					<el-input @keyup.native="number2" maxlength="3" v-model="ipAddForm.ipAddress2" style="width: 80px;"></el-input>
 					<span>&nbsp;.&nbsp;</span> 
 				</el-form-item> 
 				<el-form-item label="" prop="ipAddress3">
-					<el-input @keyup.native="number3" maxlength="3" v-model="ipAddForm.ipAddress3"
-						style="width: 80px;"></el-input>
+					<el-input @keyup.native="number3" maxlength="3" v-model="ipAddForm.ipAddress3" style="width: 80px;"></el-input>
 					<span>&nbsp;.&nbsp;</span> 
 				</el-form-item> 
 				<el-form-item label="" prop="ipAddress4">
@@ -125,7 +119,7 @@ input[type="number"] {
 		<el-form-item label="IP包名称:" prop="name"> <el-input
 			v-model="ipPackageAddForm.name" maxlength="100" style="width: 250px;"></el-input>
 		</el-form-item> <el-form-item label="已选IP列表:"> <el-button
-			type="primary" @click="addPackageIPSelectVisible=true">选择IP</el-button>
+			type="primary" @click="openIpSelectDiglog">选择IP</el-button>
 		</el-form-item> <el-table border id="packAddIpTable" ref="packAddIpTable"
 			:data="packAddIpTable" tooltip-effect="dark"> <el-table-column
 			type="index" label="序号" prop="id" header-align="center"
@@ -148,7 +142,7 @@ input[type="number"] {
 			prop="name"> <el-input
 			v-model="ipPackageUpdateForm.name" maxlength="100"
 			style="width: 250px;"></el-input> </el-form-item> <el-form-item label="已选IP列表:">
-		<el-button type="primary" @click="addPackageIPSelectVisible=true">选择IP</el-button>
+		<el-button type="primary" @click="openIpSelectDiglog">选择IP</el-button>
 		</el-form-item> <el-table border id="packUpdateIpTable" ref="packUpdateIpTable"
 			:data="packUpdateIpTable" tooltip-effect="dark"> <el-table-column
 			type="index" label="序号" prop="id" header-align="center"
@@ -173,7 +167,7 @@ input[type="number"] {
 			@click="packgeSelectIpOpen">搜索</el-button> </el-form-item> </el-row> </el-form> <el-table border
 			id="packSelectIpTable" ref="customFieldTable"
 			:data="packSelectIpTable" tooltip-effect="dark"
-			@selection-change="changeSelectIpFun"> <el-table-column
+			@selection-change="changeSelectIpFun" height="384"> <el-table-column
 			align="center" type="selection" width="55" prop="id"
 			@selection-change="changeIpTableFun"> </el-table-column> <el-table-column
 			align="center" prop="ipAddress" label="IP地址"> </el-table-column> </el-table>
@@ -240,22 +234,55 @@ var ipManagerVM = new Vue({
 	    	ipAddress:[
 	    		{ required: true, message: '不能为空'},
 	    		{  max: 3, message: '最大3个字符', trigger: 'change' },
-                {  min: 1, message: '最少1个字符', trigger: 'change' }
+                {  min: 1, message: '最少1个字符', trigger: 'blur' },
+                { validator:function(rule,value,callback){                 
+                    if(/^[0-9]*$/.test(value) == false){
+                       callback(new Error("请输入数字"));
+                    }else{
+                       callback();
+                    } 
+                    callback();
+                }, trigger: 'change'}
 	    	],
 	    	ipAddress2:[
 	    		{ required: true, message: '不能为空'},
 	    		{  max: 3, message: '最大3个字符', trigger: 'change' },
-                {  min: 1, message: '最少1个字符', trigger: 'change' }
+                {  min: 1, message: '最少1个字符', trigger: 'blur' },
+                { validator:function(rule,value,callback){                 
+                    if(/^[0-9]*$/.test(value) == false){
+                       callback(new Error("请输入数字"));
+                    }else{
+                       callback();
+                    } 
+                    callback();
+                }, trigger: 'change'}
 	    	],
 	    	ipAddress3:[
 	    		{ required: true, message: '不能为空'},
 	    		{  max: 3, message: '最大3个字符', trigger: 'change' },
-                {  min: 1, message: '最少1个字符', trigger: 'change' }
+                {  min: 1, message: '最少1个字符', trigger: 'blur' },
+                { validator:function(rule,value,callback){                 
+                    if(/^[0-9]*$/.test(value) == false){
+                       callback(new Error("请输入数字"));
+                    }else{
+                       callback();
+                    } 
+                    callback();
+                }, trigger: 'change'}
 	    	],
 	    	ipAddress4:[
 	    		{ required: true, message: '不能为空'},
 	    		{  max: 3, message: '最大3个字符', trigger: 'change' },
-                {  min: 1, message: '最少1个字符', trigger: 'change' }
+                {  min: 1, message: '最少1个字符', trigger: 'blur' },
+                { validator:function(rule,value,callback){
+                 
+                    if(/^[0-9]*$/.test(value) == false){
+                       callback(new Error("请输入数字"));
+                    }else{
+                       callback();
+                    } 
+                    callback();
+                }, trigger: 'change'}
 	    	]
         },
     	ipAddForm:{
@@ -308,12 +335,10 @@ var ipManagerVM = new Vue({
 
 		},
 		 openIpAddData(){
-		   ipManagerVM.ipAddForm.ipAddress='';
-		   ipManagerVM.ipAddForm.ipAddress2='';
-		   ipManagerVM.ipAddForm.ipAddress3='';
-		   ipManagerVM.ipAddForm.ipAddress4='';
+		 if(this.$refs['ipAddForm']) {
+        	 this.$refs['ipAddForm'].resetFields();
+           }
 		   ipManagerVM.dialogIpVisible =true;	
-		
 		},
 		 deleteRow(index, rows) {
 			this.$confirm('确认删除【'+rows[index].ipAddress+"】IP地址吗?", '消息提醒', {
@@ -327,9 +352,16 @@ var ipManagerVM = new Vue({
         openAddIpPackage(){
           //打开添加IP包窗口
            ipManagerVM.addIpPackageVisible=true;
-           //ipManagerVM.ipPackageAddForm.resetField();
-           //ipManagerVM.packAddIpTable=[];
-           this.$refs['ipPackageAddForm'].resetFields();
+           if (this.$refs['ipPackageAddForm']) {
+        	   this.$refs['ipPackageAddForm'].resetFields();
+          }
+        },
+        //打开IP选择
+        openIpSelectDiglog(){
+            ipManagerVM.addPackageIPSelectVisible=true;
+            if (this.$refs['packageAddSelectForm']) {
+         	   this.$refs['packageAddSelectForm'].resetFields();
+           }
         },
 		//查询ip库列表方法
 		queryIpDataList(){ 
@@ -370,9 +402,11 @@ var ipManagerVM = new Vue({
 		 ipTabCreatePackage(){
 		  //通过IP库页签打开添加IP包窗口
 	       ipManagerVM.addIpPackageVisible=true;
-	       ipManagerVM.ipPackageAddForm.name='';
 	       ipManagerVM.packAddIpTable=ipManagerVM.multipleIpSelection;
 	       ipManagerVM.selectIpType="1";
+	       if (this.$refs['ipPackageAddForm']) {
+       	    this.$refs['ipPackageAddForm'].resetFields();
+           }
 		 },
 		 openUpdateIpPackage(){
 		    var updateInfo=ipManagerVM.multiplePackageTable;
@@ -383,6 +417,9 @@ var ipManagerVM = new Vue({
                  });
                  return;
              }
+ 	       if (this.$refs['ipPackageUpdateForm']) {
+        	    this.$refs['ipPackageUpdateForm'].resetFields();
+            }
  	       ipManagerVM.updateIpPackageVisible=true;
 		  //打开修改Ip包
 		    var param={};
@@ -497,9 +534,11 @@ var ipManagerVM = new Vue({
                  return;
              }
 	         var packageName="";
+	     	var ids=[];	
 	        if(null!=deleIpInfo){
 	 		    for ( var i = 0; i <deleIpInfo.length; i++){
 	 		    	packageName+="【"+deleIpInfo[i].ipAddress+"】";
+	 		        ids.push(deleIpInfo[i].id);
 	 		     }
 	           }
 			this.$confirm('确认删除吗'+packageName+"IP地址吗?", '消息提醒', {
@@ -507,13 +546,6 @@ var ipManagerVM = new Vue({
                 cancelButtonText: '取消',
                 type: 'warning'
             }).then(() => {
-            	var deleIpInfo= ipManagerVM.multipleIpSelection;
-        		var ids=[];	
-        		if(null!=deleIpInfo&&deleIpInfo.length>0){
-        			for ( var i = 0; i <deleIpInfo.length; i++){
-        			  ids.push(deleIpInfo[i].id);
-        			}
-        		 }
         		var  param={};
         		param.deleId=ids;
         		//判断是否有对应IP包
@@ -558,16 +590,18 @@ var ipManagerVM = new Vue({
 	   //删除IP包数据
 		var deleInfo=ipManagerVM.multiplePackageTable;
 	     if(deleInfo.length <1){
-                   this.$message({
-                      message: '请选择删除数据',
-                      type: 'warning'
-                    });
-                 return;
+              this.$message({
+                    message: '请选择删除数据',
+                    type: 'warning'
+                 });
+               return;
              }
 	        var packageName="";
+	    	var ids=[];	
 	        if(null!=deleInfo){
 	 		   for ( var i = 0; i <deleInfo.length; i++){
 	 		      packageName+="【"+deleInfo[i].name+"】";
+	 		      ids.push(deleInfo[i].id);
 	 		    }
 	           }
 			this.$confirm('确认要删除'+packageName+"IP包吗?", '消息提醒', {
@@ -575,13 +609,6 @@ var ipManagerVM = new Vue({
                 cancelButtonText: '取消',
                 type: 'warning'
             }).then(() => {
-    		var deleIpInfo=ipManagerVM.multiplePackageTable;
-    		var ids=[];	
-    		if(null!=deleIpInfo&&deleIpInfo.length>0){
-    			for ( var i = 0; i <deleIpInfo.length; i++){
-    			  ids.push(deleIpInfo[i].id);
-    			}
-    		 }
     		var  param={};
     		param.deleId=ids;
     		//判断是否有IP包与角色对应
@@ -623,10 +650,33 @@ var ipManagerVM = new Vue({
             });
 		},
 		packgeSelectIpOpen(){
+			debugger;
 			//ip包添加选择Ip数据 
 			var ipAddress = this.packageAddSelectForm.ipAddress;
 			var param = {}; 
 			param.ipAddress=ipAddress;
+			var type=ipManagerVM.selectIpType;
+			var notInAddress=[];
+			//新增
+			if(type=="1"){
+			 var updateTable=ipManagerVM.packAddIpTable;
+				 if(null!=updateTable&&updateTable.length>0){
+					 for ( var i = 0; i <updateTable.length; i++){
+						 notInAddress.push(updateTable[i].ipAddress);
+					 }  
+				  }
+				
+			}else{
+			  var updateTable=ipManagerVM.packUpdateIpTable;
+			  if(null!=updateTable&&updateTable.length>0){
+				 for ( var i = 0; i <updateTable.length; i++){
+					 notInAddress.push(updateTable[i].ipAddress);
+				 }  
+			  }
+			}
+			if(null!=notInAddress&&notInAddress.length>0) {
+				param.notInAddress=	notInAddress.join(",");	
+		    }
 			axios.post('/ip/ipAccess/queryRepositoryList',param).then(function (response) {
 				if(null==response){
 					alert("返回异常");
@@ -776,8 +826,8 @@ var ipManagerVM = new Vue({
 		this.queryIpDataList();
 	},
 	mounted(){
-
-	}
+        document.getElementById('app').style.display = 'block';
+    }
 });
 </script>
 </body>

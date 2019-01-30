@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"  xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head th:replace="_header_include::frag(~{::title},~{},~{})">
+    <title>后台管理系统</title>
+    <style>
+        button a{color:#fff!important;}
+    </style>
+</head>
+<body>
+<div id="projectManage" class="projectManage mainPadding">  
+    <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
+        <el-breadcrumb-item>Home</el-breadcrumb-item>
+        <el-breadcrumb-item>业务设置</el-breadcrumb-item>
+        <el-breadcrumb-item><a >项目管理</a></el-breadcrumb-item>
+    </el-breadcrumb>
+    
+    <el-row class="marginB10">
+    		<shiro:hasPermission name="aggregation:projectManager:add">
+		        <el-button type="primary" @click="toAddProject">添加</el-button>
+		    </shiro:hasPermission>
+    		<shiro:hasPermission name="aggregation:projectManager:add">
+		        <el-button type="primary" @click="toUpdateProject">编辑</el-button>
+		    </shiro:hasPermission>
+    		<shiro:hasPermission name="aggregation:projectManager:add">
+		        <el-button type="primary" @click="deleteProject">删除</el-button>
+		    </shiro:hasPermission>
+	</el-row>
+	<el-form :inline="true" :model="projectSearchForm" class="demo-form-inline" ref="projectSearchForm"> 
+	    <el-row class="marginB10 greybg padding20" style="padding-bottom: 0;">
+	        <el-row :gutter="20">
+	            
+	            <el-col :span="4" :offset="18">
+				  <el-form-item class="formItem" prop="projectName">
+				    <el-input v-model="projectSearchForm.projectName" placeholder="项目名称" class="input-with-select"></el-input>
+				  </el-form-item>
+				</el-col>
+				<el-col :span="2" >
+				    <el-button type="primary" @click="searchTable()">搜索</el-button>
+				</el-col>
+	        </el-row>
+	    </el-row>
+  	</el-form>
+    <el-row>
+        <el-table  ref="multipleTable" tooltip-effect="dark" @selection-change="handleSelectionChange"
+            style="width: 100%"  :data="dataTable" >
+            <el-table-column align="center" type="selection" label="全选" width="55"></el-table-column>
+            <el-table-column align="center" type="index" width="80" label="序号"></el-table-column>
+            <el-table-column align="center" prop="projectName" label="项目名称"></el-table-column>
+            <el-table-column align="center" prop="marketLeader" label="市场部负责人"></el-table-column>
+            <el-table-column align="center" prop="promotionLeader" label="推广部负责人"></el-table-column>
+            <el-table-column align="center" prop="investmentLeader" label="招商负责人"></el-table-column>
+            <el-table-column align="center" prop="shopType" label="店型" :formatter="transShopType"></el-table-column>
+            <el-table-column align="center" prop="companyName" label="公司"></el-table-column>
+            <el-table-column align="center" prop="isNotSign" label="是否不可签约" :formatter="transformStatus"></el-table-column>
+            <el-table-column align="center" prop="classification" label="项目类别" :formatter="transClassification"></el-table-column>
+            <el-table-column align="center" prop="category" label="行业类别" :formatter="transCategory"></el-table-column>
+           <el-table-column align="center" prop="createUserName" label="条目创建人" ></el-table-column>
+        </el-table>
+        <table-pagination :pager="pager" @change="searchTable"></table-pagination>
+    </el-row>
+     
+</div>
+<!-- import common js-->
+<div th:include="_footer_include :: #jsLib"></div>
+</body>
+<script th:inline="javascript">
+var classificationList=[[${classificationList}]];//项目类别集合
+var categoryList=[[${categoryList}]];//品类集合
+var shopTypeList=[[${shopTypeList}]];//店型集合
+var projectVM = new Vue({
+        el: '#projectManage',
+        data: {
+        		projectSearchForm: {
+	        		projectName: ''
+	            },
+	            dataTable:[],
+	            pager:{
+	                total: 0,
+	                currentPage: 1,
+	                pageSize: 20,
+	            },
+	            multipleSelection:[],
+                formLabelWidth: '150px',
+                formLabelWidth1: '120px',
+        },
+        methods: {
+        	searchTable() {
+                var param ={};
+                param.pageSize = this.pager.pageSize;
+                param.pageNum = this.pager.currentPage;
+                param.projectName = this.projectSearchForm.projectName;
+                console.info(param);
+                axios.post('/aggregation/projectManager/list', param)
+                .then(function (response) {
+                      var result =  response.data;
+                      console.info(result);
+                      var table=result.data;
+                      projectVM.dataTable= table.data;
+                      projectVM.pager.total =  table.total;
+                      projectVM.pager.currentPage = table.currentPage;
+                })
+                .catch(function (error) {
+                     console.log(error);
+                });
+                
+              },
+              //是否不可签约转换方法
+              transformStatus(row, column, cellValue, index) {
+            	  var text="";
+                  if(cellValue==0){
+                	  text="否"
+                  }else if(cellValue==1){
+                	  text="是"
+                  }
+                  return text;
+              },
+              //类别转换方法
+              transClassification(row, column, cellValue, index) {
+            	  var text="";
+            	  if(classificationList){
+	                  for(var i=0;i<classificationList.length;i++){
+	                		if(cellValue==classificationList[i].value){
+	                			text=classificationList[i].name;
+	                		}
+	                	}
+            	  }
+                  return text;
+              },
+              //品类转换方法
+              transCategory(row, column, cellValue, index) {
+            	  var text="";
+            	  if(categoryList){
+            		  for(var i=0;i<categoryList.length;i++){
+                  		if(cellValue==categoryList[i].value){
+                  			text=categoryList[i].name;
+                  		}
+                  	}
+            	  }
+                  return text;
+              },
+              //店型转换方法
+              transShopType(row, column, cellValue, index) {
+            	  var text="";
+            	  if(cellValue&&shopTypeList){
+            		  var values=cellValue.split(",");
+	                  for(var i=0;i<values.length;i++){
+	                	  for(var j=0;j<shopTypeList.length;j++){
+	                  		if(values[i]==shopTypeList[j].value){
+	                  			if(i==0){
+		                  			text=text+shopTypeList[j].name;
+	                  			}else{
+		                  			text=text+","+shopTypeList[j].name;
+	                  			}
+	                  		}
+	                  	  }
+	                  }
+            	  }
+                  
+                  return text;
+              },
+              //选择行
+              handleSelectionChange(val) {
+                  this.multipleSelection = val;
+              },
+              //跳转任务用户页
+              toAddProject() {
+            	  document.location.href='/aggregation/projectManager/initCreateProject';
+              },
+              //跳转修改任务页
+              toUpdateProject() {
+            	  var rows = this.multipleSelection;
+                  if(rows.length!=1){
+                      this.$message({
+                         message: '请选择一条数据进行修改',
+                         type: 'warning'
+                       });
+                      return;
+                  }
+            	  document.location.href='/aggregation/projectManager/initUpdateProject?id='+rows[0].id;
+              },
+              handleSizeChange(val) {
+                  //下拉框  每页 10,20条切换 调用
+                     console.log(`每页 ${val} 条`);
+                  this.pageSize = val;
+                  this.initTableData(1);
+               },
+               handleCurrentChange(val) {
+                   //点击 页码
+                 console.log(`当前页: ${val}`);
+                 this.initTableData(val);
+               },
+                 deleteProject() {
+              	   var rows = this.multipleSelection;
+                     if(rows.length==0){
+                         this.$message({
+                            message: '请选择一条数据进行刪除',
+                            type: 'warning'
+                          });
+                         return;
+                     }
+                     var rowNames = [];
+                     var rowIds = [];
+                     for(var i=0;i<rows.length;i++){
+                  	   var curRow = rows[i];
+                         rowIds.push(curRow.id);
+                         rowNames.push("【"+curRow.projectName+"】");
+                     }
+                     
+                     var projectNames = rowNames.join(" ");
+                  this.$confirm('确定要删除 '+projectNames+' 公司？', '提示', {
+                      confirmButtonText: '确定',
+                      cancelButtonText: '取消',
+                      type: 'warning'
+                  }).then(() => {
+                  	  //删除
+                  	var param  = {idList:rowIds};
+                      axios.post('/aggregation/projectManager/deleteProject',param)
+                      .then(function (response) {
+                          var data =  response.data;
+                          if(data.code=='0'){
+                          	projectVM.$message({message:'删除成功',type:'success',duration:1000,onClose:function(){
+                          		projectVM.searchTable();
+                      	    }});
+                              
+                          }else{
+                          	projectVM.$message({
+                                  message: "接口调用失败",
+                                  type: 'error'
+                                }); 
+                          }
+                      })
+                      .catch(function (error) {
+                        console.log(error);
+                      })
+                      .then(function () {
+                      	
+                      });
+                  }).catch(() => {
+                         
+                  });
+              },//end
+        },
+        created(){
+            console.info("create method");
+            this.searchTable();
+           
+        },
+        mounted(){
+           console.info("mounted method");
+        }
+    })
+    
+</script>
+</html>

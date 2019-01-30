@@ -24,36 +24,38 @@
     </div>
     <div id="loginbox" class="loginbox">
             <div class="control-group normal_text">
-                <!-- <img src="images/loginLogo.png" alt="Logo"> -->
-                慧聚-登录
+                <img src="images/loginLogo.png" alt="Logo">                
             </div>
             <el-form :model="loginForm" :rules="rules" ref="loginForm" class="demo-loginForm" >
                 <el-row>
                     <el-form-item  prop="nameInput">
-                        <el-input v-model="loginForm.nameInput" maxlength="30" placeholder="登录用户名"></el-input>
+                        <span class="iconImg"><img th:src="@{/images/loginIco01.jpg}" alt=""></span>
+                        <el-input v-model="loginForm.nameInput" @keyup.native="checkLogin('loginForm')" maxlength="30" placeholder="登录用户名"></el-input>
                     </el-form-item>
                 </el-row>
                 <el-row>
                     <el-form-item  prop="pswInput">
-                        <el-input type="password" v-model="loginForm.pswInput"  maxlength="30"  placeholder="登录密码"></el-input>
+                        <span class="iconImg"><img th:src="@{/images/loginIco02.jpg}" alt=""></span>
+                        <el-input type="password" v-model="loginForm.pswInput" @keyup.native="checkLogin('loginForm')"  maxlength="30"  placeholder="登录密码"></el-input>
+                        <span class="iconImg iconRight"><img th:src="@{/images/loginIco04.jpg}" alt=""></span>
                     </el-form-item>
                 </el-row>
                 <el-row>
                     <el-col :span="14">
                         <el-form-item  prop="codeInput">
-                            <el-input type="number" v-model="loginForm.codeInput" maxlength="60"  placeholder="输入验证码"></el-input>
+                          <span class="iconImg"><img th:src="@{/images/loginIco03.jpg}" alt=""></span>
+                          <el-input type="number" v-model="loginForm.codeInput" @keyup.native="checkLogin('loginForm')" maxlength="6"  placeholder="输入验证码"></el-input>
                         </el-form-item>
                     </el-col>
                     <el-col :span="10">
-                    	<el-button type="primary" class="codeBtn" style="float: right;padding: 12px 5px;width: 110px;" @click="sendCode('loginForm','2');" :disabled="isDisabled">{{buttonName}}</el-button>
+                    	<el-button type="primary" class="codeBtn" @click="sendCode('loginForm','2');" :disabled="isDisabled">{{buttonName}}</el-button>
                     </el-col>
                 </el-row>
                 <div id="codeTipDiv" class="codeTip">
                     未收到验证码，使用<span class="link">
                       <el-button class="msgBtn" type="submit" id="msgHref" :disabled="isDisabled" @click="sendCode('loginForm','1');">短信验证码</el-button>
                       <!-- <a id="msgHref" type="submit" @click="sendCode('loginForm','1');">短信验证码</a> -->
-                    </span>                    
-               		<a type="submit"  @click="toResetPwd();" class="pswForgetBtn">忘记密码</a>
+                    </span> 
                 </div>  
                 <!-- //登录后是否显示修改密码  2-不显示 1-显示 -->
                 <input type="hidden" id="isUpdatePassword" name="isUpdatePassword" value="2">
@@ -62,14 +64,14 @@
                     <!-- 提示语 -->
                     <div class="tipCntBox"><span id="errorSpan"  style="display: none;"></span></div>
                     <el-form-item>
-                        <el-button type="primary" class="loginBtn" @click="submitForm('loginForm')">登&nbsp;&nbsp;录</el-button>
+                        <el-button type="primary" class="loginBtn" :disabled="loginDisabled" @click="submitForm('loginForm')">登&nbsp;&nbsp;录</el-button>
                     <el-form-item>
+                    <a type="submit"  @click="toResetPwd();" class="pswForgetBtn">忘记密码</a>
                 </div>
                 <!-- 图形验证码弹窗 移除hideBox则显示-->
                 <div id="passwordForgetBoxDiv" class="passwordForgetBox f-dn">
-                    <div class="closeBtn">×</div> 
                     <div class="title">请输入下面的图形验证码</div>
-                    <div class="codeImgBox"><img id="codeImg" src="images/code.jpg"></div>
+                    <div class="codeImgBox"><img id="codeImg" @click="toCodeImg" src="images/code.jpg"></div>
                     <div class="whiteIptBox">
                         <el-input v-model="loginForm.imgcodeInput" placeholder=""></el-input>
                     </div>
@@ -81,8 +83,8 @@
             <div id="logoutBoxDiv" class="logoutBox f-dn">
                 <div class="box">
                     <div class="title">下线通知</div>
-                    <div class="cnt">您的账户在另一设备登录，您被迫下线。如不是本人操作，您的密码可能已经泄漏，建议您<a href="" @click="resetLogin('1')">>修改密码</a></div>
-                    <el-button type="primary" class="blueSubmitBtn floatLeft"  @click="resetLogin()">>重新登录</el-button>
+                    <div class="cnt">您的账户在另一设备登录，您被迫下线。如不是本人操作，您的密码可能已经泄漏，建议您<a href="" @click="resetLogin('1')">修改密码</a></div>
+                    <el-button type="primary" class="blueSubmitBtn floatLeft"  @click="resetLogin()">重新登录</el-button>
                     <el-button type="primary" class="blueSubmitBtn floatRight" @click="resetLogin()">确定</el-button>
                 </div>                  
             </div>
@@ -98,6 +100,7 @@ var vm =  new Vue({
         data: {
             buttonName: "获取语音验证码",
             isDisabled: false,
+            loginDisabled: true,
             time: 60,
             loginForm: {
             	nameInput: '',
@@ -124,7 +127,7 @@ var vm =  new Vue({
                 pswInput: [
                   { required: true, message: '密码不能为空', trigger: 'change' },
                   {  max: 30, message: '最大30个字符', trigger: 'blur' },
-                  {  min: 8, message: '最少8个字符', trigger: 'blur' },
+                  {  min: 6, message: '最少6个字符', trigger: 'blur' },
                   { validator:function(rule,value,callback){
                  
                     if(/^[A-Za-z0-9]+$/.test(value) == false){
@@ -221,12 +224,12 @@ var vm =  new Vue({
 	    						$("#codeImgMsg").show();
 	    						$("#code").val("");
 	    					}else if(data.code=="0"){
-                  this.cutDown();//倒计时
- 	            		if(disType=="1"){
- 	            			msg="发送短信验证成功";
- 	            		}else{
- 	            			msg="请注意接听语音来电获取验证码！";
- 	            		}
+	    						vm.cutDown();//倒计时
+		 	            		if(disType=="1"){
+		 	            			msg="发送短信验证成功";
+		 	            		}else{
+		 	            			msg="请注意接听语音来电获取验证码！";
+		 	            		}
 	    						$("#passwordForgetBoxDiv").addClass("f-dn");
 	    						$("#codeImgMsg").hide();
 	    						$("#code").val("");
@@ -249,6 +252,17 @@ var vm =  new Vue({
        	      },
        	   	  toResetPwd() {
        	    	document.location.href='/login/resetPwd';
+       	      },
+       	   	  checkLogin(formName) {
+       	    	 var formData = this.loginForm;
+       	    	  if(formData.nameInput!=""&&formData.pswInput!=""&&formData.codeInput!=""){
+         	        this.loginDisabled=false;
+       	    	  }else{
+         	        this.loginDisabled=true;
+       	    	  }
+       	      },
+       	   	  toCodeImg() {
+       	    	document.getElementById("codeImg").src = "/login/getCaptcha?"+Math.random();
        	      },
        	   	  resetLogin(isUpdatePassword) {
        	    	$("#logoutBoxDiv").addClass("f-dn");

@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"  xmlns:th="http://www.thymeleaf.org">
+<head th:replace="_header_include::frag(~{::title},~{},~{})">
+    <title>后台管理系统</title>
+    <style>
+        .userManage .leftBox{/*width: 200px;*/height: auto;border:1px solid #ebeef5;min-height: 480px;}
+        .userManage .leftTitle{background:#ebeef5;text-indent: 20px;height: 40px;line-height: 40px;}
+        .userManage .leftTree{padding:10px;}
+        .userManage .rightTitle{background:#ebeef5;text-indent: 20px;height: 40px;line-height: 40px;}
+    </style>
+</head>
+<body>
+<div v-loading="loading" id="userManage" class="userManage mainPadding">  
+    <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
+        <el-breadcrumb-item>Home</el-breadcrumb-item>
+        <el-breadcrumb-item>业务设置</el-breadcrumb-item>
+        <el-breadcrumb-item><a href="JavaScript:void(0)" data-url="a.html">邀约区域管理</a></el-breadcrumb-item>
+    </el-breadcrumb>
+
+    <el-row :gutter="20">
+        <el-form :model="form" :rules="rules" ref="form">
+        
+         	<el-row>
+                <el-col :span="6">
+                    <el-form-item label="商务小组：" :label-width="formLabelWidth1" prop="businessGroupId">
+                        <el-select filterable v-model="form.businessGroupId" placeholder="请选择">
+                            <el-option
+                                v-for="item in swList"
+                                :key="item.id"
+                                :label="item.name"
+                                :value="item.id">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
+                </el-col>
+            </el-row>
+        	<el-row>
+                <el-col :span="6">
+                    <el-form-item label="签约项目：" :label-width="formLabelWidth1" prop="projectIds">
+                        <el-select multiple filterable v-model="form.projectIds" placeholder="请选择">
+                            <el-option
+                                v-for="item in projectList"
+                                :key="item.id"
+                                :label="item.projectName"
+                                :value="item.id">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
+                </el-col>
+            </el-row>
+        	<el-row>
+                <el-col :span="6">
+                    <el-form-item label="区域（省）：" :label-width="formLabelWidth1" prop="provincesIds">
+                        <el-select filterable v-model="form.provincesIds" @change="selectAll" multiple placeholder="请选择">
+                            <el-option
+                                v-for="item in proviceslist"
+                                :key="item.id"
+                                :label="item.name"
+                                :value="item.id">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
+                </el-col>
+            </el-row>
+        	<el-row>
+                <el-col :span="6">
+                    <el-form-item label="电销组：" :label-width="formLabelWidth1" prop="telemarketingTeamId">
+                        <el-select filterable v-model="form.telemarketingTeamId" placeholder="请选择">
+                            <el-option
+                                v-for="item in dxList"
+                                 :key="item.id"
+                                :label="item.name"
+                                :value="item.id">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
+                </el-col>
+            </el-row>
+        
+          
+            <el-row>
+                <el-col :span="6" :offset="6">
+                    <el-form-item>
+                        <el-button type="primary" @click="onSubmit('form')">提交</el-button>
+                        <el-button @click="toScheduleList">取消</el-button>
+                    </el-form-item>
+                </el-col>
+            </el-row>
+        </el-form>
+    </el-row>
+
+    
+</div>
+<!-- import common js-->
+<div th:include="_footer_include :: #jsLib"></div>
+</body>
+<script th:inline="javascript">
+	var swList=[[${swList}]];
+	var dxList=[[${dxList}]];
+	var proviceslist=[[${proviceslist}]];
+	var projectList=[[${projectList}]];
+    var addUserVm= new Vue({
+        el: '#userManage',
+        data: function() {
+            return {
+            	loading:false,
+                tableRadio:'',
+                dialogFormChooseRole: false,
+                dialogFormChooseOrg: false,
+                swList:swList,
+                dxList:dxList,
+                projectList:projectList,
+                proviceslist:proviceslist,
+                form: {
+                	businessGroupId: '',
+                	provincesIds: '',
+                	telemarketingTeamId: '',
+                	projectIds:'',
+                    
+                },
+                rules: {
+                	businessGroupId: [
+                      { required: true, message: '请选择商务小组', trigger: 'change' },
+                    ],
+                    projectIds: [
+                      { required: true, message: '请选择项目', trigger: 'blur' },
+                    ],
+                    provincesIds: [
+                      { required: true, message: '请选择省份', trigger: 'blur' },
+                    ],
+                    telemarketingTeamId: [
+                      { required: true, message: '请选择电销组', trigger: 'change' },
+                    ]
+                    
+                  },
+                formLabelWidth: '150px',
+                formLabelWidth1: '120px',
+                methodOptions: [{
+                    value: 1,
+                    label: 'POST'
+                }, {
+                    value: 2,
+                    label: 'GET'
+                }],
+                oldOptions:[]
+            }        	  
+        },
+        methods: {
+        	
+            onSubmit(formName) {
+            	 this.$refs[formName].validate((valid) => {
+          	       if (valid) {
+       	             var formData = addUserVm.form;
+       	             var param={};
+       	             param.businessGroupId= formData.businessGroupId;
+	       	          param.telemarketingTeamId = formData.telemarketingTeamId;
+	       	          let obj = {};
+	                  obj = this.swList.find((item)=>{
+	                      return item.id === param.businessGroupId;
+	                  });
+	                  let telemarketingTeamobj = {};
+	                  telemarketingTeamobj = this.dxList.find((item)=>{
+	                      return item.id === param.telemarketingTeamId;
+	                  });
+	                  
+	                  
+	                  param.businessGroup  = obj.name;
+	                  param.telemarketingTeam = telemarketingTeamobj.name;
+	       	          var projectstrs ="";
+	                  for ( var i = 0; i <formData.projectIds.length; i++){
+	                	   if(projectstrs !=""){
+	                		   projectstrs = projectstrs+","+formData.projectIds[i];
+	                	   }else{
+	                		   projectstrs = formData.projectIds[i];
+	                	   }
+	                	}
+	                  var provincestrs ="";
+	                  var procinceNames ="";
+	                  for ( var i = 0; i <formData.provincesIds.length; i++){
+	                	  for(var j =0;j<this.proviceslist.length;j++){
+	                		  if(formData.provincesIds[i] ==this.proviceslist[j].id){
+	                			  if(procinceNames ==""){
+	                				  if(formData.provincesIds[i] !=0){
+	                					  procinceNames = this.proviceslist[j].name
+	                				  }
+	                			  }else{
+	                				  if(formData.provincesIds[i] !=0){
+	                					  procinceNames =procinceNames+"," +this.proviceslist[j].name
+	                				  }
+	                			  }
+	                		  }
+	                	  }
+	                	   if(provincestrs !=""){
+	                		   if(formData.provincesIds[i] !=0){
+	                			   provincestrs = provincestrs+","+formData.provincesIds[i];
+	                		   }
+	                		   
+	                	   }else{
+	                		   if(formData.provincesIds[i] !=0){
+	                			   provincestrs = formData.provincesIds[i];
+	                		   }
+	                		   
+	                	   }
+	                	}
+	                  param.projectIds= projectstrs;
+	       	          param.provincesIds = provincestrs;
+	       	          param.provinces = procinceNames;
+	       	       	  let provinceobj = {};
+	                  provinceobj = this.proviceslist.find((item)=>{
+	                     // return (','+provincestrs+',').includes('选项0')item.id === param.telemarketingTeamId;
+	                  });
+	                  this.loading =true;
+	      	             console.info(param);
+	      	            axios.post("/invitearea/addInviteArea", param)
+	      	            .then(function (response) {
+	      	            	console.info(response);
+	      	            	var data =response.data;
+	      	            	if(data.code!="0"){
+	      	            		addUserVm.loading =false;
+	      	            		addUserVm.$message(data.msg);
+	      	            	}else{
+	      	                	document.location.href='/invitearea/inviteAreaList';
+	      	            	}
+	      	            })
+	      	            .catch(function (error) {
+	      	                 console.log(error);
+	      	            });
+      	             
+         	          } else {
+         	        	console.log('数据未通过校验！');
+         	            return false;
+         	          }
+         	        });
+            },
+            
+            selectAll(val) {
+            	const allValues = []
+            	var isall = 0;
+            	var values = val;
+            	values = ","+values+",";
+            	// 保留所有值
+            	for (const item of this.proviceslist) {
+            	allValues.push(item.id)
+            	}
+            	// 用来储存上一次的值，可以进行对比
+            	const oldVal = this.oldOptions.length === 1 ? this.oldOptions[0] : []
+
+            	console.log(this.oldOptions.length)
+            	console.log(val)
+            	console.log(oldVal)
+            	var flag = false;
+            	var oldflag = false
+            	for(var i =0;i<val.length;i++){
+            		if(val[i] ==0){
+            			flag = true;
+            		}
+            	}
+            	for(var i =0;i<oldVal.length;i++){
+            		if(oldVal[i] ==0){
+            			oldflag = true;
+            		}
+            	}
+            	// 若是全部选择
+            	if (flag) this.form.provincesIds = allValues
+
+            	// 取消全部选中 上次有 当前没有 表示取消全选
+            	if (oldflag && !flag) this.form.provincesIds = []
+
+            	// 点击非全部选中 需要排除全部选中 以及 当前点击的选项
+            	// 新老数据都有全部选中
+            	if (oldflag && flag) {
+            	const index = 0;
+            	val.splice(index, 1) // 排除全选选项
+            	this.form.provincesIds = val
+            	}
+
+            	// 全选未选 但是其他选项全部选上 则全选选上 上次和当前 都没有全选
+            	if (!oldflag && !flag) {
+            	console.log(11)
+            	if (val.length === allValues.length - 1) this.form.provincesIds = val
+            	}
+
+            	// 储存当前最后的结果 作为下次的老数据
+            	this.oldOptions[0] = this.form.provincesIds
+            	}
+            	  
+            
+            ,toScheduleList(){
+            	
+            }
+        },
+        created(){
+            console.info("create method");
+        }
+    })
+</script>
+</html>

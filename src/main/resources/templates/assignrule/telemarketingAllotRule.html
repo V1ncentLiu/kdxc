@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<head th:include="_header_include::frag(~{::title},~{},~{})">
+<head>
+<title>电销员工分配规则</title>
+    <meta charset="UTF-8">
+    <!-- import CSS
+    <link rel="stylesheet" href="css/element-ui.css">
+    <link rel="stylesheet" href="css/base.css"> -->
+</head>
+<body>
+<div id="informationAllot" class="informationAllot mainPadding">  
+    <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
+        <el-breadcrumb-item>Home</el-breadcrumb-item>
+        <el-breadcrumb-item>业务设置</el-breadcrumb-item>
+        <el-breadcrumb-item><a href="JavaScript:void(0)">电销员工分配规则</a></el-breadcrumb-item>
+    </el-breadcrumb>
+    <el-row class="marginB10">
+        <shiro:hasPermission name="teleAssignRule:add">
+          <el-button type="primary" @click="openAddPage"><i class="el-icon-plus"></i>添加新规则</el-button>
+          </shiro:hasPermission>
+         <shiro:hasPermission name="teleAssignRule:edit">
+           <el-button type="success"  @click="openUpdatePage" ><i class="el-icon-edit" ></i>编辑规则</el-button>
+         </shiro:hasPermission>
+       <shiro:hasPermission name="teleAssignRule:delete">
+          <el-button type="danger" @click="deleteDialog"><i class="el-icon-delete"></i>删除</el-button>
+         </shiro:hasPermission>
+    </el-row>
+    <el-row class="marginB10 greybg padding20">
+        <el-row :gutter="20">
+            <el-form :model="form" ref="form">
+                <el-col :span="3">
+                    <el-select v-model="form.companyId" placeholder="请选择分公司" style="width: 100%;">
+                        <el-option
+                            v-for="item in comoption"
+                            :key="item.id"
+                            :label="item.name"
+                            :value="item.id">
+                        </el-option>
+                    </el-select>
+                </el-col>
+                <el-col :span="3">
+                    <el-select v-model="form.depetId" placeholder="请选择电销事业部" style="width: 100%;">
+                        <el-option
+                            v-for="item in deptoption"
+                            :key="item.id"
+                            :label="item.name"
+                            :value="item.id">
+                        </el-option>
+                    </el-select>
+                </el-col>
+                <el-col :span="3">
+                    <el-select v-model="form.orgId" placeholder="请选择电销组" style="width: 100%;">
+                        <el-option
+                            v-for="item in orgoption"
+                            :key="item.id"
+                            :label="item.name"
+                            :value="item.id">
+                        </el-option>
+                    </el-select>
+                </el-col>
+                <el-col :span="5">
+                    <el-form-item label="生效开始:">
+                        <el-col :span="17">
+                            <el-date-picker type="datetime" placeholder="选择日期时间" v-model="form.startTime" style="width: 100%;"></el-date-picker>
+                        </el-col>
+                    </el-form-item>
+                </el-col>
+                <el-col :span="5">
+                    <el-form-item label="结束:">
+                        <el-col :span="19">
+                            <el-date-picker type="datetime" placeholder="选择日期时间" v-model="form.endTime" style="width: 100%;"></el-date-picker>
+                        </el-col>
+                    </el-form-item>
+                </el-col>
+                <el-col :span="3">
+                    <el-input  v-model="form.assignName"  placeholder="规则名称" class="input-with-select"></el-input>
+                </el-col>
+                <el-col :span="1">
+                    <el-button type="primary" @click="initTableData" >搜索</el-button>
+                </el-col>
+            </el-form>
+        </el-row>
+    </el-row>
+    <el-row>
+        <el-table 
+            ref="multipleTable"
+            tooltip-effect="dark"
+            style="width: 100%"
+            @selection-change="handleSelectionChange"
+            border
+            :data="dataTable" 
+            >
+            <el-table-column align="center" type="selection"  @selection-change="handleSelectionChange" width="55"></el-table-column>
+            <el-table-column align="center" prop="assignName" label="规则名称"></el-table-column>
+            <el-table-column align="center" prop="createTime" label="创建时间" :formatter="dateFormat"  width="170"></el-table-column>
+            <el-table-column align="center" prop="createName" label="创建人"></el-table-column>
+            <el-table-column align="center" prop="category" label="资源类别"></el-table-column>
+            <el-table-column align="center" prop="type" label="资源类型"></el-table-column>
+            <el-table-column align="center" prop="searchWord" label="搜索词"></el-table-column>
+            <el-table-column align="center" prop="startTime" label="生效时间" :formatter="dateFormat"  width="170"></el-table-column>
+            <el-table-column align="center" prop="endTime" label="截止时间"   :formatter="dateFormat"  width="170"></el-table-column>
+            <el-table-column align="center" prop="area" label="地区"></el-table-column>
+            <el-table-column align="center" prop="status" label="状态" :formatter="transformStatus"></el-table-column>
+            <el-table-column align="center" prop="handle" label="操作">
+                <template slot-scope="scope">
+                    <div v-if="scope.row.status === 1">
+                        <el-button  @click="updateStatus(scope.row.id,0,'停用')" type="danger"  size="small">
+                                   停用
+                        </el-button>
+                    </div>
+                
+                    <div v-else-if="scope.row.status === 0">
+                        <el-button @click="updateStatus(scope.row.id,1,'启用')"  type="success"  size="small">
+                                   启用
+                        </el-button>
+                    </div>
+                </template>
+            </el-table-column>
+        </el-table>
+         <table-pagination :pager="pager" @change="initTableData"></table-pagination> 
+    </el-row>
+</div>
+</body>
+<!-- import Vue before Element -->
+<div th:include="_footer_include :: #jsLib"></div>
+<script th:inline="javascript"  >
+
+ //下拉电销组
+ var orgSelect=[[${orgSelect}]];
+ //下拉电销事业部
+ var orgDept=[[${orgDept}]];
+ //下拉电销分公司
+ var orgCompany=[[${orgCompany}]];
+ 
+ var  teleRuleVM= new Vue({
+        el: '#informationAllot',
+        data: function() {
+            return {
+                form: {
+                    companyId:'',
+                    deptId:'',
+                    orgId:'',
+                    startTime:'',
+                    endTime:'',
+                    assignName:''
+                },
+                pager:{ 
+                    total: 0,
+                    currentPage: 1,
+                    pageSize: 20,
+                },
+                dataTable: [],
+                orgoption:orgSelect ,
+                deptoption:orgDept  ,
+                comoption: orgCompany,
+                value: '',//下拉选项默认值
+                value1: '',//下拉选项默认值
+                value2: '',//下拉选项默认值 
+               multseleSelection:[],
+            }        	  
+        },
+        methods: {
+        	initTableData(){
+           	 //初始化列表	
+              var pageSize = this.pager.pageSize;
+           	 
+              var pageNum = this.pager.currentPage;
+              
+              var companyId= this.form.companyId;
+              
+              var deptId= this.form.deptId;
+              
+              var orgId= this.form.orgId;
+              
+              var startTime= this.form.startTime;
+              
+              var endTime= this.form.endTime;
+
+              var assignName= this.form.assignName;
+          
+              var  param={};
+              
+              param.assignName=assignName;
+              
+              param.startTime=startTime;
+              
+              param.endTime=endTime;
+              
+              param.teleCompany=companyId;
+              
+              param.teleDepart=deptId;
+              
+              param.telemarketingId=orgId;
+              
+              param.pageSize=pageSize;
+              
+              param.pageNum=pageNum;
+              
+              if(0==pageNum){
+                   pageNum=1;	
+                 }
+                  axios.post('/assignrule/teleAssignRule/queryTeleAssignRuleList',param).then(function (response) {
+        				if(null==response){
+        					alert("返回异常");
+        					return ;
+        				}
+        				var resobj= response.data;
+        				if(null==resobj){
+        					alert("返回异常");
+        					return ;
+        				} 
+        				if(resobj.code!='0'){
+        					alert(response.data.message);
+        					return ;
+        				}
+        				var pageData=resobj.data;
+        				teleRuleVM.pager.total=pageData.total;
+        				teleRuleVM.pager.currentPage = pageData.currentPage;
+        				teleRuleVM.pager.pageSize = pageData.pageSize;
+        				teleRuleVM.dataTable =pageData.data; 	
+        			})
+            		
+           	},
+            searchTable() {//查询表格方法
+
+            },
+    		//日期数据格式化方法
+    		dateFormat:function(row, column) {
+    			var date = row[column.property];
+               	if (date == undefined) {
+    	               return "";
+              	}
+               	return moment(date).format("YYYY-MM-DD HH:mm:ss");
+    		},
+            handleSelectionChange(val) {
+                this.multseleSelection = val;
+            },
+            deleteDialog(){
+              	//选择删除数据
+                var deleteData=this.multseleSelection;
+                if(deleteData.length <1){
+                    this.$message({
+                       message: '请选择删除数据',
+                       type: 'warning'
+                     });
+                  return;
+              }
+               var deleId=[];
+               var deleName="";
+               if(null!=deleteData&&deleteData.length>0){
+             	   for(var i=0;i<deleteData.length;i++){
+             		   deleId.push(deleteData[i].id);  
+             		   deleName+="【"+deleteData[i].assignName+"】";
+             	  }
+                 }
+                
+                this.$confirm('确定要删除'+deleName+'规则？', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }).then(() => {
+                var  param={};
+                param.deleIds=deleId;
+                axios.post('/assignrule/teleAssignRule/deleteTeleAssignRule',param)
+                .then(function (response) {
+                    var data =  response.data
+                    if(data.code=='0'){
+                    	teleRuleVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
+                    	teleRuleVM.initTableData();
+                	  }});
+                    }else{
+                    	console.error(data);
+                    }
+                })
+                }).catch(() => {
+                    this.$message({
+                        type: 'info',
+                        message: '已取消删除'
+                    });          
+                });
+            },
+            //状态转换方法
+            transformStatus(row, column, cellValue, index) {
+                var text="";
+                if(cellValue=="1"){
+                  text="启用"
+                }else if(cellValue=="0"){
+                  text="停用"
+                }
+                return text;
+            },
+            updateStatus(id,status,msg) {
+              	//状态调整
+               var param={};
+                param.id=id;
+                param.status=status;
+                var  operation="停用成功";
+                if(status=='1') {
+                	operation="启用成功"
+                }
+                axios.post('/assignrule/teleAssignRule/updateTeleAssignRuleStatus',param)
+                .then(function (response) {
+                    var data =  response.data
+                    if(data.code=='0'){
+                    	teleRuleVM.$message({message:operation,type:'success',duration:2000,onClose:function(){
+                    	teleRuleVM.initTableData();
+                	  }});
+                    }else{
+                    	console.error(data);
+                    }
+                })
+            },
+            openAddPage(){
+            	window.location.href='/assignrule/teleAssignRule/preSaveTeleAssignRule';
+            },
+            openUpdatePage(){
+                //修改菜单数据	
+            	var rows = this.multseleSelection;
+                if(rows.length!=1){
+                    this.$message({
+                       message: '请选择一条数据进行修改',
+                       type: 'warning'
+                     });
+                    return;
+                }
+              window.location.href='/assignrule/teleAssignRule/preUpdateTeleAssignRule?ruleId='+ rows[0].id;
+            }
+        } ,
+   	  created(){
+   		//初始化数据列表
+   		this.initTableData();
+   	}
+    })
+</script>
+</html>

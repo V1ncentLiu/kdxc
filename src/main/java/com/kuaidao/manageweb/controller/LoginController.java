@@ -128,10 +128,10 @@ public class LoginController {
      * @return
      */
     @RequestMapping("/login")
-    public String login(RedirectAttributes redirectAttributes) {
+    public String login(HttpServletRequest request) {
         Object isShowLogoutBox =
                 SecurityUtils.getSubject().getSession().getAttribute("isShowLogoutBox");
-        redirectAttributes.addAttribute("isShowLogoutBox", isShowLogoutBox);
+        request.setAttribute("isShowLogoutBox", isShowLogoutBox);
         return "login/login";
     }
 
@@ -185,8 +185,13 @@ public class LoginController {
         } else {
             try {
                 if (null != user) {
-                    // 判断账号是否锁定
+                    // 判断账号是否禁用
                     if (SysConstant.USER_STATUS_DISABLE.equals(user.getStatus())) {
+                        errorMessage = "帐号已禁用，请联系管理员修改！";
+                        return new JSONResult<>().fail("1", errorMessage);
+                    }
+                    // 判断账号是否锁定
+                    if (SysConstant.USER_STATUS_LOCK.equals(user.getStatus())) {
                         errorMessage = "账号锁定，请联系管理员修改！";
                         return new JSONResult<>().fail("1", errorMessage);
                     }
@@ -296,7 +301,7 @@ public class LoginController {
                 errorMessage = "账号没有权限";// 产品要求账号不存在是展示"账号没有权限"
                 loginRecord.setLoginStatus(Constants.LOGIN_STATUS_OTHER);
             } catch (IncorrectCredentialsException ise) {
-                errorMessage = "登录密码错误，请重新输入。";
+                errorMessage = "登录密码错误，请重新输入";
                 loginRecord.setLoginStatus(Constants.LOGIN_STATUS_PASSWORD_ERROR);
             } catch (AuthenticationException ae) {
                 errorMessage = "账号没有权限";
@@ -405,7 +410,7 @@ public class LoginController {
         // 查询用户信息
         JSONResult<UserInfoDTO> getbyUserName = userInfoFeignClient.getbyUserName(userInfoReq);
         if (getbyUserName.getData() == null) {
-            msg = "登录用户名未注册。";
+            msg = "登录用户名未注册";
             return new JSONResult<>().fail(SysErrorCodeEnum.ERR_SYSTEM.getCode(), msg);
         }
         UserInfoDTO user = getbyUserName.getData();
@@ -448,7 +453,7 @@ public class LoginController {
         // 查询用户信息
         JSONResult<UserInfoDTO> getbyUserName = userInfoFeignClient.getbyPhone(phone);
         if (getbyUserName.getData() == null) {
-            msg = "此手机号未注册。";
+            msg = "此手机号未注册";
             return new JSONResult<>().fail(SysErrorCodeEnum.ERR_SYSTEM.getCode(), msg);
         }
         UserInfoDTO user = getbyUserName.getData();

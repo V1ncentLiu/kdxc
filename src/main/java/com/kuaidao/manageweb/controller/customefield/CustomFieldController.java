@@ -1,7 +1,5 @@
 package com.kuaidao.manageweb.controller.customefield;
 
-import java.io.File;
-import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -11,24 +9,16 @@ import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.SecurityUtils;
-import org.apache.shiro.authz.annotation.Logical;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.apache.shiro.subject.Subject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.FileSystemResource;
-import org.springframework.core.io.InputStreamResource;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.util.ResourceUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
@@ -51,7 +41,6 @@ import com.kuaidao.sys.dto.customfield.CustomFieldMenuRespDTO;
 import com.kuaidao.sys.dto.customfield.CustomFieldQueryDTO;
 import com.kuaidao.sys.dto.customfield.CustomFieldRespDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
-import groovy.transform.builder.InitializerStrategy.SET;
 
 
 /**
@@ -72,6 +61,7 @@ public class CustomFieldController {
      *   菜单  首页
      * @return
      */
+    @RequiresPermissions("customfield:view")
     @RequestMapping("/customFieldMenuPage")
     public String customFieldMenuPage() {
         return "customfield/customField";
@@ -104,7 +94,7 @@ public class CustomFieldController {
      * @throws InvocationTargetException 
      * @throws IllegalAccessException 
      */
-   // @RequiresPermissions(value= {"customfield:saveMenu","customfield:updateMenu"},logical=Logical.OR)
+    @RequiresPermissions("customfield:add")
     @PostMapping("/saveMenu")
     @ResponseBody
     @LogRecord(description="添加自定义字段菜单",operationType=OperationType.INSERT,menuName=MenuEnum.CUSTOM_FIELD)
@@ -129,7 +119,7 @@ public class CustomFieldController {
      * @param orgDTO
      * @return
      */
-    //@RequiresPermissions("customfield:updateMenu")
+    @RequiresPermissions("customfield:edit")
     @PostMapping("/updateMenu")
     @ResponseBody
     @LogRecord(description="修改自定义字段菜单",operationType=OperationType.UPDATE,menuName=MenuEnum.CUSTOM_FIELD)
@@ -154,7 +144,7 @@ public class CustomFieldController {
      * @param orgDTO
      * @return
      */
-   // @RequiresPermissions("customfield:deleteMenu")
+    @RequiresPermissions("customfield:delete")
     @PostMapping("/deleteMenu")
     @ResponseBody
     @LogRecord(description="删除自定义字段菜单",operationType=OperationType.DELETE,menuName=MenuEnum.CUSTOM_FIELD)
@@ -215,7 +205,7 @@ public class CustomFieldController {
      * @throws InvocationTargetException 
      * @throws IllegalAccessException 
      */
-    //@RequiresPermissions(value= {"customfield:saveField","customfield:updateField"},logical=Logical.OR)
+    @RequiresPermissions("customfield:addField")
     @PostMapping("/save")
     @ResponseBody
     @LogRecord(description="添加自定义字段",operationType=OperationType.INSERT,menuName=MenuEnum.CUSTOM_FIELD)
@@ -241,7 +231,7 @@ public class CustomFieldController {
      * @param orgDTO
      * @return
      */
-    //@RequiresPermissions("customfield:updateField")
+    @RequiresPermissions("customfield:editField")
     @PostMapping("/update")
     @ResponseBody
     @LogRecord(description="修改自定义字段",operationType=OperationType.UPDATE,menuName=MenuEnum.CUSTOM_FIELD)
@@ -265,7 +255,7 @@ public class CustomFieldController {
      * @param orgDTO
      * @return
      */
-    //@RequiresPermissions("customfield:deleteField")
+    @RequiresPermissions("customfield:delField")
     @PostMapping("/delete")
     @ResponseBody
     @LogRecord(description="删除自定义字段",operationType=OperationType.INSERT,menuName=MenuEnum.CUSTOM_FIELD)
@@ -312,7 +302,7 @@ public class CustomFieldController {
      * @param result
      * @return
      */
-   // @RequiresPermissions("customfield:batchSaveField")
+    @RequiresPermissions("customfield:imField")
     @PostMapping("/uploadCustomField")
     @ResponseBody
     @LogRecord(description="上传自定义字段",operationType=OperationType.IMPORTS,menuName=MenuEnum.CUSTOM_FIELD)

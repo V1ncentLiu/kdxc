@@ -22,87 +22,107 @@ import com.kuaidao.sys.dto.user.UserAndRoleRespDTO;
 
 /**
  * 组织机构
+ * 
  * @author: Chen Chengxue
- * @date: 2019年1月3日 下午5:06:53   
+ * @date: 2019年1月3日 下午5:06:53
  * @version V1.0
  */
-@FeignClient(name = "sys-service",path="/sys/organization/organization",fallback = OrganizationFeignClient.HystrixClientFallback.class)
+@FeignClient(name = "sys-service", path = "/sys/organization/organization",
+        fallback = OrganizationFeignClient.HystrixClientFallback.class)
 public interface OrganizationFeignClient {
 
     @PostMapping("/save")
     public JSONResult save(@RequestBody OrganizationAddAndUpdateDTO orgDTO);
-    
+
     @PostMapping("/update")
-    public JSONResult update(@RequestBody OrganizationAddAndUpdateDTO orgDTO);   
-    
+    public JSONResult update(@RequestBody OrganizationAddAndUpdateDTO orgDTO);
+
     @PostMapping("/delete")
     public JSONResult delete(@RequestBody IdListReq idListReq);
-    
+
     /***
-     *  组织机构 数据查询  分页 
+     * 组织机构 数据查询 分页
+     * 
      * @param queryDTO
      * @return
      */
     @PostMapping("/queryOrgDataByParam")
-    public JSONResult<PageBean<OrganizationRespDTO>> queryOrgDataByParam(@RequestBody OrganizationQueryDTO queryDTO);
-    
+    public JSONResult<PageBean<OrganizationRespDTO>> queryOrgDataByParam(
+            @RequestBody OrganizationQueryDTO queryDTO);
+
     /**
      * 查询组织机构
+     * 
      * @param queryDTO
      * @return
      */
     @PostMapping("/queryOrgByParam")
-    public JSONResult<List<OrganizationRespDTO>> queryOrgByParam( @RequestBody OrganizationQueryDTO queryDTO);
-    
-    
+    public JSONResult<List<OrganizationRespDTO>> queryOrgByParam(
+            @RequestBody OrganizationQueryDTO queryDTO);
+
+
     /**
      * 查询组织机构 树
+     * 
      * @param queryDTO
      * @return
      */
     @PostMapping("/query")
     JSONResult<List<TreeData>> query();
-    
+
     /**
      * 查询组织机构下是否由下级
+     * 
      * @param idListReq
      * @return
      */
     @PostMapping("/queryOrgByParentId")
     JSONResult<Boolean> queryOrgByParentId(IdListReq idListReq);
-    
+
     /**
      * 根据组织机构ID ,查询组织机构信息
+     * 
      * @param idEntity
      * @return
      */
     @PostMapping("/queryOrgById")
     JSONResult<OrganizationDTO> queryOrgById(@RequestBody IdEntity idEntity);
-    
-    
+
+
     /**
      * 查询组织机构下的所有用户
+     * 
      * @param reqDTO
      * @return
      */
     @PostMapping("/listOrgUserInfo")
     JSONResult<PageBean<UserAndRoleRespDTO>> listOrgUserInfo(@RequestBody OrgUserReqDTO reqDTO);
-    
+
     /**
-     *     查询组织机构下是否有员工 (包括下级的下级...)
+     * 查询组织机构下是否有员工 (包括下级的下级...)
+     * 
      * @param idEntity
      * @return
      */
     @PostMapping("/queryOrgStaffByParentId")
     JSONResult<Boolean> queryOrgStaffByParentId(@RequestBody IdListReq idListReq);
 
-    
+    /**
+     * 根据 系统代码 ，父级Id 和父级级别 查询所有的下级(子+孙)
+     * 
+     * @param reqDto
+     * @return
+     */
+    @PostMapping("/listDescenDantByParentId")
+    JSONResult<List<OrganizationDTO>> listDescenDantByParentId(
+            @RequestBody OrganizationQueryDTO reqDto);
+
     @Component
-    static class HystrixClientFallback implements  OrganizationFeignClient{
-        
+    static class HystrixClientFallback implements OrganizationFeignClient {
+
         private static Logger logger = LoggerFactory.getLogger(OrganizationFeignClient.class);
 
-        
+
         private JSONResult fallBackError(String name) {
             logger.error(name + "接口调用失败：无法获取目标服务");
             return new JSONResult().fail(SysErrorCodeEnum.ERR_REST_FAIL.getCode(),
@@ -129,13 +149,15 @@ public interface OrganizationFeignClient {
 
 
         @Override
-        public JSONResult<PageBean<OrganizationRespDTO>> queryOrgDataByParam(OrganizationQueryDTO queryDTO) {
+        public JSONResult<PageBean<OrganizationRespDTO>> queryOrgDataByParam(
+                OrganizationQueryDTO queryDTO) {
             return fallBackError("查询组织机构数据，分页");
         }
 
 
         @Override
-        public JSONResult<List<OrganizationRespDTO>> queryOrgByParam(OrganizationQueryDTO queryDTO) {
+        public JSONResult<List<OrganizationRespDTO>> queryOrgByParam(
+                OrganizationQueryDTO queryDTO) {
             return fallBackError("查询组织机构");
         }
 
@@ -168,7 +190,12 @@ public interface OrganizationFeignClient {
         public JSONResult<Boolean> queryOrgStaffByParentId(IdListReq idListReq) {
             return fallBackError("查询组织机构下是否有下级员工");
         }
+
+        public JSONResult<List<OrganizationDTO>> listDescenDantByParentId(
+                OrganizationQueryDTO reqDto) {
+            return fallBackError("根据 系统代码 ，父级Id 和父级级别 查询所有的下级(子+孙)");
+        }
     }
-  
+
 
 }
