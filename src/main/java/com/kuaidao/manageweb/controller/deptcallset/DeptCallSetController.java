@@ -38,6 +38,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.*;
 
 /**
@@ -148,6 +149,9 @@ public class DeptCallSetController {
         UserInfoDTO user = CommUtil.getCurLoginUser();
         dto.setUpdateTime(new Date());
         dto.setUpdateUser(user.getId());
+        if("".equals(dto.getDeptNo())){
+            dto.setDeptNo(null);
+        }
         return deptCallSetFeignClient.updateDeptCallSets(dto);
     }
 
@@ -367,23 +371,39 @@ public class DeptCallSetController {
      * @throws Exception
      */
     @RequestMapping(value = "/download", method = RequestMethod.GET)
-    public ResponseEntity<InputStreamResource> downloadFile(HttpServletRequest request)
-            throws IOException {
+    public ResponseEntity<InputStreamResource> downloadFile(HttpServletRequest request) {
         // 获取文件路径
-        File filePath = ResourceUtils.getFile(
-                ResourceUtils.CLASSPATH_URL_PREFIX + "excel-templates/dept-call-setting.xlsx");
-
-        FileSystemResource file = new FileSystemResource(filePath);
         HttpHeaders headers = new HttpHeaders();
-        headers.add("Cache-Control", "no-cache, no-store, must-revalidate");
-        String fileName  =new String("部门呼叫设置批量导入模板.xlsx".getBytes(),"iso-8859-1");
-        headers.add("Content-Disposition",
-                String.format("attachment; filename=\"%s\"",fileName));
-        headers.add("Pragma", "no-cache");
-        headers.add("Expires", "0");
-        return ResponseEntity.ok().headers(headers).contentLength(file.contentLength())
+        FileSystemResource file = null;
+        InputStream inputStream = null;
+        long length = 0L;
+        logger.info("===进入模板下载==");
+        try{
+            File filePath = ResourceUtils.getFile(
+                    ResourceUtils.CLASSPATH_URL_PREFIX + "excel-templates/dept-call-setting.xlsx");
+            logger.info("==模板路径==");
+            logger.info(filePath.getAbsolutePath());
+            logger.info(filePath.getPath());
+            file = new FileSystemResource(filePath);
+
+            headers.add("Cache-Control", "no-cache, no-store, must-revalidate");
+            String fileName  =new String("部门呼叫设置批量导入模板.xlsx".getBytes(),"iso-8859-1");
+            headers.add("Content-Disposition",
+                    String.format("attachment; filename=\"%s\"",fileName));
+            headers.add("Pragma", "no-cache");
+            headers.add("Expires", "0");
+            length = file.contentLength();
+            inputStream = file.getInputStream();
+        }catch (IOException e){
+            logger.info("===进入异常捕获==");
+            logger.error(e.getMessage());
+            e.printStackTrace();
+            logger.info("===退出异常捕获==");
+        }
+
+        return ResponseEntity.ok().headers(headers).contentLength(length)
                 .contentType(MediaType.parseMediaType("application/octet-stream"))
-                .body(new InputStreamResource(file.getInputStream()));
+                .body(new InputStreamResource(inputStream));
     }
 
 }
