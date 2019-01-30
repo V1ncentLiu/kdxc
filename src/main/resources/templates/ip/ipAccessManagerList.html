@@ -355,6 +355,7 @@ var ipManagerVM = new Vue({
            if (this.$refs['ipPackageAddForm']) {
         	   this.$refs['ipPackageAddForm'].resetFields();
           }
+           ipManagerVM.packAddIpTable=[];
         },
         //打开IP选择
         openIpSelectDiglog(){
@@ -650,7 +651,6 @@ var ipManagerVM = new Vue({
             });
 		},
 		packgeSelectIpOpen(){
-			debugger;
 			//ip包添加选择Ip数据 
 			var ipAddress = this.packageAddSelectForm.ipAddress;
 			var param = {}; 
@@ -662,22 +662,20 @@ var ipManagerVM = new Vue({
 			 var updateTable=ipManagerVM.packAddIpTable;
 				 if(null!=updateTable&&updateTable.length>0){
 					 for ( var i = 0; i <updateTable.length; i++){
-						 notInAddress.push(updateTable[i].ipAddress);
+						 notInAddress.push(updateTable[i].id);
 					 }  
 				  }
-				
 			}else{
 			  var updateTable=ipManagerVM.packUpdateIpTable;
 			  if(null!=updateTable&&updateTable.length>0){
 				 for ( var i = 0; i <updateTable.length; i++){
-					 notInAddress.push(updateTable[i].ipAddress);
+					 notInAddress.push(updateTable[i].id);
 				 }  
 			  }
 			}
-			if(null!=notInAddress&&notInAddress.length>0) {
-				param.notInAddress=	notInAddress.join(",");	
-		    }
+			param.deleId=notInAddress;
 			axios.post('/ip/ipAccess/queryRepositoryList',param).then(function (response) {
+				debugger;
 				if(null==response){
 					alert("返回异常");
 					return ;
