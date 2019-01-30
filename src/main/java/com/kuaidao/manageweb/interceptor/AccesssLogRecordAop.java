@@ -99,10 +99,10 @@ public class AccesssLogRecordAop {
                 	   logRecord.setUserName(getbyUserName.getData().getUsername());
                        logRecord.setName(getbyUserName.getData().getName());
                        logRecord.setPhone(getbyUserName.getData().getPhone());
+                       logRecord.setRequestURL(request.getRequestURI());
+                       logRecord.setRemoteIP(CommonUtil.getIpAddr(request));
+                        logRecord.setContent("登录系统失败");
                    }
-                   logRecord.setRequestURL(request.getRequestURI());
-                   logRecord.setRemoteIP(CommonUtil.getIpAddr(request));
-                   logRecord.setContent("登录系统失败");
                    
                 }
 
