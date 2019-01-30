@@ -52,7 +52,7 @@
             <el-table-column prop="companyPass" label="企业用户名密码"  align="center" show-overflow-tooltip></el-table-column>
             <el-table-column prop="deptUser" label="部门用户"  align="center" show-overflow-tooltip></el-table-column>
             <el-table-column prop="deptPass" label="部门用户密码" align="center" show-overflow-tooltip></el-table-column>
-            <el-table-column prop="orgName" label="所属部门" align="center" >
+            <el-table-column prop="orgName" label="所属部门(组织)" align="center" >
                 <template slot-scope="scope">
                     <span>{{ scope.row.orgName }}</span>
                     <el-button size="mini"  type="danger" @click="handleOrgSet(scope.$index, scope.row)">部门设置</el-button>   <!--handle(scope.$index, scope.row)  selectOrgs-->
@@ -91,7 +91,7 @@
                 <el-form-item label="部门用户密码"  :label-width="formLabelWidth">
                     <el-input v-model="add.deptPass" autocomplete="off"  maxlength="50"   style="width: 80%" ></el-input>
                 </el-form-item>
-                <el-form-item label="所属部门"  :label-width="formLabelWidth">
+                <el-form-item label="所属部门(组织)"  :label-width="formLabelWidth">
                     <el-input v-model="add.orgName"   size="small" maxlength="50" style="width: 80%"  readonly >
                         <el-button slot="append" icon="el-icon-search" @click="selectOrgs">选择组织</el-button>
                     </el-input>
@@ -146,7 +146,7 @@
 
     <el-dialog
             title="导入部门呼叫信息"
-            :visible.sync="importDialogVisible"  width="30%">
+            :visible.sync="importDialogVisible"  width="30%"  @close="closedImportDiaog">
         <template>
             <el-row class="marginB20">
                 下载批量上传模版：<a href="/deptcallset/download"><span style="color:#409EFF;text-decoration:underline;">部门呼叫设置模板</span></a>
@@ -176,7 +176,7 @@
         </template>
     </el-dialog>
 
-    <el-dialog :visible.sync="OraTreeMuliCheckDialog" title="选择组织"  width="30%" >
+    <el-dialog :visible.sync="OraTreeMuliCheckDialog" title="选择组织"  width="30%">
         <template>
             <div style="height: 300px;overflow-y:auto;overflow-x:auto;">
                 <el-tree
@@ -203,7 +203,7 @@
     <el-dialog :visible.sync="showTableDateDialog" title="预览数据"  @opened="showTableOpen" width="70%" :close-on-click-modal="false">
         <template>
             <el-row class="marginB20">
-                预览数据,共 <span id="importNum"></span> 条资源
+                预览数据共 <span id="importNum"></span> 条资源
             </el-row>
             <el-row>
                 <el-table :data="tableData1"  style="width: 100%" tooltip-effect="light"  ref="showTable">
@@ -417,6 +417,10 @@
             },
             openImportDataDialog(){
                 this.importDialogVisible = true;
+
+            },
+            closedImportDiaog(){
+                this.$refs.upload.clearFiles();
             },
             saveOne(){
                 var param = this.add;
