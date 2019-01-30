@@ -377,11 +377,11 @@ public class DeptCallSetController {
         FileSystemResource file = null;
         InputStream inputStream = null;
         long length = 0L;
-        logger.info("========================进入模板下载==============================");
+        logger.info("===进入模板下载==");
         try{
             File filePath = ResourceUtils.getFile(
                     ResourceUtils.CLASSPATH_URL_PREFIX + "excel-templates/dept-call-setting.xlsx");
-            logger.info("==================模板路径========================");
+            logger.info("==模板路径==");
             logger.info(filePath.getAbsolutePath());
             logger.info(filePath.getPath());
             file = new FileSystemResource(filePath);
@@ -395,9 +395,10 @@ public class DeptCallSetController {
             length = file.contentLength();
             inputStream = file.getInputStream();
         }catch (IOException e){
-            logger.info("========================进入异常捕获==============================");
+            logger.info("===进入异常捕获==");
             logger.error(e.getMessage());
             e.printStackTrace();
+            logger.info("===退出异常捕获==");
         }
 
         return ResponseEntity.ok().headers(headers).contentLength(length)
