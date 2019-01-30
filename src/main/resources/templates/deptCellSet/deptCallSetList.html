@@ -9,36 +9,36 @@
 
 <div id="mainDiv"  class="mainPadding">
     <template>
-    <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
-        <el-breadcrumb-item>Home</el-breadcrumb-item>
-        <el-breadcrumb-item>业务设置</el-breadcrumb-item>
-        <el-breadcrumb-item><a href="JavaScript:void(0)">部门呼叫设置</a></el-breadcrumb-item>
-    </el-breadcrumb>
+        <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
+            <el-breadcrumb-item>Home</el-breadcrumb-item>
+            <el-breadcrumb-item>业务设置</el-breadcrumb-item>
+            <el-breadcrumb-item><a href="JavaScript:void(0)">部门呼叫设置</a></el-breadcrumb-item>
+        </el-breadcrumb>
 
-    <el-row type="flex" class="row-bg" justify="start">
-        <el-button type="primary" @click="openAddDialog()">添加部门呼叫设置</el-button>
-        <el-button type="primary" @click="openImportDataDialog()">导入呼叫信息</el-button>
-        <el-button type="primary" @click="openUpdateDialog">修改</el-button>
-    </el-row>
+        <el-row type="flex" class="row-bg" justify="start">
+            <el-button type="primary" @click="openAddDialog()">添加部门呼叫设置</el-button>
+            <el-button type="primary" @click="openImportDataDialog()">导入呼叫信息</el-button>
+            <el-button type="primary" @click="openUpdateDialog">修改</el-button>
+        </el-row>
 
-    <el-row type="flex" class="row-bg" justify="end">
-        <el-form :inline="true" :model="queryForm" class="demo-form-inline" ref="queryForm" >
+        <el-row type="flex" class="row-bg" justify="end">
+            <el-form :inline="true" :model="queryForm" class="demo-form-inline" ref="queryForm" >
 
-            <el-form-item label="" prop="deptNo">
-                <el-input v-model="queryForm.deptNo" placeholder="部门编号"></el-input>
-            </el-form-item>
+                <el-form-item label="" prop="deptNo">
+                    <el-input v-model="queryForm.deptNo" placeholder="部门编号"></el-input>
+                </el-form-item>
 
-            <el-form-item label="" prop="orgId">
-                <el-select v-model="queryForm.orgId" placeholder="请选择所在组织" width="100">
-                    <el-option v-for="item in orgOptions" :key="item.id" :label="item.name" :value="item.id"></el-option>
-                </el-select>
-            </el-form-item>
+                <el-form-item label="" prop="orgId">
+                    <el-select v-model="queryForm.orgId" placeholder="请选择所在组织" width="100">
+                        <el-option v-for="item in orgOptions" :key="item.id" :label="item.name" :value="item.id"></el-option>
+                    </el-select>
+                </el-form-item>
 
-            <el-form-item>
-                <el-button type="primary" @click="initList">搜索</el-button>
-            </el-form-item>
-        </el-form>
-    </el-row>
+                <el-form-item>
+                    <el-button type="primary" @click="initList">搜索</el-button>
+                </el-form-item>
+            </el-form>
+        </el-row>
 
 
         <el-table :data="tableData"  style="width: 100%" tooltip-effect="light"  ref="multipleTable"
@@ -52,7 +52,7 @@
             <el-table-column prop="companyPass" label="企业用户名密码"  align="center" show-overflow-tooltip></el-table-column>
             <el-table-column prop="deptUser" label="部门用户"  align="center" show-overflow-tooltip></el-table-column>
             <el-table-column prop="deptPass" label="部门用户密码" align="center" show-overflow-tooltip></el-table-column>
-            <el-table-column prop="orgName" label="所属部门" align="center" >
+            <el-table-column prop="orgName" label="所属部门(组织)" align="center" >
                 <template slot-scope="scope">
                     <span>{{ scope.row.orgName }}</span>
                     <el-button size="mini"  type="danger" @click="handleOrgSet(scope.$index, scope.row)">部门设置</el-button>   <!--handle(scope.$index, scope.row)  selectOrgs-->
@@ -91,7 +91,7 @@
                 <el-form-item label="部门用户密码"  :label-width="formLabelWidth">
                     <el-input v-model="add.deptPass" autocomplete="off"  maxlength="50"   style="width: 80%" ></el-input>
                 </el-form-item>
-                <el-form-item label="所属部门"  :label-width="formLabelWidth">
+                <el-form-item label="所属部门(组织)"  :label-width="formLabelWidth">
                     <el-input v-model="add.orgName"   size="small" maxlength="50" style="width: 80%"  readonly >
                         <el-button slot="append" icon="el-icon-search" @click="selectOrgs">选择组织</el-button>
                     </el-input>
@@ -146,7 +146,7 @@
 
     <el-dialog
             title="导入部门呼叫信息"
-            :visible.sync="importDialogVisible"  width="30%">
+            :visible.sync="importDialogVisible"  width="30%"  @close="closedImportDiaog">
         <template>
             <el-row class="marginB20">
                 下载批量上传模版：<a href="/deptcallset/download"><span style="color:#409EFF;text-decoration:underline;">部门呼叫设置模板</span></a>
@@ -176,7 +176,7 @@
         </template>
     </el-dialog>
 
-    <el-dialog :visible.sync="OraTreeMuliCheckDialog" title="选择组织"  width="30%" >
+    <el-dialog :visible.sync="OraTreeMuliCheckDialog" title="选择组织"  width="30%">
         <template>
             <div style="height: 300px;overflow-y:auto;overflow-x:auto;">
                 <el-tree
@@ -203,10 +203,10 @@
     <el-dialog :visible.sync="showTableDateDialog" title="预览数据"  @opened="showTableOpen" width="70%" :close-on-click-modal="false">
         <template>
             <el-row class="marginB20">
-                预览数据,共 <span id="importNum"></span> 条资源
+                预览数据共 <span id="importNum"></span> 条资源
             </el-row>
             <el-row>
-                <el-table :data="tableData1" height="650" style="width: 100%" tooltip-effect="light"  ref="showTable">
+                <el-table :data="tableData1"  style="width: 100%" tooltip-effect="light"  ref="showTable">
                     <el-table-column prop="deptNo" label="部门编号"  align="center" show-overflow-tooltip></el-table-column>
                     <el-table-column prop="callCenterNo" label="呼叫中心编号" align="center" show-overflow-tooltip></el-table-column>
                     <el-table-column prop="token" label="Token"  align="center"></el-table-column>
@@ -232,7 +232,7 @@
                 <p style="font-size: 14px;text-indent: 4em">以下内容导入失败，请重新导入</p>
             </el-row>
             <el-row>
-                <el-table :data="tableData2" height="650" style="width: 100%" tooltip-effect="light"  ref="showTable">
+                <el-table :data="tableData2" style="width: 100%" tooltip-effect="light"  ref="showTable">
                     <el-table-column prop="deptNo" label="部门编号"  align="center" show-overflow-tooltip></el-table-column>
                     <el-table-column prop="callCenterNo" label="呼叫中心编号" align="center" show-overflow-tooltip></el-table-column>
                     <el-table-column prop="token" label="Token"  align="center"></el-table-column>
@@ -417,6 +417,10 @@
             },
             openImportDataDialog(){
                 this.importDialogVisible = true;
+
+            },
+            closedImportDiaog(){
+                this.$refs.upload.clearFiles();
             },
             saveOne(){
                 var param = this.add;
@@ -603,7 +607,7 @@
         font-weight: bolder;
     }
     .el-input__inner{
-     //   width: 200px;
+    //   width: 200px;
     }
     .el-button--danger:focus, .el-button--danger:hover{
         background: #6f7180;
