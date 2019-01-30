@@ -148,6 +148,9 @@ public class DeptCallSetController {
         UserInfoDTO user = CommUtil.getCurLoginUser();
         dto.setUpdateTime(new Date());
         dto.setUpdateUser(user.getId());
+        if("".equals(dto.getDeptNo())){
+            dto.setDeptNo(null);
+        }
         return deptCallSetFeignClient.updateDeptCallSets(dto);
     }
 
