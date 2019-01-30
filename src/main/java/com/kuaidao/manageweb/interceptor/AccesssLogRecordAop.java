@@ -81,7 +81,7 @@ public class AccesssLogRecordAop {
                 getRequestParam(logRecord, request);
             }
             getRespParam(logRecord, obj);
-            if ("0".equals(logRecord.getResCode())) {
+            if ("0".equals(logRecord.getResCode())  || logRecord.getResCode() ==null) {
                 if ((OperationType.LOGIN.toString()).equals(logRecord.getOperationType())) {
                     logRecord.setContent("登录系统成功");
                 }
