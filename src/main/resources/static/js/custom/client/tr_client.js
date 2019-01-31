@@ -114,11 +114,11 @@ var clientVm = new Vue({
         	 callbackPhone:[
         		 {validator:function(rule,value,callback){
         			 if(value){
-        				 if(Number.isInteger(Number(value)) && Number(value) > 0){                
-                	        callback();
-                	      }else{                 
-                	        callback(new Error("只可以输入正整数数字"));               
-                	      } 
+        				  if(!/^[0-9]*$/.test(value)){
+        					  callback(new Error("只可以输入正整数数字"));     
+        	        	  }else{
+        	        		  callback();
+        	        	  }
         			 }else{
         				 callback();
         			 }
@@ -447,11 +447,11 @@ var clientVm = new Vue({
         	   this.initClientData();
            },
            updateCallbackPhone(id,callbackPhone){
-        	   if(Number.isInteger(Number(callbackPhone)) && Number(callbackPhone) > 0){                
-          	      }else{                 
-          	      clientVm.$message({message:'只可以输入正整数数字',type:'warning'});
-          	        return false;
-          	      } 
+        	   if(!/^[0-9]*$/.test(callbackPhone)){
+        		   clientVm.$message({message:'只可以输入正整数数字',type:'warning'});
+         	        return false;
+        	    }
+        	    
         	   var param={};
         	   param.id=id;
         	   param.callbackPhone=callbackPhone;
