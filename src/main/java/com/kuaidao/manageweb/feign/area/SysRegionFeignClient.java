@@ -14,12 +14,14 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import com.kuaidao.aggregation.dto.assignrule.InfoAssignDTO;
 import com.kuaidao.aggregation.dto.assignrule.InfoAssignQueryDTO;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
+import com.kuaidao.common.entity.IdEntity;
 import com.kuaidao.common.entity.IdListReq;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.common.entity.TreeData;
 import com.kuaidao.sys.dto.area.SysRegionDTO;
 import com.kuaidao.sys.dto.organization.OrganizationAddAndUpdateDTO;
+import com.kuaidao.sys.dto.organization.OrganizationDTO;
 import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
 import com.kuaidao.sys.dto.organization.OrganizationRespDTO;
 
@@ -67,6 +69,15 @@ public interface SysRegionFeignClient {
 
     @PostMapping("/delete")
     public JSONResult delete(@RequestBody IdListReq idListReq);
+    
+    /**
+     * 根据ID ,查询区域信息
+     * 
+     * @param idEntity
+     * @return
+     */
+    @PostMapping("/queryOrgById")
+    JSONResult<SysRegionDTO> queryOrgById(@RequestBody IdEntity idEntity);
 	@Component
 	static class HystrixClientFallback implements SysRegionFeignClient {
 
@@ -134,7 +145,12 @@ public interface SysRegionFeignClient {
 			return fallBackError("查询区域树数据失败");
 		}
 
-	
+
+		@Override
+		public JSONResult<SysRegionDTO> queryOrgById(IdEntity idEntity) {
+			// TODO Auto-generated method stub
+			return fallBackError("根据ID ,查询区域信息");
+		}
 
 	}
 }
