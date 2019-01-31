@@ -185,18 +185,17 @@
                         :default-expanded-keys="expandedKeys"
                         :default-checked-keys="multipleTreeSelection"
                         ref="tree"
-                        show-checkbox
                         highlight-current
-                        :check-strictly="checkStrictly"
-                        :expand-on-click-node=false
-                        @check="handleTreeSelectionChange"
+                        @node-click="clickOrgNode"
                         class="leftTree">
                 </el-tree>
             </div>
+            <!--
             <span slot="footer" class="dialog-footer">
                     <el-button @click="closeOraTreeMultiCheck">取 消</el-button>
                     <el-button type="primary" @click="returnCheckNodekeys">确 定</el-button>
             </span>
+            -->
         </template>
     </el-dialog>
 
@@ -604,6 +603,41 @@
             },
             closeOraTreeMultiCheck(){
                 this.OraTreeMuliCheckDialog = false
+            },
+            clickOrgNode(data,node,obj){//点击左侧节点
+                console.log(data)
+                if(data.children==null) {
+                    if (this.orgFlag == 'add') {
+                        this.add.orgId = data.id;
+                        this.add.orgName = data.label;
+                        this.OraTreeMuliCheckDialog = false
+                    } else if (this.orgFlag == 'update') {
+                        this.update.orgId = data.id;
+                        this.update.orgName = data.label;
+                        this.OraTreeMuliCheckDialog = false
+                    } else {
+                        mainDivVM.orgSet.orgId = data.id;
+                        var param = mainDivVM.orgSet;
+                        console.log(param)
+                        axios.post("/deptcallset/updateDeptcallsetForNotNull", param)
+                            .then(function (response) {
+                                console.log(response.data)
+                                if (response.data.code == 0) {
+                                    mainDivVM.$message({
+                                        type: 'success', message: '更新成功!', duration: 2000, onClose: function () {
+                                            // mainDivVM.pager.pageNum = 1
+                                            mainDivVM.initList();
+                                            mainDivVM.OraTreeMuliCheckDialog = false
+                                        }
+                                    });
+                                } else {
+                                    mainDivVM.$message.error(response.data.msg);
+                                }
+                            }).catch(function (error) {
+                            console.log(error);
+                        });
+                    }
+                }
             },
             resetForm(formName) {
                 console.log( mainDivVM.$refs[formName])
