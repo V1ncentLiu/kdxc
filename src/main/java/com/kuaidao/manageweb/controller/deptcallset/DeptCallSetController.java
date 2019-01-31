@@ -152,6 +152,9 @@ public class DeptCallSetController {
         if("".equals(dto.getDeptNo())){
             dto.setDeptNo(null);
         }
+        if(dto.getOrgId()==0L){
+            dto.setOrgId(null);
+        }
         return deptCallSetFeignClient.updateDeptCallSets(dto);
     }
 
@@ -296,7 +299,8 @@ public class DeptCallSetController {
                 UserInfoDTO user = CommUtil.getCurLoginUser();
                 rowDto.setId(IdUtil.getUUID());
                 rowDto.setCreateUser(user.getId());
-                rowDto.setCreateTime(new Date());
+                Date date = new Date(System.currentTimeMillis()+i*-1000);
+                rowDto.setCreateTime(date);
                 dataList.add(rowDto);
             }else{
                 errList.add(rowDto);
@@ -373,6 +377,7 @@ public class DeptCallSetController {
     @RequestMapping(value = "/download", method = RequestMethod.GET)
     public ResponseEntity<InputStreamResource> downloadFile(HttpServletRequest request) {
         // 获取文件路径
+        logger.info("===进入方法==");
         HttpHeaders headers = new HttpHeaders();
         FileSystemResource file = null;
         InputStream inputStream = null;
