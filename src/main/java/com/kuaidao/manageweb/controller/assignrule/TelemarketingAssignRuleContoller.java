@@ -249,7 +249,7 @@ public class TelemarketingAssignRuleContoller {
 	@RequiresPermissions("teleAssignRule:edit")
 	public String preUpdateTeleAssignRule(HttpServletRequest request, Model model) {
 		RoleQueryDTO query = new RoleQueryDTO();
-		query.setRoleCode(RoleCodeEnum.DXZJ.name());
+		query.setRoleCode(RoleCodeEnum.DXCYGW.name());
 		Subject subject = SecurityUtils.getSubject();
 		UserInfoDTO user = (UserInfoDTO) subject.getSession().getAttribute("user");
 		JSONResult<List<RoleInfoDTO>> roleJson = roleManagerFeignClient.qeuryRoleByName(query);
