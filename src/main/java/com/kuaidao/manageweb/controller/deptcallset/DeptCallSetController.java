@@ -152,6 +152,9 @@ public class DeptCallSetController {
         if("".equals(dto.getDeptNo())){
             dto.setDeptNo(null);
         }
+        if(dto.getOrgId()==0L){
+            dto.setOrgId(null);
+        }
         return deptCallSetFeignClient.updateDeptCallSets(dto);
     }
 
@@ -373,6 +376,7 @@ public class DeptCallSetController {
     @RequestMapping(value = "/download", method = RequestMethod.GET)
     public ResponseEntity<InputStreamResource> downloadFile(HttpServletRequest request) {
         // 获取文件路径
+        logger.info("===进入方法==");
         HttpHeaders headers = new HttpHeaders();
         FileSystemResource file = null;
         InputStream inputStream = null;
