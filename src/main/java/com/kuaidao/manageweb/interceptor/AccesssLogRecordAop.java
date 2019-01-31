@@ -36,7 +36,7 @@ import com.kuaidao.sys.dto.user.UserInfoReq;
  */
 @Component
 @Aspect
-public class AccesssLogRecordAop {
+public class AccesssLogRecordAop {  
     private static final String FAIL_CODE = "10001";
 
     @Autowired
