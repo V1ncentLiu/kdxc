@@ -106,6 +106,7 @@ public class InviteAreaController {
      */
     @RequestMapping("/addInviteAreaPage")
     public String addInviteArea(HttpServletRequest request) {
+    	logger.info("1111111111111111111111111111111111111111");
     	//获取省份
     	List<SysRegionDTO> proviceslist = sysRegionFeignClient.getproviceList().getData();
     	OrganizationQueryDTO orgDto = new OrganizationQueryDTO();
@@ -119,6 +120,7 @@ public class InviteAreaController {
         JSONResult<List<ProjectInfoDTO>> listNoPage =
                 projectInfoFeignClient.listNoPage(new ProjectInfoPageParam());
         //
+        logger.info("22222222222222222222222222222222222");
         SysRegionDTO sysRegionDTO = new SysRegionDTO();
         sysRegionDTO.setId(0L);
         sysRegionDTO.setName("全选");
@@ -127,6 +129,7 @@ public class InviteAreaController {
 		request.setAttribute("swList", swList.getData());
 		request.setAttribute("dxList", dxList.getData());
 		request.setAttribute("proviceslist", proviceslist);
+		logger.info("3333333333333333333333");
 		return "inviteArea/addInviteAreaPage";
     }
     
