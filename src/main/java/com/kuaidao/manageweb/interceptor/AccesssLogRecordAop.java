@@ -36,7 +36,7 @@ import com.kuaidao.sys.dto.user.UserInfoReq;
  */
 @Component
 @Aspect
-public class AccesssLogRecordAop {
+public class AccesssLogRecordAop {  
     private static final String FAIL_CODE = "10001";
 
     @Autowired
@@ -81,7 +81,7 @@ public class AccesssLogRecordAop {
                 getRequestParam(logRecord, request);
             }
             getRespParam(logRecord, obj);
-            if ("0".equals(logRecord.getResCode())) {
+            if ("0".equals(logRecord.getResCode())  || logRecord.getResCode() ==null) {
                 if ((OperationType.LOGIN.toString()).equals(logRecord.getOperationType())) {
                     logRecord.setContent("登录系统成功");
                 }
@@ -99,11 +99,10 @@ public class AccesssLogRecordAop {
                 	   logRecord.setUserName(getbyUserName.getData().getUsername());
                        logRecord.setName(getbyUserName.getData().getName());
                        logRecord.setPhone(getbyUserName.getData().getPhone());
-                       logRecord.setRequestURL(request.getRequestURI());
-                       logRecord.setRemoteIP(CommonUtil.getIpAddr(request));
-                        logRecord.setContent("登录系统失败");
                    }
-                   
+                   logRecord.setRequestURL(request.getRequestURI());
+                   logRecord.setRemoteIP(CommonUtil.getIpAddr(request));
+                    logRecord.setContent("登录系统失败");
                 }
 
             }

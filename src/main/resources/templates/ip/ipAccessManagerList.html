@@ -355,6 +355,8 @@ var ipManagerVM = new Vue({
            if (this.$refs['ipPackageAddForm']) {
         	   this.$refs['ipPackageAddForm'].resetFields();
           }
+           ipManagerVM.selectIpType='1';
+           ipManagerVM.packAddIpTable=[];
         },
         //打开IP选择
         openIpSelectDiglog(){
@@ -374,16 +376,25 @@ var ipManagerVM = new Vue({
 			param.ipAddress=ipAddress;
 			axios.post('/ip/ipAccess/queryRepositoryList',param).then(function (response) {
 				if(null==response){
-					alert("返回异常");
+					ipManagerVM.$message({
+                        message: "接口调用失败",
+                        type: 'error'
+                      }); 
 					return ;
 				}
 				var resobj= response.data;
 				if(null==resobj){
-					alert("返回异常");
+					ipManagerVM.$message({
+                        message: "接口调用失败",
+                        type: 'error'
+                      }); 
 					return ;
 				} 
 				if(resobj.code!='0'){
-					alert(response.data.message);
+					ipManagerVM.$message({
+                        message: "接口调用失败",
+                        type: 'error'
+                      }); 
 					return ;
 				}
 				var pageData=resobj.data;
@@ -426,16 +437,25 @@ var ipManagerVM = new Vue({
 		    param.id=updateInfo[0].id;
 			axios.post('/ip/ipAccess/findPackageById',param).then(function (response){
 				if(null==response){
-					alert("返回异常");
+					ipManagerVM.$message({
+                        message: "接口调用失败",
+                        type: 'error'
+                      }); 
 					return ;
 				}
 				var resobj= response.data;
 				if(null==resobj){
-					alert("返回异常");
+					ipManagerVM.$message({
+                        message: "接口调用失败",
+                        type: 'error'
+                      }); 
 					return ;
 				} 
 				if(resobj.code!='0'){
-					alert(response.data.message);
+					ipManagerVM.$message({
+                        message: "接口调用失败",
+                        type: 'error'
+                      }); 
 					return ;
 				}
 				var packInfoData=resobj.data;
@@ -459,16 +479,25 @@ var ipManagerVM = new Vue({
 			param.ipAddress=ipAddress;
 			axios.post('/ip/ipAccess/queryPackageList',param).then(function (response) {
 				if(null==response){
-					alert("返回异常");
+					ipManagerVM.$message({
+                        message: "接口调用失败",
+                        type: 'error'
+                      }); 
 					return ;
 				}
 				var resobj= response.data;
 				if(null==resobj){
-					alert("返回异常");
+					ipManagerVM.$message({
+                        message: "接口调用失败",
+                        type: 'error'
+                      }); 
 					return ;
 				} 
 				if(resobj.code!='0'){
-					alert(response.data.message);
+					ipManagerVM.$message({
+                        message: "接口调用失败",
+                        type: 'error'
+                      }); 
 					return ;
 				}
 				var pageData=resobj.data;
@@ -650,7 +679,6 @@ var ipManagerVM = new Vue({
             });
 		},
 		packgeSelectIpOpen(){
-			debugger;
 			//ip包添加选择Ip数据 
 			var ipAddress = this.packageAddSelectForm.ipAddress;
 			var param = {}; 
@@ -662,33 +690,39 @@ var ipManagerVM = new Vue({
 			 var updateTable=ipManagerVM.packAddIpTable;
 				 if(null!=updateTable&&updateTable.length>0){
 					 for ( var i = 0; i <updateTable.length; i++){
-						 notInAddress.push(updateTable[i].ipAddress);
+						 notInAddress.push(updateTable[i].id);
 					 }  
 				  }
-				
 			}else{
 			  var updateTable=ipManagerVM.packUpdateIpTable;
 			  if(null!=updateTable&&updateTable.length>0){
 				 for ( var i = 0; i <updateTable.length; i++){
-					 notInAddress.push(updateTable[i].ipAddress);
+					 notInAddress.push(updateTable[i].id);
 				 }  
 			  }
 			}
-			if(null!=notInAddress&&notInAddress.length>0) {
-				param.notInAddress=	notInAddress.join(",");	
-		    }
+			param.deleId=notInAddress;
 			axios.post('/ip/ipAccess/queryRepositoryList',param).then(function (response) {
 				if(null==response){
-					alert("返回异常");
+					ipManagerVM.$message({
+                        message: "接口调用失败",
+                        type: 'error'
+                      }); 
 					return ;
 				}
 				var resobj= response.data;
 				if(null==resobj){
-					alert("返回异常");
+					ipManagerVM.$message({
+                        message: "接口调用失败",
+                        type: 'error'
+                      }); 
 					return ;
 				} 
 				if(resobj.code!='0'){
-					alert(response.data.message);
+					ipManagerVM.$message({
+                        message: "接口调用失败",
+                        type: 'error'
+                      }); 
 					return ;
 				}
 				var pageData=resobj.data;
@@ -722,16 +756,25 @@ var ipManagerVM = new Vue({
 					param.ipRepositorys=savepackageIp;
 					axios.post('/ip/ipAccess/saveIpPackage',param).then(function (response) {
 						if(null==response){
-							alert("返回异常");
+							ipManagerVM.$message({
+		                        message: "接口调用失败",
+		                        type: 'error'
+		                      }); 
 							return ;
 						}
 						var resobj= response.data;
 						if(null==resobj){
-							alert("返回异常");
+							ipManagerVM.$message({
+		                        message: "接口调用失败",
+		                        type: 'error'
+		                      }); 
 							return ;
 						} 
 						if(resobj.code!='0'){
-							alert(response.data.message);
+							ipManagerVM.$message({
+		                        message: "接口调用失败",
+		                        type: 'error'
+		                      }); 
 							return ;
 						}
 						ipManagerVM.addIpPackageVisible=false;
@@ -759,16 +802,25 @@ var ipManagerVM = new Vue({
 					param.id=ipManagerVM.oldPackageId;
 					axios.post('/ip/ipAccess/updateIpPackage',param).then(function (response) {
 						if(null==response){
-							alert("返回异常");
+							ipManagerVM.$message({
+		                        message: "接口调用失败",
+		                        type: 'error'
+		                      }); 
 							return ;
 						}
 						var resobj= response.data;
 						if(null==resobj){
-							alert("返回异常");
+							ipManagerVM.$message({
+		                        message: "接口调用失败",
+		                        type: 'error'
+		                      }); 
 							return ;
 						} 
 						if(resobj.code!='0'){
-							alert(response.data.message);
+							ipManagerVM.$message({
+		                        message: "接口调用失败",
+		                        type: 'error'
+		                      }); 
 							return ;
 						}
 						ipManagerVM.updateIpPackageVisible=false;
@@ -786,18 +838,27 @@ var ipManagerVM = new Vue({
 		refreshIpTableData(response){
 			//修改新增Ip后刷新IP列表
 			if(null==response){
-				alert("返回异常");
+				ipManagerVM.$message({
+                    message: "接口调用失败",
+                    type: 'error'
+                  }); 
 				return ;
 			}
 			var resobj= response.data;
 			if(null==resobj){
-				alert("返回异常");
+				ipManagerVM.$message({
+                    message: "接口调用失败",
+                    type: 'error'
+                  }); 
 				return ;
 			}        		
 			if(resobj.code=='0'){
 				ipManagerVM.queryIpDataList();	
 			}else{
-				alert("返回异常");
+				ipManagerVM.$message({
+                    message: "接口调用失败",
+                    type: 'error'
+                  }); 
 				return;
 			}	  
 		},
