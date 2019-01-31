@@ -299,7 +299,8 @@ public class DeptCallSetController {
                 UserInfoDTO user = CommUtil.getCurLoginUser();
                 rowDto.setId(IdUtil.getUUID());
                 rowDto.setCreateUser(user.getId());
-                rowDto.setCreateTime(new Date());
+                Date date = new Date(System.currentTimeMillis()+i*-1000);
+                rowDto.setCreateTime(date);
                 dataList.add(rowDto);
             }else{
                 errList.add(rowDto);

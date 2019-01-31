@@ -22,7 +22,7 @@ import com.kuaidao.logmgt.dto.AccessLogReqDTO;
  * @version V1.0
  */
 
-@FeignClient(name = "log-service-1", fallback = LogMgtFeignClient.HystrixClientFallback.class)
+@FeignClient(name = "log-service", fallback = LogMgtFeignClient.HystrixClientFallback.class)
 public interface LogMgtFeignClient {
 
 	@RequestMapping(method = RequestMethod.POST, value = "/log/logging/insertLogRecord")
