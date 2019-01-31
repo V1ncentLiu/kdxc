@@ -233,5 +233,16 @@ public class OrganizationController {
     public JSONResult<Boolean> queryOrgStaffByParentId(@RequestBody IdListReq idListReq) {
         return organizationFeignClient.queryOrgStaffByParentId(idListReq);
     }
+    
+    /**
+     * 查询 系统下 叶子节点组织机构 
+     * @param reqDto  system_code
+     * @return
+     */
+    @PostMapping("/listLeafOrg")
+    @ResponseBody
+    JSONResult<List<OrganizationDTO>> listLeafOrg(@RequestBody OrganizationQueryDTO reqDto){
+        return organizationFeignClient.listLeafOrg(reqDto);
+    }
 
 }
