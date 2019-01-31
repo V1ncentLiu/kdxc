@@ -281,13 +281,13 @@ var proSelect=[[${proSelect}]];
         	},
         	//添加提交
             submitForm(formName) {
-                this. updateDialogFormVisible=false;
                 this.$refs[formName].validate((valid) => {
                   if (valid) {
-                   var param={};
-                   var  projectArray= ruleVm.form.valueMultiple;
-                   var proIdArry=[];
-                   for(var i=0;i<projectArray.length;i++) {
+                  this.updateDialogFormVisible=false;
+                  var param={};
+                  var  projectArray= ruleVm.form.valueMultiple;
+                  var proIdArry=[];
+                  for(var i=0;i<projectArray.length;i++) {
                 	    var pro={};
                 	    pro.projectId=projectArray[i];
                 	    proIdArry.push(pro);
@@ -310,9 +310,10 @@ var proSelect=[[${proSelect}]];
           },
         	//修改提交
             submitUpdateForm(formName) {
-                this. updateDialogFormVisible=false;
+        
                 this.$refs[formName].validate((valid) => {
                   if (valid) {
+                   this. updateDialogFormVisible=false;
                    var param={};
                    var  projectArray= ruleVm.form.valueMultiple;
                    var proIdArry=[];
@@ -395,6 +396,13 @@ var proSelect=[[${proSelect}]];
                var deleteData=this.multseleSelection;
                var deleId=[];
                var deleName="";
+               if(null==deleteData||deleteData.length<1){
+            	   this.$message({
+                       message: '请选择删除数据',
+                       type: 'warning'
+                     });
+                    return;
+            	}
                if(null!=deleteData&&deleteData.length>0){
             	   for(var i=0;i<deleteData.length;i++){
             		   deleId.push(deleteData[i].id);  
