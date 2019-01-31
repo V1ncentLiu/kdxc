@@ -44,11 +44,24 @@ public class ModuleManagerController {
 		ModuleQueryDTO dto = new ModuleQueryDTO();
 		dto.setSystemCode(SystemCodeConstant.HUI_JU);
 		String moduleId= request.getParameter("moduleId");
-		
 		JSONResult<List<TreeData>> treeJsonRes = moduleManagerFeignClient.queryModuleTree(dto);
 		if (treeJsonRes != null && JSONResult.SUCCESS.equals(treeJsonRes.getCode()) && treeJsonRes.getData() != null) {
 			request.setAttribute("moduleData", treeJsonRes.getData());
-			request.setAttribute("selectModule", moduleId);
+			if(null!=moduleId){
+				ModuleQueryDTO queryDto = new ModuleQueryDTO();
+				queryDto.setId(new Long(moduleId));
+				JSONResult<ModuleInfoDTO> dtoJson = moduleManagerFeignClient.queryModuleById(queryDto);
+				if (dtoJson != null && JSONResult.SUCCESS.equals(dtoJson.getCode()) && dtoJson.getData() != null) {
+					ModuleInfoDTO  info=dtoJson.getData();
+					TreeData tree=new TreeData();
+					dtoJson.getData();
+					tree.setLevel(info.getLevel());
+					tree.setId(info.getId());
+					tree.setLabel(info.getName());
+					request.setAttribute("selectModule", tree);	
+				}
+			}
+		
 		} else {
 			logger.error("query module tree,res{{}}", treeJsonRes);
 		}
@@ -164,10 +177,7 @@ public class ModuleManagerController {
 					if(!checkOptions.contains(dataInfo)){
 						checkOptions.add(opt.getName() + "(" + opt.getCode() + ")");
 					}
-					
-
 				}
-
 			}
 
 			moduleDto.setType(checkModuleId);
