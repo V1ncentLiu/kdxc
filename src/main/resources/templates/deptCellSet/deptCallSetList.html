@@ -30,7 +30,7 @@
 
                 <el-form-item label="" prop="orgId">
                     <el-select v-model="queryForm.orgId" placeholder="请选择所在组织" width="100">
-                        <el-option v-for="item in orgOptions" :key="item.id" :label="item.name" :value="item.id"></el-option>
+                        <el-option v-for="item in orgLeafOptions" :key="item.id" :label="item.name" :value="item.id"></el-option>
                     </el-select>
                 </el-form-item>
 
@@ -323,6 +323,7 @@
                 orgId:""
             },
             orgOptions: [],
+            orgLeafOptions: [],
             tableData:[],
             tableData1:[],
             tableData2:[],
@@ -356,6 +357,14 @@
             },
             initOrgs(){
                 var param = {}
+                axios.post('/deptcallset/listLeafOrg',param).then(function (response) {
+                    if(null===response||response.data==null||response.data.code!='0'){
+                        return ;
+                    }else{
+                        mainDivVM.orgLeafOptions = response.data.data;
+                    }
+                })
+
                 axios.post('/deptcallset/allOrgs',param).then(function (response) {
                     if(null===response||response.data==null||response.data.code!='0'){
                         return ;
