@@ -4,6 +4,7 @@ import com.kuaidao.aggregation.dto.deptcallset.DeptCallSetAddAndUpdateDTO;
 import com.kuaidao.aggregation.dto.deptcallset.DeptCallSetQueryDTO;
 import com.kuaidao.aggregation.dto.deptcallset.DeptCallSetRespDTO;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
+import com.kuaidao.common.constant.SystemCodeConstant;
 import com.kuaidao.common.entity.IdEntity;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
@@ -15,6 +16,7 @@ import com.kuaidao.manageweb.feign.deptcallset.DeptCallSetFeignClient;
 import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
 import com.kuaidao.manageweb.util.CommUtil;
 import com.kuaidao.manageweb.util.IdUtil;
+import com.kuaidao.sys.dto.organization.OrganizationDTO;
 import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
 import com.kuaidao.sys.dto.organization.OrganizationRespDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
@@ -70,6 +72,18 @@ public class DeptCallSetController {
     public JSONResult<List<OrganizationRespDTO>> allOrgs(){
         OrganizationQueryDTO dto = new OrganizationQueryDTO();
        return organizationFeignClient.queryOrgByParam(dto);
+    }
+
+    /**
+     * 获取组织结构所有叶子节点
+     * @return
+     */
+    @RequestMapping("/listLeafOrg")
+    @ResponseBody
+    public JSONResult<List<OrganizationDTO>> listLeafOrg(){
+        OrganizationQueryDTO dto = new OrganizationQueryDTO();
+        dto.setSystemCode(SystemCodeConstant.HUI_JU);
+        return organizationFeignClient.listLeafOrg(dto);
     }
 
     /**
@@ -299,7 +313,8 @@ public class DeptCallSetController {
                 UserInfoDTO user = CommUtil.getCurLoginUser();
                 rowDto.setId(IdUtil.getUUID());
                 rowDto.setCreateUser(user.getId());
-                rowDto.setCreateTime(new Date());
+                Date date = new Date(System.currentTimeMillis()+i*-1000);
+                rowDto.setCreateTime(date);
                 dataList.add(rowDto);
             }else{
                 errList.add(rowDto);

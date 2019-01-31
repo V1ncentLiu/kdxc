@@ -34,6 +34,7 @@ import com.kuaidao.aggregation.dto.client.TrClientDataRespDTO;
 import com.kuaidao.aggregation.dto.client.TrClientQueryDTO;
 import com.kuaidao.aggregation.dto.client.TrClientRespDTO;
 import com.kuaidao.aggregation.dto.client.UploadTrClientDataDTO;
+import com.kuaidao.common.constant.OrgTypeConstant;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.constant.SystemCodeConstant;
 import com.kuaidao.common.entity.IdEntity;
@@ -82,6 +83,7 @@ public class ClientController {
     public String trClientIndex(HttpServletRequest request) {
         OrganizationQueryDTO queryDTO = new OrganizationQueryDTO();
         queryDTO.setSystemCode(SystemCodeConstant.HUI_JU);
+        queryDTO.setOrgType(OrgTypeConstant.DXZ);
         JSONResult<List<OrganizationRespDTO>> orgListJr =
                 organizationFeignClient.queryOrgByParam(queryDTO);
         if (orgListJr == null || !JSONResult.SUCCESS.equals(orgListJr.getCode())) {
@@ -312,20 +314,26 @@ public class ClientController {
             if (i == 1) {
                 // 记录上传列数
                 int rowSize = rowList.size();
-                logger.info("upload custom field,userId{{}},upload rows num{{}}", userId, rowSize);
+                logger.info("upload tr_client,userId{{}},upload rows num{{}}", userId, rowSize);
             }
             for (int j = 0; j < rowList.size(); j++) {
                 Object object = rowList.get(j);
                 String value = (String) object;
-                if (j == 0) {// 坐席号
+                
+                if (j == 0) {
+                 // 坐席号
                     rowDto.setClientNo(value);
-                } else if (j == 1) {// 点小组
+                } else if (j == 1) {
+                 // 点小组
                     rowDto.setOrgName(value);
-                } else if (j == 2) {// 绑定电话
+                } else if (j == 2) {
+                 // 绑定电话
                     rowDto.setBindPhone(value);
-                } else if (j == 3) {// 回显号
+                } else if (j == 3) {
+                    // 回显号
                     rowDto.setDisplayPhone(value);
-                } else if (j == 4) {// 回呼号码
+                } else if (j == 4) {
+                    // 回呼号码
                     rowDto.setCallbackPhone(value);
                 }
             }

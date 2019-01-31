@@ -222,6 +222,7 @@ var clientVm = new Vue({
              
              
              this.$confirm('确定要删除 '+clientNos+'坐席吗？', '提示', {
+            	 closeOnClickModal:false,
                  confirmButtonText: '确定',
                  cancelButtonText: '取消',
                  type: 'warning'
@@ -279,6 +280,22 @@ var clientVm = new Vue({
           		this.$refs['clientForm'].resetFields();
           	}
         	 
+        	 //加载用户信息
+             axios.post('/user/userManager/listUserInfoByParam', {})
+             .then(function (response) {
+                 var resData = response.data;
+                 if(resData.code=='0'){
+              	    clientVm.userList = resData.data;                     
+                 }else{
+              	     clientVm.$message({message:'查询失败',type:'error'});
+                     console.error(resData);
+                 }
+             
+             })
+             .catch(function (error) {
+                  console.log(error);
+             }).then(function(){
+             });
         	
         	 var param={id:rows[0].id};
              axios.post('/client/client/queryQimoClientById', param)
@@ -364,7 +381,7 @@ var clientVm = new Vue({
          },
          initClientData(){
         	 var param = this.searchForm;
-        	 param.pageNum=this.pager.pageNum;
+        	 param.pageNum=this.pager.currentPage;
         	 param.pageSize=this.pager.pageSize;
         	 axios.post('/client/client/listQimoClientPage',param)
              .then(function (response) {
@@ -390,6 +407,7 @@ var clientVm = new Vue({
          },
          addBatchClient(){
         	 this.dialogBatchVisible=true;
+        	 this.fileList=[];
          },
          submitUpload() {//提交文件
          	var fileList = this.fileList;
