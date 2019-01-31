@@ -5,6 +5,10 @@
 	<title>修改模块</title>
     <style>
         .addModule{width: 70%;}
+         /*去掉type为number的箭头*/
+     input::-webkit-outer-spin-button, input::-webkit-inner-spin-button {
+	  -webkit-appearance: none;
+    }
     </style>
 </head>
 <body>
@@ -33,7 +37,7 @@
                 </el-col>
                 <el-col :span="12">
                     <el-form-item label="优先级：" prop="sortNo" :label-width="formLabelWidth">
-                        <el-input-number v-model="form.sortNo"   :min="1" :max="99999999999" label="描述文字"></el-input-number>
+                        <el-input   v-model="form.sortNo" maxlength="10" autocomplete="off"  ></el-input>
                     </el-form-item>
                 </el-col>
             </el-row>
@@ -179,7 +183,16 @@
                            { required: true, message: '请输入授权名称', trigger: 'blur' }
                        ],
                        sortNo: [
-                           { required: true, message: '请输入优先级', trigger: 'blur' }
+                           { required: false, message: '请输入优先级', trigger: 'blur' },
+                           {   validator:function(rule,value,callback){                 
+                               if(/^[0-9]*$/.test(value) == false){
+                                  callback(new Error("请输入数字"));
+                               }else{
+                                  callback();
+                               } 
+                               callback();
+                           }, trigger: 'change'}
+                          
                        ],
                        type: [
                            { type: 'array', required: true, message: '请至少选择一个授权操作权限', trigger: 'change' }
