@@ -116,6 +116,14 @@ public interface OrganizationFeignClient {
     @PostMapping("/listDescenDantByParentId")
     JSONResult<List<OrganizationDTO>> listDescenDantByParentId(
             @RequestBody OrganizationQueryDTO reqDto);
+    
+    /**
+     * 查询 系统下 叶子节点组织机构 
+     * @param reqDto  system_code
+     * @return
+     */
+    @PostMapping("/listLeafOrg")
+    JSONResult<List<OrganizationDTO>> listLeafOrg(@RequestBody OrganizationQueryDTO reqDto);
 
     @Component
     static class HystrixClientFallback implements OrganizationFeignClient {
@@ -190,10 +198,17 @@ public interface OrganizationFeignClient {
         public JSONResult<Boolean> queryOrgStaffByParentId(IdListReq idListReq) {
             return fallBackError("查询组织机构下是否有下级员工");
         }
-
+        
+        @Override
         public JSONResult<List<OrganizationDTO>> listDescenDantByParentId(
                 OrganizationQueryDTO reqDto) {
             return fallBackError("根据 系统代码 ，父级Id 和父级级别 查询所有的下级(子+孙)");
+        }
+
+
+        @Override
+        public JSONResult<List<OrganizationDTO>> listLeafOrg(OrganizationQueryDTO reqDto) {
+            return fallBackError("查询叶子节点");
         }
     }
 

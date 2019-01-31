@@ -13,7 +13,7 @@
 <div id="trClientManage" class="trClientManage mainPadding" style="display:none">  
     <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
         <el-breadcrumb-item>Home</el-breadcrumb-item>
-        <el-breadcrumb-item>系统管理</el-breadcrumb-item>
+        <el-breadcrumb-item>业务设置</el-breadcrumb-item>
         <el-breadcrumb-item><a href="JavaScript:void(0)" data-url="c.html">七陌坐席管理</a></el-breadcrumb-item>
     </el-breadcrumb>
     <el-row class="marginB10">
@@ -21,7 +21,7 @@
            <el-button type="primary" @click="addClientDialog"><i class="el-icon-plus"></i> 添加坐席</el-button>
         </shiro:hasPermission>
         <shiro:hasPermission name="aggregation:qimoClient:edit">
-            <el-button type="primary" @click="modifyClientDialog">修改坐席</el-button>
+            <el-button type="primary" @click="modifyClientDialog">编辑坐席</el-button>
         </shiro:hasPermission>
         <shiro:hasPermission name="aggregation:qimoClient:import">
             <el-button type="primary" @click="addBatchClient">导入坐席</el-button>
@@ -83,7 +83,7 @@
         <table-pagination :pager="pager" @change="initClientData"></table-pagination>
     </el-row>
     
-    <el-dialog :title="addOrModifyDialogTitle" :visible.sync="dialogFormVisible" @close="closeAddClientDialog">
+    <el-dialog :title="addOrModifyDialogTitle" :visible.sync="dialogFormVisible" @close="closeAddClientDialog" :close-on-click-modal="false">
         <el-form :model="form" ref="clientForm" :rules="rules">
             <el-form-item label="登录坐席：" :label-width="formLabelWidth" prop="loginClient">
                 <el-input v-model="form.loginClient" autocomplete="off"  maxlength="50"></el-input>
@@ -139,7 +139,8 @@
     
     <el-dialog
 	  title="选择组织"
-	  :visible.sync="orgDialogVisible"
+	  :visible.sync="orgDialogVisible" 
+	  :close-on-click-modal="false"
 	  width="30%">
 	  
         <el-tree
@@ -157,7 +158,7 @@
 	</el-dialog>
 
      <!-- 批量添加 自定义字段弹窗 start -->
-            <el-dialog title="批量添加" :visible.sync="dialogBatchVisible" @close="closeUploadFileDialog">
+            <el-dialog title="批量添加" :visible.sync="dialogBatchVisible" @close="closeUploadFileDialog" :close-on-click-modal="false">
                <el-row class="marginB20">
                                  <!-- 下载批量上传模版: <a href="" download="页面自定义字段导入模板">页面自定义字段模板</a> -->
                                  下载批量上传模版：<a href="/excel-templates/qimo-client-template.xlsx" download="七陌坐席导入模板"><span style="color:#409EFF">七陌坐席导入模板</span></a>
@@ -190,7 +191,7 @@
       
             <!-- 批量添加 自定义字段弹窗 end -->
 
-      <el-dialog title="预览数据" :visible.sync="uploadPreDialogVisible">
+      <el-dialog title="预览数据" :visible.sync="uploadPreDialogVisible" :close-on-click-modal="false">
           预览数据 共{{uploadNum}}条资源    
            <el-table
 		    :data="uploadClientData"
