@@ -527,11 +527,6 @@ public class ClientController {
         for (int i = 1; i < excelDataList.size(); i++) {
             List<Object> rowList = excelDataList.get(i);
             ImportQimoClientDTO rowDto = new ImportQimoClientDTO();
-            if (i == 1) {
-                // 记录上传列数
-                int rowSize = rowList.size();
-                logger.info("upload qimo client,userId{{}},upload rows num{{}}", userId, rowSize);
-            }
             for (int j = 0; j < rowList.size(); j++) {
                 Object object = rowList.get(j);
                 String value = (String) object;

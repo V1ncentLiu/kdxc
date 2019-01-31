@@ -111,6 +111,22 @@ var clientVm = new Vue({
         		 { required: true, message: '所在组织不能为空'},
         		 
         	 ],
+        	 callbackPhone:[
+        		 {validator:function(rule,value,callback){
+        			 if(value){
+        				 if(Number.isInteger(Number(value)) && Number(value) > 0){                
+                	        callback();
+                	      }else{                 
+                	        callback(new Error("只可以输入正整数数字"));               
+                	      } 
+        			 }else{
+        				 callback();
+        			 }
+        			
+        			 
+        		 },trigger:'blur'},
+        		 
+        	 ]
          }
       },
      methods: {
