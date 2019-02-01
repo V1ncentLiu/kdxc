@@ -71,7 +71,8 @@ public class DeptCallSetController {
     @ResponseBody
     public JSONResult<List<OrganizationRespDTO>> allOrgs(){
         OrganizationQueryDTO dto = new OrganizationQueryDTO();
-       return organizationFeignClient.queryOrgByParam(dto);
+        dto.setSystemCode(SystemCodeConstant.HUI_JU);
+        return organizationFeignClient.queryOrgByParam(dto);
     }
 
     /**

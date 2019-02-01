@@ -93,7 +93,7 @@ public class AnnController {
         dto.setId(annId);  //公告ID
         JSONResult jsonResult = announcementFeignClient.publishAnnouncement(dto);
 
-        if(jsonResult.getCode().equals(jsonResult.SUCCESS)){
+        if(jsonResult.getCode().equals(JSONResult.SUCCESS)){
             Long orgId = dto.getOrgId();
             List<UserInfoDTO> list = new ArrayList();
             List<Long> idsList = new ArrayList<>();
