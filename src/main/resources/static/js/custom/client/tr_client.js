@@ -63,7 +63,7 @@ var clientVm = new Vue({
                         		   if(data.id==clientVm.form.id){
                         			   callback();
                         		   }else{
-                        			   callback(new Error("坐席编号已存在"));
+                        			   callback(new Error("此坐席编号已存在，请修改后提交"));
                         		   }
                         		   
                         	   }else{
@@ -111,6 +111,22 @@ var clientVm = new Vue({
         		 { required: true, message: '所在组织不能为空'},
         		 
         	 ],
+        	 callbackPhone:[
+        		 {validator:function(rule,value,callback){
+        			 if(value){
+        				  if(!/^[0-9]*$/.test(value)){
+        					  callback(new Error("只可以输入正整数数字"));     
+        	        	  }else{
+        	        		  callback();
+        	        	  }
+        			 }else{
+        				 callback();
+        			 }
+        			
+        			 
+        		 },trigger:'blur'},
+        		 
+        	 ]
          }
       },
      methods: {
@@ -146,6 +162,7 @@ var clientVm = new Vue({
              
              
              this.$confirm('确定要删除 '+clientNos+'坐席吗？', '提示', {
+            	 closeOnClickModal:false,
                  confirmButtonText: '确定',
                  cancelButtonText: '取消',
                  type: 'warning'
@@ -301,7 +318,7 @@ var clientVm = new Vue({
          },
          initClientData(){
         	 var param = this.searchForm;
-        	 param.pageNum=this.pager.pageNum;
+        	 param.pageNum=this.pager.currentPage;
         	 param.pageSize=this.pager.pageSize;
         	 axios.post('/client/client/listTrClientPage',param)
              .then(function (response) {
@@ -327,6 +344,7 @@ var clientVm = new Vue({
          },
          addBatchClient(){
         	 this.dialogBatchVisible=true;
+        	 this.fileList=[];
          },
          submitUpload() {//提交文件
          	var fileList = this.fileList;
@@ -380,6 +398,7 @@ var clientVm = new Vue({
     
                this.$confirm('', '确认导入数据', {
             	   showCancelButton:false,
+            	   closeOnClickModal:false,
                    confirmButtonText: '确认',
                    type: 'warning',
                    center: true
@@ -428,6 +447,11 @@ var clientVm = new Vue({
         	   this.initClientData();
            },
            updateCallbackPhone(id,callbackPhone){
+        	   if(!/^[0-9]*$/.test(callbackPhone)){
+        		   clientVm.$message({message:'只可以输入正整数数字',type:'warning'});
+         	        return false;
+        	    }
+        	    
         	   var param={};
         	   param.id=id;
         	   param.callbackPhone=callbackPhone;
@@ -435,9 +459,14 @@ var clientVm = new Vue({
                .then(function (response) {
                    var resData = response.data;
                    if(resData.code=='0'){
-                	   clientVm.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
-                		   clientVm.initClientData();
-                 	    }});
+                	   if(resData.data){
+                		   clientVm.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
+                    		   clientVm.initClientData();
+                     	    }});
+                	   }else{
+                		   clientVm.$message({message:'操作失败',type:'error'});
+                	   }
+                	 
                        
                    }else{
                 	   clientVm.$message({message:'系统错误',type:'error'});

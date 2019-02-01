@@ -1,9 +1,17 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:th="http://www.thymeleaf.org">
-<head th:include="_header_include::frag(~{::title},~{},~{})">
+<head th:replace="_header_include::frag(~{::title},~{::style},~{})">
     <title>部门呼叫设置</title>
-
+    <style>
+        button a{color:#fff!important;}
+        .formItem,.formItem .el-form-item__content{width:100%}
+        .orgSelectOopover{width:100%;text-align: left;position: relative;}
+        .orgSelectOopover:hover{background-color: #fff;border-color: #c0c4cc;}
+        .orgSelectInput{position: absolute;left: 0;top: 0;width: 90%;}
+        .orgSelectInput input{border: none;background: none;}
+        .orgSelectInput input:hover{cursor: pointer;}
+    </style>
 </head>
 <body>
 
@@ -21,24 +29,47 @@
             <el-button type="primary" @click="openUpdateDialog">修改</el-button>
         </el-row>
 
-        <el-row type="flex" class="row-bg" justify="end">
-            <el-form :inline="true" :model="queryForm" class="demo-form-inline" ref="queryForm" >
 
-                <el-form-item label="" prop="deptNo">
-                    <el-input v-model="queryForm.deptNo" placeholder="部门编号"></el-input>
-                </el-form-item>
-
-                <el-form-item label="" prop="orgId">
+             <!--   <el-form-item label="" prop="orgId">
                     <el-select v-model="queryForm.orgId" placeholder="请选择所在组织" width="100">
-                        <el-option v-for="item in orgOptions" :key="item.id" :label="item.name" :value="item.id"></el-option>
+                        <el-option v-for="item in orgLeafOptions" :key="item.id" :label="item.name" :value="item.id"></el-option>
                     </el-select>
-                </el-form-item>
+                </el-form-item>-->
+                <el-row class="marginB10 greybg padding20" style="padding-bottom: 0;" >
+                    <el-form :inline="true" :model="queryForm" class="demo-form-inline" ref="queryForm" >
+                    <el-row :gutter="20"  type="flex"  justify="end">
+                        <el-col :span="3">
+                            <el-form-item class="formItem" prop="deptNo">
+                                <el-input v-model="queryForm.deptNo" placeholder="部门编号"></el-input>
+                            </el-form-item>
+                        </el-col>
+                        <el-col :span="3">
+                            <el-popover
+                                    placement="bottom"
+                                    width="250"
+                                    trigger="click"
+                                    v-model="isShow">
+                                <el-tree
+                                        :data="dataTree"
+                                        node-key="id"
+                                        :default-expanded-keys="expandedKeys"
+                                        ref="tree"
+                                        highlight-current
+                                        @node-click="treeNodeClick">
+                                </el-tree>
+                                <el-button slot="reference" class="orgSelectOopover">
+                                    <el-input v-model="queryForm.orgName" placeholder="选择所属组织" class="orgSelectInput" readonly></el-input>
+                                    <i class="el-icon-arrow-down" style="float: right;margin-right: -12px;color: #c0c4cc;"></i>
+                                </el-button>
+                            </el-popover>
+                        </el-col>
+                        <el-col :span="3">
+                            <el-button type="primary" @click="initList">搜索</el-button>
+                        </el-col>
+                    </el-row>
+                    </el-form>
+                </el-row>
 
-                <el-form-item>
-                    <el-button type="primary" @click="initList">搜索</el-button>
-                </el-form-item>
-            </el-form>
-        </el-row>
 
 
         <el-table :data="tableData"  style="width: 100%" tooltip-effect="light"  ref="multipleTable"
@@ -185,18 +216,17 @@
                         :default-expanded-keys="expandedKeys"
                         :default-checked-keys="multipleTreeSelection"
                         ref="tree"
-                        show-checkbox
                         highlight-current
-                        :check-strictly="checkStrictly"
-                        :expand-on-click-node=false
-                        @check="handleTreeSelectionChange"
+                        @node-click="clickOrgNode"
                         class="leftTree">
                 </el-tree>
             </div>
+            <!--
             <span slot="footer" class="dialog-footer">
                     <el-button @click="closeOraTreeMultiCheck">取 消</el-button>
                     <el-button type="primary" @click="returnCheckNodekeys">确 定</el-button>
             </span>
+            -->
         </template>
     </el-dialog>
 
@@ -218,7 +248,7 @@
                 </el-table>
             </el-row>
             <div slot="footer" >
-                <el-button @click="submitUpload('import')">导 入</el-button>
+                <el-button ref="importButton" @click="submitUpload('import')" :disabled="flag">导 入</el-button>
             </div>
         </template>
     </el-dialog>
@@ -273,6 +303,8 @@
     var mainDivVM = new Vue({
         el: '#mainDiv',
         data: {
+            isShow:false,
+            flag:false,
             formLabelWidth:'150px',
             addDialogVisible:false,
             updateDialogVisible:false,
@@ -319,9 +351,11 @@
             },
             queryForm:{
                 deptNo:"",
-                orgId:""
+                orgId:"",
+                orgName:""
             },
             orgOptions: [],
+            orgLeafOptions: [],
             tableData:[],
             tableData1:[],
             tableData2:[],
@@ -355,17 +389,25 @@
             },
             initOrgs(){
                 var param = {}
-                axios.post('/deptcallset/allOrgs',param).then(function (response) {
+                axios.post('/deptcallset/listLeafOrg',param).then(function (response) {
                     if(null===response||response.data==null||response.data.code!='0'){
                         return ;
                     }else{
-                        mainDivVM.orgOptions = response.data.data;
-                        mainDivVM.orgOptions.unshift({
-                            id:"",
-                            name:"请选择组织"
-                        })
+                        mainDivVM.orgLeafOptions = response.data.data;
                     }
                 })
+
+                // axios.post('/deptcallset/allOrgs',param).then(function (response) {
+                //     if(null===response||response.data==null||response.data.code!='0'){
+                //         return ;
+                //     }else{
+                //         mainDivVM.orgOptions = response.data.data;
+                //         mainDivVM.orgOptions.unshift({
+                //             id:"",
+                //             name:"请选择组织"
+                //         })
+                //     }
+                // })
             },
             updateOne(){
                 var param = mainDivVM.update;
@@ -392,7 +434,7 @@
             openUpdateDialog(){
                 var rows = this.multipleSelection;
                 if(rows.length==0){
-                    this.$message({message: '没有选择数据', type: 'warning'});
+                    this.$message({message: '请选择修改数据', type: 'warning'});
                     return false;
                 }if(rows.length>1){
                     this.$message({message: '请选择一条数据', type: 'warning'});
@@ -461,6 +503,26 @@
                     }
                 }).catch(function (error) { console.log(error);});
             },
+            initTree:function(){
+                //  打开 组织机构多选框
+                var param = {};
+                axios.post("/organization/organization/query", param).then(function (response) {
+                    mainDivVM.dataTree = response.data.data;
+                    mainDivVM.expandedKeys = [];
+                    for(var i=0;i<mainDivVM.dataTree.length;i++){
+                        var curNode = mainDivVM.dataTree[i];
+                        mainDivVM.expandedKeys.push(curNode.id);
+                        var childs = curNode.children;
+                        if(childs){
+                            for(var j=0;j<childs.length;j++){
+                                var curChildNode = childs[j];
+                                mainDivVM.expandedKeys.push(curChildNode.id);
+                            }
+                        }
+                    }
+
+                }).catch(function (error) { console.log(error);});
+            },
             handleOrgSet(index , row){
                 this.multipleTreeSelection=[];
                 this.multipleTreeSelection.push(row.orgId);
@@ -511,7 +573,7 @@
                         this.showTableDateDialog = false;
                         // showErrTableDateDialog:false,
                         if(response.data==true){
-                            this.$message({message:'上传成功',type:'success',duration:2000,onClose:function(){
+                            this.$message({message:'导入成功',type:'success',duration:2000,onClose:function(){
                                     mainDivVM.initList();
                                 }});
                         }else{
@@ -521,6 +583,8 @@
                             mainDivVM.tableData2 = response.data
                             mainDivVM.showErrTableDateDialog = true;
                         }
+                        mainDivVM.$refs.importButton.$el.innerText="导 入"
+                        mainDivVM.flag=false
                     }else{
                         this.$refs.upload.clearFiles();
                         this.importDialogVisible = false;
@@ -540,7 +604,19 @@
                     this.$message.error({message:'请选择一个文件',type:'error'});
                     return false;
                 }
-                this.$refs.upload.submit();
+                if(flag=="import"){
+                    this.$alert('<center><strong>确认导入数据</strong></center>', {
+                        dangerouslyUseHTMLString: true,
+                        center:true
+                    }).then(() => {
+
+                        mainDivVM.$refs.importButton.$el.innerText="导入中..."
+                        mainDivVM.flag=true
+                        mainDivVM.$refs.upload.submit();
+                    });
+                }else{
+                    this.$refs.upload.submit();
+                }
             },
 
             returnCheckNodekeys(){
@@ -581,6 +657,48 @@
             closeOraTreeMultiCheck(){
                 this.OraTreeMuliCheckDialog = false
             },
+            treeNodeClick(data,node,obj){
+                if(data.children==null){
+                    this.queryForm.orgName=data.label;
+                    this.queryForm.orgId=data.id;
+                    this.isShow=false
+                }
+            },
+            clickOrgNode(data,node,obj){//点击左侧节点
+                console.log(data)
+                if(data.children==null) {
+                    if (this.orgFlag == 'add') {
+                        this.add.orgId = data.id;
+                        this.add.orgName = data.label;
+                        this.OraTreeMuliCheckDialog = false
+                    } else if (this.orgFlag == 'update') {
+                        this.update.orgId = data.id;
+                        this.update.orgName = data.label;
+                        this.OraTreeMuliCheckDialog = false
+                    } else {
+                        mainDivVM.orgSet.orgId = data.id;
+                        var param = mainDivVM.orgSet;
+                        console.log(param)
+                        axios.post("/deptcallset/updateDeptcallsetForNotNull", param)
+                            .then(function (response) {
+                                console.log(response.data)
+                                if (response.data.code == 0) {
+                                    mainDivVM.$message({
+                                        type: 'success', message: '更新成功!', duration: 2000, onClose: function () {
+                                            // mainDivVM.pager.pageNum = 1
+                                            mainDivVM.initList();
+                                            mainDivVM.OraTreeMuliCheckDialog = false
+                                        }
+                                    });
+                                } else {
+                                    mainDivVM.$message.error(response.data.msg);
+                                }
+                            }).catch(function (error) {
+                            console.log(error);
+                        });
+                    }
+                }
+            },
             resetForm(formName) {
                 console.log( mainDivVM.$refs[formName])
                 if( mainDivVM.$refs[formName]){
@@ -594,6 +712,7 @@
         created(){
             this.initOrgs();
             this.initList();
+            this.initTree();
         }
     });
 

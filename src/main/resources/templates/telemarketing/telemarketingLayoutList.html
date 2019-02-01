@@ -16,9 +16,9 @@
     <el-row class="marginB10">
         <el-col :xs="12" :sm="16" :md="16" :lg="18" :xl="12">
             <el-button type="primary" @click="addbutton">新建电销布局</el-button>
-            <el-button type="primary" @click="updateButton">修改</el-button>
             <el-button type="primary" @click="deleButton">删除</el-button>
             <el-button type="primary" @click="dialogBatchVisible = true">导入</el-button>
+   			<el-button type="primary" @click="updateButton">编辑电销布局</el-button>
         </el-col>
         </el-row>
 <el-row class="marginB10">
@@ -65,6 +65,7 @@
                     <el-table-column align="center" prop="telemarketingTeam" label="电销组"></el-table-column>
                     <el-table-column align="center"  prop="beginTime" label="起始时间" :formatter="dateFormat"></el-table-column>
                     <el-table-column align="center" prop="endTime" label="结束时间" :formatter="dateFormat"></el-table-column>
+                    <el-table-column align="center" prop="createTime" label="创建时间" :formatter="dateFormatTime"></el-table-column>
                     <el-table-column align="center" prop="status" label="启用状态" :formatter="transformStatus"></el-table-column>
                 </el-table>
                  <table-pagination :pager="pager"  @change="inviteAreaListPage"></table-pagination>
@@ -72,7 +73,7 @@
       
     </el-row>
    <!-- dialog -->
-    <el-dialog title="添加规则" :visible.sync="dialogFormVisible">
+    <el-dialog :title="showTitle" :visible.sync="dialogFormVisible">
         <el-form :model="form" ref="form" :rules="rules" class="width500">
             <el-form-item label="项目：" :label-width="formLabelWidth" prop="projectIds">
                 <el-select filterable v-model="form.projectIds" multiple placeholder="选择项目" style="width: 100%;">
@@ -188,6 +189,7 @@
         el: '#organizationManage',
         data: {
         	dataNum:"",
+        	showTitle:"",
         	exportFormVisible:false,
         	dialogBatchVisible:false,
         	formLabelWidth: '100px',
@@ -288,6 +290,10 @@
               } ,
             
               updateButton(){
+            	  this.showTitle="修改布局"
+            	  if (this.$refs['form']!=undefined) {
+                 		this.$refs['form'].resetFields();
+                 	  }
             	  $("#addOrUpdate").val(2);
             	  //修改菜单数据	
               	var rows = this.multipleSelection;
@@ -349,7 +355,7 @@
     	 		    	  moduleName+="【"+rows[i].projects+"】";
     	 		        }
     	           }
-    	           this.$confirm("确定要删除"+moduleName+"邀约区域吗?", '提示', {
+    	           this.$confirm("确定要删除"+moduleName+"电销布局吗?", '提示', {
                        confirmButtonText: '确定',
                        cancelButtonText: '取消',
                        type: 'warning'
@@ -428,6 +434,14 @@
             	     } 
             	     return moment(new Date(date)).format("YYYY-MM-DD"); 
             	} ,
+                //时间格式化
+                dateFormatTime(row, column){
+              	  var date = row[column.property]; 
+              	     if (date == undefined) { 
+              	       return ""; 
+              	     } 
+              	     return moment(new Date(date)).format("YYYY-MM-DD HH:mm:ss"); 
+              	} ,
              submitForm(formName) {
                     this.$refs[formName].validate((valid) => {
                         if (valid) {
@@ -569,7 +583,7 @@
                     }); 
                 },
                 addbutton(){
-                	addOrUpdate
+                	this.showTitle="添加布局"
                 	$("#addOrUpdate").val(1);
                 	this.dialogFormVisible=true;
                 	this.form.beginTime = "";
@@ -577,6 +591,9 @@
                 	this.form.projectIds = [];
                 	this.form.telemarketingTeamId = "";
                 	this.form.status= '0';
+                	if (this.$refs['form']!=undefined) {
+                   		this.$refs['form'].resetFields();
+                   	  }
                 }
         },
         created(){
