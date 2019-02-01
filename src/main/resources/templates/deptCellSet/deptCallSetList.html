@@ -129,7 +129,7 @@
                 </el-form-item>
             </el-form>
             <div slot="footer" class="dialog-footer">
-                <el-button @click="saveOne">提 交</el-button>
+                <el-button ref="addbutton" @click="saveOne" :disabled="addButtonflag">提 交</el-button>
                 <el-button type="primary" @click="addDialogVisible = false">取 消</el-button>
             </div>
         </template>
@@ -169,7 +169,7 @@
                 </el-form-item>
             </el-form>
             <div slot="footer" class="dialog-footer">
-                <el-button @click="updateOne">提 交</el-button>
+                <el-button ref="updateButton" @click="updateOne">提 交</el-button>
                 <el-button type="primary" @click="updateDialogVisible = false">取 消</el-button>
             </div>
         </template>
@@ -303,6 +303,7 @@
     var mainDivVM = new Vue({
         el: '#mainDiv',
         data: {
+            addButtonflag:false,
             isShow:false,
             flag:false,
             formLabelWidth:'150px',
@@ -434,7 +435,7 @@
             openUpdateDialog(){
                 var rows = this.multipleSelection;
                 if(rows.length==0){
-                    this.$message({message: '请选择修改数据', type: 'warning'});
+                    this.$message({message: '没有选择数据', type: 'warning'});
                     return false;
                 }if(rows.length>1){
                     this.$message({message: '请选择一条数据', type: 'warning'});
@@ -468,6 +469,7 @@
                 var param = this.add;
                 this.$refs['add'].validate((valid) => {
                     if (valid) {
+                        mainDivVM.addButtonflag=true
                         axios.post("/deptcallset/saveOne", param)
                             .then(function (response) {
                                 if (response.data.code == 0) {
@@ -475,10 +477,13 @@
                                             mainDivVM.pager.pageNum = 1
                                             mainDivVM.initList();
                                             mainDivVM.addDialogVisible = false;
-                                        }});
+                                            mainDivVM.addButtonflag=false
+                                    }});
                                 } else {
+                                    mainDivVM.addButtonflag=false
                                     mainDivVM.$message.error(response.data.msg);
                                 }
+
                             }).catch(function (error) {console.log(error);});
                     } else {return false;}
                 });
