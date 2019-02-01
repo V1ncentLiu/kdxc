@@ -111,6 +111,22 @@ var clientVm = new Vue({
         		 { required: true, message: '所在组织不能为空'},
         		 
         	 ],
+        	 callbackPhone:[
+        		 {validator:function(rule,value,callback){
+        			 if(value){
+        				  if(!/^[0-9]*$/.test(value)){
+        					  callback(new Error("只可以输入正整数数字"));     
+        	        	  }else{
+        	        		  callback();
+        	        	  }
+        			 }else{
+        				 callback();
+        			 }
+        			
+        			 
+        		 },trigger:'blur'},
+        		 
+        	 ]
          }
       },
      methods: {
@@ -431,11 +447,11 @@ var clientVm = new Vue({
         	   this.initClientData();
            },
            updateCallbackPhone(id,callbackPhone){
-        	   if(Number.isInteger(Number(callbackPhone)) && Number(callbackPhone) > 0){                
-          	      }else{                 
-          	      clientVm.$message({message:'只可以输入正整数数字',type:'warning'});
-          	        return false;
-          	      } 
+        	   if(!/^[0-9]*$/.test(callbackPhone)){
+        		   clientVm.$message({message:'只可以输入正整数数字',type:'warning'});
+         	        return false;
+        	    }
+        	    
         	   var param={};
         	   param.id=id;
         	   param.callbackPhone=callbackPhone;

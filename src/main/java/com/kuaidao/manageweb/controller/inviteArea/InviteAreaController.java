@@ -198,7 +198,7 @@ public class InviteAreaController {
         request.setAttribute("checkProject",inviteAreaDTOs.get(0).getProjectIds().split(",") );
         request.setAttribute("checkProvince",inviteAreaDTOs.get(0).getProvincesIds().split(",") );
         request.setAttribute("ids",ids );
-        
+        request.setAttribute("inviteAreaDTOs",inviteAreaDTOs );
         request.setAttribute("isshowTelemarketingTeam",isshowTelemarketingTeam );
         request.setAttribute("isshowBusinessGroup",isshowBusinessGroup );
         request.setAttribute("isshowproject", isshowproject);
