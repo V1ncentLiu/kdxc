@@ -62,7 +62,6 @@
                         <el-tag
                             v-for="tag in tags"
                             :key="tag"
-                            closable
                             @close="handleClose(tag)"
                             style="margin-right: 10px;">
                             {{tag}}
@@ -74,7 +73,6 @@
                         <el-tag
                             v-for="tag in areaTags"
                             :key="tag"
-                            closable
                             @close="handleCloseArea(tag)"
                             style="margin-right: 10px;">
                             {{tag}}
@@ -186,8 +184,8 @@
                     category:updateRule.category.split(","),
                     status:updateRule.status+'',//默认value值，启用
                     person:'',
-                    searchWord:updateRule.searchWord,
-                    area:updateRule.area,
+                    searchWord:'',
+                    area:'',
                     tableData: []                    
                 },
                 formLabelWidth: '150px',
@@ -353,6 +351,14 @@
            axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {  
          	AddRuleVM.typeArr=response.data.data;
             });
+           var searchWord=  updateRule.searchWord;
+           var area = updateRule.area;
+           if(null!=searchWord){
+        	  this.tags=searchWord.split(",");
+           }
+           if(null!=area){
+        	   this.areaTags=area.split(",");
+           }
            var  memberArr=updateRule.teleAssignRuleMember;
            if(null!=memberArr&&memberArr.length>0) {
         	   for(var i=0;i<memberArr.length;i++) {

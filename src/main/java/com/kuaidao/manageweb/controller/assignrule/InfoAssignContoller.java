@@ -62,7 +62,7 @@ public class InfoAssignContoller {
 	 * @return
 	 */
 	@RequestMapping("/initinfoAssign")
-    @RequiresPermissions("infoAssign:view")
+	@RequiresPermissions("infoAssign:view")
 	public String initinfoAssign(HttpServletRequest request, Model model) {
 
 		OrganizationQueryDTO orgDto = new OrganizationQueryDTO();
@@ -93,36 +93,23 @@ public class InfoAssignContoller {
 	@ResponseBody
 	public JSONResult<PageBean<InfoAssignDTO>> queryInfoAssignList(@RequestBody InfoAssignQueryDTO queryDTO,
 			HttpServletRequest request, HttpServletResponse response) {
-
 		// 数据权限处理
 		Subject subject = SecurityUtils.getSubject();
 		UserInfoDTO user = (UserInfoDTO) subject.getSession().getAttribute("user");
 		if (null != user.getRoleList() && user.getRoleList().size() > 0) {
-			// String roleCode = user.getRoleList().get(0).getRoleCode();
-			if (null != user.getRoleList().get(0).getId()) {
-				RoleQueryDTO roleDTO = new RoleQueryDTO();
-				roleDTO.setId(user.getRoleList().get(0).getId());
-				JSONResult<RoleInfoDTO> roleJson = roleManagerFeignClient.qeuryRoleById(roleDTO);
-				if (roleJson.getCode().equals(JSONResult.SUCCESS)) {
-					RoleInfoDTO roleInfo = roleJson.getData();
-					if (null != roleInfo && null != roleInfo.getRoleCode()) {
-						String roleCode = roleInfo.getRoleCode();
-						if (roleCode.equals(RoleCodeEnum.GLY.name())) {
-							// 管理员查看所有
+			String roleCode = user.getRoleList().get(0).getRoleCode();
+			if (null != roleCode) {
+				if (roleCode.equals(RoleCodeEnum.GLY.name())) {
+					// 管理员查看所有
 
-						} else if (roleCode.equals(RoleCodeEnum.YHZG.name())) {
-							// 管理员优化主管查看自己创建的
-							queryDTO.setCreateUser(user.getId());
-						} else {
-							queryDTO.setOther("1!=1");
-
-						}
-					}
+				} else if (roleCode.equals(RoleCodeEnum.YHZG.name())) {
+					// 管理员优化主管查看自己创建的
+					queryDTO.setCreateUser(user.getId());
+				} else {
+					queryDTO.setOther("1!=1");
 				}
-
 			}
 		}
-
 		return infoAssignFeignClient.queryInfoAssignPage(queryDTO);
 	}
 
