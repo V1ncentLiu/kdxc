@@ -143,6 +143,7 @@
 
 	var swList=[[${swList}]];
 	var dxList=[[${dxList}]];
+	var inviteAreaDTOs = [[${inviteAreaDTOs}]]
 	var proviceslist=[[${proviceslist}]];
 	var projectList=[[${projectList}]];
 	var isshowBusinessGroup = [[${isshowBusinessGroup}]];
@@ -158,6 +159,7 @@
         el: '#userManage',
         data: function() {
             return {
+            	inviteAreaDTOs:"",
             	submitdialogFormVisible:false,
             	add:"",
             	dataTable:[],
@@ -267,22 +269,10 @@
     			
         	},
         	showdetail(){
-        		if(isshowTelemarketingTeam){
-        			this.open("电销组需为相同数据，请重新选择信息！");
+        		if(isshowTelemarketingTeam ==1 && isshowBusinessGroup==1 && isshowproject==1 && isshowprovince==1){
+        			this.open("所有数据项必须相同，请重新选择信息！");
         			return ;
         		}
-				if(isshowBusinessGroup){
-					this.open("商务小组需为相同数据，请重新选择信息！");   
-					return ;
-				}
-				if(isshowproject){
-					this.open("签约项目需为相同数据，请重新选择信息！");
-					return ;
-				}
-				if(isshowprovince){
-					this.open("区域需为相同数据，请重新选择信息！");
-					return ;
-				}
 				this.dialogFormVisible=true;
 				var str = [];
 			     var formData = addUserVm.form;
@@ -297,58 +287,104 @@
                   });
                   
                   
-                  var businessGroupName  = obj.name;
-                  var telemarketingTeamName = telemarketingTeamobj.name;
+                  var businessGroupName  = "";
+                  var telemarketingTeamName = "";
        	          var projectstrs ="";
        	          var projectsName =""
-                  for ( var i = 0; i <formData.projectIds.length; i++){
-                	  for(var j =0;j<this.projectList.length;j++){
-                		  if(formData.projectIds[i] ==this.projectList[j].id){
-                			  if(projectsName ==""){
-                				  projectsName = this.projectList[j].projectName
-                			  }else{
-                				  projectsName =projectsName+"," +this.projectList[j].projectName
-                			  }
-                		  }
-                	  }
-                	   if(projectstrs !=""){
-                		   projectstrs = projectstrs+","+formData.projectIds[i];
-                	   }else{
-                		   projectstrs = formData.projectIds[i];
-                	   }
-                	}
-                  var provincestrs ="";
+       	          var provincestrs ="";
                   var procinceNames ="";
-                  for ( var i = 0; i <formData.provincesIds.length; i++){
-                	  for(var j =0;j<this.proviceslist.length;j++){
-                		  if(formData.provincesIds[i] ==this.proviceslist[j].id){
-                			  if(procinceNames ==""){
-                				  procinceNames = this.proviceslist[j].name
-                			  }else{
-                				  procinceNames =procinceNames+"," +this.proviceslist[j].name
-                			  }
-                		  }
-                	  }
-                	   if(provincestrs !=""){
-                		   provincestrs = provincestrs+","+formData.provincesIds[i];
-                	   }else{
-                		   provincestrs = formData.provincesIds[i];
-                	   }
-                	}
+       	          if(isshowBusinessGroup==0){
+       	        	businessGroupName  = obj.name;
+            	  }
+	       	      if(isshowTelemarketingTeam ==0){
+	       	    	telemarketingTeamName = telemarketingTeamobj.name;
+	       		  }
+	       	   	  if(isshowprovince==0){
+		       	   	 	for ( var i = 0; i <formData.provincesIds.length; i++){
+	               	  		for(var j =0;j<this.proviceslist.length;j++){
+	               		  		if(formData.provincesIds[i] ==this.proviceslist[j].id){
+	               			  		if(procinceNames ==""){
+	               				  		procinceNames = this.proviceslist[j].name
+	               			  		}else{
+	               				  		procinceNames =procinceNames+"," +this.proviceslist[j].name
+	               			  		}
+	               		  		}
+	               	  	}
+	               	   if(provincestrs !=""){
+	               		   provincestrs = provincestrs+","+formData.provincesIds[i];
+	               	   }else{
+	               		   provincestrs = formData.provincesIds[i];
+	               	   }
+               		}
+	       		  }
+	       		  if(isshowproject==0){
+	       			 for ( var i = 0; i <formData.projectIds.length; i++){
+	                	  for(var j =0;j<this.projectList.length;j++){
+	                		  if(formData.projectIds[i] ==this.projectList[j].id){
+	                			  if(projectsName ==""){
+	                				  projectsName = this.projectList[j].projectName
+	                			  }else{
+	                				  projectsName =projectsName+"," +this.projectList[j].projectName
+	                			  }
+	                		  }
+	                	  }
+	                	   if(projectstrs !=""){
+	                		   projectstrs = projectstrs+","+formData.projectIds[i];
+	                	   }else{
+	                		   projectstrs = formData.projectIds[i];
+	                	   }
+	                	}
+	       		  }
+                 
+                 
+                 
                 
        	        var idList = ids.split(",");
 			
 	        	for (var i = 0; i < idList.length; i++) {
-	        	     var invitearea = {
-	        	    	 businessGroup: businessGroupName,
-	        	    	 provinces: procinceNames,
-	        	    	 telemarketingTeam: telemarketingTeamName,
-	        	    	 projects: projectsName,
-	        	     };
-	        	     str.push(invitearea);
-	        	     console.info(invitearea);
-	        	 }
-	        	this.dataTable = str;
+	        		for(var j = 0; j < inviteAreaDTOs.length; j++){
+	        			if(idList[i] ==inviteAreaDTOs[j].id){
+	        				if(isshowTelemarketingTeam ==1){
+		        				telemarketingTeamName = inviteAreaDTOs[j].telemarketingTeam;
+	                		}
+	        				if(isshowBusinessGroup ==1){
+	        					businessGroupName = inviteAreaDTOs[j].businessGroup;
+	        				}
+	        				if(isshowproject ==1){
+	        					projectsName ="";
+	        					var proIds = inviteAreaDTOs[j].projectIds.split(",");
+	        					for ( var k = 0; k<proIds.length; k++){
+	        	                	  for(var m =0;m<this.projectList.length;m++){
+	        	                		  if(proIds[k] ==this.projectList[m].id){
+	        	                  			  if(projectsName ==""){
+	        	                  				  projectsName = this.projectList[m].projectName
+	        	                  			  }else{
+	        	                  				  projectsName =projectsName+"," +this.projectList[m].projectName
+	        	                  			  }
+	        	                  		  }
+	        	                	  }
+	        					}
+	        					
+	                  	  }
+	       				 if(isshowprovince ==1){
+	       					procinceNames = inviteAreaDTOs[j].provinces;
+	       				 }
+	        			}
+	        			
+      				}
+      				
+    				 var invitearea = {
+   	        	    	 businessGroup: businessGroupName,
+   	        	    	 provinces: procinceNames,
+   	        	    	 telemarketingTeam: telemarketingTeamName,
+   	        	    	 projects: projectsName,
+    	        	 };
+    	        	str.push(invitearea);
+	        	}
+	        	    
+        	     console.info(invitearea);
+        	     this.dataTable = str;
+	        	
         	},
         	saveOneDictionary(){
         		
@@ -358,8 +394,6 @@
           	       if (valid) {
        	             var formData = addUserVm.form;
        	             var param={};
-       	             param.businessGroupId= formData.businessGroupId;
-	       	          param.telemarketingTeamId = formData.telemarketingTeamId;
 	       	          let obj = {};
 	                  obj = this.swList.find((item)=>{
 	                      return item.id === param.businessGroupId;
@@ -370,34 +404,44 @@
 	                  });
 	                  
 	                  
-	                  param.businessGroup  = obj.name;
-	                  param.telemarketingTeam = telemarketingTeamobj.name;
+	                  if(isshowBusinessGroup ==0){
+	                	  param.businessGroupId= formData.businessGroupId;
+	                  }
+	                  if(isshowTelemarketingTeam ==0){
+	                	  param.telemarketingTeamId = formData.telemarketingTeamId;
+	                  }
+	                  
 	       	          var projectstrs ="";
-	                  for ( var i = 0; i <formData.projectIds.length; i++){
-	                	   if(projectstrs !=""){
-	                		   projectstrs = projectstrs+","+formData.projectIds[i];
-	                	   }else{
-	                		   projectstrs = formData.projectIds[i];
-	                	   }
-	                	}
+		       	       if(isshowproject==0){
+		       	    	for ( var i = 0; i <formData.projectIds.length; i++){
+		                	   if(projectstrs !=""){
+		                		   projectstrs = projectstrs+","+formData.projectIds[i];
+		                	   }else{
+		                		   projectstrs = formData.projectIds[i];
+		                	   }
+		                	} 
+		       	       }
 	                  var provincestrs ="";
 	                  var procinceNames ="";
-	                  for ( var i = 0; i <formData.provincesIds.length; i++){
-	                	  for(var j =0;j<this.proviceslist.length;j++){
-	                		  if(formData.provincesIds[i] ==this.proviceslist[j].id){
-	                			  if(procinceNames ==""){
-	                				  procinceNames = this.proviceslist[j].name
-	                			  }else{
-	                				  procinceNames =procinceNames+"," +this.proviceslist[j].name
-	                			  }
-	                		  }
-	                	  }
-	                	   if(provincestrs !=""){
-	                		   provincestrs = provincestrs+","+formData.provincesIds[i];
-	                	   }else{
-	                		   provincestrs = formData.provincesIds[i];
-	                	   }
-	                	}
+	                  if(isshowprovince ==0){
+	                	  for ( var i = 0; i <formData.provincesIds.length; i++){
+		                	  for(var j =0;j<this.proviceslist.length;j++){
+		                		  if(formData.provincesIds[i] ==this.proviceslist[j].id){
+		                			  if(procinceNames ==""){
+		                				  procinceNames = this.proviceslist[j].name
+		                			  }else{
+		                				  procinceNames =procinceNames+"," +this.proviceslist[j].name
+		                			  }
+		                		  }
+		                	  }
+		                	   if(provincestrs !=""){
+		                		   provincestrs = provincestrs+","+formData.provincesIds[i];
+		                	   }else{
+		                		   provincestrs = formData.provincesIds[i];
+		                	   }
+		                	}
+	                  }
+	                  
 	                  param.projectIds= projectstrs;
 	       	          param.provincesIds = provincestrs;
 	       	          param.provinces = procinceNames;
@@ -484,22 +528,10 @@
             
             ,
             showTips(){
-            	if(isshowTelemarketingTeam){
-        			this.open("电销组需为相同数据，请重新选择信息！");
+            	if(isshowTelemarketingTeam ==1 && isshowBusinessGroup==1 && isshowproject==1 && isshowprovince==1){
+        			this.open("所有数据项必须相同，请重新选择信息！");
         			return ;
         		}
-				if(isshowBusinessGroup){
-					this.open("商务小组需为相同数据，请重新选择信息！");   
-					return ;
-				}
-				if(isshowproject){
-					this.open("签约项目需为相同数据，请重新选择信息！");
-					return ;
-				}
-				if(isshowprovince){
-					this.open("区域需为相同数据，请重新选择信息！");
-					return ;
-				}
 				this.submitdialogFormVisible = true;
             }
         },
