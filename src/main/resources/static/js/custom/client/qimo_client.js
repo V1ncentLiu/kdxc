@@ -94,11 +94,11 @@ var clientVm = new Vue({
         	 clientNo:[
         		 { required: true, message: '坐席编号不能为空'},
         		 {validator:function(rule,value,callback){
-        			 if(Number.isInteger(Number(value)) && Number(value) > 0){                
-               	        callback();
-               	      }else{                 
-               	        callback(new Error("只可以输入正整数,不超过50位"));               
-               	      } 
+       				  if(!/^[0-9]*$/.test(value)){
+       					  callback(new Error("只可以输入正整数,不超过50位"));     
+       	        	  }else{
+       	        		  callback();
+       	        	  }
         			 
         		 },trigger:'blur'},
         		 {validator:function(rule,value,callback){
@@ -136,11 +136,12 @@ var clientVm = new Vue({
         	 phone1:[
         		 {validator:function(rule,value,callback){
         			 if(value){
-        				 if(Number.isInteger(Number(value)) && Number(value) > 0){                
-                	        callback();
-                	      }else{                 
-                	        callback(new Error("只可以输入正整数,不超过11位"));               
-                	      } 
+        				  if(!/^[0-9]*$/.test(value)){
+           					  callback(new Error("只可以输入正整数,不超过11位"));     
+           	        	  }else{
+           	        		  callback();
+           	        	  }
+        				 
         			 }else{
         				 callback(); 
         			 }
@@ -151,14 +152,16 @@ var clientVm = new Vue({
         	 phone2:[
         		 {validator:function(rule,value,callback){
         			 if(value){
-        				 if(Number.isInteger(Number(value)) && Number(value) > 0){                
-                	        callback();
-                	      }else{                 
-                	        callback(new Error("只可以输入正整数,不超过11位"));               
-                	      } 
-        			 }else{
-        				 callback();
-        			 }
+        				 if(!/^[0-9]*$/.test(value)){
+          					  callback(new Error("只可以输入正整数,不超过11位"));     
+          	        	  }else{
+          	        		  callback();
+          	        	  }
+	       				 
+	       			 }else{
+	       				 callback(); 
+	       			 }
+        			 
         		 },trigger:'blur'},
         		 
         	 ],
@@ -206,7 +209,7 @@ var clientVm = new Vue({
         	 var rows = this.multipleSelection;
              if(rows.length<1){
                  this.$message({
-                    message: '请选择数据进行删除',
+                    message: '请选择删除数据',
                     type: 'warning'
                   });
                  return;
