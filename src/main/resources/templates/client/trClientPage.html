@@ -13,7 +13,7 @@
 <div id="trClientManage" class="trClientManage mainPadding" style="display:none">  
     <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
         <el-breadcrumb-item>Home</el-breadcrumb-item>
-        <el-breadcrumb-item>系统管理</el-breadcrumb-item>
+        <el-breadcrumb-item>业务设置</el-breadcrumb-item>
         <el-breadcrumb-item><a href="JavaScript:void(0)" data-url="c.html">天润坐席管理</a></el-breadcrumb-item>
     </el-breadcrumb>
     <el-row class="marginB10">
@@ -73,12 +73,12 @@
             <el-table-column align="center" prop="clientNo" label="坐席编号"></el-table-column>
             <el-table-column align="center" prop="bindPhone" label="A(呼叫号)"></el-table-column>
             <el-table-column align="center" prop="displayPhone" label="外显手机号"></el-table-column>
-            <el-table-column align="center" prop="phoneMark" label="外呼好标记记录 (类型+次数)"></el-table-column>
+            <el-table-column align="center" prop="phoneMark" label="外显号标记记录 (类型+次数)"></el-table-column>
             <el-table-column align="center" prop="orgName" label="电销组"></el-table-column>
             <el-table-column align="center" label="回呼配置" >
                 <template slot-scope="scope">
                   <!--   <a href="javascript:void(0)" @click="goToFieldSettingPage(scope.row)" target="_blank" class="buttonText" style="color:blue">页面字段设置</a> -->
-                    <el-input v-model="scope.row.callbackPhone" style="width:130px;"></el-input>
+                    <el-input v-model="scope.row.callbackPhone" style="width:130px;" maxlength="11"></el-input>
                     &nbsp;
                     <el-button type="primary" @click="updateCallbackPhone(scope.row.id,scope.row.callbackPhone)">确定</el-button>
                 </template>
@@ -88,12 +88,12 @@
         <table-pagination :pager="pager" @change="initClientData"></table-pagination>
     </el-row>
     
-    <el-dialog :title="addOrModifyDialogTitle" :visible.sync="dialogFormVisible" @close="closeAddClientDialog">
+    <el-dialog :title="addOrModifyDialogTitle" :visible.sync="dialogFormVisible" @close="closeAddClientDialog" :close-on-click-modal="false">
         <el-form :model="form" ref="clientForm" :rules="rules">
             <el-form-item label="坐席编号：" :label-width="formLabelWidth" prop="clientNo">
                 <el-input v-model="form.clientNo" autocomplete="off"  maxlength="50"></el-input>
             </el-form-item>
-            <el-form-item label="绑定电话号：" :label-width="formLabelWidth" prop="bindPhone">
+            <el-form-item label="A(呼叫号)：" :label-width="formLabelWidth" prop="bindPhone">
                 <el-input v-model="form.bindPhone" autocomplete="off"  maxlength="11"></el-input>
             </el-form-item>
             <el-form-item label="外显手机号：" :label-width="formLabelWidth" prop="displayPhone">
@@ -124,7 +124,7 @@
     
     <el-dialog
 	  title="选择组织"
-	  :visible.sync="orgDialogVisible"
+	  :visible.sync="orgDialogVisible" :close-on-click-modal="false"
 	  width="30%">
 	  
         <el-tree
@@ -143,7 +143,7 @@
 	</el-dialog>
 
      <!-- 批量添加 自定义字段弹窗 start -->
-            <el-dialog title="批量添加" :visible.sync="dialogBatchVisible" @close="closeUploadFileDialog">
+            <el-dialog title="导入天润坐席" :visible.sync="dialogBatchVisible" @close="closeUploadFileDialog" :close-on-click-modal="false">
                <el-row class="marginB20">
                                  <!-- 下载批量上传模版: <a href="" download="页面自定义字段导入模板">页面自定义字段模板</a> -->
                                  下载批量上传模版：<a href="/excel-templates/tr-client-template.xlsx" download="天润坐席导入模板"><span style="color:#409EFF">天润坐席导入模板</span></a>
@@ -176,7 +176,7 @@
       
             <!-- 批量添加 自定义字段弹窗 end -->
 
-      <el-dialog title="预览数据" :visible.sync="uploadPreDialogVisible">
+      <el-dialog title="预览数据" :visible.sync="uploadPreDialogVisible" :close-on-click-modal="false">
           预览数据 共{{uploadNum}}条资源    
            <el-table
 		    :data="uploadClientData"
@@ -188,6 +188,11 @@
 		      label="坐席号"
 		      width="180">
 		    </el-table-column>
+		       <el-table-column
+              prop="orgName"
+              label="电销组"
+              width="180">
+            </el-table-column>
 		    <el-table-column
 		      prop="bindPhone"
 		      label="TELA(绑定电话)"
@@ -208,7 +213,7 @@
 			  </span>  
      </el-dialog>
 
-      <el-dialog title="部分导入失败" :visible.sync="uploadErrorDialogVisible" :show-close=false>
+      <el-dialog title="部分导入失败" :visible.sync="uploadErrorDialogVisible" :show-close=false :close-on-click-modal="false">
            以下内容导入失败，请重新导入    
            <el-table
             :data="uploadErrorData"
@@ -224,6 +229,11 @@
             <el-table-column
               prop="clientNo"
               label="坐席号"
+              width="180">
+            </el-table-column>
+             <el-table-column
+              prop="orgName"
+              label="电销组"
               width="180">
             </el-table-column>
             <el-table-column
@@ -255,5 +265,5 @@
 </script>
 
 <!-- 当前页面的js -->
-<script th:src="@{/js/custom/client/tr_client.js?v=1.0.1}"></script>
+<script th:src="@{/js/custom/client/tr_client.js?v=1.0.3}"></script>
 </html>

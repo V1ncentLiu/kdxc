@@ -4,6 +4,7 @@ import com.kuaidao.aggregation.dto.deptcallset.DeptCallSetAddAndUpdateDTO;
 import com.kuaidao.aggregation.dto.deptcallset.DeptCallSetQueryDTO;
 import com.kuaidao.aggregation.dto.deptcallset.DeptCallSetRespDTO;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
+import com.kuaidao.common.constant.SystemCodeConstant;
 import com.kuaidao.common.entity.IdEntity;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
@@ -15,6 +16,7 @@ import com.kuaidao.manageweb.feign.deptcallset.DeptCallSetFeignClient;
 import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
 import com.kuaidao.manageweb.util.CommUtil;
 import com.kuaidao.manageweb.util.IdUtil;
+import com.kuaidao.sys.dto.organization.OrganizationDTO;
 import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
 import com.kuaidao.sys.dto.organization.OrganizationRespDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
@@ -38,6 +40,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.*;
 
 /**
@@ -68,7 +71,20 @@ public class DeptCallSetController {
     @ResponseBody
     public JSONResult<List<OrganizationRespDTO>> allOrgs(){
         OrganizationQueryDTO dto = new OrganizationQueryDTO();
-       return organizationFeignClient.queryOrgByParam(dto);
+        dto.setSystemCode(SystemCodeConstant.HUI_JU);
+        return organizationFeignClient.queryOrgByParam(dto);
+    }
+
+    /**
+     * 获取组织结构所有叶子节点
+     * @return
+     */
+    @RequestMapping("/listLeafOrg")
+    @ResponseBody
+    public JSONResult<List<OrganizationDTO>> listLeafOrg(){
+        OrganizationQueryDTO dto = new OrganizationQueryDTO();
+        dto.setSystemCode(SystemCodeConstant.HUI_JU);
+        return organizationFeignClient.listLeafOrg(dto);
     }
 
     /**
@@ -148,6 +164,12 @@ public class DeptCallSetController {
         UserInfoDTO user = CommUtil.getCurLoginUser();
         dto.setUpdateTime(new Date());
         dto.setUpdateUser(user.getId());
+        if("".equals(dto.getDeptNo())){
+            dto.setDeptNo(null);
+        }
+        if(dto.getOrgId()==0L){
+            dto.setOrgId(null);
+        }
         return deptCallSetFeignClient.updateDeptCallSets(dto);
     }
 
@@ -292,7 +314,8 @@ public class DeptCallSetController {
                 UserInfoDTO user = CommUtil.getCurLoginUser();
                 rowDto.setId(IdUtil.getUUID());
                 rowDto.setCreateUser(user.getId());
-                rowDto.setCreateTime(new Date());
+                Date date = new Date(System.currentTimeMillis()+i*-1000);
+                rowDto.setCreateTime(date);
                 dataList.add(rowDto);
             }else{
                 errList.add(rowDto);
@@ -367,23 +390,40 @@ public class DeptCallSetController {
      * @throws Exception
      */
     @RequestMapping(value = "/download", method = RequestMethod.GET)
-    public ResponseEntity<InputStreamResource> downloadFile(HttpServletRequest request)
-            throws IOException {
+    public ResponseEntity<InputStreamResource> downloadFile(HttpServletRequest request) {
         // 获取文件路径
-        File filePath = ResourceUtils.getFile(
-                ResourceUtils.CLASSPATH_URL_PREFIX + "excel-templates/dept-call-setting.xlsx");
-
-        FileSystemResource file = new FileSystemResource(filePath);
+        logger.info("===进入方法==");
         HttpHeaders headers = new HttpHeaders();
-        headers.add("Cache-Control", "no-cache, no-store, must-revalidate");
-        String fileName  =new String("部门呼叫设置批量导入模板.xlsx".getBytes(),"iso-8859-1");
-        headers.add("Content-Disposition",
-                String.format("attachment; filename=\"%s\"",fileName));
-        headers.add("Pragma", "no-cache");
-        headers.add("Expires", "0");
-        return ResponseEntity.ok().headers(headers).contentLength(file.contentLength())
+        FileSystemResource file = null;
+        InputStream inputStream = null;
+        long length = 0L;
+        logger.info("===进入模板下载==");
+        try{
+            File filePath = ResourceUtils.getFile(
+                    ResourceUtils.CLASSPATH_URL_PREFIX + "excel-templates/dept-call-setting.xlsx");
+            logger.info("==模板路径==");
+            logger.info(filePath.getAbsolutePath());
+            logger.info(filePath.getPath());
+            file = new FileSystemResource(filePath);
+
+            headers.add("Cache-Control", "no-cache, no-store, must-revalidate");
+            String fileName  =new String("部门呼叫设置批量导入模板.xlsx".getBytes(),"iso-8859-1");
+            headers.add("Content-Disposition",
+                    String.format("attachment; filename=\"%s\"",fileName));
+            headers.add("Pragma", "no-cache");
+            headers.add("Expires", "0");
+            length = file.contentLength();
+            inputStream = file.getInputStream();
+        }catch (IOException e){
+            logger.info("===进入异常捕获==");
+            logger.error(e.getMessage());
+            e.printStackTrace();
+            logger.info("===退出异常捕获==");
+        }
+
+        return ResponseEntity.ok().headers(headers).contentLength(length)
                 .contentType(MediaType.parseMediaType("application/octet-stream"))
-                .body(new InputStreamResource(file.getInputStream()));
+                .body(new InputStreamResource(inputStream));
     }
 
 }
