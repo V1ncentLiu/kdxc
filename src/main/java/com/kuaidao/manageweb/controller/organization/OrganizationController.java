@@ -4,6 +4,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+import com.kuaidao.common.constant.DicCodeEnum;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.constant.SystemCodeConstant;
 import com.kuaidao.common.entity.IdEntity;
@@ -15,11 +16,13 @@ import com.kuaidao.common.util.CommonUtil;
 import com.kuaidao.manageweb.config.LogRecord;
 import com.kuaidao.manageweb.config.LogRecord.OperationType;
 import com.kuaidao.manageweb.constant.MenuEnum;
+import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
 import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
 import com.kuaidao.sys.dto.organization.OrganizationRespDTO;
 import com.kuaidao.sys.dto.user.OrgUserReqDTO;
 import com.kuaidao.sys.dto.user.UserAndRoleRespDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
+import com.kuaidao.sys.dto.dictionary.DictionaryItemRespDTO;
 import com.kuaidao.sys.dto.organization.OrganizationAddAndUpdateDTO;
 import com.kuaidao.sys.dto.organization.OrganizationDTO;
 import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
@@ -49,6 +52,9 @@ public class OrganizationController {
 
     @Autowired
     OrganizationFeignClient organizationFeignClient;
+    
+    @Autowired
+    DictionaryItemFeignClient dictionaryItemFeignClient;
 
     /**
      * 组织机构首页
@@ -243,6 +249,17 @@ public class OrganizationController {
     @ResponseBody
     JSONResult<List<OrganizationDTO>> listLeafOrg(@RequestBody OrganizationQueryDTO reqDto){
         return organizationFeignClient.listLeafOrg(reqDto);
+    }
+    
+    /**
+     * 组织机构 group name 查询  列表
+     * @param groupCode
+     * @return
+     */
+    @PostMapping("/queryDictionaryItemsByGroupCode")
+    @ResponseBody
+    public JSONResult<List<DictionaryItemRespDTO>> queryDicItemsByGroupCode(){
+        return dictionaryItemFeignClient.queryDicItemsByGroupCode(DicCodeEnum.ORGANIZATIONTYPE.getCode());
     }
 
 }
