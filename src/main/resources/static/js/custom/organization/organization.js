@@ -96,7 +96,7 @@
             	var rows = this.multipleSelection;
             	if(rows.length==0){
                     this.$message({
-                       message: '请选择一条数据进行修改',
+                       message: '请选择删除数据',
                        type: 'warning'
                      });
                     return;
