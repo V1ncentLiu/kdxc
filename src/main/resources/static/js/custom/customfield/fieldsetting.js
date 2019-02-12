@@ -165,6 +165,9 @@
                            
                        },trigger:'blur'}
                     ],
+                    fieldType:[
+                        {required: true, message: '请选择字段类型',trigger:'blur'}
+                    ],
                     sortNum:[
                     	{            
                     	    validator(rule,value,callback){ 
