@@ -557,20 +557,23 @@ public class LoginController {
     public String logout(String type, Model model, HttpServletRequest request,
             RedirectAttributes redirectAttributes) throws Exception {
         Subject subject = SecurityUtils.getSubject();
-        UserInfoDTO user = (UserInfoDTO) subject.getSession().getAttribute("user");
+        Object attribute = subject.getSession().getAttribute("user");
         if (subject.isAuthenticated()) {
             subject.logout();
         }
-        if (!"1".equals(type)) {
-            // 退出成功，保存退出状态
-            UserInfoReq update = new UserInfoReq();
-            update.setId(user.getId());
-            update.setIsLogin(Constants.IS_LOGIN_DOWN);
-            userInfoFeignClient.update(update);
-        } else {
-            subject.getSession().setAttribute("isShowLogoutBox", type);
-        }
+        if (attribute != null && attribute instanceof UserInfoDTO) {
 
+            UserInfoDTO user = (UserInfoDTO) subject.getSession().getAttribute("user");
+            if (!"1".equals(type)) {
+                // 退出成功，保存退出状态
+                UserInfoReq update = new UserInfoReq();
+                update.setId(user.getId());
+                update.setIsLogin(Constants.IS_LOGIN_DOWN);
+                userInfoFeignClient.update(update);
+            } else {
+                subject.getSession().setAttribute("isShowLogoutBox", type);
+            }
+        }
         return "redirect:/login";
     }
 
