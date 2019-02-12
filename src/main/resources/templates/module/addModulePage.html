@@ -15,7 +15,11 @@
     
 </head>
 <body>
-<div id="addModule" class="addModule mainPadding">  
+<div id="addModule" v-loading="loading"  class="addModule mainPadding"> 
+    <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
+        <el-breadcrumb-item>Home</el-breadcrumb-item> <el-breadcrumb-item>系统管理</el-breadcrumb-item>
+        <el-breadcrumb-item> <a href="JavaScript:void(0)">菜单管理</a></el-breadcrumb-item>
+    </el-breadcrumb> 
     <div class="fs16 marginB20"><div class="titleBorderL">添加菜单</div></div>
     <el-form :model="form" :rules="rules" ref="form">
         <div class="marginB20 fs16"><em class="redcolor">*</em>必填项</div>
@@ -40,7 +44,7 @@
                 </el-col>
                 <el-col :span="12">
                     <el-form-item label="优先级：" prop="sortNo" :label-width="formLabelWidth">
-                        <el-input  v-model="form.sortNo"  maxlength="10"      label="描述文字"></el-input>
+                        <el-input  v-model="form.sortNo"  maxlength="10" @keyup.native="number" label="描述文字"></el-input>
                     </el-form-item>
                 </el-col>
             </el-row>
@@ -153,6 +157,7 @@
                     iconUrl:'',
                     description:''
                 },
+                loading:false,
                 formLabelWidth: '150px',
                 rules:{
                    	name: [
@@ -190,7 +195,7 @@
                            { required: true, message: '请输入授权名称', trigger: 'blur' }
                        ],
                        sortNo: [
-                           { required: true,  message: '请输入优先,必须是数字', trigger: 'blur' },
+                           { required: true,  message: '请输入优先级', trigger: 'blur' },
                            { validator:function(rule,value,callback){                 
                                if(/^[1-9]*$/.test(value) == false){
                                   callback(new Error("请输正整数"));
@@ -198,7 +203,7 @@
                                   callback();
                                } 
                                callback();
-                           }, trigger: 'change'}
+                           }, trigger: 'blur'}
                        ],
                        type: [
                            { type: 'array', required: true, message: '请至少选择一个授权操作权限', trigger: 'change' }
@@ -256,9 +261,11 @@
                            opeArr.push(saveope);
                         }
                         submitData.operationInfos=opeArr;
+                     	 this.loading = true;
                         axios.post('/module/moduleManager/saveModuleInfo',submitData)
                             .then(function (response) {
                                 var data =  response.data
+                                addModuleVM.loading = false;
                                 if(data.code=='0'){
                                 	addModuleVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
                                     window.location.href="/module/moduleManager/initModuleInfo?moduleId="+moduleId; 
@@ -269,10 +276,11 @@
                                
                             })
                             .catch(function (error) {
-                              console.log(error);
+                            	addModuleVM.loading = false;
+                               console.log(error);
                             })
                             .then(function () {
-                              // always executed
+                            	addModuleVM.loading = false;
                             });  
                     
                         
@@ -308,7 +316,11 @@
                 let checkedCount = value.length;
                 this.checkAll = checkedCount === this.items.length;
                 this.isIndeterminate = checkedCount > 0 && checkedCount < this.items.length;
-            }
+            },
+            number(){
+      　　　  this.form.sortNo=this.form.sortNo.replace(/[^\.\d]/g,'');
+              this.form.sortNo=this.form.sortNo.replace('.','');
+        　　}
         }
     })
 </script>
