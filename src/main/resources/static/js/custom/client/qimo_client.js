@@ -93,14 +93,14 @@ var clientVm = new Vue({
         	],
         	 clientNo:[
         		 { required: true, message: '坐席编号不能为空'},
-        		 {validator:function(rule,value,callback){
+        	/*	 {validator:function(rule,value,callback){
        				  if(!/^[0-9]*$/.test(value)){
        					  callback(new Error("只可以输入正整数,不超过50位"));     
        	        	  }else{
        	        		  callback();
        	        	  }
         			 
-        		 },trigger:'blur'},
+        		 },trigger:'blur'},*/
         		 {validator:function(rule,value,callback){
         		
         			  var param = {clientNo:value};

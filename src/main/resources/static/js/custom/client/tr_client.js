@@ -45,7 +45,7 @@ var clientVm = new Vue({
         		 { required: true, message: '坐席编号不能为空'},
         		 {validator:function(rule,value,callback){
         			 if(!/^[0-9]*$/.test(value)){
-      					  callback(new Error("只可以输入正整数,不超过50位"));     
+      					  callback(new Error("只可以输入数字,不超过50位"));     
       	        	  }else{
       	        		  callback();
       	        	  }
@@ -87,7 +87,7 @@ var clientVm = new Vue({
         		 { required: true, message: '绑定电话号码不能为空'},
         		 {validator:function(rule,value,callback){
        				  if(!/^[0-9]*$/.test(value)){
-       					  callback(new Error("只可以输入正整数,不超过11位"));     
+       					  callback(new Error("只可以输入数字,不超过11位"));     
        	        	  }else{
        	        		  callback();
        	        	  }
@@ -99,7 +99,7 @@ var clientVm = new Vue({
         		 { required: true, message: '外显手机号不能为空'},
         		 {validator:function(rule,value,callback){
        				  if(!/^[0-9]*$/.test(value)){
-       					  callback(new Error("只可以输入正整数,不超过11位"));     
+       					  callback(new Error("只可以输入数字,不超过11位"));     
        	        	  }else{
        	        		  callback();
        	        	  }
