@@ -24,13 +24,10 @@ var myCallRecordVm = new Vue({
             label: '外呼'
         }],
         searchForm:{
-        	callStatus:'',
-        	customerName:'',
-        	customerPhone:'',
-        	callType:'',
         	startTime:'',
-        	endTime:''
-        	
+        	endTime:'',
+        	accountName:'',
+      
         }
     },
     methods:{
@@ -49,7 +46,7 @@ var myCallRecordVm = new Vue({
     		 var param = this.searchForm;
         	 param.pageNum=this.pager.currentPage;
         	 param.pageSize=this.pager.pageSize;
-        	 axios.post('/call/callRecord/listMyCallRecord',param)
+        	 axios.post('/call/callRecord/listAllTmCallTalkTime',param)
              .then(function (response) {
             	 var data =  response.data
                  if(data.code=='0'){
@@ -178,12 +175,19 @@ var myCallRecordVm = new Vue({
   	      //  var d = b.valueOf()+1*24*60*60*1000;
   	        var startTime= new Date(c);
   	       // var endTime = new Date(d);
-  	        this.searchForm.startTime=startTime.getFullYear()+"-" + (startTime.getMonth()+1) + "-" + startTime.getDate()+" 00:00:00";;
+  	        this.searchForm.startTime=startTime.getFullYear()+"-" + (startTime.getMonth()+1) + "-" + startTime.getDate()+" 00:00:00";
             this.searchForm.endTime=year+"-"+(month+1)+"-"+date+" 23:59:59";
             this.initCallRecordData();
     	}
     },
     created(){
+		var a = new Date();
+        var year = a.getFullYear();
+        var month = a.getMonth();
+        var date = a.getDate();
+        this.searchForm.startTime=year+"-" + (month+1) + "-" + date+" 00:00:00";
+        this.searchForm.endTime=year+"-"+(month+1)+"-"+date+" 23:59:59";
+    	
       this.initCallRecordData();
    },
    mounted(){
@@ -191,6 +195,10 @@ var myCallRecordVm = new Vue({
      },
      filters:{
     	 fomatSeconds2(s){
+    		 if(!s){
+    			 return "00小时00分钟00秒";
+    		 }
+    		
      		var t="";
      		var hour = Math.floor(s/3600);
      		 var min = Math.floor(s/60) % 60;

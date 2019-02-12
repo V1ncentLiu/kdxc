@@ -27,7 +27,27 @@ public class CallRecordController {
     public String myCallRecord() {
         return "call/myCallRecord";
     }
-
+    
+    
+    /**
+     * 电销顾问通话记录
+     * @return
+     */
+    @RequestMapping("/telCallRecord")
+    public String telCallRecord() {
+        //TODO devin 角色判断 查询下属顾问
+        return "call/telCallRecord";
+    }
+    
+    
+    /**
+     * 电销顾问总时长统计
+     * @return
+     */
+    @RequestMapping("/tmTalkTimeCallRecord")
+    public String tmTalkTimeCallRecord() {
+        return "call/tmTalkTimeCallRecord";
+    }
     
     /**
      * 获取我的通话记录 分页展示 ，参数模糊匹配
@@ -46,6 +66,7 @@ public class CallRecordController {
     @PostMapping("/listAllTmCallRecord")
     @ResponseBody
     public JSONResult<Map<String,Object>> listAllTmCallRecord(@RequestBody CallRecordReqDTO myCallRecordReqDTO) {
+      //根据角色查询  下属顾问
        return callRecordFeign.listAllTmCallRecord(myCallRecordReqDTO);
     }
     
