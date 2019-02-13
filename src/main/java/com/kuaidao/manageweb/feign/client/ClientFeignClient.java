@@ -1,6 +1,7 @@
 package com.kuaidao.manageweb.feign.client;
 
 import java.util.List;
+import javax.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.netflix.feign.FeignClient;
@@ -20,6 +21,8 @@ import com.kuaidao.aggregation.dto.client.TrClientDataRespDTO;
 import com.kuaidao.aggregation.dto.client.TrClientQueryDTO;
 import com.kuaidao.aggregation.dto.client.TrClientRespDTO;
 import com.kuaidao.aggregation.dto.client.UploadTrClientDataDTO;
+import com.kuaidao.aggregation.dto.client.UserCnoReqDTO;
+import com.kuaidao.aggregation.dto.client.UserCnoRespDTO;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.IdEntity;
 import com.kuaidao.common.entity.IdListReq;
@@ -153,7 +156,38 @@ public interface ClientFeignClient {
     @PostMapping("/uploadQimoClientData")
     JSONResult<List<ImportQimoClientDTO>> uploadQimoClientData(
             UploadTrClientDataDTO<ImportQimoClientDTO> reqClientDataDTO);
+    
+    /**
+     * 根据坐席号和组织机构Id精确查询数据
+     * @param userCnoDTO
+     * @return
+     */
+    @PostMapping("/queryUserCnoByCnoAndOrgId")
+    JSONResult<UserCnoRespDTO> queryUserCnoByCnoAndOrgId(@RequestBody UserCnoReqDTO userCnoDTO);
 
+    /**
+     * 保存用户和坐席关系
+     * @return
+     */
+    @PostMapping("/saveUserCno")
+    public JSONResult<Boolean> saveUserCno(@Valid @RequestBody UserCnoReqDTO userCnoDTO);
+    
+    /**
+     * 更新用户和坐席关系
+     * @return
+     */
+    @PostMapping("/updateUserCnoByCnoAndOrgId")
+    public JSONResult<Boolean> updateUserCnoByCnoAndOrgId(@RequestBody UserCnoReqDTO userCnoDTO);
+    
+    
+    /**
+     *  根据坐席账号查询可用的 七陌坐席
+     * @param loginClint 登录坐席
+     * @return
+     */
+    @PostMapping("/queryQimoClientByLoginClient")
+    JSONResult<QimoClientRespDTO> queryQimoClientByLoginClient(@RequestBody String loginClint);
+    
 	@Component
 	static class HystrixClientFallback implements ClientFeignClient {
 
@@ -243,6 +277,26 @@ public interface ClientFeignClient {
         public JSONResult<List<ImportQimoClientDTO>> uploadQimoClientData(
                 UploadTrClientDataDTO<ImportQimoClientDTO> reqClientDataDTO) {
             return fallBackError("上传七陌坐席数据");
+        }
+
+        @Override
+        public JSONResult<UserCnoRespDTO> queryUserCnoByCnoAndOrgId(UserCnoReqDTO userCnoDTO) {
+            return fallBackError("查询用户和坐席关系");
+        }
+
+        @Override
+        public JSONResult<Boolean> saveUserCno(UserCnoReqDTO userCnoDTO) {
+            return fallBackError("保存用户和坐席关系");
+        }
+
+        @Override
+        public JSONResult<Boolean> updateUserCnoByCnoAndOrgId(UserCnoReqDTO userCnoDTO) {
+            return fallBackError("更新用户和坐席关系");
+        }
+
+        @Override
+        public JSONResult<QimoClientRespDTO> queryQimoClientByLoginClient(String loginClint) {
+            return fallBackError("根据坐席号查询可用的七陌坐席");
         }
 
 	}

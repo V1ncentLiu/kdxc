@@ -8,16 +8,21 @@ import java.util.concurrent.TimeUnit;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
+import org.apache.shiro.session.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
@@ -34,7 +39,10 @@ import com.kuaidao.aggregation.dto.client.TrClientDataRespDTO;
 import com.kuaidao.aggregation.dto.client.TrClientQueryDTO;
 import com.kuaidao.aggregation.dto.client.TrClientRespDTO;
 import com.kuaidao.aggregation.dto.client.UploadTrClientDataDTO;
+import com.kuaidao.aggregation.dto.client.UserCnoReqDTO;
+import com.kuaidao.aggregation.dto.client.UserCnoRespDTO;
 import com.kuaidao.common.constant.OrgTypeConstant;
+import com.kuaidao.common.constant.RedisConstant;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.constant.SystemCodeConstant;
 import com.kuaidao.common.entity.IdEntity;
@@ -53,6 +61,7 @@ import com.kuaidao.manageweb.util.CommUtil;
 import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
 import com.kuaidao.sys.dto.organization.OrganizationRespDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
+import com.netflix.hystrix.contrib.javanica.utils.CommonUtils;
 
 /**
  * 坐席管理 controller 
@@ -588,6 +597,99 @@ public class ClientController {
         return uploadTrClientData;
     }
 
+    /**
+     *  天润坐席登录
+     * @param result
+     * @return
+     */
+    @GetMapping("/login/{cno}")
+    @ResponseBody
+    public JSONResult login(@PathVariable String cno) {
+        SecurityUtils.getSubject().getSession().setAttribute("axb", cno);
+        return new JSONResult<>().success(true);
+    }
 
+    
+    /**
+     * 登录天润坐席前 操作
+     * @param cno
+     * @return
+     */
+    @RequestMapping(value = "/destroy/{cno}", method = { RequestMethod.POST })
+    @ResponseBody
+    public JSONResult<Boolean> destroy(@PathVariable("cno") String cno) {
+        SecurityUtils.getSubject().getSession().removeAttribute("axb");
+        SecurityUtils.getSubject().getSession().removeAttribute("bindType");
+        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+        if (null != curLoginUser) {
+            UserCnoReqDTO userCno = new UserCnoReqDTO();
+            userCno.setCno(cno);
+            userCno.setOrgId(curLoginUser.getOrgId());
+            userCno.setUserId(curLoginUser.getId());
+             JSONResult<UserCnoRespDTO> userCnoJr = clientFeignClient.queryUserCnoByCnoAndOrgId(userCno);
+             if(JSONResult.SUCCESS.equals(userCnoJr.getCode())) {
+                 if(userCnoJr.getData()!=null) {
+                     JSONResult<Boolean> updateUserCnoByCnoAndOrgId = clientFeignClient.updateUserCnoByCnoAndOrgId(userCno);
+                 }else {
+                     JSONResult<Boolean> saveUserCno = clientFeignClient.saveUserCno(userCno);
+                 }
+             }else {
+                 logger.error("destroy cno,queryUserCnoByCnoAndOrgId,res{{}}",userCnoJr);
+            }
+        }
+        return new JSONResult<Boolean>().success(true);
+    }
+    
+    
+    /**
+     *  天润坐席登录
+     * @param result
+     * @return
+     */
+    @PostMapping("/login/{cno}")
+    @ResponseBody
+    public JSONResult login(@RequestParam String bindType,@RequestParam String loginName) {
+        JSONResult<QimoClientRespDTO> qimoClientJr = clientFeignClient.queryQimoClientByLoginClient(loginName);
+        if(JSONResult.SUCCESS.equals(qimoClientJr.getCode())) {
+            QimoClientRespDTO qimoClient = qimoClientJr.getData();
+            if(qimoClient==null) {
+                return new JSONResult<>().fail(SysErrorCodeEnum.ERR_NOTEXISTS_DATA.getCode(),"登录坐席不存在或坐席未启用");
+            }else {
+                Session session = SecurityUtils.getSubject().getSession();
+                session.setAttribute("loginName", loginName);
+                if("2".equals(bindType)) {
+                    session.setAttribute("bindType", bindType);
+                }
+                return new JSONResult<>().success(true);
+            }
+        }else {
+            logger.error("七陌坐席登录，通过登录查询,param{{}},res{{}}",loginName,qimoClientJr);
+        }
+        return new JSONResult<>().fail(SysErrorCodeEnum.ERR_REST_FAIL.getCode(),SysErrorCodeEnum.ERR_REST_FAIL.getMessage());
+    }
+    
+    /**
+     * 坐席登录记录
+     * @return
+     */
+    @PostMapping("/clientLoginRecord")
+    @ResponseBody
+    public JSONResult<Boolean> clientLoginRecord(@RequestParam String cno,@RequestParam Long clientType,@RequestParam String bindPhone){
+        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+        String cnoPrefix = "";
+        if(clientType.equals(1L)) {
+            cnoPrefix="tr";
+        }else {
+            cnoPrefix = "qimo";
+        }
+        Long accountId = curLoginUser.getId();
+        Map<String, Object> paramMap = new HashMap<>();
+        paramMap.put("bindPhone",bindPhone);
+        paramMap.put("accountId",accountId);
+        redisTemplate.opsForHash().putAll(RedisConstant.CLIENT_USER_PREFIX+cnoPrefix+cno,paramMap);
+        return new JSONResult<Boolean>().success(true);
+        
+    }
+    
 
 }
