@@ -4,6 +4,7 @@ import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,6 +16,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
  * @Description:
  *      公共客户资源
  */
+@Controller
+@RequestMapping("/aggregation/publiccustomer")
 public class PublicCustomerResources {
 
     private static Logger logger = LoggerFactory.getLogger(PublicCustomerResources.class);
@@ -31,7 +34,7 @@ public class PublicCustomerResources {
     /**
      * 转移资源
      */
-    @PostMapping("/releaseRecord")
+    @PostMapping("/transferOfResource")
     @ResponseBody
     public JSONResult<PageBean>   transferOfResource(){
         return null;
@@ -60,7 +63,7 @@ public class PublicCustomerResources {
     @RequestMapping("/listPage")
     public String listPage(){
         logger.info("------------ 公共客户资源列表 ---------------");
-        return "dictionary/dicListPage";
+        return "pubcustomer/publicCustomer";
     }
     @PostMapping("/queryPage")
     @ResponseBody
