@@ -35,7 +35,7 @@ button a {
 </style>
 </head>
 <body>
-	<div id="moduleManage" class="moduleManage mainPadding">
+	<div id="moduleManage" class="moduleManage mainPadding" style="display: none;">
 		<el-breadcrumb separator="/" class="elBreadcrumb marginB20">
 		<el-breadcrumb-item>Home</el-breadcrumb-item> <el-breadcrumb-item>系统管理</el-breadcrumb-item>
 		<el-breadcrumb-item> <a href="JavaScript:void(0)">菜单管理</a></el-breadcrumb-item>
@@ -250,49 +250,48 @@ button a {
                     });          
                 });
             },
-        }
-        ,
+        },
         created(){
-          	if(null!=selectModule&&selectModule){
-            	// 查询 table 需要数据
-                var pageSize = this.pager.pageSize;
-                var pageNum = this.pager.currentPage;
-            	if(0==pageNum){
-            		pageNum=1;	
-            	}
-                var param = {};
-                var parentId = selectModule.id;
-                param.parentId = parentId;
-                param.name = this.inputModuleName;
-                param.pageNum=pageNum;
-                param.pageSize=pageSize;
-                axios.post('/module/moduleManager/queryModuleDataByPage?pageNum='+pageNum+"&pageSize="+pageSize,param)
-                    .then(function (response) {
-                        var data =  response.data
-                        if(data.code=='0'){
-                        	var resData = data.data;
-                        	moduleVM.dataTable= resData.data;
-                            //3.分页组件
-                            moduleVM.pager.total= resData.total;
-                            moduleVM.pager.currentPage = resData.currentPage;
-                            moduleVM.pager.pageSize = resData.pageSize;
-                        }else{
-                        	console.error(data);
-                        }
-                        
-                       
-                    })
-                    .catch(function (error) {
-                      console.log(error);
-                    })
-                    .then(function () {
-                      // always executed
-                    });  
-              }
-          	},
-          	mounted(){ 
-          	   
+        	if(null!=selectModule&&selectModule){
+          	// 查询 table 需要数据
+              var pageSize = this.pager.pageSize;
+              var pageNum = this.pager.currentPage;
+          	if(0==pageNum){
+          		pageNum=1;	
           	}
+              var param = {};
+              var parentId = selectModule.id;
+              param.parentId = parentId;
+              param.name = this.inputModuleName;
+              param.pageNum=pageNum;
+              param.pageSize=pageSize;
+              axios.post('/module/moduleManager/queryModuleDataByPage?pageNum='+pageNum+"&pageSize="+pageSize,param)
+                  .then(function (response) {
+                      var data =  response.data
+                      if(data.code=='0'){
+                      	var resData = data.data;
+                      	moduleVM.dataTable= resData.data;
+                          //3.分页组件
+                          moduleVM.pager.total= resData.total;
+                          moduleVM.pager.currentPage = resData.currentPage;
+                          moduleVM.pager.pageSize = resData.pageSize;
+                      }else{
+                      	console.error(data);
+                      }
+                      
+                     
+                  })
+                  .catch(function (error) {
+                    console.log(error);
+                  })
+                  .then(function () {
+                    // always executed
+                  });  
+          }
+      	},
+      	mounted(){ 
+      	  document.getElementById('moduleManage').style.display = 'block';
+      	}
     })
 </script>
 </html>
