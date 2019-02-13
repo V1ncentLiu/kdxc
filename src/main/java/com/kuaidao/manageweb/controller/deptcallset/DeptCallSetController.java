@@ -167,7 +167,7 @@ public class DeptCallSetController {
         if("".equals(dto.getDeptNo())){
             dto.setDeptNo(null);
         }
-        if(dto.getOrgId()==0L){
+        if(dto.getOrgId()!=null&&dto.getOrgId()==0L){
             dto.setOrgId(null);
         }
         return deptCallSetFeignClient.updateDeptCallSets(dto);
