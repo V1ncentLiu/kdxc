@@ -251,6 +251,9 @@ public class ProjectController {
      */
     @PostMapping("/deleteProject")
     @ResponseBody
+    @RequiresPermissions("aggregation:projectManager:delete")
+    @LogRecord(description = "删除项目信息", operationType = OperationType.DELETE,
+            menuName = MenuEnum.PROJECT_MANAGEMENT)
     public JSONResult deleteMenu(@RequestBody IdListLongReq idList) {
 
         return projectInfoFeignClient.delete(idList);

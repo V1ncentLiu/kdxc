@@ -4,10 +4,16 @@
     <title>后台管理系统</title>
     <style>
         .addModule{width: 80%;}
+        .resourceRow .el-checkbox{margin-left: 0;margin-right: 30px;}
     </style>
 </head>
 <body>
-<div id="addModule" class="addModule mainPadding">  
+<div id="addModule" class="addModule mainPadding" style="display: none"> 
+    <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
+        <el-breadcrumb-item>Home</el-breadcrumb-item>
+        <el-breadcrumb-item>业务设置</el-breadcrumb-item>
+        <el-breadcrumb-item><a href="JavaScript:void(0)">电销员工分配规则</a></el-breadcrumb-item>
+    </el-breadcrumb> 
     <div class="fs16 marginB20"><div class="titleBorderL">新建分配规则</div></div>
     <el-form :model="form" :rules="rules" ref="form">
         <div class="marginB20 fs16"><em class="redcolor">*</em>必填项</div>
@@ -37,7 +43,7 @@
                     </el-form-item>
                 </el-col>
             </el-row>
-            <el-row>
+            <el-row class="resourceRow">
                 <el-col :span="12">
                     <el-form-item label="资源类别：" prop="category" :label-width="formLabelWidth">
                         <el-checkbox-group v-model="form.category">
@@ -387,7 +393,10 @@
            axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {  
          	AddRuleVM.typeArr=response.data.data;
             });
-          }
+        },
+        mounted(){
+          document.getElementById('addModule').style.display = 'block';
+        }
     })
 </script>
 </html>
