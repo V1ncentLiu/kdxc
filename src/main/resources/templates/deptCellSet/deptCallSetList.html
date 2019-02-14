@@ -15,7 +15,7 @@
 </head>
 <body>
 
-<div id="mainDiv"  class="mainPadding">
+<div id="mainDiv"  class="mainPadding" style="display: none;">
     <template>
         <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
             <el-breadcrumb-item>Home</el-breadcrumb-item>
@@ -23,10 +23,10 @@
             <el-breadcrumb-item><a href="JavaScript:void(0)">部门呼叫设置</a></el-breadcrumb-item>
         </el-breadcrumb>
 
-        <el-row type="flex" class="row-bg" justify="start">
-            <el-button type="primary" @click="openAddDialog()">添加部门呼叫设置</el-button>
-            <el-button type="primary" @click="openImportDataDialog()">导入呼叫信息</el-button>
-            <el-button type="primary" @click="openUpdateDialog">修改</el-button>
+        <el-row type="flex" class="row-bg marginB20" justify="start">
+            <el-button type="primary" @click="openAddDialog()"><i class="el-icon-plus"></i>添加部门呼叫设置</el-button>
+            <el-button type="warning" @click="openImportDataDialog()"><i class="el-icon-download"></i>导入呼叫信息</el-button>
+            <el-button type="success" @click="openUpdateDialog"><i class="el-icon-edit"></i>修改</el-button>
         </el-row>
 
 
@@ -38,15 +38,15 @@
                 <el-row class="marginB10 greybg padding20" style="padding-bottom: 0;" >
                     <el-form :inline="true" :model="queryForm" class="demo-form-inline" ref="queryForm" >
                     <el-row :gutter="20"  type="flex"  justify="end">
-                        <el-col :span="3">
+                        <el-col style="width: 250px;">
                             <el-form-item class="formItem" prop="deptNo">
                                 <el-input v-model="queryForm.deptNo" placeholder="部门编号"></el-input>
                             </el-form-item>
                         </el-col>
-                        <el-col :span="3">
+                        <el-col style="width:250px;">
                             <el-popover
                                     placement="bottom"
-                                    width="250"
+                                    width="205"
                                     trigger="click"
                                     v-model="isShow">
                                 <el-tree
@@ -58,12 +58,12 @@
                                         @node-click="treeNodeClick">
                                 </el-tree>
                                 <el-button slot="reference" class="orgSelectOopover">
-                                    <el-input v-model="queryForm.orgName" placeholder="选择所属组织" class="orgSelectInput" readonly></el-input>
+                                    <el-input v-model="queryForm.orgName" placeholder="请选择所在组织" class="orgSelectInput" readonly></el-input>
                                     <i class="el-icon-arrow-down" style="float: right;margin-right: -12px;color: #c0c4cc;"></i>
                                 </el-button>
                             </el-popover>
                         </el-col>
-                        <el-col :span="3">
+                        <el-col style="width: auto;">
                             <el-button type="primary" @click="initList">搜索</el-button>
                         </el-col>
                     </el-row>
@@ -72,9 +72,9 @@
 
 
 
-        <el-table :data="tableData"  style="width: 100%" tooltip-effect="light"  ref="multipleTable"
+        <el-table :data="tableData"  style="width: 100%" tooltip-effect="light" border ref="multipleTable"
                   @selection-change="handleSelectionChange" >
-            <el-table-column type="selection" width="55" prop="id"> </el-table-column>
+            <el-table-column type="selection" width="55" prop="id" align="center"> </el-table-column>
             <el-table-column prop="xh" label="序号" width="55" align="center"></el-table-column>
             <el-table-column prop="deptNo" label="部门编号"  align="center" ></el-table-column>
             <el-table-column prop="callCenterNo" label="呼叫中心编号" align="center" ></el-table-column>
@@ -83,9 +83,9 @@
             <el-table-column prop="companyPass" label="企业用户名密码"  align="center" ></el-table-column>
             <el-table-column prop="deptUser" label="部门用户"  align="center" ></el-table-column>
             <el-table-column prop="deptPass" label="部门用户密码" align="center" ></el-table-column>
-            <el-table-column prop="orgName" label="所属部门(组织)" align="center" >
+            <el-table-column prop="orgName" label="所属部门(组织)" align="center" width="200">
                 <template slot-scope="scope">
-                    <span>{{ scope.row.orgName }}</span>
+                    <p>{{ scope.row.orgName }}</p>
                     <el-button size="mini"  type="danger" @click="handleOrgSet(scope.$index, scope.row)">部门设置</el-button>   <!--handle(scope.$index, scope.row)  selectOrgs-->
                 </template>
             </el-table-column>
@@ -97,80 +97,80 @@
 
     <el-dialog
             title="添加部门呼叫设置"
-            :visible.sync="addDialogVisible"  width="30%"  @opened="addOpened">
+            :visible.sync="addDialogVisible" @opened="addOpened">
         <template>
             <el-form :model="add" ref="add" >
 
-                <el-form-item label="部门编号"  :label-width="formLabelWidth">
+                <el-form-item label="部门编号："  :label-width="formLabelWidth">
                     <el-input v-model="add.deptNo" autocomplete="off"  maxlength="50"   style="width: 80%" ></el-input>
                 </el-form-item>
-                <el-form-item label="呼叫中心编号"  :label-width="formLabelWidth">
+                <el-form-item label="呼叫中心编号："  :label-width="formLabelWidth">
                     <el-input v-model="add.callCenterNo" autocomplete="off"  maxlength="50"   style="width: 80%" ></el-input>
                 </el-form-item>
-                <el-form-item label="Token"  :label-width="formLabelWidth">
+                <el-form-item label="Token："  :label-width="formLabelWidth">
                     <el-input v-model="add.token" autocomplete="off"  maxlength="50"   style="width: 80%" ></el-input>
                 </el-form-item>
-                <el-form-item label="企业用户名"  :label-width="formLabelWidth">
+                <el-form-item label="企业用户名："  :label-width="formLabelWidth">
                     <el-input v-model="add.companyUser" autocomplete="off"  maxlength="50"   style="width: 80%" ></el-input>
                 </el-form-item>
-                <el-form-item label="企业用户名密码"  :label-width="formLabelWidth">
+                <el-form-item label="企业用户名密码："  :label-width="formLabelWidth">
                     <el-input v-model="add.companyPass" autocomplete="off"  maxlength="50"   style="width: 80%" ></el-input>
                 </el-form-item>
-                <el-form-item label="部门用户"  :label-width="formLabelWidth">
+                <el-form-item label="部门用户："  :label-width="formLabelWidth">
                     <el-input v-model="add.deptUser" autocomplete="off"  maxlength="50"   style="width: 80%" ></el-input>
                 </el-form-item>
-                <el-form-item label="部门用户密码"  :label-width="formLabelWidth">
+                <el-form-item label="部门用户密码："  :label-width="formLabelWidth">
                     <el-input v-model="add.deptPass" autocomplete="off"  maxlength="50"   style="width: 80%" ></el-input>
                 </el-form-item>
-                <el-form-item label="所属部门(组织)"  :label-width="formLabelWidth">
+                <el-form-item label="所属部门(组织)："  :label-width="formLabelWidth">
                     <el-input v-model="add.orgName"   size="small" maxlength="50" style="width: 80%"  readonly >
                         <el-button slot="append" icon="el-icon-search" @click="selectOrgs">选择组织</el-button>
                     </el-input>
                 </el-form-item>
             </el-form>
             <div slot="footer" class="dialog-footer">
-                <el-button @click="saveOne">提 交</el-button>
-                <el-button type="primary" @click="addDialogVisible = false">取 消</el-button>
+                <el-button  type="primary" ref="addbutton" @click="saveOne" :disabled="addButtonflag">提 交</el-button>
+                <el-button @click="addDialogVisible = false">取 消</el-button>
             </div>
         </template>
     </el-dialog>
 
     <el-dialog
             title="修改部门呼叫设置"
-            :visible.sync="updateDialogVisible"  width="30%" @opened="">
+            :visible.sync="updateDialogVisible" @opened="">
         <template>
             <el-form :model="update" ref="update" >
 
-                <el-form-item label="部门编号"  :label-width="formLabelWidth">
+                <el-form-item label="部门编号："  :label-width="formLabelWidth">
                     <el-input v-model="update.deptNo" autocomplete="off"  maxlength="50"   style="width: 80%" ></el-input>
                 </el-form-item>
-                <el-form-item label="呼叫中心编号"  :label-width="formLabelWidth">
+                <el-form-item label="呼叫中心编号："  :label-width="formLabelWidth">
                     <el-input v-model="update.callCenterNo" autocomplete="off"  maxlength="50"   style="width: 80%" ></el-input>
                 </el-form-item>
-                <el-form-item label="Token"  :label-width="formLabelWidth">
+                <el-form-item label="Token："  :label-width="formLabelWidth">
                     <el-input v-model="update.token" autocomplete="off"  maxlength="50"   style="width: 80%" ></el-input>
                 </el-form-item>
-                <el-form-item label="企业用户名"  :label-width="formLabelWidth">
+                <el-form-item label="企业用户名："  :label-width="formLabelWidth">
                     <el-input v-model="update.companyUser" autocomplete="off"  maxlength="50"   style="width: 80%" ></el-input>
                 </el-form-item>
-                <el-form-item label="企业用户名密码"  :label-width="formLabelWidth">
+                <el-form-item label="企业用户名密码："  :label-width="formLabelWidth">
                     <el-input v-model="update.companyPass" autocomplete="off"  maxlength="50"   style="width: 80%" ></el-input>
                 </el-form-item>
-                <el-form-item label="部门用户"  :label-width="formLabelWidth">
+                <el-form-item label="部门用户："  :label-width="formLabelWidth">
                     <el-input v-model="update.deptUser" autocomplete="off"  maxlength="50"   style="width: 80%" ></el-input>
                 </el-form-item>
-                <el-form-item label="部门用户密码"  :label-width="formLabelWidth">
+                <el-form-item label="部门用户密码："  :label-width="formLabelWidth">
                     <el-input v-model="update.deptPass" autocomplete="off"  maxlength="50"   style="width: 80%" ></el-input>
                 </el-form-item>
-                <el-form-item label="所属部门"  :label-width="formLabelWidth">
+                <el-form-item label="所属部门："  :label-width="formLabelWidth">
                     <el-input v-model="update.orgName"   size="small" maxlength="50" style="width: 80%"  readonly >
                         <el-button slot="append" icon="el-icon-search" @click="selectOrgs">选择组织</el-button>
                     </el-input>
                 </el-form-item>
             </el-form>
             <div slot="footer" class="dialog-footer">
-                <el-button @click="updateOne">提 交</el-button>
-                <el-button type="primary" @click="updateDialogVisible = false">取 消</el-button>
+                <el-button type="primary" ref="updateButton" @click="updateOne">提 交</el-button>
+                <el-button @click="updateDialogVisible = false">取 消</el-button>
             </div>
         </template>
     </el-dialog>
@@ -248,7 +248,7 @@
                 </el-table>
             </el-row>
             <div slot="footer" >
-                <el-button ref="importButton" @click="submitUpload('import')" :disabled="flag">导 入</el-button>
+                <el-button type="primary" ref="importButton" @click="submitUpload('import')" :disabled="flag">导 入</el-button>
             </div>
         </template>
     </el-dialog>
@@ -274,7 +274,7 @@
                 </el-table>
             </el-row>
             <div slot="footer" >
-                <el-button @click="showErrTableDateDialog=false">知道了</el-button>
+                <el-button type="primary" @click="showErrTableDateDialog=false">知道了</el-button>
             </div>
         </template>
     </el-dialog>
@@ -303,6 +303,7 @@
     var mainDivVM = new Vue({
         el: '#mainDiv',
         data: {
+            addButtonflag:false,
             isShow:false,
             flag:false,
             formLabelWidth:'150px',
@@ -434,10 +435,10 @@
             openUpdateDialog(){
                 var rows = this.multipleSelection;
                 if(rows.length==0){
-                    this.$message({message: '请选择修改数据', type: 'warning'});
+                    this.$message({message: '请选择一条数据进行修改', type: 'warning'});
                     return false;
                 }if(rows.length>1){
-                    this.$message({message: '请选择一条数据', type: 'warning'});
+                    this.$message({message: '请选择一条数据进行修改', type: 'warning'});
                     return false;
                 }else{
                     var param = {};
@@ -468,6 +469,7 @@
                 var param = this.add;
                 this.$refs['add'].validate((valid) => {
                     if (valid) {
+                        mainDivVM.addButtonflag=true
                         axios.post("/deptcallset/saveOne", param)
                             .then(function (response) {
                                 if (response.data.code == 0) {
@@ -475,10 +477,13 @@
                                             mainDivVM.pager.pageNum = 1
                                             mainDivVM.initList();
                                             mainDivVM.addDialogVisible = false;
-                                        }});
+                                            mainDivVM.addButtonflag=false
+                                    }});
                                 } else {
+                                    mainDivVM.addButtonflag=false
                                     mainDivVM.$message.error(response.data.msg);
                                 }
+
                             }).catch(function (error) {console.log(error);});
                     } else {return false;}
                 });
@@ -713,6 +718,9 @@
             this.initOrgs();
             this.initList();
             this.initTree();
+        },//created方法 结束
+        mounted(){
+            document.getElementById('mainDiv').style.display = 'block';
         }
     });
 
@@ -721,9 +729,6 @@
 
     .dialog-footer{
         text-align: center;
-    }
-    .el-table th {
-        font-weight: bolder;
     }
     .el-input__inner{
     //   width: 200px;

@@ -7,7 +7,7 @@
     </style>
 </head>
 <body>
-<div id="companyManage" class="companyManage mainPadding">  
+<div id="companyManage" class="companyManage mainPadding" style="display: none;">  
     <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
         <el-breadcrumb-item>Home</el-breadcrumb-item>
         <el-breadcrumb-item>业务设置</el-breadcrumb-item>
@@ -16,13 +16,13 @@
     
     <el-row class="marginB10">
     		<shiro:hasPermission name="aggregation:companyManager:add">
-		        <el-button type="primary" @click="toAddCompany">添加</el-button>
+		        <el-button type="primary" @click="toAddCompany"><i class="el-icon-plus"></i>添加</el-button>
 		    </shiro:hasPermission>
     		<shiro:hasPermission name="aggregation:companyManager:add">
-		        <el-button type="primary" @click="toUpdateCompany">编辑</el-button>
+		        <el-button type="success" @click="toUpdateCompany"><i class="el-icon-edit"></i>编辑</el-button>
 		    </shiro:hasPermission>
     		<shiro:hasPermission name="aggregation:companyManager:add">
-		        <el-button type="primary" @click="deleteCompany">删除</el-button>
+		        <el-button type="danger" @click="deleteCompany"><i class="el-icon-delete"></i>删除</el-button>
 		    </shiro:hasPermission>
 	</el-row>
 	<el-form :inline="true" :model="companySearchForm" class="demo-form-inline" ref="companySearchForm"> 
@@ -68,13 +68,13 @@
                 <el-input v-model="companyForm.groupName" autocomplete="off"  maxlength="50"></el-input>
             </el-form-item>
             <el-form-item label="公司地址：" :label-width="formLabelWidth" prop="companyAddress">
-                <el-input v-model="companyForm.companyAddress" autocomplete="off"  maxlength="50"></el-input>
+                <el-input v-model="companyForm.companyAddress" autocomplete="off"  maxlength="100"></el-input>
             </el-form-item>
             <el-form-item label="联系电话：" :label-width="formLabelWidth" prop="phoneNumber">
                 <el-input v-model="companyForm.phoneNumber" autocomplete="off"  maxlength="50"></el-input>
             </el-form-item>
             <el-form-item label="官网地址：" :label-width="formLabelWidth" prop="website">
-                <el-input v-model="companyForm.website" autocomplete="off"  maxlength="50"></el-input>
+                <el-input v-model="companyForm.website" autocomplete="off"  maxlength="100"></el-input>
             </el-form-item>
         </el-form>
         <div slot="footer" class="dialog-footer">
@@ -152,13 +152,16 @@ var companyVM = new Vue({
               handleSelectionChange(val) {
                   this.multipleSelection = val;
               },
-              //跳转任务用户页
+              //添加公司弹窗
               toAddCompany() {
                   	this.companyForm.id='';
+                  	if (this.$refs['companyForm']!==undefined) {
+	               		this.$refs['companyForm'].resetFields();
+	               	}
                   	this.dialogFormVisible = true;
                   	this.addOrModifyDialogTitle="添加公司";
               },
-              //跳转修改任务页
+              //跳转修改公司页
               toUpdateCompany() {
             	  var rows = this.multipleSelection;
                   if(rows.length!=1){
@@ -207,8 +210,8 @@ var companyVM = new Vue({
                	   this.dialogFormVisible = false;
                },
                closeAddCustomFieldDialog(){//关闭添加自定义字段dialog
-	               	if (this.$refs['customMenuForm']!==undefined) {
-	               		this.$refs['customMenuForm'].resetFields();
+	               	if (this.$refs['companyForm']!==undefined) {
+	               		this.$refs['companyForm'].resetFields();
 	               	}
                },
                saveCompany(formName){//保存自定义字段
@@ -247,7 +250,7 @@ var companyVM = new Vue({
               	   var rows = this.multipleSelection;
                      if(rows.length==0){
                          this.$message({
-                            message: '请选择一条数据进行刪除',
+                            message: '请选择删除数据',
                             type: 'warning'
                           });
                          return;
@@ -301,6 +304,7 @@ var companyVM = new Vue({
         },
         mounted(){
            console.info("mounted method");
+           document.getElementById('companyManage').style.display = 'block';
         }
     })
     

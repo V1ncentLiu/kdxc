@@ -7,7 +7,7 @@
     </style>
 </head>
 <body>
-<div v-loading="loading" id="organizationManage" class="organizationManage mainPadding" >  
+<div v-loading="loading" id="organizationManage" class="organizationManage mainPadding"  style="display: none;">  
     <el-breadcrumb separator="/" class="elBreadcrumb marginB20" >
         <el-breadcrumb-item>Home</el-breadcrumb-item>
         <el-breadcrumb-item>业务设置</el-breadcrumb-item>
@@ -15,10 +15,10 @@
     </el-breadcrumb>
     <el-row class="marginB10">
         <el-col :xs="12" :sm="16" :md="16" :lg="18" :xl="12">
-            <el-button type="primary" @click="addbutton">新建电销布局</el-button>
-            <el-button type="primary" @click="deleButton">删除</el-button>
-            <el-button type="primary" @click="dialogBatchVisible = true">导入</el-button>
-   			<el-button type="primary" @click="updateButton">编辑电销布局</el-button>
+            <el-button type="primary" @click="addbutton"><i class="el-icon-plus"></i>新建电销布局</el-button>
+            <el-button type="danger" @click="deleButton"><i class="el-icon-delete"></i>删除</el-button>
+            <el-button type="warning" @click="dialogBatchVisible = true"><i class="el-icon-download"></i>导入</el-button>
+   			<el-button type="success" @click="updateButton"><i class="el-icon-edit"></i>编辑电销布局</el-button>
         </el-col>
         </el-row>
 <el-row class="marginB10">
@@ -26,7 +26,7 @@
               
 				<div class="block">
 					
-  					<el-select filterable v-model="telemarketingTeamId" placeholder="请选择电销组">
+  					<el-select filterable v-model="telemarketingTeamId" placeholder="请选择电销组" clearable>
 					    <el-option
 					      v-for="item in dzList"
 					      :key="item.id"
@@ -34,7 +34,7 @@
 					      :value="item.id">
 					    </el-option>
   					</el-select>
-  					<el-select filterable v-model="projectId" placeholder="项目">
+  					<el-select filterable v-model="projectId" placeholder="项目" clearable>
 					    <el-option
 					      v-for="item in projectList"
 					      :key="item.id"
@@ -42,10 +42,10 @@
 					      :value="item.id">
 					    </el-option>
   					</el-select>
-  					<span class="demonstration">开始时间</span>
+  					<span class="demonstration">开始时间：</span>
 					<el-date-picker value-format="yyyy-MM-dd" v-model="beginTime" type="date" placeholder="选择日期">
 					</el-date-picker>
-					<span class="demonstration" style="margin-left: 20px;">结束</span>
+					<span class="demonstration" style="margin-left: 20px;">结束：</span>
 					<el-date-picker value-format="yyyy-MM-dd" v-model="endTime" type="date" placeholder="选择日期">
 					</el-date-picker>
   					<el-button type="primary" @click="inviteAreaListPage">搜索</el-button>
@@ -121,10 +121,10 @@
         </div>
     </el-dialog>
            <!-- 批量添加 自定义字段弹窗 start -->
-            <el-dialog title="批量添加" :visible.sync="dialogBatchVisible" @close="closeUploadFileDialog">
+            <el-dialog title="电销布局导入" :visible.sync="dialogBatchVisible" @close="closeUploadFileDialog">
                <el-row class="marginB20">
                                  <!-- 下载批量上传模版: <a href="" download="页面自定义字段导入模板">页面自定义字段模板</a> -->
-                                 下载批量上传模版：<a href="/excel-templates/telemarketinglayout.xlsx" download="电销布局模板"><span style="color:#409EFF">电销布局模板下载</span></a>
+                                 下载批量上传模版：<a href="/excel-templates/telemarketinglayout.xlsx" download="电销布局模板"><span style="color:#409EFF;text-decoration: underline;">导入电销布局模板</span></a>
                
                </el-row>
                <el-row>
@@ -173,7 +173,7 @@
             </el-row>
             </el-form>
             <div slot="footer" class="dialog-footer">
-            <el-button show  @click="submitExport"><span data="1" id="showButton">导入</span></el-button>
+            <el-button type="primary" show  @click="submitExport"><span data="1" id="showButton">导入</span></el-button>
             </div>
         </el-dialog>
 </div>
@@ -355,7 +355,7 @@
     	 		    	  moduleName+="【"+rows[i].projects+"】";
     	 		        }
     	           }
-    	           this.$confirm("确定要删除"+moduleName+"电销布局吗?", '提示', {
+    	           this.$confirm("确定要删除"+moduleName+"电销布局?", '提示', {
                        confirmButtonText: '确定',
                        cancelButtonText: '取消',
                        type: 'warning'
@@ -520,7 +520,7 @@
                       	orgVM.exportdataTable =response.data; 
                       	orgVM.loading = false;
                       	orgVM.exportFormVisible = true;
-                      	orgVM.dataNum="预览数据，共"+orgVM.exportdataTable.length+"条数据"
+                      	orgVM.dataNum="预览数据，共"+orgVM.exportdataTable.length+"条资源"
               	      }});
             	  }else{
             		orgVM.loading = false;
@@ -599,7 +599,10 @@
         created(){
         	this.inviteAreaListPage();
         	
-        }//created方法 结束
+        },//created方法 结束
+        mounted(){
+            document.getElementById('organizationManage').style.display = 'block';
+        }
     })
 </script>
 </html>

@@ -12,7 +12,11 @@
     </style>
 </head>
 <body>
-<div id="addModule" v-loading="loading" class="addModule mainPadding">  
+<div id="addModule" v-loading="loading" class="addModule mainPadding" style="display: none;"> 
+    <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
+        <el-breadcrumb-item>Home</el-breadcrumb-item> <el-breadcrumb-item>系统管理</el-breadcrumb-item>
+        <el-breadcrumb-item> <a href="JavaScript:void(0)">菜单管理</a></el-breadcrumb-item>
+    </el-breadcrumb>  
     <div class="fs16 marginB20"><div class="titleBorderL">编辑菜单</div></div>
     <el-form :model="form" :rules="rules" ref="form">
         <div class="marginB20 fs16"><em class="redcolor">*</em>必填项</div>
@@ -37,7 +41,7 @@
                 </el-col>
                 <el-col :span="12">
                     <el-form-item label="优先级：" prop="sortNo" :label-width="formLabelWidth">
-                        <el-input   v-model="form.sortNo" maxlength="10" autocomplete="off"  ></el-input>
+                        <el-input   v-model="form.sortNo" maxlength="10" autocomplete="off"  @keyup.native="number"></el-input>
                     </el-form-item>
                 </el-col>
             </el-row>
@@ -191,7 +195,7 @@
                                   callback();
                                } 
                                callback();
-                           }, trigger: 'change'}
+                           }, trigger: 'blur'}
                           
                        ],
                        type: [
@@ -314,7 +318,14 @@
                 let checkedCount = value.length;
                 this.checkAll = checkedCount === this.items.length;
                 this.isIndeterminate = checkedCount > 0 && checkedCount < this.items.length;
-            }
+            },
+            number(){
+      　　　  this.form.sortNo=this.form.sortNo.replace(/[^\.\d]/g,'');
+              this.form.sortNo=this.form.sortNo.replace('.','');
+        　　}
+        },
+        mounted(){ 
+          document.getElementById('addModule').style.display = 'block';
         }
     })
 </script>

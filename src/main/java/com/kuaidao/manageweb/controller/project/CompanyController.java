@@ -168,6 +168,9 @@ public class CompanyController {
      */
     @PostMapping("/deleteCompany")
     @ResponseBody
+    @RequiresPermissions("aggregation:companyManager:delete")
+    @LogRecord(description = "删除公司信息", operationType = OperationType.DELETE,
+            menuName = MenuEnum.COMPANY_MANAGEMENT)
     public JSONResult deleteCompany(@RequestBody IdListLongReq idList) {
 
         return companyInfoFeignClient.delete(idList);

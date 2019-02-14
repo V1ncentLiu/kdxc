@@ -6,7 +6,7 @@ xmlns:th="http://www.thymeleaf.org">
  
 </head>
 <body>
-<div id="informationAllot" class="informationAllot mainPadding">  
+<div id="informationAllot" class="informationAllot mainPadding" style="display: none;">  
     <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
         <el-breadcrumb-item>Home</el-breadcrumb-item>
         <el-breadcrumb-item>业务设置</el-breadcrumb-item>
@@ -17,10 +17,10 @@ xmlns:th="http://www.thymeleaf.org">
            <el-button type="primary" @click="openAddRuleDialog"><i class="el-icon-plus"></i>添加</el-button>
         </shiro:hasPermission>
            <shiro:hasPermission name="infoAssign:edit">
-        <el-button type="primary"  @click="openUpdateRuleDialog" ><i class="el-icon-edit"></i>编辑</el-button>
+        <el-button type="success"  @click="openUpdateRuleDialog" ><i class="el-icon-edit"></i>编辑</el-button>
         </shiro:hasPermission>
        <shiro:hasPermission name="infoAssign:delete">
-         <el-button type="primary" @click="deleteDialog"><i class="el-icon-delete"></i>删除</el-button>
+         <el-button type="danger" @click="deleteDialog"><i class="el-icon-delete"></i>删除</el-button>
         </shiro:hasPermission>
     </el-row>
     <el-row class="marginB10 greybg padding20">
@@ -69,7 +69,7 @@ xmlns:th="http://www.thymeleaf.org">
             <el-table-column align="center" prop="releAssignId" label="规则ID"></el-table-column>
             <el-table-column align="center" prop="projectName" label="项目名称"></el-table-column>
             <el-table-column align="center" prop="telemarketingName" label="电销组"></el-table-column>
-            <el-table-column align="center" prop="telemarketingDirectorName" label="电销总监名称"></el-table-column>
+            <el-table-column align="center" prop="telemarketingDirectorName" label="电销总监姓名"></el-table-column>
         </el-table>
          <table-pagination :pager="pager" @change="initTableData"></table-pagination> 
     </el-row>
@@ -103,7 +103,7 @@ xmlns:th="http://www.thymeleaf.org">
             </el-form-item>
         </el-form>
         <div slot="footer" class="dialog-footer">
-            <el-button type="primary" @click="submitFormType('form')">确 定</el-button>
+            <el-button type="primary" @click="submitFormType('form')">提交</el-button>
             <el-button @click="updateDialogFormVisible=false">取消</el-button>
         </div>
     </el-dialog>
@@ -130,7 +130,7 @@ var proSelect=[[${proSelect}]];
                 },
                 formLabelWidth: '100px',
                 dataTable: [],
-                dailogTitleType:'新增',
+                dailogTitleType:'添加',
                 pager:{ 
                     total: 0,
                     currentPage: 1,
@@ -250,16 +250,16 @@ var proSelect=[[${proSelect}]];
                  param.pageSize=pageSize;
      		    axios.post('/assignrule/infoAssign/queryInfoAssignList',param).then(function (response) {
      				if(null==response){
-     					alert("返回异常");
+     					console.log("返回异常");
      					return ;
      				}
      				var resobj= response.data;
      				if(null==resobj){
-     					alert("返回异常");
+     					console.log("返回异常");
      					return ;
      				} 
      				if(resobj.code!='0'){
-     					alert(response.data.message);
+     					console.log(response.data.message);
      					return ;
      				}
      				var pageData=resobj.data;
@@ -341,7 +341,7 @@ var proSelect=[[${proSelect}]];
             },
             //添加规则
             openAddRuleDialog(){
-              this.dailogTitleType="新增";
+              this.dailogTitleType="添加";
               this.updateDialogFormVisible=true;
           	 if (this.$refs['form']!=undefined) {
            		this.$refs['form'].resetFields();
@@ -445,7 +445,10 @@ var proSelect=[[${proSelect}]];
     	 created(){
     		//初始化数据列表
     		this.initTableData();
-    	}
+    	},//created方法 结束
+        mounted(){
+            document.getElementById('informationAllot').style.display = 'block';
+        }
     })
 </script>
 </html>
