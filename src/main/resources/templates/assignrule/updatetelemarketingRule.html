@@ -241,20 +241,7 @@
                     //规则成员数据	
                     var saveMemner=[];
                     var memberArry=this.form.tableData ;
-                    if(null!=memberArry&&memberArry.length>0) {
-                      for(var i=0;i<memberArry.length;i++) {
-                    		var save={};
-                    	   save.memberId=memberArry[i].person;
-                    	   save.resourceLimit=memberArry[i].num;
-                    	   saveMemner.push(save);
-                    	}
-                   }else{
-               	    this.$message({
-                        type: 'warning',
-                        message: '组内人员必输项，请输入!'
-                    });
-            	    return ;
-               }
+                    
                     var assignName=this.form.assignName ;
                     	
                     var startTime=this.form.startTime ;	
@@ -270,6 +257,29 @@
                     var searchWord=this.tags ;	
                     
                     var area=this.areaTags ;	
+                    
+                    if(endTime<startTime){
+                        this.$message({
+                            type: 'warning',
+                            message: '结束时间不能早于开始时间'
+                        });
+                        return ;
+                    }
+
+                    if(null!=memberArry&&memberArry.length>0) {
+                      for(var i=0;i<memberArry.length;i++) {
+                            var save={};
+                           save.memberId=memberArry[i].person;
+                           save.resourceLimit=memberArry[i].num;
+                           saveMemner.push(save);
+                        }
+                    }else{
+                        this.$message({
+                            type: 'warning',
+                            message: '组内人员必输项，请输入!'
+                        });
+                        return ;
+                    }
                     
                     var param={};
                     
