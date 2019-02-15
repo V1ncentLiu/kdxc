@@ -157,6 +157,12 @@ public class InfoAssignContoller {
 	public JSONResult<String> saveInfoAssign(@RequestBody InfoAssignDTO dto, HttpServletRequest request,
 			HttpServletResponse response) {
 		Long orgId = dto.getTelemarketingId();
+		Subject subject = SecurityUtils.getSubject();
+		UserInfoDTO user = (UserInfoDTO) subject.getSession().getAttribute("user");
+		if (null != user) {
+			dto.setCreateUser(user.getId());
+
+		}
 		if (null != orgId) {
 			RoleQueryDTO query = new RoleQueryDTO();
 			query.setRoleCode(RoleCodeEnum.DXZJ.name());
@@ -168,7 +174,7 @@ public class InfoAssignContoller {
 					UserInfoPageParam param = new UserInfoPageParam();
 					param.setRoleId(roleDto.getId());
 					param.setOrgId(orgId);
-					param.setPageSize(10000);
+					param.setPageSize(200);
 					param.setPageNum(1);
 					JSONResult<PageBean<UserInfoDTO>> userListJson = userInfoFeignClient.list(param);
 					if (userListJson.getCode().equals(JSONResult.SUCCESS)) {
