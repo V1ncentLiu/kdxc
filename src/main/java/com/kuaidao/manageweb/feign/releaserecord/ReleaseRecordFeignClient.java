@@ -24,16 +24,17 @@ import javax.validation.Valid;
 /**
  *
  * 功能描述: 
- *      数据字典
+ *      资源释放记录表
  * @auther  yangbiao
  * @date: 2019/1/8 17:35
  */
-@FeignClient(name = "aggregation-service-ooo1",path="/aggregation/abnormaluser",fallback = ReleaseRecordFeignClient.HystrixClientFallback.class)
+@FeignClient(name = "aggregation-service",path="/aggregation/releaserecord",fallback = ReleaseRecordFeignClient.HystrixClientFallback.class)
 public interface ReleaseRecordFeignClient {
 
     @RequestMapping("/insert")
-    public JSONResult<Boolean> saveReleaseRecord(@Valid @RequestBody ReleaseRecordInsertOrUpdateDTO dto);
+    public JSONResult<Boolean> saveReleaseRecord(@RequestBody ReleaseRecordInsertOrUpdateDTO dto);
 
+    @RequestMapping("/queryPageList")
     public JSONResult<PageBean<ReleaseRecordRespDTO>> queryPageList(@RequestBody ReleaseRecordReqDTO dto);
 
     @Component
