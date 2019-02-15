@@ -28,11 +28,13 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 import com.kuaidao.aggregation.dto.client.AddOrUpdateQimoClientDTO;
 import com.kuaidao.aggregation.dto.client.AddOrUpdateTrClientDTO;
+import com.kuaidao.aggregation.dto.client.ClientLoginReCordDTO;
 import com.kuaidao.aggregation.dto.client.ImportQimoClientDTO;
 import com.kuaidao.aggregation.dto.client.ImportTrClientDTO;
 import com.kuaidao.aggregation.dto.client.QimoClientQueryDTO;
 import com.kuaidao.aggregation.dto.client.QimoClientRespDTO;
 import com.kuaidao.aggregation.dto.client.QimoDataRespDTO;
+import com.kuaidao.aggregation.dto.client.QimoLoginReqDTO;
 import com.kuaidao.aggregation.dto.client.QueryQimoDTO;
 import com.kuaidao.aggregation.dto.client.QueryTrClientDTO;
 import com.kuaidao.aggregation.dto.client.TrClientDataRespDTO;
@@ -646,9 +648,11 @@ public class ClientController {
      * @param result
      * @return
      */
-    @PostMapping("/login/{cno}")
+    @PostMapping("/qimoLogin")
     @ResponseBody
-    public JSONResult login(@RequestParam String bindType,@RequestParam String loginName) {
+    public JSONResult qimoLogin(@RequestBody QimoLoginReqDTO reqDTO ) {
+        String loginName = reqDTO.getLoginName();
+        String bindType = reqDTO.getBindType();
         JSONResult<QimoClientRespDTO> qimoClientJr = clientFeignClient.queryQimoClientByLoginClient(loginName);
         if(JSONResult.SUCCESS.equals(qimoClientJr.getCode())) {
             QimoClientRespDTO qimoClient = qimoClientJr.getData();
@@ -674,10 +678,15 @@ public class ClientController {
      */
     @PostMapping("/clientLoginRecord")
     @ResponseBody
-    public JSONResult<Boolean> clientLoginRecord(@RequestParam String cno,@RequestParam Long clientType,@RequestParam String bindPhone){
+    public JSONResult<Boolean> clientLoginRecord(@Valid @RequestBody ClientLoginReCordDTO clientLoginRecord,BindingResult result){
+        if (result.hasErrors()) {
+            return CommonUtil.validateParam(result);
+        }
+        Integer clientType = clientLoginRecord.getClientType();
+        String bindPhone = clientLoginRecord.getBindPhone();
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
         String cnoPrefix = "";
-        if(clientType.equals(1L)) {
+        if(clientType==1) {
             cnoPrefix="tr";
         }else {
             cnoPrefix = "qimo";
@@ -686,9 +695,30 @@ public class ClientController {
         Map<String, Object> paramMap = new HashMap<>();
         paramMap.put("bindPhone",bindPhone);
         paramMap.put("accountId",accountId);
-        redisTemplate.opsForHash().putAll(RedisConstant.CLIENT_USER_PREFIX+cnoPrefix+cno,paramMap);
+        String keyString = RedisConstant.CLIENT_USER_PREFIX+cnoPrefix+clientLoginRecord.getCno();
+        //redisTemplate.opsForHash().putAll(keyString,paramMap);
+        redisTemplate.opsForValue().set(keyString, paramMap, 7, TimeUnit.DAYS);
         return new JSONResult<Boolean>().success(true);
         
+    }
+    
+    /**
+     * 七陌坐席退出
+     * @param request
+     * @return
+     */
+    @PostMapping("/qimoLogout")
+    @ResponseBody
+    public JSONResult loginout(HttpServletRequest request) {
+        Session session = SecurityUtils.getSubject().getSession();
+        if(StringUtils.isBlank((String)session.getAttribute("loginName"))) {
+            return  new JSONResult<>().fail(SysErrorCodeEnum.ERR_UNLOGINCLIENT_FAIL.getCode(),SysErrorCodeEnum.ERR_UNLOGINCLIENT_FAIL.getMessage());
+        }
+        session.removeAttribute("loginName");
+        session.removeAttribute("axb");
+        session.removeAttribute("bindType");
+        
+        return new JSONResult<>().success(true);
     }
     
 

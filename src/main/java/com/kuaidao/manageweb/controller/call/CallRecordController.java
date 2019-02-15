@@ -8,7 +8,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import com.kuaidao.aggregation.dto.call.CallRecordReqDTO;
+import com.kuaidao.aggregation.dto.call.CallRecordRespDTO;
 import com.kuaidao.common.entity.JSONResult;
+import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.manageweb.feign.call.CallRecordFeign;
 
 @Controller
@@ -81,4 +83,17 @@ public class CallRecordController {
     public JSONResult<Map<String,Object>> listAllTmCallTalkTime(@RequestBody CallRecordReqDTO myCallRecordReqDTO){
         return callRecordFeign.listAllTmCallTalkTime(myCallRecordReqDTO);
     }
+    
+    
+    /**
+     * 根据clueId 或 customerPhone 查询 通话记录
+     * @param myCallRecordReqDTO 参数 clueid 或 customerPhone 
+     * @return
+     */
+    @PostMapping("/listTmCallReacordByParams")
+    @ResponseBody
+    public  JSONResult<PageBean<CallRecordRespDTO>> listTmCallReacordByParams(@RequestBody CallRecordReqDTO myCallRecordReqDTO){
+        return callRecordFeign.listTmCallReacordByParams(myCallRecordReqDTO); 
+     }
+    
 }

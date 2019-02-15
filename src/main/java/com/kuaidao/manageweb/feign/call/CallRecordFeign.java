@@ -8,11 +8,13 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import com.kuaidao.aggregation.dto.call.CallRecordReqDTO;
+import com.kuaidao.aggregation.dto.call.CallRecordRespDTO;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.JSONResult;
+import com.kuaidao.common.entity.PageBean;
 
 
-@FeignClient(name = "aggregation-service-chen", path = "/aggregation/call/callRecord", fallback = CallRecordFeign.HystrixClientFallback.class)
+@FeignClient(name = "aggregation-service", path = "/aggregation/call/callRecord", fallback = CallRecordFeign.HystrixClientFallback.class)
 public interface CallRecordFeign {
     
     /**
@@ -37,6 +39,13 @@ public interface CallRecordFeign {
     @PostMapping("/listAllTmCallTalkTime")
     JSONResult<Map<String,Object>> listAllTmCallTalkTime(@RequestBody CallRecordReqDTO myCallRecordReqDTO);
     
+    /**
+     * 根据clueId 或 customerPhone 查询 通话记录
+     * @param myCallRecordReqDTO 参数 clueid 或 customerPhone 
+     * @return
+     */
+    JSONResult<PageBean<CallRecordRespDTO>> listTmCallReacordByParams(CallRecordReqDTO myCallRecordReqDTO);
+    
     @Component
     static class HystrixClientFallback implements CallRecordFeign {
         
@@ -60,6 +69,10 @@ public interface CallRecordFeign {
         public JSONResult<Map<String, Object>> listAllTmCallTalkTime(
                 CallRecordReqDTO myCallRecordReqDTO) {
             return fallBackError("电销通话时长");
+        }
+        @Override
+        public JSONResult<PageBean<CallRecordRespDTO>> listTmCallReacordByParams(CallRecordReqDTO myCallRecordReqDTO) {
+            return fallBackError("查询通话记录");
         }
         
         

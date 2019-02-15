@@ -81,7 +81,7 @@ public interface DeptCallSetFeignClient {
      * @return
      */
     @PostMapping("/queryByOrgid")
-    public JSONResult queryByOrgid(@RequestBody IdEntity orgid);
+    public JSONResult<DeptCallSetRespDTO> queryByOrgid(@RequestBody IdEntity orgid);
 
     @Component
     static class HystrixClientFallback implements DeptCallSetFeignClient {
