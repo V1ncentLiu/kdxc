@@ -58,42 +58,7 @@ public class ClueReleaseRecordController {
     @RequestMapping("/queryPageList")
     public JSONResult<PageBean<ReleaseRecordRespDTO>> queryPageList(@RequestBody ReleaseRecordReqDTO dto){
         JSONResult<PageBean<ReleaseRecordRespDTO>> result = releaseRecordFeignClient.queryPageList(dto);
-
-        if(JSONResult.SUCCESS.equals(result.getCode())){
-            Map<Long, String> vuserMap = userMap();
-            List reList = new ArrayList();
-            List<ReleaseRecordRespDTO> data = result.getData().getData();
-            Set<Long> set = new HashSet();
-            for(int i = 0 ; i < data.size(); i++){
-                ReleaseRecordRespDTO entity = data.get(i);
-                entity.setRealeseUserName(vuserMap.get(entity.getReleaseUserid()));
-                reList.add(entity);
-            }
-
-            result.getData().setData(reList);
-        }
         return result;
     }
-
-
-    /**
-     * 数据映射map
-     * @return
-     */
-    private Map<Long,String> userMap(){
-        UserInfoPageParam param = new UserInfoPageParam();
-        param.setPageNum(1);
-        param.setPageSize(99999);
-        JSONResult<PageBean<UserInfoDTO>> userlist = userInfoFeignClient.list(param);
-        Map map = new HashMap(10);
-        if(JSONResult.SUCCESS.equals(userlist.getCode())){
-            List<UserInfoDTO> userData = userlist.getData().getData();
-            for(UserInfoDTO dto:userData){
-                map.put(dto.getId(),dto.getUsername());
-            }
-        }
-        return map;
-    }
-
 
 }
