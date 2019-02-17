@@ -57,6 +57,8 @@ public class ClueReleaseRecordController {
      */
     @RequestMapping("/queryPageList")
     public JSONResult<PageBean<ReleaseRecordRespDTO>> queryPageList(@RequestBody ReleaseRecordReqDTO dto){
+
+
         JSONResult<PageBean<ReleaseRecordRespDTO>> result = releaseRecordFeignClient.queryPageList(dto);
         return result;
     }

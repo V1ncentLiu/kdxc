@@ -31,6 +31,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -116,6 +117,21 @@ public class PublicCustomerResources {
     @PostMapping("/queryPage")
     @ResponseBody
     public JSONResult<PageBean<PublicCustomerResourcesRespDTO>> queryListPage(@RequestBody ClueQueryParamDTO dto){
+        Date date1 = dto.getCreateTime1();
+        Date date2 = dto.getCreateTime2();
+        if(date1!=null && date2!=null ){
+            if(date1.getTime()>date2.getTime()){
+                return new JSONResult().fail("-1","创建时间，开始时间大于结束时间!");
+            }
+        }
+
+        Date date3 = dto.getReleaseTime1();
+        Date date4 = dto.getReleaseTime2();
+        if(date3!=null && date4!=null ){
+            if(date3.getTime()>date4.getTime()){
+                return new JSONResult().fail("-1","释放时间，开始时间大于结束时间!");
+            }
+        }
         return publicCustomerFeignClient.queryListPage(dto);
     }
 
