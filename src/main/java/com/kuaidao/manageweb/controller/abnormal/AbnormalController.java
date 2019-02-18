@@ -135,13 +135,7 @@ public class AbnormalController {
     @ResponseBody
     public JSONResult<PageBean<AbnomalUserRespDTO>> queryAbnoramlUsers(@RequestBody AbnomalUserQueryDTO dto){
         logger.info("====================列表查询==================");
-        Date date1 = dto.getTime1();
-        Date date2 = dto.getTime2();
-        if(date1!=null && date2!=null ){
-            if(date1.getTime()>date2.getTime()){
-                return new JSONResult().fail("-1","时间选项，开始时间大于结束时间!");
-            }
-        }
+
         UserInfoDTO user =  CommUtil.getCurLoginUser();
         List<RoleInfoDTO> roleList = user.getRoleList();
         List dxList = new ArrayList();

@@ -6,6 +6,7 @@ import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.sys.dto.announcement.annReceive.AnnReceiveQueryDTO;
 import com.kuaidao.sys.dto.announcement.annReceive.AnnReceiveRespDTO;
+import com.kuaidao.sys.dto.announcement.bussReceive.BussReceiveInsertAndUpdateDTO;
 import com.kuaidao.sys.dto.announcement.bussReceive.BussReceiveQueryDTO;
 import com.kuaidao.sys.dto.announcement.bussReceive.BussReceiveRespDTO;
 import org.slf4j.Logger;
@@ -43,6 +44,9 @@ public interface BusReceiveFeignClient {
     @PostMapping("/unreadCount")
     public JSONResult unreadCount(@RequestBody Map map);
 
+    @PostMapping("/insertAndSent")
+    public JSONResult insertAndSent(@RequestBody BussReceiveInsertAndUpdateDTO rev)
+            ;
     @Component
     static class HystrixClientFallback implements BusReceiveFeignClient {
 
@@ -79,6 +83,11 @@ public interface BusReceiveFeignClient {
         @Override
         public JSONResult unreadCount(Map map) {
             return fallBackError("业务消息记录，未读消息数量获取失败");
+        }
+
+        @Override
+        public JSONResult insertAndSent(BussReceiveInsertAndUpdateDTO rev) {
+            return fallBackError("业务消息记录，信息发送");
         }
 
     }
