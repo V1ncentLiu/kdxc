@@ -49,7 +49,7 @@ import javax.servlet.http.HttpServletResponse;
  * @Auther: admin
  * @Date: 2019/1/2 15:14
  * @Description:
- *      电销管理
+ *      重单管理
  */
 
 @Controller
@@ -84,6 +84,8 @@ public class RepetitionManagerController {
     public String inviteAreaList(HttpServletRequest request) {
 		return "aggregation/repetition/dealPetitionList";
     }
+    
+    
     /**
      * 电销布局列表
      * 

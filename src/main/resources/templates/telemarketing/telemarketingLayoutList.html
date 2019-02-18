@@ -7,7 +7,7 @@
     </style>
 </head>
 <body>
-<div v-loading="loading" id="organizationManage" class="organizationManage mainPadding" >  
+<div v-loading="loading" id="organizationManage" class="organizationManage mainPadding" style="display: none;">  
     <el-breadcrumb separator="/" class="elBreadcrumb marginB20" >
         <el-breadcrumb-item>Home</el-breadcrumb-item>
         <el-breadcrumb-item>业务设置</el-breadcrumb-item>
@@ -299,7 +299,7 @@
               	var rows = this.multipleSelection;
                   if(rows.length!=1){
                       this.$message({
-                         message: '请选择一条数据进行修改',
+                         message: '请选择删除数据',
                          type: 'warning'
                        });
                       return;
@@ -506,6 +506,8 @@
                   var isTextComputer = file.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
                   if(!isTextComputer){
                       this.$message.error('文件格式错误');
+                  	  orgVM.loading = false;
+                  	  orgVM.fileList = [];
                       return false;
                   }
               },
@@ -516,12 +518,10 @@
             		  //清空文件里列表
                 	  this.$refs.upload.clearFiles();
                       this.dialogBatchVisible = false;
-                      this.$message({message:'上传中',type:'success',duration:2000,onClose:function(){
-                      	orgVM.exportdataTable =response.data; 
-                      	orgVM.loading = false;
-                      	orgVM.exportFormVisible = true;
-                      	orgVM.dataNum="预览数据，共"+orgVM.exportdataTable.length+"条数据"
-              	      }});
+                   	orgVM.exportdataTable =response.data; 
+                   	orgVM.loading = false;
+                   	orgVM.exportFormVisible = true;
+                   	orgVM.dataNum="预览数据，共"+orgVM.exportdataTable.length+"条数据"
             	  }else{
             		orgVM.loading = false;
             		  this.$message('上传失败');
@@ -536,7 +536,8 @@
               	this.loading = true;
               	var fileList = this.fileList;
               	if(!fileList || fileList.length!=1){
-              		this.$message.error({message:'请选择一个文件',type:'error'});
+              		this.$message.error({message:'未选中文件',type:'error'});
+              		orgVM.loading = false;
               		return false;
               	}
                   this.$refs.upload.submit();
@@ -547,40 +548,46 @@
                 	  window.location.href="/telemarketing/telemarketingLayoutList"; 
                 	  return;
                   }
-              	  var param = {};
-              	  this.loading = true;
-              	  param.list = orgVM.exportdataTable;
-              	  if(param.list !=null && param.list.length==0){
-              		  this.loading = false;
-              		  this.$message({message:'无要上传的数据',type:'error'});
-              		  return;
-              	  }
-              	 this.exportFormVisible = false;
-              	  axios.post('/telemarketing/importInvitearea',param).then(function (response) {
-                    	  console.log(response);
-                        if(null !==response && response.data !=null && response.data.code=='0'){
-                      	  if(response.data.data !=null){
-                      		  $("#showButton").html("知道了");
-                      		  $("#showButton").attr("data",2);
-                      		  orgVM.loading = false;
-                      		  orgVM.addOrModifyDialogTitle="部分导入失败";
-                      		  orgVM.exportFormVisible = true;
-                      		  orgVM.exportdataTable =response.data.data; 
-                      		  orgVM.dataNum="以下内容导入失败，请重新导入"
-                      	  }else{
-                      		  window.location.href="/telemarketing/telemarketingLayoutList"; 
-                      	  }
-                      	
-                       }else{
-                      	 alert(response.data.data.message);
-  	                  	  	return ;
-                       } 
-                    }).catch(function (error) {
-                        console.log(error);
-                    })
-                    .then(function () {
-                      // always executed
-                    }); 
+                  this.$alert('<center><strong>确认导入数据</strong></center>', {
+                      dangerouslyUseHTMLString: true,
+                      center:true
+                  }).then(() => {
+                	  var param = {};
+                	  orgVM.loading = true;
+                  	  param.list = orgVM.exportdataTable;
+                  	  if(param.list !=null && param.list.length==0){
+                  		  this.loading = false;
+                  		  this.$message({message:'无要上传的数据',type:'error'});
+                  		  return;
+                  	  }
+                  	orgVM.exportFormVisible = false;
+                  	  axios.post('/telemarketing/importInvitearea',param).then(function (response) {
+                        	  console.log(response);
+                            if(null !==response && response.data !=null && response.data.code=='0' && response.data.data.length !=0){
+                          	  if(response.data.data !=null){
+                          		  $("#showButton").html("知道了");
+                          		  $("#showButton").attr("data",2);
+                          		  orgVM.loading = false;
+                          		  orgVM.addOrModifyDialogTitle="部分导入失败";
+                          		  orgVM.exportFormVisible = true;
+                          		  orgVM.exportdataTable =response.data.data; 
+                          		  orgVM.dataNum="以下内容导入失败，请重新导入"
+                          	  }else{
+                          		  window.location.href="/telemarketing/telemarketingLayoutList"; 
+                          	  }
+                          	
+                           }else{
+                          	 alert(response.data.data.message);
+      	                  	  	return ;
+                           } 
+                        }).catch(function (error) {
+                            console.log(error);
+                        })
+                        .then(function () {
+                          // always executed
+                        }); 
+                  })
+              	  
                 },
                 addbutton(){
                 	this.showTitle="添加布局"
@@ -598,6 +605,8 @@
         },
         created(){
         	this.inviteAreaListPage();
+        	document.getElementById('organizationManage').style.display = 'block';
+        	
         	
         }//created方法 结束
     })
