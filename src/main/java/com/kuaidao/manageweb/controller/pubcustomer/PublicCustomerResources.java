@@ -9,6 +9,8 @@ import com.kuaidao.common.constant.SystemCodeConstant;
 import com.kuaidao.common.entity.IdEntity;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
+import com.kuaidao.manageweb.config.LogRecord;
+import com.kuaidao.manageweb.constant.MenuEnum;
 import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
 import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
 import com.kuaidao.manageweb.feign.publiccustomer.PublicCustomerFeignClient;
@@ -23,6 +25,7 @@ import com.kuaidao.sys.dto.role.RoleInfoDTO;
 import com.kuaidao.sys.dto.role.RoleQueryDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import com.kuaidao.sys.dto.user.UserInfoPageParam;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -68,6 +71,8 @@ public class PublicCustomerResources {
     /**
      * 分配资源
      */
+    @RequiresPermissions("PublicCustomer:allocation")
+    @LogRecord(description = "公共客户资源-分配资源",operationType = LogRecord.OperationType.DISTRIBUTION,menuName = MenuEnum.TEL_CENTER_PUBLICCUSTOMER)
     @PostMapping("/allocationResource")
     @ResponseBody
     public JSONResult<Boolean>   allocationResource(@RequestBody PublicCustomerResourcesReqDTO dto){
@@ -77,6 +82,8 @@ public class PublicCustomerResources {
     /**
      * 转移资源
      */
+    @LogRecord(description = "公共客户资源-转移资源",operationType = LogRecord.OperationType.TRANSFER,menuName = MenuEnum.TEL_CENTER_PUBLICCUSTOMER)
+    @RequiresPermissions("PublicCustomer:trans")
     @PostMapping("/transferOfResource")
     @ResponseBody
     public JSONResult<Boolean>   transferOfResource(@RequestBody PublicCustomerResourcesReqDTO dto){
