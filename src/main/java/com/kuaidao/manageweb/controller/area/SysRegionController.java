@@ -101,6 +101,19 @@ public class SysRegionController {
     }
     
     /**
+     * 查询区域名称
+     * @param queryDTO
+     * @return
+     */
+    @PostMapping("/querySysRegionByParam")
+    @ResponseBody
+    public JSONResult<List<SysRegionDTO>> querySysRegionByParam(
+            @RequestBody SysRegionDTO queryDTO) {
+        JSONResult<List<SysRegionDTO>> orgList = sysRegionFeignClient.querySysRegionByParam(queryDTO);
+        return new JSONResult().success(orgList) ;
+    }
+    
+    /**
      * 查询组织机构树
      * @return
      */
