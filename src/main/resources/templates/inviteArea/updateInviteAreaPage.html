@@ -395,20 +395,24 @@
        	             var formData = addUserVm.form;
        	             var param={};
 	       	          let obj = {};
-	                  obj = this.swList.find((item)=>{
-	                      return item.id === param.businessGroupId;
-	                  });
+	                 
 	                  let telemarketingTeamobj = {};
-	                  telemarketingTeamobj = this.dxList.find((item)=>{
-	                      return item.id === param.telemarketingTeamId;
-	                  });
+	                  
 	                  
 	                  
 	                  if(isshowBusinessGroup ==0){
 	                	  param.businessGroupId= formData.businessGroupId;
+	                	  obj = this.swList.find((item)=>{
+		                      return item.id === param.businessGroupId;
+		                  });
+	                	  param.businessGroup = obj.name;
 	                  }
 	                  if(isshowTelemarketingTeam ==0){
 	                	  param.telemarketingTeamId = formData.telemarketingTeamId;
+	                	  telemarketingTeamobj = this.dxList.find((item)=>{
+		                      return item.id === param.telemarketingTeamId;
+		                  });
+	                	  param.telemarketingTeam = telemarketingTeamobj.name;
 	                  }
 	                  
 	       	          var projectstrs ="";
@@ -428,16 +432,26 @@
 		                	  for(var j =0;j<this.proviceslist.length;j++){
 		                		  if(formData.provincesIds[i] ==this.proviceslist[j].id){
 		                			  if(procinceNames ==""){
-		                				  procinceNames = this.proviceslist[j].name
+		                				  if(formData.provincesIds[i] !=0){
+		                					  procinceNames = this.proviceslist[j].name
+		                				  }
 		                			  }else{
-		                				  procinceNames =procinceNames+"," +this.proviceslist[j].name
+		                				  if(formData.provincesIds[i] !=0){
+		                					  procinceNames =procinceNames+"," +this.proviceslist[j].name
+		                				  }
 		                			  }
 		                		  }
 		                	  }
-		                	   if(provincestrs !=""){
-		                		   provincestrs = provincestrs+","+formData.provincesIds[i];
+		                	  if(provincestrs !=""){
+		                		   if(formData.provincesIds[i] !=0){
+		                			   provincestrs = provincestrs+","+formData.provincesIds[i];
+		                		   }
+		                		   
 		                	   }else{
-		                		   provincestrs = formData.provincesIds[i];
+		                		   if(formData.provincesIds[i] !=0){
+		                			   provincestrs = formData.provincesIds[i];
+		                		   }
+		                		   
 		                	   }
 		                	}
 	                  }
@@ -445,7 +459,6 @@
 	                  param.projectIds= projectstrs;
 	       	          param.provincesIds = provincestrs;
 	       	          param.provinces = procinceNames;
-	       	       param.businessGroup = 
 	       	          param.ids =ids;
 	       	       	  let provinceobj = {};
 	                  provinceobj = this.proviceslist.find((item)=>{
