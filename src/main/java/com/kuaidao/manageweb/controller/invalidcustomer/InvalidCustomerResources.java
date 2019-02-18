@@ -5,6 +5,8 @@ import com.kuaidao.aggregation.dto.pubcusres.PublicCustomerResourcesReqDTO;
 import com.kuaidao.aggregation.dto.pubcusres.PublicCustomerResourcesRespDTO;
 import com.kuaidao.common.constant.OrgTypeConstant;
 import com.kuaidao.common.constant.RoleCodeEnum;
+import com.kuaidao.common.constant.SystemCodeConstant;
+import com.kuaidao.common.entity.IdEntity;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.manageweb.feign.InvalidCustomer.InvalidCustomerFeignClient;
@@ -14,6 +16,7 @@ import com.kuaidao.manageweb.feign.publiccustomer.PublicCustomerFeignClient;
 import com.kuaidao.manageweb.feign.role.RoleManagerFeignClient;
 import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
 import com.kuaidao.manageweb.util.CommUtil;
+import com.kuaidao.sys.dto.organization.OrganizationDTO;
 import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
 import com.kuaidao.sys.dto.organization.OrganizationRespDTO;
 import com.kuaidao.sys.dto.role.RoleInfoDTO;
@@ -73,14 +76,58 @@ public class InvalidCustomerResources {
      */
     @RequestMapping("/listPage")
     public String listPage(HttpServletRequest request){
-        logger.info("------------ 公共客户资源列表 ---------------");
-        OrganizationQueryDTO orgDto = new OrganizationQueryDTO();
-        orgDto.setOrgType(OrgTypeConstant.DXZ);
+        logger.info("------------ 无效客户资源列表 ---------------");
         //电销组
-        JSONResult<List<OrganizationRespDTO>> dzList = organizationFeignClient.queryOrgByParam(orgDto);
-        request.setAttribute("dzList", dzList.getData());
-        request.setAttribute("dxgwList", dxcygws());
-        request.setAttribute("dxzjList", dxzjs());
+        List dxzList = new ArrayList();
+        List<Long> dxzIdsList = new ArrayList();
+        List dxcygwList = new ArrayList();
+        List dxzjsList = new ArrayList();
+
+        // 权限相关
+        UserInfoDTO user =  CommUtil.getCurLoginUser();
+        List<RoleInfoDTO> roleList = user.getRoleList();
+        if(roleList!=null&&roleList.get(0)!=null) {
+            if (RoleCodeEnum.GLY.name().equals(roleList.get(0).getRoleCode())) {
+                //管理员:查看全部电销组
+                OrganizationQueryDTO dto = new OrganizationQueryDTO();
+                dto.setSystemCode(SystemCodeConstant.HUI_JU);
+                dto.setOrgType(OrgTypeConstant.DXZ);
+                JSONResult<List<OrganizationRespDTO>> dzList = organizationFeignClient.queryOrgByParam(dto);
+                dxzList = dzList.getData();
+                for(OrganizationRespDTO organizationRespDTO:dzList.getData()){
+                    dxzIdsList.add(organizationRespDTO.getId());
+                }
+                dxcygwList = dxcygws(dxzIdsList);
+                dxzjsList = dxzjs(dxzIdsList);
+            }else if(RoleCodeEnum.DXFZ.name().equals(roleList.get(0).getRoleCode())){
+                //电销副总:查看事业部下的全部电销组
+                OrganizationQueryDTO orgDto = new OrganizationQueryDTO();
+                orgDto.setParentId(user.getOrgId());
+                orgDto.setSystemCode(SystemCodeConstant.HUI_JU);
+                orgDto.setOrgType(OrgTypeConstant.DXZ);
+                JSONResult<List<OrganizationDTO>> dzList = organizationFeignClient.listDescenDantByParentId(orgDto);
+                dxzList = dzList.getData();
+                for(OrganizationDTO organizationDTO:dzList.getData()){
+                    dxzIdsList.add(organizationDTO.getId());
+                }
+                dxcygwList = dxcygws(dxzIdsList);
+                dxzjsList = dxzjs(dxzIdsList);
+            }else  if(RoleCodeEnum.DXZJ.name().equals(roleList.get(0).getRoleCode())){
+                //电销总监:查看所在电销组
+                IdEntity idEntity = new IdEntity();
+                idEntity.setId(String.valueOf(user.getOrgId()));
+                JSONResult<OrganizationDTO> orgRes = organizationFeignClient.queryOrgById(idEntity);
+                dxzList.add(orgRes.getData());
+                dxzIdsList.add(orgRes.getData().getId());
+                dxcygwList = dxcygws(dxzIdsList);
+//                dxzjsList = dxzjs(dxzIdsList);
+            }
+//          添加一个对电销创业顾问的筛选
+        }
+
+        request.setAttribute("dzList", dxzList);
+        request.setAttribute("dxgwList",dxcygwList);
+        request.setAttribute("dxzjList", dxzjsList);
 
         return "invalidcustomer/invalidCustomer";
     }
@@ -107,7 +154,11 @@ public class InvalidCustomerResources {
     }
 
 
-    private List dxcygws(){
+    /**
+     * 查询的是当前组织下电销顾问。
+     * @return
+     */
+    private List dxcygwsOfCurrentOrg(){
         RoleQueryDTO query = new RoleQueryDTO();
         query.setRoleCode(RoleCodeEnum.DXCYGW.name());
         UserInfoDTO user =  CommUtil.getCurLoginUser();
@@ -133,7 +184,36 @@ public class InvalidCustomerResources {
     }
 
 
-    private List dxzjs(){
+    /**
+     * 查询的是当前组织下电销顾问。
+     * @return
+     */
+    private List dxcygws(List<Long> orgList){
+        RoleQueryDTO query = new RoleQueryDTO();
+        query.setRoleCode(RoleCodeEnum.DXCYGW.name());
+        UserInfoDTO user =  CommUtil.getCurLoginUser();
+        JSONResult<List<RoleInfoDTO>> roleJson = roleManagerFeignClient.qeuryRoleByName(query);
+        List<UserInfoDTO> resList = new ArrayList();
+        if (JSONResult.SUCCESS.equals(roleJson.getCode())) {
+            List<RoleInfoDTO> roleList = roleJson.getData();
+            if (null != roleList && roleList.size() > 0) {
+                RoleInfoDTO roleDto = roleList.get(0);
+                UserInfoPageParam param = new UserInfoPageParam();
+                param.setRoleId(roleDto.getId());
+                param.setOrgIdList(orgList);
+                param.setPageSize(10000);
+                param.setPageNum(1);
+                JSONResult<PageBean<UserInfoDTO>> userListJson = userInfoFeignClient.list(param);
+                if (JSONResult.SUCCESS.equals(userListJson.getCode())) {
+                    PageBean<UserInfoDTO> pageList = userListJson.getData();
+                    resList = pageList.getData();
+                }
+            }
+        }
+        return resList;
+    }
+
+    private List dxzjs(List<Long> orgList){
         // 这个查询是不对的啊
         RoleQueryDTO query = new RoleQueryDTO();
         query.setRoleCode(RoleCodeEnum.DXZJ.name());
@@ -146,7 +226,7 @@ public class InvalidCustomerResources {
                 RoleInfoDTO roleDto = roleList.get(0);
                 UserInfoPageParam param = new UserInfoPageParam();
                 param.setRoleId(roleDto.getId());
-                param.setOrgId(user.getOrgId());
+                param.setOrgIdList(orgList);
                 param.setPageSize(10000);
                 param.setPageNum(1);
                 JSONResult<PageBean<UserInfoDTO>> userListJson = userInfoFeignClient.list(param);
