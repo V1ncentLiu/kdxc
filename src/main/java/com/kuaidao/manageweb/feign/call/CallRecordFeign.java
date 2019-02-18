@@ -14,7 +14,7 @@ import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
 
 
-@FeignClient(name = "aggregation-service", path = "/aggregation/call/callRecord", fallback = CallRecordFeign.HystrixClientFallback.class)
+@FeignClient(name = "aggregation-service-chen", path = "/aggregation/call/callRecord", fallback = CallRecordFeign.HystrixClientFallback.class)
 public interface CallRecordFeign {
     
     /**
@@ -44,6 +44,7 @@ public interface CallRecordFeign {
      * @param myCallRecordReqDTO 参数 clueid 或 customerPhone 
      * @return
      */
+    @PostMapping("/listTmCallReacordByParams")
     JSONResult<PageBean<CallRecordRespDTO>> listTmCallReacordByParams(CallRecordReqDTO myCallRecordReqDTO);
     
     @Component
