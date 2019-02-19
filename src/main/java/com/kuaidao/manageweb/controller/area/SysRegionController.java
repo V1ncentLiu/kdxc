@@ -75,8 +75,8 @@ public class SysRegionController {
     @ResponseBody
     public JSONResult<PageBean<SysRegionDTO>> queryOrgDataByParam(int pageNum, int pageSize,
             @RequestBody SysRegionDTO queryDTO) {
-        queryDTO.setPageNum(pageNum);
-        queryDTO.setPageSize(pageSize);
+//        queryDTO.setPageNum(pageNum);
+//        queryDTO.setPageSize(pageSize);
         return sysRegionFeignClient.querySysRegionDTOByParam(queryDTO);
     }
     /**
@@ -98,6 +98,19 @@ public class SysRegionController {
             return new JSONResult<>().fail(orgList.getCode(), orgList.getMsg());
         }
         return new JSONResult().success(false) ;
+    }
+    
+    /**
+     * 查询区域名称
+     * @param queryDTO
+     * @return
+     */
+    @PostMapping("/querySysRegionByParam")
+    @ResponseBody
+    public JSONResult<List<SysRegionDTO>> querySysRegionByParam(
+            @RequestBody SysRegionDTO queryDTO) {
+        JSONResult<List<SysRegionDTO>> orgList = sysRegionFeignClient.querySysRegionByParam(queryDTO);
+        return new JSONResult().success(orgList) ;
     }
     
     /**

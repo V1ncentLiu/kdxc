@@ -61,6 +61,16 @@ public interface SysRegionFeignClient {
     @PostMapping("/queryOrgByParam")
     public JSONResult<List<SysRegionDTO>> queryOrgByParam(
             @RequestBody SysRegionDTO queryDTO);
+    /**
+     * 查询区域
+     * 
+     * @param queryDTO
+     * @return
+     */
+    @PostMapping("/querySysRegionByParam")
+    public JSONResult<List<SysRegionDTO>> querySysRegionByParam(
+            @RequestBody SysRegionDTO queryDTO);
+    
     @PostMapping("/save")
     public JSONResult save(@RequestBody SysRegionDTO orgDTO);
 
@@ -150,6 +160,13 @@ public interface SysRegionFeignClient {
 		public JSONResult<SysRegionDTO> queryOrgById(IdEntity idEntity) {
 			// TODO Auto-generated method stub
 			return fallBackError("根据ID ,查询区域信息");
+		}
+
+
+		@Override
+		public JSONResult<List<SysRegionDTO>> querySysRegionByParam(SysRegionDTO queryDTO) {
+			// TODO Auto-generated method stub
+			return fallBackError("查询区域信息失败");
 		}
 
 	}

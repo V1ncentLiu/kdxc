@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml"
     xmlns:th="http://www.thymeleaf.org">
 <head th:include="_header_include::frag(~{::title},~{},~{})">
-    <title>电销布局管理</title>
+    <title>3.4	客户重单列表</title>
     <style>
     </style>
 </head>
@@ -10,13 +10,13 @@
 <div v-loading="loading" id="organizationManage" class="organizationManage mainPadding" >  
     <el-breadcrumb separator="/" class="elBreadcrumb marginB20" >
         <el-breadcrumb-item>Home</el-breadcrumb-item>
-        <el-breadcrumb-item>业务设置</el-breadcrumb-item>
-        <el-breadcrumb-item><a href="/invitearea/inviteAreaList" data-url="b.html">电销布局管理</a></el-breadcrumb-item>
+        <el-breadcrumb-item>电销管理</el-breadcrumb-item>
+        <el-breadcrumb-item><a href="/repetition/customerrePetitionList" data-url="b.html">3.4	客户重单列表</a></el-breadcrumb-item>
     </el-breadcrumb>
     <el-row class="marginB10">
         <el-col :xs="12" :sm="16" :md="16" :lg="18" :xl="12">
-            <el-button type="primary" @click="addbutton">撤销申请</el-button>
-            <el-button type="primary" @click="deleButton">查看详情</el-button>
+            <el-button type="primary" @click="cancelButton">撤销申请</el-button>
+            <el-button type="primary" @click="detailButton">查看详情</el-button>
         </el-col>
         </el-row>
 <el-row class="marginB10">
@@ -24,7 +24,7 @@
               
 				<div class="block">
 					
-  					<el-select filterable v-model="telemarketingTeamId" placeholder="处理状态">
+  					<el-select filterable v-model="status" placeholder="处理状态">
 					    <el-option
 					      v-for="item in statusList"
 					      :key="item.value"
@@ -32,7 +32,7 @@
 					      :value="item.value">
 					    </el-option>
   					</el-select>
-  					<el-select filterable v-model="projectId" placeholder="是否重单">
+  					<el-select filterable v-model="repeatStatus" placeholder="是否重单">
 					    <el-option
 					      v-for="item in repetitionList"
 					      :key="item.value"
@@ -41,8 +41,8 @@
 					    </el-option>
   					</el-select>
   					<el-input style="width:15%;"  v-model="constomerName" placeholder="客户姓名"></el-input>
-  					<el-input style="width:15%;"  v-model="searchContent" placeholder="客户手机号"></el-input>
-  					<el-button type="primary" @click="inviteAreaListPage">搜索</el-button>
+  					<el-input style="width:15%;"  v-model="constomerPhone" placeholder="客户手机号"></el-input>
+  					<el-button type="primary" @click="search">搜索</el-button>
 				</div>
             </el-row>
             <el-row>
@@ -55,19 +55,46 @@
                     :data="dataTable"  @selection-change="handleSelectionChange">
                      <el-table-column align="center" prop="id" type="selection" width="55"></el-table-column> 
                      <!-- <el-table-column prop="date" label="全选" width="180"></el-table-column>  -->
-                    <el-table-column align="center" prop="projects" label="项目名称"></el-table-column>
-                    <el-table-column align="center" prop="telemarketingTeam" label="电销组"></el-table-column>
-                    <el-table-column align="center"  prop="beginTime" label="起始时间" :formatter="dateFormat"></el-table-column>
-                    <el-table-column align="center" prop="endTime" label="结束时间" :formatter="dateFormat"></el-table-column>
-                    <el-table-column align="center" prop="createTime" label="创建时间" :formatter="dateFormatTime"></el-table-column>
-                    <el-table-column align="center" prop="status" label="启用状态" :formatter="transformStatus"></el-table-column>
+                   <el-table-column align="center" prop="projects" label="序号"></el-table-column>
+                    <el-table-column align="center" prop="telemarketingTeam" label="客户手机号"></el-table-column>
+                    <el-table-column align="center" prop="telemarketingTeam" label="重单结果"></el-table-column>
+                    <el-table-column align="center" prop="status" label="处理状态" :formatter="transformStatus"></el-table-column>
+                    <el-table-column align="center" prop="telemarketingTeam" label="比例"></el-table-column>
+                    <el-table-column align="center" prop="telemarketingTeam" label="重单人员列表"></el-table-column>
                 </el-table>
-                 <table-pagination :pager="pager"  @change="inviteAreaListPage"></table-pagination>
+                 <table-pagination :pager="pager"  @change="search"></table-pagination>
             </el-row>
       
     </el-row>
 
-          
+    <!-- dialog -->
+    <el-dialog title="重单详情" :visible.sync="dialogFormVisible">
+        <el-form   class="width500">
+            <el-form-item label="重单手机号：" :label-width="formLabelWidth" >
+            </el-form-item>
+            <el-form-item label="备注：" :label-width="formLabelWidth" >
+            </el-form-item>
+					
+            <el-form-item label="处理状态：" :label-width="formLabelWidth" >
+                
+            </el-form-item>
+            <el-form-item label="处理结果："  :label-width="formLabelWidth" >
+                
+            </el-form-item>
+            <el-form-item label="分配比例：" :label-width="formLabelWidth" >
+                <el-table 
+                    ref="multipleTable"
+                    tooltip-effect="dark"
+                    empty-text="无数据"
+                    style="width: 100%"
+                    border
+                    :data="dataTable"  >
+                    <el-table-column align="center" prop="telemarketingTeam" label="顾问姓名"></el-table-column>
+                    <el-table-column align="center" prop="telemarketingTeam" label="比例"></el-table-column>
+                </el-table>
+            </el-form-item>
+        </el-form>
+    </el-dialog>   
             
          
 </div>
@@ -80,7 +107,11 @@
    var orgVM =  new Vue({
         el: '#organizationManage',
         data: {
-        	
+        	constomerPhone:"",
+        	constomerName:"",
+        	status:"",
+        	repeatStatus:"",
+        	dialogFormVisible:false,
         	repetitionList:"",
         	exportFormVisible:false,
         	formLabelWidth: '100px',
@@ -119,7 +150,67 @@
              
         },
         methods: {
-        	
+        	detailButton(){
+        		this.dialogFormVisible = true;
+        	},
+        	cancelButton(){
+        		this.$confirm("确定要撤销选中的重单申请?", '撤销申请', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }).then(() => {
+                   	// 查询 table 需要数据
+                    var param = {};
+                    var deleInfo=this.multipleSelection;
+  	        	    var ids="";
+  		            if(null!=deleInfo){
+  		             for ( var i = 0; i <deleInfo.length; i++){
+  		            	if("" == ids){
+  		            		ids = deleInfo[i].id
+  		            	}else{
+  		            		ids = ids+","+deleInfo[i].id
+  		            	}
+  		             }
+  		             var param={};
+  		             param.ids=ids;
+ 	                 axios.post('/invitearea/deleInviteArea',param).then(function (response) {
+ 	                  	  console.log(response);
+ 	                      if(null !==response && response.data !=null && response.data.code=='0'){
+ 	                    	  window.location.href="/invitearea/inviteAreaList"; 
+ 	                     }else{
+ 	                    	 alert(response.data.data.message);
+  	                  	  	return ;
+ 	                     } 
+ 	                  }).catch(function (error) {
+                           console.log(error);
+                       })
+                       .then(function () {
+                         // always executed
+                       });  
+  	              
+                  }
+                }).catch(() => {
+                    this.$message({
+                        type: 'info',
+                        message: '已取消删除'
+                    });          
+                });
+        	},
+        	search(){
+        		
+        	},
+        	handleSelectionChange(val) {
+                this.multipleSelection = val;
+            },
+            transformStatus(row, column, cellValue, index) {
+            	  var text="";
+                  if(cellValue=="0"){
+                	  text="启用"
+                  }else if(cellValue=="1"){
+                	  text="禁用"
+                  }
+                  return text;
+              },
         },
         created(){
         	

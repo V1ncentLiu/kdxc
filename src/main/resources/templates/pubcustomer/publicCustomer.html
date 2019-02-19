@@ -30,11 +30,15 @@
             <el-form :inline="true" :model="queryForm" class="demo-form-inline" ref="queryForm" >
             <el-row :gutter="20" >
                 <el-col :span="3">
-                    <el-form-item class="formItem" prop="releaseReason">
-                        <el-select v-model="queryForm.releaseReason" placeholder="释放原因" width="100" clearable>
-                            <el-option v-for="item in reasonArr" :key="item.value" :label="item.name" :value="item.value"></el-option>
+                        <el-select v-model="queryForm.releaseReasons" placeholder="释放原因" width="100" clearable filterable multiple>
+                            <el-option v-for="item in reasonArr" :key="item.value" :label="item.name" :value="item.value">
+                                <el-checkbox-group v-model="queryForm.releaseReasons">
+                                    <el-checkbox :label="item.value">
+                                        {{ item.name}}
+                                    </el-checkbox>
+                                </el-checkbox-group>
+                            </el-option>
                         </el-select>
-                    </el-form-item>
                 </el-col>
                 <el-col :span="3">
                     <el-select v-model="queryForm.customerStatus" placeholder="客户状态" width="100" clearable>
@@ -47,8 +51,12 @@
                     </el-select>
                 </el-col>
                 <el-col :span="3">
-                    <el-select v-model="queryForm.teleSaleId" placeholder="创业顾问" width="100" clearable>
-                        <el-option v-for="item in teleketSaleArr" :key="item.id" :label="item.name" :value="item.id"></el-option>
+                    <el-select v-model="queryForm.teleSaleIds" placeholder="创业顾问" width="100" clearable   filterable multiple>
+                        <el-option v-for="item in teleketSaleArr" :key="item.id" :label="item.name" :value="item.id">
+                            <el-checkbox-group v-model="queryForm.teleSaleIds">
+                                <el-checkbox  :key="item.id" :label="item.id"> {{ item.name}}</el-checkbox>
+                            </el-checkbox-group>
+                        </el-option>
                     </el-select>
                 </el-col>
                 <el-col :span="3">
@@ -246,10 +254,10 @@
             orgLeafOptions:[],
             multipleSelection:[],
             queryForm:{
-                releaseReason:"",
+                releaseReasons:[],
                 customerStatus:"",
                 teleGorupId:"",
-                teleSaleId:"",
+                teleSaleIds:[],
                 project:"",
                 isRepetition:"",
                 createTime1:"",
@@ -469,6 +477,7 @@
                 var param = this.queryForm;
                 param.pageSize = this.pager.pageSize;
                 param.pageNum =  this.pager.currentPage;
+                console.log(param)
                 axios.post('/aggregation/publiccustomer/queryPage',param).then(function (response) {
                     if(null===response||response.data==null||response.data.code!='0'){
                         if(response.data.code!='0'){
