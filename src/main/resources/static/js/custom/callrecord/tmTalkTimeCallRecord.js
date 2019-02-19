@@ -38,7 +38,7 @@ var myCallRecordVm = new Vue({
     		 var endTimestamp = new Date(endTime);
     		 if(startTimestamp> endTimestamp){
     			 this.$message({
-                     message: '开始时间必须大于结束时间',
+                     message: '开始时间必须小于结束时间',
                      type: 'warning'
                    });
                  return;
@@ -53,14 +53,14 @@ var myCallRecordVm = new Vue({
                  	var resData = data.data;
                  	var callRecordData = resData.data;
                  	myCallRecordVm.callRecordData= callRecordData.data;
-                 	myCallRecordVm.totalTalkTime = resData.totalTalkTime;
+                 	myCallRecordVm.totalTalkTime = resData.totalTalktime;
                   //3.分页组件
                  	myCallRecordVm.pager.total= callRecordData.total;
                  	myCallRecordVm.pager.currentPage = callRecordData.currentPage;
                  	myCallRecordVm.pager.pageSize = callRecordData.pageSize;
                      
                  }else{
-                	 myCallRecordVm.$message({message:'初始化通话记录列表错误',type:'error'});
+                	 myCallRecordVm.$message({message:'初始化通话时长列表错误',type:'error'});
                  	 console.error(data);
                  }
              

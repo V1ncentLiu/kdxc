@@ -23,6 +23,8 @@ import com.kuaidao.aggregation.dto.client.TrClientRespDTO;
 import com.kuaidao.aggregation.dto.client.UploadTrClientDataDTO;
 import com.kuaidao.aggregation.dto.client.UserCnoReqDTO;
 import com.kuaidao.aggregation.dto.client.UserCnoRespDTO;
+import com.kuaidao.callcenter.dto.QimoOutboundCallDTO;
+import com.kuaidao.callcenter.dto.QimoOutboundCallRespDTO;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.IdEntity;
 import com.kuaidao.common.entity.IdListReq;
@@ -188,6 +190,14 @@ public interface ClientFeignClient {
     @PostMapping("/queryQimoClientByLoginClient")
     JSONResult<QimoClientRespDTO> queryQimoClientByLoginClient(@RequestBody String loginClint);
     
+    /**
+     * 七陌坐席外呼
+     * @param callDTO
+     * @return
+     */
+    @PostMapping("/qimoOutboundCall")
+    JSONResult<QimoOutboundCallRespDTO> qimoOutboundCall(@RequestBody QimoOutboundCallDTO callDTO);
+    
 	@Component
 	static class HystrixClientFallback implements ClientFeignClient {
 
@@ -299,9 +309,13 @@ public interface ClientFeignClient {
             return fallBackError("根据坐席号查询可用的七陌坐席");
         }
 
+        @Override
+        public JSONResult<QimoOutboundCallRespDTO> qimoOutboundCall(QimoOutboundCallDTO callDTO) {
+            return fallBackError("七陌坐席外呼");
+        }
+
 	}
 
-   
 
 
 }
