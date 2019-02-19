@@ -209,7 +209,7 @@ function bellToRing(type,token) { //响铃
     timer()
 }
 
-function calling(type) {//通话状态
+function calling(type,token) {//通话状态
     console.log("通话状态,type:" + type)
     switch (type){
         case 1:{//外呼座席接通，呼叫客户中
@@ -220,7 +220,7 @@ function calling(type) {//通话状态
 
         }
         case 3:{//外呼客户接听 客户和座席通话
-            callingState()
+            callingTrState(token);
             return
         }
         case 4:{ //保持开始
@@ -257,7 +257,10 @@ function calling(type) {//通话状态
     timer()
 }
 
-
+//天润 接通
+function callingTrState(token){
+	$("#outboundCallStartTime").val(token.stateStartTime);
+}
 
 function idleState() {//置闲状态
     //console.log("置闲")
@@ -443,27 +446,37 @@ function three_party_consultation_buttonState() {//咨询三方
     timer()
 }
 
-function arrangementState() {//整理
-    init('idle_button')
-    init('busy_button')
-    init('little_rest_button')
-    init('have_meals_button')
-    init('train_button')
-    init('little_rest_button')
-    init('calling_button')
-    init('no-keep_button')
-    init('no-keep_back_button')
-    init('no-consulting_button')
-    init('no-transfer_button')
-    init('no-consulting_back_button')
-    init('no-three_party_consultation_button')
-    init('no-satisfaction_button')
-    init('no-answer_button')
-    init('no-refuse_button')
-    init('no-hangUp_button')
-    init("no-mute_button");
-    init("no-cancel_mute_button");
-    timer("zl")
+function arrangementState(token) {//整理
+	var callSource = sessionStorage.getItem("callSource");
+	if(callSource==='1'){//首页头部外呼
+		var startTime = $("#outboundCallStartTime").val();
+		var endTime = token.stateStartTime;
+		var talkTime = fomatSecondsToString(endTime-Number(startTime));
+		
+		$('#outboundCallTime').html(talkTime);
+		$('#outboundCallTimeDiv').show();
+	}
+	
+}
+
+function fomatSecondsToString(s){
+	var t="";
+	var hour = Math.floor(s/3600);
+	 var min = Math.floor(s/60) % 60;
+     var sec = s % 60;
+    if(hour<10){
+    	t+="0";
+    }
+     t+=hour+"小时"
+     if(min < 10){
+     	t += "0";
+     }
+     t += min + "分";
+     if(sec < 10){
+     	t += "0";
+    }
+     t += sec + "秒";
+     return t;
 }
 
 function prolongWrapup() {//置忙延时
