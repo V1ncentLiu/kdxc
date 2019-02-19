@@ -268,9 +268,9 @@ public class TelemarketingController {
 				
 				if(islegal && (telemarketingLayoutDTO2.getBeginTime() ==null || "".equals(telemarketingLayoutDTO2.getBeginTime()) || "".equals(telemarketingLayoutDTO2.getEndTime()) || islegal && telemarketingLayoutDTO2.getEndTime() ==null)) {
 					islegal = false;
-				}else if(islegal && format.parse(telemarketingLayoutDTO2.getBeginTime()).getTime()  >  format.parse(telemarketingLayoutDTO2.getEndTime()+" 23:59:59").getTime() ){
+				}else if(islegal && format.parse(telemarketingLayoutDTO2.getBeginTime()).getTime()  >  format.parse(telemarketingLayoutDTO2.getEndTime().substring(0, 10)+" 23:59:59").getTime() ){
 					islegal = false;
-				}else if(islegal &&  new Date().getTime() > format.parse(telemarketingLayoutDTO2.getEndTime()+" 23:59:59").getTime() ){
+				}else if(islegal &&  new Date().getTime() > format.parse(telemarketingLayoutDTO2.getEndTime().substring(0, 10)+" 23:59:59").getTime() ){
 					islegal = false;
 				}
 				
