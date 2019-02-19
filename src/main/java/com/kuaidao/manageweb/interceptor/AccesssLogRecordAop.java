@@ -124,6 +124,9 @@ public class AccesssLogRecordAop {
             logRecord.setResCode(FAIL_CODE);
             logRecord.setErrMsg(ExceptionUtils.getStackTrace(throwable));
             logRecord.setReqEndTime(DateUtil.convert2String(new Date(), DateUtil.ymdhms));
+            if ((OperationType.LOGINOUT.toString()).equals(logRecord.getOperationType())) {
+                logRecord.setContent("退出系统失败");
+            }
             asyncInsertLog(logRecord);
             throw throwable;
         }
