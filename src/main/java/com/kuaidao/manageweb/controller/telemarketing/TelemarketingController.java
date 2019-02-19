@@ -266,7 +266,7 @@ public class TelemarketingController {
 					islegal = false;
 				}
 				
-				if(islegal && (telemarketingLayoutDTO2.getBeginTime() ==null || islegal && telemarketingLayoutDTO2.getEndTime() ==null)) {
+				if(islegal && (telemarketingLayoutDTO2.getBeginTime() ==null || "".equals(telemarketingLayoutDTO2.getBeginTime()) || "".equals(telemarketingLayoutDTO2.getEndTime()) || islegal && telemarketingLayoutDTO2.getEndTime() ==null)) {
 					islegal = false;
 				}else if(islegal && format.parse(telemarketingLayoutDTO2.getBeginTime()).getTime()  >  format.parse(telemarketingLayoutDTO2.getEndTime()+" 23:59:59").getTime() ){
 					islegal = false;

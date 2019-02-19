@@ -151,7 +151,7 @@
               </div>
             </el-dialog>
             
-            <el-dialog :title="addOrModifyDialogTitle" :visible.sync="exportFormVisible"  width="50%" @close="submitExport">
+            <el-dialog :title="addOrModifyDialogTitle" :visible.sync="exportFormVisible"  width="50%" @close="submitExportclose">
             <el-form>
             <div id="totalNumId" class="marginB10">{{dataNum}}</div>
                  <el-row>
@@ -543,7 +543,9 @@
               	}
                   this.$refs.upload.submit();
                 },
-                
+                submitExportclose(){
+                  	  window.location.href="/telemarketing/telemarketingLayoutList"; 
+                },
                 submitExport(){
                   if($("#showButton").attr("data") ==2){
                 	  window.location.href="/telemarketing/telemarketingLayoutList"; 
@@ -564,8 +566,8 @@
                   	orgVM.exportFormVisible = false;
                   	  axios.post('/telemarketing/importInvitearea',param).then(function (response) {
                         	  console.log(response);
-                            if(null !==response && response.data !=null && response.data.code=='0' && response.data.data.length !=0){
-                          	  if(response.data.data !=null){
+                            if(null !==response && response.data !=null && response.data.code=='0'){
+                          	  if(response.data.data !=null  && response.data.data.length !=0){
                           		  $("#showButton").html("知道了");
                           		  $("#showButton").attr("data",2);
                           		  orgVM.loading = false;
