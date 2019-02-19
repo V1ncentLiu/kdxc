@@ -78,15 +78,39 @@ var homePageVM=new Vue({
             	
             	cno:[
             		 { required: true, message: '坐席号不能为空'},
+            		 {validator:function(rule,value,callback){
+            			 if(!/^[0-9]*$/.test(value)){
+          					  callback(new Error("只可以输入数字,不超过10位"));     
+          	        	  }else{
+          	        		  callback();
+          	        	  }
+            			 
+            		 },trigger:'blur'},
             	],
 	    	    bindPhone:[
 	    	    	{ required: true, message: '绑定电话不能为空'},
+	    	    	 {validator:function(rule,value,callback){
+            			 if(!/^[0-9]*$/.test(value)){
+          					  callback(new Error("只可以输入数字,不超过11位"));     
+          	        	  }else{
+          	        		  callback();
+          	        	  }
+            			 
+            		 },trigger:'blur'},
 	    	    ]
             	
             },
             qimoClientFormRules:{
             	loginClient:[
             		{ required: true, message: '登录坐席不能为空'},
+            		{validator:function(rule,value,callback){
+           			 if(!/^[0-9]*$/.test(value)){
+         					  callback(new Error("只可以输入数字,不超过10位"));     
+         	        	  }else{
+         	        		  callback();
+         	        	  }
+           			 
+           		 },trigger:'blur'},
             	]
             },
             enterpriseId:enterpriseId,
@@ -97,6 +121,12 @@ var homePageVM=new Vue({
 	    }
 	},
  	methods: {
+ 		handleMin(){
+ 			this.dialogLoginClientVisible = false;
+ 		},
+ 		handleOutMin(){
+ 			this.dialogLogoutClientVisible = false;
+ 		},
 	    handleOpen(key, keyPath) {
 	      	// console.log(key, keyPath);
 	    },
@@ -129,6 +159,7 @@ var homePageVM=new Vue({
 	     },
 	     logout(){
 	    	 this.dialogLogoutVisible=true;
+	    	 this.$refs.loginClientForm.resetFields();
 	     },
 	     cancelModifyForm(formName){//取消修改密码
          	this.$refs[formName].resetFields();
@@ -205,8 +236,18 @@ var homePageVM=new Vue({
         			this.loginClientForm.clientType=1;
         			this.dialogLogoutClientVisible  = true;
         		}else{
-
+        			 if (this.$refs.loginClientForm !==undefined) {
+        				// this.$refs.loginClientForm.resetFields();
+        				/* this.$refs.loginClientForm.clearValidate(function(){
+        					 
+        				 });*/
+        			 }
+        			
             		this.loginClientForm.clientType=1;//设置默认选中天润坐席
+            		this.loginClientForm.bindPhoneType=1;
+            		this.loginClientForm.cno='';
+            		this.loginClientForm.bindPhone='',
+            		this.loginClientForm.loginClient='',
             		this.dialogLoginClientVisible = true;
         		}
         	
@@ -363,10 +404,10 @@ var homePageVM=new Vue({
 						
 						// ccic2里面的js类
 						agentNumber = params.cno;
-						sessionStorage.setItem("enterpriseId",params.enterpriseId, 7);
-						sessionStorage.setItem("cno", params.cno, 7);
-						sessionStorage.setItem("bindTel", params.bindTel, 7);
-						sessionStorage.setItem("bindType", params.bindType, 7);
+						//sessionStorage.setItem("enterpriseId",params.enterpriseId, 7);
+						//sessionStorage.setItem("cno", params.cno, 7);
+						//sessionStorage.setItem("bindTel", params.bindTel, 7);
+						//sessionStorage.setItem("bindType", params.bindType, 7);
 					} else {
 						homePageVM.$message.error({message:d.description,type:'error'});
 					}
@@ -425,16 +466,16 @@ var homePageVM=new Vue({
         		   this.$message({message:"请登录呼叫中心",type:'warning'});
         		   return ;
         	}
+        	sessionStorage.setItem("callSource","1");//1:表示 首页头部外呼 2：表示 电销管理外呼
         	var outboundInputPhone = this.outboundInputPhone;
-        	console.log("outboundInputPhone:"+outboundInputPhone);
+        	var param = {};
         	if(this.isTrClient){//天润呼叫
-        		var param = {};
         		param.tel=outboundInputPhone;
         		param.userField={
-        				'accountId':''
+        				'accountId':this.accountId,
+        				'clueId':''
         		}
         		TOOLBAR.previewOutcall(param,function(token){
-        			console.info("直接外呼");
         			if(token.code=='0'){
         				homePageVM.$message({message:"外呼中",type:'success'});
         			}else{
@@ -443,8 +484,31 @@ var homePageVM=new Vue({
         			}
         		});
         	}else if(this.isQimoClient){//七陌呼叫
-        		
+        		param.customerPhoneNumber = outboundInputPhone;
+        		 axios.post('/client/client/qimoOutboundCall',param)
+                 .then(function (response) {
+                     var data =  response.data;
+                     if(data.code=='0'){
+                    	  var resData = data.data;
+                    	  if(resData.Succeed){
+                    		  homePageVM.$message({message:"外呼中",type:'success'});
+                    	  }else{
+                      		  homePageVM.$message({message:resData.Message,type:'error'});
+                    	  }
+                     }else{
+                    		homePageVM.$message({message:data.msg,type:'error'});
+                     }
+                 })
+                 .catch(function (error) {
+                    console.log(error);
+                 })
+                 .then(function () {
+                   // always executed
+                 });
         	}
+        },
+        logoutMin(){//退出最小化
+        	this.dialogLogoutClientVisible =false;
         }
          
   	},
@@ -458,6 +522,9 @@ var homePageVM=new Vue({
 })
 // 点击导航赋值ifream的src值
 $(function () { 
+	//初始化 天润坐席 相关参数
+	documentReady();
+	
 	var mainBoxH=$(".elMain").height()-4;
 	// 设置ifream高度
 	$("#iframeBox").height(mainBoxH)

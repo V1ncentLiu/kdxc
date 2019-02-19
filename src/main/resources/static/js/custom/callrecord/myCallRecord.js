@@ -41,7 +41,7 @@ var myCallRecordVm = new Vue({
     		 var endTimestamp = new Date(endTime);
     		 if(startTimestamp> endTimestamp){
     			 this.$message({
-                     message: '开始时间必须大于结束时间',
+                     message: '开始时间必须小于结束时间',
                      type: 'warning'
                    });
                  return;
@@ -77,7 +77,7 @@ var myCallRecordVm = new Vue({
     		var valText="";
     		if(value=="1"){
     			valText="呼入";
-    		}else if(value=="2"){
+    		}else if(value=="3"){
     			valText="外呼";
     		}
     		
@@ -184,6 +184,12 @@ var myCallRecordVm = new Vue({
     	}
     },
     created(){
+    	var a = new Date();
+        var year = a.getFullYear();
+        var month = a.getMonth();
+        var date = a.getDate();
+        this.searchForm.startTime=year+"-" + (month+1) + "-" + date+" 00:00:00";
+        this.searchForm.endTime=year+"-"+(month+1)+"-"+date+" 23:59:59";
       this.initCallRecordData();
    },
    mounted(){

@@ -3,6 +3,8 @@
  */
 function documentReady(){
     //devin unlogin()
+	//移除打电话来源标识
+	sessionStorage.removeItem("callSource");
     CTILink.setup(
         {
             webrtc: true, // 是否加载软电话，对IE浏览器无效
@@ -596,7 +598,7 @@ function handleState(token) {
                     typeButton.consult();
                     typeButton.transfer();
                     $("#phoneCallText").show().attr("disabled", false);*/
-                   // calling(3)
+                    calling(3,token)
                     console.log(token)
                     break;
                 case 'hold' : //保持开始
@@ -655,15 +657,15 @@ function handleState(token) {
                     typeButton.consult();
                     typeButton.transfer();
                     $("#phoneCallText").show().attr("disabled", false);*/
-                   // calling(3);
+                    //calling(3,token);
             }
             break;
         case '整理':  //整理开始（座席挂断）
             /*typeButton.buttonDisabled();
             typeButton.online();
             typeButton.pause();*/
-            console.log(token)
-           // arrangementState()
+            //console.log(token)
+            arrangementState(token);
             break;
     }
   /*  //log(JSON.stringify(token)+"===================="+str);
