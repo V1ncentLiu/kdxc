@@ -72,7 +72,7 @@
     </el-dialog>
     
          <!-- 批量添加 自定义字段弹窗 start -->
-            <el-dialog title="批量添加" :visible.sync="dialogBatchVisible" @close="closeUploadFileDialog">
+            <el-dialog title="邀约区域导入" :visible.sync="dialogBatchVisible" @close="closeUploadFileDialog">
                <el-row class="marginB20">
                                  <!-- 下载批量上传模版: <a href="" download="页面自定义字段导入模板">页面自定义字段模板</a> -->
                                  下载批量上传模版：<a href="/excel-templates/area-division.xlsx" download="邀约区域模板"><span style="color:#409EFF">邀约区域模板下载</span></a>
@@ -214,7 +214,7 @@
               	var rows = this.multipleSelection;
                   if(rows.length<1){
                       this.$message({
-                         message: '请选择一条数据进行修改',
+                         message: '请选择删除数据',
                          type: 'warning'
                        });
                       return;
@@ -317,6 +317,8 @@
             beforeUpload(file){//上传之前 文件校验
                 var isTextComputer = file.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
                 if(!isTextComputer){
+                	orgVM.fileList = [];
+                	orgVM.loading = false;
                     this.$message.error('文件格式错误');
                     return false;
                 }
@@ -329,15 +331,13 @@
           		  //清空文件里列表
               	  this.$refs.upload.clearFiles();
                     this.dialogBatchVisible = false;
-                    this.$message({message:'上传中',type:'success',duration:2000,onClose:function(){
-                    	orgVM.exportdataTable =response.data;
-                    	orgVM.loading = false;
-                    	orgVM.exportFormVisible = true;
-                    	num = orgVM.exportdataTable.length;
-                    	// alert("11 "+num);
-                      // $("#totalNumId").html("预览数据，共"+num+"条数据");
-                    	orgVM.dataNum="预览数据，共"+num+"条数据"
-            	      }});
+                   	orgVM.exportdataTable =response.data;
+                   	orgVM.loading = false;
+                   	orgVM.exportFormVisible = true;
+                   	num = orgVM.exportdataTable.length;
+                   	// alert("11 "+num);
+                     // $("#totalNumId").html("预览数据，共"+num+"条数据");
+                   	orgVM.dataNum="预览数据，共"+num+"条数据"
                     
                     
           	  }else{
@@ -354,7 +354,8 @@
             	this.loading = true;
             	var fileList = this.fileList;
             	if(!fileList || fileList.length!=1){
-            		this.$message.error({message:'请选择一个文件',type:'error'});
+            		this.$message.error({message:'未选中文件',type:'error'});
+            		orgVM.loading = false;
             		return false;
             	}
                 this.$refs.upload.submit();
@@ -365,44 +366,53 @@
                 	  window.location.href="/invitearea/inviteAreaList"; 
                 	  return;
                   }
-            	  var param = {};
-            	  this.loading = true;
-            	  param.list = orgVM.exportdataTable;
-            	  if(param.list !=null && param.list.length==0){
-              		  this.loading = false;
-              		  this.$message({message:'无要上传的数据',type:'error'});
-              		  return;
-              	  }
-            	 this.exportFormVisible = false;
-            	  axios.post('/invitearea/importInvitearea',param).then(function (response) {
-                  	  console.log(response);
-                      if(null !==response && response.data !=null && response.data.code=='0'){
-                    	  if(response.data.data !=null){
-                    		  $("#showButton").html("知道了");
-                      		  $("#showButton").attr("data",2);
-                      		  orgVM.addOrModifyDialogTitle="部分数据导入失败";
-                      		  orgVM.exportFormVisible = true;
-                      		  orgVM.loading = false;
-                      		  orgVM.exportdataTable =response.data.data;
-                      		  orgVM.dataNum="以下内容导入失败，请重新导入"
-                    	  }else{
-                    		  window.location.href="/invitearea/inviteAreaList"; 
-                    	  }
-                    	
-                     }else{
-                    	 alert(response.data.data.message);
-	                  	  	return ;
-                     } 
-                  }).catch(function (error) {
-                      console.log(error);
-                  })
-                  .then(function () {
-                    // always executed
-                  }); 
+
+            	  this.$alert('<center><strong>确认导入数据</strong></center>', {
+                      dangerouslyUseHTMLString: true,
+                      center:true
+                  }).then(() => {
+                	  var param = {};
+                	  orgVM.loading = true;
+                	  param.list = orgVM.exportdataTable;
+                	  if(param.list !=null && param.list.length==0){
+                  		  this.loading = false;
+                  		  this.$message({message:'无要上传的数据',type:'error'});
+                  		  return;
+                  	  }
+                	  orgVM.exportFormVisible = false;
+                	  axios.post('/invitearea/importInvitearea',param).then(function (response) {
+                      	  console.log(response);
+                          if(null !==response && response.data !=null && response.data.code=='0' && response.data.data.length !=0){
+                        	  if(response.data.data !=null){
+                        		  $("#showButton").html("知道了");
+                          		  $("#showButton").attr("data",2);
+                          		  orgVM.addOrModifyDialogTitle="部分数据导入失败";
+                          		  orgVM.exportFormVisible = true;
+                          		  orgVM.loading = false;
+                          		  orgVM.exportdataTable =response.data.data;
+                          		  orgVM.dataNum="以下内容导入失败，请重新导入"
+                        	  }else{
+                        		  window.location.href="/invitearea/inviteAreaList"; 
+                        	  }
+                        	
+                         }else{
+                        	 alert(response.data.data.message);
+    	                  	  	return ;
+                         } 
+                      }).catch(function (error) {
+                          console.log(error);
+                      })
+                      .then(function () {
+                        // always executed
+                      }); 
+                  });
+            	  
+            	 
               }
         },
         created(){
         	this.inviteAreaListPage();
+        	document.getElementById('organizationManage').style.display = 'block';
         	
         },//created方法 结束
         mounted(){
