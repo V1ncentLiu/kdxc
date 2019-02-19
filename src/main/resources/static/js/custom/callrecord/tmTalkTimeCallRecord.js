@@ -53,7 +53,7 @@ var myCallRecordVm = new Vue({
                  	var resData = data.data;
                  	var callRecordData = resData.data;
                  	myCallRecordVm.callRecordData= callRecordData.data;
-                 	myCallRecordVm.totalTalkTime = resData.totalTalkTime;
+                 	myCallRecordVm.totalTalkTime = resData.totalTalktime;
                   //3.分页组件
                  	myCallRecordVm.pager.total= callRecordData.total;
                  	myCallRecordVm.pager.currentPage = callRecordData.currentPage;

@@ -506,6 +506,9 @@ var homePageVM=new Vue({
                    // always executed
                  });
         	}
+        },
+        logoutMin(){//退出最小化
+        	this.dialogLogoutClientVisible =false;
         }
          
   	},
