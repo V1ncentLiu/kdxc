@@ -43,6 +43,8 @@ import com.kuaidao.aggregation.dto.client.TrClientRespDTO;
 import com.kuaidao.aggregation.dto.client.UploadTrClientDataDTO;
 import com.kuaidao.aggregation.dto.client.UserCnoReqDTO;
 import com.kuaidao.aggregation.dto.client.UserCnoRespDTO;
+import com.kuaidao.callcenter.dto.QimoOutboundCallDTO;
+import com.kuaidao.callcenter.dto.QimoOutboundCallRespDTO;
 import com.kuaidao.common.constant.OrgTypeConstant;
 import com.kuaidao.common.constant.RedisConstant;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
@@ -719,6 +721,26 @@ public class ClientController {
         session.removeAttribute("bindType");
         
         return new JSONResult<>().success(true);
+    }
+    
+    /**
+     * 七陌 外呼 
+     * @param callDTO
+     * @return
+     */
+    @PostMapping("/qimoOutboundCall")
+    @ResponseBody
+    public JSONResult<QimoOutboundCallRespDTO> qimoOutboundCall(@RequestBody QimoOutboundCallDTO  callDTO){
+        String customerPhoneNumber = callDTO.getCustomerPhoneNumber();
+        if(StringUtils.isBlank(customerPhoneNumber)) {
+            return new JSONResult().fail(SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getCode(),"客户手机号为null");
+        }
+        
+        Session session = SecurityUtils.getSubject().getSession();
+       callDTO.setBindType((String)session.getAttribute("bindType"));
+       callDTO.setLoginClient((String)session.getAttribute("loginName"));
+        
+        return clientFeignClient.qimoOutboundCall(callDTO);
     }
     
 
