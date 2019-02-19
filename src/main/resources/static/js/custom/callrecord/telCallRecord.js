@@ -33,7 +33,10 @@ var myCallRecordVm = new Vue({
         	cno:'',
         	bindPhone:'',
         	accountId:''
-        }
+        		
+        },
+        tmList:tmList,//组内电销顾问
+        
     },
     methods:{
     	initCallRecordData(){
@@ -43,12 +46,18 @@ var myCallRecordVm = new Vue({
     		 var endTimestamp = new Date(endTime);
     		 if(startTimestamp> endTimestamp){
     			 this.$message({
-                     message: '开始时间必须大于结束时间',
+                     message: '开始时间必须小于结束时间',
                      type: 'warning'
                    });
                  return;
              }
     		 var param = this.searchForm;
+    		 var accountId =this.searchForm.accountId;
+    		 if(accountId){
+    			 var accountIdArr = new Array();
+    			 accountIdArr.push(accountId);
+    			 param.accountIdList=accountIdArr;
+    		 }
         	 param.pageNum=this.pager.currentPage;
         	 param.pageSize=this.pager.pageSize;
         	 axios.post('/call/callRecord/listAllTmCallRecord',param)
@@ -79,7 +88,7 @@ var myCallRecordVm = new Vue({
     		var valText="";
     		if(value=="1"){
     			valText="呼入";
-    		}else if(value=="2"){
+    		}else if(value=="3"){
     			valText="外呼";
     		}
     		

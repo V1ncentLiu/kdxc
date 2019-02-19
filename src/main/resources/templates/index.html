@@ -112,7 +112,8 @@
  <!-- 退出登录 dialog start -->
  
  <!-- 呼叫中心登录 dialog start -->
-     <el-dialog title="呼叫中心" :visible.sync="dialogLoginClientVisible">
+     <el-dialog title="呼叫中心" :visible.sync="dialogLoginClientVisible" class="callCenterDialog">
+     	<el-button type="text" icon="el-icon-minus" class="minDialog" @click="handleMin"></el-button>
         <el-form :model="loginClientForm" ref="loginClientForm" :rules="loginClientForm.clientType==1?trClientFormRules:qimoClientFormRules">
             <el-form-item label="选择呼叫中心：" :label-width="formLabelWidth" prop="clientType">
                 <el-select v-model="loginClientForm.clientType" placeholder="请选择" value-key="value" @change="changeClientType">
@@ -157,8 +158,9 @@
  <!-- 呼叫中心登录  dialog end -->
  
  <!-- 呼叫中心退出dialog start -->
-     <el-dialog title="呼叫中心" :visible.sync="dialogLogoutClientVisible">
-        <el-form :model="loginClientForm" ref="loginClientForm" :rules="loginClientForm.clientType==1?trClientFormRules:qimoClientFormRules">
+     <el-dialog title="呼叫中心" :visible.sync="dialogLogoutClientVisible" class="callCenterDialog">
+     <el-button type="text" icon="el-icon-minus" class="minDialog" @click="logoutMin"></el-button>
+        <el-form :model="loginClientForm" ref="logoutClientForm" :rules="loginClientForm.clientType==1?trClientFormRules:qimoClientFormRules">
              <span v-if="loginClientForm.clientType==1">已登录天润呼叫中心</span>
              <span v-if="loginClientForm.clientType==2">已登录七陌呼叫中心</span>
             
@@ -194,7 +196,8 @@
                  <el-button type="primary" icon="fa fa-phone" @click="clickOutbound"></el-button>
              </el-form-item>
         </el-form>
-        本次通话时长：<span id="outboundCallTime"></span>
+            <input  type="hidden" id="outboundCallStartTime"/>
+            <div id="outboundCallTimeDiv" style="display:none"> 本次通话时长：<span id="outboundCallTime" ></span></div> 
         
     </el-dialog>
  <!-- 外呼 dialog end -->
@@ -262,7 +265,13 @@
     .el-dialog__footer {
         text-align: center;
     }
+    
+    /* 最小化按钮 */
+    /* .el-dialog__wrapper.callCenterDialog { border:1px solid red; } */
+    	.el-dialog__wrapper.callCenterDialog  button.el-dialog__headerbtn { display:none!important; }
+    	.minDialog { position: absolute; top:12px; right: 20px; background:#fff; }
 </style>
+
 <script>
     var annDialogVm = new Vue({
         el: '#anndialog',
@@ -429,6 +438,5 @@
 <script th:src="@{/js/custom/call/md5.js?v=1.0.0}"></script>
 <script th:src="@{/js/custom/call/toolbar.js?v=1.0.1}"></script>
 <script th:src="@{/js/custom/call/toolbarIframe.js?v=1.0.1}"></script>
-<script th:src="@{/js/custom/call/rtCall.js?v=1.0.0}"></script>
-<script th:src="@{/js/custom/call/loginClient.js?v=1.0.0}"></script>
+<!-- <script th:src="@{/js/custom/call/rtCall.js?v=1.0.0}"></script> -->
 </html>
