@@ -121,6 +121,12 @@ var homePageVM=new Vue({
 	    }
 	},
  	methods: {
+ 		handleMin(){
+ 			this.dialogLoginClientVisible = false;
+ 		},
+ 		handleOutMin(){
+ 			this.dialogLogoutClientVisible = false;
+ 		},
 	    handleOpen(key, keyPath) {
 	      	// console.log(key, keyPath);
 	    },
