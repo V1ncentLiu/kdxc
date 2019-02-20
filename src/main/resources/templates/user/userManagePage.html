@@ -51,15 +51,17 @@
 placement="bottom"
 width="200"
 trigger="click"
-v-model="isShow">                    
-<el-tree
-:data="dataTree"              
-node-key="id"
-:default-expanded-keys="expandedKeys"
-ref="tree"
-highlight-current
-@node-click="treeNodeClick">
-</el-tree> 
+v-model="isShow"> 
+<div style="max-height: 300px;overflow-y: auto;">                   
+  <el-tree
+  :data="dataTree"              
+  node-key="id"
+  :default-expanded-keys="expandedKeys"
+  ref="tree"
+  highlight-current
+  @node-click="treeNodeClick">
+  </el-tree> 
+</div>
 <el-button slot="reference" class="orgSelectOopover">
   <el-input v-model="userSearchForm.orgName" placeholder="选择所属组织" class="orgSelectInput" readonly></el-input>
   <i class="el-icon-arrow-down" style="float: right;margin-right: -12px;color: #c0c4cc;"></i>
@@ -68,7 +70,7 @@ highlight-current
 </el-col>
 <el-col :span="4">
   <el-form-item class="formItem"  prop="roleId" style="width: 100%;">
-    <el-select v-model="userSearchForm.roleId" placeholder="角色选择" style="width: 100%;">
+    <el-select clearable v-model="userSearchForm.roleId" placeholder="角色选择" style="width: 100%;" @visible-change="seleckClick">
       <el-option
       v-for="item in roleOptions"
       :key="item.id"
@@ -80,7 +82,7 @@ highlight-current
 </el-col>
 <el-col :span="4">
   <el-form-item class="formItem"  prop="status" style="width: 100%;">
-    <el-select v-model="userSearchForm.status" placeholder="全部状态" style="width: 100%;">
+    <el-select clearable v-model="userSearchForm.status" placeholder="全部状态" style="width: 100%;" @visible-change="seleckClick">
       <el-option
       v-for="item in statusOptions"
       :key="item.value"
@@ -92,7 +94,7 @@ highlight-current
 </el-col>
 <el-col :span="4">
   <el-form-item class="formItem"  prop="searchType" style="width: 100%;">
-    <el-select v-model="userSearchForm.searchType" style="width: 100%;">
+    <el-select clearable v-model="userSearchForm.searchType" style="width: 100%;" @visible-change="seleckClick">
       <el-option
       v-for="item in searchTypeOptions"
       :key="item.value"
@@ -494,6 +496,10 @@ var userVM = new Vue({
           this.userSearchForm.orgId=data.id;
           this.isShow=false
       }
+    },
+    seleckClick(){
+      console.log(0)
+      this.isShow=false;
     }
   },
   created(){
