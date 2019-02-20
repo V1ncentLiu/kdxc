@@ -115,7 +115,7 @@ var clientVm = new Vue({
         		 {validator:function(rule,value,callback){
         			 if(value){
         				  if(!/^[0-9]*$/.test(value)){
-        					  callback(new Error("只可以输入正整数数字"));     
+        					  callback(new Error("只可以输入数字"));     
         	        	  }else{
         	        		  callback();
         	        	  }
@@ -156,7 +156,7 @@ var clientVm = new Vue({
              for(var i=0;i<rows.length;i++){
                  var curRow = rows[i];
                  rowIds.push(curRow.id);
-                 rowNames.push("["+curRow.clientNo+"]");
+                 rowNames.push("【"+curRow.clientNo+"】");
              }
              var clientNos = rowNames.join(" ");
              
@@ -448,7 +448,7 @@ var clientVm = new Vue({
            },
            updateCallbackPhone(id,callbackPhone){
         	   if(!/^[0-9]*$/.test(callbackPhone)){
-        		   clientVm.$message({message:'只可以输入正整数数字',type:'warning'});
+        		   clientVm.$message({message:'只可以输入数字',type:'warning'});
          	        return false;
         	    }
         	    

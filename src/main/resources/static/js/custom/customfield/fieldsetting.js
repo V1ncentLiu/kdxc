@@ -225,7 +225,7 @@
                 for(var i=0;i<rows.length;i++){
                     var curRow = rows[i];
                     rowIds.push(curRow.id);
-                    rowNames.push("["+curRow.fieldName+"]");
+                    rowNames.push("【"+curRow.fieldName+"】");
                 }
                 var fieldName = rowNames.join(" ");
             	

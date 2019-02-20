@@ -39,9 +39,10 @@ var myCallRecordVm = new Vue({
     		 var endTime = this.searchForm.endTime;
     		 var startTimestamp = Date.parse(new Date(startTime));
     		 var endTimestamp = new Date(endTime);
+    		
     		 if(startTimestamp> endTimestamp){
     			 this.$message({
-                     message: '开始时间必须小于结束时间',
+                     message: '开始时间不能大于结束时间',
                      type: 'warning'
                    });
                  return;
@@ -101,7 +102,6 @@ var myCallRecordVm = new Vue({
     		return valText;
     	},
     	getTalkTimeText(row, column, value, index){
-    		console.log(value);
     		var valText="";
     		if(value){
     			valText =  this.formatSeconds(value);
@@ -181,6 +181,12 @@ var myCallRecordVm = new Vue({
   	        this.searchForm.startTime=startTime.getFullYear()+"-" + (startTime.getMonth()+1) + "-" + startTime.getDate()+" 00:00:00";;
             this.searchForm.endTime=year+"-"+(month+1)+"-"+date+" 23:59:59";
             this.initCallRecordData();
+    	},
+    	downloadAudio(url){
+    		location.href=url;
+    	},
+    	switchSound(id,url){
+    		switchSound(id,url);
     	}
     },
     created(){
