@@ -477,8 +477,14 @@ var homePageVM=new Vue({
         		   this.$message({message:"请登录呼叫中心",type:'warning'});
         		   return ;
         	}
+         	var outboundInputPhone = this.outboundInputPhone;
+        	 if(!/^[0-9]*$/.test(outboundInputPhone)){
+				 this.$message({message:"只可以输入数字,不超过11位",type:'warning'});
+       		     return ; 
+        	  }
+        	
         	sessionStorage.setItem("callSource","1");//1:表示 首页头部外呼 2：表示 电销管理外呼
-        	var outboundInputPhone = this.outboundInputPhone;
+       
         	var param = {};
         	if(this.isTrClient){//天润呼叫
         		param.tel=outboundInputPhone;
