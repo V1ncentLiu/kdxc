@@ -27,7 +27,7 @@ import com.kuaidao.sys.dto.user.UserAndRoleRespDTO;
  * @date: 2019年1月3日 下午5:06:53
  * @version V1.0
  */
-@FeignClient(name = "sys-service-chen", path = "/sys/organization/organization",
+@FeignClient(name = "sys-service", path = "/sys/organization/organization",
         fallback = OrganizationFeignClient.HystrixClientFallback.class)
 public interface OrganizationFeignClient {
 
@@ -116,10 +116,11 @@ public interface OrganizationFeignClient {
     @PostMapping("/listDescenDantByParentId")
     JSONResult<List<OrganizationDTO>> listDescenDantByParentId(
             @RequestBody OrganizationQueryDTO reqDto);
-    
+
     /**
-     * 查询 系统下 叶子节点组织机构 
-     * @param reqDto  system_code
+     * 查询 系统下 叶子节点组织机构
+     * 
+     * @param reqDto system_code
      * @return
      */
     @PostMapping("/listLeafOrg")
@@ -198,7 +199,7 @@ public interface OrganizationFeignClient {
         public JSONResult<Boolean> queryOrgStaffByParentId(IdListReq idListReq) {
             return fallBackError("查询组织机构下是否有下级员工");
         }
-        
+
         @Override
         public JSONResult<List<OrganizationDTO>> listDescenDantByParentId(
                 OrganizationQueryDTO reqDto) {
