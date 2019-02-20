@@ -129,6 +129,7 @@ var homePageVM=new Vue({
             dialogOutboundVisible:false,//外呼dialog
             outboundInputPhone:'',//外呼时手机号
             accountId:accountId,//登陆者ID
+            outboundDialogMin:false,//外呼dialog 是否最小化
 	    }
 	},
  	methods: {
@@ -248,7 +249,7 @@ var homePageVM=new Vue({
         			this.dialogLogoutClientVisible  = true;
         		}else{
         			 if (this.$refs.loginClientForm !==undefined) {
-        				// this.$refs.loginClientForm.resetFields();
+        				  this.$refs.loginClientForm.resetFields();
         				/* this.$refs.loginClientForm.clearValidate(function(){
         					 
         				 });*/
@@ -470,7 +471,22 @@ var homePageVM=new Vue({
         	}
         },
         openOutboundDialog(){//打开主动外呼diaolog 
+        	this.outboundInputPhone="";
         	this.dialogOutboundVisible = true;
+        	if(this.outboundDialogMin){//代表上次点击的是最小化
+        		$("#outboundCallTimeDiv").show();
+        	}
+        	this.outboundDialogMin = false;
+        	
+        },
+        closeOutboundDialog(){
+        	this.dialogOutboundVisible = false;
+        	this.outboundDialogMin=false;
+        	if(!this.outboundDialogMin){//如果是最小化就不执行这个代码
+        		return;
+        	}
+        	$('#outboundCallStartTime').val("");
+        	$('#outboundCallTime').html("");
         },
         clickOutbound(){//外呼
         	if(!this.isQimoClient && !this.isTrClient ){
@@ -526,7 +542,11 @@ var homePageVM=new Vue({
         },
         logoutMin(){//退出最小化
         	this.dialogLogoutClientVisible =false;
-        }
+        },
+    	outboundMin(){//外呼最小化
+    		this.dialogOutboundVisible = false;
+    		this.outboundDialogMin=true;
+    	}
          
   	},
    	created() {  
