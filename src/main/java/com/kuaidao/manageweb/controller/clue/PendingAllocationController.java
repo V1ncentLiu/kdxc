@@ -53,7 +53,7 @@ import com.kuaidao.sys.dto.user.UserOrgRoleReq;
  */
 
 @Controller
-@RequestMapping("/clue/PendingAllocation")
+@RequestMapping("/clue/pendingAllocation")
 public class PendingAllocationController {
     private static Logger logger = LoggerFactory.getLogger(PendingAllocationController.class);
     @Autowired
@@ -99,7 +99,7 @@ public class PendingAllocationController {
         // 查询所有信息流分配规则
         JSONResult<List<InfoAssignDTO>> findListInfoAssignByName =
                 infoAssignFeignClient.findListInfoAssignByName(new InfoAssignQueryDTO());
-        request.setAttribute("ruleList", findListInfoAssignByName.getData());
+        // request.setAttribute("ruleList", findListInfoAssignByName.getData());
         // 查询字典类别集合
         request.setAttribute("clueCategoryList", getDictionaryByCode(Constants.CLUE_CATEGORY));
         // 查询字典类别集合
@@ -262,7 +262,6 @@ public class PendingAllocationController {
      */
     @PostMapping("/getSaleList")
     @ResponseBody
-    @RequiresPermissions("aggregation:pendingAllocationManager:view")
     public JSONResult<List<UserInfoDTO>> getSaleList(@RequestBody UserOrgRoleReq userOrgRoleReq,
             HttpServletRequest request) {
         userOrgRoleReq.setRoleCode(RoleCodeEnum.DXCYGW.name());
@@ -313,6 +312,8 @@ public class PendingAllocationController {
             orgMap.put("orgName", organizationDTO.getName());
             orgMap.put("userId", user.getId());
             orgMap.put("userName", user.getName());
+            orgMap.put("id", organizationDTO.getId() + "," + user.getId());
+            orgMap.put("name", organizationDTO.getName() + "(" + user.getName() + ")");
             result.add(orgMap);
         }
         return result;
