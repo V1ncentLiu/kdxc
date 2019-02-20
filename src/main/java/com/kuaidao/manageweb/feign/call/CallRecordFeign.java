@@ -45,7 +45,7 @@ public interface CallRecordFeign {
      * @return
      */
     @PostMapping("/listTmCallReacordByParams")
-    JSONResult<PageBean<CallRecordRespDTO>> listTmCallReacordByParams(CallRecordReqDTO myCallRecordReqDTO);
+    JSONResult<PageBean<CallRecordRespDTO>> listTmCallReacordByParams(@RequestBody CallRecordReqDTO myCallRecordReqDTO);
     
     @Component
     static class HystrixClientFallback implements CallRecordFeign {

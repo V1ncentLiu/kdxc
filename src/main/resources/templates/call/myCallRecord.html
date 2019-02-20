@@ -1,7 +1,9 @@
 <!DOCTYPE html>
 <html>
-<head th:include="_header_include::frag(~{::title},~{},~{})">
+<head th:include="_header_include::frag(~{::title},~{::link},~{})">
     <title>我的通话记录</title>
+    <link th:href="@{'/font-awesome-4.7.0/css/font-awesome.css'}" rel="stylesheet">
+    <link th:href="@{'/css/custom/callrecord/simpleAudio.css'}" rel="stylesheet">
      <style>
         .trClientManage .leftBox{/*width: 200px;*/height: auto;border:1px solid #ebeef5;min-height: 480px;}
         .trClientManage .leftTitle{background:#ebeef5;text-indent: 20px;height: 40px;line-height: 40px;}
@@ -85,9 +87,14 @@
             <el-table-column align="center" prop="talkTime" label="通话时长" :formatter="getTalkTimeText"></el-table-column>
             <el-table-column align="center"  label="操作" >
                 <template slot-scope="scope">
-                  <!--   <a href="javascript:void(0)" @click="goToFieldSettingPage(scope.row)" target="_blank" class="buttonText" style="color:blue">页面字段设置</a> -->
-                    &nbsp;
-                    <el-button type="primary" @click="updateCallbackPhone(scope.row.id,scope.row.callbackPhone)">确定</el-button>
+                        <!-- <el-button type="success" size="small"><i class="el-icon-caret-right"></i>播放</el-button> -->
+                        
+                        <div style="float:left" :id="scope.row.id" class="sound-trigger sound-trigger--type-default sound-trigger--type-click" @click="switchSound(scope.row.id,scope.row.recordFile)">
+						    <div class="sound-trigger__inner">
+						    <i class="fa fa-play fa-lg"></i>
+						    </div>
+						</div>
+                        <el-button type="danger" size="small" @click="downloadAudio(scope.row.recordFile)"><i class="el-icon-download"></i>下载</el-button>
                 </template>
             
             </el-table-column>
@@ -106,5 +113,6 @@
 </script>
 
 <!-- 当前页面的js -->
-<script th:src="@{/js/custom/callrecord/myCallRecord.js?v=1.0.0}"></script>
+<script th:src="@{/js/custom/callrecord/simpleAudio.js?v=1.0.0}"></script>
+<script th:src="@{/js/custom/callrecord/myCallRecord.js?v=1.0.1}"></script>
 </html>

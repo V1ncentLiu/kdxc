@@ -259,7 +259,13 @@ function calling(type,token) {//通话状态
 
 //天润 接通
 function callingTrState(token){
-	$("#outboundCallStartTime").val(token.stateStartTime);
+	
+	var callSource = sessionStorage.getItem("callSource");
+	if(callSource==='1'){//首页头部外呼
+		$("#outboundCallStartTime").val(token.stateStartTime);
+	}
+	
+	
 }
 
 function idleState() {//置闲状态

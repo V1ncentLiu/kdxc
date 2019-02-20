@@ -26,7 +26,7 @@ var myCallRecordVm = new Vue({
         searchForm:{
         	startTime:'',
         	endTime:'',
-        	accountName:'',
+        	accoutName:'',
       
         }
     },

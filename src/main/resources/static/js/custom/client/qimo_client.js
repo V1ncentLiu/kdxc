@@ -219,7 +219,7 @@ var clientVm = new Vue({
              for(var i=0;i<rows.length;i++){
                  var curRow = rows[i];
                  rowIds.push(curRow.id);
-                 rowNames.push("["+curRow.clientNo+"]");
+                 rowNames.push("【"+curRow.clientNo+"】");
              }
              var clientNos = rowNames.join(" ");
              

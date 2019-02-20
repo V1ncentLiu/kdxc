@@ -119,7 +119,7 @@ var fieldMenuVM = new Vue({
                    for(var i=0;i<rows.length;i++){
                 	   var curRow = rows[i];
                        rowIds.push(curRow.id);
-                       rowNames.push("["+curRow.menuName+"]");
+                       rowNames.push("【"+curRow.menuName+"】");
                    }
                    
                    
