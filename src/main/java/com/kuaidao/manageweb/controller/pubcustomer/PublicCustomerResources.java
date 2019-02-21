@@ -76,6 +76,9 @@ public class PublicCustomerResources {
     @PostMapping("/allocationResource")
     @ResponseBody
     public JSONResult<Boolean>   allocationResource(@RequestBody PublicCustomerResourcesReqDTO dto){
+        Long id = CommUtil.getCurLoginUser().getId();
+        dto.setUpdateTime(new Date());
+        dto.setUpdateUserId(id);
         return publicCustomerFeignClient.allocationResource(dto);
     }
 
@@ -87,6 +90,9 @@ public class PublicCustomerResources {
     @PostMapping("/transferOfResource")
     @ResponseBody
     public JSONResult<Boolean>   transferOfResource(@RequestBody PublicCustomerResourcesReqDTO dto){
+        Long id = CommUtil.getCurLoginUser().getId();
+        dto.setUpdateTime(new Date());
+        dto.setUpdateUserId(id);
         return publicCustomerFeignClient.transferOfResource(dto);
     }
 
@@ -105,6 +111,9 @@ public class PublicCustomerResources {
     @PostMapping("/resourceReduction")
     @ResponseBody
     public JSONResult<Boolean> resourceReduction(@RequestBody PublicCustomerResourcesReqDTO dto){
+        Long id = CommUtil.getCurLoginUser().getId();
+        dto.setUpdateTime(new Date());
+        dto.setUpdateUserId(id);
         return publicCustomerFeignClient.resourceReduction(dto);
     }
     /**
