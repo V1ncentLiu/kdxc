@@ -219,6 +219,33 @@ public class UserController {
     }
 
     /**
+     * 启用禁用
+     * 
+     * @param orgDTO
+     * @return
+     */
+    @PostMapping("/updateStatus")
+    @ResponseBody
+    @RequiresPermissions("sys:userManager:edit")
+    @LogRecord(description = "启用禁用", operationType = OperationType.ENABLE,
+            menuName = MenuEnum.USER_MANAGEMENT)
+    public JSONResult updateStatus(@Valid @RequestBody UserInfoReq userInfoReq,
+            BindingResult result) {
+
+        if (result.hasErrors()) {
+            return CommonUtil.validateParam(result);
+        }
+
+        Long id = userInfoReq.getId();
+        if (id == null) {
+            return new JSONResult().fail(SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getCode(),
+                    SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getMessage());
+        }
+
+        return userInfoFeignClient.update(userInfoReq);
+    }
+
+    /**
      * 修改密码
      * 
      * @param orgDTO
@@ -342,14 +369,14 @@ public class UserController {
         }
         return null;
     }
-    
-    
+
+
     /**
-     * 根据状态列表或用户名称查询 用户  精确匹配
+     * 根据状态列表或用户名称查询 用户 精确匹配
      */
     @PostMapping("/listUserInfoByParam")
     @ResponseBody
-    public  JSONResult<List<UserInfoDTO>> listUserInfoByParam() {
+    public JSONResult<List<UserInfoDTO>> listUserInfoByParam() {
         UserInfoParamListReqDTO reqDTO = new UserInfoParamListReqDTO();
         List<Integer> statusList = new ArrayList<Integer>();
         statusList.add(SysConstant.USER_STATUS_ENABLE);

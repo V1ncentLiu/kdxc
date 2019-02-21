@@ -73,17 +73,19 @@
                     <div class="title">请输入下面的图形验证码</div>
                     <div class="codeImgBox"><img id="codeImg" @click="toCodeImg" src="images/code.jpg"></div>
                     <div class="whiteIptBox">
+                    	<el-form-item  prop="imgcodeInput">
                         <el-input v-model="loginForm.imgcodeInput" placeholder="输入图形验证码"></el-input>
+                        </el-form-item>
                     </div>
                     <div class="tip" id="codeImgMsg" style="display: none">请输入正确的验证码</div>
-                    <el-button type="primary" class="blueSubmitBtn" @click="sendCode('loginForm');">提&nbsp;&nbsp;交</el-button>
+                    <el-button type="primary" class="blueSubmitBtn" @click="sendCode('loginForm','3');">提&nbsp;&nbsp;交</el-button>
                 </div>
             </el-form>
             <!-- 下线通知 移除hideBox则显示-->   
             <div id="logoutBoxDiv" class="logoutBox f-dn">
                 <div class="box">
                     <div class="title">下线通知</div>
-                    <div class="cnt">您的账户在另一设备登录，您被迫下线。如不是本人操作，您的密码可能已经泄漏，建议您<a href="" @click="resetLogin('1')">修改密码</a></div>
+                    <div class="cnt">您的账户在另一设备登录，您被迫下线。如不是本人操作，您的密码可能已经泄漏，建议您<el-button class="msgBtn" type="submit" id="msgHref" :disabled="isDisabled" @click="resetLogin('1')">修改密码</el-button></div>
                     <el-button type="primary" class="blueSubmitBtn floatLeft"  @click="resetLogin()">重新登录</el-button>
                     <el-button type="primary" class="blueSubmitBtn floatRight" @click="resetLogin()">确定</el-button>
                 </div>                  
@@ -153,19 +155,26 @@ var vm =  new Vue({
                       
                    }, trigger: 'change'}
                 ],
+                imgcodeInput: [
+                  { required: true, message: '验证码不能为空', trigger: 'change' }
+                ]
               },         
         },
         
         methods: {
         	submitForm(formName) {
-       	        this.$refs[formName].validate((valid) => {
+        		  var valid=true;
+	       	  	  this.$refs[formName].validateField(["nameInput","pswInput","codeInput"],(error) => {
+	    	        if (error) {
+	    	    	  valid=false;
+	       	        }
+  	              });
        	          if (valid) {
     	             var formData = vm.loginForm;
     	             var param={};
     	             param.username= formData.nameInput;
     	             param.password = formData.pswInput;
     	             param.code = formData.codeInput;
-    	             param.isUpdatePassword = formData.isUpdatePassword;
     	             console.info(param);
     	             
     	            axios.post("/login/index", param)
@@ -177,7 +186,12 @@ var vm =  new Vue({
     	            		$("#errorSpan").show();
     	            	}else{
     	                	vm.$message('登录成功');
-    	                	document.location.href='/homePage/index';
+    	                	var isUpdatePassword=vm.loginForm.isUpdatePassword;
+    	                	if(isUpdatePassword=="1"){
+	    	                	document.location.href='/homePage/index?isUpdatePassword=1';
+    	                	}else{
+	    	                	document.location.href='/homePage/index';
+    	                	}
     	            	}
     	            })
     	            .catch(function (error) {
@@ -188,17 +202,22 @@ var vm =  new Vue({
        	        	console.log('数据未通过校验！');
        	            return false;
        	          }
-       	        });
        	      },
        	   	  sendCode(formName,type) {
        	    	  var valid=true;
-	       	  	this.$refs[formName].validateField(["nameInput","pswInput"],(error) => {
+       	    	  var fieldName=[];
+       	    	  if(type=='3'){
+       	    	     fieldName=["nameInput","pswInput","imgcodeInput"];
+       	    	  }else{
+       	    	     fieldName=["nameInput","pswInput"];
+       	    	  }
+	       	  	this.$refs[formName].validateField(fieldName,(error) => {
 	    	      if (error) {
 	    	    	  valid=false;
 	       	      }
    	            });
 	       	 	if (valid) {              
-	 	          if(type){
+	 	          if(type!='3'){
   	    				disType=type;
   	    			}
 	    		    var code = $("#imgcodeInput").val();
