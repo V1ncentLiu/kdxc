@@ -68,6 +68,9 @@ public class InvalidCustomerResources {
     @PostMapping("/resourceReduction")
     @ResponseBody
     public JSONResult<Boolean> resourceReduction(@RequestBody PublicCustomerResourcesReqDTO dto){
+        Long id = CommUtil.getCurLoginUser().getId();
+        dto.setUpdateTime(new Date());
+        dto.setUpdateUserId(id);
         return invalidCustomerFeignClient.resourceReduction(dto);
     }
 
