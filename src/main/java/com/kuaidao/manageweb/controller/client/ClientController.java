@@ -696,7 +696,7 @@ public class ClientController {
         Long accountId = curLoginUser.getId();
         Map<String, Object> paramMap = new HashMap<>();
         paramMap.put("bindPhone",bindPhone);
-        paramMap.put("accountId",accountId);
+        paramMap.put("accountId",accountId+"");
         String keyString = RedisConstant.CLIENT_USER_PREFIX+cnoPrefix+clientLoginRecord.getCno();
         //redisTemplate.opsForHash().putAll(keyString,paramMap);
         redisTemplate.opsForValue().set(keyString, paramMap, 7, TimeUnit.DAYS);

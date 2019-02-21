@@ -564,7 +564,7 @@ public class LoginController {
         if (subject.isAuthenticated()) {
             subject.logout();
         }
-        if (!"1".equals(type)) {
+        if (user != null && !"1".equals(type)) {
             // 退出成功，保存退出状态
             UserInfoReq update = new UserInfoReq();
             update.setId(user.getId());

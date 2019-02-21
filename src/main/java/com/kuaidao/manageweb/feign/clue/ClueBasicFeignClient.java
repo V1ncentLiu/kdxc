@@ -13,6 +13,8 @@ import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
 
+import java.util.List;
+
 /**
  * 待分配新资源
  * 
@@ -72,7 +74,13 @@ public interface ClueBasicFeignClient {
     @PostMapping("/ceoDistributionClue")
     public JSONResult<String> ceoDistributionClue(@RequestBody AllocationClueReq allocationClueReq);
 
-
+    /**
+     * 通过CusName模糊查询获取ClueIds
+     * @param cusName
+     * @return
+     */
+    @PostMapping("/queryClueIdsByCusName")
+    public JSONResult<List<Long>> queryClueIdsByCusName(@RequestBody String cusName);
 
     @Component
     static class HystrixClientFallback implements ClueBasicFeignClient {
@@ -115,6 +123,10 @@ public interface ClueBasicFeignClient {
             return fallBackError("副总分发");
         }
 
+        @Override
+        public JSONResult<List<Long>> queryClueIdsByCusName(String cusName) {
+            return fallBackError("通过客户姓名模糊查询获取clueIds");
+        }
 
 
     }

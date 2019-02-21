@@ -21,8 +21,6 @@ import com.kuaidao.aggregation.dto.clue.ClueAppiontmentDTO;
 import com.kuaidao.aggregation.dto.clue.ClueAppiontmentPageParam;
 import com.kuaidao.aggregation.dto.clue.ClueAppiontmentReq;
 import com.kuaidao.aggregation.dto.clue.ClueRepeatPhoneDTO;
-import com.kuaidao.aggregation.dto.project.CompanyInfoDTO;
-import com.kuaidao.aggregation.dto.project.CompanyInfoPageParam;
 import com.kuaidao.aggregation.dto.project.ProjectInfoDTO;
 import com.kuaidao.aggregation.dto.project.ProjectInfoPageParam;
 import com.kuaidao.common.constant.OrgTypeConstant;
@@ -98,17 +96,7 @@ public class AppiontmentController {
         JSONResult<List<ProjectInfoDTO>> listNoPage =
                 projectInfoFeignClient.listNoPage(new ProjectInfoPageParam());
         request.setAttribute("projectList", listNoPage.getData());
-        // 查询公司
 
-        JSONResult<List<CompanyInfoDTO>> CompanylistNoPage =
-                companyInfoFeignClient.listNoPage(new CompanyInfoPageParam());
-        request.setAttribute("companyList", CompanylistNoPage.getData());
-        // 查询商务总监
-        UserOrgRoleReq userOrgRoleReq = new UserOrgRoleReq();
-        userOrgRoleReq.setRoleCode(RoleCodeEnum.SWZJ.name());
-        JSONResult<List<UserInfoDTO>> listByOrgAndRole =
-                userInfoFeignClient.listByOrgAndRole(userOrgRoleReq);
-        request.setAttribute("busDirectorList", listByOrgAndRole.getData());
         return "clue/appiontmentManagerPage";
     }
 
