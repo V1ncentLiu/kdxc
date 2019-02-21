@@ -61,7 +61,7 @@
                         <el-form-item label="性别：" :label-width="formLabelWidth">
                            <el-select v-model="form.customerSex" placeholder="请选择" style="width: 100%;">
                                 <el-option
-                                    v-for="item in statusOptions"
+                                    v-for="item in optsex"
                                     :key="item.value"
                                     :label="item.label"
                                     :value="item.value">
@@ -81,9 +81,9 @@
                         <el-form-item label="餐饮经验：" :label-width="formLabelWidth">
                            <el-select v-model="form.experience" placeholder="请选择" style="width: 100%;">
                                 <el-option
-                                    v-for="item in statusOptions"
+                                    v-for="item in CateringExperienceArr"
                                     :key="item.value"
-                                    :label="item.label"
+                                    :label="item.name"
                                     :value="item.value">
                                 </el-option>
                             </el-select>
@@ -100,9 +100,9 @@
                         <el-form-item label="职业：" :label-width="formLabelWidth">
                            <el-select v-model="form.customerJob" placeholder="请选择" style="width: 100%;">
                                 <el-option
-                                    v-for="item in statusOptions"
+                                    v-for="item in occupationArr"
                                     :key="item.value"
-                                    :label="item.label"
+                                    :label="item.name"
                                     :value="item.value">
                                 </el-option>
                             </el-select>
@@ -112,9 +112,9 @@
                         <el-form-item label="合伙人：" :label-width="formLabelWidth">
                            <el-select v-model="form.customerPartner" placeholder="请选择" style="width: 100%;">
                                 <el-option
-                                    v-for="item in statusOptions"
+                                    v-for="item in partnerArr"
                                     :key="item.value"
-                                    :label="item.label"
+                                    :label="item.name"
                                     :value="item.value">
                                 </el-option>
                             </el-select>
@@ -126,9 +126,9 @@
                         <el-form-item label="选址情况：" :label-width="formLabelWidth">
                            <el-select v-model="form.address" placeholder="请选择" style="width: 100%;">
                                 <el-option
-                                    v-for="item in statusOptions"
+                                    v-for="item in optionAddressArr"
                                     :key="item.value"
-                                    :label="item.label"
+                                    :label="item.name"
                                     :value="item.value">
                                 </el-option>
                             </el-select>
@@ -152,9 +152,9 @@
                         <el-form-item label="客户级别：" :label-width="formLabelWidth">
                            <el-select v-model="form.customerLevel" placeholder="请选择" style="width: 100%;">
                                 <el-option
-                                    v-for="item in statusOptions"
+                                    v-for="item in customerLevelArr"
                                     :key="item.value"
-                                    :label="item.label"
+                                    :label="item.name"
                                     :value="item.value">
                                 </el-option>
                             </el-select>
@@ -174,9 +174,9 @@
                         <el-form-item label="投资金额：" :label-width="formLabelWidth">
                            <el-select v-model="form.money" placeholder="请选择" style="width: 100%;">
                                 <el-option
-                                    v-for="item in statusOptions"
+                                    v-for="item in ussmArr"
                                     :key="item.value"
-                                    :label="item.label"
+                                    :label="item.name"
                                     :value="item.value">
                                 </el-option>
                             </el-select>
@@ -186,9 +186,9 @@
                         <el-form-item label="店面大小：" :label-width="formLabelWidth">
                            <el-select v-model="form.area" placeholder="请选择" style="width: 100%;">
                                 <el-option
-                                    v-for="item in statusOptions"
+                                    v-for="item in StorefrontAreaArr"
                                     :key="item.value"
-                                    :label="item.label"
+                                    :label="item.name"
                                     :value="item.value">
                                 </el-option>
                             </el-select>
@@ -200,9 +200,9 @@
                         <el-form-item label="意向品类：" :label-width="formLabelWidth">
                            <el-select v-model="form.intentionCategory" placeholder="请选择" style="width: 100%;">
                                 <el-option
-                                    v-for="item in statusOptions"
+                                    v-for="item in IntentionalCategoryArr"
                                     :key="item.value"
-                                    :label="item.label"
+                                    :label="item.name"
                                     :value="item.value">
                                 </el-option>
                             </el-select>
@@ -210,16 +210,16 @@
                     </el-col>
                     <el-col :span="16">
                         <el-form-item label="意向项目：" :label-width="formLabelWidth">
-                            <el-radio v-model="radioProject" label="1">内部项目</el-radio>
+                            <el-radio v-model="form.radioProject" label="1">内部项目</el-radio>
                             <el-select v-model="form.insideProject" placeholder="请选择">
                                 <el-option
-                                    v-for="item in statusOptions"
-                                    :key="item.value"
-                                    :label="item.label"
-                                    :value="item.value">
+                                    v-for="item in proSelect"
+                                    :key="item.id"
+                                    :label="item.projectName"
+                                    :value="item.id">
                                 </el-option>
                             </el-select>
-                            <el-radio v-model="radioProject" label="2">外部项目</el-radio>
+                            <el-radio v-model="form.radioProject" label="2">外部项目</el-radio>
                             <el-input v-model="form.outsideProject" autocomplete="off" style="width: 25%;"></el-input>
                         </el-form-item>
                     </el-col>
@@ -227,32 +227,32 @@
                 <el-row>
                     <el-col :span="24">
                         <el-form-item label="省：" :label-width="formLabelWidth" style="width: 33.3%;float: left;">
-                           <el-select v-model="form.province" placeholder="请选择" style="width: 100%;">
+                           <el-select v-model="form.province" placeholder="请选择" style="width: 100%;"  @change="currentProvince">
                                 <el-option
-                                    v-for="item in statusOptions"
-                                    :key="item.value"
-                                    :label="item.label"
-                                    :value="item.value">
+                                    v-for="item in provinceArr"
+                                    :key="item.name"
+                                    :label="item.name"
+                                    :value="item.name">
                                 </el-option>
                             </el-select>
                         </el-form-item>
                         <el-form-item label="市：" :label-width="formLabelWidth" style="width: 33.3%;float: left;">
-                           <el-select v-model="form.city" placeholder="请选择" style="width: 100%;">
+                           <el-select v-model="form.city" placeholder="请选择" style="width: 100%;" @change="currentCity">
                                 <el-option
-                                    v-for="item in statusOptions"
-                                    :key="item.value"
-                                    :label="item.label"
-                                    :value="item.value">
+                                    v-for="item in cityArr"
+                                    :key="item.name"
+                                    :label="item.name"
+                                    :value="item.name">
                                 </el-option>
                             </el-select>
                         </el-form-item>
                         <el-form-item label="区县：" :label-width="formLabelWidth" style="width: 33.3%;float: left;">
                            <el-select v-model="form.district" placeholder="请选择" style="width: 100%;">
                                 <el-option
-                                    v-for="item in statusOptions"
-                                    :key="item.value"
-                                    :label="item.label"
-                                    :value="item.value">
+                                    v-for="item in districtArr"
+                                    :key="item.name"
+                                    :label="item.name"
+                                    :value="item.name">
                                 </el-option>
                             </el-select>
                         </el-form-item>
@@ -349,13 +349,14 @@
                         border
                         @selection-change="handleSelectionChange"
                      >
-                        <el-table-column
+                        <el-table-column 
+                          prop="id"
                           type="selection"
                           width="55"
                           align="center">
                         </el-table-column>
                         <el-table-column
-                          prop="dialingTime"
+                          prop="callTime"
                           label="拨打时间"
                           align="center">
                         </el-table-column>
@@ -365,89 +366,87 @@
                           align="center">
                         </el-table-column>
                         <el-table-column
-                          prop="dialing"
+                          prop="isCall"
                           label="是否接通"
                           align="center">
                         </el-table-column>
                         <el-table-column
-                          prop="resourceAvailability"
+                          prop="resourceStatus"
                           label="资源有效性"
                           align="center">
                         </el-table-column>
                         <el-table-column
-                          prop="customerfocus"
+                          prop="focusPoint"
                           label="客户关注点"
                           align="center">
                         </el-table-column>
                         <el-table-column
-                          prop="visited"
+                          prop="visitStatus"
                           label="是否继续回访"
                           align="center">
                         </el-table-column>
                         <el-table-column
-                          prop="visitedNextTime"
+                          prop="nextVisitTime"
                           label="下次回访时间"
                           align="center">
                         </el-table-column>
                         <el-table-column
-                          prop="creater"
+                          prop="createUserName"
                           label="创建人"
                           align="center">
                         </el-table-column>
+                          <el-table-column label="操作" >
+                           <template slot-scope="scope">
+                               <el-button type="primary" size="mini"  @click="onConfirmAdd(scope.$index, scope.row)">确认添加</el-button>
+							</template>
+					    </el-table-column>
                         <div slot="append" v-show="lineFormShow">
                           <el-form :inline="true" :model="formInline" class="demo-form-inline">
                             <el-row class="paddingL55">
                                   <el-date-picker
-                                    v-model="dialingTime"
+                                    v-model="formInline.callTime1"
                                     type="datetime"
                                     size="mini"
                                     placeholder="选择日期时间">
                                   </el-date-picker>
                                   <el-form-item label="" size="mini">
-                                    <el-select v-model="formInline.region" placeholder="客户状态">
-                                      <el-option label="未建立联系" value="shanghai"></el-option>
-                                      <el-option label="建立联系-无意向" value="beijing1"></el-option>
-                                      <el-option label="建立联系-不可转化" value="beijing2"></el-option>
-                                      <el-option label="建立联系-可转化" value="beijing3"></el-option>
-                                      <el-option label="建立联系-可追踪" value="beijing4"></el-option>
-                                      <el-option label="建立联系-可邀约" value="beijing5"></el-option>
-                                      <el-option label="建立联系-邀约" value="beijing6"></el-option>
-                                      <el-option label="建立联系-来访" value="beijing7"></el-option>
-                                      <el-option label="建立联系-签约" value="beijing8"></el-option>
-                                      <el-option label="建立联系-退款" value="beijing9"></el-option>
+                                    <el-select v-model="formInline.customerStatus" placeholder="客户状态">
+                                     <el-option
+				                        v-for="item in cusStatusArr"
+				                        :key="item.value"
+				                        :label="item.name"
+				                        :value="item.value">
+				                    </el-option>
                                     </el-select>
                                   </el-form-item>
                                   <el-form-item label="" size="mini">
-                                    <el-select v-model="formInline.region" placeholder="是否接通">
-                                      <el-option label="是" value="shanghai"></el-option>
-                                      <el-option label="否" value="beijing"></el-option>
+                                    <el-select v-model="formInline.isCall" placeholder="是否接通">
+                                      <el-option label="是" value="1"></el-option>
+                                      <el-option label="否" value="0"></el-option>
                                     </el-select>
                                   </el-form-item>
                                   <el-form-item label="" size="mini">
-                                    <el-select v-model="formInline.region" placeholder="无效资源">
-                                      <el-option label="无效资源" value="shanghai"></el-option>
-                                      <el-option label="有效资源" value="beijing"></el-option>
+                                    <el-select v-model="formInline.resourceStatus" placeholder="无效资源">
+                                      <el-option label="无效资源" value="0"></el-option>
+                                      <el-option label="有效资源" value="1"></el-option>
                                     </el-select>
                                   </el-form-item>
                                   <el-form-item label="" size="mini">
-                                    <el-input v-model="formInline.user" size="mini" placeholder="客户关注点"></el-input>
+                                    <el-input v-model="formInline.focusPoint" size="mini" placeholder="客户关注点"></el-input>
                                   </el-form-item>
                                   <el-form-item label="" size="mini">
-                                    <el-select v-model="formInline.region" placeholder="是否继续回访">
-                                      <el-option label="区域一" value="shanghai"></el-option>
-                                      <el-option label="区域二" value="beijing"></el-option>
+                                    <el-select v-model="formInline.visitStatus" placeholder="是否继续回访">
+                                      <el-option label="是" value="1"></el-option>
+                                      <el-option label="否" value="0"></el-option>
                                     </el-select>
                                   </el-form-item>
                                   <el-date-picker
-                                    v-model="dialingTime"
+                                    v-model="formInline.nextVisitTime"
                                     type="datetime"
                                     format="yyyy-MM-dd HH:mm"
                                     size="mini"
                                     placeholder="选择日期时间">
                                   </el-date-picker>
-                                  <el-form-item  class="lineInherit">
-                                    <el-button type="primary" size="mini" @click="onConfirmAdd">确认添加</el-button>
-                                  </el-form-item>
                             </el-row>
                           </el-form>
                         </div>
@@ -459,89 +458,48 @@
                 <el-row>
                     <el-col :span="8">
                         <el-form-item label="资源类型：" :label-width="formLabelWidth">
-                            <el-select v-model="form.resource" placeholder="请选择" style="width: 100%;">
-                                <el-option
-                                    v-for="item in statusOptions"
-                                    :key="item.value"
-                                    :label="item.label"
-                                    :value="item.value">
-                                </el-option>
-                            </el-select>
+                            <el-button type="text" disabled>{{clueBase.typeName}}</el-button>
                         </el-form-item>
                     </el-col>
                     <el-col :span="8">
                         <el-form-item label="资源类别：" :label-width="formLabelWidth">
-                            <el-select v-model="form.resourceType" placeholder="请选择" style="width: 100%;">
-                                <el-option
-                                    v-for="item in statusOptions"
-                                    :key="item.value"
-                                    :label="item.label"
-                                    :value="item.value">
-                                </el-option>
-                            </el-select>
+                            <el-button type="text" disabled>{{clueBase.categoryName}}</el-button>
                         </el-form-item>
                     </el-col>
                 </el-row>
                 <el-row>
                     <el-col :span="8">
                         <el-form-item label="广告位：" :label-width="formLabelWidth">
-                            <el-select v-model="form.adPosition" placeholder="请选择" style="width: 100%;">
-                                <el-option
-                                    v-for="item in statusOptions"
-                                    :key="item.value"
-                                    :label="item.label"
-                                    :value="item.value">
-                                </el-option>
-                            </el-select>
+                            <el-button type="text" disabled>{{clueBase.sourceTypeName}}</el-button>
                         </el-form-item>
                     </el-col>
                     <el-col :span="8">
                         <el-form-item label="媒介：" :label-width="formLabelWidth">
-                            <el-select v-model="form.media" placeholder="请选择" style="width: 100%;">
-                                <el-option
-                                    v-for="item in statusOptions"
-                                    :key="item.value"
-                                    :label="item.label"
-                                    :value="item.value">
-                                </el-option>
-                            </el-select>
+                            <el-button type="text" disabled>{{clueBase.sourceTypeName}}</el-button>
                         </el-form-item>
                     </el-col>
                 </el-row>
                 <el-row>
                     <el-col :span="8">
                         <el-form-item label="搜索词：" :label-width="formLabelWidth">
-                           <el-input v-model="form.searchWord" autocomplete="off" maxlength="50"></el-input>
+                           <el-button type="text" disabled>{{clueBase.searchWord}}</el-button>
                         </el-form-item>
                     </el-col>
                     <el-col :span="8">
                         <el-form-item label="资源项目：" :label-width="formLabelWidth">
-                            <el-select v-model="form.project" placeholder="请选择" style="width: 100%;">
-                                <el-option
-                                    v-for="item in statusOptions"
-                                    :key="item.value"
-                                    :label="item.label"
-                                    :value="item.value">
-                                </el-option>
-                            </el-select>
+                            <el-button type="text" disabled>{{clueBase.projectName}}</el-button>
                         </el-form-item>
                     </el-col>
                 </el-row>
                 <el-row>
                     <el-col :span="8">
                         <el-form-item label="留言时间：" :label-width="formLabelWidth">
-                            <!-- <el-input v-model="form.feedbackTime" autocomplete="off"></el-input> -->
-                            <el-date-picker
-                                style="width: 100%;"
-                                v-model="form.feedbackTime"
-                                type="datetime"
-                                placeholder="选择日期时间">
-                            </el-date-picker>
+                            <el-button type="text" disabled>{{clueBase.messageTime}}</el-button>
                         </el-form-item>
                     </el-col>
                     <el-col :span="8">
                         <el-form-item label="留言重点：" :label-width="formLabelWidth">
-                            <el-input v-model="form.feedbackPoint" autocomplete="off" maxLength="100"></el-input>
+                            <el-button type="text" disabled>{{clueBase.messagePoint}}</el-button>
                         </el-form-item>
                     </el-col>
                 </el-row>
@@ -579,7 +537,7 @@
                           align="center">
                         </el-table-column>
                         <el-table-column
-                          prop="callTime"
+                          prop="callTime1"
                           label="拨打时间"
                           align="center">
                         </el-table-column>
@@ -656,7 +614,7 @@
             <div class="padding20 f-tac">            
                 <el-button type="primary" @click="submitForm('form')">提交客户资源</el-button>
                 <el-button type="primary" @click="inviteCustomer">邀约来访</el-button>
-                <el-button>取 消</el-button>
+                <el-button @click="rebackClue">取 消</el-button>
             </div> 
         </el-form> 
     </el-row>
@@ -689,6 +647,10 @@
  <div th:include="_footer_include :: #jsLib"></div>
 <script th:inline="javascript" >
 var clueId=[[${clueId}]];//线索ID
+var customer=[[${customer}]];//客户信息
+var base=[[${base}]];//资源基本信息
+var intention=[[${intention}]];//资源投资意向信息
+var proSelect=[[${proSelect}]];//项目
  var addCustomerVM=   new Vue({
         el: '#addCustomer',
         data: function() {
@@ -698,42 +660,53 @@ var clueId=[[${clueId}]];//线索ID
                 dialogFormVisible: false,
                 dialogFormImg:false,
                 form: {                    
-                    resource:'',
-                    resourceType:'',
-                    adPosition:'',
-                    media:'',
-                    searchWord:'',
-                    project:'',
-                    feedbackTime:'',
-                    feedbackPoint:'',
-                    customerName:'',
+                    customerName:customer.cusName,
                     customerPhone:'',
-                    customerSex:'',
-                    ishasWx:'',
-                    experience:'',
-                    customerAge:'',
-                    customerJob:'',
-                    customerPartner:'',
-                    address:'',
-                    urgency:'',
-                    customerLevel:'',
-                    qq:'',
-                    money:'',
-                    area:'',
-                    intentionCategory:'',
-                    insideProject:'',
-                    outsideProject:'',
-                    province:'',
-                    city:'',
-                    district:''
+                    customerSex:customer.sex+"",
+                    ishasWx:customer.wechat,
+                    experience:customer.hasExperience+"",
+                    customerAge:customer.age,
+                    customerJob:customer.profession+"",
+                    customerPartner:customer.partnerType+"",
+                    address:customer.hasAddress+"",
+                    urgency:customer.urgentDate,
+                    customerLevel:customer.cusLevel+"",
+                    qq:customer.qq,
+                    money:intention.advanceAmount+"",
+                    area:intention.area+"",
+                    intentionCategory:intention.purType+"",
+                    radioProject:intention.purProjectType+"",
+                    insideProject:intention.purInProject+"",
+                    outsideProject:intention.purOutProject,
+                    province:intention.province,
+                    city:intention.city,
+                    district:intention.district,
+                   
                 },
+                clueBase:base,
+                categoryArr:[],
+                typeArr:[],
+                mediumArry:[],
+                adsenseArr:[],
+                CateringExperienceArr:[],
+                occupationArr:[],
+                partnerArr:[],
+                optionAddressArr:[],
+                customerLevelArr:[],
+                IntentionalCategoryArr:[],
+                ussmArr:[],
+                StorefrontAreaArr:[],
+                provinceArr:[],
+                cityArr:[],
+                districtArr:[],
+                proSelect:proSelect,
                 formLabelWidth: '120px',
                 rules:{
                     customerName: [
                         { required: true, message: '客户姓名不能为空', trigger: 'blur' }
                     ],
                     customerPhone: [
-                        { required: true, message: '手机号不能为空', trigger: 'blur' },
+                        /* { required: true, message: '手机号不能为空', trigger: 'blur' },
                         { validator:function(rule,value,callback){                 
                             if(/^[0-9]*$/.test(value) == false){
                                callback(new Error("请输入数字"));
@@ -741,7 +714,7 @@ var clueId=[[${clueId}]];//线索ID
                                callback();
                             } 
                             callback();
-                        }, trigger: 'blur'}
+                        }, trigger: 'blur'} */
                     ]
                 },
                 statusOptions: [{
@@ -750,6 +723,13 @@ var clueId=[[${clueId}]];//线索ID
                 }, {
                     value: '1',
                     label: '电销列表'
+                }],
+                optsex: [{
+                    value: '1',
+                    label: '男'
+                }, {
+                    value: '2',
+                    label: '女'
                 }],
                 options1: [{
                     value: '0',
@@ -768,6 +748,7 @@ var clueId=[[${clueId}]];//线索ID
                 },
                 multipleSelection:[],//上传资料
                 fileList: [],
+                cusStatusArr:[],
                 tableDataC1: [{
                     userName: '王小虎',
                     date: '2019-05-03',
@@ -788,22 +769,12 @@ var clueId=[[${clueId}]];//线索ID
                   user: '',
                   region: ''
                 },
-                tableDataC2: [{  
-                    dialingTime:'2019-2-18',
-                    customerStatus: '跟进记录1',
-                    dialing:'跟进记录2',
-                    resourceAvailability:'跟进记录3',
-                    customerfocus:'跟进记录4',
-                    visited:'跟进记录5',
-                    visitedNextTime:'跟进记录6',
-                    creater:'跟进记录7'
-                }
-                ],
+                tableDataC2: [],
                 tableDataC3: [{  //通话记录
                     name:'通话记录1',
                     role:'通话记录2',
                     callType:'外呼',
-                    callTime:'通话记录3',
+                    callTime1:'通话记录3',
                     connectSituation:'通话记录4',
                     connectTime:'通话记录5',
                     operate:'查看1',
@@ -835,12 +806,92 @@ var clueId=[[${clueId}]];//线索ID
             submitForm(form) {
                 this.$refs[form].validate((valid) => {
                     if (valid) {
-                        alert('submit!');
+                       //----客户基本信息---//
+                 	    var  clueCustomer={};
+                      	 //客户姓名
+                    	var  customerName=this.form.customerName;
+                    	clueCustomer.cusName=customerName;
+                   	    //手机号
+                    	var  customerPhone=this.form.customerPhone;
+                    	clueCustomer.phone=customerPhone;
+                   	    //性别
+                    	var customerSex=this.form.customerSex;
+                    	clueCustomer.sex=customerSex;
+                	    //微信
+                    	var  ishasWx=this.form.ishasWx;
+                    	clueCustomer.wechat=ishasWx;
+                	    //餐饮经验
+                    	var experience=this.form.experience;
+                    	clueCustomer.hasExperience=experience;
+                	    //年龄
+                    	var customerAge=this.form.customerAge;
+                    	clueCustomer.age=customerAge;
+                	    //职业
+                    	var customerJob=this.form.customerJob;
+                    	clueCustomer.profession=customerJob;
+                	    //合伙人
+                    	var customerPartner=this.form.customerPartner;
+                    	clueCustomer.partnerType=customerPartner;
+                	    //选址情况
+                    	var address=this.form.address;
+                    	clueCustomer.hasAddress=address;
+                	    //开店紧迫性
+                	    var urgency =this.form.urgency;
+                	    clueCustomer.urgentDate=urgency;
+                	    //客户级别
+                	    var customerLevel=this.form.customerLevel;
+                	    clueCustomer.cusLevel=customerLevel;
+                	    //QQ
+                	    var qq=this.form.qq;
+                	    clueCustomer.qq=qq;
+                	    
+                	    //----投资意向---//
+                	    var  clueIntention={};
+                	    //投资金额
+                	    var  money=this.form.money; 
+                	    clueIntention.advanceAmount=money;
+                	    //店面大小
+                	   var  area= this.form.area;
+                	   clueIntention.area=area;
+                	    //意向品类
+                	   var intentionCategory=this.form.intentionCategory;
+                	   clueIntention.purType=intentionCategory;
+                	    //意向项目
+                	    var radioProject= this.form.radioProject;
+                	    clueIntention.purProjectType=radioProject;
+                	    //意向内部项目
+                	    var  insideProject=this.form.insideProject;
+                	    clueIntention.purInProject=insideProject;
+                	    //意向外部项目
+                	    var  outsideProject= this.form.outsideProject;
+                	    clueIntention.purOutProject=outsideProject;
+                	    //省
+                	    var province= this.form.province;
+                	    clueIntention.province=province;
+                	    //市
+                	    var city=this.form.city;
+                	    clueIntention.city=city
+               	         //区县
+                	    var district= this.form.district;
+                	    clueIntention.district=district;
+             	        var clue={};
+             	        clue.clueId=clueId;
+                	    clue.clueCustomer=clueCustomer;
+                	    clue.clueIntention=clueIntention; 
+                        axios.post('/tele/clueMyCustomerInfo/updateCustomerClue',clue)
+                        .then(function (response) {
+                     	  addCustomerVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
+                    		  window.location.href="/tele/clueMyCustomerInfo/initmyCustomer"; 
+    		        	}});
+                      });
                     } else {
                         console.log('error submit!!');
                         return false;
                     }
                 });
+            },
+             rebackClue(){
+            	 window.location.href="/tele/clueMyCustomerInfo/initmyCustomer"; 	
             },
             submitDialogForm(dialogForm) {
                 this.$refs[dialogForm].validate((valid) => {
@@ -886,19 +937,19 @@ var clueId=[[${clueId}]];//线索ID
                 console.log("编辑跟进记录");
                 this.lineFormShow = true;
             },
-            onConfirmAdd() { //确认添加
-                console.log('submit!');
-                this.lineFormShow = false;
-                this.tableDataC2.push({
-                    dialingTime:'2019-2-12',
-                    customerStatus: 'new1',
-                    dialing:'new2',
-                    resourceAvailability:'new3',
-                    customerfocus:'new4',
-                    visited:'new5',
-                    visitedNextTime:'new6',
-                    creater:'new17'
-                });
+            onConfirmAdd(index ,row) { 
+            	debugger;
+             //跟进记录保存
+             var param={};
+             param.clueId=clueId;
+             param.callTime1=row.callTime;
+             param.customerStatus=row.customerStatusName;
+             param.isCall=row.isCall;
+             param.resourceStatus=row.resourceStatus;
+             param.focusPoint=row.focusPoint;
+             param.visitStatus=row.visitStatus;
+             param.nextVisitTime=row.nextVisitTime;
+             
             },
             deteleDialogTip () { //删除提示弹框
                 this.$confirm('确认删除？')
@@ -907,6 +958,23 @@ var clueId=[[${clueId}]];//线索ID
                   })
                   .catch(_ => {});
             }, 
+            currentProvince(selVal){
+            	debugger;
+               var  param={};
+                param.type="1";
+                param.name=selVal;
+                axios.post('/area/sysregion/querySysRegionByParam',param).then(function (response) {  
+                  addCustomerVM.cityArr=response.data.data.data;
+                });  	
+             },
+             currentCity(selVal){
+            	 var param={};
+                 param.type="2";
+                 param.name=selVal;
+                 axios.post('/area/sysregion/querySysRegionByParam',param).then(function (response) {  
+                   addCustomerVM.districtArr=response.data.data.data;
+                 });  	
+              },
             //邀约来访
             inviteCustomer(){
             	 window.location.href="/tele/clueMyCustomerInfo/inviteCustomer?clueId="+clueId; 
@@ -950,8 +1018,8 @@ var clueId=[[${clueId}]];//线索ID
            	 addCustomerVM.categoryArr=response.data.data;
             });
           	 //初始化资源类型数据
-       	 param={};
-       	 param.groupCode="clueType";
+       	   param={};
+       	   param.groupCode="clueType";
            axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {  
              addCustomerVM.typeArr=response.data.data;
             });
@@ -1025,6 +1093,20 @@ var clueId=[[${clueId}]];//线索ID
           axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {  
               addCustomerVM.StorefrontAreaArr=response.data.data;
            });
+         //客户状态 
+          param={};
+          param.groupCode="customerStatus"; 
+          axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {  
+        	  addCustomerVM.cusStatusArr=response.data.data;
+           });
+         //获取省
+          param={};
+          param.type="0";
+          axios.post('/area/sysregion/querySysRegionByParam',param).then(function (response) {  
+       	   addCustomerVM.provinceArr=response.data.data.data;
+          });
+         
+       
     	}
     })
 </script>
