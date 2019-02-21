@@ -144,6 +144,8 @@ public class AccesssLogRecordAop {
                 }
                 logRecord.setRequestURL(request.getRequestURI());
                 logRecord.setRemoteIP(CommonUtil.getIpAddr(request));
+                logRecord.setContent("退出系统失败");
+                logRecord.setRequestParam(logRecord.getRequestParam()+"     "+ExceptionUtils.getStackTrace(throwable));
             }
             asyncInsertLog(logRecord);
             throw throwable;

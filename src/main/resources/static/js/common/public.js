@@ -1,4 +1,11 @@
-function timer(id) {
+/**
+ * 计时
+ * @param id 
+ * @param noticeSecs 时间
+ * @param timeUnit 单位  1：秒 2:分钟
+ * @returns
+ */
+var outboundCallIntervalTimer =  function intervalTimer(id,noticeSecs,timeUnit) {
 	var ele_timer = document.getElementById(id);	
 	var n_sec = 0; //秒
 	var n_min = 0; //分
@@ -17,7 +24,16 @@ function timer(id) {
 		if ( n_hour < 10 ) {
 		str_hour = "0" + n_hour;
 		}
-	 
+		//分钟计时
+		if(timeUnit==2){
+			if(n_min>(noticeSecs/60)){
+				ele_timer.style.color='red';
+			 }else{
+				 ele_timer.style.color='black';
+			 }
+		}
+		
+	  
 		var time = str_hour + "小时" + str_min + "分" + str_sec+"秒";
 		// ele_timer.value = time;
 		ele_timer.innerHTML = time;
