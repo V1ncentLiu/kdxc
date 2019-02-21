@@ -127,6 +127,17 @@ public class AccesssLogRecordAop {
             if ((OperationType.LOGINOUT.toString()).equals(logRecord.getOperationType())) {
                 logRecord.setContent("退出系统失败");
             }
+            if (!(OperationType.LOGIN.toString()).equals(logRecord.getOperationType())) {
+            	UserInfoDTO user =
+                        (UserInfoDTO) SecurityUtils.getSubject().getSession().getAttribute("user");
+                if (user != null) {
+                    logRecord.setUserName(user.getUsername());
+                    logRecord.setName(user.getName());
+                    logRecord.setPhone(user.getPhone());
+                }
+                logRecord.setRequestURL(request.getRequestURI());
+                logRecord.setRemoteIP(CommonUtil.getIpAddr(request));
+            }
             asyncInsertLog(logRecord);
             throw throwable;
         }
