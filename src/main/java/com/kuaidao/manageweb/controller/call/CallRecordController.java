@@ -101,7 +101,7 @@ public class CallRecordController {
     @PostMapping("/listMyCallRecord")
     @ResponseBody
     public JSONResult<Map<String,Object>> listMyCallRecord(@RequestBody CallRecordReqDTO myCallRecordReqDTO) {
-       return callRecordFeign.listMyCallRecord(myCallRecordReqDTO);
+        return callRecordFeign.listMyCallRecord(myCallRecordReqDTO);
     }
     
     /**
@@ -113,7 +113,7 @@ public class CallRecordController {
     @ResponseBody
     public JSONResult<Map<String,Object>> listAllTmCallRecord(@RequestBody CallRecordReqDTO myCallRecordReqDTO) {
       //根据角色查询  下属顾问
-        List<String> accountIdList = myCallRecordReqDTO.getAccountIdList();
+        List<Long> accountIdList = myCallRecordReqDTO.getAccountIdList();
         if(accountIdList==null || accountIdList.size()==0) {
             UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
             Long orgId = curLoginUser.getOrgId();
@@ -135,9 +135,11 @@ public class CallRecordController {
                     if(data==null || data.size()==0) {
                         return new JSONResult().fail(SysErrorCodeEnum.ERR_NOTEXISTS_DATA.getCode(),"该用户下无顾问");
                     }
-                    List<String> idList = data.stream().map(user->user.getId()+"").collect(Collectors.toList());
+                    List<Long> idList = data.stream().map(user->user.getId()).collect(Collectors.toList());
                     myCallRecordReqDTO.setAccountIdList(idList);
                   
+                }else {
+                    return new JSONResult().fail(SysErrorCodeEnum.ERR_NOTEXISTS_DATA.getCode(),"只有电销总监才可以查询");
                 }
                 
             }

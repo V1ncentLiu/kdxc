@@ -131,7 +131,7 @@
         <table-pagination :pager="pager" @change="searchTable"></table-pagination>
     </el-row>
       <!-- dialog -->
-    <el-dialog title="编辑邀约来访" :visible.sync="appiontmentFormVisible"  @close="closeAddCustomFieldDialog" >
+    <el-dialog title="编辑邀约来访" :visible.sync="appiontmentFormVisible"  >
         <el-form :model="appiontmentForm">
             <el-form-item label="地区：" :label-width="formLabelWidth" prop="area">
                 <el-select v-model="appiontmentForm.area" placeholder="请选择" style="width: 70%;" @change="currentBusGroup" >
@@ -163,15 +163,22 @@
                     </el-option>
                 </el-select>
             </el-form-item>
-            <el-form-item label="品尝项目：" :label-width="formLabelWidth" prop="tasteProjectId">
-                <el-select v-model="appiontmentForm.tasteProjectId" multiple placeholder="请选择" style="width: 70%;">
-                    <el-option
-                        v-for="item in projectOptions"
-                        :key="item.id"
-                        :label="item.projectName"
-                        :value="item.id">
-                    </el-option>
-                </el-select>
+            <el-form-item label="品尝项目：" :label-width="formLabelWidth" >
+             	<el-form-item label="">  
+                    <el-select 
+                        v-model="appiontmentForm.tasteProjectId" 
+                        placeholder="品尝项目" 
+                        style="width: 70%;" 
+                        multiple 
+                        >
+                        <el-option
+                            v-for="item in  projectOptions"
+                            :key="item.id"
+                            :label="item.projectName"
+                            :value="item.id">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
             </el-form-item>
             <el-form-item label="预约时间：" :label-width="formLabelWidth" prop="reserveTime">
                 <el-date-picker
@@ -182,7 +189,7 @@
                 </el-date-picker>
             </el-form-item>
             <el-form-item label="备注：" :label-width="formLabelWidth" prop="remark">
-                <el-input type="textarea" :rows="2" v-model="appiontmentForm.remark" style="width: 70%;"></el-input>
+                <el-input type="textarea" :rows="2" v-model="appiontmentForm.remark" maxlength="500" style="width: 70%;"></el-input>
             </el-form-item>
         </el-form>
         <div slot="footer" class="dialog-footer">
@@ -333,13 +340,20 @@ var appiontmentVM = new Vue({
                       return;
                   }
                   var param={id:rows[0].id};
+                  appiontmentVM.appiontmentForm.id= rows[0].id;
                   //根据id获取数据
                   axios.post('/clue/appiontment/getAppiontment',param)
                   .then(function (response) {
                       var data =  response.data;
                       if(data.code=='0'){
-                    	  console.log( data.data);
-                    	  appiontmentVM.appiontmentForm= data.data;
+                    	  appiontmentVM.currentBusGroup(data.data.area);
+                    	  appiontmentVM.currentBusSale(data.data.busCompay);
+                    	  appiontmentVM.appiontmentForm.area= data.data.area;
+                    	  appiontmentVM.appiontmentForm.busCompay= data.data.busCompay;
+                    	  appiontmentVM.appiontmentForm.busDirectorId= data.data.busDirectorId;
+                    	  appiontmentVM.appiontmentForm.reserveTime= data.data.reserveTime;
+                    	  appiontmentVM.appiontmentForm.tasteProjectId= data.data.tasteProjectId.split(",");
+                    	  appiontmentVM.appiontmentForm.remark= data.data.remark;
                       }else{
                       	console.error(data);
                       }
@@ -368,11 +382,6 @@ var appiontmentVM = new Vue({
                		this.$refs[formName].resetFields();
                		}
                	   this.appiontmentFormVisible = false;
-               },
-               closeAddCustomFieldDialog(){//关闭添加自定义字段dialog
-	               	if (this.$refs['customMenuForm']!==undefined) {
-	               		this.$refs['customMenuForm'].resetFields();
-	               	}
                },
              //日期数据格式化方法
                dateFormat(row, column, cellValue, index) {
@@ -420,9 +429,9 @@ var appiontmentVM = new Vue({
                    });
                },
                //查询分公司（商务组）
-               currentBusGroup(){
+               currentBusGroup(seleVal){
                    param={};
-                 	param.parentId=appiontmentVM.appiontmentForm.area;
+                 	param.parentId=seleVal;
                  	param.orgType="2";
                    axios.post('/organization/organization/queryOrgByType',param).then(function (response) {  
                 	   appiontmentVM.busCompayOptions=response.data.data;
@@ -438,12 +447,10 @@ var appiontmentVM = new Vue({
                    });
                },
                saveAppiontment(formName){//保存自定义字段
-                  this.$refs[formName].validate((valid) => {
-                      if (valid) {
                          var param=appiontmentVM.appiontmentForm;
+                         param.tasteProjectId=this.appiontmentForm.tasteProjectId.join(',');
                          var url="/clue/appiontment/updateAppiontment";
-                        axios.post(url, param)
-                        .then(function (response) {
+                        axios.post(url, param).then(function (response) {
                             var resData = response.data;
                             if(resData.code=='0'){
                             	appiontmentVM.cancelForm(formName);
@@ -458,11 +465,6 @@ var appiontmentVM = new Vue({
                         .catch(function (error) {
                              console.log(error);
                         });
-                         
-                      } else {
-                        return false;
-                      }
-                    });
                  },// method end
                  deleteAppiontment() {
               	   var rows = this.multipleSelection;
