@@ -92,12 +92,17 @@
                 <el-row>
                     <el-col :span="8">
                         <el-form-item label="留言时间：" :label-width="formLabelWidth">
-                           <el-input v-model="form.feedbackTime" autocomplete="off"></el-input>
+                         <el-date-picker
+                                style="width: 100%;"
+                                v-model="form.feedbackTime"
+                                type="datetime"
+                                placeholder="选择日期时间">
+                            </el-date-picker>
                         </el-form-item>
                     </el-col>
                     <el-col :span="8">
                         <el-form-item label="留言重点：" :label-width="formLabelWidth">
-                            <el-input v-model="form.feedbackPoint" autocomplete="off"></el-input>
+                            <el-input v-model="form.feedbackPoint" autocomplete="off"  maxLength="100" ></el-input>
                         </el-form-item>
                     </el-col>
                 </el-row>
@@ -123,7 +128,7 @@
                         <el-form-item label="性别：" :label-width="formLabelWidth">
                            <el-select v-model="form.customerSex" placeholder="请选择" style="width: 100%;">
                                 <el-option
-                                    v-for="item in statusOptions"
+                                    v-for="item in optsex"
                                     :key="item.value"
                                     :label="item.label"
                                     :value="item.value">
@@ -198,7 +203,14 @@
                     </el-col>
                     <el-col :span="8">
                         <el-form-item label="开店紧迫性：" :label-width="formLabelWidth">
-                           <el-input v-model="form.urgency" autocomplete="off" style='width: 60%;'></el-input><span style="padding-left: 5px;">之前启动</span>
+                          <span>   
+                           <el-date-picker
+                                style='width: 60%;'
+                                v-model="form.urgency"
+                                type="month"
+                                placeholder="选择月">
+                            </el-date-picker>
+                                                                                          之前启动</span>
                         </el-form-item>
                     </el-col>
                 </el-row>
@@ -229,9 +241,9 @@
                         <el-form-item label="投资金额：" :label-width="formLabelWidth">
                            <el-select v-model="form.money" placeholder="请选择" style="width: 100%;">
                                 <el-option
-                                    v-for="item in statusOptions"
+                                    v-for="item in ussmArr"
                                     :key="item.value"
-                                    :label="item.label"
+                                    :label="item.name"
                                     :value="item.value">
                                 </el-option>
                             </el-select>
@@ -241,9 +253,9 @@
                         <el-form-item label="店面大小：" :label-width="formLabelWidth">
                            <el-select v-model="form.area" placeholder="请选择" style="width: 100%;">
                                 <el-option
-                                    v-for="item in statusOptions"
+                                    v-for="item in StorefrontAreaArr"
                                     :key="item.value"
-                                    :label="item.label"
+                                    :label="item.name"
                                     :value="item.value">
                                 </el-option>
                             </el-select>
@@ -265,16 +277,16 @@
                     </el-col>
                     <el-col :span="16">
                         <el-form-item label="意向项目：" :label-width="formLabelWidth">
-                            <el-radio v-model="radioProject" label="1">内部项目</el-radio>
+                            <el-radio v-model="form.radioProject" label="1">内部项目</el-radio>
                             <el-select v-model="form.insideProject" placeholder="请选择">
                                 <el-option
-                                    v-for="item in statusOptions"
-                                    :key="item.value"
-                                    :label="item.label"
-                                    :value="item.value">
+                                    v-for="item in projectSelect"
+                                    :key="item.id"
+                                    :label="item.projectName"
+                                    :value="item.id">
                                 </el-option>
                             </el-select>
-                            <el-radio v-model="radioProject" label="2">外部项目</el-radio>
+                            <el-radio v-model="form.radioProject" label="2">外部项目</el-radio>
                             <el-input v-model="form.outsideProject" autocomplete="off" style="width: 25%;"></el-input>
                         </el-form-item>
                     </el-col>
@@ -282,32 +294,32 @@
                 <el-row>
                     <el-col :span="24">
                         <el-form-item label="省：" :label-width="formLabelWidth" style="width: 33.3%;float: left;">
-                           <el-select v-model="form.province" placeholder="请选择" style="width: 100%;">
+                           <el-select v-model="form.province" placeholder="请选择" style="width: 100%;"  @change="currentProvince">
                                 <el-option
-                                    v-for="item in statusOptions"
-                                    :key="item.value"
-                                    :label="item.label"
-                                    :value="item.value">
+                                    v-for="item in provinceArr"
+                                    :key="item.name"
+                                    :label="item.name"
+                                    :value="item.name">
                                 </el-option>
                             </el-select>
                         </el-form-item>
                         <el-form-item label="市：" :label-width="formLabelWidth" style="width: 33.3%;float: left;">
-                           <el-select v-model="form.city" placeholder="请选择" style="width: 100%;">
+                           <el-select v-model="form.city" placeholder="请选择" style="width: 100%;" @change="currentCity" >
                                 <el-option
-                                    v-for="item in statusOptions"
-                                    :key="item.value"
-                                    :label="item.label"
-                                    :value="item.value">
+                                    v-for="item in cityArr"
+                                    :key="item.name"
+                                    :label="item.name"
+                                    :value="item.name">
                                 </el-option>
                             </el-select>
                         </el-form-item>
                         <el-form-item label="区县：" :label-width="formLabelWidth" style="width: 33.3%;float: left;">
                            <el-select v-model="form.district" placeholder="请选择" style="width: 100%;">
                                 <el-option
-                                    v-for="item in statusOptions"
-                                    :key="item.value"
-                                    :label="item.label"
-                                    :value="item.value">
+                                    v-for="item in districtArr"
+                                    :key="item.name"
+                                    :label="item.name"
+                                    :value="item.name">
                                 </el-option>
                             </el-select>
                         </el-form-item>
@@ -397,6 +409,11 @@
                 optionAddressArr:[],
                 customerLevelArr:[],
                 IntentionalCategoryArr:[],
+                ussmArr:[],
+                StorefrontAreaArr:[],
+                provinceArr:[],
+                cityArr:[],
+                districtArr:[],
                 projectSelect:proSelect,
                 formLabelWidth: '120px',
                 rules:{
@@ -429,6 +446,13 @@
                     value: '1',
                     label: '媒介'
                 }],
+                optsex: [{
+                    value: '1',
+                    label: '男'
+                }, {
+                    value: '2',
+                    label: '女'
+                }],
                 dialogForm: {
                     phoneNum:''
                 },
@@ -443,6 +467,114 @@
             submitForm(form) {
                 this.$refs[form].validate((valid) => {
                     if (valid) {
+                        //----线索基本信息---//
+                    	 var clueBasic={};
+                    	 var clueProject={};
+                     	//资源类型
+                    	var resource=this.form.resource;
+                    	clueBasic.type=resource;
+                     	//资源类别
+                    	var resourceType=this.form.resourceType;
+                    	clueBasic.category=resourceType;
+                         //广告位
+                    	var adPosition=this.form.adPosition;
+                    	clueBasic.sourceType=adPosition;
+                         //媒介
+                    	var media=this.form.media;
+                    	clueBasic.source=media;
+                         //搜索词
+                    	var searchWord=this.form.searchWord;
+                    	clueBasic.searchWord=searchWord;
+                         //资源项目
+                    	var project=this.form.project;
+                    	clueProject.projectId=project; 
+                         //留言时间
+                    	var  feedbackTime=this.form.feedbackTime;
+                    	clueBasic.messageTime=feedbackTime;
+                    	 //留言重点
+                    	var  feedbackPoint=this.form.feedbackPoint;
+                    	clueBasic.messagePoint=feedbackPoint;
+                    	 
+                 	    //----客户基本信息---//
+                 	    var  clueCustomer={};
+                      	 //客户姓名
+                    	var  customerName=this.form.customerName;
+                    	clueCustomer.cusName=customerName;
+                   	    //手机号
+                    	var  customerPhone=this.form.customerPhone;
+                    	clueCustomer.phone=customerPhone;
+                   	    //性别
+                    	var customerSex=this.form.customerSex;
+                    	clueCustomer.sex=customerSex;
+                	    //微信
+                    	var  ishasWx=this.form.ishasWx;
+                    	clueCustomer.wechat=ishasWx;
+                	    //餐饮经验
+                    	var experience=this.form.experience;
+                    	clueCustomer.hasExperience=experience;
+                	    //年龄
+                    	var customerAge=this.form.customerAge;
+                    	clueCustomer.age=customerAge;
+                	    //职业
+                    	var customerJob=this.form.customerJob;
+                    	clueCustomer.profession=customerJob;
+                	    //合伙人
+                    	var customerPartner=this.form.customerPartner;
+                    	clueCustomer.partnerType=customerPartner;
+                	    //选址情况
+                    	var address=this.form.address;
+                    	clueCustomer.hasAddress=address;
+                	    //开店紧迫性
+                	    var urgency =this.form.urgency;
+                	    clueCustomer.urgentDate=urgency;
+                	    //客户级别
+                	    var customerLevel=this.form.customerLevel;
+                	    clueCustomer.cusLevel=customerLevel;
+                	    //QQ
+                	    var qq=this.form.qq;
+                	    clueCustomer.qq=qq;
+                	    //----投资意向---//
+                	    var  clueIntention={};
+                	    //投资金额
+                	    var  money=this.form.money; 
+                	    clueIntention.advanceAmount=money;
+                	    //店面大小
+                	   var  area= this.form.area;
+                	   clueIntention.area=area;
+                	    //意向品类
+                	   var intentionCategory=this.form.intentionCategory;
+                	   clueIntention.purType=intentionCategory;
+                	    //意向项目
+                	    var radioProject= this.form.radioProject;
+                	    clueIntention.purProjectType=radioProject;
+                	    //意向内部项目
+                	    var  insideProject=this.form.insideProject;
+                	    clueIntention.purInProject=insideProject;
+                	    //意向外部项目
+                	    var  outsideProject= this.form.outsideProject;
+                	    clueIntention.purOutProject=outsideProject;
+                	    //省
+                	    var province= this.form.province;
+                	    clueIntention.province=province;
+                	    //市
+                	    var city=this.form.city;
+                	    clueIntention.city=city
+               	         //区县
+                	    var district= this.form.district;
+                	    clueIntention.district=district;
+               	     
+               	       var clue={};
+               	      clue.clueCustomer=clueCustomer;
+               	      clue.clueIntention=clueIntention; 
+               	      clue.clueBasic=clueBasic;
+               	      clue.clueProject=clueProject;
+                      axios.post('/teleClueMyCustomerInfo/saveCreateClue',clue)
+                      .then(function (response) {
+                    	  addCustomerVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
+                   		//swindow.location.href="/teleClueMyCustomerInfo/saveCreateClue"; 
+   		        	}});
+                     });
+                	   
                         alert('submit!');
                     } else {
                         console.log('error submit!!');
@@ -453,10 +585,6 @@
             submitDialogForm(dialogForm) {
                 this.$refs[dialogForm].validate((valid) => {
                     if (valid) {
-                    	
-                    	
-                    	
-                    	
                         console.log('submit!!');
                         // 关闭弹窗
                         this.dialogFormVisible = false; 
@@ -466,10 +594,26 @@
                     }
                 });
             },
+            currentProvince(selVal){
+               param={};
+               param.type="1";
+               param.name=selVal;
+               axios.post('/area/sysregion/querySysRegionByParam',param).then(function (response) {  
+                 addCustomerVM.cityArr=response.data.data.data;
+               });  	
+            },
+            currentCity(selVal){
+                param={};
+                param.type="2";
+                param.name=selVal;
+                axios.post('/area/sysregion/querySysRegionByParam',param).then(function (response) {  
+                  addCustomerVM.districtArr=response.data.data.data;
+                });  	
+             },
             number(){
-    　　　     this.form.customerPhone=this.form.customerPhone.replace(/[^\.\d]/g,'');
-               this.form.customerPhone=this.form.customerPhone.replace('.','');
-        　　}
+    　　　                           this.form.customerPhone=this.form.customerPhone.replace(/[^\.\d]/g,'');
+             this.form.customerPhone=this.form.customerPhone.replace('.','');
+        　                       }
         },
         mounted(){
             document.getElementById('addCustomer').style.display = 'block';
@@ -526,22 +670,42 @@
            axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {  
                addCustomerVM.partnerArr=response.data.data;
             });
+           
+           //选址情况
            param={};
            param.groupCode="optionAddress"; 
            axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {  
                addCustomerVM.optionAddressArr=response.data.data;
             });
+           //客户级别
            param={};
            param.groupCode="customerLevel"; 
            axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {  
                addCustomerVM.customerLevelArr=response.data.data;
             });
+           //意向品类
            param={};
            param.groupCode="IntentionalCategory"; 
            axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {  
                addCustomerVM.IntentionalCategoryArr=response.data.data;
             });
-           
+         //投资金额
+           param={};
+           param.groupCode="ussm"; 
+           axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {  
+               addCustomerVM.ussmArr=response.data.data;
+            });
+           //店面大小
+           param={};
+           param.groupCode="StorefrontArea"; 
+           axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {  
+               addCustomerVM.StorefrontAreaArr=response.data.data;
+            });
+           param={};
+           param.type="0";
+           axios.post('/area/sysregion/querySysRegionByParam',param).then(function (response) {  
+        	   addCustomerVM.provinceArr=response.data.data.data;
+           });
            
            
          }
