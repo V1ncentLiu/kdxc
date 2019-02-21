@@ -97,9 +97,12 @@ public class PendingAllocationController {
             request.setAttribute("orgList", saleGroupList);
         }
         // 查询所有信息流分配规则
-        JSONResult<List<InfoAssignDTO>> findListInfoAssignByName =
-                infoAssignFeignClient.findListInfoAssignByName(new InfoAssignQueryDTO());
-        // request.setAttribute("ruleList", findListInfoAssignByName.getData());
+        InfoAssignQueryDTO infoAssignQueryDTO = new InfoAssignQueryDTO();
+        infoAssignQueryDTO.setPageNum(1);
+        infoAssignQueryDTO.setPageSize(1000);
+        JSONResult<PageBean<InfoAssignDTO>> pageBean =
+                infoAssignFeignClient.queryInfoAssignPage(infoAssignQueryDTO);
+        request.setAttribute("ruleList", pageBean.getData().getData());
         // 查询字典类别集合
         request.setAttribute("clueCategoryList", getDictionaryByCode(Constants.CLUE_CATEGORY));
         // 查询字典类别集合
