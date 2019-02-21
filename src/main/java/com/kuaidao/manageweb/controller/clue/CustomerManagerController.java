@@ -16,8 +16,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.kuaidao.aggregation.dto.cule.CustomerManagerDTO;
-import com.kuaidao.aggregation.dto.cule.CustomerManagerQueryDTO;
+import com.kuaidao.aggregation.dto.clue.CustomerManagerDTO;
+import com.kuaidao.aggregation.dto.clue.CustomerManagerQueryDTO;
 import com.kuaidao.common.constant.OrgTypeConstant;
 import com.kuaidao.common.constant.RoleCodeEnum;
 import com.kuaidao.common.entity.IdEntity;
