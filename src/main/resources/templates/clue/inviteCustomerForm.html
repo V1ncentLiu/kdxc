@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html>
+<head th:include="_header_include::frag(~{::title},~{},~{})" >
+<title>邀约来访</title>
+    <meta charset="UTF-8">
+    <!-- import CSS -->
+    <link rel="stylesheet" href="css/element-ui.css">
+    <link rel="stylesheet" href="css/base.css">
+</head>
+<body>
+<div id="inviteCustomerForm" class="inviteCustomerForm mainPadding" style="display: none;"> 
+    <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
+        <el-breadcrumb-item>Home</el-breadcrumb-item>
+        <el-breadcrumb-item>电销中心</el-breadcrumb-item>
+        <el-breadcrumb-item>我的客户</el-breadcrumb-item>
+        <el-breadcrumb-item>预约来访</el-breadcrumb-item>
+    </el-breadcrumb>   
+    <el-row class="borderbox">
+        <div class="inforTitle">预约来访</div>    
+        <el-form :model="form" :rules="rules" ref="form" class="padding20">
+            <div class="marginB20 fs16 paddingT20">来访信息</div>
+            <div class="borderbox padding20">
+                <el-row>
+                    <el-col :span="8">
+                        <el-form-item label="地区：" :label-width="formLabelWidth">
+                            <el-select v-model="form.area" placeholder="请选择" style="width: 100%;" @change="currentBusGroup" >
+                                <el-option
+                                    v-for="item in orgAreaList"
+                                    :key="item.id"
+                                    :label="item.name"
+                                    :value="item.id">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="8">
+                        <el-form-item label="预约时间：" :label-width="formLabelWidth">
+                            <el-date-picker
+                                style="width: 100%;"
+                                v-model="form.reservationTime"
+                                type="datetime"
+                                placeholder="选择日期时间">
+                            </el-date-picker>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="8">
+                        <el-form-item label="分公司：" :label-width="formLabelWidth">
+                            <el-select v-model="form.filiale" placeholder="请选择" style="width: 100%;" @change="currentBusSale">
+                                <el-option
+                                    v-for="item in busGroupArr"
+                                    :key="item.id"
+                                    :label="item.name"
+                                    :value="item.id">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="8">
+                        <el-form-item label="品尝项目：" :label-width="formLabelWidth">
+                            <el-form-item label="">  
+                                <el-select 
+                                    v-model="form.tastingItem" 
+                                    placeholder="品尝项目" 
+                                    style="width: 100%;" 
+                                    multiple 
+                                    >
+                                    <el-option
+                                        v-for="item in  projectSelArr"
+                                        :key="item.id"
+                                        :label="item.projectName"
+                                        :value="item.id">
+                                    </el-option>
+                                </el-select>
+                            </el-form-item>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>                    
+                    <el-col :span="8">
+                        <el-form-item label="商务总监：" :label-width="formLabelWidth">
+                            <el-select v-model="form.businessDirector" placeholder="请选择" style="width: 100%;">
+                                <el-option
+                                    v-for="item in busSaleArr"
+                                    :key="item.id"
+                                    :label="item.name"
+                                    :value="item.id">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="8">
+                        <el-form-item label="备注：" :label-width="formLabelWidth">
+                           <el-input type="textarea" :rows="3" v-model="form.remark" autocomplete="off" maxlength="500"></el-input>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+            </div>
+            <div class="marginB20 fs16 paddingT20">派车单</div>
+            <div class="borderbox padding20">
+                <el-row>
+                    <el-col :span="8">
+                        <el-form-item label="客户人数：" :label-width="formLabelWidth" prop="customersNum">
+                           <el-input v-model="form.customersNum" @keyup.native="number" autocomplete="off" maxlength="3" style="width: 80%;"></el-input><span style="padding-left: 10px;">人</span>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="8">
+                        <el-form-item label="客户电话：" :label-width="formLabelWidth" prop="customerPhone">
+                           <el-input v-model="form.customerPhone" @keyup.native="number" autocomplete="off" maxlength="11" ></el-input>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="8">
+                        <el-form-item label="出发时间：" :label-width="formLabelWidth" prop="startTime">
+                           <el-date-picker
+                                style="width: 100%;"
+                                v-model="form.startTime"
+                                type="datetime"
+                                placeholder="选择日期时间">
+                            </el-date-picker>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="8">
+                        <el-form-item label="客户联系人姓名：" :label-width="formLabelWidth" prop="customerName">
+                           <el-input v-model="form.customerName" autocomplete="off" maxlength="10" ></el-input>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="8">
+                        <el-form-item label="接站时间：" :label-width="formLabelWidth" prop="pickUpTime">
+                            <el-date-picker
+                                style="width: 100%;"
+                                v-model="form.pickUpTime"
+                                type="datetime"
+                                placeholder="选择日期时间">
+                            </el-date-picker>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="8">
+                        <el-form-item label="到站时间：" :label-width="formLabelWidth" prop="arrivalTime">
+                            <el-date-picker
+                                style="width: 100%;"
+                                v-model="form.arrivalTime"
+                                type="datetime"
+                                placeholder="选择日期时间">
+                            </el-date-picker>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="8">
+                        <el-form-item label="车次/航班：" :label-width="formLabelWidth" prop="station">
+                            <el-input v-model="form.station" autocomplete="off" maxlength="" ></el-input>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="8">
+                        <el-form-item label="城市：" :label-width="formLabelWidth" prop="city">
+                            <el-input v-model="form.city" autocomplete="off" maxlength="" ></el-input>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="8">
+                        <el-form-item label="延误说明：" :label-width="formLabelWidth" prop="delayDescription">
+                            <el-input type="textarea" :rows="2" v-model="form.delayDescription" autocomplete="off" maxlength="100" ></el-input>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="8">
+                        <el-form-item label="接站地：" :label-width="formLabelWidth" prop="pickUpStation">
+                            <el-input  type="textarea" :rows="2" v-model="form.pickUpStation" autocomplete="off" maxlength="100" ></el-input>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+            </div>
+            
+            <div class="padding20 f-tac">            
+                <el-button type="primary" @click="submitForm('form')">提交</el-button>
+                <el-button>取 消</el-button>
+            </div> 
+        </el-form> 
+    </el-row>  
+</div>
+</body>
+<!-- import Vue before Element -->
+ <div th:include="_footer_include :: #jsLib"></div>
+<script th:inline="javascript" >
+  var proSelect=[[${proSelect}]];
+  var clueId=[[${clueId}]];
+  var  inviteCustomerVM= new Vue({
+        el: '#inviteCustomerForm',
+        data: function() {
+            return {        
+                form: {                    
+                    area:'',
+                    reservationTime:'',
+                    filiale:'',
+                    tastingItem:'',
+                    businessDirector:'',
+                    remark:'',
+                    customersNum:'',
+                    customerPhone:'',
+                    startTime:'',
+                    customerName:'',
+                    pickUpTime:'',
+                    arrivalTime:'',
+                    station:'',
+                    city:'',
+                    delayDescription:'',
+                    pickUpStation:'',
+                },
+                orgAreaList:[],
+                busGroupArr:[],
+                busSaleArr:[],
+                projectSelArr:proSelect,
+                formLabelWidth: '150px',
+                rules:{                    
+                    customersNum: [
+                        { validator:function(rule,value,callback){    
+                            if(value==""){
+                                callback();
+                            }else{
+                                if(/^\+?[1-9][0-9]*$/.test(value) == false){
+                                   callback(new Error("请输入大于0的正整数"));
+                                }else{
+                                   callback();
+                                } 
+                                callback();
+                            }         
+                            
+                        }, trigger: 'blur'}
+                    ],
+                    customerPhone: [
+                        { validator:function(rule,value,callback){  
+                            if(value==""){
+                                callback();
+                            }else{
+                                if(/^[0-9]*$/.test(value) == false){
+                                   callback(new Error("请输入数字"));
+                                }else{
+                                   callback();
+                                } 
+                                callback();
+                            } 
+                        }, trigger: 'blur'}
+                    ]
+                },
+                statusOptions: [{
+                    value: '0',
+                    label: '推广列表'
+                }, {
+                    value: '1',
+                    label: '电销列表'
+                }]
+            }        	  
+        },
+        methods: {
+            submitForm(form) {
+                this.$refs[form].validate((valid) => {
+                    if (valid) {
+                        // 出发时间不允许大于到站时间，接站时间
+                        if(this.form.startTime>this.form.pickUpTime||this.form.startTime>this.form.arrivalTime){
+                                this.$message({
+                                message: '出发时间不允许大于到站时间，接站时间',
+                                type: 'warning'
+                            });
+                            console.log('error submit!!');
+                            return false;
+                        }
+                        var param={};
+                        param.clueId=clueId;
+                        param.area=this.form.area;
+                        param.reserveTime=this.form.reservationTime;
+                        param.busCompay=this.form.filiale;
+                        param.tasteProjectId=this.form.tastingItem.join(',');
+                        param.busDirectorId=this.form.businessDirector;
+                        param.remark=this.form.remark;
+                        param.cusNum=this.form.customersNum;
+                        param.cusPhone=this.form.customerPhone;
+                        param.cusName=this.form.customerName;
+                        param.departTime=this.form.startTime;
+                        param.arrivalTime=this.form.arrivalTime;
+                        param.pickUpTime=this.form.pickUpTime;
+                        param.flight=this.form.station;
+                        param.delayMark= this.form.delayDescription;
+                        param.receivedPlace=this.form.pickUpStation; 
+                        param.city=this.form.city; 
+                        axios.post('/tele/clueMyCustomerInfo/inviteCustomerSave',param)
+                        .then(function (response) {
+                        	inviteCustomerVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
+                     	 
+     		            	}});
+                       });
+                        this.$message({
+                            message: '提交成功！',
+                            type: 'success'
+                        });
+                    } else {
+                        console.log('error submit!!');
+                        return false;
+                    }
+                });
+            },
+             currentBusGroup(seleVal){
+                //初始化商务组
+                param={};
+              	param.parentId=seleVal;
+                axios.post('/organization/organization/queryOrgByType',param).then(function (response) {  
+                	inviteCustomerVM.busGroupArr=response.data.data;
+             });
+            },
+            currentBusSale(seleVal){
+            	param={};
+               	param.orgId=seleVal;
+               	param.roleCode="SWZJ";
+                axios.post('/user/userManager/listByOrgAndRole' ,param).then(function (response) {  
+                	inviteCustomerVM.busSaleArr=response.data.data;
+                });
+            },
+            number(){
+    　　　                                this.form.customersNum=this.form.customersNum.replace(/[^\.\d]/g,'');
+               this.form.customersNum=this.form.customersNum.replace('.','');
+        　                    　}
+        },
+        mounted(){
+            document.getElementById('inviteCustomerForm').style.display = 'block';
+        }
+        , created(){
+        	//初始化商务中心
+           var param={};
+          	param.orgType="11";
+            axios.post('/organization/organization/queryOrgByType',param).then(function (response) {  
+            	inviteCustomerVM.orgAreaList=response.data.data;
+            });
+            
+            param={};
+          	param.orgId="1";
+            axios.post('listByOrgAndRole/user/userManager' ,param).then(function (response) {  
+            	//mycustomVM.provinceArr=response.data.data.data;
+            });
+            
+           
+            
+    	}
+    })
+</script>
+</html>
