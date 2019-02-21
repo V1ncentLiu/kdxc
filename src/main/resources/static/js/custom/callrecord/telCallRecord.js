@@ -74,7 +74,7 @@ var myCallRecordVm = new Vue({
                  	myCallRecordVm.pager.pageSize = callRecordData.pageSize;
                      
                  }else{
-                	 myCallRecordVm.$message({message:'初始化通话记录列表错误',type:'error'});
+                	 myCallRecordVm.$message({message:data.msg,type:'error'});
                  	 console.error(data);
                  }
              

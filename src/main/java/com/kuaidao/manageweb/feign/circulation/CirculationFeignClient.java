@@ -37,6 +37,12 @@ public interface CirculationFeignClient {
     @RequestMapping("/queryList")
     public JSONResult<List<CirculationRespDTO>> queryList(@RequestBody CirculationReqDTO dto);
 
+    /**
+     * 查询最早开始服务时间
+     */
+    @RequestMapping("/startTimeOfService")
+    public JSONResult<CirculationRespDTO> startTimeOfService(@RequestBody CirculationReqDTO dto);
+
     @Component
     static class HystrixClientFallback implements CirculationFeignClient {
 
@@ -58,6 +64,11 @@ public interface CirculationFeignClient {
         @Override
         public JSONResult<List<CirculationRespDTO>> queryList(CirculationReqDTO dto) {
             return fallBackError("流转人员记录-查询（不分页）");
+        }
+
+        @Override
+        public JSONResult<CirculationRespDTO> startTimeOfService(CirculationReqDTO dto) {
+            return fallBackError("最早开始服务时间");
         }
     }
 
