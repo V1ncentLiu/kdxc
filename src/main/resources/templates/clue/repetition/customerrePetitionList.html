@@ -32,7 +32,7 @@
 					      :value="item.value">
 					    </el-option>
   					</el-select>
-  					<el-select filterable v-model="repeatStatus" placeholder="是否重单">
+  					<el-select filterable v-model="dealStatus" placeholder="是否重单">
 					    <el-option
 					      v-for="item in repetitionList"
 					      :key="item.value"
@@ -40,8 +40,8 @@
 					      :value="item.value">
 					    </el-option>
   					</el-select>
-  					<el-input style="width:15%;"  v-model="constomerName" placeholder="客户姓名"></el-input>
-  					<el-input style="width:15%;"  v-model="constomerPhone" placeholder="客户手机号"></el-input>
+  					<el-input style="width:15%;"  v-model="cusName" placeholder="客户姓名"></el-input>
+  					<el-input style="width:15%;"  v-model="cusPhone" placeholder="客户手机号"></el-input>
   					<el-button type="primary" @click="search">搜索</el-button>
 				</div>
             </el-row>
@@ -55,12 +55,13 @@
                     :data="dataTable"  @selection-change="handleSelectionChange">
                      <el-table-column align="center" prop="id" type="selection" width="55"></el-table-column> 
                      <!-- <el-table-column prop="date" label="全选" width="180"></el-table-column>  -->
-                   <el-table-column align="center" prop="projects" label="序号"></el-table-column>
-                    <el-table-column align="center" prop="telemarketingTeam" label="客户手机号"></el-table-column>
-                    <el-table-column align="center" prop="telemarketingTeam" label="重单结果"></el-table-column>
-                    <el-table-column align="center" prop="status" label="处理状态" :formatter="transformStatus"></el-table-column>
-                    <el-table-column align="center" prop="telemarketingTeam" label="比例"></el-table-column>
-                    <el-table-column align="center" prop="telemarketingTeam" label="重单人员列表"></el-table-column>
+                    <el-table-column align="center" type="index" prop="id" label="序号" width="55"></el-table-column>
+                    <el-table-column align="center" prop="cusName" label="客户姓名"></el-table-column>
+                    <el-table-column align="center" prop="cusPhone" label="客户手机号"></el-table-column>
+                    <el-table-column align="center" prop="createTime" label="提交申请重单时间"></el-table-column>
+                    <el-table-column align="center" prop="dealStatus" label="重单结果"></el-table-column>
+                    <el-table-column align="center" prop="statusResult" label="处理状态" ></el-table-column>
+                    <el-table-column align="center" prop="applyUser" label="重单顾问姓名"></el-table-column>
                 </el-table>
                  <table-pagination :pager="pager"  @change="search"></table-pagination>
             </el-row>
@@ -107,10 +108,10 @@
    var orgVM =  new Vue({
         el: '#organizationManage',
         data: {
-        	constomerPhone:"",
-        	constomerName:"",
+        	cusName:"",
+        	cusPhone:"",
         	status:"",
-        	repeatStatus:"",
+        	dealStatus:"",
         	dialogFormVisible:false,
         	repetitionList:"",
         	exportFormVisible:false,
@@ -133,11 +134,11 @@
         	 repetitionList:[
         		 {
                 		value: '0',
-                    label: '启用'	
+                    label: '不重单'	
                 	},
                 	{
                    value: '1',
-                    label: '禁用'	
+                    label: '重单'	
                    }
          	],
             pager:{
@@ -150,8 +151,61 @@
              
         },
         methods: {
+        	queryRepeatPage(){//查询按钮
+          	  var param = {}; 
+          	  var pageSize = this.pager.pageSize;
+                var pageNum = this.pager.currentPage;
+                param.pageNum = pageNum;
+                param.pageSize = pageSize;
+                param.dealStatus=this.dealStatus;
+                param.cusName=this.cusName;
+                param.cusPhone=this.cusPhone;
+                param.status=this.status;
+                console.log(param);
+                axios.post('/clue/cluerepetition/queryRepeatList',param).then(function (response) {
+                	  console.log(response);
+                    if(null===response||response.data==null||response.data.code!='0'){
+	                  	  alert(response.data.msg);
+	                  	  return ;
+                   }else{
+                  	 orgVM.dataTable =response.data.data.data; 
+                  	 orgVM.pager.currentPage= response.data.data.currentPage;
+                  	 orgVM.pager.total= response.data.data.total;
+                   } 
+                })
+                .catch(function (error) {
+                  console.log(error);
+                })
+                .then(function () {
+                });  
+                
+            } ,
         	detailButton(){
+            	var rows = this.multipleSelection;
+                if(rows.length  !=1){
+                    this.$message({
+                       message: '请选择一条数据进行修改',
+                       type: 'warning'
+                     });
+                    return;
+                }
         		this.dialogFormVisible = true;
+        		var param={};
+		        param.ids=ids;
+                axios.post('/invitearea/deleInviteArea',param).then(function (response) {
+                  	  console.log(response);
+                      if(null !==response && response.data !=null && response.data.code=='0'){
+                    	  window.location.href="/invitearea/inviteAreaList"; 
+                     }else{
+                    	 alert(response.data.data.msg);
+	                  	  	return ;
+                     } 
+                  }).catch(function (error) {
+                      console.log(error);
+                  })
+                  .then(function () {
+                    // always executed
+                  });
         	},
         	cancelButton(){
         		this.$confirm("确定要撤销选中的重单申请?", '撤销申请', {
@@ -178,7 +232,7 @@
  	                      if(null !==response && response.data !=null && response.data.code=='0'){
  	                    	  window.location.href="/invitearea/inviteAreaList"; 
  	                     }else{
- 	                    	 alert(response.data.data.message);
+ 	                    	 alert(response.data.data.msg);
   	                  	  	return ;
  	                     } 
  	                  }).catch(function (error) {
@@ -197,7 +251,8 @@
                 });
         	},
         	search(){
-        		
+        		this.pager.currentPage = 1;
+        		this.queryRepeatPage();
         	},
         	handleSelectionChange(val) {
                 this.multipleSelection = val;
@@ -214,7 +269,7 @@
         },
         created(){
         	
-        	
+        	this.queryRepeatPage();
         }//created方法 结束
     })
 </script>

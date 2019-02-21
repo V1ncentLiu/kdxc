@@ -1,0 +1,926 @@
+<!DOCTYPE html>
+<html>
+<head th:include="_header_include::frag(~{::title},~{},~{})">
+<title>客户管理</title>
+    <meta charset="UTF-8">
+    <!-- import CSS -->
+    <link rel="stylesheet" href="css/element-ui.css">
+    <link rel="stylesheet" href="css/base.css">
+    <style>
+        button a{color:#fff!important;}
+        .el-checkbox { width: 100%; }
+    </style>
+</head>
+<body>
+<div id="myCustom" class="myCustom mainPadding" style="display: none;">  
+    <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
+        <el-breadcrumb-item>Home</el-breadcrumb-item>
+        <el-breadcrumb-item>电销中心</el-breadcrumb-item>
+        <el-breadcrumb-item>客户管理</el-breadcrumb-item>
+    </el-breadcrumb>
+    <el-row class="marginB10">
+        <el-button type="success" @click="openassignrDig">分配资源</el-button>
+        <el-button type="success" @click="opentransferForm">转移资源</el-button>
+        <el-button type="success" @click="openvicemanagerForm">副总分发</el-button>
+    </el-row>
+    <el-row class="marginB10 greybg padding20" style="padding-bottom: 0">        
+        <el-form :inline="true" :model="form" ref="form">
+            <el-form-item label="">
+                <el-select v-model="form.isTransfer" placeholder="全部资源" style="width: 100%;" clearable >
+                    <el-option
+                        v-for="item in isTransfer"
+                        :key="item.value"
+                        :label="item.label"
+                        :value="item.value">
+                    </el-option>
+                </el-select>
+            </el-form-item> 
+            <el-form-item label="">  
+                <el-select v-model="form.cluesta" placeholder="资源有效性" style="width: 100%;" clearable>
+                    <el-option
+                        v-for="item in clueStatus"
+                        :key="item.value"
+                        :label="item.label"
+                        :value="item.value">
+                    </el-option>
+                </el-select>
+            </el-form-item>
+            <el-form-item label="">
+                <el-input v-model="form.customerPhone" placeholder="客户手机号"></el-input>
+            </el-form-item>
+            <el-form-item label="">
+                <el-input v-model="form.customerName" placeholder="客户姓名"></el-input>
+            </el-form-item>
+            <el-form-item label="">
+                <el-select v-model="form.cusStatus" placeholder="客户状态" style="width: 100%;" clearable >
+                    <el-option
+                        v-for="item in cusStatusArr"
+                        :key="item.value"
+                        :label="item.name"
+                        :value="item.value">
+                    </el-option>
+                </el-select>
+            </el-form-item>
+            <el-form-item label="">
+                <el-select v-model="form.cusLeve" placeholder="客户级别" style="width: 100%;" clearable>
+                    <el-option
+                        v-for="item in cusLevelArr"
+                        :key="item.value"
+                        :label="item.name"
+                        :value="item.value">
+                    </el-option>
+                </el-select>
+            </el-form-item>
+            <el-form-item label="">
+                <el-select v-model="form.hasInvite" placeholder="是否邀约" style="width: 100%;" clearable >
+                    <el-option
+                        v-for="item in hasInvite"
+                        :key="item.value"
+                        :label="item.label"
+                        :value="item.value">
+                    </el-option>
+                </el-select>
+            </el-form-item>
+            <el-form-item label="编辑时间:">
+                <el-date-picker
+                    style="width: 100%;"
+                    v-model="form.updateTimeStart"
+                    type="datetime"
+                    placeholder="选择日期时间">
+                </el-date-picker>
+            </el-form-item>
+            <el-form-item label="——">
+                <el-date-picker
+                    style="width: 100%;"
+                    v-model="form.updateTimeEnd"
+                    type="datetime"
+                    placeholder="选择日期时间">
+                </el-date-picker>
+            </el-form-item>
+            <el-form-item label="创建时间:">
+                <el-date-picker
+                    style="width: 100%;"
+                    v-model="form.createTimeStart"
+                    type="datetime"
+                    placeholder="选择日期时间">
+                </el-date-picker>
+            </el-form-item>
+            <el-form-item label="——">
+                <el-date-picker
+                    style="width: 100%;"
+                    v-model="form.createTimeEnd"
+                    type="datetime"
+                    placeholder="选择日期时间">
+                </el-date-picker>
+            </el-form-item>
+            <el-form-item label="分配时间:">
+                <el-date-picker
+                    style="width: 100%;"
+                    v-model="form.assignTimeStart"
+                    type="datetime"
+                    placeholder="选择日期时间">
+                </el-date-picker>
+            </el-form-item>
+            <el-form-item label="——">
+                <el-date-picker
+                    style="width: 100%;"
+                    v-model="form.assignTimeEnd"
+                    type="datetime"
+                    placeholder="选择日期时间">
+                </el-date-picker>
+            </el-form-item>
+            <el-button type="primary"  @click="initTableData" >搜索</el-button>
+            <span style="color: rgb(0, 114, 255);text-decoration: underline;cursor: pointer;" @click="toogleClick">更多搜索</span>
+            <el-row v-show="isShow">
+                <el-form-item label="">
+                    <el-select v-model="form.dayTel" placeholder="今日是否拨打" style="width: 100%;" clearable>
+                        <el-option
+                            v-for="item in callTel"
+                            :key="item.value"
+                            :label="item.label"
+                            :value="item.value">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="">
+                    <el-select v-model="form.trackingDay" placeholder="今日是否跟访" style="width: 100%;" clearable>
+                        <el-option
+                            v-for="item in hastracking"
+                            :key="item.value"
+                            :label="item.label"
+                            :value="item.value">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="">
+                    <el-select v-model="form.repeatStatus" placeholder="是否重单" style="width: 100%;" clearable >
+                        <el-option
+                            v-for="item in clueRepeatStatus"
+                            :key="item.value"
+                            :label="item.label"
+                            :value="item.value">
+                        </el-option>
+                    </el-select>
+                </el-form-item> 
+                <el-form-item label="">  
+                    <el-select v-model="form.province" placeholder="预签约省份" style="width: 100%;" clearable >
+                        <el-option
+                            v-for="item in provinceArr"
+                            :key="item.name"
+                            :label="item.name"
+                            :value="item.name">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="">  
+                    <el-select v-model="form.category" placeholder="资源类别" style="width: 100%;" clearable>
+                        <el-option
+                            v-for="item in categoryArr"
+                            :key="item.value"
+                            :label="item.name"
+                            :value="item.value">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="">  
+                    <el-select v-model="form.teleorg" placeholder="电销组" style="width: 100%;" clearable >
+                        <el-option
+                            v-for="item in orgTeleArr"
+                            :key="item.id"
+                            :label="item.name"
+                            :value="item.id">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="">  
+                    <el-select 
+                        v-model="form.teleSaleId" 
+                        placeholder="创业顾问" 
+                        style="width: 100%;" 
+                        filterable 
+                        multiple 
+                        clearable  >
+                        <el-option
+                            v-for="item in telePerArr"
+                            :key="item.id"
+                            :label="item.name"
+                            :value="item.id">
+                            <el-checkbox-group v-model="form.teleSaleId">
+                                <el-checkbox :label="item.name"></el-checkbox>
+                            </el-checkbox-group>
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="">
+                    <el-input v-model="form.searchWord" placeholder="搜索词"></el-input>
+                </el-form-item>
+                <el-form-item label="">
+                    <el-input v-model="form.address" placeholder="地址"></el-input>
+                </el-form-item>
+            </el-row>                
+        </el-form>       
+    </el-row>
+    <el-row>
+        <el-table 
+            ref="multipleTable"
+            tooltip-effect="dark"
+            style="width: 100%"
+            border
+            :data="dataTable" 
+            @selection-change="handleSelectionChange"
+            >
+            <el-table-column align="center" type="selection"  prop="clueId"  width="55" @selection-change="handleSelectionChange" ></el-table-column>
+            <el-table-column align="center" prop="cusLevelName"  label="客户级别"></el-table-column>
+            <el-table-column align="center" prop="cusName" label="客户姓名"></el-table-column>
+            <el-table-column align="center" prop="phone" label="手机号"></el-table-column>
+            <el-table-column align="center" prop="record" label="跟进记录">
+                <template slot-scope="scope">
+                    <el-button @click="recordClick(scope.row)" type="text" size="small">点击查看</el-button>
+                </template>
+            </el-table-column>
+            <el-table-column align="center" prop="customerStatusName" label="客户状态"></el-table-column>
+            <el-table-column align="center" prop="telCount" label="拨打次数"></el-table-column>
+            <el-table-column align="center" prop="assignTime" label="分配时间"></el-table-column>
+            <el-table-column align="center" prop="updateTime" label="最后编辑时间"></el-table-column>
+            <el-table-column align="center" prop="repeatPhones" label="重复手机号资源">
+                 <template slot-scope="scope">
+                    <el-button @click="openTrackingDialog(scope.row.clueId)" type="text" size="small">
+                                                                    点击查看
+                    </el-button>
+                </template>
+            </el-table-column>
+            <el-table-column align="center" prop="focusPoint" label="客户关注点"></el-table-column>
+            <el-table-column align="center" prop="messagePoint" label="留言重点"></el-table-column>
+            <el-table-column align="center" prop="messageTime" label="留言时间"></el-table-column>
+            <el-table-column align="center" prop="createTime" label="创建日期（资源创建日期）"></el-table-column>
+            <el-table-column align="center" prop="operationName" label="资源专员"></el-table-column>
+            <el-table-column align="center" prop="searchWord" label="搜索词"></el-table-column>
+            <el-table-column align="center" prop="categoryName" label="资源类别"></el-table-column>     
+            <el-table-column align="center" prop="typeName" label="资源类型"></el-table-column>
+            <el-table-column align="center" prop="phone2" label="手机2"></el-table-column>
+            <el-table-column align="center" prop="phone3" label="手机3"></el-table-column>
+            <el-table-column align="center" prop="wechat" label="微信"></el-table-column>     
+            <el-table-column align="center" prop="qq" label="QQ"></el-table-column>
+            <el-table-column align="center" prop="email" label="邮箱"></el-table-column>
+            <el-table-column align="center" prop="address" label="地址"></el-table-column>
+            <el-table-column align="center" prop="telLastTime" label="最后拨打时间"></el-table-column>
+            <el-table-column align="center" prop="advanceAmountValue" label="投资金额"></el-table-column>
+            <el-table-column align="center" prop="areaValue" label="店面大小"></el-table-column>     
+            <el-table-column align="center" prop="purTypeName" label="意向品类"></el-table-column>
+            <el-table-column align="center" prop="projectName" label="意向品牌"></el-table-column>
+            <el-table-column align="center" prop="storeArea " label="开店区域（省市显区）"></el-table-column>
+            <el-table-column align="center" prop="hasAddressName" label="选址情况"></el-table-column>     
+            <el-table-column align="center" prop="age" label="客户年龄"></el-table-column>
+            <el-table-column align="center" prop="sex" label="客户性别"></el-table-column>
+            <el-table-column align="center" prop="professionValue" label="客户职业"></el-table-column>
+            <el-table-column align="center" prop="hasExperienceName" label="餐饮经验"></el-table-column>
+            <el-table-column align="center" prop="partnerTypeName" label="合伙人"></el-table-column>
+            <el-table-column align="center" prop="urgentDate" label="开店紧迫性"></el-table-column>
+        </el-table>
+         <table-pagination :pager="pager" @change="initTableData"></table-pagination> 
+    </el-row>
+    <!-- dialog -->
+    <!-- 跟进记录 -->
+    <el-dialog title="跟进记录" :visible.sync="recordDialog">
+        <el-table
+            ref="singleTable" 
+            tooltip-effect="dark"
+            style="width: 100%"
+            border
+            :data="recordTable" 
+            >
+            <el-table-column align="center" type="index" width="55" label="序号"></el-table-column>
+            <el-table-column align="center" prop="callTime" label="拨打时间"></el-table-column>
+            <el-table-column align="center" prop="status" label="客户状态"></el-table-column>
+            <el-table-column align="center" prop="isConnect" label="是否接通"></el-table-column>
+            <el-table-column align="center" prop="isNeedResource" label="资源有效性"></el-table-column>
+            <el-table-column align="center" prop="isInvite" label="是否邀约"></el-table-column>
+            <el-table-column align="center" prop="customerFocus" label="客户关注点"></el-table-column>  
+            <el-table-column align="center" prop="isReturnVisit" label="是否继续回访"></el-table-column>  
+            <el-table-column align="center" prop="nextTimeVisit" label="下次回访时间"></el-table-column>  
+            <el-table-column align="center" prop="createPerson" label="创建人"></el-table-column>  
+        </el-table>
+    </el-dialog>
+    <!-- 跟进记录 -->
+    <el-dialog title="手机号1233133332重复资源信息" :visible.sync="repeatPhonesDialog">
+        <el-table
+            ref="singleTable" 
+            tooltip-effect="dark"
+            style="width: 100%"
+            border
+            :data="repeatPhonesTable" 
+            >
+            <el-table-column align="center" type="index" width="55" label="序号"></el-table-column>
+            <el-table-column align="center" prop="resourceCreateTime" label="资源创建时间"></el-table-column>
+            <el-table-column align="center" prop="contactCreateTime" label="联系方式创建时间"></el-table-column>
+            <el-table-column align="center" prop="majordomo" label="电销总监"></el-table-column>
+            <el-table-column align="center" prop="adviser" label="创业顾问"></el-table-column>
+            <el-table-column align="center" prop="majordomoTeam" label="电销组"></el-table-column>
+            <el-table-column align="center" prop="resourceCreatePersonRole" label="资源创建人角色"></el-table-column>  
+            <el-table-column align="center" prop="resourceCreatePerson" label="资源创建人"></el-table-column> 
+        </el-table>
+    </el-dialog>
+    <!-- 分配资源 -->
+    <el-dialog title="分配资源" :visible.sync="allocateFormVisible">
+      <el-form :model="formAllocat" ref="formAllocat">
+        <el-row>
+            <el-form-item 
+                label="电销顾问" 
+                prop="telSales"
+                :rules="[
+                    { required: true, message: '请选择活动区域电销顾问', trigger: 'change' }
+                ]"
+                :label-width="formLabelWidth">
+              <el-select v-model="formAllocat.telSales" placeholder="请选择" style="width: 100%;">
+                    <el-option
+                        v-for="item in saleList"
+                        :key="item.id"
+                        :label="item.name"
+                        :value="item.id">
+                    </el-option>
+                </el-select>
+            </el-form-item>
+        </el-row>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button type="primary" @click="submitAllocatForm('formAllocat')">提交</el-button>
+        <el-button @click="resetForm('formAllocat');allocateFormVisible = false;">取 消</el-button>
+      </div>
+    </el-dialog>
+    <!-- 转移资源 -->
+    <el-dialog title="转移资源" :visible.sync="transferFormVisible">
+      <el-form :model="formTransfer" ref="formTransfer">
+        <el-form-item 
+            label="电销总监" 
+            prop="salesDirector"
+            :rules="[
+                { required: true, message: '请选择活动区域电销总监', trigger: 'change' }
+            ]"
+            :label-width="formLabelWidth">
+           <el-select v-model="formTransfer.salesDirector" placeholder="请选择" style="width: 100%;">
+                    <el-option
+                        v-for="item in saleGroupList"
+                        :key="item.id"
+                        :label="item.name"
+                        :value="item.id">
+                    </el-option>
+           </el-select>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button type="primary" @click="submitTransferForm('formTransfer')">提交</el-button>
+        <el-button @click="resetForm('formTransfer');transferFormVisible=false;">取 消</el-button>
+      </div>
+    </el-dialog>
+    <!-- 批号分配 -->
+    <el-dialog title="信息流批量分配" :visible.sync="batchFormVisible">
+      <el-form :model="formBatch" ref="formBatch">
+        <el-form-item 
+            label="信息流分配规则" 
+            prop="batchRule"
+            :rules="[
+                { required: true, message: '请选择信息流分配规则', trigger: 'change' }
+            ]"
+            :label-width="formLabelWidth">
+          <el-select v-model="formBatch.batchRule" placeholder="请选择" style="width: 60%;">
+            <el-option label="规则名称1" value="batchRule1"></el-option>
+            <el-option label="规则名称2" value="batchRule2"></el-option>
+          </el-select>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button type="primary" @click="submitBatchForm('formBatch')">提交</el-button>
+        <el-button @click="resetForm('formBatch');batchFormVisible=false;">取 消</el-button>
+      </div>
+    </el-dialog>
+    <!-- 副总分发 -->
+    <el-dialog title="副总分发" :visible.sync="vicemanagerFormVisible">
+      <el-form :model="formVicemanage" ref="formVicemanage">
+        <el-form-item 
+            label="电销总监" 
+            prop="salesDirector"
+            :rules="[
+                { required: true, message: '请选择电销总监', trigger: 'change' }
+            ]"
+            :label-width="formLabelWidth">
+           <el-select v-model="formVicemanage.salesDirector" placeholder="请选择" style="width: 100%;"@change="currentSalesDirector" >
+             <el-option
+                   v-for="item in saleGroupList"
+                    :key="item.id"
+                      :label="item.name"
+                     :value="item.id">
+              </el-option>
+           </el-select>
+        </el-form-item>
+        <el-form-item 
+            label="电销员工" 
+            prop="salesstaff"
+            :rules="[
+                { required: true, message: '请选择电销员工', trigger: 'change' }
+            ]"
+            :label-width="formLabelWidth">
+           <el-select v-model="formVicemanage.salesstaff" placeholder="请选择" style="width: 100%;">
+                <el-option
+                 v-for="item in saleInfoArr"
+                  :key="item.id"
+                  :label="item.name"
+                    :value="item.id">
+              </el-option>
+           </el-select>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button type="primary" @click="submitVicemanagerForm('formVicemanage')">提交</el-button>
+        <el-button @click="resetForm('formVicemanage');vicemanagerFormVisible=false;">取 消</el-button>
+      </div>
+    </el-dialog>
+</div>
+</body>
+<!-- import Vue before Element -->
+<div th:include="_footer_include :: #jsLib"></div>
+<script th:inline="javascript" >
+var orgList=[[${orgList}]];//电销组
+var saleList=[[${saleList}]];//电销创业顾问
+var saleGroupList=[[${saleGroupList}]];//同事业部下电销组
+  var  customerManVM=new Vue({
+        el: '#myCustom',
+        data: function() {
+            return {
+                isShow:false,
+                recordDialog:false,
+                repeatPhonesDialog:false,
+                allocateFormVisible: false, //分配资源
+                formAllocat:{
+                    telSales:''
+                },
+                transferFormVisible: false, //转移资源
+                formTransfer:{
+                    salesDirector:''
+                },
+                batchFormVisible: false, //批量分配
+                formBatch: {
+                    batchRule: ''
+                },
+                vicemanagerFormVisible: false, //副总分发
+                formVicemanage: {
+                    salesDirector: '',
+                    salesstaff: ''
+                },
+                pager:{ 
+                    total: 0,
+                    currentPage: 1,
+                    pageSize: 20,
+                },
+                adviserValue: '', //创业顾问
+                isTransfer:[
+                            {
+                               value: '0',
+                               label: '新资源' },
+                              {
+                               value: '1',
+                               label: '转来资源'
+                                }     
+                              ],
+                              clueStatus:[
+                               {
+                                 value: '1',
+                                 label: '有效'
+                                },
+                                 {
+                                    value: '0',
+                                    label: '无效'
+                                  }     
+                                ],
+                                callTel:[
+                                {
+                                 value: '1',
+                                 label: '是'
+                                 },
+                                  {
+                                    value: '0',
+                                    label: '否'
+                                  }     
+                                ], 
+                                hasInvite:[
+                                 {
+                                   value: '0',
+                                    label: '未邀约'
+                                  },
+                                  {
+                                    value: '1',
+                                    label: '邀约'
+                                  }     
+                               ],
+                               clueRepeatStatus:[
+                                   {
+                                    value: '0',
+                                    label: '不重单'
+                                    },
+                                    {
+                                      value: '1',
+                                      label: '重单'
+                                     }     
+                                 ],
+                                 hastracking:[
+                                   {
+                                      value: '0',
+                                       label: '未跟访'
+                                    },
+                                    {
+                                      value: '1',
+                                      label: '跟访'
+                                      }     
+                                ],    
+                form: {
+                   	isTransfer:'',
+                	cluesta:'',
+                	customerPhone:'',
+                	customerName:'',
+                	cusStatus:'',
+                	cusLeve:'',
+                	updateTimeStart:'',
+                	updateTimeEnd:'',
+                	createTimeStart:'',
+                	createTimeEnd:'',
+                	assignTimeStart:'',
+                	assignTimeEnd:'',
+                	dayTel:'',
+                	hasInvite:'',
+                	repeatStatus:'',
+                	province:'',
+                	category:'',
+                	category:'',
+                	searchWord:'',
+                	address:'',
+                	trackingDay:'',
+                	teleorg:'',
+                	teleSaleId:'',
+                },    
+                cusLevelArr:[],
+                categoryArr:[],
+                provinceArr:[],
+                repeatCurClueArr:[],
+                cusStatusArr:[],
+                telePerArr:[],
+                orgTeleArr:[],
+                multseleSelection:[],
+                formLabelWidth: '150px',
+                dataTable: [],
+                saleInfoArr:[],
+                saleList:saleList,
+                saleGroupList:saleGroupList,
+                options: [{
+                    value: '选项1',
+                    label: '黄金糕'
+                }, {
+                    value: '选项2',
+                    label: '双皮奶'
+                }, {
+                    value: '选项3',
+                    label: '蚵仔煎'
+                }, {
+                    value: '选项4',
+                    label: '龙须面'
+                }, {
+                    value: '选项5',
+                    label: '北京烤鸭'
+                }],
+                value: '',//下拉选项默认值
+                recordTable:[
+                    {
+                        callTime:'',
+                        status:'',
+                        isConnect:'是',
+                        isNeedResource:'是',
+                        isInvite:'是',
+                        customerFocus:'',
+                        isReturnVisit:'是',
+                        nextTimeVisit:'',
+                        createPerson:'张三',
+                    },
+                    {
+                        callTime:'',
+                        status:'',
+                        isConnect:'否',
+                        isNeedResource:'否',
+                        isInvite:'否',
+                        customerFocus:'',
+                        isReturnVisit:'否',
+                        nextTimeVisit:'',
+                        createPerson:'李四',
+                    }
+                ],
+                repeatPhonesTable:[
+                    {
+                        resourceCreateTime:'',
+                        contactCreateTime:'',
+                        majordomo:'',
+                        adviser:'',
+                        majordomoTeam:'',
+                        resourceCreatePersonRole:'',
+                        resourceCreatePerson:'张三',
+                    },
+                    {
+                        resourceCreateTime:'',
+                        contactCreateTime:'',
+                        majordomo:'',
+                        adviser:'',
+                        majordomoTeam:'',
+                        resourceCreatePersonRole:'',
+                        resourceCreatePerson:'王五',
+                    }
+                ]
+            }        	  
+        },
+        methods: {
+        	
+        	//初始化页面
+        	 initTableData(){
+                 var param = {};
+                 var pageSize = this.pager.pageSize;
+                 var pageNum = this.pager.currentPage;
+                 param.pageNum=pageNum;
+                 param.pageSize=pageSize;
+                 param.isTransfer=this.form.isTransfer;
+                 param. status=this.form.cluesta; 
+                 param.phone=this.form.customerPhone ;
+                 param.cusName=this.form.customerName;
+                 param.customerStatus=this.form.cusStatus;
+                 param.cusLevel=this.form.cusLeve;
+                 param.updateTimeStart=this.form.updateTimeStart;
+                 param.updateTimeEnd=this.form.updateTimeEnd;
+                 param.createTimeStart=this.form.createTimeStart;
+                 param.createTimeEnd=this.form.createTimeEnd;
+                 param.assignTimeStart=this.form.assignTimeStart;
+                 param.assignTimeEnd=this.form.assignTimeEnd;
+                 param.dayTel=this.form.dayTel;
+                 param.hasInvite=this.form.hasInvite;
+                 param.repeatStatus=this.form.repeatStatus;
+                 param.province= this.form.province;
+                 param.category= this.form.category;
+                 param.address= this.form.address;
+                 param.searchWord= this.form.searchWord;
+                 param.trackingDay= this.form.trackingDay;
+                 param.teleorg= this.form.teleorg;
+                 if(null!=this.form.teleSaleId&&this.form.teleSaleId.length>0) {
+                  param.teleSaleId= this.form.teleSaleId.join(",");
+                }
+     		    axios.post('/tele/customerManager/findcustomerManagerPage',param).then(function (response) {
+     				var resobj= response.data;
+     		    	var pageData=resobj.data;
+     		    	customerManVM.pager.total=pageData.total;
+     		    	customerManVM.pager.currentPage = pageData.currentPage;
+     		    	customerManVM.pager.pageSize = pageData.pageSize;
+     		    	customerManVM.dataTable =pageData.data; 	
+     			})
+         	
+         	},
+         	openvicemanagerForm(){
+             var rows = this.multseleSelection;
+          	 if(rows.length <1){
+                    this.$message({
+                       message: '请选副总分发数据',
+                       type: 'warning'
+                     });
+                return;
+              }	
+         	  this.vicemanagerFormVisible=true;
+         	  if(this.$refs['formVicemanage']) {
+                 this.$refs['formVicemanage'].resetFields();
+               }
+         	},
+         	currentSalesDirector(selVal){
+                param={};
+                var directorArr = selVal.split(",");
+                param.orgId=directorArr[0];
+                axios.post('/clue/pendingAllocation/getSaleList',param).then(function (response) {
+                    customerManVM.saleInfoArr=response.data.data;
+                });
+         	},
+         	openassignrDig(){
+         	   var rows = this.multseleSelection;
+            	 if(rows.length <1){
+                      this.$message({
+                         message: '请选分配资源',
+                         type: 'warning'
+                       });
+                  return;
+                }	
+         	 this.allocateFormVisible = true;
+         	 if(this.$refs['formAllocat']) {
+                this.$refs['formAllocat'].resetFields();
+              }
+         	},
+         	opentransferForm(){
+         	   var rows = this.multseleSelection;
+             	  if(rows.length <1){
+                       this.$message({
+                          message: '请选择转移资源',
+                          type: 'warning'
+                        });
+                   return;
+                 }
+         	   this.transferFormVisible = true;
+              if(this.$refs['formTransfer']) {
+                    this.$refs['formTransfer'].resetFields();
+              }
+         	},
+         	handleSelectionChange(val) {
+                this.multseleSelection = val;
+            },
+        	
+            toogleClick(){
+                if(this.isShow){
+                    this.isShow=false
+                }else{
+                    this.isShow=true
+                }          
+            },
+            submitForm(formName) {
+                this.$refs[formName].validate((valid) => {
+                    if (valid) {
+                        alert('submit!');
+                    } else {
+                        console.log('error submit!!');
+                        return false;
+                    }
+                });
+            },
+            recordClick(row) {
+                console.log(row);
+                this.recordDialog=true;
+            },
+            repeatPhonesClick(row) {
+                console.log(row);
+                this.repeatPhonesDialog=true;
+            },
+            resetForm(formName) {
+                // alert(1);
+              this.$refs[formName].resetFields();
+              // this.allocateFormVisible = false;
+              // this.dialogFormTransferVisible = false;
+            },
+            submitAllocatForm(formName) {
+                this.$refs[formName].validate((valid) => {
+                  if (valid) {
+                   var telSale=this.formAllocat.telSales;
+                   var rows = this.multseleSelection;
+                   var idArr=[];
+                   for(var i=0;i<rows.length;i++){
+                	   idArr.push(rows[i].clueId);
+                   }
+                   var  param={};
+                   param.idList=idArr;
+                   param.teleSaleId=telSale;
+                   this.allocateFormVisible = false;
+                   axios.post('/clue/PendingAllocation/allocationClue', param)
+                   .then(function (response) {
+                	  customerManVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
+                	  		customerManVM.initTableData();
+                       }});
+                   }).catch(function (error) {
+                       console.log(error);
+                   });
+                   
+                  } else {
+                    console.log('error submit!!');
+                    return false;
+                  }
+                });
+            },
+            openTrackingDialog(cid){
+                var param = {};
+                param.clueId = cid;
+                axios.post('/aggregation/tracking/queryList', param)
+                    .then(function (response) {
+                        console.log(response.data)
+                        if (response.data.code == 0) {
+                            mainDivVM.trackingParam.tableData = response.data.data
+                            mainDivVM.trackingParam.trackingDialogVisible = true;
+                        } else {
+                            mainDivVM.$message.error(response.data.msg);
+                        }
+                    }).catch(function (error) {
+                    console.log(error);
+                });
+
+            },
+            submitTransferForm(formName) {
+                this.$refs[formName].validate((valid) => {
+                  if (valid) {
+                     var rows = this.multseleSelection;
+                	 var salesDirector=this.formTransfer.salesDirector;
+                     var idArr=[];
+                     for(var i=0;i<rows.length;i++){
+                  	   idArr.push(rows[i].clueId);
+                     }
+                     var  param={};
+                     param.idList=idArr;
+                      var directorArr = salesDirector.split(",");
+                     param.teleGorupId=directorArr[0];
+                     param.teleDirectorId=directorArr[1];
+                     this.transferFormVisible = false;
+                     axios.post('/clue/PendingAllocation/transferClue', param)
+                     .then(function (response) {
+                  	  customerManVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
+                  	  		customerManVM.initTableData();
+                         }});
+                      }).catch(function (error) {
+                         console.log(error);
+                     });
+                  } else {
+                    console.log('error submit!!');
+                    return false;
+                  }
+                });
+            },
+            submitBatchForm(formName) {
+                this.$refs[formName].validate((valid) => {
+                  if (valid) {
+                    alert('submit!');
+                  } else {
+                    console.log('error submit!!');
+                    return false;
+                  }
+                });
+            },
+            submitVicemanagerForm(formName) {
+                this.$refs[formName].validate((valid) => {
+                  if (valid) {
+                	 var rows = this.multseleSelection;
+                     var saleId=this.formVicemanage.salesstaff;
+                     var salesDirector=this.formVicemanage.salesDirector
+                      var idArr=[];
+                      for(var i=0;i<rows.length;i++){
+                   	   idArr.push(rows[i].clueId);
+                      }
+                      var  param={};
+                      param.idList=idArr;
+                       var directorArr = salesDirector.split(",");
+                      param.teleGorupId=directorArr[0];
+                      param.teleDirectorId=directorArr[1];
+                      param.teleSaleId=saleId;
+                      this.vicemanagerFormVisible = false;
+                      axios.post('/clue/PendingAllocation/ceoDistributionClue', param)
+                      .then(function (response) {
+                   	  customerManVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
+                   	  		customerManVM.initTableData();
+                          }});
+                       }).catch(function (error) {
+                          console.log(error);
+                      });
+                  } else {
+                    console.log('error submit!!');
+                    return false;
+                  }
+                });
+            },  
+        },
+        mounted(){
+            document.getElementById('myCustom').style.display = 'block';
+        },
+        created(){
+    		//初始化数据列表
+    		 this.initTableData();
+    		//客户状态
+           var param={};
+            param.groupCode="customerStatus"; 
+            axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {  
+            	customerManVM.cusStatusArr=response.data.data;
+             });
+            param={};
+            param.groupCode="customerLevel"; 
+            axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {  
+            	customerManVM.cusLevelArr=response.data.data;
+             });
+            //初始资源类别数据
+            param={};
+          	param.groupCode="clueCategory";
+            axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {  
+            	customerManVM.categoryArr=response.data.data;
+            });
+            //初始化省份
+            param={};
+          	param.type="0";
+            axios.post('/area/sysregion/querySysRegionByParam',param).then(function (response) {  
+            	customerManVM.provinceArr=response.data.data.data;
+            });
+            
+            // 初始化电销人员
+            axios.post('/tele/clueMyCustomerInfo/listByOrgAndRole').then(function (response) {
+                console.log(response.data.data)
+                customerManVM.telePerArr=response.data.data;
+            });
+            
+            // 初始化电销组
+            axios.post('/tele/customerManager/listOrgInfo').then(function (response) {
+                console.log(response.data.data)
+                customerManVM.orgTeleArr=response.data.data;
+            });
+             
+           
+    		
+    	}
+    })
+</script>
+</html>
