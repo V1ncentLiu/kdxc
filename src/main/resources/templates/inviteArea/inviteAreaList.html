@@ -24,7 +24,7 @@
         <el-col :span="12" style="text-align: right;">
             <!-- <el-row class="marginB10"> -->              
   				<div class="block">
-  					<el-select filterable v-model="businessGroupId" placeholder="请选择商务小组" style="margin-right: 10px;">
+  					<el-select filterable v-model="businessGroupId" placeholder="请选择商务小组" style="margin-right: 10px;" clearable>
   					    <el-option
   					      v-for="item in swList"
   					      :key="item.id"
@@ -32,7 +32,7 @@
   					      :value="item.id">
   					    </el-option>
   					</el-select>
-  					<el-select filterable v-model="telemarketingTeamId" placeholder="请选择电销组" style="margin-right: 10px;">
+  					<el-select filterable v-model="telemarketingTeamId" placeholder="请选择电销组" style="margin-right: 10px;" clearable>
 					    <el-option
 					      v-for="item in dxList"
 					      :key="item.id"
@@ -125,7 +125,7 @@
             </el-row>
             </el-form>
             <div slot="footer" class="dialog-footer">
-            <el-button @click="submitExport"><span data="1" id="showButton">导入</span></el-button>
+            <el-button :disabled="confirmBtnDisabled" @click="submitExport"><span data="1" id="showButton">导入</span></el-button>
             </div>
         </el-dialog>
         
@@ -149,6 +149,7 @@
         	addOrModifyDialogTitle:"",
         	dialogFormVisible:false,
         	exportFormVisible:false,
+        	confirmBtnDisabled:false,
         	dataTable:[],
         	exportdataTable:[],
         	errorexportdataTable:[],
@@ -338,6 +339,9 @@
                    	// alert("11 "+num);
                      // $("#totalNumId").html("预览数据，共"+num+"条数据");
                    	orgVM.dataNum="预览数据，共"+num+"条数据"
+                   	if(num ==0){
+                   		orgVM.confirmBtnDisabled = true;
+                   	}
                     
                     
           	  }else{
@@ -351,6 +355,7 @@
           	  this.$message({message:'上传失败',type:'error'});
             }
             , submitUpload() {//提交文件
+            	orgVM.confirmBtnDisabled = false;
             	this.loading = true;
             	var fileList = this.fileList;
             	if(!fileList || fileList.length!=1){

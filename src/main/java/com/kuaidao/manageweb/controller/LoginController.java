@@ -289,8 +289,6 @@ public class LoginController {
                     errorMessage = "账号锁定，请联系管理员修改！";
                     return new JSONResult<>().fail("1", errorMessage);
                 }
-                SecurityUtils.getSubject().getSession().setAttribute("isUpdatePassword",
-                        loginReq.getIsUpdatePassword());
                 SecurityUtils.getSubject().getSession().setAttribute("wsUrlHttp", wsUrlHttp);
                 SecurityUtils.getSubject().getSession().setAttribute("wsUrlHttps", wsUrlHttps);
                 SecurityUtils.getSubject().getSession().setAttribute("mqUserName", mqUserName);
@@ -558,21 +556,22 @@ public class LoginController {
             RedirectAttributes redirectAttributes) throws Exception {
         Subject subject = SecurityUtils.getSubject();
         Object attribute = subject.getSession().getAttribute("user");
+        UserInfoDTO user = null;
+        if (attribute != null && attribute instanceof UserInfoDTO) {
+
+            user = (UserInfoDTO) subject.getSession().getAttribute("user");
+        }
         if (subject.isAuthenticated()) {
             subject.logout();
         }
-        if (attribute != null && attribute instanceof UserInfoDTO) {
-
-            UserInfoDTO user = (UserInfoDTO) subject.getSession().getAttribute("user");
-            if (!"1".equals(type)) {
-                // 退出成功，保存退出状态
-                UserInfoReq update = new UserInfoReq();
-                update.setId(user.getId());
-                update.setIsLogin(Constants.IS_LOGIN_DOWN);
-                userInfoFeignClient.update(update);
-            } else {
-                subject.getSession().setAttribute("isShowLogoutBox", type);
-            }
+        if (!"1".equals(type)) {
+            // 退出成功，保存退出状态
+            UserInfoReq update = new UserInfoReq();
+            update.setId(user.getId());
+            update.setIsLogin(Constants.IS_LOGIN_DOWN);
+            userInfoFeignClient.update(update);
+        } else {
+            subject.getSession().setAttribute("isShowLogoutBox", type);
         }
         return "redirect:/login";
     }
