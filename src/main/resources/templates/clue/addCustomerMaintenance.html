@@ -52,6 +52,7 @@
                         <el-form-item label="手机号：" prop="customerPhone" :label-width="formLabelWidth">
                            <!-- <el-input v-model="form.customerPhone" autocomplete="off" style="width: 60%;" @keyup.native="number" maxlength="11"></el-input> -->
                            <!-- <span style="padding-left: 5px;color: rgb(0, 114, 255);cursor: pointer;" @click="dialogFormVisible = true">+手机号</span> -->
+                           <a href="tel:15000000000">15000000000</a>
                            <el-button type="primary" @click="dialogFormVisible = true"><i class="el-icon-plus"></i>手机号<!-- 查看多个手机号 --></el-button>
                         </el-form-item>
                     </el-col>
@@ -275,6 +276,7 @@
                           :before-remove="beforeRemove"
                           :limit="1"
                           :on-exceed="handleExceed"
+                          :before-upload="beforeFormUpload"
                           :file-list="fileList">
                           <el-button size="small" type="primary">点击上传</el-button>
                         </el-upload>
@@ -559,14 +561,23 @@
                               size="mini"
                               type="primary"
                               icon="el-icon-caret-right"
+                              class="playBtn"
                               @click="handlePlay(scope.$index, scope.row)"
-                              ></el-button>
+                              >
+                              	<audio loop="loop">
+                                    <source src="http://fs.w.kugou.com/201902211552/efd2e515657eadeb6f38671d9b3ecf9c/G013/M04/06/08/rYYBAFUMN1yAA7XtADdy078twac672.mp3" type="audio/mpeg">
+                                </audio>
+                                <svg class="el-icon-pause-svg" style="width: 12px; height: 13px;vertical-align: middle;fill: currentColor;overflow: hidden;display: none; " viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="2024"><path d="M288 128C270.336 128 256 142.336 256 160l0 768C256 945.664 270.336 960 288 960S320 945.664 320 928l0-768C320 142.336 305.664 128 288 128zM672 128C654.336 128 640 142.336 640 160l0 768c0 17.664 14.336 32 32 32s32-14.336 32-32l0-768C704 142.336 689.664 128 672 128z" p-id="2025"></path></svg>
+                              </el-button>
                             <el-button
                               size="mini"
                               type="primary"
                               icon="el-icon-download"
+                              class="downloadMp3"
                               @click="handleDownload(scope.$index, scope.row)"
-                              ></el-button>
+                              >
+                              	<a href="http://fs.w.kugou.com/201902211552/efd2e515657eadeb6f38671d9b3ecf9c/G013/M04/06/08/rYYBAFUMN1yAA7XtADdy078twac672.mp3" download style="display: none;"><p>下载</p></a>
+                              </el-button>
                           </template>
                         </el-table-column>
                     </el-table>
@@ -933,6 +944,16 @@ var proSelect=[[${proSelect}]];//项目
             beforeRemove(file, fileList) {
               return this.$confirm(`确定移除 ${ file.name }？`);
             },
+            beforeFormUpload(file) { //上传格式大小的限制
+                const isJPG = file.type === 'image/jpeg';
+                const isPNG = file.type === 'image/png';
+                const isMP3 = file.type === 'audio/mp3';
+                const isLt200 = file.size / 1024 < 200; //200k;
+                if( !isJPG || !isPNG || !isMP3 ){
+                    this.$message.error('上传文件只能是 JPG/PNG/mp3 格式!');
+                }
+                return (isJPG || isPNG || isMP3) && isLt200;           
+            },
             editRecord() {
                 console.log("编辑跟进记录");
                 this.lineFormShow = true;
@@ -1001,10 +1022,23 @@ var proSelect=[[${proSelect}]];//项目
                 });
             },
             handlePlay(index, row) { //通话记录播放btn
+            	$("audio").hide();
                 console.log(index, row);
+                var show = $(".el-icon-pause-svg:eq("+index+")").css("display");
+                if( $(".el-icon-pause-svg:eq("+index+")").css("display") == 'none' ){
+                    $("button.playBtn:eq("+index+") i").remove();
+                    $(".el-icon-pause-svg:eq("+index+")").css("display","block");
+                    $("audio").get(index).play();
+                }else{
+                    $("button.playBtn:eq("+index+")").append('<i class="el-icon-caret-right"></i>');
+                    $(".el-icon-pause-svg:eq("+index+")").css("display","none");
+                    $("audio").get(index).pause();
+                }
             },
             handleDownload(index, row) { //通话记录下载btn
                 console.log(index, row);
+                $(".downloadMp3:eq("+index+") a").prop("download","true");
+                $(".downloadMp3:eq("+index+") a>p").trigger("click");
             },
         },
         mounted(){
