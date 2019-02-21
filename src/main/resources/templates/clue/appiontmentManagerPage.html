@@ -131,25 +131,25 @@
         <table-pagination :pager="pager" @change="searchTable"></table-pagination>
     </el-row>
       <!-- dialog -->
-    <el-dialog title="编辑邀约来访" :visible.sync="appiontmentFormVisible"  @close="closeAddCustomFieldDialog">
+    <el-dialog title="编辑邀约来访" :visible.sync="appiontmentFormVisible"  @close="closeAddCustomFieldDialog" >
         <el-form :model="appiontmentForm">
             <el-form-item label="地区：" :label-width="formLabelWidth" prop="area">
-                <el-select v-model="appiontmentForm.area" placeholder="请选择" style="width: 70%;">
+                <el-select v-model="appiontmentForm.area" placeholder="请选择" style="width: 70%;" @change="currentBusGroup" >
                     <el-option
                         v-for="item in areaOptions"
-                        :key="item.value"
-                        :label="item.label"
-                        :value="item.value">
+                        :key="item.id"
+                        :label="item.name"
+                        :value="item.id">
                     </el-option>
                 </el-select>
             </el-form-item>
             <el-form-item label="分公司：" :label-width="formLabelWidth" prop="busCompay">
-                <el-select v-model="appiontmentForm.busCompay" placeholder="请选择" style="width: 70%;">
+                <el-select v-model="appiontmentForm.busCompay" placeholder="请选择" style="width: 70%;" @change="currentBusSale">
                     <el-option
                         v-for="item in busCompayOptions"
-                        :key="item.value"
-                        :label="item.label"
-                        :value="item.value">
+                        :key="item.id"
+                        :label="item.name"
+                        :value="item.id">
                     </el-option>
                 </el-select>
             </el-form-item>
@@ -239,9 +239,6 @@
 var orgList=[[${orgList}]];//电销组
 var userList=[[${userList}]];//电销创业顾问
 var projectList=[[${projectList}]];//品尝项目
-var areaList=[[${areaList}]];//区域
-var companyList=[[${companyList}]];//分公司
-var busDirectorList=[[${busDirectorList}]];//商务总监
 var appiontmentVM = new Vue({
         el: '#appiontmentManage',
         data: {
@@ -255,11 +252,12 @@ var appiontmentVM = new Vue({
 	            },
 	            appiontmentForm: {
 	            	id:'',
-	            	appiontmentName:'',
-	            	groupName:'',
-                	appiontmentAddress:'',
-                    phoneNumber:'',
-                    website:''
+	            	area:'',
+	            	busCompay:'',
+	            	busDirectorId:'',
+	            	tasteProjectId:'',
+	            	reserveTime:'',
+	            	remark:''
                 },
 	            dataTable:[],
 	            recordTable:[],
@@ -267,9 +265,9 @@ var appiontmentVM = new Vue({
 	            teleGorupOptions:orgList,
 	            teleSaleOptions:userList,
 	            projectOptions:projectList,
-	            areaOptions:areaList,
-	            busCompayOptions:companyList,
-	            busDirectorOptions:busDirectorList,
+	            areaOptions:[],
+	            busCompayOptions:[],
+	            busDirectorOptions:[],
 	            appiontmentFormVisible: false,
 	            recordDialog:false,
                 repeatPhonesDialog:false,
@@ -340,6 +338,7 @@ var appiontmentVM = new Vue({
                   .then(function (response) {
                       var data =  response.data;
                       if(data.code=='0'){
+                    	  console.log( data.data);
                     	  appiontmentVM.appiontmentForm= data.data;
                       }else{
                       	console.error(data);
@@ -411,6 +410,32 @@ var appiontmentVM = new Vue({
                  	  text="有效资源"
                    }
                    return text;
+               },
+               //查询地区（商务中心）
+               currentBusArea(){
+            	   var param={};
+                 	param.orgType="11";
+                   axios.post('/organization/organization/queryOrgByType',param).then(function (response) {  
+                	   appiontmentVM.areaOptions=response.data.data;
+                   });
+               },
+               //查询分公司（商务组）
+               currentBusGroup(){
+                   param={};
+                 	param.parentId=appiontmentVM.appiontmentForm.area;
+                 	param.orgType="2";
+                   axios.post('/organization/organization/queryOrgByType',param).then(function (response) {  
+                	   appiontmentVM.busCompayOptions=response.data.data;
+                });
+               },
+               //查询商务总监
+               currentBusSale(seleVal){
+               	param={};
+                  	param.orgId=seleVal;
+                  	param.roleCode="SWZJ";
+                   axios.post('/user/userManager/listByOrgAndRole' ,param).then(function (response) {  
+                	   appiontmentVM.busDirectorOptions=response.data.data;
+                   });
                },
                saveAppiontment(formName){//保存自定义字段
                   this.$refs[formName].validate((valid) => {
@@ -539,6 +564,7 @@ var appiontmentVM = new Vue({
         created(){
             console.info("create method");
             this.searchTable();
+            this.currentBusArea();
            
         },
         mounted(){
