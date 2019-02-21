@@ -262,7 +262,9 @@ function callingTrState(token){
 	
 	var callSource = sessionStorage.getItem("callSource");
 	if(callSource==='1'){//首页头部外呼
-		$("#outboundCallStartTime").val(token.stateStartTime);
+		//$("#outboundCallStartTime").val(token.stateStartTime);
+		//10分钟后红色字体显示
+		outboundCallIntervalTimer("outboundCallTime",10,2);
 	}
 	
 	
@@ -453,7 +455,7 @@ function three_party_consultation_buttonState() {//咨询三方
 }
 
 function arrangementState(token) {//整理
-	var callSource = sessionStorage.getItem("callSource");
+	/*var callSource = sessionStorage.getItem("callSource");
 	if(callSource==='1'){//首页头部外呼
 		var startTime = $("#outboundCallStartTime").val();
 		var endTime = token.stateStartTime;
@@ -461,7 +463,7 @@ function arrangementState(token) {//整理
 		
 		$('#outboundCallTime').html(talkTime);
 		$('#outboundCallTimeDiv').show();
-	}
+	}*/
 	
 }
 
