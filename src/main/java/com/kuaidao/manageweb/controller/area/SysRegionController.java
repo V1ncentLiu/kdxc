@@ -73,10 +73,8 @@ public class SysRegionController {
      */
     @PostMapping("/querySysRegionDTOByParam")
     @ResponseBody
-    public JSONResult<PageBean<SysRegionDTO>> queryOrgDataByParam(int pageNum, int pageSize,
+    public JSONResult<PageBean<SysRegionDTO>> queryOrgDataByParam(
             @RequestBody SysRegionDTO queryDTO) {
-//        queryDTO.setPageNum(pageNum);
-//        queryDTO.setPageSize(pageSize);
         return sysRegionFeignClient.querySysRegionDTOByParam(queryDTO);
     }
     /**

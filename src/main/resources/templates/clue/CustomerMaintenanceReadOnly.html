@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html>
+<head th:include="_header_include::frag(~{::title},~{},~{})" >
+    <title>客户详情信息</title>
+    <meta charset="UTF-8">
+    <style type="text/css">
+        .paddingTB { padding: 4px 0px; }
+        .paddingL55 { padding-left: 55px; }
+        .el-form-item.lineInherit .el-form-item__content{ line-height: inherit!important; }
+        @media screen and (width:1920px) {
+            .paddingL55 .el-date-editor.el-input { width: 218px; }
+            /*.paddingL55 div.el-form-item:nth-of-type(2) { width: 100px; }*/
+            .paddingL55 div.el-form-item, .paddingL55 .el-input--mini .el-input__inner { width: 202px; }
+            .paddingL55 div.el-form-item:last-child { width: 186px; text-align: center; }
+        }
+        @media screen and (width:1366px) {
+            .paddingL55 { line-height: 28px; }
+            .paddingL55 .el-date-editor.el-input { width: 145px; }
+            /*.paddingL55 div.el-form-item:nth-of-type(2) { width: 100px; }*/
+            .paddingL55 div.el-form-item, .paddingL55 .el-input--mini .el-input__inner { width: 133px; }
+            .paddingL55 div.el-form-item:last-child { width: 106px; text-align: center; }
+        }
+        @media screen and (max-width:1365px) {
+            .paddingL55 { line-height: 28px; }
+            .paddingL55 .el-date-editor.el-input { width: 145px; }
+            /*.paddingL55 div.el-form-item:nth-of-type(2) { width: 100px; }*/
+            .paddingL55 div.el-form-item, .paddingL55 .el-input--mini .el-input__inner { width: 133px; }
+            .paddingL55 div.el-form-item:last-child { width: 106px; text-align: center; }
+        }
+    </style>
+</head>
+<body>
+<div id="addCustomer" class="addCustomer mainPadding" style="display: none;"> 
+
+    <el-row class="borderbox">
+        <el-form :model="form" :rules="rules" ref="form" class="padding20">
+            <div class="marginB20 fs16 paddingT20">基本信息&nbsp;&nbsp;&nbsp;&nbsp;<font color="red">线索ID：<span th:text="${clueId}"></span></font><span style="float:right"><a href="javascript:history.go(-1)" style="color: #1a53a1">返回上一页</a></span></div>
+            <div class="borderbox padding20">
+                <el-row>
+                    <el-col :span="8">
+                        <el-form-item label="客户姓名：" prop="customerName" :label-width="formLabelWidth" >
+                            <el-button type="text" disabled>{{form.customerName}}</el-button>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="8">
+                        <el-form-item label="手机号：" prop="customerPhone" :label-width="formLabelWidth" :required="true">
+                           <!-- <el-input v-model="form.customerPhone" autocomplete="off" style="width: 60%;" @keyup.native="number" maxlength="11"></el-input> -->
+                           <!-- <span style="padding-left: 5px;color: rgb(0, 114, 255);cursor: pointer;" @click="dialogFormVisible = true">+手机号</span> -->
+                            <a href="tel:15000000000"><font color="red">15000000000</font></a>
+                           <el-button type="primary" @click="dialogFormVisible = true"><i class="el-icon-plus"></i>查看多个手机号</el-button>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="8">
+                        <el-form-item label="性别：" :label-width="formLabelWidth" :required="true">
+                           <el-select v-model="form.customerSex" placeholder="请选择" style="width: 100%;" :disabled="true">
+                                <el-option
+                                    v-for="item in optsex"
+                                    :key="item.value"
+                                    :label="item.label"
+                                    :value="item.value">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="8">
+                        <el-form-item label="微信：" :label-width="formLabelWidth" :required="true">
+                            <el-button type="text" disabled>{{form.ishasWx}}</el-button>
+                           <span style="padding-left: 5px;color: rgb(0, 114, 255);cursor: pointer;" @click="dialogFormImg = true">查看二维码</span>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="8">
+                        <el-form-item label="餐饮经验：" :label-width="formLabelWidth" :required="true">
+                           <el-select v-model="form.experience" placeholder="请选择" style="width: 100%;" :disabled="true">
+                                <el-option
+                                    v-for="item in CateringExperienceArr"
+                                    :key="item.value"
+                                    :label="item.name"
+                                    :value="item.value">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="8">
+                        <el-form-item label="年龄：" :label-width="formLabelWidth" :required="true">
+                            <el-button type="text" disabled>{{form.customerAge}}</el-button>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="8">
+                        <el-form-item label="职业：" :label-width="formLabelWidth" :required="true">
+                           <el-select v-model="form.customerJob" placeholder="请选择" style="width: 100%;" :disabled="true">
+                                <el-option
+                                    v-for="item in occupationArr"
+                                    :key="item.value"
+                                    :label="item.name"
+                                    :value="item.value">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="8">
+                        <el-form-item label="合伙人：" :label-width="formLabelWidth" :required="true">
+                           <el-select v-model="form.customerPartner" placeholder="请选择" style="width: 100%;" :disabled="true">
+                                <el-option
+                                    v-for="item in partnerArr"
+                                    :key="item.value"
+                                    :label="item.name"
+                                    :value="item.value">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="8">
+                        <el-form-item label="选址情况：" :label-width="formLabelWidth" :required="true">
+                           <el-select v-model="form.address" placeholder="请选择" style="width: 100%;" :disabled="true">
+                                <el-option
+                                    v-for="item in optionAddressArr"
+                                    :key="item.value"
+                                    :label="item.name"
+                                    :value="item.value">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="8">
+                        <el-form-item label="开店紧迫性：" :label-width="formLabelWidth"  :required="true">
+                           <!-- <el-input v-model="form.urgency" autocomplete="off" style='width: 60%;'> -->
+                            <el-date-picker
+                                style='width: 60%;'
+                                v-model="form.urgency"
+                                type="month"
+                                :disabled="true"
+                                placeholder="选择月">
+                            </el-date-picker>
+                            <!--</el-input>--><span style="padding-left: 5px;" >之前启动</span>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="8">
+                        <el-form-item label="客户级别：" :label-width="formLabelWidth" :required="true">
+                           <el-select v-model="form.customerLevel" placeholder="请选择" style="width: 100%;" :disabled="true">
+                                <el-option
+                                    v-for="item in customerLevelArr"
+                                    :key="item.value"
+                                    :label="item.name"
+                                    :value="item.value">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="8">
+                        <el-form-item label="QQ：" :label-width="formLabelWidth" :required="true">
+                            <el-button type="text" disabled>{{form.qq}}</el-button>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+            </div>
+            <div class="marginB20 fs16 paddingT20">投资意向信息</div>
+            <div class="borderbox padding20">
+                <el-row>
+                    <el-col :span="8">
+                        <el-form-item label="投资金额：" :label-width="formLabelWidth" :required="true">
+                           <el-select v-model="form.money" placeholder="请选择" style="width: 100%;" :disabled="true">
+                                <el-option
+                                    v-for="item in ussmArr"
+                                    :key="item.value"
+                                    :label="item.name"
+                                    :value="item.value">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="8">
+                        <el-form-item label="店面大小：" :label-width="formLabelWidth" :required="true">
+                           <el-select v-model="form.area" placeholder="请选择" style="width: 100%;" :disabled="true">
+                                <el-option
+                                    v-for="item in StorefrontAreaArr"
+                                    :key="item.value"
+                                    :label="item.name"
+                                    :value="item.value">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+
+                <el-row>
+                    <el-col :span="8">
+                        <el-form-item label="意向品类：" :label-width="formLabelWidth" :required="true">
+                           <el-select v-model="form.intentionCategory" placeholder="请选择" style="width: 100%;" :disabled="true">
+                                <el-option
+                                    v-for="item in IntentionalCategoryArr"
+                                    :key="item.value"
+                                    :label="item.name"
+                                    :value="item.value">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="16">
+                        <el-form-item label="意向项目：" :label-width="formLabelWidth" :required="true">
+                            <el-radio v-model="form.radioProject" label="1" :disabled="true">内部项目</el-radio>
+                            <el-select v-model="form.insideProject" placeholder="请选择" :disabled="true">
+                                <el-option
+                                    v-for="item in proSelect"
+                                    :key="item.id"
+                                    :label="item.projectName"
+                                    :value="item.id">
+                                </el-option>
+                            </el-select>
+                            <el-radio v-model="form.radioProject" label="2" :disabled="true">外部项目</el-radio>
+                            <el-input v-model="form.outsideProject" autocomplete="off" style="width: 25%;" :disabled="true"></el-input>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="24">
+                        <el-form-item label="开店区域" :label-width="formLabelWidth" style="width: 33.3%;float: left;" :required="true">
+                            <el-button type="text" disabled>{{form.province}}{{form.city}}{{form.district}}</el-button>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+            </div>
+            <div class="marginB20 fs16 paddingT20">跟进记录</div>
+            <div class="borderbox padding20">
+                <el-row>
+                    <el-table
+                        ref="multipleTable"
+                        :data="tableDataC2"
+                        tooltip-effect="dark"
+                        style="width: 100%"
+                        border
+                     >
+                        <el-table-column
+                                type="index" label="序号"
+                                header-align="center" align="center" width="100">
+                        </el-table-column>
+                        <el-table-column
+                          prop="callTime"
+                          label="拨打时间"
+                          align="center">
+                        </el-table-column>
+                        <el-table-column
+                          prop="customerStatusName"
+                          label="客户状态"
+                          align="center">
+                        </el-table-column>
+                        <el-table-column
+                          prop="isCall"
+                          label="是否接通"
+                          align="center">
+	                     <template slot-scope="scope">
+	                      <div v-if="scope.row.isCall === 0">
+	                                                                                未接通
+	                      </div>
+	                       <div v-else-if="scope.row.isCall ===1">
+	                                                                                已接通
+	                       </div>
+	                     </template>
+                        </el-table-column>
+                        <el-table-column
+                          prop="resourceStatus"
+                          label="资源有效性"
+                          align="center">
+                          <template slot-scope="scope">
+	                      <div v-if="scope.row.resourceStatus === 0">
+	                                                                           无效资源
+	                      </div>
+	                       <div v-else-if="scope.row.resourceStatus ===1">
+	                                                                           有效资源
+	                       </div>
+	                     </template>
+                        </el-table-column>
+                        <el-table-column
+                                prop="invitationStatus"
+                                label="资源有效性"
+                                align="center">
+                            <template slot-scope="scope">
+                                <div v-if="scope.row.invitationStatus === 0">
+                                    否
+                                </div>
+                                <div v-else-if="scope.row.invitationStatus ===1">
+                                    是
+                                </div>
+                            </template>
+                        </el-table-column>
+
+                        <el-table-column
+                          prop="focusPoint"
+                          label="客户关注点"
+                          align="center">
+                        </el-table-column>
+                        <el-table-column
+                          prop="visitStatus"
+                          label="是否继续回访"
+                          align="center">
+                          <template slot-scope="scope">
+	                      <div v-if="scope.row.visitStatus === 0">
+	                                                                               否
+	                      </div>
+	                       <div v-else-if="scope.row.visitStatus ===1">
+	                                                                             是
+	                       </div>
+	                     </template>
+                        </el-table-column>
+                        <el-table-column
+                          prop="nextVisitTime"
+                          label="下次回访时间"
+                          align="center">
+                        </el-table-column>
+                        <el-table-column
+                          prop="createUserName"
+                          label="创建人"
+                          align="center">
+                        </el-table-column>
+                    </el-table>
+                </el-row>
+            </div>
+            <div class="marginB20 fs16 paddingT20">资源信息</div>
+            <div class="borderbox padding20">
+                <el-row>
+                    <el-col :span="8">
+                        <el-form-item label="资源类型：" :label-width="formLabelWidth" :required="true">
+                            <el-button type="text" disabled>{{clueBase.typeName}}</el-button>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="8">
+                        <el-form-item label="资源类别：" :label-width="formLabelWidth" :required="true">
+                            <el-button type="text" disabled>{{clueBase.categoryName}}</el-button>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="8">
+                        <el-form-item label="广告位：" :label-width="formLabelWidth" :required="true">
+                            <el-button type="text" disabled>{{clueBase.sourceTypeName}}</el-button>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="8">
+                        <el-form-item label="媒介：" :label-width="formLabelWidth" :required="true">
+                            <el-button type="text" disabled>{{clueBase.sourceTypeName}}</el-button>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="8">
+                        <el-form-item label="搜索词：" :label-width="formLabelWidth" :required="true">
+                           <el-button type="text" disabled>{{clueBase.searchWord}}</el-button>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="8">
+                        <el-form-item label="资源项目：" :label-width="formLabelWidth" :required="true">
+                            <el-button type="text" disabled>{{clueBase.projectName}}</el-button>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="8">
+                        <el-form-item label="留言时间：" :label-width="formLabelWidth" :required="true">
+                            <el-button type="text" disabled>{{clueBase.messageTime}}</el-button>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="8">
+                        <el-form-item label="留言重点：" :label-width="formLabelWidth" :required="true">
+                            <el-button type="text" disabled>{{clueBase.messagePoint}}</el-button>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+            </div>
+            <div class="marginB20 fs16 paddingT20">通话记录</div>
+            <div class="borderbox padding20">
+                <el-row>
+                    <el-table
+                        ref="multipleTable"
+                        :data="tableDataC3"
+                        tooltip-effect="dark"
+                        style="width: 100%"
+                        border
+                        @selection-change="handleSelectionChange"
+                     >
+                        <el-table-column
+                          type="index"
+                          width="55"
+                          label="序号"
+                          align="center">
+                        </el-table-column>
+                        <el-table-column
+                          prop="name"
+                          label="姓名"
+                          align="center">
+                        </el-table-column>
+                        <el-table-column
+                          prop="role"
+                          label="角色"
+                          align="center">
+                        </el-table-column>
+                        <el-table-column
+                          prop="callType"
+                          label="通话类型"
+                          align="center">
+                        </el-table-column>
+                        <el-table-column
+                          prop="startTime"
+                          label="拨打时间"
+                          align="center">
+                        </el-table-column>
+                        <el-table-column
+                          prop="callStatus"
+                          label="接通情况"
+                          align="center">
+                        </el-table-column>
+                        <el-table-column
+                          prop="talkTime"
+                          label="接通时长"
+                          align="center">
+                        </el-table-column>
+                        <el-table-column
+                          label="操作"
+                          align="center">
+                          <template slot-scope="scope">
+                            <el-button
+                              size="mini"
+                              type="primary"
+                              icon="el-icon-caret-right"
+                              class="playBtn"
+                              @click="handlePlay(scope.$index, scope.row)"
+                              >
+                              	<audio loop="loop">
+                                    <source src="http://fs.w.kugou.com/201902211552/efd2e515657eadeb6f38671d9b3ecf9c/G013/M04/06/08/rYYBAFUMN1yAA7XtADdy078twac672.mp3" type="audio/mpeg">
+                                </audio>
+                                <svg class="el-icon-pause-svg" style="width: 12px; height: 13px;vertical-align: middle;fill: currentColor;overflow: hidden;display: none; " viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="2024"><path d="M288 128C270.336 128 256 142.336 256 160l0 768C256 945.664 270.336 960 288 960S320 945.664 320 928l0-768C320 142.336 305.664 128 288 128zM672 128C654.336 128 640 142.336 640 160l0 768c0 17.664 14.336 32 32 32s32-14.336 32-32l0-768C704 142.336 689.664 128 672 128z" p-id="2025"></path></svg>
+                              </el-button>
+                            <el-button
+                              size="mini"
+                              type="primary"
+                              icon="el-icon-download"
+                              class="downloadMp3"
+                              @click="handleDownload(scope.$index, scope.row)"
+                              >
+                              	<a href="http://fs.w.kugou.com/201902211552/efd2e515657eadeb6f38671d9b3ecf9c/G013/M04/06/08/rYYBAFUMN1yAA7XtADdy078twac672.mp3" download style="display: none;"><p>下载</p></a>
+                              </el-button>
+                          </template>
+                        </el-table-column>
+                    </el-table>
+                </el-row>
+            </div>
+            <div class="marginB20 fs16 paddingT20">流转人员</div>
+            <div class="borderbox padding20">
+                <el-row>
+                    <el-table
+                        ref="multipleTable"
+                        :data="tableDataC4"
+                        tooltip-effect="dark"
+                        style="width: 100%"
+                        border
+                        @selection-change="handleSelectionChange"
+                     >
+                        <el-table-column
+                          type="index"
+                          width="55"
+                          label="序号"
+                          align="center">
+                        </el-table-column>
+                        <el-table-column
+                          prop="roleName"
+                          label="服务人员角色"
+                          align="center">
+                        </el-table-column>
+                        <el-table-column
+                          prop="userName"
+                          label="服务人员姓名"
+                          align="center">
+                        </el-table-column>
+                        <el-table-column
+                          prop="telRuleValue"
+                          label="分配规则（名称）"
+                          align="center">
+                        </el-table-column>
+                        <el-table-column
+                          prop="createTime"
+                          label="服务时间"
+                          align="center">
+                        </el-table-column>
+                    </el-table>
+            </div>
+        </el-form>
+    </el-row>
+
+    <!-- dialog -->
+    <el-dialog title="添加手机号" :visible.sync="dialogFormVisible">
+        <el-form :model="dialogForm" :rules="dialogRules" ref="dialogForm">
+            <el-form-item label="手机号2：" :label-width="formLabelWidth">
+                <span>15111111111</span>
+                <span><i class="el-icon-phone-outline" style="font-size: 20px;color: rgb(0, 114, 255);cursor: pointer;"></i></span>
+            </el-form-item>
+            <el-form-item label="手机号3：" prop="phoneNum" :label-width="formLabelWidth">
+                <el-input v-model="dialogForm.phoneNum" autocomplete="off" style="width: 60%;"></el-input>
+            </el-form-item>
+        </el-form>
+        <div slot="footer" class="f-tac">            
+            <el-button type="primary" @click="submitDialogForm('dialogForm')">提 交</el-button>
+            <el-button @click="dialogFormVisible = false">取 消</el-button>
+        </div>
+    </el-dialog> 
+    <!-- dialog -->
+    <el-dialog title="二维码" :visible.sync="dialogFormImg">
+        <div class="padding20" style="text-align: center;">
+            <img src="images/errorIcon.jpg" alt="" style="width: 250px;height: 250px;">
+        </div>
+    </el-dialog>    
+</div>
+</body>
+<!-- import Vue before Element -->
+ <div th:include="_footer_include :: #jsLib"></div>
+<script th:inline="javascript" >
+var clueId=[[${clueId}]];//线索ID
+var customer=[[${customer}]];//客户信息
+var base=[[${base}]];//资源基本信息
+var intention=[[${intention}]];//资源投资意向信息
+var proSelect=[[${proSelect}]];//项目
+var circulationList=[[${circulationList}]];//资源流转记录
+var trackingList=[[${trackingList}]];//跟访记录
+var isEdit=false;
+var clueFileList=[[${clueFileList}]];//上传文件
+ var addCustomerVM=   new Vue({
+        el: '#addCustomer',
+        data: function() {
+            return {       
+                isDisabled:true,//默认不可点击         
+                radioProject:'',
+                dialogFormVisible: false,
+                dialogFormImg:false,
+                form: {                    
+                    customerName:customer.cusName,
+                    customerPhone:'',
+                    customerSex:customer.sex+"",
+                    ishasWx:customer.wechat,
+                    experience:customer.hasExperience+"",
+                    customerAge:customer.age,
+                    customerJob:customer.profession+"",
+                    customerPartner:customer.partnerType+"",
+                    address:customer.hasAddress+"",
+                    urgency:customer.urgentDate,
+                    customerLevel:customer.cusLevel+"",
+                    qq:customer.qq,
+                    money:intention.advanceAmount+"",
+                    area:intention.area+"",
+                    intentionCategory:intention.purType+"",
+                    radioProject:intention.purProjectType+"",
+                    insideProject:intention.purInProject+"",
+                    outsideProject:intention.purOutProject,
+                    province:intention.province,
+                    city:intention.city,
+                    district:intention.district,
+                   
+                },
+                clueBase:base,
+                categoryArr:[],
+                typeArr:[],
+                mediumArry:[],
+                adsenseArr:[],
+                CateringExperienceArr:[],
+                occupationArr:[],
+                partnerArr:[],
+                optionAddressArr:[],
+                customerLevelArr:[],
+                IntentionalCategoryArr:[],
+                ussmArr:[],
+                StorefrontAreaArr:[],
+                provinceArr:[],
+                cityArr:[],
+                districtArr:[],
+                proSelect:proSelect,
+                formLabelWidth: '120px',
+                rules:{
+                    customerName: [
+                        { required: true, message: '客户姓名不能为空', trigger: 'blur' }
+                    ],
+                    customerPhone: [
+                        /* { required: true, message: '手机号不能为空', trigger: 'blur' },
+                        { validator:function(rule,value,callback){                 
+                            if(/^[0-9]*$/.test(value) == false){
+                               callback(new Error("请输入数字"));
+                            }else{
+                               callback();
+                            } 
+                            callback();
+                        }, trigger: 'blur'} */
+                    ]
+                },
+                statusOptions: [{
+                    value: '0',
+                    label: '推广列表'
+                }, {
+                    value: '1',
+                    label: '电销列表'
+                }],
+                optsex: [{
+                    value: '1',
+                    label: '男'
+                }, {
+                    value: '2',
+                    label: '女'
+                }],
+                options1: [{
+                    value: '0',
+                    label: '电销组'
+                }, {
+                    value: '1',
+                    label: '媒介'
+                }],
+                dialogForm: {
+                    phoneNum:''
+                },
+                dialogRules:{
+                    phoneNum: [
+                        { required: true, message: '请输入手机号码', trigger: 'blur' }
+                    ]
+                },
+                multipleSelection:[],//上传资料
+                multipleTrackingSelection:[],
+                fileList: [],
+                cusStatusArr:[],
+                tableDataC1: clueFileList,//文件记录
+                dialingTime:'',//跟进记录
+                lineFormShow: false,
+                formInline: { 
+                	id:'',
+                	callTime: '',
+                	customerStatus: '',
+                	isCall:'',
+                	resourceStatus:'',
+                	focusPoint:'',
+                	visitStatus:'',
+                	nextVisitTime:'',
+                },
+                tableDataC2: trackingList,//跟进记录
+                tableDataC3: [],  //通话记录
+                tableDataC4:circulationList//流转记录
+            }             
+        },
+        methods: {
+             rebackClue(){
+            	 window.location.href="/tele/clueMyCustomerInfo/initmyCustomer"; 	
+            },
+            submitDialogForm(dialogForm) {
+                this.$refs[dialogForm].validate((valid) => {
+                    if (valid) {
+                        console.log('submit!!');
+                        // 关闭弹窗
+                        this.dialogFormVisible = false; 
+                    } else {
+                        console.log('error submit!!');
+                        return false;
+                    }
+                });
+            },
+            number(){
+    　　　                       this.form.customerPhone=this.form.customerPhone.replace(/[^\.\d]/g,'');
+               this.form.customerPhone=this.form.customerPhone.replace('.','');
+                                 　　},
+            /*toggleSelection(rows) { 
+                if (rows) {
+                  rows.forEach(row => {
+                    this.$refs.multipleTable.toggleRowSelection(row);
+                  });
+                } else {
+                  this.$refs.multipleTable.clearSelection();
+                }
+            },*/
+            handleSelectionChange(val) {  //上传资料
+                this.multipleSelection = val;
+            },
+            handleTrackingSelection(val){
+               this.multipleTrackingSelection=val;
+            },
+            handleRemove(file, fileList) {
+                console.log(file, fileList);
+            },
+            handlePreview(file) {
+              console.log(file);
+            },
+            handleExceed(files, fileList) {
+              this.$message.warning(`当前限制选择 3 个文件，本次选择了 ${files.length} 个文件，共选择了 ${files.length + fileList.length} 个文件`);
+            },
+            beforeRemove(file, fileList) {
+              return this.$confirm(`确定移除 ${ file.name }？`);
+            },
+            beforeFormUpload(file) { //上传格式大小的限制
+                const isJPG = file.type === 'image/jpeg';
+                const isPNG = file.type === 'image/png';
+                const isMP3 = file.type === 'audio/mp3';
+                const isLt200 = file.size / 1024 < 200; //200k;
+                if( !isJPG || !isPNG || !isMP3 ){
+                    this.$message.error('上传文件只能是 JPG/PNG/mp3 格式!');
+                }
+                return (isJPG || isPNG || isMP3) && isLt200;           
+            },
+            currentProvince(selVal){
+               var  param={};
+                param.type="1";
+                param.name=selVal;
+                axios.post('/area/sysregion/querySysRegionByParam',param).then(function (response) {  
+                  addCustomerVM.cityArr=response.data.data.data;
+                });  	
+             },
+             currentCity(selVal){
+            	 var param={};
+                 param.type="2";
+                 param.name=selVal;
+                 axios.post('/area/sysregion/querySysRegionByParam',param).then(function (response) {  
+                   addCustomerVM.districtArr=response.data.data.data;
+                 });  	
+              },
+
+            handleOperateFn(index, row) { //上传资源"查看图片、下载录音"
+                console.log(index, row);
+            },
+            addRecord() { //添加记录
+                this.tableDataC2.push({
+                    dialingTime:`<el-form-item label="" size="mini">
+                                    <el-select v-model="formInline.region" placeholder="客户状态">
+                                      <el-option label="区域一" value="shanghai"></el-option>
+                                      <el-option label="区域二" value="beijing"></el-option>
+                                    </el-select>
+                                  </el-form-item>`,
+                    customerStatus: '',
+                    dialing:'',
+                    resourceAvailability:'',
+                    customerfocus:'',
+                    visited:'',
+                    visitedNextTime:'',
+                    creater:''
+                });
+            },
+            handlePlay(index, row) { //通话记录播放btn
+            	$("audio").hide();
+                console.log(index, row);
+                var show = $(".el-icon-pause-svg:eq("+index+")").css("display");
+                if( $(".el-icon-pause-svg:eq("+index+")").css("display") == 'none' ){
+                    $("button.playBtn:eq("+index+") i").remove();
+                    $(".el-icon-pause-svg:eq("+index+")").css("display","block");
+                    $("audio").get(index).play();
+                }else{
+                    $("button.playBtn:eq("+index+")").append('<i class="el-icon-caret-right"></i>');
+                    $(".el-icon-pause-svg:eq("+index+")").css("display","none");
+                    $("audio").get(index).pause();
+                }
+            },
+            handleDownload(index, row) { //通话记录下载btn
+                console.log(index, row);
+                $(".downloadMp3:eq("+index+") a").prop("download","true");
+                $(".downloadMp3:eq("+index+") a>p").trigger("click");
+            },
+        },
+        mounted(){
+            document.getElementById('addCustomer').style.display = 'block';
+        },
+        created(){
+            //初始资源类别数据
+          	var  param={};
+          	param.groupCode="clueCategory";
+            axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {  
+           	 addCustomerVM.categoryArr=response.data.data;
+            });
+          	 //初始化资源类型数据
+       	   param={};
+       	   param.groupCode="clueType";
+           axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {  
+             addCustomerVM.typeArr=response.data.data;
+            });
+           
+          //初始化资源类型数据
+      	   param={};
+      	   param.groupCode="clueType";
+          axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {  
+            addCustomerVM.typeArr=response.data.data;
+           });
+          //初始化媒介
+    	   param={};
+    	   param.groupCode="medium";
+          axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {  
+           addCustomerVM.mediumArry=response.data.data;
+         });
+          //广告位
+          param={};
+          param.groupCode="adsense"; 
+          axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {  
+              addCustomerVM.adsenseArr=response.data.data;
+           });
+          
+          //餐饮经验
+          param={};
+          param.groupCode="CateringExperience"; 
+          axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {  
+              addCustomerVM.CateringExperienceArr=response.data.data;
+           });
+          //职业
+          param={};
+          param.groupCode="occupation"; 
+          axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {  
+              addCustomerVM.occupationArr=response.data.data;
+           });
+          
+          //合伙人
+          param={};
+          param.groupCode="partner"; 
+          axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {  
+              addCustomerVM.partnerArr=response.data.data;
+           });
+          
+          //选址情况
+          param={};
+          param.groupCode="optionAddress"; 
+          axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {  
+              addCustomerVM.optionAddressArr=response.data.data;
+           });
+          //客户级别
+          param={};
+          param.groupCode="customerLevel"; 
+          axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {  
+              addCustomerVM.customerLevelArr=response.data.data;
+           });
+          //意向品类
+          param={};
+          param.groupCode="IntentionalCategory"; 
+          axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {  
+              addCustomerVM.IntentionalCategoryArr=response.data.data;
+           });
+        //投资金额
+          param={};
+          param.groupCode="ussm"; 
+          axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {  
+              addCustomerVM.ussmArr=response.data.data;
+           });
+          //店面大小
+          param={};
+          param.groupCode="StorefrontArea"; 
+          axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {  
+              addCustomerVM.StorefrontAreaArr=response.data.data;
+           });
+         //客户状态 
+          param={};
+          param.groupCode="customerStatus"; 
+          axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {  
+        	  addCustomerVM.cusStatusArr=response.data.data;
+           });
+         //获取省
+          param={};
+          param.type="0";
+          axios.post('/area/sysregion/querySysRegionByParam',param).then(function (response) {  
+       	   addCustomerVM.provinceArr=response.data.data.data;
+          });
+         
+       
+    	}
+    })
+</script>
+</html>

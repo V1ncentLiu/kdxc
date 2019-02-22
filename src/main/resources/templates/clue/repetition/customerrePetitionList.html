@@ -15,7 +15,7 @@
     </el-breadcrumb>
     <el-row class="marginB10">
         <el-col :xs="12" :sm="16" :md="16" :lg="18" :xl="12">
-            <el-button type="primary" @click="cancelButton">撤销申请</el-button>
+            <!--< el-button type="primary" @click="cancelButton">撤销申请</el-button> -->
             <el-button type="primary" @click="detailButton">查看详情</el-button>
         </el-col>
         </el-row>
@@ -24,7 +24,7 @@
               
 				<div class="block">
 					
-  					<el-select filterable v-model="status" placeholder="处理状态">
+  					<el-select filterable v-model="status" placeholder="处理状态" clearable>
 					    <el-option
 					      v-for="item in statusList"
 					      :key="item.value"
@@ -32,7 +32,7 @@
 					      :value="item.value">
 					    </el-option>
   					</el-select>
-  					<el-select filterable v-model="dealStatus" placeholder="是否重单">
+  					<el-select filterable v-model="dealStatus" placeholder="是否重单" clearable>
 					    <el-option
 					      v-for="item in repetitionList"
 					      :key="item.value"
@@ -63,7 +63,7 @@
                     <el-table-column align="center" prop="statusResult" label="处理状态" ></el-table-column>
                     <el-table-column align="center" prop="applyUser" label="重单顾问姓名"></el-table-column>
                 </el-table>
-                 <table-pagination :pager="pager"  @change="search"></table-pagination>
+                 <table-pagination :pager="pager"  @change="queryRepeatPage"></table-pagination>
             </el-row>
       
     </el-row>
@@ -71,25 +71,25 @@
     <!-- dialog -->
     <el-dialog title="重单详情" :visible.sync="dialogFormVisible">
         <el-form   class="width500">
-            <el-form-item label="重单手机号：" :label-width="formLabelWidth" >
+            <el-form-item label="重单手机号：" :label-width="formLabelWidth" >{{cusPhoneId}}
             </el-form-item>
-            <el-form-item label="备注：" :label-width="formLabelWidth" >
+            <el-form-item label="备注：" :label-width="formLabelWidth" >{{remarkId}}
             </el-form-item>
 					
-            <el-form-item label="处理状态：" :label-width="formLabelWidth" >
+            <el-form-item label="处理状态：" :label-width="formLabelWidth" >{{statusId}}
                 
             </el-form-item>
-            <el-form-item label="处理结果："  :label-width="formLabelWidth" >
+            <el-form-item label="处理结果："  :label-width="formLabelWidth" >{{dealStatusId}}
                 
             </el-form-item>
-            <el-form-item label="分配比例：" :label-width="formLabelWidth" >
+            <el-form-item label="分配比例：" v-show="isShow" :label-width="formLabelWidth" >
                 <el-table 
                     ref="multipleTable"
                     tooltip-effect="dark"
                     empty-text="无数据"
                     style="width: 100%"
                     border
-                    :data="dataTable"  >
+                    :data="repetitionDetailList"  >
                     <el-table-column align="center" prop="telemarketingTeam" label="顾问姓名"></el-table-column>
                     <el-table-column align="center" prop="telemarketingTeam" label="比例"></el-table-column>
                 </el-table>
@@ -112,6 +112,10 @@
         	cusPhone:"",
         	status:"",
         	dealStatus:"",
+        	cusPhoneId:"",
+        	remarkId:"",
+        	dealStatusId:"",
+        	statusId:"",
         	dialogFormVisible:false,
         	repetitionList:"",
         	exportFormVisible:false,
@@ -120,7 +124,9 @@
         	addOrModifyDialogTitle:"",
         	dialogFormVisible:false,
         	dataTable:[],
+        	isShow:true,
         	multipleSelection: [],
+        	repetitionDetailList:[],
         	statusList:[
         		 {
                		value: '0',
@@ -168,7 +174,7 @@
 	                  	  alert(response.data.msg);
 	                  	  return ;
                    }else{
-                  	 orgVM.dataTable =response.data.data.data; 
+                  	 orgVM.dataTable = response.data.data.data; 
                   	 orgVM.pager.currentPage= response.data.data.currentPage;
                   	 orgVM.pager.total= response.data.data.total;
                    } 
@@ -181,7 +187,10 @@
                 
             } ,
         	detailButton(){
+            	orgVM.isShow =false;
             	var rows = this.multipleSelection;
+            	this.dialogFormVisible = true;
+            	orgVM.cusPhone ="22222222222222"
                 if(rows.length  !=1){
                     this.$message({
                        message: '请选择一条数据进行修改',
@@ -189,13 +198,34 @@
                      });
                     return;
                 }
-        		this.dialogFormVisible = true;
+        		
+        		 var str = "";
+                 for ( var i = 0; i <rows.length; i++){
+               	  str = rows[i].id
+                 }
         		var param={};
-		        param.ids=ids;
-                axios.post('/invitearea/deleInviteArea',param).then(function (response) {
+		        param.id=str;
+                axios.post('/clue/cluerepetition/queryRepeatById',param).then(function (response) {
                   	  console.log(response);
+                  	  
                       if(null !==response && response.data !=null && response.data.code=='0'){
-                    	  window.location.href="/invitearea/inviteAreaList"; 
+                    	  var clueRepetitionDTO = response.data.data;
+                    	  orgVM.cusPhoneId = clueRepetitionDTO.cusPhone;
+                    	  orgVM.remarkId = clueRepetitionDTO.remark;
+                    	  if(clueRepetitionDTO.status ==0){
+                    		  orgVM.statusId = "待处理" ;
+                    	  }else{
+                    		  orgVM.statusId = "已处理" ;
+                    		  if(clueRepetitionDTO.dealStatus ==0){
+                    			  orgVM.dealStatusId = "不重单";
+                    		  }else{
+                    			  orgVM.dealStatusId = "重单";
+                    			  if(response.data.data.clueRepetitionDTOs !=null){
+                              		orgVM.repetitionDetailList = response.data.data.clueRepetitionDTOs; 
+                              	 }
+                    		  }
+                    		  
+                    	  }
                      }else{
                     	 alert(response.data.data.msg);
 	                  	  	return ;

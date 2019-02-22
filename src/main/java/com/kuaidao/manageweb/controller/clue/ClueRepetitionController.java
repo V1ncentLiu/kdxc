@@ -1,6 +1,5 @@
 package com.kuaidao.manageweb.controller.clue;
 
-import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -11,18 +10,11 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
 
 import com.kuaidao.aggregation.dto.clue.ClueRepetitionDTO;
-import com.kuaidao.aggregation.dto.project.ProjectInfoDTO;
-import com.kuaidao.aggregation.dto.project.ProjectInfoPageParam;
-import com.kuaidao.aggregation.dto.telemarkting.TelemarketingLayoutDTO;
-import com.kuaidao.common.constant.OrgTypeConstant;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.manageweb.feign.clue.ClueRepetitionFeignClient;
-import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
-import com.kuaidao.sys.dto.organization.OrganizationRespDTO;
 
 /**
 * 重单管理
@@ -64,9 +56,8 @@ public class ClueRepetitionController {
      */
     @RequestMapping("/queryRepeatById")
     @ResponseBody
-    public JSONResult<PageBean<ClueRepetitionDTO>> queryRepeatById(HttpServletRequest request,@RequestBody ClueRepetitionDTO clueRepetitionDTO) {
-    	JSONResult<PageBean<ClueRepetitionDTO>> list = clueRepetitionFeignClient.queryRepeatList(clueRepetitionDTO);
-    	return list;
+    public JSONResult<ClueRepetitionDTO> queryRepeatById(HttpServletRequest request,@RequestBody ClueRepetitionDTO clueRepetitionDTO) {
+    	return clueRepetitionFeignClient.queryRepeatById(clueRepetitionDTO);
     }
     
     /**
@@ -100,7 +91,7 @@ public class ClueRepetitionController {
     @RequestMapping("/dealPetitionList")
     @ResponseBody
     public JSONResult<PageBean<ClueRepetitionDTO>> dealPetitionList(HttpServletRequest request,@RequestBody ClueRepetitionDTO clueRepetitionDTO) {
-    	JSONResult<PageBean<ClueRepetitionDTO>> list = clueRepetitionFeignClient.queryRepeatList(clueRepetitionDTO);
+    	JSONResult<PageBean<ClueRepetitionDTO>> list = clueRepetitionFeignClient.dealPetitionList(clueRepetitionDTO);
     	return list;
     }
     
@@ -112,7 +103,9 @@ public class ClueRepetitionController {
     @RequestMapping("/dealPetitionById")
     @ResponseBody
     public JSONResult<PageBean<ClueRepetitionDTO>> dealPetitionById(HttpServletRequest request,@RequestBody ClueRepetitionDTO clueRepetitionDTO) {
-    	JSONResult<PageBean<ClueRepetitionDTO>> list = clueRepetitionFeignClient.queryRepeatList(clueRepetitionDTO);
+    	JSONResult<PageBean<ClueRepetitionDTO>> list = clueRepetitionFeignClient.dealPetitionById(clueRepetitionDTO);
     	return list;
     }
+    
+ 
 }
