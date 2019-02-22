@@ -1,5 +1,6 @@
 package com.kuaidao.manageweb.feign.call;
 
+import java.util.List;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,6 +47,14 @@ public interface CallRecordFeign {
      */
     @PostMapping("/listTmCallReacordByParams")
     JSONResult<PageBean<CallRecordRespDTO>> listTmCallReacordByParams(@RequestBody CallRecordReqDTO myCallRecordReqDTO);
+   
+    /**
+     * 根据clueId 或 customerPhone 查询 通话记录
+     * @param myCallRecordReqDTO 参数 clueid 或 customerPhone 
+     * @return
+     */
+    @PostMapping("/listTmCallReacordByParamsNoPage")
+    JSONResult<List<CallRecordRespDTO>> listTmCallReacordByParamsNoPage(@RequestBody CallRecordReqDTO myCallRecordReqDTO);
     
     @Component
     static class HystrixClientFallback implements CallRecordFeign {
@@ -74,6 +83,11 @@ public interface CallRecordFeign {
         @Override
         public JSONResult<PageBean<CallRecordRespDTO>> listTmCallReacordByParams(CallRecordReqDTO myCallRecordReqDTO) {
             return fallBackError("查询通话记录");
+        }
+        @Override
+        public JSONResult<List<CallRecordRespDTO>> listTmCallReacordByParamsNoPage(
+                CallRecordReqDTO myCallRecordReqDTO) {
+            return fallBackError("根据资源ID或手机号查询通话记录-不分页");
         }
         
         
