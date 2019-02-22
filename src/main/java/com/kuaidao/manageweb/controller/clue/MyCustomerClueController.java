@@ -169,6 +169,7 @@ public class MyCustomerClueController {
 		JSONResult<PageBean<CallRecordRespDTO>> callRecord = callRecordFeign.listTmCallReacordByParams(call);
 		// 资源通话记录
 		if (callRecord != null && callRecord.SUCCESS.equals(callRecord.getCode()) && callRecord.getData() != null) {
+
 			request.setAttribute("callRecord", callRecord.getData());
 		}
 		ClueQueryDTO queryDTO = new ClueQueryDTO();
@@ -226,7 +227,7 @@ public class MyCustomerClueController {
 		}
 		return "clue/addCustomerMaintenance";
 	}
-
+	
 	@RequestMapping("/customerInfoReadOnly")
 	public String customerInfoReadOnly(HttpServletRequest request, @RequestParam String clueId) {
 
@@ -312,13 +313,11 @@ public class MyCustomerClueController {
 	}
 
 
-
-
-
 	/**
 	 * 查询资源文件上传记录
 	 * 
 	 * @param request
+	 * @param clueId
 	 * @return
 	 */
 	@RequestMapping("/findClueFile")
@@ -327,12 +326,12 @@ public class MyCustomerClueController {
 		// 获取已上传的文件数据
 		return myCustomerFeignClient.findClueFile(dto);
 	}
-	
-	
+
 	/**
 	 * 删除已上传的资源文件
 	 * 
 	 * @param request
+	 * @param clueId
 	 * @return
 	 */
 	@RequestMapping("/deleteClueFile")
@@ -341,8 +340,7 @@ public class MyCustomerClueController {
 		// 获取已上传的文件数据
 		return myCustomerFeignClient.deleteClueFile(dto);
 	}
-	
-	
+
 	/**
 	 * 删除已上传的资源文件
 	 * 
@@ -354,6 +352,7 @@ public class MyCustomerClueController {
 	@ResponseBody
 	public JSONResult<String> uploadClueFile(HttpServletRequest request, @RequestBody ClueFileDTO dto) {
 		// 获取已上传的文件数据
+
 		return myCustomerFeignClient.uploadClueFile(dto);
 	}
 
@@ -361,6 +360,7 @@ public class MyCustomerClueController {
 	 * 查询跟进记录数据
 	 * 
 	 * @param request
+	 * @param clueId
 	 * @return
 	 */
 	@RequestMapping("/findClueTracking")
@@ -378,12 +378,19 @@ public class MyCustomerClueController {
 	 * 保存跟进记录数据
 	 * 
 	 * @param request
+	 * @param clueId
 	 * @return
 	 */
 	@RequestMapping("/saveClueTracking")
 	@ResponseBody
 	public JSONResult<List<TrackingRespDTO>> saveClueTracking(HttpServletRequest request,
 			@RequestBody TrackingInsertOrUpdateDTO dto) {
+
+		Subject subject = SecurityUtils.getSubject();
+		UserInfoDTO user = (UserInfoDTO) subject.getSession().getAttribute("user");
+		if (null != user) {
+			dto.setCreateUser(user.getId());
+		}
 		trackingFeignClient.saveTracking(dto);
 		TrackingReqDTO queryDto = new TrackingReqDTO();
 		dto.setClueId(dto.getClueId());
@@ -394,6 +401,7 @@ public class MyCustomerClueController {
 	 * 删除资源跟进记录
 	 * 
 	 * @param request
+	 * @param clueId
 	 * @return
 	 */
 	@RequestMapping("/deleteClueTracking")
@@ -410,6 +418,7 @@ public class MyCustomerClueController {
 	 * 修改资源跟进记录
 	 * 
 	 * @param request
+	 * @param clueId
 	 * @return
 	 */
 	@RequestMapping("/updateClueTracking")
@@ -426,6 +435,7 @@ public class MyCustomerClueController {
 	 * 预约来访页面跳转
 	 * 
 	 * @param request
+	 * @param clueId
 	 * @return
 	 */
 	@RequestMapping("/inviteCustomer")
@@ -445,6 +455,7 @@ public class MyCustomerClueController {
 	 * 预约来访数据保存
 	 * 
 	 * @param request
+	 * @param clueId
 	 * @return
 	 */
 	@RequestMapping("/inviteCustomerSave")
@@ -571,6 +582,15 @@ public class MyCustomerClueController {
 			relation.setTeleGorupId(user.getOrgId());
 
 			dto.setClueRelate(relation);
+
+			UserOrgRoleReq userRole = new UserOrgRoleReq();
+			userRole.setRoleCode(RoleCodeEnum.DXZJ.name());
+			userRole.setOrgId(user.getOrgId());
+			JSONResult<List<UserInfoDTO>> userInfoJson= userInfoFeignClient.listByOrgAndRole(userRole);
+			if (userInfoJson != null && userInfoJson.SUCCESS.equals(userInfoJson.getCode()) && userInfoJson.getData() != null) {
+				//relation.setTeleDirectorId(teleDirectorId);
+			 
+			}
 
 		}
 

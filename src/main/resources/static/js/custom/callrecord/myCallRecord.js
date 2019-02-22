@@ -185,8 +185,27 @@ var myCallRecordVm = new Vue({
     	downloadAudio(url){
     		location.href=url;
     	},
-    	switchSound(id,url){
-    		switchSound(id,url);
+    	switchSoundBtn(id,url){
+    		//switchSound(id,url);
+    		 var param = {};
+    		 param.id=id;
+    	   	 axios.post('/call/callRecord/getRecordFile',param)
+             .then(function (response) {
+            	 var data =  response.data
+                 if(data.code=='0'){
+                	 var url = data.data;
+                	 switchSound(id,url);
+                     
+                 }else{
+                	 console.error(data);
+                	 myCallRecordVm.$message({message:data.msg,type:'error'});
+                 }
+             
+             })
+             .catch(function (error) {
+                  console.log(error);
+             }).then(function(){
+             });
     	}
     },
     created(){

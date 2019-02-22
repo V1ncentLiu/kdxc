@@ -56,9 +56,8 @@ public class ClueRepetitionController {
      */
     @RequestMapping("/queryRepeatById")
     @ResponseBody
-    public JSONResult<PageBean<ClueRepetitionDTO>> queryRepeatById(HttpServletRequest request,@RequestBody ClueRepetitionDTO clueRepetitionDTO) {
-    	JSONResult<PageBean<ClueRepetitionDTO>> list = clueRepetitionFeignClient.queryRepeatById(clueRepetitionDTO);
-    	return list;
+    public JSONResult<ClueRepetitionDTO> queryRepeatById(HttpServletRequest request,@RequestBody ClueRepetitionDTO clueRepetitionDTO) {
+    	return clueRepetitionFeignClient.queryRepeatById(clueRepetitionDTO);
     }
     
     /**

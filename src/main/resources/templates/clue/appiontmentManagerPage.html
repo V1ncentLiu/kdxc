@@ -19,7 +19,7 @@
 		        <el-button type="primary" @click="toUpdateAppiontment">编辑</el-button>
 		    </shiro:hasPermission>
     		<shiro:hasPermission name="aggregation:appiontmentManager:view">
-		        <el-button type="primary" >预览客户信息</el-button>
+		        <el-button type="primary" @click="viewCustomerInfo">预览客户信息</el-button>
 		    </shiro:hasPermission>
     		<shiro:hasPermission name="aggregation:appiontmentManager:delete">
 		        <el-button type="primary" @click="deleteAppiontment">删除</el-button>
@@ -561,6 +561,18 @@ var appiontmentVM = new Vue({
                   .catch(function (error) {
                        console.log(error);
                   });
+              },
+              //预览客户信息
+              viewCustomerInfo() {
+            	  var rows = this.multipleSelection;
+                  if(rows.length!=1){
+                      this.$message({
+                         message: '请选择一条数据进行预览',
+                         type: 'warning'
+                       });
+                      return;
+                  }
+            	  window.open("/tele/clueMyCustomerInfo/customerInfoReadOnly?clueId="+rows[0].clueId);
               },
               //查看重复手机号资源
               repeatPhonesClick(row) {
