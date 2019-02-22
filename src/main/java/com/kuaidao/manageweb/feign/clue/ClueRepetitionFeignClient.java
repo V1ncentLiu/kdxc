@@ -45,7 +45,7 @@ public interface ClueRepetitionFeignClient {
 	 * @return
 	 */
 	@PostMapping("/queryRepeatById")
-	public JSONResult<PageBean<ClueRepetitionDTO>> queryRepeatById(@RequestBody ClueRepetitionDTO menuDTO);
+	public JSONResult<ClueRepetitionDTO> queryRepeatById(@RequestBody ClueRepetitionDTO menuDTO);
 	
 	/**
 	 * 撤销重单申请
@@ -93,7 +93,7 @@ public interface ClueRepetitionFeignClient {
 
 
 		@Override
-		public JSONResult<PageBean<ClueRepetitionDTO>> queryRepeatById(ClueRepetitionDTO menuDTO) {
+		public JSONResult<ClueRepetitionDTO> queryRepeatById(ClueRepetitionDTO menuDTO) {
 			// TODO Auto-generated method stub
 			return fallBackError("根据id查询重单详情失败");
 		}
