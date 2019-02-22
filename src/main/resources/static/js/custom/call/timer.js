@@ -11,7 +11,7 @@ function intervalTimer(id,noticeSecs,timeUnit) {
 	var n_sec = 0; //秒
 	var n_min = 0; //分
 	var n_hour = 0; //时
- 	return setInterval(function () {		 
+	outboundCallIntervalTimer =  setInterval(function () {		 
 		var str_sec = n_sec;
 		var str_min = n_min;
 		var str_hour = n_hour;
