@@ -44,7 +44,7 @@ function intervalTimer(id,noticeSecs,timeUnit) {
 			n_min++;
 		}
 		if (n_min > 59) {
-			n_sec = 0;
+			n_min = 0;
 			n_hour++;
 		} 	 
  	}, 1000);
