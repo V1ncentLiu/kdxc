@@ -240,8 +240,7 @@ public class MyCustomerClueController {
 		// 获取已上传的文件数据
 		return myCustomerFeignClient.findClueFile(dto);
 	}
-	
-	
+
 	/**
 	 * 删除已上传的资源文件
 	 * 
@@ -255,8 +254,7 @@ public class MyCustomerClueController {
 		// 获取已上传的文件数据
 		return myCustomerFeignClient.deleteClueFile(dto);
 	}
-	
-	
+
 	/**
 	 * 删除已上传的资源文件
 	 * 
@@ -268,6 +266,7 @@ public class MyCustomerClueController {
 	@ResponseBody
 	public JSONResult<String> uploadClueFile(HttpServletRequest request, @RequestBody ClueFileDTO dto) {
 		// 获取已上传的文件数据
+
 		return myCustomerFeignClient.uploadClueFile(dto);
 	}
 
@@ -300,6 +299,12 @@ public class MyCustomerClueController {
 	@ResponseBody
 	public JSONResult<List<TrackingRespDTO>> saveClueTracking(HttpServletRequest request,
 			@RequestBody TrackingInsertOrUpdateDTO dto) {
+
+		Subject subject = SecurityUtils.getSubject();
+		UserInfoDTO user = (UserInfoDTO) subject.getSession().getAttribute("user");
+		if (null != user) {
+			dto.setCreateUser(user.getId());
+		}
 		trackingFeignClient.saveTracking(dto);
 		TrackingReqDTO queryDto = new TrackingReqDTO();
 		dto.setClueId(dto.getClueId());
@@ -491,6 +496,16 @@ public class MyCustomerClueController {
 			relation.setTeleGorupId(user.getOrgId());
 
 			dto.setClueRelate(relation);
+
+			UserOrgRoleReq userRole = new UserOrgRoleReq();
+			userRole.setRoleCode(RoleCodeEnum.DXZJ.name());
+			userRole.setOrgId(user.getOrgId());
+			JSONResult<List<UserInfoDTO>> userInfoJson= userInfoFeignClient.listByOrgAndRole(userRole);
+			if (userInfoJson != null && userInfoJson.SUCCESS.equals(userInfoJson.getCode()) && userInfoJson.getData() != null) {
+				
+				//relation.setTeleDirectorId(teleDirectorId);
+			 
+			}
 
 		}
 
