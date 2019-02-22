@@ -9,6 +9,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -46,6 +47,7 @@ public class CustomerManagerController {
 	@Autowired
 	private UserInfoFeignClient userInfoFeignClient;
 
+    @RequiresPermissions("customerManager:view")
 	@RequestMapping("/initcustomerManager")
 	public String initmyCustomer(HttpServletRequest request, Model model) {
 
