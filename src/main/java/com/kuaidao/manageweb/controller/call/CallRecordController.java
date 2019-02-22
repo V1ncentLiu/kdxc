@@ -14,10 +14,12 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+import com.kuaidao.aggregation.dto.call.CallRecordCountDTO;
 import com.kuaidao.aggregation.dto.call.CallRecordReqDTO;
 import com.kuaidao.aggregation.dto.call.CallRecordRespDTO;
 import com.kuaidao.common.constant.RoleCodeEnum;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
+import com.kuaidao.common.entity.IdEntity;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.manageweb.feign.call.CallRecordFeign;
@@ -187,5 +189,26 @@ public class CallRecordController {
         return callRecordFeign.listTmCallReacordByParamsNoPage(myCallRecordReqDTO);
     }
     
+    /**
+     *  获取天润通话记录地址 根据 记录Id
+     * @param reqDTO
+     * @return
+     */
+    @PostMapping("/getRecordFile")
+    @ResponseBody
+    public JSONResult<String> getRecordFile(@RequestBody IdEntity idEntity){
+        return callRecordFeign.getRecordFile(idEntity);
+    }
+    
+    /**
+     * 根据clueId List 分组统计 拨打次数
+     * @param myCallRecordReqDTO
+     * @return
+     */
+    @PostMapping("/countCallRecordTotalByClueIdList")
+    @ResponseBody
+    public JSONResult<List<CallRecordCountDTO>> countCallRecordTotalByClueIdList(@RequestBody CallRecordReqDTO myCallRecordReqDTO){
+        return callRecordFeign.countCallRecordTotalByClueIdList(myCallRecordReqDTO);
+    }
     
 }

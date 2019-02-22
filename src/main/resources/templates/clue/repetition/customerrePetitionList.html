@@ -24,7 +24,7 @@
               
 				<div class="block">
 					
-  					<el-select filterable v-model="status" placeholder="处理状态">
+  					<el-select filterable v-model="status" placeholder="处理状态" clearable>
 					    <el-option
 					      v-for="item in statusList"
 					      :key="item.value"
@@ -32,7 +32,7 @@
 					      :value="item.value">
 					    </el-option>
   					</el-select>
-  					<el-select filterable v-model="dealStatus" placeholder="是否重单">
+  					<el-select filterable v-model="dealStatus" placeholder="是否重单" clearable>
 					    <el-option
 					      v-for="item in repetitionList"
 					      :key="item.value"
@@ -63,7 +63,7 @@
                     <el-table-column align="center" prop="statusResult" label="处理状态" ></el-table-column>
                     <el-table-column align="center" prop="applyUser" label="重单顾问姓名"></el-table-column>
                 </el-table>
-                 <table-pagination :pager="pager"  @change="search"></table-pagination>
+                 <table-pagination :pager="pager"  @change="queryRepeatPage"></table-pagination>
             </el-row>
       
     </el-row>
@@ -209,7 +209,7 @@
                   	  console.log(response);
                   	  
                       if(null !==response && response.data !=null && response.data.code=='0'){
-                    	  var clueRepetitionDTO = response.data.data.data;
+                    	  var clueRepetitionDTO = response.data.data;
                     	  orgVM.cusPhoneId = clueRepetitionDTO.cusPhone;
                     	  orgVM.remarkId = clueRepetitionDTO.remark;
                     	  if(clueRepetitionDTO.status ==0){
@@ -220,8 +220,8 @@
                     			  orgVM.dealStatusId = "不重单";
                     		  }else{
                     			  orgVM.dealStatusId = "重单";
-                    			  if(response.data.data.data.clueRepetitionDTOs !=null){
-                              		orgVM.repetitionDetailList = response.data.data.data.clueRepetitionDTOs; 
+                    			  if(response.data.data.clueRepetitionDTOs !=null){
+                              		orgVM.repetitionDetailList = response.data.data.clueRepetitionDTOs; 
                               	 }
                     		  }
                     		  

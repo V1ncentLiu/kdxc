@@ -8,9 +8,11 @@ import org.springframework.cloud.netflix.feign.FeignClient;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import com.kuaidao.aggregation.dto.call.CallRecordCountDTO;
 import com.kuaidao.aggregation.dto.call.CallRecordReqDTO;
 import com.kuaidao.aggregation.dto.call.CallRecordRespDTO;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
+import com.kuaidao.common.entity.IdEntity;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
 
@@ -55,6 +57,23 @@ public interface CallRecordFeign {
      */
     @PostMapping("/listTmCallReacordByParamsNoPage")
     JSONResult<List<CallRecordRespDTO>> listTmCallReacordByParamsNoPage(@RequestBody CallRecordReqDTO myCallRecordReqDTO);
+  
+    
+    /**
+     *  获取天润通话记录地址 根据 记录Id
+     * @param reqDTO
+     * @return
+     */
+    @PostMapping("/getRecordFile")
+    JSONResult<String> getRecordFile(@RequestBody IdEntity idEntity);
+    
+    /**
+     * 根据clueId List 分组统计 拨打次数
+     * @param myCallRecordReqDTO
+     * @return
+     */
+    @PostMapping("/countCallRecordTotalByClueIdList")
+    JSONResult<List<CallRecordCountDTO>> countCallRecordTotalByClueIdList(@RequestBody CallRecordReqDTO myCallRecordReqDTO);
     
     @Component
     static class HystrixClientFallback implements CallRecordFeign {
@@ -89,7 +108,18 @@ public interface CallRecordFeign {
                 CallRecordReqDTO myCallRecordReqDTO) {
             return fallBackError("根据资源ID或手机号查询通话记录-不分页");
         }
-        
+        @Override
+        public JSONResult<String> getRecordFile(IdEntity idEntity) {
+            return fallBackError("获取录音文件地址");
+        }
+        @Override
+        public JSONResult<List<CallRecordCountDTO>> countCallRecordTotalByClueIdList(
+                CallRecordReqDTO myCallRecordReqDTO) {
+            return fallBackError("根据线索Id统计拨打次数");
+        }
         
     }
+
+
+   
 }
