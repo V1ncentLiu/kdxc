@@ -19,10 +19,10 @@
     </el-breadcrumb>
     <el-row class="marginB10">
          <shiro:hasPermission name="myCustomerInfo:apply">
-          <el-button type="success" @click="dialogFormVisible = true">重单申请</el-button>
+          <el-button type="success" @click="openFormInfo">重单申请</el-button>
         </shiro:hasPermission>
         <shiro:hasPermission name="myCustomerInfo:releaseClue">
-           <el-button type="danger" @click="releaseFormVisible = true">释放资源</el-button>
+           <el-button type="danger" @click="openeleaseForm">释放资源</el-button>
          </shiro:hasPermission>
          <!--  <el-button type="warning">查询重复</el-button> --> 
         <shiro:hasPermission name="myCustomerInfo:add">
@@ -229,7 +229,7 @@
             <el-table-column align="center" prop="updateTime" label="最后编辑时间"></el-table-column>
             <el-table-column align="center" prop="repeatPhones" label="重复手机号资源">
                 <template slot-scope="scope">
-                    <el-button @click="repeatPhonesClick(scope.row)" type="text" size="small">点击查看</el-button>
+                    <el-button @click="repeatPhonesClick(scope.row)" type="text" size="small"></el-button>
                 </template>
             </el-table-column>
             <el-table-column align="center" prop="focusPoint" label="客户关注点"></el-table-column>
@@ -392,6 +392,7 @@
             <el-table-column align="center" prop="resourceCreatePerson" label="资源创建人"></el-table-column> 
         </el-table>
     </el-dialog>
+    <dialog-tracking :param="trackingParam"></dialog-tracking>
 </div>
 </body>
 <!-- import Vue before Element -->
@@ -458,6 +459,10 @@
                 categoryArr:[],
                 repeatClueArr:[],
                 provinceArr:[],
+                trackingParam:{
+                    trackingDialogVisible:false,
+                    tableData:[]
+                },
                 isTransfer:[
                   {
                      value: '0',
@@ -667,6 +672,18 @@
                     this.isShow=true
                 }          
             },
+            openFormInfo(){
+            	this.dialogFormVisible = true;
+            	if(this.$refs['repeatApplyForm']) {
+                    this.$refs['repeatApplyForm'].resetFields();
+              }
+            },
+            openeleaseForm(){
+            	this.releaseFormVisible=true;
+            	if(this.$refs['releaseForm']) {
+                    this.$refs['releaseForm'].resetFields();
+              }
+            },
             searchClue(){//重单申请查询线索
                 if(this.repeatApplyForm.phone==""){
                     this.$message({
@@ -688,10 +705,10 @@
                     .then(function (response) {
                         console.log(response.data)
                         if (response.data.code == 0) {
-                            mainDivVM.trackingParam.tableData = response.data.data
-                            mainDivVM.trackingParam.trackingDialogVisible = true;
+                        	mycustomVM.trackingParam.tableData = response.data.data
+                        	mycustomVM.trackingParam.trackingDialogVisible = true;
                         } else {
-                            mainDivVM.$message.error(response.data.msg);
+                        	mycustomVM.$message.error(response.data.msg);
                         }
                     }).catch(function (error) {
                     console.log(error);

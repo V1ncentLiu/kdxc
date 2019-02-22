@@ -111,6 +111,24 @@ public interface MyCustomerFeignClient {
 	@RequestMapping(method = RequestMethod.POST, value = "/releaseClue")
 	JSONResult<String> releaseClue(ReleaseClueDTO dto);
 
+	/**
+	 * 查询资源文件
+	 * 
+	 * @param dto
+	 * @return
+	 */
+	@RequestMapping(method = RequestMethod.POST, value = "/findClueFile")
+	JSONResult<List<ClueFileDTO>> findClueFile(ClueQueryDTO dto);
+
+	/**
+	 * 删除资源文件
+	 * 
+	 * @param dto
+	 * @return
+	 */
+	@RequestMapping(method = RequestMethod.POST, value = "/deleteClueFile")
+	JSONResult<String> deleteClueFile(ClueQueryDTO dto);
+
 	@Component
 	static class HystrixClientFallback implements MyCustomerFeignClient {
 
@@ -174,6 +192,18 @@ public interface MyCustomerFeignClient {
 		public JSONResult<ClueDTO> findClueInfo(ClueQueryDTO dto) {
 			// TODO Auto-generated method stub
 			return fallBackError("资源维护查询");
+		}
+
+		@Override
+		public JSONResult<List<ClueFileDTO>> findClueFile(ClueQueryDTO dto) {
+			// TODO Auto-generated method stub
+			return fallBackError("查询资源文件");
+		}
+
+		@Override
+		public JSONResult<String> deleteClueFile(ClueQueryDTO dto) {
+			// TODO Auto-generated method stub
+			return fallBackError("删除资源文件");
 		}
 
 	}

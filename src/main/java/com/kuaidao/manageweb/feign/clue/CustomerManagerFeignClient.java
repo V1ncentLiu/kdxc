@@ -1,11 +1,9 @@
 package com.kuaidao.manageweb.feign.clue;
 
-import com.kuaidao.common.entity.IdListLongReq;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.netflix.feign.FeignClient;
 import org.springframework.stereotype.Component;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
@@ -15,8 +13,6 @@ import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.manageweb.feign.assignrule.InfoAssignFeignClient;
-
-import java.util.List;
 
 @FeignClient(name = "aggregation-service", path = "/aggregation/clue/customerManager", fallback = CustomerManagerFeignClient.HystrixClientFallback.class)
 public interface CustomerManagerFeignClient {

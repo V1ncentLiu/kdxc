@@ -176,4 +176,16 @@ public class CallRecordController {
         return callRecordFeign.listTmCallReacordByParams(myCallRecordReqDTO); 
      }
     
+    /**
+     * 根据clueId 或 customerPhone 查询 通话记录
+     * @param myCallRecordReqDTO 参数 clueid 或 customerPhone 
+     * @return
+     */
+    @PostMapping("/listTmCallReacordByParamsNoPage")
+    @ResponseBody
+    JSONResult<List<CallRecordRespDTO>> listTmCallReacordByParamsNoPage(@RequestBody CallRecordReqDTO myCallRecordReqDTO){
+        return callRecordFeign.listTmCallReacordByParamsNoPage(myCallRecordReqDTO);
+    }
+    
+    
 }

@@ -6,6 +6,7 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.apache.shiro.subject.Subject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -17,9 +18,12 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.kuaidao.aggregation.dto.call.CallRecordReqDTO;
 import com.kuaidao.aggregation.dto.call.CallRecordRespDTO;
+import com.kuaidao.aggregation.dto.circulation.CirculationReqDTO;
+import com.kuaidao.aggregation.dto.circulation.CirculationRespDTO;
 import com.kuaidao.aggregation.dto.clue.ClueBasicDTO;
 import com.kuaidao.aggregation.dto.clue.ClueCustomerDTO;
 import com.kuaidao.aggregation.dto.clue.ClueDTO;
+import com.kuaidao.aggregation.dto.clue.ClueFileDTO;
 import com.kuaidao.aggregation.dto.clue.ClueQueryDTO;
 import com.kuaidao.aggregation.dto.clue.ClueRelateDTO;
 import com.kuaidao.aggregation.dto.clue.CustomerClueDTO;
@@ -31,13 +35,19 @@ import com.kuaidao.aggregation.dto.clue.RepeatClueSaveDTO;
 import com.kuaidao.aggregation.dto.clueappiont.ClueAppiontmentDTO;
 import com.kuaidao.aggregation.dto.project.ProjectInfoDTO;
 import com.kuaidao.aggregation.dto.project.ProjectInfoPageParam;
+import com.kuaidao.aggregation.dto.tracking.TrackingInsertOrUpdateDTO;
+import com.kuaidao.aggregation.dto.tracking.TrackingReqDTO;
+import com.kuaidao.aggregation.dto.tracking.TrackingRespDTO;
 import com.kuaidao.common.constant.RoleCodeEnum;
 import com.kuaidao.common.entity.IdEntityLong;
+import com.kuaidao.common.entity.IdListLongReq;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.manageweb.feign.call.CallRecordFeign;
+import com.kuaidao.manageweb.feign.circulation.CirculationFeignClient;
 import com.kuaidao.manageweb.feign.clue.MyCustomerFeignClient;
 import com.kuaidao.manageweb.feign.project.ProjectInfoFeignClient;
+import com.kuaidao.manageweb.feign.tracking.TrackingFeignClient;
 import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import com.kuaidao.sys.dto.user.UserOrgRoleReq;
@@ -58,6 +68,12 @@ public class MyCustomerClueController {
 	@Autowired
 	private CallRecordFeign callRecordFeign;
 
+	@Autowired
+	private TrackingFeignClient trackingFeignClient;
+
+	@Autowired
+	private CirculationFeignClient circulationFeignClient;
+
 	/**
 	 * 初始化我的客户
 	 * 
@@ -65,9 +81,9 @@ public class MyCustomerClueController {
 	 * @param model
 	 * @return
 	 */
+	@RequiresPermissions("myCustomerInfo:view")
 	@RequestMapping("/initmyCustomer")
 	public String initmyCustomer(HttpServletRequest request, Model model) {
-
 		return "clue/myCustom";
 	}
 
@@ -103,6 +119,7 @@ public class MyCustomerClueController {
 	 * @return
 	 */
 	@RequestMapping("/createClue")
+	@RequiresPermissions("myCustomerInfo:add")
 	public String createClue(HttpServletRequest request, Model model) {
 
 		ProjectInfoPageParam param = new ProjectInfoPageParam();
@@ -175,7 +192,152 @@ public class MyCustomerClueController {
 				request.setAttribute("intention", clueInfo.getData().getClueIntention());
 			}
 		}
+		// 获取资源跟进记录数据
+		TrackingReqDTO dto = new TrackingReqDTO();
+		dto.setClueId(new Long(clueId));
+		JSONResult<List<TrackingRespDTO>> trackingList = trackingFeignClient.queryList(dto);
+		if (trackingList != null && trackingList.SUCCESS.equals(trackingList.getCode())
+				&& trackingList.getData() != null) {
+			request.setAttribute("trackingList", trackingList.getData());
+		}
+
+		// 获取资源流转数据
+		CirculationReqDTO circDto = new CirculationReqDTO();
+		circDto.setClueId(new Long(clueId));
+		JSONResult<List<CirculationRespDTO>> circulationList = circulationFeignClient.queryList(circDto);
+		if (circulationList != null && circulationList.SUCCESS.equals(circulationList.getCode())
+				&& circulationList.getData() != null) {
+			request.setAttribute("circulationList", circulationList.getData());
+		}
+		// 项目
+		ProjectInfoPageParam param = new ProjectInfoPageParam();
+		JSONResult<List<ProjectInfoDTO>> proJson = projectInfoFeignClient.listNoPage(param);
+		if (proJson.getCode().equals(JSONResult.SUCCESS)) {
+			request.setAttribute("proSelect", proJson.getData());
+		}
+
+		// 获取已上传的文件数据
+		ClueQueryDTO fileDto = new ClueQueryDTO();
+		fileDto.setClueId(new Long(clueId));
+		JSONResult<List<ClueFileDTO>> clueFileList = myCustomerFeignClient.findClueFile(fileDto);
+		if (clueFileList != null && clueFileList.SUCCESS.equals(clueFileList.getCode())
+				&& clueFileList.getData() != null) {
+			request.setAttribute("clueFileList", clueFileList.getData());
+		}
 		return "clue/addCustomerMaintenance";
+	}
+
+	/**
+	 * 查询资源文件上传记录
+	 * 
+	 * @param request
+	 * @param clueId
+	 * @return
+	 */
+	@RequestMapping("/findClueFile")
+	@ResponseBody
+	public JSONResult<List<ClueFileDTO>> findClueFile(HttpServletRequest request, @RequestBody ClueQueryDTO dto) {
+		// 获取已上传的文件数据
+		return myCustomerFeignClient.findClueFile(dto);
+	}
+	
+	
+	/**
+	 * 删除已上传的资源文件
+	 * 
+	 * @param request
+	 * @param clueId
+	 * @return
+	 */
+	@RequestMapping("/deleteClueFile")
+	@ResponseBody
+	public JSONResult<String> deleteClueFile(HttpServletRequest request, @RequestBody ClueQueryDTO dto) {
+		// 获取已上传的文件数据
+		return myCustomerFeignClient.deleteClueFile(dto);
+	}
+	
+	
+	/**
+	 * 删除已上传的资源文件
+	 * 
+	 * @param request
+	 * @param clueId
+	 * @return
+	 */
+	@RequestMapping("/uploadClueFile")
+	@ResponseBody
+	public JSONResult<String> uploadClueFile(HttpServletRequest request, @RequestBody ClueFileDTO dto) {
+		// 获取已上传的文件数据
+		return myCustomerFeignClient.uploadClueFile(dto);
+	}
+
+	/**
+	 * 查询跟进记录数据
+	 * 
+	 * @param request
+	 * @param clueId
+	 * @return
+	 */
+	@RequestMapping("/findClueTracking")
+	@ResponseBody
+	public JSONResult<List<TrackingRespDTO>> findClueTracking(HttpServletRequest request,
+			@RequestBody TrackingInsertOrUpdateDTO dto) {
+		// 获取资源流转数据
+		TrackingReqDTO circDto = new TrackingReqDTO();
+		circDto.setClueId(dto.getClueId());
+		return trackingFeignClient.queryList(circDto);
+
+	}
+
+	/**
+	 * 保存跟进记录数据
+	 * 
+	 * @param request
+	 * @param clueId
+	 * @return
+	 */
+	@RequestMapping("/saveClueTracking")
+	@ResponseBody
+	public JSONResult<List<TrackingRespDTO>> saveClueTracking(HttpServletRequest request,
+			@RequestBody TrackingInsertOrUpdateDTO dto) {
+		trackingFeignClient.saveTracking(dto);
+		TrackingReqDTO queryDto = new TrackingReqDTO();
+		dto.setClueId(dto.getClueId());
+		return trackingFeignClient.queryList(queryDto);
+	}
+
+	/**
+	 * 删除资源跟进记录
+	 * 
+	 * @param request
+	 * @param clueId
+	 * @return
+	 */
+	@RequestMapping("/deleteClueTracking")
+	@ResponseBody
+	public JSONResult<List<TrackingRespDTO>> deleteClueTracking(HttpServletRequest request,
+			@RequestBody IdListLongReq dto) {
+		trackingFeignClient.deleteTracking(dto);
+		TrackingReqDTO queryDto = new TrackingReqDTO();
+		dto.setClueId(dto.getClueId());
+		return trackingFeignClient.queryList(queryDto);
+	}
+
+	/**
+	 * 修改资源跟进记录
+	 * 
+	 * @param request
+	 * @param clueId
+	 * @return
+	 */
+	@RequestMapping("/updateClueTracking")
+	@ResponseBody
+	public JSONResult<List<TrackingRespDTO>> updateClueTracking(HttpServletRequest request,
+			@RequestBody TrackingInsertOrUpdateDTO dto) {
+		trackingFeignClient.updateTracking(dto);
+		TrackingReqDTO queryDto = new TrackingReqDTO();
+		dto.setClueId(dto.getClueId());
+		return trackingFeignClient.queryList(queryDto);
 	}
 
 	/**
@@ -211,7 +373,7 @@ public class MyCustomerClueController {
 		Subject subject = SecurityUtils.getSubject();
 		UserInfoDTO user = (UserInfoDTO) subject.getSession().getAttribute("user");
 		if (null != user) {
-		 	dto.setCreateUser(user.getId());
+			dto.setCreateUser(user.getId());
 		}
 		return myCustomerFeignClient.saveAppiontment(dto);
 
@@ -333,7 +495,20 @@ public class MyCustomerClueController {
 		}
 
 		return myCustomerFeignClient.createCustomerClue(dto);
+	}
 
+	/**
+	 * 维护资源提交
+	 * 
+	 * @param request
+	 * @param dto
+	 * @return
+	 */
+	@RequestMapping("/updateCustomerClue")
+	@ResponseBody
+	public JSONResult<String> updateCustomerClue(HttpServletRequest request, @RequestBody ClueDTO dto) {
+
+		return myCustomerFeignClient.updateCustomerClue(dto);
 	}
 
 }
