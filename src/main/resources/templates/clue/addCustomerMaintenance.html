@@ -267,9 +267,10 @@
                         <el-button size="small" type="danger" @click="deteleClueFile">删除</el-button>
                         <el-button type="text" disabled>只允许上传图片／音频文件。</el-button>
                     </el-col>
-                    <el-col :span="4" :offset="4" class="f-tar">
+                    <el-col :span="6" :offset="2" class="f-tar">
                         <el-upload
                           class="upload-demo"
+                          ref="upload"
                           action="https://jsonplaceholder.typicode.com/posts/"
                           :on-preview="handlePreview"
                           :on-remove="handleRemove"
@@ -277,8 +278,10 @@
                           :limit="1"
                           :on-exceed="handleExceed"
                           :before-upload="beforeFormUpload"
+                          :auto-upload="false"
                           :file-list="fileList">
-                          <el-button size="small" type="primary">点击上传</el-button>
+                          <el-button slot="trigger" size="small" type="primary">点击上传</el-button>
+  						  <el-button style="margin-left: 10px;" size="small" type="success" @click="submitUpload">确定</el-button>
                         </el-upload>
                     </el-col>
                 </el-row>
@@ -949,6 +952,9 @@ var clueFileList=[[${clueFileList}]];//上传文件
                     this.$message.error('上传文件只能是 JPG/PNG/mp3 格式!');
                 }
                 return (isJPG || isPNG || isMP3) && isLt200;           
+            },
+            submitUpload() {
+                this.$refs.upload.submit();
             },
             editRecord() {
               var rows=this.multipleTrackingSelection;
