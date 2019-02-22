@@ -264,7 +264,7 @@
             <div class="borderbox padding20">
                 <el-row>
                     <el-col :span="16" >
-                        <el-button size="small" type="danger" @click="deteleDialogTip">删除</el-button>
+                        <el-button size="small" type="danger" @click="deteleClueFile">删除</el-button>
                         <el-button type="text" disabled>只允许上传图片／音频文件。</el-button>
                     </el-col>
                     <el-col :span="4" :offset="4" class="f-tar">
@@ -698,27 +698,27 @@ var clueFileList=[[${clueFileList}]];//上传文件
                 dialogFormVisible: false,
                 dialogFormImg:false,
                 form: {                    
-                    customerName:customer.cusName,
+                    customerName:'',
                     customerPhone:'',
-                    customerSex:customer.sex+"",
-                    ishasWx:customer.wechat,
-                    experience:customer.hasExperience+"",
-                    customerAge:customer.age,
-                    customerJob:customer.profession+"",
-                    customerPartner:customer.partnerType+"",
-                    address:customer.hasAddress+"",
-                    urgency:customer.urgentDate,
-                    customerLevel:customer.cusLevel+"",
-                    qq:customer.qq,
-                    money:intention.advanceAmount+"",
-                    area:intention.area+"",
-                    intentionCategory:intention.purType+"",
-                    radioProject:intention.purProjectType+"",
-                    insideProject:intention.purInProject+"",
-                    outsideProject:intention.purOutProject,
-                    province:intention.province,
-                    city:intention.city,
-                    district:intention.district,
+                    customerSex:'',
+                    ishasWx:'',
+                    experience:'',
+                    customerAge:'',
+                    customerJob:'',
+                    customerPartner:'',
+                    address:'',
+                    urgency:'',
+                    customerLevel:'',
+                    qq:'',
+                    money:'',
+                    area:'',
+                    intentionCategory:'',
+                    radioProject:'',
+                    insideProject:'',
+                    outsideProject:'',
+                    province:'',
+                    city:'',
+                    district:'',
                    
                 },
                 clueBase:base,
@@ -1019,7 +1019,30 @@ var clueFileList=[[${clueFileList}]];//上传文件
                }); 
              }
             },
-            deteleDialogTip(){
+             //上传文件
+            introPicClick() {
+
+                if($("#ossfile").find("div").length > 0){
+                }else {
+                    layer.msg("请选择所需上传图片");
+                    return;
+                }
+
+                var src = uploadFile();
+                if (src){
+                    layer.msg("上传成功");
+                    var div = $("#ossfile").children("div");
+                    $(div).remove();
+                    $("#picMsg").css("display","none");
+                }
+                $("#introPic").val(src);
+
+                setTimeout(function () {
+                    $("#introPicSrc").attr("src", src);
+                }, 1000);
+            },
+            //删除上传文件
+            deteleClueFile(){
             	
             },
             deteleTracking() {
@@ -1126,6 +1149,43 @@ var clueFileList=[[${clueFileList}]];//上传文件
         },
         mounted(){
             document.getElementById('addCustomer').style.display = 'block';
+           if(customer){
+        	   this.form.customerName=customer.cusName; 
+        	   this.form.customerSex=customer.sex+"";
+        	   this.form.ishasWx=customer.wechat;
+        	   this.form.experience=customer.hasExperience+"";
+        	   this.form.customerAge=customer.age;
+        	   this.form.customer.profession+"";
+        	   this.form.customerPartner=customer.partnerType+"";
+        	   this.form.address=customer.hasAddress+"";
+        	   this.form.urgency=customer.urgentDate;
+        	   this.form.customerLevel=customer.cusLevel+"";
+        	   this.form.qq=customer.qq;
+           } 
+           if(intention){
+        	   this.form. money=intention.advanceAmount+"";
+        	   this.form.area=intention.area+"";
+        	   this.form.intentionCategory=intention.purType+"";
+        	   this.form.radioProject=intention.purProjectType+"";
+        	   this.form.insideProject=intention.purInProject+"";
+        	   this.form.outsideProject=intention.purOutProject;
+        	   this.form.province=intention.province;
+        	   this.form.city=intention.city;
+        	   this.form.district=intention.district; 
+        	   
+           }
+           if(intention){
+        	   this.form. money=intention.advanceAmount+"";
+        	   this.form.area=intention.area+"";
+        	   this.form.intentionCategory=intention.purType+"";
+        	   this.form.radioProject=intention.purProjectType+"";
+        	   this.form.insideProject=intention.purInProject+"";
+        	   this.form.outsideProject=intention.purOutProject;
+        	   this.form.province=intention.province;
+        	   this.form.city=intention.city;
+        	   this.form.district=intention.district; 
+        	   
+           }
         },
         created(){
             //初始资源类别数据
