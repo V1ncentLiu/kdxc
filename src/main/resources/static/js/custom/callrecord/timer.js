@@ -5,7 +5,8 @@
  * @param timeUnit 单位  1：秒 2:分钟
  * @returns
  */
-var outboundCallIntervalTimer =  function intervalTimer(id,noticeSecs,timeUnit) {
+var outboundCallIntervalTimer;  
+function intervalTimer(id,noticeSecs,timeUnit) {
 	var ele_timer = document.getElementById(id);	
 	var n_sec = 0; //秒
 	var n_min = 0; //分
@@ -47,4 +48,8 @@ var outboundCallIntervalTimer =  function intervalTimer(id,noticeSecs,timeUnit) 
 			n_hour++;
 		} 	 
  	}, 1000);
+}
+//清除
+function clearTimer(){
+    clearInterval(outboundCallIntervalTimer);
 }
