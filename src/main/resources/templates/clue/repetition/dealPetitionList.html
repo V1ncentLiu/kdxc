@@ -4,6 +4,7 @@
 <head th:include="_header_include::frag(~{::title},~{::style},~{})">
     <title>电销布局管理</title>
     <style>
+      .ratioInput .el-input__inner{text-align: center;}
     </style>
 </head>
 <body>
@@ -90,12 +91,12 @@
 		            <el-table-column  align="center"  label="比例">
 		            <template slot-scope="scope">
 		            	<span v-for="(item, index) in scope.row.clueRepetitionDTOs">
-		            	<span v-if="index ==0 && item.repeatRatio !=null">
-		            	{{item.repeatRatio}}
-		            	</span>
-		            	<span v-if="index !=0 && item.repeatRatio !=null">
-		            	:{{item.repeatRatio}}
-		            	</span>
+  		            	<span v-if="index ==0 && item.repeatRatio !=null">
+  		            	{{item.repeatRatio}}
+  		            	</span>
+  		            	<span v-if="index !=0 && item.repeatRatio !=null">
+  		            	:{{item.repeatRatio}}
+  		            	</span>
 		            	</span>
 		            </template>
 		            </el-table-column>
@@ -106,7 +107,7 @@
 		            	<a href="" arget="_blank">{{item.repeatName}}</a>
 		            	</span>
 		            	<span v-if="index !=0">
-		            	|<a href="" arget="_blank">{{item.repeatName}}</a>
+		            	|&nbsp;<a href="" arget="_blank">{{item.repeatName}}</a>
 		            	</span>
 		            	</span>
 		            </template>
@@ -118,8 +119,8 @@
     </el-row>
 
     <!-- dialog -->
-    <el-dialog title="重单详情" :visible.sync="dialogFormVisible">
-        <el-form   class="width500">
+    <el-dialog title="审批处理" :visible.sync="dialogFormVisible">
+        <el-form :model="form" :rules="rules" ref="form">
         	<el-form-item label="重单线索ID：" :label-width="formLabelWidth" >{{clueId}}
             </el-form-item>
             <el-form-item label="重单客户手机号：" :label-width="formLabelWidth" >{{cusPhoneId}}
@@ -129,7 +130,7 @@
             <el-form-item label="备注：" :label-width="formLabelWidth" >{{remarkId}}
             </el-form-item>
             <el-form-item label="处理结果："  :label-width="formLabelWidth" >
-                <el-select  v-model="dealStatusId"  style="width: 100%;">
+                <el-select  v-model="form.dealStatusId" @change="changefun">
                     <el-option
                         v-for="item in dealList"
                         :key="item.value"
@@ -143,25 +144,24 @@
                     ref="multipleTable"
                     tooltip-effect="dark"
                     empty-text="无数据"
-                    style="width: 100%"
                     border
-                    :data="repetitionDetailList"  >
+                    :data="form.repetitionDetailList">
                     <el-table-column align="center" prop="repeatName" label="顾问姓名"></el-table-column>
-                    <el-table-column align="center" prop="telemarketingTeam" label="比例">
-	                   
+                    <el-table-column align="center" prop="repeatRatio" label="比例">                   
 	                    <template slot-scope="scope">
-	                    	 <el-form-item :prop="'tableData.' + scope.$index + '.repeatUser'"  style="width: 200px;margin:0 auto;height: 57px;">
-	                    </el-form-item>
-	                    	<el-input name="ratioName"   style="width:60%;text-align: center;" v-model="scope.row.num"  placeholder="0.0" class="marginB10"></el-input>%
+	                    	<el-form-item :prop="'repetitionDetailList.' + scope.$index + '.repeatRatio'" :rules='rules.repeatRatio' style="width: 200px;margin:0 auto;height: 57px;">
+                          <el-input style="width:90%;" v-model="scope.row.repeatRatio"  placeholder="0.0" class="ratioInput" type="number"></el-input>%
+	                      </el-form-item>	                    	
 	                    </template>
                     </el-table-column>
                 </el-table>
             </el-form-item>
-            <el-form-item label="备注：" :label-width="formLabelWidth" ><el-input type="textarea" rows="4"  v-model="searchContent" placeholder="请输入查询内容" class="marginB20"></el-input>
+            <el-form-item label="备注：" :label-width="formLabelWidth" >
+              <el-input type="textarea" rows="4"  v-model="searchContent" placeholder="请输入查询内容" class="marginB20"></el-input>
             </el-form-item>
         </el-form>
         <div slot="footer" style="text-align: center" class="dialog-footer">
-            <el-button type="primary" @click="submitForm()">提交</el-button>
+            <el-button type="primary" @click="submitForm('form')">提交</el-button>
             <el-button >取消</el-button>
         </div>
     </el-dialog>   
@@ -177,6 +177,10 @@
    var orgVM =  new Vue({
         el: '#organizationManage',
         data: {
+          form:{
+            repetitionDetailList:[],
+            dealStatusId:"",
+          },
         	repeatName11:"",
         	repeatName:"",
         	cusNameId:"",
@@ -189,26 +193,26 @@
         	beginTime:"",
         	endTime:"",
         	dxList:"",
-   			dxBusinessList:"",
+   			  dxBusinessList:"",
         	cusName:"",
         	cusPhone:"",
         	status:"",
         	dealStatus:"0",
         	cusPhoneId:"",
         	remarkId:"",
-        	dealStatusId:"1",
+        	
         	statusId:"",
         	dialogFormVisible:false,
         	repetitionList:"",
         	exportFormVisible:false,
-        	formLabelWidth: '100px',
+        	formLabelWidth: '150px',
         	dialogFormVisible: false,
         	addOrModifyDialogTitle:"",
         	dialogFormVisible:false,
         	dataTable:[],
         	isShow:true,
         	multipleSelection: [],
-        	repetitionDetailList:[],
+        	
         	statusList:[
         		 {
                		value: '0',
@@ -255,17 +259,45 @@
                 pageSize: 20,
             },
             loading:false,
+            rules:{
+              repeatRatio: [                        
+                  { validator:function(rule,value,callback){
+                    if(orgVM.form.dealStatusId=="1"){//重单验证
+                      if(value==""|value==undefined){
+                        callback(new Error("请输入分配比例"));
+                      }else{
+                        if(/^[0-9]*$/.test(value) == false){
+                          callback(new Error("请输入数字"));
+                        }else{
+                          callback();
+                        } 
+                      }
+                                           
+                    }else if(orgVM.form.dealStatusId=="0"){//不重单不填不需要验证
+                      callback()
+                    }                   
+                  }, trigger: 'blur'}
+              ]
+            }
          
              
         },
         methods: {
-        	submitForm(){
-        		var memberArry=this.repetitionDetailList ;
-        		for(var i=0;i<memberArry.length;i++) {
+        	submitForm(form){
+            this.$refs[form].validate((valid) => {             
+                if (valid) {
+                  var memberArry=this.form.repetitionDetailList ;
+                  for(var i=0;i<memberArry.length;i++) {
                     var save={};
-                   save.memberId=memberArry[i].repeatUser;
-                   save.resourceLimit=memberArry[i].num;
+                    save.memberId=memberArry[i].repeatUser;
+                    save.resourceLimit=memberArry[i].num;
+                  }
+                  console.log('submit!');
+                } else {
+                  console.log('error submit!!');
+                  return false;
                 }
+            });        		
         	},
         	
         	queryRepeatPage(){//查询按钮
@@ -327,13 +359,13 @@
                     	  orgVM.clueId = clueRepetitionDTO.clueId;
                     	  orgVM.cusNameId = clueRepetitionDTO.cusName;
                    		  if(clueRepetitionDTO.dealStatus ==0){
-                   			orgVM.dealStatusId = "0";
+                   			orgVM.form.dealStatusId = "0";
                    			  orgVM.isShow =false;
                    		  }else{
-                   			  orgVM.dealStatusId = "1";
+                   			  orgVM.form.dealStatusId = "1";
                    			  orgVM.isShow =true;
                    			  if(clueRepetitionDTO.clueRepetitionDTOs !=null){
-                             		orgVM.repetitionDetailList = clueRepetitionDTO.clueRepetitionDTOs; 
+                             		orgVM.form.repetitionDetailList = clueRepetitionDTO.clueRepetitionDTOs; 
                               }
                    		  }
                     		  
@@ -396,17 +428,24 @@
         		this.queryRepeatPage();
         	},
         	handleSelectionChange(val) {
-                this.multipleSelection = val;
-            },
-            transformStatus(row, column, cellValue, index) {
-            	  var text="";
-                  if(cellValue=="0"){
-                	  text="启用"
-                  }else if(cellValue=="1"){
-                	  text="禁用"
-                  }
-                  return text;
-              },
+            this.multipleSelection = val;
+          },
+          transformStatus(row, column, cellValue, index) {
+        	  var text="";
+              if(cellValue=="0"){
+            	  text="启用"
+              }else if(cellValue=="1"){
+            	  text="禁用"
+              }
+              return text;
+          },
+          changefun(){//选择处理结果
+            if(orgVM.form.dealStatusId=="1"){//重单，显示分配比例表格
+              orgVM.isShow=true
+            }else if(orgVM.form.dealStatusId=="0"){
+              orgVM.isShow=false
+            }
+          }
         },
         created(){
         	
