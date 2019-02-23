@@ -371,7 +371,6 @@ var homePageVM=new Vue({
 				dataType : 'jsonp',
 				jsonp : 'callback',
 				success : function(r) {
-					console.log(r);
 					var d = eval("(" + r + ")");
 					if (d.result == "0") {
 						params.enterpriseId = d.enterpriseId;
@@ -423,7 +422,10 @@ var homePageVM=new Vue({
 						//sessionStorage.setItem("bindTel", params.bindTel, 7);
 						//sessionStorage.setItem("bindType", params.bindType, 7);
 					} else {
-						homePageVM.$message.error({message:d.description,type:'error'});
+						//homePageVM.$message.error({message:d.description,type:'error'});
+						var _msg = "登录失败！座席号或绑定电话不正确";
+	                	homePageVM.$message({message:_msg,type:'error'});
+	                	console.error(r);
 					}
 				},
 				error : function(r) {
