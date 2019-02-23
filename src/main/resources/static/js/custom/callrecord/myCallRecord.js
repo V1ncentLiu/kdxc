@@ -64,7 +64,7 @@ var myCallRecordVm = new Vue({
                  	myCallRecordVm.pager.pageSize = callRecordData.pageSize;
                      
                  }else{
-                	 myCallRecordVm.$message({message:'初始化通话记录列表错误',type:'error'});
+                	 myCallRecordVm.$message({message:data.msg,type:'error'});
                  	 console.error(data);
                  }
              
@@ -160,7 +160,8 @@ var myCallRecordVm = new Vue({
              var date = a.getDate();
              var b = new Date(year,month,date);
              var c = b.valueOf()-6*24*60*60*1000;
-             var d = b.valueOf()+1*24*60*60*1000;
+            // var d = b.valueOf()+1*24*60*60*1000;
+             var d = b.valueOf();
              var startTime= new Date(c);
              var endTime = new Date(d);
              this.searchForm.startTime=startTime.getFullYear()+"-" + (startTime.getMonth()+1) + "-" + startTime.getDate()+" 00:00:00";
@@ -182,8 +183,30 @@ var myCallRecordVm = new Vue({
             this.searchForm.endTime=year+"-"+(month+1)+"-"+date+" 23:59:59";
             this.initCallRecordData();
     	},
-    	downloadAudio(url){
-    		location.href=url;
+    	downloadAudio(id,url){
+    		 var param = {};
+    		 param.id=id;
+    	   	 axios.post('/call/callRecord/getRecordFile',param)
+             .then(function (response) {
+            	 var data =  response.data;
+                 if(data.code=='0'){
+                	 var url = data.data;
+                	 if(url){
+                		 location.href=url;
+                		 
+                	 }
+                     
+                 }else{
+                	 console.error(data);
+                	 myCallRecordVm.$message({message:data.msg,type:'error'});
+                 }
+             
+             })
+             .catch(function (error) {
+                  console.log(error);
+             }).then(function(){
+             });
+    		
     	},
     	switchSoundBtn(id,url){
     		//switchSound(id,url);

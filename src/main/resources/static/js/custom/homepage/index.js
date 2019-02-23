@@ -475,9 +475,11 @@ var homePageVM=new Vue({
         openOutboundDialog(){//打开主动外呼diaolog 
         	this.outboundInputPhone="";
         	this.dialogOutboundVisible = true;
-        	/*if(this.outboundDialogMin){//代表上次点击的是最小化
-        		$("#outboundCallTimeDiv").show();
-        	}*/
+        	if(this.outboundDialogMin){//代表上次点击的是最小化
+        		//$("#outboundCallTimeDiv").show();
+        	}else{
+        		$('#outboundCallTime').html("");
+        	}
         	this.outboundDialogMin = false;
         	
         },
@@ -488,9 +490,9 @@ var homePageVM=new Vue({
         	this.outboundDialogMin=false;
         	if(!this.outboundDialogMin){//如果是最小化就不执行这个代码
         		return;
+        	}else{
+        		$('#outboundCallTime').html("");
         	}
-        	//$('#outboundCallStartTime').val("");
-        	$('#outboundCallTime').html("");
         },
         clickOutbound(){//外呼
         	var outboundInputPhone = this.outboundInputPhone;

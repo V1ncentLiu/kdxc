@@ -163,7 +163,16 @@ public class CallRecordController {
     @PostMapping("/listAllTmCallTalkTime")
     @ResponseBody
     public JSONResult<Map<String,Object>> listAllTmCallTalkTime(@RequestBody CallRecordReqDTO myCallRecordReqDTO){
-        return callRecordFeign.listAllTmCallTalkTime(myCallRecordReqDTO);
+        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+        List<RoleInfoDTO> roleList = curLoginUser.getRoleList();
+        if(roleList!=null && roleList.size()!=0) {
+            RoleInfoDTO roleInfoDTO = roleList.get(0);
+            String roleName = roleInfoDTO.getRoleName();
+            if(RoleCodeEnum.DXZJ.value().equals(roleName)) {
+                return callRecordFeign.listAllTmCallTalkTime(myCallRecordReqDTO);
+            }
+        }
+        return new JSONResult().fail(SysErrorCodeEnum.ERR_NOTEXISTS_DATA.getCode(),"只有电销总监才可以查询");
     }
     
     
