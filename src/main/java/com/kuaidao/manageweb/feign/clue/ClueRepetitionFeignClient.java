@@ -72,6 +72,15 @@ public interface ClueRepetitionFeignClient {
 	 */
 	@PostMapping("/dealPetitionById")
 	public JSONResult dealPetitionById(@RequestBody ClueRepetitionDTO menuDTO);
+	
+	/**
+	 * 审核重单
+	 * @param menuDTO
+	 * @return
+	 */
+	@PostMapping("/updatePetitionById")
+	public JSONResult updatePetitionById(@RequestBody ClueRepetitionDTO menuDTO);
+	
 
 	@Component
 	static class HystrixClientFallback implements ClueRepetitionFeignClient {
@@ -117,6 +126,13 @@ public interface ClueRepetitionFeignClient {
 		public JSONResult dealPetitionById(ClueRepetitionDTO menuDTO) {
 			// TODO Auto-generated method stub
 			return fallBackError("重单处理失败");
+		}
+
+
+		@Override
+		public JSONResult updatePetitionById(ClueRepetitionDTO menuDTO) {
+			// TODO Auto-generated method stub
+			return fallBackError("重单审核失败");
 		}
 
 	

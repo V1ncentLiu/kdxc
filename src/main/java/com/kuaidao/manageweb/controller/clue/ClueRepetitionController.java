@@ -1,8 +1,14 @@
 package com.kuaidao.manageweb.controller.clue;
 
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.shiro.SecurityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,9 +18,16 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.kuaidao.aggregation.dto.clue.ClueRepetitionDTO;
+import com.kuaidao.common.constant.RoleCodeEnum;
+import com.kuaidao.common.entity.IdEntity;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.manageweb.feign.clue.ClueRepetitionFeignClient;
+import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
+import com.kuaidao.sys.dto.organization.OrganizationDTO;
+import com.kuaidao.sys.dto.role.RoleInfoDTO;
+import com.kuaidao.sys.dto.user.UserInfoDTO;
+import com.kuaidao.sys.dto.user.UserOrgRoleReq;
 
 /**
 * 重单管理
@@ -27,6 +40,9 @@ public class ClueRepetitionController {
 	
 	@Autowired
 	ClueRepetitionFeignClient clueRepetitionFeignClient;
+	
+	@Autowired
+	private UserInfoFeignClient userInfoFeignClient;
 	 /**
      *  重单列表页面
      * 
@@ -45,10 +61,44 @@ public class ClueRepetitionController {
     @RequestMapping("/queryRepeatList")
     @ResponseBody
     public JSONResult<PageBean<ClueRepetitionDTO>> queryRepeatList(HttpServletRequest request,@RequestBody ClueRepetitionDTO clueRepetitionDTO) {
+    	UserInfoDTO user = getUser();
+		List<RoleInfoDTO> roleList = user.getRoleList();
+		List<Long> idList = new ArrayList<Long>();
+		if (roleList != null && RoleCodeEnum.DXZJ.name().equals(roleList.get(0).getRoleCode())) {
+			// 如果当前登录的为电销总监,查询所有下属电销员工
+			List<UserInfoDTO> userList = getUserList(user.getOrgId(), RoleCodeEnum.DXCYGW.name());
+			idList = userList.stream().map(c -> c.getId() ).collect(Collectors.toList());
+		}else if (roleList != null && RoleCodeEnum.DXCYGW.name().equals(roleList.get(0).getRoleCode())) {
+			idList.add(user.getId()) ;
+		}
+		clueRepetitionDTO.setIdList(idList);
     	JSONResult<PageBean<ClueRepetitionDTO>> list = clueRepetitionFeignClient.queryRepeatList(clueRepetitionDTO);
     	return list;
     }
-    
+    /**
+	 * 根据机构和角色类型获取用户
+	 * 
+	 * @param orgDTO
+	 * @return
+	 */
+	private List<UserInfoDTO> getUserList(Long orgId, String roleCode) {
+		UserOrgRoleReq userOrgRoleReq = new UserOrgRoleReq();
+		userOrgRoleReq.setOrgId(orgId);
+		userOrgRoleReq.setRoleCode(roleCode);
+		JSONResult<List<UserInfoDTO>> listByOrgAndRole = userInfoFeignClient.listByOrgAndRole(userOrgRoleReq);
+		return listByOrgAndRole.getData();
+	}
+    /**
+	 * 获取当前登录账号
+	 * 
+	 * @param orgDTO
+	 * @return
+	 */
+	private UserInfoDTO getUser() {
+		Object attribute = SecurityUtils.getSubject().getSession().getAttribute("user");
+		UserInfoDTO user = (UserInfoDTO) attribute;
+		return user;
+	}
     /**
      * 重单详情
      * 
@@ -107,5 +157,16 @@ public class ClueRepetitionController {
     	return list;
     }
     
+    /**
+     * 重单审核
+     * 
+     * @return
+     */
+    @RequestMapping("/updatePetitionById")
+    @ResponseBody
+    public JSONResult updatePetitionById(HttpServletRequest request,@RequestBody ClueRepetitionDTO clueRepetitionDTO) {
+    	JSONResult<PageBean<ClueRepetitionDTO>> list = clueRepetitionFeignClient.updatePetitionById(clueRepetitionDTO);
+    	return list;
+    }
  
 }

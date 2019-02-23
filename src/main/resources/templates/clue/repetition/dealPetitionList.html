@@ -24,7 +24,7 @@
             <el-row class="marginB10">
               
 				<div class="block">
-					<el-select filterable v-model="signId" placeholder="是否签约">
+					<el-select filterable v-model="signId" placeholder="是否签约" clearable>
 					    <el-option
 					      v-for="item in isSign"
 					      :key="item.value"
@@ -32,7 +32,7 @@
 					      :value="item.value">
 					    </el-option>
   					</el-select>
-  					<el-select filterable v-model="status" placeholder="处理状态">
+  					<el-select filterable v-model="status" placeholder="处理状态" clearable>
 					    <el-option
 					      v-for="item in statusList"
 					      :key="item.value"
@@ -40,7 +40,7 @@
 					      :value="item.value">
 					    </el-option>
   					</el-select>
-  					<el-select filterable v-model="dealStatus" placeholder="是否重单">
+  					<el-select filterable v-model="dealStatus" placeholder="是否重单" clearable>
 					    <el-option
 					      v-for="item in repetitionList"
 					      :key="item.value"
@@ -53,7 +53,7 @@
 					</el-date-picker>
 					<el-date-picker value-format="yyyy-MM-dd HH:mm:ss" v-model="endTime" type="datetime" placeholder="选择日期">
 					</el-date-picker>
-  					<el-select filterable v-model="teleCompanyId" placeholder="电销分公司">
+  					<el-select filterable v-model="teleCompanyId" placeholder="电销分公司" @change="showTele(1)">
 					    <el-option
 					      v-for="item in dxBusinessList"
 					      :key="item.id"
@@ -85,17 +85,17 @@
                     <el-table-column align="center" type="index" prop="id" label="序号" width="55"></el-table-column>
                     <el-table-column align="center" prop="cusName" label="客户姓名"></el-table-column>
                     <el-table-column align="center" prop="cusPhone" label="客户手机号"></el-table-column>
-                    <el-table-column align="center" prop="dealStatus" label="重单结果"></el-table-column>
+                    <el-table-column align="center" prop="dealStatusResult" label="重单结果"></el-table-column>
                     <el-table-column align="center" prop="statusResult" label="处理状态" ></el-table-column>
             
 		            <el-table-column  align="center"  label="比例">
 		            <template slot-scope="scope">
 		            	<span v-for="(item, index) in scope.row.clueRepetitionDTOs">
   		            	<span v-if="index ==0 && item.repeatRatio !=null">
-  		            	{{item.repeatRatio}}
+  		            	{{item.repeatRatio}}%
   		            	</span>
   		            	<span v-if="index !=0 && item.repeatRatio !=null">
-  		            	:{{item.repeatRatio}}
+  		            	:&nbsp;{{item.repeatRatio}}%
   		            	</span>
 		            	</span>
 		            </template>
@@ -104,10 +104,10 @@
                     <template slot-scope="scope">
 		            	<span v-for="(item, index) in scope.row.clueRepetitionDTOs">
 		            	<span v-if="index ==0">
-		            	<a href="" arget="_blank">{{item.repeatName}}</a>
+		            	<a :href="'/tele/clueMyCustomerInfo/customerInfoReadOnly?clueId='+item.clueId+''" target="_blank">{{item.repeatName}}&nbsp;&nbsp;{{item.createTime}}</a>
 		            	</span>
 		            	<span v-if="index !=0">
-		            	|&nbsp;<a href="" arget="_blank">{{item.repeatName}}</a>
+		            	|&nbsp;<a :href="'/tele/clueMyCustomerInfo/customerInfoReadOnly?clueId='+item.clueId+''" target="_blank">{{item.repeatName}}&nbsp;&nbsp;{{item.createTime}}</a>
 		            	</span>
 		            	</span>
 		            </template>
@@ -157,7 +157,7 @@
                 </el-table>
             </el-form-item>
             <el-form-item label="备注：" :label-width="formLabelWidth" >
-              <el-input type="textarea" rows="4"  v-model="searchContent" placeholder="请输入查询内容" class="marginB20"></el-input>
+              <el-input type="textarea" rows="4"  v-model=remark placeholder="输入处理备注描述" class="marginB20"></el-input>
             </el-form-item>
         </el-form>
         <div slot="footer" style="text-align: center" class="dialog-footer">
@@ -197,10 +197,10 @@
         	cusName:"",
         	cusPhone:"",
         	status:"",
-        	dealStatus:"0",
+        	dealStatus:"",
         	cusPhoneId:"",
         	remarkId:"",
-        	
+        	remark:"",
         	statusId:"",
         	dialogFormVisible:false,
         	repetitionList:"",
@@ -266,11 +266,14 @@
                       if(value==""|value==undefined){
                         callback(new Error("请输入分配比例"));
                       }else{
-                        if(/^[0-9]*$/.test(value) == false){
-                          callback(new Error("请输入数字"));
-                        }else{
-                          callback();
-                        } 
+                    	  var reg = /^[0-9]+([.]{1}[0-9]{1,1})?$/;
+                          if(!reg.test(value) ){
+                            callback(new Error("只能输入数字，如果小数请保留一位小数"));
+                          }else if(parseFloat(value)>100){
+                          	callback(new Error("数字只能小于等于100"));
+                          } 
+                        
+                         
                       }
                                            
                     }else if(orgVM.form.dealStatusId=="0"){//不重单不填不需要验证
@@ -284,7 +287,55 @@
         },
         methods: {
         	submitForm(form){
-            this.$refs[form].validate((valid) => {             
+        		var memberArry=this.form.repetitionDetailList ;
+        		var rows = this.multipleSelection;
+        		 var repeatId = "";
+                 for ( var i = 0; i <rows.length; i++){
+                	 repeatId = rows[i].repeatId
+                 }
+        		var detailDTOs = [];
+        		var dealStatusId = this.form.dealStatusId;
+       			var num = 0;
+                   for(var i=0;i<memberArry.length;i++) {
+                     var detail={};
+                     detail.id=memberArry[i].detailId;
+                     detail.repeatRatio=memberArry[i].repeatRatio;
+                     detail.repeatId = repeatId;
+                     detail.dealStatus = dealStatusId;
+                     detailDTOs.push(detail);
+                     num = parseFloat(num)+parseFloat(memberArry[i].repeatRatio)
+                 }
+        		
+        		if(dealStatusId ==1){
+        			if(num>100){
+                    	this.$message({
+                            message: '比例之和不能大于100',
+                            type: 'warning'
+                          });
+                         return;
+                    }
+        		}
+                var param={};
+                param.dealStatus = dealStatusId;
+                param.repeatId = repeatId;
+                param.detailDTOs = detailDTOs;
+                param.dealremark = this.remark;
+                axios.post('/clue/cluerepetition/updatePetitionById',param).then(function (response) {
+              	  	console.log(response);
+                  	if(null===response||response.data==null||response.data.code!='0'){
+	                  	  alert(response.data.msg);
+	                  	  return ;
+                 	}else{
+                 		window.location.href="/clue/cluerepetition/dealPetitionListPage";
+                 	} 
+              	})
+               .catch(function (error) {
+                	console.log(error);
+               })
+               .then(function () {
+               });  
+                
+           /*  this.$refs[form].validate((valid) => {             
                 if (valid) {
                   var memberArry=this.form.repetitionDetailList ;
                   for(var i=0;i<memberArry.length;i++) {
@@ -297,7 +348,7 @@
                   console.log('error submit!!');
                   return false;
                 }
-            });        		
+            });  */       		
         	},
         	
         	queryRepeatPage(){//查询按钮
@@ -358,16 +409,18 @@
                     	  orgVM.remarkId = clueRepetitionDTO.remark;
                     	  orgVM.clueId = clueRepetitionDTO.clueId;
                     	  orgVM.cusNameId = clueRepetitionDTO.cusName;
+                    	  orgVM.remark = clueRepetitionDTO.dealRemark;
                    		  if(clueRepetitionDTO.dealStatus ==0){
                    			orgVM.form.dealStatusId = "0";
                    			  orgVM.isShow =false;
                    		  }else{
                    			  orgVM.form.dealStatusId = "1";
                    			  orgVM.isShow =true;
-                   			  if(clueRepetitionDTO.clueRepetitionDTOs !=null){
-                             		orgVM.form.repetitionDetailList = clueRepetitionDTO.clueRepetitionDTOs; 
-                              }
+                   			 
                    		  }
+                   		 if(clueRepetitionDTO.clueRepetitionDTOs !=null){
+                      		orgVM.form.repetitionDetailList = clueRepetitionDTO.clueRepetitionDTOs; 
+                       }
                     		  
                      }else{
                     	 alert(response.data.data.msg);
@@ -445,10 +498,30 @@
             }else if(orgVM.form.dealStatusId=="0"){
               orgVM.isShow=false
             }
+          },
+          showTele(type){
+        	   var param={};
+	           param.orgType="3";
+	           if(type==1){
+	        	   param.parentId = orgVM.teleCompanyId
+	           }
+               axios.post('/organization/organization/queryOrgByType',param).then(function (response) {
+            	   console.log(response);
+            	   if(type==1){
+            		   orgVM.dxList = response.data.data;
+    	           }else{
+    	        	   orgVM.dxBusinessList = response.data.data;
+    	           }
+                }).catch(function (error) {
+                    console.log(error);
+                })
+                .then(function () {
+                  // always executed
+                }); 
           }
         },
         created(){
-        	
+        	this.showTele(0);
         	this.queryRepeatPage();
         }//created方法 结束
     })
