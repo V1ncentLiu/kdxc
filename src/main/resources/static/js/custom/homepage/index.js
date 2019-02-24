@@ -134,6 +134,15 @@ var homePageVM=new Vue({
 	    }
 	},
  	methods: {
+        // 输入数字控制方法
+        cnoNumber(){
+　　　    this.loginClientForm.cno=this.loginClientForm.cno.replace(/[^\.\d]/g,'');
+          this.loginClientForm.cno=this.loginClientForm.cno.replace('.','');
+    　  },
+        bindPhoneNumber(){
+　　　    this.loginClientForm.bindPhone=this.loginClientForm.bindPhone.replace(/[^\.\d]/g,'');
+          this.loginClientForm.bindPhone=this.loginClientForm.bindPhone.replace('.','');
+    　  },
  		handleMin(){
  			this.dialogLoginClientVisible = false;
  		},
