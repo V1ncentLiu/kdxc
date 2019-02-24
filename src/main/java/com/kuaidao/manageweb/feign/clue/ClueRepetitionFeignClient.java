@@ -27,7 +27,7 @@ import com.kuaidao.sys.dto.customfield.CustomFieldRespDTO;
  * @author Administrator
  *
  */
-@FeignClient(name = "aggregation-service-1", path = "/aggregation/cluerepetition", fallback = ClueRepetitionFeignClient.HystrixClientFallback.class)
+@FeignClient(name = "aggregation-service", path = "/aggregation/cluerepetition", fallback = ClueRepetitionFeignClient.HystrixClientFallback.class)
 public interface ClueRepetitionFeignClient {
 	/**
 	 * 重单申请列表
@@ -45,7 +45,7 @@ public interface ClueRepetitionFeignClient {
 	 * @return
 	 */
 	@PostMapping("/queryRepeatById")
-	public JSONResult<PageBean<ClueRepetitionDTO>> queryRepeatById(@RequestBody ClueRepetitionDTO menuDTO);
+	public JSONResult<ClueRepetitionDTO> queryRepeatById(@RequestBody ClueRepetitionDTO menuDTO);
 	
 	/**
 	 * 撤销重单申请
@@ -72,6 +72,15 @@ public interface ClueRepetitionFeignClient {
 	 */
 	@PostMapping("/dealPetitionById")
 	public JSONResult dealPetitionById(@RequestBody ClueRepetitionDTO menuDTO);
+	
+	/**
+	 * 审核重单
+	 * @param menuDTO
+	 * @return
+	 */
+	@PostMapping("/updatePetitionById")
+	public JSONResult updatePetitionById(@RequestBody ClueRepetitionDTO menuDTO);
+	
 
 	@Component
 	static class HystrixClientFallback implements ClueRepetitionFeignClient {
@@ -93,7 +102,7 @@ public interface ClueRepetitionFeignClient {
 
 
 		@Override
-		public JSONResult<PageBean<ClueRepetitionDTO>> queryRepeatById(ClueRepetitionDTO menuDTO) {
+		public JSONResult<ClueRepetitionDTO> queryRepeatById(ClueRepetitionDTO menuDTO) {
 			// TODO Auto-generated method stub
 			return fallBackError("根据id查询重单详情失败");
 		}
@@ -117,6 +126,13 @@ public interface ClueRepetitionFeignClient {
 		public JSONResult dealPetitionById(ClueRepetitionDTO menuDTO) {
 			// TODO Auto-generated method stub
 			return fallBackError("重单处理失败");
+		}
+
+
+		@Override
+		public JSONResult updatePetitionById(ClueRepetitionDTO menuDTO) {
+			// TODO Auto-generated method stub
+			return fallBackError("重单审核失败");
 		}
 
 	

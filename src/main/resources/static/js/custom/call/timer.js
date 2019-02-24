@@ -11,7 +11,7 @@ function intervalTimer(id,noticeSecs,timeUnit) {
 	var n_sec = 0; //秒
 	var n_min = 0; //分
 	var n_hour = 0; //时
- 	return setInterval(function () {		 
+	outboundCallIntervalTimer =  setInterval(function () {		 
 		var str_sec = n_sec;
 		var str_min = n_min;
 		var str_hour = n_hour;
@@ -44,7 +44,7 @@ function intervalTimer(id,noticeSecs,timeUnit) {
 			n_min++;
 		}
 		if (n_min > 59) {
-			n_sec = 0;
+			n_min = 0;
 			n_hour++;
 		} 	 
  	}, 1000);

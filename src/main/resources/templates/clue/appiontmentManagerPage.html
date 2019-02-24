@@ -19,7 +19,7 @@
 		        <el-button type="primary" @click="toUpdateAppiontment">编辑</el-button>
 		    </shiro:hasPermission>
     		<shiro:hasPermission name="aggregation:appiontmentManager:view">
-		        <el-button type="primary" >预览客户信息</el-button>
+		        <el-button type="primary" @click="viewCustomerInfo">预览客户信息</el-button>
 		    </shiro:hasPermission>
     		<shiro:hasPermission name="aggregation:appiontmentManager:delete">
 		        <el-button type="primary" @click="deleteAppiontment">删除</el-button>
@@ -111,7 +111,7 @@
            <el-table-column align="center" prop="busDirectorName" label="商务总监" ></el-table-column>
            <el-table-column align="center" prop="busSaleName" label="商务经理" ></el-table-column>
            <el-table-column align="center" prop="busCompayName" label="餐饮公司" ></el-table-column>
-           <el-table-column align="center" prop="tasteProjectId" label="品尝项目" ></el-table-column>
+           <el-table-column align="center" prop="tasteProjectId" label="品尝项目"  :formatter="transformProject"></el-table-column>
            <el-table-column align="center" prop="reserveTime" label="预约来访时间" ></el-table-column>
            <el-table-column align="center" prop="category" label="资源类别" ></el-table-column>
            <el-table-column align="center" prop="searchWord" label="搜索词" ></el-table-column>
@@ -420,6 +420,25 @@ var appiontmentVM = new Vue({
                    }
                    return text;
                },
+             	//品尝项目转换方法
+               transformProject(row, column, cellValue, index) {
+            	   var text="";
+              	   if(projectList){
+	            	   var array=cellValue.split(",");
+	                   for(var i=0;i<array.length;i++){
+	                	   for(var j=0;j<projectList.length;j++){
+	 	                		if(array[i]==projectList[j].id){
+	 	                			if(i==0){
+		 	                			text=projectList[j].projectName;
+	 	                			}else{
+		 	                			text=text+","+projectList[j].projectName;
+	 	                			}
+	 	                		}
+	 	                	}
+	                	}
+              	    }
+                    return text;
+               },
                //查询地区（商务中心）
                currentBusArea(){
             	   var param={};
@@ -536,13 +555,24 @@ var appiontmentVM = new Vue({
                   .then(function (response) {
                         var result =  response.data;
                         console.info(result);
-                        var table=result.data;
-                        appiontmentVM.recordTable= table.data;
+                        appiontmentVM.recordTable= result.data;
                         appiontmentVM.recordDialog=true;
                   })
                   .catch(function (error) {
                        console.log(error);
                   });
+              },
+              //预览客户信息
+              viewCustomerInfo() {
+            	  var rows = this.multipleSelection;
+                  if(rows.length!=1){
+                      this.$message({
+                         message: '请选择一条数据进行预览',
+                         type: 'warning'
+                       });
+                      return;
+                  }
+            	  window.open("/tele/clueMyCustomerInfo/customerInfoReadOnly?clueId="+rows[0].clueId);
               },
               //查看重复手机号资源
               repeatPhonesClick(row) {
