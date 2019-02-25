@@ -53,9 +53,17 @@
 					</el-date-picker>
 					<el-date-picker value-format="yyyy-MM-dd HH:mm:ss" v-model="endTime" type="datetime" placeholder="选择日期">
 					</el-date-picker>
-  					<el-select filterable v-model="teleCompanyId" placeholder="电销分公司" @change="showTele(1)">
+  					<el-select filterable v-model="teleCompanyId" placeholder="电销分公司" @change="showTele(7)">
 					    <el-option
 					      v-for="item in dxBusinessList"
+					      :key="item.id"
+					      :label="item.name"
+					      :value="item.id">
+					    </el-option>
+  					</el-select>
+  					<el-select filterable v-model="teleDeptId" placeholder="电销事业部" @change="showTele(1)">
+					    <el-option
+					      v-for="item in dxCauseBList"
 					      :key="item.id"
 					      :label="item.name"
 					      :value="item.id">
@@ -113,7 +121,7 @@
 		            </template>
                     </el-table-column>
                 </el-table>
-                 <table-pagination :pager="pager"  @change="search"></table-pagination>
+                 <table-pagination :pager="pager"  @change="queryRepeatPage"></table-pagination>
             </el-row>
       
     </el-row>
@@ -190,10 +198,12 @@
         	teleCompanyId:"",
         	signId:"",
         	teleGorupId:"",
+        	teleDeptId:"",
         	beginTime:"",
         	endTime:"",
         	dxList:"",
-   			  dxBusinessList:"",
+        	dxCauseBList:"",
+   			dxBusinessList:"",
         	cusName:"",
         	cusPhone:"",
         	status:"",
@@ -355,6 +365,9 @@
                 param.cusName=this.cusName;
                 param.cusPhone=this.cusPhone;
                 param.status=this.status;
+                param.teleGorupId=this.teleGorupId;
+                param.teleCompanyId=this.teleCompanyId;
+                param.teleDeptId=this.teleDeptId;
                 console.log(param);
                 axios.post('/clue/cluerepetition/dealPetitionList',param).then(function (response) {
                 	  console.log(response);
@@ -497,14 +510,19 @@
         	   var param={};
 	           if(type==1){
 	        	   param.orgType="1";
-	        	   param.parentId = orgVM.teleCompanyId
-	           }else{
+	        	   param.parentId = orgVM.teleDeptId;
+	           }else if(type ==7){
+	        	   param.orgType="7";
+	        	   param.parentId = orgVM.teleCompanyId;
+	           }else if(type ==0){
 	        	   param.orgType="3";
 	           }
                axios.post('/organization/organization/queryOrgByType',param).then(function (response) {
             	   console.log(response);
             	   if(type==1){
             		   orgVM.dxList = response.data.data;
+    	           }else if(type ==7){
+    	        	   orgVM.dxCauseBList = response.data.data;
     	           }else{
     	        	   orgVM.dxBusinessList = response.data.data;
     	           }
