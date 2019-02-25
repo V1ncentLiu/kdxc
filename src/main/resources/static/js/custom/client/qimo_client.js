@@ -1,5 +1,5 @@
 var clientVm = new Vue({
-     el: '#trClientManage',
+     el: '#qimoClientManage',
      data: {
     	 formLabelWidth:'140px',
          clientData:[],
@@ -560,6 +560,6 @@ var clientVm = new Vue({
           this.initClientData();
      },
      mounted(){
-     	document.getElementById('trClientManage').style.display = 'block';
+     	document.getElementById('qimoClientManage').style.display = 'block';
      },
 })
