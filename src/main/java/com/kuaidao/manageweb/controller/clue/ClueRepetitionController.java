@@ -22,6 +22,8 @@ import com.kuaidao.common.constant.RoleCodeEnum;
 import com.kuaidao.common.entity.IdEntity;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
+import com.kuaidao.manageweb.config.LogRecord;
+import com.kuaidao.manageweb.constant.MenuEnum;
 import com.kuaidao.manageweb.feign.clue.ClueRepetitionFeignClient;
 import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
 import com.kuaidao.sys.dto.organization.OrganizationDTO;
@@ -164,6 +166,7 @@ public class ClueRepetitionController {
      */
     @RequestMapping("/updatePetitionById")
     @ResponseBody
+    @LogRecord(description = "重单审核",operationType = LogRecord.OperationType.UPDATE,menuName = MenuEnum.REPETITION)
     public JSONResult updatePetitionById(HttpServletRequest request,@RequestBody ClueRepetitionDTO clueRepetitionDTO) {
     	JSONResult<PageBean<ClueRepetitionDTO>> list = clueRepetitionFeignClient.updatePetitionById(clueRepetitionDTO);
     	return list;
