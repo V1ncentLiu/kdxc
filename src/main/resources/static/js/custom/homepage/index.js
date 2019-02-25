@@ -518,79 +518,15 @@ var homePageVM=new Vue({
     		this.outboundDialogMin=true;
     	},
     	outboundCall(outboundInputPhone,callSource,clueId){//外呼
-    		//stopSound();//停止播放录音
-    		if(!this.isQimoClient && !this.isTrClient ){
-     		   this.$message({message:"请登录呼叫中心",type:'warning'});
-     		   return ;
-	     	}
-	     	
-	     	 if(!/^[0-9]*$/.test(outboundInputPhone)){
-					 this.$message({message:"只可以输入数字,不超过11位",type:'warning'});
-	    		     return ; 
-	     	  }
-	     	
-	     	sessionStorage.setItem("callSource",callSource);//1:表示 首页头部外呼 2：表示 电销管理外呼
-	    
-	     	var param = {};
-	     	if(this.isTrClient){//天润呼叫
-	     		param.tel=outboundInputPhone;
-	     		param.userField={
-	     				'accountId':this.accountId,
-	     		}
-	     		if(clueId){
-	     			param.clueId = clueId;
-	     		}
-	     		
-	     		debugger;
-	     		TOOLBAR.previewOutcall(param,function(token){
-	     			if(token.code=='0'){
-	     				homePageVM.$message({message:"外呼中",type:'success'});
-	     				clearTimer();//清除定时器
-	     				if(callSource==1){
-	     					$('#outboundCallTime').html("");
-	     				}else if(callSource==2){//电销页面外呼
-	     					this.tmOutboundCallDialogVisible =true;
-	     					$("#tmOutboundCallTime").html("");
-	     				}
-	     				
-	     			}else{
-	     				console.error(token);
-	     				homePageVM.$message({message:"外呼失败",type:'error'});
-	     			}
-	     		});
-	     	}else if(this.isQimoClient){//七陌呼叫
-	     		param.customerPhoneNumber = outboundInputPhone;
-	     		if(clueId){
-	     			param.clueId = clueId;
-	     		}
-	     		param.userId= this.accountId;
-	     		 axios.post('/client/client/qimoOutboundCall',param)
-	              .then(function (response) {
-	                  var data =  response.data;
-	                  if(data.code=='0'){
-	                 	  var resData = data.data;
-	                 	  if(resData.Succeed){
-	                 		//10分钟后红色字体显示
-	                 		  intervalTimer("outboundCallTime",10,2);
-	                 		  homePageVM.$message({message:"外呼中",type:'success'});
-	                 	  }else{
-	                   		  homePageVM.$message({message:resData.Message,type:'error'});
-	                 	  }
-	                  }else{
-	                 		homePageVM.$message({message:data.msg,type:'error'});
-	                  }
-	              })
-	              .catch(function (error) {
-	                 console.log(error);
-	              })
-	              .then(function () {
-	                // always executed
-	              });
-	     	}
+    		outboundCallPhone(outboundInputPhone,callSource,clueId,this.postBack());
+    		return;
     	},
     	closeTmOutboundDialog(){//关闭电销外呼dialog
     		this.tmOutboundCallDialogVisible = false;
     		clearTimer();//清除定时器
+    	},
+    	postBack(){//接通成功后的回调函数
+    		//console.info("postBack");
     	}
          
   	},

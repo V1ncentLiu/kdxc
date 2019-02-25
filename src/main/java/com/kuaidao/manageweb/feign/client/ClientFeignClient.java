@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import com.kuaidao.aggregation.dto.client.AddOrUpdateQimoClientDTO;
 import com.kuaidao.aggregation.dto.client.AddOrUpdateTrClientDTO;
+import com.kuaidao.aggregation.dto.client.ClientLoginReCordDTO;
 import com.kuaidao.aggregation.dto.client.ImportQimoClientDTO;
 import com.kuaidao.aggregation.dto.client.ImportTrClientDTO;
 import com.kuaidao.aggregation.dto.client.QimoClientQueryDTO;
@@ -198,6 +199,14 @@ public interface ClientFeignClient {
     @PostMapping("/qimoOutboundCall")
     JSONResult<QimoOutboundCallRespDTO> qimoOutboundCall(@RequestBody QimoOutboundCallDTO callDTO);
     
+    /**
+     * 坐席登录记录
+     * @param clientLoginRecord
+     * @return
+     */
+    @PostMapping("/clientLoginRecord")
+    JSONResult<Boolean> clientLoginRecord(@RequestBody ClientLoginReCordDTO clientLoginRecord);
+    
 	@Component
 	static class HystrixClientFallback implements ClientFeignClient {
 
@@ -314,8 +323,12 @@ public interface ClientFeignClient {
             return fallBackError("七陌坐席外呼");
         }
 
+        @Override
+        public JSONResult<Boolean> clientLoginRecord(ClientLoginReCordDTO clientLoginRecord) {
+            return fallBackError("坐席登录记录");
+        }
+
 	}
-
-
+   
 
 }
