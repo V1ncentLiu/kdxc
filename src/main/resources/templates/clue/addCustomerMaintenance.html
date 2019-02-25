@@ -211,8 +211,8 @@
                     </el-col>
                     <el-col :span="16">
                         <el-form-item label="意向项目：" :label-width="formLabelWidth">
-                            <el-radio v-model="form.radioProject" label="1">内部项目</el-radio>
-                            <el-select v-model="form.insideProject" placeholder="请选择">
+                            <el-radio v-model="form.radioProject" label="1" @change="projectChange" style="margin-right: 10px;">内部项目</el-radio>
+                            <el-select v-model="form.insideProject" v-show="insideProjectShow" placeholder="请选择" style="margin-right: 10px;">
                                 <el-option
                                     v-for="item in proSelect"
                                     :key="item.id"
@@ -220,8 +220,8 @@
                                     :value="item.id">
                                 </el-option>
                             </el-select>
-                            <el-radio v-model="form.radioProject" label="2">外部项目</el-radio>
-                            <el-input v-model="form.outsideProject" autocomplete="off" style="width: 25%;" maxLength="20"></el-input>
+                            <el-radio v-model="form.radioProject" label="2" @change="projectChange" style="margin-right: 10px;">外部项目</el-radio>
+                            <el-input v-model="form.outsideProject" v-show="outsideProjectShow" autocomplete="off" style="width: 25%;" maxLength="20"></el-input>
                         </el-form-item>
                     </el-col>
                 </el-row>
@@ -698,11 +698,12 @@ var clueFileList=[[${clueFileList}]];//上传文件
         el: '#addCustomer',
         data: function() {
             return {       
-                isDisabled:true,//默认不可点击         
-                radioProject:'',
+                insideProjectShow:true,//内部项目默认显示
+                outsideProjectShow:false,//外部项目默认不显示
                 dialogFormVisible: false,
                 dialogFormImg:false,
-                form: {                    
+                form: { 
+                    radioProject:'1', //意向项目单选默认选项                    
                     customerName:'',
                     customerPhone:'',
                     customerSex:'',
@@ -718,7 +719,6 @@ var clueFileList=[[${clueFileList}]];//上传文件
                     money:'',
                     area:'',
                     intentionCategory:'',
-                    radioProject:'',
                     insideProject:'',
                     outsideProject:'',
                     province:'',
@@ -926,6 +926,16 @@ var clueFileList=[[${clueFileList}]];//上传文件
     　　　     this.form.customerAge=this.form.customerAge.replace(/[^\.\d]/g,'');
                this.form.customerAge=this.form.customerAge.replace('.','');
     　　　  },
+            // 单选切换
+            projectChange(){
+                if(this.form.radioProject=="1"){//内部项目
+                    this.insideProjectShow=true;
+                    this.outsideProjectShow=false;
+                }else if(this.form.radioProject=="2"){//外部项目
+                    this.insideProjectShow=false;
+                    this.outsideProjectShow=true;
+                }
+            },
             /*toggleSelection(rows) { 
                 if (rows) {
                   rows.forEach(row => {
