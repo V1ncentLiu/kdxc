@@ -196,8 +196,9 @@ var myCallRecordVm = new Vue({
                  if(data.code=='0'){
                 	 var url = data.data;
                 	 if(url){
-                		 location.href=url;
-                		 
+                		 var fileName = url.split('?')[0];
+                		 var fileNameArr= fileName.split("/");
+                		 download(url,fileNameArr[fileNameArr.length-1],'audio/*');
                 	 }
                      
                  }else{

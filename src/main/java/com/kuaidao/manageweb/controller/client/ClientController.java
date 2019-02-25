@@ -684,23 +684,9 @@ public class ClientController {
         if (result.hasErrors()) {
             return CommonUtil.validateParam(result);
         }
-        Integer clientType = clientLoginRecord.getClientType();
-        String bindPhone = clientLoginRecord.getBindPhone();
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
-        String cnoPrefix = "";
-        if(clientType==1) {
-            cnoPrefix="tr";
-        }else {
-            cnoPrefix = "qimo";
-        }
-        Long accountId = curLoginUser.getId();
-        Map<String, Object> paramMap = new HashMap<>();
-        paramMap.put("bindPhone",bindPhone);
-        paramMap.put("accountId",accountId+"");
-        String keyString = RedisConstant.CLIENT_USER_PREFIX+cnoPrefix+clientLoginRecord.getCno();
-        //redisTemplate.opsForHash().putAll(keyString,paramMap);
-        redisTemplate.opsForValue().set(keyString, paramMap, 7, TimeUnit.DAYS);
-        return new JSONResult<Boolean>().success(true);
+        clientLoginRecord.setAccountId(curLoginUser.getId());
+        return clientFeignClient.clientLoginRecord(clientLoginRecord);
         
     }
     
