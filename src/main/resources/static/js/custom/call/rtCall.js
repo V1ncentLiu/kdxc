@@ -3,10 +3,17 @@ $(function(){
 });
 
 
-//外呼
+
+/**
+ * 外呼
+ * @param outboundInputPhone  客户手机号
+ * @param callSource  来源 1:首页外呼 2:电销管理外呼
+ * @param clueId    线索id
+ * @param callback 回调函数
+ * @returns
+ */
 function outboundCallPhone(outboundInputPhone,callSource,clueId,callback){
 	stopSound();//停止播放录音
-	return;
 	if(!homePageVM.isQimoClient && !homePageVM.isTrClient ){
 		   homePageVM.$message({message:"请登录呼叫中心",type:'warning'});
 		   return ;
@@ -22,12 +29,13 @@ function outboundCallPhone(outboundInputPhone,callSource,clueId,callback){
  	var param = {};
  	if(homePageVM.isTrClient){//天润呼叫
  		param.tel=outboundInputPhone;
- 		param.userField={
- 				'accountId':homePageVM.accountId,
- 		}
+ 		var userField ={};
+ 		userField.accountId=homePageVM.accountId;
  		if(clueId){
- 			param.clueId = clueId;
+ 			userField.clueId = clueId;
  		}
+ 		param.userField=userField;
+ 	
  		
  		TOOLBAR.previewOutcall(param,function(token){
  			if(token.code=='0'){
