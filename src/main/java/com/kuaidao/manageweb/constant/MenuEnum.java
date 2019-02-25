@@ -23,9 +23,15 @@ public enum MenuEnum {
     /**
      * 电销管理 - 电销中心
      */
-    ,TEL_CENTER_PUBLICCUSTOMER("公共客户资源"),TEL_CENTER_INVALIDCUSTOMER("无效客户资源")
+    ,TEL_CENTER_PUBLICCUSTOMER("公共客户资源"),TEL_CENTER_INVALIDCUSTOMER("无效客户资源"),
+    
+    /**
+     * 总裁办
+     * 
+     */
+    REPETITION("重单处理（总裁办）")
     ;
-
+	
 
 
 
