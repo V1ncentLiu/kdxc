@@ -27,7 +27,7 @@ function intervalTimer(id,noticeSecs,timeUnit) {
 		}
 		//分钟计时
 		if(timeUnit==2){
-			if(n_min>(noticeSecs/60)){
+			if(n_min>=noticeSecs){
 				ele_timer.style.color='red';
 			 }else{
 				 ele_timer.style.color='black';
