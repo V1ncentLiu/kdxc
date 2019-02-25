@@ -480,6 +480,9 @@ var clientVm = new Vue({
                }).then(function(){
             	   
                });
+           },
+           trCall(){
+        	   this.$refs.homePageVMRef.outboundCall('13161412317',1,'2222');
            }
          
      },
