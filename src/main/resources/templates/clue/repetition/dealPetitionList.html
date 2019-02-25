@@ -272,7 +272,7 @@
                           }else if(parseFloat(value)>100){
                           	callback(new Error("数字只能小于等于100"));
                           } 
-                        
+                          callback();
                          
                       }
                                            
@@ -287,68 +287,62 @@
         },
         methods: {
         	submitForm(form){
-        		var memberArry=this.form.repetitionDetailList ;
-        		var rows = this.multipleSelection;
-        		 var repeatId = "";
-                 for ( var i = 0; i <rows.length; i++){
-                	 repeatId = rows[i].repeatId
-                 }
-        		var detailDTOs = [];
-        		var dealStatusId = this.form.dealStatusId;
-       			var num = 0;
-                   for(var i=0;i<memberArry.length;i++) {
-                     var detail={};
-                     detail.id=memberArry[i].detailId;
-                     detail.repeatRatio=memberArry[i].repeatRatio;
-                     detail.repeatId = repeatId;
-                     detail.dealStatus = dealStatusId;
-                     detailDTOs.push(detail);
-                     num = parseFloat(num)+parseFloat(memberArry[i].repeatRatio)
-                 }
-        		
-        		if(dealStatusId ==1){
-        			if(num>100){
-                    	this.$message({
-                            message: '比例之和不能大于100',
-                            type: 'warning'
-                          });
-                         return;
-                    }
-        		}
-                var param={};
-                param.dealStatus = dealStatusId;
-                param.repeatId = repeatId;
-                param.detailDTOs = detailDTOs;
-                param.dealremark = this.remark;
-                axios.post('/clue/cluerepetition/updatePetitionById',param).then(function (response) {
-              	  	console.log(response);
-                  	if(null===response||response.data==null||response.data.code!='0'){
-	                  	  alert(response.data.msg);
-	                  	  return ;
-                 	}else{
-                 		window.location.href="/clue/cluerepetition/dealPetitionListPage";
-                 	} 
-              	})
-               .catch(function (error) {
-                	console.log(error);
-               })
-               .then(function () {
-               });  
-                
-           /*  this.$refs[form].validate((valid) => {             
-                if (valid) {
-                  var memberArry=this.form.repetitionDetailList ;
-                  for(var i=0;i<memberArry.length;i++) {
-                    var save={};
-                    save.memberId=memberArry[i].repeatUser;
-                    save.resourceLimit=memberArry[i].num;
-                  }
-                  console.log('submit!');
-                } else {
-                  console.log('error submit!!');
-                  return false;
-                }
-            });  */       		
+        		this.$refs[form].validate((valid) => {  
+        			 if (valid) {
+		        		var memberArry=this.form.repetitionDetailList ;
+		        		var rows = this.multipleSelection;
+		        		 var repeatId = "";
+		                 for ( var i = 0; i <rows.length; i++){
+		                	 repeatId = rows[i].repeatId
+		                 }
+		        		var detailDTOs = [];
+		        		var dealStatusId = this.form.dealStatusId;
+		       			var num = 0;
+		                   for(var i=0;i<memberArry.length;i++) {
+		                     var detail={};
+		                     detail.id=memberArry[i].detailId;
+		                     detail.repeatRatio=memberArry[i].repeatRatio;
+		                     detail.repeatId = repeatId;
+		                     detail.dealStatus = dealStatusId;
+		                     detailDTOs.push(detail);
+		                     num = parseFloat(num)+parseFloat(memberArry[i].repeatRatio)
+		                 }
+		        		
+		        		if(dealStatusId ==1){
+		        			if(num>100){
+		                    	this.$message({
+		                            message: '比例之和不能大于100',
+		                            type: 'warning'
+		                          });
+		                         return;
+		                    }
+		        		}
+		                var param={};
+		                param.dealStatus = dealStatusId;
+		                param.repeatId = repeatId;
+		                param.detailDTOs = detailDTOs;
+		                param.dealremark = this.remark;
+		                axios.post('/clue/cluerepetition/updatePetitionById',param).then(function (response) {
+		              	  	console.log(response);
+		                  	if(null===response||response.data==null||response.data.code!='0'){
+			                  	  alert(response.data.msg);
+			                  	  return ;
+		                 	}else{
+		                 		window.location.href="/clue/cluerepetition/dealPetitionListPage";
+		                 	} 
+		              	})
+		               .catch(function (error) {
+		                	console.log(error);
+		               })
+		               .then(function () {
+		               });  
+            
+	                  console.log('submit!');
+	                } else {
+	                  console.log('error submit!!');
+	                  return false;
+	                }
+            	});       		
         	},
         	
         	queryRepeatPage(){//查询按钮
@@ -501,9 +495,11 @@
           },
           showTele(type){
         	   var param={};
-	           param.orgType="3";
 	           if(type==1){
+	        	   param.orgType="1";
 	        	   param.parentId = orgVM.teleCompanyId
+	           }else{
+	        	   param.orgType="3";
 	           }
                axios.post('/organization/organization/queryOrgByType',param).then(function (response) {
             	   console.log(response);
