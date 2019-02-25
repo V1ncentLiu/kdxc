@@ -518,6 +518,8 @@ var homePageVM=new Vue({
     		this.outboundDialogMin=true;
     	},
     	outboundCall(outboundInputPhone,callSource,clueId){//外呼
+    		stopSound();//停止播放录音
+    		return;
     		if(!this.isQimoClient && !this.isTrClient ){
      		   this.$message({message:"请登录呼叫中心",type:'warning'});
      		   return ;

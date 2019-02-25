@@ -192,7 +192,54 @@ var myCallRecordVm = new Vue({
   	        this.searchForm.startTime=startTime.getFullYear()+"-" + (startTime.getMonth()+1) + "-" + startTime.getDate()+" 00:00:00";
             this.searchForm.endTime=year+"-"+(month+1)+"-"+date+" 23:59:59";
             this.initCallRecordData();
+    	},
+    	downloadAudio(id,url){
+    		 var param = {};
+    		 param.id=id;
+    	   	 axios.post('/call/callRecord/getRecordFile',param)
+             .then(function (response) {
+            	 var data =  response.data;
+                 if(data.code=='0'){
+                	 var url = data.data;
+                	 if(url){
+                		 location.href=url;
+                	 }
+                     
+                 }else{
+                	 console.error(data);
+                	 myCallRecordVm.$message({message:data.msg,type:'error'});
+                 }
+             
+             })
+             .catch(function (error) {
+                  console.log(error);
+             }).then(function(){
+             });
+    		
+    	},
+    	switchSoundBtn(id,url){
+    		//switchSound(id,url);
+    		 var param = {};
+    		 param.id=id;
+    	   	 axios.post('/call/callRecord/getRecordFile',param)
+             .then(function (response) {
+            	 var data =  response.data
+                 if(data.code=='0'){
+                	 var url = data.data;
+                	 switchSound(id,url);
+                     
+                 }else{
+                	 console.error(data);
+                	 myCallRecordVm.$message({message:data.msg,type:'error'});
+                 }
+             
+             })
+             .catch(function (error) {
+                  console.log(error);
+             }).then(function(){
+             });
     	}
+    	
     },
     created(){
 		var a = new Date();

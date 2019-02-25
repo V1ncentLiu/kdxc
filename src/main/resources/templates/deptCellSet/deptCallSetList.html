@@ -194,6 +194,7 @@
                         :file-list="fileList"
                         :on-change="handleChange"
                         :before-upload="beforeUpload"
+                        :on-remove="handleRemove"
                         :on-success="uploadSuccess"
                         :on-error="uploadError"
                         :data="paramData"
@@ -235,7 +236,7 @@
     <el-dialog :visible.sync="showTableDateDialog" title="预览数据"  @opened="showTableOpen" width="70%" :close-on-click-modal="false">
         <template>
             <el-row class="marginB20">
-                预览数据共 <span id="importNum"></span> 条资源
+                预览数据共 <span id="importNum">0</span> 条资源
             </el-row>
             <el-row>
                 <el-table :data="tableData1"  style="width: 100%" tooltip-effect="light"  ref="showTable">
@@ -246,7 +247,7 @@
                     <el-table-column prop="companyPass" label="企业用户名密码"  align="center" ></el-table-column>
                     <el-table-column prop="deptUser" label="部门用户"  align="center" ></el-table-column>
                     <el-table-column prop="deptPass" label="部门用户密码" align="center" ></el-table-column>
-                    <el-table-column prop="orgName" label="所属部门" align="center" ></el-table-column>
+                    <el-table-column prop="orgName" label="所属部门(组织)" align="center" ></el-table-column>
                 </el-table>
             </el-row>
             <div slot="footer" >
@@ -272,7 +273,7 @@
                     <el-table-column prop="companyPass" label="企业用户名密码"  align="center" ></el-table-column>
                     <el-table-column prop="deptUser" label="部门用户"  align="center" ></el-table-column>
                     <el-table-column prop="deptPass" label="部门用户密码" align="center" ></el-table-column>
-                    <el-table-column prop="orgName" label="所属部门" align="center" ></el-table-column>
+                    <el-table-column prop="orgName" label="所属部门(组织)" align="center" ></el-table-column>
                 </el-table>
             </el-row>
             <div slot="footer" >
@@ -461,6 +462,7 @@
                 }
             },
             openImportDataDialog(){
+                this.fileList = []
                 this.importDialogVisible = true;
 
             },
@@ -556,11 +558,13 @@
             beforeUpload(file){//上传之前 文件校验
 
                 var isTextComputer = file.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
-                console.log(file)
                 if(!isTextComputer){
                     this.$message.error('文件格式错误');
                     return false;
                 }
+            },
+            handleRemove(file, fileList){
+                this.fileList=[]
             },
             showTableOpen(){
                 if(this.tableData1)
@@ -607,6 +611,8 @@
 
                 this.paramData.importFlag = flag;
                 var fileList = this.fileList;
+                console.log(fileList)
+                console.log(fileList.length)
                 if(!fileList || fileList.length!=1){
                     this.$message.error({message:'请选择一个文件',type:'error'});
                     return false;
