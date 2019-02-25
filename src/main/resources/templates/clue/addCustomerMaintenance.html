@@ -72,7 +72,7 @@
                     </el-col>
                     <el-col :span="8">
                         <el-form-item label="微信：" :label-width="formLabelWidth">
-                           <el-input v-model="form.ishasWx" autocomplete="off" style="width: 60%;"></el-input>
+                           <el-input v-model="form.ishasWx" autocomplete="off" style="width: 60%;" maxLength="20"></el-input>
                            <span style="padding-left: 5px;color: rgb(0, 114, 255);cursor: pointer;" @click="dialogFormImg = true">查看二维码</span>
                         </el-form-item>
                     </el-col>
@@ -92,7 +92,7 @@
                     </el-col>
                     <el-col :span="8">
                         <el-form-item label="年龄：" :label-width="formLabelWidth">
-                           <el-input v-model="form.customerAge" autocomplete="off"></el-input>
+                           <el-input v-model="form.customerAge" autocomplete="off" @keyup.native="agenumber"></el-input>
                         </el-form-item>
                     </el-col>
                 </el-row>
@@ -163,7 +163,7 @@
                     </el-col>
                     <el-col :span="8">
                         <el-form-item label="QQ：" :label-width="formLabelWidth">
-                           <el-input v-model="form.qq" autocomplete="off"></el-input>
+                           <el-input v-model="form.qq" autocomplete="off" maxLength="20" @keyup.native="qqnumber"></el-input>
                         </el-form-item>
                     </el-col>
                 </el-row>
@@ -221,14 +221,14 @@
                                 </el-option>
                             </el-select>
                             <el-radio v-model="form.radioProject" label="2">外部项目</el-radio>
-                            <el-input v-model="form.outsideProject" autocomplete="off" style="width: 25%;"></el-input>
+                            <el-input v-model="form.outsideProject" autocomplete="off" style="width: 25%;" maxLength="20"></el-input>
                         </el-form-item>
                     </el-col>
                 </el-row>
                 <el-row>
-                    <el-col :span="24">
-                        <el-form-item label="省：" :label-width="formLabelWidth" style="width: 33.3%;float: left;">
-                           <el-select v-model="form.province" placeholder="请选择" style="width: 100%;"  @change="currentProvince">
+                    <el-col :span="8">
+                        <el-form-item label="开店区域：" :label-width="formLabelWidth">
+                           <el-select v-model="form.province" placeholder="省" style="width: 100%;"  @change="currentProvince">
                                 <el-option
                                     v-for="item in provinceArr"
                                     :key="item.name"
@@ -237,8 +237,10 @@
                                 </el-option>
                             </el-select>
                         </el-form-item>
-                        <el-form-item label="市：" :label-width="formLabelWidth" style="width: 33.3%;float: left;">
-                           <el-select v-model="form.city" placeholder="请选择" style="width: 100%;" @change="currentCity">
+                    </el-col>    
+                    <el-col :span="16">    
+                        <el-form-item label="" style="width: 45%;float: left;margin-left: 5%;">
+                           <el-select v-model="form.city" placeholder="市" style="width: 100%;" @change="currentCity">
                                 <el-option
                                     v-for="item in cityArr"
                                     :key="item.name"
@@ -247,8 +249,8 @@
                                 </el-option>
                             </el-select>
                         </el-form-item>
-                        <el-form-item label="区县：" :label-width="formLabelWidth" style="width: 33.3%;float: left;">
-                           <el-select v-model="form.district" placeholder="请选择" style="width: 100%;">
+                        <el-form-item label="" style="width: 45%;float: left;margin-left: 5%;">
+                           <el-select v-model="form.district" placeholder="区/县" style="width: 100%;">
                                 <el-option
                                     v-for="item in districtArr"
                                     :key="item.name"
@@ -743,9 +745,9 @@ var clueFileList=[[${clueFileList}]];//上传文件
                 proSelect:proSelect,
                 formLabelWidth: '120px',
                 rules:{
-                    customerName: [
-                        { required: true, message: '客户姓名不能为空', trigger: 'blur' }
-                    ],
+                    // customerName: [
+                    //     { required: true, message: '客户姓名不能为空', trigger: 'blur' }
+                    // ],
                     customerPhone: [
                         /* { required: true, message: '手机号不能为空', trigger: 'blur' },
                         { validator:function(rule,value,callback){                 
@@ -913,9 +915,17 @@ var clueFileList=[[${clueFileList}]];//上传文件
                 });
             },
             number(){
-    　　　                       this.form.customerPhone=this.form.customerPhone.replace(/[^\.\d]/g,'');
+    　　　     this.form.customerPhone=this.form.customerPhone.replace(/[^\.\d]/g,'');
                this.form.customerPhone=this.form.customerPhone.replace('.','');
-                                 　　},
+            },
+            qqnumber(){
+    　　　     this.form.qq=this.form.qq.replace(/[^\.\d]/g,'');
+               this.form.qq=this.form.qq.replace('.','');
+    　　　  },
+            agenumber(){
+    　　　     this.form.customerAge=this.form.customerAge.replace(/[^\.\d]/g,'');
+               this.form.customerAge=this.form.customerAge.replace('.','');
+    　　　  },
             /*toggleSelection(rows) { 
                 if (rows) {
                   rows.forEach(row => {

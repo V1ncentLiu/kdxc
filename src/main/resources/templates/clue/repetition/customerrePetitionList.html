@@ -7,7 +7,7 @@
     </style>
 </head>
 <body>
-<div v-loading="loading" id="organizationManage" class="organizationManage mainPadding" >  
+<div v-loading="loading" id="organizationManage" class="organizationManage mainPadding" style="display: none;">  
     <el-breadcrumb separator="/" class="elBreadcrumb marginB20" >
         <el-breadcrumb-item>Home</el-breadcrumb-item>
         <el-breadcrumb-item>电销管理</el-breadcrumb-item>
@@ -59,7 +59,7 @@
                     <el-table-column align="center" prop="cusName" label="客户姓名"></el-table-column>
                     <el-table-column align="center" prop="cusPhone" label="客户手机号"></el-table-column>
                     <el-table-column align="center" prop="createTime" label="提交申请重单时间"></el-table-column>
-                    <el-table-column align="center" prop="dealStatus" label="重单结果"></el-table-column>
+                    <el-table-column align="center" prop="dealStatusResult" label="重单结果"></el-table-column>
                     <el-table-column align="center" prop="statusResult" label="处理状态" ></el-table-column>
                     <el-table-column align="center" prop="applyUser" label="重单顾问姓名"></el-table-column>
                 </el-table>
@@ -90,8 +90,8 @@
                     style="width: 100%"
                     border
                     :data="repetitionDetailList"  >
-                    <el-table-column align="center" prop="telemarketingTeam" label="顾问姓名"></el-table-column>
-                    <el-table-column align="center" prop="telemarketingTeam" label="比例"></el-table-column>
+                    <el-table-column align="center" prop="repeatName" label="顾问姓名"></el-table-column>
+                    <el-table-column align="center" prop="repeatRatio" :formatter="addCent" label="比例" ></el-table-column>
                 </el-table>
             </el-form-item>
         </el-form>
@@ -189,8 +189,6 @@
         	detailButton(){
             	orgVM.isShow =false;
             	var rows = this.multipleSelection;
-            	this.dialogFormVisible = true;
-            	orgVM.cusPhone ="22222222222222"
                 if(rows.length  !=1){
                     this.$message({
                        message: '请选择一条数据进行修改',
@@ -198,7 +196,7 @@
                      });
                     return;
                 }
-        		
+            	this.dialogFormVisible = true;
         		 var str = "";
                  for ( var i = 0; i <rows.length; i++){
                	  str = rows[i].id
@@ -220,8 +218,9 @@
                     			  orgVM.dealStatusId = "不重单";
                     		  }else{
                     			  orgVM.dealStatusId = "重单";
-                    			  if(response.data.data.clueRepetitionDTOs !=null){
-                              		orgVM.repetitionDetailList = response.data.data.clueRepetitionDTOs; 
+                    			  orgVM.isShow=true;
+                    			  if(clueRepetitionDTO.clueRepetitionDTOs !=null){
+                              		orgVM.repetitionDetailList = clueRepetitionDTO.clueRepetitionDTOs; 
                               	 }
                     		  }
                     		  
@@ -296,10 +295,14 @@
                   }
                   return text;
               },
+             addCent(value){
+            	  return value.repeatRatio+"%";
+              }
         },
         created(){
         	
         	this.queryRepeatPage();
+        	document.getElementById('organizationManage').style.display = 'block';
         }//created方法 结束
     })
 </script>
