@@ -183,7 +183,11 @@ var myCallRecordVm = new Vue({
             this.searchForm.endTime=year+"-"+(month+1)+"-"+date+" 23:59:59";
             this.initCallRecordData();
     	},
-    	downloadAudio(id,url){
+    	downloadAudio(id,url,callSource){
+    		if(callSource=='2'){
+    			location.href=url;
+    			return;
+    		}
     		 var param = {};
     		 param.id=id;
     	   	 axios.post('/call/callRecord/getRecordFile',param)
@@ -208,8 +212,11 @@ var myCallRecordVm = new Vue({
              });
     		
     	},
-    	switchSoundBtn(id,url){
-    		//switchSound(id,url);
+    	switchSoundBtn(id,url,callSource){
+    		if(callSource=='2'){
+    			switchSound(id,url);
+    			return;
+    		}
     		 var param = {};
     		 param.id=id;
     	   	 axios.post('/call/callRecord/getRecordFile',param)
