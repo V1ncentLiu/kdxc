@@ -10,6 +10,9 @@ var myCallRecordVm = new Vue({
         totalTalkTime:0,
         callRecordData:[],
         callStatus:[{
+            value: "",
+            label: '全部'
+        }, {
             value: "1",
             label: '接通'
         }, {
@@ -17,6 +20,9 @@ var myCallRecordVm = new Vue({
             label: '未接通'
         }],
         callTypeList:[{
+            value: "",
+            label: '全部'
+        },{
             value: "1",
             label: '呼入'
         }, {
@@ -38,15 +44,17 @@ var myCallRecordVm = new Vue({
     		 var startTime = this.searchForm.startTime;
     		 var endTime = this.searchForm.endTime;
     		 var startTimestamp = Date.parse(new Date(startTime));
-    		 var endTimestamp = new Date(endTime);
+    		if(endTime){
+    			var endTimestamp = new Date(endTime);
+    			 if(startTimestamp> endTimestamp){
+        			 this.$message({
+                         message: '开始时间不能大于结束时间',
+                         type: 'warning'
+                       });
+                     return;
+                 }
+    		}
     		
-    		 if(startTimestamp> endTimestamp){
-    			 this.$message({
-                     message: '开始时间不能大于结束时间',
-                     type: 'warning'
-                   });
-                 return;
-             }
     		 var param = this.searchForm;
         	 param.pageNum=this.pager.currentPage;
         	 param.pageSize=this.pager.pageSize;
