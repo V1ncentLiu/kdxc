@@ -9,14 +9,23 @@ var myCallRecordVm = new Vue({
         },
         totalTalkTime:0,
         callRecordData:[],
-        callStatus:[{
+        callStatus:[
+          {
+                value: "",
+                label: '全部'
+          },
+        {
             value: "1",
             label: '接通'
         }, {
             value: "0",
-            label: '未接通'
+            label: '已接通'
         }],
-        callTypeList:[{
+        callTypeList:[
+        	{
+                value: "",
+                label: '全部'
+            },{
             value: "1",
             label: '呼入'
         }, {
@@ -43,20 +52,26 @@ var myCallRecordVm = new Vue({
     		 var startTime = this.searchForm.startTime;
     		 var endTime = this.searchForm.endTime;
     		 var startTimestamp = Date.parse(new Date(startTime));
-    		 var endTimestamp = new Date(endTime);
-    		 if(startTimestamp> endTimestamp){
-    			 this.$message({
-                     message: '开始时间必须小于结束时间',
-                     type: 'warning'
-                   });
-                 return;
-             }
+    		 if(endTime){
+    			 var endTimestamp = new Date(endTime);
+        		 if(startTimestamp> endTimestamp){
+        			 this.$message({
+                         message: '开始时间必须小于结束时间',
+                         type: 'warning'
+                       });
+                     return;
+                 }
+    			 
+    		 }
+    		 
     		 var param = this.searchForm;
     		 var accountId =this.searchForm.accountId;
     		 if(accountId){
     			 var accountIdArr = new Array();
     			 accountIdArr.push(accountId);
     			 param.accountIdList=accountIdArr;
+    		 }else{
+    			 param.accountIdList=[];
     		 }
         	 param.pageNum=this.pager.currentPage;
         	 param.pageSize=this.pager.pageSize;
@@ -107,7 +122,8 @@ var myCallRecordVm = new Vue({
     	getStartTimeText(row, column, value, index){
     		var valText="";
     		if(value){
-    			valText =  moment.unix(value).format("YYYY-MM-DD HH:MM:SS");
+    			valText =  moment.unix(Number(value)).format("YYYY-MM-DD HH:mm:ss");
+    			//valText = new Date(value).format("yyyy-MM-dd hh:mm:ss");
     		}
     		return valText;
     	},
