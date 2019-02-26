@@ -227,7 +227,7 @@ public class MyCustomerClueController {
 		}
 		return "clue/addCustomerMaintenance";
 	}
-	
+
 	@RequestMapping("/customerInfoReadOnly")
 	public String customerInfoReadOnly(HttpServletRequest request, @RequestParam String clueId) {
 
@@ -239,7 +239,7 @@ public class MyCustomerClueController {
 		// 资源通话记录
 		if (callRecord != null && callRecord.SUCCESS.equals(callRecord.getCode()) && callRecord.getData() != null) {
 			request.setAttribute("callRecord", callRecord.getData());
-		}else{
+		} else {
 			request.setAttribute("callRecord", new ArrayList());
 		}
 		ClueQueryDTO queryDTO = new ClueQueryDTO();
@@ -255,17 +255,17 @@ public class MyCustomerClueController {
 
 			if (null != clueInfo.getData().getClueCustomer()) {
 				request.setAttribute("customer", clueInfo.getData().getClueCustomer());
-			}else{
+			} else {
 				request.setAttribute("customer", new ArrayList());
 			}
 			if (null != clueInfo.getData().getClueBasic()) {
 				request.setAttribute("base", clueInfo.getData().getClueBasic());
-			}else{
+			} else {
 				request.setAttribute("base", new ArrayList());
 			}
 			if (null != clueInfo.getData().getClueIntention()) {
 				request.setAttribute("intention", clueInfo.getData().getClueIntention());
-			}else{
+			} else {
 				request.setAttribute("intention", new ArrayList());
 			}
 		}
@@ -276,9 +276,8 @@ public class MyCustomerClueController {
 		if (trackingList != null && trackingList.SUCCESS.equals(trackingList.getCode())
 				&& trackingList.getData() != null) {
 
-
 			request.setAttribute("trackingList", trackingList.getData());
-		}else{
+		} else {
 			request.setAttribute("trackingList", new ArrayList());
 		}
 
@@ -289,7 +288,7 @@ public class MyCustomerClueController {
 		if (circulationList != null && circulationList.SUCCESS.equals(circulationList.getCode())
 				&& circulationList.getData() != null) {
 			request.setAttribute("circulationList", circulationList.getData());
-		}else{
+		} else {
 			request.setAttribute("circulationList", new ArrayList());
 		}
 
@@ -311,7 +310,6 @@ public class MyCustomerClueController {
 
 		return "clue/CustomerMaintenanceReadOnly";
 	}
-
 
 	/**
 	 * 查询资源文件上传记录
@@ -342,7 +340,7 @@ public class MyCustomerClueController {
 	}
 
 	/**
-	 * 删除已上传的资源文件
+	 * 上传资源文件
 	 * 
 	 * @param request
 	 * @param clueId
@@ -351,7 +349,22 @@ public class MyCustomerClueController {
 	@RequestMapping("/uploadClueFile")
 	@ResponseBody
 	public JSONResult<String> uploadClueFile(HttpServletRequest request, @RequestBody ClueFileDTO dto) {
-		// 获取已上传的文件数据
+		// 获取已上传的文件数据zo
+
+		String filepath = dto.getFilePath();
+		if (null != dto) {
+			dto.setFileName(filepath.substring(filepath.lastIndexOf("/") + 1));
+			dto.setFileType(filepath.substring(filepath.lastIndexOf(".") + 1));
+		}
+
+		Subject subject = SecurityUtils.getSubject();
+		UserInfoDTO user = (UserInfoDTO) subject.getSession().getAttribute("user");
+		if (null != user) {
+
+			dto.setUploadUser(user.getId());
+			dto.setUploadTime(new Date());
+
+		}
 
 		return myCustomerFeignClient.uploadClueFile(dto);
 	}
@@ -586,10 +599,11 @@ public class MyCustomerClueController {
 			UserOrgRoleReq userRole = new UserOrgRoleReq();
 			userRole.setRoleCode(RoleCodeEnum.DXZJ.name());
 			userRole.setOrgId(user.getOrgId());
-			JSONResult<List<UserInfoDTO>> userInfoJson= userInfoFeignClient.listByOrgAndRole(userRole);
-			if (userInfoJson != null && userInfoJson.SUCCESS.equals(userInfoJson.getCode()) && userInfoJson.getData() != null) {
-				//relation.setTeleDirectorId(teleDirectorId);
-			 
+			JSONResult<List<UserInfoDTO>> userInfoJson = userInfoFeignClient.listByOrgAndRole(userRole);
+			if (userInfoJson != null && userInfoJson.SUCCESS.equals(userInfoJson.getCode())
+					&& userInfoJson.getData() != null) {
+				// relation.setTeleDirectorId(teleDirectorId);
+
 			}
 
 		}
