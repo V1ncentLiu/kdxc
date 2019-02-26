@@ -267,24 +267,14 @@
                         <el-button size="small" type="danger" @click="deteleClueFile">删除</el-button>
                         <el-button type="text" disabled>只允许上传图片／音频文件。</el-button>
                     </el-col>
-                    <el-col :span="6" :offset="2" class="f-tar">
-                        <el-upload
-                          class="upload-demo"
-                          ref="upload"
-                          action="https://jsonplaceholder.typicode.com/posts/"
-                          :on-preview="handlePreview"
-                          :on-remove="handleRemove"
-                          :before-remove="beforeRemove"
-                          :limit="1"
-                          :on-exceed="handleExceed"
-                          :before-upload="beforeFormUpload"
-                          :auto-upload="false"
-                          :file-list="fileList">
-                          <el-button slot="trigger" size="small" type="primary">点击上传</el-button>
-  						  <el-button style="margin-left: 10px;" size="small" type="success" @click="submitUpload">确定</el-button>
-                        </el-upload>
-                    </el-col>
-                </el-row>
+			<div id="container">
+				<a id="selectfiles" href="javascript:void(0);" class='btn'>选择文件</a>
+				<a id="postfiles" href="javascript:void(0);" onclick="clueUploadFile()" class='btn'>开始上传</a>
+			</div>
+			<div id="ossfile">你的浏览器不支持flash,Silverlight或者HTML5！</div>
+			上传到指定目录:<input type="text" id='dirname' placeholder="如果不填，默认是上传到根目录" size=50>
+			<pre id="console"></pre>
+			</el-row>
                 <el-row>
                     <el-table
                         ref="multipleTable"
@@ -692,6 +682,7 @@ var circulationList=[[${circulationList}]];//资源流转记录
 var trackingList=[[${trackingList}]];//跟访记录
 var isEdit=false;
 var clueFileList=[[${clueFileList}]];//上传文件
+var ossUrl="";
  var addCustomerVM=   new Vue({
         el: '#addCustomer',
         data: function() {
@@ -931,7 +922,7 @@ var clueFileList=[[${clueFileList}]];//上传文件
             handleTrackingSelection(val){
                this.multipleTrackingSelection=val;
             },
-            handleRemove(file, fileList) {
+  /*           handleRemove(file, fileList) {
                 console.log(file, fileList);
             },
             handlePreview(file) {
@@ -952,9 +943,29 @@ var clueFileList=[[${clueFileList}]];//上传文件
                     this.$message.error('上传文件只能是 JPG/PNG/mp3 格式!');
                 }
                 return (isJPG || isPNG || isMP3) && isLt200;           
-            },
-            submitUpload() {
-                this.$refs.upload.submit();
+            }, */
+            submitUpload(fileList) {
+            	debugger;
+    /*             if(fileList.length > 0){
+                }else {
+                	 this.$message({
+                         message: '请选择上传文件',
+                         type: 'warning'
+                       });
+                    return;
+                } */
+                var src =uploadFile();
+                if (src){
+                    layer.msg("上传成功");
+                    var div = $("#ossfile").children("div");
+                    $(div).remove();
+                    $("#picMsg").css("display","none");
+                }
+                $("#introPic").val(src);
+
+                setTimeout(function () {
+                    $("#introPicSrc").attr("src", src);
+                }, 1000); 
             },
             editRecord() {
               var rows=this.multipleTrackingSelection;
@@ -1161,7 +1172,7 @@ var clueFileList=[[${clueFileList}]];//上传文件
         	   this.form.ishasWx=customer.wechat;
         	   this.form.experience=customer.hasExperience+"";
         	   this.form.customerAge=customer.age;
-        	   this.form.customer.profession+"";
+        	   this.form.customerJob=customer.profession+"";
         	   this.form.customerPartner=customer.partnerType+"";
         	   this.form.address=customer.hasAddress+"";
         	   this.form.urgency=customer.urgentDate;
@@ -1293,4 +1304,24 @@ var clueFileList=[[${clueFileList}]];//上传文件
     	}
     })
 </script>
+<script type="text/javascript" th:src="@{'/js/custom/file_upload/lib/crypto1/crypto/crypto.js'}"></script>
+<script type="text/javascript" th:src="@{'/js/custom/file_upload/lib/crypto1/hmac/hmac.js'}"></script>
+<script type="text/javascript" th:src="@{'/js/custom/file_upload/lib/crypto1/sha1/sha1.js'}"></script>
+<script type="text/javascript" th:src="@{'/js/custom/file_upload/lib/base64.js'}"></script>
+<script type="text/javascript" th:src="@{'/js/custom/file_upload/plupload.full.min.js'}"></script>
+<script type="text/javascript" th:src="@{'/js/custom/file_upload/file_upload.js'}"></script>
+ <script type="text/javascript">
+ 
+ function clueUploadFile(){
+	 debugger;
+	 var result= uploadFile(); 
+    	var  param={};
+     	param.clueId=clueId;
+        param.filePath=result;
+	   	axios.post('/tele/clueMyCustomerInfo/uploadClueFile',param).then(function (response) {  
+        	addCustomerVM.tableDataC1=response.data.data;
+        });
+ }
+ 
+ </script>
 </html>
