@@ -57,6 +57,8 @@ var myCallRecordVm = new Vue({
     			 var accountIdArr = new Array();
     			 accountIdArr.push(accountId);
     			 param.accountIdList=accountIdArr;
+    		 }else{
+    			 param.accountIdList=[];
     		 }
         	 param.pageNum=this.pager.currentPage;
         	 param.pageSize=this.pager.pageSize;
