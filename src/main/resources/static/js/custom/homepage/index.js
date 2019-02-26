@@ -541,7 +541,7 @@ var homePageVM=new Vue({
 // 点击导航赋值ifream的src值
 $(function () { 
 	//初始化 天润坐席 相关参数
-	//documentReady();
+	documentReady();
 	
 	var mainBoxH=$(".elMain").height()-4;
 	// 设置ifream高度
