@@ -529,16 +529,10 @@ var proSelect=[[${proSelect}]];//项目
 var circulationList=[[${circulationList}]];//资源流转记录
 var trackingList=[[${trackingList}]];//跟访记录
 var isEdit=false;
-var clueFileList=[[${clueFileList}]];//上传文件
- var addCustomerVM=   new Vue({
-        el: '#addCustomer',
-        data: function() {
-            return {       
-                isDisabled:true,//默认不可点击         
-                radioProject:'',
-                dialogFormVisible: false,
-                dialogFormImg:false,
-                form: {                    
+
+/**
+ *
+ *     form: {
                     customerName:customer.cusName,
                     customerPhone:'',
                     customerSex:customer.sex+"",
@@ -560,8 +554,82 @@ var clueFileList=[[${clueFileList}]];//上传文件
                     province:intention.province,
                     city:intention.city,
                     district:intention.district,
-                   
                 },
+ */
+
+var vform;
+if(customer==null){
+    vform= {
+        customerName:"",
+            customerPhone:"",
+            customerSex:"",
+            ishasWx:"",
+            experience:"",
+            customerAge:"",
+            customerJob:"",
+            customerPartner:"",
+            address:"",
+            urgency:"",
+            customerLevel:"",
+            qq:"",
+            money:"",
+            area:"",
+            intentionCategory:"",
+            radioProject:"",
+            insideProject:"",
+            outsideProject:"",
+            province:"",
+            city:"",
+            district:"",
+    };
+}else{
+    vform={
+        customerName:customer.cusName,
+        customerPhone:'',
+        customerSex:customer.sex+"",
+        ishasWx:customer.wechat,
+        experience:customer.hasExperience+"",
+        customerAge:customer.age,
+        customerJob:customer.profession+"",
+        customerPartner:customer.partnerType+"",
+        address:customer.hasAddress+"",
+        urgency:customer.urgentDate,
+        customerLevel:customer.cusLevel+"",
+        qq:customer.qq,
+        money:intention.advanceAmount+"",
+        area:intention.area+"",
+        intentionCategory:intention.purType+"",
+        radioProject:intention.purProjectType+"",
+        insideProject:intention.purInProject+"",
+        outsideProject:intention.purOutProject,
+        province:intention.province,
+        city:intention.city,
+        district:intention.district,
+    }
+}
+
+if(base==null){
+    base={
+        typeName:"",
+        categoryName:"",
+        sourceTypeName:"",
+        sourceTypeName:"",
+        searchWord:"",
+        projectName:"",
+        messageTime:"",
+        messagePoint:""
+    }
+}
+
+ var addCustomerVM=   new Vue({
+        el: '#addCustomer',
+        data: function() {
+            return {       
+                isDisabled:true,//默认不可点击         
+                radioProject:'',
+                dialogFormVisible: false,
+                dialogFormImg:false,
+                form:vform,
                 clueBase:base,
                 categoryArr:[],
                 typeArr:[],
@@ -629,7 +697,6 @@ var clueFileList=[[${clueFileList}]];//上传文件
                 multipleTrackingSelection:[],
                 fileList: [],
                 cusStatusArr:[],
-                tableDataC1: clueFileList,//文件记录
                 dialingTime:'',//跟进记录
                 lineFormShow: false,
                 formInline: { 

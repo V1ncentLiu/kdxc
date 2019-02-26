@@ -19,30 +19,25 @@
 		        <el-button type="primary" @click="toAllocationClue">分配资源</el-button>
 		    </shiro:hasPermission>
     		<shiro:hasPermission name="aggregation:pendingAllocationManager:transfer">
-		        <el-button type="primary" @click="toTransferClue">转移资源</el-button>
+		        <el-button type="success" @click="toTransferClue">转移资源</el-button>
 		    </shiro:hasPermission>
     		<shiro:hasPermission name="aggregation:pendingAllocationManager:batch">
-		        <el-button type="primary" @click="toBatchClue">批量分发</el-button>
+		        <el-button type="warning" @click="toBatchClue">批量分发</el-button>
 		    </shiro:hasPermission>
     		<shiro:hasPermission name="aggregation:pendingAllocationManager:ceo">
-		        <el-button type="primary" @click="toCeoClue">副总分发</el-button>
+		        <el-button type="danger" @click="toCeoClue">副总分发</el-button>
 		    </shiro:hasPermission>
 	</el-row>
 	<el-form :inline="true" :model="clueSearchForm" class="demo-form-inline" ref="clueSearchForm"> 
 	    <el-row class="marginB10 greybg padding20" style="padding-bottom: 0;">
-	        <el-row :gutter="20">
-	         	<el-col :span="4">
+	     <el-row>
 				  <el-form-item class="formItem" prop="phone">
 				    <el-input v-model="clueSearchForm.phone" placeholder="客户手机号" class="input-with-select"></el-input>
 				  </el-form-item>
-				</el-col>
-	            <el-col :span="4">
 				  <el-form-item class="formItem" prop="cusName">
 				    <el-input v-model="clueSearchForm.cusName" placeholder="客户姓名" class="input-with-select"></el-input>
 				  </el-form-item>
-				</el-col>
-				<el-col :span="4">
-				  <el-form-item class="formItem"  prop="type" style="width: 100%;">
+				  <el-form-item class="formItem"  prop="type">
 				    <el-select v-model="clueSearchForm.type" @change="getSaleList" placeholder="资源类型" style="width: 100%;">
 				      <el-option
 					      v-for="item in typeOptions"
@@ -52,10 +47,8 @@
 					  </el-option>
 				    </el-select>
 				  </el-form-item>
-				</el-col>
-				<el-col :span="4">
-				  <el-form-item class="formItem"  prop="category" style="width: 100%;">
-				    <el-select v-model="clueSearchForm.category" placeholder="资源类别" style="width: 100%;">
+				  <el-form-item class="formItem"  prop="category">
+				    <el-select v-model="clueSearchForm.category" placeholder="资源类别">
 				      <el-option
 					      v-for="item in categoryOptions"
 					      :key="item.value"
@@ -64,42 +57,28 @@
 					  </el-option>
 				    </el-select>
 				  </el-form-item>
-				</el-col>
-	           
-	        </el-row>
-	        <el-row :gutter="20">
-	            <el-col :span="10" >
-				  <span class="demonstration">创建时间：</span>
-					<el-date-picker value-format="yyyy-MM-dd" v-model="clueSearchForm.startTime" type="date" placeholder="选择日期">
-					</el-date-picker>
-					<span class="demonstration" style="margin-left: 20px;">--</span>
-					<el-date-picker value-format="yyyy-MM-dd" v-model="clueSearchForm.endTime" type="date" placeholder="选择日期">
-					</el-date-picker>
-				</el-col>
-				
-	            <el-col :span="4">
+          <el-form-item class="formItem" label="创建时间：">
+  					<el-date-picker value-format="yyyy-MM-dd" v-model="clueSearchForm.startTime" type="date" placeholder="选择日期"></el-date-picker>
+          </el-form-item>
+          <el-form-item class="formItem" label="——">
+					   <el-date-picker value-format="yyyy-MM-dd" v-model="clueSearchForm.endTime" type="date" placeholder="选择日期"></el-date-picker>
+          </el-form-item>
 				  <el-form-item class="formItem" prop="messagePoint">
 				    <el-input v-model="clueSearchForm.messagePoint" placeholder="留言重点" class="input-with-select"></el-input>
 				  </el-form-item>
-				</el-col>
-	            <el-col :span="4">
 				  <el-form-item class="formItem" prop="searchWord">
 				    <el-input v-model="clueSearchForm.searchWord" placeholder="搜索词" class="input-with-select"></el-input>
 				  </el-form-item>
-				</el-col>
-	            <el-col :span="4">
 				  <el-form-item class="formItem" prop="address">
 				    <el-input v-model="clueSearchForm.address" placeholder="地址" class="input-with-select"></el-input>
 				  </el-form-item>
-				</el-col>
-				<el-col :span="2">
 				    <el-button type="primary" @click="searchTable()">搜索</el-button>
-				</el-col>
+				
 	        </el-row>
 	    </el-row>
   	</el-form>
     <el-row>
-        <el-table  ref="multipleTable" tooltip-effect="dark" @selection-change="handleSelectionChange"
+        <el-table  ref="multipleTable" tooltip-effect="dark" border @selection-change="handleSelectionChange"
             style="width: 100%"  :data="dataTable" >
             <el-table-column align="center" type="selection" label="全选" width="50"></el-table-column>
             <el-table-column align="center" prop="messagePoint" label="留言重点" ></el-table-column>

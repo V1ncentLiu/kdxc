@@ -130,9 +130,19 @@ var homePageVM=new Vue({
             outboundInputPhone:'',//外呼时手机号
             accountId:accountId,//登陆者ID
             outboundDialogMin:false,//外呼dialog 是否最小化
+            tmOutboundCallDialogVisible:false,//电销页面外呼 dialog 
 	    }
 	},
  	methods: {
+        // 输入数字控制方法
+        cnoNumber(){
+　　　    this.loginClientForm.cno=this.loginClientForm.cno.replace(/[^\.\d]/g,'');
+          this.loginClientForm.cno=this.loginClientForm.cno.replace('.','');
+    　  },
+        bindPhoneNumber(){
+　　　    this.loginClientForm.bindPhone=this.loginClientForm.bindPhone.replace(/[^\.\d]/g,'');
+          this.loginClientForm.bindPhone=this.loginClientForm.bindPhone.replace('.','');
+    　  },
  		handleMin(){
  			this.dialogLoginClientVisible = false;
  		},
@@ -355,7 +365,8 @@ var homePageVM=new Vue({
 			if (token != '') {
 				agentSign = agentSign + token;
 			} else {
-				alert('座席号或密码不正确');
+				var _msg = "登录失败！token不可以为空";
+            	homePageVM.$message({message:_msg,type:'error'});
 				return false;
 			}
 			
@@ -369,7 +380,6 @@ var homePageVM=new Vue({
 				dataType : 'jsonp',
 				jsonp : 'callback',
 				success : function(r) {
-					console.log(r);
 					var d = eval("(" + r + ")");
 					if (d.result == "0") {
 						params.enterpriseId = d.enterpriseId;
@@ -406,7 +416,7 @@ var homePageVM=new Vue({
 			                     });
 			                } else {
 			                    //座席登录失败，失败原因： + result.msg
-			                	var _msg = "登录失败！座席号或密码不正确";
+			                	var _msg = "登录失败！座席号或绑定电话不正确";
 			                	homePageVM.$message({message:_msg,type:'error'});
 			                	return;
 			                }
@@ -421,7 +431,10 @@ var homePageVM=new Vue({
 						//sessionStorage.setItem("bindTel", params.bindTel, 7);
 						//sessionStorage.setItem("bindType", params.bindType, 7);
 					} else {
-						homePageVM.$message.error({message:d.description,type:'error'});
+						//homePageVM.$message.error({message:d.description,type:'error'});
+						var _msg = "登录失败！座席号或绑定电话不正确";
+	                	homePageVM.$message({message:_msg,type:'error'});
+	                	console.error(r);
 					}
 				},
 				error : function(r) {
@@ -473,76 +486,29 @@ var homePageVM=new Vue({
         openOutboundDialog(){//打开主动外呼diaolog 
         	this.outboundInputPhone="";
         	this.dialogOutboundVisible = true;
-        	/*if(this.outboundDialogMin){//代表上次点击的是最小化
-        		$("#outboundCallTimeDiv").show();
-        	}*/
+        	if(this.outboundDialogMin){//代表上次点击的是最小化
+        		//$("#outboundCallTimeDiv").show();
+        	}else{
+        		$('#outboundCallTime').html("");
+        	}
         	this.outboundDialogMin = false;
         	
         },
         closeOutboundDialog(){
         	//清除计时器
-        	window.clearInterval(outboundCallIntervalTimer);
+        	clearTimer();
         	this.dialogOutboundVisible = false;
         	this.outboundDialogMin=false;
         	if(!this.outboundDialogMin){//如果是最小化就不执行这个代码
         		return;
+        	}else{
+        		$('#outboundCallTime').html("");
         	}
-        	//$('#outboundCallStartTime').val("");
-        	$('#outboundCallTime').html("");
         },
         clickOutbound(){//外呼
-        	if(!this.isQimoClient && !this.isTrClient ){
-        		   this.$message({message:"请登录呼叫中心",type:'warning'});
-        		   return ;
-        	}
-         	var outboundInputPhone = this.outboundInputPhone;
-        	 if(!/^[0-9]*$/.test(outboundInputPhone)){
-				 this.$message({message:"只可以输入数字,不超过11位",type:'warning'});
-       		     return ; 
-        	  }
+        	var outboundInputPhone = this.outboundInputPhone;
         	
-        	sessionStorage.setItem("callSource","1");//1:表示 首页头部外呼 2：表示 电销管理外呼
-       
-        	var param = {};
-        	if(this.isTrClient){//天润呼叫
-        		param.tel=outboundInputPhone;
-        		param.userField={
-        				'accountId':this.accountId,
-        				'clueId':''
-        		}
-        		TOOLBAR.previewOutcall(param,function(token){
-        			if(token.code=='0'){
-        				homePageVM.$message({message:"外呼中",type:'success'});
-        			}else{
-        				console.error(token);
-        				homePageVM.$message({message:"外呼失败",type:'error'});
-        			}
-        		});
-        	}else if(this.isQimoClient){//七陌呼叫
-        		param.customerPhoneNumber = outboundInputPhone;
-        		 axios.post('/client/client/qimoOutboundCall',param)
-                 .then(function (response) {
-                     var data =  response.data;
-                     if(data.code=='0'){
-                    	  var resData = data.data;
-                    	  if(resData.Succeed){
-                    		//10分钟后红色字体显示
-                    	      outboundCallIntervalTimer("outboundCallTime",10,2);
-                    		  homePageVM.$message({message:"外呼中",type:'success'});
-                    	  }else{
-                      		  homePageVM.$message({message:resData.Message,type:'error'});
-                    	  }
-                     }else{
-                    		homePageVM.$message({message:data.msg,type:'error'});
-                     }
-                 })
-                 .catch(function (error) {
-                    console.log(error);
-                 })
-                 .then(function () {
-                   // always executed
-                 });
-        	}
+        	this.outboundCall(outboundInputPhone,1);
         },
         logoutMin(){//退出最小化
         	this.dialogLogoutClientVisible =false;
@@ -550,6 +516,17 @@ var homePageVM=new Vue({
     	outboundMin(){//外呼最小化
     		this.dialogOutboundVisible = false;
     		this.outboundDialogMin=true;
+    	},
+    	outboundCall(outboundInputPhone,callSource,clueId){//外呼
+    		outboundCallPhone(outboundInputPhone,callSource,clueId,this.postBack());
+    		return;
+    	},
+    	closeTmOutboundDialog(){//关闭电销外呼dialog
+    		this.tmOutboundCallDialogVisible = false;
+    		clearTimer();//清除定时器
+    	},
+    	postBack(){//接通成功后的回调函数
+    		//console.info("postBack");
     	}
          
   	},

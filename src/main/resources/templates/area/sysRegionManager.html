@@ -42,24 +42,24 @@
                     <el-button type="primary" @click="addChildOrg"><i class="el-icon-plus"></i>添加下级区域</el-button>
                  
                  
-                    <el-button type="success" @click="modifyChildOrg"><i class="el-icon-edit"></i>修改</el-button>
+                    <el-button type="success" @click="modifyChildOrg"><i class="el-icon-edit"></i>编辑</el-button>
                    
                      
                     <el-button type="danger" @click="deleteFun"><i class="el-icon-delete"></i>删除</el-button>
                     
                 </el-col>
                 <el-col :xs="12" :sm="8" :md="8" :lg="6" :xl="6">
-                    <el-input placeholder="按照区域名称进行查询" class="input-with-select" v-model="inputOrgName">                        
+                    <el-input placeholder="请输入区域名称进行查询" class="input-with-select" v-model="inputOrgName">                        
                     <el-button slot="append" icon="el-icon-search" @click="getQuery">搜索</el-button>
                     </el-input>
                 </el-col>
             </el-row>
-            <el-row class="rightTitle fs16"> {{form.parentName}} 下一级组区域</el-row>
+            <el-row class="rightTitle fs16"> {{form.parentName}} 下一级区域</el-row>
             <el-row>
                 <el-table 
                     ref="multipleTable"
                     tooltip-effect="dark"
-                    empty-text="当前区域无下级区域"
+                    empty-text="此区域无下级区域"
                     style="width: 100%"
                     @selection-change="handleSelectionChange"
                     border
@@ -67,7 +67,7 @@
                     class="marginB20"
                     >
                     <el-table-column align="center" prop="id"  type="selection" width="55"></el-table-column> 
-                     <el-table-column align="center" prop="type" type="index"  label="序号"></el-table-column> 
+                     <el-table-column align="center" prop="type" type="index" width="55" label="序号"></el-table-column> 
                     <el-table-column align="center" prop="name" label="区域名称"></el-table-column>
                     
                 </el-table>
@@ -81,13 +81,13 @@
             <el-form-item label="上一级区域：" :label-width="formLabelWidth" prop="parentName">
                    {{form.parentName}}
             </el-form-item> 
-            <el-form-item label="区域名称：" :label-width="formLabelWidth" prop="name">
-                <el-input v-model="form.name" autocomplete="off" maxlength="50"   placeholder="输入名称"></el-input>
+            <el-form-item label="区域名称：" :label-width="formLabelWidth" prop="name" >
+                <el-input v-model="form.name"  autocomplete="off" maxlength="50"   placeholder="输入名称"></el-input>
             </el-form-item>
         </el-form>
         <div slot="footer" class="dialog-footer">
             <el-button @click="cancelForm('ruleForm')">取 消</el-button>
-            <el-button type="primary" @click="submitForm('ruleForm')">确 定</el-button>
+            <el-button :disabled="confirmBtnDisabled" type="primary" @click="submitForm('ruleForm')">确 定</el-button>
         </div>
     </el-dialog>
     
@@ -119,7 +119,7 @@
                     :data="staffNumTable" 
                     >
                     <el-table-column align="center" prop="id" type="selection" width="55"></el-table-column> 
-                     <el-table-column align="center" type="index" width="80" label="序号"></el-table-column>
+                     <el-table-column align="center" type="index" width="100" label="序号"></el-table-column>
                      <!-- <el-table-column prop="date" label="全选" width="180"></el-table-column>  -->
                     <el-table-column align="center" prop="name" label="姓名"></el-table-column>
                    
@@ -154,6 +154,7 @@
         el: '#organizationManage',
         data: function() {
             return {
+            	confirmBtnDisabled:false,
             	expandedKeys:expandedKeys,//树形结构  默认展开的
                 dataTree: orgData,//组织结构tree
                 dataTable:[],//
@@ -251,7 +252,7 @@
             	var rows = this.multipleSelection;
             	if(rows.length==0){
                     this.$message({
-                       message: '请选择一条数据进行修改',
+                       message: '请选择一条数据进行删除',
                        type: 'warning'
                      });
                     return;
@@ -376,14 +377,15 @@
                       });
                      return;
             	}
+            	this.form.name="";
                 this.addOrModifyDialogTitle="添加区域";
                 this.submitUrl = 'save';
             	this.dialogFormVisible = true;
-            	
             },
             submitForm(formName) {
                 this.$refs[formName].validate((valid) => {
                   if (valid) {
+                	  orgVM.confirmBtnDisabled = true;
                      var param=this.form;
                      param.parentId=this.selectedNode.id;
                     axios.post('/area/sysregion/'+this.submitUrl, param)
@@ -414,7 +416,7 @@
                 });
               },
               cancelForm(formName) {
-                  this.$refs[formName].resetFields();
+                //  this.$refs[formName].resetFields();
                   this.dialogFormVisible = false;
               },
               initOrgTree(){//刷新根节点tree
@@ -448,9 +450,9 @@
                        });
                       return;
                   }
-                  this.addOrModifyDialogTitle="修改组织信息";
+                  this.form.name="";
+                  this.addOrModifyDialogTitle="编辑区域";
                   this.submitUrl = 'update';
-                  
                  var parentName =  orgVM.form.parentName;
                   var param={id:rows[0].id};
                   //根据id获取数据
@@ -478,7 +480,8 @@
             	 
               },
               closeAddOrgDialog(){//close 添加组织弹框
-            	  this.$refs['ruleForm'].resetFields();
+            	 // alert(1);
+            	 //  this.$refs['ruleForm'].resetFields();
               },
               openStaffNumTable(orgId){//打开组内成员弹框
             	   this.dialogStaffNumVisible = true;

@@ -79,22 +79,20 @@
             <el-table-column type="index" width="50" label="序号"> </el-table-column>
             <el-table-column align="center" prop="customerName" label="客户姓名"></el-table-column>
             <el-table-column align="center" prop="customerPhone" label="客户电话"></el-table-column>
-            <el-table-column align="center" prop="startTime" label="开始服务时间"></el-table-column>
+            <el-table-column align="center" prop="serviceTime" label="开始服务时间"></el-table-column>
             <el-table-column align="center" prop="callType" label="通话类型" :formatter="getCallTypeText"></el-table-column>
             <el-table-column align="center" prop="startTime" label="通话时间" :formatter="getStartTimeText"></el-table-column>
             <el-table-column align="center" prop="callStatus" label="接通状态" :formatter="getCallStatusText"></el-table-column>
             <!-- <el-table-column align="center" prop="isUserStatus" label="状态" :formatter="getIsUserStatusText"></el-table-column> -->
             <el-table-column align="center" prop="talkTime" label="通话时长" :formatter="getTalkTimeText"></el-table-column>
             <el-table-column align="center"  label="操作" >
-                <template slot-scope="scope">
-                        <!-- <el-button type="success" size="small"><i class="el-icon-caret-right"></i>播放</el-button> -->
-                        
-                        <div style="float:left" :id="scope.row.id" class="sound-trigger sound-trigger--type-default sound-trigger--type-click" @click="switchSound(scope.row.id,scope.row.recordFile)">
+                <template slot-scope="scope" v-if="scope.row.talkTime >0 ">
+                        <div style="float:left" :id="scope.row.id" class="sound-trigger sound-trigger--type-default sound-trigger--type-click" @click="switchSoundBtn(scope.row.id,scope.row.recordFile,scope.row.callSource)">
 						    <div class="sound-trigger__inner">
 						    <i class="fa fa-play fa-lg"></i>
 						    </div>
 						</div>
-                        <el-button type="danger" size="small" @click="downloadAudio(scope.row.recordFile)"><i class="el-icon-download"></i>下载</el-button>
+                        <el-button type="danger" size="small" @click="downloadAudio(scope.row.id,scope.row.recordFile,scope.row.callSource)"><i class="el-icon-download"></i>下载</el-button>
                 </template>
             
             </el-table-column>
@@ -111,8 +109,7 @@
 <script th:inline="javascript">
    
 </script>
-
-<!-- 当前页面的js -->
 <script th:src="@{/js/custom/callrecord/simpleAudio.js?v=1.0.0}"></script>
+<script th:src="@{/js/custom/callrecord/download.js?v=1.0.0}"></script>
 <script th:src="@{/js/custom/callrecord/myCallRecord.js?v=1.0.1}"></script>
 </html>
