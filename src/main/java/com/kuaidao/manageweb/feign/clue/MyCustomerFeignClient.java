@@ -127,7 +127,7 @@ public interface MyCustomerFeignClient {
 	 * @return
 	 */
 	@RequestMapping(method = RequestMethod.POST, value = "/deleteClueFile")
-	JSONResult<String> deleteClueFile(ClueQueryDTO dto);
+	JSONResult<String> deleteClueFile(ClueFileDTO dto);
 
 	@Component
 	static class HystrixClientFallback implements MyCustomerFeignClient {
@@ -201,7 +201,7 @@ public interface MyCustomerFeignClient {
 		}
 
 		@Override
-		public JSONResult<String> deleteClueFile(ClueQueryDTO dto) {
+		public JSONResult<String> deleteClueFile(ClueFileDTO dto) {
 			// TODO Auto-generated method stub
 			return fallBackError("删除资源文件");
 		}

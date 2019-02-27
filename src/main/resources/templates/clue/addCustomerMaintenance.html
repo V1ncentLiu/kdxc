@@ -284,11 +284,13 @@
                         tooltip-effect="dark"
                         style="width: 100%"
                         border
-                        @selection-change="handleSelectionChange"
+                        @selection-change="handleFileSelectionChange"
                      >
                         <el-table-column
                           type="selection"
+                           prop="id"
                           width="55"
+                          @selection-change="handleFileSelectionChange"
                           align="center">
                         </el-table-column>
                         <el-table-column
@@ -321,6 +323,14 @@
                           prop="delStatus"
                           label="删除状态"
                           align="center">
+                       <template slot-scope="scope">
+	                      <div v-if="scope.row.delStatus === 0">
+	                                                                               未删除
+	                      </div>
+	                       <div v-else-if="scope.row.delStatus ===1">
+	                                                                               已删除
+	                       </div>
+	                     </template>
                         </el-table-column>
                     </el-table>
                 </el-row>
@@ -684,7 +694,7 @@ var circulationList=[[${circulationList}]];//资源流转记录
 var trackingList=[[${trackingList}]];//跟访记录
 var isEdit=false;
 var clueFileList=[[${clueFileList}]];//上传文件
-var ossUrl="";
+var ossUrl=[[${ossUrl}]];
  var addCustomerVM=   new Vue({
         el: '#addCustomer',
         data: function() {
@@ -782,6 +792,7 @@ var ossUrl="";
                 },
                 multipleSelection:[],//上传资料
                 multipleTrackingSelection:[],
+                multipleFileSelection:[],
                 fileList: [],
                 cusStatusArr:[],
                 tableDataC1: clueFileList,//文件记录
@@ -936,8 +947,12 @@ var ossUrl="";
                   this.$refs.multipleTable.clearSelection();
                 }
             },*/
-            handleSelectionChange(val) {  //上传资料
+            handleSelectionChange(val) {  
                 this.multipleSelection = val;
+            },
+            handleFileSelectionChange(val){
+            	//上传资料
+            	  this.multipleFileSelection = val;
             },
             handleTrackingSelection(val){
                this.multipleTrackingSelection=val;
@@ -964,29 +979,7 @@ var ossUrl="";
                 }
                 return (isJPG || isPNG || isMP3) && isLt200;           
             }, */
-            submitUpload(fileList) {
-            	debugger;
-    /*             if(fileList.length > 0){
-                }else {
-                	 this.$message({
-                         message: '请选择上传文件',
-                         type: 'warning'
-                       });
-                    return;
-                } */
-                var src =uploadFile();
-                if (src){
-                    layer.msg("上传成功");
-                    var div = $("#ossfile").children("div");
-                    $(div).remove();
-                    $("#picMsg").css("display","none");
-                }
-                $("#introPic").val(src);
-
-                setTimeout(function () {
-                    $("#introPicSrc").attr("src", src);
-                }, 1000); 
-            },
+ 
             editRecord() {
               var rows=this.multipleTrackingSelection;
               if(rows.length!=1){
@@ -1080,6 +1073,45 @@ var ossUrl="";
             },
             //删除上传文件
             deteleClueFile(){
+             	//删除提示弹框
+           	 var rows=this.multipleFileSelection;
+                if(rows.length<1){
+              	  if(rows.length!=1){
+                        this.$message({
+                           message: '请选择删除数据',
+                           type: 'warning'
+                         });
+                        return;
+                    }
+                }
+               this.$confirm('确定要删除上传文件？', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }).then(() => {
+               	 var ids=[];
+                   for(var i=0;i<rows.length;i++) {
+                   	ids.push(rows[i].id);
+                   }
+                   var param={};
+                   param.delIds=ids;
+                   param.clueId=clueId;
+                   axios.post('/tele/clueMyCustomerInfo/deleteClueFile',param)
+                   .then(function (response) {
+                 	  addCustomerVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
+                	     axios.post('/tele/clueMyCustomerInfo/findClueFile',param)
+                        .then(function (response) {
+                      	  addCustomerVM.tableDataC1=response.data.data;
+                        }); 
+                        
+      	              }}); 
+                   }); 
+                }).catch(() => {
+                    this.$message({
+                        type: 'info',
+                        message: '已取消删除'
+                    });          
+                });
             	
             },
             deteleTracking() {
@@ -1333,13 +1365,17 @@ var ossUrl="";
  <script type="text/javascript">
  
  function clueUploadFile(){
-	 debugger;
 	 var result= uploadFile(); 
     	var  param={};
      	param.clueId=clueId;
         param.filePath=result;
-	   	axios.post('/tele/clueMyCustomerInfo/uploadClueFile',param).then(function (response) {  
-        	addCustomerVM.tableDataC1=response.data.data;
+	   	axios.post('/tele/clueMyCustomerInfo/uploadClueFile',param).then(function (response) { 
+      	 addCustomerVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
+      	     axios.post('/tele/clueMyCustomerInfo/findClueFile',param)
+              .then(function (response) {
+            	  addCustomerVM.tableDataC1=response.data.data;
+                }); 
+             }}); 
         });
  }
  
