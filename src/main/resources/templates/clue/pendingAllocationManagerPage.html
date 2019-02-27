@@ -15,6 +15,7 @@
     </el-breadcrumb>
     
     <el-row class="marginB10">
+    		<el-button type="text" @click="dialogFormVisible = true">选择列</el-button>
     		<shiro:hasPermission name="aggregation:pendingAllocationManager:allocation">
 		        <el-button type="primary" @click="toAllocationClue">分配资源</el-button>
 		    </shiro:hasPermission>
@@ -81,21 +82,9 @@
         <el-table  ref="multipleTable" tooltip-effect="dark" border @selection-change="handleSelectionChange"
             style="width: 100%"  :data="dataTable" >
             <el-table-column align="center" type="selection" label="全选" width="50"></el-table-column>
-            <el-table-column align="center" prop="messagePoint" label="留言重点" ></el-table-column>
-            <el-table-column align="center" prop="createTime" label="日期" :formatter="dateFormat"></el-table-column>
-            <el-table-column align="center" prop="searchWord" label="搜索词" ></el-table-column>
-            <el-table-column align="center" prop="projectName" label="资源项目"></el-table-column>
-            <el-table-column align="center" prop="category" label="资源类别" :formatter="transformCategory"></el-table-column>
-            <el-table-column align="center" prop="type" label="资源类型" :formatter="transformType"></el-table-column>
-            <el-table-column align="center" prop="cusName" label="客户姓名"></el-table-column>
-           <el-table-column align="center" prop="phone" label="手机号" ></el-table-column>
-           <el-table-column align="center" prop="phone2" label="手机号2" ></el-table-column>
-           <el-table-column align="center" prop="phone3" label="手机号3" ></el-table-column>
-           <el-table-column align="center" prop="address" label="地址" ></el-table-column>
-           <el-table-column align="center" prop="messageTime" label="留言时间" :formatter="dateFormat"></el-table-column>
-           <el-table-column align="center" prop="qq" label="QQ" ></el-table-column>
-           <el-table-column align="center" prop="email" label="邮箱" ></el-table-column>
-           <el-table-column align="center" prop="createUserName" label="资源专员" ></el-table-column>
+            <el-table-column align="center" :key="index" :prop="item.fieldCode" :label="item.displayName" :width="item.width"
+	         v-for="(item,key,index) in tableColums" >
+	        </el-table-column>
         </el-table>
         <table-pagination :pager="pager" @change="searchTable"></table-pagination>
     </el-row>
@@ -192,6 +181,25 @@
         </template>
     </el-dialog>
     <!-- dialog -->
+    <el-dialog title="自定义列" :visible.sync="dialogFormVisible">
+	  <el-form :model="form">
+	    
+		  <el-form-item label="列名" prop="type">
+		    <el-checkbox-group v-model="form.type">
+		      <el-checkbox :label="item.sortNum+'_'+item.fieldCode+'_'+item.displayName+'_'+item.id"  name="type" :key="item.fieldCode"  v-for="(item,index) in  allTableColums ">
+		          {{item.displayName}}
+		      </el-checkbox>
+		  
+		     </el-checkbox-group>
+		  </el-form-item>
+	    
+	  </el-form>
+	  
+	  <div slot="footer" class="dialog-footer">
+	    <el-button @click="dialogFormVisible = false">取 消</el-button>
+	    <el-button type="primary" @click="confirmColumn">确 定</el-button>
+	  </div>
+	</el-dialog>
 </div>
 <!-- import common js-->
 <div th:include="_footer_include :: #jsLib"></div>
@@ -203,6 +211,8 @@ var saleGroupList=[[${saleGroupList}]];//同事业部下电销组
 var ruleList=[[${ruleList}]];//规则
 var clueCategoryList=[[${clueCategoryList}]];//资源类别
 var clueTypeList=[[${clueTypeList}]];//资源类型
+var fieldList=[[${fieldList}]];//自定义字段
+var userFieldList=[[${userFieldList}]];//用户自定义字段
 var clueVM = new Vue({
         el: '#clueManage',
         data: {
@@ -231,6 +241,13 @@ var clueVM = new Vue({
                 	teleSaleId:''
                 },
 	            dataTable:[],
+	            loading: true,
+	             allTableColums:[],
+	             tableColums:[],
+	             dialogFormVisible: false,
+	             form: {
+	               type: [],
+	             },
 	            orgOptions:orgList,
 	            saleOptions:saleList,
 	            ruleOptions:ruleList,
@@ -268,7 +285,14 @@ var clueVM = new Vue({
                       var result =  response.data;
                       console.info(result);
                       var table=result.data;
-                      clueVM.dataTable= table.data;
+                      var data= table.data;
+                      for(var i=0;i<data.length;i++){
+                    	  data[i].category=clueVM.transformCategory(data[i].category);
+                    	  data[i].type=clueVM.transformType(data[i].type);
+                    	  data[i].createTime=clueVM.dateFormat(data[i].createTime);
+                    	  data[i].messageTime=clueVM.dateFormat(data[i].messageTime);
+                      }
+                      clueVM.dataTable= data;
                       clueVM.pager.total =  table.total;
                       clueVM.pager.currentPage = table.currentPage;
                 })
@@ -293,7 +317,7 @@ var clueVM = new Vue({
                  this.initTableData(val);
                },
                //类别转换方法
-               transformCategory(row, column, cellValue, index) {
+               transformCategory(cellValue) {
              	  var text="";
              	  if(clueCategoryList){
  	                  for(var i=0;i<clueCategoryList.length;i++){
@@ -305,7 +329,7 @@ var clueVM = new Vue({
                    return text;
                },
                //类行转换方法
-               transformType(row, column, cellValue, index) {
+               transformType(cellValue) {
              	  var text="";
              	  if(clueTypeList){
  	                  for(var i=0;i<clueTypeList.length;i++){
@@ -317,7 +341,7 @@ var clueVM = new Vue({
                    return text;
                },
                //日期数据格式化方法
-               dateFormat(row, column, cellValue, index) {
+               dateFormat( cellValue) {
                  if (cellValue == undefined) {
                     return "";
                  }
@@ -524,9 +548,61 @@ var clueVM = new Vue({
                        console.log(error);
                   });
               },
+              confirmColumn(){
+                	this.dialogFormVisible = false;
+                	//处理用户选择的列
+                	console.info(this.form.type);
+                	var customerShowColun = [];
+                	var customerColumn = this.form.type;
+                	customerColumn.sort(this.sortNumber);//对选择的列排序
+                	var idList=[];
+                	for(var i=0;i<customerColumn.length;i++){
+                		var curItem = customerColumn[i];
+                		var itemArr = curItem.split("_");
+                		var obj = {};
+                		obj.fieldCode=itemArr[1];
+                		obj.displayName=itemArr[2];
+                		customerShowColun.push(obj);
+                		idList.push(itemArr[3])
+                	}
+                	this.tableColums = customerShowColun;
+                	var param ={};
+                  param.fieldIdList = idList;
+                  param.menuCode = "aggregation:pendingAllocationManager";
+                  console.info(param);
+                  if(idList.length!=0){
+	                  axios.post('/customfield/customField/saveUserField', param)
+	                  .then(function (response) {
+	                  	
+	                  })
+	                  .catch(function (error) {
+	                       console.log(error);
+	                  });
+                  }
+                },
+                initColumn(){
+                	//初始化table 列 和 用户自定义列
+                	this.allTableColums = fieldList;
+                	if(userFieldList.length!=0){
+                		var type=[];
+                    	for(var i=0;i<userFieldList.length;i++){
+                    		type.push(userFieldList[i].sortNum+'_'+userFieldList[i].fieldCode+'_'+userFieldList[i].displayName+'_'+userFieldList[i].fieldId)
+	                   	}
+	  	              	this.form.type = type;
+	  	              	this.confirmColumn();
+                	}else{
+  	              		this.tableColums = fieldList;
+                	}
+                	
+                },
+                sortNumber(a,b) {
+                    //对数组中元素，按照数字 从小到大 排序
+                    return a.split("_")[0] - b.split("_")[0];
+                   }
         },
         created(){
             console.info("create method");
+            this.initColumn();
             this.searchTable();
            
         },

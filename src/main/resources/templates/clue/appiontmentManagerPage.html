@@ -15,7 +15,7 @@
     </el-breadcrumb>
     
     <el-row class="marginB10">
-    <el-button type="text" @click="dialogFormVisible = true">选择列</el-button>
+    		<el-button type="text" @click="dialogFormVisible = true">选择列</el-button>
     		<shiro:hasPermission name="aggregation:appiontmentManager:edit">
 		        <el-button type="primary" @click="toUpdateAppiontment">编辑</el-button>
 		    </shiro:hasPermission>
@@ -89,7 +89,7 @@
             style="width: 100%"  :data="dataTable" >
             <el-table-column align="center" type="selection" label="全选" width="50"></el-table-column>
             <el-table-column align="center" type="index" width="30" label="序号"></el-table-column>
-            <el-table-column align="center" :key="index" :prop="item.fieldCode" :label="item.displayName" :width="item.displayName"
+            <el-table-column align="center" :key="index" :prop="item.fieldCode" :label="item.displayName" :width="item.width"
 	         v-for="(item,key,index) in tableColums" v-if="item.fieldCode == 'isRepeatPhone'">
 	               <template slot-scope="scope">
 		               <div v-if="scope.row.isRepeatPhone === 1">
@@ -98,7 +98,7 @@
 	                    <div v-else>无</div>
                 	</template>
 	        </el-table-column>
-            <el-table-column align="center" :key="index" :prop="item.fieldCode" :label="item.displayName" :width="item.displayName"
+            <el-table-column align="center" :key="index" :prop="item.fieldCode" :label="item.displayName" :width="item.width"
 	         v-else-if="item.fieldCode == 'isTrack'">
 	               <template slot-scope="scope">
 		                <div v-if="scope.row.isTrack === 1">
@@ -107,7 +107,7 @@
 	                    <div v-else>无</div>
 	                </template>
 	        </el-table-column>
-            <el-table-column align="center" :key="index" :prop="item.fieldCode" :label="item.displayName" :width="item.displayName"
+            <el-table-column align="center" :key="index" :prop="item.fieldCode" :label="item.displayName" :width="item.width"
 	         v-else>
 	        </el-table-column>
 	        
@@ -299,18 +299,7 @@ var appiontmentVM = new Vue({
 	            },
 	            multipleSelection:[],
                 formLabelWidth: '150px',
-                formLabelWidth1: '120px',
-                rules: {
-                	appiontmentName: [
-                      { required: true, message: '公司名称不能为空', trigger: 'blur' }
-                    ],
-                    groupName: [
-                      { required: true, message: '集团名称不能为空', trigger: 'blur' }
-                    ],
-                    appiontmentAddress: [
-                      { required: true, message: '公司地址不能为空', trigger: 'blur' }
-                    ]
-                  },
+                formLabelWidth1: '120px'
         },
         methods: {
         	searchTable() {
@@ -646,18 +635,20 @@ var appiontmentVM = new Vue({
                 param.fieldIdList = idList;
                 param.menuCode = "aggregation:appiontmentManager";
                 console.info(param);
-                axios.post('/customfield/customField/saveUserField', param)
-                .then(function (response) {
-                	
-                })
-                .catch(function (error) {
-                     console.log(error);
-                });
+                if(idList.length!=0){
+	                axios.post('/customfield/customField/saveUserField', param)
+	                .then(function (response) {
+	                	
+	                })
+	                .catch(function (error) {
+	                     console.log(error);
+	                });
+                }
               },
               initColumn(){
               	//初始化table 列 和 用户自定义列
               	this.allTableColums = fieldList;
-              	if(userFieldList){
+              	if(userFieldList.length!=0){
               		var type=[];
                   	for(var i=0;i<userFieldList.length;i++){
                   		type.push(userFieldList[i].sortNum+'_'+userFieldList[i].fieldCode+'_'+userFieldList[i].displayName+'_'+userFieldList[i].fieldId)
