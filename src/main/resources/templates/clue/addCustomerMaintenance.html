@@ -489,7 +489,7 @@
                 <el-row>
                     <el-col :span="8">
                         <el-form-item label="搜索词：" :label-width="formLabelWidth">
-                           <el-button type="text" disabled>{{clueBase.searchWord}}</el-button>
+                        	<div class="lineFeed">{{clueBase.searchWord}}</div>
                         </el-form-item>
                     </el-col>
                     <el-col :span="8">
@@ -501,12 +501,12 @@
                 <el-row>
                     <el-col :span="8">
                         <el-form-item label="留言时间：" :label-width="formLabelWidth">
-                            <el-button type="text" disabled>{{clueBase.messageTime}}</el-button>
+                            <el-button type="text" disabled>{{this.formatTimeFn(clueBase.messageTime)}}</el-button>
                         </el-form-item>
                     </el-col>
                     <el-col :span="8">
                         <el-form-item label="留言重点：" :label-width="formLabelWidth">
-                            <el-button type="text" disabled>{{clueBase.messagePoint}}</el-button>
+                        	<div class="lineFeed lineFeed2">{{clueBase.messagePoint}}</div>
                         </el-form-item>
                     </el-col>
                 </el-row>
@@ -659,6 +659,8 @@
     </el-dialog>    
 </div>
 <style type="text/css">
+		.lineFeed { width: 230px; word-break:break-all; word-wrap: break-word; color: #c0c4cc; cursor:not-allowed; }
+		.lineFeed2 { width: 530px; }
         .paddingTB { padding: 4px 0px; }
         .paddingL55 { padding-left: 55px; }
         .el-form-item.lineInherit .el-form-item__content{ line-height: inherit!important; }
@@ -819,6 +821,20 @@ var ossUrl=[[${ossUrl}]];
             }             
         },
         methods: {
+        	formatTimeFn(date) {
+        	  var dateNew = new Date( date );
+       		  var year = dateNew.getFullYear()
+       		  var month = dateNew.getMonth() + 1
+       		  var day = dateNew.getDate()
+       		  var hour = dateNew.getHours()
+       		  var minute = dateNew.getMinutes()
+       		  var second = dateNew.getSeconds()
+			  return year+"-"+this.formatNumberFn(month)+"-"+this.formatNumberFn(day)+" "+this.formatNumberFn(hour)+":"+this.formatNumberFn(minute)+":"+this.formatNumberFn(second);
+       		},
+        	formatNumberFn(n) {
+       		  n = n.toString()
+       		  return n[1] ? n : '0' + n
+       		},
             submitForm(form) {
                 this.$refs[form].validate((valid) => {
                     if (valid) {
