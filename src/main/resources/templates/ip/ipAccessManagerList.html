@@ -541,11 +541,9 @@ var ipManagerVM = new Vue({
 					 var ip3=ipManagerVM.ipAddForm.ipAddress3;
 					 var ip4=ipManagerVM.ipAddForm.ipAddress4;
 					 param.ipAddress=ip1+"."+ip2+"."+ip3+"."+ip4;
-				  	 this.loading = true;
 					axios.post('/ip/ipAccess/saveIpRepository',param).then(function (response) {
-					 ipManagerVM.loading = false;
-					  ipManagerVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
-					   ipManagerVM.dialogIpVisible=false;
+					    ipManagerVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
+					    ipManagerVM.dialogIpVisible=false;
 					    ipManagerVM.refreshIpTableData(response);
 		        	 }});
 					});
@@ -598,9 +596,7 @@ var ipManagerVM = new Vue({
         				}
         				var param={};
         				param.deleteIds=ids;
-        				this.loading = true;
         				axios.post('/ip/ipAccess/deleteIpRepository',param).then(function (response) {
-        				 ipManagerVM.loading = false;
         				 ipManagerVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
         						ipManagerVM.refreshIpTableData(response);
         	        	  }});	
@@ -665,9 +661,7 @@ var ipManagerVM = new Vue({
     				var param={};
     				param.deleteIds=ids;
     				//执行删除
-    				 this.loading = true;
     				axios.post('/ip/ipAccess/deleteIppackage',param).then(function (response) {
-    				 ipManagerVM.loading = false;
     			    ipManagerVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
     					ipManagerVM.queryPackageDataList(); 
     			      }});	
@@ -710,14 +704,13 @@ var ipManagerVM = new Vue({
 			  }
 			}
 			param.deleId=notInAddress;
-			 this.loading = true;
+			 
 			axios.post('/ip/ipAccess/queryRepositoryList',param).then(function (response) {
 				if(null==response){
 					ipManagerVM.$message({
                         message: "接口调用失败",
                         type: 'error'
                       }); 
-					ipManagerVM.loading = false;
 				 return ;
 				}
 				var resobj= response.data;
@@ -726,7 +719,6 @@ var ipManagerVM = new Vue({
                         message: "接口调用失败",
                         type: 'error'
                       }); 
-					ipManagerVM.loading = false;
 					return ;
 				} 
 				if(resobj.code!='0'){
@@ -734,7 +726,6 @@ var ipManagerVM = new Vue({
                         message: "接口调用失败",
                         type: 'error'
                       }); 
-					ipManagerVM.loading = false;
 					return ;
 				}
 				var pageData=resobj.data;
@@ -766,7 +757,6 @@ var ipManagerVM = new Vue({
 					var param={};
 					param.name=packageName;
 					param.ipRepositorys=savepackageIp;
-					 this.loading = true;
 					axios.post('/ip/ipAccess/saveIpPackage',param).then(function (response) {
 						if(null==response){
 							ipManagerVM.$message({
@@ -777,7 +767,6 @@ var ipManagerVM = new Vue({
 						}
 						var resobj= response.data;
 						if(null==resobj){
-							ipManagerVM.loading = false;
 							ipManagerVM.$message({
 		                        message: "接口调用失败",
 		                        type: 'error'
@@ -785,7 +774,6 @@ var ipManagerVM = new Vue({
 							return ;
 						} 
 						if(resobj.code!='0'){
-							this.loading = false;
 							ipManagerVM.$message({
 		                        message: "接口调用失败",
 		                        type: 'error'
@@ -815,10 +803,8 @@ var ipManagerVM = new Vue({
 					param.name=packageName;
 					param.ipRepositorys=savepackageIp;
 					param.id=ipManagerVM.oldPackageId;
-					this.loading = true;
 					axios.post('/ip/ipAccess/updateIpPackage',param).then(function (response) {
 						if(null==response){
-							ipManagerVM.loading = false;
 							ipManagerVM.$message({
 		                        message: "接口调用失败",
 		                        type: 'error'
@@ -831,7 +817,6 @@ var ipManagerVM = new Vue({
 		                        message: "接口调用失败",
 		                        type: 'error'
 		                      }); 
-							ipManagerVM.loading = false;
 							return ;
 						} 
 						if(resobj.code!='0'){
