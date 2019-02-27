@@ -189,6 +189,7 @@
             
             },
             clickOrgNode(data,node,obj){//点击左侧节点
+            	this.inputOrgName='';
             	this.selectedNode = data;
             	this.form.parentName=data.label;
             	this.getQuery();
