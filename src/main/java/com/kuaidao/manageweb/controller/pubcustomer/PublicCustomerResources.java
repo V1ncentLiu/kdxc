@@ -159,11 +159,13 @@ public class PublicCustomerResources {
                 dxzjsList = dxzjs(dxzIdsList);
             }else  if(RoleCodeEnum.DXZJ.name().equals(roleList.get(0).getRoleCode())){
                 //电销总监:查看所在电销组
-                IdEntity idEntity = new IdEntity();
-                idEntity.setId(String.valueOf(user.getOrgId()));
-                JSONResult<OrganizationDTO> orgRes = organizationFeignClient.queryOrgById(idEntity);
-                dxzList.add(orgRes.getData());
-                dxzIdsList.add(orgRes.getData().getId());
+                OrganizationQueryDTO dto = new OrganizationQueryDTO();
+                dto.setSystemCode(SystemCodeConstant.HUI_JU);
+                dto.setOrgType(OrgTypeConstant.DXZ);
+                dto.setId(user.getOrgId());
+                JSONResult<List<OrganizationRespDTO>> dzList = organizationFeignClient.queryOrgByParam(dto);
+                dxzList = dzList.getData();
+                dxzIdsList.add(user.getOrgId());
                 dxcygwList = dxcygws(dxzIdsList);
 //                dxzjsList = dxzjs(dxzIdsList);
             }
