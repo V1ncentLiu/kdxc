@@ -8,33 +8,45 @@ import java.util.concurrent.TimeUnit;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
+import org.apache.shiro.session.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 import com.kuaidao.aggregation.dto.client.AddOrUpdateQimoClientDTO;
 import com.kuaidao.aggregation.dto.client.AddOrUpdateTrClientDTO;
+import com.kuaidao.aggregation.dto.client.ClientLoginReCordDTO;
 import com.kuaidao.aggregation.dto.client.ImportQimoClientDTO;
 import com.kuaidao.aggregation.dto.client.ImportTrClientDTO;
 import com.kuaidao.aggregation.dto.client.QimoClientQueryDTO;
 import com.kuaidao.aggregation.dto.client.QimoClientRespDTO;
 import com.kuaidao.aggregation.dto.client.QimoDataRespDTO;
+import com.kuaidao.aggregation.dto.client.QimoLoginReqDTO;
 import com.kuaidao.aggregation.dto.client.QueryQimoDTO;
 import com.kuaidao.aggregation.dto.client.QueryTrClientDTO;
 import com.kuaidao.aggregation.dto.client.TrClientDataRespDTO;
 import com.kuaidao.aggregation.dto.client.TrClientQueryDTO;
 import com.kuaidao.aggregation.dto.client.TrClientRespDTO;
 import com.kuaidao.aggregation.dto.client.UploadTrClientDataDTO;
+import com.kuaidao.aggregation.dto.client.UserCnoReqDTO;
+import com.kuaidao.aggregation.dto.client.UserCnoRespDTO;
+import com.kuaidao.callcenter.dto.QimoOutboundCallDTO;
+import com.kuaidao.callcenter.dto.QimoOutboundCallRespDTO;
 import com.kuaidao.common.constant.OrgTypeConstant;
+import com.kuaidao.common.constant.RedisConstant;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.constant.SystemCodeConstant;
 import com.kuaidao.common.entity.IdEntity;
@@ -53,6 +65,7 @@ import com.kuaidao.manageweb.util.CommUtil;
 import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
 import com.kuaidao.sys.dto.organization.OrganizationRespDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
+import com.netflix.hystrix.contrib.javanica.utils.CommonUtils;
 
 /**
  * 坐席管理 controller 
@@ -588,6 +601,133 @@ public class ClientController {
         return uploadTrClientData;
     }
 
+    /**
+     *  天润坐席登录
+     * @param result
+     * @return
+     */
+    @GetMapping("/login/{cno}")
+    @ResponseBody
+    public JSONResult login(@PathVariable String cno) {
+        SecurityUtils.getSubject().getSession().setAttribute("axb", cno);
+        return new JSONResult<>().success(true);
+    }
 
+    
+    /**
+     * 登录天润坐席前 操作
+     * @param cno
+     * @return
+     */
+    @RequestMapping(value = "/destroy/{cno}", method = { RequestMethod.POST })
+    @ResponseBody
+    public JSONResult<Boolean> destroy(@PathVariable("cno") String cno) {
+        SecurityUtils.getSubject().getSession().removeAttribute("axb");
+        SecurityUtils.getSubject().getSession().removeAttribute("bindType");
+        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+        if (null != curLoginUser) {
+            UserCnoReqDTO userCno = new UserCnoReqDTO();
+            userCno.setCno(cno);
+            userCno.setOrgId(curLoginUser.getOrgId());
+            userCno.setUserId(curLoginUser.getId());
+             JSONResult<UserCnoRespDTO> userCnoJr = clientFeignClient.queryUserCnoByCnoAndOrgId(userCno);
+             if(JSONResult.SUCCESS.equals(userCnoJr.getCode())) {
+                 if(userCnoJr.getData()!=null) {
+                     JSONResult<Boolean> updateUserCnoByCnoAndOrgId = clientFeignClient.updateUserCnoByCnoAndOrgId(userCno);
+                 }else {
+                     JSONResult<Boolean> saveUserCno = clientFeignClient.saveUserCno(userCno);
+                 }
+             }else {
+                 logger.error("destroy cno,queryUserCnoByCnoAndOrgId,res{{}}",userCnoJr);
+            }
+        }
+        return new JSONResult<Boolean>().success(true);
+    }
+    
+    
+    /**
+     *  天润坐席登录
+     * @param result
+     * @return
+     */
+    @PostMapping("/qimoLogin")
+    @ResponseBody
+    public JSONResult qimoLogin(@RequestBody QimoLoginReqDTO reqDTO ) {
+        String loginName = reqDTO.getLoginName();
+        String bindType = reqDTO.getBindType();
+        JSONResult<QimoClientRespDTO> qimoClientJr = clientFeignClient.queryQimoClientByLoginClient(loginName);
+        if(JSONResult.SUCCESS.equals(qimoClientJr.getCode())) {
+            QimoClientRespDTO qimoClient = qimoClientJr.getData();
+            if(qimoClient==null) {
+                return new JSONResult<>().fail(SysErrorCodeEnum.ERR_NOTEXISTS_DATA.getCode(),"登录坐席不存在或坐席未启用");
+            }else {
+                Session session = SecurityUtils.getSubject().getSession();
+                session.setAttribute("loginName", loginName);
+                if("2".equals(bindType)) {
+                    session.setAttribute("bindType", bindType);
+                }
+                return new JSONResult<>().success(true);
+            }
+        }else {
+            logger.error("七陌坐席登录，通过登录查询,param{{}},res{{}}",loginName,qimoClientJr);
+        }
+        return new JSONResult<>().fail(SysErrorCodeEnum.ERR_REST_FAIL.getCode(),SysErrorCodeEnum.ERR_REST_FAIL.getMessage());
+    }
+    
+    /**
+     * 坐席登录记录
+     * @return
+     */
+    @PostMapping("/clientLoginRecord")
+    @ResponseBody
+    public JSONResult<Boolean> clientLoginRecord(@Valid @RequestBody ClientLoginReCordDTO clientLoginRecord,BindingResult result){
+        if (result.hasErrors()) {
+            return CommonUtil.validateParam(result);
+        }
+        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+        clientLoginRecord.setAccountId(curLoginUser.getId());
+        return clientFeignClient.clientLoginRecord(clientLoginRecord);
+        
+    }
+    
+    /**
+     * 七陌坐席退出
+     * @param request
+     * @return
+     */
+    @PostMapping("/qimoLogout")
+    @ResponseBody
+    public JSONResult loginout(HttpServletRequest request) {
+        Session session = SecurityUtils.getSubject().getSession();
+        if(StringUtils.isBlank((String)session.getAttribute("loginName"))) {
+            return  new JSONResult<>().fail(SysErrorCodeEnum.ERR_UNLOGINCLIENT_FAIL.getCode(),SysErrorCodeEnum.ERR_UNLOGINCLIENT_FAIL.getMessage());
+        }
+        session.removeAttribute("loginName");
+        session.removeAttribute("axb");
+        session.removeAttribute("bindType");
+        
+        return new JSONResult<>().success(true);
+    }
+    
+    /**
+     * 七陌 外呼 
+     * @param callDTO
+     * @return
+     */
+    @PostMapping("/qimoOutboundCall")
+    @ResponseBody
+    public JSONResult<QimoOutboundCallRespDTO> qimoOutboundCall(@RequestBody QimoOutboundCallDTO  callDTO){
+        String customerPhoneNumber = callDTO.getCustomerPhoneNumber();
+        if(StringUtils.isBlank(customerPhoneNumber)) {
+            return new JSONResult().fail(SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getCode(),"客户手机号为null");
+        }
+        
+        Session session = SecurityUtils.getSubject().getSession();
+       callDTO.setBindType((String)session.getAttribute("bindType"));
+       callDTO.setLoginClient((String)session.getAttribute("loginName"));
+        
+        return clientFeignClient.qimoOutboundCall(callDTO);
+    }
+    
 
 }

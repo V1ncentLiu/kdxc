@@ -126,9 +126,12 @@
                     </el-option>
                 </el-select>
             </el-form-item>
-            <el-form-item label="设定组内人员：" prop="choosePerson" :label-width="formLabelWidth">
-                <el-button type="primary" @click="addDomain">添加人员</el-button>
-            </el-form-item>
+            <div style="position: relative;">
+                <span style="color: #f56c6c;position: absolute;font-size: 16px;left: 29px;top: 10px;">*</span>
+                <el-form-item label="设定组内人员：" prop="choosePerson" :label-width="formLabelWidth">
+                    <el-button type="primary" @click="addDomain">添加人员</el-button>
+                </el-form-item>
+            </div> 
             <el-table :data="form.tableData" style="width: 100%" border>
                 <el-table-column align="center" prop="id" type="index" label="序号" width="55"></el-table-column>
                 <el-table-column align="center" prop="name" label="姓名">
@@ -163,7 +166,7 @@
         </div>
         <div class="padding20 f-tac">            
             <el-button type="primary" @click="submitForm('form')">确认</el-button>
-            <el-button>取 消</el-button>
+            <el-button @click="reBackRule" >取 消</el-button>
         </div> 
     </el-form>  
 </div>
@@ -197,7 +200,7 @@
                 formLabelWidth: '150px',
                 rules:{
                 	assignName: [
-                        { required: true, message: '请输入规则名称', trigger: 'blur' }
+                        { required: true, message: '规则名称不能为空', trigger: 'blur' }
                     ],
                     startTime: [
                         { required: true, message: '请输入规则有效开始时间', trigger: 'blur' }
@@ -241,14 +244,7 @@
                     //规则成员数据	
                     var saveMemner=[];
                     var memberArry=this.form.tableData ;
-                    if(null!=memberArry&&memberArry.length>0) {
-                      for(var i=0;i<memberArry.length;i++) {
-                    		var save={};
-                    	   save.memberId=memberArry[i].person;
-                    	   save.resourceLimit=memberArry[i].num;
-                    	   saveMemner.push(save);
-                    	}
-                   }
+                    
                     var assignName=this.form.assignName ;
                     	
                     var startTime=this.form.startTime ;	
@@ -264,6 +260,29 @@
                     var searchWord=this.tags ;	
                     
                     var area=this.areaTags ;	
+                    
+                    if(endTime<startTime){
+                        this.$message({
+                            type: 'warning',
+                            message: '结束时间不能早于开始时间'
+                        });
+                        return ;
+                    }
+
+                    if(null!=memberArry&&memberArry.length>0) {
+                      for(var i=0;i<memberArry.length;i++) {
+                            var save={};
+                           save.memberId=memberArry[i].person;
+                           save.resourceLimit=memberArry[i].num;
+                           saveMemner.push(save);
+                        }
+                    }else{
+                        this.$message({
+                            type: 'warning',
+                            message: '组内人员必输项，请输入!'
+                        });
+                        return ;
+                    }
                     
                     var param={};
                     
@@ -301,6 +320,9 @@
                     }
                 });
             },
+            reBackRule(){
+              	 window.location.href="/assignrule/teleAssignRule/initteleAssignRule"; 
+              },
             deleteRow(index, rows) {//删除一行表格
                 rows.splice(index, 1);
             },

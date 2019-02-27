@@ -7,7 +7,9 @@
     </style>
 </head>
 <body>
-<div v-loading="loading" id="organizationManage" class="organizationManage mainPadding" >  
+
+<div v-loading="loading" id="organizationManage" class="organizationManage mainPadding"  style="display: none;">  
+
     <el-breadcrumb separator="/" class="elBreadcrumb marginB20" >
         <el-breadcrumb-item>Home</el-breadcrumb-item>
         <el-breadcrumb-item>业务设置</el-breadcrumb-item>
@@ -16,63 +18,58 @@
     <el-row class="marginB10">
         <el-col :xs="12" :sm="16" :md="16" :lg="18" :xl="12">
             <el-button type="primary" @click="addbutton"><i class="el-icon-plus"></i>新建电销布局</el-button>
-            <el-button type="danger" @click="deleButton"><i class="el-icon-delete"></i>删除</el-button>
             <el-button type="warning" @click="dialogBatchVisible = true"><i class="el-icon-download"></i>导入</el-button>
-   			<el-button type="success" @click="updateButton"><i class="el-icon-edit"></i>编辑电销布局</el-button>
+            <el-button type="danger" @click="deleButton"><i class="el-icon-delete"></i>删除</el-button>
+   			    <el-button type="success" @click="updateButton"><i class="el-icon-edit"></i>编辑电销布局</el-button>
         </el-col>
-        </el-row>
-<el-row class="marginB10">
-            <el-row class="marginB10">
-              
-				<div class="block">
-					
-  					<el-select filterable v-model="telemarketingTeamId" placeholder="请选择电销组">
-					    <el-option
-					      v-for="item in dzList"
-					      :key="item.id"
-					      :label="item.name"
-					      :value="item.id">
-					    </el-option>
-  					</el-select>
-  					<el-select filterable v-model="projectId" placeholder="项目">
-					    <el-option
-					      v-for="item in projectList"
-					      :key="item.id"
-					      :label="item.projectName"
-					      :value="item.id">
-					    </el-option>
-  					</el-select>
-  					<span class="demonstration">开始时间</span>
-					<el-date-picker value-format="yyyy-MM-dd" v-model="beginTime" type="date" placeholder="选择日期">
-					</el-date-picker>
-					<span class="demonstration" style="margin-left: 20px;">结束</span>
-					<el-date-picker value-format="yyyy-MM-dd" v-model="endTime" type="date" placeholder="选择日期">
-					</el-date-picker>
-  					<el-button type="primary" @click="inviteAreaListPage">搜索</el-button>
-				</div>
-            </el-row>
-            <el-row>
-                <el-table 
-                    ref="multipleTable"
-                    tooltip-effect="dark"
-                    empty-text="无数据"
-                    style="width: 100%"
-                    border
-                    :data="dataTable"  @selection-change="handleSelectionChange">
-                     <el-table-column align="center" prop="id" type="selection" width="55"></el-table-column> 
-                     <!-- <el-table-column prop="date" label="全选" width="180"></el-table-column>  -->
-                    <el-table-column align="center" prop="projects" label="项目名称"></el-table-column>
-                    <el-table-column align="center" prop="telemarketingTeam" label="电销组"></el-table-column>
-                    <el-table-column align="center"  prop="beginTime" label="起始时间" :formatter="dateFormat"></el-table-column>
-                    <el-table-column align="center" prop="endTime" label="结束时间" :formatter="dateFormat"></el-table-column>
-                    <el-table-column align="center" prop="createTime" label="创建时间" :formatter="dateFormatTime"></el-table-column>
-                    <el-table-column align="center" prop="status" label="启用状态" :formatter="transformStatus"></el-table-column>
-                </el-table>
-                 <table-pagination :pager="pager"  @change="inviteAreaListPage"></table-pagination>
-            </el-row>
-      
     </el-row>
-   <!-- dialog -->
+    <el-row>              
+			<div class="block marginB10 greybg padding20">					
+				<el-select filterable v-model="telemarketingTeamId" placeholder="电销组" clearable>
+			    <el-option
+			      v-for="item in dzList"
+			      :key="item.id"
+			      :label="item.name"
+			      :value="item.id">
+			    </el-option>
+				</el-select>
+				<el-select filterable v-model="projectId" placeholder="项目" clearable>
+			    <el-option
+			      v-for="item in projectList"
+			      :key="item.id"
+			      :label="item.projectName"
+			      :value="item.id">
+			    </el-option>
+				</el-select>
+				<span class="demonstration">开始时间：</span>
+				<el-date-picker value-format="yyyy-MM-dd" v-model="beginTime" type="date" placeholder="选择日期">
+				</el-date-picker>
+				<span class="demonstration" style="margin-left: 20px;">结束：</span>
+				<el-date-picker value-format="yyyy-MM-dd" v-model="endTime" type="date" placeholder="选择日期">
+				</el-date-picker>
+					<el-button type="primary" @click="inviteAreaListPage">搜索</el-button>
+			</div>
+    </el-row>
+    <el-row>
+        <el-table 
+            ref="multipleTable"
+            tooltip-effect="dark"
+            empty-text="无数据"
+            style="width: 100%"
+            border
+            :data="dataTable"  @selection-change="handleSelectionChange">
+             <el-table-column align="center" prop="id" type="selection" width="55"></el-table-column> 
+             <!-- <el-table-column prop="date" label="全选" width="180"></el-table-column>  -->
+            <el-table-column align="center" prop="projects" label="项目名称"></el-table-column>
+            <el-table-column align="center" prop="telemarketingTeam" label="电销组"></el-table-column>
+            <el-table-column align="center"  prop="beginTime" label="起始时间" :formatter="dateFormat"></el-table-column>
+            <el-table-column align="center" prop="endTime" label="结束时间" :formatter="dateFormat"></el-table-column>
+            <el-table-column align="center" prop="createTime" label="创建时间" :formatter="dateFormatTime"></el-table-column>
+            <el-table-column align="center" prop="status" label="启用状态" :formatter="transformStatus"></el-table-column>
+        </el-table>
+         <table-pagination :pager="pager"  @change="inviteAreaListPage"></table-pagination>
+    </el-row>      
+    <!-- dialog -->
     <el-dialog :title="showTitle" :visible.sync="dialogFormVisible">
         <el-form :model="form" ref="form" :rules="rules" class="width500">
             <el-form-item label="项目：" :label-width="formLabelWidth" prop="projectIds">
@@ -104,7 +101,7 @@
                 <el-date-picker value-format="yyyy-MM-dd" v-model="form.endTime" type="date" placeholder="选择日期">
 					</el-date-picker>
             </el-form-item>
-            <el-form-item label="启用状态：" :label-width="formLabelWidth" >
+            <el-form-item label="启用状态：" :label-width="formLabelWidth" prop="status">
                 <el-select filterable v-model="form.status" placeholder="启用状态" style="width: 100%;">
                     <el-option
                         v-for="item in statusList"
@@ -120,6 +117,7 @@
             <el-button @click="dialogFormVisible= false">取消</el-button>
         </div>
     </el-dialog>
+
            <!-- 批量添加 自定义字段弹窗 start -->
             <el-dialog title="批量添加" :visible.sync="dialogBatchVisible" @close="closeUploadFileDialog">
                <el-row class="marginB20">
@@ -153,7 +151,7 @@
               </div>
             </el-dialog>
             
-            <el-dialog :title="addOrModifyDialogTitle" :visible.sync="exportFormVisible"  width="50%">
+            <el-dialog :title="addOrModifyDialogTitle" :visible.sync="exportFormVisible"  width="50%" @close="submitExportclose">
             <el-form>
             <div id="totalNumId" class="marginB10">{{dataNum}}</div>
                  <el-row>
@@ -173,9 +171,10 @@
             </el-row>
             </el-form>
             <div slot="footer" class="dialog-footer">
-            <el-button show  @click="submitExport"><span data="1" id="showButton">导入</span></el-button>
+            <el-button  :disabled="confirmBtnDisabled" @click="submitExport"><span data="1" id="showButton">导入</span></el-button>
             </div>
         </el-dialog>
+
 </div>
 <input id="addOrUpdate" type="hidden" >
 </body>
@@ -192,6 +191,7 @@
         	showTitle:"",
         	exportFormVisible:false,
         	dialogBatchVisible:false,
+        	confirmBtnDisabled:false,
         	formLabelWidth: '100px',
         	dialogFormVisible: false,
         	telemarketingTeamId:"",
@@ -243,6 +243,9 @@
                 ],
                 endTime: [
                     { required: true, message: '请选择结束时间', trigger: 'blur' }
+                ],
+                status: [
+                    { required: true, message: '请选择启用状态', trigger: 'blur' }
                 ]
             }
              
@@ -344,7 +347,7 @@
             	  var rows = this.multipleSelection;
                   if(rows.length <1){
                       this.$message({
-                         message: '请选择一条数据进行修改',
+                         message: '请选择删除数据',
                          type: 'warning'
                        });
                       return;
@@ -429,7 +432,7 @@
             //时间格式化
               dateFormat(row, column){
             	  var date = row[column.property]; 
-            	     if (date == undefined) { 
+            	     if (date == undefined || date ==null || date =="") { 
             	       return ""; 
             	     } 
             	     return moment(new Date(date)).format("YYYY-MM-DD"); 
@@ -506,6 +509,8 @@
                   var isTextComputer = file.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
                   if(!isTextComputer){
                       this.$message.error('文件格式错误');
+                  	  orgVM.loading = false;
+                  	  orgVM.fileList = [];
                       return false;
                   }
               },
@@ -516,12 +521,12 @@
             		  //清空文件里列表
                 	  this.$refs.upload.clearFiles();
                       this.dialogBatchVisible = false;
-                      this.$message({message:'上传中',type:'success',duration:2000,onClose:function(){
-                      	orgVM.exportdataTable =response.data; 
-                      	orgVM.loading = false;
-                      	orgVM.exportFormVisible = true;
-                      	orgVM.dataNum="预览数据，共"+orgVM.exportdataTable.length+"条数据"
-              	      }});
+
+                   	orgVM.exportdataTable =response.data; 
+                   	orgVM.loading = false;
+                   	orgVM.exportFormVisible = true;
+                   	orgVM.dataNum="预览数据，共"+orgVM.exportdataTable.length+"条数据"
+
             	  }else{
             		orgVM.loading = false;
             		  this.$message('上传失败');
@@ -533,54 +538,65 @@
             	  this.$message({message:'上传失败',type:'error'});
               }
               , submitUpload() {//提交文件
+            	orgVM.confirmBtnDisabled = false;
               	this.loading = true;
               	var fileList = this.fileList;
               	if(!fileList || fileList.length!=1){
-              		this.$message.error({message:'请选择一个文件',type:'error'});
+              		this.$message.error({message:'未选中文件',type:'error'});
+              		orgVM.loading = false;
               		return false;
               	}
                   this.$refs.upload.submit();
                 },
-                
+                submitExportclose(){
+                  	  window.location.href="/telemarketing/telemarketingLayoutList"; 
+                },
                 submitExport(){
                   if($("#showButton").attr("data") ==2){
                 	  window.location.href="/telemarketing/telemarketingLayoutList"; 
                 	  return;
                   }
-              	  var param = {};
-              	  this.loading = true;
-              	  param.list = orgVM.exportdataTable;
-              	  if(param.list !=null && param.list.length==0){
-              		  this.loading = false;
-              		  this.$message({message:'无要上传的数据',type:'error'});
-              		  return;
-              	  }
-              	 this.exportFormVisible = false;
-              	  axios.post('/telemarketing/importInvitearea',param).then(function (response) {
-                    	  console.log(response);
-                        if(null !==response && response.data !=null && response.data.code=='0'){
-                      	  if(response.data.data !=null){
-                      		  $("#showButton").html("知道了");
-                      		  $("#showButton").attr("data",2);
-                      		  orgVM.loading = false;
-                      		  orgVM.addOrModifyDialogTitle="部分导入失败";
-                      		  orgVM.exportFormVisible = true;
-                      		  orgVM.exportdataTable =response.data.data; 
-                      		  orgVM.dataNum="以下内容导入失败，请重新导入"
-                      	  }else{
-                      		  window.location.href="/telemarketing/telemarketingLayoutList"; 
-                      	  }
-                      	
-                       }else{
-                      	 alert(response.data.data.message);
-  	                  	  	return ;
-                       } 
-                    }).catch(function (error) {
-                        console.log(error);
-                    })
-                    .then(function () {
-                      // always executed
-                    }); 
+                  this.$alert('<center><strong>确认导入数据</strong></center>', {
+                      dangerouslyUseHTMLString: true,
+                      center:true
+                  }).then(() => {
+                	  var param = {};
+                	  orgVM.loading = true;
+                  	  param.list = orgVM.exportdataTable;
+                  	  if(param.list !=null && param.list.length==0){
+                  		  this.loading = false;
+                  		  this.$message({message:'无要上传的数据',type:'error'});
+                  		  return;
+                  	  }
+                  	
+                  	  axios.post('/telemarketing/importInvitearea',param).then(function (response) {
+                        	  console.log(response);
+                            if(null !==response && response.data !=null && response.data.code=='0'){
+                          	  if(response.data.data !=null  && response.data.data.length !=0){
+                          		  $("#showButton").html("知道了");
+                          		  $("#showButton").attr("data",2);
+                          		  orgVM.loading = false;
+                          		  orgVM.addOrModifyDialogTitle="部分导入失败";
+                          		  
+                          		  orgVM.exportdataTable =response.data.data; 
+                          		  orgVM.dataNum="以下内容导入失败，请重新导入"
+                          	  }else{
+                          		this.$message({message:'导入成功',type:'success'});
+                          		  window.location.href="/telemarketing/telemarketingLayoutList"; 
+                          	  }
+                          	
+                           }else{
+                          	 alert(response.data.data.message);
+      	                  	  	return ;
+                           } 
+                        }).catch(function (error) {
+                            console.log(error);
+                        })
+                        .then(function () {
+                          // always executed
+                        }); 
+                  })
+              	  
                 },
                 addbutton(){
                 	this.showTitle="添加布局"
@@ -598,8 +614,13 @@
         },
         created(){
         	this.inviteAreaListPage();
+        	document.getElementById('organizationManage').style.display = 'block';
         	
-        }//created方法 结束
+        	
+        },//created方法 结束
+        mounted(){
+            document.getElementById('organizationManage').style.display = 'block';
+        }
     })
 </script>
 </html>

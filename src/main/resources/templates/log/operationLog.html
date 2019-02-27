@@ -16,27 +16,21 @@
         <el-breadcrumb-item><a href="JavaScript:void(0)" data-url="b.html">日志管理</a></el-breadcrumb-item>
     </el-breadcrumb>
     <el-row :gutter="20">
-        <el-col :xs="12" :sm="7" :md="5" :lg="3" :xl="3">
-            <div class="leftBox">
-                <div class="leftTitle fs16"></div>
-               
-            </div>            
-        </el-col>
         <el-col>
             <el-row class="marginB10">
-               <el-tabs v-model="activeName" @tab-click="handleClick" >
+               <el-tabs type="card" v-model="activeName" @tab-click="handleClick" >
 			    <el-tab-pane label="访问日志" name="first"></el-tab-pane>
 			    <el-tab-pane label="操作日志" name="second"></el-tab-pane>
 			  </el-tabs>
-				<div class="block">
-					<span class="demonstration">操作时间</span>
-					<el-date-picker value-format="yyyy-MM-dd HH:mm:ss" v-model="beginTime" type="datetime" placeholder="选择日期">
+				<div class="block marginB10 greybg padding20" style="padding-bottom: 0">
+					<span class="demonstration">操作时间：</span>
+					<el-date-picker value-format="yyyy-MM-dd HH:mm:ss" v-model="beginTime" type="datetime" placeholder="选择日期" class="marginB20">
 					</el-date-picker>
-					<span class="demonstration" style="margin-left: 20px;">结束</span>
-					<el-date-picker value-format="yyyy-MM-dd HH:mm:ss" v-model="endTime" type="datetime" placeholder="选择日期">
+					<span class="demonstration" style="margin-left: 20px;">结束：</span>
+					<el-date-picker value-format="yyyy-MM-dd HH:mm:ss" v-model="endTime" type="datetime" placeholder="选择日期" class="marginB20">
 					</el-date-picker>
-					<el-input style="width:15%;"  v-model="content" placeholder="日志内容"></el-input>
-					<el-select v-model="operationType" placeholder="操作类型">
+					<el-input style="width:15%;"  v-model="content" placeholder="日志内容" class="marginB20"></el-input>
+					<el-select v-model="operationType" placeholder="操作类型" class="marginB20">
 					    <el-option
 					      v-for="item in operationtypes"
 					      :key="item.value"
@@ -44,7 +38,7 @@
 					      :value="item.value">
 					    </el-option>
   					</el-select>
-					<el-select v-model="queryType" placeholder="请选择">
+					<el-select v-model="queryType" placeholder="请选择" class="marginB20">
 					    <el-option
 					      v-for="item in options"
 					      :key="item.value"
@@ -52,8 +46,9 @@
 					      :value="item.value">
 					    </el-option>
   					</el-select>
-  					<el-input style="width:15%;"  v-model="searchContent" placeholder="请输入查询内容"></el-input>
-  					<el-button type="primary" @click="queryLogDataList">搜索</el-button>
+  					<el-input style="width:15%;"  v-model="searchContent" placeholder="请输入查询内容" class="marginB20"></el-input>
+  					<el-button type="primary" @click="search">搜索</el-button>
+
 				</div>
                 
             </el-row>
@@ -65,7 +60,6 @@
                     style="width: 100%"
                     border
                     :data="dataTable" 
-                    class="marginB20"
                     >
                     <el-table-column  type="index"  align="center" prop="name" label="序号" width="55"></el-table-column>
                      <!-- <el-table-column prop="date" label="全选" width="180"></el-table-column>  -->
@@ -186,6 +180,10 @@
             }             
         },
         methods: {
+        	search(){
+        		this.pager.currentPage = 1;
+        		this.queryLogDataList()
+        	},
         	queryLogDataList(){//查询按钮
         		var param = {}; 
           	  var pageSize = this.pager.pageSize;

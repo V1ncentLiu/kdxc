@@ -50,8 +50,10 @@ public class AccesssLogRecordAop {
 
     @Pointcut("@annotation(com.kuaidao.manageweb.config.LogRecord)")
     public void logCut() {}
+
     @Autowired
     private UserInfoFeignClient userInfoFeignClient;
+
     /**
      * 
      * @Description:只有标记了@LogRecord 注解的方法才会进入 @throws
@@ -81,7 +83,7 @@ public class AccesssLogRecordAop {
                 getRequestParam(logRecord, request);
             }
             getRespParam(logRecord, obj);
-            if ("0".equals(logRecord.getResCode())  || logRecord.getResCode() ==null) {
+            if ("0".equals(logRecord.getResCode()) || logRecord.getResCode() == null) {
                 if ((OperationType.LOGIN.toString()).equals(logRecord.getOperationType())) {
                     logRecord.setContent("登录系统成功");
                 }
@@ -90,40 +92,61 @@ public class AccesssLogRecordAop {
                 }
             } else {
                 if ((OperationType.LOGIN.toString()).equals(logRecord.getOperationType())) {
-                	  // 查询用户信息
-               	 UserInfoReq userInfoReq = new UserInfoReq();
-               	 LoginReq loginReq = (LoginReq) args[0];
+                    // 查询用户信息
+                    UserInfoReq userInfoReq = new UserInfoReq();
+                    LoginReq loginReq = (LoginReq) args[0];
                     userInfoReq.setUsername(loginReq.getUsername());
-                   JSONResult<UserInfoDTO> getbyUserName = userInfoFeignClient.getbyUserName(userInfoReq);
-                   if(getbyUserName !=null && getbyUserName.getData() !=null) {
-                	   logRecord.setUserName(getbyUserName.getData().getUsername());
-                       logRecord.setName(getbyUserName.getData().getName());
-                       logRecord.setPhone(getbyUserName.getData().getPhone());
-                   }
-                   logRecord.setRequestURL(request.getRequestURI());
-                   logRecord.setRemoteIP(CommonUtil.getIpAddr(request));
+                    JSONResult<UserInfoDTO> getbyUserName =
+                            userInfoFeignClient.getbyUserName(userInfoReq);
+                    if (getbyUserName != null && getbyUserName.getData() != null) {
+                        logRecord.setUserName(getbyUserName.getData().getUsername());
+                        logRecord.setName(getbyUserName.getData().getName());
+                        logRecord.setPhone(getbyUserName.getData().getPhone());
+                    }
+                    logRecord.setRequestURL(request.getRequestURI());
+                    logRecord.setRemoteIP(CommonUtil.getIpAddr(request));
                     logRecord.setContent("登录系统失败");
                 }
 
             }
-            //不管发生是否成功都显示用户名手机号
-            if (((OperationType.PUSH.toString()).equals(logRecord.getOperationType())) &&  ("获取验证码".equals(logRecord.getMenuName()))) {
-          	  // 查询用户信息
-          	 UserInfoReq userInfoReq = new UserInfoReq();
-          	 LoginReq loginReq = (LoginReq) args[0];
-               userInfoReq.setUsername(loginReq.getUsername());
-              JSONResult<UserInfoDTO> getbyUserName = userInfoFeignClient.getbyUserName(userInfoReq);
-              logRecord.setUserName(getbyUserName.getData().getUsername());
-              logRecord.setName(getbyUserName.getData().getName());
-              logRecord.setPhone(getbyUserName.getData().getPhone());
-              logRecord.setRequestURL(request.getRequestURI());
-              logRecord.setRemoteIP(CommonUtil.getIpAddr(request));
-          }
+            // 不管发生是否成功都显示用户名手机号
+            if (((OperationType.PUSH.toString()).equals(logRecord.getOperationType()))
+                    && ("获取验证码".equals(logRecord.getMenuName()))) {
+                // 查询用户信息
+                UserInfoReq userInfoReq = new UserInfoReq();
+                LoginReq loginReq = (LoginReq) args[0];
+                userInfoReq.setUsername(loginReq.getUsername());
+                JSONResult<UserInfoDTO> getbyUserName =
+                        userInfoFeignClient.getbyUserName(userInfoReq);
+                if (getbyUserName.getData() != null) {
+                    logRecord.setUserName(getbyUserName.getData().getUsername());
+                    logRecord.setName(getbyUserName.getData().getName());
+                    logRecord.setPhone(getbyUserName.getData().getPhone());
+                    logRecord.setRequestURL(request.getRequestURI());
+                    logRecord.setRemoteIP(CommonUtil.getIpAddr(request));
+                }
+            }
             logRecord.setReqEndTime(DateUtil.convert2String(new Date(), DateUtil.ymdhms));
         } catch (Throwable throwable) {
             logRecord.setResCode(FAIL_CODE);
             logRecord.setErrMsg(ExceptionUtils.getStackTrace(throwable));
             logRecord.setReqEndTime(DateUtil.convert2String(new Date(), DateUtil.ymdhms));
+            if ((OperationType.LOGINOUT.toString()).equals(logRecord.getOperationType())) {
+                logRecord.setContent("退出系统失败");
+            }
+            if (!(OperationType.LOGIN.toString()).equals(logRecord.getOperationType())) {
+            	UserInfoDTO user =
+                        (UserInfoDTO) SecurityUtils.getSubject().getSession().getAttribute("user");
+                if (user != null) {
+                    logRecord.setUserName(user.getUsername());
+                    logRecord.setName(user.getName());
+                    logRecord.setPhone(user.getPhone());
+                }
+                logRecord.setRequestURL(request.getRequestURI());
+                logRecord.setRemoteIP(CommonUtil.getIpAddr(request));
+                logRecord.setContent("退出系统失败");
+                logRecord.setRequestParam(logRecord.getRequestParam()+"     "+ExceptionUtils.getStackTrace(throwable));
+            }
             asyncInsertLog(logRecord);
             throw throwable;
         }

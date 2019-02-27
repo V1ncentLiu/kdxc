@@ -6,7 +6,7 @@
 </head>
 <body>
 
-<div id="queryForm"  class="mainPadding">
+<div id="queryForm" class="mainPadding" style="display: none;padding-bottom: 0;">
 
     <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
         <el-breadcrumb-item>Home</el-breadcrumb-item>
@@ -14,13 +14,13 @@
         <el-breadcrumb-item><a href="JavaScript:void(0)" data-url="b.html">词条管理</a></el-breadcrumb-item>
     </el-breadcrumb>
 
-    <el-row type="flex" class="row-bg" justify="start">
-        <el-button @click="openAddDialog()">添加词条</el-button>
-        <el-button @click="openUpdateDialog()">编辑词条</el-button>
-        <el-button @click="deleteDic()">删除词条</el-button>
+    <el-row type="flex" class="row-bg marginB20" justify="start">
+        <el-button type="primary" @click="openAddDialog()"><i class="el-icon-plus"></i>添加词条</el-button>
+        <el-button type="success" @click="openUpdateDialog()"><i class="el-icon-edit"></i>编辑词条</el-button>
+        <el-button type="danger" @click="deleteDic()"><i class="el-icon-delete"></i>删除词条</el-button>
     </el-row>
 
-    <el-row type="flex" class="row-bg" justify="end">
+    <el-row type="flex" class="row-bg greybg padding20" style="padding-bottom: 0;" justify="end">
         <el-form :inline="true" :model="formInline" class="demo-form-inline" ref="queryForm"  @submit.native.prevent>
             <el-form-item label="" prop="name">
                 <el-input v-model="formInline.name" placeholder="请输入名称进行查询"></el-input>
@@ -38,9 +38,9 @@
     </el-row>
 </div>
 
-<div id="pagination">
+<div id="pagination" class="mainPadding">
     <template>
-        <el-table :data="tableData3"  style="width: 100%" tooltip-effect="dark"  ref="multipleTable"  @select="selectRow"
+        <el-table :data="tableData3" border style="width: 100%" tooltip-effect="dark"  ref="multipleTable"  @select="selectRow"
                   @selection-change="handleSelectionChange" >
             <el-table-column type="selection" width="55" prop="id"> </el-table-column>
             <el-table-column prop="name" label="名称" width="180" align="center"></el-table-column>
@@ -111,7 +111,7 @@
 <div th:include="_footer_include :: #jsLib"></div>
 
 <script>
-    <!--删除提示弹窗 -->
+    // <!--删除提示弹窗 -->
     const validateAcquaintance = (rule, value, callback) => {
         if (!value) {
             callback(new Error('必须输入'))
@@ -211,7 +211,7 @@
         },
 
     });
-    <!--新增弹窗 -->
+    // <!--新增弹窗 -->
     var addDialogVm = new Vue({
         el: '#addDialog',
         data:{
@@ -375,9 +375,10 @@
             resetForm(formName) {
                 this.$refs[formName].resetFields();
             }
+        },
+        mounted(){ 
+          document.getElementById('queryForm').style.display = 'block';
         }
-
-
     });
     var resList=[[${resList}]];
     //带分页的table
@@ -447,15 +448,5 @@
     });
 
 </script>
-<style>
-    .el-button--primary {
-        background-color: #6f7180;
-        border: #6f7180;
-    }
-
-    .el-table th {
-        font-weight: bolder;
-    }
-</style>
 </body>
 </html>

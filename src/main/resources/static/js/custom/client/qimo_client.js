@@ -1,5 +1,5 @@
 var clientVm = new Vue({
-     el: '#trClientManage',
+     el: '#qimoClientManage',
      data: {
     	 formLabelWidth:'140px',
          clientData:[],
@@ -219,7 +219,7 @@ var clientVm = new Vue({
              for(var i=0;i<rows.length;i++){
                  var curRow = rows[i];
                  rowIds.push(curRow.id);
-                 rowNames.push("["+curRow.clientNo+"]");
+                 rowNames.push("【"+curRow.clientNo+"】");
              }
              var clientNos = rowNames.join(" ");
              
@@ -290,7 +290,7 @@ var clientVm = new Vue({
                  if(resData.code=='0'){
               	    clientVm.userList = resData.data;                     
                  }else{
-              	     clientVm.$message({message:'查询失败',type:'error'});
+              	     clientVm.$message({message:'查询用户列表失败',type:'error'});
                      console.error(resData);
                  }
              
@@ -307,7 +307,7 @@ var clientVm = new Vue({
                  if(resData.code=='0'){
               	    clientVm.form = resData.data;                     
                  }else{
-              	     clientVm.$message({message:'查询失败',type:'error'});
+              	     clientVm.$message({message:'查询七陌坐席失败',type:'error'});
                      console.error(resData);
                  }
              
@@ -426,6 +426,7 @@ var clientVm = new Vue({
            beforeUpload(file){//上传之前 文件校验
                var isTextComputer = file.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
                if(!isTextComputer){
+            	   this.fileList=[];
                    this.$message.error('文件格式错误');
                    return false;
                }
@@ -559,6 +560,6 @@ var clientVm = new Vue({
           this.initClientData();
      },
      mounted(){
-     	document.getElementById('trClientManage').style.display = 'block';
+     	document.getElementById('qimoClientManage').style.display = 'block';
      },
 })

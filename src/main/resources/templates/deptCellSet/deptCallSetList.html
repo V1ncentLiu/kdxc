@@ -15,7 +15,7 @@
 </head>
 <body>
 
-<div id="mainDiv"  class="mainPadding">
+<div id="mainDiv"  class="mainPadding" style="display: none;">
     <template>
         <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
             <el-breadcrumb-item>Home</el-breadcrumb-item>
@@ -49,14 +49,16 @@
                                     width="205"
                                     trigger="click"
                                     v-model="isShow">
-                                <el-tree
+                                <div style="max-height: 300px;overflow-y: auto;">
+                                    <el-tree
                                         :data="dataTree"
                                         node-key="id"
                                         :default-expanded-keys="expandedKeys"
                                         ref="tree"
                                         highlight-current
                                         @node-click="treeNodeClick">
-                                </el-tree>
+                                    </el-tree>
+                                </div>                                
                                 <el-button slot="reference" class="orgSelectOopover">
                                     <el-input v-model="queryForm.orgName" placeholder="请选择所在组织" class="orgSelectInput" readonly></el-input>
                                     <i class="el-icon-arrow-down" style="float: right;margin-right: -12px;color: #c0c4cc;"></i>
@@ -192,6 +194,7 @@
                         :file-list="fileList"
                         :on-change="handleChange"
                         :before-upload="beforeUpload"
+                        :on-remove="handleRemove"
                         :on-success="uploadSuccess"
                         :on-error="uploadError"
                         :data="paramData"
@@ -233,7 +236,7 @@
     <el-dialog :visible.sync="showTableDateDialog" title="预览数据"  @opened="showTableOpen" width="70%" :close-on-click-modal="false">
         <template>
             <el-row class="marginB20">
-                预览数据共 <span id="importNum"></span> 条资源
+                预览数据共 <span id="importNum">0</span> 条资源
             </el-row>
             <el-row>
                 <el-table :data="tableData1"  style="width: 100%" tooltip-effect="light"  ref="showTable">
@@ -244,11 +247,11 @@
                     <el-table-column prop="companyPass" label="企业用户名密码"  align="center" ></el-table-column>
                     <el-table-column prop="deptUser" label="部门用户"  align="center" ></el-table-column>
                     <el-table-column prop="deptPass" label="部门用户密码" align="center" ></el-table-column>
-                    <el-table-column prop="orgName" label="所属部门" align="center" ></el-table-column>
+                    <el-table-column prop="orgName" label="所属部门(组织)" align="center" ></el-table-column>
                 </el-table>
             </el-row>
             <div slot="footer" >
-                <el-button ref="importButton" @click="submitUpload('import')" :disabled="flag">导 入</el-button>
+                <el-button type="primary" ref="importButton" @click="submitUpload('import')" :disabled="flag">导 入</el-button>
             </div>
         </template>
     </el-dialog>
@@ -270,11 +273,11 @@
                     <el-table-column prop="companyPass" label="企业用户名密码"  align="center" ></el-table-column>
                     <el-table-column prop="deptUser" label="部门用户"  align="center" ></el-table-column>
                     <el-table-column prop="deptPass" label="部门用户密码" align="center" ></el-table-column>
-                    <el-table-column prop="orgName" label="所属部门" align="center" ></el-table-column>
+                    <el-table-column prop="orgName" label="所属部门(组织)" align="center" ></el-table-column>
                 </el-table>
             </el-row>
             <div slot="footer" >
-                <el-button @click="showErrTableDateDialog=false">知道了</el-button>
+                <el-button type="primary" @click="showErrTableDateDialog=false">知道了</el-button>
             </div>
         </template>
     </el-dialog>
@@ -459,6 +462,7 @@
                 }
             },
             openImportDataDialog(){
+                this.fileList = []
                 this.importDialogVisible = true;
 
             },
@@ -554,11 +558,13 @@
             beforeUpload(file){//上传之前 文件校验
 
                 var isTextComputer = file.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
-                console.log(file)
                 if(!isTextComputer){
                     this.$message.error('文件格式错误');
                     return false;
                 }
+            },
+            handleRemove(file, fileList){
+                this.fileList=[]
             },
             showTableOpen(){
                 if(this.tableData1)
@@ -605,6 +611,8 @@
 
                 this.paramData.importFlag = flag;
                 var fileList = this.fileList;
+                console.log(fileList)
+                console.log(fileList.length)
                 if(!fileList || fileList.length!=1){
                     this.$message.error({message:'请选择一个文件',type:'error'});
                     return false;
@@ -718,6 +726,9 @@
             this.initOrgs();
             this.initList();
             this.initTree();
+        },//created方法 结束
+        mounted(){
+            document.getElementById('mainDiv').style.display = 'block';
         }
     });
 
@@ -726,9 +737,6 @@
 
     .dialog-footer{
         text-align: center;
-    }
-    .el-table th {
-        font-weight: bolder;
     }
     .el-input__inner{
     //   width: 200px;

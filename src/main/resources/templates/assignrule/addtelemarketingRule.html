@@ -126,9 +126,12 @@
                     </el-option>
                 </el-select>
             </el-form-item>
-            <el-form-item label="设定组内人员：" prop="choosePerson" :label-width="formLabelWidth">
-                <el-button type="primary" @click="addDomain">添加人员</el-button>
-            </el-form-item>
+            <div style="position: relative;">
+                <span style="color: #f56c6c;position: absolute;font-size: 16px;left: 29px;top: 10px;">*</span>
+                <el-form-item label="设定组内人员：" prop="choosePerson" :label-width="formLabelWidth">
+                    <el-button type="primary" @click="addDomain">添加人员</el-button>
+                </el-form-item>
+            </div>            
             <el-table :data="form.tableData" style="width: 100%" border>
                 <el-table-column align="center" prop="id" type="index" label="序号" width="55"></el-table-column>
                 <el-table-column align="center" prop="name" label="姓名">
@@ -156,7 +159,7 @@
                 </el-table-column>
                 <el-table-column align="center" label="操作" width="120">
                     <template slot-scope="scope">
-                        <el-button @click.native.prevent="deleteRow(scope.$index, form.tableData)" type="text" size="small">移除</el-button>
+                        <el-button @click.native.prevent="deleteRow(scope.$index, form.tableData)" type="text" size="small">删除</el-button>
                     </template>
             </el-table-column>
           </el-table>
@@ -191,14 +194,13 @@
                     status:'1',//默认value值，启用
                     person:'',
                     searchWord:'',
-                    status:'',
                     area:'',
                     tableData: []                    
                 },
                 formLabelWidth: '150px',
                 rules:{
                 	assignName: [
-                        { required: true, message: '请输入规则名称', trigger: 'blur' },
+                        { required: true, message: '规则名称不能为空', trigger: 'blur' },
                         {validator:function(rule,value,callback){
              			    var param = {'assignName':value};
                              axios.post('/assignrule/teleAssignRule/queryTeleAssignRuleByName',param)
@@ -207,7 +209,7 @@
                                  if(data.code=='0'){
                                      var resData = data.data;
                                      if(resData.length>0){
-                                         callback(new Error("此分配规则名称已存在，请修改后提交"));
+                                         callback(new Error("此规则已经存在，请修改后提交"));
                                      }else{
                                          callback();
                                      }
@@ -260,9 +262,8 @@
                     label: '启用'
                 }, {
                     value: '0',
-                    label: '禁用'
+                    label: '停用'
                 }],
-                // tableData: [],
                 personOptions:orgUserList,
                 tags: [],
                 areaTags:[]
@@ -275,14 +276,7 @@
                     //规则成员数据	
                     var saveMemner=[];
                     var memberArry=this.form.tableData ;
-                    if(null!=memberArry&&memberArry.length>0) {
-                      for(var i=0;i<memberArry.length;i++) {
-                    		var save={};
-                    		save.memberId=memberArry[i].person;
-                    		save.resourceLimit=memberArry[i].num;
-                    		saveMemner.push(save);
-                    	}
-                   }
+
                     var assignName=this.form.assignName ;
                     	
                     var startTime=this.form.startTime ;	
@@ -297,7 +291,30 @@
                     
                     var searchWord=this.tags ;	
                     
-                    var area=this.areaTags ;	
+                    var area=this.areaTags ;
+
+                    if(endTime<startTime){
+                        this.$message({
+                            type: 'warning',
+                            message: '结束时间不能早于开始时间'
+                        });
+                        return ;
+                    }	
+
+                    if(null!=memberArry&&memberArry.length>0) {
+                      for(var i=0;i<memberArry.length;i++) {
+                            var save={};
+                            save.memberId=memberArry[i].person;
+                            save.resourceLimit=memberArry[i].num;
+                            saveMemner.push(save);
+                        }
+                    }else{
+                        this.$message({
+                            type: 'warning',
+                            message: '组内人员必输项，请输入!'
+                        });
+                        return ;
+                    }
                     
                     var param={};
                     

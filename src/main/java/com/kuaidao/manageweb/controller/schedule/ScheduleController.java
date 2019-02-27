@@ -145,9 +145,36 @@ public class ScheduleController {
     @PostMapping("/setStatus")
     @ResponseBody
     @RequiresPermissions("sys:scheduleManager:edit")
-    @LogRecord(description = "修改定时任务状态", operationType = OperationType.UPDATE,
+    @LogRecord(description = "修改定时任务状态", operationType = OperationType.ENABLE,
             menuName = MenuEnum.SCHEDULE_MANAGEMENT)
     public JSONResult setStatus(@Valid @RequestBody JobStatusSetReq jobStatusSetReq,
+            BindingResult result) {
+
+        if (result.hasErrors()) {
+            return CommonUtil.validateParam(result);
+        }
+
+        String jobId = jobStatusSetReq.getJobId();
+        if (jobId == null) {
+            return new JSONResult().fail(SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getCode(),
+                    SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getMessage());
+        }
+
+        return scheduleFeignClient.setStatus(jobStatusSetReq);
+    }
+
+    /**
+     * 删除定时任务
+     * 
+     * @param orgDTO
+     * @return
+     */
+    @PostMapping("/delete")
+    @ResponseBody
+    @RequiresPermissions("sys:scheduleManager:delete")
+    @LogRecord(description = "删除定时任务", operationType = OperationType.DELETE,
+            menuName = MenuEnum.SCHEDULE_MANAGEMENT)
+    public JSONResult delete(@Valid @RequestBody JobStatusSetReq jobStatusSetReq,
             BindingResult result) {
 
         if (result.hasErrors()) {

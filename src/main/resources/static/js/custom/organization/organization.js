@@ -16,11 +16,13 @@
                 addOrModifyDialogTitle:'',//条件或修改组织机构标题
                 submitUrl:'',//添加组织机构 url
                 form: {//添加组织机构dialog
+                	orgType:'',
                     name: '',
                     remark: '',
                     parentName:'',
                     id:''
                 },
+                orgTypeList:[],
                 staffNumSearch:{//组内组成搜索框
                 	name:'',
                 	userName:'',
@@ -187,6 +189,7 @@
             
             },
             clickOrgNode(data,node,obj){//点击左侧节点
+            	this.inputOrgName='';
             	this.selectedNode = data;
             	this.form.parentName=data.label;
             	this.getQuery();
@@ -241,6 +244,24 @@
             	}
                 this.addOrModifyDialogTitle="添加下级组织";
                 this.submitUrl = 'save';
+                
+                axios.post('/organization/organization/queryDictionaryItemsByGroupCode',{})
+                .then(function (response) {
+               	 var data =  response.data
+                    if(data.code=='0'){
+                    	orgVM.orgTypeList = data.data;
+                    }else{
+                    	orgVM.$message({message:'查询组织机构类型列表报错',type:'error'});
+                    	onsole.error(data);
+                    }
+                
+                })
+                .catch(function (error) {
+                     console.log(error);
+                }).then(function(){
+                });
+                
+                
             	this.dialogFormVisible = true;
             	
             },
@@ -315,6 +336,22 @@
                   }
                   this.addOrModifyDialogTitle="修改组织信息";
                   this.submitUrl = 'update';
+                  //查询组织机构
+                  axios.post('/organization/organization/queryDictionaryItemsByGroupCode',{})
+                  .then(function (response) {
+                 	 var data =  response.data
+                      if(data.code=='0'){
+                      	orgVM.orgTypeList = data.data;
+                      }else{
+                      	orgVM.$message({message:'查询组织机构类型列表报错',type:'error'});
+                      	onsole.error(data);
+                      }
+                  
+                  })
+                  .catch(function (error) {
+                       console.log(error);
+                  }).then(function(){
+                  });
                   
                  var parentName =  orgVM.form.parentName;
                   var param={id:rows[0].id};
@@ -389,8 +426,6 @@
               }
               
               
-              
-              
         },
        mounted(){
            document.getElementById('organizationManage').style.display = 'block';
@@ -399,4 +434,12 @@
         	this.clickOrgNode(this.dataTree[0],null,null);
         	
         }//created方法 结束
+       ,filters:{
+    	   strToNumberFormatter:function(str){
+    		   if(!str){
+    			   return '';
+    		   }
+    		   return Number(str); 
+    	   } 
+       }
     })

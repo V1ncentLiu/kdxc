@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"  xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head th:replace="_header_include::frag(~{::title},~{},~{})">
+    <title>后台管理系统</title>
+    <style>
+        button a{color:#fff!important;}
+    </style>
+</head>
+<body>
+<div id="clueManage" class="clueManage mainPadding">  
+    <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
+        <el-breadcrumb-item>Home</el-breadcrumb-item>
+        <el-breadcrumb-item>电销中心</el-breadcrumb-item>
+        <el-breadcrumb-item><a >待分配新资源</a></el-breadcrumb-item>
+    </el-breadcrumb>
+    
+    <el-row class="marginB10">
+    		<shiro:hasPermission name="aggregation:pendingAllocationManager:allocation">
+		        <el-button type="primary" @click="toAllocationClue">分配资源</el-button>
+		    </shiro:hasPermission>
+    		<shiro:hasPermission name="aggregation:pendingAllocationManager:transfer">
+		        <el-button type="success" @click="toTransferClue">转移资源</el-button>
+		    </shiro:hasPermission>
+    		<shiro:hasPermission name="aggregation:pendingAllocationManager:batch">
+		        <el-button type="warning" @click="toBatchClue">批量分发</el-button>
+		    </shiro:hasPermission>
+    		<shiro:hasPermission name="aggregation:pendingAllocationManager:ceo">
+		        <el-button type="danger" @click="toCeoClue">副总分发</el-button>
+		    </shiro:hasPermission>
+	</el-row>
+	<el-form :inline="true" :model="clueSearchForm" class="demo-form-inline" ref="clueSearchForm"> 
+	    <el-row class="marginB10 greybg padding20" style="padding-bottom: 0;">
+	     <el-row>
+				  <el-form-item class="formItem" prop="phone">
+				    <el-input v-model="clueSearchForm.phone" placeholder="客户手机号" class="input-with-select"></el-input>
+				  </el-form-item>
+				  <el-form-item class="formItem" prop="cusName">
+				    <el-input v-model="clueSearchForm.cusName" placeholder="客户姓名" class="input-with-select"></el-input>
+				  </el-form-item>
+				  <el-form-item class="formItem"  prop="type">
+				    <el-select v-model="clueSearchForm.type" @change="getSaleList" placeholder="资源类型" style="width: 100%;">
+				      <el-option
+					      v-for="item in typeOptions"
+					      :key="item.value"
+					      :label="item.name"
+					      :value="item.value">
+					  </el-option>
+				    </el-select>
+				  </el-form-item>
+				  <el-form-item class="formItem"  prop="category">
+				    <el-select v-model="clueSearchForm.category" placeholder="资源类别">
+				      <el-option
+					      v-for="item in categoryOptions"
+					      :key="item.value"
+					      :label="item.name"
+					      :value="item.value">
+					  </el-option>
+				    </el-select>
+				  </el-form-item>
+          <el-form-item class="formItem" label="创建时间：">
+  					<el-date-picker value-format="yyyy-MM-dd" v-model="clueSearchForm.startTime" type="date" placeholder="选择日期"></el-date-picker>
+          </el-form-item>
+          <el-form-item class="formItem" label="——">
+					   <el-date-picker value-format="yyyy-MM-dd" v-model="clueSearchForm.endTime" type="date" placeholder="选择日期"></el-date-picker>
+          </el-form-item>
+				  <el-form-item class="formItem" prop="messagePoint">
+				    <el-input v-model="clueSearchForm.messagePoint" placeholder="留言重点" class="input-with-select"></el-input>
+				  </el-form-item>
+				  <el-form-item class="formItem" prop="searchWord">
+				    <el-input v-model="clueSearchForm.searchWord" placeholder="搜索词" class="input-with-select"></el-input>
+				  </el-form-item>
+				  <el-form-item class="formItem" prop="address">
+				    <el-input v-model="clueSearchForm.address" placeholder="地址" class="input-with-select"></el-input>
+				  </el-form-item>
+				    <el-button type="primary" @click="searchTable()">搜索</el-button>
+				
+	        </el-row>
+	    </el-row>
+  	</el-form>
+    <el-row>
+        <el-table  ref="multipleTable" tooltip-effect="dark" border @selection-change="handleSelectionChange"
+            style="width: 100%"  :data="dataTable" >
+            <el-table-column align="center" type="selection" label="全选" width="50"></el-table-column>
+            <el-table-column align="center" prop="messagePoint" label="留言重点" ></el-table-column>
+            <el-table-column align="center" prop="createTime" label="日期" :formatter="dateFormat"></el-table-column>
+            <el-table-column align="center" prop="searchWord" label="搜索词" ></el-table-column>
+            <el-table-column align="center" prop="projectName" label="资源项目"></el-table-column>
+            <el-table-column align="center" prop="category" label="资源类别" :formatter="transformCategory"></el-table-column>
+            <el-table-column align="center" prop="type" label="资源类型" :formatter="transformType"></el-table-column>
+            <el-table-column align="center" prop="cusName" label="客户姓名"></el-table-column>
+           <el-table-column align="center" prop="phone" label="手机号" ></el-table-column>
+           <el-table-column align="center" prop="phone2" label="手机号2" ></el-table-column>
+           <el-table-column align="center" prop="phone3" label="手机号3" ></el-table-column>
+           <el-table-column align="center" prop="address" label="地址" ></el-table-column>
+           <el-table-column align="center" prop="messageTime" label="留言时间" :formatter="dateFormat"></el-table-column>
+           <el-table-column align="center" prop="qq" label="QQ" ></el-table-column>
+           <el-table-column align="center" prop="email" label="邮箱" ></el-table-column>
+           <el-table-column align="center" prop="createUserName" label="资源专员" ></el-table-column>
+        </el-table>
+        <table-pagination :pager="pager" @change="searchTable"></table-pagination>
+    </el-row>
+      <!-- dialog -->
+      <el-dialog  title="分配资源"  :visible.sync="allocationVisible"  width="30%">
+        <template>
+            <el-form :model="allocationForm" ref="allocationForm" >
+                <el-form-item label="电销顾问"    :label-width="formLabelWidth"  prop="saleId">
+                    <el-select v-model="allocationForm.saleId" placeholder="组内电销员工" style="width: 80%">
+                        <el-option v-for="item in saleOptions" 
+                        			:key="item.id" 
+                        			:label="item.name" 
+                        			:value="item.id">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+            </el-form>
+            <div slot="footer" class="dialog-footer">
+                <el-button type="primary" @click="allocationClue">提 交</el-button>
+                <el-button  @click="allocationVisible = false">取 消</el-button>
+            </div>
+        </template>
+    </el-dialog>
+    <!-- dialog -->
+      <!-- dialog -->
+      <el-dialog  title="转移资源"  :visible.sync="transferVisible"  width="30%">
+        <template>
+            <el-form :model="transferForm" ref="transferForm" >
+                <el-form-item label="电销总监"    :label-width="formLabelWidth"  prop="id">
+                    <el-select v-model="transferForm.id" placeholder="同事业部的组名（总监姓名）" style="width: 80%">
+                        <el-option v-for="item in saleGroupOptions" 
+                        			:key="item.id" 
+                        			:label="item.name" 
+                        			:value="item.id">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+            </el-form>
+            <div slot="footer" class="dialog-footer">
+                <el-button type="primary" @click="transferClue">提 交</el-button>
+                <el-button  @click="transferVisible = false">取 消</el-button>
+            </div>
+        </template>
+    </el-dialog>
+    <!-- dialog -->
+      <!-- dialog -->
+      <el-dialog  title="信息流批量分发"  :visible.sync="batchVisible"  width="30%">
+        <template>
+            <el-form :model="batchForm" ref="batchForm" >
+                <el-form-item label="信息流分配规则"    :label-width="formLabelWidth"  prop="ruleId">
+                    <el-select v-model="batchForm.ruleId" style="width: 80%">
+                        <el-option v-for="item in ruleOptions" 
+                        			:key="item.id" 
+                        			:label="item.assignName" 
+                        			:value="item.id">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+            </el-form>
+            <div slot="footer" class="dialog-footer">
+                <el-button type="primary" @click="batchClue">提 交</el-button>
+                <el-button  @click="batchVisible = false">取 消</el-button>
+            </div>
+        </template>
+    </el-dialog>
+    <!-- dialog -->
+      <!-- dialog -->
+      <el-dialog  title="副总分发"  :visible.sync="ceoVisible"  width="30%">
+        <template>
+            <el-form :model="ceoForm" ref="ceoForm" >
+                <el-form-item label="电销总监"    :label-width="formLabelWidth"  prop="id">
+                    <el-select v-model="ceoForm.id" placeholder="同事业部的组名（总监姓名）" @change="getSaleList" style="width: 80%">
+                        <el-option v-for="item in orgOptions" 
+                        			:key="item.id" 
+                        			:label="item.name" 
+                        			:value="item.id">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="电销员工"    :label-width="formLabelWidth"  prop="teleSaleId">
+                    <el-select v-model="ceoForm.teleSaleId"  style="width: 80%">
+                        <el-option v-for="item in teleSaleOptions" 
+                        			:key="item.id" 
+                        			:label="item.name" 
+                        			:value="item.id">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+            </el-form>
+            <div slot="footer" class="dialog-footer">
+                <el-button type="primary" @click="ceoClue">提 交</el-button>
+                <el-button  @click="ceoVisible = false">取 消</el-button>
+            </div>
+        </template>
+    </el-dialog>
+    <!-- dialog -->
+</div>
+<!-- import common js-->
+<div th:include="_footer_include :: #jsLib"></div>
+</body>
+<script th:inline="javascript">
+var orgList=[[${orgList}]];//电销组
+var saleList=[[${saleList}]];//电销创业顾问
+var saleGroupList=[[${saleGroupList}]];//同事业部下电销组
+var ruleList=[[${ruleList}]];//规则
+var clueCategoryList=[[${clueCategoryList}]];//资源类别
+var clueTypeList=[[${clueTypeList}]];//资源类型
+var clueVM = new Vue({
+        el: '#clueManage',
+        data: {
+        		clueSearchForm: {
+	        		phone: '',
+	        		cusName: '',
+	        		category: '',
+	        		type: '',
+	        		startTime: '',
+	        		endTime: '',
+	        		messagePoint: '',
+	        		searchWord: '',
+	        		address: ''
+	            },
+	            allocationForm: {
+	            	saleId:''
+                },
+                transferForm: {
+                	id:''
+                },
+                batchForm: {
+                	ruleId:''
+                },
+                ceoForm: {
+                	id:'',
+                	teleSaleId:''
+                },
+	            dataTable:[],
+	            orgOptions:orgList,
+	            saleOptions:saleList,
+	            ruleOptions:ruleList,
+	            saleGroupOptions:saleGroupList,
+	            categoryOptions:clueCategoryList,
+	            typeOptions:clueTypeList,
+	            teleSaleOptions:[],
+	            allocationVisible: false,
+	            transferVisible: false,
+	            batchVisible: false,
+	            ceoVisible: false,
+	            pager:{
+	                total: 0,
+	                currentPage: 1,
+	                pageSize: 20,
+	            },
+	            multipleSelection:[],
+                formLabelWidth: '150px',
+                formLabelWidth1: '120px',
+        },
+        methods: {
+        	searchTable() {
+                var param ={};
+                param.pageSize = this.pager.pageSize;
+                param.pageNum = this.pager.currentPage;
+                param.startTime = this.clueSearchForm.startTime;
+                param.endTime = this.clueSearchForm.endTime;
+                param.teleGorupId = this.clueSearchForm.teleGorupId;
+                param.teleSaleId = this.clueSearchForm.teleSaleId;
+                param.tasteProjectId = this.clueSearchForm.projectId;
+                param.cusName = this.clueSearchForm.cusName;
+                console.info(param);
+                axios.post('/clue/pendingAllocation/list', param)
+                .then(function (response) {
+                      var result =  response.data;
+                      console.info(result);
+                      var table=result.data;
+                      clueVM.dataTable= table.data;
+                      clueVM.pager.total =  table.total;
+                      clueVM.pager.currentPage = table.currentPage;
+                })
+                .catch(function (error) {
+                     console.log(error);
+                });
+                
+              },
+              //选择行
+              handleSelectionChange(val) {
+                  this.multipleSelection = val;
+              },
+              handleSizeChange(val) {
+                  //下拉框  每页 10,20条切换 调用
+                     console.log(`每页 ${val} 条`);
+                  this.pageSize = val;
+                  this.initTableData(1);
+               },
+               handleCurrentChange(val) {
+                   //点击 页码
+                 console.log(`当前页: ${val}`);
+                 this.initTableData(val);
+               },
+               //类别转换方法
+               transformCategory(row, column, cellValue, index) {
+             	  var text="";
+             	  if(clueCategoryList){
+ 	                  for(var i=0;i<clueCategoryList.length;i++){
+ 	                		if(cellValue==clueCategoryList[i].value){
+ 	                			text=clueCategoryList[i].name;
+ 	                		}
+ 	                	}
+             	  }
+                   return text;
+               },
+               //类行转换方法
+               transformType(row, column, cellValue, index) {
+             	  var text="";
+             	  if(clueTypeList){
+ 	                  for(var i=0;i<clueTypeList.length;i++){
+ 	                		if(cellValue==clueTypeList[i].value){
+ 	                			text=clueTypeList[i].name;
+ 	                		}
+ 	                	}
+             	  }
+                   return text;
+               },
+               //日期数据格式化方法
+               dateFormat(row, column, cellValue, index) {
+                 if (cellValue == undefined) {
+                    return "";
+                 }
+                 return moment(cellValue).format("YYYY-MM-DD HH:mm:ss");
+               },
+               //打开分配资源
+               toAllocationClue() {
+           	       var rows = this.multipleSelection;
+            	   if(rows.length==0){
+                       this.$message({
+                          message: '请选择一条数据进行分配',
+                          type: 'warning'
+                        });
+                       return;
+                   }
+                   this.allocationVisible = true;
+               },
+               allocationClue(){//分配资源
+           	      var rows = this.multipleSelection;
+                  var rowIds = [];
+                  for(var i=0;i<rows.length;i++){
+               	   var curRow = rows[i];
+                      rowIds.push(curRow.id);
+                  }
+               	  //分配
+               	  var param  = {};
+               	  param.idList=rowIds;
+               	  param.teleSaleId=this.allocationForm.saleId;
+                   axios.post('/clue/pendingAllocation/allocationClue',param)
+                   .then(function (response) {
+                       var data =  response.data;
+                       if(data.code=='0'){
+                       	clueVM.$message({message:'分配成功',type:'success',duration:1000,onClose:function(){
+                       		clueVM.searchTable();
+                   	    }});
+                       }else{
+                       	clueVM.$message({
+                               message: "接口调用失败",
+                               type: 'error'
+                             }); 
+                       }
+                   })
+                   .catch(function (error) {
+                     console.log(error);
+                   })
+                   .then(function () {
+                   	
+                   });
+                 },// method end
+               //打开转移资源
+               toTransferClue() {
+           	       var rows = this.multipleSelection;
+            	   if(rows.length==0){
+                       this.$message({
+                          message: '请选择一条数据进行转移',
+                          type: 'warning'
+                        });
+                       return;
+                   }
+                   this.allocationVisible = true;
+               },
+               transferClue(){//转移资源
+           	      var rows = this.multipleSelection;
+                  var rowIds = [];
+                  for(var i=0;i<rows.length;i++){
+               	   var curRow = rows[i];
+                      rowIds.push(curRow.id);
+                  }
+               	  //转移
+               	  var param  = {};
+               	  param.idList=rowIds;
+               	  var id=this.transferForm.id;
+               	  var idArray=id.split(",");
+               	  param.teleGroupId=idArray[0];
+               	  param.teleDirectorId=idArray[1];
+                   axios.post('/clue/pendingAllocation/transferClue',param)
+                   .then(function (response) {
+                       var data =  response.data;
+                       if(data.code=='0'){
+                       	clueVM.$message({message:'转移成功',type:'success',duration:1000,onClose:function(){
+                       		clueVM.searchTable();
+                   	    }});
+                       }else{
+                       	clueVM.$message({
+                               message: "接口调用失败",
+                               type: 'error'
+                             }); 
+                       }
+                   })
+                   .catch(function (error) {
+                     console.log(error);
+                   })
+                   .then(function () {
+                   	
+                   });
+                 },// method end
+               //打开批量分发
+               toBatchClue() {
+           	       var rows = this.multipleSelection;
+            	   if(rows.length==0){
+                       this.$message({
+                          message: '请选择一条数据进行分发',
+                          type: 'warning'
+                        });
+                       return;
+                   }
+                   this.batchVisible = true;
+               },
+               batchClue(){//批量分发
+           	      var rows = this.multipleSelection;
+                  var rowIds = [];
+                  for(var i=0;i<rows.length;i++){
+               	   var curRow = rows[i];
+                      rowIds.push(curRow.id);
+                  }
+               	  //转移
+               	  var param  = {};
+               	  param.idList=rowIds;
+               	  param.assignId=this.batchForm.ruleId;
+                   axios.post('/clue/pendingAllocation/batchClue',param)
+                   .then(function (response) {
+                       var data =  response.data;
+                       if(data.code=='0'){
+                       	clueVM.$message({message:'批量分发成功',type:'success',duration:1000,onClose:function(){
+                       		clueVM.searchTable();
+                   	    }});
+                       }else{
+                       	clueVM.$message({
+                               message: "接口调用失败",
+                               type: 'error'
+                             }); 
+                       }
+                   })
+                   .catch(function (error) {
+                     console.log(error);
+                   })
+                   .then(function () {
+                   	
+                   });
+                 },// method end
+               //打开副总分发
+               toCeoClue() {
+           	       var rows = this.multipleSelection;
+            	   if(rows.length==0){
+                       this.$message({
+                          message: '请选择一条数据进行分发',
+                          type: 'warning'
+                        });
+                       return;
+                   }
+                   this.ceoVisible = true;
+               },
+               ceoClue(){//副总分发
+           	      var rows = this.multipleSelection;
+                  var rowIds = [];
+                  for(var i=0;i<rows.length;i++){
+               	   var curRow = rows[i];
+                      rowIds.push(curRow.id);
+                  }
+               	  var param  = {};
+               	  param.idList=rowIds;
+               	  var id=this.ceoForm.id;
+             	  var idArray=id.split(",");
+             	  param.teleGroupId=idArray[0];
+             	  param.teleDirectorId=idArray[1];
+               	  param.teleSaleId=this.ceoForm.teleSaleId;
+                   axios.post('/clue/pendingAllocation/ceoClue',param)
+                   .then(function (response) {
+                       var data =  response.data;
+                       if(data.code=='0'){
+                       	clueVM.$message({message:'副总分发成功',type:'success',duration:1000,onClose:function(){
+                       		clueVM.searchTable();
+                   	    }});
+                       }else{
+                       	clueVM.$message({
+                               message: "接口调用失败",
+                               type: 'error'
+                             }); 
+                       }
+                   })
+                   .catch(function (error) {
+                     console.log(error);
+                   })
+                   .then(function () {
+                   	
+                   });
+                 },// method end
+                 
+              //根据电销组查询电销总监
+              getSaleList() {
+            	  var param ={};
+                  var id = this.ceoForm.id;
+            	  var idArray=id.split(",");
+                  param.orgId = idArray[0];
+                  console.info(param);
+                  axios.post('/clue/pendingAllocation/getSaleList', param)
+                  .then(function (response) {
+                        var result =  response.data;
+                        console.info(result);
+                        var table=result.data;
+                        clueVM.teleSaleOptions= table.data;
+                  })
+                  .catch(function (error) {
+                       console.log(error);
+                  });
+              },
+        },
+        created(){
+            console.info("create method");
+            this.searchTable();
+           
+        },
+        mounted(){
+           console.info("mounted method");
+        }
+    })
+    
+</script>
+</html>

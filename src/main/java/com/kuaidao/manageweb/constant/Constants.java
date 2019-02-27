@@ -28,11 +28,11 @@ public class Constants {
     public static String SESSION_ID = "huiju:sys:sessionid:";
     // redis前缀 验证码MsgID
     public static String MSG_ID = "huiju:sys:msgid:";
-    
-    //七陌坐席 redis key 
-    public static  String QIMO_CLIENT_KEY= "huiju:aggregation:client:qimo";
-    //天润坐席 reids key 
-    public static  String TR_CLIENT_KEY= "huiju:aggregation:client:tr";
+
+    // 七陌坐席 redis key
+    public static String QIMO_CLIENT_KEY = "huiju:aggregation:client:qimo";
+    // 天润坐席 reids key
+    public static String TR_CLIENT_KEY = "huiju:aggregation:client:tr";
 
     // 品类字典Code
     public static String PROJECT_CLASSIFICATION = "classification";
@@ -42,6 +42,10 @@ public class Constants {
     public static String PROJECT_SHOPTYPE = "project_shopType";
     // 项目归属字典Code
     public static String PROJECT_ATTRIBUTIVE = "project_attributive";
+    // 资源类别字典Code
+    public static String CLUE_CATEGORY = "clueCategory";
+    // 资源类型字典Code
+    public static String CLUE_TYPE = "clueType";
 
 
 }

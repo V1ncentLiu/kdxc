@@ -10,7 +10,7 @@ var homePageVM=new Vue({
         };
   		
 	    return { 
-	    	formLabelWidth:'120px',
+	    	formLabelWidth:'130px',
 	      	isCollapse: false,//侧导航是否展开
 	      	isActive:true,
 	      	dialogModifyPwdVisible:false,//修改密码dialog 是否显示
@@ -45,10 +45,110 @@ var homePageVM=new Vue({
 		   		    { validator: validatePass, trigger: 'blur' }
 		   		 ]
 		   		
-		   	}
+		   	},
+		   	isLogin:false,//坐席是否登录
+		   	isTrClient:false,//天润坐席是否登录
+		   	isQimoClient:false,//七陌坐席是否登录
+	    	callTitle:'呼叫中心',
+	    	dialogLoginClientVisible:false,//登录坐席dialog 
+	    	dialogLogoutClientVisible:false,
+	    	loginClientForm:{
+	    		clientType:1,
+	    		cno:'',
+	    		bindPhone:'',
+	    		bindPhoneType:1,
+	    	    loginClient:''
+	    		
+	    	},
+	    	clientTypeOptions: [{
+                value: 1,
+                label: '登录天润呼叫中心'
+            }, {
+                value: 2,
+                label: '登录七陌呼叫中心'
+            }],
+            bindPhoneTypeOptions: [{
+                value: 1,
+                label: '普通电话'
+            }, {
+                value: 2,
+                label: '手机外显'
+            }],
+            trClientFormRules:{//登录坐席校验规则
+            	clientType:[
+                    { required: true, message: '选择呼叫中心不能为空'}
+                ],
+            	cno:[
+            		 { required: true, message: '坐席号不能为空'},
+            		 {validator:function(rule,value,callback){
+            			 if(!/^[0-9]*$/.test(value)){
+          					  callback(new Error("只可以输入数字,不超过10位"));     
+          	        	  }else{
+          	        		  callback();
+          	        	  }
+            			 
+            		 },trigger:'blur'},
+            	],
+	    	    bindPhone:[
+	    	    	{ required: true, message: '绑定电话不能为空'},
+	    	    	 {validator:function(rule,value,callback){
+            			 if(!/^[0-9]*$/.test(value)){
+          					  callback(new Error("只可以输入数字,不超过11位"));     
+          	        	  }else{
+          	        		  callback();
+          	        	  }
+            			 
+            		 },trigger:'blur'},
+	    	    ],
+                bindPhoneType:[
+                    { required: true, message: '绑定类型不能为空'}
+                ]
+            	
+            },
+            qimoClientFormRules:{
+                clientType:[
+                    { required: true, message: '选择呼叫中心不能为空'}
+                ],
+            	loginClient:[
+            		{ required: true, message: '登录坐席不能为空'},
+            		{validator:function(rule,value,callback){
+           			 if(!/^[0-9]*$/.test(value)){
+         					  callback(new Error("只可以输入数字,不超过10位"));     
+         	        	  }else{
+         	        		  callback();
+         	        	  }
+           			 
+           		 },trigger:'blur'},
+            	],
+                bindPhoneType:[
+                    { required: true, message: '绑定类型不能为空'}
+                ]
+            },
+            enterpriseId:enterpriseId,
+            token:token,
+            dialogOutboundVisible:false,//外呼dialog
+            outboundInputPhone:'',//外呼时手机号
+            accountId:accountId,//登陆者ID
+            outboundDialogMin:false,//外呼dialog 是否最小化
+            tmOutboundCallDialogVisible:false,//电销页面外呼 dialog 
 	    }
 	},
  	methods: {
+        // 输入数字控制方法
+        cnoNumber(){
+　　　    this.loginClientForm.cno=this.loginClientForm.cno.replace(/[^\.\d]/g,'');
+          this.loginClientForm.cno=this.loginClientForm.cno.replace('.','');
+    　  },
+        bindPhoneNumber(){
+　　　    this.loginClientForm.bindPhone=this.loginClientForm.bindPhone.replace(/[^\.\d]/g,'');
+          this.loginClientForm.bindPhone=this.loginClientForm.bindPhone.replace('.','');
+    　  },
+ 		handleMin(){
+ 			this.dialogLoginClientVisible = false;
+ 		},
+ 		handleOutMin(){
+ 			this.dialogLogoutClientVisible = false;
+ 		},
 	    handleOpen(key, keyPath) {
 	      	// console.log(key, keyPath);
 	    },
@@ -81,6 +181,7 @@ var homePageVM=new Vue({
 	     },
 	     logout(){
 	    	 this.dialogLogoutVisible=true;
+	    	 this.$refs.loginClientForm.resetFields();
 	     },
 	     cancelModifyForm(formName){//取消修改密码
          	this.$refs[formName].resetFields();
@@ -148,7 +249,285 @@ var homePageVM=new Vue({
         },
         closeModifyPwdDialog(){
          	this.$refs.modifyForm.resetFields();
-        }
+        },
+        openLoginClientDialog(){//打开登录坐席dialog
+        		if(this.isQimoClient){
+        			this.loginClientForm.clientType=2;
+        			this.dialogLogoutClientVisible  = true;
+        		}else if(this.isTrClient){
+        			this.loginClientForm.clientType=1;
+        			this.dialogLogoutClientVisible  = true;
+        		}else{
+        			 if (this.$refs.loginClientForm !==undefined) {
+        				  this.$refs.loginClientForm.resetFields();
+        				/* this.$refs.loginClientForm.clearValidate(function(){
+        					 
+        				 });*/
+        			 }
+        			
+            		this.loginClientForm.clientType=1;//设置默认选中天润坐席
+            		this.loginClientForm.bindPhoneType=1;
+            		this.loginClientForm.cno='';
+            		this.loginClientForm.bindPhone='',
+            		this.loginClientForm.loginClient='',
+            		this.dialogLoginClientVisible = true;
+        		}
+        	
+        },
+        cancelLoginClientForm(){
+        	this.dialogLoginClientVisible = false;
+        },
+        changeClientType(selectedValue){
+        	this.$refs.loginClientForm.resetFields();
+        	this.loginClientForm.clientType=selectedValue;
+        },
+        loginClient(formName){
+       	 this.$refs[formName].validate((valid) => {
+             if (valid) {
+            	 var clientType = this.loginClientForm.clientType;
+            	 if(clientType==1){//天润坐席登录
+             		this.loginTrClient();
+             	}else if(clientType==2){
+             		this.loginQimoClient();
+             		
+             	}
+             	
+             } else {
+               return false;
+             }
+           });
+        	
+        	
+        },
+        loginQimoClient(){//七陌登录
+        	var loginClient = this.loginClientForm.loginClient;
+        	var bindType = this.loginClientForm.bindPhoneType;
+        	var param={};
+        	param.bindType = bindType+"";
+        	param.loginName = loginClient;
+        	 axios.post('/client/client/qimoLogin',param)
+             .then(function (response) {
+                 var data =  response.data;
+                 if(data.code=='0'){
+                     var resData = data.data;
+                     homePageVM.$message({message:"登录成功",type:'success'});
+                     homePageVM.callTitle="呼叫中心（七陌ON）";
+                     homePageVM.dialogLoginClientVisible =false;
+                     homePageVM.isQimoClient=true;
+                     homePageVM.isTrClient=false;
+                 }else{
+                		homePageVM.$message({message:data.msg,type:'error'});
+                 }
+             })
+             .catch(function (error) {
+                console.log(error);
+             })
+             .then(function () {
+               // always executed
+             });
+        },
+        loginTrClient(){//天润登录
+        	var loginType = "2";
+			var enterpriseId = this.enterpriseId;
+			var cno = this.loginClientForm.cno;
+			var bindPhone = this.loginClientForm.bindPhone;
+			var bindType = this.loginClientForm.bindPhoneType;
+			var token = this.token;
+			var params = {};
+			params.bindTel = bindPhone;
+			params.bindType = bindType;
+			params.loginStatus = 1;
+			bindType = params.bindType;
+			if (bindType == 2) {
+				// alert("bitch");
+				$.get("/client/client/login/" + cno);
+				bindType = 1;
+				params.bindType = 1;
+			} else {
+				$.post("/client/client/destroy/"+ cno);
+			}
+			
+			var cticloud_url = "api-2.cticloud.cn";
+        	
+			var agentSign;
+			var url = window.location.protocol
+					+ "//"
+					+ cticloud_url
+					+ "/interface/v10/agentLogin/authenticateJsonp?validateType="
+					+ loginType;
+
+			url += "&enterpriseId=" + enterpriseId + "&cno=" + cno;
+			agentSign = enterpriseId;
+			console.info("tr_client login url"+ url);
+			var timestamp = Date.parse(new Date()) / 1000;
+			agentSign = agentSign + timestamp;
+			
+			if (token != '') {
+				agentSign = agentSign + token;
+			} else {
+				var _msg = "登录失败！token不可以为空";
+            	homePageVM.$message({message:_msg,type:'error'});
+				return false;
+			}
+			
+			agentSign = hex_md5(agentSign);
+			url += "&timestamp=" + timestamp + "&sign=" + agentSign;
+			console.log(url);
+			
+			$.ajax({
+				type : 'get',
+				url : url,
+				dataType : 'jsonp',
+				jsonp : 'callback',
+				success : function(r) {
+					var d = eval("(" + r + ")");
+					if (d.result == "0") {
+						params.enterpriseId = d.enterpriseId;
+						params.cno = d.cno;
+						params.sessionKey = d.sessionKey;
+						params.qids = d.qids;
+						/*
+						 * document.getElementById("toolbar").contentWindow.TOOLBAR.login(params,
+						 * cbLogin);//执行登陆 ccic2里面的js类
+						 */
+						// 执行登陆
+						TOOLBAR.login(params, function(token){
+							 if (token.code == 0) {
+			                    //座席登录成功
+								 homePageVM.$message({message:'登录成功',type:'success'});
+								 homePageVM.callTitle="呼叫中心（天润ON）";
+			                     homePageVM.dialogLoginClientVisible =false;
+			                     homePageVM.isQimoClient=false;
+			                     homePageVM.isTrClient=true;
+			                     
+			                     var recordParam = {};
+			                     recordParam.clientType=homePageVM.loginClientForm.clientType;
+			                     recordParam.bindPhone= bindPhone;
+			                     recordParam.cno= cno;
+			                     //记录坐席登录
+			                     axios.post('/client/client/clientLoginRecord',recordParam)
+			                     .then(function (response) {
+			                     })
+			                     .catch(function (error) {
+			                        console.log(error);
+			                     })
+			                     .then(function () {
+			                       // always executed
+			                     });
+			                } else {
+			                    //座席登录失败，失败原因： + result.msg
+			                	var _msg = "登录失败！座席号或绑定电话不正确";
+			                	homePageVM.$message({message:_msg,type:'error'});
+			                	return;
+			                }
+							
+						});
+			
+						
+						// ccic2里面的js类
+						agentNumber = params.cno;
+						//sessionStorage.setItem("enterpriseId",params.enterpriseId, 7);
+						//sessionStorage.setItem("cno", params.cno, 7);
+						//sessionStorage.setItem("bindTel", params.bindTel, 7);
+						//sessionStorage.setItem("bindType", params.bindType, 7);
+					} else {
+						//homePageVM.$message.error({message:d.description,type:'error'});
+						var _msg = "登录失败！座席号或绑定电话不正确";
+	                	homePageVM.$message({message:_msg,type:'error'});
+	                	console.error(r);
+					}
+				},
+				error : function(r) {
+					alert(r);
+				}
+			})
+			
+			
+        },
+        logoutClient(formName){//坐席退出
+        	if(this.isQimoClient){
+        		 axios.post('/client/client/qimoLogout',{})
+                 .then(function (response) {
+                     var data =  response.data;
+                     if(data.code=='0'){
+                    	 homePageVM.dialogLogoutClientVisible =false;
+                         homePageVM.$message({message:"退出成功",type:'success'});
+                         homePageVM.callTitle="呼叫中心";
+                         homePageVM.isQimoClient=false;
+                         homePageVM.isTrClient=false;
+                     }else{
+                    		homePageVM.$message({message:data.msg,type:'error'});
+                     }
+                 })
+                 .catch(function (error) {
+                    console.log(error);
+                 })
+                 .then(function () {
+                   // always executed
+                 });
+        	}else if(this.isTrClient){//天润
+        		 var params = {};
+         	    params.logoutMode = 1;
+         	    params.removeBinding = 1;
+         	    CTILink.Agent.logout(params, function(result) {
+         	        if (result.code == 0) {
+         	      	    homePageVM.dialogLogoutClientVisible =false;
+                        homePageVM.isQimoClient=false;
+                        homePageVM.isTrClient=false;
+                        homePageVM.callTitle="呼叫中心";
+                        homePageVM.$message({message:"退出成功",type:'success'});
+         	        }else{
+         	        	homePageVM.$message({message:"退出失败",type:'error'});
+         	        }
+         	    });
+        		
+        	}
+        },
+        openOutboundDialog(){//打开主动外呼diaolog 
+        	this.outboundInputPhone="";
+        	this.dialogOutboundVisible = true;
+        	if(this.outboundDialogMin){//代表上次点击的是最小化
+        		//$("#outboundCallTimeDiv").show();
+        	}else{
+        		$('#outboundCallTime').html("");
+        	}
+        	this.outboundDialogMin = false;
+        	
+        },
+        closeOutboundDialog(){
+        	//清除计时器
+        	clearTimer();
+        	this.dialogOutboundVisible = false;
+        	this.outboundDialogMin=false;
+        	if(!this.outboundDialogMin){//如果是最小化就不执行这个代码
+        		return;
+        	}else{
+        		$('#outboundCallTime').html("");
+        	}
+        },
+        clickOutbound(){//外呼
+        	var outboundInputPhone = this.outboundInputPhone;
+        	
+        	this.outboundCall(outboundInputPhone,1);
+        },
+        logoutMin(){//退出最小化
+        	this.dialogLogoutClientVisible =false;
+        },
+    	outboundMin(){//外呼最小化
+    		this.dialogOutboundVisible = false;
+    		this.outboundDialogMin=true;
+    	},
+    	outboundCall(outboundInputPhone,callSource,clueId){//外呼
+    		outboundCallPhone(outboundInputPhone,callSource,clueId,this.postBack());
+    		return;
+    	},
+    	closeTmOutboundDialog(){//关闭电销外呼dialog
+    		this.tmOutboundCallDialogVisible = false;
+    		clearTimer();//清除定时器
+    	},
+    	postBack(){//接通成功后的回调函数
+    		//console.info("postBack");
+    	}
          
   	},
    	created() {  
@@ -161,6 +540,9 @@ var homePageVM=new Vue({
 })
 // 点击导航赋值ifream的src值
 $(function () { 
+	//初始化 天润坐席 相关参数
+	documentReady();
+	
 	var mainBoxH=$(".elMain").height()-4;
 	// 设置ifream高度
 	$("#iframeBox").height(mainBoxH)

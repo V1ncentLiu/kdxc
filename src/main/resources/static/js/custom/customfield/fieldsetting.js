@@ -225,7 +225,7 @@
                 for(var i=0;i<rows.length;i++){
                     var curRow = rows[i];
                     rowIds.push(curRow.id);
-                    rowNames.push("["+curRow.fieldName+"]");
+                    rowNames.push("【"+curRow.fieldName+"】");
                 }
                 var fieldName = rowNames.join(" ");
             	
@@ -423,6 +423,7 @@
               beforeUpload(file){//上传之前 文件校验
                   var isTextComputer = file.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
                   if(!isTextComputer){
+                	  this.fileList=[];
                       this.$message.error('文件格式错误');
                       return false;
                   }

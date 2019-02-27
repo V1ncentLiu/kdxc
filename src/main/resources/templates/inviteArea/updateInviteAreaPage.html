@@ -13,7 +13,7 @@
     </style>
 </head>
 <body>
-<div id="userManage" class="userManage mainPadding">  
+<div id="userManage" class="userManage mainPadding" style="display: none;">  
     <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
         <el-breadcrumb-item>Home</el-breadcrumb-item>
         <el-breadcrumb-item>业务设置</el-breadcrumb-item>
@@ -94,9 +94,9 @@
             <el-row>
                 <el-col :span="6" :offset="6">
                     <el-form-item>
-                    	<el-button type="primary" @click="showdetail">预览</el-button>
+                    	<el-button type="success" @click="showdetail">预览</el-button>
                         <el-button type="primary" @click="showTips">确定</el-button>
-                        <a href="/invitearea/inviteAreaList"><el-button >取消</el-button></a>
+                        <a href="/invitearea/inviteAreaList"><el-button style="margin-left: 10px;">取消</el-button></a>
                        
                     </el-form-item>
                 </el-col>
@@ -124,7 +124,7 @@
                 <el-button @click="dialogFormVisible = false">确定</el-button>
             </div>
         </el-dialog>
-    <el-dialog title="确定要执行该操作吗" :visible.sync="submitdialogFormVisible" >
+    <el-dialog title="确定要执行批量操作？" :visible.sync="submitdialogFormVisible" >
        
         <div slot="footer" class="dialog-footer">
             <el-button @click="submitdialogFormVisible =false">取 消</el-button>
@@ -395,20 +395,24 @@
        	             var formData = addUserVm.form;
        	             var param={};
 	       	          let obj = {};
-	                  obj = this.swList.find((item)=>{
-	                      return item.id === param.businessGroupId;
-	                  });
+	                 
 	                  let telemarketingTeamobj = {};
-	                  telemarketingTeamobj = this.dxList.find((item)=>{
-	                      return item.id === param.telemarketingTeamId;
-	                  });
+	                  
 	                  
 	                  
 	                  if(isshowBusinessGroup ==0){
 	                	  param.businessGroupId= formData.businessGroupId;
+	                	  obj = this.swList.find((item)=>{
+		                      return item.id === param.businessGroupId;
+		                  });
+	                	  param.businessGroup = obj.name;
 	                  }
 	                  if(isshowTelemarketingTeam ==0){
 	                	  param.telemarketingTeamId = formData.telemarketingTeamId;
+	                	  telemarketingTeamobj = this.dxList.find((item)=>{
+		                      return item.id === param.telemarketingTeamId;
+		                  });
+	                	  param.telemarketingTeam = telemarketingTeamobj.name;
 	                  }
 	                  
 	       	          var projectstrs ="";
@@ -428,16 +432,26 @@
 		                	  for(var j =0;j<this.proviceslist.length;j++){
 		                		  if(formData.provincesIds[i] ==this.proviceslist[j].id){
 		                			  if(procinceNames ==""){
-		                				  procinceNames = this.proviceslist[j].name
+		                				  if(formData.provincesIds[i] !=0){
+		                					  procinceNames = this.proviceslist[j].name
+		                				  }
 		                			  }else{
-		                				  procinceNames =procinceNames+"," +this.proviceslist[j].name
+		                				  if(formData.provincesIds[i] !=0){
+		                					  procinceNames =procinceNames+"," +this.proviceslist[j].name
+		                				  }
 		                			  }
 		                		  }
 		                	  }
-		                	   if(provincestrs !=""){
-		                		   provincestrs = provincestrs+","+formData.provincesIds[i];
+		                	  if(provincestrs !=""){
+		                		   if(formData.provincesIds[i] !=0){
+		                			   provincestrs = provincestrs+","+formData.provincesIds[i];
+		                		   }
+		                		   
 		                	   }else{
-		                		   provincestrs = formData.provincesIds[i];
+		                		   if(formData.provincesIds[i] !=0){
+		                			   provincestrs = formData.provincesIds[i];
+		                		   }
+		                		   
 		                	   }
 		                	}
 	                  }
@@ -536,6 +550,9 @@
             }
         },
         created(){
+        },//created方法 结束
+        mounted(){
+            document.getElementById('userManage').style.display = 'block';
         }
     })
 </script>
