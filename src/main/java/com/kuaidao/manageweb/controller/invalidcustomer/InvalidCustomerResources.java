@@ -1,7 +1,8 @@
 package com.kuaidao.manageweb.controller.invalidcustomer;
 
-import com.kuaidao.aggregation.dto.pubcusres.ClueQueryParamDTO;
-import com.kuaidao.aggregation.dto.pubcusres.PublicCustomerResourcesReqDTO;
+import com.kuaidao.aggregation.dto.invalidcustomer.ClueQueryParamDTO;
+import com.kuaidao.aggregation.dto.invalidcustomer.InvalidCustomerResourcesReqDTO;
+import com.kuaidao.aggregation.dto.invalidcustomer.InvalidCustomerResourcesRespDTO;
 import com.kuaidao.aggregation.dto.pubcusres.PublicCustomerResourcesRespDTO;
 import com.kuaidao.common.constant.OrgTypeConstant;
 import com.kuaidao.common.constant.RoleCodeEnum;
@@ -12,7 +13,6 @@ import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.manageweb.feign.InvalidCustomer.InvalidCustomerFeignClient;
 import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
 import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
-import com.kuaidao.manageweb.feign.publiccustomer.PublicCustomerFeignClient;
 import com.kuaidao.manageweb.feign.role.RoleManagerFeignClient;
 import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
 import com.kuaidao.manageweb.util.CommUtil;
@@ -67,7 +67,7 @@ public class InvalidCustomerResources {
 
     @PostMapping("/resourceReduction")
     @ResponseBody
-    public JSONResult<Boolean> resourceReduction(@RequestBody PublicCustomerResourcesReqDTO dto){
+    public JSONResult<Boolean> resourceReduction(@RequestBody InvalidCustomerResourcesReqDTO dto){
         Long id = CommUtil.getCurLoginUser().getId();
         dto.setUpdateTime(new Date());
         dto.setUpdateUserId(id);
@@ -117,11 +117,17 @@ public class InvalidCustomerResources {
                 dxzjsList = dxzjs(dxzIdsList);
             }else  if(RoleCodeEnum.DXZJ.name().equals(roleList.get(0).getRoleCode())){
                 //电销总监:查看所在电销组
-                IdEntity idEntity = new IdEntity();
-                idEntity.setId(String.valueOf(user.getOrgId()));
-                JSONResult<OrganizationDTO> orgRes = organizationFeignClient.queryOrgById(idEntity);
-                dxzList.add(orgRes.getData());
-                dxzIdsList.add(orgRes.getData().getId());
+//                IdEntity idEntity = new IdEntity();
+//                idEntity.setId(String.valueOf(user.getOrgId()));
+//                JSONResult<OrganizationDTO> orgRes = organizationFeignClient.queryOrgById(idEntity);
+
+                OrganizationQueryDTO dto = new OrganizationQueryDTO();
+                dto.setSystemCode(SystemCodeConstant.HUI_JU);
+                dto.setOrgType(OrgTypeConstant.DXZ);
+                dto.setId(user.getOrgId());
+                JSONResult<List<OrganizationRespDTO>> dzList = organizationFeignClient.queryOrgByParam(dto);
+                dxzList = dzList.getData();
+                dxzIdsList.add(user.getOrgId());
                 dxcygwList = dxcygws(dxzIdsList);
 //                dxzjsList = dxzjs(dxzIdsList);
             }
@@ -137,7 +143,7 @@ public class InvalidCustomerResources {
 
     @PostMapping("/queryPage")
     @ResponseBody
-    public JSONResult<PageBean<PublicCustomerResourcesRespDTO>> queryListPage(@RequestBody ClueQueryParamDTO dto){
+    public JSONResult<PageBean<InvalidCustomerResourcesRespDTO>> queryListPage(@RequestBody ClueQueryParamDTO dto){
         Date date1 = dto.getCreateTime1();
         Date date2 = dto.getCreateTime2();
         if(date1!=null && date2!=null ){
@@ -153,6 +159,45 @@ public class InvalidCustomerResources {
                 return new JSONResult().fail("-1","释放时间，开始时间大于结束时间!");
             }
         }
+
+
+
+//      权限相关
+        List<Long> dxzList = new ArrayList<Long>();
+        UserInfoDTO user =  CommUtil.getCurLoginUser();
+        List<RoleInfoDTO> roleList = user.getRoleList();
+        if(roleList!=null&&roleList.get(0)!=null) {
+            if (RoleCodeEnum.GLY.name().equals(roleList.get(0).getRoleCode())) {
+                //管理员:查看全部电销组
+                OrganizationQueryDTO orgDto = new OrganizationQueryDTO();
+                orgDto.setSystemCode(SystemCodeConstant.HUI_JU);
+                orgDto.setOrgType(OrgTypeConstant.DXZ);
+                JSONResult<List<OrganizationRespDTO>> dzList = organizationFeignClient.queryOrgByParam(orgDto);
+                List<OrganizationRespDTO> datas = dzList.getData();
+                for(OrganizationRespDTO organizationRespDTO : datas){
+                    dxzList.add(organizationRespDTO.getId());
+                }
+
+            }else if(RoleCodeEnum.DXFZ.name().equals(roleList.get(0).getRoleCode())){
+                //电销副总:查看事业部下的全部电销组
+                OrganizationQueryDTO orgDto = new OrganizationQueryDTO();
+                orgDto.setParentId(user.getOrgId());
+                orgDto.setSystemCode(SystemCodeConstant.HUI_JU);
+                orgDto.setOrgType(OrgTypeConstant.DXZ);
+                JSONResult<List<OrganizationDTO>> dzList = organizationFeignClient.listDescenDantByParentId(orgDto);
+                List<OrganizationDTO> datas = dzList.getData();
+                for(OrganizationDTO organizationDTO : datas){
+                    dxzList.add(organizationDTO.getId());
+                }
+            }else  if(RoleCodeEnum.DXZJ.name().equals(roleList.get(0).getRoleCode())){
+                //电销总监:查看所在电销组
+                dxzList.add(user.getOrgId());
+            }else{
+                dxzList.add(user.getOrgId());
+            }
+        }
+        dto.setOrgids(dxzList);
+
         return invalidCustomerFeignClient.queryListPage(dto);
     }
 

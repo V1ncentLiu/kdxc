@@ -15,6 +15,7 @@
     </el-breadcrumb>
     
     <el-row class="marginB10">
+    		<el-button type="text" @click="dialogFormVisible = true">选择列</el-button>
     		<shiro:hasPermission name="aggregation:appiontmentManager:edit">
 		        <el-button type="primary" @click="toUpdateAppiontment">编辑</el-button>
 		    </shiro:hasPermission>
@@ -88,45 +89,28 @@
             style="width: 100%"  :data="dataTable" >
             <el-table-column align="center" type="selection" label="全选" width="50"></el-table-column>
             <el-table-column align="center" type="index" width="30" label="序号"></el-table-column>
-            <el-table-column align="center" prop="cusName" label="客户姓名"></el-table-column>
-            <el-table-column align="center" prop="isSign" label="是否签约" :formatter="transformSign"></el-table-column>
-            <el-table-column align="center" prop="isRepeatPhone" label="重复手机号资源">
-                <template slot-scope="scope">
-	               <div v-if="scope.row.isRepeatPhone === 1">
-	                   <el-button @click="repeatPhonesClick(scope.row)" type="text" size="small">点击查看</el-button>
-                    </div>
-                    <div v-else>无</div>
-                </template>
-            </el-table-column>
-            <el-table-column align="center" prop="isTrack" label="跟进记录">
-                <template slot-scope="scope">
-	                <div v-if="scope.row.isTrack === 1">
-	                    <el-button @click="recordClick(scope.row)" type="text" size="small">点击查看</el-button>
-                    </div>
-                    <div v-else>无</div>
-                </template>
-            </el-table-column>
-            <el-table-column align="center" prop="area" label="地区" ></el-table-column>
-           <el-table-column align="center" prop="createUserName" label="操作人" ></el-table-column>
-           <el-table-column align="center" prop="busDirectorName" label="商务总监" ></el-table-column>
-           <el-table-column align="center" prop="busSaleName" label="商务经理" ></el-table-column>
-           <el-table-column align="center" prop="busCompayName" label="餐饮公司" ></el-table-column>
-           <el-table-column align="center" prop="tasteProjectId" label="品尝项目"  :formatter="transformProject"></el-table-column>
-           <el-table-column align="center" prop="reserveTime" label="预约来访时间" ></el-table-column>
-           <el-table-column align="center" prop="category" label="资源类别" ></el-table-column>
-           <el-table-column align="center" prop="searchWord" label="搜索词" ></el-table-column>
-           <el-table-column align="center" prop="cusNum" label="客户人数" ></el-table-column>
-           <el-table-column align="center" prop="cusPhone" label="客户手机号" ></el-table-column>
-           <el-table-column align="center" prop="driverName" label="司机姓名" ></el-table-column>
-           <el-table-column align="center" prop="arrivalTime" label="到站时间" :formatter="dateFormat"></el-table-column>
-           <el-table-column align="center" prop="departTime" label="出车时间" :formatter="dateFormat"></el-table-column>
-           <!-- <el-table-column align="center" prop="createUserName" label="出车城市" ></el-table-column> -->
-           <el-table-column align="center" prop="pickUpTime" label="接站时间" ></el-table-column>
-           <el-table-column align="center" prop="delayMark" label="延误说明" ></el-table-column>
-           <el-table-column align="center" prop="flight" label="车站／航班" ></el-table-column>
-           <el-table-column align="center" prop="pickUpPlace" label="接站地" ></el-table-column>
-           <el-table-column align="center" prop="terminal" label="航站楼" ></el-table-column>
-           <el-table-column align="center" prop="receivedPlace" label="接到地" ></el-table-column>
+            <el-table-column align="center" :key="index" :prop="item.fieldCode" :label="item.displayName" :width="item.width"
+	         v-for="(item,key,index) in tableColums" v-if="item.fieldCode == 'isRepeatPhone'">
+	               <template slot-scope="scope">
+		               <div v-if="scope.row.isRepeatPhone === 1">
+		                   <el-button @click="repeatPhonesClick(scope.row)" type="text" size="small">点击查看</el-button>
+	                    </div>
+	                    <div v-else>无</div>
+                	</template>
+	        </el-table-column>
+            <el-table-column align="center" :key="index" :prop="item.fieldCode" :label="item.displayName" :width="item.width"
+	         v-else-if="item.fieldCode == 'isTrack'">
+	               <template slot-scope="scope">
+		                <div v-if="scope.row.isTrack === 1">
+		                    <el-button @click="recordClick(scope.row)" type="text" size="small">点击查看</el-button>
+	                    </div>
+	                    <div v-else>无</div>
+	                </template>
+	        </el-table-column>
+            <el-table-column align="center" :key="index" :prop="item.fieldCode" :label="item.displayName" :width="item.width"
+	         v-else>
+	        </el-table-column>
+	        
         </el-table>
         <table-pagination :pager="pager" @change="searchTable"></table-pagination>
     </el-row>
@@ -212,9 +196,9 @@
             <el-table-column align="center" prop="customerStatusName" label="客户状态"></el-table-column>
             <el-table-column align="center" prop="isCall" label="是否接通" :formatter="transformIsCall"></el-table-column>
             <el-table-column align="center" prop="resourceStatus" label="资源有效性" :formatter="transformResource"></el-table-column>
-            <el-table-column align="center" prop="invitationStatus" label="是否邀约" :formatter="transformSign"></el-table-column>
+            <el-table-column align="center" prop="invitationStatus" label="是否邀约" :formatter="transform"></el-table-column>
             <el-table-column align="center" prop="focusPoint" label="客户关注点"></el-table-column>  
-            <el-table-column align="center" prop="visitStatus" label="是否继续回访" :formatter="transformSign"></el-table-column>  
+            <el-table-column align="center" prop="visitStatus" label="是否继续回访" :formatter="transform"></el-table-column>  
             <el-table-column align="center" prop="nextVisitTime" label="下次回访时间"></el-table-column>  
             <el-table-column align="center" prop="createUserName" label="创建人"></el-table-column>  
         </el-table>
@@ -237,7 +221,28 @@
             <el-table-column align="center" prop="createUserRoleName" label="资源创建人角色"></el-table-column>  
             <el-table-column align="center" prop="createUserName" label="资源创建人"></el-table-column> 
         </el-table>
+        
     </el-dialog>
+    
+	<el-dialog title="自定义列" :visible.sync="dialogFormVisible">
+	  <el-form :model="form">
+	    
+		  <el-form-item label="列名" prop="type">
+		    <el-checkbox-group v-model="form.type">
+		      <el-checkbox :label="item.sortNum+'_'+item.fieldCode+'_'+item.displayName+'_'+item.id"  name="type" :key="item.fieldCode"  v-for="(item,index) in  allTableColums ">
+		          {{item.displayName}}
+		      </el-checkbox>
+		  
+		     </el-checkbox-group>
+		  </el-form-item>
+	    
+	  </el-form>
+	  
+	  <div slot="footer" class="dialog-footer">
+	    <el-button @click="dialogFormVisible = false">取 消</el-button>
+	    <el-button type="primary" @click="confirmColumn">确 定</el-button>
+	  </div>
+	</el-dialog>
 </div>
 <!-- import common js-->
 <div th:include="_footer_include :: #jsLib"></div>
@@ -246,6 +251,8 @@
 var orgList=[[${orgList}]];//电销组
 var userList=[[${userList}]];//电销创业顾问
 var projectList=[[${projectList}]];//品尝项目
+var fieldList=[[${fieldList}]];//自定义字段
+var userFieldList=[[${userFieldList}]];//用户自定义字段
 var appiontmentVM = new Vue({
         el: '#appiontmentManage',
         data: {
@@ -268,6 +275,13 @@ var appiontmentVM = new Vue({
                 },
 	            dataTable:[],
 	            recordTable:[],
+	            loading: true,
+	             allTableColums:[],
+	             tableColums:[],
+	             dialogFormVisible: false,
+	             form: {
+	               type: [],
+	             },
 	            repeatPhonesTable:[],
 	            teleGorupOptions:orgList,
 	            teleSaleOptions:userList,
@@ -285,18 +299,7 @@ var appiontmentVM = new Vue({
 	            },
 	            multipleSelection:[],
                 formLabelWidth: '150px',
-                formLabelWidth1: '120px',
-                rules: {
-                	appiontmentName: [
-                      { required: true, message: '公司名称不能为空', trigger: 'blur' }
-                    ],
-                    groupName: [
-                      { required: true, message: '集团名称不能为空', trigger: 'blur' }
-                    ],
-                    appiontmentAddress: [
-                      { required: true, message: '公司地址不能为空', trigger: 'blur' }
-                    ]
-                  },
+                formLabelWidth1: '120px'
         },
         methods: {
         	searchTable() {
@@ -316,7 +319,15 @@ var appiontmentVM = new Vue({
                       var result =  response.data;
                       console.info(result);
                       var table=result.data;
-                      appiontmentVM.dataTable= table.data;
+                      var data= table.data;
+                      for(var i=0;i<data.length;i++){
+                    	  data[i].isSign=appiontmentVM.transformSign(data[i].isSign);
+                    	  data[i].tasteProjectId=appiontmentVM.transformProject(data[i].tasteProjectId);
+                    	  data[i].arrivalTime=appiontmentVM.dateFormat(data[i].arrivalTime);
+                    	  data[i].departTime=appiontmentVM.dateFormat(data[i].departTime);
+                      }
+                      appiontmentVM.dataTable= data;
+                      
                       appiontmentVM.pager.total =  table.total;
                       appiontmentVM.pager.currentPage = table.currentPage;
                 })
@@ -384,14 +395,24 @@ var appiontmentVM = new Vue({
                	   this.appiontmentFormVisible = false;
                },
              //日期数据格式化方法
-               dateFormat(row, column, cellValue, index) {
+               dateFormat(cellValue) {
                  if (cellValue == undefined) {
                     return "";
                  }
                  return moment(cellValue).format("YYYY-MM-DD HH:mm:ss");
                },
              	//是否签约状态转换方法
-               transformSign(row, column, cellValue, index) {
+               transformSign(cellValue) {
+             	  var text="";
+                   if(cellValue==0){
+                 	  text="否"
+                   }else if(cellValue==1){
+                 	  text="是"
+                   }
+                   return text;
+               },
+             	//是否转换方法
+               transform(row, column, cellValue, index) {
              	  var text="";
                    if(cellValue==0){
                  	  text="否"
@@ -421,9 +442,9 @@ var appiontmentVM = new Vue({
                    return text;
                },
              	//品尝项目转换方法
-               transformProject(row, column, cellValue, index) {
+               transformProject(cellValue) {
             	   var text="";
-              	   if(projectList){
+              	   if(projectList&&cellValue){
 	            	   var array=cellValue.split(",");
 	                   for(var i=0;i<array.length;i++){
 	                	   for(var j=0;j<projectList.length;j++){
@@ -592,9 +613,61 @@ var appiontmentVM = new Vue({
                        console.log(error);
                   });
               },
+              confirmColumn(){
+              	this.dialogFormVisible = false;
+              	//处理用户选择的列
+              	console.info(this.form.type);
+              	var customerShowColun = [];
+              	var customerColumn = this.form.type;
+              	customerColumn.sort(this.sortNumber);//对选择的列排序
+              	var idList=[];
+              	for(var i=0;i<customerColumn.length;i++){
+              		var curItem = customerColumn[i];
+              		var itemArr = curItem.split("_");
+              		var obj = {};
+              		obj.fieldCode=itemArr[1];
+              		obj.displayName=itemArr[2];
+              		customerShowColun.push(obj);
+              		idList.push(itemArr[3])
+              	}
+              	this.tableColums = customerShowColun;
+              	var param ={};
+                param.fieldIdList = idList;
+                param.menuCode = "aggregation:appiontmentManager";
+                console.info(param);
+                if(idList.length!=0){
+	                axios.post('/customfield/customField/saveUserField', param)
+	                .then(function (response) {
+	                	
+	                })
+	                .catch(function (error) {
+	                     console.log(error);
+	                });
+                }
+              },
+              initColumn(){
+              	//初始化table 列 和 用户自定义列
+              	this.allTableColums = fieldList;
+              	if(userFieldList.length!=0){
+              		var type=[];
+                  	for(var i=0;i<userFieldList.length;i++){
+                  		type.push(userFieldList[i].sortNum+'_'+userFieldList[i].fieldCode+'_'+userFieldList[i].displayName+'_'+userFieldList[i].fieldId)
+                 	}
+	              	this.form.type = type;
+	              	this.confirmColumn();
+              	}else{
+	              	this.tableColums = fieldList;
+              	}
+              	
+              },
+              sortNumber(a,b) {
+                  //对数组中元素，按照数字 从小到大 排序
+                  return a.split("_")[0] - b.split("_")[0];
+                 }
         },
         created(){
             console.info("create method");
+            this.initColumn();
             this.searchTable();
             this.currentBusArea();
            

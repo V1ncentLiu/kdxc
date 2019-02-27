@@ -54,7 +54,6 @@ import com.kuaidao.manageweb.feign.tracking.TrackingFeignClient;
 import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import com.kuaidao.sys.dto.user.UserOrgRoleReq;
- 
 
 @Controller
 @RequestMapping("/tele/clueMyCustomerInfo")
@@ -79,7 +78,7 @@ public class MyCustomerClueController {
 	private CirculationFeignClient circulationFeignClient;
 
 	@Value("${oss.url.directUpload}")
-    private String  ossUrl ;
+	private String ossUrl;
 
 	/**
 	 * 初始化我的客户
@@ -106,7 +105,7 @@ public class MyCustomerClueController {
 	@ResponseBody
 	public JSONResult<PageBean<CustomerClueDTO>> findTeleClueInfo(HttpServletRequest request,
 			@RequestBody CustomerClueQueryDTO dto) {
-		java.text.SimpleDateFormat formatter = new SimpleDateFormat( "yyyy-MM-dd");
+		java.text.SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
 		if (null != dto && null != dto.getDayTel() && dto.getDayTel().intValue() == 1) {
 			// 当日拨打电话
 			dto.setTelTime(formatter.format(new Date()));
@@ -115,6 +114,26 @@ public class MyCustomerClueController {
 			// 当日跟进
 			dto.setTrackingTime(formatter.format(new Date()));
 		}
+		// 数据权限处理
+		Subject subject = SecurityUtils.getSubject();
+		UserInfoDTO user = (UserInfoDTO) subject.getSession().getAttribute("user");
+		if (null != user.getRoleList() && user.getRoleList().size() > 0) {
+			String roleCode = user.getRoleList().get(0).getRoleCode();
+			if (null != roleCode) {
+				if (roleCode.equals(RoleCodeEnum.GLY.name())) {
+					// 管理员查看所有
+
+				} else if (roleCode.equals(RoleCodeEnum.DXZJ.name())) {
+					dto.setTeleGorup(user.getOrgId());
+
+				} else if (roleCode.equals(RoleCodeEnum.DXCYGW.name())) {
+
+					dto.setTeleSale(user.getId());
+
+				}
+			}
+		}
+
 		JSONResult<PageBean<CustomerClueDTO>> jsonResult = myCustomerFeignClient.findTeleClueInfo(dto);
 		return jsonResult;
 	}
@@ -184,9 +203,9 @@ public class MyCustomerClueController {
 		queryDTO.setClueId(new Long(clueId));
 
 		request.setAttribute("clueId", clueId);
-		
+
 		request.setAttribute("ossUrl", ossUrl);
-		
+
 		JSONResult<ClueDTO> clueInfo = myCustomerFeignClient.findClueInfo(queryDTO);
 
 		// 维护的资源数据
@@ -194,12 +213,18 @@ public class MyCustomerClueController {
 
 			if (null != clueInfo.getData().getClueCustomer()) {
 				request.setAttribute("customer", clueInfo.getData().getClueCustomer());
+			} else {
+				request.setAttribute("customer", new ArrayList());
 			}
 			if (null != clueInfo.getData().getClueBasic()) {
 				request.setAttribute("base", clueInfo.getData().getClueBasic());
+			} else {
+				request.setAttribute("customer", new ArrayList());
 			}
 			if (null != clueInfo.getData().getClueIntention()) {
 				request.setAttribute("intention", clueInfo.getData().getClueIntention());
+			} else {
+				request.setAttribute("customer", new ArrayList());
 			}
 		}
 		// 获取资源跟进记录数据
@@ -209,6 +234,8 @@ public class MyCustomerClueController {
 		if (trackingList != null && trackingList.SUCCESS.equals(trackingList.getCode())
 				&& trackingList.getData() != null) {
 			request.setAttribute("trackingList", trackingList.getData());
+		} else {
+			request.setAttribute("trackingList", new ArrayList());
 		}
 
 		// 获取资源流转数据
@@ -218,12 +245,16 @@ public class MyCustomerClueController {
 		if (circulationList != null && circulationList.SUCCESS.equals(circulationList.getCode())
 				&& circulationList.getData() != null) {
 			request.setAttribute("circulationList", circulationList.getData());
+		} else {
+			request.setAttribute("circulationList", new ArrayList());
 		}
 		// 项目
 		ProjectInfoPageParam param = new ProjectInfoPageParam();
 		JSONResult<List<ProjectInfoDTO>> proJson = projectInfoFeignClient.listNoPage(param);
 		if (proJson.getCode().equals(JSONResult.SUCCESS)) {
 			request.setAttribute("proSelect", proJson.getData());
+		} else {
+			request.setAttribute("proSelect", new ArrayList());
 		}
 
 		// 获取已上传的文件数据
@@ -237,6 +268,13 @@ public class MyCustomerClueController {
 		return "clue/addCustomerMaintenance";
 	}
 
+	/**
+	 * 客户详情
+	 * 
+	 * @param request
+	 * @param clueId
+	 * @return
+	 */
 	@RequestMapping("/customerInfoReadOnly")
 	public String customerInfoReadOnly(HttpServletRequest request, @RequestParam String clueId) {
 
