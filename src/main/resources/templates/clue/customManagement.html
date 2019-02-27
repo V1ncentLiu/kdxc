@@ -19,13 +19,13 @@
         <el-breadcrumb-item>客户管理</el-breadcrumb-item>
     </el-breadcrumb>
     <el-row class="marginB10">
-         <shiro:hasPermission name="myCustomerInfo:allocation">
+         <shiro:hasPermission name="customerManager:allocation">
             <el-button type="success" @click="openassignrDig">分配资源</el-button>
         </shiro:hasPermission>
-        <shiro:hasPermission name="myCustomerInfo:transferclue">
+        <shiro:hasPermission name="customerManager:transferclue">
           <el-button type="success" @click="opentransferForm">转移资源</el-button>
         </shiro:hasPermission>
-        <shiro:hasPermission name="myCustomerInfo:distribute">
+        <shiro:hasPermission name="customerManager:distribute">
           <el-button type="success" @click="openvicemanagerForm">副总分发</el-button>
          </shiro:hasPermission>
     </el-row>
@@ -240,21 +240,17 @@
             <el-table-column align="center" prop="cusName" label="客户姓名"></el-table-column>
             <el-table-column align="center" prop="phone" label="手机号"></el-table-column>
             <el-table-column align="center" prop="record" label="跟进记录">
-                <template slot-scope="scope">
-                    <el-button @click="recordClick(scope.row)" type="text" size="small">点击查看</el-button>
+              <template slot-scope="scope">
+                    <el-button @click="openTrackingDialog(scope.row.clueId)" type="text" size="small">
+                                                                    点击查看
+                    </el-button>
                 </template>
             </el-table-column>
             <el-table-column align="center" prop="customerStatusName" label="客户状态"></el-table-column>
             <el-table-column align="center" prop="telCount" label="拨打次数"></el-table-column>
             <el-table-column align="center" prop="assignTime" label="分配时间"></el-table-column>
             <el-table-column align="center" prop="updateTime" label="最后编辑时间"></el-table-column>
-            <el-table-column align="center" prop="repeatPhones" label="重复手机号资源">
-                 <template slot-scope="scope">
-                    <el-button @click="openTrackingDialog(scope.row.clueId)" type="text" size="small">
-                                                                    点击查看
-                    </el-button>
-                </template>
-            </el-table-column>
+            <el-table-column align="center" prop="repeatPhones" label="重复手机号资源"> </el-table-column>
             <el-table-column align="center" prop="focusPoint" label="客户关注点"></el-table-column>
             <el-table-column align="center" prop="messagePoint" label="留言重点"></el-table-column>
             <el-table-column align="center" prop="messageTime" label="留言时间"></el-table-column>
@@ -440,6 +436,7 @@
         <el-button @click="resetForm('formVicemanage');vicemanagerFormVisible=false;">取 消</el-button>
       </div>
     </el-dialog>
+     <dialog-tracking :param="trackingParam"></dialog-tracking>
 </div>
 </body>
 <!-- import Vue before Element -->
@@ -476,6 +473,10 @@ var saleGroupList=[[${saleGroupList}]];//同事业部下电销组
                     total: 0,
                     currentPage: 1,
                     pageSize: 20,
+                },
+                trackingParam:{
+                    trackingDialogVisible:false,
+                    tableData:[]
                 },
                 adviserValue: '', //创业顾问
                 isTransfer:[
@@ -801,13 +802,13 @@ var saleGroupList=[[${saleGroupList}]];//同事业部下电销组
                     .then(function (response) {
                         console.log(response.data)
                         if (response.data.code == 0) {
-                            mainDivVM.trackingParam.tableData = response.data.data
-                            mainDivVM.trackingParam.trackingDialogVisible = true;
+                        	customerManVM.trackingParam.tableData = response.data.data
+                            customerManVM.trackingParam.trackingDialogVisible = true;
                         } else {
-                            mainDivVM.$message.error(response.data.msg);
+                        	customerManVM.$message.error(response.data.msg);
                         }
                     }).catch(function (error) {
-                    console.log(error);
+                     console.log(error);
                 });
 
             },

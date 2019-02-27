@@ -1,5 +1,6 @@
 package com.kuaidao.manageweb.controller.clue;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -10,6 +11,7 @@ import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.apache.shiro.subject.Subject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -52,6 +54,7 @@ import com.kuaidao.manageweb.feign.tracking.TrackingFeignClient;
 import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import com.kuaidao.sys.dto.user.UserOrgRoleReq;
+ 
 
 @Controller
 @RequestMapping("/tele/clueMyCustomerInfo")
@@ -74,6 +77,9 @@ public class MyCustomerClueController {
 
 	@Autowired
 	private CirculationFeignClient circulationFeignClient;
+
+	@Value("${oss.url.directUpload}")
+    private String  ossUrl ;
 
 	/**
 	 * 初始化我的客户
@@ -100,13 +106,14 @@ public class MyCustomerClueController {
 	@ResponseBody
 	public JSONResult<PageBean<CustomerClueDTO>> findTeleClueInfo(HttpServletRequest request,
 			@RequestBody CustomerClueQueryDTO dto) {
+		java.text.SimpleDateFormat formatter = new SimpleDateFormat( "yyyy-MM-dd");
 		if (null != dto && null != dto.getDayTel() && dto.getDayTel().intValue() == 1) {
 			// 当日拨打电话
-			dto.setTelTime(new Date());
+			dto.setTelTime(formatter.format(new Date()));
 		}
-		if (null != dto && null != dto.getDayTel() && dto.getTrackingDay().intValue() == 1) {
+		if (null != dto && null != dto.getTrackingDay() && dto.getTrackingDay().intValue() == 1) {
 			// 当日跟进
-			dto.setTrackingTime(new Date());
+			dto.setTrackingTime(formatter.format(new Date()));
 		}
 		JSONResult<PageBean<CustomerClueDTO>> jsonResult = myCustomerFeignClient.findTeleClueInfo(dto);
 		return jsonResult;
@@ -177,7 +184,9 @@ public class MyCustomerClueController {
 		queryDTO.setClueId(new Long(clueId));
 
 		request.setAttribute("clueId", clueId);
-
+		
+		request.setAttribute("ossUrl", ossUrl);
+		
 		JSONResult<ClueDTO> clueInfo = myCustomerFeignClient.findClueInfo(queryDTO);
 
 		// 维护的资源数据
@@ -334,8 +343,16 @@ public class MyCustomerClueController {
 	 */
 	@RequestMapping("/deleteClueFile")
 	@ResponseBody
-	public JSONResult<String> deleteClueFile(HttpServletRequest request, @RequestBody ClueQueryDTO dto) {
-		// 获取已上传的文件数据
+	public JSONResult<String> deleteClueFile(HttpServletRequest request, @RequestBody ClueFileDTO dto) {
+		Subject subject = SecurityUtils.getSubject();
+		UserInfoDTO user = (UserInfoDTO) subject.getSession().getAttribute("user");
+		if (null != user) {
+			dto.setDelUser(user.getId());
+		}
+		dto.setDelTime(new Date());
+		// 删除文件
+		dto.setDelStatus(1);
+		// 删除已上传文件
 		return myCustomerFeignClient.deleteClueFile(dto);
 	}
 

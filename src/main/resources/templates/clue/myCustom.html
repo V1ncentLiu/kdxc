@@ -252,10 +252,20 @@
             <el-table-column align="center" prop="areaValue" label="店面大小"></el-table-column>     
             <el-table-column align="center" prop="purTypeName" label="意向品类"></el-table-column>
             <el-table-column align="center" prop="projectName" label="意向品牌"></el-table-column>
-            <el-table-column align="center" prop="storeArea " label="开店区域（省市显区）"></el-table-column>
+            <el-table-column align="center" prop="storeArea" label="开店区域（省市显区）"></el-table-column>
             <el-table-column align="center" prop="hasAddressName" label="选址情况"></el-table-column>     
             <el-table-column align="center" prop="age" label="客户年龄"></el-table-column>
-            <el-table-column align="center" prop="sex" label="客户性别"></el-table-column>
+            <el-table-column align="center" prop="sex" label="客户性别">
+             <template slot-scope="scope">
+	                      <div v-if="scope.row.sex === 1">
+	                                                                             男
+	                      </div>
+	                       <div v-else-if="scope.row.sex ===2">
+	                                                                             女                                         
+	                       </div>
+	                     </template>
+            
+            </el-table-column>
             <el-table-column align="center" prop="professionValue" label="客户职业"></el-table-column>
             <el-table-column align="center" prop="hasExperienceName" label="餐饮经验"></el-table-column>
             <el-table-column align="center" prop="partnerTypeName" label="合伙人"></el-table-column>
@@ -667,11 +677,10 @@
          	},
          	//展现详情
          	showClueDetailInfo (row, column) {
-         		debugger;
-         		 window.location.href='/tele/clueMyCustomerInfo/customerInfoReadOnly?clueId='+row.clueId;
+         	  window.location.href='/tele/clueMyCustomerInfo/customerInfoReadOnly?clueId='+row.clueId;
             },
          	createClueData(){
-         		  window.location.href='/tele/clueMyCustomerInfo/createClue';
+         	  window.location.href='/tele/clueMyCustomerInfo/createClue';
          	},
             toogleClick(){
                 if(this.isShow){
@@ -781,7 +790,9 @@
                         
                         axios.post('/tele/clueMyCustomerInfo/saveRepeatClue', param)
                         .then(function (response) {
-                            console.log(response.data)
+                           mycustomVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
+                        	   mycustomVM.initTableData();  
+            		         }});
                         }).catch(function (error) {
                             console.log(error);
                         });
@@ -792,6 +803,7 @@
                 });
             },
             submitreleaseForm(formName) {
+             //提交资源释放            
                 this.$refs[formName].validate((valid) => {
                     if (valid) {
                       var rows = this.multseleSelection;
@@ -812,13 +824,15 @@
                      	  var  param={};
                      	  param.releaseClueId=releId;
                      	 param.releaReason=reason;
+                     	this.releaseFormVisible=false;
                          axios.post('/tele/clueMyCustomerInfo/releaseClue', param)
                          .then(function (response) {
-                             console.log(response.data)
+                        	 mycustomVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
+                        	 mycustomVM.initTableData();  
+        		        	}});
                          }).catch(function (error) {
                              console.log(error);
                          });
-                        alert('submit!');
                     } else {
                         console.log('error submit!!');
                         return false;
