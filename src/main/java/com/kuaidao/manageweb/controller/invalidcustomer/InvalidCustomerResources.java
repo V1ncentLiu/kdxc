@@ -153,6 +153,47 @@ public class InvalidCustomerResources {
                 return new JSONResult().fail("-1","释放时间，开始时间大于结束时间!");
             }
         }
+
+
+
+//      权限相关
+        List<Long> dxzList = new ArrayList<Long>();
+        UserInfoDTO user =  CommUtil.getCurLoginUser();
+        List<RoleInfoDTO> roleList = user.getRoleList();
+        if(roleList!=null&&roleList.get(0)!=null) {
+            if (RoleCodeEnum.GLY.name().equals(roleList.get(0).getRoleCode())) {
+                //管理员:查看全部电销组
+                OrganizationQueryDTO orgDto = new OrganizationQueryDTO();
+                orgDto.setSystemCode(SystemCodeConstant.HUI_JU);
+                orgDto.setOrgType(OrgTypeConstant.DXZ);
+                JSONResult<List<OrganizationRespDTO>> dzList = organizationFeignClient.queryOrgByParam(orgDto);
+                List<OrganizationRespDTO> datas = dzList.getData();
+                for(OrganizationRespDTO organizationRespDTO : datas){
+                    dxzList.add(organizationRespDTO.getId());
+                }
+
+            }else if(RoleCodeEnum.DXFZ.name().equals(roleList.get(0).getRoleCode())){
+                //电销副总:查看事业部下的全部电销组
+                OrganizationQueryDTO orgDto = new OrganizationQueryDTO();
+                orgDto.setParentId(user.getOrgId());
+                orgDto.setSystemCode(SystemCodeConstant.HUI_JU);
+                orgDto.setOrgType(OrgTypeConstant.DXZ);
+                JSONResult<List<OrganizationDTO>> dzList = organizationFeignClient.listDescenDantByParentId(orgDto);
+                List<OrganizationDTO> datas = dzList.getData();
+                for(OrganizationDTO organizationDTO : datas){
+                    dxzList.add(organizationDTO.getId());
+                }
+            }else  if(RoleCodeEnum.DXZJ.name().equals(roleList.get(0).getRoleCode())){
+                //电销总监:查看所在电销组
+                dxzList.add(user.getOrgId());
+            }else{
+                dxzList.add(user.getOrgId());
+            }
+        }
+        dto.setOrgids(dxzList);
+
+
+
         return invalidCustomerFeignClient.queryListPage(dto);
     }
 
