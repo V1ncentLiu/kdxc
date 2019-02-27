@@ -117,8 +117,14 @@
                     </el-col>
                     <el-col :span="8">
                         <el-form-item label="手机号：" prop="customerPhone" :label-width="formLabelWidth">
-                           <el-input v-model="form.customerPhone" autocomplete="off" style="width: 60%;" @keyup.native="number" maxlength="11"></el-input>
-                           <el-button type="primary" :disabled="isDisabled" @click="dialogFormVisible = true"><i class="el-icon-plus"></i>手机号<!-- 查看多个手机号 --></el-button>
+                            <el-input v-model="form.customerPhone" autocomplete="off" style="width: 60%;" @keyup.native="number" maxlength="11"></el-input>
+                            <!-- <el-button type="primary" :disabled="isDisabled" @click="dialogFormVisible = true"><i class="el-icon-plus"></i>手机号</el-button> -->
+                            <span v-if="buttonType === 'A'">
+                                <el-button type="primary" :disabled="isDisabled" @click="dialogFormVisible = true"><i class="el-icon-plus"></i>手机号</el-button>
+                            </span>
+                            <span v-else-if="buttonType === 'B'">    
+                                <span @click="dialogFormVisible = true" style="padding-left: 5px; color: rgb(0, 114, 255); cursor: pointer;">查看多个手机号</span>
+                            </span>
                         </el-form-item>
                     </el-col>
                 </el-row>
@@ -334,18 +340,25 @@
 
     <!-- dialog -->
     <el-dialog title="添加手机号" :visible.sync="dialogFormVisible">
-        <el-form :model="dialogForm" :rules="dialogRules" ref="dialogForm">
-            <el-form-item label="手机号2：" :label-width="formLabelWidth">
-                <span>15111111111</span>
-                <span><i class="el-icon-phone-outline" style="font-size: 20px;color: rgb(0, 114, 255);cursor: pointer;"></i></span>
-            </el-form-item>
-            <el-form-item label="手机号3：" prop="phoneNum" :label-width="formLabelWidth">
-                <el-input v-model="dialogForm.phoneNum" autocomplete="off" style="width: 60%;"></el-input>
+        <button type="button" aria-label="Close" class="el-dialog__headerbtn" style="position: absolute;z-index: 9;background: #fff;" @click="clearDialog"><i class="el-dialog__close el-icon el-icon-close"></i></button>
+        <el-form :model="dynamicValidateForm" ref="dynamicValidateForm">
+            <el-form-item  
+                :label-width="formLabelWidth"
+                v-for="(domain, index) in dynamicValidateForm.domains"
+                :label="'手机号' + (parseInt(index)+2) + ':'"
+                :key="domain.key"
+                :prop="'domains.' + index + '.value'"
+                :rules="{
+                    required: true, message: '手机号不能为空', trigger: 'blur',
+                }"
+            >
+                <el-input v-model="domain.value" maxLength="11" @keyup.native="phoneNumber" style="width: 300px;margin-right: 10px;"></el-input>
+                <el-button @click.prevent="removeDomain(domain)" v-show="deleteShow">删除</el-button>
             </el-form-item>
         </el-form>
         <div slot="footer" class="f-tac">            
-            <el-button type="primary" @click="submitDialogForm('dialogForm')">提 交</el-button>
-            <el-button @click="dialogFormVisible = false">取 消</el-button>
+            <el-button type="primary" @click="submitDialogForm('dynamicValidateForm')">提 交</el-button>
+            <el-button @click="addDomain">添加更多手机号</el-button>
         </div>
     </el-dialog>    
 </div>
@@ -362,7 +375,9 @@
                 isDisabled:true,//默认不可点击  
                 insideProjectShow:true,//内部项目默认显示
                 outsideProjectShow:false,//外部项目默认不显示
-                dialogFormVisible: false,
+                dialogFormVisible: false,//新增手机号
+                buttonType: 'A',//添加手机号按钮形式
+                deleteShow:false,//删除新增手机号输入框
                 form: {  
                     radioProject:'1',//意向项目单选默认选项               
                     resource:'',
@@ -426,6 +441,11 @@
                             callback();
                         }, trigger: 'blur'}
                     ]
+                },
+                dynamicValidateForm: {//新增手机号弹窗数据
+                    domains: [{
+                        value: ''
+                    }]
                 },
                 statusOptions: [{
                     value: '0',
@@ -578,17 +598,103 @@
             rebackMV(){
             	  window.location.href="/tele/clueMyCustomerInfo/initmyCustomer"; 
             },
-            submitDialogForm(dialogForm) {
-                this.$refs[dialogForm].validate((valid) => {
-                    if (valid) {
+            submitDialogForm(formName) {
+                this.$refs[formName].validate((valid) => {
+                    if (valid) {  
+                        var domains=this.dynamicValidateForm.domains;
+                        var customerPhone=this.form.customerPhone; 
+                        var ary=[];   
+                        console.log(domains)                  
+                        for(var i=0;i<domains.length;i++){
+                            // 判断弹框里的值是否与页面的手机号1重复
+                            if(domains[i].value==customerPhone){
+                                this.$message({
+                                    message: '请不要提交重复手机号',
+                                    type: 'warning'
+                                });
+                                return;
+                            }
+                            // 判断输入框里4个值是否重复(判断对象数组的value是否有重复值)
+                            ary.push(domains[i].value);//把输入的手机号放入一个数组
+                            var s = ary.join(",")+",";                            
+                            console.log(ary)
+                            for(var j=0;j<ary.length;j++) {
+                                console.log(ary[j])
+                                if(ary[j]!=""){
+                                    if(s.replace(ary[j]+",","").indexOf(ary[j]+",")>-1) {
+                                        this.$message({
+                                            message: '请不要提交重复手机号',
+                                            type: 'warning'
+                                        });
+                                        return;
+                                    }
+                                }
+                                
+                            }   
+                            // 如果输入的是非数字
+                            if(/^[0-9]*$/.test(domains[i].value) == false){
+                                this.$message({
+                                    message: '请输入数字',
+                                    type: 'warning'
+                                });
+                                return;
+                            }
+
+                        }
+                        // 按钮变化
+                        this.buttonType='B';
                         console.log('submit!!');
                         // 关闭弹窗
-                        this.dialogFormVisible = false; 
+                        this.dialogFormVisible = false;
                     } else {
                         console.log('error submit!!');
                         return false;
                     }
                 });
+            },
+            removeDomain(item) {
+                var index = this.dynamicValidateForm.domains.indexOf(item);
+                var itemLength = this.dynamicValidateForm.domains.length;                
+                if (index !== -1) {
+                    this.dynamicValidateForm.domains.splice(index, 1)
+                }
+                if(itemLength==2){
+                    // 删除按钮不显示
+                    this.deleteShow=false;
+                }               
+            },
+            addDomain(item) {
+                var itemLength = this.dynamicValidateForm.domains.length;
+                if (itemLength<4) {
+                    this.dynamicValidateForm.domains.push({
+                        value: '',
+                        key: Date.now()
+                    });
+                }else{
+                    this.$message({
+                        message: '最多添加5个手机号',
+                        type: 'warning'
+                    });
+                }  
+                if(itemLength>0){
+                    // 显示删除按钮
+                    this.deleteShow=true;                    
+                }                              
+            },
+            clearDialog(){
+                console.log('清空')
+
+                // 1、数据清空
+                var domains=this.dynamicValidateForm.domains
+                for(var i=0;i<domains.length;i++){
+                    domains[i].value=""
+                }
+                // 2、重置表单
+                this.$refs['dynamicValidateForm'].resetFields()
+                // 3、关闭弹窗
+                this.dialogFormVisible = false;
+                // 4、按钮变化
+                this.buttonType='A';
             },
             currentProvince(selVal){
                param={};
@@ -615,6 +721,13 @@
                     this.isDisabled=true;
                 }
         　  },
+            phoneNumber(){
+                var domains=this.dynamicValidateForm.domains;
+                for(var i=0;i<domains.length;i++){
+                    domains[i].value=domains[i].value.replace(/[^\.\d]/g,'');
+                    domains[i].value=domains[i].value.replace('.','');
+                }    　　　                 
+        　　},
             qqnumber(){
     　　　     this.form.qq=this.form.qq.replace(/[^\.\d]/g,'');
                this.form.qq=this.form.qq.replace('.','');
