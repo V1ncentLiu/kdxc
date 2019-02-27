@@ -35,10 +35,15 @@ import com.kuaidao.manageweb.config.LogRecord;
 import com.kuaidao.manageweb.config.LogRecord.OperationType;
 import com.kuaidao.manageweb.constant.MenuEnum;
 import com.kuaidao.manageweb.feign.clue.AppiontmentFeignClient;
+import com.kuaidao.manageweb.feign.customfield.CustomFieldFeignClient;
 import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
 import com.kuaidao.manageweb.feign.project.CompanyInfoFeignClient;
 import com.kuaidao.manageweb.feign.project.ProjectInfoFeignClient;
 import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
+import com.kuaidao.sys.dto.customfield.CustomFieldQueryDTO;
+import com.kuaidao.sys.dto.customfield.QueryFieldByRoleAndMenuReq;
+import com.kuaidao.sys.dto.customfield.QueryFieldByUserAndMenuReq;
+import com.kuaidao.sys.dto.customfield.UserFieldDTO;
 import com.kuaidao.sys.dto.organization.OrganizationDTO;
 import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
 import com.kuaidao.sys.dto.role.RoleInfoDTO;
@@ -64,6 +69,8 @@ public class AppiontmentController {
     private ProjectInfoFeignClient projectInfoFeignClient;
     @Autowired
     private CompanyInfoFeignClient companyInfoFeignClient;
+    @Autowired
+    private CustomFieldFeignClient customFieldFeignClient;
 
     /***
      * 预约来访列表页
@@ -96,6 +103,20 @@ public class AppiontmentController {
         JSONResult<List<ProjectInfoDTO>> listNoPage =
                 projectInfoFeignClient.listNoPage(new ProjectInfoPageParam());
         request.setAttribute("projectList", listNoPage.getData());
+        // 根据角色查询页面字段
+        QueryFieldByRoleAndMenuReq queryFieldByRoleAndMenuReq = new QueryFieldByRoleAndMenuReq();
+        queryFieldByRoleAndMenuReq.setMenuCode("aggregation:appiontmentManager");
+        queryFieldByRoleAndMenuReq.setId(user.getRoleList().get(0).getId());
+        JSONResult<List<CustomFieldQueryDTO>> queryFieldByRoleAndMenu =
+                customFieldFeignClient.queryFieldByRoleAndMenu(queryFieldByRoleAndMenuReq);
+        request.setAttribute("fieldList", queryFieldByRoleAndMenu.getData());
+        // 根据用户查询页面字段
+        QueryFieldByUserAndMenuReq queryFieldByUserAndMenuReq = new QueryFieldByUserAndMenuReq();
+        queryFieldByUserAndMenuReq.setId(user.getId());
+        queryFieldByUserAndMenuReq.setMenuCode("aggregation:appiontmentManager");
+        JSONResult<List<UserFieldDTO>> queryFieldByUserAndMenu =
+                customFieldFeignClient.queryFieldByUserAndMenu(queryFieldByUserAndMenuReq);
+        request.setAttribute("userFieldList", queryFieldByUserAndMenu.getData());
 
         return "clue/appiontmentManagerPage";
     }

@@ -40,13 +40,15 @@ import com.kuaidao.sys.dto.customfield.CustomFieldMenuQueryDTO;
 import com.kuaidao.sys.dto.customfield.CustomFieldMenuRespDTO;
 import com.kuaidao.sys.dto.customfield.CustomFieldQueryDTO;
 import com.kuaidao.sys.dto.customfield.CustomFieldRespDTO;
+import com.kuaidao.sys.dto.customfield.UserFieldReq;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 
 
 /**
- *  自定义字段 
+ * 自定义字段
+ * 
  * @author: Chen Chengxue
- * @date: 2018年12月28日 下午1:45:12   
+ * @date: 2018年12月28日 下午1:45:12
  * @version V1.0
  */
 @Controller
@@ -58,7 +60,8 @@ public class CustomFieldController {
 
 
     /***
-     *   菜单  首页
+     * 菜单 首页
+     * 
      * @return
      */
     @RequiresPermissions("customfield:view")
@@ -69,7 +72,8 @@ public class CustomFieldController {
 
 
     /***
-     *  自定义字段 首页
+     * 自定义字段 首页
+     * 
      * @return
      */
     @RequestMapping("/customFieldPage")
@@ -88,16 +92,18 @@ public class CustomFieldController {
 
 
     /**
-     *  添加自定义字段 -菜单
+     * 添加自定义字段 -菜单
+     * 
      * @param orgDTO
      * @return
-     * @throws InvocationTargetException 
-     * @throws IllegalAccessException 
+     * @throws InvocationTargetException
+     * @throws IllegalAccessException
      */
     @RequiresPermissions("customfield:add")
     @PostMapping("/saveMenu")
     @ResponseBody
-    @LogRecord(description="添加自定义字段菜单",operationType=OperationType.INSERT,menuName=MenuEnum.CUSTOM_FIELD)
+    @LogRecord(description = "添加自定义字段菜单", operationType = OperationType.INSERT,
+            menuName = MenuEnum.CUSTOM_FIELD)
     public JSONResult saveMenu(@Valid @RequestBody CustomFieldMenuAddAndUpdateDTO menuDTO,
             BindingResult result) {
         if (result.hasErrors()) {
@@ -115,14 +121,16 @@ public class CustomFieldController {
     }
 
     /**
-     *   更新自定义字段 -菜单
+     * 更新自定义字段 -菜单
+     * 
      * @param orgDTO
      * @return
      */
     @RequiresPermissions("customfield:edit")
     @PostMapping("/updateMenu")
     @ResponseBody
-    @LogRecord(description="修改自定义字段菜单",operationType=OperationType.UPDATE,menuName=MenuEnum.CUSTOM_FIELD)
+    @LogRecord(description = "修改自定义字段菜单", operationType = OperationType.UPDATE,
+            menuName = MenuEnum.CUSTOM_FIELD)
     public JSONResult updateMenu(@Valid @RequestBody CustomFieldMenuAddAndUpdateDTO menuDTO,
             BindingResult result) {
 
@@ -140,14 +148,16 @@ public class CustomFieldController {
     }
 
     /**
-     *   删除自定义字段 -菜单
+     * 删除自定义字段 -菜单
+     * 
      * @param orgDTO
      * @return
      */
     @RequiresPermissions("customfield:delete")
     @PostMapping("/deleteMenu")
     @ResponseBody
-    @LogRecord(description="删除自定义字段菜单",operationType=OperationType.DELETE,menuName=MenuEnum.CUSTOM_FIELD)
+    @LogRecord(description = "删除自定义字段菜单", operationType = OperationType.DELETE,
+            menuName = MenuEnum.CUSTOM_FIELD)
     public JSONResult deleteMenu(@RequestBody IdListReq idListReq) {
         List<String> idList = idListReq.getIdList();
         if (idList == null || idList.size() == 0) {
@@ -159,7 +169,8 @@ public class CustomFieldController {
     }
 
     /**
-     *   查询自定义字段 -菜单
+     * 查询自定义字段 -菜单
+     * 
      * @param queryDTO
      * @return
      */
@@ -186,10 +197,11 @@ public class CustomFieldController {
 
     /**
      * 根据ID 查询 自定义字段 菜单信息
+     * 
      * @param queryDTO
      * @return
-     * @throws InvocationTargetException 
-     * @throws IllegalAccessException 
+     * @throws InvocationTargetException
+     * @throws IllegalAccessException
      */
     @PostMapping("/queryFieldMenuById")
     @ResponseBody
@@ -199,16 +211,18 @@ public class CustomFieldController {
     }
 
     /**
-     *  添加自定义字段
+     * 添加自定义字段
+     * 
      * @param orgDTO
      * @return
-     * @throws InvocationTargetException 
-     * @throws IllegalAccessException 
+     * @throws InvocationTargetException
+     * @throws IllegalAccessException
      */
     @RequiresPermissions("customfield:addField")
     @PostMapping("/save")
     @ResponseBody
-    @LogRecord(description="添加自定义字段",operationType=OperationType.INSERT,menuName=MenuEnum.CUSTOM_FIELD)
+    @LogRecord(description = "添加自定义字段", operationType = OperationType.INSERT,
+            menuName = MenuEnum.CUSTOM_FIELD)
     public JSONResult save(@Valid @RequestBody CustomFieldAddAndUpdateDTO customDTO,
             BindingResult result) throws IllegalAccessException, InvocationTargetException {
         if (result.hasErrors()) {
@@ -227,14 +241,16 @@ public class CustomFieldController {
     }
 
     /**
-     *   更新自定义字段
+     * 更新自定义字段
+     * 
      * @param orgDTO
      * @return
      */
     @RequiresPermissions("customfield:editField")
     @PostMapping("/update")
     @ResponseBody
-    @LogRecord(description="修改自定义字段",operationType=OperationType.UPDATE,menuName=MenuEnum.CUSTOM_FIELD)
+    @LogRecord(description = "修改自定义字段", operationType = OperationType.UPDATE,
+            menuName = MenuEnum.CUSTOM_FIELD)
     public JSONResult update(@Valid @RequestBody CustomFieldAddAndUpdateDTO customDTO,
             BindingResult result) throws IllegalAccessException, InvocationTargetException {
         if (result.hasErrors()) {
@@ -251,14 +267,16 @@ public class CustomFieldController {
     }
 
     /**
-     *   删除自定义字段
+     * 删除自定义字段
+     * 
      * @param orgDTO
      * @return
      */
     @RequiresPermissions("customfield:delField")
     @PostMapping("/delete")
     @ResponseBody
-    @LogRecord(description="删除自定义字段",operationType=OperationType.INSERT,menuName=MenuEnum.CUSTOM_FIELD)
+    @LogRecord(description = "删除自定义字段", operationType = OperationType.INSERT,
+            menuName = MenuEnum.CUSTOM_FIELD)
     public JSONResult delete(@RequestBody IdListReq idListReq) {
         List<String> idList = idListReq.getIdList();
         if (idList == null || idList.size() == 0) {
@@ -270,11 +288,12 @@ public class CustomFieldController {
     }
 
     /**
-     *   查询菜单下 自定义字段
+     * 查询菜单下 自定义字段
+     * 
      * @param queryDTO
      * @return
-     * @throws InvocationTargetException 
-     * @throws IllegalAccessException 
+     * @throws InvocationTargetException
+     * @throws IllegalAccessException
      */
     @PostMapping("/query")
     @ResponseBody
@@ -285,6 +304,7 @@ public class CustomFieldController {
 
     /**
      * 分页查询 自定义字段列表
+     * 
      * @param queryDTO
      * @return
      */
@@ -299,120 +319,149 @@ public class CustomFieldController {
 
     /**
      * 上传自定义字段
+     * 
      * @param result
      * @return
      */
     @RequiresPermissions("customfield:imField")
     @PostMapping("/uploadCustomField")
     @ResponseBody
-    @LogRecord(description="上传自定义字段",operationType=OperationType.IMPORTS,menuName=MenuEnum.CUSTOM_FIELD)
-    public JSONResult uploadCustomField(@RequestParam("file") MultipartFile file,@RequestParam("id") long menuId) throws Exception {
-        //获取当前的用户信息
+    @LogRecord(description = "上传自定义字段", operationType = OperationType.IMPORTS,
+            menuName = MenuEnum.CUSTOM_FIELD)
+    public JSONResult uploadCustomField(@RequestParam("file") MultipartFile file,
+            @RequestParam("id") long menuId) throws Exception {
+        // 获取当前的用户信息
         Subject subject = SecurityUtils.getSubject();
         UserInfoDTO user = (UserInfoDTO) subject.getSession().getAttribute("user");
         long userId = user.getId();
-        
+
         List<List<Object>> excelDataList = ExcelUtil.read2007Excel(file.getInputStream());
-        logger.info("userid{{}} custom field upload size:{{}}" ,userId, excelDataList.size());
+        logger.info("userid{{}} custom field upload size:{{}}", userId, excelDataList.size());
 
         if (excelDataList == null || excelDataList.size() == 0) {
-            return  new JSONResult<>().fail(SysErrorCodeEnum.ERR_EXCLE_DATA.getCode(),SysErrorCodeEnum.ERR_EXCLE_DATA.getMessage());
+            return new JSONResult<>().fail(SysErrorCodeEnum.ERR_EXCLE_DATA.getCode(),
+                    SysErrorCodeEnum.ERR_EXCLE_DATA.getMessage());
         }
         if (excelDataList.size() > 1000) {
             logger.error("上传自定义字段,大于1000条，条数{{}}", excelDataList.size());
-            return  new JSONResult<>().fail(SysErrorCodeEnum.ERR_EXCLE_OUT_SIZE.getCode(),"导入数据过多，已超过1000条！");
+            return new JSONResult<>().fail(SysErrorCodeEnum.ERR_EXCLE_OUT_SIZE.getCode(),
+                    "导入数据过多，已超过1000条！");
         }
 
-        //存放合法的数据
+        // 存放合法的数据
         List<CustomFieldAddAndUpdateDTO> dataList = new ArrayList<CustomFieldAddAndUpdateDTO>();
-        //存放 字段编码 ，只存放最早的 合法的一条
-        Set<String> fieldCodeSet  = new HashSet<>();
-      
+        // 存放 字段编码 ，只存放最早的 合法的一条
+        Set<String> fieldCodeSet = new HashSet<>();
+
         for (int i = 1; i < excelDataList.size(); i++) {
             List<Object> rowList = excelDataList.get(i);
             CustomFieldAddAndUpdateDTO rowDto = new CustomFieldAddAndUpdateDTO();
-            boolean isValid = true;//是否验证通过 ，默认 true 通过
-            if(i==1) {
-                //记录上传列数
+            boolean isValid = true;// 是否验证通过 ，默认 true 通过
+            if (i == 1) {
+                // 记录上传列数
                 int rowSize = rowList.size();
-                logger.info("upload custom field,userId{{}},upload rows num{{}}",userId,rowSize);  
+                logger.info("upload custom field,userId{{}},upload rows num{{}}", userId, rowSize);
             }
             for (int j = 0; j < rowList.size(); j++) {
                 Object object = rowList.get(j);
-                String value = (String)object;
-                if(j==0) {//字段编码
-                    if(!validFiled(value)) {
+                String value = (String) object;
+                if (j == 0) {// 字段编码
+                    if (!validFiled(value)) {
                         isValid = false;
                         break;
                     }
-                    if(fieldCodeSet.contains(value)) {
+                    if (fieldCodeSet.contains(value)) {
                         isValid = false;
                         break;
                     }
                     fieldCodeSet.add(value);
                     rowDto.setFieldCode(value);
-                }else if(j==1) {//字段名称
-                    if(!validFiled(value)) {
+                } else if (j == 1) {// 字段名称
+                    if (!validFiled(value)) {
                         isValid = false;
                         break;
                     }
                     rowDto.setFieldName(value);
-                }else if(j==2) {//外显名称
-                    if(!validFiled(value)) {
+                } else if (j == 2) {// 外显名称
+                    if (!validFiled(value)) {
                         isValid = false;
                         break;
                     }
                     rowDto.setDisplayName(value);
-                }else if(j==3) {//序号
-                    if(StringUtils.isBlank(value)) {
+                } else if (j == 3) {// 序号
+                    if (StringUtils.isBlank(value)) {
                         continue;
                     }
-                    if(!StringUtils.isNumeric(value) || value.length()>5) {
+                    if (!StringUtils.isNumeric(value) || value.length() > 5) {
                         isValid = false;
                         break;
                     }
                     rowDto.setSortNum(Integer.parseInt(value));
-                    
-                }else if(j==4){//宽度
-                    if(StringUtils.isBlank(value)) {
+
+                } else if (j == 4) {// 宽度
+                    if (StringUtils.isBlank(value)) {
                         continue;
                     }
-                    if(!StringUtils.isNumeric(value)) {
+                    if (!StringUtils.isNumeric(value)) {
                         isValid = false;
                         break;
                     }
                     int widthInt = Integer.parseInt(value);
-                    if(widthInt<=0 || widthInt>1000) {
+                    if (widthInt <= 0 || widthInt > 1000) {
                         isValid = false;
                         break;
                     }
                     rowDto.setWidth(widthInt);
                 }
-            }//inner foreach end
+            } // inner foreach end
             if (isValid) {
                 rowDto.setCreateUser(userId);
                 rowDto.setFieldType(SysConstant.FieldType.TEXT);
                 rowDto.setMenuId(menuId);
                 dataList.add(rowDto);
             }
-     
-        }//outer foreach end
-        logger.info("upload custom filed, valid success num{{}},userId{{}}",dataList.size(),userId);
-        if(dataList.size()==0) {
-            return  new JSONResult<>().fail(SysErrorCodeEnum.ERR_EXCLE_DATA.getCode(),SysErrorCodeEnum.ERR_EXCLE_DATA.getMessage());
+
+        } // outer foreach end
+        logger.info("upload custom filed, valid success num{{}},userId{{}}", dataList.size(),
+                userId);
+        if (dataList.size() == 0) {
+            return new JSONResult<>().fail(SysErrorCodeEnum.ERR_EXCLE_DATA.getCode(),
+                    SysErrorCodeEnum.ERR_EXCLE_DATA.getMessage());
         }
-        
+
         return customFieldFeignClient.saveBatchCustomField(dataList);
-        
+
     }
-    
+
+    /**
+     * 保存用户与自定义字段关系
+     * 
+     * @param orgDTO
+     * @return
+     * @throws InvocationTargetException
+     * @throws IllegalAccessException
+     */
+    @PostMapping("/saveUserField")
+    @ResponseBody
+    public JSONResult saveUserField(@Valid @RequestBody UserFieldReq userFieldReq,
+            BindingResult result) {
+        if (result.hasErrors()) {
+            return CommonUtil.validateParam(result);
+        }
+        Object attribute = SecurityUtils.getSubject().getSession().getAttribute("user");
+        UserInfoDTO user = (UserInfoDTO) attribute;
+        userFieldReq.setUserId(user.getId());
+        return customFieldFeignClient.saveUserField(userFieldReq);
+    }
+
     /**
      * 验证上传的数据是否合法
+     * 
      * @param field
      * @return
      */
     private boolean validFiled(String field) {
-        if(StringUtils.isBlank(field) || field.length()>50) {
+        if (StringUtils.isBlank(field) || field.length() > 50) {
             return false;
         }
         return true;
