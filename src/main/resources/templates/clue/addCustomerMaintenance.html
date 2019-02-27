@@ -1,32 +1,9 @@
 <!DOCTYPE html>
 <html>
 <head th:include="_header_include::frag(~{::title},~{},~{})" >
-    <title>客户维护</title>
+    <title>维护客户</title>
     <meta charset="UTF-8">
     <style type="text/css">
-        .paddingTB { padding: 4px 0px; }
-        .paddingL55 { padding-left: 55px; }
-        .el-form-item.lineInherit .el-form-item__content{ line-height: inherit!important; }
-        @media screen and (width:1920px) {
-            .paddingL55 .el-date-editor.el-input { width: 218px; }
-            /*.paddingL55 div.el-form-item:nth-of-type(2) { width: 100px; }*/
-            .paddingL55 div.el-form-item, .paddingL55 .el-input--mini .el-input__inner { width: 202px; }
-            .paddingL55 div.el-form-item:last-child { width: 186px; text-align: center; }
-        }
-        @media screen and (width:1366px) {
-            .paddingL55 { line-height: 28px; }
-            .paddingL55 .el-date-editor.el-input { width: 145px; }
-            /*.paddingL55 div.el-form-item:nth-of-type(2) { width: 100px; }*/
-            .paddingL55 div.el-form-item, .paddingL55 .el-input--mini .el-input__inner { width: 133px; }
-            .paddingL55 div.el-form-item:last-child { width: 106px; text-align: center; }
-        }
-        @media screen and (max-width:1365px) {
-            .paddingL55 { line-height: 28px; }
-            .paddingL55 .el-date-editor.el-input { width: 145px; }
-            /*.paddingL55 div.el-form-item:nth-of-type(2) { width: 100px; }*/
-            .paddingL55 div.el-form-item, .paddingL55 .el-input--mini .el-input__inner { width: 133px; }
-            .paddingL55 div.el-form-item:last-child { width: 106px; text-align: center; }
-        }
     </style>
 </head>
 <body>
@@ -34,11 +11,11 @@
     <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
         <el-breadcrumb-item>Home</el-breadcrumb-item>
         <el-breadcrumb-item>电销管理</el-breadcrumb-item>
-        <el-breadcrumb-item>客户维护</el-breadcrumb-item>
+        <el-breadcrumb-item>维护客户</el-breadcrumb-item>
     </el-breadcrumb> 
     
     <el-row class="borderbox">
-        <div class="inforTitle">客户维护</div> 
+        <div class="inforTitle">维护客户</div> 
         <el-form :model="form" :rules="rules" ref="form" class="padding20">
             <div class="marginB20 fs16 paddingT20">基本信息</div>
             <div class="borderbox padding20">
@@ -265,17 +242,26 @@
             <div class="marginB20 fs16 paddingT20">上传资料</div>
             <div class="borderbox padding20">
                 <el-row>
-                    <el-col :span="16" >
+                    <el-col :span="8" >
+                        
                         <el-button size="small" type="danger" @click="deteleClueFile">删除</el-button>
                         <el-button type="text" disabled>只允许上传图片／音频文件。</el-button>
                     </el-col>
-			<div id="container">
-				<a id="selectfiles" href="javascript:void(0);" class='btn'>选择文件</a>
-				<a id="postfiles" href="javascript:void(0);" onclick="clueUploadFile()" class='btn'>开始上传</a>
-			</div>
-			<div id="ossfile">你的浏览器不支持flash,Silverlight或者HTML5！</div>
-			上传到指定目录:<input type="text" id='dirname' placeholder="如果不填，默认是上传到根目录" size=50>
-			<pre id="console"></pre>
+                    <el-col :span="5" class="f-fr">
+			             <form name=theform v-show="false">
+							<input type="radio" name="myradio" value="local_name" checked=true/> 上传文件名字保持本地文件名字
+							<input type="radio" name="myradio" value="random_name" /> 上传文件名字是随机文件名
+							<br/>
+							上传到指定目录:<input type="text" id='dirname' placeholder="如果不填，默认是上传到根目录" size=50>
+						</form>
+						<div id="container">
+							<a id="selectfiles" href="javascript:void(0);" class='btn'>选择文件</a>
+							<a id="postfiles" href="javascript:void(0);" onclick="clueUploadFile()" class='btn'>开始上传</a>
+						</div>
+						<div id="ossfile">你的浏览器不支持flash,Silverlight或者HTML5！</div>
+					   <span v-show="false">上传到指定目录:<input type="text" id='dirname' placeholder="如果不填，默认是上传到根目录" size=50>
+						<pre id="console"></pre></span>
+					</el-col>
 			</el-row>
                 <el-row>
                     <el-table
@@ -315,8 +301,13 @@
                               <el-button
                                   size="mini"
                                   type="text"
-                                  @click="handleOperateFn(scope.$index, scope.row)"
-                               >{{ scope.row.operate }}</el-button>
+                                  @click="handleOperateFn1(scope.$index, scope.row)"
+                               >查看图片 </el-button>
+                                <el-button
+                                  size="mini"
+                                  type="text"
+                                  @click="handleOperateFn2(scope.$index, scope.row)"
+                               >下载录音</el-button>
                           </template>
                         </el-table-column>
                         <el-table-column
@@ -512,7 +503,7 @@
                 <el-row>
                     <el-col :span="8">
                         <el-form-item label="搜索词：" :label-width="formLabelWidth">
-                           <el-button type="text" disabled>{{clueBase.searchWord}}</el-button>
+                        	<div class="lineFeed">{{clueBase.searchWord}}</div>
                         </el-form-item>
                     </el-col>
                     <el-col :span="8">
@@ -524,12 +515,12 @@
                 <el-row>
                     <el-col :span="8">
                         <el-form-item label="留言时间：" :label-width="formLabelWidth">
-                            <el-button type="text" disabled>{{clueBase.messageTime}}</el-button>
+                            <el-button type="text" disabled>{{this.formatTimeFn(clueBase.messageTime)}}</el-button>
                         </el-form-item>
                     </el-col>
                     <el-col :span="8">
                         <el-form-item label="留言重点：" :label-width="formLabelWidth">
-                            <el-button type="text" disabled>{{clueBase.messagePoint}}</el-button>
+                        	<div class="lineFeed lineFeed2">{{clueBase.messagePoint}}</div>
                         </el-form-item>
                     </el-col>
                 </el-row>
@@ -681,6 +672,38 @@
         </div>
     </el-dialog>    
 </div>
+<link rel="stylesheet" href="/css/common/uploadStyle.css">
+<style type="text/css">
+		.lineFeed { width: 230px; word-break:break-all; word-wrap: break-word; color: #c0c4cc; cursor:not-allowed; }
+		.lineFeed2 { width: 530px; }
+        .paddingTB { padding: 4px 0px; }
+        .paddingL55 { padding-left: 55px; }
+        .el-form-item.lineInherit .el-form-item__content{ line-height: inherit!important; }
+        @media screen and (width:1920px) {
+            .paddingL55 .el-date-editor.el-input { width: 218px; }
+            /*.paddingL55 div.el-form-item:nth-of-type(2) { width: 100px; }*/
+            .paddingL55 div.el-form-item, .paddingL55 .el-input--mini .el-input__inner { width: 202px; }
+            .paddingL55 div.el-form-item:last-child { width: 186px; text-align: center; }
+        }
+        @media screen and (width: 1190px) {
+            .paddingL55 { line-height: 28px; }
+            .paddingL55 .el-date-editor.el-input { width: 122px; }
+            /*.paddingL55 div.el-form-item:nth-of-type(2) { width: 100px; }*/
+            .paddingL55 div.el-form-item, .paddingL55 .el-input--mini .el-input__inner { width: 120px; }
+            .el-form--inline .el-form-item { margin-right: 0!important; }
+            .paddingL55 div.el-form-item:last-child { width: 106px; text-align: center; }
+        }
+		@media screen and (width: 1744px) {
+            .paddingL55 { line-height: 28px; }
+            .paddingL55 .el-date-editor.el-input { width: 184px; }
+            /*.paddingL55 div.el-form-item:nth-of-type(2) { width: 100px; }*/
+            .paddingL55 div.el-form-item, .paddingL55 .el-input--mini .el-input__inner { width: 202px; }
+            .el-form--inline .el-form-item { margin-right: 0!important; }
+            .paddingL55 .el-input--mini .el-input { top: -3px; }
+            .paddingL55 div.el-form-item:last-child { width: 146px; text-align: center; }
+        }
+    </style>
+    
 </body>
 <!-- import Vue before Element -->
  <div th:include="_footer_include :: #jsLib"></div>
@@ -801,11 +824,11 @@ var ossUrl=[[${ossUrl}]];
                 formInline: { 
                 	id:'',
                 	callTime: '',
-                	customerStatus: '',
+                	customerStatus: '未建立联系',
                 	isCall:'',
                 	resourceStatus:'',
                 	focusPoint:'',
-                	visitStatus:'',
+                	visitStatus:'是',
                 	nextVisitTime:'',
                 },
                 tableDataC2: trackingList,//跟进记录
@@ -814,6 +837,20 @@ var ossUrl=[[${ossUrl}]];
             }             
         },
         methods: {
+        	formatTimeFn(date) {
+        	  var dateNew = new Date( date );
+       		  var year = dateNew.getFullYear()
+       		  var month = dateNew.getMonth() + 1
+       		  var day = dateNew.getDate()
+       		  var hour = dateNew.getHours()
+       		  var minute = dateNew.getMinutes()
+       		  var second = dateNew.getSeconds()
+			  return year+"-"+this.formatNumberFn(month)+"-"+this.formatNumberFn(day)+" "+this.formatNumberFn(hour)+":"+this.formatNumberFn(minute)+":"+this.formatNumberFn(second);
+       		},
+        	formatNumberFn(n) {
+       		  n = n.toString()
+       		  return n[1] ? n : '0' + n
+       		},
             submitForm(form) {
                 this.$refs[form].validate((valid) => {
                     if (valid) {

@@ -32,7 +32,7 @@
     <el-row class="marginB10 greybg padding20" style="padding-bottom: 0">        
         <el-form :inline="true" :model="form" ref="form">
             <el-form-item label="">
-                <el-select v-model="form.isTransfer" placeholder="全部资源" style="width: 100%;">
+                <el-select v-model="form.isTransfer" placeholder="全部资源" style="width: 100%;" clearable>
                     <el-option
                         v-for="item in isTransfer"
                         :key="item.value"
@@ -42,7 +42,7 @@
                 </el-select>
             </el-form-item> 
             <el-form-item label="">  
-                <el-select v-model="form.cluesta" placeholder="资源有效性" style="width: 100%;">
+                <el-select v-model="form.cluesta" placeholder="资源有效性" style="width: 100%;" clearable>
                     <el-option
                         v-for="item in clueStatus"
                         :key="item.value"
@@ -58,7 +58,7 @@
                 <el-input v-model="form.customerName" placeholder="客户姓名"></el-input>
             </el-form-item>
             <el-form-item label="">
-                <el-select v-model="form.cusStatus" placeholder="客户状态" style="width: 100%;">
+                <el-select v-model="form.cusStatus" placeholder="客户状态" style="width: 100%;" clearable>
                     <el-option
                         v-for="item in cusStatusArr"
                         :key="item.value"
@@ -68,7 +68,7 @@
                 </el-select>
             </el-form-item>
             <el-form-item label="">
-                <el-select v-model="form.cusLeve" placeholder="客户级别" style="width: 100%;">
+                <el-select v-model="form.cusLeve" placeholder="客户级别" style="width: 100%;" clearable>
                     <el-option
                         v-for="item in cusLevelArr"
                         :key="item.value"
@@ -129,7 +129,7 @@
             <span style="color: rgb(0, 114, 255);text-decoration: underline;cursor: pointer;" @click="toogleClick">更多搜索</span>
             <el-row v-show="isShow">
                 <el-form-item label="">
-                    <el-select v-model="form.dayTel" placeholder="今日是否拨打" style="width: 100%;">
+                    <el-select v-model="form.dayTel" placeholder="今日是否拨打" style="width: 100%;" clearable>
                         <el-option
                             v-for="item in callTel"
                             :key="item.value"
@@ -139,7 +139,7 @@
                     </el-select>
                 </el-form-item> 
                 <el-form-item label="">  
-                    <el-select v-model="form.hasInvite" placeholder="是否邀约" style="width: 100%;">
+                    <el-select v-model="form.hasInvite" placeholder="是否邀约" style="width: 100%;" clearable>
                         <el-option
                             v-for="item in hasInvite"
                             :key="item.value"
@@ -149,7 +149,7 @@
                     </el-select>
                 </el-form-item>
                 <el-form-item label="">
-                    <el-select v-model="form.repeatStatus" placeholder="是否重单" style="width: 100%;">
+                    <el-select v-model="form.repeatStatus" placeholder="是否重单" style="width: 100%;" clearable>
                         <el-option
                             v-for="item in clueRepeatStatus"
                             :key="item.value"
@@ -159,7 +159,7 @@
                     </el-select>
                 </el-form-item> 
                 <el-form-item label="">  
-                    <el-select v-model="form.province" placeholder="预签约省份" style="width: 100%;">
+                    <el-select v-model="form.province" placeholder="预签约省份" style="width: 100%;" clearable>
                         <el-option
                             v-for="item in provinceArr"
                             :key="item.name"
@@ -169,7 +169,7 @@
                     </el-select>
                 </el-form-item>
                 <el-form-item label="">  
-                    <el-select v-model="form.category" placeholder="资源类别" style="width: 100%;">
+                    <el-select v-model="form.category" placeholder="资源类别" style="width: 100%;" clearable>
                         <el-option
                             v-for="item in categoryArr"
                             :key="item.value"
@@ -185,7 +185,7 @@
                     <el-input v-model="form.address" placeholder="地址"></el-input>
                 </el-form-item>
                 <el-form-item label="">  
-                    <el-select v-model="form.trackingDay" placeholder="当日是否跟访" style="width: 100%;">
+                    <el-select v-model="form.trackingDay" placeholder="当日是否跟访" style="width: 100%;" clearable>
                         <el-option
                             v-for="item in hastracking"
                             :key="item.value"
@@ -696,10 +696,19 @@
               }
             },
             openeleaseForm(){
-            	this.releaseFormVisible=true;
-            	if(this.$refs['releaseForm']) {
-                    this.$refs['releaseForm'].resetFields();
-              }
+                var rows = this.multseleSelection;
+                if(rows.length <1){
+                    this.$message({
+                       message: '请选择释放资源',
+                       type: 'warning'
+                     });
+                  return;
+                }else{
+                    this.releaseFormVisible=true;
+                    if(this.$refs['releaseForm']) {
+                        this.$refs['releaseForm'].resetFields();
+                    }
+                }
             },
             searchClue(){//重单申请查询线索
                 if(this.repeatApplyForm.phone==""){
