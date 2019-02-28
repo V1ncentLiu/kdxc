@@ -7,6 +7,8 @@ function documentReady(){
 	sessionStorage.removeItem("callSource");
 	//移除坐席登录表示 
 	sessionStorage.removeItem("loginClient");
+	//移除账号
+	sessionStorage.removeItem("accountId");
 	
     CTILink.setup(
         {

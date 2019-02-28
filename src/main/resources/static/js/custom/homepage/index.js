@@ -316,6 +316,7 @@ var homePageVM=new Vue({
                      homePageVM.isQimoClient=true;
                      homePageVM.isTrClient=false;
                      sessionStorage.setItem("loginClient","qimo");
+                     sessionStorage.setItem("accountId",homePageVM.accountId);
                  }else{
                 		homePageVM.$message({message:data.msg,type:'error'});
                  }
@@ -401,6 +402,7 @@ var homePageVM=new Vue({
 			                     homePageVM.isQimoClient=false;
 			                     homePageVM.isTrClient=true;
 			                     sessionStorage.setItem("loginClient","tr");
+			                     sessionStorage.setItem("accountId",homePageVM.accountId);
 			                     var recordParam = {};
 			                     recordParam.clientType=homePageVM.loginClientForm.clientType;
 			                     recordParam.bindPhone= bindPhone;
@@ -457,6 +459,7 @@ var homePageVM=new Vue({
                          homePageVM.isQimoClient=false;
                          homePageVM.isTrClient=false;
                      	 sessionStorage.removeItem("loginClient");
+                     	 sessionStorage.removeItem("accountId");
                      }else{
                     		homePageVM.$message({message:data.msg,type:'error'});
                      }
@@ -478,6 +481,7 @@ var homePageVM=new Vue({
                         homePageVM.isTrClient=false;
                         homePageVM.callTitle="呼叫中心";
                         sessionStorage.removeItem("loginClient");
+                        sessionStorage.removeItem("accountId");
                         homePageVM.$message({message:"退出成功",type:'success'});
          	        }else{
          	        	homePageVM.$message({message:"退出失败",type:'error'});
