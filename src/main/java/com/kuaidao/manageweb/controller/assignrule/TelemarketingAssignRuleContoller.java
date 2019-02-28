@@ -336,7 +336,7 @@ public class TelemarketingAssignRuleContoller {
 	 */
 	@RequestMapping("/updateTeleAssignRuleStatus")
 	@ResponseBody
-	@LogRecord(description = "电销分配规则", operationType = LogRecord.OperationType.DISABLE, menuName = MenuEnum.ASSIGNRULE_TELE)
+	@LogRecord(description = "电销分配规则", operationType = LogRecord.OperationType.UPDATE, menuName = MenuEnum.ASSIGNRULE_TELE)
 	public JSONResult<String> updateTeleAssignRuleStatus(@RequestBody TelemarketingAssignRuleDTO dto,
 			HttpServletRequest request, HttpServletResponse response) {
 		return telemarketingAssignRuleFeignClient.updateTeleAssignRuleStatus(dto);
@@ -361,6 +361,7 @@ public class TelemarketingAssignRuleContoller {
 	 */
 	@RequestMapping("/queryTeleAssignRuleByName")
 	@ResponseBody
+	@LogRecord(description = "电销分配规则", operationType = LogRecord.OperationType.DISABLE, menuName = MenuEnum.ASSIGNRULE_TELE)
 	public JSONResult<List<TelemarketingAssignRuleDTO>> queryTeleAssignRuleByName(
 			@RequestBody TeleAssignRuleQueryDTO dto, HttpServletRequest request, HttpServletResponse response) {
 		return telemarketingAssignRuleFeignClient.queryTeleAssignRuleByName(dto);
