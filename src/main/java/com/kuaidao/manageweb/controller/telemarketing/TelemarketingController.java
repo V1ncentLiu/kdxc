@@ -18,6 +18,7 @@ import com.kuaidao.aggregation.dto.project.ProjectInfoPageParam;
 import com.kuaidao.aggregation.dto.telemarkting.TelemarketingLayoutDTO;
 import com.kuaidao.common.constant.OrgTypeConstant;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
+import com.kuaidao.common.constant.SystemCodeConstant;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.common.util.ExcelUtil;
@@ -78,6 +79,7 @@ public class TelemarketingController {
         
         OrganizationQueryDTO orgDto = new OrganizationQueryDTO();
 		orgDto.setOrgType(OrgTypeConstant.DXZ);
+		orgDto.setSystemCode(SystemCodeConstant.HUI_JU);
 		//商务小组
 		JSONResult<List<OrganizationRespDTO>> dzList = organizationFeignClient.queryOrgByParam(orgDto);
 		request.setAttribute("dzList", dzList.getData());
