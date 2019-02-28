@@ -677,6 +677,11 @@ public class MyCustomerClueController {
 	@ResponseBody
 	public JSONResult<String> updateCustomerClue(HttpServletRequest request, @RequestBody ClueDTO dto) {
 
+		Subject subject = SecurityUtils.getSubject();
+		UserInfoDTO user = (UserInfoDTO) subject.getSession().getAttribute("user");
+		if (null != user) {
+			dto.setUpdateUser(user.getId());
+		}
 		return myCustomerFeignClient.updateCustomerClue(dto);
 	}
 
