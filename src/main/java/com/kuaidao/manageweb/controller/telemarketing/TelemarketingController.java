@@ -270,8 +270,6 @@ public class TelemarketingController {
 					islegal = false;
 				}else if(islegal && format.parse(telemarketingLayoutDTO2.getBeginTime()).getTime()  >  format.parse(telemarketingLayoutDTO2.getEndTime().substring(0, 10)+" 23:59:59").getTime() ){
 					islegal = false;
-				}else if(islegal &&  new Date().getTime() > format.parse(telemarketingLayoutDTO2.getEndTime().substring(0, 10)+" 23:59:59").getTime() ){
-					islegal = false;
 				}
 				
 				if(islegal && telemarketingLayoutDTO2.getEndTime() ==null) {
