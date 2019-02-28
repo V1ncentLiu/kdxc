@@ -5,6 +5,9 @@ function documentReady(){
     //devin unlogin()
 	//移除打电话来源标识
 	sessionStorage.removeItem("callSource");
+	//移除坐席登录表示 
+	sessionStorage.removeItem("loginClient");
+	
     CTILink.setup(
         {
             webrtc: true, // 是否加载软电话，对IE浏览器无效
