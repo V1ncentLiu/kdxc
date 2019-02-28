@@ -340,14 +340,14 @@ var homePageVM=new Vue({
 			params.bindType = bindType;
 			params.loginStatus = 1;
 			bindType = params.bindType;
-			if (bindType == 2) {
+			/*if (bindType == 2) {*/
 				// alert("bitch");
 				$.get("/client/client/login/" + cno);
 				bindType = 1;
 				params.bindType = 1;
-			} else {
+			/*} else {
 				$.post("/client/client/destroy/"+ cno);
-			}
+			}*/
 			
 			var cticloud_url = "api-2.cticloud.cn";
         	
