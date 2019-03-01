@@ -27,10 +27,7 @@
                     </el-col>
                     <el-col :span="8">
                         <el-form-item label="手机号：" prop="customerPhone" :label-width="formLabelWidth">
-                           <!-- <el-input v-model="form.customerPhone" autocomplete="off" style="width: 60%;" @keyup.native="number" maxlength="11"></el-input> -->
-                           <!-- <span style="padding-left: 5px;color: rgb(0, 114, 255);cursor: pointer;" @click="dialogFormVisible = true">+手机号</span> -->
                            <a href="tel:15000000000">15000000000</a>
-                           <el-button type="primary" @click="dialogFormVisible = true"><i class="el-icon-plus"></i>手机号<!-- 查看多个手机号 --></el-button>
                         </el-form-item>
                     </el-col>
                 </el-row>
@@ -114,7 +111,6 @@
                     </el-col>
                     <el-col :span="8">
                         <el-form-item label="开店紧迫性：" :label-width="formLabelWidth">
-                           <!-- <el-input v-model="form.urgency" autocomplete="off" style='width: 60%;'> -->
                             <el-date-picker
                                 style='width: 60%;'
                                 v-model="form.urgency"
@@ -200,6 +196,29 @@
                             <el-radio v-model="form.radioProject" label="2" @change="projectChange" style="margin-right: 10px;">外部项目</el-radio>
                             <el-input v-model="form.outsideProject" v-show="outsideProjectShow" autocomplete="off" style="width: 25%;" maxLength="20"></el-input>
                         </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="24">
+                        <el-form-item label="是否在考虑同行业：" :label-width="formLabelWidth" style="width: 300px;float: left;">
+                            <el-radio v-model="form.radioSelect" label="0" @change="professionChange">否</el-radio>
+                            <el-radio v-model="form.radioSelect" label="1" @change="professionChange">是</el-radio>
+                        </el-form-item>
+                        <span v-show="domainShow">
+                            <el-form-item
+                                style="width: 200px;float: left;margin-right: 10px;"
+                                maxLength="15"
+                                v-for="(domain, index) in form.domains"
+                                :key="domain.key"
+                                :prop="'domains.' + index + '.value'"
+                                :rules="{
+                                  required: true, message: '品牌名称不能为空', trigger: 'blur'
+                                }"
+                            >
+                                <el-input v-model="domain.value" placeholder="输入品牌名称"></el-input>
+                            </el-form-item>
+                            <el-button type="primary" @click="addDomain"><i class="el-icon-plus"></i></el-button>
+                        </span>
                     </el-col>
                 </el-row>
                 <el-row>
@@ -474,14 +493,27 @@
                         </el-form-item>
                     </el-col>
                 </el-row>
+
                 <el-row>
                     <el-col :span="8">
-                        <el-form-item label="广告位：" :label-width="formLabelWidth">
+                        <el-form-item label="留言时间：" :label-width="formLabelWidth">
+                            <el-button type="text" disabled>{{this.formatTimeFn(clueBase.messageTime)}}</el-button>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="8">
+                        <el-form-item label="留言重点：" :label-width="formLabelWidth">
+                            <div class="lineFeed lineFeed2">{{clueBase.messagePoint}}</div>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="8">
+                        <el-form-item label="媒介：" :label-width="formLabelWidth">
                             <el-button type="text" disabled>{{clueBase.sourceTypeName}}</el-button>
                         </el-form-item>
                     </el-col>
                     <el-col :span="8">
-                        <el-form-item label="媒介：" :label-width="formLabelWidth">
+                        <el-form-item label="广告位：" :label-width="formLabelWidth">
                             <el-button type="text" disabled>{{clueBase.sourceTypeName}}</el-button>
                         </el-form-item>
                     </el-col>
@@ -495,18 +527,6 @@
                     <el-col :span="8">
                         <el-form-item label="资源项目：" :label-width="formLabelWidth">
                             <el-button type="text" disabled>{{clueBase.projectName}}</el-button>
-                        </el-form-item>
-                    </el-col>
-                </el-row>
-                <el-row>
-                    <el-col :span="8">
-                        <el-form-item label="留言时间：" :label-width="formLabelWidth">
-                            <el-button type="text" disabled>{{this.formatTimeFn(clueBase.messageTime)}}</el-button>
-                        </el-form-item>
-                    </el-col>
-                    <el-col :span="8">
-                        <el-form-item label="留言重点：" :label-width="formLabelWidth">
-                        	<div class="lineFeed lineFeed2">{{clueBase.messagePoint}}</div>
                         </el-form-item>
                     </el-col>
                 </el-row>
@@ -705,12 +725,17 @@ var ossUrl=[[${ossUrl}]];
  var addCustomerVM=   new Vue({
         el: '#addCustomer',
         data: function() {
-            return {       
+            return {  
+                domainShow:false,//默认不显示输入同行品牌名称    
                 insideProjectShow:true,//内部项目默认显示
                 outsideProjectShow:false,//外部项目默认不显示
                 dialogFormVisible: false,
                 dialogFormImg:false,
                 form: { 
+                    domains: [{ //同行业品牌数据
+                        value: ''
+                    }],
+                    radioSelect:'0',//是否考虑同行业
                     radioProject:'1', //意向项目单选默认选项                    
                     customerName:'',
                     customerPhone:'',
@@ -731,8 +756,7 @@ var ossUrl=[[${ossUrl}]];
                     outsideProject:'',
                     province:'',
                     city:'',
-                    district:'',
-                   
+                    district:''                   
                 },
                 clueBase:base,
                 categoryArr:[],
@@ -751,7 +775,7 @@ var ossUrl=[[${ossUrl}]];
                 cityArr:[],
                 districtArr:[],
                 proSelect:proSelect,
-                formLabelWidth: '120px',
+                formLabelWidth: '150px',
                 rules:{
                     // customerName: [
                     //     { required: true, message: '客户姓名不能为空', trigger: 'blur' }
@@ -959,15 +983,27 @@ var ossUrl=[[${ossUrl}]];
                     this.outsideProjectShow=true;
                 }
             },
-            /*toggleSelection(rows) { 
-                if (rows) {
-                  rows.forEach(row => {
-                    this.$refs.multipleTable.toggleRowSelection(row);
-                  });
-                } else {
-                  this.$refs.multipleTable.clearSelection();
+            // 是否同行业
+            professionChange(){
+                if(this.form.radioSelect=="0"){//否
+                    this.domainShow=false
+                }else if(this.form.radioSelect=="1"){//是
+                    this.domainShow=true
                 }
-            },*/
+            },
+            addDomain() {
+                if(this.form.domains.length>2){
+                    this.$message({
+                        message: '最多输入三个品牌',
+                        type: 'warning'
+                    });
+                }else{
+                    this.form.domains.push({
+                        value: '',
+                        key: Date.now()
+                    });
+                }                
+            },
             handleSelectionChange(val) {  
                 this.multipleSelection = val;
             },
