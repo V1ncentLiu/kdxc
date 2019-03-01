@@ -189,7 +189,7 @@ public class AppiontmentController {
 	}
 
 	/***
-	 * 取消预约来访数据
+	 * 查询取消预约来访数据
 	 * 
 	 * @return
 	 */
