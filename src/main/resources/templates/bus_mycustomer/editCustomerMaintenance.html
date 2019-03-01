@@ -27,7 +27,7 @@
                     </el-col>
                     <el-col :span="8">
                         <el-form-item label="手机号：" prop="customerPhone" :label-width="formLabelWidth">
-                           <a href="tel:15000000000">15000000000</a>
+                           <el-input v-model="form.customerPhone" autocomplete="off" maxLength="10"></el-input>
                         </el-form-item>
                     </el-col>
                 </el-row>
@@ -865,7 +865,7 @@ var ossUrl=[[${ossUrl}]];
                     	clueCustomer.cusName=customerName;
                    	    //手机号
                     	var  customerPhone=this.form.customerPhone;
-                    	clueCustomer.phone=customerPhone;
+                    	clueCustomer.linkPhone=customerPhone;
                    	    //性别
                     	var customerSex=this.form.customerSex;
                     	clueCustomer.sex=customerSex;
@@ -926,11 +926,10 @@ var ossUrl=[[${ossUrl}]];
                	         //区县
                 	    var district= this.form.district;
                 	    clueIntention.district=district;
-             	        var clue={};
-             	        clue.clueId=clueId;
-                	    clue.clueCustomer=clueCustomer;
-                	    clue.clueIntention=clueIntention; 
-                        //是否在考虑同行业
+                        //是否考虑同行
+                        var radioSelect= this.form.radioSelect;
+                        clueIntention.istrade=radioSelect;
+                        //同行业项目
                         var domains=this.form.domains;
                         var ary=[];   
                         console.log(domains)                  
@@ -952,7 +951,12 @@ var ossUrl=[[${ossUrl}]];
                                 }                                
                             }
                         }
-
+                        var  tradeProject = ary.join(',');
+                        clueIntention.tradeProject=tradeProject;
+                        var clue={};
+              	        clue.clueId=clueId;
+                 	    clue.clueCustomer=clueCustomer;
+                 	    clue.clueIntention=clueIntention; 
                         axios.post('/tele/clueMyCustomerInfo/updateCustomerClue',clue)
                         .then(function (response) {
                      	  addCustomerVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
@@ -1296,6 +1300,7 @@ var ossUrl=[[${ossUrl}]];
             document.getElementById('addCustomer').style.display = 'block';
            if(customer){
         	   this.form.customerName=customer.cusName; 
+        	   this.form.customerPhone=customer.linkPhone; 
         	   this.form.customerSex=customer.sex+"";
         	   this.form.ishasWx=customer.wechat;
         	   this.form.experience=customer.hasExperience+"";
