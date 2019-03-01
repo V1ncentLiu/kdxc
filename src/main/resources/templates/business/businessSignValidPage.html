@@ -13,11 +13,11 @@
     <el-breadcrumb separator="/" class="elBreadcrumb marginB20" >
         <el-breadcrumb-item>Home</el-breadcrumb-item>
         <el-breadcrumb-item>总裁处理确认</el-breadcrumb-item>
-        <el-breadcrumb-item><a href="/invitearea/inviteAreaList" data-url="b.html">有效签约单确认</a></el-breadcrumb-item>
+        <el-breadcrumb-item><a href="/businesssign/businessSignValidPage" data-url="b.html">有效签约单确认</a></el-breadcrumb-item>
     </el-breadcrumb>
     <el-row class="marginB10">
         <el-col :xs="12" :sm="16" :md="16" :lg="18" :xl="12">
-            <el-button type="primary" @click="addbutton"><i></i>有效性处理</el-button>
+            <el-button type="primary" @click="dealButton" ><i></i>有效性处理</el-button>
         </el-col>
     </el-row>
     <el-row>              
@@ -81,7 +81,7 @@
 				    </el-option>
 				</el-select>
 				<el-input style="width:15%;"  v-model="cusName" placeholder="客户姓名"></el-input>
-				<el-button type="primary" @click="inviteAreaListPage">搜索</el-button>
+				<el-button type="primary" @click="search">搜索</el-button>
 			</div>
     </el-row>
     <el-row>
@@ -108,7 +108,7 @@
             <el-table-column align="center" prop="teleSaleName" label="电销顾问" ></el-table-column>
             <el-table-column align="center" prop="constraintNotConsistency" label="约束不一致" ></el-table-column>
             <el-table-column align="center" prop="dealStatus" label="处理状态" :formatter="transformStatus"></el-table-column>
-            <el-table-column align="center" prop="valid" label="有效性" ></el-table-column>
+            <el-table-column align="center" prop="valid" label="有效性" :formatter="transvalidStatus"></el-table-column>
         </el-table>
          <table-pagination :pager="pager"  @change="inviteAreaListPage"></table-pagination>
     </el-row>      
@@ -127,7 +127,7 @@
             </el-form-item>
         </el-form>
         <div slot="footer" style="text-align: center" class="dialog-footer">
-            <el-button type="primary" @click="submitForm('form')">提交</el-button>
+            <el-button type="primary" @click="addbutton">提交</el-button>
             <el-button @click="dialogFormVisible= false">取消</el-button>
         </div>
     </el-dialog>
@@ -186,14 +186,15 @@
                  }
        	 	],
        	 validList:[
+       		{
+                value: '1',
+                 label: '有效'	
+                },
     	 	 	{
             	 value: '0',
               label: '无效'	
-             },
-           	{
-              value: '1',
-               label: '有效'	
-              }
+             }
+           	
     	 	],
        	 	dataTable:[],
        	 	multipleSelection: [],
@@ -224,6 +225,32 @@
              
         },
         methods: {
+        	dealButton(){
+        		
+        		var rows = this.multipleSelection;
+        		  if(rows.length <1){
+                      this.$message({
+                         message: '选择某一条或者多条签约信息',
+                         type: 'warning'
+                       });
+                      return;
+                  }
+        		  //如果只选择一条回显数据，多条不回显
+        		  if(rows.length ==1){
+        			  for(var i =0;i<orgVM.dataTable.length;i++){
+        				  if(orgVM.dataTable[i].id ==rows[0].id){
+        					   if(!"undefined" == orgVM.dataTable[i].valid){
+        						  orgVM.form.dealStatus = orgVM.dataTable[i].valid+"";  
+        					  }else{
+        						  orgVM.form.dealStatus = "1";  
+        					  } 
+        				  }
+        			  }
+        			  
+        		  }
+                this.dialogFormVisible = true;
+        	},
+        	
         	transformStatus(row, column, cellValue, index) {
           	  var text="";
                 if(cellValue=="0"){
@@ -233,8 +260,22 @@
                 }
                 return text;
             },
+            transvalidStatus(row, column, cellValue, index) {
+            	  var text="";
+                  if(cellValue=="0"){
+                	  text="无效"
+                  }else if(cellValue=="1"){
+                	  text="有效"
+                  }
+                  return text;
+              },
+            
         	handleSelectionChange(val) {
                 this.multipleSelection = val;
+            },
+            search(){
+            	this.pager.currentPage = 1;
+            	this.inviteAreaListPage()
             },
         	inviteAreaListPage(){//查询按钮
             	  var param = {}; 
