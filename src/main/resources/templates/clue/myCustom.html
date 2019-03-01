@@ -216,7 +216,7 @@
                     <input type='hidden'>
                     
                     <i class="el-icon-phone-outline"  @click="customerEidt(scope.row.clueId)"  style="margin:0 10px;font-size: 16px;cursor: pointer;"></i>  
-                  <!--<i class="el-icon-phone-outline"   onclick="callPhone(1,121221);"  style="margin:0 10px;font-size: 16px;cursor: pointer;"></i>    --> 
+                   <!-- <i class="el-icon-phone-outline"   @click="outboundCall(scope.row.phone,scope.row.clueId)"  style="margin:0 10px;font-size: 16px;cursor: pointer;"></i> --> 
         
                     <el-tag v-if="scope.row.tag">{{scope.row.tag}}</el-tag>
                 </template>
@@ -409,11 +409,23 @@
     </el-dialog>
     <dialog-tracking :param="trackingParam"></dialog-tracking>
 </div>
+ <!-- 外呼 dialog start 其他页面使用 -->
+	 <el-dialog  title="提示" :visible.sync="tmOutboundCallDialogVisible" width="30%" :close-on-click-modal="false" center @close="closeTmOutboundDialog" >
+	    <div id="tmOutboundCallTimeDiv"> 本次通话时长：<span id="tmOutboundCallTime"></span></div> 
+	   
+	</el-dialog>
 </body>
 <!-- import Vue before Element -->
 <div th:include="_footer_include :: #jsLib"></div>
- <script type="text/javascript" th:src="@{'/js/custom/call/rtCall.js'}"></script>
- <script type="text/javascript" th:src="@{'/js/custom/callrecord/simpleAudio.js'}"></script>
+<script type="text/javascript" src="//agent-gateway-2.cticloud.cn/js/agent/v10/cti-link.js"></script>
+<script th:src="@{/js/custom/call/md5.js?v=1.0.0}"></script>
+<script th:src="@{/js/custom/call/toolbar.js?v=1.0.1}"></script>
+<script th:src="@{/js/custom/call/toolbarIframe.js?v=1.0.1}"></script>
+<script th:src="@{/js/custom/call/timer.js?v=1.0.1}"></script>
+<script th:src="@{/js/custom/call/rtCall.js?v=1.0.0}"></script> 
+ <!-- 播放錄音 js -->
+ <script th:src="@{/js/custom/callrecord/simpleAudio.js?v=1.0.0}"></script>
+ 
 
 <script>
   var mycustomVM=   new Vue({
@@ -427,6 +439,7 @@
                 releaseFormVisible:false,
                 recordDialog:false,
                 repeatPhonesDialog:false,
+                tmOutboundCallDialogVisible:false,
                 form: {
                 	isTransfer:'',
                 	cluesta:'',
@@ -696,6 +709,10 @@
                     this.isShow=true
                 }          
             },
+           	closeTmOutboundDialog(){//关闭电销外呼dialog
+        		this.tmOutboundCallDialogVisible = false;
+        		clearTimer();//清除定时器
+        	},
             openFormInfo(){
             	this.dialogFormVisible = true;
             	if(this.$refs['repeatApplyForm']) {
@@ -856,23 +873,47 @@
                 this.repeatPhonesDialog=true;
             },
             repeatApplyNumber(){//输入手机号才显示查询线索按钮
-    　　　      this.repeatApplyForm.phone=this.repeatApplyForm.phone.replace(/[^\.\d]/g,'');
+    　　　                                    this.repeatApplyForm.phone=this.repeatApplyForm.phone.replace(/[^\.\d]/g,'');
                 this.repeatApplyForm.phone=this.repeatApplyForm.phone.replace('.','');
                 if(this.repeatApplyForm.phone.length==11){
                     this.searchClueDisable=false;
                 }else{
                     this.searchClueDisable=true;
                 }
-        　  },
+                
+        　                         },
             repeatApplyRepeatNumber(){
-    　　　      this.repeatApplyForm.repeatPhone=this.repeatApplyForm.repeatPhone.replace(/[^\.\d]/g,'');
+    　　　                                  this.repeatApplyForm.repeatPhone=this.repeatApplyForm.repeatPhone.replace(/[^\.\d]/g,'');
                 this.repeatApplyForm.repeatPhone=this.repeatApplyForm.repeatPhone.replace('.','');
                 if(this.repeatApplyForm.repeatPhone.length==11){
                     this.searchRepeatClueDisable=false;
                 }else{
                     this.searchRepeatClueDisable=true;
                 }
-        　  },
+        　                     },
+            //外呼号码
+           outboundCall(outboundInputPhone,clueId){//外呼
+        　                    	 debugger;
+        　                    	  var login=sessionStorage.getItem("loginClient");  //我是这样存的 ， 值为qimo 和 tr 
+        　                		if(!login){
+        　                			   mycustomVM.$message({message:"请登录呼叫中心",type:'warning'});
+        　                			   return ;
+        　                	 	}
+        　                	 	 if(!/^[0-9]*$/.test(outboundInputPhone)){
+        　                				 mycustomVM.$message({message:"只可以输入数字,不超过11位",type:'warning'});
+        　                			     return ; 
+        　                	 	  }
+        　                	 	//sessionStorage.setItem("callSource",callSource);//1:表示 首页头部外呼 2：表示 电销管理外呼
+ 
+        　                                  var param={};
+        　                	  param.clueId=clueId;
+        　                	  param.customerPhone =outboundInputPhone;
+        　                	  axios.post('/client/client/axbOutCall',param).then(function (response) { 
+        　                	     console.log(response);
+        　                	      	 
+        　                	  });
+        　                	},
+
 
         },
         mounted(){
@@ -921,9 +962,7 @@
             });
     	}
     })
-  function  callPhone(clueId ,phone){
-	   outboundCallPhone(clueId ,phone,rebackCallphone);
-  }
+ 
   
   function   rebackCallphone(){
 	   

@@ -11,6 +11,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.apache.shiro.session.Session;
+import org.apache.shiro.subject.Subject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,6 +46,7 @@ import com.kuaidao.aggregation.dto.client.UserCnoReqDTO;
 import com.kuaidao.aggregation.dto.client.UserCnoRespDTO;
 import com.kuaidao.callcenter.dto.QimoOutboundCallDTO;
 import com.kuaidao.callcenter.dto.QimoOutboundCallRespDTO;
+import com.kuaidao.callcenter.dto.TrAxbOutCallReqDTO;
 import com.kuaidao.common.constant.OrgTypeConstant;
 import com.kuaidao.common.constant.RedisConstant;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
@@ -727,6 +729,23 @@ public class ClientController {
        callDTO.setLoginClient((String)session.getAttribute("loginName"));
         
         return clientFeignClient.qimoOutboundCall(callDTO);
+    }
+    
+    /**
+     * 天润axb 外呼
+     * @return
+     */
+    @PostMapping("/axbOutCall")
+    @ResponseBody
+    public JSONResult<String> axbOutCall(@RequestBody TrAxbOutCallReqDTO trAxbOutCallReqDTO){
+        Session session = SecurityUtils.getSubject().getSession();
+        String  cno = (String)session.getAttribute("axb");
+        trAxbOutCallReqDTO.setCno(cno);
+        UserInfoDTO user = (UserInfoDTO) session.getAttribute("user");
+        trAxbOutCallReqDTO.setAccountId(user.getId());
+        trAxbOutCallReqDTO.setOrgId(user.getOrgId());
+        
+        return clientFeignClient.axbOutCall(trAxbOutCallReqDTO);
     }
     
 

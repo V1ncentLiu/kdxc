@@ -19,6 +19,7 @@ import com.kuaidao.aggregation.dto.project.ProjectInfoDTO;
 import com.kuaidao.aggregation.dto.project.ProjectInfoPageParam;
 import com.kuaidao.common.constant.OrgTypeConstant;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
+import com.kuaidao.common.constant.SystemCodeConstant;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.common.util.ExcelUtil;
@@ -78,6 +79,7 @@ public class InviteAreaController {
     public String inviteAreaList(HttpServletRequest request) {
     	OrganizationQueryDTO orgDto = new OrganizationQueryDTO();
 		orgDto.setOrgType(OrgTypeConstant.SWZ);
+		orgDto.setSystemCode(SystemCodeConstant.HUI_JU);
 		//商务小组
 		JSONResult<List<OrganizationRespDTO>> swList = organizationFeignClient.queryOrgByParam(orgDto);
 		orgDto.setOrgType(OrgTypeConstant.DXZ);
