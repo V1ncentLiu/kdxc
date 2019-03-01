@@ -209,10 +209,7 @@
                                 style="width: 200px;float: left;margin-right: 10px;"
                                 v-for="(domain, index) in form.domains"
                                 :key="domain.key"
-                                :prop="'domains.' + index + '.value'"
-                                :rules="{
-                                  required: true, message: '品牌名称不能为空', trigger: 'blur'
-                                }"
+                                :prop="'domains.' + index + '.value'" 
                             >
                                 <el-input v-model="domain.value" placeholder="输入品牌名称" maxLength="15"></el-input>
                             </el-form-item>
@@ -933,6 +930,29 @@ var ossUrl=[[${ossUrl}]];
              	        clue.clueId=clueId;
                 	    clue.clueCustomer=clueCustomer;
                 	    clue.clueIntention=clueIntention; 
+                        //是否在考虑同行业
+                        var domains=this.form.domains;
+                        var ary=[];   
+                        console.log(domains)                  
+                        for(var i=0;i<domains.length;i++){
+                            // 判断输入框里4个值是否重复(判断对象数组的value是否有重复值)
+                            ary.push(domains[i].value);//把输入的手机号放入一个数组
+                            var s = ary.join(",")+",";                            
+                            console.log(ary)
+                            for(var j=0;j<ary.length;j++) {
+                                console.log(ary[j])
+                                if(ary[j]!=""){
+                                    if(s.replace(ary[j]+",","").indexOf(ary[j]+",")>-1) {
+                                        this.$message({
+                                            message: '请不要输入相同品牌',
+                                            type: 'warning'
+                                        });
+                                        return;
+                                    }
+                                }                                
+                            }
+                        }
+
                         axios.post('/tele/clueMyCustomerInfo/updateCustomerClue',clue)
                         .then(function (response) {
                      	  addCustomerVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
