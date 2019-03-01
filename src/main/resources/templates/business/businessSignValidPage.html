@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:th="http://www.thymeleaf.org">
+<head th:include="_header_include::frag(~{::title},~{},~{})">
+    <title>有效签约单确认</title>
+    <style>
+    </style>
+</head>
+<body>
+
+<div v-loading="loading" id="organizationManage" class="organizationManage mainPadding"  style="display: none;">  
+
+    <el-breadcrumb separator="/" class="elBreadcrumb marginB20" >
+        <el-breadcrumb-item>Home</el-breadcrumb-item>
+        <el-breadcrumb-item>总裁处理确认</el-breadcrumb-item>
+        <el-breadcrumb-item><a href="/invitearea/inviteAreaList" data-url="b.html">有效签约单确认</a></el-breadcrumb-item>
+    </el-breadcrumb>
+    <el-row class="marginB10">
+        <el-col :xs="12" :sm="16" :md="16" :lg="18" :xl="12">
+            <el-button type="primary" @click="addbutton"><i></i>有效性处理</el-button>
+        </el-col>
+    </el-row>
+    <el-row>              
+			<div class="block marginB10">	
+				<el-select filterable v-model="dealStatus" placeholder="处理状态" clearable>
+				    <el-option
+				      v-for="item in dealStatusList"
+				      :key="item.value"
+				      :label="item.label"
+				      :value="item.value">
+				    </el-option>
+				</el-select>
+				<el-select filterable v-model="constraint" placeholder="约束不一致" clearable>
+				    <el-option
+				      v-for="item in constraintList"
+				       :key="item.value"
+				      :label="item.label"
+				      :value="item.value">
+				    </el-option>
+				</el-select>
+				<el-select filterable v-model="signProvince" placeholder="签约省份" clearable>
+				    <el-option
+				      v-for="item in provinceList"
+				      :key="item.name"
+				      :label="item.name"
+				      :value="item.name">
+				    </el-option>
+				</el-select>
+				<el-select filterable v-model="signProjectId" placeholder="签约项目" clearable>
+				    <el-option
+				      v-for="item in projectList"
+				      :key="item.id"
+				      :label="item.projectName"
+				      :value="item.id">
+				    </el-option>
+				</el-select>
+			</div>	
+			<div class="block marginB10 ">			
+				<el-select filterable v-model="businessGroupId" placeholder="商务组" clearable>
+				    <el-option
+				      v-for="item in swList"
+				      :key="item.id"
+				      :label="item.name"
+				      :value="item.id">
+				    </el-option>
+				</el-select>
+				<el-select filterable v-model="teleGroupid" placeholder="电销组" clearable>
+				    <el-option
+				      v-for="item in dxList"
+				      :key="item.id"
+				      :label="item.name"
+				      :value="item.id">
+				    </el-option>
+				</el-select>
+				<el-select filterable v-model="valid" placeholder="签约单有效性" clearable>
+				    <el-option
+				      v-for="item in validList"
+				       :key="item.value"
+				      :label="item.label"
+				      :value="item.value">
+				    </el-option>
+				</el-select>
+				<el-input style="width:15%;"  v-model="cusName" placeholder="客户姓名"></el-input>
+				<el-button type="primary" @click="inviteAreaListPage">搜索</el-button>
+			</div>
+    </el-row>
+    <el-row>
+        <el-table 
+            ref="multipleTable"
+            tooltip-effect="dark"
+            empty-text="无数据"
+            style="width: 100%"
+            border
+            :data="dataTable"  @selection-change="handleSelectionChange">
+             <el-table-column align="center" prop="id" type="selection" width="55"></el-table-column> 
+             <el-table-column align="center" type="index"  label="序号" width="55"></el-table-column>
+             <!-- <el-table-column prop="date" label="全选" width="180"></el-table-column>  -->
+            <el-table-column align="center" prop="signNo" label="签约单编号"></el-table-column>
+            <el-table-column align="center" prop="customerName" label="客户姓名"></el-table-column>
+            <el-table-column align="center"  prop="businessGroupName" label="商务小组" ></el-table-column>
+            <el-table-column align="center" prop="signProvince" label="签约省份" ></el-table-column>
+            <el-table-column align="center" prop="signCity" label="签约城市" ></el-table-column>
+            <el-table-column align="center" prop="signDictrict" label="签约区/县" ></el-table-column>
+            <el-table-column align="center" prop="signProjectName" label="签约项目" ></el-table-column>
+            <el-table-column align="center" prop="constrainArea" label="约束区域" ></el-table-column>
+            <el-table-column align="center" prop="constrainProject" label="约束项目" ></el-table-column>
+            <el-table-column align="center" prop="teleGroupName" label="电销组" ></el-table-column>
+            <el-table-column align="center" prop="teleSaleName" label="电销顾问" ></el-table-column>
+            <el-table-column align="center" prop="constraintNotConsistency" label="约束不一致" ></el-table-column>
+            <el-table-column align="center" prop="dealStatus" label="处理状态" :formatter="transformStatus"></el-table-column>
+            <el-table-column align="center" prop="valid" label="有效性" ></el-table-column>
+        </el-table>
+         <table-pagination :pager="pager"  @change="inviteAreaListPage"></table-pagination>
+    </el-row>      
+    <!-- dialog -->
+    <el-dialog title="有效性处理" :visible.sync="dialogFormVisible">
+        <el-form :model="form" ref="form" :rules="rules" class="width500">
+            <el-form-item label="启用状态：" :label-width="formLabelWidth" prop="status">
+                <el-select filterable v-model="form.dealStatus" placeholder="启用状态" style="width: 100%;">
+                    <el-option
+                        v-for="item in statusList"
+                        :key="item.value"
+                        :label="item.label"
+                        :value="item.value">
+                    </el-option>
+                </el-select>
+            </el-form-item>
+        </el-form>
+        <div slot="footer" style="text-align: center" class="dialog-footer">
+            <el-button type="primary" @click="submitForm('form')">提交</el-button>
+            <el-button @click="dialogFormVisible= false">取消</el-button>
+        </div>
+    </el-dialog>
+
+
+</div>
+<input id="addOrUpdate" type="hidden" >
+</body>
+<!-- import common js-->
+<div th:include="_footer_include :: #jsLib"></div>
+<script th:inline="javascript">
+
+    var dxList=[[${dxList}]];
+	var projectList = [[${projectList}]];
+	var provinceList = [[${provinceList}]];
+	var swList = [[${swList}]];
+    var orgVM =  new Vue({
+        el: '#organizationManage',
+        data: {
+        	formLabelWidth: '100px',
+        	form:{
+        		dealStatus:"1"
+        	},
+        	dealStatusList:[
+        		 {
+               		value: '0',
+                   label: '待处理'	
+               	},
+               	{
+                  value: '1',
+                   label: '已处理'	
+                  }
+        	  ],
+        	  constraintList:[
+        		  {
+                  	value: '0',
+                    label: '跨区域'	
+                   },
+                 	{
+                    value: '1',
+                     label: '项目不一致'	
+                    },
+                 	{
+                     value: '2',
+                      label: '跨区域，项目不一致'	
+                     }
+       	  	],
+       	 	statusList:[
+       	 	 	{
+               	 value: '0',
+                 label: '无效'	
+                },
+              	{
+                 value: '1',
+                  label: '有效'	
+                 }
+       	 	],
+       	 validList:[
+    	 	 	{
+            	 value: '0',
+              label: '无效'	
+             },
+           	{
+              value: '1',
+               label: '有效'	
+              }
+    	 	],
+       	 	dataTable:[],
+       	 	multipleSelection: [],
+       	    provinceList:provinceList,
+       	    projectList:projectList,
+       	    swList:swList,
+       	    dxList:dxList,
+       	 	cusName:"",
+       	 	dealStatus:"",
+       	 	constraint:"",
+       	 	signProvince:"",
+       	 	signProjectId:"",
+       	 	businessGroupId:"",
+       	 	teleGroupid:"",
+       	 	valid:"",
+            pager:{
+                total: 0,
+                currentPage: 1,
+                pageSize: 20,
+            },
+            loading:false,
+            dialogFormVisible: false,
+            rules: {
+            	dealStatus: [
+                    { required: true, message: '请选择有效性', trigger: 'blur' }
+                ]
+            }
+             
+        },
+        methods: {
+        	transformStatus(row, column, cellValue, index) {
+          	  var text="";
+                if(cellValue=="0"){
+              	  text="未处理"
+                }else if(cellValue=="1"){
+              	  text="已处理"
+                }
+                return text;
+            },
+        	handleSelectionChange(val) {
+                this.multipleSelection = val;
+            },
+        	inviteAreaListPage(){//查询按钮
+            	  var param = {}; 
+            	  var pageSize = this.pager.pageSize;
+                  var pageNum = this.pager.currentPage;
+                  var dealStatus = this.dealStatus;
+                  var constraint = this.constraint;
+                  var signProvince = this.signProvince;
+                  var signProjectId = this.signProjectId;
+                  var businessGroupId = this.businessGroupId;
+                  var teleGroupid = this.teleGroupid;
+                  var valid = this.valid;
+                  var cusName = this.cusName;
+                  
+                  param.dealStatus = dealStatus;
+                  param.valid = valid;
+                  param.pageNum = pageNum;
+                  param.pageSize = pageSize;
+                  if(constraint =='0'){
+                	  param.spanningArea =1
+                  }else if(constraint =='1'){
+                	  param.projectInconsistency =1
+                  }else if(constraint =='2'){
+                	  param.projectInconsistency =1
+                	  param.spanningArea =1
+                  } 
+                  param.signProvince = signProvince;
+                  param.signProjectId = signProjectId;
+                  param.businessGroupId = businessGroupId;
+                  param.teleGroupid = teleGroupid;
+                  param.customerName = cusName;
+                  axios.post('/businesssign/businessSignValidList',param).then(function (response) {
+                  	  console.log(response);
+                      if(null===response||response.data==null||response.data.code!='0'){
+	                  	  alert(response.data.message);
+	                  	  return ;
+                     }else{
+                    	 orgVM.dataTable =response.data.data.data; 
+                    	 orgVM.pager.currentPage= response.data.data.currentPage;
+                    	 orgVM.pager.total= response.data.data.total;
+                     } 
+                  })
+                  .catch(function (error) {
+                    console.log(error);
+                  })
+                  .then(function () {
+                  });  
+                  
+              	} ,
+                addbutton(){
+              		var rows = this.multipleSelection;
+                    if(rows.length <1){
+                        this.$message({
+                           message: '选择某一条或者多条签约信息',
+                           type: 'warning'
+                         });
+                        return;
+                    }
+                    var ids="";
+ 		            if(null!=rows){
+ 		             for ( var i = 0; i <rows.length; i++){
+ 		            	if("" == ids){
+ 		            		ids = rows[i].id
+ 		            	}else{
+ 		            		ids = ids+","+rows[i].id
+ 		            	}
+ 		             }
+                	}
+ 		           var param={};
+		           param.ids=ids;
+		           param.valid = this.form.dealStatus;
+		           axios.post('/businesssign/updateBusinessSignDTOValidByIds',param).then(function (response) {
+	                  	  console.log(response);
+	                      if(null !==response && response.data !=null && response.data.code=='0'){
+	                    	  window.location.href="/businesssign/businessSignValidPage"; 
+	                     }else{
+	                    	 alert(response.data.data.message);
+	                  	  	return ;
+	                     } 
+	                  }).catch(function (error) {
+                       console.log(error);
+                   })
+                   .then(function () {
+                     // always executed
+                   });
+              	}
+        },
+        created(){
+        	this.inviteAreaListPage();
+        	document.getElementById('organizationManage').style.display = 'block';
+        	
+        	
+        }
+    })
+</script>
+</html>
