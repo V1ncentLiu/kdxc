@@ -18,15 +18,25 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.kuaidao.aggregation.dto.clue.ClueRepetitionDTO;
+import com.kuaidao.aggregation.dto.project.ProjectInfoDTO;
+import com.kuaidao.aggregation.dto.project.ProjectInfoPageParam;
+import com.kuaidao.common.constant.OrgTypeConstant;
 import com.kuaidao.common.constant.RoleCodeEnum;
+import com.kuaidao.common.constant.SystemCodeConstant;
 import com.kuaidao.common.entity.IdEntity;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.manageweb.config.LogRecord;
 import com.kuaidao.manageweb.constant.MenuEnum;
+import com.kuaidao.manageweb.feign.area.SysRegionFeignClient;
 import com.kuaidao.manageweb.feign.clue.ClueRepetitionFeignClient;
+import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
+import com.kuaidao.manageweb.feign.project.ProjectInfoFeignClient;
 import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
+import com.kuaidao.sys.dto.area.SysRegionDTO;
 import com.kuaidao.sys.dto.organization.OrganizationDTO;
+import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
+import com.kuaidao.sys.dto.organization.OrganizationRespDTO;
 import com.kuaidao.sys.dto.role.RoleInfoDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import com.kuaidao.sys.dto.user.UserOrgRoleReq;
@@ -45,6 +55,16 @@ public class ClueRepetitionController {
 	
 	@Autowired
 	private UserInfoFeignClient userInfoFeignClient;
+	
+	@Autowired
+	private OrganizationFeignClient organizationFeignClient;
+	
+	@Autowired
+    private ProjectInfoFeignClient projectInfoFeignClient;
+	
+	@Autowired
+    SysRegionFeignClient sysRegionFeignClient;
+	
 	 /**
      *  重单列表页面
      * 
@@ -52,7 +72,7 @@ public class ClueRepetitionController {
      */
     @RequestMapping("/queryRepeatPage")
     public String queryRepeatPage(HttpServletRequest request) {
-		return "clue/repetition/customerrePetitionList";
+		return "clue/repetition/customerreP/etitionList";
     }
     
     /**
@@ -168,8 +188,9 @@ public class ClueRepetitionController {
     @ResponseBody
     @LogRecord(description = "重单审核",operationType = LogRecord.OperationType.UPDATE,menuName = MenuEnum.REPETITION)
     public JSONResult updatePetitionById(HttpServletRequest request,@RequestBody ClueRepetitionDTO clueRepetitionDTO) {
-    	JSONResult<PageBean<ClueRepetitionDTO>> list = clueRepetitionFeignClient.updatePetitionById(clueRepetitionDTO);
-    	return list;
+    	return clueRepetitionFeignClient.updatePetitionById(clueRepetitionDTO);
     }
- 
+    
+    
+
 }
