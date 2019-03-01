@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head th:replace="_header_include::frag(~{::title},~{::style},~{})">
+    <title>我的客户</title>
+    <style>
+        button a{color:#fff!important;}
+        .formItem,.formItem .el-form-item__content{width:100%}
+    </style>
+</head>
+<body>
+
+<div id="mainDiv"  class="mainPadding">
+    <template>
+        <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
+            <el-breadcrumb-item>Home</el-breadcrumb-item>
+            <el-breadcrumb-item>商务管理</el-breadcrumb-item>
+            <el-breadcrumb-item><a href="JavaScript:void(0)" data-url="b.html">我的客户</a></el-breadcrumb-item>
+        </el-breadcrumb>
+
+        <el-row class="marginB10 greybg padding20" style="padding-bottom: 0;" >
+            <el-form :inline="true" :model="queryForm" class="demo-form-inline" ref="queryForm" >
+                <el-row :gutter="20">
+                    <el-col :span="3">
+                        <el-form-item label="">
+                            <el-select v-model="queryForm.visitStatus" clearable  placeholder="到访状态" width="100">
+                                <el-option v-for="item in visitArr" :key="item.value" :label="item.name" :value="item.value"></el-option>
+                            </el-select>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="3">
+                        <el-form-item label="">
+                            <el-select v-model="queryForm.isSign" clearable  placeholder="签约状态" width="100">
+                                <el-option v-for="item in signArr" :key="item.value" :label="item.name" :value="item.value"></el-option>
+                            </el-select>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="3">
+                        <el-form-item label="">
+                            <el-select v-model="queryForm.teleGroupId" clearable  placeholder="电销组" width="100">
+                                <el-option v-for="item in options" :key="item.id" :label="item.name" :value="item.id"></el-option>
+                            </el-select>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="3">
+                        <el-form-item label="">
+                            <el-select v-model="queryForm.teleSaleId" clearable  placeholder="创业顾问" width="100">
+                                <el-option v-for="item in options" :key="item.id" :label="item.name" :value="item.id"></el-option>
+                            </el-select>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="3">
+                        <el-form-item label="">
+                            <el-select v-model="queryForm.tasteProjectId" clearable  placeholder="品尝项目" width="100">
+                                <el-option v-for="item in options" :key="item.id" :label="item.name" :value="item.id"></el-option>
+                            </el-select>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="3">
+                        <el-form-item label="">
+                            <el-input v-model="cusName" placeholder="请输入客户姓名"></el-input>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="3">
+                        <el-form-item>
+                            <el-button type="primary" @click="onSubmit">标记未到访</el-button>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row :gutter="20">
+                    <el-col :span="6">
+                        <el-form-item label="邀约到访时间">
+                            <el-date-picker v-model="queryForm.reserveTime1" type="datetime" placeholder="选择日期时间"></el-date-picker>
+                            <span>-</span>
+                            <el-date-picker v-model="queryForm.reserveTime2" type="datetime" placeholder="选择日期时间"></el-date-picker>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="6">
+                        <el-form-item label="提交邀约时间">
+                            <el-date-picker v-model="queryForm.createTime1" type="datetime" placeholder="选择日期时间"></el-date-picker>
+                            <span>-</span>
+                            <el-date-picker v-model="queryForm.createTime2" type="datetime" placeholder="选择日期时间"></el-date-picker>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="6">
+                        <el-form-item label="接收客户时间">
+                            <el-date-picker v-model="queryForm.allocateTime1" type="datetime" placeholder="选择日期时间"></el-date-picker>
+                            <span>-</span>
+                            <el-date-picker v-model="queryForm.allocateTime2" type="datetime" placeholder="选择日期时间"></el-date-picker>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="3">
+                        <el-form-item>
+                            <el-button type="primary" @click="initList">搜索</el-button>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+            </el-form>
+        </el-row>
+
+        <el-table :data="tableData" style="width: 100%" tooltip-effect="dark"  ref="multipleTable"  @select="selectRow"
+                  @row-dblclick="rowDblClick()"
+                  @selection-change="handleSelectionChange" >
+            <el-table-column type="selection" width="55" prop="clueId"> </el-table-column>
+            <el-table-column prop="xh" label="序号" width="50" align="center"></el-table-column>
+            <el-table-column prop="reserveTime" label="邀约来访时间" sortable align="center"></el-table-column>
+            <el-table-column prop="cusName" label="客户姓名" align="center"></el-table-column>
+            <el-table-column prop="visitStatus" label="到访状态" align="center"></el-table-column>
+            <el-table-column  prop="isSign" label="签约状态" align="center"></el-table-column>
+            <el-table-column  prop="" label="重单分配比例" align="center"></el-table-column>
+
+            <el-table-column  prop="createTime" label="提交邀约时间" sortable align="center"></el-table-column>
+            <el-table-column  prop="allocateTime" label="接收客户时间" sortable align="center"></el-table-column>
+            <el-table-column  prop="status" label="到访情况" align="center"></el-table-column>
+            <el-table-column  prop="status" label="签约明细" align="center"></el-table-column>
+            <el-table-column  prop="teleGorupName" label="电销组" align="center"></el-table-column>
+            <el-table-column  prop="teleDirectorName" label="电销总监" align="center"></el-table-column>
+            <el-table-column  prop="teleSaleName" label="电销员工" align="center"></el-table-column>
+            <el-table-column  prop="teleProjectName" label="电销组项目" align="center"></el-table-column>
+            <el-table-column  prop="tasteProjectName" label="品尝项目" align="center"></el-table-column>
+            <el-table-column  prop="status" label="签约店型" align="center"></el-table-column>
+            <el-table-column  prop="province" label="开店省份" align="center"></el-table-column>
+            <el-table-column  prop="city" label="开店城市" align="center"></el-table-column>
+            <el-table-column  prop="district" label="开店区域/县" align="center"></el-table-column>
+            <el-table-column  prop="sex" label="客户性别" align="center"></el-table-column>
+            <el-table-column  prop="age" label="客户年龄" align="center"></el-table-column>
+            <el-table-column  prop="partnerTypeName" label="合伙人" align="center"></el-table-column>
+            <el-table-column  prop="hasExperience" label="餐饮经验" align="center"></el-table-column>
+            <el-table-column  prop="hasAddress" label="选址情况" align="center"></el-table-column>
+            <el-table-column  prop="advanceAmount" label="预投金额" align="center"></el-table-column>
+            <el-table-column  prop="intenProject" label="意向项目" align="center"></el-table-column>
+            <el-table-column  prop="area" label="意向项目" align="center"></el-table-column>
+        </el-table>
+    </template>
+    <table-pagination :pager="pager"  @change="initList"></table-pagination>
+
+
+
+
+</div>
+
+<!-- import common js-->
+<div th:include="_footer_include :: #jsLib"></div>
+<!--<script th:src="@{/js/excel/xlsx.min.js}" src="../static/js/excel/xlsx.min.js"></script>-->
+<script th:inline="javascript">
+    <!--电销组-->
+    var dzList=[[${dzList}]];
+    var dxgwList=[[${dxgwList}]];
+    var dxzjList = [[${dxzjList}]]
+    // 查询 模块
+    var mainDivVM = new Vue({
+        el: '#mainDiv',
+        data: {
+            formLabelWidth:"150px",
+            tableData:[],
+            cusStatusArr:[],
+            teleketGroupArr:dzList,
+            teleketSaleArr:dxgwList,
+            teleketDirectorArr:dxzjList,
+            signArr:[{value:0,name:'未签约'},{value:1,name:'已签约'}],
+            visitArr:[{value:0,name:'待处理'},{value:1,name:'未到访'},{value:2,name:'首次到访'},{value:3,name:'多次到访'}],
+            orgLeafOptions:[],
+            multipleSelection:[],
+
+            queryForm:{
+                visitStatus:"",
+                isSign:"",
+                teleGroupId:"",
+                teleSaleId:"",
+                tasteProjectId:"",
+                cusName:"",
+                reserveTime1:"",
+                reserveTime2:"",
+                createTime1:"",
+                createTime2:"",
+                allocateTime1:"",
+                allocateTime2:"",
+            },
+            pager:{
+                total: 0,
+                currentPage: 1,
+                pageSize: 20,
+            },
+        },
+        methods: {
+            formatCusLevel(row, column){
+                return row.cusLevel==1?"VIP": row.cusLevel==2?"重要":row.cusLevel==2?"普通":""
+            },
+            handleSelectionChange(val) {
+                this.multipleSelection = val;
+            },
+            resetForm(formName) {
+                if( mainDivVM.$refs[formName]) {
+                    mainDivVM.$refs[formName].resetFields();
+                }
+            },
+            initList(){
+                var param = this.queryForm;
+                param.pageSize = this.pager.pageSize;
+                param.pageNum =  this.pager.currentPage;
+                axios.post('/aggregation/businessMyCustomer/queryPage',param).then(function (response) {
+                    if(null===response||response.data==null||response.data.code!='0'){
+                        if(response.data.code!='0'){
+                            mainDivVM.$message({message: response.data.msg, type: 'warning'});
+                        }
+                        return false;
+                    }else{
+                        mainDivVM.tableData =response.data.data.data;
+                        mainDivVM.pager.currentPage= response.data.data.currentPage;
+                        mainDivVM.pager.total= response.data.data.total;
+                        mainDivVM.pager.pageSize =  response.data.data.pageSize;
+                    }
+                })
+            },
+        },
+        created(){
+            this.initList();
+        }
+    });
+
+</script>
+<style>
+
+    .dialog-footer{
+        text-align: center;
+    }
+    .el-table th {
+        font-weight: bolder;
+    }
+    .el-input__inner{
+    //   width: 200px;
+    }
+    .el-button--danger:focus, .el-button--danger:hover{
+        background: #6f7180;
+        border: #6f7180;
+    }
+    .el-button--danger{
+        background: #6f7180;
+        border: #6f7180;
+    }
+</style>
+</body>
+</html>
