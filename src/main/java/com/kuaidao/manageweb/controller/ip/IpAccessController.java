@@ -169,5 +169,20 @@ public class IpAccessController {
 	public JSONResult<List<IpPackageInfoDTO>> findListByPackage(@RequestBody IpAccessManagerQueryDTO dto) {
 		return ipAccessFeignClient.findListByPackage(dto);
 	}
+	
+	
+	/**
+	 * 
+	 * @param dto
+	 * @param request
+	 * @param response
+	 * @return
+	 */
+	@RequestMapping("/findListByIp")
+	@ResponseBody
+	public JSONResult<List<IpRepositoryInfoDTO>> findListByIp(@RequestBody IpAccessManagerQueryDTO dto) {
+		return ipAccessFeignClient.findListByIp(dto);
+	}
+
 
 }
