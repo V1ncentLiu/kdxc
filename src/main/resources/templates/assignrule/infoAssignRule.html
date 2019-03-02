@@ -99,7 +99,7 @@ xmlns:th="http://www.thymeleaf.org">
                 <el-input v-model="form.ruleName"   maxlength="50" ></el-input>
             </el-form-item>
             <el-form-item label="规则ID："    :label-width="formLabelWidth" prop="ruleID">
-                <el-input v-model="form.ruleID"  type="number"   maxlength="19" ></el-input>
+                <el-input v-model="form.ruleID" @keyup.native="number" maxlength="19" ></el-input>
             </el-form-item>
         </el-form>
         <div slot="footer" class="dialog-footer">
@@ -190,6 +190,11 @@ var proSelect=[[${proSelect}]];
                         { required: true, message: '请输入规则ID', trigger: 'blur' },
                         {  max: 19, message: '最大19个字符', trigger: 'change' },
                         {validator:function(rule,value,callback){
+                            if(/^[0-9]*$/.test(value) == false){// 校验是否是数字
+                               callback(new Error("请输入数字"));
+                            }else{
+                               callback();
+                            } // 校验是否是数字结束
                         	if(ruleVm.oldruleRefId==value&&ruleVm.oldruleId){
                         		   callback();
                         	}
@@ -441,6 +446,10 @@ var proSelect=[[${proSelect}]];
                     mainDivVM.$refs[formName].resetFields();
                 }
             },
+            number(){
+    　　　      this.form.ruleID=this.form.ruleID.replace(/[^\.\d]/g,'');
+                this.form.ruleID=this.form.ruleID.replace('.','');
+        　　},
         },
     	 created(){
     		//初始化数据列表
