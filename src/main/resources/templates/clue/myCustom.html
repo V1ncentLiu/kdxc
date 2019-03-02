@@ -32,7 +32,7 @@
     <el-row class="marginB10 greybg padding20" style="padding-bottom: 0">        
         <el-form :inline="true" :model="form" ref="form">
             <el-form-item label="">
-                <el-select v-model="form.isTransfer" placeholder="全部资源" style="width: 100%;">
+                <el-select v-model="form.isTransfer" placeholder="全部资源" style="width: 100%;" clearable >
                     <el-option
                         v-for="item in isTransfer"
                         :key="item.value"
@@ -42,7 +42,7 @@
                 </el-select>
             </el-form-item> 
             <el-form-item label="">  
-                <el-select v-model="form.cluesta" placeholder="资源有效性" style="width: 100%;">
+                <el-select v-model="form.cluesta" placeholder="资源有效性" style="width: 100%;" clearable >
                     <el-option
                         v-for="item in clueStatus"
                         :key="item.value"
@@ -58,7 +58,7 @@
                 <el-input v-model="form.customerName" placeholder="客户姓名"></el-input>
             </el-form-item>
             <el-form-item label="">
-                <el-select v-model="form.cusStatus" placeholder="客户状态" style="width: 100%;">
+                <el-select v-model="form.cusStatus" placeholder="客户状态" style="width: 100%;" clearable >
                     <el-option
                         v-for="item in cusStatusArr"
                         :key="item.value"
@@ -68,7 +68,7 @@
                 </el-select>
             </el-form-item>
             <el-form-item label="">
-                <el-select v-model="form.cusLeve" placeholder="客户级别" style="width: 100%;">
+                <el-select v-model="form.cusLeve" placeholder="客户级别" style="width: 100%;" clearable >
                     <el-option
                         v-for="item in cusLevelArr"
                         :key="item.value"
@@ -129,7 +129,7 @@
             <span style="color: rgb(0, 114, 255);text-decoration: underline;cursor: pointer;" @click="toogleClick">更多搜索</span>
             <el-row v-show="isShow">
                 <el-form-item label="">
-                    <el-select v-model="form.dayTel" placeholder="今日是否拨打" style="width: 100%;">
+                    <el-select v-model="form.dayTel" placeholder="今日是否拨打" style="width: 100%;" clearable >
                         <el-option
                             v-for="item in callTel"
                             :key="item.value"
@@ -139,7 +139,7 @@
                     </el-select>
                 </el-form-item> 
                 <el-form-item label="">  
-                    <el-select v-model="form.hasInvite" placeholder="是否邀约" style="width: 100%;">
+                    <el-select v-model="form.hasInvite" placeholder="是否邀约" style="width: 100%;" clearable >
                         <el-option
                             v-for="item in hasInvite"
                             :key="item.value"
@@ -149,7 +149,7 @@
                     </el-select>
                 </el-form-item>
                 <el-form-item label="">
-                    <el-select v-model="form.repeatStatus" placeholder="是否重单" style="width: 100%;">
+                    <el-select v-model="form.repeatStatus" placeholder="是否重单" style="width: 100%;" clearable >
                         <el-option
                             v-for="item in clueRepeatStatus"
                             :key="item.value"
@@ -159,7 +159,7 @@
                     </el-select>
                 </el-form-item> 
                 <el-form-item label="">  
-                    <el-select v-model="form.province" placeholder="预签约省份" style="width: 100%;">
+                    <el-select v-model="form.province" placeholder="预签约省份" style="width: 100%;" clearable >
                         <el-option
                             v-for="item in provinceArr"
                             :key="item.name"
@@ -169,7 +169,7 @@
                     </el-select>
                 </el-form-item>
                 <el-form-item label="">  
-                    <el-select v-model="form.category" placeholder="资源类别" style="width: 100%;">
+                    <el-select v-model="form.category" placeholder="资源类别" style="width: 100%;" clearable > 
                         <el-option
                             v-for="item in categoryArr"
                             :key="item.value"
@@ -185,7 +185,7 @@
                     <el-input v-model="form.address" placeholder="地址"></el-input>
                 </el-form-item>
                 <el-form-item label="">  
-                    <el-select v-model="form.trackingDay" placeholder="当日是否跟访" style="width: 100%;">
+                    <el-select v-model="form.trackingDay" placeholder="当日是否跟访" style="width: 100%;" clearable >
                         <el-option
                             v-for="item in hastracking"
                             :key="item.value"
@@ -240,7 +240,7 @@
             <el-table-column align="center" prop="focusPoint" label="客户关注点"></el-table-column>
             <el-table-column align="center" prop="messagePoint" label="留言重点"></el-table-column>
             <el-table-column align="center" prop="messageTime" label="留言时间"></el-table-column>
-            <el-table-column align="center" prop="createTime" label="创建日期（资源创建日期）"></el-table-column>
+            <el-table-col嗯umn align="center" prop="createTime" label="创建日期（资源创建日期）"></el-table-column>
             <el-table-column align="center" prop="clueName" label="资源专员"></el-table-column>
             <el-table-column align="center" prop="searchWord" label="搜索词"></el-table-column>
             <el-table-column align="center" prop="categoryName" label="资源类别"></el-table-column>     
@@ -735,7 +735,8 @@
                 }          	
 
             },
-            searchClue(){//重单申请查询线索
+            searchClue(){
+            	//重单申请查询线索
                 if(this.repeatApplyForm.phone==""){
                     this.$message({
                       message: '请输入手机号',
@@ -745,6 +746,7 @@
                   var phone= this.repeatApplyForm.phone;
                   var param={};
                    param.phone=phone;
+                   this.repeatApplyForm.clue="";
         		   axios.post('/tele/clueMyCustomerInfo/queryRepeatClue',param).then(function (response) {
         		      mycustomVM.repeatClueArr=response.data.data;
          		  })
@@ -789,8 +791,7 @@
             },
             customerEidt(clueId,phone){
              //客户维护界面	
-            // callPhone(clueId,phone);
-             window.location.href="/tele/clueMyCustomerInfo/customerEditInfo?clueId="+clueId; 
+              window.location.href="/tele/clueMyCustomerInfo/customerEditInfo?clueId="+clueId; 
             },
             submitForm(formName) {
             	//重单提交
@@ -903,7 +904,6 @@
         　                     },
             //外呼号码
            outboundCall(outboundInputPhone,clueId){//外呼
-        　                    	 debugger;
         　                    	  var login=sessionStorage.getItem("loginClient");  //我是这样存的 ， 值为qimo 和 tr 
         　                		if(!login){
         　                			   mycustomVM.$message({message:"请登录呼叫中心",type:'warning'});
