@@ -28,7 +28,7 @@ public enum MenuEnum {
      * 总裁办
      * 
      */
-    REPETITION("重单处理（总裁办）"), BUSINESSSIGNVALID("有效签约单确认");
+    REPETITION("重单处理（总裁办）"), BUSINESSSIGNVALID("有效签约单确认"), BUSINESSSIGNREPETITION("签约重单处理（总裁办）");
 
 
 
