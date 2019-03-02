@@ -21,7 +21,7 @@ import com.kuaidao.sys.dto.ip.IpAccessManagerQueryDTO;
 import com.kuaidao.sys.dto.ip.IpPackageInfoDTO;
 import com.kuaidao.sys.dto.ip.IpRepositoryInfoDTO;
 
-@FeignClient(name = "aggregation-service-1", path = "/aggregation/sign/businesssign", fallback = BusinessSignFeignClient.HystrixClientFallback.class)
+@FeignClient(name = "aggregation-service", path = "/aggregation/sign/businesssign", fallback = BusinessSignFeignClient.HystrixClientFallback.class)
 
 public interface BusinessSignFeignClient {
 
