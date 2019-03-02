@@ -192,5 +192,37 @@ public class ClueRepetitionController {
     }
     
     
+    /**
+     *  重单处理列表页面
+     * 
+     * @return
+     */
+    @RequestMapping("/businessSignDealListPage")
+    public String businessSignDealListPage(HttpServletRequest request) {
+    	OrganizationQueryDTO orgDto = new OrganizationQueryDTO();
+		orgDto.setOrgType(OrgTypeConstant.SWZ);
+		orgDto.setSystemCode(SystemCodeConstant.HUI_JU);
+		//商务小组
+		JSONResult<List<OrganizationRespDTO>> swList = organizationFeignClient.queryOrgByParam(orgDto);
+		//获取商务经理
+		UserOrgRoleReq userRole = new UserOrgRoleReq();
+		userRole.setRoleCode(RoleCodeEnum.SWJL.name());
+		JSONResult<List<UserInfoDTO>> jsonResult = userInfoFeignClient.listByOrgAndRole(userRole);
+		request.setAttribute("swList", swList.getData());
+		request.setAttribute("businessManagerList", jsonResult.getData());
+		return "clue/repetition/businessSignDealListPage";
+    } 
+    
+    /**
+     * 重单处理列表
+     * 
+     * @return
+     */
+    @RequestMapping("/businessSignDealList")
+    @ResponseBody
+    public JSONResult<PageBean<ClueRepetitionDTO>> businessSignDealList(HttpServletRequest request,@RequestBody ClueRepetitionDTO clueRepetitionDTO) {
+    	JSONResult<PageBean<ClueRepetitionDTO>> list = clueRepetitionFeignClient.dealPetitionList(clueRepetitionDTO);
+    	return list;
+    }
 
 }
