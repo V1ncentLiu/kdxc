@@ -46,6 +46,16 @@
             padding:20px 0;
             padding-left: 2%;
         }
+        .left .el-checkbox__input{
+            float: left;
+            margin-top: 3px;
+        }
+        .left .el-checkbox__label{
+            word-wrap: break-word;
+            word-break: break-all;
+            white-space: pre-wrap !important;
+            width: 90%;
+        }
         .header .left{padding:0;width: 30%;}
         .one {
             padding-left: 20px;
@@ -145,28 +155,24 @@
             <li  v-for="(item,index) in dataList" :key="item.id">
                 <div class="left"  @click="fold(item)">
                     <i :class="{'el-icon-caret-right':item.folded,'el-icon-caret-bottom':!item.folded}" v-cloak v-if="item.subList" class="item-icon"></i>   
-                    <el-checkbox @click.native="handleOneCheckAll($event,item)" v-cloak v-if="!item.subList" :indeterminate="item.isIndeterminate" v-model="item.checkAll"> {{item.title}}</el-checkbox>
+                    <el-checkbox @click.native="handleOneCheckAll($event,item)" v-cloak v-if="!item.subList" :indeterminate="item.isIndeterminate" v-model="item.checkAll">{{item.title}}</el-checkbox>
                     <span v-if="item.subList" v-cloak>{{item.name}}</span> 
                 </div>              
                 <div class="right">
                 	<el-checkbox v-if="item.subList" :indeterminate="item.isIndeterminate" @change="checkSecondAll(item)" v-model="item.firstCheckAll"></el-checkbox>                 
                     <el-checkbox-group v-model="item.checkedCities" @change="handleOneCheckedCitiesChange(item)" v-else>
-                    <el-checkbox  v-for="m in item.operationInfos" :label="m.id" :key="m.id" v-cloak> {{m.name}}</el-checkbox>
+                    <el-checkbox  v-for="m in item.operationInfos" :label="m.id" :key="m.id" v-cloak>{{m.name}}</el-checkbox>
                     </el-checkbox-group>
                 </div>
                 <div class="line"></div>
                 <ul v-show="item.subList&&!item.folded">
                     <li v-for="(subList,cur) in item.subList" :key="subList.id">
                         <div class="left">
-                            <el-checkbox   v-model="subList.checkAll" @change="handleCheckAllChange($event,item,subList)" v-cloak>
-                                {{subList.name}}
-                            </el-checkbox>
+                            <el-checkbox   v-model="subList.checkAll" @change="handleCheckAllChange($event,item,subList)" v-cloak>{{subList.name}}</el-checkbox>
                         </div>
                         <div class="right">
                             <el-checkbox-group v-model="subList.checkedCities" @change="handleCheckedCitiesChange(item,subList)">
-                                <el-checkbox v-for="p in subList.operationInfos" :label="p.id" :key="p.id" v-cloak >
-                                    {{p.name}}
-                                </el-checkbox>
+                                <el-checkbox v-for="p in subList.operationInfos" :label="p.id" :key="p.id" v-cloak >{{p.name}}</el-checkbox>
                             </el-checkbox-group>
                         </div>
                         <div class="handle">
