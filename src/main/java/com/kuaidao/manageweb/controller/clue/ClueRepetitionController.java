@@ -15,11 +15,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.kuaidao.aggregation.dto.clue.ClueRepetitionDTO;
 import com.kuaidao.aggregation.dto.project.ProjectInfoDTO;
 import com.kuaidao.aggregation.dto.project.ProjectInfoPageParam;
+import com.kuaidao.aggregation.dto.sign.BusinessSignDTO;
 import com.kuaidao.common.constant.OrgTypeConstant;
 import com.kuaidao.common.constant.RoleCodeEnum;
 import com.kuaidao.common.constant.SystemCodeConstant;
@@ -32,6 +34,7 @@ import com.kuaidao.manageweb.feign.area.SysRegionFeignClient;
 import com.kuaidao.manageweb.feign.clue.ClueRepetitionFeignClient;
 import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
 import com.kuaidao.manageweb.feign.project.ProjectInfoFeignClient;
+import com.kuaidao.manageweb.feign.sign.BusinessSignFeignClient;
 import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
 import com.kuaidao.sys.dto.area.SysRegionDTO;
 import com.kuaidao.sys.dto.organization.OrganizationDTO;
@@ -63,7 +66,10 @@ public class ClueRepetitionController {
     private ProjectInfoFeignClient projectInfoFeignClient;
 	
 	@Autowired
-    SysRegionFeignClient sysRegionFeignClient;
+	private SysRegionFeignClient sysRegionFeignClient;
+	
+	@Autowired
+	private BusinessSignFeignClient businessSignFeignClient;
 	
 	 /**
      *  重单列表页面
@@ -192,5 +198,62 @@ public class ClueRepetitionController {
     }
     
     
+    /**
+     *  重单处理列表页面
+     * 
+     * @return
+     */
+    @RequestMapping("/businessSignDealListPage")
+    public String businessSignDealListPage(HttpServletRequest request) {
+    	OrganizationQueryDTO orgDto = new OrganizationQueryDTO();
+		orgDto.setOrgType(OrgTypeConstant.SWZ);
+		orgDto.setSystemCode(SystemCodeConstant.HUI_JU);
+		//商务小组
+		JSONResult<List<OrganizationRespDTO>> swList = organizationFeignClient.queryOrgByParam(orgDto);
+		//获取商务经理
+		UserOrgRoleReq userRole = new UserOrgRoleReq();
+		userRole.setRoleCode(RoleCodeEnum.SWJL.name());
+		JSONResult<List<UserInfoDTO>> jsonResult = userInfoFeignClient.listByOrgAndRole(userRole);
+		request.setAttribute("swList", swList.getData());
+		request.setAttribute("businessManagerList", jsonResult.getData());
+		return "clue/repetition/businessSignDealListPage";
+    } 
+    
+    /**
+     * 签约重单处理列表
+     * 
+     * @return
+     */
+    @RequestMapping("/businessSignDealList")
+    @ResponseBody
+    public JSONResult<PageBean<BusinessSignDTO>> businessSignDealList(HttpServletRequest request,@RequestBody BusinessSignDTO businessSignDTO) {
+    	JSONResult<PageBean<BusinessSignDTO>> list = businessSignFeignClient.businessSignDealList(businessSignDTO);
+    	return list;
+    }
+    /**
+     * 签约重单审核
+     * 
+     * @return
+     */
+   /* @RequestMapping("/updateBusinessPetitionById")
+    @ResponseBody
+    @LogRecord(description = "签约重单审核",operationType = LogRecord.OperationType.UPDATE,menuName = MenuEnum.BUSINESSSIGNREPETITION)
+    public JSONResult updatePetitionById(HttpServletRequest request,@RequestBody ClueRepetitionDTO clueRepetitionDTO) {
+    	return clueRepetitionFeignClient.updatePetitionById(clueRepetitionDTO);
+    }*/
+    
+    /**
+     *  重单处理列表页面
+     * 
+     * @return
+     */
+    @RequestMapping("/repeatPaymentDetails")
+    public String repeatPaymentDetails(HttpServletRequest request, @RequestParam String signId) {
+    	BusinessSignDTO businessSignDTO = new BusinessSignDTO();
+    	businessSignDTO.setId(Long.parseLong(signId));
+    	JSONResult<BusinessSignDTO> jsonResult = businessSignFeignClient.repeatPaymentDetails(businessSignDTO);
+    	request.setAttribute("businessSignDetail", jsonResult.getData());
+		return "clue/repetition/repeatPaymentDetails";
+    } 
 
 }

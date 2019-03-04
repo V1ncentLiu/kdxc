@@ -306,22 +306,32 @@
 		                	 repeatId = rows[i].repeatId
 		                 }
 		        		var detailDTOs = [];
+		        		var idList = [];
 		        		var dealStatusId = this.form.dealStatusId;
 		       			var num = 0;
 		                   for(var i=0;i<memberArry.length;i++) {
 		                     var detail={};
+		                     var ids ={};
 		                     detail.id=memberArry[i].detailId;
-		                     detail.repeatRatio=memberArry[i].repeatRatio;
+		                    
 		                     detail.repeatId = repeatId;
-		                     detail.dealStatus = dealStatusId;
+		                     if(dealStatusId ==0){
+		                    	 detail.repeatRatio =0;
+		                    	 detail.dealStatus = dealStatusId;
+		                     }else{
+		                    	 detail.dealStatus = dealStatusId;
+		                    	 detail.repeatRatio=memberArry[i].repeatRatio;
+		                     }
+		                    
 		                     detailDTOs.push(detail);
+		                     idList.push(memberArry[i].clueId);
 		                     num = parseFloat(num)+parseFloat(memberArry[i].repeatRatio)
 		                 }
 		        		
 		        		if(dealStatusId ==1){
 		        			if(num>100){
 		                    	this.$message({
-		                            message: '比例之和不能大于100',
+		                             message: '比例之和不能大于100',
 		                            type: 'warning'
 		                          });
 		                         return;
@@ -332,6 +342,7 @@
 		                param.repeatId = repeatId;
 		                param.detailDTOs = detailDTOs;
 		                param.dealremark = this.remark;
+		                param.idList = idList;
 		                axios.post('/clue/cluerepetition/updatePetitionById',param).then(function (response) {
 		              	  	console.log(response);
 		                  	if(null===response||response.data==null||response.data.code!='0'){

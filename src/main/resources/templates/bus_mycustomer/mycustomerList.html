@@ -38,32 +38,32 @@
                     <el-col :span="3">
                         <el-form-item label="">
                             <el-select v-model="queryForm.teleGroupId" clearable  placeholder="电销组" width="100">
-                                <el-option v-for="item in options" :key="item.id" :label="item.name" :value="item.id"></el-option>
+                                <el-option v-for="item in teleketGroupArr" :key="item.id" :label="item.name" :value="item.id"></el-option>
                             </el-select>
                         </el-form-item>
                     </el-col>
                     <el-col :span="3">
                         <el-form-item label="">
                             <el-select v-model="queryForm.teleSaleId" clearable  placeholder="创业顾问" width="100">
-                                <el-option v-for="item in options" :key="item.id" :label="item.name" :value="item.id"></el-option>
+                                <el-option v-for="item in teleketSaleArr" :key="item.id" :label="item.name" :value="item.id"></el-option>
                             </el-select>
                         </el-form-item>
                     </el-col>
                     <el-col :span="3">
                         <el-form-item label="">
                             <el-select v-model="queryForm.tasteProjectId" clearable  placeholder="品尝项目" width="100">
-                                <el-option v-for="item in options" :key="item.id" :label="item.name" :value="item.id"></el-option>
+                                <el-option v-for="item in tasteProArr" :key="item.id" :label="item.name" :value="item.id"></el-option>
                             </el-select>
                         </el-form-item>
                     </el-col>
                     <el-col :span="3">
                         <el-form-item label="">
-                            <el-input v-model="cusName" placeholder="请输入客户姓名"></el-input>
+                            <el-input v-model="queryForm.cusName" placeholder="请输入客户姓名"></el-input>
                         </el-form-item>
                     </el-col>
                     <el-col :span="3">
                         <el-form-item>
-                            <el-button type="primary" @click="onSubmit">标记未到访</el-button>
+                            <el-button type="primary" @click="notVisit">标记未到访</el-button>
                         </el-form-item>
                     </el-col>
                 </el-row>
@@ -98,20 +98,19 @@
             </el-form>
         </el-row>
 
-        <el-table :data="tableData" style="width: 100%" tooltip-effect="dark"  ref="multipleTable"  @select="selectRow"
-                  @row-dblclick="rowDblClick()"
+        <el-table :data="tableData" style="width: 100%" tooltip-effect="dark"  ref="multipleTable"
+                  @row-dblclick=""
                   @selection-change="handleSelectionChange" >
             <el-table-column type="selection" width="55" prop="clueId"> </el-table-column>
-            <el-table-column prop="xh" label="序号" width="50" align="center"></el-table-column>
+            <el-table-column prop="xh" label="序号" width="50"  type="index" align="center"></el-table-column>
             <el-table-column prop="reserveTime" label="邀约来访时间" sortable align="center"></el-table-column>
             <el-table-column prop="cusName" label="客户姓名" align="center"></el-table-column>
-            <el-table-column prop="visitStatus" label="到访状态" align="center"></el-table-column>
-            <el-table-column  prop="isSign" label="签约状态" align="center"></el-table-column>
+            <el-table-column prop="visitStatus" label="到访状态"  :formatter="formatVisitStatus" align="center"></el-table-column>
+            <el-table-column  prop="isSign" label="签约状态"  :formatter="formatSignStatus" align="center"></el-table-column>
             <el-table-column  prop="" label="重单分配比例" align="center"></el-table-column>
-
             <el-table-column  prop="createTime" label="提交邀约时间" sortable align="center"></el-table-column>
             <el-table-column  prop="allocateTime" label="接收客户时间" sortable align="center"></el-table-column>
-            <el-table-column  prop="status" label="到访情况" align="center"></el-table-column>
+            <el-table-column  prop="" label="到访情况" :formatter="formatVisit" align="center"></el-table-column>
             <el-table-column  prop="status" label="签约明细" align="center"></el-table-column>
             <el-table-column  prop="teleGorupName" label="电销组" align="center"></el-table-column>
             <el-table-column  prop="teleDirectorName" label="电销总监" align="center"></el-table-column>
@@ -122,14 +121,23 @@
             <el-table-column  prop="province" label="开店省份" align="center"></el-table-column>
             <el-table-column  prop="city" label="开店城市" align="center"></el-table-column>
             <el-table-column  prop="district" label="开店区域/县" align="center"></el-table-column>
-            <el-table-column  prop="sex" label="客户性别" align="center"></el-table-column>
+            <el-table-column  prop="sex" label="客户性别" align="center">
+                <template slot-scope="scope">
+                    <div v-if="scope.row.sex === 1">
+                        男
+                    </div>
+                    <div v-else-if="scope.row.sex ===2">
+                        女
+                    </div>
+                </template>
+            </el-table-column>
             <el-table-column  prop="age" label="客户年龄" align="center"></el-table-column>
             <el-table-column  prop="partnerTypeName" label="合伙人" align="center"></el-table-column>
             <el-table-column  prop="hasExperience" label="餐饮经验" align="center"></el-table-column>
             <el-table-column  prop="hasAddress" label="选址情况" align="center"></el-table-column>
             <el-table-column  prop="advanceAmount" label="预投金额" align="center"></el-table-column>
             <el-table-column  prop="intenProject" label="意向项目" align="center"></el-table-column>
-            <el-table-column  prop="area" label="意向项目" align="center"></el-table-column>
+            <el-table-column  prop="area" label="店面大小" align="center"></el-table-column>
         </el-table>
     </template>
     <table-pagination :pager="pager"  @change="initList"></table-pagination>
@@ -143,10 +151,9 @@
 <div th:include="_footer_include :: #jsLib"></div>
 <!--<script th:src="@{/js/excel/xlsx.min.js}" src="../static/js/excel/xlsx.min.js"></script>-->
 <script th:inline="javascript">
-    <!--电销组-->
-    var dzList=[[${dzList}]];
-    var dxgwList=[[${dxgwList}]];
-    var dxzjList = [[${dxzjList}]]
+    var dzList=[[${teleGroupList}]];
+    var dxgwList=[[${teleSaleList}]];
+    var tasteProList=[[${tasteProList}]];
     // 查询 模块
     var mainDivVM = new Vue({
         el: '#mainDiv',
@@ -156,7 +163,7 @@
             cusStatusArr:[],
             teleketGroupArr:dzList,
             teleketSaleArr:dxgwList,
-            teleketDirectorArr:dxzjList,
+            tasteProArr:tasteProList,
             signArr:[{value:0,name:'未签约'},{value:1,name:'已签约'}],
             visitArr:[{value:0,name:'待处理'},{value:1,name:'未到访'},{value:2,name:'首次到访'},{value:3,name:'多次到访'}],
             orgLeafOptions:[],
@@ -183,11 +190,48 @@
             },
         },
         methods: {
-            formatCusLevel(row, column){
-                return row.cusLevel==1?"VIP": row.cusLevel==2?"重要":row.cusLevel==2?"普通":""
+
+            formatVisit(row, column){
+                if(row.visitStatus==0){
+                    resVal='未到访（原因）';
+                }else  if(row.visitStatus>0&&row.status==2){
+                    resVal='审核中';
+                }else  if(row.visitStatus>0&&row.status==3){
+                    resVal='到访被驳回';
+                }else  if(row.visitStatus>0&&row.status==4){
+                    resVal='查看到访记录';
+                }else{
+                    //没有状态的时候
+                    resVal='添加到访记录';
+                }
+                return resVal;
+            },
+
+            formatVisitStatus(row, column){
+                var  resVal='待处理';
+                if(row.visitStatus==0){
+                    resVal='未到访';
+                }else  if(row.visitStatus==1){
+                    resVal='首次到访';
+                }else  if(row.visitStatus==2){
+                    resVal='2次到访';
+                }else  if(row.visitStatus==3){
+                    resVal='多次到访';
+                }
+                return resVal;
+            },
+            formatSignStatus(row, column){
+                var  resVal='未签约';
+                if(row.visitStatus==1){
+                    resVal='已到访';
+                }
+                return resVal;
             },
             handleSelectionChange(val) {
                 this.multipleSelection = val;
+            },
+            notVisit(){
+
             },
             resetForm(formName) {
                 if( mainDivVM.$refs[formName]) {
@@ -198,6 +242,9 @@
                 var param = this.queryForm;
                 param.pageSize = this.pager.pageSize;
                 param.pageNum =  this.pager.currentPage;
+
+                console.log(param)
+
                 axios.post('/aggregation/businessMyCustomer/queryPage',param).then(function (response) {
                     if(null===response||response.data==null||response.data.code!='0'){
                         if(response.data.code!='0'){

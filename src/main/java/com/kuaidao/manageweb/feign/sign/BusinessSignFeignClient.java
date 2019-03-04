@@ -6,10 +6,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.netflix.feign.FeignClient;
 import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
+import com.kuaidao.aggregation.dto.clue.ClueRepetitionDTO;
 import com.kuaidao.aggregation.dto.invitearea.InviteAreaDTO;
 import com.kuaidao.aggregation.dto.sign.BusinessSignDTO;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
@@ -38,7 +40,17 @@ public interface BusinessSignFeignClient {
 	 */
 	@RequestMapping(method = RequestMethod.POST, value = "/updateBusinessSignDTOValidByIds")
 	public JSONResult updateBusinessSignDTOValidByIds(@RequestBody BusinessSignDTO businessSignDTO);
-
+	/**
+	 * 重单处理列表
+	 * 
+	 * @param menuDTO
+	 * @return
+	 */
+	@PostMapping("/businessSignDealList")
+	public JSONResult<PageBean<BusinessSignDTO>> businessSignDealList(@RequestBody BusinessSignDTO businessSignDTO);
+	
+	@PostMapping("/repeatPaymentDetails")
+	public JSONResult<BusinessSignDTO> repeatPaymentDetails(@RequestBody BusinessSignDTO businessSignDTO);
 	@Component
 	static class HystrixClientFallback implements BusinessSignFeignClient {
 
@@ -63,7 +75,17 @@ public interface BusinessSignFeignClient {
 			return fallBackError("签约单有效性判断");
 		}
 
-		
+		@Override
+		public JSONResult<PageBean<BusinessSignDTO>> businessSignDealList(BusinessSignDTO businessSignDTO) {
+			// TODO Auto-generated method stub
+			return fallBackError("查询签约重单列表失败");
+		}
+
+		@Override
+		public JSONResult<BusinessSignDTO> repeatPaymentDetails(BusinessSignDTO businessSignDTO) {
+			// TODO Auto-generated method stub
+			return fallBackError("查询签约重单详情失败");
+		}
 		
 	}
 }
