@@ -30,7 +30,13 @@ public enum MenuEnum {
      * 
      */
     REPETITION("重单处理（总裁办）"),
-    BUSINESSSIGNVALID("有效签约单确认")
+    BUSINESSSIGNVALID("有效签约单确认"),
+    
+    /**
+     * 电销中心
+     */
+    SIGN_ORDER("签约记录")
+    
     ;
 	
 
