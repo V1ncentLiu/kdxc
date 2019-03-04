@@ -10,6 +10,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
+import org.apache.shiro.subject.Subject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -47,7 +48,7 @@ public class CustomerManagerController {
 	@Autowired
 	private UserInfoFeignClient userInfoFeignClient;
 
-    @RequiresPermissions("customerManager:view")
+	@RequiresPermissions("customerManager:view")
 	@RequestMapping("/initcustomerManager")
 	public String initmyCustomer(HttpServletRequest request, Model model) {
 
@@ -85,6 +86,34 @@ public class CustomerManagerController {
 			// 当日跟进
 			dto.setTrackingTime(new Date());
 		}
+
+		// 数据权限处理
+		Subject subject = SecurityUtils.getSubject();
+		UserInfoDTO user = (UserInfoDTO) subject.getSession().getAttribute("user");
+		if (null != user.getRoleList() && user.getRoleList().size() > 0) {
+			String roleCode = user.getRoleList().get(0).getRoleCode();
+			if (null != roleCode) {
+				if (roleCode.equals(RoleCodeEnum.GLY.name())) {
+					// 管理员查看所有
+
+				} else if (roleCode.equals(RoleCodeEnum.DXFZ.name())) {
+					// 查看事业部下所有数据
+					dto.setTeleDept(user.getOrgId());
+
+				} else if (roleCode.equals(RoleCodeEnum.DXZJL.name())) {
+
+					// 查看分公司下所有数据
+					dto.setTeleCompany(user.getOrgId());
+
+				} else if (roleCode.equals(RoleCodeEnum.DXZJ.name())) {
+
+					// 查看电销组下所有数据
+					dto.setTeleGorup(user.getOrgId());
+
+				}
+			}
+		}
+
 		JSONResult<PageBean<CustomerManagerDTO>> jsonResult = customerManagerFeignClient.findcustomerPage(dto);
 		return jsonResult;
 	}
@@ -155,8 +184,8 @@ public class CustomerManagerController {
 			if (null != user) {
 				orgMap.put("userId", user.getId());
 				orgMap.put("userName", user.getName());
-			    orgMap.put("id", organizationDTO.getId() + "," + user.getId());
-		        orgMap.put("name", organizationDTO.getName() + "(" + user.getName() + ")");
+				orgMap.put("id", organizationDTO.getId() + "," + user.getId());
+				orgMap.put("name", organizationDTO.getName() + "(" + user.getName() + ")");
 
 			}
 			result.add(orgMap);

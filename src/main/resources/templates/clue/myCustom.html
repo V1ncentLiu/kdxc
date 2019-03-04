@@ -684,14 +684,34 @@
                  param.searchWord= this.form.searchWord;
                  param.trackingDay= this.form.trackingDay;
      		    axios.post('/tele/clueMyCustomerInfo/findTeleClueInfo',param).then(function (response) {
+     				if(!response){
+						ipManagerVM.$message({
+	                        message: "接口调用失败",
+	                        type: 'error'
+	                      }); 
+						return ;
+					}
      				var resobj= response.data;
+					if(!resobj){
+						ipManagerVM.$message({
+	                        message: "接口调用失败",
+	                        type: 'error'
+	                      }); 
+						return ;
+					} 
+					if(resobj.code!='0'){
+						ipManagerVM.$message({
+	                        message: "接口调用失败",
+	                        type: 'error'
+	                      }); 
+						return ;
+					}
      		    	var pageData=resobj.data;
      				mycustomVM.pager.total=pageData.total;
      				mycustomVM.pager.currentPage = pageData.currentPage;
      				mycustomVM.pager.pageSize = pageData.pageSize;
      				mycustomVM.dataTable =pageData.data; 	
      			})
-         	
          	},
          	//展现详情
          	showClueDetailInfo (row, column) {

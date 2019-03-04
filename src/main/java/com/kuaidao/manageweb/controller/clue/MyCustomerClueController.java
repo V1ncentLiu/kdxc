@@ -282,7 +282,7 @@ public class MyCustomerClueController {
 		call.setPageNum(1);
 		JSONResult<PageBean<CallRecordRespDTO>> callRecord = callRecordFeign.listTmCallReacordByParams(call);
 		// 资源通话记录
-		if (callRecord != null && callRecord.SUCCESS.equals(callRecord.getCode()) && callRecord.getData() != null) {
+		if (callRecord != null && JSONResult.SUCCESS.equals(callRecord.getCode()) && callRecord.getData() != null) {
 			request.setAttribute("callRecord", callRecord.getData());
 		} else {
 			request.setAttribute("callRecord", new ArrayList());
@@ -296,7 +296,7 @@ public class MyCustomerClueController {
 		JSONResult<ClueDTO> clueInfo = myCustomerFeignClient.findClueInfo(queryDTO);
 
 		// 维护的资源数据
-		if (clueInfo != null && clueInfo.SUCCESS.equals(clueInfo.getCode()) && clueInfo.getData() != null) {
+		if (clueInfo != null && JSONResult.SUCCESS.equals(clueInfo.getCode()) && clueInfo.getData() != null) {
 
 			if (null != clueInfo.getData().getClueCustomer()) {
 				request.setAttribute("customer", clueInfo.getData().getClueCustomer());
