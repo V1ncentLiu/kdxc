@@ -27,7 +27,7 @@
                     </el-col>
                     <el-col :span="8">
                         <el-form-item label="手机号：" prop="customerPhone" :label-width="formLabelWidth">
-                           <a href="tel:15000000000">{{form.customerPhone}}</a>
+                           <a>{{form.customerPhone}} <i class="el-icon-phone-outline" @click="gettelNumberIcon(form.customerPhone)"></i></a>
                            <span v-if="buttonType === 'A'">
                                 <el-button type="primary" @click="dialogFormVisible = true"><i class="el-icon-plus"></i>手机号</el-button>
                             </span>
@@ -422,14 +422,16 @@
                           align="center">
                         </el-table-column>
                         <div slot="append" v-show="lineFormShow">
-                          <el-form :inline="true" :model="formInline" class="demo-form-inline">
+                          <el-form :inline="true" :model="formInline" class="demo-form-inline" :rules="rules" ref="LineRuleForm">
                             <el-row class="paddingL55">
-                                  <el-date-picker
-                                    v-model="formInline.callTime"
-                                    type="datetime"
-                                    size="mini"
-                                    placeholder="选择日期时间">
-                                  </el-date-picker>
+                            	  <el-form-item prop="callTime">
+	                                  <el-date-picker
+	                                    v-model="formInline.callTime"
+	                                    type="datetime"
+	                                    size="mini"
+	                                    placeholder="选择日期时间">
+	                                  </el-date-picker>
+	                              </el-form-item>
                                   <el-form-item label="" size="mini">
                                     <el-select v-model="formInline.customerStatus" placeholder="客户状态">
                                      <el-option
@@ -440,19 +442,19 @@
 				                    </el-option>
                                     </el-select>
                                   </el-form-item>
-                                  <el-form-item label="" size="mini">
+                                  <el-form-item label="" size="mini" prop="isCall">
                                     <el-select v-model="formInline.isCall" placeholder="是否接通">
                                       <el-option label="是" value="1"></el-option>
                                       <el-option label="否" value="0"></el-option>
                                     </el-select>
                                   </el-form-item>
-                                  <el-form-item label="" size="mini">
+                                  <el-form-item label="" size="mini" prop="resourceStatus">
                                     <el-select v-model="formInline.resourceStatus" placeholder="无效资源">
                                       <el-option label="无效资源" value="0"></el-option>
                                       <el-option label="有效资源" value="1"></el-option>
                                     </el-select>
                                   </el-form-item>
-                                  <el-form-item label="" size="mini">
+                                  <el-form-item label="" size="mini" prop="focusPoint">
                                     <el-input v-model="formInline.focusPoint" size="mini" placeholder="客户关注点"></el-input>
                                   </el-form-item>
                                   <el-form-item label="" size="mini">
@@ -461,14 +463,16 @@
                                       <el-option label="否" value="0"></el-option>
                                     </el-select>
                                   </el-form-item>
-                                  <el-date-picker
-                                    v-model="formInline.nextVisitTime"
-                                    type="datetime"
-                                    format="yyyy-MM-dd HH:mm"
-                                    size="mini"
-                                    placeholder="选择日期时间">
-                                  </el-date-picker>
-                                      <el-form-item  class="lineInherit">
+                                  <el-form-item prop="nextVisitTime">
+	                                  <el-date-picker
+	                                    v-model="formInline.nextVisitTime"
+	                                    type="datetime"
+	                                    format="yyyy-MM-dd HH:mm"
+	                                    size="mini"
+	                                    placeholder="选择日期时间">
+	                                  </el-date-picker>
+                                  </el-form-item>
+                                  <el-form-item  class="lineInherit">
                                     <el-button type="primary" size="mini" @click="onConfirmAdd">确认添加</el-button>
                                   </el-form-item>
                             </el-row>
@@ -667,6 +671,7 @@
                 }"
             >
                 <el-input v-model="domain.value" maxLength="11" @keyup.native="phoneNumber" style="width: 300px;margin-right: 10px;"></el-input>
+                <i class="el-icon-phone-outline telNumberIcon" @click="gettelNumberIcon(domain.value)"></i>
                 <el-button @click.prevent="removeDomain(domain)" v-show="deleteShow">删除</el-button>
             </el-form-item>
         </el-form>
@@ -702,6 +707,7 @@
             .paddingL55 div.el-form-item, .paddingL55 .el-input--mini .el-input__inner { width: 120px; }
             .el-form--inline .el-form-item { margin-right: 0!important; }
             .paddingL55 div.el-form-item:last-child { width: 106px; text-align: center; }
+            .paddingL55 .el-form-item__content { line-height: 29px; }
         }
 		@media screen and (width: 1744px) {
             .paddingL55 { line-height: 28px; }
@@ -712,6 +718,9 @@
             .paddingL55 .el-input--mini .el-input { top: -3px; }
             .paddingL55 div.el-form-item:last-child { width: 146px; text-align: center; }
         }
+        
+        i.el-icon-phone-outline { width: 20px; height: 20px; text-align: center; line-height: 20px; font-size: 20px;  margin: 0 5px; }
+        .telNumberIcon { width: 20px; height: 20px; text-align: center; line-height: 20px; position: absolute; right:0; top:13px;  }
     </style>
     
 </body>
@@ -794,6 +803,22 @@ var ossUrl=[[${ossUrl}]];
                             } 
                             callback();
                         }, trigger: 'blur'} */
+                    ],
+                    /*跟踪记录验证*/
+                    callTime: [
+                      { required: true, message: '请选择拨打时间', trigger: 'change' }
+                    ],
+                    focusPoint:[
+                      { required: true, message: '请填写客户关注点', trigger: 'blur' }
+                    ],
+                    isCall:[
+                      { required: true, message: '请选择是否接通', trigger: 'change' }
+                    ],
+                    resourceStatus:[
+                      { required: true, message: '请选择资源是否有效', trigger: 'change' }
+                    ],
+                    nextVisitTime:[
+                      { required: true, message: '请选择下次回访时间', trigger: 'change' }
                     ]
                 },
                 dynamicValidateForm: {//新增手机号弹窗数据
@@ -854,6 +879,15 @@ var ossUrl=[[${ossUrl}]];
             }             
         },
         methods: {
+           gettelNumberIcon (tel) { 
+        	//外呼手机
+            var  param={};
+            param.clueId=clueId;
+     	    window.parent.parent.outboundCallPhone(tel,2,clueId, function(res){
+     	    axios.post('/tele/clueMyCustomerInfo/updateCallTime',param).then(function (response) {
+              });
+     	     });
+        	},
         	formatTimeFn(date) {
         	  var dateNew = new Date( date );
        		  var year = dateNew.getFullYear()
@@ -1135,7 +1169,64 @@ var ossUrl=[[${ossUrl}]];
                 isEdit=true;
             },
             onConfirmAdd(index ,row) { 
-             //跟进记录保存
+           	 this.$refs['LineRuleForm'].validate((valid) => {
+                   if (valid) {
+                     	//start
+                	 //跟进记录保存
+                       var param={};
+                       param.clueId=clueId;
+                       var callTime=this.formInline.callTime;
+                       if(typeof(callTime)=='string'){
+                      	  param.callTime=new Date(Date.parse(callTime.replace(/-/g, "/")));
+                       }else{
+                           param.callTime=this.formInline.callTime; 
+                       }
+                 
+                       param.customerStatus=this.formInline.customerStatus;
+                       param.isCall=this.formInline.isCall;
+                       param.resourceStatus=this.formInline.resourceStatus;
+                       param.focusPoint=this.formInline.focusPoint;
+                       param.visitStatus=this.formInline.visitStatus;
+                       var nextVisitTime=this.formInline.nextVisitTime;
+                       var callTime=this.formInline.callTime;
+                       if(typeof(nextVisitTime)=='string'){
+                        	  param.nextVisitTime=new Date(Date.parse(nextVisitTime.replace(/-/g, "/")));
+                       }else{
+                           param.nextVisitTime=this.formInline.nextVisitTime; 
+                       }
+                       //如果是编辑跟进记录
+                       if( isEdit){
+                           param.id=this.formInline.id;
+                      	 axios.post('/tele/clueMyCustomerInfo/updateClueTracking',param)
+                           .then(function (response) {
+                         	  addCustomerVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
+                         	    axios.post('/tele/clueMyCustomerInfo/findClueTracking',param)
+                              .then(function (response) {
+                              	addCustomerVM.tableDataC2=response.data.data;
+                               }); 
+              	          }}); 	 
+                           });
+                       }else{
+                      	 //如果是新增跟进记录
+                           axios.post('/tele/clueMyCustomerInfo/saveClueTracking',param)
+                           .then(function (response) {
+                         	  addCustomerVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
+                         	    axios.post('/tele/clueMyCustomerInfo/findClueTracking',param)
+                              .then(function (response) {
+                              	 addCustomerVM.tableDataC2=response.data.data;
+                               }); 
+              	          }}); 
+                         }); 
+                       }
+                     	//end
+                   } else {
+                     console.log('error submit!!');
+                     return false;
+                   }
+              }); 
+            	 
+             //return ;
+             /* //跟进记录保存
              var param={};
              param.clueId=clueId;
              var callTime=this.formInline.callTime;
@@ -1180,7 +1271,7 @@ var ossUrl=[[${ossUrl}]];
                      }); 
     	          }}); 
                }); 
-             }
+             } */
             },
             deteleClueFile(){
              //删除上传文件
@@ -1475,6 +1566,16 @@ var ossUrl=[[${ossUrl}]];
 <script type="text/javascript" th:src="@{'/js/custom/file_upload/lib/base64.js'}"></script>
 <script type="text/javascript" th:src="@{'/js/custom/file_upload/plupload.full.min.js'}"></script>
 <script type="text/javascript" th:src="@{'/js/custom/file_upload/file_upload.js'}"></script>
+
+<script type="text/javascript" src="//agent-gateway-2.cticloud.cn/js/agent/v10/cti-link.js"></script>
+<script th:src="@{/js/custom/call/md5.js?v=1.0.0}"></script>
+<script th:src="@{/js/custom/call/toolbar.js?v=1.0.1}"></script>
+<script th:src="@{/js/custom/call/toolbarIframe.js?v=1.0.1}"></script>
+<script th:src="@{/js/custom/call/timer.js?v=1.0.1}"></script>
+<script th:src="@{/js/custom/call/rtCall.js?v=1.0.0}"></script> 
+ <!-- 播放錄音 js -->
+ <script th:src="@{/js/custom/callrecord/simpleAudio.js?v=1.0.0}"></script>
+
  <script type="text/javascript">
  
  function clueUploadFile(){

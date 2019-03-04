@@ -11,7 +11,7 @@ $(function(){
  * @param clueId    线索id
  * @param callback 回调函数
  * @returns
- *//*
+ */ 
 function outboundCallPhone(outboundInputPhone,callSource,clueId,callback){
 	stopSound();//停止播放录音
 	if(!homePageVM.isQimoClient && !homePageVM.isTrClient ){
@@ -90,10 +90,10 @@ function outboundCallPhone(outboundInputPhone,callSource,clueId,callback){
           });
  	}
 	
-}*/
+} 
 
 
-/*var myCallRecordVm = new Vue({
+ var myCallRecordVm = new Vue({
     el: '#myCallRecordVm',
     data: {
     	isLogin:false,
@@ -110,4 +110,4 @@ function outboundCallPhone(outboundInputPhone,callSource,clueId,callback){
 
 
 
-})*/
+}) 

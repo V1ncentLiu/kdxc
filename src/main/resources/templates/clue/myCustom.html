@@ -215,9 +215,7 @@
                     {{scope.row.phone}}
                     <input type='hidden'>
                     
-                    <i class="el-icon-phone-outline"  @click="customerEidt(scope.row.clueId)"  style="margin:0 10px;font-size: 16px;cursor: pointer;"></i>  
-                   <!-- <i class="el-icon-phone-outline"   @click="outboundCall(scope.row.phone,scope.row.clueId)"  style="margin:0 10px;font-size: 16px;cursor: pointer;"></i> --> 
-        
+                    <i class="el-icon-phone-outline"  @click="customerEidt(scope.row.clueId),outboundCall(scope.row.phone,scope.row.clueId)"  style="margin:0 10px;font-size: 16px;cursor: pointer;"></i>  
                     <el-tag v-if="scope.row.tag">{{scope.row.tag}}</el-tag>
                 </template>
             </el-table-column>
@@ -686,14 +684,34 @@
                  param.searchWord= this.form.searchWord;
                  param.trackingDay= this.form.trackingDay;
      		    axios.post('/tele/clueMyCustomerInfo/findTeleClueInfo',param).then(function (response) {
+     				if(!response){
+						ipManagerVM.$message({
+	                        message: "接口调用失败",
+	                        type: 'error'
+	                      }); 
+						return ;
+					}
      				var resobj= response.data;
+					if(!resobj){
+						ipManagerVM.$message({
+	                        message: "接口调用失败",
+	                        type: 'error'
+	                      }); 
+						return ;
+					} 
+					if(resobj.code!='0'){
+						ipManagerVM.$message({
+	                        message: "接口调用失败",
+	                        type: 'error'
+	                      }); 
+						return ;
+					}
      		    	var pageData=resobj.data;
      				mycustomVM.pager.total=pageData.total;
      				mycustomVM.pager.currentPage = pageData.currentPage;
      				mycustomVM.pager.pageSize = pageData.pageSize;
      				mycustomVM.dataTable =pageData.data; 	
      			})
-         	
          	},
          	//展现详情
          	showClueDetailInfo (row, column) {
@@ -904,27 +922,14 @@
         　                     },
             //外呼号码
            outboundCall(outboundInputPhone,clueId){//外呼
-        　                    	  var login=sessionStorage.getItem("loginClient");  //我是这样存的 ， 值为qimo 和 tr 
-        　                		if(!login){
-        　                			   mycustomVM.$message({message:"请登录呼叫中心",type:'warning'});
-        　                			   return ;
-        　                	 	}
-        　                	 	 if(!/^[0-9]*$/.test(outboundInputPhone)){
-        　                				 mycustomVM.$message({message:"只可以输入数字,不超过11位",type:'warning'});
-        　                			     return ; 
-        　                	 	  }
-        　                	 	//sessionStorage.setItem("callSource",callSource);//1:表示 首页头部外呼 2：表示 电销管理外呼
- 
-        　                                  var param={};
-        　                	  param.clueId=clueId;
-        　                	  param.customerPhone =outboundInputPhone;
-        　                	  axios.post('/client/client/axbOutCall',param).then(function (response) { 
-        　                	     console.log(response);
-        　                	      	 
-        　                	  });
+        　                    	var  param={};
+        　                         	param.clueId=clueId;
+        　                	 window.parent.outboundCallPhone(outboundInputPhone,2,clueId, function(res){
+        　                	    axios.post('/tele/clueMyCustomerInfo/updateCallTime',param).then(function (response) {
+        　                		   
+                });
+        　                	 });
         　                	},
-
-
         },
         mounted(){
             document.getElementById('myCustom').style.display = 'block';
@@ -979,8 +984,5 @@
   }
 </script>
 
- <script type="text/javascript">
-
  
- </script>
 </html>
