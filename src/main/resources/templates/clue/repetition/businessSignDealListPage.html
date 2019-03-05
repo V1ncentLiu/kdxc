@@ -95,31 +95,12 @@
             <el-table-column align="center" prop="giveAmount" label="赠送金额" ></el-table-column>
             <el-table-column align="center" prop="signProjectName" label="签约项目" ></el-table-column>
             <el-table-column align="center" prop="signCompanyName" label="所属公司" ></el-table-column>
-            <el-table-column align="center" prop="repeatStatus" label="电重单结果" :formatter="transRepetition"></el-table-column>
+            <el-table-column align="center" prop="repeatStatus" label="重单结果" :formatter="transRepetition"></el-table-column>
             <el-table-column align="center" prop="repeatStatus" label="处理状态" :formatter="transformStatus"></el-table-column>
             <el-table-column align="center" prop="repeatRemark" label="重单备注" ></el-table-column>
         </el-table>
          <table-pagination :pager="pager"  @change="inviteAreaListPage"></table-pagination>
     </el-row>      
-    <!-- dialog -->
-    <el-dialog title="有效性处理" :visible.sync="dialogFormVisible">
-        <el-form :model="form" ref="form" :rules="rules" class="width500">
-            <el-form-item label="启用状态：" :label-width="formLabelWidth" prop="status">
-                <el-select filterable v-model="form.dealStatus" placeholder="启用状态" style="width: 100%;">
-                    <el-option
-                        v-for="item in statusList"
-                        :key="item.value"
-                        :label="item.label"
-                        :value="item.value">
-                    </el-option>
-                </el-select>
-            </el-form-item>
-        </el-form>
-        <div slot="footer" style="text-align: center" class="dialog-footer">
-            <el-button type="primary" @click="addbutton">提交</el-button>
-            <el-button @click="dialogFormVisible= false">取消</el-button>
-        </div>
-    </el-dialog>
 
 
 </div>
@@ -181,7 +162,7 @@
        	 	dealStatus:"",
        	 	beginTime:"",
        	 	signProvince:"",
-       	 endTime:"",
+       	 	endTime:"",
        	 	businessGroupId:"",
        	 	teleGroupid:"",
        	 	valid:"",
@@ -205,24 +186,54 @@
         		var rows = this.multipleSelection;
         		  if(rows.length <1){
                       this.$message({
-                         message: '选择某一条或者多条签约信息',
+                         message: '选择某一条或者多条信息',
                          type: 'warning'
                        });
                       return;
                   }
-        		  //如果只选择一条回显数据，多条不回显
-        		  if(rows.length ==1){
-        			  for(var i =0;i<orgVM.dataTable.length;i++){
-        				  if(orgVM.dataTable[i].id ==rows[0].id){
-        					   if(!"undefined" == orgVM.dataTable[i].valid){
-        						  orgVM.form.dealStatus = orgVM.dataTable[i].valid+"";  
-        					  }else{
-        						  orgVM.form.dealStatus = "1";  
-        					  } 
-        				  }
-        			  }
-        			  
-        		  }
+        	
+        		  this.$confirm("确定要重单通过执行此操作?", '审核通过', {
+                      confirmButtonText: '提交',
+                      cancelButtonText: '取消',
+                      type: 'warning'
+                  }).then(() => {
+                     	// 查询 table 需要数据
+                      var param = {};
+                      var deleInfo=this.multipleSelection;
+    	        	    var ids="";
+    		            if(null!=deleInfo){
+    		             for ( var i = 0; i <deleInfo.length; i++){
+    		            	if("" == ids){
+    		            		ids = deleInfo[i].id
+    		            	}else{
+    		            		ids = ids+","+deleInfo[i].id
+    		            	}
+    		             }
+    		             return ; 
+    		             var param={};
+    		             param.ids=ids;
+   	                 	axios.post('/clue/cluerepetition/updateBusinessPetitionById',param).then(function (response) {
+   	                  	   console.log(response);
+   	                       if(null !==response && response.data !=null && response.data.code=='0'){
+   	                    	  window.location.href="/invitearea/inviteAreaList"; 
+   	                     	}else{
+   	                    	 alert(response.data.data.msg);
+    	                  	 return ;
+   	                     	} 
+   	                  }).catch(function (error) {
+                             console.log(error);
+                         })
+                         .then(function () {
+                           // always executed
+                         });  
+    	              
+                    }
+                  }).catch(() => {
+                      this.$message({
+                          type: 'info',
+                          message: '已取消删除'
+                      });          
+                  });
                 this.dialogFormVisible = true;
         	},
         	//日期数据格式化方法
@@ -303,7 +314,7 @@
                   axios.post('/clue/cluerepetition/businessSignDealList',param).then(function (response) {
                   	  console.log(response);
                       if(null===response||response.data==null||response.data.code!='0'){
-	                  	  alert(response.data.message);
+	                  	  alert(response.data.msg);
 	                  	  return ;
                      }else{
                     	 orgVM.dataTable =response.data.data.data; 
@@ -345,7 +356,7 @@
 	                      if(null !==response && response.data !=null && response.data.code=='0'){
 	                    	  window.location.href="/businesssign/businessSignValidPage"; 
 	                     }else{
-	                    	 alert(response.data.data.message);
+	                    	 alert(response.data.data.msg);
 	                  	  	return ;
 	                     } 
 	                  }).catch(function (error) {

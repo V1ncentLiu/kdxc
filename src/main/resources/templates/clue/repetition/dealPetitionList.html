@@ -24,9 +24,9 @@
             <el-row class="marginB10">
               
 				<div class="block">
-					<el-select filterable v-model="signId" placeholder="是否签约" clearable>
+					<el-select filterable v-model="isSign" placeholder="是否签约" clearable>
 					    <el-option
-					      v-for="item in isSign"
+					      v-for="item in isSignList"
 					      :key="item.value"
 					      :label="item.label"
 					      :value="item.value">
@@ -53,7 +53,7 @@
 					</el-date-picker>
 					<el-date-picker value-format="yyyy-MM-dd HH:mm:ss" v-model="endTime" type="datetime" placeholder="选择日期">
 					</el-date-picker>
-  					<el-select filterable v-model="teleCompanyId" placeholder="电销分公司" @change="showTele(7)">
+  					<el-select filterable v-model="teleCompanyId" placeholder="电销分公司" @change="showTele(7)" clearable>
 					    <el-option
 					      v-for="item in dxBusinessList"
 					      :key="item.id"
@@ -61,7 +61,7 @@
 					      :value="item.id">
 					    </el-option>
   					</el-select>
-  					<el-select filterable v-model="teleDeptId" placeholder="电销事业部" @change="showTele(1)">
+  					<el-select filterable v-model="teleDeptId" placeholder="电销事业部" @change="showTele(1)" clearable>
 					    <el-option
 					      v-for="item in dxCauseBList"
 					      :key="item.id"
@@ -69,7 +69,7 @@
 					      :value="item.id">
 					    </el-option>
   					</el-select>
-  					<el-select filterable v-model="teleGorupId" placeholder="电销组">
+  					<el-select filterable v-model="teleGorupId" placeholder="电销组" clearable>
 					    <el-option
 					      v-for="item in dxList"
 					      :key="item.id"
@@ -94,8 +94,8 @@
                     <el-table-column align="center" type="index" prop="id" label="序号" width="55"></el-table-column>
                     <el-table-column align="center" prop="cusName" label="客户姓名"></el-table-column>
                     <el-table-column align="center" prop="cusPhone" label="客户手机号"></el-table-column>
-                    <el-table-column align="center" prop="signId" label="是否签约" :formatter="transSignStatus"></el-table-column>
-                    <el-table-column align="center" prop="signTime" label="签约时间"></el-table-column>
+                    <el-table-column align="center" prop="isSign" label="是否签约" :formatter="transSignStatus"></el-table-column>
+                    <el-table-column align="center" prop="signTime" label="签约时间" :formatter="dateFormat"></el-table-column>
                     <el-table-column align="center" prop="dealStatusResult" label="重单结果"></el-table-column>
                     <el-table-column align="center" prop="statusResult" label="处理状态" ></el-table-column>
             
@@ -224,6 +224,7 @@
         	dialogFormVisible:false,
         	dataTable:[],
         	isShow:true,
+        	isSign:"",
         	multipleSelection: [],
         	
         	statusList:[
@@ -236,7 +237,7 @@
                    label: '已审批处理'	
                   }
         	],
-        	isSign:[
+        	isSignList:[
         		{
                		value: '0',
                    label: '未签约'	
@@ -299,10 +300,17 @@
              
         },
         methods: {
+        	//日期数据格式化方法
+    		dateFormat:function(row, column) {
+    			var date = row[column.property];
+               	if (date == undefined) {
+    	               return "";
+              	}
+               	return moment(date).format("YYYY-MM-DD HH:mm:ss");
+    		},
         	transSignStatus(row, column, cellValue, index) {
           	  var text="";
-          	  alert(cellValue);
-                if(cellValue=="" || "undefined" == cellValue || cellValue == null){
+                if(cellValue==0 || "undefined" == cellValue || cellValue == null){
               	  text="未签约"
                 }else{
               	  text="签约"
@@ -393,6 +401,13 @@
                 param.teleGorupId=this.teleGorupId;
                 param.teleCompanyId=this.teleCompanyId;
                 param.teleDeptId=this.teleDeptId;
+                param.beginTime = this.beginTime;
+                param.endTime = this.endTime;
+                param.isSign = this.isSign;
+                if(this.beginTime !=null && this.beginTime != '' && this.endTime !=null && this.endTime != '' && this.beginTime>this.endTime){
+                	  this.$message("开始时间不能大于结束时间");
+           	         return;
+                }
                 console.log(param);
                 axios.post('/clue/cluerepetition/dealPetitionList',param).then(function (response) {
                 	  console.log(response);
