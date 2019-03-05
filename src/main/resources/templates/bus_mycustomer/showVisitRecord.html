@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head th:replace="_header_include::frag(~{::title},~{::style},~{})">
+    <title>我的客户</title>
+    <style>
+        button a{color:#fff!important;}
+        .formItem,.formItem .el-form-item__content{width:100%}
+    </style>
+</head>
+<body>
+
+<div id="mainDiv"  class="mainPadding">
+    <template>
+        <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
+            <el-breadcrumb-item>Home</el-breadcrumb-item>
+            <el-breadcrumb-item>商务管理</el-breadcrumb-item>
+            <el-breadcrumb-item><a href="JavaScript:void(0)" data-url="b.html">我的客户</a></el-breadcrumb-item>
+        </el-breadcrumb>
+
+
+        <div v-show="showVisitAduitDatas.oneShow">
+            <el-button size="mini"  type="text" style = "color: #1e2746">首次到访</el-button>  <el-button size="mini"  type="primary" style = "color: #1e2746" @click="openEditVisitRecord">添加到访记录</el-button>
+            <el-table :data="showVisitAduitDatas.one" style="width: 100%" tooltip-effect="dark"  ref="multipleTable">
+                <el-table-column prop="customerName" label="客户姓名"   align="center"></el-table-column>
+                <el-table-column prop="projectName" label="考察项目"   align="center"></el-table-column>
+                <el-table-column prop="companyName" label="考察公司"   align="center"></el-table-column>
+                <el-table-column prop="vistitTime" label="到访时间" :formatter="formatVisitTime" align="center"></el-table-column>
+                <el-table-column prop="signProvince" label="预签约省份"   align="center"></el-table-column>
+                <el-table-column prop="signCity" label="预签约市"   align="center"></el-table-column>
+                <el-table-column prop="signDistrict" label="预签约区/县"   align="center"></el-table-column>
+                <el-table-column prop="vistitStoreTypeName" label="到访店铺类型"   align="center"></el-table-column>
+                <el-table-column prop="visitType" label="到访类型"   align="center">
+                    <template slot-scope="scope">
+                        <div v-if="scope.row.status === 1">
+                            预约来访
+                        </div>
+                        <div v-else-if="scope.row.status === 2">
+                            慕名来访
+                        </div>
+                        <div v-else-if="scope.row.status === 3">
+                            临时来访
+                        </div>
+                    </template>
+                </el-table-column>
+                <el-table-column prop="visitCity" label="到访城市"   align="center"></el-table-column>
+                <el-table-column prop="visitPeopleNum" label="到访人数"   align="center"></el-table-column>
+                <el-table-column prop="createTime" label="创建时间"   align="center"></el-table-column>
+                <el-table-column prop="isSign" label="是否签约"   align="center">
+                    <template slot-scope="scope">
+                        <div v-if="scope.row.isSign === 0">
+                            否
+                        </div>
+                        <div v-else-if="scope.row.isSign ===1">
+                            是
+                        </div>
+                    </template>
+                </el-table-column>
+                <el-table-column prop="status" label="到访有效性"   align="center">
+                    <template slot-scope="scope">
+                        <div v-if="scope.row.status === 1">
+                            审核中
+                        </div>
+                        <div v-else-if="scope.row.status ===2">
+                            有效
+                        </div>
+                    </template>
+                </el-table-column>
+            </el-table>
+            <el-button v-show="showVisitAduitDatas.oneNotSignShow" size="mini"  type="text" style = "color: #1e2746">未签约原因：{{showVisitAduitDatas.oneNotSignReason}}</el-button><br>
+            <el-button v-show="showVisitAduitDatas.oneRebutShow" size="mini"  type="text" style = "color:red">驳回原因：{{showVisitAduitDatas.oneRebutReason}}</el-button>
+        </div>
+        <br>
+        <div v-show="showVisitAduitDatas.twoShow">
+            <el-button size="mini"  type="text" style = "color: #1e2746">2次到访</el-button>
+            <el-table :data="showVisitAduitDatas.two" style="width: 100%" tooltip-effect="dark"  ref="multipleTable">
+                <el-table-column prop="customerName" label="客户姓名"   align="center"></el-table-column>
+                <el-table-column prop="projectName" label="考察项目"   align="center"></el-table-column>
+                <el-table-column prop="companyName" label="考察公司"   align="center"></el-table-column>
+                <el-table-column prop="vistitTime" label="到访时间" :formatter="formatVisitTime" align="center"></el-table-column>
+                <el-table-column prop="signProvince" label="预签约省份"   align="center"></el-table-column>
+                <el-table-column prop="signCity" label="预签约市"   align="center"></el-table-column>
+                <el-table-column prop="signDistrict" label="预签约区/县"   align="center"></el-table-column>
+                <el-table-column prop="vistitStoreTypeName" label="到访店铺类型"   align="center"></el-table-column>
+                <el-table-column prop="visitType" label="到访类型"   align="center">
+                    <template slot-scope="scope">
+                        <div v-if="scope.row.status === 1">
+                            预约来访
+                        </div>
+                        <div v-else-if="scope.row.status === 2">
+                            慕名来访
+                        </div>
+                        <div v-else-if="scope.row.status === 3">
+                            临时来访
+                        </div>
+                    </template>
+                </el-table-column>
+                <el-table-column prop="visitCity" label="到访城市"   align="center"></el-table-column>
+                <el-table-column prop="visitPeopleNum" label="到访人数"   align="center"></el-table-column>
+                <el-table-column prop="createTime" label="创建时间"   align="center"></el-table-column>
+                <el-table-column prop="isSign" label="是否签约"   align="center">
+                    <template slot-scope="scope">
+                        <div v-if="scope.row.isSign === 0">
+                            否
+                        </div>
+                        <div v-else-if="scope.row.isSign ===1">
+                            是
+                        </div>
+                    </template>
+                </el-table-column>
+                <el-table-column prop="status" label="到访有效性"   align="center">
+                    <template slot-scope="scope">
+                        <div v-if="scope.row.status === 1">
+                            审核中
+                        </div>
+                        <div v-else-if="scope.row.status ===2">
+                            有效
+                        </div>
+                    </template>
+                </el-table-column>
+            </el-table>
+            <el-button  v-show="showVisitAduitDatas.twoNotSignShow" size="mini"  type="text" style = "color: #1e2746">未签约原因：{{showVisitAduitDatas.twoNotSignReason}}</el-button><br>
+            <el-button v-show="showVisitAduitDatas.twoRebutShow"  size="mini"  type="text" style = "color: red">驳回原因：{{showVisitAduitDatas.twoRebutReason}}</el-button>
+        </div>
+        <br>
+        <div v-show="showVisitAduitDatas.threeShow">
+            <el-button size="mini"  type="text" style = "color: #1e2746">多次到访</el-button>
+            <el-table :data="showVisitAduitDatas.three" style="width: 100%" tooltip-effect="dark"  ref="multipleTable">
+                <el-table-column prop="customerName" label="客户姓名"   align="center"></el-table-column>
+                <el-table-column prop="projectName" label="考察项目"   align="center"></el-table-column>
+                <el-table-column prop="companyName" label="考察公司"   align="center"></el-table-column>
+                <el-table-column prop="vistitTime" label="到访时间" :formatter="formatVisitTime" align="center"></el-table-column>
+                <el-table-column prop="signProvince" label="预签约省份"   align="center"></el-table-column>
+                <el-table-column prop="signCity" label="预签约市"   align="center"></el-table-column>
+                <el-table-column prop="signDistrict" label="预签约区/县"   align="center"></el-table-column>
+                <el-table-column prop="vistitStoreTypeName" label="到访店铺类型"   align="center"></el-table-column>
+                <el-table-column prop="visitType" label="到访类型"   align="center">
+                    <template slot-scope="scope">
+                        <div v-if="scope.row.status === 1">
+                            预约来访
+                        </div>
+                        <div v-else-if="scope.row.status === 2">
+                            慕名来访
+                        </div>
+                        <div v-else-if="scope.row.status === 3">
+                            临时来访
+                        </div>
+                    </template>
+                </el-table-column>
+                <el-table-column prop="visitCity" label="到访城市"   align="center"></el-table-column>
+                <el-table-column prop="visitPeopleNum" label="到访人数"   align="center"></el-table-column>
+                <el-table-column prop="createTime" label="创建时间"   align="center"></el-table-column>
+                <el-table-column prop="isSign" label="是否签约"   align="center">
+                    <template slot-scope="scope">
+                        <div v-if="scope.row.isSign === 0">
+                            否
+                        </div>
+                        <div v-else-if="scope.row.isSign ===1">
+                            是
+                        </div>
+                    </template>
+                </el-table-column>
+                <el-table-column prop="status" label="到访有效性"   align="center">
+                    <template slot-scope="scope">
+                        <div v-if="scope.row.status === 1">
+                            审核中
+                        </div>
+                        <div v-else-if="scope.row.status ===2">
+                            有效
+                        </div>
+                    </template>
+                </el-table-column>
+            </el-table>
+            <el-button v-show="showVisitAduitDatas.threeNotSignShow" size="mini"  type="text" style = "color: #1e2746">未签约原因：{{showVisitAduitDatas.threeNotSignReason}}</el-button><br>
+            <el-button v-show="showVisitAduitDatas.threeRebutShow"  size="mini"  type="text" style = "color: red">驳回原因：{{showVisitAduitDatas.threeRebutReason}}</el-button>
+        </div>
+
+
+
+        <!--添加到访记录-->
+        <el-dialog title="添加到访记录" :visible.sync="addVisitRecordDialogVisible"  width="50%">
+            <template>
+                <el-form :model="addVisitRecord" ref="addVisitRecord" :rules="rules">
+                    <el-row :gutter="20">
+                        <el-col :span="10">
+                            <el-form-item label="考察公司"  :label-width="formLabelWidth"  prop="companyid">
+                                <el-select v-model="addVisitRecord.companyid" placeholder="考察公司"  clearable >
+                                    <el-option v-for="item in companyArr" :key="item.id" :label="item.companyName" :value="item.id"></el-option>
+                                </el-select>
+                            </el-form-item>
+                        </el-col>
+
+                        <el-col :span="10">
+                            <el-form-item label="到访时间"    :label-width="formLabelWidth"  prop="vistitTime">
+                                <el-date-picker v-model="addVisitRecord.vistitTime" format="yyyy-MM-dd hh:mm" type="datetime" placeholder="选择日期时间"></el-date-picker>
+                            </el-form-item>
+                        </el-col>
+                    </el-row>
+
+                    <el-row :gutter="20">
+                        <el-col :span="10">
+                            <el-form-item label="客户姓名"  :label-width="formLabelWidth"  prop="customerName" >
+                                <el-input v-model="addVisitRecord.customerName" autocomplete="off"  maxlength="10"    ></el-input>
+                            </el-form-item>
+                        </el-col>
+                        <el-col :span="10">
+                            <el-form-item label="考察项目"    :label-width="formLabelWidth"  prop="projectId">
+                                <el-select v-model="addVisitRecord.projectId" placeholder="请选择"  clearable >
+                                    <el-option v-for="item in projectArr" :key="item.id" :label="item.projectName" :value="item.id"></el-option>
+                                </el-select>
+                            </el-form-item>
+                        </el-col>
+                    </el-row>
+
+                    <el-row :gutter="20">
+                        <el-col :span="10">
+                            <el-form-item label="到访类型"  :label-width="formLabelWidth"  prop="visitType">
+                                <el-select v-model="addVisitRecord.visitType"  clearable >
+                                    <el-option v-for="item in visitTypeArr" :key="item.value" :label="item.name" :value="item.value"></el-option>
+                                </el-select>
+                            </el-form-item>
+                        </el-col>
+                        <el-col :span="10">
+                            <el-form-item label="到访店铺类型"    :label-width="formLabelWidth"  prop="vistitStoreType">
+                                <el-select v-model="addVisitRecord.vistitStoreType" placeholder="请选择"  clearable >
+                                    <el-option v-for="item in vistitStoreTypeArr" :key="item.value" :label="item.name" :value="item.value"></el-option>
+                                </el-select>
+                            </el-form-item>
+                        </el-col>
+                    </el-row>
+                    <el-row :gutter="20">
+                        <el-col :span="10">
+                            <el-form-item label="签约省份"  :label-width="formLabelWidth"  prop="signProvince"  >
+                                <el-select v-model="addVisitRecord.signProvince" placeholder="请选择"  @change="currentProvince" clearable>
+                                    <el-option v-for="item in provinceArr" :key="item.name" :label="item.name" :value="item.name"></el-option>
+                                </el-select>
+                            </el-form-item>
+                        </el-col>
+                        <el-col :span="10">
+                            <el-form-item label="签约城市"    :label-width="formLabelWidth"  prop="signCity" clearable >
+                                <el-select v-model="addVisitRecord.signCity" placeholder="请选择"  @change="currentCity">
+                                    <el-option v-for="item in cityArr" :key="item.name" :label="item.name" :value="item.name"></el-option>
+                                </el-select>
+                            </el-form-item>
+                        </el-col>
+                    </el-row>
+                    <el-row :gutter="20">
+                        <el-col :span="10">
+                            <el-form-item label="签约区/县"  :label-width="formLabelWidth"  prop="signDistrict">
+                                <el-select v-model="addVisitRecord.signDistrict" placeholder="请选择" clearable >
+                                    <el-option v-for="item in districtArr" :key="item.name" :label="item.name" :value="item.name"></el-option>
+                                </el-select>
+                            </el-form-item>
+                        </el-col>
+                        <el-col :span="10">
+                            <el-form-item label="来访城市"    :label-width="formLabelWidth"  prop="visitCity">
+                                <el-input v-model="addVisitRecord.visitCity" autocomplete="off"  maxlength="10"    ></el-input>
+                            </el-form-item>
+                        </el-col>
+                    </el-row>
+                    <el-row :gutter="20">
+                        <el-col :span="10">
+                            <el-form-item label="是否签约"  :label-width="formLabelWidth"  prop="isSign" clearable >
+                                <el-select v-model="addVisitRecord.isSign" placeholder="请选择" @change="showNotSignReason">
+                                    <el-option v-for="item in isSignArr" :key="item.value" :label="item.name" :value="item.value"></el-option>
+                                </el-select>
+                            </el-form-item>
+                        </el-col>
+                        <el-col :span="10">
+                            <el-form-item label="到访人数"    :label-width="formLabelWidth"  prop="visitPeopleNum">
+                                <el-input v-model="addVisitRecord.visitPeopleNum" autocomplete="off"  maxlength="2"    ></el-input>
+                            </el-form-item>
+                        </el-col>
+                    </el-row>
+                    <el-row :gutter="20">
+                        <el-col :span="20">
+                            <el-form-item label="未签约原因" style="display: none" id="notSignReason" :label-width="formLabelWidth"  prop="notSignReason">
+                                <el-input type="textarea" v-model="addVisitRecord.notSignReason"  maxlength="100" :rows="3" placeholder="请输入内容"></el-input>
+                            </el-form-item>
+                        </el-col>
+                    </el-row>
+                </el-form>
+
+                <div slot="footer" class="dialog-footer">
+                    <el-button type="primary" id="goSignButton"   @click="goEditSign">去填写签约单</el-button>
+                    <el-button type="primary" @click="saveVisitRecord">提交</el-button>
+                    <el-button  @click="addVisitRecordDialogVisible = false">取消</el-button>
+                </div>
+            </template>
+        </el-dialog>
+
+        <el-dialog title="添加签约单信息" width="70%" :visible.sync="dialogFormSigningVisible">
+            <template>
+                <el-form :model="formSigning" ref="formSigning" >
+                    <div class="paddB20">签约单信息</div>
+                    <div>
+                        <el-row>
+                            <el-col :span="10">
+                                <el-form-item label="签约单编号：" :label-width="formLabelWidth" prop="signNo">
+                                    <el-input v-model="formSigning.signNo" maxLength="20" ></el-input>
+                                </el-form-item>
+                            </el-col>
+                            <el-col :span="10">
+                                <el-form-item label="客户姓名：" :label-width="formLabelWidth" prop="customerName">
+                                    <el-input v-model="formSigning.customerName"></el-input>
+                                </el-form-item>
+                            </el-col>
+                        </el-row>
+                        <el-row>
+                            <el-col :span="10">
+                                <el-form-item label="客户身份证号：" :label-width="formLabelWidth" prop="idCard">
+                                    <el-input v-model="formSigning.idCard" ></el-input>
+                                </el-form-item>
+                            </el-col>
+                            <el-col :span="10">
+                                <el-form-item label="客户联系电话：" :label-width="formLabelWidth" prop="phone">
+                                    <el-input v-model="formSigning.phone"></el-input>
+                                </el-form-item>
+                            </el-col>
+                        </el-row>
+                        <el-row>
+                            <el-col :span="10">
+                                <el-form-item label="签约餐饮公司：" :label-width="formLabelWidth" prop="signCompanyId">
+                                    <el-select v-model="formSigning.signCompanyId" placeholder="请选择签约餐饮公司">
+                                        <el-option v-for="item in companyArr" :key="item.id" :label="item.companyName" :value="item.id"></el-option>
+                                    </el-select>
+                                </el-form-item>
+                            </el-col>
+                            <el-col :span="10">
+                                <el-form-item label="签约项目：" :label-width="formLabelWidth" prop="signProjectId">
+                                    <el-select v-model="formSigning.signProjectId" placeholder="请选择">
+                                        <el-option v-for="item in projectArr" :key="item.id" :label="item.projectName" :value="item.id"></el-option>
+                                    </el-select>
+                                </el-form-item>
+                            </el-col>
+                        </el-row>
+                        <el-row>
+                            <el-col :span="10">
+                                <el-form-item label="签约省份：" :label-width="formLabelWidth" prop="signProvince">
+                                    <el-select v-model="formSigning.signProvince" placeholder="请选择签约省份" @change="currentProvince">
+                                        <el-option v-for="item in provinceArr" :key="item.name" :label="item.name" :value="item.name"></el-option>
+                                    </el-select>
+                                </el-form-item>
+                            </el-col>
+                            <el-col :span="10">
+                                <el-form-item label="签约城市：" :label-width="formLabelWidth" prop="signCity">
+                                    <el-select v-model="formSigning.signCity" placeholder="请选择签约城市："  @change="currentCity">
+                                        <el-option v-for="item in cityArr" :key="item.name" :label="item.name" :value="item.name"></el-option>
+                                    </el-select>
+                                </el-form-item>
+                            </el-col>
+                        </el-row>
+                        <el-row>
+                            <el-col :span="10">
+                                <el-form-item label="签约区/县：" :label-width="formLabelWidth" prop="signDictrict">
+                                    <el-select v-model="formSigning.signDictrict" placeholder="请选择签约区/县">
+                                        <el-option v-for="item in districtArr" :key="item.name" :label="item.name" :value="item.name"></el-option>
+                                    </el-select>
+                                </el-form-item>
+                            </el-col>
+                            <el-col :span="10">
+                                <el-form-item label="签约店型：" :label-width="formLabelWidth" prop="signShopType">
+                                    <el-select v-model="formSigning.signShopType" placeholder="请选择">
+                                        <el-option v-for="item in vistitStoreTypeArr" :key="item.value" :label="item.name" :value="item.value"></el-option>
+                                    </el-select>
+                                </el-form-item>
+                            </el-col>
+                        </el-row>
+                        <el-row>
+                            <el-col :span="10">
+                                <el-form-item label="应收金额：" :label-width="formLabelWidth" prop="amountReceivable">
+                                    <el-input v-model="formSigning.amountReceivable" @keyup.native="number" autocomplete="off" maxLength="10" style="width: 80%;"></el-input><span style="padding-left: 10px;">元</span>
+                                </el-form-item>
+                            </el-col>
+                            <el-col :span="10">
+                                <el-form-item label="路费（报首次）：" :label-width="formLabelWidth" prop="firstToll">
+                                    <el-input v-model="formSigning.firstToll" @keyup.native="number" autocomplete="off" maxLength="10" style="width: 80%;"></el-input><span style="padding-left: 10px;">元</span>
+                                </el-form-item>
+                            </el-col>
+                        </el-row>
+                        <el-row>
+                            <el-col :span="10">
+                                <el-form-item label="优惠金额：" :label-width="formLabelWidth" prop="preferentialAmount">
+                                    <el-input v-model="formSigning.preferentialAmount" @keyup.native="number" autocomplete="off" maxLength="10" style="width: 80%;"></el-input><span style="padding-left: 10px;">元</span>
+                                </el-form-item>
+                            </el-col>
+                            <el-col :span="10">
+                                <el-form-item label="签约类型：" :label-width="formLabelWidth" prop="signType">
+                                    <el-select v-model="formSigning.signType" @change="selectSigningType" placeholder="请选择签约类型：">
+                                        <el-option
+                                                v-for="item in option2s"
+                                                :key="item.value"
+                                                :label="item.label"
+                                                :value="item.value">
+                                        </el-option>
+                                    </el-select>
+                                </el-form-item>
+                            </el-col>
+                        </el-row>
+                        <el-row>
+                            <el-col :span="10">
+                                <el-form-item label="赠送金额：" :label-width="formLabelWidth" prop="giveAmount">
+                                    <el-input v-model="formSigning.giveAmount" @keyup.native="number" autocomplete="off" maxLength="10" style="width: 80%;"></el-input><span style="padding-left: 10px;">元</span>
+                                </el-form-item>
+                            </el-col>
+                        </el-row>
+                    </div>
+                    <div class="paddB20">付款明细</div>
+                    <div>
+                        <el-row>
+                            <el-col :span="10">
+                                <el-form-item label="付款类型：" :label-width="formLabelWidth" prop="payType">
+                                    <el-select v-model="formSigning.payType" placeholder="请选择签约付款类型" disabled>
+                                        <el-option  key="1" label="全款" value="1"></el-option>
+                                        <el-option  key="2" label="定金" value="2"></el-option>
+                                    </el-select>
+                                </el-form-item>
+                            </el-col>
+                            <el-col :span="10">
+                                <el-form-item label="付款方式：" :label-width="formLabelWidth" prop="payMode">
+                                    <el-select v-model="formSigning.payMode" placeholder="请选择付款方式：">
+                                        <el-option
+                                                v-for="item in option3s"
+                                                :key="item.value"
+                                                :label="item.label"
+                                                :value="item.value">
+                                        </el-option>
+                                    </el-select>
+                                </el-form-item>
+                            </el-col>
+                        </el-row>
+                        <el-row>
+                            <el-col :span="10">
+                                <el-form-item label="付款时间：" :label-width="formLabelWidth" prop="payTime">
+                                    <el-date-picker
+                                            type="datetime"
+                                            format="yyyy-MM-dd"
+                                            placeholder="选择日期"
+                                            v-model="formSigning.payTime" style="width: 100%;"></el-date-picker>
+                                </el-form-item>
+                            </el-col>
+                            <el-col :span="10">
+                                <el-form-item label="实收金额：" :label-width="formLabelWidth" prop="amountReceived">
+                                    <el-input v-model="formSigning.amountReceived"></el-input>
+                                </el-form-item>
+                            </el-col>
+                        </el-row>
+                        <el-row v-show="isAllMoney">
+                            <el-col :span="10">
+                                <el-form-item label="余款金额：" :label-width="formLabelWidth" prop="amountBalance">
+                                    <el-input v-model="formSigning.amountBalance"></el-input>
+                                </el-form-item>
+                            </el-col>
+                            <el-col :span="10">
+                                <el-form-item label="预计余款补齐时间：" :label-width="formLabelWidth" prop="makeUpTime">
+                                    <el-date-picker
+                                            type="datetime"
+                                            format="yyyy-MM-dd"
+                                            placeholder="选择日期"
+                                            v-model="formSigning.makeUpTime"
+                                            style="width: 100%;"></el-date-picker>
+                                </el-form-item>
+                            </el-col>
+                        </el-row>
+                        <el-row>
+                            <el-col :span="10">
+                                <el-form-item label="业绩金额：" :label-width="formLabelWidth" prop="performanceAmount">
+                                    <el-input v-model="formSigning.performanceAmount"></el-input>
+                                </el-form-item>
+                            </el-col>
+                        </el-row>
+                    </div>
+                </el-form>
+                <div slot="footer" class="dialog-footer f-tac">
+                    <el-button type="primary" @click="submitForm('formSigning')">确 定</el-button>
+                    <el-button @click="dialogFormSigningVisible = false">取 消</el-button>
+                </div>
+            </template>
+        </el-dialog>
+
+
+    </template>
+    <!--添加到访记录-->
+
+
+
+</div>
+
+<!-- import common js-->
+<div th:include="_footer_include :: #jsLib"></div>
+<!--<script th:src="@{/js/excel/xlsx.min.js}" src="../static/js/excel/xlsx.min.js"></script>-->
+<script th:inline="javascript">
+    var clueId = [[${clueId}]];
+    var visitStatus = [[${visitStatus}]];
+    var proSelect=[[${proSelect}]];
+    var companySelect=[[${companySelect}]];
+    // 查询 模块
+    var mainDivVM = new Vue({
+        el: '#mainDiv',
+        data: {
+            formLabelWidth:"150px",
+            addVisitRecordDialogVisible:false,
+            dialogFormSigningVisible:false,
+            clueId:clueId,
+            signArr:[{value:0,name:'未签约'},{value:1,name:'已签约'}],
+            isSignArr:[{value:0,name:'否'},{value:1,name:'是'}],
+            visitArr:[{value:0,name:'待处理'},{value:1,name:'未到访'},{value:2,name:'首次到访'},{value:3,name:'多次到访'}],
+            visitTypeArr:[{value:1,name:'预约来访'},{value:2,name:'慕名来访'},{value:3,name:'临时来访'}],
+            vistitStoreTypeArr:[],
+            provinceArr:[],
+            districtArr:[],
+            cityArr:[],
+            companyArr:companySelect,
+            projectArr:proSelect,
+            addVisitRecord:{
+                clueId:clueId,
+                companyid:"",
+                vistitTime:"",
+                customerName:"",
+                projectId:"",
+                visitType:1,
+                vistitStoreType:"",
+                signProvince:"",
+                signCity:"",
+                signDistrict:"",
+                visitCity:"",
+                isSign:1,
+                visitPeopleNum:"",
+                notSignReason:""
+            },
+            showVisitAduitDatas:{
+                one:[],
+                two:[],
+                three:[],
+                oneNotSignReason:"",
+                twoNotSignReason:"",
+                threeNotSignReason:"",
+                oneRebutReason:"",
+                twoRebutReason:"",
+                threeRebutReason:"",
+                oneShow:true,
+                twoShow:false,
+                threeShow:false,
+
+                oneRebutShow:false,
+                twoRebutShow:false,
+                threeRebutShow:false,
+                oneNotSignShow:true,
+                twoNotSignShow:false,
+                threeNotSignShow:false
+            },
+            formSigning: {
+                clueId:"",
+                signNo:'',
+                customerName: '',
+                idCard: '',
+                phone: '',
+                signCompanyId:'',
+                signProjectId: '',
+                signProvince:'',
+                signCity: '',
+                signDictrict:'',
+                signShopType:'',
+                amountReceivable:'',
+                firstToll:'',
+                preferentialAmount:'',
+                signType:1,
+                giveAmount:'',
+
+                payType:1,
+                payMode:'',
+                amountReceived: '',
+                amountBalance: '',
+                makeUpTime:'',
+                payTime: '',
+                amountPerformance:''
+            },
+            rules:{
+
+            }
+        },
+        methods: {
+            formatVisitTime(row){
+
+                function dateFtt(fmt,date)
+                { //author: meizz
+                    var o = {
+                        "M+" : date.getMonth()+1,                 //月份
+                        "d+" : date.getDate(),                    //日
+                        "h+" : date.getHours(),                   //小时
+                        "m+" : date.getMinutes(),                 //分
+                        "s+" : date.getSeconds(),                 //秒
+                        "q+" : Math.floor((date.getMonth()+3)/3), //季度
+                        "S"  : date.getMilliseconds()             //毫秒
+                    };
+                    if(/(y+)/.test(fmt))
+                        fmt=fmt.replace(RegExp.$1, (date.getFullYear()+"").substr(4 - RegExp.$1.length));
+                    for(var k in o)
+                        if(new RegExp("("+ k +")").test(fmt))
+                            fmt = fmt.replace(RegExp.$1, (RegExp.$1.length==1) ? (o[k]) : (("00"+ o[k]).substr((""+ o[k]).length)));
+                    return fmt;
+                }
+                return dateFtt("yyyy-MM-dd hh:mm", new Date(row.vistitTime));
+            },
+            openEditVisitRecord(row){
+                // 打开编辑到访记录
+                this.addVisitRecord.vistitTime = new Date()
+                this.addVisitRecordDialogVisible = true;
+            },
+            saveVisitRecord(){
+                var param = this.addVisitRecord;
+                this.$refs['addVisitRecord'].validate((valid) => {
+                    if (valid) {
+                        axios.post("/busVisitRecord/insert", param)
+                            .then(function (response) {
+                                if (response.data.code == 0) {
+                                    mainDivVM.$message({type: 'success', message: '来访记录保存成功!',duration:2000,onClose:function(){
+                                            mainDivVM.initList();
+                                            mainDivVM.addVisitRecordDialogVisible = false;
+                                        //  跳转到我的客户页面
+                                            window.location.href='/aggregation/businessMyCustomer/listPage';
+                                        }});
+                                } else {
+                                    mainDivVM.$message.error(response.data.msg);
+                                }
+                            }).catch(function (error) {console.log(error);});
+                    } else {return false;}
+                });
+            },
+            goEditSign(){
+                var param = this.addVisitRecord;
+                this.$refs['addVisitRecord'].validate((valid) => {
+                    if (valid) {
+                        axios.post("/busVisitRecord/insert", param)
+                            .then(function (response) {
+                                if (response.data.code == 0) {
+                                    mainDivVM.$message({type: 'success', message: '来访记录保存成功!',duration:2000,onClose:function(){
+                                            mainDivVM.initList();
+                                            mainDivVM.addVisitRecordDialogVisible = false;
+                                            //  弹出签约单添加弹窗
+
+                                        }});
+                                } else {
+                                    mainDivVM.$message.error(response.data.msg);
+                                }
+                            }).catch(function (error) {console.log(error);});
+                    } else {return false;}
+                });
+            },
+            showNotSignReason(val){
+                if(val==0){
+                    //  将隐藏换成元素添加 和 移除 ，这样的动态就会变得好看
+                    document.getElementById("notSignReason").setAttribute("style","display:block")
+                    document.getElementById("goSignButton").setAttribute("style","visibility:hidden")
+                    // document.getElementById("goSignButton").setAttribute("style","display:none")
+                }else if(val==1){
+                    document.getElementById("notSignReason").setAttribute("style","display:none")
+                    document.getElementById("goSignButton").setAttribute("style","visibility:visible")
+                  //   document.getElementById("goSignButton").setAttribute("style","display:block")
+                }
+            },
+            currentProvince(selVal){
+                param={};
+                param.type="1";
+                param.name=selVal;
+                axios.post('/area/sysregion/querySysRegionByParam',param).then(function (response) {
+                    mainDivVM.cityArr=response.data.data.data;
+                });
+            },
+            currentCity(selVal){
+                param={};
+                param.type="2";
+                param.name=selVal;
+                axios.post('/area/sysregion/querySysRegionByParam',param).then(function (response) {
+                    mainDivVM.districtArr=response.data.data.data;
+                });
+            },
+            resetForm(formName) {
+                if( mainDivVM.$refs[formName]) {
+                    mainDivVM.$refs[formName].resetFields();
+                }
+            },
+            initList(){
+                var param = {};
+                axios.post('/busVisitRecord/queryList',param).then(function (response) {
+                    if(null===response||response.data==null||response.data.code!='0'){
+                        if(response.data.code!='0'){
+                            mainDivVM.$message({message: response.data.msg, type: 'warning'});
+                        }
+                        return false;
+                    }else{
+                        var dataList = response.data.data;
+                        // 首次到访
+                        var first = [];
+                        if(dataList.length>=1){
+                            first.push(dataList[dataList.length-1])
+                            mainDivVM.showVisitAduitDatas.one = first;
+                            if(!first[0].notSignReason){
+                                mainDivVM.showVisitAduitDatas.oneNotSignReason = first[0].notSignReason;
+                                mainDivVM.showVisitAduitDatas.oneNotSignShow = true;
+                            }
+                            if(!first[0].rebutReason){
+                                mainDivVM.showVisitAduitDatas.oneRebutReason = first[0].rebutReason;
+                                mainDivVM.showVisitAduitDatas.oneRebutShow = true;
+                            }
+                        }
+
+                        // 二次到访
+                        var two = [];
+                        if(dataList.length>=2){
+                            two.push(dataList[dataList.length-2])
+                            mainDivVM.showVisitAduitDatas.two = two;
+                            mainDivVM.showVisitAduitDatas.twoShow = true;
+                            if(!first[0].notSignReason){
+                                mainDivVM.showVisitAduitDatas.twoNotSignReason = two[0].notSignReason;
+                                mainDivVM.showVisitAduitDatas.twoNotSignShow = true;
+                            }
+                            if(!first[0].rebutReason){
+                                mainDivVM.showVisitAduitDatas.twoRebutReason = two[0].rebutReason;
+                                mainDivVM.showVisitAduitDatas.twoRebutShow = true;
+                            }
+
+                        }
+                        // 多次到访
+                        var three = []
+                        if(dataList.length>=3){
+                            three = dataList.slice(0,dataList.length-2)
+                            mainDivVM.showVisitAduitDatas.three = three;
+                            mainDivVM.showVisitAduitDatas.threeShow = true;
+                            if(!first[0].notSignReason){
+                                mainDivVM.showVisitAduitDatas.threeNotSignReason = three[0].notSignReason;
+                                mainDivVM.showVisitAduitDatas.threeNotSignShow = true;
+                            }
+                            if(!first[0].rebutReason){
+                                mainDivVM.showVisitAduitDatas.threeRebutReason = three[0].rebutReason;
+                                mainDivVM.showVisitAduitDatas.threeRebutShow = true;
+                            }
+                        }
+                    }
+                })
+            },
+        },
+        created(){
+            this.initList();
+            //  到访店铺类型 vistitStoreTypeArr
+            var param={};
+            param.groupCode="vistitStoreType";
+            axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {
+                mainDivVM.vistitStoreTypeArr=response.data.data;
+            });
+
+            //初始化省份
+            param={};
+            param.type="0";
+            axios.post('/area/sysregion/querySysRegionByParam',param).then(function (response) {
+                mainDivVM.provinceArr=response.data.data.data;
+            });
+
+            // 考察公司  考察公司
+            param={};
+            axios.post('/aggregation/businessMyCustomer/listNoPage',param).then(function (response) {
+                mainDivVM.listNoPage=response.data.data.data;
+            });
+        }
+    });
+
+</script>
+<style>
+
+    .dialog-footer{
+        text-align: center;
+    }
+    .el-table th {
+        font-weight: bolder;
+    }
+    .el-input__inner{
+    //   width: 200px;
+    }
+    .el-button--danger:focus, .el-button--danger:hover{
+        background: #6f7180;
+        border: #6f7180;
+    }
+    .el-button--danger{
+        background: #6f7180;
+        border: #6f7180;
+    }
+</style>
+</body>
+</html>
