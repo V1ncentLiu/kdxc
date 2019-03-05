@@ -46,6 +46,14 @@ public class Constants {
     public static String CLUE_CATEGORY = "clueCategory";
     // 资源类型字典Code
     public static String CLUE_TYPE = "clueType";
+    // 选址情况字典Code
+    public static String OPTION_ADDRESS = "optionAddress";
+    // 合伙人字典Code
+    public static String PARTNER = "partner";
+    // 餐饮经验字典Code
+    public static String CATERING_EXPERIENCE = "CateringExperience";
+    // 到访店型字典Code
+    public static String VISTIT_STORE_TYPE = "vistitStoreType";
 
 
 }

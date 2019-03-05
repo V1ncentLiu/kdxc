@@ -8,7 +8,7 @@ package com.kuaidao.manageweb.constant;
  * @version V1.0
  */
 public enum MenuEnum {
-    LOGIN("登录"), LOGINOUT("退出登录"), UPDATE_PASSWORD("修改密码"), GET_CODE("获取验证码"),
+    INDEX("首页"), LOGIN("登录"), LOGINOUT("退出登录"), UPDATE_PASSWORD("修改密码"), GET_CODE("获取验证码"),
     /**
      * 系统管理菜单
      */
@@ -28,13 +28,13 @@ public enum MenuEnum {
      * 总裁办
      * 
      */
-	
+
     REPETITION("重单处理（总裁办）"), BUSINESSSIGNVALID("有效签约单确认"), BUSINESSSIGNREPETITION("付款明细重单审批确认（总裁办）"), PAYDETAILREPETITION("付款明细分配比例（总裁办）"),
     /**
      * 电销中心
      */
     SIGN_ORDER("签约记录")
-    
+
     ;
 
 

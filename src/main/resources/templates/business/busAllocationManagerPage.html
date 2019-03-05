@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"  xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head th:replace="_header_include::frag(~{::title},~{},~{})">
+    <title>后台管理系统</title>
+    <style>
+        button a{color:#fff!important;}
+    </style>
+</head>
+<body>
+<div id="clueManage" class="clueManage mainPadding">  
+    <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
+        <el-breadcrumb-item>Home</el-breadcrumb-item>
+        <el-breadcrumb-item>商务管理</el-breadcrumb-item>
+        <el-breadcrumb-item><a >待分发来访客户</a></el-breadcrumb-item>
+    </el-breadcrumb>
+    
+    <el-row class="marginB10">
+    		<shiro:hasPermission name="business:busAllocationManager:allocation">
+		        <el-button type="primary" @click="toAllocationClue">分发资源</el-button>
+		    </shiro:hasPermission>
+    		<shiro:hasPermission name="business:busAllocationManager:allocation">
+		        <el-button type="success" @click="toTransferClue">外调经理</el-button>
+		    </shiro:hasPermission>
+	</el-row>
+	<el-form :inline="true" :model="searchForm" class="demo-form-inline" ref="searchForm"> 
+	    <el-row class="greybg padding20" style="padding-bottom: 0;">
+		    	<el-col :span="4">
+				  <el-form-item class="formItem"  prop="teleGorupId" style="width: 100%;">
+				    <el-select v-model="searchForm.teleGorupId" @change="getSaleList" placeholder="电销组" style="width: 100%;">
+				      <el-option
+					      v-for="item in teleGorupOptions"
+					      :key="item.id"
+					      :label="item.name"
+					      :value="item.id">
+					  </el-option>
+				    </el-select>
+				  </el-form-item>
+				</el-col>
+				<el-col :span="4">
+				  <el-form-item class="formItem"  prop="teleSaleId" style="width: 100%;">
+				    <el-select v-model="searchForm.teleSaleId" placeholder="创业顾问" style="width: 100%;">
+				      <el-option
+					      v-for="item in teleSaleOptions"
+					      :key="item.id"
+					      :label="item.username"
+					      :value="item.id">
+					  </el-option>
+				    </el-select>
+				  </el-form-item>
+				</el-col>
+				<el-col :span="4">
+				  <el-form-item class="formItem"  prop="projectId" style="width: 100%;">
+				    <el-select v-model="searchForm.projectId" placeholder="品尝项目" style="width: 100%;">
+				      <el-option
+					      v-for="item in projectOptions"
+					      :key="item.id"
+					      :label="item.projectName"
+					      :value="item.id">
+					  </el-option>
+				    </el-select>
+				  </el-form-item>
+				</el-col>
+			<el-col :span="4">
+			  <el-form-item class="formItem"  prop="province">
+			    <el-select v-model="searchForm.province"  placeholder="开店省份" style="width: 100%;">
+			      <el-option
+				      v-for="item in provinceOptions"
+				      :key="item.name"
+				      :label="item.name"
+				      :value="item.name">
+				  </el-option>
+			    </el-select>
+			  </el-form-item>
+			  </el-col>
+			<el-col :span="4">
+			  <el-form-item class="formItem"  prop="delFalg">
+			    <el-select v-model="searchForm.delFalg" placeholder="邀约来访状态">
+			      <el-option
+				      v-for="item in delFalgOptions"
+				      :key="item.value"
+				      :label="item.name"
+				      :value="item.value">
+				  </el-option>
+			    </el-select>
+			  </el-form-item>
+			  </el-col>
+	  </el-row>
+	  <el-row class="marginB10 greybg padding20" style="padding-bottom: 0;">
+	     <el-col :span="9">
+	          <el-form-item class="formItem" label="提交邀约时间：">
+	  					<el-date-picker value-format="yyyy-MM-dd" v-model="searchForm.startTime" type="date" placeholder="选择日期"></el-date-picker>
+	          </el-form-item>
+	          <el-form-item class="formItem" label="——">
+						   <el-date-picker value-format="yyyy-MM-dd" v-model="searchForm.endTime" type="date" placeholder="选择日期"></el-date-picker>
+	          </el-form-item>
+	     </el-col>
+	     <el-col :span="9">
+	          <el-form-item class="formItem" label="邀约来访时间：">
+	  					<el-date-picker value-format="yyyy-MM-dd" v-model="searchForm.startReserveTime" type="date" placeholder="选择日期"></el-date-picker>
+	          </el-form-item>
+	          <el-form-item class="formItem" label="——">
+						   <el-date-picker value-format="yyyy-MM-dd" v-model="searchForm.endReserveTime" type="date" placeholder="选择日期"></el-date-picker>
+	          </el-form-item>
+	     </el-col>
+	     <el-col :span="4">
+			   <el-form-item class="formItem" prop="cusName">
+			    <el-input v-model="searchForm.cusName" placeholder="客户姓名" class="input-with-select"></el-input>
+			  </el-form-item>
+	     </el-col>
+	     <el-col :span="2">
+			    <el-button type="primary" @click="searchTable()">搜索</el-button>
+	     </el-col>
+				
+	    </el-row>
+  	</el-form>
+    <el-row>
+        <el-table  ref="multipleTable" tooltip-effect="dark" border @selection-change="handleSelectionChange"
+            style="width: 100%"  :data="dataTable" >
+           <el-table-column align="center" type="selection" label="全选" width="50"></el-table-column>
+           <el-table-column align="center" type="index" width="30" label="序号"></el-table-column>
+           <el-table-column align="center" prop="createTime" label="提交邀约时间" :formatter="dateFormat"></el-table-column>
+           <el-table-column align="center" prop="reserveTime" label="邀约来访时间" :formatter="dateFormat"></el-table-column>
+           <el-table-column align="center" prop="teleGorupName" label="电销组"></el-table-column>
+           <el-table-column align="center" prop="teleDirectorName" label="电销总监"></el-table-column>
+           <el-table-column align="center" prop="teleSaleName" label="电销员工"></el-table-column>
+           <el-table-column align="center" prop="teleProjectId" label="电销组项目" :formatter="transformProject"></el-table-column>
+           <el-table-column align="center" prop="cusName" label="客户姓名" ></el-table-column>
+           <el-table-column align="center" prop="tasteProjectId" label="品尝项目" :formatter="transformProject"></el-table-column>
+           <el-table-column align="center" prop="province" label="开店省份" ></el-table-column>
+           <el-table-column align="center" prop="city" label="开店城市" ></el-table-column>
+           <el-table-column align="center" prop="district" label="开店区／县" ></el-table-column>
+           <el-table-column align="center" prop="sex" label="客户性别" :formatter="transformSex"></el-table-column>
+           <el-table-column align="center" prop="age" label="客户年龄" ></el-table-column>
+           <el-table-column align="center" prop="partnerType" label="合伙人" :formatter="transformPartner"></el-table-column>
+           <el-table-column align="center" prop="hasExperience" label="餐饮经验" :formatter="transformExperience"></el-table-column>
+           <el-table-column align="center" prop="hasAddress" label="选址情况" :formatter="transformAddress"></el-table-column>
+           <el-table-column align="center" prop="advanceAmount" label="预投金额" ></el-table-column>
+           <el-table-column align="center" prop="purInProject" label="意向项目" :formatter="transformProject" ></el-table-column>
+           <el-table-column align="center" prop="area" label="店面面积" ></el-table-column>
+           <el-table-column align="center" prop="delFalg" label="邀约来访" :formatter="transformDelFalg"></el-table-column>
+        </el-table>
+        <table-pagination :pager="pager" @change="searchTable"></table-pagination>
+    </el-row>
+      <!-- dialog -->
+      <el-dialog  title="分发资源"  :visible.sync="allocationVisible"  width="30%">
+        <template>
+            <el-form :model="allocationForm" ref="allocationForm" >
+                <el-form-item >
+                   	{{allocationForm.message}}
+                </el-form-item>
+                <el-form-item label="商务经理"    :label-width="formLabelWidth"  prop="saleId">
+                    <el-select v-model="allocationForm.saleId" placeholder="组内商务经理姓名" style="width: 80%">
+                        <el-option v-for="item in saleOptions" 
+                        			:key="item.id" 
+                        			:label="item.name" 
+                        			:value="item.id">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="备注"    :label-width="formLabelWidth"  prop="remark">
+                   	<el-input type="textarea" v-model="allocationForm.remark" class="input-with-select"></el-input>
+                </el-form-item>
+            </el-form>
+            <div slot="footer" class="dialog-footer">
+                <el-button type="primary" @click="allocationClue">提 交</el-button>
+                <el-button  @click="allocationVisible = false">取 消</el-button>
+            </div>
+        </template>
+    </el-dialog>
+    <!-- dialog -->
+      <!-- dialog -->
+      <el-dialog  title="外调经理"  :visible.sync="transferVisible"  width="30%">
+        <template>
+            <el-form :model="transferForm" ref="transferForm" >
+            	<el-form-item >
+                   	{{transferForm.message}}
+                </el-form-item>
+                <el-form-item label="商务经理"    :label-width="formLabelWidth"  prop="saleId">
+                    <el-select v-model="transferForm.saleId" placeholder="商务经理姓名" style="width: 80%">
+                        <el-option v-for="item in allSaleOptions" 
+                        			:key="item.id" 
+                        			:label="item.name" 
+                        			:value="item.id">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="备注"    :label-width="formLabelWidth"  prop="remark">
+			    	<el-input type="textarea" v-model="transferForm.remark" class="input-with-select"></el-input>
+                </el-form-item>
+            </el-form>
+            <div slot="footer" class="dialog-footer">
+                <el-button type="primary" @click="transferClue">提 交</el-button>
+                <el-button  @click="transferVisible = false">取 消</el-button>
+            </div>
+        </template>
+    </el-dialog>
+    <!-- dialog -->
+     
+</div>
+<!-- import common js-->
+<div th:include="_footer_include :: #jsLib"></div>
+</body>
+<script th:inline="javascript">
+var allSaleList=[[${allSaleList}]];//所有商务总监
+var busSaleList=[[${busSaleList}]];//商务总监
+var saleGroupList=[[${saleGroupList}]];//电销组
+var projectList=[[${projectList}]];//项目
+var provinceList=[[${provinceList}]];//省份
+var optionAddressList=[[${optionAddressList}]];//选址情况
+var partnerList=[[${partnerList}]];//合伙人
+var cateringExperienceList=[[${cateringExperienceList}]];//餐饮经验
+var clueVM = new Vue({
+        el: '#clueManage',
+        data: {
+        		searchForm: {
+	        		cusName: '',
+	        		teleGorupId: '',
+	        		teleSaleId: '',
+	        		projectId: '',
+	        		province: '',
+	        		delFalg: '',
+	        		startTime: '',
+	        		endTime: '',
+	        		startReserveTime: '',
+	        		endReserveTime: ''
+	            },
+	            allocationForm: {
+	            	saleId:'',
+	            	remark:'',
+	            	message:''
+                },
+                transferForm: {
+	            	saleId:'',
+	            	remark:'',
+	            	message:''
+                },
+	            dataTable:[],
+	            teleGorupOptions:saleGroupList,
+	            teleSaleOptions:[],
+	            projectOptions:projectList,
+	            provinceOptions:provinceList,
+	            delFalgOptions:[{
+	            	value:0,
+	            	name:"正常"
+	            },{
+	            	value:1,
+	            	name:"删除"
+	            },{
+	            	value:2,
+	            	name:"取消"
+	            }],
+	            saleOptions:busSaleList,
+	            allSaleOptions:allSaleList,
+	            allocationVisible: false,
+	            transferVisible: false,
+	            pager:{
+	                total: 0,
+	                currentPage: 1,
+	                pageSize: 20,
+	            },
+	            multipleSelection:[],
+                formLabelWidth: '150px',
+                formLabelWidth1: '120px',
+        },
+        methods: {
+        	searchTable() {
+                var param ={};
+                param.pageSize = this.pager.pageSize;
+                param.pageNum = this.pager.currentPage;
+                param.startTime = this.searchForm.startTime;
+                param.endTime = this.searchForm.endTime;
+                param.startReserveTime = this.searchForm.startReserveTime;
+                param.endReserveTime = this.searchForm.endReserveTime;
+                param.teleGorupId = this.searchForm.teleGorupId;
+                param.teleSaleId = this.searchForm.teleSaleId;
+                param.tasteProjectId = this.searchForm.projectId;
+                param.cusName = this.searchForm.cusName;
+                param.province = this.searchForm.province;
+                param.delFalg = this.searchForm.delFalg;
+                console.info(param);
+                axios.post('/business/busAllocation/list', param)
+                .then(function (response) {
+                      var result =  response.data;
+                      console.info(result);
+                      var table=result.data;
+                      clueVM.dataTable= table.data;
+                      clueVM.pager.total =  table.total;
+                      clueVM.pager.currentPage = table.currentPage;
+                })
+                .catch(function (error) {
+                     console.log(error);
+                });
+                
+              },
+              //选择行
+              handleSelectionChange(val) {
+                  this.multipleSelection = val;
+              },
+              handleSizeChange(val) {
+                  //下拉框  每页 10,20条切换 调用
+                     console.log(`每页 ${val} 条`);
+                  this.pageSize = val;
+                  this.initTableData(1);
+               },
+               handleCurrentChange(val) {
+                   //点击 页码
+                 console.log(`当前页: ${val}`);
+                 this.initTableData(val);
+               },
+               //品尝项目转换方法
+               transformProject(row, column, cellValue, index) {
+            	   var text="";
+              	   if(projectList&&cellValue){
+	            	   var array=cellValue.split(",");
+	                   for(var i=0;i<array.length;i++){
+	                	   for(var j=0;j<projectList.length;j++){
+	 	                		if(array[i]==projectList[j].id){
+	 	                			if(i==0){
+		 	                			text=projectList[j].projectName;
+	 	                			}else{
+		 	                			text=text+","+projectList[j].projectName;
+	 	                			}
+	 	                		}
+	 	                	}
+	                	}
+              	    }
+                    return text;
+               },
+               //性别转换方法
+               transformSex(row, column, cellValue, index) {
+                 var text="";
+                 if(cellValue=="1"){
+                   text="男"
+                 }else if(cellValue=="2"){
+                   text="女"
+                 }
+                 return text;
+               },
+               //邀约状态转换方法
+               transformDelFalg(row, column, cellValue, index) {
+                 var text="";
+                 if(cellValue=="0"){
+                   text="正常"
+                 }else if(cellValue=="1"){
+                   text="已删除"
+                 }else if(cellValue=="2"){
+                   text="已取消"
+                 }
+                 return text;
+               },
+               //合伙人转换方法
+               transformPartner(row, column, cellValue, index) {
+             	  var text="";
+             	  if(partnerList){
+ 	                  for(var i=0;i<partnerList.length;i++){
+ 	                		if(cellValue==partnerList[i].value){
+ 	                			text=partnerList[i].name;
+ 	                		}
+ 	                	}
+             	  }
+                   return text;
+               },
+               //选址情况转换方法
+               transformAddress(row, column, cellValue, index) {
+             	  var text="";
+             	  if(optionAddressList){
+ 	                  for(var i=0;i<optionAddressList.length;i++){
+ 	                		if(cellValue==optionAddressList[i].value){
+ 	                			text=optionAddressList[i].name;
+ 	                		}
+ 	                	}
+             	  }
+                   return text;
+               },
+               //餐饮经验转换方法
+               transformExperience(row, column, cellValue, index) {
+             	  var text="";
+             	  if(cateringExperienceList){
+ 	                  for(var i=0;i<cateringExperienceList.length;i++){
+ 	                		if(cellValue==cateringExperienceList[i].value){
+ 	                			text=cateringExperienceList[i].name;
+ 	                		}
+ 	                	}
+             	  }
+                   return text;
+               },
+               //日期数据格式化方法
+               dateFormat( row, column, cellValue, index) {
+                 if (cellValue == undefined) {
+                    return "";
+                 }
+                 return moment(cellValue).format("YYYY-MM-DD HH:mm:ss");
+               },
+               //打开分发资源
+               toAllocationClue() {
+            	   this.allocationForm.message="";
+           	       var rows = this.multipleSelection;
+            	   if(rows.length==0){
+                       this.$message({
+                          message: '请选择一条数据进行分发',
+                          type: 'warning'
+                        });
+                       return;
+                   }
+            	   var text="";
+            	   for(var i=0;i<rows.length;i++){
+                   	   var curRow = rows[i];
+                       if(curRow.busSaleId){
+                    	   text+="当前选择“"+curRow.cusName+"”已有之前服务商务经理"+curRow.busSaleName+",";
+                       }
+                   }
+            	   if(text!=""){
+	                   text+="请确认后分发客户。";
+	                   this.allocationForm.message=text;
+                   }
+            	   
+                   this.allocationVisible = true;
+               },
+               allocationClue(){//分发资源
+           	      var rows = this.multipleSelection;
+	           	   var idList = [];
+	               var clueIdList = [];
+	               for(var i=0;i<rows.length;i++){
+	            	   var curRow = rows[i];
+	            			idList.push(curRow.id);
+	            			clueIdList.push(curRow.clueId);
+	               }
+	            	  //外调
+	            	  var param  = {};
+	           	  param.idList=idList;
+	           	  param.clueIdList=clueIdList;
+               	  param.busSaleId=this.allocationForm.saleId;
+               	  param.remark=this.allocationForm.remark;
+                  axios.post('/business/busAllocation/busAllocationClue',param)
+                   .then(function (response) {
+                       var data =  response.data;
+                       if(data.code=='0'){
+                       	clueVM.$message({message:'分发成功',type:'success',duration:1000,onClose:function(){
+                       		clueVM.searchTable();
+                   	    }});
+                       }else{
+                       	clueVM.$message({
+                               message: "接口调用失败",
+                               type: 'error'
+                             }); 
+                       }
+                   })
+                   .catch(function (error) {
+                     console.log(error);
+                   })
+                   .then(function () {
+                   	
+                   });
+                 },// method end
+               //打开外调经理
+               toTransferClue() {
+           	       var rows = this.multipleSelection;
+            	   if(rows.length==0){
+                       this.$message({
+                          message: '请选择一条数据进行外调',
+                          type: 'warning'
+                        });
+                       return;
+                   }
+            	   var text="";
+            	   for(var i=0;i<rows.length;i++){
+                   	   var curRow = rows[i];
+                       if(curRow.busSaleId){
+                    	   text+="当前选择“"+curRow.cusName+"”已有之前服务商务经理"+curRow.busSaleName+",";
+                       }
+                   }
+            	   if(text!=""){
+	                   text+="请确认后分发客户。";
+	                   this.allocationForm.message=text;
+                   }
+                   this.allocationVisible = true;
+               },
+               transferClue(){//外调经理
+           	      var rows = this.multipleSelection;
+                  var idList = [];
+                  var clueIdList = [];
+                  for(var i=0;i<rows.length;i++){
+               	   var curRow = rows[i];
+               			idList.push(curRow.id);
+               			clueIdList.push(curRow.clueId);
+                  }
+               	  //外调
+               	  var param  = {};
+              	  param.idList=idList;
+              	  param.clueIdList=clueIdList;
+              	  param.busSaleId=this.transferForm.saleId;
+              	  param.remark=this.transferForm.remark;
+                  axios.post('/business/busAllocation/busAllocationClue',param)
+                   .then(function (response) {
+                       var data =  response.data;
+                       if(data.code=='0'){
+                       	clueVM.$message({message:'外调成功',type:'success',duration:1000,onClose:function(){
+                       		clueVM.searchTable();
+                   	    }});
+                       }else{
+                       	clueVM.$message({
+                               message: "接口调用失败",
+                               type: 'error'
+                             }); 
+                       }
+                   })
+                   .catch(function (error) {
+                     console.log(error);
+                   })
+                   .then(function () {
+                   	
+                   });
+                 },// method end
+              
+              //根据电销组查询电销总监
+              getSaleList() {
+            	  var param ={};
+            	  param.orgId = this.searchForm.teleGorupId;
+                  console.info(param);
+                  axios.post('/clue/pendingAllocation/getSaleList', param)
+                  .then(function (response) {
+                        var result =  response.data;
+                        console.info(result);
+                        var table=result.data;
+                        clueVM.teleSaleOptions= table;
+                  })
+                  .catch(function (error) {
+                       console.log(error);
+                  });
+              }
+        },
+        created(){
+            console.info("create method");
+            this.searchTable();
+           
+        },
+        mounted(){
+           console.info("mounted method");
+        }
+    })
+    
+</script>
+</html>
