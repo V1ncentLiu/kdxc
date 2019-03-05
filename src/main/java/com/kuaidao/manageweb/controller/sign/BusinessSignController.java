@@ -216,11 +216,12 @@ public class BusinessSignController {
      *  跳转到 到访记录明细页面
      */
     @RequestMapping("/visitRecordPage")
-    public String visitRecordPage(HttpServletRequest request,@RequestParam Long clueId , @RequestParam Long signId) throws Exception {
+    public String visitRecordPage(HttpServletRequest request,@RequestParam String clueId , @RequestParam String signId ,@RequestParam String readyOnly ) throws Exception {
         request.setAttribute("clueId",clueId);
         request.setAttribute("signId",signId);
+        request.setAttribute("readyOnly",readyOnly); //  readyOnly == 1 页面只读（没有添加按钮）
         IdEntityLong idEntityLong = new IdEntityLong();
-        idEntityLong.setId(clueId);
+        idEntityLong.setId(Long.valueOf(clueId));
         JSONResult<BusSignRespDTO> busSign = queryOne(idEntityLong);
         BusSignRespDTO sign = busSign.getData();
 
@@ -238,7 +239,7 @@ public class BusinessSignController {
             request.setAttribute("PayAllData",PayAllData);
         }else {
             PayDetailReqDTO detailReqDTO = new PayDetailReqDTO();
-            detailReqDTO.setSignId(signId);
+            detailReqDTO.setSignId(Long.valueOf(signId));
             JSONResult<List<PayDetailRespDTO>> resListJson = payDetailFeignClient.queryList(detailReqDTO);
             if(JSONResult.SUCCESS.equals(resListJson.getCode())){
                 List<PayDetailRespDTO> list = resListJson.getData();
@@ -250,11 +251,11 @@ public class BusinessSignController {
                 List<PayDetailRespDTO> three = new ArrayList();
                 for(int i = 0 ; i < list.size() ; i ++){
                     PayDetailRespDTO dto  = list.get(i);
-                    if("1".equals(dto.getPayType())){
+                    if("2".equals(dto.getPayType())){
                         one.add(dto);
-                    }else   if("2".equals(dto.getPayType())){
+                    }else   if("3".equals(dto.getPayType())){
                         two.add(dto);
-                    }else{
+                    }else   if("4".equals(dto.getPayType())){
                         three.add(dto);
                     }
                 }
