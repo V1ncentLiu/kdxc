@@ -304,13 +304,8 @@
                               <el-button
                                   size="mini"
                                   type="text"
-                                  @click="handleOperateFn1(scope.$index, scope.row)"
-                               >查看图片 </el-button>
-                                <el-button
-                                  size="mini"
-                                  type="text"
-                                  @click="handleOperateFn2(scope.$index, scope.row)"
-                               >下载录音</el-button>
+                                  @click="handleOperateFn(scope.$index, scope.row)"
+                               >{{scope.row.fileType =="mp3"? '下载录音':'查看图片'}} </el-button>
                           </template>
                         </el-table-column>
                         <el-table-column
@@ -685,7 +680,13 @@
         <div class="padding20" style="text-align: center;">
             <img src="images/errorIcon.jpg" alt="" style="width: 250px;height: 250px;">
         </div>
-    </el-dialog>    
+    </el-dialog> 
+    <!-- 上传资源dialog -->
+    <el-dialog title="查看图片" :visible.sync="dialogFormUploadImg">
+        <div class="padding20" style="text-align: center;">
+            <img :src="dialogFormUploadImgSrc" alt="" style="width: 250px;height: 250px;">
+        </div>
+    </el-dialog>   
 </div>
 <link rel="stylesheet" href="/css/common/uploadStyle.css">
 <style type="text/css">
@@ -724,6 +725,7 @@
     </style>
     
 </body>
+<script src="/js/common/download.js"></script>
 <!-- import Vue before Element -->
  <div th:include="_footer_include :: #jsLib"></div>
 <script th:inline="javascript" >
@@ -740,7 +742,9 @@ var ossUrl=[[${ossUrl}]];
  var addCustomerVM=   new Vue({
         el: '#addCustomer',
         data: function() {
-            return {       
+            return {
+            	dialogFormUploadImg: false, //上传资源图片弹框
+            	dialogFormUploadImgSrc: '', //上传资源图片弹框
                 insideProjectShow:true,//内部项目默认显示
                 outsideProjectShow:false,//外部项目默认不显示
                 dialogFormImg:false,
@@ -1378,9 +1382,24 @@ var ossUrl=[[${ossUrl}]];
             inviteCustomer(){
             	  window.location.href="/tele/clueMyCustomerInfo/inviteCustomer?clueId="+clueId; 
             },
-            handleOperateFn(index, row) { //上传资源"查看图片、下载录音"
+            handleOperateFn(index, row) { //上传资源"查看图片,下载录音"
+            	
                 console.log(index, row);
+            	console.log( row.filePath );
+            	console.log( row.fileName );
+            	
+            	if( row.fileType == 'mp3' ){
+            		this.download1( row.filePath, row.fileName, 'auido/mp3' );
+            	}else{
+            		this.dialogFormUploadImgSrc = row.filePath;
+                	this.dialogFormUploadImg =  true;
+            	}
+            	
             },
+            download1(data, strFileName, strMimeType) {
+				download(data, strFileName, strMimeType);
+				alert(1);
+			},
             handlePlay(index, row) { //通话记录播放btn
             	$("audio").hide();
                 console.log(index, row);
