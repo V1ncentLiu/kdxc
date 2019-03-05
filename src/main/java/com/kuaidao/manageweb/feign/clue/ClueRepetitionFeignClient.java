@@ -84,12 +84,11 @@ public interface ClueRepetitionFeignClient {
 	
 	/**
 	 * 重单比例调整
-	 * @param menuDTO
 	 * @return
 	 */
 	@PostMapping("/updatePayDetailById")
 	public JSONResult updatePayDetailById(@RequestBody PayDetailDTO payDetailDTO);
-	
+
 	@Component
 	static class HystrixClientFallback implements ClueRepetitionFeignClient {
 
@@ -150,7 +149,7 @@ public interface ClueRepetitionFeignClient {
 			return fallBackError("付款明细比例调整失败");
 		}
 
-	
+
 	}
 
 }
