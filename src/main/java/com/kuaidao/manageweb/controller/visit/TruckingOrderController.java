@@ -1,5 +1,6 @@
 package com.kuaidao.manageweb.controller.visit;
 
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -8,6 +9,7 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,6 +54,7 @@ public class TruckingOrderController {
      * 邀約來訪派車單
      * @return
      */
+    @RequiresPermissions("aggregation:truckingOrder:view")
     @RequestMapping("/truckingOrderPage")
     public String visitRecordPage(HttpServletRequest request) {
         //电销人员
@@ -79,11 +82,11 @@ public class TruckingOrderController {
      * @param reqDTO
      * @return
      */
+    @RequiresPermissions("aggregation:truckingOrder:view")
     @PostMapping("/listTrackingOrder")
     @ResponseBody
      public JSONResult<PageBean<TrackingOrderRespDTO>> listTrackingOrder(@RequestBody TrackingOrderReqDTO reqDTO){
-        //TODO devin  调试 暂时放开
-   /*     UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+       UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
         Long orgId = curLoginUser.getOrgId();
         List<RoleInfoDTO> roleList = curLoginUser.getRoleList();
         if(roleList!=null && roleList.size()!=0) {
@@ -102,13 +105,27 @@ public class TruckingOrderController {
                     List<Long> idList = userInfoDTOList.stream().map(UserInfoDTO::getId).collect(Collectors.toList());
                     reqDTO.setBusDirectorIdList(idList);
                 }
+                Long accountId = reqDTO.getAccountId();
+                if(accountId!=null) {
+                    List<Long> accountIdList = new ArrayList<>();
+                    accountIdList.add(accountId);
+                    reqDTO.setAccountIdList(accountIdList);
+                }
 
             }else if(RoleCodeEnum.SWZJ.value().equals(roleName)){//商务总监
                 List<Long> idList = new ArrayList<>();
                 idList.add(curLoginUser.getId());
                 reqDTO.setBusDirectorIdList(idList);
+                Long accountId = reqDTO.getAccountId();
+                if(accountId!=null) {
+                    List<Long> accountIdList = new ArrayList<>();
+                    accountIdList.add(accountId);
+                    reqDTO.setAccountIdList(accountIdList);
+                }
             }
-        }*/
+            
+            
+        }
 
          return trackingOrderFeignClient.listTrackingOrder(reqDTO) ;
      }
@@ -122,6 +139,7 @@ public class TruckingOrderController {
      * @param reqDTO
      * @return
      */
+    @RequiresPermissions("aggregation:truckingOrder:export")
     @PostMapping("/exportTrackingOrder")
      public void exportTrackingOrder(@RequestBody TrackingOrderReqDTO reqDTO,HttpServletResponse response) throws Exception{
         JSONResult<List<TrackingOrderRespDTO>> trackingOrderListJr = trackingOrderFeignClient.exportTrackingOrder(reqDTO);
@@ -132,7 +150,7 @@ public class TruckingOrderController {
             List<TrackingOrderRespDTO> orderList = trackingOrderListJr.getData();
             int size = orderList.size();
             for (int i = 0; i < size; i++) {
-                TrackingOrderRespDTO trackingOrderRespDTO = orderList.get(0);
+                TrackingOrderRespDTO trackingOrderRespDTO = orderList.get(i);
                 List<Object> curList = new ArrayList<>();
                 curList.add(i+1);
                 curList.add(getTimeStr(trackingOrderRespDTO.getReserveTime()));
@@ -166,6 +184,7 @@ public class TruckingOrderController {
         String name =  "派车单"+ DateUtil.convert2String(new Date(),DateUtil.ymdhms2)+".xlsx";
         response.addHeader("Content-Disposition",
                 "attachment;filename=" + new String(name.getBytes("UTF-8"), "ISO8859-1"));
+        response.addHeader("fileName", URLEncoder.encode(name,"utf-8"));
         response.setContentType("application/octet-stream");
         ServletOutputStream outputStream = response.getOutputStream();
         wbWorkbook.write(outputStream);

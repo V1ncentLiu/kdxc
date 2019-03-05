@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -75,6 +76,8 @@ public class VisitRecordController {
     @Autowired
     VisitRecordFeignClient visitRecordFeignClient;
 
+    
+    @RequiresPermissions("aggregation:visitRecord:view")
     @RequestMapping("/visitRecordPage")
     public String visitRecordPage(HttpServletRequest request) {
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
@@ -174,6 +177,7 @@ public class VisitRecordController {
      * @param visitRecordReqDTO
      * @return
      */
+    @RequiresPermissions("aggregation:visitRecord:view")
     @PostMapping("/listVisitRecord")
     @ResponseBody
     public JSONResult<PageBean<VisitRecordRespDTO>> listVisitRecord(@RequestBody VisitRecordReqDTO visitRecordReqDTO){
@@ -251,6 +255,7 @@ public class VisitRecordController {
      * 驳回签约单
      * @return
      */
+    @RequiresPermissions("aggregation:visitRecord:reject")
     @PostMapping("/rejectVisitRecord")
     @LogRecord(description = "来访记录驳回",operationType = LogRecord.OperationType.UPDATE,menuName = MenuEnum.CUSTOMER_VISIT_RECORD)
     @ResponseBody
@@ -267,6 +272,7 @@ public class VisitRecordController {
      * 审核通过 签约单
      * @return
      */
+    @RequiresPermissions("aggregation:visitRecord:pass")
     @PostMapping("/passAuditSignOrder")
     @LogRecord(description = "来访记录审核通过",operationType = LogRecord.OperationType.UPDATE,menuName = MenuEnum.CUSTOMER_VISIT_RECORD)
     @ResponseBody
