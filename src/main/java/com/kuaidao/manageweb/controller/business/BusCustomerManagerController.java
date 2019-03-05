@@ -33,6 +33,7 @@ import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
 import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
 import com.kuaidao.manageweb.feign.project.ProjectInfoFeignClient;
 import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
+import com.kuaidao.sys.constant.SysConstant;
 import com.kuaidao.sys.dto.area.SysRegionDTO;
 import com.kuaidao.sys.dto.dictionary.DictionaryItemRespDTO;
 import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
@@ -72,6 +73,7 @@ public class BusCustomerManagerController {
     @RequiresPermissions("business:busCustomerManager:view")
     public String initCompanyList(HttpServletRequest request) {
         UserInfoDTO user = getUser();
+
         // 查询所有电销组
         List<OrganizationRespDTO> teleSaleGroupList = getSaleGroupList(null, OrgTypeConstant.DXZ);
         request.setAttribute("teleSaleGroupList", teleSaleGroupList);
@@ -84,7 +86,7 @@ public class BusCustomerManagerController {
                     getSaleGroupList(null, OrgTypeConstant.SWZ);
             request.setAttribute("busSaleGroupList", busSaleGroupList);
             // 查询所有商务总监
-            List<UserInfoDTO> busDirectorList = getUserList(null, RoleCodeEnum.SWZJ.name());
+            List<UserInfoDTO> busDirectorList = getUserList(null, RoleCodeEnum.SWZJ.name(), null);
             request.setAttribute("busDirectorList", busDirectorList);
         } else if (roleList != null
                 && RoleCodeEnum.SWDQZJ.name().equals(roleList.get(0).getRoleCode())) {
@@ -96,7 +98,7 @@ public class BusCustomerManagerController {
             request.setAttribute("busSaleGroupList", busSaleGroupList);
             // 查询本区商务总监
             List<UserInfoDTO> busDirectorList =
-                    getUserList(user.getOrgId(), RoleCodeEnum.SWZJ.name());
+                    getUserList(user.getOrgId(), RoleCodeEnum.SWZJ.name(), null);
             request.setAttribute("busDirectorList", busDirectorList);
         } else if (roleList != null
                 && RoleCodeEnum.SWZJ.name().equals(roleList.get(0).getRoleCode())) {
@@ -104,19 +106,19 @@ public class BusCustomerManagerController {
 
             // 查询本区商务总监
             List<UserInfoDTO> busDirectorList =
-                    getUserList(user.getOrgId(), RoleCodeEnum.SWZJ.name());
+                    getUserList(user.getOrgId(), RoleCodeEnum.SWZJ.name(), null);
             request.setAttribute("searchBusSaleList", busDirectorList);
+            // 查询组织下商务经理
+            List<Integer> statusList = new ArrayList<Integer>();
+            statusList.add(SysConstant.USER_STATUS_ENABLE);
+            statusList.add(SysConstant.USER_STATUS_LOCK);
+            List<UserInfoDTO> saleList =
+                    getUserList(user.getOrgId(), RoleCodeEnum.SWJL.name(), statusList);
+            request.setAttribute("busSaleList", saleList);
         }
         // 查询所有商务经理
         List<Map<String, Object>> allSaleList = getAllSaleList();
         request.setAttribute("allSaleList", allSaleList);
-        // 查询组织下商务经理
-        UserOrgRoleReq userOrgRoleReq = new UserOrgRoleReq();
-        userOrgRoleReq.setRoleCode(RoleCodeEnum.SWJL.name());
-        userOrgRoleReq.setOrgId(user.getOrgId());
-        JSONResult<List<UserInfoDTO>> saleList =
-                userInfoFeignClient.listByOrgAndRole(userOrgRoleReq);
-        request.setAttribute("busSaleList", saleList.getData());
         // 查询所有项目
         JSONResult<List<ProjectInfoDTO>> listNoPage =
                 projectInfoFeignClient.listNoPage(new ProjectInfoPageParam());
@@ -229,7 +231,10 @@ public class BusCustomerManagerController {
                 organizationFeignClient.queryOrgByParam(queryDTO);
         List<OrganizationRespDTO> busAreaLsit = busArea.getData();
         // 查询所有商务经理
-        List<UserInfoDTO> userList = getUserList(null, RoleCodeEnum.SWJL.name());
+        List<Integer> statusList = new ArrayList<Integer>();
+        statusList.add(SysConstant.USER_STATUS_ENABLE);
+        statusList.add(SysConstant.USER_STATUS_LOCK);
+        List<UserInfoDTO> userList = getUserList(null, RoleCodeEnum.SWJL.name(), statusList);
 
         Map<Long, OrganizationRespDTO> orgMap = new HashMap<Long, OrganizationRespDTO>();
         // 生成<机构id，机构>map
@@ -260,10 +265,11 @@ public class BusCustomerManagerController {
      * @param orgDTO
      * @return
      */
-    private List<UserInfoDTO> getUserList(Long orgId, String roleCode) {
+    private List<UserInfoDTO> getUserList(Long orgId, String roleCode, List<Integer> statusList) {
         UserOrgRoleReq userOrgRoleReq = new UserOrgRoleReq();
         userOrgRoleReq.setOrgId(orgId);
         userOrgRoleReq.setRoleCode(roleCode);
+        userOrgRoleReq.setStatusList(statusList);
         JSONResult<List<UserInfoDTO>> listByOrgAndRole =
                 userInfoFeignClient.listByOrgAndRole(userOrgRoleReq);
         return listByOrgAndRole.getData();

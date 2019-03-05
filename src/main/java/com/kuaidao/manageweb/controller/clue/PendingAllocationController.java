@@ -41,6 +41,7 @@ import com.kuaidao.manageweb.feign.customfield.CustomFieldFeignClient;
 import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
 import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
 import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
+import com.kuaidao.sys.constant.SysConstant;
 import com.kuaidao.sys.dto.customfield.CustomFieldQueryDTO;
 import com.kuaidao.sys.dto.customfield.QueryFieldByRoleAndMenuReq;
 import com.kuaidao.sys.dto.customfield.QueryFieldByUserAndMenuReq;
@@ -86,7 +87,11 @@ public class PendingAllocationController {
         List<RoleInfoDTO> roleList = user.getRoleList();
         if (roleList != null && RoleCodeEnum.DXZJ.name().equals(roleList.get(0).getRoleCode())) {
             // 如果当前登录的为电销总监,查询所有下属电销员工
-            List<UserInfoDTO> userList = getUserList(user.getOrgId(), RoleCodeEnum.DXCYGW.name());
+            List<Integer> statusList = new ArrayList<Integer>();
+            statusList.add(SysConstant.USER_STATUS_ENABLE);
+            statusList.add(SysConstant.USER_STATUS_LOCK);
+            List<UserInfoDTO> userList =
+                    getUserList(user.getOrgId(), RoleCodeEnum.DXCYGW.name(), statusList);
             request.setAttribute("saleList", userList);
             // 查询同事业部下的电销组
             Long orgId = user.getOrgId();
@@ -99,7 +104,7 @@ public class PendingAllocationController {
 
         } else if (roleList != null
                 && RoleCodeEnum.DXFZ.name().equals(roleList.get(0).getRoleCode())) {
-            // 如果当前登录的为电销总监,查询所有下属电销组
+            // 如果当前登录的为电销副总,查询所有下属电销组
             List<Map<String, Object>> saleGroupList = getSaleGroupList(user.getOrgId());
             request.setAttribute("orgList", saleGroupList);
         }
@@ -290,6 +295,10 @@ public class PendingAllocationController {
     @ResponseBody
     public JSONResult<List<UserInfoDTO>> getSaleList(@RequestBody UserOrgRoleReq userOrgRoleReq,
             HttpServletRequest request) {
+        List<Integer> statusList = new ArrayList<Integer>();
+        statusList.add(SysConstant.USER_STATUS_ENABLE);
+        statusList.add(SysConstant.USER_STATUS_LOCK);
+        userOrgRoleReq.setStatusList(statusList);
         userOrgRoleReq.setRoleCode(RoleCodeEnum.DXCYGW.name());
         JSONResult<List<UserInfoDTO>> listByOrgAndRole =
                 userInfoFeignClient.listByOrgAndRole(userOrgRoleReq);
@@ -323,7 +332,7 @@ public class PendingAllocationController {
                 organizationFeignClient.listDescenDantByParentId(organizationQueryDTO);
         List<OrganizationDTO> data = listDescenDantByParentId.getData();
         // 查询所有电销总监
-        List<UserInfoDTO> userList = getUserList(null, RoleCodeEnum.DXZJ.name());
+        List<UserInfoDTO> userList = getUserList(null, RoleCodeEnum.DXZJ.name(), null);
         Map<Long, UserInfoDTO> userMap = new HashMap<Long, UserInfoDTO>();
         // 生成<机构id，用户>map
         for (UserInfoDTO userInfoDTO : userList) {
@@ -351,10 +360,11 @@ public class PendingAllocationController {
      * @param orgDTO
      * @return
      */
-    private List<UserInfoDTO> getUserList(Long orgId, String roleCode) {
+    private List<UserInfoDTO> getUserList(Long orgId, String roleCode, List<Integer> statusList) {
         UserOrgRoleReq userOrgRoleReq = new UserOrgRoleReq();
         userOrgRoleReq.setOrgId(orgId);
         userOrgRoleReq.setRoleCode(roleCode);
+        userOrgRoleReq.setStatusList(statusList);
         JSONResult<List<UserInfoDTO>> listByOrgAndRole =
                 userInfoFeignClient.listByOrgAndRole(userOrgRoleReq);
         return listByOrgAndRole.getData();
