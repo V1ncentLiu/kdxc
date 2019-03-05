@@ -24,6 +24,7 @@ import com.kuaidao.aggregation.dto.project.ProjectInfoPageParam;
 import com.kuaidao.aggregation.dto.sign.PayDetailDTO;
 import com.kuaidao.common.constant.OrgTypeConstant;
 import com.kuaidao.common.constant.RoleCodeEnum;
+import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.constant.SystemCodeConstant;
 import com.kuaidao.common.entity.IdListLongReq;
 import com.kuaidao.common.entity.JSONResult;
@@ -176,13 +177,21 @@ public class SignRecordController {
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
         Long orgId = curLoginUser.getOrgId();
         List<RoleInfoDTO> roleList = curLoginUser.getRoleList();
-        /*if(roleList!=null && roleList.size()!=0) {
-            RoleInfoDTO roleInfoDTO = roleList.get(0);
-            String roleName = roleInfoDTO.getRoleName();
-            if(RoleCodeEnum.SWDQZJ.value().equals(roleName) ||RoleCodeEnum.SWZJ.value().equals(roleName)) {
-               List<Long> accountIdList =  getAccountIdList(orgId,RoleCodeEnum.SWZJL.name());
-               reqDTO.setBusinessManagerIdList(accountIdList);
+        RoleInfoDTO roleInfoDTO = roleList.get(0);
+        String roleName = roleInfoDTO.getRoleName();
+    /*    if(RoleCodeEnum.SWDQZJ.value().equals(roleName) ||RoleCodeEnum.SWZJ.value().equals(roleName)) {
+            Long businessManagerId = reqDTO.getBusinessManagerId();
+            if(businessManagerId!=null) {
+                List<Long> businessManagerIdList = new ArrayList<>();
+                businessManagerIdList.add(businessManagerId);
+                reqDTO.setBusinessManagerIdList(businessManagerIdList);
+            }else {
+                List<Long> accountIdList =  getAccountIdList(orgId,RoleCodeEnum.SWJL.name());
+                reqDTO.setBusinessManagerIdList(accountIdList);
             }
+          
+        }else {
+                return new JSONResult().fail(SysErrorCodeEnum.ERR_NOTEXISTS_DATA.getCode(),"角色没有权限");
         }*/
        
         return signRecordFeignClient.listSignRecord(reqDTO);
@@ -226,12 +235,6 @@ public class SignRecordController {
             reqDTO.setBusinessGroupIdList(businessGroupIdList);
         }
         
-        Long businessManagerId = reqDTO.getBusinessManagerId();
-        if(businessManagerId!=null) {
-            List<Long> businessManagerIdList = new ArrayList<>();
-            businessManagerIdList.add(businessManagerId);
-            reqDTO.setBusinessManagerIdList(businessManagerIdList);
-        }
         
         Long teleGroupid = reqDTO.getTeleGroupid();
         if(teleGroupid!=null) {
@@ -295,7 +298,7 @@ public class SignRecordController {
         if(data==null) {
             return payDetailListJr;
         }
-        //分组
+
         Map<String, List<PayDetailDTO>> payDetailMap = data.stream().collect(Collectors.groupingBy(PayDetailDTO::getPayType,Collectors.toList()));
         
         return  new JSONResult().success(payDetailMap);
