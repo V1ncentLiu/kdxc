@@ -75,14 +75,14 @@
     <el-table ref="multipleTable" :data="tableData" tooltip-effect="dark" border>
         <el-table-column type="index" width="55" label="序号" align="center">
         </el-table-column>
-        <el-table-column align="center" prop="paymentType" label="付款方式"></el-table-column>
-        <el-table-column align="center" prop="paymentTime" label="付款时间"></el-table-column>
-        <el-table-column align="center" prop="actualMoney" label="实收金额"></el-table-column>
-        <el-table-column align="center" prop="performanceMoney" label="业绩金额"></el-table-column>      
-        <el-table-column align="center" prop="residueMoney" label="余款金额"></el-table-column>      
-        <el-table-column align="center" prop="residueMoney" label="预计余款补齐时间"></el-table-column>      
-        <el-table-column align="center" prop="residueMoney" label="分配比例"></el-table-column>      
-        <el-table-column align="center" prop="residueMoney" label="重单人员"></el-table-column>  
+        <el-table-column align="center" prop="payMode" label="付款方式" :formatter="transPayMode"></el-table-column>
+        <el-table-column align="center" prop="payTime" label="付款时间" :formatter="dateFormat"></el-table-column>
+        <el-table-column align="center" prop="amountReceived" label="实收金额"></el-table-column>
+        <el-table-column align="center" prop="amountPerformance" label="业绩金额"></el-table-column>      
+        <el-table-column align="center" prop="amountBalance" label="余款金额"></el-table-column>      
+        <el-table-column align="center" prop="makeUpTime" label="预计余款补齐时间" :formatter="dateFormat"></el-table-column>      
+        <el-table-column align="center" prop="repeatRatios" label="分配比例"></el-table-column>      
+        <el-table-column align="center" prop="userNames" label="重单人员"></el-table-column>  
         <el-table-column label="比例调整" align="center">
            <template slot-scope="scope">
                 <el-button size="mini" @click="handleDialog(scope.$index, scope.row)">操作</el-button>
@@ -94,7 +94,7 @@
         <el-form :model="dialogForm" :rules="rules" ref="dialogForm">
             <div class="marginB10">分配比例</div>
             <el-table  class="marginB20" :data="dialogForm.dialogTableData" tooltip-effect="dark" border>
-                <el-table-column align="center" prop="residuePerson" label="重单人员"></el-table-column> 
+                <el-table-column align="center" prop="userNames" label="重单人员"></el-table-column> 
                 <el-table-column align="center" prop="repeatRatio" label="分配比例">
                     <template slot-scope="scope">
                         <el-form-item :prop="'dialogTableData.' + scope.$index + '.repeatRatio'" :rules='rules.repeatRatio' style="width: 200px;margin:0 auto;height: 57px;">
@@ -108,7 +108,7 @@
                     type="textarea"
                     :rows="3"
                     placeholder="输入处理备注描述"
-                    v-model="textarea"></el-input>
+                    v-model="remark"></el-input>
             </el-form-item> 
         </el-form>
         <div slot="footer" class="f-tac">            
@@ -121,22 +121,21 @@
 <div th:include="_footer_include :: #jsLib"></div>
 <script th:inline="javascript">
 	var businessSignDetail=[[${businessSignDetail}]];
-    new Vue({
+	var signId = [[${signId}]];
+	var orgVM =  new Vue({
         el: '#repeatPaymentDetails',
         data: function() {
             return {  
-                textarea:'',//备注    
+            	remark:"",
+            	repeatRemark:'',//备注    
                 dialogFormVisible: false,
                 form: {                    
                     
                 },
                 formLabelWidth: '150px',              
                 dialogForm: {
-                    dialogTableData: [{
-                        residuePerson: 'A',                    
-                    }, {
-                        residuePerson: 'B',
-                        
+                   dialogTableData: [{
+                        repeatRatio:""
                     }]
                 },
                 clueId:"",
@@ -172,11 +171,56 @@
             handleDialog(index, row){
                 console.log(index, row);
                 this.dialogFormVisible=true;
+                var param={};
+                param.id = row.id;
+                axios.post('/clue/cluerepetition/getPaymentDetailsById',param).then(function (response) {
+              	  	console.log("1111 "+response.data.data.payDetailDTOs);
+                  	if(null===response||response.data==null||response.data.code!='0'){
+	                  	  alert(response.data.msg);
+	                  	  return ;
+                 	}else{
+                 		orgVM.dialogForm.dialogTableData = response.data.data.payDetailDTOs;
+                 		orgVM.dialogForm.remark =response.data.data.repeatRemark;
+                 	}
+              	})
+               .catch(function (error) {
+                	console.log(error);
+               })
+               .then(function () {
+               });  
             },
             submitDialogForm(dialogForm) {
                 this.$refs[dialogForm].validate((valid) => {
                     if (valid) {
-                        console.log('submit!!');
+                    	var dataArray=this.dialogForm.dialogTableData ;
+                    	var payDetailDTOs =[];
+                    	var id = "";
+                    	for ( var i = 0; i <dataArray.length; i++){
+                    		var detail={};
+                    		id= dataArray[i].id;
+                    		detail.clueId= dataArray[i].clueId;
+                    		detail.repeatRatio= dataArray[i].repeatRatio;
+                    		detail.repeatUser= dataArray[i].repeatUser;
+                    		payDetailDTOs.push(detail);
+		                }
+                    	var param={};
+                    	param.payDetailDTOs = payDetailDTOs;
+                    	param.id =id; 
+                    	param.repeatRemark = this.remark;
+                    	axios.post('/clue/cluerepetition/updatePayDetailById',param).then(function (response) {
+   		              	  	console.log(response);
+   		                  	if(null===response||response.data==null||response.data.code!='0'){
+   			                  	  alert(response.data.msg);
+   			                  	  return ;
+   		                 	}else{
+   		                 		window.location.href="/clue/cluerepetition/repeatPaymentDetails?signId="+signId;
+   		                 	} 
+   		              	})
+   		                .catch(function (error) {
+   		                	console.log(error);
+   		                })
+   		                .then(function () {
+   		                }); 
                         // 关闭弹窗
                         this.dialogFormVisible = false; 
                     } else {
@@ -185,6 +229,27 @@
                     }
                 });
             }
+            ,
+        	//日期数据格式化方法
+    		dateFormat:function(row, column) {
+    			var date = row[column.property];
+               	if (date == undefined) {
+    	               return "";
+              	}
+               	return moment(date).format("YYYY-MM-DD HH:mm:ss");
+    		},
+    		
+    		transPayMode(row, column, cellValue, index) {
+          	  var text="";
+                if(cellValue=="1"){
+              	  text="现金"
+                }else if(cellValue=="2"){
+              	  text="POS"
+                }else if(cellValue=="3"){
+              	  text="转账"
+                }
+                return text;
+            },
         },
         mounted(){
         	this.clueId = businessSignDetail.clueId ;

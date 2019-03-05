@@ -5,13 +5,13 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -30,16 +30,50 @@ import com.kuaidao.sys.dto.role.RoleInfoDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import com.kuaidao.sys.dto.user.UserOrgRoleReq;
 
+/**
+ * 邀約來訪派車單
+ * @author  Chen
+ * @date 2019年3月5日 上午9:09:07
+ * @version V1.0
+ */
 @Controller
 @RequestMapping("/truckingOrder")
 public class TruckingOrderController {
     
     private static Logger logger = LoggerFactory.getLogger(TruckingOrderController.class);
-    
+
     @Autowired
     TrackingOrderFeignClient trackingOrderFeignClient;
+
     @Autowired
     UserInfoFeignClient userInfoFeignClient;
+
+    /**
+     * 邀約來訪派車單
+     * @return
+     */
+    @RequestMapping("/truckingOrderPage")
+    public String visitRecordPage(HttpServletRequest request) {
+        //电销人员
+        List<UserInfoDTO> teleSaleList = getUserInfo(null, RoleCodeEnum.DXCYGW.name());
+        request.setAttribute("teleSaleList",teleSaleList);
+        return "visit/truckingOrder";
+    }
+
+    private List<UserInfoDTO> getUserInfo(Long orgId,String roleName){
+        UserOrgRoleReq req = new UserOrgRoleReq();
+        if(orgId!=null) {
+            req.setOrgId(orgId);
+        }
+        req.setRoleCode(roleName);
+        JSONResult<List<UserInfoDTO>> userJr = userInfoFeignClient.listByOrgAndRole(req);
+        if(userJr==null || !JSONResult.SUCCESS.equals(userJr.getCode())) {
+            logger.error("查询电销通话记录-获取组内顾问-userInfoFeignClient.listByOrgAndRole(req),param{{}},res{{}}",req,userJr);
+            return null;
+        }
+        return userJr.getData();
+    }
+
     /**
      * 查询邀约来访派车单
      * @param reqDTO
@@ -48,8 +82,8 @@ public class TruckingOrderController {
     @PostMapping("/listTrackingOrder")
     @ResponseBody
      public JSONResult<PageBean<TrackingOrderRespDTO>> listTrackingOrder(@RequestBody TrackingOrderReqDTO reqDTO){
-        
-        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+        //TODO devin  调试 暂时放开
+   /*     UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
         Long orgId = curLoginUser.getOrgId();
         List<RoleInfoDTO> roleList = curLoginUser.getRoleList();
         if(roleList!=null && roleList.size()!=0) {
@@ -68,18 +102,18 @@ public class TruckingOrderController {
                     List<Long> idList = userInfoDTOList.stream().map(UserInfoDTO::getId).collect(Collectors.toList());
                     reqDTO.setBusDirectorIdList(idList);
                 }
-                
+
             }else if(RoleCodeEnum.SWZJ.value().equals(roleName)){//商务总监
                 List<Long> idList = new ArrayList<>();
                 idList.add(curLoginUser.getId());
                 reqDTO.setBusDirectorIdList(idList);
             }
-        }
-         
+        }*/
+
          return trackingOrderFeignClient.listTrackingOrder(reqDTO) ;
      }
     
-  
+    
 
     
     

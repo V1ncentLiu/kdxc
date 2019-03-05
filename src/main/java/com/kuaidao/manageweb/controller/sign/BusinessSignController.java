@@ -1,5 +1,14 @@
 package com.kuaidao.manageweb.controller.sign;
 
+import com.kuaidao.aggregation.dto.paydetail.PayDetailReqDTO;
+import com.kuaidao.aggregation.dto.paydetail.PayDetailRespDTO;
+import com.kuaidao.aggregation.dto.sign.BusSignInsertOrUpdateDTO;
+import com.kuaidao.aggregation.dto.sign.BusSignRespDTO;
+import com.kuaidao.aggregation.dto.sign.PayDetailDTO;
+import com.kuaidao.common.entity.IdEntityLong;
+import com.kuaidao.common.util.CommonUtil;
+import com.kuaidao.manageweb.feign.paydetail.PayDetailFeignClient;
+import com.kuaidao.manageweb.feign.visitrecord.BusVisitRecordFeignClient;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.subject.Subject;
@@ -7,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -52,6 +62,7 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
 
 /**
  * @Auther: admin
@@ -75,6 +86,16 @@ public class BusinessSignController {
 	private OrganizationFeignClient organizationFeignClient;
     @Autowired
     private ProjectInfoFeignClient projectInfoFeignClient;
+
+
+    @Autowired
+    private BusVisitRecordFeignClient visitRecordFeignClient;
+
+    @Autowired
+    PayDetailFeignClient payDetailFeignClient;
+
+
+
     /**
      *  有效性签约单确认列表页面
      * 
@@ -126,4 +147,123 @@ public class BusinessSignController {
     public JSONResult addTelemarketingLayout(@RequestBody BusinessSignDTO businessSignDTO) {
     	return businessSignFeignClient.updateBusinessSignDTOValidByIds(businessSignDTO);
     }
+
+
+    /**
+     * 签约有效性判断
+     *
+     * @return
+     */
+    @RequestMapping("/getPaymentDetailsById")
+    @ResponseBody
+    public JSONResult<PayDetailDTO> getPaymentDetailsById(@RequestBody PayDetailDTO payDetailDTO) {
+        return businessSignFeignClient.getPaymentDetailsById(payDetailDTO);
+    }
+
+    /**
+     * 新增
+     */
+    @RequestMapping("/insert")
+    @ResponseBody
+    public JSONResult<Boolean> saveSign(@Valid @RequestBody BusSignInsertOrUpdateDTO dto, BindingResult result) throws Exception {
+        if (result.hasErrors()) {
+            return CommonUtil.validateParam(result);
+        }
+        return businessSignFeignClient.saveSign(dto);
+    }
+
+    /**
+     * 更新
+     */
+    @RequestMapping("/update")
+    @ResponseBody
+    public JSONResult<Boolean> updateSign(@Valid @RequestBody BusSignInsertOrUpdateDTO dto, BindingResult result) throws Exception {
+        if (result.hasErrors()) {
+            return CommonUtil.validateParam(result);
+        }
+        return businessSignFeignClient.updateSign(dto);
+    }
+
+    /**
+     *  查询明细
+     */
+    @RequestMapping("/one")
+    @ResponseBody
+    public JSONResult<BusSignRespDTO> queryOne(@RequestBody IdEntityLong idEntityLong) throws Exception {
+        return businessSignFeignClient.queryOne(idEntityLong);
+    }
+
+
+    /**
+     *  签约单，新增时候回显信息
+     *
+     *  1:回显当时提交邀约来访中填写的信息
+     *  2: 若当前用户
+     *
+     *
+     *  客户姓名，签约餐饮公司=考察公司，签约项目，签约省份，签约城市，签约区／县。
+     */
+    @RequestMapping("/echo")
+    @ResponseBody
+    public JSONResult<BusinessSignDTO> echo(@RequestBody IdEntityLong idEntityLong) throws Exception {
+        BusinessSignDTO signDTO = new BusinessSignDTO();
+//      查询需要进行回显的信息，并进行映射
+
+        return new JSONResult<BusinessSignDTO>().success(signDTO);
+    }
+
+    /**
+     *  跳转到 到访记录明细页面
+     */
+    @RequestMapping("/visitRecordPage")
+    public String visitRecordPage(HttpServletRequest request,@RequestParam Long clueId , @RequestParam Long signId) throws Exception {
+        request.setAttribute("clueId",clueId);
+        request.setAttribute("signId",signId);
+        IdEntityLong idEntityLong = new IdEntityLong();
+        idEntityLong.setId(clueId);
+        JSONResult<BusSignRespDTO> busSign = queryOne(idEntityLong);
+        BusSignRespDTO sign = busSign.getData();
+
+        List<BusSignRespDTO> signData =  new ArrayList();
+        signData.add(sign);
+        List<BusSignRespDTO> PayAllData =  new ArrayList();
+        PayAllData.add(sign);
+//      签约基本信息
+        request.setAttribute("signData", signData);
+        request.setAttribute("payType",sign.getPayType());  // 最新一次付款类型： 用来判断显示行数
+        if("1".equals(sign.getPayType())){
+            /**
+             * 全款时候：不存在定金 尾款 以及 追加定金的情况
+             */
+            request.setAttribute("PayAllData",PayAllData);
+        }else {
+            PayDetailReqDTO detailReqDTO = new PayDetailReqDTO();
+            detailReqDTO.setSignId(signId);
+            JSONResult<List<PayDetailRespDTO>> resListJson = payDetailFeignClient.queryList(detailReqDTO);
+            if(JSONResult.SUCCESS.equals(resListJson.getCode())){
+                List<PayDetailRespDTO> list = resListJson.getData();
+//              定金
+                List<PayDetailRespDTO> one = new ArrayList();
+//              追加定金
+                List<PayDetailRespDTO> two = new ArrayList();
+//              尾款
+                List<PayDetailRespDTO> three = new ArrayList();
+                for(int i = 0 ; i < list.size() ; i ++){
+                    PayDetailRespDTO dto  = list.get(i);
+                    if("1".equals(dto.getPayType())){
+                        one.add(dto);
+                    }else   if("2".equals(dto.getPayType())){
+                        two.add(dto);
+                    }else{
+                        three.add(dto);
+                    }
+                }
+                request.setAttribute("oneData",one);
+                request.setAttribute("twoData",two);
+                request.setAttribute("threeData",three);
+            }
+        }
+        return  "bus_mycustomer/showSignAndPayDetail";
+    }
+
 }

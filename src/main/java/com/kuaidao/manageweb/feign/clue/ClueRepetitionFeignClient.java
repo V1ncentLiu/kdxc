@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import com.kuaidao.aggregation.dto.clue.ClueRepetitionDTO;
+import com.kuaidao.aggregation.dto.sign.PayDetailDTO;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.IdEntity;
 import com.kuaidao.common.entity.IdListReq;
@@ -27,7 +28,7 @@ import com.kuaidao.sys.dto.customfield.CustomFieldRespDTO;
  * @author Administrator
  *
  */
-@FeignClient(name = "aggregation-service-1", path = "/aggregation/cluerepetition", fallback = ClueRepetitionFeignClient.HystrixClientFallback.class)
+@FeignClient(name = "aggregation-service", path = "/aggregation/cluerepetition", fallback = ClueRepetitionFeignClient.HystrixClientFallback.class)
 public interface ClueRepetitionFeignClient {
 	/**
 	 * 重单申请列表
@@ -81,6 +82,12 @@ public interface ClueRepetitionFeignClient {
 	@PostMapping("/updatePetitionById")
 	public JSONResult updatePetitionById(@RequestBody ClueRepetitionDTO menuDTO);
 	
+	/**
+	 * 重单比例调整
+	 * @return
+	 */
+	@PostMapping("/updatePayDetailById")
+	public JSONResult updatePayDetailById(@RequestBody PayDetailDTO payDetailDTO);
 
 	@Component
 	static class HystrixClientFallback implements ClueRepetitionFeignClient {
@@ -135,7 +142,14 @@ public interface ClueRepetitionFeignClient {
 			return fallBackError("重单审核失败");
 		}
 
-	
+
+		@Override
+		public JSONResult updatePayDetailById(PayDetailDTO payDetailDTO) {
+			// TODO Auto-generated method stub
+			return fallBackError("付款明细比例调整失败");
+		}
+
+
 	}
 
 }
