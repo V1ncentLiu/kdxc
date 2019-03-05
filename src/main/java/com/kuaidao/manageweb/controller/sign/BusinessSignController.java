@@ -217,9 +217,7 @@ public class BusinessSignController {
      */
     @RequestMapping("/visitRecordPage")
     public String visitRecordPage(HttpServletRequest request,@RequestParam String clueId , @RequestParam String signId ,@RequestParam String readyOnly ) throws Exception {
-        request.setAttribute("clueId",clueId);
-        request.setAttribute("signId",signId);
-        request.setAttribute("readyOnly",readyOnly); //  readyOnly == 1 页面只读（没有添加按钮）
+
         IdEntityLong idEntityLong = new IdEntityLong();
         idEntityLong.setId(Long.valueOf(clueId));
         JSONResult<BusSignRespDTO> busSign = queryOne(idEntityLong);
@@ -232,6 +230,11 @@ public class BusinessSignController {
 //      签约基本信息
         request.setAttribute("signData", signData);
         request.setAttribute("payType",sign.getPayType());  // 最新一次付款类型： 用来判断显示行数
+
+        if("4".equals(sign.getPayType())){
+            readyOnly = "1";
+        }
+
         if("1".equals(sign.getPayType())){
             /**
              * 全款时候：不存在定金 尾款 以及 追加定金的情况
@@ -264,6 +267,9 @@ public class BusinessSignController {
                 request.setAttribute("threeData",three);
             }
         }
+        request.setAttribute("clueId",clueId);
+        request.setAttribute("signId",signId);
+        request.setAttribute("readyOnly",readyOnly); //  readyOnly == 1 页面只读（没有添加按钮）
         return  "bus_mycustomer/showSignAndPayDetail";
     }
 
