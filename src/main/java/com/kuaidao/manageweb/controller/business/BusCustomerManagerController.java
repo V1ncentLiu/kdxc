@@ -165,6 +165,21 @@ public class BusCustomerManagerController {
         return busCustomerList;
     }
 
+    /***
+     * 下属商务经理列表
+     * 
+     * @return
+     */
+    @PostMapping("/getSaleList")
+    @ResponseBody
+    @RequiresPermissions("aggregation:appiontmentManager:view")
+    public JSONResult<List<UserInfoDTO>> getSaleList(@RequestBody UserOrgRoleReq userOrgRoleReq,
+            HttpServletRequest request) {
+        userOrgRoleReq.setRoleCode(RoleCodeEnum.SWJL.name());
+        JSONResult<List<UserInfoDTO>> listByOrgAndRole =
+                userInfoFeignClient.listByOrgAndRole(userOrgRoleReq);
+        return listByOrgAndRole;
+    }
 
     /**
      * 获取当前登录账号
