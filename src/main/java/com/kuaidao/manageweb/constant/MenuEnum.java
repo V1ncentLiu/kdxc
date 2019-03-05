@@ -8,7 +8,7 @@ package com.kuaidao.manageweb.constant;
  * @version V1.0
  */
 public enum MenuEnum {
-    LOGIN("登录"), LOGINOUT("退出登录"), UPDATE_PASSWORD("修改密码"), GET_CODE("获取验证码"),
+    INDEX("首页"), LOGIN("登录"), LOGINOUT("退出登录"), UPDATE_PASSWORD("修改密码"), GET_CODE("获取验证码"),
     /**
      * 系统管理菜单
      */
