@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -73,6 +74,7 @@ public class SignRecordController {
      * 签约记录 页面
      * @return
      */
+    @RequiresPermissions("aggregation:signRecord:view")
     @RequestMapping("/signRecordPage")
     public String signRecordPage(HttpServletRequest request) {
 
@@ -171,6 +173,7 @@ public class SignRecordController {
      */
     @PostMapping("/listSignRecord")
     @ResponseBody
+    @RequiresPermissions("aggregation:signRecord:view")
     public JSONResult<PageBean<SignRecordRespDTO>> listSignRecord(@RequestBody SignRecordReqDTO reqDTO) {
         handleReqParam(reqDTO);
         
@@ -179,7 +182,7 @@ public class SignRecordController {
         List<RoleInfoDTO> roleList = curLoginUser.getRoleList();
         RoleInfoDTO roleInfoDTO = roleList.get(0);
         String roleName = roleInfoDTO.getRoleName();
-    /*    if(RoleCodeEnum.SWDQZJ.value().equals(roleName) ||RoleCodeEnum.SWZJ.value().equals(roleName)) {
+       if(RoleCodeEnum.SWDQZJ.value().equals(roleName) ||RoleCodeEnum.SWZJ.value().equals(roleName)) {
             Long businessManagerId = reqDTO.getBusinessManagerId();
             if(businessManagerId!=null) {
                 List<Long> businessManagerIdList = new ArrayList<>();
@@ -192,7 +195,7 @@ public class SignRecordController {
           
         }else {
                 return new JSONResult().fail(SysErrorCodeEnum.ERR_NOTEXISTS_DATA.getCode(),"角色没有权限");
-        }*/
+        }
        
         return signRecordFeignClient.listSignRecord(reqDTO);
     }
@@ -256,6 +259,7 @@ public class SignRecordController {
      * @return
      */
     @PostMapping("/rejectSignOrder")
+    @RequiresPermissions("aggregation:signRecord:reject")
     @LogRecord(description = "签约单驳回",operationType = LogRecord.OperationType.UPDATE,menuName = MenuEnum.SIGN_ORDER)
     @ResponseBody
     public JSONResult<Boolean> rejectSignOrder(@Valid @RequestBody RejectSignOrderReqDTO reqDTO,BindingResult result){
@@ -271,6 +275,7 @@ public class SignRecordController {
      * @return
      */
     @PostMapping("/passAuditSignOrder")
+    @RequiresPermissions("aggregation:signRecord:pass")
     @LogRecord(description = "签约单审核通过",operationType = LogRecord.OperationType.UPDATE,menuName = MenuEnum.SIGN_ORDER)
     @ResponseBody
     public JSONResult<Boolean> passAuditSignOrder(@Valid @RequestBody RejectSignOrderReqDTO reqDTO,BindingResult result){
