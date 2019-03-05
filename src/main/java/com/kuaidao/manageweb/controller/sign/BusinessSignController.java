@@ -19,6 +19,7 @@ import com.kuaidao.aggregation.dto.invitearea.InviteAreaDTO;
 import com.kuaidao.aggregation.dto.project.ProjectInfoDTO;
 import com.kuaidao.aggregation.dto.project.ProjectInfoPageParam;
 import com.kuaidao.aggregation.dto.sign.BusinessSignDTO;
+import com.kuaidao.aggregation.dto.sign.PayDetailDTO;
 import com.kuaidao.aggregation.dto.telemarkting.TelemarketingLayoutDTO;
 import com.kuaidao.common.constant.OrgTypeConstant;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
@@ -126,4 +127,15 @@ public class BusinessSignController {
     public JSONResult addTelemarketingLayout(@RequestBody BusinessSignDTO businessSignDTO) {
     	return businessSignFeignClient.updateBusinessSignDTOValidByIds(businessSignDTO);
     }
+    /**
+     * 签约有效性判断
+     * 
+     * @return
+     */
+    @RequestMapping("/getPaymentDetailsById")
+    @ResponseBody
+    public JSONResult<PayDetailDTO> getPaymentDetailsById(@RequestBody PayDetailDTO payDetailDTO) {
+    	return businessSignFeignClient.getPaymentDetailsById(payDetailDTO);
+    }
+    
 }

@@ -22,6 +22,7 @@ import com.kuaidao.aggregation.dto.clue.ClueRepetitionDTO;
 import com.kuaidao.aggregation.dto.project.ProjectInfoDTO;
 import com.kuaidao.aggregation.dto.project.ProjectInfoPageParam;
 import com.kuaidao.aggregation.dto.sign.BusinessSignDTO;
+import com.kuaidao.aggregation.dto.sign.PayDetailDTO;
 import com.kuaidao.common.constant.OrgTypeConstant;
 import com.kuaidao.common.constant.RoleCodeEnum;
 import com.kuaidao.common.constant.SystemCodeConstant;
@@ -78,7 +79,7 @@ public class ClueRepetitionController {
      */
     @RequestMapping("/queryRepeatPage")
     public String queryRepeatPage(HttpServletRequest request) {
-		return "clue/repetition/customerreP/etitionList";
+		return "clue/repetition/customerrePetitionList";
     }
     
     /**
@@ -253,7 +254,30 @@ public class ClueRepetitionController {
     	businessSignDTO.setId(Long.parseLong(signId));
     	JSONResult<BusinessSignDTO> jsonResult = businessSignFeignClient.repeatPaymentDetails(businessSignDTO);
     	request.setAttribute("businessSignDetail", jsonResult.getData());
+    	request.setAttribute("signId", signId);
 		return "clue/repetition/repeatPaymentDetails";
     } 
+    
+    /**
+     *  重单处理列表页面
+     * 
+     * @return
+     */
+    @RequestMapping("/getPaymentDetailsById")
+    @ResponseBody
+    public JSONResult<PayDetailDTO> getPaymentDetailsById(HttpServletRequest request, @RequestBody PayDetailDTO payDetailDTO) {
+		return businessSignFeignClient.getPaymentDetailsById(payDetailDTO);
+    } 
+    
+    
+    @RequestMapping("/updatePayDetailById")
+    @ResponseBody
+    @LogRecord(description = "付款明细重单比例修改",operationType = LogRecord.OperationType.UPDATE,menuName = MenuEnum.PAYDETAILREPETITION)
+    public JSONResult updatePayDetailById(HttpServletRequest request,@RequestBody PayDetailDTO payDetailDTO) {
+    	UserInfoDTO user = getUser();
+    	payDetailDTO.setLoginUserId(user.getId());
+    	return clueRepetitionFeignClient.updatePayDetailById(payDetailDTO);
+    }
+    
 
 }
