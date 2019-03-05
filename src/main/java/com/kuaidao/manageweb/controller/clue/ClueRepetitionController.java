@@ -231,17 +231,7 @@ public class ClueRepetitionController {
     	JSONResult<PageBean<BusinessSignDTO>> list = businessSignFeignClient.businessSignDealList(businessSignDTO);
     	return list;
     }
-    /**
-     * 签约重单审核
-     * 
-     * @return
-     */
-   /* @RequestMapping("/updateBusinessPetitionById")
-    @ResponseBody
-    @LogRecord(description = "签约重单审核",operationType = LogRecord.OperationType.UPDATE,menuName = MenuEnum.BUSINESSSIGNREPETITION)
-    public JSONResult updatePetitionById(HttpServletRequest request,@RequestBody ClueRepetitionDTO clueRepetitionDTO) {
-    	return clueRepetitionFeignClient.updatePetitionById(clueRepetitionDTO);
-    }*/
+
     
     /**
      *  重单处理列表页面
@@ -279,5 +269,15 @@ public class ClueRepetitionController {
     	return clueRepetitionFeignClient.updatePayDetailById(payDetailDTO);
     }
     
-
+    /**
+     * 签约重单审核
+     * 
+     * @return
+     */
+    @RequestMapping("/updateBusinessPetitionById")
+    @ResponseBody
+    @LogRecord(description = "签约重单审核",operationType = LogRecord.OperationType.UPDATE,menuName = MenuEnum.BUSINESSSIGNREPETITION)
+    public JSONResult updateBusinessPetitionById(HttpServletRequest request,@RequestBody BusinessSignDTO businessSignDTO) {
+    	return clueRepetitionFeignClient.updateBusinessPetitionById(businessSignDTO);
+    }
 }
