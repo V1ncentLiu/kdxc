@@ -2,19 +2,20 @@ package com.kuaidao.manageweb.feign.sign;
 
 import java.util.List;
 
+import com.kuaidao.aggregation.dto.sign.BusSignInsertOrUpdateDTO;
+import com.kuaidao.aggregation.dto.sign.BusSignRespDTO;
+import com.kuaidao.common.entity.IdEntityLong;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.netflix.feign.FeignClient;
 import org.springframework.stereotype.Component;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
-import com.kuaidao.aggregation.dto.clue.ClueRepetitionDTO;
 import com.kuaidao.aggregation.dto.invitearea.InviteAreaDTO;
 import com.kuaidao.aggregation.dto.sign.BusinessSignDTO;
-import com.kuaidao.aggregation.dto.sign.PayDetailDTO;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
@@ -22,7 +23,9 @@ import com.kuaidao.sys.dto.ip.IpAccessManagerQueryDTO;
 import com.kuaidao.sys.dto.ip.IpPackageInfoDTO;
 import com.kuaidao.sys.dto.ip.IpRepositoryInfoDTO;
 
-@FeignClient(name = "aggregation-service-1", path = "/aggregation/sign/businesssign", fallback = BusinessSignFeignClient.HystrixClientFallback.class)
+import javax.validation.Valid;
+
+@FeignClient(name = "aggregation-service", path = "/aggregation/sign/businesssign", fallback = BusinessSignFeignClient.HystrixClientFallback.class)
 
 public interface BusinessSignFeignClient {
 
@@ -41,20 +44,18 @@ public interface BusinessSignFeignClient {
 	 */
 	@RequestMapping(method = RequestMethod.POST, value = "/updateBusinessSignDTOValidByIds")
 	public JSONResult updateBusinessSignDTOValidByIds(@RequestBody BusinessSignDTO businessSignDTO);
-	/**
-	 * 重单处理列表
-	 * 
-	 * @param menuDTO
-	 * @return
-	 */
-	@PostMapping("/businessSignDealList")
-	public JSONResult<PageBean<BusinessSignDTO>> businessSignDealList(@RequestBody BusinessSignDTO businessSignDTO);
-	
-	@PostMapping("/repeatPaymentDetails")
-	public JSONResult<BusinessSignDTO> repeatPaymentDetails(@RequestBody BusinessSignDTO businessSignDTO);
-	
-	@PostMapping("/getPaymentDetailsById")
-	public JSONResult<PayDetailDTO> getPaymentDetailsById(@RequestBody PayDetailDTO detailDTO);
+
+
+	@RequestMapping("/insert")
+	public JSONResult<Boolean> saveSign(@Valid @RequestBody BusSignInsertOrUpdateDTO dto);
+
+	@RequestMapping("/update")
+	public JSONResult<Boolean> updateSign(@Valid @RequestBody BusSignInsertOrUpdateDTO dto);
+
+	@RequestMapping("/one")
+	public JSONResult<BusSignRespDTO> queryOne(@RequestBody IdEntityLong idEntityLong);
+
+
 	@Component
 	static class HystrixClientFallback implements BusinessSignFeignClient {
 
@@ -69,28 +70,31 @@ public interface BusinessSignFeignClient {
 
 		@Override
 		public JSONResult<PageBean<BusinessSignDTO>> businessSignValidList(BusinessSignDTO businessSignDTO) {
+			// TODO Auto-generated method stub
 			return fallBackError("有效签约单查询失败");
 		}
 
 		@Override
 		public JSONResult updateBusinessSignDTOValidByIds(BusinessSignDTO businessSignDTO) {
+			// TODO Auto-generated method stub
 			return fallBackError("签约单有效性判断");
 		}
 
 		@Override
-		public JSONResult<PageBean<BusinessSignDTO>> businessSignDealList(BusinessSignDTO businessSignDTO) {
-			return fallBackError("查询签约重单列表失败");
+		public JSONResult<Boolean> saveSign(BusSignInsertOrUpdateDTO dto) {
+			return fallBackError("新增签约单");
 		}
 
 		@Override
-		public JSONResult<BusinessSignDTO> repeatPaymentDetails(BusinessSignDTO businessSignDTO) {
-			return fallBackError("查询签约重单详情失败");
+		public JSONResult<Boolean> updateSign(BusSignInsertOrUpdateDTO dto) {
+			return fallBackError("更新签约单");
 		}
 
 		@Override
-		public JSONResult<PayDetailDTO> getPaymentDetailsById(PayDetailDTO detailDTO) {
-			return fallBackError("根据id查询付款明细详情失败");
+		public JSONResult<BusSignRespDTO> queryOne(IdEntityLong idEntityLong) {
+			return fallBackError("查询签约单明细");
 		}
-		
+
+
 	}
 }
