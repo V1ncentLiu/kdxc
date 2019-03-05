@@ -185,7 +185,7 @@
                         <el-col :span="10">
                             <el-form-item label="考察公司"  :label-width="formLabelWidth"  prop="companyid">
                                 <el-select v-model="addVisitRecord.companyid" placeholder="考察公司"  clearable >
-                                    <el-option v-for="item in companyArr" :key="item.companyId" :label="item.companyName" :value="item.companyId"></el-option>
+                                    <el-option v-for="item in companyArr" :key="item.id" :label="item.companyName" :value="item.id"></el-option>
                                 </el-select>
                             </el-form-item>
                         </el-col>
@@ -289,6 +289,196 @@
             </template>
         </el-dialog>
 
+        <el-dialog title="添加签约单信息" width="70%" :visible.sync="dialogFormSigningVisible">
+            <template>
+                <el-form :model="formSigning" ref="formSigning" >
+                    <div class="paddB20">签约单信息</div>
+                    <div>
+                        <el-row>
+                            <el-col :span="10">
+                                <el-form-item label="签约单编号：" :label-width="formLabelWidth" prop="signNo">
+                                    <el-input v-model="formSigning.signNo" maxLength="20" ></el-input>
+                                </el-form-item>
+                            </el-col>
+                            <el-col :span="10">
+                                <el-form-item label="客户姓名：" :label-width="formLabelWidth" prop="customerName">
+                                    <el-input v-model="formSigning.customerName"></el-input>
+                                </el-form-item>
+                            </el-col>
+                        </el-row>
+                        <el-row>
+                            <el-col :span="10">
+                                <el-form-item label="客户身份证号：" :label-width="formLabelWidth" prop="idCard">
+                                    <el-input v-model="formSigning.idCard" ></el-input>
+                                </el-form-item>
+                            </el-col>
+                            <el-col :span="10">
+                                <el-form-item label="客户联系电话：" :label-width="formLabelWidth" prop="phone">
+                                    <el-input v-model="formSigning.phone"></el-input>
+                                </el-form-item>
+                            </el-col>
+                        </el-row>
+                        <el-row>
+                            <el-col :span="10">
+                                <el-form-item label="签约餐饮公司：" :label-width="formLabelWidth" prop="signCompanyId">
+                                    <el-select v-model="formSigning.signCompanyId" placeholder="请选择签约餐饮公司">
+                                        <el-option v-for="item in companyArr" :key="item.id" :label="item.companyName" :value="item.id"></el-option>
+                                    </el-select>
+                                </el-form-item>
+                            </el-col>
+                            <el-col :span="10">
+                                <el-form-item label="签约项目：" :label-width="formLabelWidth" prop="signProjectId">
+                                    <el-select v-model="formSigning.signProjectId" placeholder="请选择">
+                                        <el-option v-for="item in projectArr" :key="item.id" :label="item.projectName" :value="item.id"></el-option>
+                                    </el-select>
+                                </el-form-item>
+                            </el-col>
+                        </el-row>
+                        <el-row>
+                            <el-col :span="10">
+                                <el-form-item label="签约省份：" :label-width="formLabelWidth" prop="signProvince">
+                                    <el-select v-model="formSigning.signProvince" placeholder="请选择签约省份" @change="currentProvince">
+                                        <el-option v-for="item in provinceArr" :key="item.name" :label="item.name" :value="item.name"></el-option>
+                                    </el-select>
+                                </el-form-item>
+                            </el-col>
+                            <el-col :span="10">
+                                <el-form-item label="签约城市：" :label-width="formLabelWidth" prop="signCity">
+                                    <el-select v-model="formSigning.signCity" placeholder="请选择签约城市："  @change="currentCity">
+                                        <el-option v-for="item in cityArr" :key="item.name" :label="item.name" :value="item.name"></el-option>
+                                    </el-select>
+                                </el-form-item>
+                            </el-col>
+                        </el-row>
+                        <el-row>
+                            <el-col :span="10">
+                                <el-form-item label="签约区/县：" :label-width="formLabelWidth" prop="signDictrict">
+                                    <el-select v-model="formSigning.signDictrict" placeholder="请选择签约区/县">
+                                        <el-option v-for="item in districtArr" :key="item.name" :label="item.name" :value="item.name"></el-option>
+                                    </el-select>
+                                </el-form-item>
+                            </el-col>
+                            <el-col :span="10">
+                                <el-form-item label="签约店型：" :label-width="formLabelWidth" prop="signShopType">
+                                    <el-select v-model="formSigning.signShopType" placeholder="请选择">
+                                        <el-option v-for="item in vistitStoreTypeArr" :key="item.value" :label="item.name" :value="item.value"></el-option>
+                                    </el-select>
+                                </el-form-item>
+                            </el-col>
+                        </el-row>
+                        <el-row>
+                            <el-col :span="10">
+                                <el-form-item label="应收金额：" :label-width="formLabelWidth" prop="amountReceivable">
+                                    <el-input v-model="formSigning.amountReceivable" @keyup.native="number" autocomplete="off" maxLength="10" style="width: 80%;"></el-input><span style="padding-left: 10px;">元</span>
+                                </el-form-item>
+                            </el-col>
+                            <el-col :span="10">
+                                <el-form-item label="路费（报首次）：" :label-width="formLabelWidth" prop="firstToll">
+                                    <el-input v-model="formSigning.firstToll" @keyup.native="number" autocomplete="off" maxLength="10" style="width: 80%;"></el-input><span style="padding-left: 10px;">元</span>
+                                </el-form-item>
+                            </el-col>
+                        </el-row>
+                        <el-row>
+                            <el-col :span="10">
+                                <el-form-item label="优惠金额：" :label-width="formLabelWidth" prop="preferentialAmount">
+                                    <el-input v-model="formSigning.preferentialAmount" @keyup.native="number" autocomplete="off" maxLength="10" style="width: 80%;"></el-input><span style="padding-left: 10px;">元</span>
+                                </el-form-item>
+                            </el-col>
+                            <el-col :span="10">
+                                <el-form-item label="签约类型：" :label-width="formLabelWidth" prop="signType">
+                                    <el-select v-model="formSigning.signType" @change="selectSigningType" placeholder="请选择签约类型：">
+                                        <el-option
+                                                v-for="item in option2s"
+                                                :key="item.value"
+                                                :label="item.label"
+                                                :value="item.value">
+                                        </el-option>
+                                    </el-select>
+                                </el-form-item>
+                            </el-col>
+                        </el-row>
+                        <el-row>
+                            <el-col :span="10">
+                                <el-form-item label="赠送金额：" :label-width="formLabelWidth" prop="giveAmount">
+                                    <el-input v-model="formSigning.giveAmount" @keyup.native="number" autocomplete="off" maxLength="10" style="width: 80%;"></el-input><span style="padding-left: 10px;">元</span>
+                                </el-form-item>
+                            </el-col>
+                        </el-row>
+                    </div>
+                    <div class="paddB20">付款明细</div>
+                    <div>
+                        <el-row>
+                            <el-col :span="10">
+                                <el-form-item label="付款类型：" :label-width="formLabelWidth" prop="payType">
+                                    <el-select v-model="formSigning.payType" placeholder="请选择签约付款类型" disabled>
+                                        <el-option  key="1" label="全款" value="1"></el-option>
+                                        <el-option  key="2" label="定金" value="2"></el-option>
+                                    </el-select>
+                                </el-form-item>
+                            </el-col>
+                            <el-col :span="10">
+                                <el-form-item label="付款方式：" :label-width="formLabelWidth" prop="payMode">
+                                    <el-select v-model="formSigning.payMode" placeholder="请选择付款方式：">
+                                        <el-option
+                                                v-for="item in option3s"
+                                                :key="item.value"
+                                                :label="item.label"
+                                                :value="item.value">
+                                        </el-option>
+                                    </el-select>
+                                </el-form-item>
+                            </el-col>
+                        </el-row>
+                        <el-row>
+                            <el-col :span="10">
+                                <el-form-item label="付款时间：" :label-width="formLabelWidth" prop="payTime">
+                                    <el-date-picker
+                                            type="datetime"
+                                            format="yyyy-MM-dd"
+                                            placeholder="选择日期"
+                                            v-model="formSigning.payTime" style="width: 100%;"></el-date-picker>
+                                </el-form-item>
+                            </el-col>
+                            <el-col :span="10">
+                                <el-form-item label="实收金额：" :label-width="formLabelWidth" prop="amountReceived">
+                                    <el-input v-model="formSigning.amountReceived"></el-input>
+                                </el-form-item>
+                            </el-col>
+                        </el-row>
+                        <el-row v-show="isAllMoney">
+                            <el-col :span="10">
+                                <el-form-item label="余款金额：" :label-width="formLabelWidth" prop="amountBalance">
+                                    <el-input v-model="formSigning.amountBalance"></el-input>
+                                </el-form-item>
+                            </el-col>
+                            <el-col :span="10">
+                                <el-form-item label="预计余款补齐时间：" :label-width="formLabelWidth" prop="makeUpTime">
+                                    <el-date-picker
+                                            type="datetime"
+                                            format="yyyy-MM-dd"
+                                            placeholder="选择日期"
+                                            v-model="formSigning.makeUpTime"
+                                            style="width: 100%;"></el-date-picker>
+                                </el-form-item>
+                            </el-col>
+                        </el-row>
+                        <el-row>
+                            <el-col :span="10">
+                                <el-form-item label="业绩金额：" :label-width="formLabelWidth" prop="performanceAmount">
+                                    <el-input v-model="formSigning.performanceAmount"></el-input>
+                                </el-form-item>
+                            </el-col>
+                        </el-row>
+                    </div>
+                </el-form>
+                <div slot="footer" class="dialog-footer f-tac">
+                    <el-button type="primary" @click="submitForm('formSigning')">确 定</el-button>
+                    <el-button @click="dialogFormSigningVisible = false">取 消</el-button>
+                </div>
+            </template>
+        </el-dialog>
+
+
     </template>
     <!--添加到访记录-->
 
@@ -303,12 +493,14 @@
     var clueId = [[${clueId}]];
     var visitStatus = [[${visitStatus}]];
     var proSelect=[[${proSelect}]];
+    var companySelect=[[${companySelect}]];
     // 查询 模块
     var mainDivVM = new Vue({
         el: '#mainDiv',
         data: {
             formLabelWidth:"150px",
             addVisitRecordDialogVisible:false,
+            dialogFormSigningVisible:false,
             clueId:clueId,
             signArr:[{value:0,name:'未签约'},{value:1,name:'已签约'}],
             isSignArr:[{value:0,name:'否'},{value:1,name:'是'}],
@@ -318,7 +510,7 @@
             provinceArr:[],
             districtArr:[],
             cityArr:[],
-            companyArr:proSelect,
+            companyArr:companySelect,
             projectArr:proSelect,
             addVisitRecord:{
                 clueId:clueId,
@@ -356,6 +548,32 @@
                 oneNotSignShow:true,
                 twoNotSignShow:false,
                 threeNotSignShow:false
+            },
+            formSigning: {
+                clueId:"",
+                signNo:'',
+                customerName: '',
+                idCard: '',
+                phone: '',
+                signCompanyId:'',
+                signProjectId: '',
+                signProvince:'',
+                signCity: '',
+                signDictrict:'',
+                signShopType:'',
+                amountReceivable:'',
+                firstToll:'',
+                preferentialAmount:'',
+                signType:1,
+                giveAmount:'',
+
+                payType:1,
+                payMode:'',
+                amountReceived: '',
+                amountBalance: '',
+                makeUpTime:'',
+                payTime: '',
+                amountPerformance:''
             },
             rules:{
 

@@ -297,7 +297,6 @@ public class SignRecordController {
         }
         //分组
         Map<String, List<PayDetailDTO>> payDetailMap = data.stream().collect(Collectors.groupingBy(PayDetailDTO::getPayType,Collectors.toList()));
-        
         return  new JSONResult().success(payDetailMap);
     }
     

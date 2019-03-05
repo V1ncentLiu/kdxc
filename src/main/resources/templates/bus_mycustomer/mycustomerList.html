@@ -138,7 +138,7 @@
             <el-table-column  prop="teleSaleName" label="电销员工" align="center"></el-table-column>
             <el-table-column  prop="teleProjectName" label="电销组项目" align="center"></el-table-column>
             <el-table-column  prop="tasteProjectName" label="品尝项目" align="center"></el-table-column>
-            <el-table-column  prop="signShopType" label="签约店型" align="center"></el-table-column>
+            <el-table-column  prop="signShopTypeName" label="签约店型" align="center"></el-table-column>
             <el-table-column  prop="province" label="开店省份" align="center"></el-table-column>
             <el-table-column  prop="city" label="开店城市" align="center"></el-table-column>
             <el-table-column  prop="district" label="开店区域/县" align="center"></el-table-column>
@@ -198,7 +198,7 @@
                     <el-col :span="10">
                         <el-form-item label="考察公司"  :label-width="formLabelWidth"  prop="companyid">
                             <el-select v-model="addVisitRecord.companyid" placeholder="考察公司"  clearable >
-                                <el-option v-for="item in companyArr" :key="item.companyId" :label="item.companyName" :value="item.companyId"></el-option>
+                                <el-option v-for="item in companyArr" :key="item.id" :label="item.companyName" :value="item.id"></el-option>
                             </el-select>
                         </el-form-item>
                     </el-col>
@@ -322,7 +322,7 @@
                     <el-col :span="10">
                         <el-form-item label="考察公司"  :label-width="formLabelWidth"  prop="companyid">
                             <el-select v-model="updateVisitRecord.companyid" placeholder="考察公司"  clearable >
-                                <el-option v-for="item in companyArr" :key="item.value" :label="item.name" :value="item.value"></el-option>
+                                <el-option v-for="item in companyArr" :key="item.id" :label="item.companyName" :value="item.id"></el-option>
                             </el-select>
                         </el-form-item>
                     </el-col>
@@ -635,7 +635,7 @@
                     <el-col :span="10">
                         <el-form-item label="签约餐饮公司：" :label-width="formLabelWidth" prop="signCompanyId">
                             <el-select v-model="formSigning.signCompanyId" placeholder="请选择签约餐饮公司">
-                                <el-option v-for="item in companyArr" :key="item.companyId" :label="item.companyName" :value="item.companyId"></el-option>
+                                <el-option v-for="item in companyArr" :key="item.id" :label="item.companyName" :value="item.id"></el-option>
                             </el-select>
                         </el-form-item>
                     </el-col>
@@ -832,7 +832,7 @@
                         <el-col :span="10">
                             <el-form-item label="签约餐饮公司：" :label-width="formLabelWidth" prop="signCompanyId">
                                 <el-select :disabled="notEditRebutSign" v-model="updateFormSigning.signCompanyId" placeholder="请选择签约餐饮公司">
-                                    <el-option v-for="item in companyArr" :key="item.companyId" :label="item.companyName" :value="item.companyId"></el-option>
+                                    <el-option v-for="item in companyArr" :key="item.id" :label="item.companyName" :value="item.id"></el-option>
                                 </el-select>
                             </el-form-item>
                         </el-col>
@@ -1000,6 +1000,7 @@
     var dxgwList=[[${teleSaleList}]];
     var tasteProList=[[${tasteProList}]];
     var proSelect=[[${proSelect}]];
+    var companySelect=[[${companySelect}]];
     // 查询 模块
     var mainDivVM = new Vue({
         el: '#mainDiv',
@@ -1050,7 +1051,7 @@
             provinceArr:[],
             districtArr:[],
             cityArr:[],
-            companyArr:proSelect,
+            companyArr:companySelect,
             projectArr:proSelect,
             multipleSelection:[],
             rules:{},
@@ -1241,6 +1242,11 @@
                     var names = "";
                     var rowIds = [];
                     for(var i=0;i<rows.length;i++){
+                        console.log(rows[i].visitStatus)
+                        if(rows[i].visitStatus==0||rows[i].visitStatus==1||rows[i].visitStatus==2||rows[i].visitStatus==3){
+                            this.$message({message: '勾选数据中，包含了已到访或是已标记的客户', type: 'warning'});
+                            return false;
+                        }
                         names = names + '['+rows[i].cusName+']';
                         rowIds.push(rows[i].clueId);
                     }
@@ -1543,6 +1549,8 @@
 
             submitUpdateForm(formName) {
                 var param = this.updateFormSigning;
+                param.makeUpTime = new Date( param.makeUpTime)
+                param.payTime = new Date( param.payTime)
                 // 设置 clueid
                 this.$refs[formName].validate((valid) => {
                     if (valid) {

@@ -1,5 +1,7 @@
 package com.kuaidao.manageweb.controller.visitrecord;
 
+import com.kuaidao.aggregation.dto.project.CompanyInfoDTO;
+import com.kuaidao.aggregation.dto.project.CompanyInfoPageParam;
 import com.kuaidao.aggregation.dto.project.ProjectInfoDTO;
 import com.kuaidao.aggregation.dto.project.ProjectInfoPageParam;
 import com.kuaidao.aggregation.dto.visitrecord.BusVisitRecordReqDTO;
@@ -8,6 +10,7 @@ import com.kuaidao.aggregation.dto.visitrecord.BusVisitRecordRespDTO;
 import com.kuaidao.common.entity.IdEntityLong;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.util.CommonUtil;
+import com.kuaidao.manageweb.feign.project.CompanyInfoFeignClient;
 import com.kuaidao.manageweb.feign.project.ProjectInfoFeignClient;
 import com.kuaidao.manageweb.feign.visitrecord.BusVisitRecordFeignClient;
 import org.slf4j.Logger;
@@ -43,6 +46,9 @@ public class BusinessVisitRecordController {
 
     @Autowired
     private BusVisitRecordFeignClient visitRecordFeignClient;
+
+    @Autowired
+    private CompanyInfoFeignClient companyInfoFeignClient;
 
 
     @RequestMapping("/listPage")
@@ -119,8 +125,14 @@ public class BusinessVisitRecordController {
         // 项目
         ProjectInfoPageParam param = new ProjectInfoPageParam();
         JSONResult<List<ProjectInfoDTO>> proJson = projectInfoFeignClient.listNoPage(param);
-        if (proJson.getCode().equals(JSONResult.SUCCESS)) {
+        if(JSONResult.SUCCESS.equals(proJson.getCode())){
             request.setAttribute("proSelect", proJson.getData());
+        }
+
+        CompanyInfoPageParam pageParam = new CompanyInfoPageParam();
+        JSONResult<List<CompanyInfoDTO>> listJSONResult = companyInfoFeignClient.listNoPage(pageParam);
+        if(JSONResult.SUCCESS.equals(listJSONResult.getCode())){
+            request.setAttribute("companySelect", proJson.getData());
         }
         return  "bus_mycustomer/showVisitRecord";
     }

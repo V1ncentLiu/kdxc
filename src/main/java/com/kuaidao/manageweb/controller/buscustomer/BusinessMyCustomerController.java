@@ -94,8 +94,14 @@ public class BusinessMyCustomerController {
         // 项目
         ProjectInfoPageParam param = new ProjectInfoPageParam();
         JSONResult<List<ProjectInfoDTO>> proJson = projectInfoFeignClient.listNoPage(param);
-        if (proJson.getCode().equals(JSONResult.SUCCESS)) {
+        if(JSONResult.SUCCESS.equals(proJson.getCode())){
             request.setAttribute("proSelect", proJson.getData());
+        }
+
+        CompanyInfoPageParam pageParam = new CompanyInfoPageParam();
+        JSONResult<List<CompanyInfoDTO>> listJSONResult = companyInfoFeignClient.listNoPage(pageParam);
+        if(JSONResult.SUCCESS.equals(listJSONResult.getCode())){
+            request.setAttribute("companySelect", proJson.getData());
         }
 
         request.setAttribute("teleGroupList",teleGroupList);
