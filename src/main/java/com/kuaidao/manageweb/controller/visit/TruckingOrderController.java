@@ -11,7 +11,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -30,6 +29,12 @@ import com.kuaidao.sys.dto.role.RoleInfoDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import com.kuaidao.sys.dto.user.UserOrgRoleReq;
 
+/**
+ * 邀約來訪派車單
+ * @author  Chen
+ * @date 2019年3月5日 上午9:09:07   
+ * @version V1.0
+ */
 @Controller
 @RequestMapping("/truckingOrder")
 public class TruckingOrderController {
@@ -38,8 +43,20 @@ public class TruckingOrderController {
     
     @Autowired
     TrackingOrderFeignClient trackingOrderFeignClient;
+    
     @Autowired
     UserInfoFeignClient userInfoFeignClient;
+    
+    /**
+     * 邀約來訪派車單
+     * @return
+     */
+    @RequestMapping("/truckingOrderPage")
+    public String visitRecordPage() {
+        return "visit/truckingOrder";
+    }
+    
+    
     /**
      * 查询邀约来访派车单
      * @param reqDTO
@@ -48,8 +65,8 @@ public class TruckingOrderController {
     @PostMapping("/listTrackingOrder")
     @ResponseBody
      public JSONResult<PageBean<TrackingOrderRespDTO>> listTrackingOrder(@RequestBody TrackingOrderReqDTO reqDTO){
-        
-        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+        //TODO devin  调试 暂时放开
+   /*     UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
         Long orgId = curLoginUser.getOrgId();
         List<RoleInfoDTO> roleList = curLoginUser.getRoleList();
         if(roleList!=null && roleList.size()!=0) {
@@ -74,7 +91,7 @@ public class TruckingOrderController {
                 idList.add(curLoginUser.getId());
                 reqDTO.setBusDirectorIdList(idList);
             }
-        }
+        }*/
          
          return trackingOrderFeignClient.listTrackingOrder(reqDTO) ;
      }
