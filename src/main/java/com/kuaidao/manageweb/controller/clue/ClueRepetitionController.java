@@ -79,7 +79,7 @@ public class ClueRepetitionController {
      */
     @RequestMapping("/queryRepeatPage")
     public String queryRepeatPage(HttpServletRequest request) {
-		return "clue/repetition/customerreP/etitionList";
+		return "clue/repetition/customerrePetitionList";
     }
     
     /**
@@ -227,8 +227,8 @@ public class ClueRepetitionController {
      */
     @RequestMapping("/businessSignDealList")
     @ResponseBody
-    public JSONResult<PageBean<ClueRepetitionDTO>> businessSignDealList(HttpServletRequest request,@RequestBody ClueRepetitionDTO clueRepetitionDTO) {
-    	JSONResult<PageBean<ClueRepetitionDTO>> list = clueRepetitionFeignClient.dealPetitionList(clueRepetitionDTO);
+    public JSONResult<PageBean<BusinessSignDTO>> businessSignDealList(HttpServletRequest request,@RequestBody BusinessSignDTO businessSignDTO) {
+    	JSONResult<PageBean<BusinessSignDTO>> list = businessSignFeignClient.businessSignDealList(businessSignDTO);
     	return list;
     }
 
@@ -278,6 +278,8 @@ public class ClueRepetitionController {
     @ResponseBody
     @LogRecord(description = "签约重单审核",operationType = LogRecord.OperationType.UPDATE,menuName = MenuEnum.BUSINESSSIGNREPETITION)
     public JSONResult updateBusinessPetitionById(HttpServletRequest request,@RequestBody BusinessSignDTO businessSignDTO) {
+    	UserInfoDTO user = getUser();
+    	businessSignDTO.setLoginUserId(user.getId());
     	return clueRepetitionFeignClient.updateBusinessPetitionById(businessSignDTO);
     }
 
