@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import com.kuaidao.aggregation.dto.clue.ClueRepetitionDTO;
 import com.kuaidao.aggregation.dto.invitearea.InviteAreaDTO;
 import com.kuaidao.aggregation.dto.sign.BusinessSignDTO;
+import com.kuaidao.aggregation.dto.sign.PayDetailDTO;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
@@ -21,7 +22,7 @@ import com.kuaidao.sys.dto.ip.IpAccessManagerQueryDTO;
 import com.kuaidao.sys.dto.ip.IpPackageInfoDTO;
 import com.kuaidao.sys.dto.ip.IpRepositoryInfoDTO;
 
-@FeignClient(name = "aggregation-service", path = "/aggregation/sign/businesssign", fallback = BusinessSignFeignClient.HystrixClientFallback.class)
+@FeignClient(name = "aggregation-service-1", path = "/aggregation/sign/businesssign", fallback = BusinessSignFeignClient.HystrixClientFallback.class)
 
 public interface BusinessSignFeignClient {
 
@@ -51,6 +52,9 @@ public interface BusinessSignFeignClient {
 	
 	@PostMapping("/repeatPaymentDetails")
 	public JSONResult<BusinessSignDTO> repeatPaymentDetails(@RequestBody BusinessSignDTO businessSignDTO);
+	
+	@PostMapping("/getPaymentDetailsById")
+	public JSONResult<PayDetailDTO> getPaymentDetailsById(@RequestBody PayDetailDTO detailDTO);
 	@Component
 	static class HystrixClientFallback implements BusinessSignFeignClient {
 
@@ -65,26 +69,27 @@ public interface BusinessSignFeignClient {
 
 		@Override
 		public JSONResult<PageBean<BusinessSignDTO>> businessSignValidList(BusinessSignDTO businessSignDTO) {
-			// TODO Auto-generated method stub
 			return fallBackError("有效签约单查询失败");
 		}
 
 		@Override
 		public JSONResult updateBusinessSignDTOValidByIds(BusinessSignDTO businessSignDTO) {
-			// TODO Auto-generated method stub
 			return fallBackError("签约单有效性判断");
 		}
 
 		@Override
 		public JSONResult<PageBean<BusinessSignDTO>> businessSignDealList(BusinessSignDTO businessSignDTO) {
-			// TODO Auto-generated method stub
 			return fallBackError("查询签约重单列表失败");
 		}
 
 		@Override
 		public JSONResult<BusinessSignDTO> repeatPaymentDetails(BusinessSignDTO businessSignDTO) {
-			// TODO Auto-generated method stub
 			return fallBackError("查询签约重单详情失败");
+		}
+
+		@Override
+		public JSONResult<PayDetailDTO> getPaymentDetailsById(PayDetailDTO detailDTO) {
+			return fallBackError("根据id查询付款明细详情失败");
 		}
 		
 	}
