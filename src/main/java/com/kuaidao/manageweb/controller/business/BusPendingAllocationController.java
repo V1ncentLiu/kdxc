@@ -40,6 +40,7 @@ import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
 import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
 import com.kuaidao.manageweb.feign.project.ProjectInfoFeignClient;
 import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
+import com.kuaidao.sys.constant.SysConstant;
 import com.kuaidao.sys.dto.area.SysRegionDTO;
 import com.kuaidao.sys.dto.dictionary.DictionaryItemRespDTO;
 import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
@@ -54,7 +55,7 @@ import com.kuaidao.sys.dto.user.UserOrgRoleReq;
  */
 
 @Controller
-@RequestMapping("/business/busAllocation")
+@RequestMapping("/business/busAllocation/getSaleList")
 public class BusPendingAllocationController {
     private static Logger logger = LoggerFactory.getLogger(BusPendingAllocationController.class);
     @Autowired
@@ -69,6 +70,7 @@ public class BusPendingAllocationController {
     private DictionaryItemFeignClient dictionaryItemFeignClient;
     @Autowired
     private SysRegionFeignClient sysRegionFeignClient;
+    private List<UserInfoDTO> saleList;
 
     /***
      * 待分配资源列表页
@@ -91,13 +93,12 @@ public class BusPendingAllocationController {
         List<Map<String, Object>> allSaleList = getAllSaleList();
         request.setAttribute("allSaleList", allSaleList);
         // 查询组织下商务经理
-        UserOrgRoleReq userOrgRoleReq = new UserOrgRoleReq();
-        userOrgRoleReq.setRoleCode(RoleCodeEnum.SWJL.name());
-        userOrgRoleReq.setOrgId(user.getOrgId());
-        JSONResult<List<UserInfoDTO>> saleList =
-                userInfoFeignClient.listByOrgAndRole(userOrgRoleReq);
-        request.setAttribute("busSaleList", saleList.getData());
-
+        List<Integer> statusList = new ArrayList<Integer>();
+        statusList.add(SysConstant.USER_STATUS_ENABLE);
+        statusList.add(SysConstant.USER_STATUS_LOCK);
+        List<UserInfoDTO> saleList =
+                getUserList(user.getOrgId(), RoleCodeEnum.SWJL.name(), statusList);
+        request.setAttribute("busSaleList", saleList);
         // 查询所有省
         queryDTO.setType(1);
         JSONResult<List<SysRegionDTO>> querySysRegionByParam =
@@ -234,7 +235,10 @@ public class BusPendingAllocationController {
                 organizationFeignClient.queryOrgByParam(queryDTO);
         List<OrganizationRespDTO> busAreaLsit = busArea.getData();
         // 查询所有商务经理
-        List<UserInfoDTO> userList = getUserList(null, RoleCodeEnum.SWJL.name());
+        List<Integer> statusList = new ArrayList<Integer>();
+        statusList.add(SysConstant.USER_STATUS_ENABLE);
+        statusList.add(SysConstant.USER_STATUS_LOCK);
+        List<UserInfoDTO> userList = getUserList(null, RoleCodeEnum.SWJL.name(), statusList);
 
         Map<Long, OrganizationRespDTO> orgMap = new HashMap<Long, OrganizationRespDTO>();
         // 生成<机构id，机构>map
@@ -265,10 +269,11 @@ public class BusPendingAllocationController {
      * @param orgDTO
      * @return
      */
-    private List<UserInfoDTO> getUserList(Long orgId, String roleCode) {
+    private List<UserInfoDTO> getUserList(Long orgId, String roleCode, List<Integer> statusList) {
         UserOrgRoleReq userOrgRoleReq = new UserOrgRoleReq();
         userOrgRoleReq.setOrgId(orgId);
         userOrgRoleReq.setRoleCode(roleCode);
+        userOrgRoleReq.setStatusList(statusList);
         JSONResult<List<UserInfoDTO>> listByOrgAndRole =
                 userInfoFeignClient.listByOrgAndRole(userOrgRoleReq);
         return listByOrgAndRole.getData();

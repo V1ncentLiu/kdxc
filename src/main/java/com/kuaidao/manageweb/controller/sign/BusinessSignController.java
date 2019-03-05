@@ -218,7 +218,7 @@ public class BusinessSignController {
     @RequestMapping("/visitRecordPage")
     public String visitRecordPage(HttpServletRequest request,@RequestParam String clueId , @RequestParam String signId ,@RequestParam String readyOnly ) throws Exception {
 
-        IdEntityLong idEntityLong = new IdEntityLong();
+        IdEntityLong idEntityLong = new IdEntityLong(); 
         idEntityLong.setId(Long.valueOf(clueId));
         JSONResult<BusSignRespDTO> busSign = queryOne(idEntityLong);
         BusSignRespDTO sign = busSign.getData();

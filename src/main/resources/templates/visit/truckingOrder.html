@@ -2,504 +2,179 @@
 <html>
 
 <head th:include="_header_include::frag(~{::title},~{},~{})">
-    <title>签约记录</title>
+    <title>邀约来访派车单</title>
     <style>
         button a{color:#fff!important;}
     </style>
 </head>
 <body>
-<div id="businessContractRecord" class="businessContractRecord mainPadding" style="display: none;">  
+<div id="truckingOrder" class="truckingOrder mainPadding" style="display: none;">  
     <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
         <el-breadcrumb-item>Home</el-breadcrumb-item>
         <el-breadcrumb-item>商务管理</el-breadcrumb-item>
-        <el-breadcrumb-item>顾问签约记录</el-breadcrumb-item>
+        <el-breadcrumb-item>邀约来访派车单</el-breadcrumb-item>
     </el-breadcrumb>
     <el-row class="marginB10">
-        <el-button type="primary" @click="OpenRejectSignRecordDialog">驳回</el-button>
-        <el-button type="success" @click="pass">审核通过</el-button>
+        <el-button type="primary" @click="exportFun()">导出</el-button>
     </el-row>
     <el-row class="marginB10 greybg padding20" style="padding-bottom: 0">        
-        <el-form :inline="true" :model="form" ref="form">
-            <el-form-item label="">
-                <el-select v-model="form.signProjectIdList" placeholder="签约项目" style="width: 100%;" clearable>
-                    <el-option
-                        v-for="item in projectList"
-                        :key="item.id"
-                        :label="item.projectName"
-                        :value="item.id">
-                    </el-option>
-                </el-select>
-            </el-form-item> 
-            <el-form-item label="">  
-                <el-select v-model="form.businessGroupId" placeholder="商务小组" style="width: 100%;" clearable>
-                    <el-option
-                        v-for="item in businessGroupList"
-                        :key="item.id"
-                        :label="item.name"
-                        :value="item.id">
-                    </el-option>
-                </el-select>
-            </el-form-item>    
-            <el-form-item label="">  
-                <el-select v-model="form.businessManagerId" placeholder="商务经理" style="width: 100%;" clearable>
-                    <el-option
-                        v-for="item in busManagerList"
-                        :key="item.id"
-                        :label="item.name"
-                        :value="item.id">
-                    </el-option>
-                </el-select>
-            </el-form-item>   
-            <el-form-item label="">  
-                <el-select v-model="form.teleGroupid" placeholder="电销组" style="width: 100%;" clearable>
-                    <el-option
-                        v-for="item in teleGroupList"
-                        :key="item.id"
-                        :label="item.name"
-                        :value="item.id">
-                    </el-option>
-                </el-select>
-            </el-form-item>   
-            <el-form-item label="">  
-                <el-select v-model="form.teleSaleId" placeholder="创业顾问" style="width: 100%;" clearable>
-                    <el-option
-                        v-for="item in teleSaleList"
-                        :key="item.id"
-                        :label="item.name"
-                        :value="item.id">
-                    </el-option>
-                </el-select>
-            </el-form-item>   
-            <el-form-item label="">  
-                <el-select v-model="form.signType" placeholder="签约类型" style="width: 100%;" clearable>
-                    <el-option
-                        v-for="item in signTypeOpt"
-                        :key="item.value"
-                        :label="item.label"
-                        :value="item.value">
-                    </el-option>
-                </el-select>
-            </el-form-item>   
-            <el-form-item label="">  
-                <el-select v-model="form.status" placeholder="签约单状态" style="width: 100%;" clearable>
-                    <el-option
-                        v-for="item in signOrderStatusOpt"
-                        :key="item.value"
-                        :label="item.label"
-                        :value="item.value">
-                    </el-option>
-                </el-select>
-            </el-form-item>           
-            <el-form-item label="签约时间:">
+        <el-form :inline="true" :model="form" ref="form">                       
+            <el-form-item label="邀约来访时间:">
                 <el-date-picker
                     style="width: 100%;"
-                    v-model="form.signStartTime"
+                    v-model="form.reserveStartTime"
                     type="datetime"
+                    format="yyyy-MM-dd hh:mm"
                     placeholder="选择日期时间">
                 </el-date-picker>
             </el-form-item>
             <el-form-item label="——">
                 <el-date-picker
                     style="width: 100%;"
-                    v-model="form.signEndTime"
+                    v-model="form.reserveEndTime"
                     type="datetime"
+                    format="yyyy-MM-dd hh:mm"
                     placeholder="选择日期时间">
                 </el-date-picker>
             </el-form-item>
+            <el-form-item label="申请提交时间:">
+                <el-date-picker
+                    style="width: 100%;"
+                    v-model="form.submitStartTime"
+                    type="datetime"
+                    format="yyyy-MM-dd hh:mm"
+                    placeholder="选择日期时间">
+                </el-date-picker>
+            </el-form-item>
+            <el-form-item label="——">
+                <el-date-picker
+                    style="width: 100%;"
+                    v-model="form.submitEndTime"
+                    type="datetime"
+                    format="yyyy-MM-dd hh:mm"
+                    placeholder="选择日期时间">
+                </el-date-picker>
+            </el-form-item>
+            <el-form-item label="到站时间:">
+                <el-date-picker
+                    style="width: 100%;"
+                    v-model="form.arrivalStartTime"
+                    type="datetime"
+                    format="yyyy-MM-dd hh:mm"
+                    placeholder="选择日期时间">
+                </el-date-picker>
+            </el-form-item>
+            <el-form-item label="——">
+                <el-date-picker
+                    style="width: 100%;"
+                    v-model="form.arrivalEndTime"
+                    type="datetime"
+                    format="yyyy-MM-dd hh:mm"
+                    placeholder="选择日期时间">
+                </el-date-picker>
+            </el-form-item>
+     <!--        <el-form-item label="">  
+                <el-select v-model="form.accountIdList" placeholder="创业顾问" style="width: 100%;" clearable>
+                    <el-option
+                        v-for="item in accountIdList"
+                        :key="item.id"
+                        :label="item.name"
+                        :value="item.id">
+                    </el-option>
+                </el-select>
+            </el-form-item> -->
             <el-form-item label="">
-                <el-input v-model="form.signNo" placeholder="签约单编号"></el-input>
+                <el-input v-model="form.customerPhone" placeholder="客户手机号"></el-input>
             </el-form-item>
             <el-form-item label="">
-                <el-input v-model="form.customerName" placeholder="客户姓名"></el-input>
+                <el-input v-model="form.customerName" placeholder="请输入客户姓名"></el-input>
             </el-form-item>
-            <el-button type="primary" @click="initSignRecordData">搜索</el-button>               
+            <el-button type="primary" @click="initSignRecordData">搜索</el-button>
         </el-form>       
     </el-row>
     <el-row>
         <el-table 
-            ref="dataTable"
-            tooltip-effect="dark"
-            style="width: 100%"
-            border
-             @selection-change="handleSelectionChange"
-             v-loading="loading"
+            ref="dataTable" 
+            tooltip-effect="dark" 
+            style="width: 100%" 
+            border 
+            v-loading="loading" 
             :data="dataTable" 
             >
-            <el-table-column align="center" type="selection" width="55"></el-table-column>
-            <el-table-column align="center" prop="serialNum" label="序号" width="55"></el-table-column>
-            <el-table-column align="center" prop="signNo" label="签约单编号" width="100"></el-table-column>
-            <el-table-column align="center" prop="signType" label="签约类型" :formatter="getSignTypeText"></el-table-column>
-            <el-table-column align="center" prop="createTime" label="签约时间"></el-table-column>
-            <el-table-column align="center" prop="paymentDetails" label="付款明细">
-                <template slot-scope="scope">
-                    <el-button @click="recordClick(scope.row)" type="text" size="small">点击查看</el-button>
-                </template>
-            </el-table-column>
-            <el-table-column align="center" prop="status" label="签约单状态"  width="120">
-                <template slot-scope="scope">
-                    <span v-if="scope.row.status===0">
-                        驳回&nbsp;<el-button @click="reasonClick(scope.row)" type="text">驳回原因</el-button>
-                    </span>
-                    <span v-else-if="scope.row.status===2">
-                        有效
-                    </span>
-                    <span v-else-if="scope.row.status===2">
-                        待审核（全款）
-                    </span>
-                    <span v-else-if="scope.row.status===3">
-                        待审核（定金）
-                    </span>
-                    <span v-else-if="scope.row.status===4">
-                        待审核（补加定金）
-                    </span>
-                    <span v-else="scope.row.status===5">
-                        待审核（尾款）
-                    </span>
-                </template>
-            </el-table-column>
-            <el-table-column align="center" prop="customerName" label="客户姓名"></el-table-column>  
-            <el-table-column align="center" prop="idCard" label="客户身份证号" width="170"></el-table-column> 
-            <el-table-column align="center" prop="phone" label="客户身联系电话" width="150"></el-table-column> 
-            <el-table-column align="center" prop="signProjectName" label="签约项目"></el-table-column>   
-            <el-table-column align="center" prop="signProvince" label="签约省份"></el-table-column>
-            <el-table-column align="center" prop="signCity" label="签约城市"></el-table-column> 
-            <el-table-column align="center" prop="signDictrict" label="签约区/县" width="100"></el-table-column>
-            <el-table-column align="center" prop="businessGroupName" label="商务小组"></el-table-column> 
-            <el-table-column align="center" prop="businessManagerName" label="商务经理"></el-table-column> 
-            <el-table-column align="center" prop="teleGroupName" label="电销组"></el-table-column>
-            <el-table-column align="center" prop="teleSaleName" label="创业顾问"></el-table-column>
-            <el-table-column align="center" prop="signShopType" label="签约店型" :formatter="getSignShopTypeText"></el-table-column>
-            <el-table-column align="center" prop="amountReceivable" label="应收金额"></el-table-column>
-            <el-table-column align="center" prop="firstToll" label="路费"></el-table-column>
-            <el-table-column align="center" prop="preferentialAmount" label="优惠金额"></el-table-column>
+            <el-table-column align="center" type="index" label="序号" width="55"></el-table-column>
+            <el-table-column align="center" prop="reserveTime" label="邀约来访时间" width="170" :formatter="dateFormat" sortable></el-table-column>
+            <el-table-column align="center" prop="busDirectorName" label="商务总监" width="150"></el-table-column>
+            <el-table-column align="center" prop="busCompanyName" label="餐饮公司"></el-table-column>
+            <el-table-column align="center" prop="tasteProject" label="品尝项目"></el-table-column>
+            <el-table-column align="center" prop="createTime" label="申请提交时间"  width="170" :formatter="dateFormat" sortable></el-table-column>
+            <el-table-column align="center" prop="submitGroup" label="申请部门"></el-table-column>  
+            <el-table-column align="center" prop="accountPhone" label="顾问电话" width="120"></el-table-column> 
+            <el-table-column align="center" prop="customerName" label="客户姓名" width="150"></el-table-column> 
+            <el-table-column align="center" prop="cusNum" label="客户人数"></el-table-column>   
+            <el-table-column align="center" prop="cusPhone" label="客户手机号" width="150"></el-table-column>
+            <el-table-column align="center" prop="cusName" label="客户联系人姓名" width="150"></el-table-column> 
+            <el-table-column align="center" prop="arrivalTime" label="到站时间" width="170" :formatter="dateFormat" sortable></el-table-column>
+            <el-table-column align="center" prop="pickUpTime" label="出站时间"  width="170" :formatter="dateFormat"></el-table-column> 
+            <el-table-column align="center" prop="city" label="出车城市" width="170"></el-table-column> 
+            <el-table-column align="center" prop="pickUpTime" label="接站时间"  width="170" :formatter="dateFormat"></el-table-column>
+            <el-table-column align="center" prop="delayMark" label="延误说明"></el-table-column>
+            <el-table-column align="center" prop="flight" label="车次／航班" width="150"></el-table-column>
+            <el-table-column align="center" prop="pickUpPlace" label="接站地" width="150"></el-table-column>
+            <el-table-column align="center" prop="terminal" label="航站楼" width="150"></el-table-column>
+            <el-table-column align="center" prop="receivedPlace" label="接到地（酒店／公司）" width="200"></el-table-column>
         </el-table>
          <table-pagination :pager="pager" @change="initSignRecordData"></table-pagination>
     </el-row>
-    <!-- dialog -->
-    <!-- 驳回处理 -->
-    <el-dialog title="提示" :visible.sync="dialogFormVisible">
-        <el-form :model="dialogForm" ref="dialogForm" :rules="dialogRules">            
-            <div class="fs16 marginB20">确定要将此{{signRecordArrTitle}} 签约单驳回吗？</div>
-            <el-form-item label="驳回原因：" label-width="100px" prop="reason">
-                <el-input
-                    type="textarea"
-                    :rows="4"
-                    placeholder="请输入驳回原因"
-                    maxLength="100"
-                    v-model="dialogForm.reason">
-                </el-input>
-            </el-form-item>
-            <div class="f-tar">最多100字</div>
-        </el-form>
-        <div slot="footer" class="dialog-footer">
-            <el-button type="primary" @click="submitDialogForm('dialogForm')">确 定</el-button>
-            <el-button @click="dialogFormVisible = false" >取 消</el-button>
-        </div>
-    </el-dialog>
-    <!-- 驳回原因 -->
-    <el-dialog title="驳回原因" :visible.sync="reasonDialog">           
-        <div class="fs16 marginB20" >{{rebutReason}}</div>
-    </el-dialog>
-    <!-- 付款明细 -->
-    <el-dialog title="付款明细" :visible.sync="recordDialog">
-        <div v-show="paymentDetailsShow">
-            <div class="fs16 marginB20">全款付款明细</div>
-            <el-table
-                ref="recordTable" 
-                tooltip-effect="dark"
-                style="width: 100%;margin-bottom: 20px;"
-                border
-                :data="recordTable" 
-                >
-                <el-table-column align="center" prop="payMode" label="付款方式" :formatter="getPayModeText"></el-table-column>
-                <el-table-column align="center" prop="payTime" label="付款时间"></el-table-column>
-                <el-table-column align="center" prop="amountReceived" label="实收金额"></el-table-column>
-                <el-table-column align="center" prop="amountBalance" label="业绩金额"></el-table-column>
-                <el-table-column align="center" prop="status" label="明细状态"></el-table-column>
-            </el-table>
-        </div>        
-        <div v-show="paymentDetailsShow2">
-            <div class="fs16 marginB20">定金付款明细</div>
-            <el-table
-                ref="recordTable2" 
-                tooltip-effect="dark"
-                style="width: 100%;margin-bottom: 20px;"
-                border
-                :data="recordTable2" 
-                >
-                <el-table-column align="center" prop="paymentType" label="付款方式"></el-table-column>
-                <el-table-column align="center" prop="paymentTime" label="付款时间"></el-table-column>
-                <el-table-column align="center" prop="actualMoney" label="实收金额"></el-table-column>
-                <el-table-column align="center" prop="performanceMoney" label="业绩金额"></el-table-column>
-                <el-table-column align="center" prop="residueMoney" label="余款金额"></el-table-column>
-                <el-table-column align="center" prop="estimatedTime" label="预计余款补齐时间"></el-table-column>                
-                <el-table-column align="center" prop="detailStatus" label="明细状态"></el-table-column>
-            </el-table>
-        </div>
-        <div v-show="paymentDetailsShow3">
-            <div class="fs16 marginB20">二次定金付款明细</div>
-            <el-table
-                ref="recordTable3" 
-                tooltip-effect="dark"
-                style="width: 100%;margin-bottom: 20px;"
-                border
-                :data="recordTable3" 
-                >
-                <el-table-column align="center" prop="paymentType" label="付款方式"></el-table-column>
-                <el-table-column align="center" prop="paymentTime" label="付款时间"></el-table-column>
-                <el-table-column align="center" prop="actualMoney" label="实收金额"></el-table-column>
-                <el-table-column align="center" prop="performanceMoney" label="业绩金额"></el-table-column>
-                <el-table-column align="center" prop="residueMoney" label="余款金额"></el-table-column>
-                <el-table-column align="center" prop="estimatedTime" label="预计余款补齐时间"></el-table-column>                
-                <el-table-column align="center" prop="detailStatus" label="明细状态"></el-table-column>
-            </el-table>
-        </div>
-        <div v-show="paymentDetailsShow4">
-            <div class="fs16 marginB20">尾款付款明细</div>
-            <el-table
-                ref="recordTable" 
-                tooltip-effect="dark"
-                style="width: 100%;margin-bottom: 20px;"
-                border
-                :data="recordTable4" 
-                >
-                <el-table-column align="center" prop="paymentType" label="付款方式"></el-table-column>
-                <el-table-column align="center" prop="paymentTime" label="付款时间"></el-table-column>
-                <el-table-column align="center" prop="actualMoney" label="实收金额"></el-table-column>
-                <el-table-column align="center" prop="performanceMoney" label="业绩金额"></el-table-column>
-                <el-table-column align="center" prop="detailStatus" label="明细状态"></el-table-column>
-            </el-table>
-        </div>
-    </el-dialog>
 </div>
 <!-- import Vue before Element -->
 <div th:include="_footer_include :: #jsLib"></div>
 <script th:inline="javascript">
-    var projectList = [[${projectList}]];
-    var busManagerList = [[${busManagerList}]];
-    var businessGroupList = [[${businessGroupList}]];
-    var teleGroupList = [[${teleGroupList}]];
-    var teleSaleList = [[${teleSaleList}]];
+    var accountIdList = [[${accountIdList}]];
 </script>
 
 </body>
 
 <script>
  var signRecordVM = new Vue({
-        el: '#businessContractRecord',
+        el: '#truckingOrder',
         data: function() {
             return {
-            	 loading: true,
-                dialogFormVisible:false,
-                recordDialog:false,
-                reasonDialog:false,
-                paymentDetailsShow:false,//判断全款付款明细表格是否显示
-                paymentDetailsShow2:false,//判断定金付款明细表格是否显示
-                paymentDetailsShow3:false,//判断二次定金付款明细表格是否显示
-                paymentDetailsShow4:false,//判断尾款付款明细表格是否显示
+            	loading: true,
                 form: {
-                	signProjectId:'',
-                	businessGroupId:'',
-                	businessManagerId:'',
-                	teleGroupid:'',
-                	teleSaleId:'',
-                	signType:'',
-                	status:'',
-                	signStartTime:'',
-                	signEndTime:'',
-                	signNo:'',
-                	customerName:''
+                	reserveStartTime:'',
+                    reserveEndTime:'',
+                    submitStartTime:'',
+                    submitEndTime:'',
+                    arrivalStartTime:'',
+                    arrivalEndTime:'',
+                    accountId:'',
+                   // accountIdList:[],
+                    customerPhone:'',
+                    customerName:'',
                 },
                 formLabelWidth: '150px',
                 dataTable:[],
-                projectList:projectList,
-                busManagerList:busManagerList,
-                businessGroupList:businessGroupList,
-                teleGroupList:teleGroupList,
-                teleSaleList:teleSaleList,
-                signTypeOpt: [{
-                    value: 1,
-                    label: '一次性全款'
-                }, {
-                    value: 2,
-                    label: '先交订金'
-                }],
-                signOrderStatusOpt: [
-                	{
-                    value: 1,
-                    label: '无效'
-                }, {
-                    value: 2,
-                    label: '有效'
-                }],
-                value: '',//下拉选项默认值
-                recordTable:[],
-                recordTable2:[],
-                recordTable3:[],
-                recordTable4:[],
-                dialogForm:{
-                    reason:''
-                },
-                dialogRules:{
-                    reason: [
-                        { required: true, message: '请输入驳回原因', trigger: 'blur' }
-                    ]
-                },
+
+                accountIdList:accountIdList,
+
                 pager:{//
                     total: 0,
                     currentPage: 1,
                     pageSize: 20,
-                },
-                rebutReason:'',//驳回原因
-                multipleSelection:[],
-                signRecordArrTitle:'',
+                }
             }        	  
         },
         methods: {
-            submitDialogForm(formName) {
-                this.$refs[formName].validate((valid) => {
-                    if (valid) {
-                    	var param ={};	
-                    	var rows = this.multipleSelection;
-                        var idArr = new Array();
-                        for(var i=0;i<rows.length;i++){
-                            var curRow = rows[i];
-                           idArr.push(curRow.id);
-                        }
-                        param.idList = idArr;
-                        param.rebutReason = this.dialogForm.reason;
-                        axios.post('/sign/signRecord/rejectSignOrder', param)
-                        .then(function (response) {
-                            var resData = response.data;
-                            if(resData.code=='0'){
-                            	this.dialogForm.reason='';
-                            	signRecordVM.dialogFormVisible = false;
-                            	 signRecordVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
-                            		 signRecordVM.initSignRecordData();
-                                }});
-                            }else{
-                            	signRecordVM.$message({message:resData.msg,type:'error'});
-                                console.error(resData);
-                            }
-                        
-                        })
-                        .catch(function (error) {
-                             console.log(error);
-                        }).then(function(){
-                        });
-
-                    	
-                    } else {
-                        console.log('error submit!!');
-                        return false;
-                    }
-                });
-            },
-            recordClick(row) {//查看明细
-                console.log(row);
-                this.paymentDetailsShow=false;
-                this.paymentDetailsShow2=false;
-                this.paymentDetailsShow3=false;
-                this.paymentDetailsShow4=false;
-                var param = {};
-                param.idList = [row.id];
-                axios.post('/sign/signRecord/listPayDetailNoPage', param)
-                .then(function (response) {
-                    var resData = response.data;
-                    if(resData.code=='0'){
-                    	debugger;
-                    	var payDetailData = resData.data;
-                    	if(payDetailData[1]){
-                    		signRecordVM.paymentDetailsShow=true;
-                    		signRecordVM.recordTable= payDetailData[1];
-                    	}else if(payDetailData[2]){
-                    		signRecordVM.paymentDetailsShow2=true;
-                    		 signRecordVM.recordTable2= payDetailData[2];
-                    	}else if(payDetailData[3]){
-                    		  signRecordVM.paymentDetailsShow3=true;
-                    		  signRecordVM.recordTable3= payDetailData[3];
-                    	}else if(payDetailData[4]){
-                    		signRecordVM.paymentDetailsShow4=true;
-                    		signRecordVM.recordTable4= payDetailData[4];
-                    	}
-                        
-                    }else{
-                        signRecordVM.$message({message:resData.msg,type:'error'});
-                        console.error(resData);
-                    }
-                    signRecordVM.recordDialog=true;
-                
-                })
-                .catch(function (error) {
-                     console.log(error);
-                }).then(function(){
-                });
-               
-            },
-            reasonClick(row) {//驳回原因
-                console.log(row);
-               this.rebutReason = row.rebutReason;
-                this.reasonDialog=true;
-            },
-            pass(){//审核通过
-            	var rows = this.multipleSelection;
-                if(rows.length<1){
-                    this.$message({
-                       message: '请选择数据',
-                       type: 'warning'
-                     });
-                    return;
-                }
-                
-                var title = "";
-                var idArr = new Array();
-                for(var i=0;i<rows.length;i++){
-                    var curRow = rows[i];
-                    title += "【"+curRow.serialNum+""+curRow.customerName+"】 ";
-                    idArr.push(curRow.id);
-                }
-            	
-                this.$confirm('确定要将此 '+title+' 签约单审核通过吗？', '提示', {
-                    confirmButtonText: '确定',
-                    cancelButtonText: '取消',
-                    type: 'warning'
-                }).then(() => {
-                	var param={};
-                	param.idList = idArr;
-                   
-                    axios.post('/sign/signRecord/passAuditSignOrder', param)
-                    .then(function (response) {
-                        var resData = response.data;
-                        if(resData.code=='0'){
-                            signRecordVM.dialogFormVisible = false;
-                             signRecordVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
-                                 signRecordVM.initSignRecordData();
-                            }});
-                        }else{
-                            signRecordVM.$message({message:resData.msg,type:'error'});
-                            console.error(resData);
-                        }
-                    
-                    })
-                    .catch(function (error) {
-                         console.log(error);
-                    }).then(function(){
-                    });
-                    
-                }).catch(() => {
-                    this.$message({
-                        type: 'info',
-                        message: '已取消审核'
-                    });          
-                });
-            },
-            initSignRecordData(){
-            	
-                var startTime = this.form.signStartTime;
-                var endTime = this.form.signEndTime;
-                var startTimestamp = Date.parse(new Date(startTime));
-               if(endTime){
-                   var endTimestamp = new Date(endTime);
+            initSignRecordData(){            	
+                var reserveStartTime = this.form.reserveStartTime;
+                var reserveEndTime = this.form.reserveEndTime;
+                var submitStartTime = this.form.submitStartTime;
+                var submitEndTime = this.form.submitEndTime;
+                var arrivalStartTime = this.form.arrivalStartTime;
+                var arrivalEndTime = this.form.arrivalEndTime;
+                var startTimestamp = Date.parse(new Date(reserveStartTime));
+                if(reserveEndTime){
+                    var endTimestamp = new Date(reserveEndTime);
                     if(startTimestamp> endTimestamp){
                         this.$message({
                             message: '开始时间不能大于结束时间',
@@ -507,11 +182,40 @@
                           });
                         return;
                     }
-               }
+                }
+                var startTimestamp2 = Date.parse(new Date(submitStartTime));
+                if(submitEndTime){
+                    var endTimestamp2 = new Date(submitEndTime);
+                    if(startTimestamp2> endTimestamp2){
+                        this.$message({
+                            message: '开始时间不能大于结束时间',
+                            type: 'warning'
+                          });
+                        return;
+                    }
+                }
+                var startTimestamp3 = Date.parse(new Date(arrivalStartTime));
+                if(arrivalEndTime){
+                    var endTimestamp3 = new Date(arrivalEndTime);
+                    if(startTimestamp3> endTimestamp3){
+                        this.$message({
+                            message: '开始时间不能大于结束时间',
+                            type: 'warning'
+                          });
+                        return;
+                    }
+                }
             	 var param = this.form;
+            	 //debugger;
+            /* 	 var accountId = param.accountId;
+            	 if(accountId){
+            		 var accountIdArr = new Array();
+            		 accountIdArr.push(accountIdArr);
+            		 param.accountIdList = accountIdArr;
+            	 } */
                  param.pageNum=this.pager.currentPage;
                  param.pageSize=this.pager.pageSize;
-                 axios.post('/sign/signRecord/listSignRecord',param)
+                 axios.post('/truckingOrder/listTrackingOrder',param)
                  .then(function (response) {
                      var data =  response.data
                      if(data.code=='0'){
@@ -521,10 +225,10 @@
                         signRecordVM.pager.total= resData.total;
                         signRecordVM.pager.currentPage = resData.currentPage;
                         signRecordVM.pager.pageSize = resData.pageSize;
-                         
+                        signRecordVM.accountIdList=[];
                      }else{
                     	 signRecordVM.$message({message:data.msg,type:'error'});
-                         console.error(data);
+                         console.log(response);
                      }
                  
                  })
@@ -535,67 +239,35 @@
                  });
             	
             },
-            OpenRejectSignRecordDialog(){
-            	this.signRecordArrTitle='';
-            	var rows = this.multipleSelection;
-                if(rows.length<1){
-                    this.$message({
-                       message: '请选择数据',
-                       type: 'warning'
-                     });
-                    return;
-                }
-                var title = "";
-                for(var i=0;i<rows.length;i++){
-                    var curRow = rows[i];
-                    title += "【"+curRow.serialNum+""+curRow.customerName+"】 ";
-                }
-                this.signRecordArrTitle=title;
+            exportFun(){
+                var param = this.form;
+                axios.post('/truckingOrder/exportTrackingOrder',param,{responseType:'blob'})
+                .then(function (response) {
+                    console.log(response)
+                    var data =  response.data
+                    
+                        saveAs(data,'123.xls')
+                     
+                    
+                })
+                .catch(function (error) {
+                    console.log(error);
+                }).then(function(){
+                    signRecordVM.loading=false;
+                });                     	
             	
-            	this.dialogFormVisible=true;
             },
-            handleSelectionChange(val){
-            	this.multipleSelection = val;
-            },
-            getSignTypeText(row, column, value, index){
-            	var valText="";
-                if(value==1){
-                    valText="一次性全款";
-                }else if(value==2){
-                    valText="先交订金";
+            //日期数据格式化方法
+            dateFormat( row, column, cellValue, index) {
+                if (cellValue == undefined) {
+                    return "";
                 }
-                return valText;
+                return moment(cellValue).format("YYYY-MM-DD HH:mm");
             },
-            getSignShopTypeText(row, column, value, index){
-            	var valText="";
-                if(value==1){
-                    valText="创业店";
-                }else if(value==2){
-                    valText="标准店";
-                }else if(value==3){
-                    valText="白金店";
-                }else if(value==4){
-                    valText="旗舰店";
-                }else if(value==5){
-                    valText="区域代理";
-                }
-                return valText;
-            },
-            getPayModeText(row, column, value, index){
-            	var valText="";
-                if(value==1){
-                    valText="现金";
-                }else if(value==2){
-                    valText="POS";
-                }else if(value==3){
-                    valText="转账";
-                }
-                return valText;
-            }
 
         },
         mounted(){
-            document.getElementById('businessContractRecord').style.display = 'block';
+            document.getElementById('truckingOrder').style.display = 'block';
         },
         created(){
         	this.initSignRecordData();
