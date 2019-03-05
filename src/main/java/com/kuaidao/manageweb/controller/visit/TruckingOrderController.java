@@ -18,6 +18,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+import com.kuaidao.aggregation.dto.project.ProjectInfoDTO;
+import com.kuaidao.aggregation.dto.project.ProjectInfoPageParam;
 import com.kuaidao.aggregation.dto.visit.TrackingOrderReqDTO;
 import com.kuaidao.aggregation.dto.visit.TrackingOrderRespDTO;
 import com.kuaidao.common.constant.RoleCodeEnum;
@@ -25,6 +27,7 @@ import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.common.util.DateUtil;
 import com.kuaidao.common.util.ExcelUtil;
+import com.kuaidao.manageweb.feign.project.ProjectInfoFeignClient;
 import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
 import com.kuaidao.manageweb.feign.visit.TrackingOrderFeignClient;
 import com.kuaidao.manageweb.util.CommUtil;
@@ -50,6 +53,8 @@ public class TruckingOrderController {
     @Autowired
     UserInfoFeignClient userInfoFeignClient;
 
+    @Autowired
+    private ProjectInfoFeignClient projectInfoFeignClient;
     /**
      * 邀約來訪派車單
      * @return
@@ -60,6 +65,9 @@ public class TruckingOrderController {
         //电销人员
         List<UserInfoDTO> teleSaleList = getUserInfo(null, RoleCodeEnum.DXCYGW.name());
         request.setAttribute("teleSaleList",teleSaleList);
+     // 查询所有项目
+        JSONResult<List<ProjectInfoDTO>> listNoPage = projectInfoFeignClient.listNoPage(new ProjectInfoPageParam());
+        request.setAttribute("projectList", listNoPage.getData());
         return "visit/truckingOrder";
     }
 
