@@ -55,7 +55,7 @@ import com.kuaidao.sys.dto.user.UserOrgRoleReq;
  */
 
 @Controller
-@RequestMapping("/business/busAllocation/getSaleList")
+@RequestMapping("/business/busAllocation")
 public class BusPendingAllocationController {
     private static Logger logger = LoggerFactory.getLogger(BusPendingAllocationController.class);
     @Autowired
