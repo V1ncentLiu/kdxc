@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import com.kuaidao.aggregation.dto.clue.ClueRepetitionDTO;
+import com.kuaidao.aggregation.dto.sign.BusinessSignDTO;
 import com.kuaidao.aggregation.dto.sign.PayDetailDTO;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.IdEntity;
@@ -89,6 +90,16 @@ public interface ClueRepetitionFeignClient {
 	@PostMapping("/updatePayDetailById")
 	public JSONResult updatePayDetailById(@RequestBody PayDetailDTO payDetailDTO);
 
+	/**
+	 * 签约重单审核通过
+	 * @param menuDTO
+	 * @return
+	 */
+	@PostMapping("/updateBusinessPetitionById")
+	public JSONResult updateBusinessPetitionById(@RequestBody BusinessSignDTO businessSignDTO);
+	
+	
+	
 	@Component
 	static class HystrixClientFallback implements ClueRepetitionFeignClient {
 
@@ -150,6 +161,14 @@ public interface ClueRepetitionFeignClient {
 		}
 
 
+
+		@Override
+		public JSONResult updateBusinessPetitionById(BusinessSignDTO businessSignDTO) {
+			// TODO Auto-generated method stub
+			return fallBackError("签约重单审核通过失败");
+		}
+
+	
 	}
 
 }

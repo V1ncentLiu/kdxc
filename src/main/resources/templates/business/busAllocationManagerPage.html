@@ -26,7 +26,7 @@
 	    <el-row class="greybg padding20" style="padding-bottom: 0;">
 		    	<el-col :span="4">
 				  <el-form-item class="formItem"  prop="teleGorupId" style="width: 100%;">
-				    <el-select v-model="searchForm.teleGorupId" @change="getSaleList" placeholder="电销组" style="width: 100%;">
+				    <el-select v-model="searchForm.teleGorupId" clearable @change="getSaleList" placeholder="电销组" style="width: 100%;">
 				      <el-option
 					      v-for="item in teleGorupOptions"
 					      :key="item.id"
@@ -38,7 +38,7 @@
 				</el-col>
 				<el-col :span="4">
 				  <el-form-item class="formItem"  prop="teleSaleId" style="width: 100%;">
-				    <el-select v-model="searchForm.teleSaleId" placeholder="创业顾问" style="width: 100%;">
+				    <el-select v-model="searchForm.teleSaleId" clearable placeholder="创业顾问" style="width: 100%;">
 				      <el-option
 					      v-for="item in teleSaleOptions"
 					      :key="item.id"
@@ -50,7 +50,7 @@
 				</el-col>
 				<el-col :span="4">
 				  <el-form-item class="formItem"  prop="projectId" style="width: 100%;">
-				    <el-select v-model="searchForm.projectId" placeholder="品尝项目" style="width: 100%;">
+				    <el-select v-model="searchForm.projectId" clearable placeholder="品尝项目" style="width: 100%;">
 				      <el-option
 					      v-for="item in projectOptions"
 					      :key="item.id"
@@ -62,7 +62,7 @@
 				</el-col>
 			<el-col :span="4">
 			  <el-form-item class="formItem"  prop="province">
-			    <el-select v-model="searchForm.province"  placeholder="开店省份" style="width: 100%;">
+			    <el-select v-model="searchForm.province" clearable  placeholder="开店省份" style="width: 100%;">
 			      <el-option
 				      v-for="item in provinceOptions"
 				      :key="item.name"
@@ -74,7 +74,7 @@
 			  </el-col>
 			<el-col :span="4">
 			  <el-form-item class="formItem"  prop="delFalg">
-			    <el-select v-model="searchForm.delFalg" placeholder="邀约来访状态">
+			    <el-select v-model="searchForm.delFalg" clearable placeholder="邀约来访状态">
 			      <el-option
 				      v-for="item in delFalgOptions"
 				      :key="item.value"
@@ -114,7 +114,7 @@
 	    </el-row>
   	</el-form>
     <el-row>
-        <el-table  ref="multipleTable" tooltip-effect="dark" border @selection-change="handleSelectionChange"
+        <el-table  ref="multipleTable" tooltip-effect="dark" border @row-dblclick="showCustomerDetail" @selection-change="handleSelectionChange"
             style="width: 100%"  :data="dataTable" >
            <el-table-column align="center" type="selection" label="全选" width="50"></el-table-column>
            <el-table-column align="center" type="index" width="30" label="序号"></el-table-column>
@@ -389,7 +389,7 @@ var clueVM = new Vue({
                  if (cellValue == undefined) {
                     return "";
                  }
-                 return moment(cellValue).format("YYYY-MM-DD HH:mm:ss");
+                 return moment(cellValue).format("YYYY-MM-DD HH:mm");
                },
                //打开分发资源
                toAllocationClue() {
@@ -511,7 +511,9 @@ var clueVM = new Vue({
                    	
                    });
                  },// method end
-              
+                 showCustomerDetail(row, column){ // 客户详情
+                     window.open('/bus/BusinessCustomer/viewCustomerInfo?clueId='+row.clueId);
+                 },
               //根据电销组查询电销总监
               getSaleList() {
             	  var param ={};
