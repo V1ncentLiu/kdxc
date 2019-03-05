@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
@@ -52,10 +53,26 @@ public class TruckingOrderController {
      * @return
      */
     @RequestMapping("/truckingOrderPage")
-    public String visitRecordPage() {
+    public String visitRecordPage(HttpServletRequest request) {
+        //电销人员
+        List<UserInfoDTO> teleSaleList = getUserInfo(null, RoleCodeEnum.DXCYGW.name());
+        request.setAttribute("teleSaleList",teleSaleList);
         return "visit/truckingOrder";
     }
     
+    private List<UserInfoDTO> getUserInfo(Long orgId,String roleName){
+        UserOrgRoleReq req = new UserOrgRoleReq();
+        if(orgId!=null) {
+            req.setOrgId(orgId);
+        }
+        req.setRoleCode(roleName);
+        JSONResult<List<UserInfoDTO>> userJr = userInfoFeignClient.listByOrgAndRole(req);
+        if(userJr==null || !JSONResult.SUCCESS.equals(userJr.getCode())) {
+            logger.error("查询电销通话记录-获取组内顾问-userInfoFeignClient.listByOrgAndRole(req),param{{}},res{{}}",req,userJr);
+            return null;
+        } 
+        return userJr.getData();
+    }
     
     /**
      * 查询邀约来访派车单
