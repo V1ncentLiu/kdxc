@@ -308,13 +308,13 @@
                         </el-row>
                         <el-row>
                             <el-col :span="10">
-                                <el-form-item label="客户身份证号：" :label-width="formLabelWidth" prop="idCard">
-                                    <el-input v-model="formSigning.idCard" ></el-input>
+                                <el-form-item label="客户身份证号" :label-width="formLabelWidth" prop="idCard">
+                                    <el-input v-model="formSigning.idCard"  maxLength="20" ></el-input>
                                 </el-form-item>
                             </el-col>
                             <el-col :span="10">
                                 <el-form-item label="客户联系电话：" :label-width="formLabelWidth" prop="phone">
-                                    <el-input v-model="formSigning.phone"></el-input>
+                                    <el-input v-model="formSigning.phone" maxLength="11" ></el-input>
                                 </el-form-item>
                             </el-col>
                         </el-row>
@@ -441,14 +441,14 @@
                             </el-col>
                             <el-col :span="10">
                                 <el-form-item label="实收金额：" :label-width="formLabelWidth" prop="amountReceived">
-                                    <el-input v-model="formSigning.amountReceived"></el-input>
+                                    <el-input v-model="formSigning.amountReceived"  @change="setAddPerformanceAmount"></el-input>
                                 </el-form-item>
                             </el-col>
                         </el-row>
                         <el-row v-show="isAllMoney">
                             <el-col :span="10">
                                 <el-form-item label="余款金额：" :label-width="formLabelWidth" prop="amountBalance">
-                                    <el-input v-model="formSigning.amountBalance"></el-input>
+                                    <el-input v-model="formSigning.amountBalance" ></el-input>
                                 </el-form-item>
                             </el-col>
                             <el-col :span="10">
@@ -500,18 +500,21 @@
         data: {
             formLabelWidth:"150px",
             addVisitRecordDialogVisible:false,
-            dialogFormSigningVisible:false,
+            dialogFormSigningVisible:true,
             clueId:clueId,
             signArr:[{value:0,name:'未签约'},{value:1,name:'已签约'}],
             isSignArr:[{value:0,name:'否'},{value:1,name:'是'}],
             visitArr:[{value:0,name:'待处理'},{value:1,name:'未到访'},{value:2,name:'首次到访'},{value:3,name:'多次到访'}],
             visitTypeArr:[{value:1,name:'预约来访'},{value:2,name:'慕名来访'},{value:3,name:'临时来访'}],
+            option2s: [{value: 1, label: '一次性全款'},{value: 2, label: '先交订金'}],
+            option3s: [{value: '1', label: '现金'},{value: '2', label: 'POS'},{value: '3', label: '转账'}],
             vistitStoreTypeArr:[],
             provinceArr:[],
             districtArr:[],
             cityArr:[],
             companyArr:companySelect,
             projectArr:proSelect,
+            isAllMoney: false,
             addVisitRecord:{
                 clueId:clueId,
                 companyid:"",
@@ -567,7 +570,7 @@
                 signType:1,
                 giveAmount:'',
 
-                payType:1,
+                payType:"1",
                 payMode:'',
                 amountReceived: '',
                 amountBalance: '',
@@ -601,6 +604,9 @@
                     return fmt;
                 }
                 return dateFtt("yyyy-MM-dd hh:mm", new Date(row.vistitTime));
+            },
+            setAddPerformanceAmount(value){
+                this.formSigning.performanceAmount = this.formSigning.amountReceived
             },
             openEditVisitRecord(row){
                 // 打开编辑到访记录
@@ -638,7 +644,7 @@
                                             mainDivVM.initList();
                                             mainDivVM.addVisitRecordDialogVisible = false;
                                             //  弹出签约单添加弹窗
-
+                                            mainDivVM.dialogFormSigningVisible = true;
                                         }});
                                 } else {
                                     mainDivVM.$message.error(response.data.msg);
@@ -659,6 +665,28 @@
                   //   document.getElementById("goSignButton").setAttribute("style","display:block")
                 }
             },
+            submitForm(formName) {
+                var param = this.formSigning;
+                // 设置 clueid
+                this.$refs[formName].validate((valid) => {
+                    if (valid) {
+                        axios.post("/businesssign/insert", param)
+                            .then(function (response) {
+                                if (response.data.code == 0) {
+                                    mainDivVM.$message({type: 'success', message: '签约单保存成功!',duration:2000,onClose:function(){
+                                            // mainDivVM.pager.pageNum = 1
+                                            // mainDivVM.initList();
+                                            mainDivVM.dialogFormSigningVisible = false;
+                                            // mainDivVM.formSigning.clueId = "";
+                                            window.location.href='/aggregation/businessMyCustomer/listPage';
+                                    }});
+                                } else {
+                                    mainDivVM.$message.error(response.data.msg);
+                                }
+                            }).catch(function (error) {console.log(error);});
+                    } else {return false;}
+                });
+            },
             currentProvince(selVal){
                 param={};
                 param.type="1";
@@ -678,6 +706,15 @@
             resetForm(formName) {
                 if( mainDivVM.$refs[formName]) {
                     mainDivVM.$refs[formName].resetFields();
+                }
+            },
+            selectSigningType(pa1) { //是不是全款
+                if( pa1=='1' ){
+                    this.formSigning.payType = '1';
+                    this.isAllMoney = false;
+                }else{
+                    this.formSigning.payType = '2';
+                    this.isAllMoney = true;
                 }
             },
             initList(){

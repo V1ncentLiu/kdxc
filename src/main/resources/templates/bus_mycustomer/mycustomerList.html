@@ -300,7 +300,7 @@
             </el-form>
 
             <div slot="footer" class="dialog-footer">
-                <el-button type="primary" id="goSignButton" @click="">去填写签约单</el-button>
+                <el-button type="primary" id="goSignButton" @click="goEditSign">去填写签约单</el-button>
                 <el-button type="primary" @click="saveVisitRecord">提交</el-button>
                 <el-button  @click="addVisitRecordDialogVisible = false">取消</el-button>
             </div>
@@ -622,12 +622,12 @@
                 <el-row>
                     <el-col :span="10">
                         <el-form-item label="客户身份证号：" :label-width="formLabelWidth" prop="idCard">
-                            <el-input v-model="formSigning.idCard" ></el-input>
+                            <el-input v-model="formSigning.idCard" maxLength="20" ></el-input>
                         </el-form-item>
                     </el-col>
                     <el-col :span="10">
                         <el-form-item label="客户联系电话：" :label-width="formLabelWidth" prop="phone">
-                            <el-input v-model="formSigning.phone"></el-input>
+                            <el-input v-model="formSigning.phone" maxLength="11" ></el-input>
                         </el-form-item>
                     </el-col>
                 </el-row>
@@ -754,7 +754,7 @@
                     </el-col>
                     <el-col :span="10">
                         <el-form-item label="实收金额：" :label-width="formLabelWidth" prop="amountReceived">
-                            <el-input v-model="formSigning.amountReceived"></el-input>
+                            <el-input v-model="formSigning.amountReceived" @change="setAddPerformanceAmount"></el-input>
                         </el-form-item>
                     </el-col>
                 </el-row>
@@ -819,12 +819,12 @@
                     <el-row>
                         <el-col :span="10">
                             <el-form-item label="客户身份证号：" :label-width="formLabelWidth" prop="idCard">
-                                <el-input :disabled="notEditRebutSign" v-model="updateFormSigning.idCard" ></el-input>
+                                <el-input :disabled="notEditRebutSign" v-model="updateFormSigning.idCard"  maxLength="20" ></el-input>
                             </el-form-item>
                         </el-col>
                         <el-col :span="10">
                             <el-form-item label="客户联系电话：" :label-width="formLabelWidth" prop="phone">
-                                <el-input :disabled="notEditRebutSign" v-model="updateFormSigning.phone"></el-input>
+                                <el-input :disabled="notEditRebutSign" v-model="updateFormSigning.phone" maxLength="11" ></el-input>
                             </el-form-item>
                         </el-col>
                     </el-row>
@@ -953,7 +953,7 @@
                         </el-col>
                         <el-col :span="10">
                             <el-form-item label="实收金额：" :label-width="formLabelWidth" prop="amountReceived">
-                                <el-input v-model="updateFormSigning.amountReceived"></el-input>
+                                <el-input v-model="updateFormSigning.amountReceived" @change="setUpdatePerformanceAmount"></el-input>
                             </el-form-item>
                         </el-col>
                     </el-row>
@@ -1230,6 +1230,12 @@
                 }
                 return resVal;
             },
+            setAddPerformanceAmount(value){
+                this.formSigning.performanceAmount = this.formSigning.amountReceived
+            },
+            setUpdatePerformanceAmount(value){
+                    this.updateFormSigning.performanceAmount = this.updateFormSigning.amountReceived
+            },
             handleSelectionChange(val) {
                 this.multipleSelection = val;
             },
@@ -1482,6 +1488,26 @@
                         mainDivVM.updateVisitRecordDialogVisible = true;
                     }
                 })
+            },
+            goEditSign(){
+                var param = this.addVisitRecord;
+                this.$refs['addVisitRecord'].validate((valid) => {
+                    if (valid) {
+                        axios.post("/busVisitRecord/insert", param)
+                            .then(function (response) {
+                                if (response.data.code == 0) {
+                                    mainDivVM.$message({type: 'success', message: '来访记录保存成功!',duration:2000,onClose:function(){
+                                            mainDivVM.initList();
+                                            mainDivVM.addVisitRecordDialogVisible = false;
+                                            //  弹出签约单添加弹窗
+                                            mainDivVM.dialogFormSigningVisible = true;
+                                        }});
+                                } else {
+                                    mainDivVM.$message.error(response.data.msg);
+                                }
+                            }).catch(function (error) {console.log(error);});
+                    } else {return false;}
+                });
             },
             editSign(row){
                 this.formSigning.clueId=row.clueId;
