@@ -28,13 +28,13 @@ public enum MenuEnum {
      * 总裁办
      * 
      */
-	
+
     REPETITION("重单处理（总裁办）"), BUSINESSSIGNVALID("有效签约单确认"), BUSINESSSIGNREPETITION("付款明细重单审批确认（总裁办）"), PAYDETAILREPETITION("付款明细分配比例（总裁办）"),
     /**
      * 电销中心
      */
     SIGN_ORDER("签约记录")
-    
+
     ;
 
 

@@ -21,13 +21,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 import java.util.List;
 
 /**
- * 待分配新资源
+ *  商务 - 我的客户
  * 
- * @author: zhangxingyu
+ * @author yangbiao
  * @date: 2019年1月4日
  * @version V1.0
  */
-@FeignClient(name = "aggregation-service", path = "/aggregation/busmycustomer",
+@FeignClient(name = "aggregation-service-ooo1", path = "/aggregation/busmycustomer",
         fallback = BusMyCustomerFeignClient.HystrixClientFallback.class)
 public interface BusMyCustomerFeignClient {
 
@@ -38,7 +38,7 @@ public interface BusMyCustomerFeignClient {
     public JSONResult<List<BusMyCustomerRespDTO>> queryList(@RequestBody MyCustomerParamDTO param);
 
     @PostMapping("/notVisit")
-    public JSONResult<Boolean> queryList(@RequestBody BusMyCustomerReqDTO param);
+    public JSONResult<Boolean> notVisit(@RequestBody BusMyCustomerReqDTO param);
 
     @PostMapping("/notVisitReason")
     public JSONResult<ClueBasicDTO> notVisitReason(@RequestBody IdEntityLong idEntityLong);
@@ -66,7 +66,7 @@ public interface BusMyCustomerFeignClient {
         }
 
         @Override
-        public JSONResult<Boolean> queryList(BusMyCustomerReqDTO param) {
+        public JSONResult<Boolean> notVisit(BusMyCustomerReqDTO param) {
             return fallBackError("标记未到访");
         }
 

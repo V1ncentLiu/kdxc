@@ -4,12 +4,14 @@ import java.util.List;
 
 import com.kuaidao.aggregation.dto.sign.BusSignInsertOrUpdateDTO;
 import com.kuaidao.aggregation.dto.sign.BusSignRespDTO;
+import com.kuaidao.aggregation.dto.sign.PayDetailDTO;
 import com.kuaidao.common.entity.IdEntityLong;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.netflix.feign.FeignClient;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -45,7 +47,20 @@ public interface BusinessSignFeignClient {
 	@RequestMapping(method = RequestMethod.POST, value = "/updateBusinessSignDTOValidByIds")
 	public JSONResult updateBusinessSignDTOValidByIds(@RequestBody BusinessSignDTO businessSignDTO);
 
+	/**
+	 * 重单处理列表
+	 *
+	 * @param menuDTO
+	 * @return
+	 */
+	@PostMapping("/businessSignDealList")
+	public JSONResult<PageBean<BusinessSignDTO>> businessSignDealList(@RequestBody BusinessSignDTO businessSignDTO);
 
+	@PostMapping("/repeatPaymentDetails")
+	public JSONResult<BusinessSignDTO> repeatPaymentDetails(@RequestBody BusinessSignDTO businessSignDTO);
+
+	@PostMapping("/getPaymentDetailsById")
+	public JSONResult<PayDetailDTO> getPaymentDetailsById(@RequestBody PayDetailDTO detailDTO);
 	@RequestMapping("/insert")
 	public JSONResult<Boolean> saveSign(@Valid @RequestBody BusSignInsertOrUpdateDTO dto);
 
@@ -95,6 +110,20 @@ public interface BusinessSignFeignClient {
 			return fallBackError("查询签约单明细");
 		}
 
+		@Override
+		public JSONResult<PageBean<BusinessSignDTO>> businessSignDealList(BusinessSignDTO businessSignDTO) {
+			return fallBackError("查询签约重单列表失败");
+		}
+
+		@Override
+		public JSONResult<BusinessSignDTO> repeatPaymentDetails(BusinessSignDTO businessSignDTO) {
+			return fallBackError("查询签约重单详情失败");
+		}
+
+		@Override
+		public JSONResult<PayDetailDTO> getPaymentDetailsById(PayDetailDTO detailDTO) {
+			return fallBackError("根据id查询付款明细详情失败");
+		}
 
 	}
 }

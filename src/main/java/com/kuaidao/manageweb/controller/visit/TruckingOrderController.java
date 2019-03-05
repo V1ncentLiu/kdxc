@@ -33,7 +33,7 @@ import com.kuaidao.sys.dto.user.UserOrgRoleReq;
 /**
  * 邀約來訪派車單
  * @author  Chen
- * @date 2019年3月5日 上午9:09:07   
+ * @date 2019年3月5日 上午9:09:07
  * @version V1.0
  */
 @Controller
@@ -41,13 +41,13 @@ import com.kuaidao.sys.dto.user.UserOrgRoleReq;
 public class TruckingOrderController {
     
     private static Logger logger = LoggerFactory.getLogger(TruckingOrderController.class);
-    
+
     @Autowired
     TrackingOrderFeignClient trackingOrderFeignClient;
-    
+
     @Autowired
     UserInfoFeignClient userInfoFeignClient;
-    
+
     /**
      * 邀約來訪派車單
      * @return
@@ -59,7 +59,7 @@ public class TruckingOrderController {
         request.setAttribute("teleSaleList",teleSaleList);
         return "visit/truckingOrder";
     }
-    
+
     private List<UserInfoDTO> getUserInfo(Long orgId,String roleName){
         UserOrgRoleReq req = new UserOrgRoleReq();
         if(orgId!=null) {
@@ -70,10 +70,10 @@ public class TruckingOrderController {
         if(userJr==null || !JSONResult.SUCCESS.equals(userJr.getCode())) {
             logger.error("查询电销通话记录-获取组内顾问-userInfoFeignClient.listByOrgAndRole(req),param{{}},res{{}}",req,userJr);
             return null;
-        } 
+        }
         return userJr.getData();
     }
-    
+
     /**
      * 查询邀约来访派车单
      * @param reqDTO
@@ -102,18 +102,18 @@ public class TruckingOrderController {
                     List<Long> idList = userInfoDTOList.stream().map(UserInfoDTO::getId).collect(Collectors.toList());
                     reqDTO.setBusDirectorIdList(idList);
                 }
-                
+
             }else if(RoleCodeEnum.SWZJ.value().equals(roleName)){//商务总监
                 List<Long> idList = new ArrayList<>();
                 idList.add(curLoginUser.getId());
                 reqDTO.setBusDirectorIdList(idList);
             }
         }*/
-         
+
          return trackingOrderFeignClient.listTrackingOrder(reqDTO) ;
      }
     
-  
+    
 
     
     

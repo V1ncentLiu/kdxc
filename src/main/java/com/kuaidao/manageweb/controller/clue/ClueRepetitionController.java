@@ -8,6 +8,9 @@ import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 
+import com.kuaidao.aggregation.dto.sign.BusinessSignDTO;
+import com.kuaidao.aggregation.dto.sign.PayDetailDTO;
+import com.kuaidao.manageweb.feign.sign.BusinessSignFeignClient;
 import org.apache.shiro.SecurityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,8 +24,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.kuaidao.aggregation.dto.clue.ClueRepetitionDTO;
 import com.kuaidao.aggregation.dto.project.ProjectInfoDTO;
 import com.kuaidao.aggregation.dto.project.ProjectInfoPageParam;
-import com.kuaidao.aggregation.dto.sign.BusinessSignDTO;
-import com.kuaidao.aggregation.dto.sign.PayDetailDTO;
 import com.kuaidao.common.constant.OrgTypeConstant;
 import com.kuaidao.common.constant.RoleCodeEnum;
 import com.kuaidao.common.constant.SystemCodeConstant;
@@ -35,7 +36,6 @@ import com.kuaidao.manageweb.feign.area.SysRegionFeignClient;
 import com.kuaidao.manageweb.feign.clue.ClueRepetitionFeignClient;
 import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
 import com.kuaidao.manageweb.feign.project.ProjectInfoFeignClient;
-import com.kuaidao.manageweb.feign.sign.BusinessSignFeignClient;
 import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
 import com.kuaidao.sys.dto.area.SysRegionDTO;
 import com.kuaidao.sys.dto.organization.OrganizationDTO;
@@ -67,10 +67,10 @@ public class ClueRepetitionController {
     private ProjectInfoFeignClient projectInfoFeignClient;
 	
 	@Autowired
-	private SysRegionFeignClient sysRegionFeignClient;
-	
+    SysRegionFeignClient sysRegionFeignClient;
+
 	@Autowired
-	private BusinessSignFeignClient businessSignFeignClient;
+	BusinessSignFeignClient businessSignFeignClient;
 	
 	 /**
      *  重单列表页面
@@ -79,7 +79,7 @@ public class ClueRepetitionController {
      */
     @RequestMapping("/queryRepeatPage")
     public String queryRepeatPage(HttpServletRequest request) {
-		return "clue/repetition/customerrePetitionList";
+		return "clue/repetition/customerreP/etitionList";
     }
     
     /**
@@ -221,19 +221,19 @@ public class ClueRepetitionController {
     } 
     
     /**
-     * 签约重单处理列表
+     * 重单处理列表
      * 
      * @return
      */
     @RequestMapping("/businessSignDealList")
     @ResponseBody
-    public JSONResult<PageBean<BusinessSignDTO>> businessSignDealList(HttpServletRequest request,@RequestBody BusinessSignDTO businessSignDTO) {
-    	JSONResult<PageBean<BusinessSignDTO>> list = businessSignFeignClient.businessSignDealList(businessSignDTO);
+    public JSONResult<PageBean<ClueRepetitionDTO>> businessSignDealList(HttpServletRequest request,@RequestBody ClueRepetitionDTO clueRepetitionDTO) {
+    	JSONResult<PageBean<ClueRepetitionDTO>> list = clueRepetitionFeignClient.dealPetitionList(clueRepetitionDTO);
     	return list;
     }
     /**
      * 签约重单审核
-     * 
+     *
      * @return
      */
    /* @RequestMapping("/updateBusinessPetitionById")
@@ -242,10 +242,10 @@ public class ClueRepetitionController {
     public JSONResult updatePetitionById(HttpServletRequest request,@RequestBody ClueRepetitionDTO clueRepetitionDTO) {
     	return clueRepetitionFeignClient.updatePetitionById(clueRepetitionDTO);
     }*/
-    
+
     /**
      *  重单处理列表页面
-     * 
+     *
      * @return
      */
     @RequestMapping("/repeatPaymentDetails")
@@ -256,20 +256,20 @@ public class ClueRepetitionController {
     	request.setAttribute("businessSignDetail", jsonResult.getData());
     	request.setAttribute("signId", signId);
 		return "clue/repetition/repeatPaymentDetails";
-    } 
-    
+    }
+
     /**
      *  重单处理列表页面
-     * 
+     *
      * @return
      */
     @RequestMapping("/getPaymentDetailsById")
     @ResponseBody
     public JSONResult<PayDetailDTO> getPaymentDetailsById(HttpServletRequest request, @RequestBody PayDetailDTO payDetailDTO) {
 		return businessSignFeignClient.getPaymentDetailsById(payDetailDTO);
-    } 
-    
-    
+    }
+
+
     @RequestMapping("/updatePayDetailById")
     @ResponseBody
     @LogRecord(description = "付款明细重单比例修改",operationType = LogRecord.OperationType.UPDATE,menuName = MenuEnum.PAYDETAILREPETITION)
@@ -278,6 +278,6 @@ public class ClueRepetitionController {
     	payDetailDTO.setLoginUserId(user.getId());
     	return clueRepetitionFeignClient.updatePayDetailById(payDetailDTO);
     }
-    
+
 
 }
