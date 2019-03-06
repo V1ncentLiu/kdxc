@@ -30,8 +30,6 @@ public class BusScheduleController {
 
     /**
      * 到访记录提醒（定时任务）
-     * 
-     * @param orgDTO
      * @return
      */
     @PostMapping("/visitRecordReminder")
@@ -45,8 +43,6 @@ public class BusScheduleController {
 
     /**
      * 签约记录提醒（定时任务）
-     * 
-     * @param orgDTO
      * @return
      */
     @PostMapping("/signRecordReminder")
@@ -56,6 +52,31 @@ public class BusScheduleController {
     public void signRecordReminder() {
 
         busScheduleFeignClient.signRecordReminder();
+    }
+
+
+    /**
+     * 到访记录(商务经理)提醒（定时任务）
+     * @return
+     */
+    @PostMapping("/visitRecordToBusSaleReminder")
+    @ResponseBody
+    @LogRecord(description = "到访记录(商务经理)提醒", operationType = OperationType.SCHEDULE,
+            menuName = MenuEnum.INDEX)
+    public void visitRecordToBusSaleReminder() {
+        busScheduleFeignClient.notVisitRecordReminder();
+    }
+
+    /**
+     * 签约记录(商务经理)提醒（定时任务）
+     * @return
+     */
+    @PostMapping("/signRecordToSaleIdReminder")
+    @ResponseBody
+    @LogRecord(description = "签约记录(商务经理)提醒", operationType = OperationType.SCHEDULE,
+            menuName = MenuEnum.INDEX)
+    public void signRecordToSaleIdReminder() {
+        busScheduleFeignClient.signRecordToSaleIdReminder();
     }
 
 
