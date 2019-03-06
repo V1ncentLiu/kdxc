@@ -54,6 +54,10 @@ public class Constants {
     public static String CATERING_EXPERIENCE = "CateringExperience";
     // 到访店型字典Code
     public static String VISTIT_STORE_TYPE = "vistitStoreType";
+    // 店铺面积字典Code
+    public static String STOREFRONT_AREA = "StorefrontArea";
+    // 投资金额字典Code
+    public static String USSM = "ussm";
 
 
 }
