@@ -10,7 +10,7 @@ var myCallRecordVm = new Vue({
         totalTalkTime:0,
         callRecordData:[],
         callStatus:[{
-            value: "",
+            value: "-1",
             label: '全部'
         }, {
             value: "1",
@@ -20,7 +20,7 @@ var myCallRecordVm = new Vue({
             label: '未接通'
         }],
         callTypeList:[{
-            value: "",
+            value: "-1",
             label: '全部'
         },{
             value: "1",
@@ -54,7 +54,14 @@ var myCallRecordVm = new Vue({
                      return;
                  }
     		}
-    		
+    		 var callStatus = this.searchForm.callStatus;
+    		 if(callStatus=='-1'){
+    			 this.searchForm.callStatus='';
+    		 }
+    		 var callType = this.searchForm.callType;
+    		 if(callType=='-1'){
+    			 this.searchForm.callType='';
+    		 }
     		 var param = this.searchForm;
         	 param.pageNum=this.pager.currentPage;
         	 param.pageSize=this.pager.pageSize;

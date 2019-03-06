@@ -121,7 +121,7 @@ public class CallRecordController {
     @ResponseBody
     public JSONResult<Map<String,Object>> listAllTmCallRecord(@RequestBody CallRecordReqDTO myCallRecordReqDTO) {
       //根据角色查询  下属顾问
-        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+       UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
         Long orgId = curLoginUser.getOrgId();
         List<RoleInfoDTO> roleList = curLoginUser.getRoleList();
         if(roleList!=null && roleList.size()!=0) {

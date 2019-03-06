@@ -11,19 +11,19 @@ var myCallRecordVm = new Vue({
         callRecordData:[],
         callStatus:[
           {
-                value: "",
+                value: "-1",
                 label: '全部'
           },
         {
             value: "1",
-            label: '接通'
+            label: '未接通'
         }, {
             value: "0",
             label: '已接通'
         }],
         callTypeList:[
         	{
-                value: "",
+                value: "-1",
                 label: '全部'
             },{
             value: "1",
@@ -63,7 +63,14 @@ var myCallRecordVm = new Vue({
                  }
     			 
     		 }
-    		 
+    		 var callStatus = this.searchForm.callStatus;
+    		 if(callStatus=='-1'){
+    			 this.searchForm.callStatus='';
+    		 }
+    		 var callType = this.searchForm.callType;
+    		 if(callType=='-1'){
+    			 this.searchForm.callType='';
+    		 }
     		 var param = this.searchForm;
     		 var accountId =this.searchForm.accountId;
     		 if(accountId){

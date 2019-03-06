@@ -491,12 +491,12 @@ var homePageVM=new Vue({
         	}
         },
         openOutboundDialog(){//打开主动外呼diaolog 
-        	this.outboundInputPhone="";
         	this.dialogOutboundVisible = true;
         	if(this.outboundDialogMin){//代表上次点击的是最小化
-        		//$("#outboundCallTimeDiv").show();
+        		$("#outboundCallTimeDiv").show();
         	}else{
         		$('#outboundCallTime').html("");
+        		this.outboundInputPhone="";
         	}
         	this.outboundDialogMin = false;
         	
@@ -505,8 +505,8 @@ var homePageVM=new Vue({
         	//清除计时器
         	clearTimer();
         	this.dialogOutboundVisible = false;
-        	this.outboundDialogMin=false;
-        	if(!this.outboundDialogMin){//如果是最小化就不执行这个代码
+        	//this.outboundDialogMin=false;
+        	if(this.outboundDialogMin){//如果是最小化就不执行这个代码
         		return;
         	}else{
         		$('#outboundCallTime').html("");
