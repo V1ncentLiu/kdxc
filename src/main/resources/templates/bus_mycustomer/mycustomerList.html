@@ -118,7 +118,7 @@
             <el-table-column  prop="allocateTime" label="接收客户时间" sortable align="center"></el-table-column>
             <el-table-column  prop="" label="到访情况" :formatter="formatVisit" align="center">
                 <template slot-scope="scope">
-                    <el-button size="mini"  v-if="(scope.row.visitStatus == -1||scope.row.visitStatus == null)&& scope.row.visitAuditStatus==null" type="text" @click="openEditVisitRecord(scope.row)">添加到访信息</el-button>
+                    <el-button size="mini"  v-if="scope.row.visitStatus == -1||scope.row.visitStatus == null" type="text" @click="openEditVisitRecord(scope.row)">添加到访信息</el-button>
                     <el-button size="mini"  v-else-if="scope.row.visitStatus==0" type="text" @click="showNotVisitReason(scope.row)">未到访(原因)</el-button>
                     <el-button size="mini"  v-else-if="scope.row.visitAuditStatus==1" type="text" @click="showVisitRecord(scope.row)">到访审核中</el-button>
                     <el-button size="mini"  v-else-if="scope.row.visitAuditStatus==0" type="text" style="color: red" @click="editRebutVisitRecord(scope.row)">到访被驳回</el-button>
@@ -198,7 +198,7 @@
                     <el-col :span="10">
                         <el-form-item label="考察公司"  :label-width="formLabelWidth"  prop="companyid">
                             <el-select v-model="addVisitRecord.companyid" placeholder="考察公司"  clearable >
-                                <el-option v-for="item in companyArr" :key="item.id" :label="item.companyName" :value="item.id"></el-option>
+                                <el-option v-for="item in companyArr" :key="item.id" :label="item.name" :value="item.id"></el-option>
                             </el-select>
                         </el-form-item>
                     </el-col>
@@ -322,7 +322,7 @@
                     <el-col :span="10">
                         <el-form-item label="考察公司"  :label-width="formLabelWidth"  prop="companyid">
                             <el-select v-model="updateVisitRecord.companyid" placeholder="考察公司"  clearable >
-                                <el-option v-for="item in companyArr" :key="item.id" :label="item.companyName" :value="item.id"></el-option>
+                                <el-option v-for="item in companyArr" :key="item.id" :label="item.name" :value="item.id"></el-option>
                             </el-select>
                         </el-form-item>
                     </el-col>
@@ -635,7 +635,7 @@
                     <el-col :span="10">
                         <el-form-item label="签约餐饮公司：" :label-width="formLabelWidth" prop="signCompanyId">
                             <el-select v-model="formSigning.signCompanyId" placeholder="请选择签约餐饮公司">
-                                <el-option v-for="item in companyArr" :key="item.id" :label="item.companyName" :value="item.id"></el-option>
+                                <el-option v-for="item in companyArr" :key="item.id" :label="item.name" :value="item.id"></el-option>
                             </el-select>
                         </el-form-item>
                     </el-col>
@@ -832,7 +832,7 @@
                         <el-col :span="10">
                             <el-form-item label="签约餐饮公司：" :label-width="formLabelWidth" prop="signCompanyId">
                                 <el-select :disabled="notEditRebutSign" v-model="updateFormSigning.signCompanyId" placeholder="请选择签约餐饮公司">
-                                    <el-option v-for="item in companyArr" :key="item.id" :label="item.companyName" :value="item.id"></el-option>
+                                    <el-option v-for="item in companyArr" :key="item.id" :label="item.name" :value="item.id"></el-option>
                                 </el-select>
                             </el-form-item>
                         </el-col>
@@ -1051,7 +1051,7 @@
             provinceArr:[],
             districtArr:[],
             cityArr:[],
-            companyArr:companySelect,
+            companyArr:[],
             projectArr:proSelect,
             multipleSelection:[],
             rules:{},
@@ -1391,9 +1391,14 @@
             },
             openEditVisitRecord(row){
                // 打开编辑到访记录
-                this.addVisitRecord.clueId=row.clueId;
-                this.addVisitRecordDialogVisible = true;
-                this.addVisitRecord.vistitTime = new Date()
+                var param ={};
+                param.id = row.clueId;
+                axios.post('/busVisitRecord/echo',param).then(function (response) {
+                    mainDivVM.addVisitRecord = response.data.data;
+                    mainDivVM.addVisitRecord.clueId=row.clueId;
+                    mainDivVM.addVisitRecord.vistitTime = new Date()
+                    mainDivVM.addVisitRecordDialogVisible = true;
+                });
             },
             showNotVisitReason(row){
                 // 展示未到访原因
@@ -1508,7 +1513,9 @@
                                             mainDivVM.initList();
                                             mainDivVM.addVisitRecordDialogVisible = false;
                                             //  弹出签约单添加弹窗
-                                            mainDivVM.dialogFormSigningVisible = true;
+                                           // mainDivVM.formSigning.clueId = mainDivVM.addVisitRecord.clueId;
+                                           // mainDivVM.dialogFormSigningVisible = true;
+                                            mainDivVM.editSign(mainDivVM.addVisitRecord)
                                         }});
                                 } else {
                                     mainDivVM.$message.error(response.data.msg);
@@ -1518,8 +1525,15 @@
                 });
             },
             editSign(row){
-                this.formSigning.clueId=row.clueId;
-                this.dialogFormSigningVisible = true;
+                // this.formSigning.clueId=row.clueId;
+                // this.dialogFormSigningVisible = true;
+                var param = {};
+                param.id = row.clueId;
+                axios.post('/businesssign/echo',param).then(function (response) {
+                    mainDivVM.formSigning = response.data.data;
+                    mainDivVM.formSigning.clueId=row.clueId;
+                    mainDivVM.dialogFormSigningVisible = true;
+                });
             },
             showSignDetail(row){
 
@@ -1646,13 +1660,12 @@
                 mainDivVM.provinceArr=response.data.data.data;
             });
 
-            // 考察公司  考察公司
+            //考察公司
             param={};
-            axios.post('/aggregation/businessMyCustomer/listNoPage',param).then(function (response) {
-                mainDivVM.listNoPage=response.data.data.data;
+            param.orgType="2";
+            axios.post('/organization/organization/queryOrgByType',param).then(function (response) {
+                mainDivVM.companyArr=response.data.data;
             });
-
-
         }
     });
 

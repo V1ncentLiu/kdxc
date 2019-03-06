@@ -58,12 +58,13 @@ public class BusinessMyCustomerController {
     @RequestMapping("/listPage")
     public String listPage(HttpServletRequest request){
         logger.info("------------ 商务：我的客户列表 ---------------");
+        UserInfoDTO user = CommUtil.getCurLoginUser();
         //电销组
         List teleGroupList = new ArrayList();
         List teleSaleList = new ArrayList();
         List tasteProList = new ArrayList();
-
         MyCustomerParamDTO dto = new MyCustomerParamDTO();
+        dto.setBusSaleId(user.getId());
         JSONResult<List<BusMyCustomerRespDTO>> resList = busMyCustomerFeignClient.queryList(dto);
         if(JSONResult.SUCCESS.equals(resList.getCode())){
             List<BusMyCustomerRespDTO> datas = resList.getData();

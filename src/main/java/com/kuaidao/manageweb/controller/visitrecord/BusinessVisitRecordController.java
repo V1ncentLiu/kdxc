@@ -28,7 +28,9 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author yangbiao
@@ -151,7 +153,34 @@ public class BusinessVisitRecordController {
     public JSONResult<BusVisitRecordRespDTO> echo(@RequestBody IdEntityLong idEntityLong) throws Exception {
         BusVisitRecordRespDTO recordRespDTO = new BusVisitRecordRespDTO();
 //      查询需要进行回显的信息，并进行映射
-
+        /**
+         * 考察公司： 分公司
+         * 到访时间： 预约时间
+         * 客户姓名： 线索-客户姓名
+         * 考察项目： 品尝项目
+         * 签约省份： 投资意向信息- 省份
+         * 签约城市： 投资意向信息- 城市
+         * 签约区县： 投资意向信息- 区县
+         * 来访城市： 派车单-城市
+         * 到访人数： 派车单-客户人数
+         */
+        JSONResult<Map> mapJSONResult = visitRecordFeignClient.echoAppoinment(idEntityLong);
+        if(JSONResult.SUCCESS.equals(mapJSONResult.getCode())){
+            Map data = mapJSONResult.getData();
+            if(data!=null){
+                recordRespDTO.setCompanyid((Long)data.get("busCompany"));
+                recordRespDTO.setVistitTime(new Date((Long)data.get("arrivalTime")));
+                recordRespDTO.setCustomerName((String)data.get("cusName"));
+//                recordRespDTO.setProjectId((String)data.get("tasteProjectId"));
+                recordRespDTO.setSignProvince((String)data.get("signProvince"));
+                recordRespDTO.setSignCity((String)data.get("signCity"));
+                recordRespDTO.setSignDistrict((String)data.get("signDistrict"));
+                recordRespDTO.setVisitCity((String)data.get("city"));
+                recordRespDTO.setVisitPeopleNum((Integer)data.get("cusNum"));
+                recordRespDTO.setVisitType(1);
+                recordRespDTO.setIsSign(1);
+            }
+        }
         return new JSONResult<BusVisitRecordRespDTO>().success(recordRespDTO);
     }
 
