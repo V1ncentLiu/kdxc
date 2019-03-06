@@ -247,9 +247,9 @@ public class LoginController {
                         }).start();
                         // 判断累计次数
                         List<LoginRecordDTO> findList2 = findLoginRecordList(username, null,
-                                new Date(date.getTime() - 300000), date, null, SysConstant.YES);
-                        // 5分钟内大于等于4次 ，加上这次共5次锁定账号
-                        if (findList2 != null && findList2.size() >= 4) {
+                                new Date(date.getTime() - 1800000), date, null, SysConstant.YES);
+                        // 30分钟内互踢6次 ，加上这次共6次锁定账号
+                        if (findList2 != null && findList2.size() >= 5) {
                             // 锁定账号
                             UserInfoReq lock = new UserInfoReq();
                             lock.setId(user.getId());
