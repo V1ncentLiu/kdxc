@@ -7,6 +7,7 @@ import org.springframework.cloud.netflix.feign.FeignClient;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import com.kuaidao.aggregation.dto.clue.AppiontmentCancelDTO;
 import com.kuaidao.aggregation.dto.clue.ClueAppiontmentDTO;
 import com.kuaidao.aggregation.dto.clue.ClueAppiontmentPageParam;
 import com.kuaidao.aggregation.dto.clue.ClueAppiontmentReq;
@@ -65,7 +66,6 @@ public interface AppiontmentFeignClient {
     public JSONResult<List<ClueRepeatPhoneDTO>> repeatPhonelist(
             @RequestBody ClueAppiontmentReq param);
 
-
     /**
      * 修改预约来访信息
      * 
@@ -75,13 +75,29 @@ public interface AppiontmentFeignClient {
     @PostMapping("/update")
     public JSONResult<String> update(@RequestBody ClueAppiontmentReq req);
 
+    /**
+     * 查询取消邀约来访数据
+     * 
+     * @param dto
+     * @return
+     */
+    @PostMapping("/findCancelList")
+    public JSONResult<List<ClueAppiontmentDTO>> findCancelList(
+            @RequestBody AppiontmentCancelDTO dto);
 
+    /**
+     * 取消预约来访
+     * 
+     * @param dto
+     * @return
+     */
+    @PostMapping("/cancelAppiontment")
+    public JSONResult<String> cancelAppiontment(@RequestBody AppiontmentCancelDTO dto);
 
     @Component
     static class HystrixClientFallback implements AppiontmentFeignClient {
 
         private static Logger logger = LoggerFactory.getLogger(AppiontmentFeignClient.class);
-
 
         private JSONResult fallBackError(String name) {
             logger.error(name + "接口调用失败：无法获取目标服务");
@@ -99,12 +115,10 @@ public interface AppiontmentFeignClient {
             return fallBackError("删除预约来访信息");
         }
 
-
         @Override
         public JSONResult<String> update(@RequestBody ClueAppiontmentReq req) {
             return fallBackError("修改预约来访信息");
         }
-
 
         @Override
         public JSONResult<PageBean<ClueAppiontmentDTO>> list(
@@ -118,9 +132,17 @@ public interface AppiontmentFeignClient {
             return fallBackError("查询重复手机号资源");
         }
 
+        @Override
+        public JSONResult<String> cancelAppiontment(AppiontmentCancelDTO dto) {
+            // TODO Auto-generated method stub
+            return fallBackError("取消预约来访");
+        }
 
-
+        @Override
+        public JSONResult<List<ClueAppiontmentDTO>> findCancelList(AppiontmentCancelDTO dto) {
+            // TODO Auto-generated method stub
+            return fallBackError("查询取消预约来访数据");
+        }
     }
-
 
 }

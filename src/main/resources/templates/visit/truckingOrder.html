@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html>
+
+<head th:include="_header_include::frag(~{::title},~{},~{})">
+    <title>邀约来访派车单</title>
+    <style>
+        button a{color:#fff!important;}
+    </style>
+</head>
+<body>
+<div id="truckingOrder" class="truckingOrder mainPadding" style="display: none;">  
+    <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
+        <el-breadcrumb-item>Home</el-breadcrumb-item>
+        <el-breadcrumb-item>商务管理</el-breadcrumb-item>
+        <el-breadcrumb-item>邀约来访派车单</el-breadcrumb-item>
+    </el-breadcrumb>
+    <el-row class="marginB10">
+       <shiro:hasPermission name=" aggregation:truckingOrder:export">
+          <el-button type="primary" @click="exportFun()">导出</el-button>
+       </shiro:hasPermission>
+    </el-row>
+    <el-row class="marginB10 greybg padding20" style="padding-bottom: 0">        
+        <el-form :inline="true" :model="form" ref="form">                       
+            <el-form-item label="邀约来访时间:">
+                <el-date-picker
+                    style="width: 100%;"
+                    v-model="form.reserveStartTime"
+                    type="datetime"
+                    format="yyyy-MM-dd hh:mm"
+                    placeholder="选择日期时间">
+                </el-date-picker>
+            </el-form-item>
+            <el-form-item label="——">
+                <el-date-picker
+                    style="width: 100%;"
+                    v-model="form.reserveEndTime"
+                    type="datetime"
+                    format="yyyy-MM-dd hh:mm"
+                    placeholder="选择日期时间">
+                </el-date-picker>
+            </el-form-item>
+            <el-form-item label="申请提交时间:">
+                <el-date-picker
+                    style="width: 100%;"
+                    v-model="form.submitStartTime"
+                    type="datetime"
+                    format="yyyy-MM-dd hh:mm"
+                    placeholder="选择日期时间">
+                </el-date-picker>
+            </el-form-item>
+            <el-form-item label="——">
+                <el-date-picker
+                    style="width: 100%;"
+                    v-model="form.submitEndTime"
+                    type="datetime"
+                    format="yyyy-MM-dd hh:mm"
+                    placeholder="选择日期时间">
+                </el-date-picker>
+            </el-form-item>
+            <el-form-item label="到站时间:">
+                <el-date-picker
+                    style="width: 100%;"
+                    v-model="form.arrivalStartTime"
+                    type="datetime"
+                    format="yyyy-MM-dd hh:mm"
+                    placeholder="选择日期时间">
+                </el-date-picker>
+            </el-form-item>
+            <el-form-item label="——">
+                <el-date-picker
+                    style="width: 100%;"
+                    v-model="form.arrivalEndTime"
+                    type="datetime"
+                    format="yyyy-MM-dd hh:mm"
+                    placeholder="选择日期时间">
+                </el-date-picker>
+            </el-form-item>
+            <el-form-item label="">  
+                <el-select v-model="form.accountId" placeholder="创业顾问" style="width: 100%;" clearable>
+                    <el-option
+                        v-for="item in accountIdList"
+                        :key="item.id"
+                        :label="item.name"
+                        :value="item.id">
+                    </el-option>
+                </el-select>
+            </el-form-item> 
+            <el-form-item label="">
+                <el-input v-model="form.customerPhone" placeholder="客户手机号"></el-input>
+            </el-form-item>
+            <el-form-item label="">
+                <el-input v-model="form.customerName" placeholder="请输入客户姓名"></el-input>
+            </el-form-item>
+            <el-button type="primary" @click="initSignRecordData">搜索</el-button>
+        </el-form>       
+    </el-row>
+    <el-row>
+        <el-table 
+            ref="dataTable" 
+            tooltip-effect="dark" 
+            style="width: 100%" 
+            border 
+            v-loading="loading" 
+            :data="dataTable" 
+            >
+            <el-table-column align="center" type="index" label="序号" width="55"></el-table-column>
+            <el-table-column align="center" prop="reserveTime" label="邀约来访时间" width="170" :formatter="dateFormat" sortable></el-table-column>
+            <el-table-column align="center" prop="busDirectorName" label="商务总监" width="150"></el-table-column>
+            <el-table-column align="center" prop="busCompanyName" label="餐饮公司"></el-table-column>
+            <el-table-column align="center" prop="tasteProject" label="品尝项目"></el-table-column>
+            <el-table-column align="center" prop="createTime" label="申请提交时间"  width="170" :formatter="dateFormat" sortable></el-table-column>
+            <el-table-column align="center" prop="submitGroup" label="申请部门"></el-table-column>  
+            <el-table-column align="center" prop="accountPhone" label="顾问电话" width="120"></el-table-column> 
+            <el-table-column align="center" prop="customerName" label="客户姓名" width="150"></el-table-column> 
+            <el-table-column align="center" prop="cusNum" label="客户人数"></el-table-column>   
+            <el-table-column align="center" prop="cusPhone" label="客户手机号" width="150"></el-table-column>
+            <el-table-column align="center" prop="cusName" label="客户联系人姓名" width="150"></el-table-column> 
+            <el-table-column align="center" prop="arrivalTime" label="到站时间" width="170" :formatter="dateFormat" sortable></el-table-column>
+            <el-table-column align="center" prop="pickUpTime" label="出站时间"  width="170" :formatter="dateFormat"></el-table-column> 
+            <el-table-column align="center" prop="city" label="出车城市" width="170"></el-table-column> 
+            <el-table-column align="center" prop="pickUpTime" label="接站时间"  width="170" :formatter="dateFormat"></el-table-column>
+            <el-table-column align="center" prop="delayMark" label="延误说明"></el-table-column>
+            <el-table-column align="center" prop="flight" label="车次／航班" width="150"></el-table-column>
+            <el-table-column align="center" prop="pickUpPlace" label="接站地" width="150"></el-table-column>
+            <el-table-column align="center" prop="terminal" label="航站楼" width="150"></el-table-column>
+            <el-table-column align="center" prop="receivedPlace" label="接到地（酒店／公司）" width="200"></el-table-column>
+        </el-table>
+         <table-pagination :pager="pager" @change="initSignRecordData"></table-pagination>
+    </el-row>
+</div>
+<!-- import Vue before Element -->
+<div th:include="_footer_include :: #jsLib"></div>
+<script th:inline="javascript">
+    var accountIdList = [[${teleSaleList}]];
+</script>
+
+</body>
+
+<script>
+ var signRecordVM = new Vue({
+        el: '#truckingOrder',
+        data: function() {
+            return {
+            	loading: true,
+                form: {
+                	reserveStartTime:'',
+                    reserveEndTime:'',
+                    submitStartTime:'',
+                    submitEndTime:'',
+                    arrivalStartTime:'',
+                    arrivalEndTime:'',
+                    accountId:'',
+                    customerPhone:'',
+                    customerName:'',
+                },
+                formLabelWidth: '150px',
+                dataTable:[],
+                accountIdList:accountIdList,
+                pager:{//
+                    total: 0,
+                    currentPage: 1,
+                    pageSize: 20,
+                }
+            }        	  
+        },
+        methods: {
+            initSignRecordData(){            	
+                var reserveStartTime = this.form.reserveStartTime;
+                var reserveEndTime = this.form.reserveEndTime;
+                var submitStartTime = this.form.submitStartTime;
+                var submitEndTime = this.form.submitEndTime;
+                var arrivalStartTime = this.form.arrivalStartTime;
+                var arrivalEndTime = this.form.arrivalEndTime;
+                var startTimestamp = Date.parse(new Date(reserveStartTime));
+                if(reserveEndTime){
+                    var endTimestamp = new Date(reserveEndTime);
+                    if(startTimestamp> endTimestamp){
+                        this.$message({
+                            message: '开始时间不能大于结束时间',
+                            type: 'warning'
+                          });
+                        return;
+                    }
+                }
+                var startTimestamp2 = Date.parse(new Date(submitStartTime));
+                if(submitEndTime){
+                    var endTimestamp2 = new Date(submitEndTime);
+                    if(startTimestamp2> endTimestamp2){
+                        this.$message({
+                            message: '开始时间不能大于结束时间',
+                            type: 'warning'
+                          });
+                        return;
+                    }
+                }
+                var startTimestamp3 = Date.parse(new Date(arrivalStartTime));
+                if(arrivalEndTime){
+                    var endTimestamp3 = new Date(arrivalEndTime);
+                    if(startTimestamp3> endTimestamp3){
+                        this.$message({
+                            message: '开始时间不能大于结束时间',
+                            type: 'warning'
+                          });
+                        return;
+                    }
+                }
+            	 var param = this.form;
+                 param.pageNum=this.pager.currentPage;
+                 param.pageSize=this.pager.pageSize;
+                 axios.post('/truckingOrder/listTrackingOrder',param)
+                 .then(function (response) {
+                     var data =  response.data
+                     if(data.code=='0'){
+                        var resData = data.data;
+                        signRecordVM.dataTable= resData.data;
+                      //3.分页组件
+                        signRecordVM.pager.total= resData.total;
+                        signRecordVM.pager.currentPage = resData.currentPage;
+                        signRecordVM.pager.pageSize = resData.pageSize;
+                     }else{
+                    	 signRecordVM.$message({message:data.msg,type:'error'});
+                         console.log(response);
+                     }
+                 
+                 })
+                 .catch(function (error) {
+                      console.log(error);
+                 }).then(function(){
+                	 signRecordVM.loading=false;
+                 });
+            	
+            },
+            exportFun(){
+                var param = this.form;
+                axios.post('/truckingOrder/exportTrackingOrder',param,{responseType:'blob'})
+                .then(function (response) {
+                    console.log(response)
+                    var data =  response.data;
+                    var fileName = response.headers.filename;
+                    
+                        saveAs(data,decodeURI(fileName));
+                     
+                    
+                })
+                .catch(function (error) {
+                    console.log(error);
+                }).then(function(){
+                    signRecordVM.loading=false;
+                });                     	
+            	
+            },
+            //日期数据格式化方法
+            dateFormat( row, column, cellValue, index) {
+                if (cellValue == undefined) {
+                    return "";
+                }
+                return moment(cellValue).format("YYYY-MM-DD HH:mm");
+            },
+
+        },
+        mounted(){
+            document.getElementById('truckingOrder').style.display = 'block';
+        },
+        created(){
+        	this.initSignRecordData();
+        }
+    })
+</script>
+</html>
