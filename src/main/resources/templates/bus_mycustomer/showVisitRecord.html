@@ -612,8 +612,25 @@
             },
             openEditVisitRecord(row){
                 // 打开编辑到访记录
-                this.addVisitRecord.vistitTime = new Date()
-                this.addVisitRecordDialogVisible = true;
+                var param ={};
+                param.id = clueId;
+                axios.post('/busVisitRecord/echo',param).then(function (response) {
+                    mainDivVM.addVisitRecord = response.data.data;
+                    mainDivVM.addVisitRecord.clueId=clueId
+                    mainDivVM.addVisitRecord.vistitTime = new Date()
+                    mainDivVM.addVisitRecordDialogVisible = true;
+                });
+            },
+            editSign(row){
+                // this.formSigning.clueId=row.clueId;
+                // this.dialogFormSigningVisible = true;
+                var param ={}
+                param.id = clueId;
+                axios.post('/businesssign/echo',param).then(function (response) {
+                    mainDivVM.formSigning = response.data.data;
+                    mainDivVM.formSigning.clueId=clueId;
+                    mainDivVM.dialogFormSigningVisible = true;
+                });
             },
             saveVisitRecord(){
                 var param = this.addVisitRecord;
@@ -646,7 +663,8 @@
                                             mainDivVM.initList();
                                             mainDivVM.addVisitRecordDialogVisible = false;
                                             //  弹出签约单添加弹窗
-                                            mainDivVM.dialogFormSigningVisible = true;
+                                            // mainDivVM.dialogFormSigningVisible = true;
+                                            mainDivVM.editSign(mainDivVM.addVisitRecord)
                                         }});
                                 } else {
                                     mainDivVM.$message.error(response.data.msg);
