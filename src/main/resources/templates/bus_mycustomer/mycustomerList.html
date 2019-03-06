@@ -778,7 +778,7 @@
                 <el-row>
                     <el-col :span="10">
                         <el-form-item label="业绩金额：" :label-width="formLabelWidth" prop="performanceAmount">
-                            <el-input v-model="formSigning.performanceAmount"></el-input>
+                            <el-input v-model="formSigningAmountPerformance"></el-input>
                         </el-form-item>
                     </el-col>
                 </el-row>
@@ -953,7 +953,7 @@
                         </el-col>
                         <el-col :span="10">
                             <el-form-item label="实收金额：" :label-width="formLabelWidth" prop="amountReceived">
-                                <el-input v-model="updateFormSigning.amountReceived" @change="setUpdatePerformanceAmount"></el-input>
+                                <el-input v-model="updateFormSigning.amountReceived" ></el-input>
                             </el-form-item>
                         </el-col>
                     </el-row>
@@ -977,7 +977,7 @@
                     <el-row>
                         <el-col :span="10">
                             <el-form-item label="业绩金额：" :label-width="formLabelWidth" prop="performanceAmount">
-                                <el-input v-model="updateFormSigning.performanceAmount"></el-input>
+                                <el-input v-model="updateFormSigningAmountPerformance"></el-input>
                             </el-form-item>
                         </el-col>
                     </el-row>
@@ -1043,7 +1043,7 @@
             tasteProArr:tasteProList,
             signArr:[{value:0,name:'未签约'},{value:1,name:'已签约'}],
             isSignArr:[{value:0,name:'否'},{value:1,name:'是'}],
-            visitArr:[{value:0,name:'待处理'},{value:1,name:'未到访'},{value:2,name:'首次到访'},{value:3,name:'多次到访'}],
+            visitArr:[{value:-1,name:'待处理'},{value:0,name:'未到访'},{value:1,name:'首次到访'},{value:2,name:'2次到访'},{value:3,name:'多次到访'}],
             visitTypeArr:[{value:1,name:'预约来访'},{value:2,name:'慕名来访'},{value:3,name:'临时来访'}],
             option2s: [{value: 1, label: '一次性全款'},{value: 2, label: '先交订金'}],
             option3s: [{value: '1', label: '现金'},{value: '2', label: 'POS'},{value: '3', label: '转账'}],
@@ -1170,6 +1170,14 @@
                 currentPage: 1,
                 pageSize: 20,
             },
+        },
+        computed: {
+            updateFormSigningAmountPerformance(){
+                return this.updateFormSigning.amountReceived;
+            },
+            formSigningAmountPerformance(){
+                return this.formSigning.amountReceived;
+            }
         },
         methods: {
             formatVisitTime(row){
@@ -1553,6 +1561,7 @@
             },
             submitForm(formName) {
                 var param = this.formSigning;
+                param.amountPerformance = this.formSigningAmountPerformance;
                 // 设置 clueid
                 this.$refs[formName].validate((valid) => {
                     if (valid) {
@@ -1575,6 +1584,7 @@
 
             submitUpdateForm(formName) {
                 var param = this.updateFormSigning;
+                param.amountPerformance = this.updateFormSigningAmountPerformance;
                 param.makeUpTime = new Date( param.makeUpTime)
                 param.payTime = new Date( param.payTime)
                 // 设置 clueid

@@ -18,7 +18,9 @@ import com.kuaidao.manageweb.feign.project.CompanyInfoFeignClient;
 import com.kuaidao.manageweb.feign.project.ProjectInfoFeignClient;
 import com.kuaidao.manageweb.feign.sign.BusinessSignFeignClient;
 import com.kuaidao.manageweb.feign.visitrecord.BusVisitRecordFeignClient;
+import com.kuaidao.manageweb.util.CommUtil;
 import com.kuaidao.sys.dto.organization.OrganizationDTO;
+import com.kuaidao.sys.dto.user.UserInfoDTO;
 import com.netflix.discovery.converters.Auto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -138,7 +140,8 @@ public class BusinessMyCustomerController {
                 return new JSONResult().fail("-1","提交邀约时间，开始时间大于结束时间!");
             }
         }
-
+        UserInfoDTO user = CommUtil.getCurLoginUser();
+        param.setBusSaleId(user.getId());
         return busMyCustomerFeignClient.queryPageList(param);
     }
 
@@ -160,9 +163,6 @@ public class BusinessMyCustomerController {
        return busMyCustomerFeignClient.notVisitReason(idEntityLong);
     }
 
-
-
-
     @PostMapping("/listNoPage")
     @ResponseBody
     public JSONResult<List<CompanyInfoDTO>> listNoPage() {
@@ -170,7 +170,5 @@ public class BusinessMyCustomerController {
                 companyInfoFeignClient.listNoPage(new CompanyInfoPageParam());
         return list;
     }
-
-
 
 }

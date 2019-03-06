@@ -9,6 +9,7 @@ import com.kuaidao.common.entity.IdEntityLong;
 import com.kuaidao.common.util.CommonUtil;
 import com.kuaidao.manageweb.feign.paydetail.PayDetailFeignClient;
 import com.kuaidao.manageweb.feign.visitrecord.BusVisitRecordFeignClient;
+import com.kuaidao.manageweb.util.CommUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.subject.Subject;
@@ -169,6 +170,8 @@ public class BusinessSignController {
         if (result.hasErrors()) {
             return CommonUtil.validateParam(result);
         }
+        UserInfoDTO user = CommUtil.getCurLoginUser();
+        dto.setCreateUser(user.getId());
         return businessSignFeignClient.saveSign(dto);
     }
 
@@ -181,6 +184,8 @@ public class BusinessSignController {
         if (result.hasErrors()) {
             return CommonUtil.validateParam(result);
         }
+        UserInfoDTO user = CommUtil.getCurLoginUser();
+        dto.setUpdateUser(user.getId());
         return businessSignFeignClient.updateSign(dto);
     }
 
