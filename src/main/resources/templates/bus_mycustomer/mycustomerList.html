@@ -198,7 +198,7 @@
                     <el-col :span="10">
                         <el-form-item label="考察公司"  :label-width="formLabelWidth"  prop="companyid">
                             <el-select v-model="addVisitRecord.companyid" placeholder="考察公司"  clearable >
-                                <el-option v-for="item in companyArr" :key="item.id" :label="item.companyName" :value="item.id"></el-option>
+                                <el-option v-for="item in companyArr" :key="item.id" :label="item.name" :value="item.id"></el-option>
                             </el-select>
                         </el-form-item>
                     </el-col>
@@ -322,7 +322,7 @@
                     <el-col :span="10">
                         <el-form-item label="考察公司"  :label-width="formLabelWidth"  prop="companyid">
                             <el-select v-model="updateVisitRecord.companyid" placeholder="考察公司"  clearable >
-                                <el-option v-for="item in companyArr" :key="item.id" :label="item.companyName" :value="item.id"></el-option>
+                                <el-option v-for="item in companyArr" :key="item.id" :label="item.name" :value="item.id"></el-option>
                             </el-select>
                         </el-form-item>
                     </el-col>
@@ -635,7 +635,7 @@
                     <el-col :span="10">
                         <el-form-item label="签约餐饮公司：" :label-width="formLabelWidth" prop="signCompanyId">
                             <el-select v-model="formSigning.signCompanyId" placeholder="请选择签约餐饮公司">
-                                <el-option v-for="item in companyArr" :key="item.id" :label="item.companyName" :value="item.id"></el-option>
+                                <el-option v-for="item in companyArr" :key="item.id" :label="item.name" :value="item.id"></el-option>
                             </el-select>
                         </el-form-item>
                     </el-col>
@@ -832,7 +832,7 @@
                         <el-col :span="10">
                             <el-form-item label="签约餐饮公司：" :label-width="formLabelWidth" prop="signCompanyId">
                                 <el-select :disabled="notEditRebutSign" v-model="updateFormSigning.signCompanyId" placeholder="请选择签约餐饮公司">
-                                    <el-option v-for="item in companyArr" :key="item.id" :label="item.companyName" :value="item.id"></el-option>
+                                    <el-option v-for="item in companyArr" :key="item.id" :label="item.name" :value="item.id"></el-option>
                                 </el-select>
                             </el-form-item>
                         </el-col>
@@ -1051,7 +1051,7 @@
             provinceArr:[],
             districtArr:[],
             cityArr:[],
-            companyArr:companySelect,
+            companyArr:[],
             projectArr:proSelect,
             multipleSelection:[],
             rules:{},
@@ -1646,13 +1646,12 @@
                 mainDivVM.provinceArr=response.data.data.data;
             });
 
-            // 考察公司  考察公司
+            //考察公司
             param={};
-            axios.post('/aggregation/businessMyCustomer/listNoPage',param).then(function (response) {
-                mainDivVM.listNoPage=response.data.data.data;
+            param.orgType="2";
+            axios.post('/organization/organization/queryOrgByType',param).then(function (response) {
+                mainDivVM.companyArr=response.data.data;
             });
-
-
         }
     });
 

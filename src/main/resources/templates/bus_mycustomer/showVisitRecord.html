@@ -185,7 +185,7 @@
                         <el-col :span="10">
                             <el-form-item label="考察公司"  :label-width="formLabelWidth"  prop="companyid">
                                 <el-select v-model="addVisitRecord.companyid" placeholder="考察公司"  clearable >
-                                    <el-option v-for="item in companyArr" :key="item.id" :label="item.companyName" :value="item.id"></el-option>
+                                    <el-option v-for="item in companyArr" :key="item.id" :label="item.name" :value="item.id"></el-option>
                                 </el-select>
                             </el-form-item>
                         </el-col>
@@ -322,7 +322,7 @@
                             <el-col :span="10">
                                 <el-form-item label="签约餐饮公司：" :label-width="formLabelWidth" prop="signCompanyId">
                                     <el-select v-model="formSigning.signCompanyId" placeholder="请选择签约餐饮公司">
-                                        <el-option v-for="item in companyArr" :key="item.id" :label="item.companyName" :value="item.id"></el-option>
+                                        <el-option v-for="item in companyArr" :key="item.id" :label="item.name" :value="item.id"></el-option>
                                     </el-select>
                                 </el-form-item>
                             </el-col>
@@ -500,7 +500,7 @@
         data: {
             formLabelWidth:"150px",
             addVisitRecordDialogVisible:false,
-            dialogFormSigningVisible:true,
+            dialogFormSigningVisible:false,
             clueId:clueId,
             signArr:[{value:0,name:'未签约'},{value:1,name:'已签约'}],
             isSignArr:[{value:0,name:'否'},{value:1,name:'是'}],
@@ -512,7 +512,7 @@
             provinceArr:[],
             districtArr:[],
             cityArr:[],
-            companyArr:companySelect,
+            companyArr:[],
             projectArr:proSelect,
             isAllMoney: false,
             addVisitRecord:{
@@ -583,10 +583,8 @@
             }
         },
         computed: {
-            formSigning:{
-                amountPerformance(){
-                    return this.formSigning.amountReceived;
-                }
+            amountPerformance(){
+                return this.formSigning.amountReceived;
             }
         },
         methods: {
@@ -799,11 +797,14 @@
                 mainDivVM.provinceArr=response.data.data.data;
             });
 
-            // 考察公司  考察公司
+
+            //考察公司
             param={};
-            axios.post('/aggregation/businessMyCustomer/listNoPage',param).then(function (response) {
-                mainDivVM.listNoPage=response.data.data.data;
+            param.orgType="2";
+            axios.post('/organization/organization/queryOrgByType',param).then(function (response) {
+                mainDivVM.companyArr=response.data.data;
             });
+
         }
     });
 
