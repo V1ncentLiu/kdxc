@@ -39,12 +39,12 @@
                 </el-row>
                 <el-row>
                     <el-col :span="8">
-                        <el-form-item label="性别：" :label-width="formLabelWidth">
-                           <el-select v-model="form.customerSex" placeholder="请选择" style="width: 100%;">
+                        <el-form-item label="客户级别：" :label-width="formLabelWidth">
+                           <el-select v-model="form.customerLevel" placeholder="请选择" style="width: 100%;">
                                 <el-option
-                                    v-for="item in optsex"
+                                    v-for="item in customerLevelArr"
                                     :key="item.value"
-                                    :label="item.label"
+                                    :label="item.name"
                                     :value="item.value">
                                 </el-option>
                             </el-select>
@@ -59,15 +59,8 @@
                 </el-row>
                 <el-row>
                     <el-col :span="8">
-                        <el-form-item label="餐饮经验：" :label-width="formLabelWidth">
-                           <el-select v-model="form.experience" placeholder="请选择" style="width: 100%;">
-                                <el-option
-                                    v-for="item in CateringExperienceArr"
-                                    :key="item.value"
-                                    :label="item.name"
-                                    :value="item.value">
-                                </el-option>
-                            </el-select>
+                        <el-form-item label="邮箱：" prop="customerEmail" :label-width="formLabelWidth">
+                           <el-input v-model="form.customerEmail" autocomplete="off" maxLength="30"></el-input>
                         </el-form-item>
                     </el-col>
                     <el-col :span="8">
@@ -78,12 +71,12 @@
                 </el-row>
                 <el-row>
                     <el-col :span="8">
-                        <el-form-item label="职业：" :label-width="formLabelWidth">
-                           <el-select v-model="form.customerJob" placeholder="请选择" style="width: 100%;">
+                        <el-form-item label="性别：" :label-width="formLabelWidth">
+                           <el-select v-model="form.customerSex" placeholder="请选择" style="width: 100%;">
                                 <el-option
-                                    v-for="item in occupationArr"
+                                    v-for="item in optsex"
                                     :key="item.value"
-                                    :label="item.name"
+                                    :label="item.label"
                                     :value="item.value">
                                 </el-option>
                             </el-select>
@@ -99,20 +92,37 @@
                                     :value="item.value">
                                 </el-option>
                             </el-select>
+                            <el-input 
+                            v-model="form.customerPartnerDetail" 
+                            v-show="form.customerPartner!='1'"
+                            autocomplete="off" 
+                            maxLength="30" 
+                            placeholder="请输入合伙人姓名以及联系方式"
+                            style="margin-top:10px;"></el-input>
                         </el-form-item>
                     </el-col>
                 </el-row>
                 <el-row>
                     <el-col :span="8">
-                        <el-form-item label="选址情况：" :label-width="formLabelWidth">
-                           <el-select v-model="form.address" placeholder="请选择" style="width: 100%;">
+                        <el-form-item label="餐饮经验：" :label-width="formLabelWidth">
+                           <el-select 
+                           v-model="form.experience"
+                           placeholder="请选择" 
+                           style="width: 100%;">
                                 <el-option
-                                    v-for="item in optionAddressArr"
+                                    v-for="item in CateringExperienceArr"
                                     :key="item.value"
                                     :label="item.name"
                                     :value="item.value">
                                 </el-option>
                             </el-select>
+                            <el-input 
+                            v-model="form.cateringType" 
+                            v-show="form.experience!='0'"
+                            autocomplete="off" 
+                            maxLength="50" 
+                            placeholder="请输入曾从事餐饮类型"
+                            style="margin-top:10px;"></el-input>
                         </el-form-item>
                     </el-col>
                     <el-col :span="8">
@@ -130,10 +140,10 @@
                 </el-row>
                 <el-row>
                     <el-col :span="8">
-                        <el-form-item label="客户级别：" :label-width="formLabelWidth">
-                           <el-select v-model="form.customerLevel" placeholder="请选择" style="width: 100%;">
+                        <el-form-item label="职业：" :label-width="formLabelWidth">
+                           <el-select v-model="form.customerJob" placeholder="请选择" style="width: 100%;">
                                 <el-option
-                                    v-for="item in customerLevelArr"
+                                    v-for="item in occupationArr"
                                     :key="item.value"
                                     :label="item.name"
                                     :value="item.value">
@@ -145,6 +155,51 @@
                         <el-form-item label="QQ：" :label-width="formLabelWidth">
                            <el-input v-model="form.qq" autocomplete="off" maxLength="20" @keyup.native="qqnumber"></el-input>
                         </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="8">
+                        <el-form-item label="选址情况：" :label-width="formLabelWidth">
+                           <el-select v-model="form.address" placeholder="请选择" style="width: 100%;">
+                                <el-option
+                                    v-for="item in optionAddressArr"
+                                    :key="item.value"
+                                    :label="item.name"
+                                    :value="item.value">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="8">
+                        <el-form-item label="出资人：" :label-width="formLabelWidth">
+                            <el-radio-group v-model="form.sponsor">
+                                <el-radio label="1">自己本人</el-radio>
+                                <el-radio label="2">他人</el-radio>
+                            </el-radio-group>
+                           <el-input 
+                            v-model="form.sponsorOther" 
+                            v-show="form.sponsor!='1'"
+                            autocomplete="off" 
+                            maxLength="30" 
+                            placeholder="姓名+联系方式"
+                            style="margin-top:10px;"></el-input>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="8">
+                        <el-form-item label="决策人：" :label-width="formLabelWidth">
+                            <el-radio-group v-model="form.decisionMaker">
+                                <el-radio label="1">自己本人</el-radio>
+                                <el-radio label="2">他人</el-radio>
+                            </el-radio-group>
+                           <el-input 
+                            v-model="form.decisionMakerOther" 
+                            v-show="form.decisionMaker!='1'"
+                            autocomplete="off" 
+                            maxLength="30" 
+                            placeholder="姓名+联系方式"
+                            style="margin-top:10px;"></el-input>
                     </el-col>
                 </el-row>
             </div>
@@ -743,6 +798,9 @@ var ossUrl=[[${ossUrl}]];
         el: '#addCustomer',
         data: function() {
             return {
+                radio: '1',
+                radio1: '1',
+
             	dialogFormUploadImg: false, //上传资源图片弹框
             	dialogFormUploadImgSrc: '', //上传资源图片弹框
                 insideProjectShow:true,//内部项目默认显示
@@ -755,12 +813,19 @@ var ossUrl=[[${ossUrl}]];
                     radioProject:'1', //意向项目单选默认选项                    
                     customerName:'',
                     customerPhone:'',
+                    customerEmail:'', //邮箱
+                    cateringType: '',//曾经从事餐饮类型
+                    sponsor:'1', //出资人
+                    sponsorOther:'',//其它出资人的姓名及联系方式
+                    decisionMaker: '1',//决策人
+                    decisionMakerOther: '',//其它决策人的姓名及联系方式
                     customerSex:'',
                     ishasWx:'',
                     experience:'',
                     customerAge:'',
                     customerJob:'',
                     customerPartner:'',
+                    customerPartnerDetail: '',//合伙人姓名及联系方式
                     address:'',
                     urgency:'',
                     customerLevel:'',
@@ -808,6 +873,16 @@ var ossUrl=[[${ossUrl}]];
                             callback();
                         }, trigger: 'blur'} */
                     ],
+                    customerEmail: {
+                        validator:function(rule,value,callback){                 
+                            if( /^([a-zA-Z0-9_-])+@([a-zA-Z0-9_-])+((\.[a-zA-Z0-9_-]{2,3}){1,2})$/.test(value) == false){
+                               callback(new Error("请输入正确的邮箱格式"));
+                            }else{
+                               callback();
+                            } 
+                            callback();
+                        }, trigger: 'blur'
+                    },
                     /*跟踪记录验证*/
                     callTime: [
                       { required: true, message: '请选择拨打时间', trigger: 'change' }
@@ -1009,7 +1084,7 @@ var ossUrl=[[${ossUrl}]];
                     }
                 });
             },
-             rebackClue(){
+            rebackClue(){
             	 window.location.href="/tele/clueMyCustomerInfo/initmyCustomer"; 	
             },
             submitDialogForm(formName) {
