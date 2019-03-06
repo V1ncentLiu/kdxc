@@ -13,6 +13,8 @@ import com.kuaidao.common.util.CommonUtil;
 import com.kuaidao.manageweb.feign.project.CompanyInfoFeignClient;
 import com.kuaidao.manageweb.feign.project.ProjectInfoFeignClient;
 import com.kuaidao.manageweb.feign.visitrecord.BusVisitRecordFeignClient;
+import com.kuaidao.manageweb.util.CommUtil;
+import com.kuaidao.sys.dto.user.UserInfoDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -81,6 +83,8 @@ public class BusinessVisitRecordController {
         if (result.hasErrors()) {
             return CommonUtil.validateParam(result);
         }
+        UserInfoDTO user = CommUtil.getCurLoginUser();
+        dto.setCreateUser(user.getId());
         return visitRecordFeignClient.saveVisitRecord(dto);
     }
 
@@ -93,6 +97,8 @@ public class BusinessVisitRecordController {
         if (result.hasErrors()) {
             return CommonUtil.validateParam(result);
         }
+        UserInfoDTO user = CommUtil.getCurLoginUser();
+        dto.setUpdateUser(user.getId());
         return visitRecordFeignClient.updateVisitRecord(dto);
     }
 

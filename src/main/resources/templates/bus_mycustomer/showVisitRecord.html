@@ -441,7 +441,7 @@
                             </el-col>
                             <el-col :span="10">
                                 <el-form-item label="实收金额：" :label-width="formLabelWidth" prop="amountReceived">
-                                    <el-input v-model="formSigning.amountReceived"  @change="setAddPerformanceAmount"></el-input>
+                                    <el-input v-model="formSigning.amountReceived" ></el-input>
                                 </el-form-item>
                             </el-col>
                         </el-row>
@@ -464,8 +464,8 @@
                         </el-row>
                         <el-row>
                             <el-col :span="10">
-                                <el-form-item label="业绩金额：" :label-width="formLabelWidth" prop="performanceAmount">
-                                    <el-input v-model="formSigning.performanceAmount"></el-input>
+                                <el-form-item label="业绩金额：" :label-width="formLabelWidth" prop="amountPerformance">
+                                    <el-input v-model="amountPerformance"></el-input>
                                 </el-form-item>
                             </el-col>
                         </el-row>
@@ -553,7 +553,7 @@
                 threeNotSignShow:false
             },
             formSigning: {
-                clueId:"",
+                clueId:clueId,
                 signNo:'',
                 customerName: '',
                 idCard: '',
@@ -582,6 +582,13 @@
 
             }
         },
+        computed: {
+            formSigning:{
+                amountPerformance(){
+                    return this.formSigning.amountReceived;
+                }
+            }
+        },
         methods: {
             formatVisitTime(row){
 
@@ -604,9 +611,6 @@
                     return fmt;
                 }
                 return dateFtt("yyyy-MM-dd hh:mm", new Date(row.vistitTime));
-            },
-            setAddPerformanceAmount(value){
-                this.formSigning.performanceAmount = this.formSigning.amountReceived
             },
             openEditVisitRecord(row){
                 // 打开编辑到访记录
@@ -667,7 +671,9 @@
             },
             submitForm(formName) {
                 var param = this.formSigning;
-                // 设置 clueid
+                param.amountPerformance =  this.amountPerformance;
+                console.log("................................")
+                console.log(param)
                 this.$refs[formName].validate((valid) => {
                     if (valid) {
                         axios.post("/businesssign/insert", param)
