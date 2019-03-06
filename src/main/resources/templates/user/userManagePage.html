@@ -125,7 +125,7 @@ v-model="isShow">
   <el-table-column align="center" prop="username" label="登录用户名"></el-table-column>
   <el-table-column align="center" prop="phone" label="手机号"></el-table-column>
   <el-table-column align="center" prop="name" label="姓名"></el-table-column>
-  <el-table-column align="center" prop="orgName" label="所在组织"></el-table-column>
+  <el-table-column align="center" prop="orgName" label="所在组织" :formatter="transformOrg"></el-table-column>
   <el-table-column align="center" prop="roleList" label="角色" :formatter="transformRole"></el-table-column>
   <el-table-column align="center" prop="createTime" label="创建时间"  :formatter="dateFormat" ></el-table-column>
   <el-table-column align="center" prop="duration" label="密码使用时长（天）" ></el-table-column>
@@ -379,6 +379,18 @@ var userVM = new Vue({
       }else if(cellValue=="3"){
         text="锁定"
       }
+      return text;
+    },
+    //机构名称展示方法
+    transformOrg(row, column, cellValue, index) {
+      var text="";
+      if(row.parentParentOrgName){
+    	  text+=row.parentParentOrgName+"-";
+      }
+      if(row.parentOrgName){
+    	  text+=row.parentOrgName+"-";
+      }
+    	  text+=cellValue;
       return text;
     },
     //角色转换方法
