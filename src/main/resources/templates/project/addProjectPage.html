@@ -24,7 +24,7 @@
                     <el-form-item label="选择所属品牌：" :label-width="formLabelWidth1" prop="brandName">
                         <el-row>
                             <el-col :span="12">
-                                <el-input v-model="form.brandName" autocomplete="off" readonly="true"></el-input>                                
+                                <el-input v-model="form.brandName" autocomplete="off" :readonly="brandNameReadonly"></el-input>                                
                             </el-col>
                             <el-col :span="10">
                                 <el-button type="primary" size="small" @click="dialogFormChooseBrand = true">选择品牌</el-button>
@@ -163,7 +163,7 @@
             <el-row>
                 <el-col :span="8" :offset="6">
                     <el-form-item>
-                        <el-button type="primary" @click="onSubmit('form')">确认</el-button>
+                        <el-button type="primary" :disabled="submitDisabled" @click="onSubmit('form')">确认</el-button>
                         <el-button @click="goBack()">取消</el-button>
                     </el-form-item>
                 </el-col>
@@ -251,6 +251,8 @@ var project=[[${project}]];//品类集合
             return {
                 tableRadio:'',
                 dialogFormChooseBrand: false,
+                submitDisabled: false,
+                brandNameReadonly: true,
                 form: {
                     id: '',
                     projectName: '',
@@ -375,6 +377,8 @@ var project=[[${project}]];//品类集合
             onSubmit(formName) {
             	 this.$refs[formName].validate((valid) => {
           	       if (valid) {
+	       	            projectVm.submitDisabled=true;
+          	    	   
 	       	            var param = projectVm.form;
 	       	          	var shopType='';
 	       	          	for(var i=0;i<param.shopTypeList.length;i++){
@@ -391,6 +395,7 @@ var project=[[${project}]];//品类集合
 	       	         	}
 	       	            axios.post(url, param)
 	       	            .then(function (response) {
+	       	            	projectVm.submitDisabled=false;
 	       	            	console.info(response);
 	       	            	var data =response.data;
 	       	            	if(data.code!="0"){
@@ -402,6 +407,7 @@ var project=[[${project}]];//品类集合
 	       	            	}
 	       	            })
 	       	            .catch(function (error) {
+	       	            	projectVm.submitDisabled=false;
 	       	                 console.log(error);
 	       	            });
 	          	    } else {
