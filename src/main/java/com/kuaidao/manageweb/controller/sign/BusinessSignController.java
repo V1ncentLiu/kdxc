@@ -5,11 +5,13 @@ import com.kuaidao.aggregation.dto.paydetail.PayDetailRespDTO;
 import com.kuaidao.aggregation.dto.sign.BusSignInsertOrUpdateDTO;
 import com.kuaidao.aggregation.dto.sign.BusSignRespDTO;
 import com.kuaidao.aggregation.dto.sign.PayDetailDTO;
+import com.kuaidao.aggregation.dto.visitrecord.BusVisitRecordRespDTO;
 import com.kuaidao.common.entity.IdEntityLong;
 import com.kuaidao.common.util.CommonUtil;
 import com.kuaidao.manageweb.feign.paydetail.PayDetailFeignClient;
 import com.kuaidao.manageweb.feign.visitrecord.BusVisitRecordFeignClient;
 import com.kuaidao.manageweb.util.CommUtil;
+import com.sun.org.apache.xpath.internal.operations.Bool;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.subject.Subject;
@@ -56,10 +58,7 @@ import com.kuaidao.sys.dto.user.UserInfoDTO;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -201,20 +200,54 @@ public class BusinessSignController {
 
     /**
      *  签约单，新增时候回显信息
-     *
      *  1:回显当时提交邀约来访中填写的信息
      *  2: 若当前用户
-     *
      *
      *  客户姓名，签约餐饮公司=考察公司，签约项目，签约省份，签约城市，签约区／县。
      */
     @RequestMapping("/echo")
     @ResponseBody
-    public JSONResult<BusinessSignDTO> echo(@RequestBody IdEntityLong idEntityLong) throws Exception {
-        BusinessSignDTO signDTO = new BusinessSignDTO();
+    public JSONResult<BusSignRespDTO> echo(@RequestBody IdEntityLong idEntityLong) throws Exception {
+        BusSignRespDTO signDTO = new BusSignRespDTO();
 //      查询需要进行回显的信息，并进行映射
-
-        return new JSONResult<BusinessSignDTO>().success(signDTO);
+//      最新一次的邀约
+        JSONResult<Map> mapJSONResult = visitRecordFeignClient.echoAppoinment(idEntityLong);
+//      查询最新一次到访
+        JSONResult<BusVisitRecordRespDTO> maxNewOne = visitRecordFeignClient.findMaxNewOne(idEntityLong);
+        Boolean flag = true;
+        if(JSONResult.SUCCESS.equals(maxNewOne.getCode())){
+            BusVisitRecordRespDTO data = maxNewOne.getData();
+            if(data!=null){
+                signDTO.setSignCompanyId(data.getClueId());
+                signDTO.setSignProjectId(data.getProjectId());
+                signDTO.setSignProvince(data.getSignProvince());
+                signDTO.setSignCity(data.getSignCity());
+                signDTO.setSignDictrict(data.getSignDistrict());
+                signDTO.setSignShopType(""+(data.getVistitStoreType()==null?"1":data.getVistitStoreType()));
+                signDTO.setCustomerName(data.getCustomerName());
+                signDTO.setSignType(1);
+                signDTO.setPayType("1");
+                flag = false;
+            }
+        }
+        if(flag){
+            if(JSONResult.SUCCESS.equals(mapJSONResult.getCode())){
+                Map data = mapJSONResult.getData();
+                if(data!=null){
+                    signDTO.setSignCompanyId((Long) data.get("busCompany"));
+//                    signDTO.setSignProjectId((Long)data.get(""));
+                    signDTO.setSignProvince((String)data.get("signProvince"));
+                    signDTO.setSignCity((String)data.get("signCity"));
+                    signDTO.setSignDictrict((String)data.get("signDistrict"));
+                    signDTO.setCustomerName((String)data.get("cusName"));
+                    signDTO.setPhone((String)data.get("phone"));
+                    signDTO.setSignType(1);
+                    signDTO.setSignShopType("1");
+                    signDTO.setPayType("1");
+                }
+            }
+        }
+        return new JSONResult<BusSignRespDTO>().success(signDTO);
     }
 
     /**

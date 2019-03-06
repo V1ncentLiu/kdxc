@@ -10,10 +10,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.netflix.feign.FeignClient;
 import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.util.List;
+import java.util.Map;
 
 @FeignClient(name = "aggregation-service", path = "/aggregation/busvisitrecord", fallback = BusVisitRecordFeignClient.HystrixClientFallback.class)
 public interface BusVisitRecordFeignClient {
@@ -26,6 +28,11 @@ public interface BusVisitRecordFeignClient {
 	public JSONResult<List<BusVisitRecordRespDTO>> queryList(@RequestBody BusVisitRecordReqDTO dto);
 	@RequestMapping("/one")
 	public JSONResult<BusVisitRecordRespDTO> queryOne(@RequestBody IdEntityLong idEntityLong);
+
+	@PostMapping("/echoAppoinment")
+	public JSONResult<Map> echoAppoinment(IdEntityLong idEntityLong);
+	@PostMapping("/findMaxNewOne")
+	public JSONResult<BusVisitRecordRespDTO> findMaxNewOne(@RequestBody IdEntityLong idEntityLong);
 
 	@Component
 	static class HystrixClientFallback implements BusVisitRecordFeignClient {
@@ -56,6 +63,16 @@ public interface BusVisitRecordFeignClient {
 		@Override
 		public JSONResult<BusVisitRecordRespDTO> queryOne(IdEntityLong idEntityLong) {
 			return fallBackError("访问记录查询明细");
+		}
+
+		@Override
+		public JSONResult<Map> echoAppoinment(IdEntityLong idEntityLong) {
+			return fallBackError("回显邀约来访客户信息");
+		}
+
+		@Override
+		public JSONResult<BusVisitRecordRespDTO> findMaxNewOne(IdEntityLong idEntityLong) {
+			return fallBackError("回显邀签约记录信息");
 		}
 	}
 }

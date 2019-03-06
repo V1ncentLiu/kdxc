@@ -108,7 +108,7 @@
             <el-table-column prop="phone" label="手机号" align="center" show-overflow-tooltip></el-table-column>
             <el-table-column prop="cusLevel" :formatter="formatCusLevel" label="客户级别"  align="center"></el-table-column>
             <el-table-column prop="customerStatusName" label="客户状态" align="center" show-overflow-tooltip></el-table-column>
-            <el-table-column prop="" label="重复手机号"  align="center" show-overflow-tooltip></el-table-column>
+            <el-table-column prop="" label="重复手机号资源"  align="center" show-overflow-tooltip></el-table-column>
             <el-table-column prop="" label="跟进记录"  align="center" show-overflow-tooltip>
                 <template slot-scope="scope">
                     <el-button @click="openTrackingDialog(scope.row.clueid)" type="text" size="small">
@@ -503,6 +503,9 @@
             axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {
                 console.log(response.data.data)
                 mainDivVM.reasonArr=response.data.data;
+                if(mainDivVM.reasonArr.length==8){
+                    mainDivVM.reasonArr = mainDivVM.reasonArr.slice(0,7);
+                }
             });
             //初始化客户状态
             param={};
