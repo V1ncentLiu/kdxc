@@ -132,6 +132,7 @@
 <div th:include="_footer_include :: #jsLib"></div>
 <script th:inline="javascript">
     var accountIdList = [[${teleSaleList}]];
+    var projectList=[[${projectList}]];//品尝项目
 </script>
 
 </body>
@@ -212,7 +213,15 @@
                      var data =  response.data
                      if(data.code=='0'){
                         var resData = data.data;
-                        signRecordVM.dataTable= resData.data;
+                        var curData = resData.data;
+                        for(var i=0;i<curData.length;i++){
+                        	var ss = signRecordVM.transformProject(curData[i].tasteProjectId);
+                        	console.info(ss);
+                        	curData[i].tasteProject=ss;
+                        }
+                        
+                        
+                        signRecordVM.dataTable= curData;
                       //3.分页组件
                         signRecordVM.pager.total= resData.total;
                         signRecordVM.pager.currentPage = resData.currentPage;
@@ -237,10 +246,7 @@
                     console.log(response)
                     var data =  response.data;
                     var fileName = response.headers.filename;
-                    
                         saveAs(data,decodeURI(fileName));
-                     
-                    
                 })
                 .catch(function (error) {
                     console.log(error);
@@ -254,7 +260,26 @@
                 if (cellValue == undefined) {
                     return "";
                 }
-                return moment(cellValue).format("YYYY-MM-DD HH:mm");
+                return moment(cellValue).format("YYYY-MM-DD HH:mm:ss");
+            },
+            //品尝项目转换方法
+            transformProject(cellValue) {
+                var text="";
+                if(projectList&&cellValue){
+                    var array=cellValue.split(",");
+                    for(var i=0;i<array.length;i++){
+                        for(var j=0;j<projectList.length;j++){
+                             if(array[i]==projectList[j].id){
+                                 if(i==0){
+                                     text=projectList[j].projectName;
+                                 }else{
+                                     text=text+","+projectList[j].projectName;
+                                 }
+                             }
+                         }
+                     }
+                 }
+                 return text;
             },
 
         },
