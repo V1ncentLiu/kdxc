@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.slf4j.Logger;
@@ -134,7 +135,9 @@ public class TruckingOrderController {
             
             
         }
-
+        /*List<Long> busList = new ArrayList<>();
+        busList.add(1098210933718835200L);
+        reqDTO.setBusDirectorIdList(busList);*/
          return trackingOrderFeignClient.listTrackingOrder(reqDTO) ;
      }
     
@@ -150,13 +153,19 @@ public class TruckingOrderController {
     @RequiresPermissions("aggregation:truckingOrder:export")
     @PostMapping("/exportTrackingOrder")
      public void exportTrackingOrder(@RequestBody TrackingOrderReqDTO reqDTO,HttpServletResponse response) throws Exception{
+       /* List<Long> busList = new ArrayList<>();
+        busList.add(1098210933718835200L);
+        reqDTO.setBusDirectorIdList(busList);*/
         JSONResult<List<TrackingOrderRespDTO>> trackingOrderListJr = trackingOrderFeignClient.exportTrackingOrder(reqDTO);
         List<List<Object>> dataList = new ArrayList<List<Object>>();
         dataList.add(getHeadTitleList());
         
        if(JSONResult.SUCCESS.equals(trackingOrderListJr.getCode()) && trackingOrderListJr.getData()!=null&& trackingOrderListJr.getData().size()!=0) {
-            List<TrackingOrderRespDTO> orderList = trackingOrderListJr.getData();
-            int size = orderList.size();
+     
+           List<TrackingOrderRespDTO> orderList = trackingOrderListJr.getData();
+           int size = orderList.size();
+
+           List<ProjectInfoDTO> allProjectList = getAllProjectList();
             for (int i = 0; i < size; i++) {
                 TrackingOrderRespDTO trackingOrderRespDTO = orderList.get(i);
                 List<Object> curList = new ArrayList<>();
@@ -164,7 +173,7 @@ public class TruckingOrderController {
                 curList.add(getTimeStr(trackingOrderRespDTO.getReserveTime()));
                 curList.add(trackingOrderRespDTO.getBusDirectorName());
                 curList.add(trackingOrderRespDTO.getBusCompanyName());
-                curList.add(trackingOrderRespDTO.getTasteProject());
+                curList.add(getProjectNameStr(allProjectList,trackingOrderRespDTO.getTasteProjectId()));
                 curList.add(getTimeStr(trackingOrderRespDTO.getCreateTime()));
                 curList.add(trackingOrderRespDTO.getSubmitGroup());
                 curList.add(trackingOrderRespDTO.getAccountPhone());
@@ -200,6 +209,38 @@ public class TruckingOrderController {
         
      }
     
+    /*
+     * 獲取所有的項目
+     */
+    private List<ProjectInfoDTO> getAllProjectList() {
+        JSONResult<List<ProjectInfoDTO>> projectInfoJr = projectInfoFeignClient.listNoPage(new ProjectInfoPageParam());
+        return projectInfoJr.getData();
+    }
+    private String getProjectNameStr(List<ProjectInfoDTO> projectInfoList,String ids) {
+        if(StringUtils.isBlank(ids) || projectInfoList==null) {
+            return "";
+        }
+        String text="";
+        String[] idArr = ids.split(",");
+        for (int i = 0; i < idArr.length; i++) {
+            for (int j = 0; j < projectInfoList.size(); j++) {
+                ProjectInfoDTO projectInfoDTO = projectInfoList.get(j);
+                if(Long.valueOf(idArr[i]).equals(projectInfoDTO.getId())) {
+                    if(i==0) {
+                        text=projectInfoDTO.getProjectName();
+                    }else {
+                        text+=","+projectInfoDTO.getProjectName();
+                    }
+                }
+                
+            }
+        }
+        
+        return text;
+        
+    }
+    
+
     private String getTimeStr(Date date) {
         if(date==null) {
            return ""; 
