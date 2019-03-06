@@ -40,6 +40,20 @@ public interface BusScheduleFeignClient {
 
 
 
+    /**
+     * 到访记录提醒(商务经理) 定时任务
+     */
+    @PostMapping("/visitRecordToBusSaleReminder")
+    public JSONResult notVisitRecordReminder();
+    /**
+     * 签约记录提醒(商务经理) 定时任务
+     * @return
+     */
+    @PostMapping("/signRecordToBusSaleIdReminder")
+    public JSONResult signRecordToSaleIdReminder();
+
+
+
     @Component
     static class HystrixClientFallback implements BusScheduleFeignClient {
 
@@ -61,6 +75,16 @@ public interface BusScheduleFeignClient {
         @Override
         public JSONResult signRecordReminder() {
             return fallBackError("签约记录提醒");
+        }
+
+        @Override
+        public JSONResult notVisitRecordReminder() {
+            return fallBackError("到访记录(商务经理)提醒");
+        }
+
+        @Override
+        public JSONResult signRecordToSaleIdReminder() {
+            return fallBackError("签约记录(商务经理)提醒");
         }
 
     }
