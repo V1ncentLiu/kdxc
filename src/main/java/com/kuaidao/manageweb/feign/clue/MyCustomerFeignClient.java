@@ -121,6 +121,15 @@ public interface MyCustomerFeignClient {
 	JSONResult<List<ClueFileDTO>> findClueFile(ClueQueryDTO dto);
 
 	/**
+	 * 查询资源文件
+	 * 
+	 * @param dto
+	 * @return
+	 */
+	@RequestMapping(method = RequestMethod.POST, value = "/updateCallTime")
+	JSONResult<String> updateCallTime(ClueQueryDTO dto);
+
+	/**
 	 * 删除资源文件
 	 * 
 	 * @param dto
@@ -204,6 +213,12 @@ public interface MyCustomerFeignClient {
 		public JSONResult<String> deleteClueFile(ClueFileDTO dto) {
 			// TODO Auto-generated method stub
 			return fallBackError("删除资源文件");
+		}
+
+		@Override
+		public JSONResult<String> updateCallTime(ClueQueryDTO dto) {
+			// TODO Auto-generated method stub
+			return fallBackError("更新最后拨打时间");
 		}
 
 	}

@@ -41,6 +41,7 @@ import com.kuaidao.aggregation.dto.project.ProjectInfoPageParam;
 import com.kuaidao.aggregation.dto.tracking.TrackingInsertOrUpdateDTO;
 import com.kuaidao.aggregation.dto.tracking.TrackingReqDTO;
 import com.kuaidao.aggregation.dto.tracking.TrackingRespDTO;
+import com.kuaidao.common.constant.OrgTypeConstant;
 import com.kuaidao.common.constant.RoleCodeEnum;
 import com.kuaidao.common.entity.IdEntityLong;
 import com.kuaidao.common.entity.IdListLongReq;
@@ -49,9 +50,12 @@ import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.manageweb.feign.call.CallRecordFeign;
 import com.kuaidao.manageweb.feign.circulation.CirculationFeignClient;
 import com.kuaidao.manageweb.feign.clue.MyCustomerFeignClient;
+import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
 import com.kuaidao.manageweb.feign.project.ProjectInfoFeignClient;
 import com.kuaidao.manageweb.feign.tracking.TrackingFeignClient;
 import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
+import com.kuaidao.sys.dto.organization.OrganizationDTO;
+import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import com.kuaidao.sys.dto.user.UserOrgRoleReq;
 
@@ -76,6 +80,9 @@ public class MyCustomerClueController {
 
 	@Autowired
 	private CirculationFeignClient circulationFeignClient;
+
+	@Autowired
+	private OrganizationFeignClient organizationFeignClient;
 
 	@Value("${oss.url.directUpload}")
 	private String ossUrl;
@@ -190,11 +197,9 @@ public class MyCustomerClueController {
 
 		CallRecordReqDTO call = new CallRecordReqDTO();
 		call.setClueId(clueId);
-		call.setPageSize(10000);
-		call.setPageNum(1);
-		JSONResult<PageBean<CallRecordRespDTO>> callRecord = callRecordFeign.listTmCallReacordByParams(call);
+		JSONResult<List<CallRecordRespDTO>> callRecord = callRecordFeign.listTmCallReacordByParamsNoPage(call);
 		// 资源通话记录
-		if (callRecord != null && callRecord.SUCCESS.equals(callRecord.getCode()) && callRecord.getData() != null) {
+		if (callRecord != null && JSONResult.SUCCESS.equals(callRecord.getCode()) && callRecord.getData() != null) {
 
 			request.setAttribute("callRecord", callRecord.getData());
 		}
@@ -209,7 +214,7 @@ public class MyCustomerClueController {
 		JSONResult<ClueDTO> clueInfo = myCustomerFeignClient.findClueInfo(queryDTO);
 
 		// 维护的资源数据
-		if (clueInfo != null && clueInfo.SUCCESS.equals(clueInfo.getCode()) && clueInfo.getData() != null) {
+		if (clueInfo != null && JSONResult.SUCCESS.equals(clueInfo.getCode()) && clueInfo.getData() != null) {
 
 			if (null != clueInfo.getData().getClueCustomer()) {
 				request.setAttribute("customer", clueInfo.getData().getClueCustomer());
@@ -284,7 +289,7 @@ public class MyCustomerClueController {
 		call.setPageNum(1);
 		JSONResult<PageBean<CallRecordRespDTO>> callRecord = callRecordFeign.listTmCallReacordByParams(call);
 		// 资源通话记录
-		if (callRecord != null && callRecord.SUCCESS.equals(callRecord.getCode()) && callRecord.getData() != null) {
+		if (callRecord != null && JSONResult.SUCCESS.equals(callRecord.getCode()) && callRecord.getData() != null) {
 			request.setAttribute("callRecord", callRecord.getData());
 		} else {
 			request.setAttribute("callRecord", new ArrayList());
@@ -298,7 +303,7 @@ public class MyCustomerClueController {
 		JSONResult<ClueDTO> clueInfo = myCustomerFeignClient.findClueInfo(queryDTO);
 
 		// 维护的资源数据
-		if (clueInfo != null && clueInfo.SUCCESS.equals(clueInfo.getCode()) && clueInfo.getData() != null) {
+		if (clueInfo != null && JSONResult.SUCCESS.equals(clueInfo.getCode()) && clueInfo.getData() != null) {
 
 			if (null != clueInfo.getData().getClueCustomer()) {
 				request.setAttribute("customer", clueInfo.getData().getClueCustomer());
@@ -370,6 +375,36 @@ public class MyCustomerClueController {
 	public JSONResult<List<ClueFileDTO>> findClueFile(HttpServletRequest request, @RequestBody ClueQueryDTO dto) {
 		// 获取已上传的文件数据
 		return myCustomerFeignClient.findClueFile(dto);
+	}
+
+	/**
+	 * 更新最后拨打时间
+	 * 
+	 * @param request
+	 * @param clueId
+	 * @return
+	 */
+	@RequestMapping("/updateCallTime")
+	@ResponseBody
+	public JSONResult<String> updateCallTime(HttpServletRequest request, @RequestBody ClueQueryDTO dto) {
+		// 获取已上传的文件数据
+		return myCustomerFeignClient.updateCallTime(dto);
+	}
+
+	/**
+	 * 获取线索拨打记录
+	 * 
+	 * @param request
+	 * @param clueId
+	 * @return
+	 */
+	@RequestMapping("/findCallData")
+	@ResponseBody
+	public JSONResult<List<CallRecordRespDTO>> findCallData(HttpServletRequest request, @RequestBody ClueQueryDTO dto) {
+		CallRecordReqDTO call = new CallRecordReqDTO();
+		call.setClueId(dto.getClueId() + "");
+		JSONResult<List<CallRecordRespDTO>> callRecord = callRecordFeign.listTmCallReacordByParamsNoPage(call);
+		return callRecord;
 	}
 
 	/**
@@ -655,9 +690,30 @@ public class MyCustomerClueController {
 			userRole.setRoleCode(RoleCodeEnum.DXZJ.name());
 			userRole.setOrgId(user.getOrgId());
 			JSONResult<List<UserInfoDTO>> userInfoJson = userInfoFeignClient.listByOrgAndRole(userRole);
-			if (userInfoJson != null && userInfoJson.SUCCESS.equals(userInfoJson.getCode())
-					&& userInfoJson.getData() != null) {
-				// relation.setTeleDirectorId(teleDirectorId);
+			if (userInfoJson != null && JSONResult.SUCCESS.equals(userInfoJson.getCode())
+					&& userInfoJson.getData() != null && userInfoJson.getData().size() > 0) {
+				// 电销总监
+				relation.setTeleDirectorId(userInfoJson.getData().get(0).getId());
+			}
+
+			// 查询用户的上级
+			OrganizationQueryDTO orgDto = new OrganizationQueryDTO();
+			orgDto.setId(user.getOrgId());
+			JSONResult<List<OrganizationDTO>> orgJson = organizationFeignClient.listParentsUntilOrg(orgDto);
+			if (orgJson != null && JSONResult.SUCCESS.equals(orgJson.getCode()) && orgJson.getData() != null
+					&& orgJson.getData().size() > 0) {
+				for (OrganizationDTO org : orgJson.getData()) {
+
+					if (org.getOrgType().equals(OrgTypeConstant.DZSYB)) {
+						relation.setTeleDeptId(org.getParentId());
+
+					}
+					if (org.getOrgType().equals(OrgTypeConstant.DZFGS)) {
+
+						relation.setTeleCompanyId(org.getId());
+					}
+
+				}
 
 			}
 
@@ -677,6 +733,11 @@ public class MyCustomerClueController {
 	@ResponseBody
 	public JSONResult<String> updateCustomerClue(HttpServletRequest request, @RequestBody ClueDTO dto) {
 
+		Subject subject = SecurityUtils.getSubject();
+		UserInfoDTO user = (UserInfoDTO) subject.getSession().getAttribute("user");
+		if (null != user) {
+			dto.setUpdateUser(user.getId());
+		}
 		return myCustomerFeignClient.updateCustomerClue(dto);
 	}
 

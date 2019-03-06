@@ -162,10 +162,10 @@ var uploader = new plupload.Uploader({
     filters: {
         mime_types : [ //只允许上传图片和zip,rar文件
             // { title : "Image files", extensions : "jpg,gif,png,bmp" },
-            { title : "Image files", extensions : "jpg,png" }
+            { title : "Image files", extensions : "jpg,png,mp3,mp4" }
             // { title : "Zip files", extensions : "zip,rar" }
         ],
-        max_file_size : '200Kb', //最大只能上传10mb的文件
+        max_file_size : '10mb', //最大只能上传10mb的文件
         prevent_duplicates : false //不允许选取重复文件
     },
 
@@ -224,7 +224,7 @@ var uploader = new plupload.Uploader({
         Error: function(up, err) {
             if (err.code == -600) {
                 // document.getElementById('console').appendChild(document.createTextNode("\n选择的文件太大了,可以根据应用情况，在upload.js 设置一下上传的最大大小"));
-                layer.alert("选择的图片不能超过200K", {icon: 2});
+                alert("选择的图片不能超过10mb", {icon: 2});
             }
             else if (err.code == -601) {
                 // document.getElementById('console').appendChild(document.createTextNode("\n选择的文件后缀不对,可以根据应用情况，在upload.js进行设置可允许的上传文件类型"));
@@ -232,12 +232,12 @@ var uploader = new plupload.Uploader({
             }
             else if (err.code == -602) {
                 // document.getElementById('console').appendChild(document.createTextNode("\n这个文件已经上传过一遍了"));
-                layer.alert("这个文件已经上传过一遍了", {icon: 2});
+               alert("这个文件已经上传过一遍了", {icon: 2});
             }
             else
             {
                 // document.getElementById('console').appendChild(document.createTextNode("\nError xml:" + err.response));
-                layer.alert("请上传图片", {icon: 2});
+                 alert("请上传图片", {icon: 2});
             }
         }
     }

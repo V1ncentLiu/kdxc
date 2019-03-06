@@ -1,8 +1,8 @@
 package com.kuaidao.manageweb.feign.InvalidCustomer;
 
-import com.kuaidao.aggregation.dto.pubcusres.ClueQueryParamDTO;
-import com.kuaidao.aggregation.dto.pubcusres.PublicCustomerResourcesReqDTO;
-import com.kuaidao.aggregation.dto.pubcusres.PublicCustomerResourcesRespDTO;
+import com.kuaidao.aggregation.dto.invalidcustomer.ClueQueryParamDTO;
+import com.kuaidao.aggregation.dto.invalidcustomer.InvalidCustomerResourcesReqDTO;
+import com.kuaidao.aggregation.dto.invalidcustomer.InvalidCustomerResourcesRespDTO;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
@@ -24,11 +24,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 public interface InvalidCustomerFeignClient {
 
     @PostMapping("/releaseRecord")
-    public JSONResult<PageBean> releaseRecord(@RequestBody PublicCustomerResourcesReqDTO dto);
+    public JSONResult<PageBean> releaseRecord(@RequestBody InvalidCustomerResourcesReqDTO dto);
     @PostMapping("/resourceReduction")
-    public JSONResult<Boolean> resourceReduction(@RequestBody PublicCustomerResourcesReqDTO dto);
+    public JSONResult<Boolean> resourceReduction(@RequestBody InvalidCustomerResourcesReqDTO dto);
     @PostMapping("/queryPage")
-    public JSONResult<PageBean<PublicCustomerResourcesRespDTO>> queryListPage(@RequestBody ClueQueryParamDTO dto);
+    public JSONResult<PageBean<InvalidCustomerResourcesRespDTO>> queryListPage(@RequestBody ClueQueryParamDTO dto);
 
     @Component
     static class HystrixClientFallback implements InvalidCustomerFeignClient {
@@ -43,17 +43,17 @@ public interface InvalidCustomerFeignClient {
         }
 
         @Override
-        public JSONResult<PageBean> releaseRecord(PublicCustomerResourcesReqDTO dto) {
+        public JSONResult<PageBean> releaseRecord(InvalidCustomerResourcesReqDTO dto) {
             return fallBackError("无效客户资源-释放记录");
         }
 
         @Override
-        public JSONResult<Boolean> resourceReduction(PublicCustomerResourcesReqDTO dto) {
+        public JSONResult<Boolean> resourceReduction(InvalidCustomerResourcesReqDTO dto) {
             return fallBackError("无效客户资源-资源还原");
         }
 
         @Override
-        public JSONResult<PageBean<PublicCustomerResourcesRespDTO>> queryListPage(ClueQueryParamDTO dto) {
+        public JSONResult<PageBean<InvalidCustomerResourcesRespDTO>> queryListPage(ClueQueryParamDTO dto) {
             return fallBackError("无效客户资源分页查询");
         }
     }

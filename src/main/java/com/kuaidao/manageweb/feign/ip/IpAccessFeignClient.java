@@ -94,6 +94,14 @@ public interface IpAccessFeignClient {
 	@RequestMapping(method = RequestMethod.POST, value = "/findListByPackage")
 	public JSONResult<List<IpPackageInfoDTO>> findListByPackage(IpAccessManagerQueryDTO dto);
 	
+	/**
+	 * 添加IP时判断当前IP是否存在
+	 * @param dto
+	 * @return
+	 */
+	@RequestMapping(method = RequestMethod.POST, value = "/findListByIp")
+	public  JSONResult<List<IpRepositoryInfoDTO>> findListByIp( IpAccessManagerQueryDTO dto);
+	
 
 	@Component
 	static class HystrixClientFallback implements IpAccessFeignClient {
@@ -183,6 +191,14 @@ public interface IpAccessFeignClient {
 			// TODO Auto-generated method stub
 			return fallBackError("查询所有IP包数据失败");
 		}
+
+		@Override
+		public JSONResult<List<IpRepositoryInfoDTO>> findListByIp(IpAccessManagerQueryDTO dto) {
+			// TODO Auto-generated method stub
+			return fallBackError("查询所有IP数据失败");
+		}
+		
+		
 		
 
 	}

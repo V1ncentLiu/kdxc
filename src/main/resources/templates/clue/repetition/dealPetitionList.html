@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml"
     xmlns:th="http://www.thymeleaf.org">
 <head th:include="_header_include::frag(~{::title},~{::style},~{})">
-    <title>电销布局管理</title>
+    <title>客户重单审批处理</title>
     <style>
       .ratioInput .el-input__inner{text-align: center;}
     </style>
@@ -11,7 +11,7 @@
 <div v-loading="loading" id="organizationManage" class="organizationManage mainPadding" style="display: none;">  
     <el-breadcrumb separator="/" class="elBreadcrumb marginB20" >
         <el-breadcrumb-item>Home</el-breadcrumb-item>
-        <el-breadcrumb-item>总裁办确认</el-breadcrumb-item>
+        <el-breadcrumb-item>总裁办处理</el-breadcrumb-item>
         <el-breadcrumb-item><a href="/repetition/dealPetitionList" data-url="b.html">客户重单审批处理</a></el-breadcrumb-item>
     </el-breadcrumb>
     <el-row class="marginB10">
@@ -24,9 +24,9 @@
             <el-row class="marginB10">
               
 				<div class="block">
-					<el-select filterable v-model="signId" placeholder="是否签约" clearable>
+					<el-select filterable v-model="isSign" placeholder="是否签约" clearable>
 					    <el-option
-					      v-for="item in isSign"
+					      v-for="item in isSignList"
 					      :key="item.value"
 					      :label="item.label"
 					      :value="item.value">
@@ -48,12 +48,12 @@
 					      :value="item.value">
 					    </el-option>
   					</el-select>
-  					<span class="demonstration">签约时间时间</span>
+  					<span class="demonstration">签约时间</span>
 					<el-date-picker value-format="yyyy-MM-dd HH:mm:ss" v-model="beginTime" type="datetime" placeholder="选择日期">
-					</el-date-picker>
+					</el-date-picker>-
 					<el-date-picker value-format="yyyy-MM-dd HH:mm:ss" v-model="endTime" type="datetime" placeholder="选择日期">
 					</el-date-picker>
-  					<el-select filterable v-model="teleCompanyId" placeholder="电销分公司" @change="showTele(7)">
+  					<el-select filterable v-model="teleCompanyId" placeholder="电销分公司" @change="showTele(7)" clearable>
 					    <el-option
 					      v-for="item in dxBusinessList"
 					      :key="item.id"
@@ -61,7 +61,7 @@
 					      :value="item.id">
 					    </el-option>
   					</el-select>
-  					<el-select filterable v-model="teleDeptId" placeholder="电销事业部" @change="showTele(1)">
+  					<el-select filterable v-model="teleDeptId" placeholder="电销事业部" @change="showTele(1)" clearable>
 					    <el-option
 					      v-for="item in dxCauseBList"
 					      :key="item.id"
@@ -69,7 +69,7 @@
 					      :value="item.id">
 					    </el-option>
   					</el-select>
-  					<el-select filterable v-model="teleGorupId" placeholder="电销组">
+  					<el-select filterable v-model="teleGorupId" placeholder="电销组" clearable>
 					    <el-option
 					      v-for="item in dxList"
 					      :key="item.id"
@@ -77,6 +77,7 @@
 					      :value="item.id">
 					    </el-option>
   					</el-select>
+  					<el-input style="width:10%;"  v-model="customerName" placeholder="客户姓名"></el-input>
   					<el-button type="primary" @click="search">搜索</el-button>
 				</div>
             </el-row>
@@ -93,6 +94,8 @@
                     <el-table-column align="center" type="index" prop="id" label="序号" width="55"></el-table-column>
                     <el-table-column align="center" prop="cusName" label="客户姓名"></el-table-column>
                     <el-table-column align="center" prop="cusPhone" label="客户手机号"></el-table-column>
+                    <el-table-column align="center" prop="isSign" label="是否签约" :formatter="transSignStatus"></el-table-column>
+                    <el-table-column align="center" prop="signTime" label="签约时间" :formatter="dateFormat"></el-table-column>
                     <el-table-column align="center" prop="dealStatusResult" label="重单结果"></el-table-column>
                     <el-table-column align="center" prop="statusResult" label="处理状态" ></el-table-column>
             
@@ -170,7 +173,7 @@
         </el-form>
         <div slot="footer" style="text-align: center" class="dialog-footer">
             <el-button type="primary" @click="submitForm('form')">提交</el-button>
-            <el-button >取消</el-button>
+            <el-button @click="dialogFormVisible =false">取消</el-button>
         </div>
     </el-dialog>   
             
@@ -185,11 +188,11 @@
    var orgVM =  new Vue({
         el: '#organizationManage',
         data: {
-          form:{
-            repetitionDetailList:[],
-            dealStatusId:"",
-          },
-        	repeatName11:"",
+          	form:{
+	            repetitionDetailList:[],
+	            dealStatusId:"",
+          	},
+          	customerName:"",
         	repeatName:"",
         	cusNameId:"",
         	clueId:"",
@@ -221,6 +224,7 @@
         	dialogFormVisible:false,
         	dataTable:[],
         	isShow:true,
+        	isSign:"",
         	multipleSelection: [],
         	
         	statusList:[
@@ -233,7 +237,7 @@
                    label: '已审批处理'	
                   }
         	],
-        	isSign:[
+        	isSignList:[
         		{
                		value: '0',
                    label: '未签约'	
@@ -296,6 +300,23 @@
              
         },
         methods: {
+        	//日期数据格式化方法
+    		dateFormat:function(row, column) {
+    			var date = row[column.property];
+               	if (date == undefined) {
+    	               return "";
+              	}
+               	return moment(date).format("YYYY-MM-DD HH:mm:ss");
+    		},
+        	transSignStatus(row, column, cellValue, index) {
+          	  var text="";
+                if(cellValue==0 || "undefined" == cellValue || cellValue == null){
+              	  text="未签约"
+                }else{
+              	  text="签约"
+                }
+                return text;
+            },
         	submitForm(form){
         		this.$refs[form].validate((valid) => {  
         			 if (valid) {
@@ -306,22 +327,33 @@
 		                	 repeatId = rows[i].repeatId
 		                 }
 		        		var detailDTOs = [];
+		        		var idList = [];
 		        		var dealStatusId = this.form.dealStatusId;
 		       			var num = 0;
 		                   for(var i=0;i<memberArry.length;i++) {
 		                     var detail={};
+		                     var ids ={};
 		                     detail.id=memberArry[i].detailId;
-		                     detail.repeatRatio=memberArry[i].repeatRatio;
+		                    
 		                     detail.repeatId = repeatId;
-		                     detail.dealStatus = dealStatusId;
+		                     if(dealStatusId ==0){
+		                    	 detail.repeatRatio =0;
+		                    	 detail.dealStatus = dealStatusId;
+		                     }else{
+		                    	 detail.dealStatus = dealStatusId;
+		                    	 detail.repeatRatio=memberArry[i].repeatRatio;
+		                     }
+		                     detail.repeatUser = memberArry[i].repeatUser;
+		                     detail.clueId = memberArry[i].clueId;
 		                     detailDTOs.push(detail);
+		                     idList.push(memberArry[i].clueId);
 		                     num = parseFloat(num)+parseFloat(memberArry[i].repeatRatio)
 		                 }
 		        		
 		        		if(dealStatusId ==1){
 		        			if(num>100){
 		                    	this.$message({
-		                            message: '比例之和不能大于100',
+		                             message: '比例之和不能大于100',
 		                            type: 'warning'
 		                          });
 		                         return;
@@ -331,7 +363,8 @@
 		                param.dealStatus = dealStatusId;
 		                param.repeatId = repeatId;
 		                param.detailDTOs = detailDTOs;
-		                param.dealremark = this.remark;
+		                param.dealRemark = this.remark;
+		                param.idList = idList;
 		                axios.post('/clue/cluerepetition/updatePetitionById',param).then(function (response) {
 		              	  	console.log(response);
 		                  	if(null===response||response.data==null||response.data.code!='0'){
@@ -362,12 +395,19 @@
                 param.pageNum = pageNum;
                 param.pageSize = pageSize;
                 param.dealStatus=this.dealStatus;
-                param.cusName=this.cusName;
+                param.cusName=this.customerName;
                 param.cusPhone=this.cusPhone;
                 param.status=this.status;
                 param.teleGorupId=this.teleGorupId;
                 param.teleCompanyId=this.teleCompanyId;
                 param.teleDeptId=this.teleDeptId;
+                param.beginTime = this.beginTime;
+                param.endTime = this.endTime;
+                param.isSign = this.isSign;
+                if(this.beginTime !=null && this.beginTime != '' && this.endTime !=null && this.endTime != '' && this.beginTime>this.endTime){
+                	  this.$message("开始时间不能大于结束时间");
+           	         return;
+                }
                 console.log(param);
                 axios.post('/clue/cluerepetition/dealPetitionList',param).then(function (response) {
                 	  console.log(response);
@@ -391,7 +431,7 @@
         	detailButton(){
             	
             	var rows = this.multipleSelection;
-            	this.dialogFormVisible = true;
+            	
                 if(rows.length  !=1){
                     this.$message({
                        message: '请选择一条数据进行修改',
@@ -399,7 +439,7 @@
                      });
                     return;
                 }
-        		
+                this.dialogFormVisible = true;
         		 var str = "";
                  for ( var i = 0; i <rows.length; i++){
                	  str = rows[i].repeatId
@@ -408,7 +448,6 @@
 		        param.repeatId=str;
                 axios.post('/clue/cluerepetition/dealPetitionById',param).then(function (response) {
                   	  console.log(response);
-                  	orgVM.repeatName11="111";
                       if(null !==response && response.data !=null && response.data.code=='0'){
                     	  var clueRepetitionDTO = response.data.data;
                     	  console.log("1111111111 "+clueRepetitionDTO);

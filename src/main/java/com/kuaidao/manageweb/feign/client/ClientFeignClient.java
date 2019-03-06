@@ -26,6 +26,7 @@ import com.kuaidao.aggregation.dto.client.UserCnoReqDTO;
 import com.kuaidao.aggregation.dto.client.UserCnoRespDTO;
 import com.kuaidao.callcenter.dto.QimoOutboundCallDTO;
 import com.kuaidao.callcenter.dto.QimoOutboundCallRespDTO;
+import com.kuaidao.callcenter.dto.TrAxbOutCallReqDTO;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.IdEntity;
 import com.kuaidao.common.entity.IdListReq;
@@ -207,6 +208,15 @@ public interface ClientFeignClient {
     @PostMapping("/clientLoginRecord")
     JSONResult<Boolean> clientLoginRecord(@RequestBody ClientLoginReCordDTO clientLoginRecord);
     
+
+    /**
+     * 天润 外呼
+     * @param trAxbOutCallReqDTO
+     * @return
+     */
+    @PostMapping("/axbOutCall")
+    JSONResult<String> axbOutCall(TrAxbOutCallReqDTO trAxbOutCallReqDTO);
+    
 	@Component
 	static class HystrixClientFallback implements ClientFeignClient {
 
@@ -326,6 +336,11 @@ public interface ClientFeignClient {
         @Override
         public JSONResult<Boolean> clientLoginRecord(ClientLoginReCordDTO clientLoginRecord) {
             return fallBackError("坐席登录记录");
+        }
+
+        @Override
+        public JSONResult<String> axbOutCall(TrAxbOutCallReqDTO trAxbOutCallReqDTO) {
+            return fallBackError("天润外呼");
         }
 
 	}

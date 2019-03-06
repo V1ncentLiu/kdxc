@@ -125,6 +125,14 @@ public interface OrganizationFeignClient {
      */
     @PostMapping("/listLeafOrg")
     JSONResult<List<OrganizationDTO>> listLeafOrg(@RequestBody OrganizationQueryDTO reqDto);
+    
+    /**
+     * 根据id 查询所有的父级
+     * @param reqDto systemCode 系统代码 ;id 组织机构ID
+     * @return
+     */
+    @PostMapping("/listParentsUntilOrg")
+    public JSONResult<List<OrganizationDTO>> listParentsUntilOrg(@RequestBody OrganizationQueryDTO reqDto);
 
     @Component
     static class HystrixClientFallback implements OrganizationFeignClient {
@@ -210,6 +218,12 @@ public interface OrganizationFeignClient {
         @Override
         public JSONResult<List<OrganizationDTO>> listLeafOrg(OrganizationQueryDTO reqDto) {
             return fallBackError("查询叶子节点");
+        }
+
+
+        @Override
+        public JSONResult<List<OrganizationDTO>> listParentsUntilOrg(OrganizationQueryDTO reqDto) {
+            return fallBackError("根据ID查询所有父级");
         }
     }
 

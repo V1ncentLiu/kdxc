@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head th:replace="_header_include::frag(~{::title},~{::style},~{})">
+    <title>我的客户</title>
+    <style>
+        button a{color:#fff!important;}
+    </style>
+</head>
+<body>
+
+<div id="businessContractRecord" class="businessContractRecord mainPadding" style="display: none;">
+    <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
+        <el-breadcrumb-item>Home</el-breadcrumb-item>
+        <el-breadcrumb-item>商务管理</el-breadcrumb-item>
+        <el-breadcrumb-item>我的客户</el-breadcrumb-item>
+    </el-breadcrumb>
+    <div class="fs16 marginB20">签约单基本信息</div>
+    <el-table
+            ref="recordTableInfo"
+            tooltip-effect="dark"
+            style="width: 100%;margin-bottom: 20px;"
+            border
+            :data="recordTableInfo"
+    >
+        <el-table-column align="center" prop="signNo" label="签约单编号"></el-table-column>
+        <el-table-column align="center" prop="customerName" label="客户姓名"></el-table-column>
+        <el-table-column align="center" prop="idCard" label="客户身份证号" width="170"></el-table-column>
+        <el-table-column align="center" prop="phone" label="客户联系电话"></el-table-column>
+        <el-table-column align="center" prop="signCompanyId" label="签约餐饮公司"></el-table-column>
+        <el-table-column align="center" prop="signProjectId" label="签约项目"></el-table-column>
+        <el-table-column align="center" prop="signProvince" label="签约省份"></el-table-column>
+        <el-table-column align="center" prop="signCity" label="签约城市"></el-table-column>
+        <el-table-column align="center" prop="signDictrict" label="签约区／县"></el-table-column>
+        <el-table-column align="center" prop="signShopType" label="签约店型"></el-table-column>
+        <el-table-column align="center" prop="amountReceivable" label="应收金额"></el-table-column>
+        <el-table-column align="center" prop="firstToll" label="路费"></el-table-column>
+        <el-table-column align="center" prop="preferentialAmount" label="优惠金额"></el-table-column>
+        <el-table-column align="center" prop="giveAmount" label="赠送金额"></el-table-column>
+        <el-table-column align="center" prop="signType" label="签约类型">
+            <template slot-scope="scope">
+                <div v-if="scope.row.signType === 1">
+                    一次性全款
+                </div>
+                <div v-else-if="scope.row.signType ===2">
+                    先交定金
+                </div>
+            </template>
+        </el-table-column>
+        </el-table-column>
+    </el-table>
+    <div v-show="paymentDetailsShow">
+        <div class="fs16 marginB20">全款付款明细</div>
+        <el-table
+                ref="recordTable"
+                tooltip-effect="dark"
+                style="width: 100%;margin-bottom: 20px;width: 785px;"
+                border
+                :data="recordTable"
+        >
+            <el-table-column align="center" prop="payMode" label="付款方式">
+                <template slot-scope="scope">
+                <div v-if="scope.row.payMode === 1">
+                    现金
+                </div>
+                <div v-else-if="scope.row.payMode ===2">
+                    POS
+                </div>
+                <div v-else-if="scope.row.payMode ===3">
+                    转账
+                </div>
+                </template>
+            </el-table-column>
+            <el-table-column align="center" prop="payTime" label="付款时间"></el-table-column>
+            <el-table-column align="center" prop="amountReceived" label="实收金额"></el-table-column>
+            <el-table-column align="center" prop="amountPerformance" label="业绩金额"></el-table-column>
+            <el-table-column align="center" prop="status" label="明细状态">
+                <template slot-scope="scope">
+                    <div v-if="scope.row.status === 1">
+                        审核中
+                    </div>
+                    <div v-else-if="scope.row.status ===2">
+                        有效
+                    </div>
+                </template>
+            </el-table-column>
+        </el-table>
+    </div>
+    <div v-show="paymentDetailsShow2">
+        <div class="fs16 marginB20" style="width: 1100px;">定金付款明细<el-button  v-show="readonlyFalg" @click="recordDialogClick(1)" type="primary" size="small" class="f-fr">添加付款</el-button></div>
+        <el-table
+                ref="recordTable2"
+                tooltip-effect="dark"
+                style="width: 100%;margin-bottom: 20px;width: 1100px;"
+                border
+                :data="recordTable2"
+        >
+            <el-table-column align="center" prop="payMode" label="付款方式">
+                <template slot-scope="scope">
+                    <div v-if="scope.row.payMode === 1">
+                        现金
+                    </div>
+                    <div v-else-if="scope.row.payMode ===2">
+                        POS
+                    </div>
+                    <div v-else-if="scope.row.payMode ===3">
+                        转账
+                    </div>
+                </template>
+            </el-table-column>
+            <el-table-column align="center" prop="payTime" label="付款时间"></el-table-column>
+            <el-table-column align="center" prop="amountReceived" label="实收金额"></el-table-column>
+            <el-table-column align="center" prop="amountPerformance" label="业绩金额"></el-table-column>
+            <el-table-column align="center" prop="amountBalance" label="余款金额"></el-table-column>
+            <el-table-column align="center" prop="makeUpTime" label="预计余款补齐时间"></el-table-column>
+            <el-table-column align="center" prop="status" label="明细状态">
+                <template slot-scope="scope">
+                    <div v-if="scope.row.status === 1">
+                        审核中
+                    </div>
+                    <div v-else-if="scope.row.status ===2">
+                        有效
+                    </div>
+                </template>
+            </el-table-column>
+        </el-table>
+    </div>
+    <div v-show="paymentDetailsShow3">
+        <div class="fs16 marginB20" style="width: 1100px;">二次定金付款明细<!--<el-button @click="recordDialogClick(2)" type="primary" size="small" class="f-fr">添加付款</el-button>--></div>
+        <el-table
+                ref="recordTable3"
+                tooltip-effect="dark"
+                style="width: 100%;margin-bottom: 20px;width: 1100px;"
+                border
+                :data="recordTable3"
+        >
+            <el-table-column align="center" prop="payMode" label="付款方式">
+                <template slot-scope="scope">
+                    <div v-if="scope.row.payMode ==1">
+                        现金
+                    </div>
+                    <div v-else-if="scope.row.payMode ==2">
+                        POS
+                    </div>
+                    <div v-else-if="scope.row.payMode ==3">
+                        转账
+                    </div>
+                </template>
+            </el-table-column>
+            <el-table-column align="center" prop="payTime" label="付款时间"></el-table-column>
+            <el-table-column align="center" prop="amountReceived" label="实收金额"></el-table-column>
+            <el-table-column align="center" prop="amountPerformance" label="业绩金额"></el-table-column>
+            <el-table-column align="center" prop="amountBalance" label="余款金额"></el-table-column>
+            <el-table-column align="center" prop="makeUpTime" label="预计余款补齐时间"></el-table-column>
+            <el-table-column align="center" prop="detailStatus" label="明细状态">
+                <template slot-scope="scope">
+                    <div v-if="scope.row.status === 1">
+                        审核中
+                    </div>
+                    <div v-else-if="scope.row.status ===2">
+                        有效
+                    </div>
+                </template>
+            </el-table-column>
+        </el-table>
+    </div>
+    <div v-show="paymentDetailsShow4">
+        <div class="fs16 marginB20" style="width: 785px;">尾款付款明细<!--<el-button @click="recordDialogClick(3)" type="primary" size="small" class="f-fr">添加付款</el-button>--></div>
+        <el-table
+                ref="recordTable"
+                tooltip-effect="dark"
+                style="width: 100%;margin-bottom: 20px;width: 785px;"
+                border
+                :data="recordTable4"
+        >
+            <el-table-column align="center" prop="payMode" label="付款方式">
+                <template slot-scope="scope">
+                    <div v-if="scope.row.payMode ==1">
+                        现金
+                    </div>
+                    <div v-else-if="scope.row.payMode ==2">
+                        POS
+                    </div>
+                    <div v-else-if="scope.row.payMode ==3">
+                        转账
+                    </div>
+                </template>
+            </el-table-column>
+            <el-table-column align="center" prop="payTime" label="付款时间"></el-table-column>
+            <el-table-column align="center" prop="amountReceived" label="实收金额"></el-table-column>
+            <el-table-column align="center" prop="amountPerformance" label="业绩金额"></el-table-column>
+            <el-table-column align="center" prop="status" label="明细状态">
+                <template slot-scope="scope">
+                    <div v-if="scope.row.status === 1">
+                        审核中
+                    </div>
+                    <div v-else-if="scope.row.status ===2">
+                        有效
+                    </div>
+                </template>
+            </el-table-column>
+        </el-table>
+    </div>
+
+    <!-- 明细弹窗 -->
+    <el-dialog title="追加定金付款明细" width="70%" :visible.sync="dialogFormVisible">   <el-form :model="formMoneyDetail" ref="formMoneyDetail" >
+        <div>
+            <el-row>
+                <el-col :span="10">
+                    <el-form-item label="付款类型：" :label-width="formLabelWidth" prop="payType">
+                        <el-select v-model="formMoneyDetail.payType" placeholder="请选择签约付款类型">
+                            <el-option label="追加定金" value="3"></el-option>
+                            <el-option label="尾款" value="4"></el-option>
+                        </el-select>
+                    </el-form-item>
+                </el-col>
+                <el-col :span="10">
+                    <el-form-item label="付款方式：" :label-width="formLabelWidth" prop="payMode">
+                        <el-select v-model="formMoneyDetail.payMode" placeholder="请选择付款方式：">
+                            <el-option
+                                    v-for="item in option3s"
+                                    :key="item.value"
+                                    :label="item.label"
+                                    :value="item.value">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
+                </el-col>
+            </el-row>
+            <el-row>
+                <el-col :span="10">
+                    <el-form-item label="付款时间：" :label-width="formLabelWidth" prop="payTime">
+                        <el-date-picker
+                                type="datetime"
+                                format="yyyy-MM-dd"
+                                placeholder="选择日期"
+                                v-model="formMoneyDetail.payTime" style="width: 100%;"></el-date-picker>
+                    </el-form-item>
+                </el-col>
+                <el-col :span="10">
+                    <el-form-item label="实收金额：" :label-width="formLabelWidth" prop="amountReceived">
+                        <el-input v-model="formMoneyDetail.amountReceived" @keyup.native="number" autocomplete="off"></el-input>
+                    </el-form-item>
+                </el-col>
+            </el-row>
+            <el-row>
+                <el-col :span="10">
+                    <el-form-item label="余款金额：" :label-width="formLabelWidth" prop="amountBalance">
+                        <el-input v-model="formMoneyDetail.amountBalance" @keyup.native="number" autocomplete="off"></el-input>
+                    </el-form-item>
+                </el-col>
+                <el-col :span="10">
+                    <el-form-item label="预计余款补齐时间：" :label-width="formLabelWidth" prop="makeUpTime">
+                        <el-date-picker
+                                type="datetime"
+                                format="yyyy-MM-dd"
+                                placeholder="选择日期"
+                                v-model="formMoneyDetail.makeUpTime"
+                                style="width: 100%;"></el-date-picker>
+                    </el-form-item>
+                </el-col>
+            </el-row>
+            <el-row>
+                <el-col :span="10">
+                    <el-form-item label="业绩金额：" :label-width="formLabelWidth" prop="amountPerformance">
+                        <el-input v-model="formMoneyDetail.amountPerformance" @keyup.native="number" autocomplete="off"></el-input>
+                    </el-form-item>
+                </el-col>
+            </el-row>
+        </div>
+    </el-form>
+        <div slot="footer" class="dialog-footer f-tac">
+            <el-button type="primary" @click="submitDialogForm('formMoneyDetail')">确 定</el-button>
+            <el-button @click="dialogFormVisible = false">取 消</el-button>
+        </div>
+    </el-dialog>
+</div>
+
+<!-- import common js-->
+<div th:include="_footer_include :: #jsLib"></div>
+<!--<script th:src="@{/js/excel/xlsx.min.js}" src="../static/js/excel/xlsx.min.js"></script>-->
+<script th:inline="javascript">
+    var vclueId = [[${clueId}]];
+    var vsignId = [[${signId}]];
+    var readOnly = [[${readyOnly}]];
+    var payType = [[${payType}]];
+    var signData = [[${signData}]];
+    var PayAllData = [[${PayAllData}]];
+    var oneData = [[${oneData}]];
+    var twoData = [[${twoData}]];
+    var threeData = [[${threeData}]];
+
+
+
+    var one ;
+    var two ;
+    var three;
+    var four ;
+    payType = 4
+    if(payType==1){
+        one = true;
+        two = false;
+        three = false;
+        four = false;
+    }else if(payType==2){
+        one = false;
+        two = true;
+        three = false;
+        four = false;
+    }else if(payType==3){
+        one = false;
+        two = true;
+        three = true;
+        four = false;
+    }else{
+        one = false;
+        two = true;
+        if(!twoData){
+            three = false;
+        }else{
+            three = true;
+        }
+        four = true;
+    }
+
+    var vreadonlyFalg = true;
+    if(readOnly==1){
+        vreadonlyFalg = false;
+    }
+
+    // 查询 模块
+    var mainDivVM = new Vue({
+        el: '#businessContractRecord',
+        data: {
+            dialogFormVisible:false,//弹窗是否显示
+            paymentDetailsShow:one,//判断全款付款明细表格是否显示
+            paymentDetailsShow2:two,//判断定金付款明细表格是否显示
+            paymentDetailsShow3:three,//判断二次定金付款明细表格是否显示
+            paymentDetailsShow4:four,//判断尾款付款明细表格是否显示
+            readonlyFalg:vreadonlyFalg,
+            dialogFormType:'',
+            formLabelWidth: '150px',
+            recordTableInfo:signData,
+            recordTable:PayAllData,
+            recordTable2:oneData,
+            recordTable3:twoData,
+            recordTable4:threeData,
+            dialogForm:{
+                reason:''
+            },
+            dialogRules:{
+                reason: [
+                    { required: true, message: '请输入驳回原因', trigger: 'blur' }
+                ]
+            },
+
+            formMoneyDetail: {
+                signId:"",
+                paymentType: "",
+                paymentMode: "",
+                paymentTime: "",
+                purchaseAmount: "",
+                balanceAmount: "",
+                balanceTime:"",
+                performanceAmount: ""
+            },
+            option1s: [],
+            option2s: [{
+                value: '1',
+                label: '一次性全款'
+            },{
+                value: '2',
+                label: '先交订金'
+            }],
+            option3s: [{
+                value: '1',
+                label: '现金'
+            },{
+                value: '2',
+                label: 'POS'
+            },{
+                value: '3',
+                label: '转账'
+            }],
+        },
+        methods: {
+            recordDialogClick(type){
+                if(type==1){//定金添加付款按钮点击
+                    console.log(1)
+                    this.dialogFormVisible=true
+                    this.dialogFormType='1'
+                }else if(type==2){//二次定金添加付款按钮点击
+                    console.log(2)
+                    this.dialogFormVisible=true
+                    this.dialogFormType='2'
+                }else if(type==3){//尾款添加付款按钮点击
+                    console.log(3)
+                    this.dialogFormVisible=true
+                    this.dialogFormType='3'
+                }
+            },
+            submitDialogForm(formName) {
+                var param = this.formMoneyDetail;
+                param.signId = vsignId;
+                console.log(param)
+                this.$refs[formName].validate((valid) => {
+                    if (valid) {
+                        axios.post("/payDetail/insert", param)
+                            .then(function (response) {
+                                if (response.data.code == 0) {
+                                    mainDivVM.$message({type: 'success', message: '付款明细保存成功!',duration:2000,onClose:function(){
+                                            mainDivVM.dialogFormVisible = false;
+                                        //  跳转回上一页：
+                                            window.location.href='/businesssign/visitRecordPage?clueId='+vclueId+'&signId='+vsignId+'&readyOnly=1';
+                                        }});
+                                } else {
+                                    mainDivVM.$message.error(response.data.msg);
+                                }
+                            }).catch(function (error) {console.log(error);});
+                    } else {
+                        return false;
+                    }
+                });
+            },
+
+            resetForm(formName) {
+                if( mainDivVM.$refs[formName]) {
+                    mainDivVM.$refs[formName].resetFields();
+                }
+            },
+            initList(){
+                // var param = {};
+                // axios.post('/busVisitRecord/queryList',param).then(function (response) {
+                //     if(null===response||response.data==null||response.data.code!='0'){
+                //         if(response.data.code!='0'){
+                //             mainDivVM.$message({message: response.data.msg, type: 'warning'});
+                //         }
+                //         return false;
+                //     }else{
+                //         mainDivVM.showVisitAduitDatas.visitTableData =response.data.data;
+                //         if(response.data.data.length>0){
+                //             mainDivVM.showVisitAduitDatas.notSignReason = response.data.data[0].notSignReason
+                //         }
+                //     }
+                // })
+            },
+        },
+        created(){
+            // this.initList();
+            //  到访店铺类型 vistitStoreTypeArr
+            var param={};
+            param.groupCode="vistitStoreType";
+            axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {
+                mainDivVM.option1s=response.data.data;
+            });
+
+            //初始化省份
+            param={};
+            param.type="0";
+            axios.post('/area/sysregion/querySysRegionByParam',param).then(function (response) {
+                mainDivVM.provinceArr=response.data.data.data;
+            });
+
+            // 考察公司  考察公司
+            param={};
+            axios.post('/aggregation/businessMyCustomer/listNoPage',param).then(function (response) {
+                mainDivVM.listNoPage=response.data.data.data;
+            });
+        },
+        mounted(){
+            document.getElementById('businessContractRecord').style.display = 'block';
+        }
+    });
+
+</script>
+</body>
+</html>

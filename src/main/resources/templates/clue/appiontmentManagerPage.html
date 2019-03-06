@@ -25,6 +25,9 @@
     		<shiro:hasPermission name="aggregation:appiontmentManager:delete">
 		        <el-button type="primary" @click="deleteAppiontment">删除</el-button>
 		    </shiro:hasPermission>
+		    <shiro:hasPermission name="aggregation:appiontmentManager:cancel">
+		        <el-button type="primary" @click="openCancelForm">标记取消</el-button>
+		    </shiro:hasPermission>
 	</el-row>
 	<el-form :inline="true" :model="appiontmentSearchForm" class="demo-form-inline" ref="appiontmentSearchForm"> 
 	    <el-row class="marginB10 greybg padding20" style="padding-bottom: 0;">
@@ -39,7 +42,7 @@
 				</el-col>
 				<el-col :span="3">
 				  <el-form-item class="formItem"  prop="teleGorupId" style="width: 100%;">
-				    <el-select v-model="appiontmentSearchForm.teleGorupId" @change="getSaleList" placeholder="电销组" style="width: 100%;">
+				    <el-select v-model="appiontmentSearchForm.teleGorupId" clearable @change="getSaleList" placeholder="电销组" style="width: 100%;">
 				      <el-option
 					      v-for="item in teleGorupOptions"
 					      :key="item.id"
@@ -51,7 +54,7 @@
 				</el-col>
 				<el-col :span="3">
 				  <el-form-item class="formItem"  prop="teleSaleId" style="width: 100%;">
-				    <el-select v-model="appiontmentSearchForm.teleSaleId" placeholder="创业顾问" style="width: 100%;">
+				    <el-select v-model="appiontmentSearchForm.teleSaleId" clearable placeholder="创业顾问" style="width: 100%;">
 				      <el-option
 					      v-for="item in teleSaleOptions"
 					      :key="item.id"
@@ -63,7 +66,7 @@
 				</el-col>
 				<el-col :span="3">
 				  <el-form-item class="formItem"  prop="projectId" style="width: 100%;">
-				    <el-select v-model="appiontmentSearchForm.projectId" placeholder="品尝项目" style="width: 100%;">
+				    <el-select v-model="appiontmentSearchForm.projectId" clearable placeholder="品尝项目" style="width: 100%;">
 				      <el-option
 					      v-for="item in projectOptions"
 					      :key="item.id"
@@ -243,6 +246,22 @@
 	    <el-button type="primary" @click="confirmColumn">确 定</el-button>
 	  </div>
 	</el-dialog>
+	    <!-- 释放资源 -->
+    <el-dialog title="取消原因"    :visible.sync="cancelFormVisible">
+        <el-form :model="cancelDigForm" ref="cancelDigForm" :rules="cancelRules">
+            <el-row>
+                <el-form-item label="取消原因：" :label-width="formLabelWidth" prop="cancelReason">
+                  <el-input type="textarea" :rows="3" v-model="cancelForm.cancelReason" autocomplete="off" maxlength="100"></el-input>
+                </el-form-item>
+            </el-row>
+        </el-form>
+        <div slot="footer" class="dialog-footer">
+            <el-button type="primary" @click="submitCancelForm('cancelDigForm')">提 交</el-button>
+            <el-button @click="cancelFormVisible= false" >取 消</el-button>
+        </div>
+    </el-dialog>
+	
+	
 </div>
 <!-- import common js-->
 <div th:include="_footer_include :: #jsLib"></div>
@@ -273,12 +292,16 @@ var appiontmentVM = new Vue({
 	            	reserveTime:'',
 	            	remark:''
                 },
+                cancelDigForm:{
+                  cancelReason:'',	
+                },
 	            dataTable:[],
 	            recordTable:[],
 	            loading: true,
 	             allTableColums:[],
 	             tableColums:[],
 	             dialogFormVisible: false,
+	             cancelFormVisible:false,
 	             form: {
 	               type: [],
 	             },
@@ -299,7 +322,12 @@ var appiontmentVM = new Vue({
 	            },
 	            multipleSelection:[],
                 formLabelWidth: '150px',
-                formLabelWidth1: '120px'
+                formLabelWidth1: '120px',
+                cancelRules:{
+                	cancelReason: [
+                    //  { required: true, message: '请填写取消原因', trigger: 'blur' }
+                    ]
+                },
         },
         methods: {
         	searchTable() {
@@ -399,7 +427,7 @@ var appiontmentVM = new Vue({
                  if (cellValue == undefined) {
                     return "";
                  }
-                 return moment(cellValue).format("YYYY-MM-DD HH:mm:ss");
+                 return moment(cellValue).format("YYYY-MM-DD HH:mm");
                },
              	//是否签约状态转换方法
                transformSign(cellValue) {
@@ -505,7 +533,106 @@ var appiontmentVM = new Vue({
                         .catch(function (error) {
                              console.log(error);
                         });
-                 },// method end
+                 }, 
+                  //打开取消邀约对话框
+                openCancelForm() {
+                 var rows = this.multipleSelection;
+                    if(rows.length==0){
+                       this.$message({
+                          message: '请选择邀约数据据进行取消',
+                          type: 'warning'
+                        });
+                       return;
+                   }
+                   var rowIds = [];
+                   for(var i=0;i<rows.length;i++){
+                	   var curRow = rows[i];
+                       rowIds.push(curRow.id);
+                   }
+                    if(this.$refs['cancelDigForm']) {
+                      this.$refs['cancelDigForm'].resetFields();
+                     }
+                     var param  = {cancelIdList:rowIds};
+                        axios.post('/clue/appiontment/findCancelList',param)
+                        .then(function (response) {
+                            var data =  response.data;
+                            if(data.code=='0'){
+                            	if(null!=data.data&&data.length>0){
+                            		appiontmentVM.$message({
+                                        message: "取消数据已有到访数据，请重新选择",
+                                        type: 'error'
+                                      }); 
+                            		return  ;
+                            	 }
+                            	 appiontmentVM.cancelFormVisible=true;
+                            	
+                            }else{
+                            	
+                            }
+                        })
+                        .catch(function (error) {
+                          console.log(error);
+                        }).then(function () {
+                        	
+                        });
+                       
+                },
+                 //取消邀约数据
+                submitCancelForm(formName) {
+                this.$refs[formName].validate((valid) => {
+                if (valid) {
+              	   var rows = this.multipleSelection;
+                   if(rows.length==0){
+                       this.$message({
+                          message: '请选择邀约数据据进行取消',
+                          type: 'warning'
+                        });
+                       return;
+                   }
+                   var rowIds = [];
+                   for(var i=0;i<rows.length;i++){
+                	   var curRow = rows[i];
+                       rowIds.push(curRow.id);
+                   }
+                  var reason= this.cancelForm.cancelReason;
+                   this.$confirm('确定要取消选中的邀约来访吗？', '提示', {
+                       confirmButtonText: '确定',
+                       cancelButtonText: '取消',
+                       type: 'warning'
+                   }).then(() => {
+                   	  //删除
+                   	var param  = {cancelIdList:rowIds,cancelReason:reason};
+                       axios.post('/clue/appiontment/cancelAppiontment',param)
+                       .then(function (response) {
+                           var data =  response.data;
+                           if(data.code=='0'){
+                           	appiontmentVM.$message({message:'取消成功',type:'success',duration:1000,onClose:function(){
+                           	    appiontmentVM.cancelFormVisible=false;
+                           		appiontmentVM.searchTable();
+                       	    }});
+                           }else{
+                           	appiontmentVM.$message({
+                                   message: "接口调用失败",
+                                   type: 'error'
+                                 }); 
+                           }
+                       })
+                       .catch(function (error) {
+                         console.log(error);
+                       })
+                       .then(function () {
+                       	
+                       });
+                   }).catch(() => {
+                          
+                    });
+                } else {
+                     console.log('error submit!!');
+                    return false;
+                 }
+               }); 
+                   
+            },//end
                  deleteAppiontment() {
               	   var rows = this.multipleSelection;
                      if(rows.length==0){

@@ -78,7 +78,7 @@
             </el-form-item>
         </el-form>
         <div slot="footer" class="dialog-footer">
-            <el-button type="primary" @click="saveCompany('companyForm')">提交</el-button>
+            <el-button type="primary" :disabled="submitDisabled" @click="saveCompany('companyForm')">提交</el-button>
             <el-button @click="cancelForm('companyForm')">取 消</el-button>
         </div>
     </el-dialog>
@@ -104,6 +104,7 @@ var companyVM = new Vue({
                 },
 	            dataTable:[],
 	            dialogFormVisible: false,
+	            submitDisabled: false,
 	            addOrModifyDialogTitle:'',
 	            pager:{
 	                total: 0,
@@ -217,6 +218,7 @@ var companyVM = new Vue({
                saveCompany(formName){//保存自定义字段
                   this.$refs[formName].validate((valid) => {
                       if (valid) {
+                    	 companyVM.submitDisabled=true;
                          var param=companyVM.companyForm;
                          var url="";
                          if(param.id!=""){
@@ -226,6 +228,7 @@ var companyVM = new Vue({
                          }
                         axios.post(url, param)
                         .then(function (response) {
+                        	companyVM.submitDisabled=false;
                             var resData = response.data;
                             if(resData.code=='0'){
                             	companyVM.cancelForm(formName);
@@ -238,6 +241,7 @@ var companyVM = new Vue({
                             }
                         })
                         .catch(function (error) {
+                        	companyVM.submitDisabled=false;
                              console.log(error);
                         });
                          

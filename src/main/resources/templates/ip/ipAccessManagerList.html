@@ -541,13 +541,22 @@ var ipManagerVM = new Vue({
 					 var ip3=ipManagerVM.ipAddForm.ipAddress3;
 					 var ip4=ipManagerVM.ipAddForm.ipAddress4;
 					 param.ipAddress=ip1+"."+ip2+"."+ip3+"."+ip4;
-					axios.post('/ip/ipAccess/saveIpRepository',param).then(function (response) {
-					    ipManagerVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
-					    ipManagerVM.dialogIpVisible=false;
-					    ipManagerVM.refreshIpTableData(response);
-		        	 }});
-					});
-					
+					 axios.post('/ip/ipAccess/findListByIp',param).then(function (response) {
+						 if(response.data.data.length>0) {
+	            			 ipManagerVM.$message({
+	                              type: 'warn',
+	                             message: '当前IP已存在请重新输入IP'
+	                        }); 
+	            	         return ;
+	            	   }
+					  axios.post('/ip/ipAccess/saveIpRepository',param).then(function (response) {
+							    ipManagerVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
+							    ipManagerVM.dialogIpVisible=false;
+							    ipManagerVM.refreshIpTableData(response);
+				        	 }});
+							}); 
+						 
+					 });
                 } else {
                     console.log('error submit!!');
                     return false;
