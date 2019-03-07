@@ -27,7 +27,7 @@ import com.kuaidao.sys.dto.ip.IpRepositoryInfoDTO;
 
 import javax.validation.Valid;
 
-@FeignClient(name = "aggregation-service", path = "/aggregation/sign/businesssign", fallback = BusinessSignFeignClient.HystrixClientFallback.class)
+@FeignClient(name = "aggregation-service-1", path = "/aggregation/sign/businesssign", fallback = BusinessSignFeignClient.HystrixClientFallback.class)
 
 public interface BusinessSignFeignClient {
 
