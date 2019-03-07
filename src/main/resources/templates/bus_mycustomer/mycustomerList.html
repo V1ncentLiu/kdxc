@@ -69,54 +69,45 @@
                     </el-col>
                 </el-row>
                 <el-row :gutter="20">
-                    <el-col :span="6">
-                        <el-form-item label="邀约到访时间">
+                        <el-form-item label="邀约来访时间">
                             <el-date-picker v-model="queryForm.reserveTime1" type="datetime" placeholder="选择日期时间"></el-date-picker>
                             <span>-</span>
                             <el-date-picker v-model="queryForm.reserveTime2" type="datetime" placeholder="选择日期时间"></el-date-picker>
                         </el-form-item>
-                    </el-col>
-                    <el-col :span="6">
                         <el-form-item label="提交邀约时间">
                             <el-date-picker v-model="queryForm.createTime1" type="datetime" placeholder="选择日期时间"></el-date-picker>
                             <span>-</span>
                             <el-date-picker v-model="queryForm.createTime2" type="datetime" placeholder="选择日期时间"></el-date-picker>
                         </el-form-item>
-                    </el-col>
-                    <el-col :span="6">
                         <el-form-item label="接收客户时间">
                             <el-date-picker v-model="queryForm.allocateTime1" type="datetime" placeholder="选择日期时间"></el-date-picker>
                             <span>-</span>
                             <el-date-picker v-model="queryForm.allocateTime2" type="datetime" placeholder="选择日期时间"></el-date-picker>
                         </el-form-item>
-                    </el-col>
-                    <el-col :span="3">
                         <el-form-item>
                             <el-button type="primary" @click="initList">搜索</el-button>
                         </el-form-item>
-                    </el-col>
                 </el-row>
             </el-form>
         </el-row>
 
-        <el-table :data="tableData" style="width: 100%" tooltip-effect="dark"  ref="multipleTable"
+        <el-table :data="tableData" tooltip-effect="dark" style="width:100%"  ref="multipleTable"
                   @row-dblclick="showCustomerDetail"
                   @selection-change="handleSelectionChange" >
-            <el-table-column type="selection" width="55" prop="clueId"> </el-table-column>
-            <el-table-column prop="xh" label="序号" width="50"  type="index" align="center"></el-table-column>
-            <el-table-column prop="reserveTime" label="邀约来访时间" sortable align="center"></el-table-column>
-            <el-table-column prop="cusName" label="客户姓名" align="center">
+            <el-table-column type="selection" width="55" prop="clueId" ></el-table-column>
+            <el-table-column prop="xh" label="序号" width="60"  type="index" align="center"></el-table-column>
+            <el-table-column prop="reserveTime" label="邀约来访时间" sortable align="center"  width="180px"></el-table-column>
+            <el-table-column prop="cusName" label="客户姓名" align="center" width="88">
                 <template slot-scope="scope">
                     <el-button size="mini"  type="text" @click="editCustomerDetail(scope.row)">{{scope.row.cusName}}</el-button>
                 </template>
             </el-table-column>
-            <el-table-column prop="visitStatus" label="到访状态"  :formatter="formatVisitStatus" align="center">
+            <el-table-column prop="visitStatus" label="到访状态"  :formatter="formatVisitStatus" align="center" width="88">
             </el-table-column>
-            <el-table-column  prop="isSign" label="签约状态"  :formatter="formatSignStatus" align="center"></el-table-column>
-            <el-table-column  prop="" label="重单分配比例" align="center"></el-table-column>
-            <el-table-column  prop="createTime" label="提交邀约时间" sortable align="center"></el-table-column>
-            <el-table-column  prop="allocateTime" label="接收客户时间" sortable align="center"></el-table-column>
-            <el-table-column  prop="" label="到访情况" :formatter="formatVisit" align="center">
+            <el-table-column  prop="isSign" label="签约状态"  :formatter="formatSignStatus" align="center" width="88"></el-table-column>
+            <el-table-column  prop="createTime" label="提交邀约时间" sortable align="center" width="142px"></el-table-column>
+            <el-table-column  prop="allocateTime" label="接收客户时间" sortable align="center" width="142px"></el-table-column>
+            <el-table-column  prop="" label="到访情况" :formatter="formatVisit" align="center" width="130">
                 <template slot-scope="scope">
                     <el-button size="mini"  v-if="scope.row.visitStatus == -1||scope.row.visitStatus == null" type="text" @click="openEditVisitRecord(scope.row)">添加到访信息</el-button>
                     <el-button size="mini"  v-else-if="scope.row.visitStatus==0" type="text" @click="showNotVisitReason(scope.row)">未到访(原因)</el-button>
@@ -125,7 +116,7 @@
                     <el-button size="mini"  v-else-if="scope.row.visitAuditStatus==2" type="text" @click="toVisitRecordPage(scope.row)">查看到访记录</el-button>
                 </template>
             </el-table-column>
-            <el-table-column  prop="status" label="签约明细" align="center">
+            <el-table-column  prop="status" label="签约明细" align="center" width="130">
                 <template slot-scope="scope">
                     <el-button size="mini"  v-if="(scope.row.isSign == null ||scope.row.isSign == 0)&& scope.row.signAuditStatus==null" type="text" @click="editSign(scope.row)">添加签约单</el-button>
                     <el-button size="mini"  v-else-if="scope.row.signAuditStatus==1" type="text" @click="toReadOnlySignPage(scope.row)">审核中</el-button>
@@ -134,15 +125,15 @@
                 </template>
             </el-table-column>
             <el-table-column  prop="teleGorupName" label="电销组" align="center"></el-table-column>
-            <el-table-column  prop="teleDirectorName" label="电销总监" align="center"></el-table-column>
-            <el-table-column  prop="teleSaleName" label="电销员工" align="center"></el-table-column>
-            <el-table-column  prop="teleProjectName" label="电销组项目" align="center"></el-table-column>
-            <el-table-column  prop="tasteProjectName" label="品尝项目" align="center"></el-table-column>
-            <el-table-column  prop="signShopTypeName" label="签约店型" align="center"></el-table-column>
-            <el-table-column  prop="province" label="开店省份" align="center"></el-table-column>
-            <el-table-column  prop="city" label="开店城市" align="center"></el-table-column>
-            <el-table-column  prop="district" label="开店区域/县" align="center"></el-table-column>
-            <el-table-column  prop="sex" label="客户性别" align="center">
+            <el-table-column  prop="teleDirectorName" label="电销总监" align="center" width="88px"></el-table-column>
+            <el-table-column  prop="teleSaleName" label="电销员工" align="center" width="88px"></el-table-column>
+            <el-table-column  prop="teleProjectName" label="电销组项目" align="center" width="102px"></el-table-column>
+            <el-table-column  prop="tasteProjectName" label="品尝项目" align="center" width="88px"></el-table-column>
+            <el-table-column  prop="signShopTypeName" label="签约店型" align="center" width="88px"></el-table-column>
+            <el-table-column  prop="province" label="开店省份" align="center" width="88px"></el-table-column>
+            <el-table-column  prop="city" label="开店城市" align="center" width="88px"></el-table-column>
+            <el-table-column  prop="district" label="开店区域/县" align="center" width="110px"></el-table-column>
+            <el-table-column  prop="sex" label="客户性别" align="center" width="88px">
                 <template slot-scope="scope">
                     <div v-if="scope.row.sex === 1">
                         男
@@ -152,13 +143,13 @@
                     </div>
                 </template>
             </el-table-column>
-            <el-table-column  prop="age" label="客户年龄" align="center"></el-table-column>
+            <el-table-column  prop="age" label="客户年龄" align="center" width="88px"></el-table-column>
             <el-table-column  prop="partnerTypeName" label="合伙人" align="center"></el-table-column>
-            <el-table-column  prop="hasExperience" label="餐饮经验" align="center"></el-table-column>
-            <el-table-column  prop="hasAddress" label="选址情况" align="center"></el-table-column>
-            <el-table-column  prop="advanceAmount" label="预投金额" align="center"></el-table-column>
-            <el-table-column  prop="intenProject" label="意向项目" align="center"></el-table-column>
-            <el-table-column  prop="area" label="店面大小" align="center"></el-table-column>
+            <el-table-column  prop="hasExperience" label="餐饮经验" align="center" width="88px"></el-table-column>
+            <el-table-column  prop="hasAddress" label="选址情况" align="center" width="88px"></el-table-column>
+            <el-table-column  prop="advanceAmount" label="预投金额" align="center" width="88px"></el-table-column>
+            <el-table-column  prop="intenProject" label="意向项目" align="center" width="88px"></el-table-column>
+            <el-table-column  prop="area" label="店面面积" align="center" width="88px"></el-table-column>
         </el-table>
     </template>
     <table-pagination :pager="pager"  @change="initList"></table-pagination>
@@ -167,7 +158,8 @@
         <template>
             <el-form :model="notVisitFlag" ref="notVisitFlag">
                 <el-form-item label="" :label-width="formLabelWidth" :required="true">
-                    <el-button type="text" disabled style="color: #1e2746">{{notVisitFlag.str}}</el-button>
+                    <!--<el-button type="text" disabled style="color: #1e2746">{{notVisitFlag.str}}</el-button>-->
+                    <span style="display:block;color: #1e2746; width:90%; word-wrap:break-word; word-break:normal;">{{notVisitFlag.str}}</span>
                 </el-form-item>
             </el-form>
         </template>
@@ -177,7 +169,8 @@
         <template>
             <el-form :model="notVisitFlag" ref="notVisitFlag" :rules="notVisitFlagRules">
                 <el-form-item label="" :label-width="formLabelWidth" :required="true">
-                    <el-button type="text" disabled style="color: #1e2746">{{notVisitFlag.str}}</el-button>
+                    <!--<el-button type="text" disabled style="color: #1e2746; width:100px; word-wrap:break-word; word-break:normal;">{{notVisitFlag.str}}</el-button>-->
+                    <span style="display:block;color: #1e2746; width:90%; word-wrap:break-word; word-break:normal;">{{notVisitFlag.str}}</span>
                 </el-form-item>
                 <el-form-item label="未到访原因" :label-width="formLabelWidth"  prop="notVisitReason" >
                     <el-input type="textarea" v-model="notVisitFlag.notVisitReason"  maxlength="100" :rows="3" placeholder="请输入内容(限制100字)"></el-input>
@@ -896,7 +889,7 @@
                         </el-col>
                         <el-col :span="10">
                             <el-form-item label="签约类型：" :label-width="formLabelWidth" prop="signType">
-                                <el-select :disabled="notEditRebutSign" v-model="updateFormSigning.signType" @change="selectSigningType" placeholder="请选择签约类型：">
+                                <el-select :disabled="notEditRebutSign" v-model="updateFormSigning.signType" @change="selectUpdateSigningType" placeholder="请选择签约类型：">
                                     <el-option
                                             v-for="item in option2s"
                                             :key="item.value"
@@ -1502,7 +1495,7 @@
             editRebutVisitRecord(row){
                 var param ={};
                 console.log(row)
-                param.id = row.clueId
+                param.id = row.visitId
                 axios.post('/busVisitRecord/one',param).then(function (response) {
                     console.log(response)
                     if(null===response||response.data==null||response.data.code!='0'){
@@ -1589,6 +1582,17 @@
                     this.isAllMoney = true;
                 }
             },
+
+            selectUpdateSigningType(pa1) { //是不是全款
+                if( pa1=='1' ){
+                    this.updateFormSigning.payType = '1';
+                    this.isAllMoney = false;
+                }else{
+                    this.updateFormSigning.payType = '2';
+                    this.isAllMoney = true;
+                }
+            },
+
             submitForm(formName) {
                 var param = this.formSigning;
                 param.amountPerformance = this.formSigningAmountPerformance;
