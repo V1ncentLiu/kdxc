@@ -156,26 +156,26 @@
 	  <el-row class="marginB10 greybg padding20" style="padding-bottom: 0;">
 	     <el-col :span="7">
 	          <el-form-item class="formItem" label="提交邀约时间：">
-	  					<el-date-picker value-format="yyyy-MM-dd" v-model="searchForm.startTime" type="date" placeholder="选择日期"></el-date-picker>
+	  					<el-date-picker value-format="yyyy-MM-dd HH:mm" v-model="searchForm.startTime" type="datetime" placeholder="选择日期"></el-date-picker>
 	          </el-form-item>
 	          <el-form-item class="formItem" label="——">
-						   <el-date-picker value-format="yyyy-MM-dd" v-model="searchForm.endTime" type="date" placeholder="选择日期"></el-date-picker>
+						   <el-date-picker value-format="yyyy-MM-dd HH:mm" v-model="searchForm.endTime" type="datetime" placeholder="选择日期"></el-date-picker>
 	          </el-form-item>
 	     </el-col>
 	     <el-col :span="7">
 	          <el-form-item class="formItem" label="邀约来访时间：">
-	  					<el-date-picker value-format="yyyy-MM-dd" v-model="searchForm.startReserveTime" type="date" placeholder="选择日期"></el-date-picker>
+	  					<el-date-picker value-format="yyyy-MM-dd HH:mm" v-model="searchForm.startReserveTime" type="datetime" placeholder="选择日期"></el-date-picker>
 	          </el-form-item>
 	          <el-form-item class="formItem" label="——">
-						   <el-date-picker value-format="yyyy-MM-dd" v-model="searchForm.endReserveTime" type="date" placeholder="选择日期"></el-date-picker>
+						   <el-date-picker value-format="yyyy-MM-dd HH:mm" v-model="searchForm.endReserveTime" type="datetime" placeholder="选择日期"></el-date-picker>
 	          </el-form-item>
 	     </el-col>
 	     <el-col :span="7">
 	          <el-form-item class="formItem" label="接受客户时间：">
-	  					<el-date-picker value-format="yyyy-MM-dd" v-model="searchForm.startAllocationTime" type="date" placeholder="选择日期"></el-date-picker>
+	  					<el-date-picker value-format="yyyy-MM-dd HH:mm" v-model="searchForm.startAllocationTime" type="datetime" placeholder="选择日期"></el-date-picker>
 	          </el-form-item>
 	          <el-form-item class="formItem" label="——">
-						   <el-date-picker value-format="yyyy-MM-dd" v-model="searchForm.endAllocationTime" type="date" placeholder="选择日期"></el-date-picker>
+						   <el-date-picker value-format="yyyy-MM-dd HH:mm" v-model="searchForm.endAllocationTime" type="datetime" placeholder="选择日期"></el-date-picker>
 	          </el-form-item>
 	     </el-col>
 	     <el-col :span="2">
@@ -233,9 +233,9 @@
            <el-table-column align="center" prop="partnerType" label="合伙人" :formatter="transformPartner"></el-table-column>
            <el-table-column align="center" prop="hasExperience" label="餐饮经验" :formatter="transformExperience"></el-table-column>
            <el-table-column align="center" prop="hasAddress" label="选址情况" :formatter="transformAddress"></el-table-column>
-           <el-table-column align="center" prop="advanceAmount" label="预投金额" ></el-table-column>
+           <el-table-column align="center" prop="advanceAmount" label="预投金额" :formatter="transformUssm"></el-table-column>
            <el-table-column align="center" prop="purInProject" label="意向项目" :formatter="transformProject" ></el-table-column>
-           <el-table-column align="center" prop="area" label="店面面积" ></el-table-column>
+           <el-table-column align="center" prop="area" label="店面面积" :formatter="transformArea"></el-table-column>
         </el-table>
         <table-pagination :pager="pager" @change="searchTable"></table-pagination>
     </el-row>
@@ -482,6 +482,8 @@ var optionAddressList=[[${optionAddressList}]];//选址情况
 var partnerList=[[${partnerList}]];//合伙人
 var cateringExperienceList=[[${cateringExperienceList}]];//餐饮经验
 var shopTyleList=[[${shopTyleList}]];//签约店型
+var storefrontAreaList=[[${storefrontAreaList}]];//店铺面积
+var ussmList=[[${ussmList}]];//投资金额
 var customerVM = new Vue({
         el: '#clueManage',
         data: {
@@ -741,12 +743,36 @@ var customerVM = new Vue({
              	  }
                    return text;
                },
+             //店铺面积转换方法
+               transformArea(row, column, cellValue, index) {
+             	  var text="";
+             	  if(storefrontAreaList){
+ 	                  for(var i=0;i<storefrontAreaList.length;i++){
+ 	                		if(cellValue==storefrontAreaList[i].value){
+ 	                			text=storefrontAreaList[i].name;
+ 	                		}
+ 	                	}
+             	  }
+                   return text;
+               },
+               //投资金额转换方法
+               transformUssm(row, column, cellValue, index) {
+             	  var text="";
+             	  if(ussmList){
+ 	                  for(var i=0;i<ussmList.length;i++){
+ 	                		if(cellValue==ussmList[i].value){
+ 	                			text=ussmList[i].name;
+ 	                		}
+ 	                	}
+             	  }
+                   return text;
+               },
                //日期数据格式化方法
                dateFormat( row, column, cellValue, index) {
                  if (cellValue == undefined) {
                     return "";
                  }
-                 return moment(cellValue).format("YYYY-MM-DD HH:mm");
+                 return moment(cellValue).format("YYYY-MM-DD HH:mm:ss");
                },
                //打开分发资源
                toAllocationClue() {

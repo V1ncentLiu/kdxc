@@ -137,8 +137,12 @@ public class BusCustomerManagerController {
         // 查询字典餐饮经验集合
         request.setAttribute("cateringExperienceList",
                 getDictionaryByCode(Constants.CATERING_EXPERIENCE));
-        // 查询字典餐饮经验集合
+        // 查询字典签约店型集合
         request.setAttribute("shopTyleList", getDictionaryByCode(Constants.VISTIT_STORE_TYPE));
+        // 查询字典店铺面积集合
+        request.setAttribute("storefrontAreaList", getDictionaryByCode(Constants.STOREFRONT_AREA));
+        // 查询字典投资金额集合
+        request.setAttribute("ussmList", getDictionaryByCode(Constants.USSM));
         return "business/busCustomerManagerPage";
     }
 
@@ -251,7 +255,7 @@ public class BusCustomerManagerController {
             OrganizationRespDTO group = orgMap.get(user.getOrgId());
             OrganizationRespDTO area = orgMap.get(group.getParentId());
 
-            resultMap.put("id", user.getId());
+            resultMap.put("id", user.getId().toString());
             resultMap.put("name",
                     user.getName() + "(" + area.getName() + "--" + group.getName() + ")");
             result.add(resultMap);

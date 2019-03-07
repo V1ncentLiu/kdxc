@@ -43,7 +43,6 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import com.google.code.kaptcha.impl.DefaultKaptcha;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.JSONResult;
-import com.kuaidao.common.entity.PhoneEntity;
 import com.kuaidao.common.util.CommonUtil;
 import com.kuaidao.common.util.DateUtil;
 import com.kuaidao.common.util.MD5Util;
@@ -446,12 +445,12 @@ public class LoginController {
             throws Exception {
         String msg = "";
 
-        PhoneEntity phone = new PhoneEntity();
-        phone.setPhone(loginReq.getPhone());
+        UserInfoReq userInfoReq = new UserInfoReq();
+        userInfoReq.setUsername(loginReq.getUsername());
         // 查询用户信息
-        JSONResult<UserInfoDTO> getbyUserName = userInfoFeignClient.getbyPhone(phone);
+        JSONResult<UserInfoDTO> getbyUserName = userInfoFeignClient.getbyUserName(userInfoReq);
         if (getbyUserName.getData() == null) {
-            msg = "此手机号未注册";
+            msg = "登录用户名未注册";
             return new JSONResult<>().fail(SysErrorCodeEnum.ERR_SYSTEM.getCode(), msg);
         }
         UserInfoDTO user = getbyUserName.getData();
@@ -484,17 +483,17 @@ public class LoginController {
         if (result.hasErrors()) {
             return CommonUtil.validateParam(result);
         }
-        PhoneEntity phone = new PhoneEntity();
-        phone.setPhone(updateUserPasswordReq.getPhone());
+        UserInfoReq req = new UserInfoReq();
+        req.setUsername(updateUserPasswordReq.getUsername());
         // 查询用户信息
-        JSONResult<UserInfoDTO> jsonResult = userInfoFeignClient.getbyPhone(phone);
+        JSONResult<UserInfoDTO> jsonResult = userInfoFeignClient.getbyUserName(req);
 
         UserInfoDTO data = jsonResult.getData();
         if (JSONResult.SUCCESS.equals(jsonResult.getCode()) && data != null) {
             // * 校验验证码
             SmsCodeAndMobileValidReq smsCodeAndMobileValidReq = new SmsCodeAndMobileValidReq();
             smsCodeAndMobileValidReq.setCode(updateUserPasswordReq.getCode());
-            smsCodeAndMobileValidReq.setMobile(updateUserPasswordReq.getPhone());
+            smsCodeAndMobileValidReq.setMobile(data.getPhone());
             String msgId = redisTemplate.opsForValue().get(Constants.MSG_ID + data.getId());
             smsCodeAndMobileValidReq.setMsgId(msgId);
             JSONResult validCodeAndMobile =

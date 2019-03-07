@@ -208,7 +208,7 @@
                         multiple 
                         clearable  >
                         <el-option
-                            v-for="item in telePerArr"
+                            v-for="item in saleList"
                             :key="item.id"
                             :label="item.name"
                             :value="item.id">
@@ -240,8 +240,8 @@
             <el-table-column align="center" prop="cusLevelName"  label="客户级别"></el-table-column>
             <el-table-column align="center" prop="cusName" label="客户姓名"></el-table-column>
             <el-table-column align="center" prop="phone" label="手机号">
-                <template slot-scope="scope">
-                    {{scope.row.phone}}
+                <template slot-scope="scope" >
+                      <p @click="showClueDetailInfo(scope.row.clueId)">{{scope.row.phone}}</p>
                     <input type='hidden'>
                     <el-tag v-if="scope.row.tag">{{scope.row.tag}}</el-tag>
                 </template>
@@ -462,6 +462,7 @@
 var orgList=[[${orgList}]];//电销组
 var saleList=[[${saleList}]];//电销创业顾问
 var saleGroupList=[[${saleGroupList}]];//同事业部下电销组
+var queryOrg=[[${queryOrg}]];//电销组
   var  customerManVM=new Vue({
         el: '#myCustom',
         data: function() {
@@ -586,7 +587,7 @@ var saleGroupList=[[${saleGroupList}]];//同事业部下电销组
                 repeatCurClueArr:[],
                 cusStatusArr:[],
                 telePerArr:[],
-                orgTeleArr:[],
+                orgTeleArr:queryOrg,
                 multseleSelection:[],
                 formLabelWidth: '150px',
                 dataTable: [],
@@ -868,6 +869,11 @@ var saleGroupList=[[${saleGroupList}]];//同事业部下电销组
                   }
                 });
             },
+          	//展现详情
+         	showClueDetailInfo (clueId) {
+            	debugger;
+         	  window.location.href='/tele/clueMyCustomerInfo/customerInfoReadOnly?clueId='+clueId;
+            },
             submitVicemanagerForm(formName) {
                 this.$refs[formName].validate((valid) => {
                   if (valid) {
@@ -930,17 +936,17 @@ var saleGroupList=[[${saleGroupList}]];//同事业部下电销组
             	customerManVM.provinceArr=response.data.data.data;
             });
             
-            // 初始化电销人员
-            axios.post('/tele/clueMyCustomerInfo/listByOrgAndRole').then(function (response) {
-                console.log(response.data.data)
-                customerManVM.telePerArr=response.data.data;
-            });
+             // 初始化电销人员
+             //axios.post('/tele/clueMyCustomerInfo/listByOrgAndRole').then(function (response) {
+             //   console.log(response.data.data)
+             //   customerManVM.telePerArr=response.data.data;
+            //});
             
             // 初始化电销组
-            axios.post('/tele/customerManager/listOrgInfo').then(function (response) {
-                console.log(response.data.data)
-                customerManVM.orgTeleArr=response.data.data;
-            });
+           // axios.post('/tele/customerManager/listOrgInfo').then(function (response) {
+             //   console.log(response.data.data)
+              //  customerManVM.orgTeleArr=response.data.data;
+           // });
              
            
     		

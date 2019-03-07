@@ -169,7 +169,15 @@ public class BusinessVisitRecordController {
             Map data = mapJSONResult.getData();
             if(data!=null){
                 recordRespDTO.setCompanyid((Long)data.get("busCompany"));
-                recordRespDTO.setVistitTime(new Date((Long)data.get("arrivalTime")));
+                Object arrivalTime = data.get("arrivalTime");
+                Date arrDate = null;
+                if(arrivalTime==null){
+                    arrDate = new Date();
+                }else{
+                    arrDate = new Date((Long)arrivalTime);
+                }
+
+                recordRespDTO.setVistitTime(arrDate);
                 recordRespDTO.setCustomerName((String)data.get("cusName"));
 //                recordRespDTO.setProjectId((String)data.get("tasteProjectId"));
                 recordRespDTO.setSignProvince((String)data.get("signProvince"));
