@@ -65,10 +65,26 @@ public class CustomerManagerController {
 			List<Map<String, Object>> saleGroupList = getSaleGroupList(queryOrgById.getData().getParentId());
 			request.setAttribute("saleGroupList", saleGroupList);
 
+			//如是电销总监只展现当前组
+			List<OrganizationDTO> dataList = new  ArrayList<OrganizationDTO>();
+			dataList.add(queryOrgById.getData());
+			// 电销组
+			request.setAttribute("queryOrg", dataList);
+
 		} else if (roleList != null && RoleCodeEnum.DXFZ.name().equals(roleList.get(0).getRoleCode())) {
-			// 如果当前登录的为电销总监,查询所有下属电销组
 			List<Map<String, Object>> saleGroupList = getSaleGroupList(user.getOrgId());
 			request.setAttribute("orgList", saleGroupList);
+			
+			//如果是电销副总展现事业部下所有组
+			Long orgId = user.getOrgId();
+			OrganizationQueryDTO organizationQueryDTO = new OrganizationQueryDTO();
+			organizationQueryDTO.setParentId(orgId);
+			organizationQueryDTO.setOrgType(OrgTypeConstant.DXZ);
+			// 查询下级电销组
+			JSONResult<List<OrganizationDTO>> listDescenDantByParentId = organizationFeignClient
+					.listDescenDantByParentId(organizationQueryDTO);
+			List<OrganizationDTO> data = listDescenDantByParentId.getData();
+			request.setAttribute("queryOrg", data);
 		}
 
 		return "clue/customManagement";
