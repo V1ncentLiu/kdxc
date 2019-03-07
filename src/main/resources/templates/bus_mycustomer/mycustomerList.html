@@ -107,7 +107,7 @@
             <el-table-column prop="reserveTime" label="邀约来访时间" sortable align="center"></el-table-column>
             <el-table-column prop="cusName" label="客户姓名" align="center">
                 <template slot-scope="scope">
-                    <el-button size="mini"  type="text" @click="editCustomerDetail(scope.row)">{{scope.row.cusName}}}</el-button>
+                    <el-button size="mini"  type="text" @click="editCustomerDetail(scope.row)">{{scope.row.cusName}}</el-button>
                 </template>
             </el-table-column>
             <el-table-column prop="visitStatus" label="到访状态"  :formatter="formatVisitStatus" align="center">
@@ -127,7 +127,7 @@
             </el-table-column>
             <el-table-column  prop="status" label="签约明细" align="center">
                 <template slot-scope="scope">
-                    <el-button size="mini"  v-if="scope.row.isSign == null && scope.row.signAuditStatus==null" type="text" @click="editSign(scope.row)">添加签约单</el-button>
+                    <el-button size="mini"  v-if="(scope.row.isSign == null ||scope.row.isSign == 0)&& scope.row.signAuditStatus==null" type="text" @click="editSign(scope.row)">添加签约单</el-button>
                     <el-button size="mini"  v-else-if="scope.row.signAuditStatus==1" type="text" @click="toReadOnlySignPage(scope.row)">审核中</el-button>
                     <el-button size="mini"  v-else-if="scope.row.signAuditStatus==0" type="text"  style="color: red" @click="editRebutSign(scope.row)">被驳回</el-button>
                     <el-button size="mini"  v-else-if="scope.row.signAuditStatus==2" type="text" @click="toSignPage(scope.row)">查看签约单</el-button>
@@ -175,12 +175,12 @@
     <!--标记未到访-->
     <el-dialog title="提示" :visible.sync="notVisitFlagDialogVisible"  width="30%">
         <template>
-            <el-form :model="notVisitFlag" ref="notVisitFlag">
+            <el-form :model="notVisitFlag" ref="notVisitFlag" :rules="notVisitFlagRules">
                 <el-form-item label="" :label-width="formLabelWidth" :required="true">
                     <el-button type="text" disabled style="color: #1e2746">{{notVisitFlag.str}}</el-button>
                 </el-form-item>
-                <el-form-item label="未到访原因" :label-width="formLabelWidth"  prop="notVisitReason">
-                    <el-input type="textarea" v-model="notVisitFlag.notVisitReason"  maxlength="100" :rows="3" placeholder="请输入内容"></el-input>
+                <el-form-item label="未到访原因" :label-width="formLabelWidth"  prop="notVisitReason" >
+                    <el-input type="textarea" v-model="notVisitFlag.notVisitReason"  maxlength="100" :rows="3" placeholder="请输入内容(限制100字)"></el-input>
                 </el-form-item>
             </el-form>
             <div slot="footer" class="dialog-footer">
@@ -468,8 +468,8 @@
                             </div>
                         </template>
                     </el-table-column>
-                    <el-table-column prop="visitCity" label="到访城市"   align="center"></el-table-column>
-                    <el-table-column prop="visitPeopleNum" label="到访人数"   align="center"></el-table-column>
+                    <el-table-column prop="visitCity" label="来访城市"   align="center"></el-table-column>
+                    <!--<el-table-column prop="visitPeopleNum" label="到访人数"   align="center"></el-table-column>-->
                     <el-table-column prop="createTime" label="创建时间"   align="center"></el-table-column>
                     <el-table-column prop="isSign" label="是否签约"   align="center">
                         <template slot-scope="scope">
@@ -615,7 +615,7 @@
                     </el-col>
                     <el-col :span="10">
                         <el-form-item label="客户姓名：" :label-width="formLabelWidth" prop="customerName">
-                            <el-input v-model="formSigning.customerName"></el-input>
+                            <el-input v-model="formSigning.customerName" maxLength="10"></el-input>
                         </el-form-item>
                     </el-col>
                 </el-row>
@@ -1042,7 +1042,7 @@
             teleketSaleArr:dxgwList,
             tasteProArr:tasteProList,
             signArr:[{value:0,name:'未签约'},{value:1,name:'已签约'}],
-            isSignArr:[{value:0,name:'否'},{value:1,name:'是'}],
+            isSignArr:[{value:0,name:'未签约'},{value:1,name:'已签约'}],
             visitArr:[{value:-1,name:'待处理'},{value:0,name:'未到访'},{value:1,name:'首次到访'},{value:2,name:'2次到访'},{value:3,name:'多次到访'}],
             visitTypeArr:[{value:1,name:'预约来访'},{value:2,name:'慕名来访'},{value:3,name:'临时来访'}],
             option2s: [{value: 1, label: '一次性全款'},{value: 2, label: '先交订金'}],
@@ -1055,6 +1055,12 @@
             projectArr:proSelect,
             multipleSelection:[],
             rules:{},
+            notVisitFlagRules:{
+                notVisitReason: [
+                    { required: true, message: '未到访原因为必填项', trigger: 'blur' },
+                    { min: 1, max: 100, message: '长度在 1 到 100 个字符', trigger: 'blur' }
+                ],
+            },
             notVisitFlag:{
                 str:"",
                 clueIds:[],
@@ -1309,7 +1315,7 @@
             currentCity(selVal){
                 param={};
                 param.name="2";
-                param.parentId=selVal;
+                param.name=selVal;
                 axios.post('/area/sysregion/querySysRegionByParam',param).then(function (response) {
                     mainDivVM.districtArr=response.data.data.data;
                 });
@@ -1415,6 +1421,7 @@
                 // 展示到访记录
                 this.showVisitAduitDialogVisible = true;
                 var param = {};
+                param.clueId = row.clueId
                 axios.post('/busVisitRecord/queryList',param).then(function (response) {
                     if(null===response||response.data==null||response.data.code!='0'){
                         if(response.data.code!='0'){
