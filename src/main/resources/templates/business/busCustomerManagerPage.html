@@ -271,7 +271,7 @@
     <!--
         到访记录展示  这个需要放到一个单独的页面中
      -->
-    <el-dialog title="查看到访记录" :visible.sync="showVisitAduitDialogVisible"  width="70%">
+    <el-dialog :title="cusTitleName+'客户到访记录'" :visible.sync="showVisitAduitDialogVisible"  width="70%">
         <template>
             <div v-show="showVisitAduitDatas.oneShow">
                 <el-button size="mini"  type="text" style = "color: #1e2746">首次到访</el-button>
@@ -452,6 +452,7 @@ var ussmList=[[${ussmList}]];//投资金额
 var customerVM = new Vue({
         el: '#clueManage',
         data: {
+        		cusTitleName:'',//到访情况-点击查看-title客户名称
         		searchForm: {
         			visitStatus: '',
         			isSign: '',
@@ -871,6 +872,7 @@ var customerVM = new Vue({
                  },
                  // 展示到访记录
                  showVisitRecord(row){
+                	 this.cusTitleName = row.cusName;
                 	 this.showVisitAduitDialogVisible = true;
                      var param = {};
                      axios.post('/busVisitRecord/queryList',param).then(function (response) {
