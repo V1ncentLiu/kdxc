@@ -707,9 +707,30 @@ public class MyCustomerClueController {
 					if (org.getOrgType().equals(OrgTypeConstant.DZSYB)) {
 						relation.setTeleDeptId(org.getParentId());
 
+						UserOrgRoleReq userRoleInfo = new UserOrgRoleReq();
+						userRole.setRoleCode(RoleCodeEnum.DXFZ.name());
+						userRole.setOrgId(org.getId());
+						JSONResult<List<UserInfoDTO>> ceoUserInfoJson = userInfoFeignClient
+								.listByOrgAndRole(userRoleInfo);
+						if (ceoUserInfoJson.getCode().equals(JSONResult.SUCCESS) && null != ceoUserInfoJson.getData()
+								&& ceoUserInfoJson.getData().size() > 0) {
+							// 电销副总
+							relation.setTeleCeoId(ceoUserInfoJson.getData().get(0).getId());
+						}
+
 					}
 					if (org.getOrgType().equals(OrgTypeConstant.DZFGS)) {
 
+						UserOrgRoleReq userRoleInfo = new UserOrgRoleReq();
+						userRole.setRoleCode(RoleCodeEnum.DXZJL.name());
+						userRole.setOrgId(org.getId());
+						JSONResult<List<UserInfoDTO>> ceoUserInfoJson = userInfoFeignClient
+								.listByOrgAndRole(userRoleInfo);
+						if (ceoUserInfoJson.getCode().equals(JSONResult.SUCCESS) && null != ceoUserInfoJson.getData()
+								&& ceoUserInfoJson.getData().size() > 0) {
+							// 电销总经理
+							relation.setTeleManagerId(ceoUserInfoJson.getData().get(0).getId());
+						}
 						relation.setTeleCompanyId(org.getId());
 					}
 
