@@ -277,7 +277,6 @@ var clientVm = new Vue({
            
         	 
         	 this.addOrModifyDialogTitle='修改坐席';
-        	 this.dialogFormVisible=true;
         	 this.submitClientUrl ='updateQimoClient';
         	 if (this.$refs['clientForm']!==undefined) {
           		this.$refs['clientForm'].resetFields();
@@ -305,7 +304,20 @@ var clientVm = new Vue({
              .then(function (response) {
                  var resData = response.data;
                  if(resData.code=='0'){
-              	    clientVm.form = resData.data;                     
+              	    clientVm.form = resData.data; 
+              	    
+              	    var userList = clientVm.userList;
+              	    var isEnabled = true;
+              	    for(var i=0;i<userList.length;i++){
+              	    	if(userList[0].id==clientVm.form.userId){
+              	    		break;
+              	    	}
+              	    	isEnabled=false;
+              	    }
+              	    if(!isEnabled){
+              	    	clientVm.form.userId='';
+              	    }
+              	    
                  }else{
               	     clientVm.$message({message:'查询七陌坐席失败',type:'error'});
                      console.error(resData);
@@ -317,6 +329,8 @@ var clientVm = new Vue({
              }).then(function(){
           	   clientVm.confirmBtnDisabled=false;//启用提交按钮
              });
+             
+             this.dialogFormVisible=true;
         	 
          },
          cancelForm(formName){
