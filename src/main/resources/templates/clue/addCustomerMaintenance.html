@@ -173,12 +173,12 @@
                     <el-col :span="8">
                         <el-form-item label="出资人：" :label-width="formLabelWidth">
                             <el-radio-group v-model="form.sponsor">
-                                <el-radio label="1">自己本人</el-radio>
-                                <el-radio label="2">他人</el-radio>
+                                <el-radio label=1>自己本人</el-radio>
+                                <el-radio label=2>他人</el-radio>
                             </el-radio-group>
                            <el-input 
                             v-model="form.sponsorOther" 
-                            v-show="form.sponsor!='1'"
+                            v-show="form.sponsor!=1"
                             autocomplete="off" 
                             maxLength="30" 
                             placeholder="姓名+联系方式"
@@ -190,12 +190,12 @@
                     <el-col :span="8">
                         <el-form-item label="决策人：" :label-width="formLabelWidth">
                             <el-radio-group v-model="form.decisionMaker">
-                                <el-radio label="1">自己本人</el-radio>
-                                <el-radio label="2">他人</el-radio>
+                                <el-radio label=1>自己本人</el-radio>
+                                <el-radio label=2>他人</el-radio>
                             </el-radio-group>
                            <el-input 
                             v-model="form.decisionMakerOther" 
-                            v-show="form.decisionMaker!='1'"
+                            v-show="form.decisionMaker!=1"
                             autocomplete="off" 
                             maxLength="30" 
                             placeholder="姓名+联系方式"
@@ -815,9 +815,9 @@ var ossUrl=[[${ossUrl}]];
                     customerPhone:'',
                     customerEmail:'', //邮箱
                     cateringType: '',//曾经从事餐饮类型
-                    sponsor:'1', //出资人
+                    sponsor:1, //出资人
                     sponsorOther:'',//其它出资人的姓名及联系方式
-                    decisionMaker: '1',//决策人
+                    decisionMaker: 1,//决策人
                     decisionMakerOther: '',//其它决策人的姓名及联系方式
                     customerPartnerDetail: '',//合伙人姓名及联系方式
                     customerSex:'',
@@ -875,7 +875,7 @@ var ossUrl=[[${ossUrl}]];
                     ],
                     customerEmail: {
                         validator:function(rule,value,callback){                 
-                            if( /^([a-zA-Z0-9_-])+@([a-zA-Z0-9_-])+((\.[a-zA-Z0-9_-]{2,3}){1,2})$/.test(value) == false){
+                            if(value&&(/^([a-zA-Z0-9_-])+@([a-zA-Z0-9_-])+((\.[a-zA-Z0-9_-]{2,3}){1,2})$/.test(value) == false) ){
                                callback(new Error("请输入正确的邮箱格式"));
                             }else{
                                callback();
@@ -1029,7 +1029,7 @@ var ossUrl=[[${ossUrl}]];
                 	    var experience=this.form.cateringType;
                 	    clueCustomer.experience=experience;
                 	    //合伙人姓名电话
-                	    var partnerNamePhone=this.form.partnerNamePhone;
+                	    var partnerNamePhone=this.form.customerPartnerDetail;
                 	    clueCustomer.partnerNamePhone=partnerNamePhone;
                 	    //出资人
                 	    var investors=this.form.sponsor;
@@ -1531,6 +1531,13 @@ var ossUrl=[[${ossUrl}]];
         	   this.form.urgency=customer.urgentDate;
         	   this.form.customerLevel=customer.cusLevel==null?"":customer.cusLevel+"";
         	   this.form.qq=customer.qq;
+        	   this.form.customerEmail=customer.email;
+        	   this.form.cateringType=customer.experience;
+        	   this.form.customerPartnerDetail=customer.partnerNamePhone;
+        	   this.form.sponsor=customer.investors;
+        	   this.form.sponsorOther=customer.investorsNamePhone;
+        	   this.form.decisionMaker=customer.decide;
+        	   this.form.decisionMakerOther=customer.decideNamePhone;
         	   var phoneArr=[];
         	   if(customer.phone2){
         		   var  phone2={};
