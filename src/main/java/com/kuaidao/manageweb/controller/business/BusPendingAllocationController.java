@@ -100,7 +100,7 @@ public class BusPendingAllocationController {
                 getUserList(user.getOrgId(), RoleCodeEnum.SWJL.name(), statusList);
         request.setAttribute("busSaleList", saleList);
         // 查询所有省
-        queryDTO.setType(1);
+        queryDTO.setType(0);
         JSONResult<List<SysRegionDTO>> querySysRegionByParam =
                 sysRegionFeignClient.querySysRegionByParam(queryDTO);
         request.setAttribute("provinceList", querySysRegionByParam.getData());
@@ -112,6 +112,10 @@ public class BusPendingAllocationController {
         // 查询字典餐饮经验集合
         request.setAttribute("cateringExperienceList",
                 getDictionaryByCode(Constants.CATERING_EXPERIENCE));
+        // 查询字典店铺面积集合
+        request.setAttribute("storefrontAreaList", getDictionaryByCode(Constants.STOREFRONT_AREA));
+        // 查询字典投资金额集合
+        request.setAttribute("ussmList", getDictionaryByCode(Constants.USSM));
         return "business/busAllocationManagerPage";
     }
 
