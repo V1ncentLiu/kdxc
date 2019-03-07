@@ -18,6 +18,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import java.util.List;
+
 import javax.validation.Valid;
 
 
@@ -28,7 +30,7 @@ import javax.validation.Valid;
  * @auther  yangbiao
  * @date: 2019/1/8 17:35
  */
-@FeignClient(name = "aggregation-service",path="/aggregation/releaserecord",fallback = ReleaseRecordFeignClient.HystrixClientFallback.class)
+@FeignClient(name = "aggregation-service-1",path="/aggregation/releaserecord",fallback = ReleaseRecordFeignClient.HystrixClientFallback.class)
 public interface ReleaseRecordFeignClient {
 
     @RequestMapping("/insert")
@@ -36,6 +38,10 @@ public interface ReleaseRecordFeignClient {
 
     @RequestMapping("/queryPageList")
     public JSONResult<PageBean<ReleaseRecordRespDTO>> queryPageList(@RequestBody ReleaseRecordReqDTO dto);
+    
+    @RequestMapping("/getReleaseRecordListByCludId")
+    public JSONResult<List<ReleaseRecordRespDTO>> getReleaseRecordListByCludId(@RequestBody ReleaseRecordRespDTO dto);
+    
 
     @Component
     static class HystrixClientFallback implements ReleaseRecordFeignClient {
@@ -58,6 +64,11 @@ public interface ReleaseRecordFeignClient {
         public JSONResult<PageBean<ReleaseRecordRespDTO>> queryPageList(ReleaseRecordReqDTO dto) {
             return fallBackError("释放记录-分页查询");
         }
+
+		@Override
+		public JSONResult<List<ReleaseRecordRespDTO>> getReleaseRecordListByCludId(ReleaseRecordRespDTO dto) {
+			return fallBackError("根据资源id查询释放记录失败");
+		}
     }
 
 }
