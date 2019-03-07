@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -23,12 +24,14 @@ import com.kuaidao.aggregation.dto.call.CallRecordReqDTO;
 import com.kuaidao.aggregation.dto.call.CallRecordRespDTO;
 import com.kuaidao.aggregation.dto.circulation.CirculationReqDTO;
 import com.kuaidao.aggregation.dto.circulation.CirculationRespDTO;
+import com.kuaidao.aggregation.dto.clue.ClueAppiontmentReq;
 import com.kuaidao.aggregation.dto.clue.ClueBasicDTO;
 import com.kuaidao.aggregation.dto.clue.ClueCustomerDTO;
 import com.kuaidao.aggregation.dto.clue.ClueDTO;
 import com.kuaidao.aggregation.dto.clue.ClueFileDTO;
 import com.kuaidao.aggregation.dto.clue.ClueQueryDTO;
 import com.kuaidao.aggregation.dto.clue.ClueRelateDTO;
+import com.kuaidao.aggregation.dto.clue.ClueRepeatPhoneDTO;
 import com.kuaidao.aggregation.dto.clue.CustomerClueDTO;
 import com.kuaidao.aggregation.dto.clue.CustomerClueQueryDTO;
 import com.kuaidao.aggregation.dto.clue.ReleaseClueDTO;
@@ -48,6 +51,7 @@ import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.manageweb.feign.call.CallRecordFeign;
 import com.kuaidao.manageweb.feign.circulation.CirculationFeignClient;
+import com.kuaidao.manageweb.feign.clue.AppiontmentFeignClient;
 import com.kuaidao.manageweb.feign.clue.MyCustomerFeignClient;
 import com.kuaidao.manageweb.feign.project.ProjectInfoFeignClient;
 import com.kuaidao.manageweb.feign.tracking.TrackingFeignClient;
@@ -76,6 +80,10 @@ public class MyCustomerClueController {
 
 	@Autowired
 	private CirculationFeignClient circulationFeignClient;
+	
+	
+	@Autowired
+	private AppiontmentFeignClient appiontmentFeignClient;
 
 	@Value("${oss.url.directUpload}")
 	private String ossUrl;
@@ -137,6 +145,7 @@ public class MyCustomerClueController {
 		JSONResult<PageBean<CustomerClueDTO>> jsonResult = myCustomerFeignClient.findTeleClueInfo(dto);
 		return jsonResult;
 	}
+	
 
 	/**
 	 * 我的客户创建资源
