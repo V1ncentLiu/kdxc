@@ -43,7 +43,7 @@
                         </div>
                     </template>
                 </el-table-column>
-                <el-table-column prop="visitCity" label="到访城市"   align="center"></el-table-column>
+                <el-table-column prop="visitCity" label="来访城市"   align="center"></el-table-column>
                 <el-table-column prop="visitPeopleNum" label="到访人数"   align="center"></el-table-column>
                 <el-table-column prop="createTime" label="创建时间"   align="center"></el-table-column>
                 <el-table-column prop="isSign" label="是否签约"   align="center">
@@ -95,7 +95,7 @@
                         </div>
                     </template>
                 </el-table-column>
-                <el-table-column prop="visitCity" label="到访城市"   align="center"></el-table-column>
+                <el-table-column prop="visitCity" label="来访城市"   align="center"></el-table-column>
                 <el-table-column prop="visitPeopleNum" label="到访人数"   align="center"></el-table-column>
                 <el-table-column prop="createTime" label="创建时间"   align="center"></el-table-column>
                 <el-table-column prop="isSign" label="是否签约"   align="center">
@@ -147,7 +147,7 @@
                         </div>
                     </template>
                 </el-table-column>
-                <el-table-column prop="visitCity" label="到访城市"   align="center"></el-table-column>
+                <el-table-column prop="visitCity" label="来访城市"   align="center"></el-table-column>
                 <el-table-column prop="visitPeopleNum" label="到访人数"   align="center"></el-table-column>
                 <el-table-column prop="createTime" label="创建时间"   align="center"></el-table-column>
                 <el-table-column prop="isSign" label="是否签约"   align="center">
@@ -275,7 +275,7 @@
                     <el-row :gutter="20">
                         <el-col :span="20">
                             <el-form-item label="未签约原因" style="display: none" id="notSignReason" :label-width="formLabelWidth"  prop="notSignReason">
-                                <el-input type="textarea" v-model="addVisitRecord.notSignReason"  maxlength="100" :rows="3" placeholder="请输入内容"></el-input>
+                                <el-input type="textarea" v-model="addVisitRecord.notSignReason"  maxlength="100" :rows="3" placeholder="请输入内容(限制100字)"></el-input>
                             </el-form-item>
                         </el-col>
                     </el-row>
@@ -472,7 +472,7 @@
                     </div>
                 </el-form>
                 <div slot="footer" class="dialog-footer f-tac">
-                    <el-button type="primary" @click="submitForm('formSigning')">确 定</el-button>
+                    <el-button type="primary" @click="submitForm('formSigning')">提 交</el-button>
                     <el-button @click="dialogFormSigningVisible = false">取 消</el-button>
                 </div>
             </template>
@@ -584,7 +584,11 @@
         },
         computed: {
             amountPerformance(){
-                return this.formSigning.amountReceived;
+                var aone = parseFloat(this.formSigning.amountReceived);
+                var atwo = parseFloat(this.formSigning.firstToll);
+                if(isNaN(aone)) aone = 0
+                if(isNaN(atwo)) atwo = 0
+                return aone + atwo
             }
         },
         methods: {

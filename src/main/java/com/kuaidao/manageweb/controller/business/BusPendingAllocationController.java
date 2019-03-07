@@ -259,7 +259,7 @@ public class BusPendingAllocationController {
             OrganizationRespDTO group = orgMap.get(user.getOrgId());
             OrganizationRespDTO area = orgMap.get(group.getParentId());
 
-            resultMap.put("id", user.getId());
+            resultMap.put("id", user.getId().toString());
             resultMap.put("name",
                     user.getName() + "(" + area.getName() + "--" + group.getName() + ")");
             result.add(resultMap);
