@@ -235,7 +235,7 @@
                 <el-row>
                     <el-col :span="24">
                         <el-form-item label="是否在考虑同行业：" :label-width="formLabelWidth">
-                          {{form.tradeProject}}
+                           {{form.tradeProject==""?'否':form.tradeProject}}
                         </el-form-item>
                         
                     </el-col>
@@ -581,7 +581,7 @@ if(customer==null){
         customerJob:customer.profession+"",
         customerPartner:customer.partnerType+"",
         address:customer.hasAddress+"",
-        urgency:customer.urgentDate,
+        urgency:crtTimeFtt(customer.urgentDate),
         customerLevel:customer.cusLevel+"",
         qq:customer.qq,
         money:intention.advanceAmount+"",
@@ -607,6 +607,48 @@ if(base==null){
         projectName:"",
         messageTime:"",
         messagePoint:""
+    }
+}else{
+    base.messageTime = crtTimeFtt1( base.messageTime)
+}
+
+function crtTimeFtt1(val, row) {
+    if (val != null) {
+        var date = new Date(val);
+
+        var month = (date.getMonth() + 1);
+        if(month<10){
+            month = "0"+month;
+        }
+        var day = date.getDate();
+        if(day<10){
+            day = "0"+day;
+        }
+        var hour = date.getHours();
+        if(hour<10){
+            hour = "0"+hour;
+        }
+        var minu = date.getMinutes();
+        if(minu<10){
+            minu = "0"+minu;
+        }
+        var mill = date.getMilliseconds();
+        if(mill<10){
+            mill = "0"+mill;
+        }
+        return date.getFullYear()+''+(month) + ''+day+' '+hour+":"+minu+":"+mill;
+    }
+}
+
+function crtTimeFtt(val, row) {
+    if (val != null) {
+        var date = new Date(val);
+
+        var month = (date.getMonth() + 1);
+        if(month<10){
+            month = "0"+month;
+        }
+        return date.getFullYear()+''+(month) + '月';
     }
 }
 
