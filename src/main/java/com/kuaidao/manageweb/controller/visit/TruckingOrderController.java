@@ -135,7 +135,7 @@ public class TruckingOrderController {
             
             
         }
-       /* List<Long> busList = new ArrayList<>();
+        /*List<Long> busList = new ArrayList<>();
         busList.add(1098210933718835200L);
         reqDTO.setBusDirectorIdList(busList);*/
          return trackingOrderFeignClient.listTrackingOrder(reqDTO) ;
@@ -156,6 +156,47 @@ public class TruckingOrderController {
       /*  List<Long> busList = new ArrayList<>();
         busList.add(1098210933718835200L);
         reqDTO.setBusDirectorIdList(busList);*/
+        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+        Long orgId = curLoginUser.getOrgId();
+        List<RoleInfoDTO> roleList = curLoginUser.getRoleList();
+        if(roleList!=null && roleList.size()!=0) {
+            RoleInfoDTO roleInfoDTO = roleList.get(0);
+            String roleName = roleInfoDTO.getRoleName();
+            if(RoleCodeEnum.SWDQZJ.value().equals(roleName)) {
+                UserOrgRoleReq req = new UserOrgRoleReq();
+                req.setOrgId(orgId);
+                req.setRoleCode(RoleCodeEnum.SWZJ.name());
+                JSONResult<List<UserInfoDTO>> userJr = userInfoFeignClient.listByOrgAndRole(req);
+                if(userJr==null || !JSONResult.SUCCESS.equals(userJr.getCode())) {
+                    logger.error("查询电销通话记录-获取组内顾问-userInfoFeignClient.listByOrgAndRole(req),param{{}},res{{}}",req,userJr);
+                }
+                List<UserInfoDTO> userInfoDTOList = userJr.getData();
+                if(userInfoDTOList!=null && userInfoDTOList.size()!=0) {
+                    List<Long> idList = userInfoDTOList.stream().map(UserInfoDTO::getId).collect(Collectors.toList());
+                    reqDTO.setBusDirectorIdList(idList);
+                }
+                Long accountId = reqDTO.getAccountId();
+                if(accountId!=null) {
+                    List<Long> accountIdList = new ArrayList<>();
+                    accountIdList.add(accountId);
+                    reqDTO.setAccountIdList(accountIdList);
+                }
+
+            }else if(RoleCodeEnum.SWZJ.value().equals(roleName)){//商务总监
+                List<Long> idList = new ArrayList<>();
+                idList.add(curLoginUser.getId());
+                reqDTO.setBusDirectorIdList(idList);
+                Long accountId = reqDTO.getAccountId();
+                if(accountId!=null) {
+                    List<Long> accountIdList = new ArrayList<>();
+                    accountIdList.add(accountId);
+                    reqDTO.setAccountIdList(accountIdList);
+                }
+            }
+            
+            
+        }
+        
         JSONResult<List<TrackingOrderRespDTO>> trackingOrderListJr = trackingOrderFeignClient.exportTrackingOrder(reqDTO);
         List<List<Object>> dataList = new ArrayList<List<Object>>();
         dataList.add(getHeadTitleList());
@@ -193,6 +234,8 @@ public class TruckingOrderController {
                 dataList.add(curList);
             }
             
+        }else {
+            logger.error("export trucking_order param{{}},res{{}}",reqDTO,trackingOrderListJr);
         }
         
         XSSFWorkbook wbWorkbook = ExcelUtil.creat2007Excel(dataList);
