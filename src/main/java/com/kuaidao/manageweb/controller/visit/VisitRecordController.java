@@ -182,7 +182,7 @@ public class VisitRecordController {
     @ResponseBody
     public JSONResult<PageBean<VisitRecordRespDTO>> listVisitRecord(@RequestBody VisitRecordReqDTO visitRecordReqDTO){
         handleReqParam(visitRecordReqDTO);
-        
+       
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
         Long orgId = curLoginUser.getOrgId();
         List<RoleInfoDTO> roleList = curLoginUser.getRoleList();

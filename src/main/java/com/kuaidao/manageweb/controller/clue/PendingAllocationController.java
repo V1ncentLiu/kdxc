@@ -114,7 +114,10 @@ public class PendingAllocationController {
         infoAssignQueryDTO.setPageSize(1000);
         JSONResult<PageBean<InfoAssignDTO>> pageBean =
                 infoAssignFeignClient.queryInfoAssignPage(infoAssignQueryDTO);
-        request.setAttribute("ruleList", pageBean.getData().getData());
+        if (pageBean.getData() != null) {
+            request.setAttribute("ruleList", pageBean.getData().getData());
+        }
+
         // 查询字典类别集合
         request.setAttribute("clueCategoryList", getDictionaryByCode(Constants.CLUE_CATEGORY));
         // 查询字典类别集合
