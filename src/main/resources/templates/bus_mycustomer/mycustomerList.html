@@ -286,14 +286,14 @@
                     </el-col>
                     <el-col :span="10">
                         <el-form-item label="到访人数"    :label-width="formLabelWidth"  prop="visitPeopleNum">
-                            <el-input v- model="addVisitRecord.visitPeopleNum" autocomplete="off"  maxlength="2"    ></el-input>
+                            <el-input v-model="addVisitRecord.visitPeopleNum"  maxlength="2"    ></el-input>
                         </el-form-item>
                     </el-col>
                 </el-row>
                 <el-row :gutter="20">
                     <el-col :span="20">
                             <el-form-item label="未签约原因" style="display: none" id="notSignReason" :label-width="formLabelWidth"  prop="notSignReason">
-                                <el-input type="textarea" v-model="addVisitRecord.notSignReason"  maxlength="100" :rows="3" placeholder="请输入内容"></el-input>
+                                <el-input type="textarea" v-model="addVisitRecord.notSignReason"  maxlength="100" :rows="3" placeholder="请输入内容(限制100字)"></el-input>
                             </el-form-item>
                     </el-col>
                 </el-row>
@@ -410,7 +410,7 @@
                     </el-col>
                     <el-col :span="10">
                         <el-form-item label="到访人数"    :label-width="formLabelWidth"  prop="visitPeopleNum">
-                            <el-input v- model="updateVisitRecord.visitPeopleNum" autocomplete="off"  maxlength="2"    ></el-input>
+                            <el-input v-model="updateVisitRecord.visitPeopleNum" autocomplete="off"  maxlength="2"    ></el-input>
                         </el-form-item>
                     </el-col>
                 </el-row>
@@ -418,12 +418,12 @@
                     <el-col :span="20">
                         <div v-if="updateVisitRecord.isSign === 0">
                             <el-form-item label="未签约原因" :label-width="formLabelWidth" id="notSignReason"  prop="notSignReason">
-                                <el-input type="textarea" v-model="updateVisitRecord.notSignReason"  maxlength="100" :rows="3" placeholder="请输入内容"></el-input>
+                                <el-input type="textarea" v-model="updateVisitRecord.notSignReason"  maxlength="100" :rows="3" placeholder="请输入内容(限制100字)"></el-input>
                             </el-form-item>
                         </div>
                         <div v-else-if="updateVisitRecord.isSign === 1">
                             <el-form-item label="未签约原因"  style="display: none" :label-width="formLabelWidth" id="notSignReason"  prop="notSignReason">
-                                <el-input type="textarea" v-model="updateVisitRecord.notSignReason"  maxlength="100" :rows="3" placeholder="请输入内容"></el-input>
+                                <el-input type="textarea" v-model="updateVisitRecord.notSignReason"  maxlength="100" :rows="3" placeholder="请输入内容(限制100字)"></el-input>
                             </el-form-item>
                         </div>
                     </el-col>
@@ -474,10 +474,10 @@
                     <el-table-column prop="isSign" label="是否签约"   align="center">
                         <template slot-scope="scope">
                             <div v-if="scope.row.isSign === 0">
-                                否
+                                未签约
                             </div>
                             <div v-else-if="scope.row.isSign ===1">
-                                是
+                                已签约
                             </div>
                         </template>
                     </el-table-column>
@@ -520,16 +520,16 @@
                             </div>
                         </template>
                     </el-table-column>
-                    <el-table-column prop="visitCity" label="到访城市"   align="center"></el-table-column>
+                    <el-table-column prop="visitCity" label="来访城市"   align="center"></el-table-column>
                     <el-table-column prop="visitPeopleNum" label="到访人数"   align="center"></el-table-column>
                     <el-table-column prop="createTime" label="创建时间"   align="center"></el-table-column>
                     <el-table-column prop="isSign" label="是否签约"   align="center">
                         <template slot-scope="scope">
                             <div v-if="scope.row.isSign === 0">
-                                否
+                                未签约
                             </div>
                             <div v-else-if="scope.row.isSign ===1">
-                                是
+                                已签约
                             </div>
                         </template>
                     </el-table-column>
@@ -572,16 +572,16 @@
                             </div>
                         </template>
                     </el-table-column>
-                    <el-table-column prop="visitCity" label="到访城市"   align="center"></el-table-column>
+                    <el-table-column prop="visitCity" label="来访城市"   align="center"></el-table-column>
                     <el-table-column prop="visitPeopleNum" label="到访人数"   align="center"></el-table-column>
                     <el-table-column prop="createTime" label="创建时间"   align="center"></el-table-column>
                     <el-table-column prop="isSign" label="是否签约"   align="center">
                         <template slot-scope="scope">
                             <div v-if="scope.row.isSign === 0">
-                                否
+                                未签约
                             </div>
                             <div v-else-if="scope.row.isSign ===1">
-                                是
+                                已签约
                             </div>
                         </template>
                     </el-table-column>
@@ -785,7 +785,7 @@
             </div>
         </el-form>
         <div slot="footer" class="dialog-footer f-tac">
-            <el-button type="primary" @click="submitForm('formSigning')">确 定</el-button>
+            <el-button type="primary" @click="submitForm('formSigning')">提 交</el-button>
             <el-button @click="dialogFormSigningVisible = false">取 消</el-button>
         </div>
         </template>
@@ -1179,10 +1179,19 @@
         },
         computed: {
             updateFormSigningAmountPerformance(){
-                return this.updateFormSigning.amountReceived;
+                var aone = parseFloat(this.updateFormSigning.amountReceived);
+                var atwo = parseFloat(this.updateFormSigning.firstToll);
+                if(isNaN(aone)) aone = 0
+                if(isNaN(atwo)) atwo = 0
+                return aone + atwo
             },
+
             formSigningAmountPerformance(){
-                return this.formSigning.amountReceived;
+                var aone = parseFloat(this.formSigning.amountReceived);
+                var atwo = parseFloat(this.formSigning.firstToll);
+                if(isNaN(aone)) aone = 0
+                if(isNaN(atwo)) atwo = 0
+                return aone + atwo
             }
         },
         methods: {
