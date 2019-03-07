@@ -16,9 +16,9 @@
             <div class="control-group normal_text">忘记密码-找回密码</div>
             <el-form :model="resetPwdForm" :rules="rules" ref="resetPwdForm" class="demo-resetPwdForm" >
                 <el-row>
-                    <el-form-item  prop="phoneInput">
+                    <el-form-item  prop="username">
                       <span class="iconImg"><img th:src="@{/images/loginIco01.jpg}" alt=""></span>
-                      <el-input v-model="resetPwdForm.phoneInput" maxlength="11"  placeholder="输入已注册手机号"></el-input>
+                      <el-input v-model="resetPwdForm.username" maxlength="30"  placeholder="输入登录用户名"></el-input>
                     </el-form-item>
                 </el-row>
                 <el-row>
@@ -85,24 +85,25 @@ var vm =  new Vue({
           isDisabled: false,
           time: 60,
         	resetPwdForm: {
-            	phoneInput: '',
+        		username: '',
                 codeInput:'',
                 pswInput1:'',
                 pswInput2:''
             },
             rules: {
-            	phoneInput: [
-                    { required: true, message: '手机号不能为空', trigger: 'blur' },
-                    {  max: 11, message: '最大11个字符', trigger: 'blur' },
-                    {  min: 11, message: '输入手机号格式错误', trigger: 'blur' },
-                    { validator:function(rule,value,callback){                 
-                        if(/^1[34578]\d{9}$/.test(value) == false){
-                           callback(new Error("输入手机号格式错误"));
-                        }else{
-                           callback();
-                        } 
-                        callback();                      
-                   }, trigger: 'change'}
+            	username: [
+                    { required: true, message: '用户名不能为空', trigger: 'blur' },
+                  	{  max: 30, message: '最大30个字符', trigger: 'blur' },
+                  	{ validator:function(rule,value,callback){
+                 
+                    if(/^[A-Za-z0-9]+$/.test(value) == false){
+                       callback(new Error("请输入数字和字母"));
+                    }else{
+                       callback();
+                    } 
+                    callback();
+                      
+                    }, trigger: 'change'}
                 ],
                 pswInput1: [
                   { required: true, message: '密码不能为空', trigger: 'change' },
@@ -162,7 +163,7 @@ var vm =  new Vue({
  	            		return;
     	             }
     	             var param={};
-    	             param.phone= formData.phoneInput;
+    	             param.username= formData.username;
     	             param.oldPassword = formData.pswInput1;
     	             param.code = formData.codeInput;
     	             console.info(param);
@@ -191,7 +192,7 @@ var vm =  new Vue({
        	      },
        	   	  sendCode(formName,type) {
        	    	var valid=true;
-	       	  	this.$refs[formName].validateField(["phoneInput"],(error) => {
+	       	  	this.$refs[formName].validateField(["username"],(error) => {
   	    	      if (error) {
   	    	    	  valid=false;
 	       	      }
@@ -200,7 +201,7 @@ var vm =  new Vue({
                 this.cutDown();//倒计时
   	    		    var formData = vm.resetPwdForm;
 		            var param={};
-		            param.phone= formData.phoneInput;
+		            param.username= formData.username;
 		            param.type = type;
 		            console.info(param);
 		            axios.post("/login/sendmsgPwd", param)

@@ -135,9 +135,9 @@ public class TruckingOrderController {
             
             
         }
-        /*List<Long> busList = new ArrayList<>();
+        List<Long> busList = new ArrayList<>();
         busList.add(1098210933718835200L);
-        reqDTO.setBusDirectorIdList(busList);*/
+        reqDTO.setBusDirectorIdList(busList);
          return trackingOrderFeignClient.listTrackingOrder(reqDTO) ;
      }
     
@@ -153,9 +153,9 @@ public class TruckingOrderController {
     @RequiresPermissions("aggregation:truckingOrder:export")
     @PostMapping("/exportTrackingOrder")
      public void exportTrackingOrder(@RequestBody TrackingOrderReqDTO reqDTO,HttpServletResponse response) throws Exception{
-       /* List<Long> busList = new ArrayList<>();
+        List<Long> busList = new ArrayList<>();
         busList.add(1098210933718835200L);
-        reqDTO.setBusDirectorIdList(busList);*/
+        reqDTO.setBusDirectorIdList(busList);
         JSONResult<List<TrackingOrderRespDTO>> trackingOrderListJr = trackingOrderFeignClient.exportTrackingOrder(reqDTO);
         List<List<Object>> dataList = new ArrayList<List<Object>>();
         dataList.add(getHeadTitleList());
