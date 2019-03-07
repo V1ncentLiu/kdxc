@@ -33,12 +33,12 @@
                 </el-row>
                 <el-row>
                     <el-col :span="8">
-                        <el-form-item label="性别：" :label-width="formLabelWidth">
-                           <el-select v-model="form.customerSex" placeholder="请选择" style="width: 100%;">
+                        <el-form-item label="客户级别：" :label-width="formLabelWidth">
+                           <el-select v-model="form.customerLevel" placeholder="请选择" style="width: 100%;">
                                 <el-option
-                                    v-for="item in optsex"
+                                    v-for="item in customerLevelArr"
                                     :key="item.value"
-                                    :label="item.label"
+                                    :label="item.name"
                                     :value="item.value">
                                 </el-option>
                             </el-select>
@@ -53,8 +53,56 @@
                 </el-row>
                 <el-row>
                     <el-col :span="8">
+                        <el-form-item label="邮箱：" prop="customerEmail" :label-width="formLabelWidth">
+                           <el-input v-model="form.customerEmail" autocomplete="off" maxLength="30"></el-input>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="8">
+                        <el-form-item label="年龄：" :label-width="formLabelWidth">
+                           <el-input v-model="form.customerAge" autocomplete="off" maxLength="3" @keyup.native="agenumber" ></el-input>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="8">
+                        <el-form-item label="性别：" :label-width="formLabelWidth">
+                           <el-select v-model="form.customerSex" placeholder="请选择" style="width: 100%;">
+                                <el-option
+                                    v-for="item in optsex"
+                                    :key="item.value"
+                                    :label="item.label"
+                                    :value="item.value">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="8">
+                        <el-form-item label="合伙人：" :label-width="formLabelWidth">
+                           <el-select v-model="form.customerPartner" placeholder="请选择" style="width: 100%;">
+                                <el-option
+                                    v-for="item in partnerArr"
+                                    :key="item.value"
+                                    :label="item.name"
+                                    :value="item.value">
+                                </el-option>
+                            </el-select>
+                            <el-input 
+                            v-model="form.customerPartnerDetail" 
+                            v-show="form.customerPartner!='1'"
+                            autocomplete="off" 
+                            maxLength="30" 
+                            placeholder="请输入合伙人姓名以及联系方式"
+                            style="margin-top:10px;"></el-input>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="8">
                         <el-form-item label="餐饮经验：" :label-width="formLabelWidth">
-                           <el-select v-model="form.experience" placeholder="请选择" style="width: 100%;">
+                           <el-select 
+                           v-model="form.experience"
+                           placeholder="请选择" 
+                           style="width: 100%;">
                                 <el-option
                                     v-for="item in CateringExperienceArr"
                                     :key="item.value"
@@ -62,11 +110,25 @@
                                     :value="item.value">
                                 </el-option>
                             </el-select>
+                            <el-input 
+                            v-model="form.cateringType" 
+                            v-show="form.experience!=''&&form.experience!='0'"
+                            autocomplete="off" 
+                            maxLength="50" 
+                            placeholder="请输入曾从事餐饮类型"
+                            style="margin-top:10px;"></el-input>
                         </el-form-item>
                     </el-col>
                     <el-col :span="8">
-                        <el-form-item label="年龄：" :label-width="formLabelWidth">
-                           <el-input v-model="form.customerAge" autocomplete="off" @keyup.native="agenumber"></el-input>
+                        <el-form-item label="开店紧迫性：" :label-width="formLabelWidth">
+                           <!-- <el-input v-model="form.urgency" autocomplete="off" style='width: 60%;'> -->
+                            <el-date-picker
+                                style='width: 60%;'
+                                v-model="form.urgency"
+                                type="month"
+                                placeholder="选择月">
+                            </el-date-picker>   
+                            </el-input><span style="padding-left: 5px;">之前启动</span>
                         </el-form-item>
                     </el-col>
                 </el-row>
@@ -84,15 +146,8 @@
                         </el-form-item>
                     </el-col>
                     <el-col :span="8">
-                        <el-form-item label="合伙人：" :label-width="formLabelWidth">
-                           <el-select v-model="form.customerPartner" placeholder="请选择" style="width: 100%;">
-                                <el-option
-                                    v-for="item in partnerArr"
-                                    :key="item.value"
-                                    :label="item.name"
-                                    :value="item.value">
-                                </el-option>
-                            </el-select>
+                        <el-form-item label="QQ：" :label-width="formLabelWidth">
+                           <el-input v-model="form.qq" autocomplete="off" maxLength="20" @keyup.native="qqnumber"></el-input>
                         </el-form-item>
                     </el-col>
                 </el-row>
@@ -110,34 +165,35 @@
                         </el-form-item>
                     </el-col>
                     <el-col :span="8">
-                        <el-form-item label="开店紧迫性：" :label-width="formLabelWidth">
-                            <el-date-picker
-                                style='width: 60%;'
-                                v-model="form.urgency"
-                                type="month"
-                                placeholder="选择月">
-                            </el-date-picker>   
-                            </el-input><span style="padding-left: 5px;">之前启动</span>
+                        <el-form-item label="出资人：" :label-width="formLabelWidth">
+                            <el-radio-group v-model="form.sponsor">
+                                <el-radio label="1">自己本人</el-radio>
+                                <el-radio label="2">他人</el-radio>
+                            </el-radio-group>
+                           <el-input 
+                            v-model="form.sponsorOther" 
+                            v-show="form.sponsor!=''&&form.sponsor!='1'"
+                            autocomplete="off" 
+                            maxLength="30" 
+                            placeholder="姓名+联系方式"
+                            style="margin-top:10px;"></el-input>
                         </el-form-item>
                     </el-col>
                 </el-row>
                 <el-row>
                     <el-col :span="8">
-                        <el-form-item label="客户级别：" :label-width="formLabelWidth">
-                           <el-select v-model="form.customerLevel" placeholder="请选择" style="width: 100%;">
-                                <el-option
-                                    v-for="item in customerLevelArr"
-                                    :key="item.value"
-                                    :label="item.name"
-                                    :value="item.value">
-                                </el-option>
-                            </el-select>
-                        </el-form-item>
-                    </el-col>
-                    <el-col :span="8">
-                        <el-form-item label="QQ：" :label-width="formLabelWidth">
-                           <el-input v-model="form.qq" autocomplete="off" maxLength="20" @keyup.native="qqnumber"></el-input>
-                        </el-form-item>
+                        <el-form-item label="决策人：" :label-width="formLabelWidth">
+                            <el-radio-group v-model="form.decisionMaker">
+                                <el-radio label="1">自己本人</el-radio>
+                                <el-radio label="2">他人</el-radio>
+                            </el-radio-group>
+                           <el-input 
+                            v-model="form.decisionMakerOther" 
+                            v-show="form.decisionMaker!=''&&form.decisionMaker!='1'"
+                            autocomplete="off" 
+                            maxLength="30" 
+                            placeholder="姓名+联系方式"
+                            style="margin-top:10px;"></el-input>
                     </el-col>
                 </el-row>
             </div>
@@ -735,6 +791,13 @@ var ossUrl=[[${ossUrl}]];
                     radioProject:'1', //意向项目单选默认选项                    
                     customerName:'',
                     customerPhone:'',
+                    customerEmail:'', //邮箱
+                    cateringType: '',//曾经从事餐饮类型
+                    sponsor:'1', //出资人
+                    sponsorOther:'',//其它出资人的姓名及联系方式
+                    decisionMaker: '1',//决策人
+                    decisionMakerOther: '',//其它决策人的姓名及联系方式
+                    customerPartnerDetail: '',//合伙人姓名及联系方式
                     customerSex:'',
                     ishasWx:'',
                     experience:'',
@@ -896,7 +959,27 @@ var ossUrl=[[${ossUrl}]];
                 	    //QQ
                 	    var qq=this.form.qq;
                 	    clueCustomer.qq=qq;
-                	    
+                	  //email
+                	    var email=this.form.customerEmail;
+                	    clueCustomer.email=email;
+                	    //餐饮经验
+                	    var experience=this.form.cateringType;
+                	    clueCustomer.experience=experience;
+                	    //合伙人姓名电话
+                	    var partnerNamePhone=this.form.customerPartnerDetail;
+                	    clueCustomer.partnerNamePhone=partnerNamePhone;
+                	    //出资人
+                	    var investors=this.form.sponsor;
+                	    clueCustomer.investors=investors;
+                	    //出资人姓名电话
+                	    var investorsNamePhone=this.form.sponsorOther;
+                	    clueCustomer.investorsNamePhone=investorsNamePhone;
+                	    //决策人
+                	    var decide=this.form.decisionMaker;
+                	    clueCustomer.decide=decide;
+                	    //决策人姓名电话
+                	    var decideNamePhone=this.form.decisionMakerOther;
+                	    clueCustomer.decideNamePhone=decideNamePhone;
                 	    //----投资意向---//
                 	    var  clueIntention={};
                 	    //投资金额
@@ -1311,6 +1394,13 @@ var ossUrl=[[${ossUrl}]];
         	   this.form.urgency=customer.urgentDate;
         	   this.form.customerLevel=customer.cusLevel+"";
         	   this.form.qq=customer.qq;
+        	   this.form.customerEmail=customer.email;
+        	   this.form.cateringType=customer.experience;
+        	   this.form.customerPartnerDetail=customer.partnerNamePhone;
+        	   this.form.sponsor=customer.investors==null?"":customer.investors+"";
+        	   this.form.sponsorOther=customer.investorsNamePhone;
+        	   this.form.decisionMaker=customer.decide==null?"":customer.decide+"";
+        	   this.form.decisionMakerOther=customer.decideNamePhone;
            } 
            if(intention){
         	   this.form. money=intention.advanceAmount+"";

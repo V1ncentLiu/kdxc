@@ -112,6 +112,7 @@
                                 </el-option>
                             </el-select>-->
                             <el-button type="text" disabled>{{form.customerPartner}}</el-button>
+                            <el-button type="text" disabled>{{form.customerPartnerDetail}}</el-button>
                         </el-form-item>
                     </el-col>
                 </el-row>
@@ -127,6 +128,7 @@
                                 </el-option>
                             </el-select>-->
                             <el-button type="text" disabled>{{form.experience}}</el-button>
+                            <el-button type="text" disabled>{{form.cateringType}}</el-button>
                         </el-form-item>
                     </el-col>
                     <el-col :span="8">
@@ -180,19 +182,8 @@
                     </el-col>
                     <el-col :span="8">
                         <el-form-item label="出资人：" :label-width="formLabelWidth">
-                            <!-- <el-radio-group v-model="form.sponsor">
-                                <el-radio label="1">自己本人</el-radio>
-                                <el-radio label="2">他人</el-radio>
-                            </el-radio-group>
-                           <el-input 
-                            v-model="form.sponsorOther" 
-                            v-show="form.sponsor!=''&&form.sponsor!='1'"
-                            autocomplete="off" 
-                            maxLength="30" 
-                            placeholder="姓名+联系方式"
-                            style="margin-top:10px;"></el-input> -->
                             <el-button type="text" disabled>
-                                {{form.sponsor==2?'他人 '+form.sponsorOther :'自己本人'}}
+                                {{form.sponsor==2?'他人 '+form.sponsorOther :(form.sponsor==1?'自己本人 ' :'')}}
                             </el-button>
                         </el-form-item>
                     </el-col>
@@ -200,19 +191,8 @@
                 <el-row>
                     <el-col :span="8">
                         <el-form-item label="决策人：" :label-width="formLabelWidth">
-                            <!-- <el-radio-group v-model="form.decisionMaker">
-                                <el-radio label="1">自己本人</el-radio>
-                                <el-radio label="2">他人</el-radio>
-                            </el-radio-group>
-                           <el-input 
-                            v-model="form.decisionMakerOther" 
-                            v-show="form.decisionMaker!=''&&form.decisionMaker!='1'"
-                            autocomplete="off" 
-                            maxLength="30" 
-                            placeholder="姓名+联系方式"
-                            style="margin-top:10px;"></el-input> -->
                             <el-button type="text" disabled>
-                                {{form.customerSex==2?'他人 '+form.decisionMakerOther :'自己本人'}}
+                                {{form.decisionMaker==2?'他人 '+form.decisionMakerOther :(form.decisionMaker==1?'自己本人 ':'')}}
                             </el-button>
                     </el-col>
                 </el-row>
@@ -677,6 +657,13 @@ if(customer==null){
             province:"",
             city:"",
             district:"",
+            customerEmail:'', //邮箱
+            cateringType: '',//曾经从事餐饮类型
+            sponsor:'', //出资人
+            sponsorOther:'',//其它出资人的姓名及联系方式
+            decisionMaker: '',//决策人
+            decisionMakerOther: '',//其它决策人的姓名及联系方式
+            customerPartnerDetail: ''//合伙人姓名及联系方式
     };
 }else{
 
@@ -710,6 +697,13 @@ if(customer==null){
         province:intention.province,
         city:intention.city,
         district:intention.district,
+        customerEmail:customer.email, //邮箱
+        cateringType: customer.experience,//曾经从事餐饮类型
+        sponsor:customer.investors+"", //出资人
+        sponsorOther:customer.investorsNamePhone,//其它出资人的姓名及联系方式
+        decisionMaker: customer.decide+"",//决策人
+        decisionMakerOther: customer.decideNamePhone,//其它决策人的姓名及联系方式
+        customerPartnerDetail:customer.partnerNamePhone//合伙人姓名及联系方式
     }
 }
 

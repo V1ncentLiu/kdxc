@@ -262,7 +262,7 @@
                 </el-row>
                 <el-row>
                     <el-col :span="8">
-                        <el-form-item label="开店区域：" :label-width="formLabelWidth">
+                        <el-form-item label="开店区域：" :label-width="formLabelWidth" prop="province">
                            <el-select v-model="form.province" placeholder="省" style="width: 100%;"  @change="currentProvince">
                                 <el-option
                                     v-for="item in provinceArr"
@@ -274,7 +274,7 @@
                         </el-form-item>
                     </el-col>    
                     <el-col :span="16">    
-                        <el-form-item label="" style="width: 45%;float: left;margin-left: 5%;">
+                        <el-form-item label="" style="width: 45%;float: left;margin-left: 5%;" prop="city">
                            <el-select v-model="form.city" placeholder="市" style="width: 100%;" @change="currentCity">
                                 <el-option
                                     v-for="item in cityArr"
@@ -700,7 +700,7 @@
             </div>
             <div class="padding20 f-tac">            
                 <el-button type="primary" @click="submitForm('form')">提交客户资源</el-button>
-                <el-button type="primary" @click="inviteCustomer">邀约来访</el-button>
+                <el-button type="primary" @click="inviteCustomer('form')">邀约来访</el-button>
                 <el-button @click="rebackClue">取 消</el-button>
             </div> 
         </el-form> 
@@ -859,9 +859,15 @@ var ossUrl=[[${ossUrl}]];
                 proSelect:proSelect,
                 formLabelWidth: '120px',
                 rules:{
-                    // customerName: [
-                    //     { required: true, message: '客户姓名不能为空', trigger: 'blur' }
-                    // ],
+                    customerName: [
+                         { required: true, message: '客户姓名不能为空', trigger: 'blur' }
+                    ],
+                    province: [
+                         { required: true, message: '开店区域省份不能为空', trigger: 'blur' }
+                    ],
+                    city: [
+                         { required: true, message: '开店区域城市不能为空', trigger: 'blur' }
+                    ],
                     customerPhone: [
                         /* { required: true, message: '手机号不能为空', trigger: 'blur' },
                         { validator:function(rule,value,callback){                 
@@ -982,7 +988,13 @@ var ossUrl=[[${ossUrl}]];
        		  return n[1] ? n : '0' + n
        		},
             submitForm(form) {
-                this.$refs[form].validate((valid) => {
+       			var valid=true;
+	       	  	  this.$refs[form].validateField(["customerEmail","callTime",
+	       	  	                                  "focusPoint","isCall","resourceStatus","nextVisitTime"],(error) => {
+	    	        if (error) {
+	    	    	  valid=false;
+	       	        }
+	              });
                     if (valid) {
                        //----客户基本信息---//
                  	    var  clueCustomer={};
@@ -1103,7 +1115,6 @@ var ossUrl=[[${ossUrl}]];
                         console.log('error submit!!');
                         return false;
                     }
-                });
             },
             rebackClue(){
             	 window.location.href="/tele/clueMyCustomerInfo/initmyCustomer"; 	
@@ -1475,8 +1486,19 @@ var ossUrl=[[${ossUrl}]];
                  });  	
               },
             //邀约来访
-            inviteCustomer(){
-            	  window.location.href="/tele/clueMyCustomerInfo/inviteCustomer?clueId="+clueId; 
+            inviteCustomer(form){
+            	  var valid=true;
+	       	  	  this.$refs[form].validateField(["customerName","province","city"],(error) => {
+	    	        if (error) {
+	    	    	  valid=false;
+	       	        }
+	              });
+                    if (valid) {
+	            	  window.location.href="/tele/clueMyCustomerInfo/inviteCustomer?clueId="+clueId+"&cusName="+this.form.customerName+"&cusPhone="+this.form.customerPhone; 
+                    } else {
+                        console.log('error submit!!');
+                        return false;
+                    }
             },
             handleOperateFn(index, row) { //上传资源"查看图片,下载录音"
             	
