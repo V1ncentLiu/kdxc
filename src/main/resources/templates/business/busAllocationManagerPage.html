@@ -129,7 +129,13 @@
                 <el-form-item >
                    	{{allocationForm.message}}
                 </el-form-item>
-                <el-form-item label="商务经理"    :label-width="formLabelWidth"  prop="saleId">
+                <el-form-item label="商务经理"    
+                	:label-width="formLabelWidth"  
+                	prop="saleId"
+                	:rules="[
+                	 { required: true, message: '商务经理不能为空'},
+                	]"
+                	>
                     <el-select v-model="allocationForm.saleId" placeholder="组内商务经理姓名" style="width: 400px;">
                         <el-option v-for="item in saleOptions" 
                         			:key="item.id" 
@@ -139,11 +145,11 @@
                     </el-select>
                 </el-form-item>
                 <el-form-item label="备注"    :label-width="formLabelWidth"  prop="remark">
-                   	<el-input type="textarea" v-model="allocationForm.remark" class="input-with-select" maxlength="200" style="width: 400px;" :rows="4"></el-input>
+                   	<el-input type="textarea" v-model="allocationForm.remark" class="input-with-select" maxlength="200" style="width: 400px;" :rows="4" placeholder="输入分发备注"></el-input>
                 </el-form-item>
             </el-form>
             <div slot="footer" class="dialog-footer">
-                <el-button type="primary" @click="allocationClue">提 交</el-button>
+                <el-button type="primary" @click="allocationClue('allocationForm')">提 交</el-button>
                 <el-button  @click="allocationVisible = false">取 消</el-button>
             </div>
         </template>
@@ -156,7 +162,13 @@
             	<el-form-item >
                    	{{transferForm.message}}
                 </el-form-item>
-                <el-form-item label="商务经理"    :label-width="formLabelWidth"  prop="saleId">
+                <el-form-item label="商务经理"    
+                	:label-width="formLabelWidth" 
+                	prop="saleId"
+                	:rules="[
+                	 { required: true, message: '商务经理不能为空'},
+                	]"
+                	>
                     <el-select v-model="transferForm.saleId" placeholder="商务经理姓名" style="width: 400px;">
                         <el-option v-for="item in allSaleOptions" 
                         			:key="item.id" 
@@ -166,11 +178,11 @@
                     </el-select>
                 </el-form-item>
                 <el-form-item label="备注"    :label-width="formLabelWidth"  prop="remark">
-			    	<el-input type="textarea" v-model="transferForm.remark" class="input-with-select" maxlength="200" style="width: 400px;" :rows="4"></el-input>
+			    	<el-input type="textarea" v-model="transferForm.remark" class="input-with-select" maxlength="200" style="width: 400px;" :rows="4" placeholder="请输入外调备注"></el-input>
                 </el-form-item>
             </el-form>
             <div slot="footer" class="dialog-footer">
-                <el-button type="primary" @click="transferClue">提 交</el-button>
+                <el-button type="primary" @click="transferClue('transferForm')">提 交</el-button>
                 <el-button  @click="transferVisible = false">取 消</el-button>
             </div>
         </template>
@@ -401,6 +413,8 @@ var clueVM = new Vue({
                //打开分发资源
                toAllocationClue() {
             	   this.allocationForm.message="";
+            	   this.allocationForm.saleId = '';
+            	   this.allocationForm.remark = '';
            	       var rows = this.multipleSelection;
             	   if(rows.length==0){
                        this.$message({
@@ -423,8 +437,56 @@ var clueVM = new Vue({
             	   
                    this.allocationVisible = true;
                },
-               allocationClue(){//分发资源
-           	      var rows = this.multipleSelection;
+               allocationClue(formName){//分发资源
+            	   
+            	   this.$refs[formName].validate((valid) => {
+            	          if (valid) {
+            	            //alert('submit!');
+            	            //start
+            	        	  var rows = this.multipleSelection;
+	           	           	   var idList = [];
+	           	               var clueIdList = [];
+	           	               for(var i=0;i<rows.length;i++){
+	           	            	   var curRow = rows[i];
+	           	            			idList.push(curRow.id);
+	           	            			clueIdList.push(curRow.clueId);
+	           	               }
+	           	            	  //外调
+	           	            	  var param  = {};
+	           	           	  param.idList=idList;
+	           	           	  param.clueIdList=clueIdList;
+	                          	  param.busSaleId=this.allocationForm.saleId;
+	                          	  param.remark=this.allocationForm.remark;
+	                             axios.post('/business/busAllocation/busAllocationClue',param)
+	                              .then(function (response) {
+	                                  var data =  response.data;
+	                                  if(data.code=='0'){
+	                                  	clueVM.$message({message:'分发成功',type:'success',duration:1000,onClose:function(){
+	                                  		clueVM.allocationVisible = false;
+	                                  		clueVM.searchTable();
+	                              	    }});
+	                                  }else{
+	                                  	clueVM.$message({
+	                                          message: "接口调用失败",
+	                                          type: 'error'
+	                                        }); 
+	                                  }
+	                              })
+	                              .catch(function (error) {
+	                                console.log(error);
+	                              })
+	                              .then(function () {
+	                              	
+	                              });
+            	            //end
+            	          } else {
+            	            console.log('error submit!!');
+            	            return false;
+            	          }
+            	    });
+            	   
+            	   
+           	       /* var rows = this.multipleSelection;
 	           	   var idList = [];
 	               var clueIdList = [];
 	               for(var i=0;i<rows.length;i++){
@@ -458,10 +520,14 @@ var clueVM = new Vue({
                    })
                    .then(function () {
                    	
-                   });
+                   }); */
                  },// method end
                //打开外调经理
                toTransferClue() {
+                	 this.transferForm.message = '';
+                	 this.transferForm.saleId = '';
+                	 this.transferForm.remark = '';
+                	 
            	       var rows = this.multipleSelection;
             	   if(rows.length==0){
                        this.$message({
@@ -483,8 +549,54 @@ var clueVM = new Vue({
                    }
                    this.transferVisible = true;
                },
-               transferClue(){//外调经理
-           	      var rows = this.multipleSelection;
+               transferClue(formName){//外调经理
+            	   this.$refs[formName].validate((valid) => {
+            	          if (valid) {
+            	            //alert('submit!');
+            	            //start
+            	        	  var rows = this.multipleSelection;
+                              var idList = [];
+                              var clueIdList = [];
+                              for(var i=0;i<rows.length;i++){
+                           	   var curRow = rows[i];
+                           			idList.push(curRow.id);
+                           			clueIdList.push(curRow.clueId);
+                              }
+                           	  //外调
+                           	  var param  = {};
+                          	  param.idList=idList;
+                          	  param.clueIdList=clueIdList;
+                          	  param.busSaleId=this.transferForm.saleId;
+                          	  param.remark=this.transferForm.remark;
+                              axios.post('/business/busAllocation/busAllocationClue',param)
+                               .then(function (response) {
+                                   var data =  response.data;
+                                   if(data.code=='0'){
+                                   	clueVM.$message({message:'外调成功',type:'success',duration:1000,onClose:function(){
+                                   		clueVM.transferVisible = false;
+                                   		clueVM.searchTable();
+                               	    }});
+                                   }else{
+                                   	clueVM.$message({
+                                           message: "接口调用失败",
+                                           type: 'error'
+                                         }); 
+                                   }
+                               })
+                               .catch(function (error) {
+                                 console.log(error);
+                               })
+                               .then(function () {
+                               	
+                               });
+            	            //end
+            	          } else {
+            	            console.log('error submit!!');
+            	            return false;
+            	          }
+            	  });
+            	   
+           	      /* var rows = this.multipleSelection;
                   var idList = [];
                   var clueIdList = [];
                   for(var i=0;i<rows.length;i++){
@@ -518,7 +630,7 @@ var clueVM = new Vue({
                    })
                    .then(function () {
                    	
-                   });
+                   }); */
                  },// method end
                  showCustomerDetail(row, column){ // 客户详情
                      window.open('/bus/BusinessCustomer/viewCustomerInfo?clueId='+row.clueId);

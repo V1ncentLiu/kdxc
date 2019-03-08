@@ -125,7 +125,7 @@ public class BusCustomerManagerController {
         request.setAttribute("projectList", listNoPage.getData());
         SysRegionDTO queryDTO = new SysRegionDTO();
         // 查询所有省
-        queryDTO.setType(1);
+        queryDTO.setType(0);
         JSONResult<List<SysRegionDTO>> querySysRegionByParam =
                 sysRegionFeignClient.querySysRegionByParam(queryDTO);
         request.setAttribute("provinceList", querySysRegionByParam.getData());
