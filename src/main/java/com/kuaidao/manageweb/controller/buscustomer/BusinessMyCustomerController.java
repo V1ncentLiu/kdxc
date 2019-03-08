@@ -122,7 +122,7 @@ public class BusinessMyCustomerController {
         Date date2 =param.getReserveTime2();
         if(date1!=null && date2!=null ){
             if(date1.getTime()>date2.getTime()){
-                return new JSONResult().fail("-1","邀约到访时间，开始时间大于结束时间!");
+                return new JSONResult().fail("-1","邀约到访时间，结束时间不能早于开始时间!");
             }
         }
 
@@ -130,7 +130,7 @@ public class BusinessMyCustomerController {
         Date date4 = param.getAllocateTime2();
         if(date3!=null && date4!=null ){
             if(date3.getTime()>date4.getTime()){
-                return new JSONResult().fail("-1","接收客户时间，开始时间大于结束时间!");
+                return new JSONResult().fail("-1","接收客户时间，结束时间不能早于开始时间!");
             }
         }
 
@@ -138,7 +138,7 @@ public class BusinessMyCustomerController {
         Date date6 = param.getCreateTime2();
         if(date5!=null && date6!=null ){
             if(date5.getTime()>date6.getTime()){
-                return new JSONResult().fail("-1","提交邀约时间，开始时间大于结束时间!");
+                return new JSONResult().fail("-1","提交邀约时间，结束时间不能早于开始时间!");
             }
         }
         UserInfoDTO user = CommUtil.getCurLoginUser();
