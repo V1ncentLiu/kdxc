@@ -119,6 +119,8 @@ public class PendingAllocationController {
         request.setAttribute("clueCategoryList", getDictionaryByCode(Constants.CLUE_CATEGORY));
         // 查询字典类别集合
         request.setAttribute("clueTypeList", getDictionaryByCode(Constants.CLUE_TYPE));
+        // 查询字典释放原因集合
+        request.setAttribute("releaseReasonList", getDictionaryByCode(Constants.RELEASE_REASON));
 
         // 根据角色查询页面字段
         QueryFieldByRoleAndMenuReq queryFieldByRoleAndMenuReq = new QueryFieldByRoleAndMenuReq();
