@@ -58,7 +58,7 @@
                     <el-table-column align="center" type="index" prop="id" label="序号" width="55"></el-table-column>
                     <el-table-column align="center" prop="cusName" label="客户姓名"></el-table-column>
                     <el-table-column align="center" prop="cusPhone" label="客户手机号"></el-table-column>
-                    <el-table-column align="center" prop="createTime" label="提交重单申请时间"></el-table-column>
+                    <el-table-column align="center" prop="createTime" label="提交重单申请时间" :formatter="dateFormat"></el-table-column>
                     <el-table-column align="center" prop="dealStatusResult" label="重单结果"></el-table-column>
                     <el-table-column align="center" prop="statusResult" label="处理状态" ></el-table-column>
                     <el-table-column align="center" prop="applyUser" label="重单顾问姓名"></el-table-column>
@@ -73,14 +73,15 @@
         <el-form   class="width500">
             <el-form-item label="重单手机号：" :label-width="formLabelWidth" >{{cusPhoneId}}
             </el-form-item>
-            <el-form-item label="备注：" :label-width="formLabelWidth" >{{remarkId}}
+            <el-form-item label="提交备注：" :label-width="formLabelWidth" >{{remarkId}}
             </el-form-item>
 					
             <el-form-item label="处理状态：" :label-width="formLabelWidth" >{{statusId}}
                 
             </el-form-item>
             <el-form-item label="处理结果："  :label-width="formLabelWidth" >{{dealStatusId}}
-                
+            <el-form-item label="处理备注：" :label-width="formLabelWidth" >{{remarkId}}
+            </el-form-item>    
             </el-form-item>
             <el-form-item label="分配比例：" v-show="isShow" :label-width="formLabelWidth" >
                 <el-table 
@@ -157,6 +158,14 @@
              
         },
         methods: {
+        	//日期数据格式化方法
+    		dateFormat:function(row, column) {
+    			var date = row[column.property];
+               	if (date == undefined) {
+    	               return "";
+              	}
+               	return moment(date).format("YYYY-MM-DD HH:mm:ss");
+    		},
         	queryRepeatPage(){//查询按钮
           	  var param = {}; 
           	  var pageSize = this.pager.pageSize;
