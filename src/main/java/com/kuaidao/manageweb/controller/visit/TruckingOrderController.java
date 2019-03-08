@@ -24,6 +24,7 @@ import com.kuaidao.aggregation.dto.project.ProjectInfoPageParam;
 import com.kuaidao.aggregation.dto.visit.TrackingOrderReqDTO;
 import com.kuaidao.aggregation.dto.visit.TrackingOrderRespDTO;
 import com.kuaidao.common.constant.RoleCodeEnum;
+import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.common.util.DateUtil;
@@ -131,9 +132,9 @@ public class TruckingOrderController {
                     accountIdList.add(accountId);
                     reqDTO.setAccountIdList(accountIdList);
                 }
+            }else {
+                return new JSONResult().fail(SysErrorCodeEnum.ERR_NOTEXISTS_DATA.getCode(),"角色没有权限");
             }
-            
-            
         }
         /*List<Long> busList = new ArrayList<>();
         busList.add(1098210933718835200L);
@@ -153,13 +154,13 @@ public class TruckingOrderController {
     @RequiresPermissions("aggregation:truckingOrder:export")
     @PostMapping("/exportTrackingOrder")
      public void exportTrackingOrder(@RequestBody TrackingOrderReqDTO reqDTO,HttpServletResponse response) throws Exception{
-      /*  List<Long> busList = new ArrayList<>();
+     /*  List<Long> busList = new ArrayList<>();
         busList.add(1098210933718835200L);
         reqDTO.setBusDirectorIdList(busList);*/
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
         Long orgId = curLoginUser.getOrgId();
         List<RoleInfoDTO> roleList = curLoginUser.getRoleList();
-        if(roleList!=null && roleList.size()!=0) {
+       if(roleList!=null && roleList.size()!=0) {
             RoleInfoDTO roleInfoDTO = roleList.get(0);
             String roleName = roleInfoDTO.getRoleName();
             if(RoleCodeEnum.SWDQZJ.value().equals(roleName)) {
@@ -217,6 +218,7 @@ public class TruckingOrderController {
                 curList.add(getProjectNameStr(allProjectList,trackingOrderRespDTO.getTasteProjectId()));
                 curList.add(getTimeStr(trackingOrderRespDTO.getCreateTime()));
                 curList.add(trackingOrderRespDTO.getSubmitGroup());
+                curList.add(trackingOrderRespDTO.getTelSaleName());
                 curList.add(trackingOrderRespDTO.getAccountPhone());
                 curList.add(trackingOrderRespDTO.getCusName());
                 curList.add(trackingOrderRespDTO.getCusNum());
@@ -300,7 +302,8 @@ public class TruckingOrderController {
         headTitleList.add("餐饮公司");
         headTitleList.add("品尝项目");
         headTitleList.add("申请提交时间");
-        headTitleList.add("申请部门");
+        headTitleList.add("申请电销组");
+        headTitleList.add("申请顾问");
         headTitleList.add("顾问电话");
         headTitleList.add("客户姓名");
         headTitleList.add("客户人数");
