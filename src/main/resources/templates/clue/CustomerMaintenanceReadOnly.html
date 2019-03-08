@@ -46,8 +46,8 @@
                         <el-form-item label="手机号：" prop="customerPhone" :label-width="formLabelWidth" :required="true">
                            <!-- <el-input v-model="form.customerPhone" autocomplete="off" style="width: 60%;" @keyup.native="number" maxlength="11"></el-input> -->
                            <!-- <span style="padding-left: 5px;color: rgb(0, 114, 255);cursor: pointer;" @click="dialogFormVisible = true">+手机号</span> -->
-                            <a href="tel:15000000000"><font color="red">{{form.customerPhone}}</font></a>
-                           <el-button type="primary" @click="dialogFormVisible = true"><i class="el-icon-plus"></i>查看多个手机号</el-button>
+                            <font color="red">{{form.customerPhone}}</font>
+                            <span @click="dialogFormVisible = true" style="padding-left: 5px; color: rgb(0, 114, 255); cursor: pointer;">查看多个手机号</span>
                         </el-form-item>
                     </el-col>
                 </el-row>
@@ -70,7 +70,7 @@
                     <el-col :span="8">
                         <el-form-item label="是否添加微信：" :label-width="formLabelWidth" :required="true">
                             <el-button type="text" disabled>{{form.ishasWx}}</el-button>
-                           <!--<span style="padding-left: 5px;color: rgb(0, 114, 255);cursor: pointer;" @click="dialogFormImg = true">查看二维码</span>-->
+                            <span v-show="vxShow" style="padding-left: 5px;color: rgb(0, 114, 255);cursor: pointer;" @click="dialogFormImg = true">查看二维码</span>
                         </el-form-item>
                     </el-col>
                 </el-row>
@@ -239,6 +239,62 @@
                             <el-button type="text" disabled>{{form.province}}{{form.city}}{{form.district}}</el-button>
                         </el-form-item>
                     </el-col>
+                </el-row>
+            </div>
+            <div class="marginB20 fs16 paddingT20">上传资料</div>
+            <div class="borderbox padding20">
+                <el-row>
+                    <el-table
+                            ref="multipleTable"
+                            :data="tableDataC1"
+                            tooltip-effect="dark"
+                            style="width: 100%"
+                            border
+                    >
+                        <el-table-column
+                                type="index" label="序号"
+                                header-align="center" align="center" width="100">
+                        </el-table-column>
+                        <el-table-column
+                                prop="uploadUserName"
+                                label="上传人姓名"
+                                align="center">
+                        </el-table-column>
+                        <el-table-column
+                                prop="uploadTime"
+                                label="上传时间"
+                                align="center">
+                        </el-table-column>
+                        <el-table-column
+                                prop="fileName"
+                                label="文件名称"
+                                align="center">
+                        </el-table-column>
+                        <el-table-column
+                                label="操作"
+                                align="center">
+                            <template slot-scope="scope">
+                                <el-button
+                                        size="mini"
+                                        type="text"
+                                        @click="handleOperateFn(scope.$index, scope.row)"
+                                >{{scope.row.fileType =="mp3"? '下载录音':'查看图片'}} </el-button>
+                            </template>
+                        </el-table-column>
+                        <el-table-column
+                                prop="delStatus"
+                                label="删除状态"
+                                align="center">
+                            <template slot-scope="scope">
+                                <div v-if="scope.row.delStatus === 0">
+                                    未删除
+                                </div>
+                                <div v-else-if="scope.row.delStatus ===1">
+                                    已删除
+                                </div>
+                            </template>
+                        </el-table-column>
+                    </el-table>
                 </el-row>
             </div>
             <div class="marginB20 fs16 paddingT20">跟进记录</div>
@@ -507,27 +563,41 @@
     </el-row>
 
     <!-- dialog -->
-    <el-dialog title="添加手机号" :visible.sync="dialogFormVisible">
-        <el-form :model="dialogForm" :rules="dialogRules" ref="dialogForm">
-            <el-form-item label="手机号2：" :label-width="formLabelWidth">
-                <span>15111111111</span>
-                <span><i class="el-icon-phone-outline" style="font-size: 20px;color: rgb(0, 114, 255);cursor: pointer;"></i></span>
-            </el-form-item>
-            <el-form-item label="手机号3：" prop="phoneNum" :label-width="formLabelWidth">
-                <el-input v-model="dialogForm.phoneNum" autocomplete="off" style="width: 60%;"></el-input>
+    <el-dialog title="查看手机号" :visible.sync="dialogFormVisible">
+        <button type="button" aria-label="Close" class="el-dialog__headerbtn" style="position: absolute;z-index: 9;background: #fff;" @click="clearDialog"><i class="el-dialog__close el-icon el-icon-close"></i></button>
+        <el-form :model="dynamicValidateForm" ref="dynamicValidateForm">
+            <el-form-item
+                    :label-width="formLabelWidth"
+                    v-for="(domain, index) in dynamicValidateForm.domains"
+                    :label="'手机号' + (parseInt(index)+2) + ':'"
+                    :key="domain.key"
+                    :prop="'domains.' + index + '.value'"
+                    :rules="{
+                    required: true, message: '手机号不能为空', trigger: 'blur',
+                }"
+            >
+                <el-input v-model="domain.value" maxLength="11" @keyup.native="phoneNumber" style="width: 300px;margin-right: 10px;"></el-input>
+                <i class="el-icon-phone-outline telNumberIcon" @click="gettelNumberIcon(domain.value)"></i>
+                <el-button @click.prevent="removeDomain(domain)" v-show="deleteShow">删除</el-button>
             </el-form-item>
         </el-form>
-        <div slot="footer" class="f-tac">            
-            <el-button type="primary" @click="submitDialogForm('dialogForm')">提 交</el-button>
-            <el-button @click="dialogFormVisible = false">取 消</el-button>
+        <div slot="footer" class="f-tac">
+            <el-button type="primary" @click="submitDialogForm('dynamicValidateForm')">提 交</el-button>
+            <el-button @click="addDomain">添加更多手机号</el-button>
         </div>
-    </el-dialog> 
+    </el-dialog>
     <!-- dialog -->
     <el-dialog title="二维码" :visible.sync="dialogFormImg">
         <div class="padding20" style="text-align: center;">
             <img src="images/errorIcon.jpg" alt="" style="width: 250px;height: 250px;">
         </div>
-    </el-dialog>    
+    </el-dialog>
+    <!-- 上传资源dialog -->
+    <el-dialog title="查看图片" :visible.sync="dialogFormUploadImg">
+        <div class="padding20" style="text-align: center;">
+            <img :src="dialogFormUploadImgSrc" alt="" style="width: 250px;height: 250px;">
+        </div>
+    </el-dialog>
 </div>
 </body>
 <!-- import Vue before Element -->
@@ -540,6 +610,7 @@ var intention=[[${intention}]];//资源投资意向信息
 var proSelect=[[${proSelect}]];//项目
 var circulationList=[[${circulationList}]];//资源流转记录
 var trackingList=[[${trackingList}]];//跟访记录
+var clueFileList=[[${clueFileList}]];//上传文件
 var isEdit=false;
 
 /**
@@ -668,6 +739,11 @@ if(customer==null){
     }
 }
 
+var vxShow = false;
+if(vform.ishasWx!=null&&vform.ishasWx!=''){
+    vxShow = true;
+}
+
 if(base==null){
     base={
         typeName:"",
@@ -687,10 +763,14 @@ if(base==null){
         el: '#addCustomer',
         data: function() {
             return {       
-                isDisabled:true,//默认不可点击         
+                isDisabled:true,//默认不可点击
+                dialogFormUploadImgSrc: '',
                 radioProject:'',
                 dialogFormVisible: false,
                 dialogFormImg:false,
+                deleteShow:false,//删除新增手机号输入框
+                dialogFormUploadImg:false,
+                vxShow:vxShow,
                 form:vform,
                 clueBase:base,
                 categoryArr:[],
@@ -755,9 +835,15 @@ if(base==null){
                         { required: true, message: '请输入手机号码', trigger: 'blur' }
                     ]
                 },
+                dynamicValidateForm: {//新增手机号弹窗数据
+                    domains: [{
+                        value: ''
+                    }]
+                },
                 multipleSelection:[],//上传资料
                 multipleTrackingSelection:[],
                 fileList: [],
+                tableDataC1: clueFileList,//文件记录
                 cusStatusArr:[],
                 dialingTime:'',//跟进记录
                 lineFormShow: false,
@@ -833,6 +919,35 @@ if(base==null){
                 }
                 return (isJPG || isPNG || isMP3) && isLt200;           
             },
+            removeDomain(item) {
+                var index = this.dynamicValidateForm.domains.indexOf(item);
+                var itemLength = this.dynamicValidateForm.domains.length;
+                if (index !== -1) {
+                    this.dynamicValidateForm.domains.splice(index, 1)
+                }
+                if(itemLength==2){
+                    // 删除按钮不显示
+                    this.deleteShow=false;
+                }
+            },
+            addDomain(item) {
+                var itemLength = this.dynamicValidateForm.domains.length;
+                if (itemLength<4) {
+                    this.dynamicValidateForm.domains.push({
+                        value: '',
+                        key: Date.now()
+                    });
+                }else{
+                    this.$message({
+                        message: '最多添加5个手机号',
+                        type: 'warning'
+                    });
+                }
+                if(itemLength>0){
+                    // 显示删除按钮
+                    this.deleteShow=true;
+                }
+            },
             currentProvince(selVal){
                var  param={};
                 param.type="1";
@@ -849,7 +964,21 @@ if(base==null){
                    addCustomerVM.districtArr=response.data.data.data;
                  });  	
               },
+            clearDialog(){
+                console.log('清空')
 
+                // 1、数据清空
+                var domains=this.dynamicValidateForm.domains
+                for(var i=0;i<domains.length;i++){
+                    domains[i].value=""
+                }
+                // 2、重置表单
+                this.$refs['dynamicValidateForm'].resetFields()
+                // 3、关闭弹窗
+                this.dialogFormVisible = false;
+                // 4、按钮变化
+                this.buttonType='A';
+            },
             handleOperateFn(index, row) { //上传资源"查看图片、下载录音"
                 console.log(index, row);
             },

@@ -95,7 +95,7 @@
                   @row-dblclick="showCustomerDetail"
                   @selection-change="handleSelectionChange" >
             <el-table-column type="selection" width="55" prop="clueId" ></el-table-column>
-            <el-table-column prop="xh" label="序号" width="60"  type="index" align="center"></el-table-column>
+            <el-table-column prop="xh" label="序号" width="60" type="index" align="center"></el-table-column>
             <el-table-column prop="reserveTime" label="邀约来访时间" sortable align="center"  width="180px"></el-table-column>
             <el-table-column prop="cusName" label="客户姓名" align="center" width="88">
                 <template slot-scope="scope">
@@ -444,10 +444,10 @@
                     <el-table-column prop="projectName" label="考察项目"   align="center"></el-table-column>
                     <el-table-column prop="companyName" label="考察公司"   align="center"></el-table-column>
                     <el-table-column prop="vistitTime" label="到访时间" :formatter="formatVisitTime" align="center"></el-table-column>
-                    <el-table-column prop="signProvince" label="预签约省份"   align="center"></el-table-column>
+                    <el-table-column prop="signProvince" label="预签约省份"   align="center" width="92"></el-table-column>
                     <el-table-column prop="signCity" label="预签约市"   align="center"></el-table-column>
-                    <el-table-column prop="signDistrict" label="预签约区/县"   align="center"></el-table-column>
-                    <el-table-column prop="vistitStoreTypeName" label="到访店铺类型"   align="center"></el-table-column>
+                    <el-table-column prop="signDistrict" label="预签约区/县"   align="center" width="100"></el-table-column>
+                    <el-table-column prop="vistitStoreTypeName" label="到访店铺类型"   align="center" width="104"></el-table-column>
                     <el-table-column prop="visitType" label="到访类型"   align="center">
                         <template slot-scope="scope">
                             <div v-if="scope.row.status === 1">
@@ -474,7 +474,7 @@
                             </div>
                         </template>
                     </el-table-column>
-                    <el-table-column prop="status" label="到访有效性"   align="center">
+                    <el-table-column prop="status" label="到访有效性"   align="center" width="92">
                         <template slot-scope="scope">
                             <div v-if="scope.row.status === 1">
                                 审核中
@@ -914,11 +914,17 @@
                     <el-row>
                         <el-col :span="10">
                             <el-form-item label="付款类型：" :label-width="formLabelWidth" prop="payType">
-                                <el-select v-model="updateFormSigning.payType" placeholder="请选择签约付款类型" disabled>
-                                    <el-option  key="1" label="全款" value="1"></el-option>
+                                <el-select v-model="updateFormSigning.payType" placeholder="请选择签约付款类型">
+                                   <!-- <el-option  key="1" label="全款" value="1"></el-option>
                                     <el-option  key="2" label="定金" value="2"></el-option>
                                     <el-option  key="3" label="追加定金" value="3"></el-option>
-                                    <el-option  key="4" label="尾款" value="4"></el-option>
+                                    <el-option  key="4" label="尾款" value="4"></el-option>-->
+                                    <el-option
+                                            v-for="item in payTypeArr"
+                                            :key="item.value"
+                                            :label="item.label"
+                                            :value="item.value">
+                                    </el-option>
                                 </el-select>
                             </el-form-item>
                         </el-col>
@@ -1044,11 +1050,12 @@
             visitTypeArr:[{value:1,name:'预约来访'},{value:2,name:'慕名来访'},{value:3,name:'临时来访'}],
             option2s: [{value: 1, label: '一次性全款'},{value: 2, label: '先交订金'}],
             option3s: [{value: '1', label: '现金'},{value: '2', label: 'POS'},{value: '3', label: '转账'}],
+            payTypeArr:[{value: "1", label: '全款'},{value: "2", label: '定金'},{value: "3", label: '追加定金'},{value: "4", label: '尾款'}],
             vistitStoreTypeArr:[],
             provinceArr:[],
             districtArr:[],
             cityArr:[],
-            companyArr:[],
+            companyArr:companySelect,
             projectArr:proSelect,
             multipleSelection:[],
             rules:{},
@@ -1261,6 +1268,7 @@
             },
             notVisit(){
                 var rows = mainDivVM.multipleSelection;
+                console.log(rows)
                 if(rows.length==0){
                     this.$message({message: '请选择数据', type: 'warning'});
                     return false;
@@ -1273,7 +1281,7 @@
                             this.$message({message: '勾选数据中，包含了已到访或是已标记的客户', type: 'warning'});
                             return false;
                         }
-                        names = names + '['+rows[i].cusName+']';
+                        names = names + '['+rows[i].xh+":"+rows[i].cusName+']';
                         rowIds.push(rows[i].clueId);
                     }
                     var str = '确定要将此'+names+'标记为未到访吗?';
@@ -1564,8 +1572,12 @@
                         return false;
                     }else{
                         mainDivVM.updateFormSigning =response.data.data;
+
                         if(mainDivVM.updateFormSigning.payType > 2){
                             mainDivVM.notEditRebutSign = true;
+                            mainDivVM.payTypeArr = mainDivVM.payTypeArr.slice(2,4)
+                        }else{
+                            mainDivVM.payTypeArr = mainDivVM.payTypeArr.slice(0,2)
                         }
                         mainDivVM.dialogUpdateFormSigningVisible = true;
                     }
@@ -1687,7 +1699,7 @@
             //考察公司
             param={};
             axios.post('/aggregation/companyManager/listNoPage',param).then(function (response) {
-                mainDivVM.companyArr=response.data.data;
+                // mainDivVM.companyArr=response.data.data;
             });
         }
     });

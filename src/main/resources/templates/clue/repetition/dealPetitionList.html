@@ -168,7 +168,7 @@
                 </el-table>
             </el-form-item>
             <el-form-item label="备注：" :label-width="formLabelWidth" >
-              <el-input type="textarea" rows="4"  v-model=remark placeholder="输入处理备注描述" class="marginB20"></el-input>
+              <el-input type="textarea" rows="4" maxlength="200"  v-model=remark placeholder="输入处理备注描述" class="marginB20"></el-input>
             </el-form-item>
         </el-form>
         <div slot="footer" style="text-align: center" class="dialog-footer">
@@ -277,19 +277,13 @@
               repeatRatio: [                        
                   { validator:function(rule,value,callback){
                     if(orgVM.form.dealStatusId=="1"){//重单验证
-                      if(value==""|value==undefined){
-                        callback(new Error("请输入分配比例"));
-                      }else{
                     	  var reg = /^[0-9]+([.]{1}[0-9]{1,1})?$/;
-                          if(!reg.test(value) ){
+                          if(value !=null && value !="" && !reg.test(value) ){
                             callback(new Error("只能输入数字，如果小数请保留一位小数"));
-                          }else if(parseFloat(value)>100){
+                          }else if(value !=null && value !="" &&  parseFloat(value)>100){
                           	callback(new Error("数字只能小于等于100"));
                           } 
                           callback();
-                         
-                      }
-                                           
                     }else if(orgVM.form.dealStatusId=="0"){//不重单不填不需要验证
                       callback()
                     }                   
@@ -336,24 +330,32 @@
 		                     detail.id=memberArry[i].detailId;
 		                    
 		                     detail.repeatId = repeatId;
-		                     if(dealStatusId ==0){
+		                     if(dealStatusId =="0"){
 		                    	 detail.repeatRatio =0;
 		                    	 detail.dealStatus = dealStatusId;
 		                     }else{
 		                    	 detail.dealStatus = dealStatusId;
-		                    	 detail.repeatRatio=memberArry[i].repeatRatio;
+		                    	 if(memberArry[i].repeatRatio =="undefined" || memberArry[i].repeatRatio == "null" || memberArry[i].repeatRatio == "" || memberArry[i].repeatRatio ==undefined){
+		                    		 detail.repeatRatio = 0;
+		                    	 }else{
+		                    		 detail.repeatRatio=memberArry[i].repeatRatio;
+		                    	 }
+		                    	 
 		                     }
 		                     detail.repeatUser = memberArry[i].repeatUser;
 		                     detail.clueId = memberArry[i].clueId;
 		                     detailDTOs.push(detail);
 		                     idList.push(memberArry[i].clueId);
-		                     num = parseFloat(num)+parseFloat(memberArry[i].repeatRatio)
+		                     if(memberArry[i].repeatRatio !=null && memberArry[i].repeatRatio !="undefined"){
+		                    	 num = parseFloat(num)+parseFloat(memberArry[i].repeatRatio) 
+		                     }
+		                     
 		                 }
 		        		
 		        		if(dealStatusId ==1){
 		        			if(num>100){
 		                    	this.$message({
-		                             message: '比例之和不能大于100',
+		                             message: '分配比例错误，请重新输入。',
 		                            type: 'warning'
 		                          });
 		                         return;
@@ -365,6 +367,9 @@
 		                param.detailDTOs = detailDTOs;
 		                param.dealRemark = this.remark;
 		                param.idList = idList;
+		                if(this.remark){
+		                	
+		                }
 		                axios.post('/clue/cluerepetition/updatePetitionById',param).then(function (response) {
 		              	  	console.log(response);
 		                  	if(null===response||response.data==null||response.data.code!='0'){
@@ -450,7 +455,6 @@
                   	  console.log(response);
                       if(null !==response && response.data !=null && response.data.code=='0'){
                     	  var clueRepetitionDTO = response.data.data;
-                    	  console.log("1111111111 "+clueRepetitionDTO);
                     	  orgVM.cusPhoneId = clueRepetitionDTO.cusPhone;
                     	  orgVM.remarkId = clueRepetitionDTO.remark;
                     	  orgVM.clueId = clueRepetitionDTO.clueId;

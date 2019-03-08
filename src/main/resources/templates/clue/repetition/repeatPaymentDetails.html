@@ -54,7 +54,7 @@
             <el-row>
                 <el-col :span="8">
                     <el-form-item label="重单申请备注：" :label-width="formLabelWidth">
-                         {{repeatRemark}}
+                         {{remarks}}
                     </el-form-item>
                 </el-col>
                 <el-col :span="8">
@@ -106,7 +106,7 @@
             <el-form-item label="备注：" prop="textarea" label-width="70px">
                 <el-input 
                     type="textarea"
-                    :rows="3"
+                    :rows="3" maxlength="200"
                     placeholder="输入处理备注描述"
                     v-model="remark"></el-input>
             </el-form-item> 
@@ -127,6 +127,7 @@
         data: function() {
             return {  
             	remark:"",
+            	remarks:"",
             	repeatRemark:'',//备注    
                 dialogFormVisible: false,
                 form: {                    
@@ -151,17 +152,13 @@
                 rules:{
                     repeatRatio: [                        
                         { validator:function(rule,value,callback){
-                            if(value==""|value==undefined){
-                                callback(new Error("请输入分配比例"));
-                            }else{
-                                var reg = /^[0-9]+([.]{1}[0-9]{1,1})?$/;
-                                if(!reg.test(value) ){
-                                    callback(new Error("只能输入数字，如果小数请保留一位小数"));
-                                }else if(parseFloat(value)>100){
-                                    callback(new Error("数字只能小于等于100"));
-                                } 
-                                callback();                                 
-                            }                    
+                               var reg = /^[0-9]+([.]{1}[0-9]{1,1})?$/;
+                               if(value !=null && value !="null" && value !="" && !reg.test(value) ){
+                                   callback(new Error("只能输入数字，如果小数请保留一位小数"));
+                                 }else if(value !=null && value !="null"  && value !="" &&  parseFloat(value)>100){
+                                 	callback(new Error("数字只能小于等于100"));
+                                 } 
+                               callback();                                 
                         }, trigger: 'blur'}
                     ]
                 }              
@@ -195,14 +192,28 @@
                     	var dataArray=this.dialogForm.dialogTableData ;
                     	var payDetailDTOs =[];
                     	var id = "";
+                    	var num = 0;
                     	for ( var i = 0; i <dataArray.length; i++){
                     		var detail={};
                     		id= dataArray[i].id;
                     		detail.clueId= dataArray[i].clueId;
-                    		detail.repeatRatio= dataArray[i].repeatRatio;
+                    		if(dataArray[i].repeatRatio !=null && dataArray[i].repeatRatio != "" && dataArray[i].repeatRatio != "null" && dataArray[i].repeatRatio !="undefined"){
+                    			detail.repeatRatio= dataArray[i].repeatRatio;
+                    			num = parseFloat(num)+parseFloat(dataArray[i].repeatRatio) 
+                    		}else{
+                    			detail.repeatRatio= 0;
+                    		}
+                    		
                     		detail.repeatUser= dataArray[i].repeatUser;
                     		payDetailDTOs.push(detail);
 		                }
+                    	if(num>100){
+	                    	this.$message({
+	                             message: '分配比例错误，请重新输入。',
+	                            type: 'warning'
+	                          });
+	                         return;
+	                    }
                     	var param={};
                     	param.payDetailDTOs = payDetailDTOs;
                     	param.id =id; 
@@ -255,7 +266,7 @@
         	this.clueId = businessSignDetail.clueId ;
         	this.phone = businessSignDetail.phone ;
         	this.customerName = businessSignDetail.customerName ;
-        	this.repeatRemark = businessSignDetail.repeatRemark ;
+        	this.remarks = businessSignDetail.remark ;
         	this.signNo = businessSignDetail.signNo ;
         	this.amountReceivable = businessSignDetail.amountReceivable ;
         	this.firstToll = businessSignDetail.firstToll ;
