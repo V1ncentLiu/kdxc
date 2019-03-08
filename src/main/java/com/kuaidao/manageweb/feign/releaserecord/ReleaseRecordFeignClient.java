@@ -1,41 +1,40 @@
 package com.kuaidao.manageweb.feign.releaserecord;
 
-import com.kuaidao.aggregation.dto.cluereleaserecord.ReleaseRecordInsertOrUpdateDTO;
-import com.kuaidao.aggregation.dto.cluereleaserecord.ReleaseRecordReqDTO;
-import com.kuaidao.aggregation.dto.cluereleaserecord.ReleaseRecordRespDTO;
-import com.kuaidao.aggregation.dto.pubcusres.ClueQueryParamDTO;
-import com.kuaidao.aggregation.dto.pubcusres.PublicCustomerResourcesReqDTO;
-import com.kuaidao.aggregation.dto.pubcusres.PublicCustomerResourcesRespDTO;
-import com.kuaidao.common.constant.SysErrorCodeEnum;
-import com.kuaidao.common.entity.JSONResult;
-import com.kuaidao.common.entity.PageBean;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.netflix.feign.FeignClient;
 import org.springframework.stereotype.Component;
-import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-
-import javax.validation.Valid;
+import com.kuaidao.aggregation.dto.cluereleaserecord.ReleaseRecordInsertOrUpdateDTO;
+import com.kuaidao.aggregation.dto.cluereleaserecord.ReleaseRecordReqDTO;
+import com.kuaidao.aggregation.dto.cluereleaserecord.ReleaseRecordRespDTO;
+import com.kuaidao.common.constant.SysErrorCodeEnum;
+import com.kuaidao.common.entity.JSONResult;
+import com.kuaidao.common.entity.PageBean;
 
 
 /**
  *
- * 功能描述: 
- *      资源释放记录表
- * @auther  yangbiao
+ * 功能描述: 资源释放记录表
+ * 
+ * @auther yangbiao
  * @date: 2019/1/8 17:35
  */
-@FeignClient(name = "aggregation-service",path="/aggregation/releaserecord",fallback = ReleaseRecordFeignClient.HystrixClientFallback.class)
+@FeignClient(name = "aggregation-service", path = "/aggregation/releaserecord",
+        fallback = ReleaseRecordFeignClient.HystrixClientFallback.class)
 public interface ReleaseRecordFeignClient {
 
     @RequestMapping("/insert")
     public JSONResult<Boolean> saveReleaseRecord(@RequestBody ReleaseRecordInsertOrUpdateDTO dto);
 
     @RequestMapping("/queryPageList")
-    public JSONResult<PageBean<ReleaseRecordRespDTO>> queryPageList(@RequestBody ReleaseRecordReqDTO dto);
+    public JSONResult<PageBean<ReleaseRecordRespDTO>> queryPageList(
+            @RequestBody ReleaseRecordReqDTO dto);
+
+    @RequestMapping("/listNoPage")
+    public JSONResult<List<ReleaseRecordRespDTO>> listNoPage(@RequestBody ReleaseRecordReqDTO dto);
 
     @Component
     static class HystrixClientFallback implements ReleaseRecordFeignClient {
@@ -57,6 +56,11 @@ public interface ReleaseRecordFeignClient {
         @Override
         public JSONResult<PageBean<ReleaseRecordRespDTO>> queryPageList(ReleaseRecordReqDTO dto) {
             return fallBackError("释放记录-分页查询");
+        }
+
+        @Override
+        public JSONResult<List<ReleaseRecordRespDTO>> listNoPage(ReleaseRecordReqDTO dto) {
+            return fallBackError("根据资源查询释放记录");
         }
     }
 

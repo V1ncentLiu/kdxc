@@ -200,10 +200,10 @@
             :data="releaseTable" 
             >
             <el-table-column align="center" type="index" width="55" label="序号"></el-table-column>
-            <el-table-column align="center" prop="createDate" label="释放时间"></el-table-column>
-            <el-table-column align="center" prop="cusPhone" label="释放原因"></el-table-column>
-            <el-table-column align="center" prop="teleDirectorName" label="释放人顾问姓名"></el-table-column>
-            <el-table-column align="center" prop="teleSaleName" label="所属电销组"></el-table-column>
+            <el-table-column align="center" prop="releaseTime" label="释放时间"></el-table-column>
+            <el-table-column align="center" prop="releaseReason" label="释放原因" :formatter="transformReason"></el-table-column>
+            <el-table-column align="center" prop="teleSaleName" label="释放人顾问姓名"></el-table-column>
+            <el-table-column align="center" prop="teleGroupName" label="所属电销组"></el-table-column>
         </el-table>
         
     </el-dialog>
@@ -240,6 +240,7 @@ var clueCategoryList=[[${clueCategoryList}]];//资源类别
 var clueTypeList=[[${clueTypeList}]];//资源类型
 var fieldList=[[${fieldList}]];//自定义字段
 var userFieldList=[[${userFieldList}]];//用户自定义字段
+var releaseReasonList=[[${releaseReasonList}]];//用户自定义字段
 var clueVM = new Vue({
         el: '#clueManage',
         data: {
@@ -378,6 +379,18 @@ var clueVM = new Vue({
                     return "";
                  }
                  return moment(cellValue).format("YYYY-MM-DD HH:mm");
+               },
+             //选址情况转换方法
+               transformReason(row, column, cellValue, index) {
+             	  var text="";
+             	  if(releaseReasonList){
+ 	                  for(var i=0;i<releaseReasonList.length;i++){
+ 	                		if(cellValue==releaseReasonList[i].value){
+ 	                			text=releaseReasonList[i].name;
+ 	                		}
+ 	                	}
+             	  }
+                   return text;
                },
                //打开分配资源
                toAllocationClue() {
@@ -568,10 +581,9 @@ var clueVM = new Vue({
                  //查看资源释放记录
                  showRelease(row) {
                      var param ={};
-                     param.id = row.clueId;
-                     param.cusPhone = row.cusPhone;
+                     param.clueId = row.clueId;
                      console.info(param);
-                     axios.post('/clue/appiontment/repeatPhonelist', param)
+                     axios.post('/aggregation/releaserecord/listNoPage', param)
                      .then(function (response) {
                            var result =  response.data;
                            console.info(result);

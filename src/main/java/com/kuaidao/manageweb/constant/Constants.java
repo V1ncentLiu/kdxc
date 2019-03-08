@@ -54,6 +54,8 @@ public class Constants {
     public static String CATERING_EXPERIENCE = "CateringExperience";
     // 到访店型字典Code
     public static String VISTIT_STORE_TYPE = "vistitStoreType";
+    // 释放原因字典Code
+    public static String RELEASE_REASON = "releaseReason";
 
 
 }
