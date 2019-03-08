@@ -10,7 +10,7 @@
 <div id="addCustomer" class="addCustomer mainPadding" style="display: none;"> 
     <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
         <el-breadcrumb-item>Home</el-breadcrumb-item>
-        <el-breadcrumb-item>电销管理</el-breadcrumb-item>
+        <el-breadcrumb-item>商务管理</el-breadcrumb-item>
         <el-breadcrumb-item>维护客户</el-breadcrumb-item>
     </el-breadcrumb> 
     
@@ -26,8 +26,8 @@
                         </el-form-item>
                     </el-col>
                     <el-col :span="8">
-                        <el-form-item label="手机号：" prop="customerPhone" :label-width="formLabelWidth">
-                           <el-input v-model="form.customerPhone" autocomplete="off" maxLength="10"></el-input>
+                        <el-form-item label="客户联系手机号：" prop="customerPhone" :label-width="formLabelWidth">
+                           <el-input v-model="form.customerPhone" autocomplete="off" maxLength="11"></el-input>
                         </el-form-item>
                     </el-col>
                 </el-row>
@@ -261,12 +261,12 @@
                         <el-button size="small" type="danger" @click="deteleClueFile">删除</el-button>
                         <el-button type="text" disabled>只允许上传图片／音频文件。</el-button>
                     </el-col>
-			<div id="container">
+			<div id="container" class="f-fr">
 				<a id="selectfiles" href="javascript:void(0);" class='btn'>选择文件</a>
 				<a id="postfiles" href="javascript:void(0);" onclick="clueUploadFile()" class='btn'>开始上传</a>
 			</div>
 			<div id="ossfile">你的浏览器不支持flash,Silverlight或者HTML5！</div>
-			上传到指定目录:<input type="text" id='dirname' placeholder="如果不填，默认是上传到根目录" size=50>
+			<span v-show="false">上传到指定目录:<input type="text" id='dirname' placeholder="如果不填，默认是上传到根目录" size=50></span>
 			<pre id="console"></pre>
 			</el-row>
                 <el-row>
@@ -329,6 +329,7 @@
             </div>
             <div class="marginB20 fs16 paddingT20">跟进记录</div>
             <div class="borderbox padding20">
+              <!--  
                 <el-row>
                     <el-col :span="16" class="paddingTB">
                         <el-button size="small" type="danger" @click="deteleTracking">删除</el-button>
@@ -336,9 +337,9 @@
                     </el-col>
                     <el-col :span="4" :offset="4" class="f-tar">
                         <el-button size="small" type="primary" @click="lineFormShow=true">添加</el-button>
-                        <!-- <el-button size="small" type="primary" @click="addRecord">添加</el-button> -->
                     </el-col>
                 </el-row>
+                -->
                 <el-row>
                     <el-table
                         ref="multipleTable"
@@ -674,6 +675,7 @@
         </div>
     </el-dialog>    
 </div>
+<link rel="stylesheet" href="/css/common/uploadStyle.css">
 <style type="text/css">
 		.lineFeed { width: 230px; word-break:break-all; word-wrap: break-word; color: #c0c4cc; cursor:not-allowed; }
 		.lineFeed2 { width: 530px; }
@@ -960,7 +962,7 @@ var ossUrl=[[${ossUrl}]];
                         axios.post('/tele/clueMyCustomerInfo/updateCustomerClue',clue)
                         .then(function (response) {
                      	  addCustomerVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
-                    		  window.location.href="/tele/clueMyCustomerInfo/initmyCustomer"; 
+                    		  window.location.href="/aggregation/businessMyCustomer/listPage"; 
     		        	}});
                       });
                     } else {
@@ -1299,43 +1301,35 @@ var ossUrl=[[${ossUrl}]];
         mounted(){
             document.getElementById('addCustomer').style.display = 'block';
            if(customer){
-        	   this.form.customerName=customer.cusName; 
-        	   this.form.customerPhone=customer.linkPhone; 
-        	   this.form.customerSex=customer.sex+"";
+           	   this.form.customerName=customer.cusName; 
+        	   this.form.customerPhone=customer.phone;
+        	   this.form.customerSex=customer.sex==null?"":customer.sex+"";
         	   this.form.ishasWx=customer.wechat;
-        	   this.form.experience=customer.hasExperience+"";
+        	   this.form.experience=customer.hasExperience==null?"":customer.hasExperience+"";
         	   this.form.customerAge=customer.age;
         	   this.form.customerJob=customer.profession+"";
-        	   this.form.customerPartner=customer.partnerType+"";
-        	   this.form.address=customer.hasAddress+"";
+        	   this.form.customerPartner=customer.partnerType==null?"":customer.partnerType+"";
+        	   this.form.address=customer.hasAddress==null?"":customer.hasAddress+"";
         	   this.form.urgency=customer.urgentDate;
-        	   this.form.customerLevel=customer.cusLevel+"";
+        	   this.form.customerLevel=customer.cusLevel==null?"":customer.cusLevel+"";
         	   this.form.qq=customer.qq;
            } 
            if(intention){
-        	   this.form. money=intention.advanceAmount+"";
-        	   this.form.area=intention.area+"";
-        	   this.form.intentionCategory=intention.purType+"";
+         	   this.form. money=intention.advanceAmount==null?"":intention.advanceAmount+"";
+        	   this.form.area=intention.area==null?"":intention.area+"";
+        	   this.form.intentionCategory=intention.purType==null?"":intention.purType+"";
         	   this.form.radioProject=intention.purProjectType+"";
-        	   this.form.insideProject=intention.purInProject+"";
+        	   this.form.insideProject=intention.purInProject==null?"":intention.purInProject+"";
         	   this.form.outsideProject=intention.purOutProject;
         	   this.form.province=intention.province;
         	   this.form.city=intention.city;
         	   this.form.district=intention.district; 
-        	   
+        	   if(intention.purProjectType==2){
+        		  this.outsideProjectShow=true; //外部项目默认显示   
+        		  this.insideProjectShow=false; //内部项目不默认显示
+        	   }
            }
-           if(intention){
-        	   this.form. money=intention.advanceAmount+"";
-        	   this.form.area=intention.area+"";
-        	   this.form.intentionCategory=intention.purType+"";
-        	   this.form.radioProject=intention.purProjectType+"";
-        	   this.form.insideProject=intention.purInProject+"";
-        	   this.form.outsideProject=intention.purOutProject;
-        	   this.form.province=intention.province;
-        	   this.form.city=intention.city;
-        	   this.form.district=intention.district; 
-        	   
-           }
+       
         },
         created(){
             //初始资源类别数据

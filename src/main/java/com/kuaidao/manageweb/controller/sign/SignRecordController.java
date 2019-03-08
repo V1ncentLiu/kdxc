@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import com.github.pagehelper.PageHelper;
+import com.kuaidao.aggregation.constant.AggregationConstant;
 import com.kuaidao.aggregation.dto.busmycustomer.RejectSignOrderReqDTO;
 import com.kuaidao.aggregation.dto.busmycustomer.SignRecordReqDTO;
 import com.kuaidao.aggregation.dto.busmycustomer.SignRecordRespDTO;
@@ -266,7 +267,7 @@ public class SignRecordController {
         if(result.hasErrors()) {
             return CommonUtil.validateParam(result);
         }
-        reqDTO.setStatus(0);
+        reqDTO.setStatus(AggregationConstant.SIGN_ORDER_STATUS.REJECT);
         return signRecordFeignClient.rejectSignOrder(reqDTO);
     }
 
@@ -282,7 +283,7 @@ public class SignRecordController {
         if(result.hasErrors()) {
             return CommonUtil.validateParam(result);
         }
-        reqDTO.setStatus(2);
+        reqDTO.setStatus(AggregationConstant.SIGN_ORDER_STATUS.PASS);
         
         return signRecordFeignClient.rejectSignOrder(reqDTO);
     }

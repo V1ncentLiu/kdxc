@@ -155,5 +155,15 @@ public class ClueReleaseRecordController {
         }
         return resList;
     }
+    
+    /**
+     * 根据
+     * @param releaseRecordRespDTO
+     * @return
+     */
+    @RequestMapping("/getReleaseRecordListByCludId")
+    public JSONResult<List<ReleaseRecordRespDTO>> getReleaseRecordListByCludId(@RequestBody ReleaseRecordRespDTO releaseRecordRespDTO) {
+    	return releaseRecordFeignClient.getReleaseRecordListByCludId(releaseRecordRespDTO);
+    }
 
 }
