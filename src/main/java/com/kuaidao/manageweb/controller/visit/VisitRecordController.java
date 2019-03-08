@@ -90,12 +90,12 @@ public class VisitRecordController {
         List<UserInfoDTO> busManagerList = getUserInfo(orgId,RoleCodeEnum.SWJL.name());
         //签约省份
         SysRegionDTO sysRegionDTO = new SysRegionDTO();
-        sysRegionDTO.setType(1);;
+        sysRegionDTO.setType(0);
         JSONResult<List<SysRegionDTO>> proviceJr = sysRegionFeignClient.querySysRegionByParam(sysRegionDTO);
         //公司
         //List<OrganizationDTO> companyList = getBusinessGroupList(orgId, OrgTypeConstant.ZSZX);
         OrganizationQueryDTO companyDto = new OrganizationQueryDTO();
-        companyDto.setOrgType(OrgTypeConstant.ZSZX);
+        companyDto.setOrgType(OrgTypeConstant.SWZ);
         JSONResult<List<OrganizationRespDTO>> companyJr = organizationFeignClient.queryOrgByParam(companyDto);
         
         request.setAttribute("projectList",projectList);
