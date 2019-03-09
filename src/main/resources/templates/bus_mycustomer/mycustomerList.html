@@ -425,7 +425,7 @@
             </el-form>
 
             <div slot="footer" class="dialog-footer">
-                <el-button type="primary" @click="">去填写签约单</el-button>
+                <el-button type="primary" @click="goUpdateEditSign">去填写签约单</el-button>
                 <el-button type="primary" @click="updateVisitRecordMethod">提交</el-button>
                 <el-button  @click="updateVisitRecordDialogVisible = false">取消</el-button>
             </div>
@@ -1532,11 +1532,52 @@
                                 if (response.data.code == 0) {
                                     mainDivVM.$message({type: 'success', message: '来访记录保存成功!',duration:2000,onClose:function(){
                                             mainDivVM.initList();
-                                            mainDivVM.addVisitRecordDialogVisible = false;
+                                            mainDivVM.updateVisitRecordDialogVisible = false;
                                             //  弹出签约单添加弹窗
                                            // mainDivVM.formSigning.clueId = mainDivVM.addVisitRecord.clueId;
                                            // mainDivVM.dialogFormSigningVisible = true;
                                             mainDivVM.editSign(mainDivVM.addVisitRecord)
+                                        }});
+                                } else {
+                                    mainDivVM.$message.error(response.data.msg);
+                                }
+                            }).catch(function (error) {console.log(error);});
+                    } else {return false;}
+                });
+            },
+            goUpdateEditSign(){
+                // 设置 clueid
+                this.$refs['updateVisitRecord'].validate((valid) => {
+                    if (valid) {
+                        var param = {};
+                        param.id=this.updateVisitRecord.id;
+                        param.clueId=this.updateVisitRecord.clueId;
+                        param.companyid=this.updateVisitRecord.companyid;
+                        param.vistitTime=new Date(this.updateVisitRecord.vistitTime);
+                        param.customerName=this.updateVisitRecord.customerName;
+                        param.projectId=this.updateVisitRecord.projectId;
+                        param.visitType=this.updateVisitRecord.visitType;
+                        param.vistitStoreType=this.updateVisitRecord.vistitStoreType;
+                        param.signProvince=this.updateVisitRecord.signProvince;
+                        param.signCity=this.updateVisitRecord.signCity;
+                        param.signDistrict=this.updateVisitRecord.signDistrict;
+                        param.visitCity=this.updateVisitRecord.visitCity;
+                        param.isSign=this.updateVisitRecord.isSign;
+                        param.visitPeopleNum=this.updateVisitRecord.visitPeopleNum;
+                        param.notSignReason=this.updateVisitRecord.notSignReason;
+                        param.rebutTime = new Date(param.rebutTime)
+                        param.vistitTime = new Date(param.vistitTime)
+                        console.log(param)
+                        axios.post("/busVisitRecord/update", param)
+                            .then(function (response) {
+                                if (response.data.code == 0) {
+                                    mainDivVM.$message({type: 'success', message: '来访提交成功!',duration:2000,onClose:function(){
+                                            mainDivVM.initList();
+                                            mainDivVM.addVisitRecordDialogVisible = false;
+                                            //  弹出签约单添加弹窗
+                                            // mainDivVM.formSigning.clueId = mainDivVM.addVisitRecord.clueId;
+                                            // mainDivVM.dialogFormSigningVisible = true;
+                                            mainDivVM.editSign(mainDivVM.updateVisitRecord)
                                         }});
                                 } else {
                                     mainDivVM.$message.error(response.data.msg);
