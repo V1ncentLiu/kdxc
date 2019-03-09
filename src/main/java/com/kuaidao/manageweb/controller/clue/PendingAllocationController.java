@@ -335,7 +335,10 @@ public class PendingAllocationController {
                 organizationFeignClient.listDescenDantByParentId(organizationQueryDTO);
         List<OrganizationDTO> data = listDescenDantByParentId.getData();
         // 查询所有电销总监
-        List<UserInfoDTO> userList = getUserList(null, RoleCodeEnum.DXZJ.name(), null);
+        List<Integer> statusList = new ArrayList<Integer>();
+        statusList.add(SysConstant.USER_STATUS_ENABLE);
+        statusList.add(SysConstant.USER_STATUS_LOCK);
+        List<UserInfoDTO> userList = getUserList(null, RoleCodeEnum.DXZJ.name(), statusList);
         Map<Long, UserInfoDTO> userMap = new HashMap<Long, UserInfoDTO>();
         // 生成<机构id，用户>map
         for (UserInfoDTO userInfoDTO : userList) {
