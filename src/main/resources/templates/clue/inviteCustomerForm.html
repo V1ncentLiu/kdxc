@@ -261,14 +261,33 @@
                 this.$refs[form].validate((valid) => {
                     if (valid) {
                         // 出发时间不允许大于到站时间，接站时间
-                        if(this.form.startTime>this.form.pickUpTime||this.form.startTime>this.form.arrivalTime){
+                        var startTime=inviteCustomerVM.form.startTime
+                        var pickUpTime=inviteCustomerVM.form.pickUpTime
+                        var arrivalTime=inviteCustomerVM.form.arrivalTime
+                        console.log(startTime)
+                        console.log(pickUpTime)
+                        console.log(arrivalTime)
+                        if(pickUpTime){
+                            if(startTime>pickUpTime){
                                 this.$message({
-                                message: '出发时间不允许大于到站时间，接站时间',
-                                type: 'warning'
-                            });
-                            console.log('error submit!!');
-                            return false;
+                                    message: '出发时间不允许大于到站时间，接站时间',
+                                    type: 'warning'
+                                });
+                                console.log('error submit!!');
+                                return false;
+                            }
                         }
+                        if(arrivalTime){
+                            if(startTime>arrivalTime){
+                                this.$message({
+                                    message: '出发时间不允许大于到站时间，接站时间',
+                                    type: 'warning'
+                                });
+                                console.log('error submit!!');
+                                return false;
+                            }
+                        }
+                        
                         var param={};
                         param.clueId=clueId;
                         param.area=this.form.area;
@@ -294,10 +313,10 @@
                         		 window.location.href="/tele/clueMyCustomerInfo/initmyCustomer"; 
      		            	}});
                        });
-                        this.$message({
-                            message: '提交成功！',
-                            type: 'success'
-                        });
+                        // this.$message({
+                        //     message: '提交成功！',
+                        //     type: 'success'
+                        // });
                     } else {
                         console.log('error submit!!');
                         return false;
