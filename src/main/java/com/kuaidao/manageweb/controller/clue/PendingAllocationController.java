@@ -351,11 +351,13 @@ public class PendingAllocationController {
             UserInfoDTO user = userMap.get(organizationDTO.getId());
             orgMap.put("orgId", organizationDTO.getId());
             orgMap.put("orgName", organizationDTO.getName());
-            orgMap.put("userId", user.getId());
-            orgMap.put("userName", user.getName());
-            orgMap.put("id", organizationDTO.getId() + "," + user.getId());
-            orgMap.put("name", organizationDTO.getName() + "(" + user.getName() + ")");
-            result.add(orgMap);
+            if (user != null) {
+                orgMap.put("userId", user.getId());
+                orgMap.put("userName", user.getName());
+                orgMap.put("id", organizationDTO.getId() + "," + user.getId());
+                orgMap.put("name", organizationDTO.getName() + "(" + user.getName() + ")");
+                result.add(orgMap);
+            }
         }
         return result;
     }
