@@ -218,12 +218,12 @@ public class BusinessSignController {
         if(JSONResult.SUCCESS.equals(maxNewOne.getCode())){
             BusVisitRecordRespDTO data = maxNewOne.getData();
             if(data!=null){
-                signDTO.setSignCompanyId(data.getClueId());
+                signDTO.setSignCompanyId(data.getCompanyid());
                 signDTO.setSignProjectId(data.getProjectId());
                 signDTO.setSignProvince(data.getSignProvince());
                 signDTO.setSignCity(data.getSignCity());
                 signDTO.setSignDictrict(data.getSignDistrict());
-                signDTO.setSignShopType(""+(data.getVistitStoreType()==null?"1":data.getVistitStoreType()));
+                signDTO.setSignShopType(""+(data.getVistitStoreType()==null?"":data.getVistitStoreType()));
                 signDTO.setCustomerName(data.getCustomerName());
                 signDTO.setSignType(1);
                 signDTO.setPayType("1");
@@ -242,7 +242,7 @@ public class BusinessSignController {
                     signDTO.setCustomerName((String)data.get("cusName"));
                     signDTO.setPhone((String)data.get("phone"));
                     signDTO.setSignType(1);
-                    signDTO.setSignShopType("1");
+                    signDTO.setSignShopType("");
                     signDTO.setPayType("1");
                 }
             }
