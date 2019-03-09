@@ -177,7 +177,6 @@ public class SignRecordController {
     @RequiresPermissions("aggregation:signRecord:view")
     public JSONResult<PageBean<SignRecordRespDTO>> listSignRecord(@RequestBody SignRecordReqDTO reqDTO) {
         handleReqParam(reqDTO);
-        
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
         Long orgId = curLoginUser.getOrgId();
         List<RoleInfoDTO> roleList = curLoginUser.getRoleList();

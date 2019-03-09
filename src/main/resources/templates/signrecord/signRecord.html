@@ -125,6 +125,7 @@
             tooltip-effect="dark"
             style="width: 100%"
             border
+            height="500px"
              @selection-change="handleSelectionChange"
              v-loading="loading"
             :data="dataTable" 
@@ -136,7 +137,7 @@
             <el-table-column align="center" prop="createTime" label="签约时间"></el-table-column>
             <el-table-column align="center" prop="paymentDetails" label="付款明细">
                 <template slot-scope="scope">
-                    <el-button @click="recordClick(scope.row)" type="text" size="small">点击查看</el-button>
+                    <el-button @click="recordClick(scope.row)" type="text" size="small">查看明细</el-button>
                 </template>
             </el-table-column>
             <el-table-column align="center" prop="status" label="签约单状态"  width="120">
@@ -144,21 +145,36 @@
                     <span v-if="scope.row.status===0">
                         驳回&nbsp;<el-button @click="reasonClick(scope.row)" type="text">驳回原因</el-button>
                     </span>
-                    <span v-else-if="scope.row.status===2">
-                        有效
+                    <span v-else-if="scope.row.status===1">
+                        待审核                                    <span v-if="scope.row.payType ==1">
+                                                                                       (全款)                                                 
+                               </span>
+                              <span v-else-if="scope.row.payType ==2">
+                                                                                       (定金)                                                 
+                               </span>
+                               <span v-else-if="scope.row.payType ==3">
+                                                                                      (追加定金)                                                
+                               </span>
+                               <span v-else-if="scope.row.payType ==4">
+                                                                                      (尾款)                                             
+                               </span>
+                        
                     </span>
                     <span v-else-if="scope.row.status===2">
-                        待审核（全款）
+                         有效               <span v-if="scope.row.payType ==1">
+                                                                                       (全款)                                                 
+                               </span>
+                              <span v-else-if="scope.row.payType ==2">
+                                                                                       (定金)                                                 
+                               </span>
+                               <span v-else-if="scope.row.payType ==3">
+                                                                                      (追加定金)                                                
+                               </span>
+                               <span v-else-if="scope.row.payType ==4">
+                                                                                      (尾款)                                             
+                               </span>
                     </span>
-                    <span v-else-if="scope.row.status===3">
-                        待审核（定金）
-                    </span>
-                    <span v-else-if="scope.row.status===4">
-                        待审核（补加定金）
-                    </span>
-                    <span v-else="scope.row.status===5">
-                        待审核（尾款）
-                    </span>
+                  
                 </template>
             </el-table-column>
             <el-table-column align="center" prop="customerName" label="客户姓名"></el-table-column>  
@@ -216,10 +232,10 @@
                 :data="recordTable" 
                 >
                 <el-table-column align="center" prop="payMode" label="付款方式" :formatter="getPayModeText"></el-table-column>
-                <el-table-column align="center" prop="payTime" label="付款时间"></el-table-column>
+                <el-table-column align="center" prop="payTime" label="付款时间" :formatter="getTimeText"></el-table-column>
                 <el-table-column align="center" prop="amountReceived" label="实收金额"></el-table-column>
                 <el-table-column align="center" prop="amountBalance" label="业绩金额"></el-table-column>
-                <el-table-column align="center" prop="status" label="明细状态"></el-table-column>
+                <el-table-column align="center" prop="status" label="明细状态" :formatter="getStatusText"></el-table-column>
             </el-table>
         </div>        
         <div v-show="paymentDetailsShow2">
@@ -231,13 +247,13 @@
                 border
                 :data="recordTable2" 
                 >
-                <el-table-column align="center" prop="paymentType" label="付款方式"></el-table-column>
-                <el-table-column align="center" prop="paymentTime" label="付款时间"></el-table-column>
-                <el-table-column align="center" prop="actualMoney" label="实收金额"></el-table-column>
-                <el-table-column align="center" prop="performanceMoney" label="业绩金额"></el-table-column>
-                <el-table-column align="center" prop="residueMoney" label="余款金额"></el-table-column>
-                <el-table-column align="center" prop="estimatedTime" label="预计余款补齐时间"></el-table-column>                
-                <el-table-column align="center" prop="detailStatus" label="明细状态"></el-table-column>
+                <el-table-column align="center" prop="payMode" label="付款方式" :formatter="getPayModeText"></el-table-column>
+                <el-table-column align="center" prop="payTime" label="付款时间" :formatter="getTimeText"></el-table-column>
+                <el-table-column align="center" prop="amountReceived" label="实收金额"></el-table-column>
+                <el-table-column align="center" prop="amountPerformance" label="业绩金额"></el-table-column>
+                <el-table-column align="center" prop="amountBalance" label="余款金额"></el-table-column>
+                <el-table-column align="center" prop="makeUpTime" label="预计余款补齐时间" :formatter="getTimeText"></el-table-column>                
+                <el-table-column align="center" prop="status" label="明细状态" :formatter="getStatusText"></el-table-column>
             </el-table>
         </div>
         <div v-show="paymentDetailsShow3">
@@ -249,13 +265,13 @@
                 border
                 :data="recordTable3" 
                 >
-                <el-table-column align="center" prop="paymentType" label="付款方式"></el-table-column>
-                <el-table-column align="center" prop="paymentTime" label="付款时间"></el-table-column>
-                <el-table-column align="center" prop="actualMoney" label="实收金额"></el-table-column>
-                <el-table-column align="center" prop="performanceMoney" label="业绩金额"></el-table-column>
-                <el-table-column align="center" prop="residueMoney" label="余款金额"></el-table-column>
-                <el-table-column align="center" prop="estimatedTime" label="预计余款补齐时间"></el-table-column>                
-                <el-table-column align="center" prop="detailStatus" label="明细状态"></el-table-column>
+                <el-table-column align="center" prop="payMode" label="付款方式" :formatter="getPayModeText"></el-table-column>
+                <el-table-column align="center" prop="payTime" label="付款时间" :formatter="getTimeText"></el-table-column>
+                <el-table-column align="center" prop="amountReceived" label="实收金额"></el-table-column>
+                <el-table-column align="center" prop="amountPerformance" label="业绩金额"></el-table-column>
+                <el-table-column align="center" prop="amountBalance" label="余款金额"></el-table-column>
+                <el-table-column align="center" prop="makeUpTime" label="预计余款补齐时间" :formatter="getTimeText"></el-table-column>                
+                <el-table-column align="center" prop="status" label="明细状态" :formatter="getStatusText"></el-table-column>
             </el-table>
         </div>
         <div v-show="paymentDetailsShow4">
@@ -267,11 +283,11 @@
                 border
                 :data="recordTable4" 
                 >
-                <el-table-column align="center" prop="paymentType" label="付款方式"></el-table-column>
-                <el-table-column align="center" prop="paymentTime" label="付款时间"></el-table-column>
-                <el-table-column align="center" prop="actualMoney" label="实收金额"></el-table-column>
-                <el-table-column align="center" prop="performanceMoney" label="业绩金额"></el-table-column>
-                <el-table-column align="center" prop="detailStatus" label="明细状态"></el-table-column>
+                <el-table-column align="center" prop="payMode" label="付款方式" :formatter="getPayModeText"></el-table-column>
+                <el-table-column align="center" prop="payTime" label="付款时间" :formatter="getTimeText"></el-table-column>
+                <el-table-column align="center" prop="amountReceived" label="实收金额"></el-table-column>
+                <el-table-column align="center" prop="amountPerformance" label="业绩金额"></el-table-column>
+                <el-table-column align="center" prop="status" label="明细状态" :formatter="getStatusText"></el-table-column>
             </el-table>
         </div>
     </el-dialog>
@@ -403,7 +419,6 @@
                 });
             },
             recordClick(row) {//查看明细
-                console.log(row);
                 this.paymentDetailsShow=false;
                 this.paymentDetailsShow2=false;
                 this.paymentDetailsShow3=false;
@@ -421,6 +436,7 @@
                     		signRecordVM.recordTable= payDetailData[1];
                     	}else if(payDetailData[2]){
                     		signRecordVM.paymentDetailsShow2=true;
+                    		console.info(payDetailData[2]);
                     		 signRecordVM.recordTable2= payDetailData[2];
                     	}else if(payDetailData[3]){
                     		  signRecordVM.paymentDetailsShow3=true;
@@ -444,7 +460,6 @@
                
             },
             reasonClick(row) {//驳回原因
-                console.log(row);
                this.rebutReason = row.rebutReason;
                 this.reasonDialog=true;
             },
@@ -460,10 +475,19 @@
                 
                 var title = "";
                 var idArr = new Array();
+                var isPass = true;
                 for(var i=0;i<rows.length;i++){
                     var curRow = rows[i];
+                    if(curRow.status!=1){
+                        this.$message({message:'只允许审核待审核的数据',type:'warning'});
+                        isPass=false;
+                        break;
+                    }
                     title += "【"+curRow.serialNum+""+curRow.customerName+"】 ";
                     idArr.push(curRow.id);
+                }
+                if(!isPass){
+                	return;
                 }
             	
                 this.$confirm('确定要将此 '+title+' 签约单审核通过吗？', '提示', {
@@ -596,6 +620,22 @@
                     valText="POS";
                 }else if(value==3){
                     valText="转账";
+                }
+                return valText;
+            },
+            getStatusText(row, column, value, index){
+            	   var valText="";
+                   if(value==1){
+                       valText="审核中";
+                   }else if(value==2){
+                       valText="有效";
+                   }
+                   return valText;
+            },
+            getTimeText(row, column, value, index){
+                var valText="";
+                if(value){
+                    valText =  moment(value).format("YYYY-MM-DD HH:mm:ss");
                 }
                 return valText;
             }
