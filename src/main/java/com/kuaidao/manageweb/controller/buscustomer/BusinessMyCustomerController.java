@@ -122,7 +122,7 @@ public class BusinessMyCustomerController {
         Date date2 =param.getReserveTime2();
         if(date1!=null && date2!=null ){
             if(date1.getTime()>date2.getTime()){
-                return new JSONResult().fail("-1","邀约到访时间，结束时间不能早于开始时间!");
+                return new JSONResult().fail("-1","邀约来访时间，结束时间不能早于开始时间!");
             }
         }
 

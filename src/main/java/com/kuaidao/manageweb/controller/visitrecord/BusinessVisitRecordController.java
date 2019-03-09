@@ -168,7 +168,7 @@ public class BusinessVisitRecordController {
         if(JSONResult.SUCCESS.equals(mapJSONResult.getCode())){
             Map data = mapJSONResult.getData();
             if(data!=null){
-                recordRespDTO.setCompanyid((Long)data.get("busCompany"));
+//                recordRespDTO.setCompanyid((Long)data.get("busCompany"));
                 Object arrivalTime = data.get("arrivalTime");
                 Date arrDate = null;
                 if(arrivalTime==null){
