@@ -97,7 +97,7 @@
             <el-table-column type="selection" width="55" prop="clueId" ></el-table-column>
             <el-table-column prop="xh" label="序号" width="60" type="index" align="center"></el-table-column>
             <el-table-column prop="reserveTime" label="邀约来访时间" sortable align="center"  width="180px"></el-table-column>
-            <el-table-column prop="cusName" label="客户姓名" align="center" width="88">
+            <el-table-column prop="cusName" label="客户姓名" align="center" width="200">
                 <template slot-scope="scope">
                     <el-button size="mini"  type="text" @click="editCustomerDetail(scope.row)">{{scope.row.cusName}}</el-button>
                 </template>
@@ -168,9 +168,9 @@
     <el-dialog title="提示" :visible.sync="notVisitFlagDialogVisible"  width="30%">
         <template>
             <el-form :model="notVisitFlag" ref="notVisitFlag" :rules="notVisitFlagRules">
-                <el-form-item label="" :label-width="formLabelWidth" :required="true">
+                <el-form-item>
                     <!--<el-button type="text" disabled style="color: #1e2746; width:100px; word-wrap:break-word; word-break:normal;">{{notVisitFlag.str}}</el-button>-->
-                    <span style="display:block;color: #1e2746; width:90%; word-wrap:break-word; word-break:normal;">{{notVisitFlag.str}}</span>
+                    <span style="margin-left: 80px;display:block;color: #1e2746; width:90%; word-wrap:break-word; word-break:normal;">{{notVisitFlag.str}}</span>
                 </el-form-item>
                 <el-form-item label="未到访原因" :label-width="formLabelWidth"  prop="notVisitReason" >
                     <el-input type="textarea" v-model="notVisitFlag.notVisitReason"  maxlength="100" :rows="3" placeholder="请输入内容(限制100字)"></el-input>
@@ -198,7 +198,7 @@
 
                     <el-col :span="10">
                         <el-form-item label="到访时间"    :label-width="formLabelWidth"  prop="vistitTime">
-                            <el-date-picker v-model="addVisitRecord.vistitTime" format="yyyy-MM-dd hh:mm" type="datetime" placeholder="选择日期时间"></el-date-picker>
+                            <el-date-picker v-model="addVisitRecord.vistitTime" format="yyyy-MM-dd hh:mm" type="datetime" placeholder="选择日期时间" default-time="00:00"></el-date-picker>
                         </el-form-item>
                     </el-col>
                 </el-row>
@@ -306,10 +306,10 @@
         <template>
             <el-form :model="updateVisitRecord" ref="updateVisitRecord" :rules="rules">
                 <el-form-item label="驳回时间"  :label-width="formLabelWidth">
-                   <el-button size="mini"  type="text" style = "color: #1e2746">{{updateVisitRecord.rebutTime}}</el-button>
+                   <el-button size="mini"  type="text" style = "font-size: 17px;color: #1e2746">{{updateVisitRecord.rebutTime}}</el-button>
                 </el-form-item>
                 <el-form-item label="驳回原因"  :label-width="formLabelWidth">
-                    <el-button size="mini"  type="text"  style="color: red">{{updateFormSigning.rebutReason}}</el-button>
+                    <el-button size="mini"  type="text"  style="color: red">{{updateVisitRecord.rebutReason}}</el-button>
                 </el-form-item>
                 <el-row :gutter="20">
                     <el-col :span="10">
@@ -675,7 +675,8 @@
                 <el-row>
                     <el-col :span="10">
                         <el-form-item label="应收金额：" :label-width="formLabelWidth" prop="amountReceivable">
-                            <el-input v-model="formSigning.amountReceivable" @keyup.native="number" autocomplete="off" maxLength="10" style="width: 80%;"></el-input><span style="padding-left: 10px;">元</span>
+                            <el-input v-model="formSigning.amountReceivable" @keyup.native="number" autocomplete="off" maxLength="10" style="width: 80%;"></el-input>
+                            <span style="padding-left: 10px;">元</span>
                         </el-form-item>
                     </el-col>
                     <el-col :span="10">
@@ -747,7 +748,8 @@
                     </el-col>
                     <el-col :span="10">
                         <el-form-item label="实收金额：" :label-width="formLabelWidth" prop="amountReceived">
-                            <el-input maxLength="10" v-model="formSigning.amountReceived" @keyup.native="number4" @change="setAddPerformanceAmount"></el-input>
+                            <el-input maxLength="10" v-model="formSigning.amountReceived" @keyup.native="number4"  style="width: 80%;" @change="setAddPerformanceAmount"></el-input>
+                            <span style="padding-left: 10px;">元</span>
                         </el-form-item>
                     </el-col>
                 </el-row>
@@ -755,6 +757,7 @@
                     <el-col :span="10">
                         <el-form-item label="余款金额：" :label-width="formLabelWidth" prop="amountBalance">
                             <el-input maxLength="10" v-model="formSigning.amountBalance" @keyup.native="number5"></el-input>
+                            <span style="padding-left: 10px;">元</span>
                         </el-form-item>
                     </el-col>
                     <el-col :span="10">
@@ -771,7 +774,8 @@
                 <el-row>
                     <el-col :span="10">
                         <el-form-item label="业绩金额：" :label-width="formLabelWidth" prop="performanceAmount">
-                            <el-input maxLength="10" v-model="formSigning.AmountPerformance" @keyup.native="number6"></el-input>
+                            <el-input maxLength="10" v-model="formSigning.AmountPerformance" @keyup.native="number6"  style="width: 80%;"></el-input>
+                            <span style="padding-left: 10px;">元</span>
                         </el-form-item>
                     </el-col>
                 </el-row>
@@ -873,19 +877,19 @@
                     <el-row>
                         <el-col :span="10">
                             <el-form-item label="应收金额：" :label-width="formLabelWidth" prop="amountReceivable">
-                                <el-input :disabled="notEditRebutSign" v-model="updateFormSigning.amountReceivable" @keyup.native="number" autocomplete="off" maxLength="10" style="width: 80%;"></el-input><span style="padding-left: 10px;">元</span>
+                                <el-input :disabled="notEditRebutSign"  v-model="updateFormSigning.amountReceivable" @keyup.native="number01" autocomplete="off" maxLength="10" style="width: 80%;"></el-input><span style="padding-left: 10px;">元</span>
                             </el-form-item>
                         </el-col>
                         <el-col :span="10">
                             <el-form-item label="路费（报首次）：" :label-width="formLabelWidth" prop="firstToll">
-                                <el-input :disabled="notEditRebutSign" v-model="updateFormSigning.firstToll" @keyup.native="number" autocomplete="off" maxLength="10" style="width: 80%;"></el-input><span style="padding-left: 10px;">元</span>
+                                <el-input :disabled="notEditRebutSign"   v-model="updateFormSigning.firstToll" @keyup.native="number11" autocomplete="off" maxLength="10" style="width: 80%;"></el-input><span style="padding-left: 10px;">元</span>
                             </el-form-item>
                         </el-col>
                     </el-row>
                     <el-row>
                         <el-col :span="10">
                             <el-form-item label="优惠金额：" :label-width="formLabelWidth" prop="preferentialAmount">
-                                <el-input :disabled="notEditRebutSign" v-model="updateFormSigning.preferentialAmount" @keyup.native="number" autocomplete="off" maxLength="10" style="width: 80%;"></el-input><span style="padding-left: 10px;">元</span>
+                                <el-input :disabled="notEditRebutSign"  v-model="updateFormSigning.preferentialAmount" @keyup.native="number21" autocomplete="off" maxLength="10" style="width: 80%;"></el-input><span style="padding-left: 10px;">元</span>
                             </el-form-item>
                         </el-col>
                         <el-col :span="10">
@@ -904,7 +908,7 @@
                     <el-row>
                         <el-col :span="10">
                             <el-form-item label="赠送金额：" :label-width="formLabelWidth" prop="giveAmount">
-                                <el-input :disabled="notEditRebutSign" v-model="updateFormSigning.giveAmount" @keyup.native="number" autocomplete="off" maxLength="10" style="width: 80%;"></el-input><span style="padding-left: 10px;">元</span>
+                                <el-input :disabled="notEditRebutSign" v-model="updateFormSigning.giveAmount" @keyup.native="number31" autocomplete="off" maxLength="10" style="width: 80%;"></el-input><span style="padding-left: 10px;">元</span>
                             </el-form-item>
                         </el-col>
                     </el-row>
@@ -953,7 +957,7 @@
                         </el-col>
                         <el-col :span="10">
                             <el-form-item label="实收金额：" :label-width="formLabelWidth" prop="amountReceived">
-                                <el-input v-model="updateFormSigning.amountReceived" style="width: 80%;"></el-input>
+                                <el-input maxLength="10" v-model="updateFormSigning.amountReceived" style="width: 80%;" @keyup.native="number41"></el-input>
                                 <span style="padding-left: 10px;">元</span>
                             </el-form-item>
                         </el-col>
@@ -961,7 +965,7 @@
                     <el-row v-show="isAllMoney">
                         <el-col :span="10">
                             <el-form-item label="余款金额：" :label-width="formLabelWidth" prop="amountBalance">
-                                <el-input v-model="updateFormSigning.amountBalance" style="width: 80%;"></el-input>
+                                <el-input maxLength="10" v-model="updateFormSigning.amountBalance" style="width: 80%;" @keyup.native="number51"></el-input>
                                 <span style="padding-left: 10px;">元</span>
                             </el-form-item>
                         </el-col>
@@ -979,7 +983,7 @@
                     <el-row>
                         <el-col :span="10">
                             <el-form-item label="业绩金额：" :label-width="formLabelWidth" prop="performanceAmount">
-                                <el-input v-model="updateFormSigningAmountPerformance" style="width: 80%;"></el-input>
+                                <el-input maxLength="10" v-model="updateFormSigningAmountPerformance" style="width: 80%;" @keyup.native="number61"></el-input>
                                 <span style="padding-left: 10px;">元</span>
                             </el-form-item>
                         </el-col>
@@ -1033,7 +1037,6 @@
                 oneShow:true,
                 twoShow:false,
                 threeShow:false,
-
                 oneRebutShow:false,
                 twoRebutShow:false,
                 threeRebutShow:false,
@@ -1200,7 +1203,7 @@
         },
         methods: {
         	number(){
-        	    　        this.formSigning.amountReceivable=this.formSigning.amountReceivable.replace(/[^\.\d]/g,'');
+        	    　this.formSigning.amountReceivable=this.formSigning.amountReceivable.replace(/[^\.\d]/g,'');
         	      this.formSigning.amountReceivable=this.formSigning.amountReceivable.replace('.','');
         	},
         	number1(){
@@ -1225,8 +1228,37 @@
         	},
         	number6(){
         	    　this.formSigning.AmountPerformance=this.formSigning.AmountPerformance.replace(/[^\.\d]/g,'');
-        	   this.formSigning.AmountPerformance=this.formSigning.AmountPerformance.replace('.','');
+        	        this.formSigning.AmountPerformance=this.formSigning.AmountPerformance.replace('.','');
         	},
+
+            number01(){
+                this.updateFormSigning.amountReceivable=this.updateFormSigning.amountReceivable.replace(/[^\.\d]/g,'');
+                this.updateFormSigning.amountReceivable=this.updateFormSigning.amountReceivable.replace('.','');
+            },
+            number11(){
+                this.updateFormSigning.firstToll=this.updateFormSigning.firstToll.replace(/[^\.\d]/g,'');
+                this.updateFormSigning.firstToll=this.updateFormSigning.firstToll.replace('.','');
+            },
+            number21(){
+                this.updateFormSigning.preferentialAmount=this.updateFormSigning.preferentialAmount.replace(/[^\.\d]/g,'');
+                this.updateFormSigning.preferentialAmount=this.updateFormSigning.preferentialAmount.replace('.','');
+            },
+            number31(){
+                this.updateFormSigning.giveAmount=this.updateFormSigning.giveAmount.replace(/[^\.\d]/g,'');
+                this.updateFormSigning.giveAmount=this.updateFormSigning.giveAmount.replace('.','');
+            },
+            number41(){
+                this.updateFormSigning.amountReceived=this.updateFormSigning.amountReceived.replace(/[^\.\d]/g,'');
+                this.updateFormSigning.amountReceived=this.updateFormSigning.amountReceived.replace('.','');
+            },
+            number51(){
+                this.updateFormSigning.amountBalance=this.updateFormSigning.amountBalance.replace(/[^\.\d]/g,'');
+                this.updateFormSigning.amountBalance=this.updateFormSigning.amountBalance.replace('.','');
+            },
+            number61(){
+                this.updateFormSigningAmountPerformance=this.updateFormSigningAmountPerformance.replace(/[^\.\d]/g,'');
+                this.updateFormSigningAmountPerformance=this.updateFormSigningAmountPerformance.replace('.','');
+            },
             formatVisitTime(row){
 
                 function dateFtt(fmt,date)
@@ -1448,12 +1480,10 @@
                 axios.post('/busVisitRecord/echo',param).then(function (response) {
                     mainDivVM.addVisitRecord = response.data.data;
                     mainDivVM.addVisitRecord.clueId=row.clueId;
-                    mainDivVM.addVisitRecord.vistitTime = new Date()
+                     mainDivVM.addVisitRecord.vistitTime = new Date()
                     mainDivVM.addVisitRecordDialogVisible = true;
-
                     mainDivVM.currentProvince(mainDivVM.addVisitRecord.signProvince)
                     mainDivVM.currentCity(mainDivVM.addVisitRecord.signCity)
-
                     mainDivVM.showNotSignReason(mainDivVM.addVisitRecord.isSign);
                 });
             },
@@ -1572,6 +1602,7 @@
                                     mainDivVM.$message({type: 'success', message: '来访记录保存成功!',duration:2000,onClose:function(){
                                             mainDivVM.initList();
                                             mainDivVM.updateVisitRecordDialogVisible = false;
+                                            mainDivVM.addVisitRecordDialogVisible = false;
                                             //  弹出签约单添加弹窗
                                            // mainDivVM.formSigning.clueId = mainDivVM.addVisitRecord.clueId;
                                            // mainDivVM.dialogFormSigningVisible = true;
