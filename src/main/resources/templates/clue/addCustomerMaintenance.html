@@ -545,12 +545,12 @@
                           align="center">
                         </el-table-column>
                         <el-table-column
-                          prop="name"
+                          prop="accountName"
                           label="姓名"
                           align="center">
                         </el-table-column>
                         <el-table-column
-                          prop="role"
+                          prop="roleName"
                           label="角色"
                           align="center">
                         </el-table-column>
@@ -577,29 +577,14 @@
                         <el-table-column
                           label="操作"
                           align="center">
-                          <template slot-scope="scope">
-                            <el-button
-                              size="mini"
-                              type="primary"
-                              icon="el-icon-caret-right"
-                              class="playBtn"
-                              @click="handlePlay(scope.$index, scope.row)"
-                              >
-                              	<audio loop="loop">
-                                    <source src="http://fs.w.kugou.com/201902211552/efd2e515657eadeb6f38671d9b3ecf9c/G013/M04/06/08/rYYBAFUMN1yAA7XtADdy078twac672.mp3" type="audio/mpeg">
-                                </audio>
-                                <svg class="el-icon-pause-svg" style="width: 12px; height: 13px;vertical-align: middle;fill: currentColor;overflow: hidden;display: none; " viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="2024"><path d="M288 128C270.336 128 256 142.336 256 160l0 768C256 945.664 270.336 960 288 960S320 945.664 320 928l0-768C320 142.336 305.664 128 288 128zM672 128C654.336 128 640 142.336 640 160l0 768c0 17.664 14.336 32 32 32s32-14.336 32-32l0-768C704 142.336 689.664 128 672 128z" p-id="2025"></path></svg>
-                              </el-button>
-                            <el-button
-                              size="mini"
-                              type="primary"
-                              icon="el-icon-download"
-                              class="downloadMp3"
-                              @click="handleDownload(scope.$index, scope.row)"
-                              >
-                              	<a href="http://fs.w.kugou.com/201902211552/efd2e515657eadeb6f38671d9b3ecf9c/G013/M04/06/08/rYYBAFUMN1yAA7XtADdy078twac672.mp3" download style="display: none;"><p>下载</p></a>
-                              </el-button>
-                          </template>
+                        <template slot-scope="scope" v-if="scope.row.talkTime >0 ">
+                          <div style="float:left" :id="scope.row.id" class="sound-trigger sound-trigger--type-default sound-trigger--type-click" @click="switchSoundBtn(scope.row.id,scope.row.recordFile,scope.row.callSource)">
+						    <div class="sound-trigger__inner">
+						    <i class="fa fa-play fa-lg"></i>
+						    </div>
+						</div>
+                         <el-button type="danger" size="small" @click="downloadAudio(scope.row.id,scope.row.recordFile,scope.row.callSource)"><i class="el-icon-download"></i>下载</el-button>
+                       </template>
                         </el-table-column>
                     </el-table>
                 </el-row>
@@ -645,7 +630,7 @@
             </div>
             <div class="padding20 f-tac">            
                 <el-button type="primary" @click="submitForm('form')">提交客户资源</el-button>
-                <el-button type="primary" @click="inviteCustomer">邀约来访</el-button>
+                <el-button type="primary" @click="inviteCustomer('form')">邀约来访</el-button>
                 <el-button @click="rebackClue">取 消</el-button>
             </div> 
         </el-form> 
@@ -1382,8 +1367,108 @@ var callRecord=[[${callRecord}]];//通话记录
                  });  	
               },
             //邀约来访
-            inviteCustomer(){
-            	  window.location.href="/tele/clueMyCustomerInfo/inviteCustomer?clueId="+clueId; 
+            inviteCustomer(form){
+            	  this.$refs[form].validate((valid) => {
+                      if (valid) {
+                         //----客户基本信息---//
+                   	    var  clueCustomer={};
+                        	 //客户姓名
+                      	var  customerName=this.form.customerName;
+                      	clueCustomer.cusName=customerName;
+                     	    //手机号
+                      	var  customerPhone=this.form.customerPhone;
+                      	clueCustomer.phone=customerPhone;
+                     	    //性别
+                      	var customerSex=this.form.customerSex;
+                      	clueCustomer.sex=customerSex;
+                  	    //微信
+                      	var  ishasWx=this.form.ishasWx;
+                      	clueCustomer.wechat=ishasWx;
+                  	    //餐饮经验
+                      	var experience=this.form.experience;
+                      	clueCustomer.hasExperience=experience;
+                  	    //年龄
+                      	var customerAge=this.form.customerAge;
+                      	clueCustomer.age=customerAge;
+                  	    //职业
+                      	var customerJob=this.form.customerJob;
+                      	clueCustomer.profession=customerJob;
+                  	    //合伙人
+                      	var customerPartner=this.form.customerPartner;
+                      	clueCustomer.partnerType=customerPartner;
+                  	    //选址情况
+                      	var address=this.form.address;
+                      	clueCustomer.hasAddress=address;
+                  	    //开店紧迫性
+                  	    var urgency =this.form.urgency;
+                  	    clueCustomer.urgentDate=urgency;
+                  	    //客户级别
+                  	    var customerLevel=this.form.customerLevel;
+                  	    clueCustomer.cusLevel=customerLevel;
+                  	    //QQ
+                  	    var qq=this.form.qq;
+                  	    clueCustomer.qq=qq;
+                     	    var phoneArr=this.dynamicValidateForm.domains;
+                  	    if(phoneArr.length>0){
+                  	     for(var i=0;i<phoneArr.length;i++){
+                  	    	 if(i==0)  {
+                  	    		 clueCustomer.phone2=phoneArr[i].value;	 
+                  	         }
+                  	    	 if(i==1)  {
+                  	    		 clueCustomer.phone3=phoneArr[i].value;	
+                  	         }
+                  	    	 if(i==2)  {
+                  	    		 clueCustomer.phone4=phoneArr[i].value;	 
+                  	         }
+                  	    	 if(i==3)  {
+                  	    		 clueCustomer.phone5=phoneArr[i].value;	 
+                  	         }
+                  	      }
+                  	    }
+                  	    //----投资意向---//
+                  	    var  clueIntention={};
+                  	    //投资金额
+                  	    var  money=this.form.money; 
+                  	    clueIntention.advanceAmount=money;
+                  	    //店面大小
+                  	    var  area= this.form.area;
+                  	    clueIntention.area=area;
+                  	    //意向品类
+                  	    var intentionCategory=this.form.intentionCategory;
+                  	    clueIntention.purType=intentionCategory;
+                  	    //意向项目
+                  	    var radioProject= this.form.radioProject;
+                  	    clueIntention.purProjectType=radioProject;
+                  	    //意向内部项目
+                  	    var  insideProject=this.form.insideProject;
+                  	    clueIntention.purInProject=insideProject;
+                  	    //意向外部项目
+                  	    var  outsideProject= this.form.outsideProject;
+                  	    clueIntention.purOutProject=outsideProject;
+                  	    //省
+                  	    var province= this.form.province;
+                  	    clueIntention.province=province;
+                  	    //市
+                  	    var city=this.form.city;
+                  	    clueIntention.city=city
+                 	         //区县
+                  	    var district= this.form.district;
+                  	    clueIntention.district=district;
+               	        var clue={};
+               	        clue.clueId=clueId;
+                  	    clue.clueCustomer=clueCustomer;
+                  	    clue.clueIntention=clueIntention; 
+                          axios.post('/tele/clueMyCustomerInfo/updateCustomerClue',clue)
+                          .then(function (response) {
+                       	  addCustomerVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
+                      		  window.location.href="/tele/clueMyCustomerInfo/inviteCustomer?clueId="+clueId; 
+      		        	}});
+                        });
+                      } else {
+                          console.log('error submit!!');
+                          return false;
+                      }
+                  });  
             },
             handleOperateFn(index, row) { //上传资源"查看图片,下载录音"
             	
@@ -1422,6 +1507,62 @@ var callRecord=[[${callRecord}]];//通话记录
                 $(".downloadMp3:eq("+index+") a").prop("download","true");
                 $(".downloadMp3:eq("+index+") a>p").trigger("click");
             },
+        	switchSoundBtn(id,url,callSource){
+        		if(callSource=='2'){
+        			switchSound(id,url);
+        			return;
+        		}
+        		 var param = {};
+        		 param.id=id;
+        	   	 axios.post('/call/callRecord/getRecordFile',param)
+                 .then(function (response) {
+                	 var data =  response.data
+                     if(data.code=='0'){
+                    	 var url = data.data;
+                    	 switchSound(id,url);
+                         
+                     }else{
+                    	 console.error(data);
+                    	 myCallRecordVm.$message({message:data.msg,type:'error'});
+                     }
+                 
+                 })
+                 .catch(function (error) {
+                      console.log(error);
+                 }).then(function(){
+                 });
+        	},
+        	/* downloadAudio(id,url,callSource){
+        		if(callSource=='2'){
+        			location.href=url;
+        			return;
+        		}
+        		 var param = {};
+        		 param.id=id;
+        	   	 axios.post('/call/callRecord/getRecordFile',param)
+                 .then(function (response) {
+                	 var data =  response.data;
+                     if(data.code=='0'){
+                    	 var url = data.data;
+                    	 if(url){
+                    		 var fileName = url.split('?')[0];
+                    		 var fileNameArr= fileName.split("/");
+                    		 download(url,fileNameArr[fileNameArr.length-1],'audio/*');
+                    	 }
+                         
+                     }else{
+                    	 console.error(data);
+                    	 addCustomerVM.$message({message:data.msg,type:'error'});
+                     }
+                 
+                 })
+                 .catch(function (error) {
+                      console.log(error);
+                 }).then(function(){
+                 });
+        		
+        	}, */
+
         },
         mounted(){
             document.getElementById('addCustomer').style.display = 'block';
@@ -1597,7 +1738,7 @@ var callRecord=[[${callRecord}]];//通话记录
 <script th:src="@{/js/custom/call/rtCall.js?v=1.0.0}"></script> 
  <!-- 播放錄音 js -->
  <script th:src="@{/js/custom/callrecord/simpleAudio.js?v=1.0.0}"></script>
-
+ <script th:src="@{/js/custom/callrecord/download.js?v=1.0.0}"></script>
  <script type="text/javascript">
  
  function clueUploadFile(){
@@ -1616,6 +1757,4 @@ var callRecord=[[${callRecord}]];//通话记录
              }}); 
         });
  }
- 
  </script>
-</html>

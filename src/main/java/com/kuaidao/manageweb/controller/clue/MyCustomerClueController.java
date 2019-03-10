@@ -43,6 +43,7 @@ import com.kuaidao.aggregation.dto.tracking.TrackingReqDTO;
 import com.kuaidao.aggregation.dto.tracking.TrackingRespDTO;
 import com.kuaidao.common.constant.OrgTypeConstant;
 import com.kuaidao.common.constant.RoleCodeEnum;
+import com.kuaidao.common.constant.SystemCodeConstant;
 import com.kuaidao.common.entity.IdEntityLong;
 import com.kuaidao.common.entity.IdListLongReq;
 import com.kuaidao.common.entity.JSONResult;
@@ -699,17 +700,18 @@ public class MyCustomerClueController {
 			// 查询用户的上级
 			OrganizationQueryDTO orgDto = new OrganizationQueryDTO();
 			orgDto.setId(user.getOrgId());
+			orgDto.setSystemCode(SystemCodeConstant.HUI_JU);
 			JSONResult<List<OrganizationDTO>> orgJson = organizationFeignClient.listParentsUntilOrg(orgDto);
 			if (orgJson != null && JSONResult.SUCCESS.equals(orgJson.getCode()) && orgJson.getData() != null
 					&& orgJson.getData().size() > 0) {
 				for (OrganizationDTO org : orgJson.getData()) {
 
-					if (org.getOrgType().equals(OrgTypeConstant.DZSYB)) {
-						relation.setTeleDeptId(org.getParentId());
+					if (null!=org.getOrgType()&& org.getOrgType().equals(OrgTypeConstant.DZSYB)) {
+						relation.setTeleDeptId(org.getId());
 
 						UserOrgRoleReq userRoleInfo = new UserOrgRoleReq();
-						userRole.setRoleCode(RoleCodeEnum.DXFZ.name());
-						userRole.setOrgId(org.getId());
+						userRoleInfo.setRoleCode(RoleCodeEnum.DXFZ.name());
+						userRoleInfo.setOrgId(org.getId());
 						JSONResult<List<UserInfoDTO>> ceoUserInfoJson = userInfoFeignClient
 								.listByOrgAndRole(userRoleInfo);
 						if (ceoUserInfoJson.getCode().equals(JSONResult.SUCCESS) && null != ceoUserInfoJson.getData()
@@ -719,7 +721,7 @@ public class MyCustomerClueController {
 						}
 
 					}
-					if (org.getOrgType().equals(OrgTypeConstant.DZFGS)) {
+					if (null!=org.getOrgType()&& org.getOrgType().equals(OrgTypeConstant.DZFGS)) {
 
 						UserOrgRoleReq userRoleInfo = new UserOrgRoleReq();
 						userRole.setRoleCode(RoleCodeEnum.DXZJL.name());
