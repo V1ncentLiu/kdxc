@@ -95,7 +95,6 @@ public class CompanyController {
      */
     @PostMapping("/listNoPage")
     @ResponseBody
-    @RequiresPermissions("aggregation:companyManager:view")
     public JSONResult<List<CompanyInfoDTO>> listNoPage(
             @RequestBody CompanyInfoPageParam companyInfoPageParam, HttpServletRequest request) {
 

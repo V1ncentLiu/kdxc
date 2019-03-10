@@ -374,14 +374,14 @@
                             </el-col>
                             <el-col :span="10">
                                 <el-form-item label="路费（报首次）：" :label-width="formLabelWidth" prop="firstToll">
-                                    <el-input v-model="formSigning.firstToll" @keyup.native="number" autocomplete="off" maxLength="10" style="width: 80%;"></el-input><span style="padding-left: 10px;">元</span>
+                                    <el-input v-model="formSigning.firstToll" @keyup.native="number1" autocomplete="off" maxLength="10" style="width: 80%;"></el-input><span style="padding-left: 10px;">元</span>
                                 </el-form-item>
                             </el-col>
                         </el-row>
                         <el-row>
                             <el-col :span="10">
                                 <el-form-item label="优惠金额：" :label-width="formLabelWidth" prop="preferentialAmount">
-                                    <el-input v-model="formSigning.preferentialAmount" @keyup.native="number" autocomplete="off" maxLength="10" style="width: 80%;"></el-input><span style="padding-left: 10px;">元</span>
+                                    <el-input v-model="formSigning.preferentialAmount" @keyup.native="number2" autocomplete="off" maxLength="10" style="width: 80%;"></el-input><span style="padding-left: 10px;">元</span>
                                 </el-form-item>
                             </el-col>
                             <el-col :span="10">
@@ -400,7 +400,7 @@
                         <el-row>
                             <el-col :span="10">
                                 <el-form-item label="赠送金额：" :label-width="formLabelWidth" prop="giveAmount">
-                                    <el-input v-model="formSigning.giveAmount" @keyup.native="number" autocomplete="off" maxLength="10" style="width: 80%;"></el-input><span style="padding-left: 10px;">元</span>
+                                    <el-input v-model="formSigning.giveAmount" @keyup.native="number3" autocomplete="off" maxLength="10" style="width: 80%;"></el-input><span style="padding-left: 10px;">元</span>
                                 </el-form-item>
                             </el-col>
                         </el-row>
@@ -433,7 +433,7 @@
                             <el-col :span="10">
                                 <el-form-item label="付款时间：" :label-width="formLabelWidth" prop="payTime">
                                     <el-date-picker
-                                            type="datetime"
+                                            type="date"
                                             format="yyyy-MM-dd"
                                             placeholder="选择日期"
                                             v-model="formSigning.payTime" style="width: 100%;"></el-date-picker>
@@ -441,20 +441,20 @@
                             </el-col>
                             <el-col :span="10">
                                 <el-form-item label="实收金额：" :label-width="formLabelWidth" prop="amountReceived">
-                                    <el-input v-model="formSigning.amountReceived" ></el-input>
+                                    <el-input maxLength="10" v-model="formSigning.amountReceived" @keyup.native="number4"></el-input>
                                 </el-form-item>
                             </el-col>
                         </el-row>
                         <el-row v-show="isAllMoney">
                             <el-col :span="10">
                                 <el-form-item label="余款金额：" :label-width="formLabelWidth" prop="amountBalance">
-                                    <el-input v-model="formSigning.amountBalance" ></el-input>
+                                    <el-input maxLength="10" v-model="formSigning.amountBalance" @keyup.native="number5"></el-input>
                                 </el-form-item>
                             </el-col>
                             <el-col :span="10">
                                 <el-form-item label="预计余款补齐时间：" :label-width="formLabelWidth" prop="makeUpTime">
                                     <el-date-picker
-                                            type="datetime"
+                                            type="date"
                                             format="yyyy-MM-dd"
                                             placeholder="选择日期"
                                             v-model="formSigning.makeUpTime"
@@ -465,7 +465,7 @@
                         <el-row>
                             <el-col :span="10">
                                 <el-form-item label="业绩金额：" :label-width="formLabelWidth" prop="amountPerformance">
-                                    <el-input v-model="amountPerformance"></el-input>
+                                    <el-input maxLength="10" v-model="formSigning.amountPerformance" @keyup.native="number6"></el-input>
                                 </el-form-item>
                             </el-col>
                         </el-row>
@@ -592,6 +592,34 @@
             }
         },
         methods: {
+        	number(){
+        	    this.formSigning.amountReceivable=this.formSigning.amountReceivable.replace(/[^\.\d]/g,'');
+        	    this.formSigning.amountReceivable=this.formSigning.amountReceivable.replace('.','');
+        	},
+        	number1(){
+        	    　this.formSigning.firstToll=this.formSigning.firstToll.replace(/[^\.\d]/g,'');
+        	      this.formSigning.firstToll=this.formSigning.firstToll.replace('.','');
+        	},
+        	number2(){
+        	    　this.formSigning.preferentialAmount=this.formSigning.preferentialAmount.replace(/[^\.\d]/g,'');
+        	      this.formSigning.preferentialAmount=this.formSigning.preferentialAmount.replace('.','');
+        	},
+        	number3(){
+        	    　this.formSigning.giveAmount=this.formSigning.giveAmount.replace(/[^\.\d]/g,'');
+        	      this.formSigning.giveAmount=this.formSigning.giveAmount.replace('.','');
+        	},
+        	number4(){
+        	    　this.formSigning.amountReceived=this.formSigning.amountReceived.replace(/[^\.\d]/g,'');
+        	      this.formSigning.amountReceived=this.formSigning.amountReceived.replace('.','');
+        	},
+        	number5(){
+        	    　this.formSigning.amountBalance=this.formSigning.amountBalance.replace(/[^\.\d]/g,'');
+        	      this.formSigning.amountBalance=this.formSigning.amountBalance.replace('.','');
+        	},
+        	number6(){
+        	    　this.formSigning.AmountPerformance=this.formSigning.AmountPerformance.replace(/[^\.\d]/g,'');
+        	      this.formSigning.AmountPerformance=this.formSigning.AmountPerformance.replace('.','');
+        	},
             formatVisitTime(row){
 
                 function dateFtt(fmt,date)
@@ -623,6 +651,9 @@
                     mainDivVM.addVisitRecord.clueId=clueId
                     mainDivVM.addVisitRecord.vistitTime = new Date()
                     mainDivVM.addVisitRecordDialogVisible = true;
+                    mainDivVM.currentProvince(mainDivVM.addVisitRecord.signProvince)
+                    mainDivVM.currentCity(mainDivVM.addVisitRecord.signCity)
+                    mainDivVM.showNotSignReason(mainDivVM.addVisitRecord.isSign);
                 });
             },
             editSign(row){
@@ -634,6 +665,8 @@
                     mainDivVM.formSigning = response.data.data;
                     mainDivVM.formSigning.clueId=clueId;
                     mainDivVM.dialogFormSigningVisible = true;
+                    mainDivVM.currentProvince(mainDivVM.formSigning.signProvince)
+                    mainDivVM.currentCity(mainDivVM.formSigning.signCity)
                 });
             },
             saveVisitRecord(){
@@ -745,6 +778,7 @@
             },
             initList(){
                 var param = {};
+                param.clueId = clueId
                 axios.post('/busVisitRecord/queryList',param).then(function (response) {
                     if(null===response||response.data==null||response.data.code!='0'){
                         if(response.data.code!='0'){
@@ -758,7 +792,7 @@
                         if(dataList.length>=1){
                             first.push(dataList[dataList.length-1])
                             mainDivVM.showVisitAduitDatas.one = first;
-                            if(!first[0].notSignReason){
+                            if(first[0].isSign==0){
                                 mainDivVM.showVisitAduitDatas.oneNotSignReason = first[0].notSignReason;
                                 mainDivVM.showVisitAduitDatas.oneNotSignShow = true;
                             }
@@ -774,11 +808,11 @@
                             two.push(dataList[dataList.length-2])
                             mainDivVM.showVisitAduitDatas.two = two;
                             mainDivVM.showVisitAduitDatas.twoShow = true;
-                            if(!first[0].notSignReason){
+                            if(two[0].isSign==0){
                                 mainDivVM.showVisitAduitDatas.twoNotSignReason = two[0].notSignReason;
                                 mainDivVM.showVisitAduitDatas.twoNotSignShow = true;
                             }
-                            if(!first[0].rebutReason){
+                            if(!two[0].rebutReason){
                                 mainDivVM.showVisitAduitDatas.twoRebutReason = two[0].rebutReason;
                                 mainDivVM.showVisitAduitDatas.twoRebutShow = true;
                             }
@@ -790,11 +824,11 @@
                             three = dataList.slice(0,dataList.length-2)
                             mainDivVM.showVisitAduitDatas.three = three;
                             mainDivVM.showVisitAduitDatas.threeShow = true;
-                            if(!first[0].notSignReason){
+                            if(three[0].isSign==0){
                                 mainDivVM.showVisitAduitDatas.threeNotSignReason = three[0].notSignReason;
                                 mainDivVM.showVisitAduitDatas.threeNotSignShow = true;
                             }
-                            if(!first[0].rebutReason){
+                            if(!three[0].rebutReason){
                                 mainDivVM.showVisitAduitDatas.threeRebutReason = three[0].rebutReason;
                                 mainDivVM.showVisitAduitDatas.threeRebutShow = true;
                             }

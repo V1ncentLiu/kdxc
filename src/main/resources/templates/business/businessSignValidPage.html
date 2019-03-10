@@ -4,6 +4,9 @@
 <head th:include="_header_include::frag(~{::title},~{},~{})">
     <title>有效签约单确认</title>
     <style>
+    .el-form-item__label{
+    	width:120px;
+    }
     </style>
 </head>
 <body>
@@ -115,8 +118,8 @@
     <!-- dialog -->
     <el-dialog title="有效性处理" :visible.sync="dialogFormVisible">
         <el-form :model="form" ref="form" :rules="rules" class="width500">
-            <el-form-item label="启用状态：" :label-width="formLabelWidth" prop="status">
-                <el-select filterable v-model="form.dealStatus" placeholder="启用状态" style="width: 100%;">
+            <el-form-item label="有效性选择：" :label-width="formLabelWidth"   prop="status">
+                <el-select filterable v-model="form.dealStatus" placeholder="有效性选择" style="width:50%;">
                     <el-option
                         v-for="item in statusList"
                         :key="item.value"
@@ -218,7 +221,7 @@
             loading:false,
             dialogFormVisible: false,
             rules: {
-            	dealStatus: [
+            	status: [
                     { required: true, message: '请选择有效性', trigger: 'blur' }
                 ]
             }
@@ -254,7 +257,7 @@
         	transformStatus(row, column, cellValue, index) {
           	  var text="";
                 if(cellValue=="0"){
-              	  text="未处理"
+              	  text="待处理"
                 }else if(cellValue=="1"){
               	  text="已处理"
                 }
@@ -310,7 +313,7 @@
                   axios.post('/businesssign/businessSignValidList',param).then(function (response) {
                   	  console.log(response);
                       if(null===response||response.data==null||response.data.code!='0'){
-	                  	  alert(response.data.message);
+	                  	  alert(response.data.msg);
 	                  	  return ;
                      }else{
                     	 orgVM.dataTable =response.data.data.data; 

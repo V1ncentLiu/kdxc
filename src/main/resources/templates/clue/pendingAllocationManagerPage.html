@@ -59,10 +59,10 @@
 				    </el-select>
 				  </el-form-item>
           <el-form-item class="formItem" label="创建时间：">
-  					<el-date-picker value-format="yyyy-MM-dd" v-model="clueSearchForm.startTime" type="date" placeholder="选择日期"></el-date-picker>
+  					<el-date-picker value-format="yyyy-MM-dd" v-model="clueSearchForm.startTime" type="datetime" placeholder="选择日期"></el-date-picker>
           </el-form-item>
           <el-form-item class="formItem" label="——">
-					   <el-date-picker value-format="yyyy-MM-dd" v-model="clueSearchForm.endTime" type="date" placeholder="选择日期"></el-date-picker>
+					   <el-date-picker value-format="yyyy-MM-dd" v-model="clueSearchForm.endTime" type="datetime" placeholder="选择日期"></el-date-picker>
           </el-form-item>
 				  <el-form-item class="formItem" prop="messagePoint">
 				    <el-input v-model="clueSearchForm.messagePoint" placeholder="留言重点" class="input-with-select"></el-input>
@@ -91,7 +91,7 @@
       <!-- dialog -->
       <el-dialog  title="分配资源"  :visible.sync="allocationVisible"  width="30%">
         <template>
-            <el-form :model="allocationForm" ref="allocationForm" >
+            <el-form :model="allocationForm" ref="allocationForm" :rules="allocationFormRules">
                 <el-form-item label="电销顾问"    :label-width="formLabelWidth"  prop="saleId">
                     <el-select v-model="allocationForm.saleId" placeholder="组内电销员工" style="width: 80%">
                         <el-option v-for="item in saleOptions" 
@@ -103,7 +103,7 @@
                 </el-form-item>
             </el-form>
             <div slot="footer" class="dialog-footer">
-                <el-button type="primary" @click="allocationClue">提 交</el-button>
+                <el-button type="primary" @click="allocationClue('allocationForm')">提 交</el-button>
                 <el-button  @click="allocationVisible = false">取 消</el-button>
             </div>
         </template>
@@ -112,7 +112,7 @@
       <!-- dialog -->
       <el-dialog  title="转移资源"  :visible.sync="transferVisible"  width="30%">
         <template>
-            <el-form :model="transferForm" ref="transferForm" >
+            <el-form :model="transferForm" ref="transferForm" :rules="transferFormRules">
                 <el-form-item label="电销总监"    :label-width="formLabelWidth"  prop="id">
                     <el-select v-model="transferForm.id" placeholder="同事业部的组名（总监姓名）" style="width: 80%">
                         <el-option v-for="item in saleGroupOptions" 
@@ -124,7 +124,7 @@
                 </el-form-item>
             </el-form>
             <div slot="footer" class="dialog-footer">
-                <el-button type="primary" @click="transferClue">提 交</el-button>
+                <el-button type="primary" @click="transferClue('transferForm')">提 交</el-button>
                 <el-button  @click="transferVisible = false">取 消</el-button>
             </div>
         </template>
@@ -133,7 +133,7 @@
       <!-- dialog -->
       <el-dialog  title="信息流批量分发"  :visible.sync="batchVisible"  width="30%">
         <template>
-            <el-form :model="batchForm" ref="batchForm" >
+            <el-form :model="batchForm" ref="batchForm" :rules="batchFormRules">
                 <el-form-item label="信息流分配规则"    :label-width="formLabelWidth"  prop="ruleId">
                     <el-select v-model="batchForm.ruleId" style="width: 80%">
                         <el-option v-for="item in ruleOptions" 
@@ -145,7 +145,7 @@
                 </el-form-item>
             </el-form>
             <div slot="footer" class="dialog-footer">
-                <el-button type="primary" @click="batchClue">提 交</el-button>
+                <el-button type="primary" @click="batchClue('batchForm')">提 交</el-button>
                 <el-button  @click="batchVisible = false">取 消</el-button>
             </div>
         </template>
@@ -154,7 +154,7 @@
       <!-- dialog -->
       <el-dialog  title="副总分发"  :visible.sync="ceoVisible"  width="30%">
         <template>
-            <el-form :model="ceoForm" ref="ceoForm" >
+            <el-form :model="ceoForm" ref="ceoForm" :rules="ceoFormRules">
                 <el-form-item label="电销总监"    :label-width="formLabelWidth"  prop="id">
                     <el-select v-model="ceoForm.id" placeholder="同事业部的组名（总监姓名）" @change="getSaleList" style="width: 80%">
                         <el-option v-for="item in orgOptions" 
@@ -175,7 +175,7 @@
                 </el-form-item>
             </el-form>
             <div slot="footer" class="dialog-footer">
-                <el-button type="primary" @click="ceoClue">提 交</el-button>
+                <el-button type="primary" @click="ceoClue('ceoForm')">提 交</el-button>
                 <el-button  @click="ceoVisible = false">取 消</el-button>
             </div>
         </template>
@@ -240,6 +240,29 @@ var clueVM = new Vue({
                 	id:'',
                 	teleSaleId:''
                 },
+                allocationFormRules: {
+                	saleId: [
+                        { required: true, message: '请选择电销顾问', trigger: 'blur' }
+                    ]
+                  },
+                transferFormRules: {
+                	id: [
+                        { required: true, message: '请选择电销总监', trigger: 'blur' }
+                    ]
+                  },
+                batchFormRules: {
+                	ruleId: [
+                        { required: true, message: '请选择分配规则', trigger: 'blur' }
+                    ]
+                  },
+                ceoFormRules: {
+                	id: [
+                        { required: true, message: '请选择电销总监', trigger: 'blur' }
+                    ],
+                    teleSaleId: [
+                        { required: true, message: '请选择电销员工', trigger: 'blur' }
+                    ]
+                  },
 	            dataTable:[],
 	            loading: true,
 	             allTableColums:[],
@@ -267,6 +290,7 @@ var clueVM = new Vue({
 	            multipleSelection:[],
                 formLabelWidth: '150px',
                 formLabelWidth1: '120px',
+                
         },
         methods: {
         	searchTable() {
@@ -362,38 +386,46 @@ var clueVM = new Vue({
                    }
                    this.allocationVisible = true;
                },
-               allocationClue(){//分配资源
-           	      var rows = this.multipleSelection;
-                  var rowIds = [];
-                  for(var i=0;i<rows.length;i++){
-               	   var curRow = rows[i];
-                      rowIds.push(curRow.id);
-                  }
-               	  //分配
-               	  var param  = {};
-               	  param.idList=rowIds;
-               	  param.teleSaleId=this.allocationForm.saleId;
-                   axios.post('/clue/pendingAllocation/allocationClue',param)
-                   .then(function (response) {
-                       var data =  response.data;
-                       if(data.code=='0'){
-                       	clueVM.$message({message:'分配成功',type:'success',duration:1000,onClose:function(){
-                       		clueVM.allocationVisible = false;
-                       		clueVM.searchTable();
-                   	    }});
-                       }else{
-                       	clueVM.$message({
-                               message: "接口调用失败",
-                               type: 'error'
-                             }); 
-                       }
-                   })
-                   .catch(function (error) {
-                     console.log(error);
-                   })
-                   .then(function () {
-                   	
-                   });
+               allocationClue(formName){//分配资源
+            	   this.$refs[formName].validate((valid) => {
+           	          if (valid) {
+           	        	 var rows = this.multipleSelection;
+                         var rowIds = [];
+                         for(var i=0;i<rows.length;i++){
+                      	   var curRow = rows[i];
+                             rowIds.push(curRow.id);
+                         }
+                      	  //分配
+                      	  var param  = {};
+                      	  param.idList=rowIds;
+                      	  param.teleSaleId=this.allocationForm.saleId;
+                          axios.post('/clue/pendingAllocation/allocationClue',param)
+                          .then(function (response) {
+                              var data =  response.data;
+                              if(data.code=='0'){
+                              	clueVM.$message({message:'分配成功',type:'success',duration:1000,onClose:function(){
+                              		clueVM.allocationVisible = false;
+                              		clueVM.searchTable();
+                          	    }});
+                              }else{
+                              	clueVM.$message({
+                                      message: "接口调用失败",
+                                      type: 'error'
+                                    }); 
+                              }
+                          })
+                          .catch(function (error) {
+                            console.log(error);
+                          })
+                          .then(function () {
+                          	
+                          });
+           	          } else {
+           	        	console.log('数据未通过校验！');
+           	            return false;
+           	          }
+           	        });
+           	     
                  },// method end
                //打开转移资源
                toTransferClue() {
@@ -407,41 +439,49 @@ var clueVM = new Vue({
                    }
                    this.transferVisible = true;
                },
-               transferClue(){//转移资源
-           	      var rows = this.multipleSelection;
-                  var rowIds = [];
-                  for(var i=0;i<rows.length;i++){
-               	   var curRow = rows[i];
-                      rowIds.push(curRow.id);
-                  }
-               	  //转移
-               	  var param  = {};
-               	  param.idList=rowIds;
-               	  var id=this.transferForm.id;
-               	  var idArray=id.split(",");
-               	  param.teleGroupId=idArray[0];
-               	  param.teleDirectorId=idArray[1];
-                   axios.post('/clue/pendingAllocation/transferClue',param)
-                   .then(function (response) {
-                       var data =  response.data;
-                       if(data.code=='0'){
-                       	clueVM.$message({message:'转移成功',type:'success',duration:1000,onClose:function(){
-                       		clueVM.transferVisible = false;
-                       		clueVM.searchTable();
-                   	    }});
-                       }else{
-                       	clueVM.$message({
-                               message: "接口调用失败",
-                               type: 'error'
-                             }); 
-                       }
-                   })
-                   .catch(function (error) {
-                     console.log(error);
-                   })
-                   .then(function () {
-                   	
-                   });
+               transferClue(formName){//转移资源
+            	   this.$refs[formName].validate((valid) => {
+           	          if (valid) {
+           	        	 var rows = this.multipleSelection;
+                         var rowIds = [];
+                         for(var i=0;i<rows.length;i++){
+                      	   var curRow = rows[i];
+                             rowIds.push(curRow.id);
+                         }
+                      	  //转移
+                      	  var param  = {};
+                      	  param.idList=rowIds;
+                      	  var id=this.transferForm.id;
+                      	  var idArray=id.split(",");
+                      	  param.teleGroupId=idArray[0];
+                      	  param.teleDirectorId=idArray[1];
+                          axios.post('/clue/pendingAllocation/transferClue',param)
+                          .then(function (response) {
+                              var data =  response.data;
+                              if(data.code=='0'){
+                              	clueVM.$message({message:'转移成功',type:'success',duration:1000,onClose:function(){
+                              		clueVM.transferVisible = false;
+                              		clueVM.searchTable();
+                          	    }});
+                              }else{
+                              	clueVM.$message({
+                                      message: "接口调用失败",
+                                      type: 'error'
+                                    }); 
+                              }
+                          })
+                          .catch(function (error) {
+                            console.log(error);
+                          })
+                          .then(function () {
+                          	
+                          });
+           	          } else {
+           	        	console.log('数据未通过校验！');
+           	            return false;
+           	          }
+           	        });
+           	     
                  },// method end
                //打开批量分发
                toBatchClue() {
@@ -455,38 +495,46 @@ var clueVM = new Vue({
                    }
                    this.batchVisible = true;
                },
-               batchClue(){//批量分发
-           	      var rows = this.multipleSelection;
-                  var rowIds = [];
-                  for(var i=0;i<rows.length;i++){
-               	   var curRow = rows[i];
-                      rowIds.push(curRow.id);
-                  }
-               	  //转移
-               	  var param  = {};
-               	  param.idList=rowIds;
-               	  param.assignId=this.batchForm.ruleId;
-                   axios.post('/clue/pendingAllocation/batchClue',param)
-                   .then(function (response) {
-                       var data =  response.data;
-                       if(data.code=='0'){
-                       	clueVM.$message({message:'批量分发成功',type:'success',duration:1000,onClose:function(){
-                       		clueVM.batchVisible = false;
-                       		clueVM.searchTable();
-                   	    }});
-                       }else{
-                       	clueVM.$message({
-                               message: "接口调用失败",
-                               type: 'error'
-                             }); 
-                       }
-                   })
-                   .catch(function (error) {
-                     console.log(error);
-                   })
-                   .then(function () {
-                   	
-                   });
+               batchClue(formName){//批量分发
+            	   this.$refs[formName].validate((valid) => {
+           	          if (valid) {
+           	        	 var rows = this.multipleSelection;
+                         var rowIds = [];
+                         for(var i=0;i<rows.length;i++){
+                      	   var curRow = rows[i];
+                             rowIds.push(curRow.id);
+                         }
+                      	  //转移
+                      	  var param  = {};
+                      	  param.idList=rowIds;
+                      	  param.assignId=this.batchForm.ruleId;
+                          axios.post('/clue/pendingAllocation/batchClue',param)
+                          .then(function (response) {
+                              var data =  response.data;
+                              if(data.code=='0'){
+                              	clueVM.$message({message:'批量分发成功',type:'success',duration:1000,onClose:function(){
+                              		clueVM.batchVisible = false;
+                              		clueVM.searchTable();
+                          	    }});
+                              }else{
+                              	clueVM.$message({
+                                      message: "接口调用失败",
+                                      type: 'error'
+                                    }); 
+                              }
+                          })
+                          .catch(function (error) {
+                            console.log(error);
+                          })
+                          .then(function () {
+                          	
+                          });
+           	          } else {
+           	        	console.log('数据未通过校验！');
+           	            return false;
+           	          }
+           	        });
+           	     
                  },// method end
                //打开副总分发
                toCeoClue() {
@@ -500,41 +548,49 @@ var clueVM = new Vue({
                    }
                    this.ceoVisible = true;
                },
-               ceoClue(){//副总分发
-           	      var rows = this.multipleSelection;
-                  var rowIds = [];
-                  for(var i=0;i<rows.length;i++){
-               	   var curRow = rows[i];
-                      rowIds.push(curRow.id);
-                  }
-               	  var param  = {};
-               	  param.idList=rowIds;
-               	  var id=this.ceoForm.id;
-             	  var idArray=id.split(",");
-             	  param.teleGroupId=idArray[0];
-             	  param.teleDirectorId=idArray[1];
-               	  param.teleSaleId=this.ceoForm.teleSaleId;
-                   axios.post('/clue/pendingAllocation/ceoClue',param)
-                   .then(function (response) {
-                       var data =  response.data;
-                       if(data.code=='0'){
-                       	clueVM.$message({message:'副总分发成功',type:'success',duration:1000,onClose:function(){
-                       		clueVM.ceoVisible = false;
-                       		clueVM.searchTable();
-                   	    }});
-                       }else{
-                       	clueVM.$message({
-                               message: "接口调用失败",
-                               type: 'error'
-                             }); 
-                       }
-                   })
-                   .catch(function (error) {
-                     console.log(error);
-                   })
-                   .then(function () {
-                   	
-                   });
+               ceoClue(formName){//副总分发
+            	   this.$refs[formName].validate((valid) => {
+           	          if (valid) {
+           	        	var rows = this.multipleSelection;
+                        var rowIds = [];
+                        for(var i=0;i<rows.length;i++){
+                     	   var curRow = rows[i];
+                            rowIds.push(curRow.id);
+                        }
+                     	  var param  = {};
+                     	  param.idList=rowIds;
+                     	  var id=this.ceoForm.id;
+                   	  var idArray=id.split(",");
+                   	  param.teleGroupId=idArray[0];
+                   	  param.teleDirectorId=idArray[1];
+                     	  param.teleSaleId=this.ceoForm.teleSaleId;
+                         axios.post('/clue/pendingAllocation/ceoClue',param)
+                         .then(function (response) {
+                             var data =  response.data;
+                             if(data.code=='0'){
+                             	clueVM.$message({message:'副总分发成功',type:'success',duration:1000,onClose:function(){
+                             		clueVM.ceoVisible = false;
+                             		clueVM.searchTable();
+                         	    }});
+                             }else{
+                             	clueVM.$message({
+                                     message: "接口调用失败",
+                                     type: 'error'
+                                   }); 
+                             }
+                         })
+                         .catch(function (error) {
+                           console.log(error);
+                         })
+                         .then(function () {
+                         	
+                         });
+           	          } else {
+           	        	console.log('数据未通过校验！');
+           	            return false;
+           	          }
+           	        });
+           	      
                  },// method end
                  
               //根据电销组查询电销总监
@@ -549,7 +605,7 @@ var clueVM = new Vue({
                         var result =  response.data;
                         console.info(result);
                         var table=result.data;
-                        clueVM.teleSaleOptions= table.data;
+                        clueVM.teleSaleOptions= table;
                   })
                   .catch(function (error) {
                        console.log(error);

@@ -335,7 +335,10 @@ public class PendingAllocationController {
                 organizationFeignClient.listDescenDantByParentId(organizationQueryDTO);
         List<OrganizationDTO> data = listDescenDantByParentId.getData();
         // 查询所有电销总监
-        List<UserInfoDTO> userList = getUserList(null, RoleCodeEnum.DXZJ.name(), null);
+        List<Integer> statusList = new ArrayList<Integer>();
+        statusList.add(SysConstant.USER_STATUS_ENABLE);
+        statusList.add(SysConstant.USER_STATUS_LOCK);
+        List<UserInfoDTO> userList = getUserList(null, RoleCodeEnum.DXZJ.name(), statusList);
         Map<Long, UserInfoDTO> userMap = new HashMap<Long, UserInfoDTO>();
         // 生成<机构id，用户>map
         for (UserInfoDTO userInfoDTO : userList) {
@@ -348,11 +351,13 @@ public class PendingAllocationController {
             UserInfoDTO user = userMap.get(organizationDTO.getId());
             orgMap.put("orgId", organizationDTO.getId());
             orgMap.put("orgName", organizationDTO.getName());
-            orgMap.put("userId", user.getId());
-            orgMap.put("userName", user.getName());
-            orgMap.put("id", organizationDTO.getId() + "," + user.getId());
-            orgMap.put("name", organizationDTO.getName() + "(" + user.getName() + ")");
-            result.add(orgMap);
+            if (user != null) {
+                orgMap.put("userId", user.getId());
+                orgMap.put("userName", user.getName());
+                orgMap.put("id", organizationDTO.getId() + "," + user.getId());
+                orgMap.put("name", organizationDTO.getName() + "(" + user.getName() + ")");
+                result.add(orgMap);
+            }
         }
         return result;
     }
