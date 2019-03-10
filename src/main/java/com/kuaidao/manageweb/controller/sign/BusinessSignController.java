@@ -218,7 +218,7 @@ public class BusinessSignController {
         if(JSONResult.SUCCESS.equals(maxNewOne.getCode())){
             BusVisitRecordRespDTO data = maxNewOne.getData();
             if(data!=null){
-//                signDTO.setSignCompanyId(data.getCompanyid());
+                signDTO.setSignCompanyId(data.getCompanyid());
                 signDTO.setSignProjectId(data.getProjectId());
                 signDTO.setSignProvince(data.getSignProvince());
                 signDTO.setSignCity(data.getSignCity());
@@ -235,7 +235,11 @@ public class BusinessSignController {
                 Map data = mapJSONResult.getData();
                 if(data!=null){
 //                    signDTO.setSignCompanyId((Long) data.get("busCompany"));
-//                    signDTO.setSignProjectId((Long)data.get(""));
+                    String tasteProjectId = (String)data.get("tasteProjectId");
+                    String[] split = tasteProjectId.split(",");
+                    if(split.length>0){
+                        signDTO.setSignProjectId(Long.valueOf(split[0]));
+                    }
                     signDTO.setSignProvince((String)data.get("signProvince"));
                     signDTO.setSignCity((String)data.get("signCity"));
                     signDTO.setSignDictrict((String)data.get("signDistrict"));

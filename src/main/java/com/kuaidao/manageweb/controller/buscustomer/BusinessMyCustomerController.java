@@ -85,12 +85,12 @@ public class BusinessMyCustomerController {
                     teleSaleList.add(organizationDTO);
                 }
 //                品尝项目
-                if(myCustomerRespDTO.getTasteProjectId()!=null){
-                    OrganizationDTO organizationDTO = new OrganizationDTO();
-                    organizationDTO.setId(myCustomerRespDTO.getTasteProjectId());
-                    organizationDTO.setName(myCustomerRespDTO.getTasteProjectName());
-                    tasteProList.add(organizationDTO);
-                }
+//                if(myCustomerRespDTO.getTasteProjectId()!=null){
+//                    OrganizationDTO organizationDTO = new OrganizationDTO();
+//                    organizationDTO.setId(myCustomerRespDTO.getTasteProjectId());
+//                    organizationDTO.setName(myCustomerRespDTO.getTasteProjectName());
+//                    tasteProList.add(organizationDTO);
+//                }
             }
         }
 

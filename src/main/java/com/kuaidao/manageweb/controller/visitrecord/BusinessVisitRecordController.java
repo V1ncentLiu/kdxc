@@ -164,6 +164,15 @@ public class BusinessVisitRecordController {
          * 来访城市： 派车单-城市
          * 到访人数： 派车单-客户人数
          */
+
+        JSONResult<BusVisitRecordRespDTO> maxNewOne = visitRecordFeignClient.findMaxNewOne(idEntityLong);
+        if(JSONResult.SUCCESS.equals(maxNewOne.getCode())){
+            BusVisitRecordRespDTO data = maxNewOne.getData();
+            if(data!=null){
+                return new JSONResult<BusVisitRecordRespDTO>().success(data);
+            }
+        }
+
         JSONResult<Map> mapJSONResult = visitRecordFeignClient.echoAppoinment(idEntityLong);
         if(JSONResult.SUCCESS.equals(mapJSONResult.getCode())){
             Map data = mapJSONResult.getData();
@@ -179,7 +188,12 @@ public class BusinessVisitRecordController {
 
                 recordRespDTO.setVistitTime(arrDate);
                 recordRespDTO.setCustomerName((String)data.get("cusName"));
-//                recordRespDTO.setProjectId((String)data.get("tasteProjectId"));
+                String tasteProjectId = (String)data.get("tasteProjectId");
+                String[] split = tasteProjectId.split(",");
+                if(split.length>0){
+                    recordRespDTO.setProjectId(Long.valueOf(split[0]));
+                }
+
                 recordRespDTO.setSignProvince((String)data.get("signProvince"));
                 recordRespDTO.setSignCity((String)data.get("signCity"));
                 recordRespDTO.setSignDistrict((String)data.get("signDistrict"));

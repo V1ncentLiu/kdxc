@@ -53,7 +53,7 @@
                     <el-col :span="3">
                         <el-form-item label="">
                             <el-select v-model="queryForm.tasteProjectId" clearable  placeholder="品尝项目" width="100">
-                                <el-option v-for="item in tasteProArr" :key="item.id" :label="item.name" :value="item.id"></el-option>
+                                <el-option v-for="item in tasteProArr" :key="item.id" :label="item.projectName" :value="item.id"></el-option>
                             </el-select>
                         </el-form-item>
                     </el-col>
@@ -278,8 +278,8 @@
                         </el-form-item>
                     </el-col>
                     <el-col :span="10">
-                        <el-form-item label="到访人数"    :label-width="formLabelWidth"  prop="visitPeopleNum">
-                            <el-input v-model="addVisitRecord.visitPeopleNum"  maxlength="2"    ></el-input>
+                        <el-form-item label="到访人数" :label-width="formLabelWidth"  prop="visitPeopleNum">
+                            <el-input v-model="addVisitRecord.visitPeopleNum" maxlength="2"   @keyup.native="number7"></el-input>
                         </el-form-item>
                     </el-col>
                 </el-row>
@@ -774,7 +774,7 @@
                 <el-row>
                     <el-col :span="10">
                         <el-form-item label="业绩金额：" :label-width="formLabelWidth" prop="performanceAmount">
-                            <el-input maxLength="10" v-model="formSigning.AmountPerformance" @keyup.native="number6"  style="width: 80%;"></el-input>
+                            <el-input maxLength="10" v-model="formSigningAmountPerformance" @keyup.native="number6"  style="width: 80%;"></el-input>
                             <span style="padding-left: 10px;">元</span>
                         </el-form-item>
                     </el-col>
@@ -794,7 +794,7 @@
         <template>
             <el-form :model="updateFormSigning" ref="updateFormSigning" >
                 <el-form-item label="驳回时间："  :label-width="formLabelWidth">
-                    <el-button size="mini"  type="text" style = "color: #1e2746">{{updateFormSigning.rebutTime}}</el-button>
+                    <el-button size="mini"  type="text" style = "font-size: 17px;color: #1e2746">{{updateFormSigning.rebutTime}}</el-button>
                 </el-form-item>
                 <el-form-item label="驳回原因："  :label-width="formLabelWidth">
                     <span style="color: red; width:60%; word-wrap: break-word; word-break:break-all; ">{{updateFormSigning.rebutReason}}</span>
@@ -1046,7 +1046,7 @@
             },
             teleketGroupArr:dzList,
             teleketSaleArr:dxgwList,
-            tasteProArr:tasteProList,
+            tasteProArr:proSelect,
             signArr:[{value:0,name:'未签约'},{value:1,name:'已签约'}],
             isSignArr:[{value:0,name:'未签约'},{value:1,name:'已签约'}],
             visitArr:[{value:-1,name:'待处理'},{value:0,name:'未到访'},{value:1,name:'首次到访'},{value:2,name:'2次到访'},{value:3,name:'多次到访'}],
@@ -1200,6 +1200,8 @@
                 if(isNaN(atwo)) atwo = 0
                 return aone + atwo
             }
+
+
         },
         methods: {
         	number(){
@@ -1227,8 +1229,8 @@
         	      this.formSigning.amountBalance=this.formSigning.amountBalance.replace('.','');
         	},
         	number6(){
-        	    　this.formSigning.AmountPerformance=this.formSigning.AmountPerformance.replace(/[^\.\d]/g,'');
-        	        this.formSigning.AmountPerformance=this.formSigning.AmountPerformance.replace('.','');
+        	    　this.formSigningAmountPerformance=this.formSigningAmountPerformance.replace(/[^\.\d]/g,'');
+        	        this.formSigningAmountPerformance=this.formSigningAmountPerformance.replace('.','');
         	},
 
             number01(){
@@ -1258,6 +1260,14 @@
             number61(){
                 this.updateFormSigningAmountPerformance=this.updateFormSigningAmountPerformance.replace(/[^\.\d]/g,'');
                 this.updateFormSigningAmountPerformance=this.updateFormSigningAmountPerformance.replace('.','');
+            },
+            number7(){
+                this.addVisitRecord.visitPeopleNum=this.addVisitRecord.visitPeopleNum.replace(/[^\.\d]/g,'');
+                this.addVisitRecord.visitPeopleNum=this.addVisitRecord.visitPeopleNum.replace('.','');
+            },
+            number71(){
+                this.updateVisitRecord.visitPeopleNum=this.updateVisitRecord.visitPeopleNum.replace(/[^\.\d]/g,'');
+                this.updateVisitRecord.visitPeopleNum=this.updateVisitRecord.visitPeopleNum.replace('.','');
             },
             formatVisitTime(row){
 
@@ -1400,6 +1410,8 @@
             },
             saveVisitRecord(){
                 var param = this.addVisitRecord;
+                param.rebutTime = new Date(param.rebutTime)
+                param.createTime = new Date(param.createTime)
                 // 设置 clueid
                 this.$refs['addVisitRecord'].validate((valid) => {
                     if (valid) {
@@ -1520,7 +1532,7 @@
                         if(dataList.length>=1){
                             first.push(dataList[dataList.length-1])
                             mainDivVM.showVisitAduitDatas.one = first;
-                            if(!first[0].notSignReason){
+                            if(first[0].isSign==0){
                                 mainDivVM.showVisitAduitDatas.oneNotSignReason = first[0].notSignReason;
                                 mainDivVM.showVisitAduitDatas.oneNotSignShow = true;
                             }
@@ -1536,11 +1548,11 @@
                             two.push(dataList[dataList.length-2])
                             mainDivVM.showVisitAduitDatas.two = two;
                             mainDivVM.showVisitAduitDatas.twoShow = true;
-                            if(!first[0].notSignReason){
+                            if(two[0].isSign==0){
                                 mainDivVM.showVisitAduitDatas.twoNotSignReason = two[0].notSignReason;
                                 mainDivVM.showVisitAduitDatas.twoNotSignShow = true;
                             }
-                            if(!first[0].rebutReason){
+                            if(!two[0].rebutReason){
                                 mainDivVM.showVisitAduitDatas.twoRebutReason = two[0].rebutReason;
                                 mainDivVM.showVisitAduitDatas.twoRebutShow = true;
                             }
@@ -1552,11 +1564,11 @@
                             three = dataList.slice(0,dataList.length-2)
                             mainDivVM.showVisitAduitDatas.three = three;
                             mainDivVM.showVisitAduitDatas.threeShow = true;
-                            if(!first[0].notSignReason){
+                            if(three[0].isSign==0){
                                 mainDivVM.showVisitAduitDatas.threeNotSignReason = three[0].notSignReason;
                                 mainDivVM.showVisitAduitDatas.threeNotSignShow = true;
                             }
-                            if(!first[0].rebutReason){
+                            if(!three[0].rebutReason){
                                 mainDivVM.showVisitAduitDatas.threeRebutReason = three[0].rebutReason;
                                 mainDivVM.showVisitAduitDatas.threeRebutShow = true;
                             }
