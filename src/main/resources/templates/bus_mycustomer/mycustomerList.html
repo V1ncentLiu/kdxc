@@ -7,6 +7,7 @@
         button a{color:#fff!important;}
         .formItem,.formItem .el-form-item__content{width:100%}
         .paddB20 { padding: 0 0 20px 20px;  font-size: 16px; }
+
     </style>
 </head>
 <body>
@@ -53,7 +54,7 @@
                     <el-col :span="3">
                         <el-form-item label="">
                             <el-select v-model="queryForm.tasteProjectId" clearable  placeholder="品尝项目" width="100">
-                                <el-option v-for="item in tasteProArr" :key="item.id" :label="item.name" :value="item.id"></el-option>
+                                <el-option v-for="item in tasteProArr" :key="item.id" :label="item.projectName" :value="item.id"></el-option>
                             </el-select>
                         </el-form-item>
                     </el-col>
@@ -278,8 +279,8 @@
                         </el-form-item>
                     </el-col>
                     <el-col :span="10">
-                        <el-form-item label="到访人数"    :label-width="formLabelWidth"  prop="visitPeopleNum">
-                            <el-input v-model="addVisitRecord.visitPeopleNum"  maxlength="2"    ></el-input>
+                        <el-form-item label="到访人数" :label-width="formLabelWidth"  prop="visitPeopleNum">
+                            <el-input v-model="addVisitRecord.visitPeopleNum" maxlength="2"   @keyup.native="number7"></el-input>
                         </el-form-item>
                     </el-col>
                 </el-row>
@@ -309,7 +310,8 @@
                    <el-button size="mini"  type="text" style = "font-size: 17px;color: #1e2746">{{updateVisitRecord.rebutTime}}</el-button>
                 </el-form-item>
                 <el-form-item label="驳回原因"  :label-width="formLabelWidth">
-                    <el-button size="mini"  type="text"  style="color: red">{{updateVisitRecord.rebutReason}}</el-button>
+                	<span style="color: red; width:60%; word-wrap: break-word; word-break:break-all; ">{{updateVisitRecord.rebutReason}}</span>
+                    <!-- <el-button size="mini"  type="text"  style="color: red">{{updateVisitRecord.rebutReason}}</el-button> -->
                 </el-form-item>
                 <el-row :gutter="20">
                     <el-col :span="10">
@@ -450,13 +452,13 @@
                     <el-table-column prop="vistitStoreTypeName" label="到访店铺类型"   align="center" width="120"></el-table-column>
                     <el-table-column prop="visitType" label="到访类型"   width="100" align="center">
                         <template slot-scope="scope">
-                            <div v-if="scope.row.status === 1">
+                            <div v-if="scope.row.visitType == 1">
                                 预约来访
                             </div>
-                            <div v-else-if="scope.row.status === 2">
+                            <div v-else-if="scope.row.visitType == 2">
                                 慕名来访
                             </div>
-                            <div v-else-if="scope.row.status === 3">
+                            <div v-else-if="scope.row.visitType == 3">
                                 临时来访
                             </div>
                         </template>
@@ -467,10 +469,10 @@
                     <el-table-column prop="isSign" label="是否签约"    width="100" align="center">
                         <template slot-scope="scope">
                             <div v-if="scope.row.isSign === 0">
-                                未签约
+                                否
                             </div>
                             <div v-else-if="scope.row.isSign ===1">
-                                已签约
+                                是
                             </div>
                         </template>
                     </el-table-column>
@@ -502,13 +504,13 @@
                     <el-table-column prop="vistitStoreTypeName" label="到访店铺类型"  width="120"  align="center"></el-table-column>
                     <el-table-column prop="visitType" label="到访类型" width="100"  align="center">
                         <template slot-scope="scope">
-                            <div v-if="scope.row.status === 1">
+                            <div v-if="scope.row.visitType == 1">
                                 预约来访
                             </div>
-                            <div v-else-if="scope.row.status === 2">
+                            <div v-else-if="scope.row.visitType == 2">
                                 慕名来访
                             </div>
-                            <div v-else-if="scope.row.status === 3">
+                            <div v-else-if="scope.row.visitType == 3">
                                 临时来访
                             </div>
                         </template>
@@ -519,10 +521,10 @@
                     <el-table-column prop="isSign" label="是否签约"  width="100"  align="center">
                         <template slot-scope="scope">
                             <div v-if="scope.row.isSign === 0">
-                                未签约
+                                否
                             </div>
                             <div v-else-if="scope.row.isSign ===1">
-                                已签约
+                                是
                             </div>
                         </template>
                     </el-table-column>
@@ -554,13 +556,13 @@
                     <el-table-column prop="vistitStoreTypeName" label="到访店铺类型"   width="120" align="center"></el-table-column>
                     <el-table-column prop="visitType" label="到访类型"  width="100"  align="center">
                         <template slot-scope="scope">
-                            <div v-if="scope.row.status === 1">
+                            <div v-if="scope.row.visitType == 1">
                                 预约来访
                             </div>
-                            <div v-else-if="scope.row.status === 2">
+                            <div v-else-if="scope.row.visitType == 2">
                                 慕名来访
                             </div>
-                            <div v-else-if="scope.row.status === 3">
+                            <div v-else-if="scope.row.visitType == 3">
                                 临时来访
                             </div>
                         </template>
@@ -571,10 +573,10 @@
                     <el-table-column prop="isSign" label="是否签约"  width="100"  align="center">
                         <template slot-scope="scope">
                             <div v-if="scope.row.isSign === 0">
-                                未签约
+                                否
                             </div>
                             <div v-else-if="scope.row.isSign ===1">
-                                已签约
+                                是
                             </div>
                         </template>
                     </el-table-column>
@@ -774,7 +776,7 @@
                 <el-row>
                     <el-col :span="10">
                         <el-form-item label="业绩金额：" :label-width="formLabelWidth" prop="performanceAmount">
-                            <el-input maxLength="10" v-model="formSigning.AmountPerformance" @keyup.native="number6"  style="width: 80%;"></el-input>
+                            <el-input maxLength="10" v-model="formSigningAmountPerformance" @keyup.native="number6"  style="width: 80%;"></el-input>
                             <span style="padding-left: 10px;">元</span>
                         </el-form-item>
                     </el-col>
@@ -794,7 +796,7 @@
         <template>
             <el-form :model="updateFormSigning" ref="updateFormSigning" >
                 <el-form-item label="驳回时间："  :label-width="formLabelWidth">
-                    <el-button size="mini"  type="text" style = "color: #1e2746">{{updateFormSigning.rebutTime}}</el-button>
+                    <el-button size="mini"  type="text" style = "font-size: 17px;color: #1e2746">{{updateFormSigning.rebutTime}}</el-button>
                 </el-form-item>
                 <el-form-item label="驳回原因："  :label-width="formLabelWidth">
                     <span style="color: red; width:60%; word-wrap: break-word; word-break:break-all; ">{{updateFormSigning.rebutReason}}</span>
@@ -1019,6 +1021,8 @@
             showVisitAduitDialogVisible:false,
             dialogFormSigningVisible:false,
             dialogUpdateFormSigningVisible:false,
+            existsSign:false,
+            curSignStatus:"",
             isAllMoney: false,
             notEditRebutSign:false,
             formLabelWidth:"150px",
@@ -1046,14 +1050,15 @@
             },
             teleketGroupArr:dzList,
             teleketSaleArr:dxgwList,
-            tasteProArr:tasteProList,
+            tasteProArr:proSelect,
             signArr:[{value:0,name:'未签约'},{value:1,name:'已签约'}],
-            isSignArr:[{value:0,name:'未签约'},{value:1,name:'已签约'}],
+            isSignArr:[{value:0,name:'否'},{value:1,name:'是'}],
             visitArr:[{value:-1,name:'待处理'},{value:0,name:'未到访'},{value:1,name:'首次到访'},{value:2,name:'2次到访'},{value:3,name:'多次到访'}],
             visitTypeArr:[{value:1,name:'预约来访'},{value:2,name:'慕名来访'},{value:3,name:'临时来访'}],
             option2s: [{value: 1, label: '一次性全款'},{value: 2, label: '先交订金'}],
             option3s: [{value: '1', label: '现金'},{value: '2', label: 'POS'},{value: '3', label: '转账'}],
             payTypeArr:[{value: "1", label: '全款'},{value: "2", label: '定金'},{value: "3", label: '追加定金'},{value: "4", label: '尾款'}],
+            payTypeArr1:[{value: "1", label: '全款'},{value: "2", label: '定金'},{value: "3", label: '追加定金'},{value: "4", label: '尾款'}],
             vistitStoreTypeArr:[],
             provinceArr:[],
             districtArr:[],
@@ -1200,6 +1205,8 @@
                 if(isNaN(atwo)) atwo = 0
                 return aone + atwo
             }
+
+
         },
         methods: {
         	number(){
@@ -1227,8 +1234,8 @@
         	      this.formSigning.amountBalance=this.formSigning.amountBalance.replace('.','');
         	},
         	number6(){
-        	    　this.formSigning.AmountPerformance=this.formSigning.AmountPerformance.replace(/[^\.\d]/g,'');
-        	        this.formSigning.AmountPerformance=this.formSigning.AmountPerformance.replace('.','');
+        	    　this.formSigningAmountPerformance=this.formSigningAmountPerformance.replace(/[^\.\d]/g,'');
+        	        this.formSigningAmountPerformance=this.formSigningAmountPerformance.replace('.','');
         	},
 
             number01(){
@@ -1258,6 +1265,14 @@
             number61(){
                 this.updateFormSigningAmountPerformance=this.updateFormSigningAmountPerformance.replace(/[^\.\d]/g,'');
                 this.updateFormSigningAmountPerformance=this.updateFormSigningAmountPerformance.replace('.','');
+            },
+            number7(){
+                this.addVisitRecord.visitPeopleNum=this.addVisitRecord.visitPeopleNum.replace(/[^\.\d]/g,'');
+                this.addVisitRecord.visitPeopleNum=this.addVisitRecord.visitPeopleNum.replace('.','');
+            },
+            number71(){
+                this.updateVisitRecord.visitPeopleNum=this.updateVisitRecord.visitPeopleNum.replace(/[^\.\d]/g,'');
+                this.updateVisitRecord.visitPeopleNum=this.updateVisitRecord.visitPeopleNum.replace('.','');
             },
             formatVisitTime(row){
 
@@ -1392,7 +1407,7 @@
                     return false;
                 }
                 param={};
-                param.name="2";
+                param.type="2";
                 param.name=selVal;
                 axios.post('/area/sysregion/querySysRegionByParam',param).then(function (response) {
                     mainDivVM.districtArr=response.data.data.data;
@@ -1400,6 +1415,8 @@
             },
             saveVisitRecord(){
                 var param = this.addVisitRecord;
+                param.rebutTime = new Date(param.rebutTime)
+                param.createTime = new Date(param.createTime)
                 // 设置 clueid
                 this.$refs['addVisitRecord'].validate((valid) => {
                     if (valid) {
@@ -1439,10 +1456,14 @@
                         param.visitCity=this.updateVisitRecord.visitCity;
                         param.isSign=this.updateVisitRecord.isSign;
                         param.visitPeopleNum=this.updateVisitRecord.visitPeopleNum;
+                        if( param.isSign==1){ // 已签约
+                            param.notSignReason="";
+                        }else{
+                            param.notSignReason=this.updateVisitRecord.notSignReason;
+                        }
                         param.notSignReason=this.updateVisitRecord.notSignReason;
                         param.rebutTime = new Date(param.rebutTime)
                         param.vistitTime = new Date(param.vistitTime)
-                        console.log(param)
                         axios.post("/busVisitRecord/update", param)
                             .then(function (response) {
                                 if (response.data.code == 0) {
@@ -1462,6 +1483,17 @@
             },
 
             showNotSignReason(val){
+                if(this.addVisitRecordDialogVisible){
+                    if( val==1){
+                        this.addVisitRecord.notSignReason = '';
+                    }
+                }else{
+                    if( val==1){
+                        console.log(this.updateVisitRecord.notSignReason)
+                        this.updateVisitRecord.notSignReason = '';
+                    }
+                }
+
                 if(val==0){
                     //  将隐藏换成元素添加 和 移除 ，这样的动态就会变得好看
                     document.getElementById("notSignReason").setAttribute("style","display:block")
@@ -1477,6 +1509,10 @@
                // 打开编辑到访记录
                 var param ={};
                 param.id = row.clueId;
+                if(row.signAuditStatus==0||row.signAuditStatus==1||row.signAuditStatus==2){
+                    mainDivVM.existsSign =true;
+                    mainDivVM.curSignStatus = row.signAuditStatus;
+                }
                 axios.post('/busVisitRecord/echo',param).then(function (response) {
                     mainDivVM.addVisitRecord = response.data.data;
                     mainDivVM.addVisitRecord.clueId=row.clueId;
@@ -1520,11 +1556,11 @@
                         if(dataList.length>=1){
                             first.push(dataList[dataList.length-1])
                             mainDivVM.showVisitAduitDatas.one = first;
-                            if(!first[0].notSignReason){
+                            if(first[0].isSign==0){
                                 mainDivVM.showVisitAduitDatas.oneNotSignReason = first[0].notSignReason;
                                 mainDivVM.showVisitAduitDatas.oneNotSignShow = true;
                             }
-                            if(!first[0].rebutReason){
+                            if(first[0].rebutReason){
                                 mainDivVM.showVisitAduitDatas.oneRebutReason = first[0].rebutReason;
                                 mainDivVM.showVisitAduitDatas.oneRebutShow = true;
                             }
@@ -1536,11 +1572,11 @@
                             two.push(dataList[dataList.length-2])
                             mainDivVM.showVisitAduitDatas.two = two;
                             mainDivVM.showVisitAduitDatas.twoShow = true;
-                            if(!first[0].notSignReason){
+                            if(two[0].isSign==0){
                                 mainDivVM.showVisitAduitDatas.twoNotSignReason = two[0].notSignReason;
                                 mainDivVM.showVisitAduitDatas.twoNotSignShow = true;
                             }
-                            if(!first[0].rebutReason){
+                            if(two[0].rebutReason){
                                 mainDivVM.showVisitAduitDatas.twoRebutReason = two[0].rebutReason;
                                 mainDivVM.showVisitAduitDatas.twoRebutShow = true;
                             }
@@ -1552,11 +1588,11 @@
                             three = dataList.slice(0,dataList.length-2)
                             mainDivVM.showVisitAduitDatas.three = three;
                             mainDivVM.showVisitAduitDatas.threeShow = true;
-                            if(!first[0].notSignReason){
+                            if(three[0].isSign==0){
                                 mainDivVM.showVisitAduitDatas.threeNotSignReason = three[0].notSignReason;
                                 mainDivVM.showVisitAduitDatas.threeNotSignShow = true;
                             }
-                            if(!first[0].rebutReason){
+                            if(three[0].rebutReason){
                                 mainDivVM.showVisitAduitDatas.threeRebutReason = three[0].rebutReason;
                                 mainDivVM.showVisitAduitDatas.threeRebutShow = true;
                             }
@@ -1574,6 +1610,10 @@
                 var param ={};
                 console.log(row)
                 param.id = row.visitId
+                if(row.signAuditStatus==0||row.signAuditStatus==1||row.signAuditStatus==2){
+                    mainDivVM.existsSign =true;
+                    mainDivVM.curSignStatus = row.signAuditStatus;
+                }
                 axios.post('/busVisitRecord/one',param).then(function (response) {
                     console.log(response)
                     if(null===response||response.data==null||response.data.code!='0'){
@@ -1593,6 +1633,9 @@
                 })
             },
             goEditSign(){
+                if(!mainDivVM.existsSignMessage()){
+                    return false;
+                }
                 var param = this.addVisitRecord;
                 this.$refs['addVisitRecord'].validate((valid) => {
                     if (valid) {
@@ -1606,7 +1649,7 @@
                                             //  弹出签约单添加弹窗
                                            // mainDivVM.formSigning.clueId = mainDivVM.addVisitRecord.clueId;
                                            // mainDivVM.dialogFormSigningVisible = true;
-                                            mainDivVM.editSign(mainDivVM.addVisitRecord)
+                                            mainDivVM.toSign(mainDivVM.addVisitRecord)
                                         }});
                                 } else {
                                     mainDivVM.$message.error(response.data.msg);
@@ -1615,7 +1658,18 @@
                     } else {return false;}
                 });
             },
+
+            toSign(val){
+                if(mainDivVM.curSignStatus==0){ // 当前签约单的状态 == 0 存在驳回签约单。
+                    mainDivVM.editRebutSign(val)
+                }else{
+                    mainDivVM.editSign(val)
+                }
+            },
             goUpdateEditSign(){
+                if(!mainDivVM.existsSignMessage()){
+                    return false;
+                }
                 // 设置 clueid
                 this.$refs['updateVisitRecord'].validate((valid) => {
                     if (valid) {
@@ -1643,11 +1697,12 @@
                                 if (response.data.code == 0) {
                                     mainDivVM.$message({type: 'success', message: '来访提交成功!',duration:2000,onClose:function(){
                                             mainDivVM.initList();
-                                            mainDivVM.addVisitRecordDialogVisible = false;
+                                            mainDivVM.updateVisitRecordDialogVisible = false;
                                             //  弹出签约单添加弹窗
                                             // mainDivVM.formSigning.clueId = mainDivVM.addVisitRecord.clueId;
                                             // mainDivVM.dialogFormSigningVisible = true;
-                                            mainDivVM.editSign(mainDivVM.updateVisitRecord)
+                                            // mainDivVM.editSign(mainDivVM.updateVisitRecord)
+                                            mainDivVM.toSign(mainDivVM.updateVisitRecord)
                                         }});
                                 } else {
                                     mainDivVM.$message.error(response.data.msg);
@@ -1655,6 +1710,15 @@
                             }).catch(function (error) {console.log(error);});
                     } else {return false;}
                 });
+            },
+            existsSignMessage(){
+                if(this.existsSign){
+                    mainDivVM.$message.error("签约单已经存在");
+                }
+                if(this.curSignStatus==0){
+                    return true;
+                }
+                return false;
             },
             editSign(row){
                 // this.formSigning.clueId=row.clueId;
@@ -1688,9 +1752,9 @@
 
                         if(mainDivVM.updateFormSigning.payType > 2){
                             mainDivVM.notEditRebutSign = true;
-                            mainDivVM.payTypeArr = mainDivVM.payTypeArr.slice(2,4)
+                            mainDivVM.payTypeArr = mainDivVM.payTypeArr1.slice(2,4)
                         }else{
-                            mainDivVM.payTypeArr = mainDivVM.payTypeArr.slice(0,2)
+                            mainDivVM.payTypeArr = mainDivVM.payTypeArr1.slice(0,2)
                         }
                         mainDivVM.currentProvince(mainDivVM.updateFormSigning.signProvince)
                         mainDivVM.currentCity(mainDivVM.updateFormSigning.signCity)
@@ -1838,6 +1902,9 @@
     .el-button--danger{
         background: #6f7180;
         border: #6f7180;
+    }
+    .el-input {
+        width: 90%;
     }
 </style>
 </body>

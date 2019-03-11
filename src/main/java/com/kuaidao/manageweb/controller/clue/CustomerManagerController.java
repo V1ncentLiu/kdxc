@@ -1,5 +1,6 @@
 package com.kuaidao.manageweb.controller.clue;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -94,13 +95,14 @@ public class CustomerManagerController {
 	@ResponseBody
 	public JSONResult<PageBean<CustomerManagerDTO>> findTeleClueInfo(HttpServletRequest request,
 			@RequestBody CustomerManagerQueryDTO dto) {
+		java.text.SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
 		if (null != dto && null != dto.getDayTel() && dto.getDayTel().intValue() == 1) {
 			// 当日拨打电话
-			dto.setTelTime(new Date());
+			dto.setTelTime(formatter.format(new Date()));
 		}
-		if (null != dto && null != dto.getDayTel() && dto.getTrackingDay().intValue() == 1) {
+		if (null != dto && null != dto.getTrackingDay() && dto.getTrackingDay().intValue() == 1) {
 			// 当日跟进
-			dto.setTrackingTime(new Date());
+			dto.setTrackingTime(formatter.format(new Date()));
 		}
 
 		// 数据权限处理
