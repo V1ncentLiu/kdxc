@@ -204,16 +204,17 @@
                             <el-radio v-model="form.radioSelect" label="0" @change="professionChange">否</el-radio>
                             <el-radio v-model="form.radioSelect" label="1" @change="professionChange">是</el-radio>
                         </el-form-item>
-                        <span v-show="domainShow">
+                        <span v-if="domainShow">
                             <el-form-item
-                                style="width: 200px;float: left;margin-right: 10px;"
+                                style="width: 300px;float: left;margin-right: 10px;"
                                 v-for="(domain, index) in form.domains"
                                 :key="domain.key"
                                 :prop="'domains.' + index + '.value'" 
+                                :rules='rules.domainsValue'
                             >
-                                <el-input v-model="domain.value" placeholder="输入品牌名称" maxLength="15"></el-input>
+                                <el-input v-model="domain.value" placeholder="输入品牌名称" maxLength="15" style="width: 210px;float: left;"></el-input><el-button @click.prevent="removeDomain(domain)" type="danger">删除</el-button>
                             </el-form-item>
-                            <el-button type="primary" @click="addDomain"><i class="el-icon-plus"></i></el-button>
+                            <el-button type="primary" @click="addDomain"><i class="el-icon-plus"></i></el-button></el-input>
                         </span>
                     </el-col>
                 </el-row>
@@ -775,19 +776,8 @@ var ossUrl=[[${ossUrl}]];
                 proSelect:proSelect,
                 formLabelWidth: '150px',
                 rules:{
-                    // customerName: [
-                    //     { required: true, message: '客户姓名不能为空', trigger: 'blur' }
-                    // ],
-                    customerPhone: [
-                        /* { required: true, message: '手机号不能为空', trigger: 'blur' },
-                        { validator:function(rule,value,callback){                 
-                            if(/^[0-9]*$/.test(value) == false){
-                               callback(new Error("请输入数字"));
-                            }else{
-                               callback();
-                            } 
-                            callback();
-                        }, trigger: 'blur'} */
+                    domainsValue: [
+                        {required: true, message: '品牌名称不能为空', trigger: 'blur'}
                     ]
                 },
                 statusOptions: [{
@@ -1028,6 +1018,12 @@ var ossUrl=[[${ossUrl}]];
                         key: Date.now()
                     });
                 }                
+            },
+            removeDomain(item) {//移除
+                var index = this.form.domains.indexOf(item)
+                if (index !== -1) {
+                  this.form.domains.splice(index, 1)
+                }
             },
             handleSelectionChange(val) {  
                 this.multipleSelection = val;
