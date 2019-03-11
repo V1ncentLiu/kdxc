@@ -76,16 +76,16 @@
   			  </el-form-item>
           <br>
   	      <el-form-item class="formItem" label="提交邀约时间：">
-  	  				<el-date-picker  v-model="searchForm.startTime" type="datetime" placeholder="选择日期"></el-date-picker>
+  	  				<el-date-picker  v-model="searchForm.startTime" format="yyyy-MM-dd hh:mm" type="datetime" placeholder="选择日期"></el-date-picker>
   	      </el-form-item>
   	      <el-form-item class="formItem" label="——">
-  						<el-date-picker  v-model="searchForm.endTime" type="datetime" placeholder="选择日期"></el-date-picker>
+  						<el-date-picker  v-model="searchForm.endTime" format="yyyy-MM-dd hh:mm" type="datetime" placeholder="选择日期"></el-date-picker>
   	      </el-form-item>
   	      <el-form-item class="formItem" label="邀约来访时间：">
-  	  				<el-date-picker  v-model="searchForm.startReserveTime" type="datetime" placeholder="选择日期"></el-date-picker>
+  	  				<el-date-picker  v-model="searchForm.startReserveTime" format="yyyy-MM-dd hh:mm"  type="datetime" placeholder="选择日期"></el-date-picker>
   	      </el-form-item>
   	      <el-form-item class="formItem" label="——">
-  						<el-date-picker  v-model="searchForm.endReserveTime" type="datetime" placeholder="选择日期"></el-date-picker>
+  						<el-date-picker  v-model="searchForm.endReserveTime" format="yyyy-MM-dd hh:mm"  type="datetime" placeholder="选择日期"></el-date-picker>
   	      </el-form-item>
   			  <el-form-item class="formItem" prop="cusName">
   			    <el-input v-model="searchForm.cusName" placeholder="客户姓名" class="input-with-select"></el-input>
@@ -96,11 +96,11 @@
   	</el-form>
     <el-row>
         <el-table  ref="multipleTable" tooltip-effect="dark" border @row-dblclick="showCustomerDetail" @selection-change="handleSelectionChange"
-            style="width: 100%"  :data="dataTable" >
+            style="width: 100%"  :data="dataTable" @sort-change="sort_change">
            <el-table-column align="center" type="selection" label="全选" width="55"></el-table-column>
            <el-table-column align="center" type="index" label="序号" width="55"></el-table-column>
-           <el-table-column align="center" prop="createTime" label="提交邀约时间" :formatter="dateFormat" width="170"></el-table-column>
-           <el-table-column align="center" prop="reserveTime" label="邀约来访时间" :formatter="dateFormat" width="170"></el-table-column>
+           <el-table-column align="center" prop="createTime" label="提交邀约时间" sortable :formatter="dateFormat" width="170"></el-table-column>
+           <el-table-column align="center" prop="reserveTime" label="邀约来访时间" sortable :formatter="dateFormat" width="170"></el-table-column>
            <el-table-column align="center" prop="teleGorupName" label="电销组"></el-table-column>
            <el-table-column align="center" prop="teleDirectorName" label="电销总监"></el-table-column>
            <el-table-column align="center" prop="teleSaleName" label="电销员工"></el-table-column>
@@ -217,7 +217,9 @@ var clueVM = new Vue({
 	        		startTime: '',
 	        		endTime: '',
 	        		startReserveTime: '',
-	        		endReserveTime: ''
+	        		endReserveTime: '',
+	        		sortField: '',
+	        		sortType: ''
             },
             allocationForm: {
             	saleId:'',
@@ -272,6 +274,8 @@ var clueVM = new Vue({
                 param.cusName = this.searchForm.cusName;
                 param.province = this.searchForm.province;
                 param.delFalg = this.searchForm.delFalg;
+                param.sortField = this.searchForm.sortField;
+                param.sortType = this.searchForm.sortType;
                 console.info(param);
                 axios.post('/business/busAllocation/list', param)
                 .then(function (response) {
@@ -485,42 +489,7 @@ var clueVM = new Vue({
             	          }
             	    });
             	   
-            	   
-           	       /* var rows = this.multipleSelection;
-	           	   var idList = [];
-	               var clueIdList = [];
-	               for(var i=0;i<rows.length;i++){
-	            	   var curRow = rows[i];
-	            			idList.push(curRow.id);
-	            			clueIdList.push(curRow.clueId);
-	               }
-	            	  //外调
-	            	  var param  = {};
-	           	  param.idList=idList;
-	           	  param.clueIdList=clueIdList;
-               	  param.busSaleId=this.allocationForm.saleId;
-               	  param.remark=this.allocationForm.remark;
-                  axios.post('/business/busAllocation/busAllocationClue',param)
-                   .then(function (response) {
-                       var data =  response.data;
-                       if(data.code=='0'){
-                       	clueVM.$message({message:'分发成功',type:'success',duration:1000,onClose:function(){
-                       		clueVM.allocationVisible = false;
-                       		clueVM.searchTable();
-                   	    }});
-                       }else{
-                       	clueVM.$message({
-                               message: "接口调用失败",
-                               type: 'error'
-                             }); 
-                       }
-                   })
-                   .catch(function (error) {
-                     console.log(error);
-                   })
-                   .then(function () {
-                   	
-                   }); */
+            	
                  },// method end
                //打开外调经理
                toTransferClue() {
@@ -596,41 +565,6 @@ var clueVM = new Vue({
             	          }
             	  });
             	   
-           	      /* var rows = this.multipleSelection;
-                  var idList = [];
-                  var clueIdList = [];
-                  for(var i=0;i<rows.length;i++){
-               	   var curRow = rows[i];
-               			idList.push(curRow.id);
-               			clueIdList.push(curRow.clueId);
-                  }
-               	  //外调
-               	  var param  = {};
-              	  param.idList=idList;
-              	  param.clueIdList=clueIdList;
-              	  param.busSaleId=this.transferForm.saleId;
-              	  param.remark=this.transferForm.remark;
-                  axios.post('/business/busAllocation/busAllocationClue',param)
-                   .then(function (response) {
-                       var data =  response.data;
-                       if(data.code=='0'){
-                       	clueVM.$message({message:'外调成功',type:'success',duration:1000,onClose:function(){
-                       		clueVM.transferVisible = false;
-                       		clueVM.searchTable();
-                   	    }});
-                       }else{
-                       	clueVM.$message({
-                               message: "接口调用失败",
-                               type: 'error'
-                             }); 
-                       }
-                   })
-                   .catch(function (error) {
-                     console.log(error);
-                   })
-                   .then(function () {
-                   	
-                   }); */
                  },// method end
                  showCustomerDetail(row, column){ // 客户详情
                 	 window.location.href='/bus/BusinessCustomer/viewCustomerInfo?clueId='+row.clueId;
@@ -650,7 +584,25 @@ var clueVM = new Vue({
                   .catch(function (error) {
                        console.log(error);
                   });
-              }
+              },
+              //排序
+              sort_change(column) {
+            	  var sortField="";
+            	  var sortType="";
+                  if (column.prop === 'createTime') {
+                	  sortField="a.createTime";
+                  } else if (column.prop === 'reserveTime') {
+                	  sortField="a.reserveTime";
+                  }
+                  if (column.order === 'descending') {
+                  	sortType="desc";
+                  } else if (column.order === 'ascending') {
+                  	sortType="asc";
+                  }
+                  this.searchForm.sortField=sortField;
+                  this.searchForm.sortType=sortType;
+                  this.searchTable();
+                }
         },
         created(){
             console.info("create method");
