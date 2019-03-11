@@ -253,12 +253,18 @@ public class BusCustomerManagerController {
         for (UserInfoDTO user : userList) {
             Map<String, Object> resultMap = new HashMap<String, Object>();
             OrganizationRespDTO group = orgMap.get(user.getOrgId());
-            OrganizationRespDTO area = orgMap.get(group.getParentId());
+            if (group != null) {
+                OrganizationRespDTO area = orgMap.get(group.getParentId());
+                resultMap.put("id", user.getId().toString());
+                if (area != null) {
+                    resultMap.put("name",
+                            user.getName() + "(" + area.getName() + "--" + group.getName() + ")");
+                } else {
+                    resultMap.put("name", user.getName() + "(" + group.getName() + ")");
 
-            resultMap.put("id", user.getId().toString());
-            resultMap.put("name",
-                    user.getName() + "(" + area.getName() + "--" + group.getName() + ")");
-            result.add(resultMap);
+                }
+                result.add(resultMap);
+            }
         }
         return result;
     }
