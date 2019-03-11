@@ -237,7 +237,7 @@ public class BusinessSignController {
 //                    signDTO.setSignCompanyId((Long) data.get("busCompany"));
                     String tasteProjectId = (String)data.get("tasteProjectId");
                     String[] split = tasteProjectId.split(",");
-                    if(split.length>0){
+                    if(split.length>0&&!"".equals(split[0])){
                         signDTO.setSignProjectId(Long.valueOf(split[0]));
                     }
                     signDTO.setSignProvince((String)data.get("signProvince"));
