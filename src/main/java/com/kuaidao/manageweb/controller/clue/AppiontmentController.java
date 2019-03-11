@@ -82,7 +82,7 @@ public class AppiontmentController {
      */
     @RequestMapping("/initAppiontmentList")
     @RequiresPermissions("aggregation:appiontmentManager:view")
-    public String initCompanyList(HttpServletRequest request) {
+    public String initAppiontmentList(HttpServletRequest request) {
         UserInfoDTO user = getUser();
         OrganizationQueryDTO organizationQueryDTO = new OrganizationQueryDTO();
         organizationQueryDTO.setParentId(user.getOrgId());
