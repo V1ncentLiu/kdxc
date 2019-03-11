@@ -520,18 +520,24 @@
                     this.$message({message: '请选择资源', type: 'warning'});
                     return false;
                 }else{
-                	var param=[];
+                	var param={};
                 	param.idList = []
                 	 for(var i = 0 ; i < this.multipleSelection.length ; i++ ){
                          param.idList.push(this.multipleSelection[i].clueid)
                      }
-                	  axios.post('/cluereceiverecords/receiveClueByClueIds', param)
+                	  axios.post('/clue/cluereceiverecords/receiveClueByClueIds', param)
                       .then(function (response) {
                             var result =  response.data;
-                            console.info(result);
-                            var table=result.data;
-                            mainDivVM.repeatPhonesTable= table.data;
-                            mainDivVM.repeatPhonesDialog=true;
+                            if(result.code == 0){
+                            	console.info(result);
+                                var table=result.data;
+                                mainDivVM.repeatPhonesTable= table.data;
+                                mainDivVM.repeatPhonesDialog=true;
+                                
+                            }else{
+                            	mainDivVM.$message({message: result.msg, type: 'warning'});
+                            }
+                            
                       }).catch(function (error) {
                                   console.log(error);
                       })           
