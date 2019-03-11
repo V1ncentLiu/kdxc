@@ -724,8 +724,8 @@ public class MyCustomerClueController {
 					if (null!=org.getOrgType()&& org.getOrgType().equals(OrgTypeConstant.DZFGS)) {
 
 						UserOrgRoleReq userRoleInfo = new UserOrgRoleReq();
-						userRole.setRoleCode(RoleCodeEnum.DXZJL.name());
-						userRole.setOrgId(org.getId());
+						userRoleInfo.setRoleCode(RoleCodeEnum.DXZJL.name());
+						userRoleInfo.setOrgId(org.getId());
 						JSONResult<List<UserInfoDTO>> ceoUserInfoJson = userInfoFeignClient
 								.listByOrgAndRole(userRoleInfo);
 						if (ceoUserInfoJson.getCode().equals(JSONResult.SUCCESS) && null != ceoUserInfoJson.getData()

@@ -190,7 +190,7 @@ public class BusinessVisitRecordController {
                 recordRespDTO.setCustomerName((String)data.get("cusName"));
                 String tasteProjectId = (String)data.get("tasteProjectId");
                 String[] split = tasteProjectId.split(",");
-                if(split.length>0){
+                if(split.length>0&&!"".equals(split[0])){
                     recordRespDTO.setProjectId(Long.valueOf(split[0]));
                 }
 
