@@ -220,26 +220,26 @@
 
     <dialog-tracking :param="trackingParam"></dialog-tracking>
 
-    <!-- 重复手机号资源 -->
-    <el-dialog title="手机号1233133332重复资源信息" :visible.sync="repeatPhonesDialog">
+ 
+   <el-dialog :title="'手机号'+dailogTitleType+'重复资源信息'"    :visible.sync="repeatPhonesDialog">
         <el-table
-            ref="repeatPhonesTable" 
+            ref="singleTable" 
             tooltip-effect="dark"
             style="width: 100%"
             border
             :data="repeatPhonesTable" 
             >
             <el-table-column align="center" type="index" width="55" label="序号"></el-table-column>
-            <el-table-column align="center" prop="resourceCreateTime" label="资源创建时间"></el-table-column>
-            <el-table-column align="center" prop="contactCreateTime" label="联系方式创建时间"></el-table-column>
-            <el-table-column align="center" prop="majordomo" label="电销总监"></el-table-column>
-            <el-table-column align="center" prop="adviser" label="创业顾问"></el-table-column>
-            <el-table-column align="center" prop="majordomoTeam" label="电销组"></el-table-column>
-            <el-table-column align="center" prop="resourceCreatePersonRole" label="资源创建人角色"></el-table-column>  
-            <el-table-column align="center" prop="resourceCreatePerson" label="资源创建人"></el-table-column> 
+            <el-table-column align="center" prop="createDate" label="资源创建时间"></el-table-column>
+            <el-table-column align="center" prop="cusPhone" label="联系方式"></el-table-column>
+            <el-table-column align="center" prop="teleDirectorName" label="电销总监"></el-table-column>
+            <el-table-column align="center" prop="teleSaleName" label="创业顾问"></el-table-column>
+            <el-table-column align="center" prop="teleGorupName" label="电销组"></el-table-column>
+            <el-table-column align="center" prop="teleProject" label="电销组负责项目"></el-table-column>
+            <el-table-column align="center" prop="createUserRoleName" label="资源创建人角色"></el-table-column>  
+            <el-table-column align="center" prop="createUserName" label="资源创建人"></el-table-column> 
         </el-table>
     </el-dialog>
-
 </div>
 
 <!-- import common js-->
@@ -254,6 +254,8 @@
     var mainDivVM = new Vue({
         el: '#mainDiv',
         data: {
+        	repeatPhonesDialog:false,
+        	dailogTitleType:"",
             repeatPhonesDialog:false,//重复手机号
             allocationDialogFormVisible:false,
             releaseDialogFormVisible:false,
@@ -323,26 +325,7 @@
                 trackingDialogVisible:false,
                 tableData:[]
             },
-            repeatPhonesTable:[//重复手机号
-                {
-                    resourceCreateTime:'',
-                    contactCreateTime:'',
-                    majordomo:'',
-                    adviser:'',
-                    majordomoTeam:'',
-                    resourceCreatePersonRole:'',
-                    resourceCreatePerson:'张三',
-                },
-                {
-                    resourceCreateTime:'',
-                    contactCreateTime:'',
-                    majordomo:'',
-                    adviser:'',
-                    majordomoTeam:'',
-                    resourceCreatePersonRole:'',
-                    resourceCreatePerson:'王五',
-                }
-            ],
+            repeatPhonesTable:[],
         },
         methods: {
             formatCusLevel(row, column){
@@ -534,9 +517,24 @@
             },
             openReceive(){//领取                
                 if(this.multipleSelection.length==0){
-                    this.$message({message: '请选择领取资源', type: 'warning'});
+                    this.$message({message: '请选择资源', type: 'warning'});
                     return false;
                 }else{
+                	var param=[];
+                	param.idList = []
+                	 for(var i = 0 ; i < this.multipleSelection.length ; i++ ){
+                         param.idList.push(this.multipleSelection[i].clueid)
+                     }
+                	  axios.post('/cluereceiverecords/receiveClueByClueIds', param)
+                      .then(function (response) {
+                            var result =  response.data;
+                            console.info(result);
+                            var table=result.data;
+                            mainDivVM.repeatPhonesTable= table.data;
+                            mainDivVM.repeatPhonesDialog=true;
+                      }).catch(function (error) {
+                                  console.log(error);
+                      })           
                     // 1、本组释放到公有池的资源，本组的电销人员不能再捡了
                     // 2、总监领取老资源上限按照领取规则管理中设置的限制进行限制
                     // 3、电销人员领取新资源上限按照领取规则管理中设置的限制进行限制
@@ -570,6 +568,22 @@
             repeatPhonesClick(row) {//重复手机号按钮点击
                 console.log(row);
                 this.repeatPhonesDialog=true;
+                this.dailogTitleType=row.phone;
+                var param ={};
+                    param.id = row.clueId;
+                      param.cusPhone = row.phone;
+                       console.info(param);
+                        axios.post('/clue/appiontment/repeatPhonelist', param)
+                          .then(function (response) {
+                                var result =  response.data;
+                                console.info(result);
+                                var table=result.data;
+                                mainDivVM.repeatPhonesTable= table.data;
+                                mainDivVM.repeatPhonesDialog=true;
+                          })  .catch(function (error) {
+                                      console.log(error);
+                });
+
             },
         },
         created(){
