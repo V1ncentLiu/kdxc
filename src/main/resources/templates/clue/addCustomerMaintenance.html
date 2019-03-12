@@ -483,9 +483,19 @@
 	                                  </el-date-picker>
 	                              </el-form-item>
                                   <el-form-item label="" size="mini">
-                                    <el-select v-model="formInline.customerStatus" placeholder="客户状态">
+                                    <el-select v-model="formInline.customerStatus"   @change="customerStatusChange" placeholder="客户状态">
                                      <el-option
 				                        v-for="item in cusStatusArr"
+				                        :key="item.value"
+				                        :label="item.name"
+				                        :value="item.value">
+				                    </el-option>
+                                    </el-select>
+                                  </el-form-item>
+                                  <el-form-item label="" size="mini" v-if="substauts">
+                                    <el-select v-model="formInline.customerStatusSub"   placeholder="客户状态">
+                                     <el-option
+				                        v-for="item in customerStatusSubArr"
 				                        :key="item.value"
 				                        :label="item.name"
 				                        :value="item.value">
@@ -498,12 +508,14 @@
                                       <el-option label="否" value="0"></el-option>
                                     </el-select>
                                   </el-form-item>
+                                  <!--  
                                   <el-form-item label="" size="mini" prop="resourceStatus">
                                     <el-select v-model="formInline.resourceStatus" placeholder="无效资源">
                                       <el-option label="无效资源" value="0"></el-option>
                                       <el-option label="有效资源" value="1"></el-option>
                                     </el-select>
                                   </el-form-item>
+                                  -->
                                   <el-form-item label="" size="mini" prop="focusPoint">
                                     <el-input v-model="formInline.focusPoint" size="mini" placeholder="客户关注点"></el-input>
                                   </el-form-item>
@@ -802,6 +814,7 @@ var ossUrl=[[${ossUrl}]];
                 insideProjectShow:true,//内部项目默认显示
                 outsideProjectShow:false,//外部项目默认不显示
                 dialogFormImg:false,
+                substauts:true,
                 dialogFormVisible: false,//新增手机号                
                 buttonType: 'A',//添加手机号按钮形式
                 deleteShow:false,//删除新增手机号输入框
@@ -834,7 +847,6 @@ var ossUrl=[[${ossUrl}]];
                     province:'',
                     city:'',
                     district:'',
-                   
                 },
                 clueBase:base,
                 categoryArr:[],
@@ -849,6 +861,7 @@ var ossUrl=[[${ossUrl}]];
                 IntentionalCategoryArr:[],
                 ussmArr:[],
                 StorefrontAreaArr:[],
+                customerStatusSubArr:[],
                 provinceArr:[],
                 cityArr:[],
                 districtArr:[],
@@ -953,6 +966,7 @@ var ossUrl=[[${ossUrl}]];
                 	focusPoint:'',
                 	visitStatus:'是',
                 	nextVisitTime:'',
+                	customerStatusSub:'',
                 },
                 tableDataC2: trackingList,//跟进记录
                 tableDataC3: [],  //通话记录
@@ -1295,12 +1309,12 @@ var ossUrl=[[${ossUrl}]];
                        param.focusPoint=this.formInline.focusPoint;
                        param.visitStatus=this.formInline.visitStatus;
                        var nextVisitTime=this.formInline.nextVisitTime;
-                       var callTime=this.formInline.callTime;
                        if(typeof(nextVisitTime)=='string'){
                         	  param.nextVisitTime=new Date(Date.parse(nextVisitTime.replace(/-/g, "/")));
                        }else{
                            param.nextVisitTime=this.formInline.nextVisitTime; 
                        }
+                       param.customerStatusSub=this.formInline.customerStatusSub;
                        //如果是编辑跟进记录
                        if( isEdit){
                            param.id=this.formInline.id;
@@ -1701,12 +1715,25 @@ var ossUrl=[[${ossUrl}]];
           axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {  
         	  addCustomerVM.cusStatusArr=response.data.data;
            });
+          
+          //客户状态 
+          param={};
+          param.groupCode="customerStatusSub"; 
+          axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {  
+        	  addCustomerVM.customerStatusSubArr=response.data.data;
+           });
+          
+          
+          
          //获取省
           param={};
           param.type="0";
           axios.post('/area/sysregion/querySysRegionByParam',param).then(function (response) {  
        	   addCustomerVM.provinceArr=response.data.data.data;
           });
+          
+          
+  
          
        
     	}

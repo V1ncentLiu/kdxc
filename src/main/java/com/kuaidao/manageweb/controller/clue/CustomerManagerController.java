@@ -80,11 +80,11 @@ public class CustomerManagerController {
 			@RequestBody CustomerManagerQueryDTO dto) {
 		if (null != dto && null != dto.getDayTel() && dto.getDayTel().intValue() == 1) {
 			// 当日拨打电话
-			dto.setTelTime(new Date());
+		   //dto.setTelTime(new Date());
 		}
 		if (null != dto && null != dto.getDayTel() && dto.getTrackingDay().intValue() == 1) {
 			// 当日跟进
-			dto.setTrackingTime(new Date());
+			//dto.setTrackingTime(new Date());
 		}
 
 		// 数据权限处理
