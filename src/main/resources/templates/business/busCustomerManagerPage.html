@@ -199,7 +199,7 @@
            <el-table-column align="center" prop="hasExperience" label="餐饮经验" :formatter="transformExperience"></el-table-column>
            <el-table-column align="center" prop="hasAddress" label="选址情况" :formatter="transformAddress"></el-table-column>
            <el-table-column align="center" prop="advanceAmount" label="预投金额" :formatter="transformUssm"></el-table-column>
-           <el-table-column align="center" prop="purInProject" label="意向项目" :formatter="transformProject" ></el-table-column>
+           <el-table-column align="center" prop="purInProject" label="意向项目" :formatter="transformPurProject" ></el-table-column>
            <el-table-column align="center" prop="area" label="店面面积" :formatter="transformArea"></el-table-column>
         </el-table>
         <table-pagination :pager="pager" @change="searchTable"></table-pagination>
@@ -207,7 +207,7 @@
       <!-- dialog -->
       <el-dialog  title="分发资源"  :visible.sync="allocationVisible"  width="30%">
         <template>
-            <el-form :model="allocationForm" ref="allocationForm" >
+            <el-form :model="allocationForm" ref="allocationForm" :rules="allocationFormRules">
                 <el-form-item >
                    	{{allocationForm.message}}
                 </el-form-item>
@@ -225,7 +225,7 @@
                 </el-form-item>
             </el-form>
             <div slot="footer" class="dialog-footer">
-                <el-button type="primary" @click="allocationClue">提 交</el-button>
+                <el-button type="primary" @click="allocationClue('allocationForm')">提 交</el-button>
                 <el-button  @click="allocationVisible = false">取 消</el-button>
             </div>
         </template>
@@ -234,7 +234,7 @@
       <!-- dialog -->
       <el-dialog  title="外调经理"  :visible.sync="transferVisible"  width="30%">
         <template>
-            <el-form :model="transferForm" ref="transferForm" >
+            <el-form :model="transferForm" ref="transferForm" :rules="transferFormRules">
             	<el-form-item >
                    	{{transferForm.message}}
                 </el-form-item>
@@ -252,7 +252,7 @@
                 </el-form-item>
             </el-form>
             <div slot="footer" class="dialog-footer">
-                <el-button type="primary" @click="transferClue">提 交</el-button>
+                <el-button type="primary" @click="transferClue('transferForm')">提 交</el-button>
                 <el-button  @click="transferVisible = false">取 消</el-button>
             </div>
         </template>
@@ -437,10 +437,9 @@
 <script th:inline="javascript">
 var busSaleGroupList=[[${busSaleGroupList}]];//搜索商务组
 var busDirectorList=[[${busDirectorList}]];//搜索商务总监
-var searchBusSaleList=[[${searchBusSaleList}]];//搜索商务经理
+var busSaleList=[[${busSaleList}]];//分发商务经理
+var allSaleList=[[${allSaleList}]];//所有商务经理
 var teleSaleGroupList=[[${teleSaleGroupList}]];//电销组
-var allSaleList=[[${allSaleList}]];//所有商务总监
-var busSaleList=[[${busSaleList}]];//商务总监
 var projectList=[[${projectList}]];//项目
 var provinceList=[[${provinceList}]];//省份
 var optionAddressList=[[${optionAddressList}]];//选址情况
@@ -511,9 +510,11 @@ var customerVM = new Vue({
                     threeNotSignShow:false
                 },
 	            dataTable:[],
+	            saleOptions:busSaleList,
+	            allSaleOptions:allSaleList,
 	            busGroupOptions:busSaleGroupList,
 	            busDirectorOptions:busDirectorList,
-	            busSaleOptions:searchBusSaleList,
+	            busSaleOptions:busSaleList,
 	            teleGorupOptions:teleSaleGroupList,
 	            teleSaleOptions:[],
 	            projectOptions:projectList,
@@ -548,8 +549,7 @@ var customerVM = new Vue({
 	            	value:1,
 	            	name:"已读"
 	            }],
-	            saleOptions:busSaleList,
-	            allSaleOptions:allSaleList,
+	            
 	            allocationVisible: false,
 	            transferVisible: false,
 	            notVisitdDialogVisible:false,
@@ -559,12 +559,45 @@ var customerVM = new Vue({
 	                currentPage: 1,
 	                pageSize: 20,
 	            },
+	            allocationFormRules: {
+	            	saleId: [
+	                    { required: true, message: '请选择商务经理', trigger: 'change' }
+	                ]
+	              },
+	            transferFormRules: {
+	            	saleId: [
+	                    { required: true, message: '请选择商务经理', trigger: 'change' }
+	                ]
+	              },
 	            multipleSelection:[],
                 formLabelWidth: '150px',
                 formLabelWidth1: '120px',
         },
         methods: {
         	searchTable() {
+                var startTime = this.searchForm.startTime;
+                var endTime = this.searchForm.endTime;
+                var startReserveTime = this.searchForm.startReserveTime;
+                var endReserveTime = this.searchForm.endReserveTime;
+                var startAllocationTime = this.searchForm.startAllocationTime;
+                var endAllocationTime = this.searchForm.endAllocationTime;
+                var vilad=false;
+                if(startTime&&endTime&&startTime> endTime){
+                	vilad=true;
+                }
+                if(startReserveTime&&endReserveTime&&startReserveTime> endReserveTime){
+                	vilad=true;
+                }
+                if(startAllocationTime&&endAllocationTime&&startAllocationTime> endAllocationTime){
+                	vilad=true;
+                }
+                if(vilad){
+                	this.$message({
+                        message: '开始时间不能大于结束时间',
+                        type: 'warning'
+                      });
+                    return;
+                }
                 var param = this.searchForm;
                 param.pageSize = this.pager.pageSize;
                 param.pageNum = this.pager.currentPage;
@@ -616,8 +649,26 @@ var customerVM = new Vue({
 	 	                		}
 	 	                	}
 	                	}
+              	    }else{
+              	    	text=row.purOutProject;
               	    }
                     return text;
+               },
+             //意向项目转换方法
+               transformPurProject(row, column, cellValue, index) {
+            	   var text="";
+            	   if(cellValue){
+	            	   if(projectList){
+	  	                  for(var i=0;i<projectList.length;i++){
+	  	                		if(cellValue==projectList[i].value){
+	  	                			text=projectList[i].name;
+	  	                		}
+	  	                	}
+	              	  }
+            	   }else{
+             	    	text=row.purOutProject;
+             	   }
+                   return text;
                },
                //性别转换方法
                transformSex(row, column, cellValue, index) {
@@ -769,42 +820,50 @@ var customerVM = new Vue({
             	   
                    this.allocationVisible = true;
                },
-               allocationClue(){//分发资源
-           	      var rows = this.multipleSelection;
-	           	   var idList = [];
-	               var clueIdList = [];
-	               for(var i=0;i<rows.length;i++){
-	            	   var curRow = rows[i];
-	            			idList.push(curRow.id);
-	            			clueIdList.push(curRow.clueId);
-	               }
-	            	  //外调
-	            	  var param  = {};
-	           	  param.idList=idList;
-	           	  param.clueIdList=clueIdList;
-               	  param.busSaleId=this.allocationForm.saleId;
-               	  param.remark=this.allocationForm.remark;
-                  axios.post('/business/busAllocation/busAllocationClue',param)
-                   .then(function (response) {
-                       var data =  response.data;
-                       if(data.code=='0'){
-                       	customerVM.$message({message:'分发成功',type:'success',duration:1000,onClose:function(){
-                       		customerVM.allocationVisible = false;
-                       		customerVM.searchTable();
-                   	    }});
-                       }else{
-                       	customerVM.$message({
-                               message: "接口调用失败",
-                               type: 'error'
-                             }); 
-                       }
-                   })
-                   .catch(function (error) {
-                     console.log(error);
-                   })
-                   .then(function () {
-                   	
-                   });
+               allocationClue(formName){//分发资源
+            	   this.$refs[formName].validate((valid) => {
+         	          if (valid) {
+         	        	 var rows = this.multipleSelection;
+      	           	   var idList = [];
+      	               var clueIdList = [];
+      	               for(var i=0;i<rows.length;i++){
+      	            	   var curRow = rows[i];
+      	            			idList.push(curRow.id);
+      	            			clueIdList.push(curRow.clueId);
+      	               }
+      	            	  //外调
+      	            	  var param  = {};
+      	           	  param.idList=idList;
+      	           	  param.clueIdList=clueIdList;
+                     	  param.busSaleId=this.allocationForm.saleId;
+                     	  param.remark=this.allocationForm.remark;
+                        axios.post('/business/busAllocation/busAllocationClue',param)
+                         .then(function (response) {
+                             var data =  response.data;
+                             if(data.code=='0'){
+                             	customerVM.$message({message:'分发成功',type:'success',duration:1000,onClose:function(){
+                             		customerVM.allocationVisible = false;
+                             		customerVM.searchTable();
+                         	    }});
+                             }else{
+                             	customerVM.$message({
+                                     message: "接口调用失败",
+                                     type: 'error'
+                                   }); 
+                             }
+                         })
+                         .catch(function (error) {
+                           console.log(error);
+                         })
+                         .then(function () {
+                         	
+                         });
+         	          } else {
+         	            console.log('error submit!!');
+         	            return false;
+         	          }
+         	    });
+           	     
                  },// method end
                //打开外调经理
                toTransferClue() {
@@ -829,42 +888,49 @@ var customerVM = new Vue({
                    }
                    this.transferVisible = true;
                },
-               transferClue(){//外调经理
-           	      var rows = this.multipleSelection;
-                  var idList = [];
-                  var clueIdList = [];
-                  for(var i=0;i<rows.length;i++){
-               	   var curRow = rows[i];
-               			idList.push(curRow.id);
-               			clueIdList.push(curRow.clueId);
-                  }
-               	  //外调
-               	  var param  = {};
-              	  param.idList=idList;
-              	  param.clueIdList=clueIdList;
-              	  param.busSaleId=this.transferForm.saleId;
-              	  param.remark=this.transferForm.remark;
-                  axios.post('/business/busAllocation/busAllocationClue',param)
-                   .then(function (response) {
-                       var data =  response.data;
-                       if(data.code=='0'){
-                       	customerVM.$message({message:'外调成功',type:'success',duration:1000,onClose:function(){
-                       		customerVM.transferVisible = false;
-                       		customerVM.searchTable();
-                   	    }});
-                       }else{
-                       	customerVM.$message({
-                               message: "接口调用失败",
-                               type: 'error'
-                             }); 
-                       }
-                   })
-                   .catch(function (error) {
-                     console.log(error);
-                   })
-                   .then(function () {
-                   	
-                   });
+               transferClue(formName){//外调经理
+            	   this.$refs[formName].validate((valid) => {
+         	          if (valid) {
+         	        	 var rows = this.multipleSelection;
+                         var idList = [];
+                         var clueIdList = [];
+                         for(var i=0;i<rows.length;i++){
+                      	   var curRow = rows[i];
+                      			idList.push(curRow.id);
+                      			clueIdList.push(curRow.clueId);
+                         }
+                      	  //外调
+                      	  var param  = {};
+                     	  param.idList=idList;
+                     	  param.clueIdList=clueIdList;
+                     	  param.busSaleId=this.transferForm.saleId;
+                     	  param.remark=this.transferForm.remark;
+                         axios.post('/business/busAllocation/busAllocationClue',param)
+                          .then(function (response) {
+                              var data =  response.data;
+                              if(data.code=='0'){
+                              	customerVM.$message({message:'外调成功',type:'success',duration:1000,onClose:function(){
+                              		customerVM.transferVisible = false;
+                              		customerVM.searchTable();
+                          	    }});
+                              }else{
+                              	customerVM.$message({
+                                      message: "接口调用失败",
+                                      type: 'error'
+                                    }); 
+                              }
+                          })
+                          .catch(function (error) {
+                            console.log(error);
+                          })
+                          .then(function () {
+                          	
+                          });
+         	          } else {
+         	            console.log('error submit!!');
+         	            return false;
+         	          }
+            	   });
                  },// method end
                  showNotVisitReason(row){
                      // 展示未到访原因
@@ -968,7 +1034,7 @@ var customerVM = new Vue({
                        console.log(error);
                   });
               },
-              //根据商务组或商务总监
+              //根据商务组查询商务经理
               getBusSaleList() {
             	  var param ={};
 	              param.orgId = this.searchForm.busGroupId;

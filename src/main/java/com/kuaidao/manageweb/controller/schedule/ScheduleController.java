@@ -7,20 +7,18 @@ import java.lang.reflect.InvocationTargetException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
-import org.apache.shiro.authz.annotation.Logical;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
+import com.kuaidao.common.entity.IdEntity;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.common.util.CommonUtil;
@@ -59,37 +57,7 @@ public class ScheduleController {
         return "schedule/scheduleManagerPage";
     }
 
-    /***
-     * 新增定时任务
-     * 
-     * @return
-     */
-    @RequestMapping("/initCreateSchedule")
-    @RequiresPermissions("sys:scheduleManager:add")
-    public String initCreateSchedule(@RequestParam(required = false) String id,
-            HttpServletRequest request) {
-        // 查询用户信息
-        if (id != null) {
-            JSONResult<QrtzJob> job = scheduleFeignClient.getJob(id);
-            request.setAttribute("schedule", job.getData());
-        }
-        return "schedule/addSchedulePage";
-    }
 
-    /***
-     * 编辑定时任务
-     * 
-     * @return
-     */
-    @RequestMapping("/initUpdateSchedule")
-    @RequiresPermissions("sys:scheduleManager:edit")
-    public String initUpdateSchedule(@RequestParam String id, HttpServletRequest request) {
-        // 查询用户信息
-        JSONResult<QrtzJob> job = scheduleFeignClient.getJob(id);
-        request.setAttribute("schedule", job.getData());
-
-        return "schedule/editSchedulePage";
-    }
 
     /***
      * 定时任务列表
@@ -107,33 +75,62 @@ public class ScheduleController {
         return listJob;
     }
 
+    /***
+     * 查询定时任务
+     * 
+     * @return
+     */
+    @PostMapping("/get")
+    @ResponseBody
+    @RequiresPermissions("sys:scheduleManager:view")
+    public JSONResult<QrtzJob> get(@RequestBody IdEntity idEntity, HttpServletRequest request,
+            HttpServletResponse response) {
+
+        JSONResult<QrtzJob> job = scheduleFeignClient.getJob(idEntity.getId());;
+
+        return job;
+    }
+
 
 
     /**
-     * 保存定时任务
+     * 新增定时任务
      * 
      * @param orgDTO
      * @return
      * @throws InvocationTargetException
      * @throws IllegalAccessException
      */
-    @PostMapping("/createOrUpdate")
+    @PostMapping("/create")
     @ResponseBody
-    @RequiresPermissions(value = {"sys:scheduleManager:edit", "sys:scheduleManager:add"},
-            logical = Logical.OR)
-    @LogRecord(description = "新增或修改定时任务", operationType = OperationType.INSERT,
+    @RequiresPermissions("sys:scheduleManager:add")
+    @LogRecord(description = "新增定时任务", operationType = OperationType.INSERT,
             menuName = MenuEnum.SCHEDULE_MANAGEMENT)
-    public JSONResult create(@Valid @RequestBody JobUpdateReq jobUpdateReq, BindingResult result) {
+    public JSONResult create(@Valid @RequestBody JobCreateReq jobCreateReq, BindingResult result) {
         if (result.hasErrors()) {
             return CommonUtil.validateParam(result);
         }
-        if (jobUpdateReq.getJobId() != null) {
-            return scheduleFeignClient.update(jobUpdateReq);
-        } else {
-            JobCreateReq jobCreateReq = new JobCreateReq();
-            BeanUtils.copyProperties(jobUpdateReq, jobCreateReq);
-            return scheduleFeignClient.create(jobCreateReq);
+        return scheduleFeignClient.create(jobCreateReq);
+    }
+
+    /**
+     * 修改定时任务
+     * 
+     * @param orgDTO
+     * @return
+     * @throws InvocationTargetException
+     * @throws IllegalAccessException
+     */
+    @PostMapping("/update")
+    @ResponseBody
+    @RequiresPermissions("sys:scheduleManager:edit")
+    @LogRecord(description = "修改定时任务", operationType = OperationType.UPDATE,
+            menuName = MenuEnum.SCHEDULE_MANAGEMENT)
+    public JSONResult update(@Valid @RequestBody JobUpdateReq jobUpdateReq, BindingResult result) {
+        if (result.hasErrors()) {
+            return CommonUtil.validateParam(result);
         }
+        return scheduleFeignClient.update(jobUpdateReq);
     }
 
     /**
@@ -142,12 +139,39 @@ public class ScheduleController {
      * @param orgDTO
      * @return
      */
-    @PostMapping("/setStatus")
+    @PostMapping("/setStatusEnable")
     @ResponseBody
     @RequiresPermissions("sys:scheduleManager:edit")
-    @LogRecord(description = "修改定时任务状态", operationType = OperationType.ENABLE,
+    @LogRecord(description = "启用定时任务", operationType = OperationType.ENABLE,
             menuName = MenuEnum.SCHEDULE_MANAGEMENT)
-    public JSONResult setStatus(@Valid @RequestBody JobStatusSetReq jobStatusSetReq,
+    public JSONResult setStatusEnable(@Valid @RequestBody JobStatusSetReq jobStatusSetReq,
+            BindingResult result) {
+
+        if (result.hasErrors()) {
+            return CommonUtil.validateParam(result);
+        }
+
+        String jobId = jobStatusSetReq.getJobId();
+        if (jobId == null) {
+            return new JSONResult().fail(SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getCode(),
+                    SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getMessage());
+        }
+
+        return scheduleFeignClient.setStatus(jobStatusSetReq);
+    }
+
+    /**
+     * 修改定时任务状态
+     * 
+     * @param orgDTO
+     * @return
+     */
+    @PostMapping("/setStatusDisable")
+    @ResponseBody
+    @RequiresPermissions("sys:scheduleManager:edit")
+    @LogRecord(description = "停止定时任务", operationType = OperationType.DISABLE,
+            menuName = MenuEnum.SCHEDULE_MANAGEMENT)
+    public JSONResult setStatusDisable(@Valid @RequestBody JobStatusSetReq jobStatusSetReq,
             BindingResult result) {
 
         if (result.hasErrors()) {

@@ -116,7 +116,7 @@
            <el-table-column align="center" prop="hasExperience" label="餐饮经验" :formatter="transformExperience"></el-table-column>
            <el-table-column align="center" prop="hasAddress" label="选址情况" :formatter="transformAddress"></el-table-column>
            <el-table-column align="center" prop="advanceAmount" label="预投金额" :formatter="transformUssm"></el-table-column>
-           <el-table-column align="center" prop="purInProject" label="意向项目" :formatter="transformProject" ></el-table-column>
+           <el-table-column align="center" prop="purInProject" label="意向项目" :formatter="transformPurProject" ></el-table-column>
            <el-table-column align="center" prop="area" label="店面面积" :formatter="transformArea"></el-table-column>
            <el-table-column align="center" prop="delFalg" label="邀约来访" :formatter="transformDelFalg"></el-table-column>
         </el-table>
@@ -125,7 +125,7 @@
       <!-- dialog -->
       <el-dialog  title="分发资源"  :visible.sync="allocationVisible">
         <template>
-            <el-form :model="allocationForm" ref="allocationForm" >
+            <el-form :model="allocationForm" ref="allocationForm" :rules="allocationFormRules">
                 <el-form-item >
                    	{{allocationForm.message}}
                 </el-form-item>
@@ -158,7 +158,7 @@
       <!-- dialog -->
       <el-dialog  title="外调经理"  :visible.sync="transferVisible">
         <template>
-            <el-form :model="transferForm" ref="transferForm" >
+            <el-form :model="transferForm" ref="transferForm" :rules="transferFormRules">
             	<el-form-item >
                    	{{transferForm.message}}
                 </el-form-item>
@@ -255,6 +255,16 @@ var clueVM = new Vue({
                 currentPage: 1,
                 pageSize: 20,
             },
+            allocationFormRules: {
+            	saleId: [
+                    { required: true, message: '请选择商务经理', trigger: 'change' }
+                ]
+              },
+            transferFormRules: {
+            	saleId: [
+                    { required: true, message: '请选择商务经理', trigger: 'change' }
+                ]
+              },
             multipleSelection:[],
             formLabelWidth: '150px',
             formLabelWidth1: '120px',
@@ -262,12 +272,30 @@ var clueVM = new Vue({
         methods: {
         	searchTable() {
                 var param ={};
+                var startTime = this.searchForm.startTime;
+                var endTime = this.searchForm.endTime;
+                var startReserveTime = this.searchForm.startReserveTime;
+                var endReserveTime = this.searchForm.endReserveTime;
+            	var vilad=false;
+                if(startTime&&endTime&&startTime> endTime){
+                	vilad=true;
+                }
+                if(startReserveTime&&endReserveTime&&startReserveTime> endReserveTime){
+                	vilad=true;
+                }
+                if(vilad){
+                	this.$message({
+                        message: '开始时间不能大于结束时间',
+                        type: 'warning'
+                      });
+                    return;
+                }
+                param.startTime = startTime;
+                param.endTime = endTime;
+                param.startReserveTime = startReserveTime;
+                param.endReserveTime = endReserveTime;
                 param.pageSize = this.pager.pageSize;
                 param.pageNum = this.pager.currentPage;
-                param.startTime = this.searchForm.startTime;
-                param.endTime = this.searchForm.endTime;
-                param.startReserveTime = this.searchForm.startReserveTime;
-                param.endReserveTime = this.searchForm.endReserveTime;
                 param.teleGorupId = this.searchForm.teleGorupId;
                 param.teleSaleId = this.searchForm.teleSaleId;
                 param.tasteProjectId = this.searchForm.projectId;
@@ -324,6 +352,22 @@ var clueVM = new Vue({
 	                	}
               	    }
                     return text;
+               },
+             //意向项目转换方法
+               transformPurProject(row, column, cellValue, index) {
+            	   var text="";
+            	   if(cellValue){
+	            	   if(projectList){
+	  	                  for(var i=0;i<projectList.length;i++){
+	  	                		if(cellValue==projectList[i].value){
+	  	                			text=projectList[i].name;
+	  	                		}
+	  	                	}
+	              	  }
+            	   }else{
+             	    	text=row.purOutProject;
+             	   }
+                   return text;
                },
                //性别转换方法
                transformSex(row, column, cellValue, index) {
@@ -445,8 +489,6 @@ var clueVM = new Vue({
             	   
             	   this.$refs[formName].validate((valid) => {
             	          if (valid) {
-            	            //alert('submit!');
-            	            //start
             	        	  var rows = this.multipleSelection;
 	           	           	   var idList = [];
 	           	               var clueIdList = [];
@@ -455,8 +497,8 @@ var clueVM = new Vue({
 	           	            			idList.push(curRow.id);
 	           	            			clueIdList.push(curRow.clueId);
 	           	               }
-	           	            	  //外调
-	           	            	  var param  = {};
+           	            	  //分发
+           	            	  var param  = {};
 	           	           	  param.idList=idList;
 	           	           	  param.clueIdList=clueIdList;
 	                          	  param.busSaleId=this.allocationForm.saleId;
@@ -488,8 +530,6 @@ var clueVM = new Vue({
             	            return false;
             	          }
             	    });
-            	   
-            	
                  },// method end
                //打开外调经理
                toTransferClue() {
@@ -521,8 +561,6 @@ var clueVM = new Vue({
                transferClue(formName){//外调经理
             	   this.$refs[formName].validate((valid) => {
             	          if (valid) {
-            	            //alert('submit!');
-            	            //start
             	        	  var rows = this.multipleSelection;
                               var idList = [];
                               var clueIdList = [];

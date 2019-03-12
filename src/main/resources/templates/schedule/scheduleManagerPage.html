@@ -60,7 +60,40 @@
         </el-table>
         <table-pagination :pager="pager" @change="searchTable"></table-pagination>
     </el-row>
-    
+    <!-- dialog -->
+    <el-dialog :title="addOrModifyDialogTitle" :visible.sync="dialogFormVisible" @close="closeAddCustomFieldDialog">
+        <el-form :model="form" ref="form" :rules="rules">
+            <el-form-item label="任务名称：" :label-width="formLabelWidth1" prop="jobName">
+                <el-input v-model="form.jobName" maxlength="50" autocomplete="off"></el-input>
+            </el-form-item>
+            <el-form-item label="任务组ID：" :label-width="formLabelWidth1" prop="groupId">
+	            <el-input v-model="form.groupId" maxlength="50" autocomplete="off"></el-input>
+	        </el-form-item>
+            <el-form-item label="时间格式：" :label-width="formLabelWidth1" prop="cronExpression">
+                <el-input v-model="form.cronExpression" maxlength="50" autocomplete="off"></el-input>
+            </el-form-item>
+            <el-form-item label="地址URL：" :label-width="formLabelWidth1" prop="url">
+                <el-input v-model="form.url" maxlength="100" autocomplete="off"></el-input>
+            </el-form-item>
+            <el-form-item label="参数JSON格式：" :label-width="formLabelWidth1" prop="params">
+                <el-input v-model="form.params" maxlength="50" autocomplete="off"></el-input>
+            </el-form-item>
+            <el-form-item label="方法：" :label-width="formLabelWidth1" prop="method">
+                <el-select v-model="form.method" placeholder="请选择">
+                    <el-option
+                        v-for="item in methodOptions"
+                        :key="item.value"
+                        :label="item.label"
+                        :value="item.value">
+                    </el-option>
+                </el-select>
+            </el-form-item>
+        </el-form>
+        <div slot="footer" class="dialog-footer">
+            <el-button type="primary" :disabled="submitDisabled" @click="onSubmit('form')">提交</el-button>
+            <el-button @click="cancelForm('form')">取 消</el-button>
+        </div>
+    </el-dialog>
 </div>
 <!-- import common js-->
 <div th:include="_footer_include :: #jsLib"></div>
@@ -76,8 +109,53 @@ var userVM = new Vue({
 	                pageSize: 20,
 	            },
 	            multipleSelection:[],
+	            addOrModifyDialogTitle:'',
+	            dialogFormVisible: false,
+	            submitDisabled: false,
                 formLabelWidth: '150px',
-                formLabelWidth1: '120px'
+                formLabelWidth1: '120px',
+                form: {
+                    jobId: '',
+                    jobName: '',
+                    groupId: '',
+                    cronExpression: '',
+                    params:'',
+                    url: '',
+                    method: 1
+                    
+                },
+                rules: {
+                	jobName: [
+                      { required: true, message: '任务名称不能为空', trigger: 'blur' },
+                      {  max: 50, message: '最大50个字符', trigger: 'blur' }
+                    ],
+                    groupId: [
+                      { required: true, message: '任务组ID不能为空', trigger: 'blur' },
+                      {  max: 50, message: '最大50个字符', trigger: 'blur' }
+                    ],
+                    cronExpression: [
+                      { required: true, message: '时间格式不能为空', trigger: 'blur' },
+                      {  max: 50, message: '最大50个字符', trigger: 'blur' }
+                    ],
+                    url: [
+                      { required: true, message: '地址URL不能为空', trigger: 'blur' },
+                      {  max: 100, message: '最大100个字符', trigger: 'blur' }
+                    ],
+                    method: [
+                      { required: true, message: '方法不能为空', trigger: 'blur' },
+                    ],
+                    params: [
+                      { required: true, message: '参数不能为空', trigger: 'blur' },
+                      { max: 50, message: '最大50个字符', trigger: 'blur' }
+                    ]
+                  },
+                  methodOptions: [{
+                      value: 1,
+                      label: 'POST'
+                  }, {
+                      value: 2,
+                      label: 'GET'
+                  }]
         },
         methods: {
         	searchTable() {
@@ -104,13 +182,37 @@ var userVM = new Vue({
               handleSelectionChange(val) {
                   this.multipleSelection = val;
               },
-              //跳转任务用户页
+              //添加任务弹窗
               toAddUser() {
-            	  document.location.href='/schedule/scheduleManager/initCreateSchedule';
+                  	this.form.jobId='';
+                  	if (this.$refs['form']!==undefined) {
+	               		this.$refs['form'].resetFields();
+	               	}
+                  	this.dialogFormVisible = true;
+                  	this.addOrModifyDialogTitle="添加任务";
               },
               //跳转修改任务页
               toUpdateUser(id) {
-            	  document.location.href='/schedule/scheduleManager/initCreateSchedule?id='+id;
+                  this.addOrModifyDialogTitle="修改任务";
+                  
+                  var param={id:id};
+                  //根据id获取数据
+                  axios.post('/schedule/scheduleManager/get',param)
+                  .then(function (response) {
+                      var data =  response.data;
+                      if(data.code=='0'){
+                    	  userVM.form= data.data;
+                      }else{
+                      	console.error(data);
+                      }
+                  })
+                  .catch(function (error) {
+                    console.log(error);
+                  })
+                  .then(function () {
+                  }); 
+                  this.dialogFormVisible = true;
+              	
               },
               //修改状态
               updateStatus(id,name,status,msg) {
@@ -122,7 +224,10 @@ var userVM = new Vue({
                 	  var param = {};
                 	  param.jobId=id;
                 	  param.type=status;
-                	  var url='/schedule/scheduleManager/setStatus';
+                	  var url='/schedule/scheduleManager/setStatusDisable';
+                	  if(status==2){
+                		  url='/schedule/scheduleManager/setStatusEnable';
+                	  }
                 	  if(status==3){
                 		  url='/schedule/scheduleManager/delete';
                 	  }
@@ -148,6 +253,11 @@ var userVM = new Vue({
                   });
             	 
               },
+              closeAddCustomFieldDialog(){//关闭添加自定义字段dialog
+	               	if (this.$refs['form']!==undefined) {
+	               		this.$refs['form'].resetFields();
+	               	}
+             },
               //状态转换方法
               transformStatus(row, column, cellValue, index) {
             	  var text="";
@@ -178,7 +288,56 @@ var userVM = new Vue({
                    //点击 页码
                  console.log(`当前页: ${val}`);
                  this.initTableData(val);
-               }
+               },
+               cancelForm(formName) {
+            	   if (this.$refs[formName]!==undefined) {
+               		this.$refs[formName].resetFields();
+               		}
+               	   this.dialogFormVisible = false;
+               },
+               onSubmit(formName) {
+              	 this.$refs[formName].validate((valid) => {
+            	       if (valid) {
+            	    	 userVM.submitDisabled=true;
+         	             var formData = userVM.form;
+         	             var param=formData;
+         	             var dataMap={};
+         	          	 dataMap.params = formData.params;
+         	      		 dataMap.url = formData.url;
+         	  			 dataMap.method = formData.method;
+         	             param.dataMap= dataMap;
+         	             var msg="新增";
+	                   	 var url="/schedule/scheduleManager/create";
+	  	       	         if(formData.jobId!=''){
+	         	            msg="修改";
+                   			url="/schedule/scheduleManager/update";
+	  	       	         }
+         	            console.info(param);
+         	            axios.post(url, param)
+         	            .then(function (response) {
+         	            	userVM.submitDisabled=false;
+         	            	console.info(response);
+         	            	var data =response.data;
+         	            	if(data.code!="0"){
+         	            		userVM.$message(data.msg);
+         	            	}else{
+         	            		userVM.cancelForm(formName);
+         	            		userVM.$message({message:msg+'成功',type:'success',duration:1000,onClose:function(){
+         	            			userVM.searchTable();
+                          	    }});
+         	            	}
+         	            })
+         	            .catch(function (error) {
+         	            	userVM.submitDisabled=false;
+         	                 console.log(error);
+         	            });
+         	             
+            	          } else {
+            	        	console.log('数据未通过校验！');
+            	            return false;
+            	          }
+            	        });
+              }
         },
         created(){
             console.info("create method");
