@@ -268,7 +268,7 @@
                         </el-col>
                         <el-col :span="10">
                             <el-form-item label="到访人数"    :label-width="formLabelWidth"  prop="visitPeopleNum">
-                                <el-input v-model="addVisitRecord.visitPeopleNum" autocomplete="off"  maxlength="2"    ></el-input>
+                                <el-input v-model="addVisitRecord.visitPeopleNum" type="number" onkeypress="return( /[\d]/.test(String.fromCharCode(event.keyCode) ) )" autocomplete="off"  maxlength="2"    ></el-input>
                             </el-form-item>
                         </el-col>
                     </el-row>
@@ -492,6 +492,7 @@
 <script th:inline="javascript">
     var clueId = [[${clueId}]];
     var visitStatus = [[${visitStatus}]];
+    var signAuditStatus = [[${signAuditStatus}]];
     var proSelect=[[${proSelect}]];
     var companySelect=[[${companySelect}]];
     // 查询 模块
@@ -548,7 +549,7 @@
                 oneRebutShow:false,
                 twoRebutShow:false,
                 threeRebutShow:false,
-                oneNotSignShow:true,
+                oneNotSignShow:false,
                 twoNotSignShow:false,
                 threeNotSignShow:false
             },
@@ -579,7 +580,9 @@
                 amountPerformance:''
             },
             rules:{
+                visitPeopleNum:{
 
+                }
             }
         },
         computed: {
@@ -592,6 +595,7 @@
             }
         },
         methods: {
+
         	number(){
         	    this.formSigning.amountReceivable=this.formSigning.amountReceivable.replace(/[^\.\d]/g,'');
         	    this.formSigning.amountReceivable=this.formSigning.amountReceivable.replace('.','');
@@ -693,11 +697,22 @@
                 });
             },
             goEditSign(){
+        	    if(signAuditStatus==1||signAuditStatus==2||signAuditStatus==0){
+        	        if(signAuditStatus==0){
+                        mainDivVM.$message.error("存在被驳回签约单");
+                        // 需要弹出被驳回的签约单让他编辑。
+                        return false;
+                    }else if(signAuditStatus==1){
+                        mainDivVM.$message.error("签约单正在审核中");
+                        return  false;
+                    }else{
+                        mainDivVM.$message.error("签约单已经存在");
+                        return  false;
+        	        }
+                }
                 var param = this.addVisitRecord;
-
                 param.rebutTime = new Date(param.rebutTime);
                 param.createTime = new Date(param.createTime);
-
                 this.$refs['addVisitRecord'].validate((valid) => {
                     if (valid) {
                         axios.post("/busVisitRecord/insert", param)

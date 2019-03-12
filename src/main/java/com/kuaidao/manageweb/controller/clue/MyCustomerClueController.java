@@ -815,8 +815,12 @@ public class MyCustomerClueController {
 			}
 
 		}
-
-		return myCustomerFeignClient.createCustomerClue(dto);
+		JSONResult<String> customerClue = myCustomerFeignClient.createCustomerClue(dto);
+//		if(JSONResult.SUCCESS.equals(customerClue.getCode())){
+//			插入对应跟进记录
+//
+//		}
+		return customerClue;
 	}
 
 	/**

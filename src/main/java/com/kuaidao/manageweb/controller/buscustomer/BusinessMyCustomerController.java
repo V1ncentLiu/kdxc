@@ -61,8 +61,11 @@ public class BusinessMyCustomerController {
         UserInfoDTO user = CommUtil.getCurLoginUser();
         //电销组
         List teleGroupList = new ArrayList();
+        Map<Long,OrganizationDTO> groupMap = new HashMap();
         List teleSaleList = new ArrayList();
+        Map<Long,OrganizationDTO> saleMap = new HashMap();
         List tasteProList = new ArrayList();
+        Map tasteMap = new HashMap();
         MyCustomerParamDTO dto = new MyCustomerParamDTO();
         dto.setBusSaleId(user.getId());
         JSONResult<List<BusMyCustomerRespDTO>> resList = busMyCustomerFeignClient.queryList(dto);
@@ -74,7 +77,8 @@ public class BusinessMyCustomerController {
                     OrganizationDTO organizationDTO = new OrganizationDTO();
                     organizationDTO.setId(myCustomerRespDTO.getTeleGorupId());
                     organizationDTO.setName(myCustomerRespDTO.getTeleGorupName());
-                    teleGroupList.add(organizationDTO);
+//                    teleGroupList.add(organizationDTO);
+                    groupMap.put(organizationDTO.getId(),organizationDTO);
                 }
 
 //                创业顾问
@@ -82,7 +86,8 @@ public class BusinessMyCustomerController {
                     OrganizationDTO organizationDTO = new OrganizationDTO();
                     organizationDTO.setId(myCustomerRespDTO.getTeleSaleId());
                     organizationDTO.setName(myCustomerRespDTO.getTeleSaleName());
-                    teleSaleList.add(organizationDTO);
+//                    teleSaleList.add(organizationDTO);
+                    saleMap.put(myCustomerRespDTO.getTeleSaleId(),organizationDTO);
                 }
 //                品尝项目
 //                if(myCustomerRespDTO.getTasteProjectId()!=null){
@@ -91,6 +96,12 @@ public class BusinessMyCustomerController {
 //                    organizationDTO.setName(myCustomerRespDTO.getTasteProjectName());
 //                    tasteProList.add(organizationDTO);
 //                }
+            }
+            for(Map.Entry<Long,OrganizationDTO> entry : groupMap.entrySet()){
+                teleGroupList.add(entry.getValue());
+            }
+            for(Map.Entry<Long,OrganizationDTO> entry : saleMap.entrySet()){
+                teleSaleList.add(entry.getValue());
             }
         }
 

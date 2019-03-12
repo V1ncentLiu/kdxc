@@ -251,6 +251,8 @@ public class BusinessSignController {
                 }
             }
         }
+        signDTO.setRebutReason(null);
+        signDTO.setRebutTime(null);
         return new JSONResult<BusSignRespDTO>().success(signDTO);
     }
 
