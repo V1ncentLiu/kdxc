@@ -1462,8 +1462,13 @@
                             param.notSignReason=this.updateVisitRecord.notSignReason;
                         }
                         param.notSignReason=this.updateVisitRecord.notSignReason;
-                        param.rebutTime = new Date(param.rebutTime)
-                        param.vistitTime = new Date(param.vistitTime)
+                        if(param.rebutTime){
+                            param.rebutTime = new Date(param.rebutTime)
+                        }
+                        if(param.vistitTime){
+                            param.vistitTime = new Date(param.vistitTime)
+                        }
+
                         axios.post("/busVisitRecord/update", param)
                             .then(function (response) {
                                 if (response.data.code == 0) {
@@ -1513,6 +1518,7 @@
                     mainDivVM.existsSign =true;
                     mainDivVM.curSignStatus = row.signAuditStatus;
                 }
+
                 axios.post('/busVisitRecord/echo',param).then(function (response) {
                     mainDivVM.addVisitRecord = response.data.data;
                     mainDivVM.addVisitRecord.clueId=row.clueId;
@@ -1637,6 +1643,8 @@
                     return false;
                 }
                 var param = this.addVisitRecord;
+                param.rebutTime = new Date(param.rebutTime)
+                param.createTime = new Date(param.createTime)
                 this.$refs['addVisitRecord'].validate((valid) => {
                     if (valid) {
                         axios.post("/busVisitRecord/insert", param)
@@ -1660,7 +1668,7 @@
             },
 
             toSign(val){
-                if(mainDivVM.curSignStatus==0){ // 当前签约单的状态 == 0 存在驳回签约单。
+                if(mainDivVM.curSignStatus==0&&mainDivVM.curSignStatus!==""){ // 当前签约单的状态 == 0 存在驳回签约单。
                     mainDivVM.editRebutSign(val)
                 }else{
                     mainDivVM.editSign(val)
@@ -1689,8 +1697,13 @@
                         param.isSign=this.updateVisitRecord.isSign;
                         param.visitPeopleNum=this.updateVisitRecord.visitPeopleNum;
                         param.notSignReason=this.updateVisitRecord.notSignReason;
-                        param.rebutTime = new Date(param.rebutTime)
-                        param.vistitTime = new Date(param.vistitTime)
+                        if( param.rebutTime){
+                            param.rebutTime = new Date(param.rebutTime)
+                        }
+                       if( param.createTimeTime){
+                           param.vistitTime = new Date(param.createTimeTime)
+                       }
+
                         console.log(param)
                         axios.post("/busVisitRecord/update", param)
                             .then(function (response) {
@@ -1713,7 +1726,13 @@
             },
             existsSignMessage(){
                 if(this.existsSign){
-                    mainDivVM.$message.error("签约单已经存在");
+                    if(this.curSignStatus==0){
+                        mainDivVM.$message.error("签约单被驳回");
+                    }else  if(this.curSignStatus==1){
+                        mainDivVM.$message.error("签约单审核中");
+                    }else  if(this.curSignStatus==2){
+                        mainDivVM.$message.error("签约单已经存在");
+                    }
                 }
                 if(this.curSignStatus==0){
                     return true;
@@ -1749,15 +1768,16 @@
                         return false;
                     }else{
                         mainDivVM.updateFormSigning =response.data.data;
-
-                        if(mainDivVM.updateFormSigning.payType > 2){
-                            mainDivVM.notEditRebutSign = true;
-                            mainDivVM.payTypeArr = mainDivVM.payTypeArr1.slice(2,4)
-                        }else{
-                            mainDivVM.payTypeArr = mainDivVM.payTypeArr1.slice(0,2)
+                        if( mainDivVM.updateFormSigning){
+                            if(mainDivVM.updateFormSigning.payType > 2){
+                                mainDivVM.notEditRebutSign = true;
+                                mainDivVM.payTypeArr = mainDivVM.payTypeArr1.slice(2,4)
+                            }else{
+                                mainDivVM.payTypeArr = mainDivVM.payTypeArr1.slice(0,2)
+                            }
+                            mainDivVM.currentProvince(mainDivVM.updateFormSigning.signProvince)
+                            mainDivVM.currentCity(mainDivVM.updateFormSigning.signCity)
                         }
-                        mainDivVM.currentProvince(mainDivVM.updateFormSigning.signProvince)
-                        mainDivVM.currentCity(mainDivVM.updateFormSigning.signCity)
                         mainDivVM.dialogUpdateFormSigningVisible = true;
                     }
                 })
