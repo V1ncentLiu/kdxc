@@ -240,6 +240,19 @@
             <el-table-column align="center" prop="createUserName" label="资源创建人"></el-table-column> 
         </el-table>
     </el-dialog>
+     <el-dialog :title="receiveTitle"    :visible.sync="receiveDialog">
+        <el-table
+            ref="singleTable" 
+            tooltip-effect="dark"
+            style="width: 100%"
+            border
+            :data="repeatPhonesTable" 
+            >
+            <el-table-column align="center" type="index" width="55" label="序号"></el-table-column>
+            <el-table-column align="center" prop="cusName" label="资源姓名"></el-table-column>
+            <el-table-column align="center" prop="phone" label="手机号"></el-table-column>
+        </el-table>
+    </el-dialog>
 </div>
 
 <!-- import common js-->
@@ -254,6 +267,8 @@
     var mainDivVM = new Vue({
         el: '#mainDiv',
         data: {
+        	receiveDialog:false,
+        	receiveTitle:"",
         	repeatPhonesDialog:false,
         	dailogTitleType:"",
             repeatPhonesDialog:false,//重复手机号
@@ -529,9 +544,17 @@
                       .then(function (response) {
                             var result =  response.data;
                             if(result.code == 0){
+                            	if(result.data !=null){
+                            		var data = result.data;
+                            		if(data.backStatus !=0){
+                            			mainDivVM.receiveDialog = true;
+                            			mainDivVM.receiveTitle=data.backResult;
+                            			mainDivVM.repeatPhonesTable= data.clueCustomerDTOs;
+                            		}
+                            	}
                             	console.info(result);
                                 var table=result.data;
-                                mainDivVM.repeatPhonesTable= table.data;
+                               
                                 mainDivVM.repeatPhonesDialog=true;
                                 
                             }else{
@@ -545,7 +568,7 @@
                     // 2、总监领取老资源上限按照领取规则管理中设置的限制进行限制
                     // 3、电销人员领取新资源上限按照领取规则管理中设置的限制进行限制
                     var resourceType=1;//假数据
-                    if(resourceType==1){
+                 /*    if(resourceType==1){
                         this.$alert('此资源（资源姓名+手机号）为组内资源，不可进行领取。', '提示', {
                           confirmButtonText: '确定',
                           callback: action => {
@@ -568,7 +591,7 @@
                             message: '资源领取成功',
                             type: 'success'
                         });
-                    }
+                    } */
                 }
             },
             repeatPhonesClick(row) {//重复手机号按钮点击
