@@ -89,10 +89,11 @@ public class BusCustomerManagerController {
             List<UserInfoDTO> busDirectorList = getUserList(null, RoleCodeEnum.SWZJ.name(), null);
             request.setAttribute("busDirectorList", busDirectorList);
         } else if (roleList != null
-                && RoleCodeEnum.SWDQZJ.name().equals(roleList.get(0).getRoleCode())) {
+                && (RoleCodeEnum.SWDQZJ.name().equals(roleList.get(0).getRoleCode())
+                        || RoleCodeEnum.SWZJ.name().equals(roleList.get(0).getRoleCode()))) {
             // 商务大区总监 可以选择本区下的商务组 商务总监
-
-            // 查询所有商务组
+            // 商务总监 可以选择本商务组下的商务经理
+            // 查询下属商务组
             List<OrganizationRespDTO> busSaleGroupList =
                     getSaleGroupList(user.getOrgId(), OrgTypeConstant.SWZ);
             request.setAttribute("busSaleGroupList", busSaleGroupList);
@@ -100,14 +101,6 @@ public class BusCustomerManagerController {
             List<UserInfoDTO> busDirectorList =
                     getUserList(user.getOrgId(), RoleCodeEnum.SWZJ.name(), null);
             request.setAttribute("busDirectorList", busDirectorList);
-        } else if (roleList != null
-                && RoleCodeEnum.SWZJ.name().equals(roleList.get(0).getRoleCode())) {
-            // 商务总监 可以选择本商务组下的商务经理
-
-            // 查询本区商务总监
-            List<UserInfoDTO> busDirectorList =
-                    getUserList(user.getOrgId(), RoleCodeEnum.SWZJ.name(), null);
-            request.setAttribute("searchBusSaleList", busDirectorList);
             // 查询组织下商务经理
             List<Integer> statusList = new ArrayList<Integer>();
             statusList.add(SysConstant.USER_STATUS_ENABLE);
