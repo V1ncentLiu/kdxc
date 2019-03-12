@@ -86,7 +86,7 @@ public class BusinessMyCustomerController {
 //                品尝项目
                 if(myCustomerRespDTO.getTasteProjectId()!=null){
                     OrganizationDTO organizationDTO = new OrganizationDTO();
-                    organizationDTO.setId(myCustomerRespDTO.getTasteProjectId());
+                   // organizationDTO.setId(myCustomerRespDTO.getTasteProjectId());
                     organizationDTO.setName(myCustomerRespDTO.getTasteProjectName());
                     tasteProList.add(organizationDTO);
                 }
