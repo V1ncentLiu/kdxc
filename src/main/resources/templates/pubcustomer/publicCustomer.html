@@ -135,7 +135,13 @@
             <!-- <el-table-column prop="teleGorupName" label="电销组" align="center"></el-table-column> -->
             <el-table-column prop="releaseTime" label="释放时间" align="center" width="170"></el-table-column>
             <el-table-column prop="releaseReasonName" label="释放原因" align="center" width="170"></el-table-column>
-            <el-table-column prop="releaseNum" label="被释放次数" align="center" width="100"></el-table-column>
+            <el-table-column prop="releaseNum" label="被释放次数" align="center" width="100">
+            	 <template slot-scope="scope">
+                    <el-button @click="openreleaseDialog(scope.row)" type="text" size="small">
+                        {{scope.row.releaseNum}}
+                    </el-button>
+                </template>
+            </el-table-column>
         </el-table>
     </template>
     <table-pagination :pager="pager"  @change="initList"></table-pagination>
@@ -200,6 +206,28 @@
             <table-pagination :pager="releasePager"  @change="releaseInitList"></table-pagination>
         </template>
     </el-dialog>
+    
+    <!--释放记录-->
+    <el-dialog :title="cluereleasetitle+'释放记录'" :visible.sync="cluereleaseFormVisible">
+        <template>
+            <!-- <el-form :model="release" ref="release" class="demo-form-inline marginB20" style="width: 80%">
+                <el-row :gutter="20">
+                    <el-col  :span="7"> <el-input  v-model="release.customerName" placeholder="客户姓名"></el-input> </el-col>
+                    <el-col  :span="7"> <el-input  v-model="release.releaseReason" placeholder="释放原因"></el-input> </el-col>
+                    <el-col  :span="7"> <el-input  v-model="release.releaseUserName" placeholder="释放人电销顾问姓名"></el-input> </el-col>
+                    <el-col  :span="3">  <el-button  type="primary" @click="releaseInitList">搜索</el-button> </el-col>
+                </el-row>
+            </el-form> -->
+            <el-table :data="tablecluereleaseData"  style="width: 100%" tooltip-effect="light" border ref="releaseTable">
+               <el-table-column align="center" type="index" width="55" label="序号"></el-table-column>
+            <el-table-column align="center" prop="releaseTime" label="释放时间"></el-table-column>
+            <el-table-column align="center" prop="releaseReason" label="释放原因" :formatter="transformReason"></el-table-column>
+            <el-table-column align="center" prop="teleSaleName" label="释放人顾问姓名"></el-table-column>
+            <el-table-column align="center" prop="teleGroupName" label="所属电销组"></el-table-column>
+            </el-table>
+        </template>
+    </el-dialog>
+    
 
   <!--  <el-dialog title="跟进记录"  :visible.sync="trackingDialogVisible"  width="50%">
         <template>
@@ -220,26 +248,39 @@
 
     <dialog-tracking :param="trackingParam"></dialog-tracking>
 
-    <!-- 重复手机号资源 -->
-    <el-dialog title="手机号1233133332重复资源信息" :visible.sync="repeatPhonesDialog">
+ 
+   <el-dialog :title="'手机号'+dailogTitleType+'重复资源信息'"    :visible.sync="repeatPhonesDialog">
         <el-table
-            ref="repeatPhonesTable" 
+            ref="singleTable" 
             tooltip-effect="dark"
             style="width: 100%"
             border
             :data="repeatPhonesTable" 
             >
             <el-table-column align="center" type="index" width="55" label="序号"></el-table-column>
-            <el-table-column align="center" prop="resourceCreateTime" label="资源创建时间"></el-table-column>
-            <el-table-column align="center" prop="contactCreateTime" label="联系方式创建时间"></el-table-column>
-            <el-table-column align="center" prop="majordomo" label="电销总监"></el-table-column>
-            <el-table-column align="center" prop="adviser" label="创业顾问"></el-table-column>
-            <el-table-column align="center" prop="majordomoTeam" label="电销组"></el-table-column>
-            <el-table-column align="center" prop="resourceCreatePersonRole" label="资源创建人角色"></el-table-column>  
-            <el-table-column align="center" prop="resourceCreatePerson" label="资源创建人"></el-table-column> 
+            <el-table-column align="center" prop="createDate" label="资源创建时间"></el-table-column>
+            <el-table-column align="center" prop="cusPhone" label="联系方式"></el-table-column>
+            <el-table-column align="center" prop="teleDirectorName" label="电销总监"></el-table-column>
+            <el-table-column align="center" prop="teleSaleName" label="创业顾问"></el-table-column>
+            <el-table-column align="center" prop="teleGorupName" label="电销组"></el-table-column>
+            <el-table-column align="center" prop="teleProject" label="电销组负责项目"></el-table-column>
+            <el-table-column align="center" prop="createUserRoleName" label="资源创建人角色"></el-table-column>  
+            <el-table-column align="center" prop="createUserName" label="资源创建人"></el-table-column> 
         </el-table>
     </el-dialog>
-
+     <el-dialog :title="receiveTitle"    :visible.sync="receiveDialog">
+        <el-table
+            ref="singleTable" 
+            tooltip-effect="dark"
+            style="width: 100%"
+            border
+            :data="receiveTable" 
+            >
+            <el-table-column align="center" type="index" width="55" label="序号"></el-table-column>
+            <el-table-column align="center" prop="cusName" label="资源姓名"></el-table-column>
+            <el-table-column align="center" prop="phone" label="手机号"></el-table-column>
+        </el-table>
+    </el-dialog>
 </div>
 
 <!-- import common js-->
@@ -249,11 +290,19 @@
     // <!--电销组-->
     var dzList=[[${dzList}]];
     var dxgwList=[[${dxgwList}]];
-    var dxzjList = [[${dxzjList}]]
+    var dxzjList = [[${dxzjList}]];
+    var releaseReasonList=[[${releaseReasonList}]];//用户自定义字段
     // 查询 模块
     var mainDivVM = new Vue({
         el: '#mainDiv',
         data: {
+        	tablecluereleaseData:[],
+        	cluereleaseFormVisible:false,
+        	cluereleasetitle:"",
+        	receiveDialog:false,
+        	receiveTitle:"",
+        	repeatPhonesDialog:false,
+        	dailogTitleType:"",
             repeatPhonesDialog:false,//重复手机号
             allocationDialogFormVisible:false,
             releaseDialogFormVisible:false,
@@ -323,28 +372,21 @@
                 trackingDialogVisible:false,
                 tableData:[]
             },
-            repeatPhonesTable:[//重复手机号
-                {
-                    resourceCreateTime:'',
-                    contactCreateTime:'',
-                    majordomo:'',
-                    adviser:'',
-                    majordomoTeam:'',
-                    resourceCreatePersonRole:'',
-                    resourceCreatePerson:'张三',
-                },
-                {
-                    resourceCreateTime:'',
-                    contactCreateTime:'',
-                    majordomo:'',
-                    adviser:'',
-                    majordomoTeam:'',
-                    resourceCreatePersonRole:'',
-                    resourceCreatePerson:'王五',
-                }
-            ],
+            repeatPhonesTable:[],
+            receiveTable:[],
         },
         methods: {
+       	  transformReason(row, column, cellValue, index) {
+            	  var text="";
+            	  if(releaseReasonList){
+	                  for(var i=0;i<releaseReasonList.length;i++){
+	                		if(cellValue==releaseReasonList[i].value){
+	                			text=releaseReasonList[i].name;
+	                		}
+	                	}
+            	  }
+                  return text;
+              },
             formatCusLevel(row, column){
                 return row.cusLevel==1?"VIP": row.cusLevel==2?"重要":row.cusLevel==2?"普通":""
             },
@@ -472,6 +514,24 @@
                 this.releaseInitList()
                 this.releaseDialogFormVisible = true
             },
+            openreleaseDialog(row){
+            	alert(row.clueid);
+            	this.cluereleasetitle = row.cusName+"+"+row.phone;
+            	this.cluereleaseFormVisible = true;
+            	var param = {};
+            	param.clueId = row.clueid;
+            	axios.post('/aggregation/releaserecord/getReleaseRecordRespByClueId',param).then(function (response) {
+                    if(null===response||response.data==null||response.data.code!='0'){
+                        if(response.data.code!='0'){
+                            mainDivVM.$message({message: response.data.msg, type: 'warning'});
+                        }
+                        return false;
+                    }else{
+                        mainDivVM.tablecluereleaseData =response.data.data;
+                    }
+                })
+            	
+            },
             openBack(){
                 if(this.multipleSelection.length==0){
                     this.$message({message: '请选择还原资源', type: 'warning'});
@@ -534,14 +594,44 @@
             },
             openReceive(){//领取                
                 if(this.multipleSelection.length==0){
-                    this.$message({message: '请选择领取资源', type: 'warning'});
+                    this.$message({message: '请选择资源', type: 'warning'});
                     return false;
                 }else{
+                	var param={};
+                	param.idList = []
+                	 for(var i = 0 ; i < this.multipleSelection.length ; i++ ){
+                         param.idList.push(this.multipleSelection[i].clueid)
+                     }
+                	  axios.post('/clue/cluereceiverecords/receiveClueByClueIds', param)
+                      .then(function (response) {
+                            var result =  response.data;
+                            if(result.code == 0){
+                            	if(result.data !=null){
+                            		var data = result.data;
+                            		if(data.backStatus ==3){
+                            			mainDivVM.$message({message: data.backResult, type: 'warning'});
+                            		}else if(data.backStatus !=0){
+                            			mainDivVM.receiveDialog = true;
+                            			mainDivVM.receiveTitle=data.backResult;
+                            			mainDivVM.receiveTable= data.clueCustomerDTOs;
+                            		}else{
+                            			window.location.href="/aggregation/publiccustomer/listPage"; 
+                            		}
+                            	}
+                            	console.info(result);
+                                
+                            }else{
+                            	mainDivVM.$message({message: result.msg, type: 'warning'});
+                            }
+                            
+                      }).catch(function (error) {
+                                  console.log(error);
+                      })           
                     // 1、本组释放到公有池的资源，本组的电销人员不能再捡了
                     // 2、总监领取老资源上限按照领取规则管理中设置的限制进行限制
                     // 3、电销人员领取新资源上限按照领取规则管理中设置的限制进行限制
                     var resourceType=1;//假数据
-                    if(resourceType==1){
+                 /*    if(resourceType==1){
                         this.$alert('此资源（资源姓名+手机号）为组内资源，不可进行领取。', '提示', {
                           confirmButtonText: '确定',
                           callback: action => {
@@ -564,12 +654,28 @@
                             message: '资源领取成功',
                             type: 'success'
                         });
-                    }
+                    } */
                 }
             },
             repeatPhonesClick(row) {//重复手机号按钮点击
                 console.log(row);
                 this.repeatPhonesDialog=true;
+                this.dailogTitleType=row.phone;
+                var param ={};
+                    param.id = row.clueId;
+                      param.cusPhone = row.phone;
+                       console.info(param);
+                        axios.post('/clue/appiontment/repeatPhonelist', param)
+                          .then(function (response) {
+                                var result =  response.data;
+                                console.info(result);
+                                var table=result.data;
+                                mainDivVM.repeatPhonesTable= table;
+                                mainDivVM.repeatPhonesDialog=true;
+                          })  .catch(function (error) {
+                                      console.log(error);
+                });
+
             },
         },
         created(){
