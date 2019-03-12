@@ -30,7 +30,7 @@ import javax.validation.Valid;
  * @auther  yangbiao
  * @date: 2019/1/8 17:35
  */
-@FeignClient(name = "aggregation-service-1",path="/aggregation/releaserecord",fallback = ReleaseRecordFeignClient.HystrixClientFallback.class)
+@FeignClient(name = "aggregation-service",path="/aggregation/releaserecord",fallback = ReleaseRecordFeignClient.HystrixClientFallback.class)
 public interface ReleaseRecordFeignClient {
 
     @RequestMapping("/insert")
