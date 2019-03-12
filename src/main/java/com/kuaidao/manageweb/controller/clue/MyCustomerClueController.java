@@ -283,23 +283,21 @@ public class MyCustomerClueController {
 	 */
 	@RequestMapping("/customerInfoReadOnly")
 	public String customerInfoReadOnly(HttpServletRequest request, @RequestParam String clueId) {
-
 		CallRecordReqDTO call = new CallRecordReqDTO();
 		call.setClueId(clueId);
-		call.setPageSize(10000);
-		call.setPageNum(1);
-		JSONResult<PageBean<CallRecordRespDTO>> callRecord = callRecordFeign.listTmCallReacordByParams(call);
+		JSONResult<List<CallRecordRespDTO>> callRecord = callRecordFeign.listTmCallReacordByParamsNoPage(call);
 		// 资源通话记录
 		if (callRecord != null && JSONResult.SUCCESS.equals(callRecord.getCode()) && callRecord.getData() != null) {
+
 			request.setAttribute("callRecord", callRecord.getData());
-		} else {
-			request.setAttribute("callRecord", new ArrayList());
 		}
 		ClueQueryDTO queryDTO = new ClueQueryDTO();
 
 		queryDTO.setClueId(new Long(clueId));
 
 		request.setAttribute("clueId", clueId);
+
+		request.setAttribute("ossUrl", ossUrl);
 
 		JSONResult<ClueDTO> clueInfo = myCustomerFeignClient.findClueInfo(queryDTO);
 
@@ -314,12 +312,12 @@ public class MyCustomerClueController {
 			if (null != clueInfo.getData().getClueBasic()) {
 				request.setAttribute("base", clueInfo.getData().getClueBasic());
 			} else {
-				request.setAttribute("base", new ArrayList());
+				request.setAttribute("customer", new ArrayList());
 			}
 			if (null != clueInfo.getData().getClueIntention()) {
 				request.setAttribute("intention", clueInfo.getData().getClueIntention());
 			} else {
-				request.setAttribute("intention", new ArrayList());
+				request.setAttribute("customer", new ArrayList());
 			}
 		}
 		// 获取资源跟进记录数据
@@ -328,7 +326,6 @@ public class MyCustomerClueController {
 		JSONResult<List<TrackingRespDTO>> trackingList = trackingFeignClient.queryList(dto);
 		if (trackingList != null && trackingList.SUCCESS.equals(trackingList.getCode())
 				&& trackingList.getData() != null) {
-
 			request.setAttribute("trackingList", trackingList.getData());
 		} else {
 			request.setAttribute("trackingList", new ArrayList());
@@ -344,12 +341,13 @@ public class MyCustomerClueController {
 		} else {
 			request.setAttribute("circulationList", new ArrayList());
 		}
-
 		// 项目
 		ProjectInfoPageParam param = new ProjectInfoPageParam();
 		JSONResult<List<ProjectInfoDTO>> proJson = projectInfoFeignClient.listNoPage(param);
 		if (proJson.getCode().equals(JSONResult.SUCCESS)) {
 			request.setAttribute("proSelect", proJson.getData());
+		} else {
+			request.setAttribute("proSelect", new ArrayList());
 		}
 
 		// 获取已上传的文件数据
@@ -360,6 +358,82 @@ public class MyCustomerClueController {
 				&& clueFileList.getData() != null) {
 			request.setAttribute("clueFileList", clueFileList.getData());
 		}
+//		CallRecordReqDTO call = new CallRecordReqDTO();
+//		call.setClueId(clueId);
+//		call.setPageSize(10000);
+//		call.setPageNum(1);
+//		JSONResult<PageBean<CallRecordRespDTO>> callRecord = callRecordFeign.listTmCallReacordByParams(call);
+//		// 资源通话记录
+//		if (callRecord != null && JSONResult.SUCCESS.equals(callRecord.getCode()) && callRecord.getData() != null) {
+//			request.setAttribute("callRecord", callRecord.getData());
+//		} else {
+//			request.setAttribute("callRecord", new ArrayList());
+//		}
+//		ClueQueryDTO queryDTO = new ClueQueryDTO();
+//
+//		queryDTO.setClueId(new Long(clueId));
+//
+//		request.setAttribute("clueId", clueId);
+//
+//		JSONResult<ClueDTO> clueInfo = myCustomerFeignClient.findClueInfo(queryDTO);
+//
+//		// 维护的资源数据
+//		if (clueInfo != null && JSONResult.SUCCESS.equals(clueInfo.getCode()) && clueInfo.getData() != null) {
+//
+//			if (null != clueInfo.getData().getClueCustomer()) {
+//				request.setAttribute("customer", clueInfo.getData().getClueCustomer());
+//			} else {
+//				request.setAttribute("customer", new ArrayList());
+//			}
+//			if (null != clueInfo.getData().getClueBasic()) {
+//				request.setAttribute("base", clueInfo.getData().getClueBasic());
+//			} else {
+//				request.setAttribute("base", new ArrayList());
+//			}
+//			if (null != clueInfo.getData().getClueIntention()) {
+//				request.setAttribute("intention", clueInfo.getData().getClueIntention());
+//			} else {
+//				request.setAttribute("intention", new ArrayList());
+//			}
+//		}
+//		// 获取资源跟进记录数据
+//		TrackingReqDTO dto = new TrackingReqDTO();
+//		dto.setClueId(new Long(clueId));
+//		JSONResult<List<TrackingRespDTO>> trackingList = trackingFeignClient.queryList(dto);
+//		if (trackingList != null && trackingList.SUCCESS.equals(trackingList.getCode())
+//				&& trackingList.getData() != null) {
+//
+//			request.setAttribute("trackingList", trackingList.getData());
+//		} else {
+//			request.setAttribute("trackingList", new ArrayList());
+//		}
+//
+//		// 获取资源流转数据
+//		CirculationReqDTO circDto = new CirculationReqDTO();
+//		circDto.setClueId(new Long(clueId));
+//		JSONResult<List<CirculationRespDTO>> circulationList = circulationFeignClient.queryList(circDto);
+//		if (circulationList != null && circulationList.SUCCESS.equals(circulationList.getCode())
+//				&& circulationList.getData() != null) {
+//			request.setAttribute("circulationList", circulationList.getData());
+//		} else {
+//			request.setAttribute("circulationList", new ArrayList());
+//		}
+//
+//		// 项目
+//		ProjectInfoPageParam param = new ProjectInfoPageParam();
+//		JSONResult<List<ProjectInfoDTO>> proJson = projectInfoFeignClient.listNoPage(param);
+//		if (proJson.getCode().equals(JSONResult.SUCCESS)) {
+//			request.setAttribute("proSelect", proJson.getData());
+//		}
+//
+//		// 获取已上传的文件数据
+//		ClueQueryDTO fileDto = new ClueQueryDTO();
+//		fileDto.setClueId(new Long(clueId));
+//		JSONResult<List<ClueFileDTO>> clueFileList = myCustomerFeignClient.findClueFile(fileDto);
+//		if (clueFileList != null && clueFileList.SUCCESS.equals(clueFileList.getCode())
+//				&& clueFileList.getData() != null) {
+//			request.setAttribute("clueFileList", clueFileList.getData());
+//		}
 
 		return "clue/CustomerMaintenanceReadOnly";
 	}
