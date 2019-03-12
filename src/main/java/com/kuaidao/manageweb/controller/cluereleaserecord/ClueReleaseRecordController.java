@@ -146,5 +146,13 @@ public class ClueReleaseRecordController {
         }
         return resList;
     }
-
+    
+    /**
+     * 释放记录
+     */
+    @RequestMapping("/getReleaseRecordRespByClueId")
+    public JSONResult<List<ReleaseRecordRespDTO>> getReleaseRecordRespByClueId(
+            @RequestBody ReleaseRecordReqDTO dto) {
+        return releaseRecordFeignClient.listNoPage(dto);
+    }
 }

@@ -53,7 +53,7 @@ public class ClueReceiveRecordsController {
 		}else {
 			clueReceiveRecordsDTO.setReceiveUser(user.getId());
 			clueReceiveRecordsDTO.setTeleGroupId(user.getOrgId());
-			clueReceiveRecordsDTO.setLoginUserRole(RoleCodeEnum.DXZJ.name());
+			clueReceiveRecordsDTO.setLoginUserRole(roleList.get(0).getRoleCode());
 			
 			// 查询用户的上级
 			OrganizationQueryDTO orgDto = new OrganizationQueryDTO();

@@ -135,7 +135,13 @@
             <!-- <el-table-column prop="teleGorupName" label="电销组" align="center"></el-table-column> -->
             <el-table-column prop="releaseTime" label="释放时间" align="center" width="170"></el-table-column>
             <el-table-column prop="releaseReasonName" label="释放原因" align="center" width="170"></el-table-column>
-            <el-table-column prop="releaseNum" label="被释放次数" align="center" width="100"></el-table-column>
+            <el-table-column prop="releaseNum" label="被释放次数" align="center" width="100">
+            	 <template slot-scope="scope">
+                    <el-button @click="openreleaseDialog(scope.row)" type="text" size="small">
+                        {{scope.row.releaseNum}}
+                    </el-button>
+                </template>
+            </el-table-column>
         </el-table>
     </template>
     <table-pagination :pager="pager"  @change="initList"></table-pagination>
@@ -200,6 +206,28 @@
             <table-pagination :pager="releasePager"  @change="releaseInitList"></table-pagination>
         </template>
     </el-dialog>
+    
+    <!--释放记录-->
+    <el-dialog :title="cluereleasetitle+'释放记录'" :visible.sync="cluereleaseFormVisible">
+        <template>
+            <!-- <el-form :model="release" ref="release" class="demo-form-inline marginB20" style="width: 80%">
+                <el-row :gutter="20">
+                    <el-col  :span="7"> <el-input  v-model="release.customerName" placeholder="客户姓名"></el-input> </el-col>
+                    <el-col  :span="7"> <el-input  v-model="release.releaseReason" placeholder="释放原因"></el-input> </el-col>
+                    <el-col  :span="7"> <el-input  v-model="release.releaseUserName" placeholder="释放人电销顾问姓名"></el-input> </el-col>
+                    <el-col  :span="3">  <el-button  type="primary" @click="releaseInitList">搜索</el-button> </el-col>
+                </el-row>
+            </el-form> -->
+            <el-table :data="tablecluereleaseData"  style="width: 100%" tooltip-effect="light" border ref="releaseTable">
+               <el-table-column align="center" type="index" width="55" label="序号"></el-table-column>
+            <el-table-column align="center" prop="releaseTime" label="释放时间"></el-table-column>
+            <el-table-column align="center" prop="releaseReason" label="释放原因" :formatter="transformReason"></el-table-column>
+            <el-table-column align="center" prop="teleSaleName" label="释放人顾问姓名"></el-table-column>
+            <el-table-column align="center" prop="teleGroupName" label="所属电销组"></el-table-column>
+            </el-table>
+        </template>
+    </el-dialog>
+    
 
   <!--  <el-dialog title="跟进记录"  :visible.sync="trackingDialogVisible"  width="50%">
         <template>
@@ -246,7 +274,7 @@
             tooltip-effect="dark"
             style="width: 100%"
             border
-            :data="repeatPhonesTable" 
+            :data="receiveTable" 
             >
             <el-table-column align="center" type="index" width="55" label="序号"></el-table-column>
             <el-table-column align="center" prop="cusName" label="资源姓名"></el-table-column>
@@ -262,11 +290,15 @@
     // <!--电销组-->
     var dzList=[[${dzList}]];
     var dxgwList=[[${dxgwList}]];
-    var dxzjList = [[${dxzjList}]]
+    var dxzjList = [[${dxzjList}]];
+    var releaseReasonList=[[${releaseReasonList}]];//用户自定义字段
     // 查询 模块
     var mainDivVM = new Vue({
         el: '#mainDiv',
         data: {
+        	tablecluereleaseData:[],
+        	cluereleaseFormVisible:false,
+        	cluereleasetitle:"",
         	receiveDialog:false,
         	receiveTitle:"",
         	repeatPhonesDialog:false,
@@ -341,8 +373,20 @@
                 tableData:[]
             },
             repeatPhonesTable:[],
+            receiveTable:[],
         },
         methods: {
+       	  transformReason(row, column, cellValue, index) {
+            	  var text="";
+            	  if(releaseReasonList){
+	                  for(var i=0;i<releaseReasonList.length;i++){
+	                		if(cellValue==releaseReasonList[i].value){
+	                			text=releaseReasonList[i].name;
+	                		}
+	                	}
+            	  }
+                  return text;
+              },
             formatCusLevel(row, column){
                 return row.cusLevel==1?"VIP": row.cusLevel==2?"重要":row.cusLevel==2?"普通":""
             },
@@ -470,6 +514,24 @@
                 this.releaseInitList()
                 this.releaseDialogFormVisible = true
             },
+            openreleaseDialog(row){
+            	alert(row.clueid);
+            	this.cluereleasetitle = row.cusName+"+"+row.phone;
+            	this.cluereleaseFormVisible = true;
+            	var param = {};
+            	param.clueId = row.clueid;
+            	axios.post('/aggregation/releaserecord/getReleaseRecordRespByClueId',param).then(function (response) {
+                    if(null===response||response.data==null||response.data.code!='0'){
+                        if(response.data.code!='0'){
+                            mainDivVM.$message({message: response.data.msg, type: 'warning'});
+                        }
+                        return false;
+                    }else{
+                        mainDivVM.tablecluereleaseData =response.data.data;
+                    }
+                })
+            	
+            },
             openBack(){
                 if(this.multipleSelection.length==0){
                     this.$message({message: '请选择还原资源', type: 'warning'});
@@ -546,16 +608,17 @@
                             if(result.code == 0){
                             	if(result.data !=null){
                             		var data = result.data;
-                            		if(data.backStatus !=0){
+                            		if(data.backStatus ==3){
+                            			mainDivVM.$message({message: data.backResult, type: 'warning'});
+                            		}else if(data.backStatus !=0){
                             			mainDivVM.receiveDialog = true;
                             			mainDivVM.receiveTitle=data.backResult;
-                            			mainDivVM.repeatPhonesTable= data.clueCustomerDTOs;
+                            			mainDivVM.receiveTable= data.clueCustomerDTOs;
+                            		}else{
+                            			window.location.href="/aggregation/publiccustomer/listPage"; 
                             		}
                             	}
                             	console.info(result);
-                                var table=result.data;
-                               
-                                mainDivVM.repeatPhonesDialog=true;
                                 
                             }else{
                             	mainDivVM.$message({message: result.msg, type: 'warning'});
@@ -607,7 +670,7 @@
                                 var result =  response.data;
                                 console.info(result);
                                 var table=result.data;
-                                mainDivVM.repeatPhonesTable= table.data;
+                                mainDivVM.repeatPhonesTable= table;
                                 mainDivVM.repeatPhonesDialog=true;
                           })  .catch(function (error) {
                                       console.log(error);
