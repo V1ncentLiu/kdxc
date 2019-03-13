@@ -127,9 +127,10 @@ public class BusinessVisitRecordController {
      *  跳转到 到访记录明细页面
      */
     @RequestMapping("/visitRecordPage")
-    public String visitRecordPage(HttpServletRequest request,@RequestParam String clueId , @RequestParam String visitStatus) throws Exception {
+    public String visitRecordPage(HttpServletRequest request,@RequestParam String clueId , @RequestParam String visitStatus,@RequestParam String signAuditStatus) throws Exception {
         request.setAttribute("clueId",clueId);
         request.setAttribute("visitStatus",visitStatus);
+        request.setAttribute("signAuditStatus",signAuditStatus);
         // 项目
         ProjectInfoPageParam param = new ProjectInfoPageParam();
         JSONResult<List<ProjectInfoDTO>> proJson = projectInfoFeignClient.listNoPage(param);
@@ -169,6 +170,11 @@ public class BusinessVisitRecordController {
         if(JSONResult.SUCCESS.equals(maxNewOne.getCode())){
             BusVisitRecordRespDTO data = maxNewOne.getData();
             if(data!=null){
+                data.setRebutReason(null);
+                data.setRebutTime(null);
+                data.setNotSignReason(null);
+                data.setIsSign(1);
+                data.setVisitPeopleNum(null);
                 return new JSONResult<BusVisitRecordRespDTO>().success(data);
             }
         }
@@ -177,7 +183,6 @@ public class BusinessVisitRecordController {
         if(JSONResult.SUCCESS.equals(mapJSONResult.getCode())){
             Map data = mapJSONResult.getData();
             if(data!=null){
-//                recordRespDTO.setCompanyid((Long)data.get("busCompany"));
                 Object arrivalTime = data.get("arrivalTime");
                 Date arrDate = null;
                 if(arrivalTime==null){
@@ -203,6 +208,10 @@ public class BusinessVisitRecordController {
                 recordRespDTO.setIsSign(1);
             }
         }
+
+        recordRespDTO.setRebutReason(null);
+        recordRespDTO.setRebutTime(null);
+        recordRespDTO.setNotSignReason(null);
         return new JSONResult<BusVisitRecordRespDTO>().success(recordRespDTO);
     }
 

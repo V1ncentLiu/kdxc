@@ -1,7 +1,6 @@
 package com.kuaidao.manageweb.feign.clue;
 
 import java.util.List;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.netflix.feign.FeignClient;
@@ -9,7 +8,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-
 import com.kuaidao.aggregation.dto.clue.ClueDTO;
 import com.kuaidao.aggregation.dto.clue.ClueFileDTO;
 import com.kuaidao.aggregation.dto.clue.ClueQueryDTO;
@@ -138,6 +136,16 @@ public interface MyCustomerFeignClient {
 	@RequestMapping(method = RequestMethod.POST, value = "/deleteClueFile")
 	JSONResult<String> deleteClueFile(ClueFileDTO dto);
 
+	/**
+	 * 保留客户资源
+	 * 
+	 * @param dto
+	 * @return
+	 */
+ 
+	@RequestMapping(method = RequestMethod.POST, value = "/reserveClue")
+	public JSONResult<String> reserveClue(ClueQueryDTO dto);
+
 	@Component
 	static class HystrixClientFallback implements MyCustomerFeignClient {
 
@@ -220,6 +228,14 @@ public interface MyCustomerFeignClient {
 			// TODO Auto-generated method stub
 			return fallBackError("更新最后拨打时间");
 		}
+
+		@Override
+		public JSONResult<String> reserveClue(ClueQueryDTO dto) {
+			// TODO Auto-generated method stub
+			return fallBackError("保留客户资源数据");
+		}
+		
+		
 
 	}
 
