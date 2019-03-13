@@ -125,7 +125,7 @@
         <br>
         <div v-show="showVisitAduitDatas.threeShow">
             <el-button size="mini"  type="text" style = "color: #1e2746">多次到访</el-button>
-            <el-table :data="showVisitAduitDatas.three" style="width: 100%" tooltip-effect="dark"  ref="multipleTable">
+            <el-table :data="showVisitAduitDatas.three" style="width: 100%" tooltip-effect="light"  ref="multipleTable">
                 <el-table-column prop="customerName" label="客户姓名"   align="center"></el-table-column>
                 <el-table-column prop="projectName" label="考察项目"   align="center"></el-table-column>
                 <el-table-column prop="companyName" label="考察公司"   align="center"></el-table-column>
@@ -160,6 +160,9 @@
                         </div>
                     </template>
                 </el-table-column>
+                <el-table-column prop="notSignReason" label="未签约原因"  width="200"  show-overflow-tooltip="true" align="center"></el-table-column>
+                <el-table-column prop="rebutReason" label="驳回原因"  width="200"   show-overflow-tooltip="true" align="center"></el-table-column>
+
                 <el-table-column prop="status" label="到访有效性"   align="center">
                     <template slot-scope="scope">
                         <div v-if="scope.row.status === 1">
@@ -171,8 +174,8 @@
                     </template>
                 </el-table-column>
             </el-table>
-            <p v-show="showVisitAduitDatas.threeNotSignShow" style = "color: #1e2746">未签约原因：{{showVisitAduitDatas.threeNotSignReason}}</p><br>
-            <p v-show="showVisitAduitDatas.threeRebutShow" style = "color: red">驳回原因：{{showVisitAduitDatas.threeRebutReason}}</p>
+            <!--<p v-show="showVisitAduitDatas.threeNotSignShow" style = "color: #1e2746">未签约原因：{{showVisitAduitDatas.threeNotSignReason}}</p><br>-->
+            <!--<p v-show="showVisitAduitDatas.threeRebutShow" style = "color: red">驳回原因：{{showVisitAduitDatas.threeRebutReason}}</p>-->
         </div>
 
 
@@ -814,6 +817,7 @@
                         return false;
                     }else{
                         var dataList = response.data.data;
+                        mainDivVM.showVisitAduitDatas = {}; // 赋值之前首先需要进行数据清空
                         // 首次到访
                         var first = [];
                         if(dataList.length>=1){
