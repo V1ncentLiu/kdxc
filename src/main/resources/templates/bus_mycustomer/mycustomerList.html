@@ -464,7 +464,7 @@
                         </template>
                     </el-table-column>
                     <el-table-column prop="visitCity" label="来访城市"   width="100"  align="center"></el-table-column>
-                    <!--<el-table-column prop="visitPeopleNum" label="到访人数"   align="center"></el-table-column>-->
+                    <el-table-column prop="visitPeopleNum" label="到访人数"   align="center"></el-table-column>
                     <el-table-column prop="createTime" label="创建时间"   width="100"  align="center"></el-table-column>
                     <el-table-column prop="isSign" label="是否签约"    width="100" align="center">
                         <template slot-scope="scope">
@@ -487,8 +487,8 @@
                         </template>
                     </el-table-column>
                 </el-table>
-                <el-button v-show="showVisitAduitDatas.oneNotSignShow" size="mini"  type="text" style = "color: #1e2746">未签约原因：{{showVisitAduitDatas.oneNotSignReason}}</el-button><br>
-                <el-button v-show="showVisitAduitDatas.oneRebutShow" size="mini"  type="text" style = "color:red">驳回原因：{{showVisitAduitDatas.oneRebutReason}}</el-button>
+                <p v-show="showVisitAduitDatas.oneNotSignShow" style = "color: #1e2746">未签约原因：{{showVisitAduitDatas.oneNotSignReason}}</p>
+                <p v-show="showVisitAduitDatas.oneRebutShow"  style = "color:red">驳回原因：{{showVisitAduitDatas.oneRebutReason}}</p>
             </div>
             <br>
             <div v-show="showVisitAduitDatas.twoShow">
@@ -539,13 +539,13 @@
                         </template>
                     </el-table-column>
                 </el-table>
-                <el-button  v-show="showVisitAduitDatas.twoNotSignShow" size="mini"  type="text" style = "color: #1e2746">未签约原因：{{showVisitAduitDatas.twoNotSignReason}}</el-button><br>
-                <el-button v-show="showVisitAduitDatas.twoRebutShow"  size="mini"  type="text" style = "color: red">驳回原因：{{showVisitAduitDatas.twoRebutReason}}</el-button>
+                <p  v-show="showVisitAduitDatas.twoNotSignShow" style = "color: #1e2746">未签约原因：{{showVisitAduitDatas.twoNotSignReason}}</p>
+                <p v-show="showVisitAduitDatas.twoRebutShow" style = "color: red">驳回原因：{{showVisitAduitDatas.twoRebutReason}}</p>
             </div>
             <br>
             <div v-show="showVisitAduitDatas.threeShow">
                 <el-button size="mini"  type="text" style = "color: #1e2746">多次到访</el-button>
-                <el-table :data="showVisitAduitDatas.three" style="width: 100%" tooltip-effect="dark"  ref="multipleTable">
+                <el-table :data="showVisitAduitDatas.three" style="width: 100%" tooltip-effect="light"  ref="multipleTable">
                     <el-table-column prop="customerName" label="客户姓名"  width="100"  align="center"></el-table-column>
                     <el-table-column prop="projectName" label="考察项目"   width="100" align="center"></el-table-column>
                     <el-table-column prop="companyName" label="考察公司"   width="100" align="center"></el-table-column>
@@ -580,6 +580,10 @@
                             </div>
                         </template>
                     </el-table-column>
+
+                    <el-table-column prop="notSignReason" label="未签约原因"  width="200"  show-overflow-tooltip="true" align="center"></el-table-column>
+                    <el-table-column prop="rebutReason" label="驳回原因"  width="200"   show-overflow-tooltip="true" align="center"></el-table-column>
+
                     <el-table-column prop="status" label="到访有效性"  width="100"  align="center">
                         <template slot-scope="scope">
                             <div v-if="scope.row.status === 1">
@@ -591,8 +595,8 @@
                         </template>
                     </el-table-column>
                 </el-table>
-                <el-button v-show="showVisitAduitDatas.threeNotSignShow" size="mini"  type="text" style = "color: #1e2746">未签约原因：{{showVisitAduitDatas.threeNotSignReason}}</el-button><br>
-                <el-button v-show="showVisitAduitDatas.threeRebutShow"  size="mini"  type="text" style = "color: red">驳回原因：{{showVisitAduitDatas.threeRebutReason}}</el-button>
+              <!--  <p v-show="showVisitAduitDatas.threeNotSignShow" style = "color: #1e2746">未签约原因：{{showVisitAduitDatas.threeNotSignReason}}</p>
+                <p v-show="showVisitAduitDatas.threeRebutShow"  style = "color: red">驳回原因：{{showVisitAduitDatas.threeRebutReason}}</p>-->
             </div>
         </template>
     </el-dialog>
@@ -677,20 +681,23 @@
                 <el-row>
                     <el-col :span="10">
                         <el-form-item label="应收金额：" :label-width="formLabelWidth" prop="amountReceivable">
-                            <el-input v-model="formSigning.amountReceivable" @keyup.native="number" autocomplete="off" maxLength="10" style="width: 80%;"></el-input>
+                            <el-input v-model="formSigning.amountReceivable"  type="number"
+
+                                      oninput="if(value.length>10)value=value.slice(0,10)"  onkeypress="return(/[\d]/.test(String.fromCharCode(event.keyCode)))"
+                                      autocomplete="off" maxLength="10" style="width: 80%;"></el-input>
                             <span style="padding-left: 10px;">元</span>
                         </el-form-item>
                     </el-col>
                     <el-col :span="10">
                         <el-form-item label="路费（报首次）：" :label-width="formLabelWidth" prop="firstToll">
-                            <el-input v-model="formSigning.firstToll" @keyup.native="number1" autocomplete="off" maxLength="10" style="width: 80%;"></el-input><span style="padding-left: 10px;">元</span>
+                            <el-input v-model="formSigning.firstToll"  type="number" oninput="if(value.length>10)value=value.slice(0,10)"  onkeypress="return(/[\d]/.test(String.fromCharCode(event.keyCode)))" autocomplete="off" maxLength="10" style="width: 80%;"></el-input><span style="padding-left: 10px;">元</span>
                         </el-form-item>
                     </el-col>
                 </el-row>
                 <el-row>
                     <el-col :span="10">
                         <el-form-item label="优惠金额：" :label-width="formLabelWidth" prop="preferentialAmount">
-                            <el-input v-model="formSigning.preferentialAmount" @keyup.native="number2" autocomplete="off" maxLength="10" style="width: 80%;"></el-input><span style="padding-left: 10px;">元</span>
+                            <el-input v-model="formSigning.preferentialAmount"  type="number" oninput="if(value.length>10)value=value.slice(0,10)"  onkeypress="return(/[\d]/.test(String.fromCharCode(event.keyCode)))" autocomplete="off" maxLength="10" style="width: 80%;"></el-input><span style="padding-left: 10px;">元</span>
                         </el-form-item>
                     </el-col>
                     <el-col :span="10">
@@ -709,7 +716,7 @@
                 <el-row>
                     <el-col :span="10">
                         <el-form-item label="赠送金额：" :label-width="formLabelWidth" prop="giveAmount">
-                            <el-input v-model="formSigning.giveAmount" @keyup.native="number3" autocomplete="off" maxLength="10" style="width: 80%;"></el-input><span style="padding-left: 10px;">元</span>
+                            <el-input v-model="formSigning.giveAmount"  type="number" oninput="if(value.length>10)value=value.slice(0,10)"  onkeypress="return(/[\d]/.test(String.fromCharCode(event.keyCode)))" autocomplete="off" maxLength="10" style="width: 80%;"></el-input><span style="padding-left: 10px;">元</span>
                         </el-form-item>
                     </el-col>
                 </el-row>
@@ -750,7 +757,7 @@
                     </el-col>
                     <el-col :span="10">
                         <el-form-item label="实收金额：" :label-width="formLabelWidth" prop="amountReceived">
-                            <el-input maxLength="10" v-model="formSigning.amountReceived" @keyup.native="number4"  style="width: 80%;" @change="setAddPerformanceAmount"></el-input>
+                            <el-input maxLength="10" v-model="formSigning.amountReceived"  type="number" oninput="if(value.length>10)value=value.slice(0,10)"  onkeypress="return(/[\d]/.test(String.fromCharCode(event.keyCode)))"  style="width: 80%;" @change="setAddPerformanceAmount"></el-input>
                             <span style="padding-left: 10px;">元</span>
                         </el-form-item>
                     </el-col>
@@ -758,7 +765,7 @@
                 <el-row v-show="isAllMoney">
                     <el-col :span="10">
                         <el-form-item label="余款金额：" :label-width="formLabelWidth" prop="amountBalance">
-                            <el-input maxLength="10" v-model="formSigning.amountBalance" @keyup.native="number5"></el-input>
+                            <el-input maxLength="10" v-model="formSigning.amountBalance"  type="number" oninput="if(value.length>10)value=value.slice(0,10)"  onkeypress="return(/[\d]/.test(String.fromCharCode(event.keyCode)))"></el-input>
                             <span style="padding-left: 10px;">元</span>
                         </el-form-item>
                     </el-col>
@@ -776,7 +783,7 @@
                 <el-row>
                     <el-col :span="10">
                         <el-form-item label="业绩金额：" :label-width="formLabelWidth" prop="performanceAmount">
-                            <el-input maxLength="10" v-model="formSigningAmountPerformance" @keyup.native="number6"  style="width: 80%;"></el-input>
+                            <el-input maxLength="10" v-model="formSigningAmountPerformance"  type="number" oninput="if(value.length>10)value=value.slice(0,10)"  onkeypress="return(/[\d]/.test(String.fromCharCode(event.keyCode)))"  style="width: 80%;"></el-input>
                             <span style="padding-left: 10px;">元</span>
                         </el-form-item>
                     </el-col>
@@ -879,19 +886,19 @@
                     <el-row>
                         <el-col :span="10">
                             <el-form-item label="应收金额：" :label-width="formLabelWidth" prop="amountReceivable">
-                                <el-input :disabled="notEditRebutSign"  v-model="updateFormSigning.amountReceivable" @keyup.native="number01" autocomplete="off" maxLength="10" style="width: 80%;"></el-input><span style="padding-left: 10px;">元</span>
+                                <el-input :disabled="notEditRebutSign"  v-model="updateFormSigning.amountReceivable"  type="number" oninput="if(value.length>10)value=value.slice(0,10)"  onkeypress="return(/[\d]/.test(String.fromCharCode(event.keyCode)))" autocomplete="off" maxLength="10" style="width: 80%;"></el-input><span style="padding-left: 10px;">元</span>
                             </el-form-item>
                         </el-col>
                         <el-col :span="10">
                             <el-form-item label="路费（报首次）：" :label-width="formLabelWidth" prop="firstToll">
-                                <el-input :disabled="notEditRebutSign"   v-model="updateFormSigning.firstToll" @keyup.native="number11" autocomplete="off" maxLength="10" style="width: 80%;"></el-input><span style="padding-left: 10px;">元</span>
+                                <el-input :disabled="notEditRebutSign"   v-model="updateFormSigning.firstToll"  type="number" oninput="if(value.length>10)value=value.slice(0,10)"  onkeypress="return(/[\d]/.test(String.fromCharCode(event.keyCode)))" autocomplete="off" maxLength="10" style="width: 80%;"></el-input><span style="padding-left: 10px;">元</span>
                             </el-form-item>
                         </el-col>
                     </el-row>
                     <el-row>
                         <el-col :span="10">
                             <el-form-item label="优惠金额：" :label-width="formLabelWidth" prop="preferentialAmount">
-                                <el-input :disabled="notEditRebutSign"  v-model="updateFormSigning.preferentialAmount" @keyup.native="number21" autocomplete="off" maxLength="10" style="width: 80%;"></el-input><span style="padding-left: 10px;">元</span>
+                                <el-input :disabled="notEditRebutSign"  v-model="updateFormSigning.preferentialAmount"  type="number" oninput="if(value.length>10)value=value.slice(0,10)"  onkeypress="return(/[\d]/.test(String.fromCharCode(event.keyCode)))" autocomplete="off" maxLength="10" style="width: 80%;"></el-input><span style="padding-left: 10px;">元</span>
                             </el-form-item>
                         </el-col>
                         <el-col :span="10">
@@ -910,7 +917,7 @@
                     <el-row>
                         <el-col :span="10">
                             <el-form-item label="赠送金额：" :label-width="formLabelWidth" prop="giveAmount">
-                                <el-input :disabled="notEditRebutSign" v-model="updateFormSigning.giveAmount" @keyup.native="number31" autocomplete="off" maxLength="10" style="width: 80%;"></el-input><span style="padding-left: 10px;">元</span>
+                                <el-input :disabled="notEditRebutSign" v-model="updateFormSigning.giveAmount"  type="number" oninput="if(value.length>10)value=value.slice(0,10)"  onkeypress="return(/[\d]/.test(String.fromCharCode(event.keyCode)))" autocomplete="off" maxLength="10" style="width: 80%;"></el-input><span style="padding-left: 10px;">元</span>
                             </el-form-item>
                         </el-col>
                     </el-row>
@@ -920,7 +927,7 @@
                     <el-row>
                         <el-col :span="10">
                             <el-form-item label="付款类型：" :label-width="formLabelWidth" prop="payType">
-                                <el-select v-model="updateFormSigning.payType" placeholder="请选择签约付款类型">
+                                <el-select v-model="updateFormSigning.payType" :disabled ="payTypeSelect" placeholder="请选择签约付款类型" @change="changePayType">
                                    <!-- <el-option  key="1" label="全款" value="1"></el-option>
                                     <el-option  key="2" label="定金" value="2"></el-option>
                                     <el-option  key="3" label="追加定金" value="3"></el-option>
@@ -959,7 +966,7 @@
                         </el-col>
                         <el-col :span="10">
                             <el-form-item label="实收金额：" :label-width="formLabelWidth" prop="amountReceived">
-                                <el-input maxLength="10" v-model="updateFormSigning.amountReceived" style="width: 80%;" @keyup.native="number41"></el-input>
+                                <el-input maxLength="10" v-model="updateFormSigning.amountReceived" style="width: 80%;"  type="number" oninput="if(value.length>10)value=value.slice(0,10)"  onkeypress="return(/[\d]/.test(String.fromCharCode(event.keyCode)))"></el-input>
                                 <span style="padding-left: 10px;">元</span>
                             </el-form-item>
                         </el-col>
@@ -967,7 +974,7 @@
                     <el-row v-show="isAllMoney">
                         <el-col :span="10">
                             <el-form-item label="余款金额：" :label-width="formLabelWidth" prop="amountBalance">
-                                <el-input maxLength="10" v-model="updateFormSigning.amountBalance" style="width: 80%;" @keyup.native="number51"></el-input>
+                                <el-input maxLength="10" v-model="updateFormSigning.amountBalance" style="width: 80%;"  type="number" oninput="if(value.length>10)value=value.slice(0,10)"  onkeypress="return(/[\d]/.test(String.fromCharCode(event.keyCode)))"></el-input>
                                 <span style="padding-left: 10px;">元</span>
                             </el-form-item>
                         </el-col>
@@ -985,7 +992,7 @@
                     <el-row>
                         <el-col :span="10">
                             <el-form-item label="业绩金额：" :label-width="formLabelWidth" prop="performanceAmount">
-                                <el-input maxLength="10" v-model="updateFormSigningAmountPerformance" style="width: 80%;" @keyup.native="number61"></el-input>
+                                <el-input maxLength="10" v-model="updateFormSigningAmountPerformance" style="width: 80%;"  type="number" oninput="if(value.length>10)value=value.slice(0,10)"  onkeypress="return(/[\d]/.test(String.fromCharCode(event.keyCode)))"></el-input>
                                 <span style="padding-left: 10px;">元</span>
                             </el-form-item>
                         </el-col>
@@ -1024,6 +1031,7 @@
             existsSign:false,
             curSignStatus:"",
             isAllMoney: false,
+            payTypeSelect:false,
             notEditRebutSign:false,
             formLabelWidth:"150px",
             tableData:[],
@@ -1209,71 +1217,6 @@
 
         },
         methods: {
-        	number(){
-        	    　this.formSigning.amountReceivable=this.formSigning.amountReceivable.replace(/[^\.\d]/g,'');
-        	      this.formSigning.amountReceivable=this.formSigning.amountReceivable.replace('.','');
-        	},
-        	number1(){
-        	    　this.formSigning.firstToll=this.formSigning.firstToll.replace(/[^\.\d]/g,'');
-        	      this.formSigning.firstToll=this.formSigning.firstToll.replace('.','');
-        	},
-        	number2(){
-        	    　this.formSigning.preferentialAmount=this.formSigning.preferentialAmount.replace(/[^\.\d]/g,'');
-        	      this.formSigning.preferentialAmount=this.formSigning.preferentialAmount.replace('.','');
-        	},
-        	number3(){
-        	    　this.formSigning.giveAmount=this.formSigning.giveAmount.replace(/[^\.\d]/g,'');
-        	      this.formSigning.giveAmount=this.formSigning.giveAmount.replace('.','');
-        	},
-        	number4(){
-        	    　this.formSigning.amountReceived=this.formSigning.amountReceived.replace(/[^\.\d]/g,'');
-        	      this.formSigning.amountReceived=this.formSigning.amountReceived.replace('.','');
-        	},
-        	number5(){
-        	    　this.formSigning.amountBalance=this.formSigning.amountBalance.replace(/[^\.\d]/g,'');
-        	      this.formSigning.amountBalance=this.formSigning.amountBalance.replace('.','');
-        	},
-        	number6(){
-        	    　this.formSigningAmountPerformance=this.formSigningAmountPerformance.replace(/[^\.\d]/g,'');
-        	        this.formSigningAmountPerformance=this.formSigningAmountPerformance.replace('.','');
-        	},
-
-            number01(){
-                this.updateFormSigning.amountReceivable=this.updateFormSigning.amountReceivable.replace(/[^\.\d]/g,'');
-                this.updateFormSigning.amountReceivable=this.updateFormSigning.amountReceivable.replace('.','');
-            },
-            number11(){
-                this.updateFormSigning.firstToll=this.updateFormSigning.firstToll.replace(/[^\.\d]/g,'');
-                this.updateFormSigning.firstToll=this.updateFormSigning.firstToll.replace('.','');
-            },
-            number21(){
-                this.updateFormSigning.preferentialAmount=this.updateFormSigning.preferentialAmount.replace(/[^\.\d]/g,'');
-                this.updateFormSigning.preferentialAmount=this.updateFormSigning.preferentialAmount.replace('.','');
-            },
-            number31(){
-                this.updateFormSigning.giveAmount=this.updateFormSigning.giveAmount.replace(/[^\.\d]/g,'');
-                this.updateFormSigning.giveAmount=this.updateFormSigning.giveAmount.replace('.','');
-            },
-            number41(){
-                this.updateFormSigning.amountReceived=this.updateFormSigning.amountReceived.replace(/[^\.\d]/g,'');
-                this.updateFormSigning.amountReceived=this.updateFormSigning.amountReceived.replace('.','');
-            },
-            number51(){
-                this.updateFormSigning.amountBalance=this.updateFormSigning.amountBalance.replace(/[^\.\d]/g,'');
-                this.updateFormSigning.amountBalance=this.updateFormSigning.amountBalance.replace('.','');
-            },
-            number61(){
-                this.updateFormSigningAmountPerformance=this.updateFormSigningAmountPerformance.replace(/[^\.\d]/g,'');
-                this.updateFormSigningAmountPerformance=this.updateFormSigningAmountPerformance.replace('.','');
-            },
-            number7(){
-                this.addVisitRecord.visitPeopleNum=this.addVisitRecord.visitPeopleNum.replace(/[^\.\d]/g,'');
-                this.addVisitRecord.visitPeopleNum=this.addVisitRecord.visitPeopleNum.replace('.','');
-            },
-            number71(){
-                this.updateVisitRecord.visitPeopleNum=this.updateVisitRecord.visitPeopleNum.replace(/[^\.\d]/g,'');
-                this.updateVisitRecord.visitPeopleNum=this.updateVisitRecord.visitPeopleNum.replace('.','');
-            },
             formatVisitTime(row){
                 function dateFtt(fmt,date)
                 { //author: meizz
@@ -1339,6 +1282,13 @@
             },
             handleSelectionChange(val) {
                 this.multipleSelection = val;
+            },
+            changePayType(val){
+                if(val==3){
+                    this.isAllMoney = true;
+                }else{
+                    this.isAllMoney = false;
+                }
             },
             notVisit(){
                 var rows = mainDivVM.multipleSelection;
@@ -1769,11 +1719,25 @@
                         mainDivVM.updateFormSigning =response.data.data;
                         if( mainDivVM.updateFormSigning){
                             if(mainDivVM.updateFormSigning.payType > 2){
+                                if(mainDivVM.updateFormSigning.payType == 3){
+                                    mainDivVM.isAllMoney = true;
+                                }else{
+                                    mainDivVM.isAllMoney = false;
+                                }
                                 mainDivVM.notEditRebutSign = true;
+                                mainDivVM.payTypeSelect = false;
                                 mainDivVM.payTypeArr = mainDivVM.payTypeArr1.slice(2,4)
                             }else{
+                                if(mainDivVM.updateFormSigning.payType == 1){
+                                    mainDivVM.isAllMoney = false;
+                                }else{
+                                    mainDivVM.isAllMoney = true;
+                                }
+                                mainDivVM.payTypeSelect = true;
                                 mainDivVM.payTypeArr = mainDivVM.payTypeArr1.slice(0,2)
                             }
+
+
                             mainDivVM.currentProvince(mainDivVM.updateFormSigning.signProvince)
                             mainDivVM.currentCity(mainDivVM.updateFormSigning.signCity)
                         }
@@ -1924,6 +1888,11 @@
     }
     .el-input {
         width: 90%;
+    }
+    .el-tooltip__popper {
+        max-width: 50%;
+        line-height: 130%;
+        margin-left: 2%;
     }
 </style>
 </body>
