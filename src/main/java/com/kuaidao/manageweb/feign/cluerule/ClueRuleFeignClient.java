@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import com.kuaidao.aggregation.dto.cluerule.ClueReleaseAndReceiveRuleDTO;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
+import com.kuaidao.common.entity.IdEntityLong;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.manageweb.feign.client.ClientFeignClient;
 
@@ -26,6 +27,14 @@ public interface ClueRuleFeignClient {
     
     @PostMapping("/insertAndUpdateClueRule")
     public JSONResult<Boolean> insertAndUpdateClueRule(@RequestBody ClueReleaseAndReceiveRuleDTO reqAndReceiveRuleDTO);
+    
+    /**
+     * 删除电销规则  -具体人员的规则
+     * @param idEntityLong
+     * @return
+     */
+    @PostMapping("/deleteTeleDirectorRuleById")
+    public JSONResult<Boolean> deleteTeleDirectorRuleById(IdEntityLong idEntityLong);
     
     @Component
     static class HystrixClientFallback implements ClueRuleFeignClient {
@@ -48,8 +57,12 @@ public interface ClueRuleFeignClient {
             return fallBackError("插入或更新规则");
         }
 
-    }
+        @Override
+        public JSONResult<Boolean> deleteTeleDirectorRuleById(IdEntityLong idEntityLong) {
+            return fallBackError("删除电销规则");
+        }
 
+    }
 
 }
 
