@@ -38,15 +38,6 @@
 <el-row class="marginB10 greybg padding20" style="padding-bottom: 0;">
   <el-row :gutter="20">
     <el-col :span="4">
-<!-- <el-form-item  prop="orgId">
-<el-select v-model="userSearchForm.orgId"  placeholder="选择所属组织">
-<el-option v-for="item in searchTypeOptions"
-:key="item.value"
-:label="item.label"
-:value="item.value">
-</el-option>
-</el-select>
-</el-form-item> -->
 <el-popover
 placement="bottom"
 width="200"
@@ -353,7 +344,11 @@ var userVM = new Vue({
       var param = {};
       param.id=id;
       param.status=status;
-      axios.post('/user/userManager/updateStatus', param)
+      var url="/user/userManager/updateStatusDisable";
+      if(status==2){
+    	  url="/user/userManager/updateStatusEnable";
+      }
+      axios.post(url, param)
       .then(function (response) {
         var result =  response.data;
         if(result.code=="0"){
