@@ -5,6 +5,7 @@ package com.kuaidao.manageweb.controller.user;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -235,17 +236,17 @@ public class UserController {
     }
 
     /**
-     * 启用禁用
+     * 启用
      * 
      * @param orgDTO
      * @return
      */
-    @PostMapping("/updateStatus")
+    @PostMapping("/updateStatusEnable")
     @ResponseBody
     @RequiresPermissions("sys:userManager:edit")
-    @LogRecord(description = "启用禁用", operationType = OperationType.ENABLE,
+    @LogRecord(description = "启用", operationType = OperationType.ENABLE,
             menuName = MenuEnum.USER_MANAGEMENT)
-    public JSONResult updateStatus(@Valid @RequestBody UserInfoReq userInfoReq,
+    public JSONResult updateStatusEnable(@Valid @RequestBody UserInfoReq userInfoReq,
             BindingResult result) {
 
         if (result.hasErrors()) {
@@ -258,6 +259,35 @@ public class UserController {
                     SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getMessage());
         }
 
+        return userInfoFeignClient.update(userInfoReq);
+    }
+
+    /**
+     * 禁用
+     * 
+     * @param orgDTO
+     * @return
+     */
+    @PostMapping("/updateStatusDisable")
+    @ResponseBody
+    @RequiresPermissions("sys:userManager:edit")
+    @LogRecord(description = "禁用", operationType = OperationType.DISABLE,
+            menuName = MenuEnum.USER_MANAGEMENT)
+    public JSONResult updateStatusDisable(@Valid @RequestBody UserInfoReq userInfoReq,
+            BindingResult result) {
+
+        if (result.hasErrors()) {
+            return CommonUtil.validateParam(result);
+        }
+
+        Long id = userInfoReq.getId();
+        if (id == null) {
+            return new JSONResult().fail(SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getCode(),
+                    SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getMessage());
+        }
+        if (2 == userInfoReq.getStatus()) {
+            userInfoReq.setDisableTime(new Date());
+        }
         return userInfoFeignClient.update(userInfoReq);
     }
 
