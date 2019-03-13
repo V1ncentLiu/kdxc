@@ -82,9 +82,19 @@
         <el-table  ref="multipleTable" tooltip-effect="dark" border @selection-change="handleSelectionChange"
             style="width: 100%"  :data="dataTable" >
             <el-table-column align="center" type="selection" label="全选" width="50"></el-table-column>
-            <el-table-column align="center" :key="index" :prop="item.fieldCode" :label="item.displayName" :width="item.width"
-	         v-for="(item,key,index) in tableColums" >
+	        <el-table-column align="center" :key="index" :prop="item.fieldCode" :label="item.displayName" :width="item.width"
+	         v-for="(item,key,index) in tableColums" v-if="item.fieldCode == 'releaseNum'">
+	               <template slot-scope="scope">
+		               <div v-if="scope.row.releaseNum > 0">
+		                   <el-button @click="showRelease(scope.row)" type="text" size="small">{{scope.row.releaseNum}}</el-button>
+	                    </div>
+	                    <div v-else>无</div>
+                	</template>
 	        </el-table-column>
+            <el-table-column align="center" :key="index" :prop="item.fieldCode" :label="item.displayName" :width="item.width"
+	         v-else>
+	        </el-table-column>
+	        
         </el-table>
         <table-pagination :pager="pager" @change="searchTable"></table-pagination>
     </el-row>
@@ -180,6 +190,23 @@
             </div>
         </template>
     </el-dialog>
+    <!-- 资源释放记录 -->
+    <el-dialog title="资源释放记录" :visible.sync="releaseDialog">
+        <el-table
+            ref="singleTable" 
+            tooltip-effect="dark"
+            style="width: 100%"
+            border
+            :data="releaseTable" 
+            >
+            <el-table-column align="center" type="index" width="55" label="序号"></el-table-column>
+            <el-table-column align="center" prop="releaseTime" label="释放时间"></el-table-column>
+            <el-table-column align="center" prop="releaseReason" label="释放原因" :formatter="transformReason"></el-table-column>
+            <el-table-column align="center" prop="teleSaleName" label="释放人顾问姓名"></el-table-column>
+            <el-table-column align="center" prop="teleGroupName" label="所属电销组"></el-table-column>
+        </el-table>
+        
+    </el-dialog>
     <!-- dialog -->
     <el-dialog title="自定义列" :visible.sync="dialogFormVisible">
 	  <el-form :model="form">
@@ -213,6 +240,7 @@ var clueCategoryList=[[${clueCategoryList}]];//资源类别
 var clueTypeList=[[${clueTypeList}]];//资源类型
 var fieldList=[[${fieldList}]];//自定义字段
 var userFieldList=[[${userFieldList}]];//用户自定义字段
+var releaseReasonList=[[${releaseReasonList}]];//用户自定义字段
 var clueVM = new Vue({
         el: '#clueManage',
         data: {
@@ -278,10 +306,12 @@ var clueVM = new Vue({
 	            categoryOptions:clueCategoryList,
 	            typeOptions:clueTypeList,
 	            teleSaleOptions:[],
+	            releaseTable:[],
 	            allocationVisible: false,
 	            transferVisible: false,
 	            batchVisible: false,
 	            ceoVisible: false,
+	            releaseDialog:false,
 	            pager:{
 	                total: 0,
 	                currentPage: 1,
@@ -373,6 +403,18 @@ var clueVM = new Vue({
                     return "";
                  }
                  return moment(cellValue).format("YYYY-MM-DD HH:mm");
+               },
+             //选址情况转换方法
+               transformReason(row, column, cellValue, index) {
+             	  var text="";
+             	  if(releaseReasonList){
+ 	                  for(var i=0;i<releaseReasonList.length;i++){
+ 	                		if(cellValue==releaseReasonList[i].value){
+ 	                			text=releaseReasonList[i].name;
+ 	                		}
+ 	                	}
+             	  }
+                   return text;
                },
                //打开分配资源
                toAllocationClue() {
@@ -592,7 +634,23 @@ var clueVM = new Vue({
            	        });
            	      
                  },// method end
-                 
+                 //查看资源释放记录
+                 showRelease(row) {
+                     var param ={};
+                     param.clueId = row.id;
+                     console.info(param);
+                     axios.post('/aggregation/releaserecord/listNoPage', param)
+                     .then(function (response) {
+                           var result =  response.data;
+                           console.info(result);
+                           var table=result.data;
+                           clueVM.releaseTable= table;
+                           clueVM.releaseDialog=true;
+                     })
+                     .catch(function (error) {
+                          console.log(error);
+                     });
+                 },
               //根据电销组查询电销总监
               getSaleList() {
             	  var param ={};

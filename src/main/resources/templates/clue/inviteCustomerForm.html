@@ -22,7 +22,7 @@
             <div class="borderbox padding20">
                 <el-row>
                     <el-col :span="8">
-                        <el-form-item label="地区：" :label-width="formLabelWidth">
+                        <el-form-item label="地区：" :label-width="formLabelWidth" prop="area">
                             <el-select v-model="form.area" placeholder="请选择" style="width: 100%;" @change="currentBusGroup" >
                                 <el-option
                                     v-for="item in orgAreaList"
@@ -34,7 +34,7 @@
                         </el-form-item>
                     </el-col>
                     <el-col :span="8">
-                        <el-form-item label="预约时间：" :label-width="formLabelWidth">
+                        <el-form-item label="预约时间：" :label-width="formLabelWidth" prop="reservationTime">
                             <el-date-picker
                                 style="width: 100%;"
                                 v-model="form.reservationTime"
@@ -46,7 +46,7 @@
                 </el-row>
                 <el-row>
                     <el-col :span="8">
-                        <el-form-item label="分公司：" :label-width="formLabelWidth">
+                        <el-form-item label="分公司：" :label-width="formLabelWidth" prop="filiale">
                             <el-select v-model="form.filiale" placeholder="请选择" style="width: 100%;" @change="currentBusSale">
                                 <el-option
                                     v-for="item in busGroupArr"
@@ -58,7 +58,7 @@
                         </el-form-item>
                     </el-col>
                     <el-col :span="8">
-                        <el-form-item label="品尝项目：" :label-width="formLabelWidth">
+                        <el-form-item label="品尝项目：" :label-width="formLabelWidth" prop="tastingItem">
                             <el-form-item label="">  
                                 <el-select 
                                     v-model="form.tastingItem" 
@@ -79,7 +79,7 @@
                 </el-row>
                 <el-row>                    
                     <el-col :span="8">
-                        <el-form-item label="商务总监：" :label-width="formLabelWidth">
+                        <el-form-item label="商务总监：" :label-width="formLabelWidth" prop="businessDirector">
                             <el-select v-model="form.businessDirector" placeholder="请选择" style="width: 100%;">
                                 <el-option
                                     v-for="item in busSaleArr"
@@ -189,6 +189,8 @@
 <script th:inline="javascript" >
   var proSelect=[[${proSelect}]];
   var clueId=[[${clueId}]];
+  var cusName=[[${cusName}]];
+  var cusPhone=[[${cusPhone}]];
   var  inviteCustomerVM= new Vue({
         el: '#inviteCustomerForm',
         data: function() {
@@ -201,9 +203,9 @@
                     businessDirector:'',
                     remark:'',
                     customersNum:'',
-                    customerPhone:'',
+                    customerPhone:cusPhone,
                     startTime:'',
-                    customerName:'',
+                    customerName:cusName,
                     pickUpTime:'',
                     arrivalTime:'',
                     station:'',
@@ -233,6 +235,7 @@
                         }, trigger: 'blur'}
                     ],
                     customerPhone: [
+						{ required: true, message: '客户电话不能为空', trigger: 'blur' },
                         { validator:function(rule,value,callback){  
                             if(value==""){
                                 callback();
@@ -245,6 +248,24 @@
                                 callback();
                             } 
                         }, trigger: 'blur'}
+                    ],
+                    customerName: [
+						{ required: true, message: '客户联系人姓名不能为空', trigger: 'blur' }
+                    ],
+                	area: [
+                        { required: true, message: '地区不能为空', trigger: 'blur' }
+                    ],
+                    filiale: [
+                        { required: true, message: '分公司不能为空', trigger: 'blur' }
+                    ],
+                    businessDirector: [
+                        { required: true, message: '商务总监不能为空', trigger: 'blur' }
+                    ],
+                    reservationTime: [
+                        { required: true, message: '预约时间不能为空', trigger: 'blur' }
+                    ],
+                    tastingItem: [
+                        { required: true, message: '品尝项目不能为空', trigger: 'blur' }
                     ]
                 },
                 statusOptions: [{

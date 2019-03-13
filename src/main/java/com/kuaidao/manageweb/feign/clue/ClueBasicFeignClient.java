@@ -1,5 +1,6 @@
 package com.kuaidao.manageweb.feign.clue;
 
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.netflix.feign.FeignClient;
@@ -12,8 +13,6 @@ import com.kuaidao.aggregation.dto.clue.PendingAllocationCluePageParam;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
-
-import java.util.List;
 
 /**
  * 待分配新资源
@@ -76,6 +75,7 @@ public interface ClueBasicFeignClient {
 
     /**
      * 通过CusName模糊查询获取ClueIds
+     * 
      * @param cusName
      * @return
      */

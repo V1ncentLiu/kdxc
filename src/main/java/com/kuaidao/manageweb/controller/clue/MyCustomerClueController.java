@@ -4,9 +4,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-
 import javax.servlet.http.HttpServletRequest;
-
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.apache.shiro.subject.Subject;
@@ -18,7 +16,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
-
 import com.kuaidao.aggregation.dto.call.CallRecordReqDTO;
 import com.kuaidao.aggregation.dto.call.CallRecordRespDTO;
 import com.kuaidao.aggregation.dto.circulation.CirculationReqDTO;
@@ -50,6 +47,7 @@ import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.manageweb.feign.call.CallRecordFeign;
 import com.kuaidao.manageweb.feign.circulation.CirculationFeignClient;
+import com.kuaidao.manageweb.feign.clue.AppiontmentFeignClient;
 import com.kuaidao.manageweb.feign.clue.MyCustomerFeignClient;
 import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
 import com.kuaidao.manageweb.feign.project.ProjectInfoFeignClient;
@@ -84,6 +82,8 @@ public class MyCustomerClueController {
 
 	@Autowired
 	private OrganizationFeignClient organizationFeignClient;
+	@Autowired
+	private AppiontmentFeignClient appiontmentFeignClient;
 
 	@Value("${oss.url.directUpload}")
 	private String ossUrl;
@@ -617,9 +617,11 @@ public class MyCustomerClueController {
 	 * @return
 	 */
 	@RequestMapping("/inviteCustomer")
-	public String inviteCustomer(HttpServletRequest request, @RequestParam String clueId, Model model) {
+	public String inviteCustomer(HttpServletRequest request, @RequestParam String clueId, @RequestParam String cusName,
+			@RequestParam String cusPhone, Model model) {
 		request.setAttribute("clueId", clueId);
-
+		request.setAttribute("cusName", cusName);
+		request.setAttribute("cusPhone", cusPhone);
 		ProjectInfoPageParam param = new ProjectInfoPageParam();
 		// 项目
 		JSONResult<List<ProjectInfoDTO>> proJson = projectInfoFeignClient.listNoPage(param);
@@ -840,6 +842,19 @@ public class MyCustomerClueController {
 			dto.setUpdateUser(user.getId());
 		}
 		return myCustomerFeignClient.updateCustomerClue(dto);
+	}
+
+	/**
+	 * 保留客户资源
+	 * 
+	 * @param request
+	 * @param dto
+	 * @return
+	 */
+	@RequestMapping("/reserveClue")
+	@ResponseBody
+	public JSONResult<String> reserveClue(HttpServletRequest request, @RequestBody ClueQueryDTO dto) {
+		return myCustomerFeignClient.reserveClue(dto);
 	}
 
 }
