@@ -25,7 +25,7 @@
     <el-row class="marginB10 greybg padding20" style="padding-bottom: 0">        
         <el-form :inline="true" :model="form" ref="form">
             <el-form-item label="">
-                <el-select v-model="form.signProjectIdList" placeholder="签约项目" style="width: 100%;" clearable>
+                <el-select v-model="form.signProjectId" placeholder="签约项目" style="width: 100%;" clearable>
                     <el-option
                         v-for="item in projectList"
                         :key="item.id"
@@ -179,7 +179,7 @@
             </el-table-column>
             <el-table-column align="center" prop="customerName" label="客户姓名"></el-table-column>  
             <el-table-column align="center" prop="idCard" label="客户身份证号" width="170"></el-table-column> 
-            <el-table-column align="center" prop="phone" label="客户身联系电话" width="150"></el-table-column> 
+            <el-table-column align="center" prop="phone" label="客户联系电话" width="150"></el-table-column> 
             <el-table-column align="center" prop="signProjectName" label="签约项目"></el-table-column>   
             <el-table-column align="center" prop="signProvince" label="签约省份"></el-table-column>
             <el-table-column align="center" prop="signCity" label="签约城市"></el-table-column> 
@@ -234,7 +234,7 @@
                 <el-table-column align="center" prop="payMode" label="付款方式" :formatter="getPayModeText"></el-table-column>
                 <el-table-column align="center" prop="payTime" label="付款时间" :formatter="getTimeText"></el-table-column>
                 <el-table-column align="center" prop="amountReceived" label="实收金额"></el-table-column>
-                <el-table-column align="center" prop="amountBalance" label="业绩金额"></el-table-column>
+                <el-table-column align="center" prop="amountPerformance" label="业绩金额"></el-table-column>
                 <el-table-column align="center" prop="status" label="明细状态" :formatter="getStatusText"></el-table-column>
             </el-table>
         </div>        
@@ -385,10 +385,21 @@
                     	var param ={};	
                     	var rows = this.multipleSelection;
                         var idArr = new Array();
+                        var isPass = true;
                         for(var i=0;i<rows.length;i++){
                             var curRow = rows[i];
+                            if(curRow.status!=1){
+                                this.$message({message:'只允许审核待审核的数据',type:'warning'});
+                                isPass=false;
+                                break;
+                            }
                            idArr.push(curRow.id);
                         }
+                        if(!isPass){
+                            return;
+                        }
+                        
+                        
                         param.idList = idArr;
                         param.rebutReason = this.dialogForm.reason;
                         axios.post('/sign/signRecord/rejectSignOrder', param)
@@ -434,14 +445,17 @@
                     	if(payDetailData[1]){
                     		signRecordVM.paymentDetailsShow=true;
                     		signRecordVM.recordTable= payDetailData[1];
-                    	}else if(payDetailData[2]){
+                    	}
+                    	if(payDetailData[2]){
                     		signRecordVM.paymentDetailsShow2=true;
                     		console.info(payDetailData[2]);
                     		 signRecordVM.recordTable2= payDetailData[2];
-                    	}else if(payDetailData[3]){
+                    	}
+                    	if(payDetailData[3]){
                     		  signRecordVM.paymentDetailsShow3=true;
                     		  signRecordVM.recordTable3= payDetailData[3];
-                    	}else if(payDetailData[4]){
+                    	}
+                    	if(payDetailData[4]){
                     		signRecordVM.paymentDetailsShow4=true;
                     		signRecordVM.recordTable4= payDetailData[4];
                     	}
@@ -568,6 +582,7 @@
             },
             OpenRejectSignRecordDialog(){
             	this.signRecordArrTitle='';
+            	this.dialogForm.reason='';
             	var rows = this.multipleSelection;
                 if(rows.length<1){
                     this.$message({
@@ -577,12 +592,22 @@
                     return;
                 }
                 var title = "";
+                var isPass = true;
                 for(var i=0;i<rows.length;i++){
                     var curRow = rows[i];
-                    title += "【"+curRow.serialNum+""+curRow.customerName+"】 ";
+                    if(curRow.status!=1){
+                        this.$message({message:'只允许审核待审核的数据',type:'warning'});
+                        isPass=false;
+                        break;
+                    }
+                    title += "【"+curRow.serialNum+""+this.getCustomerName(curRow.customerName)+"】 ";
                 }
+                
+                if(!isPass){
+                    return;
+                }
+                
                 this.signRecordArrTitle=title;
-            	
             	this.dialogFormVisible=true;
             },
             handleSelectionChange(val){
@@ -638,7 +663,14 @@
                     valText =  moment(value).format("YYYY-MM-DD HH:mm:ss");
                 }
                 return valText;
+            },
+            getCustomerName(val){
+            	if(!val){
+            		return "";
+            	}
+            	return val;
             }
+            
 
         },
         mounted(){
