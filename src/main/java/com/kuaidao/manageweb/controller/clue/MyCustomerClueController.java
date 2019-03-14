@@ -442,7 +442,6 @@ public class MyCustomerClueController {
 	 * 查询资源文件上传记录
 	 * 
 	 * @param request
-	 * @param clueId
 	 * @return
 	 */
 	@RequestMapping("/findClueFile")
@@ -456,7 +455,6 @@ public class MyCustomerClueController {
 	 * 更新最后拨打时间
 	 * 
 	 * @param request
-	 * @param clueId
 	 * @return
 	 */
 	@RequestMapping("/updateCallTime")
@@ -470,7 +468,6 @@ public class MyCustomerClueController {
 	 * 获取线索拨打记录
 	 * 
 	 * @param request
-	 * @param clueId
 	 * @return
 	 */
 	@RequestMapping("/findCallData")
@@ -486,7 +483,6 @@ public class MyCustomerClueController {
 	 * 删除已上传的资源文件
 	 * 
 	 * @param request
-	 * @param clueId
 	 * @return
 	 */
 	@RequestMapping("/deleteClueFile")
@@ -508,7 +504,6 @@ public class MyCustomerClueController {
 	 * 上传资源文件
 	 * 
 	 * @param request
-	 * @param clueId
 	 * @return
 	 */
 	@RequestMapping("/uploadClueFile")
@@ -538,7 +533,6 @@ public class MyCustomerClueController {
 	 * 查询跟进记录数据
 	 * 
 	 * @param request
-	 * @param clueId
 	 * @return
 	 */
 	@RequestMapping("/findClueTracking")
@@ -556,7 +550,6 @@ public class MyCustomerClueController {
 	 * 保存跟进记录数据
 	 * 
 	 * @param request
-	 * @param clueId
 	 * @return
 	 */
 	@RequestMapping("/saveClueTracking")
@@ -579,7 +572,6 @@ public class MyCustomerClueController {
 	 * 删除资源跟进记录
 	 * 
 	 * @param request
-	 * @param clueId
 	 * @return
 	 */
 	@RequestMapping("/deleteClueTracking")
@@ -596,7 +588,6 @@ public class MyCustomerClueController {
 	 * 修改资源跟进记录
 	 * 
 	 * @param request
-	 * @param clueId
 	 * @return
 	 */
 	@RequestMapping("/updateClueTracking")
@@ -613,7 +604,6 @@ public class MyCustomerClueController {
 	 * 预约来访页面跳转
 	 * 
 	 * @param request
-	 * @param clueId
 	 * @return
 	 */
 	@RequestMapping("/inviteCustomer")
@@ -635,7 +625,6 @@ public class MyCustomerClueController {
 	 * 预约来访数据保存
 	 * 
 	 * @param request
-	 * @param clueId
 	 * @return
 	 */
 	@RequestMapping("/inviteCustomerSave")
@@ -797,7 +786,7 @@ public class MyCustomerClueController {
 						}
 
 					}
-					if (null!=org.getOrgType()&& org.getOrgType().equals(OrgTypeConstant.DZFGS)) {
+					if (null!=org.getOrgType()&& org.getOrgType().equals(OrgTypeConstant.ZSZX)) {
 
 						UserOrgRoleReq userRoleInfo = new UserOrgRoleReq();
 						userRoleInfo.setRoleCode(RoleCodeEnum.DXZJL.name());
