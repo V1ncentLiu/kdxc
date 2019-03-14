@@ -838,7 +838,15 @@
                 if(isNaN(aone)) aone = 0
                 if(isNaN(atwo)) atwo = 0
                 return aone + atwo
-            }
+            },
+
+            updateFormSigningAmountPerformance(){
+                var aone = parseFloat(this.updateFormSigning.amountReceived);
+                var atwo = parseFloat(this.updateFormSigning.firstToll);
+                if(isNaN(aone)) aone = 0
+                if(isNaN(atwo)) atwo = 0
+                return aone + atwo
+            },
         },
         methods: {
 
@@ -915,12 +923,19 @@
                     } else {return false;}
                 });
             },
+            selectUpdateSigningType(pa1) { //是不是全款
+                if( pa1=='1' ){
+                    this.updateFormSigning.payType = '1';
+                    this.isAllMoney = false;
+                }else{
+                    this.updateFormSigning.payType = '2';
+                    this.isAllMoney = true;
+                }
+            },
             goEditSign(){
         	    if(signAuditStatus==1||signAuditStatus==2||signAuditStatus==0){
         	        if(signAuditStatus==0){
                         mainDivVM.$message.error("存在被驳回签约单");
-                        editRebutSign();
-                        return false;
                     }else if(signAuditStatus==1){
                         mainDivVM.$message.error("签约单正在审核中");
                         return  false;
@@ -929,6 +944,7 @@
                         return  false;
         	        }
                 }
+
                 var param = this.addVisitRecord;
                 param.rebutTime = new Date(param.rebutTime);
                 param.createTime = new Date(param.createTime);
@@ -942,7 +958,8 @@
                                             mainDivVM.addVisitRecordDialogVisible = false;
                                             //  弹出签约单添加弹窗
                                             // mainDivVM.dialogFormSigningVisible = true;
-                                            mainDivVM.editSign(mainDivVM.addVisitRecord)
+                                            // mainDivVM.editSign(mainDivVM.addVisitRecord)
+                                            mainDivVM.toSign(mainDivVM.addVisitRecord);
                                         }});
                                 } else {
                                     mainDivVM.$message.error(response.data.msg);
@@ -1079,6 +1096,13 @@
                 }else{
                     this.formSigning.payType = '2';
                     this.isAllMoney = true;
+                }
+            },
+            toSign(val){
+                if(signAuditStatus=='0'){ // 当前签约单的状态 == 0 存在驳回签约单。
+                    mainDivVM.editRebutSign(val)
+                }else{
+                    mainDivVM.editSign(val)
                 }
             },
             initList(){
