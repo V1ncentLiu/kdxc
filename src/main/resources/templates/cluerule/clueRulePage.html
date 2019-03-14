@@ -271,8 +271,10 @@
                     <el-form-item label="次以上换频。"></el-form-item>
                 </el-row>
             </div>
-            <div class="padding20 f-tac">            
-                <el-button type="primary" @click="submitForm('form')" :disabled="clueRuleSubmitBtnDiabled">提交</el-button>
+            <div class="padding20 f-tac">     
+                <shiro:hasPermission name="aggregation:clueRule:add">       
+                   <el-button type="primary" @click="submitForm('form')" :disabled="clueRuleSubmitBtnDiabled">提交</el-button>
+                </shiro:hasPermission>
                 <el-button>取 消</el-button>
             </div> 
         </el-form> 
@@ -1042,15 +1044,39 @@
                 });
             },
             number(){
-    　　　      this.form.customerPhone=this.form.customerPhone.replace(/[^\.\d]/g,'');
-                this.form.customerPhone=this.form.customerPhone.replace('.','');
-        　　},
-            removeDomain(item) {
+		    　　　      this.form.customerPhone=this.form.customerPhone.replace(/[^\.\d]/g,'');
+		                this.form.customerPhone=this.form.customerPhone.replace('.','');
+		        　　},
+              removeDomain(item) {
                 var index = this.form.domains.indexOf(item)
                 if (index !== -1) {
                     this.form.domains.splice(index, 1)
                 }
-            },
+                var id = item.id;
+                var param={};
+                param.id=id;
+                axios.post('/cluerule/clueRule/deleteTeleDirectorRuleById', param)
+                .then(function (response) {
+                    var resData = response.data;
+                    if(resData.code=='0'){
+                    	releaseRuleVM.$message({message:'刪除成功',type:'success',duration:2000,onClose:function(){
+                    		releaseRuleVM.initClueRule();
+                          }});  ;                     
+                    }else{
+                    	releaseRuleVM.$message({message:'删除失败',type:'error'});
+                        console.error(resData);
+                    }
+                
+                })
+                .catch(function (error) {
+                     console.log(error);
+                }).then(function(){
+                    
+                });
+                
+                
+                
+             },
             addDomain() {
                 this.form.domains.push({
                 	teleDirectorId:'',
@@ -1159,10 +1185,6 @@
                         	
                         }
                         
-                       
-                        
-                         
-                      
                          
                      }else{
                     	 releaseRuleVM.$message({message:data.msg,type:'error'});

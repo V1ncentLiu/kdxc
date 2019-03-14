@@ -33,7 +33,7 @@ public enum MenuEnum {
     /**
      * 电销中心
      */
-    SIGN_ORDER("签约记录"), CUSTOMER_VISIT_RECORD("来访记录")
+    SIGN_ORDER("签约记录"), CUSTOMER_VISIT_RECORD("来访记录"),CLUE_RELEASE_RECEIVE_RULE("资源释放领取规则")
 
     ;
 
