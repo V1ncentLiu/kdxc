@@ -154,7 +154,7 @@ public class TruckingOrderController {
     @RequiresPermissions("aggregation:truckingOrder:export")
     @PostMapping("/exportTrackingOrder")
      public void exportTrackingOrder(@RequestBody TrackingOrderReqDTO reqDTO,HttpServletResponse response) throws Exception{
-     /*  List<Long> busList = new ArrayList<>();
+  /*    List<Long> busList = new ArrayList<>();
         busList.add(1098210933718835200L);
         reqDTO.setBusDirectorIdList(busList);*/
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
@@ -220,7 +220,7 @@ public class TruckingOrderController {
                 curList.add(trackingOrderRespDTO.getSubmitGroup());
                 curList.add(trackingOrderRespDTO.getTelSaleName());
                 curList.add(trackingOrderRespDTO.getAccountPhone());
-                curList.add(trackingOrderRespDTO.getCusName());
+                curList.add(trackingOrderRespDTO.getCustomerName());
                 curList.add(trackingOrderRespDTO.getCusNum());
                 curList.add(trackingOrderRespDTO.getCusPhone());
                 curList.add(trackingOrderRespDTO.getCusName());
@@ -310,7 +310,7 @@ public class TruckingOrderController {
         headTitleList.add("客户手机号");
         headTitleList.add("客户联系人姓名");
         headTitleList.add("到站时间");
-        headTitleList.add("出站时间");
+        headTitleList.add("出发时间");
         headTitleList.add("出车城市");
         headTitleList.add("接站时间");
         headTitleList.add("延误说明");
