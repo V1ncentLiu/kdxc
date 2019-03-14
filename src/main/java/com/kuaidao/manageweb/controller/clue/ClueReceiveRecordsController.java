@@ -78,7 +78,7 @@ public class ClueReceiveRecordsController {
 						}
 
 					}
-					if (null!=org.getOrgType()&& org.getOrgType().equals(OrgTypeConstant.DZFGS)) {
+					if (null!=org.getOrgType()&& org.getOrgType().equals(OrgTypeConstant.ZSZX)) {
 
 						UserOrgRoleReq userRoleInfo = new UserOrgRoleReq();
 						userRoleInfo.setRoleCode(RoleCodeEnum.DXZJL.name());
