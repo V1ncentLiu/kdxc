@@ -107,6 +107,7 @@ public class PendingAllocationController {
             // 如果当前登录的为电销副总,查询所有下属电销组
             List<Map<String, Object>> saleGroupList = getSaleGroupList(user.getOrgId());
             request.setAttribute("orgList", saleGroupList);
+            request.setAttribute("saleGroupList", saleGroupList);
         }
         // 查询所有信息流分配规则
         InfoAssignQueryDTO infoAssignQueryDTO = new InfoAssignQueryDTO();

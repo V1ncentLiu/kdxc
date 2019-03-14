@@ -78,7 +78,7 @@ public class ClueReceiveRecordsController {
 						}
 
 					}
-					if (null!=org.getOrgType()&& org.getOrgType().equals(OrgTypeConstant.DZFGS)) {
+					if (null!=org.getOrgType()&& org.getOrgType().equals(OrgTypeConstant.ZSZX)) {
 
 						UserOrgRoleReq userRoleInfo = new UserOrgRoleReq();
 						userRoleInfo.setRoleCode(RoleCodeEnum.DXZJL.name());
@@ -103,7 +103,6 @@ public class ClueReceiveRecordsController {
 	 /**
 	 * 获取当前登录账号
 	 * 
-	 * @param orgDTO
 	 * @return
 	 */
 	private UserInfoDTO getUser() {
