@@ -233,6 +233,8 @@ public class LoginController {
                 String sessionid = SecurityUtils.getSubject().getSession().getId().toString();
                 String string =
                         redisTemplate.opsForValue().get(Constants.SESSION_ID + user.getId());
+                logger.warn("newSessionId:" + sessionid);
+                logger.warn("OldSessionId:" + string);
                 if (Constants.IS_LOGIN_UP.equals(user.getIsLogin())) {
                     if (!sessionid.equals(string)) {
                         // 如果是踢下线操作1-判断累计次数，是否锁定账号 2-发送下线通知
@@ -258,8 +260,7 @@ public class LoginController {
                     }
                 }
                 SecurityUtils.getSubject().getSession().setAttribute("sessionid", "" + sessionid);
-                redisTemplate.opsForValue().set(Constants.SESSION_ID + user.getId(),
-                        SecurityUtils.getSubject().getSession().getId().toString(), 1,
+                redisTemplate.opsForValue().set(Constants.SESSION_ID + user.getId(), sessionid, 1,
                         TimeUnit.DAYS);
                 loginRecordFeignClient.create(loginRecord);
                 List<LoginRecordDTO> findList =
