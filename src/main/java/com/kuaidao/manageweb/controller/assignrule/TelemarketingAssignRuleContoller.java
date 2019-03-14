@@ -60,7 +60,7 @@ public class TelemarketingAssignRuleContoller {
 		OrganizationQueryDTO orgDto = new OrganizationQueryDTO();
 		// 查询电销分公司
 		orgDto = new OrganizationQueryDTO();
-		orgDto.setOrgType(OrgTypeConstant.ZSZX);
+		orgDto.setOrgType(OrgTypeConstant.DXFGS);
 		JSONResult<List<OrganizationRespDTO>> orgComJson = organizationFeignClient.queryOrgByParam(orgDto);
 		if (orgComJson.getCode().equals(JSONResult.SUCCESS)) {
 			model.addAttribute("orgCompany", orgComJson.getData());
