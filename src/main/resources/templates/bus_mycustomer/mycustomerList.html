@@ -280,7 +280,10 @@
                     </el-col>
                     <el-col :span="10">
                         <el-form-item label="到访人数" :label-width="formLabelWidth"  prop="visitPeopleNum">
-                            <el-input v-model="addVisitRecord.visitPeopleNum" maxlength="2"   @keyup.native="number7"></el-input>
+                            <el-input v-model="addVisitRecord.visitPeopleNum"
+                                      type="number"
+                                      oninput="if(value.length>2)value=value.slice(0,2)"  onkeypress="return(/[\d]/.test(String.fromCharCode(event.keyCode)))"
+                                      autocomplete="off" maxLength="10"></el-input>
                         </el-form-item>
                     </el-col>
                 </el-row>
@@ -682,7 +685,6 @@
                     <el-col :span="10">
                         <el-form-item label="应收金额：" :label-width="formLabelWidth" prop="amountReceivable">
                             <el-input v-model="formSigning.amountReceivable"  type="number"
-
                                       oninput="if(value.length>10)value=value.slice(0,10)"  onkeypress="return(/[\d]/.test(String.fromCharCode(event.keyCode)))"
                                       autocomplete="off" maxLength="10" style="width: 80%;"></el-input>
                             <span style="padding-left: 10px;">元</span>
@@ -1518,6 +1520,8 @@
                                 mainDivVM.showVisitAduitDatas.oneRebutReason = first[0].rebutReason;
                                 mainDivVM.showVisitAduitDatas.oneRebutShow = true;
                             }
+                        }else{
+                            mainDivVM.showVisitAduitDatas.one = first;
                         }
 
                         // 二次到访
@@ -1534,7 +1538,9 @@
                                 mainDivVM.showVisitAduitDatas.twoRebutReason = two[0].rebutReason;
                                 mainDivVM.showVisitAduitDatas.twoRebutShow = true;
                             }
-
+                        }else{
+                            mainDivVM.showVisitAduitDatas.two = two;
+                            mainDivVM.showVisitAduitDatas.twoShow = false;
                         }
                         // 多次到访
                         var three = []
@@ -1550,7 +1556,9 @@
                                 mainDivVM.showVisitAduitDatas.threeRebutReason = three[0].rebutReason;
                                 mainDivVM.showVisitAduitDatas.threeRebutShow = true;
                             }
-
+                        }else{
+                            mainDivVM.showVisitAduitDatas.three = three;
+                            mainDivVM.showVisitAduitDatas.threeShow = false;
                         }
                     //
                     }

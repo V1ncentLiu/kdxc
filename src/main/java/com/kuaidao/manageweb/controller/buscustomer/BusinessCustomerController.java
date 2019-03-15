@@ -15,6 +15,7 @@ import com.kuaidao.aggregation.dto.call.CallRecordReqDTO;
 import com.kuaidao.aggregation.dto.call.CallRecordRespDTO;
 import com.kuaidao.aggregation.dto.circulation.CirculationReqDTO;
 import com.kuaidao.aggregation.dto.circulation.CirculationRespDTO;
+import com.kuaidao.aggregation.dto.clue.ClueAppiontmentReq;
 import com.kuaidao.aggregation.dto.clue.ClueDTO;
 import com.kuaidao.aggregation.dto.clue.ClueFileDTO;
 import com.kuaidao.aggregation.dto.clue.ClueQueryDTO;
@@ -26,20 +27,22 @@ import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.manageweb.feign.call.CallRecordFeign;
 import com.kuaidao.manageweb.feign.circulation.CirculationFeignClient;
+import com.kuaidao.manageweb.feign.clue.AppiontmentFeignClient;
+import com.kuaidao.manageweb.feign.clue.AppiontmentFeignClient;
 import com.kuaidao.manageweb.feign.clue.MyCustomerFeignClient;
 import com.kuaidao.manageweb.feign.project.ProjectInfoFeignClient;
 import com.kuaidao.manageweb.feign.tracking.TrackingFeignClient;
 
 /**
  * 商务客户信息
- * @author  
+ * 
+ * @author
  *
  */
 @Controller
 @RequestMapping("/bus/BusinessCustomer")
 public class BusinessCustomerController {
-	
-	
+
 	@Autowired
 	private ProjectInfoFeignClient projectInfoFeignClient;
 
@@ -55,10 +58,12 @@ public class BusinessCustomerController {
 	@Autowired
 	private CirculationFeignClient circulationFeignClient;
 
-	@Value("${oss.url.directUpload}")
-    private String  ossUrl ;
+	@Autowired
+	private AppiontmentFeignClient appiontmentFeignClient;
 
-	
+	@Value("${oss.url.directUpload}")
+	private String ossUrl;
+
 	/**
 	 * 维护客户资源数据
 	 * 
@@ -84,9 +89,9 @@ public class BusinessCustomerController {
 		queryDTO.setClueId(new Long(clueId));
 
 		request.setAttribute("clueId", clueId);
-		
+
 		request.setAttribute("ossUrl", ossUrl);
-		
+
 		JSONResult<ClueDTO> clueInfo = myCustomerFeignClient.findClueInfo(queryDTO);
 
 		// 维护的资源数据
@@ -217,10 +222,10 @@ public class BusinessCustomerController {
 			request.setAttribute("clueFileList", clueFileList.getData());
 		}
 
+		ClueAppiontmentReq req = new ClueAppiontmentReq();
+		req.setClueId(new Long(clueId));
+		appiontmentFeignClient.updateView(req);
 		return "bus_mycustomer/viewCustomerMainenance";
 	}
-
-	
-	
 
 }

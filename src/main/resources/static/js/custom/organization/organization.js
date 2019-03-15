@@ -19,8 +19,10 @@
                 	orgType:'',
                     name: '',
                     remark: '',
-                    parentName:'',
                     id:''
+                },
+                form2:{
+                	parentName:''	
                 },
                 orgTypeList:[],
                 staffNumSearch:{//组内组成搜索框
@@ -191,7 +193,7 @@
             clickOrgNode(data,node,obj){//点击左侧节点
             	this.inputOrgName='';
             	this.selectedNode = data;
-            	this.form.parentName=data.label;
+            	this.form2.parentName=data.label;
             	this.getQuery();
             },
             getQuery(){
@@ -353,7 +355,7 @@
                   }).then(function(){
                   });
                   
-                 var parentName =  orgVM.form.parentName;
+                 var parentName =  orgVM.form2.parentName;
                   var param={id:rows[0].id};
                   //根据id获取数据
                   axios.post('/organization/organization/queryOrgById',param)
@@ -361,7 +363,7 @@
                       var data =  response.data;
                       if(data.code=='0'){
                           orgVM.form= data.data;
-                          orgVM.form.parentName=parentName;
+                          orgVM.form2.parentName=parentName;
                           //把当前的值存在临时变量里，当修改时，旧值和新值对比
                           orgVM.oldName = data.data.name;
                       }
