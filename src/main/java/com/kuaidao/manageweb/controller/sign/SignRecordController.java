@@ -196,7 +196,7 @@ public class SignRecordController {
         }else {
                 return new JSONResult().fail(SysErrorCodeEnum.ERR_NOTEXISTS_DATA.getCode(),"角色没有权限");
         }
-       
+       logger.info("listSignRecord{{}}",reqDTO.toString());
         return signRecordFeignClient.listSignRecord(reqDTO);
     }
     
