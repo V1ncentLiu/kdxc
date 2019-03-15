@@ -190,7 +190,7 @@
                     </el-select>
                 </el-form-item>
                 <el-form-item label="">  
-                    <el-select v-model="form.teleorg" placeholder="电销组" style="width: 100%;" clearable >
+                    <el-select v-model="form.teleorg" placeholder="电销组" style="width: 100%;" clearable @change="currentTelSale" >
                         <el-option
                             v-for="item in orgTeleArr"
                             :key="item.id"
@@ -208,7 +208,7 @@
                         multiple 
                         clearable  >
                         <el-option
-                            v-for="item in saleList"
+                            v-for="item in busSaleArr"
                             :key="item.id"
                             :label="item.name"
                             :value="item.id">
@@ -248,9 +248,11 @@
             </el-table-column>
             <el-table-column align="center" prop="record" label="跟进记录">
               <template slot-scope="scope">
+                   <div v-if="scope.row.isTrack === 1">
                     <el-button @click="openTrackingDialog(scope.row.clueId)" type="text" size="small">
                                                                     点击查看
                     </el-button>
+                    </div>
                 </template>
             </el-table-column>
             <el-table-column align="center" prop="customerStatusName" label="客户状态"></el-table-column>
@@ -259,7 +261,9 @@
             <el-table-column align="center" prop="updateTime" label="最后编辑时间"></el-table-column>
             <el-table-column align="center" prop="repeatPhones" label="重复手机号资源">
                 <template slot-scope="scope">
-                    <el-button @click="repeatPhonesClick(scope.row)" type="text" size="small">点击查看</el-button>
+                  <div v-if="scope.row.isTrack==1">
+                      <el-button @click="repeatPhonesClick(scope.row)" type="text" size="small">点击查看{{scope.row.isTrack}}</el-button>
+                  </div>
                 </template>
             </el-table-column>
             <el-table-column align="center" prop="focusPoint" label="客户关注点"></el-table-column>
@@ -291,7 +295,7 @@
             <el-table-column align="center" prop="areaValue" label="店面大小"></el-table-column>     
             <el-table-column align="center" prop="purTypeName" label="意向品类"></el-table-column>
             <el-table-column align="center" prop="projectName" label="意向品牌"></el-table-column>
-            <el-table-column align="center" prop="storeArea " label="开店区域（省市县区）"></el-table-column>
+            <el-table-column align="center" prop="storeArea" label="开店区域（省市县区）"></el-table-column>
             <el-table-column align="center" prop="hasAddressName" label="选址情况"></el-table-column>     
             <el-table-column align="center" prop="age" label="客户年龄"></el-table-column>
             <el-table-column align="center" prop="sex" label="客户性别"></el-table-column>
@@ -598,6 +602,7 @@ var queryOrg=[[${queryOrg}]];//电销组
                 formLabelWidth: '150px',
                 dataTable: [],
                 saleInfoArr:[],
+                busSaleArr:[],
                 saleList:saleList,
                 saleGroupList:saleGroupList,
                 options: [{
@@ -708,6 +713,14 @@ var queryOrg=[[${queryOrg}]];//电销组
      			})
          	
          	},
+            currentTelSale(seleVal){
+            	param={};
+               	param.orgId=seleVal;
+               	param.roleCode="DXCYGW";
+                axios.post('/user/userManager/listByOrgAndRole' ,param).then(function (response) {  
+                	customerManVM.busSaleArr=response.data.data;
+                });
+            },
             repeatPhonesClick(row) {
                 console.log(row);
                 this.repeatPhonesDialog=true;

@@ -25,124 +25,134 @@ import com.kuaidao.common.entity.PageBean;
  * @date: 2019年1月4日
  * @version V1.0
  */
-@FeignClient(name = "aggregation-service", path = "/aggregation/clueAppiontment",
-        fallback = AppiontmentFeignClient.HystrixClientFallback.class)
+@FeignClient(name = "aggregation-service", path = "/aggregation/clueAppiontment", fallback = AppiontmentFeignClient.HystrixClientFallback.class)
 public interface AppiontmentFeignClient {
-    /**
-     * 根据id查询预约来访信息
-     * 
-     * @param menuDTO
-     * @return
-     */
-    @PostMapping("/get")
-    public JSONResult<ClueAppiontmentDTO> get(@RequestBody IdEntityLong id);
+	/**
+	 * 根据id查询预约来访信息
+	 * 
+	 * @param menuDTO
+	 * @return
+	 */
+	@PostMapping("/get")
+	public JSONResult<ClueAppiontmentDTO> get(@RequestBody IdEntityLong id);
 
-    /**
-     * 删除预约来访信息
-     * 
-     * @param menuDTO
-     * @return
-     */
-    @PostMapping("/delete")
-    public JSONResult delete(@RequestBody IdListLongReq idList);
+	/**
+	 * 删除预约来访信息
+	 * 
+	 * @param menuDTO
+	 * @return
+	 */
+	@PostMapping("/delete")
+	public JSONResult delete(@RequestBody IdListLongReq idList);
 
-    /**
-     * 查询预约来访集合
-     * 
-     * @param menuDTO
-     * @return
-     */
-    @PostMapping("/list")
-    public JSONResult<PageBean<ClueAppiontmentDTO>> list(
-            @RequestBody ClueAppiontmentPageParam param);
+	/**
+	 * 查询预约来访集合
+	 * 
+	 * @param menuDTO
+	 * @return
+	 */
+	@PostMapping("/list")
+	public JSONResult<PageBean<ClueAppiontmentDTO>> list(@RequestBody ClueAppiontmentPageParam param);
 
-    /**
-     * 查询重复手机号资源
-     * 
-     * @param menuDTO
-     * @return
-     */
-    @PostMapping("/repeatPhonelist")
-    public JSONResult<List<ClueRepeatPhoneDTO>> repeatPhonelist(
-            @RequestBody ClueAppiontmentReq param);
+	/**
+	 * 查询重复手机号资源
+	 * 
+	 * @param menuDTO
+	 * @return
+	 */
+	@PostMapping("/repeatPhonelist")
+	public JSONResult<List<ClueRepeatPhoneDTO>> repeatPhonelist(@RequestBody ClueAppiontmentReq param);
 
-    /**
-     * 修改预约来访信息
-     * 
-     * @param idEntity
-     * @return
-     */
-    @PostMapping("/update")
-    public JSONResult<String> update(@RequestBody ClueAppiontmentReq req);
+	/**
+	 * 修改预约来访信息
+	 * 
+	 * @param idEntity
+	 * @return
+	 */
+	@PostMapping("/update")
+	public JSONResult<String> update(@RequestBody ClueAppiontmentReq req);
 
-    /**
-     * 查询取消邀约来访数据
-     * 
-     * @param dto
-     * @return
-     */
-    @PostMapping("/findCancelList")
-    public JSONResult<List<ClueAppiontmentDTO>> findCancelList(
-            @RequestBody AppiontmentCancelDTO dto);
+	/**
+	 * 修改预约来访信息
+	 * 
+	 * @param idEntity
+	 * @return
+	 */
+	@PostMapping("/updateView")
+	public JSONResult<String> updateView(@RequestBody ClueAppiontmentReq req);
 
-    /**
-     * 取消预约来访
-     * 
-     * @param dto
-     * @return
-     */
-    @PostMapping("/cancelAppiontment")
-    public JSONResult<String> cancelAppiontment(@RequestBody AppiontmentCancelDTO dto);
+	/**
+	 * 查询取消邀约来访数据
+	 * 
+	 * @param dto
+	 * @return
+	 */
+	@PostMapping("/findCancelList")
+	public JSONResult<List<ClueAppiontmentDTO>> findCancelList(@RequestBody AppiontmentCancelDTO dto);
 
-    @Component
-    static class HystrixClientFallback implements AppiontmentFeignClient {
+	/**
+	 * 取消预约来访
+	 * 
+	 * @param dto
+	 * @return
+	 */
+	@PostMapping("/cancelAppiontment")
+	public JSONResult<String> cancelAppiontment(@RequestBody AppiontmentCancelDTO dto);
 
-        private static Logger logger = LoggerFactory.getLogger(AppiontmentFeignClient.class);
+	@Component
+	static class HystrixClientFallback implements AppiontmentFeignClient {
 
-        private JSONResult fallBackError(String name) {
-            logger.error(name + "接口调用失败：无法获取目标服务");
-            return new JSONResult().fail(SysErrorCodeEnum.ERR_REST_FAIL.getCode(),
-                    SysErrorCodeEnum.ERR_REST_FAIL.getMessage());
-        }
+		private static Logger logger = LoggerFactory.getLogger(AppiontmentFeignClient.class);
 
-        @Override
-        public JSONResult<ClueAppiontmentDTO> get(@RequestBody IdEntityLong id) {
-            return fallBackError("根据id查询预约来访信息");
-        }
+		private JSONResult fallBackError(String name) {
+			logger.error(name + "接口调用失败：无法获取目标服务");
+			return new JSONResult().fail(SysErrorCodeEnum.ERR_REST_FAIL.getCode(),
+					SysErrorCodeEnum.ERR_REST_FAIL.getMessage());
+		}
 
-        @Override
-        public JSONResult delete(@RequestBody IdListLongReq idList) {
-            return fallBackError("删除预约来访信息");
-        }
+		@Override
+		public JSONResult<ClueAppiontmentDTO> get(@RequestBody IdEntityLong id) {
+			return fallBackError("根据id查询预约来访信息");
+		}
 
-        @Override
-        public JSONResult<String> update(@RequestBody ClueAppiontmentReq req) {
-            return fallBackError("修改预约来访信息");
-        }
+		@Override
+		public JSONResult delete(@RequestBody IdListLongReq idList) {
+			return fallBackError("删除预约来访信息");
+		}
 
-        @Override
-        public JSONResult<PageBean<ClueAppiontmentDTO>> list(
-                @RequestBody ClueAppiontmentPageParam param) {
-            return fallBackError("查询预约来访集合");
-        }
+		@Override
+		public JSONResult<String> update(@RequestBody ClueAppiontmentReq req) {
+			return fallBackError("修改预约来访信息");
+		}
 
-        @Override
-        public JSONResult<List<ClueRepeatPhoneDTO>> repeatPhonelist(
-                @RequestBody ClueAppiontmentReq param) {
-            return fallBackError("查询重复手机号资源");
-        }
+		@Override
+		public JSONResult<PageBean<ClueAppiontmentDTO>> list(@RequestBody ClueAppiontmentPageParam param) {
+			return fallBackError("查询预约来访集合");
+		}
 
-        @Override
-        public JSONResult<String> cancelAppiontment(AppiontmentCancelDTO dto) {
-            // TODO Auto-generated method stub
-            return fallBackError("取消预约来访");
-        }
+		@Override
+		public JSONResult<List<ClueRepeatPhoneDTO>> repeatPhonelist(@RequestBody ClueAppiontmentReq param) {
+			return fallBackError("查询重复手机号资源");
+		}
 
-        @Override
-        public JSONResult<List<ClueAppiontmentDTO>> findCancelList(AppiontmentCancelDTO dto) {
-            // TODO Auto-generated method stub
-            return fallBackError("查询取消预约来访数据");
-        }
-    }
+		@Override
+		public JSONResult<String> cancelAppiontment(AppiontmentCancelDTO dto) {
+			// TODO Auto-generated method stub
+			return fallBackError("取消预约来访");
+		}
+
+		@Override
+		public JSONResult<List<ClueAppiontmentDTO>> findCancelList(AppiontmentCancelDTO dto) {
+			// TODO Auto-generated method stub
+			return fallBackError("查询取消预约来访数据");
+		}
+
+		@Override
+		public JSONResult<String> updateView(ClueAppiontmentReq req) {
+			// TODO Auto-generated method stub
+			return fallBackError("修改资源是否查看");
+		}
+
+	}
 
 }
