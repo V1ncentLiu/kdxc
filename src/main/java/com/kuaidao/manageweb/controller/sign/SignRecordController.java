@@ -182,8 +182,7 @@ public class SignRecordController {
         List<RoleInfoDTO> roleList = curLoginUser.getRoleList();
         RoleInfoDTO roleInfoDTO = roleList.get(0);
         String roleName = roleInfoDTO.getRoleName();
-        //TODO dev  注释
-  /*    if(RoleCodeEnum.SWDQZJ.value().equals(roleName) ||RoleCodeEnum.SWZJ.value().equals(roleName)) {
+      if(RoleCodeEnum.SWDQZJ.value().equals(roleName) ||RoleCodeEnum.SWZJ.value().equals(roleName)) {
             Long businessManagerId = reqDTO.getBusinessManagerId();
             if(businessManagerId!=null) {
                 List<Long> businessManagerIdList = new ArrayList<>();
@@ -196,8 +195,8 @@ public class SignRecordController {
           
         }else {
                 return new JSONResult().fail(SysErrorCodeEnum.ERR_NOTEXISTS_DATA.getCode(),"角色没有权限");
-        }*/
-       
+        }
+       logger.info("listSignRecord{{}}",reqDTO.toString());
         return signRecordFeignClient.listSignRecord(reqDTO);
     }
     
