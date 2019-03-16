@@ -18,6 +18,7 @@
         <el-col :xs="12" :sm="16" :md="16" :lg="18" :xl="12">
             <!--< el-button type="primary" @click="cancelButton">撤销申请</el-button> -->
             <el-button type="primary" @click="detailButton">处理</el-button>
+            <el-button type="success" @click="openFormInfo">申请重单</el-button>
         </el-col>
         </el-row>
 <el-row class="marginB10">
@@ -176,7 +177,87 @@
             <el-button @click="dialogFormVisible =false">取消</el-button>
         </div>
     </el-dialog>   
-            
+    <!-- dialog -->
+    <el-dialog title="重单申请" :visible.sync="dialogFormVisible">
+        <el-form :model="repeatApplyForm" ref="repeatApplyForm" :rules="repeatRules">
+        	 <el-row>
+                <el-form-item label="申请重单员工：" :label-width="formLabelWidth" prop="repeatemployee">
+                    <el-select v-model="repeatApplyForm.repeatemployee" @change="repeatApplyChange" placeholder="请选择" style="width: 60%;">
+                        <el-option
+                            v-for="item in repeattelePerArr"
+                            :key="item.id"
+                            :label="item.name"
+                            :value="item.id">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+            </el-row>
+            <el-row>
+                <el-form-item label="申请重单手机号：" :label-width="formLabelWidth" prop="phone">
+                    <el-input v-model="repeatApplyForm.phone" placeholder="输入手机号" style="width: 60%;" @keyup.native="repeatApplyNumber" maxLength="11"></el-input>
+                    <el-button type="primary" @click="searchClue" :disabled="searchClueDisable">查询线索</el-button>
+                </el-form-item>
+            </el-row>
+            <el-row>
+                <el-form-item label="匹配线索：" :label-width="formLabelWidth" prop="clue">
+                    <el-select v-model="repeatApplyForm.repeadclue" placeholder="请选择" style="width: 60%;">
+                           <el-option
+                            v-for="item in repeatClueArr"
+                            :key="item.clueId"l
+                            :label="item.showReapet"
+                            :value="item.clueId">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+            </el-row>
+            <el-row>
+                <el-form-item label="重单员工：" :label-width="formLabelWidth" prop="employee">
+                    <el-select v-model="repeatApplyForm.employee" @change="repeatApplyChangeTwo" placeholder="请选择" style="width: 60%;">
+                        <el-option
+                            v-for="item in telePerArr"
+                            :key="item.id"
+                            :label="item.name"
+                            :value="item.id">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+            </el-row>
+            <el-row>
+                <el-form-item label="重单手机号：" :label-width="formLabelWidth" prop="repeatPhone">
+                    <el-input v-model="repeatApplyForm.repeatPhone" placeholder="输入重单手机号" style="width: 60%;" @keyup.native="repeatApplyRepeatNumber" maxLength="11"></el-input>
+                    <el-button type="primary" @click="searchRepeatClue" :disabled="searchRepeatClueDisable">查询线索</el-button>
+                </el-form-item>
+            </el-row>
+            <el-row>
+                <el-form-item label="重单线索：" :label-width="formLabelWidth" prop="repeatClue">
+                    <el-select v-model="repeatApplyForm.repeatClue" placeholder="请选择" style="width: 60%;">
+                        <el-option
+                            v-for="item in repeatCurClueArr"
+                            :key="item.clueId"
+                            :label="item.showReapet"
+                            :value="item.clueId">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+            </el-row>
+            <el-row>
+                <el-form-item label="备注：" :label-width="formLabelWidth" prop="textarea">
+                    <el-input
+                        style="width: 60%;"
+                        type="textarea"
+                        :rows="4"
+                        placeholder=""
+                        maxLength="500"
+                        v-model="repeatApplyForm.textarea">
+                    </el-input>
+                </el-form-item>
+            </el-row>
+        </el-form>
+        <div slot="footer" class="dialog-footer">
+            <el-button type="primary" @click="repeatsubmitForm('repeatApplyForm')">确 定</el-button>
+            <el-button @click="dialogFormVisible = false" >取 消</el-button>
+        </div>
+    </el-dialog>       
          
 </div>
 <input id="addOrUpdate" type="hidden" >
@@ -192,6 +273,8 @@
 	            repetitionDetailList:[],
 	            dealStatusId:"",
           	},
+          	searchClueDisable:true,//查询线索默认不可点击
+          	searchRepeatClueDisable:true,//查询线索默认不可点击
           	customerName:"",
         	repeatName:"",
         	cusNameId:"",
@@ -216,6 +299,7 @@
         	remark:"",
         	statusId:"",
         	dialogFormVisible:false,
+        	dialogFormVisible: false,
         	repetitionList:"",
         	exportFormVisible:false,
         	formLabelWidth: '150px',
@@ -226,7 +310,56 @@
         	isShow:true,
         	isSign:"",
         	multipleSelection: [],
-        	
+        	telePerArr:[],
+        	repeattelePerArr:[],
+        	repeatClueArr:[],
+        	repeatCurClueArr:[],
+        	repeatApplyForm: {
+        		repeatemployee:'',
+                phone:'',
+                clue:'',
+                employee:'',
+                repeatPhone:'',
+                repeatClue:'',
+                textarea:'',
+                repeadclue:''
+            },
+            repeatRules:{
+                phone:[
+                    { required: true, message: '请输入手机号', trigger: 'blur' },
+                    { validator:function(rule,value,callback){                 
+                        if(/^[0-9]*$/.test(value) == false){
+                           callback(new Error("请输入数字"));
+                        }else{
+                           callback();
+                        } 
+                        callback();
+                    }, trigger: 'blur'}
+                ],
+                clue: [
+                    { required: true, message: '请选择匹配线索', trigger: 'blur' }
+                ],
+                employee: [
+                    { required: true, message: '请选择重单员工', trigger: 'blur' },
+                ],
+                repeatemployee: [
+                    { required: true, message: '请选择申请员工', trigger: 'blur' },
+                 ],
+                repeatPhone: [
+                    { required: true, message: '请输入重单手机号', trigger: 'blur' },
+                    { validator:function(rule,value,callback){                 
+                        if(/^[0-9]*$/.test(value) == false){
+                           callback(new Error("请输入数字"));
+                        }else{
+                           callback();
+                        } 
+                        callback();
+                    }, trigger: 'blur'}
+                ],
+                repeatClue: [
+                    { required: true, message: '请选择重单线索', trigger: 'blur' }
+                ]
+            },
         	statusList:[
         		 {
                		value: '0',
@@ -310,6 +443,74 @@
               	  text="签约"
                 }
                 return text;
+            },
+            repeatApplyChange(){
+            	this.repeatApplyForm.repeadclue = "";
+            	this.searchClueDisable =true;
+            	this.repeatApplyForm.phone="";
+            	this.repeatClueArr=[];
+            },
+            repeatApplyChangeTwo(){
+            	this.repeatApplyForm.repeatClue = "";
+            	this.searchRepeatClueDisable =true;
+            	this.repeatApplyForm.repeatPhone="";
+            	this.repeatCurClueArr=[];
+            },
+            
+            searchClue(){
+            	//重单申请查询线索
+                if(this.repeatApplyForm.phone==""){
+                    this.$message({
+                      message: '请输入手机号',
+                      type: 'warning'
+                    });
+                  }
+                  var phone= this.repeatApplyForm.phone;
+                  var param={};
+                   param.phone=phone;
+                   param.telemarketingId = this.repeatApplyForm.repeatemployee;
+                   this.repeatApplyForm.clue="";
+        		   axios.post('/tele/clueMyCustomerInfo/queryRepeatClueTwo',param).then(function (response) {
+        		      orgVM.repeatClueArr=response.data.data;
+         		  })
+            },
+            repeatApplyNumber(){//输入手机号才显示查询线索按钮
+                this.repeatApplyForm.phone=this.repeatApplyForm.phone.replace(/[^\.\d]/g,'');
+				this.repeatApplyForm.phone=this.repeatApplyForm.phone.replace('.','');
+				if(this.repeatApplyForm.phone.length==11){
+					this.searchClueDisable=false;
+				}else{
+					this.searchClueDisable=true;
+				}
+       		},
+       		repeatApplyRepeatNumber(){
+                this.repeatApplyForm.repeatPhone=this.repeatApplyForm.repeatPhone.replace(/[^\.\d]/g,'');
+				this.repeatApplyForm.repeatPhone=this.repeatApplyForm.repeatPhone.replace('.','');
+				if(this.repeatApplyForm.repeatPhone.length==11){
+				this.searchRepeatClueDisable=false;
+				}else{
+				this.searchRepeatClueDisable=true;
+				}
+			},
+            searchRepeatClue(){
+            	//重单申请查询线索
+                if(this.repeatApplyForm.repeatPhone==""){
+                    this.$message({
+                      message: '请输入重单手机号',
+                      type: 'warning'
+                    }); 
+                 }
+                   var repeatPhone= this.repeatApplyForm.repeatPhone;
+                   var employee= this.repeatApplyForm.employee;
+   
+                   var param={};
+                   param.telemarketingId=employee
+                   this.repeatApplyForm.repeatClue="";
+                   param.phone=repeatPhone;
+         		   axios.post('/tele/clueMyCustomerInfo/queryRepeatCurClue',param).then(function (response) {
+         		      orgVM.repeatCurClueArr=response.data.data;
+          		  })
+               
             },
         	submitForm(form){
         		this.$refs[form].validate((valid) => {  
@@ -575,11 +776,70 @@
                 .then(function () {
                   // always executed
                 }); 
+          } ,
+          openFormInfo(){
+          	this.dialogFormVisible = true;
+        	if(this.$refs['repeatApplyForm']) {
+                this.$refs['repeatApplyForm'].resetFields();
           }
+        },
+        repeatsubmitForm(formName) {
+        	//重单提交
+            this.$refs[formName].validate((valid) => {
+                if (valid) {
+                	
+                	var repeatPhone=this.repeatApplyForm.repeatPhone;
+                	
+                	var  phone=this.repeatApplyForm.phone;
+                	
+                    var employee= this.repeatApplyForm.employee;
+                    
+                    var clue=this.repeatApplyForm.clue;
+                    
+                    var repeatClue=this.repeatApplyForm.repeatClue;
+                    
+                    var textarea= this.repeatApplyForm.textarea;
+                    
+                    var  param={};
+                    param.applyUserId = this.repeatApplyForm.repeatemployee;
+                    param.clueId=clue;
+                    
+                    param.phone=phone;
+                    
+                    param.repeatClueId=repeatClue;
+                    
+                    param.repeatUserId=employee;
+                    
+                    param.repeatPhone=repeatPhone;
+                    
+                    param.remark=textarea;
+                 	this.dialogFormVisible = false;
+                    axios.post('/tele/clueMyCustomerInfo/officesaveRepeatClue', param)
+                    .then(function (response) {
+                       orgVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
+                    	   orgVM.initTableData();  
+        		         }});
+                    }).catch(function (error) {
+                        console.log(error);
+                    });
+                } else {
+                    console.log('error submit!!');
+                    return false;
+                }
+            });
+        	},
         },
         created(){
         	this.showTele(0);
         	this.queryRepeatPage();
+        	 // 初始化电销人员
+            param={};
+            param.groupCode="releaseReason";
+            axios.post('/tele/clueMyCustomerInfo/listByOrgAndRole').then(function (response) {
+                console.log(response.data.data)
+                orgVM.telePerArr=response.data.data;
+                orgVM.repeattelePerArr=response.data.data;
+            });
         	document.getElementById('organizationManage').style.display = 'block';
         }//created方法 结束
     })
