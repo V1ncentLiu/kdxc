@@ -285,7 +285,7 @@ public class MyCustomerClueController {
 	 * @return
 	 */
 	@RequestMapping("/customerInfoReadOnly")
-	public String customerInfoReadOnly(HttpServletRequest request, @RequestParam String clueId) {
+	public String customerInfoReadOnly(HttpServletRequest request, @RequestParam String clueId, @RequestParam(required = false) String commonPool) {
 		CallRecordReqDTO call = new CallRecordReqDTO();
 		call.setClueId(clueId);
 		JSONResult<List<CallRecordRespDTO>> callRecord = callRecordFeign.listTmCallReacordByParamsNoPage(call);
@@ -361,6 +361,9 @@ public class MyCustomerClueController {
 				&& clueFileList.getData() != null) {
 			request.setAttribute("clueFileList", clueFileList.getData());
 		}
+
+
+		request.setAttribute("commonPool", commonPool);
 		return "clue/CustomerMaintenanceReadOnly";
 	}
 
