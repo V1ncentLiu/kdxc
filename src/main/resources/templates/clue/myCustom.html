@@ -201,6 +201,7 @@
         <el-table 
             ref="multipleTable"
             tooltip-effect="dark"
+             v-loading="loading"
             style="width: 100%"
             border
             :data="dataTable" 
@@ -435,6 +436,7 @@
                 recordDialog:false,
                 repeatPhonesDialog:false,
                 tmOutboundCallDialogVisible:false,
+                loading:false,
                 dailogTitleType:'',
                 form: {
                 	isTransfer:'',
@@ -683,6 +685,7 @@
                  param.address= this.form.address;
                  param.searchWord= this.form.searchWord;
                  param.trackingDay= this.form.trackingDay;
+             	this.loading=true;
      		    axios.post('/tele/clueMyCustomerInfo/findTeleClueInfo',param).then(function (response) {
      				if(!response){
      					mycustomVM.$message({
@@ -710,7 +713,8 @@
      				mycustomVM.pager.total=pageData.total;
      				mycustomVM.pager.currentPage = pageData.currentPage;
      				mycustomVM.pager.pageSize = pageData.pageSize;
-     				mycustomVM.dataTable =pageData.data; 	
+     				mycustomVM.dataTable =pageData.data;
+     				mycustomVM.loading=false;
      			})
          	},
          	//展现详情
