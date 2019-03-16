@@ -48,6 +48,9 @@ public interface AnnReceiveFeignClient {
 
     @PostMapping("/batchInsert")
     public JSONResult batchInsert(@RequestBody List<AnnReceiveAddAndUpdateDTO> list);
+    
+    @PostMapping("/queryAnnReceiveNoPage")
+    public JSONResult<List<AnnReceiveRespDTO>> queryAnnReceiveNoPage(AnnReceiveQueryDTO queryDTO);
 
     @Component
     static class HystrixClientFallback implements AnnReceiveFeignClient {
@@ -90,6 +93,13 @@ public interface AnnReceiveFeignClient {
         public JSONResult batchInsert(List<AnnReceiveAddAndUpdateDTO> list) {
             return fallBackError("公告记录：站内通知-批量插入失败");
         }
+
+        @Override
+        public JSONResult<List<AnnReceiveRespDTO>> queryAnnReceiveNoPage(
+                AnnReceiveQueryDTO queryDTO) {
+            return fallBackError("查询消息");
+        }
     }
+
 
 }
