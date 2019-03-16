@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -192,6 +193,9 @@ public class VisitRecordController {
             Long busManagerId = visitRecordReqDTO.getBusManagerId();
             if(busManagerId==null) {
                 List<Long> accountIdList =  getAccountIdList(orgId,RoleCodeEnum.SWJL.name());
+                if(CollectionUtils.isEmpty(accountIdList)) {
+                    return new JSONResult().fail(SysErrorCodeEnum.ERR_NOTEXISTS_DATA.getCode(),"该用户下没有下属"); 
+                }
                 visitRecordReqDTO.setBusManagerIdList(accountIdList);
             }else {
                 List<Long> busManagerIdList = new ArrayList<>();
@@ -202,7 +206,7 @@ public class VisitRecordController {
         }else {
             return new JSONResult().fail(SysErrorCodeEnum.ERR_NOTEXISTS_DATA.getCode(),"角色没有权限");
         }
-        
+        logger.info("listVisitRecord,curLoginUser{{}},reqParam{{}}",curLoginUser,visitRecordReqDTO);
        return visitRecordFeignClient.listVisitRecord(visitRecordReqDTO);
     }
     
