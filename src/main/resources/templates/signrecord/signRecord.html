@@ -55,7 +55,7 @@
                 </el-select>
             </el-form-item>   
             <el-form-item label="">  
-                <el-select v-model="form.teleGroupid" placeholder="电销组" style="width: 100%;" clearable>
+                <el-select v-model="form.teleGroupid" placeholder="电销组" style="width: 100%;" clearable @change="changeTeleGroup">
                     <el-option
                         v-for="item in teleGroupList"
                         :key="item.id"
@@ -299,7 +299,7 @@
     var busManagerList = [[${busManagerList}]];
     var businessGroupList = [[${businessGroupList}]];
     var teleGroupList = [[${teleGroupList}]];
-    var teleSaleList = [[${teleSaleList}]];
+    //var teleSaleList = [[${teleSaleList}]];
 </script>
 
 </body>
@@ -336,7 +336,7 @@
                 busManagerList:busManagerList,
                 businessGroupList:businessGroupList,
                 teleGroupList:teleGroupList,
-                teleSaleList:teleSaleList,
+                teleSaleList:[],
                 signTypeOpt: [{
                     value: 1,
                     label: '一次性全款'
@@ -650,7 +650,10 @@
             },
             getStatusText(row, column, value, index){
             	   var valText="";
-                   if(value==1){
+            	   if(value==0){
+            		   valText="驳回";
+            	   }
+            	   else if(value==1){
                        valText="审核中";
                    }else if(value==2){
                        valText="有效";
@@ -669,6 +672,23 @@
             		return "";
             	}
             	return val;
+            },
+            changeTeleGroup(selectedValue){//改变电销组
+            	this.teleSaleList=[];
+            	if(!selectedValue){
+            		return;
+            	}
+                var param ={};
+                param.orgId = selectedValue;
+                axios.post('/business/busAllocation/getSaleList', param)
+                .then(function (response) {
+                      var result =  response.data;
+                      var table=result.data;
+                      signRecordVM.teleSaleList= table;
+                })
+                .catch(function (error) {
+                     console.log(error);
+                });
             }
             
 

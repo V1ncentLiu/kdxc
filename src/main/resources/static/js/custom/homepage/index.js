@@ -258,24 +258,28 @@ var homePageVM=new Vue({
         			this.loginClientForm.clientType=1;
         			this.dialogLogoutClientVisible  = true;
         		}else{
-        			 if (this.$refs.loginClientForm !==undefined) {
+        			/* if (this.$refs.loginClientForm !==undefined) {
         				  this.$refs.loginClientForm.resetFields();
-        				/* this.$refs.loginClientForm.clearValidate(function(){
+        				 this.$refs.loginClientForm.clearValidate(function(){
         					 
-        				 });*/
+        				 });
         			 }
         			
             		this.loginClientForm.clientType=1;//设置默认选中天润坐席
             		this.loginClientForm.bindPhoneType=1;
             		this.loginClientForm.cno='';
             		this.loginClientForm.bindPhone='',
-            		this.loginClientForm.loginClient='',
+            		this.loginClientForm.loginClient='',*/
             		this.dialogLoginClientVisible = true;
         		}
         	
         },
         cancelLoginClientForm(){
         	this.dialogLoginClientVisible = false;
+        	if (this.$refs.loginClientForm !==undefined) {
+				  this.$refs.loginClientForm.resetFields();
+			 }
+        	
         },
         changeClientType(selectedValue){
         	this.$refs.loginClientForm.resetFields();

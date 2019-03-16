@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -90,13 +91,13 @@ public class SignRecordController {
         //商务经理        
         List<UserInfoDTO> busManagerList = getUserInfo(orgId,RoleCodeEnum.SWJL.name());
         //电销人员
-        List<UserInfoDTO> teleSaleList = getUserInfo(null, RoleCodeEnum.DXCYGW.name());
+       // List<UserInfoDTO> teleSaleList = getUserInfo(null, RoleCodeEnum.DXCYGW.name());
         
         request.setAttribute("projectList",projectList);
         request.setAttribute("busManagerList",busManagerList);
         request.setAttribute("businessGroupList",businessGroupList);
         request.setAttribute("teleGroupList",teleGroupList);
-        request.setAttribute("teleSaleList",teleSaleList);
+        //request.setAttribute("teleSaleList",teleSaleList);
 
         return "signrecord/signRecord";
     }
@@ -190,6 +191,9 @@ public class SignRecordController {
                 reqDTO.setBusinessManagerIdList(businessManagerIdList);
             }else {
                 List<Long> accountIdList =  getAccountIdList(orgId,RoleCodeEnum.SWJL.name());
+                if(CollectionUtils.isEmpty(accountIdList)) {
+                    return new JSONResult().fail(SysErrorCodeEnum.ERR_NOTEXISTS_DATA.getCode(),"该用户下没有下属");
+                }
                 reqDTO.setBusinessManagerIdList(accountIdList);
             }
           
