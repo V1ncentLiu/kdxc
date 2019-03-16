@@ -108,36 +108,50 @@
             </el-form>
         </el-row>
 
-        <el-table :data="tableData" border style="width: 100%" tooltip-effect="light"  ref="multipleTable">
-            <el-table-column type="index" width="55"  label="序号"  prop="clueid"> </el-table-column>
-            <el-table-column prop="createTime" label="创建时间"  align="center"  width="170"></el-table-column>
-            <el-table-column prop="projectName" label="资源项目" align="center"  width="170"></el-table-column>
-            <el-table-column prop="searchWord" label="搜索词"  align="center"  width="170"></el-table-column>
-            <el-table-column prop="sourceTypeName" label="广告位" align="center"  width="170"></el-table-column>
-            <el-table-column prop="sourceName" label="媒介" align="center"  width="170"></el-table-column>
-            <el-table-column prop="typeName" label="资源类型" align="center" width="170"></el-table-column>
-            <el-table-column prop="categoryName" label="资源类别" align="center"   width="170"></el-table-column>
-            <el-table-column prop="industryCategoryName" label="行业类别" align="center"   width="170"></el-table-column>
-            <el-table-column prop="cusName" label="客户姓名" align="center"   width="170"></el-table-column>
-            <el-table-column prop="phone" label="手机" align="center"  width="170"></el-table-column>
-            <el-table-column prop="messageTime" label="留言时间" align="center"  width="170"></el-table-column>
-            <el-table-column prop="messagePoint" label="留言重点"  align="center"  width="170"></el-table-column>
-            <el-table-column prop="qq" label="QQ"  align="center"  width="170"></el-table-column>
-            <el-table-column prop="email" label="邮箱" align="center" width="170"></el-table-column>
-            <el-table-column prop="address" label="地址" align="center"  width="170"></el-table-column>
-            <el-table-column prop="wechat" label="微信" align="center"  width="170"></el-table-column>
-            <el-table-column prop="zyzyName" label="资源专员" align="center"  width="170"></el-table-column>
-            <el-table-column prop="releaseReason" label="废弃原因" align="center"  width="170">
+        <!--<el-table :data="tableData" border style="width: 100%" tooltip-effect="light"  ref="multipleTable">-->
+            <!--<el-table-column type="index" width="55"  label="序号"  prop="clueid"> </el-table-column>-->
+            <!--<el-table-column prop="createTime" label="创建时间"  align="center"  width="170"></el-table-column>-->
+            <!--<el-table-column prop="projectName" label="资源项目" align="center"  width="170"></el-table-column>-->
+            <!--<el-table-column prop="searchWord" label="搜索词"  align="center"  width="170"></el-table-column>-->
+            <!--<el-table-column prop="sourceTypeName" label="广告位" align="center"  width="170"></el-table-column>-->
+            <!--<el-table-column prop="sourceName" label="媒介" align="center"  width="170"></el-table-column>-->
+            <!--<el-table-column prop="typeName" label="资源类型" align="center" width="170"></el-table-column>-->
+            <!--<el-table-column prop="categoryName" label="资源类别" align="center"   width="170"></el-table-column>-->
+            <!--<el-table-column prop="industryCategoryName" label="行业类别" align="center"   width="170"></el-table-column>-->
+            <!--<el-table-column prop="cusName" label="客户姓名" align="center"   width="170"></el-table-column>-->
+            <!--<el-table-column prop="phone" label="手机" align="center"  width="170"></el-table-column>-->
+            <!--<el-table-column prop="messageTime" label="留言时间" align="center"  width="170"></el-table-column>-->
+            <!--<el-table-column prop="messagePoint" label="留言重点"  align="center"  width="170"></el-table-column>-->
+            <!--<el-table-column prop="qq" label="QQ"  align="center"  width="170"></el-table-column>-->
+            <!--<el-table-column prop="email" label="邮箱" align="center" width="170"></el-table-column>-->
+            <!--<el-table-column prop="address" label="地址" align="center"  width="170"></el-table-column>-->
+            <!--<el-table-column prop="wechat" label="微信" align="center"  width="170"></el-table-column>-->
+            <!--<el-table-column prop="zyzyName" label="资源专员" align="center"  width="170"></el-table-column>-->
+            <!--<el-table-column prop="releaseReason" label="废弃原因" align="center"  width="170">-->
+                <!--<template slot-scope="scope">-->
+                    <!--<el-button @click="openReleaseUserInfo(scope.row)" type="text" size="small">-->
+                        <!--{{scope.row.releaseReason}}<br>-->
+                        <!--查看释放人员-->
+                    <!--</el-button>-->
+                <!--</template>-->
+            <!--</el-table-column>-->
+            <!--<el-table-column prop="releaseReasonName" label="废弃时间" align="center"  width="170"></el-table-column>-->
+        <!--</el-table>-->
+    <el-table  ref="multipleTable" tooltip-effect="dark" border @selection-change="handleSelectionChange"
+               style="width: 100%"  :data="tableData" >
+        <el-table-column align="center" type="selection" label="全选" width="50"></el-table-column>
+        <el-table-column align="center" :key="index" :prop="item.fieldCode" :label="item.displayName" :width="item.width"
+                         v-for="(item,key,index) in tableColums" v-if="item.fieldCode == 'abandonReason'">
                 <template slot-scope="scope">
                     <el-button @click="openReleaseUserInfo(scope.row)" type="text" size="small">
-                        {{scope.row.releaseReason}}<br>
-                        查看释放人员
+                    {{scope.row.abandonReason}}<br>
+                    查看释放人员
                     </el-button>
                 </template>
-            </el-table-column>
-            <el-table-column prop="releaseReasonName" label="废弃时间" align="center"  width="170"></el-table-column>
-        </el-table>
-
+        </el-table-column>
+        <el-table-column align="center" :key="index" :prop="item.fieldCode" :label="item.displayName" :width="item.width" v-else>
+        </el-table-column>
+    </el-table>
     <table-pagination :pager="pager"  @change="initList"></table-pagination>
     <!-- 释放人员信息 -->
     <el-dialog title="释放人员信息" :visible.sync="dialogFormVisible">
@@ -152,21 +166,26 @@
         </el-table>
     </el-dialog>
     <!-- 选择列 -->
-    <el-dialog title="选择列" :visible.sync="dialogChooseList" class="dialogChooseList">
-        <el-form :model="form">
-            <el-form-item label="" prop="type">
-                <el-checkbox-group v-model="form.type">
-                    <el-checkbox :label="item.sortNum+'_'+item.fieldCode+'_'+item.displayName+'_'+item.id"  name="type" :key="item.fieldCode"  v-for="(item,index) in  allTableColums ">
-                        {{item.displayName}}
-                    </el-checkbox>
-                </el-checkbox-group>
-            </el-form-item>
-        </el-form>
-        <div slot="footer" class="dialog-footer">
-            <el-button type="primary" @click="confirmColumn">确 定</el-button>
-            <el-button @click="dialogChooseList = false">取 消</el-button>
-        </div>
-    </el-dialog>
+        <!-- dialog -->
+        <el-dialog title="自定义列" :visible.sync="dialogChooseList">
+            <el-form :model="form">
+
+                <el-form-item label="列名" prop="type">
+                    <el-checkbox-group v-model="form.type">
+                        <el-checkbox :label="item.sortNum+'_'+item.fieldCode+'_'+item.displayName+'_'+item.id"  name="type" :key="item.fieldCode"  v-for="(item,index) in  allTableColums ">
+                            {{item.displayName}}
+                        </el-checkbox>
+
+                    </el-checkbox-group>
+                </el-form-item>
+
+            </el-form>
+
+            <div slot="footer" class="dialog-footer">
+                <el-button @click="dialogChooseList = false">取 消</el-button>
+                <el-button type="primary" @click="confirmColumn">确 定</el-button>
+            </div>
+        </el-dialog>
     </template>
 </div>
 
@@ -263,16 +282,13 @@
                 this.tableColums = customerShowColun;
                 var param ={};
                 param.fieldIdList = idList;
-                param.menuCode = "aggregation:pendingAllocationManager";
-                console.info(param);
+                param.menuCode = "aggregation:abandonPool";
                 if(idList.length!=0){
-                    // axios.post('/customfield/customField/saveUserField', param)
-                    // .then(function (response) {
-
-                    // })
-                    // .catch(function (error) {
-                    // console.log(error);
-                    // });
+                    axios.post('/customfield/customField/saveUserField', param)
+                        .then(function (response) {
+                        }).catch(function (error) {
+                            console.log(error);
+                        });
                 }
             },
             initColumn(){
@@ -304,6 +320,23 @@
                     mainDivVM.$refs[formName].resetFields();
                 }
             },
+            initColumn(){
+                //初始化table 列 和 用户自定义列
+                this.allTableColums = fieldList;
+                console.log("....................")
+                console.log( this.allTableColums)
+                if(userFieldList.length!=0){
+                    var type=[];
+                    for(var i=0;i<userFieldList.length;i++){
+                        type.push(userFieldList[i].sortNum+'_'+userFieldList[i].fieldCode+'_'+userFieldList[i].displayName+'_'+userFieldList[i].fieldId)
+                    }
+                    this.form.type = type;
+                    this.confirmColumn();
+                }else{
+                    this.tableColums = fieldList;
+                }
+
+            },
             initList(){
                 var param = this.queryForm;
                 param.pageSize = this.pager.pageSize;
@@ -325,6 +358,7 @@
         },
         created(){
             this.initList();
+            this.initColumn()
             //初始资源类别数据
             var  param={};
             param.groupCode="clueCategory";
