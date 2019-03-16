@@ -4,7 +4,9 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+
 import javax.servlet.http.HttpServletRequest;
+
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.apache.shiro.subject.Subject;
@@ -12,12 +14,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+
 import com.kuaidao.aggregation.dto.call.CallRecordReqDTO;
 import com.kuaidao.aggregation.dto.call.CallRecordRespDTO;
+import com.kuaidao.aggregation.dto.circulation.CirculationInsertOrUpdateDTO;
 import com.kuaidao.aggregation.dto.circulation.CirculationReqDTO;
 import com.kuaidao.aggregation.dto.circulation.CirculationRespDTO;
 import com.kuaidao.aggregation.dto.clue.ClueBasicDTO;
@@ -47,7 +52,6 @@ import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.manageweb.feign.call.CallRecordFeign;
 import com.kuaidao.manageweb.feign.circulation.CirculationFeignClient;
-import com.kuaidao.manageweb.feign.clue.AppiontmentFeignClient;
 import com.kuaidao.manageweb.feign.clue.MyCustomerFeignClient;
 import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
 import com.kuaidao.manageweb.feign.project.ProjectInfoFeignClient;
@@ -55,6 +59,7 @@ import com.kuaidao.manageweb.feign.tracking.TrackingFeignClient;
 import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
 import com.kuaidao.sys.dto.organization.OrganizationDTO;
 import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
+import com.kuaidao.sys.dto.role.RoleInfoDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import com.kuaidao.sys.dto.user.UserOrgRoleReq;
 
@@ -82,8 +87,6 @@ public class MyCustomerClueController {
 
 	@Autowired
 	private OrganizationFeignClient organizationFeignClient;
-	@Autowired
-	private AppiontmentFeignClient appiontmentFeignClient;
 
 	@Value("${oss.url.directUpload}")
 	private String ossUrl;
@@ -358,83 +361,6 @@ public class MyCustomerClueController {
 				&& clueFileList.getData() != null) {
 			request.setAttribute("clueFileList", clueFileList.getData());
 		}
-//		CallRecordReqDTO call = new CallRecordReqDTO();
-//		call.setClueId(clueId);
-//		call.setPageSize(10000);
-//		call.setPageNum(1);
-//		JSONResult<PageBean<CallRecordRespDTO>> callRecord = callRecordFeign.listTmCallReacordByParams(call);
-//		// 资源通话记录
-//		if (callRecord != null && JSONResult.SUCCESS.equals(callRecord.getCode()) && callRecord.getData() != null) {
-//			request.setAttribute("callRecord", callRecord.getData());
-//		} else {
-//			request.setAttribute("callRecord", new ArrayList());
-//		}
-//		ClueQueryDTO queryDTO = new ClueQueryDTO();
-//
-//		queryDTO.setClueId(new Long(clueId));
-//
-//		request.setAttribute("clueId", clueId);
-//
-//		JSONResult<ClueDTO> clueInfo = myCustomerFeignClient.findClueInfo(queryDTO);
-//
-//		// 维护的资源数据
-//		if (clueInfo != null && JSONResult.SUCCESS.equals(clueInfo.getCode()) && clueInfo.getData() != null) {
-//
-//			if (null != clueInfo.getData().getClueCustomer()) {
-//				request.setAttribute("customer", clueInfo.getData().getClueCustomer());
-//			} else {
-//				request.setAttribute("customer", new ArrayList());
-//			}
-//			if (null != clueInfo.getData().getClueBasic()) {
-//				request.setAttribute("base", clueInfo.getData().getClueBasic());
-//			} else {
-//				request.setAttribute("base", new ArrayList());
-//			}
-//			if (null != clueInfo.getData().getClueIntention()) {
-//				request.setAttribute("intention", clueInfo.getData().getClueIntention());
-//			} else {
-//				request.setAttribute("intention", new ArrayList());
-//			}
-//		}
-//		// 获取资源跟进记录数据
-//		TrackingReqDTO dto = new TrackingReqDTO();
-//		dto.setClueId(new Long(clueId));
-//		JSONResult<List<TrackingRespDTO>> trackingList = trackingFeignClient.queryList(dto);
-//		if (trackingList != null && trackingList.SUCCESS.equals(trackingList.getCode())
-//				&& trackingList.getData() != null) {
-//
-//			request.setAttribute("trackingList", trackingList.getData());
-//		} else {
-//			request.setAttribute("trackingList", new ArrayList());
-//		}
-//
-//		// 获取资源流转数据
-//		CirculationReqDTO circDto = new CirculationReqDTO();
-//		circDto.setClueId(new Long(clueId));
-//		JSONResult<List<CirculationRespDTO>> circulationList = circulationFeignClient.queryList(circDto);
-//		if (circulationList != null && circulationList.SUCCESS.equals(circulationList.getCode())
-//				&& circulationList.getData() != null) {
-//			request.setAttribute("circulationList", circulationList.getData());
-//		} else {
-//			request.setAttribute("circulationList", new ArrayList());
-//		}
-//
-//		// 项目
-//		ProjectInfoPageParam param = new ProjectInfoPageParam();
-//		JSONResult<List<ProjectInfoDTO>> proJson = projectInfoFeignClient.listNoPage(param);
-//		if (proJson.getCode().equals(JSONResult.SUCCESS)) {
-//			request.setAttribute("proSelect", proJson.getData());
-//		}
-//
-//		// 获取已上传的文件数据
-//		ClueQueryDTO fileDto = new ClueQueryDTO();
-//		fileDto.setClueId(new Long(clueId));
-//		JSONResult<List<ClueFileDTO>> clueFileList = myCustomerFeignClient.findClueFile(fileDto);
-//		if (clueFileList != null && clueFileList.SUCCESS.equals(clueFileList.getCode())
-//				&& clueFileList.getData() != null) {
-//			request.setAttribute("clueFileList", clueFileList.getData());
-//		}
-
 		return "clue/CustomerMaintenanceReadOnly";
 	}
 
@@ -509,23 +435,18 @@ public class MyCustomerClueController {
 	@RequestMapping("/uploadClueFile")
 	@ResponseBody
 	public JSONResult<String> uploadClueFile(HttpServletRequest request, @RequestBody ClueFileDTO dto) {
-		// 获取已上传的文件数据zo
-
-		String filepath = dto.getFilePath();
-		if (null != dto) {
+		// 获取已上传的文件数据
+		if (null != dto && null != dto.getFilePath()) {
+			String filepath = dto.getFilePath();
 			dto.setFileName(filepath.substring(filepath.lastIndexOf("/") + 1));
 			dto.setFileType(filepath.substring(filepath.lastIndexOf(".") + 1));
 		}
-
 		Subject subject = SecurityUtils.getSubject();
 		UserInfoDTO user = (UserInfoDTO) subject.getSession().getAttribute("user");
 		if (null != user) {
-
 			dto.setUploadUser(user.getId());
 			dto.setUploadTime(new Date());
-
 		}
-
 		return myCustomerFeignClient.uploadClueFile(dto);
 	}
 
@@ -634,7 +555,40 @@ public class MyCustomerClueController {
 		UserInfoDTO user = (UserInfoDTO) subject.getSession().getAttribute("user");
 		if (null != user) {
 			dto.setCreateUser(user.getId());
+			// 保存流转记录
+			CirculationInsertOrUpdateDTO circul = new CirculationInsertOrUpdateDTO();
+			circul.setAllotUserId(user.getId());
+			circul.setAllotRoleId(user.getRoleId());
+			circul.setClueId(dto.getClueId());
+			if (null != dto.getBusDirectorId()) {
+				IdEntityLong id = new IdEntityLong();
+				id.setId(dto.getBusDirectorId());
+				JSONResult<UserInfoDTO> dirUser = userInfoFeignClient.get(id);
+				if (dirUser.getCode().equals(JSONResult.SUCCESS) && null != dirUser.getData()) {
+					circul.setUserId(dirUser.getData().getId());
+					dirUser.getData().getId();
+					List<RoleInfoDTO> roleList = dirUser.getData().getRoleList();
+					if (null != roleList && roleList.size() > 0) {
+						circul.setAllotRoleId(roleList.get(0).getId());
+					}
+				}
+				// 保存流转信息
+				circulationFeignClient.saveCirculation(circul);
+			}
 		}
+		// 获取商务大区总监
+		if (null != dto.getArea()) {
+			UserOrgRoleReq req = new UserOrgRoleReq();
+			req.setOrgId(new Long(dto.getArea()));
+			req.setRoleCode(RoleCodeEnum.SWDQZJ.name());
+			JSONResult<List<UserInfoDTO>> userList = userInfoFeignClient.listByOrgAndRole(req);
+			if (userList.getCode().equals(JSONResult.SUCCESS) && null != userList.getData()
+					&& userList.getData().size() > 0) {
+				UserInfoDTO areaDir = userList.getData().get(0);
+				dto.setBusAreaDirectorId(areaDir.getId());
+			}
+		}
+
 		return myCustomerFeignClient.saveAppiontment(dto);
 
 	}
@@ -657,7 +611,57 @@ public class MyCustomerClueController {
 		}
 		return myCustomerFeignClient.queryRepeatClue(dto);
 	}
+	/**
+	 * 重单申请查询重单数据
+	 * 
+	 * @param request
+	 * @param dto
+	 * @return
+	 */
+	@RequestMapping("/queryRepeatClueTwo")
+	@ResponseBody
+	public JSONResult<List<RepeatClueDTO>> queryRepeatClueTwo(HttpServletRequest request,
+			@RequestBody RepeatClueQueryDTO dto) {
+		return myCustomerFeignClient.queryRepeatClue(dto);
+	}
 
+/**
+	 * 总裁办重单申请保存
+	 * 
+	 * @param request
+	 * @param dto
+	 * @return
+	 */
+	@RequestMapping("/officesaveRepeatClue")
+	@ResponseBody
+	public JSONResult<String> officesaveRepeatClue(HttpServletRequest request, @RequestBody RepeatClueSaveDTO dto) {
+
+		Subject subject = SecurityUtils.getSubject();
+		UserInfoDTO user = (UserInfoDTO) subject.getSession().getAttribute("user");
+		if (null != user) {
+			dto.setOrgId(user.getOrgId());
+			dto.setUserId(user.getId());
+		}
+		if (null != dto.getRepeatUserId() && null !=dto.getApplyUserId()) {
+			IdListLongReq idListLongReq = new IdListLongReq();
+			List<Long> idList = new ArrayList<>();
+			idList.add(dto.getRepeatUserId());
+			idList.add(dto.getApplyUserId());
+			idListLongReq.setIdList(idList);
+			JSONResult<List<UserInfoDTO>> userInfo = userInfoFeignClient.listById(idListLongReq);
+			if (userInfo != null && userInfo.SUCCESS.equals(userInfo.getCode()) && userInfo.getData() != null) {
+				for (UserInfoDTO userInfoDTO : userInfo.getData()) {
+					if(userInfoDTO.getId().longValue() == dto.getRepeatUserId()) {
+						dto.setRepeatOrgId(userInfoDTO.getOrgId());
+					}
+					if(userInfoDTO.getId().longValue() == dto.getApplyUserId()) {
+						dto.setApplyOrgId(userInfoDTO.getOrgId());
+					}
+				}
+			}
+		}
+		return myCustomerFeignClient.saveRepeatClue(dto);
+	}
 	/**
 	 * 重单申请查询被重单数据
 	 * 
@@ -771,7 +775,7 @@ public class MyCustomerClueController {
 					&& orgJson.getData().size() > 0) {
 				for (OrganizationDTO org : orgJson.getData()) {
 
-					if (null!=org.getOrgType()&& org.getOrgType().equals(OrgTypeConstant.DZSYB)) {
+					if (null != org.getOrgType() && org.getOrgType().equals(OrgTypeConstant.DZSYB)) {
 						relation.setTeleDeptId(org.getId());
 
 						UserOrgRoleReq userRoleInfo = new UserOrgRoleReq();
@@ -786,7 +790,7 @@ public class MyCustomerClueController {
 						}
 
 					}
-					if (null!=org.getOrgType()&& org.getOrgType().equals(OrgTypeConstant.ZSZX)) {
+					if (null != org.getOrgType() && org.getOrgType().equals(OrgTypeConstant.ZSZX)) {
 
 						UserOrgRoleReq userRoleInfo = new UserOrgRoleReq();
 						userRoleInfo.setRoleCode(RoleCodeEnum.DXZJL.name());
@@ -807,10 +811,10 @@ public class MyCustomerClueController {
 
 		}
 		JSONResult<String> customerClue = myCustomerFeignClient.createCustomerClue(dto);
-//		if(JSONResult.SUCCESS.equals(customerClue.getCode())){
-//			插入对应跟进记录
-//
-//		}
+		// if(JSONResult.SUCCESS.equals(customerClue.getCode())){
+		// 插入对应跟进记录
+		//
+		// }
 		return customerClue;
 	}
 
