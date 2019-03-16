@@ -46,8 +46,14 @@
                         <el-form-item label="手机号：" prop="customerPhone" :label-width="formLabelWidth" :required="true">
                            <!-- <el-input v-model="form.customerPhone" autocomplete="off" style="width: 60%;" @keyup.native="number" maxlength="11"></el-input> -->
                            <!-- <span style="padding-left: 5px;color: rgb(0, 114, 255);cursor: pointer;" @click="dialogFormVisible = true">+手机号</span> -->
-                            <font color="red">{{form.customerPhone}}</font>
-                            <span @click="dialogFormVisible = true" style="padding-left: 5px; color: rgb(0, 114, 255); cursor: pointer;">查看多个手机号</span>
+                            <div v-show="showPhone">
+                                <font color="red">{{form.customerPhone}}</font>
+                                <span @click="dialogFormVisible = true" style="padding-left: 5px; color: rgb(0, 114, 255); cursor: pointer;">查看多个手机号</span>
+                            </div>
+                            <div v-show="!showPhone">
+                                <font color="red">领取后显示</font>
+                            </div>
+
                         </el-form-item>
                     </el-col>
                 </el-row>
@@ -682,6 +688,13 @@ var proSelect=[[${proSelect}]];//项目
 var circulationList=[[${circulationList}]];//资源流转记录
 var trackingList=[[${trackingList}]];//跟访记录
 var clueFileList=[[${clueFileList}]];//上传文件
+var commonPool=[[${commonPool}]];//上传文件
+
+var showPhone = true;
+if(commonPool==1){
+    showPhone = false;
+}
+
 var isEdit=false;
 
 function crtTimeFtt(val, row) {
@@ -829,7 +842,8 @@ if(base==null){
  var addCustomerVM=   new Vue({
         el: '#addCustomer',
         data: function() {
-            return {       
+            return {
+                showPhone:showPhone,
                 isDisabled:true,//默认不可点击
                 dialogFormUploadImgSrc: '',
                 radioProject:'',

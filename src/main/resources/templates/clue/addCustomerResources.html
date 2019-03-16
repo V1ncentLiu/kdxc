@@ -6,7 +6,7 @@
     <meta charset="UTF-8">
 </head>
 <body>
-<div id="addCustomer" class="addCustomer mainPadding" style="display: none;"> 
+<div  v-loading="loading" id="addCustomer" class="addCustomer mainPadding" style="display: none;"> 
     <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
         <el-breadcrumb-item>Home</el-breadcrumb-item>
         <el-breadcrumb-item>电销管理</el-breadcrumb-item>
@@ -378,6 +378,7 @@
                 dialogFormVisible: false,//新增手机号
                 buttonType: 'A',//添加手机号按钮形式
                 deleteShow:false,//删除新增手机号输入框
+                loading:false,
                 form: {  
                     radioProject:'1',//意向项目单选默认选项               
                     resource:'',
@@ -600,9 +601,11 @@
                	      clue.clueIntention=clueIntention; 
                	      clue.clueBasic=clueBasic;
                	      clue.clueProject=clueProject;
+               	       this.loading=true;
                       axios.post('/tele/clueMyCustomerInfo/saveCreateClue',clue)
                       .then(function (response) {
                     	  addCustomerVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
+                    		addCustomerVM.loading=false;
                    		    window.location.href="/tele/clueMyCustomerInfo/initmyCustomer"; 
    		        	   }});
                      });
