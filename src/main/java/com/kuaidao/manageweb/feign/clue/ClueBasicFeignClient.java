@@ -7,6 +7,7 @@ import org.springframework.cloud.netflix.feign.FeignClient;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import com.kuaidao.aggregation.dto.TeleConsoleReqDTO;
 import com.kuaidao.aggregation.dto.clue.AllocationClueReq;
 import com.kuaidao.aggregation.dto.clue.PendingAllocationClueDTO;
 import com.kuaidao.aggregation.dto.clue.PendingAllocationCluePageParam;
@@ -81,6 +82,15 @@ public interface ClueBasicFeignClient {
      */
     @PostMapping("/queryClueIdsByCusName")
     public JSONResult<List<Long>> queryClueIdsByCusName(@RequestBody String cusName);
+    
+    
+    /**
+     * 统计分配的资源数
+     * @param reqDTO
+     * @return
+     */
+    @PostMapping("/countAssignClueNum")
+    public JSONResult<Integer> countAssignClueNum(@RequestBody TeleConsoleReqDTO reqDTO);
 
     @Component
     static class HystrixClientFallback implements ClueBasicFeignClient {
@@ -126,6 +136,12 @@ public interface ClueBasicFeignClient {
         @Override
         public JSONResult<List<Long>> queryClueIdsByCusName(String cusName) {
             return fallBackError("通过客户姓名模糊查询获取clueIds");
+        }
+
+
+        @Override
+        public JSONResult<Integer> countAssignClueNum(TeleConsoleReqDTO reqDTO) {
+            return fallBackError("统计分配资源数");
         }
 
 
