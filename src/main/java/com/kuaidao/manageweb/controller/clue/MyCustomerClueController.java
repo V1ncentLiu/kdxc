@@ -572,7 +572,7 @@ public class MyCustomerClueController {
 					dirUser.getData().getId();
 					List<RoleInfoDTO> roleList = dirUser.getData().getRoleList();
 					if (null != roleList && roleList.size() > 0) {
-						circul.setAllotRoleId(roleList.get(0).getId());
+						circul.setRoleId(roleList.get(0).getId());
 					}
 				}
 				// 保存流转信息
