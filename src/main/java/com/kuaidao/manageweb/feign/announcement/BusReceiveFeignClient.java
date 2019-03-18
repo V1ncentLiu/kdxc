@@ -47,6 +47,11 @@ public interface BusReceiveFeignClient {
     @PostMapping("/insertAndSent")
     public JSONResult insertAndSent(@RequestBody BussReceiveInsertAndUpdateDTO rev)
             ;
+    
+    @PostMapping("/queryBussReceiveNoPage")
+    public JSONResult<List<BussReceiveRespDTO>> queryBussReceiveNoPage(
+            BussReceiveQueryDTO queryDTO);
+    
     @Component
     static class HystrixClientFallback implements BusReceiveFeignClient {
 
@@ -90,5 +95,13 @@ public interface BusReceiveFeignClient {
             return fallBackError("业务消息记录，信息发送");
         }
 
+        @Override
+        public JSONResult<List<BussReceiveRespDTO>> queryBussReceiveNoPage(
+                BussReceiveQueryDTO queryDTO) {
+            return fallBackError("查询消息");
+        }
+
     }
+
+
 }
