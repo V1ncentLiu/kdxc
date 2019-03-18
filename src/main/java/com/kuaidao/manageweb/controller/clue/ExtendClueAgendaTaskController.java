@@ -14,12 +14,15 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.kuaidao.aggregation.dto.clue.ClueAgendaTaskDTO;
 import com.kuaidao.aggregation.dto.clue.ClueAgendaTaskQueryDTO;
+import com.kuaidao.aggregation.dto.clue.ClueDTO;
+import com.kuaidao.aggregation.dto.clue.ClueQueryDTO;
 import com.kuaidao.aggregation.dto.project.ProjectInfoDTO;
 import com.kuaidao.aggregation.dto.project.ProjectInfoPageParam;
 import com.kuaidao.common.constant.RoleCodeEnum;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.manageweb.feign.clue.ExtendClueFeignClient;
+import com.kuaidao.manageweb.feign.clue.MyCustomerFeignClient;
 import com.kuaidao.manageweb.feign.project.ProjectInfoFeignClient;
 import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
@@ -37,6 +40,9 @@ public class ExtendClueAgendaTaskController {
 
 	@Autowired
 	private UserInfoFeignClient userInfoFeignClient;
+
+	@Autowired
+	private MyCustomerFeignClient myCustomerFeignClient;
 
 	/**
 	 * 初始化待审核列表
@@ -138,6 +144,26 @@ public class ExtendClueAgendaTaskController {
 
 		return userList;
 
+	}
+
+	/**
+	 * 客户详情
+	 * 
+	 * @param request
+	 * @param clueId
+	 * @return
+	 */
+	@RequestMapping("/customerInfoView")
+	@ResponseBody
+	public JSONResult<ClueDTO> customerInfoReadOnly(HttpServletRequest request, @RequestBody ClueAgendaTaskQueryDTO queryDto) {
+
+		ClueQueryDTO queryDTO = new ClueQueryDTO();
+
+		queryDTO.setClueId(queryDto.getClueId());
+
+		JSONResult<ClueDTO> clueInfo = myCustomerFeignClient.findClueInfo(queryDTO);
+
+		return clueInfo;
 	}
 
 }
