@@ -23,7 +23,7 @@ import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.manageweb.feign.assignrule.InfoAssignFeignClient;
 
-@FeignClient(name = "aggregation-service", path = "/aggregation/clue/myCustomer", fallback = MyCustomerFeignClient.HystrixClientFallback.class)
+@FeignClient(name = "aggregation-service-001", path = "/aggregation/clue/myCustomer", fallback = MyCustomerFeignClient.HystrixClientFallback.class)
 public interface MyCustomerFeignClient {
 
 	/**
