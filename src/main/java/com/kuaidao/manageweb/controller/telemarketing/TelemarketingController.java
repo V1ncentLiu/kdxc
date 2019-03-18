@@ -234,7 +234,7 @@ public class TelemarketingController {
 				if(islegal && telemarketingLayoutDTO2.getTelemarketingTeam() !=null) {
 					islegal = false;
 					for (OrganizationRespDTO organizationRespDTO : dxList.getData()) {
-						if(organizationRespDTO.getName().equals(telemarketingLayoutDTO2.getTelemarketingTeam().trim())) {
+						if((organizationRespDTO.getName().trim()).equals(telemarketingLayoutDTO2.getTelemarketingTeam().trim())) {
 							telemarketingLayoutDTO2.setTelemarketingTeamId(organizationRespDTO.getId());
 							islegal = true;
 							break;
@@ -249,7 +249,7 @@ public class TelemarketingController {
 					for (int i = 0; i < projects.length; i++) {
 						int isCanUser = 1 ;//是否能用0 可用  1不可用
 						for (ProjectInfoDTO projectInfoDTO : listNoPage.getData()) {
-							if(projectInfoDTO.getProjectName().equals(projects[i].trim())) {
+							if((projectInfoDTO.getProjectName().trim()).equals(projects[i].trim())) {
 								if("".equals(projectIds)) {
 									projectIds = projectInfoDTO.getId()+"";
 								}else {
