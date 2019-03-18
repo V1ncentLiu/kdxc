@@ -793,7 +793,7 @@ public class MyCustomerClueController {
 						}
 
 					}
-					if (null != org.getOrgType() && org.getOrgType().equals(OrgTypeConstant.ZSZX)) {
+					if (null != org.getOrgType() && org.getOrgType().equals(OrgTypeConstant.DXFGS)) {
 
 						UserOrgRoleReq userRoleInfo = new UserOrgRoleReq();
 						userRoleInfo.setRoleCode(RoleCodeEnum.DXZJL.name());
