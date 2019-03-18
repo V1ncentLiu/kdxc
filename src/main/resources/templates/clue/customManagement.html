@@ -808,9 +808,13 @@ var userFieldList=[];
                    this.allocateFormVisible = false; 
                    axios.post('/clue/pendingAllocation/allocationClue', param)
                    .then(function (response) {
-                	  customerManVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
-                	  		customerManVM.initTableData();
-                       }});
+                       if(response.data.code==-1){
+                           customerManVM.$message.error(response.data.msg);
+                       }else {
+                           customerManVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
+                                   customerManVM.initTableData();
+                               }});
+                       }
                    }).catch(function (error) {
                        console.log(error);
                    });
