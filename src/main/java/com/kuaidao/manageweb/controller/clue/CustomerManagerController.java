@@ -111,8 +111,6 @@ public class CustomerManagerController {
                 customFieldFeignClient.queryFieldByUserAndMenu(queryFieldByUserAndMenuReq);
         request.setAttribute("userFieldList", queryFieldByUserAndMenu.getData());
 		
-		
-
 		return "clue/customManagement";
 	}
 
