@@ -89,6 +89,23 @@ public class RoleManagerController {
 		JSONResult<List<IndexModuleDTO>> treeJsonRes = moduleManagerFeignClient
 				.queryModuleShow(SystemCodeConstant.HUI_JU);
 		if (treeJsonRes != null && JSONResult.SUCCESS.equals(treeJsonRes.getCode()) && treeJsonRes.getData() != null) {
+			List<IndexModuleDTO> moduledtoList = treeJsonRes.getData();
+
+			if (null != moduledtoList && moduledtoList.size() > 0) {
+
+				for (IndexModuleDTO indexMoudel : moduledtoList) {
+
+					List<ModuleInfoDTO> moduleList = indexMoudel.getSubList();
+
+					for (ModuleInfoDTO module : moduleList) {
+
+						List<String> checkedCities = new ArrayList<String>();
+
+						module.setCheckedCities(checkedCities);
+					}
+				}
+			}
+
 			request.setAttribute("moduleData", treeJsonRes.getData());
 		} else {
 			logger.error("query module tree,res{{}}", treeJsonRes);
@@ -143,6 +160,7 @@ public class RoleManagerController {
 									if (roleOpe.getId().equals(operation.getId())) {
 
 										checkedCities.add(operation.getId() + "");
+										module.setCheckAll(true);
 										break;
 									}
 
@@ -248,6 +266,7 @@ public class RoleManagerController {
 	public JSONResult<List<RoleInfoDTO>> qeuryRoleByName(@RequestBody RoleQueryDTO roleDTO) {
 		return roleManagerFeignClient.qeuryRoleByName(roleDTO);
 	}
+
 	/**
 	 * 删除角色时判断是否有用户关联
 	 * 

@@ -332,7 +332,7 @@
                 </el-row>
             </div>
             <div class="padding20 f-tac">            
-                <el-button type="primary" @click="submitForm('form')">提交客户资源</el-button>
+                <el-button type="primary" @click="submitForm('form')"  :disabled="confirmBtnDisabled" >提交客户资源</el-button>
                 <el-button  @click="rebackMV">取 消</el-button>
             </div> 
         </el-form> 
@@ -357,7 +357,7 @@
             </el-form-item>
         </el-form>
         <div slot="footer" class="f-tac">            
-            <el-button type="primary" @click="submitDialogForm('dynamicValidateForm')">提 交</el-button>
+            <el-button type="primary" @click="submitDialogForm('dynamicValidateForm')"  >提 交</el-button>
             <el-button @click="addDomain">添加更多手机号</el-button>
         </div>
     </el-dialog>    
@@ -379,6 +379,7 @@
                 buttonType: 'A',//添加手机号按钮形式
                 deleteShow:false,//删除新增手机号输入框
                 loading:false,
+                confirmBtnDisabled:false,//提交按钮 是否禁用
                 form: {  
                     radioProject:'1',//意向项目单选默认选项               
                     resource:'',
@@ -601,14 +602,17 @@
                	      clue.clueIntention=clueIntention; 
                	      clue.clueBasic=clueBasic;
                	      clue.clueProject=clueProject;
-               	       this.loading=true;
+               	      addCustomerVM.confirmBtnDisabled=true;//禁用提交按钮
                       axios.post('/tele/clueMyCustomerInfo/saveCreateClue',clue)
                       .then(function (response) {
                     	  addCustomerVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
                     		addCustomerVM.loading=false;
                    		    window.location.href="/tele/clueMyCustomerInfo/initmyCustomer"; 
    		        	   }});
-                     });
+                     }).then(function(){
+                 		//fieldMenuVM.$refs.confirmBtn.disabled=false;
+                 		addCustomerVM.confirmBtnDisabled=false;//启用提交按钮
+                   });
                     } else {
                         console.log('error submit!!');
                         return false;

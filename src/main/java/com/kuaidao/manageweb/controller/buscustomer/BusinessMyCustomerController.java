@@ -67,7 +67,7 @@ public class BusinessMyCustomerController {
         List tasteProList = new ArrayList();
         Map tasteMap = new HashMap();
         MyCustomerParamDTO dto = new MyCustomerParamDTO();
-       // dto.setBusSaleId(user.getId());
+        dto.setBusSaleId(user.getId());
         JSONResult<List<BusMyCustomerRespDTO>> resList = busMyCustomerFeignClient.queryList(dto);
         if(JSONResult.SUCCESS.equals(resList.getCode())){
             List<BusMyCustomerRespDTO> datas = resList.getData();
