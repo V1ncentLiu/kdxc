@@ -10,7 +10,7 @@
 <div id="addCustomer" class="addCustomer mainPadding" style="display: none;"> 
     <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
         <el-breadcrumb-item>Home</el-breadcrumb-item>
-        <el-breadcrumb-item>电销管理</el-breadcrumb-item>
+        <el-breadcrumb-item>商务管理</el-breadcrumb-item>
         <el-breadcrumb-item>维护客户</el-breadcrumb-item>
     </el-breadcrumb> 
     
@@ -260,16 +260,17 @@
                             <el-radio v-model="form.radioSelect" label="0" @change="professionChange">否</el-radio>
                             <el-radio v-model="form.radioSelect" label="1" @change="professionChange">是</el-radio>
                         </el-form-item>
-                        <span v-show="domainShow">
+                          <span v-if="domainShow">
                             <el-form-item
-                                style="width: 200px;float: left;margin-right: 10px;"
+                                style="width: 300px;float: left;margin-right: 10px;"
                                 v-for="(domain, index) in form.domains"
                                 :key="domain.key"
                                 :prop="'domains.' + index + '.value'" 
-                            >
-                                <el-input v-model="domain.value" placeholder="输入品牌名称" maxLength="15"></el-input>
+                                :rules='rules.domainsValue'
+                                  >
+                                <el-input v-model="domain.value" placeholder="输入品牌名称" maxLength="15" style="width: 210px;float: left;"></el-input><el-button @click.prevent="removeDomain(domain)" type="danger">删除</el-button>
                             </el-form-item>
-                            <el-button type="primary" @click="addDomain"><i class="el-icon-plus"></i></el-button>
+                            <el-button type="primary" @click="addDomain"><i class="el-icon-plus"></i></el-button></el-input>
                         </span>
                     </el-col>
                 </el-row>
@@ -317,12 +318,12 @@
                         <el-button size="small" type="danger" @click="deteleClueFile">删除</el-button>
                         <el-button type="text" disabled>只允许上传图片／音频文件。</el-button>
                     </el-col>
-			<div id="container">
+			<div id="container" class="f-fr">
 				<a id="selectfiles" href="javascript:void(0);" class='btn'>选择文件</a>
 				<a id="postfiles" href="javascript:void(0);" onclick="clueUploadFile()" class='btn'>开始上传</a>
 			</div>
 			<div id="ossfile">你的浏览器不支持flash,Silverlight或者HTML5！</div>
-			上传到指定目录:<input type="text" id='dirname' placeholder="如果不填，默认是上传到根目录" size=50>
+			<span v-show="false">上传到指定目录:<input type="text" id='dirname' placeholder="如果不填，默认是上传到根目录" size=50></span>
 			<pre id="console"></pre>
 			</el-row>
                 <el-row>
@@ -385,6 +386,7 @@
             </div>
             <div class="marginB20 fs16 paddingT20">跟进记录</div>
             <div class="borderbox padding20">
+              <!--  
                 <el-row>
                     <el-col :span="16" class="paddingTB">
                         <el-button size="small" type="danger" @click="deteleTracking">删除</el-button>
@@ -392,9 +394,9 @@
                     </el-col>
                     <el-col :span="4" :offset="4" class="f-tar">
                         <el-button size="small" type="primary" @click="lineFormShow=true">添加</el-button>
-                        <!-- <el-button size="small" type="primary" @click="addRecord">添加</el-button> -->
                     </el-col>
                 </el-row>
+                -->
                 <el-row>
                     <el-table
                         ref="multipleTable"
@@ -730,6 +732,7 @@
         </div>
     </el-dialog>    
 </div>
+<link rel="stylesheet" href="/css/common/uploadStyle.css">
 <style type="text/css">
 		.lineFeed { width: 230px; word-break:break-all; word-wrap: break-word; color: #c0c4cc; cursor:not-allowed; }
 		.lineFeed2 { width: 530px; }
@@ -1043,7 +1046,7 @@ var ossUrl=[[${ossUrl}]];
                         axios.post('/tele/clueMyCustomerInfo/updateCustomerClue',clue)
                         .then(function (response) {
                      	  addCustomerVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
-                    		  window.location.href="/tele/clueMyCustomerInfo/initmyCustomer"; 
+                    		  window.location.href="/aggregation/businessMyCustomer/listPage"; 
     		        	}});
                       });
                     } else {
@@ -1109,6 +1112,12 @@ var ossUrl=[[${ossUrl}]];
                         key: Date.now()
                     });
                 }                
+            },
+            removeDomain(item) {//移除
+                var index = this.form.domains.indexOf(item)
+                if (index !== -1) {
+                  this.form.domains.splice(index, 1)
+                }
             },
             handleSelectionChange(val) {  
                 this.multipleSelection = val;
@@ -1383,16 +1392,16 @@ var ossUrl=[[${ossUrl}]];
             document.getElementById('addCustomer').style.display = 'block';
            if(customer){
         	   this.form.customerName=customer.cusName; 
-        	   this.form.customerPhone=customer.linkPhone; 
-        	   this.form.customerSex=customer.sex+"";
+        	   this.form.customerPhone=customer.phone;
+        	   this.form.customerSex=customer.sex==null?"":customer.sex+"";
         	   this.form.ishasWx=customer.wechat;
-        	   this.form.experience=customer.hasExperience+"";
+        	   this.form.experience=customer.hasExperience==null?"":customer.hasExperience+"";
         	   this.form.customerAge=customer.age;
         	   this.form.customerJob=customer.profession+"";
-        	   this.form.customerPartner=customer.partnerType+"";
-        	   this.form.address=customer.hasAddress+"";
+        	   this.form.customerPartner=customer.partnerType==null?"":customer.partnerType+"";
+        	   this.form.address=customer.hasAddress==null?"":customer.hasAddress+"";
         	   this.form.urgency=customer.urgentDate;
-        	   this.form.customerLevel=customer.cusLevel+"";
+        	   this.form.customerLevel=customer.cusLevel==null?"":customer.cusLevel+"";
         	   this.form.qq=customer.qq;
         	   this.form.customerEmail=customer.email;
         	   this.form.cateringType=customer.experience;
@@ -1412,6 +1421,10 @@ var ossUrl=[[${ossUrl}]];
         	   this.form.province=intention.province;
         	   this.form.city=intention.city;
         	   this.form.district=intention.district; 
+        	   if(intention.purProjectType==2){
+         		  this.outsideProjectShow=true; //外部项目默认显示   
+         		  this.insideProjectShow=false; //内部项目不默认显示
+         	   }
         	   
            }
            if(intention){
@@ -1545,6 +1558,7 @@ var ossUrl=[[${ossUrl}]];
       	     axios.post('/tele/clueMyCustomerInfo/findClueFile',param)
               .then(function (response) {
             	  addCustomerVM.tableDataC1=response.data.data;
+            	  ossfile.innerHTML="";
                 }); 
              }}); 
         });
