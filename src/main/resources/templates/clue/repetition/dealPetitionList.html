@@ -199,7 +199,7 @@
                 </el-form-item>
             </el-row>
             <el-row>
-                <el-form-item label="匹配线索：" :label-width="formLabelWidth" prop="clue">
+                <el-form-item label="匹配线索：" :label-width="formLabelWidth" prop="repeadclue">
                     <el-select v-model="repeatApplyForm.repeadclue" placeholder="请选择" style="width: 60%;">
                            <el-option
                             v-for="item in repeatClueArr"
@@ -337,7 +337,7 @@
                         callback();
                     }, trigger: 'blur'}
                 ],
-                clue: [
+                repeadclue: [
                     { required: true, message: '请选择匹配线索', trigger: 'blur' }
                 ],
                 employee: [
@@ -569,13 +569,14 @@
 		                param.detailDTOs = detailDTOs;
 		                param.dealRemark = this.remark;
 		                param.idList = idList;
-		                if(this.remark){
-		                	
-		                }
+		               
 		                axios.post('/clue/cluerepetition/updatePetitionById',param).then(function (response) {
 		              	  	console.log(response);
 		                  	if(null===response||response.data==null||response.data.code!='0'){
-			                  	  alert(response.data.msg);
+		                  		orgVM.$message({
+	   	                            message: response.data.msg,
+	   	                            type: 'warning'
+	   	                          });
 			                  	  return ;
 		                 	}else{
 		                 		window.location.href="/clue/cluerepetition/dealPetitionListPage";
@@ -619,7 +620,10 @@
                 axios.post('/clue/cluerepetition/dealPetitionList',param).then(function (response) {
                 	  console.log(response);
                     if(null===response||response.data==null||response.data.code!='0'){
-	                  	  alert(response.data.msg);
+                    	orgVM.$message({
+                            message: response.data.msg,
+                            type: 'warning'
+                          });
 	                  	  return ;
                    }else{
                   	 orgVM.dataTable = response.data.data.data; 
@@ -675,7 +679,10 @@
                        }
                     		  
                      }else{
-                    	 alert(response.data.data.msg);
+                    	 this.$message({
+                             message: response.data.data.msg,
+                             type: 'warning'
+                           });
 	                  	  	return ;
                      } 
                   }).catch(function (error) {
@@ -710,7 +717,10 @@
  	                      if(null !==response && response.data !=null && response.data.code=='0'){
  	                    	  window.location.href="/invitearea/inviteAreaList"; 
  	                     }else{
- 	                    	 alert(response.data.data.msg);
+ 	                    	this.$message({
+ 	                             message: response.data.data.msg,
+ 	                             type: 'warning'
+ 	                           });
   	                  	  	return ;
  	                     } 
  	                  }).catch(function (error) {
@@ -795,7 +805,7 @@
                 	
                     var employee= this.repeatApplyForm.employee;
                     
-                    var clue=this.repeatApplyForm.clue;
+                    var clue=this.repeatApplyForm.repeadclue;
                     
                     var repeatClue=this.repeatApplyForm.repeatClue;
                     
