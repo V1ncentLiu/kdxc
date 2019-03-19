@@ -466,6 +466,7 @@ public class MyCustomerClueController {
 		// 获取资源流转数据
 		TrackingReqDTO circDto = new TrackingReqDTO();
 		circDto.setClueId(dto.getClueId());
+		circDto.setStage(dto.getStage());
 		return trackingFeignClient.queryList(circDto);
 
 	}
