@@ -4,6 +4,7 @@
     <title>后台管理系统</title>
     <style>
         button a{color:#fff!important;}
+        .lineFeed { width: 230px; word-break:break-all; word-wrap: break-word; text-align:center; color: #c0c4cc; cursor:not-allowed; }
     </style>
 </head>
 <body>
@@ -21,6 +22,7 @@
     		<shiro:hasPermission name="business:busCustomerManager:allocation">
 		        <el-button type="success" @click="toTransferClue">外调经理</el-button>
 		    </shiro:hasPermission>
+		         <el-button type="success" @click="notVisit">标记未到访</el-button>
 	</el-row>
 	<el-form :inline="true" :model="searchForm" class="demo-form-inline" ref="searchForm"> 
 	    <el-row class="greybg padding20" style="padding-bottom: 0;">
@@ -161,7 +163,7 @@
            <el-table-column align="center" prop="isView" label="读取客户状态" :formatter="transformView" width="120"></el-table-column>
            <el-table-column align="center" prop="appiontmentCreateTime" sortable label="提交邀约时间" :formatter="dateFormat" width="170"></el-table-column>
            <el-table-column align="center" prop="allocateTime" sortable label="接受客户时间" :formatter="dateFormat" width="170"></el-table-column>
-           <el-table-column align="center" prop="visit" label="到访情况" >
+           <el-table-column align="center" prop="visit" label="到访情况" width="100">
 	               <template slot-scope="scope">
 		               <div v-if="scope.row.visitStatus === 0">
 		                   <el-button  type="text" @click="showNotVisitReason(scope.row)" size="small">未到访（原因）</el-button>
@@ -212,7 +214,7 @@
                    	{{allocationForm.message}}
                 </el-form-item>
                 <el-form-item label="商务经理"    :label-width="formLabelWidth"  prop="saleId">
-                    <el-select v-model="allocationForm.saleId" placeholder="组内商务经理姓名" style="width: 80%">
+                    <el-select v-model="allocationForm.saleId" placeholder="组内商务经理姓名" style="width: 100%">
                         <el-option v-for="item in saleOptions" 
                         			:key="item.id" 
                         			:label="item.name" 
@@ -239,7 +241,7 @@
                    	{{transferForm.message}}
                 </el-form-item>
                 <el-form-item label="商务经理"    :label-width="formLabelWidth"  prop="saleId">
-                    <el-select v-model="transferForm.saleId" placeholder="外调经理姓名（所属大区-所属组）" style="width: 80%">
+                    <el-select v-model="transferForm.saleId" placeholder="外调经理姓名（所属大区-所属组）" style="width: 100%">
                         <el-option v-for="item in allSaleOptions" 
                         			:key="item.id" 
                         			:label="item.name" 
@@ -262,8 +264,9 @@
     <el-dialog title="未到访原因" :visible.sync="notVisitdDialogVisible"  width="50%">
         <template>
             <el-form :model="notVisitFlag" ref="notVisitFlag">
-                <el-form-item label="" :label-width="formLabelWidth" :required="true">
-                    <el-button type="text" disabled style="color: #1e2746">{{notVisitFlag.str}}</el-button>
+                <el-form-item label=""  :required="true" >
+                	<div class="lineFeed">{{notVisitFlag.str}}</div>
+                    <!-- <el-button type="text" disabled style="color: #1e2746">{{notVisitFlag.str}}</el-button> -->
                 </el-form-item>
             </el-form>
         </template>
@@ -430,6 +433,24 @@
             </div>
         </template>
     </el-dialog>
+        <!--标记未到访-->
+    <el-dialog title="提示" :visible.sync="notVisitFlagDialogVisible"  width="30%">
+        <template>
+            <el-form :model="notVisitFlag" ref="notVisitFlag" :rules="notVisitFlagRules">
+                <el-form-item>
+                    <!--<el-button type="text" disabled style="color: #1e2746; width:100px; word-wrap:break-word; word-break:normal;">{{notVisitFlag.str}}</el-button>-->
+                    <span style="margin-left: 80px;display:block;color: #1e2746; width:90%; word-wrap:break-word; word-break:normal;">{{notVisitFlag.str}}</span>
+                </el-form-item>
+                <el-form-item label="未到访原因" :label-width="formLabelWidth"  prop="notVisitReason" >
+                    <el-input type="textarea" v-model="notVisitFlag.notVisitReason"  maxlength="100" :rows="3" placeholder="请输入内容(限制100字)"></el-input>
+                </el-form-item>
+            </el-form>
+            <div slot="footer" class="dialog-footer">
+                <el-button type="primary" @click="saveNotVisit">确定</el-button>
+                <el-button  @click="notVisitFlagDialogVisible = false">取消</el-button>
+            </div>
+        </template>
+    </el-dialog>
 </div>
 <!-- import common js-->
 <div th:include="_footer_include :: #jsLib"></div>
@@ -448,6 +469,7 @@ var cateringExperienceList=[[${cateringExperienceList}]];//餐饮经验
 var shopTyleList=[[${shopTyleList}]];//签约店型
 var storefrontAreaList=[[${storefrontAreaList}]];//店铺面积
 var ussmList=[[${ussmList}]];//投资金额
+
 var customerVM = new Vue({
         el: '#clueManage',
         data: {
@@ -519,6 +541,7 @@ var customerVM = new Vue({
 	            teleSaleOptions:[],
 	            projectOptions:projectList,
 	            provinceOptions:provinceList,
+	            notVisitFlagDialogVisible:false,
 	            visitStatusOptions:[{
 	            	value:-1,
 	            	name:"待处理"
@@ -617,6 +640,51 @@ var customerVM = new Vue({
                      console.log(error);
                 });
                 
+              },
+              notVisit(){
+                  var rows = customerVM.multipleSelection;
+                  if(rows.length==0){
+                      this.$message({message: '请选择数据', type: 'warning'});
+                      return false;
+                  }else{
+                      var names = "";
+                      var rowIds = [];
+                      debugger;
+                   for(var i=0;i<rows.length;i++){
+                        if(rows[i].visitStatus==0||rows[i].visitStatus==1||rows[i].visitStatus==2||rows[i].visitStatus==3){
+                              this.$message({message: '勾选数据中，包含了已到访或是已标记的客户', type: 'warning'});
+                              return false;
+                          }
+                          names = names + '【'+rows[i].cusName+'】'; 
+                          rowIds.push(rows[i].clueId);
+                      } 
+                      var str = '确定要将此'+names+'标记为未到访吗?';
+                      this.notVisitFlag.clueIds = rowIds;
+                      this.notVisitFlag.str  = str;
+                      this.notVisitFlag.notVisitReason = "";
+                      this.notVisitFlagDialogVisible = true;
+                  }
+              },
+              saveNotVisit(){
+                  var param = this.notVisitFlag;
+                  // 设置 clueid
+                  this.$refs['notVisitFlag'].validate((valid) => {
+                      if (valid) {
+                          axios.post("/aggregation/businessMyCustomer/notVisit", param)
+                              .then(function (response) {
+                                  if (response.data.code == 0) {
+                                      mainDivVM.$message({type: 'success', message: '标记成功!',duration:2000,onClose:function(){
+                                    	  customerVM.pager.pageNum = 1
+                                    	  customerVM.searchTable();
+                                    	  customerVM.notVisitFlagDialogVisible = false;
+                                    	 // customerVM.addVisitRecord.clueId = "";
+                                          }});
+                                  } else {
+                                	  customerVM.$message.error(response.data.msg);
+                                  }
+                              }).catch(function (error) {console.log(error);});
+                      } else {return false;}
+                  });
               },
               //选择行
               handleSelectionChange(val) {

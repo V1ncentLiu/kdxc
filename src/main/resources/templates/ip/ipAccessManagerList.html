@@ -108,7 +108,7 @@ input[type="number"] {
 			</el-form> 
 			<span slot="footer" class="dialog-footer"> 
 				<el-button @click="dialogIpVisible = false">取 消</el-button> 
-				<el-button type="primary" @click="submitipAddForm('ipAddForm')">确 定</el-button>
+				<el-button type="primary" @click="submitipAddForm('ipAddForm')" :disabled="IpconfirmBtnDisabled"  >确 定</el-button>
 			</span> 
 		</el-dialog> 
 		<!-- 添加IP包弹框 --> 
@@ -132,7 +132,7 @@ input[type="number"] {
 		<div slot="footer" class="dialog-footer">
 			<el-button @click="addIpPackageVisible = false">取 消</el-button>
 			<el-button type="primary"
-				@click="saveIpPackageData('ipPackageAddForm')">提交</el-button>
+				@click="saveIpPackageData('ipPackageAddForm')"  :disabled="packgeconfirmBtnDisabled"  >提交</el-button>
 		</div>
 		</el-dialog> <!--修改IP包弹框 --> <el-dialog title="修改IP包"
 			:visible.sync="updateIpPackageVisible"> <el-form
@@ -191,6 +191,8 @@ var ipManagerVM = new Vue({
 		addIpPackageVisible:false,
 		addPackageIPSelectVisible:false,
 		updateIpPackageVisible:false,
+		IpconfirmBtnDisabled:false,
+		packgeconfirmBtnDisabled:false,
 		oldPackageName:'',
         oldPackageId:'',
 		selectIpType:'1',
@@ -541,6 +543,7 @@ var ipManagerVM = new Vue({
 					 var ip3=ipManagerVM.ipAddForm.ipAddress3;
 					 var ip4=ipManagerVM.ipAddForm.ipAddress4;
 					 param.ipAddress=ip1+"."+ip2+"."+ip3+"."+ip4;
+					 ipManagerVM.IpconfirmBtnDisabled=true;
 					 axios.post('/ip/ipAccess/findListByIp',param).then(function (response) {
 						 if(response.data.data.length>0) {
 	            			 ipManagerVM.$message({
@@ -554,7 +557,9 @@ var ipManagerVM = new Vue({
 							    ipManagerVM.dialogIpVisible=false;
 							    ipManagerVM.refreshIpTableData(response);
 				        	 }});
-							}); 
+							}).then(function () {
+								ipManagerVM.IpconfirmBtnDisabled=false;//启用提交按钮
+                            }); ; 
 						 
 					 });
                 } else {
@@ -766,6 +771,7 @@ var ipManagerVM = new Vue({
 					var param={};
 					param.name=packageName;
 					param.ipRepositorys=savepackageIp;
+					ipManagerVM.packgeconfirmBtnDisabled=true;
 					axios.post('/ip/ipAccess/saveIpPackage',param).then(function (response) {
 						if(null==response){
 							ipManagerVM.$message({
@@ -795,7 +801,9 @@ var ipManagerVM = new Vue({
 						  ipManagerVM.ipManager="second";
 						  ipManagerVM.queryPackageDataList(); 
 						 }});	
-					  });
+					  }).then(function () {
+						  ipManagerVM.packgeconfirmBtnDisabled=false;//启用提交按钮
+                      }); ;
                 } else {
                     console.log('error submit!!');
                     return false;

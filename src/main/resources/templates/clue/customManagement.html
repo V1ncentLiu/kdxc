@@ -229,26 +229,20 @@
         </el-form>       
     </el-row>
     <el-row>
-        <el-table 
-            ref="multipleTable"
-            tooltip-effect="dark"
-            style="width: 100%"
-            border
-            :data="dataTable" 
-            @selection-change="handleSelectionChange"
-            >
-            <el-table-column align="center" type="selection"  prop="clueId"  width="55" @selection-change="handleSelectionChange" ></el-table-column>
-            <el-table-column align="center" prop="cusLevelName"  label="客户级别"></el-table-column>
-            <el-table-column align="center" prop="cusName" label="客户姓名"></el-table-column>
-            <el-table-column align="center" prop="phone" label="手机号">
-                <template slot-scope="scope" >
+   <el-table  ref="multipleTable" tooltip-effect="dark" border @selection-change="handleSelectionChange"
+            style="width: 100%"  :data="dataTable" >
+            <el-table-column align="center" type="selection" label="全选" width="50"></el-table-column>
+	        <el-table-column align="center" :key="index" :prop="item.fieldCode" :label="item.displayName" :width="item.width"
+	         v-for="(item,key,index) in tableColums" v-if="item.fieldCode == 'phone'">
+	             <template slot-scope="scope" >
                       <p style="color:#409EFF; cursor:pointer" @click="showClueDetailInfo(scope.row.clueId)">{{scope.row.phone}}</p>
                     <input type='hidden'>
                     <el-tag v-if="scope.row.tag">{{scope.row.tag}}</el-tag>
                 </template>
             </el-table-column>
-            <el-table-column align="center" prop="record" label="跟进记录">
-              <template slot-scope="scope">
+            <el-table-column :prop="item.fieldCode" :label="item.displayName" :width="item.width"
+	          v-else-if="item.fieldCode == 'record'">
+                <template slot-scope="scope">
                    <div v-if="scope.row.isTrack === 1">
                     <el-button @click="openTrackingDialog(scope.row.clueId)" type="text" size="small">
                                                                     点击查看
@@ -256,54 +250,17 @@
                     </div>
                 </template>
             </el-table-column>
-            <el-table-column align="center" prop="customerStatusName" label="客户状态"></el-table-column>
-            <el-table-column align="center" prop="telCount" label="拨打次数"></el-table-column>
-            <el-table-column align="center" prop="assignTime" label="分配时间"></el-table-column>
-            <el-table-column align="center" prop="updateTime" label="最后编辑时间"></el-table-column>
-            <el-table-column align="center" prop="repeatPhones" label="重复手机号资源">
-                <template slot-scope="scope">
+            <el-table-column :prop="item.fieldCode" :label="item.displayName" :width="item.width"
+	          v-else-if="item.fieldCode == 'repeatPhones'">
+               <template slot-scope="scope">
                   <div v-if="scope.row.isTrack==1">
-                      <el-button @click="repeatPhonesClick(scope.row)" type="text" size="small">点击查看{{scope.row.isTrack}}</el-button>
+                      <el-button @click="repeatPhonesClick(scope.row)" type="text" size="small">点击查看</el-button>
                   </div>
                 </template>
             </el-table-column>
-            <el-table-column align="center" prop="focusPoint" label="客户关注点"></el-table-column>
-            <el-table-column align="center" prop="messagePoint" label="留言重点"></el-table-column>
-            <el-table-column align="center" prop="messageTime" label="留言时间"></el-table-column>
-            <el-table-column align="center" prop="createTime" label="创建日期（资源创建日期）"></el-table-column>
-            <el-table-column align="center" prop="operationName" label="资源专员"></el-table-column>
-            
-            <el-table-column align="center" prop="teleCompanyName" label="电销分公司"></el-table-column>
-            <el-table-column align="center" prop="teleManagerName" label="电销总经理"></el-table-column>
-            <el-table-column align="center" prop="teleDeptName" label="电销事业部"></el-table-column>
-            <el-table-column align="center" prop="teleCeoName" label="电销副总"></el-table-column>
-            <el-table-column align="center" prop="teleGorupName" label="电销组"></el-table-column>
-            <el-table-column align="center" prop="teleDirectorName" label="电销总监"></el-table-column>
-            <el-table-column align="center" prop="teleProjectName" label="电销组项目"></el-table-column>
-            <el-table-column align="center" prop="teleSaleName" label="电销员工"></el-table-column>
-                        
-            <el-table-column align="center" prop="searchWord" label="搜索词"></el-table-column>
-            <el-table-column align="center" prop="categoryName" label="资源类别"></el-table-column>     
-            <el-table-column align="center" prop="typeName" label="资源类型"></el-table-column>
-            <el-table-column align="center" prop="phone2" label="手机2"></el-table-column>
-            <el-table-column align="center" prop="phone3" label="手机3"></el-table-column>
-            <el-table-column align="center" prop="wechat" label="微信"></el-table-column>     
-            <el-table-column align="center" prop="qq" label="QQ"></el-table-column>
-            <el-table-column align="center" prop="email" label="邮箱"></el-table-column>
-            <el-table-column align="center" prop="address" label="地址"></el-table-column>
-            <el-table-column align="center" prop="telLastTime" label="最后拨打时间"></el-table-column>
-            <el-table-column align="center" prop="advanceAmountValue" label="投资金额"></el-table-column>
-            <el-table-column align="center" prop="areaValue" label="店面大小"></el-table-column>     
-            <el-table-column align="center" prop="purTypeName" label="意向品类"></el-table-column>
-            <el-table-column align="center" prop="projectName" label="意向品牌"></el-table-column>
-            <el-table-column align="center" prop="storeArea" label="开店区域（省市县区）"></el-table-column>
-            <el-table-column align="center" prop="hasAddressName" label="选址情况"></el-table-column>     
-            <el-table-column align="center" prop="age" label="客户年龄"></el-table-column>
-            <el-table-column align="center" prop="sex" label="客户性别"></el-table-column>
-            <el-table-column align="center" prop="professionValue" label="客户职业"></el-table-column>
-            <el-table-column align="center" prop="hasExperienceName" label="餐饮经验"></el-table-column>
-            <el-table-column align="center" prop="partnerTypeName" label="合伙人"></el-table-column>
-            <el-table-column align="center" prop="urgentDate" label="开店紧迫性"></el-table-column>
+            <el-table-column align="center" :key="index" :prop="item.fieldCode" :label="item.displayName" :width="item.width"  v-else>
+	        </el-table-column>
+	        
         </el-table>
          <table-pagination :pager="pager" @change="initTableData"></table-pagination> 
     </el-row>
@@ -493,462 +450,9 @@ var orgList=[[${orgList}]];//电销组
 var saleList=[[${saleList}]];//电销创业顾问
 var saleGroupList=[[${saleGroupList}]];//同事业部下电销组
 var queryOrg=[[${queryOrg}]];//电销组
-
-var fieldList=[
-    {
-        displayName:"客户级别",
-        fieldCode:"cusLevelName",//需要改成后端返回的字段名称
-        fieldName:"客户级别",
-        id:"1",
-        menuCode:null,
-        menuId:null,
-        pageNum:0,
-        pageSize:0,
-        sortNum:1
-    },{
-        displayName:"客户姓名",
-        fieldCode:"cusName",
-        fieldName:"客户姓名",
-        id:"2",
-        menuCode:null,
-        menuId:null,
-        pageNum:0,
-        pageSize:0,
-        sortNum:2
-    },{
-        displayName:"手机号",
-        fieldCode:"phone",
-        fieldName:"手机号",
-        id:"3",
-        menuCode:null,
-        menuId:null,
-        pageNum:0,
-        pageSize:0,
-        sortNum:3
-    },{
-        displayName:"跟进记录",
-        fieldCode:"record",
-        fieldName:"跟进记录",
-        id:"4",
-        menuCode:null,
-        menuId:null,
-        pageNum:0,
-        pageSize:0,
-        sortNum:4
-    },{
-        displayName:"客户状态",
-        fieldCode:"customerStatusName",
-        fieldName:"客户状态",
-        id:"5",
-        menuCode:null,
-        menuId:null,
-        pageNum:0,
-        pageSize:0,
-        sortNum:5
-    },{
-        displayName:"拨打次数",
-        fieldCode:"telCount",
-        fieldName:"拨打次数",
-        id:"6",
-        menuCode:null,
-        menuId:null,
-        pageNum:0,
-        pageSize:0,
-        sortNum:6
-    },{
-        displayName:"分配时间",
-        fieldCode:"assignTime",
-        fieldName:"分配时间",
-        id:"7",
-        menuCode:null,
-        menuId:null,
-        pageNum:0,
-        pageSize:0,
-        sortNum:7
-    },{
-        displayName:"最后编辑时间",
-        fieldCode:"updateTime",
-        fieldName:"最后编辑时间",
-        id:"8",
-        menuCode:null,
-        menuId:null,
-        pageNum:0,
-        pageSize:0,
-        sortNum:8
-    },{
-        displayName:"重复手机号资源",
-        fieldCode:"repeatPhones",
-        fieldName:"重复手机号资源",
-        id:"9",
-        menuCode:null,
-        menuId:null,
-        pageNum:0,
-        pageSize:0,
-        sortNum:9
-    },{
-        displayName:"客户关注点",
-        fieldCode:"focusPoint",
-        fieldName:"客户关注点",
-        id:"10",
-        menuCode:null,
-        menuId:null,
-        pageNum:0,
-        pageSize:0,
-        sortNum:10
-    },{
-        displayName:"留言重点",
-        fieldCode:"messagePoint",
-        fieldName:"留言重点",
-        id:"11",
-        menuCode:null,
-        menuId:null,
-        pageNum:0,
-        pageSize:0,
-        sortNum:11
-    },{
-        displayName:"留言时间",
-        fieldCode:"messageTime",
-        fieldName:"留言时间",
-        id:"12",
-        menuCode:null,
-        menuId:null,
-        pageNum:0,
-        pageSize:0,
-        sortNum:12
-    },{
-        displayName:"创建日期（资源创建日期）",
-        fieldCode:"createTime",
-        fieldName:"创建日期（资源创建日期）",
-        id:"13",
-        menuCode:null,
-        menuId:null,
-        pageNum:0,
-        pageSize:0,
-        sortNum:13
-    },{
-        displayName:"资源专员",
-        fieldCode:"operationName",
-        fieldName:"资源专员",
-        id:"14",
-        menuCode:null,
-        menuId:null,
-        pageNum:0,
-        pageSize:0,
-        sortNum:14
-    },{
-        displayName:"电销分公司",
-        fieldCode:"teleCompanyName",
-        fieldName:"电销分公司",
-        id:"15",
-        menuCode:null,
-        menuId:null,
-        pageNum:0,
-        pageSize:0,
-        sortNum:15
-    },{
-        displayName:"电销总经理",
-        fieldCode:"teleManagerName",
-        fieldName:"电销总经理",
-        id:"16",
-        menuCode:null,
-        menuId:null,
-        pageNum:0,
-        pageSize:0,
-        sortNum:16
-    },{
-        displayName:"资源专员",
-        fieldCode:"teleDeptName",
-        fieldName:"资源专员",
-        id:"17",
-        menuCode:null,
-        menuId:null,
-        pageNum:0,
-        pageSize:0,
-        sortNum:17
-    },{
-        displayName:"电销事业部",
-        fieldCode:"teleCeoName",
-        fieldName:"电销事业部",
-        id:"18",
-        menuCode:null,
-        menuId:null,
-        pageNum:0,
-        pageSize:0,
-        sortNum:18
-    },{
-        displayName:"电销副总",
-        fieldCode:"teleGorupName",
-        fieldName:"电销副总",
-        id:"19",
-        menuCode:null,
-        menuId:null,
-        pageNum:0,
-        pageSize:0,
-        sortNum:19
-    },{
-        displayName:"电销组",
-        fieldCode:"teleDirectorName",
-        fieldName:"电销组",
-        id:"20",
-        menuCode:null,
-        menuId:null,
-        pageNum:0,
-        pageSize:0,
-        sortNum:20
-    },{
-        displayName:"电销总监",
-        fieldCode:"teleDirectorName",
-        fieldName:"电销总监",
-        id:"21",
-        menuCode:null,
-        menuId:null,
-        pageNum:0,
-        pageSize:0,
-        sortNum:21
-    },{
-        displayName:"电销组项目",
-        fieldCode:"teleProjectName",
-        fieldName:"电销组项目",
-        id:"22",
-        menuCode:null,
-        menuId:null,
-        pageNum:0,
-        pageSize:0,
-        sortNum:22
-    },{
-        displayName:"电销员工",
-        fieldCode:"teleSaleName",
-        fieldName:"电销员工",
-        id:"23",
-        menuCode:null,
-        menuId:null,
-        pageNum:0,
-        pageSize:0,
-        sortNum:23
-    },{
-        displayName:"搜索词",
-        fieldCode:"searchWord",
-        fieldName:"搜索词",
-        id:"24",
-        menuCode:null,
-        menuId:null,
-        pageNum:0,
-        pageSize:0,
-        sortNum:24
-    },{
-        displayName:"资源类别",
-        fieldCode:"categoryName",
-        fieldName:"资源类别",
-        id:"25",
-        menuCode:null,
-        menuId:null,
-        pageNum:0,
-        pageSize:0,
-        sortNum:25
-    },{
-        displayName:"资源类型",
-        fieldCode:"typeName",
-        fieldName:"资源类型",
-        id:"26",
-        menuCode:null,
-        menuId:null,
-        pageNum:0,
-        pageSize:0,
-        sortNum:26
-    },{
-        displayName:"手机2",
-        fieldCode:"phone2",
-        fieldName:"手机2",
-        id:"27",
-        menuCode:null,
-        menuId:null,
-        pageNum:0,
-        pageSize:0,
-        sortNum:27
-    },{
-        displayName:"手机3",
-        fieldCode:"phone3",
-        fieldName:"手机3",
-        id:"28",
-        menuCode:null,
-        menuId:null,
-        pageNum:0,
-        pageSize:0,
-        sortNum:28
-    },{
-        displayName:"微信",
-        fieldCode:"wechat",
-        fieldName:"微信",
-        id:"29",
-        menuCode:null,
-        menuId:null,
-        pageNum:0,
-        pageSize:0,
-        sortNum:29
-    },{
-        displayName:"QQ",
-        fieldCode:"qq",
-        fieldName:"QQ",
-        id:"30",
-        menuCode:null,
-        menuId:null,
-        pageNum:0,
-        pageSize:0,
-        sortNum:30
-    },{
-        displayName:"邮箱",
-        fieldCode:"email",
-        fieldName:"邮箱",
-        id:"31",
-        menuCode:null,
-        menuId:null,
-        pageNum:0,
-        pageSize:0,
-        sortNum:31
-    },{
-        displayName:"地址",
-        fieldCode:"address",
-        fieldName:"地址",
-        id:"32",
-        menuCode:null,
-        menuId:null,
-        pageNum:0,
-        pageSize:0,
-        sortNum:32
-    },{
-        displayName:"最后拨打时间",
-        fieldCode:"telLastTime",
-        fieldName:"最后拨打时间",
-        id:"33",
-        menuCode:null,
-        menuId:null,
-        pageNum:0,
-        pageSize:0,
-        sortNum:33
-    },{
-        displayName:"投资金额",
-        fieldCode:"advanceAmountValue",
-        fieldName:"投资金额",
-        id:"34",
-        menuCode:null,
-        menuId:null,
-        pageNum:0,
-        pageSize:0,
-        sortNum:34
-    },{
-        displayName:"店面大小",
-        fieldCode:"areaValue",
-        fieldName:"店面大小",
-        id:"35",
-        menuCode:null,
-        menuId:null,
-        pageNum:0,
-        pageSize:0,
-        sortNum:35
-    },{
-        displayName:"意向品类",
-        fieldCode:"purTypeName",
-        fieldName:"意向品类",
-        id:"36",
-        menuCode:null,
-        menuId:null,
-        pageNum:0,
-        pageSize:0,
-        sortNum:36
-    },{
-        displayName:"意向品牌",
-        fieldCode:"projectName",
-        fieldName:"意向品牌",
-        id:"37",
-        menuCode:null,
-        menuId:null,
-        pageNum:0,
-        pageSize:0,
-        sortNum:37
-    },{
-        displayName:"开店区域（省市县区）",
-        fieldCode:"storeArea",
-        fieldName:"开店区域（省市县区）",
-        id:"38",
-        menuCode:null,
-        menuId:null,
-        pageNum:0,
-        pageSize:0,
-        sortNum:38
-    },{
-        displayName:"选址情况",
-        fieldCode:"hasAddressName",
-        fieldName:"选址情况",
-        id:"39",
-        menuCode:null,
-        menuId:null,
-        pageNum:0,
-        pageSize:0,
-        sortNum:39
-    },{
-        displayName:"客户年龄",
-        fieldCode:"age",
-        fieldName:"客户年龄",
-        id:"40",
-        menuCode:null,
-        menuId:null,
-        pageNum:0,
-        pageSize:0,
-        sortNum:40
-    },{
-        displayName:"客户性别",
-        fieldCode:"sex",
-        fieldName:"客户性别",
-        id:"41",
-        menuCode:null,
-        menuId:null,
-        pageNum:0,
-        pageSize:0,
-        sortNum:41
-    },{
-        displayName:"客户职业",
-        fieldCode:"professionValue",
-        fieldName:"客户职业",
-        id:"42",
-        menuCode:null,
-        menuId:null,
-        pageNum:0,
-        pageSize:0,
-        sortNum:42
-    },{
-        displayName:"餐饮经验",
-        fieldCode:"hasExperienceName",
-        fieldName:"餐饮经验",
-        id:"43",
-        menuCode:null,
-        menuId:null,
-        pageNum:0,
-        pageSize:0,
-        sortNum:43
-    },{
-        displayName:"合伙人",
-        fieldCode:"partnerTypeName",
-        fieldName:"合伙人",
-        id:"44",
-        menuCode:null,
-        menuId:null,
-        pageNum:0,
-        pageSize:0,
-        sortNum:44
-    },{
-        displayName:"开店紧迫性",
-        fieldCode:"urgentDate",
-        fieldName:"开店紧迫性",
-        id:"45",
-        menuCode:null,
-        menuId:null,
-        pageNum:0,
-        pageSize:0,
-        sortNum:45
-    }
-];
+var fieldList=[[${fieldList}]];//自定义字段
+var userFieldList=[[${userFieldList}]];//用户自定义字段
 var userFieldList=[];
-
   var  customerManVM=new Vue({
         el: '#myCustom',
         data: function() {
@@ -1304,9 +808,13 @@ var userFieldList=[];
                    this.allocateFormVisible = false; 
                    axios.post('/clue/pendingAllocation/allocationClue', param)
                    .then(function (response) {
-                	  customerManVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
-                	  		customerManVM.initTableData();
-                       }});
+                       if(response.data.code==-1){
+                           customerManVM.$message.error(response.data.msg);
+                       }else {
+                           customerManVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
+                                   customerManVM.initTableData();
+                               }});
+                       }
                    }).catch(function (error) {
                        console.log(error);
                    });
@@ -1394,7 +902,7 @@ var userFieldList=[];
                       param.teleDirectorId=directorArr[1];
                       param.teleSaleId=saleId;
                       this.vicemanagerFormVisible = false;
-                      axios.post('/clue/PendingAllocation/ceoDistributionClue', param)
+                      axios.post('/clue/pendingAllocation/ceoDistributionClue', param)
                       .then(function (response) {
                    	  customerManVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
                    	  		customerManVM.initTableData();
@@ -1429,17 +937,17 @@ var userFieldList=[];
                 this.tableColums = customerShowColun;
                 var param ={};
                   param.fieldIdList = idList;
-                  param.menuCode = "aggregation:pendingAllocationManager";
+                  param.menuCode = "customerManager";
                   console.info(param);
-                  // if(idList.length!=0){
-                  //     axios.post('/customfield/customField/saveUserField', param)
-                  //     .then(function (response) {
+                  if(idList.length!=0){
+                    axios.post('/customfield/customField/saveUserField', param)
+                     .then(function (response) {
                         
-                  //     })
-                  //     .catch(function (error) {
-                  //          console.log(error);
-                  //     });
-                  // }
+                      })
+                     .catch(function (error) {
+                            console.log(error);
+                      });
+                    }
                 },
                 initColumn(){
                     //初始化table 列 和 用户自定义列

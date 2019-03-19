@@ -316,26 +316,16 @@
 		</el-table-column> <el-table-column prop="startTime" label="拨打时间" align="center">
 		</el-table-column> <el-table-column prop="callStatus" label="接通情况" align="center">
 		</el-table-column> <el-table-column prop="talkTime" label="接通时长" align="center">
-		</el-table-column> <el-table-column label="操作" align="center"> <template
-			slot-scope="scope"> <el-button size="mini" type="primary"
-			icon="el-icon-caret-right" class="playBtn"
-			@click="handlePlay(scope.$index, scope.row)">
-		<audio loop="loop">
-			<source
-				src="http://fs.w.kugou.com/201902211552/efd2e515657eadeb6f38671d9b3ecf9c/G013/M04/06/08/rYYBAFUMN1yAA7XtADdy078twac672.mp3"
-				type="audio/mpeg">
-		</audio> <svg class="el-icon-pause-svg"
-			style="width: 12px; height: 13px; vertical-align: middle; fill: currentColor; overflow: hidden; display: none;"
-			viewBox="0 0 1024 1024" version="1.1"
-			xmlns="http://www.w3.org/2000/svg" p-id="2024">
-			<path
-				d="M288 128C270.336 128 256 142.336 256 160l0 768C256 945.664 270.336 960 288 960S320 945.664 320 928l0-768C320 142.336 305.664 128 288 128zM672 128C654.336 128 640 142.336 640 160l0 768c0 17.664 14.336 32 32 32s32-14.336 32-32l0-768C704 142.336 689.664 128 672 128z"
-				p-id="2025"></path></svg> </el-button> <el-button size="mini" type="primary"
-			icon="el-icon-download" class="downloadMp3"
-			@click="handleDownload(scope.$index, scope.row)">
-		<a
-			href="http://fs.w.kugou.com/201902211552/efd2e515657eadeb6f38671d9b3ecf9c/G013/M04/06/08/rYYBAFUMN1yAA7XtADdy078twac672.mp3"
-			download style="display: none;"><p>下载</p></a> </el-button> </template> </el-table-column> </el-table> </el-row>
+		</el-table-column> <el-table-column label="操作" align="center"> 
+		     <template slot-scope="scope" v-if="scope.row.talkTime >0 ">
+              <div style="float:left" :id="scope.row.id" class="sound-trigger sound-trigger--type-default sound-trigger--type-click" @click="switchSoundBtn(scope.row.id,scope.row.recordFile,scope.row.callSource)">
+				 <div class="sound-trigger__inner">
+					 <i class="fa fa-play fa-lg"></i>
+					 </div>
+				 </div>
+             <el-button type="danger" size="small" @click="downloadAudio(scope.row.id,scope.row.recordFile,scope.row.callSource)"><i class="el-icon-download"></i>下载</el-button>
+            </template>
+		 </el-table-column> </el-table> </el-row>
 		<div class="marginB20 fs16 paddingT20">流转人员</div>
 		<el-row> <el-table ref="multipleTable" :data="tableDataC4"
 			tooltip-effect="dark" style="width: 100%"
@@ -520,6 +510,7 @@ var trackingList=[[${trackingList}]];//跟访记录
 var isEdit=false;
 var clueFileList=[[${clueFileList}]];//上传文件
 var ossUrl=[[${ossUrl}]];
+var callRecord=[[${callRecord}]];//通话记录
  var addCustomerVM=   new Vue({
         el: '#addCustomer',
         data: function() {
@@ -689,7 +680,7 @@ var ossUrl=[[${ossUrl}]];
                 	customerStatusSub:'',
                 },
                 tableDataC2: trackingList,//跟进记录
-                tableDataC3: [],  //通话记录
+                tableDataC3: callRecord,  //通话记录
                 tableDataC4:circulationList//流转记录
             }             
         },
@@ -1275,6 +1266,61 @@ var ossUrl=[[${ossUrl}]];
                 $(".downloadMp3:eq("+index+") a").prop("download","true");
                 $(".downloadMp3:eq("+index+") a>p").trigger("click");
             },
+        	switchSoundBtn(id,url,callSource){
+        		if(callSource=='2'){
+        			switchSound(id,url);
+        			return;
+        		}
+        		 var param = {};
+        		 param.id=id;
+        	   	 axios.post('/call/callRecord/getRecordFile',param)
+                 .then(function (response) {
+                	 var data =  response.data
+                     if(data.code=='0'){
+                    	 var url = data.data;
+                    	 switchSound(id,url);
+                         
+                     }else{
+                    	 console.error(data);
+                    	 myCallRecordVm.$message({message:data.msg,type:'error'});
+                     }
+                 
+                 })
+                 .catch(function (error) {
+                      console.log(error);
+                 }).then(function(){
+                 });
+        	},
+        	 downloadAudio(id,url,callSource){
+        		if(callSource=='2'){
+        			location.href=url;
+        			return;
+        		}
+        		 var param = {};
+        		 param.id=id;
+        	   	 axios.post('/call/callRecord/getRecordFile',param)
+                 .then(function (response) {
+                	 var data =  response.data;
+                     if(data.code=='0'){
+                    	 var url = data.data;
+                    	 if(url){
+                    		 var fileName = url.split('?')[0];
+                    		 var fileNameArr= fileName.split("/");
+                    		 download(url,fileNameArr[fileNameArr.length-1]);
+                    	 }
+                         
+                     }else{
+                    	 console.error(data);
+                    	 addCustomerVM.$message({message:data.msg,type:'error'});
+                     }
+                 
+                 })
+                 .catch(function (error) {
+                      console.log(error);
+                 }).then(function(){
+                 });
+        		
+        	},  
             keepCustomer(){
             	//保留客户
             	var param={};
@@ -1507,7 +1553,7 @@ var ossUrl=[[${ossUrl}]];
 <script th:src="@{/js/custom/call/rtCall.js?v=1.0.0}"></script>
 <!-- 播放錄音 js -->
 <script th:src="@{/js/custom/callrecord/simpleAudio.js?v=1.0.0}"></script>
-
+ <script th:src="@{/js/custom/callrecord/download.js?v=1.0.0}"></script>
 <script type="text/javascript">
  
  function clueUploadFile(){
