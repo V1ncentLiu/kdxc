@@ -160,8 +160,9 @@ public class ConsoleController {
     */
    @PostMapping("/countTodayAppiontmentNum")
    @ResponseBody
-   public JSONResult<Integer> countTodayAppiontmentNum(@RequestBody TeleConsoleReqDTO teleConsoleReqDTO){
+   public JSONResult<Integer> countTodayAppiontmentNum(){
        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+       TeleConsoleReqDTO teleConsoleReqDTO = new TeleConsoleReqDTO();
        Long id = curLoginUser.getId();
        teleConsoleReqDTO.setTeleSaleId(id);
        teleConsoleReqDTO.setStartTime(DateUtil.getTodayStartTime());
