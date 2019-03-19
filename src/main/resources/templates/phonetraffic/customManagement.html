@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html>
+<head th:include="_header_include::frag(~{::title},~{},~{})">
+<title>客户管理</title>
+    <meta charset="UTF-8">
+    <!-- import CSS -->
+    <link rel="stylesheet" href="css/element-ui.css">
+    <link rel="stylesheet" href="css/base.css">
+    <style>
+        button a{color:#fff!important;}
+        .el-checkbox { width: 100%; }
+    </style>
+</head>
+<body>
+<div id="myCustom" class="myCustom mainPadding" style="display: none;">  
+    <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
+        <el-breadcrumb-item>Home</el-breadcrumb-item>
+        <el-breadcrumb-item></el-breadcrumb-item>
+        <el-breadcrumb-item>客户管理</el-breadcrumb-item>
+    </el-breadcrumb>
+    <el-row class="marginB10">
+        <el-button type="text" @click="dialogFormVisible = true"><i class="el-icon-menu"></i>选择列</el-button>
+            <el-button type="success" @click="openassignrDig">分配资源</el-button>
+            <el-button type="success" @click="opentransferForm">转移资源</el-button>
+            <el-button type="success" @click="editClue">编辑资源</el-button>
+    </el-row>
+    <el-row class="marginB10 greybg padding20" style="padding-bottom: 0">        
+        <el-form :inline="true" :model="form" ref="form">
+            <el-form-item label="">
+                <el-select v-model="form.dealStatus" placeholder="选择处理状态" style="width: 100%;" clearable >
+                    <el-option
+                        v-for="item in dealStatusArr"
+                        :key="item.value"
+                        :label="item.label"
+                        :value="item.value">
+                    </el-option>
+                </el-select>
+            </el-form-item>
+            <el-form-item label="">
+                <el-select v-model="form.operatorId" placeholder="话务人员" style="width: 100%;" clearable >
+                    <el-option
+                            v-for="item in dealStatusArr"
+                            :key="item.value"
+                            :label="item.label"
+                            :value="item.value">
+                    </el-option>
+                </el-select>
+            </el-form-item>
+            <el-form-item label="">
+                <el-select v-model="form.projectId" placeholder="资源项目" style="width: 100%;" clearable >
+                    <el-option
+                            v-for="item in dealStatusArr"
+                            :key="item.value"
+                            :label="item.label"
+                            :value="item.value">
+                    </el-option>
+                </el-select>
+            </el-form-item>
+            <el-form-item label="">
+                <el-select v-model="form.source" placeholder="媒介" style="width: 100%;" clearable >
+                    <el-option
+                            v-for="item in mediumArr"
+                            :key="item.value"
+                            :label="item.label"
+                            :value="item.value">
+                    </el-option>
+                </el-select>
+            </el-form-item>
+            <el-form-item label="">
+                <el-select v-model="form.cusStatus" placeholder="客户状态" style="width: 100%;" clearable >
+                    <el-option
+                            v-for="item in mediumArr"
+                            :key="item.value"
+                            :label="item.label"
+                            :value="item.value">
+                    </el-option>
+                </el-select>
+            </el-form-item>
+
+            <el-form-item label="">
+                <el-row>
+                    <el-col>
+                        <el-select v-model="form.defineColumn"  style="width: 100%;">
+                            <el-option label="手机号" value="phone"></el-option>
+                            <el-option label="客户姓名" value="cusName"></el-option>
+                            <el-option label="QQ" value="qq"></el-option>
+                            <el-option label="微信" value="wx"></el-option>
+                            <el-option label="邮箱" value="email"></el-option>
+                        </el-select>
+                    </el-col>
+                    <el-col>
+                        <el-input v-model="form.defineValue" placeholder=""></el-input>
+                    </el-col>
+                </el-row>
+            </el-form-item>
+
+
+            <el-form-item label="创建时间:">
+                <el-date-picker
+                    style="width: 100%;"
+                    v-model="form.createTime1"
+                    type="datetime"
+                    placeholder="选择日期时间">
+                </el-date-picker>
+            </el-form-item>
+            <el-form-item label="结束">
+                <el-date-picker
+                    style="width: 100%;"
+                    v-model="form.createTime2"
+                    type="datetime"
+                    placeholder="选择日期时间">
+                </el-date-picker>
+            </el-form-item>
+            <el-button type="primary"  @click="initTableData" >搜索</el-button>
+        </el-form>
+    </el-row>
+    <el-row>
+   <el-table  ref="multipleTable" tooltip-effect="dark" border @selection-change="handleSelectionChange"
+            style="width: 100%"  :data="dataTable" >
+            <el-table-column align="center" type="selection" label="全选" width="50" :prop="clueId"></el-table-column>
+	        <el-table-column align="center" :key="index" :prop="item.fieldCode" :label="item.displayName" :width="item.width"
+	         v-for="(item,key,index) in tableColums" v-if="item.fieldCode == 'phone'">
+	             <template slot-scope="scope" >
+                     {{scope.row.phone}}
+                      <!--<p style="color:#409EFF; cursor:pointer" >{{scope.row.phone}}</p> &lt;!&ndash;@click="showClueDetailInfo(scope.row.clueId)"&ndash;&gt;-->
+                    <input type='hidden'>
+                    <el-tag v-if="scope.row.tag">{{scope.row.tag}}</el-tag>
+                </template>
+            </el-table-column>
+            <el-table-column :prop="item.fieldCode" :label="item.displayName" :width="item.width"
+	          v-else-if="item.fieldCode == 'isTrack'">
+                <template slot-scope="scope">
+                   <div v-if="scope.row.isTrack === 1">
+                    <el-button @click="openTrackingDialog(scope.row.clueId)" type="text" size="small">
+                        点击查看
+                    </el-button>
+                    </div>
+                </template>
+            </el-table-column>
+            <el-table-column :prop="item.fieldCode" :label="item.displayName" :width="item.width"
+	          v-else-if="item.fieldCode == 'isRepeatPhone'">
+               <template slot-scope="scope">
+                  <div v-if="scope.row.isRepeatPhone==1">
+                      <el-button @click="repeatPhonesClick(scope.row)" type="text" size="small">点击查看</el-button>
+                  </div>
+                </template>
+            </el-table-column>
+           <el-table-column :prop="item.fieldCode" :label="item.displayName" :width="item.width"
+                            v-else-if="item.fieldCode == 'sex'">
+               <template slot-scope="scope">
+                   <div v-if="scope.row.sex==1">
+                       男
+                   </div>
+                   <div v-if="scope.row.sex==2">
+                       女
+                   </div>
+               </template>
+           </el-table-column>
+            <el-table-column align="center" :key="index" :prop="item.fieldCode" :label="item.displayName" :width="item.width"  v-else></el-table-column>
+        </el-table>
+         <table-pagination :pager="pager" @change="initTableData"></table-pagination> 
+    </el-row>
+
+    <!-- 跟进记录 -->
+    <el-dialog title="跟进记录" :visible.sync="recordDialog">
+        <el-table ref="singleTable" tooltip-effect="dark" style="width: 100%" border :data="recordTable">
+            <el-table-column align="center" type="index" width="55" label="序号"></el-table-column>
+            <el-table-column align="center" prop="callTime" label="拨打时间"></el-table-column>
+            <el-table-column align="center" prop="status" label="客户状态"></el-table-column>
+            <el-table-column align="center" prop="isConnect" label="是否接通"></el-table-column>
+            <el-table-column align="center" prop="isNeedResource" label="资源有效性"></el-table-column>
+            <el-table-column align="center" prop="isInvite" label="是否邀约"></el-table-column>
+            <el-table-column align="center" prop="customerFocus" label="客户关注点"></el-table-column>  
+            <el-table-column align="center" prop="isReturnVisit" label="是否继续回访"></el-table-column>  
+            <el-table-column align="center" prop="nextTimeVisit" label="下次回访时间"></el-table-column>  
+            <el-table-column align="center" prop="createPerson" label="创建人"></el-table-column>  
+        </el-table>
+    </el-dialog>
+    <!-- 跟进记录 -->
+    <el-dialog :title="'手机号'+dailogTitleType+'重复资源信息'"   :visible.sync="repeatPhonesDialog">
+        <el-table
+            ref="singleTable" 
+            tooltip-effect="dark"
+            style="width: 100%"
+            border
+            :data="repeatPhonesTable" 
+            >
+            <el-table-column align="center" type="index" width="55" label="序号"></el-table-column>
+            <el-table-column align="center" prop="createDate" label="资源创建时间"></el-table-column>
+            <el-table-column align="center" prop="cusPhone" label="联系方式"></el-table-column>
+            <el-table-column align="center" prop="teleDirectorName" label="电销总监"></el-table-column>
+            <el-table-column align="center" prop="teleSaleName" label="创业顾问"></el-table-column>
+            <el-table-column align="center" prop="teleGorupName" label="电销组"></el-table-column>
+            <el-table-column align="center" prop="teleProject" label="电销组负责项目"></el-table-column>
+            <el-table-column align="center" prop="createUserRoleName" label="资源创建人角色"></el-table-column>  
+            <el-table-column align="center" prop="createUserName" label="资源创建人"></el-table-column> 
+        </el-table>
+    </el-dialog>
+    <!-- 分配资源 -->
+    <el-dialog title="分配资源" :visible.sync="allocateFormVisible">
+      <el-form :model="formAllocat" ref="formAllocat">
+        <el-row>
+            <el-form-item 
+                label="分配员工"
+                prop="telSales"
+                :rules="[
+                    { required: true, message: '请选择话务人员', trigger: 'change' }
+                ]"
+                :label-width="formLabelWidth">
+              <el-select v-model="formAllocat.telSales" placeholder="请选择话务人员" style="width: 100%;">
+                    <el-option
+                        v-for="item in hwArr"
+                        :key="item.id"
+                        :label="item.name"
+                        :value="item.id">
+                    </el-option>
+                </el-select>
+            </el-form-item>
+        </el-row>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button type="primary" @click="submitAllocatForm('formAllocat')">提交</el-button>
+        <el-button @click="resetForm('formAllocat');allocateFormVisible = false;">取 消</el-button>
+      </div>
+    </el-dialog>
+    <!-- 转移资源 -->
+    <el-dialog title="转移资源" :visible.sync="transferFormVisible">
+      <el-form :model="formTransfer" ref="formTransfer">
+        <el-form-item 
+            label="分配员工"
+            prop="salesDirector"
+            :rules="[
+                { required: true, message: '请选择话务人员', trigger: 'change' }
+            ]"
+            :label-width="formLabelWidth">
+           <el-select v-model="formTransfer.salesDirector" placeholder="请选择话务人员" style="width: 100%;">
+                    <el-option
+                        v-for="item in hwArr"
+                        :key="item.id"
+                        :label="item.name"
+                        :value="item.id">
+                    </el-option>
+           </el-select>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button type="primary" @click="submitTransferForm('formTransfer')">提交</el-button>
+        <el-button @click="resetForm('formTransfer');transferFormVisible=false;">取 消</el-button>
+      </div>
+    </el-dialog>
+
+    <dialog-tracking :param="trackingParam"></dialog-tracking>
+    <!-- 自定义列 -->
+    <el-dialog title="自定义列" :visible.sync="dialogFormVisible">
+      <el-form :model="formList">
+        
+          <el-form-item label="列名" prop="type">
+            <el-checkbox-group v-model="formList.type">
+              <el-checkbox :label="item.sortNum+'_'+item.fieldCode+'_'+item.displayName+'_'+item.id"  name="type" :key="item.fieldCode"  v-for="(item,index) in  allTableColums ">
+                  {{item.displayName}}
+              </el-checkbox>
+          
+             </el-checkbox-group>
+          </el-form-item>
+        
+      </el-form>
+      
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="dialogFormVisible = false">取 消</el-button>
+        <el-button type="primary" @click="confirmColumn">确 定</el-button>
+      </div>
+    </el-dialog>
+</div>
+</body>
+<!-- import Vue before Element -->
+<div th:include="_footer_include :: #jsLib"></div>
+<script th:inline="javascript" >
+var queryOrg=[[${queryOrg}]];//电销组
+var fieldList=[[${fieldList}]];//自定义字段
+var userFieldList=[[${userFieldList}]];//用户自定义字段
+  var  customerManVM=new Vue({
+        el: '#myCustom',
+        data: function() {
+            return {
+                isShow:false,
+                recordDialog:false,
+                repeatPhonesDialog:false,
+                allocateFormVisible: false, //分配资源
+                reasonArr:[],
+                hwArr:[],
+                dailogTitleType:'',
+                formAllocat:{
+                    telSales:''
+                },
+                transferFormVisible: false, //转移资源
+                formTransfer:{
+                    salesDirector:''
+                },
+                vicemanagerFormVisible: false, //副总分发
+                formVicemanage: {
+                    salesDirector: '',
+                    salesstaff: ''
+                },
+                pager:{ 
+                    total: 0,
+                    currentPage: 1,
+                    pageSize: 20,
+                },
+                trackingParam:{
+                    trackingDialogVisible:false,
+                    tableData:[]
+                },
+                adviserValue: '', //创业顾问
+                dealStatusArr:[{value: '', label: '全部' },{value: '0', label: '待处理' }, {value: '1', label: '已处理'}],
+
+                form: {
+                    defineColumn:"phone",
+                    defineValue:"",
+                    createTime1:"",
+                    createTime2:"",
+                    source:"",
+                    cusStatus:"",
+                    projectId:"",
+                    operatorId:"",
+                    dealStatus:"0"
+                },
+                cusLevelArr:[],
+                categoryArr:[],
+                provinceArr:[],
+                repeatCurClueArr:[],
+                cusStatusArr:[],
+                telePerArr:[],
+                mediumArr:[],
+                orgTeleArr:queryOrg,
+                multseleSelection:[],
+                formLabelWidth: '150px',
+                dataTable: [],
+                saleInfoArr:[],
+                busSaleArr:[],
+                value: '',//下拉选项默认值
+                recordTable:[],
+                repeatPhonesTable:[],
+                dialogFormVisible: false,
+                formList: {
+                   type: [],
+                },
+                allTableColums:[],
+                tableColums:[],
+            }        	  
+        },
+        methods: {
+        	//初始化页面
+        	 initTableData(){
+                var param = {};
+                param=this.form
+                param.pageNum=this.pager.currentPage ;
+                param.pageSize=this.pager.pageSize;
+     		    axios.post('/phonetraffic/queryPage',param).then(function (response) {
+     				var resobj= response.data;
+     		    	var pageData=resobj.data;
+     		    	customerManVM.pager.total=pageData.total;
+     		    	customerManVM.pager.currentPage = pageData.currentPage;
+     		    	customerManVM.pager.pageSize = pageData.pageSize;
+     		    	customerManVM.dataTable =pageData.data; 	
+     			})
+         	},
+            editClue(){
+                //编辑数据
+                var rows = this.multseleSelection;
+                if(rows.length <1){
+                    this.$message({
+                        message: '请选择一条数据',
+                        type: 'warning'
+                    });
+                    return;
+                }
+                console.log(rows[0])
+                window.location.href='/phonetraffic/toEditPage?clueId='+rows[0].clueId;
+            },
+            repeatPhonesClick(row) {
+                console.log(row);
+                this.repeatPhonesDialog=true;
+                this.dailogTitleType=row.phone;
+                var param ={};
+                    param.id = row.clueId;
+                      param.cusPhone = row.phone;
+                       console.info(param);
+                        axios.post('/clue/appiontment/repeatPhonelist', param)
+                          .then(function (response) {
+                                var result =  response.data;
+                                console.info(result);
+                                var table=result.data;
+                                 appiontmentVM.repeatPhonesTable= table.data;
+                                 appiontmentVM.repeatPhonesDialog=true;
+                          })  .catch(function (error) {
+                                      console.log(error);
+                });
+                
+            },
+         	openvicemanagerForm(){
+             var rows = this.multseleSelection;
+          	 if(rows.length <1){
+                    this.$message({
+                       message: '请选副总分发数据',
+                       type: 'warning'
+                     });
+                return;
+              }	
+         	  this.vicemanagerFormVisible=true;
+         	  if(this.$refs['formVicemanage']) {
+                 this.$refs['formVicemanage'].resetFields();
+               }
+         	},
+         	currentSalesDirector(selVal){
+                param={};
+                var directorArr = selVal.split(",");
+                param.orgId=directorArr[0];
+                axios.post('/clue/pendingAllocation/getSaleList',param).then(function (response) {
+                    customerManVM.saleInfoArr=response.data.data;
+                });
+         	},
+         	openassignrDig(){
+         	   var rows = this.multseleSelection;
+            	 if(rows.length <1){
+                      this.$message({
+                         message: '请选分配资源',
+                         type: 'warning'
+                       });
+                  return;
+                }	
+         	 this.allocateFormVisible = true;
+         	 if(this.$refs['formAllocat']) {
+                this.$refs['formAllocat'].resetFields();
+              }
+         	},
+         	opentransferForm(){
+         	   var rows = this.multseleSelection;
+             	  if(rows.length <1){
+                       this.$message({
+                          message: '请选择转移资源',
+                          type: 'warning'
+                        });
+                   return;
+                 }
+         	   this.transferFormVisible = true;
+              if(this.$refs['formTransfer']) {
+                    this.$refs['formTransfer'].resetFields();
+              }
+         	},
+         	handleSelectionChange(val) {
+                this.multseleSelection = val;
+            },
+        	
+            toogleClick(){
+                if(this.isShow){
+                    this.isShow=false
+                }else{
+                    this.isShow=true
+                }          
+            },
+            submitForm(formName) {
+                this.$refs[formName].validate((valid) => {
+                    if (valid) {
+                        alert('submit!');
+                    } else {
+                        console.log('error submit!!');
+                        return false;
+                    }
+                });
+            },
+            recordClick(row) {
+                console.log(row);
+                this.recordDialog=true;
+            },
+            resetForm(formName) {
+                // alert(1);
+              this.$refs[formName].resetFields();
+              // this.allocateFormVisible = false;
+              // this.dialogFormTransferVisible = false;
+            },
+            submitAllocatForm(formName) {
+                this.$refs[formName].validate((valid) => {
+                  if (valid) {
+                   var telSale=this.formAllocat.telSales;
+                   var rows = this.multseleSelection;
+                   var idArr=[];
+                   for(var i=0;i<rows.length;i++){
+                	   idArr.push(rows[i].clueId);
+                   }
+                   var  param={};
+                   param.idList=idArr;
+                   param.teleSaleId=telSale;
+                   this.allocateFormVisible = false; 
+                   axios.post('/clue/pendingAllocation/allocationClue', param)
+                   .then(function (response) {
+                       if(response.data.code==-1){
+                           customerManVM.$message.error(response.data.msg);
+                       }else {
+                           customerManVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
+                                   customerManVM.initTableData();
+                               }});
+                       }
+                   }).catch(function (error) {
+                       console.log(error);
+                   });
+                   
+                  } else {
+                    console.log('error submit!!');
+                    return false;
+                  }
+                });
+            },
+            openTrackingDialog(cid){
+                var param = {};
+                param.clueId = cid;
+                axios.post('/aggregation/tracking/queryList', param)
+                    .then(function (response) {
+                        console.log(response.data)
+                        if (response.data.code == 0) {
+                        	customerManVM.trackingParam.tableData = response.data.data
+                            customerManVM.trackingParam.trackingDialogVisible = true;
+                        } else {
+                        	customerManVM.$message.error(response.data.msg);
+                        }
+                    }).catch(function (error) {
+                     console.log(error);
+                });
+
+            },
+            submitTransferForm(formName) {
+                this.$refs[formName].validate((valid) => {
+                  if (valid) {
+                     var rows = this.multseleSelection;
+                	 var salesDirector=this.formTransfer.salesDirector;
+                     var idArr=[];
+                     for(var i=0;i<rows.length;i++){
+                  	   idArr.push(rows[i].clueId);
+                     }
+                     var  param={};
+                     param.idList=idArr;
+                      var directorArr = salesDirector.split(",");
+                     param.teleGorupId=directorArr[0];
+                     param.teleDirectorId=directorArr[1];
+                     this.transferFormVisible = false;
+                     axios.post('/clue/pendingAllocation/transferClue', param)
+                     .then(function (response) {
+                  	  customerManVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
+                  	  		customerManVM.initTableData();
+                         }});
+                      }).catch(function (error) {
+                         console.log(error);
+                     });
+                  } else {
+                    console.log('error submit!!');
+                    return false;
+                  }
+                });
+            },
+            submitBatchForm(formName) {
+                this.$refs[formName].validate((valid) => {
+                  if (valid) {
+                    alert('submit!');
+                  } else {
+                    console.log('error submit!!');
+                    return false;
+                  }
+                });
+            },
+          	//展现详情
+         	showClueDetailInfo (clueId) {
+         	    window.location.href='/tele/clueMyCustomerInfo/customerInfoReadOnly?clueId='+clueId;
+            },
+            submitVicemanagerForm(formName) {
+                this.$refs[formName].validate((valid) => {
+                  if (valid) {
+                	 var rows = this.multseleSelection;
+                     var saleId=this.formVicemanage.salesstaff;
+                     var salesDirector=this.formVicemanage.salesDirector
+                      var idArr=[];
+                      for(var i=0;i<rows.length;i++){
+                   	   idArr.push(rows[i].clueId);
+                      }
+                      var  param={};
+                      param.idList=idArr;
+                       var directorArr = salesDirector.split(",");
+                      param.teleGorupId=directorArr[0];
+                      param.teleDirectorId=directorArr[1];
+                      param.teleSaleId=saleId;
+                      this.vicemanagerFormVisible = false;
+                      axios.post('/clue/pendingAllocation/ceoDistributionClue', param)
+                      .then(function (response) {
+                   	  customerManVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
+                   	  		customerManVM.initTableData();
+                          }});
+                       }).catch(function (error) {
+                          console.log(error);
+                      });
+                  } else {
+                    console.log('error submit!!');
+                    return false;
+                  }
+                });
+            },  
+            //处理用户选择的列
+            confirmColumn(){
+                this.dialogFormVisible = false;
+                
+                var customerShowColun = [];
+                var customerColumn = this.formList.type;
+                customerColumn.sort(this.sortNumber);//对选择的列排序
+                var idList=[];
+                for(var i=0;i<customerColumn.length;i++){
+                    var curItem = customerColumn[i];
+                    var itemArr = curItem.split("_");
+                    var obj = {};
+                    obj.fieldCode=itemArr[1];
+                    obj.displayName=itemArr[2];
+                    customerShowColun.push(obj);
+                    idList.push(itemArr[3])
+                }
+                this.tableColums = customerShowColun;
+                var param ={};
+                  param.fieldIdList = idList;
+                  param.menuCode = "aggregation:PhoneTraffic";
+                  console.info(param);
+                  if(idList.length!=0){
+                    axios.post('/customfield/customField/saveUserField', param)
+                     .then(function (response) {
+                        
+                      })
+                     .catch(function (error) {
+                            console.log(error);
+                      });
+                    }
+                },
+                initColumn(){
+                    //初始化table 列 和 用户自定义列
+                    this.allTableColums = fieldList;
+                    if(userFieldList.length!=0){
+                        var type=[];
+                        for(var i=0;i<userFieldList.length;i++){
+                            type.push(userFieldList[i].sortNum+'_'+userFieldList[i].fieldCode+'_'+userFieldList[i].displayName+'_'+userFieldList[i].fieldId)
+                        }
+                        this.formList.type = type;
+                        this.confirmColumn();
+                    }else{
+                        this.tableColums = fieldList;
+                    }
+                    
+                },
+                sortNumber(a,b) {
+                    //对数组中元素，按照数字 从小到大 排序
+                    return a.split("_")[0] - b.split("_")[0];
+               }
+        },
+        mounted(){
+            document.getElementById('myCustom').style.display = 'block';
+        },
+        created(){
+    		//初始化数据列表
+    		 this.initTableData();
+    		//客户状态
+           var param={};
+            param.groupCode="customerStatus"; 
+            axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {  
+            	customerManVM.cusStatusArr=response.data.data;
+             });
+            //客户级别
+            param={};
+            param.groupCode="customerLevel"; 
+            axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {  
+            	customerManVM.cusLevelArr=response.data.data;
+            });
+            //客户媒介
+            param={};
+            param.groupCode="medium";
+            axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {
+                customerManVM.mediumArr=response.data.data;
+            });
+
+
+            this.initColumn();
+    		
+    	}
+    })
+</script>
+</html>
