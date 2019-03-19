@@ -10,7 +10,6 @@
     <!-- 工作台 -->
     <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
         <el-breadcrumb-item>Home</el-breadcrumb-item>
-        <el-breadcrumb-item>电销管理</el-breadcrumb-item>
         <el-breadcrumb-item>电销中心</el-breadcrumb-item>
         <el-breadcrumb-item>我的工作台</el-breadcrumb-item>
     </el-breadcrumb>
@@ -19,7 +18,9 @@
         <div class="affiche marginB20">
             <span>系统公告：系统将于2018年12月5日晚上12:00进行系统升级，请各位同事及时处理工作。系统预计在12:20分恢复正常使用,感谢配合!</span>
         </div>
-        <div class="title"><img th:src="@{/images/icon_kb.png}" alt="">数字看板</div>
+        <div class="title">
+            <div class="leftbox f-fl"><img th:src="@{/images/icon_kb.png}" alt="" class="f-fl">数字看板</div>
+        </div>
         <ul class="board">
             <li>
                 <div class="tit">今日领取资源数</div>
@@ -182,7 +183,10 @@
                 </el-tabs>
             </li>
         </ul>
-        <div class="title"><img th:src="@{/images/icon_remind.png}" alt="">消息提醒</div>
+        <div class="title">
+            <div class="leftbox f-fl"><img th:src="@{/images/icon_remind.png}" alt="" class="f-fl">消息提醒</div>
+            <div class="rightbox f-fr">进入消息中心<img th:src="@{/images/icon_arrow.png}" alt="" class="f-fr"></div>
+        </div>
         <ul class="news">
             <li><em></em>新分配客户3人，请到我的客户列表进行查收。</li>
             <li><em></em>您的客户“客户姓名”-13041123558回访时间2018-10-1815:35:00即将到，请及时进行回访！</li>
@@ -191,11 +195,57 @@
         </ul>        
     </el-row>
     <!-- 工作台结束 -->
-    <el-row type="flex" class="row-bg marginB10" justify="start">
+    <!-- 今日待跟进客户资源 -->
+    <div class="title">
+        <div class="leftbox f-fl">今日待跟进客户资源</div>
+        <div class="rightbox f-fr">进入我的客户<img th:src="@{/images/icon_arrow.png}" alt="" class="f-fr"></div>
+    </div>
+    <!-- <el-table 
+        ref="multipleTable"
+        tooltip-effect="dark"
+         v-loading="loading"
+        style="width: 100%"
+        border
+        :data="dataTable" 
+        @row-dblclick="showClueDetailInfo"
+        >
+        <el-table-column align="center" prop="cusLevelName" label="客户级别"></el-table-column>
+        <el-table-column align="center" prop="cusName" label="客户姓名"></el-table-column>
+        <el-table-column align="center" prop="phone" label="手机号" width="170">
+            <template slot-scope="scope">
+                {{scope.row.phone}}
+                <input type='hidden'>
+                <i class="el-icon-phone-outline"  @click="customerEidt(scope.row.clueId)"  style="margin:0 10px;font-size: 16px;cursor: pointer;"></i>  
+                <el-tag v-if="scope.row.tag">{{scope.row.tag}}</el-tag>
+            </template>
+        </el-table-column>
+        <el-table-column prop="" label="跟进记录"  align="center">
+            <template slot-scope="scope">
+                <el-button @click="openTrackingDialog(scope.row.clueId)" type="text" size="small">点击查看</el-button>
+            </template>
+        </el-table-column>
+        <el-table-column align="center" prop="customerStatusName" label="客户状态"></el-table-column>
+        <el-table-column align="center" prop="repeatPhones" label="重复手机号资源" width="170">
+            <template slot-scope="scope">
+                <el-button @click="repeatPhonesClick(scope.row)" type="text" size="small">点击查看</el-button>
+            </template>
+        </el-table-column>
+        <el-table-column align="center" prop="focusPoint" label="客户关注点" width="170"></el-table-column>
+        <el-table-column align="center" prop="nextTimeVisit" label="下次回访时间"></el-table-column>
+        <el-table-column align="center" prop="assignTime" label="分配时间" width="170" sortable></el-table-column>
+    </el-table>
+    <table-pagination :pager="pager" @change="initTableData"></table-pagination> -->
+
+    <!-- 快速领取新资源 -->
+    <!-- <el-row type="flex" class="row-bg marginB10" justify="start">
         <el-button type="primary" @click="openReceive">领取</el-button>
-    </el-row>
+    </el-row> -->
+    <div class="title">
+        <div class="leftbox f-fl">快速领取新资源</div>
+        <div class="rightbox f-fr">进入公有池挑选资源<img th:src="@{/images/icon_arrow.png}" alt="" class="f-fr"></div>
+    </div>
     <el-table :data="tableData" border style="width: 100%" tooltip-effect="light"  ref="multipleTable" @selection-change="handleSelectionChange"    @row-dblclick="showClueDetailInfo">
-        <el-table-column type="selection" width="55" prop="clueid" align="center"></el-table-column>
+        <el-table-column align="center" type="index" width="55" label="序号"></el-table-column>
         <el-table-column prop="cusName" label="客户姓名"  align="center"></el-table-column>
         <el-table-column prop="" label="资源类型" align="center"></el-table-column>
         <el-table-column prop="" label="资源类别" align="center"></el-table-column>
@@ -264,29 +314,16 @@
     var mainDivVM = new Vue({
         el: '#mainDiv',
         data: {
-        	tablecluereleaseData:[],
-        	cluereleaseFormVisible:false,
-        	cluereleasetitle:"",
         	receiveDialog:false,
         	receiveTitle:"",
-        	repeatPhonesDialog:false,
         	dailogTitleType:"",
             repeatPhonesDialog:false,//重复手机号
-            allocationDialogFormVisible:false,
-            releaseDialogFormVisible:false,
-            transDialogFormVisible:false,
             formLabelWidth:"150px",
             tableData:[],
-            tableReData:[],
             categoryArr:[],
             typeArr:[],
             reasonArr:[],
             cusStatusArr:[],
-            teleketGroupArr:dzList,
-            teleketSaleArr:dxgwList,
-            teleketDirectorArr:dxzjList,
-            repeatArr:[{value:1,name:'是'},{value:0,name:'否'}],
-            orgLeafOptions:[],
             multipleSelection:[],
             queryForm:{
                 releaseReasons:[],
@@ -306,33 +343,7 @@
                 category:"",
                 address:""
             },
-            release:{
-                customerName:"",
-                releaseReason:"",
-                releaseUserName:""
-            },
-            allocation:{
-                saleid:""
-            },
-            trans:{
-                director:""
-            },
-            transrules:{
-                director: [
-                    {required: true, message: '请选择电销总监', trigger: 'change'},
-                ],
-            },
-            allorules:{
-                saleid: [
-                    {required: true, message: '请选择电销顾问', trigger: 'change'},
-                ],
-            },
             pager:{
-                total: 0,
-                currentPage: 1,
-                pageSize: 20,
-            },
-            releasePager:{
                 total: 0,
                 currentPage: 1,
                 pageSize: 20,
@@ -343,6 +354,8 @@
             },
             repeatPhonesTable:[],
             receiveTable:[],
+            // 今日待跟进客户资源
+            dataTable: [],
             // 工作台
             activeName:'1',
             activeName2:'1',
@@ -351,20 +364,6 @@
             activeName5:'1'
         },
         methods: {
-       	    transformReason(row, column, cellValue, index) {
-            	var text="";
-            	if(releaseReasonList){
-	                for(var i=0;i<releaseReasonList.length;i++){
-                		if(cellValue==releaseReasonList[i].value){
-                			text=releaseReasonList[i].name;
-                		}
-                	}
-            	}
-                return text;
-            },
-            formatCusLevel(row, column){
-                return row.cusLevel==1?"VIP": row.cusLevel==2?"重要":row.cusLevel==2?"普通":""
-            },
             openTrackingDialog(cid){
                 var param = {};
                 param.clueId = cid;
@@ -380,37 +379,6 @@
                     console.log(error);
                 });
 
-            },
-            allocationSubmit(){
-                this.$refs['allocation'].validate((valid) => {
-                    if (valid) {
-                        var param = {};
-
-                        param.teleSaleId = this.allocation.saleid;
-                        param.cliueIdsList = []
-                        for(var i = 0 ; i < this.multipleSelection.length ; i++ ){
-                            param.cliueIdsList.push(this.multipleSelection[i].clueid)
-                        }
-                        axios.post('/aggregation/publiccustomer/allocationResource', param)
-                            .then(function (response) {
-                                if (response.data.code == 0) {
-                                    mainDivVM.$message({
-                                        type: 'success', message: '资源分配成功!', duration: 2000, onClose: function () {
-                                            mainDivVM.initList();
-                                            mainDivVM.allocationDialogFormVisible = false;
-                                        }
-                                    });
-                                } else {
-                                    mainDivVM.$message.error(response.data.msg);
-                                }
-                            }).catch(function (error) {
-                            console.log(error);
-                        });
-                    } else {
-                        console.log('数据未通过校验！');
-                        return false;
-                    }
-                })
             },
             handleSelectionChange(val) {
                 this.multipleSelection = val;
@@ -521,6 +489,11 @@
                                       console.log(error);
                 });
 
+            },
+            // 今日待跟进客户资源
+            customerEidt(clueId,phone){
+             //客户维护界面   
+              window.location.href="/tele/clueMyCustomerInfo/customerEditInfo?clueId="+clueId; 
             },
             // 工作台
             handleClick(tab, event) {
