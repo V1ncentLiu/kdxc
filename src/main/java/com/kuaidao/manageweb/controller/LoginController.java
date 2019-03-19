@@ -417,7 +417,7 @@ public class LoginController {
             return new JSONResult<>().fail(SysErrorCodeEnum.ERR_SYSTEM.getCode(), msg);
         }
         if (SysConstant.USER_STATUS_DISABLE.equals(user.getStatus())) {
-            msg = "账号不可用，请联系管理员！";
+            msg = "帐号已禁用，请联系管理员！";
             return new JSONResult<>().fail(SysErrorCodeEnum.ERR_SYSTEM.getCode(), msg);
         }
         if (!user.getPassword().equals(MD5Util
@@ -570,6 +570,9 @@ public class LoginController {
             update.setId(user.getId());
             update.setIsLogin(Constants.IS_LOGIN_DOWN);
             userInfoFeignClient.update(update);
+            if("3".equals(type)) {
+            	subject.getSession().setAttribute("isShowLogoutBox", type);
+            }
         } else {
             subject.getSession().setAttribute("isShowLogoutBox", type);
         }
