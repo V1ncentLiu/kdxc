@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import com.kuaidao.aggregation.dto.TeleConsoleReqDTO;
+import com.kuaidao.common.constant.CluePhase;
 import com.kuaidao.common.constant.RoleCodeEnum;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.util.DateUtil;
@@ -58,13 +59,13 @@ public class ConsoleController {
      * @return
      */
     @RequestMapping("/index")
-    public String index() {
+    public String index(String type ) {
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
         List<RoleInfoDTO> roleList = curLoginUser.getRoleList();
         RoleInfoDTO roleInfoDTO = roleList.get(0);
         String roleName = roleInfoDTO.getRoleName();
         String path= "";
-        if(RoleCodeEnum.DXCYGW.value().equals(roleName)) {
+/*        if(RoleCodeEnum.DXCYGW.value().equals(roleName)) {
             //电销顾问
         }else if(RoleCodeEnum.DXZJ.value().equals(roleName)) {
             //电销总监
@@ -72,6 +73,15 @@ public class ConsoleController {
             //商务经理
         }else if(RoleCodeEnum.SWZJ.value().equals(roleName)) {
             //商务总监
+        }*/
+        if(type.equals("1")) {
+            path = "console/consoleTelemarketing";
+        }else if(type.equals("2")) {
+            path="console/consoleTelMajordomo";
+        }else if(type.equals("3")) {
+            path="console/consoleBusinessManager";
+        }else if(type.equals("4")) {
+            path="console/consoleBusinessMajordomo";
         }
         return path;
     }
@@ -168,6 +178,23 @@ public class ConsoleController {
        teleConsoleReqDTO.setStartTime(DateUtil.getTodayStartTime());
        teleConsoleReqDTO.setEndTime(new Date());
        return appiontmentFeignClient.countTodayAppiontmentNum(teleConsoleReqDTO);
+   }
+   
+   /**
+    * 电销总监未分配资源数
+    * @param reqDTO
+    * @return
+    */
+   @PostMapping("/countTeleDircortoerUnAssignClueNum")
+   @ResponseBody
+   public JSONResult<Integer> countTeleDircortoerUnAssignClueNum(@RequestBody TeleConsoleReqDTO reqDTO){
+       UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+       reqDTO.setTeleDirectorId(curLoginUser.getId());
+       Date curDate = new Date();
+       reqDTO.setEndTime(curDate);
+       reqDTO.setStartTime(DateUtil.getTodayStartTime());
+       reqDTO.setPhase(CluePhase.PHAE_3RD.getCode());
+       return  clueBasicFeignClient.countAssignClueNum(reqDTO);
    }
     
     
