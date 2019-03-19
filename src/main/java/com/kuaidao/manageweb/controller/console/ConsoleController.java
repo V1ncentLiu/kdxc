@@ -59,13 +59,13 @@ public class ConsoleController {
      * @return
      */
     @RequestMapping("/index")
-    public String index() {
+    public String index(String type ) {
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
         List<RoleInfoDTO> roleList = curLoginUser.getRoleList();
         RoleInfoDTO roleInfoDTO = roleList.get(0);
         String roleName = roleInfoDTO.getRoleName();
         String path= "";
-        if(RoleCodeEnum.DXCYGW.value().equals(roleName)) {
+/*        if(RoleCodeEnum.DXCYGW.value().equals(roleName)) {
             //电销顾问
         }else if(RoleCodeEnum.DXZJ.value().equals(roleName)) {
             //电销总监
@@ -73,6 +73,15 @@ public class ConsoleController {
             //商务经理
         }else if(RoleCodeEnum.SWZJ.value().equals(roleName)) {
             //商务总监
+        }*/
+        if(type.equals("1")) {
+            path = "console/consoleTelemarketing";
+        }else if(type.equals("2")) {
+            path="console/consoleTelMajordomo";
+        }else if(type.equals("3")) {
+            path="console/consoleBusinessManager";
+        }else if(type.equals("4")) {
+            path="console/consoleBusinessMajordomo";
         }
         return path;
     }
