@@ -8,6 +8,7 @@ import org.springframework.cloud.netflix.feign.FeignClient;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import com.kuaidao.aggregation.dto.TeleConsoleReqDTO;
 import com.kuaidao.aggregation.dto.call.CallRecordCountDTO;
 import com.kuaidao.aggregation.dto.call.CallRecordReqDTO;
 import com.kuaidao.aggregation.dto.call.CallRecordRespDTO;
@@ -75,6 +76,15 @@ public interface CallRecordFeign {
     @PostMapping("/countCallRecordTotalByClueIdList")
     JSONResult<List<CallRecordCountDTO>> countCallRecordTotalByClueIdList(@RequestBody CallRecordReqDTO myCallRecordReqDTO);
     
+    
+    /***
+     * 
+     * @param teleConsoleReqDTO
+     * @return
+     */
+    @PostMapping("/countTodayTalkTime")
+    JSONResult<Integer> countTodayTalkTime(TeleConsoleReqDTO teleConsoleReqDTO);
+    
     @Component
     static class HystrixClientFallback implements CallRecordFeign {
         
@@ -117,9 +127,12 @@ public interface CallRecordFeign {
                 CallRecordReqDTO myCallRecordReqDTO) {
             return fallBackError("根据线索Id统计拨打次数");
         }
+        @Override
+        public JSONResult<Integer> countTodayTalkTime(TeleConsoleReqDTO teleConsoleReqDTO) {
+            return fallBackError("通话时长");
+        }
         
     }
-
 
    
 }
