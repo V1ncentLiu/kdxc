@@ -572,7 +572,7 @@ public class MyCustomerClueController {
 					dirUser.getData().getId();
 					List<RoleInfoDTO> roleList = dirUser.getData().getRoleList();
 					if (null != roleList && roleList.size() > 0) {
-						circul.setAllotRoleId(roleList.get(0).getId());
+						circul.setRoleId(roleList.get(0).getId());
 					}
 				}
 				// 保存流转信息
@@ -641,28 +641,28 @@ public class MyCustomerClueController {
 
 		Subject subject = SecurityUtils.getSubject();
 		UserInfoDTO user = (UserInfoDTO) subject.getSession().getAttribute("user");
-//		if (null != user) {
-//			dto.setOrgId(user.getOrgId());
-//			dto.setUserId(user.getId());
-//		}
-//		if (null != dto.getRepeatUserId() && null !=dto.getApplyUserId()) {
-//			IdListLongReq idListLongReq = new IdListLongReq();
-//			List<Long> idList = new ArrayList<>();
-//			idList.add(dto.getRepeatUserId());
-//			idList.add(dto.getApplyUserId());
-//			idListLongReq.setIdList(idList);
-//			JSONResult<List<UserInfoDTO>> userInfo = userInfoFeignClient.listById(idListLongReq);
-//			if (userInfo != null && userInfo.SUCCESS.equals(userInfo.getCode()) && userInfo.getData() != null) {
-//				for (UserInfoDTO userInfoDTO : userInfo.getData()) {
-//					if(userInfoDTO.getId().longValue() == dto.getRepeatUserId()) {
-//						dto.setRepeatOrgId(userInfoDTO.getOrgId());
-//					}
-//					if(userInfoDTO.getId().longValue() == dto.getApplyUserId()) {
-//						dto.setApplyOrgId(userInfoDTO.getOrgId());
-//					}
-//				}
-//			}
-//		}
+		if (null != user) {
+			dto.setOrgId(user.getOrgId());
+			dto.setUserId(user.getId());
+		}
+		if (null != dto.getRepeatUserId() && null !=dto.getApplyUserId()) {
+			IdListLongReq idListLongReq = new IdListLongReq();
+			List<Long> idList = new ArrayList<>();
+			idList.add(dto.getRepeatUserId());
+			idList.add(dto.getApplyUserId());
+			idListLongReq.setIdList(idList);
+			JSONResult<List<UserInfoDTO>> userInfo = userInfoFeignClient.listById(idListLongReq);
+			if (userInfo != null && userInfo.SUCCESS.equals(userInfo.getCode()) && userInfo.getData() != null) {
+				for (UserInfoDTO userInfoDTO : userInfo.getData()) {
+					if(userInfoDTO.getId().longValue() == dto.getRepeatUserId()) {
+						dto.setRepeatOrgId(userInfoDTO.getOrgId());
+					}
+					if(userInfoDTO.getId().longValue() == dto.getApplyUserId()) {
+						dto.setApplyOrgId(userInfoDTO.getOrgId());
+					}
+				}
+			}
+		}
 		return myCustomerFeignClient.saveRepeatClue(dto);
 	}
 	/**
@@ -793,7 +793,7 @@ public class MyCustomerClueController {
 						}
 
 					}
-					if (null != org.getOrgType() && org.getOrgType().equals(OrgTypeConstant.ZSZX)) {
+					if (null != org.getOrgType() && org.getOrgType().equals(OrgTypeConstant.DXFGS)) {
 
 						UserOrgRoleReq userRoleInfo = new UserOrgRoleReq();
 						userRoleInfo.setRoleCode(RoleCodeEnum.DXZJL.name());

@@ -7,6 +7,7 @@ import org.springframework.cloud.netflix.feign.FeignClient;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import com.kuaidao.aggregation.dto.TeleConsoleReqDTO;
 import com.kuaidao.aggregation.dto.clue.AppiontmentCancelDTO;
 import com.kuaidao.aggregation.dto.clue.ClueAppiontmentDTO;
 import com.kuaidao.aggregation.dto.clue.ClueAppiontmentPageParam;
@@ -98,6 +99,14 @@ public interface AppiontmentFeignClient {
 	 */
 	@PostMapping("/cancelAppiontment")
 	public JSONResult<String> cancelAppiontment(@RequestBody AppiontmentCancelDTO dto);
+	
+	/**
+	 * 根据开始时间结束时间查询邀约单数量 不包括删除的
+	 * @param teleConsoleReqDTO
+	 * @return
+	 */
+	@PostMapping("/countTodayAppiontmentNum")
+	 public JSONResult<Integer> countTodayAppiontmentNum(@RequestBody TeleConsoleReqDTO teleConsoleReqDTO);
 
 	@Component
 	static class HystrixClientFallback implements AppiontmentFeignClient {
@@ -153,6 +162,12 @@ public interface AppiontmentFeignClient {
 			return fallBackError("修改资源是否查看");
 		}
 
+        @Override
+        public JSONResult<Integer> countTodayAppiontmentNum(TeleConsoleReqDTO teleConsoleReqDTO) {
+            return fallBackError("统计邀约单数量");
+        }
+
 	}
+
 
 }

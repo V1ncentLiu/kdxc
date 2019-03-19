@@ -30,15 +30,18 @@
         <el-row class="marginB10 greybg padding20" style="padding-bottom: 0;" >
             <el-form :inline="true" :model="queryForm" class="demo-form-inline" ref="queryForm" >
                 <el-form-item label="">
-                    <el-select v-model="queryForm.releaseReasons" placeholder="释放原因" width="100" clearable filterable multiple>
-                        <el-option v-for="item in reasonArr" :key="item.value" :label="item.name" :value="item.value">
-                            <el-checkbox-group v-model="queryForm.releaseReasons">
-                                <el-checkbox :label="item.value">
-                                    {{ item.name}}
-                                </el-checkbox>
-                            </el-checkbox-group>
-                        </el-option>
-                    </el-select>
+                    <!--<el-select v-model="queryForm.releaseReasons" placeholder="释放原因" width="100" clearable filterable multiple>-->
+                        <!--<el-option v-for="item in reasonArr" :key="item.value" :label="item.name" :value="item.value">-->
+                            <!--<el-checkbox-group v-model="queryForm.releaseReasons">-->
+                                <!--<el-checkbox :label="item.value">-->
+                                    <!--{{ item.name}}-->
+                                <!--</el-checkbox>-->
+                            <!--</el-checkbox-group>-->
+                        <!--</el-option>-->
+                    <!--</el-select>-->
+                    <el-form-item label="">
+                    <el-input  v-model="queryForm.releaseReason" placeholder="释放原因"></el-input>
+                    </el-form-item>
                 </el-form-item>
                 <el-form-item label="">
                     <el-select v-model="queryForm.customerStatus" placeholder="客户状态" width="100" clearable>
@@ -59,11 +62,11 @@
                         </el-option>
                     </el-select>
                 </el-form-item>
+                <!--<el-form-item label="">-->
+                    <!--<el-input  v-model="queryForm.project" placeholder="项目名称"></el-input>-->
+                <!--</el-form-item>-->
                 <el-form-item label="">
-                    <el-input  v-model="queryForm.project" placeholder="项目名称"></el-input>
-                </el-form-item>
-                <el-form-item label="">
-                    <el-select v-model="queryForm.isRepetition" placeholder="是否重单" width="100" clearable>
+                    <el-select v-model="queryForm.isRepeatPhone" placeholder="重复手机号资源" width="100" clearable>
                         <el-option v-for="item in repeatArr" :key="item.value" :label="item.name" :value="item.value"></el-option>
                     </el-select>
                 </el-form-item>
@@ -108,9 +111,6 @@
             <el-table-column prop="" label="性别"  align="center"></el-table-column>
             <!--<el-table-column prop="phone" label="手机号" align="center" width="120"></el-table-column>-->
             <el-table-column prop="cusLevel" :formatter="formatCusLevel" label="客户级别"  align="center"></el-table-column>
-            <el-table-column prop="customerStatusName" label="客户状态" align="center" show-overflow-tooltip></el-table-column>
-            <el-table-column prop="" label="重复手机号资源"  align="center" show-overflow-tooltip></el-table-column>
-            <el-table-column prop="" label="跟进记录"  align="center" show-overflow-tooltip>
             <el-table-column prop="customerStatusName" label="客户状态" align="center" width="150"></el-table-column>
             <el-table-column prop="" label="重复手机号"  align="center" width="120">
                 <template slot-scope="scope">
@@ -325,11 +325,12 @@
             multipleSelection:[],
             queryForm:{
                 releaseReasons:[],
+                releaseReason:"",
                 customerStatus:"",
                 teleGorupId:"",
                 teleSaleIds:[],
                 project:"",
-                isRepetition:"",
+                isRepeatPhone:"",
                 createTime1:"",
                 createTime2:"",
                 releaseTime1:"",
@@ -519,7 +520,6 @@
                 this.releaseDialogFormVisible = true
             },
             openreleaseDialog(row){
-            	alert(row.clueid);
             	this.cluereleasetitle = row.cusName+"+"+row.phone;
             	this.cluereleaseFormVisible = true;
             	var param = {};
