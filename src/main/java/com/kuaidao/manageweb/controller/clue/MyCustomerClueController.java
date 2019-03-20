@@ -278,7 +278,7 @@ public class MyCustomerClueController {
         }
         return "clue/addCustomerMaintenance";
     }
-
+ 
     /**
      * 客户详情
      * 
@@ -360,16 +360,14 @@ public class MyCustomerClueController {
             request.setAttribute("proSelect", new ArrayList());
         }
 
-        // 获取已上传的文件数据
-        ClueQueryDTO fileDto = new ClueQueryDTO();
-        fileDto.setClueId(new Long(clueId));
-        JSONResult<List<ClueFileDTO>> clueFileList = myCustomerFeignClient.findClueFile(fileDto);
-        if (clueFileList != null && clueFileList.SUCCESS.equals(clueFileList.getCode())
-                && clueFileList.getData() != null) {
-            request.setAttribute("clueFileList", clueFileList.getData());
-        }
-
-
+		// 获取已上传的文件数据
+		ClueQueryDTO fileDto = new ClueQueryDTO();
+		fileDto.setClueId(new Long(clueId));
+		JSONResult<List<ClueFileDTO>> clueFileList = myCustomerFeignClient.findClueFile(fileDto);
+		if (clueFileList != null && clueFileList.SUCCESS.equals(clueFileList.getCode())
+				&& clueFileList.getData() != null) {
+			request.setAttribute("clueFileList", clueFileList.getData());
+		}
         request.setAttribute("commonPool", commonPool);
         return "clue/CustomerMaintenanceReadOnly";
     }
@@ -516,12 +514,11 @@ public class MyCustomerClueController {
     @ResponseBody
     public JSONResult<List<TrackingRespDTO>> deleteClueTracking(HttpServletRequest request,
             @RequestBody IdListLongReq dto) {
-        trackingFeignClient.deleteTracking(dto);
-        TrackingReqDTO queryDto = new TrackingReqDTO();
-        dto.setClueId(dto.getClueId());
-        return trackingFeignClient.queryList(queryDto);
-    }
-
+    	trackingFeignClient.deleteTracking(dto);
+		TrackingReqDTO queryDto = new TrackingReqDTO();
+		dto.setClueId(dto.getClueId());
+		return trackingFeignClient.queryList(queryDto);
+	}
     /**
      * 修改资源跟进记录
      * 
@@ -610,25 +607,7 @@ public class MyCustomerClueController {
         return myCustomerFeignClient.saveAppiontment(dto);
 
     }
-
-    /**
-     * 重单申请查询重单数据
-     * 
-     * @param request
-     * @param dto
-     * @return
-     */
-    @RequestMapping("/queryRepeatClue")
-    @ResponseBody
-    public JSONResult<List<RepeatClueDTO>> queryRepeatClue(HttpServletRequest request,
-            @RequestBody RepeatClueQueryDTO dto) {
-        Subject subject = SecurityUtils.getSubject();
-        UserInfoDTO user = (UserInfoDTO) subject.getSession().getAttribute("user");
-        if (null != user) {
-            dto.setTelemarketingId(user.getId());
-        }
-        return myCustomerFeignClient.queryRepeatClue(dto);
-    }
+ 
 
     /**
      * 重单申请查询重单数据
@@ -643,19 +622,37 @@ public class MyCustomerClueController {
             @RequestBody RepeatClueQueryDTO dto) {
         return myCustomerFeignClient.queryRepeatClue(dto);
     }
+	/**
+	 * 重单申请查询重单数据
+	 * 
+	 * @param request
+	 * @param dto
+	 * @return
+	 */
+	@RequestMapping("/queryRepeatClue")
+	@ResponseBody
+	public JSONResult<List<RepeatClueDTO>> queryRepeatClue(HttpServletRequest request,
+			@RequestBody RepeatClueQueryDTO dto) {
+		Subject subject = SecurityUtils.getSubject();
+		UserInfoDTO user = (UserInfoDTO) subject.getSession().getAttribute("user");
+		if (null != user) {
+			dto.setTelemarketingId(user.getId());
+		}
+		return myCustomerFeignClient.queryRepeatClue(dto);
+	}
 
-    /**
-     * 总裁办重单申请保存
-     * 
-     * @param request
-     * @param dto
-     * @return
-     */
-    @RequestMapping("/officesaveRepeatClue")
-    @ResponseBody
-    public JSONResult<String> officesaveRepeatClue(HttpServletRequest request,
-            @RequestBody RepeatClueSaveDTO dto) {
-
+ 
+ 
+	/**
+	 * 总裁办重单申请保存
+	 * 
+	 * @param request
+	 * @param dto
+	 * @return
+	 */
+	@RequestMapping("/officesaveRepeatClue")
+	@ResponseBody
+	public JSONResult<String> officesaveRepeatClue(HttpServletRequest request, @RequestBody RepeatClueSaveDTO dto) {
         Subject subject = SecurityUtils.getSubject();
         UserInfoDTO user = (UserInfoDTO) subject.getSession().getAttribute("user");
         if (null != user) {
@@ -684,19 +681,21 @@ public class MyCustomerClueController {
         return myCustomerFeignClient.saveRepeatClue(dto);
     }
 
-    /**
-     * 重单申请查询被重单数据
-     * 
-     * @param request
-     * @param dto
-     * @return
-     */
-    @RequestMapping("/queryRepeatCurClue")
-    @ResponseBody
-    public JSONResult<List<RepeatClueDTO>> queryRepeatCurClue(HttpServletRequest request,
-            @RequestBody RepeatClueQueryDTO dto) {
-        return myCustomerFeignClient.queryRepeatClue(dto);
-    }
+ 
+	/**
+	 * 重单申请查询被重单数据
+	 * 
+	 * @param request
+	 * @param dto
+	 * @return
+	 */
+	@RequestMapping("/queryRepeatCurClue")
+	@ResponseBody
+	public JSONResult<List<RepeatClueDTO>> queryRepeatCurClue(HttpServletRequest request,
+			@RequestBody RepeatClueQueryDTO dto) {
+		return myCustomerFeignClient.queryRepeatClue(dto);
+	}
+ 
 
     /**
      * 查询所有电销创业顾问

@@ -10,6 +10,7 @@ import com.kuaidao.common.entity.IdEntity;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.manageweb.config.LogRecord;
+import com.kuaidao.manageweb.constant.Constants;
 import com.kuaidao.manageweb.constant.MenuEnum;
 import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
 import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
@@ -144,13 +145,29 @@ public class PublicCustomerResources {
             dxcygwList = dxcygws(dxzIdsList);
             dxzjsList = dxzjs(dxzIdsList);
         }
+        // 查询字典释放原因集合
+        request.setAttribute("releaseReasonList", getDictionaryByCode(Constants.RELEASE_REASON));
         request.setAttribute("dzList", dxzList);
         request.setAttribute("dxgwList",dxcygwList);
         request.setAttribute("dxzjList", dxzjsList);
 
         return "pubcustomer/publicCustomer";
     }
-
+    /**
+     * 查询字典表
+     *
+     * @param code
+     * @return
+     */
+    private List<DictionaryItemRespDTO> getDictionaryByCode(String code) {
+        JSONResult<List<DictionaryItemRespDTO>> queryDicItemsByGroupCode =
+                dictionaryItemFeignClient.queryDicItemsByGroupCode(code);
+        if (queryDicItemsByGroupCode != null
+                && JSONResult.SUCCESS.equals(queryDicItemsByGroupCode.getCode())) {
+            return queryDicItemsByGroupCode.getData();
+        }
+        return null;
+    }
     @PostMapping("/queryPage")
     @ResponseBody
     public JSONResult<PageBean<PublicCustomerResourcesRespDTO>> queryListPage(@RequestBody ClueQueryParamDTO dto){

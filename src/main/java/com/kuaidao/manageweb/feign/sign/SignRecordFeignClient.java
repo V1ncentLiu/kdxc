@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import com.kuaidao.aggregation.dto.busmycustomer.RejectSignOrderReqDTO;
 import com.kuaidao.aggregation.dto.busmycustomer.SignRecordReqDTO;
 import com.kuaidao.aggregation.dto.busmycustomer.SignRecordRespDTO;
+import com.kuaidao.aggregation.dto.console.BusinessConsolePanelRespDTO;
+import com.kuaidao.aggregation.dto.console.BusinessConsoleReqDTO;
 import com.kuaidao.aggregation.dto.sign.PayDetailDTO;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.IdListLongReq;
@@ -52,6 +54,14 @@ public interface SignRecordFeignClient {
     @PostMapping("/listPayDetailNoPage")
     JSONResult<List<PayDetailDTO>> listPayDetailNoPage(IdListLongReq idListLongReq);
     
+    /**
+     *当月签约数
+     * @param businessConsoleReqDTO
+     * @return
+     */
+    @PostMapping("/countCurMonthSignedNum")
+    JSONResult<BusinessConsolePanelRespDTO> countCurMonthSignedNum(BusinessConsoleReqDTO businessConsoleReqDTO);
+    
     @Component
     static class HystrixClientFallback implements SignRecordFeignClient {
 
@@ -77,8 +87,13 @@ public interface SignRecordFeignClient {
         public JSONResult<List<PayDetailDTO>> listPayDetailNoPage(IdListLongReq idListLongReq) {
             return fallBackError("根据signID查询付款明细");
         }
-    }
 
+        @Override
+        public JSONResult<BusinessConsolePanelRespDTO> countCurMonthSignedNum(
+                BusinessConsoleReqDTO businessConsoleReqDTO) {
+            return fallBackError("查询签约数");
+        }
+    }
 
 }
 

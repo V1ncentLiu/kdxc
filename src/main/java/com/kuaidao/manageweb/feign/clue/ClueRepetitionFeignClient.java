@@ -98,7 +98,13 @@ public interface ClueRepetitionFeignClient {
 	@PostMapping("/updateBusinessPetitionById")
 	public JSONResult updateBusinessPetitionById(@RequestBody BusinessSignDTO businessSignDTO);
 	
-	
+	 /**
+     *  根据重单主表id查询重单详细信
+     *
+     * @return
+     */
+	@PostMapping("/getRepeatDetailsByRepeatId")
+	JSONResult<ClueRepetitionDTO> getRepeatDetailsByRepeatId(@RequestBody ClueRepetitionDTO clueRepetitionDTO);
 	
 	@Component
 	static class HystrixClientFallback implements ClueRepetitionFeignClient {
@@ -166,6 +172,13 @@ public interface ClueRepetitionFeignClient {
 		public JSONResult updateBusinessPetitionById(BusinessSignDTO businessSignDTO) {
 			// TODO Auto-generated method stub
 			return fallBackError("签约重单审核通过失败");
+		}
+
+
+		@Override
+		public JSONResult<ClueRepetitionDTO> getRepeatDetailsByRepeatId(ClueRepetitionDTO clueRepetitionDTO) {
+			// TODO Auto-generated method stub
+			return fallBackError("根据重单主表id查询重单详细信息失败");
 		}
 
 	
