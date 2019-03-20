@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html>
+<head th:include="_header_include::frag(~{::title},~{},~{})">
+<title>已分发资源</title>
+    <meta charset="UTF-8">
+    <!-- import CSS -->
+    <link rel="stylesheet" href="css/element-ui.css">
+    <link rel="stylesheet" href="css/base.css">
+    <style>
+        .dialogForm .el-form-item{margin-bottom: 5px;}        
+        .el-checkbox{margin-right: 30px!important;}
+        .el-checkbox+.el-checkbox{margin-left: 0;}    
+    </style>
+</head>
+<body>
+<div id="optimizeClueManagement" class="optimizeClueManagement mainPadding" style="display: none;">  
+    <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
+        <el-breadcrumb-item>Home</el-breadcrumb-item>
+        <el-breadcrumb-item>线索管理</el-breadcrumb-item>
+        <el-breadcrumb-item>已分发资源</el-breadcrumb-item>
+    </el-breadcrumb>
+    <el-row class="marginB10 greybg padding20" style="padding-bottom: 0">
+        <el-row class="marginB10">
+            <el-button type="text" @click="dialogChooseList = true"><i class="el-icon-menu"></i>选择列</el-button>
+        </el-row>
+        <el-form :inline="true" :model="form" ref="form">
+            <el-form-item label="创建时间:">
+                <el-date-picker
+                    style="width: 100%;"
+                    v-model="form.starTime"
+                    type="datetime"
+                    placeholder="选择日期时间">
+                </el-date-picker>
+            </el-form-item>
+            <el-form-item label="——">
+                <el-date-picker
+                    style="width: 100%;"
+                    v-model="form.endTime"
+                    type="datetime"
+                    placeholder="选择日期时间">
+                </el-date-picker>
+            </el-form-item>
+            <el-form-item label="分发时间:">
+                <el-date-picker
+                    style="width: 100%;"
+                    v-model="form.assignTimeStart"
+                    type="datetime"
+                    placeholder="选择日期时间">
+                </el-date-picker>
+            </el-form-item>
+            <el-form-item label="——">
+                <el-date-picker
+                    style="width: 100%;"
+                    v-model="form.assignTimeEnd"
+                    type="datetime"
+                    placeholder="选择日期时间">
+                </el-date-picker>
+            </el-form-item>
+            <el-form-item label="">
+                <el-select v-model="form.telemarketingBranch" placeholder="电销分公司" @change="showTele(7)"  clearable >
+                    <el-option
+                        v-for="item in dxBusinessList"
+                        :key="item.id"
+                        :label="item.name"
+                        :value="item.id">
+                    </el-option>
+                </el-select>
+            </el-form-item> 
+            <el-form-item label="">
+                <el-select v-model="form.businessUnit" placeholder="事业部"  @change="showTele(1)" clearable >
+                    <el-option
+                        v-for="item in dxCauseBList"
+                        :key="item.id"
+                        :label="item.name"
+                        :value="item.id">
+                    </el-option>
+                </el-select>
+            </el-form-item> 
+            <el-form-item label="">
+                <el-select v-model="form.telemarketingItem" placeholder="电销组" clearable >
+                    <el-option
+                        v-for="item in dxList"
+                        :key="item.id"
+                        :label="item.name"
+                        :value="item.id">
+                    </el-option>
+                </el-select>
+            </el-form-item> 
+            <el-form-item label="">
+                <el-select v-model="form.resourceProject" placeholder="资源项目">
+                    <el-option
+                        v-for="item in proSelectArr"
+                        :key="item.id"
+                        :label="item.projectName"
+                        :value="item.id">
+                    </el-option>
+                </el-select>
+            </el-form-item>            
+            <el-form-item label="">
+                <el-select v-model="form.medium" placeholder="媒介">
+                    <el-option
+                        v-for="item in mediumArry"
+                        :key="item.value"
+                        :label="item.name"
+                        :value="item.value">
+                    </el-option>
+                </el-select>
+            </el-form-item> 
+            <el-form-item label="">
+                <el-select v-model="form.resourceType" placeholder="资源类别">
+                    <el-option
+                        v-for="item in categoryArr"
+                        :key="item.value"
+                        :label="item.name"
+                        :value="item.value">
+                    </el-option>
+                </el-select>
+            </el-form-item> 
+            <el-form-item label="">
+                <el-select v-model="form.tradeType" placeholder="行业类别">
+                    <el-option
+                        v-for="item in industryCategoryArr"
+                        :key="item.value"
+                        :label="item.name"
+                        :value="item.value">
+                    </el-option>
+                </el-select>
+            </el-form-item> 
+            <el-form-item label="">
+                <el-select v-model="form.resourceStage" placeholder="资源阶段">
+                    <el-option
+                        v-for="item in phaseArr"
+                        :key="item.value"
+                        :label="item.name"
+                        :value="item.value">
+                    </el-option>
+                </el-select>
+            </el-form-item>
+            <el-form-item label="">
+                <el-select v-model="form.resourcePerson" placeholder="资源专员">
+                    <el-option
+                        v-for="item in userArr"
+                        :key="item.id"
+                        :label="item.name"
+                        :value="item.id">
+                    </el-option>
+                </el-select>
+            </el-form-item>
+            <el-form-item label="">
+                <el-input v-model="form.phone" placeholder="手机号" maxLength="11" @keyup.native="number"></el-input>
+            </el-form-item>
+            <el-button type="primary" @click="initTableData">搜索</el-button> 
+        </el-form>
+    </el-row>
+    <el-row>
+        <el-table 
+            ref="tableData"
+            tooltip-effect="dark"
+            style="width: 100%"
+            border
+            :data="tableData"
+            @row-dblclick="rowDblClick()"
+            @selection-change="handleSelectionChange" 
+            >
+            <el-table-column align="center" prop="clueId" type="selection" width="55"></el-table-column>
+            <el-table-column align="center" type="index" label="序号" width="55"></el-table-column>
+            <el-table-column align="center" prop="phaseName" label="线索阶段"></el-table-column>
+            <el-table-column align="center" prop="createTime" label="创建时间"></el-table-column>
+            <el-table-column align="center" prop="projectName" label="资源项目"></el-table-column>
+            <el-table-column align="center" prop="searchWord" label="搜索词"></el-table-column>
+            <el-table-column align="center" prop="sourceTypeName" label="广告位"></el-table-column>
+            <el-table-column align="center" prop="sourceName" label="媒介"></el-table-column>
+            <el-table-column align="center" prop="typeName" label="资源类型"></el-table-column>
+            <el-table-column align="center" prop="categoryName" label="资源类别"></el-table-column>
+            <el-table-column align="center" prop="industryCategoryName" label="行业类别"></el-table-column>
+            <el-table-column align="center" prop="phone" label="手机"></el-table-column>
+            <el-table-column align="center" prop="messageTime" label="留言时间"></el-table-column>
+            <el-table-column align="center" prop="messagePoint" label="留言重点"></el-table-column>
+            <el-table-column align="center" prop="email" label="邮箱"></el-table-column>
+            <el-table-column align="center" prop="address" label="地址"></el-table-column>
+            <el-table-column align="center" prop="wechat" label="微信"></el-table-column>
+            <el-table-column align="center" prop="operationName" label="资源专员"></el-table-column>
+            <el-table-column align="center" prop="teleCompanyName" label="电销分公司" width="120"></el-table-column>
+            <el-table-column align="center" prop="teleManagerName" label="电销总经理" width="120"></el-table-column>
+            <el-table-column align="center" prop="teleDeptName" label="电销事业部" width="120"></el-table-column>
+            <el-table-column align="center" prop="teleCeoName" label="电销副总"></el-table-column>
+            <el-table-column align="center" prop="teleGorupName" label="电销组"></el-table-column>
+            <el-table-column align="center" prop="teleDirectorName" label="电销总监"></el-table-column>
+            <el-table-column align="center" prop="teleSaleName" label="电销人员"></el-table-column>
+            <el-table-column align="center" prop="assignTime" label="分发时间"></el-table-column>
+        </el-table>
+        <table-pagination :pager="pager" @change="initTableData"></table-pagination> 
+    </el-row>
+    <!-- dialog -->
+    <el-dialog title="线索详细信息" :visible.sync="dialogFormVisible">
+        <el-form :model="dialogForm" ref="dialogForm" class="marginB20 dialogForm">
+            <div class="fs16 redcolor marginB20">线索ID：5546112345678</div>
+            <div class="borderbox padding20">
+                <el-row>
+                    <el-col :span="12">
+                        <el-form-item label="客户姓名：" :label-width="formLabelWidth">
+                            张三
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="12">
+                        <el-form-item label="手机号：" :label-width="formLabelWidth">
+                            15100001234
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="12">
+                        <el-form-item label="微信：" :label-width="formLabelWidth">
+                            zhansan<span>/二维码</span>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="12">
+                        <el-form-item label="邮箱：" :label-width="formLabelWidth">
+                            zhangsan@sina.com
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="12">
+                        <el-form-item label="QQ：" :label-width="formLabelWidth">
+                           123123123
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="12">
+                        <el-form-item label="资源类型：" :label-width="formLabelWidth">
+                            类型1
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="12">
+                        <el-form-item label="资源项目：" :label-width="formLabelWidth">
+                            项目1
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="12">
+                        <el-form-item label="资源类别：" :label-width="formLabelWidth">
+                            类别1
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="12">
+                        <el-form-item label="媒介：" :label-width="formLabelWidth">
+                            媒介1
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="12">
+                        <el-form-item label="搜索词：" :label-width="formLabelWidth">
+                            搜索词1
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="12">
+                        <el-form-item label="行业类别：" :label-width="formLabelWidth">
+                            类别1
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="12">
+                        <el-form-item label="留言时间：" :label-width="formLabelWidth">
+                            2019年3月13日
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="24">
+                        <el-form-item label="留言重点：" :label-width="formLabelWidth">
+                            留言重点内容留言重点内容留言重点内容留言重
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+            </div>
+        </el-form>
+    </el-dialog>  
+    <!-- 选择列 -->
+    <el-dialog title="选择列" :visible.sync="dialogChooseList">
+        <el-form :model="form">        
+            <el-form-item label="列名" prop="type">
+                <el-checkbox-group v-model="form.type">
+                    <el-checkbox :label="item.sortNum+'_'+item.fieldCode+'_'+item.displayName+'_'+item.id"  name="type" :key="item.fieldCode"  v-for="(item,index) in  allTableColums ">
+                        {{item.displayName}}
+                    </el-checkbox>          
+                 </el-checkbox-group>
+            </el-form-item>        
+        </el-form>
+        <div slot="footer" class="dialog-footer">
+            <el-button type="primary" @click="">确 定</el-button>
+            <el-button @click="dialogChooseList = false">取 消</el-button>            
+        </div>
+    </el-dialog>
+</div>
+</body>
+<!-- import Vue before Element -->
+ <div th:include="_footer_include :: #jsLib"></div>
+<script th:inline="javascript" >
+var proSelect=[[${proSelect}]];
+var userList=[[${userList}]];
+    var ocmVM = new Vue({
+        el: '#optimizeClueManagement',
+        data: function() {
+            return {
+                dialogFormVisible: false,
+                dialogChooseList: false,
+                multipleSelection: [],//选择行
+                allTableColums:[
+                    {
+                        displayName:"线索阶段",
+                        fieldCode:"clueStage ",
+                        fieldName:"线索阶段",
+                        id:"1103929467040124928",
+                        menuCode:null,
+                        menuId:null,
+                        pageNum:0,
+                        pageSize:0,
+                        sortNum:1,
+                        width:100
+                    },
+                    {
+                        displayName:"创建时间",
+                        fieldCode:"creatTime",
+                        fieldName:"创建时间",
+                        id:"1103929467040124929",
+                        menuCode:null,
+                        menuId:null,
+                        pageNum:0,
+                        pageSize:0,
+                        sortNum:2,
+                        width:100
+                    }
+                ],//自定义列
+                form: {
+                    starTime:'',
+                    endTime:'',
+                    starTime1:'',
+                    endTime1:'',
+                    telemarketingBranch:'',
+                    businessUnit:'',
+                    telemarketingItem:'',
+                    resourceProject:'',
+                    medium:'',
+                    resourceType:'',
+                    tradeType:'',
+                    resourceStage:'',
+                    resourcePerson:'',
+                    phone:'',
+                },
+                pager:{ 
+                    total: 0,
+                    currentPage: 1,
+                    pageSize: 20,
+                },
+                dialogForm:{},
+                formLabelWidth: '120px',
+                dxBusinessList:[],
+                industryCategoryArr:[],
+                categoryArr:[],
+                mediumArry:[],
+                phaseArr:[],
+                dxList:[],
+                dxCauseBList:[],
+                proSelectArr:proSelect,
+                dxBusinessList:[],
+                userArr:userList,
+                tableData:[],             
+            }        	  
+        },
+        methods: {
+            handleSelectionChange(val) {//选择节点的事件
+                console.log(val)
+                this.multipleSelection = val;
+            }, 
+            submitForm(formName){//表格搜索
+                var starTime=this.form.starTime;
+                var endTime=this.form.endTime;
+                if(endTime){
+                    if(starTime>endTime){
+                        this.$message({
+                            message: '开始时间不能大于结束时间',
+                            type: 'warning'
+                        });
+                        return;
+                    }
+                }
+            },
+       	      initTableData(){
+                var param = {};
+                var pageSize = this.pager.pageSize;
+                var pageNum = this.pager.currentPage;
+                param.pageNum=pageNum;
+                param.pageSize=pageSize;
+                param.createTimeStart=this.form.starTime;
+                param.createTimeEnd=this.form.endTime;
+                param.assignTimeStart=this.form.assignTimeStart;
+                param.assignTimeEnd=this.form.assignTimeEnd;
+                param.assignTimeEnd=this.form.assignTimeEnd;
+                param.teleCompanyId=this.form.telemarketingBranch;
+                param.teleDeptId=this.form.businessUnit;
+                param.teleGorupId=this.form.telemarketingItem;
+                param.teleGorupId=this.form.telemarketingItem;
+                param.projectId=this.form.resourceProject; 
+                param.operationId=this.form.resourcePerson;
+                param.phase=this.form.resourceStage;
+                param.source=this.form.medium;
+                param.category=this.form.resourceType;
+                param.industryCategory=this.form.tradeType;
+    		    axios.post('/exetend/distributionedTaskManager/queryPageDistributionedTask',param).then(function (response) {
+    				if(!response){
+    					ocmVM.$message({
+	                        message: "接口调用失败",
+	                        type: 'error'
+	                      }); 
+						return ;
+					}
+    				var resobj= response.data;
+					if(!resobj){
+						ocmVM.$message({
+	                        message: "接口调用失败",
+	                        type: 'error'
+	                      }); 
+						return ;
+					} 
+					if(resobj.code!='0'){
+						ocmVM.$message({
+	                        message: "接口调用失败",
+	                        type: 'error'
+	                      }); 
+						return ;
+					}
+    		    	var pageData=resobj.data;
+    		    	ocmVM.pager.total=pageData.total;
+    		    	ocmVM.pager.currentPage = pageData.currentPage;
+    		    	ocmVM.pager.pageSize = pageData.pageSize;
+    		    	ocmVM.tableData =pageData.data; 	
+    			})
+        	},
+            
+            
+            rowDblClick(row, column, event){//双击查看详情
+                this.dialogFormVisible = true
+            },
+            number(){
+    　　　                             this.form.phone=this.form.phone.replace(/[^\.\d]/g,'');
+              this.form.phone=this.form.phone.replace('.','');
+        　                              　},
+            confirmColumn(){
+                this.dialogChooseList = false;
+                //处理用户选择的列
+                console.info(this.form.type);
+                var customerShowColun = [];
+                var customerColumn = this.form.type;
+                customerColumn.sort(this.sortNumber);//对选择的列排序
+                var idList=[];
+                for(var i=0;i<customerColumn.length;i++){
+                    var curItem = customerColumn[i];
+                    var itemArr = curItem.split("_");
+                    var obj = {};
+                    obj.fieldCode=itemArr[1];
+                    obj.displayName=itemArr[2];
+                    customerShowColun.push(obj);
+                    idList.push(itemArr[3])
+                }
+                this.tableColums = customerShowColun;
+                var param ={};
+                param.fieldIdList = idList;
+                param.menuCode = "aggregation:pendingAllocationManager";
+                console.info(param);
+                if(idList.length!=0){
+                    axios.post('/customfield/customField/saveUserField', param)
+                    .then(function (response) {
+
+                    })
+                    .catch(function (error) {
+                    console.log(error);
+                    });
+                }
+            },
+            //级联查询机构
+            showTele(type){
+         	   var param={};
+ 	           if(type==1){
+ 	        	   param.orgType="1";
+ 	        	   param.parentId = this.form.businessUnit;
+ 	           }else if(type ==7){
+ 	        	   param.orgType="7";
+ 	        	   param.parentId = this.form.telemarketingBranch;
+ 	           }else if(type ==0){
+ 	        	   param.orgType="3";
+ 	           }
+                axios.post('/organization/organization/queryOrgByType',param).then(function (response) {
+             	   console.log(response);
+             	   if(type==1){
+             		  ocmVM.dxList = response.data.data;
+     	           }else if(type ==7){
+     	        	  ocmVM.dxCauseBList = response.data.data;
+     	           }else{
+     	        	  ocmVM.dxBusinessList = response.data.data;
+     	           }
+                 }).catch(function (error) {
+                     console.log(error);
+                 })
+                 .then(function () {
+                   // always executed
+                 }); 
+           }
+
+        },
+        mounted(){
+           
+        	document.getElementById('optimizeClueManagement').style.display = 'block';
+         	this.initTableData();
+            var  param={};
+       	   param.groupCode="medium";
+             axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {  
+            	 ocmVM.mediumArry=response.data.data;
+            });
+             
+             //初始资源类别数据
+              param={};
+            	param.groupCode="clueCategory";
+              axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {  
+            	  ocmVM.categoryArr=response.data.data;
+              });
+              //初始行业类别
+              param={};
+              param.groupCode="industryCategory";
+               axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {  
+            	   ocmVM.industryCategoryArr=response.data.data;
+               }); 
+               
+               //初始化线索阶段
+               param={};
+               param.groupCode="phase";
+                axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {  
+             	   ocmVM.phaseArr=response.data.data;
+               }); 
+               
+               //初始化电销分公司
+               this.showTele(0);
+               
+        }
+    })
+</script>
+</html>

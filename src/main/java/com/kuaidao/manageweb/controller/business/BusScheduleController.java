@@ -64,6 +64,7 @@ public class BusScheduleController {
     @LogRecord(description = "到访记录(商务经理)提醒", operationType = OperationType.SCHEDULE,
             menuName = MenuEnum.INDEX)
     public void visitRecordToBusSaleReminder() {
+        logger.info("================到访记录(商务经理)提醒=============");
         busScheduleFeignClient.notVisitRecordReminder();
     }
 

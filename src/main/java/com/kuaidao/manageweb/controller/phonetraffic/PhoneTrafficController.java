@@ -16,6 +16,8 @@ import com.kuaidao.aggregation.dto.project.ProjectInfoDTO;
 import com.kuaidao.aggregation.dto.project.ProjectInfoPageParam;
 import com.kuaidao.aggregation.dto.tracking.TrackingReqDTO;
 import com.kuaidao.aggregation.dto.tracking.TrackingRespDTO;
+import com.kuaidao.common.constant.RoleCodeEnum;
+import com.kuaidao.common.constant.StageContant;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.common.util.CommonUtil;
@@ -31,6 +33,7 @@ import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
 import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
 import com.kuaidao.manageweb.feign.phonetraffic.PhoneTrafficFeignClient;
 import com.kuaidao.manageweb.feign.project.ProjectInfoFeignClient;
+import com.kuaidao.manageweb.feign.role.RoleManagerFeignClient;
 import com.kuaidao.manageweb.feign.tracking.TrackingFeignClient;
 import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
 import com.kuaidao.manageweb.util.CommUtil;
@@ -39,7 +42,10 @@ import com.kuaidao.sys.dto.customfield.QueryFieldByRoleAndMenuReq;
 import com.kuaidao.sys.dto.customfield.QueryFieldByUserAndMenuReq;
 import com.kuaidao.sys.dto.customfield.UserFieldDTO;
 import com.kuaidao.sys.dto.role.RoleInfoDTO;
+import com.kuaidao.sys.dto.role.RoleQueryDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
+import com.kuaidao.sys.dto.user.UserInfoPageParam;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,6 +57,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -93,13 +100,26 @@ public class PhoneTrafficController {
     @Autowired
     private MyCustomerFeignClient myCustomerFeignClient;
 
+    @Autowired
+    RoleManagerFeignClient roleManagerFeignClient;
+
+
     @Value("${oss.url.directUpload}")
     private String ossUrl;
 
     @RequestMapping("/listPage")
     public String listPage(HttpServletRequest request){
         UserInfoDTO user =  CommUtil.getCurLoginUser();
+        // 项目
+        ProjectInfoPageParam param = new ProjectInfoPageParam();
+        JSONResult<List<ProjectInfoDTO>> proJson = projectInfoFeignClient.listNoPage(param);
+        if (proJson.getCode().equals(JSONResult.SUCCESS)) {
+            request.setAttribute("proSelect", proJson.getData());
+        } else {
+            request.setAttribute("proSelect", new ArrayList());
+        }
         // 话务人员
+
         // 根据角色查询页面字段
         QueryFieldByRoleAndMenuReq queryFieldByRoleAndMenuReq = new QueryFieldByRoleAndMenuReq();
         queryFieldByRoleAndMenuReq.setMenuCode("aggregation:PhoneTraffic");
@@ -116,6 +136,8 @@ public class PhoneTrafficController {
                 customFieldFeignClient.queryFieldByUserAndMenu(queryFieldByUserAndMenuReq);
         request.setAttribute("userFieldList", queryFieldByUserAndMenu.getData());
 
+        request.setAttribute("phtrafficList", phTrafficList());
+
         return "/phonetraffic/customManagement";
     }
 
@@ -123,6 +145,61 @@ public class PhoneTrafficController {
     @ResponseBody
     public JSONResult<PageBean<PhoneTrafficRespDTO>> queryListPage(@RequestBody PhoneTrafficParamDTO param){
         logger.info("============分页数据查询==================");
+        UserInfoDTO user =  CommUtil.getCurLoginUser();
+        List<RoleInfoDTO> roleList = user.getRoleList();
+
+        /**
+         * 数据权限说明：
+         *    管理员权限：
+         *      能够看见全部数据
+         *    电销顾问：
+         *      能够看见自己以及所在电销组下电销创业顾问创建的数据
+         *    其他的只能够看见自己创建的数据
+         */
+//            List dxList = new ArrayList();
+//        if(roleList!=null&&roleList.get(0)!=null) {
+//            if (RoleCodeEnum.HWZG.name().equals(roleList.get(0).getRoleCode())) {
+//                dxList = phoneTrafficUser();
+//                dxList.add(user.getId());
+//                param.setUserList(dxList);
+//            } else {
+//                dxList.add(user.getId());
+//                param.setUserList(dxList);
+//            }
+//        }
+        if(roleList!=null&&roleList.get(0)!=null) {
+            if (RoleCodeEnum.GLY.name().equals(roleList.get(0).getRoleCode())) {
+            }else if (RoleCodeEnum.HWZG.name().equals(roleList.get(0).getRoleCode())) {
+                param.setPhTraDirectorId(user.getId());
+            } else {
+                param.setOperatorId(user.getId());
+            }
+        }
+
+        String defineColumn = param.getDefineColumn();
+        String defineValue = param.getDefineValue();
+        if(StringUtils.isNotBlank(defineColumn)&&StringUtils.isNotBlank(defineValue)){
+            if("phone".equals(defineColumn)){
+                param.setPhone(defineValue);
+            }else  if("cusName".equals(defineColumn)){
+                param.setCusName(defineValue);
+            }else if("qq".equals(defineColumn)){
+                param.setQq(defineValue);
+            }else if("wx".equals(defineColumn)){
+                param.setWx(defineValue);
+            }else if("email".equals(defineColumn)){
+                param.setEmail(defineValue);
+            }
+        }
+
+//      时间判断：
+        Date date1 = param.getCreateTime1();
+        Date date2 = param.getCreateTime2();
+        if(date1!=null && date2!=null ){
+            if(date1.getTime()>date2.getTime()){
+                return new JSONResult().fail("-1","创建时间，开始时间大于结束时间!");
+            }
+        }
         return  phoneTrafficFeignClient.queryList(param);
     }
 
@@ -146,7 +223,7 @@ public class PhoneTrafficController {
             allocationClueReq.setRoleId(roleList.get(0).getId());
             allocationClueReq.setRoleCode(roleList.get(0).getRoleCode());
         }
-        return clueBasicFeignClient.allocationClue(allocationClueReq);
+        return phoneTrafficFeignClient.allocationClue(allocationClueReq);
     }
 
     /**
@@ -169,7 +246,7 @@ public class PhoneTrafficController {
             allocationClueReq.setRoleId(roleList.get(0).getId());
             allocationClueReq.setRoleCode(roleList.get(0).getRoleCode());
         }
-        return clueBasicFeignClient.transferClue(allocationClueReq);
+        return phoneTrafficFeignClient.transferClue(allocationClueReq);
     }
 
     /**
@@ -180,9 +257,9 @@ public class PhoneTrafficController {
         CallRecordReqDTO call = new CallRecordReqDTO();
         call.setClueId(clueId);
         JSONResult<List<CallRecordRespDTO>> callRecord = callRecordFeign.listTmCallReacordByParamsNoPage(call);
+
         // 资源通话记录
         if (callRecord != null && JSONResult.SUCCESS.equals(callRecord.getCode()) && callRecord.getData() != null) {
-
             request.setAttribute("callRecord", callRecord.getData());
         }
         ClueQueryDTO queryDTO = new ClueQueryDTO();
@@ -217,6 +294,7 @@ public class PhoneTrafficController {
         // 获取资源跟进记录数据
         TrackingReqDTO dto = new TrackingReqDTO();
         dto.setClueId(new Long(clueId));
+        dto.setStage(StageContant.STAGE_PHONE_TRAFFIC);
         JSONResult<List<TrackingRespDTO>> trackingList = trackingFeignClient.queryList(dto);
         if (trackingList != null && trackingList.SUCCESS.equals(trackingList.getCode())
                 && trackingList.getData() != null) {
@@ -228,6 +306,7 @@ public class PhoneTrafficController {
         // 获取资源流转数据
         CirculationReqDTO circDto = new CirculationReqDTO();
         circDto.setClueId(new Long(clueId));
+        circDto.setStage(StageContant.STAGE_PHONE_TRAFFIC);
         JSONResult<List<CirculationRespDTO>> circulationList = circulationFeignClient.queryList(circDto);
         if (circulationList != null && circulationList.SUCCESS.equals(circulationList.getCode())
                 && circulationList.getData() != null) {
@@ -247,12 +326,83 @@ public class PhoneTrafficController {
         // 获取已上传的文件数据
         ClueQueryDTO fileDto = new ClueQueryDTO();
         fileDto.setClueId(new Long(clueId));
+        fileDto.setStage(StageContant.STAGE_PHONE_TRAFFIC);
         JSONResult<List<ClueFileDTO>> clueFileList = myCustomerFeignClient.findClueFile(fileDto);
         if (clueFileList != null && clueFileList.SUCCESS.equals(clueFileList.getCode())
                 && clueFileList.getData() != null) {
             request.setAttribute("clueFileList", clueFileList.getData());
         }
-
         return "/phonetraffic/editCustomerMaintenance";
     }
+
+    /**
+     * 转电销
+     */
+    public void toTele(){
+//    通过规则，转到电销
+    }
+
+    /**
+     * 话务人员：当前人员，所属组织同级 以及 下属组织的人员
+     */
+    /**
+     * 组内电销顾问查询
+     * @return
+     */
+    private List phoneTrafficUser(){
+        RoleQueryDTO query = new RoleQueryDTO();
+        query.setRoleCode(RoleCodeEnum.HWY.name());
+        UserInfoDTO user =  CommUtil.getCurLoginUser();
+        JSONResult<List<RoleInfoDTO>> roleJson = roleManagerFeignClient.qeuryRoleByName(query);
+        ArrayList resList = new ArrayList();
+        if (JSONResult.SUCCESS.equals(roleJson.getCode())) {
+            List<RoleInfoDTO> roleList = roleJson.getData();
+            if (null != roleList && roleList.size() > 0) {
+                RoleInfoDTO roleDto = roleList.get(0);
+                UserInfoPageParam param = new UserInfoPageParam();
+//                param.setRoleId(roleDto.getId());
+                param.setOrgId(user.getOrgId());
+                param.setPageSize(10000);
+                param.setPageNum(1);
+                JSONResult<PageBean<UserInfoDTO>> userListJson = userInfoFeignClient.list(param);
+                if (JSONResult.SUCCESS.equals(userListJson.getCode())) {
+                    PageBean<UserInfoDTO> pageList = userListJson.getData();
+                    List<UserInfoDTO> userList = pageList.getData();
+                    for(UserInfoDTO dto:userList){
+                        resList.add(dto.getId());
+                    }
+                }
+            }
+        }
+        return resList;
+    }
+
+    private List<UserInfoDTO> phTrafficList(){
+        RoleQueryDTO query = new RoleQueryDTO();
+        query.setRoleCode(RoleCodeEnum.HWY.name());
+        UserInfoDTO user =  CommUtil.getCurLoginUser();
+        JSONResult<List<RoleInfoDTO>> roleJson = roleManagerFeignClient.qeuryRoleByName(query);
+        List<UserInfoDTO> userList = new ArrayList();
+        if (JSONResult.SUCCESS.equals(roleJson.getCode())) {
+            List<RoleInfoDTO> roleList = roleJson.getData();
+            if (null != roleList && roleList.size() > 0) {
+                RoleInfoDTO roleDto = roleList.get(0);
+                UserInfoPageParam param = new UserInfoPageParam();
+//                param.setRoleId(roleDto.getId());  // 查询该组织下，该角色的全部员工。去掉就是查询全部该组织下的员工
+                param.setOrgId(user.getOrgId());
+                param.setPageSize(10000);
+                param.setPageNum(1);
+                JSONResult<PageBean<UserInfoDTO>> userListJson = userInfoFeignClient.list(param);
+                if (JSONResult.SUCCESS.equals(userListJson.getCode())) {
+                    PageBean<UserInfoDTO> pageList = userListJson.getData();
+                    userList = pageList.getData();
+                }
+            }
+        }
+        userList.add(user);
+        return userList;
+    }
+
+
+
 }

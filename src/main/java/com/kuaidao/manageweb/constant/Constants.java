@@ -42,6 +42,12 @@ public class Constants {
     public static String PROJECT_SHOPTYPE = "project_shopType";
     // 项目归属字典Code
     public static String PROJECT_ATTRIBUTIVE = "project_attributive";
+    // 广告位字典Code
+    public static String ADSENSE = "adsense";
+    // 媒介字典Code
+    public static String MEDIUM = "medium";
+    // 行业类别字典Code
+    public static String INDUSTRY_CATEGORY = "industryCategory";
     // 资源类别字典Code
     public static String CLUE_CATEGORY = "clueCategory";
     // 资源类型字典Code

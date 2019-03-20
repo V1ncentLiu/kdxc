@@ -310,12 +310,12 @@
 			border
                         @selection-change="handleSelectionChange">
 		<el-table-column type="index" width="55" label="序号" align="center">
-		</el-table-column> <el-table-column prop="name" label="姓名" align="center">
-		</el-table-column> <el-table-column prop="role" label="角色" align="center">
+		</el-table-column> <el-table-column prop="accountName" label="姓名" align="center">
+		</el-table-column> <el-table-column prop="roleName" label="角色" align="center">
 		</el-table-column> <el-table-column prop="callType" label="通话类型" align="center">
-		</el-table-column> <el-table-column prop="startTime" label="拨打时间" align="center">
+		</el-table-column> <el-table-column prop="startTime" label="拨打时间" :formatter="getStartTimeText" align="center">
 		</el-table-column> <el-table-column prop="callStatus" label="接通情况" align="center">
-		</el-table-column> <el-table-column prop="talkTime" label="接通时长" align="center">
+		</el-table-column> <el-table-column prop="talkTime" label="接通时长"  :formatter="getTalkTimeText" align="center">
 		</el-table-column> <el-table-column label="操作" align="center"> 
 		     <template slot-scope="scope" v-if="scope.row.talkTime >0 ">
               <div style="float:left" :id="scope.row.id" class="sound-trigger sound-trigger--type-default sound-trigger--type-click" @click="switchSoundBtn(scope.row.id,scope.row.recordFile,scope.row.callSource)">
@@ -715,6 +715,14 @@ var callRecord=[[${callRecord}]];//通话记录
        			this.substatus=false;
        		 }
        		},
+        	getStartTimeText(row, column, value, index){
+        		var valText="";
+        		if(value){
+        			valText =  moment.unix(value).format("YYYY-MM-DD HH:MM:SS");
+        		}
+        		return valText;
+        	},
+       		
             submitForm(form) {
        			var valid=true;
 	       	  	  this.$refs[form].validateField(["customerEmail","callTime",
@@ -1007,6 +1015,14 @@ var callRecord=[[${callRecord}]];//通话记录
                 this.formInline.nextVisitTime=rows[0].nextVisitTime;
                 isEdit=true;
             },
+    		//日期数据格式化方法
+    		dateFormat(row, column) {
+    			var date = row[column.property];
+               	if (date == undefined) {
+    	               return "";
+              	}
+               	return moment(date).format("YYYY-MM-DD HH:mm:ss");
+    		},
             onConfirmAdd(index ,row) { 
            	 this.$refs['LineRuleForm'].validate((valid) => {
                    if (valid) {
@@ -1291,6 +1307,29 @@ var callRecord=[[${callRecord}]];//通话记录
                  }).then(function(){
                  });
         	},
+            getTalkTimeText(row, column, value, index){
+        		var valText="";
+        		if(value){
+        			valText =  this.formatSeconds(value);
+        		}
+        		return valText;
+        	},
+             formatSeconds(s){
+        		var t="";
+                var min = Math.floor(s/60) % 60;
+                var sec = s % 60;
+               
+               if(min < 10){
+                	t += "0";
+                }
+                t += min + ":";
+               if(sec < 10){
+                	t += "0";
+               }
+                t+=sec;
+               // t += sec.toFixed(2);
+    		  return t;
+        	},
         	 downloadAudio(id,url,callSource){
         		if(callSource=='2'){
         			location.href=url;
@@ -1334,10 +1373,11 @@ var callRecord=[[${callRecord}]];//通话记录
                           type: 'success'
                         }); 
                   }else{
+                	  addCustomerVM.isShowBtn=false;
                 	  addCustomerVM.$message({
                           message: '当前客户不能保留',
                           type: 'warn'
-                        });  
+                       });  
                   }
                 }); 
             }
@@ -1394,8 +1434,8 @@ var callRecord=[[${callRecord}]];//通话记录
            } 
              if(base){
     	      if(null!=base.releaseTime&&base.releaseTime!=0){
-    		  this.isShowTip=true;
-    		  this.showTipInfo="客户"+base.releaseTime+"小时后即将释放到公有池";
+    		    this.isShowTip=true;
+    		   this.showTipInfo="客户"+base.releaseTime+"小时后即将释放到公有池";
     	     }
              if(null!=base.reserve&&base.reserve==0){
            	  this.isShowBtn=true;
@@ -1523,11 +1563,6 @@ var callRecord=[[${callRecord}]];//通话记录
           axios.post('/area/sysregion/querySysRegionByParam',param).then(function (response) {  
        	   addCustomerVM.provinceArr=response.data.data.data;
           });
-          
-          
-  
-         
-       
     	}
     })
 </script>

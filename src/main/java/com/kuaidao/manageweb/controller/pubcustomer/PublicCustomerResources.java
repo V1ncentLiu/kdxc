@@ -201,7 +201,7 @@ public class PublicCustomerResources {
         }
 
 //      权限相关
-        List<Long> dxzList = new ArrayList<Long>();
+     /*   List<Long> dxzList = new ArrayList<Long>();
         UserInfoDTO user =  CommUtil.getCurLoginUser();
         List<RoleInfoDTO> roleList = user.getRoleList();
         if(roleList!=null&&roleList.get(0)!=null) {
@@ -234,7 +234,7 @@ public class PublicCustomerResources {
                 dxzList.add(user.getOrgId());
             }
         }
-        dto.setOrgids(dxzList);
+        dto.setOrgids(dxzList);*/
 
         return publicCustomerFeignClient.queryListPage(dto);
     }
