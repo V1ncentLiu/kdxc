@@ -1,5 +1,6 @@
 package com.kuaidao.manageweb.feign.phonetraffic;
 
+import com.kuaidao.aggregation.dto.clue.AllocationClueReq;
 import com.kuaidao.aggregation.dto.paydetail.PayDetailInsertOrUpdateDTO;
 import com.kuaidao.aggregation.dto.paydetail.PayDetailReqDTO;
 import com.kuaidao.aggregation.dto.paydetail.PayDetailRespDTO;
@@ -19,12 +20,17 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.util.List;
 
-@FeignClient(name = "aggregation-service-ooo1", path = "/aggregation/phonetraffic", fallback = PhoneTrafficFeignClient.HystrixClientFallback.class)
+@FeignClient(name = "aggregation-service", path = "/aggregation/phonetraffic", fallback = PhoneTrafficFeignClient.HystrixClientFallback.class)
 public interface PhoneTrafficFeignClient {
 
 	@PostMapping("/queryPage")
-	@ResponseBody
 	public JSONResult<PageBean<PhoneTrafficRespDTO>> queryList(@RequestBody PhoneTrafficParamDTO dto);
+
+	@PostMapping("/allocationClue")
+    JSONResult allocationClue(AllocationClueReq allocationClueReq);
+
+	@PostMapping("/transferClue")
+	JSONResult transferClue(AllocationClueReq allocationClueReq);
 
 	@Component
 	static class HystrixClientFallback implements PhoneTrafficFeignClient {
@@ -39,7 +45,17 @@ public interface PhoneTrafficFeignClient {
 
 		@Override
 		public JSONResult<PageBean<PhoneTrafficRespDTO>> queryList(PhoneTrafficParamDTO dto) {
-			return fallBackError("话务管理");
+			return fallBackError("话务管理分页查询");
+		}
+
+		@Override
+		public JSONResult allocationClue(AllocationClueReq allocationClueReq) {
+			return fallBackError("话务管理-资源分配");
+		}
+
+		@Override
+		public JSONResult transferClue(AllocationClueReq allocationClueReq) {
+			return fallBackError("话务管理-资源转移");
 		}
 
 	}
