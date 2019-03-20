@@ -285,7 +285,8 @@ public class MyCustomerClueController {
 	 * @return
 	 */
 	@RequestMapping("/customerInfoReadOnly")
-	public String customerInfoReadOnly(HttpServletRequest request, @RequestParam String clueId, @RequestParam(required = false) String commonPool) {
+	public String customerInfoReadOnly(HttpServletRequest request, @RequestParam String clueId,
+			@RequestParam(required = false) String commonPool) {
 		CallRecordReqDTO call = new CallRecordReqDTO();
 		call.setClueId(clueId);
 		JSONResult<List<CallRecordRespDTO>> callRecord = callRecordFeign.listTmCallReacordByParamsNoPage(call);
@@ -361,7 +362,6 @@ public class MyCustomerClueController {
 				&& clueFileList.getData() != null) {
 			request.setAttribute("clueFileList", clueFileList.getData());
 		}
-
 
 		request.setAttribute("commonPool", commonPool);
 		return "clue/CustomerMaintenanceReadOnly";
@@ -485,6 +485,7 @@ public class MyCustomerClueController {
 		UserInfoDTO user = (UserInfoDTO) subject.getSession().getAttribute("user");
 		if (null != user) {
 			dto.setCreateUser(user.getId());
+			dto.setOrgId(user.getOrgId());
 		}
 		trackingFeignClient.saveTracking(dto);
 		TrackingReqDTO queryDto = new TrackingReqDTO();
@@ -614,6 +615,7 @@ public class MyCustomerClueController {
 		}
 		return myCustomerFeignClient.queryRepeatClue(dto);
 	}
+
 	/**
 	 * 重单申请查询重单数据
 	 * 
@@ -628,7 +630,7 @@ public class MyCustomerClueController {
 		return myCustomerFeignClient.queryRepeatClue(dto);
 	}
 
-/**
+	/**
 	 * 总裁办重单申请保存
 	 * 
 	 * @param request
@@ -641,30 +643,33 @@ public class MyCustomerClueController {
 
 		Subject subject = SecurityUtils.getSubject();
 		UserInfoDTO user = (UserInfoDTO) subject.getSession().getAttribute("user");
-//		if (null != user) {
-//			dto.setOrgId(user.getOrgId());
-//			dto.setUserId(user.getId());
-//		}
-//		if (null != dto.getRepeatUserId() && null !=dto.getApplyUserId()) {
-//			IdListLongReq idListLongReq = new IdListLongReq();
-//			List<Long> idList = new ArrayList<>();
-//			idList.add(dto.getRepeatUserId());
-//			idList.add(dto.getApplyUserId());
-//			idListLongReq.setIdList(idList);
-//			JSONResult<List<UserInfoDTO>> userInfo = userInfoFeignClient.listById(idListLongReq);
-//			if (userInfo != null && userInfo.SUCCESS.equals(userInfo.getCode()) && userInfo.getData() != null) {
-//				for (UserInfoDTO userInfoDTO : userInfo.getData()) {
-//					if(userInfoDTO.getId().longValue() == dto.getRepeatUserId()) {
-//						dto.setRepeatOrgId(userInfoDTO.getOrgId());
-//					}
-//					if(userInfoDTO.getId().longValue() == dto.getApplyUserId()) {
-//						dto.setApplyOrgId(userInfoDTO.getOrgId());
-//					}
-//				}
-//			}
-//		}
+		// if (null != user) {
+		// dto.setOrgId(user.getOrgId());
+		// dto.setUserId(user.getId());
+		// }
+		// if (null != dto.getRepeatUserId() && null !=dto.getApplyUserId()) {
+		// IdListLongReq idListLongReq = new IdListLongReq();
+		// List<Long> idList = new ArrayList<>();
+		// idList.add(dto.getRepeatUserId());
+		// idList.add(dto.getApplyUserId());
+		// idListLongReq.setIdList(idList);
+		// JSONResult<List<UserInfoDTO>> userInfo =
+		// userInfoFeignClient.listById(idListLongReq);
+		// if (userInfo != null && userInfo.SUCCESS.equals(userInfo.getCode())
+		// && userInfo.getData() != null) {
+		// for (UserInfoDTO userInfoDTO : userInfo.getData()) {
+		// if(userInfoDTO.getId().longValue() == dto.getRepeatUserId()) {
+		// dto.setRepeatOrgId(userInfoDTO.getOrgId());
+		// }
+		// if(userInfoDTO.getId().longValue() == dto.getApplyUserId()) {
+		// dto.setApplyOrgId(userInfoDTO.getOrgId());
+		// }
+		// }
+		// }
+		// }
 		return myCustomerFeignClient.saveRepeatClue(dto);
 	}
+
 	/**
 	 * 重单申请查询被重单数据
 	 * 
