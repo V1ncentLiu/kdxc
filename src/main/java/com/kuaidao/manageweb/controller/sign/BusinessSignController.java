@@ -202,9 +202,15 @@ public class BusinessSignController {
     @RequestMapping("/one")
     @ResponseBody
     public JSONResult<BusSignRespDTO> queryOne(@RequestBody IdEntityLong idEntityLong) throws Exception {
-        return businessSignFeignClient.queryOne(idEntityLong);
+        JSONResult<BusSignRespDTO> res = businessSignFeignClient.queryOne(idEntityLong);
+        if(JSONResult.SUCCESS.equals(res.getCode())){
+            BusSignRespDTO data = res.getData();
+            String linkPhone = linkPhone(idEntityLong);
+            data.setPhone(linkPhone);
+            res.setData(data);
+        }
+        return res;
     }
-
 
     /**
      *  签约单，新增时候回显信息
@@ -221,17 +227,8 @@ public class BusinessSignController {
 //      最新一次的邀约
         JSONResult<Map> mapJSONResult = visitRecordFeignClient.echoAppoinment(idEntityLong);
 //      获取客户信息
+        String linkPhone = linkPhone(idEntityLong);
 
-        List<Long> list = new ArrayList<>();
-        list.add(idEntityLong.getId());
-        IdListLongReq idListLongReq = new IdListLongReq();
-        idListLongReq.setIdList(list);
-        JSONResult<List<CustomerClueDTO>> listJSONResult = clueCustomerFeignClient.findcustomersByClueIds(idListLongReq);
-        if(JSONResult.SUCCESS.equals(listJSONResult.getCode())){
-            List<CustomerClueDTO> data = listJSONResult.getData();
-            CustomerClueDTO customerClueDTO = data.get(0);
-            customerClueDTO.getLinkPhone();
-        }
 //      查询最新一次到访
         JSONResult<BusVisitRecordRespDTO> maxNewOne = visitRecordFeignClient.findMaxNewOne(idEntityLong);
         Boolean flag = true;
@@ -245,6 +242,7 @@ public class BusinessSignController {
                 signDTO.setSignDictrict(data.getSignDistrict());
                 signDTO.setSignShopType(data.getVistitStoreType());
                 signDTO.setCustomerName(data.getCustomerName());
+                signDTO.setPhone(linkPhone);
                 signDTO.setSignType(1);
                 signDTO.setPayType("1");
                 flag = false;
@@ -264,7 +262,7 @@ public class BusinessSignController {
                     signDTO.setSignCity((String)data.get("signCity"));
                     signDTO.setSignDictrict((String)data.get("signDistrict"));
                     signDTO.setCustomerName((String)data.get("cusName"));
-                    signDTO.setPhone((String)data.get("phone"));
+                    signDTO.setPhone(linkPhone);
                     signDTO.setSignType(1);
                     signDTO.setSignShopType("");
                     signDTO.setPayType("1");
@@ -275,6 +273,25 @@ public class BusinessSignController {
         signDTO.setRebutTime(null);
         return new JSONResult<BusSignRespDTO>().success(signDTO);
     }
+
+    /**
+     * 获取商务客户详情电话
+     */
+    private String linkPhone(IdEntityLong idEntityLong){
+        List<Long> list = new ArrayList<>();
+        list.add(idEntityLong.getId());
+        IdListLongReq idListLongReq = new IdListLongReq();
+        idListLongReq.setIdList(list);
+        JSONResult<List<CustomerClueDTO>> listJSONResult = clueCustomerFeignClient.findcustomersByClueIds(idListLongReq);
+        String linkPhone = "";
+        if(JSONResult.SUCCESS.equals(listJSONResult.getCode())){
+            List<CustomerClueDTO> data = listJSONResult.getData();
+            CustomerClueDTO customerClueDTO = data.get(0);
+            linkPhone = customerClueDTO.getLinkPhone();
+        }
+        return linkPhone;
+    }
+
 
     /**
      *  跳转到 到访记录明细页面
