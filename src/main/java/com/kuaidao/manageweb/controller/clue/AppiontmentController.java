@@ -1,6 +1,4 @@
-/**
- * 
- */
+
 package com.kuaidao.manageweb.controller.clue;
 
 import java.util.List;
@@ -17,7 +15,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
-import com.kuaidao.aggregation.dto.TeleConsoleReqDTO;
 import com.kuaidao.aggregation.dto.clue.AppiontmentCancelDTO;
 import com.kuaidao.aggregation.dto.clue.ClueAppiontmentDTO;
 import com.kuaidao.aggregation.dto.clue.ClueAppiontmentPageParam;

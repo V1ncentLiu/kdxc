@@ -122,7 +122,7 @@
                     border
                     :data="detailList"  >
                     <el-table-column align="center" type="index"  label="序号" width="55"></el-table-column>
-                    <el-table-column align="center" prop="payType" label="付款方式"></el-table-column>
+                    <el-table-column align="center" prop="payType" label="付款方式" :formatter="paytype"></el-table-column>
                     <el-table-column align="center" prop="amountPerformance" label="业绩金额"></el-table-column>
                     <el-table-column align="center" prop="userNames" label="重单人员"></el-table-column>
                     <el-table-column align="center" prop="repeatRatios" label="分配比例"></el-table-column>
@@ -384,6 +384,19 @@
              addCent(value){
             	  return value.repeatRatio+"%";
               },
+              paytype(row, column, cellValue, index) {
+            	  var text="";
+                  if(cellValue=="1"){
+                	  text="定金"
+                  }else if(cellValue=="2"){
+                	  text="全款"
+                  }else if(cellValue=="3"){
+                	  text="追加定金"
+                  }else if(cellValue=="4"){
+                	  text="尾款"
+                  }
+                  return text;
+              },
               repeatPhonesClick(row) {//重复手机号按钮点击
                   console.log(row);
                   this.repeatPhonesDialog=true;
@@ -417,7 +430,8 @@
                                 	  orgVM.repeatDetaildialogFormVisible = true;
                                 	  orgVM.detailList = result.payDetailDTOs;
                                   }else{
-                                	  
+                                	  orgVM.payDetailList = result.clueRepetitionDTOs;
+                                	  orgVM.repeatPayDetaildialogFormVisible= true;
                                   }
                                   
                             })  .catch(function (error) {

@@ -7,12 +7,12 @@ import org.springframework.cloud.netflix.feign.FeignClient;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import com.kuaidao.aggregation.dto.TeleConsoleReqDTO;
 import com.kuaidao.aggregation.dto.clue.AppiontmentCancelDTO;
 import com.kuaidao.aggregation.dto.clue.ClueAppiontmentDTO;
 import com.kuaidao.aggregation.dto.clue.ClueAppiontmentPageParam;
 import com.kuaidao.aggregation.dto.clue.ClueAppiontmentReq;
 import com.kuaidao.aggregation.dto.clue.ClueRepeatPhoneDTO;
+import com.kuaidao.aggregation.dto.console.TeleConsoleReqDTO;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.IdEntityLong;
 import com.kuaidao.common.entity.IdListLongReq;
@@ -108,6 +108,15 @@ public interface AppiontmentFeignClient {
 	@PostMapping("/countTodayAppiontmentNum")
 	 public JSONResult<Integer> countTodayAppiontmentNum(@RequestBody TeleConsoleReqDTO teleConsoleReqDTO);
 
+	   /**
+     * 电销总监 预计明日来访数
+     * @param reqDTO
+     * @return
+     */
+	@PostMapping("/countTeleDirecotorTomorrowArriveTime")
+    public JSONResult<Integer> countTeleDirecotorTomorrowArriveTime(TeleConsoleReqDTO reqDTO);
+
+	
 	@Component
 	static class HystrixClientFallback implements AppiontmentFeignClient {
 
@@ -165,6 +174,11 @@ public interface AppiontmentFeignClient {
         @Override
         public JSONResult<Integer> countTodayAppiontmentNum(TeleConsoleReqDTO teleConsoleReqDTO) {
             return fallBackError("统计邀约单数量");
+        }
+
+        @Override
+        public JSONResult<Integer> countTeleDirecotorTomorrowArriveTime(TeleConsoleReqDTO reqDTO) {
+            return fallBackError("预计明日来访数");
         }
 
 	}
