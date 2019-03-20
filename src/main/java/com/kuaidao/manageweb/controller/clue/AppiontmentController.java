@@ -1,6 +1,4 @@
-/**
- * 
- */
+
 package com.kuaidao.manageweb.controller.clue;
 
 import java.util.List;
@@ -22,7 +20,6 @@ import com.kuaidao.aggregation.dto.clue.ClueAppiontmentDTO;
 import com.kuaidao.aggregation.dto.clue.ClueAppiontmentPageParam;
 import com.kuaidao.aggregation.dto.clue.ClueAppiontmentReq;
 import com.kuaidao.aggregation.dto.clue.ClueRepeatPhoneDTO;
-import com.kuaidao.aggregation.dto.console.TeleConsoleReqDTO;
 import com.kuaidao.aggregation.dto.project.ProjectInfoDTO;
 import com.kuaidao.aggregation.dto.project.ProjectInfoPageParam;
 import com.kuaidao.common.constant.OrgTypeConstant;
@@ -109,6 +106,7 @@ public class AppiontmentController {
         JSONResult<List<ProjectInfoDTO>> listNoPage =
                 projectInfoFeignClient.listNoPage(new ProjectInfoPageParam());
         request.setAttribute("projectList", listNoPage.getData());
+
         // 根据角色查询页面字段
         QueryFieldByRoleAndMenuReq queryFieldByRoleAndMenuReq = new QueryFieldByRoleAndMenuReq();
         queryFieldByRoleAndMenuReq.setMenuCode("aggregation:appiontmentManager");
@@ -116,6 +114,7 @@ public class AppiontmentController {
         JSONResult<List<CustomFieldQueryDTO>> queryFieldByRoleAndMenu =
                 customFieldFeignClient.queryFieldByRoleAndMenu(queryFieldByRoleAndMenuReq);
         request.setAttribute("fieldList", queryFieldByRoleAndMenu.getData());
+
         // 根据用户查询页面字段
         QueryFieldByUserAndMenuReq queryFieldByUserAndMenuReq = new QueryFieldByUserAndMenuReq();
         queryFieldByUserAndMenuReq.setId(user.getId());

@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head th:replace="_header_include::frag(~{::title},~{::style},~{})">
+    <title>废弃池</title>
+    <style>
+        button a{color:#fff!important;}
+        .formItem,.formItem .el-form-item__content{width:100%}
+    </style>
+</head>
+<body>
+
+<div id="mainDiv"  class="mainPadding">
+    <template>
+        <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
+            <el-breadcrumb-item>Home</el-breadcrumb-item>
+            <el-breadcrumb-item>电销中心</el-breadcrumb-item>
+            <el-breadcrumb-item><a href="JavaScript:void(0)">废弃池</a></el-breadcrumb-item>
+        </el-breadcrumb>
+        <el-row class="marginB10">
+            <el-button type="text" @click="dialogChooseList = true"><i class="el-icon-menu"></i>选择列</el-button>
+        </el-row>
+        <el-row class="marginB10 greybg padding20" style="padding-bottom: 0;" >
+            <el-form :inline="true" :model="queryForm" class="demo-form-inline" ref="queryForm" >
+                <el-form-item label="创建时间:">
+                    <el-date-picker
+                            style="width: 100%;"
+                            v-model="queryForm.createTime1"
+                            type="datetime"
+                            placeholder="选择日期时间">
+                    </el-date-picker>
+                </el-form-item>
+                <el-form-item label="——">
+                    <el-date-picker
+                            style="width: 100%;"
+                            v-model="queryForm.createTime2"
+                            type="datetime"
+                            placeholder="选择日期时间">
+                    </el-date-picker>
+                </el-form-item>
+                <el-form-item label="">
+                    <el-select v-model="queryForm.source" placeholder="媒介" clearable>
+                        <el-option
+                                v-for="item in mediumArr"
+                                :key="item.value"
+                                :label="item.name"
+                                :value="item.value">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="">
+                    <el-select v-model="queryForm.zyzyId" placeholder="资源专员" clearable>
+                        <el-option
+                                v-for="item in zyzyArr"
+                                :key="item.id"
+                                :label="item.name"
+                                :value="item.id">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="">
+                    <el-select v-model="queryForm.abandonReason" placeholder="废弃原因" clearable>
+                        <el-option
+                                v-for="item in abandonReasonArr"
+                                :key="item.value"
+                                :label="item.name"
+                                :value="item.value">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="">
+                    <el-select v-model="queryForm.category" placeholder="资源类别" clearable>
+                        <el-option
+                                v-for="item in categoryArr"
+                                :key="item.value"
+                                :label="item.name"
+                                :value="item.value">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="">
+                    <el-select v-model="queryForm.type" placeholder="资源类型" clearable>
+                        <el-option
+                                v-for="item in typeArr"
+                                :key="item.value"
+                                :label="item.name"
+                                :value="item.value">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="">
+                    <el-select v-model="queryForm.projectId" placeholder="资源项目" clearable>
+                        <el-option
+                                v-for="item in proArr"
+                                :key="item.id"
+                                :label="item.projectName"
+                                :value="item.id">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="">
+                    <el-input v-model="queryForm.phone" placeholder="手机号" maxLength="11" @keyup.native="number"></el-input>
+                </el-form-item>
+                <el-form-item label="">
+                    <el-input v-model="queryForm.cusName" placeholder="客户姓名" maxLength="11"></el-input>
+                </el-form-item>
+                <el-button type="primary" @click="initList()">搜索</el-button>
+            </el-form>
+        </el-row>
+
+        <!--<el-table :data="tableData" border style="width: 100%" tooltip-effect="light"  ref="multipleTable">-->
+            <!--<el-table-column type="index" width="55"  label="序号"  prop="clueid"> </el-table-column>-->
+            <!--<el-table-column prop="createTime" label="创建时间"  align="center"  width="170"></el-table-column>-->
+            <!--<el-table-column prop="projectName" label="资源项目" align="center"  width="170"></el-table-column>-->
+            <!--<el-table-column prop="searchWord" label="搜索词"  align="center"  width="170"></el-table-column>-->
+            <!--<el-table-column prop="sourceTypeName" label="广告位" align="center"  width="170"></el-table-column>-->
+            <!--<el-table-column prop="sourceName" label="媒介" align="center"  width="170"></el-table-column>-->
+            <!--<el-table-column prop="typeName" label="资源类型" align="center" width="170"></el-table-column>-->
+            <!--<el-table-column prop="categoryName" label="资源类别" align="center"   width="170"></el-table-column>-->
+            <!--<el-table-column prop="industryCategoryName" label="行业类别" align="center"   width="170"></el-table-column>-->
+            <!--<el-table-column prop="cusName" label="客户姓名" align="center"   width="170"></el-table-column>-->
+            <!--<el-table-column prop="phone" label="手机" align="center"  width="170"></el-table-column>-->
+            <!--<el-table-column prop="messageTime" label="留言时间" align="center"  width="170"></el-table-column>-->
+            <!--<el-table-column prop="messagePoint" label="留言重点"  align="center"  width="170"></el-table-column>-->
+            <!--<el-table-column prop="qq" label="QQ"  align="center"  width="170"></el-table-column>-->
+            <!--<el-table-column prop="email" label="邮箱" align="center" width="170"></el-table-column>-->
+            <!--<el-table-column prop="address" label="地址" align="center"  width="170"></el-table-column>-->
+            <!--<el-table-column prop="wechat" label="微信" align="center"  width="170"></el-table-column>-->
+            <!--<el-table-column prop="zyzyName" label="资源专员" align="center"  width="170"></el-table-column>-->
+            <!--<el-table-column prop="releaseReason" label="废弃原因" align="center"  width="170">-->
+                <!--<template slot-scope="scope">-->
+                    <!--<el-button @click="openReleaseUserInfo(scope.row)" type="text" size="small">-->
+                        <!--{{scope.row.releaseReason}}<br>-->
+                        <!--查看释放人员-->
+                    <!--</el-button>-->
+                <!--</template>-->
+            <!--</el-table-column>-->
+            <!--<el-table-column prop="releaseReasonName" label="废弃时间" align="center"  width="170"></el-table-column>-->
+        <!--</el-table>-->
+    <el-table  ref="multipleTable" tooltip-effect="dark" border @selection-change="handleSelectionChange"
+               style="width: 100%"  :data="tableData" >
+        <el-table-column align="center" type="index" label="序号" width="50"></el-table-column>
+        <el-table-column align="center" :key="index" :prop="item.fieldCode" :label="item.displayName" :width="item.width"
+                         v-for="(item,key,index) in tableColums" v-if="item.fieldCode == 'abandonReason'">
+                <template slot-scope="scope">
+                    <el-button @click="openReleaseUserInfo(scope.row)" type="text" size="small">
+                    {{scope.row.abandonReason}}<br>
+                    查看释放人员
+                    </el-button>
+                </template>
+        </el-table-column>
+        <el-table-column align="center" :key="index" :prop="item.fieldCode" :label="item.displayName" :width="item.width" v-else>
+        </el-table-column>
+    </el-table>
+    <table-pagination :pager="pager"  @change="initList"></table-pagination>
+    <!-- 释放人员信息 -->
+    <el-dialog title="释放人员信息" :visible.sync="dialogFormVisible">
+        <el-table ref="dialogTableData" :data="dialogTableData" tooltip-effect="dark" border>
+            <el-table-column align="center" prop="teleCompanyName" label="电销分公司"></el-table-column>
+            <el-table-column align="center" prop="teleManagerName" label="电销总经理"></el-table-column>
+            <el-table-column align="center" prop="teleDeptName" label="电销事业部"></el-table-column>
+            <el-table-column align="center" prop="teleCeoName" label="电销副总"></el-table-column>
+            <el-table-column align="center" prop="teleGorupName" label="电销组"></el-table-column>
+            <el-table-column align="center" prop="teleDirectorName" label="电销总监"></el-table-column>
+            <el-table-column align="center" prop="teleSaleName" label="电销顾问"></el-table-column>
+        </el-table>
+    </el-dialog>
+    <!-- 选择列 -->
+        <!-- dialog -->
+        <el-dialog title="自定义列" :visible.sync="dialogChooseList">
+            <el-form :model="form">
+
+                <el-form-item label="列名" prop="type">
+                    <el-checkbox-group v-model="form.type">
+                        <el-checkbox :label="item.sortNum+'_'+item.fieldCode+'_'+item.displayName+'_'+item.id"  name="type" :key="item.fieldCode"  v-for="(item,index) in  allTableColums ">
+                            {{item.displayName}}
+                        </el-checkbox>
+
+                    </el-checkbox-group>
+                </el-form-item>
+
+            </el-form>
+
+            <div slot="footer" class="dialog-footer">
+                <el-button @click="dialogChooseList = false">取 消</el-button>
+                <el-button type="primary" @click="confirmColumn">确 定</el-button>
+            </div>
+        </el-dialog>
+    </template>
+</div>
+
+<!-- import common js-->
+<div th:include="_footer_include :: #jsLib"></div>
+<!--<script th:src="@{/js/excel/xlsx.min.js}" src="../static/js/excel/xlsx.min.js"></script>-->
+<script th:inline="javascript">
+    <!--电销组-->
+    var proSelect = [[${proSelect}]]
+    var zyzyList = [[${zyzyList}]]
+    var fieldList=[[${fieldList}]];//自定义字段
+    var userFieldList=[[${userFieldList}]];//用户自定义字段
+    // 查询 模块
+    var mainDivVM = new Vue({
+        el: '#mainDiv',
+        data: {
+            dialogFormVisible: false,
+            dialogChooseList: false,
+            multipleSelection: [],//选择行
+            allTableColums:[],//自定义列
+            tableColums:[],
+            tableData:[],
+            categoryArr:[],
+            typeArr:[],
+            mediumArr:[],
+            zyzyArr:zyzyList,
+            proArr:proSelect,
+            abandonReasonArr:[{value:"1",name:"重复线索"},{value:"2",name:"空号无效释放"},{value:"3",name:"全部"}],
+            queryForm:{
+                starTime:'',
+                endTime:'',
+                medium:'',
+                resourcePerson:'',
+                abandonReason:'',
+                resourceType:'',
+                resourceStyle:'',
+                resourceProject:'',
+                phone:'',
+                customerName:''
+            },
+            dialogTableData:[],
+            form: {
+                type: [],
+            },
+            pager:{
+                total: 0,
+                currentPage: 1,
+                pageSize: 20,
+            }
+        },
+        methods: {
+
+            handleSelectionChange(val) {//选择节点的事件
+                console.log(val)
+                this.multipleSelection = val;
+            },
+            searchTable() {
+                var starTime = this.searchform.starTime;
+                var endTime = this.searchform.endTime;
+                if (endTime) {
+                    if (starTime > endTime) {
+                        this.$message({
+                            message: '开始时间不能大于结束时间',
+                            type: 'warning'
+                        });
+                        return;
+                    }
+                }
+            },
+            confirmColumn(){
+                //处理用户选择的列
+                console.info(this.form.type);
+                var customerShowColun = [];
+                var customerColumn = this.form.type;
+                if(customerColumn.length==0){
+                    this.$message({
+                        message: '请选择列',
+                        type: 'warning'
+                    });
+                    return;
+                }
+                this.dialogChooseList = false;
+                customerColumn.sort(this.sortNumber);//对选择的列排序
+                var idList=[];
+                for(var i=0;i<customerColumn.length;i++){
+                    var curItem = customerColumn[i];
+                    var itemArr = curItem.split("_");
+                    var obj = {};
+                    obj.fieldCode=itemArr[1];
+                    obj.displayName=itemArr[2];
+                    customerShowColun.push(obj);
+                    idList.push(itemArr[3])
+                }
+                this.tableColums = customerShowColun;
+                var param ={};
+                param.fieldIdList = idList;
+                param.menuCode = "aggregation:abandonPool";
+                if(idList.length!=0){
+                    axios.post('/customfield/customField/saveUserField', param)
+                        .then(function (response) {
+                        }).catch(function (error) {
+                            console.log(error);
+                        });
+                }
+            },
+            initColumn(){
+                //初始化table 列 和 用户自定义列
+                this.allTableColums = fieldList;
+                if(userFieldList.length!=0){
+                    var type=[];
+                    for(var i=0;i<userFieldList.length;i++){
+                        type.push(userFieldList[i].sortNum+'_'+userFieldList[i].fieldCode+'_'+userFieldList[i].displayName+'_'+userFieldList[i].fieldId)
+                    }
+                    this.form.type = type;
+                    this.confirmColumn();
+                }else{
+                    this.tableColums = fieldList;
+                }
+
+            },
+            sortNumber(a,b) {
+                //对数组中元素，按照数字 从小到大 排序
+                return a.split("_")[0] - b.split("_")[0];
+            },
+            openReleaseUserInfo(row){
+                this.dialogTableData = [row];
+                console.log(row)
+                this.dialogFormVisible=true
+            },
+            resetForm(formName) {
+                if( mainDivVM.$refs[formName]) {
+                    mainDivVM.$refs[formName].resetFields();
+                }
+            },
+            initColumn(){
+                //初始化table 列 和 用户自定义列
+                this.allTableColums = fieldList;
+                console.log("....................")
+                console.log( this.allTableColums)
+                if(userFieldList.length!=0){
+                    var type=[];
+                    for(var i=0;i<userFieldList.length;i++){
+                        type.push(userFieldList[i].sortNum+'_'+userFieldList[i].fieldCode+'_'+userFieldList[i].displayName+'_'+userFieldList[i].fieldId)
+                    }
+                    this.form.type = type;
+                    this.confirmColumn();
+                }else{
+                    this.tableColums = fieldList;
+                }
+
+            },
+            initList(){
+                var param = this.queryForm;
+                param.pageSize = this.pager.pageSize;
+                param.pageNum =  this.pager.currentPage;
+                axios.post('/abandonsource/queryPage',param).then(function (response) {
+                    if(null===response||response.data==null||response.data.code!='0'){
+                        if(response.data.code!='0'){
+                            mainDivVM.$message({message: response.data.msg, type: 'warning'});
+                        }
+                        return false;
+                    }else{
+                        mainDivVM.tableData =response.data.data.data;
+                        mainDivVM.pager.currentPage= response.data.data.currentPage;
+                        mainDivVM.pager.total= response.data.data.total;
+                        mainDivVM.pager.pageSize =  response.data.data.pageSize;
+                    }
+                })
+            },
+        },
+        created(){
+            this.initList();
+            this.initColumn()
+            //初始资源类别数据
+            var  param={};
+            param.groupCode="clueCategory";
+            axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {
+                console.log(response.data.data)
+                mainDivVM.categoryArr=response.data.data;
+            });
+            //初始化资源类型数据
+            param={};
+            param.groupCode="clueType";
+            axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {
+                console.log(response.data.data)
+                mainDivVM.typeArr=response.data.data;
+            });
+
+            //初始化媒介数据
+            param={};
+            param.groupCode="medium";
+            axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {
+                console.log(response.data.data)
+                mainDivVM.mediumArr=response.data.data;
+            });
+
+        }
+    });
+
+</script>
+</body>
+</html>

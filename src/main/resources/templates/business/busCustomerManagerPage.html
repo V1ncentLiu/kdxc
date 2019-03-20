@@ -22,7 +22,9 @@
     		<shiro:hasPermission name="business:busCustomerManager:allocation">
 		        <el-button type="success" @click="toTransferClue">外调经理</el-button>
 		    </shiro:hasPermission>
+		    <shiro:hasPermission name="business:busCustomerManager:cancelVisit">
 		         <el-button type="success" @click="notVisit">标记未到访</el-button>
+		    </shiro:hasPermission>
 	</el-row>
 	<el-form :inline="true" :model="searchForm" class="demo-form-inline" ref="searchForm"> 
 	    <el-row class="greybg padding20" style="padding-bottom: 0;">
@@ -673,7 +675,7 @@ var customerVM = new Vue({
                           axios.post("/aggregation/businessMyCustomer/notVisit", param)
                               .then(function (response) {
                                   if (response.data.code == 0) {
-                                      mainDivVM.$message({type: 'success', message: '标记成功!',duration:2000,onClose:function(){
+                                	   customerVM.$message({type: 'success', message: '标记成功!',duration:2000,onClose:function(){
                                     	  customerVM.pager.pageNum = 1
                                     	  customerVM.searchTable();
                                     	  customerVM.notVisitFlagDialogVisible = false;
@@ -1125,11 +1127,11 @@ var customerVM = new Vue({
             	  var sortField="";
             	  var sortType="";
                   if (column.prop === 'appiontmentCreateTime') {
-                	  sortField="a.createTime";
+                	  sortField="a.create_Time";
                   } else if (column.prop === 'reserveTime') {
-                	  sortField="a.reserveTime";
+                	  sortField="a.reserve_Time";
                   } else if (column.prop === 'allocateTime') {
-                	  sortField="a.allocateTime";
+                	  sortField="a.allocate_Time";
                   }
                   if (column.order === 'descending') {
                   	sortType="desc";

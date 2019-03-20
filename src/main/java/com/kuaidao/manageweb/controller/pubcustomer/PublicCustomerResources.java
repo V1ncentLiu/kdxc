@@ -10,6 +10,7 @@ import com.kuaidao.common.entity.IdEntity;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.manageweb.config.LogRecord;
+import com.kuaidao.manageweb.constant.Constants;
 import com.kuaidao.manageweb.constant.MenuEnum;
 import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
 import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
@@ -132,53 +133,41 @@ public class PublicCustomerResources {
         UserInfoDTO user =  CommUtil.getCurLoginUser();
         List<RoleInfoDTO> roleList = user.getRoleList();
         if(roleList!=null&&roleList.get(0)!=null) {
-            if (RoleCodeEnum.GLY.name().equals(roleList.get(0).getRoleCode())) {
-                //管理员:查看全部电销组
-                OrganizationQueryDTO dto = new OrganizationQueryDTO();
-                dto.setSystemCode(SystemCodeConstant.HUI_JU);
-                dto.setOrgType(OrgTypeConstant.DXZ);
-                JSONResult<List<OrganizationRespDTO>> dzList = organizationFeignClient.queryOrgByParam(dto);
-                dxzList = dzList.getData();
-                for(OrganizationRespDTO organizationRespDTO:dzList.getData()){
-                    dxzIdsList.add(organizationRespDTO.getId());
-                }
-                dxcygwList = dxcygws(dxzIdsList);
-                dxzjsList = dxzjs(dxzIdsList);
-            }else if(RoleCodeEnum.DXFZ.name().equals(roleList.get(0).getRoleCode())){
-                //电销副总:查看事业部下的全部电销组
-                OrganizationQueryDTO orgDto = new OrganizationQueryDTO();
-                orgDto.setParentId(user.getOrgId());
-                orgDto.setSystemCode(SystemCodeConstant.HUI_JU);
-                orgDto.setOrgType(OrgTypeConstant.DXZ);
-                JSONResult<List<OrganizationDTO>> dzList = organizationFeignClient.listDescenDantByParentId(orgDto);
-                dxzList = dzList.getData();
-                for(OrganizationDTO organizationDTO:dzList.getData()){
-                    dxzIdsList.add(organizationDTO.getId());
-                }
-                dxcygwList = dxcygws(dxzIdsList);
-                dxzjsList = dxzjs(dxzIdsList);
-            }else  if(RoleCodeEnum.DXZJ.name().equals(roleList.get(0).getRoleCode())){
-                //电销总监:查看所在电销组
-                OrganizationQueryDTO dto = new OrganizationQueryDTO();
-                dto.setSystemCode(SystemCodeConstant.HUI_JU);
-                dto.setOrgType(OrgTypeConstant.DXZ);
-                dto.setId(user.getOrgId());
-                JSONResult<List<OrganizationRespDTO>> dzList = organizationFeignClient.queryOrgByParam(dto);
-                dxzList = dzList.getData();
-                dxzIdsList.add(user.getOrgId());
-                dxcygwList = dxcygws(dxzIdsList);
-//                dxzjsList = dxzjs(dxzIdsList);
+            //修改成共有池后，对数据全选没有限制
+            OrganizationQueryDTO dto = new OrganizationQueryDTO();
+            dto.setSystemCode(SystemCodeConstant.HUI_JU);
+            dto.setOrgType(OrgTypeConstant.DXZ);
+            JSONResult<List<OrganizationRespDTO>> dzList = organizationFeignClient.queryOrgByParam(dto);
+            dxzList = dzList.getData();
+            for(OrganizationRespDTO organizationRespDTO:dzList.getData()){
+                dxzIdsList.add(organizationRespDTO.getId());
             }
-//          添加一个对电销创业顾问的筛选
+            dxcygwList = dxcygws(dxzIdsList);
+            dxzjsList = dxzjs(dxzIdsList);
         }
-
+        // 查询字典释放原因集合
+        request.setAttribute("releaseReasonList", getDictionaryByCode(Constants.RELEASE_REASON));
         request.setAttribute("dzList", dxzList);
         request.setAttribute("dxgwList",dxcygwList);
         request.setAttribute("dxzjList", dxzjsList);
 
         return "pubcustomer/publicCustomer";
     }
-
+    /**
+     * 查询字典表
+     *
+     * @param code
+     * @return
+     */
+    private List<DictionaryItemRespDTO> getDictionaryByCode(String code) {
+        JSONResult<List<DictionaryItemRespDTO>> queryDicItemsByGroupCode =
+                dictionaryItemFeignClient.queryDicItemsByGroupCode(code);
+        if (queryDicItemsByGroupCode != null
+                && JSONResult.SUCCESS.equals(queryDicItemsByGroupCode.getCode())) {
+            return queryDicItemsByGroupCode.getData();
+        }
+        return null;
+    }
     @PostMapping("/queryPage")
     @ResponseBody
     public JSONResult<PageBean<PublicCustomerResourcesRespDTO>> queryListPage(@RequestBody ClueQueryParamDTO dto){
@@ -199,43 +188,6 @@ public class PublicCustomerResources {
                 return new JSONResult().fail("-1","释放时间，开始时间大于结束时间!");
             }
         }
-
-//      权限相关
-        List<Long> dxzList = new ArrayList<Long>();
-        UserInfoDTO user =  CommUtil.getCurLoginUser();
-        List<RoleInfoDTO> roleList = user.getRoleList();
-        if(roleList!=null&&roleList.get(0)!=null) {
-            if (RoleCodeEnum.GLY.name().equals(roleList.get(0).getRoleCode())) {
-                //管理员:查看全部电销组
-                OrganizationQueryDTO orgDto = new OrganizationQueryDTO();
-                orgDto.setSystemCode(SystemCodeConstant.HUI_JU);
-                orgDto.setOrgType(OrgTypeConstant.DXZ);
-                JSONResult<List<OrganizationRespDTO>> dzList = organizationFeignClient.queryOrgByParam(orgDto);
-                List<OrganizationRespDTO> datas = dzList.getData();
-                for(OrganizationRespDTO organizationRespDTO : datas){
-                    dxzList.add(organizationRespDTO.getId());
-                }
-
-            }else if(RoleCodeEnum.DXFZ.name().equals(roleList.get(0).getRoleCode())){
-                //电销副总:查看事业部下的全部电销组
-                OrganizationQueryDTO orgDto = new OrganizationQueryDTO();
-                orgDto.setParentId(user.getOrgId());
-                orgDto.setSystemCode(SystemCodeConstant.HUI_JU);
-                orgDto.setOrgType(OrgTypeConstant.DXZ);
-                JSONResult<List<OrganizationDTO>> dzList = organizationFeignClient.listDescenDantByParentId(orgDto);
-                List<OrganizationDTO> datas = dzList.getData();
-                for(OrganizationDTO organizationDTO : datas){
-                    dxzList.add(organizationDTO.getId());
-                }
-            }else  if(RoleCodeEnum.DXZJ.name().equals(roleList.get(0).getRoleCode())){
-                //电销总监:查看所在电销组
-                dxzList.add(user.getOrgId());
-            }else{
-                dxzList.add(user.getOrgId());
-            }
-        }
-        dto.setOrgids(dxzList);
-
         return publicCustomerFeignClient.queryListPage(dto);
     }
 
