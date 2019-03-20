@@ -23,6 +23,7 @@
             <el-button type="success" @click="openassignrDig">分配资源</el-button>
             <el-button type="success" @click="opentransferForm">转移资源</el-button>
             <el-button type="success" @click="editClue">编辑资源</el-button>
+            <!--<el-button type="success" @click="releaseClue">释放资源</el-button>-->
     </el-row>
     <el-row class="marginB10 greybg padding20" style="padding-bottom: 0">        
         <el-form :inline="true" :model="form" ref="form">
@@ -39,20 +40,20 @@
             <el-form-item label="">
                 <el-select v-model="form.operatorId" placeholder="话务人员" style="width: 100%;" clearable >
                     <el-option
-                            v-for="item in dealStatusArr"
-                            :key="item.value"
-                            :label="item.label"
-                            :value="item.value">
+                            v-for="item in userArr"
+                            :key="item.id"
+                            :label="item.name"
+                            :value="item.id">
                     </el-option>
                 </el-select>
             </el-form-item>
             <el-form-item label="">
                 <el-select v-model="form.projectId" placeholder="资源项目" style="width: 100%;" clearable >
                     <el-option
-                            v-for="item in dealStatusArr"
-                            :key="item.value"
-                            :label="item.label"
-                            :value="item.value">
+                            v-for="item in proArr"
+                            :key="item.id"
+                            :label="item.projectName"
+                            :value="item.id">
                     </el-option>
                 </el-select>
             </el-form-item>
@@ -61,7 +62,7 @@
                     <el-option
                             v-for="item in mediumArr"
                             :key="item.value"
-                            :label="item.label"
+                            :label="item.name"
                             :value="item.value">
                     </el-option>
                 </el-select>
@@ -69,9 +70,9 @@
             <el-form-item label="">
                 <el-select v-model="form.cusStatus" placeholder="客户状态" style="width: 100%;" clearable >
                     <el-option
-                            v-for="item in mediumArr"
+                            v-for="item in cusStatusArr"
                             :key="item.value"
-                            :label="item.label"
+                            :label="item.name"
                             :value="item.value">
                     </el-option>
                 </el-select>
@@ -209,7 +210,7 @@
                 :label-width="formLabelWidth">
               <el-select v-model="formAllocat.telSales" placeholder="请选择话务人员" style="width: 100%;">
                     <el-option
-                        v-for="item in hwArr"
+                        v-for="item in userArr"
                         :key="item.id"
                         :label="item.name"
                         :value="item.id">
@@ -235,7 +236,7 @@
             :label-width="formLabelWidth">
            <el-select v-model="formTransfer.salesDirector" placeholder="请选择话务人员" style="width: 100%;">
                     <el-option
-                        v-for="item in hwArr"
+                        v-for="item in userArr"
                         :key="item.id"
                         :label="item.name"
                         :value="item.id">
@@ -276,6 +277,8 @@
 <div th:include="_footer_include :: #jsLib"></div>
 <script th:inline="javascript" >
 var queryOrg=[[${queryOrg}]];//电销组
+var proSelect=[[${proSelect}]];//项目组
+var phtrafficList=[[${phtrafficList}]];// 话务员工
 var fieldList=[[${fieldList}]];//自定义字段
 var userFieldList=[[${userFieldList}]];//用户自定义字段
   var  customerManVM=new Vue({
@@ -288,6 +291,7 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                 allocateFormVisible: false, //分配资源
                 reasonArr:[],
                 hwArr:[],
+                proArr:proSelect,
                 dailogTitleType:'',
                 formAllocat:{
                     telSales:''
@@ -324,13 +328,9 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                     operatorId:"",
                     dealStatus:"0"
                 },
-                cusLevelArr:[],
-                categoryArr:[],
-                provinceArr:[],
-                repeatCurClueArr:[],
                 cusStatusArr:[],
-                telePerArr:[],
                 mediumArr:[],
+                userArr:phtrafficList,
                 orgTeleArr:queryOrg,
                 multseleSelection:[],
                 formLabelWidth: '150px',
@@ -376,6 +376,9 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                 }
                 console.log(rows[0])
                 window.location.href='/phonetraffic/toEditPage?clueId='+rows[0].clueId;
+            },
+            releaseClue(){
+        	  //释放资源
             },
             repeatPhonesClick(row) {
                 console.log(row);
@@ -491,7 +494,7 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                    param.idList=idArr;
                    param.teleSaleId=telSale;
                    this.allocateFormVisible = false; 
-                   axios.post('/clue/pendingAllocation/allocationClue', param)
+                   axios.post('/phonetraffic/allocationClue', param)
                    .then(function (response) {
                        if(response.data.code==-1){
                            customerManVM.$message.error(response.data.msg);
@@ -542,7 +545,7 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                      param.teleGorupId=directorArr[0];
                      param.teleDirectorId=directorArr[1];
                      this.transferFormVisible = false;
-                     axios.post('/clue/pendingAllocation/transferClue', param)
+                     axios.post('/phonetraffic/transferClue', param)
                      .then(function (response) {
                   	  customerManVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
                   	  		customerManVM.initTableData();
@@ -661,26 +664,18 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
     		 this.initTableData();
     		//客户状态
            var param={};
-            param.groupCode="customerStatus"; 
+            param.groupCode="PhCustomerStatusSub";
             axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {  
             	customerManVM.cusStatusArr=response.data.data;
              });
-            //客户级别
-            param={};
-            param.groupCode="customerLevel"; 
-            axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {  
-            	customerManVM.cusLevelArr=response.data.data;
-            });
+
             //客户媒介
             param={};
             param.groupCode="medium";
             axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {
                 customerManVM.mediumArr=response.data.data;
             });
-
-
             this.initColumn();
-    		
     	}
     })
 </script>
