@@ -519,17 +519,17 @@
                 console.log(param)
                 axios.post("/bussReceive/list", param)
                     .then(function (response) {
-                        var data = response.data.data
-                        console.log(response.code)
-                        console.log(response.data)
-                        vm.businessData = data.data;
-                        console.log(vm.businessData)
-                        vm.total = data.total;
-                        vm.pageSize = data.pageSize;
-                        vm.currentPage = data.currentPage;
+                        if(response.data.code==0){
+                            var data = response.data.data
+                            vm.businessData = data.data;
+                            if(data.data.length>0){
+                                vm.total = data.total;
+                                vm.pageSize = data.pageSize;
+                                vm.currentPage = data.currentPage;
+                            }
+                        }
                     })
                     .catch(function (error) {
-                        console.log(error);
                     }).then(function () {
                     });
             },
@@ -545,13 +545,15 @@
                 console.log(param)
                 axios.post("/annReceive/list", param)
                     .then(function (response) {
-                        var data = response.data.data
-
-                        vm.annData = data.data;
-                        console.log(vm.businessData)
-                        vm.total = data.total;
-                        vm.pageSize = data.pageSize;
-                        vm.currentPage = data.currentPage;
+                        if(response.data.code==0) {
+                            var data = response.data.data
+                            vm.annData = data.data;
+                            if(data.data.length>0) {
+                                vm.total = data.total;
+                                vm.pageSize = data.pageSize;
+                                vm.currentPage = data.currentPage;
+                            }
+                        }
                     })
                     .catch(function (error) {
                         console.log(error);
