@@ -1,5 +1,6 @@
 package com.kuaidao.manageweb.controller.sign;
 
+import com.kuaidao.aggregation.dto.clue.CustomerClueDTO;
 import com.kuaidao.aggregation.dto.paydetail.PayDetailReqDTO;
 import com.kuaidao.aggregation.dto.paydetail.PayDetailRespDTO;
 import com.kuaidao.aggregation.dto.sign.BusSignInsertOrUpdateDTO;
@@ -7,7 +8,10 @@ import com.kuaidao.aggregation.dto.sign.BusSignRespDTO;
 import com.kuaidao.aggregation.dto.sign.PayDetailDTO;
 import com.kuaidao.aggregation.dto.visitrecord.BusVisitRecordRespDTO;
 import com.kuaidao.common.entity.IdEntityLong;
+import com.kuaidao.common.entity.IdListLongReq;
 import com.kuaidao.common.util.CommonUtil;
+import com.kuaidao.manageweb.feign.clue.ClueBasicFeignClient;
+import com.kuaidao.manageweb.feign.clue.ClueCustomerFeignClient;
 import com.kuaidao.manageweb.feign.paydetail.PayDetailFeignClient;
 import com.kuaidao.manageweb.feign.visitrecord.BusVisitRecordFeignClient;
 import com.kuaidao.manageweb.util.CommUtil;
@@ -86,6 +90,10 @@ public class BusinessSignController {
 	private OrganizationFeignClient organizationFeignClient;
     @Autowired
     private ProjectInfoFeignClient projectInfoFeignClient;
+    @Autowired
+    private ClueBasicFeignClient clueBasicFeignClient;
+    @Autowired
+    private ClueCustomerFeignClient clueCustomerFeignClient;
 
 
     @Autowired
@@ -212,6 +220,18 @@ public class BusinessSignController {
 //      查询需要进行回显的信息，并进行映射
 //      最新一次的邀约
         JSONResult<Map> mapJSONResult = visitRecordFeignClient.echoAppoinment(idEntityLong);
+//      获取客户信息
+
+        List<Long> list = new ArrayList<>();
+        list.add(idEntityLong.getId());
+        IdListLongReq idListLongReq = new IdListLongReq();
+        idListLongReq.setIdList(list);
+        JSONResult<List<CustomerClueDTO>> listJSONResult = clueCustomerFeignClient.findcustomersByClueIds(idListLongReq);
+        if(JSONResult.SUCCESS.equals(listJSONResult.getCode())){
+            List<CustomerClueDTO> data = listJSONResult.getData();
+            CustomerClueDTO customerClueDTO = data.get(0);
+            customerClueDTO.getLinkPhone();
+        }
 //      查询最新一次到访
         JSONResult<BusVisitRecordRespDTO> maxNewOne = visitRecordFeignClient.findMaxNewOne(idEntityLong);
         Boolean flag = true;
