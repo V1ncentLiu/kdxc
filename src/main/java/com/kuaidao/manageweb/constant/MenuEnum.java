@@ -22,7 +22,7 @@ public enum MenuEnum {
     /**
      * 电销管理 - 电销中心
      */
-    ,TEL_CENTER_PUBLICCUSTOMER("公共客户资源"), TEL_CENTER_INVALIDCUSTOMER("无效客户资源"),
+    ,TEL_CENTER_PUBLICCUSTOMER("公共客户资源"), TEL_CENTER_INVALIDCUSTOMER("无效客户资源"), OPT_RULE_MANAGEMENT("优化分配规则管理"), NOT_OPT_RULE_MANAGEMENT("非优化分配规则管理"), TRAFFIC_RULE_MANAGEMENT("话务分配规则管理"),
 
     /**
      * 总裁办

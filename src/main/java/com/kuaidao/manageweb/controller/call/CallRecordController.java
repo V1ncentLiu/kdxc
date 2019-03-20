@@ -1,6 +1,7 @@
 package com.kuaidao.manageweb.controller.call;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+import com.kuaidao.aggregation.dto.TeleConsoleReqDTO;
 import com.kuaidao.aggregation.dto.call.CallRecordCountDTO;
 import com.kuaidao.aggregation.dto.call.CallRecordReqDTO;
 import com.kuaidao.aggregation.dto.call.CallRecordRespDTO;
@@ -23,6 +25,7 @@ import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.IdEntity;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
+import com.kuaidao.common.util.DateUtil;
 import com.kuaidao.manageweb.feign.call.CallRecordFeign;
 import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
 import com.kuaidao.manageweb.util.CommUtil;
@@ -247,6 +250,24 @@ public class CallRecordController {
     @ResponseBody
     public JSONResult<List<CallRecordCountDTO>> countCallRecordTotalByClueIdList(@RequestBody CallRecordReqDTO myCallRecordReqDTO){
         return callRecordFeign.countCallRecordTotalByClueIdList(myCallRecordReqDTO);
+    }
+    
+    
+    
+    /**
+     * 统计 通话时长
+     * @param teleConsoleReqDTO
+     * @return
+     */
+    @PostMapping("/countTodayTalkTime")
+    @ResponseBody
+    public JSONResult<Integer> countTodayTalkTime(@RequestBody TeleConsoleReqDTO teleConsoleReqDTO){
+        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+        Long id = curLoginUser.getId();
+        teleConsoleReqDTO.setTeleSaleId(id);
+        teleConsoleReqDTO.setStartTime(DateUtil.getTodayStartTime());
+        teleConsoleReqDTO.setEndTime(new Date());
+        return callRecordFeign.countTodayTalkTime(teleConsoleReqDTO);
     }
     
 }
