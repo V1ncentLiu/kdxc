@@ -642,28 +642,28 @@ public class MyCustomerClueController {
 
 		Subject subject = SecurityUtils.getSubject();
 		UserInfoDTO user = (UserInfoDTO) subject.getSession().getAttribute("user");
-//		if (null != user) {
-//			dto.setOrgId(user.getOrgId());
-//			dto.setUserId(user.getId());
-//		}
-//		if (null != dto.getRepeatUserId() && null !=dto.getApplyUserId()) {
-//			IdListLongReq idListLongReq = new IdListLongReq();
-//			List<Long> idList = new ArrayList<>();
-//			idList.add(dto.getRepeatUserId());
-//			idList.add(dto.getApplyUserId());
-//			idListLongReq.setIdList(idList);
-//			JSONResult<List<UserInfoDTO>> userInfo = userInfoFeignClient.listById(idListLongReq);
-//			if (userInfo != null && userInfo.SUCCESS.equals(userInfo.getCode()) && userInfo.getData() != null) {
-//				for (UserInfoDTO userInfoDTO : userInfo.getData()) {
-//					if(userInfoDTO.getId().longValue() == dto.getRepeatUserId()) {
-//						dto.setRepeatOrgId(userInfoDTO.getOrgId());
-//					}
-//					if(userInfoDTO.getId().longValue() == dto.getApplyUserId()) {
-//						dto.setApplyOrgId(userInfoDTO.getOrgId());
-//					}
-//				}
-//			}
-//		}
+		if (null != user) {
+			dto.setOrgId(user.getOrgId());
+			dto.setUserId(user.getId());
+		}
+		if (null != dto.getRepeatUserId() && null !=dto.getApplyUserId()) {
+			IdListLongReq idListLongReq = new IdListLongReq();
+			List<Long> idList = new ArrayList<>();
+			idList.add(dto.getRepeatUserId());
+			idList.add(dto.getApplyUserId());
+			idListLongReq.setIdList(idList);
+			JSONResult<List<UserInfoDTO>> userInfo = userInfoFeignClient.listById(idListLongReq);
+			if (userInfo != null && userInfo.SUCCESS.equals(userInfo.getCode()) && userInfo.getData() != null) {
+				for (UserInfoDTO userInfoDTO : userInfo.getData()) {
+					if(userInfoDTO.getId().longValue() == dto.getRepeatUserId()) {
+						dto.setRepeatOrgId(userInfoDTO.getOrgId());
+					}
+					if(userInfoDTO.getId().longValue() == dto.getApplyUserId()) {
+						dto.setApplyOrgId(userInfoDTO.getOrgId());
+					}
+				}
+			}
+		}
 		return myCustomerFeignClient.saveRepeatClue(dto);
 	}
 	/**

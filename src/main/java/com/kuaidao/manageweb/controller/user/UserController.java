@@ -15,7 +15,9 @@ import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.apache.shiro.subject.Subject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -70,6 +72,10 @@ public class UserController {
     private OrganizationFeignClient organizationFeignClient;
     @Autowired
     private SysSettingFeignClient sysSettingFeignClient;
+    @Autowired
+    private AmqpTemplate amqpTemplate;
+    @Autowired
+    private StringRedisTemplate redisTemplate;
 
     /***
      * 用户列表页
@@ -236,7 +242,7 @@ public class UserController {
     }
 
     /**
-     * 启用
+     * 禁用
      * 
      * @param orgDTO
      * @return
@@ -244,7 +250,7 @@ public class UserController {
     @PostMapping("/updateStatusEnable")
     @ResponseBody
     @RequiresPermissions("sys:userManager:edit")
-    @LogRecord(description = "启用", operationType = OperationType.ENABLE,
+    @LogRecord(description = "禁用", operationType = OperationType.DISABLE,
             menuName = MenuEnum.USER_MANAGEMENT)
     public JSONResult updateStatusEnable(@Valid @RequestBody UserInfoReq userInfoReq,
             BindingResult result) {
@@ -258,12 +264,28 @@ public class UserController {
             return new JSONResult().fail(SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getCode(),
                     SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getMessage());
         }
-
+        IdEntityLong entityLong = new IdEntityLong();
+        entityLong.setId(id);
+        JSONResult<UserInfoDTO> getbyUserName = userInfoFeignClient.get(entityLong);
+        UserInfoDTO user = getbyUserName.getData();
+        
+        String sessionid = SecurityUtils.getSubject().getSession().getId().toString();
+        String string =
+                redisTemplate.opsForValue().get(Constants.SESSION_ID + user.getId());
+        if (Constants.IS_LOGIN_UP.equals(user.getIsLogin())) {
+	        // 发送下线通知
+	        new Thread(new Runnable() {
+	            @Override
+	            public void run() {
+	                amqpTemplate.convertAndSend("amq.topic", string+"?notUser", string);
+	            }
+	        }).start();
+        }
         return userInfoFeignClient.update(userInfoReq);
     }
 
     /**
-     * 禁用
+     * 启用
      * 
      * @param orgDTO
      * @return
@@ -271,7 +293,7 @@ public class UserController {
     @PostMapping("/updateStatusDisable")
     @ResponseBody
     @RequiresPermissions("sys:userManager:edit")
-    @LogRecord(description = "禁用", operationType = OperationType.DISABLE,
+    @LogRecord(description = "启用", operationType = OperationType.ENABLE,
             menuName = MenuEnum.USER_MANAGEMENT)
     public JSONResult updateStatusDisable(@Valid @RequestBody UserInfoReq userInfoReq,
             BindingResult result) {
