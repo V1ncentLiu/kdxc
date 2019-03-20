@@ -145,6 +145,15 @@ public interface MyCustomerFeignClient {
  
 	@RequestMapping(method = RequestMethod.POST, value = "/reserveClue")
 	public JSONResult<String> reserveClue(ClueQueryDTO dto);
+	
+
+	/***
+	 *电销 人员待跟进客户资源
+	 * @param queryDto
+	 * @return
+	 */
+    @RequestMapping(method = RequestMethod.POST, value = "/listTodayFollowClue")
+	 JSONResult<PageBean<CustomerClueDTO>> listTodayFollowClue(CustomerClueQueryDTO queryDto);
 
 	@Component
 	static class HystrixClientFallback implements MyCustomerFeignClient {
@@ -234,9 +243,16 @@ public interface MyCustomerFeignClient {
 			// TODO Auto-generated method stub
 			return fallBackError("保留客户资源数据");
 		}
+
+        @Override
+        public JSONResult<PageBean<CustomerClueDTO>> listTodayFollowClue(
+                CustomerClueQueryDTO queryDto) {
+            return fallBackError("电销 人员待跟进客户资源");
+        }
 		
 		
 
 	}
+
 
 }
