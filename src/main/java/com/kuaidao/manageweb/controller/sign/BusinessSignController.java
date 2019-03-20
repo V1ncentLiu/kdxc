@@ -228,7 +228,6 @@ public class BusinessSignController {
         JSONResult<Map> mapJSONResult = visitRecordFeignClient.echoAppoinment(idEntityLong);
 //      获取客户信息
         String linkPhone = linkPhone(idEntityLong);
-
 //      查询最新一次到访
         JSONResult<BusVisitRecordRespDTO> maxNewOne = visitRecordFeignClient.findMaxNewOne(idEntityLong);
         Boolean flag = true;
