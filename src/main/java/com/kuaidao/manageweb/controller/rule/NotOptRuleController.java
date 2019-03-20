@@ -36,12 +36,10 @@ import com.kuaidao.manageweb.config.LogRecord;
 import com.kuaidao.manageweb.config.LogRecord.OperationType;
 import com.kuaidao.manageweb.constant.Constants;
 import com.kuaidao.manageweb.constant.MenuEnum;
-import com.kuaidao.manageweb.feign.area.SysRegionFeignClient;
 import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
 import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
 import com.kuaidao.manageweb.feign.project.ProjectInfoFeignClient;
 import com.kuaidao.manageweb.feign.rule.ClueAssignRuleFeignClient;
-import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
 import com.kuaidao.sys.dto.dictionary.DictionaryItemRespDTO;
 import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
 import com.kuaidao.sys.dto.organization.OrganizationRespDTO;
@@ -62,13 +60,9 @@ public class NotOptRuleController {
     @Autowired
     private OrganizationFeignClient organizationFeignClient;
     @Autowired
-    private UserInfoFeignClient userInfoFeignClient;
-    @Autowired
     private ProjectInfoFeignClient projectInfoFeignClient;
     @Autowired
     private DictionaryItemFeignClient dictionaryItemFeignClient;
-    @Autowired
-    private SysRegionFeignClient sysRegionFeignClient;
 
     /***
      * 非优化规则列表页
