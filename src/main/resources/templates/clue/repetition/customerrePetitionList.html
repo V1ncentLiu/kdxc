@@ -65,10 +65,18 @@
 		                	</span>
 		                </template>
                     </el-table-column>
+                    <el-table-column align="center" prop="customerStatusName" label="客户状态"></el-table-column>
                     <el-table-column align="center" prop="createTime" label="提交重单申请时间" :formatter="dateFormat"></el-table-column>
                     <el-table-column align="center" prop="dealStatusResult" label="重单结果"></el-table-column>
                     <el-table-column align="center" prop="statusResult" label="处理状态" ></el-table-column>
                     <el-table-column align="center" prop="applyUser" label="重单顾问姓名"></el-table-column>
+                    <el-table-column align="center" prop="applyUser" label="判单明细">
+                    	<template slot-scope="scope">
+                    		<span v-if="scope.row.auditStatus ==1">
+		                    	<el-button @click="repeatDetailButton(scope.row)" type="text" size="small">点击查看</el-button>
+		                	</span>
+		                </template>
+                    </el-table-column>
                 </el-table>
                  <table-pagination :pager="pager"  @change="queryRepeatPage"></table-pagination>
             </el-row>
@@ -104,6 +112,37 @@
             </el-form-item>
         </el-form>
     </el-dialog>   
+    <!-- dialog -->
+    <el-dialog title="判单明细" :visible.sync="repeatDetaildialogFormVisible">
+                <el-table 
+                    ref="multipleTable"
+                    tooltip-effect="dark"
+                    empty-text="无数据"
+                    style="width: 100%"
+                    border
+                    :data="detailList"  >
+                    <el-table-column align="center" type="index"  label="序号" width="55"></el-table-column>
+                    <el-table-column align="center" prop="payType" label="付款方式"></el-table-column>
+                    <el-table-column align="center" prop="amountPerformance" label="业绩金额"></el-table-column>
+                    <el-table-column align="center" prop="userNames" label="重单人员"></el-table-column>
+                    <el-table-column align="center" prop="repeatRatios" label="分配比例"></el-table-column>
+                </el-table>
+        </el-form>
+    </el-dialog> 
+        <!-- dialog -->
+    <el-dialog title="判单明细" :visible.sync="repeatPayDetaildialogFormVisible">
+                <el-table 
+                    ref="multipleTable"
+                    tooltip-effect="dark"
+                    empty-text="无数据"
+                    style="width: 100%"
+                    border
+                    :data="payDetailList"  >
+                    <el-table-column align="center" prop="repeatName" label="顾问姓名"></el-table-column>
+                    <el-table-column align="center" prop="repeatRatio" :formatter="addCent" label="比例" ></el-table-column>
+                </el-table>
+        </el-form>
+    </el-dialog>
     <el-dialog :title="'手机号'+dailogTitleType+'重复资源信息'"    :visible.sync="repeatPhonesDialog">
         <el-table
             ref="singleTable" 
@@ -144,6 +183,8 @@
         	dealRemarkId:"",
         	dealStatusId:"",
         	statusId:"",
+        	repeatPayDetaildialogFormVisible:false,
+        	repeatDetaildialogFormVisible:false,
         	dialogFormVisible:false,
         	repeatPhonesDialog:false,
         	repetitionList:"",
@@ -156,6 +197,8 @@
         	isShow:true,
         	multipleSelection: [],
         	repetitionDetailList:[],
+        	payDetailList:[],
+        	detailList:[],
         	repeatPhonesTable:[],
         	statusList:[
         		 {
@@ -209,7 +252,10 @@
                 axios.post('/clue/cluerepetition/queryRepeatList',param).then(function (response) {
                 	  console.log(response);
                     if(null===response||response.data==null||response.data.code!='0'){
-	                  	  alert(response.data.msg);
+                    	orgVM.$message({
+                            message: response.data.msg,
+                            type: 'warning'
+                          });
 	                  	  return ;
                    }else{
                   	 orgVM.dataTable = response.data.data.data; 
@@ -353,6 +399,27 @@
                                   var table=result.data;
                                   orgVM.repeatPhonesTable= table;
                                   orgVM.repeatPhonesDialog=true;
+                            })  .catch(function (error) {
+                                        console.log(error);
+                  });
+
+              },
+              repeatDetailButton(row) {//重复手机号按钮点击
+                  console.log(row);
+                  var param ={};
+                        param.repeatId = row.repeatId;
+                         console.info(param);
+                          axios.post('/clue/cluerepetition/getRepeatDetailsByRepeatId', param)
+                            .then(function (response) {
+                                  var result =  response.data.data;
+                                  console.info(result);
+                                  if(result.payDetailDTOs !=null && result.payDetailDTOs.length>0){
+                                	  orgVM.repeatDetaildialogFormVisible = true;
+                                	  orgVM.detailList = result.payDetailDTOs;
+                                  }else{
+                                	  
+                                  }
+                                  
                             })  .catch(function (error) {
                                         console.log(error);
                   });
