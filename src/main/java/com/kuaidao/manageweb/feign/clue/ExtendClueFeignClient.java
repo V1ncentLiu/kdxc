@@ -16,7 +16,7 @@ import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
 
-@FeignClient(name = "aggregation-service-001", path = "/aggregation/extend/clueManager", fallback = ExtendClueFeignClient.HystrixClientFallback.class)
+@FeignClient(name = "aggregation-service", path = "/aggregation/extend/clueManager", fallback = ExtendClueFeignClient.HystrixClientFallback.class)
 public interface ExtendClueFeignClient {
 
 	/**

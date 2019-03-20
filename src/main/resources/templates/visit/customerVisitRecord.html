@@ -14,6 +14,10 @@
         <el-breadcrumb-item>客户到访记录</el-breadcrumb-item>
     </el-breadcrumb>
     <el-row class="marginB10">
+    	<el-tabs type="card" v-model="activeName" @tab-click="handleClick" >
+			<el-tab-pane label="到访记录" name="first"></el-tab-pane>
+			<el-tab-pane label="未到访记录" name="second"></el-tab-pane>
+		</el-tabs>
        <shiro:hasPermission name=" aggregation:visitRecord:reject">
         <el-button type="primary" @click="OpenRejectVisitRecordDialog">驳回</el-button>
         </shiro:hasPermission>
@@ -217,6 +221,7 @@
         el: '#customerVisitRecord',
         data: function() {
             return {
+            	activeName: 'first',//tabs:到访记录
             	loading:true,
                 dialogFormVisible:false,
                 notSignedReasonDialog:false,
@@ -278,6 +283,13 @@
             }        	  
         },
         methods: {
+             handleClick(tab, event) {  //到访或者未到访tab切换
+                if(tab.name=='first'){
+                	window.location.href="/visit/visit/customerVisitRecord.html";
+                }else{
+                	window.location.href="/visit/visit/customerNoVisitRecord.html";
+                }
+             },
             submitDialogForm(formName) {
                 this.$refs[formName].validate((valid) => {
                     if (valid) {

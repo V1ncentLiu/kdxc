@@ -603,12 +603,12 @@
                           align="center">
                         </el-table-column>
                         <el-table-column
-                          prop="name"
+                          prop="accountName"
                           label="姓名"
                           align="center">
                         </el-table-column>
                         <el-table-column
-                          prop="role"
+                          prop="roleName"
                           label="角色"
                           align="center">
                         </el-table-column>
@@ -618,7 +618,7 @@
                           align="center">
                         </el-table-column>
                         <el-table-column
-                          prop="startTime"
+                          prop="serviceTime"
                           label="拨打时间"
                           align="center">
                         </el-table-column>
@@ -630,35 +630,20 @@
                         <el-table-column
                           prop="talkTime"
                           label="接通时长"
-                          align="center">
+                          align="center"
+                          :formatter="getTalkTimeText"
+                          >
                         </el-table-column>
-                        <el-table-column
-                          label="操作"
-                          align="center">
-                          <template slot-scope="scope">
-                            <el-button
-                              size="mini"
-                              type="primary"
-                              icon="el-icon-caret-right"
-                              class="playBtn"
-                              @click="handlePlay(scope.$index, scope.row)"
-                              >
-                              	<audio loop="loop">
-                                    <source src="http://fs.w.kugou.com/201902211552/efd2e515657eadeb6f38671d9b3ecf9c/G013/M04/06/08/rYYBAFUMN1yAA7XtADdy078twac672.mp3" type="audio/mpeg">
-                                </audio>
-                                <svg class="el-icon-pause-svg" style="width: 12px; height: 13px;vertical-align: middle;fill: currentColor;overflow: hidden;display: none; " viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="2024"><path d="M288 128C270.336 128 256 142.336 256 160l0 768C256 945.664 270.336 960 288 960S320 945.664 320 928l0-768C320 142.336 305.664 128 288 128zM672 128C654.336 128 640 142.336 640 160l0 768c0 17.664 14.336 32 32 32s32-14.336 32-32l0-768C704 142.336 689.664 128 672 128z" p-id="2025"></path></svg>
-                              </el-button>
-                            <el-button
-                              size="mini"
-                              type="primary"
-                              icon="el-icon-download"
-                              class="downloadMp3"
-                              @click="handleDownload(scope.$index, scope.row)"
-                              >
-                              	<a href="http://fs.w.kugou.com/201902211552/efd2e515657eadeb6f38671d9b3ecf9c/G013/M04/06/08/rYYBAFUMN1yAA7XtADdy078twac672.mp3" download style="display: none;"><p>下载</p></a>
-                              </el-button>
-                          </template>
-                        </el-table-column>
+                        		</el-table-column> <el-table-column label="操作" align="center"> 
+		     <template slot-scope="scope" v-if="scope.row.talkTime >0 ">
+              <div style="float:left" :id="scope.row.id" class="sound-trigger sound-trigger--type-default sound-trigger--type-click" @click="switchSoundBtn(scope.row.id,scope.row.recordFile,scope.row.callSource)">
+				 <div class="sound-trigger__inner">
+					 <i class="fa fa-play fa-lg"></i>
+					 </div>
+				 </div>
+             <el-button type="danger" size="small" @click="downloadAudio(scope.row.id,scope.row.recordFile,scope.row.callSource)"><i class="el-icon-download"></i>下载</el-button>
+            </template>
+		 </el-table-column> </el-table> </el-row>
                     </el-table>
                 </el-row>
             </div>
@@ -1055,6 +1040,61 @@ var ossUrl=[[${ossUrl}]];
                     }
                 });
             },
+            switchSoundBtn(id,url,callSource){
+        		if(callSource=='2'){
+        			switchSound(id,url);
+        			return;
+        		}
+        		 var param = {};
+        		 param.id=id;
+        	   	 axios.post('/call/callRecord/getRecordFile',param)
+                 .then(function (response) {
+                	 var data =  response.data
+                     if(data.code=='0'){
+                    	 var url = data.data;
+                    	 switchSound(id,url);
+                         
+                     }else{
+                    	 console.error(data);
+                    	 myCallRecordVm.$message({message:data.msg,type:'error'});
+                     }
+                 
+                 })
+                 .catch(function (error) {
+                      console.log(error);
+                 }).then(function(){
+                 });
+        	},
+        	 downloadAudio(id,url,callSource){
+        		if(callSource=='2'){
+        			location.href=url;
+        			return;
+        		}
+        		 var param = {};
+        		 param.id=id;
+        	   	 axios.post('/call/callRecord/getRecordFile',param)
+                 .then(function (response) {
+                	 var data =  response.data;
+                     if(data.code=='0'){
+                    	 var url = data.data;
+                    	 if(url){
+                    		 var fileName = url.split('?')[0];
+                    		 var fileNameArr= fileName.split("/");
+                    		 download(url,fileNameArr[fileNameArr.length-1]);
+                    	 }
+                         
+                     }else{
+                    	 console.error(data);
+                    	 addCustomerVM.$message({message:data.msg,type:'error'});
+                     }
+                 
+                 })
+                 .catch(function (error) {
+                      console.log(error);
+                 }).then(function(){
+                 });
+        		
+        	},  
              rebackClue(){
             	 window.location.href="/tele/clueMyCustomerInfo/initmyCustomer"; 	
             },
@@ -1243,6 +1283,29 @@ var ossUrl=[[${ossUrl}]];
                     $("#introPicSrc").attr("src", src);
                 }, 1000);
             },
+        	getTalkTimeText(row, column, value, index){
+        		var valText="";
+        		if(value){
+        			valText =  this.formatSeconds(value);
+        		}
+        		return valText;
+        	},
+            formatSeconds(s){
+        		var t="";
+                var min = Math.floor(s/60) % 60;
+                var sec = s % 60;
+               
+               if(min < 10){
+                	t += "0";
+                }
+                t += min + ":";
+               if(sec < 10){
+                	t += "0";
+               }
+                t+=sec;
+               // t += sec.toFixed(2);
+    		  return t;
+        	},
             //删除上传文件
             deteleClueFile(){
              	//删除提示弹框
@@ -1392,7 +1455,7 @@ var ossUrl=[[${ossUrl}]];
             document.getElementById('addCustomer').style.display = 'block';
            if(customer){
         	   this.form.customerName=customer.cusName; 
-        	   this.form.customerPhone=customer.phone;
+        	   this.form.customerPhone=customer.linkPhone;
         	   this.form.customerSex=customer.sex==null?"":customer.sex+"";
         	   this.form.ishasWx=customer.wechat;
         	   this.form.experience=customer.hasExperience==null?"":customer.hasExperience+"";
