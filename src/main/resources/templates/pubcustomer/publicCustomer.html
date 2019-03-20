@@ -281,7 +281,7 @@
             >
             <el-table-column align="center" type="index" width="55" label="序号"></el-table-column>
             <el-table-column align="center" prop="cusName" label="客户姓名"></el-table-column>
-            <el-table-column align="center" prop="createTime" label="创建时间"></el-table-column>
+            <el-table-column align="center" prop="createTime" :formatter="dateFormat" label="创建时间"></el-table-column>
         </el-table>
     </el-dialog>
 </div>
@@ -380,6 +380,14 @@
             receiveTable:[],
         },
         methods: {
+       		//日期数据格式化方法
+   			dateFormat:function(row, column) {
+   				var date = row[column.property];
+              	if (date == undefined) {
+   	               return "";
+             	}
+              	return moment(date).format("YYYY-MM-DD HH:mm:ss");
+   			},
        	  transformReason(row, column, cellValue, index) {
             	  var text="";
             	  if(releaseReasonList){
