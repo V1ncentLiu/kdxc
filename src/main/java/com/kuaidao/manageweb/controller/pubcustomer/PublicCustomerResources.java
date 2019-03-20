@@ -154,7 +154,7 @@ public class PublicCustomerResources {
     }
     /**
      * 查询字典表
-     * 
+     *
      * @param code
      * @return
      */
