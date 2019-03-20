@@ -147,7 +147,6 @@ public class PhoneTrafficController {
         logger.info("============分页数据查询==================");
         UserInfoDTO user =  CommUtil.getCurLoginUser();
         List<RoleInfoDTO> roleList = user.getRoleList();
-        List dxList = new ArrayList();
 
         /**
          * 数据权限说明：
@@ -157,16 +156,26 @@ public class PhoneTrafficController {
          *      能够看见自己以及所在电销组下电销创业顾问创建的数据
          *    其他的只能够看见自己创建的数据
          */
+//            List dxList = new ArrayList();
+//        if(roleList!=null&&roleList.get(0)!=null) {
+//            if (RoleCodeEnum.HWZG.name().equals(roleList.get(0).getRoleCode())) {
+//                dxList = phoneTrafficUser();
+//                dxList.add(user.getId());
+//                param.setUserList(dxList);
+//            } else {
+//                dxList.add(user.getId());
+//                param.setUserList(dxList);
+//            }
+//        }
         if(roleList!=null&&roleList.get(0)!=null) {
-            if (RoleCodeEnum.HWZG.name().equals(roleList.get(0).getRoleCode())) {
-                dxList = phoneTrafficUser();
-                dxList.add(user.getId());
-                param.setUserList(dxList);
+            if (RoleCodeEnum.GLY.name().equals(roleList.get(0).getRoleCode())) {
+            }else if (RoleCodeEnum.HWZG.name().equals(roleList.get(0).getRoleCode())) {
+                param.setPhTraDirectorId(user.getId());
             } else {
-                dxList.add(user.getId());
-                param.setUserList(dxList);
+                param.setOperatorId(user.getId());
             }
         }
+
         String defineColumn = param.getDefineColumn();
         String defineValue = param.getDefineValue();
         if(StringUtils.isNotBlank(defineColumn)&&StringUtils.isNotBlank(defineValue)){
@@ -214,7 +223,7 @@ public class PhoneTrafficController {
             allocationClueReq.setRoleId(roleList.get(0).getId());
             allocationClueReq.setRoleCode(roleList.get(0).getRoleCode());
         }
-        return clueBasicFeignClient.allocationClue(allocationClueReq);
+        return phoneTrafficFeignClient.allocationClue(allocationClueReq);
     }
 
     /**
@@ -237,7 +246,7 @@ public class PhoneTrafficController {
             allocationClueReq.setRoleId(roleList.get(0).getId());
             allocationClueReq.setRoleCode(roleList.get(0).getRoleCode());
         }
-        return clueBasicFeignClient.transferClue(allocationClueReq);
+        return phoneTrafficFeignClient.transferClue(allocationClueReq);
     }
 
     /**
@@ -327,9 +336,15 @@ public class PhoneTrafficController {
     }
 
     /**
+     * 转电销
+     */
+    public void toTele(){
+//    通过规则，转到电销
+    }
+
+    /**
      * 话务人员：当前人员，所属组织同级 以及 下属组织的人员
      */
-
     /**
      * 组内电销顾问查询
      * @return
@@ -345,7 +360,7 @@ public class PhoneTrafficController {
             if (null != roleList && roleList.size() > 0) {
                 RoleInfoDTO roleDto = roleList.get(0);
                 UserInfoPageParam param = new UserInfoPageParam();
-                param.setRoleId(roleDto.getId());
+//                param.setRoleId(roleDto.getId());
                 param.setOrgId(user.getOrgId());
                 param.setPageSize(10000);
                 param.setPageNum(1);
