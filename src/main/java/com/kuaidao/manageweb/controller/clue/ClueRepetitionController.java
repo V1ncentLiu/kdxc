@@ -282,5 +282,15 @@ public class ClueRepetitionController {
     	businessSignDTO.setLoginUserId(user.getId());
     	return clueRepetitionFeignClient.updateBusinessPetitionById(businessSignDTO);
     }
-
+    
+    /**
+     *  根据重单主表id查询重单详细信
+     *
+     * @return
+     */
+    @RequestMapping("/getRepeatDetailsByRepeatId")
+    @ResponseBody
+    public JSONResult<ClueRepetitionDTO> getRepeatDetailsByRepeatId(@RequestBody ClueRepetitionDTO clueRepetitionDTO){
+    	return clueRepetitionFeignClient.getRepeatDetailsByRepeatId(clueRepetitionDTO);
+    }
 }
