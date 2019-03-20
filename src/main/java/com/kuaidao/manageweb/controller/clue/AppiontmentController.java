@@ -109,6 +109,7 @@ public class AppiontmentController {
         JSONResult<List<ProjectInfoDTO>> listNoPage =
                 projectInfoFeignClient.listNoPage(new ProjectInfoPageParam());
         request.setAttribute("projectList", listNoPage.getData());
+
         // 根据角色查询页面字段
         QueryFieldByRoleAndMenuReq queryFieldByRoleAndMenuReq = new QueryFieldByRoleAndMenuReq();
         queryFieldByRoleAndMenuReq.setMenuCode("aggregation:appiontmentManager");
@@ -116,6 +117,7 @@ public class AppiontmentController {
         JSONResult<List<CustomFieldQueryDTO>> queryFieldByRoleAndMenu =
                 customFieldFeignClient.queryFieldByRoleAndMenu(queryFieldByRoleAndMenuReq);
         request.setAttribute("fieldList", queryFieldByRoleAndMenu.getData());
+
         // 根据用户查询页面字段
         QueryFieldByUserAndMenuReq queryFieldByUserAndMenuReq = new QueryFieldByUserAndMenuReq();
         queryFieldByUserAndMenuReq.setId(user.getId());

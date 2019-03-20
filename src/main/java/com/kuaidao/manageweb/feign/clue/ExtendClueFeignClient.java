@@ -1,0 +1,67 @@
+package com.kuaidao.manageweb.feign.clue;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.cloud.netflix.feign.FeignClient;
+import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+
+import com.kuaidao.aggregation.dto.clue.ClueAgendaTaskDTO;
+import com.kuaidao.aggregation.dto.clue.ClueAgendaTaskQueryDTO;
+import com.kuaidao.aggregation.dto.clue.ClueDistributionedTaskDTO;
+import com.kuaidao.aggregation.dto.clue.ClueDistributionedTaskQueryDTO;
+import com.kuaidao.common.constant.SysErrorCodeEnum;
+import com.kuaidao.common.entity.JSONResult;
+import com.kuaidao.common.entity.PageBean;
+
+@FeignClient(name = "aggregation-service-001", path = "/aggregation/extend/clueManager", fallback = ExtendClueFeignClient.HystrixClientFallback.class)
+public interface ExtendClueFeignClient {
+
+	/**
+	 * 待审核数据分页查询
+	 * 
+	 * @param queryDto
+	 * @return
+	 */
+	@RequestMapping(method = RequestMethod.POST, value = "/queryPageAgendaTask")
+	public JSONResult<PageBean<ClueAgendaTaskDTO>> queryPageAgendaTask(@RequestBody ClueAgendaTaskQueryDTO queryDto);
+
+	/**
+	 * 已审核列表查询
+	 * 
+	 * @param queryDto
+	 * @return
+	 */
+	@RequestMapping(method = RequestMethod.POST, value = "/queryPageDistributionedTask")
+	public JSONResult<PageBean<ClueDistributionedTaskDTO>> queryPageDistributionedTask(
+			@RequestBody ClueDistributionedTaskQueryDTO queryDto);
+
+	@Component
+	static class HystrixClientFallback implements ExtendClueFeignClient {
+
+		private static Logger logger = LoggerFactory.getLogger(ExtendClueFeignClient.class);
+
+		private JSONResult fallBackError(String name) {
+			logger.error(name + "接口调用失败：无法获取目标服务");
+			return new JSONResult().fail(SysErrorCodeEnum.ERR_REST_FAIL.getCode(),
+					SysErrorCodeEnum.ERR_REST_FAIL.getMessage());
+		}
+
+		@Override
+		public JSONResult<PageBean<ClueAgendaTaskDTO>> queryPageAgendaTask(ClueAgendaTaskQueryDTO queryDto) {
+			// TODO Auto-generated method stub
+			return fallBackError("查询待审核数据");
+		}
+
+		@Override
+		public JSONResult<PageBean<ClueDistributionedTaskDTO>> queryPageDistributionedTask(
+				ClueDistributionedTaskQueryDTO queryDto) {
+			// TODO Auto-generated method stub
+			return fallBackError("查询已审核业务");
+		}
+
+	}
+
+}

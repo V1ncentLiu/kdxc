@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html>
+<head th:include="_header_include::frag(~{::title},~{},~{})">
+<title>待分发资源</title>
+<meta charset="UTF-8">
+<!-- import CSS -->
+<link rel="stylesheet" href="css/element-ui.css">
+<link rel="stylesheet" href="css/base.css">
+<style>
+.dialogForm .el-form-item {
+	margin-bottom: 5px;
+}
+</style>
+</head>
+<body>
+	<div id="waitDistributResource"
+		class="waitDistributResource mainPadding" style="display: none;">
+		<el-breadcrumb separator="/" class="elBreadcrumb marginB20">
+		<el-breadcrumb-item>Home</el-breadcrumb-item> <el-breadcrumb-item>线索管理</el-breadcrumb-item>
+		<el-breadcrumb-item>待分发资源池</el-breadcrumb-item> </el-breadcrumb>
+		<el-row class="marginB10"> <el-button type="primary"
+			@click="editFun">自动分发</el-button> </el-row>
+		<el-row class="marginB10 greybg padding20" style="padding-bottom: 0">
+		<el-form :inline="true" :model="form" ref="form"> <el-form-item
+			label="创建时间:"> <el-date-picker style="width: 100%;"
+			v-model="form.starTime" type="datetime" placeholder="选择日期时间">
+		</el-date-picker> </el-form-item> <el-form-item label="——"> <el-date-picker
+			style="width: 100%;" v-model="form.endTime" type="datetime"
+			placeholder="选择日期时间"> </el-date-picker> </el-form-item> <el-form-item label="">
+		<el-select v-model="form.resourceProject" placeholder="资源项目">
+		<el-option v-for="item in proSelectArr" :key="item.id"
+			:label="item.projectName" :value="item.id"> </el-option> </el-select> </el-form-item> <el-form-item
+			label=""> <el-select v-model="form.resourcePerson"
+			placeholder="资源专员"> <el-option
+			v-for="item in userListArr" :key="item.id" :label="item.name"
+			:value="item.id"> </el-option> </el-select> </el-form-item> <el-form-item label="">
+		<el-input v-model="form.customName" placeholder="客户姓名"></el-input> </el-form-item> <el-form-item
+			label=""> <el-input v-model="form.resourceId"
+			placeholder="线索ID"></el-input> </el-form-item> <el-form-item label="">
+		<el-select v-model="form.medium" placeholder="媒介"> <el-option
+			v-for="item in mediumArry" :key="item.value" :label="item.name"
+			:value="item.value"> </el-option> </el-select> </el-form-item> <el-form-item label="">
+		<el-select v-model="form.resourceType" placeholder="资源类别">
+		<el-option v-for="item in categoryArr" :key="item.value"
+			:label="item.name" :value="item.value"> </el-option> </el-select> </el-form-item> <el-form-item
+			label=""> <el-select v-model="form.tradeType"
+			placeholder="行业类别"> <el-option
+			v-for="item in industryCategoryArr" :key="item.value"
+			:label="item.name" :value="item.value"> </el-option> </el-select> </el-form-item> <el-form-item
+			label=""> <el-input v-model="form.email"
+			placeholder="邮箱"></el-input> </el-form-item> <el-form-item label="">
+		<el-input v-model="form.qq" placeholder="QQ" maxLength="20"
+			@keyup.native="number"></el-input> </el-form-item> <el-form-item label="">
+		<el-input v-model="form.phone" placeholder="手机号" maxLength="11"
+			@keyup.native="number1"></el-input> </el-form-item> <el-button type="primary"
+			@click="initTableData">搜索</el-button> </el-form> </el-row>
+		<el-row> <el-table ref="tableData" tooltip-effect="dark"
+			style="width: 100%" border :data="tableData"
+			@row-dblclick="rowDblClick"
+			@selection-change="handleSelectionChange">
+		<el-table-column align="center" prop="clueId" type="selection"
+			width="55"></el-table-column> <el-table-column align="center"
+			type="index" label="序号" width="55"></el-table-column> <el-table-column
+			align="center" prop="createTime" label="创建日期"></el-table-column> <el-table-column
+			align="center" prop="projectName" label="资源项目"></el-table-column> <el-table-column
+			align="center" prop="searchWord" label="搜索词"></el-table-column> <el-table-column
+			align="center" prop="sourceTypeName" label="广告位"></el-table-column> <el-table-column
+			align="center" prop="sourceName" label="媒介"></el-table-column> <el-table-column
+			align="center" prop="typeName" label="资源类型"></el-table-column> <el-table-column
+			align="center" prop="categoryName" label="资源类别"></el-table-column> <el-table-column
+			align="center" prop="industryCategoryName" label="行业类别"></el-table-column>
+		<el-table-column align="center" prop="cusName" label="客户姓名"></el-table-column>
+		<el-table-column align="center" prop="phone" label="手机号"></el-table-column>
+		<el-table-column align="center" prop="messageTime" label="留言时间"></el-table-column>
+		<el-table-column align="center" prop="messagePoint" label="留言重点"></el-table-column>
+		<el-table-column align="center" prop="qq" label="QQ"></el-table-column>
+		<el-table-column align="center" prop="email" label="邮箱"></el-table-column>
+		<el-table-column align="center" prop="address" label="地址"></el-table-column>
+		<el-table-column align="center" prop="wechat" label="微信"></el-table-column>
+		<el-table-column align="center" prop="operationName" label="资源专员"></el-table-column>
+		</el-table> <table-pagination :pager="pager" @change="initTableData"></table-pagination>
+		</el-row>
+		<!-- dialog -->
+		<el-dialog title="线索详细信息" :visible.sync="dialogFormVisible">
+		<el-form :model="dialogForm" ref="dialogForm"
+			class="marginB20 dialogForm">
+		<div class="fs16 redcolor marginB20">线索ID：{{basic.id}}</div>
+		<div class="borderbox padding20">
+			<el-row> <el-col :span="12"> <el-form-item
+				label="客户姓名：" :label-width="formLabelWidth"> {{customer.cusName}} </el-form-item> </el-col> <el-col
+				:span="12"> <el-form-item label="手机号："
+				:label-width="formLabelWidth"> {{customer.phone}} </el-form-item> </el-col> </el-row>
+			<el-row> <el-col :span="12"> <el-form-item
+				label="微信：" :label-width="formLabelWidth"> {{customer.wechat}}<span>/二维码</span>
+			</el-form-item> </el-col> <el-col :span="12"> <el-form-item label="邮箱："
+				:label-width="formLabelWidth"> {{customer.email}}</el-form-item> </el-col> </el-row>
+			<el-row> <el-col :span="12"> <el-form-item
+				label="QQ：" :label-width="formLabelWidth"> 123123123
+			</el-form-item> </el-col> <el-col :span="12"> <el-form-item label="资源类型："
+				:label-width="formLabelWidth">{{basic.typeName}}</el-form-item> </el-col> </el-row>
+			<el-row> <el-col :span="12"> <el-form-item
+				label="资源项目：" :label-width="formLabelWidth"> 项目1 </el-form-item> </el-col> <el-col
+				:span="12"> <el-form-item label="资源类别："
+				:label-width="formLabelWidth"> {{basic.categoryName}}</el-form-item> </el-col> </el-row>
+			<el-row> <el-col :span="12"> <el-form-item
+				label="媒介：" :label-width="formLabelWidth"> {{basic.sourceName}} </el-form-item> </el-col> <el-col
+				:span="12"> <el-form-item label="搜索词："
+				:label-width="formLabelWidth"> {{basic.searchWord}} </el-form-item> </el-col> </el-row>
+			<el-row> <el-col :span="12"> <el-form-item
+				label="行业类别：" :label-width="formLabelWidth"> {{basic.industryCategoryName}}  </el-form-item> </el-col> <el-col
+				:span="12"> <el-form-item label="留言时间："
+				:label-width="formLabelWidth"> {{basic.messageTime}} </el-form-item> </el-col> </el-row>
+			<el-row> <el-col :span="24"> <el-form-item
+				label="留言重点：" :label-width="formLabelWidth">
+			 {{basic.messagePoint}}</el-form-item> </el-col> </el-row>
+		</div>
+		</el-form> </el-dialog>
+	</div>
+</body>
+<div th:include="_footer_include :: #jsLib"></div>
+<script th:inline="javascript">
+var proSelect=[[${proSelect}]];
+var userList=[[${userList}]];
+    var wdrVM = new Vue({
+        el: '#waitDistributResource',
+        data: function() {
+            return {
+                dialogFormVisible: false,
+                multipleSelection: [],//选择行
+                form: {
+                    starTime:'',
+                    endTime:'',
+                    resourceProject:'',
+                    resourcePerson:'',
+                    customName:'',
+                    resourceId:'',
+                    medium:'',
+                    resourceType:'',
+                    tradeType:'',
+                    email:'',
+                    qq:'',
+                    phone:'',
+                },
+                pager:{ 
+                    total: 0,
+                    currentPage: 1,
+                    pageSize: 20,
+                },
+                dialogForm:{},
+                formLabelWidth: '120px',
+                industryCategoryArr:[],
+                categoryArr:[],
+                mediumArry:[],
+                tableData: [],             
+                options: [],
+                proSelectArr:proSelect,
+                userListArr:userList,
+                customer:"",
+                basic:'',
+            }        	  
+        },
+        methods: {
+        	 initTableData(){
+                 var param = {};
+                 var pageSize = this.pager.pageSize;
+                 var pageNum = this.pager.currentPage;
+                 param.pageNum=pageNum;
+                 param.pageSize=pageSize;
+                 param.createTimeStart=this.form.starTime;
+                 param.createTimeEnd=this.form.endTime;
+                 param.projectId=this.form.resourceProject; 
+                 param.operationId=this.form.resourcePerson;
+                 param.cusName=this.form.customName;
+                 param.clueId=this.form.resourceId;
+                 param.source=this.form.medium;
+                 param.category=this.form.cusLeve;
+                 param.industryCategory=this.form.updateTimeStart;
+                 param.qq=this.form.qq;
+                 param.email=this.form.email;
+                 param.phone=this.form.phone;
+     		    axios.post('/exetend/agendaTaskManager/queryPageAgendaTask',param).then(function (response) {
+     				if(!response){
+     					wdrVM.$message({
+	                        message: "接口调用失败",
+	                        type: 'error'
+	                      }); 
+						return ;
+					}
+     				var resobj= response.data;
+					if(!resobj){
+						wdrVM.$message({
+	                        message: "接口调用失败",
+	                        type: 'error'
+	                      }); 
+						return ;
+					} 
+					if(resobj.code!='0'){
+						wdrVM.$message({
+	                        message: "接口调用失败",
+	                        type: 'error'
+	                      }); 
+						return ;
+					}
+     		    	var pageData=resobj.data;
+     		    	wdrVM.pager.total=pageData.total;
+     		    	wdrVM.pager.currentPage = pageData.currentPage;
+     		    	wdrVM.pager.pageSize = pageData.pageSize;
+     		    	wdrVM.tableData =pageData.data; 	
+     			})
+         	},
+            handleSelectionChange(val) {//选择节点的事件
+                console.log(val)
+                this.multipleSelection = val;
+            }, 
+            submitForm(formName){//表格搜索
+                var starTime=this.form.starTime;
+                var endTime=this.form.endTime;
+                if(endTime){
+                    if(starTime>endTime){
+                        this.$message({
+                            message: '开始时间不能大于结束时间',
+                            type: 'warning'
+                        });
+                        return;
+                    }
+                }
+            },
+            //双击行处理
+            rowDblClick(row, column, event){//双击查看详情
+             var  param={};
+             param.clueId=row.clueId;
+     		  axios.post('/exetend/agendaTaskManager/customerInfoView',param).then(function (response) {
+     				if(!response){
+     					wdrVM.$message({
+	                        message: "接口调用失败",
+	                        type: 'error'
+	                      }); 
+						return ;
+					}
+     				var resobj= response.data;
+					if(!resobj){
+						wdrVM.$message({
+	                        message: "接口调用失败",
+	                        type: 'error'
+	                      }); 
+						return ;
+					} 
+					if(resobj.code!='0'){
+						wdrVM.$message({
+	                        message: "接口调用失败",
+	                        type: 'error'
+	                      }); 
+						return ;
+					}
+				   wdrVM.customer=response.data.data.clueCustomer;
+				  var messageTime= response.data.data.clueBasic.messageTime;
+				  if(null!=messageTime){
+					  response.data.data.clueBasic.messageTime=crtTimeFtt1(messageTime);
+				  }
+				   wdrVM.basic=response.data.data.clueBasic;
+     			})
+            	
+            	
+          this.dialogFormVisible = true
+            },
+            editFun() {
+                var rows = this.multipleSelection;
+                if(rows.length==0){
+                    this.$message({
+                        message: '请选择数据进行分发',
+                        type: 'warning'
+                    });
+                    return;
+                }else{
+                    this.$confirm('确定要按照规则执行自动分发吗?', '提示', {
+                        confirmButtonText: '确定',
+                        cancelButtonText: '取消',
+                        type: 'warning'
+                    }).then(() => {
+                        this.$message({
+                            type: 'success',
+                            message: '操作成功!'
+                        });
+                    }).catch(() => {
+                        this.$message({
+                            type: 'info',
+                            message: '已取消操作'
+                        });          
+                    });
+                }                
+            },
+            number(){
+    　　　      this.form.qq=this.form.qq.replace(/[^\.\d]/g,'');
+                this.form.qq=this.form.qq.replace('.','');
+        　　},
+            number1(){
+    　　　      this.form.phone=this.form.phone.replace(/[^\.\d]/g,'');
+                this.form.phone=this.form.phone.replace('.','');
+        　　},
+        },
+        mounted(){
+            document.getElementById('waitDistributResource').style.display = 'block';
+        	this.initTableData();
+            //初始化媒介
+      	   var  param={};
+      	   param.groupCode="medium";
+            axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {  
+              wdrVM.mediumArry=response.data.data;
+           });
+            
+            //初始资源类别数据
+             param={};
+           	param.groupCode="clueCategory";
+             axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {  
+                wdrVM.categoryArr=response.data.data;
+             });
+             //初始行业类别
+             param={};
+             param.groupCode="industryCategory";
+              axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {  
+            	  wdrVM.industryCategoryArr=response.data.data;
+              }); 
+             
+        }
+    })
+    function crtTimeFtt1(val, row) {
+        if (val != null) {
+            var date = new Date(val);
+
+            var month = (date.getMonth() + 1);
+            if(month<10){
+                month = "0"+month;
+            }
+            var day = date.getDate();
+            if(day<10){
+                day = "0"+day;
+            }
+            var hour = date.getHours();
+            if(hour<10){
+                hour = "0"+hour;
+            }
+            var minu = date.getMinutes();
+            if(minu<10){
+                minu = "0"+minu;
+            }
+            var mill = date.getSeconds();
+            if(mill<10){
+                mill = "0"+mill;
+            }
+            return date.getFullYear()+''+(month) + ''+day+' '+hour+":"+minu+":"+mill;
+        }
+    }
+ 
+</script>
+</html>
