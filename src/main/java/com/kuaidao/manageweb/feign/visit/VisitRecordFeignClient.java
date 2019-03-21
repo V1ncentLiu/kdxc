@@ -8,6 +8,8 @@ import org.springframework.cloud.netflix.feign.FeignClient;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import com.kuaidao.aggregation.dto.console.BusinessConsolePanelRespDTO;
+import com.kuaidao.aggregation.dto.console.BusinessConsoleReqDTO;
 import com.kuaidao.aggregation.dto.sign.PayDetailDTO;
 import com.kuaidao.aggregation.dto.visitrecord.RejectVisitRecordReqDTO;
 import com.kuaidao.aggregation.dto.visitrecord.VisitRecordReqDTO;
@@ -52,6 +54,14 @@ public interface VisitRecordFeignClient {
     @PostMapping("/listPayDetailNoPage")
     JSONResult<List<PayDetailDTO>> listPayDetailNoPage(IdListLongReq idListLongReq);
     
+    /**
+     * 查询当月到访数
+     * @param businessConsoleReqDTO
+     * @return
+     */
+    @PostMapping("/countCurMonthNum")
+    JSONResult<BusinessConsolePanelRespDTO> countCurMonthNum(BusinessConsoleReqDTO businessConsoleReqDTO);
+    
     @Component
     static class HystrixClientFallback implements VisitRecordFeignClient {
 
@@ -81,7 +91,15 @@ public interface VisitRecordFeignClient {
         public JSONResult<Boolean> rejectVisitRecord(RejectVisitRecordReqDTO reqDTO) {
             return fallBackError("来访记录驳回");
         }
+
+
+        @Override
+        public JSONResult<BusinessConsolePanelRespDTO> countCurMonthNum(
+                BusinessConsoleReqDTO businessConsoleReqDTO) {
+            return fallBackError("查询到访数");
+        }
     }
+
 
 
 }

@@ -7,10 +7,10 @@ import org.springframework.cloud.netflix.feign.FeignClient;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import com.kuaidao.aggregation.dto.TeleConsoleReqDTO;
 import com.kuaidao.aggregation.dto.clue.AllocationClueReq;
 import com.kuaidao.aggregation.dto.clue.PendingAllocationClueDTO;
 import com.kuaidao.aggregation.dto.clue.PendingAllocationCluePageParam;
+import com.kuaidao.aggregation.dto.console.TeleConsoleReqDTO;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
@@ -91,6 +91,16 @@ public interface ClueBasicFeignClient {
      */
     @PostMapping("/countAssignClueNum")
     public JSONResult<Integer> countAssignClueNum(@RequestBody TeleConsoleReqDTO reqDTO);
+    
+    
+    /**
+     * 电销总监 查询待分配资源
+     * @param pageParam
+     * @return
+     */
+    @PostMapping("/listUnAssignClue")
+    public JSONResult<List<PendingAllocationClueDTO>> listUnAssignClue(
+            PendingAllocationCluePageParam pageParam);
 
     @Component
     static class HystrixClientFallback implements ClueBasicFeignClient {
@@ -145,7 +155,16 @@ public interface ClueBasicFeignClient {
         }
 
 
+        @Override
+        public JSONResult<List<PendingAllocationClueDTO>> listUnAssignClue(
+                PendingAllocationCluePageParam pageParam) {
+            return fallBackError("查询待分配资源");
+        }
+
+
     }
+
+   
 
 
 }
