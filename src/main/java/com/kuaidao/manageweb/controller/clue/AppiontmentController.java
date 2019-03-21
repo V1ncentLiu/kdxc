@@ -82,14 +82,17 @@ public class AppiontmentController {
     @RequiresPermissions("aggregation:appiontmentManager:view")
     public String initAppiontmentList(HttpServletRequest request) {
         UserInfoDTO user = getUser();
+        List<RoleInfoDTO> roleList = user.getRoleList();
+        // 查询所有电销组
         OrganizationQueryDTO organizationQueryDTO = new OrganizationQueryDTO();
-        organizationQueryDTO.setParentId(user.getOrgId());
+        // 如果当前登录的为电销副总,查询所有下属电销组，管理员查询所有电销组
+        if (roleList != null && RoleCodeEnum.DXFZ.name().equals(roleList.get(0).getRoleCode())) {
+            organizationQueryDTO.setParentId(user.getOrgId());
+        }
         organizationQueryDTO.setOrgType(OrgTypeConstant.DXZ);
-        // 查询所有下属电销组
         JSONResult<List<OrganizationDTO>> listDescenDantByParentId =
                 organizationFeignClient.listDescenDantByParentId(organizationQueryDTO);
         request.setAttribute("orgList", listDescenDantByParentId.getData());
-        List<RoleInfoDTO> roleList = user.getRoleList();
         // 如果当前登录的为电销总监,查询所有下属电销员工
         if (roleList != null && RoleCodeEnum.DXZJ.name().equals(roleList.get(0).getRoleCode())) {
             UserOrgRoleReq userOrgRoleReq = new UserOrgRoleReq();
