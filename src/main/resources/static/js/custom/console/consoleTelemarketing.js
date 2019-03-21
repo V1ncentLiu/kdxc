@@ -43,8 +43,6 @@ var mainDivVM = new Vue({
         receiveTable:[],
         // 今日待跟进客户资源
         dataTable: [],
-
-
         // 工作台
         activeName:'1',
         activeName2:'1',
@@ -69,8 +67,6 @@ var mainDivVM = new Vue({
                 // {content:'公告3公告3公告3公告3公告3公告3公告3',id:3}
             ]
         }
-        
-
     },
     methods: {
         openTrackingDialog(cid){//跟进记录点击方法
@@ -208,6 +204,8 @@ var mainDivVM = new Vue({
             var param = {};
             // axios.post('/tele/clueMyCustomerInfo/findTeleClueInfo',param).then(function (response) {
             axios.post('/console/console/listTodayFollowClue',param).then(function (response) {
+                console.log('今日待跟进客户资源')
+                console.log(response.data)
                 if(!response){
                     mainDivVM.$message({
                         message: "接口调用失败",
@@ -253,6 +251,7 @@ var mainDivVM = new Vue({
             // 未读消息
             param={};
             axios.post('/console/console/queryBussReceiveNoPage',param).then(function (response) {
+                console.log('未读消息')
                 console.log(response.data)
                 if(response.data){
                     if (response.data.data) {
