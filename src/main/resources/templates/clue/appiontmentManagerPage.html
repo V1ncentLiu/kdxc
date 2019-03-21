@@ -108,10 +108,10 @@
         <table-pagination :pager="pager" @change="searchTable"></table-pagination>
     </el-row>
       <!-- dialog -->
-    <el-dialog title="编辑邀约来访" :visible.sync="appiontmentFormVisible"  >
-        <el-form :model="appiontmentForm">
+    <el-dialog title="编辑邀约来访" :visible.sync="appiontmentFormVisible" >
+        <el-form :model="appiontmentForm" ref="appiontmentForm" :rules="appiontmentFormRule">
             <el-form-item label="地区：" :label-width="formLabelWidth" prop="area">
-                <el-select v-model="appiontmentForm.area" placeholder="请选择" style="width: 70%;" @change="currentBusGroup" >
+                <el-select v-model="appiontmentForm.area" disabled placeholder="请选择" style="width: 70%;" @change="currentBusGroup" >
                     <el-option
                         v-for="item in areaOptions"
                         :key="item.id"
@@ -121,7 +121,7 @@
                 </el-select>
             </el-form-item>
             <el-form-item label="分公司：" :label-width="formLabelWidth" prop="busCompay">
-                <el-select v-model="appiontmentForm.busCompay" placeholder="请选择" style="width: 70%;" @change="currentBusSale">
+                <el-select v-model="appiontmentForm.busCompay" disabled placeholder="请选择" style="width: 70%;" @change="currentBusSale">
                     <el-option
                         v-for="item in busCompayOptions"
                         :key="item.id"
@@ -131,7 +131,7 @@
                 </el-select>
             </el-form-item>
             <el-form-item label="商务总监：" :label-width="formLabelWidth" prop="busDirectorId">
-                <el-select v-model="appiontmentForm.busDirectorId" placeholder="请选择" style="width: 70%;">
+                <el-select v-model="appiontmentForm.busDirectorId" disabled placeholder="请选择" style="width: 70%;">
                     <el-option
                         v-for="item in busDirectorOptions"
                         :key="item.id"
@@ -141,7 +141,7 @@
                 </el-select>
             </el-form-item>
             <el-form-item label="品尝项目：" :label-width="formLabelWidth" >
-             	<el-form-item label="">  
+             	<el-form-item label="" prop="tasteProjectId">
                     <el-select 
                         v-model="appiontmentForm.tasteProjectId" 
                         placeholder="品尝项目" 
@@ -188,8 +188,6 @@
             <el-table-column align="center" prop="callTime" label="拨打时间"></el-table-column>
             <el-table-column align="center" prop="customerStatusName" label="客户状态"></el-table-column>
             <el-table-column align="center" prop="isCall" label="是否接通" :formatter="transformIsCall"></el-table-column>
-            <el-table-column align="center" prop="resourceStatus" label="资源有效性" :formatter="transformResource"></el-table-column>
-            <el-table-column align="center" prop="invitationStatus" label="是否邀约" :formatter="transform"></el-table-column>
             <el-table-column align="center" prop="focusPoint" label="客户关注点"></el-table-column>  
             <el-table-column align="center" prop="visitStatus" label="是否继续回访" :formatter="transform"></el-table-column>  
             <el-table-column align="center" prop="nextVisitTime" label="下次回访时间"></el-table-column>  
@@ -319,15 +317,32 @@ var appiontmentVM = new Vue({
                     //  { required: true, message: '请填写取消原因', trigger: 'blur' }
                     ]
                 },
+                appiontmentFormRule:{
+                	tasteProjectId: [
+                      { required: true, message: '品尝项目不能为空', trigger: 'change' }
+                    ],
+                    reserveTime: [
+                      { required: true, message: '预约时间不能为空', trigger: 'change' }
+                    ]
+                },
         },
         methods: {
         	searchTable() {
                 var param ={};
                 
+                var startTime = this.appiontmentSearchForm.startTime;
+                var endTime = this.appiontmentSearchForm.endTime;
+                if(startTime&&endTime&&startTime> endTime){
+                	this.$message({
+                        message: '开始时间不能大于结束时间',
+                        type: 'warning'
+                      });
+                    return;
+                }
+                param.startTime = startTime;
+                param.endTime = endTime;
                 param.pageSize = this.pager.pageSize;
                 param.pageNum = this.pager.currentPage;
-                param.startTime = this.appiontmentSearchForm.startTime;
-                param.endTime = this.appiontmentSearchForm.endTime;
                 param.teleGorupId = this.appiontmentSearchForm.teleGorupId;
                 param.teleSaleId = this.appiontmentSearchForm.teleSaleId;
                 param.tasteProjectId = this.appiontmentSearchForm.projectId;
@@ -379,6 +394,13 @@ var appiontmentVM = new Vue({
                   .then(function (response) {
                       var data =  response.data;
                       if(data.code=='0'){
+                    	  if(data.data.isAllocate==1){
+                    		  this.$message({
+                                  message: '此客户资源商务已经在跟进不可编辑',
+                                  type: 'warning'
+                                });
+                               return;
+                    	  }
                     	  appiontmentVM.currentBusGroup(data.data.area);
                     	  appiontmentVM.currentBusSale(data.data.busCompay);
                     	  appiontmentVM.appiontmentForm.area= data.data.area;
@@ -387,6 +409,7 @@ var appiontmentVM = new Vue({
                     	  appiontmentVM.appiontmentForm.reserveTime= data.data.reserveTime;
                     	  appiontmentVM.appiontmentForm.tasteProjectId= data.data.tasteProjectId.split(",");
                     	  appiontmentVM.appiontmentForm.remark= data.data.remark;
+                    	  appiontmentVM.appiontmentFormVisible = true;
                       }else{
                       	console.error(data);
                       }
@@ -396,7 +419,6 @@ var appiontmentVM = new Vue({
                   })
                   .then(function () {
                   }); 
-                  this.appiontmentFormVisible = true;
               	
               },
               handleSizeChange(val) {
@@ -521,24 +543,31 @@ var appiontmentVM = new Vue({
                    });
                },
                saveAppiontment(formName){//保存自定义字段
-                         var param=appiontmentVM.appiontmentForm;
-                         param.tasteProjectId=this.appiontmentForm.tasteProjectId.join(',');
-                         var url="/clue/appiontment/updateAppiontment";
-                        axios.post(url, param).then(function (response) {
-                            var resData = response.data;
-                            if(resData.code=='0'){
-                            	appiontmentVM.cancelForm(formName);
-                            	appiontmentVM.$message({message:'操作成功',type:'success',duration:1000,onClose:function(){
-                            		appiontmentVM.searchTable();
-                          	    }});
-                            }else{
-                            	appiontmentVM.$message('操作失败');
-                                console.error(resData);
-                            }
-                        })
-                        .catch(function (error) {
-                             console.log(error);
-                        });
+            	   this.$refs[formName].validate((valid) => {
+            	        if (valid) {
+            	        	var param=appiontmentVM.appiontmentForm;
+                            param.tasteProjectId=appiontmentVM.appiontmentForm.tasteProjectId.join(',');
+                            var url="/clue/appiontment/updateAppiontment";
+                           axios.post(url, param).then(function (response) {
+                               var resData = response.data;
+                               if(resData.code=='0'){
+                               	appiontmentVM.cancelForm(formName);
+                               	appiontmentVM.$message({message:'操作成功',type:'success',duration:1000,onClose:function(){
+                               		appiontmentVM.searchTable();
+                             	    }});
+                               }else{
+                               	appiontmentVM.$message('操作失败');
+                                   console.error(resData);
+                               }
+                           })
+                           .catch(function (error) {
+                                console.log(error);
+                           });
+            	        } else {
+            	          console.log('error submit!!');
+            	          return false;
+            	        }
+            	      });
                  }, 
                   //打开取消邀约对话框
                 openCancelForm() {
@@ -563,7 +592,7 @@ var appiontmentVM = new Vue({
                         .then(function (response) {
                             var data =  response.data;
                             if(data.code=='0'){
-                            	if(null!=data.data&&data.length>0){
+                            	if(null!=data.data&&data.data.length>0){
                             		appiontmentVM.$message({
                                         message: "取消数据已有到访数据，请重新选择",
                                         type: 'error'
@@ -688,21 +717,27 @@ var appiontmentVM = new Vue({
                          
                   });
               },//end
-              //根据电销组查询电销总监
+              //根据电销组查询电销顾问
               getSaleList() {
             	  var param ={};
-                  param.orgId = this.appiontmentSearchForm.teleGorupId;
-                  console.info(param);
-                  axios.post('/clue/appiontment/getSaleList', param)
-                  .then(function (response) {
-                        var result =  response.data;
-                        console.info(result);
-                        var table=result.data;
-                        appiontmentVM.teleSaleOptions= table;
-                  })
-                  .catch(function (error) {
-                       console.log(error);
-                  });
+            	  var orgId=this.appiontmentSearchForm.teleGorupId
+                  if(orgId){
+                  	param.orgId = orgId;
+                  	console.info(param);
+                    axios.post('/clue/appiontment/getSaleList', param)
+                    .then(function (response) {
+                          var result =  response.data;
+                          console.info(result);
+                          var table=result.data;
+                          appiontmentVM.teleSaleOptions= table;
+                    })
+                    .catch(function (error) {
+                         console.log(error);
+                    });
+                  }else{
+                	  this.teleSaleOptions=[];
+                  }
+                  
               },
               //查看跟进记录
               recordClick(row) {
@@ -730,7 +765,7 @@ var appiontmentVM = new Vue({
                        });
                       return;
                   }
-            	  window.open("/tele/clueMyCustomerInfo/customerInfoReadOnly?clueId="+rows[0].clueId);
+                  window.location.href="/tele/clueMyCustomerInfo/customerInfoReadOnly?clueId="+rows[0].clueId;
               },
               //查看重复手机号资源
               repeatPhonesClick(row) {

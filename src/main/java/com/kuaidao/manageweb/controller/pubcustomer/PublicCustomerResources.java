@@ -12,12 +12,17 @@ import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.manageweb.config.LogRecord;
 import com.kuaidao.manageweb.constant.Constants;
 import com.kuaidao.manageweb.constant.MenuEnum;
+import com.kuaidao.manageweb.feign.customfield.CustomFieldFeignClient;
 import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
 import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
 import com.kuaidao.manageweb.feign.publiccustomer.PublicCustomerFeignClient;
 import com.kuaidao.manageweb.feign.role.RoleManagerFeignClient;
 import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
 import com.kuaidao.manageweb.util.CommUtil;
+import com.kuaidao.sys.dto.customfield.CustomFieldQueryDTO;
+import com.kuaidao.sys.dto.customfield.QueryFieldByRoleAndMenuReq;
+import com.kuaidao.sys.dto.customfield.QueryFieldByUserAndMenuReq;
+import com.kuaidao.sys.dto.customfield.UserFieldDTO;
 import com.kuaidao.sys.dto.dictionary.DictionaryItemRespDTO;
 import com.kuaidao.sys.dto.organization.OrganizationDTO;
 import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
@@ -67,6 +72,9 @@ public class PublicCustomerResources {
 
     @Autowired
     PublicCustomerFeignClient publicCustomerFeignClient;
+
+    @Autowired
+    private CustomFieldFeignClient customFieldFeignClient;
 
 
     /**
@@ -145,11 +153,29 @@ public class PublicCustomerResources {
             dxcygwList = dxcygws(dxzIdsList);
             dxzjsList = dxzjs(dxzIdsList);
         }
+
         // 查询字典释放原因集合
         request.setAttribute("releaseReasonList", getDictionaryByCode(Constants.RELEASE_REASON));
         request.setAttribute("dzList", dxzList);
         request.setAttribute("dxgwList",dxcygwList);
         request.setAttribute("dxzjList", dxzjsList);
+
+//      公共列：
+        // 根据角色查询页面字段
+        QueryFieldByRoleAndMenuReq queryFieldByRoleAndMenuReq = new QueryFieldByRoleAndMenuReq();
+        queryFieldByRoleAndMenuReq.setMenuCode("PublicCustomer");
+        queryFieldByRoleAndMenuReq.setId(user.getRoleList().get(0).getId());
+        JSONResult<List<CustomFieldQueryDTO>> queryFieldByRoleAndMenu =
+                customFieldFeignClient.queryFieldByRoleAndMenu(queryFieldByRoleAndMenuReq);
+        request.setAttribute("fieldList", queryFieldByRoleAndMenu.getData());
+
+        // 根据用户查询页面字段
+        QueryFieldByUserAndMenuReq queryFieldByUserAndMenuReq = new QueryFieldByUserAndMenuReq();
+        queryFieldByUserAndMenuReq.setId(user.getId());
+        queryFieldByUserAndMenuReq.setMenuCode("PublicCustomer");
+        JSONResult<List<UserFieldDTO>> queryFieldByUserAndMenu =
+                customFieldFeignClient.queryFieldByUserAndMenu(queryFieldByUserAndMenuReq);
+        request.setAttribute("userFieldList", queryFieldByUserAndMenu.getData());
 
         return "pubcustomer/publicCustomer";
     }
@@ -168,10 +194,10 @@ public class PublicCustomerResources {
         }
         return null;
     }
+
     @PostMapping("/queryPage")
     @ResponseBody
     public JSONResult<PageBean<PublicCustomerResourcesRespDTO>> queryListPage(@RequestBody ClueQueryParamDTO dto){
-
 
 //      参数验证相关
         Date date1 = dto.getCreateTime1();
@@ -189,6 +215,34 @@ public class PublicCustomerResources {
             }
         }
         return publicCustomerFeignClient.queryListPage(dto);
+    }
+    /**
+     * 获取指定电销组的电销顾问
+     */
+    @ResponseBody
+    @PostMapping("/findDxcygwByDxzId")
+    public  JSONResult<List<UserInfoDTO>>  findDxcygwByDxzId(@RequestBody PublicCustomerResourcesReqDTO dto){
+        RoleQueryDTO query = new RoleQueryDTO();
+        query.setRoleCode(RoleCodeEnum.DXCYGW.name());
+        JSONResult<List<RoleInfoDTO>> roleJson = roleManagerFeignClient.qeuryRoleByName(query);
+        List<UserInfoDTO> resList = new ArrayList();
+        if (JSONResult.SUCCESS.equals(roleJson.getCode())) {
+            List<RoleInfoDTO> roleList = roleJson.getData();
+            if (null != roleList && roleList.size() > 0) {
+                RoleInfoDTO roleDto = roleList.get(0);
+                UserInfoPageParam param = new UserInfoPageParam();
+                param.setRoleId(roleDto.getId());
+                param.setOrgId(dto.getTeleGroupId());
+                param.setPageSize(10000);
+                param.setPageNum(1);
+                JSONResult<PageBean<UserInfoDTO>> userListJson = userInfoFeignClient.list(param);
+                if (JSONResult.SUCCESS.equals(userListJson.getCode())) {
+                    PageBean<UserInfoDTO> pageList = userListJson.getData();
+                    resList = pageList.getData();
+                }
+            }
+        }
+        return new JSONResult<List<UserInfoDTO>>().success(resList);
     }
 
 

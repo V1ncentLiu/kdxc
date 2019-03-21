@@ -2,6 +2,7 @@ package com.kuaidao.manageweb.feign.sign;
 
 import java.util.List;
 
+import com.kuaidao.aggregation.dto.busmycustomer.SignRecordReqDTO;
 import com.kuaidao.aggregation.dto.sign.BusSignInsertOrUpdateDTO;
 import com.kuaidao.aggregation.dto.sign.BusSignRespDTO;
 import com.kuaidao.aggregation.dto.sign.PayDetailDTO;
@@ -70,6 +71,8 @@ public interface BusinessSignFeignClient {
 	@RequestMapping("/one")
 	public JSONResult<BusSignRespDTO> queryOne(@RequestBody IdEntityLong idEntityLong);
 
+	@RequestMapping("/querySignList")
+	public JSONResult<List<BusSignRespDTO>> querySignList(@RequestBody SignRecordReqDTO dto);
 
 	@Component
 	static class HystrixClientFallback implements BusinessSignFeignClient {
@@ -108,6 +111,11 @@ public interface BusinessSignFeignClient {
 		@Override
 		public JSONResult<BusSignRespDTO> queryOne(IdEntityLong idEntityLong) {
 			return fallBackError("查询签约单明细");
+		}
+
+		@Override
+		public JSONResult<List<BusSignRespDTO>> querySignList(SignRecordReqDTO dto) {
+			return fallBackError("查询签约单不分页");
 		}
 
 		@Override

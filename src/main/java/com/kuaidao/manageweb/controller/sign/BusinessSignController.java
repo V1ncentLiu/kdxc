@@ -1,5 +1,7 @@
 package com.kuaidao.manageweb.controller.sign;
 
+import com.kuaidao.aggregation.dto.busmycustomer.SignRecordReqDTO;
+import com.kuaidao.aggregation.dto.clue.CustomerClueDTO;
 import com.kuaidao.aggregation.dto.paydetail.PayDetailReqDTO;
 import com.kuaidao.aggregation.dto.paydetail.PayDetailRespDTO;
 import com.kuaidao.aggregation.dto.sign.BusSignInsertOrUpdateDTO;
@@ -7,7 +9,10 @@ import com.kuaidao.aggregation.dto.sign.BusSignRespDTO;
 import com.kuaidao.aggregation.dto.sign.PayDetailDTO;
 import com.kuaidao.aggregation.dto.visitrecord.BusVisitRecordRespDTO;
 import com.kuaidao.common.entity.IdEntityLong;
+import com.kuaidao.common.entity.IdListLongReq;
 import com.kuaidao.common.util.CommonUtil;
+import com.kuaidao.manageweb.feign.clue.ClueBasicFeignClient;
+import com.kuaidao.manageweb.feign.clue.ClueCustomerFeignClient;
 import com.kuaidao.manageweb.feign.paydetail.PayDetailFeignClient;
 import com.kuaidao.manageweb.feign.visitrecord.BusVisitRecordFeignClient;
 import com.kuaidao.manageweb.util.CommUtil;
@@ -86,6 +91,10 @@ public class BusinessSignController {
 	private OrganizationFeignClient organizationFeignClient;
     @Autowired
     private ProjectInfoFeignClient projectInfoFeignClient;
+    @Autowired
+    private ClueBasicFeignClient clueBasicFeignClient;
+    @Autowired
+    private ClueCustomerFeignClient clueCustomerFeignClient;
 
 
     @Autowired
@@ -194,7 +203,23 @@ public class BusinessSignController {
     @RequestMapping("/one")
     @ResponseBody
     public JSONResult<BusSignRespDTO> queryOne(@RequestBody IdEntityLong idEntityLong) throws Exception {
-        return businessSignFeignClient.queryOne(idEntityLong);
+        JSONResult<BusSignRespDTO> res = businessSignFeignClient.queryOne(idEntityLong);
+        if(JSONResult.SUCCESS.equals(res.getCode())){
+            BusSignRespDTO data = res.getData();
+            String linkPhone = linkPhone(idEntityLong);
+            data.setPhone(linkPhone);
+            res.setData(data);
+        }
+        return res;
+    }
+
+    /**
+     * 查询签约单 不分页
+     */
+    @RequestMapping("/querySignList")
+    @ResponseBody
+    public JSONResult<List<BusSignRespDTO>> querySignList(@RequestBody SignRecordReqDTO dto) throws Exception {
+        return businessSignFeignClient.querySignList(dto);
     }
 
 
@@ -212,6 +237,8 @@ public class BusinessSignController {
 //      查询需要进行回显的信息，并进行映射
 //      最新一次的邀约
         JSONResult<Map> mapJSONResult = visitRecordFeignClient.echoAppoinment(idEntityLong);
+//      获取客户信息
+        String linkPhone = linkPhone(idEntityLong);
 //      查询最新一次到访
         JSONResult<BusVisitRecordRespDTO> maxNewOne = visitRecordFeignClient.findMaxNewOne(idEntityLong);
         Boolean flag = true;
@@ -225,6 +252,7 @@ public class BusinessSignController {
                 signDTO.setSignDictrict(data.getSignDistrict());
                 signDTO.setSignShopType(data.getVistitStoreType());
                 signDTO.setCustomerName(data.getCustomerName());
+                signDTO.setPhone(linkPhone);
                 signDTO.setSignType(1);
                 signDTO.setPayType("1");
                 flag = false;
@@ -244,7 +272,7 @@ public class BusinessSignController {
                     signDTO.setSignCity((String)data.get("signCity"));
                     signDTO.setSignDictrict((String)data.get("signDistrict"));
                     signDTO.setCustomerName((String)data.get("cusName"));
-                    signDTO.setPhone((String)data.get("phone"));
+                    signDTO.setPhone(linkPhone);
                     signDTO.setSignType(1);
                     signDTO.setSignShopType("");
                     signDTO.setPayType("1");
@@ -254,6 +282,24 @@ public class BusinessSignController {
         signDTO.setRebutReason(null);
         signDTO.setRebutTime(null);
         return new JSONResult<BusSignRespDTO>().success(signDTO);
+    }
+
+    /**
+     * 获取商务客户详情电话
+     */
+    private String linkPhone(IdEntityLong idEntityLong){
+        List<Long> list = new ArrayList<>();
+        list.add(idEntityLong.getId());
+        IdListLongReq idListLongReq = new IdListLongReq();
+        idListLongReq.setIdList(list);
+        JSONResult<List<CustomerClueDTO>> listJSONResult = clueCustomerFeignClient.findcustomersByClueIds(idListLongReq);
+        String linkPhone = "";
+        if(JSONResult.SUCCESS.equals(listJSONResult.getCode())){
+            List<CustomerClueDTO> data = listJSONResult.getData();
+            CustomerClueDTO customerClueDTO = data.get(0);
+            linkPhone = customerClueDTO.getLinkPhone();
+        }
+        return linkPhone;
     }
 
     /**

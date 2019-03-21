@@ -48,7 +48,7 @@
                            <!-- <span style="padding-left: 5px;color: rgb(0, 114, 255);cursor: pointer;" @click="dialogFormVisible = true">+手机号</span> -->
                             <div v-show="showPhone">
                                 <font color="red">{{form.customerPhone}}</font>
-                                <span @click="dialogFormVisible = true" style="padding-left: 5px; color: rgb(0, 114, 255); cursor: pointer;">查看多个手机号</span>
+                                <span  v-show="showMulitPhone"  @click="dialogFormVisible = true" style="padding-left: 5px; color: rgb(0, 114, 255); cursor: pointer;">查看多个手机号</span>
                             </div>
                             <div v-show="!showPhone">
                                 <font color="red">领取后显示</font>
@@ -60,38 +60,9 @@
                 <el-row>
                     <el-col :span="8">
                         <el-form-item label="性别：" :label-width="formLabelWidth" >
-                          <!-- <el-select v-model="form.customerSex" placeholder="请选择" style="width: 100%;" :disabled="true">
-                                <el-option
-                                    v-for="item in optsex"
-                                    :key="item.value"
-                                    :label="item.label"
-                                    :value="item.value">
-                                </el-option>
-                            </el-select>-->
                             <el-button type="text" disabled>
                                 {{form.customerSex==1?'男':'女'}}
                             </el-button>
-                        </el-form-item>
-                    </el-col>
-                    <el-col :span="8">
-                        <el-form-item label="是否添加微信：" :label-width="formLabelWidth" >
-                            <el-button type="text" disabled>{{form.ishasWx}}</el-button>
-                            <span v-show="vxShow" style="padding-left: 5px;color: rgb(0, 114, 255);cursor: pointer;" @click="dialogFormImg = true">查看二维码</span>
-                        </el-form-item>
-                    </el-col>
-                </el-row>
-                <el-row>
-                    <el-col :span="8">
-                        <el-form-item label="餐饮经验：" :label-width="formLabelWidth" >
-                         <!--  <el-select v-model="form.experience" placeholder="请选择" style="width: 100%;" :disabled="true">
-                                <el-option
-                                    v-for="item in CateringExperienceArr"
-                                    :key="item.value"
-                                    :label="item.name"
-                                    :value="item.value">
-                                </el-option>
-                            </el-select>-->
-                            <el-button type="text" disabled>{{form.experience}}</el-button>
                         </el-form-item>
                     </el-col>
                     <el-col :span="8">
@@ -102,35 +73,41 @@
                 </el-row>
                 <el-row>
                     <el-col :span="8">
-                        <el-form-item label="职业：" :label-width="formLabelWidth" >
-                          <!-- <el-select v-model="form.customerJob" placeholder="请选择" style="width: 100%;" :disabled="true">
-                                <el-option
-                                    v-for="item in occupationArr"
-                                    :key="item.value"
-                                    :label="item.name"
-                                    :value="item.value">
-                                </el-option>
-                            </el-select>-->
-                            <el-button type="text" disabled>{{form.customerJob}}</el-button>
+                        <el-form-item label="客户级别：" :label-width="formLabelWidth">
+                            <el-button type="text" disabled>
+                                {{form.customerLevel}}
+                            </el-button>
                         </el-form-item>
                     </el-col>
                     <el-col :span="8">
-                        <el-form-item label="合伙人：" :label-width="formLabelWidth" >
-                            <el-button type="text" disabled>{{form.customerPartner}}</el-button>
-                            <el-button type="text" disabled>{{form.customerPartnerDetail}}</el-button>
+                        <el-form-item label="微信：" :label-width="formLabelWidth" >
+                            <el-button type="text" disabled>{{form.ishasWx}}</el-button>
+                            <span v-show="vxShow" style="padding-left: 5px;color: rgb(0, 114, 255);cursor: pointer;" @click="dialogFormImg = true">查看二维码</span>
                         </el-form-item>
                     </el-col>
                 </el-row>
                 <el-row>
                     <el-col :span="8">
-                        <el-form-item label="开店紧迫性：" :label-width="formLabelWidth"  >
-                            <el-button type="text" disabled>{{form.urgency}}</el-button>
-                            <!--</el-input>--><span style="padding-left: 5px;" >之前启动</span>
+                        <el-form-item label="职业：" :label-width="formLabelWidth" >
+                            <el-button type="text" disabled>{{form.customerJob}}</el-button>
                         </el-form-item>
                     </el-col>
                     <el-col :span="8">
                         <el-form-item label="QQ：" :label-width="formLabelWidth" >
                             <el-button type="text" disabled>{{form.qq}}</el-button>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="8">
+                        <el-form-item label="餐饮经验：" :label-width="formLabelWidth" >
+                            <el-button type="text" disabled>{{form.experience}}</el-button>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="8">
+                        <el-form-item label="开店紧迫性：" :label-width="formLabelWidth"  >
+                            <el-button type="text" disabled>{{form.urgency}}</el-button>
+                            <!--</el-input>--><span style="padding-left: 5px;" >之前启动</span>
                         </el-form-item>
                     </el-col>
                 </el-row>
@@ -154,6 +131,12 @@
                             <el-button type="text" disabled>
                                 {{form.decisionMaker==2?'他人 '+form.decisionMakerOther :(form.decisionMaker==1?'自己本人 ':'')}}
                             </el-button>
+                    </el-col>
+                    <el-col :span="8">
+                        <el-form-item label="合伙人：" :label-width="formLabelWidth" >
+                            <el-button type="text" disabled>{{form.customerPartner}}</el-button>
+                            <el-button type="text" disabled>{{form.customerPartnerDetail}}</el-button>
+                        </el-form-item>
                     </el-col>
                 </el-row>
             </div>
@@ -315,19 +298,19 @@
                    </div>
                  </template>
                 </el-table-column>
-                <el-table-column
-                  prop="resourceStatus"
-                  label="资源有效性"
-                  align="center">
-                  <template slot-scope="scope">
-                  <div v-if="scope.row.resourceStatus === 0">
-                                                                       无效资源
-                  </div>
-                   <div v-else-if="scope.row.resourceStatus ===1">
-                                                                       有效资源
-                   </div>
-                 </template>
-                </el-table-column>
+                <!--<el-table-column-->
+                  <!--prop="resourceStatus"-->
+                  <!--label="资源有效性"-->
+                  <!--align="center">-->
+                  <!--<template slot-scope="scope">-->
+                  <!--<div v-if="scope.row.resourceStatus === 0">-->
+                                                                       <!--无效资源-->
+                  <!--</div>-->
+                   <!--<div v-else-if="scope.row.resourceStatus ===1">-->
+                                                                       <!--有效资源-->
+                   <!--</div>-->
+                 <!--</template>-->
+                <!--</el-table-column>-->
                 <!--<el-table-column-->
                         <!--prop="invitationStatus"-->
                         <!--label="是否邀约"-->
@@ -584,6 +567,12 @@ if(commonPool==1){
     showPhone = false;
 }
 
+var showMulitPhone = false;
+if(customer.phone2||customer.phone3||customer.phone4||customer.phone5){
+    showMulitPhone = true;
+}
+
+
 var isEdit=false;
 
 function crtTimeFtt(val, row) {
@@ -732,6 +721,7 @@ if(base==null){
         el: '#addCustomer',
         data: function() {
             return {
+                showMulitPhone:showMulitPhone,
                 showPhone:showPhone,
                 isDisabled:true,//默认不可点击
                 dialogFormUploadImgSrc: '',
