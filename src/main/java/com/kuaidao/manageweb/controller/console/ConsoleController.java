@@ -6,8 +6,10 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
+import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +19,12 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+import com.github.pagehelper.PageHelper;
+import com.kuaidao.aggregation.constant.AggregationConstant;
+import com.kuaidao.aggregation.dto.busmycustomer.SignRecordReqDTO;
+import com.kuaidao.aggregation.dto.busmycustomer.SignRecordRespDTO;
+import com.kuaidao.aggregation.dto.clue.BusPendingAllocationDTO;
+import com.kuaidao.aggregation.dto.clue.BusPendingAllocationPageParam;
 import com.kuaidao.aggregation.dto.clue.CustomerClueDTO;
 import com.kuaidao.aggregation.dto.clue.CustomerClueQueryDTO;
 import com.kuaidao.aggregation.dto.clue.PendingAllocationClueDTO;
@@ -24,6 +32,8 @@ import com.kuaidao.aggregation.dto.clue.PendingAllocationCluePageParam;
 import com.kuaidao.aggregation.dto.console.BusinessConsolePanelRespDTO;
 import com.kuaidao.aggregation.dto.console.BusinessConsoleReqDTO;
 import com.kuaidao.aggregation.dto.console.TeleConsoleReqDTO;
+import com.kuaidao.aggregation.dto.visitrecord.VisitRecordReqDTO;
+import com.kuaidao.aggregation.dto.visitrecord.VisitRecordRespDTO;
 import com.kuaidao.common.constant.CluePhase;
 import com.kuaidao.common.constant.RoleCodeEnum;
 import com.kuaidao.common.entity.JSONResult;
@@ -35,6 +45,7 @@ import com.kuaidao.manageweb.feign.announcement.BusReceiveFeignClient;
 import com.kuaidao.manageweb.feign.clue.AppiontmentFeignClient;
 import com.kuaidao.manageweb.feign.clue.ClueBasicFeignClient;
 import com.kuaidao.manageweb.feign.clue.MyCustomerFeignClient;
+import com.kuaidao.manageweb.feign.clue.PendingVisitFeignClient;
 import com.kuaidao.manageweb.feign.sign.SignRecordFeignClient;
 import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
 import com.kuaidao.manageweb.feign.visit.VisitRecordFeignClient;
@@ -83,6 +94,9 @@ public class ConsoleController {
     
     @Autowired
     SignRecordFeignClient signRecordFeignClient;
+    
+    @Autowired
+    PendingVisitFeignClient pendingVisitFeignClient;
     /***
      * 跳转控制台页面
      * @return
@@ -402,7 +416,114 @@ public class ConsoleController {
        return  signRecordFeignClient.countCurMonthSignedNum(businessConsoleReqDTO);
    }*/
    
+   
+   /**
+    * 商务总监 1. 待分配任务数  9当月二次到访数  10 当月二次来访签约数： 看板统计
+    * @return
+    */
+   @RequestMapping("/countBusinessDirectorCurMonthNum")
+   @ResponseBody
+   public JSONResult<BusinessConsolePanelRespDTO> countBusinessDirectorCurMonthNum(@RequestBody BusinessConsoleReqDTO businessConsoleReqDTO){
+       UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+       List<Long> accountIdList = new ArrayList<Long>();
+       accountIdList.add(curLoginUser.getId());
+       businessConsoleReqDTO.setAccountIdList(accountIdList);
+       Date curDate = new Date();
+       businessConsoleReqDTO.setEndTime(curDate);
+       //本月第一天 00
+       businessConsoleReqDTO.setStartTime(DateUtil.getCurStartDate());
+       return  visitRecordFeignClient.countBusinessDirectorCurMonthNum(businessConsoleReqDTO);
+   }
+   
+   /**
+    * 商务总监  4预计明日到访数
+    * @param businessConsoleReqDTO
+    * @return
+    */
+   @PostMapping("/countBusiDirecotorTomorrowArriveTime")
+   @ResponseBody
+   public JSONResult<Integer> countBusiDirecotorTomorrowArriveTime(@RequestBody BusinessConsoleReqDTO businessConsoleReqDTO){
+       UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+       Long id = curLoginUser.getId();
+       UserOrgRoleReq req = new UserOrgRoleReq();
+       req.setOrgId(id);
+       req.setRoleCode(RoleCodeEnum.DXCYGW.name());
+       JSONResult<List<UserInfoDTO>> userInfoJr = userInfoFeignClient.listByOrgAndRole(req);
+       if(!JSONResult.SUCCESS.equals(userInfoJr.getCode())) {
+          return  new JSONResult<Integer>().fail(userInfoJr.getCode(),userInfoJr.getMsg()); 
+       }
+       List<UserInfoDTO> data = userInfoJr.getData();
+       if(CollectionUtils.isEmpty(data)) {
+          return new JSONResult<Integer>().success(0);
+       }
+       List<Long> teleSaleIdList = data.stream().map(UserInfoDTO::getId).collect(Collectors.toList());
+       businessConsoleReqDTO.setAccountIdList(teleSaleIdList);  
+       Date curDate = new Date();
+       Date nextDate = DateUtil.addDays(curDate, 1);
+       businessConsoleReqDTO.setStartTime(DateUtil.getStartOrEndOfDay(nextDate, LocalTime.MIN));
+       businessConsoleReqDTO.setEndTime(DateUtil.getStartOrEndOfDay(nextDate, LocalTime.MAX));
+       
+       return appiontmentFeignClient.countBusiDirecotorTomorrowArriveTime(businessConsoleReqDTO);
+   }
+   
+   
+   /***
+    * 商务总监 待分配来访客户列表
+    * 
+    * @return
+    */
+   @PostMapping("/pendingVisitListNoPage")
+   @ResponseBody
+   public JSONResult<List<BusPendingAllocationDTO>> pendingVisitListNoPage(
+           @RequestBody BusPendingAllocationPageParam pageParam, HttpServletRequest request) {
+       UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+       // 插入当前用户、角色信息
+       pageParam.setUserId(curLoginUser.getId());
+       List<RoleInfoDTO> roleList = curLoginUser.getRoleList();
+       if (roleList != null) {
+           pageParam.setRoleCode(roleList.get(0).getRoleCode());
+       }
+
+       JSONResult<List<BusPendingAllocationDTO>> pendingAllocationList =
+               pendingVisitFeignClient.pendingVisitListNoPage(pageParam);
+
+       return pendingAllocationList;
+   }
+   
+   
+   /**
+    * 商务总监 待审批到访记录
+    * @param visitRecordReqDTO
+    * @return
+    */
+   @PostMapping("/listVisitRecord")
+   @ResponseBody
+   public JSONResult<List<VisitRecordRespDTO>> listVisitRecord(@RequestBody VisitRecordReqDTO visitRecordReqDTO){
+       UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+       List<Long> busGroupIdList = new ArrayList<>();
+       busGroupIdList.add(curLoginUser.getId());
+       visitRecordReqDTO.setBusGroupIdList(busGroupIdList);
+       visitRecordReqDTO.setStatus(1);
+      return  visitRecordFeignClient.listVisitRecordNoPage(visitRecordReqDTO);
+   }
   
+   
+   
+   /**
+    * 商务总监 待审批签约记录
+    * @param reqDTO
+    * @return
+    */
+   @PostMapping("/listSignRecord")
+   @ResponseBody
+   public JSONResult<List<SignRecordRespDTO>> listSignRecord(@RequestBody SignRecordReqDTO reqDTO) {
+       UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+       List<Long> businessGroupIdList = new ArrayList<>();
+       businessGroupIdList.add(curLoginUser.getId());
+       reqDTO.setBusinessGroupIdList(businessGroupIdList);
+       reqDTO.setStatus(AggregationConstant.SIGN_ORDER_STATUS.AUDITING);
+       return signRecordFeignClient.listSignRecordNoPage(reqDTO);
+   }
     
     
     public static void main(String[] args) {

@@ -4,9 +4,11 @@
 package com.kuaidao.manageweb.controller.rule;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.slf4j.Logger;
@@ -40,10 +42,14 @@ import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
 import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
 import com.kuaidao.manageweb.feign.project.ProjectInfoFeignClient;
 import com.kuaidao.manageweb.feign.rule.ClueAssignRuleFeignClient;
+import com.kuaidao.manageweb.feign.user.SysSettingFeignClient;
+import com.kuaidao.sys.constant.SysConstant;
 import com.kuaidao.sys.dto.dictionary.DictionaryItemRespDTO;
 import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
 import com.kuaidao.sys.dto.organization.OrganizationRespDTO;
 import com.kuaidao.sys.dto.role.RoleInfoDTO;
+import com.kuaidao.sys.dto.user.SysSettingDTO;
+import com.kuaidao.sys.dto.user.SysSettingReq;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 
 /**
@@ -63,6 +69,8 @@ public class NotOptRuleController {
     private ProjectInfoFeignClient projectInfoFeignClient;
     @Autowired
     private DictionaryItemFeignClient dictionaryItemFeignClient;
+    @Autowired
+    private SysSettingFeignClient sysSettingFeignClient;
 
     /***
      * 非优化规则列表页
@@ -76,8 +84,9 @@ public class NotOptRuleController {
         JSONResult<List<ProjectInfoDTO>> listNoPage =
                 projectInfoFeignClient.listNoPage(new ProjectInfoPageParam());
         request.setAttribute("projectList", listNoPage.getData());
-        // 查询字典资源类别集合
-        request.setAttribute("clueCategoryList", getDictionaryByCode(Constants.CLUE_CATEGORY));
+
+        // 查询非优化字典资源类别集合
+        request.setAttribute("clueCategoryList", getNotOptCategory());
         // 查询字典资源类型集合
         request.setAttribute("clueTypeList", getDictionaryByCode(Constants.CLUE_TYPE));
         // 查询字典广告位集合
@@ -105,8 +114,8 @@ public class NotOptRuleController {
         JSONResult<List<ProjectInfoDTO>> listNoPage =
                 projectInfoFeignClient.listNoPage(new ProjectInfoPageParam());
         request.setAttribute("projectList", listNoPage.getData());
-        // 查询字典资源类别集合
-        request.setAttribute("clueCategoryList", getDictionaryByCode(Constants.CLUE_CATEGORY));
+        // 查询非优化字典资源类别集合
+        request.setAttribute("clueCategoryList", getNotOptCategory());
         // 查询字典资源类型集合
         request.setAttribute("clueTypeList", getDictionaryByCode(Constants.CLUE_TYPE));
         // 查询字典广告位集合
@@ -138,8 +147,8 @@ public class NotOptRuleController {
         JSONResult<List<ProjectInfoDTO>> listNoPage =
                 projectInfoFeignClient.listNoPage(new ProjectInfoPageParam());
         request.setAttribute("projectList", listNoPage.getData());
-        // 查询字典资源类别集合
-        request.setAttribute("clueCategoryList", getDictionaryByCode(Constants.CLUE_CATEGORY));
+        // 查询非优化字典资源类别集合
+        request.setAttribute("clueCategoryList", getNotOptCategory());
         // 查询字典资源类型集合
         request.setAttribute("clueTypeList", getDictionaryByCode(Constants.CLUE_TYPE));
         // 查询字典广告位集合
@@ -312,6 +321,46 @@ public class NotOptRuleController {
         return user;
     }
 
+    /**
+     * 查询系统参数
+     * 
+     * @param code
+     * @return
+     */
+    private String getSysSetting(String code) {
+        SysSettingReq sysSettingReq = new SysSettingReq();
+        sysSettingReq.setCode(code);
+        JSONResult<SysSettingDTO> byCode = sysSettingFeignClient.getByCode(sysSettingReq);
+        if (byCode != null && JSONResult.SUCCESS.equals(byCode.getCode())) {
+            return byCode.getData().getValue();
+        }
+        return null;
+    }
+
+    /**
+     * 查询系统参数非优化资源类别
+     * 
+     * @param code
+     * @return
+     */
+    private List<DictionaryItemRespDTO> getNotOptCategory() {
+        // 系统参数非优化资源类别
+        String reminderTime = getSysSetting(SysConstant.NOPT_CATEGORY);
+        List<DictionaryItemRespDTO> dictionaryByCode = getDictionaryByCode(Constants.CLUE_CATEGORY);
+        List<DictionaryItemRespDTO> notOptCategory = new ArrayList<DictionaryItemRespDTO>();
+        if (StringUtils.isNoneBlank(reminderTime) && dictionaryByCode != null) {
+            String[] split = reminderTime.split(",");
+            for (DictionaryItemRespDTO dictionaryItemRespDTO : dictionaryByCode) {
+                for (int i = 0; i < split.length; i++) {
+                    if (split[i].equals(dictionaryItemRespDTO.getValue())) {
+                        notOptCategory.add(dictionaryItemRespDTO);
+                        continue;
+                    }
+                }
+            }
+        }
+        return notOptCategory;
+    }
 
     /**
      * 查询字典表
