@@ -24,7 +24,7 @@
                 </el-col>
                 <el-col :span="12">
                     <el-form-item label="广告位：" prop="sourceType" :label-width="formLabelWidth">
-                        <el-select v-model="form.sourceType" multiple placeholder="请选择" style="width: 300px;">
+                        <el-select v-model="form.sourceType" disabled multiple placeholder="请选择" style="width: 300px;">
                             <el-option
                                 v-for="item in sourceTypeOptions"
                                 :key="item.value"
@@ -36,6 +36,18 @@
                 </el-col>
             </el-row>
             <el-row>
+                <el-col :span="12">
+                    <el-form-item label="规则有效开始时间：" prop="startTime" :label-width="formLabelWidth">
+                        <el-date-picker type="datetime" format="yyyy-MM-dd HH:mm:ss" placeholder="选择日期时间" v-model="form.startTime" style="width: 300px;"></el-date-picker>
+                    </el-form-item>
+                </el-col>
+                <el-col :span="12">
+                    <el-form-item label="规则有效结束时间：" prop="endTime" :label-width="formLabelWidth">
+                        <el-date-picker type="datetime" format="yyyy-MM-dd HH:mm:ss" placeholder="选择日期时间" v-model="form.endTime" style="width: 300px;"></el-date-picker>
+                    </el-form-item>
+                </el-col>
+            </el-row>
+            <el-row>                
                 <el-col :span="12">
                     <el-form-item label="资源项目：" prop="projectId" :label-width="formLabelWidth">
                         <el-select v-model="form.projectId" disabled placeholder="请选择" style="width: 300px;">
@@ -49,20 +61,8 @@
                     </el-form-item>
                 </el-col>
                 <el-col :span="12">
-                    <el-form-item label="规则有效结束时间：" prop="endTime" :label-width="formLabelWidth">
-                        <el-date-picker type="datetime" placeholder="选择日期时间" v-model="form.endTime" style="width: 300px;"></el-date-picker>
-                    </el-form-item>
-                </el-col>
-            </el-row>
-            <el-row>                
-                <el-col :span="12">
-                    <el-form-item label="规则有效开始时间：" prop="startTime" :label-width="formLabelWidth">
-                        <el-date-picker type="datetime" placeholder="选择日期时间" v-model="form.startTime" style="width: 300px;"></el-date-picker>
-                    </el-form-item>
-                </el-col>
-                <el-col :span="12">
                     <el-form-item label="资源类型：" prop="type" :label-width="formLabelWidth">
-                        <el-select v-model="form.type" multiple placeholder="请选择" style="width: 300px;">
+                        <el-select v-model="form.type" disabled multiple placeholder="请选择" style="width: 300px;">
                             <el-option
                                 v-for="item in typeOptions"
                                 :key="item.value"
@@ -88,7 +88,7 @@
                 </el-col>
                 <el-col :span="12">
                     <el-form-item label="资源类别：" prop="category" :label-width="formLabelWidth">
-                        <el-select v-model="form.category" multiple placeholder="请选择" style="width: 300px;">
+                        <el-select v-model="form.category" disabled multiple placeholder="请选择" style="width: 300px;">
                             <el-option
                                 v-for="item in categoryOptions"
                                 :key="item.value"
@@ -293,10 +293,10 @@ var adsenseList=[[${adsenseList}]];//广告位集合
                 }],
                 priorOptions: [{
                     value: 1,
-                    name: '优化'
+                    name: '优先'
                 }, {
                     value: 0,
-                    name: '非优化'
+                    name: '非优先'
                 }],
             }        	  
         },
@@ -307,9 +307,11 @@ var adsenseList=[[${adsenseList}]];//广告位集合
                         // 开始时间不能大约结束时间
                         var startTime=this.form.startTime;
                         var endTime=this.form.endTime;
-                        if(endTime && startTime>endTime){
+                        var  start=new Date(startTime).getTime();
+                        var  end=new Date(endTime).getTime();
+                        if(start>end){
                             this.$message({
-                                message: '开始时间不能大于结束时间',
+                                message: '结束时间不允许选择早于开始时间',
                                 type: 'warning'
                             });
                             return;

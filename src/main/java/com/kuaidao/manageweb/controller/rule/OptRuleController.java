@@ -4,9 +4,11 @@
 package com.kuaidao.manageweb.controller.rule;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.slf4j.Logger;
@@ -37,10 +39,14 @@ import com.kuaidao.manageweb.constant.MenuEnum;
 import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
 import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
 import com.kuaidao.manageweb.feign.rule.ClueAssignRuleFeignClient;
+import com.kuaidao.manageweb.feign.user.SysSettingFeignClient;
+import com.kuaidao.sys.constant.SysConstant;
 import com.kuaidao.sys.dto.dictionary.DictionaryItemRespDTO;
 import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
 import com.kuaidao.sys.dto.organization.OrganizationRespDTO;
 import com.kuaidao.sys.dto.role.RoleInfoDTO;
+import com.kuaidao.sys.dto.user.SysSettingDTO;
+import com.kuaidao.sys.dto.user.SysSettingReq;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 
 /**
@@ -58,6 +64,8 @@ public class OptRuleController {
     private OrganizationFeignClient organizationFeignClient;
     @Autowired
     private DictionaryItemFeignClient dictionaryItemFeignClient;
+    @Autowired
+    private SysSettingFeignClient sysSettingFeignClient;
 
     /***
      * 优化规则列表页
@@ -67,8 +75,8 @@ public class OptRuleController {
     @RequestMapping("/initRuleList")
     @RequiresPermissions("clueAssignRule:optRuleManager:view")
     public String initCompanyList(HttpServletRequest request) {
-        // 查询字典资源类别集合
-        request.setAttribute("clueCategoryList", getDictionaryByCode(Constants.CLUE_CATEGORY));
+        // 查询优化类资源类别集合
+        request.setAttribute("clueCategoryList", getOptCategory());
         // 查询字典行业类别集合
         request.setAttribute("industryCategoryList",
                 getDictionaryByCode(Constants.INDUSTRY_CATEGORY));
@@ -91,8 +99,8 @@ public class OptRuleController {
         JSONResult<List<OrganizationRespDTO>> queryOrgByParam =
                 organizationFeignClient.queryOrgByParam(organizationQueryDTO);
         request.setAttribute("orgList", queryOrgByParam.getData());
-        // 查询字典资源类别集合
-        request.setAttribute("clueCategoryList", getDictionaryByCode(Constants.CLUE_CATEGORY));
+        // 查询优化类资源类别集合
+        request.setAttribute("clueCategoryList", getOptCategory());
         // 查询字典行业类别集合
         request.setAttribute("industryCategoryList",
                 getDictionaryByCode(Constants.INDUSTRY_CATEGORY));
@@ -119,8 +127,8 @@ public class OptRuleController {
         JSONResult<List<OrganizationRespDTO>> queryOrgByParam =
                 organizationFeignClient.queryOrgByParam(organizationQueryDTO);
         request.setAttribute("orgList", queryOrgByParam.getData());
-        // 查询字典资源类别集合
-        request.setAttribute("clueCategoryList", getDictionaryByCode(Constants.CLUE_CATEGORY));
+        // 查询优化类资源类别集合
+        request.setAttribute("clueCategoryList", getOptCategory());
         // 查询字典行业类别集合
         request.setAttribute("industryCategoryList",
                 getDictionaryByCode(Constants.INDUSTRY_CATEGORY));
@@ -292,6 +300,46 @@ public class OptRuleController {
         return user;
     }
 
+    /**
+     * 查询系统参数
+     * 
+     * @param code
+     * @return
+     */
+    private String getSysSetting(String code) {
+        SysSettingReq sysSettingReq = new SysSettingReq();
+        sysSettingReq.setCode(code);
+        JSONResult<SysSettingDTO> byCode = sysSettingFeignClient.getByCode(sysSettingReq);
+        if (byCode != null && JSONResult.SUCCESS.equals(byCode.getCode())) {
+            return byCode.getData().getValue();
+        }
+        return null;
+    }
+
+    /**
+     * 查询系统参数优化资源类别
+     * 
+     * @param code
+     * @return
+     */
+    private List<DictionaryItemRespDTO> getOptCategory() {
+        // 系统参数优化资源类别
+        String reminderTime = getSysSetting(SysConstant.OPT_CATEGORY);
+        List<DictionaryItemRespDTO> dictionaryByCode = getDictionaryByCode(Constants.CLUE_CATEGORY);
+        List<DictionaryItemRespDTO> notOptCategory = new ArrayList<DictionaryItemRespDTO>();
+        if (StringUtils.isNoneBlank(reminderTime) && dictionaryByCode != null) {
+            String[] split = reminderTime.split(",");
+            for (DictionaryItemRespDTO dictionaryItemRespDTO : dictionaryByCode) {
+                for (int i = 0; i < split.length; i++) {
+                    if (split[i].equals(dictionaryItemRespDTO.getValue())) {
+                        notOptCategory.add(dictionaryItemRespDTO);
+                        continue;
+                    }
+                }
+            }
+        }
+        return notOptCategory;
+    }
 
     /**
      * 查询字典表
