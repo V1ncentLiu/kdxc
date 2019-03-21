@@ -1,5 +1,6 @@
 package com.kuaidao.manageweb.controller.sign;
 
+import com.kuaidao.aggregation.dto.busmycustomer.SignRecordReqDTO;
 import com.kuaidao.aggregation.dto.clue.CustomerClueDTO;
 import com.kuaidao.aggregation.dto.paydetail.PayDetailReqDTO;
 import com.kuaidao.aggregation.dto.paydetail.PayDetailRespDTO;
@@ -213,6 +214,16 @@ public class BusinessSignController {
     }
 
     /**
+     * 查询签约单 不分页
+     */
+    @RequestMapping("/querySignList")
+    @ResponseBody
+    public JSONResult<List<BusSignRespDTO>> querySignList(@RequestBody SignRecordReqDTO dto) throws Exception {
+        return businessSignFeignClient.querySignList(dto);
+    }
+
+
+    /**
      *  签约单，新增时候回显信息
      *  1:回显当时提交邀约来访中填写的信息
      *  2: 若当前用户
@@ -290,7 +301,6 @@ public class BusinessSignController {
         }
         return linkPhone;
     }
-
 
     /**
      *  跳转到 到访记录明细页面
