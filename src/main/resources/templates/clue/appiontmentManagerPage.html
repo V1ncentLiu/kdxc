@@ -394,6 +394,13 @@ var appiontmentVM = new Vue({
                   .then(function (response) {
                       var data =  response.data;
                       if(data.code=='0'){
+                    	  if(data.data.isAllocate==1){
+                    		  this.$message({
+                                  message: '此客户资源商务已经在跟进不可编辑',
+                                  type: 'warning'
+                                });
+                               return;
+                    	  }
                     	  appiontmentVM.currentBusGroup(data.data.area);
                     	  appiontmentVM.currentBusSale(data.data.busCompay);
                     	  appiontmentVM.appiontmentForm.area= data.data.area;
@@ -402,6 +409,7 @@ var appiontmentVM = new Vue({
                     	  appiontmentVM.appiontmentForm.reserveTime= data.data.reserveTime;
                     	  appiontmentVM.appiontmentForm.tasteProjectId= data.data.tasteProjectId.split(",");
                     	  appiontmentVM.appiontmentForm.remark= data.data.remark;
+		                  this.appiontmentFormVisible = true;
                       }else{
                       	console.error(data);
                       }
@@ -411,7 +419,6 @@ var appiontmentVM = new Vue({
                   })
                   .then(function () {
                   }); 
-                  this.appiontmentFormVisible = true;
               	
               },
               handleSizeChange(val) {
