@@ -47,6 +47,7 @@ import com.kuaidao.sys.dto.customfield.UserFieldDTO;
 import com.kuaidao.sys.dto.dictionary.DictionaryItemRespDTO;
 import com.kuaidao.sys.dto.organization.OrganizationDTO;
 import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
+import com.kuaidao.sys.dto.organization.OrganizationRespDTO;
 import com.kuaidao.sys.dto.role.RoleInfoDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import com.kuaidao.sys.dto.user.UserOrgRoleReq;
@@ -83,16 +84,7 @@ public class AppiontmentController {
     public String initAppiontmentList(HttpServletRequest request) {
         UserInfoDTO user = getUser();
         List<RoleInfoDTO> roleList = user.getRoleList();
-        // 查询所有电销组
-        OrganizationQueryDTO organizationQueryDTO = new OrganizationQueryDTO();
-        // 如果当前登录的为电销副总,查询所有下属电销组，管理员查询所有电销组
-        if (roleList != null && RoleCodeEnum.DXFZ.name().equals(roleList.get(0).getRoleCode())) {
-            organizationQueryDTO.setParentId(user.getOrgId());
-        }
-        organizationQueryDTO.setOrgType(OrgTypeConstant.DXZ);
-        JSONResult<List<OrganizationDTO>> listDescenDantByParentId =
-                organizationFeignClient.listDescenDantByParentId(organizationQueryDTO);
-        request.setAttribute("orgList", listDescenDantByParentId.getData());
+
         // 如果当前登录的为电销总监,查询所有下属电销员工
         if (roleList != null && RoleCodeEnum.DXZJ.name().equals(roleList.get(0).getRoleCode())) {
             UserOrgRoleReq userOrgRoleReq = new UserOrgRoleReq();
@@ -102,6 +94,23 @@ public class AppiontmentController {
                     userInfoFeignClient.listByOrgAndRole(userOrgRoleReq);
             request.setAttribute("userList", listByOrgAndRole.getData());
 
+        } else if (roleList != null
+                && RoleCodeEnum.DXFZ.name().equals(roleList.get(0).getRoleCode())) {
+            // 如果当前登录的为电销副总,查询所有下属电销组
+            OrganizationQueryDTO organizationQueryDTO = new OrganizationQueryDTO();
+            organizationQueryDTO.setParentId(user.getOrgId());
+            organizationQueryDTO.setOrgType(OrgTypeConstant.DXZ);
+            JSONResult<List<OrganizationDTO>> listDescenDantByParentId =
+                    organizationFeignClient.listDescenDantByParentId(organizationQueryDTO);
+            request.setAttribute("orgList", listDescenDantByParentId.getData());
+        } else if (roleList != null
+                && RoleCodeEnum.GLY.name().equals(roleList.get(0).getRoleCode())) {
+            // 管理员查询所有电销组
+            OrganizationQueryDTO queryDTO = new OrganizationQueryDTO();
+            queryDTO.setOrgType(OrgTypeConstant.DXZ);
+            JSONResult<List<OrganizationRespDTO>> queryOrgByParam =
+                    organizationFeignClient.queryOrgByParam(queryDTO);
+            request.setAttribute("orgList", queryOrgByParam.getData());
         }
         // 查询字典类别集合
         request.setAttribute("clueCategoryList", getDictionaryByCode(Constants.CLUE_CATEGORY));
