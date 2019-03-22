@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -19,6 +20,7 @@ import com.kuaidao.aggregation.dto.clue.ClueQueryDTO;
 import com.kuaidao.aggregation.dto.project.ProjectInfoDTO;
 import com.kuaidao.aggregation.dto.project.ProjectInfoPageParam;
 import com.kuaidao.common.constant.RoleCodeEnum;
+import com.kuaidao.common.entity.IdListLongReq;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.manageweb.feign.clue.ExtendClueFeignClient;
@@ -52,6 +54,7 @@ public class ExtendClueAgendaTaskController {
 	 * @return
 	 */
 	@RequestMapping("/waitDistributResource")
+	@RequiresPermissions("waitDistributResource:view")
 	public String initWaitDistributResource(HttpServletRequest request, Model model) {
 		// 项目
 		ProjectInfoPageParam param = new ProjectInfoPageParam();
@@ -68,6 +71,7 @@ public class ExtendClueAgendaTaskController {
 	}
 
 	@RequestMapping("/queryPageAgendaTask")
+	@RequiresPermissions("waitDistributResource:view")
 	@ResponseBody
 	public JSONResult<PageBean<ClueAgendaTaskDTO>> queryPageAgendaTask(HttpServletRequest request,
 			@RequestBody ClueAgendaTaskQueryDTO queryDto) {
@@ -155,13 +159,35 @@ public class ExtendClueAgendaTaskController {
 	 */
 	@RequestMapping("/customerInfoView")
 	@ResponseBody
-	public JSONResult<ClueDTO> customerInfoReadOnly(HttpServletRequest request, @RequestBody ClueAgendaTaskQueryDTO queryDto) {
+	public JSONResult<ClueDTO> customerInfoReadOnly(HttpServletRequest request,
+			@RequestBody ClueAgendaTaskQueryDTO queryDto) {
 
 		ClueQueryDTO queryDTO = new ClueQueryDTO();
 
 		queryDTO.setClueId(queryDto.getClueId());
 
 		JSONResult<ClueDTO> clueInfo = myCustomerFeignClient.findClueInfo(queryDTO);
+
+		return clueInfo;
+	}
+
+	/**
+	 * 自动分配
+	 * 
+	 * @param request
+	 * @param clueId
+	 * @return
+	 */
+	@RequestMapping("/autoAllocationTask")
+	@RequiresPermissions("waitDistributResource:distribute")
+	@ResponseBody
+	public JSONResult<String> autoAllocationTask(HttpServletRequest request, @RequestBody IdListLongReq queryDto) {
+
+		ClueQueryDTO queryDTO = new ClueQueryDTO();
+
+		queryDTO.setClueId(queryDto.getClueId());
+
+		JSONResult<String> clueInfo = extendClueFeignClient.autoAllocationTask(queryDto);
 
 		return clueInfo;
 	}
