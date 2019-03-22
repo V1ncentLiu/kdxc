@@ -1,7 +1,7 @@
 var consoleMessageTempate=
     '<div v-show="param.newsBox">'
     +'<div class="title">'   
-    +'<div class="leftbox f-fl"><img th:src="@{/images/icon_remind.png}" alt="" class="f-fl">消息提醒</div>'
+    +'<div class="leftbox f-fl"><img src="../../images/icon_remind.png" alt="" class="f-fl">消息提醒</div>'
     +'<div class="rightbox f-fr">进入消息中心<img th:src="@{/images/icon_arrow.png}" alt="" class="f-fr"></div>'
     +'</div>'
     +'<ul class="news">'
