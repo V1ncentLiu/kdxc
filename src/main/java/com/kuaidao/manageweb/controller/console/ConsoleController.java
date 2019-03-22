@@ -31,6 +31,7 @@ import com.kuaidao.aggregation.dto.clue.PendingAllocationClueDTO;
 import com.kuaidao.aggregation.dto.clue.PendingAllocationCluePageParam;
 import com.kuaidao.aggregation.dto.console.BusinessConsolePanelRespDTO;
 import com.kuaidao.aggregation.dto.console.BusinessConsoleReqDTO;
+import com.kuaidao.aggregation.dto.console.BusinessDirectorConsolePanelRespDTO;
 import com.kuaidao.aggregation.dto.console.TeleConsoleReqDTO;
 import com.kuaidao.aggregation.dto.visitrecord.VisitRecordReqDTO;
 import com.kuaidao.aggregation.dto.visitrecord.VisitRecordRespDTO;
@@ -423,7 +424,7 @@ public class ConsoleController {
     */
    @RequestMapping("/countBusinessDirectorCurMonthNum")
    @ResponseBody
-   public JSONResult<BusinessConsolePanelRespDTO> countBusinessDirectorCurMonthNum(@RequestBody BusinessConsoleReqDTO businessConsoleReqDTO){
+   public JSONResult<BusinessDirectorConsolePanelRespDTO> countBusinessDirectorCurMonthNum(@RequestBody BusinessConsoleReqDTO businessConsoleReqDTO){
        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
        List<Long> accountIdList = new ArrayList<Long>();
        accountIdList.add(curLoginUser.getId());

@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import com.kuaidao.aggregation.dto.console.BusinessConsolePanelRespDTO;
 import com.kuaidao.aggregation.dto.console.BusinessConsoleReqDTO;
+import com.kuaidao.aggregation.dto.console.BusinessDirectorConsolePanelRespDTO;
 import com.kuaidao.aggregation.dto.sign.PayDetailDTO;
 import com.kuaidao.aggregation.dto.visitrecord.RejectVisitRecordReqDTO;
 import com.kuaidao.aggregation.dto.visitrecord.VisitRecordReqDTO;
@@ -68,7 +69,7 @@ public interface VisitRecordFeignClient {
      * @return
      */
     @PostMapping("/countBusinessDirectorCurMonthNum")
-    JSONResult<BusinessConsolePanelRespDTO> countBusinessDirectorCurMonthNum(
+    JSONResult<BusinessDirectorConsolePanelRespDTO> countBusinessDirectorCurMonthNum(
             BusinessConsoleReqDTO businessConsoleReqDTO);
     
     
@@ -119,7 +120,7 @@ public interface VisitRecordFeignClient {
 
 
         @Override
-        public JSONResult<BusinessConsolePanelRespDTO> countBusinessDirectorCurMonthNum(
+        public JSONResult<BusinessDirectorConsolePanelRespDTO> countBusinessDirectorCurMonthNum(
                 BusinessConsoleReqDTO businessConsoleReqDTO) {
             return fallBackError("商务总监看板");
         }
