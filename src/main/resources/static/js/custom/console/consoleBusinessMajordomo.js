@@ -33,6 +33,7 @@ var mainDivVM = new Vue({
             // 公告
             param={};
             axios.post('/console/console/queryAnnReceiveNoPage',param).then(function (response) {
+                console.log('公告')
                 console.log(response.data)
                 mainDivVM.items=response.data.data;
             });
@@ -56,36 +57,15 @@ var mainDivVM = new Vue({
                     mainDivVM.consoleNewsParam.newsBox=false
                 }                
             }); 
-            // 待分配资源数
-            // param={};
-            // axios.post('/console/console/countTeleDircortoerUnAssignClueNum',param).then(function (response) {
-            //     console.log(response.data)                
-            //     mainDivVM.assignClueNum=response.data.data;
-            // });
-            // // 今日接受资源
-            // param={};
-            // axios.post('/console/console/countTeleDircortoerReceiveClueNum',param).then(function (response) {
-            //     console.log(response.data)
-            //     mainDivVM.receiveClueNum=response.data.data;
-            // });
-            // // 今日领取资源数
-            // param={};
-            // axios.post('/console/console/countTeleDircortoerGetClueNum',param).then(function (response) {
-            //     console.log(response.data)
-            //     mainDivVM.todaygetClueNum=response.data.data;
-            // });
-            // // 今日邀约数
-            // param={};
-            // axios.post('/console/console/countTeleDirectorTodayAppiontmentNum',param).then(function (response) {
-            //     console.log(response.data)
-            //     mainDivVM.todayAppiontmentNum=response.data.data;
-            // });
-            // // 预计明日到访数
-            // param={};
-            // axios.post('/console/console/countTeleDirecotorTomorrowArriveTime',param).then(function (response) {
-            //     console.log(response.data)
-            //     mainDivVM.tomorrowArriveTime=response.data.data;
-            // });       
+            // 待分配任务数 当月二次到访数 当月二次到访签约数
+            param={};
+            axios.post('/console/console/countBusinessDirectorCurMonthNum',param).then(function (response) {
+                console.log('待分配任务数 当月二次到访数 当月二次到访签约数')                
+                console.log(response.data)                
+                mainDivVM.assignClueNum=response.data.data;
+                mainDivVM.assignClueNum=response.data.data;
+                mainDivVM.assignClueNum=response.data.data;
+            });   
         },
     },
     created(){
