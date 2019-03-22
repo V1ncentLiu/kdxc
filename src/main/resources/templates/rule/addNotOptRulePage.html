@@ -169,9 +169,9 @@
                             <el-select filterable v-model="scope.row.orgId" placeholder="请选择">
                                 <el-option
                                     v-for="item in orgOptions"
-                                    :key="item.id"
+                                    :key="item.id+','+item.orgType"
                                     :label="item.name"
-                                    :value="item.id">
+                                    :value="item.id+','+item.orgType">
                                 </el-option>
                             </el-select>
                         </el-form-item>
@@ -354,6 +354,9 @@ var adsenseList=[[${adsenseList}]];//广告位集合
                         var orgIdChoose=this.form.assignRuleTeamList; 
                         var ary=[];                   
                         for(var i=0;i<orgIdChoose.length;i++){
+                        	var split=orgIdChoose[i].orgId.split(",");
+                        	orgIdChoose[i].orgId=split[0];
+                        	orgIdChoose[i].orgType=split[1];
                             ary.push(orgIdChoose[i].orgId);//把选择的值放入一个数组
                             var s = ary.join(",")+","; 
                             for(var j=0;j<ary.length;j++) {
@@ -430,7 +433,8 @@ var adsenseList=[[${adsenseList}]];//广告位集合
             },
             addDomain() {
                 this.form.assignRuleTeamList.push({
-                    orgId: '',                    
+                    orgId: '',       
+                    orgType: '', 
                     proportion:'',
                     resourceMaxNum:'',
                     isPrior: 0,//默认非优先
