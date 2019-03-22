@@ -222,12 +222,22 @@ public class BusinessSignController {
         return businessSignFeignClient.querySignList(dto);
     }
 
+    /**
+     * 查询签约单 不分页
+     */
+    @RequestMapping("/queryRebuts")
+    @ResponseBody
+    public JSONResult<List<BusSignRespDTO>> queryRebuts(@RequestBody SignRecordReqDTO dto) throws Exception {
+        dto.setStatus(0);
+        JSONResult<List<BusSignRespDTO>> listRes = businessSignFeignClient.querySignList(dto);
+        return listRes;
+    }
+
 
     /**
      *  签约单，新增时候回显信息
      *  1:回显当时提交邀约来访中填写的信息
      *  2: 若当前用户
-     *
      *  客户姓名，签约餐饮公司=考察公司，签约项目，签约省份，签约城市，签约区／县。
      */
     @RequestMapping("/echo")
