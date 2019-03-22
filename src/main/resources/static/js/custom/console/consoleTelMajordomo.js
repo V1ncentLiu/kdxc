@@ -11,6 +11,18 @@ var mainDivVM = new Vue({
         repeatPhonesDialog:false,
         repeatPhonesTable:[],
         dailogTitleType:'',
+        multipleSelection:[],
+        allocationVisible: false,
+        allocationForm: {
+            saleId:''
+        },
+        allocationFormRules: {
+            saleId: [
+                { required: true, message: '请选择电销顾问', trigger: 'blur' }
+            ]
+        },
+        formLabelWidth: '150px',
+        saleOptions:saleList,
         // 工作台
         activeName:'1',
         activeName2:'1',
@@ -153,6 +165,60 @@ var mainDivVM = new Vue({
             }).catch(function (error) {
                 console.log(error);
             });                
+        },
+        // 快速分配资源
+        //打开分配资源
+        toAllocationClue() {
+            var rows = this.multipleSelection;
+            if(rows.length==0){
+                this.$message({
+                    message: '请选择数据进行分配',
+                    type: 'warning'
+                });
+               return;
+            }
+            this.allocationVisible = true;
+        },
+        // 提交分配资源
+        allocationClue(formName){//分配资源
+            this.$refs[formName].validate((valid) => {
+                if (valid) {
+                    var rows = this.multipleSelection;
+                    var rowIds = [];
+                    for(var i=0;i<rows.length;i++){
+                        var curRow = rows[i];
+                        rowIds.push(curRow.id);
+                    }
+                    //分配
+                    var param  = {};
+                    param.idList=rowIds;
+                    param.teleSaleId=this.allocationForm.saleId;
+                    axios.post('/clue/pendingAllocation/allocationClue',param)
+                    .then(function (response) {
+                        var data =  response.data;
+                        if(data.code=='0'){
+                            clueVM.$message({message:'分配成功',type:'success',duration:1000,onClose:function(){
+                                clueVM.allocationVisible = false;
+                                clueVM.searchTable();
+                            }});
+                        }else{
+                            clueVM.$message({
+                                message: "接口调用失败",
+                                type: 'error'
+                            }); 
+                        }
+                    })
+                    .catch(function (error) {
+                        console.log(error);
+                    })
+                    .then(function () {
+                        
+                    });
+                } else {
+                    console.log('数据未通过校验！');
+                    return false;
+                }
+            });
         },
     },
     created(){

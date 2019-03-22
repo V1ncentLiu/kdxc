@@ -58,14 +58,14 @@ var mainDivVM = new Vue({
                 }                
             }); 
             // 待分配任务数 当月二次到访数 当月二次到访签约数
-            param={};
-            axios.post('/console/console/countBusinessDirectorCurMonthNum',param).then(function (response) {
-                console.log('待分配任务数 当月二次到访数 当月二次到访签约数')                
-                console.log(response.data)                
-                mainDivVM.assignClueNum=response.data.data;
-                mainDivVM.assignClueNum=response.data.data;
-                mainDivVM.assignClueNum=response.data.data;
-            });   
+            // param={};
+            // axios.post('/console/console/countBusinessDirectorCurMonthNum',param).then(function (response) {
+            //     console.log('待分配任务数 当月二次到访数 当月二次到访签约数')                
+            //     console.log(response.data)                
+            //     mainDivVM.visitedNum=response.data.data;
+            //     mainDivVM.assignClueNum=response.data.data;
+            //     mainDivVM.assignClueNum=response.data.data;
+            // });   
         },
     },
     created(){
