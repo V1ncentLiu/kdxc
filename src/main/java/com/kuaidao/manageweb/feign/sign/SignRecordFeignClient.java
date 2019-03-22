@@ -61,6 +61,15 @@ public interface SignRecordFeignClient {
      */
     @PostMapping("/countCurMonthSignedNum")
     JSONResult<BusinessConsolePanelRespDTO> countCurMonthSignedNum(BusinessConsoleReqDTO businessConsoleReqDTO);
+   
+    /**
+     * 商务总监控制台  待审批签约记录
+     * @param reqDTO
+     * @return
+     */
+    @PostMapping("/listSignRecordNoPage")
+    JSONResult<List<SignRecordRespDTO>> listSignRecordNoPage(SignRecordReqDTO reqDTO);
+    
     
     @Component
     static class HystrixClientFallback implements SignRecordFeignClient {
@@ -93,7 +102,14 @@ public interface SignRecordFeignClient {
                 BusinessConsoleReqDTO businessConsoleReqDTO) {
             return fallBackError("查询签约数");
         }
+
+        @Override
+        public JSONResult<List<SignRecordRespDTO>> listSignRecordNoPage(SignRecordReqDTO reqDTO) {
+            return fallBackError("查询待审批签约记录");
+        }
     }
+
+    
 
 }
 

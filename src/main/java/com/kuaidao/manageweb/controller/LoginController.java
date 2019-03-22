@@ -130,6 +130,7 @@ public class LoginController {
     public String login(HttpServletRequest request) {
         Object isShowLogoutBox =
                 SecurityUtils.getSubject().getSession().getAttribute("isShowLogoutBox");
+        SecurityUtils.getSubject().getSession().removeAttribute("isShowLogoutBox");
         request.setAttribute("isShowLogoutBox", isShowLogoutBox);
         return "login/login";
     }
@@ -570,8 +571,8 @@ public class LoginController {
             update.setId(user.getId());
             update.setIsLogin(Constants.IS_LOGIN_DOWN);
             userInfoFeignClient.update(update);
-            if("3".equals(type)) {
-            	subject.getSession().setAttribute("isShowLogoutBox", type);
+            if ("3".equals(type)) {
+                subject.getSession().setAttribute("isShowLogoutBox", type);
             }
         } else {
             subject.getSession().setAttribute("isShowLogoutBox", type);

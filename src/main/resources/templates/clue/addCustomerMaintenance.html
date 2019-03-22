@@ -58,16 +58,24 @@
 				label="性别：" :label-width="formLabelWidth"> <el-select
 				v-model="form.customerSex" placeholder="请选择" style="width: 100%;">
 			<el-option v-for="item in optsex" :key="item.value"
-				:label="item.label" :value="item.value"> </el-option> </el-select> </el-form-item> </el-col> <el-col
-				:span="8"> <el-form-item label="合伙人："
-				:label-width="formLabelWidth"> <el-select
-				v-model="form.customerPartner" placeholder="请选择"
-				style="width: 100%;"> <el-option
-				v-for="item in partnerArr" :key="item.value" :label="item.name"
-				:value="item.value"> </el-option> </el-select> <el-input
-				v-model="form.customerPartnerDetail"
-				v-show="form.customerPartner!='1'" autocomplete="off" maxLength="30"
-				placeholder="请输入合伙人姓名以及联系方式" style="margin-top:10px;"></el-input> </el-form-item> </el-col>
+				:label="item.label" :value="item.value"> </el-option> </el-select> </el-form-item> </el-col> 
+			<el-col :span="8"> 
+				<el-form-item label="合伙人：" :label-width="formLabelWidth"> 
+					<el-select v-model="form.customerPartner" placeholder="请选择"
+						style="width: 100%;"> 
+						<el-option v-for="item in partnerArr" 
+						:key="item.value" :label="item.name"
+						:value="item.value"> 
+						</el-option> 
+					</el-select> 
+					<el-input v-model="form.customerPartnerDetail"
+						v-show="form.customerPartner!='' && form.customerPartner!='1'" 
+						autocomplete="off" maxLength="30"
+						placeholder="请输入合伙人姓名以及联系方式" 
+						style="margin-top:10px;">
+					</el-input> 
+				</el-form-item> 
+			</el-col>
 			</el-row>
 			<el-row> <el-col :span="8"> <el-form-item
 				label="餐饮经验：" :label-width="formLabelWidth"> <el-select
@@ -171,7 +179,7 @@
 			上传文件名字是随机文件名 <br /> 上传到指定目录:<input type="text" id='dirname'
 				placeholder="如果不填，默认是上传到根目录" size=50>
 		</form>
-		<div id="container">
+		<div id="container" style="text-align:right;">
 			<a id="selectfiles" href="javascript:void(0);" class='btn'>选择文件</a> <a
 				id="postfiles" href="javascript:void(0);" onclick="clueUploadFile()"
 				class='btn'>开始上传</a>
@@ -259,7 +267,7 @@
 				v-for="item in cusStatusArr" :key="item.value" :label="item.name"
 				:value="item.value"> </el-option> </el-select> </el-form-item> <el-form-item label=""
 				size="mini" > <el-select
-				v-model="formInline.customerStatusSub" placeholder="客户状态" :disabled="substatus">
+				v-model="formInline.customerStatusSub" placeholder="客户状态" :disabled="!substatus">
 			<el-option v-for="item in customerStatusSubArr" :key="item.value"
 				:label="item.name" :value="item.value"> </el-option> </el-select> </el-form-item> <el-form-item
 				label="" size="mini" prop="isCall"> <el-select
@@ -422,6 +430,10 @@
 	line-height: inherit !important;
 }
 
+.progress {
+	width: 100%!important;
+}
+
 @media screen and (width:1920px) {
 	.paddingL55 .el-date-editor.el-input {
 		width: 218px;
@@ -436,6 +448,15 @@
 		text-align: center;
 	}
 	
+}
+.paddingL55 {
+	width: 1700px;
+}
+.paddingL55 .el-form-item__content {
+	line-height: 28px;
+}
+#ossfile {
+	text-align: right;
 }
 @media screen and (max-width: 1190px) {
 	.paddingL55 {
@@ -541,7 +562,7 @@ var callRecord=[[${callRecord}]];//通话记录
                 insideProjectShow:true,//内部项目默认显示
                 outsideProjectShow:false,//外部项目默认不显示
                 dialogFormImg:false,
-                substatus:false,
+                substatus:true,
                 dialogFormVisible: false,//新增手机号                
                 buttonType: 'A',//添加手机号按钮形式
                 deleteShow:false,//删除新增手机号输入框
@@ -597,13 +618,13 @@ var callRecord=[[${callRecord}]];//通话记录
                 formLabelWidth: '120px',
                 rules:{
                     customerName: [
-                         { required: true, message: '客户姓名不能为空', trigger: 'blur' }
+                         { required: true, message: '客户姓名不能为空', trigger: 'change' }
                     ],
                     province: [
-                         { required: true, message: '开店区域省份不能为空', trigger: 'blur' }
+                         { required: true, message: '开店区域省份不能为空', trigger: 'change' }
                     ],
                     city: [
-                         { required: true, message: '开店区域城市不能为空', trigger: 'blur' }
+                         { required: true, message: '开店区域城市不能为空', trigger: 'change' }
                     ],
                     customerPhone: [
                         /* { required: true, message: '手机号不能为空', trigger: 'blur' },
@@ -727,9 +748,9 @@ var callRecord=[[${callRecord}]];//通话记录
        		},
        		customerStatusChange(selVal){
        		  if(selVal=='3'){
-       			this.substatus=true;
+				  this.substatus=false;
        		 }else{
-       			this.substatus=false;
+				  this.substatus=true;
        		 }
        		},
             submitForm(form) {

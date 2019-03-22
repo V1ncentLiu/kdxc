@@ -151,6 +151,19 @@
             <el-table-column  prop="advanceAmount" label="预投金额" align="center" width="88px"></el-table-column>
             <el-table-column  prop="intenProject" label="意向项目" align="center" width="88px"></el-table-column>
             <el-table-column  prop="area" label="店面面积" align="center" width="88px"></el-table-column>
+            <el-table-column  prop="delFalg" label="邀约状态" align="center" width="88px">
+                <template slot-scope="scope">
+                    <div v-if="scope.row.delFalg == 0">
+                        正常
+                    </div>
+                    <div v-else-if="scope.row.delFalg ==1">
+                        已删除
+                    </div>
+                    <div v-else-if="scope.row.delFalg ==2">
+                        取消
+                    </div>
+                </template>
+            </el-table-column>
         </el-table>
     </template>
     <table-pagination :pager="pager"  @change="initList"></table-pagination>
@@ -803,209 +816,228 @@
 
     <el-dialog title="编辑签约单" width="70%" :visible.sync="dialogUpdateFormSigningVisible">
         <template>
-            <el-form :model="updateFormSigning" ref="updateFormSigning" >
-                <el-form-item label="驳回时间："  :label-width="formLabelWidth">
-                    <el-button size="mini"  type="text" style = "font-size: 17px;color: #1e2746">{{updateFormSigning.rebutTime}}</el-button>
-                </el-form-item>
-                <el-form-item label="驳回原因："  :label-width="formLabelWidth">
-                    <span style="color: red; width:60%; word-wrap: break-word; word-break:break-all; ">{{updateFormSigning.rebutReason}}</span>
-                    <!-- <el-button size="mini"  type="text"  style="color: red">{{updateFormSigning.rebutReason}}</el-button> -->
-                </el-form-item>
-                <div class="paddB20">签约单信息</div>
-                <div>
-                    <el-row>
-                        <el-col :span="10">
-                            <el-form-item label="签约单编号：" :label-width="formLabelWidth" prop="signNo">
-                                <el-input :disabled="notEditRebutSign" v-model="updateFormSigning.signNo" maxLength="20" disabled></el-input>
-                            </el-form-item>
-                        </el-col>
-                        <el-col :span="10">
-                            <el-form-item label="客户姓名：" :label-width="formLabelWidth" prop="customerName">
-                                <el-input :disabled="notEditRebutSign" v-model="updateFormSigning.customerName"></el-input>
-                            </el-form-item>
-                        </el-col>
-                    </el-row>
-                    <el-row>
-                        <el-col :span="10">
-                            <el-form-item label="客户身份证号：" :label-width="formLabelWidth" prop="idCard">
-                                <el-input :disabled="notEditRebutSign" v-model="updateFormSigning.idCard"  maxLength="20" ></el-input>
-                            </el-form-item>
-                        </el-col>
-                        <el-col :span="10">
-                            <el-form-item label="客户联系电话：" :label-width="formLabelWidth" prop="phone">
-                                <el-input :disabled="notEditRebutSign" v-model="updateFormSigning.phone" maxLength="11" ></el-input>
-                            </el-form-item>
-                        </el-col>
-                    </el-row>
-                    <el-row>
-                        <el-col :span="10">
-                            <el-form-item label="签约餐饮公司：" :label-width="formLabelWidth" prop="signCompanyId">
-                                <el-select :disabled="notEditRebutSign" v-model="updateFormSigning.signCompanyId" placeholder="请选择签约餐饮公司">
-                                    <el-option v-for="item in companyArr" :key="item.id" :label="item.companyName" :value="item.id"></el-option>
-                                </el-select>
-                            </el-form-item>
-                        </el-col>
-                        <el-col :span="10">
-                            <el-form-item label="签约项目：" :label-width="formLabelWidth" prop="signProjectId">
-                                <el-select :disabled="notEditRebutSign" v-model="updateFormSigning.signProjectId" placeholder="请选择">
-                                    <el-option v-for="item in projectArr" :key="item.id" :label="item.projectName" :value="item.id"></el-option>
-                                </el-select>
-                            </el-form-item>
-                        </el-col>
-                    </el-row>
-                    <el-row>
-                        <el-col :span="10">
-                            <el-form-item label="签约省份：" :label-width="formLabelWidth" prop="signProvince">
-                                <el-select :disabled="notEditRebutSign" v-model="updateFormSigning.signProvince" placeholder="请选择签约省份" @change="currentProvince">
-                                    <el-option v-for="item in provinceArr" :key="item.name" :label="item.name" :value="item.name"></el-option>
-                                </el-select>
-                            </el-form-item>
-                        </el-col>
-                        <el-col :span="10">
-                            <el-form-item label="签约城市：" :label-width="formLabelWidth" prop="signCity">
-                                <el-select :disabled="notEditRebutSign" v-model="updateFormSigning.signCity" placeholder="请选择签约城市："  @change="currentCity">
-                                    <el-option v-for="item in cityArr" :key="item.name" :label="item.name" :value="item.name"></el-option>
-                                </el-select>
-                            </el-form-item>
-                        </el-col>
-                    </el-row>
-                    <el-row>
-                        <el-col :span="10">
-                            <el-form-item label="签约区/县：" :label-width="formLabelWidth" prop="signDictrict">
-                                <el-select :disabled="notEditRebutSign" v-model="updateFormSigning.signDictrict" placeholder="请选择签约区/县">
-                                    <el-option v-for="item in districtArr" :key="item.name" :label="item.name" :value="item.name"></el-option>
-                                </el-select>
-                            </el-form-item>
-                        </el-col>
-                        <el-col :span="10">
-                            <el-form-item label="签约店型：" :label-width="formLabelWidth" prop="signShopType">
-                                <el-select :disabled="notEditRebutSign" v-model="updateFormSigning.signShopType" placeholder="请选择">
-                                    <el-option v-for="item in vistitStoreTypeArr" :key="item.value" :label="item.name" :value="item.value"></el-option>
-                                </el-select>
-                            </el-form-item>
-                        </el-col>
-                    </el-row>
-                    <el-row>
-                        <el-col :span="10">
-                            <el-form-item label="应收金额：" :label-width="formLabelWidth" prop="amountReceivable">
-                                <el-input :disabled="notEditRebutSign"  v-model="updateFormSigning.amountReceivable"  type="number" oninput="if(value.length>10)value=value.slice(0,10)"  onkeypress="return(/[\d]/.test(String.fromCharCode(event.keyCode)))" autocomplete="off" maxLength="10" style="width: 80%;"></el-input><span style="padding-left: 10px;">元</span>
-                            </el-form-item>
-                        </el-col>
-                        <el-col :span="10">
-                            <el-form-item label="路费（报首次）：" :label-width="formLabelWidth" prop="firstToll">
-                                <el-input :disabled="notEditRebutSign"   v-model="updateFormSigning.firstToll"  type="number" oninput="if(value.length>10)value=value.slice(0,10)"  onkeypress="return(/[\d]/.test(String.fromCharCode(event.keyCode)))" autocomplete="off" maxLength="10" style="width: 80%;"></el-input><span style="padding-left: 10px;">元</span>
-                            </el-form-item>
-                        </el-col>
-                    </el-row>
-                    <el-row>
-                        <el-col :span="10">
-                            <el-form-item label="优惠金额：" :label-width="formLabelWidth" prop="preferentialAmount">
-                                <el-input :disabled="notEditRebutSign"  v-model="updateFormSigning.preferentialAmount"  type="number" oninput="if(value.length>10)value=value.slice(0,10)"  onkeypress="return(/[\d]/.test(String.fromCharCode(event.keyCode)))" autocomplete="off" maxLength="10" style="width: 80%;"></el-input><span style="padding-left: 10px;">元</span>
-                            </el-form-item>
-                        </el-col>
-                        <el-col :span="10">
-                            <el-form-item label="签约类型：" :label-width="formLabelWidth" prop="signType">
-                                <el-select :disabled="notEditRebutSign" v-model="updateFormSigning.signType" @change="selectUpdateSigningType" placeholder="请选择签约类型：">
-                                    <el-option
-                                            v-for="item in option2s"
-                                            :key="item.value"
-                                            :label="item.label"
-                                            :value="item.value">
-                                    </el-option>
-                                </el-select>
-                            </el-form-item>
-                        </el-col>
-                    </el-row>
-                    <el-row>
-                        <el-col :span="10">
-                            <el-form-item label="赠送金额：" :label-width="formLabelWidth" prop="giveAmount">
-                                <el-input :disabled="notEditRebutSign" v-model="updateFormSigning.giveAmount"  type="number" oninput="if(value.length>10)value=value.slice(0,10)"  onkeypress="return(/[\d]/.test(String.fromCharCode(event.keyCode)))" autocomplete="off" maxLength="10" style="width: 80%;"></el-input><span style="padding-left: 10px;">元</span>
-                            </el-form-item>
-                        </el-col>
-                    </el-row>
-                </div>
-                <div class="paddB20">付款明细</div>
-                <div>
-                    <el-row>
-                        <el-col :span="10">
-                            <el-form-item label="付款类型：" :label-width="formLabelWidth" prop="payType">
-                                <el-select v-model="updateFormSigning.payType" :disabled ="payTypeSelect" placeholder="请选择签约付款类型" @change="changePayType">
-                                   <!-- <el-option  key="1" label="全款" value="1"></el-option>
-                                    <el-option  key="2" label="定金" value="2"></el-option>
-                                    <el-option  key="3" label="追加定金" value="3"></el-option>
-                                    <el-option  key="4" label="尾款" value="4"></el-option>-->
-                                    <el-option
-                                            v-for="item in payTypeArr"
-                                            :key="item.value"
-                                            :label="item.label"
-                                            :value="item.value">
-                                    </el-option>
-                                </el-select>
-                            </el-form-item>
-                        </el-col>
-                        <el-col :span="10">
-                            <el-form-item label="付款方式：" :label-width="formLabelWidth" prop="payMode">
-                                <el-select v-model="updateFormSigning.payMode" placeholder="请选择付款方式：">
-                                    <el-option
-                                            v-for="item in option3s"
-                                            :key="item.value"
-                                            :label="item.label"
-                                            :value="item.value">
-                                    </el-option>
-                                </el-select>
-                            </el-form-item>
-                        </el-col>
-                    </el-row>
-                    <el-row>
-                        <el-col :span="10">
-                            <el-form-item label="付款时间：" :label-width="formLabelWidth" prop="payTime">
-                                <el-date-picker
-                                        type="date"
-                                        format="yyyy-MM-dd"
-                                        placeholder="选择日期"
-                                        v-model="updateFormSigning.payTime" style="width: 100%;"></el-date-picker>
-                            </el-form-item>
-                        </el-col>
-                        <el-col :span="10">
-                            <el-form-item label="实收金额：" :label-width="formLabelWidth" prop="amountReceived">
-                                <el-input maxLength="10" v-model="updateFormSigning.amountReceived" style="width: 80%;"  type="number" oninput="if(value.length>10)value=value.slice(0,10)"  onkeypress="return(/[\d]/.test(String.fromCharCode(event.keyCode)))"></el-input>
-                                <span style="padding-left: 10px;">元</span>
-                            </el-form-item>
-                        </el-col>
-                    </el-row>
-                    <el-row v-show="isAllMoney">
-                        <el-col :span="10">
-                            <el-form-item label="余款金额：" :label-width="formLabelWidth" prop="amountBalance">
-                                <el-input maxLength="10" v-model="updateFormSigning.amountBalance" style="width: 80%;"  type="number" oninput="if(value.length>10)value=value.slice(0,10)"  onkeypress="return(/[\d]/.test(String.fromCharCode(event.keyCode)))"></el-input>
-                                <span style="padding-left: 10px;">元</span>
-                            </el-form-item>
-                        </el-col>
-                        <el-col :span="10">
-                            <el-form-item label="预计余款补齐时间：" :label-width="formLabelWidth" prop="makeUpTime">
-                                <el-date-picker
-                                        type="date"
-                                        format="yyyy-MM-dd"
-                                        placeholder="选择日期"
-                                        v-model="updateFormSigning.makeUpTime"
-                                        style="width: 100%;"></el-date-picker>
-                            </el-form-item>
-                        </el-col>
-                    </el-row>
-                    <el-row>
-                        <el-col :span="10">
-                            <el-form-item label="业绩金额：" :label-width="formLabelWidth" prop="performanceAmount">
-                                <el-input maxLength="10" v-model="updateFormSigningAmountPerformance" style="width: 80%;"  type="number" oninput="if(value.length>10)value=value.slice(0,10)"  onkeypress="return(/[\d]/.test(String.fromCharCode(event.keyCode)))"></el-input>
-                                <span style="padding-left: 10px;">元</span>
-                            </el-form-item>
-                        </el-col>
-                    </el-row>
-                </div>
-            </el-form>
-            <div slot="footer" class="dialog-footer f-tac">
-                <el-button type="primary" @click="submitUpdateForm('updateFormSigning')">提交</el-button>
-                <el-button @click="dialogUpdateFormSigningVisible = false">取 消</el-button>
+		 <el-tabs v-model="editableTabsValue" type="card" @tab-click="tabClick">
+              <el-tab-pane :key="item.name" v-for="(item, index) in editableTabs" :label="item.title" :name="item.name">
+              </el-tab-pane>
+         </el-tabs>
+
+          <el-form :model="updateFormSigning" :rules="rules" ref="updateFormSigning" >
+            <el-form-item label="驳回时间："  :label-width="formLabelWidth">
+                <el-button size="mini"  type="text" style = "font-size: 17px;color: #1e2746">{{updateFormSigning.rebutTime}}</el-button>
+            </el-form-item>
+            <el-form-item label="驳回原因："  :label-width="formLabelWidth">
+                <span style="color: red; width:60%; word-wrap: break-word; word-break:break-all; ">{{updateFormSigning.rebutReason}}</span>
+            </el-form-item>
+            <div class="paddB20">签约单信息</div>
+            <div>
+                <el-row>
+                    <el-col :span="10">
+                        <el-form-item label="签约单编号：" :label-width="formLabelWidth" prop="signNo">
+                            <el-input :disabled="notEditRebutSign" v-model="updateFormSigning.signNo" maxLength="20" disabled></el-input>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="10">
+                        <el-form-item label="客户姓名：" :label-width="formLabelWidth" prop="customerName">
+                            <el-input :disabled="notEditRebutSign" v-model="updateFormSigning.customerName"></el-input>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="10">
+                        <el-form-item label="客户身份证号：" :label-width="formLabelWidth" prop="idCard">
+                            <el-input :disabled="notEditRebutSign" v-model="updateFormSigning.idCard"  maxLength="20" ></el-input>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="10">
+                        <el-form-item label="客户联系电话：" :label-width="formLabelWidth" prop="phone">
+                            <el-input :disabled="notEditRebutSign" v-model="updateFormSigning.phone" maxLength="11" ></el-input>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="10">
+                        <el-form-item label="签约餐饮公司：" :label-width="formLabelWidth" prop="signCompanyId">
+                            <el-select :disabled="notEditRebutSign" v-model="updateFormSigning.signCompanyId" placeholder="请选择签约餐饮公司">
+                                <el-option v-for="item in companyArr" :key="item.id" :label="item.companyName" :value="item.id"></el-option>
+                            </el-select>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="10">
+                        <el-form-item label="签约项目：" :label-width="formLabelWidth" prop="signProjectId">
+                            <el-select :disabled="notEditRebutSign" v-model="updateFormSigning.signProjectId" placeholder="请选择">
+                                <el-option v-for="item in projectArr" :key="item.id" :label="item.projectName" :value="item.id"></el-option>
+                            </el-select>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="10">
+                        <el-form-item label="签约省份：" :label-width="formLabelWidth" prop="signProvince">
+                            <el-select :disabled="notEditRebutSign" v-model="updateFormSigning.signProvince" placeholder="请选择签约省份" @change="currentProvince">
+                                <el-option v-for="item in provinceArr" :key="item.name" :label="item.name" :value="item.name"></el-option>
+                            </el-select>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="10">
+                        <el-form-item label="签约城市：" :label-width="formLabelWidth" prop="signCity">
+                            <el-select :disabled="notEditRebutSign" v-model="updateFormSigning.signCity" placeholder="请选择签约城市："  @change="currentCity">
+                                <el-option v-for="item in cityArr" :key="item.name" :label="item.name" :value="item.name"></el-option>
+                            </el-select>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="10">
+                        <el-form-item label="签约区/县：" :label-width="formLabelWidth" prop="signDictrict">
+                            <el-select :disabled="notEditRebutSign" v-model="updateFormSigning.signDictrict" placeholder="请选择签约区/县">
+                                <el-option v-for="item in districtArr" :key="item.name" :label="item.name" :value="item.name"></el-option>
+                            </el-select>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="10">
+                        <el-form-item label="签约店型：" :label-width="formLabelWidth" prop="signShopType">
+                            <el-select :disabled="notEditRebutSign" v-model="updateFormSigning.signShopType" placeholder="请选择">
+                                <el-option v-for="item in vistitStoreTypeArr" :key="item.value" :label="item.name" :value="item.value"></el-option>
+                            </el-select>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="10">
+                        <el-form-item label="应收金额：" :label-width="formLabelWidth" prop="amountReceivable">
+                            <el-input :disabled="notEditRebutSign"  v-model="updateFormSigning.amountReceivable"  type="number" oninput="if(value.length>10)value=value.slice(0,10)"  onkeypress="return(/[\d]/.test(String.fromCharCode(event.keyCode)))" autocomplete="off" maxLength="10" style="width: 80%;"></el-input><span style="padding-left: 10px;">元</span>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="10">
+                        <el-form-item label="路费（报首次）：" :label-width="formLabelWidth" prop="firstToll">
+                            <el-input :disabled="notEditRebutSign"   v-model="updateFormSigning.firstToll"  type="number" oninput="if(value.length>10)value=value.slice(0,10)"  onkeypress="return(/[\d]/.test(String.fromCharCode(event.keyCode)))" autocomplete="off" maxLength="10" style="width: 80%;"></el-input><span style="padding-left: 10px;">元</span>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="10">
+                        <el-form-item label="优惠金额：" :label-width="formLabelWidth" prop="preferentialAmount">
+                            <el-input :disabled="notEditRebutSign"  v-model="updateFormSigning.preferentialAmount"  type="number" oninput="if(value.length>10)value=value.slice(0,10)"  onkeypress="return(/[\d]/.test(String.fromCharCode(event.keyCode)))" autocomplete="off" maxLength="10" style="width: 80%;"></el-input><span style="padding-left: 10px;">元</span>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="10">
+                        <el-form-item label="签约类型：" :label-width="formLabelWidth" prop="signType">
+                            <el-select :disabled="notEditRebutSign" v-model="updateFormSigning.signType" @change="selectUpdateSigningType" placeholder="请选择签约类型：">
+                                <el-option
+                                        v-for="item in option2s"
+                                        :key="item.value"
+                                        :label="item.label"
+                                        :value="item.value">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="10">
+                        <el-form-item label="赠送金额：" :label-width="formLabelWidth" prop="giveAmount">
+                            <el-input :disabled="notEditRebutSign" v-model="updateFormSigning.giveAmount"  type="number" oninput="if(value.length>10)value=value.slice(0,10)"  onkeypress="return(/[\d]/.test(String.fromCharCode(event.keyCode)))" autocomplete="off" maxLength="10" style="width: 80%;"></el-input><span style="padding-left: 10px;">元</span>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="10">
+                        <el-form-item label="是否远程签约：" :label-width="formLabelWidth" prop="isRemoteSign">
+                            <el-select v-model="updateFormSigning.isRemoteSign" placeholder="请选择是否远程签约：">
+                                <el-option
+                                        v-for="item in isSignArr"
+                                        :key="item.value"
+                                        :label="item.label"
+                                        :value="item.value">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
             </div>
-        </template>
+            <div class="paddB20">付款明细</div>
+            <div>
+                <el-row>
+                    <el-col :span="10">
+                        <el-form-item label="付款类型：" :label-width="formLabelWidth" prop="payType">
+                            <el-select v-model="updateFormSigning.payType" :disabled ="payTypeSelect" placeholder="请选择签约付款类型" @change="changePayType">
+                                <el-option
+                                        v-for="item in payTypeArr"
+                                        :key="item.value"
+                                        :label="item.label"
+                                        :value="item.value">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="10">
+                        <el-form-item label="付款方式：" :label-width="formLabelWidth" prop="payMode">
+                            <el-select v-model="updateFormSigning.payMode" placeholder="请选择付款方式：">
+                                <el-option
+                                        v-for="item in option3s"
+                                        :key="item.value"
+                                        :label="item.label"
+                                        :value="item.value">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="10">
+                        <el-form-item label="付款时间：" :label-width="formLabelWidth" prop="payTime" required>
+                            <el-date-picker
+                                    type="date"
+                                    format="yyyy-MM-dd"
+                                    placeholder="选择日期"
+                                    v-model="updateFormSigning.payTime" style="width: 100%;"></el-date-picker>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="10">
+                        <el-form-item label="实收金额：" :label-width="formLabelWidth" prop="amountReceived">
+                            <el-input maxLength="10" v-model="updateFormSigning.amountReceived" style="width: 80%;"  type="number" oninput="if(value.length>10)value=value.slice(0,10)"  onkeypress="return(/[\d]/.test(String.fromCharCode(event.keyCode)))"></el-input>
+                            <span style="padding-left: 10px;">元</span>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row v-show="isAllMoney">
+                    <el-col :span="10">
+                        <el-form-item label="余款金额：" :label-width="formLabelWidth" prop="amountBalance">
+                            <el-input maxLength="10" v-model="updateFormSigning.amountBalance" style="width: 80%;"  type="number" oninput="if(value.length>10)value=value.slice(0,10)"  onkeypress="return(/[\d]/.test(String.fromCharCode(event.keyCode)))"></el-input>
+                            <span style="padding-left: 10px;">元</span>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="10">
+                        <el-form-item label="预计余款补齐时间：" :label-width="formLabelWidth" prop="makeUpTime" required>
+                            <el-date-picker
+                                    type="date"
+                                    format="yyyy-MM-dd"
+                                    placeholder="选择日期"
+                                    v-model="updateFormSigning.makeUpTime"
+                                    style="width: 100%;"></el-date-picker>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="10">
+                        <el-form-item label="业绩金额：" :label-width="formLabelWidth" prop="performanceAmount">
+                            <el-input maxLength="10" v-model="updateFormSigningAmountPerformance" style="width: 80%;"  type="number" oninput="if(value.length>10)value=value.slice(0,10)"  onkeypress="return(/[\d]/.test(String.fromCharCode(event.keyCode)))"></el-input>
+                            <span style="padding-left: 10px;">元</span>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="10">
+                        <el-form-item label="备注：" :label-width="formLabelWidth">
+                            <el-input type="textarea" v-model="updateFormSigning.remarks"></el-input>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+            </div>
+        </el-form>
+          <div class="dialog-footer f-tac">
+            <el-button type="primary" @click="submitUpdateForm('updateFormSigning')">提交</el-button>
+            <el-button @click="dialogUpdateFormSigningVisible = false">取 消</el-button>
+          </div>
+       </template>
     </el-dialog>
 
 </div>
@@ -1023,6 +1055,9 @@
     var mainDivVM = new Vue({
         el: '#mainDiv',
         data: {
+            editableTabsValue: 0, //tabs标签
+            editableTabs: [],
+            tabIndex: 2,
             updateVisitRecordDialogVisible:false,
             addVisitRecordDialogVisible:false,
             notVisitdDialogVisible:false,
@@ -1076,7 +1111,6 @@
             companyArr:[],
             projectArr:proSelect,
             multipleSelection:[],
-            rules:{},
             notVisitFlagRules:{
                 notVisitReason: [
                     { required: true, message: '未到访原因为必填项', trigger: 'blur' },
@@ -1167,7 +1201,7 @@
                 signId:"",
                 clueId:"",
                 signNo:'',
-                customerName: '',
+                customerName: "",
                 idCard: '',
                 phone: '',
                 signCompanyId:'',
@@ -1191,13 +1225,83 @@
                 amountBalance: '',
                 makeUpTime:'',
                 payTime: '',
-                amountPerformance:''
+                amountPerformance:'',
+                remarks: '' //备注
             },
             pager:{
                 total: 0,
                 currentPage: 1,
                 pageSize: 20,
             },
+            //rules
+            rules: {
+            	customerName: [
+				    { required: true, message: '请输入客户姓名', trigger: 'blur' }
+				],
+				idCard: [
+				    { required: true, message: '请输入客户身份证号', trigger: 'blur' }
+				],
+				phone: [
+					{ required: true, message: '请输入客户联系电话', trigger: 'blur' }
+				],
+				signCompanyId: [
+					{ required: true, message: '请选择签约餐饮公司', trigger: 'change' }
+				],
+				signProjectId: [
+					{ required: true, message: '请选择签约项目', trigger: 'change' }
+				],
+				signProvince: [
+					{ required: true, message: '请选择签约省份', trigger: 'change' }
+				],
+				signCity: [
+					{ required: true, message: '请选择签约城市', trigger: 'change' }
+				],
+				signDictrict: [
+					{ required: true, message: '请选择签约区/县', trigger: 'change' }
+				],
+				signShopType: [
+					{ required: true, message: '请选择签约店型', trigger: 'change' }
+				],
+				amountReceivable: [
+					{ required: true, message: '请输入应收金额', trigger: 'blur' }
+				],
+				firstToll: [
+					{ required: true, message: '请输入路费（报首次）', trigger: 'blur' }
+				],
+				preferentialAmount: [
+					{ required: true, message: '请输入优惠金额', trigger: 'blur' }
+				],
+				signType: [
+					{ required: true, message: '请选择签约类型', trigger: 'change' }
+				],
+				giveAmount: [
+					{ required: true, message: '请输入赠送金额', trigger: 'blur' }
+				],
+				// payType: [
+				// 	{ required: true, message: '请选择付款类型', trigger: 'change' }
+				// ],
+				payMode: [
+					{ required: true, message: '请选择付款方式', trigger: 'change' }
+				],
+				payTime: [
+					{ type: 'date', required: true, message: '请选择时间', trigger: 'change' }
+				],
+				amountReceived: [
+					{ required: true, message: '请输入实收金额', trigger: 'blur' }
+				],
+				amountBalance: [
+					{ required: true, message: '请输入余款金额', trigger: 'blur' }
+				],
+				makeUpTime: [
+					{ type: 'date', required: true, message: '请选择预计余款补齐时间', trigger: 'change' }
+				],
+				// performanceAmount: [
+				// 	{ required: true, message: '请输入业绩金额', trigger: 'blur' }
+				// ],
+                isRemoteSign: [ //是否远程签约
+                    { required: true, message: '请选择是否远程签约', trigger: 'change' }
+                ]
+			},
         },
         computed: {
             updateFormSigningAmountPerformance(){
@@ -1218,6 +1322,9 @@
 
         },
         methods: {
+        	tabClick(tab, event){
+                this.updateFormSigning = this.editableTabs[tab.index].updateFormSigning;
+            },
             formatVisitTime(row){
                 function dateFtt(fmt,date)
                 { //author: meizz
@@ -1714,16 +1821,33 @@
             editRebutSign(row){
                 var param ={};
                 console.log(row)
-                param.id = row.clueId
-                axios.post('/businesssign/one',param).then(function (response) {
-                    console.log(response)
+                param.clueId = row.clueId
+                axios.post('/businesssign/queryRebuts',param).then(function (response) {
+                    console.log(response)                  
                     if(null===response||response.data==null||response.data.code!='0'){
                         if(response.data.code!='0'){
                             mainDivVM.$message({message: response.data.msg, type: 'warning'});
                         }
                         return false;
                     }else{
-                        mainDivVM.updateFormSigning =response.data.data;
+                        if(response.data.data.length==0){
+                            mainDivVM.$message({message:'没有签约单', type: 'warning'});
+                            return false;
+                        }
+
+                        //填装数据
+                        mainDivVM.editableTabs = []
+                        for(var i = 0 ; i < response.data.data.length ;i++){
+                            console.log(response.data.data[i])
+                            var data = {};
+                            data.updateFormSigning=response.data.data[i];
+                            data.title='（'+ data.updateFormSigning.signNo +'）签约单';
+                            data.name=""+i;
+                            mainDivVM.editableTabs.push(data);
+                        }
+
+                        //设置显示数据
+                        mainDivVM.updateFormSigning =response.data.data[0];
                         if( mainDivVM.updateFormSigning){
                             if(mainDivVM.updateFormSigning.payType > 2){
                                 if(mainDivVM.updateFormSigning.payType == 3){
@@ -1743,8 +1867,6 @@
                                 mainDivVM.payTypeSelect = true;
                                 mainDivVM.payTypeArr = mainDivVM.payTypeArr1.slice(0,2)
                             }
-
-
                             mainDivVM.currentProvince(mainDivVM.updateFormSigning.signProvince)
                             mainDivVM.currentCity(mainDivVM.updateFormSigning.signCity)
                         }
@@ -1804,6 +1926,7 @@
             submitUpdateForm(formName) {
                 var param = this.updateFormSigning;
                 param.amountPerformance = this.updateFormSigningAmountPerformance;
+                this.updateFormSigning.amountPerformance = this.updateFormSigningAmountPerformance;
                 param.makeUpTime = new Date( param.makeUpTime)
                 param.payTime = new Date( param.payTime)
                 // 设置 clueid

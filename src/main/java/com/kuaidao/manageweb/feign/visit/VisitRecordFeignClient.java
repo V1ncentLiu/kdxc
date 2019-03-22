@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import com.kuaidao.aggregation.dto.console.BusinessConsolePanelRespDTO;
 import com.kuaidao.aggregation.dto.console.BusinessConsoleReqDTO;
+import com.kuaidao.aggregation.dto.console.BusinessDirectorConsolePanelRespDTO;
 import com.kuaidao.aggregation.dto.sign.PayDetailDTO;
 import com.kuaidao.aggregation.dto.visitrecord.RejectVisitRecordReqDTO;
 import com.kuaidao.aggregation.dto.visitrecord.VisitRecordReqDTO;
@@ -62,6 +63,24 @@ public interface VisitRecordFeignClient {
     @PostMapping("/countCurMonthNum")
     JSONResult<BusinessConsolePanelRespDTO> countCurMonthNum(BusinessConsoleReqDTO businessConsoleReqDTO);
     
+    /**
+     * 商务总监 看板 9当月二次到访数  10 当月二次来访签约数
+     * @param businessConsoleReqDTO
+     * @return
+     */
+    @PostMapping("/countBusinessDirectorCurMonthNum")
+    JSONResult<BusinessDirectorConsolePanelRespDTO> countBusinessDirectorCurMonthNum(
+            BusinessConsoleReqDTO businessConsoleReqDTO);
+    
+    
+    /**
+     * 查询到访记录
+     * @param visitRecordReqDTO
+     * @return
+     */
+    @PostMapping("/listVisitRecordNoPage")
+    JSONResult<List<VisitRecordRespDTO>> listVisitRecordNoPage(VisitRecordReqDTO visitRecordReqDTO);
+    
     @Component
     static class HystrixClientFallback implements VisitRecordFeignClient {
 
@@ -98,7 +117,23 @@ public interface VisitRecordFeignClient {
                 BusinessConsoleReqDTO businessConsoleReqDTO) {
             return fallBackError("查询到访数");
         }
+
+
+        @Override
+        public JSONResult<BusinessDirectorConsolePanelRespDTO> countBusinessDirectorCurMonthNum(
+                BusinessConsoleReqDTO businessConsoleReqDTO) {
+            return fallBackError("商务总监看板");
+        }
+
+
+        @Override
+        public JSONResult<List<VisitRecordRespDTO>> listVisitRecordNoPage(
+                VisitRecordReqDTO visitRecordReqDTO) {
+            return fallBackError("查询到访记录");
+        }
     }
+
+   
 
 
 

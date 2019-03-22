@@ -15,10 +15,10 @@ var myCallRecordVm = new Vue({
                 label: '全部'
           },
         {
-            value: "1",
+            value: "0",
             label: '未接通'
         }, {
-            value: "0",
+            value: "1",
             label: '已接通'
         }],
         callTypeList:[

@@ -76,14 +76,19 @@ public class ClueReceiveRecordsController {
 							// 电销副总
 							clueReceiveRecordsDTO.setTeleCeoId(ceoUserInfoJson.getData().get(0).getId());
 						}
-						userRoleInfo.setRoleCode(RoleCodeEnum.DXZJ.name());
-						JSONResult<List<UserInfoDTO>> ceoUserInfoJsons = userInfoFeignClient
-								.listByOrgAndRole(userRoleInfo);
-						if (ceoUserInfoJson.getCode().equals(JSONResult.SUCCESS) && null != ceoUserInfoJson.getData()
-								&& ceoUserInfoJson.getData().size() > 0) {
-							// 电销总监
-							clueReceiveRecordsDTO.setTeleDirectorId(ceoUserInfoJson.getData().get(0).getId());
+						if(!RoleCodeEnum.DXZJ.name().equals(roleList.get(0).getRoleCode())) {
+							userRoleInfo.setRoleCode(RoleCodeEnum.DXZJ.name());
+							JSONResult<List<UserInfoDTO>> ceoUserInfoJsons = userInfoFeignClient
+									.listByOrgAndRole(userRoleInfo);
+							if (ceoUserInfoJsons.getCode().equals(JSONResult.SUCCESS) && null != ceoUserInfoJsons.getData()
+									&& ceoUserInfoJsons.getData().size() > 0) {
+								// 电销总监
+								clueReceiveRecordsDTO.setTeleDirectorId(ceoUserInfoJsons.getData().get(0).getId());
+							}
+						}else {
+							clueReceiveRecordsDTO.setTeleDirectorId(user.getId());
 						}
+						
 
 					}
 					if (null!=org.getOrgType()&& org.getOrgType().equals(OrgTypeConstant.ZSZX)) {
@@ -97,14 +102,6 @@ public class ClueReceiveRecordsController {
 								&& ceoUserInfoJson.getData().size() > 0) {
 							// 电销总经理
 							clueReceiveRecordsDTO.setTeleManagerId(ceoUserInfoJson.getData().get(0).getId());
-						}
-						userRoleInfo.setRoleCode(RoleCodeEnum.DXZJ.name());
-						JSONResult<List<UserInfoDTO>> ceoUserInfoJsons = userInfoFeignClient
-								.listByOrgAndRole(userRoleInfo);
-						if (ceoUserInfoJson.getCode().equals(JSONResult.SUCCESS) && null != ceoUserInfoJson.getData()
-								&& ceoUserInfoJson.getData().size() > 0) {
-							// 电销总监
-							clueReceiveRecordsDTO.setTeleDirectorId(ceoUserInfoJson.getData().get(0).getId());
 						}
 						clueReceiveRecordsDTO.setTeleCompanyId(org.getId());
 					}
