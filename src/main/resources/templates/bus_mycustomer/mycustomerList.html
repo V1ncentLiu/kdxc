@@ -777,7 +777,7 @@
                         </el-form-item>
                     </el-col>
                 </el-row>
-                <el-row v-show="isAllMoney">
+                <el-row v-show="isAllMoney" >
                     <el-col :span="10">
                         <el-form-item label="余款金额：" :label-width="formLabelWidth" prop="amountBalance">
                             <el-input maxLength="10" v-model="formSigning.amountBalance"  type="number" oninput="if(value.length>10)value=value.slice(0,10)"  onkeypress="return(/[\d]/.test(String.fromCharCode(event.keyCode)))"></el-input>
@@ -816,11 +816,10 @@
 
     <el-dialog title="编辑签约单" width="70%" :visible.sync="dialogUpdateFormSigningVisible">
         <template>
-		 <el-tabs v-model="editableTabsValue" type="card" @tab-click="tabClick">
-              <el-tab-pane :key="item.name" v-for="(item, index) in editableTabs" :label="item.title" :name="item.name">
-              </el-tab-pane>
-         </el-tabs>
-
+		 <!--<el-tabs v-model="editableTabsValue" type="card" @tab-click="tabClick">-->
+              <!--<el-tab-pane :key="item.name" v-for="(item, index) in editableTabs" :label="item.title" :name="item.name">-->
+              <!--</el-tab-pane>-->
+         <!--</el-tabs>-->
           <el-form :model="updateFormSigning" :rules="rules" ref="updateFormSigning" >
             <el-form-item label="驳回时间："  :label-width="formLabelWidth">
                 <el-button size="mini"  type="text" style = "font-size: 17px;color: #1e2746">{{updateFormSigning.rebutTime}}</el-button>
@@ -945,7 +944,7 @@
                                 <el-option
                                         v-for="item in isSignArr"
                                         :key="item.value"
-                                        :label="item.label"
+                                        :label="item.name"
                                         :value="item.value">
                                 </el-option>
                             </el-select>
@@ -998,15 +997,15 @@
                         </el-form-item>
                     </el-col>
                 </el-row>
-                <el-row v-show="isAllMoney">
+                <el-row v-if="isAllMoney" >
                     <el-col :span="10">
                         <el-form-item label="余款金额：" :label-width="formLabelWidth" prop="amountBalance">
-                            <el-input maxLength="10" v-model="updateFormSigning.amountBalance" style="width: 80%;"  type="number" oninput="if(value.length>10)value=value.slice(0,10)"  onkeypress="return(/[\d]/.test(String.fromCharCode(event.keyCode)))"></el-input>
+                            <el-input  maxLength="10" v-model="updateFormSigning.amountBalance" style="width: 80%;"  type="number" oninput="if(value.length>10)value=value.slice(0,10)"  onkeypress="return(/[\d]/.test(String.fromCharCode(event.keyCode)))"></el-input>
                             <span style="padding-left: 10px;">元</span>
                         </el-form-item>
                     </el-col>
                     <el-col :span="10">
-                        <el-form-item label="预计余款补齐时间：" :label-width="formLabelWidth" prop="makeUpTime" required>
+                        <el-form-item label="预计余款补齐时间："  :label-width="formLabelWidth" prop="makeUpTime" required>
                             <el-date-picker
                                     type="date"
                                     format="yyyy-MM-dd"
@@ -1100,7 +1099,7 @@
             isSignArr:[{value:0,name:'否'},{value:1,name:'是'}],
             visitArr:[{value:-1,name:'待处理'},{value:0,name:'未到访'},{value:1,name:'首次到访'},{value:2,name:'2次到访'},{value:3,name:'多次到访'}],
             visitTypeArr:[{value:1,name:'预约来访'},{value:2,name:'慕名来访'},{value:3,name:'临时来访'}],
-            option2s: [{value: 1, label: '一次性全款'},{value: 2, label: '先交订金'}],
+            option2s: [{value: 1, label: '一次性全款'},{value: 2, label: '先付定金'}],
             option3s: [{value: '1', label: '现金'},{value: '2', label: 'POS'},{value: '3', label: '转账'}],
             payTypeArr:[{value: "1", label: '全款'},{value: "2", label: '定金'},{value: "3", label: '追加定金'},{value: "4", label: '尾款'}],
             payTypeArr1:[{value: "1", label: '全款'},{value: "2", label: '定金'},{value: "3", label: '追加定金'},{value: "4", label: '尾款'}],
@@ -1822,7 +1821,7 @@
                 var param ={};
                 console.log(row)
                 param.clueId = row.clueId
-                axios.post('/businesssign/queryRebuts',param).then(function (response) {
+                axios.post('/businesssign/one',param).then(function (response) {
                     console.log(response)                  
                     if(null===response||response.data==null||response.data.code!='0'){
                         if(response.data.code!='0'){
@@ -1830,24 +1829,23 @@
                         }
                         return false;
                     }else{
-                        if(response.data.data.length==0){
-                            mainDivVM.$message({message:'没有签约单', type: 'warning'});
-                            return false;
-                        }
-
+                        // if(response.data.data.length==0){
+                        //     mainDivVM.$message({message:'没有签约单', type: 'warning'});
+                        //     return false;
+                        // }
                         //填装数据
-                        mainDivVM.editableTabs = []
-                        for(var i = 0 ; i < response.data.data.length ;i++){
-                            console.log(response.data.data[i])
-                            var data = {};
-                            data.updateFormSigning=response.data.data[i];
-                            data.title='（'+ data.updateFormSigning.signNo +'）签约单';
-                            data.name=""+i;
-                            mainDivVM.editableTabs.push(data);
-                        }
+                        // mainDivVM.editableTabs = []
+                        // for(var i = 0 ; i < response.data.data.length ;i++){
+                        //     console.log(response.data.data[i])
+                        //     var data = {};
+                        //     data.updateFormSigning=response.data.data[i];
+                        //     data.title='（'+ data.updateFormSigning.signNo +'）签约单';
+                        //     data.name=""+i;
+                        //     mainDivVM.editableTabs.push(data);
+                        // }
 
                         //设置显示数据
-                        mainDivVM.updateFormSigning =response.data.data[0];
+                        mainDivVM.updateFormSigning =response.data.data;
                         if( mainDivVM.updateFormSigning){
                             if(mainDivVM.updateFormSigning.payType > 2){
                                 if(mainDivVM.updateFormSigning.payType == 3){
