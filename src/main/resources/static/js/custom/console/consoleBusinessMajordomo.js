@@ -7,6 +7,10 @@ var mainDivVM = new Vue({
         activeName3:'1',
         activeName4:'1',
         activeName5:'1',
+        unAssignNum:'',//待分配任务数
+        secondVisitedNum:'',//当月二次到访数
+        secondSignedNum:'',//当月二次来访签约数
+        direcotorTomorrowArriveTime:'',//预计明日到访数
         //公告        
         items: [ 
             // {content:'系统将于2018年12月5日晚上12:00进行系统升级，请各位同事及时处理工作。系统预计在12:20分恢复正常使用,感谢配合!',id:1},
@@ -58,14 +62,21 @@ var mainDivVM = new Vue({
                 }                
             }); 
             // 待分配任务数 当月二次到访数 当月二次到访签约数
-            // param={};
-            // axios.post('/console/console/countBusinessDirectorCurMonthNum',param).then(function (response) {
-            //     console.log('待分配任务数 当月二次到访数 当月二次到访签约数')                
-            //     console.log(response.data)                
-            //     mainDivVM.visitedNum=response.data.data;
-            //     mainDivVM.assignClueNum=response.data.data;
-            //     mainDivVM.assignClueNum=response.data.data;
-            // });   
+            param={};
+            axios.post('/console/console/countBusinessDirectorCurMonthNum',param).then(function (response) {
+                console.log('待分配任务数 当月二次到访数 当月二次到访签约数')                
+                console.log(response)                
+                // mainDivVM.unAssignNum=response.data.data.unAssignNum;
+                // mainDivVM.secondVisitedNum=response.data.data.secondVisitedNum;
+                // mainDivVM.secondSignedNum=response.data.data.secondSignedNum;
+            }); 
+            // 预计明日到访数
+            param={};
+            axios.post('/console/console/countBusiDirecotorTomorrowArriveTime',param).then(function (response) {
+                console.log('预计明日到访数')                
+                console.log(response)                
+                mainDivVM.direcotorTomorrowArriveTime=response.data.data;
+            });   
         },
     },
     created(){
