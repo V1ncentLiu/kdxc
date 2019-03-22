@@ -10,7 +10,7 @@
 </head>
 <body>
 
-<div id="mainDiv"  class="mainPadding">
+<div v-loading="loading" id="mainDiv"  class="mainPadding">
     <template>
         <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
             <el-breadcrumb-item>Home</el-breadcrumb-item>
@@ -301,6 +301,7 @@
     var mainDivVM = new Vue({
         el: '#mainDiv',
         data: {
+        	loading:false,
             dialogChooseList: false,
         	tablecluereleaseData:[],
         	cluereleaseFormVisible:false,
@@ -669,6 +670,7 @@
                     this.$message({message: '请选择资源', type: 'warning'});
                     return false;
                 }else{
+                	this.loading = true;
                 	var param={};
                 	param.idList = []
                 	 for(var i = 0 ; i < this.multipleSelection.length ; i++ ){
@@ -676,23 +678,30 @@
                      }
                 	  axios.post('/clue/cluereceiverecords/receiveClueByClueIds', param)
                       .then(function (response) {
+                    	  
                             var result =  response.data;
                             if(result.code == 0){
                             	if(result.data !=null){
                             		var data = result.data;
                             		if(data.backStatus ==3){
+                            			mainDivVM.loading = false;
                             			mainDivVM.$message({message: data.backResult, type: 'warning'});
                             		}else if(data.backStatus !=0){
+                            			mainDivVM.loading = false;
                             			mainDivVM.receiveDialog = true;
                             			mainDivVM.receiveTitle=data.backResult;
                             			mainDivVM.receiveTable= data.clueCustomerDTOs;
                             		}else{
-                            			window.location.href="/aggregation/publiccustomer/listPage"; 
+                            			mainDivVM.$message({message:'领取成功',type:'success',duration:500,onClose:function(){
+                            				window.location.href="/aggregation/publiccustomer/listPage"; 
+                            			}});
+                            			
                             		}
                             	}
                             	console.info(result);
                                 
                             }else{
+                            	mainDivVM.loading = false;
                             	mainDivVM.$message({message: result.msg, type: 'warning'});
                             }
                             
