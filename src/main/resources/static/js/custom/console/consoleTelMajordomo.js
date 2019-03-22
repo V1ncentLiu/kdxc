@@ -55,6 +55,7 @@ var mainDivVM = new Vue({
             // 未读消息
             param={};
             axios.post('/console/console/queryBussReceiveNoPage',param).then(function (response) {
+                console.log('未读消息')
                 console.log(response.data)
                 if(response.data){
                     if (response.data.data) {
