@@ -1,5 +1,6 @@
 package com.kuaidao.manageweb.feign.clue;
 
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.netflix.feign.FeignClient;
@@ -44,6 +45,17 @@ public interface PendingVisitFeignClient {
     @PostMapping("/busAllocationClue")
     public JSONResult<String> busAllocationClue(
             @RequestBody BusAllocationClueReq busAllocationClueReq);
+    
+    
+
+    /**
+     * 商务总监控制台 待分配邀约来访客户 
+     * @param pageParam
+     * @return
+     */
+    @PostMapping("/pendingVisitListNoPage")
+    public JSONResult<List<BusPendingAllocationDTO>> pendingVisitListNoPage(
+            BusPendingAllocationPageParam pageParam);
 
 
     @Component
@@ -71,7 +83,15 @@ public interface PendingVisitFeignClient {
             return fallBackError("分配资源");
         }
 
+
+        @Override
+        public JSONResult<List<BusPendingAllocationDTO>> pendingVisitListNoPage(
+                BusPendingAllocationPageParam pageParam) {
+            return fallBackError("查询待分配来访客户列表");
+        }
+
     }
+
 
 
 }

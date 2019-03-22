@@ -18,8 +18,13 @@
 		<el-breadcrumb separator="/" class="elBreadcrumb marginB20">
 		<el-breadcrumb-item>Home</el-breadcrumb-item> <el-breadcrumb-item>线索管理</el-breadcrumb-item>
 		<el-breadcrumb-item>待分发资源池</el-breadcrumb-item> </el-breadcrumb>
-		<el-row class="marginB10"> <el-button type="primary"
-			@click="editFun">自动分发</el-button> </el-row>
+		<el-row class="marginB10"> 
+        <shiro:hasPermission name="waitDistributResource:distribute">
+		  <el-button type="primary"
+			@click="editFun">自动分发</el-button> 
+         </shiro:hasPermission>
+			
+			</el-row>
 		<el-row class="marginB10 greybg padding20" style="padding-bottom: 0">
 		<el-form :inline="true" :model="form" ref="form"> <el-form-item
 			label="创建时间:"> <el-date-picker style="width: 100%;"
@@ -277,10 +282,42 @@ var userList=[[${userList}]];
                         cancelButtonText: '取消',
                         type: 'warning'
                     }).then(() => {
-                        this.$message({
-                            type: 'success',
-                            message: '操作成功!'
-                        });
+                    	var param={};
+                        var rows = this.multipleSelection;
+                        var ids=[];
+                        if(null!=rows&&rows.length>0){
+                        	for(var i=0;i<rows.length;i++){
+                        		ids.push(rows[i].clueId);	
+                        	}
+                        }
+               		  axios.post('/exetend/agendaTaskManager/autoAllocationTask',param).then(function (response) {
+           			 if(!response){
+           					wdrVM.$message({
+      	                        message: "接口调用失败",
+      	                        type: 'error'
+      	                      }); 
+      						return ;
+      					}
+           				var resobj= response.data;
+      					if(!resobj){
+      						wdrVM.$message({
+      	                        message: "接口调用失败",
+      	                        type: 'error'
+      	                      }); 
+      						return ;
+      					} 
+      					if(resobj.code!='0'){
+      						wdrVM.$message({
+      	                        message: "接口调用失败",
+      	                        type: 'error'
+      	                      }); 
+      						return ;
+      					}
+      				 wdrVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
+      						wdrVM.initTableData();
+   		        	}});
+      			 
+           		  	});
                     }).catch(() => {
                         this.$message({
                             type: 'info',

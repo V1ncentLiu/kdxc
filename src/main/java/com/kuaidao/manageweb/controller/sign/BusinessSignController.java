@@ -222,12 +222,22 @@ public class BusinessSignController {
         return businessSignFeignClient.querySignList(dto);
     }
 
+    /**
+     * 查询签约单 不分页
+     */
+    @RequestMapping("/queryRebuts")
+    @ResponseBody
+    public JSONResult<List<BusSignRespDTO>> queryRebuts(@RequestBody SignRecordReqDTO dto) throws Exception {
+        dto.setStatus(0);
+        JSONResult<List<BusSignRespDTO>> listRes = businessSignFeignClient.querySignList(dto);
+        return listRes;
+    }
+
 
     /**
      *  签约单，新增时候回显信息
      *  1:回显当时提交邀约来访中填写的信息
      *  2: 若当前用户
-     *
      *  客户姓名，签约餐饮公司=考察公司，签约项目，签约省份，签约城市，签约区／县。
      */
     @RequestMapping("/echo")
@@ -308,9 +318,21 @@ public class BusinessSignController {
     @RequestMapping("/visitRecordPage")
     public String visitRecordPage(HttpServletRequest request,@RequestParam String clueId , @RequestParam String signId ,@RequestParam String readyOnly ) throws Exception {
 
-        IdEntityLong idEntityLong = new IdEntityLong(); 
+        IdEntityLong idEntityLong = new IdEntityLong();
         idEntityLong.setId(Long.valueOf(clueId));
         JSONResult<BusSignRespDTO> busSign = queryOne(idEntityLong);
+
+//        tab页面显示逻辑
+//        SignRecordReqDTO recordReqDTO = new SignRecordReqDTO();
+//        recordReqDTO.setClueId(Long.valueOf(clueId));
+//        if("1".equals(readyOnly)){
+//            recordReqDTO.setStatus(0); // 审核中
+//        }else{
+//            recordReqDTO.setStatus(1); // 查看到访记录
+//        }
+//        JSONResult<List<BusSignRespDTO>> resSignListJson = querySignList(recordReqDTO);
+//        List<BusSignRespDTO> data = resSignListJson.getData();
+//        BusSignRespDTO sign = data.get(0);
         BusSignRespDTO sign = busSign.getData();
 
         List<BusSignRespDTO> signData =  new ArrayList();
@@ -320,11 +342,9 @@ public class BusinessSignController {
 //      签约基本信息
         request.setAttribute("signData", signData);
         request.setAttribute("payType",sign.getPayType());  // 最新一次付款类型： 用来判断显示行数
-
         if("4".equals(sign.getPayType())){
             readyOnly = "1";
         }
-
         if("1".equals(sign.getPayType())){
             /**
              * 全款时候：不存在定金 尾款 以及 追加定金的情况

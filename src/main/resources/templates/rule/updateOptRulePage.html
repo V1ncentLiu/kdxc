@@ -23,20 +23,8 @@
                     </el-form-item>
                 </el-col>
                 <el-col :span="12">
-                    <el-form-item label="规则有效开始时间：" prop="startTime" :label-width="formLabelWidth">
-                        <el-date-picker type="datetime" placeholder="选择日期时间" v-model="form.startTime" style="width: 300px;"></el-date-picker>
-                    </el-form-item>
-                </el-col>
-            </el-row>
-            <el-row>                
-                <el-col :span="12">
-                    <el-form-item label="规则有效结束时间：" prop="endTime" :label-width="formLabelWidth">
-                        <el-date-picker type="datetime" placeholder="选择日期时间" v-model="form.endTime" style="width: 300px;"></el-date-picker>
-                    </el-form-item>
-                </el-col>
-                <el-col :span="12">
                     <el-form-item label="行业类别：" prop="industryCategory" :label-width="formLabelWidth">
-                        <el-select v-model="form.industryCategory" multiple placeholder="请选择" style="width: 300px;">
+                        <el-select v-model="form.industryCategory" disabled multiple placeholder="请选择" style="width: 300px;">
                             <el-option
                                 v-for="item in industryOptions"
                                 :key="item.value"
@@ -44,6 +32,18 @@
                                 :value="item.value">
                             </el-option>
                         </el-select>
+                    </el-form-item>
+                </el-col>
+            </el-row>
+            <el-row>                
+                <el-col :span="12">
+                    <el-form-item label="规则有效开始时间：" prop="startTime" :label-width="formLabelWidth">
+                        <el-date-picker type="datetime" placeholder="选择日期时间" v-model="form.startTime" style="width: 300px;"></el-date-picker>
+                    </el-form-item>
+                </el-col>
+                <el-col :span="12">
+                    <el-form-item label="规则有效结束时间：" prop="endTime" :label-width="formLabelWidth">
+                        <el-date-picker type="datetime" placeholder="选择日期时间" v-model="form.endTime" style="width: 300px;"></el-date-picker>
                     </el-form-item>
                 </el-col>
             </el-row>
@@ -62,7 +62,7 @@
                 </el-col>
                 <el-col :span="12">
                     <el-form-item label="资源类别：" prop="category" :label-width="formLabelWidth">
-                        <el-select v-model="form.category" multiple placeholder="请选择" style="width: 300px;">
+                        <el-select v-model="form.category" disabled multiple placeholder="请选择" style="width: 300px;">
                             <el-option
                                 v-for="item in categoryOptions"
                                 :key="item.value"
@@ -155,9 +155,9 @@
                             <el-select filterable v-model="scope.row.orgId" placeholder="请选择">
                                 <el-option
                                     v-for="item in orgOptions"
-                                    :key="item.id"
+                                    :key="item.id+','+item.orgType"
                                     :label="item.name"
-                                    :value="item.id">
+                                    :value="item.id+','+item.orgType">
                                 </el-option>
                             </el-select>
                         </el-form-item>
@@ -305,10 +305,10 @@ var orgList=[[${orgList}]];//媒介集合
                 }],
                 priorOptions: [{
                     value: 1,
-                    name: '优化'
+                    name: '优先'
                 }, {
                     value: 0,
-                    name: '非优化'
+                    name: '非优先'
                 }],
                 tags1: [],//包含搜索词
                 tags2: [],//不包含搜索词
@@ -318,12 +318,14 @@ var orgList=[[${orgList}]];//媒介集合
             submitForm(form) {
                 this.$refs[form].validate((valid) => {
                     if (valid) {
-                        // 开始时间不能大约结束时间
+                    	// 开始时间不能大约结束时间
                         var startTime=this.form.startTime;
                         var endTime=this.form.endTime;
-                        if(endTime && startTime>endTime){
+                        var  start=new Date(startTime).getTime();
+                        var  end=new Date(endTime).getTime();
+                        if(start>end){
                             this.$message({
-                                message: '开始时间不能大于结束时间',
+                                message: '结束时间不允许选择早于开始时间',
                                 type: 'warning'
                             });
                             return;
@@ -332,6 +334,9 @@ var orgList=[[${orgList}]];//媒介集合
                         var orgIdChoose=this.form.assignRuleTeamList; 
                         var ary=[];                   
                         for(var i=0;i<orgIdChoose.length;i++){
+                        	var split=orgIdChoose[i].orgId.split(",");
+                        	orgIdChoose[i].orgId=split[0];
+                        	orgIdChoose[i].orgType=split[1];
                             ary.push(orgIdChoose[i].orgId);//把选择的值放入一个数组
                             var s = ary.join(",")+","; 
                             for(var j=0;j<ary.length;j++) {
@@ -356,8 +361,16 @@ var orgList=[[${orgList}]];//媒介集合
                         param.source=this.form.source.join(',');
                         param.industryCategory=this.form.industryCategory.join(',');
                         param.category=this.form.category.join(',');
-                        param.searchWord=this.tags1.join(',');
-                        param.notSearchWord=this.tags2.join(',');
+                        if(this.tags1){
+	                        param.searchWord=this.tags1.join(',');
+                        }else{
+                        	param.searchWord='';
+                        }
+                        if(this.tags2){
+	                        param.notSearchWord=this.tags2.join(',');
+                        }else{
+                        	param.notSearchWord='';
+                        }
                         axios.post('/clueAssignRule/optRule/update', param)
 	       	            .then(function (response) {
 	       	            	aorVM.submitDisabled=false;
@@ -407,7 +420,8 @@ var orgList=[[${orgList}]];//媒介集合
             
             addDomain() {
                 this.form.assignRuleTeamList.push({
-                    orgId: '',                    
+                    orgId: '',           
+                    orgType: '', 
                     proportion:'',
                     resourceMaxNum:'',
                     isPrior: 0,//默认非优先
@@ -439,9 +453,17 @@ var orgList=[[${orgList}]];//媒介集合
             this.form.source=clueAssignRule.source.split(',');
             this.form.category=clueAssignRule.category.split(',');
             this.form.status=clueAssignRule.status;
-            this.form.assignRuleTeamList=clueAssignRule.assignRuleTeamList;
-            this.tags1=clueAssignRule.searchWord.split(',');
-            this.tags2=clueAssignRule.notSearchWord.split(',');
+            var orgIdChoose=clueAssignRule.assignRuleTeamList;
+            for(var i=0;i<orgIdChoose.length;i++){
+            	orgIdChoose[i].orgId=orgIdChoose[i].orgId+","+orgIdChoose[i].orgType;
+            }
+            this.form.assignRuleTeamList=orgIdChoose;
+            if(clueAssignRule.searchWord){
+	            this.tags1=clueAssignRule.searchWord.split(',');
+            }
+            if(clueAssignRule.notSearchWord){
+	            this.tags2=clueAssignRule.notSearchWord.split(',');
+            }
             this.form.province=clueAssignRule.province;
             this.form.notProvince=clueAssignRule.notProvince;
         }

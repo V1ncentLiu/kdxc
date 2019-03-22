@@ -12,6 +12,7 @@ import com.kuaidao.aggregation.dto.clue.ClueAppiontmentDTO;
 import com.kuaidao.aggregation.dto.clue.ClueAppiontmentPageParam;
 import com.kuaidao.aggregation.dto.clue.ClueAppiontmentReq;
 import com.kuaidao.aggregation.dto.clue.ClueRepeatPhoneDTO;
+import com.kuaidao.aggregation.dto.console.BusinessConsoleReqDTO;
 import com.kuaidao.aggregation.dto.console.TeleConsoleReqDTO;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.IdEntityLong;
@@ -115,6 +116,18 @@ public interface AppiontmentFeignClient {
      */
 	@PostMapping("/countTeleDirecotorTomorrowArriveTime")
     public JSONResult<Integer> countTeleDirecotorTomorrowArriveTime(TeleConsoleReqDTO reqDTO);
+	
+	
+
+    /**
+     * 商务总监 预计明日到访数
+     * @param businessConsoleReqDTO
+     * @return
+     */
+	@PostMapping("/countBusiDirecotorTomorrowArriveTime")
+    public JSONResult<Integer> countBusiDirecotorTomorrowArriveTime(
+            BusinessConsoleReqDTO businessConsoleReqDTO);
+
 
 	
 	@Component
@@ -179,6 +192,12 @@ public interface AppiontmentFeignClient {
         @Override
         public JSONResult<Integer> countTeleDirecotorTomorrowArriveTime(TeleConsoleReqDTO reqDTO) {
             return fallBackError("预计明日来访数");
+        }
+
+        @Override
+        public JSONResult<Integer> countBusiDirecotorTomorrowArriveTime(
+                BusinessConsoleReqDTO businessConsoleReqDTO) {
+            return fallBackError("预计明日到访数");
         }
 
 	}

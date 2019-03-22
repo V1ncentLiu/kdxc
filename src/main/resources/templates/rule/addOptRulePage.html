@@ -23,18 +23,6 @@
                     </el-form-item>
                 </el-col>
                 <el-col :span="12">
-                    <el-form-item label="规则有效开始时间：" prop="startTime" :label-width="formLabelWidth">
-                        <el-date-picker type="datetime" placeholder="选择日期时间" v-model="form.startTime" style="width: 300px;"></el-date-picker>
-                    </el-form-item>
-                </el-col>
-            </el-row>
-            <el-row>                
-                <el-col :span="12">
-                    <el-form-item label="规则有效结束时间：" prop="endTime" :label-width="formLabelWidth">
-                        <el-date-picker type="datetime" placeholder="选择日期时间" v-model="form.endTime" style="width: 300px;"></el-date-picker>
-                    </el-form-item>
-                </el-col>
-                <el-col :span="12">
                     <el-form-item label="行业类别：" prop="industryCategory" :label-width="formLabelWidth">
                         <el-select v-model="form.industryCategory" multiple placeholder="请选择" style="width: 300px;">
                             <el-option
@@ -44,6 +32,18 @@
                                 :value="item.value">
                             </el-option>
                         </el-select>
+                    </el-form-item>
+                </el-col>
+            </el-row>
+            <el-row>                
+                <el-col :span="12">
+                    <el-form-item label="规则有效开始时间：" prop="startTime" :label-width="formLabelWidth">
+                        <el-date-picker type="datetime" placeholder="选择日期时间" v-model="form.startTime" style="width: 300px;"></el-date-picker>
+                    </el-form-item>
+                </el-col>
+                <el-col :span="12">
+                    <el-form-item label="规则有效结束时间：" prop="endTime" :label-width="formLabelWidth">
+                        <el-date-picker type="datetime" placeholder="选择日期时间" v-model="form.endTime" style="width: 300px;"></el-date-picker>
                     </el-form-item>
                 </el-col>
             </el-row>
@@ -187,9 +187,9 @@
                             <el-select filterable v-model="scope.row.orgId" placeholder="请选择">
                                 <el-option
                                     v-for="item in orgOptions"
-                                    :key="item.id"
+                                    :key="item.id+','+item.orgType"
                                     :label="item.name"
-                                    :value="item.id">
+                                    :value="item.id+','+item.orgType">
                                 </el-option>
                             </el-select>
                         </el-form-item>
@@ -342,10 +342,10 @@ var orgList=[[${orgList}]];//媒介集合
                 }],
                 priorOptions: [{
                     value: 1,
-                    name: '优化'
+                    name: '优先'
                 }, {
                     value: 0,
-                    name: '非优化'
+                    name: '非优先'
                 }],
                 tags1: [],//包含搜索词
                 tags2: [],//不包含搜索词
@@ -362,7 +362,7 @@ var orgList=[[${orgList}]];//媒介集合
                         var endTime=this.form.endTime;
                         if(endTime && startTime>endTime){
                             this.$message({
-                                message: '开始时间不能大于结束时间',
+                                message: '结束时间不允许选择早于开始时间',
                                 type: 'warning'
                             });
                             return;
@@ -371,6 +371,9 @@ var orgList=[[${orgList}]];//媒介集合
                         var orgIdChoose=this.form.assignRuleTeamList; 
                         var ary=[];                   
                         for(var i=0;i<orgIdChoose.length;i++){
+                        	var split=orgIdChoose[i].orgId.split(",");
+                        	orgIdChoose[i].orgId=split[0];
+                        	orgIdChoose[i].orgType=split[1];
                             ary.push(orgIdChoose[i].orgId);//把选择的值放入一个数组
                             var s = ary.join(",")+","; 
                             for(var j=0;j<ary.length;j++) {
@@ -468,6 +471,7 @@ var orgList=[[${orgList}]];//媒介集合
             addDomain() {
                 this.form.assignRuleTeamList.push({
                     orgId: '',                    
+                    orgType: '',                    
                     proportion:'',
                     resourceMaxNum:'',
                     isPrior: 0,//默认非优先

@@ -43,8 +43,6 @@ var mainDivVM = new Vue({
         receiveTable:[],
         // 今日待跟进客户资源
         dataTable: [],
-
-
         // 工作台
         activeName:'1',
         activeName2:'1',
@@ -69,8 +67,6 @@ var mainDivVM = new Vue({
                 // {content:'公告3公告3公告3公告3公告3公告3公告3',id:3}
             ]
         }
-        
-
     },
     methods: {
         openTrackingDialog(cid){//跟进记录点击方法
@@ -102,6 +98,8 @@ var mainDivVM = new Vue({
             param.pageSize = this.pager.pageSize;
             param.pageNum =  this.pager.currentPage;
             axios.post('/aggregation/publiccustomer/queryPage',param).then(function (response) {
+                console.log('快速领取新资源')
+                console.log(response.data)
                 if(null===response||response.data==null||response.data.code!='0'){
                     if(response.data.code!='0'){
                         mainDivVM.$message({message: response.data.msg, type: 'warning'});
@@ -115,68 +113,65 @@ var mainDivVM = new Vue({
                 }
             })
         },
-        openReceive(){//领取                
-            if(this.multipleSelection.length==0){
-                this.$message({message: '请选择资源', type: 'warning'});
-                return false;
-            }else{
-            	var param={};
-            	param.idList = []
-            	 for(var i = 0 ; i < this.multipleSelection.length ; i++ ){
-                     param.idList.push(this.multipleSelection[i].clueid)
-                 }
-            	  axios.post('/clue/cluereceiverecords/receiveClueByClueIds', param)
-                  .then(function (response) {
-                        var result =  response.data;
-                        if(result.code == 0){
-                        	if(result.data !=null){
-                        		var data = result.data;
-                        		if(data.backStatus ==3){
-                        			mainDivVM.$message({message: data.backResult, type: 'warning'});
-                        		}else if(data.backStatus !=0){
-                        			mainDivVM.receiveDialog = true;
-                        			mainDivVM.receiveTitle=data.backResult;
-                        			mainDivVM.receiveTable= data.clueCustomerDTOs;
-                        		}else{
-                        			window.location.href="/aggregation/publiccustomer/listPage"; 
-                        		}
-                        	}                                
-                        }else{
-                        	mainDivVM.$message({message: result.msg, type: 'warning'});
-                        }
-                        
-                  }).catch(function (error) {
-                              console.log(error);
-                  })           
-                // 1、本组释放到公有池的资源，本组的电销人员不能再捡了
-                // 2、总监领取老资源上限按照领取规则管理中设置的限制进行限制
-                // 3、电销人员领取新资源上限按照领取规则管理中设置的限制进行限制
-                var resourceType=1;//假数据
-             /*    if(resourceType==1){
-                    this.$alert('此资源（资源姓名+手机号）为组内资源，不可进行领取。', '提示', {
-                      confirmButtonText: '确定',
-                      callback: action => {
-                        this.$message({
-                          type: 'info',
-                          message: `action: ${ action }`
-                        });
-                      }
-                    });
-                    return;
-                }else if(resourceType==2){
-                    this.$alert('今日领取超限制XX数。', '提示');
-                    return;
-                }else if(resourceType==3){
-                    this.$alert('今日领取超限制XX数。', '提示');
-                    return;
-                }else{
-                    //领取成功
+        openReceive(row){//领取 
+            console.log(row)               
+            var param={};
+            param.idList = []
+            // for(var i = 0 ; i < this.multipleSelection.length ; i++ ){
+            //     param.idList.push(this.multipleSelection[i].clueid)
+            // }
+            param.idList.push(row.clueid)
+            axios.post('/clue/cluereceiverecords/receiveClueByClueIds', param)
+              .then(function (response) {
+                    var result =  response.data;
+                    if(result.code == 0){
+                        if(result.data !=null){
+                            var data = result.data;
+                            if(data.backStatus ==3){
+                                mainDivVM.$message({message: data.backResult, type: 'warning'});
+                            }else if(data.backStatus !=0){
+                                mainDivVM.receiveDialog = true;
+                                mainDivVM.receiveTitle=data.backResult;
+                                mainDivVM.receiveTable= data.clueCustomerDTOs;
+                            }else{
+                                window.location.href="/aggregation/publiccustomer/listPage"; 
+                            }
+                        }                                
+                    }else{
+                        mainDivVM.$message({message: result.msg, type: 'warning'});
+                    }
+                    
+              }).catch(function (error) {
+                          console.log(error);
+              })           
+            // 1、本组释放到公有池的资源，本组的电销人员不能再捡了
+            // 2、总监领取老资源上限按照领取规则管理中设置的限制进行限制
+            // 3、电销人员领取新资源上限按照领取规则管理中设置的限制进行限制
+            var resourceType=1;//假数据
+            /*    if(resourceType==1){
+                this.$alert('此资源（资源姓名+手机号）为组内资源，不可进行领取。', '提示', {
+                  confirmButtonText: '确定',
+                  callback: action => {
                     this.$message({
-                        message: '资源领取成功',
-                        type: 'success'
+                      type: 'info',
+                      message: `action: ${ action }`
                     });
-                } */
-            }
+                  }
+                });
+                return;
+            }else if(resourceType==2){
+                this.$alert('今日领取超限制XX数。', '提示');
+                return;
+            }else if(resourceType==3){
+                this.$alert('今日领取超限制XX数。', '提示');
+                return;
+            }else{
+                //领取成功
+                this.$message({
+                    message: '资源领取成功',
+                    type: 'success'
+                });
+            } */
         },
         //展现详情
         showClueDetailInfo (row, column) {
@@ -208,6 +203,8 @@ var mainDivVM = new Vue({
             var param = {};
             // axios.post('/tele/clueMyCustomerInfo/findTeleClueInfo',param).then(function (response) {
             axios.post('/console/console/listTodayFollowClue',param).then(function (response) {
+                console.log('今日待跟进客户资源')
+                console.log(response.data)
                 if(!response){
                     mainDivVM.$message({
                         message: "接口调用失败",
@@ -253,6 +250,7 @@ var mainDivVM = new Vue({
             // 未读消息
             param={};
             axios.post('/console/console/queryBussReceiveNoPage',param).then(function (response) {
+                console.log('未读消息')
                 console.log(response.data)
                 if(response.data){
                     if (response.data.data) {
