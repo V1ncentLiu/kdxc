@@ -818,6 +818,9 @@
         <template>
 		 <el-tabs v-model="editableTabsValue" type="card" @tab-click="tabClick">
               <el-tab-pane :key="item.name" v-for="(item, index) in editableTabs" :label="item.title" :name="item.name">
+              </el-tab-pane>
+         </el-tabs>
+
           <el-form :model="updateFormSigning" :rules="rules" ref="updateFormSigning" >
             <el-form-item label="驳回时间："  :label-width="formLabelWidth">
                 <el-button size="mini"  type="text" style = "font-size: 17px;color: #1e2746">{{updateFormSigning.rebutTime}}</el-button>
@@ -938,9 +941,9 @@
                     </el-col>
                     <el-col :span="10">
                         <el-form-item label="是否远程签约：" :label-width="formLabelWidth" prop="isRemoteSign">
-                            <el-select v-model="formSigning.isRemoteSign" placeholder="请选择是否远程签约：">
+                            <el-select v-model="updateFormSigning.isRemoteSign" placeholder="请选择是否远程签约：">
                                 <el-option
-                                        v-for="item in option2s"
+                                        v-for="item in isSignArr"
                                         :key="item.value"
                                         :label="item.label"
                                         :value="item.value">
@@ -1034,8 +1037,6 @@
             <el-button type="primary" @click="submitUpdateForm('updateFormSigning')">提交</el-button>
             <el-button @click="dialogUpdateFormSigningVisible = false">取 消</el-button>
           </div>
-              </el-tab-pane>
-         </el-tabs>
        </template>
     </el-dialog>
 
@@ -1054,7 +1055,7 @@
     var mainDivVM = new Vue({
         el: '#mainDiv',
         data: {
-            editableTabsValue: '1', //tabs标签
+            editableTabsValue: 0, //tabs标签
             editableTabs: [],
             tabIndex: 2,
             updateVisitRecordDialogVisible:false,
@@ -1063,7 +1064,7 @@
             notVisitFlagDialogVisible:false,
             showVisitAduitDialogVisible:false,
             dialogFormSigningVisible:false,
-            dialogUpdateFormSigningVisible:true,
+            dialogUpdateFormSigningVisible:false,
             existsSign:false,
             curSignStatus:"",
             isAllMoney: false,
@@ -1276,9 +1277,9 @@
 				giveAmount: [
 					{ required: true, message: '请输入赠送金额', trigger: 'blur' }
 				],
-				payType: [
-					{ required: true, message: '请选择付款类型', trigger: 'change' }
-				],
+				// payType: [
+				// 	{ required: true, message: '请选择付款类型', trigger: 'change' }
+				// ],
 				payMode: [
 					{ required: true, message: '请选择付款方式', trigger: 'change' }
 				],
@@ -1294,9 +1295,9 @@
 				makeUpTime: [
 					{ type: 'date', required: true, message: '请选择预计余款补齐时间', trigger: 'change' }
 				],
-				performanceAmount: [
-					{ required: true, message: '请输入业绩金额', trigger: 'blur' }
-				],
+				// performanceAmount: [
+				// 	{ required: true, message: '请输入业绩金额', trigger: 'blur' }
+				// ],
                 isRemoteSign: [ //是否远程签约
                     { required: true, message: '请选择是否远程签约', trigger: 'change' }
                 ]
@@ -1322,13 +1323,8 @@
         },
         methods: {
         	tabClick(tab, event){
-        		console.log( tab.index );
-                console.log( this.editableTabs[tab.index].updateFormSigning1 );
-                console.log( this.editableTabs[tab.index].updateFormSigning1.customerName);
-        		this.updateFormSigning.customerName = '2323'//this.editableTabs[tab.index].updateFormSigning.customerName;
-                console.log(this.updateFormSigning)
-                // updateFormSigning
-        	},
+                this.updateFormSigning = this.editableTabs[tab.index].updateFormSigning;
+            },
             formatVisitTime(row){
                 function dateFtt(fmt,date)
                 { //author: meizz
@@ -1825,7 +1821,7 @@
             editRebutSign(row){
                 var param ={};
                 console.log(row)
-                param.id = row.clueId
+                param.clueId = row.clueId
                 axios.post('/businesssign/queryRebuts',param).then(function (response) {
                     console.log(response)                  
                     if(null===response||response.data==null||response.data.code!='0'){
@@ -1838,13 +1834,16 @@
                             mainDivVM.$message({message:'没有签约单', type: 'warning'});
                             return false;
                         }
+
                         //填装数据
-                        for(var i = 0 ; i < response.data.data ;i++){
+                        mainDivVM.editableTabs = []
+                        for(var i = 0 ; i < response.data.data.length ;i++){
+                            console.log(response.data.data[i])
                             var data = {};
-                            data.title='';
-                            data.name='';
                             data.updateFormSigning=response.data.data[i];
-                            mainDivVM.editableTabs.push();
+                            data.title='（'+ data.updateFormSigning.signNo +'）签约单';
+                            data.name=""+i;
+                            mainDivVM.editableTabs.push(data);
                         }
 
                         //设置显示数据
@@ -1927,6 +1926,7 @@
             submitUpdateForm(formName) {
                 var param = this.updateFormSigning;
                 param.amountPerformance = this.updateFormSigningAmountPerformance;
+                this.updateFormSigning.amountPerformance = this.updateFormSigningAmountPerformance;
                 param.makeUpTime = new Date( param.makeUpTime)
                 param.payTime = new Date( param.payTime)
                 // 设置 clueid
