@@ -13,6 +13,7 @@ import com.kuaidao.aggregation.dto.clue.ClueAgendaTaskQueryDTO;
 import com.kuaidao.aggregation.dto.clue.ClueDistributionedTaskDTO;
 import com.kuaidao.aggregation.dto.clue.ClueDistributionedTaskQueryDTO;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
+import com.kuaidao.common.entity.IdListLongReq;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
 
@@ -38,6 +39,15 @@ public interface ExtendClueFeignClient {
 	public JSONResult<PageBean<ClueDistributionedTaskDTO>> queryPageDistributionedTask(
 			@RequestBody ClueDistributionedTaskQueryDTO queryDto);
 
+	/**
+	 * 已审核列表查询
+	 * 
+	 * @param queryDto
+	 * @return
+	 */
+	@RequestMapping(method = RequestMethod.POST, value = "/autoAllocationTask")
+	public JSONResult<String> autoAllocationTask(@RequestBody IdListLongReq list);
+
 	@Component
 	static class HystrixClientFallback implements ExtendClueFeignClient {
 
@@ -60,6 +70,12 @@ public interface ExtendClueFeignClient {
 				ClueDistributionedTaskQueryDTO queryDto) {
 			// TODO Auto-generated method stub
 			return fallBackError("查询已审核业务");
+		}
+
+		@Override
+		public JSONResult<String> autoAllocationTask(IdListLongReq list) {
+			// TODO Auto-generated method stub
+			return fallBackError("自动分配任务");
 		}
 
 	}
