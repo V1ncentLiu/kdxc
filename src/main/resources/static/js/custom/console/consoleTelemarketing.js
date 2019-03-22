@@ -98,6 +98,8 @@ var mainDivVM = new Vue({
             param.pageSize = this.pager.pageSize;
             param.pageNum =  this.pager.currentPage;
             axios.post('/aggregation/publiccustomer/queryPage',param).then(function (response) {
+                console.log('快速领取新资源')
+                console.log(response.data)
                 if(null===response||response.data==null||response.data.code!='0'){
                     if(response.data.code!='0'){
                         mainDivVM.$message({message: response.data.msg, type: 'warning'});
