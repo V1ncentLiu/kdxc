@@ -481,6 +481,8 @@ var mainDivVM = new Vue({
         this.initBoard();
         // 待分配邀约来访客户
         this.searchTable();
+        // 待审签约记录
+        this.initSignRecordData();
     },
     mounted(){
         document.getElementById('mainDiv').style.display = 'block';
