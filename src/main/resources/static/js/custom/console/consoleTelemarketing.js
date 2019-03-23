@@ -158,6 +158,10 @@ var mainDivVM = new Vue({
         // 今日待跟进客户资源
         initTableData(){
             var param = {};
+            var pageSize = this.pager.pageSize;
+            var pageNum = this.pager.currentPage;
+            param.pageNum=pageNum;
+            param.pageSize=pageSize;
             // axios.post('/tele/clueMyCustomerInfo/findTeleClueInfo',param).then(function (response) {
             axios.post('/console/console/listTodayFollowClue',param).then(function (response) {
                 console.log('今日待跟进客户资源')
@@ -166,7 +170,7 @@ var mainDivVM = new Vue({
                     mainDivVM.$message({
                         message: "接口调用失败",
                         type: 'error'
-                      }); 
+                    }); 
                     return ;
                 }
                 var resobj= response.data;
