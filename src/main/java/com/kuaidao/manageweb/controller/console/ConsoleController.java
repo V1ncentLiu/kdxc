@@ -106,18 +106,19 @@ public class ConsoleController {
      */
     @RequestMapping("/index")
     public String index(String type ) {
+        System.out.println("console console");
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
         List<RoleInfoDTO> roleList = curLoginUser.getRoleList();
         RoleInfoDTO roleInfoDTO = roleList.get(0);
-        String roleName = roleInfoDTO.getRoleName();
+        String roleCode = roleInfoDTO.getRoleCode();
         String path= "";
-/*        if(RoleCodeEnum.DXCYGW.value().equals(roleName)) {
+/*        if(RoleCodeEnum.DXCYGW.name().equals(roleCode)) {
             //电销顾问
-        }else if(RoleCodeEnum.DXZJ.value().equals(roleName)) {
+        }else if(RoleCodeEnum.DXZJ.name().equals(roleCode)) {
             //电销总监
-        }else if(RoleCodeEnum.SWJL.value().equals(roleName)) {
+        }else if(RoleCodeEnum.SWJL.name().equals(roleCode)) {
             //商务经理
-        }else if(RoleCodeEnum.SWZJ.value().equals(roleName)) {
+        }else if(RoleCodeEnum.SWZJ.name().equals(roleCode)) {
             //商务总监
         }*/
         if(type.equals("1")) {

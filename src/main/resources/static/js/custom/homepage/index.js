@@ -131,6 +131,7 @@ var homePageVM=new Vue({
             accountId:accountId,//登陆者ID
             outboundDialogMin:false,//外呼dialog 是否最小化
             tmOutboundCallDialogVisible:false,//电销页面外呼 dialog 
+            consoleBtnVisible:isShowConsoleBtn,//控制台按鈕是否可見
 	    }
 	},
  	methods: {
@@ -615,6 +616,13 @@ var homePageVM=new Vue({
     	},
     	postBack(){//接通成功后的回调函数
     		//console.info("postBack");
+    	},
+    	openConsolePage(){//点击控制台button 事件
+    		var dataUrl = "/console/console/index?type=1";
+			$("#iframeBox").attr({
+				"src":dataUrl //设置ifream地址
+			});
+    		
     	}
          
   	},
