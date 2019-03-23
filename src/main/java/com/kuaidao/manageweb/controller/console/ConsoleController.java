@@ -9,18 +9,17 @@ import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
-import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
-import com.github.pagehelper.PageHelper;
 import com.kuaidao.aggregation.constant.AggregationConstant;
+import com.kuaidao.aggregation.dto.busmycustomer.BusMyCustomerRespDTO;
+import com.kuaidao.aggregation.dto.busmycustomer.MyCustomerParamDTO;
 import com.kuaidao.aggregation.dto.busmycustomer.SignRecordReqDTO;
 import com.kuaidao.aggregation.dto.busmycustomer.SignRecordRespDTO;
 import com.kuaidao.aggregation.dto.clue.BusPendingAllocationDTO;
@@ -39,10 +38,10 @@ import com.kuaidao.common.constant.CluePhase;
 import com.kuaidao.common.constant.RoleCodeEnum;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
-import com.kuaidao.common.util.CommonUtil;
 import com.kuaidao.common.util.DateUtil;
 import com.kuaidao.manageweb.feign.announcement.AnnReceiveFeignClient;
 import com.kuaidao.manageweb.feign.announcement.BusReceiveFeignClient;
+import com.kuaidao.manageweb.feign.busmycustomer.BusMyCustomerFeignClient;
 import com.kuaidao.manageweb.feign.clue.AppiontmentFeignClient;
 import com.kuaidao.manageweb.feign.clue.ClueBasicFeignClient;
 import com.kuaidao.manageweb.feign.clue.MyCustomerFeignClient;
@@ -98,24 +97,28 @@ public class ConsoleController {
     
     @Autowired
     PendingVisitFeignClient pendingVisitFeignClient;
+    
+    @Autowired
+    BusMyCustomerFeignClient busMyCustomerFeignClient;
     /***
      * 跳转控制台页面
      * @return
      */
     @RequestMapping("/index")
     public String index(String type ) {
+        System.out.println("console console");
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
         List<RoleInfoDTO> roleList = curLoginUser.getRoleList();
         RoleInfoDTO roleInfoDTO = roleList.get(0);
-        String roleName = roleInfoDTO.getRoleName();
+        String roleCode = roleInfoDTO.getRoleCode();
         String path= "";
-/*        if(RoleCodeEnum.DXCYGW.value().equals(roleName)) {
+/*        if(RoleCodeEnum.DXCYGW.name().equals(roleCode)) {
             //电销顾问
-        }else if(RoleCodeEnum.DXZJ.value().equals(roleName)) {
+        }else if(RoleCodeEnum.DXZJ.name().equals(roleCode)) {
             //电销总监
-        }else if(RoleCodeEnum.SWJL.value().equals(roleName)) {
+        }else if(RoleCodeEnum.SWJL.name().equals(roleCode)) {
             //商务经理
-        }else if(RoleCodeEnum.SWZJ.value().equals(roleName)) {
+        }else if(RoleCodeEnum.SWZJ.name().equals(roleCode)) {
             //商务总监
         }*/
         if(type.equals("1")) {
@@ -235,8 +238,7 @@ public class ConsoleController {
     */
    @PostMapping("/listTodayFollowClue")
    @ResponseBody
-   public JSONResult<PageBean<CustomerClueDTO>> listTodayFollowClue() throws Exception{
-       CustomerClueQueryDTO queryDto = new CustomerClueQueryDTO();
+   public JSONResult<PageBean<CustomerClueDTO>> listTodayFollowClue(@RequestBody CustomerClueQueryDTO queryDto) throws Exception{
        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
        queryDto.setTeleSale(curLoginUser.getId());
        Date curDate = new Date();
@@ -374,7 +376,7 @@ public class ConsoleController {
     */
    @PostMapping("/listUnAssignClue")
    @ResponseBody
-   public JSONResult<List<PendingAllocationClueDTO>> listUnAssignClue(
+   public JSONResult<PageBean<PendingAllocationClueDTO>> listUnAssignClue(
            @RequestBody PendingAllocationCluePageParam pageParam){
        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
        pageParam.setUserId(curLoginUser.getId());
@@ -398,6 +400,23 @@ public class ConsoleController {
        businessConsoleReqDTO.setEndTime(curDate);
        businessConsoleReqDTO.setStartTime(DateUtil.getCurStartDate());
        return  visitRecordFeignClient.countCurMonthNum(businessConsoleReqDTO);
+   }
+   
+   
+   /**
+    * 商务经理控制台  待处理邀约来访客户
+    * @param param
+    * @return
+    */
+   @PostMapping("/listPendingInviteCustomer")
+   @ResponseBody
+   public JSONResult<PageBean<BusMyCustomerRespDTO>> listPendingInviteCustomer(@RequestBody MyCustomerParamDTO param){
+       UserInfoDTO user = CommUtil.getCurLoginUser();
+       param.setBusSaleId(user.getId());
+       //param.setBusSaleId(1084621842175623168L);
+       
+       return busMyCustomerFeignClient.listPendingInviteCustomer(param);
+       
    }
    
 /*   *//**
@@ -493,8 +512,8 @@ public class ConsoleController {
    
    
    /**
-    * 商务总监 待审批到访记录
-    * @param visitRecordReqDTO
+    * 商务总监 待审批到访记录  待审批未到访记录 
+    * @param visitRecordReqDTO  isVisit:是否到访  
     * @return
     */
    @PostMapping("/listVisitRecord")

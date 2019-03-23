@@ -185,39 +185,42 @@
         <dialog-console :param="consoleNewsParam"></dialog-console>               
     </el-row>
     <!-- 工作台结束 -->
-    <!-- 今日待跟进客户资源 -->
-    <div class="title">
-        <div class="leftbox f-fl">待分配资源</div>
-        <div class="rightbox f-fr">
-            <img th:src="@{/images/icon_arrow.png}" alt="" class="f-fr">
-            <span class="f-fr">进入待分配资源列表</span>
-            <el-button type="primary" size="small" class="f-fr btn" @click="toAllocationClue">快速分配资源</el-button>
+    <!-- 待分配资源 -->
+    <el-row class="marginB20">
+        <div class="title">
+            <div class="leftbox f-fl">待分配资源</div>
+            <div class="rightbox f-fr">
+                <img th:src="@{/images/icon_arrow.png}" alt="" class="f-fr">
+                <span class="f-fr">进入待分配资源列表</span>
+                <el-button type="primary" size="small" class="f-fr btn" @click="toAllocationClue">快速分配资源</el-button>
+            </div>
         </div>
-    </div>
-    <el-table 
-        ref="multipleTable"
-        tooltip-effect="dark"
-        style="width: 100%"
-        border
-        :data="dataTable" 
-        >
-        <el-table-column align="center" type="selection"  prop="clueId"  width="55" @selection-change="handleSelectionChange" ></el-table-column>
-        <el-table-column align="center" prop="cusName" label="客户姓名"></el-table-column>
-        <el-table-column align="center" prop="searchWord" label="搜索词"></el-table-column>
-        <el-table-column align="center" prop="projectName" label="资源项目"></el-table-column>
-        <el-table-column align="center" prop="categoryName" label="资源类别"></el-table-column>
-        <el-table-column align="center" prop="typeName" label="资源类型"></el-table-column>
-        <el-table-column align="center" prop="createTime" label="创建时间" width="170"></el-table-column>
-        <el-table-column align="center" prop="phone" label="手机号" width="170"></el-table-column>
-        <el-table-column align="center" prop="repeatPhones" label="重复手机号资源" width="170">
-            <template slot-scope="scope">
-                <el-button @click="repeatPhonesClick(scope.row)" type="text" size="small">点击查看</el-button>
-            </template>
-        </el-table-column>
-        <el-table-column align="center" prop="messagePoint" label="留言重点" width="170"></el-table-column>
-        <el-table-column align="center" prop="messageTime" label="留言时间" width="170"></el-table-column>
-        <el-table-column align="center" prop="operationName" label="资源专员"></el-table-column>
-    </el-table>
+        <el-table 
+            ref="multipleTable"
+            tooltip-effect="dark"
+            style="width: 100%"
+            border
+            :data="dataTable" 
+            >
+            <el-table-column align="center" type="selection"  prop="clueId"  width="55" @selection-change="handleSelectionChange" ></el-table-column>
+            <el-table-column align="center" prop="cusName" label="客户姓名"></el-table-column>
+            <el-table-column align="center" prop="searchWord" label="搜索词"></el-table-column>
+            <el-table-column align="center" prop="projectName" label="资源项目"></el-table-column>
+            <el-table-column align="center" prop="categoryName" label="资源类别"></el-table-column>
+            <el-table-column align="center" prop="typeName" label="资源类型"></el-table-column>
+            <el-table-column align="center" prop="createTime" label="创建时间" width="170"></el-table-column>
+            <el-table-column align="center" prop="phone" label="手机号" width="170"></el-table-column>
+            <el-table-column align="center" prop="repeatPhones" label="重复手机号资源" width="170">
+                <template slot-scope="scope">
+                    <el-button @click="repeatPhonesClick(scope.row)" type="text" size="small">点击查看</el-button>
+                </template>
+            </el-table-column>
+            <el-table-column align="center" prop="messagePoint" label="留言重点" width="170"></el-table-column>
+            <el-table-column align="center" prop="messageTime" label="留言时间" width="170"></el-table-column>
+            <el-table-column align="center" prop="operationName" label="资源专员"></el-table-column>
+        </el-table>
+        <table-pagination :pager="pager" @change="searchTable"></table-pagination>
+    </el-row>
     <!-- 重复手机号资源表格 -->
     <el-dialog :title="'手机号'+dailogTitleType+'重复资源信息'"   :visible.sync="repeatPhonesDialog">
         <el-table
@@ -242,12 +245,12 @@
     <el-dialog  title="分配资源"  :visible.sync="allocationVisible">
         <template>
             <el-form :model="allocationForm" ref="allocationForm" :rules="allocationFormRules">
-                <el-form-item label="电销顾问"    :label-width="formLabelWidth"  prop="saleId">
+                <el-form-item label="电销顾问" :label-width="formLabelWidth"  prop="saleId">
                     <el-select v-model="allocationForm.saleId" placeholder="组内电销员工" style="width: 80%">
                         <el-option v-for="item in saleOptions" 
-                                    :key="item.id" 
-                                    :label="item.name" 
-                                    :value="item.id">
+                            :key="item.id" 
+                            :label="item.name" 
+                            :value="item.id">
                         </el-option>
                     </el-select>
                 </el-form-item>
@@ -259,7 +262,6 @@
         </template>
     </el-dialog>
 </div>
-
 <!-- import common js-->
 <div th:include="_footer_include :: #jsLib"></div>
 <script th:inline="javascript">

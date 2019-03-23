@@ -121,19 +121,24 @@ var mainDivVM = new Vue({
         },
         searchTable() {
             var param ={};
+            param.pageSize = this.pager.pageSize;
+            param.pageNum = this.pager.currentPage;
             console.info(param);
             // axios.post('/clue/pendingAllocation/list', param)
             axios.post('/console/console/listUnAssignClue', param)
             .then(function (response) {
-                  var result =  response.data;
-                  console.info(result);
-                  var table=result.data;
-                  var data= table.data;
-                  for(var i=0;i<data.length;i++){
-                      data[i].createTime=mainDivVM.dateFormat(data[i].createTime);
-                      data[i].messageTime=mainDivVM.dateFormat(data[i].messageTime);
-                  }
-                  mainDivVM.dataTable= data;
+                var result =  response.data;
+                console.info('待分配资源');
+                console.info(result);
+                var table=result.data;
+                var data= table.data;
+                for(var i=0;i<data.length;i++){
+                    data[i].createTime=mainDivVM.dateFormat(data[i].createTime);
+                    data[i].messageTime=mainDivVM.dateFormat(data[i].messageTime);
+                }
+                mainDivVM.dataTable= data;
+                mainDivVM.pager.total =  table.total;
+                mainDivVM.pager.currentPage = table.currentPage;
             })
             .catch(function (error) {
                  console.log(error);

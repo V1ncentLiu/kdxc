@@ -134,8 +134,8 @@
 			<el-option v-for="item in StorefrontAreaArr" :key="item.value"
 				:label="item.name" :value="item.value"> </el-option> </el-select> </el-form-item> </el-col> </el-row>
 			<el-row> <el-col :span="8"> <el-form-item
-				label="意向品类：" :label-width="formLabelWidth"> <el-select
-				v-model="form.intentionCategory" placeholder="请选择"
+				label="意向品类：" :label-width="formLabelWidth"> <el-select 
+				v-model="form.intentionCategory" placeholder="请选择" @change="projectChangeSelect"
 				style="width: 100%;"> <el-option
 				v-for="item in IntentionalCategoryArr" :key="item.value"
 				:label="item.name" :value="item.value"> </el-option> </el-select> </el-form-item> </el-col> <el-col
@@ -753,6 +753,14 @@ var callRecord=[[${callRecord}]];//通话记录
 				  this.substatus=true;
        		 }
        		},
+       		projectChangeSelect(selVal){
+                var  param={};
+                param.category=selVal;
+         	    axios.post('/aggregation/projectManager/listNoPage',param).then(function (response) {
+         	    	addCustomerVM.proSelect=response.data.data;
+                });
+         	},
+       		
             submitForm(form) {
        			var valid=true;
 	       	  	  this.$refs[form].validateField(["customerEmail","callTime",
@@ -1022,6 +1030,10 @@ var callRecord=[[${callRecord}]];//通话记录
             handleTrackingSelection(val){
                this.multipleTrackingSelection=val;
             },
+            
+            
+            
+            
             editRecord() {
             //编辑跟进记录
               var rows=this.multipleTrackingSelection;
