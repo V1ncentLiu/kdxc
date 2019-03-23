@@ -376,7 +376,7 @@ public class ConsoleController {
     */
    @PostMapping("/listUnAssignClue")
    @ResponseBody
-   public JSONResult<List<PendingAllocationClueDTO>> listUnAssignClue(
+   public JSONResult<PageBean<PendingAllocationClueDTO>> listUnAssignClue(
            @RequestBody PendingAllocationCluePageParam pageParam){
        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
        pageParam.setUserId(curLoginUser.getId());
