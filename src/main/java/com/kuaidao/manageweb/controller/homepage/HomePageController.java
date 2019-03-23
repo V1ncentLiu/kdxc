@@ -72,6 +72,16 @@ public class HomePageController {
             }
 
         }
+        //判断是否显示控制台按钮
+        /*        if(RoleCodeEnum.DXCYGW.value().equals(roleName)) {
+        //电销顾问
+    }else if(RoleCodeEnum.DXZJ.value().equals(roleName)) {
+        //电销总监
+    }else if(RoleCodeEnum.SWJL.value().equals(roleName)) {
+        //商务经理
+    }else if(RoleCodeEnum.SWZJ.value().equals(roleName)) {
+        //商务总监
+    }*/
 
         return "index";
     }
