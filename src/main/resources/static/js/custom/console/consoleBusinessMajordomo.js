@@ -310,7 +310,7 @@ var mainDivVM = new Vue({
                     var resData = data.data;
                     mainDiv.dataTable4= resData.data;                     
                 }else{
-                    signRecordVM.$message({message:data.msg,type:'error'});
+                    mainDiv.$message({message:data.msg,type:'error'});
                     console.error(data);
                 }             
             })
@@ -358,12 +358,12 @@ var mainDivVM = new Vue({
                 .then(function (response) {
                     var resData = response.data;
                     if(resData.code=='0'){
-                        signRecordVM.dialogFormVisible = false;
-                        signRecordVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
-                            signRecordVM.initSignRecordData();
+                        mainDiv.dialogFormVisible = false;
+                        mainDiv.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
+                            mainDiv.initSignRecordData();
                         }});
                     }else{
-                        signRecordVM.$message({message:resData.msg,type:'error'});
+                        mainDiv.$message({message:resData.msg,type:'error'});
                         console.error(resData);
                     }
                 
