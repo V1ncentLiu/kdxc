@@ -308,9 +308,9 @@ var mainDivVM = new Vue({
                 console.log(data)
                 if(data.code=='0'){
                     var resData = data.data;
-                    mainDiv.dataTable4= resData.data;                     
+                    mainDivVM.dataTable4= resData;                     
                 }else{
-                    mainDiv.$message({message:data.msg,type:'error'});
+                    mainDivVM.$message({message:data.msg,type:'error'});
                     console.error(data);
                 }             
             })
@@ -358,12 +358,12 @@ var mainDivVM = new Vue({
                 .then(function (response) {
                     var resData = response.data;
                     if(resData.code=='0'){
-                        mainDiv.dialogFormVisible = false;
-                        mainDiv.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
-                            mainDiv.initSignRecordData();
+                        mainDivVM.dialogFormVisible = false;
+                        mainDivVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
+                            mainDivVM.initSignRecordData();
                         }});
                     }else{
-                        mainDiv.$message({message:resData.msg,type:'error'});
+                        mainDivVM.$message({message:resData.msg,type:'error'});
                         console.error(resData);
                     }
                 
@@ -409,6 +409,50 @@ var mainDivVM = new Vue({
             
             this.signRecordArrTitle=title;
             this.dialogFormVisible=true;
+        },
+        recordClick(row) {//查看明细
+            this.paymentDetailsShow=false;
+            this.paymentDetailsShow2=false;
+            this.paymentDetailsShow3=false;
+            this.paymentDetailsShow4=false;
+            var param = {};
+            param.idList = [row.id];
+            axios.post('/sign/signRecord/listPayDetailNoPage', param)
+            .then(function (response) {
+                var resData = response.data;
+                if(resData.code=='0'){
+                    debugger;
+                    var payDetailData = resData.data;
+                    if(payDetailData[1]){
+                        mainDivVM.paymentDetailsShow=true;
+                        mainDivVM.recordTable= payDetailData[1];
+                    }
+                    if(payDetailData[2]){
+                        mainDivVM.paymentDetailsShow2=true;
+                        console.info(payDetailData[2]);
+                         mainDivVM.recordTable2= payDetailData[2];
+                    }
+                    if(payDetailData[3]){
+                          mainDivVM.paymentDetailsShow3=true;
+                          mainDivVM.recordTable3= payDetailData[3];
+                    }
+                    if(payDetailData[4]){
+                        mainDivVM.paymentDetailsShow4=true;
+                        mainDivVM.recordTable4= payDetailData[4];
+                    }
+                    
+                }else{
+                    mainDivVM.$message({message:resData.msg,type:'error'});
+                    console.error(resData);
+                }
+                mainDivVM.recordDialog=true;
+            
+            })
+            .catch(function (error) {
+                 console.log(error);
+            }).then(function(){
+            });
+           
         },
         reasonClick(row) {//驳回原因
             this.rebutReason = row.rebutReason;
@@ -473,6 +517,56 @@ var mainDivVM = new Vue({
                 return "";
             }
             return val;
+        },
+        submitDialogForm(formName) { //提交驳回原因
+            this.$refs[formName].validate((valid) => {
+                if (valid) {
+                    var param ={};  
+                    var rows = this.multipleSelection;
+                    var idArr = new Array();
+                    var isPass = true;
+                    for(var i=0;i<rows.length;i++){
+                        var curRow = rows[i];
+                        if(curRow.status!=1){
+                            this.$message({message:'只允许审核待审核的数据',type:'warning'});
+                            isPass=false;
+                            break;
+                        }
+                       idArr.push(curRow.id);
+                    }
+                    if(!isPass){
+                        return;
+                    }
+                    
+                    
+                    param.idList = idArr;
+                    param.rebutReason = this.dialogForm.reason;
+                    axios.post('/sign/signRecord/rejectSignOrder', param)
+                    .then(function (response) {
+                        var resData = response.data;
+                        if(resData.code=='0'){
+                            mainDivVM.dialogForm.reason='';
+                            mainDivVM.dialogFormVisible = false;
+                             mainDivVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
+                                 mainDivVM.initSignRecordData();
+                            }});
+                        }else{
+                            mainDivVM.$message({message:resData.msg,type:'error'});
+                            console.error(resData);
+                        }
+                    
+                    })
+                    .catch(function (error) {
+                         console.log(error);
+                    }).then(function(){
+                    });
+
+                    
+                } else {
+                    console.log('error submit!!');
+                    return false;
+                }
+            });
         },
 
     },
