@@ -214,7 +214,8 @@
     </div>
 
     <!-- 明细弹窗 -->
-    <el-dialog title="付款明细" width="70%" :visible.sync="dialogFormVisible">   <el-form :model="formMoneyDetail" ref="formMoneyDetail" >
+    <el-dialog title="付款明细" width="70%" :visible.sync="dialogFormVisible">
+        <el-form :model="formMoneyDetail" ref="formMoneyDetail"  :rules="rules">
         <div>
             <el-row>
                 <el-col :span="10">
@@ -255,7 +256,7 @@
                     </el-form-item>
                 </el-col>
             </el-row>
-            <el-row v-show="showfalg">
+            <el-row v-if="showfalg">
                 <el-col :span="10">
                     <el-form-item label="余款金额：" :label-width="formLabelWidth" prop="amountBalance">
                         <el-input v-model="formMoneyDetail.amountBalance"  type="number" min="0" oninput="if(value.length>10)value=value.slice(0,10)"  onkeypress="return(/[\d]/.test(String.fromCharCode(event.keyCode)))" maxLength="10" autocomplete="off" width="80%" ></el-input>
@@ -275,12 +276,76 @@
             </el-row>
             <el-row>
                 <el-col :span="10">
-                    <el-form-item label="业绩金额：" :label-width="formLabelWidth" prop="amountPerformance">
+                    <el-form-item label="业绩金额：" :label-width="formLabelWidth" prop="performanceAmount">
                         <el-input v-model="formMoneyDetailAmountPerformance"  type="number" min="0" oninput="if(value.length>10)value=value.slice(0,10)"  onkeypress="return(/[\d]/.test(String.fromCharCode(event.keyCode)))" maxLength="10" autocomplete="off" width="80%"></el-input>
                         <span style="padding-left: 10px;">元</span>
                     </el-form-item>
                 </el-col>
             </el-row>
+            <el-row>
+                <el-col :span="20">
+                    <el-form-item label="备注" :label-width="formLabelWidth">
+                        <el-input type="textarea" v-model="formMoneyDetail.remarks" maxLength="200"></el-input>
+                    </el-form-item>
+                </el-col>
+            </el-row>
+
+            <div class="paddB20">补充到访记录<i class="el-icon-caret-bottom" @click="suppShow"></i><i class="el-icon-caret-top" @click="suppHide"></i><span style="font-size:14px;color: #ccc;">(若无到访记录可不添写)</span></div>
+            <div v-if="suppWrap">
+                <el-row>
+                    <el-col :span="10">
+                        <el-form-item label="到访时间：" :label-width="formLabelWidth" prop="visitTime">
+                            <el-date-picker
+                                    type="date"
+                                    format="yyyy-MM-dd HH:mm"
+                                    placeholder="选择日期"
+                                    v-model="formMoneyDetail.visitTime" style="width: 90%;"></el-date-picker>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="10">
+                        <el-form-item label="来访城市：" :label-width="formLabelWidth"  prop="visitCity">
+                            <el-input  v-model="formMoneyDetail.visitCity" maxLength="10" >
+                            </el-input>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="10">
+                        <el-form-item label="到访类型：" :label-width="formLabelWidth" prop="visitType">
+                            <el-select v-model="formMoneyDetail.visitType" placeholder="请选择到访类型" style="width:100%">
+                                <el-option
+                                        v-for="item in visitTypeArr"
+                                        :key="item.value"
+                                        :label="item.name"
+                                        :value="item.value">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="10">
+                        <el-form-item label="到访店铺类型：" :label-width="formLabelWidth" prop="visitShopType">
+                            <el-select v-model="formMoneyDetail.visitShopType" placeholder="请选择到访店铺类型" style="width:100%">
+                                <el-option
+                                        v-for="item in vistitStoreTypeArr"
+                                        :key="item.value"
+                                        :label="item.name"
+                                        :value="item.value">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="10">
+                        <el-form-item label="到访人数：" :label-width="formLabelWidth" prop="visitNum">
+                            <el-input  v-model="formMoneyDetail.visitNum" type="number"  min="1" maxLength="2" oninput="if(value.length>2)value=value.slice(0,2)"  onkeypress="return(/[\d]/.test(String.fromCharCode(event.keyCode)))" style="width:80%">
+                            </el-input>
+                            <span style="padding-left: 10px;">人</span>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+            </div>
+
         </div>
     </el-form>
         <div slot="footer" class="dialog-footer f-tac">
@@ -419,10 +484,10 @@
                 </div>
 
                 <div class="paddB20">补充到访记录<i class="el-icon-caret-bottom" @click="suppShow"></i><i class="el-icon-caret-top" @click="suppHide"></i><span style="font-size:14px;color: #ccc;">(若无到访记录可不添写)</span></div>
-                <div v-show="suppWrap">
+                <div v-if="suppWrap">
                     <el-row>
                         <el-col :span="10">
-                            <el-form-item label="到访时间：" :label-width="formLabelWidth">
+                            <el-form-item label="到访时间：" :label-width="formLabelWidth" prop="visitTime">
                                 <el-date-picker
                                         type="date"
                                         format="yyyy-MM-dd HH:mm"
@@ -431,7 +496,7 @@
                             </el-form-item>
                         </el-col>
                         <el-col :span="10">
-                            <el-form-item label="来访城市：" :label-width="formLabelWidth">
+                            <el-form-item label="来访城市：" :label-width="formLabelWidth"  prop="visitCity">
                                 <el-input  v-model="formSigning.visitCity" maxLength="10" >
                                 </el-input>
                             </el-form-item>
@@ -439,7 +504,7 @@
                     </el-row>
                     <el-row>
                         <el-col :span="10">
-                            <el-form-item label="到访类型：" :label-width="formLabelWidth">
+                            <el-form-item label="到访类型：" :label-width="formLabelWidth"   prop="visitType">
                                 <el-select v-model="formSigning.visitType" placeholder="请选择到访类型" style="width:100%">
                                     <el-option
                                             v-for="item in visitTypeArr"
@@ -451,7 +516,7 @@
                             </el-form-item>
                         </el-col>
                         <el-col :span="10">
-                            <el-form-item label="到访店铺类型：" :label-width="formLabelWidth">
+                            <el-form-item label="到访店铺类型：" :label-width="formLabelWidth"  prop="visitShopType">
                                 <el-select v-model="formSigning.visitShopType" placeholder="请选择到访店铺类型" style="width:100%">
                                     <el-option
                                             v-for="item in vistitStoreTypeArr"
@@ -465,7 +530,7 @@
                     </el-row>
                     <el-row>
                         <el-col :span="10">
-                            <el-form-item label="到访人数：" :label-width="formLabelWidth">
+                            <el-form-item label="到访人数：" :label-width="formLabelWidth"  prop="visitNum">
                                 <el-input  v-model="formSigning.visitNum" type="number"  min="1" maxLength="2" oninput="if(value.length>2)value=value.slice(0,2)"  onkeypress="return(/[\d]/.test(String.fromCharCode(event.keyCode)))" style="width:80%">
                                 </el-input>
                                 <span style="padding-left: 10px;">人</span>
@@ -687,9 +752,9 @@
                 giveAmount: [
                     { required: true, message: '请输入赠送金额', trigger: 'blur' }
                 ],
-                // payType: [
-                // 	{ required: true, message: '请选择付款类型', trigger: 'change' }
-                // ],
+                payType: [
+                	{ required: true, message: '请选择付款类型', trigger: 'change' }
+                ],
                 payMode: [
                     { required: true, message: '请选择付款方式', trigger: 'change' }
                 ],
@@ -710,9 +775,32 @@
                 // ],
                 isRemoteSign: [ //是否远程签约
                     { required: true, message: '请选择是否远程签约', trigger: 'change' }
-                ]
+                ],
+                visitTime: [ //请选择到访时间
+                    { required: true, message: '请选择到访时间', trigger: 'change' }
+                ],
+                visitCity: [ //请填写来访城市
+                    { required: true, message: '请填写来访城市', trigger: 'change' }
+                ],
+                visitType: [ //请选择到访类型
+                    { required: true, message: '请选择到访类型', trigger: 'change' }
+                ],
+                visitShopType: [ //请选择到访店铺类型
+                    { required: true, message: '请选择到访店铺类型', trigger: 'change' }
+                ],
+                visitNum: [ //请填写到访人数
+                    { required: true, message: '请填写到访人数', trigger: 'change' }
+                ],
+
+
             },
             formMoneyDetail: {
+                visitTime:"",
+                visitCity:"",
+                visitType:"",
+                visitShopType:"",
+                visitNum:"",
+
                 signId:"",
                 paymentType: "",
                 paymentMode: "",
@@ -720,7 +808,8 @@
                 purchaseAmount: "",
                 balanceAmount: "",
                 balanceTime:"",
-                performanceAmount: ""
+                performanceAmount: "",
+                remarks:""
             },
 
             formSigning: {
@@ -754,7 +843,8 @@
                 amountBalance: '',
                 makeUpTime:'',
                 payTime: new Date(),
-                amountPerformance:''
+                amountPerformance:'',
+                remarks:""
             },
             option2s: [{
                 value: '1',
@@ -806,6 +896,7 @@
                 this.formMoneyDetail.amountPerformance=this.formMoneyDetail.amountPerformance.replace('.','');
             },
             recordDialogClick(type){
+                this.suppWrap =false; // 默认关闭 到访记录 填写部分
                 if(type==1){//定金添加付款按钮点击
                     console.log(1)
                     this.dialogFormVisible=true
@@ -840,6 +931,7 @@
             editSign(){
                 var param = {};
                 param.id = vclueId;
+                this.suppWrap =false; // 默认关闭 到访记录 填写部分
                 axios.post('/businesssign/echo',param).then(function (response) {
                     mainDivVM.formSigning = response.data.data;
                     mainDivVM.formSigning.clueId=vclueId;
@@ -850,6 +942,7 @@
                     mainDivVM.formSigning.payTime = new Date()
                     mainDivVM.formSigning.isRemoteSign = 0;
                 });
+
             },
             currentProvince(selVal){
                 if(!selVal){
@@ -907,10 +1000,10 @@
                 });
             },
             submitDialogForm(formName) {
+                this.formMoneyDetail.amountPerformance =  this.formMoneyDetailAmountPerformance;
                 var param = this.formMoneyDetail;
-                param.amountPerformance  = this.formMoneyDetailAmountPerformance;
                 param.signId = vsignId;
-                console.log(param)
+                param.clueId =vclueId;
                 this.$refs[formName].validate((valid) => {
                     if (valid) {
                         axios.post("/payDetail/insert", param)

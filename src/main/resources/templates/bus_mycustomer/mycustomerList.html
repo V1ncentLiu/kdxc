@@ -119,13 +119,12 @@
             </el-table-column>
             <el-table-column  prop="status" label="签约明细" align="center" width="280">
                 <template slot-scope="scope">
-                    <el-button size="mini"  v-if="(scope.row.isSign == null ||scope.row.isSign == 0)&& scope.row.signAuditStatus==null" type="text" @click="editSign(scope.row)">添加签约单</el-button>
+                    <el-button size="mini"  v-if="scope.row.signAuditStatus==null" type="text" @click="editSign(scope.row)">添加签约单</el-button>
                     <div  v-else-if="scope.row.signList.length==1">
                         <el-button size="mini"  v-if="scope.row.signAuditStatus==1" type="text" @click="toReadOnlySignPage(scope.row)">审核中</el-button>
                         <el-button size="mini"  v-else-if="scope.row.signAuditStatus==0" type="text"  style="color: red" @click="editRebutSign(scope.row)">被驳回</el-button>
                         <el-button size="mini"  v-else-if="scope.row.signAuditStatus==2" type="text" @click="toSignPage(scope.row)">查看签约单</el-button>
                     </div>
-
                     <div  v-else-if="scope.row.signList.length>1"   v-for="item in scope.row.signList">
                         <el-button size="mini"  v-if="item.signStatus==0" type="text"  style="color: red" @click="editRebutSign(item)">被驳回({{item.signNo}})</el-button>
                         <el-button size="mini"  v-else-if="item.signStatus==1" type="text" style="color:chartreuse" @click="toReadOnlySignPage(item)">审核中({{item.signNo}})</el-button>
@@ -756,7 +755,7 @@
             <div v-show="suppWrap">
                 <el-row>
                     <el-col :span="10">
-                        <el-form-item label="到访时间：" :label-width="formLabelWidth">
+                        <el-form-item label="到访时间：" :label-width="formLabelWidth" prop="visitTime">
                             <el-date-picker
                                     type="date"
                                     format="yyyy-MM-dd HH:mm"
@@ -765,7 +764,7 @@
                         </el-form-item>
                     </el-col>
                     <el-col :span="10">
-                        <el-form-item label="来访城市：" :label-width="formLabelWidth">
+                        <el-form-item label="来访城市：" :label-width="formLabelWidth"  prop="visitCity">
                             <el-input  v-model="formSigning.visitCity" maxLength="10" >
                             </el-input>
                         </el-form-item>
@@ -773,7 +772,7 @@
                 </el-row>
                 <el-row>
                     <el-col :span="10">
-                        <el-form-item label="到访类型：" :label-width="formLabelWidth">
+                        <el-form-item label="到访类型：" :label-width="formLabelWidth"   prop="visitType">
                             <el-select v-model="formSigning.visitType" placeholder="请选择到访类型" style="width:100%">
                                 <el-option
                                         v-for="item in visitTypeArr"
@@ -785,7 +784,7 @@
                         </el-form-item>
                     </el-col>
                     <el-col :span="10">
-                        <el-form-item label="到访店铺类型：" :label-width="formLabelWidth">
+                        <el-form-item label="到访店铺类型：" :label-width="formLabelWidth"  prop="visitShopType">
                             <el-select v-model="formSigning.visitShopType" placeholder="请选择到访店铺类型" style="width:100%">
                                 <el-option
                                         v-for="item in vistitStoreTypeArr"
@@ -799,7 +798,7 @@
                 </el-row>
                 <el-row>
                     <el-col :span="10">
-                        <el-form-item label="到访人数：" :label-width="formLabelWidth">
+                        <el-form-item label="到访人数：" :label-width="formLabelWidth"  prop="visitNum">
                             <el-input  v-model="formSigning.visitNum" type="number"  min="1" maxLength="2" oninput="if(value.length>2)value=value.slice(0,2)"  onkeypress="return(/[\d]/.test(String.fromCharCode(event.keyCode)))" style="width:80%">
                             </el-input>
                             <span style="padding-left: 10px;">人</span>
@@ -1384,6 +1383,21 @@
 				// ],
                 isRemoteSign: [ //是否远程签约
                     { required: true, message: '请选择是否远程签约', trigger: 'change' }
+                ],
+                visitTime: [ //请选择到访时间
+                    { required: true, message: '请选择到访时间', trigger: 'change' }
+                ],
+                visitCity: [ //请填写来访城市
+                    { required: true, message: '请填写来访城市', trigger: 'change' }
+                ],
+                visitType: [ //请选择到访类型
+                    { required: true, message: '请选择到访类型', trigger: 'change' }
+                ],
+                visitShopType: [ //请选择到访店铺类型
+                    { required: true, message: '请选择到访店铺类型', trigger: 'change' }
+                ],
+                visitNum: [ //请填写到访人数
+                    { required: true, message: '请填写到访人数', trigger: 'change' }
                 ]
 			},
         },
