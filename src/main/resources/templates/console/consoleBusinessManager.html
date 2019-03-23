@@ -241,41 +241,42 @@
         <div class="leftbox f-fl">待处理邀约来访客户</div>
         <div class="rightbox f-fr">进入我的客户资源<img th:src="@{/images/icon_arrow.png}" alt="" class="f-fr"></div>
     </div>
-    <el-table border :data="tableData" tooltip-effect="dark" style="width:100%"  ref="multipleTable" @row-dblclick="showCustomerDetail">
-        <el-table-column prop="xh" label="序号" width="60" type="index" align="center"></el-table-column>
-        <el-table-column prop="reserveTime" label="邀约来访时间" sortable align="center"  width="180px"></el-table-column>
-        <el-table-column prop="cusName" label="客户姓名" align="center" width="200">
-            <template slot-scope="scope">
-                <el-button size="mini"  type="text" @click="editCustomerDetail(scope.row)">{{scope.row.cusName}}</el-button>
-            </template>
-        </el-table-column>
-        <el-table-column prop="visitStatus" label="到访状态"  :formatter="formatVisitStatus" align="center" width="88">
-        </el-table-column>
-        <el-table-column  prop="isSign" label="签约状态"  :formatter="formatSignStatus" align="center" width="88"></el-table-column>
-        <el-table-column  prop="createTime" label="提交邀约时间" sortable align="center" width="170px"></el-table-column>
-        <el-table-column  prop="allocateTime" label="接收客户时间" sortable align="center" width="170px"></el-table-column>
-        <el-table-column  prop="" label="到访情况" :formatter="formatVisit" align="center" width="130">
-            <template slot-scope="scope">
-                <el-button size="mini"  v-if="scope.row.visitStatus == -1||scope.row.visitStatus == null" type="text" @click="openEditVisitRecord(scope.row)">添加到访记录</el-button>
-                <el-button size="mini"  v-else-if="scope.row.visitStatus==0" type="text" @click="showNotVisitReason(scope.row)">未到访(原因)</el-button>
-                <el-button size="mini"  v-else-if="scope.row.visitAuditStatus==1" type="text" @click="showVisitRecord(scope.row)">到访审核中</el-button>
-                <el-button size="mini"  v-else-if="scope.row.visitAuditStatus==0" type="text" style="color: red" @click="editRebutVisitRecord(scope.row)">到访被驳回</el-button>
-                <el-button size="mini"  v-else-if="scope.row.visitAuditStatus==2" type="text" @click="toVisitRecordPage(scope.row)">查看到访记录</el-button>
-            </template>
-        </el-table-column>
-        <el-table-column  prop="status" label="签约明细" align="center" width="130">
-            <template slot-scope="scope">
-                <el-button size="mini"  v-if="(scope.row.isSign == null ||scope.row.isSign == 0)&& scope.row.signAuditStatus==null" type="text" @click="editSign(scope.row)">添加签约单</el-button>
-                <el-button size="mini"  v-else-if="scope.row.signAuditStatus==1" type="text" @click="toReadOnlySignPage(scope.row)">审核中</el-button>
-                <el-button size="mini"  v-else-if="scope.row.signAuditStatus==0" type="text"  style="color: red" @click="editRebutSign(scope.row)">被驳回</el-button>
-                <el-button size="mini"  v-else-if="scope.row.signAuditStatus==2" type="text" @click="toSignPage(scope.row)">查看签约单</el-button>
-            </template>
-        </el-table-column>
-        <el-table-column  prop="tasteProjectName" label="品尝项目" align="center"></el-table-column>
-        <el-table-column  prop="signShopTypeName" label="签约店型" align="center"></el-table-column>
-        <el-table-column  prop="province" label="开店省份" align="center"></el-table-column>
-    </el-table>
-    <table-pagination :pager="pager"  @change="initList"></table-pagination>
+    <el-row class="marginB20">
+        <el-table border :data="tableData" tooltip-effect="dark" style="width:100%"  ref="multipleTable" @row-dblclick="showCustomerDetail">
+            <el-table-column prop="xh" label="序号" width="60" type="index" align="center"></el-table-column>
+            <el-table-column prop="reserveTime" label="邀约来访时间" sortable align="center"  width="180px"></el-table-column>
+            <el-table-column prop="cusName" label="客户姓名" align="center" width="200">
+                <template slot-scope="scope">
+                    <el-button size="mini"  type="text" @click="editCustomerDetail(scope.row)">{{scope.row.cusName}}</el-button>
+                </template>
+            </el-table-column>
+            <el-table-column prop="visitStatus" label="到访状态"  :formatter="formatVisitStatus" align="center" width="88">
+            </el-table-column>
+            <el-table-column  prop="isSign" label="签约状态"  :formatter="formatSignStatus" align="center" width="88"></el-table-column>
+            <el-table-column  prop="createTime" label="提交邀约时间" sortable align="center" width="170px"></el-table-column>
+            <el-table-column  prop="allocateTime" label="接收客户时间" sortable align="center" width="170px"></el-table-column>
+            <el-table-column  prop="" label="到访情况" :formatter="formatVisit" align="center" width="130">
+                <template slot-scope="scope">
+                    <el-button size="mini"  v-if="scope.row.visitStatus == -1||scope.row.visitStatus == null" type="text" @click="openEditVisitRecord(scope.row)">添加到访记录</el-button>
+                    <el-button size="mini"  v-else-if="scope.row.visitStatus==0" type="text" @click="showNotVisitReason(scope.row)">未到访(原因)</el-button>
+                    <el-button size="mini"  v-else-if="scope.row.visitAuditStatus==1" type="text" @click="showVisitRecord(scope.row)">到访审核中</el-button>
+                    <el-button size="mini"  v-else-if="scope.row.visitAuditStatus==0" type="text" style="color: red" @click="editRebutVisitRecord(scope.row)">到访被驳回</el-button>
+                    <el-button size="mini"  v-else-if="scope.row.visitAuditStatus==2" type="text" @click="toVisitRecordPage(scope.row)">查看到访记录</el-button>
+                </template>
+            </el-table-column>
+            <el-table-column  prop="status" label="签约明细" align="center" width="130">
+                <template slot-scope="scope">
+                    <el-button size="mini"  v-if="(scope.row.isSign == null ||scope.row.isSign == 0)&& scope.row.signAuditStatus==null" type="text" @click="editSign(scope.row)">添加签约单</el-button>
+                    <el-button size="mini"  v-else-if="scope.row.signAuditStatus==1" type="text" @click="toReadOnlySignPage(scope.row)">审核中</el-button>
+                    <el-button size="mini"  v-else-if="scope.row.signAuditStatus==0" type="text"  style="color: red" @click="editRebutSign(scope.row)">被驳回</el-button>
+                    <el-button size="mini"  v-else-if="scope.row.signAuditStatus==2" type="text" @click="toSignPage(scope.row)">查看签约单</el-button>
+                </template>
+            </el-table-column>
+            <el-table-column  prop="tasteProjectName" label="品尝项目" align="center"></el-table-column>
+            <el-table-column  prop="signShopTypeName" label="签约店型" align="center"></el-table-column>
+            <el-table-column  prop="province" label="开店省份" align="center"></el-table-column>
+        </el-table>
+    </el-row>
     <!--添加到访记录-->
     <el-dialog title="未到访原因" :visible.sync="notVisitdDialogVisible"  width="50%">
         <template>
@@ -690,7 +691,6 @@
         </template>
     </el-dialog>
 </div>
-
 <!-- import common js-->
 <div th:include="_footer_include :: #jsLib"></div>
 <script th:inline="javascript">

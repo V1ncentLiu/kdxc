@@ -331,27 +331,6 @@ var mainDivVM = new Vue({
         editCustomerDetail(row, column){ // 客户维护
             window.location.href='/bus/BusinessCustomer/editCustomerInfo?clueId='+row.clueId;
         },
-        showNotVisitReason(row){// 展示未到访原因            
-            var param={};
-            param.id = row.clueId;
-            axios.post('/aggregation/businessMyCustomer/notVisitReason',param).then(function (response) {
-                mainDivVM.notVisitdDialogVisible = true;
-                mainDivVM.notVisitFlag.str = response.data.data.notVisitReason
-            });
-        },
-        editSign(row){//添加签约单
-            // this.formSigning.clueId=row.clueId;
-            // this.dialogFormSigningVisible = true;
-            var param = {};
-            param.id = row.clueId;
-            axios.post('/businesssign/echo',param).then(function (response) {
-                mainDivVM.formSigning = response.data.data;
-                mainDivVM.formSigning.clueId=row.clueId;
-                mainDivVM.dialogFormSigningVisible = true;
-                mainDivVM.currentProvince(mainDivVM.formSigning.signProvince)
-                mainDivVM.currentCity(mainDivVM.formSigning.signCity)
-            });
-        },
         currentProvince(selVal){
             if(!selVal){
                 return false;
@@ -402,6 +381,50 @@ var mainDivVM = new Vue({
                 this.isAllMoney = false;
             }
         },
+        // 到访情况
+        openEditVisitRecord(){//添加到访记录
+
+        },       
+        showNotVisitReason(row){//未到访(原因)           
+            var param={};
+            param.id = row.clueId;
+            axios.post('/aggregation/businessMyCustomer/notVisitReason',param).then(function (response) {
+                mainDivVM.notVisitdDialogVisible = true;
+                mainDivVM.notVisitFlag.str = response.data.data.notVisitReason
+            });
+        },
+        showVisitRecord(){//到访审核中
+
+        },
+        editRebutVisitRecord(){//到访被驳回
+
+        },
+        toVisitRecordPage(){//查看到访记录
+
+        },
+        // 签约明细        
+        editSign(row){//添加签约单
+            // this.formSigning.clueId=row.clueId;
+            // this.dialogFormSigningVisible = true;
+            var param = {};
+            param.id = row.clueId;
+            axios.post('/businesssign/echo',param).then(function (response) {
+                mainDivVM.formSigning = response.data.data;
+                mainDivVM.formSigning.clueId=row.clueId;
+                mainDivVM.dialogFormSigningVisible = true;
+                mainDivVM.currentProvince(mainDivVM.formSigning.signProvince)
+                mainDivVM.currentCity(mainDivVM.formSigning.signCity)
+            });
+        },
+        toReadOnlySignPage(){//审核中
+
+        },
+        editRebutSign(){//被驳回
+
+        },
+        toSignPage(){//查看签约单
+
+        },        
     },
     created(){        
         // 工作台

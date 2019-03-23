@@ -12,24 +12,6 @@ var mainDivVM = new Vue({
         reasonArr:[],
         cusStatusArr:[],
         multipleSelection:[],
-        queryForm:{
-            releaseReasons:[],
-            releaseReason:"",
-            customerStatus:"",
-            teleGorupId:"",
-            teleSaleIds:[],
-            project:"",
-            isRepeatPhone:"",
-            createTime1:"",
-            createTime2:"",
-            releaseTime1:"",
-            releaseTime2:"",
-            searchWord:"",
-            phone:"",
-            type:"",
-            category:"",
-            address:""
-        },
         pager:{
             total: 0,
             currentPage: 1,
@@ -52,6 +34,7 @@ var mainDivVM = new Vue({
         receiveTodayNum:'',//今日领取资源数
         assignTodayNum:'',//今日分配资源数
         todayTalkTime:'',//今日通话时长
+        todayAppiontmentNum:'',//今日邀约数
         //公告
         items: [
             // {content:'系统将于2018年12月5日晚上12:00进行系统升级，请各位同事及时处理工作。系统预计在12:20分恢复正常使用,感谢配合!',id:1},
@@ -94,9 +77,11 @@ var mainDivVM = new Vue({
         },
         // 快速领取新资源
         initList(){
-            var param = this.queryForm;
-            param.pageSize = this.pager.pageSize;
-            param.pageNum =  this.pager.currentPage;
+            var param = {};
+            // param.pageSize = this.pager.pageSize;
+            // param.pageNum =  this.pager.currentPage;
+            param.pageSize = 1;
+            param.pageNum =  20;
             axios.post('/aggregation/publiccustomer/queryPage',param).then(function (response) {
                 console.log('快速领取新资源')
                 console.log(response.data)
@@ -107,9 +92,6 @@ var mainDivVM = new Vue({
                     return false;
                 }else{
                     mainDivVM.tableData =response.data.data.data;
-                    mainDivVM.pager.currentPage= response.data.data.currentPage;
-                    mainDivVM.pager.total= response.data.data.total;
-                    mainDivVM.pager.pageSize =  response.data.data.pageSize;
                 }
             })
         },
@@ -147,31 +129,6 @@ var mainDivVM = new Vue({
             // 1、本组释放到公有池的资源，本组的电销人员不能再捡了
             // 2、总监领取老资源上限按照领取规则管理中设置的限制进行限制
             // 3、电销人员领取新资源上限按照领取规则管理中设置的限制进行限制
-            var resourceType=1;//假数据
-            /*    if(resourceType==1){
-                this.$alert('此资源（资源姓名+手机号）为组内资源，不可进行领取。', '提示', {
-                  confirmButtonText: '确定',
-                  callback: action => {
-                    this.$message({
-                      type: 'info',
-                      message: `action: ${ action }`
-                    });
-                  }
-                });
-                return;
-            }else if(resourceType==2){
-                this.$alert('今日领取超限制XX数。', '提示');
-                return;
-            }else if(resourceType==3){
-                this.$alert('今日领取超限制XX数。', '提示');
-                return;
-            }else{
-                //领取成功
-                this.$message({
-                    message: '资源领取成功',
-                    type: 'success'
-                });
-            } */
         },
         //展现详情
         showClueDetailInfo (row, column) {
@@ -201,6 +158,10 @@ var mainDivVM = new Vue({
         // 今日待跟进客户资源
         initTableData(){
             var param = {};
+            var pageSize = this.pager.pageSize;
+            var pageNum = this.pager.currentPage;
+            param.pageNum=pageNum;
+            param.pageSize=pageSize;
             // axios.post('/tele/clueMyCustomerInfo/findTeleClueInfo',param).then(function (response) {
             axios.post('/console/console/listTodayFollowClue',param).then(function (response) {
                 console.log('今日待跟进客户资源')
@@ -209,7 +170,7 @@ var mainDivVM = new Vue({
                     mainDivVM.$message({
                         message: "接口调用失败",
                         type: 'error'
-                      }); 
+                    }); 
                     return ;
                 }
                 var resobj= response.data;
@@ -287,6 +248,13 @@ var mainDivVM = new Vue({
                 console.log('今日通话时长')
                 console.log(response.data)
                 mainDivVM.todayTalkTime=response.data.data;
+            }); 
+            // 今日邀约数
+            param={};
+            axios.post('/console/console/countTodayAppiontmentNum',param).then(function (response) {
+                console.log('今日邀约数')
+                console.log(response.data)
+                mainDivVM.todayAppiontmentNum=response.data.data;
             }); 
         }
     },
