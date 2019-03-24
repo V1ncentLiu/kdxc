@@ -87,7 +87,7 @@
                 </el-select>
             </el-form-item> 
             <el-form-item label="">
-                <el-select v-model="form.resourceProject" placeholder="资源项目">
+                <el-select v-model="form.resourceProject" placeholder="资源项目" clearable >
                     <el-option
                         v-for="item in proSelectArr"
                         :key="item.id"
@@ -97,7 +97,7 @@
                 </el-select>
             </el-form-item>            
             <el-form-item label="">
-                <el-select v-model="form.medium" placeholder="媒介">
+                <el-select v-model="form.medium" placeholder="媒介" clearable >
                     <el-option
                         v-for="item in mediumArry"
                         :key="item.value"
@@ -107,7 +107,7 @@
                 </el-select>
             </el-form-item> 
             <el-form-item label="">
-                <el-select v-model="form.resourceType" placeholder="资源类别">
+                <el-select v-model="form.resourceType" placeholder="资源类别" clearable >
                     <el-option
                         v-for="item in categoryArr"
                         :key="item.value"
@@ -117,7 +117,7 @@
                 </el-select>
             </el-form-item> 
             <el-form-item label="">
-                <el-select v-model="form.tradeType" placeholder="行业类别">
+                <el-select v-model="form.tradeType" placeholder="行业类别" clearable>
                     <el-option
                         v-for="item in industryCategoryArr"
                         :key="item.value"
@@ -127,7 +127,7 @@
                 </el-select>
             </el-form-item> 
             <el-form-item label="">
-                <el-select v-model="form.resourceStage" placeholder="资源阶段">
+                <el-select v-model="form.resourceStage" placeholder="资源阶段" clearable >
                     <el-option
                         v-for="item in phaseArr"
                         :key="item.value"
@@ -137,7 +137,7 @@
                 </el-select>
             </el-form-item>
             <el-form-item label="">
-                <el-select v-model="form.resourcePerson" placeholder="资源专员">
+                <el-select v-model="form.resourcePerson" placeholder="资源专员" clearable >
                     <el-option
                         v-for="item in userArr"
                         :key="item.id"
@@ -398,7 +398,6 @@ var userList=[[${userList}]];
                 param.createTimeEnd=this.form.endTime;
                 param.assignTimeStart=this.form.assignTimeStart;
                 param.assignTimeEnd=this.form.assignTimeEnd;
-                param.assignTimeEnd=this.form.assignTimeEnd;
                 param.teleCompanyId=this.form.telemarketingBranch;
                 param.teleDeptId=this.form.businessUnit;
                 param.teleGorupId=this.form.telemarketingItem;
@@ -409,6 +408,29 @@ var userList=[[${userList}]];
                 param.source=this.form.medium;
                 param.category=this.form.resourceType;
                 param.industryCategory=this.form.tradeType;
+                var starTime=this.form.starTime;
+                var endTime=this.form.endTime;
+                if(endTime){
+                    if(starTime>endTime){
+                        this.$message({
+                            message: '创建开始时间不能大于结束时间',
+                            type: 'warning'
+                        });
+                        return;
+                    }
+                }
+                var start=this.form.assignTimeStart;
+                var end=this.form.assignTimeEnd;
+                if(end){
+                    if(start>end){
+                        this.$message({
+                            message: '分发开始时间不能大于结束时间',
+                            type: 'warning'
+                        });
+                        return;
+                    }
+                }
+                
     		    axios.post('/exetend/distributionedTaskManager/queryPageDistributionedTask',param).then(function (response) {
     				if(!response){
     					ocmVM.$message({
