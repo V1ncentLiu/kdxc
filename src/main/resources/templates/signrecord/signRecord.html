@@ -222,6 +222,7 @@
     </el-dialog>
     <!-- 付款明细 -->
     <el-dialog title="付款明细" :visible.sync="recordDialog">
+        <div class="fs16 marginB20">签约单编号()付款明细以及付款绑定到访记录</div>
         <div v-show="paymentDetailsShow">
             <div class="fs16 marginB20">全款付款明细</div>
             <el-table
@@ -290,6 +291,20 @@
                 <el-table-column align="center" prop="status" label="明细状态" :formatter="getStatusText"></el-table-column>
             </el-table>
         </div>
+        <div v-show="visitRecordShow">
+            <div class="fs16 marginB20">关联到访记录</div>
+            <el-table ref="recordTable" tooltip-effect="dark" style="width: 100%;margin-bottom: 20px;" border :data="visitRecordTable">
+                <el-table-column align="center" prop="vistitTime" label="到访时间"></el-table-column>
+                <el-table-column align="center" prop="vistitStoreTypeName" label="到访店铺类型" :formatter="getTimeText"></el-table-column>
+                <el-table-column align="center" prop="visitType" label="到访类型">
+
+                </el-table-column>
+                <el-table-column align="center" prop="visitCity" label="到访城市"></el-table-column>
+                <el-table-column align="center" prop="createTime" label="创建时间"></el-table-column>
+                <el-table-column align="center" prop="amountPerformance" label="到访批次"></el-table-column>
+                <el-table-column align="center" prop="status" label="到访有效性" :formatter="getStatusText"></el-table-column>
+            </el-table>
+        </div>
     </el-dialog>
 </div>
 <!-- import Vue before Element -->
@@ -317,6 +332,7 @@
                 paymentDetailsShow2:false,//判断定金付款明细表格是否显示
                 paymentDetailsShow3:false,//判断二次定金付款明细表格是否显示
                 paymentDetailsShow4:false,//判断尾款付款明细表格是否显示
+                visitRecordShow:false,
                 form: {
                 	signProjectId:'',
                 	businessGroupId:'',
@@ -360,6 +376,7 @@
                 recordTable2:[],
                 recordTable3:[],
                 recordTable4:[],
+                visitRecordTable:[],
                 dialogForm:{
                     reason:''
                 },
@@ -434,11 +451,15 @@
                 this.paymentDetailsShow2=false;
                 this.paymentDetailsShow3=false;
                 this.paymentDetailsShow4=false;
+                this.visitRecordShow=false;
+                // row.signNo;
+
                 var param = {};
                 param.idList = [row.id];
                 axios.post('/sign/signRecord/listPayDetailNoPage', param)
                 .then(function (response) {
                     var resData = response.data;
+                    console.log(resData.data)
                     if(resData.code=='0'){
                     	debugger;
                     	var payDetailData = resData.data;
@@ -459,7 +480,12 @@
                     		signRecordVM.paymentDetailsShow4=true;
                     		signRecordVM.recordTable4= payDetailData[4];
                     	}
-                        
+                        if(payDetailData['visitRecord']){
+                            if(payDetailData['visitRecord'].length >0){
+                                signRecordVM.visitRecordShow=true;
+                                signRecordVM.visitRecordTable= payDetailData['visitRecord'];
+                            }
+                        }
                     }else{
                         signRecordVM.$message({message:resData.msg,type:'error'});
                         console.error(resData);
