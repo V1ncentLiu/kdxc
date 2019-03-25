@@ -170,7 +170,7 @@
             </div>
             
             <div class="padding20 f-tac">            
-                <el-button type="primary" @click="submitForm('form')">提交</el-button>
+                <el-button type="primary" @click="submitForm('form')"  :disabled="addBtnDisabled"   >提交</el-button>
                 <el-button @click="rebackClue">取 消</el-button>
             </div> 
         </el-form> 
@@ -211,6 +211,7 @@
                 busSaleArr:[],
                 projectSelArr:proSelect,
                 formLabelWidth: '150px',
+                addBtnDisabled:false,
                 rules:{                    
                     customersNum: [
                         { validator:function(rule,value,callback){    
@@ -320,11 +321,13 @@
                         param.delayMark= this.form.delayDescription;
                         param.receivedPlace=this.form.pickUpStation; 
                         param.city=this.form.city; 
+                        this.addBtnDisabled=true;
                         axios.post('/tele/clueMyCustomerInfo/inviteCustomerSave',param)
                         .then(function (response) {
                         	inviteCustomerVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
-                        		//  window.location.href="/tele/clueMyCustomerInfo/customerEditInfo?clueId="+clueId; 
+                        		 //window.location.href="/tele/clueMyCustomerInfo/customerEditInfo?clueId="+clueId; 
                         		 window.location.href="/tele/clueMyCustomerInfo/initmyCustomer"; 
+                        		 this.addBtnDisabled=false;
      		            	}});
                        });
                         // this.$message({
@@ -343,6 +346,7 @@
              currentBusGroup(seleVal){
                 //初始化商务组
                 param={};
+                this.form.filiale='';
               	param.parentId=seleVal;
                 axios.post('/organization/organization/queryOrgByType',param).then(function (response) {  
                 	inviteCustomerVM.busGroupArr=response.data.data;
@@ -352,6 +356,7 @@
             	param={};
                	param.orgId=seleVal;
                	param.roleCode="SWZJ";
+               	this.form.businessDirector='';
                 axios.post('/user/userManager/listByOrgAndRole' ,param).then(function (response) {  
                 	inviteCustomerVM.busSaleArr=response.data.data;
                 });

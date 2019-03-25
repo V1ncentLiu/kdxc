@@ -253,7 +253,7 @@
             <el-table-column :prop="item.fieldCode" :label="item.displayName" :width="item.width"
 	          v-else-if="item.fieldCode == 'repeatPhones'">
                <template slot-scope="scope">
-                  <div v-if="scope.row.isTrack==1">
+                  <div v-if="scope.row.isRepeatPhone===1">
                       <el-button @click="repeatPhonesClick(scope.row)" type="text" size="small">点击查看</el-button>
                   </div>
                 </template>
@@ -296,8 +296,8 @@
             :data="repeatPhonesTable" 
             >
             <el-table-column align="center" type="index" width="55" label="序号"></el-table-column>
-            <el-table-column align="center" prop="createDate" label="资源创建时间"></el-table-column>
-            <el-table-column align="center" prop="cusPhone" label="联系方式"></el-table-column>
+            <el-table-column align="center" prop="createTime" label="资源创建时间"></el-table-column>
+            <el-table-column align="center" prop="phone" label="联系方式"></el-table-column>
             <el-table-column align="center" prop="teleDirectorName" label="电销总监"></el-table-column>
             <el-table-column align="center" prop="teleSaleName" label="创业顾问"></el-table-column>
             <el-table-column align="center" prop="teleGorupName" label="电销组"></el-table-column>
@@ -696,6 +696,7 @@ var userFieldList=[];
                 console.log(row);
                 this.repeatPhonesDialog=true;
                 this.dailogTitleType=row.phone;
+                this.repeatPhonesTable=[];
                 var param ={};
                     param.id = row.clueId;
                       param.cusPhone = row.phone;
@@ -705,8 +706,8 @@ var userFieldList=[];
                                 var result =  response.data;
                                 console.info(result);
                                 var table=result.data;
-                                 appiontmentVM.repeatPhonesTable= table.data;
-                                 appiontmentVM.repeatPhonesDialog=true;
+                                customerManVM.repeatPhonesTable=table;
+                                customerManVM.repeatPhonesDialog=true;
                           })  .catch(function (error) {
                                       console.log(error);
                 });
