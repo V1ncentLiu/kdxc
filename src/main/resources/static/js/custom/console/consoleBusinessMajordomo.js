@@ -72,7 +72,10 @@ var mainDivVM = new Vue({
         recordTable4:[],//尾款付款明细表格
         // 待审批到访记录
         dataTable2:[],
-        dialogFormVisibleVisit:false
+        dialogFormVisibleVisit:false,
+        // 待审批未到访记录
+        dataTable3:[],
+        dialogFormVisibleUnVisit:false,
 
     },
     methods: {
@@ -728,7 +731,142 @@ var mainDivVM = new Vue({
                 }
             });
         },
-
+        // 待审批未到访记录
+        initCustomerUnVisitRecord(){//初始列表 
+            var param = {};
+            // axios.post('/visit/visitRecord/listVisitRecord',param)
+            param.isVisit=0;
+            axios.post('/console/console/listVisitRecord',param)            
+            .then(function (response) {
+                var data =  response.data
+                console.log('待审批未到访记录')
+                console.log(data)
+                if(data.code=='0'){
+                    var resData = data.data;
+                    mainDivVM.dataTable3= resData;                    
+                }else{
+                    mainDivVM.$message({message:data.msg,type:'error'});
+                    console.error(data);
+                }             
+            })
+            .catch(function (error) {
+                console.log(error);
+            }).then(function(){
+            });            
+        },
+        OpenRejectUnVisitRecordDialog(){//待审批未到访记录驳回
+           this.signRecordArrTitle='';
+           var rows = this.multipleSelection;
+           if(rows.length<1){
+               this.$message({
+                  message: '请选择数据',
+                  type: 'warning'
+                });
+               return;
+           }
+           var title = "";
+           for(var i=0;i<rows.length;i++){
+               var curRow = rows[i];
+               title += "【"+curRow.serialNum+""+curRow.customerName+"】";
+           }
+           this.signRecordArrTitle=title;
+           
+           this.dialogFormVisibleUnVisit=true;
+        },
+        passUnVisit(){//未到访审核通过
+            var rows = this.multipleSelection;
+            if(rows.length<1){
+                this.$message({
+                   message: '请选择数据',
+                   type: 'warning'
+                 });
+                return;
+            }            
+            var title = "";
+            var idArr = new Array();
+            var isPass = true;
+            for(var i=0;i<rows.length;i++){
+                var curRow = rows[i];
+                if(curRow.status!=1){
+                    this.$message({message:'只允许审核待审核的数据',type:'warning'});
+                    isPass=false;
+                    break;
+                }
+                title += "【"+curRow.serialNum+""+curRow.customerName+"】 ";
+                idArr.push(curRow.id);
+            }
+            if(!isPass){
+                return;
+            }
+            
+            this.$confirm('确定要将此 '+title+' 未到访记录定为有效吗？', '提示', {
+                confirmButtonText: '确定',
+                cancelButtonText: '取消',
+                type: 'warning'
+            }).then(() => {
+                var param={};
+                param.idList = idArr;
+               
+                axios.post('/visit/visitRecord/passAuditSignOrder', param)
+                .then(function (response) {
+                    var resData = response.data;
+                    if(resData.code=='0'){
+                        mainDivVM.dialogFormVisibleUnVisit = false;
+                        mainDivVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
+                            mainDivVM.initCustomerVisitRecord();
+                        }});
+                    }else{
+                        mainDivVM.$message({message:resData.msg,type:'error'});
+                        console.error(resData);
+                    }
+                
+                })
+                .catch(function (error) {
+                     console.log(error);
+                }).then(function(){
+                });
+            }).catch(() => {
+                this.$message({
+                    type: 'info',
+                    message: '已取消审核'
+                });          
+            });
+        },
+        submitDialogFormVisit(formName) {//未到访提交
+            this.$refs[formName].validate((valid) => {
+                if (valid) {                  
+                    var param ={}; 
+                    var rows = this.multipleSelection;
+                    var idArr = new Array();
+                    for(var i=0;i<rows.length;i++){
+                        var curRow = rows[i];
+                       idArr.push(curRow.id);
+                    }
+                    param.idList = idArr;
+                    param.rebutReason = this.dialogForm.reason;
+                    axios.post('/visit/visitRecord/rejectVisitRecord', param)
+                    .then(function (response) {
+                        var resData = response.data;
+                        if(resData.code=='0'){
+                            mainDivVM.dialogForm.reason='';
+                            mainDivVM.dialogFormVisibleUnVisit = false;
+                            mainDivVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
+                                mainDivVM.initCustomerUnVisitRecord();
+                            }});
+                        }else{
+                            mainDivVM.$message({message:resData.msg,type:'error'});
+                            console.error(resData);
+                        }                    
+                    })
+                    .catch(function (error) {
+                         console.log(error);
+                    }).then(function(){
+                    });
+                } else {
+                    return false;
+                }
+            });
+        },
 
     },
     created(){
@@ -740,6 +878,8 @@ var mainDivVM = new Vue({
         this.initSignRecordData();
         // 待审批到访记录
         this.initCustomerVisitRecord();
+        // 待审未批到访记录
+        this.initCustomerUnVisitRecord();
     },
     mounted(){
         document.getElementById('mainDiv').style.display = 'block';
