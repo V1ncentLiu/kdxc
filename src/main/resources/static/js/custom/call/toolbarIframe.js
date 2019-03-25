@@ -78,7 +78,6 @@ var TOOLBAR = (function () {
         CTILink.Agent.queueStatus(params, callback);
     };
     toolbar.previewOutcall = function (params, callback) { //外呼
-    	console.log("外呼");
         CTILink.Agent.previewOutcall(params, callback);
     };
     toolbar.pause = function (params, callback) { //置忙

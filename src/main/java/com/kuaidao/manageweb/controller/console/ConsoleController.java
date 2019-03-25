@@ -128,8 +128,10 @@ public class ConsoleController {
         RoleInfoDTO roleInfoDTO = roleList.get(0);
         String roleCode = roleInfoDTO.getRoleCode();
         String path= "";
-/*        if(RoleCodeEnum.DXCYGW.name().equals(roleCode)) {
+        
+       if(RoleCodeEnum.DXCYGW.name().equals(roleCode)) {
             //电销顾问
+           path = "console/consoleTelemarketing";
         }else if(RoleCodeEnum.DXZJ.name().equals(roleCode)) {
             //电销总监
             List<Integer> statusList = new ArrayList<Integer>();
@@ -141,10 +143,21 @@ public class ConsoleController {
             path = "console/consoleTelemarketing";
         }else if(RoleCodeEnum.SWJL.name().equals(roleCode)) {
             //商务经理
+            // 项目
+            ProjectInfoPageParam param = new ProjectInfoPageParam();
+            JSONResult<List<ProjectInfoDTO>> proJson = projectInfoFeignClient.listNoPage(param);
+            if(JSONResult.SUCCESS.equals(proJson.getCode())){
+                request.setAttribute("proSelect", proJson.getData());
+            }
+            path="console/consoleBusinessManager";
         }else if(RoleCodeEnum.SWZJ.name().equals(roleCode)) {
             //商务总监
-        }*/
-        if(type.equals("1")) {
+            // 查询所有商务经理
+            List<Map<String, Object>> allSaleList = getAllSaleList();
+            request.setAttribute("allSaleList", allSaleList);
+            path="console/consoleBusinessMajordomo";
+        }
+ /*       if(type.equals("1")) {
             path = "console/consoleTelemarketing";
         }else if(type.equals("2")) {
             List<Integer> statusList = new ArrayList<Integer>();
@@ -167,7 +180,7 @@ public class ConsoleController {
             List<Map<String, Object>> allSaleList = getAllSaleList();
             request.setAttribute("allSaleList", allSaleList);
             path="console/consoleBusinessMajordomo";
-        }
+        }*/
         return path;
     }
     
