@@ -294,6 +294,9 @@ var mainDivVM = new Vue({
         }
     },
     methods: {
+        gotoBusinessMyCustomer(){//跳转我的客户
+            window.location.href="/aggregation/businessMyCustomer/listPage"; 
+        },
         // 工作台
         handleClick(tab, event) {
             console.log(tab, event);

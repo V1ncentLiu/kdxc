@@ -290,7 +290,7 @@
 				v-model="formInline.nextVisitTime" type="datetime"
 				format="yyyy-MM-dd HH:mm" size="mini" placeholder="选择日期时间">
 			</el-date-picker> </el-form-item> <el-form-item class="lineInherit"> <el-button
-				type="primary" size="mini" @click="onConfirmAdd">确认添加</el-button> </el-form-item> </el-row>
+				type="primary" size="mini" @click="onConfirmAdd"  :disabled="addBtnDisabled" >确认添加</el-button> </el-form-item> </el-row>
 			</el-form>
 		</div>
 		</el-table> </el-row>
@@ -566,6 +566,7 @@ var callRecord=[[${callRecord}]];//通话记录
                 dialogFormVisible: false,//新增手机号                
                 buttonType: 'A',//添加手机号按钮形式
                 deleteShow:false,//删除新增手机号输入框
+                addBtnDisabled:false,
                 form: { 
                     radioProject:'1', //意向项目单选默认选项                    
                     customerName:'',
@@ -733,6 +734,9 @@ var callRecord=[[${callRecord}]];//通话记录
      	     });
         	},
         	formatTimeFn(date) {
+        	 if(null==date){
+        	    return "";
+        	  }
         	  var dateNew = new Date( date );
        		  var year = dateNew.getFullYear()
        		  var month = dateNew.getMonth() + 1
@@ -1083,6 +1087,7 @@ var callRecord=[[${callRecord}]];//通话记录
                            param.nextVisitTime=this.formInline.nextVisitTime; 
                        }
                        param.customerStatusSub=this.formInline.customerStatusSub;
+                       this.addBtnDisabled=true;
                        //如果是编辑跟进记录
                        if( isEdit){
                            param.id=this.formInline.id;
@@ -1092,6 +1097,8 @@ var callRecord=[[${callRecord}]];//通话记录
                          	    axios.post('/tele/clueMyCustomerInfo/findClueTracking',param)
                               .then(function (response) {
                             	  isEdit=false;
+                            	 addCustomerVM.lineFormShow=false;
+                            	 addCustomerVM.addBtnDisabled=false;
                               	addCustomerVM.tableDataC2=response.data.data;
                                }); 
               	          }}); 	 
@@ -1103,6 +1110,8 @@ var callRecord=[[${callRecord}]];//通话记录
                          	  addCustomerVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
                          	    axios.post('/tele/clueMyCustomerInfo/findClueTracking',param)
                               .then(function (response) {
+                              	addCustomerVM.lineFormShow=false;
+                           	     addCustomerVM.addBtnDisabled=false;
                               	 addCustomerVM.tableDataC2=response.data.data;
                                }); 
               	          }}); 
@@ -1441,7 +1450,6 @@ var callRecord=[[${callRecord}]];//通话记录
             },
             download1(data, strFileName, strMimeType) {
 				download(data, strFileName, strMimeType);
-				alert(1);
 			},
             handlePlay(index, row) { //通话记录播放btn
             	$("audio").hide();
@@ -1547,7 +1555,7 @@ var callRecord=[[${callRecord}]];//通话记录
         	   this.form.ishasWx=customer.wechat;
         	   this.form.experience=customer.hasExperience==null?"":customer.hasExperience+"";
         	   this.form.customerAge=customer.age;
-        	   this.form.customerJob=customer.profession+"";
+        	   this.form.customerJob=customer.profession==null?"":customer.profession+""; 
         	   this.form.customerPartner=customer.partnerType==null?"":customer.partnerType+"";
         	   this.form.address=customer.hasAddress==null?"":customer.hasAddress+"";
         	   this.form.urgency=customer.urgentDate;
