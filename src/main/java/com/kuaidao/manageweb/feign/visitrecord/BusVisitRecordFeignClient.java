@@ -5,6 +5,7 @@ import com.kuaidao.aggregation.dto.visitrecord.BusVisitRecordInsertOrUpdateDTO;
 import com.kuaidao.aggregation.dto.visitrecord.BusVisitRecordRespDTO;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.IdEntityLong;
+import com.kuaidao.common.entity.IdListLongReq;
 import com.kuaidao.common.entity.JSONResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import sun.awt.util.IdentityArrayList;
 
 import java.util.List;
 import java.util.Map;
@@ -33,6 +35,10 @@ public interface BusVisitRecordFeignClient {
 	public JSONResult<Map> echoAppoinment(IdEntityLong idEntityLong);
 	@PostMapping("/findMaxNewOne")
 	public JSONResult<BusVisitRecordRespDTO> findMaxNewOne(@RequestBody IdEntityLong idEntityLong);
+
+	@PostMapping("/findByIds")
+	public JSONResult<List<BusVisitRecordRespDTO>> findByIds(@RequestBody IdListLongReq idListLongReq);
+
 
 	@Component
 	static class HystrixClientFallback implements BusVisitRecordFeignClient {
@@ -73,6 +79,11 @@ public interface BusVisitRecordFeignClient {
 		@Override
 		public JSONResult<BusVisitRecordRespDTO> findMaxNewOne(IdEntityLong idEntityLong) {
 			return fallBackError("回显邀签约记录信息");
+		}
+
+		@Override
+		public JSONResult<List<BusVisitRecordRespDTO>> findByIds(IdListLongReq idListLongReq) {
+			return fallBackError("通过IDS查询到访记录");
 		}
 	}
 }
