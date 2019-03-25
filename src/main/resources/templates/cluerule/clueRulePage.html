@@ -246,7 +246,7 @@
                                 </el-form-item>
                                 <el-form-item 
                                     style="margin-top: -6px;"                            
-                                    :prop="'domains.' + index + '.id'"
+                                    :prop="'domains.' + index + '.limitNum'"
                                     :rules='rules.domainsValue2'
                                     >                            
                                     <el-input v-model="domain.limitNum" placeholder="1-5000以内整数" maxLength="4" type="number" min="1" max="5000" ></el-input>
@@ -345,7 +345,7 @@
                     ],
                     // 1-5000以内整数
                     domainsValue2:[
-                        { required: true, message: '请输入数字', trigger: 'blur' },
+                        /* { required: true, message: '请输入数字', trigger: 'blur' }, */
                         { validator:function(rule,value,callback){
                             if(value!=""){
                                 if(/^[0-9]*$/.test(value) == false || value > 5000 || value == 0){
@@ -950,14 +950,37 @@
                         	 }
                         	 
                          }else{
-                             var teleDirectorRule={};
-                             teleDirectorRule.id=form.id7;
-                             teleDirectorRule.isEnabled=teleDirectorRuleIsEnabled;
-                             teleDirectorRule.limitNum=form.number16;
-                             teleDirectorRule.type=1;
-                             publicPoolRuleList.push(teleDirectorRule);
-                             param.teleDirectorReceiveRuleList = this.form.domains;
-                             isTeleDirectorRuleBl=true;
+                        	var telDirecotrArr =  this.form.domains;
+                         	if(telDirecotrArr.length==0) {
+                         		 isTeleDirectorRuleBl=true;
+                        	} else{
+                        		var telDirectorIdArr = {};
+                        		var isExistsSameId = true;
+                        		for(var i=0;i<telDirecotrArr.length;i++){
+                        			var curId = telDirecotrArr[i].teleDirectorId;
+                        			if(telDirectorIdArr["id"+curId]){
+                        				isExistsSameId =false;
+                        				this.$message({message:"为相同的电销总监设置了限制领取资源数",type:'warning'});
+                        				break;
+                        			}else{
+                        				telDirectorIdArr["id"+curId] = curId;
+                        			}
+                        		}
+                        		
+                        		if(!isExistsSameId){
+                        			this.clueRuleSubmitBtnDiabled=false;
+                        			return;
+                        		}
+                        		  var teleDirectorRule={};
+                                  teleDirectorRule.id=form.id7;
+                                  teleDirectorRule.isEnabled=teleDirectorRuleIsEnabled;
+                                  teleDirectorRule.limitNum=form.number16;
+                                  teleDirectorRule.type=1;
+                                  publicPoolRuleList.push(teleDirectorRule);
+                                  param.teleDirectorReceiveRuleList = telDirecotrArr;
+                                  isTeleDirectorRuleBl=true;
+                        	}
+                           
                          }
                          
                          //2
@@ -1087,7 +1110,7 @@
             addDomain() {
                 this.form.domains.push({
                 	teleDirectorId:'',
-                	id: '',
+                	limitNum: '',
                     key: Date.now()
                 });
             },
@@ -1132,17 +1155,18 @@
                         		releaseRuleVM.form.number3=autoReleRule.retentionDay;
                         		releaseRuleVM.form.remindValue1=autoReleRule.isReleaseRemind;
                         	}else if(autoReleRule.customerStatus==2){
+                        		debugger;
                         		releaseRuleVM.form.id2=autoReleRule.id;
                                 releaseRuleVM.form.number4=autoReleRule.timeoutRelease;
                                 releaseRuleVM.form.number5=autoReleRule.retentionTimes;
                                 releaseRuleVM.form.number6=autoReleRule.retentionDay;
-                                releaseRuleVM.form.remindValue3=autoReleRule.isReleaseRemind;
+                                releaseRuleVM.form.remindValue2=autoReleRule.isReleaseRemind;
                         	}else if(autoReleRule.customerStatus==5){
                         		releaseRuleVM.form.id3=autoReleRule.id;
                                 releaseRuleVM.form.number7=autoReleRule.timeoutRelease;
                                 releaseRuleVM.form.number8=autoReleRule.retentionTimes;
                                 releaseRuleVM.form.number9=autoReleRule.retentionDay;
-                                releaseRuleVM.form.remindValue2=autoReleRule.isReleaseRemind;
+                                releaseRuleVM.form.remindValue3=autoReleRule.isReleaseRemind;
                         	}else if(autoReleRule.customerStatus==6){
                         		releaseRuleVM.form.id4=autoReleRule.id;
                                 releaseRuleVM.form.number10=autoReleRule.timeoutRelease;

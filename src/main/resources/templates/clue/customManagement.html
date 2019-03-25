@@ -253,7 +253,7 @@
             <el-table-column :prop="item.fieldCode" :label="item.displayName" :width="item.width"
 	          v-else-if="item.fieldCode == 'repeatPhones'">
                <template slot-scope="scope">
-                  <div v-if="scope.row.isTrack==1">
+                  <div v-if="scope.row.isRepeatPhone===1">
                       <el-button @click="repeatPhonesClick(scope.row)" type="text" size="small">点击查看</el-button>
                   </div>
                 </template>
@@ -296,8 +296,8 @@
             :data="repeatPhonesTable" 
             >
             <el-table-column align="center" type="index" width="55" label="序号"></el-table-column>
-            <el-table-column align="center" prop="createDate" label="资源创建时间"></el-table-column>
-            <el-table-column align="center" prop="cusPhone" label="联系方式"></el-table-column>
+            <el-table-column align="center" prop="createTime" label="资源创建时间"></el-table-column>
+            <el-table-column align="center" prop="phone" label="联系方式"></el-table-column>
             <el-table-column align="center" prop="teleDirectorName" label="电销总监"></el-table-column>
             <el-table-column align="center" prop="teleSaleName" label="创业顾问"></el-table-column>
             <el-table-column align="center" prop="teleGorupName" label="电销组"></el-table-column>
@@ -317,7 +317,7 @@
                     { required: true, message: '请选择活动区域电销顾问', trigger: 'change' }
                 ]"
                 :label-width="formLabelWidth">
-              <el-select v-model="formAllocat.telSales" placeholder="请选择" style="width: 100%;">
+              <el-select v-model="formAllocat.telSales" placeholder="请选择" style="width: 80%;">
                     <el-option
                         v-for="item in saleList"
                         :key="item.id"
@@ -328,7 +328,7 @@
             </el-form-item>
         </el-row>
       </el-form>
-      <div slot="footer" class="dialog-footer">
+      <div slot="footer" class="dialog-footer" style="text-align:center;">
         <el-button type="primary" @click="submitAllocatForm('formAllocat')">提交</el-button>
         <el-button @click="resetForm('formAllocat');allocateFormVisible = false;">取 消</el-button>
       </div>
@@ -343,7 +343,7 @@
                 { required: true, message: '请选择活动区域电销总监', trigger: 'change' }
             ]"
             :label-width="formLabelWidth">
-           <el-select v-model="formTransfer.salesDirector" placeholder="请选择" style="width: 100%;">
+           <el-select v-model="formTransfer.salesDirector" placeholder="请选择" style="width: 80%;">
                     <el-option
                         v-for="item in saleGroupList"
                         :key="item.id"
@@ -353,7 +353,7 @@
            </el-select>
         </el-form-item>
       </el-form>
-      <div slot="footer" class="dialog-footer">
+      <div slot="footer" class="dialog-footer" style="text-align:center;">
         <el-button type="primary" @click="submitTransferForm('formTransfer')">提交</el-button>
         <el-button @click="resetForm('formTransfer');transferFormVisible=false;">取 消</el-button>
       </div>
@@ -374,7 +374,7 @@
           </el-select>
         </el-form-item>
       </el-form>
-      <div slot="footer" class="dialog-footer">
+      <div slot="footer" class="dialog-footer" style="text-align:center;">
         <el-button type="primary" @click="submitBatchForm('formBatch')">提交</el-button>
         <el-button @click="resetForm('formBatch');batchFormVisible=false;">取 消</el-button>
       </div>
@@ -389,7 +389,7 @@
                 { required: true, message: '请选择电销总监', trigger: 'change' }
             ]"
             :label-width="formLabelWidth">
-           <el-select v-model="formVicemanage.salesDirector" placeholder="请选择" style="width: 100%;"@change="currentSalesDirector" >
+           <el-select v-model="formVicemanage.salesDirector" placeholder="请选择" style="width: 80%;"@change="currentSalesDirector" >
              <el-option
                    v-for="item in saleGroupList"
                     :key="item.id"
@@ -405,7 +405,7 @@
                 { required: true, message: '请选择电销员工', trigger: 'change' }
             ]"
             :label-width="formLabelWidth">
-           <el-select v-model="formVicemanage.salesstaff" placeholder="请选择" style="width: 100%;">
+           <el-select v-model="formVicemanage.salesstaff" placeholder="请选择" style="width: 80%;">
                 <el-option
                  v-for="item in saleInfoArr"
                   :key="item.id"
@@ -415,7 +415,7 @@
            </el-select>
         </el-form-item>
       </el-form>
-      <div slot="footer" class="dialog-footer">
+      <div slot="footer" class="dialog-footer" style="text-align:center;">
         <el-button type="primary" @click="submitVicemanagerForm('formVicemanage')">提交</el-button>
         <el-button @click="resetForm('formVicemanage');vicemanagerFormVisible=false;">取 消</el-button>
       </div>
@@ -696,6 +696,7 @@ var userFieldList=[];
                 console.log(row);
                 this.repeatPhonesDialog=true;
                 this.dailogTitleType=row.phone;
+                this.repeatPhonesTable=[];
                 var param ={};
                     param.id = row.clueId;
                       param.cusPhone = row.phone;
@@ -705,8 +706,8 @@ var userFieldList=[];
                                 var result =  response.data;
                                 console.info(result);
                                 var table=result.data;
-                                 appiontmentVM.repeatPhonesTable= table.data;
-                                 appiontmentVM.repeatPhonesDialog=true;
+                                customerManVM.repeatPhonesTable=table;
+                                customerManVM.repeatPhonesDialog=true;
                           })  .catch(function (error) {
                                       console.log(error);
                 });

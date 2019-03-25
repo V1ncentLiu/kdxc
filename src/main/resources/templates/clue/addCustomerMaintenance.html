@@ -134,8 +134,8 @@
 			<el-option v-for="item in StorefrontAreaArr" :key="item.value"
 				:label="item.name" :value="item.value"> </el-option> </el-select> </el-form-item> </el-col> </el-row>
 			<el-row> <el-col :span="8"> <el-form-item
-				label="意向品类：" :label-width="formLabelWidth"> <el-select
-				v-model="form.intentionCategory" placeholder="请选择"
+				label="意向品类：" :label-width="formLabelWidth"> <el-select 
+				v-model="form.intentionCategory" placeholder="请选择" @change="projectChangeSelect"
 				style="width: 100%;"> <el-option
 				v-for="item in IntentionalCategoryArr" :key="item.value"
 				:label="item.name" :value="item.value"> </el-option> </el-select> </el-form-item> </el-col> <el-col
@@ -290,7 +290,7 @@
 				v-model="formInline.nextVisitTime" type="datetime"
 				format="yyyy-MM-dd HH:mm" size="mini" placeholder="选择日期时间">
 			</el-date-picker> </el-form-item> <el-form-item class="lineInherit"> <el-button
-				type="primary" size="mini" @click="onConfirmAdd">确认添加</el-button> </el-form-item> </el-row>
+				type="primary" size="mini" @click="onConfirmAdd"  :disabled="addBtnDisabled" >确认添加</el-button> </el-form-item> </el-row>
 			</el-form>
 		</div>
 		</el-table> </el-row>
@@ -328,12 +328,12 @@
 			border
                         @selection-change="handleSelectionChange">
 		<el-table-column type="index" width="55" label="序号" align="center">
-		</el-table-column> <el-table-column prop="name" label="姓名" align="center">
-		</el-table-column> <el-table-column prop="role" label="角色" align="center">
+		</el-table-column> <el-table-column prop="accountName" label="姓名" align="center">
+		</el-table-column> <el-table-column prop="roleName" label="角色" align="center">
 		</el-table-column> <el-table-column prop="callType" label="通话类型" align="center">
-		</el-table-column> <el-table-column prop="startTime" label="拨打时间" align="center">
+		</el-table-column> <el-table-column prop="startTime" label="拨打时间" :formatter="getStartTimeText"  align="center">
 		</el-table-column> <el-table-column prop="callStatus" label="接通情况" align="center">
-		</el-table-column> <el-table-column prop="talkTime" label="接通时长" align="center">
+		</el-table-column> <el-table-column prop="talkTime" label="接通时长"  :formatter="getTalkTimeText"  align="center">
 		</el-table-column> <el-table-column label="操作" align="center"> 
 		     <template slot-scope="scope" v-if="scope.row.talkTime >0 ">
               <div style="float:left" :id="scope.row.id" class="sound-trigger sound-trigger--type-default sound-trigger--type-click" @click="switchSoundBtn(scope.row.id,scope.row.recordFile,scope.row.callSource)">
@@ -566,6 +566,7 @@ var callRecord=[[${callRecord}]];//通话记录
                 dialogFormVisible: false,//新增手机号                
                 buttonType: 'A',//添加手机号按钮形式
                 deleteShow:false,//删除新增手机号输入框
+                addBtnDisabled:false,
                 form: { 
                     radioProject:'1', //意向项目单选默认选项                    
                     customerName:'',
@@ -733,6 +734,9 @@ var callRecord=[[${callRecord}]];//通话记录
      	     });
         	},
         	formatTimeFn(date) {
+        	 if(null==date){
+        	    return "";
+        	  }
         	  var dateNew = new Date( date );
        		  var year = dateNew.getFullYear()
        		  var month = dateNew.getMonth() + 1
@@ -753,6 +757,14 @@ var callRecord=[[${callRecord}]];//通话记录
 				  this.substatus=true;
        		 }
        		},
+       		projectChangeSelect(selVal){
+                var  param={};
+                param.category=selVal;
+         	    axios.post('/aggregation/projectManager/listNoPage',param).then(function (response) {
+         	    	addCustomerVM.proSelect=response.data.data;
+                });
+         	},
+       		
             submitForm(form) {
        			var valid=true;
 	       	  	  this.$refs[form].validateField(["customerEmail","callTime",
@@ -1022,6 +1034,10 @@ var callRecord=[[${callRecord}]];//通话记录
             handleTrackingSelection(val){
                this.multipleTrackingSelection=val;
             },
+            
+            
+            
+            
             editRecord() {
             //编辑跟进记录
               var rows=this.multipleTrackingSelection;
@@ -1071,6 +1087,7 @@ var callRecord=[[${callRecord}]];//通话记录
                            param.nextVisitTime=this.formInline.nextVisitTime; 
                        }
                        param.customerStatusSub=this.formInline.customerStatusSub;
+                       this.addBtnDisabled=true;
                        //如果是编辑跟进记录
                        if( isEdit){
                            param.id=this.formInline.id;
@@ -1080,6 +1097,8 @@ var callRecord=[[${callRecord}]];//通话记录
                          	    axios.post('/tele/clueMyCustomerInfo/findClueTracking',param)
                               .then(function (response) {
                             	  isEdit=false;
+                            	 addCustomerVM.lineFormShow=false;
+                            	 addCustomerVM.addBtnDisabled=false;
                               	addCustomerVM.tableDataC2=response.data.data;
                                }); 
               	          }}); 	 
@@ -1091,6 +1110,8 @@ var callRecord=[[${callRecord}]];//通话记录
                          	  addCustomerVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
                          	    axios.post('/tele/clueMyCustomerInfo/findClueTracking',param)
                               .then(function (response) {
+                              	addCustomerVM.lineFormShow=false;
+                           	     addCustomerVM.addBtnDisabled=false;
                               	 addCustomerVM.tableDataC2=response.data.data;
                                }); 
               	          }}); 
@@ -1243,6 +1264,37 @@ var callRecord=[[${callRecord}]];//通话记录
                   addCustomerVM.cityArr=response.data.data.data;
                 });  	
              },
+           	getStartTimeText(row, column, value, index){
+         		var valText="";
+         		if(value){
+         			valText =  moment.unix(value).format("YYYY-MM-DD HH:MM:SS");
+         		}
+         		return valText;
+         	},
+         	  getTalkTimeText(row, column, value, index){
+        		var valText="";
+        		if(value){
+        			valText =  this.formatSeconds(value);
+        		}
+        		return valText;
+        	},
+             formatSeconds(s){
+        		var t="";
+                var min = Math.floor(s/60) % 60;
+                var sec = s % 60;
+               
+               if(min < 10){
+                	t += "0";
+                }
+                t += min + ":";
+               if(sec < 10){
+                	t += "0";
+               }
+                t+=sec;
+               // t += sec.toFixed(2);
+    		  return t;
+        	},
+        		
              currentCity(selVal){
             	 //动态获取区县
             	 var param={};
@@ -1260,8 +1312,123 @@ var callRecord=[[${callRecord}]];//通话记录
 	    	    	  valid=false;
 	       	        }
 	              });
-                    if (valid) {
-	            	  window.location.href="/tele/clueMyCustomerInfo/inviteCustomer?clueId="+clueId+"&cusName="+this.form.customerName+"&cusPhone="+this.form.customerPhone; 
+                 if (valid) {
+                    	
+                 	var  clueCustomer={};
+                     	 //客户姓名
+                   	var  customerName=this.form.customerName;
+                   	clueCustomer.cusName=customerName;
+                  	    //手机号
+                   	var  customerPhone=this.form.customerPhone;
+                   	clueCustomer.phone=customerPhone;
+                  	    //性别
+                   	var customerSex=this.form.customerSex;
+                   	clueCustomer.sex=customerSex;
+               	    //微信
+                   	var  ishasWx=this.form.ishasWx;
+                   	clueCustomer.wechat=ishasWx;
+               	    //餐饮经验
+                   	var experience=this.form.experience;
+                   	clueCustomer.hasExperience=experience;
+               	    //年龄
+                   	var customerAge=this.form.customerAge;
+                   	clueCustomer.age=customerAge;
+               	    //职业
+                   	var customerJob=this.form.customerJob;
+                   	clueCustomer.profession=customerJob;
+               	    //合伙人
+                   	var customerPartner=this.form.customerPartner;
+                   	clueCustomer.partnerType=customerPartner;
+               	    //选址情况
+                   	var address=this.form.address;
+                   	clueCustomer.hasAddress=address;
+               	    //开店紧迫性
+               	    var urgency =this.form.urgency;
+               	    clueCustomer.urgentDate=urgency;
+               	    //客户级别
+               	    var customerLevel=this.form.customerLevel;
+               	    clueCustomer.cusLevel=customerLevel;
+               	    //QQ
+               	    var qq=this.form.qq;
+               	    clueCustomer.qq=qq;
+               	    //email
+               	    var email=this.form.customerEmail;
+               	    clueCustomer.email=email;
+               	    //餐饮经验
+               	    var experience=this.form.cateringType;
+               	    clueCustomer.experience=experience;
+               	    //合伙人姓名电话
+               	    var partnerNamePhone=this.form.customerPartnerDetail;
+               	    clueCustomer.partnerNamePhone=partnerNamePhone;
+               	    //出资人
+               	    var investors=this.form.sponsor;
+               	    clueCustomer.investors=investors;
+               	    //出资人姓名电话
+               	    var investorsNamePhone=this.form.sponsorOther;
+               	    clueCustomer.investorsNamePhone=investorsNamePhone;
+               	    //决策人
+               	    var decide=this.form.decisionMaker;
+               	    clueCustomer.decide=decide;
+               	    //决策人姓名电话
+               	    var decideNamePhone=this.form.decisionMakerOther;
+               	    clueCustomer.decideNamePhone=decideNamePhone;
+                  	    var phoneArr=this.dynamicValidateForm.domains;
+               	    if(phoneArr.length>0){
+               	     for(var i=0;i<phoneArr.length;i++){
+               	    	 if(i==0)  {
+               	    		 clueCustomer.phone2=phoneArr[i].value;	 
+               	         }
+               	    	 if(i==1)  {
+               	    		 clueCustomer.phone3=phoneArr[i].value;	
+               	         }
+               	    	 if(i==2)  {
+               	    		 clueCustomer.phone4=phoneArr[i].value;	 
+               	         }
+               	    	 if(i==3)  {
+               	    		 clueCustomer.phone5=phoneArr[i].value;	 
+               	         }
+               	      }
+               	    }
+               	    //----投资意向---//
+               	    var  clueIntention={};
+               	    //投资金额
+               	    var  money=this.form.money; 
+               	    clueIntention.advanceAmount=money;
+               	    //店面大小
+               	    var  area= this.form.area;
+               	    clueIntention.area=area;
+               	    //意向品类
+               	    var intentionCategory=this.form.intentionCategory;
+               	    clueIntention.purType=intentionCategory;
+               	    //意向项目
+               	    var radioProject= this.form.radioProject;
+               	    clueIntention.purProjectType=radioProject;
+               	    //意向内部项目
+               	    var  insideProject=this.form.insideProject;
+               	    clueIntention.purInProject=insideProject;
+               	    //意向外部项目
+               	    var  outsideProject= this.form.outsideProject;
+               	    clueIntention.purOutProject=outsideProject;
+               	    //省
+               	    var province= this.form.province;
+               	    clueIntention.province=province;
+               	    //市
+               	    var city=this.form.city;
+               	    clueIntention.city=city
+              	         //区县
+               	    var district= this.form.district;
+               	    clueIntention.district=district;
+            	        var clue={};
+            	        clue.clueId=clueId;
+               	    clue.clueCustomer=clueCustomer;
+               	    clue.clueIntention=clueIntention; 
+                       axios.post('/tele/clueMyCustomerInfo/updateCustomerClue',clue)
+                       .then(function (response) {
+                    	  addCustomerVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
+        	               window.location.href="/tele/clueMyCustomerInfo/inviteCustomer?clueId="+clueId+"&cusName="+addCustomerVM.form.customerName+"&cusPhone="+addCustomerVM.form.customerPhone; 
+   		        	  }});
+                     });
+                    	
                     } else {
                         console.log('error submit!!');
                         return false;
@@ -1283,7 +1450,6 @@ var callRecord=[[${callRecord}]];//通话记录
             },
             download1(data, strFileName, strMimeType) {
 				download(data, strFileName, strMimeType);
-				alert(1);
 			},
             handlePlay(index, row) { //通话记录播放btn
             	$("audio").hide();
@@ -1389,7 +1555,7 @@ var callRecord=[[${callRecord}]];//通话记录
         	   this.form.ishasWx=customer.wechat;
         	   this.form.experience=customer.hasExperience==null?"":customer.hasExperience+"";
         	   this.form.customerAge=customer.age;
-        	   this.form.customerJob=customer.profession+"";
+        	   this.form.customerJob=customer.profession==null?"":customer.profession+""; 
         	   this.form.customerPartner=customer.partnerType==null?"":customer.partnerType+"";
         	   this.form.address=customer.hasAddress==null?"":customer.hasAddress+"";
         	   this.form.urgency=customer.urgentDate;
@@ -1523,7 +1689,7 @@ var callRecord=[[${callRecord}]];//通话记录
            });
           //意向品类
           param={};
-          param.groupCode="IntentionalCategory"; 
+          param.groupCode="project_category"; 
           axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {  
               addCustomerVM.IntentionalCategoryArr=response.data.data;
            });

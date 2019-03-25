@@ -2,6 +2,7 @@ package com.kuaidao.manageweb.controller.homepage;
 
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.subject.Subject;
 import org.slf4j.Logger;
@@ -12,10 +13,12 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import com.kuaidao.aggregation.dto.deptcallset.DeptCallSetRespDTO;
+import com.kuaidao.common.constant.RoleCodeEnum;
 import com.kuaidao.common.entity.IdEntity;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.manageweb.feign.deptcallset.DeptCallSetFeignClient;
 import com.kuaidao.sys.dto.module.IndexModuleDTO;
+import com.kuaidao.sys.dto.role.RoleInfoDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 
 @Controller
@@ -72,6 +75,20 @@ public class HomePageController {
             }
 
         }
+      //判断是否显示控制台按钮
+        List<RoleInfoDTO> roleList = user.getRoleList();
+        boolean isShowConsoleBtn = false;
+        if(CollectionUtils.isNotEmpty(roleList)) {
+            RoleInfoDTO roleInfoDTO = roleList.get(0);
+            String roleCode = roleInfoDTO.getRoleCode();
+           if(RoleCodeEnum.DXCYGW.name().equals(roleCode) || RoleCodeEnum.DXZJ.name().equals(roleCode)
+                   || RoleCodeEnum.SWJL.name().equals(roleCode) ||RoleCodeEnum.SWZJ.name().equals(roleCode)) {
+               //电销顾问 电销总监 商务经理 商务总监
+               isShowConsoleBtn = true;
+           }
+        }
+        request.setAttribute("isShowConsoleBtn", isShowConsoleBtn);
+ 
 
         return "index";
     }
