@@ -131,6 +131,7 @@ var homePageVM=new Vue({
             accountId:accountId,//登陆者ID
             outboundDialogMin:false,//外呼dialog 是否最小化
             tmOutboundCallDialogVisible:false,//电销页面外呼 dialog 
+            consoleBtnVisible:isShowConsoleBtn,//控制台按鈕是否可見
 	    }
 	},
  	methods: {
@@ -344,14 +345,15 @@ var homePageVM=new Vue({
 			params.bindType = bindType;
 			params.loginStatus = 1;
 			bindType = params.bindType;
-			/*if (bindType == 2) {*/
+			if (bindType == 2) {
 				// alert("bitch");
 				$.get("/client/client/login/" + cno);
-				bindType = 1;
+				//TODO 暂时注释 dev
+				//bindType = 1;
 				params.bindType = 1;
-			/*} else {
+			} else {
 				$.post("/client/client/destroy/"+ cno);
-			}*/
+			}
 			
 			var cticloud_url = "api-2.cticloud.cn";
         	
@@ -529,8 +531,9 @@ var homePageVM=new Vue({
     		this.outboundDialogMin=true;
     	},
     	outboundCall(outboundInputPhone,callSource,clueId){//外呼
-    		//outboundCallPhone(outboundInputPhone,callSource,clueId,this.postBack());
+    		outboundCallPhone(outboundInputPhone,callSource,clueId,null);
     		//stopSound();//停止播放录音
+    		/*clearTimer();//清除定时器
     		if(!homePageVM.isQimoClient && !homePageVM.isTrClient ){
     			   homePageVM.$message({message:"请登录呼叫中心",type:'warning'});
     			   return ;
@@ -545,6 +548,12 @@ var homePageVM=new Vue({
 
     	 	var param = {};
     	 	if(homePageVM.isTrClient){//天润呼叫
+    	 		var bindType = this.loginClientForm.bindPhoneType;
+    	 		if(bindType==2){//abx外呼
+    	 			this.axbOutboundCall(outboundInputPhone,callSource,clueId);
+    	 			return;
+    	 		}
+    	 		//预览外呼
     	 		param.tel=outboundInputPhone;
     	 		var userField ={};
     	 		userField.accountId=homePageVM.accountId;
@@ -557,9 +566,9 @@ var homePageVM=new Vue({
     	 		TOOLBAR.previewOutcall(param,function(token){
     	 			if(token.code=='0'){
     	 				homePageVM.$message({message:"外呼中",type:'success'});
-    	 				clearTimer();//清除定时器
+    	 				
     	 				if(callSource==1){
-    	 					$('#outboundCallTime').html("");
+    	 	     			$('#outboundCallTime').html("");
     	 				}else if(callSource==2){//电销页面外呼
     	 					homePageVM.tmOutboundCallDialogVisible =true;
     	 					$("#tmOutboundCallTime").html("");
@@ -605,7 +614,7 @@ var homePageVM=new Vue({
     	          .then(function () {
     	            // always executed
     	          });
-    	 	}
+    	 	}*/
     		
     		
     	},
@@ -615,7 +624,15 @@ var homePageVM=new Vue({
     	},
     	postBack(){//接通成功后的回调函数
     		//console.info("postBack");
+    	},
+    	openConsolePage(){//点击控制台button 事件
+    		var dataUrl = "/console/console/index?type=1";
+			$("#iframeBox").attr({
+				"src":dataUrl //设置ifream地址
+			});
+    		
     	}
+    
          
   	},
    	created() {  

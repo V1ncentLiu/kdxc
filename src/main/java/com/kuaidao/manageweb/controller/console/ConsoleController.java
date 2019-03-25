@@ -4,23 +4,24 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
-import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
-import com.github.pagehelper.PageHelper;
 import com.kuaidao.aggregation.constant.AggregationConstant;
+import com.kuaidao.aggregation.dto.busmycustomer.BusMyCustomerRespDTO;
+import com.kuaidao.aggregation.dto.busmycustomer.MyCustomerParamDTO;
 import com.kuaidao.aggregation.dto.busmycustomer.SignRecordReqDTO;
 import com.kuaidao.aggregation.dto.busmycustomer.SignRecordRespDTO;
 import com.kuaidao.aggregation.dto.clue.BusPendingAllocationDTO;
@@ -33,28 +34,36 @@ import com.kuaidao.aggregation.dto.console.BusinessConsolePanelRespDTO;
 import com.kuaidao.aggregation.dto.console.BusinessConsoleReqDTO;
 import com.kuaidao.aggregation.dto.console.BusinessDirectorConsolePanelRespDTO;
 import com.kuaidao.aggregation.dto.console.TeleConsoleReqDTO;
+import com.kuaidao.aggregation.dto.project.ProjectInfoDTO;
+import com.kuaidao.aggregation.dto.project.ProjectInfoPageParam;
 import com.kuaidao.aggregation.dto.visitrecord.VisitRecordReqDTO;
 import com.kuaidao.aggregation.dto.visitrecord.VisitRecordRespDTO;
 import com.kuaidao.common.constant.CluePhase;
+import com.kuaidao.common.constant.OrgTypeConstant;
 import com.kuaidao.common.constant.RoleCodeEnum;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
-import com.kuaidao.common.util.CommonUtil;
 import com.kuaidao.common.util.DateUtil;
 import com.kuaidao.manageweb.feign.announcement.AnnReceiveFeignClient;
 import com.kuaidao.manageweb.feign.announcement.BusReceiveFeignClient;
+import com.kuaidao.manageweb.feign.busmycustomer.BusMyCustomerFeignClient;
 import com.kuaidao.manageweb.feign.clue.AppiontmentFeignClient;
 import com.kuaidao.manageweb.feign.clue.ClueBasicFeignClient;
 import com.kuaidao.manageweb.feign.clue.MyCustomerFeignClient;
 import com.kuaidao.manageweb.feign.clue.PendingVisitFeignClient;
+import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
+import com.kuaidao.manageweb.feign.project.ProjectInfoFeignClient;
 import com.kuaidao.manageweb.feign.sign.SignRecordFeignClient;
 import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
 import com.kuaidao.manageweb.feign.visit.VisitRecordFeignClient;
 import com.kuaidao.manageweb.util.CommUtil;
+import com.kuaidao.sys.constant.SysConstant;
 import com.kuaidao.sys.dto.announcement.annReceive.AnnReceiveQueryDTO;
 import com.kuaidao.sys.dto.announcement.annReceive.AnnReceiveRespDTO;
 import com.kuaidao.sys.dto.announcement.bussReceive.BussReceiveQueryDTO;
 import com.kuaidao.sys.dto.announcement.bussReceive.BussReceiveRespDTO;
+import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
+import com.kuaidao.sys.dto.organization.OrganizationRespDTO;
 import com.kuaidao.sys.dto.role.RoleInfoDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import com.kuaidao.sys.dto.user.UserOrgRoleReq;
@@ -98,35 +107,80 @@ public class ConsoleController {
     
     @Autowired
     PendingVisitFeignClient pendingVisitFeignClient;
+    
+    @Autowired
+    BusMyCustomerFeignClient busMyCustomerFeignClient;
+    
+    @Autowired
+    private ProjectInfoFeignClient projectInfoFeignClient;
+    
+    @Autowired
+    private OrganizationFeignClient organizationFeignClient;
     /***
      * 跳转控制台页面
      * @return
      */
     @RequestMapping("/index")
-    public String index(String type ) {
+    public String index(String type,HttpServletRequest request) {
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+        Long orgId = curLoginUser.getOrgId();
         List<RoleInfoDTO> roleList = curLoginUser.getRoleList();
         RoleInfoDTO roleInfoDTO = roleList.get(0);
-        String roleName = roleInfoDTO.getRoleName();
+        String roleCode = roleInfoDTO.getRoleCode();
         String path= "";
-/*        if(RoleCodeEnum.DXCYGW.value().equals(roleName)) {
+        
+       if(RoleCodeEnum.DXCYGW.name().equals(roleCode)) {
             //电销顾问
-        }else if(RoleCodeEnum.DXZJ.value().equals(roleName)) {
+           path = "console/consoleTelemarketing";
+        }else if(RoleCodeEnum.DXZJ.name().equals(roleCode)) {
             //电销总监
-        }else if(RoleCodeEnum.SWJL.value().equals(roleName)) {
-            //商务经理
-        }else if(RoleCodeEnum.SWZJ.value().equals(roleName)) {
-            //商务总监
-        }*/
-        if(type.equals("1")) {
+            List<Integer> statusList = new ArrayList<Integer>();
+            statusList.add(SysConstant.USER_STATUS_ENABLE);
+            statusList.add(SysConstant.USER_STATUS_LOCK);
+            List<UserInfoDTO> userList =
+                    getUserList(orgId, RoleCodeEnum.DXCYGW.name(), statusList);
+            request.setAttribute("saleList", userList);
             path = "console/consoleTelemarketing";
-        }else if(type.equals("2")) {
-            path="console/consoleTelMajordomo";
-        }else if(type.equals("3")) {
+        }else if(RoleCodeEnum.SWJL.name().equals(roleCode)) {
+            //商务经理
+            // 项目
+            ProjectInfoPageParam param = new ProjectInfoPageParam();
+            JSONResult<List<ProjectInfoDTO>> proJson = projectInfoFeignClient.listNoPage(param);
+            if(JSONResult.SUCCESS.equals(proJson.getCode())){
+                request.setAttribute("proSelect", proJson.getData());
+            }
             path="console/consoleBusinessManager";
-        }else if(type.equals("4")) {
+        }else if(RoleCodeEnum.SWZJ.name().equals(roleCode)) {
+            //商务总监
+            // 查询所有商务经理
+            List<Map<String, Object>> allSaleList = getAllSaleList();
+            request.setAttribute("allSaleList", allSaleList);
             path="console/consoleBusinessMajordomo";
         }
+ /*       if(type.equals("1")) {
+            path = "console/consoleTelemarketing";
+        }else if(type.equals("2")) {
+            List<Integer> statusList = new ArrayList<Integer>();
+            statusList.add(SysConstant.USER_STATUS_ENABLE);
+            statusList.add(SysConstant.USER_STATUS_LOCK);
+            List<UserInfoDTO> userList = getUserList(orgId, RoleCodeEnum.DXCYGW.name(), statusList);
+            request.setAttribute("saleList", userList);
+            path="console/consoleTelMajordomo";
+        }else if(type.equals("3")) {
+            // 项目
+            ProjectInfoPageParam param = new ProjectInfoPageParam();
+            JSONResult<List<ProjectInfoDTO>> proJson = projectInfoFeignClient.listNoPage(param);
+            if(JSONResult.SUCCESS.equals(proJson.getCode())){
+                request.setAttribute("proSelect", proJson.getData());
+            }
+
+            path="console/consoleBusinessManager";
+        }else if(type.equals("4")) {
+            // 查询所有商务经理
+            List<Map<String, Object>> allSaleList = getAllSaleList();
+            request.setAttribute("allSaleList", allSaleList);
+            path="console/consoleBusinessMajordomo";
+        }*/
         return path;
     }
     
@@ -235,8 +289,7 @@ public class ConsoleController {
     */
    @PostMapping("/listTodayFollowClue")
    @ResponseBody
-   public JSONResult<PageBean<CustomerClueDTO>> listTodayFollowClue() throws Exception{
-       CustomerClueQueryDTO queryDto = new CustomerClueQueryDTO();
+   public JSONResult<PageBean<CustomerClueDTO>> listTodayFollowClue(@RequestBody CustomerClueQueryDTO queryDto) throws Exception{
        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
        queryDto.setTeleSale(curLoginUser.getId());
        Date curDate = new Date();
@@ -374,7 +427,7 @@ public class ConsoleController {
     */
    @PostMapping("/listUnAssignClue")
    @ResponseBody
-   public JSONResult<List<PendingAllocationClueDTO>> listUnAssignClue(
+   public JSONResult<PageBean<PendingAllocationClueDTO>> listUnAssignClue(
            @RequestBody PendingAllocationCluePageParam pageParam){
        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
        pageParam.setUserId(curLoginUser.getId());
@@ -398,6 +451,23 @@ public class ConsoleController {
        businessConsoleReqDTO.setEndTime(curDate);
        businessConsoleReqDTO.setStartTime(DateUtil.getCurStartDate());
        return  visitRecordFeignClient.countCurMonthNum(businessConsoleReqDTO);
+   }
+   
+   
+   /**
+    * 商务经理控制台  待处理邀约来访客户
+    * @param param
+    * @return
+    */
+   @PostMapping("/listPendingInviteCustomer")
+   @ResponseBody
+   public JSONResult<PageBean<BusMyCustomerRespDTO>> listPendingInviteCustomer(@RequestBody MyCustomerParamDTO param){
+       UserInfoDTO user = CommUtil.getCurLoginUser();
+       param.setBusSaleId(user.getId());
+       //param.setBusSaleId(1084621842175623168L);
+       
+       return busMyCustomerFeignClient.listPendingInviteCustomer(param);
+       
    }
    
 /*   *//**
@@ -493,8 +563,8 @@ public class ConsoleController {
    
    
    /**
-    * 商务总监 待审批到访记录
-    * @param visitRecordReqDTO
+    * 商务总监 待审批到访记录  待审批未到访记录 
+    * @param visitRecordReqDTO  isVisit:是否到访  
     * @return
     */
    @PostMapping("/listVisitRecord")
@@ -542,6 +612,75 @@ public class ConsoleController {
         Date addDays2 = DateUtil.addDays(disableTime,1);
         System.out.println(addDays2);
         System.out.println(DateUtil.diffTimes(addDays2, new Date()));
+    }
+    
+    /**
+     * 根据机构和角色类型获取用户
+     * 
+     * @param orgDTO
+     * @return
+     */
+    private List<UserInfoDTO> getUserList(Long orgId, String roleCode, List<Integer> statusList) {
+        UserOrgRoleReq userOrgRoleReq = new UserOrgRoleReq();
+        userOrgRoleReq.setOrgId(orgId);
+        userOrgRoleReq.setRoleCode(roleCode);
+        userOrgRoleReq.setStatusList(statusList);
+        JSONResult<List<UserInfoDTO>> listByOrgAndRole =
+                userInfoFeignClient.listByOrgAndRole(userOrgRoleReq);
+        return listByOrgAndRole.getData();
+    }
+    
+    /**
+     * 获取所有商务经理（组织名-大区名）
+     * 
+     * @param orgDTO
+     * @return
+     */
+    private List<Map<String, Object>> getAllSaleList() {
+        // 查询所有商务组
+        OrganizationQueryDTO queryDTO = new OrganizationQueryDTO();
+        queryDTO.setOrgType(OrgTypeConstant.SWZ);
+        JSONResult<List<OrganizationRespDTO>> queryOrgByParam =
+                organizationFeignClient.queryOrgByParam(queryDTO);
+        List<OrganizationRespDTO> groupList = queryOrgByParam.getData();
+        // 查询所有商务大区
+        queryDTO.setOrgType(OrgTypeConstant.SWDQ);
+        JSONResult<List<OrganizationRespDTO>> busArea =
+                organizationFeignClient.queryOrgByParam(queryDTO);
+        List<OrganizationRespDTO> busAreaLsit = busArea.getData();
+        // 查询所有商务经理
+        List<Integer> statusList = new ArrayList<Integer>();
+        statusList.add(SysConstant.USER_STATUS_ENABLE);
+        statusList.add(SysConstant.USER_STATUS_LOCK);
+        List<UserInfoDTO> userList = getUserList(null, RoleCodeEnum.SWJL.name(), statusList);
+
+        Map<Long, OrganizationRespDTO> orgMap = new HashMap<Long, OrganizationRespDTO>();
+        // 生成<机构id，机构>map
+        for (OrganizationRespDTO org : groupList) {
+            orgMap.put(org.getId(), org);
+        }
+        for (OrganizationRespDTO org : busAreaLsit) {
+            orgMap.put(org.getId(), org);
+        }
+        List<Map<String, Object>> result = new ArrayList<Map<String, Object>>();
+        // 生成结果集，匹配电销组以及电销总监
+        for (UserInfoDTO user : userList) {
+            Map<String, Object> resultMap = new HashMap<String, Object>();
+            OrganizationRespDTO group = orgMap.get(user.getOrgId());
+            if (group != null) {
+                OrganizationRespDTO area = orgMap.get(group.getParentId());
+                resultMap.put("id", user.getId().toString());
+                if (area != null) {
+                    resultMap.put("name",
+                            user.getName() + "(" + area.getName() + "--" + group.getName() + ")");
+                } else {
+                    resultMap.put("name", user.getName() + "(" + group.getName() + ")");
+
+                }
+                result.add(resultMap);
+            }
+        }
+        return result;
     }
 
 }
