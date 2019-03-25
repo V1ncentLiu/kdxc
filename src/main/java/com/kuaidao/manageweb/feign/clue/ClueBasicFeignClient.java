@@ -99,7 +99,7 @@ public interface ClueBasicFeignClient {
      * @return
      */
     @PostMapping("/listUnAssignClue")
-    public JSONResult<List<PendingAllocationClueDTO>> listUnAssignClue(
+    public JSONResult<PageBean<PendingAllocationClueDTO>> listUnAssignClue(
             PendingAllocationCluePageParam pageParam);
 
     @Component
@@ -156,7 +156,7 @@ public interface ClueBasicFeignClient {
 
 
         @Override
-        public JSONResult<List<PendingAllocationClueDTO>> listUnAssignClue(
+        public JSONResult<PageBean<PendingAllocationClueDTO>> listUnAssignClue(
                 PendingAllocationCluePageParam pageParam) {
             return fallBackError("查询待分配资源");
         }

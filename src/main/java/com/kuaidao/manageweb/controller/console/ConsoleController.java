@@ -140,7 +140,7 @@ public class ConsoleController {
             List<UserInfoDTO> userList =
                     getUserList(orgId, RoleCodeEnum.DXCYGW.name(), statusList);
             request.setAttribute("saleList", userList);
-            path = "console/consoleTelemarketing";
+            path = "console/consoleTelMajordomo";
         }else if(RoleCodeEnum.SWJL.name().equals(roleCode)) {
             //商务经理
             // 项目
