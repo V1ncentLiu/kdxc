@@ -14,6 +14,7 @@ $(function(){
  */ 
 function outboundCallPhone(outboundInputPhone,callSource,clueId,callback){
 	stopSound();//停止播放录音
+	clearTimer();//清除定时器
 	if(!homePageVM.isQimoClient && !homePageVM.isTrClient ){
 		   homePageVM.$message({message:"请登录呼叫中心",type:'warning'});
 		   return ;
@@ -26,37 +27,17 @@ function outboundCallPhone(outboundInputPhone,callSource,clueId,callback){
  	
  	sessionStorage.setItem("callSource",callSource);//1:表示 首页头部外呼 2：表示 电销管理外呼
 
- 	var param = {};
- 	if(homePageVM.isTrClient){//天润呼叫
- 		param.tel=outboundInputPhone;
- 		var userField ={};
- 		userField.accountId=homePageVM.accountId;
- 		if(clueId){
- 			userField.clueId = clueId;
- 		}
- 		param.userField=userField;
  	
+ 	if(homePageVM.isTrClient){//天润呼叫
+ 		var bindType = homePageVM.loginClientForm.bindPhoneType;
+ 		if(bindType==2){//abx外呼
+ 			axbOutboundCall(outboundInputPhone,callSource,clueId);
+ 			return;
+ 		}
+ 		priviewOutbound(outboundInputPhone,callSource,clueId,callback);
  		
- 		TOOLBAR.previewOutcall(param,function(token){
- 			if(token.code=='0'){
- 				homePageVM.$message({message:"外呼中",type:'success'});
- 				clearTimer();//清除定时器
- 				if(callSource==1){
- 					$('#outboundCallTime').html("");
- 				}else if(callSource==2){//电销页面外呼
- 					homePageVM.tmOutboundCallDialogVisible =true;
- 					$("#tmOutboundCallTime").html("");
- 				}
- 				if (typeof callback === 'function') {
-		            callback();
-		        }
- 				
- 			}else{
- 				console.error(token);
- 				homePageVM.$message({message:"外呼失败",type:'error'});
- 			}
- 		});
  	}else if(homePageVM.isQimoClient){//七陌呼叫
+ 		var param = {};
  		param.customerPhoneNumber = outboundInputPhone;
  		if(clueId){
  			param.clueId = clueId;
@@ -92,8 +73,66 @@ function outboundCallPhone(outboundInputPhone,callSource,clueId,callback){
 	
 } 
 
+//abx外呼
+function axbOutboundCall(outboundInputPhone,callSource,clueId){
+	console.log("axb outbound call");
+	var axbParam = {};
+		axbParam.clueId = clueId;
+		axbParam.customerPhone = outboundInputPhone;
+		 axios.post('/client/client/axbOutCall',axbParam)
+      .then(function (response) {
+          var data =  response.data;
+          if(data.code=='0'){
+     		  //10分钟后红色字体显示
+     		  intervalTimer("outboundCallTime",10,1);
+     		  homePageVM.$message({message:"外呼中",type:'success'});
+          }else{
+         		homePageVM.$message({message:data.msg,type:'error'});
+          }
+      })
+      .catch(function (error) {
+         console.log(error);
+      })
+      .then(function () {
+        // always executed
+      });
+		
+}
+//tian run priview call
+function priviewOutbound(outboundInputPhone,callSource,clueId,callback){
+    	var param = {};
+	    param.tel=outboundInputPhone;
+		var userField ={};
+		userField.accountId=homePageVM.accountId;
+		if(clueId){
+			userField.clueId = clueId;
+		}
+		param.userField=userField;
+	
+		
+		TOOLBAR.previewOutcall(param,function(token){
+			if(token.code=='0'){
+				homePageVM.$message({message:"外呼中",type:'success'});
+				if(callSource==1){
+					$('#outboundCallTime').html("");
+				}else if(callSource==2){//电销页面外呼
+					homePageVM.tmOutboundCallDialogVisible =true;
+					$("#tmOutboundCallTime").html("");
+				}
+				if (typeof callback === 'function') {
+	            callback();
+	        }
+				
+			}else{
+				console.error(token);
+				homePageVM.$message({message:"外呼失败",type:'error'});
+			}
+		});
+}
 
- var myCallRecordVm = new Vue({
+
+
+/* var myCallRecordVm = new Vue({
     el: '#myCallRecordVm',
     data: {
     	isLogin:false,
@@ -107,7 +146,4 @@ function outboundCallPhone(outboundInputPhone,callSource,clueId,callback){
     },
 
 
-
-
-
-}) 
+}) */
