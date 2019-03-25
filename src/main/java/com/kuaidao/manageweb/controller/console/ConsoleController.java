@@ -140,7 +140,7 @@ public class ConsoleController {
             List<UserInfoDTO> userList =
                     getUserList(orgId, RoleCodeEnum.DXCYGW.name(), statusList);
             request.setAttribute("saleList", userList);
-            path = "console/consoleTelemarketing";
+            path = "console/consoleTelMajordomo";
         }else if(RoleCodeEnum.SWJL.name().equals(roleCode)) {
             //商务经理
             // 项目
@@ -213,7 +213,8 @@ public class ConsoleController {
     @PostMapping("/queryBussReceiveNoPage")
     @ResponseBody
     public JSONResult<List<BussReceiveRespDTO>> queryBussReceiveNoPage(@RequestBody BussReceiveQueryDTO queryDTO) {
-        
+        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+        queryDTO.setReceiveUser(curLoginUser.getId());
         return busReceiveFeignClient.queryBussReceiveNoPage(queryDTO);
     }
     
