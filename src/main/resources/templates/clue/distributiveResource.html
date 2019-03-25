@@ -159,7 +159,7 @@
             style="width: 100%"
             border
             :data="tableData"
-            @row-dblclick="rowDblClick()"
+            @row-dblclick="rowDblClick"
             @selection-change="handleSelectionChange" 
             >
             <el-table-column align="center" prop="clueId" type="selection" width="55"></el-table-column>
@@ -194,84 +194,84 @@
     <!-- dialog -->
     <el-dialog title="线索详细信息" :visible.sync="dialogFormVisible">
         <el-form :model="dialogForm" ref="dialogForm" class="marginB20 dialogForm">
-            <div class="fs16 redcolor marginB20">线索ID：5546112345678</div>
+            <div class="fs16 redcolor marginB20">线索ID：{{basic.id}}</div>
             <div class="borderbox padding20">
                 <el-row>
                     <el-col :span="12">
                         <el-form-item label="客户姓名：" :label-width="formLabelWidth">
-                            张三
+                      {{customer.cusName}}
                         </el-form-item>
                     </el-col>
                     <el-col :span="12">
                         <el-form-item label="手机号：" :label-width="formLabelWidth">
-                            15100001234
+                           {{customer.phone}}
                         </el-form-item>
                     </el-col>
                 </el-row>
                 <el-row>
                     <el-col :span="12">
                         <el-form-item label="微信：" :label-width="formLabelWidth">
-                            zhansan<span>/二维码</span>
+                          {{customer.wechat}}<span>/二维码</span>
                         </el-form-item>
                     </el-col>
                     <el-col :span="12">
                         <el-form-item label="邮箱：" :label-width="formLabelWidth">
-                            zhangsan@sina.com
+                          {{customer.email}}
                         </el-form-item>
                     </el-col>
                 </el-row>
                 <el-row>
                     <el-col :span="12">
                         <el-form-item label="QQ：" :label-width="formLabelWidth">
-                           123123123
+                         {{customer.qq}}
                         </el-form-item>
                     </el-col>
                     <el-col :span="12">
                         <el-form-item label="资源类型：" :label-width="formLabelWidth">
-                            类型1
+                     {{basic.typeName}}
                         </el-form-item>
                     </el-col>
                 </el-row>
                 <el-row>
                     <el-col :span="12">
                         <el-form-item label="资源项目：" :label-width="formLabelWidth">
-                            项目1
+                         {{basic.projectName}}                                                     
                         </el-form-item>
                     </el-col>
                     <el-col :span="12">
                         <el-form-item label="资源类别：" :label-width="formLabelWidth">
-                            类别1
+                       {{basic.categoryName}}
                         </el-form-item>
                     </el-col>
                 </el-row>
                 <el-row>
                     <el-col :span="12">
                         <el-form-item label="媒介：" :label-width="formLabelWidth">
-                            媒介1
+                        {{basic.sourceName}}
                         </el-form-item>
                     </el-col>
                     <el-col :span="12">
                         <el-form-item label="搜索词：" :label-width="formLabelWidth">
-                            搜索词1
+                          {{basic.searchWord}}
                         </el-form-item>
                     </el-col>
                 </el-row>
                 <el-row>
                     <el-col :span="12">
                         <el-form-item label="行业类别：" :label-width="formLabelWidth">
-                            类别1
+                       {{basic.industryCategoryName}}
                         </el-form-item>
                     </el-col>
                     <el-col :span="12">
                         <el-form-item label="留言时间：" :label-width="formLabelWidth">
-                            2019年3月13日
+                            {{basic.messageTime}}
                         </el-form-item>
                     </el-col>
                 </el-row>
                 <el-row>
                     <el-col :span="24">
                         <el-form-item label="留言重点：" :label-width="formLabelWidth">
-                            留言重点内容留言重点内容留言重点内容留言重
+                       {{basic.messagePoint}}
                         </el-form-item>
                     </el-col>
                 </el-row>
@@ -367,7 +367,10 @@ var userList=[[${userList}]];
                 proSelectArr:proSelect,
                 dxBusinessList:[],
                 userArr:userList,
-                tableData:[],             
+                tableData:[],
+                customer:'',
+                basic:'',
+                
             }        	  
         },
         methods: {
@@ -463,7 +466,47 @@ var userList=[[${userList}]];
         	},
             
             
-            rowDblClick(row, column, event){//双击查看详情
+            rowDblClick(row, column, event){
+        	  //双击查看详情
+        	  var  param={};
+              param.clueId=row.clueId;
+     		  axios.post('/exetend/agendaTaskManager/customerInfoView',param).then(function (response) {
+     				if(!response){
+     					ocmVM.$message({
+	                        message: "接口调用失败",
+	                        type: 'error'
+	                      }); 
+						return ;
+					}
+     				var resobj= response.data;
+					if(!resobj){
+						ocmVM.$message({
+	                        message: "接口调用失败",
+	                        type: 'error'
+	                      }); 
+						return ;
+					} 
+					if(resobj.code!='0'){
+						ocmVM.$message({
+	                        message: "接口调用失败",
+	                        type: 'error'
+	                      }); 
+						return ;
+					}
+					ocmVM.customer=response.data.data.clueCustomer;
+				  var messageTime= response.data.data.clueBasic.messageTime;
+				  if(null!=messageTime){
+					  response.data.data.clueBasic.messageTime=crtTimeFtt1(messageTime);
+				  }
+				  ocmVM.basic=response.data.data.clueBasic;
+     			})
+            	
+        		
+        		
+        		
+        		
+        		
+        		
                 this.dialogFormVisible = true
             },
             number(){
@@ -567,5 +610,33 @@ var userList=[[${userList}]];
                
         }
     })
+    
+    function crtTimeFtt1(val, row) {
+        if (val != null) {
+            var date = new Date(val);
+
+            var month = (date.getMonth() + 1);
+            if(month<10){
+                month = "0"+month;
+            }
+            var day = date.getDate();
+            if(day<10){
+                day = "0"+day;
+            }
+            var hour = date.getHours();
+            if(hour<10){
+                hour = "0"+hour;
+            }
+            var minu = date.getMinutes();
+            if(minu<10){
+                minu = "0"+minu;
+            }
+            var mill = date.getSeconds();
+            if(mill<10){
+                mill = "0"+mill;
+            }
+            return date.getFullYear()+''+(month) + ''+day+' '+hour+":"+minu+":"+mill;
+        }
+    }
 </script>
 </html>
