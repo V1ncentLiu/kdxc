@@ -72,6 +72,7 @@ var mainDivVM = new Vue({
         recordTable4:[],//尾款付款明细表格
         // 待审批到访记录
         dataTable2:[],
+        dialogFormVisibleVisit:false
 
     },
     methods: {
@@ -321,7 +322,7 @@ var mainDivVM = new Vue({
             }).then(function(){
             });            
         },
-        pass(){//审核通过
+        pass(){//待审签约记录审核通过
             var rows = this.multipleSelection;
             if(rows.length<1){
                 this.$message({
@@ -382,7 +383,7 @@ var mainDivVM = new Vue({
                 });          
             });
         },
-        OpenRejectSignRecordDialog(){//驳回
+        OpenRejectSignRecordDialog(){//待审签约记录驳回
             this.signRecordArrTitle='';
             this.dialogForm.reason='';
             var rows = this.multipleSelection;
@@ -455,7 +456,7 @@ var mainDivVM = new Vue({
             }).then(function(){
             });           
         },
-        reasonClick(row) {//驳回原因
+        reasonClick(row) {//待审签约记录驳回原因
             this.rebutReason = row.rebutReason;
             this.reasonDialog=true;
         },
@@ -573,6 +574,7 @@ var mainDivVM = new Vue({
         initCustomerVisitRecord(){//初始列表 
             var param = {};
             // axios.post('/visit/visitRecord/listVisitRecord',param)
+            param.isVisit=1;
             axios.post('/console/console/listVisitRecord',param)            
             .then(function (response) {
                 var data =  response.data
@@ -580,7 +582,7 @@ var mainDivVM = new Vue({
                 console.log(data)
                 if(data.code=='0'){
                     var resData = data.data;
-                    mainDivVM.dataTable2= resData.data;                    
+                    mainDivVM.dataTable2= resData;                    
                 }else{
                     mainDivVM.$message({message:data.msg,type:'error'});
                     console.error(data);
@@ -590,6 +592,141 @@ var mainDivVM = new Vue({
                 console.log(error);
             }).then(function(){
             });            
+        },
+        getVisitTypeText(row, column, value, index){
+            var valText="";
+            if(value==1){
+                valText="预约来访";
+            }else if(value==2){
+                valText="慕名来访";
+            }else if(value==3){
+                valText="临时来访";
+            }
+            return valText;
+        },
+        getVisitNumText(row, column, value, index){
+            var valText="";
+            if(value==1){
+                valText="首次到访";
+            }else if(value==2){
+                valText="二次来访";
+            }else if(value>=3){
+                valText="多次来访";
+            }
+            return valText;
+        },
+        OpenRejectVisitRecordDialog(){//待审批到访记录驳回
+           this.signRecordArrTitle='';
+           var rows = this.multipleSelection;
+           if(rows.length<1){
+               this.$message({
+                  message: '请选择数据',
+                  type: 'warning'
+                });
+               return;
+           }
+           var title = "";
+           for(var i=0;i<rows.length;i++){
+               var curRow = rows[i];
+               title += "【"+curRow.serialNum+""+curRow.customerName+"】";
+           }
+           this.signRecordArrTitle=title;
+           
+           this.dialogFormVisibleVisit=true;
+        },
+        passVisit(){//到访审核通过
+            var rows = this.multipleSelection;
+            if(rows.length<1){
+                this.$message({
+                   message: '请选择数据',
+                   type: 'warning'
+                 });
+                return;
+            }            
+            var title = "";
+            var idArr = new Array();
+            var isPass = true;
+            for(var i=0;i<rows.length;i++){
+                var curRow = rows[i];
+                if(curRow.status!=1){
+                    this.$message({message:'只允许审核待审核的数据',type:'warning'});
+                    isPass=false;
+                    break;
+                }
+                title += "【"+curRow.serialNum+""+curRow.customerName+"】 ";
+                idArr.push(curRow.id);
+            }
+            if(!isPass){
+                return;
+            }
+            
+            this.$confirm('确定要将此 '+title+' 到访记录定为有效吗？', '提示', {
+                confirmButtonText: '确定',
+                cancelButtonText: '取消',
+                type: 'warning'
+            }).then(() => {
+                var param={};
+                param.idList = idArr;
+               
+                axios.post('/visit/visitRecord/passAuditSignOrder', param)
+                .then(function (response) {
+                    var resData = response.data;
+                    if(resData.code=='0'){
+                        mainDivVM.dialogFormVisibleVisit = false;
+                        mainDivVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
+                            mainDivVM.initCustomerVisitRecord();
+                        }});
+                    }else{
+                        mainDivVM.$message({message:resData.msg,type:'error'});
+                        console.error(resData);
+                    }
+                
+                })
+                .catch(function (error) {
+                     console.log(error);
+                }).then(function(){
+                });
+            }).catch(() => {
+                this.$message({
+                    type: 'info',
+                    message: '已取消审核'
+                });          
+            });
+        },
+        submitDialogFormVisit(formName) {//到访提交
+            this.$refs[formName].validate((valid) => {
+                if (valid) {                  
+                    var param ={}; 
+                    var rows = this.multipleSelection;
+                    var idArr = new Array();
+                    for(var i=0;i<rows.length;i++){
+                        var curRow = rows[i];
+                       idArr.push(curRow.id);
+                    }
+                    param.idList = idArr;
+                    param.rebutReason = this.dialogForm.reason;
+                    axios.post('/visit/visitRecord/rejectVisitRecord', param)
+                    .then(function (response) {
+                        var resData = response.data;
+                        if(resData.code=='0'){
+                            mainDivVM.dialogForm.reason='';
+                            mainDivVM.dialogFormVisibleVisit = false;
+                            mainDivVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
+                                mainDivVM.initCustomerVisitRecord();
+                            }});
+                        }else{
+                            mainDivVM.$message({message:resData.msg,type:'error'});
+                            console.error(resData);
+                        }                    
+                    })
+                    .catch(function (error) {
+                         console.log(error);
+                    }).then(function(){
+                    });
+                } else {
+                    return false;
+                }
+            });
         },
 
 

@@ -285,8 +285,8 @@
             <div class="rightbox f-fr">
                 <img th:src="@{/images/icon_arrow.png}" alt="" class="f-fr">
                 <span class="f-fr">进入客户到访记录</span>
-                <el-button type="success" size="small" class="f-fr btn" @click="">审核通过</el-button>
-                <el-button type="danger" size="small" class="f-fr btn" @click="">驳回</el-button>
+                <el-button type="success" size="small" class="f-fr btn" @click="passVisit">审核通过</el-button>
+                <el-button type="danger" size="small" class="f-fr btn" @click="OpenRejectVisitRecordDialog">驳回</el-button>
             </div>
         </div>
         <el-table 
@@ -299,41 +299,60 @@
             >
             <el-table-column align="center" type="selection" width="55"></el-table-column>
             <el-table-column align="center" prop="serialNum" label="序号" width="55"></el-table-column>
-            <el-table-column align="center" prop="submitInvitateTime" width="170" label="提交邀约时间"></el-table-column>
-            <el-table-column align="center" prop="invitateVistitTime" width="170" label="邀约来访时间"></el-table-column>
-            <el-table-column align="center" prop="teleGroupName" label="电销组"></el-table-column> 
-            <el-table-column align="center" prop="salesDirector" label="电销总监"></el-table-column> 
-            <el-table-column align="center" prop="salesStaff" label="电销员工"></el-table-column> 
-            <el-table-column align="center" prop="teleGroupProgram" label="电销组项目"></el-table-column> 
-            <el-table-column align="center" prop="businessDistrict" label="商务大区"></el-table-column> 
-            <el-table-column align="center" prop="businessGroup" label="商务小组"></el-table-column> 
-            <el-table-column align="center" prop="businessManagerName" label="商务经理" width="100"></el-table-column>
             <el-table-column align="center" prop="customerName" label="客户姓名"></el-table-column>  
-            <el-table-column align="center" prop="tasteItems" label="品尝项目" width="100"></el-table-column>
-            <el-table-column align="center" prop="contractShopType" label="签约店型" width="100"></el-table-column>
-            <el-table-column align="center" prop="openshopProvince " label="开店省份" width="100"></el-table-column> 
-            <el-table-column align="center" prop="openshopCity" label="开店城市" width="100"></el-table-column>   
-            <el-table-column align="center" prop="openshopProvinceDistrict" label="开店区／县" width="120"></el-table-column>
-            <el-table-column align="center" prop="customerSex" label="客户性别"></el-table-column>  
-            <el-table-column align="center" prop="customerAge" label="客户年龄"></el-table-column>  
-            <el-table-column align="center" prop="partner" label="合伙人"></el-table-column>
-            <el-table-column align="center" prop="cateringExperience" label="餐饮经验"></el-table-column>
-            <el-table-column align="center" prop="siteSelection" label="选址情况"></el-table-column>
-            <el-table-column align="center" prop="preinvestmentAmount" label="预投金额"></el-table-column>
-            <el-table-column align="center" prop="intentionProject" label="意向项目"></el-table-column>
-            <el-table-column align="center" prop="storefrontArea" label="店面面积"></el-table-column>
-            <el-table-column align="center" prop="createTime" label="创建时间"></el-table-column>
-            <el-table-column align="center" prop="noVisitReason" label="未到访原因" width="100">
+            <el-table-column align="center" prop="projectName" label="考察项目" width="100"></el-table-column>
+            <el-table-column align="center" prop="companyName" label="考察公司"></el-table-column>
+            <el-table-column align="center" prop="vistitTime" label="到访时间"></el-table-column>
+            <el-table-column align="center" prop="vistitStoreType" label="到访店铺类型" width="120" :formatter="getSignShopTypeText"></el-table-column>
+            <el-table-column align="center" prop="visitType" label="到访类型" :formatter="getVisitTypeText"></el-table-column>
+            <el-table-column align="center" prop="visitCity" label="来访城市"></el-table-column> 
+            <el-table-column align="center" prop="signProvince" label="预签约省份" width="100"></el-table-column> 
+            <el-table-column align="center" prop="signCity" label="预签约城市" width="100"></el-table-column>   
+            <el-table-column align="center" prop="signDistrict" label="预签约区／县" width="120"></el-table-column>
+            <el-table-column align="center" prop="businessGroupName" label="商务小组"></el-table-column> 
+            <el-table-column align="center" prop="businessManagerName" label="商务经理" width="100"></el-table-column>
+            <el-table-column align="center" prop="teleGroupName" label="电销组"></el-table-column> 
+            <el-table-column align="center" prop="teleSaleName" label="创业顾问"></el-table-column> 
+            <el-table-column align="center" prop="isSign" label="是否签约" width="100">
                 <template slot-scope="scope">
-                    <span>未到访原因</span>
+                    <span v-if="scope.row.isSign===0">
+                        否&nbsp;<el-button @click="notSignedReasonClick(scope.row)" type="text">未签约原因</el-button>
+                    </span>
+                    <span v-else-if="scope.row.isSign===1">是</span>
                 </template>
             </el-table-column>
+            <el-table-column align="center" prop="createTime" label="创建时间"></el-table-column> 
+            <el-table-column align="center" prop="visitCount" label="到访批次" :formatter="getVisitNumText"></el-table-column> 
             <el-table-column align="center" prop="status" label="到访有效性" width="100">
                 <template slot-scope="scope">
-                    <span>待审核</span> 
+                    <span v-if="scope.row.status===0">
+                        驳回&nbsp;<el-button @click="reasonClick(scope.row)" type="text">驳回原因</el-button>
+                    </span>
+                    <span v-else-if="scope.row.status===1">待审核</span>
+                    <span v-else-if="scope.row.status===2">有效</span> 
                 </template>
             </el-table-column>
         </el-table>
+        <!-- 驳回处理 -->
+        <el-dialog title="提示" :visible.sync="dialogFormVisibleVisit">
+            <el-form :model="dialogForm" ref="dialogForm" :rules="dialogRules">            
+                <div class="fs16 marginB20">确定要将此 {{signRecordArrTitle}} 到访记录驳回吗？</div>
+                <el-form-item label="驳回原因：" label-width="100px" prop="reason">
+                    <el-input
+                        type="textarea"
+                        :rows="4"
+                        placeholder="请输入驳回原因"
+                        maxLength="100"
+                        v-model="dialogForm.reason">
+                    </el-input>
+                </el-form-item>
+                <div class="f-tar">最多100字</div>
+            </el-form>
+            <div slot="footer" class="dialog-footer">
+                <el-button type="primary" @click="submitDialogFormVisit('dialogForm')">确 定</el-button>
+                <el-button @click="dialogFormVisible = false" >取 消</el-button>
+            </div>
+        </el-dialog>
     </el-row>
     <!-- 待审批到访、未到访记录 end -->
     <!-- 待审签约记录 -->
