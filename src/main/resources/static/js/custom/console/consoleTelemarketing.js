@@ -52,6 +52,12 @@ var mainDivVM = new Vue({
         }
     },
     methods: {
+        gotoMyCustomer(){//跳转我的客户
+            window.location.href="/tele/clueMyCustomerInfo/initmyCustomer"; 
+        },
+        gotoPublicCustomer(){//跳转公有池
+            window.location.href="/aggregation/publiccustomer/listPage"; 
+        },
         openTrackingDialog(cid){//跟进记录点击方法
             var param = {};
             param.clueId = cid;

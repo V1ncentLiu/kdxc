@@ -52,6 +52,9 @@ var mainDivVM = new Vue({
         
     },
     methods: {
+        gotoPendingAllocation(){//跳转待分配资源列表
+            window.location.href="/clue/pendingAllocation/initAppiontmentList"; 
+        },
         // 工作台
         handleClick(tab, event) {
             console.log(tab, event);
