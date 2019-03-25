@@ -79,6 +79,18 @@ var mainDivVM = new Vue({
 
     },
     methods: {
+        gotoBusAllocation(){//跳转待分配来访客户
+            window.location.href="/business/busAllocation/initAppiontmentList"; 
+        },
+        gotoVisitRecord(){//跳转客户到访记录
+            window.location.href="/visit/visitRecord/visitRecordPage"; 
+        },
+        gotoVisitRecord(){//跳转客户未到访记录
+            window.location.href="/visit/visitRecord/visitRecordPage"; 
+        },
+        gotoSignRecord(){//跳转客户签约记录
+            window.location.href="/sign/signRecord/signRecordPage"; 
+        },
         // 工作台
         handleClick(tab, event) {
             console.log(tab, event);
