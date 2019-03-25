@@ -145,13 +145,13 @@ public class ConsoleController {
             //商务总监
         }*/
         if(type.equals("1")) {
+            path = "console/consoleTelemarketing";
+        }else if(type.equals("2")) {
             List<Integer> statusList = new ArrayList<Integer>();
             statusList.add(SysConstant.USER_STATUS_ENABLE);
             statusList.add(SysConstant.USER_STATUS_LOCK);
             List<UserInfoDTO> userList = getUserList(orgId, RoleCodeEnum.DXCYGW.name(), statusList);
             request.setAttribute("saleList", userList);
-            path = "console/consoleTelemarketing";
-        }else if(type.equals("2")) {
             path="console/consoleTelMajordomo";
         }else if(type.equals("3")) {
             // 项目
