@@ -6,6 +6,9 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+
+import com.kuaidao.aggregation.dto.visitrecord.BusVisitRecordRespDTO;
+import com.kuaidao.manageweb.feign.visitrecord.BusVisitRecordFeignClient;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.slf4j.Logger;
@@ -70,6 +73,9 @@ public class SignRecordController {
     
     @Autowired
     ProjectInfoFeignClient projectInfoFeignClient;
+
+    @Autowired
+    BusVisitRecordFeignClient visitRecordFeignClient;
 
     
     /**
@@ -196,11 +202,15 @@ public class SignRecordController {
                 }
                 reqDTO.setBusinessManagerIdList(accountIdList);
             }
-          
+
         }else {
                 return new JSONResult().fail(SysErrorCodeEnum.ERR_NOTEXISTS_DATA.getCode(),"角色没有权限");
         }
-       logger.info("listSignRecord{{}}",reqDTO.toString());
+//        List<Long> accountIdList = new ArrayList<>();
+//        accountIdList.add(1084621842175623168L);
+//        reqDTO.setBusinessManagerIdList(accountIdList);
+
+        logger.info("listSignRecord{{}}",reqDTO.toString());
         return signRecordFeignClient.listSignRecord(reqDTO);
     }
     
@@ -307,10 +317,22 @@ public class SignRecordController {
         if(data==null) {
             return payDetailListJr;
         }
+        Map payDetailMap = data.stream().collect(Collectors.groupingBy(PayDetailDTO::getPayType,Collectors.toList()));
 
-        Map<String, List<PayDetailDTO>> payDetailMap = data.stream().collect(Collectors.groupingBy(PayDetailDTO::getPayType,Collectors.toList()));
+
+        List<Long> idList = new ArrayList<>();
+        for(int i = 0 ; i< data.size() ; i++){
+            PayDetailDTO payDetailDTO = data.get(i);
+            Long visitRecordId = payDetailDTO.getVisitRecordId();
+            idList.add(visitRecordId);
+        }
+        if(idList.size()>0){
+//          查询关联的全部到访记录
+            IdListLongReq visitIds = new IdListLongReq();
+            visitIds.setIdList(idList);
+            JSONResult<List<BusVisitRecordRespDTO>> visitListResult = visitRecordFeignClient.findByIds(visitIds);
+            payDetailMap.put("visitRecord",visitListResult.getData());
+        }
         return  new JSONResult().success(payDetailMap);
     }
-    
-        
 }

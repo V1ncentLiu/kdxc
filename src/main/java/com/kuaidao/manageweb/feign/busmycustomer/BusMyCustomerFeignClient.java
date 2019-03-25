@@ -44,13 +44,12 @@ public interface BusMyCustomerFeignClient {
     public JSONResult<ClueBasicDTO> notVisitReason(@RequestBody IdEntityLong idEntityLong);
     
     /**
-     * 商务经理控制台 查看待跟进邀约来访客户
+     * 商务经理控制台  待处理邀约来访客户
      * @param param
      * @return
      */
     @PostMapping("/listPendingInviteCustomer")
-    public JSONResult<PageBean<BusMyCustomerRespDTO>> listPendingInviteCustomer(
-            MyCustomerParamDTO param);
+    public JSONResult<PageBean<BusMyCustomerRespDTO>> listPendingInviteCustomer(@RequestBody MyCustomerParamDTO param);
 
     @Component
     static class HystrixClientFallback implements BusMyCustomerFeignClient {
@@ -87,7 +86,7 @@ public interface BusMyCustomerFeignClient {
         @Override
         public JSONResult<PageBean<BusMyCustomerRespDTO>> listPendingInviteCustomer(
                 MyCustomerParamDTO param) {
-            return fallBackError("商务经理控制台-查看待跟进邀约来访客户");
+            return fallBackError("商务经理控制台-待处理邀约来访客户");
         }
     }
 
