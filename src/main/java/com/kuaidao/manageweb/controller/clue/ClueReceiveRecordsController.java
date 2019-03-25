@@ -88,10 +88,8 @@ public class ClueReceiveRecordsController {
 						}else {
 							clueReceiveRecordsDTO.setTeleDirectorId(user.getId());
 						}
-						
-
 					}
-					if (null!=org.getOrgType()&& org.getOrgType().equals(OrgTypeConstant.ZSZX)) {
+					if (null!=org.getOrgType()&& org.getOrgType().equals(OrgTypeConstant.DXFGS)) {
 
 						UserOrgRoleReq userRoleInfo = new UserOrgRoleReq();
 						userRoleInfo.setRoleCode(RoleCodeEnum.DXZJL.name());
@@ -105,7 +103,20 @@ public class ClueReceiveRecordsController {
 						}
 						clueReceiveRecordsDTO.setTeleCompanyId(org.getId());
 					}
+					if (null!=org.getOrgType()&& org.getOrgType().equals(OrgTypeConstant.DXFGS)) {
 
+						UserOrgRoleReq userRoleInfo = new UserOrgRoleReq();
+						userRoleInfo.setRoleCode(RoleCodeEnum.DXZJL.name());
+						userRoleInfo.setOrgId(org.getId());
+						JSONResult<List<UserInfoDTO>> ceoUserInfoJson = userInfoFeignClient
+								.listByOrgAndRole(userRoleInfo);
+						if (ceoUserInfoJson.getCode().equals(JSONResult.SUCCESS) && null != ceoUserInfoJson.getData()
+								&& ceoUserInfoJson.getData().size() > 0) {
+							// 电销总经理
+							clueReceiveRecordsDTO.setTeleManagerId(ceoUserInfoJson.getData().get(0).getId());
+						}
+						clueReceiveRecordsDTO.setTeleCompanyId(org.getId());
+					}
 				}
 
 			}
