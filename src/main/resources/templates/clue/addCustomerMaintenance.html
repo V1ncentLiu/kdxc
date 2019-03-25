@@ -357,7 +357,7 @@
 		</el-table-column> </el-table>
 		<div class="padding20 f-tac">
 			<el-button type="primary" @click="submitForm('form')">提交客户资源</el-button>
-			<el-button type="primary" @click="inviteCustomer('form')">邀约来访</el-button>
+			<el-button type="primary"  :disabled="inviteBtnDisabled"  @click="inviteCustomer('form')">邀约来访</el-button>
 			<el-button @click="rebackClue">取 消</el-button>
 		</div></el-form> </el-row>
 
@@ -567,6 +567,7 @@ var callRecord=[[${callRecord}]];//通话记录
                 buttonType: 'A',//添加手机号按钮形式
                 deleteShow:false,//删除新增手机号输入框
                 addBtnDisabled:false,
+                inviteBtnDisabled:false,
                 form: { 
                     radioProject:'1', //意向项目单选默认选项                    
                     customerName:'',
@@ -1422,11 +1423,13 @@ var callRecord=[[${callRecord}]];//通话记录
             	        clue.clueId=clueId;
                	    clue.clueCustomer=clueCustomer;
                	    clue.clueIntention=clueIntention; 
+               	    this.inviteBtnDisabled=true;
                        axios.post('/tele/clueMyCustomerInfo/updateCustomerClue',clue)
                        .then(function (response) {
                     	  addCustomerVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
         	               window.location.href="/tele/clueMyCustomerInfo/inviteCustomer?clueId="+clueId+"&cusName="+addCustomerVM.form.customerName+"&cusPhone="+addCustomerVM.form.customerPhone; 
-   		        	  }});
+        	               // addCustomerVM.inviteBtnDisabled=false;
+                    	  }});
                      });
                     	
                     } else {
@@ -1593,6 +1596,11 @@ var callRecord=[[${callRecord}]];//通话记录
         		   phone5.value=customer.phone5;
         		   phoneArr.push(phone5);
         	   }
+        	   if(phoneArr.length<1){
+        		   var  phone5={};
+        		   phone5.value="";
+        		   phoneArr.push(phone5); 
+        	   } 
         	   this.dynamicValidateForm.domains=phoneArr; 
         	   
            } 
