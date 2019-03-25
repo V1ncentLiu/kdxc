@@ -70,6 +70,8 @@ var mainDivVM = new Vue({
         recordTable2:[],//定金付款明细表格
         recordTable3:[],//二次定金付款明细表格
         recordTable4:[],//尾款付款明细表格
+        // 待审批到访记录
+        dataTable2:[],
 
     },
     methods: {
@@ -271,12 +273,12 @@ var mainDivVM = new Vue({
                     .then(function (response) {
                         var data =  response.data;
                         if(data.code=='0'){
-                            clueVM.$message({message:'分发成功',type:'success',duration:1000,onClose:function(){
-                                clueVM.allocationVisible = false;
-                                clueVM.searchTable();
+                            mainDivVM.$message({message:'分发成功',type:'success',duration:1000,onClose:function(){
+                                mainDivVM.allocationVisible = false;
+                                mainDivVM.searchTable();
                             }});
                         }else{
-                            clueVM.$message({
+                            mainDivVM.$message({
                                 message: "接口调用失败",
                                 type: 'error'
                             }); 
@@ -451,8 +453,7 @@ var mainDivVM = new Vue({
             .catch(function (error) {
                  console.log(error);
             }).then(function(){
-            });
-           
+            });           
         },
         reasonClick(row) {//驳回原因
             this.rebutReason = row.rebutReason;
@@ -568,6 +569,29 @@ var mainDivVM = new Vue({
                 }
             });
         },
+        // 待审批到访记录
+        initCustomerVisitRecord(){//初始列表 
+            var param = {};
+            // axios.post('/visit/visitRecord/listVisitRecord',param)
+            axios.post('/console/console/listVisitRecord',param)            
+            .then(function (response) {
+                var data =  response.data
+                console.log('待审批到访记录')
+                console.log(data)
+                if(data.code=='0'){
+                    var resData = data.data;
+                    mainDivVM.dataTable2= resData.data;                    
+                }else{
+                    mainDivVM.$message({message:data.msg,type:'error'});
+                    console.error(data);
+                }             
+            })
+            .catch(function (error) {
+                console.log(error);
+            }).then(function(){
+            });            
+        },
+
 
     },
     created(){
@@ -577,6 +601,8 @@ var mainDivVM = new Vue({
         this.searchTable();
         // 待审签约记录
         this.initSignRecordData();
+        // 待审批到访记录
+        this.initCustomerVisitRecord();
     },
     mounted(){
         document.getElementById('mainDiv').style.display = 'block';
