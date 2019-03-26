@@ -709,7 +709,11 @@ public class MyCustomerClueController {
     @ResponseBody
     public JSONResult<List<UserInfoDTO>> listByOrgAndRole(HttpServletRequest request) {
         UserOrgRoleReq userRole = new UserOrgRoleReq();
+        List<Integer> status = new ArrayList();
+        status.add(1);
+        status.add(3);
         userRole.setRoleCode(RoleCodeEnum.DXCYGW.name());
+        userRole.setStatusList(status);
         return userInfoFeignClient.listByOrgAndRole(userRole);
     }
 
