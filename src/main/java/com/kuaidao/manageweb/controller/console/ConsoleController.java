@@ -41,8 +41,10 @@ import com.kuaidao.aggregation.dto.visitrecord.VisitRecordRespDTO;
 import com.kuaidao.common.constant.CluePhase;
 import com.kuaidao.common.constant.OrgTypeConstant;
 import com.kuaidao.common.constant.RoleCodeEnum;
+import com.kuaidao.common.entity.IdEntityLong;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
+import com.kuaidao.common.util.CommonUtil;
 import com.kuaidao.common.util.DateUtil;
 import com.kuaidao.manageweb.feign.announcement.AnnReceiveFeignClient;
 import com.kuaidao.manageweb.feign.announcement.BusReceiveFeignClient;
@@ -573,7 +575,7 @@ public class ConsoleController {
    public JSONResult<List<VisitRecordRespDTO>> listVisitRecord(@RequestBody VisitRecordReqDTO visitRecordReqDTO){
        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
        List<Long> busGroupIdList = new ArrayList<>();
-       busGroupIdList.add(curLoginUser.getId());
+       busGroupIdList.add(curLoginUser.getOrgId());
        visitRecordReqDTO.setBusGroupIdList(busGroupIdList);
        visitRecordReqDTO.setStatus(1);
       return  visitRecordFeignClient.listVisitRecordNoPage(visitRecordReqDTO);
@@ -591,7 +593,7 @@ public class ConsoleController {
    public JSONResult<List<SignRecordRespDTO>> listSignRecord(@RequestBody SignRecordReqDTO reqDTO) {
        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
        List<Long> businessGroupIdList = new ArrayList<>();
-       businessGroupIdList.add(curLoginUser.getId());
+       businessGroupIdList.add(curLoginUser.getOrgId());
        reqDTO.setBusinessGroupIdList(businessGroupIdList);
        reqDTO.setStatus(AggregationConstant.SIGN_ORDER_STATUS.AUDITING);
        return signRecordFeignClient.listSignRecordNoPage(reqDTO);
@@ -682,6 +684,34 @@ public class ConsoleController {
             }
         }
         return result;
+    }
+    
+    
+    /**
+     *  获取工作天数
+     * @param request
+     * @return
+     */
+    @PostMapping("/getWorkDay")
+    @ResponseBody
+    public JSONResult<String> getWorkDay(HttpServletRequest request) {
+        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+        IdEntityLong idEntityLong = new IdEntityLong();
+        idEntityLong.setId(curLoginUser.getId());
+        JSONResult<UserInfoDTO> jsonResult = userInfoFeignClient.get(idEntityLong);
+        if(!JSONResult.SUCCESS.equals(jsonResult.getCode())) {
+            return new JSONResult<String>().fail(jsonResult.getCode(),jsonResult.getMsg());
+        }
+        UserInfoDTO data = jsonResult.getData();
+        String workDay = "0";
+        if(data==null || data.getCreateTime()==null) {
+            return new JSONResult<String>().success(workDay);
+        }
+        
+        Date createTime = data.getCreateTime();
+        int diffDay = DateUtil.diffDay(createTime, new Date());
+        return new JSONResult<String>().success(diffDay+"");
+        
     }
 
 }
