@@ -155,11 +155,15 @@ public class ConsoleController {
         }else if(RoleCodeEnum.SWZJ.name().equals(roleCode)) {
             //商务总监
             // 查询所有商务经理
-            List<Map<String, Object>> allSaleList = getAllSaleList();
-            request.setAttribute("allSaleList", allSaleList);
+            List<Integer> statusList = new ArrayList<Integer>();
+            statusList.add(SysConstant.USER_STATUS_ENABLE);
+            statusList.add(SysConstant.USER_STATUS_LOCK);
+            List<UserInfoDTO> saleList =
+                    getUserList(orgId, RoleCodeEnum.SWJL.name(), statusList);
+            request.setAttribute("busSaleList", saleList);
             path="console/consoleBusinessMajordomo";
         }
- /*       if(type.equals("1")) {
+       /*if(type.equals("1")) {
             path = "console/consoleTelemarketing";
         }else if(type.equals("2")) {
             List<Integer> statusList = new ArrayList<Integer>();
@@ -181,6 +185,13 @@ public class ConsoleController {
             // 查询所有商务经理
             List<Map<String, Object>> allSaleList = getAllSaleList();
             request.setAttribute("allSaleList", allSaleList);
+         // 查询组织下商务经理
+            List<Integer> statusList = new ArrayList<Integer>();
+            statusList.add(SysConstant.USER_STATUS_ENABLE);
+            statusList.add(SysConstant.USER_STATUS_LOCK);
+            List<UserInfoDTO> saleList =
+                    getUserList(orgId, RoleCodeEnum.SWJL.name(), statusList);
+            request.setAttribute("busSaleList", saleList);
             path="console/consoleBusinessMajordomo";
         }*/
         return path;
