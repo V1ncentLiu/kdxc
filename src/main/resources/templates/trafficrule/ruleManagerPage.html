@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"  xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head th:replace="_header_include::frag(~{::title},~{::style},~{})">
+	<title>后台管理系统</title>
+    <meta charset="UTF-8">
+    <!-- import CSS -->
+    <link rel="stylesheet" href="css/element-ui.css">
+    <link rel="stylesheet" href="css/base.css">
+    <style>
+        .dialogForm .el-form-item{margin-bottom: 5px;}
+    </style>
+</head>
+<body>
+<div id="optimizeClueManagement" class="optimizeClueManagement mainPadding" style="display: none;">  
+    <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
+        <el-breadcrumb-item>Home</el-breadcrumb-item>
+        <el-breadcrumb-item>线索管理</el-breadcrumb-item>
+        <el-breadcrumb-item>非优化分配规则管理</el-breadcrumb-item>
+    </el-breadcrumb>
+    <el-row class="marginB10">
+        <shiro:hasPermission name="clueAssignRule:notOptRuleManager:add">
+        	<el-button type="primary" @click="addFun"><i class="el-icon-plus"></i>添加规则</el-button>
+        </shiro:hasPermission>
+    	<shiro:hasPermission name="clueAssignRule:notOptRuleManager:view">
+       		<el-button type="success" @click="viewFun"><i class="el-icon-edit"></i>查看规则</el-button>
+        </shiro:hasPermission>
+    	<shiro:hasPermission name="clueAssignRule:notOptRuleManager:edit">
+       		<el-button type="success" @click="editFun"><i class="el-icon-edit"></i>编辑规则</el-button>
+        </shiro:hasPermission>
+    	<shiro:hasPermission name="clueAssignRule:notOptRuleManager:delete">
+        	<el-button type="danger" @click="deleteFun"><i class="el-icon-delete"></i>删除</el-button>
+        </shiro:hasPermission>
+    </el-row>
+    <el-row class="marginB10 greybg padding20" style="padding-bottom: 0">
+        <el-form :inline="true" :model="form" ref="form">
+            <el-form-item label="">
+                <el-input v-model="form.assignName" placeholder="规则名称"></el-input>
+            </el-form-item>
+            <el-form-item label="规则有效时间:">
+                <el-date-picker
+                    style="width: 100%;"
+                    v-model="form.startTime"
+                    type="datetime"
+                    placeholder="选择日期时间">
+                </el-date-picker>
+            </el-form-item>
+            <el-form-item label="至">
+                <el-date-picker
+                    style="width: 100%;"
+                    v-model="form.endTime"
+                    type="datetime"
+                    placeholder="选择日期时间">
+                </el-date-picker>
+            </el-form-item>
+            <el-button type="primary" @click="searchTable('form')">搜索</el-button> 
+        </el-form>
+    </el-row>
+    <el-row>
+        <el-table 
+            ref="dataTable"
+            tooltip-effect="dark"
+            style="width: 100%"
+            border
+            :data="dataTable"
+            @selection-change="handleSelectionChange" 
+            >
+            <el-table-column align="center" type="selection" width="55"></el-table-column>
+            <el-table-column align="center" type="index" label="序号"  width="55"></el-table-column>
+            <el-table-column align="center" prop="assignName" label="规则名称"></el-table-column>
+            <el-table-column align="center" prop="createTime" label="创建时间" :formatter="dateFormat"></el-table-column>
+            <el-table-column align="center" prop="createUserName" label="创建人"></el-table-column>
+            <el-table-column align="center" prop="category" label="资源类别" :formatter="transformCategory"></el-table-column>
+            <el-table-column align="center" prop="type" label="资源类型" :formatter="transformType"></el-table-column>
+            <el-table-column align="center" prop="searchWord" label="搜索词"  width="130"></el-table-column>
+            <el-table-column align="center" prop="startTime" label="生效时间"  :formatter="dateFormat"></el-table-column>
+            <el-table-column align="center" prop="endTime" label="截止时间"  :formatter="dateFormat"></el-table-column>
+            <el-table-column align="center" prop="area" label="地区" width="150"></el-table-column>
+            <el-table-column align="center" prop="status" label="类型" :formatter="transformStatus" ></el-table-column>
+            <el-table-column align="center" prop="handler" label="操作" width="120">
+                <template slot-scope="scope"> 
+                    <span v-if="scope.row.status == '0'">
+                        <el-button size="mini" type="success" @click="updateStatus(scope.row.id,1,'启用')">启用</el-button>
+                    </span>
+                    <span v-else-if="scope.row.status == '1'">
+                        <el-button size="mini" type="danger" @click="updateStatus(scope.row.id,0,'禁用')">禁用</el-button>
+                    </span>
+                </template>
+            </el-table-column>
+        </el-table>
+        <table-pagination :pager="pager" @change="searchTable"></table-pagination>
+    </el-row>
+    <!-- dialog -->
+    <el-dialog title="规则详情" :visible.sync="dialogFormVisible">
+        <el-form :model="dialogForm" ref="dialogForm" class="marginB20 dialogForm">
+            <div class="borderbox padding20">
+                <el-row>
+                    <el-col :span="12">
+                        <el-form-item label="规则名称：" :label-width="formLabelWidth">
+                            {{dialogForm.assignName}}
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="12">
+                        <el-form-item label="资源类别：" :label-width="formLabelWidth">
+                             {{dialogForm.category}}
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="12">
+                        <el-form-item label="资源类型：" :label-width="formLabelWidth">
+                             {{dialogForm.type}}
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="12">
+                        <el-form-item label="搜索词：" :label-width="formLabelWidth">
+                             {{dialogForm.searchWord}}
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="12">
+                        <el-form-item label="地区：" :label-width="formLabelWidth">
+                             {{dialogForm.area}}
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="12">
+                        <el-form-item label="是否启用：" :label-width="formLabelWidth">
+                             {{dialogForm.status}}
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="12">
+                        <el-form-item label="生效开始时间：" :label-width="formLabelWidth">
+                            {{dialogForm.startTime}}
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="12">
+                        <el-form-item label="生效结束时间：" :label-width="formLabelWidth">
+                            {{dialogForm.endTime}}
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+            </div>
+        </el-form>
+        <el-table ref="dialogTableData" :data="dialogTableData" tooltip-effect="dark" border>
+            <el-table-column align="center" prop="userName" label="组内人员"></el-table-column>
+            <el-table-column align="center" prop="resourceLimit" label="资源条数"></el-table-column>
+        </el-table>
+    </el-dialog>  
+</div>
+</body>
+<!-- import Vue before Element -->
+<div th:include="_footer_include :: #jsLib"></div>
+
+<!-- import common js-->
+<script th:inline="javascript">
+var clueCategoryList=[[${clueCategoryList}]];//资源类别集合
+var clueTypeList=[[${clueTypeList}]];//资源类型集合
+    var ocmVM = new Vue({
+        el: '#optimizeClueManagement',
+        data: function() {
+            return {
+                dialogFormVisible: false,
+                multipleSelection: [],//选择行
+                pager:{
+	                total: 0,
+	                currentPage: 1,
+	                pageSize: 20,
+	            },
+                form: {
+                    assignName:'',
+                    startTime:'',
+                    endTime:'',
+                },
+                dialogForm:{
+                	 assignName:'',
+                     category:'',
+                     type:'',
+                     searchWord:'',
+                     area:'',
+                     startTime:'',
+                     endTime:'',
+                     status:''
+                },
+                formLabelWidth: '120px',
+                dataTable: [],
+                dialogTableData:[],
+
+            }        	  
+        },
+        methods: {
+            handleSelectionChange(val) {//选择节点的事件
+                console.log(val)
+                this.multipleSelection = val;
+            },
+            handleStart(index, row) {
+                console.log(index, row);
+            },
+            handleForbid(index, row) {
+                console.log(index, row);
+            },            
+            deleteFun() {
+            	var rows = this.multipleSelection;
+                if(rows.length==0){
+                    this.$message({
+                       message: '请选择数据进行删除',
+                       type: 'warning'
+                     });
+                    return;
+                }
+                var rowNames = [];
+                var rowIds = [];
+                for(var i=0;i<rows.length;i++){
+             	   var curRow = rows[i];
+                    rowIds.push(curRow.id);
+                    rowNames.push("【"+curRow.assignName+"】");
+                }
+             this.$confirm('确定要删除 '+rowNames.join(" ")+'规则？', '提示', {
+                 confirmButtonText: '确定',
+                 cancelButtonText: '取消',
+                 type: 'warning'
+             }).then(() => {
+             	  //删除
+             	var param  = {idList:rowIds};
+                 axios.post('/trafficAssignRule/rule/delete',param)
+                 .then(function (response) {
+                     var data =  response.data;
+                     if(data.code=='0'){
+                    	 ocmVM.$message({message:'删除成功',type:'success',duration:1000,onClose:function(){
+                     		ocmVM.searchTable();
+                 	    }});
+                         
+                     }else{
+                    	 ocmVM.$message({
+                             message: "接口调用失败",
+                             type: 'error'
+                           }); 
+                     }
+                 })
+                 .catch(function (error) {
+                   console.log(error);
+                 })
+                 .then(function () {
+                 	
+                 });
+             }).catch(() => {
+                    
+             });
+            },
+            //修改状态
+            updateStatus(id,status,msg) {
+              var param = {};
+              param.id=id;
+              param.status=status;
+              var url='/trafficAssignRule/rule/updateStatusEnable';
+              if(status==0){
+            	  url='/trafficAssignRule/rule/updateStatusDisable';
+              }
+              axios.post(url, param)
+              .then(function (response) {
+                var result =  response.data;
+                if(result.code=="0"){
+                	ocmVM.$message({message:msg+'成功',type:'success',duration:1000,onClose:function(){
+                	ocmVM.searchTable();
+          	      }});
+                  
+                }else{
+                	ocmVM.$message.error(msg+"失败");
+                }
+              })
+              .catch(function (error) {
+                console.log(error);
+              });
+            },
+            searchTable() {
+            	var startTime=this.form.startTime;
+                var endTime=this.form.endTime;
+                if(endTime && startTime>endTime){
+                    this.$message({
+                        message: '结束时间不允许选择早于开始时间',
+                        type: 'warning'
+                    });
+                    return;
+                }
+                var param =this.form;
+                param.pageSize = this.pager.pageSize;
+                param.pageNum = this.pager.currentPage;
+                console.info(param);
+                axios.post('/trafficAssignRule/rule/list', param)
+                .then(function (response) {
+                      var result =  response.data;
+                      console.info(result);
+                      var table=result.data;
+                      ocmVM.dataTable= table.data;
+                      ocmVM.pager.total =  table.total;
+                      ocmVM.pager.currentPage = table.currentPage;
+                })
+                .catch(function (error) {
+                     console.log(error);
+                });
+                
+              },
+              viewFun(){//双击查看详情
+            	  var rows = this.multipleSelection;
+                  if(rows.length!=1){
+                      this.$message({
+                          message: '请选择一条数据进行查看',
+                          type: 'warning'
+                      });
+                      return;
+                  }
+                var row = rows[0];
+                this.dialogFormVisible = true;
+                this.dialogForm.assignName = row.assignName;
+                this.dialogForm.category =this.transformCategory(null,null,row.category);
+                this.dialogForm.type = this.transformType(null,null,row.type);
+                this.dialogForm.searchWord = row.searchWord;
+                this.dialogForm.area = row.area;
+                this.dialogForm.status = this.transformStatus(null,null,row.status);
+                this.dialogForm.startTime = this.dateFormat(null,null,row.startTime);
+                this.dialogForm.endTime = this.dateFormat(null,null,row.endTime);
+                this.dialogTableData=row.traffcList;
+            },
+            addFun(){
+            	document.location.href='/trafficAssignRule/rule/initCreate';
+            },
+            editFun() {
+                var rows = this.multipleSelection;
+                if(rows.length!=1){
+                    this.$message({
+                        message: '请选择一条数据进行编辑',
+                        type: 'warning'
+                    });
+                    return;
+                }else{
+                	document.location.href='/trafficAssignRule/rule/initUpdate?id='+rows[0].id;
+                }                
+            },
+          //状态转换方法
+            transformStatus(row, column, cellValue, index) {
+          	  	var text="停用";
+                if(cellValue==1){
+              	  text="启用"
+                }
+                return text;
+            },
+          //日期数据格式化方法
+            dateFormat( row, column, cellValue, index) {
+              if (cellValue == undefined) {
+                 return "";
+              }
+              return moment(cellValue).format("YYYY-MM-DD HH:mm:ss");
+            },
+          //资源类别转换方法
+            transformCategory(row, column, cellValue, index) {
+          	   var text="";
+            	   if(clueCategoryList&&cellValue){
+ 	            	   var array=cellValue.split(",");
+ 	                   for(var i=0;i<array.length;i++){
+ 	                	   for(var j=0;j<clueCategoryList.length;j++){
+ 	 	                		if(array[i]==clueCategoryList[j].value){
+ 	 	                			if(i==0){
+ 		 	                			text=clueCategoryList[j].name;
+ 	 	                			}else{
+ 		 	                			text=text+","+clueCategoryList[j].name;
+ 	 	                			}
+ 	 	                		}
+ 	 	                	}
+ 	                	}
+            	    }
+                  return text;
+             },
+          //资源类型转换方法
+            transformType(row, column, cellValue, index) {
+          	   var text="";
+            	   if(clueTypeList&&cellValue){
+ 	            	   var array=cellValue.split(",");
+ 	                   for(var i=0;i<array.length;i++){
+ 	                	   for(var j=0;j<clueTypeList.length;j++){
+ 	 	                		if(array[i]==clueTypeList[j].value){
+ 	 	                			if(i==0){
+ 		 	                			text=clueTypeList[j].name;
+ 	 	                			}else{
+ 		 	                			text=text+","+clueTypeList[j].name;
+ 	 	                			}
+ 	 	                		}
+ 	 	                	}
+ 	                	}
+            	    }
+                  return text;
+             },
+        },
+        created(){
+            console.info("create method");
+            this.searchTable();
+        },
+        mounted(){
+            document.getElementById('optimizeClueManagement').style.display = 'block';
+        }
+    })
+</script>
+</html>
