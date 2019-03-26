@@ -189,26 +189,26 @@ public class SignRecordController {
         List<RoleInfoDTO> roleList = curLoginUser.getRoleList();
         RoleInfoDTO roleInfoDTO = roleList.get(0);
         String roleName = roleInfoDTO.getRoleName();
-//      if(RoleCodeEnum.SWDQZJ.value().equals(roleName) ||RoleCodeEnum.SWZJ.value().equals(roleName)) {
-//            Long businessManagerId = reqDTO.getBusinessManagerId();
-//            if(businessManagerId!=null) {
-//                List<Long> businessManagerIdList = new ArrayList<>();
-//                businessManagerIdList.add(businessManagerId);
-//                reqDTO.setBusinessManagerIdList(businessManagerIdList);
-//            }else {
-//                List<Long> accountIdList =  getAccountIdList(orgId,RoleCodeEnum.SWJL.name());
-//                if(CollectionUtils.isEmpty(accountIdList)) {
-//                    return new JSONResult().fail(SysErrorCodeEnum.ERR_NOTEXISTS_DATA.getCode(),"该用户下没有下属");
-//                }
-//                reqDTO.setBusinessManagerIdList(accountIdList);
-//            }
-//
-//        }else {
-//                return new JSONResult().fail(SysErrorCodeEnum.ERR_NOTEXISTS_DATA.getCode(),"角色没有权限");
-//        }
-        List<Long> accountIdList = new ArrayList<>();
+      if(RoleCodeEnum.SWDQZJ.value().equals(roleName) ||RoleCodeEnum.SWZJ.value().equals(roleName)) {
+            Long businessManagerId = reqDTO.getBusinessManagerId();
+            if(businessManagerId!=null) {
+                List<Long> businessManagerIdList = new ArrayList<>();
+                businessManagerIdList.add(businessManagerId);
+                reqDTO.setBusinessManagerIdList(businessManagerIdList);
+            }else {
+                List<Long> accountIdList =  getAccountIdList(orgId,RoleCodeEnum.SWJL.name());
+                if(CollectionUtils.isEmpty(accountIdList)) {
+                    return new JSONResult().fail(SysErrorCodeEnum.ERR_NOTEXISTS_DATA.getCode(),"该用户下没有下属");
+                }
+                reqDTO.setBusinessManagerIdList(accountIdList);
+            }
+
+        }else {
+                return new JSONResult().fail(SysErrorCodeEnum.ERR_NOTEXISTS_DATA.getCode(),"角色没有权限");
+        }
+        /*List<Long> accountIdList = new ArrayList<>();
         accountIdList.add(1084621842175623168L);
-        reqDTO.setBusinessManagerIdList(accountIdList);
+        reqDTO.setBusinessManagerIdList(accountIdList);*/
 
         logger.info("listSignRecord{{}}",reqDTO.toString());
         return signRecordFeignClient.listSignRecord(reqDTO);
