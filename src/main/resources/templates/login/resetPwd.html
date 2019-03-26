@@ -176,8 +176,9 @@ var vm =  new Vue({
     	            		$("#errorSpan").text(data.msg);
     	            		$("#errorSpan").show();
     	            	}else{
-    	                	vm.$message('登录成功');
-    	                	document.location.href='/login';
+    	            		vm.$message({message:'密码找回成功，请使用新密码重新进行登录',type:'success',duration:1000,onClose:function(){
+	    	                	document.location.href='/login';
+                      	    }});
     	            	}
     	            })
     	            .catch(function (error) {
@@ -198,7 +199,7 @@ var vm =  new Vue({
 	       	      }
    	          	});
   	       	 	if (valid) {
-                this.cutDown();//倒计时
+  	       	 		vm.isDisabled = true;
   	    		    var formData = vm.resetPwdForm;
 		            var param={};
 		            param.username= formData.username;
@@ -206,10 +207,12 @@ var vm =  new Vue({
 		            console.info(param);
 		            axios.post("/login/sendmsgPwd", param)
 		 	           .then(function (response) {
+		  	       	 		vm.isDisabled = false;
 		 	           		console.info(response);
 		 	            	var data =response.data;
 		 	            	var msg="";
 	 	            		if(data.code=="0"){
+		                	this.cutDown();//倒计时
 		 	            		if(type=="1"){
 		 	            			msg="发送短信验证成功";
 		 	            		}else{
@@ -222,6 +225,7 @@ var vm =  new Vue({
 	 	            		$("#errorSpan").show();
 		 	            })
 		 	            .catch(function (error) {
+		  	       	 		vm.isDisabled = false;
 		 	                 console.log(error);
 		 	            });
 	       	     }else {
