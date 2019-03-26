@@ -502,6 +502,7 @@ public class ConsoleController {
        List<Long> accountIdList = new ArrayList<Long>();
        accountIdList.add(curLoginUser.getId());
        businessConsoleReqDTO.setAccountIdList(accountIdList);
+       businessConsoleReqDTO.setBusinessGroupId(curLoginUser.getOrgId());
        Date curDate = new Date();
        businessConsoleReqDTO.setEndTime(curDate);
        //本月第一天 00
