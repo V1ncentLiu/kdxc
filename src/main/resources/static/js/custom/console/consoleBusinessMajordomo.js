@@ -11,6 +11,7 @@ var mainDivVM = new Vue({
         secondVisitedNum:'',//当月二次到访数
         secondSignedNum:'',//当月二次来访签约数
         direcotorTomorrowArriveTime:'',//预计明日到访数
+        workDay:'',
         //公告        
         items: [ 
             // {content:'系统将于2018年12月5日晚上12:00进行系统升级，请各位同事及时处理工作。系统预计在12:20分恢复正常使用,感谢配合!',id:1},
@@ -140,6 +141,13 @@ var mainDivVM = new Vue({
                 console.log(response.data)                
                 mainDivVM.direcotorTomorrowArriveTime=response.data.data;
             });   
+            // 工作天数
+            param={};
+            axios.post('/console/console/getWorkDay',param).then(function (response) {
+                console.log('工作天数')                
+                console.log(response.data)                
+                mainDivVM.workDay=response.data.data;
+            });
         },
         // 待分配邀约来访客户
         searchTable() {
