@@ -177,12 +177,12 @@ public class LoginController {
         smsCodeAndMobileValidReq.setMobile(user.getPhone());
         String msgId = redisTemplate.opsForValue().get(Constants.MSG_ID + user.getId());
         smsCodeAndMobileValidReq.setMsgId(msgId);
-//        JSONResult result = msgPushFeignClient.validCodeAndMobile(smsCodeAndMobileValidReq);
-//        if (!JSONResult.SUCCESS.equals(result.getCode())) {
-//            logger.error(result.getMsg());
-//            errorMessage = "验证码错误";
-//            loginRecord.setLoginStatus(Constants.LOGIN_STATUS_PASSWORD_ERROR);
-//        } else {
+        JSONResult result = msgPushFeignClient.validCodeAndMobile(smsCodeAndMobileValidReq);
+        if (!JSONResult.SUCCESS.equals(result.getCode())) {
+            logger.error(result.getMsg());
+            errorMessage = "验证码错误";
+            loginRecord.setLoginStatus(Constants.LOGIN_STATUS_PASSWORD_ERROR);
+        } else {
             try {
                 if (null != user) {
                     // 判断账号是否禁用
@@ -311,7 +311,7 @@ public class LoginController {
                 errorMessage = "登陆时出现异常";
                 loginRecord.setLoginStatus(Constants.LOGIN_STATUS_OTHER);
             }
-//        }
+        }
         // 保存登录记录
         loginRecord.setIsChangeMachine(SysConstant.NO);
         loginRecordFeignClient.create(loginRecord);
