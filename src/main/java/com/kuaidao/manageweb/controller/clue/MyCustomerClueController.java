@@ -839,6 +839,18 @@ public class MyCustomerClueController {
             }
 
         }
+        
+        // 保存流转记录
+        CirculationInsertOrUpdateDTO circul = new CirculationInsertOrUpdateDTO();
+        circul.setAllotUserId(user.getId());
+        circul.setAllotRoleId(user.getRoleId());
+        circul.setClueId(dto.getClueId());
+        circul.setUserId(user.getId());
+        if(null!=user.getRoleList()&&user.getRoleList().size()>0){
+        	   circul.setRoleId(user.getRoleList().get(0).getId());
+        	
+        }
+        dto.setCirculationInsertOrUpdateDTO(circul);
         JSONResult<String> customerClue = myCustomerFeignClient.createCustomerClue(dto);
         // if(JSONResult.SUCCESS.equals(customerClue.getCode())){
         // 插入对应跟进记录
