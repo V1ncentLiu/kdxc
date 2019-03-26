@@ -222,7 +222,7 @@
     </el-dialog>
     <!-- 付款明细 -->
     <el-dialog title="付款明细" :visible.sync="recordDialog">
-        <div class="fs16 marginB20">签约单编号()付款明细以及付款绑定到访记录</div>
+        <div class="fs16 marginB20">签约单编号({{curRow.signNo}}})付款明细以及付款绑定到访记录</div>
         <div v-show="paymentDetailsShow">
             <div class="fs16 marginB20">全款付款明细</div>
             <el-table
@@ -318,7 +318,7 @@
         <div slot="footer" class="dialog-footer f-tac">
             <template>
                 <shiro:hasPermission name=" aggregation:signRecord:reject">
-                    <el-button type="primary" @click="OpenRejectSignRecordDialog">驳回</el-button>
+                    <el-button type="primary" @click="rebutOne">驳回</el-button>
                 </shiro:hasPermission>
                 <shiro:hasPermission name=" aggregation:signRecord:pass">
                     <el-button type="success" @click="passOne">审核通过</el-button>
@@ -422,6 +422,9 @@
                     if (valid) {
                     	var param ={};	
                     	var rows = this.multipleSelection;
+                    	if(rows.length==0){
+                            rows.push(this.curRow);
+                        }
                         var idArr = new Array();
                         var isPass = true;
                         for(var i=0;i<rows.length;i++){
@@ -448,6 +451,7 @@
                             	signRecordVM.dialogFormVisible = false;
                             	 signRecordVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
                             		 signRecordVM.initSignRecordData();
+                            		 signRecordVM.recordDialog = false;
                                 }});
                             }else{
                             	signRecordVM.$message({message:resData.msg,type:'error'});
@@ -473,6 +477,7 @@
                 this.paymentDetailsShow3=false;
                 this.paymentDetailsShow4=false;
                 this.visitRecordShow=false;
+                this.curRow = row;
                 // row.signNo;
 
                 var param = {};
@@ -586,7 +591,7 @@
             },
 
             passOne(){ //审核通过一条
-                var curRow = this.multipleSelection;
+                var curRow = this.curRow;
                 var title = "";
                 var idArr = new Array();
                 var isPass = true;
@@ -606,7 +611,7 @@
                                 signRecordVM.dialogFormVisible = false;
                                 signRecordVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
                                         signRecordVM.initSignRecordData();// 刷新列表
-                                        //关闭弹窗
+                                        signRecordVM.recordDialog = false;
                                     }});
                             }else{
                                 signRecordVM.$message({message:resData.msg,type:'error'});
@@ -681,13 +686,30 @@
                     }
                     title += "【"+curRow.serialNum+""+this.getCustomerName(curRow.customerName)+"】 ";
                 }
-                
                 if(!isPass){
                     return;
                 }
-                
                 this.signRecordArrTitle=title;
             	this.dialogFormVisible=true;
+            },
+
+            rebutOne(){
+                this.signRecordArrTitle='';
+                this.dialogForm.reason='';
+                var title = "";
+                var isPass = true;
+                var curRow = this.curRow;
+                this.multipleSelection = [];
+                if(curRow.status!=1){
+                    this.$message({message:'只允许审核待审核的数据',type:'warning'});
+                    isPass=false;
+                }
+                title += "【"+curRow.serialNum+""+this.getCustomerName(curRow.customerName)+"】 ";
+                if(!isPass){
+                    return;
+                }
+                this.signRecordArrTitle=title;
+                this.dialogFormVisible=true;
             },
             handleSelectionChange(val){
             	this.multipleSelection = val;
