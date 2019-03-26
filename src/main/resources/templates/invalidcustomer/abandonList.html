@@ -137,16 +137,19 @@
             <!--</el-table-column>-->
             <!--<el-table-column prop="releaseReasonName" label="废弃时间" align="center"  width="170"></el-table-column>-->
         <!--</el-table>-->
-    <el-table  ref="multipleTable" tooltip-effect="dark" border @selection-change="handleSelectionChange"
-               style="width: 100%"  :data="tableData"  >
+    <el-table  ref="multipleTable" tooltip-effect="dark" border @selection-change="handleSelectionChange"  @row-dblclick="showClueDetailInfo" style="width: 100%"  :data="tableData"  >
         <el-table-column align="center" type="index" label="序号" width="50"></el-table-column>
         <el-table-column align="center" :key="index" :prop="item.fieldCode" :label="item.displayName" :width="item.width"
                          v-for="(item,key,index) in tableColums" v-if="item.fieldCode == 'abandonReason'">
                 <template slot-scope="scope">
-                    <el-button @click="openReleaseUserInfo(scope.row)" type="text" size="small">
-                    {{scope.row.abandonReason}}<br>
-                    查看释放人员
-                    </el-button>
+                    <div>
+                        {{scope.row.abandonReason==1?"重复资源":scope.row.abandonReason==2?"不跟进-空号":""}}
+                    </div>
+                    <div v-if="scope.row.abandonReason==2">
+                        <el-button @click="openReleaseUserInfo(scope.row)" type="text" size="small">
+                            查看释放人员
+                        </el-button>
+                    </div>
                 </template>
         </el-table-column>
         <el-table-column align="center" :key="index" :prop="item.fieldCode" :label="item.displayName" :width="item.width" v-else>
@@ -288,6 +291,10 @@
                             console.log(error);
                         });
                 }
+            },
+            //展现详情
+            showClueDetailInfo (row, column) {
+                window.location.href='/tele/clueMyCustomerInfo/customerInfoReadOnly?clueId='+row.clueId;
             },
             sortNumber(a,b) {
                 //对数组中元素，按照数字 从小到大 排序
