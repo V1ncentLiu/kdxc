@@ -8,6 +8,7 @@ var mainDivVM = new Vue({
         activeName4:'1',
         activeName5:'1',
         activeName6:'1',
+        activeName7:'1',
         visitedNum:'',//当月到访数   
         signedNum:'',//当月签约数
         secondVisitedNum:'',//当月二次到访数
