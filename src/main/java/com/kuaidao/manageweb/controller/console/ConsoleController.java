@@ -213,7 +213,8 @@ public class ConsoleController {
     @PostMapping("/queryBussReceiveNoPage")
     @ResponseBody
     public JSONResult<List<BussReceiveRespDTO>> queryBussReceiveNoPage(@RequestBody BussReceiveQueryDTO queryDTO) {
-        
+        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+        queryDTO.setReceiveUser(curLoginUser.getId());
         return busReceiveFeignClient.queryBussReceiveNoPage(queryDTO);
     }
     
