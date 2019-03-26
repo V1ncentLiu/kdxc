@@ -93,12 +93,9 @@ public class OptRuleController {
     @RequestMapping("/initCreate")
     @RequiresPermissions("clueAssignRule:optRuleManager:add")
     public String initCreateProject(HttpServletRequest request) {
-        // 查询电销组
-        OrganizationQueryDTO organizationQueryDTO = new OrganizationQueryDTO();
-        organizationQueryDTO.setOrgType(OrgTypeConstant.DXZ);
-        JSONResult<List<OrganizationRespDTO>> queryOrgByParam =
-                organizationFeignClient.queryOrgByParam(organizationQueryDTO);
-        request.setAttribute("orgList", queryOrgByParam.getData());
+        // 查询电销组和话务组
+        request.setAttribute("orgList", getTeleAndTrafficGroup());
+
         // 查询优化类资源类别集合
         request.setAttribute("clueCategoryList", getOptCategory());
         // 查询字典行业类别集合
@@ -121,12 +118,8 @@ public class OptRuleController {
         JSONResult<ClueAssignRuleDTO> jsonResult =
                 clueAssignRuleFeignClient.get(new IdEntityLong(id));
         request.setAttribute("clueAssignRule", jsonResult.getData());
-        // 查询电销组
-        OrganizationQueryDTO organizationQueryDTO = new OrganizationQueryDTO();
-        organizationQueryDTO.setOrgType(OrgTypeConstant.DXZ);
-        JSONResult<List<OrganizationRespDTO>> queryOrgByParam =
-                organizationFeignClient.queryOrgByParam(organizationQueryDTO);
-        request.setAttribute("orgList", queryOrgByParam.getData());
+        // 查询电销组和话务组
+        request.setAttribute("orgList", getTeleAndTrafficGroup());
         // 查询优化类资源类别集合
         request.setAttribute("clueCategoryList", getOptCategory());
         // 查询字典行业类别集合
@@ -314,6 +307,24 @@ public class OptRuleController {
             return byCode.getData().getValue();
         }
         return null;
+    }
+
+    /***
+     * 查询电销组加 话务组的集合
+     * 
+     * @return
+     */
+    private List<OrganizationRespDTO> getTeleAndTrafficGroup() {
+        OrganizationQueryDTO organizationQueryDTO = new OrganizationQueryDTO();
+        organizationQueryDTO.setOrgType(OrgTypeConstant.DXZ);
+        JSONResult<List<OrganizationRespDTO>> teleResult =
+                organizationFeignClient.queryOrgByParam(organizationQueryDTO);
+        organizationQueryDTO.setOrgType(OrgTypeConstant.HWZ);
+        JSONResult<List<OrganizationRespDTO>> trafficResult =
+                organizationFeignClient.queryOrgByParam(organizationQueryDTO);
+        List<OrganizationRespDTO> list = teleResult.getData();
+        list.addAll(trafficResult.getData());
+        return list;
     }
 
     /**
