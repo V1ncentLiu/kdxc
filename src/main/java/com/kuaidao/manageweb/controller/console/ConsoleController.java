@@ -137,7 +137,7 @@ public class ConsoleController {
         String roleCode = roleInfoDTO.getRoleCode();
         String path= "";
         
-      /* if(RoleCodeEnum.DXCYGW.name().equals(roleCode)) {
+       if(RoleCodeEnum.DXCYGW.name().equals(roleCode)) {
             //电销顾问
            path = "console/consoleTelemarketing";
         }else if(RoleCodeEnum.DXZJ.name().equals(roleCode)) {
@@ -167,9 +167,19 @@ public class ConsoleController {
             List<UserInfoDTO> saleList =
                     getUserList(orgId, RoleCodeEnum.SWJL.name(), statusList);
             request.setAttribute("busSaleList", saleList);
+            // 查询所有项目
+            JSONResult<List<ProjectInfoDTO>> listNoPage =
+                    projectInfoFeignClient.listNoPage(new ProjectInfoPageParam());
+            request.setAttribute("projectList", listNoPage.getData());
+            // 查询字典选址情况集合
+            request.setAttribute("optionAddressList", getDictionaryByCode(Constants.OPTION_ADDRESS));
+            // 查询字典店铺面积集合
+            request.setAttribute("storefrontAreaList", getDictionaryByCode(Constants.STOREFRONT_AREA));
+         // 查询字典投资金额集合
+            request.setAttribute("ussmList", getDictionaryByCode(Constants.USSM));
             path="console/consoleBusinessMajordomo";
-        }*/
-       if(type.equals("1")) {
+        }
+      /* if(type.equals("1")) {
             path = "console/consoleTelemarketing";
         }else if(type.equals("2")) {
             List<Integer> statusList = new ArrayList<Integer>();
@@ -210,7 +220,7 @@ public class ConsoleController {
             request.setAttribute("ussmList", getDictionaryByCode(Constants.USSM));
             
             path="console/consoleBusinessMajordomo";
-        }
+        }*/
         return path;
     }
     
