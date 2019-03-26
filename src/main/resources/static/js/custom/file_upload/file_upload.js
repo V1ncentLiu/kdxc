@@ -9,6 +9,7 @@ filename = ''
 key = ''
 expire = 0
 g_object_name = ''
+oldfilename=''
 g_object_name_type = 'random_name'
 now = timestamp = Date.parse(new Date()) / 1000;
 //必传参数
@@ -87,15 +88,16 @@ function uploadFile(data) {
     set_upload_param(uploader, '', false);
     console.log("host", host);
     console.log("g_object_name", g_object_name);
-    return host+"/"+g_object_name;
+    return host+"/"+g_object_name+";"+oldfilename;
 }
 
  
 function calculate_object_name(filename)
 {
+	oldfilename = filename 
     if (g_object_name_type == 'local_name')
     {
-        g_object_name += "${filename}"
+        g_object_name += filename
     }
     else if (g_object_name_type == 'random_name')
     {
