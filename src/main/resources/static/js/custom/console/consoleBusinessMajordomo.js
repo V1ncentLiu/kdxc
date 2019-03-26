@@ -247,7 +247,7 @@ var mainDivVM = new Vue({
             var rows = this.multipleSelection;
             if(rows.length==0){
                 this.$message({
-                    message: '请选择一条数据进行分发',
+                    message: '请选择数据进行分发',
                     type: 'warning'
                 });
                 return;

@@ -206,9 +206,9 @@ public class SignRecordController {
         }else {
                 return new JSONResult().fail(SysErrorCodeEnum.ERR_NOTEXISTS_DATA.getCode(),"角色没有权限");
         }
-//        List<Long> accountIdList = new ArrayList<>();
-//        accountIdList.add(1084621842175623168L);
-//        reqDTO.setBusinessManagerIdList(accountIdList);
+        /*List<Long> accountIdList = new ArrayList<>();
+        accountIdList.add(1084621842175623168L);
+        reqDTO.setBusinessManagerIdList(accountIdList);*/
 
         logger.info("listSignRecord{{}}",reqDTO.toString());
         return signRecordFeignClient.listSignRecord(reqDTO);

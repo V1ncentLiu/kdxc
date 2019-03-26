@@ -9,6 +9,7 @@
         #tableBox td{border:1px solid #c6e1fc;padding: 14px 0;text-align: center;}
         #tableBox td .el-form-item{margin-bottom: 2px}
         #tableBox .el-form-item__error{top: 100%;left: -50%;width: 200%;}
+        .selectIpt .el-input__inner{width: 200px;}
     </style>
 </head>
 <body>
@@ -123,7 +124,31 @@
                     <tr>
                         <td>4</td>
                         <td>邀约</td>
-                        <td colspan="4">电销提交邀约来访状态自动变为邀约，等待商务反馈到访以及签约情况</td>
+                         <td>
+                            <el-form-item prop="number19">  
+                                <el-input v-model="form.number19" placeholder="0-50数字" maxLength="2" type="number" min="0" max="50"></el-input>
+                            </el-form-item>
+                        </td>
+                        <td>
+                            <el-form-item prop="number20">  
+                                <el-input v-model="form.number20" placeholder="0-5以内整数" maxLength="1" type="number" min="0" max="5"></el-input>
+                            </el-form-item>
+                        </td>
+                        <td>
+                            <el-form-item prop="number21">  
+                                <el-input v-model="form.number21" placeholder="0-50数字" maxLength="1" type="number" min="1" max="5"></el-input>
+                            </el-form-item>
+                        </td>
+                        <td>
+                            <el-select v-model="form.remindValue5" filterable placeholder="否">
+                                <el-option
+                                    v-for="item in remindOptions"
+                                    :key="item.value"
+                                    :label="item.label"
+                                    :value="item.value">
+                                </el-option>
+                            </el-select>
+                        </td>
                     </tr>
                     <tr>
                         <td>5</td>
@@ -231,11 +256,12 @@
                         <span class="f-fl">
                             <div v-for="(domain, index) in form.domains" :key="domain.key">
                                 <el-form-item  
+                                    class="selectIpt" 
                                     style="margin-top: -6px;"                          
                                     :prop="'domains.' + index + '.teleDirectorId'"
                                     :rules='rules.domainsValue1'
                                     >
-                                    <el-select v-model="domain.teleDirectorId" filterable placeholder="请选择电销总监">
+                                    <el-select v-model="domain.teleDirectorId" filterable placeholder="电销总监姓名（所属组）">
                                         <el-option
                                             v-for="item in options"
                                             :key="item.id"
@@ -323,10 +349,14 @@
                     number16:'',
                     number17:'',
                     number18:'',
+                    number19:'',
+                    number20:'',
+                    number21:'',
                     remindValue1:0,
                     remindValue2:0,
                     remindValue3:0,
                     remindValue4:0,
+                    remindValue5:0,
                     id1:'',
                     id2:'',
                     id3:'',
@@ -337,6 +367,7 @@
                     id8:'',
                     id9:'',
                     id10:'',
+                    id11:'',
                     domains: []                    
                 },
                 rules:{
@@ -733,7 +764,65 @@
                              callback();
                             }
                         }, trigger: 'blur'}   
-                    ]
+                    ],
+                    number19:[
+                        { validator:function(rule,value,callback){
+                            if(releaseRuleVM.checked2==true){
+                                if(value!=""){
+                                    if(/^[0-9]+(.[0-9]{1})?$/.test(value) == false || value > 50){
+                                        callback(new Error("请输入0-50的数字（最多保留一位小数）"));
+                                        return
+                                    }else{
+                                        callback();
+                                    } 
+                                }else{
+                                    callback(new Error("请输入数字"));
+                                    return
+                                }
+                                
+                            }
+                            callback();
+                        }, trigger: 'blur'}
+                    ],
+                    number21:[
+                        { validator:function(rule,value,callback){
+                            if(releaseRuleVM.checked2==true){
+                                if(value!=""){
+                                    if(/^[0-9]+(.[0-9]{1})?$/.test(value) == false || value > 50){
+                                        callback(new Error("请输入0-50的数字（最多保留一位小数）"));
+                                        return
+                                    }else{
+                                        callback();
+                                    } 
+                                }else{
+                                    callback(new Error("请输入数字"));
+                                    return
+                                }
+                                
+                            }
+                            callback();
+                        }, trigger: 'blur'}
+                    ],
+                    number20:[
+                        { validator:function(rule,value,callback){ 
+                            if(releaseRuleVM.checked2==true){
+                                if(value!=""){
+                                    if(/^[0-9]*$/.test(value) == false || value > 5){
+                                        callback(new Error("请输入0-5以内整数"));
+                                        return
+                                    }else{
+                                        callback();
+                                    } 
+                                }else{
+                                    callback(new Error("请输入数字"));
+                                    return
+                                }
+                                
+                            }
+                            callback();
+                        }, trigger: 'blur'}
+                    ],
+                    
 
 
                 },
@@ -854,7 +943,21 @@
                             follow.isReleaseRemind = form.remindValue2;
                             follow.remindTime = form.number13;
                             autoReleaseRule.push(follow);
-                            //3
+                            //4.invite
+                            var invite={};
+                            invite.id=form.id11;
+                            invite.isEnabled=autoReleaseRuleIsEnabled;
+                            invite.customerStatus=4;
+                            invite.timeoutRelease=form.number19;
+                            invite.retentionTimes=form.number20;
+                            invite.retentionDay = form.number21;
+                            invite.isReleaseRemind = form.remindValue5;
+                            invite.remindTime = form.number13;
+                            autoReleaseRule.push(invite);
+                            
+                            
+                            
+                            //5
                             var notVisit={};
                             notVisit.id=form.id3;
                             notVisit.isEnabled=autoReleaseRuleIsEnabled;
@@ -865,7 +968,7 @@
                             notVisit.isReleaseRemind = form.remindValue3;
                             notVisit.remindTime = form.number13;
                             autoReleaseRule.push(notVisit);
-                            //4.到访未签约
+                            //6.到访未签约
                             var  unSign={};
                             unSign.id=form.id4;
                             unSign.isEnabled=autoReleaseRuleIsEnabled;
@@ -936,6 +1039,7 @@
                           //
                         
                          //公有池领取规则
+                         //1.电销总监领取规则
                          var publicPoolRuleList = new Array();
                          var teleDirectorRuleIsEnabled=this.checked6==true?1:0;
                          var isTeleDirectorRuleBl = false;
@@ -950,6 +1054,15 @@
                         	 }
                         	 
                          }else{
+                        	  //添加 电销规则
+                             var teleDirectorRule={};
+                             teleDirectorRule.id=form.id7;
+                             teleDirectorRule.isEnabled=teleDirectorRuleIsEnabled;
+                             teleDirectorRule.limitNum=form.number16;
+                             teleDirectorRule.type=1;
+                             publicPoolRuleList.push(teleDirectorRule);
+                             isTeleDirectorRuleBl=true;
+                        	 
                         	var telDirecotrArr =  this.form.domains;
                          	if(telDirecotrArr.length==0) {
                          		 isTeleDirectorRuleBl=true;
@@ -971,19 +1084,14 @@
                         			this.clueRuleSubmitBtnDiabled=false;
                         			return;
                         		}
-                        		  var teleDirectorRule={};
-                                  teleDirectorRule.id=form.id7;
-                                  teleDirectorRule.isEnabled=teleDirectorRuleIsEnabled;
-                                  teleDirectorRule.limitNum=form.number16;
-                                  teleDirectorRule.type=1;
-                                  publicPoolRuleList.push(teleDirectorRule);
+                        		
                                   param.teleDirectorReceiveRuleList = telDirecotrArr;
-                                  isTeleDirectorRuleBl=true;
+                                  
                         	}
                            
                          }
                          
-                         //2
+                         //2电销顾问领取规则
                          var telRuleIsEnabled=this.checked7==true?1:0;
                          var isTelRuleBl = false;
                          if(!telRuleIsEnabled){
@@ -1062,6 +1170,7 @@
 
                     } else {
                         console.log('error submit!!');
+                        this.clueRuleSubmitBtnDiabled=false;
                         return false;
                     }
                 });
@@ -1148,31 +1257,36 @@
                         		releaseRuleVM.checked2=autoReleRule.isEnabled==0?false:true;
                         		releaseRuleVM.form.number13=autoReleRule.remindTime;
                         	}
-                        	if(autoReleRule.customerStatus==1){
+                        	if(autoReleRule.customerStatus==1){//未联系
                         		releaseRuleVM.form.id1=autoReleRule.id;
                         		releaseRuleVM.form.number1=autoReleRule.timeoutRelease;
                         		releaseRuleVM.form.number2=autoReleRule.retentionTimes;
                         		releaseRuleVM.form.number3=autoReleRule.retentionDay;
                         		releaseRuleVM.form.remindValue1=autoReleRule.isReleaseRemind;
-                        	}else if(autoReleRule.customerStatus==2){
-                        		debugger;
+                        	}else if(autoReleRule.customerStatus==2){//gen jin
                         		releaseRuleVM.form.id2=autoReleRule.id;
                                 releaseRuleVM.form.number4=autoReleRule.timeoutRelease;
                                 releaseRuleVM.form.number5=autoReleRule.retentionTimes;
                                 releaseRuleVM.form.number6=autoReleRule.retentionDay;
                                 releaseRuleVM.form.remindValue2=autoReleRule.isReleaseRemind;
-                        	}else if(autoReleRule.customerStatus==5){
+                        	}else if(autoReleRule.customerStatus==5){//未到访
                         		releaseRuleVM.form.id3=autoReleRule.id;
                                 releaseRuleVM.form.number7=autoReleRule.timeoutRelease;
                                 releaseRuleVM.form.number8=autoReleRule.retentionTimes;
                                 releaseRuleVM.form.number9=autoReleRule.retentionDay;
                                 releaseRuleVM.form.remindValue3=autoReleRule.isReleaseRemind;
-                        	}else if(autoReleRule.customerStatus==6){
+                        	}else if(autoReleRule.customerStatus==6){//到访未到访
                         		releaseRuleVM.form.id4=autoReleRule.id;
                                 releaseRuleVM.form.number10=autoReleRule.timeoutRelease;
                                 releaseRuleVM.form.number11=autoReleRule.retentionTimes;
                                 releaseRuleVM.form.number12=autoReleRule.retentionDay;
                                 releaseRuleVM.form.remindValue4=autoReleRule.isReleaseRemind;
+                        	}else if(autoReleRule.customerStatus==4){//yao yue
+                        		releaseRuleVM.form.id11=autoReleRule.id;
+                                releaseRuleVM.form.number19=autoReleRule.timeoutRelease;
+                                releaseRuleVM.form.number20=autoReleRule.retentionTimes;
+                                releaseRuleVM.form.number21=autoReleRule.retentionDay;
+                                releaseRuleVM.form.remindValue5=autoReleRule.isReleaseRemind;
                         	}
                         	
                         }
