@@ -423,7 +423,6 @@ public class ConsoleController {
    /**
     * 电销总监 查询待分配资源
     * @param pageParam
-    * @param result
     * @return
     */
    @PostMapping("/listUnAssignClue")
@@ -432,7 +431,8 @@ public class ConsoleController {
            @RequestBody PendingAllocationCluePageParam pageParam){
        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
        pageParam.setUserId(curLoginUser.getId());
-       return clueBasicFeignClient.listUnAssignClue(pageParam);
+       return null;
+//       return clueBasicFeignClient.listUnAssignClue(pageParam);
    }
    
    
