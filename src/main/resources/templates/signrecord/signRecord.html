@@ -222,6 +222,7 @@
     </el-dialog>
     <!-- 付款明细 -->
     <el-dialog title="付款明细" :visible.sync="recordDialog">
+        <div class="fs16 marginB20">签约单编号({{curRow.signNo}}})付款明细以及付款绑定到访记录</div>
         <div v-show="paymentDetailsShow">
             <div class="fs16 marginB20">全款付款明细</div>
             <el-table
@@ -290,6 +291,40 @@
                 <el-table-column align="center" prop="status" label="明细状态" :formatter="getStatusText"></el-table-column>
             </el-table>
         </div>
+        <div v-show="visitRecordShow">
+            <div class="fs16 marginB20">关联到访记录</div>
+            <el-table ref="recordTable" tooltip-effect="dark" style="width: 100%;margin-bottom: 20px;" border :data="visitRecordTable">
+                <el-table-column align="center" prop="vistitTime" label="到访时间"></el-table-column>
+                <el-table-column align="center" prop="vistitStoreTypeName" label="到访店铺类型"></el-table-column>
+                <el-table-column align="center" prop="visitType" label="到访类型">
+                    <template slot-scope="scope">
+                        <div v-if="scope.row.visitType == 1">
+                            预约来访
+                        </div>
+                        <div v-else-if="scope.row.visitType == 2">
+                            慕名来访
+                        </div>
+                        <div v-else-if="scope.row.visitType == 3">
+                            临时来访
+                        </div>
+                    </template>
+                </el-table-column>
+                <el-table-column align="center" prop="visitCity" label="到访城市"></el-table-column>
+                <el-table-column align="center" prop="createTime" label="创建时间"></el-table-column>
+                <el-table-column align="center" prop="amountPerformance" label="到访批次"></el-table-column>
+                <el-table-column align="center" prop="status" label="到访有效性" :formatter="getStatusText"></el-table-column>
+            </el-table>
+        </div>
+        <div slot="footer" class="dialog-footer f-tac">
+            <template>
+                <shiro:hasPermission name=" aggregation:signRecord:reject">
+                    <el-button type="primary" @click="rebutOne">驳回</el-button>
+                </shiro:hasPermission>
+                <shiro:hasPermission name=" aggregation:signRecord:pass">
+                    <el-button type="success" @click="passOne">审核通过</el-button>
+                </shiro:hasPermission>
+            </template>
+        </div>
     </el-dialog>
 </div>
 <!-- import Vue before Element -->
@@ -309,7 +344,7 @@
         el: '#businessContractRecord',
         data: function() {
             return {
-            	 loading: true,
+                loading: true,
                 dialogFormVisible:false,
                 recordDialog:false,
                 reasonDialog:false,
@@ -317,6 +352,8 @@
                 paymentDetailsShow2:false,//判断定金付款明细表格是否显示
                 paymentDetailsShow3:false,//判断二次定金付款明细表格是否显示
                 paymentDetailsShow4:false,//判断尾款付款明细表格是否显示
+                visitRecordShow:false,
+                curRow:"", // 列表数据：当前行，使用地点：付款明细
                 form: {
                 	signProjectId:'',
                 	businessGroupId:'',
@@ -360,6 +397,7 @@
                 recordTable2:[],
                 recordTable3:[],
                 recordTable4:[],
+                visitRecordTable:[],
                 dialogForm:{
                     reason:''
                 },
@@ -384,6 +422,9 @@
                     if (valid) {
                     	var param ={};	
                     	var rows = this.multipleSelection;
+                    	if(rows.length==0){
+                            rows.push(this.curRow);
+                        }
                         var idArr = new Array();
                         var isPass = true;
                         for(var i=0;i<rows.length;i++){
@@ -410,6 +451,7 @@
                             	signRecordVM.dialogFormVisible = false;
                             	 signRecordVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
                             		 signRecordVM.initSignRecordData();
+                            		 signRecordVM.recordDialog = false;
                                 }});
                             }else{
                             	signRecordVM.$message({message:resData.msg,type:'error'});
@@ -434,11 +476,16 @@
                 this.paymentDetailsShow2=false;
                 this.paymentDetailsShow3=false;
                 this.paymentDetailsShow4=false;
+                this.visitRecordShow=false;
+                this.curRow = row;
+                // row.signNo;
+
                 var param = {};
                 param.idList = [row.id];
                 axios.post('/sign/signRecord/listPayDetailNoPage', param)
                 .then(function (response) {
                     var resData = response.data;
+                    console.log(resData.data)
                     if(resData.code=='0'){
                     	debugger;
                     	var payDetailData = resData.data;
@@ -459,7 +506,12 @@
                     		signRecordVM.paymentDetailsShow4=true;
                     		signRecordVM.recordTable4= payDetailData[4];
                     	}
-                        
+                        if(payDetailData['visitRecord']){
+                            if(payDetailData['visitRecord'].length >0){
+                                signRecordVM.visitRecordShow=true;
+                                signRecordVM.visitRecordTable= payDetailData['visitRecord'];
+                            }
+                        }
                     }else{
                         signRecordVM.$message({message:resData.msg,type:'error'});
                         console.error(resData);
@@ -486,7 +538,6 @@
                      });
                     return;
                 }
-                
                 var title = "";
                 var idArr = new Array();
                 var isPass = true;
@@ -538,6 +589,39 @@
                     });          
                 });
             },
+
+            passOne(){ //审核通过一条
+                var curRow = this.curRow;
+                var title = "";
+                var idArr = new Array();
+                var isPass = true;
+                if(curRow.status!=1){
+                    this.$message({message:'只允许审核待审核的数据',type:'warning'});
+                    isPass=false;
+                }else{
+                    idArr.push(curRow.id)
+                }
+                this.$confirm('确定要将此 '+title+' 签约单审核通过吗？', '提示', {confirmButtonText: '确定', cancelButtonText: '取消', type: 'warning'}).then(() => {
+                    var param={};
+                    param.idList = idArr;
+                    axios.post('/sign/signRecord/passAuditSignOrder', param)
+                        .then(function (response) {
+                            var resData = response.data;
+                            if(resData.code=='0'){
+                                signRecordVM.dialogFormVisible = false;
+                                signRecordVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
+                                        signRecordVM.initSignRecordData();// 刷新列表
+                                        signRecordVM.recordDialog = false;
+                                    }});
+                            }else{
+                                signRecordVM.$message({message:resData.msg,type:'error'});
+                                console.error(resData);
+                            }
+                        }).catch(function (error) {console.log(error);}).then(function(){
+                    });
+                }).catch(() => {this.$message({type: 'info', message: '已取消审核'});});
+            },
+
             initSignRecordData(){
             	
                 var startTime = this.form.signStartTime;
@@ -602,13 +686,30 @@
                     }
                     title += "【"+curRow.serialNum+""+this.getCustomerName(curRow.customerName)+"】 ";
                 }
-                
                 if(!isPass){
                     return;
                 }
-                
                 this.signRecordArrTitle=title;
             	this.dialogFormVisible=true;
+            },
+
+            rebutOne(){
+                this.signRecordArrTitle='';
+                this.dialogForm.reason='';
+                var title = "";
+                var isPass = true;
+                var curRow = this.curRow;
+                this.multipleSelection = [];
+                if(curRow.status!=1){
+                    this.$message({message:'只允许审核待审核的数据',type:'warning'});
+                    isPass=false;
+                }
+                title += "【"+curRow.serialNum+""+this.getCustomerName(curRow.customerName)+"】 ";
+                if(!isPass){
+                    return;
+                }
+                this.signRecordArrTitle=title;
+                this.dialogFormVisible=true;
             },
             handleSelectionChange(val){
             	this.multipleSelection = val;

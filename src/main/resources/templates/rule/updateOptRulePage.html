@@ -13,7 +13,7 @@
         <el-breadcrumb-item>Home</el-breadcrumb-item>
         <el-breadcrumb-item>优化分配规则管理</el-breadcrumb-item>
     </el-breadcrumb>
-    <div class="inforTitle">新建优化分配规则</div> 
+    <div class="inforTitle">编辑优化分配规则</div> 
     <el-form :model="form" :rules="rules" ref="form">
         <div class="borderbox padding20">
             <el-row>
@@ -103,7 +103,7 @@
             <el-row>
                 <el-col :span="12">
                     <el-form-item label="包含搜索词：" :label-width="formLabelWidth" style="float: left;">
-                        <el-input v-model="form.searchWord" autocomplete="off"  maxlength="50" style="width: 300px;"></el-input>                            
+                        <el-input v-model="form.searchWord" autocomplete="off"  maxlength="50" style="width: 230px;"></el-input>                            
                     </el-form-item>
                     <el-form-item style="float: left;">
                         <el-button type="primary" @click="addFun1">添加</el-button>           
@@ -111,7 +111,7 @@
                 </el-col>
                 <el-col :span="12">
                     <el-form-item label="不包含搜索词：" :label-width="formLabelWidth" style="float: left;">
-                        <el-input v-model="form.notSearchWord" autocomplete="off"  maxlength="50" style="width: 300px;"></el-input>
+                        <el-input v-model="form.notSearchWord" autocomplete="off"  maxlength="50" style="width: 230px;"></el-input>
                     </el-form-item>
                     <el-form-item style="float: left;">
                         <el-button type="primary" @click="addFun2">添加</el-button>           
@@ -133,7 +133,7 @@
             </el-row>
             <el-row>
                 <el-form-item label="是否启用：" prop="isUse" :label-width="formLabelWidth">
-                    <el-select v-model="form.status" placeholder="请选择">
+                    <el-select v-model="form.status" placeholder="请选择" style="width: 300px;">
                         <el-option
                             v-for="item in statusOptions"
                             :key="item.value"
@@ -174,7 +174,12 @@
                 <el-table-column align="center" prop="resourceMaxNum" label="资源条数*">
                     <template slot-scope="scope">
                         <el-form-item :prop="'assignRuleTeamList.' + scope.$index + '.resourceMaxNum'" :rules='rules.resourceMaxNum' style="width: 200px;margin:0 auto;height: 57px;">
+                            <!-- input值 -->
                             <el-input @keyup.native.prevent="resourceMaxNumber1(scope.$index, form.assignRuleTeamList)" v-model="scope.row.resourceMaxNum" placeholder="不限"></el-input>
+                            <!-- 不限按钮    -->
+                            <el-button type="primary" size="small" style="position: absolute;top: 6px;right: 4px;z-index: 2;" @click="unlimitedBtn(scope.$index, form.assignRuleTeamList)" >不限</el-button>
+                            <!-- 不限input -->
+                            <el-input style="position: absolute;top: 0;right: 0;z-index: 1;" @focus="unlimitedIpt(scope.$index, form.assignRuleTeamList)"  v-if="scope.row.unlimitedShow" v-model="scope.row.unlimited"></el-input>
                         </el-form-item>
                     </template>
                 </el-table-column>
@@ -217,7 +222,7 @@ var orgList=[[${orgList}]];//媒介集合
     var aorVM = new Vue({
         el: '#addOptimizeRule',
         data: function() {
-            return {
+            return {                
                 form: {
                 	id:'',
                     ruleName:'',
@@ -231,7 +236,9 @@ var orgList=[[${orgList}]];//媒介集合
                     province:'',
                     notProvince:'',
                     status:1,
-                    assignRuleTeamList: []
+                    assignRuleTeamList: [
+                        // unlimitedShow:false,//是否显示不限input
+                    ]
                 },
                 formLabelWidth: '150px',
                 rules:{
@@ -315,6 +322,24 @@ var orgList=[[${orgList}]];//媒介集合
             }        	  
         },
         methods: {
+            unlimitedBtn(index, rows){                
+                rows[index].unlimitedShow=true 
+                rows[index].unlimited="不限" 
+                rows[index].unlimitedVal="-1" 
+                rows[index].resourceMaxNum="0" //为了不让校验而赋的无用的值  
+                console.log(rows[index].unlimited)
+                console.log(rows[index].unlimitedVal)                             
+                console.log(rows[index].resourceMaxNum)                             
+            },
+            unlimitedIpt(index, rows){//点击不限input
+                rows[index].unlimitedShow=false 
+                rows[index].unlimited=""
+                rows[index].unlimitedVal="" 
+                rows[index].resourceMaxNum=""                             
+                console.log(rows[index].unlimited)
+                console.log(rows[index].unlimitedVal)                             
+                console.log(rows[index].resourceMaxNum)
+            },
             submitForm(form) {
                 this.$refs[form].validate((valid) => {
                     if (valid) {
@@ -416,8 +441,7 @@ var orgList=[[${orgList}]];//媒介集合
             },
             deleteFun2(tag) {//删除不包含搜索词
                 this.tags2.splice(this.tags2.indexOf(tag), 1);
-            },
-            
+            },            
             addDomain() {
                 this.form.assignRuleTeamList.push({
                     orgId: '',           
@@ -425,6 +449,9 @@ var orgList=[[${orgList}]];//媒介集合
                     proportion:'',
                     resourceMaxNum:'',
                     isPrior: 0,//默认非优先
+                    unlimited:'',//不限层
+                    unlimitedVal:'',//不限层取值
+                    unlimitedShow:false,//是否显示不限input
                 });
             },
             resourceMaxNumber(index, rows){

@@ -4,9 +4,10 @@ import com.kuaidao.aggregation.dto.busmycustomer.SignRecordReqDTO;
 import com.kuaidao.aggregation.dto.clue.CustomerClueDTO;
 import com.kuaidao.aggregation.dto.paydetail.PayDetailReqDTO;
 import com.kuaidao.aggregation.dto.paydetail.PayDetailRespDTO;
-import com.kuaidao.aggregation.dto.sign.BusSignInsertOrUpdateDTO;
-import com.kuaidao.aggregation.dto.sign.BusSignRespDTO;
-import com.kuaidao.aggregation.dto.sign.PayDetailDTO;
+import com.kuaidao.aggregation.dto.project.CompanyInfoDTO;
+import com.kuaidao.aggregation.dto.project.CompanyInfoPageParam;
+import com.kuaidao.aggregation.dto.sign.*;
+import com.kuaidao.aggregation.dto.visitrecord.BusVisitRecordInsertOrUpdateDTO;
 import com.kuaidao.aggregation.dto.visitrecord.BusVisitRecordRespDTO;
 import com.kuaidao.common.entity.IdEntityLong;
 import com.kuaidao.common.entity.IdListLongReq;
@@ -14,6 +15,7 @@ import com.kuaidao.common.util.CommonUtil;
 import com.kuaidao.manageweb.feign.clue.ClueBasicFeignClient;
 import com.kuaidao.manageweb.feign.clue.ClueCustomerFeignClient;
 import com.kuaidao.manageweb.feign.paydetail.PayDetailFeignClient;
+import com.kuaidao.manageweb.feign.project.CompanyInfoFeignClient;
 import com.kuaidao.manageweb.feign.visitrecord.BusVisitRecordFeignClient;
 import com.kuaidao.manageweb.util.CommUtil;
 import com.sun.org.apache.xpath.internal.operations.Bool;
@@ -36,7 +38,6 @@ import com.kuaidao.aggregation.dto.clue.ClueRepetitionDTO;
 import com.kuaidao.aggregation.dto.invitearea.InviteAreaDTO;
 import com.kuaidao.aggregation.dto.project.ProjectInfoDTO;
 import com.kuaidao.aggregation.dto.project.ProjectInfoPageParam;
-import com.kuaidao.aggregation.dto.sign.BusinessSignDTO;
 import com.kuaidao.aggregation.dto.telemarkting.TelemarketingLayoutDTO;
 import com.kuaidao.common.constant.OrgTypeConstant;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
@@ -95,6 +96,10 @@ public class BusinessSignController {
     private ClueBasicFeignClient clueBasicFeignClient;
     @Autowired
     private ClueCustomerFeignClient clueCustomerFeignClient;
+
+    @Autowired
+    CompanyInfoFeignClient companyInfoFeignClient;
+
 
 
     @Autowired
@@ -202,11 +207,16 @@ public class BusinessSignController {
      */
     @RequestMapping("/one")
     @ResponseBody
-    public JSONResult<BusSignRespDTO> queryOne(@RequestBody IdEntityLong idEntityLong) throws Exception {
+    public JSONResult<BusSignRespDTO> queryOne(@RequestBody SignParamDTO param) throws Exception {
+
+        IdEntityLong idEntityLong = new IdEntityLong();
+        idEntityLong.setId(param.getSignId());
         JSONResult<BusSignRespDTO> res = businessSignFeignClient.queryOne(idEntityLong);
         if(JSONResult.SUCCESS.equals(res.getCode())){
             BusSignRespDTO data = res.getData();
-            String linkPhone = linkPhone(idEntityLong);
+            IdEntityLong idLong= new IdEntityLong();
+            idLong.setId(param.getClueId());
+            String linkPhone = linkPhone(idLong);
             data.setPhone(linkPhone);
             res.setData(data);
         }
@@ -318,11 +328,25 @@ public class BusinessSignController {
     @RequestMapping("/visitRecordPage")
     public String visitRecordPage(HttpServletRequest request,@RequestParam String clueId , @RequestParam String signId ,@RequestParam String readyOnly ) throws Exception {
 
-        IdEntityLong idEntityLong = new IdEntityLong(); 
-        idEntityLong.setId(Long.valueOf(clueId));
-        JSONResult<BusSignRespDTO> busSign = queryOne(idEntityLong);
-        BusSignRespDTO sign = busSign.getData();
+        IdEntityLong idEntityLong = new IdEntityLong();
+        idEntityLong.setId(Long.valueOf(signId));
+        SignParamDTO paramDTO = new SignParamDTO();
+        paramDTO.setClueId(Long.valueOf(clueId));
+        paramDTO.setSignId(Long.valueOf(signId));
+        JSONResult<BusSignRespDTO> busSign = queryOne(paramDTO);
 
+//        tab页面显示逻辑
+//        SignRecordReqDTO recordReqDTO = new SignRecordReqDTO();
+//        recordReqDTO.setClueId(Long.valueOf(clueId));
+//        if("1".equals(readyOnly)){
+//            recordReqDTO.setStatus(0); // 审核中
+//        }else{
+//            recordReqDTO.setStatus(1); // 查看到访记录
+//        }
+//        JSONResult<List<BusSignRespDTO>> resSignListJson = querySignList(recordReqDTO);
+//        List<BusSignRespDTO> data = resSignListJson.getData();
+//        BusSignRespDTO sign = data.get(0);
+        BusSignRespDTO sign = busSign.getData();
         List<BusSignRespDTO> signData =  new ArrayList();
         signData.add(sign);
         List<BusSignRespDTO> PayAllData =  new ArrayList();
@@ -330,11 +354,9 @@ public class BusinessSignController {
 //      签约基本信息
         request.setAttribute("signData", signData);
         request.setAttribute("payType",sign.getPayType());  // 最新一次付款类型： 用来判断显示行数
-
         if("4".equals(sign.getPayType())){
             readyOnly = "1";
         }
-
         if("1".equals(sign.getPayType())){
             /**
              * 全款时候：不存在定金 尾款 以及 追加定金的情况
@@ -367,6 +389,20 @@ public class BusinessSignController {
                 request.setAttribute("threeData",three);
             }
         }
+
+        // 项目
+        ProjectInfoPageParam param = new ProjectInfoPageParam();
+        JSONResult<List<ProjectInfoDTO>> proJson = projectInfoFeignClient.listNoPage(param);
+        if(JSONResult.SUCCESS.equals(proJson.getCode())){
+            request.setAttribute("proSelect", proJson.getData());
+        }
+
+        CompanyInfoPageParam pageParam = new CompanyInfoPageParam();
+        JSONResult<List<CompanyInfoDTO>> listJSONResult = companyInfoFeignClient.listNoPage(pageParam);
+        if(JSONResult.SUCCESS.equals(listJSONResult.getCode())){
+            request.setAttribute("companySelect", proJson.getData());
+        }
+
         request.setAttribute("clueId",clueId);
         request.setAttribute("signId",signId);
         request.setAttribute("readyOnly",readyOnly); //  readyOnly == 1 页面只读（没有添加按钮）
