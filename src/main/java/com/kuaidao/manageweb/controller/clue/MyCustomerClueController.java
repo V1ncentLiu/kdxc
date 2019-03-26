@@ -452,7 +452,8 @@ public class MyCustomerClueController {
         // 获取已上传的文件数据
         if (null != dto && null != dto.getFilePath()) {
             String filepath = dto.getFilePath();
-            dto.setFileName(filepath.substring(filepath.lastIndexOf("/") + 1));
+            dto.setFileName(filepath.split(";")[1]);
+            dto.setFilePath(filepath.split(";")[0]);
             dto.setFileType(filepath.substring(filepath.lastIndexOf(".") + 1));
         }
         Subject subject = SecurityUtils.getSubject();
@@ -708,7 +709,11 @@ public class MyCustomerClueController {
     @ResponseBody
     public JSONResult<List<UserInfoDTO>> listByOrgAndRole(HttpServletRequest request) {
         UserOrgRoleReq userRole = new UserOrgRoleReq();
+        List<Integer> status = new ArrayList();
+        status.add(1);
+        status.add(3);
         userRole.setRoleCode(RoleCodeEnum.DXCYGW.name());
+        userRole.setStatusList(status);
         return userInfoFeignClient.listByOrgAndRole(userRole);
     }
 

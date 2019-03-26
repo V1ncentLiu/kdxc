@@ -62,7 +62,9 @@ public class ExtendClueDistributionedTaskController {
 	@ResponseBody
 	public JSONResult<PageBean<ClueDistributionedTaskDTO>> queryPageDistributionedTask(HttpServletRequest request,
 			@RequestBody ClueDistributionedTaskQueryDTO queryDto) {
-		return extendClueFeignClient.queryPageDistributionedTask(queryDto);
+		JSONResult<PageBean<ClueDistributionedTaskDTO>> pageBeanJSONResult = extendClueFeignClient
+				.queryPageDistributionedTask(queryDto);
+		return pageBeanJSONResult;
 
 	}
 

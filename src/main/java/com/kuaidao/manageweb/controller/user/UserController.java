@@ -281,6 +281,7 @@ public class UserController {
 	            }
 	        }).start();
         }
+        userInfoReq.setDisableTime(new Date());
         return userInfoFeignClient.update(userInfoReq);
     }
 
