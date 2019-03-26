@@ -179,7 +179,7 @@ public class ConsoleController {
             request.setAttribute("ussmList", getDictionaryByCode(Constants.USSM));
             path="console/consoleBusinessMajordomo";
         }
-      /* if(type.equals("1")) {
+/*       if(type.equals("1")) {
             path = "console/consoleTelemarketing";
         }else if(type.equals("2")) {
             List<Integer> statusList = new ArrayList<Integer>();
@@ -471,8 +471,7 @@ public class ConsoleController {
            @RequestBody PendingAllocationCluePageParam pageParam){
        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
        pageParam.setUserId(curLoginUser.getId());
-       return null;
-//       return clueBasicFeignClient.listUnAssignClue(pageParam);
+       return clueBasicFeignClient.listUnAssignClue(pageParam);
    }
    
    
@@ -504,7 +503,7 @@ public class ConsoleController {
    @ResponseBody
    public JSONResult<PageBean<BusMyCustomerRespDTO>> listPendingInviteCustomer(@RequestBody MyCustomerParamDTO param){
        UserInfoDTO user = CommUtil.getCurLoginUser();
-       param.setBusSaleId(user.getId());
+      param.setBusSaleId(user.getId());
        //param.setBusSaleId(1084621842175623168L);
        
        return busMyCustomerFeignClient.listPendingInviteCustomer(param);
