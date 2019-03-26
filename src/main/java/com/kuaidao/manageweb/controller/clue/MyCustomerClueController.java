@@ -452,7 +452,8 @@ public class MyCustomerClueController {
         // 获取已上传的文件数据
         if (null != dto && null != dto.getFilePath()) {
             String filepath = dto.getFilePath();
-            dto.setFileName(filepath.substring(filepath.lastIndexOf("/") + 1));
+            dto.setFileName(filepath.split(";")[1]);
+            dto.setFilePath(filepath.split(";")[0]);
             dto.setFileType(filepath.substring(filepath.lastIndexOf(".") + 1));
         }
         Subject subject = SecurityUtils.getSubject();
