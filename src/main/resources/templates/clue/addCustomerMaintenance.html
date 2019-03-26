@@ -1444,7 +1444,20 @@ var callRecord=[[${callRecord}]];//通话记录
             	console.log( row.fileName );
             	
             	if( row.fileType == 'mp3' ){
-            		this.download1( row.filePath, row.fileName, 'auido/mp3' );
+            		/* axios.get(row.filePath).then(function(response){
+            			console.log(response);
+            			//this.download1( response.data, row.fileName, 'auido/mp3' );
+            		}).catch(function(error){
+            			console.log(error);
+            		}); */
+            		var x=new XMLHttpRequest();
+        		    x.open("GET", row.filePath, true);
+        		    x.responseType = 'blob';
+        		    x.onload=function(e){
+        		        download(x.response, row.fileName, "auido/mp3" );
+        		    };
+        		    x.send();
+            		//this.download1( row.filePath, row.fileName, 'auido/mp3' );
             	}else{
             		this.dialogFormUploadImgSrc = row.filePath;
                 	this.dialogFormUploadImg =  true;
@@ -1604,7 +1617,7 @@ var callRecord=[[${callRecord}]];//通话记录
         	   this.dynamicValidateForm.domains=phoneArr; 
         	   
            } 
-			if(base){
+             if(base){
     	      if(null!=base.releaseTime&&base.releaseTime!=0){
     		  this.isShowTip=true;
     		  this.showTipInfo="客户"+base.releaseTime+"小时后即将释放到公有池";

@@ -605,7 +605,7 @@ var appiontmentVM = new Vue({
                  var rows = this.multipleSelection;
                     if(rows.length==0){
                        this.$message({
-                          message: '请选择邀约数据据进行取消',
+                          message: '请选择邀约数据进行取消',
                           type: 'warning'
                         });
                        return;
@@ -651,7 +651,7 @@ var appiontmentVM = new Vue({
               	   var rows = this.multipleSelection;
                    if(rows.length==0){
                        this.$message({
-                          message: '请选择邀约数据据进行取消',
+                          message: '请选择邀约数据进行取消',
                           type: 'warning'
                         });
                        return;
@@ -818,9 +818,16 @@ var appiontmentVM = new Vue({
                   });
               },
               confirmColumn(){
-              	this.dialogFormVisible = false;
               	//处理用户选择的列
               	console.info(this.form.type);
+              	if(this.form.type.length==0){
+            		this.$message({
+                        message: "请至少保留一列",
+                        type: 'error'
+                      }); 
+            		return;
+            	}
+              	this.dialogFormVisible = false;
               	var customerShowColun = [];
               	var customerColumn = this.form.type;
               	customerColumn.sort(this.sortNumber);//对选择的列排序
@@ -860,7 +867,12 @@ var appiontmentVM = new Vue({
 	              	this.form.type = type;
 	              	this.confirmColumn();
               	}else{
-	              	this.tableColums = fieldList;
+              		var type=[];
+                  	for(var i=0;i<fieldList.length;i++){
+                  		type.push(fieldList[i].sortNum+'_'+fieldList[i].fieldCode+'_'+fieldList[i].displayName+'_'+fieldList[i].id)
+                 	}
+	              	this.form.type = type;
+	              	this.confirmColumn();
               	}
               	
               },

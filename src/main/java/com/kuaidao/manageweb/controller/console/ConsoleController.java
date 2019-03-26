@@ -41,9 +41,12 @@ import com.kuaidao.aggregation.dto.visitrecord.VisitRecordRespDTO;
 import com.kuaidao.common.constant.CluePhase;
 import com.kuaidao.common.constant.OrgTypeConstant;
 import com.kuaidao.common.constant.RoleCodeEnum;
+import com.kuaidao.common.entity.IdEntityLong;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
+import com.kuaidao.common.util.CommonUtil;
 import com.kuaidao.common.util.DateUtil;
+import com.kuaidao.manageweb.constant.Constants;
 import com.kuaidao.manageweb.feign.announcement.AnnReceiveFeignClient;
 import com.kuaidao.manageweb.feign.announcement.BusReceiveFeignClient;
 import com.kuaidao.manageweb.feign.busmycustomer.BusMyCustomerFeignClient;
@@ -51,6 +54,7 @@ import com.kuaidao.manageweb.feign.clue.AppiontmentFeignClient;
 import com.kuaidao.manageweb.feign.clue.ClueBasicFeignClient;
 import com.kuaidao.manageweb.feign.clue.MyCustomerFeignClient;
 import com.kuaidao.manageweb.feign.clue.PendingVisitFeignClient;
+import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
 import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
 import com.kuaidao.manageweb.feign.project.ProjectInfoFeignClient;
 import com.kuaidao.manageweb.feign.sign.SignRecordFeignClient;
@@ -62,6 +66,7 @@ import com.kuaidao.sys.dto.announcement.annReceive.AnnReceiveQueryDTO;
 import com.kuaidao.sys.dto.announcement.annReceive.AnnReceiveRespDTO;
 import com.kuaidao.sys.dto.announcement.bussReceive.BussReceiveQueryDTO;
 import com.kuaidao.sys.dto.announcement.bussReceive.BussReceiveRespDTO;
+import com.kuaidao.sys.dto.dictionary.DictionaryItemRespDTO;
 import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
 import com.kuaidao.sys.dto.organization.OrganizationRespDTO;
 import com.kuaidao.sys.dto.role.RoleInfoDTO;
@@ -116,6 +121,9 @@ public class ConsoleController {
     
     @Autowired
     private OrganizationFeignClient organizationFeignClient;
+    
+    @Autowired
+    private DictionaryItemFeignClient dictionaryItemFeignClient;
     /***
      * 跳转控制台页面
      * @return
@@ -153,11 +161,25 @@ public class ConsoleController {
         }else if(RoleCodeEnum.SWZJ.name().equals(roleCode)) {
             //商务总监
             // 查询所有商务经理
-            List<Map<String, Object>> allSaleList = getAllSaleList();
-            request.setAttribute("allSaleList", allSaleList);
+            List<Integer> statusList = new ArrayList<Integer>();
+            statusList.add(SysConstant.USER_STATUS_ENABLE);
+            statusList.add(SysConstant.USER_STATUS_LOCK);
+            List<UserInfoDTO> saleList =
+                    getUserList(orgId, RoleCodeEnum.SWJL.name(), statusList);
+            request.setAttribute("busSaleList", saleList);
+            // 查询所有项目
+            JSONResult<List<ProjectInfoDTO>> listNoPage =
+                    projectInfoFeignClient.listNoPage(new ProjectInfoPageParam());
+            request.setAttribute("projectList", listNoPage.getData());
+            // 查询字典选址情况集合
+            request.setAttribute("optionAddressList", getDictionaryByCode(Constants.OPTION_ADDRESS));
+            // 查询字典店铺面积集合
+            request.setAttribute("storefrontAreaList", getDictionaryByCode(Constants.STOREFRONT_AREA));
+         // 查询字典投资金额集合
+            request.setAttribute("ussmList", getDictionaryByCode(Constants.USSM));
             path="console/consoleBusinessMajordomo";
         }
- /*       if(type.equals("1")) {
+      /* if(type.equals("1")) {
             path = "console/consoleTelemarketing";
         }else if(type.equals("2")) {
             List<Integer> statusList = new ArrayList<Integer>();
@@ -179,6 +201,24 @@ public class ConsoleController {
             // 查询所有商务经理
             List<Map<String, Object>> allSaleList = getAllSaleList();
             request.setAttribute("allSaleList", allSaleList);
+         // 查询组织下商务经理
+            List<Integer> statusList = new ArrayList<Integer>();
+            statusList.add(SysConstant.USER_STATUS_ENABLE);
+            statusList.add(SysConstant.USER_STATUS_LOCK);
+            List<UserInfoDTO> saleList =
+                    getUserList(orgId, RoleCodeEnum.SWJL.name(), statusList);
+            request.setAttribute("busSaleList", saleList);
+            // 查询所有项目
+            JSONResult<List<ProjectInfoDTO>> listNoPage =
+                    projectInfoFeignClient.listNoPage(new ProjectInfoPageParam());
+            request.setAttribute("projectList", listNoPage.getData());
+            // 查询字典选址情况集合
+            request.setAttribute("optionAddressList", getDictionaryByCode(Constants.OPTION_ADDRESS));
+            // 查询字典店铺面积集合
+            request.setAttribute("storefrontAreaList", getDictionaryByCode(Constants.STOREFRONT_AREA));
+         // 查询字典投资金额集合
+            request.setAttribute("ussmList", getDictionaryByCode(Constants.USSM));
+            
             path="console/consoleBusinessMajordomo";
         }*/
         return path;
@@ -500,6 +540,7 @@ public class ConsoleController {
        List<Long> accountIdList = new ArrayList<Long>();
        accountIdList.add(curLoginUser.getId());
        businessConsoleReqDTO.setAccountIdList(accountIdList);
+       businessConsoleReqDTO.setBusinessGroupId(curLoginUser.getOrgId());
        Date curDate = new Date();
        businessConsoleReqDTO.setEndTime(curDate);
        //本月第一天 00
@@ -573,7 +614,7 @@ public class ConsoleController {
    public JSONResult<List<VisitRecordRespDTO>> listVisitRecord(@RequestBody VisitRecordReqDTO visitRecordReqDTO){
        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
        List<Long> busGroupIdList = new ArrayList<>();
-       busGroupIdList.add(curLoginUser.getId());
+       busGroupIdList.add(curLoginUser.getOrgId());
        visitRecordReqDTO.setBusGroupIdList(busGroupIdList);
        visitRecordReqDTO.setStatus(1);
       return  visitRecordFeignClient.listVisitRecordNoPage(visitRecordReqDTO);
@@ -591,7 +632,7 @@ public class ConsoleController {
    public JSONResult<List<SignRecordRespDTO>> listSignRecord(@RequestBody SignRecordReqDTO reqDTO) {
        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
        List<Long> businessGroupIdList = new ArrayList<>();
-       businessGroupIdList.add(curLoginUser.getId());
+       businessGroupIdList.add(curLoginUser.getOrgId());
        reqDTO.setBusinessGroupIdList(businessGroupIdList);
        reqDTO.setStatus(AggregationConstant.SIGN_ORDER_STATUS.AUDITING);
        return signRecordFeignClient.listSignRecordNoPage(reqDTO);
@@ -682,6 +723,50 @@ public class ConsoleController {
             }
         }
         return result;
+    }
+    
+    
+    /**
+     *  获取工作天数
+     * @param request
+     * @return
+     */
+    @PostMapping("/getWorkDay")
+    @ResponseBody
+    public JSONResult<String> getWorkDay(HttpServletRequest request) {
+        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+        IdEntityLong idEntityLong = new IdEntityLong();
+        idEntityLong.setId(curLoginUser.getId());
+        JSONResult<UserInfoDTO> jsonResult = userInfoFeignClient.get(idEntityLong);
+        if(!JSONResult.SUCCESS.equals(jsonResult.getCode())) {
+            return new JSONResult<String>().fail(jsonResult.getCode(),jsonResult.getMsg());
+        }
+        UserInfoDTO data = jsonResult.getData();
+        String workDay = "0";
+        if(data==null || data.getCreateTime()==null) {
+            return new JSONResult<String>().success(workDay);
+        }
+        
+        Date createTime = data.getCreateTime();
+        int diffDay = DateUtil.diffDay(createTime, new Date());
+        return new JSONResult<String>().success(diffDay+"");
+        
+    }
+    
+    /**
+     * 查询字典表
+     * 
+     * @param code
+     * @return
+     */
+    private List<DictionaryItemRespDTO> getDictionaryByCode(String code) {
+        JSONResult<List<DictionaryItemRespDTO>> queryDicItemsByGroupCode =
+                dictionaryItemFeignClient.queryDicItemsByGroupCode(code);
+        if (queryDicItemsByGroupCode != null
+                && JSONResult.SUCCESS.equals(queryDicItemsByGroupCode.getCode())) {
+            return queryDicItemsByGroupCode.getData();
+        }
+        return null;
     }
 
 }
