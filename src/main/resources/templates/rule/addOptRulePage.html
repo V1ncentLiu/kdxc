@@ -206,7 +206,12 @@
                 <el-table-column align="center" prop="resourceMaxNum" label="资源条数*">
                     <template slot-scope="scope">
                         <el-form-item :prop="'assignRuleTeamList.' + scope.$index + '.resourceMaxNum'" :rules='rules.resourceMaxNum' style="width: 200px;margin:0 auto;height: 57px;">
-                            <el-input @keyup.native.prevent="resourceMaxNumber1(scope.$index, form.assignRuleTeamList)" v-model="scope.row.resourceMaxNum" placeholder="不限"></el-input>
+                            <!-- input值 -->
+                            <el-input @keyup.native.prevent="resourceMaxNumber1(scope.$index, form.assignRuleTeamList)" v-model="scope.row.resourceMaxNum" placeholder=""></el-input>
+                            <!-- 不限按钮    -->
+                            <el-button type="primary" size="small" style="position: absolute;top: 6px;right: 4px;z-index: 2;" @click="unlimitedBtn(scope.$index, form.assignRuleTeamList)" >不限</el-button>
+                            <!-- 不限input -->
+                            <el-input style="position: absolute;top: 0;right: 0;z-index: 1;" @focus="unlimitedIpt(scope.$index, form.assignRuleTeamList)"  v-if="scope.row.unlimitedShow" v-model="scope.row.unlimited"></el-input>
                         </el-form-item>
                     </template>
                 </el-table-column>
@@ -248,7 +253,7 @@ var orgList=[[${orgList}]];//媒介集合
     var aorVM = new Vue({
         el: '#addOptimizeRule',
         data: function() {
-            return {
+            return {                
                 form: {
                     ruleName:'',
                     startTime:'',
@@ -263,10 +268,13 @@ var orgList=[[${orgList}]];//媒介集合
                     status:1,
                     assignRuleTeamList: [
                         // {
-                        //     orgId:'',
-                        //     proportion:'',
-                        //     resourceMaxNum:'',
-                        //     isPrior:'',
+                        //      orgId:'',
+                        //      proportion:'',
+                        //      resourceMaxNum:'',
+                        //      isPrior:'',
+                        //      unlimited:'',//不限文字
+                        //      unlimitedVal:'',//不限-1取值
+                        //      unlimitedShow:false,//是否显示不限input
                         // }
                     ]
                 },
@@ -354,6 +362,24 @@ var orgList=[[${orgList}]];//媒介集合
             }        	  
         },
         methods: {
+            unlimitedBtn(index, rows){                
+                rows[index].unlimitedShow=true 
+                rows[index].unlimited="不限" 
+                rows[index].unlimitedVal="-1" 
+                rows[index].resourceMaxNum="0" //为了不让校验而赋的无用的值  
+                console.log(rows[index].unlimited)
+                console.log(rows[index].unlimitedVal)                             
+                console.log(rows[index].resourceMaxNum)                             
+            },
+            unlimitedIpt(index, rows){//点击不限input
+                rows[index].unlimitedShow=false 
+                rows[index].unlimited=""
+                rows[index].unlimitedVal="" 
+                rows[index].resourceMaxNum=""                             
+                console.log(rows[index].unlimited)
+                console.log(rows[index].unlimitedVal)                             
+                console.log(rows[index].resourceMaxNum)
+            },
             submitForm(form) {
                 this.$refs[form].validate((valid) => {
                     if (valid) {
@@ -475,6 +501,9 @@ var orgList=[[${orgList}]];//媒介集合
                     proportion:'',
                     resourceMaxNum:'',
                     isPrior: 0,//默认非优先
+                    unlimited:'',//不限层
+                    unlimitedVal:'',//不限层取值
+                    unlimitedShow:false,//默认不显示
                 });
             },
             resourceMaxNumber(index, rows){
