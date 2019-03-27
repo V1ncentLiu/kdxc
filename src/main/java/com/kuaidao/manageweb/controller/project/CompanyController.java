@@ -98,8 +98,7 @@ public class CompanyController {
     public JSONResult<List<CompanyInfoDTO>> listNoPage(
             @RequestBody CompanyInfoPageParam companyInfoPageParam, HttpServletRequest request) {
 
-        JSONResult<List<CompanyInfoDTO>> list =
-                companyInfoFeignClient.listNoPage(companyInfoPageParam);
+        JSONResult<List<CompanyInfoDTO>> list = companyInfoFeignClient.allCompany();
 
         return list;
     }

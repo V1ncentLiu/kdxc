@@ -35,7 +35,6 @@ import com.kuaidao.aggregation.dto.console.BusinessConsoleReqDTO;
 import com.kuaidao.aggregation.dto.console.BusinessDirectorConsolePanelRespDTO;
 import com.kuaidao.aggregation.dto.console.TeleConsoleReqDTO;
 import com.kuaidao.aggregation.dto.project.ProjectInfoDTO;
-import com.kuaidao.aggregation.dto.project.ProjectInfoPageParam;
 import com.kuaidao.aggregation.dto.visitrecord.VisitRecordReqDTO;
 import com.kuaidao.aggregation.dto.visitrecord.VisitRecordRespDTO;
 import com.kuaidao.common.constant.CluePhase;
@@ -44,7 +43,6 @@ import com.kuaidao.common.constant.RoleCodeEnum;
 import com.kuaidao.common.entity.IdEntityLong;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
-import com.kuaidao.common.util.CommonUtil;
 import com.kuaidao.common.util.DateUtil;
 import com.kuaidao.manageweb.constant.Constants;
 import com.kuaidao.manageweb.feign.announcement.AnnReceiveFeignClient;
@@ -75,8 +73,9 @@ import com.kuaidao.sys.dto.user.UserOrgRoleReq;
 
 /**
  * 控制台
- * @author  Chen
- * @date 2019年3月16日 下午2:27:31   
+ * 
+ * @author Chen
+ * @date 2019年3月16日 下午2:27:31
  * @version V1.0
  */
 
@@ -84,150 +83,147 @@ import com.kuaidao.sys.dto.user.UserOrgRoleReq;
 @RequestMapping("/console/console")
 public class ConsoleController {
     private static Logger logger = LoggerFactory.getLogger(ConsoleController.class);
-     
+
     @Autowired
     AnnReceiveFeignClient annReceiveFeignClient;
 
     @Autowired
     BusReceiveFeignClient busReceiveFeignClient;
-    
+
     @Autowired
     ClueBasicFeignClient clueBasicFeignClient;
-    
+
     @Autowired
     AppiontmentFeignClient appiontmentFeignClient;
-    
-    
+
+
     @Autowired
     UserInfoFeignClient userInfoFeignClient;
-    
+
     @Autowired
     MyCustomerFeignClient myCustomerFeignClient;
 
     @Autowired
     VisitRecordFeignClient visitRecordFeignClient;
-    
+
     @Autowired
     SignRecordFeignClient signRecordFeignClient;
-    
+
     @Autowired
     PendingVisitFeignClient pendingVisitFeignClient;
-    
+
     @Autowired
     BusMyCustomerFeignClient busMyCustomerFeignClient;
-    
+
     @Autowired
     private ProjectInfoFeignClient projectInfoFeignClient;
-    
+
     @Autowired
     private OrganizationFeignClient organizationFeignClient;
-    
+
     @Autowired
     private DictionaryItemFeignClient dictionaryItemFeignClient;
+
     /***
      * 跳转控制台页面
+     * 
      * @return
      */
     @RequestMapping("/index")
-    public String index(String type,HttpServletRequest request) {
+    public String index(String type, HttpServletRequest request) {
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
         Long orgId = curLoginUser.getOrgId();
         List<RoleInfoDTO> roleList = curLoginUser.getRoleList();
         RoleInfoDTO roleInfoDTO = roleList.get(0);
         String roleCode = roleInfoDTO.getRoleCode();
-        String path= "";
-        
-       if(RoleCodeEnum.DXCYGW.name().equals(roleCode)) {
-            //电销顾问
-           path = "console/consoleTelemarketing";
-        }else if(RoleCodeEnum.DXZJ.name().equals(roleCode)) {
-            //电销总监
-            List<Integer> statusList = new ArrayList<Integer>();
-            statusList.add(SysConstant.USER_STATUS_ENABLE);
-            statusList.add(SysConstant.USER_STATUS_LOCK);
-            List<UserInfoDTO> userList =
-                    getUserList(orgId, RoleCodeEnum.DXCYGW.name(), statusList);
-            request.setAttribute("saleList", userList);
-            path = "console/consoleTelMajordomo";
-        }else if(RoleCodeEnum.SWJL.name().equals(roleCode)) {
-            //商务经理
-            // 项目
-            ProjectInfoPageParam param = new ProjectInfoPageParam();
-            JSONResult<List<ProjectInfoDTO>> proJson = projectInfoFeignClient.listNoPage(param);
-            if(JSONResult.SUCCESS.equals(proJson.getCode())){
-                request.setAttribute("proSelect", proJson.getData());
-            }
-            path="console/consoleBusinessManager";
-        }else if(RoleCodeEnum.SWZJ.name().equals(roleCode)) {
-            //商务总监
-            // 查询所有商务经理
-            List<Integer> statusList = new ArrayList<Integer>();
-            statusList.add(SysConstant.USER_STATUS_ENABLE);
-            statusList.add(SysConstant.USER_STATUS_LOCK);
-            List<UserInfoDTO> saleList =
-                    getUserList(orgId, RoleCodeEnum.SWJL.name(), statusList);
-            request.setAttribute("busSaleList", saleList);
-            // 查询所有项目
-            JSONResult<List<ProjectInfoDTO>> listNoPage =
-                    projectInfoFeignClient.listNoPage(new ProjectInfoPageParam());
-            request.setAttribute("projectList", listNoPage.getData());
-            // 查询字典选址情况集合
-            request.setAttribute("optionAddressList", getDictionaryByCode(Constants.OPTION_ADDRESS));
-            // 查询字典店铺面积集合
-            request.setAttribute("storefrontAreaList", getDictionaryByCode(Constants.STOREFRONT_AREA));
-         // 查询字典投资金额集合
-            request.setAttribute("ussmList", getDictionaryByCode(Constants.USSM));
-            path="console/consoleBusinessMajordomo";
-        }
-/*       if(type.equals("1")) {
+        String path = "";
+
+        if (RoleCodeEnum.DXCYGW.name().equals(roleCode)) {
+            // 电销顾问
             path = "console/consoleTelemarketing";
-        }else if(type.equals("2")) {
+        } else if (RoleCodeEnum.DXZJ.name().equals(roleCode)) {
+            // 电销总监
+            // 如果当前登录的为电销总监,查询所有下属电销员工
             List<Integer> statusList = new ArrayList<Integer>();
             statusList.add(SysConstant.USER_STATUS_ENABLE);
             statusList.add(SysConstant.USER_STATUS_LOCK);
             List<UserInfoDTO> userList = getUserList(orgId, RoleCodeEnum.DXCYGW.name(), statusList);
             request.setAttribute("saleList", userList);
-            path="console/consoleTelMajordomo";
-        }else if(type.equals("3")) {
+
+            // 查询字典类别集合
+            request.setAttribute("clueCategoryList", getDictionaryByCode(Constants.CLUE_CATEGORY));
+            // 查询字典类别集合
+            request.setAttribute("clueTypeList", getDictionaryByCode(Constants.CLUE_TYPE));
+
+            path = "console/consoleTelMajordomo";
+        } else if (RoleCodeEnum.SWJL.name().equals(roleCode)) {
+            // 商务经理
             // 项目
-            ProjectInfoPageParam param = new ProjectInfoPageParam();
-            JSONResult<List<ProjectInfoDTO>> proJson = projectInfoFeignClient.listNoPage(param);
-            if(JSONResult.SUCCESS.equals(proJson.getCode())){
+            JSONResult<List<ProjectInfoDTO>> proJson = projectInfoFeignClient.allProject();
+            if (JSONResult.SUCCESS.equals(proJson.getCode())) {
                 request.setAttribute("proSelect", proJson.getData());
             }
-
-            path="console/consoleBusinessManager";
-        }else if(type.equals("4")) {
+            path = "console/consoleBusinessManager";
+        } else if (RoleCodeEnum.SWZJ.name().equals(roleCode)) {
+            // 商务总监
             // 查询所有商务经理
-            List<Map<String, Object>> allSaleList = getAllSaleList();
-            request.setAttribute("allSaleList", allSaleList);
-         // 查询组织下商务经理
             List<Integer> statusList = new ArrayList<Integer>();
             statusList.add(SysConstant.USER_STATUS_ENABLE);
             statusList.add(SysConstant.USER_STATUS_LOCK);
-            List<UserInfoDTO> saleList =
-                    getUserList(orgId, RoleCodeEnum.SWJL.name(), statusList);
+            List<UserInfoDTO> saleList = getUserList(orgId, RoleCodeEnum.SWJL.name(), statusList);
             request.setAttribute("busSaleList", saleList);
             // 查询所有项目
-            JSONResult<List<ProjectInfoDTO>> listNoPage =
-                    projectInfoFeignClient.listNoPage(new ProjectInfoPageParam());
-            request.setAttribute("projectList", listNoPage.getData());
+            JSONResult<List<ProjectInfoDTO>> allProject = projectInfoFeignClient.allProject();
+            request.setAttribute("projectList", allProject.getData());
             // 查询字典选址情况集合
-            request.setAttribute("optionAddressList", getDictionaryByCode(Constants.OPTION_ADDRESS));
+            request.setAttribute("optionAddressList",
+                    getDictionaryByCode(Constants.OPTION_ADDRESS));
             // 查询字典店铺面积集合
-            request.setAttribute("storefrontAreaList", getDictionaryByCode(Constants.STOREFRONT_AREA));
-         // 查询字典投资金额集合
+            request.setAttribute("storefrontAreaList",
+                    getDictionaryByCode(Constants.STOREFRONT_AREA));
+            // 查询字典投资金额集合
             request.setAttribute("ussmList", getDictionaryByCode(Constants.USSM));
-            
-            path="console/consoleBusinessMajordomo";
-        }*/
+            path = "console/consoleBusinessMajordomo";
+        }
+        /*
+         * if(type.equals("1")) { path = "console/consoleTelemarketing"; }else if(type.equals("2"))
+         * { List<Integer> statusList = new ArrayList<Integer>();
+         * statusList.add(SysConstant.USER_STATUS_ENABLE);
+         * statusList.add(SysConstant.USER_STATUS_LOCK); List<UserInfoDTO> userList =
+         * getUserList(orgId, RoleCodeEnum.DXCYGW.name(), statusList);
+         * request.setAttribute("saleList", userList); // 查询字典类别集合
+         * request.setAttribute("clueCategoryList", getDictionaryByCode(Constants.CLUE_CATEGORY));
+         * // 查询字典类别集合 request.setAttribute("clueTypeList",
+         * getDictionaryByCode(Constants.CLUE_TYPE)); path="console/consoleTelMajordomo"; }else
+         * if(type.equals("3")) { // 项目 ProjectInfoPageParam param = new ProjectInfoPageParam();
+         * JSONResult<List<ProjectInfoDTO>> proJson = projectInfoFeignClient.listNoPage(param);
+         * if(JSONResult.SUCCESS.equals(proJson.getCode())){ request.setAttribute("proSelect",
+         * proJson.getData()); }
+         * 
+         * path="console/consoleBusinessManager"; }else if(type.equals("4")) { // 查询所有商务经理
+         * List<Map<String, Object>> allSaleList = getAllSaleList();
+         * request.setAttribute("allSaleList", allSaleList); // 查询组织下商务经理 List<Integer> statusList =
+         * new ArrayList<Integer>(); statusList.add(SysConstant.USER_STATUS_ENABLE);
+         * statusList.add(SysConstant.USER_STATUS_LOCK); List<UserInfoDTO> saleList =
+         * getUserList(orgId, RoleCodeEnum.SWJL.name(), statusList);
+         * request.setAttribute("busSaleList", saleList); // 查询所有项目 JSONResult<List<ProjectInfoDTO>>
+         * listNoPage = projectInfoFeignClient.listNoPage(new ProjectInfoPageParam());
+         * request.setAttribute("projectList", listNoPage.getData()); // 查询字典选址情况集合
+         * request.setAttribute("optionAddressList", getDictionaryByCode(Constants.OPTION_ADDRESS));
+         * // 查询字典店铺面积集合 request.setAttribute("storefrontAreaList",
+         * getDictionaryByCode(Constants.STOREFRONT_AREA)); // 查询字典投资金额集合
+         * request.setAttribute("ussmList", getDictionaryByCode(Constants.USSM));
+         * 
+         * path="console/consoleBusinessMajordomo"; }
+         */
         return path;
     }
-    
-    
-    
+
+
+
     /**
-     *   查询公告 --不 带分页
+     * 查询公告 --不 带分页
+     * 
      * @param queryDTO
      * @return
      */
@@ -243,30 +239,32 @@ public class ConsoleController {
         queryDTO.setDate2(curDate);
         return annReceiveFeignClient.queryAnnReceiveNoPage(queryDTO);
     }
-    
+
     /**
-     * 控制台使用
-     *   查询业务消息 -- 不带分页
+     * 控制台使用 查询业务消息 -- 不带分页
+     * 
      * @param queryDTO
      * @return
      */
     @PostMapping("/queryBussReceiveNoPage")
     @ResponseBody
-    public JSONResult<List<BussReceiveRespDTO>> queryBussReceiveNoPage(@RequestBody BussReceiveQueryDTO queryDTO) {
+    public JSONResult<List<BussReceiveRespDTO>> queryBussReceiveNoPage(
+            @RequestBody BussReceiveQueryDTO queryDTO) {
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
         queryDTO.setReceiveUser(curLoginUser.getId());
         return busReceiveFeignClient.queryBussReceiveNoPage(queryDTO);
     }
-    
-    
+
+
     /**
-     *  统计电销人员今日分配资源数
+     * 统计电销人员今日分配资源数
+     * 
      * @param reqDTO
      * @return
      */
     @PostMapping("/countAssignClueNum")
     @ResponseBody
-    public JSONResult<Integer> countAssignClueNum(@RequestBody TeleConsoleReqDTO reqDTO){
+    public JSONResult<Integer> countAssignClueNum(@RequestBody TeleConsoleReqDTO reqDTO) {
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
         reqDTO.setTeleSaleId(curLoginUser.getId());
         reqDTO.setType(1);
@@ -277,384 +275,419 @@ public class ConsoleController {
         sourceList.add(1);
         sourceList.add(2);
         reqDTO.setSourceList(sourceList);
-        return  clueBasicFeignClient.countAssignClueNum(reqDTO);
+        return clueBasicFeignClient.countAssignClueNum(reqDTO);
     }
-    
-    
+
+
     /**
      * 统计电销人员今日領取数
+     * 
      * @param reqDTO
      * @return
      */
     @PostMapping("/countReceiveClueNum")
     @ResponseBody
-    public JSONResult<Integer> countReceiveClueNum(@RequestBody TeleConsoleReqDTO reqDTO){
+    public JSONResult<Integer> countReceiveClueNum(@RequestBody TeleConsoleReqDTO reqDTO) {
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
         reqDTO.setTeleSaleId(curLoginUser.getId());
         Date curDate = new Date();
         reqDTO.setEndTime(curDate);
-       // reqDTO.setStartTime(DateUtil.getCurStartDate());
+        // reqDTO.setStartTime(DateUtil.getCurStartDate());
         reqDTO.setStartTime(DateUtil.getTodayStartTime());
         List<Integer> sourceList = new ArrayList<Integer>();
         sourceList.add(3);
         reqDTO.setSourceList(sourceList);
         reqDTO.setType(1);
-        return  clueBasicFeignClient.countAssignClueNum(reqDTO);
+        return clueBasicFeignClient.countAssignClueNum(reqDTO);
     }
-    
-    
-    
-   /***
-    * 控制台 今日邀约单 不包括 删除的
-    * @param teleConsoleReqDTO
-    * @return
-    */
-   @PostMapping("/countTodayAppiontmentNum")
-   @ResponseBody
-   public JSONResult<Integer> countTodayAppiontmentNum(){
-       UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
-       TeleConsoleReqDTO teleConsoleReqDTO = new TeleConsoleReqDTO();
-       Long id = curLoginUser.getId();
-       teleConsoleReqDTO.setTeleSaleId(id);
-       teleConsoleReqDTO.setStartTime(DateUtil.getTodayStartTime());
-       teleConsoleReqDTO.setEndTime(new Date());
-       return appiontmentFeignClient.countTodayAppiontmentNum(teleConsoleReqDTO);
-   }
-   
-   
-   /**
-    *   查询电销人员 待跟进客户资源
-    * 
-    * @param queryDto
-    * @return
-    */
-   @PostMapping("/listTodayFollowClue")
-   @ResponseBody
-   public JSONResult<PageBean<CustomerClueDTO>> listTodayFollowClue(@RequestBody CustomerClueQueryDTO queryDto) throws Exception{
-       UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
-       queryDto.setTeleSale(curLoginUser.getId());
-       Date curDate = new Date();
-       queryDto.setAssignTimeStart(DateUtil.getStartOrEndOfDay(curDate, LocalTime.MIN));
-       queryDto.setAssignTimeEnd(DateUtil.getStartOrEndOfDay(curDate, LocalTime.MAX));
-       return  myCustomerFeignClient.listTodayFollowClue(queryDto);
-   }
-   
-   /**
-    * 电销总监未分配资源数
-    * @param reqDTO
-    * @return
-    */
-   @PostMapping("/countTeleDircortoerUnAssignClueNum")
-   @ResponseBody
-   public JSONResult<Integer> countTeleDircortoerUnAssignClueNum(@RequestBody TeleConsoleReqDTO reqDTO){
-       UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
-       reqDTO.setTeleDirectorId(curLoginUser.getId());
-       Date curDate = new Date();
-       reqDTO.setEndTime(curDate);
-       reqDTO.setStartTime(DateUtil.getTodayStartTime());
-       reqDTO.setPhase(CluePhase.PHAE_3RD.getCode());
-       reqDTO.setType(2);
-       return  clueBasicFeignClient.countAssignClueNum(reqDTO);
-   }
-   
-   
-   /**
-    * 电销总监今日接受资源数
-    * @param reqDTO
-    * @return
-    */
-   @PostMapping("/countTeleDircortoerReceiveClueNum")
-   @ResponseBody
-   public JSONResult<Integer> countTeleDircortoerReceiveClueNum(@RequestBody TeleConsoleReqDTO reqDTO){
-       UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
-       reqDTO.setTeleDirectorId(curLoginUser.getId());
-       Date curDate = new Date();
-       reqDTO.setEndTime(curDate);
-       reqDTO.setStartTime(DateUtil.getTodayStartTime());
-       reqDTO.setType(2);
-       List<Integer> teleDirectorSourceList = new ArrayList<>();
-       teleDirectorSourceList.add(2);
-       teleDirectorSourceList.add(3);
-       reqDTO.setTeleDirectorSourceList(teleDirectorSourceList);
-       return  clueBasicFeignClient.countAssignClueNum(reqDTO);
-   }
-   
-   /**
-    * 电销总监今日领取资源数
-    * @param reqDTO
-    * @return
-    */
-   @PostMapping("/countTeleDircortoerGetClueNum")
-   @ResponseBody
-   public JSONResult<Integer> countTeleDircortoerGetClueNum(@RequestBody TeleConsoleReqDTO reqDTO){
-       UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
-       reqDTO.setTeleDirectorId(curLoginUser.getId());
-       Date curDate = new Date();
-       reqDTO.setEndTime(curDate);
-       reqDTO.setStartTime(DateUtil.getTodayStartTime());
-       reqDTO.setType(2);
-       List<Integer> teleDirectorSourceList = new ArrayList<>();
-       teleDirectorSourceList.add(1);
-       reqDTO.setTeleDirectorSourceList(teleDirectorSourceList);
-       return  clueBasicFeignClient.countAssignClueNum(reqDTO);
-   }
-   
-   /**
-    * 电销总监  今日邀约数
-    * @return
-    */
-   @PostMapping("/countTeleDirectorTodayAppiontmentNum")
-   @ResponseBody
-   public JSONResult<Integer> countTeleDirectorTodayAppiontmentNum(){
-       UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
-       TeleConsoleReqDTO teleConsoleReqDTO = new TeleConsoleReqDTO();
-       Long id = curLoginUser.getId();
-       UserOrgRoleReq req = new UserOrgRoleReq();
-       req.setOrgId(id);
-       req.setRoleCode(RoleCodeEnum.DXCYGW.name());
-       JSONResult<List<UserInfoDTO>> userInfoJr = userInfoFeignClient.listByOrgAndRole(req);
-       if(!JSONResult.SUCCESS.equals(userInfoJr.getCode())) {
-          return  new JSONResult<Integer>().fail(userInfoJr.getCode(),userInfoJr.getMsg()); 
-       }
-       List<UserInfoDTO> data = userInfoJr.getData();
-       if(CollectionUtils.isEmpty(data)) {
-          return new JSONResult<Integer>().success(0);
-       }
-       List<Long> teleSaleIdList = data.stream().map(UserInfoDTO::getId).collect(Collectors.toList());
-       teleConsoleReqDTO.setTeleSaleIdList(teleSaleIdList);       
-       teleConsoleReqDTO.setStartTime(DateUtil.getTodayStartTime());
-       teleConsoleReqDTO.setEndTime(new Date());
-       return appiontmentFeignClient.countTodayAppiontmentNum(teleConsoleReqDTO);
-   }
-   
-   
-   /**
-    *  电销总监 预计明日到访数
-    *  
-    * @return
-    */
-   @PostMapping("/countTeleDirecotorTomorrowArriveTime")
-   @ResponseBody
-   public JSONResult<Integer> countTeleDirecotorTomorrowArriveTime(@RequestBody TeleConsoleReqDTO reqDTO){
-       
-       UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
-       TeleConsoleReqDTO teleConsoleReqDTO = new TeleConsoleReqDTO();
-       Long id = curLoginUser.getId();
-       UserOrgRoleReq req = new UserOrgRoleReq();
-       req.setOrgId(id);
-       req.setRoleCode(RoleCodeEnum.DXCYGW.name());
-       JSONResult<List<UserInfoDTO>> userInfoJr = userInfoFeignClient.listByOrgAndRole(req);
-       if(!JSONResult.SUCCESS.equals(userInfoJr.getCode())) {
-          return  new JSONResult<Integer>().fail(userInfoJr.getCode(),userInfoJr.getMsg()); 
-       }
-       List<UserInfoDTO> data = userInfoJr.getData();
-       if(CollectionUtils.isEmpty(data)) {
-          return new JSONResult<Integer>().success(0);
-       }
-       List<Long> teleSaleIdList = data.stream().map(UserInfoDTO::getId).collect(Collectors.toList());
-       teleConsoleReqDTO.setTeleSaleIdList(teleSaleIdList);  
-       Date curDate = new Date();
-       Date nextDate = DateUtil.addDays(curDate, 1);
-       teleConsoleReqDTO.setStartTime(DateUtil.getStartOrEndOfDay(nextDate, LocalTime.MIN));
-       teleConsoleReqDTO.setEndTime(DateUtil.getStartOrEndOfDay(nextDate, LocalTime.MAX));
-       return appiontmentFeignClient.countTeleDirecotorTomorrowArriveTime(teleConsoleReqDTO);
-   }
-   
-   /**
-    * 电销总监 查询待分配资源
-    * @param pageParam
-    * @return
-    */
-   @PostMapping("/listUnAssignClue")
-   @ResponseBody
-   public JSONResult<PageBean<PendingAllocationClueDTO>> listUnAssignClue(
-           @RequestBody PendingAllocationCluePageParam pageParam){
-       UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
-       pageParam.setUserId(curLoginUser.getId());
-       return clueBasicFeignClient.listUnAssignClue(pageParam);
-   }
-   
-   
-   
-   /**
-    * 商务经理 看板统计
-    * @return
-    */
-   @RequestMapping("/countCurMonthNum")
-   @ResponseBody
-   public JSONResult<BusinessConsolePanelRespDTO> countCurMonthVisitedNum(@RequestBody BusinessConsoleReqDTO businessConsoleReqDTO){
-       UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
-       List<Long> accountIdList = new ArrayList<Long>();
-       accountIdList.add(curLoginUser.getId());
-       businessConsoleReqDTO.setAccountIdList(accountIdList);
-       Date curDate = new Date();
-       businessConsoleReqDTO.setEndTime(curDate);
-       businessConsoleReqDTO.setStartTime(DateUtil.getCurStartDate());
-       return  visitRecordFeignClient.countCurMonthNum(businessConsoleReqDTO);
-   }
-   
-   
-   /**
-    * 商务经理控制台  待处理邀约来访客户
-    * @param param
-    * @return
-    */
-   @PostMapping("/listPendingInviteCustomer")
-   @ResponseBody
-   public JSONResult<PageBean<BusMyCustomerRespDTO>> listPendingInviteCustomer(@RequestBody MyCustomerParamDTO param){
-       UserInfoDTO user = CommUtil.getCurLoginUser();
-      param.setBusSaleId(user.getId());
-       //param.setBusSaleId(1084621842175623168L);
-       
-       return busMyCustomerFeignClient.listPendingInviteCustomer(param);
-       
-   }
-   
-/*   *//**
-    * 商务经理当月签约数
-    * @param businessConsoleReqDTO
-    * @return
-    *//*
-   @RequestMapping("/countCurMonthSignedNum")
-   @ResponseBody
-   public JSONResult<BusinessConsolePanelRespDTO> countCurMonthSignedNum(@RequestBody BusinessConsoleReqDTO businessConsoleReqDTO){
-       UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
-       List<Long> accountIdList = new ArrayList<Long>();
-       accountIdList.add(curLoginUser.getId());
-       Date curDate = new Date();
-       businessConsoleReqDTO.setEndTime(curDate);
-       businessConsoleReqDTO.setStartTime(DateUtil.getCurStartDate());
-       return  signRecordFeignClient.countCurMonthSignedNum(businessConsoleReqDTO);
-   }*/
-   
-   
-   /**
-    * 商务总监 1. 待分配任务数  9当月二次到访数  10 当月二次来访签约数： 看板统计
-    * @return
-    */
-   @RequestMapping("/countBusinessDirectorCurMonthNum")
-   @ResponseBody
-   public JSONResult<BusinessDirectorConsolePanelRespDTO> countBusinessDirectorCurMonthNum(@RequestBody BusinessConsoleReqDTO businessConsoleReqDTO){
-       UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
-       List<Long> accountIdList = new ArrayList<Long>();
-       accountIdList.add(curLoginUser.getId());
-       businessConsoleReqDTO.setAccountIdList(accountIdList);
-       businessConsoleReqDTO.setBusinessGroupId(curLoginUser.getOrgId());
-       Date curDate = new Date();
-       businessConsoleReqDTO.setEndTime(curDate);
-       //本月第一天 00
-       businessConsoleReqDTO.setStartTime(DateUtil.getCurStartDate());
-       return  visitRecordFeignClient.countBusinessDirectorCurMonthNum(businessConsoleReqDTO);
-   }
-   
-   /**
-    * 商务总监  4预计明日到访数
-    * @param businessConsoleReqDTO
-    * @return
-    */
-   @PostMapping("/countBusiDirecotorTomorrowArriveTime")
-   @ResponseBody
-   public JSONResult<Integer> countBusiDirecotorTomorrowArriveTime(@RequestBody BusinessConsoleReqDTO businessConsoleReqDTO){
-       UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
-       Long id = curLoginUser.getId();
-       UserOrgRoleReq req = new UserOrgRoleReq();
-       req.setOrgId(id);
-       req.setRoleCode(RoleCodeEnum.DXCYGW.name());
-       JSONResult<List<UserInfoDTO>> userInfoJr = userInfoFeignClient.listByOrgAndRole(req);
-       if(!JSONResult.SUCCESS.equals(userInfoJr.getCode())) {
-          return  new JSONResult<Integer>().fail(userInfoJr.getCode(),userInfoJr.getMsg()); 
-       }
-       List<UserInfoDTO> data = userInfoJr.getData();
-       if(CollectionUtils.isEmpty(data)) {
-          return new JSONResult<Integer>().success(0);
-       }
-       List<Long> teleSaleIdList = data.stream().map(UserInfoDTO::getId).collect(Collectors.toList());
-       businessConsoleReqDTO.setAccountIdList(teleSaleIdList);  
-       Date curDate = new Date();
-       Date nextDate = DateUtil.addDays(curDate, 1);
-       businessConsoleReqDTO.setStartTime(DateUtil.getStartOrEndOfDay(nextDate, LocalTime.MIN));
-       businessConsoleReqDTO.setEndTime(DateUtil.getStartOrEndOfDay(nextDate, LocalTime.MAX));
-       
-       return appiontmentFeignClient.countBusiDirecotorTomorrowArriveTime(businessConsoleReqDTO);
-   }
-   
-   
-   /***
-    * 商务总监 待分配来访客户列表
-    * 
-    * @return
-    */
-   @PostMapping("/pendingVisitListNoPage")
-   @ResponseBody
-   public JSONResult<List<BusPendingAllocationDTO>> pendingVisitListNoPage(
-           @RequestBody BusPendingAllocationPageParam pageParam, HttpServletRequest request) {
-       UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
-       // 插入当前用户、角色信息
-       pageParam.setUserId(curLoginUser.getId());
-       List<RoleInfoDTO> roleList = curLoginUser.getRoleList();
-       if (roleList != null) {
-           pageParam.setRoleCode(roleList.get(0).getRoleCode());
-       }
 
-       JSONResult<List<BusPendingAllocationDTO>> pendingAllocationList =
-               pendingVisitFeignClient.pendingVisitListNoPage(pageParam);
 
-       return pendingAllocationList;
-   }
-   
-   
-   /**
-    * 商务总监 待审批到访记录  待审批未到访记录 
-    * @param visitRecordReqDTO  isVisit:是否到访  
-    * @return
-    */
-   @PostMapping("/listVisitRecord")
-   @ResponseBody
-   public JSONResult<List<VisitRecordRespDTO>> listVisitRecord(@RequestBody VisitRecordReqDTO visitRecordReqDTO){
-       UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
-       List<Long> busGroupIdList = new ArrayList<>();
-       busGroupIdList.add(curLoginUser.getOrgId());
-       visitRecordReqDTO.setBusGroupIdList(busGroupIdList);
-       visitRecordReqDTO.setStatus(1);
-      return  visitRecordFeignClient.listVisitRecordNoPage(visitRecordReqDTO);
-   }
-  
-   
-   
-   /**
-    * 商务总监 待审批签约记录
-    * @param reqDTO
-    * @return
-    */
-   @PostMapping("/listSignRecord")
-   @ResponseBody
-   public JSONResult<List<SignRecordRespDTO>> listSignRecord(@RequestBody SignRecordReqDTO reqDTO) {
-       UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
-       List<Long> businessGroupIdList = new ArrayList<>();
-       businessGroupIdList.add(curLoginUser.getOrgId());
-       reqDTO.setBusinessGroupIdList(businessGroupIdList);
-       reqDTO.setStatus(AggregationConstant.SIGN_ORDER_STATUS.AUDITING);
-       return signRecordFeignClient.listSignRecordNoPage(reqDTO);
-   }
-    
-    
+
+    /***
+     * 控制台 今日邀约单 不包括 删除的
+     * 
+     * @param teleConsoleReqDTO
+     * @return
+     */
+    @PostMapping("/countTodayAppiontmentNum")
+    @ResponseBody
+    public JSONResult<Integer> countTodayAppiontmentNum() {
+        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+        TeleConsoleReqDTO teleConsoleReqDTO = new TeleConsoleReqDTO();
+        Long id = curLoginUser.getId();
+        teleConsoleReqDTO.setTeleSaleId(id);
+        teleConsoleReqDTO.setStartTime(DateUtil.getTodayStartTime());
+        teleConsoleReqDTO.setEndTime(new Date());
+        return appiontmentFeignClient.countTodayAppiontmentNum(teleConsoleReqDTO);
+    }
+
+
+    /**
+     * 查询电销人员 待跟进客户资源
+     * 
+     * @param queryDto
+     * @return
+     */
+    @PostMapping("/listTodayFollowClue")
+    @ResponseBody
+    public JSONResult<PageBean<CustomerClueDTO>> listTodayFollowClue(
+            @RequestBody CustomerClueQueryDTO queryDto) throws Exception {
+        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+        queryDto.setTeleSale(curLoginUser.getId());
+        Date curDate = new Date();
+        queryDto.setAssignTimeStart(DateUtil.getStartOrEndOfDay(curDate, LocalTime.MIN));
+        queryDto.setAssignTimeEnd(DateUtil.getStartOrEndOfDay(curDate, LocalTime.MAX));
+        return myCustomerFeignClient.listTodayFollowClue(queryDto);
+    }
+
+    /**
+     * 电销总监未分配资源数
+     * 
+     * @param reqDTO
+     * @return
+     */
+    @PostMapping("/countTeleDircortoerUnAssignClueNum")
+    @ResponseBody
+    public JSONResult<Integer> countTeleDircortoerUnAssignClueNum(
+            @RequestBody TeleConsoleReqDTO reqDTO) {
+        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+        reqDTO.setTeleDirectorId(curLoginUser.getId());
+        Date curDate = new Date();
+        reqDTO.setEndTime(curDate);
+        reqDTO.setStartTime(DateUtil.getTodayStartTime());
+        reqDTO.setPhase(CluePhase.PHAE_3RD.getCode());
+        reqDTO.setType(2);
+        return clueBasicFeignClient.countAssignClueNum(reqDTO);
+    }
+
+
+    /**
+     * 电销总监今日接受资源数
+     * 
+     * @param reqDTO
+     * @return
+     */
+    @PostMapping("/countTeleDircortoerReceiveClueNum")
+    @ResponseBody
+    public JSONResult<Integer> countTeleDircortoerReceiveClueNum(
+            @RequestBody TeleConsoleReqDTO reqDTO) {
+        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+        reqDTO.setTeleDirectorId(curLoginUser.getId());
+        Date curDate = new Date();
+        reqDTO.setEndTime(curDate);
+        reqDTO.setStartTime(DateUtil.getTodayStartTime());
+        reqDTO.setType(2);
+        List<Integer> teleDirectorSourceList = new ArrayList<>();
+        teleDirectorSourceList.add(2);
+        teleDirectorSourceList.add(3);
+        reqDTO.setTeleDirectorSourceList(teleDirectorSourceList);
+        return clueBasicFeignClient.countAssignClueNum(reqDTO);
+    }
+
+    /**
+     * 电销总监今日领取资源数
+     * 
+     * @param reqDTO
+     * @return
+     */
+    @PostMapping("/countTeleDircortoerGetClueNum")
+    @ResponseBody
+    public JSONResult<Integer> countTeleDircortoerGetClueNum(
+            @RequestBody TeleConsoleReqDTO reqDTO) {
+        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+        reqDTO.setTeleDirectorId(curLoginUser.getId());
+        Date curDate = new Date();
+        reqDTO.setEndTime(curDate);
+        reqDTO.setStartTime(DateUtil.getTodayStartTime());
+        reqDTO.setType(2);
+        List<Integer> teleDirectorSourceList = new ArrayList<>();
+        teleDirectorSourceList.add(1);
+        reqDTO.setTeleDirectorSourceList(teleDirectorSourceList);
+        return clueBasicFeignClient.countAssignClueNum(reqDTO);
+    }
+
+    /**
+     * 电销总监 今日邀约数
+     * 
+     * @return
+     */
+    @PostMapping("/countTeleDirectorTodayAppiontmentNum")
+    @ResponseBody
+    public JSONResult<Integer> countTeleDirectorTodayAppiontmentNum() {
+        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+        TeleConsoleReqDTO teleConsoleReqDTO = new TeleConsoleReqDTO();
+        Long id = curLoginUser.getId();
+        UserOrgRoleReq req = new UserOrgRoleReq();
+        req.setOrgId(id);
+        req.setRoleCode(RoleCodeEnum.DXCYGW.name());
+        JSONResult<List<UserInfoDTO>> userInfoJr = userInfoFeignClient.listByOrgAndRole(req);
+        if (!JSONResult.SUCCESS.equals(userInfoJr.getCode())) {
+            return new JSONResult<Integer>().fail(userInfoJr.getCode(), userInfoJr.getMsg());
+        }
+        List<UserInfoDTO> data = userInfoJr.getData();
+        if (CollectionUtils.isEmpty(data)) {
+            return new JSONResult<Integer>().success(0);
+        }
+        List<Long> teleSaleIdList =
+                data.stream().map(UserInfoDTO::getId).collect(Collectors.toList());
+        teleConsoleReqDTO.setTeleSaleIdList(teleSaleIdList);
+        teleConsoleReqDTO.setStartTime(DateUtil.getTodayStartTime());
+        teleConsoleReqDTO.setEndTime(new Date());
+        return appiontmentFeignClient.countTodayAppiontmentNum(teleConsoleReqDTO);
+    }
+
+
+    /**
+     * 电销总监 预计明日到访数
+     * 
+     * @return
+     */
+    @PostMapping("/countTeleDirecotorTomorrowArriveTime")
+    @ResponseBody
+    public JSONResult<Integer> countTeleDirecotorTomorrowArriveTime(
+            @RequestBody TeleConsoleReqDTO reqDTO) {
+
+        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+        TeleConsoleReqDTO teleConsoleReqDTO = new TeleConsoleReqDTO();
+        Long id = curLoginUser.getId();
+        UserOrgRoleReq req = new UserOrgRoleReq();
+        req.setOrgId(id);
+        req.setRoleCode(RoleCodeEnum.DXCYGW.name());
+        JSONResult<List<UserInfoDTO>> userInfoJr = userInfoFeignClient.listByOrgAndRole(req);
+        if (!JSONResult.SUCCESS.equals(userInfoJr.getCode())) {
+            return new JSONResult<Integer>().fail(userInfoJr.getCode(), userInfoJr.getMsg());
+        }
+        List<UserInfoDTO> data = userInfoJr.getData();
+        if (CollectionUtils.isEmpty(data)) {
+            return new JSONResult<Integer>().success(0);
+        }
+        List<Long> teleSaleIdList =
+                data.stream().map(UserInfoDTO::getId).collect(Collectors.toList());
+        teleConsoleReqDTO.setTeleSaleIdList(teleSaleIdList);
+        Date curDate = new Date();
+        Date nextDate = DateUtil.addDays(curDate, 1);
+        teleConsoleReqDTO.setStartTime(DateUtil.getStartOrEndOfDay(nextDate, LocalTime.MIN));
+        teleConsoleReqDTO.setEndTime(DateUtil.getStartOrEndOfDay(nextDate, LocalTime.MAX));
+        return appiontmentFeignClient.countTeleDirecotorTomorrowArriveTime(teleConsoleReqDTO);
+    }
+
+    /**
+     * 电销总监 查询待分配资源
+     * 
+     * @param pageParam
+     * @return
+     */
+    @PostMapping("/listUnAssignClue")
+    @ResponseBody
+    public JSONResult<PageBean<PendingAllocationClueDTO>> listUnAssignClue(
+            @RequestBody PendingAllocationCluePageParam pageParam) {
+        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+        pageParam.setUserId(curLoginUser.getId());
+        return clueBasicFeignClient.listUnAssignClue(pageParam);
+    }
+
+
+
+    /**
+     * 商务经理 看板统计
+     * 
+     * @return
+     */
+    @RequestMapping("/countCurMonthNum")
+    @ResponseBody
+    public JSONResult<BusinessConsolePanelRespDTO> countCurMonthVisitedNum(
+            @RequestBody BusinessConsoleReqDTO businessConsoleReqDTO) {
+        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+        List<Long> accountIdList = new ArrayList<Long>();
+        accountIdList.add(curLoginUser.getId());
+        businessConsoleReqDTO.setAccountIdList(accountIdList);
+        Date curDate = new Date();
+        businessConsoleReqDTO.setEndTime(curDate);
+        businessConsoleReqDTO.setStartTime(DateUtil.getCurStartDate());
+        return visitRecordFeignClient.countCurMonthNum(businessConsoleReqDTO);
+    }
+
+
+    /**
+     * 商务经理控制台 待处理邀约来访客户
+     * 
+     * @param param
+     * @return
+     */
+    @PostMapping("/listPendingInviteCustomer")
+    @ResponseBody
+    public JSONResult<PageBean<BusMyCustomerRespDTO>> listPendingInviteCustomer(
+            @RequestBody MyCustomerParamDTO param) {
+        UserInfoDTO user = CommUtil.getCurLoginUser();
+        param.setBusSaleId(user.getId());
+        // param.setBusSaleId(1084621842175623168L);
+
+        return busMyCustomerFeignClient.listPendingInviteCustomer(param);
+
+    }
+
+    /*   *//**
+            * 商务经理当月签约数
+            * 
+            * @param businessConsoleReqDTO
+            * @return
+            *//*
+              * @RequestMapping("/countCurMonthSignedNum")
+              * 
+              * @ResponseBody public JSONResult<BusinessConsolePanelRespDTO>
+              * countCurMonthSignedNum(@RequestBody BusinessConsoleReqDTO businessConsoleReqDTO){
+              * UserInfoDTO curLoginUser = CommUtil.getCurLoginUser(); List<Long> accountIdList =
+              * new ArrayList<Long>(); accountIdList.add(curLoginUser.getId()); Date curDate = new
+              * Date(); businessConsoleReqDTO.setEndTime(curDate);
+              * businessConsoleReqDTO.setStartTime(DateUtil.getCurStartDate()); return
+              * signRecordFeignClient.countCurMonthSignedNum(businessConsoleReqDTO); }
+              */
+
+
+    /**
+     * 商务总监 1. 待分配任务数 9当月二次到访数 10 当月二次来访签约数： 看板统计
+     * 
+     * @return
+     */
+    @RequestMapping("/countBusinessDirectorCurMonthNum")
+    @ResponseBody
+    public JSONResult<BusinessDirectorConsolePanelRespDTO> countBusinessDirectorCurMonthNum(
+            @RequestBody BusinessConsoleReqDTO businessConsoleReqDTO) {
+        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+        List<Long> accountIdList = new ArrayList<Long>();
+        accountIdList.add(curLoginUser.getId());
+        businessConsoleReqDTO.setAccountIdList(accountIdList);
+        businessConsoleReqDTO.setBusinessGroupId(curLoginUser.getOrgId());
+        Date curDate = new Date();
+        businessConsoleReqDTO.setEndTime(curDate);
+        // 本月第一天 00
+        businessConsoleReqDTO.setStartTime(DateUtil.getCurStartDate());
+        return visitRecordFeignClient.countBusinessDirectorCurMonthNum(businessConsoleReqDTO);
+    }
+
+    /**
+     * 商务总监 4预计明日到访数
+     * 
+     * @param businessConsoleReqDTO
+     * @return
+     */
+    @PostMapping("/countBusiDirecotorTomorrowArriveTime")
+    @ResponseBody
+    public JSONResult<Integer> countBusiDirecotorTomorrowArriveTime(
+            @RequestBody BusinessConsoleReqDTO businessConsoleReqDTO) {
+        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+        Long id = curLoginUser.getId();
+        UserOrgRoleReq req = new UserOrgRoleReq();
+        req.setOrgId(id);
+        req.setRoleCode(RoleCodeEnum.DXCYGW.name());
+        JSONResult<List<UserInfoDTO>> userInfoJr = userInfoFeignClient.listByOrgAndRole(req);
+        if (!JSONResult.SUCCESS.equals(userInfoJr.getCode())) {
+            return new JSONResult<Integer>().fail(userInfoJr.getCode(), userInfoJr.getMsg());
+        }
+        List<UserInfoDTO> data = userInfoJr.getData();
+        if (CollectionUtils.isEmpty(data)) {
+            return new JSONResult<Integer>().success(0);
+        }
+        List<Long> teleSaleIdList =
+                data.stream().map(UserInfoDTO::getId).collect(Collectors.toList());
+        businessConsoleReqDTO.setAccountIdList(teleSaleIdList);
+        Date curDate = new Date();
+        Date nextDate = DateUtil.addDays(curDate, 1);
+        businessConsoleReqDTO.setStartTime(DateUtil.getStartOrEndOfDay(nextDate, LocalTime.MIN));
+        businessConsoleReqDTO.setEndTime(DateUtil.getStartOrEndOfDay(nextDate, LocalTime.MAX));
+
+        return appiontmentFeignClient.countBusiDirecotorTomorrowArriveTime(businessConsoleReqDTO);
+    }
+
+
+    /***
+     * 商务总监 待分配来访客户列表
+     * 
+     * @return
+     */
+    @PostMapping("/pendingVisitListNoPage")
+    @ResponseBody
+    public JSONResult<List<BusPendingAllocationDTO>> pendingVisitListNoPage(
+            @RequestBody BusPendingAllocationPageParam pageParam, HttpServletRequest request) {
+        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+        // 插入当前用户、角色信息
+        pageParam.setUserId(curLoginUser.getId());
+        List<RoleInfoDTO> roleList = curLoginUser.getRoleList();
+        if (roleList != null) {
+            pageParam.setRoleCode(roleList.get(0).getRoleCode());
+        }
+
+        JSONResult<List<BusPendingAllocationDTO>> pendingAllocationList =
+                pendingVisitFeignClient.pendingVisitListNoPage(pageParam);
+
+        return pendingAllocationList;
+    }
+
+
+    /**
+     * 商务总监 待审批到访记录 待审批未到访记录
+     * 
+     * @param visitRecordReqDTO isVisit:是否到访
+     * @return
+     */
+    @PostMapping("/listVisitRecord")
+    @ResponseBody
+    public JSONResult<List<VisitRecordRespDTO>> listVisitRecord(
+            @RequestBody VisitRecordReqDTO visitRecordReqDTO) {
+        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+        List<Long> busGroupIdList = new ArrayList<>();
+        busGroupIdList.add(curLoginUser.getOrgId());
+        visitRecordReqDTO.setBusGroupIdList(busGroupIdList);
+        visitRecordReqDTO.setStatus(1);
+        return visitRecordFeignClient.listVisitRecordNoPage(visitRecordReqDTO);
+    }
+
+
+
+    /**
+     * 商务总监 待审批签约记录
+     * 
+     * @param reqDTO
+     * @return
+     */
+    @PostMapping("/listSignRecord")
+    @ResponseBody
+    public JSONResult<List<SignRecordRespDTO>> listSignRecord(
+            @RequestBody SignRecordReqDTO reqDTO) {
+        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+        List<Long> businessGroupIdList = new ArrayList<>();
+        businessGroupIdList.add(curLoginUser.getOrgId());
+        // reqDTO.setBusinessGroupIdList(businessGroupIdList);
+        List<Long> accountIdList =
+                getAccountIdList(curLoginUser.getOrgId(), RoleCodeEnum.SWJL.name());
+        if (CollectionUtils.isEmpty(accountIdList)) {
+            // return new
+            // JSONResult().fail(SysErrorCodeEnum.ERR_NOTEXISTS_DATA.getCode(),"该用户下没有下属");
+            return new JSONResult<List<SignRecordRespDTO>>().success(new ArrayList<>());
+        }
+        reqDTO.setBusinessManagerIdList(accountIdList);
+        reqDTO.setStatus(AggregationConstant.SIGN_ORDER_STATUS.AUDITING);
+        return signRecordFeignClient.listSignRecordNoPage(reqDTO);
+    }
+
+
     public static void main(String[] args) {
         Date curDate = new Date();
         Date addDays = DateUtil.addDays(curDate, -7);
         System.out.println(addDays);
         System.out.println(DateFormatUtils.format(new Date(), "yyyy-MM-dd 00:00:00"));
-     // 获取当天凌晨0点0分0秒Date
+        // 获取当天凌晨0点0分0秒Date
         Calendar calendar1 = Calendar.getInstance();
-        calendar1.set(calendar1.get(Calendar.YEAR), calendar1.get(Calendar.MONTH), calendar1.get(Calendar.DAY_OF_MONTH),
-                0, 0, 0);
+        calendar1.set(calendar1.get(Calendar.YEAR), calendar1.get(Calendar.MONTH),
+                calendar1.get(Calendar.DAY_OF_MONTH), 0, 0, 0);
         Date beginOfDate = calendar1.getTime();
         System.out.println(beginOfDate);
         Date disableTime = DateUtil.convert2Date("2019-03-18 14:00:48", DateUtil.ymdhms);
-        Date addDays2 = DateUtil.addDays(disableTime,1);
+        Date addDays2 = DateUtil.addDays(disableTime, 1);
         System.out.println(addDays2);
         System.out.println(DateUtil.diffTimes(addDays2, new Date()));
     }
-    
+
     /**
      * 根据机构和角色类型获取用户
      * 
@@ -670,7 +703,7 @@ public class ConsoleController {
                 userInfoFeignClient.listByOrgAndRole(userOrgRoleReq);
         return listByOrgAndRole.getData();
     }
-    
+
     /**
      * 获取所有商务经理（组织名-大区名）
      * 
@@ -723,10 +756,11 @@ public class ConsoleController {
         }
         return result;
     }
-    
-    
+
+
     /**
-     *  获取工作天数
+     * 获取工作天数
+     * 
      * @param request
      * @return
      */
@@ -737,21 +771,21 @@ public class ConsoleController {
         IdEntityLong idEntityLong = new IdEntityLong();
         idEntityLong.setId(curLoginUser.getId());
         JSONResult<UserInfoDTO> jsonResult = userInfoFeignClient.get(idEntityLong);
-        if(!JSONResult.SUCCESS.equals(jsonResult.getCode())) {
-            return new JSONResult<String>().fail(jsonResult.getCode(),jsonResult.getMsg());
+        if (!JSONResult.SUCCESS.equals(jsonResult.getCode())) {
+            return new JSONResult<String>().fail(jsonResult.getCode(), jsonResult.getMsg());
         }
         UserInfoDTO data = jsonResult.getData();
         String workDay = "0";
-        if(data==null || data.getCreateTime()==null) {
+        if (data == null || data.getCreateTime() == null) {
             return new JSONResult<String>().success(workDay);
         }
-        
+
         Date createTime = data.getCreateTime();
         int diffDay = DateUtil.diffDay(createTime, new Date());
-        return new JSONResult<String>().success(diffDay+"");
-        
+        return new JSONResult<String>().success(diffDay + "");
+
     }
-    
+
     /**
      * 查询字典表
      * 
@@ -768,4 +802,31 @@ public class ConsoleController {
         return null;
     }
 
+
+    /**
+     * 获取当前组织机构下 角色信息
+     * 
+     * @param orgId
+     * @param roleCode
+     * @return
+     */
+    private List<Long> getAccountIdList(Long orgId, String roleCode) {
+        UserOrgRoleReq req = new UserOrgRoleReq();
+        req.setOrgId(orgId);
+        req.setRoleCode(roleCode);
+        JSONResult<List<UserInfoDTO>> userJr = userInfoFeignClient.listByOrgAndRole(req);
+        if (userJr == null || !JSONResult.SUCCESS.equals(userJr.getCode())) {
+            logger.error(
+                    "查询电销通话记录-获取组内顾问-userInfoFeignClient.listByOrgAndRole(req),param{{}},res{{}}",
+                    req, userJr);
+            return null;
+        }
+        List<UserInfoDTO> userInfoDTOList = userJr.getData();
+        if (userInfoDTOList != null && userInfoDTOList.size() != 0) {
+            List<Long> idList =
+                    userInfoDTOList.stream().map(UserInfoDTO::getId).collect(Collectors.toList());
+            return idList;
+        }
+        return null;
+    }
 }
