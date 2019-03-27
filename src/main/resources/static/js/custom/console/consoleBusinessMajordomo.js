@@ -43,6 +43,7 @@ var mainDivVM = new Vue({
             ]
         },
         saleOptions:busSaleList,
+        projectOptions:projectList,
         // 待审签约记录
         dataTable4:[],
         pager:{//
