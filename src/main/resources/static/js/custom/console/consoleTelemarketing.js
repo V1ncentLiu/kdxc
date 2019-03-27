@@ -35,6 +35,7 @@ var mainDivVM = new Vue({
         assignTodayNum:'',//今日分配资源数
         todayTalkTime:'',//今日通话时长
         todayAppiontmentNum:'',//今日邀约数
+        workDay:'',//工作天数
         //公告
         items: [
             // {content:'系统将于2018年12月5日晚上12:00进行系统升级，请各位同事及时处理工作。系统预计在12:20分恢复正常使用,感谢配合!',id:1},
@@ -86,8 +87,8 @@ var mainDivVM = new Vue({
             var param = {};
             // param.pageSize = this.pager.pageSize;
             // param.pageNum =  this.pager.currentPage;
-            param.pageSize = 1;
-            param.pageNum =  20;
+            param.pageSize = 20;
+            param.pageNum =  1;
             axios.post('/aggregation/publiccustomer/queryPage',param).then(function (response) {
                 console.log('快速领取新资源')
                 console.log(response.data)
@@ -262,6 +263,13 @@ var mainDivVM = new Vue({
                 console.log(response.data)
                 mainDivVM.todayAppiontmentNum=response.data.data;
             }); 
+            // 工作天数
+            param={};
+            axios.post('/console/console/getWorkDay',param).then(function (response) {
+                console.log('工作天数')                
+                console.log(response.data)                
+                mainDivVM.workDay=response.data.data;
+            });
         }
     },
     created(){
