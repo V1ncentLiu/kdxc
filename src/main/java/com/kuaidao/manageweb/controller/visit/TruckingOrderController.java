@@ -20,7 +20,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import com.kuaidao.aggregation.dto.project.ProjectInfoDTO;
-import com.kuaidao.aggregation.dto.project.ProjectInfoPageParam;
 import com.kuaidao.aggregation.dto.visit.TrackingOrderReqDTO;
 import com.kuaidao.aggregation.dto.visit.TrackingOrderRespDTO;
 import com.kuaidao.common.constant.RoleCodeEnum;
@@ -39,14 +38,15 @@ import com.kuaidao.sys.dto.user.UserOrgRoleReq;
 
 /**
  * 邀約來訪派車單
- * @author  Chen
+ * 
+ * @author Chen
  * @date 2019年3月5日 上午9:09:07
  * @version V1.0
  */
 @Controller
 @RequestMapping("/truckingOrder")
 public class TruckingOrderController {
-    
+
     private static Logger logger = LoggerFactory.getLogger(TruckingOrderController.class);
 
     @Autowired
@@ -57,31 +57,35 @@ public class TruckingOrderController {
 
     @Autowired
     private ProjectInfoFeignClient projectInfoFeignClient;
+
     /**
      * 邀約來訪派車單
+     * 
      * @return
      */
     @RequiresPermissions("aggregation:truckingOrder:view")
     @RequestMapping("/truckingOrderPage")
     public String visitRecordPage(HttpServletRequest request) {
-        //电销人员
+        // 电销人员
         List<UserInfoDTO> teleSaleList = getUserInfo(null, RoleCodeEnum.DXCYGW.name());
-        request.setAttribute("teleSaleList",teleSaleList);
-     // 查询所有项目
-        JSONResult<List<ProjectInfoDTO>> listNoPage = projectInfoFeignClient.listNoPage(new ProjectInfoPageParam());
-        request.setAttribute("projectList", listNoPage.getData());
+        request.setAttribute("teleSaleList", teleSaleList);
+        // 查询所有项目
+        JSONResult<List<ProjectInfoDTO>> allProject = projectInfoFeignClient.allProject();
+        request.setAttribute("projectList", allProject.getData());
         return "visit/truckingOrder";
     }
 
-    private List<UserInfoDTO> getUserInfo(Long orgId,String roleName){
+    private List<UserInfoDTO> getUserInfo(Long orgId, String roleName) {
         UserOrgRoleReq req = new UserOrgRoleReq();
-        if(orgId!=null) {
+        if (orgId != null) {
             req.setOrgId(orgId);
         }
         req.setRoleCode(roleName);
         JSONResult<List<UserInfoDTO>> userJr = userInfoFeignClient.listByOrgAndRole(req);
-        if(userJr==null || !JSONResult.SUCCESS.equals(userJr.getCode())) {
-            logger.error("查询电销通话记录-获取组内顾问-userInfoFeignClient.listByOrgAndRole(req),param{{}},res{{}}",req,userJr);
+        if (userJr == null || !JSONResult.SUCCESS.equals(userJr.getCode())) {
+            logger.error(
+                    "查询电销通话记录-获取组内顾问-userInfoFeignClient.listByOrgAndRole(req),param{{}},res{{}}",
+                    req, userJr);
             return null;
         }
         return userJr.getData();
@@ -89,133 +93,148 @@ public class TruckingOrderController {
 
     /**
      * 查询邀约来访派车单
+     * 
      * @param reqDTO
      * @return
      */
     @RequiresPermissions("aggregation:truckingOrder:view")
     @PostMapping("/listTrackingOrder")
     @ResponseBody
-     public JSONResult<PageBean<TrackingOrderRespDTO>> listTrackingOrder(@RequestBody TrackingOrderReqDTO reqDTO){
-       UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+    public JSONResult<PageBean<TrackingOrderRespDTO>> listTrackingOrder(
+            @RequestBody TrackingOrderReqDTO reqDTO) {
+        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
         Long orgId = curLoginUser.getOrgId();
         List<RoleInfoDTO> roleList = curLoginUser.getRoleList();
-        if(roleList!=null && roleList.size()!=0) {
+        if (roleList != null && roleList.size() != 0) {
             RoleInfoDTO roleInfoDTO = roleList.get(0);
             String roleName = roleInfoDTO.getRoleName();
-            if(RoleCodeEnum.SWDQZJ.value().equals(roleName)) {
+            if (RoleCodeEnum.SWDQZJ.value().equals(roleName)) {
                 UserOrgRoleReq req = new UserOrgRoleReq();
                 req.setOrgId(orgId);
                 req.setRoleCode(RoleCodeEnum.SWZJ.name());
                 JSONResult<List<UserInfoDTO>> userJr = userInfoFeignClient.listByOrgAndRole(req);
-                if(userJr==null || !JSONResult.SUCCESS.equals(userJr.getCode())) {
-                    logger.error("查询电销通话记录-获取组内顾问-userInfoFeignClient.listByOrgAndRole(req),param{{}},res{{}}",req,userJr);
+                if (userJr == null || !JSONResult.SUCCESS.equals(userJr.getCode())) {
+                    logger.error(
+                            "查询电销通话记录-获取组内顾问-userInfoFeignClient.listByOrgAndRole(req),param{{}},res{{}}",
+                            req, userJr);
                 }
                 List<UserInfoDTO> userInfoDTOList = userJr.getData();
-                if(userInfoDTOList!=null && userInfoDTOList.size()!=0) {
-                    List<Long> idList = userInfoDTOList.stream().map(UserInfoDTO::getId).collect(Collectors.toList());
+                if (userInfoDTOList != null && userInfoDTOList.size() != 0) {
+                    List<Long> idList = userInfoDTOList.stream().map(UserInfoDTO::getId)
+                            .collect(Collectors.toList());
                     reqDTO.setBusDirectorIdList(idList);
                 }
                 Long accountId = reqDTO.getAccountId();
-                if(accountId!=null) {
+                if (accountId != null) {
                     List<Long> accountIdList = new ArrayList<>();
                     accountIdList.add(accountId);
                     reqDTO.setAccountIdList(accountIdList);
                 }
 
-            }else if(RoleCodeEnum.SWZJ.value().equals(roleName)){//商务总监
+            } else if (RoleCodeEnum.SWZJ.value().equals(roleName)) {// 商务总监
                 List<Long> idList = new ArrayList<>();
                 idList.add(curLoginUser.getId());
                 reqDTO.setBusDirectorIdList(idList);
                 Long accountId = reqDTO.getAccountId();
-                if(accountId!=null) {
+                if (accountId != null) {
                     List<Long> accountIdList = new ArrayList<>();
                     accountIdList.add(accountId);
                     reqDTO.setAccountIdList(accountIdList);
                 }
-            }else {
-                return new JSONResult().fail(SysErrorCodeEnum.ERR_NOTEXISTS_DATA.getCode(),"角色没有权限");
+            } else {
+                return new JSONResult().fail(SysErrorCodeEnum.ERR_NOTEXISTS_DATA.getCode(),
+                        "角色没有权限");
             }
         }
-        /*List<Long> busList = new ArrayList<>();
-        busList.add(1098210933718835200L);
-        reqDTO.setBusDirectorIdList(busList);*/
-         return trackingOrderFeignClient.listTrackingOrder(reqDTO) ;
-     }
-    
-    
+        /*
+         * List<Long> busList = new ArrayList<>(); busList.add(1098210933718835200L);
+         * reqDTO.setBusDirectorIdList(busList);
+         */
+        return trackingOrderFeignClient.listTrackingOrder(reqDTO);
+    }
 
-    
-    
+
+
     /**
-     * 导出 
+     * 导出
+     * 
      * @param reqDTO
      * @return
      */
     @RequiresPermissions("aggregation:truckingOrder:export")
     @PostMapping("/exportTrackingOrder")
-     public void exportTrackingOrder(@RequestBody TrackingOrderReqDTO reqDTO,HttpServletResponse response) throws Exception{
-  /*    List<Long> busList = new ArrayList<>();
-        busList.add(1098210933718835200L);
-        reqDTO.setBusDirectorIdList(busList);*/
+    public void exportTrackingOrder(@RequestBody TrackingOrderReqDTO reqDTO,
+            HttpServletResponse response) throws Exception {
+        /*
+         * List<Long> busList = new ArrayList<>(); busList.add(1098210933718835200L);
+         * reqDTO.setBusDirectorIdList(busList);
+         */
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
         Long orgId = curLoginUser.getOrgId();
         List<RoleInfoDTO> roleList = curLoginUser.getRoleList();
-       if(roleList!=null && roleList.size()!=0) {
+        if (roleList != null && roleList.size() != 0) {
             RoleInfoDTO roleInfoDTO = roleList.get(0);
             String roleName = roleInfoDTO.getRoleName();
-            if(RoleCodeEnum.SWDQZJ.value().equals(roleName)) {
+            if (RoleCodeEnum.SWDQZJ.value().equals(roleName)) {
                 UserOrgRoleReq req = new UserOrgRoleReq();
                 req.setOrgId(orgId);
                 req.setRoleCode(RoleCodeEnum.SWZJ.name());
                 JSONResult<List<UserInfoDTO>> userJr = userInfoFeignClient.listByOrgAndRole(req);
-                if(userJr==null || !JSONResult.SUCCESS.equals(userJr.getCode())) {
-                    logger.error("查询电销通话记录-获取组内顾问-userInfoFeignClient.listByOrgAndRole(req),param{{}},res{{}}",req,userJr);
+                if (userJr == null || !JSONResult.SUCCESS.equals(userJr.getCode())) {
+                    logger.error(
+                            "查询电销通话记录-获取组内顾问-userInfoFeignClient.listByOrgAndRole(req),param{{}},res{{}}",
+                            req, userJr);
                 }
                 List<UserInfoDTO> userInfoDTOList = userJr.getData();
-                if(userInfoDTOList!=null && userInfoDTOList.size()!=0) {
-                    List<Long> idList = userInfoDTOList.stream().map(UserInfoDTO::getId).collect(Collectors.toList());
+                if (userInfoDTOList != null && userInfoDTOList.size() != 0) {
+                    List<Long> idList = userInfoDTOList.stream().map(UserInfoDTO::getId)
+                            .collect(Collectors.toList());
                     reqDTO.setBusDirectorIdList(idList);
                 }
                 Long accountId = reqDTO.getAccountId();
-                if(accountId!=null) {
+                if (accountId != null) {
                     List<Long> accountIdList = new ArrayList<>();
                     accountIdList.add(accountId);
                     reqDTO.setAccountIdList(accountIdList);
                 }
 
-            }else if(RoleCodeEnum.SWZJ.value().equals(roleName)){//商务总监
+            } else if (RoleCodeEnum.SWZJ.value().equals(roleName)) {// 商务总监
                 List<Long> idList = new ArrayList<>();
                 idList.add(curLoginUser.getId());
                 reqDTO.setBusDirectorIdList(idList);
                 Long accountId = reqDTO.getAccountId();
-                if(accountId!=null) {
+                if (accountId != null) {
                     List<Long> accountIdList = new ArrayList<>();
                     accountIdList.add(accountId);
                     reqDTO.setAccountIdList(accountIdList);
                 }
             }
-            
-            
+
+
         }
-        
-        JSONResult<List<TrackingOrderRespDTO>> trackingOrderListJr = trackingOrderFeignClient.exportTrackingOrder(reqDTO);
+
+        JSONResult<List<TrackingOrderRespDTO>> trackingOrderListJr =
+                trackingOrderFeignClient.exportTrackingOrder(reqDTO);
         List<List<Object>> dataList = new ArrayList<List<Object>>();
         dataList.add(getHeadTitleList());
-        
-       if(JSONResult.SUCCESS.equals(trackingOrderListJr.getCode()) && trackingOrderListJr.getData()!=null&& trackingOrderListJr.getData().size()!=0) {
-     
-           List<TrackingOrderRespDTO> orderList = trackingOrderListJr.getData();
-           int size = orderList.size();
 
-           List<ProjectInfoDTO> allProjectList = getAllProjectList();
+        if (JSONResult.SUCCESS.equals(trackingOrderListJr.getCode())
+                && trackingOrderListJr.getData() != null
+                && trackingOrderListJr.getData().size() != 0) {
+
+            List<TrackingOrderRespDTO> orderList = trackingOrderListJr.getData();
+            int size = orderList.size();
+
+            List<ProjectInfoDTO> allProjectList = getAllProjectList();
             for (int i = 0; i < size; i++) {
                 TrackingOrderRespDTO trackingOrderRespDTO = orderList.get(i);
                 List<Object> curList = new ArrayList<>();
-                curList.add(i+1);
+                curList.add(i + 1);
                 curList.add(getTimeStr(trackingOrderRespDTO.getReserveTime()));
                 curList.add(trackingOrderRespDTO.getBusDirectorName());
                 curList.add(trackingOrderRespDTO.getBusCompanyName());
-                curList.add(getProjectNameStr(allProjectList,trackingOrderRespDTO.getTasteProjectId()));
+                curList.add(getProjectNameStr(allProjectList,
+                        trackingOrderRespDTO.getTasteProjectId()));
                 curList.add(getTimeStr(trackingOrderRespDTO.getCreateTime()));
                 curList.add(trackingOrderRespDTO.getSubmitGroup());
                 curList.add(trackingOrderRespDTO.getTelSaleName());
@@ -235,66 +254,67 @@ public class TruckingOrderController {
                 curList.add(trackingOrderRespDTO.getReceivedPlace());
                 dataList.add(curList);
             }
-            
-        }else {
-            logger.error("export trucking_order param{{}},res{{}}",reqDTO,trackingOrderListJr);
+
+        } else {
+            logger.error("export trucking_order param{{}},res{{}}", reqDTO, trackingOrderListJr);
         }
-        
+
         XSSFWorkbook wbWorkbook = ExcelUtil.creat2007Excel(dataList);
-        
-        
-        String name =  "派车单"+ DateUtil.convert2String(new Date(),DateUtil.ymdhms2)+".xlsx";
+
+
+        String name = "派车单" + DateUtil.convert2String(new Date(), DateUtil.ymdhms2) + ".xlsx";
         response.addHeader("Content-Disposition",
                 "attachment;filename=" + new String(name.getBytes("UTF-8"), "ISO8859-1"));
-        response.addHeader("fileName", URLEncoder.encode(name,"utf-8"));
+        response.addHeader("fileName", URLEncoder.encode(name, "utf-8"));
         response.setContentType("application/octet-stream");
         ServletOutputStream outputStream = response.getOutputStream();
         wbWorkbook.write(outputStream);
         outputStream.close();
-        
-     }
-    
+
+    }
+
     /*
      * 獲取所有的項目
      */
     private List<ProjectInfoDTO> getAllProjectList() {
-        JSONResult<List<ProjectInfoDTO>> projectInfoJr = projectInfoFeignClient.listNoPage(new ProjectInfoPageParam());
+        JSONResult<List<ProjectInfoDTO>> projectInfoJr = projectInfoFeignClient.allProject();
         return projectInfoJr.getData();
     }
-    private String getProjectNameStr(List<ProjectInfoDTO> projectInfoList,String ids) {
-        if(StringUtils.isBlank(ids) || projectInfoList==null) {
+
+    private String getProjectNameStr(List<ProjectInfoDTO> projectInfoList, String ids) {
+        if (StringUtils.isBlank(ids) || projectInfoList == null) {
             return "";
         }
-        String text="";
+        String text = "";
         String[] idArr = ids.split(",");
         for (int i = 0; i < idArr.length; i++) {
             for (int j = 0; j < projectInfoList.size(); j++) {
                 ProjectInfoDTO projectInfoDTO = projectInfoList.get(j);
-                if(Long.valueOf(idArr[i]).equals(projectInfoDTO.getId())) {
-                    if(i==0) {
-                        text=projectInfoDTO.getProjectName();
-                    }else {
-                        text+=","+projectInfoDTO.getProjectName();
+                if (Long.valueOf(idArr[i]).equals(projectInfoDTO.getId())) {
+                    if (i == 0) {
+                        text = projectInfoDTO.getProjectName();
+                    } else {
+                        text += "," + projectInfoDTO.getProjectName();
                     }
                 }
-                
+
             }
         }
-        
+
         return text;
-        
+
     }
-    
+
 
     private String getTimeStr(Date date) {
-        if(date==null) {
-           return ""; 
+        if (date == null) {
+            return "";
         }
-        return DateUtil.convert2String(date,DateUtil.ymdhms);
+        return DateUtil.convert2String(date, DateUtil.ymdhms);
     }
-    
-    
-    private List<Object> getHeadTitleList(){
+
+
+    private List<Object> getHeadTitleList() {
         List<Object> headTitleList = new ArrayList<>();
         headTitleList.add("序号");
         headTitleList.add("邀约来访时间");
@@ -320,6 +340,6 @@ public class TruckingOrderController {
         headTitleList.add("接到地（酒店／公司）");
         return headTitleList;
     }
-    
+
 
 }

@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import com.kuaidao.aggregation.dto.project.CompanyInfoDTO;
 import com.kuaidao.aggregation.dto.project.ProjectInfoDTO;
-import com.kuaidao.aggregation.dto.project.ProjectInfoPageParam;
 import com.kuaidao.aggregation.dto.visitrecord.BusVisitRecordInsertOrUpdateDTO;
 import com.kuaidao.aggregation.dto.visitrecord.BusVisitRecordReqDTO;
 import com.kuaidao.aggregation.dto.visitrecord.BusVisitRecordRespDTO;
@@ -138,8 +137,7 @@ public class BusinessVisitRecordController {
         request.setAttribute("visitStatus", visitStatus);
         request.setAttribute("signAuditStatus", signAuditStatus);
         // 项目
-        ProjectInfoPageParam param = new ProjectInfoPageParam();
-        JSONResult<List<ProjectInfoDTO>> proJson = projectInfoFeignClient.listNoPage(param);
+        JSONResult<List<ProjectInfoDTO>> proJson = projectInfoFeignClient.allProject();
         if (JSONResult.SUCCESS.equals(proJson.getCode())) {
             request.setAttribute("proSelect", proJson.getData());
         }

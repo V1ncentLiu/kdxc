@@ -58,6 +58,15 @@ public interface ProjectInfoFeignClient {
     public JSONResult<List<ProjectInfoDTO>> listNoPage(@RequestBody ProjectInfoPageParam param);
 
     /**
+     * 查询所有项目
+     * 
+     * @param menuDTO
+     * @return
+     */
+    @PostMapping("/allProject")
+    public JSONResult<List<ProjectInfoDTO>> allProject();
+
+    /**
      * 修改项目信息
      * 
      * @param idEntity
@@ -146,6 +155,11 @@ public interface ProjectInfoFeignClient {
         public JSONResult<List<ProjectInfoDTO>> listNoPage(
                 @RequestBody ProjectInfoPageParam param) {
             return fallBackError("查询项目集合");
+        }
+
+        @Override
+        public JSONResult<List<ProjectInfoDTO>> allProject() {
+            return fallBackError("查询所有项目");
         }
 
         @Override

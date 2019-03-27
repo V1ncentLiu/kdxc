@@ -35,7 +35,6 @@ import com.kuaidao.aggregation.dto.clue.RepeatClueQueryDTO;
 import com.kuaidao.aggregation.dto.clue.RepeatClueSaveDTO;
 import com.kuaidao.aggregation.dto.clueappiont.ClueAppiontmentDTO;
 import com.kuaidao.aggregation.dto.project.ProjectInfoDTO;
-import com.kuaidao.aggregation.dto.project.ProjectInfoPageParam;
 import com.kuaidao.aggregation.dto.tracking.TrackingInsertOrUpdateDTO;
 import com.kuaidao.aggregation.dto.tracking.TrackingReqDTO;
 import com.kuaidao.aggregation.dto.tracking.TrackingRespDTO;
@@ -157,9 +156,8 @@ public class MyCustomerClueController {
     @RequiresPermissions("myCustomerInfo:add")
     public String createClue(HttpServletRequest request, Model model) {
 
-        ProjectInfoPageParam param = new ProjectInfoPageParam();
         // 项目
-        JSONResult<List<ProjectInfoDTO>> proJson = projectInfoFeignClient.listNoPage(param);
+        JSONResult<List<ProjectInfoDTO>> proJson = projectInfoFeignClient.allProject();
         if (proJson.getCode().equals(JSONResult.SUCCESS)) {
             model.addAttribute("proSelect", proJson.getData());
         }
@@ -260,8 +258,7 @@ public class MyCustomerClueController {
             request.setAttribute("circulationList", new ArrayList());
         }
         // 项目
-        ProjectInfoPageParam param = new ProjectInfoPageParam();
-        JSONResult<List<ProjectInfoDTO>> proJson = projectInfoFeignClient.listNoPage(param);
+        JSONResult<List<ProjectInfoDTO>> proJson = projectInfoFeignClient.allProject();
         if (proJson.getCode().equals(JSONResult.SUCCESS)) {
             request.setAttribute("proSelect", proJson.getData());
         } else {
@@ -278,7 +275,7 @@ public class MyCustomerClueController {
         }
         return "clue/addCustomerMaintenance";
     }
- 
+
     /**
      * 客户详情
      * 
@@ -352,22 +349,21 @@ public class MyCustomerClueController {
             request.setAttribute("circulationList", new ArrayList());
         }
         // 项目
-        ProjectInfoPageParam param = new ProjectInfoPageParam();
-        JSONResult<List<ProjectInfoDTO>> proJson = projectInfoFeignClient.listNoPage(param);
+        JSONResult<List<ProjectInfoDTO>> proJson = projectInfoFeignClient.allProject();
         if (proJson.getCode().equals(JSONResult.SUCCESS)) {
             request.setAttribute("proSelect", proJson.getData());
         } else {
             request.setAttribute("proSelect", new ArrayList());
         }
 
-		// 获取已上传的文件数据
-		ClueQueryDTO fileDto = new ClueQueryDTO();
-		fileDto.setClueId(new Long(clueId));
-		JSONResult<List<ClueFileDTO>> clueFileList = myCustomerFeignClient.findClueFile(fileDto);
-		if (clueFileList != null && clueFileList.SUCCESS.equals(clueFileList.getCode())
-				&& clueFileList.getData() != null) {
-			request.setAttribute("clueFileList", clueFileList.getData());
-		}
+        // 获取已上传的文件数据
+        ClueQueryDTO fileDto = new ClueQueryDTO();
+        fileDto.setClueId(new Long(clueId));
+        JSONResult<List<ClueFileDTO>> clueFileList = myCustomerFeignClient.findClueFile(fileDto);
+        if (clueFileList != null && clueFileList.SUCCESS.equals(clueFileList.getCode())
+                && clueFileList.getData() != null) {
+            request.setAttribute("clueFileList", clueFileList.getData());
+        }
         request.setAttribute("commonPool", commonPool);
         return "clue/CustomerMaintenanceReadOnly";
     }
@@ -515,11 +511,12 @@ public class MyCustomerClueController {
     @ResponseBody
     public JSONResult<List<TrackingRespDTO>> deleteClueTracking(HttpServletRequest request,
             @RequestBody IdListLongReq dto) {
-    	trackingFeignClient.deleteTracking(dto);
-		TrackingReqDTO queryDto = new TrackingReqDTO();
-		dto.setClueId(dto.getClueId());
-		return trackingFeignClient.queryList(queryDto);
-	}
+        trackingFeignClient.deleteTracking(dto);
+        TrackingReqDTO queryDto = new TrackingReqDTO();
+        dto.setClueId(dto.getClueId());
+        return trackingFeignClient.queryList(queryDto);
+    }
+
     /**
      * 修改资源跟进记录
      * 
@@ -548,9 +545,8 @@ public class MyCustomerClueController {
         request.setAttribute("clueId", clueId);
         request.setAttribute("cusName", cusName);
         request.setAttribute("cusPhone", cusPhone);
-        ProjectInfoPageParam param = new ProjectInfoPageParam();
         // 项目
-        JSONResult<List<ProjectInfoDTO>> proJson = projectInfoFeignClient.listNoPage(param);
+        JSONResult<List<ProjectInfoDTO>> proJson = projectInfoFeignClient.allProject();
         if (proJson.getCode().equals(JSONResult.SUCCESS)) {
             model.addAttribute("proSelect", proJson.getData());
         }
@@ -608,7 +604,7 @@ public class MyCustomerClueController {
         return myCustomerFeignClient.saveAppiontment(dto);
 
     }
- 
+
 
     /**
      * 重单申请查询重单数据
@@ -623,37 +619,39 @@ public class MyCustomerClueController {
             @RequestBody RepeatClueQueryDTO dto) {
         return myCustomerFeignClient.queryRepeatClue(dto);
     }
-	/**
-	 * 重单申请查询重单数据
-	 * 
-	 * @param request
-	 * @param dto
-	 * @return
-	 */
-	@RequestMapping("/queryRepeatClue")
-	@ResponseBody
-	public JSONResult<List<RepeatClueDTO>> queryRepeatClue(HttpServletRequest request,
-			@RequestBody RepeatClueQueryDTO dto) {
-		Subject subject = SecurityUtils.getSubject();
-		UserInfoDTO user = (UserInfoDTO) subject.getSession().getAttribute("user");
-		if (null != user) {
-			dto.setTelemarketingId(user.getId());
-		}
-		return myCustomerFeignClient.queryRepeatClue(dto);
-	}
 
- 
- 
-	/**
-	 * 总裁办重单申请保存
-	 * 
-	 * @param request
-	 * @param dto
-	 * @return
-	 */
-	@RequestMapping("/officesaveRepeatClue")
-	@ResponseBody
-	public JSONResult<String> officesaveRepeatClue(HttpServletRequest request, @RequestBody RepeatClueSaveDTO dto) {
+    /**
+     * 重单申请查询重单数据
+     * 
+     * @param request
+     * @param dto
+     * @return
+     */
+    @RequestMapping("/queryRepeatClue")
+    @ResponseBody
+    public JSONResult<List<RepeatClueDTO>> queryRepeatClue(HttpServletRequest request,
+            @RequestBody RepeatClueQueryDTO dto) {
+        Subject subject = SecurityUtils.getSubject();
+        UserInfoDTO user = (UserInfoDTO) subject.getSession().getAttribute("user");
+        if (null != user) {
+            dto.setTelemarketingId(user.getId());
+        }
+        return myCustomerFeignClient.queryRepeatClue(dto);
+    }
+
+
+
+    /**
+     * 总裁办重单申请保存
+     * 
+     * @param request
+     * @param dto
+     * @return
+     */
+    @RequestMapping("/officesaveRepeatClue")
+    @ResponseBody
+    public JSONResult<String> officesaveRepeatClue(HttpServletRequest request,
+            @RequestBody RepeatClueSaveDTO dto) {
         Subject subject = SecurityUtils.getSubject();
         UserInfoDTO user = (UserInfoDTO) subject.getSession().getAttribute("user");
         if (null != user) {
@@ -682,21 +680,21 @@ public class MyCustomerClueController {
         return myCustomerFeignClient.saveRepeatClue(dto);
     }
 
- 
-	/**
-	 * 重单申请查询被重单数据
-	 * 
-	 * @param request
-	 * @param dto
-	 * @return
-	 */
-	@RequestMapping("/queryRepeatCurClue")
-	@ResponseBody
-	public JSONResult<List<RepeatClueDTO>> queryRepeatCurClue(HttpServletRequest request,
-			@RequestBody RepeatClueQueryDTO dto) {
-		return myCustomerFeignClient.queryRepeatClue(dto);
-	}
- 
+
+    /**
+     * 重单申请查询被重单数据
+     * 
+     * @param request
+     * @param dto
+     * @return
+     */
+    @RequestMapping("/queryRepeatCurClue")
+    @ResponseBody
+    public JSONResult<List<RepeatClueDTO>> queryRepeatCurClue(HttpServletRequest request,
+            @RequestBody RepeatClueQueryDTO dto) {
+        return myCustomerFeignClient.queryRepeatClue(dto);
+    }
+
 
     /**
      * 查询所有电销创业顾问
@@ -844,16 +842,16 @@ public class MyCustomerClueController {
             }
 
         }
-        
+
         // 保存流转记录
         CirculationInsertOrUpdateDTO circul = new CirculationInsertOrUpdateDTO();
         circul.setAllotUserId(user.getId());
         circul.setAllotRoleId(user.getRoleId());
         circul.setClueId(dto.getClueId());
         circul.setUserId(user.getId());
-        if(null!=user.getRoleList()&&user.getRoleList().size()>0){
-        	   circul.setRoleId(user.getRoleList().get(0).getId());
-        	
+        if (null != user.getRoleList() && user.getRoleList().size() > 0) {
+            circul.setRoleId(user.getRoleList().get(0).getId());
+
         }
         dto.setCirculationInsertOrUpdateDTO(circul);
         JSONResult<String> customerClue = myCustomerFeignClient.createCustomerClue(dto);
