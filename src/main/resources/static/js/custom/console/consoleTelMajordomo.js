@@ -144,6 +144,8 @@ var mainDivVM = new Vue({
                 var table=result.data;
                 var data= table.data;
                 for(var i=0;i<data.length;i++){
+                    data[i].category=mainDivVM.transformCategory(data[i].category);
+                    data[i].type=mainDivVM.transformType(data[i].type);
                     data[i].createTime=mainDivVM.dateFormat(data[i].createTime);
                     data[i].messageTime=mainDivVM.dateFormat(data[i].messageTime);
                 }
@@ -182,6 +184,30 @@ var mainDivVM = new Vue({
                 console.log(error);
             });                
         },
+        //类别转换方法
+        transformCategory(cellValue) {
+          var text="";
+          if(clueCategoryList){
+              for(var i=0;i<clueCategoryList.length;i++){
+                    if(cellValue==clueCategoryList[i].value){
+                        text=clueCategoryList[i].name;
+                    }
+                }
+          }
+           return text;
+        },
+        //类行转换方法
+        transformType(cellValue) {
+          var text="";
+          if(clueTypeList){
+              for(var i=0;i<clueTypeList.length;i++){
+                    if(cellValue==clueTypeList[i].value){
+                        text=clueTypeList[i].name;
+                    }
+                }
+          }
+           return text;
+        },
         // 快速分配资源
         //打开分配资源
         toAllocationClue() {
@@ -213,12 +239,12 @@ var mainDivVM = new Vue({
                     .then(function (response) {
                         var data =  response.data;
                         if(data.code=='0'){
-                            clueVM.$message({message:'分配成功',type:'success',duration:1000,onClose:function(){
-                                clueVM.allocationVisible = false;
-                                clueVM.searchTable();
+                            mainDivVM.$message({message:'分配成功',type:'success',duration:1000,onClose:function(){
+                                mainDivVM.allocationVisible = false;
+                                mainDivVM.searchTable();
                             }});
                         }else{
-                            clueVM.$message({
+                            mainDivVM.$message({
                                 message: "接口调用失败",
                                 type: 'error'
                             }); 
@@ -235,7 +261,7 @@ var mainDivVM = new Vue({
                     return false;
                 }
             });
-        },
+        },        
     },
     created(){
         // 工作台

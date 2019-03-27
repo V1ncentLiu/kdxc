@@ -87,8 +87,8 @@ var mainDivVM = new Vue({
             var param = {};
             // param.pageSize = this.pager.pageSize;
             // param.pageNum =  this.pager.currentPage;
-            param.pageSize = 1;
-            param.pageNum =  20;
+            param.pageSize = 20;
+            param.pageNum =  1;
             axios.post('/aggregation/publiccustomer/queryPage',param).then(function (response) {
                 console.log('快速领取新资源')
                 console.log(response.data)

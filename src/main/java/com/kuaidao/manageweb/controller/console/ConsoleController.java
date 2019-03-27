@@ -44,7 +44,6 @@ import com.kuaidao.common.constant.RoleCodeEnum;
 import com.kuaidao.common.entity.IdEntityLong;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
-import com.kuaidao.common.util.CommonUtil;
 import com.kuaidao.common.util.DateUtil;
 import com.kuaidao.manageweb.constant.Constants;
 import com.kuaidao.manageweb.feign.announcement.AnnReceiveFeignClient;
@@ -142,12 +141,14 @@ public class ConsoleController {
            path = "console/consoleTelemarketing";
         }else if(RoleCodeEnum.DXZJ.name().equals(roleCode)) {
             //电销总监
+            // 如果当前登录的为电销总监,查询所有下属电销员工
             List<Integer> statusList = new ArrayList<Integer>();
             statusList.add(SysConstant.USER_STATUS_ENABLE);
             statusList.add(SysConstant.USER_STATUS_LOCK);
             List<UserInfoDTO> userList =
                     getUserList(orgId, RoleCodeEnum.DXCYGW.name(), statusList);
             request.setAttribute("saleList", userList);
+
             path = "console/consoleTelMajordomo";
         }else if(RoleCodeEnum.SWJL.name().equals(roleCode)) {
             //商务经理
@@ -632,7 +633,13 @@ public class ConsoleController {
        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
        List<Long> businessGroupIdList = new ArrayList<>();
        businessGroupIdList.add(curLoginUser.getOrgId());
-       reqDTO.setBusinessGroupIdList(businessGroupIdList);
+       //reqDTO.setBusinessGroupIdList(businessGroupIdList);
+       List<Long> accountIdList =  getAccountIdList(curLoginUser.getOrgId(),RoleCodeEnum.SWJL.name());
+       if(CollectionUtils.isEmpty(accountIdList)) {
+           //return new JSONResult().fail(SysErrorCodeEnum.ERR_NOTEXISTS_DATA.getCode(),"该用户下没有下属");
+           return new JSONResult<List<SignRecordRespDTO>>().success(new ArrayList<>());
+       }
+       reqDTO.setBusinessManagerIdList(accountIdList);
        reqDTO.setStatus(AggregationConstant.SIGN_ORDER_STATUS.AUDITING);
        return signRecordFeignClient.listSignRecordNoPage(reqDTO);
    }
@@ -768,4 +775,27 @@ public class ConsoleController {
         return null;
     }
 
+    
+    /**
+     * 获取当前组织机构下  角色信息
+     * @param orgId
+     * @param roleCode
+     * @return
+     */
+    private List<Long> getAccountIdList(Long orgId,String roleCode){
+        UserOrgRoleReq req = new UserOrgRoleReq();
+        req.setOrgId(orgId);
+        req.setRoleCode(roleCode);
+        JSONResult<List<UserInfoDTO>> userJr = userInfoFeignClient.listByOrgAndRole(req);
+        if(userJr==null || !JSONResult.SUCCESS.equals(userJr.getCode())) {
+            logger.error("查询电销通话记录-获取组内顾问-userInfoFeignClient.listByOrgAndRole(req),param{{}},res{{}}",req,userJr);
+            return null;
+        }
+        List<UserInfoDTO> userInfoDTOList = userJr.getData();
+        if(userInfoDTOList!=null && userInfoDTOList.size()!=0) {
+            List<Long> idList = userInfoDTOList.stream().map(UserInfoDTO::getId).collect(Collectors.toList());
+           return idList;
+        }
+        return null;
+    }
 }

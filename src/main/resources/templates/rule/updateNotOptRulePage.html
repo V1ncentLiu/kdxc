@@ -14,7 +14,7 @@
         <el-breadcrumb-item>线索管理</el-breadcrumb-item>
         <el-breadcrumb-item>非优化分配规则管理</el-breadcrumb-item>
     </el-breadcrumb>
-    <div class="inforTitle">编辑优化分配规则</div> 
+    <div class="inforTitle">编辑非优化分配规则</div> 
     <el-form :model="form" :rules="rules" ref="form">
         <div class="borderbox padding20">
             <el-row>
@@ -157,7 +157,7 @@
                     <template slot-scope="scope">
                         <el-form-item :prop="'assignRuleTeamList.' + scope.$index + '.resourceMaxNum'" :rules='rules.resourceMaxNum' style="width: 200px;margin:0 auto;height: 57px;">                            
                             <!-- input值 -->
-                            <el-input @keyup.native.prevent="resourceMaxNumber1(scope.$index, form.assignRuleTeamList)" v-model="scope.row.resourceMaxNum" placeholder="不限"></el-input>
+                            <el-input @keyup.native.prevent="resourceMaxNumber1(scope.$index, form.assignRuleTeamList)" v-model="scope.row.resourceMaxNum" ></el-input>
                             <!-- 不限按钮    -->
                             <el-button type="primary" size="small" style="position: absolute;top: 6px;right: 4px;z-index: 2;" @click="unlimitedBtn(scope.$index, form.assignRuleTeamList)" >不限</el-button>
                             <!-- 不限input -->
@@ -441,6 +441,9 @@ var adsenseList=[[${adsenseList}]];//广告位集合
             var orgIdChoose=clueAssignRule.assignRuleTeamList;
             for(var i=0;i<orgIdChoose.length;i++){
             	orgIdChoose[i].orgId=orgIdChoose[i].orgId+","+orgIdChoose[i].orgType;
+            	if(orgIdChoose[i].resourceMaxNum==-1){
+            		this.unlimitedBtn(i,orgIdChoose);
+            	}
             }
             this.form.assignRuleTeamList=orgIdChoose;
             this.form.searchWord=clueAssignRule.searchWord;
