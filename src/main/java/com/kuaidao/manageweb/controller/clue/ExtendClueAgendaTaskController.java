@@ -181,13 +181,13 @@ public class ExtendClueAgendaTaskController {
 	@RequestMapping("/autoAllocationTask")
 	@RequiresPermissions("waitDistributResource:distribute")
 	@ResponseBody
-	public JSONResult<String> autoAllocationTask(HttpServletRequest request, @RequestBody IdListLongReq queryDto) {
+	public JSONResult<Integer> autoAllocationTask(HttpServletRequest request, @RequestBody IdListLongReq queryDto) {
 
 		ClueQueryDTO queryDTO = new ClueQueryDTO();
 
 		queryDTO.setClueId(queryDto.getClueId());
 
-		JSONResult<String> clueInfo = extendClueFeignClient.autoAllocationTask(queryDto);
+		JSONResult<Integer> clueInfo = extendClueFeignClient.autoAllocationTask(queryDto);
 
 		return clueInfo;
 	}
