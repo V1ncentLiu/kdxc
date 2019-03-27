@@ -148,6 +148,11 @@ public class ConsoleController {
             List<UserInfoDTO> userList =
                     getUserList(orgId, RoleCodeEnum.DXCYGW.name(), statusList);
             request.setAttribute("saleList", userList);
+            
+              // 查询字典类别集合
+            request.setAttribute("clueCategoryList", getDictionaryByCode(Constants.CLUE_CATEGORY));
+            // 查询字典类别集合
+            request.setAttribute("clueTypeList", getDictionaryByCode(Constants.CLUE_TYPE));
 
             path = "console/consoleTelMajordomo";
         }else if(RoleCodeEnum.SWJL.name().equals(roleCode)) {
@@ -180,7 +185,7 @@ public class ConsoleController {
             request.setAttribute("ussmList", getDictionaryByCode(Constants.USSM));
             path="console/consoleBusinessMajordomo";
         }
-/*       if(type.equals("1")) {
+/*      if(type.equals("1")) {
             path = "console/consoleTelemarketing";
         }else if(type.equals("2")) {
             List<Integer> statusList = new ArrayList<Integer>();
@@ -188,6 +193,10 @@ public class ConsoleController {
             statusList.add(SysConstant.USER_STATUS_LOCK);
             List<UserInfoDTO> userList = getUserList(orgId, RoleCodeEnum.DXCYGW.name(), statusList);
             request.setAttribute("saleList", userList);
+            // 查询字典类别集合
+            request.setAttribute("clueCategoryList", getDictionaryByCode(Constants.CLUE_CATEGORY));
+            // 查询字典类别集合
+            request.setAttribute("clueTypeList", getDictionaryByCode(Constants.CLUE_TYPE));
             path="console/consoleTelMajordomo";
         }else if(type.equals("3")) {
             // 项目
