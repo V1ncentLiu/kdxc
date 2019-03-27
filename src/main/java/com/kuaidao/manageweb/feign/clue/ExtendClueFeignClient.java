@@ -46,7 +46,7 @@ public interface ExtendClueFeignClient {
 	 * @return
 	 */
 	@RequestMapping(method = RequestMethod.POST, value = "/autoAllocationTask")
-	public JSONResult<String> autoAllocationTask(@RequestBody IdListLongReq list);
+	public JSONResult<Integer> autoAllocationTask(@RequestBody IdListLongReq list);
 
 	@Component
 	static class HystrixClientFallback implements ExtendClueFeignClient {
@@ -73,7 +73,7 @@ public interface ExtendClueFeignClient {
 		}
 
 		@Override
-		public JSONResult<String> autoAllocationTask(IdListLongReq list) {
+		public JSONResult<Integer> autoAllocationTask(IdListLongReq list) {
 			// TODO Auto-generated method stub
 			return fallBackError("自动分配任务");
 		}
