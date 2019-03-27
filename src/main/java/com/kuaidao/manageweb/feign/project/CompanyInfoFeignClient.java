@@ -25,7 +25,7 @@ import com.kuaidao.sys.dto.role.RoleQueryDTO;
  * @date: 2019年1月4日
  * @version V1.0
  */
-@FeignClient(name = "aggregation-service", path = "/aggregation/companyInfo",
+@FeignClient(name = "aggregation-service-zhang", path = "/aggregation/companyInfo",
         fallback = CompanyInfoFeignClient.HystrixClientFallback.class)
 public interface CompanyInfoFeignClient {
     /**
@@ -61,8 +61,8 @@ public interface CompanyInfoFeignClient {
      * @param menuDTO
      * @return
      */
-    @PostMapping("/listNoPage")
-    public JSONResult<List<CompanyInfoDTO>> listNoPage(@RequestBody CompanyInfoPageParam param);
+    @PostMapping("/allCompany")
+    public JSONResult<List<CompanyInfoDTO>> allCompany();
 
     /**
      * 修改公司信息
@@ -132,8 +132,7 @@ public interface CompanyInfoFeignClient {
         }
 
         @Override
-        public JSONResult<List<CompanyInfoDTO>> listNoPage(
-                @RequestBody CompanyInfoPageParam param) {
+        public JSONResult<List<CompanyInfoDTO>> allCompany() {
             return fallBackError("查询公司集合");
         }
 
