@@ -781,9 +781,7 @@ public class MyCustomerClueController {
             relation.setTeleSaleId(user.getId());
             // 电销组
             relation.setTeleGorupId(user.getOrgId());
-
             dto.setClueRelate(relation);
-
             UserOrgRoleReq userRole = new UserOrgRoleReq();
             userRole.setRoleCode(RoleCodeEnum.DXZJ.name());
             userRole.setOrgId(user.getOrgId());

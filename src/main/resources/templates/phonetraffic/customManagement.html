@@ -21,7 +21,6 @@
     <el-row class="marginB10">
         <el-button type="text" @click="dialogFormVisible = true"><i class="el-icon-menu"></i>选择列</el-button>
             <el-button type="success" @click="openassignrDig">分配资源</el-button>
-            <el-button type="success" @click="opentransferForm">转移资源</el-button>
             <el-button type="success" @click="editClue">编辑资源</el-button>
             <!--<el-button type="success" @click="releaseClue">释放资源</el-button>-->
     </el-row>
@@ -116,28 +115,28 @@
         </el-form>
     </el-row>
     <el-row>
-   <el-table  ref="multipleTable" tooltip-effect="dark" border @selection-change="handleSelectionChange"
-            style="width: 100%"  :data="dataTable" >
+   <el-table  ref="multipleTable" tooltip-effect="dark" border @selection-change="handleSelectionChange" style="width: 100%"  :data="dataTable" @row-dblclick="showClueDetailInfo">
             <el-table-column align="center" type="selection" label="全选" width="50" :prop="clueId"></el-table-column>
 	        <el-table-column align="center" :key="index" :prop="item.fieldCode" :label="item.displayName" :width="item.width"
 	         v-for="(item,key,index) in tableColums" v-if="item.fieldCode == 'phone'">
 	             <template slot-scope="scope" >
                      {{scope.row.phone}}
-                      <!--<p style="color:#409EFF; cursor:pointer" >{{scope.row.phone}}</p> &lt;!&ndash;@click="showClueDetailInfo(scope.row.clueId)"&ndash;&gt;-->
                     <input type='hidden'>
+                     <i class="el-icon-phone-outline"  @click="customerEidt(scope.row.clueId)"  style="margin:0 10px;font-size: 16px;cursor: pointer;"></i>
                     <el-tag v-if="scope.row.tag">{{scope.row.tag}}</el-tag>
                 </template>
             </el-table-column>
-            <el-table-column :prop="item.fieldCode" :label="item.displayName" :width="item.width"
-	          v-else-if="item.fieldCode == 'isTrack'">
+
+            <el-table-column :prop="item.fieldCode" :label="item.displayName" :width="item.width" v-else-if="item.fieldCode == 'isTrack'">
                 <template slot-scope="scope">
-                   <div v-if="scope.row.isTrack === 1">
+                   <div v-if="scope.row.isTrack == 1">
                     <el-button @click="openTrackingDialog(scope.row.clueId)" type="text" size="small">
                         点击查看
                     </el-button>
                     </div>
                 </template>
             </el-table-column>
+
             <el-table-column :prop="item.fieldCode" :label="item.displayName" :width="item.width"
 	          v-else-if="item.fieldCode == 'isRepeatPhone'">
                <template slot-scope="scope">
@@ -201,7 +200,7 @@
     <el-dialog title="分配资源" :visible.sync="allocateFormVisible">
       <el-form :model="formAllocat" ref="formAllocat">
         <el-row>
-            <el-form-item 
+            <el-form-item
                 label="分配员工"
                 prop="telSales"
                 :rules="[
@@ -222,31 +221,6 @@
       <div slot="footer" class="dialog-footer">
         <el-button type="primary" @click="submitAllocatForm('formAllocat')">提交</el-button>
         <el-button @click="resetForm('formAllocat');allocateFormVisible = false;">取 消</el-button>
-      </div>
-    </el-dialog>
-    <!-- 转移资源 -->
-    <el-dialog title="转移资源" :visible.sync="transferFormVisible">
-      <el-form :model="formTransfer" ref="formTransfer">
-        <el-form-item 
-            label="分配员工"
-            prop="salesDirector"
-            :rules="[
-                { required: true, message: '请选择话务人员', trigger: 'change' }
-            ]"
-            :label-width="formLabelWidth">
-           <el-select v-model="formTransfer.salesDirector" placeholder="请选择话务人员" style="width: 100%;">
-                    <el-option
-                        v-for="item in userArr"
-                        :key="item.id"
-                        :label="item.name"
-                        :value="item.id">
-                    </el-option>
-           </el-select>
-        </el-form-item>
-      </el-form>
-      <div slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="submitTransferForm('formTransfer')">提交</el-button>
-        <el-button @click="resetForm('formTransfer');transferFormVisible=false;">取 消</el-button>
       </div>
     </el-dialog>
 
@@ -364,6 +338,10 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
      		    	customerManVM.dataTable =pageData.data; 	
      			})
          	},
+            customerEidt(clueId,phone){
+                //客户维护界面
+                window.location.href='/phonetraffic/toEditPage?clueId='+clueId;
+            },
             editClue(){
                 //编辑数据
                 var rows = this.multseleSelection;
@@ -425,12 +403,15 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
          	openassignrDig(){
          	   var rows = this.multseleSelection;
             	 if(rows.length <1){
-                      this.$message({
-                         message: '请选分配资源',
-                         type: 'warning'
-                       });
+                      this.$message({message: '请选分配资源', type: 'warning'});
                   return;
-                }	
+                }
+            	 for(var i = 0 ; i < rows.length ; i++ ){
+            	     if(rows[i].customerStatus==4){
+                         this.$message({message: '转电销客户不可再次分配', type: 'warning'});
+                         return;
+                     }
+                 }
          	 this.allocateFormVisible = true;
          	 if(this.$refs['formAllocat']) {
                 this.$refs['formAllocat'].resetFields();
@@ -499,7 +480,7 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                        if(response.data.code==-1){
                            customerManVM.$message.error(response.data.msg);
                        }else {
-                           customerManVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
+                           customerManVM.$message({message:'分配成功',type:'success',duration:2000,onClose:function(){
                                    customerManVM.initTableData();
                                }});
                        }
@@ -530,35 +511,6 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                 });
 
             },
-            submitTransferForm(formName) {
-                this.$refs[formName].validate((valid) => {
-                  if (valid) {
-                     var rows = this.multseleSelection;
-                	 var salesDirector=this.formTransfer.salesDirector;
-                     var idArr=[];
-                     for(var i=0;i<rows.length;i++){
-                  	   idArr.push(rows[i].clueId);
-                     }
-                     var  param={};
-                     param.idList=idArr;
-                      var directorArr = salesDirector.split(",");
-                     param.teleGorupId=directorArr[0];
-                     param.teleDirectorId=directorArr[1];
-                     this.transferFormVisible = false;
-                     axios.post('/phonetraffic/transferClue', param)
-                     .then(function (response) {
-                  	  customerManVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
-                  	  		customerManVM.initTableData();
-                         }});
-                      }).catch(function (error) {
-                         console.log(error);
-                     });
-                  } else {
-                    console.log('error submit!!');
-                    return false;
-                  }
-                });
-            },
             submitBatchForm(formName) {
                 this.$refs[formName].validate((valid) => {
                   if (valid) {
@@ -570,8 +522,12 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                 });
             },
           	//展现详情
-         	showClueDetailInfo (clueId) {
-         	    window.location.href='/tele/clueMyCustomerInfo/customerInfoReadOnly?clueId='+clueId;
+         	showClueDetailInfo (row) {
+         	    window.location.href='/phonetraffic/toReadyOnlyPage?clueId='+row.clueId;
+            },
+            //编辑客户详情
+            editClueDetailInfo (clueId) {
+                window.location.href='/phonetraffic/toEditPage?clueId='+clueId;
             },
             submitVicemanagerForm(formName) {
                 this.$refs[formName].validate((valid) => {
@@ -664,7 +620,7 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
     		 this.initTableData();
     		//客户状态
            var param={};
-            param.groupCode="PhCustomerStatusSub";
+            param.groupCode="PhCustomerStatus";
             axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {  
             	customerManVM.cusStatusArr=response.data.data;
              });

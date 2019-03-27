@@ -11,7 +11,7 @@
      style="display: none;">
     <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
         <el-breadcrumb-item>Home</el-breadcrumb-item>
-        <el-breadcrumb-item>话务管理</el-breadcrumb-item>
+        <el-breadcrumb-item>电销管理</el-breadcrumb-item>
         <el-breadcrumb-item>维护客户</el-breadcrumb-item>
     </el-breadcrumb>
 
@@ -94,26 +94,8 @@
                 <el-row>
                     <el-col
                             :span="16">
-                        <el-form-item label="意向项目："
-                                      :label-width="formLabelWidth">
-                            <el-radio
-                                    v-model="form.radioProject" label="1" @change="projectChange"
-                                    style="margin-right: 10px;">内部项目
-                            </el-radio>
-                            <el-select
-                                    v-model="form.insideProject" v-show="insideProjectShow"
-                                    placeholder="请选择" style="margin-right: 10px;" clearable filterable>
-                                <el-option
-                                        v-for="item in proSelect" :key="item.id" :label="item.projectName"
-                                        :value="item.id"></el-option>
-                            </el-select>
-                            <el-radio
-                                    v-model="form.radioProject" label="2" @change="projectChange"
-                                    style="margin-right: 10px;">外部项目
-                            </el-radio>
-                            <el-input
-                                    v-model="form.outsideProject" v-show="outsideProjectShow"
-                                    autocomplete="off" style="width: 25%;" maxLength="20"></el-input>
+                        <el-form-item label="意向项目：":label-width="formLabelWidth">
+                            <el-button type="text" disabled>{{form.radioProject==1? form.insideProject:form.outsideProject}}</el-button>
                         </el-form-item>
                     </el-col>
                 </el-row>
@@ -125,284 +107,142 @@
             <div class="borderbox padding20">
                 <el-row>
                     <el-col :span="8">
-                        <el-form-item
-                                label="客户姓名：" prop="customerName" :label-width="formLabelWidth">
-                            <el-input v-model="form.customerName" autocomplete="off"
-                                      maxLength="10"></el-input>
+                        <el-form-item label="客户姓名：" prop="customerName" :label-width="formLabelWidth" >
+                            <el-button type="text" disabled>{{form.customerName}}</el-button>
                         </el-form-item>
                     </el-col>
                     <el-col :span="8">
-                        <el-form-item
-                                label="手机号：" prop="customerPhone" :label-width="formLabelWidth">
-                            <a>{{form.customerPhone}} <i class="el-icon-phone-outline"
-                                                         @click="gettelNumberIcon(form.customerPhone)"></i></a> <span
-                                v-if="buttonType === 'A'"> <el-button type="primary"
-                                                                      @click="dialogFormVisible = true">
-				<i class="el-icon-plus"></i>手机号</el-button>
-			</span> <span v-else-if="buttonType === 'B'"> <span
-                                @click="dialogFormVisible = true"
-                                style="padding-left: 5px; color: rgb(0, 114, 255); cursor: pointer;">查看多个手机号</span>
-			</span></el-form-item>
+                        <el-form-item label="手机号：" prop="customerPhone" :label-width="formLabelWidth" >
+                            <div v-show="showPhone">
+                                <font color="red">{{form.customerPhone}}</font>
+                                <span @click="dialogFormVisible = true" style="padding-left: 5px; color: rgb(0, 114, 255); cursor: pointer;">查看多个手机号</span>
+                            </div>
+                            <div v-show="!showPhone">
+                                <font color="red">领取后显示</font>
+                            </div>
+
+                        </el-form-item>
                     </el-col>
                 </el-row>
+
+
                 <el-row>
                     <el-col :span="8">
-                        <el-form-item
-                                label="客户级别：" :label-width="formLabelWidth">
-                            <el-select
-                                    v-model="form.customerLevel" placeholder="请选择" style="width: 100%;">
-                                <el-option v-for="item in customerLevelArr" :key="item.value"
-                                           :label="item.name" :value="item.value"></el-option>
-                            </el-select>
-                        </el-form-item>
-                    </el-col>
-                    <el-col
-                            :span="8">
-                        <el-form-item label="微信："
-                                      :label-width="formLabelWidth">
-                            <el-input
-                                    v-model="form.ishasWx" autocomplete="off" style="width: 60%;"
-                                    maxLength="20"></el-input>
-                            <span
-                                    style="padding-left: 5px; color: rgb(0, 114, 255); cursor: pointer;"
-                                    @click="dialogFormImg = true">查看二维码</span></el-form-item>
-                    </el-col>
-                </el-row>
-                <el-row>
-                    <el-col :span="8">
-                        <el-form-item
-                                label="邮箱：" prop="customerEmail" :label-width="formLabelWidth">
-                            <el-input v-model="form.customerEmail" autocomplete="off"
-                                      maxLength="30"></el-input>
+                        <el-form-item label="客户级别：" :label-width="formLabelWidth">
+                            <el-button type="text" disabled>
+                                {{form.customerLevel}}
+                            </el-button>
                         </el-form-item>
                     </el-col>
                     <el-col :span="8">
-                        <el-form-item
-                                label="年龄：" :label-width="formLabelWidth">
-                            <el-input
-                                    v-model="form.customerAge" autocomplete="off" maxLength="3"
-                                    @keyup.native="agenumber"></el-input>
+                        <el-form-item label="邮箱：" prop="customerEmail" :label-width="formLabelWidth">
+                            <el-button type="text" disabled>
+                                {{form.customerEmail}}
+                            </el-button>
                         </el-form-item>
                     </el-col>
                 </el-row>
                 <el-row>
                     <el-col :span="8">
-                        <el-form-item
-                                label="性别：" :label-width="formLabelWidth">
-                            <el-select
-                                    v-model="form.customerSex" placeholder="请选择" style="width: 100%;">
-                                <el-option v-for="item in optsex" :key="item.value"
-                                           :label="item.label" :value="item.value"></el-option>
-                            </el-select>
+                        <el-form-item label="性别：" :label-width="formLabelWidth" >
+                            <el-button type="text" disabled>
+                                {{form.customerSex==1?'男':'女'}}
+                            </el-button>
                         </el-form-item>
                     </el-col>
-                    <el-col
-                            :span="8">
-                        <el-form-item label="合伙人："
-                                      :label-width="formLabelWidth">
-                            <el-select
-                                    v-model="form.customerPartner" placeholder="请选择"
-                                    style="width: 100%;">
-                                <el-option
-                                        v-for="item in partnerArr" :key="item.value" :label="item.name"
-                                        :value="item.value"></el-option>
-                            </el-select>
-                            <el-input
-                                    v-model="form.customerPartnerDetail"
-                                    v-show="form.customerPartner!='1'" autocomplete="off" maxLength="30"
-                                    placeholder="请输入合伙人姓名以及联系方式" style="margin-top:10px;"></el-input>
+                    <el-col :span="8">
+                        <el-form-item label="微信：" :label-width="formLabelWidth" >
+                            <el-button type="text" disabled>{{form.ishasWx}}</el-button>
+                            <span v-show="vxShow" style="padding-left: 5px;color: rgb(0, 114, 255);cursor: pointer;" @click="dialogFormImg = true">查看二维码</span>
                         </el-form-item>
                     </el-col>
                 </el-row>
                 <el-row>
                     <el-col :span="8">
-                        <el-form-item
-                                label="餐饮经验：" :label-width="formLabelWidth">
-                            <el-select
-                                    v-model="form.experience" placeholder="请选择" style="width: 100%;">
-                                <el-option v-for="item in CateringExperienceArr" :key="item.value"
-                                           :label="item.name" :value="item.value"></el-option>
-                            </el-select>
-                            <el-input
-                                    v-model="form.cateringType"
-                                    v-show="form.experience!=''&&form.experience!='0'"
-                                    autocomplete="off" maxLength="50" placeholder="请输入曾从事餐饮类型"
-                                    style="margin-top:10px;"></el-input>
+                        <el-form-item label="餐饮经验：" :label-width="formLabelWidth" >
+                            <el-button type="text" disabled>{{form.experience}}</el-button>
                         </el-form-item>
                     </el-col>
                     <el-col :span="8">
-                        <el-form-item
-                                label="开店紧迫性：" :label-width="formLabelWidth">
-                            <!-- <el-input v-model="form.urgency" autocomplete="off" style='width: 60%;'> -->
-                            <el-date-picker style='width: 60%;' v-model="form.urgency"
-                                            type="month" placeholder="选择月"></el-date-picker>
-                            </el-input>
-                            <span style="padding-left: 5px;">之前启动</span></el-form-item>
-                    </el-col>
-                </el-row>
-                <el-row>
-                    <el-col :span="8">
-                        <el-form-item
-                                label="职业：" :label-width="formLabelWidth">
-                            <el-select
-                                    v-model="form.customerJob" placeholder="请选择" style="width: 100%;">
-                                <el-option v-for="item in occupationArr" :key="item.value"
-                                           :label="item.name" :value="item.value"></el-option>
-                            </el-select>
-                        </el-form-item>
-                    </el-col>
-                    <el-col
-                            :span="8">
-                        <el-form-item label="QQ："
-                                      :label-width="formLabelWidth">
-                            <el-input
-                                    v-model="form.qq" autocomplete="off" maxLength="20"
-                                    @keyup.native="qqnumber"></el-input>
+                        <el-form-item label="年龄：" :label-width="formLabelWidth" >
+                            <el-button type="text" disabled>{{form.customerAge}}</el-button>
                         </el-form-item>
                     </el-col>
                 </el-row>
                 <el-row>
                     <el-col :span="8">
-                        <el-form-item
-                                label="选址情况：" :label-width="formLabelWidth">
-                            <el-select
-                                    v-model="form.address" placeholder="请选择" style="width: 100%;">
-                                <el-option v-for="item in optionAddressArr" :key="item.value"
-                                           :label="item.name" :value="item.value"></el-option>
-                            </el-select>
+                        <el-form-item label="职业：" :label-width="formLabelWidth" >
+                            <el-button type="text" disabled>{{form.customerJob}}</el-button>
                         </el-form-item>
                     </el-col>
-                    <el-col
-                            :span="8">
-                        <el-form-item label="出资人："
-                                      :label-width="formLabelWidth">
-                            <el-radio-group
-                                    v-model="form.sponsor">
-                                <el-radio label="1">自己本人</el-radio>
-                                <el-radio label="2">他人</el-radio>
-                            </el-radio-group>
-                            <el-input
-                                    v-model="form.sponsorOther"
-                                    v-show="form.sponsor!=''&&form.sponsor!='1'" autocomplete="off"
-                                    maxLength="30" placeholder="姓名+联系方式" style="margin-top:10px;"></el-input>
+                    <el-col :span="8">
+                        <el-form-item label="合伙人：" :label-width="formLabelWidth" >
+                            <el-button type="text" disabled>{{form.customerPartner}}</el-button>
+                            <el-button type="text" disabled>{{form.customerPartnerDetail}}</el-button>
                         </el-form-item>
                     </el-col>
                 </el-row>
                 <el-row>
                     <el-col :span="8">
-                        <el-form-item
-                                label="决策人：" :label-width="formLabelWidth">
-                            <el-radio-group
-                                    v-model="form.decisionMaker">
-                                <el-radio label="1">自己本人</el-radio>
-                                <el-radio label="2">他人</el-radio>
-                            </el-radio-group>
-                            <el-input
-                                    v-model="form.decisionMakerOther"
-                                    v-show="form.decisionMaker!=''&&form.decisionMaker!='1'"
-                                    autocomplete="off" maxLength="30" placeholder="姓名+联系方式"
-                                    style="margin-top:10px;"></el-input>
+                        <el-form-item label="开店紧迫性：" :label-width="formLabelWidth"  >
+                            <el-button type="text" disabled>{{form.urgency}}</el-button>
+                            <!--</el-input>--><span style="padding-left: 5px;" >之前启动</span>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="8">
+                        <el-form-item label="QQ：" :label-width="formLabelWidth" >
+                            <el-button type="text" disabled>{{form.qq}}</el-button>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="8">
+                        <el-form-item label="选址情况：" :label-width="formLabelWidth">
+                            <el-button type="text" disabled>{{form.address}}</el-button>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="8">
+                        <el-form-item label="出资人：" :label-width="formLabelWidth">
+                            <el-button type="text" disabled>
+                                {{form.sponsor==2?'他人 '+form.sponsorOther :(form.sponsor==1?'自己本人 ' :'')}}
+                            </el-button>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="8">
+                        <el-form-item label="决策人：" :label-width="formLabelWidth">
+                            <el-button type="text" disabled>
+                                {{form.decisionMaker==2?'他人 '+form.decisionMakerOther :(form.decisionMaker==1?'自己本人 ':'')}}
+                            </el-button>
+                        </el-form-item>
                     </el-col>
                 </el-row>
             </div>
             <div class="marginB20 fs16 paddingT20">投资意向信息</div>
+
             <div class="borderbox padding20">
                 <el-row>
                     <el-col :span="8">
-                        <el-form-item
-                                label="投资金额：" :label-width="formLabelWidth">
-                            <el-select
-                                    v-model="form.money" placeholder="请选择" style="width: 100%;">
-                                <el-option v-for="item in ussmArr" :key="item.value"
-                                           :label="item.name" :value="item.value"></el-option>
-                            </el-select>
+                        <el-form-item label="投资金额：" :label-width="formLabelWidth" >
+                            <el-button type="text" disabled>{{form.money}}</el-button>
                         </el-form-item>
                     </el-col>
-                    <el-col
-                            :span="8">
-                        <el-form-item label="店面大小："
-                                      :label-width="formLabelWidth">
-                            <el-select
-                                    v-model="form.area" placeholder="请选择" style="width: 100%;">
-                                <el-option v-for="item in StorefrontAreaArr" :key="item.value"
-                                           :label="item.name" :value="item.value"></el-option>
-                            </el-select>
-                        </el-form-item>
-                    </el-col>
-                </el-row>
-                <el-row>
-                    <!--<el-col :span="8"> <el-form-item-->
-                    <!--label="意向品类：" :label-width="formLabelWidth">-->
-                    <!--<el-select-->
-                    <!--v-model="form.intentionCategory" placeholder="请选择"-->
-                    <!--style="width: 100%;"> <el-option-->
-                    <!--v-for="item in IntentionalCategoryArr" :key="item.value"-->
-                    <!--:label="item.name" :value="item.value"> </el-option> </el-select> </el-form-item>-->
-                    <!--</el-col>-->
-
-                </el-row>
-                <el-row>
                     <el-col :span="8">
-                        <el-form-item
-                                label="开店区域：" :label-width="formLabelWidth" prop="province">
-                            <el-select v-model="form.province" placeholder="省"
-                                       style="width: 100%;" @change="currentProvince">
-                                <el-option
-                                        v-for="item in provinceArr" :key="item.name" :label="item.name"
-                                        :value="item.name"></el-option>
-                            </el-select>
+                        <el-form-item label="店面大小：" :label-width="formLabelWidth" >
+                            <el-button type="text" disabled>{{form.area}}</el-button>
                         </el-form-item>
                     </el-col>
-                    <el-col :span="16">
-                        <el-form-item
-                                label="" style="width: 45%;float: left;margin-left: 5%;" prop="city">
-                            <el-select v-model="form.city" placeholder="市" style="width: 100%;"
-                                       @change="currentCity">
-                                <el-option
-                                        v-for="item in cityArr" :key="item.name" :label="item.name"
-                                        :value="item.name"></el-option>
-                            </el-select>
-                        </el-form-item>
-                        <el-form-item label=""
-                                      style="width: 45%;float: left;margin-left: 5%;">
-                            <el-select
-                                    v-model="form.district" placeholder="区/县" style="width: 100%;">
-                                <el-option v-for="item in districtArr" :key="item.name"
-                                           :label="item.name" :value="item.name"></el-option>
-                            </el-select>
+                </el-row>
+                <el-row>
+                    <el-col :span="24">
+                        <el-form-item label="开店区域：" :label-width="formLabelWidth" style="width: 33.3%;float: left;" >
+                            <el-button type="text" disabled>{{form.province}}{{form.city}}{{form.district}}</el-button>
                         </el-form-item>
                     </el-col>
                 </el-row>
             </div>
             <div class="marginB20 fs16 paddingT20">上传资料</div>
-            <el-row>
-                <el-col :span="8">
-                    <el-button size="small"
-                               type="danger" @click="deteleClueFile">删除
-                    </el-button>
-                    <el-button
-                            type="text" disabled>只允许上传图片／音频文件。
-                    </el-button>
-                </el-col>
-                <el-col :span="5"
-                        class="f-fr">
-                    <form name=theform v-show="false">
-                        <input type="radio" name="myradio" value="local_name" checked=true/>
-                        上传文件名字保持本地文件名字 <input type="radio" name="myradio" value="random_name"/>
-                        上传文件名字是随机文件名 <br/> 上传到指定目录:<input type="text" id='dirname'
-                                                          placeholder="如果不填，默认是上传到根目录" size=50>
-                    </form>
-                    <div id="container">
-                        <a id="selectfiles" href="javascript:void(0);" class='btn'>选择文件</a> <a
-                            id="postfiles" href="javascript:void(0);" onclick="clueUploadFile()"
-                            class='btn'>开始上传</a>
-                    </div>
-                    <div id="ossfile">你的浏览器不支持flash,Silverlight或者HTML5！</div>
-                    <span v-show="false">上传到指定目录:<input type="text" id='dirname'
-                                                        placeholder="如果不填，默认是上传到根目录" size=50> <pre
-                            id="console"></pre></span>
-                </el-col>
-            </el-row>
             <el-row>
                 <el-table ref="multipleTable" :data="tableDataC1"
                           tooltip-effect="dark" style="width: 100%"
@@ -438,22 +278,6 @@
             </el-row>
             <div class="marginB20 fs16 paddingT20">跟进记录</div>
             <el-row>
-                <el-col :span="16" class="paddingTB">
-                    <el-button
-                            size="small" type="danger" @click="deteleTracking">删除
-                    </el-button>
-                    <el-button
-                            size="small" type="info" @click="editRecord">编辑
-                    </el-button>
-                </el-col>
-                <el-col
-                        :span="4" :offset="4" class="f-tar">
-                    <el-button size="small"
-                               type="primary" @click="lineFormShow=true">添加
-                    </el-button> <!-- <el-button size="small" type="primary" @click="addRecord">添加</el-button> -->
-                </el-col>
-            </el-row>
-            <el-row>
                 <el-table ref="multipleTable" :data="tableDataC2"
                           tooltip-effect="dark" style="width: 100%"
                           border
@@ -472,19 +296,7 @@
                             <div v-if="scope.row.isCall === 0">未接通</div>
                             <div v-else-if="scope.row.isCall ===1">已接通</div>
                         </template>
-                    </el-table-column> <!-- <el-table-column
-                          prop="resourceStatus"
-                          label="资源有效性"
-                          align="center">
-                          <template slot-scope="scope">
-	                      <div v-if="scope.row.resourceStatus === 0">
-	                                                                           无效资源
-	                      </div>
-	                       <div v-else-if="scope.row.resourceStatus ===1">
-	                                                                           有效资源
-	                       </div>
-	                     </template>
-                        </el-table-column> -->
+                    </el-table-column>
                     <el-table-column
                             prop="focusPoint" label="客户关注点" align="center"></el-table-column>
                     <el-table-column
@@ -499,76 +311,6 @@
                     </el-table-column>
                     <el-table-column prop="createUserName" label="创建人" align="center">
                     </el-table-column>
-                    <div slot="append" v-show="lineFormShow">
-                        <el-form :inline="true" :model="formInline" class="demo-form-inline"
-                                 :rules="rules" ref="LineRuleForm">
-                            <el-row
-                                    class="paddingL55">
-                                <el-form-item prop="callTime">
-                                    <el-date-picker v-model="formInline.callTime" type="datetime"
-                                                    size="mini" placeholder="选择日期时间"></el-date-picker>
-                                </el-form-item>
-                                <el-form-item
-                                        label="" size="mini">
-                                    <el-select
-                                            v-model="formInline.customerStatus" @change="customerStatusChange"
-                                            placeholder="客户状态">
-                                        <el-option
-                                                v-for="item in cusStatusArr" :key="item.value" :label="item.name"
-                                                :value="item.value"></el-option>
-                                    </el-select>
-                                </el-form-item>
-                                <el-form-item label=""
-                                              size="mini" v-if="substatus">
-                                    <el-select
-                                            v-model="formInline.customerStatusSub" placeholder="客户状态">
-                                        <el-option v-for="item in customerStatusSubArr" :key="item.value"
-                                                   :label="item.name" :value="item.value"></el-option>
-                                    </el-select>
-                                </el-form-item>
-                                <el-form-item
-                                        label="" size="mini" prop="isCall">
-                                    <el-select
-                                            v-model="formInline.isCall" placeholder="是否接通">
-                                        <el-option
-                                                label="是" value="1"></el-option>
-                                        <el-option label="否" value="0"></el-option>
-                                    </el-select>
-                                </el-form-item> <!--
-                                  <el-form-item label="" size="mini" prop="resourceStatus">
-                                    <el-select v-model="formInline.resourceStatus" placeholder="无效资源">
-                                      <el-option label="无效资源" value="0"></el-option>
-                                      <el-option label="有效资源" value="1"></el-option>
-                                    </el-select>
-                                  </el-form-item>
-                                  -->
-                                <el-form-item label="" size="mini"
-                                              prop="focusPoint">
-                                    <el-input
-                                            v-model="formInline.focusPoint" size="mini" placeholder="客户关注点"></el-input>
-                                </el-form-item>
-                                <el-form-item label="" size="mini">
-                                    <el-select
-                                            v-model="formInline.visitStatus" placeholder="是否继续回访">
-                                        <el-option
-                                                label="是" value="1"></el-option>
-                                        <el-option label="否" value="0"></el-option>
-                                    </el-select>
-                                </el-form-item>
-                                <el-form-item prop="nextVisitTime">
-                                    <el-date-picker
-                                            v-model="formInline.nextVisitTime" type="datetime"
-                                            format="yyyy-MM-dd HH:mm" size="mini" placeholder="选择日期时间">
-                                    </el-date-picker>
-                                </el-form-item>
-                                <el-form-item class="lineInherit">
-                                    <el-button
-                                            type="primary" size="mini" @click="onConfirmAdd">确认添加
-                                    </el-button>
-                                </el-form-item>
-                            </el-row>
-                        </el-form>
-                    </div>
                 </el-table>
             </el-row>
 
@@ -626,11 +368,6 @@
                     <el-table-column prop="createTime" label="服务时间" align="center">
                     </el-table-column>
                 </el-table>
-                <div class="padding20 f-tac">
-                    <el-button type="primary" @click="submitForm('form')">提交</el-button>
-                    <el-button type="primary" @click="submitForm('form','toTele')">转电销</el-button>
-                    <el-button @click="rebackClue">取 消</el-button>
-                </div>
             </el-row>
         </el-form>
     </el-row>
@@ -1021,9 +758,7 @@
                     this.substatus = false;
                 }
             },
-            submitForm(form,flag) {
-
-
+            submitForm(form) {
                 var valid = true;
                 this.$refs[form].validateField(["customerEmail", "callTime",
                     "focusPoint", "isCall", "resourceStatus", "nextVisitTime"], (error) => {
@@ -1141,9 +876,7 @@
                     clue.clueId = clueId;
                     clue.clueCustomer = clueCustomer;
                     clue.clueIntention = clueIntention;
-
-                    clue.flag = flag;
-                    axios.post('/phonetraffic/toTele', clue)
+                    axios.post('/tele/clueMyCustomerInfo/updateCustomerClue', clue)
                         .then(function (response) {
                             addCustomerVM.$message({
                                 message: '操作成功', type: 'success', duration: 2000, onClose: function () {
@@ -1742,109 +1475,140 @@
         },
         created() {
             //初始资源类别数据
-            var param = {};
-            param.groupCode = "clueCategory";
-            axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode', param).then(function (response) {
-                addCustomerVM.categoryArr = response.data.data;
+            var  param={};
+            param.groupCode="clueCategory";
+            axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {
+                addCustomerVM.categoryArr=response.data.data;
+
+
             });
             //初始化资源类型数据
-            param = {};
-            param.groupCode = "clueType";
-            axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode', param).then(function (response) {
-                addCustomerVM.typeArr = response.data.data;
+            param={};
+            param.groupCode="clueType";
+            axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {
+                addCustomerVM.typeArr=response.data.data;
             });
 
             //初始化资源类型数据
-            param = {};
-            param.groupCode = "clueType";
-            axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode', param).then(function (response) {
-                addCustomerVM.typeArr = response.data.data;
+            param={};
+            param.groupCode="clueType";
+            axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {
+                addCustomerVM.typeArr=response.data.data;
             });
             //初始化媒介
-            param = {};
-            param.groupCode = "medium";
-            axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode', param).then(function (response) {
-                addCustomerVM.mediumArry = response.data.data;
+            param={};
+            param.groupCode="medium";
+            axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {
+                addCustomerVM.mediumArry=response.data.data;
             });
             //广告位
-            param = {};
-            param.groupCode = "adsense";
-            axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode', param).then(function (response) {
-                addCustomerVM.adsenseArr = response.data.data;
+            param={};
+            param.groupCode="adsense";
+            axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {
+                addCustomerVM.adsenseArr=response.data.data;
             });
 
             //餐饮经验
-            param = {};
-            param.groupCode = "CateringExperience";
-            axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode', param).then(function (response) {
-                addCustomerVM.CateringExperienceArr = response.data.data;
+            param={};
+            param.groupCode="CateringExperience";
+            axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {
+                addCustomerVM.CateringExperienceArr=response.data.data;
+                for(var i = 0 ; i < addCustomerVM.CateringExperienceArr.length ; i++){
+                    if(addCustomerVM.CateringExperienceArr[i].value==vform.experience){
+                        vform.experience = addCustomerVM.CateringExperienceArr[i].name;
+                    }
+                }
             });
             //职业
-            param = {};
-            param.groupCode = "occupation";
-            axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode', param).then(function (response) {
-                addCustomerVM.occupationArr = response.data.data;
+            param={};
+            param.groupCode="occupation";
+            axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {
+                addCustomerVM.occupationArr=response.data.data;
+                for(var i = 0 ; i < addCustomerVM.occupationArr.length ; i++){
+                    if(addCustomerVM.occupationArr[i].value==vform.customerJob){
+                        vform.customerJob = addCustomerVM.occupationArr[i].name;
+                    }
+                }
             });
 
             //合伙人
-            param = {};
-            param.groupCode = "partner";
-            axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode', param).then(function (response) {
-                addCustomerVM.partnerArr = response.data.data;
+            param={};
+            param.groupCode="partner";
+            axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {
+                addCustomerVM.partnerArr=response.data.data;
+                for(var i = 0 ; i < addCustomerVM.partnerArr.length ; i++){
+                    if(addCustomerVM.partnerArr[i].value==vform.customerPartner){
+                        vform.customerPartner = addCustomerVM.partnerArr[i].name;
+                    }
+                }
             });
 
             //选址情况
-            param = {};
-            param.groupCode = "optionAddress";
-            axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode', param).then(function (response) {
-                addCustomerVM.optionAddressArr = response.data.data;
+            param={};
+            param.groupCode="optionAddress";
+            axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {
+                addCustomerVM.optionAddressArr=response.data.data;
+                for(var i = 0 ; i < addCustomerVM.optionAddressArr.length ; i++){
+                    if(addCustomerVM.optionAddressArr[i].value==vform.address){
+                        vform.address = addCustomerVM.optionAddressArr[i].name;
+                    }
+                }
             });
-            //客户级别
-            param = {};
-            param.groupCode = "customerLevel";
-            axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode', param).then(function (response) {
-                addCustomerVM.customerLevelArr = response.data.data;
+            param={};
+            param.groupCode="customerLevel";
+            axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {
+                addCustomerVM.customerLevelArr=response.data.data;
+                for(var i = 0 ; i < addCustomerVM.customerLevelArr.length ; i++){
+                    if(addCustomerVM.customerLevelArr[i].value==vform.customerLevel){
+                        vform.customerLevel = addCustomerVM.customerLevelArr[i].name;
+                    }
+                }
             });
             //意向品类
-            param = {};
-            param.groupCode = "IntentionalCategory";
-            axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode', param).then(function (response) {
-                addCustomerVM.IntentionalCategoryArr = response.data.data;
+            param={};
+            param.groupCode="IntentionalCategory";
+            axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {
+                addCustomerVM.IntentionalCategoryArr=response.data.data;
+                for(var i = 0 ; i < addCustomerVM.IntentionalCategoryArr.length ; i++){
+                    if(addCustomerVM.IntentionalCategoryArr[i].value==vform.intentionCategory){
+                        vform.intentionCategory = addCustomerVM.IntentionalCategoryArr[i].name;
+                    }
+                }
             });
             //投资金额
-            param = {};
-            param.groupCode = "ussm";
-            axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode', param).then(function (response) {
-                addCustomerVM.ussmArr = response.data.data;
+            param={};
+            param.groupCode="ussm";
+            axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {
+                addCustomerVM.ussmArr=response.data.data;
+                for(var i = 0 ; i < addCustomerVM.ussmArr.length ; i++){
+                    if(addCustomerVM.ussmArr[i].value==vform.money){
+                        vform.money = addCustomerVM.ussmArr[i].name;
+                    }
+                }
             });
             //店面大小
-            param = {};
-            param.groupCode = "StorefrontArea";
-            axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode', param).then(function (response) {
-                addCustomerVM.StorefrontAreaArr = response.data.data;
+            param={};
+            param.groupCode="StorefrontArea";
+            axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {
+                addCustomerVM.StorefrontAreaArr=response.data.data;
+                for(var i = 0 ; i < addCustomerVM.StorefrontAreaArr.length ; i++){
+                    if(addCustomerVM.StorefrontAreaArr[i].value==vform.area){
+                        vform.area = addCustomerVM.StorefrontAreaArr[i].name;
+                    }
+                }
             });
             //客户状态
-            param = {};
-            param.groupCode = "PhCustomerStatus";
-            axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode', param).then(function (response) {
-                addCustomerVM.cusStatusArr = response.data.data;
+            param={};
+            param.groupCode="customerStatus";
+            axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {
+                addCustomerVM.cusStatusArr=response.data.data;
             });
-
-            //二级客户状态
-            param = {};
-            param.groupCode = "PhCustomerStatusSub";
-            axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode', param).then(function (response) {
-                addCustomerVM.customerStatusSubArr = response.data.data;
-            });
-
-
             //获取省
-            param = {};
-            param.type = "0";
-            axios.post('/area/sysregion/querySysRegionByParam', param).then(function (response) {
-                addCustomerVM.provinceArr = response.data.data.data;
+            param={};
+            param.type="0";
+            axios.post('/area/sysregion/querySysRegionByParam',param).then(function (response) {
+                addCustomerVM.provinceArr=response.data.data.data;
             });
-
 
         }
     })
