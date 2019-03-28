@@ -58,7 +58,7 @@ public interface ProjectInfoFeignClient {
     public JSONResult<List<ProjectInfoDTO>> listNoPage(@RequestBody ProjectInfoPageParam param);
 
     /**
-     * 查询所有项目
+     * 查询所有项目 adw
      * 
      * @param menuDTO
      * @return
