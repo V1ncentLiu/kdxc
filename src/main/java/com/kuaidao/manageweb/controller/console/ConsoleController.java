@@ -35,6 +35,7 @@ import com.kuaidao.aggregation.dto.console.BusinessConsoleReqDTO;
 import com.kuaidao.aggregation.dto.console.BusinessDirectorConsolePanelRespDTO;
 import com.kuaidao.aggregation.dto.console.TeleConsoleReqDTO;
 import com.kuaidao.aggregation.dto.project.ProjectInfoDTO;
+import com.kuaidao.aggregation.dto.project.ProjectInfoPageParam;
 import com.kuaidao.aggregation.dto.visitrecord.VisitRecordReqDTO;
 import com.kuaidao.aggregation.dto.visitrecord.VisitRecordRespDTO;
 import com.kuaidao.common.constant.CluePhase;
@@ -138,7 +139,7 @@ public class ConsoleController {
         String roleCode = roleInfoDTO.getRoleCode();
         String path = "";
 
-        if (RoleCodeEnum.DXCYGW.name().equals(roleCode)) {
+       if (RoleCodeEnum.DXCYGW.name().equals(roleCode)) {
             // 电销顾问
             path = "console/consoleTelemarketing";
         } else if (RoleCodeEnum.DXZJ.name().equals(roleCode)) {
@@ -185,37 +186,56 @@ public class ConsoleController {
             request.setAttribute("ussmList", getDictionaryByCode(Constants.USSM));
             path = "console/consoleBusinessMajordomo";
         }
-        /*
-         * if(type.equals("1")) { path = "console/consoleTelemarketing"; }else if(type.equals("2"))
-         * { List<Integer> statusList = new ArrayList<Integer>();
-         * statusList.add(SysConstant.USER_STATUS_ENABLE);
-         * statusList.add(SysConstant.USER_STATUS_LOCK); List<UserInfoDTO> userList =
-         * getUserList(orgId, RoleCodeEnum.DXCYGW.name(), statusList);
-         * request.setAttribute("saleList", userList); // 查询字典类别集合
-         * request.setAttribute("clueCategoryList", getDictionaryByCode(Constants.CLUE_CATEGORY));
-         * // 查询字典类别集合 request.setAttribute("clueTypeList",
-         * getDictionaryByCode(Constants.CLUE_TYPE)); path="console/consoleTelMajordomo"; }else
-         * if(type.equals("3")) { // 项目 ProjectInfoPageParam param = new ProjectInfoPageParam();
-         * JSONResult<List<ProjectInfoDTO>> proJson = projectInfoFeignClient.listNoPage(param);
-         * if(JSONResult.SUCCESS.equals(proJson.getCode())){ request.setAttribute("proSelect",
-         * proJson.getData()); }
-         * 
-         * path="console/consoleBusinessManager"; }else if(type.equals("4")) { // 查询所有商务经理
-         * List<Map<String, Object>> allSaleList = getAllSaleList();
-         * request.setAttribute("allSaleList", allSaleList); // 查询组织下商务经理 List<Integer> statusList =
-         * new ArrayList<Integer>(); statusList.add(SysConstant.USER_STATUS_ENABLE);
-         * statusList.add(SysConstant.USER_STATUS_LOCK); List<UserInfoDTO> saleList =
-         * getUserList(orgId, RoleCodeEnum.SWJL.name(), statusList);
-         * request.setAttribute("busSaleList", saleList); // 查询所有项目 JSONResult<List<ProjectInfoDTO>>
-         * listNoPage = projectInfoFeignClient.listNoPage(new ProjectInfoPageParam());
-         * request.setAttribute("projectList", listNoPage.getData()); // 查询字典选址情况集合
-         * request.setAttribute("optionAddressList", getDictionaryByCode(Constants.OPTION_ADDRESS));
-         * // 查询字典店铺面积集合 request.setAttribute("storefrontAreaList",
-         * getDictionaryByCode(Constants.STOREFRONT_AREA)); // 查询字典投资金额集合
-         * request.setAttribute("ussmList", getDictionaryByCode(Constants.USSM));
-         * 
-         * path="console/consoleBusinessMajordomo"; }
-         */
+
+        
+        
+/*        if(type.equals("1")) {
+            path = "console/consoleTelemarketing";
+        }else if(type.equals("2")) {
+            List<Integer> statusList = new ArrayList<Integer>();
+            statusList.add(SysConstant.USER_STATUS_ENABLE);
+            statusList.add(SysConstant.USER_STATUS_LOCK);
+            List<UserInfoDTO> userList = getUserList(orgId, RoleCodeEnum.DXCYGW.name(), statusList);
+            request.setAttribute("saleList", userList);
+            // 查询字典类别集合
+            request.setAttribute("clueCategoryList", getDictionaryByCode(Constants.CLUE_CATEGORY));
+            // 查询字典类别集合
+            request.setAttribute("clueTypeList", getDictionaryByCode(Constants.CLUE_TYPE));
+            path="console/consoleTelMajordomo";
+        }else if(type.equals("3")) {
+            // 项目
+            ProjectInfoPageParam param = new ProjectInfoPageParam();
+            JSONResult<List<ProjectInfoDTO>> proJson = projectInfoFeignClient.listNoPage(param);
+            if(JSONResult.SUCCESS.equals(proJson.getCode())){
+                request.setAttribute("proSelect", proJson.getData());
+            }
+
+            path="console/consoleBusinessManager";
+        }else if(type.equals("4")) {
+            // 查询所有商务经理
+            List<Map<String, Object>> allSaleList = getAllSaleList();
+            request.setAttribute("allSaleList", allSaleList);
+         // 查询组织下商务经理
+            List<Integer> statusList = new ArrayList<Integer>();
+            statusList.add(SysConstant.USER_STATUS_ENABLE);
+            statusList.add(SysConstant.USER_STATUS_LOCK);
+            List<UserInfoDTO> saleList =
+                    getUserList(orgId, RoleCodeEnum.SWJL.name(), statusList);
+            request.setAttribute("busSaleList", saleList);
+            // 查询所有项目
+            JSONResult<List<ProjectInfoDTO>> listNoPage =
+                    projectInfoFeignClient.listNoPage(new ProjectInfoPageParam());
+            request.setAttribute("projectList", listNoPage.getData());
+            // 查询字典选址情况集合
+            request.setAttribute("optionAddressList", getDictionaryByCode(Constants.OPTION_ADDRESS));
+            // 查询字典店铺面积集合
+            request.setAttribute("storefrontAreaList", getDictionaryByCode(Constants.STOREFRONT_AREA));
+         // 查询字典投资金额集合
+            request.setAttribute("ussmList", getDictionaryByCode(Constants.USSM));
+            
+            path="console/consoleBusinessMajordomo";
+        }*/
+         
         return path;
     }
 
@@ -352,11 +372,12 @@ public class ConsoleController {
             @RequestBody TeleConsoleReqDTO reqDTO) {
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
         reqDTO.setTeleDirectorId(curLoginUser.getId());
-        Date curDate = new Date();
+        reqDTO.setPhase(CluePhase.PHAE_3RD.getCode());
+   /*     Date curDate = new Date();
         reqDTO.setEndTime(curDate);
         reqDTO.setStartTime(DateUtil.getTodayStartTime());
-        reqDTO.setPhase(CluePhase.PHAE_3RD.getCode());
-        reqDTO.setType(2);
+        //type 为2 表示查询时字段用电销总监的时间字段 为1 用电销顾问时间字段
+        reqDTO.setType(2);*/
         return clueBasicFeignClient.countAssignClueNum(reqDTO);
     }
 
@@ -532,16 +553,16 @@ public class ConsoleController {
             * @param businessConsoleReqDTO
             * @return
             *//*
-              * @RequestMapping("/countCurMonthSignedNum")
-              * 
-              * @ResponseBody public JSONResult<BusinessConsolePanelRespDTO>
-              * countCurMonthSignedNum(@RequestBody BusinessConsoleReqDTO businessConsoleReqDTO){
-              * UserInfoDTO curLoginUser = CommUtil.getCurLoginUser(); List<Long> accountIdList =
-              * new ArrayList<Long>(); accountIdList.add(curLoginUser.getId()); Date curDate = new
-              * Date(); businessConsoleReqDTO.setEndTime(curDate);
-              * businessConsoleReqDTO.setStartTime(DateUtil.getCurStartDate()); return
-              * signRecordFeignClient.countCurMonthSignedNum(businessConsoleReqDTO); }
-              */
+                * @RequestMapping("/countCurMonthSignedNum")
+                * 
+                * @ResponseBody public JSONResult<BusinessConsolePanelRespDTO>
+                * countCurMonthSignedNum(@RequestBody BusinessConsoleReqDTO businessConsoleReqDTO){
+                * UserInfoDTO curLoginUser = CommUtil.getCurLoginUser(); List<Long> accountIdList =
+                * new ArrayList<Long>(); accountIdList.add(curLoginUser.getId()); Date curDate = new
+                * Date(); businessConsoleReqDTO.setEndTime(curDate);
+                * businessConsoleReqDTO.setStartTime(DateUtil.getCurStartDate()); return
+                * signRecordFeignClient.countCurMonthSignedNum(businessConsoleReqDTO); }
+                */
 
 
     /**
