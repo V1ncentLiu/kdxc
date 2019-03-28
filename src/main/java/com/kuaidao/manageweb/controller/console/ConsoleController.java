@@ -189,7 +189,7 @@ public class ConsoleController {
 
         
         
-     /*   if(type.equals("1")) {
+   /*     if(type.equals("1")) {
             path = "console/consoleTelemarketing";
         }else if(type.equals("2")) {
             List<Integer> statusList = new ArrayList<Integer>();
@@ -440,9 +440,8 @@ public class ConsoleController {
     public JSONResult<Integer> countTeleDirectorTodayAppiontmentNum() {
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
         TeleConsoleReqDTO teleConsoleReqDTO = new TeleConsoleReqDTO();
-        Long id = curLoginUser.getId();
         UserOrgRoleReq req = new UserOrgRoleReq();
-        req.setOrgId(id);
+        req.setOrgId(curLoginUser.getOrgId());
         req.setRoleCode(RoleCodeEnum.DXCYGW.name());
         JSONResult<List<UserInfoDTO>> userInfoJr = userInfoFeignClient.listByOrgAndRole(req);
         if (!JSONResult.SUCCESS.equals(userInfoJr.getCode())) {
