@@ -21,7 +21,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.kuaidao.aggregation.dto.clue.BusCustomerDTO;
 import com.kuaidao.aggregation.dto.clue.BusCustomerPageParam;
 import com.kuaidao.aggregation.dto.project.ProjectInfoDTO;
-import com.kuaidao.aggregation.dto.project.ProjectInfoPageParam;
 import com.kuaidao.common.constant.OrgTypeConstant;
 import com.kuaidao.common.constant.RoleCodeEnum;
 import com.kuaidao.common.entity.JSONResult;
@@ -113,9 +112,8 @@ public class BusCustomerManagerController {
         List<Map<String, Object>> allSaleList = getAllSaleList();
         request.setAttribute("allSaleList", allSaleList);
         // 查询所有项目
-        JSONResult<List<ProjectInfoDTO>> listNoPage =
-                projectInfoFeignClient.listNoPage(new ProjectInfoPageParam());
-        request.setAttribute("projectList", listNoPage.getData());
+        JSONResult<List<ProjectInfoDTO>> allProject = projectInfoFeignClient.allProject();
+        request.setAttribute("projectList", allProject.getData());
         SysRegionDTO queryDTO = new SysRegionDTO();
         // 查询所有省
         queryDTO.setType(0);

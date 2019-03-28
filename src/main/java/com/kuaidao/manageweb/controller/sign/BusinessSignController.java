@@ -20,7 +20,6 @@ import com.kuaidao.aggregation.dto.paydetail.PayDetailReqDTO;
 import com.kuaidao.aggregation.dto.paydetail.PayDetailRespDTO;
 import com.kuaidao.aggregation.dto.project.CompanyInfoDTO;
 import com.kuaidao.aggregation.dto.project.ProjectInfoDTO;
-import com.kuaidao.aggregation.dto.project.ProjectInfoPageParam;
 import com.kuaidao.aggregation.dto.sign.BusSignInsertOrUpdateDTO;
 import com.kuaidao.aggregation.dto.sign.BusSignRespDTO;
 import com.kuaidao.aggregation.dto.sign.BusinessSignDTO;
@@ -110,14 +109,13 @@ public class BusinessSignController {
                 organizationFeignClient.queryOrgByParam(orgDto);
 
         // 查询项目列表
-        JSONResult<List<ProjectInfoDTO>> listNoPage =
-                projectInfoFeignClient.listNoPage(new ProjectInfoPageParam());
+        JSONResult<List<ProjectInfoDTO>> allProject = projectInfoFeignClient.allProject();
         // 获取省份
         List<SysRegionDTO> proviceslist = sysRegionFeignClient.getproviceList().getData();
 
         request.setAttribute("swList", swList.getData());
         request.setAttribute("dxList", dxList.getData());
-        request.setAttribute("projectList", listNoPage.getData());
+        request.setAttribute("projectList", allProject.getData());
         request.setAttribute("provinceList", proviceslist);
         return "business/businessSignValidPage";
     }
@@ -384,8 +382,7 @@ public class BusinessSignController {
         }
 
         // 项目
-        ProjectInfoPageParam param = new ProjectInfoPageParam();
-        JSONResult<List<ProjectInfoDTO>> proJson = projectInfoFeignClient.listNoPage(param);
+        JSONResult<List<ProjectInfoDTO>> proJson = projectInfoFeignClient.allProject();
         if (JSONResult.SUCCESS.equals(proJson.getCode())) {
             request.setAttribute("proSelect", proJson.getData());
         }

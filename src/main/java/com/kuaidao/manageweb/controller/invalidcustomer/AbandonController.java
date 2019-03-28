@@ -1,36 +1,9 @@
 package com.kuaidao.manageweb.controller.invalidcustomer;
 
-import com.kuaidao.aggregation.dto.invalidcustomer.*;
-import com.kuaidao.aggregation.dto.project.ProjectInfoDTO;
-import com.kuaidao.aggregation.dto.project.ProjectInfoPageParam;
-import com.kuaidao.common.constant.OrgTypeConstant;
-import com.kuaidao.common.constant.RoleCodeEnum;
-import com.kuaidao.common.constant.SystemCodeConstant;
-import com.kuaidao.common.entity.JSONResult;
-import com.kuaidao.common.entity.PageBean;
-import com.kuaidao.manageweb.config.LogRecord;
-import com.kuaidao.manageweb.constant.MenuEnum;
-import com.kuaidao.manageweb.feign.InvalidCustomer.AbandonFeignClient;
-import com.kuaidao.manageweb.feign.InvalidCustomer.InvalidCustomerFeignClient;
-import com.kuaidao.manageweb.feign.customfield.CustomFieldFeignClient;
-import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
-import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
-import com.kuaidao.manageweb.feign.project.ProjectInfoFeignClient;
-import com.kuaidao.manageweb.feign.role.RoleManagerFeignClient;
-import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
-import com.kuaidao.manageweb.util.CommUtil;
-import com.kuaidao.sys.dto.customfield.CustomFieldQueryDTO;
-import com.kuaidao.sys.dto.customfield.QueryFieldByRoleAndMenuReq;
-import com.kuaidao.sys.dto.customfield.QueryFieldByUserAndMenuReq;
-import com.kuaidao.sys.dto.customfield.UserFieldDTO;
-import com.kuaidao.sys.dto.organization.OrganizationDTO;
-import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
-import com.kuaidao.sys.dto.organization.OrganizationRespDTO;
-import com.kuaidao.sys.dto.role.RoleInfoDTO;
-import com.kuaidao.sys.dto.role.RoleQueryDTO;
-import com.kuaidao.sys.dto.user.UserInfoDTO;
-import com.kuaidao.sys.dto.user.UserInfoPageParam;
-import com.kuaidao.sys.dto.user.UserOrgRoleReq;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import javax.servlet.http.HttpServletRequest;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,17 +13,28 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
-
-import javax.servlet.http.HttpServletRequest;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import com.kuaidao.aggregation.dto.invalidcustomer.AbandonParamDTO;
+import com.kuaidao.aggregation.dto.invalidcustomer.AbandonRespDTO;
+import com.kuaidao.aggregation.dto.project.ProjectInfoDTO;
+import com.kuaidao.common.constant.RoleCodeEnum;
+import com.kuaidao.common.entity.JSONResult;
+import com.kuaidao.common.entity.PageBean;
+import com.kuaidao.manageweb.feign.InvalidCustomer.AbandonFeignClient;
+import com.kuaidao.manageweb.feign.customfield.CustomFieldFeignClient;
+import com.kuaidao.manageweb.feign.project.ProjectInfoFeignClient;
+import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
+import com.kuaidao.manageweb.util.CommUtil;
+import com.kuaidao.sys.dto.customfield.CustomFieldQueryDTO;
+import com.kuaidao.sys.dto.customfield.QueryFieldByRoleAndMenuReq;
+import com.kuaidao.sys.dto.customfield.QueryFieldByUserAndMenuReq;
+import com.kuaidao.sys.dto.customfield.UserFieldDTO;
+import com.kuaidao.sys.dto.user.UserInfoDTO;
+import com.kuaidao.sys.dto.user.UserOrgRoleReq;
 
 /**
- * @author  yangbiao
+ * @author yangbiao
  * @Date: 2019/2/11 15:13
- * @Description:
- *      废弃池
+ * @Description: 废弃池
  */
 @Controller
 @RequestMapping("/abandonsource")
@@ -75,29 +59,28 @@ public class AbandonController {
     @RequiresPermissions("aggregation:abandonPool:view")
     @PostMapping("/queryPage")
     @ResponseBody
-    public JSONResult<PageBean<AbandonRespDTO>> queryListPage(@RequestBody AbandonParamDTO dto){
+    public JSONResult<PageBean<AbandonRespDTO>> queryListPage(@RequestBody AbandonParamDTO dto) {
 
-        Date date1 =dto.getCreateTime1();
-        Date date2 =dto.getCreateTime2();
-        if(date1!=null && date2!=null ){
-            if(date1.getTime()>date2.getTime()){
-                return new JSONResult().fail("-1","创建时间，结束时间不能早于开始时间!");
+        Date date1 = dto.getCreateTime1();
+        Date date2 = dto.getCreateTime2();
+        if (date1 != null && date2 != null) {
+            if (date1.getTime() > date2.getTime()) {
+                return new JSONResult().fail("-1", "创建时间，结束时间不能早于开始时间!");
             }
         }
         return abandonFeignClient.queryListPage(dto);
     }
 
     @RequestMapping("/listPage")
-    public String listPage(HttpServletRequest request){
+    public String listPage(HttpServletRequest request) {
         // 项目
-        ProjectInfoPageParam param = new ProjectInfoPageParam();
-        JSONResult<List<ProjectInfoDTO>> proJson = projectInfoFeignClient.listNoPage(param);
-        if(JSONResult.SUCCESS.equals(proJson.getCode())){
+        JSONResult<List<ProjectInfoDTO>> proJson = projectInfoFeignClient.allProject();
+        if (JSONResult.SUCCESS.equals(proJson.getCode())) {
             request.setAttribute("proSelect", proJson.getData());
         }
-        request.setAttribute("zyzyList",queryUserByRole());
+        request.setAttribute("zyzyList", queryUserByRole());
 
-        UserInfoDTO user =  CommUtil.getCurLoginUser();
+        UserInfoDTO user = CommUtil.getCurLoginUser();
         // 根据角色查询页面字段
         QueryFieldByRoleAndMenuReq queryFieldByRoleAndMenuReq = new QueryFieldByRoleAndMenuReq();
         queryFieldByRoleAndMenuReq.setMenuCode("aggregation:abandonPool");
@@ -119,6 +102,7 @@ public class AbandonController {
 
     /**
      * 查询所有资源专员
+     * 
      * @return
      */
 
@@ -166,7 +150,8 @@ public class AbandonController {
         }
 
         userRole.setRoleCode(RoleCodeEnum.TGNQWY.name());
-        JSONResult<List<UserInfoDTO>> userKNqWyList = userInfoFeignClient.listByOrgAndRole(userRole);
+        JSONResult<List<UserInfoDTO>> userKNqWyList =
+                userInfoFeignClient.listByOrgAndRole(userRole);
 
         if (JSONResult.SUCCESS.equals(userKNqWyList.getCode()) && null != userKNqWyList.getData()
                 && userKNqWyList.getData().size() > 0) {

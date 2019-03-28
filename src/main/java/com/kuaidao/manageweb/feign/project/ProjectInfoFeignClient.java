@@ -26,7 +26,7 @@ import com.kuaidao.common.entity.PageBean;
  * @date: 2019年1月4日
  * @version V1.0
  */
-@FeignClient(name = "aggregation-service-zhang", path = "/aggregation/projectInfo",
+@FeignClient(name = "aggregation-service", path = "/aggregation/projectInfo",
         fallback = ProjectInfoFeignClient.HystrixClientFallback.class)
 public interface ProjectInfoFeignClient {
     /**
@@ -56,6 +56,15 @@ public interface ProjectInfoFeignClient {
      */
     @PostMapping("/listNoPage")
     public JSONResult<List<ProjectInfoDTO>> listNoPage(@RequestBody ProjectInfoPageParam param);
+
+    /**
+     * 查询所有项目 adw
+     * 
+     * @param menuDTO
+     * @return
+     */
+    @PostMapping("/allProject")
+    public JSONResult<List<ProjectInfoDTO>> allProject();
 
     /**
      * 修改项目信息
@@ -146,6 +155,11 @@ public interface ProjectInfoFeignClient {
         public JSONResult<List<ProjectInfoDTO>> listNoPage(
                 @RequestBody ProjectInfoPageParam param) {
             return fallBackError("查询项目集合");
+        }
+
+        @Override
+        public JSONResult<List<ProjectInfoDTO>> allProject() {
+            return fallBackError("查询所有项目1");
         }
 
         @Override

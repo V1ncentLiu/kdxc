@@ -17,7 +17,6 @@ import com.kuaidao.aggregation.dto.clue.ClueDTO;
 import com.kuaidao.aggregation.dto.clue.ClueFileDTO;
 import com.kuaidao.aggregation.dto.clue.ClueQueryDTO;
 import com.kuaidao.aggregation.dto.project.ProjectInfoDTO;
-import com.kuaidao.aggregation.dto.project.ProjectInfoPageParam;
 import com.kuaidao.aggregation.dto.tracking.TrackingReqDTO;
 import com.kuaidao.aggregation.dto.tracking.TrackingRespDTO;
 import com.kuaidao.common.entity.JSONResult;
@@ -125,8 +124,7 @@ public class BusinessCustomerController {
             request.setAttribute("circulationList", circulationList.getData());
         }
         // 项目
-        ProjectInfoPageParam param = new ProjectInfoPageParam();
-        JSONResult<List<ProjectInfoDTO>> proJson = projectInfoFeignClient.listNoPage(param);
+        JSONResult<List<ProjectInfoDTO>> proJson = projectInfoFeignClient.allProject();
         if (proJson.getCode().equals(JSONResult.SUCCESS)) {
             request.setAttribute("proSelect", proJson.getData());
         }
@@ -211,8 +209,7 @@ public class BusinessCustomerController {
         }
 
         // 项目
-        ProjectInfoPageParam param = new ProjectInfoPageParam();
-        JSONResult<List<ProjectInfoDTO>> proJson = projectInfoFeignClient.listNoPage(param);
+        JSONResult<List<ProjectInfoDTO>> proJson = projectInfoFeignClient.allProject();
         if (proJson.getCode().equals(JSONResult.SUCCESS)) {
             request.setAttribute("proSelect", proJson.getData());
         }

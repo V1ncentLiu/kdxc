@@ -1,6 +1,7 @@
 package com.kuaidao.manageweb.feign.phonetraffic;
 
 import com.kuaidao.aggregation.dto.clue.AllocationClueReq;
+import com.kuaidao.aggregation.dto.clue.ClueDTO;
 import com.kuaidao.aggregation.dto.paydetail.PayDetailInsertOrUpdateDTO;
 import com.kuaidao.aggregation.dto.paydetail.PayDetailReqDTO;
 import com.kuaidao.aggregation.dto.paydetail.PayDetailRespDTO;
@@ -32,6 +33,9 @@ public interface PhoneTrafficFeignClient {
 	@PostMapping("/transferClue")
 	JSONResult transferClue(AllocationClueReq allocationClueReq);
 
+	@PostMapping("/toTele")
+	public JSONResult toTele(@RequestBody ClueDTO clueDTO);
+
 	@Component
 	static class HystrixClientFallback implements PhoneTrafficFeignClient {
 		private static Logger logger = LoggerFactory.getLogger(PhoneTrafficFeignClient.class);
@@ -56,6 +60,11 @@ public interface PhoneTrafficFeignClient {
 		@Override
 		public JSONResult transferClue(AllocationClueReq allocationClueReq) {
 			return fallBackError("话务管理-资源转移");
+		}
+
+		@Override
+		public JSONResult toTele(ClueDTO clueDTO) {
+			return fallBackError("话务管理-转电销");
 		}
 
 	}
