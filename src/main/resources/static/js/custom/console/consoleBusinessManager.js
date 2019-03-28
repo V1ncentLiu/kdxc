@@ -15,7 +15,8 @@ var mainDivVM = new Vue({
         secondSignedNum:'',//当月二次来访签约数
         unPaymentNum:'',//未收齐尾款笔数
         workDay:'',//工作天数
-        //公告        
+        //公告  
+        afficheBox:false,     
         items: [ 
             // {content:'系统将于2018年12月5日晚上12:00进行系统升级，请各位同事及时处理工作。系统预计在12:20分恢复正常使用,感谢配合!',id:1},
             // {content:'公告2公告2公告2公告2公告2公告2公告2',id:2},
@@ -310,7 +311,12 @@ var mainDivVM = new Vue({
             axios.post('/console/console/queryAnnReceiveNoPage',param).then(function (response) {
                 console.log('公告')
                 console.log(response.data)
-                mainDivVM.items=response.data.data;
+                if(response.data.data&&response.data.data.length>0){
+                    mainDivVM.items=response.data.data;
+                    mainDivVM.afficheBox=true
+                }else{
+                    mainDivVM.afficheBox=false
+                }
             });
             // 未读消息
             param={};

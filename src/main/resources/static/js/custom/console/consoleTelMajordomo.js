@@ -35,7 +35,8 @@ var mainDivVM = new Vue({
         todayAppiontmentNum:'',//今日邀约数
         tomorrowArriveTime:'',//预计明日到访数
         workDay:'',//工作天数
-        //公告        
+        //公告  
+        afficheBox:false,
         items: [ 
             // {content:'系统将于2018年12月5日晚上12:00进行系统升级，请各位同事及时处理工作。系统预计在12:20分恢复正常使用,感谢配合!',id:1},
             // {content:'公告2公告2公告2公告2公告2公告2公告2',id:2},
@@ -65,8 +66,14 @@ var mainDivVM = new Vue({
             // 公告
             param={};
             axios.post('/console/console/queryAnnReceiveNoPage',param).then(function (response) {
+                console.log('公告')
                 console.log(response.data)
-                mainDivVM.items=response.data.data;
+                if(response.data.data&&response.data.data.length>0){
+                    mainDivVM.items=response.data.data;
+                    mainDivVM.afficheBox=true
+                }else{
+                    mainDivVM.afficheBox=false
+                }
             });
             // 未读消息
             param={};
@@ -181,6 +188,31 @@ var mainDivVM = new Vue({
             }).catch(function (error) {
                 console.log(error);
             });                
+        },
+        //类别转换方法
+        transformCategory(cellValue) {
+          var text="";
+          if(clueCategoryList){
+              for(var i=0;i<clueCategoryList.length;i++){
+                    if(cellValue==clueCategoryList[i].value){
+                        text=clueCategoryList[i].name;
+                    }
+                }
+          }
+           return text;
+        },
+        //类行转换方法
+        transformType(cellValue) {
+          var text="";
+          if(clueTypeList){
+              for(var i=0;i<clueTypeList.length;i++){
+                    if(cellValue==clueTypeList[i].value){
+                        text=clueTypeList[i].name;
+                        break;
+                    }
+                }
+          }
+           return text;
         },
         // 快速分配资源
         //打开分配资源

@@ -56,13 +56,13 @@ public interface CompanyInfoFeignClient {
     public JSONResult<PageBean<CompanyInfoDTO>> list(@RequestBody CompanyInfoPageParam param);
 
     /**
-     * 查询公司集合
+     * 查询公司集合.
      * 
      * @param menuDTO
      * @return
      */
-    @PostMapping("/listNoPage")
-    public JSONResult<List<CompanyInfoDTO>> listNoPage(@RequestBody CompanyInfoPageParam param);
+    @PostMapping("/allCompany")
+    public JSONResult<List<CompanyInfoDTO>> allCompany();
 
     /**
      * 修改公司信息
@@ -132,9 +132,8 @@ public interface CompanyInfoFeignClient {
         }
 
         @Override
-        public JSONResult<List<CompanyInfoDTO>> listNoPage(
-                @RequestBody CompanyInfoPageParam param) {
-            return fallBackError("查询公司集合");
+        public JSONResult<List<CompanyInfoDTO>> allCompany() {
+            return fallBackError("查询公司集合.");
         }
 
         @Override
