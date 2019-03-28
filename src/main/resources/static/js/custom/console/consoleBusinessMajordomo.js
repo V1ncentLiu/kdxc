@@ -223,7 +223,7 @@ var mainDivVM = new Vue({
         //意向项目转换方法
         transformPurProject(row, column, cellValue, index) {
             var text="";
-            if(cellValue){
+            if(cellValue==1){
                 if(projectList){
                     for(var i=0;i<projectList.length;i++){
                         if(cellValue==projectList[i].value){

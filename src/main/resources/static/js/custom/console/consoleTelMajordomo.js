@@ -203,6 +203,7 @@ var mainDivVM = new Vue({
               for(var i=0;i<clueTypeList.length;i++){
                     if(cellValue==clueTypeList[i].value){
                         text=clueTypeList[i].name;
+                        break;
                     }
                 }
           }
