@@ -224,8 +224,10 @@ public class TelemarketingAssignRuleContoller {
 			if (null != roleList && roleList.size() > 0) {
 				RoleInfoDTO roleDto = roleList.get(0);
 				UserInfoPageParam param = new UserInfoPageParam();
+				if (roleDto.getRoleCode().equals(RoleCodeEnum.DXZJ.name())) {
+					param.setOrgId(user.getOrgId());
+				}
 				param.setRoleId(roleDto.getId());
-				param.setOrgId(user.getOrgId());
 				param.setPageSize(10000);
 				param.setPageNum(1);
 				JSONResult<PageBean<UserInfoDTO>> userListJson = userInfoFeignClient.list(param);
@@ -259,7 +261,9 @@ public class TelemarketingAssignRuleContoller {
 				RoleInfoDTO roleDto = roleList.get(0);
 				UserInfoPageParam param = new UserInfoPageParam();
 				param.setRoleId(roleDto.getId());
-				param.setOrgId(user.getOrgId());
+				if (roleDto.getRoleCode().equals(RoleCodeEnum.DXZJ.name())) {
+					param.setOrgId(user.getOrgId());
+				}
 				param.setPageSize(10000);
 				param.setPageNum(1);
 				JSONResult<PageBean<UserInfoDTO>> userListJson = userInfoFeignClient.list(param);
