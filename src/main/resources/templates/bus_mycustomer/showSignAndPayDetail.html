@@ -468,14 +468,16 @@
                     </el-row>
                     <el-row>
                         <el-col :span="10">
-                            <el-form-item label="是否远程签约：" :label-width="formLabelWidth" prop="isRemoteSign">
+                            <el-form-item label="是否远程签约：" :label-width="formLabelWidth" prop="isRemoteSign1">
                                 <el-select v-model="formSigning.isRemoteSign" @change="selectIsRemoteSign" placeholder="请选择是否远程签约：">
-                                    <el-option
-                                            v-for="item in isSignArr"
-                                            :key="item.value"
-                                            :label="item.name"
-                                            :value="item.value">
-                                    </el-option>
+                                    <!--<el-option-->
+                                            <!--v-for="item in isSignArr"-->
+                                            <!--:key="item.value"-->
+                                            <!--:label="item.name"-->
+                                            <!--:value="item.value">-->
+                                    <!--</el-option>-->
+                                    <el-option  key="0" label="否" value="0"></el-option>
+                                    <el-option  key="1" label="是" value="1"></el-option>
                                 </el-select>
                             </el-form-item>
                         </el-col>
@@ -700,7 +702,7 @@
             companyArr:[],
             projectArr:proSelect,
             isAllMoney:false,
-            suppWrap:true,
+            suppWrap:false,
             dialogForm:{
                 reason:''
             },
@@ -773,7 +775,7 @@
                 // performanceAmount: [
                 // 	{ required: true, message: '请输入业绩金额', trigger: 'blur' }
                 // ],
-                isRemoteSign: [ //是否远程签约
+                isRemoteSign1: [ //是否远程签约
                     { required: true, message: '请选择是否远程签约', trigger: 'change' }
                 ],
                 visitTime: [ //请选择到访时间
@@ -828,9 +830,9 @@
                 amountReceivable:'',
                 firstToll:'',
                 preferentialAmount:'',
-                signType:1,
+                signType:'',
                 giveAmount:'',
-                isRemoteSign:1,
+                isRemoteSign:'',
 
                 visitTime:"",
                 visitCity:"",
@@ -932,7 +934,7 @@
             editSign(){
                 var param = {};
                 param.id = vclueId;
-                this.suppWrap =false; // 默认关闭 到访记录 填写部分
+                this.suppWrap =true; // 默认关闭 到访记录 填写部分
                 axios.post('/businesssign/echo',param).then(function (response) {
                     mainDivVM.formSigning = response.data.data;
                     mainDivVM.formSigning.clueId=vclueId;
@@ -941,7 +943,7 @@
                     mainDivVM.currentCity(mainDivVM.formSigning.signCity)
                     //  设置默认时间
                     mainDivVM.formSigning.payTime = new Date()
-                    mainDivVM.formSigning.isRemoteSign = 0;
+                    mainDivVM.formSigning.isRemoteSign = "0";
                 });
 
             },
