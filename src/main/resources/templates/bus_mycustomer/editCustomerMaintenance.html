@@ -361,11 +361,18 @@
                           label="操作"
                           align="center">
                           <template slot-scope="scope">
-                              <el-button
-                                  size="mini"
-                                  type="text"
-                                  @click="handleOperateFn(scope.$index, scope.row)"
-                               >{{ scope.row.operate }}</el-button>
+                            <!-- <el-button
+                                size="mini"
+                                type="text"
+                                @click="handleOperateFn(scope.$index, scope.row)">
+                                {{ scope.row.operate }}
+                            </el-button> -->
+                            <el-button 
+                                size="mini" 
+                                type="text"
+                                @click="handleOperateFn(scope.$index, scope.row)">
+                                {{scope.row.fileType=="mp3"? '下载录音':'查看图片'}} 
+                            </el-button>
                           </template>
                         </el-table-column>
                         <el-table-column
@@ -749,6 +756,7 @@
         }
     </style>
 </body>
+<script src="/js/common/download.js"></script>
 <!-- import Vue before Element -->
  <div th:include="_footer_include :: #jsLib"></div>
 <script th:inline="javascript" >
@@ -1413,6 +1421,25 @@ var ossUrl=[[${ossUrl}]];
             },
             handleOperateFn(index, row) { //上传资源"查看图片、下载录音"
                 console.log(index, row);
+                if( row.fileType == 'mp3' ){
+                    /* axios.get(row.filePath).then(function(response){
+                        console.log(response);
+                        //this.download1( response.data, row.fileName, 'auido/mp3' );
+                    }).catch(function(error){
+                        console.log(error);
+                    }); */
+                    var x=new XMLHttpRequest();
+                    x.open("GET", row.filePath, true);
+                    x.responseType = 'blob';
+                    x.onload=function(e){
+                        download(x.response, row.fileName, "auido/mp3" );
+                    };
+                    x.send();
+                    //this.download1( row.filePath, row.fileName, 'auido/mp3' );
+                }else{
+                    this.dialogFormUploadImgSrc = row.filePath;
+                    this.dialogFormUploadImg =  true;
+                }
             },
             addRecord() { //添加记录
                 this.tableDataC2.push({
