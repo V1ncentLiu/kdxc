@@ -28,19 +28,19 @@
     <el-row class="marginB10 greybg padding20" style="padding-bottom: 0">        
         <el-form :inline="true" :model="form" ref="form">
             <el-form-item label="">
-                <el-select v-model="form.teleGroupName" placeholder="电销组" style="width: 100%;" clearable>
+                <el-select v-model="form.teleGroupId" placeholder="电销组" style="width: 100%;"  @change="currentTelSale" clearable>
                     <el-option
-                        v-for="item in projectList"
+                        v-for="item in orgSelect"
                         :key="item.id"
-                        :label="item.projectName"
+                        :label="item.name"
                         :value="item.id">
                     </el-option>
                 </el-select>
             </el-form-item> 
             <el-form-item label="">  
-                <el-select v-model="form.businessConsultant" placeholder="创业顾问" style="width: 100%;" clearable>
+                <el-select v-model="form.teleSaleId" placeholder="创业顾问" style="width: 100%;" clearable>
                     <el-option
-                        v-for="item in businessGroupList"
+                        v-for="item in busSaleArr "
                         :key="item.id"
                         :label="item.name"
                         :value="item.id">
@@ -48,17 +48,17 @@
                 </el-select>
             </el-form-item>    
             <el-form-item label="">  
-                <el-select v-model="form.tasteItems" placeholder="品尝项目" style="width: 100%;" clearable>
+                <el-select v-model="form.projectId" placeholder="品尝项目" style="width: 100%;" clearable>
                     <el-option
-                        v-for="item in busManagerList"
+                        v-for="item in projectList"
                         :key="item.id"
-                        :label="item.name"
+                        :label="item.projectName"
                         :value="item.id">
                     </el-option>
                 </el-select>
             </el-form-item>   
             <el-form-item label="">  
-                <el-select v-model="form.openshopProvince" placeholder="开店省份" style="width: 100%;" clearable>
+                <el-select v-model="form.province" placeholder="开店省份" style="width: 100%;" clearable>
                     <el-option
                         v-for="item in proviceList"
                         :key="item.id"
@@ -67,6 +67,7 @@
                     </el-option>
                 </el-select>
             </el-form-item>   
+            <!-- 
             <el-form-item label="">  
                 <el-select v-model="form.invisitStatus" placeholder="邀约来访状态" style="width: 100%;" clearable>
                     <el-option
@@ -77,10 +78,18 @@
                     </el-option>
                 </el-select>
             </el-form-item>   
+             -->
             <el-form-item label="提交邀约时间：">
                 <el-date-picker
                     style="width: 100%;"
-                    v-model="form.submitInvitateTime"
+                    v-model="form.createTimeStart"
+                    type="datetime"
+                    format="yyyy-MM-dd HH:mm"
+                    placeholder="选择日期时间">
+                </el-date-picker>
+                 <el-date-picker
+                    style="width: 100%;"
+                    v-model="form.createTimeEnd"
                     type="datetime"
                     format="yyyy-MM-dd HH:mm"
                     placeholder="选择日期时间">
@@ -89,14 +98,21 @@
             <el-form-item label="邀约到访时间：">
                 <el-date-picker
                     style="width: 100%;"
-                    v-model="form.invitateVistitTime"
+                    v-model="form.reserveTimeStart"
+                    type="datetime"
+                    format="yyyy-MM-dd HH:mm"
+                    placeholder="选择日期时间">
+                </el-date-picker>
+                <el-date-picker
+                    style="width: 100%;"
+                    v-model="form.reserveTimeEnd"
                     type="datetime"
                     format="yyyy-MM-dd HH:mm"
                     placeholder="选择日期时间">
                 </el-date-picker>
             </el-form-item>
             <el-form-item label="">  
-                <el-select v-model="form.visitEffectiveness" placeholder="到访有效性" style="width: 100%;" clearable>
+                <el-select v-model="form.status" placeholder="到访有效性" style="width: 100%;" clearable>
                     <el-option
                         v-for="item in visitEffStatusOpt"
                         :key="item.value"
@@ -106,13 +122,12 @@
                 </el-select>
             </el-form-item>
             <el-form-item label="">
-                <el-input v-model="form.customerName" placeholder="客户姓名"></el-input>
+                <el-input v-model="form.cusName" placeholder="客户姓名"></el-input>
             </el-form-item>
             <el-button type="primary" @click="initCustomerVisitRecord">搜索</el-button>               
         </el-form>       
     </el-row>
-    <el-row>
-        <el-table 
+    <el-table 
             ref="multipleTable"
             tooltip-effect="dark"
             style="width: 100%"
@@ -124,39 +139,57 @@
             >
             <el-table-column align="center" type="selection" width="55"></el-table-column>
             <el-table-column align="center" prop="serialNum" label="序号" width="55"></el-table-column>
-            <el-table-column align="center" prop="submitInvitateTime" label="提交邀约时间"></el-table-column>
-            <el-table-column align="center" prop="invitateVistitTime" label="邀约来访时间"></el-table-column>
-            <el-table-column align="center" prop="teleGroupName" label="电销组"></el-table-column> 
-            <el-table-column align="center" prop="salesDirector" label="电销总监"></el-table-column> 
-            <el-table-column align="center" prop="salesStaff" label="电销员工"></el-table-column> 
-            <el-table-column align="center" prop="teleGroupProgram" label="电销组项目"></el-table-column> 
-            <el-table-column align="center" prop="businessDistrict" label="商务大区"></el-table-column> 
-            <el-table-column align="center" prop="businessGroup" label="商务小组"></el-table-column> 
-            <el-table-column align="center" prop="businessManagerName" label="商务经理" width="100"></el-table-column>
-            <el-table-column align="center" prop="customerName" label="客户姓名"></el-table-column>  
-            <el-table-column align="center" prop="tasteItems" label="品尝项目" width="100"></el-table-column>
+            <el-table-column align="center" prop="createTime" label="提交邀约时间"></el-table-column>
+            <el-table-column align="center" prop="reserveTime" label="邀约来访时间"></el-table-column>
+            <el-table-column align="center" prop="teleGorupName" label="电销组"></el-table-column> 
+            <el-table-column align="center" prop="teleDirectorName" label="电销总监"></el-table-column> 
+            <el-table-column align="center" prop="teleSaleName" label="电销员工"></el-table-column> 
+            <el-table-column align="center" prop="teleProject" label="电销组项目"></el-table-column> 
+            <el-table-column align="center" prop="busAreaName" label="商务大区"></el-table-column> 
+            <el-table-column align="center" prop="busSaleName" label="商务小组"></el-table-column> 
+            <el-table-column align="center" prop="busSaleName" label="商务经理" width="100"></el-table-column>
+            <el-table-column align="center" prop="cusName" label="客户姓名"></el-table-column>  
+            <el-table-column align="center" prop="tasteProjectName" label="品尝项目" width="100"></el-table-column>
             <el-table-column align="center" prop="contractShopType" label="签约店型" width="100"></el-table-column>
-            <el-table-column align="center" prop="openshopProvince " label="开店省份" width="100"></el-table-column> 
-            <el-table-column align="center" prop="openshopCity" label="开店城市" width="100"></el-table-column>   
-            <el-table-column align="center" prop="openshopProvinceDistrict" label="开店区／县" width="120"></el-table-column>
-            <el-table-column align="center" prop="customerSex" label="客户性别"></el-table-column>  
-            <el-table-column align="center" prop="customerAge" label="客户年龄"></el-table-column>  
-            <el-table-column align="center" prop="partner" label="合伙人"></el-table-column>
-            <el-table-column align="center" prop="cateringExperience" label="餐饮经验"></el-table-column>
-            <el-table-column align="center" prop="siteSelection" label="选址情况"></el-table-column>
-            <el-table-column align="center" prop="preinvestmentAmount" label="预投金额"></el-table-column>
-            <el-table-column align="center" prop="intentionProject" label="意向项目"></el-table-column>
-            <el-table-column align="center" prop="storefrontArea" label="店面面积"></el-table-column>
+            <el-table-column align="center" prop="province" label="开店省份" width="100"></el-table-column> 
+            <el-table-column align="center" prop="city" label="开店城市" width="100"></el-table-column>   
+            <el-table-column align="center" prop="district" label="开店区／县" width="120"></el-table-column>
+            <el-table-column align="center" prop="sex" label="客户性别">
+                <template slot-scope="scope">
+	                      <div v-if="scope.row.sex === 1">
+	                                                                             男
+	                      </div>
+	                       <div v-else-if="scope.row.sex ===2">
+	                                                                             女                                         
+	                       </div>
+	          </template>
+            
+            </el-table-column>  
+            <el-table-column align="center" prop="age" label="客户年龄"></el-table-column>  
+            <el-table-column align="center" prop="partnerTypeName" label="合伙人"></el-table-column>
+            <el-table-column align="center" prop="experience" label="餐饮经验"></el-table-column>
+            <el-table-column align="center" prop="hasAddressName" label="选址情况"></el-table-column>
+            <el-table-column align="center" prop="advanceAmountName" label="预投金额"></el-table-column>
+            <el-table-column align="center" prop="purProject" label="意向项目"></el-table-column>
+            <el-table-column align="center" prop="areaName" label="店面面积"></el-table-column>
             <el-table-column align="center" prop="createTime" label="创建时间"></el-table-column>
-            <el-table-column align="center" prop="noVisitReason" label="未到访原因" width="100">
+            <el-table-column align="center" prop="notVisitReason" label="未到访原因" width="100">
                 <template slot-scope="scope">
                  	<span>未到访原因</span>
                 </template>
             </el-table-column>
             <el-table-column align="center" prop="status" label="到访有效性" width="100">
-                <template slot-scope="scope">
-                 	<span>待审核</span> 
-                </template>
+                        <template slot-scope="scope">
+	                      <div v-if="scope.row.status ===0">
+	                                                                           被驳回
+	                      </div>
+	                       <div v-else-if="scope.row.status ===1">
+	                                                                             审核中                               
+	                       </div>
+	                      <div v-else-if="scope.row.status ===2">
+	                                                                             有效                              
+	                       </div>
+	          </template>
             </el-table-column>
             
         </el-table>
@@ -166,7 +199,7 @@
     <!-- 驳回处理 -->
     <el-dialog title="提示" :visible.sync="dialogFormVisible">
         <el-form :model="dialogForm" ref="dialogForm" :rules="dialogRules">            
-            <div class="fs16 marginB20">确定要将此 {{signRecordArrTitle}} 到访记录驳回吗？</div>
+            <div class="fs16 marginB20">确定要将此 {{signRecordArrTitle}} 未到访记录驳回吗？</div>
             <el-form-item label="驳回原因：" label-width="100px" prop="reason">
                 <el-input
                     type="textarea"
@@ -201,6 +234,7 @@
     var businessGroupList = [[${businessGroupList}]];
     var proviceList = [[${proviceList}]];
     var companyList = [[${companyList}]];
+    var orgSelect = [[${orgSelect}]];
 </script>
 <script>
   var customerVisitRecordVm =   new Vue({
@@ -213,44 +247,22 @@
                 notSignedReasonDialog:false,
                 reasonDialog:false,
                 form: {
-                	teleGroupName:'',
-                	businessConsultant: '',
-                	tasteItems: '',
-                	openshopProvince: '',
-                	invisitStatus: '',
+                	teleGroupId:'',
+                	teleSaleId: '',
+                	projectId: '',
+                	province: '',
                 	submitInvitateTime: '',
                 	invitateVistitTime: '',
-                	visitEffectiveness: '',
-                	customerName:''
-                }
+                	status: '',
+                	createTimeStart:'',
+                	createTimeEnd:'',
+                	reserveTimeStart:'',
+                	reserveTimeEnd:'',
+                	cusName:'',
+                	
+                },
                 formLabelWidth: '150px',
-                dataTable: [{ //表格字段
-                	submitInvitateTime:''
-               		invitateVistitTime:''
-               		teleGroupName:''
-               		salesDirector:''
-               		salesStaff:''
-               		teleGroupProgram:''
-               		businessDistrict:''
-               		businessGroup:''
-               		businessManagerName:''
-               		customerName:''
-               		tasteItems:''
-               		contractShopType:''
-               		openshopProvince:''
-               		openshopCity:''
-               		openshopProvinceDistrict:''
-               		customerSex:''
-               		customerAge:''
-               		partner:''
-               		cateringExperience:''
-               		siteSelection:''
-               		preinvestmentAmount:''
-               		intentionProject:''
-               		storefrontArea:''
-               		createTime:''
-               		noVisitReason:''	
-                }],
+                dataTable: [],
                 visitEffStatusOpt: [{
                     value: 0,
                     label: '无效'
@@ -290,20 +302,22 @@
                 rebutReason:'',//驳回原因
                 multipleSelection:[],
                 signRecordArrTitle:'',
-                notSignReason:'',//未签约原因
+                notSignReason:'',//未签约原因,
+                orgSelect:orgSelect,
+                busSaleArr:[],
             }        	  
         },
         methods: {
              handleClick(tab, event) {  //到访或者未到访tab切换
-                if(tab.name=='first'){
-                	window.location.href="/visit/visit/customerVisitRecord.html";
-                }else{
-                	window.location.href="/visit/visit/customerNoVisitRecord.html";
-                }
+                 if(tab.name=='first'){
+                 	window.location.href="/visit/visitRecord/visitRecordPage.html";
+                 }else{
+                 	window.location.href="/visit/visitRecord/noVisitRecordPage.html";
+                 }
              },
             submitDialogForm(formName) {
-                this.$refs[formName].validate((valid) => {
-                    if (valid) {
+              //  this.$refs[formName].validate((valid) => {
+                 //   if (valid) {
                       
                     	var param ={}; 
                         var rows = this.multipleSelection;
@@ -337,10 +351,10 @@
                     	
                     	
                     	
-                    } else {
-                        return false;
-                    }
-                });
+                   // } else {
+                  //      return false;
+                  //  }
+               // });
             },
             notSignedReasonClick(row) {//未签约原因
                 console.log(row);
@@ -372,14 +386,13 @@
                         isPass=false;
                         break;
                     }
-                    title += "【"+curRow.serialNum+""+curRow.customerName+"】 ";
+                    title += "【"+curRow.cusName+"】 ";
                     idArr.push(curRow.id);
                 }
                 if(!isPass){
                     return;
                 }
-            	
-                this.$confirm('确定要将此 '+title+' 到访记录定为有效吗？', '提示', {
+                this.$confirm('确定要将此 '+title+'未到访记录定为有效吗？', '提示', {
                     confirmButtonText: '确定',
                     cancelButtonText: '取消',
                     type: 'warning'
@@ -412,10 +425,21 @@
                     });          
                 });
             },
+            currentTelSale(seleVal){
+         		if(null==seleVal||seleVal==""){
+         			return ;
+         		}
+            	param={};
+               	param.orgId=seleVal;
+               	param.roleCode="DXCYGW";
+                axios.post('/user/userManager/listByOrgAndRole' ,param).then(function (response) {  
+                	customerVisitRecordVm.busSaleArr=response.data.data;
+                });
+            },
+        	
             initCustomerVisitRecord(){//初始列表
-            	   
-                var startTime = this.form.visitStartTime;
-                var endTime = this.form.visitEndTime;
+                var startTime = this.form.createTimeStart;
+                var endTime = this.form.createTimeEnd;
                 var startTimestamp = Date.parse(new Date(startTime));
                if(endTime){
                    var endTimestamp = new Date(endTime);
@@ -430,7 +454,7 @@
                  var param = this.form;
                  param.pageNum=this.pager.currentPage;
                  param.pageSize=this.pager.pageSize;
-                 axios.post('/visit/visitRecord/listVisitRecord',param)
+                 axios.post('/visit/visitRecord/listNoVisitRecord',param)
                  .then(function (response) {
                      var data =  response.data
                      if(data.code=='0'){
@@ -438,8 +462,8 @@
                         customerVisitRecordVm.dataTable= resData.data;
                       //3.分页组件
                         customerVisitRecordVm.pager.total= resData.total;
-                        customerVisitRecordVm.pager.currentPage = resData.currentPage;
-                        customerVisitRecordVm.pager.pageSize = resData.pageSize;
+                         customerVisitRecordVm.pager.currentPage = resData.currentPage;
+                         customerVisitRecordVm.pager.pageSize = resData.pageSize;
                          
                      }else{
                          customerVisitRecordVm.$message({message:data.msg,type:'error'});
@@ -455,7 +479,6 @@
             	
             },
             OpenRejectVisitRecordDialog(){//驳回
-            	debugger;
             	   this.signRecordArrTitle='';
                    var rows = this.multipleSelection;
                    if(rows.length<1){
@@ -468,7 +491,7 @@
                    var title = "";
                    for(var i=0;i<rows.length;i++){
                        var curRow = rows[i];
-                       title += "【"+curRow.serialNum+""+curRow.customerName+"】";
+                       title += "【"+curRow.cusName+"】";
                    }
                    this.signRecordArrTitle=title;
                    

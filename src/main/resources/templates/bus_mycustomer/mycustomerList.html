@@ -183,6 +183,9 @@
                     <span style="display:block;color: #1e2746; width:90%; word-wrap:break-word; word-break:normal;">{{notVisitFlag.str}}</span>
                 </el-form-item>
             </el-form>
+            <div slot="footer" class="dialog-footer" style="text-align: center">
+                <el-button type="primary" @click="openEditVisitRecord">添加到访记录</el-button>
+            </div>
         </template>
     </el-dialog>
     <!--标记未到访-->
@@ -1131,7 +1134,7 @@
         data: {
             editableTabsValue: 0, //tabs标签
             editableTabs: [],
-            suppWrap: false,
+            suppWrap: true,
             tabIndex: 2,
             updateVisitRecordDialogVisible:false,
             addVisitRecordDialogVisible:false,
@@ -1193,6 +1196,7 @@
                 ],
             },
             notVisitFlag:{
+                clueId:"",
                 str:"",
                 clueIds:[],
                 notVisitReason:""
@@ -1490,7 +1494,7 @@
                 this.multipleSelection = val;
             },
             selectIsRemoteSign (pa1) { //是否远程签约event
-                if( pa1==0 ){
+                if( pa1==1 ){
                     this.suppWrap = false;
                 }else{
                     this.suppWrap = true;
@@ -1681,7 +1685,13 @@
             openEditVisitRecord(row){
                // 打开编辑到访记录
                 var param ={};
-                param.id = row.clueId;
+                if(row.clueId){
+                    param.id = row.clueId;
+                }else{
+                    param.id = mainDivVM.notVisitFlag.clueId;
+                }
+
+
                 if(row.signAuditStatus==0||row.signAuditStatus==1||row.signAuditStatus==2){
                     mainDivVM.existsSign =true;
                     mainDivVM.curSignStatus = row.signAuditStatus;
@@ -1701,6 +1711,7 @@
                 // 展示未到访原因
                 var param={};
                 param.id = row.clueId;
+                mainDivVM.notVisitFlag.clueId = row.clueId;
                 axios.post('/aggregation/businessMyCustomer/notVisitReason',param).then(function (response) {
                     mainDivVM.notVisitdDialogVisible = true;
                     mainDivVM.notVisitFlag.str = response.data.data.notVisitReason
