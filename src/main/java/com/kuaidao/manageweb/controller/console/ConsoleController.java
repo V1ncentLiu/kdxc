@@ -189,7 +189,7 @@ public class ConsoleController {
 
         
         
-/*        if(type.equals("1")) {
+   /*     if(type.equals("1")) {
             path = "console/consoleTelemarketing";
         }else if(type.equals("2")) {
             List<Integer> statusList = new ArrayList<Integer>();
@@ -317,7 +317,9 @@ public class ConsoleController {
         List<Integer> sourceList = new ArrayList<Integer>();
         sourceList.add(3);
         reqDTO.setSourceList(sourceList);
+        //type 1：日期字段用电销的
         reqDTO.setType(1);
+        reqDTO.setPhase(CluePhase.PHAE_4TH.getCode());
         return clueBasicFeignClient.countAssignClueNum(reqDTO);
     }
 
@@ -402,6 +404,7 @@ public class ConsoleController {
         teleDirectorSourceList.add(2);
         teleDirectorSourceList.add(3);
         reqDTO.setTeleDirectorSourceList(teleDirectorSourceList);
+        reqDTO.setPhase(CluePhase.PHAE_3RD.getCode());
         return clueBasicFeignClient.countAssignClueNum(reqDTO);
     }
 
@@ -437,9 +440,8 @@ public class ConsoleController {
     public JSONResult<Integer> countTeleDirectorTodayAppiontmentNum() {
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
         TeleConsoleReqDTO teleConsoleReqDTO = new TeleConsoleReqDTO();
-        Long id = curLoginUser.getId();
         UserOrgRoleReq req = new UserOrgRoleReq();
-        req.setOrgId(id);
+        req.setOrgId(curLoginUser.getOrgId());
         req.setRoleCode(RoleCodeEnum.DXCYGW.name());
         JSONResult<List<UserInfoDTO>> userInfoJr = userInfoFeignClient.listByOrgAndRole(req);
         if (!JSONResult.SUCCESS.equals(userInfoJr.getCode())) {
