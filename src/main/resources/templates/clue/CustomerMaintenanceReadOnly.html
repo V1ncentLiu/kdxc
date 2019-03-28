@@ -525,6 +525,7 @@
     </el-dialog>
 </div>
 </body>
+<script src="/js/common/download.js"></script>
 <!-- import Vue before Element -->
  <div th:include="_footer_include :: #jsLib"></div>
 <script src="/js/common/download.js"></script>
@@ -911,8 +912,18 @@ if(base==null){
                 this.buttonType='A';
             },
             handleOperateFn(index, row) { //上传资源"查看图片、下载录音"
+              console.log(index, row);
+              console.log( row.filePath );
+              console.log( row.fileName );
                 if( row.fileType == 'mp3' ){
-                    this.download1( row.filePath, row.fileName, 'auido/mp3' );
+                  var x=new XMLHttpRequest();
+                  x.open("GET", row.filePath, true);
+                  x.responseType = 'blob';
+                  x.onload=function(e){
+                    download(x.response, row.fileName, "auido/mp3" );
+                  };
+                  x.send();
+//                    this.download1( row.filePath, row.fileName, 'auido/mp3' );
                 }else{
                     this.dialogFormUploadImgSrc = row.filePath;
                     this.dialogFormUploadImg =  true;
