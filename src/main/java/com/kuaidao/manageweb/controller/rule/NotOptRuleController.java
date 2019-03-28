@@ -23,7 +23,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import com.kuaidao.aggregation.constant.AggregationConstant;
 import com.kuaidao.aggregation.dto.project.ProjectInfoDTO;
-import com.kuaidao.aggregation.dto.project.ProjectInfoPageParam;
 import com.kuaidao.aggregation.dto.rule.ClueAssignRuleDTO;
 import com.kuaidao.aggregation.dto.rule.ClueAssignRulePageParam;
 import com.kuaidao.aggregation.dto.rule.ClueAssignRuleReq;
@@ -81,9 +80,8 @@ public class NotOptRuleController {
     @RequiresPermissions("clueAssignRule:notOptRuleManager:view")
     public String initCompanyList(HttpServletRequest request) {
         // 查询所有项目
-        JSONResult<List<ProjectInfoDTO>> listNoPage =
-                projectInfoFeignClient.listNoPage(new ProjectInfoPageParam());
-        request.setAttribute("projectList", listNoPage.getData());
+        JSONResult<List<ProjectInfoDTO>> allProject = projectInfoFeignClient.allProject();
+        request.setAttribute("projectList", allProject.getData());
 
         // 查询非优化字典资源类别集合
         request.setAttribute("clueCategoryList", getNotOptCategory());
@@ -107,9 +105,8 @@ public class NotOptRuleController {
         // 查询电销组加话务组
         request.setAttribute("orgList", getTeleAndTrafficGroup());
         // 查询所有项目
-        JSONResult<List<ProjectInfoDTO>> listNoPage =
-                projectInfoFeignClient.listNoPage(new ProjectInfoPageParam());
-        request.setAttribute("projectList", listNoPage.getData());
+        JSONResult<List<ProjectInfoDTO>> allProject = projectInfoFeignClient.allProject();
+        request.setAttribute("projectList", allProject.getData());
         // 查询非优化字典资源类别集合
         request.setAttribute("clueCategoryList", getNotOptCategory());
         // 查询字典资源类型集合
@@ -136,9 +133,8 @@ public class NotOptRuleController {
         // 查询电销组加话务组
         request.setAttribute("orgList", getTeleAndTrafficGroup());
         // 查询所有项目
-        JSONResult<List<ProjectInfoDTO>> listNoPage =
-                projectInfoFeignClient.listNoPage(new ProjectInfoPageParam());
-        request.setAttribute("projectList", listNoPage.getData());
+        JSONResult<List<ProjectInfoDTO>> allProject = projectInfoFeignClient.allProject();
+        request.setAttribute("projectList", allProject.getData());
         // 查询非优化字典资源类别集合
         request.setAttribute("clueCategoryList", getNotOptCategory());
         // 查询字典资源类型集合

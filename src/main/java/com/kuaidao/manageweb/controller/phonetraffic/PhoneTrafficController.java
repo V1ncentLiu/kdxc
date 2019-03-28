@@ -167,14 +167,15 @@ public class PhoneTrafficController {
 //                param.setUserList(dxList);
 //            }
 //        }
-        if(roleList!=null&&roleList.get(0)!=null) {
-            if (RoleCodeEnum.GLY.name().equals(roleList.get(0).getRoleCode())) {
-            }else if (RoleCodeEnum.HWZG.name().equals(roleList.get(0).getRoleCode())) {
-                param.setPhTraDirectorId(user.getId());
-            } else {
-                param.setOperatorId(user.getId());
-            }
-        }
+//        权限相关代码
+//        if(roleList!=null&&roleList.get(0)!=null) {
+//            if (RoleCodeEnum.GLY.name().equals(roleList.get(0).getRoleCode())) {
+//            }else if (RoleCodeEnum.HWZG.name().equals(roleList.get(0).getRoleCode())) {
+//                param.setPhTraDirectorId(user.getId());
+//            } else {
+//                param.setOperatorId(user.getId());
+//            }
+//        }
 
         String defineColumn = param.getDefineColumn();
         String defineValue = param.getDefineValue();
@@ -227,27 +228,17 @@ public class PhoneTrafficController {
     }
 
     /**
-     * 转移资源
+     * 分配资源
      * @return
      */
-    @PostMapping("/transferClue")
+    @PostMapping("/toTele")
     @ResponseBody
-    public JSONResult transferClue(@Valid @RequestBody AllocationClueReq allocationClueReq,
-                                   BindingResult result) {
+    public JSONResult toTele(@RequestBody ClueDTO clueDTO) {
 
-        if (result.hasErrors()) {
-            return CommonUtil.validateParam(result);
-        }
-        UserInfoDTO user = CommUtil.getCurLoginUser();
-        // 插入当前用户、角色信息
-        allocationClueReq.setUserId(user.getId());
-        List<RoleInfoDTO> roleList = user.getRoleList();
-        if (roleList != null) {
-            allocationClueReq.setRoleId(roleList.get(0).getId());
-            allocationClueReq.setRoleCode(roleList.get(0).getRoleCode());
-        }
-        return phoneTrafficFeignClient.transferClue(allocationClueReq);
+        return phoneTrafficFeignClient.toTele(clueDTO);
     }
+
+
 
     /**
      * 跳转 编辑资源页面
@@ -335,12 +326,105 @@ public class PhoneTrafficController {
         return "/phonetraffic/editCustomerMaintenance";
     }
 
+
+    /**
+     * 跳转 编辑资源页面
+     */
+    @RequestMapping("/toReadyOnlyPage")
+    public String toReadyOnlyPage(HttpServletRequest request, @RequestParam String clueId){
+        CallRecordReqDTO call = new CallRecordReqDTO();
+        call.setClueId(clueId);
+        JSONResult<List<CallRecordRespDTO>> callRecord = callRecordFeign.listTmCallReacordByParamsNoPage(call);
+
+        // 资源通话记录
+        if (callRecord != null && JSONResult.SUCCESS.equals(callRecord.getCode()) && callRecord.getData() != null) {
+            request.setAttribute("callRecord", callRecord.getData());
+        }
+        ClueQueryDTO queryDTO = new ClueQueryDTO();
+
+        queryDTO.setClueId(new Long(clueId));
+
+        request.setAttribute("clueId", clueId);
+
+        request.setAttribute("ossUrl", ossUrl);
+
+        JSONResult<ClueDTO> clueInfo = myCustomerFeignClient.findClueInfo(queryDTO);
+
+        // 维护的资源数据
+        if (clueInfo != null && JSONResult.SUCCESS.equals(clueInfo.getCode()) && clueInfo.getData() != null) {
+
+            if (null != clueInfo.getData().getClueCustomer()) {
+                request.setAttribute("customer", clueInfo.getData().getClueCustomer());
+            } else {
+                request.setAttribute("customer", new ArrayList());
+            }
+            if (null != clueInfo.getData().getClueBasic()) {
+                request.setAttribute("base", clueInfo.getData().getClueBasic());
+            } else {
+                request.setAttribute("customer", new ArrayList());
+            }
+            if (null != clueInfo.getData().getClueIntention()) {
+                request.setAttribute("intention", clueInfo.getData().getClueIntention());
+            } else {
+                request.setAttribute("customer", new ArrayList());
+            }
+        }
+        // 获取资源跟进记录数据
+        TrackingReqDTO dto = new TrackingReqDTO();
+        dto.setClueId(new Long(clueId));
+        dto.setStage(StageContant.STAGE_PHONE_TRAFFIC);
+        JSONResult<List<TrackingRespDTO>> trackingList = trackingFeignClient.queryList(dto);
+        if (trackingList != null && trackingList.SUCCESS.equals(trackingList.getCode())
+                && trackingList.getData() != null) {
+            request.setAttribute("trackingList", trackingList.getData());
+        } else {
+            request.setAttribute("trackingList", new ArrayList());
+        }
+
+        // 获取资源流转数据
+        CirculationReqDTO circDto = new CirculationReqDTO();
+        circDto.setClueId(new Long(clueId));
+        circDto.setStage(StageContant.STAGE_PHONE_TRAFFIC);
+        JSONResult<List<CirculationRespDTO>> circulationList = circulationFeignClient.queryList(circDto);
+        if (circulationList != null && circulationList.SUCCESS.equals(circulationList.getCode())
+                && circulationList.getData() != null) {
+            request.setAttribute("circulationList", circulationList.getData());
+        } else {
+            request.setAttribute("circulationList", new ArrayList());
+        }
+        // 项目
+        ProjectInfoPageParam param = new ProjectInfoPageParam();
+        JSONResult<List<ProjectInfoDTO>> proJson = projectInfoFeignClient.listNoPage(param);
+        if (proJson.getCode().equals(JSONResult.SUCCESS)) {
+            request.setAttribute("proSelect", proJson.getData());
+        } else {
+            request.setAttribute("proSelect", new ArrayList());
+        }
+
+        // 获取已上传的文件数据
+        ClueQueryDTO fileDto = new ClueQueryDTO();
+        fileDto.setClueId(new Long(clueId));
+        fileDto.setStage(StageContant.STAGE_PHONE_TRAFFIC);
+        JSONResult<List<ClueFileDTO>> clueFileList = myCustomerFeignClient.findClueFile(fileDto);
+        if (clueFileList != null && clueFileList.SUCCESS.equals(clueFileList.getCode())
+                && clueFileList.getData() != null) {
+            request.setAttribute("clueFileList", clueFileList.getData());
+        }
+        return "/phonetraffic/readOnlyCustomerMaintenance";
+    }
+
+
     /**
      * 转电销
      */
     public void toTele(){
 //    通过规则，转到电销
     }
+
+    /**
+     *
+     */
+
 
     /**
      * 话务人员：当前人员，所属组织同级 以及 下属组织的人员

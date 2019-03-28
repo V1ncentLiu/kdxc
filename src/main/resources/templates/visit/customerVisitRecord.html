@@ -285,9 +285,9 @@
         methods: {
              handleClick(tab, event) {  //到访或者未到访tab切换
                 if(tab.name=='first'){
-                	window.location.href="/visit/visit/customerVisitRecord.html";
+                	window.location.href="/visit/visitRecord/visitRecordPage.html";
                 }else{
-                	window.location.href="/visit/visit/customerNoVisitRecord.html";
+                	window.location.href="/visit/visitRecord/noVisitRecordPage.html";
                 }
              },
             submitDialogForm(formName) {
@@ -444,7 +444,7 @@
             	
             },
             OpenRejectVisitRecordDialog(){//驳回
-            	debugger;
+            	
             	   this.signRecordArrTitle='';
                    var rows = this.multipleSelection;
                    if(rows.length<1){
@@ -454,10 +454,19 @@
                         });
                        return;
                    }
+                   var isPass = true;
                    var title = "";
                    for(var i=0;i<rows.length;i++){
                        var curRow = rows[i];
+                       if(curRow.status!=1){
+                           this.$message({message:'只允许审核待审核的数据',type:'warning'});
+                           isPass=false;
+                           break;
+                       }
                        title += "【"+curRow.serialNum+""+curRow.customerName+"】";
+                   }
+                   if(!isPass){
+                       return;
                    }
                    this.signRecordArrTitle=title;
                    

@@ -15,13 +15,14 @@
     </el-breadcrumb>
     <el-row>
         <div class="tip">感谢您辛苦工作的第<em>{{workDay}}</em>天，累计业绩达<em>--</em>元，继续努力！</div>
-        <div class="affiche marginB20">
-            <span class="f-fl">系统公告：</span>   
-            <marquee class="f-fl" style="width: 90%;">
-                <ul>
-                    <li v-for="item in items" :key="item.id">{{ item.content }}</li>
-                </ul>                
-            </marquee>         
+        <!-- 系统公告 -->
+        <div class="affiche marginB20" v-if="afficheBox">
+            <span class="f-fl"><img th:src="@{/images/icon_notice.png}" alt="" class="f-fl" style="margin-right: 10px;">系统公告：</span>  
+            <div class="f-fl" style="width: 90%;">
+                <marquee onmouseover="this.stop()" onmouseout="this.start()">
+                    <span style="margin-right: 50px;" v-for="item in items" :key="item.id">{{ item.content }}</span>                
+                </marquee> 
+            </div>                     
         </div>
         <div class="title">
             <div class="leftbox f-fl"><img th:src="@{/images/icon_kb.png}" alt="" class="f-fl">数字看板</div>
@@ -240,7 +241,7 @@
                <el-table-column align="center" prop="province" label="开店省份" ></el-table-column>
                <el-table-column align="center" prop="hasAddress" label="选址情况" :formatter="transformAddress"></el-table-column>
                <el-table-column align="center" prop="advanceAmount" label="预投金额" :formatter="transformUssm"></el-table-column>
-               <el-table-column align="center" prop="purInProject" label="意向项目" :formatter="transformPurProject" ></el-table-column>
+               <el-table-column align="center" prop="purProjectType" label="意向项目" :formatter="transformPurProject" ></el-table-column>
                <el-table-column align="center" prop="area" label="店面面积" :formatter="transformArea"></el-table-column>
             </el-table>
         </el-row>
@@ -294,7 +295,7 @@
             tooltip-effect="dark"
             style="width: 100%"
             border
-            @selection-change="handleSelectionChange"
+            @selection-change="handleSelectionChange2"
             :data="dataTable2" 
             >
             <el-table-column align="center" type="selection" width="55"></el-table-column>
@@ -371,7 +372,7 @@
             tooltip-effect="dark"
             style="width: 100%"
             border
-            @selection-change="handleSelectionChange"
+            @selection-change="handleSelectionChange3"
             :data="dataTable3" 
             >
             <el-table-column align="center" type="selection" width="55"></el-table-column>
@@ -432,10 +433,10 @@
         </el-dialog>
     </el-row>
     <!-- 待审批未到访记录 end -->
-    <!-- 待审签约记录 -->
+    <!-- 待审批签约记录 -->
     <el-row class="marginB20">
         <div class="title">
-            <div class="leftbox f-fl">待审签约记录</div>
+            <div class="leftbox f-fl">待审批签约记录</div>
             <div class="rightbox f-fr">
                 <img th:src="@{/images/icon_arrow.png}" alt="" class="f-fr">
                 <span class="f-fr" @click="gotoSignRecord">进入客户签约记录</span>
@@ -448,7 +449,7 @@
             tooltip-effect="dark"
             style="width: 100%"
             border
-             @selection-change="handleSelectionChange"
+             @selection-change="handleSelectionChange4"
             :data="dataTable4" 
             >
             <el-table-column align="center" type="selection" width="55"></el-table-column>

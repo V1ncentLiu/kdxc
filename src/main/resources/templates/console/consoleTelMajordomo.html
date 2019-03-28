@@ -15,13 +15,14 @@
     </el-breadcrumb>
     <el-row>
         <div class="tip">感谢您辛苦工作的第<em>{{workDay}}</em>天，组内累计业绩达<em>--</em>元，继续努力！</div>
-        <div class="affiche marginB20">
-            <span class="f-fl">系统公告：</span>   
-            <marquee class="f-fl" style="width: 90%;">
-                <ul>
-                    <li v-for="item in items" :key="item.id">{{ item.content }}</li>
-                </ul>                
-            </marquee>    
+        <!-- 系统公告 -->
+        <div class="affiche marginB20" v-if="afficheBox">
+            <span class="f-fl"><img th:src="@{/images/icon_notice.png}" alt="" class="f-fl" style="margin-right: 10px;">系统公告：</span>  
+            <div class="f-fl" style="width: 90%;">
+                <marquee onmouseover="this.stop()" onmouseout="this.start()">
+                    <span style="margin-right: 50px;" v-for="item in items" :key="item.id">{{ item.content }}</span>                
+                </marquee> 
+            </div>                     
         </div>
         <div class="title">
             <div class="leftbox f-fl"><img th:src="@{/images/icon_kb.png}" alt="" class="f-fl">数字看板</div>
@@ -201,13 +202,14 @@
             style="width: 100%"
             border
             :data="dataTable" 
+            @selection-change="handleSelectionChange"
             >
-            <el-table-column align="center" type="selection"  prop="clueId"  width="55" @selection-change="handleSelectionChange" ></el-table-column>
+            <el-table-column align="center" type="selection"  prop="clueId"  width="55"></el-table-column>
             <el-table-column align="center" prop="cusName" label="客户姓名"></el-table-column>
             <el-table-column align="center" prop="searchWord" label="搜索词"></el-table-column>
             <el-table-column align="center" prop="projectName" label="资源项目"></el-table-column>
-            <el-table-column align="center" prop="categoryName" label="资源类别"></el-table-column>
-            <el-table-column align="center" prop="typeName" label="资源类型"></el-table-column>
+            <el-table-column align="center" prop="category" label="资源类别" ></el-table-column>
+            <el-table-column align="center" prop="type" label="资源类型"></el-table-column>
             <el-table-column align="center" prop="createTime" label="创建时间" width="170"></el-table-column>
             <el-table-column align="center" prop="phone" label="手机号" width="170"></el-table-column>
             <el-table-column align="center" prop="repeatPhones" label="重复手机号资源" width="170">
@@ -266,6 +268,8 @@
 <div th:include="_footer_include :: #jsLib"></div>
 <script th:inline="javascript">
     var saleList=[[${saleList}]];//电销创业顾问
+    var clueCategoryList=[[${clueCategoryList}]];//资源类别
+    var clueTypeList=[[${clueTypeList}]];//资源类型
 </script>
 <script th:src="@{/js/custom/console/consoleTelMajordomo.js?v=1.0.0}"></script>
 </body>

@@ -23,7 +23,6 @@ import com.kuaidao.aggregation.dto.project.BrandListDTO;
 import com.kuaidao.aggregation.dto.project.BrandListPageParam;
 import com.kuaidao.aggregation.dto.project.CategoryDTO;
 import com.kuaidao.aggregation.dto.project.CompanyInfoDTO;
-import com.kuaidao.aggregation.dto.project.CompanyInfoPageParam;
 import com.kuaidao.aggregation.dto.project.ProjectInfoDTO;
 import com.kuaidao.aggregation.dto.project.ProjectInfoPageParam;
 import com.kuaidao.aggregation.dto.project.ProjectInfoReq;
@@ -96,8 +95,7 @@ public class ProjectController {
         request.setAttribute("projectAttributiveList",
                 getDictionaryByCode(Constants.PROJECT_ATTRIBUTIVE));
         // 查询公司列表
-        JSONResult<List<CompanyInfoDTO>> listNoPage =
-                companyInfoFeignClient.listNoPage(new CompanyInfoPageParam());
+        JSONResult<List<CompanyInfoDTO>> listNoPage = companyInfoFeignClient.allCompany();
 
         request.setAttribute("companyList", listNoPage.getData());
         // 查询品牌品类集合
@@ -118,8 +116,7 @@ public class ProjectController {
         JSONResult<ProjectInfoDTO> jsonResult = projectInfoFeignClient.get(new IdEntityLong(id));
         request.setAttribute("project", jsonResult.getData());
         // 查询公司列表
-        JSONResult<List<CompanyInfoDTO>> listNoPage =
-                companyInfoFeignClient.listNoPage(new CompanyInfoPageParam());
+        JSONResult<List<CompanyInfoDTO>> listNoPage = companyInfoFeignClient.allCompany();
 
         request.setAttribute("companyList", listNoPage.getData());
         // 查询字典品类集合

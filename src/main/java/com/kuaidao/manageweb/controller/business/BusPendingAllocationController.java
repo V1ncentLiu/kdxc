@@ -24,7 +24,6 @@ import com.kuaidao.aggregation.dto.clue.BusAllocationClueReq;
 import com.kuaidao.aggregation.dto.clue.BusPendingAllocationDTO;
 import com.kuaidao.aggregation.dto.clue.BusPendingAllocationPageParam;
 import com.kuaidao.aggregation.dto.project.ProjectInfoDTO;
-import com.kuaidao.aggregation.dto.project.ProjectInfoPageParam;
 import com.kuaidao.common.constant.OrgTypeConstant;
 import com.kuaidao.common.constant.RoleCodeEnum;
 import com.kuaidao.common.entity.JSONResult;
@@ -85,9 +84,8 @@ public class BusPendingAllocationController {
         List<OrganizationRespDTO> saleGroupList = getSaleGroupList();
         request.setAttribute("saleGroupList", saleGroupList);
         // 查询所有项目
-        JSONResult<List<ProjectInfoDTO>> listNoPage =
-                projectInfoFeignClient.listNoPage(new ProjectInfoPageParam());
-        request.setAttribute("projectList", listNoPage.getData());
+        JSONResult<List<ProjectInfoDTO>> allProject = projectInfoFeignClient.allProject();
+        request.setAttribute("projectList", allProject.getData());
         SysRegionDTO queryDTO = new SysRegionDTO();
         // 查询所有商务经理
         List<Map<String, Object>> allSaleList = getAllSaleList();
