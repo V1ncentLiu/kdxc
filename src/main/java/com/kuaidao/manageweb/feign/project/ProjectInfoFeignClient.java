@@ -159,7 +159,7 @@ public interface ProjectInfoFeignClient {
 
         @Override
         public JSONResult<List<ProjectInfoDTO>> allProject() {
-            return fallBackError("查询所有项目");
+            return fallBackError("查询所有项目1");
         }
 
         @Override

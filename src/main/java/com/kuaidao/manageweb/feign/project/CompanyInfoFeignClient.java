@@ -56,7 +56,7 @@ public interface CompanyInfoFeignClient {
     public JSONResult<PageBean<CompanyInfoDTO>> list(@RequestBody CompanyInfoPageParam param);
 
     /**
-     * 查询公司集合
+     * 查询公司集合.
      * 
      * @param menuDTO
      * @return
@@ -133,7 +133,7 @@ public interface CompanyInfoFeignClient {
 
         @Override
         public JSONResult<List<CompanyInfoDTO>> allCompany() {
-            return fallBackError("查询公司集合");
+            return fallBackError("查询公司集合.");
         }
 
         @Override
