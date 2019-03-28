@@ -46,6 +46,7 @@ var mainDivVM = new Vue({
         saleOptions:busSaleList,
         // 待审签约记录
         dataTable4:[],
+        multipleSelection4:[],
         pager:{//
             total: 0,
             currentPage: 1,
@@ -74,9 +75,11 @@ var mainDivVM = new Vue({
         recordTable4:[],//尾款付款明细表格
         // 待审批到访记录
         dataTable2:[],
+        multipleSelection2:[],
         dialogFormVisibleVisit:false,
         // 待审批未到访记录
         dataTable3:[],
+        multipleSelection3:[],
         dialogFormVisibleUnVisit:false,
 
     },
@@ -175,6 +178,15 @@ var mainDivVM = new Vue({
         handleSelectionChange(val) {
             this.multipleSelection = val;
         },
+        handleSelectionChange2(val) {
+            this.multipleSelection2 = val;
+        },
+        handleSelectionChange3(val) {
+            this.multipleSelection3 = val;
+        },
+        handleSelectionChange4(val) {
+            this.multipleSelection4 = val;
+        },
         //日期数据格式化方法
         dateFormat( row, column, cellValue, index) {
             if (cellValue == undefined) {
@@ -228,7 +240,7 @@ var mainDivVM = new Vue({
         //意向项目转换方法
         transformPurProject(row, column, cellValue, index) {
             var text="";
-            if(cellValue){
+            if(cellValue==1){
                 if(projectList){
                     for(var i=0;i<projectList.length;i++){
                         if(cellValue==projectList[i].value){
@@ -352,7 +364,7 @@ var mainDivVM = new Vue({
             });            
         },
         pass(){//待审签约记录审核通过
-            var rows = this.multipleSelection;
+            var rows = this.multipleSelection4;
             if(rows.length<1){
                 this.$message({
                    message: '请选择数据',
@@ -415,7 +427,7 @@ var mainDivVM = new Vue({
         OpenRejectSignRecordDialog(){//待审签约记录驳回
             this.signRecordArrTitle='';
             this.dialogForm.reason='';
-            var rows = this.multipleSelection;
+            var rows = this.multipleSelection4;
             if(rows.length<1){
                 this.$message({
                    message: '请选择数据',
@@ -646,7 +658,7 @@ var mainDivVM = new Vue({
         },
         OpenRejectVisitRecordDialog(){//待审批到访记录驳回
            this.signRecordArrTitle='';
-           var rows = this.multipleSelection;
+           var rows = this.multipleSelection2;
            if(rows.length<1){
                this.$message({
                   message: '请选择数据',
@@ -664,7 +676,7 @@ var mainDivVM = new Vue({
            this.dialogFormVisibleVisit=true;
         },
         passVisit(){//到访审核通过
-            var rows = this.multipleSelection;
+            var rows = this.multipleSelection2;
             if(rows.length<1){
                 this.$message({
                    message: '请选择数据',
@@ -726,7 +738,7 @@ var mainDivVM = new Vue({
             this.$refs[formName].validate((valid) => {
                 if (valid) {                  
                     var param ={}; 
-                    var rows = this.multipleSelection;
+                    var rows = this.multipleSelection2;
                     var idArr = new Array();
                     for(var i=0;i<rows.length;i++){
                         var curRow = rows[i];
@@ -782,7 +794,7 @@ var mainDivVM = new Vue({
         },
         OpenRejectUnVisitRecordDialog(){//待审批未到访记录驳回
            this.signRecordArrTitle='';
-           var rows = this.multipleSelection;
+           var rows = this.multipleSelection3;
            if(rows.length<1){
                this.$message({
                   message: '请选择数据',
@@ -800,7 +812,7 @@ var mainDivVM = new Vue({
            this.dialogFormVisibleUnVisit=true;
         },
         passUnVisit(){//未到访审核通过
-            var rows = this.multipleSelection;
+            var rows = this.multipleSelection3;
             if(rows.length<1){
                 this.$message({
                    message: '请选择数据',
@@ -858,11 +870,11 @@ var mainDivVM = new Vue({
                 });          
             });
         },
-        submitDialogFormVisit(formName) {//未到访提交
+        submitDialogFormUnVisit(formName) {//未到访提交
             this.$refs[formName].validate((valid) => {
                 if (valid) {                  
                     var param ={}; 
-                    var rows = this.multipleSelection;
+                    var rows = this.multipleSelection3;
                     var idArr = new Array();
                     for(var i=0;i<rows.length;i++){
                         var curRow = rows[i];

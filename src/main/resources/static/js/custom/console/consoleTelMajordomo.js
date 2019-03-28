@@ -189,6 +189,31 @@ var mainDivVM = new Vue({
                 console.log(error);
             });                
         },
+        //类别转换方法
+        transformCategory(cellValue) {
+          var text="";
+          if(clueCategoryList){
+              for(var i=0;i<clueCategoryList.length;i++){
+                    if(cellValue==clueCategoryList[i].value){
+                        text=clueCategoryList[i].name;
+                    }
+                }
+          }
+           return text;
+        },
+        //类行转换方法
+        transformType(cellValue) {
+          var text="";
+          if(clueTypeList){
+              for(var i=0;i<clueTypeList.length;i++){
+                    if(cellValue==clueTypeList[i].value){
+                        text=clueTypeList[i].name;
+                        break;
+                    }
+                }
+          }
+           return text;
+        },
         // 快速分配资源
         //打开分配资源
         toAllocationClue() {
