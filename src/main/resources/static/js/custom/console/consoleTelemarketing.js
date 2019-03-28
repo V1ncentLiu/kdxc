@@ -83,6 +83,10 @@ var mainDivVM = new Vue({
                 mainDivVM.$refs[formName].resetFields();
             }
         },
+        // 今日待跟进客户资源进入我的客户详情
+        showClueDetailInfo (row, column) {
+            window.location.href='/tele/clueMyCustomerInfo/customerInfoReadOnly?clueId='+row.clueId;
+        },
         // 快速领取新资源
         initList(){
             var param = {};
@@ -138,8 +142,8 @@ var mainDivVM = new Vue({
             // 2、总监领取老资源上限按照领取规则管理中设置的限制进行限制
             // 3、电销人员领取新资源上限按照领取规则管理中设置的限制进行限制
         },
-        //展现详情
-        showClueDetailInfo (row, column) {
+        //快速领取新资源进入公有池展现详情
+        showClueDetailInfo2 (row, column) {
             window.location.href='/tele/clueMyCustomerInfo/customerInfoReadOnly?clueId='+row.clueid+"&commonPool=1";
         },
         repeatPhonesClick(row) {//重复手机号按钮点击
