@@ -292,8 +292,8 @@ public class ConsoleController {
         reqDTO.setEndTime(curDate);
         reqDTO.setStartTime(DateUtil.getCurStartDate());
         List<Integer> sourceList = new ArrayList<Integer>();
-        sourceList.add(1);
-        sourceList.add(2);
+        sourceList.add(AggregationConstant.SALE_RECEIVE_SOURCE.SOURCE1);
+        sourceList.add(AggregationConstant.SALE_RECEIVE_SOURCE.SOURCE2);
         reqDTO.setSourceList(sourceList);
         return clueBasicFeignClient.countAssignClueNum(reqDTO);
     }
@@ -315,7 +315,7 @@ public class ConsoleController {
         // reqDTO.setStartTime(DateUtil.getCurStartDate());
         reqDTO.setStartTime(DateUtil.getTodayStartTime());
         List<Integer> sourceList = new ArrayList<Integer>();
-        sourceList.add(3);
+        sourceList.add(AggregationConstant.SALE_RECEIVE_SOURCE.SOURCE3);
         reqDTO.setSourceList(sourceList);
         //type 1：日期字段用电销的
         reqDTO.setType(1);
@@ -401,8 +401,8 @@ public class ConsoleController {
         reqDTO.setStartTime(DateUtil.getTodayStartTime());
         reqDTO.setType(2);
         List<Integer> teleDirectorSourceList = new ArrayList<>();
-        teleDirectorSourceList.add(2);
-        teleDirectorSourceList.add(3);
+        teleDirectorSourceList.add(AggregationConstant.DIRECTOR_RECEIVE_SOURCE.SOURCE2);
+        teleDirectorSourceList.add(AggregationConstant.DIRECTOR_RECEIVE_SOURCE.SOURCE3);
         reqDTO.setTeleDirectorSourceList(teleDirectorSourceList);
         reqDTO.setPhase(CluePhase.PHAE_3RD.getCode());
         return clueBasicFeignClient.countAssignClueNum(reqDTO);
@@ -425,7 +425,7 @@ public class ConsoleController {
         reqDTO.setStartTime(DateUtil.getTodayStartTime());
         reqDTO.setType(2);
         List<Integer> teleDirectorSourceList = new ArrayList<>();
-        teleDirectorSourceList.add(1);
+        teleDirectorSourceList.add(AggregationConstant.DIRECTOR_RECEIVE_SOURCE.SOURCE1);
         reqDTO.setTeleDirectorSourceList(teleDirectorSourceList);
         return clueBasicFeignClient.countAssignClueNum(reqDTO);
     }
@@ -472,7 +472,7 @@ public class ConsoleController {
 
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
         TeleConsoleReqDTO teleConsoleReqDTO = new TeleConsoleReqDTO();
-        Long id = curLoginUser.getId();
+        Long id = curLoginUser.getOrgId();
         UserOrgRoleReq req = new UserOrgRoleReq();
         req.setOrgId(id);
         req.setRoleCode(RoleCodeEnum.DXCYGW.name());
@@ -599,7 +599,7 @@ public class ConsoleController {
     public JSONResult<Integer> countBusiDirecotorTomorrowArriveTime(
             @RequestBody BusinessConsoleReqDTO businessConsoleReqDTO) {
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
-        Long id = curLoginUser.getId();
+        Long id = curLoginUser.getOrgId();
         UserOrgRoleReq req = new UserOrgRoleReq();
         req.setOrgId(id);
         req.setRoleCode(RoleCodeEnum.DXCYGW.name());
