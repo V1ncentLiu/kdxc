@@ -243,16 +243,16 @@ var mainDivVM = new Vue({
             if(cellValue==1){
                 if(projectList){
                     for(var i=0;i<projectList.length;i++){
-                        if(cellValue==projectList[i].value){
-                            text=projectList[i].name;
+                        if(row.purInProject==projectList[i].id){
+                            text=projectList[i].projectName;
                         }
                     }
                 }
-            }else{
+           }else{
                 text=row.purOutProject;
-            }
-            return text;
-        },
+           }
+           return text;
+       },
         //店铺面积转换方法
         transformArea(row, column, cellValue, index) {
             var text="";
