@@ -152,7 +152,7 @@
                     </el-select>
                 </el-form-item>
                 <el-form-item label="">
-                    <el-select v-model="form.repeatStatus" placeholder="是否重单" style="width: 100%;" clearable >
+                    <el-select v-model="form.repeatStatus" placeholder="是否重复手机号" style="width: 100%;" clearable >
                         <el-option
                             v-for="item in clueRepeatStatus"
                             :key="item.value"
@@ -561,11 +561,11 @@
                      clueRepeatStatus:[
                          {
                           value: '0',
-                          label: '不重单'
+                          label: '否'
                           },
                           {
                             value: '1',
-                            label: '重单'
+                            label: '是'
                            }     
                        ],
                        hastracking:[
@@ -881,9 +881,16 @@
                      	this.dialogFormVisible = false;
                         axios.post('/tele/clueMyCustomerInfo/saveRepeatClue', param)
                         .then(function (response) {
-                           mycustomVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
-                        	   mycustomVM.initTableData();  
-            		         }});
+                        	if (response.data.code == 0) {
+                       		 	mycustomVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
+                             	   mycustomVM.initTableData();  
+                 		         }});
+	                       	}else{
+	                       		mycustomVM.$message({
+	  	                             message: response.data.msg,
+	  	                             type: 'warning'
+	  	                           });
+	                       	}
                         }).catch(function (error) {
                             console.log(error);
                         });
