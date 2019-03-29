@@ -151,24 +151,26 @@ var mainDivVM = new Vue({
         showClueDetailInfo2 (row, column) {
             window.location.href='/tele/clueMyCustomerInfo/customerInfoReadOnly?clueId='+row.clueid+"&commonPool=1";
         },
-        repeatPhonesClick(row) {//重复手机号按钮点击
+        repeatPhonesClick(row) {//今日待跟进客户资源-我的客户重复手机号按钮点击
             this.repeatPhonesDialog=true;
             this.dailogTitleType=row.phone;
+            this.repeatPhonesTable=[];
             var param ={};
             param.id = row.clueId;
-            param.cusPhone = row.phone;
-            axios.post('/clue/appiontment/repeatPhonelist', param)
+                param.cusPhone = row.phone;
+                param.clueId = row.clueId;
+                axios.post('/clue/appiontment/repeatPhonelist', param)
                 .then(function (response) {
                     var result =  response.data;
                     var table=result.data;
-                    mainDivVM.repeatPhonesTable= table;
-                    mainDivVM.repeatPhonesDialog=true;
+                    mycustomVM.repeatPhonesTable=table;
+                    mycustomVM.repeatPhonesDialog=true;
                 })  .catch(function (error) {
                     console.log(error);
-            });
+            });            
         },
         repeatPhonesClick2(row) {//重复手机号按钮点击
-            this.repeatPhonesDialog=true;
+            this.repeatPhonesDialog2=true;
             this.dailogTitleType=row.clueid;
             var param ={};
             param.id = row.clueid;
