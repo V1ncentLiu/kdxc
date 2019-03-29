@@ -266,7 +266,7 @@ public class BusinessSignController {
                 flag = false;
             }
         }
-        if (flag) {
+        if (flag) {// 没有签约单
             if (JSONResult.SUCCESS.equals(mapJSONResult.getCode())) {
                 Map data = mapJSONResult.getData();
                 if (data != null) {
@@ -284,6 +284,14 @@ public class BusinessSignController {
                     signDTO.setSignType(1);
                     signDTO.setSignShopType("");
                     signDTO.setPayType("1");
+
+                    if(data.get("cusNum")!=null){
+                        signDTO.setVisitNum((Integer)data.get("cusNum"));// 来访人数
+                    }
+                    if(data.get("city")!=null){
+                        signDTO.setVisitCity((String)data.get("city"));// 来访城市
+                    }
+
                 }
             }
         }
