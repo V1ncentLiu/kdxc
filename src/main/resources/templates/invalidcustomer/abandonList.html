@@ -18,7 +18,7 @@
             <el-breadcrumb-item><a href="JavaScript:void(0)">废弃池</a></el-breadcrumb-item>
         </el-breadcrumb>
         <el-row class="marginB10">
-            <el-button type="text" @click="dialogChooseList = true"><i class="el-icon-menu"></i>选择列</el-button>
+            <el-button type="text" @click="checkline"><i class="el-icon-menu"></i>选择列</el-button>
         </el-row>
         <el-row class="marginB10 greybg padding20" style="padding-bottom: 0;" >
             <el-form :inline="true" :model="queryForm" class="demo-form-inline" ref="queryForm" >
@@ -175,7 +175,10 @@
 
                 <el-form-item label="列名" prop="type">
                     <el-checkbox-group v-model="form.type">
-                        <el-checkbox :label="item.sortNum+'_'+item.fieldCode+'_'+item.displayName+'_'+item.id"  name="type" :key="item.fieldCode"  v-for="(item,index) in  allTableColums ">
+                    	<span>
+                    	
+                    	</span>
+                        <el-checkbox :label="item.sortNum+'_'+item.fieldCode+'_'+item.displayName+'_'+item.id"   name="type" :key="item.fieldCode"  v-for="(item,index) in  allTableColums ">
                             {{item.displayName}}
                         </el-checkbox>
 
@@ -238,7 +241,24 @@
             }
         },
         methods: {
-
+        	checkline(){
+        		this.dialogChooseList = true;
+        	 	//初始化table 列 和 用户自定义列
+              	this.allTableColums = fieldList;
+              	if(userFieldList.length!=0){
+              		var type=[];
+                  	for(var i=0;i<userFieldList.length;i++){
+                  		type.push(userFieldList[i].sortNum+'_'+userFieldList[i].fieldCode+'_'+userFieldList[i].displayName+'_'+userFieldList[i].fieldId)
+                 	}
+	              	this.form.type = type;
+              	}else{
+              		var type=[];
+                  	for(var i=0;i<fieldList.length;i++){
+                  		type.push(fieldList[i].sortNum+'_'+fieldList[i].fieldCode+'_'+fieldList[i].displayName+'_'+fieldList[i].id)
+                 	}
+	              	this.form.type = type;
+              	}
+        	},
             handleSelectionChange(val) {//选择节点的事件
                 console.log(val)
                 this.multipleSelection = val;
@@ -311,22 +331,25 @@
                 }
             },
             initColumn(){
-                //初始化table 列 和 用户自定义列
-                this.allTableColums = fieldList;
-                console.log("....................")
-                console.log( this.allTableColums)
-                if(userFieldList.length!=0){
-                    var type=[];
-                    for(var i=0;i<userFieldList.length;i++){
-                        type.push(userFieldList[i].sortNum+'_'+userFieldList[i].fieldCode+'_'+userFieldList[i].displayName+'_'+userFieldList[i].fieldId)
-                    }
-                    this.form.type = type;
-                    this.confirmColumn();
-                }else{
-                    this.tableColums = fieldList;
-                }
-
-            },
+              	//初始化table 列 和 用户自定义列
+              	this.allTableColums = fieldList;
+              	if(userFieldList.length!=0){
+              		var type=[];
+                  	for(var i=0;i<userFieldList.length;i++){
+                  		type.push(userFieldList[i].sortNum+'_'+userFieldList[i].fieldCode+'_'+userFieldList[i].displayName+'_'+userFieldList[i].fieldId)
+                 	}
+	              	this.form.type = type;
+	              	this.confirmColumn();
+              	}else{
+              		var type=[];
+                  	for(var i=0;i<fieldList.length;i++){
+                  		type.push(fieldList[i].sortNum+'_'+fieldList[i].fieldCode+'_'+fieldList[i].displayName+'_'+fieldList[i].id)
+                 	}
+	              	this.form.type = type;
+	              	this.confirmColumn();
+              	}
+              	
+              },
             initList(){
                 var param = this.queryForm;
                 param.pageSize = this.pager.pageSize;
