@@ -128,7 +128,9 @@ var mainDivVM = new Vue({
                                 mainDivVM.receiveTitle=data.backResult;
                                 mainDivVM.receiveTable= data.clueCustomerDTOs;
                             }else{
-                                window.location.href="/aggregation/publiccustomer/listPage"; 
+                                // window.location.href="/aggregation/publiccustomer/listPage"; 
+                                // 领取成功刷新表格
+                                mainDivVM.initList();
                             }
                         }                                
                     }else{
