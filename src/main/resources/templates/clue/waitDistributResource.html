@@ -92,10 +92,14 @@
 			class="marginB20 dialogForm">
 		<div class="fs16 redcolor marginB20">线索ID：{{basic.id}}</div>
 		<div class="borderbox padding20">
-			<el-row> <el-col :span="12"> <el-form-item
-				label="客户姓名：" :label-width="formLabelWidth"> {{customer.cusName}} </el-form-item> </el-col> <el-col
-				:span="12"> <el-form-item label="手机号："
-				:label-width="formLabelWidth"> {{customer.phone}} </el-form-item> </el-col> </el-row>
+			<el-row> 
+				<el-col :span="12"> 
+					<el-form-item label="客户姓名：" :label-width="formLabelWidth"> {{customer.cusName}} </el-form-item> 
+				</el-col> 
+				<el-col :span="12"> 
+					<el-form-item label="手机号：" :label-width="formLabelWidth"> {{customer.phone}} </el-form-item>
+				</el-col>
+			</el-row>
 			<el-row> <el-col :span="12"> <el-form-item
 				label="微信：" :label-width="formLabelWidth"> {{customer.wechat}}<span>/二维码</span>
 			</el-form-item> </el-col> <el-col :span="12"> <el-form-item label="邮箱："
@@ -267,7 +271,25 @@ var userList=[[${userList}]];
 	                      }); 
 						return ;
 					}
-				   wdrVM.customer=response.data.data.clueCustomer;
+				  var customer=response.data.data.clueCustomer;
+				  var phone = '';
+				  if(customer.phone){
+					  phone+=customer.phone;
+				  }
+				  if(customer.phone2){
+					  if(phone){
+						  phone+=",";
+					  }
+					  phone+=customer.phone2;
+				  }
+				  if(customer.phone3){
+					  if(phone){
+						  phone+=",";
+					  }
+					  phone+=customer.phone3;
+				  }
+				  customer.phone=phone;
+				  wdrVM.customer=customer;
 				  var messageTime= response.data.data.clueBasic.messageTime;
 				  if(null!=messageTime){
 					  response.data.data.clueBasic.messageTime=crtTimeFtt1(messageTime);
@@ -324,7 +346,7 @@ var userList=[[${userList}]];
       						return ;
       					}
       					
-      				 wdrVM.$message({message:'成功分发'+resobj+'条资源',type:'success',duration:2000,onClose:function(){
+      				 wdrVM.$message({message:'成功分发'+resobj.data+'条资源',type:'success',duration:2000,onClose:function(){
       						wdrVM.initTableData();
    		        	}});
       			 

@@ -470,12 +470,14 @@
                         <el-col :span="10">
                             <el-form-item label="是否远程签约：" :label-width="formLabelWidth" prop="isRemoteSign">
                                 <el-select v-model="formSigning.isRemoteSign" @change="selectIsRemoteSign" placeholder="请选择是否远程签约：">
-                                    <el-option
-                                            v-for="item in isSignArr"
-                                            :key="item.value"
-                                            :label="item.name"
-                                            :value="item.value">
-                                    </el-option>
+                                    <!--<el-option-->
+                                            <!--v-for="item in isSignArr"-->
+                                            <!--:key="item.value"-->
+                                            <!--:label="item.name"-->
+                                            <!--:value="item.value">-->
+                                    <!--</el-option>-->
+                                    <el-option  key="0" label="否" value="0"></el-option>
+                                    <el-option  key="1" label="是" value="1"></el-option>
                                 </el-select>
                             </el-form-item>
                         </el-col>
@@ -764,12 +766,12 @@
                 amountReceived: [
                     { required: true, message: '请输入实收金额', trigger: 'blur' }
                 ],
-                amountBalance: [
-                    { required: true, message: '请输入余款金额', trigger: 'blur' }
-                ],
-                makeUpTime: [
-                    { type: 'date', required: true, message: '请选择预计余款补齐时间', trigger: 'change' }
-                ],
+                // amountBalance: [
+                //     { required: true, message: '请输入余款金额', trigger: 'blur' }
+                // ],
+                // makeUpTime: [
+                //     { type: 'date', required: true, message: '请选择预计余款补齐时间', trigger: 'change' }
+                // ],
                 // performanceAmount: [
                 // 	{ required: true, message: '请输入业绩金额', trigger: 'blur' }
                 // ],
@@ -828,9 +830,9 @@
                 amountReceivable:'',
                 firstToll:'',
                 preferentialAmount:'',
-                signType:1,
+                signType:'',
                 giveAmount:'',
-                isRemoteSign:1,
+                isRemoteSign:'',
 
                 visitTime:"",
                 visitCity:"",
@@ -897,6 +899,7 @@
                 this.formMoneyDetail.amountPerformance=this.formMoneyDetail.amountPerformance.replace('.','');
             },
             recordDialogClick(type){
+                this.resetForm('formMoneyDetail');
                 this.suppWrap =false; // 默认关闭 到访记录 填写部分
                 if(type==1){//定金添加付款按钮点击
                     console.log(1)
@@ -930,9 +933,11 @@
                 }
             },
             editSign(){
+                mainDivVM.resetForm('formSigning');
                 var param = {};
                 param.id = vclueId;
-                this.suppWrap =false; // 默认关闭 到访记录 填写部分
+                mainDivVM.isAllMoney = false
+                this.suppWrap =true; // 默认关闭 到访记录 填写部分
                 axios.post('/businesssign/echo',param).then(function (response) {
                     mainDivVM.formSigning = response.data.data;
                     mainDivVM.formSigning.clueId=vclueId;
@@ -941,7 +946,7 @@
                     mainDivVM.currentCity(mainDivVM.formSigning.signCity)
                     //  设置默认时间
                     mainDivVM.formSigning.payTime = new Date()
-                    mainDivVM.formSigning.isRemoteSign = 0;
+                    mainDivVM.formSigning.isRemoteSign = "0";
                 });
 
             },
@@ -968,7 +973,7 @@
                 });
             },
             selectIsRemoteSign (pa1) { //是否远程签约event
-                if( pa1==0 ){
+                if( pa1==1 ){
                     this.suppWrap = false;
                 }else{
                     this.suppWrap = true;

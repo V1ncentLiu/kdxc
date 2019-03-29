@@ -179,9 +179,17 @@
                 </template>
             </el-table-column>
             <el-table-column align="center" prop="status" label="到访有效性" width="100">
-                <template slot-scope="scope">
-                 	<span>待审核</span> 
-                </template>
+                        <template slot-scope="scope">
+	                      <div v-if="scope.row.status ===0">
+	                                                                           被驳回
+	                      </div>
+	                       <div v-else-if="scope.row.status ===1">
+	                                                                             审核中                               
+	                       </div>
+	                      <div v-else-if="scope.row.status ===2">
+	                                                                             有效                              
+	                       </div>
+	          </template>
             </el-table-column>
             
         </el-table>
@@ -436,6 +444,19 @@
                if(endTime){
                    var endTimestamp = new Date(endTime);
                     if(startTimestamp> endTimestamp){
+                        this.$message({
+                            message: '开始时间不能大于结束时间',
+                            type: 'warning'
+                          });
+                        return;
+                    }
+               }
+                var reserveTimeStart = this.form.reserveTimeStart;
+                var reserveTimeEnd = this.form.reserveTimeEnd;
+                var reserveStartTimestamp = Date.parse(new Date(reserveTimeStart));
+               if(reserveTimeEnd){
+                   var reserveEndTimestamp = new Date(reserveTimeEnd);
+                    if(reserveStartTimestamp> reserveEndTimestamp){
                         this.$message({
                             message: '开始时间不能大于结束时间',
                             type: 'warning'
