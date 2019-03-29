@@ -290,8 +290,8 @@
                 </el-col>
             </el-row>
 
-            <!--<div class="paddB20">补充到访记录<i class="el-icon-caret-bottom" @click="suppShow"></i><i class="el-icon-caret-top" @click="suppHide"></i><span style="font-size:14px;color: #ccc;">(若无到访记录可不添写)</span></div>-->
-            <el-button type="text" @click="suppShow">添加补充到访记录</el-button><i class="el-icon-caret-bottom"></i><i class="el-icon-caret-top" ></i><el-button type="text" @click="suppHide">取消添加补充到访记录</el-button><span style="font-size:14px;color: #ccc;">(若无到访记录可不添写)</span>
+            <!--<div class="paddB20">补充到访记录<i class="el-icon-caret-bottom" @click="suppShow"></i><i class="el-icon-caret-top" @click="suppHide"></i><span style="font-size:14px;color: #ccc;">(若无到访记录可不填写)</span></div>-->
+            <el-button type="text" @click="suppShow">添加补充到访记录</el-button><i class="el-icon-caret-bottom"></i><i class="el-icon-caret-top" ></i><el-button type="text" @click="suppHide">取消添加补充到访记录</el-button><span style="font-size:14px;color: #ccc;">(若无到访记录可不填写)</span>
             <div v-if="suppWrap">
                 <el-row>
                     <el-col :span="10">
@@ -487,8 +487,8 @@
                 </div>
 
                 <div class="paddB20">
-                    <!--补充到访记录<i class="el-icon-caret-bottom" @click="suppShow"></i><i class="el-icon-caret-top" @click="suppHide"></i><span style="font-size:14px;color: #ccc;">(若无到访记录可不添写)</span>-->
-                    <el-button type="text" @click="suppShow">添加补充到访记录</el-button><i class="el-icon-caret-bottom"></i><i class="el-icon-caret-top" ></i><el-button type="text" @click="suppHide">取消添加补充到访记录</el-button><span style="font-size:14px;color: #ccc;">(若无到访记录可不添写)</span>
+                    <!--补充到访记录<i class="el-icon-caret-bottom" @click="suppShow"></i><i class="el-icon-caret-top" @click="suppHide"></i><span style="font-size:14px;color: #ccc;">(若无到访记录可不填写)</span>-->
+                    <el-button type="text" @click="suppShow">添加补充到访记录</el-button><i class="el-icon-caret-bottom"></i><i class="el-icon-caret-top" ></i><el-button type="text" @click="suppHide">取消添加补充到访记录</el-button><span style="font-size:14px;color: #ccc;">(若无到访记录可不填写)</span>
                 </div>
                 <div v-if="suppWrap">
                     <el-row>
@@ -768,18 +768,18 @@
                 payTime: [
                     { type: 'date', required: true, message: '请选择时间', trigger: 'change' }
                 ],
-                amountReceived: [
-                    { required: true, message: '请输入实收金额', trigger: 'blur' }
-                ],
+                // amountReceived: [
+                //     { required: true, message: '请输入实收金额', trigger: 'blur' }
+                // ],
                 // amountBalance: [
                 //     { required: true, message: '请输入余款金额', trigger: 'blur' }
                 // ],
                 // makeUpTime: [
                 //     { type: 'date', required: true, message: '请选择预计余款补齐时间', trigger: 'change' }
                 // ],
-                // performanceAmount: [
-                // 	{ required: true, message: '请输入业绩金额', trigger: 'blur' }
-                // ],
+                performanceAmount: [
+                	{ required: true, message: '请输入业绩金额', trigger: 'blur' }
+                ],
                 isRemoteSign: [ //是否远程签约
                     { required: true, message: '请选择是否远程签约', trigger: 'change' }
                 ],
@@ -796,9 +796,39 @@
                     { required: true, message: '请选择到访店铺类型', trigger: 'change' }
                 ],
                 visitNum: [ //请填写到访人数
-                    { required: true, message: '请填写到访人数', trigger: 'change' }
-                ],
+                    { required: true, message: '请填写到访人数', trigger: 'change' },
+                    { validator:function(rule,value,callback){
+                            var reg =  /^[1-9]+[0-9]*]*$/ ;
+                            if(value ==null || value =="null" || value ==""  ){
+                                callback(new Error("请填写到访人数"));
+                                mainDivVM.addVisitRecord.visitPeopleNum =null;
 
+                            }else  if(value !=null && value !="null" && value !="" && !reg.test(value) ){
+                                callback(new Error("请输入正整数"));
+                                mainDivVM.addVisitRecord.visitPeopleNum =null;
+                            }else{
+                                callback();
+                            }
+
+                        }, trigger: 'change'}
+                ],
+                visitPeopleNum: [ //请填写到访人数
+                    { required: true, message: '请填写到访人数', trigger: 'change' },
+                    { validator:function(rule,value,callback){
+                            var reg =  /^[1-9]+[0-9]*]*$/ ;
+                            if(value ==null || value =="null" || value ==""  ){
+                                callback(new Error("请填写到访人数"));
+                                mainDivVM.addVisitRecord.visitPeopleNum =null;
+
+                            }else  if(value !=null && value !="null" && value !="" && !reg.test(value) ){
+                                callback(new Error("请输入正整数"));
+                                mainDivVM.addVisitRecord.visitPeopleNum =null;
+                            }else{
+                                callback();
+                            }
+
+                        }, trigger: 'change'}
+                ],
 
             },
             formMoneyDetail: {
