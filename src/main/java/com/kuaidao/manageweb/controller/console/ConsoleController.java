@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import com.kuaidao.aggregation.constant.AggregationConstant;
+import com.kuaidao.aggregation.constant.AggregationConstant.DelFlag;
 import com.kuaidao.aggregation.dto.busmycustomer.BusMyCustomerRespDTO;
 import com.kuaidao.aggregation.dto.busmycustomer.MyCustomerParamDTO;
 import com.kuaidao.aggregation.dto.busmycustomer.SignRecordReqDTO;
@@ -189,7 +190,7 @@ public class ConsoleController {
 
         
         
-/*        if(type.equals("1")) {
+       /*   if(type.equals("1")) {
             path = "console/consoleTelemarketing";
         }else if(type.equals("2")) {
             List<Integer> statusList = new ArrayList<Integer>();
@@ -359,6 +360,9 @@ public class ConsoleController {
         Date curDate = new Date();
         queryDto.setAssignTimeStart(DateUtil.getStartOrEndOfDay(curDate, LocalTime.MIN));
         queryDto.setAssignTimeEnd(DateUtil.getStartOrEndOfDay(curDate, LocalTime.MAX));
+      /*  queryDto.setTeleSale(33336666L);
+        queryDto.setAssignTimeStart(DateUtil.convert2Date("2019-01-14 00:00:00", DateUtil.ymdhms));
+        queryDto.setAssignTimeEnd(DateUtil.convert2Date("2019-04-14 00:00:00", DateUtil.ymdhms));*/
         return myCustomerFeignClient.listTodayFollowClue(queryDto);
     }
 
@@ -602,7 +606,7 @@ public class ConsoleController {
         Long id = curLoginUser.getOrgId();
         UserOrgRoleReq req = new UserOrgRoleReq();
         req.setOrgId(id);
-        req.setRoleCode(RoleCodeEnum.DXCYGW.name());
+        req.setRoleCode(RoleCodeEnum.SWJL.name());
         JSONResult<List<UserInfoDTO>> userInfoJr = userInfoFeignClient.listByOrgAndRole(req);
         if (!JSONResult.SUCCESS.equals(userInfoJr.getCode())) {
             return new JSONResult<Integer>().fail(userInfoJr.getCode(), userInfoJr.getMsg());
@@ -639,6 +643,8 @@ public class ConsoleController {
         if (roleList != null) {
             pageParam.setRoleCode(roleList.get(0).getRoleCode());
         }
+        
+        pageParam.setDelFalg(DelFlag.NOT_DEL);
 
         JSONResult<List<BusPendingAllocationDTO>> pendingAllocationList =
                 pendingVisitFeignClient.pendingVisitListNoPage(pageParam);
