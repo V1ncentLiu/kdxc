@@ -290,13 +290,14 @@
                 </el-col>
             </el-row>
 
-            <div class="paddB20">补充到访记录<i class="el-icon-caret-bottom" @click="suppShow"></i><i class="el-icon-caret-top" @click="suppHide"></i><span style="font-size:14px;color: #ccc;">(若无到访记录可不添写)</span></div>
+            <!--<div class="paddB20">补充到访记录<i class="el-icon-caret-bottom" @click="suppShow"></i><i class="el-icon-caret-top" @click="suppHide"></i><span style="font-size:14px;color: #ccc;">(若无到访记录可不添写)</span></div>-->
+            <el-button type="text" @click="suppShow">添加补充到访记录</el-button><i class="el-icon-caret-bottom"></i><i class="el-icon-caret-top" ></i><el-button type="text" @click="suppHide">取消添加补充到访记录</el-button><span style="font-size:14px;color: #ccc;">(若无到访记录可不添写)</span>
             <div v-if="suppWrap">
                 <el-row>
                     <el-col :span="10">
                         <el-form-item label="到访时间：" :label-width="formLabelWidth" prop="visitTime">
                             <el-date-picker
-                                    type="date"
+                                    type="datetime"
                                     format="yyyy-MM-dd HH:mm"
                                     placeholder="选择日期"
                                     v-model="formMoneyDetail.visitTime" style="width: 90%;"></el-date-picker>
@@ -395,7 +396,7 @@
                         </el-col>
                         <el-col :span="10">
                             <el-form-item label="签约省份：" :label-width="formLabelWidth" prop="signProvince">
-                                <el-select v-model="formSigning.signProvince" placeholder="请选择签约省份" @change="currentProvince">
+                                <el-select v-model="formSigning.signProvince" placeholder="请选择签约省份" @change="changeProvince">
                                     <el-option v-for="item in provinceArr" :key="item.name" :label="item.name" :value="item.name"></el-option>
                                 </el-select>
                             </el-form-item>
@@ -404,7 +405,7 @@
                     <el-row>
                         <el-col :span="10">
                             <el-form-item label="签约城市：" :label-width="formLabelWidth" prop="signCity">
-                                <el-select v-model="formSigning.signCity" placeholder="请选择签约城市："  @change="currentCity">
+                                <el-select v-model="formSigning.signCity" placeholder="请选择签约城市："  @change="changeCity">
                                     <el-option v-for="item in cityArr" :key="item.name" :label="item.name" :value="item.name"></el-option>
                                 </el-select>
                             </el-form-item>
@@ -469,7 +470,7 @@
                     <el-row>
                         <el-col :span="10">
                             <el-form-item label="是否远程签约：" :label-width="formLabelWidth" prop="isRemoteSign">
-                                <el-select v-model="formSigning.isRemoteSign" @change="selectIsRemoteSign" placeholder="请选择是否远程签约：">
+                                <el-select v-model="formSigning.isRemoteSign11"  @change="selectIsRemoteSign" placeholder="请选择是否远程签约："> <!--  -->
                                     <!--<el-option-->
                                             <!--v-for="item in isSignArr"-->
                                             <!--:key="item.value"-->
@@ -485,13 +486,16 @@
                     </el-row>
                 </div>
 
-                <div class="paddB20">补充到访记录<i class="el-icon-caret-bottom" @click="suppShow"></i><i class="el-icon-caret-top" @click="suppHide"></i><span style="font-size:14px;color: #ccc;">(若无到访记录可不添写)</span></div>
+                <div class="paddB20">
+                    <!--补充到访记录<i class="el-icon-caret-bottom" @click="suppShow"></i><i class="el-icon-caret-top" @click="suppHide"></i><span style="font-size:14px;color: #ccc;">(若无到访记录可不添写)</span>-->
+                    <el-button type="text" @click="suppShow">添加补充到访记录</el-button><i class="el-icon-caret-bottom"></i><i class="el-icon-caret-top" ></i><el-button type="text" @click="suppHide">取消添加补充到访记录</el-button><span style="font-size:14px;color: #ccc;">(若无到访记录可不添写)</span>
+                </div>
                 <div v-if="suppWrap">
                     <el-row>
                         <el-col :span="10">
                             <el-form-item label="到访时间：" :label-width="formLabelWidth" prop="visitTime">
                                 <el-date-picker
-                                        type="date"
+                                        type="datetime"
                                         format="yyyy-MM-dd HH:mm"
                                         placeholder="选择日期"
                                         v-model="formSigning.visitTime" style="width: 90%;"></el-date-picker>
@@ -533,7 +537,8 @@
                     <el-row>
                         <el-col :span="10">
                             <el-form-item label="到访人数：" :label-width="formLabelWidth"  prop="visitNum">
-                                <el-input  v-model="formSigning.visitNum" type="number"  min="1" maxLength="2" oninput="if(value.length>2)value=value.slice(0,2)"  onkeypress="return(/[\d]/.test(String.fromCharCode(event.keyCode)))" style="width:80%">
+                                <el-input  v-model="formSigning.visitNum" type="number"  min="1"
+                                           maxLength="2" oninput="if(value.length>2)value=value.slice(0,2)"  onkeypress="return(/[\d]/.test(String.fromCharCode(event.keyCode)))" style="width:80%;">
                                 </el-input>
                                 <span style="padding-left: 10px;">人</span>
                             </el-form-item>
@@ -832,7 +837,7 @@
                 preferentialAmount:'',
                 signType:'',
                 giveAmount:'',
-                isRemoteSign:'',
+                isRemoteSign11:'',
 
                 visitTime:"",
                 visitCity:"",
@@ -946,7 +951,7 @@
                     mainDivVM.currentCity(mainDivVM.formSigning.signCity)
                     //  设置默认时间
                     mainDivVM.formSigning.payTime = new Date()
-                    mainDivVM.formSigning.isRemoteSign = "0";
+                    mainDivVM.formSigning.isRemoteSign11= "0";
                 });
 
             },
@@ -972,6 +977,16 @@
                     mainDivVM.districtArr=response.data.data.data;
                 });
             },
+
+            changeProvince(selVal){
+                mainDivVM.formSigning.signCity = '';
+                mainDivVM.formSigning.signDictrict='';
+                this.currentProvince(selVal);
+            },
+            changeCity(selVal){
+                mainDivVM.formSigning.signDictrict='';
+                this.currentCity(selVal);
+            },
             selectIsRemoteSign (pa1) { //是否远程签约event
                 if( pa1==1 ){
                     this.suppWrap = false;
@@ -988,6 +1003,7 @@
             submitForm(formName) {
                 var param = this.formSigning;
                 param.amountPerformance = this.formSigningAmountPerformance;
+                param.isRemoteSign = this.formSigning.isRemoteSign11;
                 // 设置 clueid
                 this.$refs[formName].validate((valid) => {
                     if (valid) {
