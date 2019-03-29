@@ -740,7 +740,7 @@
                 <el-row>
                     <el-col :span="10">
                         <el-form-item label="是否远程签约：" :label-width="formLabelWidth" prop="isRemoteSign">
-                            <el-select v-model="formSigning.isRemoteSign" @change="selectIsRemoteSign" placeholder="请选择是否远程签约：">
+                            <el-select v-model="formSigning.isRemoteSign11" @change="selectIsRemoteSign" placeholder="请选择是否远程签约：">
                                 <el-option
                                         v-for="item in isSignArr"
                                         :key="item.value"
@@ -754,7 +754,8 @@
                 </el-row>
             </div>
 
-            <div class="paddB20">补充到访记录<i class="el-icon-caret-bottom" @click="suppShow"></i><i class="el-icon-caret-top" @click="suppHide"></i><span style="font-size:14px;color: #ccc;">(若无到访记录可不添写)</span></div>
+            <!--<div class="paddB20">补充到访记录<i class="el-icon-caret-bottom" @click="suppShow"></i><i class="el-icon-caret-top" @click="suppHide"></i><span style="font-size:14px;color: #ccc;">(若无到访记录可不添写)</span></div>-->
+            <el-button type="text" @click="suppShow">添加补充到访记录</el-button><i class="el-icon-caret-bottom"></i><i class="el-icon-caret-top" ></i><el-button type="text" @click="suppHide">取消添加补充到访记录</el-button><span style="font-size:14px;color: #ccc;">(若无到访记录可不添写)</span>
             <div v-if="suppWrap">
                 <el-row>
                     <el-col :span="10">
@@ -1267,7 +1268,7 @@
                 preferentialAmount:'',
                 signType:1,
                 giveAmount:'',
-                isRemoteSign:1,
+                isRemoteSign11:1,
 
                 visitTime:"",
                 visitCity:"",
@@ -1987,6 +1988,8 @@
             editSign(row){
                 // this.formSigning.clueId=row.clueId;
                 // this.dialogFormSigningVisible = true;
+                this.resetForm('formSigning')
+                this.isAllMoney = false;
                 var param = {};
                 param.id = row.clueId;
                 axios.post('/businesssign/echo',param).then(function (response) {
@@ -1997,7 +2000,7 @@
                     mainDivVM.currentCity(mainDivVM.formSigning.signCity)
                 //  设置默认时间
                     mainDivVM.formSigning.payTime = new Date()
-                    mainDivVM.formSigning.isRemoteSign = 0;
+                    mainDivVM.formSigning.isRemoteSign11 = 0;
                 });
             },
             showSignDetail(row){
@@ -2092,6 +2095,7 @@
             submitForm(formName) {
                 var param = this.formSigning;
                 param.amountPerformance = this.formSigningAmountPerformance;
+                param.isRemoteSign = this.formSigning.isRemoteSign11;
                 // 设置 clueid
                 this.$refs[formName].validate((valid) => {
                     if (valid) {
