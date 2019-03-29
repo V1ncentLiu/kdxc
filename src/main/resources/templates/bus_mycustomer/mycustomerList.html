@@ -740,7 +740,7 @@
                 <el-row>
                     <el-col :span="10">
                         <el-form-item label="是否远程签约：" :label-width="formLabelWidth" prop="isRemoteSign">
-                            <el-select v-model="formSigning.isRemoteSign11" @change="selectIsRemoteSign" placeholder="请选择是否远程签约：">
+                            <el-select v-model="formSigning.isRemoteSign" placeholder="请选择是否远程签约：">
                                 <el-option
                                         v-for="item in isSignArr"
                                         :key="item.value"
@@ -754,8 +754,8 @@
                 </el-row>
             </div>
 
-            <!--<div class="paddB20">补充到访记录<i class="el-icon-caret-bottom" @click="suppShow"></i><i class="el-icon-caret-top" @click="suppHide"></i><span style="font-size:14px;color: #ccc;">(若无到访记录可不添写)</span></div>-->
-            <el-button type="text" @click="suppShow">添加补充到访记录</el-button><i class="el-icon-caret-bottom"></i><i class="el-icon-caret-top" ></i><el-button type="text" @click="suppHide">取消添加补充到访记录</el-button><span style="font-size:14px;color: #ccc;">(若无到访记录可不添写)</span>
+            <!--<div class="paddB20">补充到访记录<i class="el-icon-caret-bottom" @click="suppShow"></i><i class="el-icon-caret-top" @click="suppHide"></i><span style="font-size:14px;color: #ccc;">(若无到访记录可不填写)</span></div>-->
+            <el-button v-if="shouAddVisitButton" type="text" @click="suppShow">添加补充到访记录</el-button><el-button v-if="!shouAddVisitButton" type="text" @click="suppHide">取消添加补充到访记录</el-button><span style="font-size:14px;color: #ccc;">(若无到访记录可不填写)</span>
             <div v-if="suppWrap">
                 <el-row>
                     <el-col :span="10">
@@ -1137,6 +1137,7 @@
             editableTabs: [],
             suppWrap: true,
             tabIndex: 2,
+            shouAddVisitButton:false,
             updateVisitRecordDialogVisible:false,
             addVisitRecordDialogVisible:false,
             notVisitdDialogVisible:false,
@@ -1268,7 +1269,7 @@
                 preferentialAmount:'',
                 signType:1,
                 giveAmount:'',
-                isRemoteSign11:1,
+                isRemoteSign:'',
 
                 visitTime:"",
                 visitCity:"",
@@ -1351,19 +1352,72 @@
 					{ required: true, message: '请选择签约店型', trigger: 'change' }
 				],
 				amountReceivable: [
-					{ required: true, message: '请输入应收金额', trigger: 'blur' }
+					{ required: true, message: '请输入应收金额', trigger: 'blur' },
+                    { validator:function(rule,value,callback){
+                            var reg =  /^[1-9]+[0-9]*]*$/ ;
+                            if(value ==null || value =="null" || value ==""  ){
+                                callback(new Error("请输入应收金额"));
+                                mainDivVM.formSigning.amountReceivable =null;
+
+                            }else  if(value !=null && value !="null" && value !="" && !reg.test(value) ){
+                                callback(new Error("请输入正整数"));
+                                mainDivVM.formSigning.amountReceivable =null;
+                            }else{
+                                callback();
+                            }
+                        }, trigger: 'change'}
 				],
 				firstToll: [
-					{ required: true, message: '请输入路费（报首次）', trigger: 'blur' }
+					{ required: true, message: '请输入路费（报首次）', trigger: 'blur' },
+                    { validator:function(rule,value,callback){
+                            var reg =  /^[1-9]+[0-9]*]*$/ ;
+                            if(value ==null || value =="null" || value ==""  ){
+                                callback(new Error("请输入路费（报首次）"));
+                                mainDivVM.formSigning.firstToll =null;
+
+                            }else  if(value !=null && value !="null" && value !="" && !reg.test(value) ){
+                                callback(new Error("请输入正整数"));
+                                mainDivVM.formSigning.firstToll =null;
+                            }else{
+                                callback();
+                            }
+                        }, trigger: 'change'}
 				],
 				preferentialAmount: [
-					{ required: true, message: '请输入优惠金额', trigger: 'blur' }
+					{ required: true, message: '请输入优惠金额', trigger: 'blur' },
+                    { validator:function(rule,value,callback){
+                            var reg =  /^[1-9]+[0-9]*]*$/ ;
+                            if(value ==null || value =="null" || value ==""  ){
+                                callback(new Error("请输入优惠金额"));
+                                mainDivVM.formSigning.preferentialAmount =null;
+
+                            }else  if(value !=null && value !="null" && value !="" && !reg.test(value) ){
+                                callback(new Error("请输入正整数"));
+                                mainDivVM.formSigning.preferentialAmount =null;
+                            }else{
+                                callback();
+                            }
+
+                        }, trigger: 'change'}
 				],
 				signType: [
 					{ required: true, message: '请选择签约类型', trigger: 'change' }
 				],
 				giveAmount: [
-					{ required: true, message: '请输入赠送金额', trigger: 'blur' }
+					{ required: true, message: '请输入赠送金额', trigger: 'blur' },
+                    { validator:function(rule,value,callback){
+                            var reg =  /^[1-9]+[0-9]*]*$/ ;
+                            if(value ==null || value =="null" || value ==""  ){
+                                callback(new Error("请输入赠送金额"));
+                                mainDivVM.formSigning.giveAmount =null;
+
+                            }else  if(value !=null && value !="null" && value !="" && !reg.test(value) ){
+                                callback(new Error("请输入正整数"));
+                                mainDivVM.formSigning.giveAmount =null;
+                            }else{
+                                callback();
+                            }
+                        }, trigger: 'change'}
 				],
 				// payType: [
 				// 	{ required: true, message: '请选择付款类型', trigger: 'change' }
@@ -1375,17 +1429,43 @@
 					{ type: 'date', required: true, message: '请选择时间', trigger: 'change' }
 				],
 				amountReceived: [
-					{ required: true, message: '请输入实收金额', trigger: 'blur' }
+					{ required: true, message: '请输入实收金额', trigger: 'blur' },
+                    { validator:function(rule,value,callback){
+                            var reg =  /^[1-9]+[0-9]*]*$/ ;
+                            if(value ==null || value =="null" || value ==""  ){
+                                callback(new Error("请输入实收金额"));
+                                mainDivVM.formSigning.amountReceived =null;
+
+                            }else  if(value !=null && value !="null" && value !="" && !reg.test(value) ){
+                                callback(new Error("请输入正整数"));
+                                mainDivVM.formSigning.amountReceived =null;
+                            }else{
+                                callback();
+                            }
+                        }, trigger: 'change'}
 				],
 				amountBalance: [
-					{ required: true, message: '请输入余款金额', trigger: 'blur' }
+					{ required: true, message: '请输入余款金额', trigger: 'blur' },
+                    { validator:function(rule,value,callback){
+                            var reg =  /^[1-9]+[0-9]*]*$/ ;
+                            if(value ==null || value =="null" || value ==""  ){
+                                callback(new Error("请输入余款金额"));
+                                mainDivVM.formSigning.amountBalance =null;
+
+                            }else  if(value !=null && value !="null" && value !="" && !reg.test(value) ){
+                                callback(new Error("请输入正整数"));
+                                mainDivVM.formSigning.amountBalance =null;
+                            }else{
+                                callback();
+                            }
+                        }, trigger: 'change'}
 				],
 				makeUpTime: [
 					{ type: 'date', required: true, message: '请选择预计余款补齐时间', trigger: 'change' }
 				],
-				// performanceAmount: [
-				// 	{ required: true, message: '请输入业绩金额', trigger: 'blur' }
-				// ],
+				performanceAmount: [
+					{ required: true, message: '请输入业绩金额', trigger: 'blur' }
+				],
                 isRemoteSign: [ //是否远程签约
                     { required: true, message: '请选择是否远程签约', trigger: 'change' }
                 ],
@@ -1402,15 +1482,29 @@
                     { required: true, message: '请选择到访店铺类型', trigger: 'change' }
                 ],
                 visitNum: [ //请填写到访人数
-                    { required: true, message: '请填写到访人数', trigger: 'change' }
+                    { required: true, message: '请填写到访人数', trigger: 'change' },
+                    { validator:function(rule,value,callback){
+                            var reg =  /^[1-9]+[0-9]*]*$/ ;
+                            if(value ==null || value =="null" || value ==""  ){
+                                callback(new Error("请填写到访人数"));
+                                mainDivVM.formSigning.visitNum =null;
+
+                            }else  if(value !=null && value !="null" && value !="" && !reg.test(value) ){
+                                callback(new Error("请输入正整数"));
+                                mainDivVM.formSigning.visitNum =null;
+                            }else{
+                                callback();
+                            }
+                        }, trigger: 'change'}
                 ],
                 visitPeopleNum: [ //请填写到访人数
+                     { required: true, message: '请填写到访人数', trigger: 'change' },
                   	 { validator:function(rule,value,callback){
                   		 var reg =  /^[1-9]+[0-9]*]*$/ ;
                   		 if(value ==null || value =="null" || value ==""  ){
                   			 callback(new Error("请填写到访人数"));
                   			mainDivVM.addVisitRecord.visitPeopleNum =null;
-                  			
+
                   		 }else  if(value !=null && value !="null" && value !="" && !reg.test(value) ){
                                callback(new Error("请输入正整数"));
                                mainDivVM.addVisitRecord.visitPeopleNum =null;
@@ -1519,9 +1613,11 @@
             },
             suppShow(){ //补充到访记录展开
                 this.suppWrap = true;
+                this.shouAddVisitButton = false;
             },
             suppHide(){
                 this.suppWrap = false;
+                this.shouAddVisitButton = true;
             },
             changePayType(val){
         	    if(val==3){
@@ -2000,7 +2096,8 @@
                     mainDivVM.currentCity(mainDivVM.formSigning.signCity)
                 //  设置默认时间
                     mainDivVM.formSigning.payTime = new Date()
-                    mainDivVM.formSigning.isRemoteSign11 = 0;
+                    mainDivVM.formSigning.isRemoteSign = 0;
+                    mainDivVM.formSigning.visitTime = new Date();
                 });
             },
             showSignDetail(row){
@@ -2095,7 +2192,6 @@
             submitForm(formName) {
                 var param = this.formSigning;
                 param.amountPerformance = this.formSigningAmountPerformance;
-                param.isRemoteSign = this.formSigning.isRemoteSign11;
                 // 设置 clueid
                 this.$refs[formName].validate((valid) => {
                     if (valid) {
