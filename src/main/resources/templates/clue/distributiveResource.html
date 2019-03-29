@@ -163,30 +163,9 @@
             @selection-change="handleSelectionChange"
             >
             <el-table-column align="center" type="index" label="序号" width="55"></el-table-column>
-            <el-table-column align="center" prop="phaseName" label="线索阶段"></el-table-column>
-            <el-table-column align="center" prop="createTime" label="创建时间"></el-table-column>
-            <el-table-column align="center" prop="projectName" label="资源项目"></el-table-column>
-            <el-table-column align="center" prop="searchWord" label="搜索词"></el-table-column>
-            <el-table-column align="center" prop="sourceTypeName" label="广告位"></el-table-column>
-            <el-table-column align="center" prop="sourceName" label="媒介"></el-table-column>
-            <el-table-column align="center" prop="typeName" label="资源类型"></el-table-column>
-            <el-table-column align="center" prop="categoryName" label="资源类别"></el-table-column>
-            <el-table-column align="center" prop="industryCategoryName" label="行业类别"></el-table-column>
-            <el-table-column align="center" prop="phone" label="手机"></el-table-column>
-            <el-table-column align="center" prop="messageTime" label="留言时间"></el-table-column>
-            <el-table-column align="center" prop="messagePoint" label="留言重点"></el-table-column>
-            <el-table-column align="center" prop="email" label="邮箱"></el-table-column>
-            <el-table-column align="center" prop="address" label="地址"></el-table-column>
-            <el-table-column align="center" prop="wechat" label="微信"></el-table-column>
-            <el-table-column align="center" prop="operationName" label="资源专员"></el-table-column>
-            <el-table-column align="center" prop="teleCompanyName" label="电销分公司" width="120"></el-table-column>
-            <el-table-column align="center" prop="teleManagerName" label="电销总经理" width="120"></el-table-column>
-            <el-table-column align="center" prop="teleDeptName" label="电销事业部" width="120"></el-table-column>
-            <el-table-column align="center" prop="teleCeoName" label="电销副总"></el-table-column>
-            <el-table-column align="center" prop="teleGorupName" label="电销组"></el-table-column>
-            <el-table-column align="center" prop="teleDirectorName" label="电销总监"></el-table-column>
-            <el-table-column align="center" prop="teleSaleName" label="电销人员"></el-table-column>
-            <el-table-column align="center" prop="assignTime" label="分发时间"></el-table-column>
+            <el-table-column align="center" :key="index" :prop="item.fieldCode" :label="item.displayName" :width="item.width"
+	         v-for="(item,key,index) in tableColums" >
+	        </el-table-column>
         </el-table>
         <table-pagination :pager="pager" @change="initTableData"></table-pagination>
     </el-row>
@@ -279,20 +258,23 @@
     </el-dialog>
     <!-- 选择列 -->
     <el-dialog title="选择列" :visible.sync="dialogChooseList">
-        <el-form :model="form">
-            <el-form-item label="列名" prop="type">
-                <el-checkbox-group v-model="form.type">
-                    <el-checkbox :label="item.sortNum+'_'+item.fieldCode+'_'+item.displayName+'_'+item.id"  name="type" :key="item.fieldCode"  v-for="(item,index) in  allTableColums ">
-                        {{item.displayName}}
-                    </el-checkbox>
-                 </el-checkbox-group>
-            </el-form-item>
-        </el-form>
-        <div slot="footer" class="dialog-footer">
-            <el-button type="primary" @click="">确 定</el-button>
-            <el-button @click="dialogChooseList = false">取 消</el-button>
-        </div>
-    </el-dialog>
+	  <el-form :model="fieldFrom">
+	    
+		  <el-form-item label="列名" prop="type">
+		    <el-checkbox-group v-model="fieldFrom.type">
+		      <el-checkbox :label="item.sortNum+'_'+item.fieldCode+'_'+item.displayName+'_'+item.id"  name="type" :key="item.fieldCode"  v-for="(item,index) in  allTableColums ">
+		          {{item.displayName}}
+		      </el-checkbox>
+		     </el-checkbox-group>
+		  </el-form-item>
+	    
+	  </el-form>
+	  
+	  <div slot="footer" class="dialog-footer">
+	    <el-button @click="dialogChooseList = false">取 消</el-button>
+	    <el-button type="primary" @click="confirmColumn">确 定</el-button>
+	  </div>
+	</el-dialog>
 </div>
 </body>
 <!-- import Vue before Element -->
@@ -300,6 +282,8 @@
 <script th:inline="javascript" >
 var proSelect=[[${proSelect}]];
 var userList=[[${userList}]];
+var fieldList=[[${fieldList}]];//自定义字段
+var userFieldList=[[${userFieldList}]];//用户自定义字段
     var ocmVM = new Vue({
         el: '#optimizeClueManagement',
         data: function() {
@@ -307,32 +291,11 @@ var userList=[[${userList}]];
                 dialogFormVisible: false,
                 dialogChooseList: false,
                 multipleSelection: [],//选择行
-                allTableColums:[
-                    {
-                        displayName:"线索阶段",
-                        fieldCode:"clueStage ",
-                        fieldName:"线索阶段",
-                        id:"1103929467040124928",
-                        menuCode:null,
-                        menuId:null,
-                        pageNum:0,
-                        pageSize:0,
-                        sortNum:1,
-                        width:100
-                    },
-                    {
-                        displayName:"创建时间",
-                        fieldCode:"creatTime",
-                        fieldName:"创建时间",
-                        id:"1103929467040124929",
-                        menuCode:null,
-                        menuId:null,
-                        pageNum:0,
-                        pageSize:0,
-                        sortNum:2,
-                        width:100
-                    }
-                ],//自定义列
+                allTableColums:[],//自定义列
+                tableColums:[],
+                fieldFrom: {
+ 	               type: []
+ 	             },
                 form: {
                     starTime:'',
                     endTime:'',
@@ -531,38 +494,6 @@ var userList=[[${userList}]];
     　　　                             this.form.phone=this.form.phone.replace(/[^\.\d]/g,'');
               this.form.phone=this.form.phone.replace('.','');
         　                              　},
-            confirmColumn(){
-                this.dialogChooseList = false;
-                //处理用户选择的列
-                console.info(this.form.type);
-                var customerShowColun = [];
-                var customerColumn = this.form.type;
-                customerColumn.sort(this.sortNumber);//对选择的列排序
-                var idList=[];
-                for(var i=0;i<customerColumn.length;i++){
-                    var curItem = customerColumn[i];
-                    var itemArr = curItem.split("_");
-                    var obj = {};
-                    obj.fieldCode=itemArr[1];
-                    obj.displayName=itemArr[2];
-                    customerShowColun.push(obj);
-                    idList.push(itemArr[3])
-                }
-                this.tableColums = customerShowColun;
-                var param ={};
-                param.fieldIdList = idList;
-                param.menuCode = "aggregation:pendingAllocationManager";
-                console.info(param);
-                if(idList.length!=0){
-                    axios.post('/customfield/customField/saveUserField', param)
-                    .then(function (response) {
-
-                    })
-                    .catch(function (error) {
-                    console.log(error);
-                    });
-                }
-            },
             //级联查询机构
             showTele(type){
          	   var param={};
@@ -590,12 +521,76 @@ var userList=[[${userList}]];
                  .then(function () {
                    // always executed
                  });
-           }
+           },
+           confirmColumn(){
+           	this.dialogChooseList = false;
+           	//处理用户选择的列
+           	console.info(this.fieldFrom.type);
+           	if(this.fieldFrom.type.length==0){
+           		this.$message({
+                       message: "请至少保留一列",
+                       type: 'error'
+                     }); 
+           		return;
+           	}
+           	var customerShowColun = [];
+           	var customerColumn = this.fieldFrom.type;
+           	customerColumn.sort(this.sortNumber);//对选择的列排序
+           	var idList=[];
+           	for(var i=0;i<customerColumn.length;i++){
+           		var curItem = customerColumn[i];
+           		var itemArr = curItem.split("_");
+           		var obj = {};
+           		obj.fieldCode=itemArr[1];
+           		obj.displayName=itemArr[2];
+           		customerShowColun.push(obj);
+           		idList.push(itemArr[3])
+           	}
+           	this.tableColums = customerShowColun;
+           	var param ={};
+             param.fieldIdList = idList;
+             param.menuCode = "DistributiveResource";
+             console.info(param);
+             if(idList.length!=0){
+                 axios.post('/customfield/customField/saveUserField', param)
+                 .then(function (response) {
+                 	
+                 })
+                 .catch(function (error) {
+                      console.log(error);
+                 });
+             }
+           },
+           initColumn(){
+           	//初始化table 列 和 用户自定义列
+           	this.allTableColums = fieldList;
+           	if(userFieldList.length!=0){
+           		var type=[];
+               	for(var i=0;i<userFieldList.length;i++){
+               		type.push(userFieldList[i].sortNum+'_'+userFieldList[i].fieldCode+'_'+userFieldList[i].displayName+'_'+userFieldList[i].fieldId)
+                }
+              	this.fieldFrom.type = type;
+              	this.confirmColumn();
+           	}else{
+           		var type=[];
+                 	for(var i=0;i<fieldList.length;i++){
+                 		type.push(fieldList[i].sortNum+'_'+fieldList[i].fieldCode+'_'+fieldList[i].displayName+'_'+fieldList[i].id)
+                	}
+	              	this.fieldFrom.type = type;
+	              	this.confirmColumn();
+           	}
+           	
+           },
+           sortNumber(a,b) {
+               //对数组中元素，按照数字 从小到大 排序
+               return a.split("_")[0] - b.split("_")[0];
+              }
 
         },
         mounted(){
 
         	document.getElementById('optimizeClueManagement').style.display = 'block';
+        	this.initColumn();
          	this.initTableData();
             var  param={};
        	   param.groupCode="medium";
