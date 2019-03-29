@@ -140,7 +140,7 @@ public class ConsoleController {
         String roleCode = roleInfoDTO.getRoleCode();
         String path = "";
 
-  /*     if (RoleCodeEnum.DXCYGW.name().equals(roleCode)) {
+       if (RoleCodeEnum.DXCYGW.name().equals(roleCode)) {
             // 电销顾问
             path = "console/consoleTelemarketing";
         } else if (RoleCodeEnum.DXZJ.name().equals(roleCode)) {
@@ -190,7 +190,7 @@ public class ConsoleController {
 
         
         
-        if(type.equals("1")) {
+       /*   if(type.equals("1")) {
             path = "console/consoleTelemarketing";
         }else if(type.equals("2")) {
             List<Integer> statusList = new ArrayList<Integer>();
