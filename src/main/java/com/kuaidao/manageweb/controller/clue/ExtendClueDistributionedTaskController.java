@@ -3,6 +3,7 @@ package com.kuaidao.manageweb.controller.clue;
 import java.util.ArrayList;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
+import org.apache.shiro.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -16,8 +17,13 @@ import com.kuaidao.common.constant.RoleCodeEnum;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.manageweb.feign.clue.ExtendClueFeignClient;
+import com.kuaidao.manageweb.feign.customfield.CustomFieldFeignClient;
 import com.kuaidao.manageweb.feign.project.ProjectInfoFeignClient;
 import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
+import com.kuaidao.sys.dto.customfield.CustomFieldQueryDTO;
+import com.kuaidao.sys.dto.customfield.QueryFieldByRoleAndMenuReq;
+import com.kuaidao.sys.dto.customfield.QueryFieldByUserAndMenuReq;
+import com.kuaidao.sys.dto.customfield.UserFieldDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import com.kuaidao.sys.dto.user.UserOrgRoleReq;
 
@@ -31,6 +37,8 @@ public class ExtendClueDistributionedTaskController {
     private UserInfoFeignClient userInfoFeignClient;
     @Autowired
     private ProjectInfoFeignClient projectInfoFeignClient;
+    @Autowired
+    private CustomFieldFeignClient customFieldFeignClient;
 
     /**
      * 初始化已审核列表数据
@@ -41,6 +49,7 @@ public class ExtendClueDistributionedTaskController {
      */
     @RequestMapping("/initDistributiveResource")
     public String initDistributiveResource(HttpServletRequest request, Model model) {
+        UserInfoDTO user = getUser();
         // 项目
         JSONResult<List<ProjectInfoDTO>> proJson = projectInfoFeignClient.allProject();
         if (proJson.getCode().equals(JSONResult.SUCCESS)) {
@@ -50,6 +59,21 @@ public class ExtendClueDistributionedTaskController {
         List<UserInfoDTO> userList = this.queryUserByRole();
 
         request.setAttribute("userList", userList);
+        // 根据角色查询页面字段
+        QueryFieldByRoleAndMenuReq queryFieldByRoleAndMenuReq = new QueryFieldByRoleAndMenuReq();
+        queryFieldByRoleAndMenuReq.setMenuCode("DistributiveResource");
+        queryFieldByRoleAndMenuReq.setId(user.getRoleList().get(0).getId());
+        JSONResult<List<CustomFieldQueryDTO>> queryFieldByRoleAndMenu =
+                customFieldFeignClient.queryFieldByRoleAndMenu(queryFieldByRoleAndMenuReq);
+        request.setAttribute("fieldList", queryFieldByRoleAndMenu.getData());
+        // 根据用户查询页面字段
+        QueryFieldByUserAndMenuReq queryFieldByUserAndMenuReq = new QueryFieldByUserAndMenuReq();
+        queryFieldByUserAndMenuReq.setRoleId(user.getRoleList().get(0).getId());
+        queryFieldByUserAndMenuReq.setId(user.getId());
+        queryFieldByUserAndMenuReq.setMenuCode("DistributiveResource");
+        JSONResult<List<UserFieldDTO>> queryFieldByUserAndMenu =
+                customFieldFeignClient.queryFieldByUserAndMenu(queryFieldByUserAndMenuReq);
+        request.setAttribute("userFieldList", queryFieldByUserAndMenu.getData());
         return "clue/distributiveResource";
     }
 
@@ -134,4 +158,15 @@ public class ExtendClueDistributionedTaskController {
 
     }
 
+    /**
+     * 获取当前登录账号
+     * 
+     * @param orgDTO
+     * @return
+     */
+    private UserInfoDTO getUser() {
+        Object attribute = SecurityUtils.getSubject().getSession().getAttribute("user");
+        UserInfoDTO user = (UserInfoDTO) attribute;
+        return user;
+    }
 }
