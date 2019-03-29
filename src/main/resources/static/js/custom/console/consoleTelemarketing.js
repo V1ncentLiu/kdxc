@@ -4,9 +4,12 @@ var mainDivVM = new Vue({
     	receiveDialog:false,
     	receiveTitle:"",
     	dailogTitleType:"",
-        repeatPhonesDialog:false,//重复手机号
+        repeatPhonesDialog:false,//今日待跟进客户资源重复手机号
+        repeatPhonesDialog2:false,//快速领取新资源重复手机号
         formLabelWidth:"150px",
-        tableData:[],
+        // 快速领取新资源
+        tableData:[],        
+        repeatPhonesTable2:[],//快速领取新资源重复手机号
         categoryArr:[],
         typeArr:[],
         reasonArr:[],
@@ -152,16 +155,33 @@ var mainDivVM = new Vue({
             this.repeatPhonesDialog=true;
             this.dailogTitleType=row.phone;
             var param ={};
-                param.id = row.clueId;
-                  param.cusPhone = row.phone;
-                    axios.post('/clue/appiontment/repeatPhonelist', param)
-                      .then(function (response) {
-                            var result =  response.data;
-                            var table=result.data;
-                            mainDivVM.repeatPhonesTable= table;
-                            mainDivVM.repeatPhonesDialog=true;
-                      })  .catch(function (error) {
-                                  console.log(error);
+            param.id = row.clueId;
+            param.cusPhone = row.phone;
+            axios.post('/clue/appiontment/repeatPhonelist', param)
+                .then(function (response) {
+                    var result =  response.data;
+                    var table=result.data;
+                    mainDivVM.repeatPhonesTable= table;
+                    mainDivVM.repeatPhonesDialog=true;
+                })  .catch(function (error) {
+                    console.log(error);
+            });
+        },
+        repeatPhonesClick2(row) {//重复手机号按钮点击
+            this.repeatPhonesDialog=true;
+            this.dailogTitleType=row.clueid;
+            var param ={};
+            param.id = row.clueid;
+            param.cusPhone = row.phone;
+            axios.post('/clue/appiontment/repeatPhonelist', param)
+                .then(function (response) {
+                    var result =  response.data;
+                    console.info(result);
+                    var table=result.data;
+                    mainDivVM.repeatPhonesTable2= table;
+                    mainDivVM.repeatPhonesDialog2=true;
+                })  .catch(function (error) {
+                    console.log(error);
             });
         },
         // 今日待跟进客户资源
