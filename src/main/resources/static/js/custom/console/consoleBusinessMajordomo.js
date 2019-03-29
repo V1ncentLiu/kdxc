@@ -77,6 +77,8 @@ var mainDivVM = new Vue({
         dataTable2:[],
         multipleSelection2:[],
         dialogFormVisibleVisit:false,
+        notSignedReasonDialog:false,//未签约原因弹窗
+        notSignReason:'',//未签约原因值
         // 待审批未到访记录
         dataTable3:[],
         multipleSelection3:[],
@@ -768,6 +770,11 @@ var mainDivVM = new Vue({
                     return false;
                 }
             });
+        },
+        notSignedReasonClick(row) {//到访记录未签约原因
+            console.log(row);
+            this.notSignReason=row.notSignReason;
+            this.notSignedReasonDialog=true;
         },
         // 待审批未到访记录
         initCustomerUnVisitRecord(){//初始列表 
