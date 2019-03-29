@@ -581,8 +581,15 @@ public class ConsoleController {
     public JSONResult<BusinessDirectorConsolePanelRespDTO> countBusinessDirectorCurMonthNum(
             @RequestBody BusinessConsoleReqDTO businessConsoleReqDTO) {
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
-        List<Long> accountIdList = new ArrayList<Long>();
-        accountIdList.add(curLoginUser.getId());
+    
+        List<Long> businessGroupIdList = new ArrayList<>();
+        businessGroupIdList.add(curLoginUser.getOrgId());
+        // reqDTO.setBusinessGroupIdList(businessGroupIdList);
+        List<Long> accountIdList =
+                getAccountIdList(curLoginUser.getOrgId(), RoleCodeEnum.SWJL.name());
+        if (CollectionUtils.isEmpty(accountIdList)) {
+            return new JSONResult<BusinessDirectorConsolePanelRespDTO>().success(null);
+        }
         businessConsoleReqDTO.setAccountIdList(accountIdList);
         businessConsoleReqDTO.setBusinessGroupId(curLoginUser.getOrgId());
         Date curDate = new Date();
@@ -810,8 +817,8 @@ public class ConsoleController {
         }
 
         Date createTime = data.getCreateTime();
-        int diffDay = DateUtil.diffDay(createTime, new Date());
-        return new JSONResult<String>().success(diffDay + "");
+        int diffDay = DateUtil.diffDay(createTime, new Date())+1;
+        return new JSONResult<String>().success(diffDay+"");
 
     }
 
