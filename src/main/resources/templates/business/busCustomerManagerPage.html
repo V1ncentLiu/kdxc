@@ -495,6 +495,12 @@ var customerVM = new Vue({
 	                    { required: true, message: '请选择商务经理', trigger: 'change' }
 	                ]
 	              },
+	              notVisitFlagRules:{
+	                  notVisitReason: [
+	                      { required: true, message: '未到访原因为必填项', trigger: 'blur' },
+	                      { min: 1, max: 100, message: '长度在 1 到 100 个字符', trigger: 'blur' }
+	                  ],
+	              },
 	            multipleSelection:[],
                 formLabelWidth: '150px',
                 formLabelWidth1: '120px',
@@ -914,12 +920,11 @@ var customerVM = new Vue({
                          customerVM.notVisitFlag.str = response.data.data.notVisitReason
                      });
                  },
-                 // 展示到访记录
                  showVisitRecord(row){
-                	 this.cusTitleName = row.cusName;
-                	 this.showVisitAduitDialogVisible = true;
+                     // 展示到访记录
+                     this.showVisitAduitDialogVisible = true;
                      var param = {};
-                     param.clueId=row.clueId;
+                     param.clueId = row.clueId
                      axios.post('/busVisitRecord/queryList',param).then(function (response) {
                          if(null===response||response.data==null||response.data.code!='0'){
                              if(response.data.code!='0'){
@@ -938,14 +943,16 @@ var customerVM = new Vue({
                              if(dataList.length>=1){
                                  first.push(dataList[dataList.length-1])
                                  customerVM.showVisitAduitDatas.one = first;
-                                 if(!first[0].notSignReason){
+                                 if(first[0].isSign==0){
                                      customerVM.showVisitAduitDatas.oneNotSignReason = first[0].notSignReason;
                                      customerVM.showVisitAduitDatas.oneNotSignShow = true;
                                  }
-                                 if(!first[0].rebutReason){
+                                 if(first[0].rebutReason){
                                      customerVM.showVisitAduitDatas.oneRebutReason = first[0].rebutReason;
                                      customerVM.showVisitAduitDatas.oneRebutShow = true;
                                  }
+                             }else{
+                                 customerVM.showVisitAduitDatas.one = first;
                              }
 
                              // 二次到访
@@ -954,15 +961,17 @@ var customerVM = new Vue({
                                  two.push(dataList[dataList.length-2])
                                  customerVM.showVisitAduitDatas.two = two;
                                  customerVM.showVisitAduitDatas.twoShow = true;
-                                 if(!first[0].notSignReason){
+                                 if(two[0].isSign==0){
                                      customerVM.showVisitAduitDatas.twoNotSignReason = two[0].notSignReason;
                                      customerVM.showVisitAduitDatas.twoNotSignShow = true;
                                  }
-                                 if(!first[0].rebutReason){
+                                 if(two[0].rebutReason){
                                      customerVM.showVisitAduitDatas.twoRebutReason = two[0].rebutReason;
                                      customerVM.showVisitAduitDatas.twoRebutShow = true;
                                  }
-
+                             }else{
+                                 customerVM.showVisitAduitDatas.two = two;
+                                 customerVM.showVisitAduitDatas.twoShow = false;
                              }
                              // 多次到访
                              var three = []
@@ -970,15 +979,17 @@ var customerVM = new Vue({
                                  three = dataList.slice(0,dataList.length-2)
                                  customerVM.showVisitAduitDatas.three = three;
                                  customerVM.showVisitAduitDatas.threeShow = true;
-                                 if(!first[0].notSignReason){
+                                 if(three[0].isSign==0){
                                      customerVM.showVisitAduitDatas.threeNotSignReason = three[0].notSignReason;
                                      customerVM.showVisitAduitDatas.threeNotSignShow = true;
                                  }
-                                 if(!first[0].rebutReason){
+                                 if(three[0].rebutReason){
                                      customerVM.showVisitAduitDatas.threeRebutReason = three[0].rebutReason;
                                      customerVM.showVisitAduitDatas.threeRebutShow = true;
                                  }
-
+                             }else{
+                                 customerVM.showVisitAduitDatas.three = three;
+                                 customerVM.showVisitAduitDatas.threeShow = false;
                              }
                          //
                          }

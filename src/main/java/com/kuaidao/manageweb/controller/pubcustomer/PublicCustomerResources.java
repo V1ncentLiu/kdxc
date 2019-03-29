@@ -3,6 +3,7 @@ package com.kuaidao.manageweb.controller.pubcustomer;
 import com.kuaidao.aggregation.dto.pubcusres.ClueQueryParamDTO;
 import com.kuaidao.aggregation.dto.pubcusres.PublicCustomerResourcesReqDTO;
 import com.kuaidao.aggregation.dto.pubcusres.PublicCustomerResourcesRespDTO;
+import com.kuaidao.common.constant.DicCodeEnum;
 import com.kuaidao.common.constant.OrgTypeConstant;
 import com.kuaidao.common.constant.RoleCodeEnum;
 import com.kuaidao.common.constant.SystemCodeConstant;
@@ -176,7 +177,18 @@ public class PublicCustomerResources {
         JSONResult<List<UserFieldDTO>> queryFieldByUserAndMenu =
                 customFieldFeignClient.queryFieldByUserAndMenu(queryFieldByUserAndMenuReq);
         request.setAttribute("userFieldList", queryFieldByUserAndMenu.getData());
-
+        // 查询字典话务一级客户状态集合
+        request.setAttribute("phCustomerStatusList",
+                getDictionaryByCode(DicCodeEnum.PHCUSTOMERSTATUS.getCode()));
+        // 查询字典话务二级客户状态集合
+        request.setAttribute("phCustomerStatusSubList",
+                getDictionaryByCode(DicCodeEnum.PHCUSTOMERSTATUSSUB.getCode()));
+     // 查询字典电销一级客户状态集合
+        request.setAttribute("customerStatusList",
+                getDictionaryByCode(DicCodeEnum.CUSTOMERSTATUS.getCode()));
+        // 查询字典电销二级客户状态集合
+        request.setAttribute("customerStatusSubList",
+                getDictionaryByCode(DicCodeEnum.CUSTOMERSTATUSSUB.getCode()));
         return "pubcustomer/publicCustomer";
     }
     /**

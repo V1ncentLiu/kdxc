@@ -18,16 +18,17 @@
         <el-breadcrumb-item>我的客户</el-breadcrumb-item>
     </el-breadcrumb>
      <el-row class="marginB10">
-         <shiro:hasPermission name="myCustomerInfo:apply">
-          <el-button type="success" @click="openFormInfo">重单申请</el-button>
-        <!-- <shiro:hasPermission name="myCustomerInfo:releaseClue">
-           <el-button type="danger" @click="openeleaseForm">释放资源</el-button>
-         </shiro:hasPermission> -->
+        <el-button type="text" @click="userDefinedDialog = true"><i class="el-icon-menu"></i>选择列</el-button>
+        <shiro:hasPermission name="myCustomerInfo:apply">
+            <el-button type="success" @click="openFormInfo">重单申请</el-button>
+            <!-- <shiro:hasPermission name="myCustomerInfo:releaseClue">
+                <el-button type="danger" @click="openeleaseForm">释放资源</el-button>
+            </shiro:hasPermission> -->
  
-         <!--  <el-button type="warning">查询重复</el-button> --> 
+            <!-- <el-button type="warning">查询重复</el-button> --> 
         <shiro:hasPermission name="myCustomerInfo:add">
-              <el-button type="primary" @click="createClueData" >新建客户资源</a></el-button>
-         </shiro:hasPermission>
+            <el-button type="primary" @click="createClueData" >新建客户资源</a></el-button>
+        </shiro:hasPermission>
     </el-row>
     <el-row class="marginB10 greybg padding20" style="padding-bottom: 0">        
         <el-form :inline="true" :model="form" ref="form">
@@ -411,6 +412,26 @@
         </el-table>
     </el-dialog>
     <dialog-tracking :param="trackingParam"></dialog-tracking>
+    <!-- 自定义列 -->
+    <el-dialog title="自定义列" :visible.sync="userDefinedDialog">
+      <el-form :model="formList">
+        
+          <el-form-item label="列名" prop="type">
+            <el-checkbox-group v-model="formList.type">
+              <el-checkbox :label="item.sortNum+'_'+item.fieldCode+'_'+item.displayName+'_'+item.id"  name="type" :key="item.fieldCode"  v-for="(item,index) in  allTableColums ">
+                  {{item.displayName}}
+              </el-checkbox>
+          
+             </el-checkbox-group>
+          </el-form-item>
+        
+      </el-form>
+      
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="userDefinedDialog = false">取 消</el-button>
+        <el-button type="primary" @click="confirmColumn">确 定</el-button>
+      </div>
+    </el-dialog>
 </div>
 </body>
 <!-- import Vue before Element -->
@@ -421,12 +442,14 @@
 <script th:src="@{/js/custom/call/toolbarIframe.js?v=1.0.1}"></script>
 <script th:src="@{/js/custom/call/timer.js?v=1.0.1}"></script>
 <script th:src="@{/js/custom/call/rtCall.js?v=1.0.0}"></script> 
- <!-- 播放錄音 js -->
- <script th:src="@{/js/custom/callrecord/simpleAudio.js?v=1.0.0}"></script>
- 
-
+<!-- 播放錄音 js -->
+<script th:src="@{/js/custom/callrecord/simpleAudio.js?v=1.0.0}"></script>
 <script>
-  var mycustomVM=   new Vue({
+    // var fieldList=[[${fieldList}]];//自定义字段
+    // var userFieldList=[[${userFieldList}]];//用户自定义字段
+    var fieldList=[];//自定义字段
+    var userFieldList=[];//用户自定义字段
+    var mycustomVM=new Vue({
         el: '#myCustom',
         data: function() {
             return {
@@ -657,7 +680,13 @@
                     reason: [
                         { required: true, message: '请选择释放原因', trigger: 'blur' }
                     ]
-                }
+                },
+                userDefinedDialog:false,//自定义列
+                formList: {
+                   type: [],
+                },
+                allTableColums:[],
+                tableColums:[],
             }        	  
         },
         methods: {
@@ -928,34 +957,84 @@
                 
             },
             repeatApplyNumber(){//输入手机号才显示查询线索按钮
-    　　　                                    this.repeatApplyForm.phone=this.repeatApplyForm.phone.replace(/[^\.\d]/g,'');
+                this.repeatApplyForm.phone=this.repeatApplyForm.phone.replace(/[^\.\d]/g,'');
                 this.repeatApplyForm.phone=this.repeatApplyForm.phone.replace('.','');
                 if(this.repeatApplyForm.phone.length==11){
                     this.searchClueDisable=false;
                 }else{
                     this.searchClueDisable=true;
                 }
-                
-        　                         },
+            },
             repeatApplyRepeatNumber(){
-    　　　                                  this.repeatApplyForm.repeatPhone=this.repeatApplyForm.repeatPhone.replace(/[^\.\d]/g,'');
+                this.repeatApplyForm.repeatPhone=this.repeatApplyForm.repeatPhone.replace(/[^\.\d]/g,'');
                 this.repeatApplyForm.repeatPhone=this.repeatApplyForm.repeatPhone.replace('.','');
                 if(this.repeatApplyForm.repeatPhone.length==11){
                     this.searchRepeatClueDisable=false;
                 }else{
                     this.searchRepeatClueDisable=true;
                 }
-        　                     },
+            },
             //外呼号码
-           outboundCall(outboundInputPhone,clueId){//外呼
-        　                    	var  param={};
-        　                         	param.clueId=clueId;
-        　                	 window.parent.outboundCallPhone(outboundInputPhone,2,clueId, function(res){
-        　                	    axios.post('/tele/clueMyCustomerInfo/updateCallTime',param).then(function (response) {
-        　                		   
-                });
-        　                	 });
-        　                	},
+            outboundCall(outboundInputPhone,clueId){//外呼
+                var  param={};
+                param.clueId=clueId;
+                window.parent.outboundCallPhone(outboundInputPhone,2,clueId, function(res){
+                    axios.post('/tele/clueMyCustomerInfo/updateCallTime',param).then(function(response){
+                    });
+            　  });
+        　  },
+            //处理用户选择的列
+            confirmColumn(){
+                this.userDefinedDialog = false;
+                
+                console.info(this.formList.type);
+                var customerShowColun = [];
+                var customerColumn = this.formList.type;
+                customerColumn.sort(this.sortNumber);//对选择的列排序
+                var idList=[];
+                for(var i=0;i<customerColumn.length;i++){
+                    var curItem = customerColumn[i];
+                    var itemArr = curItem.split("_");
+                    var obj = {};
+                    obj.fieldCode=itemArr[1];
+                    obj.displayName=itemArr[2];
+                    customerShowColun.push(obj);
+                    idList.push(itemArr[3])
+                }
+                this.tableColums = customerShowColun;
+                var param ={};
+                param.fieldIdList = idList;
+                param.menuCode = "customerManager";
+                console.info(param);
+                if(idList.length!=0){
+                    // axios.post('/customfield/customField/saveUserField', param)
+                    // .then(function (response) {
+                    
+                    // })
+                    // .catch(function (error) {
+                    //     console.log(error);
+                    // });
+                }
+            },
+            initColumn(){
+                //初始化table 列 和 用户自定义列
+                this.allTableColums = fieldList;
+                if(userFieldList.length!=0){
+                    var type=[];
+                    for(var i=0;i<userFieldList.length;i++){
+                        type.push(userFieldList[i].sortNum+'_'+userFieldList[i].fieldCode+'_'+userFieldList[i].displayName+'_'+userFieldList[i].fieldId)
+                    }
+                    this.formList.type = type;
+                    this.confirmColumn();
+                }else{
+                    this.tableColums = fieldList;
+                }
+                
+            },
+            sortNumber(a,b) {
+                //对数组中元素，按照数字 从小到大 排序
+                return a.split("_")[0] - b.split("_")[0];
+           }
         },
         mounted(){
             document.getElementById('myCustom').style.display = 'block';
@@ -1001,6 +1080,9 @@
             axios.post('/area/sysregion/querySysRegionByParam',param).then(function (response) {  
             	mycustomVM.provinceArr=response.data.data.data;
             });
+
+            // 初始化列
+            this.initColumn();
     	}
     })
  
