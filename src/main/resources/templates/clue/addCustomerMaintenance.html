@@ -1414,131 +1414,90 @@
                     }
                 }
                 this.lineFormShow = true;
+                this.formInline.id=rows[0].id;
+                this.formInline.callTime=rows[0].callTime;
+                this.formInline.customerStatus=rows[0].customerStatus;;
+                this.formInline.isCall=rows[0].isCall+"";
+               // this.formInline.resourceStatus=rows[0].resourceStatus+"";
+                this.formInline.focusPoint=rows[0].focusPoint;
+                this.formInline.visitStatus=rows[0].visitStatus+"";
+                this.formInline.nextVisitTime=rows[0].nextVisitTime;
+                isEdit=true;
                 this.formInline.id = rows[0].id;
                 this.formInline.callTime = rows[0].callTime;
                 this.formInline.customerStatus = rows[0].customerStatus;
-                ;
                 this.formInline.isCall = rows[0].isCall + "";
-                this.formInline.resourceStatus = rows[0].resourceStatus + "";
+              //  this.formInline.resourceStatus = rows[0].resourceStatus + "";
                 this.formInline.focusPoint = rows[0].focusPoint;
                 this.formInline.visitStatus = rows[0].visitStatus + "";
                 this.formInline.nextVisitTime = rows[0].nextVisitTime;
                 isEdit = true;
             },
-            onConfirmAdd(index, row) {
-                this.$refs['LineRuleForm'].validate((valid) => {
-                    if (valid) {
-                        //start
-                        //跟进记录保存
-                        var param = {};
-                        param.clueId = clueId;
-                        var callTime = this.formInline.callTime;
-                        if (typeof(callTime) == 'string') {
-                            param.callTime = new Date(Date.parse(callTime.replace(/-/g, "/")));
-                        } else {
-                            param.callTime = this.formInline.callTime;
-                        }
-
-                        param.customerStatus = this.formInline.customerStatus;
-                        param.isCall = this.formInline.isCall;
-                        param.resourceStatus = this.formInline.resourceStatus;
-                        param.focusPoint = this.formInline.focusPoint;
-                        param.visitStatus = this.formInline.visitStatus;
-                        var nextVisitTime = this.formInline.nextVisitTime;
-                        if (typeof(nextVisitTime) == 'string') {
-                            param.nextVisitTime = new Date(Date.parse(nextVisitTime.replace(/-/g, "/")));
-                        } else {
-                            param.nextVisitTime = this.formInline.nextVisitTime;
-                        }
-                        param.customerStatusSub = this.formInline.customerStatusSub;
-                        this.addBtnDisabled = true;
-                        //如果是编辑跟进记录
-                        if (isEdit) {
-                            param.id = this.formInline.id;
-                            axios.post('/tele/clueMyCustomerInfo/updateClueTracking', param)
-                                .then(function (response) {
-                                    addCustomerVM.$message({
-                                        message: '操作成功', type: 'success', duration: 2000, onClose: function () {
-                                            axios.post('/tele/clueMyCustomerInfo/findClueTracking', param)
-                                                .then(function (response) {
-                                                    isEdit = false;
-                                                    addCustomerVM.lineFormShow = false;
-                                                    addCustomerVM.addBtnDisabled = false;
-                                                    addCustomerVM.tableDataC2 = response.data.data;
-                                                });
-                                        }
-                                    });
-                                });
-                        } else {
-                            //如果是新增跟进记录
-                            axios.post('/tele/clueMyCustomerInfo/saveClueTracking', param)
-                                .then(function (response) {
-                                    addCustomerVM.$message({
-                                        message: '操作成功', type: 'success', duration: 2000, onClose: function () {
-                                            axios.post('/tele/clueMyCustomerInfo/findClueTracking', param)
-                                                .then(function (response) {
-                                                    addCustomerVM.lineFormShow = false;
-                                                    addCustomerVM.addBtnDisabled = false;
-                                                    addCustomerVM.tableDataC2 = response.data.data;
-                                                });
-                                        }
-                                    });
-                                });
-                        }
-                        //end
-                    } else {
-                        console.log('error submit!!');
-                        return false;
-                    }
-                });
-
-                //return ;
-                /* //跟进记录保存
-             var param={};
-             param.clueId=clueId;
-             var callTime=this.formInline.callTime;
-             if(typeof(callTime)=='string'){
-            	  param.callTime=new Date(Date.parse(callTime.replace(/-/g, "/")));
-             }else{
-                 param.callTime=this.formInline.callTime;
-             }
-
-             param.customerStatus=this.formInline.customerStatus;
-             param.isCall=this.formInline.isCall;
-             param.resourceStatus=this.formInline.resourceStatus;
-             param.focusPoint=this.formInline.focusPoint;
-             param.visitStatus=this.formInline.visitStatus;
-             var nextVisitTime=this.formInline.nextVisitTime;
-             var callTime=this.formInline.callTime;
-             if(typeof(nextVisitTime)=='string'){
-              	  param.nextVisitTime=new Date(Date.parse(nextVisitTime.replace(/-/g, "/")));
-             }else{
-                 param.nextVisitTime=this.formInline.nextVisitTime;
-             }
-             //如果是编辑跟进记录
-             if( isEdit){
-                 param.id=this.formInline.id;
-            	 axios.post('/tele/clueMyCustomerInfo/updateClueTracking',param)
-                 .then(function (response) {
-               	  addCustomerVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
-               	    axios.post('/tele/clueMyCustomerInfo/findClueTracking',param)
-                    .then(function (response) {
-                    	addCustomerVM.tableDataC2=response.data.data;
-                     });
-    	          }});
-                 });
-             }else{
-            	 //如果是新增跟进记录
-                 axios.post('/tele/clueMyCustomerInfo/saveClueTracking',param)
-                 .then(function (response) {
-               	  addCustomerVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
-               	    axios.post('/tele/clueMyCustomerInfo/findClueTracking',param)
-                    .then(function (response) {
-                    	 addCustomerVM.tableDataC2=response.data.data;
-                     });
-    	          }});
-               });
-             } */
+            onConfirmAdd(index ,row) { 
+             var _this = this;
+           	 this.$refs['LineRuleForm'].validate((valid) => {
+                   if (valid) {
+                     	//start
+                	 //跟进记录保存
+                       var param={};
+                       param.clueId=clueId;
+                       var callTime=this.formInline.callTime;
+                       if(typeof(callTime)=='string'){
+                      	  param.callTime=new Date(Date.parse(callTime.replace(/-/g, "/")));
+                       }else{
+                           param.callTime=this.formInline.callTime; 
+                       }
+                 
+                       param.customerStatus=this.formInline.customerStatus;
+                       param.isCall=this.formInline.isCall;
+                       param.resourceStatus=this.formInline.resourceStatus;
+                       param.focusPoint=this.formInline.focusPoint;
+                       param.visitStatus=this.formInline.visitStatus;
+                       var nextVisitTime=this.formInline.nextVisitTime;
+                       if(typeof(nextVisitTime)=='string'){
+                        	  param.nextVisitTime=new Date(Date.parse(nextVisitTime.replace(/-/g, "/")));
+                       }else{
+                           param.nextVisitTime=this.formInline.nextVisitTime; 
+                       }
+                       param.customerStatusSub=this.formInline.customerStatusSub;
+                       this.addBtnDisabled=true;
+                       //如果是编辑跟进记录
+                       if( isEdit){
+                           param.id=this.formInline.id;
+                      	 axios.post('/tele/clueMyCustomerInfo/updateClueTracking',param)
+                           .then(function (response) {
+                         	  addCustomerVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
+                         	    axios.post('/tele/clueMyCustomerInfo/findClueTracking',param)
+                              .then(function (response) {
+                            	  isEdit=false;
+                            	 addCustomerVM.lineFormShow=false;
+                            	 addCustomerVM.addBtnDisabled=false;
+                              	addCustomerVM.tableDataC2=response.data.data;
+                               }); 
+              	          }}); 	 
+                           });
+                       }else{
+                      	 //如果是新增跟进记录
+                           axios.post('/tele/clueMyCustomerInfo/saveClueTracking',param)
+                           .then(function (response) {
+                         	  addCustomerVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
+                         	    axios.post('/tele/clueMyCustomerInfo/findClueTracking',param)
+                              .then(function (response) {
+                              	addCustomerVM.lineFormShow=false;
+                           	     addCustomerVM.addBtnDisabled=false;
+                              	 addCustomerVM.tableDataC2=response.data.data;
+                              	 //新增
+                              	 _this.$refs['LineRuleForm'].resetFields();
+                               }); 
+              	          }}); 
+                         }); 
+                       }
+                     	//end
+                   } else {
+                     console.log('error submit!!');
+                     return false;
+                   }
+               }); 
             },
             deteleClueFile() {
                 //删除上传文件
