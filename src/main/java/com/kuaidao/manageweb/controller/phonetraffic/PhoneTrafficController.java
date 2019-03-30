@@ -131,14 +131,14 @@ public class PhoneTrafficController {
         // 根据用户查询页面字段
         QueryFieldByUserAndMenuReq queryFieldByUserAndMenuReq = new QueryFieldByUserAndMenuReq();
         queryFieldByUserAndMenuReq.setId(user.getId());
-        queryFieldByUserAndMenuReq.setMenuCode("aggregation:appiontmentManager");
+        queryFieldByUserAndMenuReq.setMenuCode("aggregation:PhoneTraffic");
         JSONResult<List<UserFieldDTO>> queryFieldByUserAndMenu =
                 customFieldFeignClient.queryFieldByUserAndMenu(queryFieldByUserAndMenuReq);
         request.setAttribute("userFieldList", queryFieldByUserAndMenu.getData());
 
         request.setAttribute("phtrafficList", phTrafficList());
 
-        return "/phonetraffic/customManagement";
+        return "phonetraffic/customManagement";
     }
 
     @PostMapping("/queryPage")

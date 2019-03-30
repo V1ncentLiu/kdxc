@@ -25,9 +25,10 @@ var homePageVM=new Vue({
 		     	{ifreamUrl:'b.html',index:'1-2',name:"数据演示2"}*/
 		       ,
 		    user:user,//用戶信息
-		    defaultOpeneds:["0"],//默认打开菜单索引
+		    defaultOpeneds:showBtnIndex,//默认打开菜单索引
 		    initUrl:showMenuUrl,//默认展示页面
-	        defaultActive:'0-0',//默认激活菜单
+	       // defaultActive:'0-0',//默认激活菜单
+	        defaultActive:defaultActive,//默认激活菜单
 		   	modifyFormRules:{
 		   		oldPassword:[
 		   		    { required: true, message: '当前密码不能为空',trigger:'blur'},
@@ -626,6 +627,8 @@ var homePageVM=new Vue({
     		//console.info("postBack");
     	},
     	openConsolePage(){//点击控制台button 事件
+    		this.defaultActive= null;
+    		$('.menu').css("color","rgb(255, 255, 255)");
     		var dataUrl = "/console/console/index?type=1";
 			$("#iframeBox").attr({
 				"src":dataUrl //设置ifream地址
