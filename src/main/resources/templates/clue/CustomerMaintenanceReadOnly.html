@@ -1050,16 +1050,23 @@ if(base==null){
                 }
                 var param = {};
                 param.id=id;
-                axios.post('/call/callRecord/getRecordFile',param)
-                    .then(function (response) {
-                        var data =  response.data;
-                        if(data.code=='0'){
-                            var url = data.data;
-                            if(url){
-                                var fileName = url.split('?')[0];
-                                var fileNameArr= fileName.split("/");
-                                download(url,fileNameArr[fileNameArr.length-1]);
-                            }
+                axios.post('/call/callRecord/getRecordFile', param)
+                .then(function (response) {
+                    var data = response.data;
+                    if (data.code == '0') {
+                    var url = data.data;
+                    if (url) {
+                        var fileName = url.split('?')[0];
+                        var fileNameArr = fileName.split("/");
+//                                download(url, fileNameArr[fileNameArr.length - 1]);
+                        var x = new XMLHttpRequest();
+                        x.open("GET",url,true);
+                        x.responseType = 'blob';
+                        x.onload = function(e) {
+                        download(x.response,fileNameArr[fileNameArr.length-1],'audio/mp3');
+                        };
+                        x.send();
+                    }
 
                         }else{
                             console.error(data);
