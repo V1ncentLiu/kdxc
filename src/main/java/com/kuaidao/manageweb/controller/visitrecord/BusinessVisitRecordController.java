@@ -1,20 +1,11 @@
 package com.kuaidao.manageweb.controller.visitrecord;
 
-import com.kuaidao.aggregation.dto.project.CompanyInfoDTO;
-import com.kuaidao.aggregation.dto.project.CompanyInfoPageParam;
-import com.kuaidao.aggregation.dto.project.ProjectInfoDTO;
-import com.kuaidao.aggregation.dto.project.ProjectInfoPageParam;
-import com.kuaidao.aggregation.dto.visitrecord.BusVisitRecordReqDTO;
-import com.kuaidao.aggregation.dto.visitrecord.BusVisitRecordInsertOrUpdateDTO;
-import com.kuaidao.aggregation.dto.visitrecord.BusVisitRecordRespDTO;
-import com.kuaidao.common.entity.IdEntityLong;
-import com.kuaidao.common.entity.JSONResult;
-import com.kuaidao.common.util.CommonUtil;
-import com.kuaidao.manageweb.feign.project.CompanyInfoFeignClient;
-import com.kuaidao.manageweb.feign.project.ProjectInfoFeignClient;
-import com.kuaidao.manageweb.feign.visitrecord.BusVisitRecordFeignClient;
-import com.kuaidao.manageweb.util.CommUtil;
-import com.kuaidao.sys.dto.user.UserInfoDTO;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import javax.servlet.http.HttpServletRequest;
+import javax.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,19 +15,24 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.validation.Valid;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import com.kuaidao.aggregation.dto.project.CompanyInfoDTO;
+import com.kuaidao.aggregation.dto.project.ProjectInfoDTO;
+import com.kuaidao.aggregation.dto.visitrecord.BusVisitRecordInsertOrUpdateDTO;
+import com.kuaidao.aggregation.dto.visitrecord.BusVisitRecordReqDTO;
+import com.kuaidao.aggregation.dto.visitrecord.BusVisitRecordRespDTO;
+import com.kuaidao.common.entity.IdEntityLong;
+import com.kuaidao.common.entity.JSONResult;
+import com.kuaidao.common.util.CommonUtil;
+import com.kuaidao.manageweb.feign.project.CompanyInfoFeignClient;
+import com.kuaidao.manageweb.feign.project.ProjectInfoFeignClient;
+import com.kuaidao.manageweb.feign.visitrecord.BusVisitRecordFeignClient;
+import com.kuaidao.manageweb.util.CommUtil;
+import com.kuaidao.sys.dto.user.UserInfoDTO;
 
 /**
  * @author yangbiao
  * @Date: 2019/1/2 15:14
- * @Description:
- *      到访记录
+ * @Description: 到访记录
  */
 
 @Controller
@@ -56,22 +52,23 @@ public class BusinessVisitRecordController {
 
 
     @RequestMapping("/listPage")
-    public String listPage(HttpServletRequest request,@RequestParam String clueId){
+    public String listPage(HttpServletRequest request, @RequestParam String clueId) {
         BusVisitRecordReqDTO recordReqDTO = new BusVisitRecordReqDTO();
         recordReqDTO.setClueId(Long.valueOf(clueId));
-        JSONResult<List<BusVisitRecordRespDTO>> listJSONResult = visitRecordFeignClient.queryList(recordReqDTO);
+        JSONResult<List<BusVisitRecordRespDTO>> listJSONResult =
+                visitRecordFeignClient.queryList(recordReqDTO);
         List<BusVisitRecordRespDTO> data = new ArrayList<>();
-        String notSignReason="";
-        if(JSONResult.SUCCESS.equals(listJSONResult.getCode())){
+        String notSignReason = "";
+        if (JSONResult.SUCCESS.equals(listJSONResult.getCode())) {
             data = listJSONResult.getData();
-            if(data!=null&&data.size()>0){
-                notSignReason =  data.get(data.size()-1).getNotSignReason();
+            if (data != null && data.size() > 0) {
+                notSignReason = data.get(data.size() - 1).getNotSignReason();
             }
         }
-//      查询到访状态： 首次到访  2次到访  多次到访  （需要添加接口）
+        // 查询到访状态： 首次到访 2次到访 多次到访 （需要添加接口）
 
-        request.setAttribute("tableData",data);
-        request.setAttribute("notSignReason",notSignReason);
+        request.setAttribute("tableData", data);
+        request.setAttribute("notSignReason", notSignReason);
         return "bus_mycustomer/showVisitRecord";
     }
 
@@ -81,12 +78,15 @@ public class BusinessVisitRecordController {
      */
     @RequestMapping("/insert")
     @ResponseBody
-    public JSONResult<Boolean> saveVisitRecord(@Valid @RequestBody BusVisitRecordInsertOrUpdateDTO dto, BindingResult result) throws Exception {
+    public JSONResult<Boolean> saveVisitRecord(
+            @Valid @RequestBody BusVisitRecordInsertOrUpdateDTO dto, BindingResult result)
+            throws Exception {
         if (result.hasErrors()) {
             return CommonUtil.validateParam(result);
         }
         UserInfoDTO user = CommUtil.getCurLoginUser();
         dto.setCreateUser(user.getId());
+        dto.setId(null);
         return visitRecordFeignClient.saveVisitRecord(dto);
     }
 
@@ -95,7 +95,9 @@ public class BusinessVisitRecordController {
      */
     @RequestMapping("/update")
     @ResponseBody
-    public JSONResult<Boolean> updateVisitRecord(@Valid @RequestBody BusVisitRecordInsertOrUpdateDTO dto, BindingResult result) throws Exception {
+    public JSONResult<Boolean> updateVisitRecord(
+            @Valid @RequestBody BusVisitRecordInsertOrUpdateDTO dto, BindingResult result)
+            throws Exception {
         if (result.hasErrors()) {
             return CommonUtil.validateParam(result);
         }
@@ -109,67 +111,64 @@ public class BusinessVisitRecordController {
      */
     @RequestMapping("/queryList")
     @ResponseBody
-    public JSONResult<List<BusVisitRecordRespDTO>> queryList(@RequestBody BusVisitRecordReqDTO dto) throws Exception {
+    public JSONResult<List<BusVisitRecordRespDTO>> queryList(@RequestBody BusVisitRecordReqDTO dto)
+            throws Exception {
         return visitRecordFeignClient.queryList(dto);
     }
 
 
     /**
-     *  查询明细
+     * 查询明细
      */
     @RequestMapping("/one")
     @ResponseBody
-    public JSONResult<BusVisitRecordRespDTO> queryOne(@RequestBody IdEntityLong idEntityLong) throws Exception {
+    public JSONResult<BusVisitRecordRespDTO> queryOne(@RequestBody IdEntityLong idEntityLong)
+            throws Exception {
         return visitRecordFeignClient.queryOne(idEntityLong);
     }
 
     /**
-     *  跳转到 到访记录明细页面
+     * 跳转到 到访记录明细页面
      */
     @RequestMapping("/visitRecordPage")
-    public String visitRecordPage(HttpServletRequest request,@RequestParam String clueId , @RequestParam String visitStatus,@RequestParam String signAuditStatus) throws Exception {
-        request.setAttribute("clueId",clueId);
-        request.setAttribute("visitStatus",visitStatus);
-        request.setAttribute("signAuditStatus",signAuditStatus);
+    public String visitRecordPage(HttpServletRequest request, @RequestParam String clueId,
+            @RequestParam String visitStatus, @RequestParam String signAuditStatus)
+            throws Exception {
+        request.setAttribute("clueId", clueId);
+        request.setAttribute("visitStatus", visitStatus);
+        request.setAttribute("signAuditStatus", signAuditStatus);
         // 项目
-        ProjectInfoPageParam param = new ProjectInfoPageParam();
-        JSONResult<List<ProjectInfoDTO>> proJson = projectInfoFeignClient.listNoPage(param);
-        if(JSONResult.SUCCESS.equals(proJson.getCode())){
+        JSONResult<List<ProjectInfoDTO>> proJson = projectInfoFeignClient.allProject();
+        if (JSONResult.SUCCESS.equals(proJson.getCode())) {
             request.setAttribute("proSelect", proJson.getData());
         }
 
-        CompanyInfoPageParam pageParam = new CompanyInfoPageParam();
-        JSONResult<List<CompanyInfoDTO>> listJSONResult = companyInfoFeignClient.listNoPage(pageParam);
-        if(JSONResult.SUCCESS.equals(listJSONResult.getCode())){
+        JSONResult<List<CompanyInfoDTO>> listJSONResult = companyInfoFeignClient.allCompany();
+        if (JSONResult.SUCCESS.equals(listJSONResult.getCode())) {
             request.setAttribute("companySelect", proJson.getData());
         }
-        return  "bus_mycustomer/showVisitRecord";
+        return "bus_mycustomer/showVisitRecord";
     }
 
     /**
-     *  到访记录，新增时候回显信息
+     * 到访记录，新增时候回显信息
      */
     @RequestMapping("/echo")
     @ResponseBody
-    public JSONResult<BusVisitRecordRespDTO> echo(@RequestBody IdEntityLong idEntityLong) throws Exception {
+    public JSONResult<BusVisitRecordRespDTO> echo(@RequestBody IdEntityLong idEntityLong)
+            throws Exception {
         BusVisitRecordRespDTO recordRespDTO = new BusVisitRecordRespDTO();
-//      查询需要进行回显的信息，并进行映射
+        // 查询需要进行回显的信息，并进行映射
         /**
-         * 考察公司： 分公司
-         * 到访时间： 预约时间
-         * 客户姓名： 线索-客户姓名
-         * 考察项目： 品尝项目
-         * 签约省份： 投资意向信息- 省份
-         * 签约城市： 投资意向信息- 城市
-         * 签约区县： 投资意向信息- 区县
-         * 来访城市： 派车单-城市
-         * 到访人数： 派车单-客户人数
+         * 考察公司： 分公司 到访时间： 预约时间 客户姓名： 线索-客户姓名 考察项目： 品尝项目 签约省份： 投资意向信息- 省份 签约城市： 投资意向信息- 城市 签约区县：
+         * 投资意向信息- 区县 来访城市： 派车单-城市 到访人数： 派车单-客户人数
          */
 
-        JSONResult<BusVisitRecordRespDTO> maxNewOne = visitRecordFeignClient.findMaxNewOne(idEntityLong);
-        if(JSONResult.SUCCESS.equals(maxNewOne.getCode())){
+        JSONResult<BusVisitRecordRespDTO> maxNewOne =
+                visitRecordFeignClient.findMaxNewOne(idEntityLong);
+        if (JSONResult.SUCCESS.equals(maxNewOne.getCode())) {
             BusVisitRecordRespDTO data = maxNewOne.getData();
-            if(data!=null){
+            if (data != null) {
                 data.setRebutReason(null);
                 data.setRebutTime(null);
                 data.setNotSignReason(null);
@@ -180,30 +179,30 @@ public class BusinessVisitRecordController {
         }
 
         JSONResult<Map> mapJSONResult = visitRecordFeignClient.echoAppoinment(idEntityLong);
-        if(JSONResult.SUCCESS.equals(mapJSONResult.getCode())){
+        if (JSONResult.SUCCESS.equals(mapJSONResult.getCode())) {
             Map data = mapJSONResult.getData();
-            if(data!=null){
+            if (data != null) {
                 Object arrivalTime = data.get("arrivalTime");
                 Date arrDate = null;
-                if(arrivalTime==null){
+                if (arrivalTime == null) {
                     arrDate = new Date();
-                }else{
-                    arrDate = new Date((Long)arrivalTime);
+                } else {
+                    arrDate = new Date((Long) arrivalTime);
                 }
 
                 recordRespDTO.setVistitTime(arrDate);
-                recordRespDTO.setCustomerName((String)data.get("cusName"));
-                String tasteProjectId = (String)data.get("tasteProjectId");
+                recordRespDTO.setCustomerName((String) data.get("cusName"));
+                String tasteProjectId = (String) data.get("tasteProjectId");
                 String[] split = tasteProjectId.split(",");
-                if(split.length>0&&!"".equals(split[0])){
+                if (split.length > 0 && !"".equals(split[0])) {
                     recordRespDTO.setProjectId(Long.valueOf(split[0]));
                 }
 
-                recordRespDTO.setSignProvince((String)data.get("signProvince"));
-                recordRespDTO.setSignCity((String)data.get("signCity"));
-                recordRespDTO.setSignDistrict((String)data.get("signDistrict"));
-                recordRespDTO.setVisitCity((String)data.get("city"));
-                recordRespDTO.setVisitPeopleNum((Integer)data.get("cusNum"));
+                recordRespDTO.setSignProvince((String) data.get("signProvince"));
+                recordRespDTO.setSignCity((String) data.get("signCity"));
+                recordRespDTO.setSignDistrict((String) data.get("signDistrict"));
+                recordRespDTO.setVisitCity((String) data.get("city"));
+                recordRespDTO.setVisitPeopleNum((Integer) data.get("cusNum"));
                 recordRespDTO.setVisitType(1);
                 recordRespDTO.setIsSign(1);
             }

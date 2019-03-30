@@ -832,9 +832,19 @@
                  	this.dialogFormVisiblerepeat = false;
                     axios.post('/tele/clueMyCustomerInfo/officesaveRepeatClue', param)
                     .then(function (response) {
-                       orgVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
-                    	   orgVM.initTableData();  
-        		         }});
+                    	console.log(response);
+                    	if (response.data.code == 0) {
+                    		orgVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
+                         	   
+                         	   orgVM.initTableData();  
+             		         }});
+                    	}else{
+                    		orgVM.$message({
+	                             message: response.data.msg,
+	                             type: 'warning'
+	                           });
+                    	}
+                       
                     }).catch(function (error) {
                         console.log(error);
                     });

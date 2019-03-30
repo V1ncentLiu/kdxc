@@ -4,9 +4,12 @@ var mainDivVM = new Vue({
     	receiveDialog:false,
     	receiveTitle:"",
     	dailogTitleType:"",
-        repeatPhonesDialog:false,//重复手机号
+        repeatPhonesDialog:false,//今日待跟进客户资源重复手机号
+        repeatPhonesDialog2:false,//快速领取新资源重复手机号
         formLabelWidth:"150px",
-        tableData:[],
+        // 快速领取新资源
+        tableData:[],        
+        repeatPhonesTable2:[],//快速领取新资源重复手机号
         categoryArr:[],
         typeArr:[],
         reasonArr:[],
@@ -37,6 +40,7 @@ var mainDivVM = new Vue({
         todayAppiontmentNum:'',//今日邀约数
         workDay:'',//工作天数
         //公告
+        afficheBox:false,
         items: [
             // {content:'系统将于2018年12月5日晚上12:00进行系统升级，请各位同事及时处理工作。系统预计在12:20分恢复正常使用,感谢配合!',id:1},
             // {content:'公告2公告2公告2公告2公告2公告2公告2',id:2},
@@ -82,6 +86,10 @@ var mainDivVM = new Vue({
                 mainDivVM.$refs[formName].resetFields();
             }
         },
+        // 今日待跟进客户资源进入我的客户详情
+        showClueDetailInfo (row, column) {
+            window.location.href='/tele/clueMyCustomerInfo/customerInfoReadOnly?clueId='+row.clueId;
+        },
         // 快速领取新资源
         initList(){
             var param = {};
@@ -123,7 +131,9 @@ var mainDivVM = new Vue({
                                 mainDivVM.receiveTitle=data.backResult;
                                 mainDivVM.receiveTable= data.clueCustomerDTOs;
                             }else{
-                                window.location.href="/aggregation/publiccustomer/listPage"; 
+                                // window.location.href="/aggregation/publiccustomer/listPage"; 
+                                // 领取成功刷新表格
+                                mainDivVM.initList();
                             }
                         }                                
                     }else{
@@ -137,24 +147,43 @@ var mainDivVM = new Vue({
             // 2、总监领取老资源上限按照领取规则管理中设置的限制进行限制
             // 3、电销人员领取新资源上限按照领取规则管理中设置的限制进行限制
         },
-        //展现详情
-        showClueDetailInfo (row, column) {
+        //快速领取新资源进入公有池展现详情
+        showClueDetailInfo2 (row, column) {
             window.location.href='/tele/clueMyCustomerInfo/customerInfoReadOnly?clueId='+row.clueid+"&commonPool=1";
         },
-        repeatPhonesClick(row) {//重复手机号按钮点击
+        repeatPhonesClick(row) {//今日待跟进客户资源-我的客户重复手机号按钮点击
             this.repeatPhonesDialog=true;
             this.dailogTitleType=row.phone;
+            this.repeatPhonesTable=[];
             var param ={};
-                param.id = row.clueId;
-                  param.cusPhone = row.phone;
-                    axios.post('/clue/appiontment/repeatPhonelist', param)
-                      .then(function (response) {
-                            var result =  response.data;
-                            var table=result.data;
-                            mainDivVM.repeatPhonesTable= table;
-                            mainDivVM.repeatPhonesDialog=true;
-                      })  .catch(function (error) {
-                                  console.log(error);
+            param.id = row.clueId;
+                param.cusPhone = row.phone;
+                param.clueId = row.clueId;
+                axios.post('/clue/appiontment/repeatPhonelist', param)
+                .then(function (response) {
+                    var result =  response.data;
+                    var table=result.data;
+                    mycustomVM.repeatPhonesTable=table;
+                    mycustomVM.repeatPhonesDialog=true;
+                })  .catch(function (error) {
+                    console.log(error);
+            });            
+        },
+        repeatPhonesClick2(row) {//重复手机号按钮点击
+            this.repeatPhonesDialog2=true;
+            this.dailogTitleType=row.clueid;
+            var param ={};
+            param.id = row.clueid;
+            param.cusPhone = row.phone;
+            axios.post('/clue/appiontment/repeatPhonelist', param)
+                .then(function (response) {
+                    var result =  response.data;
+                    console.info(result);
+                    var table=result.data;
+                    mainDivVM.repeatPhonesTable2= table;
+                    mainDivVM.repeatPhonesDialog2=true;
+                })  .catch(function (error) {
+                    console.log(error);
             });
         },
         // 今日待跟进客户资源
@@ -213,7 +242,13 @@ var mainDivVM = new Vue({
             axios.post('/console/console/queryAnnReceiveNoPage',param).then(function (response) {
                 console.log('公告')
                 console.log(response.data)
-                mainDivVM.items=response.data.data;
+                if(response.data.data&&response.data.data.length>0){
+                    mainDivVM.items=response.data.data;
+                    mainDivVM.afficheBox=true
+                }else{
+                    mainDivVM.afficheBox=false
+                }
+                
             });
             // 未读消息
             param={};

@@ -25,6 +25,7 @@ import com.kuaidao.aggregation.dto.assignrule.InfoAssignQueryDTO;
 import com.kuaidao.aggregation.dto.clue.AllocationClueReq;
 import com.kuaidao.aggregation.dto.clue.PendingAllocationClueDTO;
 import com.kuaidao.aggregation.dto.clue.PendingAllocationCluePageParam;
+import com.kuaidao.common.constant.DicCodeEnum;
 import com.kuaidao.common.constant.OrgTypeConstant;
 import com.kuaidao.common.constant.RoleCodeEnum;
 import com.kuaidao.common.entity.IdEntity;
@@ -125,6 +126,18 @@ public class PendingAllocationController {
         request.setAttribute("clueTypeList", getDictionaryByCode(Constants.CLUE_TYPE));
         // 查询字典释放原因集合
         request.setAttribute("releaseReasonList", getDictionaryByCode(Constants.RELEASE_REASON));
+        // 查询字典电销一级客户状态集合
+        request.setAttribute("customerStatusList",
+                getDictionaryByCode(DicCodeEnum.CUSTOMERSTATUS.getCode()));
+        // 查询字典电销二级客户状态集合
+        request.setAttribute("customerStatusSubList",
+                getDictionaryByCode(DicCodeEnum.CUSTOMERSTATUSSUB.getCode()));
+        // 查询字典话务一级客户状态集合
+        request.setAttribute("phCustomerStatusList",
+                getDictionaryByCode(DicCodeEnum.PHCUSTOMERSTATUS.getCode()));
+        // 查询字典话务二级客户状态集合
+        request.setAttribute("phCustomerStatusSubList",
+                getDictionaryByCode(DicCodeEnum.PHCUSTOMERSTATUSSUB.getCode()));
 
         // 根据角色查询页面字段
         QueryFieldByRoleAndMenuReq queryFieldByRoleAndMenuReq = new QueryFieldByRoleAndMenuReq();
@@ -136,6 +149,7 @@ public class PendingAllocationController {
         // 根据用户查询页面字段
         QueryFieldByUserAndMenuReq queryFieldByUserAndMenuReq = new QueryFieldByUserAndMenuReq();
         queryFieldByUserAndMenuReq.setId(user.getId());
+        queryFieldByUserAndMenuReq.setRoleId(user.getRoleList().get(0).getId());
         queryFieldByUserAndMenuReq.setMenuCode("aggregation:pendingAllocationManager");
         JSONResult<List<UserFieldDTO>> queryFieldByUserAndMenu =
                 customFieldFeignClient.queryFieldByUserAndMenu(queryFieldByUserAndMenuReq);

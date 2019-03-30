@@ -489,6 +489,34 @@
 	}
 }
 
+@media screen and (max-width: 1700px) {
+	.paddingL55 div.el-form-item, .paddingL55 .el-input--mini .el-input__inner
+		{
+		width: 200px!important;
+	}
+	.paddingL55 div.el-form-item:last-child {
+		width: 60px!important;
+	}
+}
+@media screen and (min-width: 1709px) {
+	.paddingL55 div.el-form-item, .paddingL55 .el-input--mini .el-input__inner
+		{
+		width: 197px;
+	}
+	.paddingL55 div.el-form-item:last-child {
+		width: 100px;
+	}
+}
+@media screen and (max-width: 1738px) {
+	.paddingL55 div.el-form-item, .paddingL55 .el-input--mini .el-input__inner
+		{
+		width: 197px;
+	}
+	.paddingL55 div.el-form-item:last-child {
+		width: 100px;
+	}
+}
+
 @media screen and (width: 1744px) {
 	.paddingL55 {
 		line-height: 28px;
@@ -563,6 +591,7 @@ i.el-icon-phone-outline {
 
 </body>
 <script src="/js/common/download.js"></script>
+<script th:src="@{/js/custom/callrecord/download.js?v=1.0.0}"></script>
 <!-- import Vue before Element -->
 <div th:include="_footer_include :: #jsLib"></div>
 <script th:inline="javascript">
@@ -1530,7 +1559,7 @@ var callRecord=[[${callRecord}]];//通话记录
                          
                      }else{
                     	 console.error(data);
-                    	 myCallRecordVm.$message({message:data.msg,type:'error'});
+						 addCustomerVM.$message({message:data.msg,type:'error'});
                      }
                  
                  })
@@ -1661,9 +1690,17 @@ var callRecord=[[${callRecord}]];//通话记录
         	   this.form.radioProject=intention.purProjectType+"";
         	   this.form.insideProject=intention.purInProject==null?"":intention.purInProject+"";
         	   this.form.outsideProject=intention.purOutProject;
-        	   this.form.province=intention.province;
-        	   this.form.city=intention.city;
-        	   this.form.district=intention.district; 
+        	   if(intention.province){
+	        	   this.form.province=intention.province;
+	        	   this.currentProvince(intention.province);
+        	   }
+        	   if(intention.city){
+        	   		this.form.city=intention.city;
+	        	   	this.currentCity(intention.city);
+        	   }
+        	   if(intention.district){
+	        	   this.form.district=intention.district; 
+        	   }
         	   if(intention.purProjectType==2){
         		  this.outsideProjectShow=true; //外部项目默认显示   
         		  this.insideProjectShow=false; //内部项目不默认显示

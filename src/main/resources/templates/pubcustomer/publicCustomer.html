@@ -237,7 +237,7 @@
             <el-table :data="tableReData"  style="width: 100%" tooltip-effect="light" border ref="releaseTable">
                 <el-table-column prop="xh" label="序号" width="55"  align="center"></el-table-column>
                 <el-table-column prop="releaseTime" label="释放时间" align="center"></el-table-column>
-                <el-table-column prop="releaseReasonValue" label="释放原因"  align="center"></el-table-column>
+                <el-table-column prop="releaseReason" label="释放原因" :formatter="transformReason"  align="center"></el-table-column>
                 <el-table-column prop="realeseUserName" label="释放人姓名"  align="center"></el-table-column>
                 <el-table-column prop="" label="所属电销组"  align="center"></el-table-column>
             </el-table>
@@ -306,7 +306,10 @@
     var releaseReasonList=[[${releaseReasonList}]];//用户自定义字段
     var fieldList=[[${fieldList}]];//自定义字段
     var userFieldList=[[${userFieldList}]];//用户自定义字段
-
+    var customerStatusList=[[${customerStatusList}]];//电销一级客户状态
+    var customerStatusSubList=[[${customerStatusSubList}]];//电销二级客户状态
+    var customerStatusList=[[${customerStatusList}]];//电销一级客户状态
+    var phCustomerStatusSubList=[[${phCustomerStatusSubList}]];//话务二级客户状态
     // 查询 模块
     var mainDivVM = new Vue({
         el: '#mainDiv',
@@ -418,6 +421,62 @@
               },
             formatCusLevel(row, column){
                 return row.cusLevel==1?"VIP": row.cusLevel==2?"重要":row.cusLevel==2?"普通":""
+            },
+          //释放原因转换方法
+            transformReason(row, column, cellValue, index) {
+          	  var text="";
+          	  if(cellValue){
+	            	  var arr= cellValue.split(",");
+	            	  //用释放原因转换
+	            	  if(arr.length==1){
+		             	  if(releaseReasonList){
+		 	                  for(var i=0;i<releaseReasonList.length;i++){
+		 	                		if(cellValue==releaseReasonList[i].value){
+		 	                			text=releaseReasonList[i].name;
+		 	                		}
+		 	                	}
+		             	  }
+	            	  }else if(arr.length>1){
+	            		//用电销状态转换
+	            		  if(arr[0]=="track"){
+	            			//电销一级状态
+	            			  if(customerStatusList){
+			 	                  for(var i=0;i<customerStatusList.length;i++){
+			 	                	if(arr[1]==customerStatusList[i].value){
+			 	                		text+=customerStatusList[i].name;
+			 	                	}
+			 	                  }
+			             	  }
+	            			//电销二级状态
+	            			  if(customerStatusSubList&&arr.length==3){
+	            				  for(var i=0;i<customerStatusSubList.length;i++){
+				 	                if(arr[2]==customerStatusSubList[i].value){
+				 	                	text+="-"+customerStatusSubList[i].name;
+				 	                }
+				 	              }
+	            			  }
+	            			//用话务状态转换
+	            		  }else if(arr[0]=="phtrack"){
+	            			//话务一级状态
+	            			  if(phCustomerStatusList){
+			 	                  for(var i=0;i<phCustomerStatusList.length;i++){
+			 	                	if(arr[1]==phCustomerStatusList[i].value){
+			 	                		text+=phCustomerStatusList[i].name;
+			 	                	}
+			 	                  }
+			             	  }
+	            			//话务二级状态
+	            			  if(phCustomerStatusSubList&&arr.length==3){
+	            				  for(var i=0;i<phCustomerStatusSubList.length;i++){
+				 	                if(arr[2]==phCustomerStatusSubList[i].value){
+				 	                	text+="-"+phCustomerStatusSubList[i].name;
+				 	                }
+				 	              }
+	            			  }
+	            		  }
+	            	  }
+          	  }
+               return text;
             },
             openTrackingDialog(cid){
                 var param = {};

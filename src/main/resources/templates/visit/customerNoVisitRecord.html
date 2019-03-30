@@ -138,7 +138,7 @@
             :data="dataTable" 
             >
             <el-table-column align="center" type="selection" width="55"></el-table-column>
-            <el-table-column align="center" prop="serialNum" label="序号" width="55"></el-table-column>
+            <el-table-column align="center" type="index" label="序号" width="55"></el-table-column>
             <el-table-column align="center" prop="createTime" label="提交邀约时间"></el-table-column>
             <el-table-column align="center" prop="reserveTime" label="邀约来访时间"></el-table-column>
             <el-table-column align="center" prop="teleGorupName" label="电销组"></el-table-column> 
@@ -149,8 +149,8 @@
             <el-table-column align="center" prop="busSaleName" label="商务小组"></el-table-column> 
             <el-table-column align="center" prop="busSaleName" label="商务经理" width="100"></el-table-column>
             <el-table-column align="center" prop="cusName" label="客户姓名"></el-table-column>  
-            <el-table-column align="center" prop="tasteProjectName" label="品尝项目" width="100"></el-table-column>
-            <el-table-column align="center" prop="contractShopType" label="签约店型" width="100"></el-table-column>
+            <el-table-column align="center" prop="tasteProjectId" label="品尝项目" width="100" :formatter="transformProject"></el-table-column>
+            <!-- <el-table-column align="center" prop="contractShopType" label="签约店型" width="100"></el-table-column> -->
             <el-table-column align="center" prop="province" label="开店省份" width="100"></el-table-column> 
             <el-table-column align="center" prop="city" label="开店城市" width="100"></el-table-column>   
             <el-table-column align="center" prop="district" label="开店区／县" width="120"></el-table-column>
@@ -179,9 +179,17 @@
                 </template>
             </el-table-column>
             <el-table-column align="center" prop="status" label="到访有效性" width="100">
-                <template slot-scope="scope">
-                 	<span>待审核</span> 
-                </template>
+                        <template slot-scope="scope">
+	                      <div v-if="scope.row.status ===0">
+	                                                                           被驳回
+	                      </div>
+	                       <div v-else-if="scope.row.status ===1">
+	                                                                             审核中                               
+	                       </div>
+	                      <div v-else-if="scope.row.status ===2">
+	                                                                             有效                              
+	                       </div>
+	          </template>
             </el-table-column>
             
         </el-table>
@@ -191,7 +199,7 @@
     <!-- 驳回处理 -->
     <el-dialog title="提示" :visible.sync="dialogFormVisible">
         <el-form :model="dialogForm" ref="dialogForm" :rules="dialogRules">            
-            <div class="fs16 marginB20">确定要将此 {{signRecordArrTitle}} 到访记录驳回吗？</div>
+            <div class="fs16 marginB20">确定要将此 {{signRecordArrTitle}} 未到访记录驳回吗？</div>
             <el-form-item label="驳回原因：" label-width="100px" prop="reason">
                 <el-input
                     type="textarea"
@@ -384,7 +392,7 @@
                 if(!isPass){
                     return;
                 }
-                this.$confirm('确定要将此 '+title+' 到访记录定为有效吗？', '提示', {
+                this.$confirm('确定要将此 '+title+'未到访记录定为有效吗？', '提示', {
                     confirmButtonText: '确定',
                     cancelButtonText: '取消',
                     type: 'warning'
@@ -428,7 +436,25 @@
                 	customerVisitRecordVm.busSaleArr=response.data.data;
                 });
             },
-        	
+          //品尝项目转换方法
+            transformProject(row, column, cellValue, index) {
+         	   var text="";
+           	   if(projectList&&cellValue){
+	            	   var array=cellValue.split(",");
+	                   for(var i=0;i<array.length;i++){
+	                	   for(var j=0;j<projectList.length;j++){
+	 	                		if(array[i]==projectList[j].id){
+	 	                			if(i==0){
+		 	                			text=projectList[j].projectName;
+	 	                			}else{
+		 	                			text=text+","+projectList[j].projectName;
+	 	                			}
+	 	                		}
+	 	                	}
+	                	}
+           	    }
+                 return text;
+            },
             initCustomerVisitRecord(){//初始列表
                 var startTime = this.form.createTimeStart;
                 var endTime = this.form.createTimeEnd;
@@ -436,6 +462,19 @@
                if(endTime){
                    var endTimestamp = new Date(endTime);
                     if(startTimestamp> endTimestamp){
+                        this.$message({
+                            message: '开始时间不能大于结束时间',
+                            type: 'warning'
+                          });
+                        return;
+                    }
+               }
+                var reserveTimeStart = this.form.reserveTimeStart;
+                var reserveTimeEnd = this.form.reserveTimeEnd;
+                var reserveStartTimestamp = Date.parse(new Date(reserveTimeStart));
+               if(reserveTimeEnd){
+                   var reserveEndTimestamp = new Date(reserveTimeEnd);
+                    if(reserveStartTimestamp> reserveEndTimestamp){
                         this.$message({
                             message: '开始时间不能大于结束时间',
                             type: 'warning'

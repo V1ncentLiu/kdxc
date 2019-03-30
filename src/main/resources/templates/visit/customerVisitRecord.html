@@ -444,7 +444,7 @@
             	
             },
             OpenRejectVisitRecordDialog(){//驳回
-            	debugger;
+            	
             	   this.signRecordArrTitle='';
                    var rows = this.multipleSelection;
                    if(rows.length<1){
@@ -454,10 +454,19 @@
                         });
                        return;
                    }
+                   var isPass = true;
                    var title = "";
                    for(var i=0;i<rows.length;i++){
                        var curRow = rows[i];
+                       if(curRow.status!=1){
+                           this.$message({message:'只允许驳回待审核的数据',type:'warning'});
+                           isPass=false;
+                           break;
+                       }
                        title += "【"+curRow.serialNum+""+curRow.customerName+"】";
+                   }
+                   if(!isPass){
+                       return;
                    }
                    this.signRecordArrTitle=title;
                    

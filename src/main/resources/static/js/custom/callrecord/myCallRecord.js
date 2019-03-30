@@ -214,8 +214,6 @@ var myCallRecordVm = new Vue({
                 		 var fileName = url.split('?')[0];
                 		 var fileNameArr= fileName.split("/");
                 		 download(url,fileNameArr[fileNameArr.length-1],'audio/*');
-                		 //myCallRecordVm.download(url,fileName);
-                		// myCallRecordVm.download2(url);
                 	 }
                      
                  }else{
@@ -254,21 +252,7 @@ var myCallRecordVm = new Vue({
                   console.log(error);
              }).then(function(){
              });
-    	},
-    	download(dataurl, filename) {
-    		  var a = document.createElement("a");
-    		  a.href = dataurl;
-    		  a.setAttribute("download", filename);
-    		  a.click();
-    		  return false;
-    	},
-        download2(url) {
-            var $form = $('<form method="GET"></form>');
-            $form.attr('action',url);
-            $form.appendTo($('body'));
-            $form.submit();
-        }
-        
+    	}
     },
     created(){
     	var a = new Date();

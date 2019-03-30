@@ -35,7 +35,6 @@ import com.kuaidao.aggregation.dto.clue.RepeatClueQueryDTO;
 import com.kuaidao.aggregation.dto.clue.RepeatClueSaveDTO;
 import com.kuaidao.aggregation.dto.clueappiont.ClueAppiontmentDTO;
 import com.kuaidao.aggregation.dto.project.ProjectInfoDTO;
-import com.kuaidao.aggregation.dto.project.ProjectInfoPageParam;
 import com.kuaidao.aggregation.dto.tracking.TrackingInsertOrUpdateDTO;
 import com.kuaidao.aggregation.dto.tracking.TrackingReqDTO;
 import com.kuaidao.aggregation.dto.tracking.TrackingRespDTO;
@@ -49,10 +48,15 @@ import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.manageweb.feign.call.CallRecordFeign;
 import com.kuaidao.manageweb.feign.circulation.CirculationFeignClient;
 import com.kuaidao.manageweb.feign.clue.MyCustomerFeignClient;
+import com.kuaidao.manageweb.feign.customfield.CustomFieldFeignClient;
 import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
 import com.kuaidao.manageweb.feign.project.ProjectInfoFeignClient;
 import com.kuaidao.manageweb.feign.tracking.TrackingFeignClient;
 import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
+import com.kuaidao.sys.dto.customfield.CustomFieldQueryDTO;
+import com.kuaidao.sys.dto.customfield.QueryFieldByRoleAndMenuReq;
+import com.kuaidao.sys.dto.customfield.QueryFieldByUserAndMenuReq;
+import com.kuaidao.sys.dto.customfield.UserFieldDTO;
 import com.kuaidao.sys.dto.organization.OrganizationDTO;
 import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
 import com.kuaidao.sys.dto.role.RoleInfoDTO;
@@ -83,7 +87,8 @@ public class MyCustomerClueController {
 
     @Autowired
     private OrganizationFeignClient organizationFeignClient;
-
+    @Autowired
+    private CustomFieldFeignClient customFieldFeignClient;
     @Value("${oss.url.directUpload}")
     private String ossUrl;
 
@@ -97,6 +102,22 @@ public class MyCustomerClueController {
     @RequiresPermissions("myCustomerInfo:view")
     @RequestMapping("/initmyCustomer")
     public String initmyCustomer(HttpServletRequest request, Model model) {
+        UserInfoDTO user = getUser();
+        // 根据角色查询页面字段
+        QueryFieldByRoleAndMenuReq queryFieldByRoleAndMenuReq = new QueryFieldByRoleAndMenuReq();
+        queryFieldByRoleAndMenuReq.setMenuCode("myCustomerInfo");
+        queryFieldByRoleAndMenuReq.setId(user.getRoleList().get(0).getId());
+        JSONResult<List<CustomFieldQueryDTO>> queryFieldByRoleAndMenu =
+                customFieldFeignClient.queryFieldByRoleAndMenu(queryFieldByRoleAndMenuReq);
+        request.setAttribute("fieldList", queryFieldByRoleAndMenu.getData());
+        // 根据用户查询页面字段
+        QueryFieldByUserAndMenuReq queryFieldByUserAndMenuReq = new QueryFieldByUserAndMenuReq();
+        queryFieldByUserAndMenuReq.setId(user.getId());
+        queryFieldByUserAndMenuReq.setRoleId(user.getRoleList().get(0).getId());
+        queryFieldByUserAndMenuReq.setMenuCode("myCustomerInfo");
+        JSONResult<List<UserFieldDTO>> queryFieldByUserAndMenu =
+                customFieldFeignClient.queryFieldByUserAndMenu(queryFieldByUserAndMenuReq);
+        request.setAttribute("userFieldList", queryFieldByUserAndMenu.getData());
         return "clue/myCustom";
     }
 
@@ -157,9 +178,8 @@ public class MyCustomerClueController {
     @RequiresPermissions("myCustomerInfo:add")
     public String createClue(HttpServletRequest request, Model model) {
 
-        ProjectInfoPageParam param = new ProjectInfoPageParam();
         // 项目
-        JSONResult<List<ProjectInfoDTO>> proJson = projectInfoFeignClient.listNoPage(param);
+        JSONResult<List<ProjectInfoDTO>> proJson = projectInfoFeignClient.allProject();
         if (proJson.getCode().equals(JSONResult.SUCCESS)) {
             model.addAttribute("proSelect", proJson.getData());
         }
@@ -260,8 +280,7 @@ public class MyCustomerClueController {
             request.setAttribute("circulationList", new ArrayList());
         }
         // 项目
-        ProjectInfoPageParam param = new ProjectInfoPageParam();
-        JSONResult<List<ProjectInfoDTO>> proJson = projectInfoFeignClient.listNoPage(param);
+        JSONResult<List<ProjectInfoDTO>> proJson = projectInfoFeignClient.allProject();
         if (proJson.getCode().equals(JSONResult.SUCCESS)) {
             request.setAttribute("proSelect", proJson.getData());
         } else {
@@ -278,7 +297,7 @@ public class MyCustomerClueController {
         }
         return "clue/addCustomerMaintenance";
     }
- 
+
     /**
      * 客户详情
      * 
@@ -352,22 +371,21 @@ public class MyCustomerClueController {
             request.setAttribute("circulationList", new ArrayList());
         }
         // 项目
-        ProjectInfoPageParam param = new ProjectInfoPageParam();
-        JSONResult<List<ProjectInfoDTO>> proJson = projectInfoFeignClient.listNoPage(param);
+        JSONResult<List<ProjectInfoDTO>> proJson = projectInfoFeignClient.allProject();
         if (proJson.getCode().equals(JSONResult.SUCCESS)) {
             request.setAttribute("proSelect", proJson.getData());
         } else {
             request.setAttribute("proSelect", new ArrayList());
         }
 
-		// 获取已上传的文件数据
-		ClueQueryDTO fileDto = new ClueQueryDTO();
-		fileDto.setClueId(new Long(clueId));
-		JSONResult<List<ClueFileDTO>> clueFileList = myCustomerFeignClient.findClueFile(fileDto);
-		if (clueFileList != null && clueFileList.SUCCESS.equals(clueFileList.getCode())
-				&& clueFileList.getData() != null) {
-			request.setAttribute("clueFileList", clueFileList.getData());
-		}
+        // 获取已上传的文件数据
+        ClueQueryDTO fileDto = new ClueQueryDTO();
+        fileDto.setClueId(new Long(clueId));
+        JSONResult<List<ClueFileDTO>> clueFileList = myCustomerFeignClient.findClueFile(fileDto);
+        if (clueFileList != null && clueFileList.SUCCESS.equals(clueFileList.getCode())
+                && clueFileList.getData() != null) {
+            request.setAttribute("clueFileList", clueFileList.getData());
+        }
         request.setAttribute("commonPool", commonPool);
         return "clue/CustomerMaintenanceReadOnly";
     }
@@ -515,11 +533,12 @@ public class MyCustomerClueController {
     @ResponseBody
     public JSONResult<List<TrackingRespDTO>> deleteClueTracking(HttpServletRequest request,
             @RequestBody IdListLongReq dto) {
-    	trackingFeignClient.deleteTracking(dto);
-		TrackingReqDTO queryDto = new TrackingReqDTO();
-		dto.setClueId(dto.getClueId());
-		return trackingFeignClient.queryList(queryDto);
-	}
+        trackingFeignClient.deleteTracking(dto);
+        TrackingReqDTO queryDto = new TrackingReqDTO();
+        dto.setClueId(dto.getClueId());
+        return trackingFeignClient.queryList(queryDto);
+    }
+
     /**
      * 修改资源跟进记录
      * 
@@ -548,9 +567,8 @@ public class MyCustomerClueController {
         request.setAttribute("clueId", clueId);
         request.setAttribute("cusName", cusName);
         request.setAttribute("cusPhone", cusPhone);
-        ProjectInfoPageParam param = new ProjectInfoPageParam();
         // 项目
-        JSONResult<List<ProjectInfoDTO>> proJson = projectInfoFeignClient.listNoPage(param);
+        JSONResult<List<ProjectInfoDTO>> proJson = projectInfoFeignClient.allProject();
         if (proJson.getCode().equals(JSONResult.SUCCESS)) {
             model.addAttribute("proSelect", proJson.getData());
         }
@@ -608,7 +626,7 @@ public class MyCustomerClueController {
         return myCustomerFeignClient.saveAppiontment(dto);
 
     }
- 
+
 
     /**
      * 重单申请查询重单数据
@@ -623,37 +641,39 @@ public class MyCustomerClueController {
             @RequestBody RepeatClueQueryDTO dto) {
         return myCustomerFeignClient.queryRepeatClue(dto);
     }
-	/**
-	 * 重单申请查询重单数据
-	 * 
-	 * @param request
-	 * @param dto
-	 * @return
-	 */
-	@RequestMapping("/queryRepeatClue")
-	@ResponseBody
-	public JSONResult<List<RepeatClueDTO>> queryRepeatClue(HttpServletRequest request,
-			@RequestBody RepeatClueQueryDTO dto) {
-		Subject subject = SecurityUtils.getSubject();
-		UserInfoDTO user = (UserInfoDTO) subject.getSession().getAttribute("user");
-		if (null != user) {
-			dto.setTelemarketingId(user.getId());
-		}
-		return myCustomerFeignClient.queryRepeatClue(dto);
-	}
 
- 
- 
-	/**
-	 * 总裁办重单申请保存
-	 * 
-	 * @param request
-	 * @param dto
-	 * @return
-	 */
-	@RequestMapping("/officesaveRepeatClue")
-	@ResponseBody
-	public JSONResult<String> officesaveRepeatClue(HttpServletRequest request, @RequestBody RepeatClueSaveDTO dto) {
+    /**
+     * 重单申请查询重单数据
+     * 
+     * @param request
+     * @param dto
+     * @return
+     */
+    @RequestMapping("/queryRepeatClue")
+    @ResponseBody
+    public JSONResult<List<RepeatClueDTO>> queryRepeatClue(HttpServletRequest request,
+            @RequestBody RepeatClueQueryDTO dto) {
+        Subject subject = SecurityUtils.getSubject();
+        UserInfoDTO user = (UserInfoDTO) subject.getSession().getAttribute("user");
+        if (null != user) {
+            dto.setTelemarketingId(user.getId());
+        }
+        return myCustomerFeignClient.queryRepeatClue(dto);
+    }
+
+
+
+    /**
+     * 总裁办重单申请保存
+     * 
+     * @param request
+     * @param dto
+     * @return
+     */
+    @RequestMapping("/officesaveRepeatClue")
+    @ResponseBody
+    public JSONResult<String> officesaveRepeatClue(HttpServletRequest request,
+            @RequestBody RepeatClueSaveDTO dto) {
         Subject subject = SecurityUtils.getSubject();
         UserInfoDTO user = (UserInfoDTO) subject.getSession().getAttribute("user");
         if (null != user) {
@@ -682,21 +702,21 @@ public class MyCustomerClueController {
         return myCustomerFeignClient.saveRepeatClue(dto);
     }
 
- 
-	/**
-	 * 重单申请查询被重单数据
-	 * 
-	 * @param request
-	 * @param dto
-	 * @return
-	 */
-	@RequestMapping("/queryRepeatCurClue")
-	@ResponseBody
-	public JSONResult<List<RepeatClueDTO>> queryRepeatCurClue(HttpServletRequest request,
-			@RequestBody RepeatClueQueryDTO dto) {
-		return myCustomerFeignClient.queryRepeatClue(dto);
-	}
- 
+
+    /**
+     * 重单申请查询被重单数据
+     * 
+     * @param request
+     * @param dto
+     * @return
+     */
+    @RequestMapping("/queryRepeatCurClue")
+    @ResponseBody
+    public JSONResult<List<RepeatClueDTO>> queryRepeatCurClue(HttpServletRequest request,
+            @RequestBody RepeatClueQueryDTO dto) {
+        return myCustomerFeignClient.queryRepeatClue(dto);
+    }
+
 
     /**
      * 查询所有电销创业顾问
@@ -781,9 +801,7 @@ public class MyCustomerClueController {
             relation.setTeleSaleId(user.getId());
             // 电销组
             relation.setTeleGorupId(user.getOrgId());
-
             dto.setClueRelate(relation);
-
             UserOrgRoleReq userRole = new UserOrgRoleReq();
             userRole.setRoleCode(RoleCodeEnum.DXZJ.name());
             userRole.setOrgId(user.getOrgId());
@@ -844,16 +862,16 @@ public class MyCustomerClueController {
             }
 
         }
-        
+
         // 保存流转记录
         CirculationInsertOrUpdateDTO circul = new CirculationInsertOrUpdateDTO();
         circul.setAllotUserId(user.getId());
         circul.setAllotRoleId(user.getRoleId());
         circul.setClueId(dto.getClueId());
         circul.setUserId(user.getId());
-        if(null!=user.getRoleList()&&user.getRoleList().size()>0){
-        	   circul.setRoleId(user.getRoleList().get(0).getId());
-        	
+        if (null != user.getRoleList() && user.getRoleList().size() > 0) {
+            circul.setRoleId(user.getRoleList().get(0).getId());
+
         }
         dto.setCirculationInsertOrUpdateDTO(circul);
         JSONResult<String> customerClue = myCustomerFeignClient.createCustomerClue(dto);
@@ -896,6 +914,18 @@ public class MyCustomerClueController {
     public JSONResult<String> reserveClue(HttpServletRequest request,
             @RequestBody ClueQueryDTO dto) {
         return myCustomerFeignClient.reserveClue(dto);
+    }
+
+    /**
+     * 获取当前登录账号
+     * 
+     * @param orgDTO
+     * @return
+     */
+    private UserInfoDTO getUser() {
+        Object attribute = SecurityUtils.getSubject().getSession().getAttribute("user");
+        UserInfoDTO user = (UserInfoDTO) attribute;
+        return user;
     }
 
 }

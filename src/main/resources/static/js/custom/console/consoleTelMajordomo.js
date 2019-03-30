@@ -35,7 +35,8 @@ var mainDivVM = new Vue({
         todayAppiontmentNum:'',//今日邀约数
         tomorrowArriveTime:'',//预计明日到访数
         workDay:'',//工作天数
-        //公告        
+        //公告  
+        afficheBox:false,
         items: [ 
             // {content:'系统将于2018年12月5日晚上12:00进行系统升级，请各位同事及时处理工作。系统预计在12:20分恢复正常使用,感谢配合!',id:1},
             // {content:'公告2公告2公告2公告2公告2公告2公告2',id:2},
@@ -65,8 +66,14 @@ var mainDivVM = new Vue({
             // 公告
             param={};
             axios.post('/console/console/queryAnnReceiveNoPage',param).then(function (response) {
+                console.log('公告')
                 console.log(response.data)
-                mainDivVM.items=response.data.data;
+                if(response.data.data&&response.data.data.length>0){
+                    mainDivVM.items=response.data.data;
+                    mainDivVM.afficheBox=true
+                }else{
+                    mainDivVM.afficheBox=false
+                }
             });
             // 未读消息
             param={};
@@ -144,8 +151,8 @@ var mainDivVM = new Vue({
                 var table=result.data;
                 var data= table.data;
                 for(var i=0;i<data.length;i++){
-                    data[i].category=mainDivVM.transformCategory(data[i].category);
-                    data[i].type=mainDivVM.transformType(data[i].type);
+                	data[i].category=mainDivVM.transformCategory(data[i].category);
+                	data[i].type=mainDivVM.transformType(data[i].type);
                     data[i].createTime=mainDivVM.dateFormat(data[i].createTime);
                     data[i].messageTime=mainDivVM.dateFormat(data[i].messageTime);
                 }
@@ -203,6 +210,7 @@ var mainDivVM = new Vue({
               for(var i=0;i<clueTypeList.length;i++){
                     if(cellValue==clueTypeList[i].value){
                         text=clueTypeList[i].name;
+                        break;
                     }
                 }
           }
@@ -239,12 +247,12 @@ var mainDivVM = new Vue({
                     .then(function (response) {
                         var data =  response.data;
                         if(data.code=='0'){
-                            mainDivVM.$message({message:'分配成功',type:'success',duration:1000,onClose:function(){
-                                mainDivVM.allocationVisible = false;
-                                mainDivVM.searchTable();
+                            clueVM.$message({message:'分配成功',type:'success',duration:1000,onClose:function(){
+                                clueVM.allocationVisible = false;
+                                clueVM.searchTable();
                             }});
                         }else{
-                            mainDivVM.$message({
+                            clueVM.$message({
                                 message: "接口调用失败",
                                 type: 'error'
                             }); 
@@ -261,7 +269,7 @@ var mainDivVM = new Vue({
                     return false;
                 }
             });
-        },        
+        },
     },
     created(){
         // 工作台
