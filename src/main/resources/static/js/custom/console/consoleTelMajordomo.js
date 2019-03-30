@@ -151,6 +151,8 @@ var mainDivVM = new Vue({
                 var table=result.data;
                 var data= table.data;
                 for(var i=0;i<data.length;i++){
+                	data[i].category=mainDivVM.transformCategory(data[i].category);
+                	data[i].type=mainDivVM.transformType(data[i].type);
                     data[i].createTime=mainDivVM.dateFormat(data[i].createTime);
                     data[i].messageTime=mainDivVM.dateFormat(data[i].messageTime);
                 }

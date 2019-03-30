@@ -138,7 +138,7 @@
             :data="dataTable" 
             >
             <el-table-column align="center" type="selection" width="55"></el-table-column>
-            <el-table-column align="center" prop="serialNum" label="序号" width="55"></el-table-column>
+            <el-table-column align="center" type="index" label="序号" width="55"></el-table-column>
             <el-table-column align="center" prop="createTime" label="提交邀约时间"></el-table-column>
             <el-table-column align="center" prop="reserveTime" label="邀约来访时间"></el-table-column>
             <el-table-column align="center" prop="teleGorupName" label="电销组"></el-table-column> 
@@ -149,8 +149,8 @@
             <el-table-column align="center" prop="busSaleName" label="商务小组"></el-table-column> 
             <el-table-column align="center" prop="busSaleName" label="商务经理" width="100"></el-table-column>
             <el-table-column align="center" prop="cusName" label="客户姓名"></el-table-column>  
-            <el-table-column align="center" prop="tasteProjectName" label="品尝项目" width="100"></el-table-column>
-            <el-table-column align="center" prop="contractShopType" label="签约店型" width="100"></el-table-column>
+            <el-table-column align="center" prop="tasteProjectId" label="品尝项目" width="100" :formatter="transformProject"></el-table-column>
+            <!-- <el-table-column align="center" prop="contractShopType" label="签约店型" width="100"></el-table-column> -->
             <el-table-column align="center" prop="province" label="开店省份" width="100"></el-table-column> 
             <el-table-column align="center" prop="city" label="开店城市" width="100"></el-table-column>   
             <el-table-column align="center" prop="district" label="开店区／县" width="120"></el-table-column>
@@ -436,7 +436,25 @@
                 	customerVisitRecordVm.busSaleArr=response.data.data;
                 });
             },
-        	
+          //品尝项目转换方法
+            transformProject(row, column, cellValue, index) {
+         	   var text="";
+           	   if(projectList&&cellValue){
+	            	   var array=cellValue.split(",");
+	                   for(var i=0;i<array.length;i++){
+	                	   for(var j=0;j<projectList.length;j++){
+	 	                		if(array[i]==projectList[j].id){
+	 	                			if(i==0){
+		 	                			text=projectList[j].projectName;
+	 	                			}else{
+		 	                			text=text+","+projectList[j].projectName;
+	 	                			}
+	 	                		}
+	 	                	}
+	                	}
+           	    }
+                 return text;
+            },
             initCustomerVisitRecord(){//初始列表
                 var startTime = this.form.createTimeStart;
                 var endTime = this.form.createTimeEnd;

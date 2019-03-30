@@ -48,10 +48,15 @@ import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.manageweb.feign.call.CallRecordFeign;
 import com.kuaidao.manageweb.feign.circulation.CirculationFeignClient;
 import com.kuaidao.manageweb.feign.clue.MyCustomerFeignClient;
+import com.kuaidao.manageweb.feign.customfield.CustomFieldFeignClient;
 import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
 import com.kuaidao.manageweb.feign.project.ProjectInfoFeignClient;
 import com.kuaidao.manageweb.feign.tracking.TrackingFeignClient;
 import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
+import com.kuaidao.sys.dto.customfield.CustomFieldQueryDTO;
+import com.kuaidao.sys.dto.customfield.QueryFieldByRoleAndMenuReq;
+import com.kuaidao.sys.dto.customfield.QueryFieldByUserAndMenuReq;
+import com.kuaidao.sys.dto.customfield.UserFieldDTO;
 import com.kuaidao.sys.dto.organization.OrganizationDTO;
 import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
 import com.kuaidao.sys.dto.role.RoleInfoDTO;
@@ -82,22 +87,40 @@ public class MyCustomerClueController {
 
 	@Autowired
 	private OrganizationFeignClient organizationFeignClient;
-
-	@Value("${oss.url.directUpload}")
-	private String ossUrl;
-
-	/**
-	 * 初始化我的客户
-	 * 
-	 * @param request
-	 * @param model
-	 * @return
-	 */
-	@RequiresPermissions("myCustomerInfo:view")
-	@RequestMapping("/initmyCustomer")
-	public String initmyCustomer(HttpServletRequest request, Model model) {
-		return "clue/myCustom";
-	}
+ 
+    @Autowired
+    private CustomFieldFeignClient customFieldFeignClient;
+    @Value("${oss.url.directUpload}")
+    private String ossUrl;
+ 
+    /**
+     * 初始化我的客户
+     * 
+     * @param request
+     * @param model
+     * @return
+     */
+    @RequiresPermissions("myCustomerInfo:view")
+    @RequestMapping("/initmyCustomer")
+    public String initmyCustomer(HttpServletRequest request, Model model) {
+        UserInfoDTO user = getUser();
+        // 根据角色查询页面字段
+        QueryFieldByRoleAndMenuReq queryFieldByRoleAndMenuReq = new QueryFieldByRoleAndMenuReq();
+        queryFieldByRoleAndMenuReq.setMenuCode("myCustomerInfo");
+        queryFieldByRoleAndMenuReq.setId(user.getRoleList().get(0).getId());
+        JSONResult<List<CustomFieldQueryDTO>> queryFieldByRoleAndMenu =
+                customFieldFeignClient.queryFieldByRoleAndMenu(queryFieldByRoleAndMenuReq);
+        request.setAttribute("fieldList", queryFieldByRoleAndMenu.getData());
+        // 根据用户查询页面字段
+        QueryFieldByUserAndMenuReq queryFieldByUserAndMenuReq = new QueryFieldByUserAndMenuReq();
+        queryFieldByUserAndMenuReq.setId(user.getId());
+        queryFieldByUserAndMenuReq.setRoleId(user.getRoleList().get(0).getId());
+        queryFieldByUserAndMenuReq.setMenuCode("myCustomerInfo");
+        JSONResult<List<UserFieldDTO>> queryFieldByUserAndMenu =
+                customFieldFeignClient.queryFieldByUserAndMenu(queryFieldByUserAndMenuReq);
+        request.setAttribute("userFieldList", queryFieldByUserAndMenu.getData());
+        return "clue/myCustom";
+    }
 
 	/**
 	 * 我的客户分页查询
@@ -860,5 +883,17 @@ public class MyCustomerClueController {
 	public JSONResult<String> reserveClue(HttpServletRequest request, @RequestBody ClueQueryDTO dto) {
 		return myCustomerFeignClient.reserveClue(dto);
 	}
+
+    /**
+     * 获取当前登录账号
+     * 
+     * @param orgDTO
+     * @return
+     */
+    private UserInfoDTO getUser() {
+        Object attribute = SecurityUtils.getSubject().getSession().getAttribute("user");
+        UserInfoDTO user = (UserInfoDTO) attribute;
+        return user;
+    }
 
 }
