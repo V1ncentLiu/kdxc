@@ -111,10 +111,22 @@
             <el-table-column  prop="" label="到访情况" :formatter="formatVisit" align="center" width="130">
                 <template slot-scope="scope">
                     <el-button size="mini"  v-if="scope.row.visitStatus == -1||scope.row.visitStatus == null" type="text" @click="openEditVisitRecord(scope.row)">添加到访记录</el-button>
-                    <el-button size="mini"  v-else-if="scope.row.visitStatus==0" type="text" @click="showNotVisitReason(scope.row)">未到访(原因)</el-button>
-                    <el-button size="mini"  v-else-if="scope.row.visitAuditStatus==1" type="text" @click="showVisitRecord(scope.row)">到访审核中</el-button>
-                    <el-button size="mini"  v-else-if="scope.row.visitAuditStatus==0" type="text" style="color: red" @click="editRebutVisitRecord(scope.row)">到访被驳回</el-button>
-                    <el-button size="mini"  v-else-if="scope.row.visitAuditStatus==2" type="text" @click="toVisitRecordPage(scope.row)">查看到访记录</el-button>
+                    <div  v-else-if="scope.row.visitList.length==1">
+                        <!--<el-button size="mini"  v-if="scope.row.visitStatus==0" type="text" @click="showNotVisitReason(scope.row)">未到访(原因)</el-button>-->
+                        <el-button size="mini"  v-else-if="item.isVisit==0&&item.status==1" type="text" @click="showNotVisitReason(item)">未到访(审核中）</el-button>
+                        <el-button size="mini"  v-else-if="item.isVisit==0&&item.status==2" type="text" style="color: red" @click="showNotVisitReason(item)">未到访</el-button>
+                        <el-button size="mini"  v-else-if="item.isVisit==0&&item.status==0" type="text" @click="openEditVisitRecord(item)">添加到访记录</el-button>
+                        <el-button size="mini"  v-else-if="item.isVisit==1&&item.status==1" type="text" @click="showVisitRecord(item)">审核中）</el-button>
+                        <el-button size="mini"  v-else-if="item.isVisit==1&&item.status==0" type="text" style="color: red" @click="editRebutVisitRecord(item)">到访被驳回</el-button>
+                        <el-button size="mini"  v-else-if="item.isVisit==1&&item.status==2" type="text" @click="toVisitRecordPage(item )">查看到访记录</el-button>
+                    </div>
+                    <div  v-else-if="scope.row.visitList.length>1"   v-for="item in scope.row.visitList ">
+                        <el-button size="mini"  v-if="item.isVisit==0&&item.status==1" type="text" @click="showNotVisitReason(item)">未到访(审核中）</el-button>
+                        <el-button size="mini"  v-else-if="item.isVisit==0&&item.status==2" type="text" style="color: red" @click="showNotVisitReason(item)">未到访</el-button>
+                        <el-button size="mini"  v-else-if="item.isVisit==1&&item.status==1" type="text" @click="showVisitRecord(item)">审核中</el-button>
+                        <el-button size="mini"  v-else-if="item.isVisit==1&&item.status==0" type="text" style="color: red" @click="editRebutVisitRecord(item)">到访被驳回</el-button>
+                        <el-button size="mini"  v-else-if="item.isVisit==1&&item.status==2" type="text" @click="toVisitRecordPage(item )">查看到访记录</el-button>
+                    </div>
                 </template>
             </el-table-column>
             <el-table-column  prop="status" label="签约明细" align="center" width="280">
