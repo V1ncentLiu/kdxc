@@ -294,11 +294,16 @@ public class VisitRecordController {
             JSONResult<List<OrganizationRespDTO>> queryOrgByParam =
                     organizationFeignClient.queryOrgByParam(queryDTO);
             List<OrganizationRespDTO> data = queryOrgByParam.getData();
+            if (CollectionUtils.isEmpty(data)) {
+                return new JSONResult().fail(SysErrorCodeEnum.ERR_NOTEXISTS_DATA.getCode(),
+                        "该用户下没有下属");
+            }
             for (OrganizationRespDTO organizationRespDTO : data) {
                 busGroupIdList.add(organizationRespDTO.getId());
             }
         } else if (RoleCodeEnum.SWZJ.name().equals(roleCode)) {
             busGroupIdList.add(orgId);
+        } else if (RoleCodeEnum.GLY.name().equals(roleCode)) {
         } else {
             return new JSONResult().fail(SysErrorCodeEnum.ERR_NOTEXISTS_DATA.getCode(), "角色没有权限");
         }
