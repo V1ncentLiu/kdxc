@@ -31,7 +31,7 @@ import com.kuaidao.sys.dto.user.UserOrgRoleReq;
  * @date: 2019年1月4日
  * @version V1.0
  */
-@FeignClient(name = "sys-service-chen", path = "/sys/userInfo",
+@FeignClient(name = "sys-service", path = "/sys/userInfo",
         fallback = UserInfoFeignClient.HystrixClientFallback.class)
 public interface UserInfoFeignClient {
     /**
