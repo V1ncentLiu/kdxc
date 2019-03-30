@@ -87,40 +87,40 @@ public class MyCustomerClueController {
 
 	@Autowired
 	private OrganizationFeignClient organizationFeignClient;
- 
-    @Autowired
-    private CustomFieldFeignClient customFieldFeignClient;
-    @Value("${oss.url.directUpload}")
-    private String ossUrl;
- 
-    /**
-     * 初始化我的客户
-     * 
-     * @param request
-     * @param model
-     * @return
-     */
-    @RequiresPermissions("myCustomerInfo:view")
-    @RequestMapping("/initmyCustomer")
-    public String initmyCustomer(HttpServletRequest request, Model model) {
-        UserInfoDTO user = getUser();
-        // 根据角色查询页面字段
-        QueryFieldByRoleAndMenuReq queryFieldByRoleAndMenuReq = new QueryFieldByRoleAndMenuReq();
-        queryFieldByRoleAndMenuReq.setMenuCode("myCustomerInfo");
-        queryFieldByRoleAndMenuReq.setId(user.getRoleList().get(0).getId());
-        JSONResult<List<CustomFieldQueryDTO>> queryFieldByRoleAndMenu =
-                customFieldFeignClient.queryFieldByRoleAndMenu(queryFieldByRoleAndMenuReq);
-        request.setAttribute("fieldList", queryFieldByRoleAndMenu.getData());
-        // 根据用户查询页面字段
-        QueryFieldByUserAndMenuReq queryFieldByUserAndMenuReq = new QueryFieldByUserAndMenuReq();
-        queryFieldByUserAndMenuReq.setId(user.getId());
-        queryFieldByUserAndMenuReq.setRoleId(user.getRoleList().get(0).getId());
-        queryFieldByUserAndMenuReq.setMenuCode("myCustomerInfo");
-        JSONResult<List<UserFieldDTO>> queryFieldByUserAndMenu =
-                customFieldFeignClient.queryFieldByUserAndMenu(queryFieldByUserAndMenuReq);
-        request.setAttribute("userFieldList", queryFieldByUserAndMenu.getData());
-        return "clue/myCustom";
-    }
+
+	@Autowired
+	private CustomFieldFeignClient customFieldFeignClient;
+	@Value("${oss.url.directUpload}")
+	private String ossUrl;
+
+	/**
+	 * 初始化我的客户
+	 * 
+	 * @param request
+	 * @param model
+	 * @return
+	 */
+	@RequiresPermissions("myCustomerInfo:view")
+	@RequestMapping("/initmyCustomer")
+	public String initmyCustomer(HttpServletRequest request, Model model) {
+		UserInfoDTO user = getUser();
+		// 根据角色查询页面字段
+		QueryFieldByRoleAndMenuReq queryFieldByRoleAndMenuReq = new QueryFieldByRoleAndMenuReq();
+		queryFieldByRoleAndMenuReq.setMenuCode("myCustomerInfo");
+		queryFieldByRoleAndMenuReq.setId(user.getRoleList().get(0).getId());
+		JSONResult<List<CustomFieldQueryDTO>> queryFieldByRoleAndMenu = customFieldFeignClient
+				.queryFieldByRoleAndMenu(queryFieldByRoleAndMenuReq);
+		request.setAttribute("fieldList", queryFieldByRoleAndMenu.getData());
+		// 根据用户查询页面字段
+		QueryFieldByUserAndMenuReq queryFieldByUserAndMenuReq = new QueryFieldByUserAndMenuReq();
+		queryFieldByUserAndMenuReq.setId(user.getId());
+		queryFieldByUserAndMenuReq.setRoleId(user.getRoleList().get(0).getId());
+		queryFieldByUserAndMenuReq.setMenuCode("myCustomerInfo");
+		JSONResult<List<UserFieldDTO>> queryFieldByUserAndMenu = customFieldFeignClient
+				.queryFieldByUserAndMenu(queryFieldByUserAndMenuReq);
+		request.setAttribute("userFieldList", queryFieldByUserAndMenu.getData());
+		return "clue/myCustom";
+	}
 
 	/**
 	 * 我的客户分页查询
@@ -574,10 +574,14 @@ public class MyCustomerClueController {
 		UserInfoDTO user = (UserInfoDTO) subject.getSession().getAttribute("user");
 		if (null != user) {
 			dto.setCreateUser(user.getId());
+
 			// 保存流转记录
 			CirculationInsertOrUpdateDTO circul = new CirculationInsertOrUpdateDTO();
 			circul.setAllotUserId(user.getId());
-			circul.setAllotRoleId(user.getRoleId());
+			List<RoleInfoDTO> roleListAll = user.getRoleList();
+			if (null != roleListAll && roleListAll.size() > 0) {
+				circul.setAllotRoleId(roleListAll.get(0).getId());
+			}
 			circul.setClueId(dto.getClueId());
 			if (null != dto.getBusDirectorId()) {
 				IdEntityLong id = new IdEntityLong();
@@ -884,16 +888,16 @@ public class MyCustomerClueController {
 		return myCustomerFeignClient.reserveClue(dto);
 	}
 
-    /**
-     * 获取当前登录账号
-     * 
-     * @param orgDTO
-     * @return
-     */
-    private UserInfoDTO getUser() {
-        Object attribute = SecurityUtils.getSubject().getSession().getAttribute("user");
-        UserInfoDTO user = (UserInfoDTO) attribute;
-        return user;
-    }
+	/**
+	 * 获取当前登录账号
+	 * 
+	 * @param orgDTO
+	 * @return
+	 */
+	private UserInfoDTO getUser() {
+		Object attribute = SecurityUtils.getSubject().getSession().getAttribute("user");
+		UserInfoDTO user = (UserInfoDTO) attribute;
+		return user;
+	}
 
 }
