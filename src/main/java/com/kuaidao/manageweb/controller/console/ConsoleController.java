@@ -189,8 +189,8 @@ public class ConsoleController {
         }
 
         
-        
-       /*   if(type.equals("1")) {
+        /*
+         if(type.equals("1")) {
             path = "console/consoleTelemarketing";
         }else if(type.equals("2")) {
             List<Integer> statusList = new ArrayList<Integer>();
