@@ -454,11 +454,11 @@
                                                 :value="item.value"></el-option>
                                     </el-select>
                                 </el-form-item>
-                                <el-form-item label=""
-                                              size="mini">
+                                <el-form-item label="" size="mini" prop="customerStatusSub">
                                     <el-select
                                             v-model="formInline.customerStatusSub" placeholder="客户状态"
-                                            :disabled="substatus">
+                                            :disabled="substatus"
+                                            :required="customerStatusRequired">
                                         <el-option v-for="item in customerStatusSubArr" :key="item.value"
                                                    :label="item.name" :value="item.value"></el-option>
                                     </el-select>
@@ -915,6 +915,7 @@
         el: '#addCustomer',
         data: function () {
             return {
+                customerStatusRequired:false,
                 isShowTip: false,//是否显示释放公有池提示信息
                 isShowBtn: false,//是否显示保留客户按钮
                 radio: '1',
@@ -1015,6 +1016,27 @@
                     callTime: [
                         {required: true, message: '请选择拨打时间', trigger: 'change'}
                     ],
+                    // customerStatusSub: [
+                    //     {required: true, message: '请选择客户状态', trigger: 'change'}
+                    // ],
+                    customerStatusSub: {
+                        validator: function (rule, value, callback) {
+                            console.log(value);
+                            console.log(value);
+                            if(!addCustomerVM.substatus){//客户状态是否可选，false表示可选
+                                if (!value) {
+                                    addCustomerVM.customerStatusRequired=true //验证启用
+                                    callback(new Error("请选择客户状态"));
+                                } else {
+                                    callback();
+                                }                            
+                            }else{
+                                addCustomerVM.customerStatusRequired=false //验证不启用
+                                callback();
+                            }
+                            callback();
+                        }, trigger: 'change'
+                    },
                     focusPoint: [
                         {required: true, message: '请填写客户关注点', trigger: 'blur'}
                     ],
@@ -1459,7 +1481,11 @@
                        }else{
                            param.nextVisitTime=this.formInline.nextVisitTime; 
                        }
-                       param.customerStatusSub=this.formInline.customerStatusSub;
+
+                       if(this.formInline.customerStatus=='3'){//如果选择的是不跟进在传此字段
+                            param.customerStatusSub=this.formInline.customerStatusSub;
+                       }
+                       
                        this.addBtnDisabled=true;
                        if(param.customerStatus=='3'&&param.customerStatusSub=='1'){
                     	      this.$confirm("客户至不跟进空号将释放废弃池，我的客户列表将消失", '提示', {
@@ -1888,7 +1914,7 @@
                     x.open("GET", row.filePath, true);
                     x.responseType = 'blob';
                     x.onload = function (e) {
-                        download(x.response, row.fileName, "auido/mp3");
+                        download(x.response, row.fileName, "audio/mp3");
                     };
                     x.send();
                     //this.download1( row.filePath, row.fileName, 'auido/mp3' );
@@ -1960,7 +1986,14 @@
                             if (url) {
                                 var fileName = url.split('?')[0];
                                 var fileNameArr = fileName.split("/");
-                                download(url, fileNameArr[fileNameArr.length - 1]);
+//                                download(url, fileNameArr[fileNameArr.length - 1]);
+																var x = new XMLHttpRequest();
+																x.open("GET",url,true);
+																x.responseType = 'blob';
+																x.onload = function(e) {
+																	download(x.response,fileNameArr[fileNameArr.length-1],'audio/mp3');
+                                };
+																x.send();
                             }
 
                         } else {

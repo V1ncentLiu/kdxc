@@ -215,7 +215,7 @@
 
     <!-- 明细弹窗 -->
     <el-dialog title="付款明细" width="70%" :visible.sync="dialogFormVisible">
-        <el-form :model="formMoneyDetail" ref="formMoneyDetail"  :rules="rules">
+        <el-form :model="formMoneyDetail" ref="formMoneyDetail"  :rules="detailRules">
         <div>
             <el-row>
                 <el-col :span="10">
@@ -277,7 +277,7 @@
             <el-row>
                 <el-col :span="10">
                     <el-form-item label="业绩金额：" :label-width="formLabelWidth" prop="performanceAmount">
-                        <el-input v-model="formMoneyDetailAmountPerformance"  type="number" min="0" oninput="if(value.length>10)value=value.slice(0,10)"  onkeypress="return(/[\d]/.test(String.fromCharCode(event.keyCode)))" maxLength="10" autocomplete="off" width="80%"></el-input>
+                        <el-input v-model="formMoneyDetailAmountPerformance"  type="number" min="0" oninput="if(value.length>10)value=value.slice(0,10)"  onkeypress="return(/[\d]/.test(String.fromCharCode(event.keyCode)))" maxLength="10" autocomplete="off" style="width:80%"></el-input>
                         <span style="padding-left: 10px;">元</span>
                     </el-form-item>
                 </el-col>
@@ -289,7 +289,7 @@
                     </el-form-item>
                 </el-col>
             </el-row>
-            <el-button v-if="shouAddVisitButton" type="text" @click="suppShow">添加补充到访记录</el-button><el-button v-if="!shouAddVisitButton" type="text" @click="suppHide">取消添加补充到访记录</el-button><span style="font-size:14px;color: #ccc;">(若无到访记录可不填写)</span>
+            <el-button v-if="shouAddVisitButton" type="text" @click="suppDetailShow">添加补充到访记录</el-button><el-button v-if="!shouAddVisitButton" type="text" @click="suppDetailHide">取消添加补充到访记录</el-button><span style="font-size:14px;color: #ccc;">(若无到访记录可不填写)</span>
             <!--<div class="paddB20">补充到访记录<i class="el-icon-caret-bottom" @click="suppShow"></i><i class="el-icon-caret-top" @click="suppHide"></i><span style="font-size:14px;color: #ccc;">(若无到访记录可不填写)</span></div>-->
             <div v-if="suppWrap">
                 <el-row>
@@ -469,7 +469,7 @@
                     <el-row>
                         <el-col :span="10">
                             <el-form-item label="是否远程签约：" :label-width="formLabelWidth" prop="isRemoteSign">
-                                <el-select v-model="formSigning.isRemoteSign11"  @change="selectIsRemoteSign" placeholder="请选择是否远程签约："> <!--  -->
+                                <el-select v-model="formSigning.isRemoteSign11"  placeholder="请选择是否远程签约："> <!--  -->
                                     <!--<el-option-->
                                             <!--v-for="item in isSignArr"-->
                                             <!--:key="item.value"-->
@@ -491,7 +491,7 @@
                 </div>
                 <div v-if="suppWrap">
                     <el-row>
-                        <el-col :span="10">
+                        <el-col :span="12">
                             <el-form-item label="到访时间：" :label-width="formLabelWidth" prop="visitTime">
                                 <el-date-picker
                                         type="datetime"
@@ -508,7 +508,7 @@
                         </el-col>
                     </el-row>
                     <el-row>
-                        <el-col :span="10">
+                        <el-col :span="12">
                             <el-form-item label="到访类型：" :label-width="formLabelWidth"   prop="visitType">
                                 <el-select v-model="formSigning.visitType" placeholder="请选择到访类型" style="width:100%">
                                     <el-option
@@ -715,6 +715,29 @@
                 reason: [
                     { required: true, message: '请输入驳回原因', trigger: 'blur' }
                 ]
+            },
+            detailRules:{
+                payType: [
+                    { required: true, message: '请选择付款类型', trigger: 'change' }
+                ],
+                payMode: [
+                    { required: true, message: '请选择付款方式', trigger: 'change' }
+                ],
+                payTime: [
+                    { type: 'date', required: true, message: '请选择时间', trigger: 'change' }
+                ],
+                amountReceived: [
+                    { required: true, message: '请输入实收金额', trigger: 'blur' }
+                ],
+                amountBalance: [
+                    { required: true, message: '请输入余款金额', trigger: 'blur' }
+                ],
+                makeUpTime: [
+                    { type: 'date', required: true, message: '请选择预计余款补齐时间', trigger: 'change' }
+                ],
+                // performanceAmount: [
+                // 	{ required: true, message: '请输入业绩金额', trigger: 'blur' }
+                // ],
             },
             rules: {
                 customerName: [
@@ -951,6 +974,7 @@
                 this.shouAddVisitButton = true;
                 this.suppWrap = false;
                 this.formMoneyDetail.visitTime = new Date();
+                this.formMoneyDetail.payTime = new Date();
             },
             payTypeChange(val){
                 if(val==3){
@@ -986,6 +1010,7 @@
                     mainDivVM.formSigning.payTime = new Date()
                     mainDivVM.formSigning.isRemoteSign11= "0";
                     mainDivVM.formSigning.visitTime = new Date();
+                    mainDivVM.formSigning.visitType = 1;
                 });
 
             },
@@ -1031,11 +1056,51 @@
             suppShow(){ //补充到访记录展开
                 this.suppWrap = true;
                 this.shouAddVisitButton = false;
+                //清空补充到访记录数据
+                var param = {};
+                param.id = vclueId;
+                axios.post('/businesssign/visitEcho',param).then(function (response) {
+                    var echoData = response.data.data;
+                    mainDivVM.formSigning.visitCity = echoData.visitCity;
+                    mainDivVM.formSigning.visitNum=echoData.visitNum;
+                    mainDivVM.formSigning.visitType= 1;
+                    mainDivVM.formSigning.visitTime=new Date();
+                });
             },
             suppHide(){
                 this.suppWrap = false;
                 this.shouAddVisitButton = true;
+                this.formSigning.visitCity = '';
+                this.formSigning.visitNum='';
+                this.formSigning.visitShopType='';
+                this.formSigning.visitTime='';
+                this.formSigning.visitType='';
             },
+
+            suppDetailShow(){ //补充到访记录展开
+                this.suppWrap = true;
+                this.shouAddVisitButton = false;
+                //清空补充到访记录数据
+                var param = {};
+                param.id = vclueId;
+                axios.post('/businesssign/visitEcho',param).then(function (response) {
+                    var echoData = response.data.data;
+                    mainDivVM.formMoneyDetail.visitCity = echoData.visitCity;
+                    mainDivVM.formMoneyDetail.visitNum=echoData.visitNum;
+                    mainDivVM.formMoneyDetail.visitType= 1;
+                    mainDivVM.formMoneyDetail.visitTime=new Date();
+                });
+            },
+            suppDetailHide(){
+                this.suppWrap = false;
+                this.shouAddVisitButton = true;
+                this.formMoneyDetail.visitCity = '';
+                this.formMoneyDetail.visitNum='';
+                this.formMoneyDetail.visitShopType='';
+                this.formMoneyDetail.visitTime='';
+                this.formMoneyDetail.visitType='';
+            },
+
             submitForm(formName) {
                 var param = this.formSigning;
                 param.amountPerformance = this.formSigningAmountPerformance;

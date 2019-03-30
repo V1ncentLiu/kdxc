@@ -266,10 +266,13 @@ public class BusinessSignController {
                 flag = false;
             }
         }
-        if (flag) {// 没有签约单
-            if (JSONResult.SUCCESS.equals(mapJSONResult.getCode())) {
-                Map data = mapJSONResult.getData();
-                if (data != null) {
+
+
+
+        if (JSONResult.SUCCESS.equals(mapJSONResult.getCode())) {
+            Map data = mapJSONResult.getData();
+            if (data != null) {
+                if (flag) {// 没有签约单
                     // signDTO.setSignCompanyId((Long) data.get("busCompany"));
                     String tasteProjectId = (String) data.get("tasteProjectId");
                     String[] split = tasteProjectId.split(",");
@@ -284,19 +287,56 @@ public class BusinessSignController {
                     signDTO.setSignType(1);
                     signDTO.setSignShopType("");
                     signDTO.setPayType("1");
-
-                    if(data.get("cusNum")!=null){
+                    if(data.get("cusNum")!=null){ // 首次到访，设置到访人数。如果没有到访记录则认为是首次到访
                         signDTO.setVisitNum((Integer)data.get("cusNum"));// 来访人数
                     }
-                    if(data.get("city")!=null){
-                        signDTO.setVisitCity((String)data.get("city"));// 来访城市
-                    }
-
+                }
+                if(data.get("city")!=null){
+                    signDTO.setVisitCity((String)data.get("city"));// 来访城市
                 }
             }
         }
         signDTO.setRebutReason(null);
         signDTO.setRebutTime(null);
+        return new JSONResult<BusSignRespDTO>().success(signDTO);
+    }
+
+    /**
+     * 添加签约单时，到访记录回显
+     */
+    @RequestMapping("/visitEcho")
+    @ResponseBody
+    public JSONResult<BusSignRespDTO> visitEcho(@RequestBody IdEntityLong idEntityLong)
+            throws Exception {
+        BusSignRespDTO signDTO = new BusSignRespDTO();
+        // 查询需要进行回显的信息，并进行映射
+        // 最新一次的邀约
+        JSONResult<Map> mapJSONResult = visitRecordFeignClient.echoAppoinment(idEntityLong);
+        // 获取客户信息
+        String linkPhone = linkPhone(idEntityLong);
+        // 查询最新一次到访
+        JSONResult<BusVisitRecordRespDTO> maxNewOne =
+                visitRecordFeignClient.findMaxNewOne(idEntityLong);
+        Boolean flag = true;
+        if (JSONResult.SUCCESS.equals(maxNewOne.getCode())) {
+            BusVisitRecordRespDTO data = maxNewOne.getData();
+            if (data != null) {
+                flag = false;
+            }
+        }
+        if (JSONResult.SUCCESS.equals(mapJSONResult.getCode())) {
+            Map data = mapJSONResult.getData();
+            if (data != null) {
+                if (flag) {// 没有签约单
+                    if(data.get("cusNum")!=null){ // 首次到访，设置到访人数。如果没有到访记录则认为是首次到访
+                        signDTO.setVisitNum((Integer)data.get("cusNum"));// 来访人数
+                    }
+                }
+                if(data.get("city")!=null){
+                    signDTO.setVisitCity((String)data.get("city"));// 来访城市
+                }
+            }
+        }
         return new JSONResult<BusSignRespDTO>().success(signDTO);
     }
 
