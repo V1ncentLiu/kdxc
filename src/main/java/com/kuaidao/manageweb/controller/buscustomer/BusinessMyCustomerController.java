@@ -146,7 +146,7 @@ public class BusinessMyCustomerController {
             }
         }
         UserInfoDTO user = CommUtil.getCurLoginUser();
-       // param.setBusSaleId(user.getId());
+        //param.setBusSaleId(user.getId());
         return busMyCustomerFeignClient.queryPageList(param);
     }
 

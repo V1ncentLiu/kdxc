@@ -106,8 +106,14 @@
   		            	<span v-if="index ==0 && item.repeatRatio !=null">
   		            	{{item.repeatRatio}}%
   		            	</span>
-  		            	<span v-if="index !=0 && item.repeatRatio !=null">
+  		            	<span v-else-if="index ==0 && (item.repeatRatio ==null || item.repeatRatio =='')">
+  		            		0%
+  		            	</span>
+  		            	<span v-else-if="index !=0 && item.repeatRatio !=null">
   		            	:&nbsp;{{item.repeatRatio}}%
+  		            	</span>
+  		            	<span v-else-if="index !=0 && (item.repeatRatio ==null || item.repeatRatio =='') ">
+  		            	:&nbsp;0%
   		            	</span>
 		            	</span>
 		            </template>
@@ -832,9 +838,19 @@
                  	this.dialogFormVisiblerepeat = false;
                     axios.post('/tele/clueMyCustomerInfo/officesaveRepeatClue', param)
                     .then(function (response) {
-                       orgVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
-                    	   orgVM.initTableData();  
-        		         }});
+                    	console.log(response);
+                    	if (response.data.code == 0) {
+                    		orgVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
+                         	   
+                         	   orgVM.initTableData();  
+             		         }});
+                    	}else{
+                    		orgVM.$message({
+	                             message: response.data.msg,
+	                             type: 'warning'
+	                           });
+                    	}
+                       
                     }).catch(function (error) {
                         console.log(error);
                     });

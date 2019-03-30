@@ -194,9 +194,9 @@
             <el-form :model="notVisitFlag" ref="notVisitFlag" :rules="notVisitFlagRules">
                 <el-form-item>
                     <!--<el-button type="text" disabled style="color: #1e2746; width:100px; word-wrap:break-word; word-break:normal;">{{notVisitFlag.str}}</el-button>-->
-                    <span style="margin-left: 80px;display:block;color: #1e2746; width:90%; word-wrap:break-word; word-break:normal;">{{notVisitFlag.str}}</span>
+                    <span style="display:block;color: #1e2746; width:100%; word-wrap:break-word; word-break:normal;">{{notVisitFlag.str}}</span>
                 </el-form-item>
-                <el-form-item label="未到访原因" :label-width="formLabelWidth"  prop="notVisitReason" >
+                <el-form-item label="未到访原因" :label-width="formLabelWidth2"  prop="notVisitReason" >
                     <el-input type="textarea" v-model="notVisitFlag.notVisitReason"  maxlength="100" :rows="3" placeholder="请输入内容(限制100字)"></el-input>
                 </el-form-item>
             </el-form>
@@ -266,14 +266,14 @@
                 <el-row :gutter="20">
                     <el-col :span="10">
                         <el-form-item label="签约省份"  :label-width="formLabelWidth"  prop="signProvince"  >
-                            <el-select v-model="addVisitRecord.signProvince" placeholder="请选择"  @change="currentProvince" clearable style="width:100%">
+                            <el-select v-model="addVisitRecord.signProvince" placeholder="请选择"  @change="changeVisitProvince" clearable style="width:100%">
                                 <el-option v-for="item in provinceArr" :key="item.name" :label="item.name" :value="item.name"></el-option>
                             </el-select>
                         </el-form-item>
                     </el-col>
                     <el-col :span="10">
                         <el-form-item label="签约城市"    :label-width="formLabelWidth"  prop="signCity" clearable style="width:100%">
-                            <el-select v-model="addVisitRecord.signCity" placeholder="请选择"  @change="currentCity" style="width:100%">
+                            <el-select v-model="addVisitRecord.signCity" placeholder="请选择"  @change="changeVisitCity" style="width:100%">
                                 <el-option v-for="item in cityArr" :key="item.name" :label="item.name" :value="item.name"></el-option>
                             </el-select>
                         </el-form-item>
@@ -394,14 +394,14 @@
                 <el-row :gutter="20">
                     <el-col :span="10">
                         <el-form-item label="签约省份"  :label-width="formLabelWidth"  prop="signProvince"  >
-                            <el-select v-model="updateVisitRecord.signProvince" placeholder="请选择"  @change="currentProvince" clearable style="width:100%">
+                            <el-select v-model="updateVisitRecord.signProvince" placeholder="请选择"  @change="changeUpdateVisitProvince" clearable style="width:100%">
                                 <el-option v-for="item in provinceArr" :key="item.name" :label="item.name" :value="item.name"></el-option>
                             </el-select>
                         </el-form-item>
                     </el-col>
                     <el-col :span="10">
                         <el-form-item label="签约城市"    :label-width="formLabelWidth"  prop="signCity" clearable >
-                            <el-select v-model="updateVisitRecord.signCity" placeholder="请选择"  @change="currentCity" style="width:100%">
+                            <el-select v-model="updateVisitRecord.signCity" placeholder="请选择"  @change="changeUpdateVisitCity" style="width:100%">
                                 <el-option v-for="item in cityArr" :key="item.name" :label="item.name" :value="item.name"></el-option>
                             </el-select>
                         </el-form-item>
@@ -666,7 +666,7 @@
                     </el-col>
                     <el-col :span="10">
                         <el-form-item label="签约省份：" :label-width="formLabelWidth" prop="signProvince">
-                            <el-select v-model="formSigning.signProvince" placeholder="请选择签约省份" @change="currentProvince" style="width:100%">
+                            <el-select v-model="formSigning.signProvince" placeholder="请选择签约省份" @change="changeSignProvince" style="width:100%">
                                 <el-option v-for="item in provinceArr" :key="item.name" :label="item.name" :value="item.name"></el-option>
                             </el-select>
                         </el-form-item>
@@ -675,7 +675,7 @@
                 <el-row>
                     <el-col :span="10">
                         <el-form-item label="签约城市：" :label-width="formLabelWidth" prop="signCity">
-                            <el-select v-model="formSigning.signCity" placeholder="请选择签约城市："  @change="currentCity" style="width:100%">
+                            <el-select v-model="formSigning.signCity" placeholder="请选择签约城市："  @change="changeSignCity" style="width:100%">
                                 <el-option v-for="item in cityArr" :key="item.name" :label="item.name" :value="item.name"></el-option>
                             </el-select>
                         </el-form-item>
@@ -740,7 +740,7 @@
                 <el-row>
                     <el-col :span="10">
                         <el-form-item label="是否远程签约：" :label-width="formLabelWidth" prop="isRemoteSign">
-                            <el-select v-model="formSigning.isRemoteSign" @change="selectIsRemoteSign" placeholder="请选择是否远程签约：">
+                            <el-select v-model="formSigning.isRemoteSign" placeholder="请选择是否远程签约：">
                                 <el-option
                                         v-for="item in isSignArr"
                                         :key="item.value"
@@ -750,17 +750,17 @@
                             </el-select>
                         </el-form-item>
                     </el-col>
-
                 </el-row>
             </div>
 
-            <div class="paddB20">补充到访记录<i class="el-icon-caret-bottom" @click="suppShow"></i><i class="el-icon-caret-top" @click="suppHide"></i><span style="font-size:14px;color: #ccc;">(若无到访记录可不添写)</span></div>
+            <!--<div class="paddB20">补充到访记录<i class="el-icon-caret-bottom" @click="suppShow"></i><i class="el-icon-caret-top" @click="suppHide"></i><span style="font-size:14px;color: #ccc;">(若无到访记录可不填写)</span></div>-->
+            <el-button v-if="shouAddVisitButton" type="text" @click="suppShow">添加补充到访记录</el-button><el-button v-if="!shouAddVisitButton" type="text" @click="suppHide">取消添加补充到访记录</el-button><span style="font-size:14px;color: #ccc;">(若无到访记录可不填写)</span>
             <div v-if="suppWrap">
                 <el-row>
-                    <el-col :span="10">
+                    <el-col :span="12">
                         <el-form-item label="到访时间：" :label-width="formLabelWidth" prop="visitTime">
                             <el-date-picker
-                                    type="date"
+                                    type="datetime"
                                     format="yyyy-MM-dd HH:mm"
                                     placeholder="选择日期"
                                     v-model="formSigning.visitTime" style="width: 90%;"></el-date-picker>
@@ -774,7 +774,7 @@
                     </el-col>
                 </el-row>
                 <el-row>
-                    <el-col :span="10">
+                    <el-col :span="12">
                         <el-form-item label="到访类型：" :label-width="formLabelWidth"   prop="visitType">
                             <el-select v-model="formSigning.visitType" placeholder="请选择到访类型" style="width:100%">
                                 <el-option
@@ -952,14 +952,14 @@
                 <el-row>
                     <el-col :span="10">
                         <el-form-item label="签约省份：" :label-width="formLabelWidth" prop="signProvince">
-                            <el-select :disabled="notEditRebutSign" v-model="updateFormSigning.signProvince" placeholder="请选择签约省份" @change="currentProvince" style="width:100%;">
+                            <el-select :disabled="notEditRebutSign" v-model="updateFormSigning.signProvince" placeholder="请选择签约省份" @change="changeUpdateSignProvince" style="width:100%;">
                                 <el-option v-for="item in provinceArr" :key="item.name" :label="item.name" :value="item.name"></el-option>
                             </el-select>
                         </el-form-item>
                     </el-col>
                     <el-col :span="10">
                         <el-form-item label="签约城市：" :label-width="formLabelWidth" prop="signCity">
-                            <el-select :disabled="notEditRebutSign" v-model="updateFormSigning.signCity" placeholder="请选择签约城市："  @change="currentCity" style="width:100%;">
+                            <el-select :disabled="notEditRebutSign" v-model="updateFormSigning.signCity" placeholder="请选择签约城市："  @change="changeUpdateSignCity" style="width:100%;">
                                 <el-option v-for="item in cityArr" :key="item.name" :label="item.name" :value="item.name"></el-option>
                             </el-select>
                         </el-form-item>
@@ -1136,6 +1136,7 @@
             editableTabs: [],
             suppWrap: true,
             tabIndex: 2,
+            shouAddVisitButton:false,
             updateVisitRecordDialogVisible:false,
             addVisitRecordDialogVisible:false,
             notVisitdDialogVisible:false,
@@ -1149,6 +1150,7 @@
             payTypeSelect:false,
             notEditRebutSign:false,
             formLabelWidth:"150px",
+            formLabelWidth2:"98px",
             tableData:[],
             visitTableData:[],
             showVisitAduitDatas:{
@@ -1267,7 +1269,7 @@
                 preferentialAmount:'',
                 signType:1,
                 giveAmount:'',
-                isRemoteSign:1,
+                isRemoteSign:'',
 
                 visitTime:"",
                 visitCity:"",
@@ -1350,19 +1352,72 @@
 					{ required: true, message: '请选择签约店型', trigger: 'change' }
 				],
 				amountReceivable: [
-					{ required: true, message: '请输入应收金额', trigger: 'blur' }
+					{ required: true, message: '请输入应收金额', trigger: 'blur' },
+                    { validator:function(rule,value,callback){
+                            var reg =  /^[1-9]+[0-9]*]*$/ ;
+                            if(value ==null || value =="null" || value ==""  ){
+                                callback(new Error("请输入应收金额"));
+                                mainDivVM.formSigning.amountReceivable =null;
+
+                            }else  if(value !=null && value !="null" && value !="" && !reg.test(value) ){
+                                callback(new Error("请输入正整数"));
+                                mainDivVM.formSigning.amountReceivable =null;
+                            }else{
+                                callback();
+                            }
+                        }, trigger: 'change'}
 				],
 				firstToll: [
-					{ required: true, message: '请输入路费（报首次）', trigger: 'blur' }
+					{ required: true, message: '请输入路费（报首次）', trigger: 'blur' },
+                    { validator:function(rule,value,callback){
+                            var reg =  /^[1-9]+[0-9]*]*$/ ;
+                            if(value ==null || value =="null" || value ==""  ){
+                                callback(new Error("请输入路费（报首次）"));
+                                mainDivVM.formSigning.firstToll =null;
+
+                            }else  if(value !=null && value !="null" && value !="" && !reg.test(value) ){
+                                callback(new Error("请输入正整数"));
+                                mainDivVM.formSigning.firstToll =null;
+                            }else{
+                                callback();
+                            }
+                        }, trigger: 'change'}
 				],
 				preferentialAmount: [
-					{ required: true, message: '请输入优惠金额', trigger: 'blur' }
+					{ required: true, message: '请输入优惠金额', trigger: 'blur' },
+                    { validator:function(rule,value,callback){
+                            var reg =  /^[1-9]+[0-9]*]*$/ ;
+                            if(value ==null || value =="null" || value ==""  ){
+                                callback(new Error("请输入优惠金额"));
+                                mainDivVM.formSigning.preferentialAmount =null;
+
+                            }else  if(value !=null && value !="null" && value !="" && !reg.test(value) ){
+                                callback(new Error("请输入正整数"));
+                                mainDivVM.formSigning.preferentialAmount =null;
+                            }else{
+                                callback();
+                            }
+
+                        }, trigger: 'change'}
 				],
 				signType: [
 					{ required: true, message: '请选择签约类型', trigger: 'change' }
 				],
 				giveAmount: [
-					{ required: true, message: '请输入赠送金额', trigger: 'blur' }
+					{ required: true, message: '请输入赠送金额', trigger: 'blur' },
+                    { validator:function(rule,value,callback){
+                            var reg =  /^[1-9]+[0-9]*]*$/ ;
+                            if(value ==null || value =="null" || value ==""  ){
+                                callback(new Error("请输入赠送金额"));
+                                mainDivVM.formSigning.giveAmount =null;
+
+                            }else  if(value !=null && value !="null" && value !="" && !reg.test(value) ){
+                                callback(new Error("请输入正整数"));
+                                mainDivVM.formSigning.giveAmount =null;
+                            }else{
+                                callback();
+                            }
+                        }, trigger: 'change'}
 				],
 				// payType: [
 				// 	{ required: true, message: '请选择付款类型', trigger: 'change' }
@@ -1374,17 +1429,43 @@
 					{ type: 'date', required: true, message: '请选择时间', trigger: 'change' }
 				],
 				amountReceived: [
-					{ required: true, message: '请输入实收金额', trigger: 'blur' }
+					{ required: true, message: '请输入实收金额', trigger: 'blur' },
+                    { validator:function(rule,value,callback){
+                            var reg =  /^[1-9]+[0-9]*]*$/ ;
+                            if(value ==null || value =="null" || value ==""  ){
+                                callback(new Error("请输入实收金额"));
+                                mainDivVM.formSigning.amountReceived =null;
+
+                            }else  if(value !=null && value !="null" && value !="" && !reg.test(value) ){
+                                callback(new Error("请输入正整数"));
+                                mainDivVM.formSigning.amountReceived =null;
+                            }else{
+                                callback();
+                            }
+                        }, trigger: 'change'}
 				],
 				amountBalance: [
-					{ required: true, message: '请输入余款金额', trigger: 'blur' }
+					{ required: true, message: '请输入余款金额', trigger: 'blur' },
+                    { validator:function(rule,value,callback){
+                            var reg =  /^[1-9]+[0-9]*]*$/ ;
+                            if(value ==null || value =="null" || value ==""  ){
+                                callback(new Error("请输入余款金额"));
+                                mainDivVM.formSigning.amountBalance =null;
+
+                            }else  if(value !=null && value !="null" && value !="" && !reg.test(value) ){
+                                callback(new Error("请输入正整数"));
+                                mainDivVM.formSigning.amountBalance =null;
+                            }else{
+                                callback();
+                            }
+                        }, trigger: 'change'}
 				],
 				makeUpTime: [
 					{ type: 'date', required: true, message: '请选择预计余款补齐时间', trigger: 'change' }
 				],
-				// performanceAmount: [
-				// 	{ required: true, message: '请输入业绩金额', trigger: 'blur' }
-				// ],
+				performanceAmount: [
+					{ required: true, message: '请输入业绩金额', trigger: 'blur' }
+				],
                 isRemoteSign: [ //是否远程签约
                     { required: true, message: '请选择是否远程签约', trigger: 'change' }
                 ],
@@ -1401,8 +1482,38 @@
                     { required: true, message: '请选择到访店铺类型', trigger: 'change' }
                 ],
                 visitNum: [ //请填写到访人数
-                    { required: true, message: '请填写到访人数', trigger: 'change' }
-                ]
+                    { required: true, message: '请填写到访人数', trigger: 'change' },
+                    { validator:function(rule,value,callback){
+                            var reg =  /^[1-9]+[0-9]*]*$/ ;
+                            if(value ==null || value =="null" || value ==""  ){
+                                callback(new Error("请填写到访人数"));
+                                mainDivVM.formSigning.visitNum =null;
+
+                            }else  if(value !=null && value !="null" && value !="" && !reg.test(value) ){
+                                callback(new Error("请输入正整数"));
+                                mainDivVM.formSigning.visitNum =null;
+                            }else{
+                                callback();
+                            }
+                        }, trigger: 'change'}
+                ],
+                visitPeopleNum: [ //请填写到访人数
+                     { required: true, message: '请填写到访人数', trigger: 'change' },
+                  	 { validator:function(rule,value,callback){
+                  		 var reg =  /^[1-9]+[0-9]*]*$/ ;
+                  		 if(value ==null || value =="null" || value ==""  ){
+                  			 callback(new Error("请填写到访人数"));
+                  			mainDivVM.addVisitRecord.visitPeopleNum =null;
+
+                  		 }else  if(value !=null && value !="null" && value !="" && !reg.test(value) ){
+                               callback(new Error("请输入正整数"));
+                               mainDivVM.addVisitRecord.visitPeopleNum =null;
+                  		 }else{
+                  			 callback(); 
+                  		 }
+                                                          
+                    }, trigger: 'change'}
+                  ]
 			},
         },
         computed: {
@@ -1502,9 +1613,26 @@
             },
             suppShow(){ //补充到访记录展开
                 this.suppWrap = true;
+                this.shouAddVisitButton = false;
+                var param = {};
+                param.id = vclueId;
+                axios.post('/businesssign/visitEcho',param).then(function (response) {
+                    var echoData = response.data.data;
+                    mainDivVM.formSigning.visitCity = echoData.visitCity;
+                    mainDivVM.formSigning.visitNum=echoData.visitNum;
+                    mainDivVM.formSigning.visitType=1;;
+                    mainDivVM.formSigning.visitTime=new Date();
+                });
             },
             suppHide(){
                 this.suppWrap = false;
+                this.shouAddVisitButton = true;
+                //清空补充到访记录数据
+                this.formSigning.visitCity = '';
+                this.formSigning.visitNum='';
+                this.formSigning.visitShopType='';
+                this.formSigning.visitTime='';
+                this.formSigning.visitType='';
             },
             changePayType(val){
         	    if(val==3){
@@ -1584,6 +1712,48 @@
                 axios.post('/area/sysregion/querySysRegionByParam',param).then(function (response) {
                     mainDivVM.districtArr=response.data.data.data;
                 });
+            },
+
+            changeUpdateVisitProvince(selVal){
+                mainDivVM.updateVisitRecord.signCity = '';
+                mainDivVM.updateVisitRecord.signDistrict='';
+                mainDivVM.districtArr=[]
+                this.currentProvince(selVal);
+            },
+            changeUpdateVisitCity(selVal){
+                mainDivVM.updateVisitRecord.signDistrict='';
+                this. currentCity(selVal);
+            },
+            changeVisitProvince(selVal){
+                mainDivVM.addVisitRecord.signCity = '';
+                mainDivVM.addVisitRecord.signDistrict='';
+                mainDivVM.districtArr=[]
+                this.currentProvince(selVal);
+            },
+            changeVisitCity(selVal){
+                mainDivVM.addVisitRecord.signDistrict=''
+                this. currentCity(selVal);
+            },
+
+            changeUpdateSignProvince(selVal){
+                mainDivVM.updateFormSigning.signCity = '';
+                mainDivVM.updateFormSigning.signDictrict='';
+                mainDivVM.districtArr=[]
+        	    this.currentProvince(selVal);
+            },
+            changeUpdateSignCity(selVal){
+                mainDivVM.updateFormSigning.signDictrict='';
+        	    this. currentCity(selVal);
+            },
+            changeSignProvince(selVal){
+                mainDivVM.formSigning.signCity = '';
+                mainDivVM.formSigning.signDictrict='';
+                mainDivVM.districtArr=[]
+                this.currentProvince(selVal);
+            },
+            changeSignCity(selVal){
+                mainDivVM.formSigning.signDictrict='';
+                this. currentCity(selVal);
             },
             saveVisitRecord(){
                 var param = this.addVisitRecord;
@@ -1683,12 +1853,15 @@
                 }
             },
             openEditVisitRecord(row){
+            	//关闭未到访原因弹窗
+            	this.notVisitdDialogVisible=false;
                // 打开编辑到访记录
                 var param ={};
                 if(row.clueId){
                     param.id = row.clueId;
                 }else{
                     param.id = mainDivVM.notVisitFlag.clueId;
+                    row.clueId = mainDivVM.notVisitFlag.clueId;
                 }
 
 
@@ -1827,6 +2000,7 @@
                 if(!mainDivVM.existsSignMessage()){
                     return false;
                 }
+                this.resetForm('formSigning')
                 var param = this.addVisitRecord;
                 param.rebutTime = new Date(param.rebutTime)
                 param.createTime = new Date(param.createTime)
@@ -1927,6 +2101,8 @@
             editSign(row){
                 // this.formSigning.clueId=row.clueId;
                 // this.dialogFormSigningVisible = true;
+                this.resetForm('formSigning')
+                this.isAllMoney = false;
                 var param = {};
                 param.id = row.clueId;
                 axios.post('/businesssign/echo',param).then(function (response) {
@@ -1938,6 +2114,7 @@
                 //  设置默认时间
                     mainDivVM.formSigning.payTime = new Date()
                     mainDivVM.formSigning.isRemoteSign = 0;
+                    mainDivVM.formSigning.visitTime = new Date();
                 });
             },
             showSignDetail(row){

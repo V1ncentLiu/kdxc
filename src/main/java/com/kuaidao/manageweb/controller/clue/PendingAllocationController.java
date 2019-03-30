@@ -149,6 +149,7 @@ public class PendingAllocationController {
         // 根据用户查询页面字段
         QueryFieldByUserAndMenuReq queryFieldByUserAndMenuReq = new QueryFieldByUserAndMenuReq();
         queryFieldByUserAndMenuReq.setId(user.getId());
+        queryFieldByUserAndMenuReq.setRoleId(user.getRoleList().get(0).getId());
         queryFieldByUserAndMenuReq.setMenuCode("aggregation:pendingAllocationManager");
         JSONResult<List<UserFieldDTO>> queryFieldByUserAndMenu =
                 customFieldFeignClient.queryFieldByUserAndMenu(queryFieldByUserAndMenuReq);

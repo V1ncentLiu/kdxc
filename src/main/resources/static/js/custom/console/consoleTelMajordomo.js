@@ -151,6 +151,8 @@ var mainDivVM = new Vue({
                 var table=result.data;
                 var data= table.data;
                 for(var i=0;i<data.length;i++){
+                	data[i].category=mainDivVM.transformCategory(data[i].category);
+                	data[i].type=mainDivVM.transformType(data[i].type);
                     data[i].createTime=mainDivVM.dateFormat(data[i].createTime);
                     data[i].messageTime=mainDivVM.dateFormat(data[i].messageTime);
                 }
@@ -245,12 +247,12 @@ var mainDivVM = new Vue({
                     .then(function (response) {
                         var data =  response.data;
                         if(data.code=='0'){
-                            clueVM.$message({message:'分配成功',type:'success',duration:1000,onClose:function(){
-                                clueVM.allocationVisible = false;
-                                clueVM.searchTable();
+                            mainDivVM.$message({message:'分配成功',type:'success',duration:1000,onClose:function(){
+                                mainDivVM.allocationVisible = false;
+                                mainDivVM.searchTable();
                             }});
                         }else{
-                            clueVM.$message({
+                            mainDivVM.$message({
                                 message: "接口调用失败",
                                 type: 'error'
                             }); 

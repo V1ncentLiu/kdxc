@@ -443,6 +443,7 @@
 	                       </div>
 	                     </template>
                         </el-table-column>
+                       <!-- 
                         <el-table-column
                           prop="resourceStatus"
                           label="资源有效性"
@@ -456,6 +457,7 @@
 	                       </div>
 	                     </template>
                         </el-table-column>
+                         -->
                         <el-table-column
                           prop="focusPoint"
                           label="客户关注点"
@@ -845,16 +847,28 @@ var ossUrl=[[${ossUrl}]];
                     //     { required: true, message: '客户姓名不能为空', trigger: 'blur' }
                     // ],
                     customerPhone: [
-                        /* { required: true, message: '手机号不能为空', trigger: 'blur' },
-                        { validator:function(rule,value,callback){                 
-                            if(/^[0-9]*$/.test(value) == false){
-                               callback(new Error("请输入数字"));
+                        /* { required: true, message: '手机号不能为空', trigger: 'blur' }, */
+                        { validator:function(rule,value,callback){ 
+                            if(value){
+                                if(/^[0-9]*$/.test(value) == false){
+                                   callback(new Error("请输入数字"));
+                                }else{
+                                   callback();
+                                } 
+                            }                            
+                            callback();
+                        }, trigger: 'blur'}
+                    ],
+                    customerEmail: {
+                        validator:function(rule,value,callback){                 
+                            if(value&&(/^([a-zA-Z0-9_-])+@([a-zA-Z0-9_-])+((\.[a-zA-Z0-9_-]{2,3}){1,2})$/.test(value) == false) ){
+                               callback(new Error("请输入正确的邮箱格式"));
                             }else{
                                callback();
                             } 
                             callback();
-                        }, trigger: 'blur'} */
-                    ]
+                        }, trigger: 'blur'
+                    },
                 },
                 statusOptions: [{
                     value: '0',
@@ -1502,13 +1516,13 @@ var ossUrl=[[${ossUrl}]];
         	   this.form.urgency=customer.urgentDate;
         	   this.form.customerLevel=customer.cusLevel==null?"":customer.cusLevel+"";
         	   this.form.qq=customer.qq;
-        	   this.form.customerEmail=customer.email;
-        	   this.form.cateringType=customer.experience;
-        	   this.form.customerPartnerDetail=customer.partnerNamePhone;
+        	   this.form.customerEmail=customer.email==null?"":customer.email;
+        	   this.form.cateringType=customer.experience==null?"":customer.experience;
+        	   this.form.customerPartnerDetail=customer.partnerNamePhone==null?"":customer.partnerNamePhone;
         	   this.form.sponsor=customer.investors==null?"":customer.investors+"";
-        	   this.form.sponsorOther=customer.investorsNamePhone;
+        	   this.form.sponsorOther=customer.investorsNamePhone==null?"":customer.investorsNamePhone;
         	   this.form.decisionMaker=customer.decide==null?"":customer.decide+"";
-        	   this.form.decisionMakerOther=customer.decideNamePhone;
+        	   this.form.decisionMakerOther=customer.decideNamePhone==null?"":customer.decideNamePhone;
            } 
            if(intention){
         	   this.form.money=intention.advanceAmount==null?"":intention.advanceAmount+"";

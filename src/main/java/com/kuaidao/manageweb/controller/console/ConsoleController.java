@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import com.kuaidao.aggregation.constant.AggregationConstant;
+import com.kuaidao.aggregation.constant.AggregationConstant.DelFlag;
 import com.kuaidao.aggregation.dto.busmycustomer.BusMyCustomerRespDTO;
 import com.kuaidao.aggregation.dto.busmycustomer.MyCustomerParamDTO;
 import com.kuaidao.aggregation.dto.busmycustomer.SignRecordReqDTO;
@@ -189,7 +190,7 @@ public class ConsoleController {
 
         
         
-   /*     if(type.equals("1")) {
+       /*   if(type.equals("1")) {
             path = "console/consoleTelemarketing";
         }else if(type.equals("2")) {
             List<Integer> statusList = new ArrayList<Integer>();
@@ -292,8 +293,8 @@ public class ConsoleController {
         reqDTO.setEndTime(curDate);
         reqDTO.setStartTime(DateUtil.getCurStartDate());
         List<Integer> sourceList = new ArrayList<Integer>();
-        sourceList.add(1);
-        sourceList.add(2);
+        sourceList.add(AggregationConstant.SALE_RECEIVE_SOURCE.SOURCE1);
+        sourceList.add(AggregationConstant.SALE_RECEIVE_SOURCE.SOURCE2);
         reqDTO.setSourceList(sourceList);
         return clueBasicFeignClient.countAssignClueNum(reqDTO);
     }
@@ -315,7 +316,7 @@ public class ConsoleController {
         // reqDTO.setStartTime(DateUtil.getCurStartDate());
         reqDTO.setStartTime(DateUtil.getTodayStartTime());
         List<Integer> sourceList = new ArrayList<Integer>();
-        sourceList.add(3);
+        sourceList.add(AggregationConstant.SALE_RECEIVE_SOURCE.SOURCE3);
         reqDTO.setSourceList(sourceList);
         //type 1：日期字段用电销的
         reqDTO.setType(1);
@@ -359,6 +360,9 @@ public class ConsoleController {
         Date curDate = new Date();
         queryDto.setAssignTimeStart(DateUtil.getStartOrEndOfDay(curDate, LocalTime.MIN));
         queryDto.setAssignTimeEnd(DateUtil.getStartOrEndOfDay(curDate, LocalTime.MAX));
+      /*  queryDto.setTeleSale(33336666L);
+        queryDto.setAssignTimeStart(DateUtil.convert2Date("2019-01-14 00:00:00", DateUtil.ymdhms));
+        queryDto.setAssignTimeEnd(DateUtil.convert2Date("2019-04-14 00:00:00", DateUtil.ymdhms));*/
         return myCustomerFeignClient.listTodayFollowClue(queryDto);
     }
 
@@ -401,8 +405,8 @@ public class ConsoleController {
         reqDTO.setStartTime(DateUtil.getTodayStartTime());
         reqDTO.setType(2);
         List<Integer> teleDirectorSourceList = new ArrayList<>();
-        teleDirectorSourceList.add(2);
-        teleDirectorSourceList.add(3);
+        teleDirectorSourceList.add(AggregationConstant.DIRECTOR_RECEIVE_SOURCE.SOURCE2);
+        teleDirectorSourceList.add(AggregationConstant.DIRECTOR_RECEIVE_SOURCE.SOURCE3);
         reqDTO.setTeleDirectorSourceList(teleDirectorSourceList);
         reqDTO.setPhase(CluePhase.PHAE_3RD.getCode());
         return clueBasicFeignClient.countAssignClueNum(reqDTO);
@@ -425,7 +429,7 @@ public class ConsoleController {
         reqDTO.setStartTime(DateUtil.getTodayStartTime());
         reqDTO.setType(2);
         List<Integer> teleDirectorSourceList = new ArrayList<>();
-        teleDirectorSourceList.add(1);
+        teleDirectorSourceList.add(AggregationConstant.DIRECTOR_RECEIVE_SOURCE.SOURCE1);
         reqDTO.setTeleDirectorSourceList(teleDirectorSourceList);
         return clueBasicFeignClient.countAssignClueNum(reqDTO);
     }
@@ -472,7 +476,7 @@ public class ConsoleController {
 
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
         TeleConsoleReqDTO teleConsoleReqDTO = new TeleConsoleReqDTO();
-        Long id = curLoginUser.getId();
+        Long id = curLoginUser.getOrgId();
         UserOrgRoleReq req = new UserOrgRoleReq();
         req.setOrgId(id);
         req.setRoleCode(RoleCodeEnum.DXCYGW.name());
@@ -577,8 +581,15 @@ public class ConsoleController {
     public JSONResult<BusinessDirectorConsolePanelRespDTO> countBusinessDirectorCurMonthNum(
             @RequestBody BusinessConsoleReqDTO businessConsoleReqDTO) {
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
-        List<Long> accountIdList = new ArrayList<Long>();
-        accountIdList.add(curLoginUser.getId());
+    
+        List<Long> businessGroupIdList = new ArrayList<>();
+        businessGroupIdList.add(curLoginUser.getOrgId());
+        // reqDTO.setBusinessGroupIdList(businessGroupIdList);
+        List<Long> accountIdList =
+                getAccountIdList(curLoginUser.getOrgId(), RoleCodeEnum.SWJL.name());
+        if (CollectionUtils.isEmpty(accountIdList)) {
+            return new JSONResult<BusinessDirectorConsolePanelRespDTO>().success(null);
+        }
         businessConsoleReqDTO.setAccountIdList(accountIdList);
         businessConsoleReqDTO.setBusinessGroupId(curLoginUser.getOrgId());
         Date curDate = new Date();
@@ -599,10 +610,10 @@ public class ConsoleController {
     public JSONResult<Integer> countBusiDirecotorTomorrowArriveTime(
             @RequestBody BusinessConsoleReqDTO businessConsoleReqDTO) {
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
-        Long id = curLoginUser.getId();
+        Long id = curLoginUser.getOrgId();
         UserOrgRoleReq req = new UserOrgRoleReq();
         req.setOrgId(id);
-        req.setRoleCode(RoleCodeEnum.DXCYGW.name());
+        req.setRoleCode(RoleCodeEnum.SWJL.name());
         JSONResult<List<UserInfoDTO>> userInfoJr = userInfoFeignClient.listByOrgAndRole(req);
         if (!JSONResult.SUCCESS.equals(userInfoJr.getCode())) {
             return new JSONResult<Integer>().fail(userInfoJr.getCode(), userInfoJr.getMsg());
@@ -639,6 +650,8 @@ public class ConsoleController {
         if (roleList != null) {
             pageParam.setRoleCode(roleList.get(0).getRoleCode());
         }
+        
+        pageParam.setDelFalg(DelFlag.NOT_DEL);
 
         JSONResult<List<BusPendingAllocationDTO>> pendingAllocationList =
                 pendingVisitFeignClient.pendingVisitListNoPage(pageParam);
@@ -804,8 +817,8 @@ public class ConsoleController {
         }
 
         Date createTime = data.getCreateTime();
-        int diffDay = DateUtil.diffDay(createTime, new Date());
-        return new JSONResult<String>().success(diffDay + "");
+        int diffDay = DateUtil.diffDay(createTime, new Date())+1;
+        return new JSONResult<String>().success(diffDay+"");
 
     }
 

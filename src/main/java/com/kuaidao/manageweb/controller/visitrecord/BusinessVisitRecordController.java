@@ -86,6 +86,7 @@ public class BusinessVisitRecordController {
         }
         UserInfoDTO user = CommUtil.getCurLoginUser();
         dto.setCreateUser(user.getId());
+        dto.setId(null);
         return visitRecordFeignClient.saveVisitRecord(dto);
     }
 
