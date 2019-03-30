@@ -289,9 +289,8 @@
                     </el-form-item>
                 </el-col>
             </el-row>
-
+            <el-button v-if="shouAddVisitButton" type="text" @click="suppShow">添加补充到访记录</el-button><el-button v-if="!shouAddVisitButton" type="text" @click="suppHide">取消添加补充到访记录</el-button><span style="font-size:14px;color: #ccc;">(若无到访记录可不填写)</span>
             <!--<div class="paddB20">补充到访记录<i class="el-icon-caret-bottom" @click="suppShow"></i><i class="el-icon-caret-top" @click="suppHide"></i><span style="font-size:14px;color: #ccc;">(若无到访记录可不填写)</span></div>-->
-            <el-button type="text" @click="suppShow">添加补充到访记录</el-button><i class="el-icon-caret-bottom"></i><i class="el-icon-caret-top" ></i><el-button type="text" @click="suppHide">取消添加补充到访记录</el-button><span style="font-size:14px;color: #ccc;">(若无到访记录可不填写)</span>
             <div v-if="suppWrap">
                 <el-row>
                     <el-col :span="10">
@@ -488,7 +487,7 @@
 
                 <div class="paddB20">
                     <!--补充到访记录<i class="el-icon-caret-bottom" @click="suppShow"></i><i class="el-icon-caret-top" @click="suppHide"></i><span style="font-size:14px;color: #ccc;">(若无到访记录可不填写)</span>-->
-                    <el-button type="text" @click="suppShow">添加补充到访记录</el-button><i class="el-icon-caret-bottom"></i><i class="el-icon-caret-top" ></i><el-button type="text" @click="suppHide">取消添加补充到访记录</el-button><span style="font-size:14px;color: #ccc;">(若无到访记录可不填写)</span>
+                    <el-button v-if="shouAddVisitButton" type="text" @click="suppShow">添加补充到访记录</el-button><el-button v-if="!shouAddVisitButton" type="text" @click="suppHide">取消添加补充到访记录</el-button><span style="font-size:14px;color: #ccc;">(若无到访记录可不填写)</span>
                 </div>
                 <div v-if="suppWrap">
                     <el-row>
@@ -685,6 +684,7 @@
     var mainDivVM = new Vue({
         el: '#businessContractRecord',
         data: {
+            shouAddVisitButton:false,
             dialogFormVisible:false,//弹窗是否显示
             dialogFormSigningVisible:false,//添加签约单
             paymentDetailsShow:one,//判断全款付款明细表格是否显示
@@ -777,9 +777,9 @@
                 // makeUpTime: [
                 //     { type: 'date', required: true, message: '请选择预计余款补齐时间', trigger: 'change' }
                 // ],
-                performanceAmount: [
-                	{ required: true, message: '请输入业绩金额', trigger: 'blur' }
-                ],
+                // performanceAmount: [
+                // 	{ required: true, message: '请输入业绩金额', trigger: 'blur' }
+                // ],
                 isRemoteSign: [ //是否远程签约
                     { required: true, message: '请选择是否远程签约', trigger: 'change' }
                 ],
@@ -948,6 +948,8 @@
                     this.payType='3'
                 }
                 // this.formMoneyDetail={};
+                this.shouAddVisitButton = true;
+                this.suppWrap = false;
                 this.formMoneyDetail.visitTime = new Date();
             },
             payTypeChange(val){
@@ -1028,9 +1030,11 @@
             },
             suppShow(){ //补充到访记录展开
                 this.suppWrap = true;
+                this.shouAddVisitButton = false;
             },
             suppHide(){
                 this.suppWrap = false;
+                this.shouAddVisitButton = true;
             },
             submitForm(formName) {
                 var param = this.formSigning;
