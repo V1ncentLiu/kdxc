@@ -454,11 +454,11 @@
                                                 :value="item.value"></el-option>
                                     </el-select>
                                 </el-form-item>
-                                <el-form-item label=""
-                                              size="mini">
+                                <el-form-item label="" size="mini" prop="customerStatusSub">
                                     <el-select
                                             v-model="formInline.customerStatusSub" placeholder="客户状态"
-                                            :disabled="substatus">
+                                            :disabled="substatus"
+                                            :required="customerStatusRequired">
                                         <el-option v-for="item in customerStatusSubArr" :key="item.value"
                                                    :label="item.name" :value="item.value"></el-option>
                                     </el-select>
@@ -915,6 +915,7 @@
         el: '#addCustomer',
         data: function () {
             return {
+                customerStatusRequired:false,
                 isShowTip: false,//是否显示释放公有池提示信息
                 isShowBtn: false,//是否显示保留客户按钮
                 radio: '1',
@@ -1015,6 +1016,27 @@
                     callTime: [
                         {required: true, message: '请选择拨打时间', trigger: 'change'}
                     ],
+                    // customerStatusSub: [
+                    //     {required: true, message: '请选择客户状态', trigger: 'change'}
+                    // ],
+                    customerStatusSub: {
+                        validator: function (rule, value, callback) {
+                            console.log(value);
+                            console.log(value);
+                            if(!addCustomerVM.substatus){//客户状态是否可选，false表示可选
+                                if (!value) {
+                                    addCustomerVM.customerStatusRequired=true //验证启用
+                                    callback(new Error("请选择客户状态"));
+                                } else {
+                                    callback();
+                                }                            
+                            }else{
+                                addCustomerVM.customerStatusRequired=false //验证不启用
+                                callback();
+                            }
+                            callback();
+                        }, trigger: 'change'
+                    },
                     focusPoint: [
                         {required: true, message: '请填写客户关注点', trigger: 'blur'}
                     ],
@@ -1459,39 +1481,145 @@
                        }else{
                            param.nextVisitTime=this.formInline.nextVisitTime; 
                        }
-                       param.customerStatusSub=this.formInline.customerStatusSub;
-                       this.addBtnDisabled=true;
-                       //如果是编辑跟进记录
-                       if( isEdit){
-                           param.id=this.formInline.id;
-                      	 axios.post('/tele/clueMyCustomerInfo/updateClueTracking',param)
-                           .then(function (response) {
-                         	  addCustomerVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
-                         	    axios.post('/tele/clueMyCustomerInfo/findClueTracking',param)
-                              .then(function (response) {
-                            	  isEdit=false;
-                            	 addCustomerVM.lineFormShow=false;
-                            	 addCustomerVM.addBtnDisabled=false;
-                              	addCustomerVM.tableDataC2=response.data.data;
-                               }); 
-              	          }}); 	 
-                           });
-                       }else{
-                      	 //如果是新增跟进记录
-                           axios.post('/tele/clueMyCustomerInfo/saveClueTracking',param)
-                           .then(function (response) {
-                         	  addCustomerVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
-                         	    axios.post('/tele/clueMyCustomerInfo/findClueTracking',param)
-                              .then(function (response) {
-                              	addCustomerVM.lineFormShow=false;
-                           	     addCustomerVM.addBtnDisabled=false;
-                              	 addCustomerVM.tableDataC2=response.data.data;
-                              	 //新增
-                              	 _this.$refs['LineRuleForm'].resetFields();
-                               }); 
-              	          }}); 
-                         }); 
+
+                       if(this.formInline.customerStatus=='3'){//如果选择的是不跟进在传此字段
+                            param.customerStatusSub=this.formInline.customerStatusSub;
                        }
+                       
+                       this.addBtnDisabled=true;
+                       if(param.customerStatus=='3'&&param.customerStatusSub=='1'){
+                    	      this.$confirm("客户至不跟进空号将释放废弃池，我的客户列表将消失", '提示', {
+                                  confirmButtonText: '确定',
+                                  cancelButtonText: '取消',
+                                  type: 'warning'
+                              }).then(() => {
+                                  //如果是编辑跟进记录
+                                  if( isEdit){
+                                      param.id=this.formInline.id;
+                                 	 axios.post('/tele/clueMyCustomerInfo/updateClueTracking',param)
+                                      .then(function (response) {
+                                    	  addCustomerVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
+                                    	    axios.post('/tele/clueMyCustomerInfo/findClueTracking',param)
+                                         .then(function (response) {
+                                       	  isEdit=false;
+                                       	  addCustomerVM.lineFormShow=false;
+                                       	  addCustomerVM.addBtnDisabled=false;
+                                          addCustomerVM.tableDataC2=response.data.data;
+                                          window.location.href = "/tele/clueMyCustomerInfo/initmyCustomer";
+                                          }); 
+                         	          }}); 	 
+                                      });
+                                  }else{
+                                 	 //如果是新增跟进记录
+                                      axios.post('/tele/clueMyCustomerInfo/saveClueTracking',param)
+                                      .then(function (response) {
+                                    	  addCustomerVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
+                                    	    axios.post('/tele/clueMyCustomerInfo/findClueTracking',param)
+                                         .then(function (response) {
+                                         	addCustomerVM.lineFormShow=false;
+                                      	     addCustomerVM.addBtnDisabled=false;
+                                         	 addCustomerVM.tableDataC2=response.data.data;
+                                             window.location.href = "/tele/clueMyCustomerInfo/initmyCustomer";
+                                         	 //新增
+                                         	 _this.$refs['LineRuleForm'].resetFields();
+                                          }); 
+                         	          }}); 
+                                    }); 
+                                }
+                            	//end
+                              }).catch(() => {
+                                  this.$message({
+                                      type: 'info',
+                                      message: '已取消删除'
+                                  });          
+                              });
+                    	   
+                    	   
+                    	   
+                    	   
+                       }else if(param.customerStatus=='3'){
+                    	   this.$confirm("客户至不跟进空号将释放公有池，我的客户列表将消失", '提示', {
+                               confirmButtonText: '确定',
+                               cancelButtonText: '取消',
+                               type: 'warning'
+                           }).then(() => {
+                         	  
+                               //如果是编辑跟进记录
+                               if( isEdit){
+                                   param.id=this.formInline.id;
+                              	 axios.post('/tele/clueMyCustomerInfo/updateClueTracking',param)
+                                   .then(function (response) {
+                                 	  addCustomerVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
+                                 	    axios.post('/tele/clueMyCustomerInfo/findClueTracking',param)
+                                      .then(function (response) {
+                                    	  isEdit=false;
+                                    	 addCustomerVM.lineFormShow=false;
+                                    	 addCustomerVM.addBtnDisabled=false;
+                                       	addCustomerVM.tableDataC2=response.data.data;
+                                        window.location.href = "/tele/clueMyCustomerInfo/initmyCustomer";
+                                       }); 
+                      	          }}); 	 
+                                   });
+                               }else{
+                              	 //如果是新增跟进记录
+                                   axios.post('/tele/clueMyCustomerInfo/saveClueTracking',param)
+                                   .then(function (response) {
+                                 	  addCustomerVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
+                                 	    axios.post('/tele/clueMyCustomerInfo/findClueTracking',param)
+                                      .then(function (response) {
+                                      	addCustomerVM.lineFormShow=false;
+                                   	     addCustomerVM.addBtnDisabled=false;
+                                      	 addCustomerVM.tableDataC2=response.data.data;
+                                      	 //新增
+                                      	 _this.$refs['LineRuleForm'].resetFields();
+                                         window.location.href = "/tele/clueMyCustomerInfo/initmyCustomer";
+
+                                       }); 
+                      	          }}); 
+                                 }); 
+                               }   
+                         	//end
+                        	   
+                           }).catch(() => {
+                               this.$message({
+                                   type: 'info',
+                                   message: '已取消删除'
+                               });          
+                           });
+                    	   
+                       }else{
+                           //如果是编辑跟进记录
+                           if( isEdit){
+                               param.id=this.formInline.id;
+                          	 axios.post('/tele/clueMyCustomerInfo/updateClueTracking',param)
+                               .then(function (response) {
+                             	  addCustomerVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
+                             	    axios.post('/tele/clueMyCustomerInfo/findClueTracking',param)
+                                  .then(function (response) {
+                                	  isEdit=false;
+                                	 addCustomerVM.lineFormShow=false;
+                                	 addCustomerVM.addBtnDisabled=false;
+                                  	addCustomerVM.tableDataC2=response.data.data;
+                                   }); 
+                  	          }}); 	 
+                               });
+                           }else{
+                          	 //如果是新增跟进记录
+                               axios.post('/tele/clueMyCustomerInfo/saveClueTracking',param)
+                               .then(function (response) {
+                             	  addCustomerVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
+                             	    axios.post('/tele/clueMyCustomerInfo/findClueTracking',param)
+                                  .then(function (response) {
+                                  	addCustomerVM.lineFormShow=false;
+                               	     addCustomerVM.addBtnDisabled=false;
+                                  	 addCustomerVM.tableDataC2=response.data.data;
+                                  	 //新增
+                                  	 _this.$refs['LineRuleForm'].resetFields();
+                                   }); 
+                  	          }}); 
+                             }); 
+                           }   
+                         }
                      	//end
                    } else {
                      console.log('error submit!!');
