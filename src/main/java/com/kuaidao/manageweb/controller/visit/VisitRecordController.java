@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+import com.kuaidao.aggregation.constant.AggregationConstant;
 import com.kuaidao.aggregation.dto.project.ProjectInfoDTO;
 import com.kuaidao.aggregation.dto.visitrecord.RejectVisitRecordReqDTO;
 import com.kuaidao.aggregation.dto.visitrecord.VisitNoRecordReqDTO;
@@ -278,26 +279,36 @@ public class VisitRecordController {
     @ResponseBody
     public JSONResult<PageBean<VisitNoRecordRespDTO>> listNoVisitRecord(
             @RequestBody VisitNoRecordReqDTO visitNoRecordReqDTO) {
-        // handleReqParam(visitRecordReqDTO);
-
+        // 获取当前账号角色 机构信息
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
         Long orgId = curLoginUser.getOrgId();
         List<RoleInfoDTO> roleList = curLoginUser.getRoleList();
         RoleInfoDTO roleInfoDTO = roleList.get(0);
-        String roleName = roleInfoDTO.getRoleName();
-        if (RoleCodeEnum.SWDQZJ.value().equals(roleName)
-                || RoleCodeEnum.SWZJ.value().equals(roleName)) {
-            // Long busManagerId = visitNoRecordReqDTO.getBusManagerId();
-            List<Long> accountIdList = getAccountIdList(orgId, RoleCodeEnum.SWJL.name());
-            if (CollectionUtils.isEmpty(accountIdList)) {
+        String roleCode = roleInfoDTO.getRoleCode();
+        List<Long> busGroupIdList = new ArrayList<Long>();
+
+        if (RoleCodeEnum.SWDQZJ.name().equals(roleCode)) {
+            // 查询下级所有商务组
+            OrganizationQueryDTO queryDTO = new OrganizationQueryDTO();
+            queryDTO.setParentId(orgId);
+            queryDTO.setOrgType(OrgTypeConstant.SWZ);
+            JSONResult<List<OrganizationRespDTO>> queryOrgByParam =
+                    organizationFeignClient.queryOrgByParam(queryDTO);
+            List<OrganizationRespDTO> data = queryOrgByParam.getData();
+            if (CollectionUtils.isEmpty(data)) {
                 return new JSONResult().fail(SysErrorCodeEnum.ERR_NOTEXISTS_DATA.getCode(),
                         "该用户下没有下属");
             }
-            visitNoRecordReqDTO.setBusManagerIdList(accountIdList);
-
+            for (OrganizationRespDTO organizationRespDTO : data) {
+                busGroupIdList.add(organizationRespDTO.getId());
+            }
+        } else if (RoleCodeEnum.SWZJ.name().equals(roleCode)) {
+            busGroupIdList.add(orgId);
+        } else if (RoleCodeEnum.GLY.name().equals(roleCode)) {
         } else {
             return new JSONResult().fail(SysErrorCodeEnum.ERR_NOTEXISTS_DATA.getCode(), "角色没有权限");
         }
+        visitNoRecordReqDTO.setBusGroupIdList(busGroupIdList);
 
         logger.info("listVisitRecord,curLoginUser{{}},reqParam{{}}", curLoginUser,
                 visitNoRecordReqDTO);
@@ -376,7 +387,7 @@ public class VisitRecordController {
         if (result.hasErrors()) {
             return CommonUtil.validateParam(result);
         }
-        reqDTO.setStatus(0);
+        reqDTO.setStatus(AggregationConstant.VISIT_RECORD_STATUS.REJECT);
         return visitRecordFeignClient.rejectVisitRecord(reqDTO);
     }
 
@@ -395,8 +406,9 @@ public class VisitRecordController {
         if (result.hasErrors()) {
             return CommonUtil.validateParam(result);
         }
-        reqDTO.setStatus(2);
+        reqDTO.setStatus(AggregationConstant.VISIT_RECORD_STATUS.PASS);
 
         return visitRecordFeignClient.rejectVisitRecord(reqDTO);
     }
+
 }
