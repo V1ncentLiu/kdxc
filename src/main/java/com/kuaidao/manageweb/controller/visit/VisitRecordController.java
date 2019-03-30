@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+import com.kuaidao.aggregation.constant.AggregationConstant;
 import com.kuaidao.aggregation.dto.project.ProjectInfoDTO;
 import com.kuaidao.aggregation.dto.visitrecord.RejectVisitRecordReqDTO;
 import com.kuaidao.aggregation.dto.visitrecord.VisitNoRecordReqDTO;
@@ -386,7 +387,7 @@ public class VisitRecordController {
         if (result.hasErrors()) {
             return CommonUtil.validateParam(result);
         }
-        reqDTO.setStatus(0);
+        reqDTO.setStatus(AggregationConstant.VISIT_RECORD_STATUS.REJECT);
         return visitRecordFeignClient.rejectVisitRecord(reqDTO);
     }
 
@@ -405,7 +406,7 @@ public class VisitRecordController {
         if (result.hasErrors()) {
             return CommonUtil.validateParam(result);
         }
-        reqDTO.setStatus(2);
+        reqDTO.setStatus(AggregationConstant.VISIT_RECORD_STATUS.PASS);
 
         return visitRecordFeignClient.rejectVisitRecord(reqDTO);
     }
