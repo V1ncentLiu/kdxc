@@ -213,7 +213,13 @@ var myCallRecordVm = new Vue({
                 	 if(url){
                 		 var fileName = url.split('?')[0];
                 		 var fileNameArr= fileName.split("/");
-                		 download(url,fileNameArr[fileNameArr.length-1],'audio/*');
+                		 //download(url,fileNameArr[fileNameArr.length-1],'audio/*');
+                		 
+                		var x=new XMLHttpRequest();
+            			x.open("GET", url, true);
+            			x.responseType = 'blob';
+            			x.onload=function(e){download(x.response, fileNameArr[fileNameArr.length-1], 'audio/*' ); }
+            			x.send();
                 	 }
                      
                  }else{

@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+
+import com.kuaidao.aggregation.constant.AggregationConstant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -113,6 +115,7 @@ public class BusinessVisitRecordController {
     @ResponseBody
     public JSONResult<List<BusVisitRecordRespDTO>> queryList(@RequestBody BusVisitRecordReqDTO dto)
             throws Exception {
+        dto.setIsVisit(AggregationConstant.YES);
         return visitRecordFeignClient.queryList(dto);
     }
 
