@@ -300,6 +300,7 @@ public class BusinessSignController {
         signDTO.setIsRemoteSign(0);
         signDTO.setPayTime(new Date());
         signDTO.setVisitTime(new Date());
+        signDTO.setVisitType(1);
         signDTO.setRebutReason(null);
         signDTO.setRebutTime(null);
         return new JSONResult<BusSignRespDTO>().success(signDTO);

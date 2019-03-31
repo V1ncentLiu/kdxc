@@ -223,7 +223,7 @@
     <!--添加到访记录-->
     <el-dialog title="添加到访记录" :visible.sync="addVisitRecordDialogVisible"  width="70%">
         <template>
-            <el-form :model="addVisitRecord" ref="addVisitRecord" :rules="rules">
+            <el-form :model="addVisitRecord" ref="addVisitRecord" :rules="rulesVisit">
                 <el-row :gutter="20">
                     <el-col :span="10">
                         <el-form-item label="考察公司"  :label-width="formLabelWidth"  prop="companyid">
@@ -1335,8 +1335,7 @@
                 currentPage: 1,
                 pageSize: 20,
             },
-            //rules
-            rules: {
+            rulesVisit:{
                 companyid:[
                     { required: true, message: '请选择考察公司', trigger: 'change' }
                 ],
@@ -1349,12 +1348,47 @@
                 vistitStoreType:[
                     { required: true, message: '请选择到访店铺类型', trigger: 'change' }
                 ],
-                signDistrict:[
-                    { required: true, message: '请选择签约区/县', trigger: 'change' }
-                ],
                 isSign:[
                     { required: true, message: '请选择是否签约', trigger: 'change' }
                 ],
+                signProvince: [
+                    { required: true, message: '请选择签约省份', trigger: 'change' }
+                ],
+                signDistrict:[
+                    { required: true, message: '请选择签约区/县', trigger: 'change' }
+                ],
+                customerName: [
+                    { required: true, message: '请输入客户姓名', trigger: 'blur' }
+                ],
+                signCity: [
+                    { required: true, message: '请选择签约城市', trigger: 'change' }
+                ],
+                visitCity: [ //请填写来访城市
+                    { required: true, message: '请填写来访城市', trigger: 'change' }
+                ],
+                signShopType: [
+                    { required: true, message: '请选择签约店型', trigger: 'change' }
+                ],
+                visitPeopleNum: [ //请填写到访人数
+                    { required: true, message: '请填写到访人数', trigger: 'blur' },
+                    { validator:function(rule,value,callback){
+                            var reg =  /^[1-9]+[0-9]*]*$/ ;
+                            if(value ==null || value =="null" || value ==""  ){
+                                callback(new Error("请填写到访人数"));
+                                mainDivVM.addVisitRecord.visitPeopleNum =null;
+
+                            }else  if(value !=null && value !="null" && value !="" && !reg.test(value) ){
+                                callback(new Error("请输入正整数"));
+                                mainDivVM.addVisitRecord.visitPeopleNum =null;
+                            }else{
+                                callback();
+                            }
+
+                        }, trigger: 'change'}
+                ]
+            },
+            rules: {
+
             	customerName: [
 				    { required: true, message: '请输入客户姓名', trigger: 'blur' }
 				],
@@ -1373,12 +1407,12 @@
 				signProvince: [
 					{ required: true, message: '请选择签约省份', trigger: 'change' }
 				],
-				signCity: [
-					{ required: true, message: '请选择签约城市', trigger: 'change' }
-				],
 				signDictrict: [
 					{ required: true, message: '请选择签约区/县', trigger: 'change' }
 				],
+                signCity: [
+                    { required: true, message: '请选择签约城市', trigger: 'change' }
+                ],
 				signShopType: [
 					{ required: true, message: '请选择签约店型', trigger: 'change' }
 				],
@@ -1490,9 +1524,9 @@
                             }
                         }, trigger: 'change'}
 				],
-				makeUpTime: [
-					{ type: 'date', required: true, message: '请选择预计余款补齐时间', trigger: 'change' }
-				],
+				// makeUpTime: [
+				// 	{ type: 'date', required: true, message: '请选择预计余款补齐时间', trigger: 'change' }
+				// ],
 				performanceAmount: [
 					{ required: true, message: '请输入业绩金额', trigger: 'blur' }
 				],
@@ -1645,7 +1679,7 @@
                 this.suppWrap = true;
                 this.shouAddVisitButton = false;
                 var param = {};
-                param.id = vclueId;
+                param.id = mainDivVM.formSigning.clueId;
                 axios.post('/businesssign/visitEcho',param).then(function (response) {
                     var echoData = response.data.data;
                     mainDivVM.formSigning.visitCity = echoData.visitCity;
@@ -2239,6 +2273,8 @@
 
             submitForm(formName) {
                 var param = this.formSigning;
+                this.formSigning.visitTime = new Date( this.formSigning.visitTime);
+                this.formSigning.payTime = new Date( this.formSigning.payTime);
                 param.amountPerformance = this.formSigningAmountPerformance;
                 // 设置 clueid
                 this.$refs[formName].validate((valid) => {
