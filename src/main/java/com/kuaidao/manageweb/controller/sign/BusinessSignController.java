@@ -1,6 +1,7 @@
 package com.kuaidao.manageweb.controller.sign;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
@@ -296,6 +297,9 @@ public class BusinessSignController {
                 }
             }
         }
+        signDTO.setIsRemoteSign(0);
+        signDTO.setPayTime(new Date());
+        signDTO.setVisitTime(new Date());
         signDTO.setRebutReason(null);
         signDTO.setRebutTime(null);
         return new JSONResult<BusSignRespDTO>().success(signDTO);
