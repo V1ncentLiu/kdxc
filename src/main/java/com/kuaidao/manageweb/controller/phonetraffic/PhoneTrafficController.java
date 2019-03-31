@@ -461,6 +461,10 @@ public class PhoneTrafficController {
         return resList;
     }
 
+    /**
+     * 查询非禁用账户
+     * @return
+     */
     private List<UserInfoDTO> phTrafficList(){
         RoleQueryDTO query = new RoleQueryDTO();
         query.setRoleCode(RoleCodeEnum.HWY.name());
@@ -473,6 +477,7 @@ public class PhoneTrafficController {
                 RoleInfoDTO roleDto = roleList.get(0);
                 UserInfoPageParam param = new UserInfoPageParam();
 //                param.setRoleId(roleDto.getId());  // 查询该组织下，该角色的全部员工。去掉就是查询全部该组织下的员工
+                param.setStatus(1); // 启用
                 param.setOrgId(user.getOrgId());
                 param.setPageSize(10000);
                 param.setPageNum(1);
@@ -480,6 +485,21 @@ public class PhoneTrafficController {
                 if (JSONResult.SUCCESS.equals(userListJson.getCode())) {
                     PageBean<UserInfoDTO> pageList = userListJson.getData();
                     userList = pageList.getData();
+                }
+
+                UserInfoPageParam param1 = new UserInfoPageParam();
+//                param1.setRoleId(roleDto.getId());  // 查询该组织下，该角色的全部员工。去掉就是查询全部该组织下的员工
+                param1.setStatus(3); // 锁定
+                param1.setOrgId(user.getOrgId());
+                param1.setPageSize(10000);
+                param1.setPageNum(1);
+                JSONResult<PageBean<UserInfoDTO>> userList3Json = userInfoFeignClient.list(param1);
+                if (JSONResult.SUCCESS.equals(userList3Json.getCode())) {
+                    PageBean<UserInfoDTO> page3List = userList3Json.getData();
+                    List<UserInfoDTO> data = page3List.getData();
+                    if(data!=null&&data.size()>0){
+                        userList.addAll(data);
+                    }
                 }
             }
         }
