@@ -110,11 +110,24 @@
             <el-table-column  prop="allocateTime" label="接收客户时间" sortable align="center" width="142px"></el-table-column>
             <el-table-column  prop="" label="到访情况" :formatter="formatVisit" align="center" width="130">
                 <template slot-scope="scope">
-                    <el-button size="mini"  v-if="scope.row.visitStatus == -1||scope.row.visitStatus == null" type="text" @click="openEditVisitRecord(scope.row)">添加到访记录</el-button>
-                    <el-button size="mini"  v-else-if="scope.row.visitStatus==0" type="text" @click="showNotVisitReason(scope.row)">未到访(原因)</el-button>
-                    <el-button size="mini"  v-else-if="scope.row.visitAuditStatus==1" type="text" @click="showVisitRecord(scope.row)">到访审核中</el-button>
-                    <el-button size="mini"  v-else-if="scope.row.visitAuditStatus==0" type="text" style="color: red" @click="editRebutVisitRecord(scope.row)">到访被驳回</el-button>
-                    <el-button size="mini"  v-else-if="scope.row.visitAuditStatus==2" type="text" @click="toVisitRecordPage(scope.row)">查看到访记录</el-button>
+                    <!--<el-button size="mini"  v-if="(scope.row.visitStatus == -1||scope.row.visitStatus == null)&&scope.row.visitAuditStatus==null" type="text" @click="openEditVisitRecord(scope.row)">添加到访记录</el-button>-->
+                    <el-button size="mini"  v-if="scope.row.visitList.length==0" type="text" @click="openEditVisitRecord(scope.row)">添加到访记录</el-button>
+                    <div  v-else-if="scope.row.visitList.length==1"  v-for="item in scope.row.visitList ">
+                        <!--<el-button size="mini"  v-if="scope.row.visitStatus==0" type="text" @click="showNotVisitReason(scope.row)">未到访(原因)</el-button>-->
+                        <el-button size="mini"  v-if="item.isVisit==0&&item.status==1" type="text" @click="showNotVisitReason(item)">未到访(审核中)</el-button>
+                        <el-button size="mini"  v-else-if="item.isVisit==0&&item.status==2" type="text" style="color: red" @click="showNotVisitReason(item)">未到访</el-button>
+                        <el-button size="mini"  v-else-if="item.isVisit==0&&item.status==0" type="text" @click="openEditVisitRecord(item)">添加到访记录</el-button>
+                        <el-button size="mini"  v-else-if="item.isVisit==1&&item.status==1" type="text" @click="showVisitRecord(item)">审核中</el-button>
+                        <el-button size="mini"  v-else-if="item.isVisit==1&&item.status==0" type="text" style="color: red" @click="editRebutVisitRecord(item)">到访被驳回</el-button>
+                        <el-button size="mini"  v-else-if="item.isVisit==1&&item.status==2" type="text" @click="toVisitRecordPage(item )">查看到访记录</el-button>
+                    </div>
+                    <div  v-else-if="scope.row.visitList.length>1"   v-for="item in scope.row.visitList ">
+                        <el-button size="mini"  v-if="item.isVisit==0&&item.status==1" type="text" @click="showNotVisitReason(item)">未到访(审核中)</el-button>
+                        <el-button size="mini"  v-else-if="item.isVisit==0&&item.status==2" type="text" style="color: red" @click="showNotVisitReason(item)">未到访</el-button>
+                        <el-button size="mini"  v-else-if="item.isVisit==1&&item.status==1" type="text" @click="showVisitRecord(item)">审核中</el-button>
+                        <el-button size="mini"  v-else-if="item.isVisit==1&&item.status==0" type="text" style="color: red" @click="editRebutVisitRecord(item)">到访被驳回</el-button>
+                        <el-button size="mini"  v-else-if="item.isVisit==1&&item.status==2" type="text" @click="toVisitRecordPage(item )">查看到访记录</el-button>
+                    </div>
                 </template>
             </el-table-column>
             <el-table-column  prop="status" label="签约明细" align="center" width="280">
@@ -853,7 +866,7 @@
                 <el-row v-if="isAllMoney" >
                     <el-col :span="10">
                         <el-form-item label="余款金额：" :label-width="formLabelWidth" prop="amountBalance">
-                            <el-input maxLength="10" v-model="formSigning.amountBalance" min="0" type="number" oninput="if(value.length>10)value=value.slice(0,10)"  onkeypress="return(/[\d]/.test(String.fromCharCode(event.keyCode)))" style="width: 80%;"></el-input>
+                            <el-input maxLength="10" v-model="formSigning.amountBalance" min="0" type="number" oninput="if(value.length>10)value=value.slice(0,10)"   style="width: 80%;"></el-input>
                             <span style="padding-left: 10px;">元</span>
                         </el-form-item>
                     </el-col>
@@ -1324,6 +1337,24 @@
             },
             //rules
             rules: {
+                companyid:[
+                    { required: true, message: '请选择考察公司', trigger: 'change' }
+                ],
+                vistitTime:[
+                    { required: true, message: '请选择到访时间', trigger: 'change' }
+                ],
+                projectId:[
+                    { required: true, message: '请选择考察项目', trigger: 'change' }
+                ],
+                vistitStoreType:[
+                    { required: true, message: '请选择到访店铺类型', trigger: 'change' }
+                ],
+                signDistrict:[
+                    { required: true, message: '请选择签约区/县', trigger: 'change' }
+                ],
+                isSign:[
+                    { required: true, message: '请选择是否签约', trigger: 'change' }
+                ],
             	customerName: [
 				    { required: true, message: '请输入客户姓名', trigger: 'blur' }
 				],
@@ -1445,8 +1476,7 @@
                         }, trigger: 'change'}
 				],
 				amountBalance: [
-					{ required: true, message: '请输入余款金额', trigger: 'blur' },
-                    { validator:function(rule,value,callback){
+                    {required: true, validator:function(rule,value,callback){
                             var reg =  /^[1-9]+[0-9]*]*$/ ;
                             if(value ==null || value =="null" || value ==""  ){
                                 callback(new Error("请输入余款金额"));
@@ -1482,7 +1512,7 @@
                     { required: true, message: '请选择到访店铺类型', trigger: 'change' }
                 ],
                 visitNum: [ //请填写到访人数
-                    { required: true, message: '请填写到访人数', trigger: 'change' },
+                    { required: true, message: '请填写到访人数', trigger: 'blur' },
                     { validator:function(rule,value,callback){
                             var reg =  /^[1-9]+[0-9]*]*$/ ;
                             if(value ==null || value =="null" || value ==""  ){
@@ -1498,7 +1528,7 @@
                         }, trigger: 'change'}
                 ],
                 visitPeopleNum: [ //请填写到访人数
-                     { required: true, message: '请填写到访人数', trigger: 'change' },
+                     { required: true, message: '请填写到访人数', trigger: 'blur' },
                   	 { validator:function(rule,value,callback){
                   		 var reg =  /^[1-9]+[0-9]*]*$/ ;
                   		 if(value ==null || value =="null" || value ==""  ){
@@ -1856,6 +1886,7 @@
             	//关闭未到访原因弹窗
             	this.notVisitdDialogVisible=false;
                // 打开编辑到访记录
+                this.resetForm('addVisitRecord')
                 var param ={};
                 if(row.clueId){
                     param.id = row.clueId;
@@ -2112,9 +2143,9 @@
                     mainDivVM.currentProvince(mainDivVM.formSigning.signProvince)
                     mainDivVM.currentCity(mainDivVM.formSigning.signCity)
                 //  设置默认时间
-                    mainDivVM.formSigning.payTime = new Date()
-                    mainDivVM.formSigning.isRemoteSign = 0;
-                    mainDivVM.formSigning.visitTime = new Date();
+                //     mainDivVM.formSigning.payTime = new Date()
+                //     mainDivVM.formSigning.isRemoteSign = 0;
+                //     mainDivVM.formSigning.visitTime = new Date();
                 });
             },
             showSignDetail(row){

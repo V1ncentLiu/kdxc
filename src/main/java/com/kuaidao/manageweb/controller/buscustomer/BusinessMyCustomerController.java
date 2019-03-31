@@ -61,7 +61,7 @@ public class BusinessMyCustomerController {
         List tasteProList = new ArrayList();
         Map tasteMap = new HashMap();
         MyCustomerParamDTO dto = new MyCustomerParamDTO();
-       // dto.setBusSaleId(user.getId());
+        dto.setBusSaleId(user.getId());
         JSONResult<List<BusMyCustomerRespDTO>> resList = busMyCustomerFeignClient.queryList(dto);
         if (JSONResult.SUCCESS.equals(resList.getCode())) {
             List<BusMyCustomerRespDTO> datas = resList.getData();
@@ -146,7 +146,10 @@ public class BusinessMyCustomerController {
             }
         }
         UserInfoDTO user = CommUtil.getCurLoginUser();
-        //param.setBusSaleId(user.getId());
+        /**
+         * 下回代码注释掉，请记得给我改回来
+         */
+        param.setBusSaleId(user.getId());
         return busMyCustomerFeignClient.queryPageList(param);
     }
 

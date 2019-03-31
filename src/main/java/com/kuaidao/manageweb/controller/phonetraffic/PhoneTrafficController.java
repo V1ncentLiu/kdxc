@@ -131,14 +131,14 @@ public class PhoneTrafficController {
         // 根据用户查询页面字段
         QueryFieldByUserAndMenuReq queryFieldByUserAndMenuReq = new QueryFieldByUserAndMenuReq();
         queryFieldByUserAndMenuReq.setId(user.getId());
-        queryFieldByUserAndMenuReq.setMenuCode("aggregation:appiontmentManager");
+        queryFieldByUserAndMenuReq.setMenuCode("aggregation:PhoneTraffic");
         JSONResult<List<UserFieldDTO>> queryFieldByUserAndMenu =
                 customFieldFeignClient.queryFieldByUserAndMenu(queryFieldByUserAndMenuReq);
         request.setAttribute("userFieldList", queryFieldByUserAndMenu.getData());
 
         request.setAttribute("phtrafficList", phTrafficList());
 
-        return "/phonetraffic/customManagement";
+        return "phonetraffic/customManagement";
     }
 
     @PostMapping("/queryPage")
@@ -168,14 +168,14 @@ public class PhoneTrafficController {
 //            }
 //        }
 //        权限相关代码
-//        if(roleList!=null&&roleList.get(0)!=null) {
-//            if (RoleCodeEnum.GLY.name().equals(roleList.get(0).getRoleCode())) {
-//            }else if (RoleCodeEnum.HWZG.name().equals(roleList.get(0).getRoleCode())) {
-//                param.setPhTraDirectorId(user.getId());
-//            } else {
-//                param.setOperatorId(user.getId());
-//            }
-//        }
+        if(roleList!=null&&roleList.get(0)!=null) {
+            if (RoleCodeEnum.GLY.name().equals(roleList.get(0).getRoleCode())) {
+            }else if (RoleCodeEnum.HWZG.name().equals(roleList.get(0).getRoleCode())) {
+                param.setPhTraDirectorId(user.getId());
+            } else {
+                param.setOperatorId(user.getId());
+            }
+        }
 
         String defineColumn = param.getDefineColumn();
         String defineValue = param.getDefineValue();
