@@ -21,7 +21,7 @@
     <el-row class="marginB10">
         <el-button type="text" @click="dialogFormVisible = true"><i class="el-icon-menu"></i>选择列</el-button>
             <el-button type="success" @click="openassignrDig">分配资源</el-button>
-            <el-button type="success" @click="editClue">编辑资源</el-button>
+            <!--<el-button type="success" @click="editClue">编辑资源</el-button>-->
             <!--<el-button type="success" @click="releaseClue">释放资源</el-button>-->
     </el-row>
     <el-row class="marginB10 greybg padding20" style="padding-bottom: 0">        
@@ -202,12 +202,12 @@
         <el-row>
             <el-form-item
                 label="分配员工"
-                prop="telSales"
+                prop="operatorId"
                 :rules="[
                     { required: true, message: '请选择话务人员', trigger: 'change' }
                 ]"
                 :label-width="formLabelWidth">
-              <el-select v-model="formAllocat.telSales" placeholder="请选择话务人员" style="width: 100%;">
+              <el-select v-model="formAllocat.operatorId" placeholder="请选择话务人员" style="width: 100%;">
                     <el-option
                         v-for="item in userArr"
                         :key="item.id"
@@ -269,7 +269,7 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                 proArr:proSelect,
                 dailogTitleType:'',
                 formAllocat:{
-                    telSales:''
+                    operatorId:''
                 },
                 transferFormVisible: false, //转移资源
                 formTransfer:{
@@ -466,7 +466,7 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
             submitAllocatForm(formName) {
                 this.$refs[formName].validate((valid) => {
                   if (valid) {
-                   var telSale=this.formAllocat.telSales;
+                   var operatorId=this.formAllocat.operatorId;
                    var rows = this.multseleSelection;
                    var idArr=[];
                    for(var i=0;i<rows.length;i++){
@@ -474,7 +474,7 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                    }
                    var  param={};
                    param.idList=idArr;
-                   param.teleSaleId=telSale;
+                   param.operatorId=operatorId;
                    this.allocateFormVisible = false; 
                    axios.post('/phonetraffic/allocationClue', param)
                    .then(function (response) {
