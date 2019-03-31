@@ -411,14 +411,14 @@
 </body>
 <!-- import Vue before Element -->
 <div th:include="_footer_include :: #jsLib"></div>
-<script type="text/javascript" src="//agent-gateway-2.cticloud.cn/js/agent/v10/cti-link.js"></script>
+<!-- <script type="text/javascript" src="//agent-gateway-2.cticloud.cn/js/agent/v10/cti-link.js"></script>
 <script th:src="@{/js/custom/call/md5.js?v=1.0.0}"></script>
 <script th:src="@{/js/custom/call/toolbar.js?v=1.0.1}"></script>
 <script th:src="@{/js/custom/call/toolbarIframe.js?v=1.0.1}"></script>
 <script th:src="@{/js/custom/call/timer.js?v=1.0.1}"></script>
-<script th:src="@{/js/custom/call/rtCall.js?v=1.0.0}"></script> 
+<script th:src="@{/js/custom/call/rtCall.js?v=1.0.0}"></script>  -->
 <!-- 播放錄音 js -->
-<script th:src="@{/js/custom/callrecord/simpleAudio.js?v=1.0.0}"></script>
+<!-- <script th:src="@{/js/custom/callrecord/simpleAudio.js?v=1.0.0}"></script> -->
 <script th:inline="javascript" >
 var fieldList=[[${fieldList}]];//自定义字段
 var userFieldList=[[${userFieldList}]];//用户自定义字段
@@ -782,7 +782,6 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                 param.clueId = cid;
                 axios.post('/aggregation/tracking/queryList', param)
                     .then(function (response) {
-                        console.log(response.data)
                         if (response.data.code == 0) {
                         	mycustomVM.trackingParam.tableData = response.data.data
                         	mycustomVM.trackingParam.trackingDialogVisible = true;
@@ -790,7 +789,6 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                         	mycustomVM.$message.error(response.data.msg);
                         }
                     }).catch(function (error) {
-                    console.log(error);
                 });
 
             },
@@ -865,10 +863,8 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
 	  	                           });
 	                       	}
                         }).catch(function (error) {
-                            console.log(error);
                         });
                     } else {
-                        console.log('error submit!!');
                         return false;
                     }
                 });
@@ -902,20 +898,16 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                         	 mycustomVM.initTableData();  
         		        	}});
                          }).catch(function (error) {
-                             console.log(error);
                          });
                     } else {
-                        console.log('error submit!!');
                         return false;
                     }
                 });
             },
             recordClick(row) {
-                console.log(row);
                 this.recordDialog=true;
             },
             repeatPhonesClick(row) {
-                console.log(row);
                 this.repeatPhonesDialog=true;
                 this.dailogTitleType=row.phone;
                 this.repeatPhonesTable=[];
@@ -923,11 +915,9 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                     param.id = row.clueId;
                       param.cusPhone = row.phone;
                       param.clueId = row.clueId;
-                       console.info(param);
                         axios.post('/clue/appiontment/repeatPhonelist', param)
                           .then(function (response) {
                                 var result =  response.data;
-                                console.info(result);
                                 var table=result.data;
                                 mycustomVM.repeatPhonesTable=table;
                                 mycustomVM.repeatPhonesDialog=true;
@@ -966,7 +956,6 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
            confirmColumn(){
              	this.dialogChooseList = false;
              	//处理用户选择的列
-             	console.info(this.fieldFrom.type);
              	if(this.fieldFrom.type.length==0){
              		this.$message({
                          message: "请至少保留一列",
@@ -991,7 +980,6 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
              	var param ={};
                param.fieldIdList = idList;
                param.menuCode = "myCustomerInfo";
-               console.info(param);
                if(idList.length!=0){
                    axios.post('/customfield/customField/saveUserField', param)
                    .then(function (response) {
@@ -1033,7 +1021,6 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
             param={};
             param.groupCode="releaseReason";
             axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {
-                console.log(response.data.data)
                 mycustomVM.reasonArr=response.data.data;
             });
             
@@ -1041,7 +1028,6 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
             param={};
             param.groupCode="releaseReason";
             axios.post('/tele/clueMyCustomerInfo/listByOrgAndRole').then(function (response) {
-                console.log(response.data.data)
                 mycustomVM.telePerArr=response.data.data;
             });
             
