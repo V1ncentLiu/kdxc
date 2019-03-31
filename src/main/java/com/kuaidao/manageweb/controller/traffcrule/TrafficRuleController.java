@@ -176,7 +176,7 @@ public class TrafficRuleController {
         List<RoleInfoDTO> roleList = user.getRoleList();
         if (roleList.size() > 0) {
             // 插入话务组id
-            trafficAssignRuleReq.setTrafficId(roleList.get(0).getId());
+            trafficAssignRuleReq.setTrafficId(user.getOrgId());
         }
         trafficAssignRuleReq.setCreateUser(user.getId());
         // 插入类型为优化
