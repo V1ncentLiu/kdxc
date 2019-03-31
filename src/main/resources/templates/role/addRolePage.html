@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml"
     xmlns:th="http://www.thymeleaf.org">
 <head th:include="_header_include::frag(~{::title},~{},~{::style})">
-	<title>添加角色</title>
+    <title>添加角色</title>
     <style>
         .role-table {
             border: 1px solid #e0e0e0;
@@ -146,7 +146,7 @@
         <!-- 树形表格 -->
         <ul class="role-table col-xs-offset-2 col-md-offset-1 col-sm-offset-2 marginB20">
             <li class="header">
-                <div class="left">全选&nbsp;&nbsp;&nbsp;&nbsp;模块菜单</div>
+                <div class="left"><el-checkbox v-model="checkAll1" @change="handleCheckAllChange1">全选</el-checkbox>&nbsp;&nbsp;&nbsp;&nbsp;模块菜单</div>
                 <div class="right">操作权限</div>
                 <div class="handle">数据权限</div>
             </li>
@@ -155,11 +155,11 @@
             <li  v-for="(item,index) in dataList" :key="item.id">
                 <div class="left"  @click="fold(item)">
                     <i :class="{'el-icon-caret-right':item.folded,'el-icon-caret-bottom':!item.folded}" v-cloak v-if="item.subList" class="item-icon"></i>   
-                    <el-checkbox @click.native="handleOneCheckAll($event,item)" v-cloak v-if="!item.subList" :indeterminate="item.isIndeterminate" v-model="item.checkAll">{{item.title}}</el-checkbox>
+                    <el-checkbox @change="handleOneCheckAll(item)" v-cloak v-if="!item.subList" :indeterminate="item.isIndeterminate" v-model="item.checkAll">{{item.title}}</el-checkbox>
                     <span v-if="item.subList" v-cloak>{{item.name}}</span> 
                 </div>              
                 <div class="right">
-                	<el-checkbox v-if="item.subList" :indeterminate="item.isIndeterminate" @change="checkSecondAll(item)" v-model="item.firstCheckAll"></el-checkbox>                 
+                    <el-checkbox v-if="item.subList" :indeterminate="item.isIndeterminate" @change="checkSecondAll(item)" v-model="item.firstCheckAll"></el-checkbox>                 
                     <el-checkbox-group v-model="item.checkedCities" @change="handleOneCheckedCitiesChange(item)" v-else>
                     <el-checkbox  v-for="m in item.operationInfos" :label="m.id" :key="m.id" v-cloak>{{m.name}}</el-checkbox>
                     </el-checkbox-group>
@@ -168,7 +168,8 @@
                 <ul v-show="item.subList&&!item.folded">
                     <li v-for="(subList,cur) in item.subList" :key="subList.id">
                         <div class="left">
-                            <el-checkbox   v-model="subList.checkAll" @change="handleCheckAllChange($event,item,subList)" v-cloak>{{subList.name}}</el-checkbox>
+                            <!-- <el-checkbox   v-model="subList.checkAll" @change="handleCheckAllChange($event,item,subList)" v-cloak>{{subList.name}}</el-checkbox> -->
+                            <el-checkbox   v-model="subList.checkAll" @change="handleCheckAllChange(item,subList)" v-cloak>{{subList.name}}</el-checkbox>
                         </div>
                         <div class="right">
                             <el-checkbox-group v-model="subList.checkedCities" @change="handleCheckedCitiesChange(item,subList)">
@@ -252,6 +253,7 @@ var moduleData=[[${moduleData}]];
                 isDisabled: true,
                 chooseLimitCheck: [],//默认选中
                 fields: [],
+                checkAll1:false,
                 dataList:moduleData,
                 addRoleValidateForm: {
                     roleName: '',
@@ -261,7 +263,7 @@ var moduleData=[[${moduleData}]];
                 rules:{
                     roleName:[{ required: true, message: '角色名称不能为空'},
                      {validator:function(rule,value,callback){
-                   			    var param = {'roleName':value};
+                                var param = {'roleName':value};
                                    axios.post('/role/roleManager/qeuryRoleByName',param)
                                    .then(function (response) {
                                        var data =  response.data;
@@ -283,11 +285,11 @@ var moduleData=[[${moduleData}]];
                                    .then(function () {
                                      // always executed
                                    });
-                   			  
-                   		  },trigger:'blur'}],
+                              
+                          },trigger:'blur'}],
                       roleCode:[{ required: true, message: '角色编码不能为空'},
                       {validator:function(rule,value,callback){
-                     			    var param = {'roleCode':value};
+                                    var param = {'roleCode':value};
                                      axios.post('/role/roleManager/qeuryRoleByName',param)
                                      .then(function (response) {
                                          var data =  response.data;
@@ -309,11 +311,11 @@ var moduleData=[[${moduleData}]];
                                      .then(function () {
                                        // always executed
                                      });
-                     			  
-                     		  },trigger:'blur'}]
+                                  
+                              },trigger:'blur'}]
                 },
                 chooseIpform: {
-                	ipPackageName: '',
+                    ipPackageName: '',
                     searchHasIp:'',
                     type:[]
                 },
@@ -347,46 +349,46 @@ var moduleData=[[${moduleData}]];
                 });
             },
             openIpPackDilog(){
-            	 addRoleVM.dialogFormChooseIP = true;
-               	 if (this.$refs['chooseIpform']) {
-               		this.$refs['chooseIpform'].resetFields();
+                 addRoleVM.dialogFormChooseIP = true;
+                 if (this.$refs['chooseIpform']) {
+                    this.$refs['chooseIpform'].resetFields();
               }
             },
             reBackRoleInfo(){
-            	 window.location.href="/role/roleManager/initRoleInfo"; 	
+                 window.location.href="/role/roleManager/initRoleInfo";     
             },
             submitFormRole(formName) {
                 this.$refs[formName].validate((valid) => {
                     if (valid) {
-                    	//处理角色对应操作项数据
+                        //处理角色对应操作项数据
                        var submitData=addRoleVM.dataList;
                        var  operationArry=[];
                        //设置操作权限菜单
                        var  menuArry=[];
-                    	if(null!=submitData){
-                    		//循环一级菜单
-                    	  for(var i=0; i<submitData.length;i++)  {
-                    		 var subList= submitData[i].subList;  
-                    		 if(null!=subList){
-                    			 //循环二级菜单
-                    			  for(var j=0; j<subList.length;j++)  {
-                             		  var checkedCities= subList[j].checkedCities; 
-                             		  if(null!=checkedCities){
-                             			 //二级菜单Id
-                             			 menuArry.push(subList[j].id);
-                             			//循环选中操作
-                             			for(var m=0; m<checkedCities.length;m++)  {
-                             				var operation={};
-                             				 operation.id=checkedCities[m];
-                                			 operationArry.push(operation);  
-                                		 }
-                             		   }
-                             	   }
-                                 } 	 
-                    		 }
+                        if(null!=submitData){
+                            //循环一级菜单
+                          for(var i=0; i<submitData.length;i++)  {
+                             var subList= submitData[i].subList;  
+                             if(null!=subList){
+                                 //循环二级菜单
+                                  for(var j=0; j<subList.length;j++)  {
+                                      var checkedCities= subList[j].checkedCities; 
+                                      if(null!=checkedCities){
+                                         //二级菜单Id
+                                         menuArry.push(subList[j].id);
+                                        //循环选中操作
+                                        for(var m=0; m<checkedCities.length;m++)  {
+                                            var operation={};
+                                             operation.id=checkedCities[m];
+                                             operationArry.push(operation);  
+                                         }
+                                       }
+                                   }
+                                 }   
+                             }
                          }
-                    	//获取菜单的数据列
-                    	var  fieldMap=addRoleVM.checkBoxFieldArr;
+                        //获取菜单的数据列
+                        var  fieldMap=addRoleVM.checkBoxFieldArr;
                          //处理角色对应的Ip包数据
                          var  param={};
                          param.roleName=addRoleVM.addRoleValidateForm.roleName;
@@ -397,33 +399,33 @@ var moduleData=[[${moduleData}]];
                          param.menuIds=menuArry;
                          param.menuFileds=fieldMap;
                          axios.post('/role/roleManager/saveRoleInfo',param).then(function (response) {
-                		           if(null==response){
-                		        		addRoleVM.$message({
+                                   if(null==response){
+                                        addRoleVM.$message({
                                             message: "接口调用失败",
                                             type: 'error'
                                           }); 
-                		                 return ;
-                		            }
-                		            var resobj= response.data;
-                		            if(null==resobj){
-                		            	addRoleVM.$message({
+                                         return ;
+                                    }
+                                    var resobj= response.data;
+                                    if(null==resobj){
+                                        addRoleVM.$message({
                                             message: "接口调用失败",
                                             type: 'error'
                                           }); 
-                		                 return ;
-                		            } 
-                		            if(resobj.code!='0'){
-                		            	addRoleVM.$message({
+                                         return ;
+                                    } 
+                                    if(resobj.code!='0'){
+                                        addRoleVM.$message({
                                             message: "接口调用失败",
                                             type: 'error'
                                           }); 
-                		            	return ;
-                		            }
-                		             window.location.href="/role/roleManager/initRoleInfo"; 
-                		            }).catch(function (error) {
-                   		              console.log(error);
-                		            }).then(function () {
-                		       });	
+                                        return ;
+                                    }
+                                     window.location.href="/role/roleManager/initRoleInfo"; 
+                                    }).catch(function (error) {
+                                      console.log(error);
+                                    }).then(function () {
+                               });  
                          
                     } else {
                         console.log('error submit!!');
@@ -444,127 +446,127 @@ var moduleData=[[${moduleData}]];
             queryIpPackgeData(){
              //查询Ip包数据
                 var param={};
-	            var ipAddress = this.chooseIpform.searchHasIp;
-	            var ipPackageName = this.chooseIpform.ipPackageName;
-             	param.ipPackageName=ipPackageName;
-             	param.ipAddress=ipAddress;
-            	var ipListTable=addRoleVM.ipListTable;
-            	var deleId=[];
-            	if(null!=ipListTable&&ipListTable.length>0){
-            	for (var i=0;i<ipListTable.length;i++ ) {
-            		  deleId.push(ipListTable[i].id);  
-            	 }
+                var ipAddress = this.chooseIpform.searchHasIp;
+                var ipPackageName = this.chooseIpform.ipPackageName;
+                param.ipPackageName=ipPackageName;
+                param.ipAddress=ipAddress;
+                var ipListTable=addRoleVM.ipListTable;
+                var deleId=[];
+                if(null!=ipListTable&&ipListTable.length>0){
+                for (var i=0;i<ipListTable.length;i++ ) {
+                      deleId.push(ipListTable[i].id);  
+                 }
                 }
-             	param.deleId=deleId;
-		        axios.post('/ip/ipAccess/queryPackageList',param).then(function (response) {
-		           if(null==response){
-		        		addRoleVM.$message({
+                param.deleId=deleId;
+                axios.post('/ip/ipAccess/queryPackageList',param).then(function (response) {
+                   if(null==response){
+                        addRoleVM.$message({
                             message: "接口调用失败",
                             type: 'error'
                           }); 
-		                 return ;
-		            }
-		            var resobj= response.data;
-		            if(null==resobj){
-		            	addRoleVM.$message({
+                         return ;
+                    }
+                    var resobj= response.data;
+                    if(null==resobj){
+                        addRoleVM.$message({
                             message: "接口调用失败",
                             type: 'error'
                           }); 
-		                 return ;
-		            } 
-		            if(resobj.code!='0'){
-		            	addRoleVM.$message({
+                         return ;
+                    } 
+                    if(resobj.code!='0'){
+                        addRoleVM.$message({
                             message: "接口调用失败",
                             type: 'error'
                           }); 
-		            	return ;
-		            }
-		             var pageData=resobj.data;
-		           	 addRoleVM.dataTableIP =pageData.data; 
-		            })
-		            .catch(function (error) {
-		              console.log(error);
-		            })
-		            .then(function () {
-		            });	
+                        return ;
+                    }
+                     var pageData=resobj.data;
+                     addRoleVM.dataTableIP =pageData.data; 
+                    })
+                    .catch(function (error) {
+                      console.log(error);
+                    })
+                    .then(function () {
+                    }); 
             },
-	    	changeIpTableFun(val) {
-	    	     this.multipleIpSelection = val;
-	    	 },
-	    	 submitIpPackeageForm(formName) {
-	    	  //选择IP包后提交数据
-	           this.$refs[formName].validate((valid) => {
-	                if (valid) {
-	                 var ipSelectData=addRoleVM.multipleIpSelection; 
-	                 addRoleVM.ipListTable=addRoleVM.ipListTable.concat(ipSelectData);
-	                 addRoleVM.dialogFormChooseIP=false;
-	               } else {
-	                 console.log('error submit!!');
-	                return false;
-	              }
-	           });
-	           },
-	            openDialogLimitData(moduleCode ,id){
-	        	//打开数据权限界面
-	            addRoleVM.dialogFormSetting=true;
-	             var  param={};
-	        	 param.menuCode=moduleCode;
-	        	 addRoleVM.feildMenuId=id;
-	             axios.post('/role/roleManager/queryCustomField',param).then(function (response) {
-			           if(null==response){
-			             
-			            }
-			            var resobj= response.data;
-			            if(null==resobj){
-			            	addRoleVM.$message({
+            changeIpTableFun(val) {
+                 this.multipleIpSelection = val;
+             },
+             submitIpPackeageForm(formName) {
+              //选择IP包后提交数据
+               this.$refs[formName].validate((valid) => {
+                    if (valid) {
+                     var ipSelectData=addRoleVM.multipleIpSelection; 
+                     addRoleVM.ipListTable=addRoleVM.ipListTable.concat(ipSelectData);
+                     addRoleVM.dialogFormChooseIP=false;
+                   } else {
+                     console.log('error submit!!');
+                    return false;
+                  }
+               });
+               },
+                openDialogLimitData(moduleCode ,id){
+                //打开数据权限界面
+                addRoleVM.dialogFormSetting=true;
+                 var  param={};
+                 param.menuCode=moduleCode;
+                 addRoleVM.feildMenuId=id;
+                 axios.post('/role/roleManager/queryCustomField',param).then(function (response) {
+                       if(null==response){
+                         
+                        }
+                        var resobj= response.data;
+                        if(null==resobj){
+                            addRoleVM.$message({
                                 message: "接口调用失败",
                                 type: 'error'
                               }); 
-			               	return ;
-			            } 
-			            if(resobj.code!='0'){
-			            	addRoleVM.$message({
+                            return ;
+                        } 
+                        if(resobj.code!='0'){
+                            addRoleVM.$message({
                                 message: "接口调用失败",
                                 type: 'error'
                               }); 
-			            	return ;
-			            }
-			             addRoleVM.fields=resobj.data;
-			              var  fieldAray= resobj.data;
-			              var fArray=[];
-			            //获取菜单是否已选择
-	                    var  fieldMap=addRoleVM.checkBoxFieldArr;
-	                    if(null!=fieldMap){
-	                     for(var key in fieldMap){
-	                      	var value=fieldMap[key];
-	                      	if(key==id&&value.length>0){
-	                      	//如果做过选择选择上次选中数据
-	                          fArray=value; 
-	                      	  } 
-	                       } 
-	                      } 
-	                     if(fArray.length<1){
-	                     //默认全部选中
-	                       if(null!=fieldAray){
-	  			             for(var i=0;i<fieldAray.length;i++){
-	  					        fArray.push(fieldAray[i].id);
-	  					      }
-	  					     addRoleVM.chooseLimitCheck=fArray;
-	  			            }  
-	                      }
-			            })
-			            .catch(function (error) {
-			              console.log(error);
-			            })
-			            .then(function () {
-			            });	 
-	            },
-	            //提交数据权限
-	            submitFormField(form){
-	            	//选择数据权限合并(菜单对应Map ,菜单Id,当前被选择的数据)
-	            	Vue.set(this.checkBoxFieldArr,addRoleVM.feildMenuId,addRoleVM.chooseLimitCheck);
-	                addRoleVM.dialogFormSetting=false;	
-	            },
+                            return ;
+                        }
+                         addRoleVM.fields=resobj.data;
+                          var  fieldAray= resobj.data;
+                          var fArray=[];
+                        //获取菜单是否已选择
+                        var  fieldMap=addRoleVM.checkBoxFieldArr;
+                        if(null!=fieldMap){
+                         for(var key in fieldMap){
+                            var value=fieldMap[key];
+                            if(key==id&&value.length>0){
+                            //如果做过选择选择上次选中数据
+                              fArray=value; 
+                              } 
+                           } 
+                          } 
+                         if(fArray.length<1){
+                         //默认全部选中
+                           if(null!=fieldAray){
+                             for(var i=0;i<fieldAray.length;i++){
+                                fArray.push(fieldAray[i].id);
+                              }
+                             addRoleVM.chooseLimitCheck=fArray;
+                            }  
+                          }
+                        })
+                        .catch(function (error) {
+                          console.log(error);
+                        })
+                        .then(function () {
+                        });  
+                },
+                //提交数据权限
+                submitFormField(form){
+                    //选择数据权限合并(菜单对应Map ,菜单Id,当前被选择的数据)
+                    Vue.set(this.checkBoxFieldArr,addRoleVM.feildMenuId,addRoleVM.chooseLimitCheck);
+                    addRoleVM.dialogFormSetting=false;  
+                },
              // 删除
              deleteFun() {
                 this.$confirm('删除后此角色信息将不存在，确认删除吗？', '消息提醒', {
@@ -601,8 +603,7 @@ var moduleData=[[${moduleData}]];
                 }
             },
             // 全选一项
-            handleCheckAllChange(event, item, subList) {
-                console.log(event)
+            handleCheckAllChange(item, subList) {
                 console.log(item)
                 console.log(subList)
                 var arr = [];
@@ -614,70 +615,32 @@ var moduleData=[[${moduleData}]];
                 }
                 // subList.checkedCities = event.target.checked ? arr : [];
                 subList.checkedCities = subList.checkAll ? arr : [];
-                // if (typeof subList === "undefined") {
-                //     this.$set(subList, "isIndeterminate", false)
-                // }
-                // subList.isIndeterminate = false;
                 if (typeof subList.checkAll === "undefined") {
                     this.$set(subList, "checkAll", true);
                 }
-                if (typeof item.isIndeterminate === "undefined") {
-                    this.$set(item, "isIndeterminate", true);
+                var secondAllSelect = item.subList.every((item) => item.checkAll);
+                if (secondAllSelect) {
+                    item.firstCheckAll = true;
+                } else {
+                    item.firstCheckAll = false;
                 }
-                for (var a = 0; a < item.subList.length; a++) {
-                    if (!item.subList[a].checkAll) {
-                        item.isIndeterminate = true;
-                        for (var a = 0; a < item.subList.length; a++) {
-                            if (item.subList[a].checkAll) {
-                                break;
-                            } else {
-                                item.isIndeterminate = false;
-                                item.firstCheckAll = false;
-                            }
-                        }
-                        break
-                    } else {
-                        item.isIndeterminate = false;
-                        item.firstCheckAll = true;
-                    }
-                }
-
+                this.checkAllSelect();
             },
             // 单选
             handleCheckedCitiesChange(item, subList) {
+                debugger
                 var checkedCount = subList.checkedCities.length;
                 if (typeof subList.checkAll === "undefined") {
                     this.$set(subList, "checkAll", false);
                 }
-                if (typeof subList.isIndeterminate === "undefined") {
-                    this.$set(subList, "isIndeterminate", false);
-                }
-                if (typeof item.isIndeterminate === "undefined") {
-                    this.$set(item, "isIndeterminate", true);
-                }
-                subList.isIndeterminate = checkedCount > 0 && checkedCount < subList.operationInfos.length;
                 subList.checkAll = checkedCount === subList.operationInfos.length;
-                if (checkedCount === 0) {
-                    subList.isIndeterminate = false
+                var secondAllSelect = item.subList.every((item) => item.checkAll);
+                if (secondAllSelect) {
+                    item.firstCheckAll = true;
+                } else {
+                    item.firstCheckAll = false;
                 }
-                for (var a = 0; a < item.subList.length; a++) {
-                    if (!item.subList[a].checkAll) {
-                        item.isIndeterminate = true;
-                        for (var b = 0; b < item.subList.length; b++) {
-                            if (item.subList[b].checkedCities.length > 0) {
-                                break
-                            } else {
-                                item.isIndeterminate = false;
-                                item.firstCheckAll = false;
-                            }
-                        }
-                        break
-                    } else {
-                        item.isIndeterminate = false;
-                        item.firstCheckAll = true;
-                    }
-                }
-
+                this.checkAllSelect();
             },
             // 点击所有
             checkSecondAll: function (item) {
@@ -687,7 +650,7 @@ var moduleData=[[${moduleData}]];
                 for (var a = 0; a < item.subList.length; a++) {
                     this.checkItemAll(item.firstCheckAll, item.subList[a])
                 }
-                item.isIndeterminate=false
+                // item.isIndeterminate=false
             },
             checkItemAll: function (flag, item) {
                 var arr = [];
@@ -699,27 +662,26 @@ var moduleData=[[${moduleData}]];
                 }
                 item.checkedCities = flag ? arr : [];
                 item.checkAll = flag;
+                this.checkAllSelect();
             },
             
             // 没有二级菜单
             handleOneCheckedCitiesChange:function (item) {
                 var checkedCount = item.checkedCities.length;
-                if (typeof item.isIndeterminate === "undefined") {
-                    this.$set(item, "isIndeterminate", false);
-                }
                 if (typeof item.checkAll === "undefined") {
                     this.$set(item, "checkAll", false);
                 }
-                item.isIndeterminate = checkedCount > 0 && checkedCount < item.operationInfos.length;
                 item.checkAll = checkedCount === item.operationInfos.length;
+                this.checkAllSelect();
             },
-            handleOneCheckAll:function (event,item) {
+            handleOneCheckAll:function (item) {
                 var arr = [];
                 for (var a = 0; a < item.operationInfos.length; a++) {
                     arr.push(item.operationInfost[a].id)
                 }
 
-                item.checkedCities = event.target.checked ? arr : [];
+                item.checkedCities = item.checked ? arr : [];
+                this.checkAllSelect();
             },
             visitLimitRadioChange(value) {
                 if(value==1){
@@ -727,6 +689,30 @@ var moduleData=[[${moduleData}]];
                 }else{
                     this.isDisabled=false
                 }
+            },
+            handleCheckAllChange1(val) {
+                this.dataList.forEach((item) => {
+                    if (!item.subList) {
+                        item.checkAll = val;
+                        this.handleOneCheckAll(item);
+                    } else {
+                        item.firstCheckAll = val;
+                        this.checkSecondAll(item);
+                        item.subList.forEach((innerItem) => {
+                            innerItem.checkAll = val;
+                        })
+                    }
+                })
+            },
+            // 校验单选和多选关联
+            checkAllSelect() {
+                var flag = true;
+                this.dataList.forEach((item) => {
+                    if (!(item.firstCheckAll || item.checkAll)) {
+                        flag = false;
+                    }
+                });
+                this.checkAll1 = flag;
             }
         },
         mounted(){
