@@ -4,11 +4,11 @@
 function documentReady(){
     //devin unlogin()
 	//移除打电话来源标识
-	sessionStorage.removeItem("callSource");
+	//sessionStorage.removeItem("callSource");
 	//移除坐席登录表示 
-	sessionStorage.removeItem("loginClient");
+	//sessionStorage.removeItem("loginClient");
 	//移除账号
-	sessionStorage.removeItem("accountId");
+	//sessionStorage.removeItem("accountId");
 	
     CTILink.setup(
         {
