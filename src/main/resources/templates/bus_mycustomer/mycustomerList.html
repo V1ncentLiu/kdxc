@@ -1094,7 +1094,8 @@
                 <el-row v-if="isAllMoney" >
                     <el-col :span="10">
                         <el-form-item label="余款金额：" :label-width="formLabelWidth" prop="amountBalance">
-                            <el-input  maxLength="10" v-model="updateFormSigning.amountBalance" style="width: 80%;"  type="number"  min="0" oninput="if(value.length>10)value=value.slice(0,10)"  onkeypress="return(/[\d]/.test(String.fromCharCode(event.keyCode)))"></el-input>
+                            <!-- <el-input  maxLength="10" v-model="updateFormSigning.amountBalance" style="width: 80%;"  type="number"  min="0" oninput="if(value.length>10)value=value.slice(0,10)"  onkeypress="return(/[\d]/.test(String.fromCharCode(event.keyCode)))"></el-input> -->
+                            <el-input  maxLength="10" v-model="updateFormSigning.amountBalance" style="width: 80%;"  type="number"  min="0" oninput="if(value.length>10)value=value.slice(0,10)"  @keyup.native="number2"></el-input>
                             <span style="padding-left: 10px;">元</span>
                         </el-form-item>
                     </el-col>
@@ -1515,11 +1516,13 @@
                             var reg =  /^[1-9]+[0-9]*]*$/ ;
                             if(value ==null || value =="null" || value ==""  ){
                                 callback(new Error("请输入余款金额"));
-                                mainDivVM.formSigning.amountBalance =null;
+                                // mainDivVM.formSigning.amountBalance =null;
+                                return;
 
                             }else  if(value !=null && value !="null" && value !="" && !reg.test(value) ){
                                 callback(new Error("请输入正整数"));
-                                mainDivVM.formSigning.amountBalance =null;
+                                // mainDivVM.formSigning.amountBalance =null;
+                                return;
                             }else{
                                 callback();
                             }
@@ -2346,9 +2349,13 @@
                     }
                 })
             },
-            number(){
+            number(){//添加签约单余款
     　　　      this.formSigning.amountBalance=this.formSigning.amountBalance.replace(/[^\.\d]/g,'');
                 this.formSigning.amountBalance=this.formSigning.amountBalance.replace('.','');
+        　　},
+            number2(){//编辑签约单余款
+    　　　      this.updateFormSigning.amountBalance=this.updateFormSigning.amountBalance.replace(/[^\.\d]/g,'');
+                this.updateFormSigning.amountBalance=this.updateFormSigning.amountBalance.replace('.','');
         　　},
         },
         created(){
