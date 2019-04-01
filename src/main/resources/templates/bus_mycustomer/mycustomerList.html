@@ -92,7 +92,7 @@
             </el-form>
         </el-row>
 
-        <el-table :data="tableData" tooltip-effect="dark" style="width:100%"  ref="multipleTable"
+        <el-table :data="tableData" border tooltip-effect="dark" style="width:100%"  ref="multipleTable"
                   @row-dblclick="showCustomerDetail"
                   @selection-change="handleSelectionChange" >
             <el-table-column type="selection" width="55" prop="clueId" ></el-table-column>
@@ -114,7 +114,7 @@
                     <el-button size="mini"  v-if="scope.row.visitList.length==0" type="text" @click="openEditVisitRecord(scope.row)">添加到访记录</el-button>
                     <div  v-else-if="scope.row.visitList.length==1"  v-for="item in scope.row.visitList ">
                         <!--<el-button size="mini"  v-if="scope.row.visitStatus==0" type="text" @click="showNotVisitReason(scope.row)">未到访(原因)</el-button>-->
-                        <el-button size="mini"  v-if="item.isVisit==0&&item.status==1" type="text" @click="showNotVisitReason(item)">未到访(审核中)</el-button>
+                        <el-button size="mini"  v-if="item.isVisit==0&&item.status==1" type="text" @click="showNotVisitReason1(item)">未到访(审核中)</el-button>
                         <el-button size="mini"  v-else-if="item.isVisit==0&&item.status==2" type="text" style="color: red" @click="showNotVisitReason(item)">未到访</el-button>
                         <el-button size="mini"  v-else-if="item.isVisit==0&&item.status==0" type="text" @click="openEditVisitRecord(item)">添加到访记录</el-button>
                         <el-button size="mini"  v-else-if="item.isVisit==1&&item.status==1" type="text" @click="showVisitRecord(item)">审核中</el-button>
@@ -199,6 +199,17 @@
             <div slot="footer" class="dialog-footer" style="text-align: center">
                 <el-button type="primary" @click="openEditVisitRecord">添加到访记录</el-button>
             </div>
+        </template>
+    </el-dialog>
+    <!--添加到访记录-->
+    <el-dialog title="未到访原因" :visible.sync="notVisitdDialogVisible1"  width="50%">
+        <template>
+            <el-form :model="notVisitFlag" ref="notVisitFlag">
+                <el-form-item label="" :label-width="formLabelWidth" :required="true">
+                    <!--<el-button type="text" disabled style="color: #1e2746">{{notVisitFlag.str}}</el-button>-->
+                    <span style="display:block;color: #1e2746; width:90%; word-wrap:break-word; word-break:normal;">{{notVisitFlag.str}}</span>
+                </el-form-item>
+            </el-form>
         </template>
     </el-dialog>
     <!--标记未到访-->
@@ -866,7 +877,8 @@
                 <el-row v-if="isAllMoney" >
                     <el-col :span="10">
                         <el-form-item label="余款金额：" :label-width="formLabelWidth" prop="amountBalance">
-                            <el-input maxLength="10" v-model="formSigning.amountBalance" min="0" type="number" oninput="if(value.length>10)value=value.slice(0,10)"   style="width: 80%;"></el-input>
+                            <!-- <el-input maxLength="10" v-model="formSigning.amountBalance" min="0" type="number" oninput="if(value.length>10)value=value.slice(0,10)"   style="width: 80%;"></el-input> -->
+                            <el-input maxLength="10" v-model="formSigning.amountBalance" min="0" oninput="if(value.length>10)value=value.slice(0,10)" @keyup.native="number" style="width: 80%;"></el-input>                             
                             <span style="padding-left: 10px;">元</span>
                         </el-form-item>
                     </el-col>
@@ -1093,7 +1105,8 @@
                 <el-row v-if="isAllMoney" >
                     <el-col :span="10">
                         <el-form-item label="余款金额：" :label-width="formLabelWidth" prop="amountBalance">
-                            <el-input  maxLength="10" v-model="updateFormSigning.amountBalance" style="width: 80%;"  type="number"  min="0" oninput="if(value.length>10)value=value.slice(0,10)"  onkeypress="return(/[\d]/.test(String.fromCharCode(event.keyCode)))"></el-input>
+                            <!-- <el-input  maxLength="10" v-model="updateFormSigning.amountBalance" style="width: 80%;"  type="number"  min="0" oninput="if(value.length>10)value=value.slice(0,10)"  onkeypress="return(/[\d]/.test(String.fromCharCode(event.keyCode)))"></el-input> -->
+                            <el-input  maxLength="10" v-model="updateFormSigning.amountBalance" style="width: 80%;"  type="number"  min="0" oninput="if(value.length>10)value=value.slice(0,10)"  @keyup.native="number2"></el-input>
                             <span style="padding-left: 10px;">元</span>
                         </el-form-item>
                     </el-col>
@@ -1153,6 +1166,7 @@
             updateVisitRecordDialogVisible:false,
             addVisitRecordDialogVisible:false,
             notVisitdDialogVisible:false,
+            notVisitdDialogVisible1:false,
             notVisitFlagDialogVisible:false,
             showVisitAduitDialogVisible:false,
             dialogFormSigningVisible:false,
@@ -1514,11 +1528,13 @@
                             var reg =  /^[1-9]+[0-9]*]*$/ ;
                             if(value ==null || value =="null" || value ==""  ){
                                 callback(new Error("请输入余款金额"));
-                                mainDivVM.formSigning.amountBalance =null;
+                                // mainDivVM.formSigning.amountBalance =null;
+                                return;
 
                             }else  if(value !=null && value !="null" && value !="" && !reg.test(value) ){
                                 callback(new Error("请输入正整数"));
-                                mainDivVM.formSigning.amountBalance =null;
+                                // mainDivVM.formSigning.amountBalance =null;
+                                return;
                             }else{
                                 callback();
                             }
@@ -1733,7 +1749,7 @@
                 // 设置 clueid
                 this.$refs['notVisitFlag'].validate((valid) => {
                     if (valid) {
-                        axios.post("/aggregation/businessMyCustomer/notVisit", param)
+                        axios.post("/aggregation/businessMyCustomer/notVisitBysVisitId", param)
                             .then(function (response) {
                                 if (response.data.code == 0) {
                                     mainDivVM.$message({type: 'success', message: '标记成功!',duration:2000,onClose:function(){
@@ -1946,16 +1962,23 @@
                 });
             },
             showNotVisitReason(row){
-                // 展示未到访原因
                 var param={};
-                param.id = row.clueId;
+                param.id = row.visitId;
                 mainDivVM.notVisitFlag.clueId = row.clueId;
-                axios.post('/aggregation/businessMyCustomer/notVisitReason',param).then(function (response) {
+                axios.post('/busVisitRecord/one',param).then(function (response) {
                     mainDivVM.notVisitdDialogVisible = true;
                     mainDivVM.notVisitFlag.str = response.data.data.notVisitReason
                 });
             },
-
+            showNotVisitReason1(row){
+                var param={};
+                param.id = row.visitId;
+                mainDivVM.notVisitFlag.clueId = row.clueId;
+                axios.post('/busVisitRecord/one',param).then(function (response) {
+                    mainDivVM.notVisitdDialogVisible1 = true;
+                    mainDivVM.notVisitFlag.str = response.data.data.notVisitReason
+                });
+            },
             showVisitRecord(row){
                 // 展示到访记录
                 this.showVisitAduitDialogVisible = true;
@@ -2249,7 +2272,7 @@
                 window.location.href='/businesssign/visitRecordPage?clueId='+row.clueId+"&signId="+row.signId+"&readyOnly=1";
             },
             selectSigningType(pa1) { //是不是全款
-                this.formSigning.amountBalance = '';
+                // this.formSigning.amountBalance = null;
                 this.formSigning.makeUpTime = '';
                 if( pa1=='1' ){
                     this.formSigning.payType = '1';
@@ -2345,6 +2368,14 @@
                     }
                 })
             },
+            number(){//添加签约单余款
+    　　　      this.formSigning.amountBalance=this.formSigning.amountBalance.replace(/[^\.\d]/g,'');
+                this.formSigning.amountBalance=this.formSigning.amountBalance.replace('.','');
+        　　},
+            number2(){//编辑签约单余款
+    　　　      this.updateFormSigning.amountBalance=this.updateFormSigning.amountBalance.replace(/[^\.\d]/g,'');
+                this.updateFormSigning.amountBalance=this.updateFormSigning.amountBalance.replace('.','');
+        　　},
         },
         created(){
             this.initList();
@@ -2371,33 +2402,5 @@
     });
 
 </script>
-<style>
-
-    .dialog-footer{
-        text-align: center;
-    }
-    .el-table th {
-        font-weight: bolder;
-    }
-    .el-input__inner{
-    //   width: 200px;
-    }
-    .el-button--danger:focus, .el-button--danger:hover{
-        background: #6f7180;
-        border: #6f7180;
-    }
-    .el-button--danger{
-        background: #6f7180;
-        border: #6f7180;
-    }
-    .el-input {
-        width: 90%;
-    }
-    .el-tooltip__popper {
-        max-width: 50%;
-        line-height: 130%;
-        margin-left: 2%;
-    }
-</style>
 </body>
 </html>

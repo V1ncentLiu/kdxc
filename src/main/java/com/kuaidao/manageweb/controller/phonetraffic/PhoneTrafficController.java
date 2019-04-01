@@ -142,13 +142,13 @@ public class PhoneTrafficController {
         if(roleList!=null&&roleList.get(0)!=null) {
             if (RoleCodeEnum.GLY.name().equals(roleList.get(0).getRoleCode())||RoleCodeEnum.HWZG.name().equals(roleList.get(0).getRoleCode())) {
                 request.setAttribute("phtrafficList", phTrafficList());
+
             } else {
                 List<UserInfoDTO> list = new ArrayList<>();
                 list.add(user);
                 request.setAttribute("phtrafficList", list);
             }
         }
-
 
         return "phonetraffic/customManagement";
     }
@@ -162,13 +162,14 @@ public class PhoneTrafficController {
 
 //【话务主管】—待处理，指阶段为“待分配话务”的阶段；已处理—指待分配话务之后的流转阶段。
 //【话务专员/信息流专员】——待处理，指阶段为“话务跟进中”的阶段；已处理—指话务跟进中之后的流转阶段。
-
+// 话务主管还能够看见：走了优化类分配规则+但是分配不成功的数据
 //        权限相关代码
         if(roleList!=null&&roleList.get(0)!=null) {
             if (RoleCodeEnum.GLY.name().equals(roleList.get(0).getRoleCode())||RoleCodeEnum.HWZG.name().equals(roleList.get(0).getRoleCode())) {
 //               这样的逻辑 下管理员能够看见电销的数据。
                 if(RoleCodeEnum.HWZG.name().equals(roleList.get(0).getRoleCode())){
                     param.setPhTraDirectorId(user.getId());
+                    param.setRoleCode(RoleCodeEnum.HWZG.name());
                 }else{
                     // 管理员能够看见全部的数据
                 }
@@ -186,6 +187,18 @@ public class PhoneTrafficController {
                     phases.add(CluePhase.PHAE_11TH.getCode());
                     phases.add(CluePhase.PHAE_12TH.getCode());
                     param.setPhases(phases);
+                }else{
+                    List<Integer> phases = new ArrayList<>();
+                    phases.add(CluePhase.PHASE_1ST.getCode());
+                    phases.add(CluePhase.PHAE_2ND.getCode());
+                    phases.add(CluePhase.PHAE_3RD.getCode());
+                    phases.add(CluePhase.PHAE_4TH.getCode());
+                    phases.add(CluePhase.PHAE_5TH.getCode());
+                    phases.add(CluePhase.PHAE_6TH.getCode());
+                    phases.add(CluePhase.PHAE_10TH.getCode());
+                    phases.add(CluePhase.PHAE_11TH.getCode());
+                    phases.add(CluePhase.PHAE_12TH.getCode());
+                    param.setPhases(phases);
                 }
             } else {
                 param.setOperatorId(user.getId());
@@ -194,6 +207,17 @@ public class PhoneTrafficController {
                     param.setPhase(CluePhase.PHAE_2ND.getCode());
                 }else  if(dealStatus==1){
                     List<Integer> phases = new ArrayList<>();
+                    phases.add(CluePhase.PHAE_3RD.getCode());
+                    phases.add(CluePhase.PHAE_4TH.getCode());
+                    phases.add(CluePhase.PHAE_5TH.getCode());
+                    phases.add(CluePhase.PHAE_6TH.getCode());
+                    phases.add(CluePhase.PHAE_10TH.getCode());
+                    phases.add(CluePhase.PHAE_11TH.getCode());
+                    phases.add(CluePhase.PHAE_12TH.getCode());
+                    param.setPhases(phases);
+                }else{
+                    List<Integer> phases = new ArrayList<>();
+                    phases.add(CluePhase.PHAE_2ND.getCode());
                     phases.add(CluePhase.PHAE_3RD.getCode());
                     phases.add(CluePhase.PHAE_4TH.getCode());
                     phases.add(CluePhase.PHAE_5TH.getCode());
@@ -352,7 +376,7 @@ public class PhoneTrafficController {
                 && clueFileList.getData() != null) {
             request.setAttribute("clueFileList", clueFileList.getData());
         }
-        return "/phonetraffic/editCustomerMaintenance";
+        return "phonetraffic/editCustomerMaintenance";
     }
 
 
@@ -439,7 +463,7 @@ public class PhoneTrafficController {
                 && clueFileList.getData() != null) {
             request.setAttribute("clueFileList", clueFileList.getData());
         }
-        return "/phonetraffic/readOnlyCustomerMaintenance";
+        return "phonetraffic/readOnlyCustomerMaintenance";
     }
 
 
@@ -520,7 +544,7 @@ public class PhoneTrafficController {
 
         Long roleId = null;
         RoleQueryDTO query1 = new RoleQueryDTO();
-        query.setRoleCode(RoleCodeEnum.HWZG.name());
+        query1.setRoleCode(RoleCodeEnum.HWZG.name());
         JSONResult<List<RoleInfoDTO>> roleJson1 = roleManagerFeignClient.qeuryRoleByName(query1);
         if (JSONResult.SUCCESS.equals(roleJson1.getCode())) {
             List<RoleInfoDTO> data = roleJson1.getData();

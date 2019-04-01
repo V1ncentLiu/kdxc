@@ -1036,20 +1036,25 @@
             saveClue(form,flag){
                 // 客户状态 == 不跟进 提示： 不跟进客户将被释放
                 var trackRow = addCustomerVM.tableDataC2[addCustomerVM.tableDataC2.length-1];
-                console.log( addCustomerVM.tableDataC2)
-                if(trackRow.customerStatus==1&&flag=="toTele"){
-                    this.$message({message: '未联系客户不可转电销组！', type: 'warning'});
-                    return false;
-                } else if(trackRow.customerStatus==3&&flag=="toTele"){
-                    this.$message({message: '不跟进客户不可转电销组！', type: 'warning'});
-                    return false;
-                } else if(trackRow.customerStatus==3&&flag!="toTele"){ // 不跟进
-                    this.$confirm("不跟进客户将被释放", '提示', { cancelButtonText: '取消', confirmButtonText: '确定',type: 'warning'}).then(() => {
-                    //  直接释放资源到废弃池或是共有池
-                    }).catch(() => {});
+
+                if(trackRow){
+                    if(trackRow.customerStatus==1&&flag=="toTele"){
+                        this.$message({message: '未联系客户不可转电销组！', type: 'warning'});
+                        return false;
+                    } else if(trackRow.customerStatus==3&&flag=="toTele"){
+                        this.$message({message: '不跟进客户不可转电销组！', type: 'warning'});
+                        return false;
+                    } else if(trackRow.customerStatus==3&&flag!="toTele"){ // 不跟进
+                        this.$confirm("不跟进客户将被释放", '提示', { cancelButtonText: '取消', confirmButtonText: '确定',type: 'warning'}).then(() => {
+                            //  直接释放资源到废弃池或是共有池
+                        }).catch(() => {});
+                    }else{
+                        addCustomerVM.submitForm(form,flag);
+                    }
                 }else{
-                    addCustomerVM.submitForm(form);
+                    addCustomerVM.submitForm(form,flag);
                 }
+
             },
             submitForm(form,flag) {
 

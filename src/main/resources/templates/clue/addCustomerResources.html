@@ -80,7 +80,7 @@
                         <el-form-item label="资源项目：" :label-width="formLabelWidth">
                             <el-select v-model="form.project" placeholder="请选择" style="width: 100%;">
                                 <el-option
-                                    v-for="item in projectSelect"
+                                    v-for="item in proSelect"
                                     :key="item.id"
                                     :label="item.projectName"
                                     :value="item.id">
@@ -268,7 +268,7 @@
                 <el-row>
                     <el-col :span="8">
                         <el-form-item label="意向品类：" :label-width="formLabelWidth">
-                           <el-select v-model="form.intentionCategory" placeholder="请选择" style="width: 100%;">
+                           <el-select v-model="form.intentionCategory" placeholder="请选择" style="width: 100%;" @change="projectChangeSelect" >
                                 <el-option
                                     v-for="item in IntentionalCategoryArr"
                                     :key="item.value"
@@ -283,7 +283,7 @@
                             <el-radio v-model="form.radioProject" label="1" @change="projectChange" style="margin-right: 10px;">内部项目</el-radio>
                             <el-select v-model="form.insideProject" v-show="insideProjectShow" placeholder="请选择" style="margin-right: 10px;">
                                 <el-option
-                                    v-for="item in projectSelect"
+                                    v-for="item in proSelect"
                                     :key="item.id"
                                     :label="item.projectName"
                                     :value="item.id">
@@ -427,6 +427,7 @@
                 cityArr:[],
                 districtArr:[],
                 projectSelect:proSelect,
+                proSelect:[], 
                 formLabelWidth: '120px',
                 rules:{
                     // customerName: [
@@ -621,6 +622,14 @@
             },
             rebackMV(){
             	  window.location.href="/tele/clueMyCustomerInfo/initmyCustomer"; 
+            },
+            projectChangeSelect(selVal) {
+                var param = {};
+                param.category = selVal;
+                axios.post('/aggregation/projectManager/listNoPage', param).then(function (response) {
+                	debugger;
+                    addCustomerVM.proSelect = response.data.data;
+                });
             },
             submitDialogForm(formName) {
                 this.$refs[formName].validate((valid) => {
@@ -841,7 +850,7 @@
             });
            //意向品类
            param={};
-           param.groupCode="IntentionalCategory"; 
+           param.groupCode="project_category"; 
            axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {  
                addCustomerVM.IntentionalCategoryArr=response.data.data;
             });
