@@ -324,12 +324,20 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                 param.pageNum=this.pager.currentPage ;
                 param.pageSize=this.pager.pageSize;
      		    axios.post('/phonetraffic/queryPage',param).then(function (response) {
-     				var resobj= response.data;
-     		    	var pageData=resobj.data;
-     		    	customerManVM.pager.total=pageData.total;
-     		    	customerManVM.pager.currentPage = pageData.currentPage;
-     		    	customerManVM.pager.pageSize = pageData.pageSize;
-     		    	customerManVM.dataTable =pageData.data; 	
+
+     		        if(response.data.code != 0){
+                        customerManVM.$message({
+                            message: response.data.msg,
+                            type: 'warning'
+                        });
+                    }else{
+                        var resobj= response.data;
+                        var pageData=resobj.data;
+                        customerManVM.pager.total=pageData.total;
+                        customerManVM.pager.currentPage = pageData.currentPage;
+                        customerManVM.pager.pageSize = pageData.pageSize;
+                        customerManVM.dataTable =pageData.data;
+                    }
      			})
          	},
             customerEidt(clueId,phone){
@@ -401,7 +409,7 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                   return;
                 }
             	 for(var i = 0 ; i < rows.length ; i++ ){
-            	     if(rows[i].customerStatus==4){
+            	     if(rows[i].customerStatus==4||rows[i].phase>=3){
                          this.$message({message: '转电销客户不可再次分配', type: 'warning'});
                          return;
                      }
