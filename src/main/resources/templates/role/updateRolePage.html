@@ -384,7 +384,6 @@
                          param.id=roleInfo.id;
                          param.menuIds=menuArry;
                          param.menuFileds=fieldMap;
-                         debugger;
                          axios.post('/role/roleManager/updateRoleInfo',param).then(function (response) {
           		           if(null==response){
           		        	 addRoleVM.$message({
@@ -496,10 +495,18 @@
 	           },
 	            openDialogLimitData(moduleCode ,id){
 		        	//打开数据权限界面
-		            addRoleVM.dialogFormSetting=true;
+		             addRoleVM.dialogFormSetting=true;
 		             var  param={};
 		        	 param.menuCode=moduleCode;
 		        	 addRoleVM.feildMenuId=id;
+		         	 var map=addRoleVM.checkBoxFieldArr;
+		         	var checkArr=[];
+		         	for(var key in map){
+		         		if(key==id){
+		         			 console.log("属性：" + key + ",值：" + map[key]);
+		         			checkArr=map[key];
+		         		  }
+		         		}
 		             axios.post('/role/roleManager/queryCustomField',param).then(function (response) {
 				           if(null==response){
 				        	   addRoleVM.$message({
@@ -525,13 +532,21 @@
 				            }
 				             addRoleVM.fields=resobj.data;
 				             var  fieldAray= roleInfo.customFieldMenus;
-				             debugger;
 				             var  fArray=[];
 				             var  menuFields= resobj.data;
-				              if(null!=fieldAray){
+				             if(checkArr.length>0){
+				            	 for(var i=0;i<checkArr.length;i++){
+						              for(var j=0;j<menuFields.length;j++){
+						               if(menuFields[j].id==checkArr[i]){
+						            	  fArray.push(menuFields[j].id);	
+						              }
+						             }
+							      } 
+				            	 
+				            	 
+				             }else if(null!=fieldAray){
 				            	for(var i=0;i<fieldAray.length;i++){
 				            	   for(var j=0;j<menuFields.length;j++){
-				            		   console.log(menuFields[j].id+"----"+fieldAray[i].customFieldId)
 				            	   if(menuFields[j].id==fieldAray[i].customFieldId){
 				            		   fArray.push(menuFields[j].id);	
 				            	   }
@@ -548,7 +563,6 @@
 		            },
 		           //提交数据权限
 		           submitFormField(form){
-		            	debugger ;
 		            	Vue.set(this.checkBoxFieldArr,addRoleVM.feildMenuId,addRoleVM.chooseLimitCheck);
 		                addRoleVM.dialogFormSetting=false;	
 		          },
