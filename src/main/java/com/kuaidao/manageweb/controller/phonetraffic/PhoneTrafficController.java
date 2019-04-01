@@ -142,6 +142,7 @@ public class PhoneTrafficController {
         if(roleList!=null&&roleList.get(0)!=null) {
             if (RoleCodeEnum.GLY.name().equals(roleList.get(0).getRoleCode())||RoleCodeEnum.HWZG.name().equals(roleList.get(0).getRoleCode())) {
                 request.setAttribute("phtrafficList", phTrafficList());
+
             } else {
                 List<UserInfoDTO> list = new ArrayList<>();
                 list.add(user);
@@ -186,6 +187,18 @@ public class PhoneTrafficController {
                     phases.add(CluePhase.PHAE_11TH.getCode());
                     phases.add(CluePhase.PHAE_12TH.getCode());
                     param.setPhases(phases);
+                }else{
+                    List<Integer> phases = new ArrayList<>();
+                    phases.add(CluePhase.PHASE_1ST.getCode());
+                    phases.add(CluePhase.PHAE_2ND.getCode());
+                    phases.add(CluePhase.PHAE_3RD.getCode());
+                    phases.add(CluePhase.PHAE_4TH.getCode());
+                    phases.add(CluePhase.PHAE_5TH.getCode());
+                    phases.add(CluePhase.PHAE_6TH.getCode());
+                    phases.add(CluePhase.PHAE_10TH.getCode());
+                    phases.add(CluePhase.PHAE_11TH.getCode());
+                    phases.add(CluePhase.PHAE_12TH.getCode());
+                    param.setPhases(phases);
                 }
             } else {
                 param.setOperatorId(user.getId());
@@ -194,6 +207,17 @@ public class PhoneTrafficController {
                     param.setPhase(CluePhase.PHAE_2ND.getCode());
                 }else  if(dealStatus==1){
                     List<Integer> phases = new ArrayList<>();
+                    phases.add(CluePhase.PHAE_3RD.getCode());
+                    phases.add(CluePhase.PHAE_4TH.getCode());
+                    phases.add(CluePhase.PHAE_5TH.getCode());
+                    phases.add(CluePhase.PHAE_6TH.getCode());
+                    phases.add(CluePhase.PHAE_10TH.getCode());
+                    phases.add(CluePhase.PHAE_11TH.getCode());
+                    phases.add(CluePhase.PHAE_12TH.getCode());
+                    param.setPhases(phases);
+                }else{
+                    List<Integer> phases = new ArrayList<>();
+                    phases.add(CluePhase.PHAE_2ND.getCode());
                     phases.add(CluePhase.PHAE_3RD.getCode());
                     phases.add(CluePhase.PHAE_4TH.getCode());
                     phases.add(CluePhase.PHAE_5TH.getCode());
