@@ -27,7 +27,8 @@
             background: #ddd;
             position: absolute;
             left: 30%;
-            top: 0
+            top: 0;
+            z-index: 1;
         }
         .vertical-line1 {
             width: 1px;
@@ -35,7 +36,8 @@
             background: #ddd;
             position: absolute;
             left: 80%;
-            top: 0
+            top: 0;
+            z-index: 1;
         }
 
         .left {
@@ -79,6 +81,8 @@
         [v-cloak] {
             display: none;
         }
+        .checkAllBtn .el-checkbox__inner{margin-top: 15px;}
+        .firstCheckAllBtn{position: absolute;left: 10px;top: 20px; }
     </style>
 </head>
 <body>
@@ -136,20 +140,20 @@
         <!-- 树形表格 -->
         <ul class="role-table col-xs-offset-2 col-md-offset-1 col-sm-offset-2 marginB20">
             <li class="header">
-                <div class="left">全选&nbsp;&nbsp;&nbsp;&nbsp;模块菜单</div>
+                <div class="left"><el-checkbox v-model="checkAll1" @change="handleCheckAllChange1">全选</el-checkbox>&nbsp;&nbsp;&nbsp;&nbsp;模块菜单</div>
                 <div class="right">操作权限</div>
                 <div class="handle">数据权限</div>
             </li>
             <div class="vertical-line"></div>
             <div class="vertical-line1"></div>
-            <li  v-for="(item,index) in dataList" :key="item.id">
+            <li  v-for="(item,index) in dataList" :key="item.id" style="position: relative;">
                 <div class="left"  @click="fold(item)">
                     <i :class="{'el-icon-caret-right':item.folded,'el-icon-caret-bottom':!item.folded}" v-cloak v-if="item.subList" class="item-icon"></i>   
-                    <el-checkbox @click.native="handleOneCheckAll($event,item)" v-cloak v-if="!item.subList" :indeterminate="item.isIndeterminate" v-model="item.checkAll"> {{item.title}}</el-checkbox>
+                    <el-checkbox @change="handleOneCheckAll(item)" v-cloak v-if="!item.subList" :indeterminate="item.isIndeterminate" v-model="item.checkAll"> {{item.title}}</el-checkbox>
                     <span v-if="item.subList" v-cloak>{{item.name}}</span> 
                 </div>              
                 <div class="right">
-                	<el-checkbox v-if="item.subList" :indeterminate="item.isIndeterminate" @change="checkSecondAll(item)" v-model="item.firstCheckAll"></el-checkbox>                 
+                	<el-checkbox v-if="item.subList" :indeterminate="item.isIndeterminate" @change="checkSecondAll(item)" v-model="item.firstCheckAll" class="firstCheckAllBtn"></el-checkbox>                 
                     <el-checkbox-group v-model="item.checkedCities" @change="handleOneCheckedCitiesChange(item)" v-else>
                     <el-checkbox  v-for="m in item.operationInfos" :label="m.id" :key="m.id" v-cloak> {{m.name}}</el-checkbox>
                     </el-checkbox-group>
@@ -158,7 +162,7 @@
                 <ul v-show="item.subList&&!item.folded">
                     <li v-for="(subList,cur) in item.subList" :key="subList.id">
                         <div class="left">
-                            <el-checkbox   v-model="subList.checkAll" @change="handleCheckAllChange($event,item,subList)" v-cloak>
+                            <el-checkbox   v-model="subList.checkAll" @change="handleCheckAllChange(item,subList)" v-cloak>
                                 {{subList.name}}
                             </el-checkbox>
                         </div>
@@ -250,6 +254,7 @@
                 isDisabled: false,
                 chooseLimitCheck: [],//默认选中
                 fields: [],
+                checkAll1:false,//全选默认
                 dataList:moduleData,
                 addRoleValidateForm: {
                     roleName: roleInfo.roleName,
@@ -583,8 +588,7 @@
                 }
             },
             // 全选一项
-            handleCheckAllChange(event, item, subList) {
-                console.log(event)
+            handleCheckAllChange(item, subList) {
                 console.log(item)
                 console.log(subList)
                 var arr = [];
@@ -596,34 +600,16 @@
                 }
                 // subList.checkedCities = event.target.checked ? arr : [];
                 subList.checkedCities = subList.checkAll ? arr : [];
-                // if (typeof subList === "undefined") {
-                //     this.$set(subList, "isIndeterminate", false)
-                // }
-                // subList.isIndeterminate = false;
                 if (typeof subList.checkAll === "undefined") {
                     this.$set(subList, "checkAll", true);
                 }
-                if (typeof item.isIndeterminate === "undefined") {
-                    this.$set(item, "isIndeterminate", true);
+                var secondAllSelect = item.subList.every((item) => item.checkAll);
+                if (secondAllSelect) {
+                    item.firstCheckAll = true;
+                } else {
+                    item.firstCheckAll = false;
                 }
-                for (var a = 0; a < item.subList.length; a++) {
-                    if (!item.subList[a].checkAll) {
-                        item.isIndeterminate = true;
-                        for (var a = 0; a < item.subList.length; a++) {
-                            if (item.subList[a].checkAll) {
-                                break
-                            } else {
-                                item.isIndeterminate = false;
-                                item.firstCheckAll = false;
-                            }
-                        }
-                        break
-                    } else {
-                        item.isIndeterminate = false;
-                        item.firstCheckAll = true;
-                    }
-                }
-
+                this.checkAllSelect();
             },
             // 单选
             handleCheckedCitiesChange(item, subList) {
@@ -631,35 +617,14 @@
                 if (typeof subList.checkAll === "undefined") {
                     this.$set(subList, "checkAll", false);
                 }
-                if (typeof subList.isIndeterminate === "undefined") {
-                    this.$set(subList, "isIndeterminate", false);
-                }
-                if (typeof item.isIndeterminate === "undefined") {
-                    this.$set(item, "isIndeterminate", true);
-                }
-                subList.isIndeterminate = checkedCount > 0 && checkedCount < subList.operationInfos.length;
                 subList.checkAll = checkedCount === subList.operationInfos.length;
-                if (checkedCount === 0) {
-                    subList.isIndeterminate = false
+                var secondAllSelect = item.subList.every((item) => item.checkAll);
+                if (secondAllSelect) {
+                    item.firstCheckAll = true;
+                } else {
+                    item.firstCheckAll = false;
                 }
-                for (var a = 0; a < item.subList.length; a++) {
-                    if (!item.subList[a].checkAll) {
-                        item.isIndeterminate = true;
-                        for (var b = 0; b < item.subList.length; b++) {
-                            if (item.subList[b].checkedCities.length > 0) {
-                                break
-                            } else {
-                                item.isIndeterminate = false;
-                                item.firstCheckAll = false;
-                            }
-                        }
-                        break
-                    } else {
-                        item.isIndeterminate = false;
-                        item.firstCheckAll = true;
-                    }
-                }
-
+                this.checkAllSelect();
             },
             // 点击所有
             checkSecondAll: function (item) {
@@ -669,7 +634,7 @@
                 for (var a = 0; a < item.subList.length; a++) {
                     this.checkItemAll(item.firstCheckAll, item.subList[a])
                 }
-                item.isIndeterminate=false
+                // item.isIndeterminate=false
             },
             checkItemAll: function (flag, item) {
                 var arr = [];
@@ -681,19 +646,17 @@
                 }
                 item.checkedCities = flag ? arr : [];
                 item.checkAll = flag;
+                this.checkAllSelect();
             },
             
             // 没有二级菜单
             handleOneCheckedCitiesChange:function (item) {
                 var checkedCount = item.checkedCities.length;
-                if (typeof item.isIndeterminate === "undefined") {
-                    this.$set(item, "isIndeterminate", false);
-                }
                 if (typeof item.checkAll === "undefined") {
                     this.$set(item, "checkAll", false);
                 }
-                item.isIndeterminate = checkedCount > 0 && checkedCount < item.operationInfos.length;
                 item.checkAll = checkedCount === item.operationInfos.length;
+                this.checkAllSelect();
             },
             handleOneCheckAll:function (event,item) {
                 var arr = [];
@@ -702,6 +665,7 @@
                 }
 
                 item.checkedCities = event.target.checked ? arr : [];
+                this.checkAllSelect();
             },
             visitLimitRadioChange(value) {
                 if(value==1){
@@ -709,6 +673,30 @@
                 }else{
                     this.isDisabled=false
                 }
+            },
+            handleCheckAllChange1(val) {
+                this.dataList.forEach((item) => {
+                    if (!item.subList) {
+                        item.checkAll = val;
+                        this.handleOneCheckAll(item);
+                    } else {
+                        item.firstCheckAll = val;
+                        this.checkSecondAll(item);
+                        item.subList.forEach((innerItem) => {
+                            innerItem.checkAll = val;
+                        })
+                    }
+                })
+            },
+            // 校验单选和多选关联
+            checkAllSelect() {
+                var flag = true;
+                this.dataList.forEach((item) => {
+                    if (!(item.firstCheckAll || item.checkAll)) {
+                        flag = false;
+                    }
+                });
+                this.checkAll1 = flag;
             }
         },
         created(){

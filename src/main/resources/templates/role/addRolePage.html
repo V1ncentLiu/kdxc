@@ -27,7 +27,8 @@
             background: #ddd;
             position: absolute;
             left: 30%;
-            top: 0
+            top: 0;
+            z-index: 1;
         }
         .vertical-line1 {
             width: 1px;
@@ -35,7 +36,8 @@
             background: #ddd;
             position: absolute;
             left: 80%;
-            top: 0
+            top: 0;
+            z-index: 1;
         }
 
         .left {
@@ -89,6 +91,8 @@
         [v-cloak] {
             display: none;
         }
+        .checkAllBtn .el-checkbox__inner{margin-top: 15px;}
+        .firstCheckAllBtn{position: absolute;left: 10px;top: 20px; }
     </style>
 </head>
 <body>
@@ -146,22 +150,22 @@
         <!-- 树形表格 -->
         <ul class="role-table col-xs-offset-2 col-md-offset-1 col-sm-offset-2 marginB20">
             <li class="header">
-                <div class="left"><el-checkbox v-model="checkAll1" @change="handleCheckAllChange1">全选</el-checkbox>&nbsp;&nbsp;&nbsp;&nbsp;模块菜单</div>
+                <div class="left checkAllBtn"><el-checkbox v-model="checkAll1" @change="handleCheckAllChange1">全选</el-checkbox>&nbsp;&nbsp;&nbsp;&nbsp;模块菜单</div>
                 <div class="right">操作权限</div>
                 <div class="handle">数据权限</div>
             </li>
             <div class="vertical-line"></div>
             <div class="vertical-line1"></div>
-            <li  v-for="(item,index) in dataList" :key="item.id">
+            <li  v-for="(item,index) in dataList" :key="item.id" style="position: relative;">
                 <div class="left"  @click="fold(item)">
                     <i :class="{'el-icon-caret-right':item.folded,'el-icon-caret-bottom':!item.folded}" v-cloak v-if="item.subList" class="item-icon"></i>   
                     <el-checkbox @change="handleOneCheckAll(item)" v-cloak v-if="!item.subList" :indeterminate="item.isIndeterminate" v-model="item.checkAll">{{item.title}}</el-checkbox>
                     <span v-if="item.subList" v-cloak>{{item.name}}</span> 
                 </div>              
                 <div class="right">
-                    <el-checkbox v-if="item.subList" :indeterminate="item.isIndeterminate" @change="checkSecondAll(item)" v-model="item.firstCheckAll"></el-checkbox>                 
+                    <el-checkbox v-if="item.subList" :indeterminate="item.isIndeterminate" @change="checkSecondAll(item)" v-model="item.firstCheckAll" class="firstCheckAllBtn"></el-checkbox>                 
                     <el-checkbox-group v-model="item.checkedCities" @change="handleOneCheckedCitiesChange(item)" v-else>
-                    <el-checkbox  v-for="m in item.operationInfos" :label="m.id" :key="m.id" v-cloak>{{m.name}}</el-checkbox>
+                        <el-checkbox  v-for="m in item.operationInfos" :label="m.id" :key="m.id" v-cloak>{{m.name}}</el-checkbox>
                     </el-checkbox-group>
                 </div>
                 <div class="line"></div>
@@ -253,7 +257,7 @@ var moduleData=[[${moduleData}]];
                 isDisabled: true,
                 chooseLimitCheck: [],//默认选中
                 fields: [],
-                checkAll1:false,
+                checkAll1:false,//全选默认
                 dataList:moduleData,
                 addRoleValidateForm: {
                     roleName: '',
@@ -628,7 +632,6 @@ var moduleData=[[${moduleData}]];
             },
             // 单选
             handleCheckedCitiesChange(item, subList) {
-                debugger
                 var checkedCount = subList.checkedCities.length;
                 if (typeof subList.checkAll === "undefined") {
                     this.$set(subList, "checkAll", false);
