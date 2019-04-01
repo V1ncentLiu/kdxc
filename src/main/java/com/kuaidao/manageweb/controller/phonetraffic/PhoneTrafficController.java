@@ -352,7 +352,7 @@ public class PhoneTrafficController {
                 && clueFileList.getData() != null) {
             request.setAttribute("clueFileList", clueFileList.getData());
         }
-        return "/phonetraffic/editCustomerMaintenance";
+        return "phonetraffic/editCustomerMaintenance";
     }
 
 
@@ -439,7 +439,7 @@ public class PhoneTrafficController {
                 && clueFileList.getData() != null) {
             request.setAttribute("clueFileList", clueFileList.getData());
         }
-        return "/phonetraffic/readOnlyCustomerMaintenance";
+        return "phonetraffic/readOnlyCustomerMaintenance";
     }
 
 
@@ -520,7 +520,7 @@ public class PhoneTrafficController {
 
         Long roleId = null;
         RoleQueryDTO query1 = new RoleQueryDTO();
-        query.setRoleCode(RoleCodeEnum.HWZG.name());
+        query1.setRoleCode(RoleCodeEnum.HWZG.name());
         JSONResult<List<RoleInfoDTO>> roleJson1 = roleManagerFeignClient.qeuryRoleByName(query1);
         if (JSONResult.SUCCESS.equals(roleJson1.getCode())) {
             List<RoleInfoDTO> data = roleJson1.getData();
