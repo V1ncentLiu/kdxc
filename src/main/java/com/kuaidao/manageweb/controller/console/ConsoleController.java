@@ -189,8 +189,8 @@ public class ConsoleController {
         }
 
         
-        /*
-         if(type.equals("1")) {
+        
+        /* if(type.equals("1")) {
             path = "console/consoleTelemarketing";
         }else if(type.equals("2")) {
             List<Integer> statusList = new ArrayList<Integer>();
@@ -517,7 +517,7 @@ public class ConsoleController {
 
     /**
      * 商务经理 看板统计
-     * 
+     * 当月到访数  当月签约数 当月二次到访数  当月二次来访签约数  未收齐尾款笔数
      * @return
      */
     @RequestMapping("/countCurMonthNum")
@@ -722,6 +722,7 @@ public class ConsoleController {
         Date addDays2 = DateUtil.addDays(disableTime, 1);
         System.out.println(addDays2);
         System.out.println(DateUtil.diffTimes(addDays2, new Date()));
+       
     }
 
     /**
