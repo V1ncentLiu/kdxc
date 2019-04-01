@@ -1,7 +1,6 @@
 package com.kuaidao.manageweb.controller.phonetraffic;
 
-import com.kuaidao.aggregation.dto.busmycustomer.BusMyCustomerRespDTO;
-import com.kuaidao.aggregation.dto.busmycustomer.MyCustomerParamDTO;
+import com.kuaidao.aggregation.constant.AggregationConstant;
 import com.kuaidao.aggregation.dto.call.CallRecordReqDTO;
 import com.kuaidao.aggregation.dto.call.CallRecordRespDTO;
 import com.kuaidao.aggregation.dto.circulation.CirculationReqDTO;
@@ -22,8 +21,6 @@ import com.kuaidao.common.constant.StageContant;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.common.util.CommonUtil;
-import com.kuaidao.manageweb.config.LogRecord;
-import com.kuaidao.manageweb.constant.MenuEnum;
 import com.kuaidao.manageweb.feign.assignrule.InfoAssignFeignClient;
 import com.kuaidao.manageweb.feign.call.CallRecordFeign;
 import com.kuaidao.manageweb.feign.circulation.CirculationFeignClient;
@@ -138,18 +135,20 @@ public class PhoneTrafficController {
         request.setAttribute("userFieldList", queryFieldByUserAndMenu.getData());
 
 
+
+        Integer flag = AggregationConstant.YES;
         List<RoleInfoDTO> roleList = user.getRoleList();
         if(roleList!=null&&roleList.get(0)!=null) {
             if (RoleCodeEnum.GLY.name().equals(roleList.get(0).getRoleCode())||RoleCodeEnum.HWZG.name().equals(roleList.get(0).getRoleCode())) {
                 request.setAttribute("phtrafficList", phTrafficList());
-
+                flag = AggregationConstant.NO;
             } else {
                 List<UserInfoDTO> list = new ArrayList<>();
                 list.add(user);
                 request.setAttribute("phtrafficList", list);
             }
         }
-
+        request.setAttribute("editflag",flag);
         return "phonetraffic/customManagement";
     }
 
