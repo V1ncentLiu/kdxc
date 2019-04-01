@@ -92,7 +92,7 @@
             </el-form>
         </el-row>
 
-        <el-table :data="tableData" tooltip-effect="dark" style="width:100%"  ref="multipleTable"
+        <el-table :data="tableData" border tooltip-effect="dark" style="width:100%"  ref="multipleTable"
                   @row-dblclick="showCustomerDetail"
                   @selection-change="handleSelectionChange" >
             <el-table-column type="selection" width="55" prop="clueId" ></el-table-column>
@@ -866,7 +866,8 @@
                 <el-row v-if="isAllMoney" >
                     <el-col :span="10">
                         <el-form-item label="余款金额：" :label-width="formLabelWidth" prop="amountBalance">
-                            <el-input maxLength="10" v-model="formSigning.amountBalance" min="0" type="number" oninput="if(value.length>10)value=value.slice(0,10)"   style="width: 80%;"></el-input>
+                            <!-- <el-input maxLength="10" v-model="formSigning.amountBalance" min="0" type="number" oninput="if(value.length>10)value=value.slice(0,10)"   style="width: 80%;"></el-input> -->
+                            <el-input maxLength="10" v-model="formSigning.amountBalance" min="0" oninput="if(value.length>10)value=value.slice(0,10)" @keyup.native="number" style="width: 80%;"></el-input>                             
                             <span style="padding-left: 10px;">元</span>
                         </el-form-item>
                     </el-col>
@@ -1093,7 +1094,8 @@
                 <el-row v-if="isAllMoney" >
                     <el-col :span="10">
                         <el-form-item label="余款金额：" :label-width="formLabelWidth" prop="amountBalance">
-                            <el-input  maxLength="10" v-model="updateFormSigning.amountBalance" style="width: 80%;"  type="number"  min="0" oninput="if(value.length>10)value=value.slice(0,10)"  onkeypress="return(/[\d]/.test(String.fromCharCode(event.keyCode)))"></el-input>
+                            <!-- <el-input  maxLength="10" v-model="updateFormSigning.amountBalance" style="width: 80%;"  type="number"  min="0" oninput="if(value.length>10)value=value.slice(0,10)"  onkeypress="return(/[\d]/.test(String.fromCharCode(event.keyCode)))"></el-input> -->
+                            <el-input  maxLength="10" v-model="updateFormSigning.amountBalance" style="width: 80%;"  type="number"  min="0" oninput="if(value.length>10)value=value.slice(0,10)"  @keyup.native="number2"></el-input>
                             <span style="padding-left: 10px;">元</span>
                         </el-form-item>
                     </el-col>
@@ -1514,11 +1516,13 @@
                             var reg =  /^[1-9]+[0-9]*]*$/ ;
                             if(value ==null || value =="null" || value ==""  ){
                                 callback(new Error("请输入余款金额"));
-                                mainDivVM.formSigning.amountBalance =null;
+                                // mainDivVM.formSigning.amountBalance =null;
+                                return;
 
                             }else  if(value !=null && value !="null" && value !="" && !reg.test(value) ){
                                 callback(new Error("请输入正整数"));
-                                mainDivVM.formSigning.amountBalance =null;
+                                // mainDivVM.formSigning.amountBalance =null;
+                                return;
                             }else{
                                 callback();
                             }
@@ -2249,7 +2253,7 @@
                 window.location.href='/businesssign/visitRecordPage?clueId='+row.clueId+"&signId="+row.signId+"&readyOnly=1";
             },
             selectSigningType(pa1) { //是不是全款
-                this.formSigning.amountBalance = '';
+                // this.formSigning.amountBalance = null;
                 this.formSigning.makeUpTime = '';
                 if( pa1=='1' ){
                     this.formSigning.payType = '1';
@@ -2345,6 +2349,14 @@
                     }
                 })
             },
+            number(){//添加签约单余款
+    　　　      this.formSigning.amountBalance=this.formSigning.amountBalance.replace(/[^\.\d]/g,'');
+                this.formSigning.amountBalance=this.formSigning.amountBalance.replace('.','');
+        　　},
+            number2(){//编辑签约单余款
+    　　　      this.updateFormSigning.amountBalance=this.updateFormSigning.amountBalance.replace(/[^\.\d]/g,'');
+                this.updateFormSigning.amountBalance=this.updateFormSigning.amountBalance.replace('.','');
+        　　},
         },
         created(){
             this.initList();
@@ -2371,33 +2383,5 @@
     });
 
 </script>
-<style>
-
-    .dialog-footer{
-        text-align: center;
-    }
-    .el-table th {
-        font-weight: bolder;
-    }
-    .el-input__inner{
-    //   width: 200px;
-    }
-    .el-button--danger:focus, .el-button--danger:hover{
-        background: #6f7180;
-        border: #6f7180;
-    }
-    .el-button--danger{
-        background: #6f7180;
-        border: #6f7180;
-    }
-    .el-input {
-        width: 90%;
-    }
-    .el-tooltip__popper {
-        max-width: 50%;
-        line-height: 130%;
-        margin-left: 2%;
-    }
-</style>
 </body>
 </html>

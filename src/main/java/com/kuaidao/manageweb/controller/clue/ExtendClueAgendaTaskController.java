@@ -203,9 +203,6 @@ public class ExtendClueAgendaTaskController {
     public JSONResult<Integer> autoAllocationTask(HttpServletRequest request,
             @RequestBody IdListLongReq queryDto) {
 
-        ClueQueryDTO queryDTO = new ClueQueryDTO();
-
-        queryDTO.setClueId(queryDto.getClueId());
 
         JSONResult<Integer> clueInfo = extendClueFeignClient.autoAllocationTask(queryDto);
 

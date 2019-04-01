@@ -19,7 +19,7 @@
         <el-breadcrumb-item>话务管理列表</el-breadcrumb-item>
     </el-breadcrumb>
     <el-row class="marginB10">
-        <el-button type="text" @click="dialogFormVisible = true"><i class="el-icon-menu"></i>选择列</el-button>
+        <el-button type="text" @click="checkline"><i class="el-icon-menu"></i>选择列</el-button>
             <el-button type="success" @click="openassignrDig">分配资源</el-button>
             <!--<el-button type="success" @click="editClue">编辑资源</el-button>-->
             <!--<el-button type="success" @click="releaseClue">释放资源</el-button>-->
@@ -115,7 +115,7 @@
 	             <template slot-scope="scope" >
                      {{scope.row.phone}}
                     <input type='hidden'>
-                     <i class="el-icon-phone-outline"  @click="customerEidt(scope.row.clueId)"  style="margin:0 10px;font-size: 16px;cursor: pointer;"></i>
+                     <i class="el-icon-phone-outline" style="margin:0 10px;font-size: 16px;cursor: pointer;"></i>
                     <el-tag v-if="scope.row.tag">{{scope.row.tag}}</el-tag>
                 </template>
             </el-table-column>
@@ -129,6 +129,14 @@
                     </div>
                 </template>
             </el-table-column>
+
+           <el-table-column :prop="item.fieldCode" :label="item.displayName" :width="item.width" v-else-if="item.fieldCode == 'cusName'">
+               <template slot-scope="scope">
+                   <el-button  @click="customerEidt(scope.row.clueId)"   type="text" size="small">
+                       {{scope.row.cusName}}
+                   </el-button>
+               </template>
+           </el-table-column>
 
             <el-table-column :prop="item.fieldCode" :label="item.displayName" :width="item.width"
 	          v-else-if="item.fieldCode == 'isRepeatPhone'">
@@ -220,24 +228,23 @@
 
     <dialog-tracking :param="trackingParam"></dialog-tracking>
     <!-- 自定义列 -->
-    <el-dialog title="自定义列" :visible.sync="dialogFormVisible">
-      <el-form :model="formList">
-        
-          <el-form-item label="列名" prop="type">
-            <el-checkbox-group v-model="formList.type">
-              <el-checkbox :label="item.sortNum+'_'+item.fieldCode+'_'+item.displayName+'_'+item.id"  name="type" :key="item.fieldCode"  v-for="(item,index) in  allTableColums ">
-                  {{item.displayName}}
-              </el-checkbox>
-          
-             </el-checkbox-group>
-          </el-form-item>
-        
-      </el-form>
-      
-      <div slot="footer" class="dialog-footer">
-        <el-button @click="dialogFormVisible = false">取 消</el-button>
-        <el-button type="primary" @click="confirmColumn">确 定</el-button>
-      </div>
+    <el-dialog title="自定义列" :visible.sync="dialogChooseList">
+        <el-form :model="form">
+            <el-form-item label="列名" prop="type">
+                <el-checkbox-group v-model="form.type">
+                    	<span>
+                    	</span>
+                    <el-checkbox :label="item.sortNum+'_'+item.fieldCode+'_'+item.displayName+'_'+item.id"   name="type" :key="item.fieldCode"  v-for="(item,index) in  allTableColums ">
+                        {{item.displayName}}
+                    </el-checkbox>
+
+                </el-checkbox-group>
+            </el-form-item>
+        </el-form>
+        <div slot="footer" class="dialog-footer">
+            <el-button @click="dialogChooseList = false">取 消</el-button>
+            <el-button type="primary" @click="confirmColumn">确 定</el-button>
+        </div>
     </el-dialog>
 </div>
 </body>
@@ -308,7 +315,7 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                 value: '',//下拉选项默认值
                 recordTable:[],
                 repeatPhonesTable:[],
-                dialogFormVisible: false,
+                dialogChooseList: false,
                 formList: {
                    type: [],
                 },
@@ -561,13 +568,34 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                     return false;
                   }
                 });
-            },  
-            //处理用户选择的列
+            },
+            checkline(){
+                this.dialogChooseList = true;
+                //初始化table 列 和 用户自定义列
+                this.allTableColums = fieldList;
+                if(userFieldList.length!=0){
+                    var type=[];
+                    for(var i=0;i<userFieldList.length;i++){
+                        type.push(userFieldList[i].sortNum+'_'+userFieldList[i].fieldCode+'_'+userFieldList[i].displayName+'_'+userFieldList[i].fieldId)
+                    }
+                    this.form.type = type;
+                }else{
+                    var type=[];
+                    for(var i=0;i<fieldList.length;i++){
+                        type.push(fieldList[i].sortNum+'_'+fieldList[i].fieldCode+'_'+fieldList[i].displayName+'_'+fieldList[i].id)
+                    }
+                    this.form.type = type;
+                }
+            },
             confirmColumn(){
-                this.dialogFormVisible = false;
-                
+                //处理用户选择的列
                 var customerShowColun = [];
-                var customerColumn = this.formList.type;
+                var customerColumn = this.form.type;
+                if(customerColumn.length==0){
+                    this.$message({message: '请选择列', type: 'warning'});
+                    return;
+                }
+                this.dialogChooseList = false;
                 customerColumn.sort(this.sortNumber);//对选择的列排序
                 var idList=[];
                 for(var i=0;i<customerColumn.length;i++){
@@ -581,19 +609,16 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                 }
                 this.tableColums = customerShowColun;
                 var param ={};
-                  param.fieldIdList = idList;
-                  param.menuCode = "aggregation:PhoneTraffic";
-                  console.info(param);
-                  if(idList.length!=0){
+                param.fieldIdList = idList;
+                param.menuCode = "aggregation:PhoneTraffic";
+                if(idList.length!=0){
                     axios.post('/customfield/customField/saveUserField', param)
-                     .then(function (response) {
-                        
-                      })
-                     .catch(function (error) {
-                            console.log(error);
-                      });
-                    }
-                },
+                        .then(function (response) {
+                        }).catch(function (error) {
+                        console.log(error);
+                    });
+                }
+            },
                 initColumn(){
                     //初始化table 列 和 用户自定义列
                     this.allTableColums = fieldList;
@@ -602,13 +627,19 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                         for(var i=0;i<userFieldList.length;i++){
                             type.push(userFieldList[i].sortNum+'_'+userFieldList[i].fieldCode+'_'+userFieldList[i].displayName+'_'+userFieldList[i].fieldId)
                         }
-                        this.formList.type = type;
+                        this.form.type = type;
                         this.confirmColumn();
                     }else{
-                        this.tableColums = fieldList;
+                        var type=[];
+                        for(var i=0;i<fieldList.length;i++){
+                            type.push(fieldList[i].sortNum+'_'+fieldList[i].fieldCode+'_'+fieldList[i].displayName+'_'+fieldList[i].id)
+                        }
+                        this.form.type = type;
+                        this.confirmColumn();
                     }
-                    
+
                 },
+
                 sortNumber(a,b) {
                     //对数组中元素，按照数字 从小到大 排序
                     return a.split("_")[0] - b.split("_")[0];
