@@ -422,10 +422,10 @@
     </el-dialog>
     <dialog-tracking :param="trackingParam"></dialog-tracking>
     <!-- 自定义列 -->
-     <el-dialog title="自定义列" :visible.sync="dialogChooseList">
-            <el-form :model="form">
+      <el-dialog title="自定义列" :visible.sync="dialogChooseList">
+            <el-form :model="form1">
                 <el-form-item label="列名" prop="type">
-                    <el-checkbox-group v-model="form.type">
+                    <el-checkbox-group v-model="form1.type">
                     	<span>
                     	</span>
                         <el-checkbox :label="item.sortNum+'_'+item.fieldCode+'_'+item.displayName+'_'+item.id"   name="type" :key="item.fieldCode"  v-for="(item,index) in  allTableColums ">
@@ -439,7 +439,7 @@
                 <el-button @click="dialogChooseList = false">取 消</el-button>
                 <el-button type="primary" @click="confirmColumn">确 定</el-button>
             </div>
-        </el-dialog>
+       </el-dialog>
     </template>
 </div>
 </body>
@@ -572,7 +572,10 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                 	trackingDay:'',
                 	teleorg:'',
                 	teleSaleId:'',
-                },    
+                },
+                form1: {
+                    type: [],
+                },
                 cusLevelArr:[],
                 categoryArr:[],
                 provinceArr:[],
@@ -652,13 +655,13 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                   	for(var i=0;i<userFieldList.length;i++){
                   		type.push(userFieldList[i].sortNum+'_'+userFieldList[i].fieldCode+'_'+userFieldList[i].displayName+'_'+userFieldList[i].fieldId)
                  	}
-	              	this.form.type = type;
+	              	this.form1.type = type;
               	}else{
               		var type=[];
                   	for(var i=0;i<fieldList.length;i++){
                   		type.push(fieldList[i].sortNum+'_'+fieldList[i].fieldCode+'_'+fieldList[i].displayName+'_'+fieldList[i].id)
                  	}
-	              	this.form.type = type;
+	              	this.form1.type = type;
               	}
         	},
         	//初始化页面
@@ -942,7 +945,7 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
             confirmColumn(){
                 //处理用户选择的列
                 var customerShowColun = [];
-                var customerColumn = this.form.type;
+                var customerColumn = this.form1.type;
                 if(customerColumn.length==0){
                     this.$message({
                         message: '请选择列',
@@ -982,14 +985,14 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                   	for(var i=0;i<userFieldList.length;i++){
                   		type.push(userFieldList[i].sortNum+'_'+userFieldList[i].fieldCode+'_'+userFieldList[i].displayName+'_'+userFieldList[i].fieldId)
                  	}
-	              	this.form.type = type;
+	              	this.form1.type = type;
 	              	this.confirmColumn();
               	}else{
               		var type=[];
                   	for(var i=0;i<fieldList.length;i++){
                   		type.push(fieldList[i].sortNum+'_'+fieldList[i].fieldCode+'_'+fieldList[i].displayName+'_'+fieldList[i].id)
                  	}
-	              	this.form.type = type;
+	              	this.form1.type = type;
 	              	this.confirmColumn();
               	}
               	
