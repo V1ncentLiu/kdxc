@@ -469,15 +469,13 @@
                     <el-row>
                         <el-col :span="10">
                             <el-form-item label="是否远程签约：" :label-width="formLabelWidth" prop="isRemoteSign">
-                                <el-select v-model="formSigning.isRemoteSign11"  placeholder="请选择是否远程签约："> <!--  -->
-                                    <!--<el-option-->
-                                            <!--v-for="item in isSignArr"-->
-                                            <!--:key="item.value"-->
-                                            <!--:label="item.name"-->
-                                            <!--:value="item.value">-->
-                                    <!--</el-option>-->
-                                    <el-option  key="0" label="否" value="0"></el-option>
-                                    <el-option  key="1" label="是" value="1"></el-option>
+                                <el-select v-model="formSigning.isRemoteSign"  placeholder="请选择是否远程签约："> <!--  -->
+                                    <el-option
+                                            v-for="item in isSignArr"
+                                            :key="item.value"
+                                            :label="item.name"
+                                            :value="item.value">
+                                    </el-option>
                                 </el-select>
                             </el-form-item>
                         </el-col>
@@ -727,17 +725,85 @@
                     { type: 'date', required: true, message: '请选择时间', trigger: 'change' }
                 ],
                 amountReceived: [
-                    { required: true, message: '请输入实收金额', trigger: 'blur' }
+                    { required: true,validator:function(rule,value,callback){
+                            var reg =  /^[1-9]+[0-9]*]*$/ ;
+                            if(value ==null || value =="null" || value ==""  ){
+                                callback(new Error("请输入实收金额"));
+                                mainDivVM.formMoneyDetail.amountReceived =null;
+
+                            }else  if(value !=null && value !="null" && value !="" && !reg.test(value) ){
+                                callback(new Error("请输入正整数"));
+                                mainDivVM.formMoneyDetail.amountReceived =null;
+                            }else{
+                                callback();
+                            }
+
+                        }, trigger: 'change'}
                 ],
                 amountBalance: [
-                    { required: true, message: '请输入余款金额', trigger: 'blur' }
+                    { required: true,validator:function(rule,value,callback){
+                            var reg =  /^[1-9]+[0-9]*]*$/ ;
+                            if(value ==null || value =="null" || value ==""  ){
+                                callback(new Error("请输入余款金额"));
+                                mainDivVM.formMoneyDetail.amountBalance =null;
+
+                            }else  if(value !=null && value !="null" && value !="" && !reg.test(value) ){
+                                callback(new Error("请输入正整数"));
+                                mainDivVM.formMoneyDetail.amountBalance =null;
+                            }else{
+                                callback();
+                            }
+
+                        }, trigger: 'change'}
                 ],
                 makeUpTime: [
                     { type: 'date', required: true, message: '请选择预计余款补齐时间', trigger: 'change' }
                 ],
                 // performanceAmount: [
-                // 	{ required: true, message: '请输入业绩金额', trigger: 'blur' }
+                //     { required: true,validator:function(rule,value,callback){
+                //             var reg =  /^[1-9]+[0-9]*]*$/ ;
+                //             if(value ==null || value =="null" || value ==""  ){
+                //                 callback(new Error("请输入业绩金额"));
+                //                 mainDivVM.formMoneyDetail.visitNum =null;
+                //
+                //             }else  if(value !=null && value !="null" && value !="" && !reg.test(value) ){
+                //                 callback(new Error("请输入正整数"));
+                //                 mainDivVM.formMoneyDetail.visitNum =null;
+                //             }else{
+                //                 callback();
+                //             }
+                //
+                //         }, trigger: 'change'}
                 // ],
+                visitTime: [ //请选择到访时间
+                    { required: true, message: '请选择到访时间', trigger: 'change' }
+                ],
+                visitCity: [ //请填写来访城市
+                    { required: true, message: '请填写来访城市', trigger: 'change' }
+                ],
+                visitType: [ //请选择到访类型
+                    { required: true, message: '请选择到访类型', trigger: 'change' }
+                ],
+                visitShopType: [ //请选择到访店铺类型
+                    { required: true, message: '请选择到访店铺类型', trigger: 'change' }
+                ],
+                visitNum: [ //请填写到访人数
+                    { required: true,validator:function(rule,value,callback){
+                            var reg =  /^[1-9]+[0-9]*]*$/ ;
+                            if(value ==null || value =="null" || value ==""  ){
+                                callback(new Error("请填写到访人数"));
+                                mainDivVM.formMoneyDetail.visitNum =null;
+
+                            }else  if(value !=null && value !="null" && value !="" && !reg.test(value) ){
+                                callback(new Error("请输入正整数"));
+                                mainDivVM.formMoneyDetail.visitNum =null;
+                            }else{
+                                callback();
+                            }
+
+                        }, trigger: 'change'}
+                ],
+
             },
             rules: {
                 customerName: [
@@ -768,19 +834,68 @@
                     { required: true, message: '请选择签约店型', trigger: 'change' }
                 ],
                 amountReceivable: [
-                    { required: true, message: '请输入应收金额', trigger: 'blur' }
+                    { required: true,validator:function(rule,value,callback){
+                                var reg =  /^[1-9]+[0-9]*]*$/ ;
+                                if(value ==null || value =="null" || value ==""  ){
+                                    callback(new Error("请输入应收金额"));
+                                    mainDivVM.formSigning.amountReceivable =null;
+
+                                }else  if(value !=null && value !="null" && value !="" && !reg.test(value) ){
+                                    callback(new Error("请输入正整数"));
+                                    mainDivVM.formSigning.amountReceivable =null;
+                                }else{
+                                    callback();
+                                }
+
+                            }, trigger: 'change'}
                 ],
                 firstToll: [
-                    { required: true, message: '请输入路费（报首次）', trigger: 'blur' }
+                    { required: true,validator:function(rule,value,callback){
+                            var reg =  /^[1-9]+[0-9]*]*$/ ;
+                            if(value ==null || value =="null" || value ==""  ){
+                                callback(new Error("请输入路费（报首次）"));
+                                mainDivVM.formSigning.firstToll =null;
+
+                            }else  if(value !=null && value !="null" && value !="" && !reg.test(value) ){
+                                callback(new Error("请输入正整数"));
+                                mainDivVM.formSigning.firstToll =null;
+                            }else{
+                                callback();
+                            }
+                        }, trigger: 'change'}
                 ],
                 preferentialAmount: [
-                    { required: true, message: '请输入优惠金额', trigger: 'blur' }
+                    { required: true,validator:function(rule,value,callback){
+                            var reg =  /^[1-9]+[0-9]*]*$/ ;
+                            if(value ==null || value =="null" || value ==""  ){
+                                callback(new Error("请输入优惠金额"));
+                                mainDivVM.formSigning.preferentialAmount =null;
+
+                            }else  if(value !=null && value !="null" && value !="" && !reg.test(value) ){
+                                callback(new Error("请输入正整数"));
+                                mainDivVM.formSigning.preferentialAmount =null;
+                            }else{
+                                callback();
+                            }
+                        }, trigger: 'change'}
                 ],
                 signType: [
                     { required: true, message: '请选择签约类型', trigger: 'change' }
                 ],
                 giveAmount: [
-                    { required: true, message: '请输入赠送金额', trigger: 'blur' }
+                    { required: true,validator:function(rule,value,callback){
+                            var reg =  /^[1-9]+[0-9]*]*$/ ;
+                            if(value ==null || value =="null" || value ==""  ){
+                                callback(new Error("请输入赠送金额"));
+                                mainDivVM.formSigning.giveAmount =null;
+
+                            }else  if(value !=null && value !="null" && value !="" && !reg.test(value) ){
+                                callback(new Error("请输入正整数"));
+                                mainDivVM.formSigning.giveAmount =null;
+                            }else{
+                                callback();
+                            }
+                        }, trigger: 'change'}
                 ],
                 payType: [
                 	{ required: true, message: '请选择付款类型', trigger: 'change' }
@@ -791,15 +906,39 @@
                 payTime: [
                     { type: 'date', required: true, message: '请选择时间', trigger: 'change' }
                 ],
-                // amountReceived: [
-                //     { required: true, message: '请输入实收金额', trigger: 'blur' }
-                // ],
-                // amountBalance: [
-                //     { required: true, message: '请输入余款金额', trigger: 'blur' }
-                // ],
-                // makeUpTime: [
-                //     { type: 'date', required: true, message: '请选择预计余款补齐时间', trigger: 'change' }
-                // ],
+                amountReceived: [
+                    { required: true,validator:function(rule,value,callback){
+                            var reg =  /^[1-9]+[0-9]*]*$/ ;
+                            if(value ==null || value =="null" || value ==""  ){
+                                callback(new Error("请输入实收金额"));
+                                mainDivVM.formSigning.amountReceived =null;
+
+                            }else  if(value !=null && value !="null" && value !="" && !reg.test(value) ){
+                                callback(new Error("请输入正整数"));
+                                mainDivVM.formSigning.amountReceived =null;
+                            }else{
+                                callback();
+                            }
+                        }, trigger: 'change'}
+                ],
+                amountBalance: [
+                    { required: true,validator:function(rule,value,callback){
+                            var reg =  /^[1-9]+[0-9]*]*$/ ;
+                            if(value ==null || value =="null" || value ==""  ){
+                                callback(new Error("请输入余款金额"));
+                                mainDivVM.formSigning.amountBalance =null;
+
+                            }else  if(value !=null && value !="null" && value !="" && !reg.test(value) ){
+                                callback(new Error("请输入余款金额"));
+                                mainDivVM.formSigning.amountBalance =null;
+                            }else{
+                                callback();
+                            }
+                        }, trigger: 'change'}
+                ],
+                makeUpTime: [
+                    { type: 'date', required: true, message: '请选择预计余款补齐时间', trigger: 'change' }
+                ],
                 // performanceAmount: [
                 // 	{ required: true, message: '请输入业绩金额', trigger: 'blur' }
                 // ],
@@ -819,33 +958,15 @@
                     { required: true, message: '请选择到访店铺类型', trigger: 'change' }
                 ],
                 visitNum: [ //请填写到访人数
-                    { required: true, message: '请填写到访人数', trigger: 'change' },
-                    { validator:function(rule,value,callback){
+                    { required: true,validator:function(rule,value,callback){
                             var reg =  /^[1-9]+[0-9]*]*$/ ;
                             if(value ==null || value =="null" || value ==""  ){
                                 callback(new Error("请填写到访人数"));
-                                mainDivVM.addVisitRecord.visitPeopleNum =null;
+                                mainDivVM.formSigning.visitNum =null;
 
                             }else  if(value !=null && value !="null" && value !="" && !reg.test(value) ){
                                 callback(new Error("请输入正整数"));
-                                mainDivVM.addVisitRecord.visitPeopleNum =null;
-                            }else{
-                                callback();
-                            }
-
-                        }, trigger: 'change'}
-                ],
-                visitPeopleNum: [ //请填写到访人数
-                    { required: true, message: '请填写到访人数', trigger: 'change' },
-                    { validator:function(rule,value,callback){
-                            var reg =  /^[1-9]+[0-9]*]*$/ ;
-                            if(value ==null || value =="null" || value ==""  ){
-                                callback(new Error("请填写到访人数"));
-                                mainDivVM.addVisitRecord.visitPeopleNum =null;
-
-                            }else  if(value !=null && value !="null" && value !="" && !reg.test(value) ){
-                                callback(new Error("请输入正整数"));
-                                mainDivVM.addVisitRecord.visitPeopleNum =null;
+                                mainDivVM.formSigning.visitNum =null;
                             }else{
                                 callback();
                             }
@@ -890,7 +1011,7 @@
                 preferentialAmount:'',
                 signType:'',
                 giveAmount:'',
-                isRemoteSign11:'',
+                isRemoteSign:'',
 
                 visitTime:"",
                 visitCity:"",
@@ -1007,10 +1128,10 @@
                     mainDivVM.currentProvince(mainDivVM.formSigning.signProvince)
                     mainDivVM.currentCity(mainDivVM.formSigning.signCity)
                     //  设置默认时间
-                    mainDivVM.formSigning.payTime = new Date()
-                    mainDivVM.formSigning.isRemoteSign11= "0";
-                    mainDivVM.formSigning.visitTime = new Date();
-                    mainDivVM.formSigning.visitType = 1;
+                    // mainDivVM.formSigning.payTime = new Date()
+                    // mainDivVM.formSigning.isRemoteSign11= "0";
+                    // mainDivVM.formSigning.visitTime = new Date();
+                    // mainDivVM.formSigning.visitType = 1;
                 });
 
             },
@@ -1102,9 +1223,10 @@
             },
 
             submitForm(formName) {
+                this.formSigning.visitTime = new Date( this.formSigning.visitTime);
+                this.formSigning.payTime = new Date( this.formSigning.payTime);
                 var param = this.formSigning;
                 param.amountPerformance = this.formSigningAmountPerformance;
-                param.isRemoteSign = this.formSigning.isRemoteSign11;
                 // 设置 clueid
                 this.$refs[formName].validate((valid) => {
                     if (valid) {
@@ -1126,6 +1248,8 @@
             },
             submitDialogForm(formName) {
                 this.formMoneyDetail.amountPerformance =  this.formMoneyDetailAmountPerformance;
+                this.formMoneyDetail.payTime = new Date( this.formMoneyDetail.payTime)
+                this.formMoneyDetail.visitTime = new Date( this.formMoneyDetail.visitTime)
                 var param = this.formMoneyDetail;
                 param.signId = vsignId;
                 param.clueId =vclueId;

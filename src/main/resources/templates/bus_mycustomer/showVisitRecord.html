@@ -271,7 +271,7 @@
                         </el-col>
                         <el-col :span="10">
                             <el-form-item label="到访人数"    :label-width="formLabelWidth"  prop="visitPeopleNum">
-                                <el-input v-model="addVisitRecord.visitPeopleNum" type="number" min="0" oninput="if(value.length>2)value=value.slice(0,2)"  onkeypress="return( /[\d]/.test(String.fromCharCode(event.keyCode) ) )" autocomplete="off"     ></el-input>
+                                <el-input v-model="addVisitRecord.visitPeopleNum" type="number" min="0"   oninput="if(value.length>2)value=value.slice(0,2)"  autocomplete="off"     ></el-input>
                             </el-form-item>
                         </el-col>
                     </el-row>
@@ -831,9 +831,71 @@
                 amountPerformance:''
             },
             rules:{
-                visitPeopleNum:{
+                companyid:[
+                    { required: true, message: '请选择考察公司', trigger: 'change' }
+                ],
+                vistitTime:[
+                    { required: true, message: '请选择到访时间', trigger: 'change' }
+                ],
+                projectId:[
+                    { required: true, message: '请选择考察项目', trigger: 'change' }
+                ],
+                vistitStoreType:[
+                    { required: true, message: '请选择到访店铺类型', trigger: 'change' }
+                ],
+                signDistrict:[
+                    { required: true, message: '请选择签约区/县', trigger: 'change' }
+                ],
+                isSign:[
+                    { required: true, message: '请选择是否签约', trigger: 'change' }
+                ],
+                customerName: [
+                    { required: true, message: '请输入客户姓名', trigger: 'blur' }
+                ],
+                idCard: [
+                    { required: true, message: '请输入客户身份证号', trigger: 'blur' }
+                ],
+                phone: [
+                    { required: true, message: '请输入客户联系电话', trigger: 'blur' }
+                ],
+                signCompanyId: [
+                    { required: true, message: '请选择签约餐饮公司', trigger: 'change' }
+                ],
+                signProjectId: [
+                    { required: true, message: '请选择签约项目', trigger: 'change' }
+                ],
+                signProvince: [
+                    { required: true, message: '请选择签约省份', trigger: 'change' }
+                ],
+                signCity: [
+                    { required: true, message: '请选择签约城市', trigger: 'change' }
+                ],
+                signDictrict: [
+                    { required: true, message: '请选择签约区/县', trigger: 'change' }
+                ],
+                signShopType: [
+                    { required: true, message: '请选择签约店型', trigger: 'change' }
+                ],
+                visitCity: [ //请填写来访城市
+                    { required: true, message: '请填写来访城市', trigger: 'change' }
+                ],
+                visitPeopleNum: [ //请填写到访人数
+                    { required: true, message: '请填写到访人数', trigger: 'blur' },
+                    { validator:function(rule,value,callback){
+                            var reg =  /^[1-9]+[0-9]*]*$/ ;
+                            if(value ==null || value =="null" || value ==""  ){
+                                callback(new Error("请填写到访人数"));
+                                mainDivVM.addVisitRecord.visitPeopleNum =null;
 
-                }
+                            }else  if(value !=null && value !="null" && value !="" && !reg.test(value) ){
+                                callback(new Error("请输入正整数"));
+                                mainDivVM.addVisitRecord.visitPeopleNum =null;
+                            }else{
+                                callback();
+                            }
+
+                        }, trigger: 'change'}
+                ]
             }
         },
         computed: {

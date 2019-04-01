@@ -16,6 +16,7 @@ import com.kuaidao.aggregation.dto.project.ProjectInfoDTO;
 import com.kuaidao.aggregation.dto.project.ProjectInfoPageParam;
 import com.kuaidao.aggregation.dto.tracking.TrackingReqDTO;
 import com.kuaidao.aggregation.dto.tracking.TrackingRespDTO;
+import com.kuaidao.common.constant.CluePhase;
 import com.kuaidao.common.constant.RoleCodeEnum;
 import com.kuaidao.common.constant.StageContant;
 import com.kuaidao.common.entity.JSONResult;
@@ -131,14 +132,25 @@ public class PhoneTrafficController {
         // 根据用户查询页面字段
         QueryFieldByUserAndMenuReq queryFieldByUserAndMenuReq = new QueryFieldByUserAndMenuReq();
         queryFieldByUserAndMenuReq.setId(user.getId());
-        queryFieldByUserAndMenuReq.setMenuCode("aggregation:appiontmentManager");
+        queryFieldByUserAndMenuReq.setMenuCode("aggregation:PhoneTraffic");
         JSONResult<List<UserFieldDTO>> queryFieldByUserAndMenu =
                 customFieldFeignClient.queryFieldByUserAndMenu(queryFieldByUserAndMenuReq);
         request.setAttribute("userFieldList", queryFieldByUserAndMenu.getData());
 
-        request.setAttribute("phtrafficList", phTrafficList());
 
-        return "/phonetraffic/customManagement";
+        List<RoleInfoDTO> roleList = user.getRoleList();
+        if(roleList!=null&&roleList.get(0)!=null) {
+            if (RoleCodeEnum.GLY.name().equals(roleList.get(0).getRoleCode())||RoleCodeEnum.HWZG.name().equals(roleList.get(0).getRoleCode())) {
+                request.setAttribute("phtrafficList", phTrafficList());
+            } else {
+                List<UserInfoDTO> list = new ArrayList<>();
+                list.add(user);
+                request.setAttribute("phtrafficList", list);
+            }
+        }
+
+
+        return "phonetraffic/customManagement";
     }
 
     @PostMapping("/queryPage")
@@ -148,34 +160,51 @@ public class PhoneTrafficController {
         UserInfoDTO user =  CommUtil.getCurLoginUser();
         List<RoleInfoDTO> roleList = user.getRoleList();
 
-        /**
-         * 数据权限说明：
-         *    管理员权限：
-         *      能够看见全部数据
-         *    电销顾问：
-         *      能够看见自己以及所在电销组下电销创业顾问创建的数据
-         *    其他的只能够看见自己创建的数据
-         */
-//            List dxList = new ArrayList();
-//        if(roleList!=null&&roleList.get(0)!=null) {
-//            if (RoleCodeEnum.HWZG.name().equals(roleList.get(0).getRoleCode())) {
-//                dxList = phoneTrafficUser();
-//                dxList.add(user.getId());
-//                param.setUserList(dxList);
-//            } else {
-//                dxList.add(user.getId());
-//                param.setUserList(dxList);
-//            }
-//        }
+//【话务主管】—待处理，指阶段为“待分配话务”的阶段；已处理—指待分配话务之后的流转阶段。
+//【话务专员/信息流专员】——待处理，指阶段为“话务跟进中”的阶段；已处理—指话务跟进中之后的流转阶段。
+
 //        权限相关代码
-//        if(roleList!=null&&roleList.get(0)!=null) {
-//            if (RoleCodeEnum.GLY.name().equals(roleList.get(0).getRoleCode())) {
-//            }else if (RoleCodeEnum.HWZG.name().equals(roleList.get(0).getRoleCode())) {
-//                param.setPhTraDirectorId(user.getId());
-//            } else {
-//                param.setOperatorId(user.getId());
-//            }
-//        }
+        if(roleList!=null&&roleList.get(0)!=null) {
+            if (RoleCodeEnum.GLY.name().equals(roleList.get(0).getRoleCode())||RoleCodeEnum.HWZG.name().equals(roleList.get(0).getRoleCode())) {
+//               这样的逻辑 下管理员能够看见电销的数据。
+                if(RoleCodeEnum.HWZG.name().equals(roleList.get(0).getRoleCode())){
+                    param.setPhTraDirectorId(user.getId());
+                }else{
+                    // 管理员能够看见全部的数据
+                }
+                Integer dealStatus = param.getDealStatus();
+                if(dealStatus==0){
+                    param.setPhase(CluePhase.PHASE_1ST.getCode());
+                }else  if(dealStatus==1){
+                    List<Integer> phases = new ArrayList<>();
+                    phases.add(CluePhase.PHAE_2ND.getCode());
+                    phases.add(CluePhase.PHAE_3RD.getCode());
+                    phases.add(CluePhase.PHAE_4TH.getCode());
+                    phases.add(CluePhase.PHAE_5TH.getCode());
+                    phases.add(CluePhase.PHAE_6TH.getCode());
+                    phases.add(CluePhase.PHAE_10TH.getCode());
+                    phases.add(CluePhase.PHAE_11TH.getCode());
+                    phases.add(CluePhase.PHAE_12TH.getCode());
+                    param.setPhases(phases);
+                }
+            } else {
+                param.setOperatorId(user.getId());
+                Integer dealStatus = param.getDealStatus();
+                if(dealStatus==0){
+                    param.setPhase(CluePhase.PHAE_2ND.getCode());
+                }else  if(dealStatus==1){
+                    List<Integer> phases = new ArrayList<>();
+                    phases.add(CluePhase.PHAE_3RD.getCode());
+                    phases.add(CluePhase.PHAE_4TH.getCode());
+                    phases.add(CluePhase.PHAE_5TH.getCode());
+                    phases.add(CluePhase.PHAE_6TH.getCode());
+                    phases.add(CluePhase.PHAE_10TH.getCode());
+                    phases.add(CluePhase.PHAE_11TH.getCode());
+                    phases.add(CluePhase.PHAE_12TH.getCode());
+                    param.setPhases(phases);
+                }
+            }
+        }
 
         String defineColumn = param.getDefineColumn();
         String defineValue = param.getDefineValue();
@@ -323,7 +352,7 @@ public class PhoneTrafficController {
                 && clueFileList.getData() != null) {
             request.setAttribute("clueFileList", clueFileList.getData());
         }
-        return "/phonetraffic/editCustomerMaintenance";
+        return "phonetraffic/editCustomerMaintenance";
     }
 
 
@@ -410,7 +439,7 @@ public class PhoneTrafficController {
                 && clueFileList.getData() != null) {
             request.setAttribute("clueFileList", clueFileList.getData());
         }
-        return "/phonetraffic/readOnlyCustomerMaintenance";
+        return "phonetraffic/readOnlyCustomerMaintenance";
     }
 
 
@@ -461,11 +490,15 @@ public class PhoneTrafficController {
         return resList;
     }
 
+    /**
+     * 查询非禁用账户
+     * @return
+     */
     private List<UserInfoDTO> phTrafficList(){
         RoleQueryDTO query = new RoleQueryDTO();
-        query.setRoleCode(RoleCodeEnum.HWY.name());
-        UserInfoDTO user =  CommUtil.getCurLoginUser();
+        query.setRoleCode(RoleCodeEnum.HWZG.name());
         JSONResult<List<RoleInfoDTO>> roleJson = roleManagerFeignClient.qeuryRoleByName(query);
+        UserInfoDTO user =  CommUtil.getCurLoginUser();
         List<UserInfoDTO> userList = new ArrayList();
         if (JSONResult.SUCCESS.equals(roleJson.getCode())) {
             List<RoleInfoDTO> roleList = roleJson.getData();
@@ -483,8 +516,38 @@ public class PhoneTrafficController {
                 }
             }
         }
-        userList.add(user);
-        return userList;
+
+
+        Long roleId = null;
+        RoleQueryDTO query1 = new RoleQueryDTO();
+        query1.setRoleCode(RoleCodeEnum.HWZG.name());
+        JSONResult<List<RoleInfoDTO>> roleJson1 = roleManagerFeignClient.qeuryRoleByName(query1);
+        if (JSONResult.SUCCESS.equals(roleJson1.getCode())) {
+            List<RoleInfoDTO> data = roleJson1.getData();
+            if (null != data && data.size() > 0) {
+                RoleInfoDTO roleInfoDTO = data.get(0);
+                roleId = roleInfoDTO.getId();
+            }
+        }
+
+        List<UserInfoDTO> user1List = new ArrayList();
+        boolean falg = true;
+        for(UserInfoDTO userInfo:userList){
+            Integer status = userInfo.getStatus();
+            Long id = userInfo.getId();
+            if(roleId!=null&&!roleId.equals(userInfo.getRoleId())){
+                if(status!=2){
+                    user1List.add(userInfo);
+                }
+//                if (id.equals(user.getId())) {
+//                    falg = false;
+//                }
+            }
+        }
+//        if(falg){
+//            userList.add(user);
+//        }
+        return user1List;
     }
 
 
