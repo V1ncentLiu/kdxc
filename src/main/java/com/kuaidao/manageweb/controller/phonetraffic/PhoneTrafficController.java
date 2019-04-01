@@ -174,6 +174,7 @@ public class PhoneTrafficController {
                     // 管理员能够看见全部的数据
                 }
                 Integer dealStatus = param.getDealStatus();
+
                 if(dealStatus!=null&&dealStatus==0){
                     param.setPhase(CluePhase.PHASE_1ST.getCode());
                 }else  if(dealStatus!=null&&dealStatus==1){
