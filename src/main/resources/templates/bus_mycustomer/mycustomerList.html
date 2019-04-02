@@ -925,7 +925,7 @@
               <!--<el-tab-pane :key="item.name" v-for="(item, index) in editableTabs" :label="item.title" :name="item.name">-->
               <!--</el-tab-pane>-->
          <!--</el-tabs>-->
-          <el-form :model="updateFormSigning" :rules="rules" ref="updateFormSigning" >
+          <el-form :model="updateFormSigning" :rules="updateRules" ref="updateFormSigning" >
             <el-form-item label="驳回时间："  :label-width="formLabelWidth">
                 <el-button size="mini"  type="text" style = "font-size: 17px;color: #1e2746">{{updateFormSigning.rebutTime}}</el-button>
             </el-form-item>
@@ -1401,8 +1401,7 @@
                         }, trigger: 'change'}
                 ]
             },
-            rules: {
-
+            updateRules: {
             	customerName: [
 				    { required: true, message: '请输入客户姓名', trigger: 'blur' }
 				],
@@ -1479,6 +1478,85 @@
 
                         }, trigger: 'change'}
 				],
+
+                rules: {
+
+                    customerName: [
+                        { required: true, message: '请输入客户姓名', trigger: 'blur' }
+                    ],
+                    idCard: [
+                        { required: true, message: '请输入客户身份证号', trigger: 'blur' }
+                    ],
+                    phone: [
+                        { required: true, message: '请输入客户联系电话', trigger: 'blur' }
+                    ],
+                    signCompanyId: [
+                        { required: true, message: '请选择签约餐饮公司', trigger: 'change' }
+                    ],
+                    signProjectId: [
+                        { required: true, message: '请选择签约项目', trigger: 'change' }
+                    ],
+                    signProvince: [
+                        { required: true, message: '请选择签约省份', trigger: 'change' }
+                    ],
+                    signDictrict: [
+                        { required: true, message: '请选择签约区/县', trigger: 'change' }
+                    ],
+                    signCity: [
+                        { required: true, message: '请选择签约城市', trigger: 'change' }
+                    ],
+                    signShopType: [
+                        { required: true, message: '请选择签约店型', trigger: 'change' }
+                    ],
+                    amountReceivable: [
+                        { required: true, message: '请输入应收金额', trigger: 'blur' },
+                        { validator:function(rule,value,callback){
+                                var reg =  /^[0-9]+[0-9]*]*$/ ;
+                                if(value ==null || value =="null" || value ==""  ){
+                                    callback(new Error("请输入应收金额"));
+                                    mainDivVM.formSigning.amountReceivable =null;
+
+                                }else  if(value !=null && value !="null" && value !="" && !reg.test(value) ){
+                                    callback(new Error("请输入正整数"));
+                                    mainDivVM.formSigning.amountReceivable =null;
+                                }else{
+                                    callback();
+                                }
+                            }, trigger: 'change'}
+                    ],
+                    firstToll: [
+                        { required: true, message: '请输入路费（报首次）', trigger: 'blur' },
+                        { validator:function(rule,value,callback){
+                                var reg =  /^[0-9]+[0-9]*]*$/ ;
+                                if(value ==null || value =="null" || value ==""  ){
+                                    callback(new Error("请输入路费（报首次）"));
+                                    mainDivVM.formSigning.firstToll =null;
+
+                                }else  if(value !=null && value !="null" && value !="" && !reg.test(value) ){
+                                    callback(new Error("请输入正整数"));
+                                    mainDivVM.formSigning.firstToll =null;
+                                }else{
+                                    callback();
+                                }
+                            }, trigger: 'change'}
+                    ],
+                    preferentialAmount: [
+                        { required: true, message: '请输入优惠金额', trigger: 'blur' },
+                        { validator:function(rule,value,callback){
+                                var reg =  /^[0-9]+[0-9]*]*$/ ;
+                                if(value ==null || value =="null" || value ==""  ){
+                                    callback(new Error("请输入优惠金额"));
+                                    mainDivVM.formSigning.preferentialAmount =null;
+
+                                }else  if(value !=null && value !="null" && value !="" && !reg.test(value) ){
+                                    callback(new Error("请输入正整数"));
+                                    mainDivVM.formSigning.preferentialAmount =null;
+                                }else{
+                                    callback();
+                                }
+
+                            }, trigger: 'change'}
+                    ],
 				signType: [
 					{ required: true, message: '请选择签约类型', trigger: 'change' }
 				],
@@ -2301,7 +2379,6 @@
                 this.formSigning.payTime = new Date( this.formSigning.payTime);
                 var param = this.formSigning;
                 param.amountPerformance = this.formSigningAmountPerformance;
-                debugger
                 console.log(param)
                 // 设置 clueid
                 this.$refs[formName].validate((valid) => {
