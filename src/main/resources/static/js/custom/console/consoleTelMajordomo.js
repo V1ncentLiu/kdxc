@@ -172,25 +172,24 @@ var mainDivVM = new Vue({
             return moment(cellValue).format("YYYY-MM-DD HH:mm");
         },
         //查看重复手机号资源
-        repeatPhonesClick(row) {
-            console.log(row);
-            this.repeatPhonesDialog=true;
-            this.dailogTitleType=row.phone;
-            var param ={};
-            param.id = row.clueId;
-            param.cusPhone = row.phone;
-            console.info(param);
-            axios.post('/clue/appiontment/repeatPhonelist', param)
-            .then(function (response) {
-                var result =  response.data;
-                console.info(result);
-                var table=result.data;
-                mainDivVM.repeatPhonesTable= table.data;
-                mainDivVM.repeatPhonesDialog=true;
-            }).catch(function (error) {
-                console.log(error);
-            });                
-        },
+        showRepeatPhone(row) {
+             this.repeatPhonesDialog=true;
+             this.dailogTitleType=row.phone;
+             var param ={};
+                 param.id = row.id;
+                   param.cusPhone = row.phone;
+                    console.info(param);
+                     axios.post('/clue/appiontment/repeatPhonelist', param)
+                       .then(function (response) {
+                             var result =  response.data;
+                             console.info(result);
+                             var table=result.data;
+                             mainDivVM.repeatPhonesTable= table;
+                             mainDivVM.repeatPhonesDialog=true;
+                       })  .catch(function (error) {
+                                   console.log(error);
+             });
+         },
         //类别转换方法
         transformCategory(cellValue) {
           var text="";
