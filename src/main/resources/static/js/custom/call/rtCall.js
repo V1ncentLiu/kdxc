@@ -135,6 +135,8 @@ function priviewOutbound(outboundInputPhone,callSource,clueId,callback){
 			if(token.code=='0'){
 				homePageVM.$message({message:"外呼中",type:'success'});
 				if(callSource==1){
+					//清空 显示时间
+					//$("#outboundCallStartTime").html("");
 					$('#outboundCallTime').html("");
 				}else if(callSource==2){//电销页面外呼
 					homePageVM.tmOutboundCallDialogVisible =true;
