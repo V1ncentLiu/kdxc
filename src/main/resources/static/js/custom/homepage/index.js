@@ -352,9 +352,13 @@ var homePageVM=new Vue({
              });
         },
         loginTrClient(){//天润登录
+        	var cno = this.loginClientForm.cno;
+        	//验证坐席是否属于自己
+        	if(!this.validClientNo(cno)){
+        		return;
+        	}
         	var loginType = "2";
 			var enterpriseId = this.enterpriseId;
-			var cno = this.loginClientForm.cno;
 			var bindPhone = this.loginClientForm.bindPhone;
 			var bindType = this.loginClientForm.bindPhoneType;
 			var token = this.token;
@@ -675,6 +679,34 @@ var homePageVM=new Vue({
 			$("#iframeBox").attr({
 				"src":dataUrl //设置ifream地址
 			});
+    		
+    	},
+    	validClientNo(cno){//验证坐席是否属于自己
+    			var isPass =false;
+    			$.ajax({  
+    				type: "POST",  
+    				url: "/client/client/queryClientInfoByCno",          
+    				data: JSON.stringify({clientNo:cno}),   
+    				dataType: 'json',     
+    				async: false, //设置为同步请求
+    				contentType:"application/json",
+    				success: function(data){  
+    					console.info(data);
+    					if(data.code==0){
+    						isPass= data.data;
+    						if(!isPass){
+    							homePageVM.$message({message:"登陆失败，该坐席号不属于您的归属部门",type:'error'});
+    						}
+    					}else{
+    						homePageVM.$message({message:data.msg+"(验证)",type:'error'});
+    					}
+    				},  
+    				error: function() {     
+    				     
+    				}
+    			})
+    			
+    			return isPass;
     		
     	}
     
