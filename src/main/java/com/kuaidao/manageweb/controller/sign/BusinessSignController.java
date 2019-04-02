@@ -172,6 +172,10 @@ public class BusinessSignController {
         }
         UserInfoDTO user = CommUtil.getCurLoginUser();
         dto.setCreateUser(user.getId());
+        if(dto.getSignType()==1){ // 全款
+            dto.setMakeUpTime(null);
+            dto.setAmountBalance(null);
+        }
         return businessSignFeignClient.saveSign(dto);
     }
 
@@ -187,6 +191,10 @@ public class BusinessSignController {
         }
         UserInfoDTO user = CommUtil.getCurLoginUser();
         dto.setUpdateUser(user.getId());
+        if(dto.getSignType()==1){ // 全款
+            dto.setMakeUpTime(null);
+            dto.setAmountBalance(null);
+        }
         return businessSignFeignClient.updateSign(dto);
     }
 
