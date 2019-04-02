@@ -396,7 +396,9 @@ public class MyCustomerClueController {
                 && clueFileList.getData() != null) {
             request.setAttribute("clueFileList", clueFileList.getData());
         }
+        UserInfoDTO user = getUser();
         request.setAttribute("commonPool", commonPool);
+        request.setAttribute("loginUserId", user.getId());
         return "clue/CustomerMaintenanceReadOnly";
     }
 
