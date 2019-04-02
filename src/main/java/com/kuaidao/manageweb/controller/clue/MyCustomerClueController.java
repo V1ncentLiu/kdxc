@@ -138,7 +138,7 @@ public class MyCustomerClueController {
             @RequestBody CustomerClueQueryDTO dto) {
         long time1 = new Date().getTime();
         java.text.SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
-        if (null != dto && null != dto.getDayTel() && dto.getDayTel().intValue() == 1) {
+        if (null != dto && null != dto.getDayTel()) {
             // 当日拨打电话
             dto.setTelTime(formatter.format(new Date()));
         }
