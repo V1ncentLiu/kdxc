@@ -34,17 +34,15 @@
                         </el-form-item>
                     </el-col>
                     <el-col :span="16">
-                        <el-form-item
-                                label="手机号：" prop="customerPhone" :label-width="formLabelWidth">
-                            <a>{{form.customerPhone}} <i class="el-icon-phone-outline"
-                                                         @click="gettelNumberIcon(form.customerPhone)"></i></a> <span
-                                v-if="buttonType === 'A'"> <el-button type="primary"
-                                                                      @click="dialogFormVisible = true">
-				<i class="el-icon-plus"></i>手机号</el-button>
-			</span> <span v-else-if="buttonType === 'B'"> <span
-                                @click="dialogFormVisible = true"
-                                style="padding-left: 5px; color: rgb(0, 114, 255); cursor: pointer;">查看多个手机号</span>
-			</span></el-form-item>
+                        <el-form-item label="手机号：" prop="customerPhone" :label-width="formLabelWidth">
+                            <a>{{form.customerPhone}} <i class="el-icon-phone-outline" @click="gettelNumberIcon(form.customerPhone)"></i></a> 
+                            <span v-if="buttonType === 'A'"> 
+                                <el-button type="primary" @click="dialogFormVisible = true"><i class="el-icon-plus"></i>手机号</el-button>
+			                </span> 
+                            <span v-else-if="buttonType === 'B'">
+                                <span @click="dialogFormVisible = true" style="padding-left: 5px; color: rgb(0, 114, 255); cursor: pointer;">查看多个手机号</span>
+                            </span>
+                        </el-form-item>
                     </el-col>
                 </el-row>
                 <el-row>
@@ -80,8 +78,8 @@
                     </el-col>
                     <el-col :span="8">
                         <el-form-item
-                                label="年龄：" :label-width="formLabelWidth">
-                            <el-input
+                                label="年龄：" :label-width="formLabelWidth" prop="customerAge">
+                            <el-input  type="number" min="1"
                                     v-model="form.customerAge" autocomplete="off" maxLength="3"
                                     @keyup.native="agenumber"></el-input>
                         </el-form-item>
@@ -651,11 +649,11 @@
 
     <!-- dialog -->
     <el-dialog title="添加手机号" :visible.sync="dialogFormVisible">
-        <button type="button" aria-label="Close" class="el-dialog__headerbtn"
+        <!-- <button type="button" aria-label="Close" class="el-dialog__headerbtn"
                 style="position: absolute; z-index: 9; background: #fff;"
                 @click="clearDialog">
             <i class="el-dialog__close el-icon el-icon-close"></i>
-        </button>
+        </button> -->
         <el-form :model="dynamicValidateForm" ref="dynamicValidateForm"
                  style="width: 540px;">
             <el-form-item
@@ -990,6 +988,18 @@
                     ],
                     city: [
                         {required: true, message: '开店区域城市不能为空', trigger: 'change'}
+                    ],
+                    customerAge:[
+                    	 { validator:function(rule,value,callback){
+                             var reg =  /^[1-9]+[0-9]*]*$/ ;
+                             if(value !=null && value !="null" && value !="" && !reg.test(value) ){
+                                 callback(new Error("请输入正整数"));
+                                 addCustomerVM.form.customerAge =null;
+                             }else{
+                                 callback();
+                             }
+
+                         }, trigger: 'change'}
                     ],
                     customerPhone: [
                         /* { required: true, message: '手机号不能为空', trigger: 'blur' },
@@ -1405,8 +1415,8 @@
                 this.form.qq = this.form.qq.replace('.', '');
             },
             agenumber() {
-                this.form.customerAge = this.form.customerAge.replace(/[^\.\d]/g, '');
-                this.form.customerAge = this.form.customerAge.replace('.', '');
+                /* this.form.customerAge = this.form.customerAge.replace(/[^\.\d]/g, '');
+                this.form.customerAge = this.form.customerAge.replace('.', ''); */
             },
             // 单选切换
             projectChange() {
@@ -2089,6 +2099,16 @@
                     phoneArr.push(phone5);
                 }
                 this.dynamicValidateForm.domains = phoneArr;
+                if(phoneArr.length>0){
+                    this.buttonType = 'B';//按钮状态
+                }else{
+                    this.buttonType = 'A';//按钮状态
+                }
+                if(phoneArr.length>1){                    
+                    this.deleteShow=true;// 删除默认显示
+                }else{                    
+                    this.deleteShow=false;// 删除默认不显示
+                }
 
             }
             if (base) {
