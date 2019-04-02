@@ -230,9 +230,15 @@ var mainDivVM = new Vue({
                 mainDivVM.pager.pageSize = pageData.pageSize;
                 mainDivVM.dataTable =pageData.data;
             })
-        },
-        // 工作台
-        handleClick(tab, event) {
+        },        
+        dateFormat:function(row, column) {//日期数据格式化方法
+            var date = row[column.property];
+             if (date == undefined) {
+               return "";
+             }
+             return moment(date).format("YYYY-MM-DD HH:mm:ss");
+        },        
+        handleClick(tab, event) {// 工作台
             console.log(tab, event);
         },
         initBoard(){
@@ -303,7 +309,8 @@ var mainDivVM = new Vue({
                 console.log(response.data)                
                 mainDivVM.workDay=response.data.data;
             });
-        },fomatSeconds2(s){//格式化时间
+        },
+        fomatSeconds2(s){//格式化时间
      		var t="";
      		var hour = Math.floor(s/3600);
      		 var min = Math.floor(s/60) % 60;
