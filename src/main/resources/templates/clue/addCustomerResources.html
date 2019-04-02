@@ -80,7 +80,7 @@
                         <el-form-item label="资源项目：" :label-width="formLabelWidth">
                             <el-select v-model="form.project" placeholder="请选择" style="width: 100%;">
                                 <el-option
-                                    v-for="item in proSelect"
+                                    v-for="item in projectSelect"
                                     :key="item.id"
                                     :label="item.projectName"
                                     :value="item.id">
@@ -368,6 +368,7 @@
 <script th:inline="javascript" >
   //下拉项目数据
   var proSelect=[[${proSelect}]];
+  var purProSelect=[[${proSelect}]];
   var addCustomerVM=   new Vue({
         el: '#addCustomer',
         data: function() {
@@ -427,7 +428,7 @@
                 cityArr:[],
                 districtArr:[],
                 projectSelect:proSelect,
-                proSelect:[], 
+                proSelect:purProSelect, 
                 formLabelWidth: '120px',
                 rules:{
                     // customerName: [
@@ -627,7 +628,6 @@
                 var param = {};
                 param.category = selVal;
                 axios.post('/aggregation/projectManager/listNoPage', param).then(function (response) {
-                	debugger;
                     addCustomerVM.proSelect = response.data.data;
                 });
             },

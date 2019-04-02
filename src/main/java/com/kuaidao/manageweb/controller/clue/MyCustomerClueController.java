@@ -145,6 +145,10 @@ public class MyCustomerClueController {
         if (null != dto && null != dto.getTrackingDay() && dto.getTrackingDay().intValue() == 1) {
             // 当日跟进
             dto.setTrackingTime(formatter.format(new Date()));
+        } else if (null != dto && null != dto.getTrackingDay()
+                && dto.getTrackingDay().intValue() == 0) {
+            dto.setNotTrackingTime(formatter.format(new Date()));
+
         }
         // 数据权限处理
         Subject subject = SecurityUtils.getSubject();
