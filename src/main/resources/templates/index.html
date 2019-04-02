@@ -240,11 +240,11 @@
     <template>
         <el-dialog
                 title="消息提醒"
-                :visible.sync="bussdialogVisible" width="60%">
+                :visible.sync="cols.bussdialogVisible" width="60%" v-for="(cols,index) in colss">
             <el-table
-                    :data="bussDialogTableData"
+                    :data="cols.bussDialogTableData"
                     style="width: 100%">
-                <template v-for="(col ,index) in cols">
+                <template v-for="(col ,index) in cols.cols">
                     <el-table-column :prop="col.prop" :label="col.label" header-align="center">
                         <template slot-scope="scope">
                             <span style="white-space: pre-wrap">{{scope.row.content_ }}</span>
@@ -253,9 +253,16 @@
                 </template>
             </el-table>
             <span slot="footer" class="dialog-footer" >
-            <el-button type="primary" @click="updateStatusBuss">我知道了</el-button>
+            <el-button type="primary" @click="updateStatusBuss(index)">我知道了</el-button>
         </span>
         </el-dialog>
+
+        <!--<el-dialog title="消息提醒" :visible.sync="col.bussdialogVisible" width="60%" v-for="(col,index) in cols">-->
+            <!--<span class="content">{{col.content}}</span>-->
+            <!--<span slot="footer" class="dialog-footer" >-->
+            <!--<el-button type="primary" @click="updateStatusBuss(index)">我知道了</el-button>-->
+        <!--</span>-->
+        <!--</el-dialog>-->
     </template>
 </div>
 </body>
@@ -315,8 +322,8 @@
                          }});
                      }).catch(function (error) {console.log(error);});
                  annDialogVm.anndialogVisible = false;
-             }
-            ,initDialogData(){
+             },
+             initDialogData(){
                 var param = {};
                 param.id = this.id;
                 axios.post('/ann/queryOneAnn', param)
@@ -346,23 +353,40 @@
             content:"",
             bussRevid:"",
             bussDialogTableData:[],
-            cols:[]
+            colss:[]
         },
         methods:{
-            updateStatusBuss(){
+            updateStatusBuss(index){
                 var param = {};
-                param.ids = this.bussRevid;
+                param.ids = this.colss[index].bussRevid;
                 axios.post('/bussReceive/batchUpdate', param)
                     .then(function (response) {
                         bussDialogVm.$message({type: 'success', message: '更新完成!',duration:2000,onClose:function(){
                                 homePageVM.messageCount();
                             }});
                     }).catch(function (error) {console.log(error);});
-                bussDialogVm.bussdialogVisible = false;
+
+                var cols=this.cols;
+                this.colss[index].bussdialogVisible=false;
+            },
+            checkMessboxStatus() {
+                var count = 0;
+                for (let i = 0; i < this.cols.length; i++) {
+                    const item = this.cols[i];
+                    if (!item.bussdialogVisible) {
+                        count++
+                    }
+                }
+                return count == this.cols.length;
             }
-            ,initDialogData(){
-                bussDialogVm.bussDialogTableData = [{content_:bussDialogVm.content}]
-                bussDialogVm.cols =[{ label: this.title, prop: "content_", type: "normal" }];
+            ,initDialogData(title,content,bussRevid){
+                var cols ={
+                    bussRevid:bussRevid,
+                    bussDialogTableData:[{content_:bussDialogVm.content}],
+                    cols:[{ label: this.title, prop: "content_", type: "normal" }],
+                    bussdialogVisible: true,
+                }
+                bussDialogVm.colss.push(cols)
             },
             showOutVisiable:function(){
             }
@@ -428,8 +452,8 @@
                     bussDialogVm.bussRevid =bussRevid
                     bussDialogVm.title = title;
                     bussDialogVm.content = ccontent;
-                    bussDialogVm.bussdialogVisible=true;
-                    bussDialogVm.initDialogData();
+                    // bussDialogVm.bussdialogVisible=true;
+                    bussDialogVm.initDialogData(title,ccontent,bussRevid);
                 }
             });
             
