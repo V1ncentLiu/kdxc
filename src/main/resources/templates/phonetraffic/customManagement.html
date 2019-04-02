@@ -115,7 +115,7 @@
 	             <template slot-scope="scope" >
                      {{scope.row.phone}}
                     <input type='hidden'>
-                     <i class="el-icon-phone-outline" style="margin:0 10px;font-size: 16px;cursor: pointer;"></i>
+                     <i class="el-icon-phone-outline"  @click="customerEidt(scope.row.clueId)"  style="margin:0 10px;font-size: 16px;cursor: pointer;"></i>
                     <el-tag v-if="scope.row.tag">{{scope.row.tag}}</el-tag>
                 </template>
             </el-table-column>
@@ -130,13 +130,13 @@
                 </template>
             </el-table-column>
 
-           <el-table-column :prop="item.fieldCode" :label="item.displayName" :width="item.width" v-else-if="item.fieldCode == 'cusName'">
-               <template slot-scope="scope">
-                   <el-button  @click="customerEidt(scope.row.clueId)"   type="text" size="small">
-                       {{scope.row.cusName}}
-                   </el-button>
-               </template>
-           </el-table-column>
+           <!--<el-table-column :prop="item.fieldCode" :label="item.displayName" :width="item.width" v-else-if="item.fieldCode == 'cusName'">-->
+               <!--<template slot-scope="scope">-->
+                   <!--<el-button  @click="customerEidt(scope.row.clueId)"   type="text" size="small">-->
+                       <!--{{scope.row.cusName}}-->
+                   <!--</el-button>-->
+               <!--</template>-->
+           <!--</el-table-column>-->
 
             <el-table-column :prop="item.fieldCode" :label="item.displayName" :width="item.width"
 	          v-else-if="item.fieldCode == 'isRepeatPhone'">
@@ -256,6 +256,9 @@ var proSelect=[[${proSelect}]];//项目组
 var phtrafficList=[[${phtrafficList}]];// 话务员工
 var fieldList=[[${fieldList}]];//自定义字段
 var userFieldList=[[${userFieldList}]];//用户自定义字段
+var editflag=[[${editflag}]];//可编辑标志
+
+
   var  customerManVM=new Vue({
         el: '#myCustom',
         data: function() {
@@ -349,7 +352,9 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
          	},
             customerEidt(clueId,phone){
                 //客户维护界面
-                window.location.href='/phonetraffic/toEditPage?clueId='+clueId;
+                if(editflag==1){
+                    window.location.href='/phonetraffic/toEditPage?clueId='+clueId;
+                }
             },
             editClue(){
                 //编辑数据
