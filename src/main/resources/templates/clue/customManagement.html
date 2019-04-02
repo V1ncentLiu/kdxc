@@ -19,7 +19,7 @@
         <el-breadcrumb-item>客户管理</el-breadcrumb-item>
     </el-breadcrumb>
     <el-row class="marginB10">
-        <el-button type="text" @click="checkline"><i class="el-icon-menu"></i>选择列</el-button>
+        <el-button type="text" @click="dialogChooseList = true"><i class="el-icon-menu"></i>选择列</el-button>
         <shiro:hasPermission name="customerManager:allocation">
             <el-button type="success" @click="openassignrDig">分配资源</el-button>
         </shiro:hasPermission>
@@ -232,7 +232,7 @@
    <el-table  ref="multipleTable" tooltip-effect="dark" border @selection-change="handleSelectionChange"
             style="width: 100%"  :data="dataTable" >
             <el-table-column align="center" type="selection" label="全选" width="50"></el-table-column>
-	        <el-table-column align="center" :key="index" :prop="item.fieldCode" :label="item.displayName" :width="item.width"
+	        <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width"
 	         v-for="(item,key,index) in tableColums" v-if="item.fieldCode == 'phone'">
 	             <template slot-scope="scope" >
                       <p style="color:#409EFF; cursor:pointer" @click="showClueDetailInfo(scope.row.clueId)">{{scope.row.phone}}</p>
@@ -240,7 +240,7 @@
                     <el-tag v-if="scope.row.tag">{{scope.row.tag}}</el-tag>
                 </template>
             </el-table-column>
-            <el-table-column :prop="item.fieldCode" :label="item.displayName" :width="item.width"
+            <el-table-column :prop="item.fieldCode" :key="item.fieldCode" :label="item.displayName" :width="item.width"
 	          v-else-if="item.fieldCode == 'record'">
                 <template slot-scope="scope">
                    <div v-if="scope.row.isTrack === 1">
@@ -250,7 +250,7 @@
                     </div>
                 </template>
             </el-table-column>
-            <el-table-column :prop="item.fieldCode" :label="item.displayName" :width="item.width"
+            <el-table-column :prop="item.fieldCode" :key="item.fieldCode" :label="item.displayName" :width="item.width"
 	          v-else-if="item.fieldCode == 'repeatPhones'">
                <template slot-scope="scope">
                   <div v-if="scope.row.isRepeatPhone===1">
@@ -258,7 +258,7 @@
                   </div>
                 </template>
             </el-table-column>
-            <el-table-column align="center" :key="index" :prop="item.fieldCode" :label="item.displayName" :width="item.width"  v-else>
+            <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width"  v-else>
 	        </el-table-column>
 	        
         </el-table>
@@ -646,24 +646,6 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
             }        	  
         },
         methods: {
-        	checkline(){
-        		this.dialogChooseList = true;
-        	 	//初始化table 列 和 用户自定义列
-              	this.allTableColums = fieldList;
-              	if(userFieldList.length!=0){
-              		var type=[];
-                  	for(var i=0;i<userFieldList.length;i++){
-                  		type.push(userFieldList[i].sortNum+'_'+userFieldList[i].fieldCode+'_'+userFieldList[i].displayName+'_'+userFieldList[i].fieldId)
-                 	}
-	              	this.form1.type = type;
-              	}else{
-              		var type=[];
-                  	for(var i=0;i<fieldList.length;i++){
-                  		type.push(fieldList[i].sortNum+'_'+fieldList[i].fieldCode+'_'+fieldList[i].displayName+'_'+fieldList[i].id)
-                 	}
-	              	this.form1.type = type;
-              	}
-        	},
         	//初始化页面
         	 initTableData(){
                  var param = {};
@@ -943,6 +925,7 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
             },  
             //处理用户选择的列
             confirmColumn(){
+            	debugger;
                 //处理用户选择的列
                 var customerShowColun = [];
                 var customerColumn = this.form1.type;

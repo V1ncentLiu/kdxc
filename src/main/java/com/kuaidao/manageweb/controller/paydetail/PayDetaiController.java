@@ -82,6 +82,10 @@ public class PayDetaiController {
         }
         UserInfoDTO user = CommUtil.getCurLoginUser();
         dto.setCreateUser(user.getId());
+        if("4".equals(dto.getPayType())){ //尾款
+            dto.setMakeUpTime(null);
+            dto.setAmountBalance(null);
+        }
         return payDetailFeignClient.savePayDedail(dto);
     }
 

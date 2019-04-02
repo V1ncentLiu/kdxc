@@ -262,10 +262,11 @@ function callingTrState(token){
 	
 	var callSource = sessionStorage.getItem("callSource");
 	if(callSource==1){//首页头部外呼
-		//$("#outboundCallStartTime").val(token.stateStartTime);
+		$("#outboundCallStartTime").val(token.stateStartTime);
 		//10分钟后红色字体显示
 		intervalTimer("outboundCallTime",10,2);
 	}else if(callSource==2){
+		$("#tmOutboundCallStartTime").val(token.stateStartTime);
 		intervalTimer("tmOutboundCallTime",10,2);
 	}
 	
@@ -457,15 +458,19 @@ function three_party_consultation_buttonState() {//咨询三方
 }
 
 function arrangementState(token) {//整理
-	/*var callSource = sessionStorage.getItem("callSource");
-	if(callSource===1){//首页头部外呼
-		var startTime = $("#outboundCallStartTime").val();
+	var callSource = sessionStorage.getItem("callSource");
+	if(callSource==1){//首页头部外呼
+		/*var startTime = $("#outboundCallStartTime").val();
 		var endTime = token.stateStartTime;
 		var talkTime = fomatSecondsToString(endTime-Number(startTime));
 		
 		$('#outboundCallTime').html(talkTime);
-		$('#outboundCallTimeDiv').show();
-	}*/
+		$('#outboundCallTimeDiv').show();*/
+		clearTimer();//清除定时器
+		
+	}else if(callSource==2){
+		clearTimer();//清除定时器
+	}
 	
 }
 
