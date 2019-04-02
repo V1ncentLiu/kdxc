@@ -72,8 +72,8 @@
             <el-form-item label="时间格式：" :label-width="formLabelWidth2" prop="cronExpression">
                 <el-input v-model="form.cronExpression" maxlength="50" autocomplete="off"  style="width:90%"></el-input>
             </el-form-item>
-            <el-form-item label="地址URL：" :label-width="formLabelWidth2" prop="url">
-                <el-input v-model="form.url" maxlength="100" autocomplete="off"  style="width:90%"></el-input>
+            <el-form-item label="地址URL：" :label-width="formLabelWidth2" prop="url" >
+                <el-input v-model="form.url" maxlength="100" autocomplete="off" :disabled="urlDisabled" style="width:90%"></el-input>
             </el-form-item>
             <el-form-item label="参数JSON格式：" :label-width="formLabelWidth2" prop="params">
                 <el-input v-model="form.params" maxlength="50" autocomplete="off"  style="width:90%"></el-input>
@@ -111,6 +111,7 @@ var userVM = new Vue({
 	            multipleSelection:[],
 	            addOrModifyDialogTitle:'',
 	            dialogFormVisible: false,
+	            urlDisabled: false,
 	            submitDisabled: false,
                 formLabelWidth: '150px',
                 formLabelWidth1: '120px',
@@ -190,12 +191,13 @@ var userVM = new Vue({
 	               		this.$refs['form'].resetFields();
 	               	}
                   	this.dialogFormVisible = true;
+                  	this.urlDisabled = false;
                   	this.addOrModifyDialogTitle="添加任务";
               },
               //跳转修改任务页
               toUpdateUser(id) {
                   this.addOrModifyDialogTitle="修改任务";
-                  
+                  this.urlDisabled = true;
                   var param={id:id};
                   //根据id获取数据
                   axios.post('/schedule/scheduleManager/get',param)

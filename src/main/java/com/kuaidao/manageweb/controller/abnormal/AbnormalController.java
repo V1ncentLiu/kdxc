@@ -158,8 +158,17 @@ public class AbnormalController {
                 dto.setCreateUserList(dxList);
             }
         }
-        JSONResult<PageBean<AbnomalUserRespDTO>> resList = abnormalUserFeignClient.queryAbnomalUserList(dto);
 
+
+        Date date1 = dto.getTime1();
+        Date date2 = dto.getTime2();
+        if(date1!=null && date2!=null ){
+            if(date1.getTime()>date2.getTime()){
+                return new JSONResult().fail("-1","创建时间，开始时间大于结束时间!");
+            }
+        }
+
+        JSONResult<PageBean<AbnomalUserRespDTO>> resList = abnormalUserFeignClient.queryAbnomalUserList(dto);
 //      数据转换
         List<AbnomalUserRespDTO> resdata = resList.getData().getData();
         Map<String, String> dicMap = dicMap();
