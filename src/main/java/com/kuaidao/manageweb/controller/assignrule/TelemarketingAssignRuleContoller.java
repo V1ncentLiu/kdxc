@@ -224,7 +224,7 @@ public class TelemarketingAssignRuleContoller {
 			if (null != roleList && roleList.size() > 0) {
 				RoleInfoDTO roleDto = roleList.get(0);
 				UserInfoPageParam param = new UserInfoPageParam();
-				if (roleDto.getRoleCode().equals(RoleCodeEnum.DXZJ.name())) {
+				if (user.getRoleList() !=null && user.getRoleList().size()>0 && (user.getRoleList().get(0).getRoleCode()).equals(RoleCodeEnum.DXZJ.name())) {
 					param.setOrgId(user.getOrgId());
 				}
 				param.setRoleId(roleDto.getId());
