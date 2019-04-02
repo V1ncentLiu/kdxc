@@ -78,8 +78,8 @@
                     </el-col>
                     <el-col :span="8">
                         <el-form-item
-                                label="年龄：" :label-width="formLabelWidth">
-                            <el-input
+                                label="年龄：" :label-width="formLabelWidth" prop="customerAge">
+                            <el-input  type="number" min="1"
                                     v-model="form.customerAge" autocomplete="off" maxLength="3"
                                     @keyup.native="agenumber"></el-input>
                         </el-form-item>
@@ -989,6 +989,18 @@
                     city: [
                         {required: true, message: '开店区域城市不能为空', trigger: 'change'}
                     ],
+                    customerAge:[
+                    	 { validator:function(rule,value,callback){
+                             var reg =  /^[1-9]+[0-9]*]*$/ ;
+                             if(value !=null && value !="null" && value !="" && !reg.test(value) ){
+                                 callback(new Error("请输入正整数"));
+                                 addCustomerVM.form.customerAge =null;
+                             }else{
+                                 callback();
+                             }
+
+                         }, trigger: 'change'}
+                    ],
                     customerPhone: [
                         /* { required: true, message: '手机号不能为空', trigger: 'blur' },
                         { validator:function(rule,value,callback){
@@ -1403,8 +1415,8 @@
                 this.form.qq = this.form.qq.replace('.', '');
             },
             agenumber() {
-                this.form.customerAge = this.form.customerAge.replace(/[^\.\d]/g, '');
-                this.form.customerAge = this.form.customerAge.replace('.', '');
+                /* this.form.customerAge = this.form.customerAge.replace(/[^\.\d]/g, '');
+                this.form.customerAge = this.form.customerAge.replace('.', ''); */
             },
             // 单选切换
             projectChange() {

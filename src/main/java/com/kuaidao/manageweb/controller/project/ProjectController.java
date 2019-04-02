@@ -175,7 +175,6 @@ public class ProjectController {
      */
     @PostMapping("/listNoPage")
     @ResponseBody
-    @RequiresPermissions("aggregation:projectManager:view")
     public JSONResult<List<ProjectInfoDTO>> listNoPage(
             @RequestBody ProjectInfoPageParam projectInfoPageParam, HttpServletRequest request) {
 
