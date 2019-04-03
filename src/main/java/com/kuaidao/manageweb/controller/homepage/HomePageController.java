@@ -50,7 +50,13 @@ public class HomePageController {
 
         Subject subject = SecurityUtils.getSubject();
         UserInfoDTO user = (UserInfoDTO) subject.getSession().getAttribute("user");
-        request.setAttribute("user", user);
+        
+        UserInfoDTO userInfoRespDTO = new UserInfoDTO();
+        userInfoRespDTO.setId(user.getId());
+        userInfoRespDTO.setName(user.getName());
+        userInfoRespDTO.setOrgId(user.getOrgId());
+        request.setAttribute("user", userInfoRespDTO);
+        
         List<IndexModuleDTO> menuList = user.getMenuList();
         request.setAttribute("menuList", menuList);
         request.setAttribute("isUpdatePassword", isUpdatePassword);
