@@ -566,6 +566,39 @@
 		            	Vue.set(this.checkBoxFieldArr,addRoleVM.feildMenuId,addRoleVM.chooseLimitCheck);
 		                addRoleVM.dialogFormSetting=false;	
 		          },
+		          //自动勾选自定义字段
+	                limitData(moduleCode ,id){
+	                    
+	                    var  param={};
+	                    param.menuCode=moduleCode;
+	                    axios.post('/role/roleManager/queryCustomField',param).then(function (response) {
+	                           var resobj= response.data;
+	                           if(null==resobj||resobj.code!='0'){
+	                               addRoleVM.$message({
+	                                   message: "接口调用失败",
+	                                   type: 'error'
+	                                 }); 
+	                               return ;
+	                           } 
+	                            addRoleVM.fields=resobj.data;
+	                             var  fieldAray= resobj.data;
+	                             var fArray=[];
+	                           //获取菜单是否已选择
+	                          
+	                            //默认全部选中
+	                              if(null!=fieldAray){
+	                                for(var i=0;i<fieldAray.length;i++){
+	                                   fArray.push(fieldAray[i].id);
+	                                 }
+	                              Vue.set(addRoleVM.checkBoxFieldArr,id,fArray);
+	                               }
+	                           })
+	                           .catch(function (error) {
+	                             console.log(error);
+	                           })
+	                           .then(function () {
+	                           });  
+	                   },
             // 删除
             deleteFun() {
                 this.$confirm('删除后此角色信息将不存在，确认删除吗？', '消息提醒', {
@@ -623,6 +656,7 @@
                 } else {
                     item.firstCheckAll = false;
                 }
+                this.limitData(subList.authCode,subList.id);
                 this.checkAllSelect();
             },
             // 单选
@@ -660,6 +694,7 @@
                 }
                 item.checkedCities = flag ? arr : [];
                 item.checkAll = flag;
+                this.limitData(item.authCode,item.id);
                 this.checkAllSelect();
             },
             

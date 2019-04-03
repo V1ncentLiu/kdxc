@@ -599,6 +599,8 @@
                 	    //意向内部项目
                 	    var  insideProject=this.form.insideProject;
                 	    clueIntention.purInProject=insideProject;
+                	    
+                	   
                 	    //意向外部项目
                 	    var  outsideProject= this.form.outsideProject;
                 	    clueIntention.purOutProject=outsideProject;
@@ -745,6 +747,9 @@
                param={};
                param.type="1";
                param.name=selVal;
+               this.form.district=null;
+               this.form.city=null;
+               this.districtArr =null;
                axios.post('/area/sysregion/querySysRegionByParam',param).then(function (response) {  
                  addCustomerVM.cityArr=response.data.data.data;
                });  	
@@ -753,6 +758,7 @@
                 param={};
                 param.type="2";
                 param.name=selVal;
+                this.form.district=null;
                 axios.post('/area/sysregion/querySysRegionByParam',param).then(function (response) {  
                   addCustomerVM.districtArr=response.data.data.data;
                 });  	
@@ -786,9 +792,11 @@
                 if(this.form.radioProject=="1"){//内部项目
                     this.insideProjectShow=true;
                     this.outsideProjectShow=false;
+                    this.form.outsideProject = null;
                 }else if(this.form.radioProject=="2"){//外部项目
                     this.insideProjectShow=false;
                     this.outsideProjectShow=true;
+                    this.form.insideProject =null;
                 }
             }
         },

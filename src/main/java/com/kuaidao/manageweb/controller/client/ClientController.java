@@ -763,16 +763,16 @@ public class ClientController {
             return new JSONResult().fail(SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getCode(),SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getMessage());
         }
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
-        UserCnoReqDTO userCno = new UserCnoReqDTO();
-        userCno.setCno(cno);
-        userCno.setOrgId(curLoginUser.getOrgId());
-        JSONResult<UserCnoRespDTO> userCnoJr = clientFeignClient.queryUserCnoByCnoAndOrgId(userCno);
-        if(userCnoJr==null || !JSONResult.SUCCESS.equals(userCnoJr.getCode())) {
-            return new JSONResult<Boolean>().fail(userCnoJr.getCode(),userCnoJr.getMsg());
+        TrClientQueryDTO queryDTO = new TrClientQueryDTO();
+        queryDTO.setClientNo(cno);
+        queryDTO.setOrgId(curLoginUser.getOrgId());
+        JSONResult<TrClientRespDTO>  trClientJr = clientFeignClient.queryTrClientByParam(queryDTO);
+        if(trClientJr==null || !JSONResult.SUCCESS.equals(trClientJr.getCode())) {
+            return new JSONResult<Boolean>().fail(trClientJr.getCode(),trClientJr.getMsg());
         }
         //默认坐席属于自己
         boolean isBelongToSelf = true;
-        UserCnoRespDTO data = userCnoJr.getData();
+        TrClientRespDTO data = trClientJr.getData();
         if (data==null) {
             isBelongToSelf = false;
         }
