@@ -138,13 +138,17 @@ public class MyCustomerClueController {
             @RequestBody CustomerClueQueryDTO dto) {
         long time1 = new Date().getTime();
         java.text.SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
-        if (null != dto && null != dto.getDayTel() && dto.getDayTel().intValue() == 1) {
+        if (null != dto && null != dto.getDayTel()) {
             // 当日拨打电话
             dto.setTelTime(formatter.format(new Date()));
         }
         if (null != dto && null != dto.getTrackingDay() && dto.getTrackingDay().intValue() == 1) {
             // 当日跟进
             dto.setTrackingTime(formatter.format(new Date()));
+        } else if (null != dto && null != dto.getTrackingDay()
+                && dto.getTrackingDay().intValue() == 0) {
+            dto.setNotTrackingTime(formatter.format(new Date()));
+
         }
         // 数据权限处理
         Subject subject = SecurityUtils.getSubject();
@@ -392,7 +396,9 @@ public class MyCustomerClueController {
                 && clueFileList.getData() != null) {
             request.setAttribute("clueFileList", clueFileList.getData());
         }
+        UserInfoDTO user = getUser();
         request.setAttribute("commonPool", commonPool);
+        request.setAttribute("loginUserId", user.getId());
         return "clue/CustomerMaintenanceReadOnly";
     }
 

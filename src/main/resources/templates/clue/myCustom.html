@@ -128,7 +128,7 @@
                     placeholder="选择日期时间">
                 </el-date-picker>
             </el-form-item>
-            <el-button type="primary" @click="initTableData">搜索</el-button>
+            <el-button type="primary" @click="search">搜索</el-button>
             <span style="color: rgb(0, 114, 255);text-decoration: underline;cursor: pointer;" @click="toogleClick">更多搜索</span>
             <el-row v-show="isShow">
                 <el-form-item label="">
@@ -212,7 +212,7 @@
             @row-dblclick="showClueDetailInfo"
             >
             <el-table-column align="center" type="selection"  prop="clueId"  @selection-change="handleSelectionChange" width="55"></el-table-column>
-             <el-table-column align="center" :key="index" :prop="item.fieldCode" :label="item.displayName" :width="item.width"
+             <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width"
 	         v-for="(item,key,index) in tableColums" v-if="item.fieldCode == 'phone'">
 	               <template slot-scope="scope">
                     	{{scope.row.phone}}
@@ -222,7 +222,7 @@
 	                    <el-tag v-if="scope.row.tag">{{scope.row.tag}}</el-tag>
 	                </template>
 	        </el-table-column>
-	        <el-table-column align="center" :key="index" :prop="item.fieldCode" :label="item.displayName" :width="item.width" 
+	        <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width" 
 	          v-else-if="item.fieldCode == 'isTrack'">
 	               <template slot-scope="scope">
 	                    <div v-if="scope.row.isTrack === 1"> 
@@ -230,7 +230,7 @@
 	                    </div> 
 	                </template>
 	        </el-table-column>
-	        <el-table-column align="center" :key="index" :prop="item.fieldCode" :label="item.displayName" :width="item.width" 
+	        <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width" 
 	          v-else-if="item.fieldCode == 'repeatPhones'">
 	               <template slot-scope="scope">
                		  <div v-if="scope.row.isRepeatPhone === 1"> 
@@ -238,7 +238,7 @@
 	                  </div> 
 	                </template>
 	        </el-table-column>
-	        <el-table-column align="center" :key="index" :prop="item.fieldCode" :label="item.displayName" :width="item.width" 
+	        <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width" 
 	          v-else-if="item.fieldCode == 'sex'">
 	               <template slot-scope="scope">
                       <div v-if="scope.row.sex === 1">
@@ -249,10 +249,10 @@
                       </div>
 	               </template>
 	        </el-table-column>
-            <el-table-column align="center" sortable  :key="index" :prop="item.fieldCode" :label="item.displayName" :width="item.width"
+            <el-table-column align="center" sortable  :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width"
 	          v-else-if="item.fieldCode == 'assignTime'||item.fieldCode == 'updateTime'||item.fieldCode == 'createTime'">
 	        </el-table-column>
-            <el-table-column align="center" :key="index" :prop="item.fieldCode" :label="item.displayName" :width="item.width"
+            <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width"
 	          v-else>
 	        </el-table-column>
         </el-table>
@@ -666,6 +666,10 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
             }        	  
         },
         methods: {
+        	search(){
+        		this.pager.currentPage =1;
+        		this.initTableData();
+        	},
          	 initTableData(){
                  var param = {};
                  var pageSize = this.pager.pageSize;

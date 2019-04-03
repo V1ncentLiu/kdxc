@@ -19,7 +19,7 @@
         <el-breadcrumb-item>话务管理列表</el-breadcrumb-item>
     </el-breadcrumb>
     <el-row class="marginB10">
-        <el-button type="text" @click="checkline"><i class="el-icon-menu"></i>选择列</el-button>
+        <el-button type="text" @click="dialogChooseList = true"><i class="el-icon-menu"></i>选择列</el-button>
             <el-button type="success" @click="openassignrDig">分配资源</el-button>
             <!--<el-button type="success" @click="editClue">编辑资源</el-button>-->
             <!--<el-button type="success" @click="releaseClue">释放资源</el-button>-->
@@ -110,7 +110,7 @@
     <el-row>
    <el-table  ref="multipleTable" tooltip-effect="dark" border @selection-change="handleSelectionChange" style="width: 100%"  :data="dataTable" @row-dblclick="showClueDetailInfo">
             <el-table-column align="center" type="selection" label="全选" width="50" :prop="clueId"></el-table-column>
-	        <el-table-column align="center" :key="index" :prop="item.fieldCode" :label="item.displayName" :width="item.width"
+	        <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width"
 	         v-for="(item,key,index) in tableColums" v-if="item.fieldCode == 'phone'">
 	             <template slot-scope="scope" >
                      {{scope.row.phone}}
@@ -120,7 +120,7 @@
                 </template>
             </el-table-column>
 
-            <el-table-column :prop="item.fieldCode" :label="item.displayName" :width="item.width" v-else-if="item.fieldCode == 'isTrack'">
+            <el-table-column :prop="item.fieldCode" :key="item.fieldCode" :label="item.displayName" :width="item.width" v-else-if="item.fieldCode == 'isTrack'">
                 <template slot-scope="scope">
                    <div v-if="scope.row.isTrack == 1">
                     <el-button @click="openTrackingDialog(scope.row.clueId)" type="text" size="small">
@@ -130,15 +130,7 @@
                 </template>
             </el-table-column>
 
-           <!--<el-table-column :prop="item.fieldCode" :label="item.displayName" :width="item.width" v-else-if="item.fieldCode == 'cusName'">-->
-               <!--<template slot-scope="scope">-->
-                   <!--<el-button  @click="customerEidt(scope.row.clueId)"   type="text" size="small">-->
-                       <!--{{scope.row.cusName}}-->
-                   <!--</el-button>-->
-               <!--</template>-->
-           <!--</el-table-column>-->
-
-            <el-table-column :prop="item.fieldCode" :label="item.displayName" :width="item.width"
+            <el-table-column :prop="item.fieldCode" :key="item.fieldCode" :label="item.displayName" :width="item.width"
 	          v-else-if="item.fieldCode == 'isRepeatPhone'">
                <template slot-scope="scope">
                   <div v-if="scope.row.isRepeatPhone==1">
@@ -146,7 +138,7 @@
                   </div>
                 </template>
             </el-table-column>
-           <el-table-column :prop="item.fieldCode" :label="item.displayName" :width="item.width"
+           <el-table-column :prop="item.fieldCode" :key="item.fieldCode" :label="item.displayName" :width="item.width"
                             v-else-if="item.fieldCode == 'sex'">
                <template slot-scope="scope">
                    <div v-if="scope.row.sex==1">
@@ -157,7 +149,7 @@
                    </div>
                </template>
            </el-table-column>
-            <el-table-column align="center" :key="index" :prop="item.fieldCode" :label="item.displayName" :width="item.width"  v-else></el-table-column>
+            <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width"  v-else></el-table-column>
         </el-table>
          <table-pagination :pager="pager" @change="initTableData"></table-pagination> 
     </el-row>
@@ -573,24 +565,6 @@ var editflag=[[${editflag}]];//可编辑标志
                     return false;
                   }
                 });
-            },
-            checkline(){
-                this.dialogChooseList = true;
-                //初始化table 列 和 用户自定义列
-                this.allTableColums = fieldList;
-                if(userFieldList.length!=0){
-                    var type=[];
-                    for(var i=0;i<userFieldList.length;i++){
-                        type.push(userFieldList[i].sortNum+'_'+userFieldList[i].fieldCode+'_'+userFieldList[i].displayName+'_'+userFieldList[i].fieldId)
-                    }
-                    this.form.type = type;
-                }else{
-                    var type=[];
-                    for(var i=0;i<fieldList.length;i++){
-                        type.push(fieldList[i].sortNum+'_'+fieldList[i].fieldCode+'_'+fieldList[i].displayName+'_'+fieldList[i].id)
-                    }
-                    this.form.type = type;
-                }
             },
             confirmColumn(){
                 //处理用户选择的列
