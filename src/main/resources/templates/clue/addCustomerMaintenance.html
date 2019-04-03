@@ -615,7 +615,7 @@
 		           <i class="fa fa-play-1 fa-lg"></i>
 			 	</span>
                             </a>
-                            <a class="download_img"  v-if="accountId==loginUserId"
+                            <a class="download_img"  v-if="scope.row.accountId==loginUserId"
                                @click="downloadAudio(scope.row.id,scope.row.recordFile,scope.row.callSource)"></a>
                         </template>
                     </el-table-column>
@@ -909,10 +909,12 @@
     var clueFileList = [[${clueFileList}]];//上传文件
     var ossUrl = [[${ossUrl}]];
     var callRecord = [[${callRecord}]];//通话记录
+    var loginUserId=[[${loginUserId}]];
     var addCustomerVM = new Vue({
         el: '#addCustomer',
         data: function () {
             return {
+            	loginUserId:loginUserId,
                 customerStatusRequired:false,
                 isShowTip: false,//是否显示释放公有池提示信息
                 isShowBtn: false,//是否显示保留客户按钮
@@ -1163,6 +1165,7 @@
             projectChangeSelect(selVal) {
                 var param = {};
                 param.category = selVal;
+                this.form.insideProject=null;
                 axios.post('/aggregation/projectManager/listNoPage', param).then(function (response) {
                     addCustomerVM.proSelect = response.data.data;
                 });
@@ -1751,7 +1754,7 @@
             getStartTimeText(row, column, value, index) {
                 var valText = "";
                 if (value) {
-                    valText = moment.unix(value).format("YYYY-MM-DD HH:MM:SS");
+                  valText =  moment.unix(Number(value)).format("YYYY-MM-DD HH:mm:ss");
                 }
                 return valText;
             },
