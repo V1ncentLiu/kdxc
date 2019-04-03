@@ -45,6 +45,7 @@ var mainDivVM = new Vue({
         },
         saleOptions:busSaleList,
         // 待审签约记录
+        showbutton:false,
         dataTable4:[],
         multipleSelection4:[],
         pager:{//
@@ -59,6 +60,8 @@ var mainDivVM = new Vue({
         paymentDetailsShow2:false,//判断定金付款明细表格是否显示
         paymentDetailsShow3:false,//判断二次定金付款明细表格是否显示
         paymentDetailsShow4:false,//判断尾款付款明细表格是否显示
+        visitRecordShow:false,
+        curRow:"", // 列表数据：当前行，使用地点：付款明细
         signRecordArrTitle:'',
         dialogForm:{//输入驳回原因
             reason:''
@@ -73,6 +76,7 @@ var mainDivVM = new Vue({
         recordTable2:[],//定金付款明细表格
         recordTable3:[],//二次定金付款明细表格
         recordTable4:[],//尾款付款明细表格
+        visitRecordTable:[],
         // 待审批到访记录
         dataTable2:[],
         multipleSelection2:[],
@@ -457,48 +461,63 @@ var mainDivVM = new Vue({
             this.dialogFormVisible=true;
         },
         recordClick(row) {//查看明细
-            this.paymentDetailsShow=false;
-            this.paymentDetailsShow2=false;
-            this.paymentDetailsShow3=false;
-            this.paymentDetailsShow4=false;
-            var param = {};
-            param.idList = [row.id];
-            axios.post('/sign/signRecord/listPayDetailNoPage', param)
-            .then(function (response) {
-                var resData = response.data;
-                if(resData.code=='0'){
-                    debugger;
-                    var payDetailData = resData.data;
-                    if(payDetailData[1]){
-                        mainDivVM.paymentDetailsShow=true;
-                        mainDivVM.recordTable= payDetailData[1];
-                    }
-                    if(payDetailData[2]){
-                        mainDivVM.paymentDetailsShow2=true;
-                        console.info(payDetailData[2]);
-                         mainDivVM.recordTable2= payDetailData[2];
-                    }
-                    if(payDetailData[3]){
-                          mainDivVM.paymentDetailsShow3=true;
-                          mainDivVM.recordTable3= payDetailData[3];
-                    }
-                    if(payDetailData[4]){
-                        mainDivVM.paymentDetailsShow4=true;
-                        mainDivVM.recordTable4= payDetailData[4];
-                    }
-                    
+                this.paymentDetailsShow=false;
+                this.paymentDetailsShow2=false;
+                this.paymentDetailsShow3=false;
+                this.paymentDetailsShow4=false;
+                this.visitRecordShow=false;
+                this.curRow = row;
+                if(row.status==1){
+                    this.showbutton = true;
                 }else{
-                    mainDivVM.$message({message:resData.msg,type:'error'});
-                    console.error(resData);
+                    this.showbutton = false;
                 }
-                mainDivVM.recordDialog=true;
-            
-            })
-            .catch(function (error) {
-                 console.log(error);
-            }).then(function(){
-            });           
-        },
+                // row.signNo;
+                var param = {};
+                param.idList = [row.id];
+                axios.post('/sign/signRecord/listPayDetailNoPage', param)
+                .then(function (response) {
+                    var resData = response.data;
+                    console.log(resData.data)
+                    if(resData.code=='0'){
+                        debugger;
+                        var payDetailData = resData.data;
+                        if(payDetailData[1]){
+                            mainDivVM.paymentDetailsShow=true;
+                            mainDivVM.recordTable= payDetailData[1];
+                        }
+                        if(payDetailData[2]){
+                            mainDivVM.paymentDetailsShow2=true;
+                            console.info(payDetailData[2]);
+                             mainDivVM.recordTable2= payDetailData[2];
+                        }
+                        if(payDetailData[3]){
+                              mainDivVM.paymentDetailsShow3=true;
+                              mainDivVM.recordTable3= payDetailData[3];
+                        }
+                        if(payDetailData[4]){
+                            mainDivVM.paymentDetailsShow4=true;
+                            mainDivVM.recordTable4= payDetailData[4];
+                        }
+                        if(payDetailData['visitRecord']){
+                            if(payDetailData['visitRecord'].length >0){
+                                mainDivVM.visitRecordShow=true;
+                                mainDivVM.visitRecordTable= payDetailData['visitRecord'];
+                            }
+                        }
+                    }else{
+                        mainDivVM.$message({message:resData.msg,type:'error'});
+                        console.error(resData);
+                    }
+                    mainDivVM.recordDialog=true;
+                
+                })
+                .catch(function (error) {
+                     console.log(error);
+                }).then(function(){
+                });
+               
+            },
         reasonClick(row) {//待审签约记录驳回原因
             this.rebutReason = row.rebutReason;
             this.reasonDialog=true;
@@ -612,6 +631,55 @@ var mainDivVM = new Vue({
                     return false;
                 }
             });
+        },
+        rebutOne(){
+            this.signRecordArrTitle='';
+            this.dialogForm.reason='';
+            var title = "";
+            var isPass = true;
+            var curRow = this.curRow;
+            this.multipleSelection = [];
+            if(curRow.status!=1){
+                this.$message({message:'只允许审核待审核的数据',type:'warning'});
+                isPass=false;
+            }
+            title += "【"+curRow.serialNum+""+this.getCustomerName(curRow.customerName)+"】 ";
+            if(!isPass){
+                return;
+            }
+            this.signRecordArrTitle=title;
+            this.dialogFormVisible=true;
+        },
+        passOne(){ //审核通过一条
+            var curRow = this.curRow;
+            var title = "";
+            var idArr = new Array();
+            var isPass = true;
+            if(curRow.status!=1){
+                this.$message({message:'只允许审核待审核的数据',type:'warning'});
+                isPass=false;
+            }else{
+                idArr.push(curRow.id)
+            }
+            this.$confirm('确定要将此 '+title+' 签约单审核通过吗？', '提示', {confirmButtonText: '确定', cancelButtonText: '取消', type: 'warning'}).then(() => {
+                var param={};
+                param.idList = idArr;
+                axios.post('/sign/signRecord/passAuditSignOrder', param)
+                    .then(function (response) {
+                        var resData = response.data;
+                        if(resData.code=='0'){
+                            signRecordVM.dialogFormVisible = false;
+                            signRecordVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
+                                    signRecordVM.initSignRecordData();// 刷新列表
+                                    signRecordVM.recordDialog = false;
+                                }});
+                        }else{
+                            signRecordVM.$message({message:resData.msg,type:'error'});
+                            console.error(resData);
+                        }
+                    }).catch(function (error) {console.log(error);}).then(function(){
+                });
+            }).catch(() => {this.$message({type: 'info', message: '已取消审核'});});
         },
         // 待审批到访记录
         initCustomerVisitRecord(){//初始列表 

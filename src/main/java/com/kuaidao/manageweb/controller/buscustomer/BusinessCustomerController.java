@@ -73,8 +73,8 @@ public class BusinessCustomerController {
         call.setClueId(clueId);
         call.setPageSize(10000);
         call.setPageNum(1);
-        JSONResult<PageBean<CallRecordRespDTO>> callRecord =
-                callRecordFeign.listTmCallReacordByParams(call);
+        JSONResult<List<CallRecordRespDTO>> callRecord =
+                callRecordFeign.listTmCallReacordByParamsNoPage(call);
         // 资源通话记录
         if (callRecord != null && callRecord.SUCCESS.equals(callRecord.getCode())
                 && callRecord.getData() != null) {
@@ -147,8 +147,8 @@ public class BusinessCustomerController {
         call.setClueId(clueId);
         call.setPageSize(10000);
         call.setPageNum(1);
-        JSONResult<PageBean<CallRecordRespDTO>> callRecord =
-                callRecordFeign.listTmCallReacordByParams(call);
+        JSONResult<List<CallRecordRespDTO>> callRecord =
+                callRecordFeign.listTmCallReacordByParamsNoPage(call);
         // 资源通话记录
         if (callRecord != null && callRecord.SUCCESS.equals(callRecord.getCode())
                 && callRecord.getData() != null) {
