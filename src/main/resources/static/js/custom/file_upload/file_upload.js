@@ -84,7 +84,11 @@ function get_suffix(filename) {
 }
 //上传文件
 function uploadFile(data) {
+	
     params = data;
+    if(uploader.files.length==0){
+    	return null;
+    }
     set_upload_param(uploader, '', false);
     console.log("host", host);
     console.log("g_object_name", g_object_name);
