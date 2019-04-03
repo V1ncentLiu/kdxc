@@ -80,7 +80,7 @@
                     <el-col :span="8">
                         <el-form-item label="性别：" :label-width="formLabelWidth" >
                             <el-button type="text" disabled>
-                                {{form.customerSex==1?'男':'女'}}
+                                {{form.customerSex==1?'男':form.customerSex==1?'女',''}}
                             </el-button>
                         </el-form-item>
                     </el-col>
@@ -370,7 +370,7 @@
                 </el-row>
                 
             </div>
-            <div class="marginB20 fs16 paddingT20">通话记录</div>            
+            <div class="marginB20 fs16 paddingT20">通话记录</div>
             <el-row>
                 <el-table
                     ref="multipleTable"
@@ -444,7 +444,7 @@
                       </template>
                     </el-table-column>
                 </el-table>
-            </el-row>            
+            </el-row>
             <div class="marginB20 fs16 paddingT20">流转人员</div>
             <el-table
                 ref="multipleTable"
@@ -514,6 +514,7 @@ var intention=[[${intention}]];//资源投资意向信息
 var proSelect=[[${proSelect}]];//项目
 var circulationList=[[${circulationList}]];//资源流转记录
 var trackingList=[[${trackingList}]];//跟访记录
+var callRecord=[[${callRecord}]];//上传文件
 var isEdit=false;
 var vform;
 if(proSelect==null){
@@ -608,7 +609,7 @@ if(base==null){
 }
 
 function crtTimeFtt1(val, row) {
-    if (val != null) {
+    if (val!=null) {
         var date = new Date(val);
 
         var month = (date.getMonth() + 1);
@@ -725,7 +726,7 @@ function crtTimeFtt(val, row) {
                 	nextVisitTime:'',
                 },
                 tableDataC2: trackingList,//跟进记录
-                tableDataC3: [],  //通话记录
+                tableDataC3: callRecord,  //通话记录
                 tableDataC4:circulationList//流转记录
             }             
         },
@@ -938,7 +939,7 @@ function crtTimeFtt(val, row) {
            });
           //意向品类
           param={};
-          param.groupCode="IntentionalCategory"; 
+          param.groupCode="project_category";
           axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {  
               addCustomerVM.IntentionalCategoryArr=response.data.data;
               for(var i = 0 ; i < addCustomerVM.IntentionalCategoryArr.length ; i++){

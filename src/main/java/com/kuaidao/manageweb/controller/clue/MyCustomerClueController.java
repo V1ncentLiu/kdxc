@@ -305,6 +305,8 @@ public class MyCustomerClueController {
                 && clueFileList.getData() != null) {
             request.setAttribute("clueFileList", clueFileList.getData());
         }
+        UserInfoDTO user = getUser();
+        request.setAttribute("loginUserId", user.getId());
         return "clue/addCustomerMaintenance";
     }
 
