@@ -18,7 +18,7 @@
         <el-breadcrumb-item>商务管理</el-breadcrumb-item>
         <el-breadcrumb-item>我的客户</el-breadcrumb-item>
     </el-breadcrumb>
-    <div class="fs16 marginB20">签约单基本信息  <el-button size="mini"  style="color:#ffffff;background-color: #409EFF"  @click="editSign()">添加多个签约单</el-button></div>
+    <div class="fs16 marginB20">签约单基本信息  <el-button v-show="showSignButtonFlag" size="mini"  style="color:#ffffff;background-color: #409EFF"  @click="editSign()">添加多个签约单</el-button></div>
     <el-table ref="recordTableInfo" tooltip-effect="dark" style="width: 100%;margin-bottom: 20px;" border :data="recordTableInfo">
         <el-table-column align="center" prop="signNo" label="签约单编号"></el-table-column>
         <el-table-column align="center" prop="customerName" label="客户姓名"></el-table-column>
@@ -634,6 +634,7 @@
     var vclueId = [[${clueId}]];
     var vsignId = [[${signId}]];
     var readOnly = [[${readyOnly}]];
+    var showSignButton = [[${showSignButton}]]
     var payType = [[${payType}]];
     var signData = [[${signData}]];
     var PayAllData = [[${PayAllData}]];
@@ -678,6 +679,12 @@
         vreadonlyFalg = false;
     }
 
+    var showSignButtonFlag = true;
+    if(showSignButton==1){
+        showSignButtonFlag = false;
+    }
+
+
     // 查询 模块
     var mainDivVM = new Vue({
         el: '#businessContractRecord',
@@ -690,6 +697,7 @@
             paymentDetailsShow3:three,//判断二次定金付款明细表格是否显示
             paymentDetailsShow4:four,//判断尾款付款明细表格是否显示
             readonlyFalg:vreadonlyFalg,
+            showSignButtonFlag:showSignButtonFlag,
             showfalg:true,
             dialogFormType:'',
             formLabelWidth: '150px',
