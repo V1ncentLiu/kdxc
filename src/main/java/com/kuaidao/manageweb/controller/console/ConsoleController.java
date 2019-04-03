@@ -592,6 +592,7 @@ public class ConsoleController {
         }
         businessConsoleReqDTO.setAccountIdList(accountIdList);
         businessConsoleReqDTO.setBusinessGroupId(curLoginUser.getOrgId());
+        businessConsoleReqDTO.setBusDirectorId(curLoginUser.getId());
         Date curDate = new Date();
         businessConsoleReqDTO.setEndTime(curDate);
         // 本月第一天 00
@@ -627,6 +628,7 @@ public class ConsoleController {
         List<Long> teleSaleIdList =
                 data.stream().map(UserInfoDTO::getId).collect(Collectors.toList());
         businessConsoleReqDTO.setAccountIdList(teleSaleIdList);
+        businessConsoleReqDTO.setBusDirectorId(curLoginUser.getId());
         Date curDate = new Date();
         Date nextDate = DateUtil.addDays(curDate, 1);
         businessConsoleReqDTO.setStartTime(DateUtil.getStartOrEndOfDay(nextDate, LocalTime.MIN));
