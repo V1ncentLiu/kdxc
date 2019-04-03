@@ -615,7 +615,7 @@
 		           <i class="fa fa-play-1 fa-lg"></i>
 			 	</span>
                             </a>
-                            <a class="download_img"  v-if="accountId==loginUserId"
+                            <a class="download_img"  v-if="scope.row.accountId==loginUserId"
                                @click="downloadAudio(scope.row.id,scope.row.recordFile,scope.row.callSource)"></a>
                         </template>
                     </el-table-column>
@@ -909,10 +909,12 @@
     var clueFileList = [[${clueFileList}]];//上传文件
     var ossUrl = [[${ossUrl}]];
     var callRecord = [[${callRecord}]];//通话记录
+    var loginUserId=[[${loginUserId}]];
     var addCustomerVM = new Vue({
         el: '#addCustomer',
         data: function () {
             return {
+            	loginUserId:loginUserId,
                 customerStatusRequired:false,
                 isShowTip: false,//是否显示释放公有池提示信息
                 isShowBtn: false,//是否显示保留客户按钮
@@ -1124,7 +1126,7 @@
                 this.lineFormShow=true
                 // 跟进记录初始化
                 this.$refs.LineRuleForm.resetFields(); //移除校验结果并重置字段值
-                this.formInline.customerStatus='';
+                this.formInline.customerStatus='1';
                 this.formInline.visitStatus='';
             },
             gettelNumberIcon(tel) {
@@ -2240,7 +2242,7 @@
             //客户状态
             param = {};
             param.groupCode = "customerStatus";
-            axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode', param).then(function (response) {
+            axios.post('/dictionary/DictionaryItem/queryTeleMyCusCustomerStatus', param).then(function (response) {
                 addCustomerVM.cusStatusArr = response.data.data;
             });
 
