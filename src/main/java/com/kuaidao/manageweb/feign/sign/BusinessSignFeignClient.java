@@ -48,6 +48,13 @@ public interface BusinessSignFeignClient {
 	@RequestMapping(method = RequestMethod.POST, value = "/updateBusinessSignDTOValidByIds")
 	public JSONResult updateBusinessSignDTOValidByIds(@RequestBody BusinessSignDTO businessSignDTO);
 
+
+	/**
+	 *  找到最大值。
+	 */
+	@PostMapping("/findMaxNewOne")
+	public JSONResult<BusSignRespDTO> findMaxNewOne(@RequestBody IdEntityLong idEntityLong);
+
 	/**
 	 * 重单处理列表
 	 *
@@ -96,6 +103,11 @@ public interface BusinessSignFeignClient {
 		public JSONResult updateBusinessSignDTOValidByIds(BusinessSignDTO businessSignDTO) {
 			// TODO Auto-generated method stub
 			return fallBackError("签约单有效性判断");
+		}
+
+		@Override
+		public JSONResult<BusSignRespDTO> findMaxNewOne(IdEntityLong idEntityLong) {
+			return fallBackError("最新到访记录");
 		}
 
 		@Override
