@@ -40,7 +40,7 @@
                                 <el-button type="primary" @click="dialogFormVisible = true"><i class="el-icon-plus"></i>手机号</el-button>
 			                </span> 
                             <span v-else-if="buttonType === 'B'">
-                                <span @click="dialogFormVisible = true" style="padding-left: 5px; color: rgb(0, 114, 255); cursor: pointer;">查看多个手机号</span>
+                                <span @click="dialogFormVisible = true" style="padding-left: 5px; color: rgb(0, 114, 255); cursor: pointer;"><span v-if="form.customerPhone2 ==null || form.customerPhone2==''">添加多个手机号</span><span v-else-if="form.customerPhone2 !=null && form.customerPhone2 !=''">查看多个手机号</span>
                             </span>
                         </el-form-item>
                     </el-col>
@@ -933,6 +933,7 @@
                     radioProject: '1', //意向项目单选默认选项
                     customerName: '',
                     customerPhone: '',
+                    customerPhone2:'',
                     customerEmail: '', //邮箱
                     cateringType: '',//曾经从事餐饮类型
                     sponsor: '1', //出资人
@@ -1423,9 +1424,11 @@
                 if (this.form.radioProject == "1") {//内部项目
                     this.insideProjectShow = true;
                     this.outsideProjectShow = false;
+                    this.form.outsideProject = null;
                 } else if (this.form.radioProject == "2") {//外部项目
                     this.insideProjectShow = false;
                     this.outsideProjectShow = true;
+                    this.form.insideProject =null;
                 }
             },
             handleSelectionChange(val) {
@@ -1738,6 +1741,9 @@
                 var param = {};
                 param.type = "1";
                 param.name = selVal;
+                this.form.district=null;
+                this.form.city=null;
+                this.districtArr =null;
                 axios.post('/area/sysregion/querySysRegionByParam', param).then(function (response) {
                     addCustomerVM.cityArr = response.data.data.data;
                 });
@@ -1778,6 +1784,7 @@
                 var param = {};
                 param.type = "2";
                 param.name = selVal;
+                this.form.district=null;
                 axios.post('/area/sysregion/querySysRegionByParam', param).then(function (response) {
                     addCustomerVM.districtArr = response.data.data.data;
                 });
@@ -2051,6 +2058,7 @@
             if (customer) {
                 this.form.customerName = customer.cusName;
                 this.form.customerPhone = customer.phone;
+                this.form.customerPhone2 = customer.phone2;
                 this.form.customerSex = customer.sex == null ? "" : customer.sex + "";
                 this.form.ishasWx = customer.wechat;
                 this.form.experience = customer.hasExperience == null ? "" : customer.hasExperience + "";
