@@ -722,7 +722,7 @@
                     { required: true, message: '请选择付款方式', trigger: 'change' }
                 ],
                 payTime: [
-                    { type: 'date', required: true, message: '请选择时间', trigger: 'change' }
+                    { type: 'date', required: true, message: '请选择付款时间', trigger: 'change' }
                 ],
                 amountReceived: [
                     { required: true,validator:function(rule,value,callback){
@@ -977,20 +977,20 @@
             },
             formMoneyDetail: {
                 clueId:"",
-                visitTime:"",
+                visitTime:new Date(),
                 visitCity:"",
                 visitType:"",
                 visitShopType:"",
                 visitNum:"",
 
-                signId:"",
-                paymentType: "",
-                paymentMode: "",
-                paymentTime: "",
-                purchaseAmount: "",
-                balanceAmount: "",
-                balanceTime:"",
-                performanceAmount: "",
+                signId:'',
+                payType:'',
+                payMode:'',
+                amountReceived: '',
+                amountBalance: '',
+                makeUpTime:'',
+                payTime: new Date(),
+                amountPerformance:'',
                 remarks:""
             },
 
@@ -1078,24 +1078,19 @@
                 this.formMoneyDetail.amountPerformance=this.formMoneyDetail.amountPerformance.replace('.','');
             },
             recordDialogClick(type){
-                this.resetForm('formMoneyDetail');
                 this.suppWrap =false; // 默认关闭 到访记录 填写部分
                 if(type==1){//定金添加付款按钮点击
-                    console.log(1)
                     this.dialogFormVisible=true
                 }else if(type==2){//二次定金添加付款按钮点击
-                    console.log(2)
                     this.dialogFormVisible=true
                 }else if(type==3){//尾款添加付款按钮点击
-                    console.log(3)
                     this.dialogFormVisible=true
                     this.payType='3'
                 }
-                // this.formMoneyDetail={};
+                // this.formMoneyDetail={}; // 将formMoneyDetail设置为空
+                this.resetForm('formMoneyDetail'); //重置校验状态
                 this.shouAddVisitButton = true;
                 this.suppWrap = false;
-                this.formMoneyDetail.visitTime = new Date();
-                this.formMoneyDetail.payTime = new Date();
             },
             payTypeChange(val){
                 if(val==3){
