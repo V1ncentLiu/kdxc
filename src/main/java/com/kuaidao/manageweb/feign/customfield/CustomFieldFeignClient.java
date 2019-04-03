@@ -31,7 +31,7 @@ import com.kuaidao.sys.dto.customfield.UserFieldReq;
  * @date: 2019年1月3日 下午5:06:37
  * @version V1.0
  */
-@FeignClient(name = "sys-service-1", path = "/sys/customfield/customField",
+@FeignClient(name = "sys-service", path = "/sys/customfield/customField",
         fallback = CustomFieldFeignClient.HystrixClientFallback.class)
 public interface CustomFieldFeignClient {
     /**
