@@ -592,6 +592,7 @@ public class ConsoleController {
         }
         businessConsoleReqDTO.setAccountIdList(accountIdList);
         businessConsoleReqDTO.setBusinessGroupId(curLoginUser.getOrgId());
+        businessConsoleReqDTO.setBusDirectorId(curLoginUser.getId());
         Date curDate = new Date();
         businessConsoleReqDTO.setEndTime(curDate);
         // 本月第一天 00
