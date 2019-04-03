@@ -55,7 +55,7 @@
                   @selection-change="handleSelectionChange" >
             <el-table-column type="selection" width="55" prop="id"> </el-table-column>
             <el-table-column prop="phone" label="客户电话" width="180" align="center"></el-table-column>
-            <el-table-column prop="typeName" label="异常类型" width="180" align="center"></el-table-column>
+            <el-table-column prop="type" label="异常类型" width="180" align="center" :formatter="transformType"></el-table-column>
             <el-table-column prop="createTime" label="创建时间" width="300" align="center"></el-table-column>
             <el-table-column prop="createUserName" label="创建人" width="300" align="center"></el-table-column>
             <el-table-column  prop="status" label="状态"  align="center">
@@ -182,6 +182,19 @@
                         mainDivVM.pager.total= response.data.data.total;
                     }
                 })
+            },
+          //合伙人转换方法
+            transformType(row, column, cellValue, index) {
+            	var typeList=this.abnorMalType;
+          	  var text="";
+          	  if(typeList){
+	                  for(var i=0;i<typeList.length;i++){
+	                		if(cellValue==typeList[i].value){
+	                			text=typeList[i].name;
+	                		}
+	                	}
+          	  }
+                return text;
             },
             initAbnormalType(){
                 var param = {}
