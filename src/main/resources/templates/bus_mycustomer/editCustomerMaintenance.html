@@ -228,7 +228,7 @@
                 <el-row>
                     <el-col :span="8">
                         <el-form-item label="意向品类：" :label-width="formLabelWidth">
-                           <el-select v-model="form.intentionCategory" placeholder="请选择" style="width: 100%;">
+                           <el-select v-model="form.intentionCategory" placeholder="请选择" @change="projectChangeSelect" style="width: 100%;">
                                 <el-option
                                     v-for="item in IntentionalCategoryArr"
                                     :key="item.value"
@@ -937,6 +937,13 @@ var ossUrl=[[${ossUrl}]];
        		  n = n.toString()
        		  return n[1] ? n : '0' + n
        		},
+            projectChangeSelect(selVal) {
+                var param = {};
+                param.category = selVal;
+                axios.post('/aggregation/projectManager/listNoPage', param).then(function (response) {
+                    addCustomerVM.proSelect = response.data.data;
+                });
+            },
             submitForm(form) {
                 this.$refs[form].validate((valid) => {
                     if (valid) {
@@ -1606,12 +1613,12 @@ var ossUrl=[[${ossUrl}]];
           axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {  
               addCustomerVM.customerLevelArr=response.data.data;
            });
-          //意向品类
-          param={};
-          param.groupCode="IntentionalCategory"; 
-          axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {  
-              addCustomerVM.IntentionalCategoryArr=response.data.data;
-           });
+            //意向品类
+            param = {};
+            param.groupCode = "project_category";
+            axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode', param).then(function (response) {
+                addCustomerVM.IntentionalCategoryArr = response.data.data;
+            });
         //投资金额
           param={};
           param.groupCode="ussm"; 
