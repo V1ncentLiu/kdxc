@@ -189,8 +189,8 @@ public class ConsoleController {
         }
 
         
-        
-        /* if(type.equals("1")) {
+/*        
+         if(type.equals("1")) {
             path = "console/consoleTelemarketing";
         }else if(type.equals("2")) {
             List<Integer> statusList = new ArrayList<Integer>();
@@ -616,8 +616,10 @@ public class ConsoleController {
         req.setRoleCode(RoleCodeEnum.SWJL.name());
         JSONResult<List<UserInfoDTO>> userInfoJr = userInfoFeignClient.listByOrgAndRole(req);
         if (!JSONResult.SUCCESS.equals(userInfoJr.getCode())) {
+            logger.error("countBusiDirecotorTomorrowArriveTime  userInfoFeignClient.listByOrgAndRole({}),res{{}}",req,userInfoJr);
             return new JSONResult<Integer>().fail(userInfoJr.getCode(), userInfoJr.getMsg());
         }
+        logger.info("countBusiDirecotorTomorrowArriveTime UserOrgRoleReq_{} {{}}",id,userInfoJr);
         List<UserInfoDTO> data = userInfoJr.getData();
         if (CollectionUtils.isEmpty(data)) {
             return new JSONResult<Integer>().success(0);
@@ -722,6 +724,7 @@ public class ConsoleController {
         Date addDays2 = DateUtil.addDays(disableTime, 1);
         System.out.println(addDays2);
         System.out.println(DateUtil.diffTimes(addDays2, new Date()));
+     
        
     }
 
