@@ -713,7 +713,7 @@
                 </el-table>
                 <div class="padding20 f-tac">
                     <el-button type="primary" @click="saveClue('form')">提交</el-button>
-                    <el-button type="primary" @click="saveClue('form','toTele')">转电销</el-button>
+                    <el-button type="primary" v-show="showButtonToTele" @click="saveClue('form','toTele')">转电销</el-button>
                     <el-button @click="rebackClue">取 消</el-button>
                 </div>
         </el-form>
@@ -764,6 +764,14 @@
         <div class="padding20" style="text-align: center;">
             <img :src="dialogFormUploadImgSrc" alt=""
                  style="width: 250px; height: 250px;">
+        </div>
+    </el-dialog>
+    <el-dialog title="" :visible.sync="showMessageDialog">
+        <div class="padding20" style="text-align: center;">
+            分配失败，请重新分配
+        </div>
+        <div slot="footer" class="dialog-footer" style="text-align: center;">
+            <el-button type="primary" @click="showMessageDialog = false;"> 知道了</el-button>
         </div>
     </el-dialog>
 </div>
@@ -981,10 +989,18 @@
     var clueFileList = [[${clueFileList}]];//上传文件
     var ossUrl = [[${ossUrl}]];
     var callRecord = [[${callRecord}]];//通话记录
+
+
+    var showButtonToTele = true;
+    if(base.phCustomerStatus==4||base.phase>2){
+        showButtonToTele = false;
+    }
+
     var addCustomerVM = new Vue({
         el: '#addCustomer',
         data: function () {
             return {
+                showButtonToTele:showButtonToTele,
                 customerStatusRequired:false,
                 isShowTip: false,//是否显示释放公有池提示信息
                 isShowBtn: false,//是否显示保留客户按钮
@@ -1170,6 +1186,7 @@
                 multipleTrackingSelection: [],
                 multipleFileSelection: [],
                 fileList: [],
+                showMessageDialog:false,
                 cusStatusArr: [],
                 tableDataC1: clueFileList,//文件记录
                 dialingTime: '',//跟进记录
