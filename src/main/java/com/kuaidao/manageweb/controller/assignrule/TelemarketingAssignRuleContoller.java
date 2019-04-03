@@ -232,7 +232,7 @@ public class TelemarketingAssignRuleContoller {
 					OrganizationQueryDTO orgDto = new OrganizationQueryDTO();
 					// 查询电销分公司
 					orgDto = new OrganizationQueryDTO();
-					orgDto.setOrgType(OrgTypeConstant.DXFGS);
+					orgDto.setOrgType(OrgTypeConstant.DXZ);
 					orgDto.setParentId(user.getOrgId());
 					JSONResult<List<OrganizationDTO>> orgComJson = organizationFeignClient.listDescenDantByParentId(orgDto);
 					if(orgComJson !=null && orgComJson.getData() !=null && orgComJson.getData().size()>0) {
@@ -282,7 +282,7 @@ public class TelemarketingAssignRuleContoller {
 					OrganizationQueryDTO orgDto = new OrganizationQueryDTO();
 					// 查询电销分公司
 					orgDto = new OrganizationQueryDTO();
-					orgDto.setOrgType(OrgTypeConstant.DXFGS);
+					orgDto.setOrgType(OrgTypeConstant.DXZ);
 					orgDto.setParentId(user.getOrgId());
 					JSONResult<List<OrganizationDTO>> orgComJson = organizationFeignClient.listDescenDantByParentId(orgDto);
 					if(orgComJson !=null && orgComJson.getData() !=null && orgComJson.getData().size()>0) {
