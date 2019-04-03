@@ -48,6 +48,13 @@ public class DictionaryItemController {
         return result;
     }
 
+    @PostMapping("/queryTeleMyCusCustomerStatus")
+    @ResponseBody
+    public JSONResult<List<DictionaryItemRespDTO>> queryTeleMyCusCustomerStatus(@RequestBody DictionaryItemQueryDTO queryDTO){
+        JSONResult result = dictionaryItemFeignClient.queryTeleMyCusCustomerStatus(queryDTO.getGroupCode());
+        return result;
+    }
+
 
     @RequestMapping("/itemListPage")
     public String itemListPage(HttpServletRequest request){
