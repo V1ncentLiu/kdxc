@@ -1,5 +1,26 @@
 $(function(){
 	documentReady();
+	//坐席重登录
+	var clientInfo = localStorage.getItem("clientInfo");
+	if(clientInfo){
+		var clientInfoObj = JSON.parse(clientInfo);
+		var loginClientType = clientInfoObj.loginClientType;
+		if(loginClientType=="tr"){
+			homePageVM.loginClientForm.clientType = clientInfoObj.clientType;
+			homePageVM.loginClientForm.bindPhone = clientInfoObj.bindTel;
+			homePageVM.loginClientForm.bindType = clientInfoObj.bindType;
+			homePageVM.loginClientForm.cno = clientInfoObj.cno;
+			homePageVM.enterpriseId = clientInfoObj.enterpriseId;
+			homePageVM.token = clientInfoObj.token;
+			homePageVM.loginTrClient();
+		}else if(loginClientType == "qimo"){
+			clientInfo.loginClientForm.clientType = clientInfoObj.clientType;
+			clientInfo.loginClientForm.loginClient = clientInfoObj.loginClient;
+            clientInfo.loginClientForm.bindType = clientInfoObj.bindPhoneType;
+            homePageVM.loginTrClient();
+		}
+	}
+	
 });
 
 
@@ -114,6 +135,8 @@ function priviewOutbound(outboundInputPhone,callSource,clueId,callback){
 			if(token.code=='0'){
 				homePageVM.$message({message:"外呼中",type:'success'});
 				if(callSource==1){
+					//清空 显示时间
+					//$("#outboundCallStartTime").html("");
 					$('#outboundCallTime').html("");
 				}else if(callSource==2){//电销页面外呼
 					homePageVM.tmOutboundCallDialogVisible =true;

@@ -7,7 +7,7 @@
     </style>
 </head>
 <body>
-<div id="clueManage" class="clueManage mainPadding">  
+<div id="clueManage" class="clueManage mainPadding" style="display: none;">  
     <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
         <el-breadcrumb-item>Home</el-breadcrumb-item>
         <el-breadcrumb-item>电销中心</el-breadcrumb-item>
@@ -80,9 +80,9 @@
   	</el-form>
     <el-row>
         <el-table  ref="multipleTable" tooltip-effect="dark" border @selection-change="handleSelectionChange"
-            style="width: 100%"  :data="dataTable" >
+            style="width: 100%"  :data="dataTable" key="multipleTable">
             <el-table-column align="center" type="selection" label="全选" width="50"></el-table-column>
-	        <el-table-column align="center" :key="index" :prop="item.fieldCode" :label="item.displayName" :width="item.width"
+	        <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width"
 	         v-for="(item,key,index) in tableColums" v-if="item.fieldCode == 'releaseNum'">
 	               <template slot-scope="scope">
 		               <div v-if="scope.row.releaseNum > 0">
@@ -91,7 +91,7 @@
 	                    <div v-else>无</div>
                 	</template>
 	        </el-table-column>
-	        <el-table-column align="center" :key="index" :prop="item.fieldCode" :label="item.displayName" :width="item.width"
+	        <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width"
 	          v-else-if="item.fieldCode == 'isRepeatPhone'">
 	               <template slot-scope="scope">
 		               <div v-if="scope.row.isRepeatPhone ==1">
@@ -100,7 +100,7 @@
 	                    <div v-else></div>
                 	</template>
 	        </el-table-column>
-            <el-table-column align="center" :key="index" :prop="item.fieldCode" :label="item.displayName" :width="item.width"
+            <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width"
 	         v-else>
 	        </el-table-column>
 	        
@@ -524,6 +524,7 @@ var clueVM = new Vue({
                         });
                        return;
                    }
+                   this.allocationForm.saleId = '';
                    this.allocationVisible = true;
                },
                allocationClue(formName){//分配资源
@@ -577,6 +578,7 @@ var clueVM = new Vue({
                         });
                        return;
                    }
+                   this.transferForm.id = '';
                    this.transferVisible = true;
                },
                transferClue(formName){//转移资源
@@ -686,6 +688,8 @@ var clueVM = new Vue({
                         });
                        return;
                    }
+                   this.ceoForm.id= '';
+                   this.ceoForm.teleSaleId= '';
                    this.ceoVisible = true;
                },
                ceoClue(formName){//副总分发
@@ -810,6 +814,7 @@ var clueVM = new Vue({
                 		idList.push(itemArr[3])
                 	}
                 	this.tableColums = customerShowColun;
+                	this.dataTable=this.dataTable;
                 	var param ={};
                   param.fieldIdList = idList;
                   param.menuCode = "aggregation:pendingAllocationManager";
@@ -854,9 +859,9 @@ var clueVM = new Vue({
             this.initColumn();
             this.searchTable();
            
-        },
+        },//created方法 结束
         mounted(){
-           console.info("mounted method");
+            document.getElementById('clueManage').style.display = 'block';
         }
     })
     

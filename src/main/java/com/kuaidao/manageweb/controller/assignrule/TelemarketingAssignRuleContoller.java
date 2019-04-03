@@ -2,6 +2,7 @@ package com.kuaidao.manageweb.controller.assignrule;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -224,8 +225,22 @@ public class TelemarketingAssignRuleContoller {
 			if (null != roleList && roleList.size() > 0) {
 				RoleInfoDTO roleDto = roleList.get(0);
 				UserInfoPageParam param = new UserInfoPageParam();
-				if (roleDto.getRoleCode().equals(RoleCodeEnum.DXZJ.name())) {
+				if (user.getRoleList() !=null && user.getRoleList().size()>0 && user.getRoleList().get(0).getRoleCode().equals(RoleCodeEnum.DXZJ.name())) {
 					param.setOrgId(user.getOrgId());
+				}
+				if (user.getRoleList() !=null && user.getRoleList().size()>0 && user.getRoleList().get(0).getRoleCode().equals(RoleCodeEnum.DXFZ.name())) {
+					OrganizationQueryDTO orgDto = new OrganizationQueryDTO();
+					// 查询电销分公司
+					orgDto = new OrganizationQueryDTO();
+					orgDto.setOrgType(OrgTypeConstant.DXZ);
+					orgDto.setParentId(user.getOrgId());
+					JSONResult<List<OrganizationDTO>> orgComJson = organizationFeignClient.listDescenDantByParentId(orgDto);
+					if(orgComJson !=null && orgComJson.getData() !=null && orgComJson.getData().size()>0) {
+						 List<Long> idList =
+								 orgComJson.getData().stream().map(c -> c.getId() ).collect(Collectors.toList());
+						 param.setOrgIdList(idList);
+					}
+					
 				}
 				param.setRoleId(roleDto.getId());
 				param.setPageSize(10000);
@@ -260,10 +275,24 @@ public class TelemarketingAssignRuleContoller {
 			if (null != roleList && roleList.size() > 0) {
 				RoleInfoDTO roleDto = roleList.get(0);
 				UserInfoPageParam param = new UserInfoPageParam();
-				param.setRoleId(roleDto.getId());
-				if (roleDto.getRoleCode().equals(RoleCodeEnum.DXZJ.name())) {
+				if (user.getRoleList() !=null && user.getRoleList().size()>0 && user.getRoleList().get(0).getRoleCode().equals(RoleCodeEnum.DXZJ.name())) {
 					param.setOrgId(user.getOrgId());
 				}
+				if (user.getRoleList() !=null && user.getRoleList().size()>0 && user.getRoleList().get(0).getRoleCode().equals(RoleCodeEnum.DXFZ.name())) {
+					OrganizationQueryDTO orgDto = new OrganizationQueryDTO();
+					// 查询电销分公司
+					orgDto = new OrganizationQueryDTO();
+					orgDto.setOrgType(OrgTypeConstant.DXZ);
+					orgDto.setParentId(user.getOrgId());
+					JSONResult<List<OrganizationDTO>> orgComJson = organizationFeignClient.listDescenDantByParentId(orgDto);
+					if(orgComJson !=null && orgComJson.getData() !=null && orgComJson.getData().size()>0) {
+						 List<Long> idList =
+								 orgComJson.getData().stream().map(c -> c.getId() ).collect(Collectors.toList());
+						 param.setOrgIdList(idList);
+					}
+					
+				}
+				param.setRoleId(roleDto.getId());
 				param.setPageSize(10000);
 				param.setPageNum(1);
 				JSONResult<PageBean<UserInfoDTO>> userListJson = userInfoFeignClient.list(param);

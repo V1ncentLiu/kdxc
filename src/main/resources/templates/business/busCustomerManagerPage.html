@@ -161,7 +161,7 @@
                         type="datetime" placeholder="选择日期"></el-date-picker>
             </el-form-item>
             <el-form-item
-                    class="formItem" label="接受客户时间：">
+                    class="formItem" label="接收客户时间：">
                 <el-date-picker
                         v-model="searchForm.startAllocationTime" format="yyyy-MM-dd HH:mm"
                         type="datetime" placeholder="选择日期"></el-date-picker>
@@ -198,7 +198,7 @@
                     align="center" prop="appiontmentCreateTime" sortable label="提交邀约时间"
                     :formatter="dateFormat" width="170"></el-table-column>
             <el-table-column
-                    align="center" prop="allocateTime" sortable label="接受客户时间"
+                    align="center" prop="allocateTime" sortable label="接收客户时间"
                     :formatter="dateFormat" width="170"></el-table-column>
             <el-table-column
                     align="center" prop="visit" label="到访情况" width="100">
@@ -215,12 +215,11 @@
                     </div>
                 </template>
             </el-table-column>
-            <el-table-column align="center" prop="sign" label="签约单">
+            <el-table-column align="center" label="签约单">
                 <template slot-scope="scope">
-                    <div v-if="scope.row.signId != null && scope.row.signId != ''">
-                        <el-button type="text" @click="toSignPage(scope.row)" size="small">点击查看</el-button>
+                    <div  v-if="scope.row.signList.length>=1"   v-for="item in scope.row.signList">
+                        <el-button size="mini"  type="text" @click="toSignPage(item)">查看签约单({{item.signNo}})</el-button>
                     </div>
-                    <div v-else></div>
                 </template>
             </el-table-column>
             <el-table-column align="center" prop="busAreaName" label="商务大区"></el-table-column>
@@ -1191,7 +1190,7 @@
                 })
             },
             toSignPage(row) {  // 进入签约单明细  能够 新增付款
-                window.location.href = '/businesssign/visitRecordPage?readyOnly=1&clueId=' + row.clueId + "&signId=" + row.signId;
+                window.location.href = '/businesssign/visitRecordPage?readyOnly=1&showSignButton=1&clueId=' + row.clueId + "&signId=" + row.signId;
             },
             showCustomerDetail(row, column) { // 客户详情
                 window.location.href = '/bus/BusinessCustomer/viewCustomerInfo?clueId=' + row.clueId;

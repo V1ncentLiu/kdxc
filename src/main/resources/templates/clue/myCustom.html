@@ -115,7 +115,7 @@
             <el-form-item label="分配时间:">
                 <el-date-picker
                     style="width: 100%;"
-                    v-model="form.assignTimeStart"
+                    v-model="form.distributionTimeStart"
                     type="datetime"
                     placeholder="选择日期时间">
                 </el-date-picker>
@@ -123,12 +123,12 @@
             <el-form-item label="——">
                 <el-date-picker
                     style="width: 100%;"
-                    v-model="form.assignTimeEnd"
+                    v-model="form.distributionTimeEnd"
                     type="datetime"
                     placeholder="选择日期时间">
                 </el-date-picker>
             </el-form-item>
-            <el-button type="primary" @click="initTableData">搜索</el-button>
+            <el-button type="primary" @click="search">搜索</el-button>
             <span style="color: rgb(0, 114, 255);text-decoration: underline;cursor: pointer;" @click="toogleClick">更多搜索</span>
             <el-row v-show="isShow">
                 <el-form-item label="">
@@ -184,9 +184,9 @@
                 <el-form-item label="">
                     <el-input v-model="form.searchWord" placeholder="搜索词"></el-input>
                 </el-form-item>
-                <el-form-item label="">
+                <!-- <el-form-item label="">
                     <el-input v-model="form.address" placeholder="地址"></el-input>
-                </el-form-item>
+                </el-form-item> -->
                 <el-form-item label="">  
                     <el-select v-model="form.trackingDay" placeholder="当日是否跟访" style="width: 100%;" clearable >
                         <el-option
@@ -212,7 +212,7 @@
             @row-dblclick="showClueDetailInfo"
             >
             <el-table-column align="center" type="selection"  prop="clueId"  @selection-change="handleSelectionChange" width="55"></el-table-column>
-             <el-table-column align="center" :key="index" :prop="item.fieldCode" :label="item.displayName" :width="item.width"
+             <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width"
 	         v-for="(item,key,index) in tableColums" v-if="item.fieldCode == 'phone'">
 	               <template slot-scope="scope">
                     	{{scope.row.phone}}
@@ -222,7 +222,7 @@
 	                    <el-tag v-if="scope.row.tag">{{scope.row.tag}}</el-tag>
 	                </template>
 	        </el-table-column>
-	        <el-table-column align="center" :key="index" :prop="item.fieldCode" :label="item.displayName" :width="item.width" 
+	        <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width" 
 	          v-else-if="item.fieldCode == 'isTrack'">
 	               <template slot-scope="scope">
 	                    <div v-if="scope.row.isTrack === 1"> 
@@ -230,7 +230,7 @@
 	                    </div> 
 	                </template>
 	        </el-table-column>
-	        <el-table-column align="center" :key="index" :prop="item.fieldCode" :label="item.displayName" :width="item.width" 
+	        <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width" 
 	          v-else-if="item.fieldCode == 'repeatPhones'">
 	               <template slot-scope="scope">
                		  <div v-if="scope.row.isRepeatPhone === 1"> 
@@ -238,7 +238,7 @@
 	                  </div> 
 	                </template>
 	        </el-table-column>
-	        <el-table-column align="center" :key="index" :prop="item.fieldCode" :label="item.displayName" :width="item.width" 
+	        <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width" 
 	          v-else-if="item.fieldCode == 'sex'">
 	               <template slot-scope="scope">
                       <div v-if="scope.row.sex === 1">
@@ -249,7 +249,10 @@
                       </div>
 	               </template>
 	        </el-table-column>
-            <el-table-column align="center" :key="index" :prop="item.fieldCode" :label="item.displayName" :width="item.width"
+            <el-table-column align="center" sortable  :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width"
+	          v-else-if="item.fieldCode == 'distributionTime'||item.fieldCode == 'updateTime'||item.fieldCode == 'createTime'">
+	        </el-table-column>
+            <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width"
 	          v-else>
 	        </el-table-column>
         </el-table>
@@ -411,14 +414,14 @@
 </body>
 <!-- import Vue before Element -->
 <div th:include="_footer_include :: #jsLib"></div>
-<script type="text/javascript" src="//agent-gateway-2.cticloud.cn/js/agent/v10/cti-link.js"></script>
+<!-- <script type="text/javascript" src="//agent-gateway-2.cticloud.cn/js/agent/v10/cti-link.js"></script>
 <script th:src="@{/js/custom/call/md5.js?v=1.0.0}"></script>
 <script th:src="@{/js/custom/call/toolbar.js?v=1.0.1}"></script>
 <script th:src="@{/js/custom/call/toolbarIframe.js?v=1.0.1}"></script>
 <script th:src="@{/js/custom/call/timer.js?v=1.0.1}"></script>
-<script th:src="@{/js/custom/call/rtCall.js?v=1.0.0}"></script> 
+<script th:src="@{/js/custom/call/rtCall.js?v=1.0.0}"></script>  -->
 <!-- 播放錄音 js -->
-<script th:src="@{/js/custom/callrecord/simpleAudio.js?v=1.0.0}"></script>
+<!-- <script th:src="@{/js/custom/callrecord/simpleAudio.js?v=1.0.0}"></script> -->
 <script th:inline="javascript" >
 var fieldList=[[${fieldList}]];//自定义字段
 var userFieldList=[[${userFieldList}]];//用户自定义字段
@@ -447,8 +450,8 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                 	updateTimeEnd:'',
                 	createTimeStart:'',
                 	createTimeEnd:'',
-                	assignTimeStart:'',
-                	assignTimeEnd:'',
+                  distributionTimeStart:'',
+                  distributionTimeEnd:'',
                 	dayTel:'',
                 	hasInvite:'',
                 	repeatStatus:'',
@@ -663,6 +666,10 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
             }        	  
         },
         methods: {
+        	search(){
+        		this.pager.currentPage =1;
+        		this.initTableData();
+        	},
          	 initTableData(){
                  var param = {};
                  var pageSize = this.pager.pageSize;
@@ -679,14 +686,14 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                  param.updateTimeEnd=this.form.updateTimeEnd;
                  param.createTimeStart=this.form.createTimeStart;
                  param.createTimeEnd=this.form.createTimeEnd;
-                 param.assignTimeStart=this.form.assignTimeStart;
-                 param.assignTimeEnd=this.form.assignTimeEnd;
+                 param.distributionTimeStart=this.form.distributionTimeStart;
+                 param.distributionTimeEnd=this.form.distributionTimeEnd;
                  param.dayTel=this.form.dayTel;
                  param.hasInvite=this.form.hasInvite;
                  param.repeatStatus=this.form.repeatStatus;
                  param.province= this.form.province;
                  param.category= this.form.category;
-                 param.address= this.form.address;
+                 //param.address= this.form.address;
                  param.searchWord= this.form.searchWord;
                  param.trackingDay= this.form.trackingDay;
              	this.loading=true;
@@ -782,7 +789,6 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                 param.clueId = cid;
                 axios.post('/aggregation/tracking/queryList', param)
                     .then(function (response) {
-                        console.log(response.data)
                         if (response.data.code == 0) {
                         	mycustomVM.trackingParam.tableData = response.data.data
                         	mycustomVM.trackingParam.trackingDialogVisible = true;
@@ -790,7 +796,6 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                         	mycustomVM.$message.error(response.data.msg);
                         }
                     }).catch(function (error) {
-                    console.log(error);
                 });
 
             },
@@ -865,10 +870,8 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
 	  	                           });
 	                       	}
                         }).catch(function (error) {
-                            console.log(error);
                         });
                     } else {
-                        console.log('error submit!!');
                         return false;
                     }
                 });
@@ -902,20 +905,16 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                         	 mycustomVM.initTableData();  
         		        	}});
                          }).catch(function (error) {
-                             console.log(error);
                          });
                     } else {
-                        console.log('error submit!!');
                         return false;
                     }
                 });
             },
             recordClick(row) {
-                console.log(row);
                 this.recordDialog=true;
             },
             repeatPhonesClick(row) {
-                console.log(row);
                 this.repeatPhonesDialog=true;
                 this.dailogTitleType=row.phone;
                 this.repeatPhonesTable=[];
@@ -923,11 +922,9 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                     param.id = row.clueId;
                       param.cusPhone = row.phone;
                       param.clueId = row.clueId;
-                       console.info(param);
                         axios.post('/clue/appiontment/repeatPhonelist', param)
                           .then(function (response) {
                                 var result =  response.data;
-                                console.info(result);
                                 var table=result.data;
                                 mycustomVM.repeatPhonesTable=table;
                                 mycustomVM.repeatPhonesDialog=true;
@@ -966,7 +963,6 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
            confirmColumn(){
              	this.dialogChooseList = false;
              	//处理用户选择的列
-             	console.info(this.fieldFrom.type);
              	if(this.fieldFrom.type.length==0){
              		this.$message({
                          message: "请至少保留一列",
@@ -991,7 +987,6 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
              	var param ={};
                param.fieldIdList = idList;
                param.menuCode = "myCustomerInfo";
-               console.info(param);
                if(idList.length!=0){
                    axios.post('/customfield/customField/saveUserField', param)
                    .then(function (response) {
@@ -1033,7 +1028,6 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
             param={};
             param.groupCode="releaseReason";
             axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {
-                console.log(response.data.data)
                 mycustomVM.reasonArr=response.data.data;
             });
             
@@ -1041,7 +1035,6 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
             param={};
             param.groupCode="releaseReason";
             axios.post('/tele/clueMyCustomerInfo/listByOrgAndRole').then(function (response) {
-                console.log(response.data.data)
                 mycustomVM.telePerArr=response.data.data;
             });
             

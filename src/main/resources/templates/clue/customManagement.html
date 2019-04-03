@@ -19,7 +19,7 @@
         <el-breadcrumb-item>客户管理</el-breadcrumb-item>
     </el-breadcrumb>
     <el-row class="marginB10">
-        <el-button type="text" @click="dialogFormVisible = true"><i class="el-icon-menu"></i>选择列</el-button>
+        <el-button type="text" @click="dialogChooseList = true"><i class="el-icon-menu"></i>选择列</el-button>
         <shiro:hasPermission name="customerManager:allocation">
             <el-button type="success" @click="openassignrDig">分配资源</el-button>
         </shiro:hasPermission>
@@ -42,7 +42,7 @@
                     </el-option>
                 </el-select>
             </el-form-item> 
-            <el-form-item label="">  
+           <!--  <el-form-item label="">  
                 <el-select v-model="form.cluesta" placeholder="资源有效性" style="width: 100%;" clearable>
                     <el-option
                         v-for="item in clueStatus"
@@ -51,7 +51,7 @@
                         :value="item.value">
                     </el-option>
                 </el-select>
-            </el-form-item>
+            </el-form-item> -->
             <el-form-item label="">
                 <el-input v-model="form.customerPhone" placeholder="客户手机号"></el-input>
             </el-form-item>
@@ -78,7 +78,7 @@
                     </el-option>
                 </el-select>
             </el-form-item>
-            <el-form-item label="">
+            <!-- <el-form-item label="">
                 <el-select v-model="form.hasInvite" placeholder="是否邀约" style="width: 100%;" clearable >
                     <el-option
                         v-for="item in hasInvite"
@@ -87,7 +87,7 @@
                         :value="item.value">
                     </el-option>
                 </el-select>
-            </el-form-item>
+            </el-form-item> -->
             <el-form-item label="编辑时间:">
                 <el-date-picker
                     style="width: 100%;"
@@ -222,9 +222,9 @@
                 <el-form-item label="">
                     <el-input v-model="form.searchWord" placeholder="搜索词"></el-input>
                 </el-form-item>
-                <el-form-item label="">
+             <!--    <el-form-item label="">
                     <el-input v-model="form.address" placeholder="地址"></el-input>
-                </el-form-item>
+                </el-form-item> -->
             </el-row>                
         </el-form>       
     </el-row>
@@ -232,7 +232,7 @@
    <el-table  ref="multipleTable" tooltip-effect="dark" border @selection-change="handleSelectionChange"
             style="width: 100%"  :data="dataTable" >
             <el-table-column align="center" type="selection" label="全选" width="50"></el-table-column>
-	        <el-table-column align="center" :key="index" :prop="item.fieldCode" :label="item.displayName" :width="item.width"
+	        <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width"
 	         v-for="(item,key,index) in tableColums" v-if="item.fieldCode == 'phone'">
 	             <template slot-scope="scope" >
                       <p style="color:#409EFF; cursor:pointer" @click="showClueDetailInfo(scope.row.clueId)">{{scope.row.phone}}</p>
@@ -240,7 +240,7 @@
                     <el-tag v-if="scope.row.tag">{{scope.row.tag}}</el-tag>
                 </template>
             </el-table-column>
-            <el-table-column :prop="item.fieldCode" :label="item.displayName" :width="item.width"
+            <el-table-column :prop="item.fieldCode" :key="item.fieldCode" :label="item.displayName" :width="item.width"
 	          v-else-if="item.fieldCode == 'record'">
                 <template slot-scope="scope">
                    <div v-if="scope.row.isTrack === 1">
@@ -250,7 +250,7 @@
                     </div>
                 </template>
             </el-table-column>
-            <el-table-column :prop="item.fieldCode" :label="item.displayName" :width="item.width"
+            <el-table-column :prop="item.fieldCode" :key="item.fieldCode" :label="item.displayName" :width="item.width"
 	          v-else-if="item.fieldCode == 'repeatPhones'">
                <template slot-scope="scope">
                   <div v-if="scope.row.isRepeatPhone===1">
@@ -258,7 +258,7 @@
                   </div>
                 </template>
             </el-table-column>
-            <el-table-column align="center" :key="index" :prop="item.fieldCode" :label="item.displayName" :width="item.width"  v-else>
+            <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width"  v-else>
 	        </el-table-column>
 	        
         </el-table>
@@ -278,7 +278,7 @@
             <el-table-column align="center" prop="callTime" label="拨打时间"></el-table-column>
             <el-table-column align="center" prop="status" label="客户状态"></el-table-column>
             <el-table-column align="center" prop="isConnect" label="是否接通"></el-table-column>
-            <el-table-column align="center" prop="isNeedResource" label="资源有效性"></el-table-column>
+           <!--  <el-table-column align="center" prop="isNeedResource" label="资源有效性"></el-table-column> -->
             <el-table-column align="center" prop="isInvite" label="是否邀约"></el-table-column>
             <el-table-column align="center" prop="customerFocus" label="客户关注点"></el-table-column>  
             <el-table-column align="center" prop="isReturnVisit" label="是否继续回访"></el-table-column>  
@@ -422,25 +422,25 @@
     </el-dialog>
     <dialog-tracking :param="trackingParam"></dialog-tracking>
     <!-- 自定义列 -->
-    <el-dialog title="自定义列" :visible.sync="dialogFormVisible">
-      <el-form :model="formList">
-        
-          <el-form-item label="列名" prop="type">
-            <el-checkbox-group v-model="formList.type">
-              <el-checkbox :label="item.sortNum+'_'+item.fieldCode+'_'+item.displayName+'_'+item.id"  name="type" :key="item.fieldCode"  v-for="(item,index) in  allTableColums ">
-                  {{item.displayName}}
-              </el-checkbox>
-          
-             </el-checkbox-group>
-          </el-form-item>
-        
-      </el-form>
-      
-      <div slot="footer" class="dialog-footer">
-        <el-button @click="dialogFormVisible = false">取 消</el-button>
-        <el-button type="primary" @click="confirmColumn">确 定</el-button>
-      </div>
-    </el-dialog>
+      <el-dialog title="自定义列" :visible.sync="dialogChooseList">
+            <el-form :model="form1">
+                <el-form-item label="列名" prop="type">
+                    <el-checkbox-group v-model="form1.type">
+                    	<span>
+                    	</span>
+                        <el-checkbox :label="item.sortNum+'_'+item.fieldCode+'_'+item.displayName+'_'+item.id"   name="type" :key="item.fieldCode"  v-for="(item,index) in  allTableColums ">
+                            {{item.displayName}}
+                        </el-checkbox>
+
+                    </el-checkbox-group>
+                </el-form-item>
+            </el-form>
+            <div slot="footer" class="dialog-footer">
+                <el-button @click="dialogChooseList = false">取 消</el-button>
+                <el-button type="primary" @click="confirmColumn">确 定</el-button>
+            </div>
+       </el-dialog>
+    </template>
 </div>
 </body>
 <!-- import Vue before Element -->
@@ -459,6 +459,7 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
             return {
                 isShow:false,
                 recordDialog:false,
+                dialogChooseList:false,
                 repeatPhonesDialog:false,
                 allocateFormVisible: false, //分配资源
                 dailogTitleType:'',
@@ -571,7 +572,10 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                 	trackingDay:'',
                 	teleorg:'',
                 	teleSaleId:'',
-                },    
+                },
+                form1: {
+                    type: [],
+                },
                 cusLevelArr:[],
                 categoryArr:[],
                 provinceArr:[],
@@ -642,7 +646,6 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
             }        	  
         },
         methods: {
-        	
         	//初始化页面
         	 initTableData(){
                  var param = {};
@@ -674,6 +677,19 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                  if(null!=this.form.teleSaleId&&this.form.teleSaleId.length>0) {
                   param.teleSaleId= this.form.teleSaleId.join(",");
                 }
+                 if(this.form.updateTimeStart !=null && this.form.updateTimeStart != '' && this.form.updateTimeEnd !=null && this.form.updateTimeEnd != '' && this.form.updateTimeStart>this.form.updateTimeEnd){
+               	  	this.$message("编辑开始时间不能大于结束时间");
+          	         return;
+                 }
+                 if(this.form.createTimeStart !=null && this.form.createTimeStart != '' && this.form.createTimeEnd !=null && this.form.createTimeEnd != '' && this.form.createTimeStart>this.form.createTimeEnd){
+                	  	this.$message("创建开始时间不能大于结束时间");
+           	         return;
+                  }
+                 if(this.form.assignTimeStart !=null && this.form.assignTimeStart != '' && this.form.assignTimeEnd !=null && this.form.assignTimeEnd != '' && this.form.assignTimeStart>this.form.assignTimeEnd){
+                	  	this.$message("分配开始时间不能大于结束时间");
+           	         return;
+                  }
+                 
      		    axios.post('/tele/customerManager/findcustomerManagerPage',param).then(function (response) {
      				var resobj= response.data;
      		    	var pageData=resobj.data;
@@ -922,11 +938,18 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
             },  
             //处理用户选择的列
             confirmColumn(){
-                this.dialogFormVisible = false;
-                
-                console.info(this.formList.type);
+            	debugger;
+                //处理用户选择的列
                 var customerShowColun = [];
-                var customerColumn = this.formList.type;
+                var customerColumn = this.form1.type;
+                if(customerColumn.length==0){
+                    this.$message({
+                        message: '请选择列',
+                        type: 'warning'
+                    });
+                    return;
+                }
+                this.dialogChooseList = false;
                 customerColumn.sort(this.sortNumber);//对选择的列排序
                 var idList=[];
                 for(var i=0;i<customerColumn.length;i++){
@@ -940,34 +963,36 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                 }
                 this.tableColums = customerShowColun;
                 var param ={};
-                  param.fieldIdList = idList;
-                  param.menuCode = "customerManager";
-                  console.info(param);
-                  if(idList.length!=0){
+                param.fieldIdList = idList;
+                param.menuCode = "customerManager";
+                if(idList.length!=0){
                     axios.post('/customfield/customField/saveUserField', param)
-                     .then(function (response) {
-                        
-                      })
-                     .catch(function (error) {
+                        .then(function (response) {
+                        }).catch(function (error) {
                             console.log(error);
-                      });
-                    }
-                },
-                initColumn(){
-                    //初始化table 列 和 用户自定义列
-                    this.allTableColums = fieldList;
-                    if(userFieldList.length!=0){
-                        var type=[];
-                        for(var i=0;i<userFieldList.length;i++){
-                            type.push(userFieldList[i].sortNum+'_'+userFieldList[i].fieldCode+'_'+userFieldList[i].displayName+'_'+userFieldList[i].fieldId)
-                        }
-                        this.formList.type = type;
-                        this.confirmColumn();
-                    }else{
-                        this.tableColums = fieldList;
-                    }
-                    
-                },
+                        });
+                }
+            },
+            initColumn(){
+              	//初始化table 列 和 用户自定义列
+              	this.allTableColums = fieldList;
+              	if(userFieldList.length!=0){
+              		var type=[];
+                  	for(var i=0;i<userFieldList.length;i++){
+                  		type.push(userFieldList[i].sortNum+'_'+userFieldList[i].fieldCode+'_'+userFieldList[i].displayName+'_'+userFieldList[i].fieldId)
+                 	}
+	              	this.form1.type = type;
+	              	this.confirmColumn();
+              	}else{
+              		var type=[];
+                  	for(var i=0;i<fieldList.length;i++){
+                  		type.push(fieldList[i].sortNum+'_'+fieldList[i].fieldCode+'_'+fieldList[i].displayName+'_'+fieldList[i].id)
+                 	}
+	              	this.form1.type = type;
+	              	this.confirmColumn();
+              	}
+              	
+              },
                 sortNumber(a,b) {
                     //对数组中元素，按照数字 从小到大 排序
                     return a.split("_")[0] - b.split("_")[0];

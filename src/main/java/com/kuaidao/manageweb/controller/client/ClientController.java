@@ -749,5 +749,35 @@ public class ClientController {
         return clientFeignClient.axbOutCall(trAxbOutCallReqDTO);
     }
     
+    
+    /**
+     * 根据坐席号查询坐席的信息，判断坐席号是否属于当前用户
+     * @param cno  坐席号
+     * @return
+     */
+    @PostMapping("/queryClientInfoByCno")
+    @ResponseBody
+   public JSONResult<Boolean> queryClientInfoByCno(@RequestBody TrClientQueryDTO trClientQueryDTO,HttpServletRequest request) {
+        String cno =  trClientQueryDTO.getClientNo();
+        if(StringUtils.isBlank(cno)) {
+            return new JSONResult().fail(SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getCode(),SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getMessage());
+        }
+        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+        TrClientQueryDTO queryDTO = new TrClientQueryDTO();
+        queryDTO.setClientNo(cno);
+        queryDTO.setOrgId(curLoginUser.getOrgId());
+        JSONResult<TrClientRespDTO>  trClientJr = clientFeignClient.queryTrClientByParam(queryDTO);
+        if(trClientJr==null || !JSONResult.SUCCESS.equals(trClientJr.getCode())) {
+            return new JSONResult<Boolean>().fail(trClientJr.getCode(),trClientJr.getMsg());
+        }
+        //默认坐席属于自己
+        boolean isBelongToSelf = true;
+        TrClientRespDTO data = trClientJr.getData();
+        if (data==null) {
+            isBelongToSelf = false;
+        }
+        
+        return new JSONResult<Boolean>().success(isBelongToSelf);
+}
 
 }

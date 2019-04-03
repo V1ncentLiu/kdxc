@@ -265,22 +265,30 @@ var homePageVM=new Vue({
         				 this.$refs.loginClientForm.clearValidate(function(){
         					 
         				 });
-        			 }
-        			
-            		this.loginClientForm.clientType=1;//设置默认选中天润坐席
-            		this.loginClientForm.bindPhoneType=1;
-            		this.loginClientForm.cno='';
-            		this.loginClientForm.bindPhone='',
-            		this.loginClientForm.loginClient='',*/
-            		this.dialogLoginClientVisible = true;
+        			 }*/
+        		/*	if(!this.dialogLoginClientVisible){
+        				this.loginClientForm.clientType=1;//设置默认选中天润坐席
+                		this.loginClientForm.bindPhoneType=1;
+                		this.loginClientForm.cno='';
+                		this.loginClientForm.bindPhone='';
+                		this.loginClientForm.loginClient='';
+                		
+        			}*/
+        			this.dialogLoginClientVisible = true;
         		}
         	
         },
         cancelLoginClientForm(){
         	this.dialogLoginClientVisible = false;
-        	if (this.$refs.loginClientForm !==undefined) {
+        /*	if (this.$refs.loginClientForm !==undefined) {
 				  this.$refs.loginClientForm.resetFields();
-			 }
+			 }*/
+        	
+        	this.loginClientForm.clientType=1;//设置默认选中天润坐席
+    		this.loginClientForm.bindPhoneType=1;
+    		this.loginClientForm.cno='';
+    		this.loginClientForm.bindPhone='';
+    		this.loginClientForm.loginClient='';
         	
         },
         changeClientType(selectedValue){
@@ -314,6 +322,7 @@ var homePageVM=new Vue({
         	 axios.post('/client/client/qimoLogin',param)
              .then(function (response) {
                  var data =  response.data;
+                 
                  if(data.code=='0'){
                      var resData = data.data;
                      homePageVM.$message({message:"登录成功",type:'success'});
@@ -321,10 +330,18 @@ var homePageVM=new Vue({
                      homePageVM.dialogLoginClientVisible =false;
                      homePageVM.isQimoClient=true;
                      homePageVM.isTrClient=false;
-                     sessionStorage.setItem("loginClient","qimo");
-                     sessionStorage.setItem("accountId",homePageVM.accountId);
+                     //sessionStorage.setItem("loginClient","qimo");
+                     //sessionStorage.setItem("accountId",homePageVM.accountId);
+                     var clientInfo={};
+                     clientInfo.loginClientType="qimo";
+                     clientInfo.loginClient = homePageVM.loginClientForm.loginClient
+                     clientInfo.clientType = homePageVM.loginClientForm.clientType;
+                     clientInfo.bindType = homePageVM.loginClientForm.bindPhoneType;
+                     localStorage.setItem("clientInfo",JSON.stringify(clientInfo));
+                     
                  }else{
-                		homePageVM.$message({message:data.msg,type:'error'});
+                	 console.error(data);
+                     homePageVM.$message({message:data.msg,type:'error'});
                  }
              })
              .catch(function (error) {
@@ -335,9 +352,13 @@ var homePageVM=new Vue({
              });
         },
         loginTrClient(){//天润登录
+        	var cno = this.loginClientForm.cno;
+        	//验证坐席是否属于自己
+        	if(!this.validClientNo(cno)){
+        		return;
+        	}
         	var loginType = "2";
 			var enterpriseId = this.enterpriseId;
-			var cno = this.loginClientForm.cno;
 			var bindPhone = this.loginClientForm.bindPhone;
 			var bindType = this.loginClientForm.bindPhoneType;
 			var token = this.token;
@@ -401,6 +422,7 @@ var homePageVM=new Vue({
 						 */
 						// 执行登陆
 						TOOLBAR.login(params, function(token){
+							
 							 if (token.code == 0) {
 			                    //座席登录成功
 								 homePageVM.$message({message:'登录成功',type:'success'});
@@ -408,8 +430,19 @@ var homePageVM=new Vue({
 			                     homePageVM.dialogLoginClientVisible =false;
 			                     homePageVM.isQimoClient=false;
 			                     homePageVM.isTrClient=true;
-			                     sessionStorage.setItem("loginClient","tr");
-			                     sessionStorage.setItem("accountId",homePageVM.accountId);
+			                     //sessionStorage.setItem("loginClient","tr");
+			                    // sessionStorage.setItem("accountId",homePageVM.accountId);
+			                     
+			                     var clientInfo={};
+			                     clientInfo.loginClientType="tr";
+			                     clientInfo.clientType = homePageVM.loginClientForm.clientType;
+			                     clientInfo.bindTel=homePageVM.loginClientForm.bindPhone;
+			                     clientInfo.bindType = homePageVM.loginClientForm.bindPhoneType;
+			                     clientInfo.cno=homePageVM.loginClientForm.cno;
+			                     clientInfo.enterpriseId = homePageVM.enterpriseId;
+			                     clientInfo.token=homePageVM.token;
+			                     localStorage.setItem("clientInfo",JSON.stringify(clientInfo));
+			                     
 			                     var recordParam = {};
 			                     recordParam.clientType=homePageVM.loginClientForm.clientType;
 			                     recordParam.bindPhone= bindPhone;
@@ -428,6 +461,7 @@ var homePageVM=new Vue({
 			                    //座席登录失败，失败原因： + result.msg
 			                	var _msg = "登录失败！座席号或绑定电话不正确";
 			                	homePageVM.$message({message:_msg,type:'error'});
+			                	console.error(token);
 			                	return;
 			                }
 							
@@ -465,8 +499,11 @@ var homePageVM=new Vue({
                          homePageVM.callTitle="呼叫中心";
                          homePageVM.isQimoClient=false;
                          homePageVM.isTrClient=false;
-                     	 sessionStorage.removeItem("loginClient");
-                     	 sessionStorage.removeItem("accountId");
+                     	// sessionStorage.removeItem("loginClient");
+                     	// sessionStorage.removeItem("accountId");
+                         localStorage.removeItem("clientInfo");
+                      
+                         
                      }else{
                     		homePageVM.$message({message:data.msg,type:'error'});
                      }
@@ -487,9 +524,18 @@ var homePageVM=new Vue({
                         homePageVM.isQimoClient=false;
                         homePageVM.isTrClient=false;
                         homePageVM.callTitle="呼叫中心";
-                        sessionStorage.removeItem("loginClient");
-                        sessionStorage.removeItem("accountId");
+                       // sessionStorage.removeItem("loginClient");
+                      //  sessionStorage.removeItem("accountId");
+                        localStorage.removeItem("clientInfo");
                         homePageVM.$message({message:"退出成功",type:'success'});
+                        
+                        homePageVM.loginClientForm.clientType=1;//设置默认选中天润坐席
+                        homePageVM.loginClientForm.bindPhoneType=1;
+                        homePageVM.loginClientForm.cno='';
+                        homePageVM.loginClientForm.bindPhone='';
+                        homePageVM.loginClientForm.loginClient='';
+                        //homePageVM.$refs.loginClientForm.clearValidate();
+                        
          	        }else{
          	        	homePageVM.$message({message:"退出失败",type:'error'});
          	        }
@@ -633,6 +679,34 @@ var homePageVM=new Vue({
 			$("#iframeBox").attr({
 				"src":dataUrl //设置ifream地址
 			});
+    		
+    	},
+    	validClientNo(cno){//验证坐席是否属于自己
+    			var isPass =false;
+    			$.ajax({  
+    				type: "POST",  
+    				url: "/client/client/queryClientInfoByCno",          
+    				data: JSON.stringify({clientNo:cno}),   
+    				dataType: 'json',     
+    				async: false, //设置为同步请求
+    				contentType:"application/json",
+    				success: function(data){  
+    					console.info(data);
+    					if(data.code==0){
+    						isPass= data.data;
+    						if(!isPass){
+    							homePageVM.$message({message:"登陆失败，该坐席号不属于您的归属部门",type:'error'});
+    						}
+    					}else{
+    						homePageVM.$message({message:data.msg+"(验证)",type:'error'});
+    					}
+    				},  
+    				error: function() {     
+    				     
+    				}
+    			})
+    			
+    			return isPass;
     		
     	}
     

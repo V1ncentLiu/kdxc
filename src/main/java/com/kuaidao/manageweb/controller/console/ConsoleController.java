@@ -189,7 +189,7 @@ public class ConsoleController {
         }
 
         
-        /*
+/*        
          if(type.equals("1")) {
             path = "console/consoleTelemarketing";
         }else if(type.equals("2")) {
@@ -517,7 +517,7 @@ public class ConsoleController {
 
     /**
      * 商务经理 看板统计
-     * 
+     * 当月到访数  当月签约数 当月二次到访数  当月二次来访签约数  未收齐尾款笔数
      * @return
      */
     @RequestMapping("/countCurMonthNum")
@@ -592,6 +592,7 @@ public class ConsoleController {
         }
         businessConsoleReqDTO.setAccountIdList(accountIdList);
         businessConsoleReqDTO.setBusinessGroupId(curLoginUser.getOrgId());
+        businessConsoleReqDTO.setBusDirectorId(curLoginUser.getId());
         Date curDate = new Date();
         businessConsoleReqDTO.setEndTime(curDate);
         // 本月第一天 00
@@ -616,8 +617,10 @@ public class ConsoleController {
         req.setRoleCode(RoleCodeEnum.SWJL.name());
         JSONResult<List<UserInfoDTO>> userInfoJr = userInfoFeignClient.listByOrgAndRole(req);
         if (!JSONResult.SUCCESS.equals(userInfoJr.getCode())) {
+            logger.error("countBusiDirecotorTomorrowArriveTime  userInfoFeignClient.listByOrgAndRole({}),res{{}}",req,userInfoJr);
             return new JSONResult<Integer>().fail(userInfoJr.getCode(), userInfoJr.getMsg());
         }
+        logger.info("countBusiDirecotorTomorrowArriveTime UserOrgRoleReq_{} {{}}",id,userInfoJr);
         List<UserInfoDTO> data = userInfoJr.getData();
         if (CollectionUtils.isEmpty(data)) {
             return new JSONResult<Integer>().success(0);
@@ -625,6 +628,7 @@ public class ConsoleController {
         List<Long> teleSaleIdList =
                 data.stream().map(UserInfoDTO::getId).collect(Collectors.toList());
         businessConsoleReqDTO.setAccountIdList(teleSaleIdList);
+        businessConsoleReqDTO.setBusDirectorId(curLoginUser.getId());
         Date curDate = new Date();
         Date nextDate = DateUtil.addDays(curDate, 1);
         businessConsoleReqDTO.setStartTime(DateUtil.getStartOrEndOfDay(nextDate, LocalTime.MIN));
@@ -722,6 +726,8 @@ public class ConsoleController {
         Date addDays2 = DateUtil.addDays(disableTime, 1);
         System.out.println(addDays2);
         System.out.println(DateUtil.diffTimes(addDays2, new Date()));
+     
+       
     }
 
     /**

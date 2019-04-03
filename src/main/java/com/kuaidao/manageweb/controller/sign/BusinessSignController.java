@@ -1,6 +1,7 @@
 package com.kuaidao.manageweb.controller.sign;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
@@ -171,6 +172,10 @@ public class BusinessSignController {
         }
         UserInfoDTO user = CommUtil.getCurLoginUser();
         dto.setCreateUser(user.getId());
+        if(dto.getSignType()==1){ // 全款
+            dto.setMakeUpTime(null);
+            dto.setAmountBalance(null);
+        }
         return businessSignFeignClient.saveSign(dto);
     }
 
@@ -186,6 +191,10 @@ public class BusinessSignController {
         }
         UserInfoDTO user = CommUtil.getCurLoginUser();
         dto.setUpdateUser(user.getId());
+        if(dto.getSignType()==1){ // 全款
+            dto.setMakeUpTime(null);
+            dto.setAmountBalance(null);
+        }
         return businessSignFeignClient.updateSign(dto);
     }
 
@@ -249,30 +258,52 @@ public class BusinessSignController {
         // 查询最新一次到访
         JSONResult<BusVisitRecordRespDTO> maxNewOne =
                 visitRecordFeignClient.findMaxNewOne(idEntityLong);
-        Boolean flag = true;
+        // 查询最新一次签约记录
+        JSONResult<BusSignRespDTO> maxNewOne1 = businessSignFeignClient.findMaxNewOne(idEntityLong);
+
+        boolean signFlag = true;
         if (JSONResult.SUCCESS.equals(maxNewOne.getCode())) {
-            BusVisitRecordRespDTO data = maxNewOne.getData();
-            if (data != null) {
-                signDTO.setSignCompanyId(data.getCompanyid());
-                signDTO.setSignProjectId(data.getProjectId());
+            BusSignRespDTO data = maxNewOne1.getData();
+            if(data!=null){
+                signDTO.setIdCard(data.getIdCard());
+                signDTO.setSignCompanyId(data.getSignCompanyId());
+                signDTO.setSignProjectId(data.getSignProjectId());
                 signDTO.setSignProvince(data.getSignProvince());
                 signDTO.setSignCity(data.getSignCity());
-                signDTO.setSignDictrict(data.getSignDistrict());
-                signDTO.setSignShopType(data.getVistitStoreType());
+                signDTO.setSignDictrict(data.getSignDictrict());
+                signDTO.setSignShopType(data.getSignShopType());
                 signDTO.setCustomerName(data.getCustomerName());
                 signDTO.setPhone(linkPhone);
                 signDTO.setSignType(1);
                 signDTO.setPayType("1");
-                flag = false;
+                signFlag = false;
             }
         }
 
-
+        Boolean flag = true;
+        if (JSONResult.SUCCESS.equals(maxNewOne.getCode())) {
+            BusVisitRecordRespDTO data = maxNewOne.getData();
+            if (data != null) {
+                if(signFlag){
+                    signDTO.setSignCompanyId(data.getCompanyid());
+                    signDTO.setSignProjectId(data.getProjectId());
+                    signDTO.setSignProvince(data.getSignProvince());
+                    signDTO.setSignCity(data.getSignCity());
+                    signDTO.setSignDictrict(data.getSignDistrict());
+                    signDTO.setSignShopType(data.getVistitStoreType());
+                    signDTO.setCustomerName(data.getCustomerName());
+                    signDTO.setPhone(linkPhone);
+                    signDTO.setSignType(1);
+                    signDTO.setPayType("1");
+                    flag = false;
+                }
+            }
+        }
 
         if (JSONResult.SUCCESS.equals(mapJSONResult.getCode())) {
             Map data = mapJSONResult.getData();
             if (data != null) {
-                if (flag) {// 没有签约单
+                if (flag&&signFlag) {// 没有到访记录
                     // signDTO.setSignCompanyId((Long) data.get("busCompany"));
                     String tasteProjectId = (String) data.get("tasteProjectId");
                     String[] split = tasteProjectId.split(",");
@@ -296,6 +327,10 @@ public class BusinessSignController {
                 }
             }
         }
+        signDTO.setIsRemoteSign(0);
+        signDTO.setPayTime(new Date());
+        signDTO.setVisitTime(new Date());
+        signDTO.setVisitType(1);
         signDTO.setRebutReason(null);
         signDTO.setRebutTime(null);
         return new JSONResult<BusSignRespDTO>().success(signDTO);
@@ -364,7 +399,7 @@ public class BusinessSignController {
      */
     @RequestMapping("/visitRecordPage")
     public String visitRecordPage(HttpServletRequest request, @RequestParam String clueId,
-            @RequestParam String signId, @RequestParam String readyOnly) throws Exception {
+            @RequestParam String signId, @RequestParam String readyOnly,@RequestParam(required = false) String showSignButton) throws Exception {
 
         IdEntityLong idEntityLong = new IdEntityLong();
         idEntityLong.setId(Long.valueOf(signId));
@@ -438,6 +473,13 @@ public class BusinessSignController {
         JSONResult<List<CompanyInfoDTO>> listJSONResult = companyInfoFeignClient.allCompany();
         if (JSONResult.SUCCESS.equals(listJSONResult.getCode())) {
             request.setAttribute("companySelect", proJson.getData());
+        }
+
+
+        if(showSignButton!=null){
+            request.setAttribute("showSignButton", showSignButton);
+        }else{
+            request.setAttribute("showSignButton", "");
         }
 
         request.setAttribute("clueId", clueId);
