@@ -100,8 +100,14 @@ public class ClueRepetitionController {
 		}else if (roleList != null && RoleCodeEnum.DXCYGW.name().equals(roleList.get(0).getRoleCode())) {
 			idList.add(user.getId()) ;
 		}
-		clueRepetitionDTO.setIdList(idList);
-    	JSONResult<PageBean<ClueRepetitionDTO>> list = clueRepetitionFeignClient.queryRepeatList(clueRepetitionDTO);
+		JSONResult<PageBean<ClueRepetitionDTO>> list = new JSONResult<>();
+		if(idList !=null && idList.size()>0) {
+			clueRepetitionDTO.setIdList(idList);
+	    	list = clueRepetitionFeignClient.queryRepeatList(clueRepetitionDTO);
+		}else {
+			list = new JSONResult<PageBean<ClueRepetitionDTO>>().success(new PageBean<ClueRepetitionDTO>());
+		}
+		
     	return list;
     }
     /**
