@@ -399,7 +399,7 @@ public class BusinessSignController {
      */
     @RequestMapping("/visitRecordPage")
     public String visitRecordPage(HttpServletRequest request, @RequestParam String clueId,
-            @RequestParam String signId, @RequestParam String readyOnly) throws Exception {
+            @RequestParam String signId, @RequestParam String readyOnly,@RequestParam(required = false) String showSignButton) throws Exception {
 
         IdEntityLong idEntityLong = new IdEntityLong();
         idEntityLong.setId(Long.valueOf(signId));
@@ -473,6 +473,13 @@ public class BusinessSignController {
         JSONResult<List<CompanyInfoDTO>> listJSONResult = companyInfoFeignClient.allCompany();
         if (JSONResult.SUCCESS.equals(listJSONResult.getCode())) {
             request.setAttribute("companySelect", proJson.getData());
+        }
+
+
+        if(showSignButton!=null){
+            request.setAttribute("showSignButton", showSignButton);
+        }else{
+            request.setAttribute("showSignButton", "");
         }
 
         request.setAttribute("clueId", clueId);
