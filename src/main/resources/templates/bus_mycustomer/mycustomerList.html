@@ -1111,7 +1111,7 @@
                         </el-form-item>
                     </el-col>
                     <el-col :span="10">
-                        <el-form-item label="预计余款补齐时间："  :label-width="formLabelWidth" prop="makeUpTime" required>
+                        <el-form-item label="预计余款补齐时间："  :label-width="formLabelWidth" prop="makeUpTime">
                             <el-date-picker
                                     type="date"
                                     format="yyyy-MM-dd"
@@ -1540,9 +1540,9 @@
                             }
                         }, trigger: 'change'}
 				],
-				// makeUpTime: [
-				// 	{ type: 'date', required: true, message: '请选择预计余款补齐时间', trigger: 'change' }
-				// ],
+				makeUpTime: [
+					{required: true, message: '请选择预计余款补齐时间', trigger: 'change' }
+				],
 				// performanceAmount: [
 				// 	{ required: true, message: '请输入业绩金额', trigger: 'blur' }
 				// ],
@@ -2326,8 +2326,13 @@
                 var param = this.updateFormSigning;
                 param.amountPerformance = this.updateFormSigningAmountPerformance;
                 this.updateFormSigning.amountPerformance = this.updateFormSigningAmountPerformance;
-                param.makeUpTime = new Date( param.makeUpTime)
-                param.payTime = new Date( param.payTime)
+                if(param.makeUpTime){
+                    param.makeUpTime = new Date(param.makeUpTime)
+                }
+               if(param.payTime){
+                   param.payTime = new Date( param.payTime)
+               }
+
                 // 设置 clueid
                 this.$refs[formName].validate((valid) => {
                     if (valid) {
