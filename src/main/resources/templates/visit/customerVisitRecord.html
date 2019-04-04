@@ -157,7 +157,22 @@
                 </template>
             </el-table-column>
              <el-table-column align="center" prop="createTime" label="创建时间"></el-table-column> 
-               <el-table-column align="center" prop="visitCount" label="到访批次" :formatter="getVisitNumText"></el-table-column> 
+               <el-table-column align="center" prop="visitNum" label="到访批次" >
+               	<template slot-scope="scope">
+                        <div v-if="scope.row.visitNum == 1">
+                            首次到访
+                        </div>
+                        <div v-else-if="scope.row.visitNum == 2">
+                            二次到访
+                        </div>
+                        <div v-else-if="scope.row.visitNum > 2">
+                            多次到访
+                        </div>
+                        <div v-else>
+                            待处理
+                        </div>
+                    </template>
+               </el-table-column> 
             <el-table-column align="center" prop="status" label="到访有效性" width="100">
                 <template slot-scope="scope">
                  <span v-if="scope.row.status===0">

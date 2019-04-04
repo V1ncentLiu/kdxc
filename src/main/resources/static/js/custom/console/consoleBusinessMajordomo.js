@@ -96,8 +96,8 @@ var mainDivVM = new Vue({
         gotoVisitRecord(){//跳转客户到访记录
             window.location.href="/visit/visitRecord/visitRecordPage"; 
         },
-        gotoVisitRecord(){//跳转客户未到访记录
-            window.location.href="/visit/visitRecord/visitRecordPage"; 
+        gotoNoVisitRecord(){//跳转客户未到访记录
+            window.location.href="/visit/visitRecord/noVisitRecordPage"; 
         },
         gotoSignRecord(){//跳转客户签约记录
             window.location.href="/sign/signRecord/signRecordPage"; 
@@ -586,7 +586,10 @@ var mainDivVM = new Vue({
             this.$refs[formName].validate((valid) => {
                 if (valid) {
                     var param ={};  
-                    var rows = this.multipleSelection;
+                    var rows = this.multipleSelection4;
+                    if(rows.length==0){
+                        rows.push(this.curRow);
+                    }
                     var idArr = new Array();
                     var isPass = true;
                     for(var i=0;i<rows.length;i++){
@@ -613,6 +616,7 @@ var mainDivVM = new Vue({
                             mainDivVM.dialogFormVisible = false;
                              mainDivVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
                                  mainDivVM.initSignRecordData();
+                                 mainDivVM.recordDialog = false;
                             }});
                         }else{
                             mainDivVM.$message({message:resData.msg,type:'error'});
@@ -638,7 +642,7 @@ var mainDivVM = new Vue({
             var title = "";
             var isPass = true;
             var curRow = this.curRow;
-            this.multipleSelection = [];
+            this.multipleSelection4 = [];
             if(curRow.status!=1){
                 this.$message({message:'只允许审核待审核的数据',type:'warning'});
                 isPass=false;
@@ -668,13 +672,13 @@ var mainDivVM = new Vue({
                     .then(function (response) {
                         var resData = response.data;
                         if(resData.code=='0'){
-                            signRecordVM.dialogFormVisible = false;
-                            signRecordVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
-                                    signRecordVM.initSignRecordData();// 刷新列表
-                                    signRecordVM.recordDialog = false;
+                            mainDivVM.dialogFormVisible = false;
+                            mainDivVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
+                                    mainDivVM.initSignRecordData();// 刷新列表
+                                    mainDivVM.recordDialog = false;
                                 }});
                         }else{
-                            signRecordVM.$message({message:resData.msg,type:'error'});
+                            mainDivVM.$message({message:resData.msg,type:'error'});
                             console.error(resData);
                         }
                     }).catch(function (error) {console.log(error);}).then(function(){

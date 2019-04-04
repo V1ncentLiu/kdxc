@@ -580,79 +580,7 @@
                     </div>
                 </el-table>
             </el-row>
-            <div class="marginB20 fs16 paddingT20">资源信息</div>
-            <div class="borderbox padding20">
-                <el-row>
-                    <el-col :span="8">
-                        <el-form-item
-                                label="资源类型：" :label-width="formLabelWidth">
-                            <el-button
-                                    type="text" disabled>{{clueBase.typeName}}
-                            </el-button>
-                        </el-form-item>
-                    </el-col>
-                    <el-col
-                            :span="8">
-                        <el-form-item label="资源类别："
-                                      :label-width="formLabelWidth">
-                            <el-button type="text"
-                                       disabled>{{clueBase.categoryName}}
-                            </el-button>
-                        </el-form-item>
-                    </el-col>
-                </el-row>
-                <el-row>
-                    <el-col :span="8">
-                        <el-form-item
-                                label="广告位：" :label-width="formLabelWidth">
-                            <el-button
-                                    type="text" disabled>{{clueBase.sourceTypeName}}
-                            </el-button>
-                        </el-form-item>
-                    </el-col>
-                    <el-col
-                            :span="8">
-                        <el-form-item label="媒介："
-                                      :label-width="formLabelWidth">
-                            <el-button type="text"
-                                       disabled>{{clueBase.sourceName}}
-                            </el-button>
-                        </el-form-item>
-                    </el-col>
-                </el-row>
-                <el-row>
-                    <el-col :span="8">
-                        <el-form-item
-                                label="搜索词：" :label-width="formLabelWidth">
-                            <div class="lineFeed">{{clueBase.searchWord}}</div>
-                        </el-form-item>
-                    </el-col>
-                    <el-col :span="8">
-                        <el-form-item label="资源项目："
-                                      :label-width="formLabelWidth">
-                            <el-button type="text"
-                                       disabled>{{clueBase.projectName}}
-                            </el-button>
-                        </el-form-item>
-                    </el-col>
-                </el-row>
-                <el-row>
-                    <el-col :span="8">
-                        <el-form-item
-                                label="留言时间：" :label-width="formLabelWidth">
-                            <el-button
-                                    type="text" disabled>{{this.formatTimeFn(clueBase.messageTime)}}
-                            </el-button>
-                        </el-form-item>
-                    </el-col>
-                    <el-col :span="8">
-                        <el-form-item label="留言重点："
-                                      :label-width="formLabelWidth">
-                            <div class="lineFeed lineFeed2">{{clueBase.messagePoint}}</div>
-                        </el-form-item>
-                    </el-col>
-                </el-row>
-            </div>
+
             <div class="marginB20 fs16 paddingT20">通话记录</div>
             <el-row>
                 <el-table ref="multipleTable" :data="tableDataC3"
@@ -688,7 +616,7 @@
 		           <i class="fa fa-play-1 fa-lg"></i>
 			 	</span>
                             </a>
-                            <a class="download_img"  v-if="accountId==loginUserId"
+                            <a class="download_img"  v-if="scope.row.accountId==loginUserId"
                                @click="downloadAudio(scope.row.id,scope.row.recordFile,scope.row.callSource)"></a>
                         </template>
                     </el-table-column>
@@ -989,7 +917,7 @@
     var clueFileList = [[${clueFileList}]];//上传文件
     var ossUrl = [[${ossUrl}]];
     var callRecord = [[${callRecord}]];//通话记录
-
+    var loginUserId=[[${loginUserId}]];
 
     var showButtonToTele = true;
     if(base.phCustomerStatus==4||base.phase>2){
@@ -1000,6 +928,7 @@
         el: '#addCustomer',
         data: function () {
             return {
+            	loginUserId:loginUserId,
                 showButtonToTele:showButtonToTele,
                 customerStatusRequired:false,
                 isShowTip: false,//是否显示释放公有池提示信息
@@ -1062,6 +991,7 @@
                 ussmArr: [],
                 StorefrontAreaArr: [],
                 customerStatusSubArr: [],
+                customerStatusSubArr1: [],
                 provinceArr: [],
                 cityArr: [],
                 districtArr: [],
@@ -1242,7 +1172,13 @@
                 return n[1] ? n : '0' + n
             },
             customerStatusChange(selVal) {
-                if (selVal == '3') {
+                if (selVal == '3'||selVal == '2') {
+                    if(selVal == '3'){
+                        this.customerStatusSubArr = this.customerStatusSubArr1.slice(2)
+                    }else if(selVal == '2'){
+                        this.customerStatusSubArr = this.customerStatusSubArr1.slice(0,2)
+                    }
+
                     this.substatus = false;
                 } else {
                     this.substatus = true;
@@ -1584,15 +1520,18 @@
                 this.formInline.visitStatus=rows[0].visitStatus+"";
                 this.formInline.nextVisitTime=rows[0].nextVisitTime;
                 isEdit=true;
-                this.formInline.id = rows[0].id;
-                this.formInline.callTime = rows[0].callTime;
-                this.formInline.customerStatus = rows[0].customerStatus;
-                this.formInline.isCall = rows[0].isCall + "";
-                //  this.formInline.resourceStatus = rows[0].resourceStatus + "";
-                this.formInline.focusPoint = rows[0].focusPoint;
-                this.formInline.visitStatus = rows[0].visitStatus + "";
-                this.formInline.nextVisitTime = rows[0].nextVisitTime;
-                isEdit = true;
+
+                this.formInline.customerStatusSub = rows[0].customerStatusSub
+                this.customerStatusChange(this.formInline.customerStatus);
+                // this.formInline.id = rows[0].id;
+                // this.formInline.callTime = rows[0].callTime;
+                // this.formInline.customerStatus = rows[0].customerStatus;
+                // this.formInline.isCall = rows[0].isCall + "";
+                // //  this.formInline.resourceStatus = rows[0].resourceStatus + "";
+                // this.formInline.focusPoint = rows[0].focusPoint;
+                // this.formInline.visitStatus = rows[0].visitStatus + "";
+                // this.formInline.nextVisitTime = rows[0].nextVisitTime;
+                // isEdit = true;
             },
             onConfirmAdd(index ,row) {
                 var _this = this;
@@ -1621,7 +1560,7 @@
                             param.nextVisitTime=this.formInline.nextVisitTime;
                         }
 
-                        if(this.formInline.customerStatus=='3'){//如果选择的是不跟进在传此字段
+                        if(this.formInline.customerStatus=='3'||this.formInline.customerStatus=='2'){//如果选择的是不跟进/跟进在传此字段
                             param.customerStatusSub=this.formInline.customerStatusSub;
                         }
 
@@ -1747,6 +1686,7 @@
                                 });
                         }else{
                             //如果是新增跟进记录
+                            param.stage = 1; // 新增时候指明当前跟进记录为话务
                             axios.post('/tele/clueMyCustomerInfo/saveClueTracking',param)
                                 .then(function (response) {
                                     addCustomerVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
@@ -1838,6 +1778,7 @@
                     var param = {};
                     param.idList = ids;
                     param.clueId = clueId;
+                    param.stage = 1; // 新增时候指明当前跟进记录为话务
                     axios.post('/tele/clueMyCustomerInfo/deleteClueTracking', param)
                         .then(function (response) {
                             addCustomerVM.$message({
@@ -2331,16 +2272,16 @@
             });
             //客户状态
             param = {};
-            param.groupCode = "customerStatus";
+            param.groupCode = "PhCustomerStatus";
             axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode', param).then(function (response) {
                 addCustomerVM.cusStatusArr = response.data.data;
             });
 
             //客户状态
             param = {};
-            param.groupCode = "customerStatusSub";
+            param.groupCode = "PhCustomerStatusSub";
             axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode', param).then(function (response) {
-                addCustomerVM.customerStatusSubArr = response.data.data;
+                addCustomerVM.customerStatusSubArr1 = response.data.data;
             });
 
 
