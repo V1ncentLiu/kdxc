@@ -884,7 +884,7 @@ var mainDivVM = new Vue({
            var title = "";
            for(var i=0;i<rows.length;i++){
                var curRow = rows[i];
-               title += "【"+curRow.serialNum+""+curRow.customerName+"】";
+               title += "【"+curRow.cusName+"】";
            }
            this.signRecordArrTitle=title;
            
@@ -909,7 +909,7 @@ var mainDivVM = new Vue({
                     isPass=false;
                     break;
                 }
-                title += "【"+curRow.serialNum+""+curRow.customerName+"】 ";
+                title += "【"+curRow.cusName+"】 ";
                 idArr.push(curRow.id);
             }
             if(!isPass){
@@ -930,7 +930,7 @@ var mainDivVM = new Vue({
                     if(resData.code=='0'){
                         mainDivVM.dialogFormVisibleUnVisit = false;
                         mainDivVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
-                            mainDivVM.initCustomerVisitRecord();
+                            mainDivVM.initCustomerUnVisitRecord();
                         }});
                     }else{
                         mainDivVM.$message({message:resData.msg,type:'error'});
