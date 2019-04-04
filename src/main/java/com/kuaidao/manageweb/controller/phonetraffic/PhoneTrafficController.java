@@ -547,7 +547,8 @@ public class PhoneTrafficController {
 
 
     @RequestMapping("/release")
-    public JSONResult releaseClue(@RequestBody TrafficParam trafficParam){
+    @ResponseBody
+    public JSONResult<Boolean> releaseClue(@RequestBody TrafficParam trafficParam){
         return phoneTrafficFeignClient.releaseClue(trafficParam);
     }
 
