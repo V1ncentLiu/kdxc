@@ -361,7 +361,7 @@
                             <span class="sound-trigger__inner"><i class="fa fa-play-1 fa-lg"></i></span>
                         </a>
 
-                        <a  class="download_img" @click="downloadAudio(scope.row.id,scope.row.recordFile,scope.row.callSource)"></a>
+                        <a  class="download_img" v-if="scope.row.accountId==loginUserId" @click="downloadAudio(scope.row.id,scope.row.recordFile,scope.row.callSource)"></a>
                     </template>
                 </el-table-column>
             </el-table>
@@ -421,7 +421,7 @@
     <!-- dialog -->
     <el-dialog title="二维码" :visible.sync="dialogFormImg">
         <div class="padding20" style="text-align: center;">
-            <img src="images/errorIcon.jpg" alt="" style="width: 250px;height: 250px;">
+            <img th:src="@{/images/errorIcon.jpg}" alt="" style="width: 250px;height: 250px;">
         </div>
     </el-dialog>
 </div>
@@ -485,6 +485,7 @@ var proSelect=[[${proSelect}]];//项目
 var circulationList=[[${circulationList}]];//资源流转记录
 var trackingList=[[${trackingList}]];//跟访记录
 var callRecord=[[${callRecord}]];//上传文件
+var loginUserId=[[${loginUserId}]];
 var isEdit=false;
 var vform;
 if(proSelect==null){
@@ -497,6 +498,7 @@ for(var i = 0 ; i < proSelect.length ; i++){
  }
 if(customer==null){
     vform= {
+    		loginUserId:loginUserId,
             customerName:"",
             customerPhone:"",
             customerSex:"",
@@ -744,17 +746,17 @@ function crtTimeFtt(val, row) {
                     }).then(function(){
                 });
             },
+          getStartTimeText(row, column, value, index){
+            var valText="";
+            if(value){
+              valText =  moment.unix(Number(value)).format("YYYY-MM-DD HH:mm:ss");
+            }
+            return valText;
+          },
             getTalkTimeText(row, column, value, index){
                 var valText="";
                 if(value){
                     valText =  this.formatSeconds(value);
-                }
-                return valText;
-            },
-            getStartTimeText(row, column, value, index){
-                var valText="";
-                if(value){
-                    valText =  moment.unix(value).format("YYYY-MM-DD HH:MM:SS");
                 }
                 return valText;
             },

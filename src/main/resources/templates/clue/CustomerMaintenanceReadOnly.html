@@ -418,7 +418,7 @@
 				        <span class="sound-trigger__inner"><i class="fa fa-play-1 fa-lg"></i></span>
                     </a>
                     
-                    <a  class="download_img" @click="downloadAudio(scope.row.id,scope.row.recordFile,scope.row.callSource)"></a>
+                    <a v-if="scope.row.accountId==loginUserId" class="download_img" @click="downloadAudio(scope.row.id,scope.row.recordFile,scope.row.callSource)"></a>
                 </template>
             </el-table-column>
             </el-table>
@@ -482,7 +482,7 @@
     <!-- dialog -->
     <el-dialog title="二维码" :visible.sync="dialogFormImg">
         <div class="padding20" style="text-align: center;">
-            <img src="images/errorIcon.jpg" alt="" style="width: 250px;height: 250px;">
+            <img th:src="@{/images/errorIcon.jpg}" alt="" style="width: 250px;height: 250px;">
         </div>
     </el-dialog>
     <!-- 上传资源dialog -->
@@ -687,7 +687,7 @@ var trackingList=[[${trackingList}]];//跟访记录
 var clueFileList=[[${clueFileList}]];//上传文件
 var commonPool=[[${commonPool}]];//上传文件
 var callRecord=[[${callRecord}]];//上传文件
-
+var loginUserId=[[${loginUserId}]];
 var showPhone = true;
 if(commonPool==1){
     showPhone = false;
@@ -843,6 +843,7 @@ if(base==null){
         el: '#addCustomer',
         data: function() {
             return {
+            	loginUserId:loginUserId,
                 showPhone:showPhone,
                 isDisabled:true,//默认不可点击
                 dialogFormUploadImgSrc: '',

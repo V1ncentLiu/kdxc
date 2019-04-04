@@ -1,6 +1,7 @@
 package com.kuaidao.manageweb.controller.assignrule;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -18,10 +19,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.github.pagehelper.Page;
 import com.kuaidao.aggregation.dto.assignrule.TeleAssignRuleQueryDTO;
 import com.kuaidao.aggregation.dto.assignrule.TelemarketingAssignRuleDTO;
 import com.kuaidao.common.constant.OrgTypeConstant;
 import com.kuaidao.common.constant.RoleCodeEnum;
+import com.kuaidao.common.constant.SystemCodeConstant;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.manageweb.config.LogRecord;
@@ -61,7 +64,8 @@ public class TelemarketingAssignRuleContoller {
 		OrganizationQueryDTO orgDto = new OrganizationQueryDTO();
 		// 查询电销分公司
 		orgDto = new OrganizationQueryDTO();
-		orgDto.setOrgType(OrgTypeConstant.ZSZX);
+		orgDto.setOrgType(OrgTypeConstant.DXFGS);
+		orgDto.setSystemCode(SystemCodeConstant.HUI_JU);
 		JSONResult<List<OrganizationRespDTO>> orgComJson = organizationFeignClient.queryOrgByParam(orgDto);
 		if (orgComJson.getCode().equals(JSONResult.SUCCESS)) {
 			model.addAttribute("orgCompany", orgComJson.getData());
@@ -69,6 +73,7 @@ public class TelemarketingAssignRuleContoller {
 		// 电销事业部
 		orgDto = new OrganizationQueryDTO();
 		orgDto.setOrgType(OrgTypeConstant.DZSYB);
+		orgDto.setSystemCode(SystemCodeConstant.HUI_JU);
 		JSONResult<List<OrganizationRespDTO>> orgDeptJson = organizationFeignClient.queryOrgByParam(orgDto);
 		if (orgDeptJson.getCode().equals(JSONResult.SUCCESS)) {
 			model.addAttribute("orgDept", orgDeptJson.getData());
@@ -76,6 +81,7 @@ public class TelemarketingAssignRuleContoller {
 		// 查询电销组
 		orgDto = new OrganizationQueryDTO();
 		orgDto.setOrgType(OrgTypeConstant.DXZ);
+		orgDto.setSystemCode(SystemCodeConstant.HUI_JU);
 		JSONResult<List<OrganizationRespDTO>> orgJson = organizationFeignClient.queryOrgByParam(orgDto);
 		if (orgJson.getCode().equals(JSONResult.SUCCESS)) {
 			model.addAttribute("orgSelect", orgJson.getData());
@@ -95,39 +101,108 @@ public class TelemarketingAssignRuleContoller {
 		// 获取当前登录用户的机构信息//
 		Subject subject = SecurityUtils.getSubject();
 		UserInfoDTO user = (UserInfoDTO) subject.getSession().getAttribute("user");
+		List<Long> orgList = new ArrayList<>();
+		JSONResult<PageBean<TelemarketingAssignRuleDTO>> json= new JSONResult<>();
 		if (null != user.getRoleList() && user.getRoleList().size() > 0) {
 			String roleCode = user.getRoleList().get(0).getRoleCode();
 			if (null != roleCode) {
+				// 管理员查看所有
 				if (roleCode.equals(RoleCodeEnum.GLY.name())) {
-					// 管理员查看所有
+					orgList = getTelList(queryDTO);
+					if(queryDTO.getTelemarketingId() !=null || queryDTO.getTeleDepart() !=null || queryDTO.getTeleCompany() !=null) {
+						queryDTO.setFieldList(orgList);
+					}else {
+						json = telemarketingAssignRuleFeignClient.queryTeleAssignRulePage(queryDTO);
+						return json;
+					}
+					
 				} else if (roleCode.equals(RoleCodeEnum.DXZC.name()) || roleCode.equals(RoleCodeEnum.DXZJL.name())
 						|| roleCode.equals(RoleCodeEnum.DXFZ.name())) {
 					// 电销总裁、电销总经理、电销副总、查看所有下级电销的数据
-					List<Long> orgList = this.queryTeleOrgInfoList(user.getOrgId());
-					queryDTO.setFieldList(orgList);
+					List<Long> loginOrgList = this.queryTeleOrgInfoList(user.getOrgId());
+					if(queryDTO.getTelemarketingId() !=null || queryDTO.getTeleDepart() !=null || queryDTO.getTeleCompany() !=null) {
+						orgList = getTelList(queryDTO);
+						loginOrgList.retainAll(orgList);
+					}
+					
+					queryDTO.setFieldList(loginOrgList);
 
 				} else if (roleCode.equals(RoleCodeEnum.DXZJ.name())) {
-					// 电销总监查看自己创建的
-					queryDTO.setCreateUser(user.getId());
+					List<Long> orgLists = new ArrayList<>();
+					orgLists.add(user.getOrgId());
+					if(queryDTO.getTelemarketingId() !=null || queryDTO.getTeleDepart() !=null || queryDTO.getTeleCompany() !=null) {
+						orgList = getTelList(queryDTO);
+						orgLists.retainAll(orgList);
+						queryDTO.setFieldList(orgLists);
+					}else {
+						// 电销总监查看自己创建的
+						queryDTO.setFieldList(orgLists);
+					}
+					
 				} else {
 					queryDTO.setOther("1!=1");
 				}
 			}
 
-			// 根据选择的电销公司查询下面所有电销组
-			String teleComStr = this.queryTeleOrgInfoStr(queryDTO.getTeleCompany());
-
-			queryDTO.setTeleCompanyStr(teleComStr);
-
-			// 根据选择的电销事业部查询下面所有电销组
-			String teleDeptStr = this.queryTeleOrgInfoStr(queryDTO.getTeleDepart());
-
-			queryDTO.setTeleDepartStr(teleDeptStr);
 		}
-
-		return telemarketingAssignRuleFeignClient.queryTeleAssignRulePage(queryDTO);
+		
+		if(queryDTO.getFieldList() !=null && queryDTO.getFieldList().size()>0) {
+			json = telemarketingAssignRuleFeignClient.queryTeleAssignRulePage(queryDTO);
+		}else {
+			// 包装分页pageBean
+			PageBean<TelemarketingAssignRuleDTO> pageInfoDto = new PageBean<TelemarketingAssignRuleDTO>();
+			pageInfoDto.setCurrentPage(1);
+			pageInfoDto.setPageSize(20);
+			pageInfoDto.setTotal(0);
+			pageInfoDto.setPageSizes(0);
+			pageInfoDto.setData(null);
+			json = new JSONResult<PageBean<TelemarketingAssignRuleDTO>>().success(pageInfoDto);
+		}
+		return json;
 	}
 
+	public List<Long> getTelList(TeleAssignRuleQueryDTO queryDTO){
+		List<Long> orgList = new ArrayList<>();
+		if(queryDTO.getTelemarketingId() !=null) {
+			orgList.add(queryDTO.getTelemarketingId());
+		} 
+		List<Long> departOrgList = new ArrayList<>();	
+		if(queryDTO.getTeleDepart() !=null) {
+			// 根据选择的电销事业部查询下面所有电销组
+			String teleDeptStr = this.queryTeleOrgInfoStr(queryDTO.getTeleDepart(),OrgTypeConstant.DXZ);
+			if(org.apache.commons.lang.StringUtils.isNotBlank(teleDeptStr)) {
+				for (String str : teleDeptStr.split(",")) {
+					departOrgList.add(Long.parseLong(str));
+				}
+			}
+			if(queryDTO.getTelemarketingId() !=null) {
+				if(orgList.size()>0) {
+					orgList.retainAll(departOrgList);
+				}
+			}else {
+				orgList = departOrgList;
+			}
+			
+			
+		}
+		List<Long> companyorgList = new ArrayList<>();
+		if(queryDTO.getTeleCompany() !=null) {
+			String teleComStr = this.queryTeleOrgInfoStr(queryDTO.getTeleCompany(),OrgTypeConstant.DZSYB);
+			if(org.apache.commons.lang.StringUtils.isNotBlank(teleComStr)) {
+				for (String str : teleComStr.split(",")) {
+					companyorgList.add(Long.parseLong(str));
+				}
+			}
+			if(queryDTO.getTelemarketingId() !=null || queryDTO.getTeleDepart() !=null) {
+				if(orgList.size()>0) {
+					orgList.retainAll(companyorgList);
+				}
+			}else {
+				orgList = companyorgList;
+			}
+		}
+		return orgList;
+	}
 	/**
 	 * 查询机构下的所有电销组
 	 * 
@@ -135,7 +210,7 @@ public class TelemarketingAssignRuleContoller {
 	 * @return
 	 */
 
-	private String queryTeleOrgInfoStr(Long parentId) {
+	private String queryTeleOrgInfoStr(Long parentId,int orgType) {
 
 		// 电销分公司
 		if (null != parentId) {
@@ -143,7 +218,8 @@ public class TelemarketingAssignRuleContoller {
 
 			dto.setParentId(parentId);
 
-			dto.setOrgType(OrgTypeConstant.DXZ);
+			dto.setOrgType(orgType);
+			dto.setSystemCode(SystemCodeConstant.HUI_JU);
 
 			JSONResult<List<OrganizationDTO>> orgJson = organizationFeignClient.listDescenDantByParentId(dto);
 

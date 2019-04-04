@@ -7,6 +7,7 @@ import com.kuaidao.aggregation.dto.paydetail.PayDetailReqDTO;
 import com.kuaidao.aggregation.dto.paydetail.PayDetailRespDTO;
 import com.kuaidao.aggregation.dto.phonetraffic.PhoneTrafficParamDTO;
 import com.kuaidao.aggregation.dto.phonetraffic.PhoneTrafficRespDTO;
+import com.kuaidao.aggregation.dto.phonetraffic.TrafficParam;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
@@ -35,6 +36,9 @@ public interface PhoneTrafficFeignClient {
 
 	@PostMapping("/toTele")
 	public JSONResult toTele(@RequestBody ClueDTO clueDTO);
+
+	@PostMapping("/releaseClue")
+	public JSONResult releaseClue(TrafficParam trafficParam);
 
 	@Component
 	static class HystrixClientFallback implements PhoneTrafficFeignClient {
@@ -65,6 +69,11 @@ public interface PhoneTrafficFeignClient {
 		@Override
 		public JSONResult toTele(ClueDTO clueDTO) {
 			return fallBackError("话务管理-转电销");
+		}
+
+		@Override
+		public JSONResult releaseClue(TrafficParam trafficParam) {
+				return fallBackError("话务管理-释放资源（废弃池/共有池）");
 		}
 
 	}

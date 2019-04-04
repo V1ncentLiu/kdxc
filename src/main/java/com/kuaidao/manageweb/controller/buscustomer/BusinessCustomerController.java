@@ -3,6 +3,8 @@ package com.kuaidao.manageweb.controller.buscustomer;
 import java.util.ArrayList;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
+
+import org.apache.shiro.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
@@ -27,6 +29,7 @@ import com.kuaidao.manageweb.feign.clue.AppiontmentFeignClient;
 import com.kuaidao.manageweb.feign.clue.MyCustomerFeignClient;
 import com.kuaidao.manageweb.feign.project.ProjectInfoFeignClient;
 import com.kuaidao.manageweb.feign.tracking.TrackingFeignClient;
+import com.kuaidao.sys.dto.user.UserInfoDTO;
 
 /**
  * 商务客户信息
@@ -137,6 +140,8 @@ public class BusinessCustomerController {
                 && clueFileList.getData() != null) {
             request.setAttribute("clueFileList", clueFileList.getData());
         }
+        UserInfoDTO user = getUser();
+        request.setAttribute("loginUserId", user.getId());
         return "bus_mycustomer/editCustomerMaintenance";
     }
 
@@ -226,9 +231,21 @@ public class BusinessCustomerController {
         ClueAppiontmentReq req = new ClueAppiontmentReq();
         req.setClueId(new Long(clueId));
         appiontmentFeignClient.updateView(req);
+        UserInfoDTO user = getUser();
+        request.setAttribute("loginUserId", user.getId());
         return "bus_mycustomer/viewCustomerMainenance";
     }
 
-
+    /**
+     * 获取当前登录账号
+     * 
+     * @param orgDTO
+     * @return
+     */
+    private UserInfoDTO getUser() {
+        Object attribute = SecurityUtils.getSubject().getSession().getAttribute("user");
+        UserInfoDTO user = (UserInfoDTO) attribute;
+        return user;
+    }
 
 }

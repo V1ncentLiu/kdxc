@@ -229,7 +229,7 @@
                 <el-row>
                     <el-col :span="8">
                         <el-form-item label="意向品类：" :label-width="formLabelWidth">
-                           <el-select v-model="form.intentionCategory" placeholder="请选择" @change="projectChangeSelect" style="width: 100%;">
+                           <el-select v-model="form.intentionCategory" placeholder="请选择" @change="projectChangeSelect1" style="width: 100%;">
                                 <el-option
                                     v-for="item in IntentionalCategoryArr"
                                     :key="item.value"
@@ -611,7 +611,7 @@
                             <span class="sound-trigger__inner"><i class="fa fa-play-1 fa-lg"></i></span>
                         </a>
 
-                        <a  class="download_img" @click="downloadAudio(scope.row.id,scope.row.recordFile,scope.row.callSource)"></a>
+                        <a  class="download_img" v-if="scope.row.accountId==loginUserId" @click="downloadAudio(scope.row.id,scope.row.recordFile,scope.row.callSource)"></a>
                     </template>
                 </el-table-column>
             </el-table>
@@ -683,7 +683,7 @@
     <!-- dialog -->
     <el-dialog title="二维码" :visible.sync="dialogFormImg">
         <div class="padding20" style="text-align: center;">
-            <img src="images/errorIcon.jpg" alt="" style="width: 250px;height: 250px;">
+            <img th:src="@{/images/errorIcon.jpg}" alt="" style="width: 250px;height: 250px;">
         </div>
     </el-dialog>
     <!-- 上传资源dialog -->
@@ -920,6 +920,12 @@ var callRecord=[[${callRecord}]];//上传文件
        		  n = n.toString()
        		  return n[1] ? n : '0' + n
        		},
+
+            projectChangeSelect1(selVal) {
+                addCustomerVM.form.insideProject = '';
+               this.projectChangeSelect(selVal);
+            },
+
             projectChangeSelect(selVal) {
                 var param = {};
                 param.category = selVal;
@@ -1012,7 +1018,7 @@ var callRecord=[[${callRecord}]];//上传文件
             getStartTimeText(row, column, value, index){
                 var valText="";
                 if(value){
-                    valText =  moment.unix(value).format("YYYY-MM-DD HH:MM:SS");
+                  valText =  moment.unix(Number(value)).format("YYYY-MM-DD HH:mm:ss");
                 }
                 return valText;
             },
@@ -1551,7 +1557,7 @@ var callRecord=[[${callRecord}]];//上传文件
            if(intention){
         	   this.form.money=intention.advanceAmount==null?"":intention.advanceAmount+"";
         	   this.form.area=intention.area==null?"":intention.area+"";
-        	   this.form.intentionCategory=intention.area==null?"":intention.purType+"";
+        	   this.form.intentionCategory=intention.purType==null?"":intention.purType+"";
         	   this.form.radioProject=intention.purProjectType+"";
         	   this.form.insideProject=intention.purInProject==null?"":intention.purInProject+"";
         	   this.form.outsideProject=intention.purOutProject;
@@ -1562,6 +1568,7 @@ var callRecord=[[${callRecord}]];//上传文件
          		  this.outsideProjectShow=true; //外部项目默认显示   
          		  this.insideProjectShow=false; //内部项目不默认显示
          	   }
+
         	   if(this.form.intentionCategory){
                    this.projectChangeSelect(this.form.intentionCategory)
                }else{

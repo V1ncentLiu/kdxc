@@ -395,55 +395,22 @@
             :data="dataTable3" 
             >
             <el-table-column align="center" type="selection" width="55"></el-table-column>
-            <el-table-column align="center" prop="serialNum" label="序号" width="55"></el-table-column>
-            <el-table-column align="center" prop="customerName" label="客户姓名"></el-table-column>  
-            <el-table-column align="center" prop="projectName" label="考察项目" width="100"></el-table-column>
-            <el-table-column align="center" prop="companyName" label="考察公司"></el-table-column>
-            <el-table-column align="center" prop="vistitTime" label="到访时间"></el-table-column>
-            <el-table-column align="center" prop="vistitStoreType" label="到访店铺类型" width="120" :formatter="getSignShopTypeText"></el-table-column>
-            <el-table-column align="center" prop="visitType" label="到访类型" :formatter="getVisitTypeText"></el-table-column>
-            <el-table-column align="center" prop="visitCity" label="来访城市"></el-table-column> 
-            <el-table-column align="center" prop="signProvince" label="预签约省份" width="100"></el-table-column> 
-            <el-table-column align="center" prop="signCity" label="预签约城市" width="100"></el-table-column>   
-            <el-table-column align="center" prop="signDistrict" label="预签约区／县" width="120"></el-table-column>
-            <el-table-column align="center" prop="businessGroupName" label="商务小组"></el-table-column> 
-            <el-table-column align="center" prop="businessManagerName" label="商务经理" width="100"></el-table-column>
-            <el-table-column align="center" prop="teleGroupName" label="电销组"></el-table-column> 
-            <el-table-column align="center" prop="teleSaleName" label="创业顾问"></el-table-column> 
-            <el-table-column align="center" prop="isSign" label="是否签约" width="100">
-                <template slot-scope="scope">
-                    <span v-if="scope.row.isSign===0">
-                        否&nbsp;<el-button @click="notSignedReasonClick(scope.row)" type="text">未签约原因</el-button>
-                    </span>
-                    <span v-else-if="scope.row.isSign===1">是</span>
-                </template>
-            </el-table-column>
+            <el-table-column align="center" type="index" label="序号" width="55"></el-table-column>
+            <el-table-column align="center" prop="cusName" label="客户姓名"></el-table-column>  
+            <el-table-column align="center" prop="tasteProjectId" label="品尝项目" width="100" :formatter="transformProject"></el-table-column>
+            <!-- <el-table-column align="center" prop="companyName" label="签约店型"></el-table-column> -->
+            <el-table-column align="center" prop="createTime" label="提交邀约时间"></el-table-column>
+            <el-table-column align="center" prop="reserveTime" label="邀约来访时间" width="120"></el-table-column>
+            <!-- <el-table-column align="center" prop="visitCity" label="来访城市"></el-table-column>  -->
+            <el-table-column align="center" prop="province" label="预签约省份" width="100"></el-table-column> 
+            <el-table-column align="center" prop="city" label="预签约城市" width="100"></el-table-column>   
+            <el-table-column align="center" prop="district" label="预签约区／县" width="120"></el-table-column>
+            <el-table-column align="center" prop="busGroupName" label="商务小组"></el-table-column> 
+            <el-table-column align="center" prop="busSaleName" label="商务经理" width="100"></el-table-column>
+            <el-table-column align="center" prop="teleGorupName" label="电销组"></el-table-column> 
+            <el-table-column align="center" prop="teleSaleName" label="电销顾问"></el-table-column> 
             <el-table-column align="center" prop="createTime" label="创建时间" width="170"></el-table-column> 
-            <el-table-column align="center" prop="visitNum" label="到访批次" >
-            	<template slot-scope="scope">
-                        <div v-if="scope.row.visitNum == 1">
-                            首次到访
-                        </div>
-                        <div v-else-if="scope.row.visitNum == 2">
-                            二次到访
-                        </div>
-                        <div v-else-if="scope.row.visitNum > 2">
-                            多次到访
-                        </div>
-                        <div v-else>
-                            待处理
-                        </div>
-                    </template>
-            </el-table-column> 
-            <el-table-column align="center" prop="status" label="到访有效性" width="100">
-                <template slot-scope="scope">
-                    <span v-if="scope.row.status===0">
-                        驳回&nbsp;<el-button @click="reasonClick(scope.row)" type="text">驳回原因</el-button>
-                    </span>
-                    <span v-else-if="scope.row.status===1">待审核</span>
-                    <span v-else-if="scope.row.status===2">有效</span> 
-                </template>
-            </el-table-column>
+            <el-table-column align="center" prop="notVisitReason" label="未到访原因" width="170"></el-table-column> 
         </el-table>
         <!-- 驳回处理 -->
         <el-dialog title="提示" :visible.sync="dialogFormVisibleUnVisit">

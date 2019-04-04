@@ -163,8 +163,8 @@ var mainDivVM = new Vue({
                 .then(function (response) {
                     var result =  response.data;
                     var table=result.data;
-                    mycustomVM.repeatPhonesTable=table;
-                    mycustomVM.repeatPhonesDialog=true;
+                    mainDivVM.repeatPhonesTable=table;
+                    mainDivVM.repeatPhonesDialog=true;
                 })  .catch(function (error) {
                     console.log(error);
             });            

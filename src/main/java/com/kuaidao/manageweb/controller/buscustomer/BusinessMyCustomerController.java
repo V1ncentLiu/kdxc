@@ -113,6 +113,7 @@ public class BusinessMyCustomerController {
         request.setAttribute("teleGroupList", teleGroupList);
         request.setAttribute("teleSaleList", teleSaleList);
         request.setAttribute("tasteProList", tasteProList);
+        request.setAttribute("loginUserId", user.getId());
         return "bus_mycustomer/mycustomerList";
     }
 
