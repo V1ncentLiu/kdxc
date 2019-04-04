@@ -961,6 +961,7 @@ var mainDivVM = new Vue({
                     }
                     param.idList = idArr;
                     param.rebutReason = this.dialogForm.reason;
+                    param.type = 2;//标记是未到访记录
                     axios.post('/visit/visitRecord/rejectVisitRecord', param)
                     .then(function (response) {
                         var resData = response.data;
