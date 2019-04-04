@@ -587,6 +587,9 @@ var mainDivVM = new Vue({
                 if (valid) {
                     var param ={};  
                     var rows = this.multipleSelection;
+                    if(rows.length==0){
+                        rows.push(this.curRow);
+                    }
                     var idArr = new Array();
                     var isPass = true;
                     for(var i=0;i<rows.length;i++){
@@ -613,6 +616,7 @@ var mainDivVM = new Vue({
                             mainDivVM.dialogFormVisible = false;
                              mainDivVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
                                  mainDivVM.initSignRecordData();
+                                 mainDivVM.recordDialog = false;
                             }});
                         }else{
                             mainDivVM.$message({message:resData.msg,type:'error'});
