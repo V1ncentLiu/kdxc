@@ -96,8 +96,8 @@ var mainDivVM = new Vue({
         gotoVisitRecord(){//跳转客户到访记录
             window.location.href="/visit/visitRecord/visitRecordPage"; 
         },
-        gotoVisitRecord(){//跳转客户未到访记录
-            window.location.href="/visit/visitRecord/visitRecordPage"; 
+        gotoNoVisitRecord(){//跳转客户未到访记录
+            window.location.href="/visit/visitRecord/noVisitRecordPage"; 
         },
         gotoSignRecord(){//跳转客户签约记录
             window.location.href="/sign/signRecord/signRecordPage"; 
@@ -586,7 +586,7 @@ var mainDivVM = new Vue({
             this.$refs[formName].validate((valid) => {
                 if (valid) {
                     var param ={};  
-                    var rows = this.multipleSelection;
+                    var rows = this.multipleSelection4;
                     if(rows.length==0){
                         rows.push(this.curRow);
                     }
@@ -642,7 +642,7 @@ var mainDivVM = new Vue({
             var title = "";
             var isPass = true;
             var curRow = this.curRow;
-            this.multipleSelection = [];
+            this.multipleSelection4 = [];
             if(curRow.status!=1){
                 this.$message({message:'只允许审核待审核的数据',type:'warning'});
                 isPass=false;
