@@ -31,13 +31,16 @@ var mainDivVM = new Vue({
                 // {content:'公告3公告3公告3公告3公告3公告3公告3',id:3}
             ]
         },
-        // 待处理邀约来访客户
+        //待处理邀约来访客户        
         editableTabsValue: 0, //tabs标签
         editableTabs: [],
+        suppWrap: true,
         tabIndex: 2,
+        shouAddVisitButton:false,
         updateVisitRecordDialogVisible:false,
         addVisitRecordDialogVisible:false,
         notVisitdDialogVisible:false,
+        notVisitdDialogVisible1:false,
         notVisitFlagDialogVisible:false,
         showVisitAduitDialogVisible:false,
         dialogFormSigningVisible:false,
@@ -48,6 +51,7 @@ var mainDivVM = new Vue({
         payTypeSelect:false,
         notEditRebutSign:false,
         formLabelWidth:"150px",
+        formLabelWidth2:"98px",
         tableData:[],
         visitTableData:[],
         showVisitAduitDatas:{
@@ -77,7 +81,7 @@ var mainDivVM = new Vue({
         isSignArr:[{value:0,name:'否'},{value:1,name:'是'}],
         visitArr:[{value:-1,name:'待处理'},{value:0,name:'未到访'},{value:1,name:'首次到访'},{value:2,name:'2次到访'},{value:3,name:'多次到访'}],
         visitTypeArr:[{value:1,name:'预约来访'},{value:2,name:'慕名来访'},{value:3,name:'临时来访'}],
-        option2s: [{value: 1, label: '一次性全款'},{value: 2, label: '先交订金'}],
+        option2s: [{value: 1, label: '一次性全款'},{value: 2, label: '先付定金'}],
         option3s: [{value: '1', label: '现金'},{value: '2', label: 'POS'},{value: '3', label: '转账'}],
         payTypeArr:[{value: "1", label: '全款'},{value: "2", label: '定金'},{value: "3", label: '追加定金'},{value: "4", label: '尾款'}],
         payTypeArr1:[{value: "1", label: '全款'},{value: "2", label: '定金'},{value: "3", label: '追加定金'},{value: "4", label: '尾款'}],
@@ -95,6 +99,7 @@ var mainDivVM = new Vue({
             ],
         },
         notVisitFlag:{
+            clueId:"",
             str:"",
             clueIds:[],
             notVisitReason:""
@@ -165,13 +170,20 @@ var mainDivVM = new Vue({
             preferentialAmount:'',
             signType:1,
             giveAmount:'',
+            isRemoteSign:'',
+
+            visitTime:"",
+            visitCity:"",
+            visitType:"",
+            visitShopType:"",
+            visitNum:"",
 
             payType:1,
             payMode:'',
             amountReceived: '',
             amountBalance: '',
             makeUpTime:'',
-            payTime: '',
+            payTime: new Date(),
             amountPerformance:''
         },
         updateFormSigning: {
@@ -194,6 +206,7 @@ var mainDivVM = new Vue({
             giveAmount:'',
             rebutTime:"",
             rebutReason:"",
+            isRemoteSign:0,
 
             payDetailId:"",
             payType:'1',
@@ -210,8 +223,60 @@ var mainDivVM = new Vue({
             currentPage: 1,
             pageSize: 20,
         },
-        //rules
+        rulesVisit:{
+            companyid:[
+                { required: true, message: '请选择考察公司', trigger: 'change' }
+            ],
+            vistitTime:[
+                { required: true, message: '请选择到访时间', trigger: 'change' }
+            ],
+            projectId:[
+                { required: true, message: '请选择考察项目', trigger: 'change' }
+            ],
+            vistitStoreType:[
+                { required: true, message: '请选择到访店铺类型', trigger: 'change' }
+            ],
+            isSign:[
+                { required: true, message: '请选择是否签约', trigger: 'change' }
+            ],
+            signProvince: [
+                { required: true, message: '请选择签约省份', trigger: 'change' }
+            ],
+            signDistrict:[
+                { required: true, message: '请选择签约区/县', trigger: 'change' }
+            ],
+            customerName: [
+                { required: true, message: '请输入客户姓名', trigger: 'blur' }
+            ],
+            signCity: [
+                { required: true, message: '请选择签约城市', trigger: 'change' }
+            ],
+            visitCity: [ //请填写来访城市
+                { required: true, message: '请填写来访城市', trigger: 'change' }
+            ],
+            signShopType: [
+                { required: true, message: '请选择签约店型', trigger: 'change' }
+            ],
+            visitPeopleNum: [ //请填写到访人数
+                { required: true, message: '请填写到访人数', trigger: 'blur' },
+                { validator:function(rule,value,callback){
+                        var reg =  /^[0-9]+[0-9]*]*$/ ;
+                        if(value ==null || value =="null" || value ==""  ){
+                            callback(new Error("请填写到访人数"));
+                            mainDivVM.addVisitRecord.visitPeopleNum =null;
+
+                        }else  if(value !=null && value !="null" && value !="" && !reg.test(value) ){
+                            callback(new Error("请输入正整数"));
+                            mainDivVM.addVisitRecord.visitPeopleNum =null;
+                        }else{
+                            callback();
+                        }
+
+                    }, trigger: 'change'}
+            ]
+        },
         rules: {
+
             customerName: [
                 { required: true, message: '请输入客户姓名', trigger: 'blur' }
             ],
@@ -230,29 +295,94 @@ var mainDivVM = new Vue({
             signProvince: [
                 { required: true, message: '请选择签约省份', trigger: 'change' }
             ],
-            signCity: [
-                { required: true, message: '请选择签约城市', trigger: 'change' }
-            ],
             signDictrict: [
                 { required: true, message: '请选择签约区/县', trigger: 'change' }
+            ],
+            signCity: [
+                { required: true, message: '请选择签约城市', trigger: 'change' }
             ],
             signShopType: [
                 { required: true, message: '请选择签约店型', trigger: 'change' }
             ],
             amountReceivable: [
-                { required: true, message: '请输入应收金额', trigger: 'blur' }
+                { required: true, message: '请输入应收金额', trigger: 'blur' },
+                { validator:function(rule,value,callback){
+                        if(value===0){
+                            callback();
+                        }
+                        var reg =  /^[0-9]+[0-9]*]*$/ ;
+                        if(value ==null || value =="null" || value ==""  ){
+                            callback(new Error("请输入应收金额"));
+                            mainDivVM.formSigning.amountReceivable =null;
+
+                        }else  if(value !=null && value !="null" && value !="" && !reg.test(value) ){
+                            callback(new Error("请输入正整数"));
+                            mainDivVM.formSigning.amountReceivable =null;
+                        }else{
+                            callback();
+                        }
+                    }, trigger: 'change'}
             ],
             firstToll: [
-                { required: true, message: '请输入路费（报首次）', trigger: 'blur' }
+                { required: true, message: '请输入路费（报首次）', trigger: 'blur' },
+                { validator:function(rule,value,callback){
+                        if(value===0){
+                            callback();
+                        }
+                        var reg =  /^[0-9]+[0-9]*]*$/ ;
+                        if(value ==null || value =="null" || value ==""  ){
+                            callback(new Error("请输入路费（报首次）"));
+                            mainDivVM.formSigning.firstToll =null;
+
+                        }else  if(value !=null && value !="null" && value !="" && !reg.test(value) ){
+                            callback(new Error("请输入正整数"));
+                            mainDivVM.formSigning.firstToll =null;
+                        }else{
+                            callback();
+                        }
+                    }, trigger: 'change'}
             ],
             preferentialAmount: [
-                { required: true, message: '请输入优惠金额', trigger: 'blur' }
+                { required: true, message: '请输入优惠金额', trigger: 'blur' },
+                { validator:function(rule,value,callback){
+                        if(value===0){
+                            callback();
+                        }
+                        var reg =  /^[0-9]+[0-9]*]*$/ ;
+                        if(value ==null || value =="null" || value ==""  ){
+                            callback(new Error("请输入优惠金额"));
+                            mainDivVM.formSigning.preferentialAmount =null;
+
+                        }else  if(value !=null && value !="null" && value !="" && !reg.test(value) ){
+                            callback(new Error("请输入正整数"));
+                            mainDivVM.formSigning.preferentialAmount =null;
+                        }else{
+                            callback();
+                        }
+
+                    }, trigger: 'change'}
             ],
             signType: [
                 { required: true, message: '请选择签约类型', trigger: 'change' }
             ],
             giveAmount: [
-                { required: true, message: '请输入赠送金额', trigger: 'blur' }
+                { required: true, message: '请输入赠送金额', trigger: 'blur' },
+                { validator:function(rule,value,callback){
+                        if(value===0){
+                            callback();
+                        }
+                        var reg =  /^[0-9]+[0-9]*]*$/ ;
+                        if(value ==null || value =="null" || value ==""  ){
+                            callback(new Error("请输入赠送金额"));
+                            mainDivVM.formSigning.giveAmount =null;
+
+                        }else  if(value !=null && value !="null" && value !="" && !reg.test(value) ){
+                            callback(new Error("请输入正整数"));
+                            mainDivVM.formSigning.giveAmount =null;
+                        }else{
+                            callback();
+                        }
+                    }, trigger: 'change'}
             ],
             // payType: [
             //  { required: true, message: '请选择付款类型', trigger: 'change' }
@@ -264,20 +394,98 @@ var mainDivVM = new Vue({
                 { type: 'date', required: true, message: '请选择时间', trigger: 'change' }
             ],
             amountReceived: [
-                { required: true, message: '请输入实收金额', trigger: 'blur' }
+                { required: true, message: '请输入实收金额', trigger: 'blur' },
+                { validator:function(rule,value,callback){
+                        if(value===0){
+                            callback();
+                        }
+                        var reg =  /^[0-9]+[0-9]*]*$/ ;
+                        if(value ==null || value =="null" || value ==""  ){
+                            callback(new Error("请输入实收金额"));
+                            mainDivVM.formSigning.amountReceived =null;
+
+                        }else  if(value !=null && value !="null" && value !="" && !reg.test(value) ){
+                            callback(new Error("请输入正整数"));
+                            mainDivVM.formSigning.amountReceived =null;
+                        }else{
+                            callback();
+                        }
+                    }, trigger: 'change'}
             ],
             amountBalance: [
-                { required: true, message: '请输入余款金额', trigger: 'blur' }
+                {required: true, validator:function(rule,value,callback){
+                        if(value===0){
+                            callback();
+                        }
+                        var reg =  /^[0-9]+[0-9]*]*$/ ;
+                        if(value ==null || value =="null" || value ==""  ){
+                            callback(new Error("请输入余款金额"));
+                            // mainDivVM.formSigning.amountBalance =null;
+                            return;
+
+                        }else  if(value !=null && value !="null" && value !="" && !reg.test(value) ){
+                            callback(new Error("请输入正整数"));
+                            // mainDivVM.formSigning.amountBalance =null;
+                            return;
+                        }else{
+                            callback();
+                        }
+                    }, trigger: 'change'}
             ],
             makeUpTime: [
-                { type: 'date', required: true, message: '请选择预计余款补齐时间', trigger: 'change' }
+                {required: true, message: '请选择预计余款补齐时间', trigger: 'change' }
             ],
             // performanceAmount: [
             //  { required: true, message: '请输入业绩金额', trigger: 'blur' }
             // ],
             isRemoteSign: [ //是否远程签约
                 { required: true, message: '请选择是否远程签约', trigger: 'change' }
-            ]
+            ],
+            visitTime: [ //请选择到访时间
+                { required: true, message: '请选择到访时间', trigger: 'change' }
+            ],
+            visitCity: [ //请填写来访城市
+                { required: true, message: '请填写来访城市', trigger: 'change' }
+            ],
+            visitType: [ //请选择到访类型
+                { required: true, message: '请选择到访类型', trigger: 'change' }
+            ],
+            visitShopType: [ //请选择到访店铺类型
+                { required: true, message: '请选择到访店铺类型', trigger: 'change' }
+            ],
+            visitNum: [ //请填写到访人数
+                { required: true, message: '请填写到访人数', trigger: 'blur' },
+                { validator:function(rule,value,callback){
+                        var reg =  /^[0-9]+[0-9]*]*$/ ;
+                        if(value ==null || value =="null" || value ==""  ){
+                            callback(new Error("请填写到访人数"));
+                            mainDivVM.formSigning.visitNum =null;
+
+                        }else  if(value !=null && value !="null" && value !="" && !reg.test(value) ){
+                            callback(new Error("请输入正整数"));
+                            mainDivVM.formSigning.visitNum =null;
+                        }else{
+                            callback();
+                        }
+                    }, trigger: 'change'}
+            ],
+            visitPeopleNum: [ //请填写到访人数
+                 { required: true, message: '请填写到访人数', trigger: 'blur' },
+                 { validator:function(rule,value,callback){
+                     var reg =  /^[0-9]+[0-9]*]*$/ ;
+                     if(value ==null || value =="null" || value ==""  ){
+                         callback(new Error("请填写到访人数"));
+                        mainDivVM.addVisitRecord.visitPeopleNum =null;
+
+                     }else  if(value !=null && value !="null" && value !="" && !reg.test(value) ){
+                           callback(new Error("请输入正整数"));
+                           mainDivVM.addVisitRecord.visitPeopleNum =null;
+                     }else{
+                         callback(); 
+                     }
+                                                      
+                }, trigger: 'change'}
+              ]
         },
     },
     computed: {
@@ -427,6 +635,38 @@ var mainDivVM = new Vue({
         handleSelectionChange(val) {
             this.multipleSelection = val;
         },
+        selectIsRemoteSign (pa1) { //是否远程签约event
+            if( pa1==1 ){
+                this.suppWrap = false;
+            }else{
+                this.suppWrap = true;
+            }
+        },
+        suppShow(){ //补充到访记录展开
+            this.suppWrap = true;
+            this.shouAddVisitButton = false;
+            var param = {};
+            param.id = mainDivVM.formSigning.clueId;
+            axios.post('/businesssign/visitEcho',param).then(function (response) {
+                var echoData = response.data.data;
+                mainDivVM.formSigning.visitCity = echoData.visitCity;
+                if(echoData.visitNum>0){
+                    mainDivVM.formSigning.visitNum=echoData.visitNum;
+                }
+                mainDivVM.formSigning.visitType=1;;
+                mainDivVM.formSigning.visitTime=new Date();
+            });
+        },
+        suppHide(){
+            this.suppWrap = false;
+            this.shouAddVisitButton = true;
+            //清空补充到访记录数据
+            this.formSigning.visitCity = '';
+            this.formSigning.visitNum='';
+            this.formSigning.visitShopType='';
+            this.formSigning.visitTime='';
+            this.formSigning.visitType='';
+        },
         changePayType(val){
             if(val==3){
                 this.isAllMoney = true;
@@ -505,6 +745,48 @@ var mainDivVM = new Vue({
             axios.post('/area/sysregion/querySysRegionByParam',param).then(function (response) {
                 mainDivVM.districtArr=response.data.data.data;
             });
+        },
+
+        changeUpdateVisitProvince(selVal){
+            mainDivVM.updateVisitRecord.signCity = '';
+            mainDivVM.updateVisitRecord.signDistrict='';
+            mainDivVM.districtArr=[]
+            this.currentProvince(selVal);
+        },
+        changeUpdateVisitCity(selVal){
+            mainDivVM.updateVisitRecord.signDistrict='';
+            this. currentCity(selVal);
+        },
+        changeVisitProvince(selVal){
+            mainDivVM.addVisitRecord.signCity = '';
+            mainDivVM.addVisitRecord.signDistrict='';
+            mainDivVM.districtArr=[]
+            this.currentProvince(selVal);
+        },
+        changeVisitCity(selVal){
+            mainDivVM.addVisitRecord.signDistrict=''
+            this. currentCity(selVal);
+        },
+
+        changeUpdateSignProvince(selVal){
+            mainDivVM.updateFormSigning.signCity = '';
+            mainDivVM.updateFormSigning.signDictrict='';
+            mainDivVM.districtArr=[]
+            this.currentProvince(selVal);
+        },
+        changeUpdateSignCity(selVal){
+            mainDivVM.updateFormSigning.signDictrict='';
+            this. currentCity(selVal);
+        },
+        changeSignProvince(selVal){
+            mainDivVM.formSigning.signCity = '';
+            mainDivVM.formSigning.signDictrict='';
+            mainDivVM.districtArr=[]
+            this.currentProvince(selVal);
+        },
+        changeSignCity(selVal){
+            mainDivVM.formSigning.signDictrict='';
+            this. currentCity(selVal);
         },
         saveVisitRecord(){
             var param = this.addVisitRecord;
@@ -604,9 +886,19 @@ var mainDivVM = new Vue({
             }
         },
         openEditVisitRecord(row){
+            //关闭未到访原因弹窗
+            this.notVisitdDialogVisible=false;
            // 打开编辑到访记录
+            this.resetForm('addVisitRecord')
             var param ={};
-            param.id = row.clueId;
+            if(row.clueId){
+                param.id = row.clueId;
+            }else{
+                param.id = mainDivVM.notVisitFlag.clueId;
+                row.clueId = mainDivVM.notVisitFlag.clueId;
+            }
+
+
             if(row.signAuditStatus==0||row.signAuditStatus==1||row.signAuditStatus==2){
                 mainDivVM.existsSign =true;
                 mainDivVM.curSignStatus = row.signAuditStatus;
@@ -623,15 +915,23 @@ var mainDivVM = new Vue({
             });
         },
         showNotVisitReason(row){
-            // 展示未到访原因
             var param={};
-            param.id = row.clueId;
-            axios.post('/aggregation/businessMyCustomer/notVisitReason',param).then(function (response) {
+            param.id = row.visitId;
+            mainDivVM.notVisitFlag.clueId = row.clueId;
+            axios.post('/busVisitRecord/one',param).then(function (response) {
                 mainDivVM.notVisitdDialogVisible = true;
                 mainDivVM.notVisitFlag.str = response.data.data.notVisitReason
             });
         },
-
+        showNotVisitReason1(row){
+            var param={};
+            param.id = row.visitId;
+            mainDivVM.notVisitFlag.clueId = row.clueId;
+            axios.post('/busVisitRecord/one',param).then(function (response) {
+                mainDivVM.notVisitdDialogVisible1 = true;
+                mainDivVM.notVisitFlag.str = response.data.data.notVisitReason
+            });
+        },
         showVisitRecord(row){
             // 展示到访记录
             this.showVisitAduitDialogVisible = true;
@@ -741,6 +1041,7 @@ var mainDivVM = new Vue({
             if(!mainDivVM.existsSignMessage()){
                 return false;
             }
+            this.resetForm('formSigning')
             var param = this.addVisitRecord;
             param.rebutTime = new Date(param.rebutTime)
             param.createTime = new Date(param.createTime)
@@ -841,6 +1142,8 @@ var mainDivVM = new Vue({
         editSign(row){
             // this.formSigning.clueId=row.clueId;
             // this.dialogFormSigningVisible = true;
+            this.resetForm('formSigning')
+            this.isAllMoney = false;
             var param = {};
             param.id = row.clueId;
             axios.post('/businesssign/echo',param).then(function (response) {
@@ -849,6 +1152,10 @@ var mainDivVM = new Vue({
                 mainDivVM.dialogFormSigningVisible = true;
                 mainDivVM.currentProvince(mainDivVM.formSigning.signProvince)
                 mainDivVM.currentCity(mainDivVM.formSigning.signCity)
+            //  设置默认时间
+            //     mainDivVM.formSigning.payTime = new Date()
+            //     mainDivVM.formSigning.isRemoteSign = 0;
+            //     mainDivVM.formSigning.visitTime = new Date();
             });
         },
         showSignDetail(row){
@@ -857,33 +1164,34 @@ var mainDivVM = new Vue({
         editRebutSign(row){
             var param ={};
             console.log(row)
+            param.id = row.signId
+            param.signId = row.signId
             param.clueId = row.clueId
-            axios.post('/businesssign/queryRebuts',param).then(function (response) {
-                console.log(response)                  
+            axios.post('/businesssign/one',param).then(function (response) {
+                console.log(response)
                 if(null===response||response.data==null||response.data.code!='0'){
                     if(response.data.code!='0'){
                         mainDivVM.$message({message: response.data.msg, type: 'warning'});
                     }
                     return false;
                 }else{
-                    if(response.data.data.length==0){
-                        mainDivVM.$message({message:'没有签约单', type: 'warning'});
-                        return false;
-                    }
-
+                    // if(response.data.data.length==0){
+                    //     mainDivVM.$message({message:'没有签约单', type: 'warning'});
+                    //     return false;
+                    // }
                     //填装数据
-                    mainDivVM.editableTabs = []
-                    for(var i = 0 ; i < response.data.data.length ;i++){
-                        console.log(response.data.data[i])
-                        var data = {};
-                        data.updateFormSigning=response.data.data[i];
-                        data.title='（'+ data.updateFormSigning.signNo +'）签约单';
-                        data.name=""+i;
-                        mainDivVM.editableTabs.push(data);
-                    }
+                    // mainDivVM.editableTabs = []
+                    // for(var i = 0 ; i < response.data.data.length ;i++){
+                    //     console.log(response.data.data[i])
+                    //     var data = {};
+                    //     data.updateFormSigning=response.data.data[i];
+                    //     data.title='（'+ data.updateFormSigning.signNo +'）签约单';
+                    //     data.name=""+i;
+                    //     mainDivVM.editableTabs.push(data);
+                    // }
 
                     //设置显示数据
-                    mainDivVM.updateFormSigning =response.data.data[0];
+                    mainDivVM.updateFormSigning =response.data.data;
                     if( mainDivVM.updateFormSigning){
                         if(mainDivVM.updateFormSigning.payType > 2){
                             if(mainDivVM.updateFormSigning.payType == 3){
@@ -917,6 +1225,8 @@ var mainDivVM = new Vue({
             window.location.href='/businesssign/visitRecordPage?clueId='+row.clueId+"&signId="+row.signId+"&readyOnly=1";
         },
         selectSigningType(pa1) { //是不是全款
+            // this.formSigning.amountBalance = null;
+            // this.formSigning.makeUpTime = '';
             if( pa1=='1' ){
                 this.formSigning.payType = '1';
                 this.isAllMoney = false;
@@ -925,8 +1235,9 @@ var mainDivVM = new Vue({
                 this.isAllMoney = true;
             }
         },
-
         selectUpdateSigningType(pa1) { //是不是全款
+            // this.updateFormSigning.amountBalance = '';
+            // this.updateFormSigning.makeUpTime = '';
             if( pa1=='1' ){
                 this.updateFormSigning.payType = '1';
                 this.isAllMoney = false;
@@ -936,9 +1247,12 @@ var mainDivVM = new Vue({
             }
         },
 
-        submitForm(formName) {
+        submitForm(formName) {                
+            this.formSigning.visitTime = new Date( this.formSigning.visitTime);
+            this.formSigning.payTime = new Date( this.formSigning.payTime);
             var param = this.formSigning;
             param.amountPerformance = this.formSigningAmountPerformance;
+            console.log(param)
             // 设置 clueid
             this.$refs[formName].validate((valid) => {
                 if (valid) {
@@ -963,8 +1277,12 @@ var mainDivVM = new Vue({
             var param = this.updateFormSigning;
             param.amountPerformance = this.updateFormSigningAmountPerformance;
             this.updateFormSigning.amountPerformance = this.updateFormSigningAmountPerformance;
-            param.makeUpTime = new Date( param.makeUpTime)
-            param.payTime = new Date( param.payTime)
+            if(param.makeUpTime){
+                param.makeUpTime = new Date(param.makeUpTime)
+            }
+           if(param.payTime){
+               param.payTime = new Date( param.payTime)
+           }
             // 设置 clueid
             this.$refs[formName].validate((valid) => {
                 if (valid) {
@@ -990,13 +1308,11 @@ var mainDivVM = new Vue({
             }
         },
         initList(){
-            var param = this.queryForm;
+            var param = {};
             param.pageSize = this.pager.pageSize;
             param.pageNum =  this.pager.currentPage;
             // axios.post('/aggregation/businessMyCustomer/queryPage',param).then(function (response) {
             axios.post('/console/console/listPendingInviteCustomer',param).then(function (response) {
-                console.log('待处理邀约来访客户')
-                console.log(response.data)
                 if(null===response||response.data==null||response.data.code!='0'){
                     if(response.data.code!='0'){
                         mainDivVM.$message({message: response.data.msg, type: 'warning'});
@@ -1007,9 +1323,18 @@ var mainDivVM = new Vue({
                     mainDivVM.pager.currentPage= response.data.data.currentPage;
                     mainDivVM.pager.total= response.data.data.total;
                     mainDivVM.pager.pageSize =  response.data.data.pageSize;
+                    console.log(  mainDivVM.tableData)
                 }
             })
         },
+        number(){//添加签约单余款
+　　　      this.formSigning.amountBalance=this.formSigning.amountBalance.replace(/[^\.\d]/g,'');
+            this.formSigning.amountBalance=this.formSigning.amountBalance.replace('.','');
+    　　},
+        number2(){//编辑签约单余款
+　　　      this.updateFormSigning.amountBalance=this.updateFormSigning.amountBalance.replace(/[^\.\d]/g,'');
+            this.updateFormSigning.amountBalance=this.updateFormSigning.amountBalance.replace('.','');
+    　　},
     },
     created(){        
         // 工作台
