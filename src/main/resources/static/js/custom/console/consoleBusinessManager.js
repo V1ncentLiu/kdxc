@@ -1311,7 +1311,8 @@ var mainDivVM = new Vue({
             var param = this.queryForm;
             param.pageSize = this.pager.pageSize;
             param.pageNum =  this.pager.currentPage;
-            axios.post('/aggregation/businessMyCustomer/queryPage',param).then(function (response) {
+            // axios.post('/aggregation/businessMyCustomer/queryPage',param).then(function (response) {
+            axios.post('/console/console/listPendingInviteCustomer',param).then(function (response) {
                 if(null===response||response.data==null||response.data.code!='0'){
                     if(response.data.code!='0'){
                         mainDivVM.$message({message: response.data.msg, type: 'warning'});
