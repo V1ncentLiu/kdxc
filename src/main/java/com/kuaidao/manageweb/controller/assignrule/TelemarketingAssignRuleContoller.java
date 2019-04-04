@@ -24,6 +24,7 @@ import com.kuaidao.aggregation.dto.assignrule.TeleAssignRuleQueryDTO;
 import com.kuaidao.aggregation.dto.assignrule.TelemarketingAssignRuleDTO;
 import com.kuaidao.common.constant.OrgTypeConstant;
 import com.kuaidao.common.constant.RoleCodeEnum;
+import com.kuaidao.common.constant.SystemCodeConstant;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.manageweb.config.LogRecord;
@@ -64,6 +65,7 @@ public class TelemarketingAssignRuleContoller {
 		// 查询电销分公司
 		orgDto = new OrganizationQueryDTO();
 		orgDto.setOrgType(OrgTypeConstant.DXFGS);
+		orgDto.setSystemCode(SystemCodeConstant.HUI_JU);
 		JSONResult<List<OrganizationRespDTO>> orgComJson = organizationFeignClient.queryOrgByParam(orgDto);
 		if (orgComJson.getCode().equals(JSONResult.SUCCESS)) {
 			model.addAttribute("orgCompany", orgComJson.getData());
@@ -71,6 +73,7 @@ public class TelemarketingAssignRuleContoller {
 		// 电销事业部
 		orgDto = new OrganizationQueryDTO();
 		orgDto.setOrgType(OrgTypeConstant.DZSYB);
+		orgDto.setSystemCode(SystemCodeConstant.HUI_JU);
 		JSONResult<List<OrganizationRespDTO>> orgDeptJson = organizationFeignClient.queryOrgByParam(orgDto);
 		if (orgDeptJson.getCode().equals(JSONResult.SUCCESS)) {
 			model.addAttribute("orgDept", orgDeptJson.getData());
@@ -78,6 +81,7 @@ public class TelemarketingAssignRuleContoller {
 		// 查询电销组
 		orgDto = new OrganizationQueryDTO();
 		orgDto.setOrgType(OrgTypeConstant.DXZ);
+		orgDto.setSystemCode(SystemCodeConstant.HUI_JU);
 		JSONResult<List<OrganizationRespDTO>> orgJson = organizationFeignClient.queryOrgByParam(orgDto);
 		if (orgJson.getCode().equals(JSONResult.SUCCESS)) {
 			model.addAttribute("orgSelect", orgJson.getData());
@@ -215,6 +219,7 @@ public class TelemarketingAssignRuleContoller {
 			dto.setParentId(parentId);
 
 			dto.setOrgType(orgType);
+			dto.setSystemCode(SystemCodeConstant.HUI_JU);
 
 			JSONResult<List<OrganizationDTO>> orgJson = organizationFeignClient.listDescenDantByParentId(dto);
 
