@@ -376,6 +376,8 @@ public class PhoneTrafficController {
                 && clueFileList.getData() != null) {
             request.setAttribute("clueFileList", clueFileList.getData());
         }
+        UserInfoDTO user =  CommUtil.getCurLoginUser();
+        request.setAttribute("loginUserId", user.getId());
         return "phonetraffic/editCustomerMaintenance";
     }
 
