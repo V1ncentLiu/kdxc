@@ -851,16 +851,16 @@ var mainDivVM = new Vue({
         // 待审批未到访记录
         initCustomerUnVisitRecord(){//初始列表 
             var param = {};
-            // axios.post('/visit/visitRecord/listVisitRecord',param)
-            param.isVisit=0;
-            axios.post('/console/console/listVisitRecord',param)            
+            param.pageSize = 0;
+            param.pageNum = 0;
+            axios.post('/visit/visitRecord/listNoVisitRecord',param)            
             .then(function (response) {
                 var data =  response.data
                 console.log('待审批未到访记录')
                 console.log(data)
                 if(data.code=='0'){
                     var resData = data.data;
-                    mainDivVM.dataTable3= resData;                    
+                    mainDivVM.dataTable3= resData.data;                    
                 }else{
                     mainDivVM.$message({message:data.msg,type:'error'});
                     console.error(data);
