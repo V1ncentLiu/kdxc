@@ -1219,6 +1219,14 @@
                     } else if(trackRow.customerStatus==3&&flag!="toTele"){ // 不跟进
                         this.$confirm("不跟进客户将被释放", '提示', { cancelButtonText: '取消', confirmButtonText: '确定',type: 'warning'}).then(() => {
                             //  直接释放资源到废弃池或是共有池
+                            var param = {};
+                            param.clueId = clueId;
+                            param.customerStatus = trackRow.customerStatus;
+                            param.customerStatusSub = trackRow.customerStatusSub;
+                            axios.post('/phonetraffic/release', param)
+                                .then(function (response) {
+                                    addCustomerVM.$message({message: '释放成功', type: 'success', duration: 2000, onClose: function () {window.location.href = "/phonetraffic/listPage";}});
+                                });
                         }).catch(() => {});
                     }else{
                         addCustomerVM.submitForm(form,flag);
@@ -2171,7 +2179,12 @@
                 this.form.money = intention.advanceAmount == null ? "" : intention.advanceAmount + "";
                 this.form.area = intention.area == null ? "" : intention.area + "";
                 this.form.intentionCategory = intention.purType == null ? "" : intention.purType + "";
-                this.form.radioProject = intention.purProjectType + "";
+                if(intention.purProjectType){
+                    this.form.radioProject = intention.purProjectType+"";
+                }else{
+                    this.form.radioProject = "1";
+                }
+                debugger
                 this.form.insideProject = intention.purInProject == null ? "" : intention.purInProject + "";
                 this.form.outsideProject = intention.purOutProject;
                 if (intention.province) {

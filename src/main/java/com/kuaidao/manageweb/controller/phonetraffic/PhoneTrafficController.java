@@ -11,6 +11,7 @@ import com.kuaidao.aggregation.dto.clue.ClueFileDTO;
 import com.kuaidao.aggregation.dto.clue.ClueQueryDTO;
 import com.kuaidao.aggregation.dto.phonetraffic.PhoneTrafficParamDTO;
 import com.kuaidao.aggregation.dto.phonetraffic.PhoneTrafficRespDTO;
+import com.kuaidao.aggregation.dto.phonetraffic.TrafficParam;
 import com.kuaidao.aggregation.dto.project.ProjectInfoDTO;
 import com.kuaidao.aggregation.dto.project.ProjectInfoPageParam;
 import com.kuaidao.aggregation.dto.tracking.TrackingReqDTO;
@@ -540,6 +541,15 @@ public class PhoneTrafficController {
         return map;
     }
 
+    /**
+     * 释放资源到共有池以及废弃池
+     */
 
+
+    @RequestMapping("/release")
+    @ResponseBody
+    public JSONResult<Boolean> releaseClue(@RequestBody TrafficParam trafficParam){
+        return phoneTrafficFeignClient.releaseClue(trafficParam);
+    }
 
 }
