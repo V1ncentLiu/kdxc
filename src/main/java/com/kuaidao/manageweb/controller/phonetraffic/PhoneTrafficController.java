@@ -54,9 +54,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * @Auther: admin
@@ -145,7 +143,10 @@ public class PhoneTrafficController {
             } else {
                 List<UserInfoDTO> list = new ArrayList<>();
                 list.add(user);
-                request.setAttribute("phtrafficList", list);
+                Map<String,List<UserInfoDTO>> map = new HashMap<>();
+                map.put("phUsers",list);
+                map.put("phAllUsers",list);
+                request.setAttribute("phtrafficList", map);
             }
         }
         request.setAttribute("editflag",flag);
@@ -170,10 +171,8 @@ public class PhoneTrafficController {
                     param.setPhTraDirectorId(user.getId());
                     param.setRoleCode(RoleCodeEnum.HWZG.name());
                 }else{
-                    // 管理员能够看见全部的数据
                 }
                 Integer dealStatus = param.getDealStatus();
-
                 if(dealStatus!=null&&dealStatus==0){
                     param.setPhase(CluePhase.PHASE_1ST.getCode());
                 }else  if(dealStatus!=null&&dealStatus==1){
@@ -481,46 +480,12 @@ public class PhoneTrafficController {
      */
 
 
-    /**
-     * 话务人员：当前人员，所属组织同级 以及 下属组织的人员
-     */
-    /**
-     * 组内电销顾问查询
-     * @return
-     */
-    private List phoneTrafficUser(){
-        RoleQueryDTO query = new RoleQueryDTO();
-        query.setRoleCode(RoleCodeEnum.HWY.name());
-        UserInfoDTO user =  CommUtil.getCurLoginUser();
-        JSONResult<List<RoleInfoDTO>> roleJson = roleManagerFeignClient.qeuryRoleByName(query);
-        ArrayList resList = new ArrayList();
-        if (JSONResult.SUCCESS.equals(roleJson.getCode())) {
-            List<RoleInfoDTO> roleList = roleJson.getData();
-            if (null != roleList && roleList.size() > 0) {
-                RoleInfoDTO roleDto = roleList.get(0);
-                UserInfoPageParam param = new UserInfoPageParam();
-//                param.setRoleId(roleDto.getId());
-                param.setOrgId(user.getOrgId());
-                param.setPageSize(10000);
-                param.setPageNum(1);
-                JSONResult<PageBean<UserInfoDTO>> userListJson = userInfoFeignClient.list(param);
-                if (JSONResult.SUCCESS.equals(userListJson.getCode())) {
-                    PageBean<UserInfoDTO> pageList = userListJson.getData();
-                    List<UserInfoDTO> userList = pageList.getData();
-                    for(UserInfoDTO dto:userList){
-                        resList.add(dto.getId());
-                    }
-                }
-            }
-        }
-        return resList;
-    }
 
     /**
      * 查询非禁用账户
      * @return
      */
-    private List<UserInfoDTO> phTrafficList(){
+    private Map<String ,List<UserInfoDTO>> phTrafficList(){
         RoleQueryDTO query = new RoleQueryDTO();
         query.setRoleCode(RoleCodeEnum.HWZG.name());
         JSONResult<List<RoleInfoDTO>> roleJson = roleManagerFeignClient.qeuryRoleByName(query);
@@ -543,7 +508,7 @@ public class PhoneTrafficController {
             }
         }
 
-
+        // 查询话务总监ID
         Long roleId = null;
         RoleQueryDTO query1 = new RoleQueryDTO();
         query1.setRoleCode(RoleCodeEnum.HWZG.name());
@@ -555,25 +520,24 @@ public class PhoneTrafficController {
                 roleId = roleInfoDTO.getId();
             }
         }
-
         List<UserInfoDTO> user1List = new ArrayList();
+        List<UserInfoDTO> user2List = new ArrayList();
         boolean falg = true;
         for(UserInfoDTO userInfo:userList){
             Integer status = userInfo.getStatus();
             Long id = userInfo.getId();
-            if(roleId!=null&&!roleId.equals(userInfo.getRoleId())){
-                if(status!=2){
+            if(roleId!=null&&!roleId.equals(userInfo.getRoleId())){  // 剔除话务总监
+                if(status!=2){ // 提出禁用
                     user1List.add(userInfo);
                 }
-//                if (id.equals(user.getId())) {
-//                    falg = false;
-//                }
+                user2List.add(userInfo);
             }
         }
-//        if(falg){
-//            userList.add(user);
-//        }
-        return user1List;
+
+        Map<String,List<UserInfoDTO>> map = new HashMap<>();
+        map.put("phUsers",user1List);
+        map.put("phAllUsers",user2List);
+        return map;
     }
 
 
