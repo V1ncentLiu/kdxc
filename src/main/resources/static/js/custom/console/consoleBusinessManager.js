@@ -1308,7 +1308,7 @@ var mainDivVM = new Vue({
             }
         },
         initList(){
-            var param = this.queryForm;
+            var param = {};
             param.pageSize = this.pager.pageSize;
             param.pageNum =  this.pager.currentPage;
             // axios.post('/aggregation/businessMyCustomer/queryPage',param).then(function (response) {
