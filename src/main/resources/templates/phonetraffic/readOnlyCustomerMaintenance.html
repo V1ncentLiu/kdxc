@@ -1377,22 +1377,21 @@
                 }
             },
             handleOperateFn(index, row) { //上传资源"查看图片,下载录音"
-
-                console.log(index, row);
-                console.log(row.filePath);
-                console.log(row.fileName);
-
                 if (row.fileType == 'mp3') {
-                    this.download1(row.filePath, row.fileName, 'auido/mp3');
+                    var x = new XMLHttpRequest();
+                    x.open("GET", row.filePath, true);
+                    x.responseType = 'blob';
+                    x.onload = function (e) {
+                        download(x.response, row.fileName, "audio/mp3");
+                    };
+                    x.send();
                 } else {
                     this.dialogFormUploadImgSrc = row.filePath;
                     this.dialogFormUploadImg = true;
                 }
-
             },
             download1(data, strFileName, strMimeType) {
                 download(data, strFileName, strMimeType);
-                alert(1);
             },
             handlePlay(index, row) { //通话记录播放btn
                 $("audio").hide();
