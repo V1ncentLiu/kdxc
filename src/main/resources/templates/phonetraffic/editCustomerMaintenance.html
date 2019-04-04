@@ -93,8 +93,7 @@
                 <el-row>
                     <el-col
                             :span="16">
-                        <el-form-item label="意向项目："
-                                      :label-width="formLabelWidth">
+                        <el-form-item label="意向项目：" :label-width="formLabelWidth" required>
                             <el-radio
                                     v-model="form.radioProject" label="1" @change="projectChange"
                                     style="margin-right: 10px;">内部项目
@@ -1194,6 +1193,19 @@
             },
 
             saveClue(form,flag){
+
+
+                if( this.form.radioProject == 1){ // 内部项目
+                    if(!this.form.insideProject){
+                        this.$message.error('请填写意向项目');
+                        return false;
+                    }
+                }else  if( this.form.radioProject == 2){ // 外部项目
+                    if(!this.form.outsideProject){
+                        this.$message.error('请填写意向项目');
+                        return false;
+                    }
+                }
                 // 客户状态 == 不跟进 提示： 不跟进客户将被释放
                 var trackRow = addCustomerVM.tableDataC2[addCustomerVM.tableDataC2.length-1];
 
@@ -1485,6 +1497,7 @@
                     this.outsideProjectShow = true;
                     this.form.insideProject =null;
                 }
+
             },
             handleSelectionChange(val) {
                 this.multipleSelection = val;
@@ -1803,9 +1816,15 @@
                 var param = {};
                 param.type = "1";
                 param.name = selVal;
-                this.form.district=null;
-                this.form.city=null;
-                this.districtArr =null;
+                if(this.form.district){
+                    this.form.district=null;
+                }
+                if(this.form.city){
+                    this.form.city=null;
+                }
+                if(this.form.city){
+                    this.districtArr=null;
+                }
                 axios.post('/area/sysregion/querySysRegionByParam', param).then(function (response) {
                     addCustomerVM.cityArr = response.data.data.data;
                 });
@@ -2118,7 +2137,6 @@
                     phoneArr.push(phone3);
 
                 }
-
                 if (customer.phone4) {
                     var phone4 = {};
                     phone4.value = customer.phone4;
