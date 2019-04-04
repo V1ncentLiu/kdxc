@@ -860,7 +860,7 @@ var mainDivVM = new Vue({
                 console.log(data)
                 if(data.code=='0'){
                     var resData = data.data;
-                    mainDivVM.dataTable3= resData;                    
+                    mainDivVM.dataTable3= resData.data;                    
                 }else{
                     mainDivVM.$message({message:data.msg,type:'error'});
                     console.error(data);
