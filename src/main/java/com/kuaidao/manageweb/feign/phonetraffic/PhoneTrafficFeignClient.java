@@ -40,7 +40,7 @@ public interface PhoneTrafficFeignClient {
 	@PostMapping("/releaseClue")
 	public JSONResult releaseClue(TrafficParam trafficParam);
 
-    @Component
+	@Component
 	static class HystrixClientFallback implements PhoneTrafficFeignClient {
 		private static Logger logger = LoggerFactory.getLogger(PhoneTrafficFeignClient.class);
 
