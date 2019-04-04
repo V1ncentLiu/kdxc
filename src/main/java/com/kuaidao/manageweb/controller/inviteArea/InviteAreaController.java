@@ -102,6 +102,7 @@ public class InviteAreaController {
         List<SysRegionDTO> proviceslist = sysRegionFeignClient.getproviceList().getData();
         OrganizationQueryDTO orgDto = new OrganizationQueryDTO();
         orgDto.setOrgType(OrgTypeConstant.SWZ);
+        orgDto.setSystemCode(SystemCodeConstant.HUI_JU);
         // 商务小组
         JSONResult<List<OrganizationRespDTO>> swList =
                 organizationFeignClient.queryOrgByParam(orgDto);
@@ -137,6 +138,7 @@ public class InviteAreaController {
         List<SysRegionDTO> proviceslist = sysRegionFeignClient.getproviceList().getData();
         OrganizationQueryDTO orgDto = new OrganizationQueryDTO();
         orgDto.setOrgType(OrgTypeConstant.SWZ);
+        orgDto.setSystemCode(SystemCodeConstant.HUI_JU);
         // 商务小组
         JSONResult<List<OrganizationRespDTO>> swList =
                 organizationFeignClient.queryOrgByParam(orgDto);
