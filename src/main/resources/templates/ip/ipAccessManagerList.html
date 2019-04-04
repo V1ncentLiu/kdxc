@@ -550,6 +550,7 @@ var ipManagerVM = new Vue({
 	                              type: 'warn',
 	                             message: '当前IP已存在请重新输入IP'
 	                        }); 
+								ipManagerVM.IpconfirmBtnDisabled=false;//启用提交按钮
 	            	         return ;
 	            	   }
 					  axios.post('/ip/ipAccess/saveIpRepository',param).then(function (response) {
@@ -718,7 +719,9 @@ var ipManagerVM = new Vue({
 			  }
 			}
 			param.deleId=notInAddress;
-			 
+			param.pageNum=1;
+			param.pageSize=1000;
+			
 			axios.post('/ip/ipAccess/queryRepositoryList',param).then(function (response) {
 				if(null==response){
 					ipManagerVM.$message({
