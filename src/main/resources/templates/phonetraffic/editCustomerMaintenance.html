@@ -990,6 +990,7 @@
                 ussmArr: [],
                 StorefrontAreaArr: [],
                 customerStatusSubArr: [],
+                customerStatusSubArr1: [],
                 provinceArr: [],
                 cityArr: [],
                 districtArr: [],
@@ -1170,7 +1171,13 @@
                 return n[1] ? n : '0' + n
             },
             customerStatusChange(selVal) {
-                if (selVal == '3') {
+                if (selVal == '3'||selVal == '2') {
+                    if(selVal == '3'){
+                        this.customerStatusSubArr = this.customerStatusSubArr1.slice(2)
+                    }else if(selVal == '2'){
+                        this.customerStatusSubArr = this.customerStatusSubArr1.slice(0,2)
+                    }
+
                     this.substatus = false;
                 } else {
                     this.substatus = true;
@@ -1675,6 +1682,7 @@
                                 });
                         }else{
                             //如果是新增跟进记录
+                            param.stage = 1; // 新增时候指明当前跟进记录为话务
                             axios.post('/tele/clueMyCustomerInfo/saveClueTracking',param)
                                 .then(function (response) {
                                     addCustomerVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
@@ -1766,6 +1774,7 @@
                     var param = {};
                     param.idList = ids;
                     param.clueId = clueId;
+                    param.stage = 1; // 新增时候指明当前跟进记录为话务
                     axios.post('/tele/clueMyCustomerInfo/deleteClueTracking', param)
                         .then(function (response) {
                             addCustomerVM.$message({
@@ -2259,16 +2268,16 @@
             });
             //客户状态
             param = {};
-            param.groupCode = "customerStatus";
+            param.groupCode = "PhCustomerStatus";
             axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode', param).then(function (response) {
                 addCustomerVM.cusStatusArr = response.data.data;
             });
 
             //客户状态
             param = {};
-            param.groupCode = "customerStatusSub";
+            param.groupCode = "PhCustomerStatusSub";
             axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode', param).then(function (response) {
-                addCustomerVM.customerStatusSubArr = response.data.data;
+                addCustomerVM.customerStatusSubArr1 = response.data.data;
             });
 
 
