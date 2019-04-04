@@ -672,13 +672,13 @@ var mainDivVM = new Vue({
                     .then(function (response) {
                         var resData = response.data;
                         if(resData.code=='0'){
-                            signRecordVM.dialogFormVisible = false;
-                            signRecordVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
-                                    signRecordVM.initSignRecordData();// 刷新列表
-                                    signRecordVM.recordDialog = false;
+                            mainDivVM.dialogFormVisible = false;
+                            mainDivVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
+                                    mainDivVM.initSignRecordData();// 刷新列表
+                                    mainDivVM.recordDialog = false;
                                 }});
                         }else{
-                            signRecordVM.$message({message:resData.msg,type:'error'});
+                            mainDivVM.$message({message:resData.msg,type:'error'});
                             console.error(resData);
                         }
                     }).catch(function (error) {console.log(error);}).then(function(){
