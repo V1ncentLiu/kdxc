@@ -93,8 +93,7 @@
                 <el-row>
                     <el-col
                             :span="16">
-                        <el-form-item label="意向项目："
-                                      :label-width="formLabelWidth">
+                        <el-form-item label="意向项目：" :label-width="formLabelWidth" required>
                             <el-radio
                                     v-model="form.radioProject" label="1" @change="projectChange"
                                     style="margin-right: 10px;">内部项目
@@ -683,7 +682,7 @@
     <!-- dialog -->
     <el-dialog title="二维码" :visible.sync="dialogFormImg">
         <div class="padding20" style="text-align: center;">
-            <img src="images/errorIcon.jpg" alt=""
+            <img th:src="@{/images/errorIcon.jpg}" alt=""
                  style="width: 250px; height: 250px;">
         </div>
     </el-dialog>
@@ -1194,6 +1193,19 @@
             },
 
             saveClue(form,flag){
+
+
+                if( this.form.radioProject == 1){ // 内部项目
+                    if(!this.form.insideProject){
+                        this.$message.error('请填写意向项目');
+                        return false;
+                    }
+                }else  if( this.form.radioProject == 2){ // 外部项目
+                    if(!this.form.outsideProject){
+                        this.$message.error('请填写意向项目');
+                        return false;
+                    }
+                }
                 // 客户状态 == 不跟进 提示： 不跟进客户将被释放
                 var trackRow = addCustomerVM.tableDataC2[addCustomerVM.tableDataC2.length-1];
 
@@ -1207,6 +1219,14 @@
                     } else if(trackRow.customerStatus==3&&flag!="toTele"){ // 不跟进
                         this.$confirm("不跟进客户将被释放", '提示', { cancelButtonText: '取消', confirmButtonText: '确定',type: 'warning'}).then(() => {
                             //  直接释放资源到废弃池或是共有池
+                            var param = {};
+                            param.clueId = clueId;
+                            param.customerStatus = trackRow.customerStatus;
+                            param.customerStatusSub = trackRow.customerStatusSub;
+                            axios.post('/phonetraffic/release', param)
+                                .then(function (response) {
+                                    addCustomerVM.$message({message: '释放成功', type: 'success', duration: 2000, onClose: function () {window.location.href = "/phonetraffic/listPage";}});
+                                });
                         }).catch(() => {});
                     }else{
                         addCustomerVM.submitForm(form,flag);
@@ -1485,6 +1505,7 @@
                     this.outsideProjectShow = true;
                     this.form.insideProject =null;
                 }
+
             },
             handleSelectionChange(val) {
                 this.multipleSelection = val;
@@ -1803,9 +1824,15 @@
                 var param = {};
                 param.type = "1";
                 param.name = selVal;
-                this.form.district=null;
-                this.form.city=null;
-                this.districtArr =null;
+                if(this.form.district){
+                    this.form.district=null;
+                }
+                if(this.form.city){
+                    this.form.city=null;
+                }
+                if(this.form.city){
+                    this.districtArr=null;
+                }
                 axios.post('/area/sysregion/querySysRegionByParam', param).then(function (response) {
                     addCustomerVM.cityArr = response.data.data.data;
                 });
@@ -1986,18 +2013,7 @@
                 }
             },
             handleOperateFn(index, row) { //上传资源"查看图片,下载录音"
-
-                console.log(index, row);
-                console.log(row.filePath);
-                console.log(row.fileName);
-
                 if (row.fileType == 'mp3') {
-                    /* axios.get(row.filePath).then(function(response){
-            			console.log(response);
-            			//this.download1( response.data, row.fileName, 'auido/mp3' );
-            		}).catch(function(error){
-            			console.log(error);
-            		}); */
                     var x = new XMLHttpRequest();
                     x.open("GET", row.filePath, true);
                     x.responseType = 'blob';
@@ -2005,12 +2021,10 @@
                         download(x.response, row.fileName, "audio/mp3");
                     };
                     x.send();
-                    //this.download1( row.filePath, row.fileName, 'auido/mp3' );
                 } else {
                     this.dialogFormUploadImgSrc = row.filePath;
                     this.dialogFormUploadImg = true;
                 }
-
             },
             download1(data, strFileName, strMimeType) {
                 download(data, strFileName, strMimeType);
@@ -2131,7 +2145,6 @@
                     phoneArr.push(phone3);
 
                 }
-
                 if (customer.phone4) {
                     var phone4 = {};
                     phone4.value = customer.phone4;
@@ -2166,7 +2179,12 @@
                 this.form.money = intention.advanceAmount == null ? "" : intention.advanceAmount + "";
                 this.form.area = intention.area == null ? "" : intention.area + "";
                 this.form.intentionCategory = intention.purType == null ? "" : intention.purType + "";
-                this.form.radioProject = intention.purProjectType + "";
+                if(intention.purProjectType){
+                    this.form.radioProject = intention.purProjectType+"";
+                }else{
+                    this.form.radioProject = "1";
+                }
+                debugger
                 this.form.insideProject = intention.purInProject == null ? "" : intention.purInProject + "";
                 this.form.outsideProject = intention.purOutProject;
                 if (intention.province) {

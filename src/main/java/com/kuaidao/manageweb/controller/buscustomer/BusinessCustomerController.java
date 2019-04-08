@@ -140,6 +140,8 @@ public class BusinessCustomerController {
                 && clueFileList.getData() != null) {
             request.setAttribute("clueFileList", clueFileList.getData());
         }
+        UserInfoDTO user = getUser();
+        request.setAttribute("loginUserId", user.getId());
         return "bus_mycustomer/editCustomerMaintenance";
     }
 

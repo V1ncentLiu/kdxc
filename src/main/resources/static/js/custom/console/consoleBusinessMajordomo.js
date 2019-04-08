@@ -851,16 +851,16 @@ var mainDivVM = new Vue({
         // 待审批未到访记录
         initCustomerUnVisitRecord(){//初始列表 
             var param = {};
-            // axios.post('/visit/visitRecord/listVisitRecord',param)
-            param.isVisit=0;
-            axios.post('/console/console/listVisitRecord',param)            
+            param.pageSize = 0;
+            param.pageNum = 0;
+            axios.post('/visit/visitRecord/listNoVisitRecord',param)            
             .then(function (response) {
                 var data =  response.data
                 console.log('待审批未到访记录')
                 console.log(data)
                 if(data.code=='0'){
                     var resData = data.data;
-                    mainDivVM.dataTable3= resData;                    
+                    mainDivVM.dataTable3= resData.data;                    
                 }else{
                     mainDivVM.$message({message:data.msg,type:'error'});
                     console.error(data);
@@ -884,7 +884,7 @@ var mainDivVM = new Vue({
            var title = "";
            for(var i=0;i<rows.length;i++){
                var curRow = rows[i];
-               title += "【"+curRow.serialNum+""+curRow.customerName+"】";
+               title += "【"+curRow.cusName+"】";
            }
            this.signRecordArrTitle=title;
            
@@ -909,7 +909,7 @@ var mainDivVM = new Vue({
                     isPass=false;
                     break;
                 }
-                title += "【"+curRow.serialNum+""+curRow.customerName+"】 ";
+                title += "【"+curRow.cusName+"】 ";
                 idArr.push(curRow.id);
             }
             if(!isPass){
@@ -930,7 +930,7 @@ var mainDivVM = new Vue({
                     if(resData.code=='0'){
                         mainDivVM.dialogFormVisibleUnVisit = false;
                         mainDivVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
-                            mainDivVM.initCustomerVisitRecord();
+                            mainDivVM.initCustomerUnVisitRecord();
                         }});
                     }else{
                         mainDivVM.$message({message:resData.msg,type:'error'});
@@ -961,6 +961,7 @@ var mainDivVM = new Vue({
                     }
                     param.idList = idArr;
                     param.rebutReason = this.dialogForm.reason;
+                    param.type = 2;//标记是未到访记录
                     axios.post('/visit/visitRecord/rejectVisitRecord', param)
                     .then(function (response) {
                         var resData = response.data;
