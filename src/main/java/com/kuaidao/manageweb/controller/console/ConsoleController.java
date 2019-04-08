@@ -295,6 +295,7 @@ public class ConsoleController {
         List<Integer> sourceList = new ArrayList<Integer>();
         sourceList.add(AggregationConstant.SALE_RECEIVE_SOURCE.SOURCE1);
         sourceList.add(AggregationConstant.SALE_RECEIVE_SOURCE.SOURCE2);
+        reqDTO.setPhase(CluePhase.PHAE_4TH.getCode());
         reqDTO.setSourceList(sourceList);
         return clueBasicFeignClient.countAssignClueNum(reqDTO);
     }
