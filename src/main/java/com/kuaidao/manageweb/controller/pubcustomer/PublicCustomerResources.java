@@ -148,8 +148,10 @@ public class PublicCustomerResources {
             dto.setOrgType(OrgTypeConstant.DXZ);
             JSONResult<List<OrganizationRespDTO>> dzList = organizationFeignClient.queryOrgByParam(dto);
             dxzList = dzList.getData();
-            for(OrganizationRespDTO organizationRespDTO:dzList.getData()){
-                dxzIdsList.add(organizationRespDTO.getId());
+            if(dzList!=null&&dzList.getData()!=null){
+                for(OrganizationRespDTO organizationRespDTO:dzList.getData()){
+                    dxzIdsList.add(organizationRespDTO.getId());
+                }
             }
             dxcygwList = dxcygws(dxzIdsList);
             dxzjsList = dxzjs(dxzIdsList);
