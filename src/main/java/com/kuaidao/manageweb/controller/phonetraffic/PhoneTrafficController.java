@@ -22,6 +22,8 @@ import com.kuaidao.common.constant.StageContant;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.common.util.CommonUtil;
+import com.kuaidao.manageweb.config.LogRecord;
+import com.kuaidao.manageweb.constant.MenuEnum;
 import com.kuaidao.manageweb.feign.assignrule.InfoAssignFeignClient;
 import com.kuaidao.manageweb.feign.call.CallRecordFeign;
 import com.kuaidao.manageweb.feign.circulation.CirculationFeignClient;
@@ -45,6 +47,7 @@ import com.kuaidao.sys.dto.role.RoleQueryDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import com.kuaidao.sys.dto.user.UserInfoPageParam;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -263,6 +266,9 @@ public class PhoneTrafficController {
      */
     @PostMapping("/allocationClue")
     @ResponseBody
+    @RequiresPermissions("aggregation:PhoneTraffic:allocation")
+    @LogRecord(description = "分配资源", operationType = LogRecord.OperationType.DISTRIBUTION,
+            menuName = MenuEnum.PHONETRAFFIC_MANAGER)
     public JSONResult allocationClue(@Valid @RequestBody AllocationClueReq allocationClueReq,
                                      BindingResult result) {
 
@@ -544,8 +550,6 @@ public class PhoneTrafficController {
     /**
      * 释放资源到共有池以及废弃池
      */
-
-
     @RequestMapping("/release")
     @ResponseBody
     public JSONResult<Boolean> releaseClue(@RequestBody TrafficParam trafficParam){
