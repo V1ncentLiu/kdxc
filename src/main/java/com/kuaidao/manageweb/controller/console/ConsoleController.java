@@ -189,8 +189,8 @@ public class ConsoleController {
         }
 
         
-/*        
-         if(type.equals("1")) {
+        
+  /*       if(type.equals("1")) {
             path = "console/consoleTelemarketing";
         }else if(type.equals("2")) {
             List<Integer> statusList = new ArrayList<Integer>();
@@ -772,15 +772,22 @@ public class ConsoleController {
 
         Map<Long, OrganizationRespDTO> orgMap = new HashMap<Long, OrganizationRespDTO>();
         // 生成<机构id，机构>map
-        for (OrganizationRespDTO org : groupList) {
-            orgMap.put(org.getId(), org);
+        if(CollectionUtils.isNotEmpty(groupList)) {
+            for (OrganizationRespDTO org : groupList) {
+                orgMap.put(org.getId(), org);
+            }
         }
-        for (OrganizationRespDTO org : busAreaLsit) {
-            orgMap.put(org.getId(), org);
+      
+        if(CollectionUtils.isNotEmpty(busAreaLsit)) {
+              for (OrganizationRespDTO org : busAreaLsit) {
+                  orgMap.put(org.getId(), org);
+              }
         }
+   
         List<Map<String, Object>> result = new ArrayList<Map<String, Object>>();
         // 生成结果集，匹配电销组以及电销总监
-        for (UserInfoDTO user : userList) {
+        if(CollectionUtils.isNotEmpty(userList)) {
+            for (UserInfoDTO user : userList) {
             Map<String, Object> resultMap = new HashMap<String, Object>();
             OrganizationRespDTO group = orgMap.get(user.getOrgId());
             if (group != null) {
@@ -796,6 +803,8 @@ public class ConsoleController {
                 result.add(resultMap);
             }
         }
+        }
+  
         return result;
     }
 
