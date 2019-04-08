@@ -17,7 +17,7 @@
         <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
             <el-breadcrumb-item>Home</el-breadcrumb-item>
             <el-breadcrumb-item>商务管理</el-breadcrumb-item>
-            <el-breadcrumb-item><a href="JavaScript:void(0)" data-url="b.html">我的客户</a></el-breadcrumb-item>
+            <el-breadcrumb-item>我的客户</el-breadcrumb-item>
         </el-breadcrumb>
 
         <el-row class="marginB10 greybg padding20" style="padding-bottom: 0;" >
@@ -741,7 +741,7 @@
                 <el-row>
                     <el-col :span="10">
                         <el-form-item label="路费（报首次）：" :label-width="formLabelWidth" prop="firstToll">
-                            <el-input v-model="formSigning.firstToll"  type="number"  min="0" oninput="if(value.length>10)value=value.slice(0,10)"  onkeypress="return(/[\d]/.test(String.fromCharCode(event.keyCode)))" autocomplete="off" maxLength="10" style="width: 80%;"></el-input><span style="padding-left: 10px;">元</span>
+                            <el-input @change="formSigningAmountPerformance" v-model="formSigning.firstToll"  type="number"  min="0" oninput="if(value.length>10)value=value.slice(0,10)"  onkeypress="return(/[\d]/.test(String.fromCharCode(event.keyCode)))" autocomplete="off" maxLength="10" style="width: 80%;"></el-input><span style="padding-left: 10px;">元</span>
                         </el-form-item>
                     </el-col>
                     <el-col :span="10">
@@ -878,7 +878,8 @@
                     </el-col>
                     <el-col :span="10">
                         <el-form-item label="实收金额：" :label-width="formLabelWidth" prop="amountReceived">
-                            <el-input maxLength="10" v-model="formSigning.amountReceived"  type="number"  min="0" oninput="if(value.length>10)value=value.slice(0,10)"  onkeypress="return(/[\d]/.test(String.fromCharCode(event.keyCode)))"  style="width: 80%;" @change="setAddPerformanceAmount"></el-input>
+                            <!-- <el-input maxLength="10" v-model="formSigning.amountReceived"  type="number"  min="0" oninput="if(value.length>10)value=value.slice(0,10)"  onkeypress="return(/[\d]/.test(String.fromCharCode(event.keyCode)))"  style="width: 80%;" @change="setAddPerformanceAmount"></el-input> -->
+                            <el-input maxLength="10" v-model="formSigning.amountReceived"  type="number"  min="0" oninput="if(value.length>10)value=value.slice(0,10)"  onkeypress="return(/[\d]/.test(String.fromCharCode(event.keyCode)))"  style="width: 80%;" @change="formSigningAmountPerformance"></el-input>
                             <span style="padding-left: 10px;">元</span>
                         </el-form-item>
                     </el-col>
@@ -905,7 +906,8 @@
                 <el-row>
                     <el-col :span="10">
                         <el-form-item label="业绩金额：" :label-width="formLabelWidth" prop="performanceAmount">
-                            <el-input maxLength="10" v-model="formSigningAmountPerformance"  type="number"  min="0" oninput="if(value.length>10)value=value.slice(0,10)"  onkeypress="return(/[\d]/.test(String.fromCharCode(event.keyCode)))"  style="width: 80%;"></el-input>
+                            <!-- <el-input maxLength="10" v-model="formSigningAmountPerformance"  type="number"  min="0" oninput="if(value.length>10)value=value.slice(0,10)"  onkeypress="return(/[\d]/.test(String.fromCharCode(event.keyCode)))"  style="width: 80%;"></el-input> -->
+                            <el-input maxLength="10" v-model="formSigning.performanceAmount" @keyup.native="number3" min="0" style="width: 80%;"></el-input>
                             <span style="padding-left: 10px;">元</span>
                         </el-form-item>
                     </el-col>
@@ -1321,7 +1323,8 @@
                 amountBalance: '',
                 makeUpTime:'',
                 payTime: new Date(),
-                amountPerformance:''
+                amountPerformance:'',
+                performanceAmount:''
             },
             updateFormSigning: {
                 signId:"",
@@ -1539,11 +1542,13 @@
                             var reg =  /^[0-9]+[0-9]*]*$/ ;
                             if(value ==null || value =="null" || value ==""  ){
                                 callback(new Error("请输入实收金额"));
-                                mainDivVM.formSigning.amountReceived =null;
+                                // mainDivVM.formSigning.amountReceived =null;
+                                return;
 
                             }else  if(value !=null && value !="null" && value !="" && !reg.test(value) ){
                                 callback(new Error("请输入正整数"));
-                                mainDivVM.formSigning.amountReceived =null;
+                                // mainDivVM.formSigning.amountReceived =null;
+                                return;
                             }else{
                                 callback();
                             }
@@ -1551,30 +1556,41 @@
 				],
 				amountBalance: [
                     {required: true, validator:function(rule,value,callback){
-                            if(value===0){
-                                callback();
-                            }
-                            var reg =  /^[0-9]+[0-9]*]*$/ ;
-                            if(value ==null || value =="null" || value ==""  ){
-                                callback(new Error("请输入余款金额"));
-                                // mainDivVM.formSigning.amountBalance =null;
-                                return;
+                        if(value===0){
+                            callback();
+                        }
+                        var reg =  /^[0-9]+[0-9]*]*$/ ;
+                        if(value ==null || value =="null" || value ==""  ){
+                            callback(new Error("请输入余款金额"));
+                            // mainDivVM.formSigning.amountBalance =null;
+                            return;
 
-                            }else  if(value !=null && value !="null" && value !="" && !reg.test(value) ){
-                                callback(new Error("请输入正整数"));
-                                // mainDivVM.formSigning.amountBalance =null;
-                                return;
-                            }else{
-                                callback();
-                            }
-                        }, trigger: 'change'}
+                        }else  if(value !=null && value !="null" && value !="" && !reg.test(value) ){
+                            callback(new Error("请输入正整数"));
+                            // mainDivVM.formSigning.amountBalance =null;
+                            return;
+                        }else{
+                            callback();
+                        }
+                    }, trigger: 'change'}
 				],
 				makeUpTime: [
 					{required: true, message: '请选择预计余款补齐时间', trigger: 'change' }
 				],
-				// performanceAmount: [
-				// 	{ required: true, message: '请输入业绩金额', trigger: 'blur' }
-				// ],
+				performanceAmount: [
+					{ required: true, message: '请输入业绩金额', trigger: 'blur' },
+                    { validator:function(rule,value,callback){
+                        if(value=="0"){
+                            callback();
+                        }
+                        var reg =  /^\+?[1-9][0-9]*$/ ;
+                        if(value !=null && value !="null" && value !="" && !reg.test(value) ){
+                            callback(new Error("请输入整数"));
+                        }else{
+                            callback();
+                        }
+                    }, trigger: 'blur'}
+				],
                 isRemoteSign: [ //是否远程签约
                     { required: true, message: '请选择是否远程签约', trigger: 'change' }
                 ],
@@ -1633,17 +1649,18 @@
                 if(isNaN(atwo)) atwo = 0
                 return aone + atwo
             },
+
+
+        },
+        methods: {
             formSigningAmountPerformance(){
                 var aone = parseFloat(this.formSigning.amountReceived);
                 var atwo = parseFloat(this.formSigning.firstToll);
                 if(isNaN(aone)) aone = 0
                 if(isNaN(atwo)) atwo = 0
-                return aone + atwo
-            }
-
-
-        },
-        methods: {
+                // return aone + atwo
+                this.formSigning.performanceAmount=(aone + atwo)+ ""
+            },
         	tabClick(tab, event){
                 this.updateFormSigning = this.editableTabs[tab.index].updateFormSigning;
             },
@@ -2411,6 +2428,10 @@
             number2(){//编辑签约单余款
     　　　      this.updateFormSigning.amountBalance=this.updateFormSigning.amountBalance.replace(/[^\.\d]/g,'');
                 this.updateFormSigning.amountBalance=this.updateFormSigning.amountBalance.replace('.','');
+        　　},
+            number3(){//添加签约单业绩金额
+    　　　      this.formSigning.performanceAmount=this.formSigning.performanceAmount.replace(/[^\.\d]/g,'');
+                this.formSigning.performanceAmount=this.formSigning.performanceAmount.replace('.','');
         　　},
         },
         created(){
