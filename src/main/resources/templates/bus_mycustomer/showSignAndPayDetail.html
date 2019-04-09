@@ -251,7 +251,7 @@
                 </el-col>
                 <el-col :span="10">
                     <el-form-item label="实收金额：" :label-width="formLabelWidth" prop="amountReceived">
-                        <el-input v-model="formMoneyDetail.amountReceived"  type="number" min="0" oninput="if(value.length>10)value=value.slice(0,10)"  onkeypress="return(/[\d]/.test(String.fromCharCode(event.keyCode)))" autocomplete="off" width="80%"></el-input>
+                        <el-input v-model="formMoneyDetail.amountReceived"  @input="formMoneyDetailAmountPerformance" type="number" min="0" oninput="if(value.length>10)value=value.slice(0,10)"  onkeypress="return(/[\d]/.test(String.fromCharCode(event.keyCode)))" autocomplete="off" width="80%"></el-input>
                         <span style="padding-left: 10px;">元</span>
                     </el-form-item>
                 </el-col>
@@ -277,7 +277,7 @@
             <el-row>
                 <el-col :span="10">
                     <el-form-item label="业绩金额：" :label-width="formLabelWidth" prop="performanceAmount">
-                        <el-input v-model="formMoneyDetailAmountPerformance"  type="number" min="0" oninput="if(value.length>10)value=value.slice(0,10)"  onkeypress="return(/[\d]/.test(String.fromCharCode(event.keyCode)))" maxLength="10" autocomplete="off" style="width:80%"></el-input>
+                        <el-input v-model="formMoneyDetail.performanceAmount"  type="number"oninput="if(value.length>10)value=value.slice(0,10)"  onkeypress="return(/[\d]/.test(String.fromCharCode(event.keyCode)))" min="0" maxLength="10" style="width:80%"></el-input>
                         <span style="padding-left: 10px;">元</span>
                     </el-form-item>
                 </el-col>
@@ -438,7 +438,7 @@
                         <el-col :span="10">
                             <el-form-item label="路费（报首次）：" :label-width="formLabelWidth" prop="firstToll">
                                 <!-- <el-input v-model="formSigning.firstToll"  type="number"  min="0" oninput="if(value.length>10)value=value.slice(0,10)"  onkeypress="return(/[\d]/.test(String.fromCharCode(event.keyCode)))" autocomplete="off" maxLength="10" style="width: 80%;"></el-input> -->
-                                <el-input @change="formSigningAmountPerformance" v-model="formSigning.firstToll"  type="number"  min="0" oninput="if(value.length>10)value=value.slice(0,10)"  onkeypress="return(/[\d]/.test(String.fromCharCode(event.keyCode)))" autocomplete="off" maxLength="10" style="width: 80%;"></el-input>
+                                <el-input @input="formSigningAmountPerformance" v-model="formSigning.firstToll"  type="number"  min="0" oninput="if(value.length>10)value=value.slice(0,10)"  onkeypress="return(/[\d]/.test(String.fromCharCode(event.keyCode)))" autocomplete="off" maxLength="10" style="width: 80%;"></el-input>
                                 <span style="padding-left: 10px;">元</span>
                             </el-form-item>
                         </el-col>
@@ -581,7 +581,7 @@
                         <el-col :span="10">
                             <el-form-item label="实收金额：" :label-width="formLabelWidth" prop="amountReceived">
                                 <!-- <el-input maxLength="10" v-model="formSigning.amountReceived"  type="number"  min="0" oninput="if(value.length>10)value=value.slice(0,10)"  onkeypress="return(/[\d]/.test(String.fromCharCode(event.keyCode)))"  style="width: 80%;" ></el-input> -->
-                                <el-input @change="formSigningAmountPerformance" maxLength="10" v-model="formSigning.amountReceived"  type="number"  min="0" oninput="if(value.length>10)value=value.slice(0,10)"  onkeypress="return(/[\d]/.test(String.fromCharCode(event.keyCode)))"  style="width: 80%;" ></el-input>
+                                <el-input @input="formSigningAmountPerformance" maxLength="10" v-model="formSigning.amountReceived"  type="number"  min="0" oninput="if(value.length>10)value=value.slice(0,10)"  onkeypress="return(/[\d]/.test(String.fromCharCode(event.keyCode)))"  style="width: 80%;" ></el-input>
                                 <span style="padding-left: 10px;">元</span>
                             </el-form-item>
                         </el-col>
@@ -749,7 +749,6 @@
                             }else{
                                 callback();
                             }
-
                         }, trigger: 'change'}
                 ],
                 amountBalance: [
@@ -771,22 +770,21 @@
                 makeUpTime: [
                     { type: 'date', required: true, message: '请选择预计余款补齐时间', trigger: 'change' }
                 ],
-                // performanceAmount: [
-                //     { required: true,validator:function(rule,value,callback){
-                //             var reg =  /^[0-9]+[0-9]*]*$/ ;
-                //             if(value ==null || value =="null" || value ==""  ){
-                //                 callback(new Error("请输入业绩金额"));
-                //                 mainDivVM.formMoneyDetail.visitNum =null;
-                //
-                //             }else  if(value !=null && value !="null" && value !="" && !reg.test(value) ){
-                //                 callback(new Error("请输入正整数"));
-                //                 mainDivVM.formMoneyDetail.visitNum =null;
-                //             }else{
-                //                 callback();
-                //             }
-                //
-                //         }, trigger: 'change'}
-                // ],
+                performanceAmount: [
+                    { required: true,validator:function(rule,value,callback){
+                            var reg =  /^[0-9]+[0-9]*]*$/ ;
+                            if(value ==null || value =="null" || value ==""  ){
+                                callback(new Error("请输入业绩金额"));
+                                mainDivVM.formMoneyDetail.amountPerformance =null;
+
+                            }else  if(value !=null && value !="null" && value !="" && !reg.test(value) ){
+                                callback(new Error("请输入正整数"));
+                                mainDivVM.formMoneyDetail.amountPerformance =null;
+                            }else{
+                                callback();
+                            }
+                        }, trigger: 'change'}
+                ],
                 visitTime: [ //请选择到访时间
                     { required: true, message: '请选择到访时间', trigger: 'change' }
                 ],
@@ -1014,6 +1012,7 @@
                 makeUpTime:'',
                 payTime: new Date(),
                 amountPerformance:'',
+                performanceAmount:'',
                 remarks:""
             },
 
@@ -1077,12 +1076,13 @@
             payTypeArr1:[{value: "1", label: '全款'},{value: "2", label: '定金'},{value: "3", label: '追加定金'},{value: "4", label: '尾款'}],
         },
         computed: {
-            formMoneyDetailAmountPerformance() {
-                return this.formMoneyDetail.amountReceived;
-            },
+
             
         },
         methods: {
+            formMoneyDetailAmountPerformance() {
+                this.formMoneyDetail.performanceAmount= this.formMoneyDetail.amountReceived;
+            },
             formSigningAmountPerformance(){
                 var aone = parseFloat(this.formSigning.amountReceived);
                 var atwo = parseFloat(this.formSigning.firstToll);
@@ -1142,17 +1142,13 @@
                 param.id = vclueId;
                 mainDivVM.isAllMoney = false
                 this.suppWrap =true; // 默认关闭 到访记录 填写部分
+                this.shouAddVisitButton = false;
                 axios.post('/businesssign/echo',param).then(function (response) {
                     mainDivVM.formSigning = response.data.data;
                     mainDivVM.formSigning.clueId=vclueId;
                     mainDivVM.dialogFormSigningVisible = true;
                     mainDivVM.currentProvince(mainDivVM.formSigning.signProvince)
                     mainDivVM.currentCity(mainDivVM.formSigning.signCity)
-                    //  设置默认时间
-                    // mainDivVM.formSigning.payTime = new Date()
-                    // mainDivVM.formSigning.isRemoteSign11= "0";
-                    // mainDivVM.formSigning.visitTime = new Date();
-                    // mainDivVM.formSigning.visitType = 1;
                 });
 
             },
@@ -1250,8 +1246,8 @@
             submitForm(formName) {
                 this.formSigning.visitTime = new Date( this.formSigning.visitTime);
                 this.formSigning.payTime = new Date( this.formSigning.payTime);
+                this.formSigning.amountPerformance =  this.formSigning.performanceAmount;
                 var param = this.formSigning;
-                param.amountPerformance = this.formSigningAmountPerformance;
                 // 设置 clueid
                 this.$refs[formName].validate((valid) => {
                     if (valid) {
@@ -1272,9 +1268,9 @@
                 });
             },
             submitDialogForm(formName) {
-                this.formMoneyDetail.amountPerformance =  this.formMoneyDetailAmountPerformance;
                 this.formMoneyDetail.payTime = new Date( this.formMoneyDetail.payTime)
                 this.formMoneyDetail.visitTime = new Date( this.formMoneyDetail.visitTime)
+                this.formMoneyDetail.amountPerformance= this.formMoneyDetail.performanceAmount;
                 var param = this.formMoneyDetail;
                 param.signId = vsignId;
                 param.clueId =vclueId;
@@ -1323,6 +1319,10 @@
     　　　      this.formSigning.performanceAmount=this.formSigning.performanceAmount.replace(/[^\.\d]/g,'');
                 this.formSigning.performanceAmount=this.formSigning.performanceAmount.replace('.','');
         　　},
+            number2(){//添加更多签约单业绩金额
+                this.formMoneyDetail.amountPerformance=this.formMoneyDetail.amountPerformance.replace(/[^\.\d]/g,'');
+                this.formMoneyDetail.amountPerformance=this.formMoneyDetail.amountPerformance.replace('.','');
+            },
         },
         created(){
             // this.initList();

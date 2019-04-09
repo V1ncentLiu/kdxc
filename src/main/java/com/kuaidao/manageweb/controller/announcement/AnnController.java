@@ -12,6 +12,7 @@ import com.kuaidao.manageweb.feign.announcement.AnnReceiveFeignClient;
 import com.kuaidao.manageweb.feign.announcement.AnnouncementFeignClient;
 import com.kuaidao.manageweb.feign.msgpush.MsgPushFeignClient;
 import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
+import com.kuaidao.manageweb.service.IAnnounceService;
 import com.kuaidao.manageweb.util.IdUtil;
 import com.kuaidao.msgpush.dto.SmsCodeSendReq;
 import com.kuaidao.msgpush.dto.SmsTemplateCodeReq;
@@ -21,6 +22,7 @@ import com.kuaidao.sys.dto.announcement.AnnouncementRespDTO;
 import com.kuaidao.sys.dto.announcement.annReceive.AnnReceiveAddAndUpdateDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import com.kuaidao.sys.dto.user.UserInfoPageParam;
+import com.kuaidao.sys.dto.user.UserInfoParamListReqDTO;
 import com.rabbitmq.http.client.domain.UserInfo;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.Logical;
@@ -34,6 +36,7 @@ import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessagePostProcessor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
@@ -70,6 +73,10 @@ public class AnnController {
     @Autowired
     private MsgPushFeignClient msgPushFeignClient;
 
+    @Autowired
+    IAnnounceService announceService;
+
+
     @Value("${AnnMessageTempId}")
     private String tempId;
 
@@ -92,80 +99,8 @@ public class AnnController {
         long annId = IdUtil.getUUID();
         dto.setId(annId);  //公告ID
         JSONResult jsonResult = announcementFeignClient.publishAnnouncement(dto);
-
         if(jsonResult.getCode().equals(JSONResult.SUCCESS)){
-            Long orgId = dto.getOrgId();
-            List<UserInfoDTO> list = new ArrayList();
-            List<Long> idsList = new ArrayList<>();
-
-            UserInfoPageParam param = new UserInfoPageParam();
-            param.setPageNum(1);
-            param.setPageSize(100000);
-            if(orgId==0){ //全部用户
-                param.setStatus(1); //
-            }else{//指定组织结构下的数据。
-//                获取多个组织下的用户，通过组织ID进行获取。
-                List<Long> orgids = dto.getOrgids();
-                param.setStatus(1);
-                param.setOrgIdList(orgids);
-            }
-            JSONResult<PageBean<UserInfoDTO>> list1 = userInfoFeignClient.list(param);
-            if(list1.getCode().equals("0")){
-                list = list1.getData().getData();
-                List<AnnReceiveAddAndUpdateDTO> annrList = new ArrayList<AnnReceiveAddAndUpdateDTO>();
-                for(UserInfoDTO userinfo :list){
-                    AnnReceiveAddAndUpdateDTO annDto = new AnnReceiveAddAndUpdateDTO();
-                    long annRecId = IdUtil.getUUID();
-                    idsList.add(annRecId);
-                    annDto.setId(annRecId);
-                    annDto.setReceiveUser(userinfo.getId());
-                    annDto.setAnnouncementId(annId);
-                    annrList.add(annDto);
-                }
-                annReceiveFeignClient.batchInsert(annrList);
-            }
-
-        /*
-            list = new ArrayList();
-            if(list.size()==0){
-                UserInfoDTO user = new UserInfoDTO();
-                user.setId(123456L);
-                user.setUsername("yangbiao");
-                user.setPhone("18210470854");
-                user.setOrgId(3453453L);
-                list.add(user);
-            }
-        */
-
-            Integer type = dto.getType();
-            if(type==1||type==0){ //站内公告通知
-//                for(UserInfoDTO userInfo:list){
-                for(int i = 0 ; i < list.size();i++){
-                    Long aLong = idsList.get(i);
-                    UserInfoDTO userInfo =  list.get(i);
-                    amqpTemplate.convertAndSend("amq.topic",userInfo.getOrgId()+"."+userInfo.getId(),"announce,"+annId+","+aLong);
-                }
-            }
-
-//            if(type==2||type==0){ //短信
-//                for(UserInfoDTO userInfo:list){
-////                  获取电话：发送短信
-////                  构建短信模板
-//                    String phone = userInfo.getPhone();
-//                    Map map = new HashMap();
-//                    map.put("","");
-//                    SmsTemplateCodeReq smsTemplateCodeReq = new SmsTemplateCodeReq();
-//                    smsTemplateCodeReq.setMobile(phone);
-//                    smsTemplateCodeReq.setTempId(tempId);
-//                    smsTemplateCodeReq.setTempPara(map);
-////                    msgPushFeignClient.sendTempSms(smsTemplateCodeReq);
-////                  以后使用上面的东西进行替换.
-//                    SmsCodeSendReq smsCodeSendReq = new SmsCodeSendReq();
-//                    smsCodeSendReq.setMobile(phone);
-//                    msgPushFeignClient.sendCode(smsCodeSendReq);
-//                }
-//            }
-
+            announceService.sendMessage(dto);
         }
         return jsonResult;
     }

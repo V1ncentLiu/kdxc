@@ -17,14 +17,15 @@ import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
+import org.springframework.scheduling.annotation.EnableAsync;
 
 
 @SpringBootApplication
 @EnableEurekaClient
 @EnableFeignClients
 @EnableCircuitBreaker
+@EnableAsync
 public class ManageWebApplication {
-
 
     public static void main(String[] args) {
         SpringApplication.run(ManageWebApplication.class, args);
