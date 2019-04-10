@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"  xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head th:replace="_header_include::frag(~{::title},~{},~{})">
+    <title>后台管理系统</title>
+    <style>
+        button a{color:#fff!important;}
+    </style>
+</head>
+<body>
+<div id="clueManage" class="clueManage mainPadding" style="display: none;">  
+    <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
+        <el-breadcrumb-item>Home</el-breadcrumb-item>
+        <el-breadcrumb-item>财务管理</el-breadcrumb-item>
+        <el-breadcrumb-item><a >餐饮公司退返款（客户签约单）</a></el-breadcrumb-item>
+    </el-breadcrumb>
+    
+    <el-row class="marginB10">
+    		<shiro:hasPermission name="business:busAllocationManager:allocation">
+		        <el-button type="primary" @click="toAllocationClue">申请退款</el-button>
+		    </shiro:hasPermission>
+    		<shiro:hasPermission name="business:busAllocationManager:allocation">
+		        <el-button type="success" @click="toTransferClue">申请返款</el-button>
+		    </shiro:hasPermission>
+	</el-row>
+	<el-form :inline="true" :model="searchForm" class="demo-form-inline" ref="searchForm"> 
+	    <el-row class="greybg padding20" style="padding-bottom: 0;">
+				  <el-form-item class="formItem"  prop="busAreaId">
+				    <el-select v-model="searchForm.busAreaId" clearable  placeholder="商务大区">
+				      <el-option
+					      v-for="item in busAreaOptions"
+					      :key="item.id"
+					      :label="item.name"
+					      :value="item.id">
+					  </el-option>
+				    </el-select>
+				  </el-form-item>
+				  <el-form-item class="formItem"  prop="busGroupId">
+				    <el-select v-model="searchForm.busGroupId" clearable placeholder="签单商务组">
+				      <el-option
+					      v-for="item in busGroupOptions"
+					      :key="item.id"
+					      :label="item.name"
+					      :value="item.id">
+					  </el-option>
+				    </el-select>
+				  </el-form-item>
+				  <el-form-item class="formItem"  prop="busSaleId">
+				    <el-select v-model="searchForm.busSaleId" clearable placeholder="签单商务经理">
+				      <el-option
+					      v-for="item in busSaleOptions"
+					      :key="item.id"
+					      :label="item.name"
+					      :value="item.id">
+					  </el-option>
+				    </el-select>
+				  </el-form-item>
+				  <el-form-item class="formItem"  prop="signShopType">
+				    <el-select v-model="searchForm.signShopType" clearable placeholder="签约店型">
+				      <el-option
+					      v-for="item in signShopTypeOptions"
+					      :key="item.value"
+					      :label="item.name"
+					      :value="item.value">
+					  </el-option>
+				    </el-select>
+				  </el-form-item>
+  			  <el-form-item class="formItem"  prop="signType">
+  			    <el-select v-model="searchForm.signType" clearable  placeholder="签约类型">
+  			      <el-option
+  				      v-for="item in signTypeOptions"
+  				      :key="item.value"
+  				      :label="item.name"
+  				      :value="item.value">
+  				  </el-option>
+  			    </el-select>
+  			  </el-form-item>
+          <br>
+  	      <el-form-item class="formItem" label="签约时间：">
+  	  				<el-date-picker  v-model="searchForm.startTime" format="yyyy-MM-dd HH:mm" type="datetime" placeholder="选择日期"></el-date-picker>
+  	      </el-form-item>
+  	      <el-form-item class="formItem" label="——">
+  						<el-date-picker  v-model="searchForm.endTime" format="yyyy-MM-dd HH:mm" type="datetime" placeholder="选择日期"></el-date-picker>
+  	      </el-form-item>
+  		  <el-form-item class="formItem" prop="cusName">
+  			  <el-input v-model="searchForm.cusName" placeholder="客户姓名" class="input-with-select"></el-input>
+  		  </el-form-item>
+	    </el-row>
+	    <el-row class="greybg padding20" style="padding-bottom: 0;">
+				  <el-form-item class="formItem"  prop="teleDeptId">
+				    <el-select v-model="searchForm.teleDeptId" clearable  placeholder="电销事业部">
+				      <el-option
+					      v-for="item in teleDeptOptions"
+					      :key="item.id"
+					      :label="item.name"
+					      :value="item.id">
+					  </el-option>
+				    </el-select>
+				  </el-form-item>
+				  <el-form-item class="formItem"  prop="teleGorupId">
+				    <el-select v-model="searchForm.teleGorupId" clearable  placeholder="电销组">
+				      <el-option
+					      v-for="item in teleGorupOptions"
+					      :key="item.id"
+					      :label="item.name"
+					      :value="item.id">
+					  </el-option>
+				    </el-select>
+				  </el-form-item>
+				  <el-form-item class="formItem"  prop="teleSaleId">
+				    <el-select v-model="searchForm.teleSaleId" clearable placeholder="创业顾问">
+				      <el-option
+					      v-for="item in teleSaleOptions"
+					      :key="item.id"
+					      :label="item.name"
+					      :value="item.id">
+					  </el-option>
+				    </el-select>
+				  </el-form-item>
+  			  <el-form-item class="formItem"  prop="signProvince">
+  			    <el-select v-model="searchForm.signProvince" clearable  placeholder="签约省份">
+  			      <el-option
+  				      v-for="item in provinceOptions"
+  				      :key="item.name"
+  				      :label="item.name"
+  				      :value="item.name">
+  				  </el-option>
+  			    </el-select>
+  			  </el-form-item>
+				  <el-form-item class="formItem"  prop="signStatus">
+				    <el-select v-model="searchForm.signStatus" clearable placeholder="签约单状态">
+				      <el-option
+					      v-for="item in signStatusOptions"
+					      :key="item.value"
+					      :label="item.name"
+					      :value="item.value">
+					  </el-option>
+				    </el-select>
+				  </el-form-item>
+          <br>
+  		  <el-form-item class="formItem" prop="phone">
+  			  <el-input v-model="searchForm.phone" placeholder="客户手机号" class="input-with-select"></el-input>
+  		  </el-form-item>
+  		  <el-form-item class="formItem" prop="signNo">
+  			  <el-input v-model="searchForm.signNO" placeholder="签约单编号" class="input-with-select"></el-input>
+  		  </el-form-item>
+  		  <el-button type="primary" @click="searchTable()">搜索</el-button>
+	    </el-row>
+  	</el-form>
+    <el-row>
+        <el-table  ref="multipleTable" tooltip-effect="dark" border  @selection-change="handleSelectionChange"
+            style="width: 100%"  :data="dataTable" @sort-change="sort_change">
+           <el-table-column align="center" type="selection" label="全选" width="55"></el-table-column>
+           <el-table-column align="center" type="index" label="序号" width="55"></el-table-column>
+           <el-table-column align="center" prop="signNo" label="签约单编号"  width="170"></el-table-column>
+           <el-table-column align="center" prop="projectName" label="签约项目" width="170"></el-table-column>
+           <el-table-column align="center" prop="signStatus" label="签约单状态"></el-table-column>
+           <el-table-column align="center" prop="signType" label="签约类型"></el-table-column>
+           <el-table-column align="center" prop="signTime" label="签约时间"></el-table-column>
+           <el-table-column align="center" label="付款明细">
+           		 <template slot-scope="scope">
+                        <el-button type="text" size="small">查看明细
+                        <!-- @click="showVisitRecord(scope.row)" -->
+                        </el-button>
+                </template>
+           </el-table-column>
+           <el-table-column align="center" prop="signShopType" label="签约店型"></el-table-column>
+           <el-table-column align="center" prop="amountReceivable" label="应收金额"></el-table-column>
+           <el-table-column align="center" prop="firstToll" label="路费"></el-table-column>
+           <el-table-column align="center" prop="preferentialAmount" label="优惠金额"></el-table-column>
+           <el-table-column align="center" prop="giveAmount" label="赠送金额"></el-table-column>
+           <el-table-column align="center" prop="cusName" label="客户姓名" ></el-table-column>
+           <el-table-column align="center" prop="idCard" label="客户身份证号"></el-table-column>
+           <el-table-column align="center" prop="phone" label="手机号"></el-table-column>
+           <el-table-column align="center" prop="signProvince" label="签约省份" ></el-table-column>
+           <el-table-column align="center" prop="signCity" label="签约城市" ></el-table-column>
+           <el-table-column align="center" prop="signDistrict" label="签约区／县" width="120"></el-table-column>
+           <el-table-column align="center" prop="busAreaName" label="商务大区"></el-table-column>
+           <el-table-column align="center" prop="busGroupName" label="商务小组"></el-table-column>
+           <el-table-column align="center" prop="busSaleName" label="商务经理"></el-table-column>
+           <el-table-column align="center" prop="teleCompanyName" label="电销分公司"></el-table-column>
+           <el-table-column align="center" prop="teleDeptName" label="电销事业部"></el-table-column>
+           <el-table-column align="center" prop="teleGorupName" label="电销组"></el-table-column>
+           <el-table-column align="center" prop="teleSaleName" label="创业顾问"></el-table-column>
+           <el-table-column align="center" prop="isRemoteSign" label="是否远程签约" :formatter="transformSex"></el-table-column>
+        </el-table>
+        <table-pagination :pager="pager" @change="searchTable"></table-pagination>
+    </el-row>
+      <!-- dialog -->
+      <el-dialog  title="分发资源"  :visible.sync="allocationVisible">
+        <template>
+            <el-form :model="allocationForm" ref="allocationForm" :rules="allocationFormRules">
+                <el-form-item style="padding-left: ">{{allocationForm.message}}</el-form-item>
+                <el-form-item label="商务经理"    
+                	:label-width="formLabelWidth"  
+                	prop="saleId"
+                	:rules="[
+                	 { required: true, message: '商务经理不能为空'},
+                	]"
+                	>
+                    <el-select v-model="allocationForm.saleId" placeholder="组内商务经理姓名" style="width: 400px;">
+                        <el-option v-for="item in saleOptions" 
+                        			:key="item.id" 
+                        			:label="item.name" 
+                        			:value="item.id">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="备注"    :label-width="formLabelWidth"  prop="remark">
+                   	<el-input type="textarea" v-model="allocationForm.remark" class="input-with-select" maxlength="200" style="width: 400px;" :rows="4" placeholder="输入分发备注"></el-input>
+                </el-form-item>
+            </el-form>
+            <div slot="footer" class="dialog-footer">
+                <el-button type="primary" @click="allocationClue('allocationForm')">提 交</el-button>
+                <el-button  @click="allocationClueCancel('allocationForm')">取 消</el-button>
+            </div>
+        </template>
+    </el-dialog>
+    <!-- dialog -->
+      <!-- dialog -->
+      <el-dialog  title="外调经理"  :visible.sync="transferVisible">
+        <template>
+            <el-form :model="transferForm" ref="transferForm" :rules="transferFormRules">
+            	  <el-form-item >{{transferForm.message}}</el-form-item>
+                <el-form-item label="商务经理"    
+                	:label-width="formLabelWidth" 
+                	prop="saleId"
+                	:rules="[
+                	 { required: true, message: '商务经理不能为空'},
+                	]"
+                	>
+                    <el-select v-model="transferForm.saleId" placeholder="外调经理姓名（所属大区-所属组）" style="width: 400px;">
+                        <el-option v-for="item in allSaleOptions" 
+                        			:key="item.id" 
+                        			:label="item.name" 
+                        			:value="item.id">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="备注"    :label-width="formLabelWidth"  prop="remark">
+			    	<el-input type="textarea" v-model="transferForm.remark" class="input-with-select" maxlength="200" style="width: 400px;" :rows="4" placeholder="请输入外调备注"></el-input>
+                </el-form-item>
+            </el-form>
+            <div slot="footer" class="dialog-footer">
+                <el-button type="primary" @click="transferClue('transferForm')">提 交</el-button>
+                <el-button  @click="transferClueCancel('transferForm')">取 消</el-button>
+            </div>
+        </template>
+    </el-dialog>
+    <!-- dialog -->
+     
+</div>
+<!-- import common js-->
+<div th:include="_footer_include :: #jsLib"></div>
+</body>
+<script th:inline="javascript">
+var busAreaList=[[${busAreaList}]];//商务大区
+var busGroupList=[[${busGroupList}]];//商务组
+var busSaleList=[[${busSaleList}]];//商务经理
+var teleDeptList=[[${teleDeptList}]];//电销事业部
+var teleGroupList=[[${teleGroupList}]];//电销组
+var teleSaleList=[[${teleSaleList}]];//创业顾问
+var provinceList=[[${provinceList}]];//省份
+var vistitStoreTypeList=[[${vistitStoreTypeList}]];//签约店型
+var clueVM = new Vue({
+        el: '#clueManage',
+        data: {
+      		searchForm: {
+	       		busAreaId: '',
+	       		busGroupId: '',
+	       		busSaleId: '',
+	       		signType: '',
+	       		signShopType: '',
+	       		startTime: '',
+	       		endTime: '',
+	       		cusName: '',
+	       		teleDeptId: '',
+	       		teleGorupId: '',
+	       		teleSaleId: '',
+	       		signProvince: '',
+	       		signStatus: '',
+	       		phone: '',
+	       		signNo: ''
+            },
+            allocationForm: {
+            	saleId:'',
+            	remark:'',
+            	message:''
+              },
+              transferForm: {
+            	saleId:'',
+            	remark:'',
+            	message:''
+              },
+            dataTable:[],
+            busAreaOptions:busAreaList,
+            busGroupOptions:busGroupList,
+            busSaleOptions:busSaleList,
+            teleDeptOptions:teleDeptList,
+            teleGorupOptions:teleGorupList,
+            teleSaleOptions:teleSaleList,
+            provinceOptions:provinceList,
+            signShopTypeOptions:vistitStoreTypeList,
+            signTypeOptions:[{
+            	value:1,
+            	name:"一次性全款"
+            },{
+            	value:2,
+            	name:"先交订金"
+            }],
+            allocationVisible: false,
+            transferVisible: false,
+            pager:{
+                total: 0,
+                currentPage: 1,
+                pageSize: 20,
+            },
+            allocationFormRules: {
+            	saleId: [
+                    { required: true, message: '请选择商务经理', trigger: 'change' }
+                ]
+              },
+            transferFormRules: {
+            	saleId: [
+                    { required: true, message: '请选择商务经理', trigger: 'change' }
+                ]
+              },
+            multipleSelection:[],
+            formLabelWidth: '150px',
+            formLabelWidth1: '120px',
+        },
+        methods: {
+        	searchTable() {
+                var param ={};
+                var startTime = this.searchForm.startTime;
+                var endTime = this.searchForm.endTime;
+                var startReserveTime = this.searchForm.startReserveTime;
+                var endReserveTime = this.searchForm.endReserveTime;
+            	var vilad=false;
+                if(startTime&&endTime&&startTime> endTime){
+                	vilad=true;
+                }
+                if(startReserveTime&&endReserveTime&&startReserveTime> endReserveTime){
+                	vilad=true;
+                }
+                if(vilad){
+                	this.$message({
+                        message: '开始时间不能大于结束时间',
+                        type: 'warning'
+                      });
+                    return;
+                }
+                param.startTime = startTime;
+                param.endTime = endTime;
+                param.startReserveTime = startReserveTime;
+                param.endReserveTime = endReserveTime;
+                param.pageSize = this.pager.pageSize;
+                param.pageNum = this.pager.currentPage;
+                param.teleGorupId = this.searchForm.teleGorupId;
+                param.teleSaleId = this.searchForm.teleSaleId;
+                param.tasteProjectId = this.searchForm.projectId;
+                param.cusName = this.searchForm.cusName;
+                param.province = this.searchForm.province;
+               
+                //列表只查询正常数据，取消删除数据不查询
+                //param.delFalg = this.searchForm.delFalg;
+                param.delFalg =0;
+                param.sortField = this.searchForm.sortField;
+                param.sortType = this.searchForm.sortType;
+                console.info(param);
+                axios.post('/business/busAllocation/list', param)
+                .then(function (response) {
+                      var result =  response.data;
+                      console.info(result);
+                      var table=result.data;
+                      clueVM.dataTable= table.data;
+                      clueVM.pager.total =  table.total;
+                      clueVM.pager.currentPage = table.currentPage;
+                })
+                .catch(function (error) {
+                     console.log(error);
+                });
+                
+              },
+              //选择行
+              handleSelectionChange(val) {
+                  this.multipleSelection = val;
+              },
+              handleSizeChange(val) {
+                  //下拉框  每页 10,20条切换 调用
+                     console.log(`每页 ${val} 条`);
+                  this.pageSize = val;
+                  this.initTableData(1);
+               },
+               handleCurrentChange(val) {
+                   //点击 页码
+                 console.log(`当前页: ${val}`);
+                 this.initTableData(val);
+               },
+               //品尝项目转换方法
+               transformProject(row, column, cellValue, index) {
+            	   var text="";
+              	   if(projectList&&cellValue){
+	            	   var array=cellValue.split(",");
+	                   for(var i=0;i<array.length;i++){
+	                	   for(var j=0;j<projectList.length;j++){
+	 	                		if(array[i]==projectList[j].id){
+	 	                			if(i==0){
+		 	                			text=projectList[j].projectName;
+	 	                			}else{
+		 	                			text=text+","+projectList[j].projectName;
+	 	                			}
+	 	                		}
+	 	                	}
+	                	}
+              	    }
+                    return text;
+               },
+             //意向项目转换方法
+               transformPurProject(row, column, cellValue, index) {
+            	   var text="";
+            	   if(cellValue==1){
+	            	   if(projectList){
+	  	                  for(var i=0;i<projectList.length;i++){
+	  	                		if(row.purInProject==projectList[i].id){
+	  	                			text=projectList[i].projectName;
+	  	                		}
+	  	                	}
+	              	  }
+            	   }else{
+             	    	text=row.purOutProject;
+             	   }
+                   return text;
+               },
+               //性别转换方法
+               transformSex(row, column, cellValue, index) {
+                 var text="";
+                 if(cellValue=="1"){
+                   text="男"
+                 }else if(cellValue=="2"){
+                   text="女"
+                 }
+                 return text;
+               },
+               //邀约状态转换方法
+               transformDelFalg(row, column, cellValue, index) {
+                 var text="";
+                 if(cellValue=="0"){
+                   text="正常"
+                 }else if(cellValue=="1"){
+                   text="已删除"
+                 }else if(cellValue=="2"){
+                   text="已取消"
+                 }
+                 return text;
+               },
+               //合伙人转换方法
+               transformPartner(row, column, cellValue, index) {
+             	  var text="";
+             	  if(partnerList){
+ 	                  for(var i=0;i<partnerList.length;i++){
+ 	                		if(cellValue==partnerList[i].value){
+ 	                			text=partnerList[i].name;
+ 	                		}
+ 	                	}
+             	  }
+                   return text;
+               },
+               //选址情况转换方法
+               transformAddress(row, column, cellValue, index) {
+             	  var text="";
+             	  if(optionAddressList){
+ 	                  for(var i=0;i<optionAddressList.length;i++){
+ 	                		if(cellValue==optionAddressList[i].value){
+ 	                			text=optionAddressList[i].name;
+ 	                		}
+ 	                	}
+             	  }
+                   return text;
+               },
+               //餐饮经验转换方法
+               transformExperience(row, column, cellValue, index) {
+             	  var text="";
+             	  if(cateringExperienceList){
+ 	                  for(var i=0;i<cateringExperienceList.length;i++){
+ 	                		if(cellValue==cateringExperienceList[i].value){
+ 	                			text=cateringExperienceList[i].name;
+ 	                		}
+ 	                	}
+             	  }
+                   return text;
+               },
+               //店铺面积转换方法
+               transformArea(row, column, cellValue, index) {
+             	  var text="";
+             	  if(storefrontAreaList){
+ 	                  for(var i=0;i<storefrontAreaList.length;i++){
+ 	                		if(cellValue==storefrontAreaList[i].value){
+ 	                			text=storefrontAreaList[i].name;
+ 	                		}
+ 	                	}
+             	  }
+                   return text;
+               },
+               //投资金额转换方法
+               transformUssm(row, column, cellValue, index) {
+             	  var text="";
+             	  if(ussmList){
+ 	                  for(var i=0;i<ussmList.length;i++){
+ 	                		if(cellValue==ussmList[i].value){
+ 	                			text=ussmList[i].name;
+ 	                		}
+ 	                	}
+             	  }
+                   return text;
+               },
+               //日期数据格式化方法
+               dateFormat( row, column, cellValue, index) {
+                 if (cellValue == undefined) {
+                    return "";
+                 }
+                 return moment(cellValue).format("YYYY-MM-DD HH:mm:ss");
+               },
+               //打开分发资源
+               toAllocationClue() {
+            	   this.allocationForm.message="";
+            	   this.allocationForm.saleId = '';
+            	   this.allocationForm.remark = '';
+           	       var rows = this.multipleSelection;
+            	   if(rows.length==0){
+                       this.$message({
+                          message: '请选择一条数据进行分发',
+                          type: 'warning'
+                        });
+                       return;
+                   }
+            	   var text="";
+            	   for(var i=0;i<rows.length;i++){
+                   	   var curRow = rows[i];
+                       if(curRow.busSaleId){
+                    	   text+="当前选择“"+curRow.cusName+"”已有之前服务商务经理"+curRow.busSaleName+",";
+                       }
+                   }
+            	   if(text!=""){
+	                   text+="请确认后分发客户。";
+	                   this.allocationForm.message=text;
+                   }
+            	   
+                   this.allocationVisible = true;
+               },
+               allocationClueCancel(formName){//分发资源取消
+            	   this.$refs[formName].resetFields();
+            	   this.allocationVisible = false;
+               },
+               allocationClue(formName){//分发资源
+            	   
+            	   this.$refs[formName].validate((valid) => {
+            	          if (valid) {
+            	        	  var rows = this.multipleSelection;
+	           	           	   var idList = [];
+	           	               var clueIdList = [];
+	           	               for(var i=0;i<rows.length;i++){
+	           	            	   var curRow = rows[i];
+	           	            			idList.push(curRow.id);
+	           	            			clueIdList.push(curRow.clueId);
+	           	               }
+           	            	  //分发
+           	            	  var param  = {};
+           	            	  param.type=1;
+	           	           	  param.idList=idList;
+	           	           	  param.clueIdList=clueIdList;
+	                          	  param.busSaleId=this.allocationForm.saleId;
+	                          	  param.remark=this.allocationForm.remark;
+	                             axios.post('/business/busAllocation/busAllocationClue',param)
+	                              .then(function (response) {
+	                                  var data =  response.data;
+	                                  if(data.code=='0'){
+	                                  	clueVM.$message({message:'分发成功',type:'success',duration:1000,onClose:function(){
+	                                  		clueVM.allocationVisible = false;
+	                                  		clueVM.searchTable();
+	                              	    }});
+	                                  }else{
+	                                  	clueVM.$message({
+	                                          message: "接口调用失败",
+	                                          type: 'error'
+	                                        }); 
+	                                  }
+	                              })
+	                              .catch(function (error) {
+	                                console.log(error);
+	                              })
+	                              .then(function () {
+	                              	
+	                              });
+            	            //end
+            	          } else {
+            	            console.log('error submit!!');
+            	            return false;
+            	          }
+            	    });
+                 },// method end
+               //打开外调经理
+               toTransferClue() {
+                	 this.transferForm.message = '';
+                	 this.transferForm.saleId = '';
+                	 this.transferForm.remark = '';
+                	 
+           	       var rows = this.multipleSelection;
+            	   if(rows.length==0){
+                       this.$message({
+                          message: '请选择一条数据进行外调',
+                          type: 'warning'
+                        });
+                       return;
+                   }
+            	   var text="";
+            	   for(var i=0;i<rows.length;i++){
+                   	   var curRow = rows[i];
+                       if(curRow.busSaleId){
+                    	   text+="当前选择“"+curRow.cusName+"”已有之前服务商务经理"+curRow.busSaleName+",";
+                       }
+                   }
+            	   if(text!=""){
+	                   text+="请确认后分发客户。";
+	                   this.allocationForm.message=text;
+                   }
+                   this.transferVisible = true;
+               },
+               transferClueCancel(formName){//外调经理取消
+            	   this.$refs[formName].resetFields();
+            	   this.transferVisible = false;
+               },
+               transferClue(formName){//外调经理
+            	   this.$refs[formName].validate((valid) => {
+            	          if (valid) {
+            	        	  var rows = this.multipleSelection;
+                              var idList = [];
+                              var clueIdList = [];
+                              for(var i=0;i<rows.length;i++){
+                           	   var curRow = rows[i];
+                           			idList.push(curRow.id);
+                           			clueIdList.push(curRow.clueId);
+                              }
+                           	  //外调
+                           	  var param  = {};
+                           	  param.type=2;
+                          	  param.idList=idList;
+                          	  param.clueIdList=clueIdList;
+                          	  param.busSaleId=this.transferForm.saleId;
+                          	  param.remark=this.transferForm.remark;
+                              axios.post('/business/busAllocation/busAllocationClue',param)
+                               .then(function (response) {
+                                   var data =  response.data;
+                                   if(data.code=='0'){
+                                   	clueVM.$message({message:'外调成功',type:'success',duration:1000,onClose:function(){
+                                   		clueVM.transferVisible = false;
+                                   		clueVM.searchTable();
+                               	    }});
+                                   }else{
+                                   	clueVM.$message({
+                                           message: "接口调用失败",
+                                           type: 'error'
+                                         }); 
+                                   }
+                               })
+                               .catch(function (error) {
+                                 console.log(error);
+                               })
+                               .then(function () {
+                               	
+                               });
+            	            //end
+            	          } else {
+            	            console.log('error submit!!');
+            	            return false;
+            	          }
+            	  });
+            	   
+                 },// method end
+                 showCustomerDetail(row, column){ // 客户详情
+                	 window.location.href='/bus/BusinessCustomer/viewCustomerInfo?clueId='+row.clueId;
+                 },
+              //根据电销组查询电销总监
+              getSaleList() {
+            	  var param ={};
+            	  param.orgId = this.searchForm.teleGorupId;
+                  console.info(param);
+                  axios.post('/business/busAllocation/getSaleList', param)
+                  .then(function (response) {
+                        var result =  response.data;
+                        console.info(result);
+                        var table=result.data;
+                        clueVM.teleSaleOptions= table;
+                  })
+                  .catch(function (error) {
+                       console.log(error);
+                  });
+              },
+              //排序
+              sort_change(column) {
+            	  var sortField="";
+            	  var sortType="";
+                  if (column.prop === 'createTime') {
+                	  sortField="a.create_Time";
+                  } else if (column.prop === 'reserveTime') {
+                	  sortField="a.reserve_Time";
+                  }
+                  if (column.order === 'descending') {
+                  	sortType="desc";
+                  } else if (column.order === 'ascending') {
+                  	sortType="asc";
+                  }
+                  this.searchForm.sortField=sortField;
+                  this.searchForm.sortType=sortType;
+                  this.searchTable();
+                }
+        },
+        created(){
+            console.info("create method");
+            this.searchTable();
+           
+        },
+        mounted(){
+           console.info("mounted method");
+           document.getElementById('clueManage').style.display = 'block';
+        }
+    })
+    
+</script>
+</html>
