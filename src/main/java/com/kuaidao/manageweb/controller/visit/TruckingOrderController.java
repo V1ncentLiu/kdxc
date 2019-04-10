@@ -67,11 +67,11 @@ public class TruckingOrderController {
     @RequestMapping("/truckingOrderPage")
     public String visitRecordPage(HttpServletRequest request) {
         // 电销人员
-        List<UserInfoDTO> teleSaleList = getUserInfo(null, RoleCodeEnum.DXCYGW.name());
-        request.setAttribute("teleSaleList", teleSaleList);
+        /*List<UserInfoDTO> teleSaleList = getUserInfo(null, RoleCodeEnum.DXCYGW.name());
+        request.setAttribute("teleSaleList", teleSaleList);*/
         // 查询所有项目
-        JSONResult<List<ProjectInfoDTO>> allProject = projectInfoFeignClient.allProject();
-        request.setAttribute("projectList", allProject.getData());
+       /* JSONResult<List<ProjectInfoDTO>> allProject = projectInfoFeignClient.allProject();
+        request.setAttribute("projectList", allProject.getData());*/
         return "visit/truckingOrder";
     }
 
@@ -146,10 +146,10 @@ public class TruckingOrderController {
                         "角色没有权限");
             }
         }
-        /*
-         * List<Long> busList = new ArrayList<>(); busList.add(1098210933718835200L);
-         * reqDTO.setBusDirectorIdList(busList);
-         */
+        
+         /* List<Long> busList = new ArrayList<>(); busList.add(1098210933718835200L);
+          reqDTO.setBusDirectorIdList(busList);*/
+         
         return trackingOrderFeignClient.listTrackingOrder(reqDTO);
     }
 
@@ -339,6 +339,20 @@ public class TruckingOrderController {
         headTitleList.add("航站楼");
         headTitleList.add("接到地（酒店／公司）");
         return headTitleList;
+    }
+    
+    /**
+     * 查询所有的电销人员
+     * @param result
+     * @return
+     */
+    @PostMapping("/queryAllTeleSales")
+    @ResponseBody
+    public JSONResult<List<UserInfoDTO>> queryAllTeleSales() {
+     // 电销人员
+        UserOrgRoleReq req = new UserOrgRoleReq();
+        req.setRoleCode(RoleCodeEnum.DXCYGW.name());
+        return userInfoFeignClient.listByOrgAndRole(req);
     }
 
 
