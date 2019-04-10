@@ -280,9 +280,9 @@ var homePageVM=new Vue({
         },
         cancelLoginClientForm(){
         	this.dialogLoginClientVisible = false;
-        /*	if (this.$refs.loginClientForm !==undefined) {
-				  this.$refs.loginClientForm.resetFields();
-			 }*/
+        	if (this.$refs.loginClientForm !==undefined) {
+				  this.$refs.loginClientForm.clearValidate();
+			 }
         	
         	this.loginClientForm.clientType=1;//设置默认选中天润坐席
     		this.loginClientForm.bindPhoneType=1;
