@@ -35,8 +35,11 @@ public enum MenuEnum {
     /**
      * 话务
      */
-    PHONETRAFFIC_MANAGER("话务管理")
-    ;
+    PHONETRAFFIC_MANAGER("话务管理"),
+    /**
+     * 财务
+     */
+    REFUNDREBATE_MANAGER("餐饮公司退返款");
 
 
 
