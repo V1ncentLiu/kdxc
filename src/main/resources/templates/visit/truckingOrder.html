@@ -132,7 +132,7 @@
 <!-- import Vue before Element -->
 <div th:include="_footer_include :: #jsLib"></div>
 <script th:inline="javascript">
-    var accountIdList = [[${teleSaleList}]];
+   /*  var accountIdList = [[${teleSaleList}]]; */
     var projectList=[[${projectList}]];//品尝项目
 </script>
 
@@ -157,7 +157,7 @@
                 },
                 formLabelWidth: '150px',
                 dataTable:[],
-                accountIdList:accountIdList,
+                accountIdList:[],
                 pager:{//
                     total: 0,
                     currentPage: 1,
@@ -215,11 +215,11 @@
                      if(data.code=='0'){
                         var resData = data.data;
                         var curData = resData.data;
-                        for(var i=0;i<curData.length;i++){
+                 /*        for(var i=0;i<curData.length;i++){
                         	var ss = signRecordVM.transformProject(curData[i].tasteProjectId);
                         	console.info(ss);
                         	curData[i].tasteProject=ss;
-                        }
+                        } */
                         
                         
                         signRecordVM.dataTable= curData;
@@ -284,6 +284,22 @@
                  }
                  return text;
             },
+            getAllTeleSales(){//电销顾问下拉框
+            	axios.post('/truckingOrder/queryAllTeleSales', {})
+                .then(function (response) {
+                      var result =  response.data;
+                      if(result.code=='0'){
+                          var table=result.data;
+                          signRecordVM.accountIdList= table;
+                      }else{
+                          console.error(response);
+                      }
+                      
+                })
+                .catch(function (error) {
+                     console.log(error);
+                });  
+            }
 
         },
         mounted(){
@@ -291,6 +307,7 @@
         },
         created(){
         	this.initSignRecordData();
+        	this.getAllTeleSales();
         }
     })
 </script>

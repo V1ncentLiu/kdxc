@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import com.kuaidao.common.constant.DicCodeEnum;
+import com.kuaidao.common.constant.OrgTypeConstant;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.constant.SystemCodeConstant;
 import com.kuaidao.common.entity.IdEntity;
@@ -29,6 +30,7 @@ import com.kuaidao.manageweb.config.LogRecord.OperationType;
 import com.kuaidao.manageweb.constant.MenuEnum;
 import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
 import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
+import com.kuaidao.manageweb.util.CommUtil;
 import com.kuaidao.sys.dto.dictionary.DictionaryItemRespDTO;
 import com.kuaidao.sys.dto.organization.OrganizationAddAndUpdateDTO;
 import com.kuaidao.sys.dto.organization.OrganizationDTO;
@@ -296,5 +298,53 @@ public class OrganizationController {
         return dictionaryItemFeignClient
                 .queryDicItemsByGroupCode(DicCodeEnum.ORGANIZATIONTYPE.getCode());
     }
+    
+    /**
+     * 查询所有的商务小组
+     * @param request
+     * @return
+     */
+    @RequestMapping("/queryBusGroupList")
+    @ResponseBody
+    public JSONResult<List<OrganizationDTO>> queryBusGroupList(){
+        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+     // 商务小组
+        OrganizationQueryDTO busGroupReqDTO = new OrganizationQueryDTO();
+        busGroupReqDTO.setSystemCode(SystemCodeConstant.HUI_JU);
+        busGroupReqDTO.setParentId(curLoginUser.getOrgId());
+        busGroupReqDTO.setOrgType(OrgTypeConstant.SWZ);
+        return organizationFeignClient.listDescenDantByParentId(busGroupReqDTO);
+    }
+    
+    /**
+     * 查询所有的电销组
+     * @param result
+     * @return
+     */
+    @PostMapping("/queryTeleGroupList")
+    @ResponseBody
+    public JSONResult<List<OrganizationRespDTO>> queryTeleGroupList() {
+        // 电销组
+        OrganizationQueryDTO busGroupReqDTO = new OrganizationQueryDTO();
+        busGroupReqDTO.setSystemCode(SystemCodeConstant.HUI_JU);
+        busGroupReqDTO.setOrgType(OrgTypeConstant.DXZ);
+        return organizationFeignClient.queryOrgByParam(busGroupReqDTO);
+    }
+    
+    
+    /**
+     * 查询所有的商务组
+     * @return
+     */
+    @PostMapping("/queryAllBusGroup")
+    @ResponseBody
+    public JSONResult<List<OrganizationRespDTO>> queryAllBusGroup(){
+        OrganizationQueryDTO companyDto = new OrganizationQueryDTO();
+        companyDto.setSystemCode(SystemCodeConstant.HUI_JU);
+        companyDto.setOrgType(OrgTypeConstant.SWZ);
+        return    organizationFeignClient.queryOrgByParam(companyDto);
+    }
+    
+    
 
 }

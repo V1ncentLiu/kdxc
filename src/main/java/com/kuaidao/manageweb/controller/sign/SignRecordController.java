@@ -85,7 +85,7 @@ public class SignRecordController {
     @RequestMapping("/signRecordPage")
     public String signRecordPage(HttpServletRequest request) {
 
-        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+     /*   UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
         Long orgId = curLoginUser.getOrgId();
         // 签约项目
         List<ProjectInfoDTO> projectList = getProjectList();
@@ -101,7 +101,7 @@ public class SignRecordController {
         request.setAttribute("projectList", projectList);
         request.setAttribute("busManagerList", busManagerList);
         request.setAttribute("businessGroupList", businessGroupList);
-        request.setAttribute("teleGroupList", teleGroupList);
+        request.setAttribute("teleGroupList", teleGroupList);*/
         // request.setAttribute("teleSaleList",teleSaleList);
 
         return "signrecord/signRecord";
@@ -361,4 +361,33 @@ public class SignRecordController {
         }
         return new JSONResult().success(payDetailMap);
     }
+    
+    
+    /**
+     *   查询所有的签约项目
+     */
+    @RequestMapping("/queryProjectList")
+    @ResponseBody
+    public JSONResult<List<ProjectInfoDTO>> queryProjectList() {
+        // 签约项目
+        return projectInfoFeignClient.allProject();
+    }
+    
+    
+    /**
+     * 根据组织机构Id查询所有商务经理 
+     * @return
+     */
+    @PostMapping("/queryBusManagerByOrgId")
+    @ResponseBody
+    public JSONResult<List<UserInfoDTO>> queryBusManagerByOrgId() {
+        // 商务经理
+        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+        UserOrgRoleReq req = new UserOrgRoleReq();
+        req.setOrgId(curLoginUser.getOrgId());
+        req.setRoleCode(RoleCodeEnum.SWJL.name());
+        return userInfoFeignClient.listByOrgAndRole(req);
+    }
+    
+    
 }

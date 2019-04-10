@@ -82,7 +82,7 @@ public class VisitRecordController {
     @RequiresPermissions("aggregation:visitRecord:view")
     @RequestMapping("/visitRecordPage")
     public String visitRecordPage(HttpServletRequest request) {
-        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+/*        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
         Long orgId = curLoginUser.getOrgId();
         // 签约项目
         List<ProjectInfoDTO> projectList = getProjectList();
@@ -107,7 +107,7 @@ public class VisitRecordController {
         request.setAttribute("busManagerList", busManagerList);
         request.setAttribute("businessGroupList", businessGroupList);
         request.setAttribute("proviceList", proviceJr.getData());
-        request.setAttribute("companyList", companyJr.getData());
+        request.setAttribute("companyList", companyJr.getData());*/
 
         return "visit/customerVisitRecord";
     }
@@ -409,6 +409,20 @@ public class VisitRecordController {
         reqDTO.setStatus(AggregationConstant.VISIT_RECORD_STATUS.PASS);
 
         return visitRecordFeignClient.rejectVisitRecord(reqDTO);
+    }
+    
+    
+    /***
+     * 签约省份
+     * @param result
+     * @return
+     */
+    @ResponseBody
+    @PostMapping("/getSignProvince")
+    public JSONResult<List<SysRegionDTO>> getSignProvince() {
+        SysRegionDTO sysRegionDTO = new SysRegionDTO();
+        sysRegionDTO.setType(0);
+        return  sysRegionFeignClient.querySysRegionByParam(sysRegionDTO);
     }
 
 }
