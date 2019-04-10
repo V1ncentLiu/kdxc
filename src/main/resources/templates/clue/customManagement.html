@@ -18,19 +18,19 @@
         <el-breadcrumb-item>电销管理</el-breadcrumb-item>
         <el-breadcrumb-item>客户管理</el-breadcrumb-item>
     </el-breadcrumb>
-    <el-row class="marginB10">
-        <el-button type="text" @click="dialogChooseList = true"><i class="el-icon-menu"></i>选择列</el-button>
+    <el-row class="marginB20">
+        <el-button type="primary" @click="dialogChooseList = true"><i class="el-icon-menu"></i>选择列</el-button>
         <shiro:hasPermission name="customerManager:allocation">
             <el-button type="success" @click="openassignrDig">分配资源</el-button>
         </shiro:hasPermission>
         <shiro:hasPermission name="customerManager:transferclue">
-          <el-button type="success" @click="opentransferForm">转移资源</el-button>
+          <el-button type="warning" @click="opentransferForm">转移资源</el-button>
         </shiro:hasPermission>
         <shiro:hasPermission name="customerManager:distribute">
-          <el-button type="success" @click="openvicemanagerForm">副总分发</el-button>
+          <el-button type="danger" @click="openvicemanagerForm">副总分发</el-button>
          </shiro:hasPermission>
     </el-row>
-    <el-row class="marginB10 greybg padding20" style="padding-bottom: 0">        
+    <el-row class="marginB20 greybg padding20" style="padding-bottom: 0">        
         <el-form :inline="true" :model="form" ref="form">
             <el-form-item label="">
                 <el-select v-model="form.isTransfer" placeholder="全部资源" style="width: 100%;" clearable >
@@ -96,7 +96,7 @@
                     placeholder="选择日期时间">
                 </el-date-picker>
             </el-form-item>
-            <el-form-item label="——">
+            <el-form-item label="—">
                 <el-date-picker
                     style="width: 100%;"
                     v-model="form.updateTimeEnd"
@@ -112,7 +112,7 @@
                     placeholder="选择日期时间">
                 </el-date-picker>
             </el-form-item>
-            <el-form-item label="——">
+            <el-form-item label="—">
                 <el-date-picker
                     style="width: 100%;"
                     v-model="form.createTimeEnd"
@@ -120,7 +120,7 @@
                     placeholder="选择日期时间">
                 </el-date-picker>
             </el-form-item>
-            <br>
+            <!-- <br> -->
             <el-form-item label="分配时间:">
                 <el-date-picker
                     style="width: 100%;"
@@ -129,16 +129,19 @@
                     placeholder="选择日期时间">
                 </el-date-picker>
             </el-form-item>
-            <el-form-item label="——">
+            <el-form-item label="—">
                 <el-date-picker
                     style="width: 100%;"
                     v-model="form.assignTimeEnd"
                     type="datetime"
                     placeholder="选择日期时间">
                 </el-date-picker>
+            </el-form-item>            
+            <el-form-item label="">
+                <el-input v-model="form.searchWord" placeholder="搜索词"></el-input>
             </el-form-item>
-            <el-button type="primary"  @click="initTableData" >搜索</el-button>
-            <span style="color: rgb(0, 114, 255);text-decoration: underline;cursor: pointer;" @click="toogleClick">更多搜索</span>
+            <el-button type="primary" icon="el-icon-search" @click="initTableData" >搜索</el-button>
+            <span style="color: rgb(0, 114, 255);text-decoration: underline;cursor: pointer;margin:0 10px;" @click="toogleClick">更多搜索</span>
             <el-row v-show="isShow">
                 <el-form-item label="">
                     <el-select v-model="form.dayTel" placeholder="今日是否拨打" style="width: 100%;" clearable>
@@ -219,9 +222,6 @@
                         </el-option>
                     </el-select>
                 </el-form-item>
-                <el-form-item label="">
-                    <el-input v-model="form.searchWord" placeholder="搜索词"></el-input>
-                </el-form-item>
              <!--    <el-form-item label="">
                     <el-input v-model="form.address" placeholder="地址"></el-input>
                 </el-form-item> -->
@@ -240,8 +240,7 @@
                     <el-tag v-if="scope.row.tag">{{scope.row.tag}}</el-tag>
                 </template>
             </el-table-column>
-            <el-table-column :prop="item.fieldCode" :key="item.fieldCode" :label="item.displayName" :width="item.width"
-	          v-else-if="item.fieldCode == 'record'">
+            <el-table-column :prop="item.fieldCode" :key="item.fieldCode" :label="item.displayName" :width="item.width" align="center" v-else-if="item.fieldCode == 'record'">
                 <template slot-scope="scope">
                    <div v-if="scope.row.isTrack === 1">
                     <el-button @click="openTrackingDialog(scope.row.clueId)" type="text" size="small">
@@ -250,8 +249,7 @@
                     </div>
                 </template>
             </el-table-column>
-            <el-table-column :prop="item.fieldCode" :key="item.fieldCode" :label="item.displayName" :width="item.width"
-	          v-else-if="item.fieldCode == 'repeatPhones'">
+            <el-table-column :prop="item.fieldCode" :key="item.fieldCode" :label="item.displayName" :width="item.width" align="center" v-else-if="item.fieldCode == 'repeatPhones'">
                <template slot-scope="scope">
                   <div v-if="scope.row.isRepeatPhone===1">
                       <el-button @click="repeatPhonesClick(scope.row)" type="text" size="small">点击查看</el-button>
@@ -894,7 +892,7 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
             },  
             //处理用户选择的列
             confirmColumn(){
-            	debugger;
+            	// debugger;
                 //处理用户选择的列
                 var customerShowColun = [];
                 var customerColumn = this.form1.type;
