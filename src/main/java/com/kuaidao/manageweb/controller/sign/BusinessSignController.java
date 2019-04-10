@@ -215,6 +215,7 @@ public class BusinessSignController {
             String linkPhone = linkPhone(idLong);
             data.setPhone(linkPhone);
             res.setData(data);
+            data.setPerformanceAmount(data.getAmountPerformance());
         }
         return res;
     }
