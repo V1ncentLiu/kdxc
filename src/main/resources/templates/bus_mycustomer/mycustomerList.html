@@ -123,6 +123,7 @@
                     </div>
                     <div  v-else-if="scope.row.visitList.length>1"   v-for="item in scope.row.visitList ">
                         <el-button size="mini"  v-if="item.isVisit==0&&item.status==1" type="text" @click="showNotVisitReason(item)">未到访(审核中)</el-button>
+                        <!--<el-button size="mini"  v-else-if="item.isVisit==0&&item.status==0" type="text" @click="openEditVisitRecord(item)">添加到访记录</el-button>-->
                         <el-button size="mini"  v-else-if="item.isVisit==0&&item.status==2" type="text" style="color: red" @click="showNotVisitReason(item)">未到访</el-button>
                         <el-button size="mini"  v-else-if="item.isVisit==1&&item.status==1" type="text" @click="showVisitRecord(item)">审核中</el-button>
                         <el-button size="mini"  v-else-if="item.isVisit==1&&item.status==0" type="text" style="color: red" @click="editRebutVisitRecord(item)">到访被驳回</el-button>
@@ -741,7 +742,7 @@
                 <el-row>
                     <el-col :span="10">
                         <el-form-item label="路费（报首次）：" :label-width="formLabelWidth" prop="firstToll">
-                            <el-input v-model="formSigning.firstToll"  type="number"  min="0" oninput="if(value.length>10)value=value.slice(0,10)"  onkeypress="return(/[\d]/.test(String.fromCharCode(event.keyCode)))" autocomplete="off" maxLength="10" style="width: 80%;"></el-input><span style="padding-left: 10px;">元</span>
+                            <el-input @input="formSigningAmountPerformance" v-model="formSigning.firstToll"  type="number"  min="0" oninput="if(value.length>10)value=value.slice(0,10)"  onkeypress="return(/[\d]/.test(String.fromCharCode(event.keyCode)))" autocomplete="off" maxLength="10" style="width: 80%;"></el-input><span style="padding-left: 10px;">元</span>
                         </el-form-item>
                     </el-col>
                     <el-col :span="10">
@@ -878,7 +879,8 @@
                     </el-col>
                     <el-col :span="10">
                         <el-form-item label="实收金额：" :label-width="formLabelWidth" prop="amountReceived">
-                            <el-input maxLength="10" v-model="formSigning.amountReceived"  type="number"  min="0" oninput="if(value.length>10)value=value.slice(0,10)"  onkeypress="return(/[\d]/.test(String.fromCharCode(event.keyCode)))"  style="width: 80%;" @change="setAddPerformanceAmount"></el-input>
+                            <!-- <el-input maxLength="10" v-model="formSigning.amountReceived"  type="number"  min="0" oninput="if(value.length>10)value=value.slice(0,10)"  onkeypress="return(/[\d]/.test(String.fromCharCode(event.keyCode)))"  style="width: 80%;" @change="setAddPerformanceAmount"></el-input> -->
+                            <el-input maxLength="10" v-model="formSigning.amountReceived"  type="number"  min="0" oninput="if(value.length>10)value=value.slice(0,10)"  onkeypress="return(/[\d]/.test(String.fromCharCode(event.keyCode)))"  style="width: 80%;" @input="formSigningAmountPerformance"></el-input>
                             <span style="padding-left: 10px;">元</span>
                         </el-form-item>
                     </el-col>
@@ -905,7 +907,8 @@
                 <el-row>
                     <el-col :span="10">
                         <el-form-item label="业绩金额：" :label-width="formLabelWidth" prop="performanceAmount">
-                            <el-input maxLength="10" v-model="formSigningAmountPerformance"  type="number"  min="0" oninput="if(value.length>10)value=value.slice(0,10)"  onkeypress="return(/[\d]/.test(String.fromCharCode(event.keyCode)))"  style="width: 80%;"></el-input>
+                            <!-- <el-input maxLength="10" v-model="formSigningAmountPerformance"  type="number"  min="0" oninput="if(value.length>10)value=value.slice(0,10)"  onkeypress="return(/[\d]/.test(String.fromCharCode(event.keyCode)))"  style="width: 80%;"></el-input> -->
+                            <el-input maxLength="10" v-model="formSigning.performanceAmount"  @keyup.native="number3" min="0" style="width: 80%;"></el-input>
                             <span style="padding-left: 10px;">元</span>
                         </el-form-item>
                     </el-col>
@@ -1023,7 +1026,7 @@
                     </el-col>
                     <el-col :span="10">
                         <el-form-item label="路费（报首次）：" :label-width="formLabelWidth" prop="firstToll">
-                            <el-input :disabled="notEditRebutSign"   v-model="updateFormSigning.firstToll"  type="number"  min="0" oninput="if(value.length>10)value=value.slice(0,10)"  onkeypress="return(/[\d]/.test(String.fromCharCode(event.keyCode)))" autocomplete="off" maxLength="10" style="width: 80%;"></el-input><span style="padding-left: 10px;">元</span>
+                            <el-input :disabled="notEditRebutSign"  @input="updateFormSigningAmountPerformance"  v-model="updateFormSigning.firstToll"  type="number"  min="0" oninput="if(value.length>10)value=value.slice(0,10)"  onkeypress="return(/[\d]/.test(String.fromCharCode(event.keyCode)))" autocomplete="off" maxLength="10" style="width: 80%;"></el-input><span style="padding-left: 10px;">元</span>
                         </el-form-item>
                     </el-col>
                 </el-row>
@@ -1106,7 +1109,7 @@
                     </el-col>
                     <el-col :span="10">
                         <el-form-item label="实收金额：" :label-width="formLabelWidth" prop="amountReceived">
-                            <el-input maxLength="10" v-model="updateFormSigning.amountReceived" style="width: 80%;"  type="number"  min="0" oninput="if(value.length>10)value=value.slice(0,10)"  onkeypress="return(/[\d]/.test(String.fromCharCode(event.keyCode)))"></el-input>
+                            <el-input maxLength="10" @input="updateFormSigningAmountPerformance" v-model="updateFormSigning.amountReceived" style="width: 80%;"  type="number"  min="0" oninput="if(value.length>10)value=value.slice(0,10)"  onkeypress="return(/[\d]/.test(String.fromCharCode(event.keyCode)))"></el-input>
                             <span style="padding-left: 10px;">元</span>
                         </el-form-item>
                     </el-col>
@@ -1133,7 +1136,7 @@
                 <el-row>
                     <el-col :span="10">
                         <el-form-item label="业绩金额：" :label-width="formLabelWidth" prop="performanceAmount">
-                            <el-input maxLength="10" v-model="updateFormSigningAmountPerformance" style="width: 80%;"  type="number"  min="0" oninput="if(value.length>10)value=value.slice(0,10)"  onkeypress="return(/[\d]/.test(String.fromCharCode(event.keyCode)))"></el-input>
+                            <el-input maxLength="10" v-model="updateFormSigning.performanceAmount"  @keyup.native="number4" min="0" style="width: 80%;"></el-input>
                             <span style="padding-left: 10px;">元</span>
                         </el-form-item>
                     </el-col>
@@ -1321,7 +1324,8 @@
                 amountBalance: '',
                 makeUpTime:'',
                 payTime: new Date(),
-                amountPerformance:''
+                amountPerformance:'',
+                performanceAmount:''
             },
             updateFormSigning: {
                 signId:"",
@@ -1353,6 +1357,7 @@
                 makeUpTime:'',
                 payTime: '',
                 amountPerformance:'',
+                performanceAmount:'',
                 remarks: '' //备注
             },
             pager:{
@@ -1539,11 +1544,13 @@
                             var reg =  /^[0-9]+[0-9]*]*$/ ;
                             if(value ==null || value =="null" || value ==""  ){
                                 callback(new Error("请输入实收金额"));
-                                mainDivVM.formSigning.amountReceived =null;
+                                // mainDivVM.formSigning.amountReceived =null;
+                                return;
 
                             }else  if(value !=null && value !="null" && value !="" && !reg.test(value) ){
                                 callback(new Error("请输入正整数"));
-                                mainDivVM.formSigning.amountReceived =null;
+                                // mainDivVM.formSigning.amountReceived =null;
+                                return;
                             }else{
                                 callback();
                             }
@@ -1551,30 +1558,44 @@
 				],
 				amountBalance: [
                     {required: true, validator:function(rule,value,callback){
-                            if(value===0){
-                                callback();
-                            }
-                            var reg =  /^[0-9]+[0-9]*]*$/ ;
-                            if(value ==null || value =="null" || value ==""  ){
-                                callback(new Error("请输入余款金额"));
-                                // mainDivVM.formSigning.amountBalance =null;
-                                return;
+                        if(value===0){
+                            callback();
+                        }
+                        var reg =  /^[0-9]+[0-9]*]*$/ ;
+                        if(value ==null || value =="null" || value ==""  ){
+                            callback(new Error("请输入余款金额"));
+                            // mainDivVM.formSigning.amountBalance =null;
+                            return;
 
-                            }else  if(value !=null && value !="null" && value !="" && !reg.test(value) ){
-                                callback(new Error("请输入正整数"));
-                                // mainDivVM.formSigning.amountBalance =null;
-                                return;
-                            }else{
-                                callback();
-                            }
-                        }, trigger: 'change'}
+                        }else  if(value !=null && value !="null" && value !="" && !reg.test(value) ){
+                            callback(new Error("请输入正整数"));
+                            // mainDivVM.formSigning.amountBalance =null;
+                            return;
+                        }else{
+                            callback();
+                        }
+                    }, trigger: 'change'}
 				],
 				makeUpTime: [
 					{required: true, message: '请选择预计余款补齐时间', trigger: 'change' }
 				],
-				// performanceAmount: [
-				// 	{ required: true, message: '请输入业绩金额', trigger: 'blur' }
-				// ],
+				performanceAmount: [
+					{ required: true, validator:function(rule,value,callback){
+                        if(value=="0"){
+                            callback();
+                        }
+                        var reg =  /^\+?[1-9][0-9]*$/ ;
+                        if(value ==null || value =="null" || value ==""  ){
+                            callback(new Error("请输入业绩金额"));
+                            return;
+                        }else if(value !=null && value !="null" && value !="" && !reg.test(value) ){
+                            callback(new Error("请输入整数"));
+                            return;
+                        }else{
+                            callback();
+                        }
+                    }, trigger: 'blur'}
+				],
                 isRemoteSign: [ //是否远程签约
                     { required: true, message: '请选择是否远程签约', trigger: 'change' }
                 ],
@@ -1625,25 +1646,21 @@
                   ]
 			},
         },
-        computed: {
-            updateFormSigningAmountPerformance(){
-                var aone = parseFloat(this.updateFormSigning.amountReceived);
-                var atwo = parseFloat(this.updateFormSigning.firstToll);
-                if(isNaN(aone)) aone = 0
-                if(isNaN(atwo)) atwo = 0
-                return aone + atwo
-            },
+        methods: {
             formSigningAmountPerformance(){
                 var aone = parseFloat(this.formSigning.amountReceived);
                 var atwo = parseFloat(this.formSigning.firstToll);
                 if(isNaN(aone)) aone = 0
                 if(isNaN(atwo)) atwo = 0
-                return aone + atwo
-            }
-
-
-        },
-        methods: {
+                this.formSigning.performanceAmount=(aone + atwo)+ ""
+            },
+            updateFormSigningAmountPerformance(){
+                var aone = parseFloat(this.updateFormSigning.amountReceived);
+                var atwo = parseFloat(this.updateFormSigning.firstToll);
+                if(isNaN(aone)) aone = 0
+                if(isNaN(atwo)) atwo = 0
+                this.updateFormSigning.performanceAmount=(aone + atwo)+ ""
+            },
         	tabClick(tab, event){
                 this.updateFormSigning = this.editableTabs[tab.index].updateFormSigning;
             },
@@ -2253,20 +2270,6 @@
                         }
                         return false;
                     }else{
-                        // if(response.data.data.length==0){
-                        //     mainDivVM.$message({message:'没有签约单', type: 'warning'});
-                        //     return false;
-                        // }
-                        //填装数据
-                        // mainDivVM.editableTabs = []
-                        // for(var i = 0 ; i < response.data.data.length ;i++){
-                        //     console.log(response.data.data[i])
-                        //     var data = {};
-                        //     data.updateFormSigning=response.data.data[i];
-                        //     data.title='（'+ data.updateFormSigning.signNo +'）签约单';
-                        //     data.name=""+i;
-                        //     mainDivVM.editableTabs.push(data);
-                        // }
 
                         //设置显示数据
                         mainDivVM.updateFormSigning =response.data.data;
@@ -2328,9 +2331,8 @@
             submitForm(formName) {                
                 this.formSigning.visitTime = new Date( this.formSigning.visitTime);
                 this.formSigning.payTime = new Date( this.formSigning.payTime);
+                this.formSigning.amountPerformance =  this.formSigning.performanceAmount;
                 var param = this.formSigning;
-                param.amountPerformance = this.formSigningAmountPerformance;
-                console.log(param)
                 // 设置 clueid
                 this.$refs[formName].validate((valid) => {
                     if (valid) {
@@ -2352,15 +2354,15 @@
             },
 
             submitUpdateForm(formName) {
+                this.updateFormSigning.amountPerformance =  this.updateFormSigning.performanceAmount;
                 var param = this.updateFormSigning;
-                param.amountPerformance = this.updateFormSigningAmountPerformance;
-                this.updateFormSigning.amountPerformance = this.updateFormSigningAmountPerformance;
                 if(param.makeUpTime){
                     param.makeUpTime = new Date(param.makeUpTime)
                 }
                if(param.payTime){
                    param.payTime = new Date( param.payTime)
                }
+
                 // 设置 clueid
                 this.$refs[formName].validate((valid) => {
                     if (valid) {
@@ -2412,6 +2414,14 @@
     　　　      this.updateFormSigning.amountBalance=this.updateFormSigning.amountBalance.replace(/[^\.\d]/g,'');
                 this.updateFormSigning.amountBalance=this.updateFormSigning.amountBalance.replace('.','');
         　　},
+            number3(){//添加签约单业绩金额
+    　　　      this.formSigning.performanceAmount=this.formSigning.performanceAmount.replace(/[^\.\d]/g,'');
+                this.formSigning.performanceAmount=this.formSigning.performanceAmount.replace('.','');
+        　　},
+            number4(){//编辑签约单业绩金额
+                this.updateFormSigning.performanceAmount=this.updateFormSigning.performanceAmount.replace(/[^\.\d]/g,'');
+                this.updateFormSigning.performanceAmount=this.updateFormSigning.performanceAmount.replace('.','');
+            },
         },
         created(){
             this.initList();

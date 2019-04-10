@@ -23,18 +23,19 @@ public enum MenuEnum {
      * 电销管理 - 电销中心
      */
     ,TEL_CENTER_PUBLICCUSTOMER("公共客户资源"), TEL_CENTER_INVALIDCUSTOMER("无效客户资源"), OPT_RULE_MANAGEMENT("优化分配规则管理"), NOT_OPT_RULE_MANAGEMENT("非优化分配规则管理"), TRAFFIC_RULE_MANAGEMENT("话务分配规则管理"),
-
     /**
      * 总裁办
      * 
      */
-
     REPETITION("重单处理（总裁办）"), BUSINESSSIGNVALID("有效签约单确认"), BUSINESSSIGNREPETITION("付款明细重单审批确认（总裁办）"), PAYDETAILREPETITION("付款明细分配比例（总裁办）"),
     /**
      * 电销中心
      */
-    SIGN_ORDER("签约记录"), CUSTOMER_VISIT_RECORD("来访记录"), CLUE_RELEASE_RECEIVE_RULE("资源释放领取规则")
-
+    SIGN_ORDER("签约记录"), CUSTOMER_VISIT_RECORD("来访记录"), CLUE_RELEASE_RECEIVE_RULE("资源释放领取规则"),
+    /**
+     * 话务
+     */
+    PHONETRAFFIC_MANAGER("话务管理")
     ;
 
 
