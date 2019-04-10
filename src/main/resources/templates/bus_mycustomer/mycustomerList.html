@@ -123,6 +123,7 @@
                     </div>
                     <div  v-else-if="scope.row.visitList.length>1"   v-for="item in scope.row.visitList ">
                         <el-button size="mini"  v-if="item.isVisit==0&&item.status==1" type="text" @click="showNotVisitReason(item)">未到访(审核中)</el-button>
+                        <!--<el-button size="mini"  v-else-if="item.isVisit==0&&item.status==0" type="text" @click="openEditVisitRecord(item)">添加到访记录</el-button>-->
                         <el-button size="mini"  v-else-if="item.isVisit==0&&item.status==2" type="text" style="color: red" @click="showNotVisitReason(item)">未到访</el-button>
                         <el-button size="mini"  v-else-if="item.isVisit==1&&item.status==1" type="text" @click="showVisitRecord(item)">审核中</el-button>
                         <el-button size="mini"  v-else-if="item.isVisit==1&&item.status==0" type="text" style="color: red" @click="editRebutVisitRecord(item)">到访被驳回</el-button>
@@ -1584,8 +1585,12 @@
                             callback();
                         }
                         var reg =  /^\+?[1-9][0-9]*$/ ;
-                        if(value !=null && value !="null" && value !="" && !reg.test(value) ){
+                        if(value ==null || value =="null" || value ==""  ){
+                            callback(new Error("请输入业绩金额"));
+                            return;
+                        }else if(value !=null && value !="null" && value !="" && !reg.test(value) ){
                             callback(new Error("请输入整数"));
+                            return;
                         }else{
                             callback();
                         }
@@ -2268,7 +2273,6 @@
 
                         //设置显示数据
                         mainDivVM.updateFormSigning =response.data.data;
-                        mainDivVM.updateFormSigning.performanceAmount  =  mainDivVM.updateFormSigning.amountPerformance;
                         if( mainDivVM.updateFormSigning){
                             if(mainDivVM.updateFormSigning.payType > 2){
                                 if(mainDivVM.updateFormSigning.payType == 3){
@@ -2414,7 +2418,7 @@
     　　　      this.formSigning.performanceAmount=this.formSigning.performanceAmount.replace(/[^\.\d]/g,'');
                 this.formSigning.performanceAmount=this.formSigning.performanceAmount.replace('.','');
         　　},
-            number4(){//添加签约单业绩金额
+            number4(){//编辑签约单业绩金额
                 this.updateFormSigning.performanceAmount=this.updateFormSigning.performanceAmount.replace(/[^\.\d]/g,'');
                 this.updateFormSigning.performanceAmount=this.updateFormSigning.performanceAmount.replace('.','');
             },
