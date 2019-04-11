@@ -5,10 +5,7 @@ import com.kuaidao.aggregation.dto.call.CallRecordReqDTO;
 import com.kuaidao.aggregation.dto.call.CallRecordRespDTO;
 import com.kuaidao.aggregation.dto.circulation.CirculationReqDTO;
 import com.kuaidao.aggregation.dto.circulation.CirculationRespDTO;
-import com.kuaidao.aggregation.dto.clue.AllocationClueReq;
-import com.kuaidao.aggregation.dto.clue.ClueDTO;
-import com.kuaidao.aggregation.dto.clue.ClueFileDTO;
-import com.kuaidao.aggregation.dto.clue.ClueQueryDTO;
+import com.kuaidao.aggregation.dto.clue.*;
 import com.kuaidao.aggregation.dto.phonetraffic.PhoneTrafficParamDTO;
 import com.kuaidao.aggregation.dto.phonetraffic.PhoneTrafficRespDTO;
 import com.kuaidao.aggregation.dto.phonetraffic.TrafficParam;
@@ -27,6 +24,7 @@ import com.kuaidao.manageweb.constant.MenuEnum;
 import com.kuaidao.manageweb.feign.assignrule.InfoAssignFeignClient;
 import com.kuaidao.manageweb.feign.call.CallRecordFeign;
 import com.kuaidao.manageweb.feign.circulation.CirculationFeignClient;
+import com.kuaidao.manageweb.feign.clue.AppiontmentFeignClient;
 import com.kuaidao.manageweb.feign.clue.ClueBasicFeignClient;
 import com.kuaidao.manageweb.feign.clue.MyCustomerFeignClient;
 import com.kuaidao.manageweb.feign.customfield.CustomFieldFeignClient;
@@ -102,6 +100,8 @@ public class PhoneTrafficController {
 
     @Autowired
     RoleManagerFeignClient roleManagerFeignClient;
+    @Autowired
+    private AppiontmentFeignClient appiontmentFeignClient;
 
 
     @Value("${oss.url.directUpload}")
@@ -554,6 +554,14 @@ public class PhoneTrafficController {
     @ResponseBody
     public JSONResult<Boolean> releaseClue(@RequestBody TrafficParam trafficParam){
         return phoneTrafficFeignClient.releaseClue(trafficParam);
+    }
+
+    @PostMapping("/repeatPhonelist")
+    @ResponseBody
+    public JSONResult<List<ClueRepeatPhoneDTO>> repeatPhonelist(
+            @RequestBody ClueAppiontmentReq param, HttpServletRequest request) {
+        JSONResult<List<ClueRepeatPhoneDTO>> list = appiontmentFeignClient.repeatPhonelist(param);
+        return list;
     }
 
 }

@@ -136,8 +136,9 @@ public class PublicCustomerResources {
         List dxzList = new ArrayList();
         List<Long> dxzIdsList = new ArrayList();
         List dxcygwList = new ArrayList();
-        List dxzjsList = new ArrayList();
+//        List dxzjsList = new ArrayList();  // 页面上没有电销总监，故而去掉电销总监
 
+        long startTime2=System.currentTimeMillis();
         // 权限相关
         UserInfoDTO user =  CommUtil.getCurLoginUser();
         List<RoleInfoDTO> roleList = user.getRoleList();
@@ -154,15 +155,18 @@ public class PublicCustomerResources {
                 }
             }
             dxcygwList = dxcygws(dxzIdsList);
-            dxzjsList = dxzjs(dxzIdsList);
+//            dxzjsList = dxzjs(dxzIdsList);
         }
-
+        long endTime2=System.currentTimeMillis();
+        System.out.println("电销组： "+(endTime2-startTime2)+"ms");
         // 查询字典释放原因集合
         request.setAttribute("releaseReasonList", getDictionaryByCode(Constants.RELEASE_REASON));
         request.setAttribute("dzList", dxzList);
         request.setAttribute("dxgwList",dxcygwList);
-        request.setAttribute("dxzjList", dxzjsList);
+//        request.setAttribute("dxzjList", dxzjsList);
 
+
+        long startTime=System.currentTimeMillis();
 //      公共列：
         // 根据角色查询页面字段
         QueryFieldByRoleAndMenuReq queryFieldByRoleAndMenuReq = new QueryFieldByRoleAndMenuReq();
@@ -171,7 +175,6 @@ public class PublicCustomerResources {
         JSONResult<List<CustomFieldQueryDTO>> queryFieldByRoleAndMenu =
                 customFieldFeignClient.queryFieldByRoleAndMenu(queryFieldByRoleAndMenuReq);
         request.setAttribute("fieldList", queryFieldByRoleAndMenu.getData());
-
         // 根据用户查询页面字段
         QueryFieldByUserAndMenuReq queryFieldByUserAndMenuReq = new QueryFieldByUserAndMenuReq();
         queryFieldByUserAndMenuReq.setId(user.getId());
@@ -179,6 +182,10 @@ public class PublicCustomerResources {
         JSONResult<List<UserFieldDTO>> queryFieldByUserAndMenu =
                 customFieldFeignClient.queryFieldByUserAndMenu(queryFieldByUserAndMenuReq);
         request.setAttribute("userFieldList", queryFieldByUserAndMenu.getData());
+        long endTime=System.currentTimeMillis();
+        System.out.println("公共列： "+(endTime-startTime)+"ms");
+
+        long startTime1=System.currentTimeMillis();
         // 查询字典话务一级客户状态集合
         request.setAttribute("phCustomerStatusList",
                 getDictionaryByCode(DicCodeEnum.PHCUSTOMERSTATUS.getCode()));
@@ -191,6 +198,8 @@ public class PublicCustomerResources {
         // 查询字典电销二级客户状态集合
         request.setAttribute("customerStatusSubList",
                 getDictionaryByCode(DicCodeEnum.CUSTOMERSTATUSSUB.getCode()));
+        long endTime1=System.currentTimeMillis();
+        System.out.println("数据字典： "+(endTime1-startTime1)+"ms");
         return "pubcustomer/publicCustomer";
     }
     /**
