@@ -268,18 +268,17 @@ public class UserController {
         entityLong.setId(id);
         JSONResult<UserInfoDTO> getbyUserName = userInfoFeignClient.get(entityLong);
         UserInfoDTO user = getbyUserName.getData();
-        
+
         String sessionid = SecurityUtils.getSubject().getSession().getId().toString();
-        String string =
-                redisTemplate.opsForValue().get(Constants.SESSION_ID + user.getId());
+        String string = redisTemplate.opsForValue().get(Constants.SESSION_ID + user.getId());
         if (Constants.IS_LOGIN_UP.equals(user.getIsLogin())) {
-	        // 发送下线通知
-	        new Thread(new Runnable() {
-	            @Override
-	            public void run() {
-	                amqpTemplate.convertAndSend("amq.topic", string+"?notUser", string);
-	            }
-	        }).start();
+            // 发送下线通知
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    amqpTemplate.convertAndSend("amq.topic", string + "?notUser", string);
+                }
+            }).start();
         }
         userInfoReq.setDisableTime(new Date());
         return userInfoFeignClient.update(userInfoReq);
@@ -341,6 +340,7 @@ public class UserController {
                 UserInfoReq userInfoReq = new UserInfoReq();
                 userInfoReq.setId(id);
                 userInfoReq.setPassword(updateUserPasswordReq.getNewPassword());
+                userInfoReq.setResetPasswordTime(new Date());
                 // 修改密码
                 JSONResult<String> updatePwdRes = userInfoFeignClient.update(userInfoReq);
                 if (updatePwdRes != null && JSONResult.SUCCESS.equals(updatePwdRes.getCode())) {
@@ -483,6 +483,7 @@ public class UserController {
                 UserInfoReq userInfoReq = new UserInfoReq();
                 userInfoReq.setId(id);
                 userInfoReq.setPassword(updateUserPasswordReq.getNewPassword());
+                userInfoReq.setResetPasswordTime(new Date());
                 // 修改密码
                 JSONResult<String> updatePwdRes = userInfoFeignClient.update(userInfoReq);
                 if (updatePwdRes != null && JSONResult.SUCCESS.equals(updatePwdRes.getCode())) {

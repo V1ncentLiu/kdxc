@@ -16,7 +16,7 @@
     </el-breadcrumb>
     <el-row class="marginB10">
        <shiro:hasPermission name=" aggregation:truckingOrder:export">
-          <el-button type="primary" @click="exportFun()">导出</el-button>
+          <el-button icon="el-icon-upload2" type="primary" @click="exportFun()">导出</el-button>
        </shiro:hasPermission>
     </el-row>
     <el-row class="marginB10 greybg padding20" style="padding-bottom: 0">        
@@ -30,7 +30,7 @@
                     placeholder="选择日期时间">
                 </el-date-picker>
             </el-form-item>
-            <el-form-item label="——">
+            <el-form-item label="—">
                 <el-date-picker
                     style="width: 100%;"
                     v-model="form.reserveEndTime"
@@ -48,7 +48,7 @@
                     placeholder="选择日期时间">
                 </el-date-picker>
             </el-form-item>
-            <el-form-item label="——">
+            <el-form-item label="—">
                 <el-date-picker
                     style="width: 100%;"
                     v-model="form.submitEndTime"
@@ -57,6 +57,7 @@
                     placeholder="选择日期时间">
                 </el-date-picker>
             </el-form-item>
+            <br>
             <el-form-item label="到站时间:">
                 <el-date-picker
                     style="width: 100%;"
@@ -66,7 +67,7 @@
                     placeholder="选择日期时间">
                 </el-date-picker>
             </el-form-item>
-            <el-form-item label="——">
+            <el-form-item label="—">
                 <el-date-picker
                     style="width: 100%;"
                     v-model="form.arrivalEndTime"
@@ -91,7 +92,7 @@
             <el-form-item label="">
                 <el-input v-model="form.customerName" placeholder="请输入客户姓名"></el-input>
             </el-form-item>
-            <el-button type="primary" @click="initSignRecordData">搜索</el-button>
+            <el-button icon="el-icon-search" type="primary" @click="initSignRecordData">搜索</el-button>
         </el-form>       
     </el-row>
     <el-row>
@@ -132,7 +133,7 @@
 <!-- import Vue before Element -->
 <div th:include="_footer_include :: #jsLib"></div>
 <script th:inline="javascript">
-    var accountIdList = [[${teleSaleList}]];
+   /*  var accountIdList = [[${teleSaleList}]]; */
     var projectList=[[${projectList}]];//品尝项目
 </script>
 
@@ -157,7 +158,7 @@
                 },
                 formLabelWidth: '150px',
                 dataTable:[],
-                accountIdList:accountIdList,
+                accountIdList:[],
                 pager:{//
                     total: 0,
                     currentPage: 1,
@@ -215,11 +216,11 @@
                      if(data.code=='0'){
                         var resData = data.data;
                         var curData = resData.data;
-                        for(var i=0;i<curData.length;i++){
+                 /*        for(var i=0;i<curData.length;i++){
                         	var ss = signRecordVM.transformProject(curData[i].tasteProjectId);
                         	console.info(ss);
                         	curData[i].tasteProject=ss;
-                        }
+                        } */
                         
                         
                         signRecordVM.dataTable= curData;
@@ -284,6 +285,22 @@
                  }
                  return text;
             },
+            getAllTeleSales(){//电销顾问下拉框
+            	axios.post('/truckingOrder/queryAllTeleSales', {})
+                .then(function (response) {
+                      var result =  response.data;
+                      if(result.code=='0'){
+                          var table=result.data;
+                          signRecordVM.accountIdList= table;
+                      }else{
+                          console.error(response);
+                      }
+                      
+                })
+                .catch(function (error) {
+                     console.log(error);
+                });  
+            }
 
         },
         mounted(){
@@ -291,6 +308,7 @@
         },
         created(){
         	this.initSignRecordData();
+        	this.getAllTeleSales();
         }
     })
 </script>

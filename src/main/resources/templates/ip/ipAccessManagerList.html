@@ -31,60 +31,66 @@ input[type="number"] {
 	<div id="app" v-loading="loading" class="mainPadding" style="display: none;">
 		<el-breadcrumb separator="/" class="elBreadcrumb marginB20">
 		<el-breadcrumb-item>Home</el-breadcrumb-item> <el-breadcrumb-item>系统管理</el-breadcrumb-item>
-		<el-breadcrumb-item>
-		<a href="JavaScript:void(0)" data-url="b.html">访问IP管理</a></el-breadcrumb-item> </el-breadcrumb>
-		<template> <el-tabs type="card" v-model="ipManager"
-			@tab-click="handleClick"> <el-tab-pane label="访问IP库"
-			name="first"> <el-form :inline="true"
-			:model="iprepositoryForm" class="demo-form-inline"
-			ref="iprepositoryForm"> <el-row> <el-col
-			:span="18"> <el-button type="primary" @click="openIpAddData"><i class="el-icon-plus"></i>添加IP</el-button>
-		<el-button type="danger" @click="delIpGroup"><i class="el-icon-delete"></i>删除</el-button> <el-button
-			type="success" @click="ipTabCreatePackage"><i class="el-icon-plus"></i>创建IP包</el-button> </el-col> <el-col
-			:span="6"> <!-- <el-form-item prop="ipAddress"> 
-								<el-input v-model="iprepositoryForm.ipAddress" placeholder="输入包含IP查询"></el-input> 
-							</el-form-item>
-							<el-form-item>
-								<el-button type="primary" @click="queryIpDataList">搜索</el-button>
-							</el-form-item>  --> <el-form-item prop="ipAddress"
-			class="searchBox"> <el-input placeholder="输入包含IP查询"
-			class="input-with-select" v-model="iprepositoryForm.ipAddress"
-			style="width: 100%;"> <el-button slot="append"
-			icon="el-icon-search" @click="queryIpDataList">搜索</el-button> </el-input> </el-form-item> </el-col> </el-row> </el-form> <el-table
-			border id="ipManagerTable" ref="customFieldTable" :data="ipTableData"
-			tooltip-effect="dark" tyle="width: 100%,height:750px"
-			@selection-change="changeIpTableFun" class="marginB20"> <el-table-column
-			type="selection" width="55" prop="id"
-			@selection-change="changeIpTableFun" align="center">
-		</el-table-column> <el-table-column prop="ipAddress" label="IP地址" align="center">
-		</el-table-column> <el-table-column prop="createTime" :formatter="dateFormat"
-			label="创建时间" align="center"> </el-table-column> </el-table> <table-pagination
-			:pager="ippager" @change="queryIpDataList"></table-pagination> </el-tab-pane> <el-tab-pane
-			label="访问IP包" name="second"> <el-form :inline="true"
-			:model="ippackageForm" class="demo-form-inline"
-			ref="customFieldQueryForm"> <el-row> <el-col
-			:span="12"> <el-button type="primary"
-			@click="openAddIpPackage"><i class="el-icon-plus"></i>创建IP包</el-button> <el-button type="success"
-			@click="openUpdateIpPackage"><i class="el-icon-edit"></i>修改IP包</el-button> <el-button
-			type="danger" @click="delpackageGroup"><i class="el-icon-delete"></i>删除</el-button> </el-col> <el-col
-			:span="12" style="text-align: right;"> <el-form-item
-			prop="ipAddress"> <el-input
-			v-model="ippackageForm.ipPackageName" placeholder="输入IP包名查询"></el-input>
-		</el-form-item> <el-form-item prop="ipAddress"> <el-input
-			v-model="ippackageForm.ipAddress" placeholder="输入包含IP查询"></el-input>
-		</el-form-item> <el-form-item> <el-button type="primary"
-			@click="queryPackageDataList">搜索</el-button> </el-form-item> </el-col> </el-row> </el-form> <el-table
-			id="ipPackageTable" border ref="customFieldTable"
-			:data="packageTableData" tooltip-effect="dark"
-			@selection-change="changePackageTableFun" class="marginB20">
-		<el-table-column align="center" type="selection" prop="id" width="55"
-			@selection-change="changePackageTableFun"> </el-table-column> <el-table-column
-			align="center" prop="name" label="包名" width="180">
-		</el-table-column> <el-table-column align="center" prop="ipAddress" label="IP地址"
-			width="500"> </el-table-column> <el-table-column align="center"
-			prop="createTime" :formatter="dateFormat" label="创建时间">
-		</el-table-column> </el-table> <table-pagination :pager="packpager" @change="queryPackageDataList"></table-pagination>
-		</el-tab-pane> </el-tabs> <!-- 添加IP库弹框 --> 
+		<el-breadcrumb-item>访问IP管理</el-breadcrumb-item> </el-breadcrumb>
+		<template> 
+		<el-tabs type="card" v-model="ipManager" @tab-click="handleClick"> <el-tab-pane label="访问IP库" name="first"> 
+		<el-row class="marginB10 greybg padding20" style="padding-bottom: 0">
+			<el-form :inline="true" :model="iprepositoryForm" class="demo-form-inline" ref="iprepositoryForm"> 			
+				<el-col :span="18"> 
+					<el-button type="primary" @click="openIpAddData"><i class="el-icon-plus"></i>添加IP</el-button>
+					<el-button type="danger" @click="delIpGroup"><i class="el-icon-delete"></i>删除</el-button> 
+					<el-button type="success" @click="ipTabCreatePackage"><i class="el-icon-plus"></i>创建IP包</el-button> 
+				</el-col> 
+				<el-col :span="6">
+					<el-form-item prop="ipAddress" class="searchBox"> 
+						<el-input placeholder="输入包含IP查询" class="input-with-select" v-model="iprepositoryForm.ipAddress" style="width: 100%;"> 
+							<el-button slot="append" icon="el-icon-search" @click="queryIpDataList">搜索</el-button> 
+						</el-input> 
+					</el-form-item> 
+				</el-col> 
+			
+			</el-form>
+		</el-row> 
+		<el-table border id="ipManagerTable" ref="customFieldTable" :data="ipTableData" tooltip-effect="dark" tyle="width: 100%,height:750px" @selection-change="changeIpTableFun"> 
+			<el-table-column type="selection" width="55" prop="id" @selection-change="changeIpTableFun" align="center"></el-table-column> 
+			<el-table-column prop="ipAddress" label="IP地址" align="center"></el-table-column> 
+			<el-table-column prop="createTime" :formatter="dateFormat" label="创建时间" align="center"> 
+			</el-table-column> 
+		</el-table> 
+		<table-pagination :pager="ippager" @change="queryIpDataList"></table-pagination>
+	</el-tab-pane> 
+	<el-tab-pane label="访问IP包" name="second"> 
+		<el-row class="marginB10 greybg padding20" style="padding-bottom: 0">
+			<el-form :inline="true" :model="ippackageForm" class="demo-form-inline" ref="customFieldQueryForm">
+				<el-col :span="12"> 
+					<el-button type="primary" @click="openAddIpPackage"><i class="el-icon-plus"></i>创建IP包</el-button> 
+					<el-button type="success" @click="openUpdateIpPackage"><i class="el-icon-edit"></i>修改IP包</el-button> 
+					<el-button type="danger" @click="delpackageGroup"><i class="el-icon-delete"></i>删除</el-button> 
+				</el-col> 
+				<el-col :span="12" style="text-align: right;"> 
+					<el-form-item prop="ipAddress"> 
+						<el-input v-model="ippackageForm.ipPackageName" placeholder="输入IP包名查询"></el-input>
+					</el-form-item> 
+					<el-form-item prop="ipAddress"> 
+						<el-input v-model="ippackageForm.ipAddress" placeholder="输入包含IP查询"></el-input> 
+					</el-form-item> 
+					<el-form-item> 
+						<el-button type="primary" @click="queryPackageDataList">搜索</el-button> 
+					</el-form-item> 
+				</el-col> 			 
+			</el-form> 
+		</el-row>
+		<el-table id="ipPackageTable" border ref="customFieldTable" :data="packageTableData" tooltip-effect="dark" @selection-change="changePackageTableFun">
+			<el-table-column align="center" type="selection" prop="id" width="55" @selection-change="changePackageTableFun"> 
+			</el-table-column> 
+			<el-table-column align="center" prop="name" label="包名" width="180"></el-table-column> 
+			<el-table-column align="center" prop="ipAddress" label="IP地址" width="500"></el-table-column> 
+			<el-table-column align="center" prop="createTime" :formatter="dateFormat" label="创建时间"></el-table-column> 
+		</el-table> 
+		<table-pagination :pager="packpager" @change="queryPackageDataList"></table-pagination>
+		</el-tab-pane> 
+	</el-tabs> 
+	<!-- 添加IP库弹框 --> 
 		<!-- <el-dialog title="添加IP" :visible.sync="dialogIpVisible" width="30%" :before-close="handleClose">  -->
 		<el-dialog title="添加IP" :visible.sync="dialogIpVisible" width="530px"> 
 			<el-form :inline="true"
@@ -107,8 +113,8 @@ input[type="number"] {
 				</el-form-item> 
 			</el-form> 
 			<div slot="footer" class="dialog-footer" style="text-align:center;"> 
-				<el-button @click="dialogIpVisible = false">取 消</el-button> 
 				<el-button type="primary" @click="submitipAddForm('ipAddForm')" :disabled="IpconfirmBtnDisabled"  >确 定</el-button>
+				<el-button @click="dialogIpVisible = false">取 消</el-button> 				
 			</div> 
 		</el-dialog> 
 		<!-- 添加IP包弹框 --> 
@@ -130,9 +136,9 @@ input[type="number"] {
 			@click.native.prevent="deleteRow(scope.$index, packAddIpTable)"
 			type="text">删除</el-button> </template> </el-table-column> </el-table> </el-form>
 		<div slot="footer" class="dialog-footer" style="text-align:center;">
+			<el-button type="primary" @click="saveIpPackageData('ipPackageAddForm')"  :disabled="packgeconfirmBtnDisabled"  >提交</el-button>
 			<el-button @click="addIpPackageVisible = false">取 消</el-button>
-			<el-button type="primary"
-				@click="saveIpPackageData('ipPackageAddForm')"  :disabled="packgeconfirmBtnDisabled"  >提交</el-button>
+			
 		</div>
 		</el-dialog> <!--修改IP包弹框 --> <el-dialog title="修改IP包"
 			:visible.sync="updateIpPackageVisible"> <el-form
@@ -153,9 +159,8 @@ input[type="number"] {
 			@click.native.prevent="deleteRow(scope.$index, packUpdateIpTable)"
 			type="text">删除</el-button> </template> </el-table-column> </el-table> </el-form>
 		<div slot="footer" class="dialog-footer" style="text-align:center;">
-			<el-button @click="updateIpPackageVisible = false">取 消</el-button>
-			<el-button type="primary"
-				@click="updateIpPackageData('ipPackageUpdateForm')">提交</el-button>
+			<el-button type="primary" @click="updateIpPackageData('ipPackageUpdateForm')">提交</el-button>
+			<el-button @click="updateIpPackageVisible = false">取 消</el-button>			
 		</div>
 		</el-dialog> <el-dialog title="选择IP" :visible.sync="addPackageIPSelectVisible"
 			@opened="packgeSelectIpOpen" class="chooseDialog"> <el-form
@@ -172,8 +177,8 @@ input[type="number"] {
 			@selection-change="changeIpTableFun"> </el-table-column> <el-table-column
 			align="center" prop="ipAddress" label="IP地址"> </el-table-column> </el-table>
 		<div slot="footer" class="dialog-footer" style="text-align:center;">
-			<el-button @click="addPackageIPSelectVisible =false">取 消</el-button>
 			<el-button type="primary" @click="packageSelectIpSubmit">提交</el-button>
+			<el-button @click="addPackageIPSelectVisible =false">取 消</el-button>			
 		</div>
 		</el-dialog> </template>
 	</div>

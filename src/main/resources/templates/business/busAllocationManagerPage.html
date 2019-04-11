@@ -11,10 +11,10 @@
     <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
         <el-breadcrumb-item>Home</el-breadcrumb-item>
         <el-breadcrumb-item>商务管理</el-breadcrumb-item>
-        <el-breadcrumb-item><a >待分发来访客户</a></el-breadcrumb-item>
+        <el-breadcrumb-item><a >待分配来访客户</a></el-breadcrumb-item>
     </el-breadcrumb>
     
-    <el-row class="marginB10">
+    <el-row class="marginB20">
     		<shiro:hasPermission name="business:busAllocationManager:allocation">
 		        <el-button type="primary" @click="toAllocationClue">分发资源</el-button>
 		    </shiro:hasPermission>
@@ -22,7 +22,7 @@
 		        <el-button type="success" @click="toTransferClue">外调经理</el-button>
 		    </shiro:hasPermission>
 	</el-row>
-	<el-form :inline="true" :model="searchForm" class="demo-form-inline" ref="searchForm"> 
+	<el-form :inline="true" :model="searchForm" class="demo-form-inline marginB20" ref="searchForm"> 
 	    <el-row class="greybg padding20" style="padding-bottom: 0;">
 				  <el-form-item class="formItem"  prop="teleGorupId">
 				    <el-select v-model="searchForm.teleGorupId" clearable @change="getSaleList" placeholder="电销组">
@@ -63,7 +63,10 @@
   				      :value="item.name">
   				  </el-option>
   			    </el-select>
-  			  </el-form-item>
+  			  </el-form-item>          
+          <el-form-item class="formItem" prop="cusName">
+            <el-input v-model="searchForm.cusName" placeholder="客户姓名" class="input-with-select"></el-input>
+          </el-form-item>
   			  <!--  
   			  <el-form-item class="formItem"  prop="delFalg">
   			    <el-select v-model="searchForm.delFalg" clearable placeholder="邀约来访状态">
@@ -80,19 +83,16 @@
   	      <el-form-item class="formItem" label="提交邀约时间：">
   	  				<el-date-picker  v-model="searchForm.startTime" format="yyyy-MM-dd HH:mm" type="datetime" placeholder="选择日期"></el-date-picker>
   	      </el-form-item>
-  	      <el-form-item class="formItem" label="——">
+  	      <el-form-item class="formItem" label="—">
   						<el-date-picker  v-model="searchForm.endTime" format="yyyy-MM-dd HH:mm" type="datetime" placeholder="选择日期"></el-date-picker>
   	      </el-form-item>
   	      <el-form-item class="formItem" label="邀约来访时间：">
   	  				<el-date-picker  v-model="searchForm.startReserveTime" format="yyyy-MM-dd HH:mm"  type="datetime" placeholder="选择日期"></el-date-picker>
   	      </el-form-item>
-  	      <el-form-item class="formItem" label="——">
+  	      <el-form-item class="formItem" label="—">
   						<el-date-picker  v-model="searchForm.endReserveTime" format="yyyy-MM-dd HH:mm"  type="datetime" placeholder="选择日期"></el-date-picker>
   	      </el-form-item>
-  			  <el-form-item class="formItem" prop="cusName">
-  			    <el-input v-model="searchForm.cusName" placeholder="客户姓名" class="input-with-select"></el-input>
-  			  </el-form-item>
-  			  <el-button type="primary" @click="searchTable()">搜索</el-button>
+  			  <el-button icon="el-icon-search" type="primary" @click="searchTable()">搜索</el-button>
 				
 	    </el-row>
   	</el-form>
@@ -149,7 +149,7 @@
                 </el-form-item>
             </el-form>
             <div slot="footer" class="dialog-footer">
-                <el-button type="primary" @click="allocationClue('allocationForm')">提 交</el-button>
+                <el-button type="primary" :disabled="submitDisable" @click="allocationClue('allocationForm')">提 交</el-button>
                 <el-button  @click="allocationClueCancel('allocationForm')">取 消</el-button>
             </div>
         </template>
@@ -180,7 +180,7 @@
                 </el-form-item>
             </el-form>
             <div slot="footer" class="dialog-footer">
-                <el-button type="primary" @click="transferClue('transferForm')">提 交</el-button>
+                <el-button type="primary" :disabled="submitDisable" @click="transferClue('transferForm')">提 交</el-button>
                 <el-button  @click="transferClueCancel('transferForm')">取 消</el-button>
             </div>
         </template>
@@ -246,6 +246,7 @@ var clueVM = new Vue({
             }],
             saleOptions:busSaleList,
             allSaleOptions:allSaleList,
+            submitDisable: false,
             allocationVisible: false,
             transferVisible: false,
             pager:{
@@ -472,6 +473,9 @@ var clueVM = new Vue({
                         });
                        return;
                    }
+            	   if(this.$refs['allocationForm']) {
+                       this.$refs['allocationForm'].resetFields();
+                      }
             	   var text="";
             	   for(var i=0;i<rows.length;i++){
                    	   var curRow = rows[i];
@@ -494,6 +498,7 @@ var clueVM = new Vue({
             	   
             	   this.$refs[formName].validate((valid) => {
             	          if (valid) {
+            	        	  clueVM.submitDisable=true;
             	        	  var rows = this.multipleSelection;
 	           	           	   var idList = [];
 	           	               var clueIdList = [];
@@ -511,6 +516,7 @@ var clueVM = new Vue({
 	                          	  param.remark=this.allocationForm.remark;
 	                             axios.post('/business/busAllocation/busAllocationClue',param)
 	                              .then(function (response) {
+	                            	  clueVM.submitDisable=false;
 	                                  var data =  response.data;
 	                                  if(data.code=='0'){
 	                                  	clueVM.$message({message:'分发成功',type:'success',duration:1000,onClose:function(){
@@ -525,10 +531,8 @@ var clueVM = new Vue({
 	                                  }
 	                              })
 	                              .catch(function (error) {
+	                            	clueVM.submitDisable=false;
 	                                console.log(error);
-	                              })
-	                              .then(function () {
-	                              	
 	                              });
             	            //end
             	          } else {
@@ -551,6 +555,9 @@ var clueVM = new Vue({
                         });
                        return;
                    }
+            	   if(this.$refs['transferForm']) {
+                       this.$refs['transferForm'].resetFields();
+                      }
             	   var text="";
             	   for(var i=0;i<rows.length;i++){
                    	   var curRow = rows[i];
@@ -571,6 +578,7 @@ var clueVM = new Vue({
                transferClue(formName){//外调经理
             	   this.$refs[formName].validate((valid) => {
             	          if (valid) {
+            	        	  clueVM.submitDisable=true;
             	        	  var rows = this.multipleSelection;
                               var idList = [];
                               var clueIdList = [];
@@ -588,6 +596,7 @@ var clueVM = new Vue({
                           	  param.remark=this.transferForm.remark;
                               axios.post('/business/busAllocation/busAllocationClue',param)
                                .then(function (response) {
+                            	   clueVM.submitDisable=false;
                                    var data =  response.data;
                                    if(data.code=='0'){
                                    	clueVM.$message({message:'外调成功',type:'success',duration:1000,onClose:function(){
@@ -602,10 +611,8 @@ var clueVM = new Vue({
                                    }
                                })
                                .catch(function (error) {
+                            	   clueVM.submitDisable=false;
                                  console.log(error);
-                               })
-                               .then(function () {
-                               	
                                });
             	            //end
             	          } else {

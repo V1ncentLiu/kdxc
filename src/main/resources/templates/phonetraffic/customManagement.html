@@ -19,7 +19,7 @@
         <el-breadcrumb-item>话务管理列表</el-breadcrumb-item>
     </el-breadcrumb>
     <el-row class="marginB10">
-        <el-button type="text" @click="dialogChooseList = true"><i class="el-icon-menu"></i>选择列</el-button>
+        <el-button type="primary" @click="dialogChooseList = true"><i class="el-icon-menu"></i>选择列</el-button>
         <shiro:hasPermission name="aggregation:PhoneTraffic:allocation">
             <el-button type="success" @click="openassignrDig">分配资源</el-button>
         </shiro:hasPermission>
@@ -98,7 +98,7 @@
                     placeholder="选择日期时间">
                 </el-date-picker>
             </el-form-item>
-            <el-form-item label="——">
+            <el-form-item label="—">
                 <el-date-picker
                     style="width: 100%;"
                     v-model="form.createTime2"
@@ -106,7 +106,7 @@
                     placeholder="选择日期时间">
                 </el-date-picker>
             </el-form-item>
-            <el-button type="primary"  @click="initTableData" >搜索</el-button>
+            <el-button icon="el-icon-search" type="primary"  @click="initTableData" >搜索</el-button>
         </el-form>
     </el-row>
     <el-row>
@@ -117,7 +117,7 @@
 	             <template slot-scope="scope" >
                      {{scope.row.phone}}
                     <input type='hidden'>
-                     <i class="el-icon-phone-outline"  @click="customerEidt(scope.row.clueId)"  style="margin:0 10px;font-size: 16px;cursor: pointer;"></i>
+                     <i  v-show="phoneButton" class="el-icon-phone-outline"  @click="customerEidt(scope.row.clueId)"  style="margin:0 10px;font-size: 16px;cursor: pointer;"></i>
                     <el-tag v-if="scope.row.tag">{{scope.row.tag}}</el-tag>
                 </template>
             </el-table-column>
@@ -252,12 +252,16 @@ var fieldList=[[${fieldList}]];//自定义字段
 var userFieldList=[[${userFieldList}]];//用户自定义字段
 var editflag=[[${editflag}]];//可编辑标志
 
-
+var phoneButton = false;
+    if(editflag == 1){
+        phoneButton = true;
+    }
   var  customerManVM=new Vue({
         el: '#myCustom',
         data: function() {
             return {
                 isShow:false,
+                phoneButton:phoneButton,
                 recordDialog:false,
                 repeatPhonesDialog:false,
                 allocateFormVisible: false, //分配资源
@@ -375,7 +379,7 @@ var editflag=[[${editflag}]];//可编辑标志
                 param.id = row.clueId;
                 param.cusPhone = row.phone;
                 console.info(param);
-                axios.post('/clue/appiontment/repeatPhonelist', param)
+                axios.post('/phonetraffic/repeatPhonelist', param)
                           .then(function (response) {
                                 var result =  response.data;
                                 console.info(result.data);
