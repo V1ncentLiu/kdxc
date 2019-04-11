@@ -345,6 +345,36 @@ public class OrganizationController {
         return    organizationFeignClient.queryOrgByParam(companyDto);
     }
     
+    /**
+     * 查询所有的商务大区
+     * @param result
+     * @return
+     */
+    @PostMapping("/queryBusinessAreaList")
+    @ResponseBody
+    public JSONResult<List<OrganizationRespDTO>> queryBusinessAreaList() {
+        // 电销组
+        OrganizationQueryDTO busGroupReqDTO = new OrganizationQueryDTO();
+        busGroupReqDTO.setSystemCode(SystemCodeConstant.HUI_JU);
+        busGroupReqDTO.setOrgType(OrgTypeConstant.SWDQ);
+        return organizationFeignClient.queryOrgByParam(busGroupReqDTO);
+    }
+    
+    /**
+     * 查询所有的电销事业部
+     * @param result
+     * @return
+     */
+    @PostMapping("/queryTeleDeptList")
+    @ResponseBody
+    public JSONResult<List<OrganizationRespDTO>> queryTeleDeptList() {
+        // 电销组
+        OrganizationQueryDTO busGroupReqDTO = new OrganizationQueryDTO();
+        busGroupReqDTO.setSystemCode(SystemCodeConstant.HUI_JU);
+        busGroupReqDTO.setOrgType(OrgTypeConstant.DZSYB);
+        return organizationFeignClient.queryOrgByParam(busGroupReqDTO);
+    }
+    
     
 
 }
