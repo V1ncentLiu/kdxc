@@ -14,7 +14,7 @@
         <el-breadcrumb-item>商务管理</el-breadcrumb-item>
         <el-breadcrumb-item>客户签约记录</el-breadcrumb-item>
     </el-breadcrumb>
-    <el-row class="marginB10">
+    <el-row class="marginB20">
        <shiro:hasPermission name=" aggregation:signRecord:reject">
           <el-button type="primary" @click="OpenRejectSignRecordDialog">驳回</el-button>
         </shiro:hasPermission>
@@ -22,7 +22,7 @@
             <el-button type="success" @click="pass">审核通过</el-button>
         </shiro:hasPermission>
     </el-row>
-    <el-row class="marginB10 greybg padding20" style="padding-bottom: 0">        
+    <el-row class="marginB20 greybg padding20" style="padding-bottom: 0">        
         <el-form :inline="true" :model="form" ref="form">
             <el-form-item label="">
                 <el-select v-model="form.signProjectId" placeholder="签约项目" style="width: 100%;" clearable>
@@ -116,7 +116,7 @@
             <el-form-item label="">
                 <el-input v-model="form.customerName" placeholder="客户姓名"></el-input>
             </el-form-item>
-            <el-button type="primary" @click="initSignRecordData">搜索</el-button>               
+            <el-button icon="el-icon-search" type="primary" @click="initSignRecordData">搜索</el-button>               
         </el-form>       
     </el-row>
     <el-row>
@@ -359,10 +359,10 @@
 <!-- import Vue before Element -->
 <div th:include="_footer_include :: #jsLib"></div>
 <script th:inline="javascript">
-    var projectList = [[${projectList}]];
+   /*  var projectList = [[${projectList}]];
     var busManagerList = [[${busManagerList}]];
     var businessGroupList = [[${businessGroupList}]];
-    var teleGroupList = [[${teleGroupList}]];
+    var teleGroupList = [[${teleGroupList}]]; */
     //var teleSaleList = [[${teleSaleList}]];
 </script>
 
@@ -399,10 +399,10 @@
                 },
                 formLabelWidth: '150px',
                 dataTable:[],
-                projectList:projectList,
-                busManagerList:busManagerList,
-                businessGroupList:businessGroupList,
-                teleGroupList:teleGroupList,
+                projectList:[],
+                busManagerList:[],
+                businessGroupList:[],
+                teleGroupList:[],
                 teleSaleList:[],
                 signTypeOpt: [{
                     value: 1,
@@ -824,7 +824,79 @@
                 .catch(function (error) {
                      console.log(error);
                 });
-            }
+            },
+            getProjectList(){//获取projectLits 
+            	   axios.post('/sign/signRecord/queryProjectList', {})
+                   .then(function (response) {
+                         var result =  response.data;
+                         if(result.code=='0'){
+                        	 var table=result.data;
+                             signRecordVM.projectList= table;
+                         }else{
+                        	  console.error(response); 
+                         }
+                         
+                   })
+                   .catch(function (error) {
+                        console.log(error);
+                   });
+            },
+            queryBusManagerByOrgId(){//获取所有商务经理  
+                axios.post('/sign/signRecord/queryBusManagerByOrgId', {})
+                .then(function (response) {
+                      var result =  response.data;
+                      if(result.code=='0'){
+                    	  var table=result.data;
+                          signRecordVM.busManagerList= table;
+                      }else{
+                    	  console.error(response);
+                      }
+                      
+                })
+                .catch(function (error) {
+                     console.log(error);
+                });
+         },
+         queryBusGroupList(){//根据组织机构Id查询所有商务经理 
+             axios.post('/organization/organization/queryBusGroupList', {})
+             .then(function (response) {
+                   var result =  response.data;
+                   if(result.code=='0'){
+                       var table=result.data;
+                       signRecordVM.businessGroupList= table;
+                   }else{
+                       console.error(response);
+                   }
+                   
+             })
+             .catch(function (error) {
+                  console.log(error);
+             });
+        	 
+         },
+         queryTeleGroupList(){//根据组织机构Id查询所有电销组 
+             axios.post('/organization/organization/queryTeleGroupList', {})
+             .then(function (response) {
+                   var result =  response.data;
+                   if(result.code=='0'){
+                       var table=result.data;
+                       signRecordVM.teleGroupList= table;
+                   }else{
+                       console.error(response);
+                   }
+                   
+             })
+             .catch(function (error) {
+                  console.log(error);
+             });
+             
+         },
+         initSelect(){//初始下拉框
+        	 this.getProjectList();
+        	 this.queryBusManagerByOrgId();
+        	 this.queryBusGroupList();
+        	 this.queryTeleGroupList();
+         }
             
 
         },
@@ -833,6 +905,7 @@
         },
         created(){
         	this.initSignRecordData();
+        	this.initSelect();
         }
     })
 </script>

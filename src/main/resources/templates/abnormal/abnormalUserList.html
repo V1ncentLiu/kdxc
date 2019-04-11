@@ -12,7 +12,7 @@
     <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
         <el-breadcrumb-item>Home</el-breadcrumb-item>
         <el-breadcrumb-item>业务设置</el-breadcrumb-item>
-        <el-breadcrumb-item><a href="JavaScript:void(0)">标记异常客户</a></el-breadcrumb-item>
+        <el-breadcrumb-item>标记异常客户</el-breadcrumb-item>
     </el-breadcrumb>
 
     <el-row type="flex" class="row-bg marginB10" justify="start">
@@ -20,44 +20,39 @@
         <el-button type="danger" @click="deletebatch()"><i class="el-icon-delete"></i>删除</el-button>
     </el-row>
 
-    <el-row type="flex" class="row-bg marginB10 greybg padding20" style="padding-bottom: 0" justify="end">
+    <el-row type="flex" class="row-bg marginB10 greybg padding20" style="padding-bottom: 0">
         <el-form :inline="true" :model="queryForm" class="demo-form-inline" ref="queryForm" >
-
             <el-form-item label="">
                 <el-select v-model="queryForm.status" placeholder="状态搜索" width="100" clearable>
                     <el-option v-for="item in statusOptions" :key="item.value" :label="item.label" :value="item.value"></el-option>
                 </el-select>
             </el-form-item>
-
             <el-form-item label="">
                 <el-select v-model="queryForm.type" placeholder="异常类型" width="100" clearable>
                     <el-option v-for="item in abnorMalType" :key="item.value" :label="item.name" :value="item.value"></el-option>
                 </el-select>
             </el-form-item>
-
-            <el-form-item label="创建时间">
+            <el-form-item label="创建时间：">
                 <el-date-picker v-model="queryForm.time1" type="datetime" placeholder="选择日期时间"></el-date-picker>
-                <span>到</span>
+            </el-form-item> 
+            <el-form-item label="—">
                 <el-date-picker v-model="queryForm.time2" type="datetime" placeholder="选择日期时间"></el-date-picker>
             </el-form-item>
-
             <el-form-item label="" prop="name">
                 <el-input v-model="queryForm.phone" placeholder="客户电话"></el-input>
             </el-form-item>
-            <el-form-item>
-                <el-button type="primary" @click="initList">搜索</el-button>
-            </el-form-item>
+            <el-button icon="el-icon-search" type="primary" @click="initList">搜索</el-button>
         </el-form>
     </el-row>
 
 
         <el-table :data="tableData" style="width: 100%" tooltip-effect="dark" border ref="multipleTable"
                   @selection-change="handleSelectionChange" >
-            <el-table-column type="selection" width="55" prop="id"> </el-table-column>
-            <el-table-column prop="phone" label="客户电话" width="180" align="center"></el-table-column>
-            <el-table-column prop="type" label="异常类型" width="180" align="center" :formatter="transformType"></el-table-column>
-            <el-table-column prop="createTime" label="创建时间" width="300" align="center"></el-table-column>
-            <el-table-column prop="createUserName" label="创建人" width="300" align="center"></el-table-column>
+            <el-table-column type="selection" width="55" prop="id" align="center"> </el-table-column>
+            <el-table-column prop="phone" label="客户电话" align="center"></el-table-column>
+            <el-table-column prop="type" label="异常类型" align="center" :formatter="transformType"></el-table-column>
+            <el-table-column prop="createTime" label="创建时间" align="center"></el-table-column>
+            <el-table-column prop="createUserName" label="创建人" align="center"></el-table-column>
             <el-table-column  prop="status" label="状态"  align="center">
                 <template slot-scope="scope">
                     <span style="" v-if="scope.row.status!=1">正常标记</span>

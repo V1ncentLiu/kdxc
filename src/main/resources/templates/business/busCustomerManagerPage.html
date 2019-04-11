@@ -20,15 +20,14 @@
     </style>
 </head>
 <body>
-<div id="clueManage" class="clueManage mainPadding">
+<div id="clueManage" class="clueManage mainPadding" style="display: none;">
     <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
         <el-breadcrumb-item>Home</el-breadcrumb-item>
         <el-breadcrumb-item>商务管理</el-breadcrumb-item>
-        <el-breadcrumb-item>
-            <a>客户管理</a></el-breadcrumb-item>
+        <el-breadcrumb-item>客户管理</el-breadcrumb-item>
     </el-breadcrumb>
 
-    <el-row class="marginB10">
+    <el-row class="marginB20">
         <shiro:hasPermission
                 name="business:busCustomerManager:allocation">
             <el-button type="primary" @click="toAllocationClue">分发资源</el-button>
@@ -37,11 +36,10 @@
             <el-button type="success" @click="toTransferClue">外调经理</el-button>
         </shiro:hasPermission>
         <shiro:hasPermission name="business:busCustomerManager:cancelVisit">
-            <el-button type="success" @click="notVisit">标记未到访</el-button>
+            <el-button type="warning" @click="notVisit">标记未到访</el-button>
         </shiro:hasPermission>
     </el-row>
-    <el-form :inline="true" :model="searchForm" class="demo-form-inline"
-             ref="searchForm">
+    <el-form :inline="true" :model="searchForm" class="demo-form-inline marginB20" ref="searchForm">
         <el-row class="greybg padding20"
                 style="padding-bottom: 0;">
             <el-form-item class="formItem"
@@ -172,9 +170,7 @@
                         v-model="searchForm.endAllocationTime" format="yyyy-MM-dd HH:mm"
                         type="datetime" placeholder="选择日期"></el-date-picker>
             </el-form-item>
-            <el-button
-                    type="primary" @click="searchTable()">搜索
-            </el-button>
+            <el-button icon="el-icon-search" type="primary" @click="searchTable()">搜索</el-button>
         </el-row>
     </el-form>
     <el-row>
@@ -268,7 +264,7 @@
         <table-pagination :pager="pager" @change="searchTable"></table-pagination>
     </el-row>
     <!-- dialog -->
-    <el-dialog title="分发资源" :visible.sync="allocationVisible" width="30%">
+    <el-dialog title="分发资源" :visible.sync="allocationVisible" width="650px">
         <template>
             <el-form :model="allocationForm"
                      ref="allocationForm" :rules="allocationFormRules">
@@ -293,7 +289,7 @@
                 </el-form-item>
             </el-form>
             <div slot="footer" class="dialog-footer">
-                <el-button type="primary" @click="allocationClue('allocationForm')">提
+                <el-button type="primary" :disabled="submitDisable" @click="allocationClue('allocationForm')">提
                     交
                 </el-button>
                 <el-button @click="allocationVisible = false">取 消</el-button>
@@ -327,7 +323,7 @@
                 </el-form-item>
             </el-form>
             <div slot="footer" class="dialog-footer">
-                <el-button type="primary" @click="transferClue('transferForm')">提
+                <el-button type="primary" :disabled="submitDisable" @click="transferClue('transferForm')">提
                     交
                 </el-button>
                 <el-button @click="transferVisible = false">取 消</el-button>
@@ -658,6 +654,7 @@
                 name: "已读"
             }],
 
+            submitDisable: false,
             allocationVisible: false,
             transferVisible: false,
             notVisitdDialogVisible: false,
@@ -971,6 +968,9 @@
                     });
                     return;
                 }
+                if(this.$refs['allocationForm']) {
+                    this.$refs['allocationForm'].resetFields();
+                   }
                 var text = "";
                 for (var i = 0; i < rows.length; i++) {
                     var curRow = rows[i];
@@ -988,6 +988,7 @@
             allocationClue(formName) {//分发资源
                 this.$refs[formName].validate((valid) => {
                     if (valid) {
+                    	customerVM.submitDisable=true;
                         var rows = this.multipleSelection;
                         var idList = [];
                         var clueIdList = [];
@@ -1005,6 +1006,7 @@
                         param.remark = this.allocationForm.remark;
                         axios.post('/business/busAllocation/busAllocationClue', param)
                             .then(function (response) {
+                            	customerVM.submitDisable=false;
                                 var data = response.data;
                                 if (data.code == '0') {
                                     customerVM.$message({
@@ -1021,10 +1023,8 @@
                                 }
                             })
                             .catch(function (error) {
+                            	customerVM.submitDisable=false;
                                 console.log(error);
-                            })
-                            .then(function () {
-
                             });
                     } else {
                         console.log('error submit!!');
@@ -1043,6 +1043,9 @@
                     });
                     return;
                 }
+                if(this.$refs['transferForm']) {
+                   this.$refs['transferForm'].resetFields();
+                  }
                 var text = "";
                 for (var i = 0; i < rows.length; i++) {
                     var curRow = rows[i];
@@ -1059,6 +1062,7 @@
             transferClue(formName) {//外调经理
                 this.$refs[formName].validate((valid) => {
                     if (valid) {
+                    	customerVM.submitDisable=true;
                         var rows = this.multipleSelection;
                         var idList = [];
                         var clueIdList = [];
@@ -1076,6 +1080,7 @@
                         param.remark = this.transferForm.remark;
                         axios.post('/business/busAllocation/busAllocationClue', param)
                             .then(function (response) {
+                            	customerVM.submitDisable=false;
                                 var data = response.data;
                                 if (data.code == '0') {
                                     customerVM.$message({
@@ -1092,10 +1097,8 @@
                                 }
                             })
                             .catch(function (error) {
+                            	customerVM.submitDisable=false;
                                 console.log(error);
-                            })
-                            .then(function () {
-
                             });
                     } else {
                         console.log('error submit!!');
@@ -1274,8 +1277,8 @@
             this.searchTable();
 
         },
-        mounted() {
-            console.info("mounted method");
+        mounted(){
+            document.getElementById('clueManage').style.display = 'block';
         }
     })
 
