@@ -58,7 +58,7 @@
                 </el-col>
             </el-row>
             <el-row>
-                <el-col :span="8">
+               <!--  <el-col :span="8">
                     <el-form-item label="公司：" :label-width="formLabelWidth1" prop="companyId">
                         <el-select v-model="form.companyId" placeholder="请选择" style="width:100%">
                             <el-option
@@ -66,6 +66,42 @@
                                 :key="item.id"
                                 :label="item.companyName"
                                 :value="item.id">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
+                </el-col> -->
+                 <el-col :span="8">
+                    <el-form-item label="项目所属集团：" :label-width="formLabelWidth1" prop="groupId">
+                        <el-select filterable v-model="form.groupId" placeholder="请选择" style="width:100%">
+                            <el-option
+                                v-for="item in companyOptions"
+                                :key="item.id"
+                                :label="item.groupName"
+                                :value="item.id">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
+                </el-col>
+                <el-col :span="8" :offset="4">
+                    <el-form-item label="是否给品牌商结算：" :label-width="formLabelWidth1" prop="isSettle">
+                        <el-select v-model="form.isSettle" placeholder="请选择" style="width:100%">
+                            <el-option
+                                v-for="item in isSettleOptions"
+                                :key="item.value"
+                                :label="item.label"
+                                :value="item.value">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
+                </el-col>
+                <el-col :span="8">
+                    <el-form-item label="结算比例：" :label-width="formLabelWidth1" prop="ratio">
+                        <el-select v-model="form.ratio" placeholder="请选择" style="width:100%">
+                            <el-option
+                                v-for="item in ratioList"
+                                :key="item.value"
+                                :label="item.name"
+                                :value="item.value">
                             </el-option>
                         </el-select>
                     </el-form-item>
@@ -234,6 +270,7 @@ var projectAttributiveList=[[${projectAttributiveList}]];//店型集合
 var companyList=[[${companyList}]];//店型集合
 var brandCategoryList=[[${brandCategoryList}]];//品类集合
 var project=[[${project}]];//品类集合
+var ratioList = [[${ratioList}]];//比例集合
 
    var projectVm= new Vue({
         el: '#userManage',
@@ -243,6 +280,17 @@ var project=[[${project}]];//品类集合
                 dialogFormChooseBrand: false,
                 submitDisabled: false,
                 brandNameReadonly: true,
+                ratioList:ratioList,
+                isSettleOptions:[
+	           		 {
+	                    	value: '0',
+	                        label: '否'	
+	                    	},
+	                    	{
+	                       value: '1',
+	                        label: '是'	
+	                       }
+	           	],
                 form: {
                     id: '',
                     projectName: '',
@@ -262,7 +310,10 @@ var project=[[${project}]];//品类集合
                     projectAttributive: '',
                     shopType: '',
                     shopTypeList: [],
-                    headAddress: ''
+                    headAddress: '',
+                    groupId:'',
+                    ratio:'',
+                    isSettle:'',
                     
                 },
                 pager:{
@@ -288,6 +339,9 @@ var project=[[${project}]];//品类集合
                     brandCompany: [
                         { max: 50, message: '最长50个字符', trigger: 'blur' }
                     ],
+                    ratio:[{ required: true, message: '请选择结算比例', trigger: 'change' }],
+                    groupId:[{ required: true, message: '请选择集团', trigger: 'change' }],
+                    isSettle:[{ required: true, message: '请选择是否给品牌商结算', trigger: 'change' }]
                   },
                 formLabelWidth1: '150px',
                 dataTableBrand:[],
@@ -429,6 +483,9 @@ var project=[[${project}]];//品类集合
 	            this.form.isNotSign = project.isNotSign;
 	            this.form.projectAttributive = project.projectAttributive;
 	            this.form.headAddress = project.headAddress;
+            	this.form.ratio = project.ratio+"%";
+            	this.form.groupId = project.groupId;
+            	this.form.isSettle = project.isSettle+"";
 	            if(project.shopType!=null&&project.shopType!=""){
 		            this.form.shopTypeList = project.shopType.split(",");
 	            }
