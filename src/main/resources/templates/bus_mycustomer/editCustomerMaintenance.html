@@ -278,7 +278,7 @@
                 <el-row>
                     <el-col :span="8">
                         <el-form-item label="开店区域：" :label-width="formLabelWidth">
-                           <el-select v-model="form.province" placeholder="省" style="width: 100%;"  @change="currentProvince">
+                           <el-select v-model="form.province" placeholder="省" style="width: 100%;"  @change="changeProvince">
                                 <el-option
                                     v-for="item in provinceArr"
                                     :key="item.name"
@@ -290,7 +290,7 @@
                     </el-col>    
                     <el-col :span="16">    
                         <el-form-item label="" style="width: 45%;float: left;margin-left: 5%;">
-                           <el-select v-model="form.city" placeholder="市" style="width: 100%;" @change="currentCity">
+                           <el-select v-model="form.city" placeholder="市" style="width: 100%;" @change="changeCity">
                                 <el-option
                                     v-for="item in cityArr"
                                     :key="item.name"
@@ -1450,7 +1450,15 @@ var callRecord=[[${callRecord}]];//上传文件
                          message: '已取消删除'
                      });          
                  });
-            }, 
+            },
+
+            changeProvince(selVal){
+                addCustomerVM.form.city='';
+                addCustomerVM.form. district='';
+                addCustomerVM.cityArr=[];
+                addCustomerVM.districtArr=[];
+                this.currentProvince(selVal)
+            },
             currentProvince(selVal){
                var  param={};
                 param.type="1";
@@ -1459,6 +1467,11 @@ var callRecord=[[${callRecord}]];//上传文件
                   addCustomerVM.cityArr=response.data.data.data;
                 });  	
              },
+            changeCity(selVal){
+                addCustomerVM.form.district='';
+                addCustomerVM.districtArr=[];
+                this.currentCity(selVal)
+            },
              currentCity(selVal){
             	 var param={};
                  param.type="2";
@@ -1563,7 +1576,16 @@ var callRecord=[[${callRecord}]];//上传文件
         	   this.form.outsideProject=intention.purOutProject;
         	   this.form.province=intention.province;
         	   this.form.city=intention.city;
-        	   this.form.district=intention.district; 
+        	   this.form.district=intention.district;
+
+        	   if(this.form.province){
+        	     this.currentProvince(this.form.province)
+               }
+        	   if(this.form.city){
+                   this.currentCity(this.form.city)
+               }
+
+
         	   if(intention.purProjectType==2){
          		  this.outsideProjectShow=true; //外部项目默认显示   
          		  this.insideProjectShow=false; //内部项目不默认显示
