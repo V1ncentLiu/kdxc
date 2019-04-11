@@ -295,7 +295,7 @@
 
                 <div slot="footer" class="dialog-footer">
                     <!--<el-button type="primary" id="goSignButton"   @click="goEditSign">去填写签约单</el-button>-->
-                    <el-button type="primary" @click="saveVisitRecord">提交</el-button>
+                    <el-button type="primary" @click="saveVisitRecord" :disabled="addVisitAble">提交</el-button>
                     <el-button  @click="addVisitRecordDialogVisible = false">取消</el-button>
                 </div>
             </template>
@@ -726,6 +726,7 @@
         el: '#mainDiv',
         data: {
             formLabelWidth:"150px",
+            addVisitAble:false,
             addVisitRecordDialogVisible:false,
             dialogUpdateFormSigningVisible:false,
             dialogFormSigningVisible:false,
@@ -983,17 +984,20 @@
                 param.createTime = new Date( param.createTime)
                 this.$refs['addVisitRecord'].validate((valid) => {
                     if (valid) {
+                        mainDivVM.addVisitAble = true;
                         axios.post("/busVisitRecord/insert", param)
                             .then(function (response) {
                                 if (response.data.code == 0) {
                                     mainDivVM.$message({type: 'success', message: '来访记录保存成功!',duration:2000,onClose:function(){
                                             mainDivVM.initList();
                                             mainDivVM.addVisitRecordDialogVisible = false;
+                                            // mainDivVM.addVisitAble = false;
                                         //  跳转到我的客户页面
                                             window.location.href='/aggregation/businessMyCustomer/listPage';
                                         }});
                                 } else {
                                     mainDivVM.$message.error(response.data.msg);
+                                    mainDivVM.addVisitAble = false;
                                 }
                             }).catch(function (error) {console.log(error);});
                     } else {return false;}

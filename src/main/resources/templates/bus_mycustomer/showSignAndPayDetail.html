@@ -349,7 +349,7 @@
         </div>
     </el-form>
         <div slot="footer" class="dialog-footer f-tac">
-            <el-button type="primary" @click="submitDialogForm('formMoneyDetail')">提交</el-button>
+            <el-button type="primary" @click="submitDialogForm('formMoneyDetail')" :disabled="addPayDetailButtonAble">提交</el-button>
             <el-button @click="dialogFormVisible = false">取 消</el-button>
         </div>
     </el-dialog>
@@ -623,7 +623,7 @@
                 </div>
             </el-form>
             <div slot="footer" class="dialog-footer f-tac">
-                <el-button type="primary" @click="submitForm('formSigning')">提 交</el-button>
+                <el-button type="primary" @click="submitForm('formSigning')" :disabled="addSignButtonAble">提 交</el-button>
                 <el-button @click="dialogFormSigningVisible = false">取 消</el-button>
             </div>
         </template>
@@ -693,6 +693,8 @@
     var mainDivVM = new Vue({
         el: '#businessContractRecord',
         data: {
+            addSignButtonAble:false,
+            addPayDetailButtonAble:false,
             shouAddVisitButton:false,
             dialogFormVisible:false,//弹窗是否显示
             dialogFormSigningVisible:false,//添加签约单
@@ -1251,6 +1253,7 @@
                 // 设置 clueid
                 this.$refs[formName].validate((valid) => {
                     if (valid) {
+                        mainDivVM.addSignButtonAble =true;
                         axios.post("/businesssign/insert", param)
                             .then(function (response) {
                                 if (response.data.code == 0) {
@@ -1261,6 +1264,7 @@
                                             window.location.href='/aggregation/businessMyCustomer/listPage';
                                     }});
                                 } else {
+                                    mainDivVM.addSignButtonAble = false;
                                     mainDivVM.$message.error(response.data.msg);
                                 }
                             }).catch(function (error) {console.log(error);});
@@ -1276,16 +1280,19 @@
                 param.clueId =vclueId;
                 this.$refs[formName].validate((valid) => {
                     if (valid) {
+                        mainDivVM.addPayDetailButtonAble=true;
                         axios.post("/payDetail/insert", param)
                             .then(function (response) {
                                 if (response.data.code == 0) {
                                     mainDivVM.$message({type: 'success', message: '付款明细保存成功!',duration:2000,onClose:function(){
                                             mainDivVM.dialogFormVisible = false;
+                                            mainDivVM.addPayDetailButtonAble=false;
                                         //  跳转回上一页：
                                             window.location.href='/businesssign/visitRecordPage?clueId='+vclueId+'&signId='+vsignId+'&readyOnly=1';
                                         }});
                                 } else {
                                     mainDivVM.$message.error(response.data.msg);
+                                    mainDivVM.addPayDetailButtonAble=false;
                                 }
                             }).catch(function (error) {console.log(error);});
                     } else {
