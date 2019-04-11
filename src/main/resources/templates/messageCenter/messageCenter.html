@@ -6,7 +6,11 @@
 </head>
 
 <body>
-<div id="addDialog" class="mainPadding">
+<div id="addDialog" class="mainPadding" style="display: none;">
+    <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
+        <el-breadcrumb-item>Home</el-breadcrumb-item>
+        <el-breadcrumb-item>消息中心</el-breadcrumb-item>
+    </el-breadcrumb>
     <template>
         <el-tabs v-model="activeName" type="card" @tab-click="handleClick">
             <el-tab-pane label="业务消息" name="business" ref="business" >
@@ -20,17 +24,18 @@
                         </el-form-item>
                         <el-form-item label="接收时间">
                             <el-date-picker v-model="businessForm.date1" type="datetime" placeholder="选择日期时间"></el-date-picker>
-                            <span>到</span>
+                        </el-form-item>
+                        <el-form-item label="—">   
                             <el-date-picker v-model="businessForm.date2" type="datetime" placeholder="选择日期时间"></el-date-picker>
                         </el-form-item>
                         <el-form-item>
-                            <el-button type="primary" @click="onBussSubmit">搜索</el-button>
-                            <el-button type="primary" @click="changeBussState">标记已读</el-button>
+                            <el-button icon="el-icon-search" type="primary" @click="onBussSubmit">搜索</el-button>
+                            <el-button type="success" @click="changeBussState">标记已读</el-button>
                         </el-form-item>
                     </el-form>
                 </template>
                 <template>
-                    <el-table :data="businessData" height="650" border  @selection-change="handleSelectionChange" @row-dblclick="showBussMx" tooltip-effect="light" >
+                    <el-table :data="businessData" border  @selection-change="handleSelectionChange" @row-dblclick="showBussMx" tooltip-effect="light" >
                         <el-table-column type="selection" width="55"></el-table-column>
                         <el-table-column property="title" stripe label="标题" width="150"  show-overflow-tooltip  align="center"> <!--:formatter="formatTitle"-->
                             <template slot-scope="scope">
@@ -79,18 +84,19 @@
                         </el-form-item>
                         <el-form-item label="接收时间">
                             <el-date-picker v-model="annForm.date1" type="datetime" placeholder="选择日期时间"></el-date-picker>
-                            <span>到</span>
+                        </el-form-item>
+                        <el-form-item label="—">
                             <el-date-picker v-model="annForm.date2" type="datetime" placeholder="选择日期时间"></el-date-picker>
                         </el-form-item>
                         <el-form-item>
-                            <el-button type="primary" @click="onAnnSubmit">搜索</el-button>
-                            <el-button type="primary" @click="changeAnnState">标记已读</el-button>
+                            <el-button icon="el-icon-search" type="primary" @click="onAnnSubmit">搜索</el-button>
+                            <el-button type="success" @click="changeAnnState">标记已读</el-button>
                         </el-form-item>
                     </el-form>
                 </template>
 
                 <template>
-                    <el-table :data="annData" height="650" border style=""  @selection-change="handleSelectionChange"  @row-dblclick="showAnnMx"  tooltip-effect="light"  :cell-style="cellStyle">
+                    <el-table :data="annData" border style=""  @selection-change="handleSelectionChange"  @row-dblclick="showAnnMx"  tooltip-effect="light"  :cell-style="cellStyle">
                         <el-table-column type="selection" width="55"></el-table-column>
                         <el-table-column property="title" label="标题" width="200" show-overflow-tooltip align="center">
                             <template slot-scope="scope">
@@ -194,9 +200,9 @@
     .el-dialog__footer {
         text-align: center;
     }
-    .el-table th {
+    /*.el-table th {
         font-weight: bolder;
-    }
+    }*/
      .el-tooltip__popper {
          max-width: 60%;
          line-height: 130%;
@@ -602,6 +608,9 @@
                 document.getElementById("tab-business").innerHTML =  "业务消息<span style='color: red'>"+str+"</span>";
             })
              window.parent.homePageVM.messageCount()
+        },//created方法 结束
+        mounted(){
+            document.getElementById('addDialog').style.display = 'block';
         }
     });
 
