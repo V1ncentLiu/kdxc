@@ -194,6 +194,58 @@
                     </el-col>
                 </el-row>
             </div>
+            <div class="marginB20 fs16 paddingT20">上传资料</div>
+            <el-row>
+                    <el-table
+                            ref="multipleTable"
+                            :data="tableDataC1"
+                            tooltip-effect="dark"
+                            style="width: 100%"
+                            border
+                    >
+                        <el-table-column
+                                type="index" label="序号"
+                                header-align="center" align="center" width="100">
+                        </el-table-column>
+                        <el-table-column
+                                prop="uploadUserName"
+                                label="上传人姓名"
+                                align="center">
+                        </el-table-column>
+                        <el-table-column
+                                prop="uploadTime"
+                                label="上传时间"
+                                align="center">
+                        </el-table-column>
+                        <el-table-column
+                                prop="fileName"
+                                label="文件名称"
+                                align="center">
+                        </el-table-column>
+                        <el-table-column
+                                label="操作"
+                                align="center">
+                            <template slot-scope="scope">
+                                <el-button size="mini"type="text" @click="handleOperateFn(scope.$index, scope.row)">
+                                    {{scope.row.fileType =="mp3"? '下载录音':'查看图片'}}
+                                </el-button>
+                            </template>
+                        </el-table-column>
+                        <el-table-column
+                                prop="delStatus"
+                                label="删除状态"
+                                align="center">
+                            <template slot-scope="scope">
+                                <div v-if="scope.row.delStatus === 0">
+                                    未删除
+                                </div>
+                                <div v-else-if="scope.row.delStatus ===1">
+                                    已删除
+                                </div>
+                            </template>
+                        </el-table-column>
+                    </el-table>
+                </el-row>
             <div class="marginB20 fs16 paddingT20">跟进记录</div>
             <el-row>
                 <el-table
@@ -424,6 +476,12 @@
             <img th:src="@{/images/errorIcon.jpg}" alt="" style="width: 250px;height: 250px;">
         </div>
     </el-dialog>
+    <!-- 上传资源dialog -->
+    <el-dialog title="查看图片" :visible.sync="dialogFormUploadImg">
+        <div class="padding20" style="text-align: center;">
+            <img :src="dialogFormUploadImgSrc" alt="" style="width: 250px;height: 250px;">
+        </div>
+    </el-dialog>
 </div>
 </body>
 <style type="text/css">
@@ -484,6 +542,7 @@ var intention=[[${intention}]];//资源投资意向信息
 var proSelect=[[${proSelect}]];//项目
 var circulationList=[[${circulationList}]];//资源流转记录
 var trackingList=[[${trackingList}]];//跟访记录
+var clueFileList=[[${clueFileList}]];//上传文件
 var callRecord=[[${callRecord}]];//上传文件
 var loginUserId=[[${loginUserId}]];
 var isEdit=false;
@@ -623,7 +682,9 @@ function crtTimeFtt(val, row) {
  var addCustomerVM=   new Vue({
         el: '#addCustomer',
         data: function() {
-            return {       
+            return {
+                dialogFormUploadImgSrc: '',
+                dialogFormUploadImg:false,
                 isDisabled:true,//默认不可点击         
                 radioProject:'',
                 dialogFormVisible: false,
@@ -697,6 +758,7 @@ function crtTimeFtt(val, row) {
                 	visitStatus:'',
                 	nextVisitTime:'',
                 },
+                tableDataC1: clueFileList,//文件记录
                 tableDataC2: trackingList,//跟进记录
                 tableDataC3: callRecord,  //通话记录
                 tableDataC4:circulationList//流转记录
@@ -857,7 +919,22 @@ function crtTimeFtt(val, row) {
               },
 
             handleOperateFn(index, row) { //上传资源"查看图片、下载录音"
-                console.log(index, row);
+                if( row.fileType == 'mp3' ){
+                    var x=new XMLHttpRequest();
+                    x.open("GET", row.filePath, true);
+                    x.responseType = 'blob';
+                    x.onload=function(e){
+                        download(x.response, row.fileName, "auido/mp3" );
+                    };
+                    x.send();
+//                    this.download1( row.filePath, row.fileName, 'auido/mp3' );
+                }else{
+                    this.dialogFormUploadImgSrc = row.filePath;
+                    this.dialogFormUploadImg =  true;
+                }
+            },
+            download1(data, strFileName, strMimeType) {
+                download(data, strFileName, strMimeType);
             },
             addRecord() { //添加记录
                 this.tableDataC2.push({
