@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.kuaidao.aggregation.constant.AggregationConstant;
 import com.kuaidao.aggregation.dto.financing.RefundAndImgRespDTO;
 import com.kuaidao.aggregation.dto.financing.RefundImgRespDTO;
+import com.kuaidao.aggregation.dto.financing.RefundInfoQueryDTO;
 import com.kuaidao.aggregation.dto.financing.RefundQueryDTO;
 import com.kuaidao.aggregation.dto.financing.RefundRespDTO;
 import com.kuaidao.aggregation.dto.financing.RefundUpdateDTO;
@@ -89,6 +90,23 @@ public class RefundController {
         queryDTO.setCurUser(curLoginUser.getId());
         queryDTO.setType(AggregationConstant.REFOUND_REBATE_TYPE.REFOUND_TYPE);
         return refundFeignClient.listRefundApply(queryDTO);
+    }
+    
+    
+    /**
+     * 查询退款详情 根据Id
+     * @param idEntityLong
+     * @return
+     */
+    @PostMapping("/queryRefundInfoById")
+    @ResponseBody
+    public JSONResult<RefundAndImgRespDTO> queryRefundInfoById(@RequestBody RefundInfoQueryDTO refundInfoQueryDTO){
+        Long id = refundInfoQueryDTO.getId();
+        if(id == null) {
+            return CommonUtil.getParamIllegalJSONResult();
+        }
+        refundInfoQueryDTO.setType(AggregationConstant.REFOUND_REBATE_TYPE.REFOUND_TYPE);
+        return refundFeignClient.queryRefundInfoById(refundInfoQueryDTO);
     }
     
     
@@ -314,20 +332,21 @@ public class RefundController {
         return  refundFeignClient.deleteImgByIdList(idListLongReq);
     }
     
+    
     /**
-     * 查询退返款详情 根据Id
+     * 查询返款详情 根据Id
      * @param idEntityLong
      * @return
      */
-    @PostMapping("/queryRefundInfoById")
+    @PostMapping("/queryRebateInfoById")
     @ResponseBody
-    public JSONResult<RefundAndImgRespDTO> queryRefundInfoById(@RequestBody IdEntityLong idEntityLong){
-        Long id = idEntityLong.getId();
+    public JSONResult<RefundAndImgRespDTO> queryRebateInfoById(@RequestBody RefundInfoQueryDTO refundInfoQueryDTO){
+        Long id = refundInfoQueryDTO.getId();
         if(id == null) {
             return CommonUtil.getParamIllegalJSONResult();
         }
-        return refundFeignClient.queryRefundInfoById(idEntityLong);
+        refundInfoQueryDTO.setType(AggregationConstant.REFOUND_REBATE_TYPE.REBATE_TYPE);
+        return refundFeignClient.queryRefundInfoById(refundInfoQueryDTO);
     }
-    
 
 }

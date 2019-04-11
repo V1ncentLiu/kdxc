@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.PostMapping;
 import com.kuaidao.aggregation.dto.financing.RefundAndImgRespDTO;
 import com.kuaidao.aggregation.dto.financing.RefundImgRespDTO;
+import com.kuaidao.aggregation.dto.financing.RefundInfoQueryDTO;
 import com.kuaidao.aggregation.dto.financing.RefundQueryDTO;
 import com.kuaidao.aggregation.dto.financing.RefundRespDTO;
 import com.kuaidao.aggregation.dto.financing.RefundUpdateDTO;
@@ -64,7 +65,7 @@ public interface RefundFeignClient {
      * @return
      */
     @PostMapping("/queryRefundInfoById")
-    JSONResult<RefundAndImgRespDTO> queryRefundInfoById(IdEntityLong idEntityLong);
+    JSONResult<RefundAndImgRespDTO> queryRefundInfoById(RefundInfoQueryDTO refundInfoQueryDTO);
     
     @Component
     static class HystrixClientFallback implements RefundFeignClient {
@@ -98,7 +99,7 @@ public interface RefundFeignClient {
         }
 
         @Override
-        public JSONResult<RefundAndImgRespDTO> queryRefundInfoById(IdEntityLong idEntityLong) {
+        public JSONResult<RefundAndImgRespDTO> queryRefundInfoById(RefundInfoQueryDTO refundInfoQueryDTO) {
             return fallBackError("根据Id查询退返款详情");
         }
     }
