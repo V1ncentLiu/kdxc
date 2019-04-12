@@ -66,6 +66,8 @@ public class Constants {
     public static String USSM = "ussm";
     // 释放原因字典Code
     public static String RELEASE_REASON = "releaseReason";
+    
+    public static String SETTLEMENT_RATIO="settlement_ratio";
 
 
 }

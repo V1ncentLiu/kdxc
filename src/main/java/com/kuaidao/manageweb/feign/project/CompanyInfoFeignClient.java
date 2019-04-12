@@ -63,6 +63,14 @@ public interface CompanyInfoFeignClient {
      */
     @PostMapping("/allCompany")
     public JSONResult<List<CompanyInfoDTO>> allCompany();
+    
+    /**
+     * 查询集团
+     * @return
+     */
+    @PostMapping("/getCompanyList")
+    public JSONResult<List<CompanyInfoDTO>> getCompanyList();
+    
 
     /**
      * 修改公司信息
@@ -140,6 +148,12 @@ public interface CompanyInfoFeignClient {
         public JSONResult<List<RoleInfoDTO>> roleList(@RequestBody RoleQueryDTO roleQueryDTO) {
             return fallBackError("查询角色列表");
         }
+
+		@Override
+		public JSONResult<List<CompanyInfoDTO>> getCompanyList() {
+			// TODO Auto-generated method stub
+			return fallBackError("查询集团列表失败");
+		}
 
 
 
