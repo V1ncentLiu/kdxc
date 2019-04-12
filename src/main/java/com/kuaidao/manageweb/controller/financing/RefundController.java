@@ -122,6 +122,7 @@ public class RefundController {
            return CommonUtil.getParamIllegalJSONResult();
        }
        refundUpdateDTO.setStatus(AggregationConstant.REFOUND_REBATE_STATUS.STATUS_5);
+       refundUpdateDTO.setType(AggregationConstant.REFOUND_REBATE_TYPE.REFOUND_TYPE);
        return refundFeignClient.updateRefundInfo(refundUpdateDTO);
     }
     
@@ -152,7 +153,7 @@ public class RefundController {
         return refundFeignClient.listRefundApply(queryDTO);
     }
     /**
-     * 更新退款确认
+     * 退款确认
      * @param result
      * @return
      */
@@ -164,6 +165,7 @@ public class RefundController {
             return CommonUtil.getParamIllegalJSONResult();
         }
         refundUpdateDTO.setStatus(AggregationConstant.REFOUND_REBATE_STATUS.STATUS_3);
+        refundUpdateDTO.setType(AggregationConstant.REFOUND_REBATE_TYPE.REFOUND_TYPE);
         return refundFeignClient.updateRefundInfo(refundUpdateDTO);
     }
     
@@ -180,6 +182,7 @@ public class RefundController {
             return CommonUtil.getParamIllegalJSONResult();
         }
         refundUpdateDTO.setStatus(AggregationConstant.REFOUND_REBATE_STATUS.STATUS_2);
+        refundUpdateDTO.setType(AggregationConstant.REFOUND_REBATE_TYPE.REFOUND_TYPE);
         return refundFeignClient.updateRefundInfo(refundUpdateDTO);
     }
     
@@ -196,6 +199,7 @@ public class RefundController {
             return CommonUtil.getParamIllegalJSONResult();
         }
         refundUpdateDTO.setStatus(AggregationConstant.REFOUND_REBATE_STATUS.STATUS_4);
+        refundUpdateDTO.setType(AggregationConstant.REFOUND_REBATE_TYPE.REFOUND_TYPE);
         return refundFeignClient.updateRefundInfo(refundUpdateDTO);
     }
 
@@ -254,6 +258,7 @@ public class RefundController {
            return CommonUtil.getParamIllegalJSONResult();
        }
        refundUpdateDTO.setStatus(AggregationConstant.REFOUND_REBATE_STATUS.STATUS_5);
+       refundUpdateDTO.setType(AggregationConstant.REFOUND_REBATE_TYPE.REBATE_TYPE);
        return refundFeignClient.updateRefundInfo(refundUpdateDTO);
     }
     
@@ -270,6 +275,7 @@ public class RefundController {
             return CommonUtil.getParamIllegalJSONResult();
         }
         refundUpdateDTO.setStatus(AggregationConstant.REFOUND_REBATE_STATUS.STATUS_3);
+        refundUpdateDTO.setType(AggregationConstant.REFOUND_REBATE_TYPE.REBATE_TYPE);
         return refundFeignClient.updateRefundInfo(refundUpdateDTO);
     }
     
@@ -286,6 +292,7 @@ public class RefundController {
             return CommonUtil.getParamIllegalJSONResult();
         }
         refundUpdateDTO.setStatus(AggregationConstant.REFOUND_REBATE_STATUS.STATUS_2);
+        refundUpdateDTO.setType(AggregationConstant.REFOUND_REBATE_TYPE.REBATE_TYPE);
         return refundFeignClient.updateRefundInfo(refundUpdateDTO);
     }
     
@@ -302,6 +309,7 @@ public class RefundController {
             return CommonUtil.getParamIllegalJSONResult();
         }
         refundUpdateDTO.setStatus(AggregationConstant.REFOUND_REBATE_STATUS.STATUS_4);
+        refundUpdateDTO.setType(AggregationConstant.REFOUND_REBATE_TYPE.REBATE_TYPE);
         return refundFeignClient.updateRefundInfo(refundUpdateDTO);
     }
     
