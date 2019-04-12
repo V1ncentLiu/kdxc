@@ -32,6 +32,7 @@ import com.kuaidao.sys.dto.role.RoleInfoDTO;
 import com.kuaidao.sys.dto.role.RoleQueryDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import com.kuaidao.sys.dto.user.UserInfoPageParam;
+import com.kuaidao.sys.dto.user.UserOrgRoleReq;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -148,13 +149,15 @@ public class PublicCustomerResources {
             dto.setSystemCode(SystemCodeConstant.HUI_JU);
             dto.setOrgType(OrgTypeConstant.DXZ);
             JSONResult<List<OrganizationRespDTO>> dzList = organizationFeignClient.queryOrgByParam(dto);
+            long endTime2=System.currentTimeMillis();
+            System.out.println("组织机构： "+(endTime2-startTime2)+"ms");
             dxzList = dzList.getData();
             if(dzList!=null&&dzList.getData()!=null){
                 for(OrganizationRespDTO organizationRespDTO:dzList.getData()){
                     dxzIdsList.add(organizationRespDTO.getId());
                 }
             }
-            dxcygwList = dxcygws(dxzIdsList);
+//            dxcygwList = dxcygws(dxzIdsList);
 //            dxzjsList = dxzjs(dxzIdsList);
         }
         long endTime2=System.currentTimeMillis();
@@ -304,28 +307,35 @@ public class PublicCustomerResources {
      * @return
      */
     private List dxcygws(List<Long> orgList){
-        RoleQueryDTO query = new RoleQueryDTO();
-        query.setRoleCode(RoleCodeEnum.DXCYGW.name());
-        UserInfoDTO user =  CommUtil.getCurLoginUser();
-        JSONResult<List<RoleInfoDTO>> roleJson = roleManagerFeignClient.qeuryRoleByName(query);
+
+        UserOrgRoleReq param = new UserOrgRoleReq();
+        param.setRoleCode(RoleCodeEnum.DXCYGW.name());
+        param.setOrgIdList(orgList);
+        JSONResult<List<UserInfoDTO>> userListJson = userInfoFeignClient.listByOrgAndRole(param);
         List<UserInfoDTO> resList = new ArrayList();
-        if (JSONResult.SUCCESS.equals(roleJson.getCode())) {
-            List<RoleInfoDTO> roleList = roleJson.getData();
-            if (null != roleList && roleList.size() > 0) {
-                RoleInfoDTO roleDto = roleList.get(0);
-                UserInfoPageParam param = new UserInfoPageParam();
-                param.setRoleId(roleDto.getId());
-                param.setOrgIdList(orgList);
-                param.setPageSize(10000);
-                param.setPageNum(1);
-                JSONResult<PageBean<UserInfoDTO>> userListJson = userInfoFeignClient.list(param);
-                if (JSONResult.SUCCESS.equals(userListJson.getCode())) {
-                    PageBean<UserInfoDTO> pageList = userListJson.getData();
-                    resList = pageList.getData();
-                }
-            }
+        if (JSONResult.SUCCESS.equals(userListJson.getCode())) {
+            resList = userListJson.getData();
         }
         return resList;
+//        RoleQueryDTO query = new RoleQueryDTO();
+//        query.setRoleCode(RoleCodeEnum.DXCYGW.name());
+//        UserInfoDTO user =  CommUtil.getCurLoginUser();
+//        JSONResult<List<RoleInfoDTO>> roleJson = roleManagerFeignClient.qeuryRoleByName(query);
+//        List<UserInfoDTO> resList = new ArrayList();
+//        if (JSONResult.SUCCESS.equals(roleJson.getCode())) {
+//            List<RoleInfoDTO> roleList = roleJson.getData();
+//            if (null != roleList && roleList.size() > 0) {
+//                RoleInfoDTO roleDto = roleList.get(0);
+//                UserOrgRoleReq param = new UserOrgRoleReq();
+//                param.setRoleId(roleDto.getId());
+//                param.setOrgIdList(orgList);
+//                JSONResult<List<UserInfoDTO>> userListJson = userInfoFeignClient.listByOrgAndRole(param);
+//                if (JSONResult.SUCCESS.equals(userListJson.getCode())) {
+//                   resList = userListJson.getData();
+//                }
+//            }
+//        }
+//        return resList;
     }
 
     private List dxzjs(List<Long> orgList){
