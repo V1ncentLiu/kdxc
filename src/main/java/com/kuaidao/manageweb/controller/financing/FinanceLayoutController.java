@@ -75,7 +75,7 @@ public class FinanceLayoutController {
         JSONResult<List<OrganizationRespDTO>> swList =
                 organizationFeignClient.queryOrgByParam(orgDto);
         UserOrgRoleReq userOrgRoleReq = new UserOrgRoleReq();
-        userOrgRoleReq.setRoleCode(RoleCodeEnum.CW.name());
+        userOrgRoleReq.setRoleCode(RoleCodeEnum.CYCW.name());
      // 商务小组
         JSONResult<List<UserInfoDTO>> cwList =
         		userInfoFeignClient.listByOrgAndRole(userOrgRoleReq);
