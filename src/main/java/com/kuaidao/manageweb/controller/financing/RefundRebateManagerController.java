@@ -95,11 +95,8 @@ public class RefundRebateManagerController {
         request.setAttribute("teleSaleList", teleSaleList);
 
         // 查询所有省
-        SysRegionDTO queryDTO = new SysRegionDTO();
-        queryDTO.setType(0);
-        JSONResult<List<SysRegionDTO>> querySysRegionByParam =
-                sysRegionFeignClient.querySysRegionByParam(queryDTO);
-        request.setAttribute("provinceList", querySysRegionByParam.getData());
+        JSONResult<List<SysRegionDTO>> getproviceList = sysRegionFeignClient.getproviceList();
+        request.setAttribute("provinceList", getproviceList.getData());
 
         // 查询签约店型集合
         request.setAttribute("vistitStoreTypeList",

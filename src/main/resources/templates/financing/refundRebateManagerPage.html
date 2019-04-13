@@ -74,7 +74,6 @@
   				  </el-option>
   			    </el-select>
   			  </el-form-item>
-          <br>
   	      <el-form-item class="formItem" label="签约时间：">
   	  				<el-date-picker  v-model="searchForm.startTime" format="yyyy-MM-dd HH:mm" type="datetime" placeholder="选择日期"></el-date-picker>
   	      </el-form-item>
@@ -136,7 +135,6 @@
 					  </el-option>
 				    </el-select>
 				  </el-form-item>
-          <br>
   		  <el-form-item class="formItem" prop="phone">
   			  <el-input v-model="searchForm.phone" placeholder="客户手机号" class="input-with-select"></el-input>
   		  </el-form-item>
@@ -148,13 +146,13 @@
   	</el-form>
     <el-row>
         <el-table  ref="multipleTable" tooltip-effect="dark" border  @selection-change="handleSelectionChange"
-            style="width: 100%"  :data="dataTable" @sort-change="sort_change">
+            style="width: 100%"  :data="dataTable" >
            <el-table-column align="center" type="selection" label="全选" width="55"></el-table-column>
            <el-table-column align="center" type="index" label="序号" width="55"></el-table-column>
            <el-table-column align="center" prop="signNo" label="签约单编号"  width="170"></el-table-column>
            <el-table-column align="center" prop="projectName" label="签约项目" width="170"></el-table-column>
-           <el-table-column align="center" prop="signStatus" label="签约单状态"></el-table-column>
-           <el-table-column align="center" prop="signType" label="签约类型"></el-table-column>
+           <el-table-column align="center" prop="signStatus" label="签约单状态" :formatter="transformSignStatus"></el-table-column>
+           <el-table-column align="center" prop="signType" label="签约类型" :formatter="transformSignType"></el-table-column>
            <el-table-column align="center" prop="signTime" label="签约时间"></el-table-column>
            <el-table-column align="center" label="付款明细">
            		 <template slot-scope="scope">
@@ -163,7 +161,7 @@
                         </el-button>
                 </template>
            </el-table-column>
-           <el-table-column align="center" prop="signShopType" label="签约店型"></el-table-column>
+           <el-table-column align="center" prop="signShopType" label="签约店型" :formatter="transformSignShopType"></el-table-column>
            <el-table-column align="center" prop="amountReceivable" label="应收金额"></el-table-column>
            <el-table-column align="center" prop="firstToll" label="路费"></el-table-column>
            <el-table-column align="center" prop="preferentialAmount" label="优惠金额"></el-table-column>
@@ -198,7 +196,7 @@
                 	]"
                 	>
                     <el-select v-model="allocationForm.saleId" placeholder="组内商务经理姓名" style="width: 400px;">
-                        <el-option v-for="item in saleOptions" 
+                        <el-option v-for="item in teleSaleOptions" 
                         			:key="item.id" 
                         			:label="item.name" 
                         			:value="item.id">
@@ -229,7 +227,7 @@
                 	]"
                 	>
                     <el-select v-model="transferForm.saleId" placeholder="外调经理姓名（所属大区-所属组）" style="width: 400px;">
-                        <el-option v-for="item in allSaleOptions" 
+                        <el-option v-for="item in busSaleOptions" 
                         			:key="item.id" 
                         			:label="item.name" 
                         			:value="item.id">
@@ -296,7 +294,7 @@ var clueVM = new Vue({
             busGroupOptions:busGroupList,
             busSaleOptions:busSaleList,
             teleDeptOptions:teleDeptList,
-            teleGorupOptions:teleGorupList,
+            teleGorupOptions:teleGroupList,
             teleSaleOptions:teleSaleList,
             provinceOptions:provinceList,
             signShopTypeOptions:vistitStoreTypeList,
@@ -306,6 +304,22 @@ var clueVM = new Vue({
             },{
             	value:2,
             	name:"先交订金"
+            }],
+            signStatusOptions:[{
+            	value:1,
+            	name:"正常"
+            },{
+            	value:2,
+            	name:"退款确认中"
+            },{
+            	value:3,
+            	name:"返款确认中"
+            },{
+            	value:4,
+            	name:"退款成功"
+            },{
+            	value:5,
+            	name:"返款成功"
             }],
             allocationVisible: false,
             transferVisible: false,
@@ -333,13 +347,8 @@ var clueVM = new Vue({
                 var param ={};
                 var startTime = this.searchForm.startTime;
                 var endTime = this.searchForm.endTime;
-                var startReserveTime = this.searchForm.startReserveTime;
-                var endReserveTime = this.searchForm.endReserveTime;
             	var vilad=false;
                 if(startTime&&endTime&&startTime> endTime){
-                	vilad=true;
-                }
-                if(startReserveTime&&endReserveTime&&startReserveTime> endReserveTime){
                 	vilad=true;
                 }
                 if(vilad){
@@ -351,23 +360,26 @@ var clueVM = new Vue({
                 }
                 param.startTime = startTime;
                 param.endTime = endTime;
-                param.startReserveTime = startReserveTime;
-                param.endReserveTime = endReserveTime;
                 param.pageSize = this.pager.pageSize;
                 param.pageNum = this.pager.currentPage;
+                param.busAreaId = this.searchForm.busAreaId;
+                param.busGroupId = this.searchForm.busGroupId;
+                param.busSaleId = this.searchForm.busSaleId;
+                param.signType = this.searchForm.signType;
+                param.signShopType = this.searchForm.signShopType;
+                param.cusName = this.searchForm.cusName;
+                param.teleDeptId = this.searchForm.teleDeptId;
                 param.teleGorupId = this.searchForm.teleGorupId;
                 param.teleSaleId = this.searchForm.teleSaleId;
-                param.tasteProjectId = this.searchForm.projectId;
-                param.cusName = this.searchForm.cusName;
-                param.province = this.searchForm.province;
-               
+                param.signProvince = this.searchForm.signProvince;
+                param.signStatus = this.searchForm.signStatus;
+                param.phone = this.searchForm.phone;
+                param.signNo = this.searchForm.signNo;
+                
                 //列表只查询正常数据，取消删除数据不查询
                 //param.delFalg = this.searchForm.delFalg;
-                param.delFalg =0;
-                param.sortField = this.searchForm.sortField;
-                param.sortType = this.searchForm.sortType;
                 console.info(param);
-                axios.post('/business/busAllocation/list', param)
+                axios.post('/financing/refundRebate/list', param)
                 .then(function (response) {
                       var result =  response.data;
                       console.info(result);
@@ -415,111 +427,55 @@ var clueVM = new Vue({
               	    }
                     return text;
                },
-             //意向项目转换方法
-               transformPurProject(row, column, cellValue, index) {
-            	   var text="";
-            	   if(cellValue==1){
-	            	   if(projectList){
-	  	                  for(var i=0;i<projectList.length;i++){
-	  	                		if(row.purInProject==projectList[i].id){
-	  	                			text=projectList[i].projectName;
-	  	                		}
-	  	                	}
-	              	  }
-            	   }else{
-             	    	text=row.purOutProject;
-             	   }
-                   return text;
-               },
-               //性别转换方法
+               //是否转换方法
                transformSex(row, column, cellValue, index) {
                  var text="";
                  if(cellValue=="1"){
-                   text="男"
+                   text="是"
+                 }else if(cellValue=="0"){
+                   text="否"
+                 }
+                 return text;
+               },
+               //签约类型转换方法
+               transformSignType(row, column, cellValue, index) {
+                 var text="";
+                 if(cellValue=="1"){
+                   text="一次性全款"
                  }else if(cellValue=="2"){
-                   text="女"
+                   text="先交订金"
                  }
                  return text;
                },
                //邀约状态转换方法
-               transformDelFalg(row, column, cellValue, index) {
+               transformSignStatus(row, column, cellValue, index) {
                  var text="";
-                 if(cellValue=="0"){
-                   text="正常"
-                 }else if(cellValue=="1"){
-                   text="已删除"
-                 }else if(cellValue=="2"){
-                   text="已取消"
+                 if(cellValue=="2"){
+                   text="退款确认中";
+                 }else if(cellValue=="3"){
+                   text="返款确认中";
+                 }else if(cellValue=="4"){
+                   text="退款成功";
+                 }else if(cellValue=="5"){
+                   text="返款成功";
+                 }else{
+                   text="正常";
                  }
                  return text;
                },
                //合伙人转换方法
-               transformPartner(row, column, cellValue, index) {
+               transformSignShopType(row, column, cellValue, index) {
              	  var text="";
-             	  if(partnerList){
- 	                  for(var i=0;i<partnerList.length;i++){
- 	                		if(cellValue==partnerList[i].value){
- 	                			text=partnerList[i].name;
+             	  if(vistitStoreTypeList){
+ 	                  for(var i=0;i<vistitStoreTypeList.length;i++){
+ 	                		if(cellValue==vistitStoreTypeList[i].value){
+ 	                			text=vistitStoreTypeList[i].name;
  	                		}
  	                	}
              	  }
                    return text;
                },
-               //选址情况转换方法
-               transformAddress(row, column, cellValue, index) {
-             	  var text="";
-             	  if(optionAddressList){
- 	                  for(var i=0;i<optionAddressList.length;i++){
- 	                		if(cellValue==optionAddressList[i].value){
- 	                			text=optionAddressList[i].name;
- 	                		}
- 	                	}
-             	  }
-                   return text;
-               },
-               //餐饮经验转换方法
-               transformExperience(row, column, cellValue, index) {
-             	  var text="";
-             	  if(cateringExperienceList){
- 	                  for(var i=0;i<cateringExperienceList.length;i++){
- 	                		if(cellValue==cateringExperienceList[i].value){
- 	                			text=cateringExperienceList[i].name;
- 	                		}
- 	                	}
-             	  }
-                   return text;
-               },
-               //店铺面积转换方法
-               transformArea(row, column, cellValue, index) {
-             	  var text="";
-             	  if(storefrontAreaList){
- 	                  for(var i=0;i<storefrontAreaList.length;i++){
- 	                		if(cellValue==storefrontAreaList[i].value){
- 	                			text=storefrontAreaList[i].name;
- 	                		}
- 	                	}
-             	  }
-                   return text;
-               },
-               //投资金额转换方法
-               transformUssm(row, column, cellValue, index) {
-             	  var text="";
-             	  if(ussmList){
- 	                  for(var i=0;i<ussmList.length;i++){
- 	                		if(cellValue==ussmList[i].value){
- 	                			text=ussmList[i].name;
- 	                		}
- 	                	}
-             	  }
-                   return text;
-               },
-               //日期数据格式化方法
-               dateFormat( row, column, cellValue, index) {
-                 if (cellValue == undefined) {
-                    return "";
-                 }
-                 return moment(cellValue).format("YYYY-MM-DD HH:mm:ss");
-               },
+              
                //打开分发资源
                toAllocationClue() {
             	   this.allocationForm.message="";
@@ -678,41 +634,7 @@ var clueVM = new Vue({
                  },// method end
                  showCustomerDetail(row, column){ // 客户详情
                 	 window.location.href='/bus/BusinessCustomer/viewCustomerInfo?clueId='+row.clueId;
-                 },
-              //根据电销组查询电销总监
-              getSaleList() {
-            	  var param ={};
-            	  param.orgId = this.searchForm.teleGorupId;
-                  console.info(param);
-                  axios.post('/business/busAllocation/getSaleList', param)
-                  .then(function (response) {
-                        var result =  response.data;
-                        console.info(result);
-                        var table=result.data;
-                        clueVM.teleSaleOptions= table;
-                  })
-                  .catch(function (error) {
-                       console.log(error);
-                  });
-              },
-              //排序
-              sort_change(column) {
-            	  var sortField="";
-            	  var sortType="";
-                  if (column.prop === 'createTime') {
-                	  sortField="a.create_Time";
-                  } else if (column.prop === 'reserveTime') {
-                	  sortField="a.reserve_Time";
-                  }
-                  if (column.order === 'descending') {
-                  	sortType="desc";
-                  } else if (column.order === 'ascending') {
-                  	sortType="asc";
-                  }
-                  this.searchForm.sortField=sortField;
-                  this.searchForm.sortType=sortType;
-                  this.searchTable();
-                }
+                 }
         },
         created(){
             console.info("create method");
