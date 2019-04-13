@@ -823,7 +823,7 @@
                 param.id = row.clueid;
                 param.cusPhone = row.phone;
                 console.info(param);
-                axios.post('/clue/appiontment/repeatPhonelist', param)
+                axios.post('/clue/appiontment/repeatPhoneMap', param)
                   .then(function (response) {
                         var result =  response.data;
                         console.info(result);
@@ -876,8 +876,15 @@
             param={};
             param.groupCode="customerStatus";
             axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {
-                console.log(response.data.data)
-                mainDivVM.cusStatusArr=response.data.data;
+                var datas = response.data.data;
+                var arr = []
+                for(var i = 0 ; i < datas.length ; i++){
+                    if(datas[i].name!='已签约'){
+                        arr.push(datas[i])
+                    }
+                }
+                mainDivVM.cusStatusArr=arr
+                // mainDivVM.cusStatusArr=response.data.data;
             });
 
             // 初始化table数据

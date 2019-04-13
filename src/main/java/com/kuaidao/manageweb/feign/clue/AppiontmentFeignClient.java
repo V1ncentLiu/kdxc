@@ -1,6 +1,8 @@
 package com.kuaidao.manageweb.feign.clue;
 
 import java.util.List;
+import java.util.Map;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.netflix.feign.FeignClient;
@@ -31,8 +33,6 @@ import com.kuaidao.common.entity.PageBean;
 public interface AppiontmentFeignClient {
 	/**
 	 * 根据id查询预约来访信息
-	 * 
-	 * @param menuDTO
 	 * @return
 	 */
 	@PostMapping("/get")
@@ -40,8 +40,6 @@ public interface AppiontmentFeignClient {
 
 	/**
 	 * 删除预约来访信息
-	 * 
-	 * @param menuDTO
 	 * @return
 	 */
 	@PostMapping("/delete")
@@ -49,8 +47,6 @@ public interface AppiontmentFeignClient {
 
 	/**
 	 * 查询预约来访集合
-	 * 
-	 * @param menuDTO
 	 * @return
 	 */
 	@PostMapping("/list")
@@ -58,17 +54,20 @@ public interface AppiontmentFeignClient {
 
 	/**
 	 * 查询重复手机号资源
-	 * 
-	 * @param menuDTO
 	 * @return
 	 */
 	@PostMapping("/repeatPhonelist")
 	public JSONResult<List<ClueRepeatPhoneDTO>> repeatPhonelist(@RequestBody ClueAppiontmentReq param);
 
 	/**
+	 * 查询重复手机号资源
+	 * @return
+	 */
+	@PostMapping("/repeatPhoneMap")
+	public JSONResult<Map> repeatPhoneMap(@RequestBody ClueAppiontmentReq clueAppiontmentReq);
+
+	/**
 	 * 修改预约来访信息
-	 * 
-	 * @param idEntity
 	 * @return
 	 */
 	@PostMapping("/update")
@@ -76,8 +75,6 @@ public interface AppiontmentFeignClient {
 
 	/**
 	 * 修改预约来访信息
-	 * 
-	 * @param idEntity
 	 * @return
 	 */
 	@PostMapping("/updateView")
@@ -116,8 +113,6 @@ public interface AppiontmentFeignClient {
      */
 	@PostMapping("/countTeleDirecotorTomorrowArriveTime")
     public JSONResult<Integer> countTeleDirecotorTomorrowArriveTime(TeleConsoleReqDTO reqDTO);
-	
-	
 
     /**
      * 商务总监 预计明日到访数
@@ -125,11 +120,8 @@ public interface AppiontmentFeignClient {
      * @return
      */
 	@PostMapping("/countBusiDirecotorTomorrowArriveTime")
-    public JSONResult<Integer> countBusiDirecotorTomorrowArriveTime(
-            BusinessConsoleReqDTO businessConsoleReqDTO);
+    public JSONResult<Integer> countBusiDirecotorTomorrowArriveTime(BusinessConsoleReqDTO businessConsoleReqDTO);
 
-
-	
 	@Component
 	static class HystrixClientFallback implements AppiontmentFeignClient {
 
@@ -164,6 +156,11 @@ public interface AppiontmentFeignClient {
 		@Override
 		public JSONResult<List<ClueRepeatPhoneDTO>> repeatPhonelist(@RequestBody ClueAppiontmentReq param) {
 			return fallBackError("查询重复手机号资源");
+		}
+
+		@Override
+		public JSONResult<Map> repeatPhoneMap(ClueAppiontmentReq clueAppiontmentReq) {
+			return fallBackError("查询重复手机号Map查询资源");
 		}
 
 		@Override
