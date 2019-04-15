@@ -2,6 +2,7 @@
 package com.kuaidao.manageweb.controller.clue;
 
 import java.util.List;
+import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import org.apache.shiro.SecurityUtils;
@@ -171,8 +172,18 @@ public class AppiontmentController {
     public JSONResult<List<ClueRepeatPhoneDTO>> repeatPhonelist(
             @RequestBody ClueAppiontmentReq param, HttpServletRequest request) {
         JSONResult<List<ClueRepeatPhoneDTO>> list = appiontmentFeignClient.repeatPhonelist(param);
-
         return list;
+    }
+
+    /***
+     * 重复手机号资源信息
+     * @return
+     */
+    @PostMapping("/repeatPhoneMap")
+    @ResponseBody
+    public JSONResult<Map> repeatPhoneMap(@RequestBody ClueAppiontmentReq param, HttpServletRequest request) {
+        JSONResult<Map> map = appiontmentFeignClient.repeatPhoneMap(param);
+        return map;
     }
 
     /***

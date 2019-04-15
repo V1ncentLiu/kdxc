@@ -6,6 +6,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
+
+import com.kuaidao.common.constant.RoleCodeEnum;
+import com.kuaidao.sys.dto.role.RoleInfoDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,7 +64,12 @@ public class BusinessMyCustomerController {
         List tasteProList = new ArrayList();
         Map tasteMap = new HashMap();
         MyCustomerParamDTO dto = new MyCustomerParamDTO();
-        dto.setBusSaleId(user.getId());
+        List<RoleInfoDTO> roleList = user.getRoleList();
+        if (roleList != null && RoleCodeEnum.GLY.name().equals(roleList.get(0).getRoleCode())) {
+        }else{
+            dto.setBusSaleId(user.getId());
+        }
+
         JSONResult<List<BusMyCustomerRespDTO>> resList = busMyCustomerFeignClient.queryList(dto);
         if (JSONResult.SUCCESS.equals(resList.getCode())) {
             List<BusMyCustomerRespDTO> datas = resList.getData();
@@ -150,7 +158,11 @@ public class BusinessMyCustomerController {
         /**
          * 下回代码注释掉，请记得给我改回来
          */
-        param.setBusSaleId(user.getId());
+        List<RoleInfoDTO> roleList = user.getRoleList();
+        if (roleList != null && RoleCodeEnum.GLY.name().equals(roleList.get(0).getRoleCode())) {
+        }else{
+            param.setBusSaleId(user.getId());
+        }
         return busMyCustomerFeignClient.queryPageList(param);
     }
 

@@ -233,12 +233,18 @@ public class BusCustomerManagerController {
 
         Map<Long, OrganizationRespDTO> orgMap = new HashMap<Long, OrganizationRespDTO>();
         // 生成<机构id，机构>map
-        for (OrganizationRespDTO org : groupList) {
-            orgMap.put(org.getId(), org);
+        if(groupList!=null){
+            for (OrganizationRespDTO org : groupList) {
+                orgMap.put(org.getId(), org);
+            }
         }
-        for (OrganizationRespDTO org : busAreaLsit) {
-            orgMap.put(org.getId(), org);
+
+        if(busAreaLsit!=null){
+            for (OrganizationRespDTO org : busAreaLsit) {
+                orgMap.put(org.getId(), org);
+            }
         }
+
         List<Map<String, Object>> result = new ArrayList<Map<String, Object>>();
         // 生成结果集，匹配电销组以及电销总监
         for (UserInfoDTO user : userList) {
