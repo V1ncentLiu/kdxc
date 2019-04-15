@@ -4,6 +4,7 @@
     <title>后台管理系统</title>
     <style>
         .el-upload-list{width: 200px;}
+        .el-tag{margin-right: 10px;}
     </style>
 </head>
 <body>
@@ -204,9 +205,6 @@
                       action="https://jsonplaceholder.typicode.com/posts/"
                       multiple
                       :file-list="allocationForm.fileList"
-                      :on-success="uploadSuccess"
-                      :on-error="uploadError"
-                      :before-upload="beforeAvatarUpload"
                       >
                       <el-button size="small" type="primary">点击上传</el-button>
                       <div slot="tip" class="el-upload__tip">只能上传jpg/png文件，且不超过500kb</div>
@@ -231,28 +229,57 @@
     </el-dialog>
     <!-- dialog -->
       <!-- dialog -->
-      <el-dialog  title="外调经理"  :visible.sync="transferVisible">
+      <el-dialog  title="（RC2019022700002）签约单申请返款"  :visible.sync="transferVisible">
         <template>
             <el-form :model="transferForm" ref="transferForm" :rules="transferFormRules">
-            	  <el-form-item >{{transferForm.message}}</el-form-item>
-                <el-form-item label="商务经理"    
-                	:label-width="formLabelWidth" 
-                	prop="saleId"
-                	:rules="[
-                	 { required: true, message: '商务经理不能为空'},
-                	]"
-                	>
-                    <el-select v-model="transferForm.saleId" placeholder="外调经理姓名（所属大区-所属组）" style="width: 400px;">
-                        <el-option v-for="item in busSaleOptions" 
-                        			:key="item.id" 
-                        			:label="item.name" 
-                        			:value="item.id">
-                        </el-option>
-                    </el-select>
-                </el-form-item>
-                <el-form-item label="备注"    :label-width="formLabelWidth"  prop="remark">
-			    	<el-input type="textarea" v-model="transferForm.remark" class="input-with-select" maxlength="200" style="width: 400px;" :rows="4" placeholder="请输入外调备注"></el-input>
-                </el-form-item>
+              <el-form-item label="" :label-width="formLabelWidth" prop="">
+                <el-tag
+                  :key="tag"
+                  v-for="tag in dynamicTags"
+                  closable
+                  :disable-transitions="false"
+                  @close="handleClose(tag)">
+                  {{tag}}
+                </el-tag>
+              </el-form-item>
+              <el-form-item label="关联签约单：" :label-width="formLabelWidth" prop="dynamicTags">
+                <el-button type="primary" @click="chooseRelevance">选择关联签约单</el-button>
+              </el-form-item>
+            	<el-form-item label="返款客户金额：" :label-width="formLabelWidth" prop="refundAmount">
+                <el-input v-model="transferForm.refundAmount" placeholder="" style="width:50%"></el-input>
+              </el-form-item>
+              <el-form-item label="返还餐饮公司金额：" :label-width="formLabelWidth" prop="reason" class="redcolor">
+                  {{transferForm.money}}
+              </el-form-item>
+              <el-form-item label="退款时间：" :label-width="formLabelWidth" prop="drawbackTime">
+                  <el-date-picker
+                      style="width: 50%;"
+                      v-model="transferForm.drawbackTime"
+                      type="datetime"
+                      placeholder="选择日期时间">
+                  </el-date-picker>
+              </el-form-item>
+              <el-form-item label="上传图片：" :label-width="formLabelWidth" prop="fileList">
+                  <el-upload
+                      class="upload-demo"
+                      action="https://jsonplaceholder.typicode.com/posts/"
+                      multiple
+                      :file-list="transferForm.fileList"
+                      >
+                      <el-button size="small" type="primary">点击上传</el-button>
+                      <div slot="tip" class="el-upload__tip">只能上传jpg/png文件，且不超过500kb</div>
+                  </el-upload>
+              </el-form-item>
+              <el-form-item label="退款原因：" :label-width="formLabelWidth" prop="refundReason">
+                  <el-input
+                      type="textarea"
+                      :rows="3"
+                      placeholder=""
+                      maxLength="100"
+                      v-model="allocationForm.refundReason" 
+                      style="width: 80%;">
+                  </el-input>
+              </el-form-item>
             </el-form>
             <div slot="footer" class="dialog-footer">
                 <el-button type="primary" @click="transferClue('transferForm')">提 交</el-button>
@@ -380,6 +407,47 @@
             </el-table>
         </div>
     </el-dialog>
+    <!-- 关联签约单 -->
+    <!-- dialog -->
+    <el-dialog title="选择关联签约单" :visible.sync="dialogFormChooseVisible">      
+      <el-row class="marginB10 greybg padding20" style="padding-bottom: 0;">
+        <el-form :inline="true" :model="dialogFormChoose" ref="dialogFormChoose">
+          <el-form-item class="formItem" label="签约时间：">
+              <el-date-picker  v-model="dialogFormChoose.startTime" format="yyyy-MM-dd HH:mm" type="datetime" placeholder="选择日期"></el-date-picker>
+          </el-form-item>
+          <el-form-item class="formItem" label="—">
+              <el-date-picker  v-model="dialogFormChoose.endTime" format="yyyy-MM-dd HH:mm" type="datetime" placeholder="选择日期"></el-date-picker>
+          </el-form-item>
+          <el-form-item label=""  prop="">
+            <el-input v-model="dialogFormChoose.searchIpBag" placeholder="签约单编号"></el-input>
+          </el-form-item>
+          <el-form-item label=""  prop="">
+            <el-input v-model="dialogFormChoose.searchHasIp" placeholder="客户姓名"></el-input>
+          </el-form-item>
+          <el-form-item label=""  prop="">
+            <el-button type="primary" size="medium" icon="el-icon-search">搜索</el-button>
+          </el-form-item>
+        </el-form>  
+      </el-row>
+      <el-table 
+          tooltip-effect="dark"
+          style="width: 100%"
+          border
+          :data="dataTableChoose" 
+          class="marginB10">
+          <el-table-column align="center" prop="" type="selection" name="type" width="55"></el-table-column>
+          <el-table-column align="center" prop="" label="序号" type="index" name="type" width="55"></el-table-column>
+          <el-table-column align="center" prop="" label="签约单编号"></el-table-column>
+          <el-table-column align="center" prop="" label="签约时间"></el-table-column>
+          <el-table-column align="center" prop="" label="客户姓名"></el-table-column>
+          <el-table-column align="center" prop="" label="客户手机号"></el-table-column>
+          <el-table-column align="center" prop="" label="应收金额"></el-table-column>
+      </el-table>
+      <div slot="footer" class="dialog-footer">
+          <el-button type="primary" @click="submitForm('dialogFormChoose')">提交</el-button>
+          <el-button @click="dialogFormChooseVisible = false">取消</el-button>
+      </div>      
+  </el-dialog>
 </div>
 <!-- import common js-->
 <div th:include="_footer_include :: #jsLib"></div>
@@ -412,106 +480,135 @@ var clueVM = new Vue({
 	       		signStatus: '',
 	       		phone: '',
 	       		signNo: ''
-            },
-            allocationForm: {
-            	reason:'退款金额不对',
-              person:'张三',
-              rejectTime:'20190411 22:55:13',
-              money:'1000',
-              fileList: [//上传
-                // {
-                //   name: 'food.jpeg', 
-                //   url: 'https://fuss10.elemecdn.com/3/63/4e7f3a15429bfda99bce42a18cdd1jpeg.jpeg?imageMogr2/thumbnail/360x360/format/webp/quality/100'
-                // }, 
-                // {
-                //   name: 'food2.jpeg', 
-                //   url: 'https://fuss10.elemecdn.com/3/63/4e7f3a15429bfda99bce42a18cdd1jpeg.jpeg?imageMogr2/thumbnail/360x360/format/webp/quality/100'
-                // }
-              ],
-            },
-            transferForm: {
-            	saleId:'',
-            	remark:'',
-            	message:''
-            },
-            dataTable:[],
-            recordDialog:false,
-            reasonDialog:false,
-            paymentDetailsShow:false,//判断全款付款明细表格是否显示
-            paymentDetailsShow2:false,//判断定金付款明细表格是否显示
-            paymentDetailsShow3:false,//判断二次定金付款明细表格是否显示
-            paymentDetailsShow4:false,//判断尾款付款明细表格是否显示
-            visitRecordShow:false,
-            curRow:"", // 列表数据：当前行，使用地点：付款明细
-            recordTable:[],
-            recordTable2:[],
-            recordTable3:[],
-            recordTable4:[],
-            visitRecordTable:[],
-            showbutton:false,
-            busAreaOptions:busAreaList,
-            busGroupOptions:busGroupList,
-            busSaleOptions:busSaleList,
-            teleDeptOptions:teleDeptList,
-            teleGorupOptions:teleGroupList,
-            teleSaleOptions:teleSaleList,
-            provinceOptions:provinceList,
-            signShopTypeOptions:vistitStoreTypeList,
-            signTypeOptions:[{
-            	value:1,
-            	name:"一次性全款"
-            },{
-            	value:2,
-            	name:"先交订金"
-            }],
-            signStatusOptions:[{
-            	value:1,
-            	name:"正常"
-            },{
-            	value:2,
-            	name:"退款确认中"
-            },{
-            	value:3,
-            	name:"返款确认中"
-            },{
-            	value:4,
-            	name:"退款成功"
-            },{
-            	value:5,
-            	name:"返款成功"
-            }],
-            allocationVisible: true,
-            transferVisible: false,
-            pager:{
-                total: 0,
-                currentPage: 1,
-                pageSize: 20,
-            },
-            allocationFormRules: {
-            	refundReason : [
-                  { required: true, message: '请输入退款原因', trigger: 'blur' }
-              ],
-              drawbackTime : [
-                  { required: true, message: '请选择退款时间', trigger: 'blur' }
-              ],
-              refundAmount: [
-                  { required: true, message: '请输入退款客户金额', trigger: 'blur' }
-              ],
-              fileList: [
-                  { required: true, message: '请上传图片', trigger: 'blur' }
-              ],
-            },
-            transferFormRules: {
-            	saleId: [
-                    { required: true, message: '请选择商务经理', trigger: 'change' }
-                ]
-              },
-            multipleSelection:[],
-            formLabelWidth: '150px',
-            formLabelWidth1: '120px',            
-      
+          },
+          allocationForm: {
+          	reason:'退款金额不对',
+            person:'张三',
+            rejectTime:'20190411 22:55:13',
+            money:'1000',
+            fileList: [//上传
+              // {
+              //   name: 'food.jpeg', 
+              //   url: 'https://fuss10.elemecdn.com/3/63/4e7f3a15429bfda99bce42a18cdd1jpeg.jpeg?imageMogr2/thumbnail/360x360/format/webp/quality/100'
+              // }, 
+              // {
+              //   name: 'food2.jpeg', 
+              //   url: 'https://fuss10.elemecdn.com/3/63/4e7f3a15429bfda99bce42a18cdd1jpeg.jpeg?imageMogr2/thumbnail/360x360/format/webp/quality/100'
+              // }
+            ],
+          },
+          transferForm: {
+          	reason:'返款金额不对',
+            person:'李四',
+            rejectTime:'20190411 22:55:13',
+            money:'2000',
+            fileList: [//上传
+              // {
+              //   name: 'food.jpeg', 
+              //   url: 'https://fuss10.elemecdn.com/3/63/4e7f3a15429bfda99bce42a18cdd1jpeg.jpeg?imageMogr2/thumbnail/360x360/format/webp/quality/100'
+              // }, 
+              // {
+              //   name: 'food2.jpeg', 
+              //   url: 'https://fuss10.elemecdn.com/3/63/4e7f3a15429bfda99bce42a18cdd1jpeg.jpeg?imageMogr2/thumbnail/360x360/format/webp/quality/100'
+              // }
+            ],
+          },
+          dataTable:[],
+          recordDialog:false,
+          reasonDialog:false,
+          paymentDetailsShow:false,//判断全款付款明细表格是否显示
+          paymentDetailsShow2:false,//判断定金付款明细表格是否显示
+          paymentDetailsShow3:false,//判断二次定金付款明细表格是否显示
+          paymentDetailsShow4:false,//判断尾款付款明细表格是否显示
+          visitRecordShow:false,
+          curRow:"", // 列表数据：当前行，使用地点：付款明细
+          recordTable:[],
+          recordTable2:[],
+          recordTable3:[],
+          recordTable4:[],
+          visitRecordTable:[],
+          showbutton:false,
+          busAreaOptions:busAreaList,
+          busGroupOptions:busGroupList,
+          busSaleOptions:busSaleList,
+          teleDeptOptions:teleDeptList,
+          teleGorupOptions:teleGroupList,
+          teleSaleOptions:teleSaleList,
+          provinceOptions:provinceList,
+          signShopTypeOptions:vistitStoreTypeList,
+          signTypeOptions:[{
+          	value:1,
+          	name:"一次性全款"
+          },{
+          	value:2,
+          	name:"先交订金"
+          }],
+          signStatusOptions:[{
+          	value:1,
+          	name:"正常"
+          },{
+          	value:2,
+          	name:"退款确认中"
+          },{
+          	value:3,
+          	name:"返款确认中"
+          },{
+          	value:4,
+          	name:"退款成功"
+          },{
+          	value:5,
+          	name:"返款成功"
+          }],
+          allocationVisible: false,
+          transferVisible: false,
+          pager:{
+              total: 0,
+              currentPage: 1,
+              pageSize: 20,
+          },
+          allocationFormRules: {
+          	refundReason : [
+                { required: true, message: '请输入退款原因', trigger: 'blur' }
+            ],
+            drawbackTime : [
+                { required: true, message: '请选择退款时间', trigger: 'blur' }
+            ],
+            refundAmount: [
+                { required: true, message: '请输入退款客户金额', trigger: 'blur' }
+            ],
+            fileList: [
+                { required: true, message: '请上传图片', trigger: 'blur' }
+            ],
+          },
+          transferFormRules: {
+          	refundReason : [
+                { required: true, message: '请输入返款原因', trigger: 'blur' }
+            ],
+            drawbackTime : [
+                { required: true, message: '请选择退款时间', trigger: 'blur' }
+            ],
+            refundAmount: [
+                { required: true, message: '请输入返款客户金额', trigger: 'blur' }
+            ],
+            fileList: [
+                { required: true, message: '请上传图片', trigger: 'blur' }
+            ],
+          },
+          multipleSelection:[],
+          formLabelWidth: '150px',
+          formLabelWidth1: '120px',     
+          dialogFormChooseVisible:false, //关联弹窗
+          dialogFormChoose:{},   
+          dataTableChoose:[],   
+          dynamicTags: ['标签一', '标签二', '标签三'],
         },
         methods: {
+          chooseRelevance(){
+            this.dialogFormChooseVisible=true;
+          },
+          handleClose(tag) {
+            this.dynamicTags.splice(this.dynamicTags.indexOf(tag), 1);
+          },
         	searchTable() {
                 var param ={};
                 var startTime = this.searchForm.startTime;
@@ -653,7 +750,7 @@ var clueVM = new Vue({
            	       var rows = this.multipleSelection;
             	   if(rows.length==0){
                        this.$message({
-                          message: '请选择一条数据进行分发',
+                          message: '请选择一条数据进行退款申请',
                           type: 'warning'
                         });
                        return;
@@ -732,7 +829,7 @@ var clueVM = new Vue({
            	       var rows = this.multipleSelection;
             	   if(rows.length==0){
                        this.$message({
-                          message: '请选择一条数据进行外调',
+                          message: '请选择一条数据进行返款申请',
                           type: 'warning'
                         });
                        return;
@@ -903,28 +1000,6 @@ var clueVM = new Vue({
                         }
                         return valText;
                  },
-                 //上传照片前的校验
-                beforeAvatarUpload(file) {
-                  var testmsg=/^image\/(jpeg|png|jpg)$/.test(file.type)
-                  const isLt4M = file.size / 1024/1024 <=4//图片大小不超过2MB
-                    if (!testmsg) {
-                    this.$message.error('上传图片格式不对!');
-                    return
-                  }
-                  if(!isLt4M) {
-                    this.$message.error('上传图片大小不能超过 4M!');
-                    return
-                  }
-                  return testmsg  && isLt4M
-                },
-                //上传成功
-                uploadSuccess(res,file,fileList){
-                  this.$message.success('上传成功')
-                },
-                //上传失败
-                uploadError(err,file){
-                  this.$message.error('上传失败')
-                },
         },
         created(){
             console.info("create method");
