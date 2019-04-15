@@ -113,13 +113,8 @@
                     </el-col>
                     <el-col :span="8">
                         <el-form-item label="手机号：" prop="customerPhone" :label-width="formLabelWidth" >
-                            <!--<div v-show="showPhone">-->
-                                <font color="red">{{form.customerPhone}}</font>
-                            <span @click="dialogFormVisible = true" style="padding-left: 5px; color: rgb(0, 114, 255); cursor: pointer;">查看多个手机号</span>
-                            <!--</div>-->
-                            <!--<div v-show="!showPhone">-->
-                                <!--<font color="red">领取后显示</font>-->
-                            <!--</div>-->
+                            <font color="red">{{form.customerPhone}}</font>
+                            <span v-show="isShowPhoneButton" @click="dialogFormVisible = true" style="padding-left: 5px; color: rgb(0, 114, 255); cursor: pointer;">查看多个手机号</span>
 
                         </el-form-item>
                     </el-col>
@@ -687,6 +682,8 @@
         el: '#addCustomer',
         data: function () {
             return {
+                isShowPhoneButton:false,
+                vxShow:vxShow,
             	loginUserId:loginUserId,
                 isShowTip: false,//是否显示释放公有池提示信息
                 isShowBtn: false,//是否显示保留客户按钮
@@ -1519,7 +1516,7 @@
                 this.form.customerJob = customer.profession == null?"":customer.profession+"";
                 this.form.customerPartner = customer.partnerType == null ? "" : customer.partnerType + "";
                 this.form.address = customer.hasAddress == null ? "" : customer.hasAddress + "";
-                this.form.urgency = customer.urgentDate;
+                this.form.urgency = crtTimeFtt(customer.urgentDate);
                 this.form.customerLevel = customer.cusLevel == null ? "" : customer.cusLevel + "";
                 this.form.qq = customer.qq;
                 this.form.customerEmail = customer.email;
@@ -1542,7 +1539,6 @@
                     phoneArr.push(phone3);
 
                 }
-
                 if (customer.phone4) {
                     var phone4 = {};
                     phone4.value = customer.phone4;
@@ -1555,15 +1551,8 @@
                     phoneArr.push(phone5);
                 }
                 this.dynamicValidateForm.domains = phoneArr;
-
-            }
-            if (base) {
-                if (null != base.releaseTime && base.releaseTime != 0) {
-                    this.isShowTip = true;
-                    this.showTipInfo = "客户" + base.releaseTime + "小时后即将释放到公有池";
-                }
-                if (null != base.reserve && base.reserve == 0) {
-                    this.isShowBtn = true;
+                if(customer.phone2||customer.phone3||customer.phone4||customer.phone5){
+                    this.isShowPhoneButton = true;
                 }
             }
             if (intention) {

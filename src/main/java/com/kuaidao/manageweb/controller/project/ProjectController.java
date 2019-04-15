@@ -94,9 +94,18 @@ public class ProjectController {
         // 查询字典项目归属集合
         request.setAttribute("projectAttributiveList",
                 getDictionaryByCode(Constants.PROJECT_ATTRIBUTIVE));
+        // 查询字典集团分配比例归属集合
+        List<DictionaryItemRespDTO>  ratioList = getDictionaryByCode(Constants.SETTLEMENT_RATIO);
+        if(ratioList !=null && ratioList.size()>0) {
+        	for (DictionaryItemRespDTO dictionaryItemRespDTO : ratioList) {
+        		dictionaryItemRespDTO.setName(dictionaryItemRespDTO.getValue()+"%");
+			}
+        }
+        request.setAttribute("ratioList",ratioList);
         // 查询公司列表
-        JSONResult<List<CompanyInfoDTO>> listNoPage = companyInfoFeignClient.allCompany();
-
+       // JSONResult<List<CompanyInfoDTO>> listNoPage = companyInfoFeignClient.allCompany();
+        //request.setAttribute("companyList", listNoPage.getData());
+        JSONResult<List<CompanyInfoDTO>> listNoPage = companyInfoFeignClient.getCompanyList();
         request.setAttribute("companyList", listNoPage.getData());
         // 查询品牌品类集合
         JSONResult<List<CategoryDTO>> categoryList = projectInfoFeignClient.getCategoryList();
@@ -115,10 +124,21 @@ public class ProjectController {
         // 查询项目信息
         JSONResult<ProjectInfoDTO> jsonResult = projectInfoFeignClient.get(new IdEntityLong(id));
         request.setAttribute("project", jsonResult.getData());
-        // 查询公司列表
-        JSONResult<List<CompanyInfoDTO>> listNoPage = companyInfoFeignClient.allCompany();
-
+//        // 查询公司列表
+//        JSONResult<List<CompanyInfoDTO>> listNoPage = companyInfoFeignClient.allCompany();
+//
+//        request.setAttribute("companyList", listNoPage.getData());
+        List<DictionaryItemRespDTO>  ratioList = getDictionaryByCode(Constants.SETTLEMENT_RATIO);
+        if(ratioList !=null && ratioList.size()>0) {
+        	for (DictionaryItemRespDTO dictionaryItemRespDTO : ratioList) {
+        		dictionaryItemRespDTO.setName(dictionaryItemRespDTO.getValue()+"%");
+			}
+        }
+        
+        request.setAttribute("ratioList",ratioList);
+        JSONResult<List<CompanyInfoDTO>> listNoPage = companyInfoFeignClient.getCompanyList();
         request.setAttribute("companyList", listNoPage.getData());
+        
         // 查询字典品类集合
         request.setAttribute("categoryList", getDictionaryByCode(Constants.PROJECT_CATEGORY));
         // 查询字典类别集合
