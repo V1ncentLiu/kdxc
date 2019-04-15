@@ -21,7 +21,7 @@ import com.kuaidao.common.entity.PageBean;
  * @date: 2019年1月4日
  * @version V1.0
  */
-@FeignClient(name = "aggregation-service", path = "/aggregation/reconciliationConfirm",
+@FeignClient(name = "aggregation-service-zhang", path = "/aggregation/reconciliationConfirm",
         fallback = ReconciliationConfirmFeignClient.HystrixClientFallback.class)
 public interface ReconciliationConfirmFeignClient {
 
@@ -98,11 +98,11 @@ public interface ReconciliationConfirmFeignClient {
 
 
 
-		@Override
-		public JSONResult<PageBean<ReconciliationConfirmDTO>> applyList(ReconciliationConfirmPageParam param) {
-			return fallBackError("对账申请列表");
-		}
-
+        @Override
+        public JSONResult<PageBean<ReconciliationConfirmDTO>> applyList(
+                ReconciliationConfirmPageParam param) {
+            return fallBackError("对账申请列表");
+        }
 
 
 

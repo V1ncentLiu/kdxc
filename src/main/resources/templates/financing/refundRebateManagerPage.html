@@ -185,16 +185,16 @@
       <el-dialog  title="（RC2019022700001）签约单申请退款"  :visible.sync="allocationVisible" width="870px">
         <template>
             <el-form :model="allocationForm" ref="allocationForm" :rules="allocationFormRules"> 
-              <el-form-item label="退款客户金额：" :label-width="formLabelWidth" prop="refundAmount">
-                  <el-input v-model="allocationForm.refundAmount" placeholder="" style="width:50%"></el-input>
+              <el-form-item label="退款客户金额：" :label-width="formLabelWidth" prop="cusAmount">
+                  <el-input v-model="allocationForm.cusAmount" placeholder="" style="width:50%"></el-input>
               </el-form-item>
-              <el-form-item label="退还餐饮公司金额：" :label-width="formLabelWidth" prop="reason" class="redcolor">
+             <!--  <el-form-item label="退还餐饮公司金额：" :label-width="formLabelWidth" prop="reason" class="redcolor">
                   {{allocationForm.money}}
-              </el-form-item>
-              <el-form-item label="退款时间：" :label-width="formLabelWidth" prop="drawbackTime">
+              </el-form-item> -->
+              <el-form-item label="退款时间：" :label-width="formLabelWidth" prop="refundTime">
                   <el-date-picker
                       style="width: 50%;"
-                      v-model="allocationForm.drawbackTime"
+                      v-model="allocationForm.refundTime"
                       type="datetime"
                       placeholder="选择日期时间">
                   </el-date-picker>
@@ -210,13 +210,13 @@
                       <div slot="tip" class="el-upload__tip">只能上传jpg/png文件，且不超过500kb</div>
                   </el-upload>
               </el-form-item>
-              <el-form-item label="退款原因：" :label-width="formLabelWidth" prop="refundReason">
+              <el-form-item label="退款原因：" :label-width="formLabelWidth" prop="reason">
                   <el-input
                       type="textarea"
                       :rows="3"
                       placeholder=""
                       maxLength="100"
-                      v-model="allocationForm.refundReason" 
+                      v-model="allocationForm.reason" 
                       style="width: 80%;">
                   </el-input>
               </el-form-item>
@@ -482,10 +482,9 @@ var clueVM = new Vue({
 	       		signNo: ''
           },
           allocationForm: {
-          	reason:'退款金额不对',
-            person:'张三',
-            rejectTime:'20190411 22:55:13',
-            money:'1000',
+          	reason:'',
+            refundTime:'',
+            cusAmount:'',
             fileList: [//上传
               // {
               //   name: 'food.jpeg', 
@@ -498,20 +497,19 @@ var clueVM = new Vue({
             ],
           },
           transferForm: {
-          	reason:'返款金额不对',
-            person:'李四',
-            rejectTime:'20190411 22:55:13',
-            money:'2000',
-            fileList: [//上传
-              // {
-              //   name: 'food.jpeg', 
-              //   url: 'https://fuss10.elemecdn.com/3/63/4e7f3a15429bfda99bce42a18cdd1jpeg.jpeg?imageMogr2/thumbnail/360x360/format/webp/quality/100'
-              // }, 
-              // {
-              //   name: 'food2.jpeg', 
-              //   url: 'https://fuss10.elemecdn.com/3/63/4e7f3a15429bfda99bce42a18cdd1jpeg.jpeg?imageMogr2/thumbnail/360x360/format/webp/quality/100'
-              // }
-            ],
+        	  reason:'',
+              refundTime:'',
+              cusAmount:'',
+              fileList: [//上传
+                // {
+                //   name: 'food.jpeg', 
+                //   url: 'https://fuss10.elemecdn.com/3/63/4e7f3a15429bfda99bce42a18cdd1jpeg.jpeg?imageMogr2/thumbnail/360x360/format/webp/quality/100'
+                // }, 
+                // {
+                //   name: 'food2.jpeg', 
+                //   url: 'https://fuss10.elemecdn.com/3/63/4e7f3a15429bfda99bce42a18cdd1jpeg.jpeg?imageMogr2/thumbnail/360x360/format/webp/quality/100'
+                // }
+              ],
           },
           dataTable:[],
           recordDialog:false,
@@ -674,25 +672,6 @@ var clueVM = new Vue({
                  console.log(`当前页: ${val}`);
                  this.initTableData(val);
                },
-               //品尝项目转换方法
-               transformProject(row, column, cellValue, index) {
-            	   var text="";
-              	   if(projectList&&cellValue){
-	            	   var array=cellValue.split(",");
-	                   for(var i=0;i<array.length;i++){
-	                	   for(var j=0;j<projectList.length;j++){
-	 	                		if(array[i]==projectList[j].id){
-	 	                			if(i==0){
-		 	                			text=projectList[j].projectName;
-	 	                			}else{
-		 	                			text=text+","+projectList[j].projectName;
-	 	                			}
-	 	                		}
-	 	                	}
-	                	}
-              	    }
-                    return text;
-               },
                //是否转换方法
                transformSex(row, column, cellValue, index) {
                  var text="";
@@ -754,17 +733,6 @@ var clueVM = new Vue({
                           type: 'warning'
                         });
                        return;
-                   }
-            	   var text="";
-            	   for(var i=0;i<rows.length;i++){
-                   	   var curRow = rows[i];
-                       if(curRow.busSaleId){
-                    	   text+="当前选择“"+curRow.cusName+"”已有之前服务商务经理"+curRow.busSaleName+",";
-                       }
-                   }
-            	   if(text!=""){
-	                   text+="请确认后分发客户。";
-	                   this.allocationForm.message=text;
                    }
             	   
                    this.allocationVisible = true;
