@@ -157,22 +157,8 @@
                 </template>
             </el-table-column>
              <el-table-column align="center" prop="createTime" label="创建时间"></el-table-column> 
-               <el-table-column align="center" prop="visitNum" label="到访批次" >
-               	<template slot-scope="scope">
-                        <div v-if="scope.row.visitNum == 1">
-                            首次到访
-                        </div>
-                        <div v-else-if="scope.row.visitNum == 2">
-                            二次到访
-                        </div>
-                        <div v-else-if="scope.row.visitNum > 2">
-                            多次到访
-                        </div>
-                        <div v-else>
-                            待处理
-                        </div>
-                    </template>
-               </el-table-column> 
+               <el-table-column align="center" prop="visitNum" :formatter="transVisitNum" label="到访批次" >
+               </el-table-column>
             <el-table-column align="center" prop="status" label="到访有效性" width="100">
                 <template slot-scope="scope">
                  <span v-if="scope.row.status===0">
@@ -298,18 +284,46 @@
             }        	  
         },
         methods: {
+            transVisitNum(row, column, cellValue, index){
+                var text = "";
+                if (cellValue == "1") {
+                    text = "首次到访"
+                }else if (cellValue == "2") {
+                    text = "二次到访"
+                }else{
+                    text = this.toChinesNum(cellValue)+"次到访"
+                }
+                return text;
+             },
+            toChinesNum(num){
+                  let changeNum = ['零', '一', '二', '三', '四', '五', '六', '七', '八', '九']; //changeNum[0] = "零"
+                  let unit = ["", "十", "百", "千", "万"];
+                  num = parseInt(num);
+                  let getWan = (temp) => {
+                      let strArr = temp.toString().split("").reverse();
+                      let newNum = "";
+                      for (var i = 0; i < strArr.length; i++) {
+                          newNum = (i == 0 && strArr[i] == 0 ? "" : (i > 0 && strArr[i] == 0 && strArr[i - 1] == 0 ? "" : changeNum[strArr[i]] + (strArr[i] == 0 ? unit[0] : unit[i]))) + newNum;
+                      }
+                      return newNum;
+                  }
+                  let overWan = Math.floor(num / 10000);
+                  let noWan = num % 10000;
+                  if (noWan.toString().length < 4) noWan = "0" + noWan;
+                  return overWan ? getWan(overWan) + "万" + getWan(noWan) : getWan(num);
+            },
              handleClick(tab, event) {  //到访或者未到访tab切换
                 if(tab.name=='first'){
-                	window.location.href="/visit/visitRecord/visitRecordPage.html";
+                    window.location.href="/visit/visitRecord/visitRecordPage.html";
                 }else{
-                	window.location.href="/visit/visitRecord/noVisitRecordPage.html";
+                    window.location.href="/visit/visitRecord/noVisitRecordPage.html";
                 }
              },
             submitDialogForm(formName) {
                 this.$refs[formName].validate((valid) => {
                     if (valid) {
-                      
-                    	var param ={}; 
+
+                        var param ={};
                         var rows = this.multipleSelection;
                         var idArr = new Array();
                         for(var i=0;i<rows.length;i++){
@@ -322,25 +336,25 @@
                         .then(function (response) {
                             var resData = response.data;
                             if(resData.code=='0'){
-                            	customerVisitRecordVm.dialogForm.reason='';
+                                customerVisitRecordVm.dialogForm.reason='';
                                 customerVisitRecordVm.dialogFormVisible = false;
                                 customerVisitRecordVm.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
-                                	customerVisitRecordVm.initCustomerVisitRecord();
+                                    customerVisitRecordVm.initCustomerVisitRecord();
                                 }});
                             }else{
-                            	customerVisitRecordVm.$message({message:resData.msg,type:'error'});
+                                customerVisitRecordVm.$message({message:resData.msg,type:'error'});
                                 console.error(resData);
                             }
-                        
+
                         })
                         .catch(function (error) {
                              console.log(error);
                         }).then(function(){
                         });
-                    	
-                    	
-                    	
-                    	
+
+
+
+
                     } else {
                         return false;
                     }
