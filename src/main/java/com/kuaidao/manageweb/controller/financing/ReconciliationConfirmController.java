@@ -24,6 +24,7 @@ import com.kuaidao.aggregation.dto.financing.ReconciliationConfirmDTO;
 import com.kuaidao.aggregation.dto.financing.ReconciliationConfirmPageParam;
 import com.kuaidao.aggregation.dto.financing.ReconciliationConfirmReq;
 import com.kuaidao.aggregation.dto.project.ProjectInfoDTO;
+import com.kuaidao.common.constant.DicCodeEnum;
 import com.kuaidao.common.constant.OrgTypeConstant;
 import com.kuaidao.common.constant.RoleCodeEnum;
 import com.kuaidao.common.entity.JSONResult;
@@ -109,6 +110,9 @@ public class ReconciliationConfirmController {
         // 查询所有省
         JSONResult<List<SysRegionDTO>> getproviceList = sysRegionFeignClient.getproviceList();
         request.setAttribute("provinceList", getproviceList.getData());
+        // 查询签约店型集合
+        request.setAttribute("vistitStoreTypeList",
+                getDictionaryByCode(DicCodeEnum.VISITSTORETYPE.getCode()));
         // 根据角色查询页面字段
         QueryFieldByRoleAndMenuReq queryFieldByRoleAndMenuReq = new QueryFieldByRoleAndMenuReq();
         queryFieldByRoleAndMenuReq.setMenuCode("financing:reconciliationConfirmManager");
