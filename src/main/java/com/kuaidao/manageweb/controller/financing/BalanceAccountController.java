@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
+import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -50,7 +51,9 @@ import com.kuaidao.aggregation.dto.financing.RefundInfoQueryDTO;
 import com.kuaidao.aggregation.dto.financing.RefundQueryDTO;
 import com.kuaidao.aggregation.dto.financing.RefundRespDTO;
 import com.kuaidao.aggregation.dto.financing.RefundUpdateDTO;
+import com.kuaidao.aggregation.dto.paydetail.PayDetailAccountDTO;
 import com.kuaidao.aggregation.dto.project.ProjectInfoDTO;
+import com.kuaidao.common.constant.DicCodeEnum;
 import com.kuaidao.common.constant.OrgTypeConstant;
 import com.kuaidao.common.constant.RoleCodeEnum;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
@@ -65,6 +68,7 @@ import com.kuaidao.manageweb.constant.MenuEnum;
 import com.kuaidao.manageweb.feign.area.SysRegionFeignClient;
 import com.kuaidao.manageweb.feign.customfield.CustomFieldFeignClient;
 import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
+import com.kuaidao.manageweb.feign.financing.BalanceAccountApplyClient;
 import com.kuaidao.manageweb.feign.financing.ReconciliationConfirmFeignClient;
 import com.kuaidao.manageweb.feign.financing.RefundFeignClient;
 import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
@@ -76,6 +80,7 @@ import com.kuaidao.sys.dto.customfield.CustomFieldQueryDTO;
 import com.kuaidao.sys.dto.customfield.QueryFieldByRoleAndMenuReq;
 import com.kuaidao.sys.dto.customfield.QueryFieldByUserAndMenuReq;
 import com.kuaidao.sys.dto.customfield.UserFieldDTO;
+import com.kuaidao.sys.dto.dictionary.DictionaryItemRespDTO;
 import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
 import com.kuaidao.sys.dto.organization.OrganizationRespDTO;
 import com.kuaidao.sys.dto.role.RoleInfoDTO;
@@ -107,7 +112,8 @@ public class BalanceAccountController {
 	    private DictionaryItemFeignClient dictionaryItemFeignClient;
 	    @Autowired
 	    private SysRegionFeignClient sysRegionFeignClient;
-
+	    @Autowired
+	    private BalanceAccountApplyClient balanceAccountApplyClient;
 	    @Autowired
 	    private CustomFieldFeignClient customFieldFeignClient;
     private Configuration configuration = null;
@@ -165,6 +171,9 @@ public class BalanceAccountController {
          JSONResult<List<UserFieldDTO>> queryFieldByUserAndMenu =
                  customFieldFeignClient.queryFieldByUserAndMenu(queryFieldByUserAndMenuReq);
          request.setAttribute("userFieldList", queryFieldByUserAndMenu.getData());
+      // 查询签约店型集合
+         request.setAttribute("vistitStoreTypeList",
+                 getDictionaryByCode(DicCodeEnum.VISITSTORETYPE.getCode()));
          return "financing/balanceAccountPage";
     }
     
@@ -197,12 +206,12 @@ public class BalanceAccountController {
      * 
      * @return
      */
-    @PostMapping("/reconciliationConfirm")
+    @PostMapping("/rejectApply")
     @ResponseBody
-    @RequiresPermissions("financing:balanceaccountManager:reconciliation")
+ //   @RequiresPermissions("financing:balanceaccountManager:reconciliation")
     @LogRecord(description = "驳回", operationType = OperationType.UPDATE,
             menuName = MenuEnum.REFUNDREBATEAPPLY_MANAGER)
-    public JSONResult<Void> applyRefund(@RequestBody ReconciliationConfirmReq req,
+    public JSONResult<Void> rejectApply(@RequestBody ReconciliationConfirmReq req,
             HttpServletRequest request) {
         req.setStatus(AggregationConstant.RECONCILIATION_STATUS.STATUS_1);
         JSONResult<Void> reconciliationConfirm =
@@ -216,12 +225,12 @@ public class BalanceAccountController {
      */
     @PostMapping("/settlementConfirm")
     @ResponseBody
-    @RequiresPermissions("financing:reconciliationConfirmManager:settlement")
+  //  @RequiresPermissions("financing:reconciliationConfirmManager:settlement")
     @LogRecord(description = "结算确认", operationType = OperationType.UPDATE,
             menuName = MenuEnum.RECONCILIATIONCONFIRM_MANAGER)
     public JSONResult<Void> settlementConfirm(@RequestBody ReconciliationConfirmReq req,
             HttpServletRequest request) {
-        req.setStatus(AggregationConstant.RECONCILIATION_STATUS.STATUS_4);
+        req.setStatus(AggregationConstant.RECONCILIATION_STATUS.STATUS_2);
         JSONResult<Void> reconciliationConfirm =
                 reconciliationConfirmFeignClient.reconciliationConfirm(req);
         return reconciliationConfirm;
@@ -268,6 +277,21 @@ public class BalanceAccountController {
         List<OrganizationRespDTO> data = queryOrgByParam.getData();
         return data;
     }
+    /**
+     * 查询字典表
+     * 
+     * @param code
+     * @return
+     */
+    private List<DictionaryItemRespDTO> getDictionaryByCode(String code) {
+        JSONResult<List<DictionaryItemRespDTO>> queryDicItemsByGroupCode =
+                dictionaryItemFeignClient.queryDicItemsByGroupCode(code);
+        if (queryDicItemsByGroupCode != null
+                && JSONResult.SUCCESS.equals(queryDicItemsByGroupCode.getCode())) {
+            return queryDicItemsByGroupCode.getData();
+        }
+        return null;
+    }
     /***
      * 下载模板
      * @param queryDTO
@@ -275,8 +299,74 @@ public class BalanceAccountController {
      */
     @PostMapping("/downBalanceAccount")
     @ResponseBody
-    public void downBalanceAccount(@RequestBody RefundQueryDTO queryDTO) {
-    //	BalanceAccountDto
+    public void downBalanceAccount(@RequestBody PayDetailAccountDTO queryDTO) {
+    	JSONResult<PayDetailAccountDTO> jsonResult = balanceAccountApplyClient.getPayDetailById(queryDTO);
+    	Map dataMap= new HashMap<>();
+    	if (JSONResult.SUCCESS.equals(jsonResult.getCode()) && jsonResult.getData() !=null) {
+    		List<DictionaryItemRespDTO> dictionaryItemRespDTOs = getDictionaryByCode(DicCodeEnum.VISITSTORETYPE.getCode());
+    		
+    		PayDetailAccountDTO accountDTO = jsonResult.getData();
+    		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    		dataMap.put("signShopType", "");
+    		//去字典表查询签约店型
+    		if(dictionaryItemRespDTOs !=null && dictionaryItemRespDTOs.size()>0) {
+    			for (DictionaryItemRespDTO dictionaryItemRespDTO : dictionaryItemRespDTOs) {
+					if(dictionaryItemRespDTO.getValue().equals(accountDTO.getSignShopType())) {
+						dataMap.put("signShopType", dictionaryItemRespDTO.getName());
+					}
+				}
+    		}
+    		String payMode = "";
+    		if(accountDTO.getPayMode() ==1) {
+    			payMode = "现金";
+    		}else if(accountDTO.getPayMode() ==2) {
+    			payMode = "POS";
+    		}else if(accountDTO.getPayMode() ==3) {
+    			payMode = "转账";
+    		}
+    		String payType = "";
+    		if(accountDTO.getPayType() ==1) {
+    			payType = "全款";
+    		}else if(accountDTO.getPayType() ==2) {
+    			payType = "定金";
+    		}else if(accountDTO.getPayType() ==3) {
+    			payType = "追加定金";
+    		}else if(accountDTO.getPayType() ==4) {
+    			payType = "尾款";
+    		}
+    		String createTime = sdf.format(accountDTO.getPayTime());
+    		dataMap.put("year", createTime.substring(0, 3));
+            dataMap.put("month", createTime.substring(5, 6));
+            dataMap.put("day", createTime.substring(8, 9));
+            dataMap.put("statementNo", accountDTO.getStatementNo());
+            dataMap.put("cueName", accountDTO.getCusName());
+            dataMap.put("phone", accountDTO.getPhone());
+            dataMap.put("idCard", accountDTO.getIdCard());
+            dataMap.put("projectName", accountDTO.getProjectName());
+            dataMap.put("area", accountDTO.getSignProvince()+accountDTO.getSignCity()+accountDTO.getSignDictrict());
+            dataMap.put("companyName", accountDTO.getCompanyName());
+            dataMap.put("payMode", payMode);
+            dataMap.put("payType", payType);
+            dataMap.put("amountReceived", accountDTO.getAmountReceived()==null?"":(accountDTO.getAmountReceived()+""));
+            dataMap.put("businessManager",accountDTO.getBusinessManagerName());
+            dataMap.put("busAreaName", accountDTO.getBusAreaName());
+            dataMap.put("teleDeptName", accountDTO.getTeleDeptName());
+            dataMap.put("teleGorupName", accountDTO.getTeleGorupName());
+            dataMap.put("teleSaleName", accountDTO.getTeleSaleName());
+            dataMap.put("signAmountReceivable", accountDTO.getSignAmountReceivable()==null?"":(accountDTO.getSignAmountReceivable()+"") );
+            if(accountDTO.getPayType() ==1 || accountDTO.getPayType()==2) {
+            	dataMap.put("firstToll", accountDTO.getFirstToll()==null?"":(accountDTO.getFirstToll()+""));
+            	dataMap.put("preferentialAmount", accountDTO.getPreferentialAmount()==null?"":(accountDTO.getPreferentialAmount()+"") );
+            }else {
+            	dataMap.put("firstToll", "");
+            	dataMap.put("preferentialAmount", "");
+            }	
+            dataMap.put("settlementMoney", accountDTO.getSettlementMoney());
+            
+            dataMap.put("amountPerformance", accountDTO.getAmountPerformance());
+            dataMap.put("ID", "111111111111111111");
+    	}
+    	down(dataMap);
     }
     /**
      * 注意dataMap里存放的数据Key值要与模板中的参数相对应 
