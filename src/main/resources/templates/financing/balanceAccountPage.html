@@ -236,13 +236,16 @@
     </el-dialog>
     <!-- dialog -->
     <el-dialog title="提交对账确认" :visible.sync="submitApplyVisible" width="30%">
-        <el-form :model="apply" :ref="apply" :rules="rules" class="width500"> 
+        <el-form :model="apply" ref="apply" :rules="allpyrules" class="width500"> 
 	        <el-form-item label="结算金额：" :label-width="formLabelWidth1" prop="money">
 	             <el-input v-model="apply.money" placeholder="" style="width: 60%;" @keyup.native="repeatApplyNumber" maxLength="11"></el-input>
 	         </el-form-item>
-	         <el-form-item label="是否有疑意："  :label-width="formLabelWidth1" prop="radio">
-	             <el-radio v-model="apply.isDoubt" label="0">否</el-radio>
-	             <el-radio v-model="apply.isDoubt" label="1">是</el-radio>
+	         <el-form-item label="是否有疑意："  :label-width="formLabelWidth1" prop="isDoubt">
+	          <el-radio-group v-model="apply.isDoubt">
+	          	<el-radio  :label="0">否</el-radio>
+	             <el-radio  :label="1">是</el-radio>
+	          </el-radio-group>
+	             
 	         </el-form-item>
 	         <el-form-item label="疑意:"  
 	                              prop="doubtRemark" :label-width="formLabelWidth1">
@@ -257,7 +260,7 @@
           </el-form>
         <div slot="footer" style="text-align: center" class="dialog-footer">
             <el-button type="primary" @click="settlementConfirm('apply')">提交</el-button>
-            <el-button @click="dialogFormVisible= false">取消</el-button>
+            <el-button @click="submitApplyVisible= false">取消</el-button>
         </div>
     </el-dialog>
 </div>
@@ -380,17 +383,13 @@ var clueVM = new Vue({
                       {required: true,min: 1, max: 100, message: '长度在 1 到 100 个字符', trigger: 'blur'}
                   ],
               },
-              rules: {
-            	  money: [
-                      {required: true,min: 1, max: 100, message: '长度在 1 到 100 个字符', trigger: 'blur'}
-                  ],
+              allpyrules: {
                   money: [
-                      { required: true, message: '请输入结算金额', trigger: 'blur' },
-                      { validator:function(rule,value,callback){
+                      {validator:function(rule,value,callback){
                               if(value===0){
                                   callback();
                               }
-                              var reg =  /^[0-9]+[0-9]*]*$/ ;
+                              var reg =   /^[1-9]\d*$/; 
                               if(value ==null || value =="null" || value ==""  ){
                                   callback(new Error("请输入结算金额"));
                                   clueVM.apply.money =null;
@@ -553,7 +552,7 @@ var clueVM = new Vue({
                  }else if(cellValue=="1"){
                      text="驳回商务";
                  }else if(cellValue=="2"){
-                   text="提交对账理";
+                   text="提交对账";
                  }else if(cellValue=="3"){
                    text="已对账";
                  }else if(cellValue=="4"){
@@ -584,6 +583,7 @@ var clueVM = new Vue({
                         });
                        return;
                    }  
+            	   window.location.href="/financing/balanceaccount/balanceAccountPage";
             	   var param  = {};
  	           	   param.payDetailId=rows[0].payId;
             	   axios.post('/financing/balanceaccount/downBalanceAccount', param)
@@ -607,15 +607,7 @@ var clueVM = new Vue({
             	   var status = rows[0].status;
             	   var statementNo = rows[0].statementNo;
             	   var payTime = rows[0].payTime;
-            	   this.rejectVisible = true;
-            	   var msg = "";
-            	   if(status =="驳回商务"){
-            		   msg = "该申请已是驳回状态，请勿重复操作"
-            	   }else if(status !="待处理"){
-            		   msg = "已提交对账申请,不能驳回"
-            	   }
-            	   
-            	 
+            	   var msg = "只有待处理的申请允许驳回！";
             	   if(status !="待处理"){
             		   this.$message({
                            message: msg,
@@ -623,7 +615,8 @@ var clueVM = new Vue({
                          });
                         return;
             	   }
-	            	this.backQuery = "【"+statementNo+"】 付款时间："+payTime+" 驳回吗?";
+            	   this.rejectVisible = true;
+	               this.backQuery = "【"+statementNo+"】 付款时间："+payTime+" 驳回吗?";
                },
                //驳回
                reconciliationConfirm(formName) {
@@ -642,10 +635,9 @@ var clueVM = new Vue({
           	           	  	axios.post('/financing/balanceaccount/rejectApply',param)
                              .then(function (response) {
                                  var data =  response.data;
-                                 if(data.code=='0'){
+                                 if(response.status==200){
                                  	clueVM.$message({message:'驳回成功',type:'success',duration:1000,onClose:function(){
-                                 		clueVM.allocationVisible = false;
-                                 		clueVM.searchTable();
+                                 		window.location.href="/financing/balanceaccount/balanceAccountPage";
                              	    }});
                                  }else{
                                  	clueVM.$message({
@@ -677,32 +669,40 @@ var clueVM = new Vue({
             	   var status = rows[0].status;
             	   var statementNo = rows[0].statementNo;
             	   var payTime = rows[0].payTime;
-            	   this.rejectVisible = true;
             	   var msg = "";
             	   if(status =="驳回商务"){
-            		   msg = "驳回状态禁止提交对账申请"
-            	   }else if(status !="待处理"){
-            		   msg = "已提交对账申请"
+            		   msg = "该申请处于驳回商务状态，不允许提交对账"
+            	   }else if(status =="已结算"){
+            		   msg = "该申请处于已结算状态，不允许提交对账"
             	   }
-            	   if(status !="待处理"){
+            	   if(msg !=""){
             		   this.$message({
                            message: msg,
                            type: 'warning'
                          });
                         return;
             	   }
-            	   this.commissionMoney = null;
+            	   if(status=="提交对账" || status=="已对账"){
+            		   this.commissionMoney = null;
+                	   this.apply.money = rows[0].money ;
+                	   this.apply.isDoubt = rows[0].isDoubt ;
+                	   this.apply.doubtRemark = rows[0].doubtRemark ;
+                	   this.commissionMoney = rows[0].commissionMoney ;
+            	   }else{
+            		   this.commissionMoney = null;
+            	   }
             	   this.ratio = rows[0].ratio ;
             	   this.submitApplyVisible = true;
                },
                //结算确认
-               settlementConfirm(formName) {
-            	   this.$refs[formName].validate((valid) => {
+               settlementConfirm(form) {
+            	   var rows = this.multipleSelection;
+            	   this.$refs[form].validate((valid) => {
                        if (valid) {
                     	   var idList = [];
            	               for(var i=0;i<rows.length;i++){
            	            	   var curRow = rows[i];
-           	            	   idList.push(curRow.id);
+           	            	   idList.push(curRow.accountId);
            	               } 
 	           	           var param  = {};
 	       	           	  param.idList=idList;
@@ -712,10 +712,9 @@ var clueVM = new Vue({
                           axios.post('/financing/balanceaccount/settlementConfirm',param)
                           .then(function (response) {
                               var data =  response.data;
-                              if(data.code=='0'){
+                              if(response.status==200){
                               	clueVM.$message({message:'提交对账成功',type:'success',duration:1000,onClose:function(){
-                              		clueVM.allocationVisible = false;
-                              		clueVM.searchTable();
+                              		window.location.href="/financing/balanceaccount/balanceAccountPage";
                           	    }});
                               }else{
                               	clueVM.$message({
