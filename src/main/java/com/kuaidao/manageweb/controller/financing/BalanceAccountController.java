@@ -10,7 +10,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
+import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -219,7 +221,7 @@ public class BalanceAccountController {
         return reconciliationConfirm;
     }
     /***
-     * 结算确认
+     * 申请确认
      * 
      * @return
      */
@@ -230,6 +232,12 @@ public class BalanceAccountController {
             menuName = MenuEnum.RECONCILIATIONCONFIRM_MANAGER)
     public JSONResult<Void> settlementConfirm(@RequestBody ReconciliationConfirmReq req,
             HttpServletRequest request) {
+    	UserInfoDTO user = getUser();
+        // 插入当前用户、角色信息
+    	req.setCommitUser(user.getId());
+    	req.setCommitTime(new Date());
+    	BigDecimal bigDecimal = new BigDecimal(req.getMoney());
+    	req.setCommissionMoney(bigDecimal.multiply(new BigDecimal(req.getRatio())).divide(new BigDecimal(100)));
         req.setStatus(AggregationConstant.RECONCILIATION_STATUS.STATUS_2);
         JSONResult<Void> reconciliationConfirm =
                 reconciliationConfirmFeignClient.reconciliationConfirm(req);
@@ -338,33 +346,32 @@ public class BalanceAccountController {
     		dataMap.put("year", createTime.substring(0, 4));
             dataMap.put("month", createTime.substring(5, 7));
             dataMap.put("day", createTime.substring(8, 10));
-            dataMap.put("statementNo", accountDTO.getStatementNo());
-            dataMap.put("cueName", accountDTO.getCusName());
-            dataMap.put("phone", accountDTO.getPhone());
-            dataMap.put("idCard", accountDTO.getIdCard());
-            dataMap.put("projectName", accountDTO.getProjectName());
+            dataMap.put("statementNo", accountDTO.getStatementNo()==null?"":(accountDTO.getStatementNo()+""));
+            dataMap.put("cueName", accountDTO.getCusName()==null?"":(accountDTO.getCusName()+""));
+            dataMap.put("phone", accountDTO.getPhone()==null?"":(accountDTO.getPhone()+""));
+            dataMap.put("idCard", accountDTO.getIdCard()==null?"":(accountDTO.getIdCard()+""));
+            dataMap.put("projectName", accountDTO.getProjectName()==null?"":(accountDTO.getProjectName()+""));
             dataMap.put("area", accountDTO.getSignProvince()+accountDTO.getSignCity()+accountDTO.getSignDictrict());
-            dataMap.put("companyName", accountDTO.getCompanyName());
+            dataMap.put("companyName", accountDTO.getCompanyName()==null?"":(accountDTO.getCompanyName()+""));
             dataMap.put("payMode", payMode);
             dataMap.put("payType", payType);
-            dataMap.put("amountReceived", accountDTO.getAmountReceived()==null?"":(accountDTO.getAmountReceived()+""));
-            dataMap.put("businessManager",accountDTO.getBusinessManagerName());
-            dataMap.put("busAreaName", accountDTO.getBusAreaName());
-            dataMap.put("teleDeptName", accountDTO.getTeleDeptName());
-            dataMap.put("teleGorupName", accountDTO.getTeleGorupName());
-            dataMap.put("teleSaleName", accountDTO.getTeleSaleName());
-            dataMap.put("signAmountReceivable", accountDTO.getSignAmountReceivable()==null?"":(accountDTO.getSignAmountReceivable()+"") );
+            dataMap.put("received", accountDTO.getAmountReceived()==null?"":(accountDTO.getAmountReceived()+""));
+            dataMap.put("businessManager",accountDTO.getBusinessManagerName()==null?"":(accountDTO.getBusinessManagerName()+""));
+            dataMap.put("busarea", accountDTO.getBusAreaName()==null?"":accountDTO.getBusAreaName());
+            dataMap.put("dept", accountDTO.getTeleDeptName()==null?"":accountDTO.getTeleDeptName());
+            dataMap.put("group",accountDTO.getTeleGorupName()==null?"":accountDTO.getTeleGorupName() );
+            dataMap.put("sale", accountDTO.getTeleSaleName()==null?"":accountDTO.getTeleSaleName());
+            dataMap.put("receivable", accountDTO.getSignAmountReceivable()==null?"":(accountDTO.getSignAmountReceivable()+"") );
             if(accountDTO.getPayType() ==1 || accountDTO.getPayType()==2) {
-            	dataMap.put("firstToll", accountDTO.getFirstToll()==null?"":(accountDTO.getFirstToll()+""));
-            	dataMap.put("preferentialAmount", accountDTO.getPreferentialAmount()==null?"":(accountDTO.getPreferentialAmount()+"") );
+            	dataMap.put("toll", accountDTO.getFirstToll()==null?"":(accountDTO.getFirstToll()+""));
+            	dataMap.put("preferent", accountDTO.getPreferentialAmount()==null?"":(accountDTO.getPreferentialAmount()+"") );
             }else {
-            	dataMap.put("firstToll", "");
-            	dataMap.put("preferentialAmount", "");
+            	dataMap.put("toll", "");
+            	dataMap.put("preferent", "");
             }	
-            dataMap.put("settlementMoney", accountDTO.getSettlementMoney());
+            dataMap.put("settle",  accountDTO.getSettlementMoney()==null?"":accountDTO.getSettlementMoney());
             
-            dataMap.put("amountPerformance", accountDTO.getAmountPerformance());
-            dataMap.put("ID", "111111111111111111");
+            dataMap.put("amount", accountDTO.getAmountPerformance()==null?"":accountDTO.getAmountPerformance());
     	}
     	down(dataMap);
     }
@@ -404,12 +411,13 @@ public class BalanceAccountController {
 
        try {
            // test.ftl为要装载的模板 
-           t = configuration.getTemplate("04133.ftl");
+           t = configuration.getTemplate("04166.ftl");
            t.setEncoding("utf-8");
 
            out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outFile), "utf-8"));
            t.process(dataMap, out);
            out.close();
+           
        } catch (Exception e) {
            e.printStackTrace();
        }
