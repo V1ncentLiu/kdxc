@@ -335,9 +335,9 @@ public class BalanceAccountController {
     			payType = "尾款";
     		}
     		String createTime = sdf.format(accountDTO.getPayTime());
-    		dataMap.put("year", createTime.substring(0, 3));
-            dataMap.put("month", createTime.substring(5, 6));
-            dataMap.put("day", createTime.substring(8, 9));
+    		dataMap.put("year", createTime.substring(0, 4));
+            dataMap.put("month", createTime.substring(5, 7));
+            dataMap.put("day", createTime.substring(8, 10));
             dataMap.put("statementNo", accountDTO.getStatementNo());
             dataMap.put("cueName", accountDTO.getCusName());
             dataMap.put("phone", accountDTO.getPhone());
