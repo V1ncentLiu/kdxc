@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml"  xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
-<head th:replace="_header_include::frag(~{::title},~{},~{})">
+<head th:replace="_header_include::frag(~{::title},~{::style},~{})">
     <title>后台管理系统</title>
     <style>
-        button a{color:#fff!important;}
+        .el-upload-list{width: 200px;}
+        .el-tag{margin-right: 10px;}
     </style>
 </head>
 <body>
@@ -74,7 +75,6 @@
   				  </el-option>
   			    </el-select>
   			  </el-form-item>
-          <br>
   	      <el-form-item class="formItem" label="签约时间：">
   	  				<el-date-picker  v-model="searchForm.startTime" format="yyyy-MM-dd HH:mm" type="datetime" placeholder="选择日期"></el-date-picker>
   	      </el-form-item>
@@ -84,8 +84,6 @@
   		  <el-form-item class="formItem" prop="cusName">
   			  <el-input v-model="searchForm.cusName" placeholder="客户姓名" class="input-with-select"></el-input>
   		  </el-form-item>
-	    </el-row>
-	    <el-row class="greybg padding20" style="padding-bottom: 0;">
 				  <el-form-item class="formItem"  prop="teleDeptId">
 				    <el-select v-model="searchForm.teleDeptId" clearable  placeholder="电销事业部">
 				      <el-option
@@ -136,7 +134,6 @@
 					  </el-option>
 				    </el-select>
 				  </el-form-item>
-          <br>
   		  <el-form-item class="formItem" prop="phone">
   			  <el-input v-model="searchForm.phone" placeholder="客户手机号" class="input-with-select"></el-input>
   		  </el-form-item>
@@ -148,22 +145,21 @@
   	</el-form>
     <el-row>
         <el-table  ref="multipleTable" tooltip-effect="dark" border  @selection-change="handleSelectionChange"
-            style="width: 100%"  :data="dataTable" @sort-change="sort_change">
+            style="width: 100%"  :data="dataTable" >
            <el-table-column align="center" type="selection" label="全选" width="55"></el-table-column>
            <el-table-column align="center" type="index" label="序号" width="55"></el-table-column>
            <el-table-column align="center" prop="signNo" label="签约单编号"  width="170"></el-table-column>
            <el-table-column align="center" prop="projectName" label="签约项目" width="170"></el-table-column>
-           <el-table-column align="center" prop="signStatus" label="签约单状态"></el-table-column>
-           <el-table-column align="center" prop="signType" label="签约类型"></el-table-column>
+           <el-table-column align="center" prop="signStatus" label="签约单状态" :formatter="transformSignStatus"></el-table-column>
+           <el-table-column align="center" prop="signType" label="签约类型" :formatter="transformSignType"></el-table-column>
            <el-table-column align="center" prop="signTime" label="签约时间"></el-table-column>
            <el-table-column align="center" label="付款明细">
            		 <template slot-scope="scope">
-                        <el-button type="text" size="small">查看明细
-                        <!-- @click="showVisitRecord(scope.row)" -->
+                        <el-button type="text" size="small" @click="recordClick(scope.row)">查看明细
                         </el-button>
                 </template>
            </el-table-column>
-           <el-table-column align="center" prop="signShopType" label="签约店型"></el-table-column>
+           <el-table-column align="center" prop="signShopType" label="签约店型" :formatter="transformSignShopType"></el-table-column>
            <el-table-column align="center" prop="amountReceivable" label="应收金额"></el-table-column>
            <el-table-column align="center" prop="firstToll" label="路费"></el-table-column>
            <el-table-column align="center" prop="preferentialAmount" label="优惠金额"></el-table-column>
@@ -186,28 +182,44 @@
         <table-pagination :pager="pager" @change="searchTable"></table-pagination>
     </el-row>
       <!-- dialog -->
-      <el-dialog  title="分发资源"  :visible.sync="allocationVisible">
+      <el-dialog  title="（RC2019022700001）签约单申请退款"  :visible.sync="allocationVisible" width="870px">
         <template>
-            <el-form :model="allocationForm" ref="allocationForm" :rules="allocationFormRules">
-                <el-form-item style="padding-left: ">{{allocationForm.message}}</el-form-item>
-                <el-form-item label="商务经理"    
-                	:label-width="formLabelWidth"  
-                	prop="saleId"
-                	:rules="[
-                	 { required: true, message: '商务经理不能为空'},
-                	]"
-                	>
-                    <el-select v-model="allocationForm.saleId" placeholder="组内商务经理姓名" style="width: 400px;">
-                        <el-option v-for="item in saleOptions" 
-                        			:key="item.id" 
-                        			:label="item.name" 
-                        			:value="item.id">
-                        </el-option>
-                    </el-select>
-                </el-form-item>
-                <el-form-item label="备注"    :label-width="formLabelWidth"  prop="remark">
-                   	<el-input type="textarea" v-model="allocationForm.remark" class="input-with-select" maxlength="200" style="width: 400px;" :rows="4" placeholder="输入分发备注"></el-input>
-                </el-form-item>
+            <el-form :model="allocationForm" ref="allocationForm" :rules="allocationFormRules"> 
+              <el-form-item label="退款客户金额：" :label-width="formLabelWidth" prop="cusAmount">
+                  <el-input v-model="allocationForm.cusAmount" placeholder="" style="width:50%"></el-input>
+              </el-form-item>
+             <!--  <el-form-item label="退还餐饮公司金额：" :label-width="formLabelWidth" prop="reason" class="redcolor">
+                  {{allocationForm.money}}
+              </el-form-item> -->
+              <el-form-item label="退款时间：" :label-width="formLabelWidth" prop="refundTime">
+                  <el-date-picker
+                      style="width: 50%;"
+                      v-model="allocationForm.refundTime"
+                      type="datetime"
+                      placeholder="选择日期时间">
+                  </el-date-picker>
+              </el-form-item>
+              <el-form-item label="上传图片：" :label-width="formLabelWidth" prop="fileList">
+                  <el-upload
+                      class="upload-demo"
+                      action="https://jsonplaceholder.typicode.com/posts/"
+                      multiple
+                      :file-list="allocationForm.fileList"
+                      >
+                      <el-button size="small" type="primary">点击上传</el-button>
+                      <div slot="tip" class="el-upload__tip">只能上传jpg/png文件，且不超过500kb</div>
+                  </el-upload>
+              </el-form-item>
+              <el-form-item label="退款原因：" :label-width="formLabelWidth" prop="reason">
+                  <el-input
+                      type="textarea"
+                      :rows="3"
+                      placeholder=""
+                      maxLength="100"
+                      v-model="allocationForm.reason" 
+                      style="width: 80%;">
+                  </el-input>
+              </el-form-item>
             </el-form>
             <div slot="footer" class="dialog-footer">
                 <el-button type="primary" @click="allocationClue('allocationForm')">提 交</el-button>
@@ -217,28 +229,57 @@
     </el-dialog>
     <!-- dialog -->
       <!-- dialog -->
-      <el-dialog  title="外调经理"  :visible.sync="transferVisible">
+      <el-dialog  title="（RC2019022700002）签约单申请返款"  :visible.sync="transferVisible">
         <template>
             <el-form :model="transferForm" ref="transferForm" :rules="transferFormRules">
-            	  <el-form-item >{{transferForm.message}}</el-form-item>
-                <el-form-item label="商务经理"    
-                	:label-width="formLabelWidth" 
-                	prop="saleId"
-                	:rules="[
-                	 { required: true, message: '商务经理不能为空'},
-                	]"
-                	>
-                    <el-select v-model="transferForm.saleId" placeholder="外调经理姓名（所属大区-所属组）" style="width: 400px;">
-                        <el-option v-for="item in allSaleOptions" 
-                        			:key="item.id" 
-                        			:label="item.name" 
-                        			:value="item.id">
-                        </el-option>
-                    </el-select>
-                </el-form-item>
-                <el-form-item label="备注"    :label-width="formLabelWidth"  prop="remark">
-			    	<el-input type="textarea" v-model="transferForm.remark" class="input-with-select" maxlength="200" style="width: 400px;" :rows="4" placeholder="请输入外调备注"></el-input>
-                </el-form-item>
+              <el-form-item label="" :label-width="formLabelWidth" prop="">
+                <el-tag
+                  :key="tag"
+                  v-for="tag in dynamicTags"
+                  closable
+                  :disable-transitions="false"
+                  @close="handleClose(tag)">
+                  {{tag}}
+                </el-tag>
+              </el-form-item>
+              <el-form-item label="关联签约单：" :label-width="formLabelWidth" prop="dynamicTags">
+                <el-button type="primary" @click="chooseRelevance">选择关联签约单</el-button>
+              </el-form-item>
+            	<el-form-item label="返款客户金额：" :label-width="formLabelWidth" prop="cusAmount">
+                <el-input v-model="transferForm.cusAmount" placeholder="" style="width:50%"></el-input>
+              </el-form-item>
+              <!-- <el-form-item label="返还餐饮公司金额：" :label-width="formLabelWidth" prop="reason" class="redcolor">
+                  {{transferForm.money}}
+              </el-form-item> -->
+              <el-form-item label="返款时间：" :label-width="formLabelWidth" prop="refundTime">
+                  <el-date-picker
+                      style="width: 50%;"
+                      v-model="transferForm.refundTime"
+                      type="datetime"
+                      placeholder="选择日期时间">
+                  </el-date-picker>
+              </el-form-item>
+              <el-form-item label="上传图片：" :label-width="formLabelWidth" prop="fileList">
+                  <el-upload
+                      class="upload-demo"
+                      action="https://jsonplaceholder.typicode.com/posts/"
+                      multiple
+                      :file-list="transferForm.fileList"
+                      >
+                      <el-button size="small" type="primary">点击上传</el-button>
+                      <div slot="tip" class="el-upload__tip">只能上传jpg/png文件，且不超过500kb</div>
+                  </el-upload>
+              </el-form-item>
+              <el-form-item label="返款原因：" :label-width="formLabelWidth" prop="reason">
+                  <el-input
+                      type="textarea"
+                      :rows="3"
+                      placeholder=""
+                      maxLength="100"
+                      v-model="transferForm.reason" 
+                      style="width: 80%;">
+                  </el-input>
+              </el-form-item>
             </el-form>
             <div slot="footer" class="dialog-footer">
                 <el-button type="primary" @click="transferClue('transferForm')">提 交</el-button>
@@ -247,7 +288,167 @@
         </template>
     </el-dialog>
     <!-- dialog -->
-     
+      <!-- 付款明细 -->
+    <el-dialog title="付款明细" :visible.sync="recordDialog">
+        <div v-show="visitRecordShow" class="fs16 marginB20">签约单编号({{curRow.signNo}})付款明细以及付款绑定到访记录</div>
+        <div v-show="paymentDetailsShow">
+            <div class="fs16 marginB20">全款付款明细</div>
+            <el-table
+                ref="recordTable" 
+                tooltip-effect="dark"
+                style="width: 100%;margin-bottom: 20px;"
+                border
+                :data="recordTable" 
+                >
+                <el-table-column align="center" prop="statementNo" label="结算单编号" width="200"></el-table-column>
+                <el-table-column align="center" prop="payMode" label="付款方式" :formatter="getPayModeText"></el-table-column>
+                <el-table-column align="center" prop="payTime" label="付款时间" :formatter="getTimeText"></el-table-column>
+                <el-table-column align="center" prop="amountReceived" label="实收金额"></el-table-column>
+                <el-table-column align="center" prop="amountPerformance" label="业绩金额"></el-table-column>
+                <el-table-column align="center" prop="status" label="明细状态" :formatter="getStatusText"></el-table-column>
+                <el-table-column align="center" prop="remarks" label="备注"></el-table-column>
+            </el-table>
+        </div>        
+        <div v-show="paymentDetailsShow2">
+            <div class="fs16 marginB20">定金付款明细</div>
+            <el-table
+                ref="recordTable2" 
+                tooltip-effect="dark"
+                style="width: 100%;margin-bottom: 20px;"
+                border
+                :data="recordTable2" 
+                >
+                <el-table-column align="center" prop="statementNo" label="结算单编号" width="200"></el-table-column>
+                <el-table-column align="center" prop="payMode" label="付款方式" :formatter="getPayModeText"></el-table-column>
+                <el-table-column align="center" prop="payTime" label="付款时间" :formatter="getTimeText"></el-table-column>
+                <el-table-column align="center" prop="amountReceived" label="实收金额"></el-table-column>
+                <el-table-column align="center" prop="amountPerformance" label="业绩金额"></el-table-column>
+                <el-table-column align="center" prop="amountBalance" label="余款金额"></el-table-column>
+                <el-table-column align="center" prop="makeUpTime" label="预计余款补齐时间" :formatter="getTimeText"></el-table-column>                
+                <el-table-column align="center" prop="status" label="明细状态" :formatter="getStatusText"></el-table-column>
+                <el-table-column align="center" prop="remarks" label="备注"></el-table-column>
+            </el-table>
+        </div>
+        <div v-show="paymentDetailsShow3">
+            <div class="fs16 marginB20">二次定金付款明细</div>
+            <el-table
+                ref="recordTable3" 
+                tooltip-effect="dark"
+                style="width: 100%;margin-bottom: 20px;"
+                border
+                :data="recordTable3" 
+                >
+                <el-table-column align="center" prop="statementNo" label="结算单编号" width="200"></el-table-column>
+                <el-table-column align="center" prop="payMode" label="付款方式" :formatter="getPayModeText"></el-table-column>
+                <el-table-column align="center" prop="payTime" label="付款时间" :formatter="getTimeText"></el-table-column>
+                <el-table-column align="center" prop="amountReceived" label="实收金额"></el-table-column>
+                <el-table-column align="center" prop="amountPerformance" label="业绩金额"></el-table-column>
+                <el-table-column align="center" prop="amountBalance" label="余款金额"></el-table-column>
+                <el-table-column align="center" prop="makeUpTime" label="预计余款补齐时间" :formatter="getTimeText"></el-table-column>                
+                <el-table-column align="center" prop="status" label="明细状态" :formatter="getStatusText"></el-table-column>
+                <el-table-column align="center" prop="remarks" label="备注"></el-table-column>
+            </el-table>
+        </div>
+        <div v-show="paymentDetailsShow4">
+            <div class="fs16 marginB20">尾款付款明细</div>
+            <el-table
+                ref="recordTable" 
+                tooltip-effect="dark"
+                style="width: 100%;margin-bottom: 20px;"
+                border
+                :data="recordTable4" 
+                >
+                <el-table-column align="center" prop="statementNo" label="结算单编号" width="200"></el-table-column>
+                <el-table-column align="center" prop="payMode" label="付款方式" :formatter="getPayModeText"></el-table-column>
+                <el-table-column align="center" prop="payTime" label="付款时间" :formatter="getTimeText"></el-table-column>
+                <el-table-column align="center" prop="amountReceived" label="实收金额"></el-table-column>
+                <el-table-column align="center" prop="amountPerformance" label="业绩金额"></el-table-column>
+                <el-table-column align="center" prop="status" label="明细状态" :formatter="getStatusText"></el-table-column>
+                <el-table-column align="center" prop="remarks" label="备注"></el-table-column>
+            </el-table>
+        </div>
+        <div v-show="visitRecordShow">
+            <div class="fs16 marginB20">关联到访记录</div>
+            <el-table ref="recordTable" tooltip-effect="dark" style="width: 100%;margin-bottom: 20px;" border :data="visitRecordTable">
+                <el-table-column align="center" prop="vistitTime" label="到访时间"></el-table-column>
+                <el-table-column align="center" prop="vistitStoreTypeName" label="到访店铺类型"></el-table-column>
+                <el-table-column align="center" prop="visitType" label="到访类型">
+                    <template slot-scope="scope">
+                        <div v-if="scope.row.visitType == 1">
+                            预约来访
+                        </div>
+                        <div v-else-if="scope.row.visitType == 2">
+                            慕名来访
+                        </div>
+                        <div v-else-if="scope.row.visitType == 3">
+                            临时来访
+                        </div>
+                    </template>
+                </el-table-column>
+                <el-table-column align="center" prop="visitCity" label="到访城市"></el-table-column>
+                <el-table-column align="center" prop="createTime" label="创建时间"></el-table-column>
+                <el-table-column align="center" prop="visitNum" label="到访批次">
+                    <template slot-scope="scope">
+                        <div v-if="scope.row.visitNum == 1">
+                            首次到访
+                        </div>
+                        <div v-else-if="scope.row.visitNum == 2">
+                            二次到访
+                        </div>
+                        <div v-else-if="scope.row.visitNum > 2">
+                            多次到访
+                        </div>
+                        <div v-else>
+                            待处理
+                        </div>
+                    </template>
+                </el-table-column>
+                <el-table-column align="center" prop="status" label="到访有效性" :formatter="getStatusText"></el-table-column>
+            </el-table>
+        </div>
+    </el-dialog>
+    <!-- 关联签约单 -->
+    <!-- dialog -->
+    <el-dialog title="选择关联签约单" :visible.sync="dialogFormChooseVisible">      
+      <el-row class="marginB10 greybg padding20" style="padding-bottom: 0;">
+        <el-form :inline="true" :model="dialogFormChoose" ref="dialogFormChoose">
+          <el-form-item class="formItem" label="签约时间：">
+              <el-date-picker  v-model="dialogFormChoose.startTime" format="yyyy-MM-dd HH:mm" type="datetime" placeholder="选择日期"></el-date-picker>
+          </el-form-item>
+          <el-form-item class="formItem" label="—">
+              <el-date-picker  v-model="dialogFormChoose.endTime" format="yyyy-MM-dd HH:mm" type="datetime" placeholder="选择日期"></el-date-picker>
+          </el-form-item>
+          <el-form-item label=""  prop="">
+            <el-input v-model="dialogFormChoose.signNo" placeholder="签约单编号"></el-input>
+          </el-form-item>
+          <el-form-item label=""  prop="">
+            <el-input v-model="dialogFormChoose.cusName" placeholder="客户姓名"></el-input>
+          </el-form-item>
+          <el-form-item label=""  prop="">
+            <el-button type="primary" size="medium" icon="el-icon-search">搜索</el-button>
+          </el-form-item>
+        </el-form>  
+      </el-row>
+      <el-table 
+          tooltip-effect="dark"
+          style="width: 100%"
+          border
+          :data="dataTableChoose" 
+           @selection-change="signSelectionChange"
+          class="marginB10">
+          <el-table-column align="center" prop="" type="selection" name="type" width="55"></el-table-column>
+          <el-table-column align="center" prop="" label="序号" type="index" name="type" width="55"></el-table-column>
+          <el-table-column align="center" prop="signNo" label="签约单编号"></el-table-column>
+          <el-table-column align="center" prop="signTime" label="签约时间"></el-table-column>
+          <el-table-column align="center" prop="cusName" label="客户姓名"></el-table-column>
+          <el-table-column align="center" prop="phone" label="客户手机号"></el-table-column>
+          <el-table-column align="center" prop="amountReceivable" label="应收金额"></el-table-column>
+      </el-table>
+      <div slot="footer" class="dialog-footer">
+          <el-button type="primary" @click="submitSign('dialogFormChoose')">提交</el-button>
+          <el-button @click="dialogFormChooseVisible = false">取消</el-button>
+      </div>
+  </el-dialog>
 </div>
 <!-- import common js-->
 <div th:include="_footer_include :: #jsLib"></div>
@@ -280,66 +481,161 @@ var clueVM = new Vue({
 	       		signStatus: '',
 	       		phone: '',
 	       		signNo: ''
-            },
-            allocationForm: {
-            	saleId:'',
-            	remark:'',
-            	message:''
-              },
-              transferForm: {
-            	saleId:'',
-            	remark:'',
-            	message:''
-              },
-            dataTable:[],
-            busAreaOptions:busAreaList,
-            busGroupOptions:busGroupList,
-            busSaleOptions:busSaleList,
-            teleDeptOptions:teleDeptList,
-            teleGorupOptions:teleGorupList,
-            teleSaleOptions:teleSaleList,
-            provinceOptions:provinceList,
-            signShopTypeOptions:vistitStoreTypeList,
-            signTypeOptions:[{
-            	value:1,
-            	name:"一次性全款"
-            },{
-            	value:2,
-            	name:"先交订金"
-            }],
-            allocationVisible: false,
-            transferVisible: false,
-            pager:{
-                total: 0,
-                currentPage: 1,
-                pageSize: 20,
-            },
-            allocationFormRules: {
-            	saleId: [
-                    { required: true, message: '请选择商务经理', trigger: 'change' }
-                ]
-              },
-            transferFormRules: {
-            	saleId: [
-                    { required: true, message: '请选择商务经理', trigger: 'change' }
-                ]
-              },
-            multipleSelection:[],
-            formLabelWidth: '150px',
-            formLabelWidth1: '120px',
+          },
+          allocationForm: {
+        	  
+        	signId:'',
+          	reason:'',
+            refundTime:'',
+            cusAmount:'',
+            fileList: [],
+          },
+          transferForm: {
+        	  signId:'',
+              reason:'',
+              refundTime:'',
+              cusAmount:'',
+              signProjectId:'',
+              signProvince:'',
+              fileList: [],
+          },
+          dataTable:[],
+          recordDialog:false,
+          reasonDialog:false,
+          paymentDetailsShow:false,//判断全款付款明细表格是否显示
+          paymentDetailsShow2:false,//判断定金付款明细表格是否显示
+          paymentDetailsShow3:false,//判断二次定金付款明细表格是否显示
+          paymentDetailsShow4:false,//判断尾款付款明细表格是否显示
+          visitRecordShow:false,
+          curRow:"", // 列表数据：当前行，使用地点：付款明细
+          recordTable:[],
+          recordTable2:[],
+          recordTable3:[],
+          recordTable4:[],
+          visitRecordTable:[],
+          showbutton:false,
+          busAreaOptions:busAreaList,
+          busGroupOptions:busGroupList,
+          busSaleOptions:busSaleList,
+          teleDeptOptions:teleDeptList,
+          teleGorupOptions:teleGroupList,
+          teleSaleOptions:teleSaleList,
+          provinceOptions:provinceList,
+          signShopTypeOptions:vistitStoreTypeList,
+          signTypeOptions:[{
+          	value:1,
+          	name:"一次性全款"
+          },{
+          	value:2,
+          	name:"先交订金"
+          }],
+          signStatusOptions:[{
+          	value:1,
+          	name:"正常"
+          },{
+          	value:2,
+          	name:"退款确认中"
+          },{
+          	value:3,
+          	name:"返款确认中"
+          },{
+          	value:4,
+          	name:"退款成功"
+          },{
+          	value:5,
+          	name:"返款成功"
+          }],
+          allocationVisible: false,
+          transferVisible: false,
+          pager:{
+              total: 0,
+              currentPage: 1,
+              pageSize: 20,
+          },
+          allocationFormRules: {
+          	reason : [
+                { required: true, message: '请输入退款原因', trigger: 'blur' }
+            ],
+            refundTime : [
+                { required: true, message: '请选择退款时间', trigger: 'blur' }
+            ],
+            cusAmount: [
+                { required: true, message: '请输入退款客户金额', trigger: 'blur' }
+            ],
+           /*  fileList: [
+                { required: true, message: '请上传图片', trigger: 'blur' }
+            ], */
+          },
+          transferFormRules: {
+        	reason : [
+                { required: true, message: '请输入返款原因', trigger: 'blur' }
+            ],
+            refundTime : [
+                { required: true, message: '请选择退款时间', trigger: 'blur' }
+            ],
+            cusAmount: [
+                { required: true, message: '请输入返款客户金额', trigger: 'blur' }
+            ],
+            /* fileList: [
+                { required: true, message: '请上传图片', trigger: 'blur' }
+            ], */
+          },
+          multipleSelection:[],
+          signSelection:[],
+          formLabelWidth: '150px',
+          formLabelWidth1: '120px',     
+          dialogFormChooseVisible:false, //关联弹窗
+          dialogFormChoose:{
+        	  startTime:'',
+        	  endTime:'',
+        	  cusName:'',
+        	  signNo:'',
+        	  startPeojectId:'',
+        	  startProvince:''
+        	  
+          },   
+          dataTableChoose:[],   
+          dynamicTags: [],
         },
         methods: {
+          handleClose(tag) {
+            this.dynamicTags.splice(this.dynamicTags.indexOf(tag), 1);
+          },
+          chooseRelevance(){
+        	  var param ={};
+              var startTime = this.dialogFormChoose.startTime;
+              var endTime = this.dialogFormChoose.endTime;
+              if(startTime&&endTime&&startTime> endTime){
+              	this.$message({
+                      message: '开始时间不能大于结束时间',
+                      type: 'warning'
+                    });
+                  return;
+              }
+              param.startTime = startTime;
+              param.endTime = endTime;
+              param.cusName = this.dialogFormChoose.cusName;
+              param.signProvince = this.dialogFormChoose.signProvince;
+              param.signProject = this.dialogFormChoose.signProject;
+              param.signNo = this.dialogFormChoose.signNo;
+              
+              console.info(param);
+              axios.post('/financing/refundRebate/rebatesignList', param)
+              .then(function (response) {
+                    var result =  response.data;
+                    clueVM.dataTableChoose= result.data;
+              })
+              .catch(function (error) {
+                   console.log(error);
+              });
+            this.dialogFormChooseVisible=true;
+          },
         	searchTable() {
                 var param ={};
                 var startTime = this.searchForm.startTime;
                 var endTime = this.searchForm.endTime;
-                var startReserveTime = this.searchForm.startReserveTime;
-                var endReserveTime = this.searchForm.endReserveTime;
             	var vilad=false;
                 if(startTime&&endTime&&startTime> endTime){
-                	vilad=true;
-                }
-                if(startReserveTime&&endReserveTime&&startReserveTime> endReserveTime){
                 	vilad=true;
                 }
                 if(vilad){
@@ -351,23 +647,26 @@ var clueVM = new Vue({
                 }
                 param.startTime = startTime;
                 param.endTime = endTime;
-                param.startReserveTime = startReserveTime;
-                param.endReserveTime = endReserveTime;
                 param.pageSize = this.pager.pageSize;
                 param.pageNum = this.pager.currentPage;
+                param.busAreaId = this.searchForm.busAreaId;
+                param.busGroupId = this.searchForm.busGroupId;
+                param.busSaleId = this.searchForm.busSaleId;
+                param.signType = this.searchForm.signType;
+                param.signShopType = this.searchForm.signShopType;
+                param.cusName = this.searchForm.cusName;
+                param.teleDeptId = this.searchForm.teleDeptId;
                 param.teleGorupId = this.searchForm.teleGorupId;
                 param.teleSaleId = this.searchForm.teleSaleId;
-                param.tasteProjectId = this.searchForm.projectId;
-                param.cusName = this.searchForm.cusName;
-                param.province = this.searchForm.province;
-               
+                param.signProvince = this.searchForm.signProvince;
+                param.signStatus = this.searchForm.signStatus;
+                param.phone = this.searchForm.phone;
+                param.signNo = this.searchForm.signNo;
+                
                 //列表只查询正常数据，取消删除数据不查询
                 //param.delFalg = this.searchForm.delFalg;
-                param.delFalg =0;
-                param.sortField = this.searchForm.sortField;
-                param.sortType = this.searchForm.sortType;
                 console.info(param);
-                axios.post('/business/busAllocation/list', param)
+                axios.post('/financing/refundRebate/list', param)
                 .then(function (response) {
                       var result =  response.data;
                       console.info(result);
@@ -385,6 +684,9 @@ var clueVM = new Vue({
               handleSelectionChange(val) {
                   this.multipleSelection = val;
               },
+              signSelectionChange(val) {
+                  this.signSelection = val;
+              },
               handleSizeChange(val) {
                   //下拉框  每页 10,20条切换 调用
                      console.log(`每页 ${val} 条`);
@@ -396,185 +698,114 @@ var clueVM = new Vue({
                  console.log(`当前页: ${val}`);
                  this.initTableData(val);
                },
-               //品尝项目转换方法
-               transformProject(row, column, cellValue, index) {
-            	   var text="";
-              	   if(projectList&&cellValue){
-	            	   var array=cellValue.split(",");
-	                   for(var i=0;i<array.length;i++){
-	                	   for(var j=0;j<projectList.length;j++){
-	 	                		if(array[i]==projectList[j].id){
-	 	                			if(i==0){
-		 	                			text=projectList[j].projectName;
-	 	                			}else{
-		 	                			text=text+","+projectList[j].projectName;
-	 	                			}
-	 	                		}
-	 	                	}
-	                	}
-              	    }
-                    return text;
-               },
-             //意向项目转换方法
-               transformPurProject(row, column, cellValue, index) {
-            	   var text="";
-            	   if(cellValue==1){
-	            	   if(projectList){
-	  	                  for(var i=0;i<projectList.length;i++){
-	  	                		if(row.purInProject==projectList[i].id){
-	  	                			text=projectList[i].projectName;
-	  	                		}
-	  	                	}
-	              	  }
-            	   }else{
-             	    	text=row.purOutProject;
-             	   }
-                   return text;
-               },
-               //性别转换方法
+               //是否转换方法
                transformSex(row, column, cellValue, index) {
                  var text="";
                  if(cellValue=="1"){
-                   text="男"
+                   text="是"
+                 }else if(cellValue=="0"){
+                   text="否"
+                 }
+                 return text;
+               },
+               //签约类型转换方法
+               transformSignType(row, column, cellValue, index) {
+                 var text="";
+                 if(cellValue=="1"){
+                   text="一次性全款"
                  }else if(cellValue=="2"){
-                   text="女"
+                   text="先交订金"
                  }
                  return text;
                },
                //邀约状态转换方法
-               transformDelFalg(row, column, cellValue, index) {
+               transformSignStatus(row, column, cellValue, index) {
                  var text="";
-                 if(cellValue=="0"){
-                   text="正常"
-                 }else if(cellValue=="1"){
-                   text="已删除"
-                 }else if(cellValue=="2"){
-                   text="已取消"
+                 if(cellValue=="2"){
+                   text="退款确认中";
+                 }else if(cellValue=="3"){
+                   text="返款确认中";
+                 }else if(cellValue=="4"){
+                   text="退款成功";
+                 }else if(cellValue=="5"){
+                   text="返款成功";
+                 }else{
+                   text="正常";
                  }
                  return text;
                },
                //合伙人转换方法
-               transformPartner(row, column, cellValue, index) {
+               transformSignShopType(row, column, cellValue, index) {
              	  var text="";
-             	  if(partnerList){
- 	                  for(var i=0;i<partnerList.length;i++){
- 	                		if(cellValue==partnerList[i].value){
- 	                			text=partnerList[i].name;
+             	  if(vistitStoreTypeList){
+ 	                  for(var i=0;i<vistitStoreTypeList.length;i++){
+ 	                		if(cellValue==vistitStoreTypeList[i].value){
+ 	                			text=vistitStoreTypeList[i].name;
  	                		}
  	                	}
              	  }
                    return text;
                },
-               //选址情况转换方法
-               transformAddress(row, column, cellValue, index) {
-             	  var text="";
-             	  if(optionAddressList){
- 	                  for(var i=0;i<optionAddressList.length;i++){
- 	                		if(cellValue==optionAddressList[i].value){
- 	                			text=optionAddressList[i].name;
- 	                		}
- 	                	}
-             	  }
-                   return text;
-               },
-               //餐饮经验转换方法
-               transformExperience(row, column, cellValue, index) {
-             	  var text="";
-             	  if(cateringExperienceList){
- 	                  for(var i=0;i<cateringExperienceList.length;i++){
- 	                		if(cellValue==cateringExperienceList[i].value){
- 	                			text=cateringExperienceList[i].name;
- 	                		}
- 	                	}
-             	  }
-                   return text;
-               },
-               //店铺面积转换方法
-               transformArea(row, column, cellValue, index) {
-             	  var text="";
-             	  if(storefrontAreaList){
- 	                  for(var i=0;i<storefrontAreaList.length;i++){
- 	                		if(cellValue==storefrontAreaList[i].value){
- 	                			text=storefrontAreaList[i].name;
- 	                		}
- 	                	}
-             	  }
-                   return text;
-               },
-               //投资金额转换方法
-               transformUssm(row, column, cellValue, index) {
-             	  var text="";
-             	  if(ussmList){
- 	                  for(var i=0;i<ussmList.length;i++){
- 	                		if(cellValue==ussmList[i].value){
- 	                			text=ussmList[i].name;
- 	                		}
- 	                	}
-             	  }
-                   return text;
-               },
-               //日期数据格式化方法
-               dateFormat( row, column, cellValue, index) {
-                 if (cellValue == undefined) {
-                    return "";
-                 }
-                 return moment(cellValue).format("YYYY-MM-DD HH:mm:ss");
-               },
-               //打开分发资源
-               toAllocationClue() {
-            	   this.allocationForm.message="";
-            	   this.allocationForm.saleId = '';
-            	   this.allocationForm.remark = '';
-           	       var rows = this.multipleSelection;
+              
+               //关联签约单确定
+               submitSign() {
+           	       var rows = this.signSelection;
             	   if(rows.length==0){
                        this.$message({
-                          message: '请选择一条数据进行分发',
+                          message: '请至少选择一条数据进行关联',
                           type: 'warning'
                         });
                        return;
                    }
-            	   var text="";
+            	   var signList=[];
             	   for(var i=0;i<rows.length;i++){
-                   	   var curRow = rows[i];
-                       if(curRow.busSaleId){
-                    	   text+="当前选择“"+curRow.cusName+"”已有之前服务商务经理"+curRow.busSaleName+",";
-                       }
+               			signList.push(rows[i].signNo);
                    }
-            	   if(text!=""){
-	                   text+="请确认后分发客户。";
-	                   this.allocationForm.message=text;
+            	   this.dynamicTags =signList;
+            	   this.dialogFormChooseVisible=false;
+               },
+               //打开申请退款
+               toAllocationClue(formName) {
+            	   if(this.$refs[formName]){
+	            	   this.$refs[formName].resetFields();
+            	   }
+           	       var rows = this.multipleSelection;
+            	   if(rows.length!=1){
+                       this.$message({
+                          message: '请选择一条数据进行退款申请',
+                          type: 'warning'
+                        });
+                       return;
                    }
-            	   
+            	   if(rows[0].signStatus!=1){
+            		   this.$message({
+                           message: '只允许操作签约状态为正常的数据',
+                           type: 'warning'
+                         });
+                        return;
+            	   }
+            	   this.allocationForm.signId=rows[0].signId;
                    this.allocationVisible = true;
                },
-               allocationClueCancel(formName){//分发资源取消
+               allocationClueCancel(formName){//申请退款取消
             	   this.$refs[formName].resetFields();
             	   this.allocationVisible = false;
                },
-               allocationClue(formName){//分发资源
+               allocationClue(formName){//申请退款
             	   
             	   this.$refs[formName].validate((valid) => {
             	          if (valid) {
-            	        	  var rows = this.multipleSelection;
-	           	           	   var idList = [];
-	           	               var clueIdList = [];
-	           	               for(var i=0;i<rows.length;i++){
-	           	            	   var curRow = rows[i];
-	           	            			idList.push(curRow.id);
-	           	            			clueIdList.push(curRow.clueId);
-	           	               }
-           	            	  //分发
            	            	  var param  = {};
-           	            	  param.type=1;
-	           	           	  param.idList=idList;
-	           	           	  param.clueIdList=clueIdList;
-	                          	  param.busSaleId=this.allocationForm.saleId;
-	                          	  param.remark=this.allocationForm.remark;
-	                             axios.post('/business/busAllocation/busAllocationClue',param)
+           	            	  param.signId=this.allocationForm.signId;
+           	            	  param.reason=this.allocationForm.reason;
+           	            	  param.refundTime=this.allocationForm.refundTime;
+           	            	  param.cusAmount=this.allocationForm.cusAmount;
+           	            	  param.imgUrlList=[];
+	                          axios.post('/financing/refundRebate/applyRefund',param)
 	                              .then(function (response) {
 	                                  var data =  response.data;
 	                                  if(data.code=='0'){
-	                                  	clueVM.$message({message:'分发成功',type:'success',duration:1000,onClose:function(){
+	                                  	clueVM.$message({message:'申请成功',type:'success',duration:1000,onClose:function(){
 	                                  		clueVM.allocationVisible = false;
 	                                  		clueVM.searchTable();
 	                              	    }});
@@ -598,31 +829,29 @@ var clueVM = new Vue({
             	          }
             	    });
                  },// method end
-               //打开外调经理
-               toTransferClue() {
-                	 this.transferForm.message = '';
-                	 this.transferForm.saleId = '';
-                	 this.transferForm.remark = '';
-                	 
+               //打开返款申请
+               toTransferClue(formName) {
+                   if(this.$refs[formName]){
+  	            	   this.$refs[formName].resetFields();
+              	   }
            	       var rows = this.multipleSelection;
-            	   if(rows.length==0){
+            	   if(rows.length!=1){
                        this.$message({
-                          message: '请选择一条数据进行外调',
+                          message: '请选择一条数据进行返款申请',
                           type: 'warning'
                         });
                        return;
                    }
-            	   var text="";
-            	   for(var i=0;i<rows.length;i++){
-                   	   var curRow = rows[i];
-                       if(curRow.busSaleId){
-                    	   text+="当前选择“"+curRow.cusName+"”已有之前服务商务经理"+curRow.busSaleName+",";
-                       }
-                   }
-            	   if(text!=""){
-	                   text+="请确认后分发客户。";
-	                   this.allocationForm.message=text;
-                   }
+            	   if(rows[0].signStatus!=1){
+            		   this.$message({
+                           message: '只允许操作签约状态为正常的数据',
+                           type: 'warning'
+                         });
+                        return;
+            	   }
+                   this.transferForm.signId = rows[0].signId;
+                   this.dialogFormChoose.signProjectId = rows[0].signProject;
+                   this.dialogFormChoose.signProvince = rows[0].signProvince;
                    this.transferVisible = true;
                },
                transferClueCancel(formName){//外调经理取消
@@ -632,26 +861,19 @@ var clueVM = new Vue({
                transferClue(formName){//外调经理
             	   this.$refs[formName].validate((valid) => {
             	          if (valid) {
-            	        	  var rows = this.multipleSelection;
-                              var idList = [];
-                              var clueIdList = [];
-                              for(var i=0;i<rows.length;i++){
-                           	   var curRow = rows[i];
-                           			idList.push(curRow.id);
-                           			clueIdList.push(curRow.clueId);
-                              }
                            	  //外调
                            	  var param  = {};
-                           	  param.type=2;
-                          	  param.idList=idList;
-                          	  param.clueIdList=clueIdList;
-                          	  param.busSaleId=this.transferForm.saleId;
-                          	  param.remark=this.transferForm.remark;
-                              axios.post('/business/busAllocation/busAllocationClue',param)
+                           	  param.signId=this.transferForm.signId;
+         	            	  param.reason=this.transferForm.reason;
+         	            	  param.refundTime=this.transferForm.refundTime;
+         	            	  param.cusAmount=this.transferForm.cusAmount;
+         	            	  param.signNoList=this.dynamicTags;
+         	            	  param.imgUrlList=[];
+	                          axios.post('/financing/refundRebate/applyRebate',param)
                                .then(function (response) {
                                    var data =  response.data;
                                    if(data.code=='0'){
-                                   	clueVM.$message({message:'外调成功',type:'success',duration:1000,onClose:function(){
+                                   	clueVM.$message({message:'申请成功',type:'success',duration:1000,onClose:function(){
                                    		clueVM.transferVisible = false;
                                    		clueVM.searchTable();
                                	    }});
@@ -676,43 +898,108 @@ var clueVM = new Vue({
             	  });
             	   
                  },// method end
-                 showCustomerDetail(row, column){ // 客户详情
-                	 window.location.href='/bus/BusinessCustomer/viewCustomerInfo?clueId='+row.clueId;
+                 recordClick(row) {//查看明细
+                     this.paymentDetailsShow=false;
+                     this.paymentDetailsShow2=false;
+                     this.paymentDetailsShow3=false;
+                     this.paymentDetailsShow4=false;
+                     this.visitRecordShow=false;
+                     this.curRow = row;
+                     if(row.status==1){
+                         this.showbutton = true;
+                     }else{
+                         this.showbutton = false;
+                     }
+                     // row.signNo;
+                     var param = {};
+                     param.idList = [row.signId];
+                     axios.post('/sign/signRecord/listPayDetailNoPage', param)
+                     .then(function (response) {
+                         var resData = response.data;
+                         console.log(resData.data)
+                         if(resData.code=='0'){
+                         	var payDetailData = resData.data;
+                         	if(payDetailData[1]){
+                         		clueVM.paymentDetailsShow=true;
+                         		clueVM.recordTable= payDetailData[1];
+                         	}
+                         	if(payDetailData[2]){
+                         		clueVM.paymentDetailsShow2=true;
+                         		console.info(payDetailData[2]);
+                         		 clueVM.recordTable2= payDetailData[2];
+                         	}
+                         	if(payDetailData[3]){
+                         		  clueVM.paymentDetailsShow3=true;
+                         		  clueVM.recordTable3= payDetailData[3];
+                         	}
+                         	if(payDetailData[4]){
+                         		clueVM.paymentDetailsShow4=true;
+                         		clueVM.recordTable4= payDetailData[4];
+                         	}
+                             if(payDetailData['visitRecord']){
+                                 if(payDetailData['visitRecord'].length >0){
+                                     clueVM.visitRecordShow=true;
+                                     clueVM.visitRecordTable= payDetailData['visitRecord'];
+                                 }
+                             }
+                         }else{
+                             clueVM.$message({message:resData.msg,type:'error'});
+                             console.error(resData);
+                         }
+                         clueVM.recordDialog=true;
+                     
+                     })
+                     .catch(function (error) {
+                          console.log(error);
+                     }).then(function(){
+                     });
+                    
                  },
-              //根据电销组查询电销总监
-              getSaleList() {
-            	  var param ={};
-            	  param.orgId = this.searchForm.teleGorupId;
-                  console.info(param);
-                  axios.post('/business/busAllocation/getSaleList', param)
-                  .then(function (response) {
-                        var result =  response.data;
-                        console.info(result);
-                        var table=result.data;
-                        clueVM.teleSaleOptions= table;
-                  })
-                  .catch(function (error) {
-                       console.log(error);
-                  });
-              },
-              //排序
-              sort_change(column) {
-            	  var sortField="";
-            	  var sortType="";
-                  if (column.prop === 'createTime') {
-                	  sortField="a.create_Time";
-                  } else if (column.prop === 'reserveTime') {
-                	  sortField="a.reserve_Time";
-                  }
-                  if (column.order === 'descending') {
-                  	sortType="desc";
-                  } else if (column.order === 'ascending') {
-                  	sortType="asc";
-                  }
-                  this.searchForm.sortField=sortField;
-                  this.searchForm.sortType=sortType;
-                  this.searchTable();
-                }
+                 getTimeText(row, column, value, index){
+                     var valText="";
+                     if(value){
+                         valText =  moment(value).format("YYYY-MM-DD HH:mm:ss");
+                     }
+                     return valText;
+                 },
+                 getSignShopTypeText(row, column, value, index){
+                 	var valText="";
+                     if(value==1){
+                         valText="创业店";
+                     }else if(value==2){
+                         valText="标准店";
+                     }else if(value==3){
+                         valText="白金店";
+                     }else if(value==4){
+                         valText="旗舰店";
+                     }else if(value==5){
+                         valText="区域代理";
+                     }
+                     return valText;
+                 },
+                 getPayModeText(row, column, value, index){
+                 	var valText="";
+                     if(value==1){
+                         valText="现金";
+                     }else if(value==2){
+                         valText="POS";
+                     }else if(value==3){
+                         valText="转账";
+                     }
+                     return valText;
+                 },
+                 getStatusText(row, column, value, index){
+                 	   var valText="";
+                 	   if(value==0){
+                 		   valText="驳回";
+                 	   }
+                 	   else if(value==1){
+                            valText="审核中";
+                        }else if(value==2){
+                            valText="有效";
+                        }
+                        return valText;
+                 },
         },
         created(){
             console.info("create method");

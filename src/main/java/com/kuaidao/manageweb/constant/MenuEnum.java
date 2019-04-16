@@ -39,10 +39,9 @@ public enum MenuEnum {
     /**
      * 财务
      */
-    REFUNDREBATE_MANAGER("餐饮公司退返款"),REFUNDAPPLYLIST("退款申请列表"),REFUNDCONFIRM("退款确认"),REBATEAPPLYLIST("返款申请列表"),REBATECONFIRM("返款确认")
+    REFUNDREBATE_MANAGER("餐饮公司退返款"),REFUNDAPPLYLIST("退款申请列表"),REFUNDCONFIRM("退款确认"),REBATEAPPLYLIST("返款申请列表"),REBATECONFIRM("返款确认"),RECONCILIATIONCONFIRM_MANAGER("对账结算确认")
+    ,REFUNDREBATEAPPLY_MANAGER("对账结算申请");
     
-    ;
-
 
 
     /**

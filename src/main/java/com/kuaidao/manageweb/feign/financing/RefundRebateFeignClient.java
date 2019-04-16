@@ -1,5 +1,6 @@
 package com.kuaidao.manageweb.feign.financing;
 
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.netflix.feign.FeignClient;
@@ -20,7 +21,7 @@ import com.kuaidao.common.entity.PageBean;
  * @date: 2019年1月4日
  * @version V1.0
  */
-@FeignClient(name = "aggregation-service", path = "/aggregation/refundRebate",
+@FeignClient(name = "aggregation-service-zhang", path = "/aggregation/refundRebate",
         fallback = RefundRebateFeignClient.HystrixClientFallback.class)
 public interface RefundRebateFeignClient {
 
@@ -32,6 +33,16 @@ public interface RefundRebateFeignClient {
      */
     @PostMapping("/list")
     public JSONResult<PageBean<RefundRebateListDTO>> list(@RequestBody RefundRebatePageParam param);
+
+    /**
+     * 关联签约单列表
+     * 
+     * @param menuDTO
+     * @return
+     */
+    @PostMapping("/rebatesignList")
+    public JSONResult<List<RefundRebateListDTO>> rebatesignList(
+            @RequestBody RefundRebatePageParam param);
 
 
     /**
@@ -69,6 +80,12 @@ public interface RefundRebateFeignClient {
         public JSONResult<PageBean<RefundRebateListDTO>> list(
                 @RequestBody RefundRebatePageParam param) {
             return fallBackError("餐饮公司退返款列表");
+        }
+
+        @Override
+        public JSONResult<List<RefundRebateListDTO>> rebatesignList(
+                @RequestBody RefundRebatePageParam param) {
+            return fallBackError("关联签约单");
         }
 
 

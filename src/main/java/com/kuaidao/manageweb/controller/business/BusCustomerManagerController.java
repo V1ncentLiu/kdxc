@@ -114,12 +114,9 @@ public class BusCustomerManagerController {
         // 查询所有项目
         JSONResult<List<ProjectInfoDTO>> allProject = projectInfoFeignClient.allProject();
         request.setAttribute("projectList", allProject.getData());
-        SysRegionDTO queryDTO = new SysRegionDTO();
         // 查询所有省
-        queryDTO.setType(0);
-        JSONResult<List<SysRegionDTO>> querySysRegionByParam =
-                sysRegionFeignClient.querySysRegionByParam(queryDTO);
-        request.setAttribute("provinceList", querySysRegionByParam.getData());
+        JSONResult<List<SysRegionDTO>> getproviceList = sysRegionFeignClient.getproviceList();
+        request.setAttribute("provinceList", getproviceList.getData());
 
         // 查询字典选址情况集合
         request.setAttribute("optionAddressList", getDictionaryByCode(Constants.OPTION_ADDRESS));

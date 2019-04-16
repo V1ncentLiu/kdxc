@@ -389,8 +389,11 @@ public class BusinessSignController {
         String linkPhone = "";
         if (JSONResult.SUCCESS.equals(listJSONResult.getCode())) {
             List<CustomerClueDTO> data = listJSONResult.getData();
-            CustomerClueDTO customerClueDTO = data.get(0);
-            linkPhone = customerClueDTO.getLinkPhone();
+            if(data !=null && data.size()>0) {
+            	CustomerClueDTO customerClueDTO = data.get(0);
+                linkPhone = customerClueDTO.getLinkPhone();
+            }
+            
         }
         return linkPhone;
     }

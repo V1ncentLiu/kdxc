@@ -95,11 +95,8 @@ public class RefundRebateManagerController {
         request.setAttribute("teleSaleList", teleSaleList);
 
         // 查询所有省
-        SysRegionDTO queryDTO = new SysRegionDTO();
-        queryDTO.setType(0);
-        JSONResult<List<SysRegionDTO>> querySysRegionByParam =
-                sysRegionFeignClient.querySysRegionByParam(queryDTO);
-        request.setAttribute("provinceList", querySysRegionByParam.getData());
+        JSONResult<List<SysRegionDTO>> getproviceList = sysRegionFeignClient.getproviceList();
+        request.setAttribute("provinceList", getproviceList.getData());
 
         // 查询签约店型集合
         request.setAttribute("vistitStoreTypeList",
@@ -128,6 +125,20 @@ public class RefundRebateManagerController {
         }
 
         JSONResult<PageBean<RefundRebateListDTO>> list = refundRebateFeignClient.list(pageParam);
+        return list;
+    }
+
+    /***
+     * 关联签约单列表
+     * 
+     * @return
+     */
+    @PostMapping("/rebatesignList")
+    @ResponseBody
+    public JSONResult<List<RefundRebateListDTO>> rebatesignList(
+            @RequestBody RefundRebatePageParam pageParam, HttpServletRequest request) {
+        JSONResult<List<RefundRebateListDTO>> list =
+                refundRebateFeignClient.rebatesignList(pageParam);
         return list;
     }
 
