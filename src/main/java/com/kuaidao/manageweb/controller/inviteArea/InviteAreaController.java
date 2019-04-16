@@ -5,6 +5,11 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
+
+import com.kuaidao.aggregation.dto.project.CompanyInfoDTO;
+import com.kuaidao.aggregation.dto.project.CompanyInfoPageParam;
+import com.kuaidao.aggregation.dto.project.ProjectInfoPageParam;
+import com.kuaidao.manageweb.feign.project.CompanyInfoFeignClient;
 import org.apache.shiro.SecurityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,6 +61,11 @@ public class InviteAreaController {
     private OrganizationFeignClient organizationFeignClient;
     @Autowired
     private ProjectInfoFeignClient projectInfoFeignClient;
+    @Autowired
+    private CompanyInfoFeignClient companyInfoFeignClient;
+
+
+
 
     /**
      * 邀约记录列表页面
@@ -449,12 +459,27 @@ public class InviteAreaController {
      * 公司表中保存了公司对应集团：（保存的是集团名称）
      * 查询集团下项目：项目中保存的是集团的ID。这里的集团是从哪里获取的。
      */
-    public List<ProjectInfoDTO> InviteProjects(){
+    @RequestMapping("/InviteProjects")
+    @ResponseBody
+    public List<ProjectInfoDTO> InviteProjects(@RequestBody InviteAreaDTO inviteAreaDTO){
         List<ProjectInfoDTO> list = new ArrayList<>();
-//      商务小组ID 名称
-        Long GroupTeamId = 1L;
-        String GroupTeamName = "外包";
-
+        CompanyInfoPageParam param = new CompanyInfoPageParam();
+        param.setCompanyName1(inviteAreaDTO.getBusinessGroup());
+        param.setPageNum(1);
+        param.setPageSize(99999);
+        JSONResult<PageBean<CompanyInfoDTO>> list1 = companyInfoFeignClient.list(param);
+        if(JSONResult.SUCCESS.equals(list1.getCode())){
+            List<CompanyInfoDTO> data = list1.getData().getData();
+            if(data!=null&&data.size()>0){
+                CompanyInfoDTO dto = data.get(0);
+                ProjectInfoPageParam p = new ProjectInfoPageParam();
+                p.setGroupName(dto.getGroupName());
+                JSONResult<List<ProjectInfoDTO>> listJSONResult = projectInfoFeignClient.listNoPage(p);
+                if(JSONResult.SUCCESS.equals(listJSONResult.getCode())){
+                    list = listJSONResult.getData();
+                }
+            }
+        }
         return list;
     }
 }

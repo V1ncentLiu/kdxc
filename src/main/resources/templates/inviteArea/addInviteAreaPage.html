@@ -23,7 +23,7 @@
          	<el-row>
                 <el-col :span="8">
                     <el-form-item label="商务小组：" :label-width="formLabelWidth1" prop="businessGroupId">
-                        <el-select filterable v-model="form.businessGroupId" placeholder="请选择" style="width:100%">
+                        <el-select filterable v-model="form.businessGroupId" placeholder="请选择" style="width:100%" @change="setProject">
                             <el-option
                                 v-for="item in swList"
                                 :key="item.id"
@@ -170,7 +170,28 @@
             }        	  
         },
         methods: {
-
+            setProject(value){
+                var groupName = "";
+                for(var i = 0 ; i < swList.length ; i++){
+                    if(swList[i].id == value){
+                        groupName = swList[i].name;
+                        break;
+                    }
+                }
+                var param = {};
+                param.businessGroup = groupName;
+                debugger
+                axios.post("/invitearea/InviteProjects", param).then(function (response) {
+                    var data = response.data;
+                    if(data&&data.length>0){
+                        var arr = [];
+                        for(var i = 0 ; i < data.length ; i++){
+                            arr.push(data[i].id)
+                        }
+                        addUserVm.form.projectIds = arr;
+                    }
+                }).catch(function (error) {console.log(error);});
+            },
             onSubmit(formName) {
             	 this.$refs[formName].validate((valid) => {
           	       if (valid) {

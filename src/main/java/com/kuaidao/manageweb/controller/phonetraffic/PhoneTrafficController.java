@@ -553,6 +553,8 @@ public class PhoneTrafficController {
     @RequestMapping("/release")
     @ResponseBody
     public JSONResult<Boolean> releaseClue(@RequestBody TrafficParam trafficParam){
+        UserInfoDTO user =  CommUtil.getCurLoginUser();
+        trafficParam.setCreateUser(user.getId());
         return phoneTrafficFeignClient.releaseClue(trafficParam);
     }
 
