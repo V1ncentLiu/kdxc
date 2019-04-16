@@ -129,6 +129,20 @@ public class RefundRebateManagerController {
     }
 
     /***
+     * 关联签约单列表
+     * 
+     * @return
+     */
+    @PostMapping("/rebatesignList")
+    @ResponseBody
+    public JSONResult<List<RefundRebateListDTO>> rebatesignList(
+            @RequestBody RefundRebatePageParam pageParam, HttpServletRequest request) {
+        JSONResult<List<RefundRebateListDTO>> list =
+                refundRebateFeignClient.rebatesignList(pageParam);
+        return list;
+    }
+
+    /***
      * 餐饮公司退款申请
      * 
      * @return

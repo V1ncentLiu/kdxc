@@ -245,16 +245,16 @@
               <el-form-item label="关联签约单：" :label-width="formLabelWidth" prop="dynamicTags">
                 <el-button type="primary" @click="chooseRelevance">选择关联签约单</el-button>
               </el-form-item>
-            	<el-form-item label="返款客户金额：" :label-width="formLabelWidth" prop="refundAmount">
-                <el-input v-model="transferForm.refundAmount" placeholder="" style="width:50%"></el-input>
+            	<el-form-item label="返款客户金额：" :label-width="formLabelWidth" prop="cusAmount">
+                <el-input v-model="transferForm.cusAmount" placeholder="" style="width:50%"></el-input>
               </el-form-item>
-              <el-form-item label="返还餐饮公司金额：" :label-width="formLabelWidth" prop="reason" class="redcolor">
+              <!-- <el-form-item label="返还餐饮公司金额：" :label-width="formLabelWidth" prop="reason" class="redcolor">
                   {{transferForm.money}}
-              </el-form-item>
-              <el-form-item label="退款时间：" :label-width="formLabelWidth" prop="drawbackTime">
+              </el-form-item> -->
+              <el-form-item label="返款时间：" :label-width="formLabelWidth" prop="refundTime">
                   <el-date-picker
                       style="width: 50%;"
-                      v-model="transferForm.drawbackTime"
+                      v-model="transferForm.refundTime"
                       type="datetime"
                       placeholder="选择日期时间">
                   </el-date-picker>
@@ -270,13 +270,13 @@
                       <div slot="tip" class="el-upload__tip">只能上传jpg/png文件，且不超过500kb</div>
                   </el-upload>
               </el-form-item>
-              <el-form-item label="退款原因：" :label-width="formLabelWidth" prop="refundReason">
+              <el-form-item label="返款原因：" :label-width="formLabelWidth" prop="reason">
                   <el-input
                       type="textarea"
                       :rows="3"
                       placeholder=""
                       maxLength="100"
-                      v-model="allocationForm.refundReason" 
+                      v-model="transferForm.reason" 
                       style="width: 80%;">
                   </el-input>
               </el-form-item>
@@ -419,10 +419,10 @@
               <el-date-picker  v-model="dialogFormChoose.endTime" format="yyyy-MM-dd HH:mm" type="datetime" placeholder="选择日期"></el-date-picker>
           </el-form-item>
           <el-form-item label=""  prop="">
-            <el-input v-model="dialogFormChoose.searchIpBag" placeholder="签约单编号"></el-input>
+            <el-input v-model="dialogFormChoose.signNo" placeholder="签约单编号"></el-input>
           </el-form-item>
           <el-form-item label=""  prop="">
-            <el-input v-model="dialogFormChoose.searchHasIp" placeholder="客户姓名"></el-input>
+            <el-input v-model="dialogFormChoose.cusName" placeholder="客户姓名"></el-input>
           </el-form-item>
           <el-form-item label=""  prop="">
             <el-button type="primary" size="medium" icon="el-icon-search">搜索</el-button>
@@ -434,19 +434,20 @@
           style="width: 100%"
           border
           :data="dataTableChoose" 
+           @selection-change="signSelectionChange"
           class="marginB10">
           <el-table-column align="center" prop="" type="selection" name="type" width="55"></el-table-column>
           <el-table-column align="center" prop="" label="序号" type="index" name="type" width="55"></el-table-column>
-          <el-table-column align="center" prop="" label="签约单编号"></el-table-column>
-          <el-table-column align="center" prop="" label="签约时间"></el-table-column>
-          <el-table-column align="center" prop="" label="客户姓名"></el-table-column>
-          <el-table-column align="center" prop="" label="客户手机号"></el-table-column>
-          <el-table-column align="center" prop="" label="应收金额"></el-table-column>
+          <el-table-column align="center" prop="signNo" label="签约单编号"></el-table-column>
+          <el-table-column align="center" prop="signTime" label="签约时间"></el-table-column>
+          <el-table-column align="center" prop="cusName" label="客户姓名"></el-table-column>
+          <el-table-column align="center" prop="phone" label="客户手机号"></el-table-column>
+          <el-table-column align="center" prop="amountReceivable" label="应收金额"></el-table-column>
       </el-table>
       <div slot="footer" class="dialog-footer">
-          <el-button type="primary" @click="submitForm('dialogFormChoose')">提交</el-button>
+          <el-button type="primary" @click="submitSign('dialogFormChoose')">提交</el-button>
           <el-button @click="dialogFormChooseVisible = false">取消</el-button>
-      </div>      
+      </div>
   </el-dialog>
 </div>
 <!-- import common js-->
@@ -482,34 +483,21 @@ var clueVM = new Vue({
 	       		signNo: ''
           },
           allocationForm: {
+        	  
+        	signId:'',
           	reason:'',
             refundTime:'',
             cusAmount:'',
-            fileList: [//上传
-              // {
-              //   name: 'food.jpeg', 
-              //   url: 'https://fuss10.elemecdn.com/3/63/4e7f3a15429bfda99bce42a18cdd1jpeg.jpeg?imageMogr2/thumbnail/360x360/format/webp/quality/100'
-              // }, 
-              // {
-              //   name: 'food2.jpeg', 
-              //   url: 'https://fuss10.elemecdn.com/3/63/4e7f3a15429bfda99bce42a18cdd1jpeg.jpeg?imageMogr2/thumbnail/360x360/format/webp/quality/100'
-              // }
-            ],
+            fileList: [],
           },
           transferForm: {
-        	  reason:'',
+        	  signId:'',
+              reason:'',
               refundTime:'',
               cusAmount:'',
-              fileList: [//上传
-                // {
-                //   name: 'food.jpeg', 
-                //   url: 'https://fuss10.elemecdn.com/3/63/4e7f3a15429bfda99bce42a18cdd1jpeg.jpeg?imageMogr2/thumbnail/360x360/format/webp/quality/100'
-                // }, 
-                // {
-                //   name: 'food2.jpeg', 
-                //   url: 'https://fuss10.elemecdn.com/3/63/4e7f3a15429bfda99bce42a18cdd1jpeg.jpeg?imageMogr2/thumbnail/360x360/format/webp/quality/100'
-                // }
-              ],
+              signProjectId:'',
+              signProvince:'',
+              fileList: [],
           },
           dataTable:[],
           recordDialog:false,
@@ -565,47 +553,82 @@ var clueVM = new Vue({
               pageSize: 20,
           },
           allocationFormRules: {
-          	refundReason : [
+          	reason : [
                 { required: true, message: '请输入退款原因', trigger: 'blur' }
             ],
-            drawbackTime : [
+            refundTime : [
                 { required: true, message: '请选择退款时间', trigger: 'blur' }
             ],
-            refundAmount: [
+            cusAmount: [
                 { required: true, message: '请输入退款客户金额', trigger: 'blur' }
             ],
-            fileList: [
+           /*  fileList: [
                 { required: true, message: '请上传图片', trigger: 'blur' }
-            ],
+            ], */
           },
           transferFormRules: {
-          	refundReason : [
+        	reason : [
                 { required: true, message: '请输入返款原因', trigger: 'blur' }
             ],
-            drawbackTime : [
+            refundTime : [
                 { required: true, message: '请选择退款时间', trigger: 'blur' }
             ],
-            refundAmount: [
+            cusAmount: [
                 { required: true, message: '请输入返款客户金额', trigger: 'blur' }
             ],
-            fileList: [
+            /* fileList: [
                 { required: true, message: '请上传图片', trigger: 'blur' }
-            ],
+            ], */
           },
           multipleSelection:[],
+          signSelection:[],
           formLabelWidth: '150px',
           formLabelWidth1: '120px',     
           dialogFormChooseVisible:false, //关联弹窗
-          dialogFormChoose:{},   
+          dialogFormChoose:{
+        	  startTime:'',
+        	  endTime:'',
+        	  cusName:'',
+        	  signNo:'',
+        	  startPeojectId:'',
+        	  startProvince:''
+        	  
+          },   
           dataTableChoose:[],   
-          dynamicTags: ['标签一', '标签二', '标签三'],
+          dynamicTags: [],
         },
         methods: {
-          chooseRelevance(){
-            this.dialogFormChooseVisible=true;
-          },
           handleClose(tag) {
             this.dynamicTags.splice(this.dynamicTags.indexOf(tag), 1);
+          },
+          chooseRelevance(){
+        	  var param ={};
+              var startTime = this.dialogFormChoose.startTime;
+              var endTime = this.dialogFormChoose.endTime;
+              if(startTime&&endTime&&startTime> endTime){
+              	this.$message({
+                      message: '开始时间不能大于结束时间',
+                      type: 'warning'
+                    });
+                  return;
+              }
+              param.startTime = startTime;
+              param.endTime = endTime;
+              param.cusName = this.dialogFormChoose.cusName;
+              param.signProvince = this.dialogFormChoose.signProvince;
+              param.signProject = this.dialogFormChoose.signProject;
+              param.signNo = this.dialogFormChoose.signNo;
+              
+              console.info(param);
+              axios.post('/financing/refundRebate/rebatesignList', param)
+              .then(function (response) {
+                    var result =  response.data;
+                    clueVM.dataTableChoose= result.data;
+              })
+              .catch(function (error) {
+                   console.log(error);
+              });
+            this.dialogFormChooseVisible=true;
           },
         	searchTable() {
                 var param ={};
@@ -660,6 +683,9 @@ var clueVM = new Vue({
               //选择行
               handleSelectionChange(val) {
                   this.multipleSelection = val;
+              },
+              signSelectionChange(val) {
+                  this.signSelection = val;
               },
               handleSizeChange(val) {
                   //下拉框  每页 10,20条切换 调用
@@ -721,50 +747,58 @@ var clueVM = new Vue({
                    return text;
                },
               
-               //打开分发资源
-               toAllocationClue() {
-            	   this.allocationForm.message="";
-            	   this.allocationForm.saleId = '';
-            	   this.allocationForm.remark = '';
-           	       var rows = this.multipleSelection;
+               //关联签约单确定
+               submitSign() {
+           	       var rows = this.signSelection;
             	   if(rows.length==0){
+                       this.$message({
+                          message: '请至少选择一条数据进行关联',
+                          type: 'warning'
+                        });
+                       return;
+                   }
+            	   var signList=[];
+            	   for(var i=0;i<rows.length;i++){
+               			signList.push(rows[i].signNo);
+                   }
+            	   this.dynamicTags =signList;
+            	   this.dialogFormChooseVisible=false;
+               },
+               //打开申请退款
+               toAllocationClue(formName) {
+            	   if(this.$refs[formName]){
+	            	   this.$refs[formName].resetFields();
+            	   }
+           	       var rows = this.multipleSelection;
+            	   if(rows.length!=1){
                        this.$message({
                           message: '请选择一条数据进行退款申请',
                           type: 'warning'
                         });
                        return;
                    }
-            	   
+            	   this.allocationForm.signId=rows[0].signId;
                    this.allocationVisible = true;
                },
-               allocationClueCancel(formName){//分发资源取消
+               allocationClueCancel(formName){//申请退款取消
             	   this.$refs[formName].resetFields();
             	   this.allocationVisible = false;
                },
-               allocationClue(formName){//分发资源
+               allocationClue(formName){//申请退款
             	   
             	   this.$refs[formName].validate((valid) => {
             	          if (valid) {
-            	        	  var rows = this.multipleSelection;
-	           	           	   var idList = [];
-	           	               var clueIdList = [];
-	           	               for(var i=0;i<rows.length;i++){
-	           	            	   var curRow = rows[i];
-	           	            			idList.push(curRow.id);
-	           	            			clueIdList.push(curRow.clueId);
-	           	               }
-           	            	  //分发
            	            	  var param  = {};
-           	            	  param.type=1;
-	           	           	  param.idList=idList;
-	           	           	  param.clueIdList=clueIdList;
-	                          	  param.busSaleId=this.allocationForm.saleId;
-	                          	  param.remark=this.allocationForm.remark;
-	                             axios.post('/business/busAllocation/busAllocationClue',param)
+           	            	  param.signId=this.allocationForm.signId;
+           	            	  param.reason=this.allocationForm.reason;
+           	            	  param.refundTime=this.allocationForm.refundTime;
+           	            	  param.cusAmount=this.allocationForm.cusAmount;
+           	            	  param.imgUrlList=[];
+	                          axios.post('/financing/refundRebate/applyRefund',param)
 	                              .then(function (response) {
 	                                  var data =  response.data;
 	                                  if(data.code=='0'){
-	                                  	clueVM.$message({message:'分发成功',type:'success',duration:1000,onClose:function(){
+	                                  	clueVM.$message({message:'申请成功',type:'success',duration:1000,onClose:function(){
 	                                  		clueVM.allocationVisible = false;
 	                                  		clueVM.searchTable();
 	                              	    }});
@@ -788,31 +822,22 @@ var clueVM = new Vue({
             	          }
             	    });
                  },// method end
-               //打开外调经理
-               toTransferClue() {
-                	 this.transferForm.message = '';
-                	 this.transferForm.saleId = '';
-                	 this.transferForm.remark = '';
-                	 
+               //打开返款申请
+               toTransferClue(formName) {
+                   if(this.$refs[formName]){
+  	            	   this.$refs[formName].resetFields();
+              	   }
            	       var rows = this.multipleSelection;
-            	   if(rows.length==0){
+            	   if(rows.length!=1){
                        this.$message({
                           message: '请选择一条数据进行返款申请',
                           type: 'warning'
                         });
                        return;
                    }
-            	   var text="";
-            	   for(var i=0;i<rows.length;i++){
-                   	   var curRow = rows[i];
-                       if(curRow.busSaleId){
-                    	   text+="当前选择“"+curRow.cusName+"”已有之前服务商务经理"+curRow.busSaleName+",";
-                       }
-                   }
-            	   if(text!=""){
-	                   text+="请确认后分发客户。";
-	                   this.allocationForm.message=text;
-                   }
+                   this.transferForm.signId = rows[0].signId;
+                   this.dialogFormChoose.signProjectId = rows[0].signProject;
+                   this.dialogFormChoose.signProvince = rows[0].signProvince;
                    this.transferVisible = true;
                },
                transferClueCancel(formName){//外调经理取消
@@ -822,26 +847,19 @@ var clueVM = new Vue({
                transferClue(formName){//外调经理
             	   this.$refs[formName].validate((valid) => {
             	          if (valid) {
-            	        	  var rows = this.multipleSelection;
-                              var idList = [];
-                              var clueIdList = [];
-                              for(var i=0;i<rows.length;i++){
-                           	   var curRow = rows[i];
-                           			idList.push(curRow.id);
-                           			clueIdList.push(curRow.clueId);
-                              }
                            	  //外调
                            	  var param  = {};
-                           	  param.type=2;
-                          	  param.idList=idList;
-                          	  param.clueIdList=clueIdList;
-                          	  param.busSaleId=this.transferForm.saleId;
-                          	  param.remark=this.transferForm.remark;
-                              axios.post('/business/busAllocation/busAllocationClue',param)
+                           	  param.signId=this.transferForm.signId;
+         	            	  param.reason=this.transferForm.reason;
+         	            	  param.refundTime=this.transferForm.refundTime;
+         	            	  param.cusAmount=this.transferForm.cusAmount;
+         	            	  param.signNoList=this.dynamicTags;
+         	            	  param.imgUrlList=[];
+	                          axios.post('/financing/refundRebate/applyRebate',param)
                                .then(function (response) {
                                    var data =  response.data;
                                    if(data.code=='0'){
-                                   	clueVM.$message({message:'外调成功',type:'success',duration:1000,onClose:function(){
+                                   	clueVM.$message({message:'申请成功',type:'success',duration:1000,onClose:function(){
                                    		clueVM.transferVisible = false;
                                    		clueVM.searchTable();
                                	    }});
