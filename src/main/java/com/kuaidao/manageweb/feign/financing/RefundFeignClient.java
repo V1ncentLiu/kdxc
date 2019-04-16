@@ -7,6 +7,7 @@ import org.springframework.cloud.netflix.feign.FeignClient;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.PostMapping;
 import com.kuaidao.aggregation.dto.financing.RefundAndImgRespDTO;
+import com.kuaidao.aggregation.dto.financing.RefundEditRejectReqDTO;
 import com.kuaidao.aggregation.dto.financing.RefundImgRespDTO;
 import com.kuaidao.aggregation.dto.financing.RefundInfoQueryDTO;
 import com.kuaidao.aggregation.dto.financing.RefundQueryDTO;
@@ -67,6 +68,16 @@ public interface RefundFeignClient {
     @PostMapping("/queryRefundInfoById")
     JSONResult<RefundAndImgRespDTO> queryRefundInfoById(RefundInfoQueryDTO refundInfoQueryDTO);
     
+    
+    /**
+     * 编辑驳回退款
+     * @param refundUpdateDTO
+     * @return
+     */
+    @PostMapping("/editRejectRefundInfo")
+    JSONResult<Boolean> editRejectRefundInfo(RefundEditRejectReqDTO refundUpdateDTO);
+
+    
     @Component
     static class HystrixClientFallback implements RefundFeignClient {
 
@@ -102,6 +113,12 @@ public interface RefundFeignClient {
         public JSONResult<RefundAndImgRespDTO> queryRefundInfoById(RefundInfoQueryDTO refundInfoQueryDTO) {
             return fallBackError("根据Id查询退返款详情");
         }
+
+        @Override
+        public JSONResult<Boolean> editRejectRefundInfo(RefundEditRejectReqDTO refundUpdateDTO) {
+            return fallBackError("编辑驳回退款");
+        }
     }
+
 
 }

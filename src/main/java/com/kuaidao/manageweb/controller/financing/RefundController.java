@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import com.kuaidao.aggregation.constant.AggregationConstant;
 import com.kuaidao.aggregation.dto.financing.RefundAndImgRespDTO;
+import com.kuaidao.aggregation.dto.financing.RefundEditRejectReqDTO;
 import com.kuaidao.aggregation.dto.financing.RefundImgRespDTO;
 import com.kuaidao.aggregation.dto.financing.RefundInfoQueryDTO;
 import com.kuaidao.aggregation.dto.financing.RefundQueryDTO;
@@ -39,7 +40,6 @@ import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
 import com.kuaidao.sys.dto.organization.OrganizationRespDTO;
 import com.kuaidao.sys.dto.role.RoleInfoDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
-import com.kuaidao.sys.dto.user.UserOrgRoleReq;
 
 /**
  *  退返款
@@ -82,9 +82,9 @@ public class RefundController {
      * 返款申请页面
      * @return
      */
-    @RequestMapping("/rebateApplayPage")
+    @RequestMapping("/rebateApplyPage")
     public String rebateApplayPage() {
-        return "financing/rebateApplayPage";
+        return "financing/rebateApplyPage";
     }
 
     /***
@@ -250,6 +250,24 @@ public class RefundController {
     }
     
     
+    /**
+     * 编辑驳回退款
+     * @return
+     */
+    @PostMapping("/editRejectRefundInfo")
+    @ResponseBody
+    @LogRecord(operationType = OperationType.UPDATE, description = "编辑驳回退款",
+    menuName = MenuEnum.REFUNDAPPLYLIST)
+    public JSONResult<Boolean> editRejectRefundInfo(@RequestBody RefundEditRejectReqDTO refundUpdateDTO){
+       Long  id = refundUpdateDTO.getId();
+       if(id==null) {
+           return CommonUtil.getParamIllegalJSONResult();
+       }
+       refundUpdateDTO.setType(AggregationConstant.REFOUND_REBATE_TYPE.REFOUND_TYPE);
+       return refundFeignClient.editRejectRefundInfo(refundUpdateDTO);
+    }
+    
+    
     /***
      * 退款确认列表
      * @param queryDTO
@@ -263,7 +281,8 @@ public class RefundController {
         queryDTO.setCurUser(curLoginUser.getId());
         queryDTO.setType(AggregationConstant.REFOUND_REBATE_TYPE.REFOUND_TYPE);
         
-        List<RoleInfoDTO> roleList = curLoginUser.getRoleList();
+        //TODO dev 
+      /*  List<RoleInfoDTO> roleList = curLoginUser.getRoleList();
         RoleInfoDTO roleInfoDTO = roleList.get(0);
         String roleCode = roleInfoDTO.getRoleCode();
         if (RoleCodeEnum.QDSJCW.name().equals(roleCode)){
@@ -272,7 +291,7 @@ public class RefundController {
             queryDTO.setRoleCode(roleCode);
         }else {
             return new JSONResult().fail(SysErrorCodeEnum.ERR_NOTEXISTS_DATA.getCode(), "角色没有权限");
-        }
+        }*/
         return refundFeignClient.listRefundApply(queryDTO);
     }
     /**
@@ -289,6 +308,8 @@ public class RefundController {
         if(CollectionUtils.isEmpty(idList)) {
             return CommonUtil.getParamIllegalJSONResult();
         }
+        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+        refundUpdateDTO.setCurUser(curLoginUser.getId());
         refundUpdateDTO.setStatus(AggregationConstant.REFOUND_REBATE_STATUS.STATUS_3);
         refundUpdateDTO.setType(AggregationConstant.REFOUND_REBATE_TYPE.REFOUND_TYPE);
         return refundFeignClient.updateRefundInfo(refundUpdateDTO);
@@ -308,6 +329,8 @@ public class RefundController {
         if(CollectionUtils.isEmpty(idList)) {
             return CommonUtil.getParamIllegalJSONResult();
         }
+        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+        refundUpdateDTO.setCurUser(curLoginUser.getId());
         refundUpdateDTO.setStatus(AggregationConstant.REFOUND_REBATE_STATUS.STATUS_2);
         refundUpdateDTO.setType(AggregationConstant.REFOUND_REBATE_TYPE.REFOUND_TYPE);
         return refundFeignClient.updateRefundInfo(refundUpdateDTO);
@@ -327,6 +350,8 @@ public class RefundController {
         if(CollectionUtils.isEmpty(idList)) {
             return CommonUtil.getParamIllegalJSONResult();
         }
+        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+        refundUpdateDTO.setCurUser(curLoginUser.getId());
         refundUpdateDTO.setStatus(AggregationConstant.REFOUND_REBATE_STATUS.STATUS_4);
         refundUpdateDTO.setType(AggregationConstant.REFOUND_REBATE_TYPE.REFOUND_TYPE);
         return refundFeignClient.updateRefundInfo(refundUpdateDTO);
@@ -338,9 +363,9 @@ public class RefundController {
      * @param queryDTO
      * @return
      */
-    @PostMapping("/listRebateApplay")
+    @PostMapping("/listRebateApply")
     @ResponseBody
-    public JSONResult<PageBean<RefundRespDTO>> listRebateApplay(
+    public JSONResult<PageBean<RefundRespDTO>> listRebateApply(
             @RequestBody RefundQueryDTO queryDTO) {
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
         queryDTO.setCurUser(curLoginUser.getId());
@@ -388,6 +413,8 @@ public class RefundController {
        if(CollectionUtils.isEmpty(idList)) {
            return CommonUtil.getParamIllegalJSONResult();
        }
+       UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+       refundUpdateDTO.setCurUser(curLoginUser.getId());
        refundUpdateDTO.setStatus(AggregationConstant.REFOUND_REBATE_STATUS.STATUS_5);
        refundUpdateDTO.setType(AggregationConstant.REFOUND_REBATE_TYPE.REBATE_TYPE);
        return refundFeignClient.updateRefundInfo(refundUpdateDTO);
@@ -407,6 +434,8 @@ public class RefundController {
         if(CollectionUtils.isEmpty(idList)) {
             return CommonUtil.getParamIllegalJSONResult();
         }
+        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+        refundUpdateDTO.setCurUser(curLoginUser.getId());
         refundUpdateDTO.setStatus(AggregationConstant.REFOUND_REBATE_STATUS.STATUS_3);
         refundUpdateDTO.setType(AggregationConstant.REFOUND_REBATE_TYPE.REBATE_TYPE);
         return refundFeignClient.updateRefundInfo(refundUpdateDTO);
@@ -426,6 +455,8 @@ public class RefundController {
         if(CollectionUtils.isEmpty(idList)) {
             return CommonUtil.getParamIllegalJSONResult();
         }
+        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+        refundUpdateDTO.setCurUser(curLoginUser.getId());
         refundUpdateDTO.setStatus(AggregationConstant.REFOUND_REBATE_STATUS.STATUS_2);
         refundUpdateDTO.setType(AggregationConstant.REFOUND_REBATE_TYPE.REBATE_TYPE);
         return refundFeignClient.updateRefundInfo(refundUpdateDTO);
@@ -461,6 +492,25 @@ public class RefundController {
         }
         return refundFeignClient.listImgById(idEntityLong);
     }
+    
+    
+    /**
+     * 编辑驳回退款
+     * @return
+     */
+    @PostMapping("/editRejectRebateInfo")
+    @ResponseBody
+    @LogRecord(operationType = OperationType.UPDATE, description = "编辑驳回返款",
+    menuName = MenuEnum.REBATEAPPLYLIST)
+    public JSONResult<Boolean> editRejectRebateInfo(@RequestBody RefundEditRejectReqDTO refundUpdateDTO){
+       Long  id = refundUpdateDTO.getId();
+       if(id==null) {
+           return CommonUtil.getParamIllegalJSONResult();
+       }
+       refundUpdateDTO.setType(AggregationConstant.REFOUND_REBATE_TYPE.REBATE_TYPE);
+       return refundFeignClient.editRejectRefundInfo(refundUpdateDTO);
+    }
+    
     
     /**
      * 根据图片Id 删除 图片
