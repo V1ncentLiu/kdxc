@@ -30,238 +30,237 @@
           <el-button type="danger" @click="openvicemanagerForm">副总分发</el-button>
          </shiro:hasPermission>
     </el-row>
-    <el-row class="marginB20 greybg padding20" style="padding-bottom: 0">        
-        <el-form :inline="true" :model="form" ref="form">
-            <el-form-item label="">
-                <el-select v-model="form.isTransfer" placeholder="全部资源" style="width: 100%;" clearable >
-                    <el-option
-                        v-for="item in isTransfer"
-                        :key="item.value"
-                        :label="item.label"
-                        :value="item.value">
-                    </el-option>
-                </el-select>
-            </el-form-item> 
-           <!--  <el-form-item label="">  
-                <el-select v-model="form.cluesta" placeholder="资源有效性" style="width: 100%;" clearable>
-                    <el-option
-                        v-for="item in clueStatus"
-                        :key="item.value"
-                        :label="item.label"
-                        :value="item.value">
-                    </el-option>
-                </el-select>
-            </el-form-item> -->
-            <el-form-item label="">
-                <el-input v-model="form.customerPhone" placeholder="客户手机号"></el-input>
-            </el-form-item>
-            <el-form-item label="">
-                <el-input v-model="form.customerName" placeholder="客户姓名"></el-input>
-            </el-form-item>
-            <el-form-item label="">
-                <el-select v-model="form.cusStatus" placeholder="客户状态" style="width: 100%;" clearable >
-                    <el-option
-                        v-for="item in cusStatusArr"
-                        :key="item.value"
-                        :label="item.name"
-                        :value="item.value">
-                    </el-option>
-                </el-select>
-            </el-form-item>
-            <el-form-item label="">
-                <el-select v-model="form.cusLeve" placeholder="客户级别" style="width: 100%;" clearable>
-                    <el-option
-                        v-for="item in cusLevelArr"
-                        :key="item.value"
-                        :label="item.name"
-                        :value="item.value">
-                    </el-option>
-                </el-select>
-            </el-form-item>
-            <!-- <el-form-item label="">
-                <el-select v-model="form.hasInvite" placeholder="是否邀约" style="width: 100%;" clearable >
-                    <el-option
-                        v-for="item in hasInvite"
-                        :key="item.value"
-                        :label="item.label"
-                        :value="item.value">
-                    </el-option>
-                </el-select>
-            </el-form-item> -->
-            <el-form-item label="编辑时间:">
-                <el-date-picker
-                    style="width: 100%;"
-                    v-model="form.updateTimeStart"
-                    type="datetime"
-                    placeholder="选择日期时间">
-                </el-date-picker>
-            </el-form-item>
-            <el-form-item label="—">
-                <el-date-picker
-                    style="width: 100%;"
-                    v-model="form.updateTimeEnd"
-                    type="datetime"
-                    placeholder="选择日期时间">
-                </el-date-picker>
-            </el-form-item>
-            <el-form-item label="创建时间:">
-                <el-date-picker
-                    style="width: 100%;"
-                    v-model="form.createTimeStart"
-                    type="datetime"
-                    placeholder="选择日期时间">
-                </el-date-picker>
-            </el-form-item>
-            <el-form-item label="—">
-                <el-date-picker
-                    style="width: 100%;"
-                    v-model="form.createTimeEnd"
-                    type="datetime"
-                    placeholder="选择日期时间">
-                </el-date-picker>
-            </el-form-item>
-            <!-- <br> -->
-            <el-form-item label="分配时间:">
-                <el-date-picker
-                    style="width: 100%;"
-                    v-model="form.assignTimeStart"
-                    type="datetime"
-                    placeholder="选择日期时间">
-                </el-date-picker>
-            </el-form-item>
-            <el-form-item label="—">
-                <el-date-picker
-                    style="width: 100%;"
-                    v-model="form.assignTimeEnd"
-                    type="datetime"
-                    placeholder="选择日期时间">
-                </el-date-picker>
-            </el-form-item>            
-            <el-form-item label="">
-                <el-input v-model="form.searchWord" placeholder="搜索词"></el-input>
-            </el-form-item>
-            <el-button type="primary" icon="el-icon-search" @click="initTableData" >搜索</el-button>
-            <span style="color: rgb(0, 114, 255);text-decoration: underline;cursor: pointer;margin:0 10px;" @click="toogleClick">更多搜索</span>
-            <el-row v-show="isShow">
-                <el-form-item label="">
-                    <el-select v-model="form.dayTel" placeholder="今日是否拨打" style="width: 100%;" clearable>
+    <div class="mainSearchBg">        
+        <div class="mainSearchFormBox">        
+            <el-form :inline="true" class="demo-form-inline mainSearchForm" :model="form" ref="form">
+                <el-form-item label="全部资源:">
+                    <el-select v-model="form.isTransfer" placeholder="全部资源" style="width: 100%;" clearable >
                         <el-option
-                            v-for="item in callTel"
-                            :key="item.value"
-                            :label="item.label"
-                            :value="item.value">
-                        </el-option>
-                    </el-select>
-                </el-form-item>
-                <el-form-item label="">
-                    <el-select v-model="form.trackingDay" placeholder="今日是否跟访" style="width: 100%;" clearable>
-                        <el-option
-                            v-for="item in hastracking"
-                            :key="item.value"
-                            :label="item.label"
-                            :value="item.value">
-                        </el-option>
-                    </el-select>
-                </el-form-item>
-                <el-form-item label="">
-                    <el-select v-model="form.repeatStatus" placeholder="是否重复手机号" style="width: 100%;" clearable >
-                        <el-option
-                            v-for="item in clueRepeatStatus"
+                            v-for="item in isTransfer"
                             :key="item.value"
                             :label="item.label"
                             :value="item.value">
                         </el-option>
                     </el-select>
                 </el-form-item> 
-                <el-form-item label="">  
-                    <el-select v-model="form.province" placeholder="预签约省份" style="width: 100%;" clearable >
+               <!--  <el-form-item label="">  
+                    <el-select v-model="form.cluesta" placeholder="资源有效性" style="width: 100%;" clearable>
                         <el-option
-                            v-for="item in provinceArr"
-                            :key="item.name"
-                            :label="item.name"
-                            :value="item.name">
-                        </el-option>
-                    </el-select>
-                </el-form-item>
-                <el-form-item label="">  
-                    <el-select v-model="form.category" placeholder="资源类别" style="width: 100%;" clearable>
-                        <el-option
-                            v-for="item in categoryArr"
+                            v-for="item in clueStatus"
                             :key="item.value"
-                            :label="item.name"
+                            :label="item.label"
                             :value="item.value">
                         </el-option>
                     </el-select>
-                </el-form-item>
-                <el-form-item label="">  
-                    <el-select v-model="form.teleorg" placeholder="电销组" style="width: 100%;" clearable @change="currentTelSale" >
-                        <el-option
-                            v-for="item in orgTeleArr"
-                            :key="item.id"
-                            :label="item.name"
-                            :value="item.id">
-                        </el-option>
-                    </el-select>
-                </el-form-item>
-                <el-form-item label="">  
-                    <el-select 
-                        v-model="form.teleSaleId" 
-                        placeholder="创业顾问" 
-                        style="width: 100%;" 
-                        filterable 
-                        multiple 
-                        clearable  >
-                        <el-option
-                            v-for="item in busSaleArr"
-                            :key="item.id"
-                            :label="item.name"
-                            :value="item.id">
-                            <el-checkbox-group v-model="form.teleSaleId">
-                                <el-checkbox :label="item.id">{{item.name}}</el-checkbox>
-                            </el-checkbox-group>
-                        </el-option>
-                    </el-select>
-                </el-form-item>
-             <!--    <el-form-item label="">
-                    <el-input v-model="form.address" placeholder="地址"></el-input>
                 </el-form-item> -->
-            </el-row>                
-        </el-form>       
-    </el-row>
-    <el-row>
-   <el-table  ref="multipleTable" tooltip-effect="dark" border @selection-change="handleSelectionChange"
-            style="width: 100%"  :data="dataTable" >
-            <el-table-column align="center" type="selection" label="全选" width="50"></el-table-column>
-	        <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width"
-	         v-for="(item,key,index) in tableColums" v-if="item.fieldCode == 'phone'">
-	             <template slot-scope="scope" >
-                      <p style="color:#409EFF; cursor:pointer" @click="showClueDetailInfo(scope.row.clueId)">{{scope.row.phone}}</p>
-                    <input type='hidden'>
-                    <el-tag v-if="scope.row.tag">{{scope.row.tag}}</el-tag>
-                </template>
-            </el-table-column>
-            <el-table-column :prop="item.fieldCode" :key="item.fieldCode" :label="item.displayName" :width="item.width" align="center" v-else-if="item.fieldCode == 'record'">
-                <template slot-scope="scope">
-                   <div v-if="scope.row.isTrack === 1">
-                    <el-button @click="openTrackingDialog(scope.row.clueId)" type="text" size="small">
-                                                                    点击查看
-                    </el-button>
-                    </div>
-                </template>
-            </el-table-column>
-            <el-table-column :prop="item.fieldCode" :key="item.fieldCode" :label="item.displayName" :width="item.width" align="center" v-else-if="item.fieldCode == 'repeatPhones'">
-               <template slot-scope="scope">
-                  <div v-if="scope.row.isRepeatPhone===1">
-                      <el-button @click="repeatPhonesClick(scope.row)" type="text" size="small">点击查看</el-button>
-                  </div>
-                </template>
-            </el-table-column>
-            <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width"  v-else>
-	        </el-table-column>
-	        
-        </el-table>
-         <table-pagination :pager="pager" @change="initTableData"></table-pagination> 
-    </el-row>
+                <el-form-item label="客户手机号:">
+                    <el-input v-model="form.customerPhone" placeholder="客户手机号"></el-input>
+                </el-form-item>
+                <el-form-item label="客户姓名:">
+                    <el-input v-model="form.customerName" placeholder="客户姓名"></el-input>
+                </el-form-item>
+                <el-form-item label="编辑时间:">
+                    <el-date-picker
+                        v-model="form.updateTimeStart"
+                        type="datetime"
+                        placeholder="选择日期时间">
+                    </el-date-picker>
+                </el-form-item>
+                <el-form-item label="—" class="widthauto">
+                    <el-date-picker
+                        v-model="form.updateTimeEnd"
+                        type="datetime"
+                        placeholder="选择日期时间">
+                    </el-date-picker>
+                </el-form-item>
+                <el-row v-show="isShow">
+                    <el-form-item label="客户状态:">
+                        <el-select v-model="form.cusStatus" placeholder="客户状态" clearable >
+                            <el-option
+                                v-for="item in cusStatusArr"
+                                :key="item.value"
+                                :label="item.name"
+                                :value="item.value">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
+                    <el-form-item label="客户级别:">
+                        <el-select v-model="form.cusLeve" placeholder="客户级别" clearable>
+                            <el-option
+                                v-for="item in cusLevelArr"
+                                :key="item.value"
+                                :label="item.name"
+                                :value="item.value">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
+                    <!-- <el-form-item label="">
+                        <el-select v-model="form.hasInvite" placeholder="是否邀约" style="width: 100%;" clearable >
+                            <el-option
+                                v-for="item in hasInvite"
+                                :key="item.value"
+                                :label="item.label"
+                                :value="item.value">
+                            </el-option>
+                        </el-select>
+                    </el-form-item> -->
+                    <el-form-item label="今日是否拨打:">
+                        <el-select v-model="form.dayTel" placeholder="今日是否拨打" style="width: 100%;" clearable>
+                            <el-option
+                                v-for="item in callTel"
+                                :key="item.value"
+                                :label="item.label"
+                                :value="item.value">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>                
+                    <el-form-item label="创建时间:">
+                        <el-date-picker
+                            v-model="form.createTimeStart"
+                            type="datetime"
+                            placeholder="选择日期时间">
+                        </el-date-picker>
+                    </el-form-item>
+                    <el-form-item label="—" class="widthauto">
+                        <el-date-picker
+                            v-model="form.createTimeEnd"
+                            type="datetime"
+                            placeholder="选择日期时间">
+                        </el-date-picker>
+                    </el-form-item>  
+                    <el-form-item label="今日是否跟访:">
+                        <el-select v-model="form.trackingDay" placeholder="今日是否跟访" clearable>
+                            <el-option
+                                v-for="item in hastracking"
+                                :key="item.value"
+                                :label="item.label"
+                                :value="item.value">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
+                    <el-form-item label="是否重复手机:">
+                        <el-select v-model="form.repeatStatus" placeholder="是否重复手机号" clearable >
+                            <el-option
+                                v-for="item in clueRepeatStatus"
+                                :key="item.value"
+                                :label="item.label"
+                                :value="item.value">
+                            </el-option>
+                        </el-select>
+                    </el-form-item> 
+                    <el-form-item label="预签约省份:">  
+                        <el-select v-model="form.province" placeholder="预签约省份" clearable >
+                            <el-option
+                                v-for="item in provinceArr"
+                                :key="item.name"
+                                :label="item.name"
+                                :value="item.name">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
+                    <el-form-item label="分配时间:">
+                        <el-date-picker
+                            style="width: 100%;"
+                            v-model="form.assignTimeStart"
+                            type="datetime"
+                            placeholder="选择日期时间">
+                        </el-date-picker>
+                    </el-form-item>
+                    <el-form-item label="—" class="widthauto">
+                        <el-date-picker
+                            style="width: 100%;"
+                            v-model="form.assignTimeEnd"
+                            type="datetime"
+                            placeholder="选择日期时间">
+                        </el-date-picker>
+                    </el-form-item>  
+                    <el-form-item label="资源类别:">  
+                        <el-select v-model="form.category" placeholder="资源类别" style="width: 100%;" clearable>
+                            <el-option
+                                v-for="item in categoryArr"
+                                :key="item.value"
+                                :label="item.name"
+                                :value="item.value">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
+                    <el-form-item label="电销组:">  
+                        <el-select v-model="form.teleorg" placeholder="电销组" style="width: 100%;" clearable @change="currentTelSale" >
+                            <el-option
+                                v-for="item in orgTeleArr"
+                                :key="item.id"
+                                :label="item.name"
+                                :value="item.id">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
+                    <el-form-item label="创业顾问:">  
+                        <el-select 
+                            v-model="form.teleSaleId" 
+                            placeholder="创业顾问" 
+                            style="width: 100%;" 
+                            filterable 
+                            multiple 
+                            clearable  >
+                            <el-option
+                                v-for="item in busSaleArr"
+                                :key="item.id"
+                                :label="item.name"
+                                :value="item.id">
+                                <el-checkbox-group v-model="form.teleSaleId">
+                                    <el-checkbox :label="item.id">{{item.name}}</el-checkbox>
+                                </el-checkbox-group>
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
+                    <el-form-item label="搜索词:">
+                        <el-input v-model="form.searchWord" placeholder="搜索词"></el-input>
+                    </el-form-item>                     
+                    <!--    <el-form-item label="">
+                        <el-input v-model="form.address" placeholder="地址"></el-input>
+                    </el-form-item> -->
+                </el-row>  
+                <div class="mainSearchBtnBox">                        
+                    <el-button type="primary" icon="el-icon-search" @click="initTableData" class="searchBtn">搜索</el-button>
+                    <el-button type="info" class="searchBtn">取消</el-button>
+                    <span style="color: #5c6be8;cursor: pointer;margin:0 10px;" @click="toogleClick">更多搜索<i class="el-icon-arrow-down greycolor paddingL6"></i></span>
+                </div>              
+            </el-form>       
+        </div>    
+        <el-row>
+            <el-table  ref="multipleTable" tooltip-effect="dark" border @selection-change="handleSelectionChange" style="width: 100%"  :data="dataTable" >
+                <el-table-column align="center" type="selection" label="全选" width="50"></el-table-column>
+    	        <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width"
+    	         v-for="(item,key,index) in tableColums" v-if="item.fieldCode == 'phone'">
+    	             <template slot-scope="scope" >
+                          <p style="color:#409EFF; cursor:pointer" @click="showClueDetailInfo(scope.row.clueId)">{{scope.row.phone}}</p>
+                        <input type='hidden'>
+                        <el-tag v-if="scope.row.tag">{{scope.row.tag}}</el-tag>
+                    </template>
+                </el-table-column>
+                <el-table-column :prop="item.fieldCode" :key="item.fieldCode" :label="item.displayName" :width="item.width" align="center" v-else-if="item.fieldCode == 'record'">
+                    <template slot-scope="scope">
+                       <div v-if="scope.row.isTrack === 1">
+                        <el-button @click="openTrackingDialog(scope.row.clueId)" type="text" size="small">
+                                                                        点击查看
+                        </el-button>
+                        </div>
+                    </template>
+                </el-table-column>
+                <el-table-column :prop="item.fieldCode" :key="item.fieldCode" :label="item.displayName" :width="item.width" align="center" v-else-if="item.fieldCode == 'repeatPhones'">
+                   <template slot-scope="scope">
+                      <div v-if="scope.row.isRepeatPhone===1">
+                          <el-button @click="repeatPhonesClick(scope.row)" type="text" size="small">点击查看</el-button>
+                      </div>
+                    </template>
+                </el-table-column>
+                <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width"  v-else>
+    	        </el-table-column>
+    	        
+            </el-table>
+             <table-pagination :pager="pager" @change="initTableData"></table-pagination> 
+        </el-row>
+    </div>
     <!-- dialog -->
     <!-- 跟进记录 -->
     <el-dialog title="跟进记录" :visible.sync="recordDialog">
