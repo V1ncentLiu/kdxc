@@ -681,6 +681,14 @@ var appiontmentVM = new Vue({
                    var rowIds = [];
                    for(var i=0;i<rows.length;i++){
                 	   var curRow = rows[i];
+                	   if(curRow.delFalg =="已删除"){
+	                  		appiontmentVM.$message({message: "选择邀约信息包含已删除邀约，不允许标记取消操作",type: 'warning'}); 
+               	   			return;
+	                      }
+                	   if(curRow.delFalg =="已取消"){
+	                  		appiontmentVM.$message({message: "选择邀约信息包含已取消邀约，不允许标记取消操作",type: 'warning'}); 
+              	   			return;
+	                      }
                        rowIds.push(curRow.id);
                    }
                     if(this.$refs['cancelDigForm']) {
@@ -777,15 +785,23 @@ var appiontmentVM = new Vue({
                           });
                          return;
                      }
+					
+                     
                      var rowIds = [];
                      for(var i=0;i<rows.length;i++){
                   	   	var curRow = rows[i];
+                  	  if(curRow.delFalg =="已删除"){
+	                  		appiontmentVM.$message({message: "选择邀约信息包含已删除邀约，不允许进行重复删除操作",type: 'warning'}); 
+                	   		return;
+	                      }
                   	   	if(curRow.isAllocate==1){
                   	   		appiontmentVM.$message({message: "选择邀约信息已经分配给商务经理，不允许进行删除操作",type: 'warning'}); 
                   	   		return;
                   	   	}
+	                  	 
                          rowIds.push(curRow.id);
                      }
+                     
                   this.$confirm('确定要删除选中的邀约来访吗？', '提示', {
                       confirmButtonText: '确定',
                       cancelButtonText: '取消',

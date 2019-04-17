@@ -768,6 +768,10 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
 						return ;
 					}
      		    	var pageData=resobj.data;
+     		    	var data=pageData.data;
+    		    	 for(var i=0;i<data.length;i++){
+    		    		data[i].urgentDate=mycustomVM.dateFormat(null,null,data[i].urgentDate,null);
+                    }
      				mycustomVM.pager.total=pageData.total;
      				mycustomVM.pager.currentPage = pageData.currentPage;
      				mycustomVM.pager.pageSize = pageData.pageSize;
@@ -775,6 +779,13 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
      				mycustomVM.loading=false;
      			})
          	},
+        	//日期数据格式化方法
+    		dateFormat(row, column, cellValue, index) {
+               	if (cellValue == undefined) {
+    	               return "";
+              	}
+               	return moment(cellValue).format("YYYY-MM");
+    		},
          	//展现详情
          	showClueDetailInfo (row, column) {
          	  window.location.href='/tele/clueMyCustomerInfo/customerInfoReadOnly?clueId='+row.clueId;
