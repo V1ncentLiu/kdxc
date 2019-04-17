@@ -1,5 +1,8 @@
 package com.kuaidao.manageweb.controller.clue;
 
+import com.kuaidao.manageweb.config.LogRecord;
+import com.kuaidao.manageweb.config.LogRecord.OperationType;
+import com.kuaidao.manageweb.constant.MenuEnum;
 import java.util.ArrayList;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
@@ -200,6 +203,8 @@ public class ExtendClueAgendaTaskController {
     @RequestMapping("/autoAllocationTask")
     @RequiresPermissions("waitDistributResource:distribute")
     @ResponseBody
+    @LogRecord(description = "待分发资源自动分配", operationType = OperationType.DISTRIBUTION,
+        menuName = MenuEnum.WAIT_DISTRIBUT_RESOURCE)
     public JSONResult<Integer> autoAllocationTask(HttpServletRequest request,
             @RequestBody IdListLongReq queryDto) {
 

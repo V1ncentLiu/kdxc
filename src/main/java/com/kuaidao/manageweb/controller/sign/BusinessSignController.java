@@ -1,5 +1,6 @@
 package com.kuaidao.manageweb.controller.sign;
 
+import com.kuaidao.manageweb.config.LogRecord.OperationType;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -165,6 +166,8 @@ public class BusinessSignController {
      */
     @RequestMapping("/insert")
     @ResponseBody
+    @LogRecord(description = "添加签约单", operationType = OperationType.INSERT,
+        menuName = MenuEnum.SIGN_ORDER)
     public JSONResult<Boolean> saveSign(@Valid @RequestBody BusSignInsertOrUpdateDTO dto,
             BindingResult result) throws Exception {
         if (result.hasErrors()) {

@@ -1,5 +1,8 @@
 package com.kuaidao.manageweb.controller.clue;
 
+import com.kuaidao.manageweb.config.LogRecord;
+import com.kuaidao.manageweb.config.LogRecord.OperationType;
+import com.kuaidao.manageweb.constant.MenuEnum;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -44,6 +47,8 @@ public class ClueReceiveRecordsController {
 	 */
 	@RequestMapping("/receiveClueByClueIds")
 	 @ResponseBody
+	@LogRecord(description = "公有池领取", operationType = OperationType.RECEIVE,
+			menuName = MenuEnum.TEL_CENTER_PUBLICCUSTOMER)
 	public JSONResult<ClueReceiveRecordsDTO> receiveClueByClueIds(@RequestBody ClueReceiveRecordsDTO clueReceiveRecordsDTO) {
 		UserInfoDTO user = getUser();
 		List<RoleInfoDTO> roleList = user.getRoleList();

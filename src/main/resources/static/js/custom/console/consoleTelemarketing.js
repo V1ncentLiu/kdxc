@@ -37,6 +37,9 @@ var mainDivVM = new Vue({
         receiveTodayNum:'',//今日领取资源数
         assignTodayNum:'',//今日分配资源数
         todayTalkTime:'',//今日通话时长
+        todayTalkTimeh:'',//今日通话时长
+        todayTalkTimem:'',//今日通话时长
+        todayTalkTimes:'',//今日通话时长
         todayAppiontmentNum:'',//今日邀约数
         workDay:'',//工作天数
         //公告
@@ -294,6 +297,9 @@ var mainDivVM = new Vue({
             param={};
             axios.post('/call/callRecord/countTodayTalkTime',param).then(function (response) {
                 mainDivVM.todayTalkTime=mainDivVM.fomatSeconds2(response.data.data);
+                mainDivVM.todayTalkTimeh=mainDivVM.fomatSecondsh(response.data.data);
+                mainDivVM.todayTalkTimem=mainDivVM.fomatSecondsm(response.data.data);
+                mainDivVM.todayTalkTimes=mainDivVM.fomatSecondss(response.data.data);
             }); 
             // 今日邀约数
             param={};
@@ -328,7 +334,41 @@ var mainDivVM = new Vue({
              }
               t += sec + "秒";
               return t;
-     	}
+     	},
+        fomatSecondsh(s){//格式化时间
+            var t="";
+            var hour = Math.floor(s/3600);
+             var min = Math.floor(s/60) % 60;
+              var sec = s % 60;
+             if(hour<10){
+                t+="0";
+             }
+              t+=hour;
+              
+              return t;
+        },
+        fomatSecondsm(s){//格式化时间
+            var t="";
+            var hour = Math.floor(s/3600);
+             var min = Math.floor(s/60) % 60;
+              var sec = s % 60;
+              if(min < 10){
+                t += "0";
+              }
+              t += min;
+              return t;
+        },
+        fomatSecondss(s){//格式化时间
+            var t="";
+            var hour = Math.floor(s/3600);
+             var min = Math.floor(s/60) % 60;
+              var sec = s % 60;
+              if(sec < 10){
+                t += "0";
+             }
+              t += sec;
+              return t;
+        }
     },
     created(){
         this.initList();
