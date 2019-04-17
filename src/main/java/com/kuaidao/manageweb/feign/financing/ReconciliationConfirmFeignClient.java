@@ -21,7 +21,7 @@ import com.kuaidao.common.entity.PageBean;
  * @date: 2019年1月4日
  * @version V1.0
  */
-@FeignClient(name = "aggregation-service-zhang", path = "/aggregation/reconciliationConfirm",
+@FeignClient(name = "aggregation-service", path = "/aggregation/reconciliationConfirm",
         fallback = ReconciliationConfirmFeignClient.HystrixClientFallback.class)
 public interface ReconciliationConfirmFeignClient {
 
@@ -64,6 +64,15 @@ public interface ReconciliationConfirmFeignClient {
     @PostMapping("/applyList")
     public JSONResult<PageBean<ReconciliationConfirmDTO>> applyList(
             @RequestBody ReconciliationConfirmPageParam param);
+    /**
+     * 驳回
+     * 
+     * @param idEntity
+     * @return
+     */
+    @PostMapping("/rejectApply")
+    public JSONResult<Void> rejectApply(@RequestBody ReconciliationConfirmReq req);
+    
 
     @Component
     static class HystrixClientFallback implements ReconciliationConfirmFeignClient {
@@ -103,6 +112,14 @@ public interface ReconciliationConfirmFeignClient {
                 ReconciliationConfirmPageParam param) {
             return fallBackError("对账申请列表");
         }
+
+
+
+		@Override
+		public JSONResult<Void> rejectApply(ReconciliationConfirmReq req) {
+			// TODO Auto-generated method stub
+			return fallBackError("对账驳回");
+		}
 
 
 

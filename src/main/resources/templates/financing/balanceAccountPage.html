@@ -173,6 +173,16 @@
                     </div>
                 </template>
 	        </el-table-column>
+	        <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width"
+	         v-else-if="item.fieldCode == 'status'">
+	               <template slot-scope="scope">{{scope.row.status}} 
+           		  	<div v-if="scope.row.status ==='驳回商务'">
+                        <el-button type="text" size="small" @click="backRemark(scope.row)">
+                        	驳回原因
+                        </el-button>
+                    </div>
+                </template>
+	        </el-table-column>
             <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width"
 	         	v-else>
 	        </el-table-column>
@@ -190,7 +200,17 @@
             </el-form>
         </template>
     </el-dialog>
-    
+      <!--驳回原因-->
+    <el-dialog title="驳回原因" :visible.sync="backVisable"
+               width="50%">
+        <template>
+            <el-form >
+                <el-form-item label="" >
+                    <div class="lineFeed">{{backRemarks}}</div>
+                </el-form-item>
+            </el-form>
+        </template>
+    </el-dialog>
     <el-dialog title="自定义列" :visible.sync="dialogFormVisible">
 	  <el-form :model="form">
 	    
@@ -302,6 +322,8 @@ var clueVM = new Vue({
 	       		statementNo: '',
 	       		signNo: ''
             },
+            backRemarks:"",
+            backVisable:false,
             submitApplyVisible:false,
             ratio:"",
             commissionMoney:"",
@@ -473,7 +495,7 @@ var clueVM = new Vue({
                     	  data[i].signType=clueVM.transformSignType(null,null,data[i].signType,null);
                     	  data[i].signShopType=clueVM.transformSignShopType(null,null,data[i].signShopType,null);
                     	  data[i].payType=clueVM.transformPayType(null,null,data[i].payType,null);
-                    	  data[i].payMode=clueVM.transformStatus(null,null,data[i].payMode,null);
+                    	  data[i].payMode=clueVM.transformPayMode(null,null,data[i].payMode,null);
                     	  data[i].isRemoteSign=clueVM.transformSex(null,null,data[i].isRemoteSign,null);
                       }
                       clueVM.dataTable= data;
@@ -583,17 +605,14 @@ var clueVM = new Vue({
                         });
                        return;
                    }  
-            	   
-            	   window.location.href="/financing/balanceaccount/balanceAccountPage";
-            	   var param  = {};
- 	           	   param.payDetailId=rows[0].payId;
-            	   axios.post('/financing/balanceaccount/downBalanceAccount', param)
-  	                .then(function (response) {
-  	                	
-  	                })
-  	                .catch(function (error) {
-  	                     console.log(error);
-  	                });
+            	   if(status =="待处理" || status =="驳回商务"){
+            		   this.$message({
+                           message: "未提交对账不允许下载结算单",
+                           type: 'warning'
+                         });
+                        return;
+            	   }
+            	   window.location.href="/financing/balanceaccount/downBalanceAccount?payDetailId="+rows[0].payId;
                },
                //驳回
                rejectback() {
@@ -633,6 +652,7 @@ var clueVM = new Vue({
        	            	var param  = {};
           	           	  	param.idList=idList;
           	           		param.remark = this.rejectform.remark;
+          	           		param.payDetailId=rows[0].payId;
           	           	  	axios.post('/financing/balanceaccount/rejectApply',param)
                              .then(function (response) {
                                  var data =  response.data;
@@ -736,8 +756,13 @@ var clueVM = new Vue({
                },
                viewDoubt(row) {
                    // 查看疑意
-                   customerVM.viewDoubtVisable = true;
-                   customerVM.viewDoubtForm.doubtRemark = row.doubtRemark;
+                   clueVM.viewDoubtVisable = true;
+                   clueVM.viewDoubtForm.doubtRemark = row.doubtRemark;
+               },
+               //驳回原因
+               backRemark(row){
+            	   clueVM.backVisable = true;
+            	   clueVM.backRemarks = row.remark; 
                },
                confirmColumn(){
                  	//处理用户选择的列
@@ -766,7 +791,7 @@ var clueVM = new Vue({
                  	this.tableColums = customerShowColun;
                  	var param ={};
                    param.fieldIdList = idList;
-                   param.menuCode = "financing:reconciliationConfirmManager";
+                   param.menuCode = "financing:balanceaccountManager";
                    console.info(param);
                    if(idList.length!=0){
    	                axios.post('/customfield/customField/saveUserField', param)

@@ -182,15 +182,15 @@
         <table-pagination :pager="pager" @change="searchTable"></table-pagination>
     </el-row>
       <!-- dialog -->
-      <el-dialog  title="（RC2019022700001）签约单申请退款"  :visible.sync="allocationVisible" width="870px">
+      <el-dialog  :title="refundTitle"  :visible.sync="allocationVisible" width="870px">
         <template>
             <el-form :model="allocationForm" ref="allocationForm" :rules="allocationFormRules"> 
               <el-form-item label="退款客户金额：" :label-width="formLabelWidth" prop="cusAmount">
                   <el-input v-model="allocationForm.cusAmount" placeholder="" style="width:50%"></el-input>
               </el-form-item>
-             <!--  <el-form-item label="退还餐饮公司金额：" :label-width="formLabelWidth" prop="reason" class="redcolor">
-                  {{allocationForm.money}}
-              </el-form-item> -->
+             <el-form-item label="" v-show="isSettle==1" :label-width="formLabelWidth" class="redcolor">
+                  <span style="color:red;">当前项目为给品牌商结算</span>
+              </el-form-item>
               <el-form-item label="退款时间：" :label-width="formLabelWidth" prop="refundTime">
                   <el-date-picker
                       style="width: 50%;"
@@ -200,16 +200,12 @@
                   </el-date-picker>
               </el-form-item>
               <el-form-item label="上传图片：" :label-width="formLabelWidth" prop="fileList">
-                  <el-upload
-                      class="upload-demo"
-                      action="https://jsonplaceholder.typicode.com/posts/"
-                      multiple
-                      :file-list="allocationForm.fileList"
-                      >
-                      <el-button size="small" type="primary">点击上传</el-button>
-                      <div slot="tip" class="el-upload__tip">只能上传jpg/png文件，且不超过500kb</div>
-                  </el-upload>
               </el-form-item>
+                        <a id="selectfiles" href="javascript:void(0);" class='btn'>选择文件</a> 
+                        <a id="postfiles" href="javascript:void(0);" onclick="clueUploadFile()"
+                            class='btn'>开始上传</a>
+                    <div id="ossfile"></div>
+                   <div slot="tip" class="el-upload__tip">只能上传jpg/png文件，且不超过500kb</div>
               <el-form-item label="退款原因：" :label-width="formLabelWidth" prop="reason">
                   <el-input
                       type="textarea"
@@ -229,7 +225,7 @@
     </el-dialog>
     <!-- dialog -->
       <!-- dialog -->
-      <el-dialog  title="（RC2019022700002）签约单申请返款"  :visible.sync="transferVisible">
+      <el-dialog  :title="rebateTitle"  :visible.sync="transferVisible">
         <template>
             <el-form :model="transferForm" ref="transferForm" :rules="transferFormRules">
               <el-form-item label="" :label-width="formLabelWidth" prop="">
@@ -248,9 +244,9 @@
             	<el-form-item label="返款客户金额：" :label-width="formLabelWidth" prop="cusAmount">
                 <el-input v-model="transferForm.cusAmount" placeholder="" style="width:50%"></el-input>
               </el-form-item>
-              <!-- <el-form-item label="返还餐饮公司金额：" :label-width="formLabelWidth" prop="reason" class="redcolor">
-                  {{transferForm.money}}
-              </el-form-item> -->
+              <el-form-item label="" v-show="isSettle==1" :label-width="formLabelWidth" class="redcolor">
+                  <span style="color:red;">当前项目为给品牌商结算</span>
+              </el-form-item>
               <el-form-item label="返款时间：" :label-width="formLabelWidth" prop="refundTime">
                   <el-date-picker
                       style="width: 50%;"
@@ -452,7 +448,20 @@
 </div>
 <!-- import common js-->
 <div th:include="_footer_include :: #jsLib"></div>
+
 </body>
+<script type="text/javascript"
+        th:src="@{'/js/custom/file_upload/lib/crypto1/crypto/crypto.js'}"></script>
+<script type="text/javascript"
+        th:src="@{'/js/custom/file_upload/lib/crypto1/hmac/hmac.js'}"></script>
+<script type="text/javascript"
+        th:src="@{'/js/custom/file_upload/lib/crypto1/sha1/sha1.js'}"></script>
+<script type="text/javascript"
+        th:src="@{'/js/custom/file_upload/lib/base64.js'}"></script>
+<script type="text/javascript"
+        th:src="@{'/js/custom/file_upload/plupload.full.min.js'}"></script>
+<script type="text/javascript"
+        th:src="@{'/js/custom/financing/file_upload.js'}"></script>
 <script th:inline="javascript">
 var busAreaList=[[${busAreaList}]];//商务大区
 var busGroupList=[[${busGroupList}]];//商务组
@@ -547,6 +556,9 @@ var clueVM = new Vue({
           }],
           allocationVisible: false,
           transferVisible: false,
+          isSettle:0,
+          refundTitle:'',
+          rebateTitle:'',
           pager:{
               total: 0,
               currentPage: 1,
@@ -785,6 +797,8 @@ var clueVM = new Vue({
                         return;
             	   }
             	   this.allocationForm.signId=rows[0].signId;
+            	   this.isSettle=rows[0].isSettle;
+            	   this.refundTitle="（"+rows[0].signId+"）签约单申请退款";
                    this.allocationVisible = true;
                },
                allocationClueCancel(formName){//申请退款取消
@@ -852,6 +866,8 @@ var clueVM = new Vue({
                    this.transferForm.signId = rows[0].signId;
                    this.dialogFormChoose.signProjectId = rows[0].signProject;
                    this.dialogFormChoose.signProvince = rows[0].signProvince;
+                   this.isSettle=rows[0].isSettle;
+                   this.rebateTitle="（"+rows[0].signId+"）签约单申请返款";
                    this.transferVisible = true;
                },
                transferClueCancel(formName){//外调经理取消
