@@ -13,7 +13,7 @@
         <el-breadcrumb-item>商务管理</el-breadcrumb-item>
         <el-breadcrumb-item>客户到访记录</el-breadcrumb-item>
     </el-breadcrumb>
-    <el-row class="marginB10">
+    <el-row class="marginB20">
     	<el-tabs type="card" v-model="activeName" @tab-click="handleClick" >
 			<el-tab-pane label="到访记录" name="first"></el-tab-pane>
 			<el-tab-pane label="未到访记录" name="second"></el-tab-pane>
@@ -25,113 +25,117 @@
                 <el-button type="success" @click="pass">审核通过</el-button>
          </shiro:hasPermission>
     </el-row>
-    <el-row class="marginB10 greybg padding20" style="padding-bottom: 0">        
-        <el-form :inline="true" :model="form" ref="form">
-            <el-form-item label="">
-                <el-select v-model="form.teleGroupId" placeholder="电销组" style="width: 100%;"  @change="currentTelSale" clearable>
-                    <el-option
-                        v-for="item in orgSelect"
-                        :key="item.id"
-                        :label="item.name"
-                        :value="item.id">
-                    </el-option>
-                </el-select>
-            </el-form-item> 
-            <el-form-item label="">  
-                <el-select v-model="form.teleSaleId" placeholder="创业顾问" style="width: 100%;" clearable>
-                    <el-option
-                        v-for="item in busSaleArr "
-                        :key="item.id"
-                        :label="item.name"
-                        :value="item.id">
-                    </el-option>
-                </el-select>
-            </el-form-item>    
-            <el-form-item label="">  
-                <el-select v-model="form.projectId" placeholder="品尝项目" style="width: 100%;" clearable>
-                    <el-option
-                        v-for="item in projectList"
-                        :key="item.id"
-                        :label="item.projectName"
-                        :value="item.id">
-                    </el-option>
-                </el-select>
-            </el-form-item>   
-            <el-form-item label="">  
-                <el-select v-model="form.province" placeholder="开店省份" style="width: 100%;" clearable>
-                    <el-option
-                        v-for="item in proviceList"
-                        :key="item.id"
-                        :label="item.name"
-                        :value="item.name">
-                    </el-option>
-                </el-select>
-            </el-form-item> 
-            <el-form-item label="">  
-                <el-select v-model="form.status" placeholder="到访有效性" style="width: 100%;" clearable>
-                    <el-option
-                        v-for="item in visitEffStatusOpt"
-                        :key="item.value"
-                        :label="item.label"
-                        :value="item.value">
-                    </el-option>
-                </el-select>
-            </el-form-item>
-            <el-form-item label="">
-                <el-input v-model="form.cusName" placeholder="客户姓名"></el-input>
-            </el-form-item>  
-            <!-- 
-            <el-form-item label="">  
-                <el-select v-model="form.invisitStatus" placeholder="邀约来访状态" style="width: 100%;" clearable>
-                    <el-option
-                        v-for="item in visitEffStatusOpt"
-                        :key="item.value"
-                        :label="item.label"
-                        :value="item.value">
-                    </el-option>
-                </el-select>
-            </el-form-item>   
-             -->
-            <el-form-item label="提交邀约时间：">
-                <el-date-picker
-                    style="width: 100%;"
-                    v-model="form.createTimeStart"
-                    type="datetime"
-                    format="yyyy-MM-dd HH:mm"
-                    placeholder="选择日期时间">
-                </el-date-picker>
-            </el-form-item>
-            <el-form-item label="—">
-                <el-date-picker
-                    style="width: 100%;"
-                    v-model="form.createTimeEnd"
-                    type="datetime"
-                    format="yyyy-MM-dd HH:mm"
-                    placeholder="选择日期时间">
-                </el-date-picker>
-            </el-form-item>
-            <el-form-item label="邀约到访时间：">
-                <el-date-picker
-                    style="width: 100%;"
-                    v-model="form.reserveTimeStart"
-                    type="datetime"
-                    format="yyyy-MM-dd HH:mm"
-                    placeholder="选择日期时间">
-                </el-date-picker>
-            </el-form-item>
-            <el-form-item label="—">
-                <el-date-picker
-                    style="width: 100%;"
-                    v-model="form.reserveTimeEnd"
-                    type="datetime"
-                    format="yyyy-MM-dd HH:mm"
-                    placeholder="选择日期时间">
-                </el-date-picker>
-            </el-form-item>            
-            <el-button icon="el-icon-search" type="primary" @click="initCustomerVisitRecord">搜索</el-button>               
-        </el-form>       
-    </el-row>
-    <el-table 
+    <div class="mainSearchBg">        
+        <div class="mainSearchFormBox">
+            <el-form :inline="true" class="demo-form-inline mainSearchForm" :model="form" ref="form">
+                <el-form-item label="客户姓名:">
+                    <el-input v-model="form.cusName" placeholder="客户姓名"></el-input>
+                </el-form-item>  
+                <el-form-item label="电销组:">
+                    <el-select v-model="form.teleGroupId" placeholder="电销组" @change="currentTelSale" clearable>
+                        <el-option
+                            v-for="item in orgSelect"
+                            :key="item.id"
+                            :label="item.name"
+                            :value="item.id">
+                        </el-option>
+                    </el-select>
+                </el-form-item> 
+                <el-form-item label="创业顾问:">  
+                    <el-select v-model="form.teleSaleId" placeholder="创业顾问" clearable>
+                        <el-option
+                            v-for="item in busSaleArr "
+                            :key="item.id"
+                            :label="item.name"
+                            :value="item.id">
+                        </el-option>
+                    </el-select>
+                </el-form-item> 
+                <el-form-item label="提交邀约时间:">
+                    <el-date-picker
+                        v-model="form.createTimeStart"
+                        type="datetime"
+                        format="yyyy-MM-dd HH:mm"
+                        placeholder="选择日期时间">
+                    </el-date-picker>
+                </el-form-item>
+                <el-form-item label="—" class="widthauto">
+                    <el-date-picker
+                        v-model="form.createTimeEnd"
+                        type="datetime"
+                        format="yyyy-MM-dd HH:mm"
+                        placeholder="选择日期时间">
+                    </el-date-picker>
+                </el-form-item>
+                <el-row v-show="isShow">
+                    <el-form-item label="品尝项目:">  
+                        <el-select v-model="form.projectId" placeholder="品尝项目" clearable>
+                            <el-option
+                                v-for="item in projectList"
+                                :key="item.id"
+                                :label="item.projectName"
+                                :value="item.id">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>   
+                    <el-form-item label="开店省份:">  
+                        <el-select v-model="form.province" placeholder="开店省份" clearable>
+                            <el-option
+                                v-for="item in proviceList"
+                                :key="item.id"
+                                :label="item.name"
+                                :value="item.name">
+                            </el-option>
+                        </el-select>
+                    </el-form-item> 
+                    <el-form-item label="到访有效性:">  
+                        <el-select v-model="form.status" placeholder="到访有效性" clearable>
+                            <el-option
+                                v-for="item in visitEffStatusOpt"
+                                :key="item.value"
+                                :label="item.label"
+                                :value="item.value">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
+                    
+                    <!-- 
+                    <el-form-item label="">  
+                        <el-select v-model="form.invisitStatus" placeholder="邀约来访状态" style="width: 100%;" clearable>
+                            <el-option
+                                v-for="item in visitEffStatusOpt"
+                                :key="item.value"
+                                :label="item.label"
+                                :value="item.value">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>   
+                     -->                
+                    <el-form-item label="邀约到访时间:">
+                        <el-date-picker
+                            v-model="form.reserveTimeStart"
+                            type="datetime"
+                            format="yyyy-MM-dd HH:mm"
+                            placeholder="选择日期时间">
+                        </el-date-picker>
+                    </el-form-item>
+                    <el-form-item label="—" class="widthauto">
+                        <el-date-picker
+                            v-model="form.reserveTimeEnd"
+                            type="datetime"
+                            format="yyyy-MM-dd HH:mm"
+                            placeholder="选择日期时间">
+                        </el-date-picker>
+                    </el-form-item>   
+                </el-row>    
+                <div class="mainSearchBtnBox">
+                    <el-button icon="el-icon-search" type="primary" @click="initCustomerVisitRecord" class="searchBtn">搜索</el-button>
+                    <el-button type="info" class="searchBtn">取消</el-button>
+                    <span style="color: #5c6be8;cursor: pointer;margin:0 10px;" @click="toogleClick">更多搜索<i class="el-icon-arrow-down greycolor paddingL6"></i></span>
+                </div> 
+            </el-form> 
+        </div>
+        <el-table 
             ref="multipleTable"
             tooltip-effect="dark"
             style="width: 100%"
@@ -194,8 +198,8 @@
             </el-table-column>
             
         </el-table>
-          <table-pagination :pager="pager" @change="initCustomerVisitRecord"></table-pagination>
-    </el-row>
+        <table-pagination :pager="pager" @change="initCustomerVisitRecord"></table-pagination>
+    </div>
     <!-- dialog -->
     <!-- 驳回处理 -->
     <el-dialog title="提示" :visible.sync="dialogFormVisible">
@@ -242,6 +246,7 @@
         el: '#customerVisitRecord',
         data: function() {
             return {
+                isShow:false,
             	activeName: 'second',//tabs:到访记录
             	loading:true,
                 dialogFormVisible:false,
@@ -581,7 +586,14 @@
                     valText="多次来访";
                 }
                 return valText;
-            }
+            },
+            toogleClick(){
+                if(this.isShow){
+                    this.isShow=false
+                }else{
+                    this.isShow=true
+                }          
+            },
 
         },
         mounted(){
