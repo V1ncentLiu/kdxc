@@ -10,77 +10,82 @@
 <div v-loading="loading" id="organizationManage" class="organizationManage mainPadding" style="display: none;">  
     <el-breadcrumb separator="/" class="elBreadcrumb marginB20" >
         <el-breadcrumb-item>Home</el-breadcrumb-item>
-        <el-breadcrumb-item>电销管理</el-breadcrumb-item>
+        <el-breadcrumb-item>电销中心</el-breadcrumb-item>
         <el-breadcrumb-item>客户重单列表</el-breadcrumb-item>
     </el-breadcrumb>
     <el-row class="marginB20">
         <!--< el-button type="primary" @click="cancelButton">撤销申请</el-button> -->
         <el-button type="primary" @click="detailButton">查看详情</el-button>
     </el-row>
-    <el-row class="marginB20 greybg padding20" style="padding-bottom: 0;">           
-				<el-form :inline="true">
-            <el-form-item label="">
-      					<el-select filterable v-model="status" placeholder="处理状态" clearable>
+    <div class="mainSearchBg">        
+        <div class="mainSearchFormBox">          
+			<el-form :inline="true" class="demo-form-inline mainSearchForm">
+                <el-form-item label="处理状态:">
+  					<el-select filterable v-model="status" placeholder="处理状态" clearable>
       				    <el-option
       				      v-for="item in statusList"
       				      :key="item.value"
       				      :label="item.label"
       				      :value="item.value">
       				    </el-option>
-      					</el-select>
-            </el-form-item>
-            <el-form-item label="">
-      					<el-select filterable v-model="dealStatus" placeholder="是否重单" clearable>
-      				    <el-option
-      				      v-for="item in repetitionList"
-      				      :key="item.value"
-      				      :label="item.label"
-      				      :value="item.value">
-      				    </el-option>
-      					</el-select>
-            </el-form-item>
-            <el-form-item label="">
-      					<el-input v-model="cusName" placeholder="客户姓名"></el-input>
-            </el-form-item>
-            <el-form-item label="">
-      					<el-input v-model="cusPhone" placeholder="客户手机号"></el-input>
-            </el-form-item>
-					  <el-button icon="el-icon-search" type="primary" @click="search">搜索</el-button>
-        </el-form>
-    </el-row>
-    <el-table 
-        ref="multipleTable"
-        tooltip-effect="dark"
-        empty-text="无数据"
-        style="width: 100%"
-        border
-        :data="dataTable"  @selection-change="handleSelectionChange">
-         <el-table-column align="center" prop="id" type="selection" width="55"></el-table-column> 
-         <!-- <el-table-column prop="date" label="全选" width="180"></el-table-column>  -->
-        <el-table-column align="center" type="index" prop="id" label="序号" width="55"></el-table-column>
-        <el-table-column align="center" prop="cusName" label="客户姓名"></el-table-column>
-        <el-table-column align="center" prop="cusPhone" label="客户手机号"></el-table-column>
-        <el-table-column prop="" label="重复手机号资源"  align="center" show-overflow-tooltip>
-        	<template slot-scope="scope">
-        		<span v-if="scope.row.isRepeatPhone ==1">
-            	<el-button @click="repeatPhonesClick(scope.row)" type="text" size="small">点击查看</el-button>
-        	</span>
-        </template>
-        </el-table-column>
-        <el-table-column align="center" prop="customerStatusName" label="客户状态"></el-table-column>
-        <el-table-column align="center" prop="createTime" label="提交重单申请时间" :formatter="dateFormat"></el-table-column>
-        <el-table-column align="center" prop="dealStatusResult" label="重单结果"></el-table-column>
-        <el-table-column align="center" prop="statusResult" label="处理状态" ></el-table-column>
-        <el-table-column align="center" prop="applyUser" label="重单顾问姓名"></el-table-column>
-        <el-table-column align="center" prop="applyUser" label="判单明细">
-        	<template slot-scope="scope">
-        		<span v-if="scope.row.auditStatus ==1">
-            	<el-button @click="repeatDetailButton(scope.row)" type="text" size="small">点击查看</el-button>
-        	</span>
-        </template>
-        </el-table-column>
-    </el-table>
-    <table-pagination :pager="pager"  @change="queryRepeatPage"></table-pagination>
+  					</el-select>
+                </el-form-item>
+                <el-form-item label="是否重单:">
+  					<el-select filterable v-model="dealStatus" placeholder="是否重单" clearable>
+  				    <el-option
+  				      v-for="item in repetitionList"
+  				      :key="item.value"
+  				      :label="item.label"
+  				      :value="item.value">
+  				    </el-option>
+  					</el-select>
+                </el-form-item>
+                <el-form-item label="客户姓名:">
+  					<el-input v-model="cusName" placeholder="客户姓名"></el-input>
+                </el-form-item>
+                <el-form-item label="客户手机号:">
+  					<el-input v-model="cusPhone" placeholder="客户手机号"></el-input>
+                </el-form-item>
+                <div class="mainSearchBtnBox"> 
+				    <el-button icon="el-icon-search" type="primary" @click="search" class="searchBtn">搜索</el-button>
+                    <el-button type="info" class="searchBtn">取消</el-button>
+                </div>
+            </el-form>
+        </div>
+        <el-table 
+            ref="multipleTable"
+            tooltip-effect="dark"
+            empty-text="无数据"
+            style="width: 100%"
+            border
+            :data="dataTable"  @selection-change="handleSelectionChange">
+             <el-table-column align="center" prop="id" type="selection" width="55"></el-table-column> 
+             <!-- <el-table-column prop="date" label="全选" width="180"></el-table-column>  -->
+            <el-table-column align="center" type="index" prop="id" label="序号" width="55"></el-table-column>
+            <el-table-column align="center" prop="cusName" label="客户姓名"></el-table-column>
+            <el-table-column align="center" prop="cusPhone" label="客户手机号"></el-table-column>
+            <el-table-column prop="" label="重复手机号资源"  align="center" show-overflow-tooltip>
+            	<template slot-scope="scope">
+            		<span v-if="scope.row.isRepeatPhone ==1">
+                	<el-button @click="repeatPhonesClick(scope.row)" type="text" size="small">点击查看</el-button>
+            	</span>
+            </template>
+            </el-table-column>
+            <el-table-column align="center" prop="customerStatusName" label="客户状态"></el-table-column>
+            <el-table-column align="center" prop="createTime" label="提交重单申请时间" :formatter="dateFormat"></el-table-column>
+            <el-table-column align="center" prop="dealStatusResult" label="重单结果"></el-table-column>
+            <el-table-column align="center" prop="statusResult" label="处理状态" ></el-table-column>
+            <el-table-column align="center" prop="applyUser" label="重单顾问姓名"></el-table-column>
+            <el-table-column align="center" prop="applyUser" label="判单明细">
+            	<template slot-scope="scope">
+            		<span v-if="scope.row.auditStatus ==1">
+                	<el-button @click="repeatDetailButton(scope.row)" type="text" size="small">点击查看</el-button>
+            	</span>
+            </template>
+            </el-table-column>
+        </el-table>
+        <table-pagination :pager="pager"  @change="queryRepeatPage"></table-pagination>
+    </div>
     <!-- dialog -->
     <el-dialog title="重单详情" :visible.sync="dialogFormVisible">
         <el-form   class="width500">
