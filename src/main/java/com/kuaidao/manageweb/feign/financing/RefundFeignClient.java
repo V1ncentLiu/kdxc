@@ -1,6 +1,7 @@
 package com.kuaidao.manageweb.feign.financing;
 
 import java.util.List;
+import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.netflix.feign.FeignClient;
@@ -76,6 +77,14 @@ public interface RefundFeignClient {
      */
     @PostMapping("/editRejectRefundInfo")
     JSONResult<Boolean> editRejectRefundInfo(RefundEditRejectReqDTO refundUpdateDTO);
+    
+    /**
+     *   查询签约单信息  
+     * @param refundQueryDTO
+     * @return
+     */
+    @PostMapping("/querySignInfoBySignNo")
+    JSONResult<Map<String, Object>> querySignInfoBySignNo(RefundQueryDTO refundQueryDTO);
 
     
     @Component
@@ -117,6 +126,12 @@ public interface RefundFeignClient {
         @Override
         public JSONResult<Boolean> editRejectRefundInfo(RefundEditRejectReqDTO refundUpdateDTO) {
             return fallBackError("编辑驳回退款");
+        }
+
+        @Override
+        public JSONResult<Map<String, Object>> querySignInfoBySignNo(
+                RefundQueryDTO refundQueryDTO) {
+            return fallBackError("根据signno查询签约单编号");
         }
     }
 

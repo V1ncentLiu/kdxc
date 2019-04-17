@@ -2,6 +2,7 @@ package com.kuaidao.manageweb.controller.financing;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
@@ -476,6 +477,8 @@ public class RefundController {
         if(CollectionUtils.isEmpty(idList)) {
             return CommonUtil.getParamIllegalJSONResult();
         }
+        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+        refundUpdateDTO.setCurUser(curLoginUser.getId());
         refundUpdateDTO.setStatus(AggregationConstant.REFOUND_REBATE_STATUS.STATUS_4);
         refundUpdateDTO.setType(AggregationConstant.REFOUND_REBATE_TYPE.REBATE_TYPE);
         return refundFeignClient.updateRefundInfo(refundUpdateDTO);
@@ -544,6 +547,22 @@ public class RefundController {
         }
         refundInfoQueryDTO.setType(AggregationConstant.REFOUND_REBATE_TYPE.REBATE_TYPE);
         return refundFeignClient.queryRefundInfoById(refundInfoQueryDTO);
+    }
+    
+    
+    /**
+     * 查询签约单信息  
+     * @param 参数 签约单号
+     * @return
+     */
+    @PostMapping("/querySignInfoBySignNo")
+    @ResponseBody
+    public JSONResult<Map<String,Object>> querySignInfoBySignNo(@RequestBody RefundQueryDTO refundQueryDTO) {
+        String signNo = refundQueryDTO.getSignNo();
+        if(!CommonUtil.isNotBlank(signNo)) {
+            return CommonUtil.getParamIllegalJSONResult();
+        }
+        return refundFeignClient.querySignInfoBySignNo(refundQueryDTO);
     }
 
 }
