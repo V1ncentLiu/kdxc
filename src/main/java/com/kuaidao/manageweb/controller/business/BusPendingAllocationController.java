@@ -163,13 +163,12 @@ public class BusPendingAllocationController {
         UserInfoDTO user = getUser();
         // 插入当前用户、角色信息
         busAllocationClueReq.setUserId(user.getId());
+        busAllocationClueReq.setOrg(user.getOrgId());
         List<RoleInfoDTO> roleList = user.getRoleList();
         if (roleList != null) {
-
             busAllocationClueReq.setRoleId(roleList.get(0).getId());
             busAllocationClueReq.setRoleCode(roleList.get(0).getRoleCode());
         }
-
         return pendingVisitFeignClient.busAllocationClue(busAllocationClueReq);
     }
 

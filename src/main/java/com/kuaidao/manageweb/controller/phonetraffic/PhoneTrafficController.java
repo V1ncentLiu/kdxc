@@ -283,6 +283,7 @@ public class PhoneTrafficController {
             allocationClueReq.setRoleId(roleList.get(0).getId());
             allocationClueReq.setRoleCode(roleList.get(0).getRoleCode());
         }
+        allocationClueReq.setOrg(user.getOrgId());
         return phoneTrafficFeignClient.allocationClue(allocationClueReq);
     }
 
@@ -293,7 +294,10 @@ public class PhoneTrafficController {
     @PostMapping("/toTele")
     @ResponseBody
     public JSONResult toTele(@RequestBody ClueDTO clueDTO) {
-
+        UserInfoDTO user =  CommUtil.getCurLoginUser();
+        clueDTO.setOrg(user.getOrgId());
+        clueDTO.setUpdateUser(user.getId());
+        clueDTO.setPhUpdateTime(new Date());
         return phoneTrafficFeignClient.toTele(clueDTO);
     }
 
