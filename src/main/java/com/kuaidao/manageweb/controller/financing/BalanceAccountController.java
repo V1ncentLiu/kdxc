@@ -1,5 +1,7 @@
 package com.kuaidao.manageweb.controller.financing;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -9,8 +11,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.math.BigDecimal;
+import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
@@ -18,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
@@ -41,6 +46,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.servlet.ModelAndView;
 import org.w3c.dom.Document;
 
 import com.kuaidao.aggregation.constant.AggregationConstant;
@@ -217,7 +223,7 @@ public class BalanceAccountController {
             HttpServletRequest request) {
         req.setStatus(AggregationConstant.RECONCILIATION_STATUS.STATUS_1);
         JSONResult<Void> reconciliationConfirm =
-                reconciliationConfirmFeignClient.reconciliationConfirm(req);
+                reconciliationConfirmFeignClient.rejectApply(req);
         return reconciliationConfirm;
     }
     /***
@@ -304,10 +310,12 @@ public class BalanceAccountController {
      * 下载模板
      * @param queryDTO
      * @return
+     * @throws Exception 
      */
-    @PostMapping("/downBalanceAccount")
-    @ResponseBody
-    public void downBalanceAccount(@RequestBody PayDetailAccountDTO queryDTO) {
+    @RequestMapping("/downBalanceAccount")
+    public ModelAndView  downBalanceAccount(HttpServletRequest request, HttpServletResponse response) throws Exception {
+    	PayDetailAccountDTO queryDTO = new PayDetailAccountDTO();
+    	queryDTO.setPayDetailId(Long.parseLong(request.getParameter("payDetailId")));
     	JSONResult<PayDetailAccountDTO> jsonResult = balanceAccountApplyClient.getPayDetailById(queryDTO);
     	Map dataMap= new HashMap<>();
     	if (JSONResult.SUCCESS.equals(jsonResult.getCode()) && jsonResult.getData() !=null) {
@@ -373,45 +381,48 @@ public class BalanceAccountController {
             
             dataMap.put("amount", accountDTO.getAmountPerformance()==null?"":accountDTO.getAmountPerformance());
     	}
-    	down(dataMap);
+    	File file = createDoc(dataMap);
+    	response.setContentType("text/html;charset=utf-8");
+        request.setCharacterEncoding("UTF-8");
+        java.io.BufferedInputStream bis = null;
+        java.io.BufferedOutputStream bos = null;
+     
+        try {
+            long fileLength = file.length();
+            response.setContentType("application/msword");
+            response.setHeader("Content-disposition", "attachment; filename="
+                    + URLEncoder.encode(dataMap.get("statementNo")+".doc", "utf-8"));
+            response.setHeader("Content-Length", String.valueOf(fileLength));
+            bis = new BufferedInputStream(new FileInputStream(file));
+            bos = new BufferedOutputStream(response.getOutputStream());
+            byte[] buff = new byte[2048];
+            int bytesRead;
+            while (-1 != (bytesRead = bis.read(buff, 0, buff.length))) {
+                bos.write(buff, 0, bytesRead);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (bis != null)
+                bis.close();
+            if (bos != null)
+                bos.close();
+        }
+        return null;
     }
-    /**
-     * 注意dataMap里存放的数据Key值要与模板中的参数相对应 
-     * @param dataMap
-     * 
-     */
-    @SuppressWarnings("unchecked")
-    private void getData(Map dataMap) {
-        //       dataMap.put("image", getImageStr());
-    	dataMap.put("year", "2018");
-        dataMap.put("month", "04");
-        dataMap.put("day", "13");
-        dataMap.put("statementNo", "fad32586fs");
-        dataMap.put("cueName", "王五");
-        dataMap.put("phone", "17300000000");
-        dataMap.put("ID", "111111111111111111");
-        dataMap.put("projectName", "麻辣烫");
-        dataMap.put("area", "北京");
-        dataMap.put("companyName", "快道科技有限公司");
-        dataMap.put("signShopType", "哈哈");
-        dataMap.put("payMode", "全款");
-        dataMap.put("payType", "POS");
-        dataMap.put("amountReceived", "60000.00");
-        dataMap.put("businessManager","张三");
-    }
-    
+
     public void down(Map dataMap) {
        // 设置模本装置方法和路径,FreeMarker支持多种模板装载方法。可以重servlet，classpath，数据库装载，  
        // 这里我们的模板是放在com.ftl包下面  
        configuration.setClassForTemplateLoading(this.getClass(),"/excel-templates");
        Template t = null;
        // 输出文档路径及名称
-       File outFile = new File("D:/test.doc");
+       File outFile = new File("D:/"+dataMap.get("statementNo")+".doc");
        Writer out = null;
 
        try {
            // test.ftl为要装载的模板 
-           t = configuration.getTemplate("04166.ftl");
+           t = configuration.getTemplate("04172.ftl");
            t.setEncoding("utf-8");
 
            out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outFile), "utf-8"));
@@ -422,6 +433,27 @@ public class BalanceAccountController {
            e.printStackTrace();
        }
    }
+    private File createDoc(Map dataMap){
+        // 获取模板
+        Configuration configuration = new Configuration();
+        configuration.setDefaultEncoding("utf-8");
+        configuration.setClassForTemplateLoading(this.getClass(),"/excel-templates");
+        Template t = null;
+         
+        String name = "temp"+(int)(Math.random()*1000)+".doc";
+        File file = new File(name);
+        try {
+        	t = configuration.getTemplate("04172.ftl");
+            t.setEncoding("UTF-8");
+             
+            Writer out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(name),"UTF-8"));
+            t.process(dataMap, out);
+            out.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } 
+        return file;
+    }
     public static void wordToHtml(String filePath, String outPutFilePath, String newFileName)
             throws Exception {
  
