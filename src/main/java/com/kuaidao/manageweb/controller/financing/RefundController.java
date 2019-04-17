@@ -1,18 +1,28 @@
 package com.kuaidao.manageweb.controller.financing;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.client.RestTemplate;
 import com.kuaidao.aggregation.constant.AggregationConstant;
 import com.kuaidao.aggregation.dto.financing.RefundAndImgRespDTO;
 import com.kuaidao.aggregation.dto.financing.RefundEditRejectReqDTO;
@@ -59,12 +69,19 @@ public class RefundController {
     
     @Autowired
     OrganizationFeignClient organizationFeignClient;
+    
+    @Autowired
+    RestTemplate restTemplate;
+    
+    @Value("${oss.url.directUpload}")
+    private String ossUrl;
 
 
     /**
      * 退款申请页面
      * @return
      */
+    @RequiresPermissions("aggregation:refundApply:view")
     @RequestMapping("/refundApplyPage")
     public String refundApplyPage() {
         return "financing/refundApplyPage";
@@ -74,6 +91,7 @@ public class RefundController {
      * 退款确认页面
      * @return
      */
+    @RequiresPermissions("aggregation:refundConfirm:view")
     @RequestMapping("/refundConfirmPage")
     public String refundConfirmPage() {
         return "financing/refundConfirmPage";
@@ -83,6 +101,7 @@ public class RefundController {
      * 返款申请页面
      * @return
      */
+    @RequiresPermissions("aggregation:rebateApply:view")
     @RequestMapping("/rebateApplyPage")
     public String rebateApplayPage() {
         return "financing/rebateApplyPage";
@@ -92,6 +111,7 @@ public class RefundController {
      * 返款确认页面页面
      * @return
      */
+    @RequiresPermissions("aggregation:rebateConfirm:view")
     @RequestMapping("/rebateConfirmPage")
     public String rebateConfirmPage() {
         return "financing/rebateConfirmPage";
@@ -103,6 +123,7 @@ public class RefundController {
      * @param queryDTO
      * @return
      */
+    @RequiresPermissions("aggregation:refundApply:view")
     @PostMapping("/listRefundApplay")
     @ResponseBody
     public JSONResult<PageBean<RefundRespDTO>> listRefundApplay(
@@ -236,6 +257,7 @@ public class RefundController {
      * 标记退款结束
      * @return
      */
+    @RequiresPermissions("aggregation:refundApply:updateRefundFinish")
     @PostMapping("/updateRefundInfo")
     @ResponseBody
     @LogRecord(operationType = OperationType.UPDATE, description = "标记退款结束",
@@ -274,6 +296,7 @@ public class RefundController {
      * @param queryDTO
      * @return
      */
+    @RequiresPermissions("aggregation:refundConfirm:view")
     @PostMapping("/listRefundConfirm")
     @ResponseBody
     public JSONResult<PageBean<RefundRespDTO>> listRefundConfirm(
@@ -300,6 +323,7 @@ public class RefundController {
      * @param result
      * @return
      */
+    @RequiresPermissions("aggregation:refundConfirm:confirmRefund")
     @PostMapping("/updateRefundConfirm")
     @ResponseBody
     @LogRecord(operationType = OperationType.UPDATE, description = "退款确认",
@@ -321,6 +345,7 @@ public class RefundController {
      * @param result
      * @return
      */
+    @RequiresPermissions("aggregation:refundConfirm:rejectRefund")
     @PostMapping("/rejectRefund")
     @ResponseBody
     @LogRecord(operationType = OperationType.UPDATE, description = "驳回退款",
@@ -342,6 +367,7 @@ public class RefundController {
      * @param result
      * @return
      */
+    @RequiresPermissions("aggregation:refundConfirm:markRefund")
     @PostMapping("/markRefund")
     @ResponseBody
     @LogRecord(operationType = OperationType.UPDATE, description = "标记退款",
@@ -364,6 +390,7 @@ public class RefundController {
      * @param queryDTO
      * @return
      */
+    @RequiresPermissions("aggregation:rebateApply:view")
     @PostMapping("/listRebateApply")
     @ResponseBody
     public JSONResult<PageBean<RefundRespDTO>> listRebateApply(
@@ -379,6 +406,7 @@ public class RefundController {
      * @param queryDTO
      * @return
      */
+    @RequiresPermissions("aggregation:rebateConfirm:view")
     @PostMapping("/listRebateConfirm")
     @ResponseBody
     public JSONResult<PageBean<RefundRespDTO>> listRebateConfirm(
@@ -405,6 +433,7 @@ public class RefundController {
      * 标记返款结束
      * @return
      */
+    @RequiresPermissions("aggregation:rebateApply:markRefundFinish")
     @PostMapping("/updateRebateInfo")
     @ResponseBody
     @LogRecord(operationType = OperationType.UPDATE, description = "标记返款结束",
@@ -426,6 +455,7 @@ public class RefundController {
      * @param result
      * @return
      */
+    @RequiresPermissions("aggregation:rebateConfirm:confirmRebate")
     @PostMapping("/updateRebateConfirm")
     @ResponseBody
     @LogRecord(operationType = OperationType.UPDATE, description = "返款确认",
@@ -447,6 +477,7 @@ public class RefundController {
      * @param result
      * @return
      */
+    @RequiresPermissions("aggregation:rebateConfirm:rejectRebate")
     @PostMapping("/rejectRebate")
     @ResponseBody
     @LogRecord(operationType = OperationType.UPDATE, description = "驳回返款",
@@ -468,6 +499,7 @@ public class RefundController {
      * @param result
      * @return
      */
+    @RequiresPermissions("aggregation:rebateConfirm:markRebate")
     @PostMapping("/markRebate")
     @ResponseBody
     @LogRecord(operationType = OperationType.UPDATE, description = "标记返款",
@@ -563,6 +595,17 @@ public class RefundController {
             return CommonUtil.getParamIllegalJSONResult();
         }
         return refundFeignClient.querySignInfoBySignNo(refundQueryDTO);
+    }
+    
+    @RequestMapping("/downloadOssImg")
+    @ResponseBody
+    public ResponseEntity<byte[]> downloadOssImg(String url) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setAccept(Arrays.asList(MediaType.APPLICATION_OCTET_STREAM));
+        HttpEntity<String> entity = new HttpEntity<String>(headers);
+        ResponseEntity<byte[]> response = restTemplate.exchange(url,HttpMethod.GET, entity, byte[].class);
+        byte[] imageBytes = response.getBody();
+        return new ResponseEntity<byte[]>(imageBytes,headers,HttpStatus.OK);
     }
 
 }
