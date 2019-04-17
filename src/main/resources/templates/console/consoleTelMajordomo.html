@@ -18,7 +18,7 @@
         <!-- 系统公告 -->
         <div class="affiche marginB20" v-if="afficheBox">
             <span class="f-fl"><img th:src="@{/images/icon_notice.png}" alt="" class="f-fl" style="margin-right: 10px;">系统公告：</span>  
-            <div class="f-fl" style="width: 90%;">
+            <div class="f-fl" style="width: 86%;">
                 <marquee onmouseover="this.stop()" onmouseout="this.start()">
                     <span style="margin-right: 50px;" v-for="item in items" :key="item.id">{{ item.content }}</span>                
                 </marquee> 
@@ -27,8 +27,89 @@
         <div class="title">
             <div class="leftbox f-fl"><img th:src="@{/images/icon_kb.png}" alt="" class="f-fl">数字看板</div>
         </div>
-        <ul class="board">
-            <li>
+        <ul class="board board2">
+            <li class="boardStyle0 bg1">
+                <div class="cnt">
+                    <div class="toptitle">待分配资源</div>
+                    <div class="con">{{assignClueNum}}<em>个</em></div>
+                </div>
+            </li>
+            <li class="boardStyle0 bg2">
+                <div class="cnt">
+                    <div class="toptitle">今日接收资源</div>
+                    <div class="con">{{receiveClueNum}}<em>个</em></div>
+                </div>
+            </li>
+            <li class="boardStyle0 bg3">
+                <div class="cnt">
+                    <div class="toptitle">今日领取资源</div>
+                    <div class="con">{{todaygetClueNum}}<em>个</em></div>
+                </div>
+            </li>
+            <li class="boardStyle2 bgColor1">
+                <div class="cnt">
+                    <div class="f-fl">
+                        <div class="toptitle">今日首次邀约数</div>
+                        <div class="con">{{todayAppiontmentNum}}</div>
+                    </div>
+                    <div class="f-fr"><img th:src="@{/images/icon_appointment.png}" alt=""></div>
+                </div>
+            </li>
+            <li class="boardStyle2 bgColor2">
+                <div class="cnt">
+                    <div class="f-fl">
+                        <div class="toptitle">今日首访数</div>
+                        <div class="con">6</div>
+                    </div>
+                    <div class="f-fr"><img th:src="@{/images/icon_jrsfs.png}" alt=""></div>
+                </div>
+            </li>
+            <li class="boardStyle2 bgColor3">
+                <div class="cnt">
+                    <div class="f-fl">
+                        <div class="toptitle">今日签约数</div>
+                        <div class="con">50</div>
+                    </div>
+                    <div class="f-fr"><img th:src="@{/images/icon_jrqys.png}" alt=""></div>
+                </div>
+            </li>
+            <li class="boardStyle2 bgColor4">
+                <div class="cnt">
+                    <div class="f-fl">
+                        <div class="toptitle">预计明日到访数</div>
+                        <div class="con">{{tomorrowArriveTime}}</div>
+                    </div>
+                    <div class="f-fr"><img th:src="@{/images/icon_jrsfs.png}" alt=""></div>
+                </div>
+            </li>
+            <li class="boardStyle2 bgColor5">
+                <div class="cnt">
+                    <div class="f-fl">
+                        <div class="toptitle">当月首访数</div>
+                        <div class="con">20</div>
+                    </div>
+                    <div class="f-fr"><img th:src="@{/images/icon_jrqys.png}" alt=""></div>
+                </div>
+            </li>
+            <li class="boardStyle2 bgColor6">
+                <div class="cnt">
+                    <div class="f-fl">
+                        <div class="toptitle">当月签约数</div>
+                        <div class="con">300</div>
+                    </div>
+                    <div class="f-fr"><img th:src="@{/images/icon_jrsfs.png}" alt=""></div>
+                </div>
+            </li>
+            <li class="boardStyle2 bgColor7">
+                <div class="cnt">
+                    <div class="f-fl">
+                        <div class="toptitle">累计邀约数</div>
+                        <div class="con">20</div>
+                    </div>
+                    <div class="f-fr"><img th:src="@{/images/icon_invitation.png}" alt=""></div>
+                </div>
+            </li>
+            <!-- <li>
                 <div class="tit">待分配资源数</div>
                 <div class="cnt">
                     <div class="f-fl">{{assignClueNum}}</div>
@@ -83,9 +164,112 @@
                     <div class="f-fl">--</div>
                     <div class="f-fr"><img th:src="@{/images/icon_invitation.png}" alt=""></div>
                 </div>
-            </li>
+            </li> -->
         </ul>
-        <ul class="boardTab">
+        <div class="boardTabList">
+            <el-tabs v-model="activeName" @tab-click="handleClick">
+                <el-tab-pane label="当月" name="1">
+                    <ul class="tabUl">
+                        <li class="tabLi1">
+                            <img th:src="@{/images/icon_achievement.png}" alt="">
+                            <div class="name">业绩</div>
+                            <div class="num"><span>1000,000,000.00</span><em>元</em></div>
+                            <div class="line"></div>
+                        </li>
+                        <li class="tabLi2">
+                            <img th:src="@{/images/icon_ranking.png}" alt="">
+                            <div class="name">组内排名</div>
+                            <div class="num">第<span>15</span>名</div>
+                            <div class="line"></div>
+                        </li>
+                        <li class="tabLi3">
+                            <img th:src="@{/images/icon_gspm.png}" alt="">
+                            <div class="name">公司排名</div>
+                            <div class="num">第<span>10</span>名</div>
+                            <div class="line"></div>
+                        </li>
+                        <li class="tabLi4">
+                            <img th:src="@{/images/icon_disparity.png}" alt="">
+                            <div class="name">距组内上一名业绩差</div>
+                            <div class="num"><span>5,467.00</span><em>元</em></div>
+                            <div class="line"></div>
+                        </li>
+                        <li class="tabLi5">
+                            <img th:src="@{/images/icon_yjc.png}" alt="">
+                            <div class="name">距公司上一名业绩差</div>
+                            <div class="num"><span>6,518,900.00</span><em>元</em></div>
+                        </li>
+                    </ul>
+                </el-tab-pane>
+                <el-tab-pane label="季度" name="2">
+                    <ul class="tabUl">
+                        <li class="tabLi1">
+                            <img th:src="@{/images/icon_achievement.png}" alt="">
+                            <div class="name">业绩</div>
+                            <div class="num"><span>1000,000,000.01</span><em>元</em></div>
+                            <div class="line"></div>
+                        </li>
+                        <li class="tabLi2">
+                            <img th:src="@{/images/icon_ranking.png}" alt="">
+                            <div class="name">组内排名</div>
+                            <div class="num">第<span>15</span>名</div>
+                            <div class="line"></div>
+                        </li>
+                        <li class="tabLi3">
+                            <img th:src="@{/images/icon_gspm.png}" alt="">
+                            <div class="name">公司排名</div>
+                            <div class="num">第<span>10</span>名</div>
+                            <div class="line"></div>
+                        </li>
+                        <li class="tabLi4">
+                            <img th:src="@{/images/icon_disparity.png}" alt="">
+                            <div class="name">距组内上一名业绩差</div>
+                            <div class="num"><span>5,467.00</span><em>元</em></div>
+                            <div class="line"></div>
+                        </li>
+                        <li class="tabLi5">
+                            <img th:src="@{/images/icon_yjc.png}" alt="">
+                            <div class="name">距公司上一名业绩差</div>
+                            <div class="num"><span>6,518,900.00</span><em>元</em></div>
+                        </li>
+                    </ul>
+                </el-tab-pane>
+                <el-tab-pane label="年度" name="3">
+                    <ul class="tabUl">
+                        <li class="tabLi1">
+                            <img th:src="@{/images/icon_achievement.png}" alt="">
+                            <div class="name">业绩</div>
+                            <div class="num"><span>1000,000,000.02</span><em>元</em></div>
+                            <div class="line"></div>
+                        </li>
+                        <li class="tabLi2">
+                            <img th:src="@{/images/icon_ranking.png}" alt="">
+                            <div class="name">组内排名</div>
+                            <div class="num">第<span>15</span>名</div>
+                            <div class="line"></div>
+                        </li>
+                        <li class="tabLi3">
+                            <img th:src="@{/images/icon_gspm.png}" alt="">
+                            <div class="name">公司排名</div>
+                            <div class="num">第<span>10</span>名</div>
+                            <div class="line"></div>
+                        </li>
+                        <li class="tabLi4">
+                            <img th:src="@{/images/icon_disparity.png}" alt="">
+                            <div class="name">距组内上一名业绩差</div>
+                            <div class="num"><span>5,467.00</span><em>元</em></div>
+                            <div class="line"></div>
+                        </li>
+                        <li class="tabLi5">
+                            <img th:src="@{/images/icon_yjc.png}" alt="">
+                            <div class="name">距公司上一名业绩差</div>
+                            <div class="num"><span>6,518,900.00</span><em>元</em></div>
+                        </li>
+                    </ul>
+                </el-tab-pane>
+            </el-tabs>
+        </div>
+        <!-- <ul class="boardTab">
             <li>
                 <el-tabs v-model="activeName" @tab-click="handleClick">
                     <el-tab-pane label="当月" name="1">
@@ -181,7 +365,7 @@
                     </el-tab-pane>
                 </el-tabs>
             </li>
-        </ul>
+        </ul> -->
         <!-- 消息提醒 -->
         <dialog-console :param="consoleNewsParam"></dialog-console>               
     </el-row>
