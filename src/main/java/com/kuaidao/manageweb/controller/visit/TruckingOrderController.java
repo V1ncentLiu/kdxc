@@ -1,5 +1,8 @@
 package com.kuaidao.manageweb.controller.visit;
 
+import com.kuaidao.manageweb.config.LogRecord;
+import com.kuaidao.manageweb.config.LogRecord.OperationType;
+import com.kuaidao.manageweb.constant.MenuEnum;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Date;
@@ -163,6 +166,8 @@ public class TruckingOrderController {
      */
     @RequiresPermissions("aggregation:truckingOrder:export")
     @PostMapping("/exportTrackingOrder")
+    @LogRecord(description = "邀约来访派车单导出", operationType = OperationType.EXPORT,
+        menuName = MenuEnum.TRUCKING_ORDER_PAGE)
     public void exportTrackingOrder(@RequestBody TrackingOrderReqDTO reqDTO,
             HttpServletResponse response) throws Exception {
         /*

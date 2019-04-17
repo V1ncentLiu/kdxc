@@ -208,6 +208,8 @@ public class AppiontmentController {
     @RequestMapping("/cancelAppiontment")
     @ResponseBody
     @RequiresPermissions("aggregation:appiontmentManager:cancel")
+    @LogRecord(description = "取消预约来访数据", operationType = OperationType.UPDATE,
+        menuName = MenuEnum.APPIONTMENT_MANAGEMENT)
     public JSONResult<String> cancelAppiontment(@RequestBody AppiontmentCancelDTO dto,
             HttpServletRequest request) {
 
@@ -263,6 +265,8 @@ public class AppiontmentController {
      */
     @PostMapping("/deleteAppiontment")
     @ResponseBody
+    @LogRecord(description = "删除预约来访信息", operationType = OperationType.DELETE,
+        menuName = MenuEnum.APPIONTMENT_MANAGEMENT)
     public JSONResult deleteAppiontment(@RequestBody IdListLongReq idList) {
 
         return appiontmentFeignClient.delete(idList);
