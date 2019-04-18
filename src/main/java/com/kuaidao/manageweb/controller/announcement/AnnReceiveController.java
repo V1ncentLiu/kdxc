@@ -67,7 +67,7 @@ public class AnnReceiveController {
 
         if(date1!=null && date2!=null ){
             if(date1.getTime()>date2.getTime()){
-                return new JSONResult().fail("-1","时间选项，开始时间大于结束时间!");
+                return new JSONResult().fail("-1","时间选项，结束时间不能早于开始时间!");
             }
         }
         Subject subject = SecurityUtils.getSubject();
