@@ -1,5 +1,6 @@
 package com.kuaidao.manageweb.controller.organization;
 
+import java.util.ArrayList;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
@@ -17,9 +18,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import com.kuaidao.common.constant.DicCodeEnum;
 import com.kuaidao.common.constant.OrgTypeConstant;
+import com.kuaidao.common.constant.RoleCodeEnum;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.constant.SystemCodeConstant;
 import com.kuaidao.common.entity.IdEntity;
+import com.kuaidao.common.entity.IdEntityLong;
 import com.kuaidao.common.entity.IdListReq;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
@@ -30,6 +33,7 @@ import com.kuaidao.manageweb.config.LogRecord.OperationType;
 import com.kuaidao.manageweb.constant.MenuEnum;
 import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
 import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
+import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
 import com.kuaidao.manageweb.util.CommUtil;
 import com.kuaidao.sys.dto.dictionary.DictionaryItemRespDTO;
 import com.kuaidao.sys.dto.organization.OrganizationAddAndUpdateDTO;
@@ -39,6 +43,7 @@ import com.kuaidao.sys.dto.organization.OrganizationRespDTO;
 import com.kuaidao.sys.dto.user.OrgUserReqDTO;
 import com.kuaidao.sys.dto.user.UserAndRoleRespDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
+import com.kuaidao.sys.dto.user.UserOrgRoleReq;
 
 /**
  * 组织机构类
@@ -58,6 +63,9 @@ public class OrganizationController {
 
     @Autowired
     DictionaryItemFeignClient dictionaryItemFeignClient;
+    
+    @Autowired
+    UserInfoFeignClient userInfoFeignClient;
 
     /**
      * 组织机构首页
@@ -345,6 +353,103 @@ public class OrganizationController {
         return    organizationFeignClient.queryOrgByParam(companyDto);
     }
     
+    /**
+     * 查询所有的商务大区
+     * @param result
+     * @return
+     */
+    @PostMapping("/queryBusinessAreaList")
+    @ResponseBody
+    public JSONResult<List<OrganizationRespDTO>> queryBusinessAreaList() {
+        // 电销组
+        OrganizationQueryDTO busGroupReqDTO = new OrganizationQueryDTO();
+        busGroupReqDTO.setSystemCode(SystemCodeConstant.HUI_JU);
+        busGroupReqDTO.setOrgType(OrgTypeConstant.SWDQ);
+        return organizationFeignClient.queryOrgByParam(busGroupReqDTO);
+    }
+    
+    /**
+     * 查询所有的电销事业部
+     * @param result
+     * @return
+     */
+    @PostMapping("/queryTeleDeptList")
+    @ResponseBody
+    public JSONResult<List<OrganizationRespDTO>> queryTeleDeptList() {
+        // 电销组
+        OrganizationQueryDTO busGroupReqDTO = new OrganizationQueryDTO();
+        busGroupReqDTO.setSystemCode(SystemCodeConstant.HUI_JU);
+        busGroupReqDTO.setOrgType(OrgTypeConstant.DZSYB);
+        return organizationFeignClient.queryOrgByParam(busGroupReqDTO);
+    }
+    
+    
+    /**
+     * 根据父级Id查询所有的商务小组
+     * @param request
+     * @return
+     */
+    @RequestMapping("/queryBusGroupListByParentId")
+    @ResponseBody
+    public JSONResult<List<OrganizationDTO>> queryBusGroupListByParentId(@RequestBody IdEntityLong idEntityLong){
+     // 商务小组
+        OrganizationQueryDTO busGroupReqDTO = new OrganizationQueryDTO();
+        busGroupReqDTO.setSystemCode(SystemCodeConstant.HUI_JU);
+        busGroupReqDTO.setParentId(idEntityLong.getId());
+        busGroupReqDTO.setOrgType(OrgTypeConstant.SWZ);
+        return organizationFeignClient.listDescenDantByParentId(busGroupReqDTO);
+    }
+    
+    /**
+     * 根据组织机构Id查询所有商务经理 
+     * @return
+     */
+    @PostMapping("/queryBusManagerByOrgId")
+    @ResponseBody
+    public JSONResult<List<UserInfoDTO>> queryBusManagerByOrgId(@RequestBody IdEntityLong idEntityLong) {
+        // 商务经理
+        UserOrgRoleReq req = new UserOrgRoleReq();
+        Long id = idEntityLong.getId();
+        if(id==null) {
+            UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+            id = curLoginUser.getId();
+        }
+        req.setOrgId(id);
+        req.setRoleCode(RoleCodeEnum.SWJL.name());
+        return userInfoFeignClient.listByOrgAndRole(req);
+    }
+    
+    
+    /**
+     * 根据父级Id查询所有的电销组
+     * @param result
+     * @return
+     */
+    @PostMapping("/queryTeleGroupListByParentId")
+    @ResponseBody
+    public JSONResult<List<OrganizationRespDTO>> queryTeleGroupListByParentId(@RequestBody IdEntityLong idEntityLong) {
+        // 电销组
+        OrganizationQueryDTO busGroupReqDTO = new OrganizationQueryDTO();
+        busGroupReqDTO.setParentId(idEntityLong.getId()); 
+        busGroupReqDTO.setSystemCode(SystemCodeConstant.HUI_JU);
+        busGroupReqDTO.setOrgType(OrgTypeConstant.DXZ);
+        return organizationFeignClient.queryOrgByParam(busGroupReqDTO);
+    }
+    
+    /**
+     * 根据orgId 查询下属 创业顾问
+     * 
+     * @param orgDTO
+     * @return
+     */
+    @PostMapping("/queryTeleSaleByOrgId")
+    @ResponseBody
+    public JSONResult<List<UserInfoDTO>> queryTeleSaleByOrgId(@RequestBody IdEntityLong idEntityLong) {
+        UserOrgRoleReq req = new UserOrgRoleReq();
+        req.setOrgId(idEntityLong.getId());
+        req.setRoleCode(RoleCodeEnum.DXCYGW.name());
+        return userInfoFeignClient.listByOrgAndRole(req);
+    }
     
 
 }

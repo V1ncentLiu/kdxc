@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html  xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head th:include="_header_include::frag(~{::title},~{},~{})">
+    <title>动态列</title>
+</head>
+<body>
+<div id="table">
+   <template>
+      <el-table v-loading="loading" :data="tableData3" height="650" style="width: 100%">
+      
+        <el-table-column :key="index" :prop="item.columnCode" :label="item.columnName" width="180"
+         v-for="(item,key,index) in tableColums">
+        
+         </el-table-column>
+        
+      </el-table>
+    </template> 
+    
+    
+	<el-button type="text" @click="dialogFormVisible = true">打开自定义列的Dialog</el-button>
+	<el-dialog title="自定义列" :visible.sync="dialogFormVisible">
+	  <el-form :model="form">
+	    
+		  <el-form-item label="列名" prop="type">
+		    <el-checkbox-group v-model="form.type">
+		      <el-checkbox :label="index+'_'+item.columnCode+'_'+item.columnName"  name="type" :key="item.columnCode"  v-for="(item,index) in  allTableColums ">
+		          {{item.columnName}}
+		      </el-checkbox>
+		  
+		     </el-checkbox-group>
+		  </el-form-item>
+	    
+	  </el-form>
+	  
+	  <div slot="footer" class="dialog-footer">
+	    <el-button @click="dialogFormVisible = false">取 消</el-button>
+	    <el-button type="primary" @click="confirmColumn">确 定</el-button>
+	  </div>
+	</el-dialog>
+
+</div>
+
+ <div th:include="_footer_include :: #jsLib"></div>
+
+
+
+<script>
+
+ var vm = new Vue({
+     el:'#table',
+     data:{
+             tableData3:[],
+             num:"",
+             loading: true,
+            // allTableColums:["are","name","address"],
+             allTableColums:[],
+             tableColums:[],
+             dialogTableVisible: false,
+             dialogFormVisible: false,
+             form: {
+               type: [],
+             },
+             formLabelWidth: '120px'
+ 
+ 
+
+     },
+     methods:{
+        getTableData:function (){
+            //后台取数   jquery 也可以
+            axios.post('/demo/listTableData', {
+                firstName: 'Fred',
+                lastName: 'Flintstone'
+              })
+              .then(function (response) {
+                vm.tableData3=response.data;
+                vm.loading=false;
+              })
+              .catch(function (error) {
+                console.log(error);
+              });
+        },
+        getTableNum:function(){
+            axios.get("/demo/getTableNum?id=1")
+              .then(function (response) {
+                vm.num=response.data;
+              })
+              .catch(function (error) {
+                // handle error
+                console.log(error);
+              })
+              .then(function () {
+                 console.info("getTableNum finish");
+              });
+        },
+        confirmColumn(){
+        	this.dialogFormVisible = false;
+        	//处理用户选择的列
+        	console.info(this.form.type);
+        	var customerShowColun = [];
+        	var customerColumn = this.form.type;
+        	
+        	customerColumn.sort(this.sortNumber);//对选择的列排序
+        	for(var i=0;i<customerColumn.length;i++){
+        		var curItem = customerColumn[i];
+        		var itemArr = curItem.split("_");
+        		var obj = {};
+        		obj.columnCode=itemArr[1];
+        		obj.columnName=itemArr[2];
+        		customerShowColun.push(obj);
+        	}
+        	this.tableColums = customerShowColun;
+        	
+        	console.info(this.tableColums);
+        	console.info(this.allTableColums);
+        },
+        initColumn(){
+        	//初始化table 列 和 用户自定义列
+        	
+        	var tableColumns = this.getColumn();
+        	this.allTableColums = tableColumns;
+        	this.tableColums = tableColumns;
+        },
+        getColumn(){
+        	//表格的所有列 字段属性
+        	var allTableColums = [
+                {
+                "columnCode":"area",
+                "columnName":"区域"   
+                },
+                {
+                 "columnCode":"name",
+                 "columnName":"姓名"   
+                 },
+                 {
+                     "columnCode":"address",
+                     "columnName":"地址"   
+                 }
+            ];
+        	return allTableColums;
+        },
+        sortNumber(a,b) {
+         //对数组中元素，按照数字 从小到大 排序
+         return a.split("_")[0] - b.split("_")[0];
+        }
+        
+     },
+     created(){
+    	 
+    	 this.initColumn();//初始化列
+         console.info("create method");
+         this.getTableData();//初始化table 数据
+        // this.getTableNum();
+     },
+     mounted(){
+        console.info("mounted method");
+       
+     }
+     
+ });
+ 
+</script>
+</body>
+</html>

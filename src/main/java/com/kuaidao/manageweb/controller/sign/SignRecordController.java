@@ -24,7 +24,6 @@ import com.kuaidao.aggregation.dto.busmycustomer.SignRecordRespDTO;
 import com.kuaidao.aggregation.dto.project.ProjectInfoDTO;
 import com.kuaidao.aggregation.dto.sign.PayDetailDTO;
 import com.kuaidao.aggregation.dto.visitrecord.BusVisitRecordRespDTO;
-import com.kuaidao.common.constant.OrgTypeConstant;
 import com.kuaidao.common.constant.RoleCodeEnum;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.constant.SystemCodeConstant;
@@ -85,23 +84,19 @@ public class SignRecordController {
     @RequestMapping("/signRecordPage")
     public String signRecordPage(HttpServletRequest request) {
 
-     /*   UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
-        Long orgId = curLoginUser.getOrgId();
-        // 签约项目
-        List<ProjectInfoDTO> projectList = getProjectList();
-        // 商务小组
-        List<OrganizationDTO> businessGroupList = getBusinessGroupList(orgId, OrgTypeConstant.SWZ);
-        // 电销组
-        List<OrganizationRespDTO> teleGroupList = getTeleGroupList(OrgTypeConstant.DXZ);
-        // 商务经理
-        List<UserInfoDTO> busManagerList = getUserInfo(orgId, RoleCodeEnum.SWJL.name());
-        // 电销人员
-        // List<UserInfoDTO> teleSaleList = getUserInfo(null, RoleCodeEnum.DXCYGW.name());
-
-        request.setAttribute("projectList", projectList);
-        request.setAttribute("busManagerList", busManagerList);
-        request.setAttribute("businessGroupList", businessGroupList);
-        request.setAttribute("teleGroupList", teleGroupList);*/
+        /*
+         * UserInfoDTO curLoginUser = CommUtil.getCurLoginUser(); Long orgId =
+         * curLoginUser.getOrgId(); // 签约项目 List<ProjectInfoDTO> projectList = getProjectList(); //
+         * 商务小组 List<OrganizationDTO> businessGroupList = getBusinessGroupList(orgId,
+         * OrgTypeConstant.SWZ); // 电销组 List<OrganizationRespDTO> teleGroupList =
+         * getTeleGroupList(OrgTypeConstant.DXZ); // 商务经理 List<UserInfoDTO> busManagerList =
+         * getUserInfo(orgId, RoleCodeEnum.SWJL.name()); // 电销人员 // List<UserInfoDTO> teleSaleList =
+         * getUserInfo(null, RoleCodeEnum.DXCYGW.name());
+         * 
+         * request.setAttribute("projectList", projectList); request.setAttribute("busManagerList",
+         * busManagerList); request.setAttribute("businessGroupList", businessGroupList);
+         * request.setAttribute("teleGroupList", teleGroupList);
+         */
         // request.setAttribute("teleSaleList",teleSaleList);
 
         return "signrecord/signRecord";
@@ -197,7 +192,7 @@ public class SignRecordController {
         List<RoleInfoDTO> roleList = curLoginUser.getRoleList();
         RoleInfoDTO roleInfoDTO = roleList.get(0);
         String roleName = roleInfoDTO.getRoleName();
-       if (RoleCodeEnum.SWDQZJ.value().equals(roleName)
+        if (RoleCodeEnum.SWDQZJ.value().equals(roleName)
                 || RoleCodeEnum.SWZJ.value().equals(roleName)) {
             Long businessManagerId = reqDTO.getBusinessManagerId();
             if (businessManagerId != null) {
@@ -216,11 +211,12 @@ public class SignRecordController {
         } else {
             return new JSONResult().fail(SysErrorCodeEnum.ERR_NOTEXISTS_DATA.getCode(), "角色没有权限");
         }
-        
-     /*     List<Long> accountIdList = new ArrayList<>(); 
-          accountIdList.add(1084621842175623168L);
-          reqDTO.setBusinessManagerIdList(accountIdList);*/
-         
+
+        /*
+         * List<Long> accountIdList = new ArrayList<>(); accountIdList.add(1084621842175623168L);
+         * reqDTO.setBusinessManagerIdList(accountIdList);
+         */
+
 
         logger.info("listSignRecord{{}}", reqDTO.toString());
         return signRecordFeignClient.listSignRecord(reqDTO);
@@ -361,10 +357,24 @@ public class SignRecordController {
         }
         return new JSONResult().success(payDetailMap);
     }
-    
-    
+
     /**
-     *   查询所有的签约项目
+     * 根据sign_Id 查询 付款明细
+     * 
+     * @param idListLongReq
+     * @return
+     */
+    @PostMapping("/listPayDetail")
+    @ResponseBody
+    public JSONResult listPayDetail(@RequestBody IdListLongReq idListLongReq) {
+        JSONResult<List<PayDetailDTO>> payDetailListJr =
+                signRecordFeignClient.listPayDetailNoPage(idListLongReq);
+        return payDetailListJr;
+    }
+
+
+    /**
+     * 查询所有的签约项目
      */
     @RequestMapping("/queryProjectList")
     @ResponseBody
@@ -372,10 +382,11 @@ public class SignRecordController {
         // 签约项目
         return projectInfoFeignClient.allProject();
     }
-    
-    
+
+
     /**
-     * 根据组织机构Id查询所有商务经理 
+     * 根据组织机构Id查询所有商务经理
+     * 
      * @return
      */
     @PostMapping("/queryBusManagerByOrgId")
@@ -388,6 +399,6 @@ public class SignRecordController {
         req.setRoleCode(RoleCodeEnum.SWJL.name());
         return userInfoFeignClient.listByOrgAndRole(req);
     }
-    
-    
+
+
 }
