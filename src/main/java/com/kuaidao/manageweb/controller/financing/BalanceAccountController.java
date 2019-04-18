@@ -103,7 +103,7 @@ public class BalanceAccountController {
      * @return
      */
     @RequestMapping("/balanceAccountPage")
- //   @RequiresPermissions("financing:balanceaccountManager:view")
+    @RequiresPermissions("financing:balanceaccountManager:view")
     public String balanceAccountPage(HttpServletRequest request) {
         UserInfoDTO user = getUser();
         // 查询所有商务大区
@@ -184,7 +184,7 @@ public class BalanceAccountController {
      */
     @PostMapping("/rejectApply")
     @ResponseBody
-    // @RequiresPermissions("financing:balanceaccountManager:reconciliation")
+     @RequiresPermissions("financing:balanceaccountManager:rejectApply")
     @LogRecord(description = "驳回", operationType = OperationType.UPDATE,
             menuName = MenuEnum.REFUNDREBATEAPPLY_MANAGER)
     public JSONResult<Void> rejectApply(@RequestBody ReconciliationConfirmReq req,
@@ -201,7 +201,7 @@ public class BalanceAccountController {
      */
     @PostMapping("/settlementConfirm")
     @ResponseBody
-    // @RequiresPermissions("financing:reconciliationConfirmManager:settlement")
+     @RequiresPermissions("financing:reconciliationConfirmManager:settlementConfirm")
     @LogRecord(description = "结算确认", operationType = OperationType.UPDATE,
             menuName = MenuEnum.RECONCILIATIONCONFIRM_MANAGER)
     public JSONResult<Void> settlementConfirm(@RequestBody ReconciliationConfirmReq req,
