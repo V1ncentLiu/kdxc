@@ -191,7 +191,7 @@ public class PendingAllocationController {
     @ResponseBody
     @RequiresPermissions("aggregation:pendingAllocationManager:allocation")
     @LogRecord(description = "分配资源", operationType = OperationType.DISTRIBUTION,
-            menuName = MenuEnum.PENDING_ALLOCATION_CLUE)
+            menuName = MenuEnum.TELE_CUSTOMER_MANAGER)
     public JSONResult allocationClue(@Valid @RequestBody AllocationClueReq allocationClueReq,
             BindingResult result) {
 
