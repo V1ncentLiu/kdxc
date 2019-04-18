@@ -31,58 +31,61 @@
         </shiro:hasPermission>
         <!--  <el-button type="success" @click="trCall"><i class="el-icon-edit"></i>外呼</el-button> -->
     </el-row>
-    <el-row class="marginB20 greybg padding20" style="padding-bottom: 0;"> 
-      <el-form :inline="true">
-        <el-form-item label="">        
-          <el-select v-model="searchForm.orgId" placeholder="请选择所在组织" value-key="value" clearable>
-            <el-option
-                v-for="item in orgList"
-                :key="item.id"
-                :label="item.name"
-                :value="item.id">
-            </el-option>
-          </el-select>
-        </el-form-item>
-        <el-form-item label="">
-          <el-input placeholder="请输入坐席编号"  v-model="searchForm.clientNo"></el-input>
-        </el-form-item>
-        <el-form-item label="">
-          <el-input placeholder="A(呼叫号)"  v-model="searchForm.bindPhone"></el-input>
-        </el-form-item>
-        <el-form-item label="">
-          <el-input placeholder="外显手机号"  v-model="searchForm.displayPhone"></el-input>
-        </el-form-item>
-        <el-button icon="el-icon-search" type="primary" @click="initClientData" >搜索</el-button>
-      </el-form>
-    </el-row>
-    <el-row>
-        <el-table 
-            ref="multipleTable"
-            tooltip-effect="dark"
-            style="width: 100%"
-            border
-             @selection-change="handleSelectionChange"
-            :data="clientData" 
-            >
-            <el-table-column align="center" type="selection" width="55"></el-table-column>
-            <el-table-column align="center" prop="clientNo" label="坐席编号"></el-table-column>
-            <el-table-column align="center" prop="bindPhone" label="A(呼叫号)"></el-table-column>
-            <el-table-column align="center" prop="displayPhone" label="外显手机号"></el-table-column>
-            <!-- <el-table-column align="center" prop="phoneMark" label="外显号标记记录 (类型+次数)"></el-table-column> -->
-            <el-table-column align="center" prop="orgName" label="电销组"></el-table-column>
-           <!--  <el-table-column align="center" label="回呼配置" >
-                <template slot-scope="scope">
-                    <a href="javascript:void(0)" @click="goToFieldSettingPage(scope.row)" target="_blank" class="buttonText" style="color:blue">页面字段设置</a>
-                    <el-input v-model="scope.row.callbackPhone" style="width:130px;" maxlength="11"></el-input>
-                    &nbsp;
-                    <el-button type="primary" @click="updateCallbackPhone(scope.row.id,scope.row.callbackPhone)">确定</el-button>
-                </template>
-            </el-table-column> -->
-            
-        </el-table>
-        <table-pagination :pager="pager" @change="initClientData"></table-pagination>
-    </el-row>
-    
+    <div class="mainSearchBg">        
+        <div class="mainSearchFormBox">
+          <el-form :inline="true" class="demo-form-inline mainSearchForm">
+            <el-form-item label="所在组织:">        
+              <el-select v-model="searchForm.orgId" placeholder="请选择所在组织" value-key="value" clearable>
+                <el-option
+                    v-for="item in orgList"
+                    :key="item.id"
+                    :label="item.name"
+                    :value="item.id">
+                </el-option>
+              </el-select>
+            </el-form-item>
+            <el-form-item label="坐席编号:">
+              <el-input placeholder="请输入坐席编号"  v-model="searchForm.clientNo"></el-input>
+            </el-form-item>
+            <el-form-item label="A(呼叫号):">
+              <el-input placeholder="A(呼叫号)"  v-model="searchForm.bindPhone"></el-input>
+            </el-form-item>
+            <el-form-item label="外显手机号:" style="margin-right: 10px;">
+              <el-input placeholder="外显手机号"  v-model="searchForm.displayPhone"></el-input>
+            </el-form-item>
+            <el-form-item label="">
+              <el-button icon="el-icon-search" type="primary" @click="initClientData" >搜索</el-button>
+            </el-form-item>
+          </el-form>
+        </div>
+        <el-row>
+            <el-table 
+                ref="multipleTable"
+                tooltip-effect="dark"
+                style="width: 100%"
+                border
+                 @selection-change="handleSelectionChange"
+                :data="clientData" 
+                >
+                <el-table-column align="center" type="selection" width="55"></el-table-column>
+                <el-table-column align="center" prop="clientNo" label="坐席编号"></el-table-column>
+                <el-table-column align="center" prop="bindPhone" label="A(呼叫号)"></el-table-column>
+                <el-table-column align="center" prop="displayPhone" label="外显手机号"></el-table-column>
+                <!-- <el-table-column align="center" prop="phoneMark" label="外显号标记记录 (类型+次数)"></el-table-column> -->
+                <el-table-column align="center" prop="orgName" label="电销组"></el-table-column>
+               <!--  <el-table-column align="center" label="回呼配置" >
+                    <template slot-scope="scope">
+                        <a href="javascript:void(0)" @click="goToFieldSettingPage(scope.row)" target="_blank" class="buttonText" style="color:blue">页面字段设置</a>
+                        <el-input v-model="scope.row.callbackPhone" style="width:130px;" maxlength="11"></el-input>
+                        &nbsp;
+                        <el-button type="primary" @click="updateCallbackPhone(scope.row.id,scope.row.callbackPhone)">确定</el-button>
+                    </template>
+                </el-table-column> -->
+                
+            </el-table>
+            <table-pagination :pager="pager" @change="initClientData"></table-pagination>
+        </el-row>
+    </div>
     <el-dialog :title="addOrModifyDialogTitle" :visible.sync="dialogFormVisible" @close="closeAddClientDialog" :close-on-click-modal="false">
         <el-form :model="form" ref="clientForm" :rules="rules">
             <el-form-item label="坐席编号：" :label-width="formLabelWidth" prop="clientNo">
