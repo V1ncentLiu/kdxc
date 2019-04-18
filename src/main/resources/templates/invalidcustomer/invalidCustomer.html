@@ -11,85 +11,87 @@
 <body>
 
 <div id="mainDiv" class="mainPadding" style="display: none;">
-    <template>
-        <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
-            <el-breadcrumb-item>Home</el-breadcrumb-item>
-            <el-breadcrumb-item>电销管理</el-breadcrumb-item>
-            <el-breadcrumb-item>无效客户资源</el-breadcrumb-item>
-        </el-breadcrumb>
+    <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
+        <el-breadcrumb-item>Home</el-breadcrumb-item>
+        <el-breadcrumb-item>电销管理</el-breadcrumb-item>
+        <el-breadcrumb-item>无效客户资源</el-breadcrumb-item>
+    </el-breadcrumb>
 
-        <el-row type="flex" class="row-bg marginB10" justify="start">
-            <el-button type="primary" @click="openRelease">释放记录</el-button>
-            <el-button type="success" @click="openBack">资源还原</el-button>
-        </el-row>
-
-
-        <el-row class="marginB10 greybg padding20" style="padding-bottom: 0;" >
-            <el-form :inline="true" :model="queryForm" class="demo-form-inline" ref="queryForm" >
-                        <el-form-item label="">
-                                <el-select v-model="queryForm.customerStatus" placeholder="客户状态" width="100" clearable>
-                                    <el-option v-for="item in cusStatusArr" :key="item.value" :label="item.name" :value="item.value"></el-option>
-                                </el-select>
-                        </el-form-item>
-                        <el-form-item label="">
-                                <el-select v-model="queryForm.teleGorupId" placeholder="电销组" width="100" clearable>
-                                    <el-option v-for="item in teleketGroupArr" :key="item.id" :label="item.name" :value="item.id"></el-option>
-                                </el-select>
-                        </el-form-item>
-                        <el-form-item label="">
-                                <el-select v-model="queryForm.teleSaleIds" placeholder="创业顾问" width="100" clearable  filterable multiple>
-                                    <el-option v-for="item in teleketSaleArr" :key="item.id" :label="item.name" :value="item.id">
-                                        <el-checkbox-group v-model="queryForm.teleSaleIds">
-                                            <el-checkbox  :key="item.id" :label="item.id"> {{ item.name}}</el-checkbox>
-                                        </el-checkbox-group>
-                                    </el-option>
-                                </el-select>
-                        </el-form-item>
-                        <el-form-item label="">
-                            <el-input  v-model="queryForm.project" placeholder="项目名称"></el-input>
-                        </el-form-item>
-                        <el-form-item label="">
-                            <el-select v-model="queryForm.isRepetition" placeholder="是否重单" width="100" clearable>
-                                <el-option v-for="item in repeatArr" :key="item.value" :label="item.name" :value="item.value"></el-option>
-                            </el-select>
-                        </el-form-item>
-                        <el-form-item label="创建时间">
-                            <el-date-picker v-model="queryForm.createTime1" type="datetime" placeholder="选择日期时间"></el-date-picker>
-                            <span>-</span>
-                            <el-date-picker v-model="queryForm.createTime2" type="datetime" placeholder="选择日期时间"></el-date-picker>
-                        </el-form-item>
-                        <el-form-item label="释放时间">
-                            <el-date-picker v-model="queryForm.releaseTime1" type="datetime" placeholder="选择日期时间"></el-date-picker>
-                            <span>-</span>
-                            <el-date-picker v-model="queryForm.releaseTime2" type="datetime" placeholder="选择日期时间"></el-date-picker>
-                        </el-form-item>
-                        <el-form-item label="">
-                            <el-input  v-model="queryForm.searchWord" placeholder="搜索词"></el-input>
-                        </el-form-item>
-                        <el-form-item label="">
-                                <el-input v-model="queryForm.phone" placeholder="客户手机号"></el-input>
-                        </el-form-item>
-                        <el-form-item  prop="type">
-                            <el-select v-model="queryForm.type" placeholder="资源类型" width="100" clearable>
-                                <el-option v-for="item in typeArr" :key="item.value" :label="item.name" :value="item.value"></el-option>
-                            </el-select>
-                        </el-form-item>
-                        <el-form-item   prop="category">
-                            <el-select v-model="queryForm.category" placeholder="资源类别" width="100" clearable>
-                                <el-option v-for="item in categoryArr" :key="item.value" :label="item.name" :value="item.value"></el-option>
-                            </el-select>
-                        </el-form-item>
-                        <el-form-item label="">
-                            <el-input  v-model="queryForm.address" placeholder="地区"></el-input>
-                        </el-form-item>
-                        <el-form-item label="">
-                            <el-button type="primary" @click="initList">搜索</el-button>
-                        </el-form-item>
-                </el-form>
-        </el-row>
-
-        <el-table :data="tableData" border style="width: 100%" tooltip-effect="light"  ref="multipleTable"
-                  @selection-change="handleSelectionChange" >
+    <el-row type="flex" class="row-bg marginB20" justify="start">
+        <el-button type="primary" @click="openRelease">释放记录</el-button>
+        <el-button type="success" @click="openBack">资源还原</el-button>
+    </el-row>
+    <div class="mainSearchBg">        
+        <div class="mainSearchFormBox">
+            <el-form :inline="true" :model="queryForm" class="demo-form-inline mainSearchForm" ref="queryForm" >
+                <el-form-item label="客户状态:">
+                    <el-select v-model="queryForm.customerStatus" placeholder="客户状态" clearable>
+                        <el-option v-for="item in cusStatusArr" :key="item.value" :label="item.name" :value="item.value"></el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="电销组:">
+                    <el-select v-model="queryForm.teleGorupId" placeholder="电销组" clearable>
+                        <el-option v-for="item in teleketGroupArr" :key="item.id" :label="item.name" :value="item.id"></el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="创业顾问:">
+                    <el-select v-model="queryForm.teleSaleIds" placeholder="创业顾问" clearable  filterable multiple>
+                        <el-option v-for="item in teleketSaleArr" :key="item.id" :label="item.name" :value="item.id">
+                            <el-checkbox-group v-model="queryForm.teleSaleIds">
+                                <el-checkbox  :key="item.id" :label="item.id"> {{ item.name}}</el-checkbox>
+                            </el-checkbox-group>
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="创建时间">
+                    <el-date-picker v-model="queryForm.createTime1" type="datetime" placeholder="选择日期时间"></el-date-picker>
+                </el-form-item>
+                <el-form-item label="—" class="widthauto">
+                    <el-date-picker v-model="queryForm.createTime2" type="datetime" placeholder="选择日期时间"></el-date-picker>
+                </el-form-item>
+                <el-row v-show="isShow">
+                    <el-form-item label="项目名称:">
+                        <el-input  v-model="queryForm.project" placeholder="项目名称"></el-input>
+                    </el-form-item>
+                    <el-form-item label="是否重单:">
+                        <el-select v-model="queryForm.isRepetition" placeholder="是否重单" width="100" clearable>
+                            <el-option v-for="item in repeatArr" :key="item.value" :label="item.name" :value="item.value"></el-option>
+                        </el-select>
+                    </el-form-item>
+                    <el-form-item label="客户手机号:">
+                            <el-input v-model="queryForm.phone" placeholder="客户手机号"></el-input>
+                    </el-form-item>                
+                    <el-form-item label="释放时间">
+                        <el-date-picker v-model="queryForm.releaseTime1" type="datetime" placeholder="选择日期时间"></el-date-picker>
+                    </el-form-item>
+                    <el-form-item label="—" class="widthauto">    
+                        <el-date-picker v-model="queryForm.releaseTime2" type="datetime" placeholder="选择日期时间"></el-date-picker>
+                    </el-form-item>
+                    <el-form-item label="搜索词:">
+                        <el-input  v-model="queryForm.searchWord" placeholder="搜索词"></el-input>
+                    </el-form-item>                
+                    <el-form-item label="资源类型:" prop="type">
+                        <el-select v-model="queryForm.type" placeholder="资源类型" clearable>
+                            <el-option v-for="item in typeArr" :key="item.value" :label="item.name" :value="item.value"></el-option>
+                        </el-select>
+                    </el-form-item>
+                    <el-form-item label="资源类别:" prop="category">
+                        <el-select v-model="queryForm.category" placeholder="资源类别" width="100" clearable>
+                            <el-option v-for="item in categoryArr" :key="item.value" :label="item.name" :value="item.value"></el-option>
+                        </el-select>
+                    </el-form-item>
+                    <el-form-item label="地区:">
+                        <el-input  v-model="queryForm.address" placeholder="地区"></el-input>
+                    </el-form-item>
+                </el-row>  
+                <div class="mainSearchBtnBox"> 
+                    <el-button type="primary" @click="initList" class="searchBtn">搜索</el-button>
+                    <el-button type="info" class="searchBtn">取消</el-button>
+                    <span style="color: #5c6be8;cursor: pointer;margin:0 10px;" @click="toogleClick">更多搜索<i class="el-icon-arrow-down greycolor paddingL6"></i></span>
+                </div> 
+            </el-form>
+        </div>
+        <el-table :data="tableData" border style="width: 100%" tooltip-effect="light" ref="multipleTable" @selection-change="handleSelectionChange" >
             <el-table-column type="selection" width="55" prop="clueid"> </el-table-column>
             <el-table-column prop="cusName" label="客户姓名"  align="center"></el-table-column>
             <el-table-column prop="phone" label="手机号" align="center"></el-table-column>
@@ -113,9 +115,8 @@
             <el-table-column prop="releaseTime" label="释放时间" align="center" width="170"></el-table-column>
             <el-table-column prop="releaseReasonName" label="释放原因" align="center" ></el-table-column>
         </el-table>
-    </template>
-    <table-pagination :pager="pager"  @change="initList"></table-pagination>
-
+        <table-pagination :pager="pager"  @change="initList"></table-pagination>
+    </div>
     <!--释放记录-->
     <el-dialog title="释放记录"  :visible.sync="releaseDialogFormVisible">
         <template>
@@ -158,6 +159,7 @@
     var mainDivVM = new Vue({
         el: '#mainDiv',
         data: {
+            isShow:false,
             releaseDialogFormVisible:false,
             formLabelWidth:"150px",
             tableData:[],
@@ -331,6 +333,13 @@
                         mainDivVM.pager.pageSize =  response.data.data.pageSize;
                     }
                 })
+            },
+            toogleClick(){
+                if(this.isShow){
+                    this.isShow=false
+                }else{
+                    this.isShow=true
+                }          
             },
         },
         created(){
