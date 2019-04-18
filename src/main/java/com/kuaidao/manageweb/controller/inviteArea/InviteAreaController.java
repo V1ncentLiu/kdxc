@@ -402,7 +402,7 @@ public class InviteAreaController {
                     islegal = false;
                     for (OrganizationRespDTO organizationRespDTO : dxList.getData()) {
                         if (organizationRespDTO.getName().equals(inviteAreaDTO2.getTelemarketingTeam().trim())) {
-                            inviteAreaDTO2.setTelemarketingTeamId(organizationRespDTO.getId());
+                            inviteAreaDTO2.setTelemarketingTeamId(""+organizationRespDTO.getId());
                             islegal = true;
                             break;
                         }

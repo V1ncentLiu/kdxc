@@ -237,7 +237,7 @@ var homePageVM=new Vue({
 				var str = "";
 				if(data&&data!=0){
 					annCount = data;
-					str = "&nbsp;(&nbsp;"+(annCount)+"&nbsp;)"
+					str = '<em class="messageCount">'+annCount+'</em>'
 				}
 				document.getElementById("messageCount").innerHTML= str;
 			})

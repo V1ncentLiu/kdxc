@@ -21,133 +21,141 @@
             <el-button type="success" @click="openFormInfo">申请重单</el-button>
         </el-col>
     </el-row>
-    <el-row class="marginB20 greybg padding20" style="padding-bottom: 0;">    
-        <el-form :inline="true" class="demo-form-inline">   
-            <el-form-item label="">
-        		<el-select filterable v-model="isSign" placeholder="是否签约" clearable>
-        		    <el-option
-        		      v-for="item in isSignList"
-        		      :key="item.value"
-        		      :label="item.label"
-        		      :value="item.value">
-        		    </el-option>
-        		</el-select>
-            </el-form-item>
-            <el-form-item label="">
-        		<el-select filterable v-model="status" placeholder="处理状态" clearable>
-        		    <el-option
-        		      v-for="item in statusList"
-        		      :key="item.value"
-        		      :label="item.label"
-        		      :value="item.value">
-        		    </el-option>
-        		</el-select>
-            </el-form-item>
-            <el-form-item label="">
-        		<el-select filterable v-model="dealStatus" placeholder="是否重单" clearable>
-        		    <el-option
-        		      v-for="item in repetitionList"
-        		      :key="item.value"
-        		      :label="item.label"
-        		      :value="item.value">
-        		    </el-option>
-        		</el-select>
-            </el-form-item>               
-            <el-form-item label="签约时间：">
-        		<el-date-picker value-format="yyyy-MM-dd HH:mm:ss" v-model="beginTime" type="datetime" placeholder="选择日期">
-        		</el-date-picker>
-            </el-form-item>
-            <el-form-item label="—">
-        		<el-date-picker value-format="yyyy-MM-dd HH:mm:ss" v-model="endTime" type="datetime" placeholder="选择日期">
-        		</el-date-picker>
-            </el-form-item>
-            <el-form-item label="">
-        		<el-select filterable v-model="teleCompanyId" placeholder="电销分公司" @change="showTele(7)" clearable>
-        		    <el-option
-        		      v-for="item in dxBusinessList"
-        		      :key="item.id"
-        		      :label="item.name"
-        		      :value="item.id">
-        		    </el-option>
-        		</el-select>
-            </el-form-item>
-            <el-form-item label="">
-        		<el-select filterable v-model="teleDeptId" placeholder="电销事业部" @change="showTele(1)" clearable>
-        		    <el-option
-        		      v-for="item in dxCauseBList"
-        		      :key="item.id"
-        		      :label="item.name"
-        		      :value="item.id">
-        		    </el-option>
-        		</el-select>
-            </el-form-item>
-            <el-form-item label="">
-        		<el-select filterable v-model="teleGorupId" placeholder="电销组" clearable>
-        		    <el-option
-        		      v-for="item in dxList"
-        		      :key="item.id"
-        		      :label="item.name"
-        		      :value="item.id">
-        		    </el-option>
-        		</el-select>
-            </el-form-item>
-            <el-form-item label="">
-        		<el-input style="width:200px;"  v-model="customerName" placeholder="客户姓名"></el-input>
-            </el-form-item>
-    		<el-button icon="el-icon-search" type="primary" @click="search">搜索</el-button>
-        </el-form>
-    </el-row>
-    <el-row>
-        <el-table 
-            ref="multipleTable"
-            tooltip-effect="dark"
-            empty-text="无数据"
-            style="width: 100%"
-            border
-            :data="dataTable"  @selection-change="handleSelectionChange">
-             <el-table-column align="center" prop="repeatId" type="selection" width="55"></el-table-column> 
-             <!-- <el-table-column prop="date" label="全选" width="180"></el-table-column>  -->
-            <el-table-column align="center" type="index" prop="id" label="序号" width="55"></el-table-column>
-            <el-table-column align="center" prop="cusName" label="客户姓名"></el-table-column>
-            <el-table-column align="center" prop="cusPhone" label="客户手机号"></el-table-column>
-            <el-table-column align="center" prop="isSign" label="是否签约" :formatter="transSignStatus"></el-table-column>
-            <el-table-column align="center" prop="signTime" label="签约时间" :formatter="dateFormat"></el-table-column>
-            <el-table-column align="center" prop="dealStatusResult" label="重单结果"></el-table-column>
-            <el-table-column align="center" prop="statusResult" label="处理状态" ></el-table-column>
-    
-            <el-table-column  align="center"  label="比例">
-            <template slot-scope="scope">
-            	<span v-for="(item, index) in scope.row.clueRepetitionDTOs">
-	            	<span v-if="index ==0 && item.repeatRatio !=null">
-	            	{{item.repeatRatio}}%
-	            	</span>
-	            	<span v-else-if="index ==0 && (item.repeatRatio ==null || item.repeatRatio =='')">
-	            		0%
-	            	</span>
-	            	<span v-else-if="index !=0 && item.repeatRatio !=null">
-	            	:&nbsp;{{item.repeatRatio}}%
-	            	</span>
-	            	<span v-else-if="index !=0 && (item.repeatRatio ==null || item.repeatRatio =='') ">
-	            	:&nbsp;0%
-	            	</span>
-            	</span>
-            </template>
-            </el-table-column>
-            <el-table-column align="center" prop="applyUser" label="重单顾问人员" width="300">
-            <template slot-scope="scope">
-            	<span  v-for="(item, index) in scope.row.clueRepetitionDTOs">
-            	<span v-if="index ==0">
-            	<a style="color: rgb(0, 114, 255);" :href="'/tele/clueMyCustomerInfo/customerInfoReadOnly?clueId='+item.clueId+''" target="_blank">{{item.repeatName}}&nbsp;&nbsp;{{item.createTime}}</a>
-            	</span>
-            	<span v-if="index !=0">
-            	|&nbsp;<a style="color: rgb(0, 114, 255);" :href="'/tele/clueMyCustomerInfo/customerInfoReadOnly?clueId='+item.clueId+''" target="_blank">{{item.repeatName}}&nbsp;&nbsp;{{item.createTime}}</a>
-            	</span>
-            	</span>
-            </template>
-            </el-table-column>
-        </el-table>
-         <table-pagination :pager="pager"  @change="queryRepeatPage"></table-pagination>
-    </el-row>      
+    <div class="mainSearchBg">        
+        <div class="mainSearchFormBox">
+            <el-form :inline="true" class="demo-form-inline mainSearchForm"> 
+                <el-form-item label="客户姓名:">
+                    <el-input v-model="customerName" placeholder="请输入客户姓名"></el-input>
+                </el-form-item>
+                <el-form-item label="是否签约:">
+            		<el-select filterable v-model="isSign" placeholder="是否签约" clearable>
+            		    <el-option
+            		      v-for="item in isSignList"
+            		      :key="item.value"
+            		      :label="item.label"
+            		      :value="item.value">
+            		    </el-option>
+            		</el-select>
+                </el-form-item>
+                <el-form-item label="处理状态:">
+            		<el-select filterable v-model="status" placeholder="处理状态" clearable>
+            		    <el-option
+            		      v-for="item in statusList"
+            		      :key="item.value"
+            		      :label="item.label"
+            		      :value="item.value">
+            		    </el-option>
+            		</el-select>
+                </el-form-item>
+                <el-form-item label="签约时间:">
+                    <el-date-picker value-format="yyyy-MM-dd HH:mm:ss" v-model="beginTime" type="datetime" placeholder="选择日期">
+                    </el-date-picker>
+                </el-form-item>
+                <el-form-item label="—" class="widthauto">
+                    <el-date-picker value-format="yyyy-MM-dd HH:mm:ss" v-model="endTime" type="datetime" placeholder="选择日期">
+                    </el-date-picker>
+                </el-form-item>
+                <el-row v-show="isShowSearch">
+                    <el-form-item label="是否重单:">
+                		<el-select filterable v-model="dealStatus" placeholder="是否重单" clearable>
+                		    <el-option
+                		      v-for="item in repetitionList"
+                		      :key="item.value"
+                		      :label="item.label"
+                		      :value="item.value">
+                		    </el-option>
+                		</el-select>
+                    </el-form-item> 
+                    <el-form-item label="电销分公司:">
+                		<el-select filterable v-model="teleCompanyId" placeholder="电销分公司" @change="showTele(7)" clearable>
+                		    <el-option
+                		      v-for="item in dxBusinessList"
+                		      :key="item.id"
+                		      :label="item.name"
+                		      :value="item.id">
+                		    </el-option>
+                		</el-select>
+                    </el-form-item>
+                    <el-form-item label="电销事业部:">
+                		<el-select filterable v-model="teleDeptId" placeholder="电销事业部" @change="showTele(1)" clearable>
+                		    <el-option
+                		      v-for="item in dxCauseBList"
+                		      :key="item.id"
+                		      :label="item.name"
+                		      :value="item.id">
+                		    </el-option>
+                		</el-select>
+                    </el-form-item>
+                    <el-form-item label="电销组:">
+                		<el-select filterable v-model="teleGorupId" placeholder="电销组" clearable>
+                		    <el-option
+                		      v-for="item in dxList"
+                		      :key="item.id"
+                		      :label="item.name"
+                		      :value="item.id">
+                		    </el-option>
+                		</el-select>
+                    </el-form-item>
+                </el-row>
+                <div class="mainSearchBtnBox"> 
+        		    <el-button icon="el-icon-search" type="primary" @click="search" class="searchBtn">搜索</el-button>
+                    <el-button type="info" class="searchBtn">取消</el-button>
+                    <span style="color: #5c6be8;cursor: pointer;margin:0 10px;" @click="toogleClick">更多搜索<i class="el-icon-arrow-down greycolor paddingL6"></i></span>
+                </div> 
+            </el-form>
+        </div>
+        <el-row>
+            <el-table 
+                ref="multipleTable"
+                tooltip-effect="dark"
+                empty-text="无数据"
+                style="width: 100%"
+                border
+                :data="dataTable"  @selection-change="handleSelectionChange">
+                 <el-table-column align="center" prop="repeatId" type="selection" width="55"></el-table-column> 
+                 <!-- <el-table-column prop="date" label="全选" width="180"></el-table-column>  -->
+                <el-table-column align="center" type="index" prop="id" label="序号" width="55"></el-table-column>
+                <el-table-column align="center" prop="cusName" label="客户姓名"></el-table-column>
+                <el-table-column align="center" prop="cusPhone" label="客户手机号"></el-table-column>
+                <el-table-column align="center" prop="isSign" label="是否签约" :formatter="transSignStatus"></el-table-column>
+                <el-table-column align="center" prop="signTime" label="签约时间" :formatter="dateFormat"></el-table-column>
+                <el-table-column align="center" prop="dealStatusResult" label="重单结果"></el-table-column>
+                <el-table-column align="center" prop="statusResult" label="处理状态" ></el-table-column>
+        
+                <el-table-column  align="center"  label="比例">
+                <template slot-scope="scope">
+                	<span v-for="(item, index) in scope.row.clueRepetitionDTOs">
+    	            	<span v-if="index ==0 && item.repeatRatio !=null">
+    	            	{{item.repeatRatio}}%
+    	            	</span>
+    	            	<span v-else-if="index ==0 && (item.repeatRatio ==null || item.repeatRatio =='')">
+    	            		0%
+    	            	</span>
+    	            	<span v-else-if="index !=0 && item.repeatRatio !=null">
+    	            	:&nbsp;{{item.repeatRatio}}%
+    	            	</span>
+    	            	<span v-else-if="index !=0 && (item.repeatRatio ==null || item.repeatRatio =='') ">
+    	            	:&nbsp;0%
+    	            	</span>
+                	</span>
+                </template>
+                </el-table-column>
+                <el-table-column align="center" prop="applyUser" label="重单顾问人员" width="300">
+                <template slot-scope="scope">
+                	<span  v-for="(item, index) in scope.row.clueRepetitionDTOs">
+                	<span v-if="index ==0">
+                	<a style="color: rgb(0, 114, 255);" :href="'/tele/clueMyCustomerInfo/customerInfoReadOnly?clueId='+item.clueId+''" target="_blank">{{item.repeatName}}&nbsp;&nbsp;{{item.createTime}}</a>
+                	</span>
+                	<span v-if="index !=0">
+                	|&nbsp;<a style="color: rgb(0, 114, 255);" :href="'/tele/clueMyCustomerInfo/customerInfoReadOnly?clueId='+item.clueId+''" target="_blank">{{item.repeatName}}&nbsp;&nbsp;{{item.createTime}}</a>
+                	</span>
+                	</span>
+                </template>
+                </el-table-column>
+            </el-table>
+             <table-pagination :pager="pager"  @change="queryRepeatPage"></table-pagination>
+        </el-row>  
+    </div>
     <!-- dialog -->
     <el-dialog title="审批处理" :visible.sync="dialogFormVisible">
         <el-form :model="form" :rules="rules" ref="form">
@@ -291,6 +299,7 @@
    var orgVM =  new Vue({
         el: '#organizationManage',
         data: {
+            isShowSearch:false,
           	form:{
 	            repetitionDetailList:[],
 	            dealStatusId:"",
@@ -872,6 +881,13 @@
                 }
             });
         	},
+            toogleClick(){
+                if(this.isShowSearch){
+                    this.isShowSearch=false
+                }else{
+                    this.isShowSearch=true
+                }          
+            },
         },
         created(){
         	this.showTele(0);
