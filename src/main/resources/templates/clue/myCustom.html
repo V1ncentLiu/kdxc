@@ -748,37 +748,53 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                  //param.address= this.form.address;
                  param.searchWord= this.form.searchWord;
                  param.trackingDay= this.form.trackingDay;
-                this.loading=true;
-                axios.post('/tele/clueMyCustomerInfo/findTeleClueInfo',param).then(function (response) {
-                    if(!response){
-                        mycustomVM.$message({
-                            message: "接口调用失败",
-                            type: 'error'
-                          }); 
-                        return ;
+
+             	this.loading=true;
+     		    axios.post('/tele/clueMyCustomerInfo/findTeleClueInfo',param).then(function (response) {
+     				if(!response){
+     					mycustomVM.$message({
+	                        message: "接口调用失败",
+	                        type: 'error'
+	                      }); 
+						return ;
+					}
+     				var resobj= response.data;
+					if(!resobj){
+						mycustomVM.$message({
+	                        message: "接口调用失败",
+	                        type: 'error'
+	                      }); 
+						return ;
+					} 
+					if(resobj.code!='0'){
+						mycustomVM.$message({
+	                        message: "接口调用失败",
+	                        type: 'error'
+	                      }); 
+						return ;
+					}
+     		    	var pageData=resobj.data;
+     		    	var data=pageData.data;
+    		    	 for(var i=0;i<data.length;i++){
+    		    		data[i].urgentDate=mycustomVM.dateFormat(null,null,data[i].urgentDate,null);
                     }
-                    var resobj= response.data;
-                    if(!resobj){
-                        mycustomVM.$message({
-                            message: "接口调用失败",
-                            type: 'error'
-                          }); 
-                        return ;
-                    } 
-                    if(resobj.code!='0'){
-                        mycustomVM.$message({
-                            message: "接口调用失败",
-                            type: 'error'
-                          }); 
-                        return ;
-                    }
-                    var pageData=resobj.data;
-                    mycustomVM.pager.total=pageData.total;
-                    mycustomVM.pager.currentPage = pageData.currentPage;
-                    mycustomVM.pager.pageSize = pageData.pageSize;
-                    mycustomVM.dataTable =pageData.data;
-                    mycustomVM.loading=false;
-                })
+     				mycustomVM.pager.total=pageData.total;
+     				mycustomVM.pager.currentPage = pageData.currentPage;
+     				mycustomVM.pager.pageSize = pageData.pageSize;
+     				mycustomVM.dataTable =pageData.data;
+     				mycustomVM.loading=false;
+     			})
+         	},
+        	//日期数据格式化方法
+    		dateFormat(row, column, cellValue, index) {
+               	if (cellValue == undefined) {
+    	               return "";
+              	}
+               	return moment(cellValue).format("YYYY-MM");
+    		},
+         	//展现详情
+         	showClueDetailInfo (row, column) {
+         	  window.location.href='/tele/clueMyCustomerInfo/customerInfoReadOnly?clueId='+row.clueId;
             },
             //展现详情
             showClueDetailInfo (row, column) {

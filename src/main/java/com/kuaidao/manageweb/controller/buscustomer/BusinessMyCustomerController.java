@@ -1,5 +1,8 @@
 package com.kuaidao.manageweb.controller.buscustomer;
 
+import com.kuaidao.manageweb.config.LogRecord;
+import com.kuaidao.manageweb.config.LogRecord.OperationType;
+import com.kuaidao.manageweb.constant.MenuEnum;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -171,6 +174,8 @@ public class BusinessMyCustomerController {
      */
     @PostMapping("/notVisit")
     @ResponseBody
+    @LogRecord(description = "标记未到访", operationType = OperationType.UPDATE,
+        menuName = MenuEnum.BUS_MY_CUSTOMER)
     public JSONResult<Boolean> notVisit(@RequestBody BusMyCustomerReqDTO param) {
         return busMyCustomerFeignClient.notVisit(param);
     }
