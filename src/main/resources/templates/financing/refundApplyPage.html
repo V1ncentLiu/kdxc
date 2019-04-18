@@ -161,12 +161,12 @@
             <el-table-column align="center" prop="cusAmount" label="退款客户金额"></el-table-column>
             <el-table-column align="center" prop="companyAmount" label="退换餐饮公司金额"></el-table-column>
             <el-table-column align="center" prop="refundTime" label="退款时间"></el-table-column>
-            <el-table-column align="center" prop="" label="退款图片">
+            <el-table-column align="center" prop="" label="退款图片" width="100">
                 <template slot-scope="scope">
                     <el-button @click="download(scope.row)" type="text">下载图片</el-button>
                 </template>
             </el-table-column>
-            <el-table-column align="center" prop="reason" label="返款原因">
+            <el-table-column align="center" prop="reason" label="返款原因" width="100">
                 <template slot-scope="scope">
                     <el-button @click="showReason1(scope.row)" type="text">查看原因</el-button>
                 </template>
@@ -193,21 +193,25 @@
                 </template>
             </el-table-column>
             <el-table-column align="center" prop="signTime" label="签约时间"></el-table-column>
-            <el-table-column align="center" prop="" label="付款明细">
-                <template slot-scope="scope">
+            <el-table-column align="center" prop="" label="付款明细" width="100">
+                <!-- <template slot-scope="scope">
                     <el-button @click="showDetail(scope.row)" type="text">查看明细</el-button>
+                </template> -->
+                <template slot-scope="scope">
+                    <el-button type="text" size="small" @click="recordClick(scope.row)">查看明细
+                    </el-button>
                 </template>
             </el-table-column>
-            <el-table-column align="center" prop="signShopType" label="签约店型" :formatter="getSignShopTypeText"></el-table-column>
+            <el-table-column align="center" prop="signShopType" label="签约店型" :formatter="getSignShopTypeText" width="100"></el-table-column>
             <el-table-column align="center" prop="amountReceivable" label="应收金额"></el-table-column>
             <el-table-column align="center" prop="firstToll" label="路费"></el-table-column>
             <el-table-column align="center" prop="preferentialAmount" label="优惠金额"></el-table-column>
             <el-table-column align="center" prop="giveAmount" label="赠送金额"></el-table-column>
             <el-table-column align="center" prop="idCard" label="客户身份证号"></el-table-column>
             <el-table-column align="center" prop="phone" label="手机号"></el-table-column>
-            <el-table-column align="center" prop="signProvince" label="签约省份"></el-table-column>
-            <el-table-column align="center" prop="signCity" label="签约城市"></el-table-column>
-            <el-table-column align="center" prop="signDictrict" label="签约区／县"></el-table-column>
+            <el-table-column align="center" prop="signProvince" label="签约省份" width="110"></el-table-column>
+            <el-table-column align="center" prop="signCity" label="签约城市" width="120"></el-table-column>
+            <el-table-column align="center" prop="signDictrict" label="签约区／县" width="130"></el-table-column>
             <el-table-column align="center" prop="busAreaName" label="商务大区"></el-table-column>
             <el-table-column align="center" prop="busGroupName" label="商务小组"></el-table-column>
             <el-table-column align="center" prop="busManagerName" label="商务经理"></el-table-column>
@@ -293,6 +297,27 @@
     <!-- 返款原因 -->
     <el-dialog title="返款原因" :visible.sync="reasonDialog1">           
         <div class="fs16 marginB20" >{{reason}}</div>
+    </el-dialog>
+    <!-- 付款明细 -->
+    <el-dialog title="付款明细" :visible.sync="recordDialog" width="870px">
+        <el-table
+            ref="recordTableDetail" 
+            tooltip-effect="dark"
+            style="width: 100%;margin-bottom: 20px;"
+            border
+            :data="recordTableDetail" 
+            >
+            <el-table-column align="center" prop="payType" label="付款类型" :formatter="transformPayType"></el-table-column>
+            <el-table-column align="center" prop="statementNo" label="结算单编号" width="200"></el-table-column>
+            <el-table-column align="center" prop="payMode" label="付款方式" :formatter="getPayModeText"></el-table-column>
+            <el-table-column align="center" prop="payTime" label="付款时间" :formatter="getTimeText"></el-table-column>
+            <el-table-column align="center" prop="amountReceived" label="实收金额"></el-table-column>
+            <el-table-column align="center" prop="amountPerformance" label="业绩金额"></el-table-column>
+            <el-table-column align="center" prop="accountStatus" label="结算状态" :formatter="transformStatus"></el-table-column>
+            <el-table-column align="center" prop="money" label="结算金额"></el-table-column>
+            <el-table-column align="center" prop="commissionMoney" label="佣金"></el-table-column>
+            <el-table-column align="center" prop="remarks" label="备注"></el-table-column>
+        </el-table>
     </el-dialog>
     
     <!-- 下载图片 dialog 开始 -->
@@ -442,7 +467,9 @@
                     signature:'', 
                     'x:params':'',
                     'realName':''
-                 }
+                 },
+                recordTableDetail:[],//付款明细data
+                recordDialog:false,//付款明细弹窗
             }             
         },
         methods: {
@@ -959,7 +986,77 @@
                     suffix = filename.substring(pos);
                 }
                 return suffix;
-            }
+            },
+            recordClick(row) {//查看明细
+                 // row.signNo;
+                 var param = {};
+                 param.idList = [row.signId];
+                 axios.post('/sign/signRecord/listPayDetail', param)
+                 .then(function (response) {
+                     var resData = response.data;
+                     console.log(resData.data)
+                     if(resData.code=='0'){
+                        mainDivVM.recordTableDetail= resData.data;
+                     }else{
+                         mainDivVM.$message({message:resData.msg,type:'error'});
+                         console.error(resData);
+                     }
+                     mainDivVM.recordDialog=true;
+                 })
+                 .catch(function (error) {
+                      console.log(error);
+                 }).then(function(){
+                 });
+                
+             },
+             //付款类型转换方法
+             transformPayType(row, column, cellValue, index) {
+               var text="";
+               if(cellValue=="1"){
+                 text="全款"
+               }else if(cellValue=="2"){
+                 text="订金"
+               }else if(cellValue=="2"){
+                 text="追加定金"
+               }else if(cellValue=="2"){
+                 text="尾款"
+               }
+               return text;
+             },
+             getPayModeText(row, column, value, index){
+                var valText="";
+                 if(value==1){
+                     valText="现金";
+                 }else if(value==2){
+                     valText="POS";
+                 }else if(value==3){
+                     valText="转账";
+                 }
+                 return valText;
+             },
+             getTimeText(row, column, value, index){
+                 var valText="";
+                 if(value){
+                     valText =  moment(value).format("YYYY-MM-DD HH:mm:ss");
+                 }
+                 return valText;
+             },
+             //处理状态转换方法
+             transformStatus(row, column, cellValue, index) {
+               var text="";
+               if(cellValue=="0"){
+                 text="待处理";
+               }else if(cellValue=="1"){
+                 text="驳回";
+               }else if(cellValue=="2"){
+                 text="提交对账";
+               }else if(cellValue=="3"){
+                 text="已对账";
+               }else if(cellValue=="4"){
+                 text="已结算";
+               }
+               return text;
+             },
             
           
         },
