@@ -18,6 +18,7 @@ import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.web.client.RestTemplate;
 
 
 @SpringBootApplication
@@ -83,4 +84,13 @@ public class ManageWebApplication {
         return redisTemplate;
     }
 
+    
+    /**
+     * restTemplate
+     * @return
+     */
+    @Bean
+    RestTemplate restTemplate() {
+        return new RestTemplate();
+    }
 }

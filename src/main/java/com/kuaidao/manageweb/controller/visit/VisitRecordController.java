@@ -82,32 +82,24 @@ public class VisitRecordController {
     @RequiresPermissions("aggregation:visitRecord:view")
     @RequestMapping("/visitRecordPage")
     public String visitRecordPage(HttpServletRequest request) {
-/*        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
-        Long orgId = curLoginUser.getOrgId();
-        // 签约项目
-        List<ProjectInfoDTO> projectList = getProjectList();
-        // 商务小组
-        List<OrganizationDTO> businessGroupList = getBusinessGroupList(orgId, OrgTypeConstant.SWZ);
-        // 商务经理
-        List<UserInfoDTO> busManagerList = getUserInfo(orgId, RoleCodeEnum.SWJL.name());
-        // 签约省份
-        SysRegionDTO sysRegionDTO = new SysRegionDTO();
-        sysRegionDTO.setType(0);
-        JSONResult<List<SysRegionDTO>> proviceJr =
-                sysRegionFeignClient.querySysRegionByParam(sysRegionDTO);
-        // 公司
-        // List<OrganizationDTO> companyList = getBusinessGroupList(orgId,
-        // OrgTypeConstant.ZSZX);
-        OrganizationQueryDTO companyDto = new OrganizationQueryDTO();
-        companyDto.setOrgType(OrgTypeConstant.SWZ);
-        JSONResult<List<OrganizationRespDTO>> companyJr =
-                organizationFeignClient.queryOrgByParam(companyDto);
-
-        request.setAttribute("projectList", projectList);
-        request.setAttribute("busManagerList", busManagerList);
-        request.setAttribute("businessGroupList", businessGroupList);
-        request.setAttribute("proviceList", proviceJr.getData());
-        request.setAttribute("companyList", companyJr.getData());*/
+        /*
+         * UserInfoDTO curLoginUser = CommUtil.getCurLoginUser(); Long orgId =
+         * curLoginUser.getOrgId(); // 签约项目 List<ProjectInfoDTO> projectList = getProjectList(); //
+         * 商务小组 List<OrganizationDTO> businessGroupList = getBusinessGroupList(orgId,
+         * OrgTypeConstant.SWZ); // 商务经理 List<UserInfoDTO> busManagerList = getUserInfo(orgId,
+         * RoleCodeEnum.SWJL.name()); // 签约省份 SysRegionDTO sysRegionDTO = new SysRegionDTO();
+         * sysRegionDTO.setType(0); JSONResult<List<SysRegionDTO>> proviceJr =
+         * sysRegionFeignClient.querySysRegionByParam(sysRegionDTO); // 公司 // List<OrganizationDTO>
+         * companyList = getBusinessGroupList(orgId, // OrgTypeConstant.ZSZX); OrganizationQueryDTO
+         * companyDto = new OrganizationQueryDTO(); companyDto.setOrgType(OrgTypeConstant.SWZ);
+         * JSONResult<List<OrganizationRespDTO>> companyJr =
+         * organizationFeignClient.queryOrgByParam(companyDto);
+         * 
+         * request.setAttribute("projectList", projectList); request.setAttribute("busManagerList",
+         * busManagerList); request.setAttribute("businessGroupList", businessGroupList);
+         * request.setAttribute("proviceList", proviceJr.getData());
+         * request.setAttribute("companyList", companyJr.getData());
+         */
 
         return "visit/customerVisitRecord";
     }
@@ -124,10 +116,7 @@ public class VisitRecordController {
         // 商务经理
         List<UserInfoDTO> busManagerList = getUserInfo(orgId, RoleCodeEnum.SWJL.name());
         // 签约省份
-        SysRegionDTO sysRegionDTO = new SysRegionDTO();
-        sysRegionDTO.setType(0);
-        JSONResult<List<SysRegionDTO>> proviceJr =
-                sysRegionFeignClient.querySysRegionByParam(sysRegionDTO);
+        JSONResult<List<SysRegionDTO>> proviceJr = sysRegionFeignClient.getproviceList();
         // 公司
         // List<OrganizationDTO> companyList = getBusinessGroupList(orgId,
         // OrgTypeConstant.ZSZX);
@@ -410,10 +399,11 @@ public class VisitRecordController {
 
         return visitRecordFeignClient.rejectVisitRecord(reqDTO);
     }
-    
-    
+
+
     /***
      * 签约省份
+     * 
      * @param result
      * @return
      */
@@ -422,7 +412,7 @@ public class VisitRecordController {
     public JSONResult<List<SysRegionDTO>> getSignProvince() {
         SysRegionDTO sysRegionDTO = new SysRegionDTO();
         sysRegionDTO.setType(0);
-        return  sysRegionFeignClient.querySysRegionByParam(sysRegionDTO);
+        return sysRegionFeignClient.querySysRegionByParam(sysRegionDTO);
     }
 
 }

@@ -1,7 +1,7 @@
 /**
  * 
  */
-package com.kuaidao.manageweb.controller.business;
+package com.kuaidao.manageweb.controller.financing;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -18,17 +18,21 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
-import com.kuaidao.aggregation.dto.clue.BusCustomerDTO;
-import com.kuaidao.aggregation.dto.clue.BusCustomerPageParam;
-import com.kuaidao.aggregation.dto.project.ProjectInfoDTO;
+import com.kuaidao.aggregation.constant.AggregationConstant;
+import com.kuaidao.aggregation.dto.financing.ApplyRefundRebateReq;
+import com.kuaidao.aggregation.dto.financing.RefundRebateListDTO;
+import com.kuaidao.aggregation.dto.financing.RefundRebatePageParam;
+import com.kuaidao.common.constant.DicCodeEnum;
 import com.kuaidao.common.constant.OrgTypeConstant;
 import com.kuaidao.common.constant.RoleCodeEnum;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
-import com.kuaidao.manageweb.constant.Constants;
+import com.kuaidao.manageweb.config.LogRecord;
+import com.kuaidao.manageweb.config.LogRecord.OperationType;
+import com.kuaidao.manageweb.constant.MenuEnum;
 import com.kuaidao.manageweb.feign.area.SysRegionFeignClient;
-import com.kuaidao.manageweb.feign.clue.BusCustomerFeignClient;
 import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
+import com.kuaidao.manageweb.feign.financing.RefundRebateFeignClient;
 import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
 import com.kuaidao.manageweb.feign.project.ProjectInfoFeignClient;
 import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
@@ -47,11 +51,11 @@ import com.kuaidao.sys.dto.user.UserOrgRoleReq;
  */
 
 @Controller
-@RequestMapping("/business/busCustomerManager")
-public class BusCustomerManagerController {
-    private static Logger logger = LoggerFactory.getLogger(BusCustomerManagerController.class);
+@RequestMapping("/financing/refundRebate")
+public class RefundRebateManagerController {
+    private static Logger logger = LoggerFactory.getLogger(RefundRebateManagerController.class);
     @Autowired
-    private BusCustomerFeignClient busCustomerFeignClient;
+    private RefundRebateFeignClient refundRebateFeignClient;
     @Autowired
     private OrganizationFeignClient organizationFeignClient;
     @Autowired
@@ -64,86 +68,53 @@ public class BusCustomerManagerController {
     private SysRegionFeignClient sysRegionFeignClient;
 
     /***
-     * 商务客户管理页
+     * 餐饮公司退返款页
      * 
      * @return
      */
-    @RequestMapping("/initCustomerManager")
-    @RequiresPermissions("business:busCustomerManager:view")
-    public String initCompanyList(HttpServletRequest request) {
-        UserInfoDTO user = getUser();
-
+    @RequestMapping("/initRefundRebateManager")
+    @RequiresPermissions("financing:refundRebateManager:view")
+    public String initRefundRebateManager(HttpServletRequest request) {
+        // 查询所有商务大区
+        List<OrganizationRespDTO> busAreaList = getOrgList(null, OrgTypeConstant.SWDQ);
+        request.setAttribute("busAreaList", busAreaList);
+        // 查询所有商务组
+        List<OrganizationRespDTO> busGroupList = getOrgList(null, OrgTypeConstant.SWZ);
+        request.setAttribute("busGroupList", busGroupList);
+        // 查询所有电销事业部
+        List<OrganizationRespDTO> teleDeptList = getOrgList(null, OrgTypeConstant.DZSYB);
+        request.setAttribute("teleDeptList", teleDeptList);
         // 查询所有电销组
-        List<OrganizationRespDTO> teleSaleGroupList = getSaleGroupList(null, OrgTypeConstant.DXZ);
-        request.setAttribute("teleSaleGroupList", teleSaleGroupList);
-        List<RoleInfoDTO> roleList = user.getRoleList();
-        if (roleList != null && RoleCodeEnum.GLY.name().equals(roleList.get(0).getRoleCode())) {
-            // 管理员 可以选择所有商务组 商务总监
-
-            // 查询所有商务组
-            List<OrganizationRespDTO> busSaleGroupList =
-                    getSaleGroupList(null, OrgTypeConstant.SWZ);
-            request.setAttribute("busSaleGroupList", busSaleGroupList);
-            // 查询所有商务总监
-            List<UserInfoDTO> busDirectorList = getUserList(null, RoleCodeEnum.SWZJ.name(), null);
-            request.setAttribute("busDirectorList", busDirectorList);
-        } else if (roleList != null
-                && (RoleCodeEnum.SWDQZJ.name().equals(roleList.get(0).getRoleCode())
-                        || RoleCodeEnum.SWZJ.name().equals(roleList.get(0).getRoleCode()))) {
-            // 商务大区总监 可以选择本区下的商务组 商务总监
-            // 商务总监 可以选择本商务组下的商务经理
-            // 查询下属商务组
-            List<OrganizationRespDTO> busSaleGroupList =
-                    getSaleGroupList(user.getOrgId(), OrgTypeConstant.SWZ);
-            request.setAttribute("busSaleGroupList", busSaleGroupList);
-            // 查询本区商务总监
-            List<UserInfoDTO> busDirectorList =
-                    getUserList(user.getOrgId(), RoleCodeEnum.SWZJ.name(), null);
-            request.setAttribute("busDirectorList", busDirectorList);
-            // 查询组织下商务经理
-            List<Integer> statusList = new ArrayList<Integer>();
-            statusList.add(SysConstant.USER_STATUS_ENABLE);
-            statusList.add(SysConstant.USER_STATUS_LOCK);
-            List<UserInfoDTO> saleList =
-                    getUserList(user.getOrgId(), RoleCodeEnum.SWJL.name(), statusList);
-            request.setAttribute("busSaleList", saleList);
-        }
+        List<OrganizationRespDTO> teleGroupList = getOrgList(null, OrgTypeConstant.DXZ);
+        request.setAttribute("teleGroupList", teleGroupList);
         // 查询所有商务经理
-        List<Map<String, Object>> allSaleList = getAllSaleList();
-        request.setAttribute("allSaleList", allSaleList);
-        // 查询所有项目
-        JSONResult<List<ProjectInfoDTO>> allProject = projectInfoFeignClient.allProject();
-        request.setAttribute("projectList", allProject.getData());
+        List<UserInfoDTO> busSaleList = getUserList(null, RoleCodeEnum.SWJL.name(), null);
+        request.setAttribute("busSaleList", busSaleList);
+        // 查询所有电销创业顾问
+        List<UserInfoDTO> teleSaleList = getUserList(null, RoleCodeEnum.DXCYGW.name(), null);
+        request.setAttribute("teleSaleList", teleSaleList);
+
         // 查询所有省
         JSONResult<List<SysRegionDTO>> getproviceList = sysRegionFeignClient.getproviceList();
         request.setAttribute("provinceList", getproviceList.getData());
 
-        // 查询字典选址情况集合
-        request.setAttribute("optionAddressList", getDictionaryByCode(Constants.OPTION_ADDRESS));
-        // 查询字典合伙人集合
-        request.setAttribute("partnerList", getDictionaryByCode(Constants.PARTNER));
-        // 查询字典餐饮经验集合
-        request.setAttribute("cateringExperienceList",
-                getDictionaryByCode(Constants.CATERING_EXPERIENCE));
-        // 查询字典签约店型集合
-        request.setAttribute("shopTyleList", getDictionaryByCode(Constants.VISTIT_STORE_TYPE));
-        // 查询字典店铺面积集合
-        request.setAttribute("storefrontAreaList", getDictionaryByCode(Constants.STOREFRONT_AREA));
-        // 查询字典投资金额集合
-        request.setAttribute("ussmList", getDictionaryByCode(Constants.USSM));
-        return "business/busCustomerManagerPage";
+        // 查询签约店型集合
+        request.setAttribute("vistitStoreTypeList",
+                getDictionaryByCode(DicCodeEnum.VISITSTORETYPE.getCode()));
+
+        return "financing/refundRebateManagerPage";
     }
 
     /***
-     * 商务客户管理列表
+     * 餐饮公司退返款列表
      * 
      * @return
      */
     @PostMapping("/list")
     @ResponseBody
-    @RequiresPermissions("business:busCustomerManager:view")
-    public JSONResult<PageBean<BusCustomerDTO>> list(@RequestBody BusCustomerPageParam pageParam,
-            HttpServletRequest request) {
+    @RequiresPermissions("financing:refundRebateManager:view")
+    public JSONResult<PageBean<RefundRebateListDTO>> list(
+            @RequestBody RefundRebatePageParam pageParam, HttpServletRequest request) {
         UserInfoDTO user = getUser();
         // 插入当前用户、角色信息
         pageParam.setUserId(user.getId());
@@ -153,26 +124,62 @@ public class BusCustomerManagerController {
             pageParam.setRoleCode(roleList.get(0).getRoleCode());
         }
 
-        JSONResult<PageBean<BusCustomerDTO>> busCustomerList =
-                busCustomerFeignClient.busCustomerList(pageParam);
-
-        return busCustomerList;
+        JSONResult<PageBean<RefundRebateListDTO>> list = refundRebateFeignClient.list(pageParam);
+        return list;
     }
 
     /***
-     * 下属商务经理列表
+     * 关联签约单列表
      * 
      * @return
      */
-    @PostMapping("/getSaleList")
+    @PostMapping("/rebatesignList")
     @ResponseBody
-    @RequiresPermissions("aggregation:appiontmentManager:view")
-    public JSONResult<List<UserInfoDTO>> getSaleList(@RequestBody UserOrgRoleReq userOrgRoleReq,
+    public JSONResult<List<RefundRebateListDTO>> rebatesignList(
+            @RequestBody RefundRebatePageParam pageParam, HttpServletRequest request) {
+        JSONResult<List<RefundRebateListDTO>> list =
+                refundRebateFeignClient.rebatesignList(pageParam);
+        return list;
+    }
+
+    /***
+     * 餐饮公司退款申请
+     * 
+     * @return
+     */
+    @PostMapping("/applyRefund")
+    @ResponseBody
+    @RequiresPermissions("financing:refundRebateManager:applyRefund")
+    @LogRecord(description = "申请退款", operationType = OperationType.INSERT,
+            menuName = MenuEnum.REFUNDREBATE_MANAGER)
+    public JSONResult<Long> applyRefund(@RequestBody ApplyRefundRebateReq req,
             HttpServletRequest request) {
-        userOrgRoleReq.setRoleCode(RoleCodeEnum.SWJL.name());
-        JSONResult<List<UserInfoDTO>> listByOrgAndRole =
-                userInfoFeignClient.listByOrgAndRole(userOrgRoleReq);
-        return listByOrgAndRole;
+        UserInfoDTO user = getUser();
+        // 插入申请人id
+        req.setCreateUser(user.getId());
+        req.setType(AggregationConstant.REFOUND_REBATE_TYPE.REFOUND_TYPE);
+        JSONResult<Long> applyRefund = refundRebateFeignClient.applyRefundRebate(req);
+        return applyRefund;
+    }
+
+    /***
+     * 餐饮公司返款申请
+     * 
+     * @return
+     */
+    @PostMapping("/applyRebate")
+    @ResponseBody
+    @RequiresPermissions("financing:refundRebateManager:applyRebate")
+    @LogRecord(description = "申请返款", operationType = OperationType.INSERT,
+            menuName = MenuEnum.REFUNDREBATE_MANAGER)
+    public JSONResult<Long> applyRebate(@RequestBody ApplyRefundRebateReq req,
+            HttpServletRequest request) {
+        UserInfoDTO user = getUser();
+        // 插入申请人id
+        req.setCreateUser(user.getId());
+        req.setType(AggregationConstant.REFOUND_REBATE_TYPE.REBATE_TYPE);
+        JSONResult<Long> applyRebate = refundRebateFeignClient.applyRefundRebate(req);
+        return applyRebate;
     }
 
     /**
@@ -193,7 +200,7 @@ public class BusCustomerManagerController {
      * @param orgDTO
      * @return
      */
-    private List<OrganizationRespDTO> getSaleGroupList(Long parentId, Integer type) {
+    private List<OrganizationRespDTO> getOrgList(Long parentId, Integer type) {
         OrganizationQueryDTO queryDTO = new OrganizationQueryDTO();
         queryDTO.setParentId(parentId);
         queryDTO.setOrgType(type);
@@ -230,15 +237,11 @@ public class BusCustomerManagerController {
 
         Map<Long, OrganizationRespDTO> orgMap = new HashMap<Long, OrganizationRespDTO>();
         // 生成<机构id，机构>map
-        if (groupList != null) {
-            for (OrganizationRespDTO org : groupList) {
-                orgMap.put(org.getId(), org);
-            }
+        for (OrganizationRespDTO org : groupList) {
+            orgMap.put(org.getId(), org);
         }
-        if (busAreaLsit != null) {
-            for (OrganizationRespDTO org : busAreaLsit) {
-                orgMap.put(org.getId(), org);
-            }
+        for (OrganizationRespDTO org : busAreaLsit) {
+            orgMap.put(org.getId(), org);
         }
         List<Map<String, Object>> result = new ArrayList<Map<String, Object>>();
         // 生成结果集，匹配电销组以及电销总监

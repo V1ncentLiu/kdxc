@@ -86,7 +86,6 @@ public class BusPendingAllocationController {
         // 查询所有项目
         JSONResult<List<ProjectInfoDTO>> allProject = projectInfoFeignClient.allProject();
         request.setAttribute("projectList", allProject.getData());
-        SysRegionDTO queryDTO = new SysRegionDTO();
         // 查询所有商务经理
         List<Map<String, Object>> allSaleList = getAllSaleList();
         request.setAttribute("allSaleList", allSaleList);
@@ -98,10 +97,8 @@ public class BusPendingAllocationController {
                 getUserList(user.getOrgId(), RoleCodeEnum.SWJL.name(), statusList);
         request.setAttribute("busSaleList", saleList);
         // 查询所有省
-        queryDTO.setType(0);
-        JSONResult<List<SysRegionDTO>> querySysRegionByParam =
-                sysRegionFeignClient.querySysRegionByParam(queryDTO);
-        request.setAttribute("provinceList", querySysRegionByParam.getData());
+        JSONResult<List<SysRegionDTO>> getproviceList = sysRegionFeignClient.getproviceList();
+        request.setAttribute("provinceList", getproviceList.getData());
 
         // 查询字典选址情况集合
         request.setAttribute("optionAddressList", getDictionaryByCode(Constants.OPTION_ADDRESS));
@@ -166,9 +163,11 @@ public class BusPendingAllocationController {
         busAllocationClueReq.setOrg(user.getOrgId());
         List<RoleInfoDTO> roleList = user.getRoleList();
         if (roleList != null) {
+
             busAllocationClueReq.setRoleId(roleList.get(0).getId());
             busAllocationClueReq.setRoleCode(roleList.get(0).getRoleCode());
         }
+
         return pendingVisitFeignClient.busAllocationClue(busAllocationClueReq);
     }
 
