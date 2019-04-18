@@ -443,7 +443,7 @@ public class BalanceAccountController {
         String name = "temp"+(int)(Math.random()*1000)+".doc";
         File file = new File(name);
         try {
-        	t = configuration.getTemplate("04172.ftl");
+        	t = configuration.getTemplate("balanceaccount.ftl");
             t.setEncoding("UTF-8");
              
             Writer out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(name),"UTF-8"));
@@ -454,113 +454,5 @@ public class BalanceAccountController {
         } 
         return file;
     }
-    public static void wordToHtml(String filePath, String outPutFilePath, String newFileName)
-            throws Exception {
- 
-        String substring = filePath.substring(filePath.lastIndexOf(".") + 1);
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        outPutFilePath = getRealPath(outPutFilePath);
-        filePath = getRealPath(filePath);
- 
-        //防止错误输入
-        if(!outPutFilePath.endsWith("/") && !outPutFilePath.endsWith("\\")) {
-            outPutFilePath = outPutFilePath + "/";
-        }
- 
-        /*
-         * word2007和word2003的构建方式不同，
-         * 前者的构建方式是xml，后者的构建方式是dom树。
-         * 文件的后缀也不同，前者后缀为.docx，后者后缀为.doc
-         * 相应的，apache.poi提供了不同的实现类。
-         */
-        if ("docx".equals(substring)) {
- 
- 
-            InputStream inputStream = new FileInputStream(new File(filePath));
-            XWPFDocument document = new XWPFDocument(inputStream);
- 
-            //step 2 : prepare XHTML options
-            final String imageUrl = "";
- 
-            XHTMLOptions options = XHTMLOptions.create();
-            options.setExtractor(new FileImageExtractor(new File(outPutFilePath + imageUrl)));
-            options.setIgnoreStylesIfUnused(false);
-            options.setFragment(true);
-            //    			@Override 重写的方法，加上这个报错，你看看是啥问题
-            options.URIResolver(uri -> imageUrl + uri);
- 
-            //step 3 : convert XWPFDocument to XHTML
-            XHTMLConverter.getInstance().convert(document, out, options);
-        } else {
-            HWPFDocument wordDocument = new HWPFDocument(new FileInputStream(filePath));
-            WordToHtmlConverter wordToHtmlConverter = new WordToHtmlConverter(
-                    DocumentBuilderFactory.newInstance().newDocumentBuilder()
-                            .newDocument());
-            wordToHtmlConverter.setPicturesManager((content, pictureType, suggestedName, widthInches, heightInches) -> suggestedName);
-            wordToHtmlConverter.processDocument(wordDocument);
-            //save pictures
-            List pics = wordDocument.getPicturesTable().getAllPictures();
-            if (pics != null) {
-                for (int i = 0; i < pics.size(); i++) {
-                    Picture pic = (Picture) pics.get(i);
-                    System.out.println();
-                    try {
-                        pic.writeImageContent(new FileOutputStream(outPutFilePath
-                                + pic.suggestFullFileName()));
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-            Document htmlDocument = wordToHtmlConverter.getDocument();
-            DOMSource domSource = new DOMSource(htmlDocument);
-            StreamResult streamResult = new StreamResult(out);
- 
-            TransformerFactory tf = TransformerFactory.newInstance();
-            Transformer serializer = tf.newTransformer();
-            serializer.setOutputProperty(OutputKeys.ENCODING, "utf-8");
-            serializer.setOutputProperty(OutputKeys.INDENT, "yes");
-            serializer.setOutputProperty(OutputKeys.METHOD, "html");
-            serializer.transform(domSource, streamResult);
-        }
- 
-        out.close();
-        writeFile(new String(out.toByteArray()), outPutFilePath + newFileName);
-    }
-    public static String getRealPath(String dirPath) {
-        //利用资源加载器获取资源URL
-        String path = Class.class.getResource("/").getPath();
-        return path + dirPath;
-
-    }
-    private static void writeFile(String content, String path) {
-        FileOutputStream fos = null;
-        BufferedWriter bw = null;
-        try {
-            File file = new File(path);
-            if (!file.exists()) {
-                boolean newFile = file.createNewFile();
-            }
-            fos = new FileOutputStream(file);
-            bw = new BufferedWriter(new OutputStreamWriter(fos));
-            bw.write(content);
-        } catch (FileNotFoundException fnfe) {
-            fnfe.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                if (bw != null) {
-                    bw.close();
-                }
-                if (fos != null) {
-                    fos.close();
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-
+    
 }
