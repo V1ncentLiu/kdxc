@@ -77,8 +77,8 @@
             </el-row>
         	<el-row v-show="telemarketingTeamShow">
                 <el-col :span="6">
-                    <el-form-item label="电销组：" :label-width="formLabelWidth1" prop="telemarketingTeamId">
-                        <el-select filterable v-model="form.telemarketingTeamId" placeholder="请选择">
+                    <el-form-item label="电销组：" :label-width="formLabelWidth1" prop="telemarketingTeamIds">
+                        <el-select filterable multiple v-model="form.telemarketingTeamIds" placeholder="请选择">
                             <el-option
                                 v-for="item in dxList"
                                  :key="item.id"
@@ -183,7 +183,7 @@
                 form: {
                 	businessGroupId: checkbusinessGroupId,
                 	provincesIds: checkProvince,
-                	telemarketingTeamId: checkTelemarketingTeam,
+                	telemarketingTeamIds: checkTelemarketingTeam,
                 	projectIds:checkProject
                     
                 },
@@ -197,7 +197,7 @@
                     provincesIds: [
                       { required: true, message: '请选择省份', trigger: 'blur' },
                     ],
-                    telemarketingTeamId: [
+                    telemarketingTeamIds: [
                       { required: true, message: '请选择电销组', trigger: 'change' },
                     ]
                     
@@ -281,12 +281,8 @@
                   obj = this.swList.find((item)=>{
                       return item.id === formData.businessGroupId;
                   });
-                  let telemarketingTeamobj = {};
-                  telemarketingTeamobj = this.dxList.find((item)=>{
-                      return item.id === formData.telemarketingTeamId;
-                  });
-                  
-                  
+
+
                   var businessGroupName  = "";
                   var telemarketingTeamName = "";
        	          var projectstrs ="";
@@ -297,7 +293,25 @@
        	        	businessGroupName  = obj.name;
             	  }
 	       	      if(isshowTelemarketingTeam ==0){
-	       	    	telemarketingTeamName = telemarketingTeamobj.name;
+                      var teamNames ="";
+                      var teamIds ="";
+                      for ( var i = 0; i <formData.telemarketingTeamIds.length; i++){
+                          for(var j = 0 ; j < this.dxList.length ; j++){
+                              if(formData.telemarketingTeamIds[i] ==this.dxList[j].id){
+                                  if(teamIds !=""){
+                                      teamIds = teamIds+","+formData.telemarketingTeamIds[i];
+                                  }else{
+                                      teamIds = formData.telemarketingTeamIds[i];
+                                  }
+                                  if(teamNames !=""){
+                                      teamNames = teamNames+","+ this.dxList[i].name;
+                                  }else{
+                                      teamNames = this.dxList[i].name;
+                                  }
+                              }
+                          }
+                      }
+                      telemarketingTeamName = teamNames;
 	       		  }
 	       	   	  if(isshowprovince==0){
 		       	   	 	for ( var i = 0; i <formData.provincesIds.length; i++){
@@ -395,11 +409,8 @@
        	             var formData = addUserVm.form;
        	             var param={};
 	       	          let obj = {};
-	                 
 	                  let telemarketingTeamobj = {};
-	                  
-	                  
-	                  
+
 	                  if(isshowBusinessGroup ==0){
 	                	  param.businessGroupId= formData.businessGroupId;
 	                	  obj = this.swList.find((item)=>{
@@ -408,11 +419,26 @@
 	                	  param.businessGroup = obj.name;
 	                  }
 	                  if(isshowTelemarketingTeam ==0){
-	                	  param.telemarketingTeamId = formData.telemarketingTeamId;
-	                	  telemarketingTeamobj = this.dxList.find((item)=>{
-		                      return item.id === param.telemarketingTeamId;
-		                  });
-	                	  param.telemarketingTeam = telemarketingTeamobj.name;
+                          var teamNames ="";
+                          var teamIds ="";
+                          for ( var i = 0; i <formData.telemarketingTeamIds.length; i++){
+                              for(var j = 0 ; j < this.dxList.length ; j++){
+                                  if(formData.telemarketingTeamIds[i] ==this.dxList[j].id){
+                                      if(teamIds !=""){
+                                          teamIds = teamIds+","+formData.telemarketingTeamIds[i];
+                                      }else{
+                                          teamIds = formData.telemarketingTeamIds[i];
+                                      }
+                                      if(teamNames !=""){
+                                          teamNames = teamNames+","+ this.dxList[i].name;
+                                      }else{
+                                          teamNames = this.dxList[i].name;
+                                      }
+                                  }
+                              }
+                          }
+                          param.telemarketingTeams = teamNames;
+                          param.telemarketingTeamIds = teamIds;
 	                  }
 	                  
 	       	          var projectstrs ="";

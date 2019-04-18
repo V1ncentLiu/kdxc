@@ -41,8 +41,6 @@ public class ClueReceiveRecordsController {
     private ClueReceiveRecordsFeignClient clueReceiveRecordsFeignClient;
     /**
 	 * 领取
-	 * 
-	 * @param queryDto
 	 * @return
 	 */
 	@RequestMapping("/receiveClueByClueIds")
@@ -123,8 +121,8 @@ public class ClueReceiveRecordsController {
 						clueReceiveRecordsDTO.setTeleCompanyId(org.getId());
 					}
 				}
-
 			}
+			clueReceiveRecordsDTO.setRoleId(roleList.get(0).getId());
 			return clueReceiveRecordsFeignClient.receiveClueByClueIds(clueReceiveRecordsDTO);
 		}
 		

@@ -331,22 +331,7 @@
                 </el-table-column>
                 <el-table-column align="center" prop="visitCity" label="到访城市"></el-table-column>
                 <el-table-column align="center" prop="createTime" label="创建时间"></el-table-column>
-                <el-table-column align="center" prop="visitNum" label="到访批次">
-                    <template slot-scope="scope">
-                        <div v-if="scope.row.visitNum == 1">
-                            首次到访
-                        </div>
-                        <div v-else-if="scope.row.visitNum == 2">
-                            二次到访
-                        </div>
-                        <div v-else-if="scope.row.visitNum > 2">
-                            多次到访
-                        </div>
-                        <div v-else>
-                            待处理
-                        </div>
-                    </template>
-                </el-table-column>
+                <el-table-column align="center" prop="visitNum" label="到访批次"  :formatter="transVisitNum"></el-table-column>
                 <el-table-column align="center" prop="status" label="到访有效性" :formatter="getStatusText"></el-table-column>
             </el-table>
         </div>
@@ -454,6 +439,34 @@
             }        	  
         },
         methods: {
+            transVisitNum(row, column, cellValue, index){
+                var text = "";
+                if (cellValue == "1") {
+                    text = "首次到访"
+                }else if (cellValue == "2") {
+                    text = "二次到访"
+                }else{
+                    text = this.toChinesNum(cellValue)+"次到访"
+                }
+                return text;
+            },
+            toChinesNum(num){
+                let changeNum = ['零', '一', '二', '三', '四', '五', '六', '七', '八', '九']; //changeNum[0] = "零"
+                let unit = ["", "十", "百", "千", "万"];
+                num = parseInt(num);
+                let getWan = (temp) => {
+                    let strArr = temp.toString().split("").reverse();
+                    let newNum = "";
+                    for (var i = 0; i < strArr.length; i++) {
+                        newNum = (i == 0 && strArr[i] == 0 ? "" : (i > 0 && strArr[i] == 0 && strArr[i - 1] == 0 ? "" : changeNum[strArr[i]] + (strArr[i] == 0 ? unit[0] : unit[i]))) + newNum;
+                    }
+                    return newNum;
+                }
+                let overWan = Math.floor(num / 10000);
+                let noWan = num % 10000;
+                if (noWan.toString().length < 4) noWan = "0" + noWan;
+                return overWan ? getWan(overWan) + "万" + getWan(noWan) : getWan(num);
+            },
             submitDialogForm(formName) {
                 this.$refs[formName].validate((valid) => {
                     if (valid) {

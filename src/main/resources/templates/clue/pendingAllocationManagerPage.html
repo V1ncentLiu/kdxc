@@ -531,62 +531,73 @@ var clueVM = new Vue({
                  }
                  return moment(cellValue).format("YYYY-MM-DD HH:mm");
                },
+            transformReason(row, column, cellValue, index) {
+                var text="";
+                if(releaseReasonList){
+                    for(var i=0;i<releaseReasonList.length;i++){
+                        if(cellValue==releaseReasonList[i].value){
+                            text=releaseReasonList[i].name;
+                        }
+                    }
+                }
+                return text;
+            },
              //释放原因转换方法
-               transformReason(row, column, cellValue, index) {
-             	  var text="";
-             	  if(cellValue){
-	            	  var arr= cellValue.split(",");
-	            	  //用释放原因转换
-	            	  if(arr.length==1){
-		             	  if(releaseReasonList){
-		 	                  for(var i=0;i<releaseReasonList.length;i++){
-		 	                		if(cellValue==releaseReasonList[i].value){
-		 	                			text=releaseReasonList[i].name;
-		 	                		}
-		 	                	}
-		             	  }
-	            	  }else if(arr.length>1){
-	            		//用电销状态转换
-	            		  if(arr[0]=="track"){
-	            			//电销一级状态
-	            			  if(customerStatusList){
-			 	                  for(var i=0;i<customerStatusList.length;i++){
-			 	                	if(arr[1]==customerStatusList[i].value){
-			 	                		text+=customerStatusList[i].name;
-			 	                	}
-			 	                  }
-			             	  }
-	            			//电销二级状态
-	            			  if(customerStatusSubList&&arr.length==3){
-	            				  for(var i=0;i<customerStatusSubList.length;i++){
-				 	                if(arr[2]==customerStatusSubList[i].value){
-				 	                	text+="-"+customerStatusSubList[i].name;
-				 	                }
-				 	              }
-	            			  }
-	            			//用话务状态转换
-	            		  }else if(arr[0]=="phtrack"){
-	            			//话务一级状态
-	            			  if(phCustomerStatusList){
-			 	                  for(var i=0;i<phCustomerStatusList.length;i++){
-			 	                	if(arr[1]==phCustomerStatusList[i].value){
-			 	                		text+=phCustomerStatusList[i].name;
-			 	                	}
-			 	                  }
-			             	  }
-	            			//话务二级状态
-	            			  if(phCustomerStatusSubList&&arr.length==3){
-	            				  for(var i=0;i<phCustomerStatusSubList.length;i++){
-				 	                if(arr[2]==phCustomerStatusSubList[i].value){
-				 	                	text+="-"+phCustomerStatusSubList[i].name;
-				 	                }
-				 	              }
-	            			  }
-	            		  }
-	            	  }
-             	  }
-                  return text;
-               },
+             //   transformReason(row, column, cellValue, index) {
+             // 	  var text="";
+             // 	  if(cellValue){
+	         //    	  var arr= cellValue.split(",");
+	         //    	  //用释放原因转换
+	         //    	  if(arr.length==1){
+		     //         	  if(releaseReasonList){
+		 	 //                  for(var i=0;i<releaseReasonList.length;i++){
+		 	 //                		if(cellValue==releaseReasonList[i].value){
+		 	 //                			text=releaseReasonList[i].name;
+		 	 //                		}
+		 	 //                	}
+		     //         	  }
+	         //    	  }else if(arr.length>1){
+	         //    		//用电销状态转换
+	         //    		  if(arr[0]=="track"){
+	         //    			//电销一级状态
+	         //    			  if(customerStatusList){
+			 // 	                  for(var i=0;i<customerStatusList.length;i++){
+			 // 	                	if(arr[1]==customerStatusList[i].value){
+			 // 	                		text+=customerStatusList[i].name;
+			 // 	                	}
+			 // 	                  }
+			 //             	  }
+	         //    			//电销二级状态
+	         //    			  if(customerStatusSubList&&arr.length==3){
+	         //    				  for(var i=0;i<customerStatusSubList.length;i++){
+				//  	                if(arr[2]==customerStatusSubList[i].value){
+				//  	                	text+="-"+customerStatusSubList[i].name;
+				//  	                }
+				//  	              }
+	         //    			  }
+	         //    			//用话务状态转换
+	         //    		  }else if(arr[0]=="phtrack"){
+	         //    			//话务一级状态
+	         //    			  if(phCustomerStatusList){
+			 // 	                  for(var i=0;i<phCustomerStatusList.length;i++){
+			 // 	                	if(arr[1]==phCustomerStatusList[i].value){
+			 // 	                		text+=phCustomerStatusList[i].name;
+			 // 	                	}
+			 // 	                  }
+			 //             	  }
+	         //    			//话务二级状态
+	         //    			  if(phCustomerStatusSubList&&arr.length==3){
+	         //    				  for(var i=0;i<phCustomerStatusSubList.length;i++){
+				//  	                if(arr[2]==phCustomerStatusSubList[i].value){
+				//  	                	text+="-"+phCustomerStatusSubList[i].name;
+				//  	                }
+				//  	              }
+	         //    			  }
+	         //    		  }
+	         //    	  }
+             // 	  }
+             //      return text;
+             //   },
                //打开分配资源
                toAllocationClue() {
            	       var rows = this.multipleSelection;

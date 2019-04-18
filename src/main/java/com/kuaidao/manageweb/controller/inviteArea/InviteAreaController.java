@@ -5,6 +5,11 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
+
+import com.kuaidao.aggregation.dto.project.CompanyInfoDTO;
+import com.kuaidao.aggregation.dto.project.CompanyInfoPageParam;
+import com.kuaidao.aggregation.dto.project.ProjectInfoPageParam;
+import com.kuaidao.manageweb.feign.project.CompanyInfoFeignClient;
 import org.apache.shiro.SecurityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,6 +61,11 @@ public class InviteAreaController {
     private OrganizationFeignClient organizationFeignClient;
     @Autowired
     private ProjectInfoFeignClient projectInfoFeignClient;
+    @Autowired
+    private CompanyInfoFeignClient companyInfoFeignClient;
+
+
+
 
     /**
      * 邀约记录列表页面
@@ -158,24 +168,33 @@ public class InviteAreaController {
         for (InviteAreaDTO inviteAreaDTO2 : inviteAreaDTOs) {
             String[] projectids = inviteAreaDTO2.getProjectIds().split(",");
             Arrays.sort(projectids);
-
             String[] provinces = inviteAreaDTO2.getProvincesIds().split(",");
             Arrays.sort(provinces);
+
+            String telemarketingTeamIds = inviteAreaDTO2.getTelemarketingTeamIds();
+            String[] teleTeamIds = telemarketingTeamIds.split(",");
+            Arrays.sort(teleTeamIds);
+
             for (InviteAreaDTO inviteAreaDTO3 : inviteAreaDTOs) {
                 if (inviteAreaDTO2.getId().longValue() != inviteAreaDTO3.getId().longValue()) {
                     if (inviteAreaDTO2.getBusinessGroupId().longValue() != inviteAreaDTO3
                             .getBusinessGroupId().longValue()) {
                         isshowBusinessGroup = 1;
                     }
-                    if (inviteAreaDTO2.getTelemarketingTeamId().longValue() != inviteAreaDTO3
-                            .getTelemarketingTeamId().longValue()) {
-                        isshowTelemarketingTeam = 1;
-                    }
+//                    if (inviteAreaDTO2.getTelemarketingTeamId().longValue() != inviteAreaDTO3
+//                            .getTelemarketingTeamId().longValue()) {
+//                        isshowTelemarketingTeam = 1;
+//                    }
 
+                    String[] teleTeamIdsnew = inviteAreaDTO2.getTelemarketingTeamIds().split(",");
+                    Arrays.sort(teleTeamIdsnew);
                     String[] projectidsnew = inviteAreaDTO3.getProjectIds().split(",");
                     Arrays.sort(projectidsnew);
                     String[] provincesnew = inviteAreaDTO3.getProvincesIds().split(",");
                     Arrays.sort(provincesnew);
+                    if (!Arrays.equals(teleTeamIds, teleTeamIdsnew)) {
+                        isshowTelemarketingTeam = 1;
+                    }
                     if (!Arrays.equals(provinces, provincesnew)) {
                         isshowprovince = 1;
                     }
@@ -192,10 +211,8 @@ public class InviteAreaController {
         sysRegionDTO.setName("全选");
         proviceslist.add(0, sysRegionDTO);
 
-        request.setAttribute("checkbusinessGroupId",
-                inviteAreaDTOs.get(0).getBusinessGroupId().toString());
-        request.setAttribute("checkTelemarketingTeam",
-                inviteAreaDTOs.get(0).getTelemarketingTeamId().toString());
+        request.setAttribute("checkbusinessGroupId", inviteAreaDTOs.get(0).getBusinessGroupId().toString());
+        request.setAttribute("checkTelemarketingTeam", inviteAreaDTOs.get(0).getTelemarketingTeamIds().split(","));
         request.setAttribute("checkProject", inviteAreaDTOs.get(0).getProjectIds().split(","));
         request.setAttribute("checkProvince", inviteAreaDTOs.get(0).getProvincesIds().split(","));
         request.setAttribute("ids", ids);
@@ -257,8 +274,7 @@ public class InviteAreaController {
 
     /**
      * 上传自定义字段
-     * 
-     * @param result
+     *
      * @return
      */
     // @RequiresPermissions("customfield:batchSaveField")
@@ -385,8 +401,7 @@ public class InviteAreaController {
                 if (islegal && inviteAreaDTO2.getTelemarketingTeam() != null) {
                     islegal = false;
                     for (OrganizationRespDTO organizationRespDTO : dxList.getData()) {
-                        if (organizationRespDTO.getName()
-                                .equals(inviteAreaDTO2.getTelemarketingTeam().trim())) {
+                        if (organizationRespDTO.getName().equals(inviteAreaDTO2.getTelemarketingTeam().trim())) {
                             inviteAreaDTO2.setTelemarketingTeamId(organizationRespDTO.getId());
                             islegal = true;
                             break;
@@ -438,5 +453,33 @@ public class InviteAreaController {
         }
         return new JSONResult<>().success(illegalDataList);
     }
-
+    /**
+     * 商务小组名称-->匹配公司表中公司名称-->找到公司对应集团-->通过集团找到所属项目（项目表中有所属集团）
+     * 商务小组名称 能够匹配 公司表中公司名称
+     * 公司表中保存了公司对应集团：（保存的是集团名称）
+     * 查询集团下项目：项目中保存的是集团的ID。这里的集团是从哪里获取的。
+     */
+    @RequestMapping("/InviteProjects")
+    @ResponseBody
+    public List<ProjectInfoDTO> InviteProjects(@RequestBody InviteAreaDTO inviteAreaDTO){
+        List<ProjectInfoDTO> list = new ArrayList<>();
+        CompanyInfoPageParam param = new CompanyInfoPageParam();
+        param.setCompanyName1(inviteAreaDTO.getBusinessGroup());
+        param.setPageNum(1);
+        param.setPageSize(99999);
+        JSONResult<PageBean<CompanyInfoDTO>> list1 = companyInfoFeignClient.list(param);
+        if(JSONResult.SUCCESS.equals(list1.getCode())){
+            List<CompanyInfoDTO> data = list1.getData().getData();
+            if(data!=null&&data.size()>0){
+                CompanyInfoDTO dto = data.get(0);
+                ProjectInfoPageParam p = new ProjectInfoPageParam();
+                p.setGroupName(dto.getGroupName());
+                JSONResult<List<ProjectInfoDTO>> listJSONResult = projectInfoFeignClient.listNoPage(p);
+                if(JSONResult.SUCCESS.equals(listJSONResult.getCode())){
+                    list = listJSONResult.getData();
+                }
+            }
+        }
+        return list;
+    }
 }

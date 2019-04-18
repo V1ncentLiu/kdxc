@@ -25,12 +25,12 @@
             <el-button type="success" @click="pass">审核通过</el-button>
         </shiro:hasPermission>
     </el-row>
-    <div class="mainSearchBg">        
+    <div class="mainSearchBg">
         <div class="mainSearchFormBox">
             <el-form :inline="true"  class="demo-form-inline mainSearchForm" :model="form" ref="form">
                 <el-form-item label="客户姓名:">
                     <el-input v-model="form.customerName" placeholder="请输入客户姓名"></el-input>
-                </el-form-item>  
+                </el-form-item>
                 <el-form-item label="考察项目:">
                     <el-select v-model="form.projectId" placeholder="考察项目" clearable>
                         <el-option
@@ -40,8 +40,8 @@
                             :value="item.id">
                         </el-option>
                     </el-select>
-                </el-form-item> 
-                <el-form-item label="商务小组:">  
+                </el-form-item>
+                <el-form-item label="商务小组:">
                     <el-select v-model="form.busGroupId" placeholder="商务小组" clearable>
                         <el-option
                             v-for="item in businessGroupList"
@@ -50,7 +50,7 @@
                             :value="item.id">
                         </el-option>
                     </el-select>
-                </el-form-item>  
+                </el-form-item>
                 <el-form-item label="到访时间:">
                     <el-date-picker
                         v-model="form.visitStartTime"
@@ -66,7 +66,7 @@
                     </el-date-picker>
                 </el-form-item>
                 <el-row v-show="isShow">
-                    <el-form-item label="商务经理:">  
+                    <el-form-item label="商务经理:">
                         <el-select v-model="form.busManagerId" placeholder="商务经理" clearable>
                             <el-option
                                 v-for="item in busManagerList"
@@ -75,8 +75,8 @@
                                 :value="item.id">
                             </el-option>
                         </el-select>
-                    </el-form-item>   
-                    <el-form-item label="签约省份:">  
+                    </el-form-item>
+                    <el-form-item label="签约省份:">
                         <el-select v-model="form.signProvince" placeholder="签约省份" clearable>
                             <el-option
                                 v-for="item in proviceList"
@@ -85,8 +85,8 @@
                                 :value="item.name">
                             </el-option>
                         </el-select>
-                    </el-form-item>   
-                    <el-form-item label="到访有效性:">  
+                    </el-form-item>
+                    <el-form-item label="到访有效性:">
                         <el-select v-model="form.status" placeholder="到访有效性" clearable>
                             <el-option
                                 v-for="item in visitEffStatusOpt"
@@ -95,8 +95,8 @@
                                 :value="item.value">
                             </el-option>
                         </el-select>
-                    </el-form-item>   
-                    <el-form-item label="是否签约:">  
+                    </el-form-item>
+                    <el-form-item label="是否签约:">
                         <el-select v-model="form.isSign" placeholder="是否签约" clearable>
                             <el-option
                                 v-for="item in signStatusOpt"
@@ -105,8 +105,8 @@
                                 :value="item.value">
                             </el-option>
                         </el-select>
-                    </el-form-item> 
-                    <el-form-item label="考察公司:">  
+                    </el-form-item>
+                    <el-form-item label="考察公司:">
                         <el-select v-model="form.companyId" placeholder="考察公司" clearable>
                             <el-option
                                 v-for="item in companyList"
@@ -115,9 +115,9 @@
                                 :value="item.id">
                             </el-option>
                         </el-select>
-                    </el-form-item>                     
-                </el-row>  
-                <div class="mainSearchBtnBox">       
+                    </el-form-item>
+                </el-row>
+                <div class="mainSearchBtnBox">
                     <el-button icon="el-icon-search" type="primary" @click="initCustomerVisitRecord" class="searchBtn">搜索</el-button>
                     <el-button type="info" class="searchBtn">取消</el-button>
                     <span style="color: #5c6be8;cursor: pointer;margin:0 10px;" @click="toogleClick">更多搜索<i class="el-icon-arrow-down greycolor paddingL6"></i></span>
@@ -125,7 +125,7 @@
             </el-form>
         </div>
         <el-row>
-            <el-table 
+            <el-table
                 ref="multipleTable"
                 tooltip-effect="dark"
                 style="width: 100%"
@@ -133,24 +133,24 @@
                 border
                 @selection-change="handleSelectionChange"
                 v-loading="loading"
-                :data="dataTable" 
+                :data="dataTable"
                 >
                 <el-table-column align="center" type="selection" width="55"></el-table-column>
                 <el-table-column align="center" prop="serialNum" label="序号" width="55"></el-table-column>
-                <el-table-column align="center" prop="customerName" label="客户姓名"></el-table-column>  
+                <el-table-column align="center" prop="customerName" label="客户姓名"></el-table-column>
                 <el-table-column align="center" prop="projectName" label="考察项目" width="100"></el-table-column>
                 <el-table-column align="center" prop="companyName" label="考察公司"></el-table-column>
                 <el-table-column align="center" prop="vistitTime" label="到访时间"></el-table-column>
                 <el-table-column align="center" prop="vistitStoreType" label="到访店铺类型" width="120" :formatter="getSignShopTypeText"></el-table-column>
                 <el-table-column align="center" prop="visitType" label="到访类型" :formatter="getVisitTypeText"></el-table-column>
-                <el-table-column align="center" prop="visitCity" label="来访城市"></el-table-column> 
-                <el-table-column align="center" prop="signProvince" label="预签约省份" width="100"></el-table-column> 
-                <el-table-column align="center" prop="signCity" label="预签约城市" width="100"></el-table-column>   
+                <el-table-column align="center" prop="visitCity" label="来访城市"></el-table-column>
+                <el-table-column align="center" prop="signProvince" label="预签约省份" width="100"></el-table-column>
+                <el-table-column align="center" prop="signCity" label="预签约城市" width="100"></el-table-column>
                 <el-table-column align="center" prop="signDistrict" label="预签约区／县" width="120"></el-table-column>
-                <el-table-column align="center" prop="businessGroupName" label="商务小组"></el-table-column> 
+                <el-table-column align="center" prop="businessGroupName" label="商务小组"></el-table-column>
                 <el-table-column align="center" prop="businessManagerName" label="商务经理" width="100"></el-table-column>
-                <el-table-column align="center" prop="teleGroupName" label="电销组"></el-table-column> 
-                <el-table-column align="center" prop="teleSaleName" label="创业顾问"></el-table-column> 
+                <el-table-column align="center" prop="teleGroupName" label="电销组"></el-table-column>
+                <el-table-column align="center" prop="teleSaleName" label="创业顾问"></el-table-column>
                 <el-table-column align="center" prop="isSign" label="是否签约" width="100">
                     <template slot-scope="scope">
                      <span v-if="scope.row.isSign===0">
@@ -161,41 +161,27 @@
                         </span>
                     </template>
                 </el-table-column>
-                 <el-table-column align="center" prop="createTime" label="创建时间"></el-table-column> 
-                   <el-table-column align="center" prop="visitNum" label="到访批次" >
-                   	<template slot-scope="scope">
-                            <div v-if="scope.row.visitNum == 1">
-                                首次到访
-                            </div>
-                            <div v-else-if="scope.row.visitNum == 2">
-                                二次到访
-                            </div>
-                            <div v-else-if="scope.row.visitNum > 2">
-                                多次到访
-                            </div>
-                            <div v-else>
-                                待处理
-                            </div>
-                        </template>
-                   </el-table-column> 
-                <el-table-column align="center" prop="status" label="到访有效性" width="100">
-                    <template slot-scope="scope">
-                     <span v-if="scope.row.status===0">
-                        驳回&nbsp;<el-button @click="reasonClick(scope.row)" type="text">驳回原因</el-button>
-                         </span>
-                                   <span v-else-if="scope.row.status===1">
-                              待审核
-                        </span>
-                                  <span v-else-if="scope.row.status===2">
-                             有效
-                        </span> 
-                    </template>
-                </el-table-column>
-                  
-                
-            </el-table>
-              <table-pagination :pager="pager" @change="initCustomerVisitRecord"></table-pagination>
-        </el-row>
+                 <el-table-column align="center" prop="createTime" label="创建时间"></el-table-column>
+               <el-table-column align="center" prop="visitNum" :formatter="transVisitNum" label="到访批次" >
+               </el-table-column>
+            <el-table-column align="center" prop="status" label="到访有效性" width="100">
+                <template slot-scope="scope">
+                 <span v-if="scope.row.status===0">
+                    驳回&nbsp;<el-button @click="reasonClick(scope.row)" type="text">驳回原因</el-button>
+                     </span>
+                               <span v-else-if="scope.row.status===1">
+                          待审核
+                    </span>
+                              <span v-else-if="scope.row.status===2">
+                         有效
+                    </span> 
+                </template>
+            </el-table-column>
+              
+            
+        </el-table>
+          <table-pagination :pager="pager" @change="initCustomerVisitRecord"></table-pagination>
+    </el-row>
     </div>
     <!-- dialog -->
     <!-- 驳回处理 -->
@@ -305,18 +291,46 @@
             }        	  
         },
         methods: {
+            transVisitNum(row, column, cellValue, index){
+                var text = "";
+                if (cellValue == "1") {
+                    text = "首次到访"
+                }else if (cellValue == "2") {
+                    text = "二次到访"
+                }else{
+                    text = this.toChinesNum(cellValue)+"次到访"
+                }
+                return text;
+             },
+            toChinesNum(num){
+                  let changeNum = ['零', '一', '二', '三', '四', '五', '六', '七', '八', '九']; //changeNum[0] = "零"
+                  let unit = ["", "十", "百", "千", "万"];
+                  num = parseInt(num);
+                  let getWan = (temp) => {
+                      let strArr = temp.toString().split("").reverse();
+                      let newNum = "";
+                      for (var i = 0; i < strArr.length; i++) {
+                          newNum = (i == 0 && strArr[i] == 0 ? "" : (i > 0 && strArr[i] == 0 && strArr[i - 1] == 0 ? "" : changeNum[strArr[i]] + (strArr[i] == 0 ? unit[0] : unit[i]))) + newNum;
+                      }
+                      return newNum;
+                  }
+                  let overWan = Math.floor(num / 10000);
+                  let noWan = num % 10000;
+                  if (noWan.toString().length < 4) noWan = "0" + noWan;
+                  return overWan ? getWan(overWan) + "万" + getWan(noWan) : getWan(num);
+            },
              handleClick(tab, event) {  //到访或者未到访tab切换
                 if(tab.name=='first'){
-                	window.location.href="/visit/visitRecord/visitRecordPage.html";
+                    window.location.href="/visit/visitRecord/visitRecordPage.html";
                 }else{
-                	window.location.href="/visit/visitRecord/noVisitRecordPage.html";
+                    window.location.href="/visit/visitRecord/noVisitRecordPage.html";
                 }
              },
             submitDialogForm(formName) {
                 this.$refs[formName].validate((valid) => {
                     if (valid) {
-                      
-                    	var param ={}; 
+
+                        var param ={};
                         var rows = this.multipleSelection;
                         var idArr = new Array();
                         for(var i=0;i<rows.length;i++){
@@ -329,25 +343,25 @@
                         .then(function (response) {
                             var resData = response.data;
                             if(resData.code=='0'){
-                            	customerVisitRecordVm.dialogForm.reason='';
+                                customerVisitRecordVm.dialogForm.reason='';
                                 customerVisitRecordVm.dialogFormVisible = false;
                                 customerVisitRecordVm.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
-                                	customerVisitRecordVm.initCustomerVisitRecord();
+                                    customerVisitRecordVm.initCustomerVisitRecord();
                                 }});
                             }else{
-                            	customerVisitRecordVm.$message({message:resData.msg,type:'error'});
+                                customerVisitRecordVm.$message({message:resData.msg,type:'error'});
                                 console.error(resData);
                             }
-                        
+
                         })
                         .catch(function (error) {
                              console.log(error);
                         }).then(function(){
                         });
-                    	
-                    	
-                    	
-                    	
+
+
+
+
                     } else {
                         return false;
                     }
@@ -465,7 +479,7 @@
                  });
             	
             },
-            OpenRejectVisitRecordDialog(){//驳回            	
+            OpenRejectVisitRecordDialog(){//驳回
         	   this.signRecordArrTitle='';
                var rows = this.multipleSelection;
                if(rows.length<1){
@@ -490,7 +504,7 @@
                    return;
                }
                this.signRecordArrTitle=title;
-               
+
                this.dialogFormVisible=true;
             },
             reasonClick(row) {//驳回原因
@@ -554,7 +568,7 @@
                      console.log(error);
                 });
              },
-             queryBusManagerByOrgId(){//获取所有商务经理  
+             queryBusManagerByOrgId(){//获取所有商务经理
                  axios.post('/sign/signRecord/queryBusManagerByOrgId', {})
                  .then(function (response) {
                        var result =  response.data;
@@ -564,13 +578,13 @@
                        }else{
                            console.error(response);
                        }
-                       
+
                  })
                  .catch(function (error) {
                       console.log(error);
                  });
               },
-              queryBusGroupList(){//根据组织机构Id查询所有商务经zu 
+              queryBusGroupList(){//根据组织机构Id查询所有商务经zu
                   axios.post('/organization/organization/queryBusGroupList', {})
                   .then(function (response) {
                         var result =  response.data;
@@ -580,12 +594,12 @@
                         }else{
                             console.error(response);
                         }
-                        
+
                   })
                   .catch(function (error) {
                        console.log(error);
                   });
-                  
+
               },
               getSignProvince(){
             	  axios.post('/visit/visitRecord/getSignProvince', {})
@@ -597,11 +611,11 @@
                         }else{
                             console.error(response);
                         }
-                        
+
                   })
                   .catch(function (error) {
                        console.log(error);
-                  });  
+                  });
               },
               queryAllBusGroup(){
                 axios.post('/organization/organization/queryAllBusGroup', {})
@@ -613,11 +627,11 @@
                     }else{
                         console.error(response);
                     }
-                        
+
                 })
                 .catch(function (error) {
                        console.log(error);
-                });  
+                });
             },
             initSelect(){//初始下拉框
                   this.getProjectList();
@@ -631,7 +645,7 @@
                     this.isShow=false
                 }else{
                     this.isShow=true
-                }          
+                }
             },
 
         },

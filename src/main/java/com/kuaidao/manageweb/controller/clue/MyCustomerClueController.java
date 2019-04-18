@@ -607,7 +607,6 @@ public class MyCustomerClueController {
         UserInfoDTO user = (UserInfoDTO) subject.getSession().getAttribute("user");
         if (null != user) {
             dto.setCreateUser(user.getId());
-
             // 保存流转记录
             CirculationInsertOrUpdateDTO circul = new CirculationInsertOrUpdateDTO();
             circul.setAllotUserId(user.getId());
@@ -615,6 +614,7 @@ public class MyCustomerClueController {
             if (null != roleListAll && roleListAll.size() > 0) {
                 circul.setAllotRoleId(roleListAll.get(0).getId());
             }
+            circul.setAllotOrg(user.getOrgId());
             circul.setClueId(dto.getClueId());
             if (null != dto.getBusDirectorId()) {
                 IdEntityLong id = new IdEntityLong();
@@ -627,6 +627,7 @@ public class MyCustomerClueController {
                     if (null != roleList && roleList.size() > 0) {
                         circul.setRoleId(roleList.get(0).getId());
                     }
+                    circul.setOrg(dirUser.getData().getOrgId());
                 }
                 // 保存流转信息
                 circulationFeignClient.saveCirculation(circul);
@@ -891,10 +892,12 @@ public class MyCustomerClueController {
             circul.setAllotRoleId(user.getRoleList().get(0).getId());
         }
         circul.setClueId(dto.getClueId());
+        circul.setAllotOrg(user.getOrgId());
         circul.setUserId(user.getId());
         if (null != user.getRoleList() && user.getRoleList().size() > 0) {
             circul.setRoleId(user.getRoleList().get(0).getId());
         }
+        circul.setOrg(user.getOrgId());
         dto.setCirculationInsertOrUpdateDTO(circul);
         JSONResult<String> customerClue = myCustomerFeignClient.createCustomerClue(dto);
         return customerClue;
@@ -938,8 +941,6 @@ public class MyCustomerClueController {
 
     /**
      * 获取当前登录账号
-     * 
-     * @param orgDTO
      * @return
      */
     private UserInfoDTO getUser() {

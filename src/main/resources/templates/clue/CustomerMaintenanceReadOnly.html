@@ -74,22 +74,35 @@
                     </el-col>
                     <el-col :span="8">
                         <el-form-item label="微信：" :label-width="formLabelWidth" >
-                            <el-button type="text" disabled>{{form.ishasWx}}</el-button>
-                            <span v-show="vxShow" style="padding-left: 5px;color: rgb(0, 114, 255);cursor: pointer;" @click="dialogFormImg = true">查看二维码</span>
+                            <div v-if="showPhone">
+                                <el-button type="text" disabled>{{form.ishasWx}}</el-button>
+                                <span v-show="vxShow" style="padding-left: 5px;color: rgb(0, 114, 255);cursor: pointer;" @click="dialogFormImg = true">查看二维码</span>
+                            </div>
+                            <div v-else>
+                                <el-button type="text" disabled>{{(form.ishasWx==null||form.ishasWx=='')?'':'***'}}</el-button>
+                            </div>
                         </el-form-item>
                     </el-col>
                 </el-row>
                 <el-row>
                     <el-col :span="8">
                         <el-form-item label="QQ：" :label-width="formLabelWidth" >
-                            <el-button type="text" disabled>{{form.qq}}</el-button>
+                            <div v-if="showPhone">
+                                <el-button type="text" disabled>{{form.qq}}</el-button>
+                            </div>
+                            <div v-else>
+                                <el-button type="text" disabled>{{(form.qq==null||form.qq=='')?'':'***'}}</el-button>
+                            </div>
                         </el-form-item>
                     </el-col>
                     <el-col :span="8">
                         <el-form-item label="邮箱：" prop="customerEmail" :label-width="formLabelWidth">
-                            <el-button type="text" disabled>
-                                {{form.customerEmail}}
-                            </el-button>
+                            <div v-if="showPhone">
+                                <el-button type="text" disabled>{{form.customerEmail}}</el-button>
+                            </div>
+                            <div v-else>
+                                <el-button type="text" disabled>{{(form.customerEmail==null||form.customerEmail=='')?'':'***'}}</el-button>
+                            </div>
                         </el-form-item>
                     </el-col>
                 </el-row>
@@ -328,32 +341,12 @@
                 border
                 @selection-change="handleSelectionChange"
              >
-                <el-table-column
-                  type="index"
-                  width="55"
-                  label="序号"
-                  align="center">
-                </el-table-column>
-                <el-table-column
-                  prop="roleName"
-                  label="服务人员角色"
-                  align="center">
-                </el-table-column>
-                <el-table-column
-                  prop="userName"
-                  label="服务人员姓名"
-                  align="center">
-                </el-table-column>
-                <el-table-column
-                  prop="telRuleValue"
-                  label="分配规则（名称）"
-                  align="center">
-                </el-table-column>
-                <el-table-column
-                  prop="createTime"
-                  label="服务时间"
-                  align="center">
-                </el-table-column>
+                <el-table-column type="index" width="55" label="序号" align="center"></el-table-column>
+                <el-table-column prop="roleName" label="角色" align="center"></el-table-column>
+                <el-table-column prop="orgName" label="所属组(组名)" align="center"></el-table-column>
+                <!--<el-table-column prop="userName" label="服务人员姓名" align="center"></el-table-column>-->
+                <!--<el-table-column prop="telRuleValue" label="分配规则（名称）" align="center"></el-table-column>-->
+                <el-table-column prop="createTime" label="开始服务时间" align="center"></el-table-column>
             </el-table>            
         </el-form>
     </el-row>
