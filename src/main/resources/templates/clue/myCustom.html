@@ -17,7 +17,7 @@
         <el-breadcrumb-item>电销管理</el-breadcrumb-item>
         <el-breadcrumb-item>我的客户</el-breadcrumb-item>
     </el-breadcrumb>
-     <el-row class="marginB10">
+    <el-row class="marginB20">
         <el-button type="primary" @click="dialogChooseList = true"><i class="el-icon-menu"></i>选择列</el-button>
         <shiro:hasPermission name="myCustomerInfo:apply">
             <el-button type="success" @click="openFormInfo">重单申请</el-button>
@@ -30,234 +30,239 @@
             <el-button type="warning" @click="createClueData" >新建客户资源</a></el-button>
         </shiro:hasPermission>
     </el-row>
-    <el-row class="marginB10 greybg padding20" style="padding-bottom: 0">        
-        <el-form :inline="true" :model="form" ref="form">
-            <el-form-item label="">
-                <el-select v-model="form.isTransfer" placeholder="全部资源" style="width: 100%;" clearable >
-                    <el-option
-                        v-for="item in isTransfer"
-                        :key="item.value"
-                        :label="item.label"
-                        :value="item.value">
-                    </el-option>
-                </el-select>
-            </el-form-item> 
-            <!--  
-            <el-form-item label="">  
-                <el-select v-model="form.cluesta" placeholder="资源有效性" style="width: 100%;" clearable >
-                    <el-option
-                        v-for="item in clueStatus"
-                        :key="item.value"
-                        :label="item.label"
-                        :value="item.value">
-                    </el-option>
-                </el-select>
-            </el-form-item>
-            -->
-            <el-form-item label="">
-                <el-input v-model="form.customerPhone" placeholder="客户手机号"></el-input>
-            </el-form-item>
-            <el-form-item label="">
-                <el-input v-model="form.customerName" placeholder="客户姓名"></el-input>
-            </el-form-item>
-            <el-form-item label="">
-                <el-select v-model="form.cusStatus" placeholder="客户状态" style="width: 100%;" clearable >
-                    <el-option
-                        v-for="item in cusStatusArr"
-                        :key="item.value"
-                        :label="item.name"
-                        :value="item.value">
-                    </el-option>
-                </el-select>
-            </el-form-item>
-            <el-form-item label="">
-                <el-select v-model="form.cusLeve" placeholder="客户级别" style="width: 100%;" clearable >
-                    <el-option
-                        v-for="item in cusLevelArr"
-                        :key="item.value"
-                        :label="item.name"
-                        :value="item.value">
-                    </el-option>
-                </el-select>
-            </el-form-item>
-            <el-form-item label="编辑时间:">
-                <el-date-picker
-                    style="width: 100%;"
-                    v-model="form.updateTimeStart"
-                    type="datetime"
-                    placeholder="选择日期时间">
-                </el-date-picker>
-            </el-form-item>
-            <el-form-item label="—">
-                <el-date-picker
-                    style="width: 100%;"
-                    v-model="form.updateTimeEnd"
-                    type="datetime"
-                    placeholder="选择日期时间">
-                </el-date-picker>
-            </el-form-item>
-            <el-form-item label="创建时间:">
-                <el-date-picker
-                    style="width: 100%;"
-                    v-model="form.createTimeStart"
-                    type="datetime"
-                    placeholder="选择日期时间">
-                </el-date-picker>
-            </el-form-item>
-            <el-form-item label="—">
-                <el-date-picker
-                    style="width: 100%;"
-                    v-model="form.createTimeEnd"
-                    type="datetime"
-                    placeholder="选择日期时间">
-                </el-date-picker>
-            </el-form-item>
-            <el-form-item label="分配时间:">
-                <el-date-picker
-                    style="width: 100%;"
-                    v-model="form.distributionTimeStart"
-                    type="datetime"
-                    placeholder="选择日期时间">
-                </el-date-picker>
-            </el-form-item>
-            <el-form-item label="—">
-                <el-date-picker
-                    style="width: 100%;"
-                    v-model="form.distributionTimeEnd"
-                    type="datetime"
-                    placeholder="选择日期时间">
-                </el-date-picker>
-            </el-form-item>
-            <el-button icon="el-icon-search" type="primary" @click="search">搜索</el-button>
-            <span style="color: rgb(0, 114, 255);text-decoration: underline;cursor: pointer;margin:0 10px;" @click="toogleClick">更多搜索</span>
-            <el-row v-show="isShow">
-                <el-form-item label="">
-                    <el-select v-model="form.dayTel" placeholder="今日是否拨打" style="width: 100%;" clearable >
-                        <el-option
-                            v-for="item in callTel"
-                            :key="item.value"
-                            :label="item.label"
-                            :value="item.value">
-                        </el-option>
-                    </el-select>
-                </el-form-item> 
-                <el-form-item label="">  
-                    <el-select v-model="form.hasInvite" placeholder="是否邀约" style="width: 100%;" clearable >
-                        <el-option
-                            v-for="item in hasInvite"
-                            :key="item.value"
-                            :label="item.label"
-                            :value="item.value">
-                        </el-option>
-                    </el-select>
+    <div class="mainSearchBg">  
+        <div class="mainSearchFormBox">
+            <el-form :inline="true" class="demo-form-inline mainSearchForm" :model="form" ref="form">
+                <el-form-item label="客户手机号:" >
+                    <el-input v-model="form.customerPhone" placeholder="客户手机号"></el-input>
                 </el-form-item>
-                <el-form-item label="">
-                    <el-select v-model="form.repeatStatus" placeholder="是否重复手机号" style="width: 100%;" clearable >
-                        <el-option
-                            v-for="item in clueRepeatStatus"
-                            :key="item.value"
-                            :label="item.label"
-                            :value="item.value">
-                        </el-option>
-                    </el-select>
-                </el-form-item> 
-                <el-form-item label="">  
-                    <el-select v-model="form.province" placeholder="预签约省份" style="width: 100%;" clearable >
-                        <el-option
-                            v-for="item in provinceArr"
-                            :key="item.name"
-                            :label="item.name"
-                            :value="item.name">
-                        </el-option>
-                    </el-select>
+                <el-form-item label="客户姓名:" >
+                    <el-input v-model="form.customerName" placeholder="客户姓名"></el-input>
                 </el-form-item>
-                <el-form-item label="">  
-                    <el-select v-model="form.category" placeholder="资源类别" style="width: 100%;" clearable > 
+                <el-form-item label="客户级别:" >
+                    <el-select v-model="form.cusLeve" placeholder="客户级别" clearable>
                         <el-option
-                            v-for="item in categoryArr"
+                            v-for="item in cusLevelArr"
                             :key="item.value"
                             :label="item.name"
                             :value="item.value">
                         </el-option>
                     </el-select>
                 </el-form-item>
-                <el-form-item label="">
-                    <el-input v-model="form.searchWord" placeholder="搜索词"></el-input>
+                <el-form-item label="编辑时间:" >
+                    <el-date-picker
+                        
+                        v-model="form.updateTimeStart"
+                        type="datetime"
+                        placeholder="选择日期时间">
+                    </el-date-picker>
                 </el-form-item>
-                <!-- <el-form-item label="">
-                    <el-input v-model="form.address" placeholder="地址"></el-input>
-                </el-form-item> -->
+                <el-form-item label="—" class="widthauto">
+                    <el-date-picker
+                        
+                        v-model="form.updateTimeEnd"
+                        type="datetime"
+                        placeholder="选择日期时间">
+                    </el-date-picker>
+                </el-form-item>                                  
+                <!--  
                 <el-form-item label="">  
-                    <el-select v-model="form.trackingDay" placeholder="当日是否跟访" style="width: 100%;" clearable >
+                    <el-select v-model="form.cluesta" placeholder="资源有效性" style="width: 100%;" clearable >
                         <el-option
-                            v-for="item in hastracking"
+                            v-for="item in clueStatus"
                             :key="item.value"
                             :label="item.label"
                             :value="item.value">
                         </el-option>
                     </el-select>
                 </el-form-item>
-            </el-row>                
-        </el-form>       
-    </el-row>
-    <el-row>
-        <el-table 
-            ref="multipleTable"
-            tooltip-effect="dark"
-             v-loading="loading"
-            style="width: 100%"
-            border
-            :data="dataTable" 
-            @selection-change="handleSelectionChange"
-            @row-dblclick="showClueDetailInfo"
-            >
-            <el-table-column align="center" type="selection"  prop="clueId"  @selection-change="handleSelectionChange" width="55"></el-table-column>
-             <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width"
-	         v-for="(item,key,index) in tableColums" v-if="item.fieldCode == 'phone'">
-	               <template slot-scope="scope">
-                    	{{scope.row.phone}}
-	                    <input type='hidden'>
-	                    
-	                    <i class="el-icon-phone-outline"  @click="customerEidt(scope.row.clueId)"  style="margin:0 10px;font-size: 16px;cursor: pointer;"></i>  
-	                    <el-tag v-if="scope.row.tag">{{scope.row.tag}}</el-tag>
-	                </template>
-	        </el-table-column>
-	        <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width" 
-	          v-else-if="item.fieldCode == 'isTrack'">
-	               <template slot-scope="scope">
-	                    <div v-if="scope.row.isTrack === 1"> 
-	                         <el-button @click="openTrackingDialog(scope.row.clueId)" type="text" size="small"> 点击查看 </el-button>
-	                    </div> 
-	                </template>
-	        </el-table-column>
-	        <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width" 
-	          v-else-if="item.fieldCode == 'repeatPhones'">
-	               <template slot-scope="scope">
-               		  <div v-if="scope.row.isRepeatPhone === 1"> 
-	                    <el-button @click="repeatPhonesClick(scope.row)" type="text" size="small">点击查看</el-button>
-	                  </div> 
-	                </template>
-	        </el-table-column>
-	        <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width" 
-	          v-else-if="item.fieldCode == 'sex'">
-	               <template slot-scope="scope">
-                      <div v-if="scope.row.sex === 1">
-                                                                                       男
-                      </div>
-                      <div v-else-if="scope.row.sex ===2">
-                                                                                    女                                         
-                      </div>
-	               </template>
-	        </el-table-column>
-            <el-table-column align="center" sortable  :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width"
-	          v-else-if="item.fieldCode == 'distributionTime'||item.fieldCode == 'updateTime'||item.fieldCode == 'createTime'">
-	        </el-table-column>
-            <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width"
-	          v-else>
-	        </el-table-column>
-        </el-table>
-          <table-pagination :pager="pager" @change="initTableData"></table-pagination> 
-    </el-row>
+                -->   
+                <el-row v-show="isShow">
+                    <el-form-item label="搜索词:" >
+                        <el-input v-model="form.searchWord" placeholder="搜索词"></el-input>
+                    </el-form-item>
+                    <el-form-item label="客户状态:" >
+                        <el-select v-model="form.cusStatus" placeholder="客户状态" clearable>
+                            <el-option
+                                v-for="item in cusStatusArr"
+                                :key="item.value"
+                                :label="item.name"
+                                :value="item.value">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
+                    <el-form-item label="全部资源:" >
+                        <el-select v-model="form.isTransfer" placeholder="全部资源" clearable >
+                            <el-option
+                                v-for="item in isTransfer"
+                                :key="item.value"
+                                :label="item.label"
+                                :value="item.value">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
+                    <el-form-item label="分配时间:">
+                        <el-date-picker
+                            
+                            v-model="form.distributionTimeStart"
+                            type="datetime"
+                            placeholder="选择日期时间">
+                        </el-date-picker>
+                    </el-form-item>
+                    <el-form-item label="—" class="widthauto">
+                        <el-date-picker
+                            
+                            v-model="form.distributionTimeEnd"
+                            type="datetime"
+                            placeholder="选择日期时间">
+                        </el-date-picker>
+                    </el-form-item>
+                    <el-form-item label="预签约省份:" >  
+                        <el-select v-model="form.province" placeholder="预签约省份" clearable>
+                            <el-option
+                                v-for="item in provinceArr"
+                                :key="item.name"
+                                :label="item.name"
+                                :value="item.name">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
+                    <el-form-item label="资源类别:" >  
+                        <el-select v-model="form.category" placeholder="资源类别" clearable> 
+                            <el-option
+                                v-for="item in categoryArr"
+                                :key="item.value"
+                                :label="item.name"
+                                :value="item.value">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
+                    <el-form-item label="重复手机号:" >
+                        <el-select v-model="form.repeatStatus" placeholder="重复手机号" clearable >
+                            <el-option
+                                v-for="item in clueRepeatStatus"
+                                :key="item.value"
+                                :label="item.label"
+                                :value="item.value">
+                            </el-option>
+                        </el-select>
+                    </el-form-item> 
+                    <el-form-item label="创建时间:">
+                        <el-date-picker
+                            
+                            v-model="form.createTimeStart"
+                            type="datetime"
+                            placeholder="选择日期时间">
+                        </el-date-picker>
+                    </el-form-item>
+                    <el-form-item label="—" class="widthauto">
+                        <el-date-picker
+                            
+                            v-model="form.createTimeEnd"
+                            type="datetime"
+                            placeholder="选择日期时间">
+                        </el-date-picker>
+                    </el-form-item>
+                    <el-form-item label="今日是否拨打:" >
+                        <el-select v-model="form.dayTel" placeholder="今日是否拨打" clearable>
+                            <el-option
+                                v-for="item in callTel"
+                                :key="item.value"
+                                :label="item.label"
+                                :value="item.value">
+                            </el-option>
+                        </el-select>
+                    </el-form-item> 
+                    <!-- <el-form-item label="">
+                        <el-input v-model="form.address" placeholder="地址"></el-input>
+                    </el-form-item> -->
+                    <el-form-item label="当日是否跟访:" >  
+                        <el-select v-model="form.trackingDay" placeholder="当日是否跟访" clearable>
+                            <el-option
+                                v-for="item in hastracking"
+                                :key="item.value"
+                                :label="item.label"
+                                :value="item.value">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
+                    <el-form-item label="是否邀约:" >  
+                        <el-select v-model="form.hasInvite" placeholder="是否邀约" clearable>
+                            <el-option
+                                v-for="item in hasInvite"
+                                :key="item.value"
+                                :label="item.label"
+                                :value="item.value">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>                         
+                </el-row>
+                <div class="mainSearchBtnBox">
+                    <el-button icon="el-icon-search" type="primary" @click="search" class="searchBtn">搜索</el-button>
+                    <el-button type="info" class="searchBtn">取消</el-button>
+                    <span style="color: #5c6be8;cursor: pointer;margin:0 10px;" @click="toogleClick">更多搜索<i class="el-icon-arrow-down greycolor paddingL6"></i></span>
+                </div>
+            </el-form>  
+        </div>
+        <el-row>
+            <el-table 
+                ref="multipleTable"
+                tooltip-effect="dark"
+                 v-loading="loading"
+                style="width: 100%"
+                border
+                :data="dataTable" 
+                @selection-change="handleSelectionChange"
+                @row-dblclick="showClueDetailInfo"
+                >
+                <el-table-column align="center" type="selection"  prop="clueId"  @selection-change="handleSelectionChange" width="55"></el-table-column>
+                 <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width"
+                 v-for="(item,key,index) in tableColums" v-if="item.fieldCode == 'phone'">
+                       <template slot-scope="scope">
+                            {{scope.row.phone}}
+                            <input type='hidden'>
+                            
+                            <i class="el-icon-phone-outline"  @click="customerEidt(scope.row.clueId)"  style="margin:0 10px;font-size: 16px;cursor: pointer;"></i>  
+                            <el-tag v-if="scope.row.tag">{{scope.row.tag}}</el-tag>
+                        </template>
+                </el-table-column>
+                <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width" 
+                  v-else-if="item.fieldCode == 'isTrack'">
+                       <template slot-scope="scope">
+                            <div v-if="scope.row.isTrack === 1"> 
+                                 <el-button @click="openTrackingDialog(scope.row.clueId)" type="text" size="small"> 点击查看 </el-button>
+                            </div> 
+                        </template>
+                </el-table-column>
+                <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width" 
+                  v-else-if="item.fieldCode == 'repeatPhones'">
+                       <template slot-scope="scope">
+                          <div v-if="scope.row.isRepeatPhone === 1"> 
+                            <el-button @click="repeatPhonesClick(scope.row)" type="text" size="small">点击查看</el-button>
+                          </div> 
+                        </template>
+                </el-table-column>
+                <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width" 
+                  v-else-if="item.fieldCode == 'sex'">
+                       <template slot-scope="scope">
+                          <div v-if="scope.row.sex === 1">
+                                                                                           男
+                          </div>
+                          <div v-else-if="scope.row.sex ===2">
+                                                                                        女                                         
+                          </div>
+                       </template>
+                </el-table-column>
+                <el-table-column align="center" sortable  :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width"
+                  v-else-if="item.fieldCode == 'distributionTime'||item.fieldCode == 'updateTime'||item.fieldCode == 'createTime'">
+                </el-table-column>
+                <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width"
+                  v-else>
+                </el-table-column>
+            </el-table>
+              <table-pagination :pager="pager" @change="initTableData"></table-pagination> 
+        </el-row>
+    </div>
     <!-- dialog -->
     <el-dialog title="重单申请" :visible.sync="dialogFormVisible">
         <el-form :model="repeatApplyForm" ref="repeatApplyForm" :rules="repeatRules">
@@ -350,23 +355,17 @@
     </el-dialog>
     <!-- 跟进记录 -->
     <el-dialog title="跟进记录" :visible.sync="recordDialog">
-        <el-table
-            ref="singleTable" 
-            tooltip-effect="dark"
-            style="width: 100%"
-            border
-            :data="recordTable" 
-            >
+        <el-table ref="singleTable" tooltip-effect="dark" style="width: 100%" border :data="recordTable">
             <el-table-column align="center" type="index" width="55" label="序号"></el-table-column>
             <el-table-column align="center" prop="callTime" label="拨打时间"></el-table-column>
             <el-table-column align="center" prop="status" label="客户状态"></el-table-column>
             <el-table-column align="center" prop="isConnect" label="是否接通"></el-table-column>
             <el-table-column align="center" prop="isNeedResource" label="资源有效性"></el-table-column>
             <el-table-column align="center" prop="isInvite" label="是否邀约"></el-table-column>
-            <el-table-column align="center" prop="customerFocus" label="客户关注点"></el-table-column>  
-            <el-table-column align="center" prop="isReturnVisit" label="是否继续回访"></el-table-column>  
-            <el-table-column align="center" prop="nextTimeVisit" label="下次回访时间"></el-table-column>  
-            <el-table-column align="center" prop="createPerson" label="创建人"></el-table-column>  
+            <el-table-column align="center" prop="customerFocus" label="客户关注点"></el-table-column>
+            <!--<el-table-column align="center" prop="isReturnVisit" label="是否继续回访"></el-table-column>  -->
+            <el-table-column align="center" prop="nextTimeVisit" label="下次回访时间"></el-table-column>
+            <el-table-column align="center" prop="createPerson" label="创建人"></el-table-column>
         </el-table>
     </el-dialog>
     <!-- 重复手机号 -->
@@ -494,29 +493,29 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                 loading:false,
                 dailogTitleType:'',
                 form: {
-                	isTransfer:'',
-                	cluesta:'',
-                	customerPhone:'',
-                	customerName:'',
-                	cusStatus:'',
-                	cusLeve:'',
-                	updateTimeStart:'',
-                	updateTimeEnd:'',
-                	createTimeStart:'',
-                	createTimeEnd:'',
+                    isTransfer:'',
+                    cluesta:'',
+                    customerPhone:'',
+                    customerName:'',
+                    cusStatus:'',
+                    cusLeve:'',
+                    updateTimeStart:'',
+                    updateTimeEnd:'',
+                    createTimeStart:'',
+                    createTimeEnd:'',
                   distributionTimeStart:'',
                   distributionTimeEnd:'',
-                	dayTel:'',
-                	hasInvite:'',
-                	repeatStatus:'',
-                	province:'',
-                	category:'',
-                	category:'',
-                	searchWord:'',
-                	address:'',
-                	trackingDay:'',
-                	
-                	
+                    dayTel:'',
+                    hasInvite:'',
+                    repeatStatus:'',
+                    province:'',
+                    category:'',
+                    category:'',
+                    searchWord:'',
+                    address:'',
+                    trackingDay:'',
+                    
+                    
                 },
                 repeatApplyForm: {
                     phone:'',
@@ -710,14 +709,14 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                 },
                 allTableColums:[],
                 tableColums:[]
-            }        	  
+            }             
         },
         methods: {
-        	search(){
-        		this.pager.currentPage =1;
-        		this.initTableData();
-        	},
-         	 initTableData(){
+            search(){
+                this.pager.currentPage =1;
+                this.initTableData();
+            },
+             initTableData(){
                  var param = {};
                  var pageSize = this.pager.pageSize;
                  var pageNum = this.pager.currentPage;
@@ -743,6 +742,7 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                  //param.address= this.form.address;
                  param.searchWord= this.form.searchWord;
                  param.trackingDay= this.form.trackingDay;
+
              	this.loading=true;
      		    axios.post('/tele/clueMyCustomerInfo/findTeleClueInfo',param).then(function (response) {
      				if(!response){
@@ -768,6 +768,10 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
 						return ;
 					}
      		    	var pageData=resobj.data;
+     		    	var data=pageData.data;
+    		    	 for(var i=0;i<data.length;i++){
+    		    		data[i].urgentDate=mycustomVM.dateFormat(null,null,data[i].urgentDate,null);
+                    }
      				mycustomVM.pager.total=pageData.total;
      				mycustomVM.pager.currentPage = pageData.currentPage;
      				mycustomVM.pager.pageSize = pageData.pageSize;
@@ -775,13 +779,24 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
      				mycustomVM.loading=false;
      			})
          	},
+        	//日期数据格式化方法
+    		dateFormat(row, column, cellValue, index) {
+               	if (cellValue == undefined) {
+    	               return "";
+              	}
+               	return moment(cellValue).format("YYYY-MM");
+    		},
          	//展现详情
          	showClueDetailInfo (row, column) {
          	  window.location.href='/tele/clueMyCustomerInfo/customerInfoReadOnly?clueId='+row.clueId;
             },
-         	createClueData(){
-         	  window.location.href='/tele/clueMyCustomerInfo/createClue';
-         	},
+            //展现详情
+            showClueDetailInfo (row, column) {
+              window.location.href='/tele/clueMyCustomerInfo/customerInfoReadOnly?clueId='+row.clueId;
+            },
+            createClueData(){
+              window.location.href='/tele/clueMyCustomerInfo/createClue';
+            },
             toogleClick(){
                 if(this.isShow){
                     this.isShow=false
@@ -789,13 +804,13 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                     this.isShow=true
                 }          
             },
-           	closeTmOutboundDialog(){//关闭电销外呼dialog
-        		this.tmOutboundCallDialogVisible = false;
-        		clearTimer();//清除定时器
-        	},
+            closeTmOutboundDialog(){//关闭电销外呼dialog
+                this.tmOutboundCallDialogVisible = false;
+                clearTimer();//清除定时器
+            },
             openFormInfo(){
-            	this.dialogFormVisible = true;
-            	if(this.$refs['repeatApplyForm']) {
+                this.dialogFormVisible = true;
+                if(this.$refs['repeatApplyForm']) {
                     this.$refs['repeatApplyForm'].resetFields();
               }
             },
@@ -812,11 +827,11 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                     if(this.$refs['releaseForm']) {
                         this.$refs['releaseForm'].resetFields();
                     }
-                }          	
+                }           
 
             },
             searchClue(){
-            	//重单申请查询线索
+                //重单申请查询线索
                 if(this.repeatApplyForm.phone==""){
                     this.$message({
                       message: '请输入手机号',
@@ -827,9 +842,9 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                   var param={};
                    param.phone=phone;
                    this.repeatApplyForm.clue="";
-        		   axios.post('/tele/clueMyCustomerInfo/queryRepeatClue',param).then(function (response) {
-        		      mycustomVM.repeatClueArr=response.data.data;
-         		  })
+                   axios.post('/tele/clueMyCustomerInfo/queryRepeatClue',param).then(function (response) {
+                      mycustomVM.repeatClueArr=response.data.data;
+                  })
             },
             openTrackingDialog(cid){
                 var param = {};
@@ -837,17 +852,17 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                 axios.post('/aggregation/tracking/queryList', param)
                     .then(function (response) {
                         if (response.data.code == 0) {
-                        	mycustomVM.trackingParam.tableData = response.data.data
-                        	mycustomVM.trackingParam.trackingDialogVisible = true;
+                            mycustomVM.trackingParam.tableData = response.data.data
+                            mycustomVM.trackingParam.trackingDialogVisible = true;
                         } else {
-                        	mycustomVM.$message.error(response.data.msg);
+                            mycustomVM.$message.error(response.data.msg);
                         }
                     }).catch(function (error) {
                 });
 
             },
             searchRepeatClue(){
-            	//重单申请查询线索
+                //重单申请查询线索
                 if(this.repeatApplyForm.repeatPhone==""){
                     this.$message({
                       message: '请输入重单手机号',
@@ -861,27 +876,27 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                    param.telemarketingId=employee
                    this.repeatApplyForm.repeatClue="";
                    param.phone=repeatPhone;
-         		   axios.post('/tele/clueMyCustomerInfo/queryRepeatCurClue',param).then(function (response) {
-         		      mycustomVM.repeatCurClueArr=response.data.data;
-          		  })
+                   axios.post('/tele/clueMyCustomerInfo/queryRepeatCurClue',param).then(function (response) {
+                      mycustomVM.repeatCurClueArr=response.data.data;
+                  })
                
             },
             handleSelectionChange(val) {
                 this.multseleSelection = val;
             },
             customerEidt(clueId,phone){
-             //客户维护界面	
+             //客户维护界面   
               window.location.href="/tele/clueMyCustomerInfo/customerEditInfo?clueId="+clueId; 
             },
             submitForm(formName) {
-            	//重单提交
+                //重单提交
                 this.$refs[formName].validate((valid) => {
                     if (valid) {
-                    	
-                    	var repeatPhone=this.repeatApplyForm.repeatPhone;
-                    	
-                    	var  phone=this.repeatApplyForm.phone;
-                    	
+                        
+                        var repeatPhone=this.repeatApplyForm.repeatPhone;
+                        
+                        var  phone=this.repeatApplyForm.phone;
+                        
                         var employee= this.repeatApplyForm.employee;
                         
                         var clue=this.repeatApplyForm.clue;
@@ -903,19 +918,19 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                         param.repeatPhone=repeatPhone;
                         
                         param.remark=textarea;
-                     	this.dialogFormVisible = false;
+                        this.dialogFormVisible = false;
                         axios.post('/tele/clueMyCustomerInfo/saveRepeatClue', param)
                         .then(function (response) {
-                        	if (response.data.code == 0) {
-                       		 	mycustomVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
-                             	   mycustomVM.initTableData();  
-                 		         }});
-	                       	}else{
-	                       		mycustomVM.$message({
-	  	                             message: response.data.msg,
-	  	                             type: 'warning'
-	  	                           });
-	                       	}
+                            if (response.data.code == 0) {
+                                mycustomVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
+                                   mycustomVM.initTableData();  
+                                 }});
+                            }else{
+                                mycustomVM.$message({
+                                     message: response.data.msg,
+                                     type: 'warning'
+                                   });
+                            }
                         }).catch(function (error) {
                         });
                     } else {
@@ -936,21 +951,21 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                           return;
                       }
                        var  releId=[];
-                   	  if(null!=rows&&rows.length>0){
-                      	   for(var i=0;i<rows.length;i++){
-                      		 releId.push(rows[i].clueId);
-                      	    }
+                      if(null!=rows&&rows.length>0){
+                           for(var i=0;i<rows.length;i++){
+                             releId.push(rows[i].clueId);
+                            }
                         }
-                     	  var  reason= this.releaseForm.reason;
-                     	  var  param={};
-                     	  param.releaseClueId=releId;
-                     	 param.releaReason=reason;
-                     	this.releaseFormVisible=false;
+                          var  reason= this.releaseForm.reason;
+                          var  param={};
+                          param.releaseClueId=releId;
+                         param.releaReason=reason;
+                        this.releaseFormVisible=false;
                          axios.post('/tele/clueMyCustomerInfo/releaseClue', param)
                          .then(function (response) {
-                        	 mycustomVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
-                        	 mycustomVM.initTableData();  
-        		        	}});
+                             mycustomVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
+                             mycustomVM.initTableData();  
+                            }});
                          }).catch(function (error) {
                          });
                     } else {
@@ -1050,39 +1065,39 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                 window.parent.outboundCallPhone(outboundInputPhone,2,clueId, function(res){
                     axios.post('/tele/clueMyCustomerInfo/updateCallTime',param).then(function(response){
                     });
-            　 			 });
-        　	 		},
+            　            });
+        　           },
            confirmColumn(){
-             	this.dialogChooseList = false;
-             	//处理用户选择的列
-             	if(this.fieldFrom.type.length==0){
-             		this.$message({
+                this.dialogChooseList = false;
+                //处理用户选择的列
+                if(this.fieldFrom.type.length==0){
+                    this.$message({
                          message: "请至少保留一列",
                          type: 'error'
                        }); 
-             		return;
-             	}
-             	var customerShowColun = [];
-             	var customerColumn = this.fieldFrom.type;
-             	customerColumn.sort(this.sortNumber);//对选择的列排序
-             	var idList=[];
-             	for(var i=0;i<customerColumn.length;i++){
-             		var curItem = customerColumn[i];
-             		var itemArr = curItem.split("_");
-             		var obj = {};
-             		obj.fieldCode=itemArr[1];
-             		obj.displayName=itemArr[2];
-             		customerShowColun.push(obj);
-             		idList.push(itemArr[3])
-             	}
-             	this.tableColums = customerShowColun;
-             	var param ={};
+                    return;
+                }
+                var customerShowColun = [];
+                var customerColumn = this.fieldFrom.type;
+                customerColumn.sort(this.sortNumber);//对选择的列排序
+                var idList=[];
+                for(var i=0;i<customerColumn.length;i++){
+                    var curItem = customerColumn[i];
+                    var itemArr = curItem.split("_");
+                    var obj = {};
+                    obj.fieldCode=itemArr[1];
+                    obj.displayName=itemArr[2];
+                    customerShowColun.push(obj);
+                    idList.push(itemArr[3])
+                }
+                this.tableColums = customerShowColun;
+                var param ={};
                param.fieldIdList = idList;
                param.menuCode = "myCustomerInfo";
                if(idList.length!=0){
                    axios.post('/customfield/customField/saveUserField', param)
                    .then(function (response) {
-                   	
+                    
                    })
                    .catch(function (error) {
                         console.log(error);
@@ -1090,24 +1105,24 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                }
              },
              initColumn(){
-             	//初始化table 列 和 用户自定义列
-             	this.allTableColums = fieldList;
-             	if(userFieldList.length!=0){
-             		var type=[];
-                 	for(var i=0;i<userFieldList.length;i++){
-                 		type.push(userFieldList[i].sortNum+'_'+userFieldList[i].fieldCode+'_'+userFieldList[i].displayName+'_'+userFieldList[i].fieldId)
+                //初始化table 列 和 用户自定义列
+                this.allTableColums = fieldList;
+                if(userFieldList.length!=0){
+                    var type=[];
+                    for(var i=0;i<userFieldList.length;i++){
+                        type.push(userFieldList[i].sortNum+'_'+userFieldList[i].fieldCode+'_'+userFieldList[i].displayName+'_'+userFieldList[i].fieldId)
                   }
-                	this.fieldFrom.type = type;
-                	this.confirmColumn();
-             	}else{
-             		var type=[];
-                   	for(var i=0;i<fieldList.length;i++){
-                   		type.push(fieldList[i].sortNum+'_'+fieldList[i].fieldCode+'_'+fieldList[i].displayName+'_'+fieldList[i].id)
-                  	}
-  	              	this.fieldFrom.type = type;
-  	              	this.confirmColumn();
-             	}
-             	
+                    this.fieldFrom.type = type;
+                    this.confirmColumn();
+                }else{
+                    var type=[];
+                    for(var i=0;i<fieldList.length;i++){
+                        type.push(fieldList[i].sortNum+'_'+fieldList[i].fieldCode+'_'+fieldList[i].displayName+'_'+fieldList[i].id)
+                    }
+                    this.fieldFrom.type = type;
+                    this.confirmColumn();
+                }
+                
              },
              sortNumber(a,b) {
                  //对数组中元素，按照数字 从小到大 排序
@@ -1132,9 +1147,9 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
             
         },
         created(){
-    		//初始化数据列表
-    		this.initTableData();
-    		//客户状态
+            //初始化数据列表
+            this.initTableData();
+            //客户状态
            var param={};
             param.groupCode="customerStatus"; 
             axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {
@@ -1146,33 +1161,33 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                     }
 
                 }
-            	mycustomVM.cusStatusArr=arr
+                mycustomVM.cusStatusArr=arr
              });
             param={};
             param.groupCode="customerLevel"; 
             axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {  
-            	mycustomVM.cusLevelArr=response.data.data;
+                mycustomVM.cusLevelArr=response.data.data;
              });
             //初始资源类别数据
             param={};
-          	param.groupCode="clueCategory";
+            param.groupCode="clueCategory";
             axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {  
-            	mycustomVM.categoryArr=response.data.data;
+                mycustomVM.categoryArr=response.data.data;
             });
             param={};
-          	param.type="0";
+            param.type="0";
             axios.post('/area/sysregion/querySysRegionByParam',param).then(function (response) {  
-            	mycustomVM.provinceArr=response.data.data.data;
+                mycustomVM.provinceArr=response.data.data.data;
             });
 
             // 初始化列
             this.initColumn();
-    	}
+        }
     })
  
   
   function   rebackCallphone(){
-	   
+       
   }
 </script>
 

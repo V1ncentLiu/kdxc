@@ -1,6 +1,7 @@
 var myCallRecordVm = new Vue({
     el: '#myCallRecordVm',
     data: {
+        isShow:false,
     	formLabelWidth:'120px',
 	    pager:{//组织列表pager
           total: 0,
@@ -274,7 +275,14 @@ var myCallRecordVm = new Vue({
                   console.log(error);
              }).then(function(){
              });
-    	}
+    	},
+        toogleClick(){
+            if(this.isShow){
+                this.isShow=false
+            }else{
+                this.isShow=true
+            }          
+        },
     	
     },
     created(){

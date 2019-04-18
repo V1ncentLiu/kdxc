@@ -1,5 +1,8 @@
 package com.kuaidao.manageweb.controller.visitrecord;
 
+import com.kuaidao.manageweb.config.LogRecord;
+import com.kuaidao.manageweb.config.LogRecord.OperationType;
+import com.kuaidao.manageweb.constant.MenuEnum;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -80,6 +83,8 @@ public class BusinessVisitRecordController {
      */
     @RequestMapping("/insert")
     @ResponseBody
+    @LogRecord(description = "添加到访记录", operationType = OperationType.INSERT,
+        menuName = MenuEnum.CUSTOMER_VISIT_RECORD)
     public JSONResult<Boolean> saveVisitRecord(
             @Valid @RequestBody BusVisitRecordInsertOrUpdateDTO dto, BindingResult result)
             throws Exception {

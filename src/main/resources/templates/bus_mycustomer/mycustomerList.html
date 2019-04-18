@@ -5,7 +5,7 @@
     <title>我的客户</title>
     <style>
         button a{color:#fff!important;}
-        .formItem,.formItem .el-form-item__content{width:100%}
+        /*.formItem,.formItem .el-form-item__content{width:100%}*/
         .paddB20 { padding: 0 0 20px 20px;  font-size: 16px; }
 
     </style>
@@ -13,88 +13,73 @@
 <body>
 
 <div id="mainDiv" class="mainPadding"  style="display: none;">
-    <template>
-        <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
-            <el-breadcrumb-item>Home</el-breadcrumb-item>
-            <el-breadcrumb-item>商务管理</el-breadcrumb-item>
-            <el-breadcrumb-item>我的客户</el-breadcrumb-item>
-        </el-breadcrumb>
-
-        <el-row class="marginB10 greybg padding20" style="padding-bottom: 0;" >
-            <el-form :inline="true" :model="queryForm" class="demo-form-inline" ref="queryForm" >
-                <el-row :gutter="20">
-                    <el-col :span="3">
-                        <el-form-item label="">
-                            <el-select v-model="queryForm.visitStatus" clearable  placeholder="到访状态" width="100">
-                                <el-option v-for="item in visitArr" :key="item.value" :label="item.name" :value="item.value"></el-option>
-                            </el-select>
-                        </el-form-item>
-                    </el-col>
-                    <el-col :span="3">
-                        <el-form-item label="">
-                            <el-select v-model="queryForm.isSign" clearable  placeholder="签约状态" width="100">
-                                <el-option v-for="item in signArr" :key="item.value" :label="item.name" :value="item.value"></el-option>
-                            </el-select>
-                        </el-form-item>
-                    </el-col>
-                    <el-col :span="3">
-                        <el-form-item label="">
-                            <el-select v-model="queryForm.teleGroupId" clearable  placeholder="电销组" width="100">
-                                <el-option v-for="item in teleketGroupArr" :key="item.id" :label="item.name" :value="item.id"></el-option>
-                            </el-select>
-                        </el-form-item>
-                    </el-col>
-                    <el-col :span="3">
-                        <el-form-item label="">
-                            <el-select v-model="queryForm.teleSaleId" clearable  placeholder="创业顾问" width="100">
-                                <el-option v-for="item in teleketSaleArr" :key="item.id" :label="item.name" :value="item.id"></el-option>
-                            </el-select>
-                        </el-form-item>
-                    </el-col>
-                    <el-col :span="3">
-                        <el-form-item label="">
-                            <el-select v-model="queryForm.tasteProjectId" clearable  placeholder="品尝项目" width="100">
-                                <el-option v-for="item in tasteProArr" :key="item.id" :label="item.projectName" :value="item.id"></el-option>
-                            </el-select>
-                        </el-form-item>
-                    </el-col>
-                    <el-col :span="3">
-                        <el-form-item label="">
-                            <el-input v-model="queryForm.cusName" placeholder="请输入客户姓名"></el-input>
-                        </el-form-item>
-                    </el-col>
-                    <el-col :span="3">
-                        <el-form-item>
-                            <el-button type="warning" @click="notVisit" >标记未到访</el-button>
-                        </el-form-item>
-                    </el-col>
+    <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
+        <el-breadcrumb-item>Home</el-breadcrumb-item>
+        <el-breadcrumb-item>商务管理</el-breadcrumb-item>
+        <el-breadcrumb-item>我的客户</el-breadcrumb-item>
+    </el-breadcrumb>
+    <el-row class="marginB20">
+        <el-button type="primary" @click="notVisit" >标记未到访</el-button>
+    </el-row>
+    <div class="mainSearchBg">        
+        <div class="mainSearchFormBox">
+            <el-form :inline="true" :model="queryForm" class="demo-form-inline mainSearchForm" ref="queryForm">
+                <el-form-item label="邀约来访时间:">
+                    <el-date-picker v-model="queryForm.reserveTime1" type="datetime" placeholder="选择日期时间"></el-date-picker>
+                </el-form-item>
+                <el-form-item label="—" class="widthauto">
+                    <el-date-picker v-model="queryForm.reserveTime2" type="datetime" placeholder="选择日期时间"></el-date-picker>
+                </el-form-item>
+                <el-form-item label="到访状态:">
+                    <el-select v-model="queryForm.visitStatus" clearable  placeholder="到访状态">
+                        <el-option v-for="item in visitArr" :key="item.value" :label="item.name" :value="item.value"></el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="签约状态:">
+                    <el-select v-model="queryForm.isSign" clearable  placeholder="签约状态">
+                        <el-option v-for="item in signArr" :key="item.value" :label="item.name" :value="item.value"></el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="电销组:">
+                    <el-select v-model="queryForm.teleGroupId" clearable  placeholder="电销组">
+                        <el-option v-for="item in teleketGroupArr" :key="item.id" :label="item.name" :value="item.id"></el-option>
+                    </el-select>
+                </el-form-item>
+                <el-row v-show="isShow">
+                    <el-form-item label="提交邀约时间:">
+                        <el-date-picker v-model="queryForm.createTime1" type="datetime" placeholder="选择日期时间"></el-date-picker>
+                    </el-form-item>
+                    <el-form-item label="—" class="widthauto">
+                        <el-date-picker v-model="queryForm.createTime2" type="datetime" placeholder="选择日期时间"></el-date-picker>
+                    </el-form-item>
+                    <el-form-item label="创业顾问:">
+                        <el-select v-model="queryForm.teleSaleId" clearable  placeholder="创业顾问" width="100">
+                            <el-option v-for="item in teleketSaleArr" :key="item.id" :label="item.name" :value="item.id"></el-option>
+                        </el-select>
+                    </el-form-item>
+                    <el-form-item label="品尝项目:">
+                        <el-select v-model="queryForm.tasteProjectId" clearable  placeholder="品尝项目">
+                            <el-option v-for="item in tasteProArr" :key="item.id" :label="item.projectName" :value="item.id"></el-option>
+                        </el-select>
+                    </el-form-item>
+                    <el-form-item label="客户姓名:">
+                        <el-input v-model="queryForm.cusName" placeholder="请输入客户姓名"></el-input>
+                    </el-form-item>
+                    <el-form-item label="接收客户时间:">
+                        <el-date-picker v-model="queryForm.allocateTime1" type="datetime" placeholder="选择日期时间"></el-date-picker>
+                    </el-form-item>
+                    <el-form-item label="—" class="widthauto">
+                        <el-date-picker v-model="queryForm.allocateTime2" type="datetime" placeholder="选择日期时间"></el-date-picker>
+                    </el-form-item>
                 </el-row>
-                <el-row :gutter="20">
-                        <el-form-item label="邀约来访时间：">
-                            <el-date-picker v-model="queryForm.reserveTime1" type="datetime" placeholder="选择日期时间"></el-date-picker>
-                            <span style="padding:0 10px;">—</span>
-                            <el-date-picker v-model="queryForm.reserveTime2" type="datetime" placeholder="选择日期时间"></el-date-picker>
-                        </el-form-item>
-                        <el-form-item label="提交邀约时间:">
-                            <el-date-picker v-model="queryForm.createTime1" type="datetime" placeholder="选择日期时间"></el-date-picker>
-                            <span style="padding:0 10px;">—</span>
-                            <el-date-picker v-model="queryForm.createTime2" type="datetime" placeholder="选择日期时间"></el-date-picker>
-                        </el-form-item>
-                        <el-form-item label="接收客户时间:">
-                            <el-date-picker v-model="queryForm.allocateTime1" type="datetime" placeholder="选择日期时间"></el-date-picker>
-                            <span style="padding:0 10px;">—</span>
-                            <el-date-picker v-model="queryForm.allocateTime2" type="datetime" placeholder="选择日期时间"></el-date-picker>
-                        </el-form-item>
-                        <el-form-item>
-                            <el-button icon="el-icon-search" type="primary" @click="initList">搜索</el-button>
-                        </el-form-item>
-                </el-row>
+                <div class="mainSearchBtnBox"> 
+                    <el-button icon="el-icon-search" type="primary" @click="initList" class="searchBtn">搜索</el-button>
+                    <el-button type="info" class="searchBtn">取消</el-button>
+                    <span style="color: #5c6be8;cursor: pointer;margin:0 10px;" @click="toogleClick">更多搜索<i class="el-icon-arrow-down greycolor paddingL6"></i></span>
+                </div> 
             </el-form>
-        </el-row>
-
-        <el-table :data="tableData" border tooltip-effect="dark" style="width:100%"  ref="multipleTable"
-                  @row-dblclick="showCustomerDetail"
-                  @selection-change="handleSelectionChange" >
+        </div>
+        <el-table :data="tableData" border tooltip-effect="dark" style="width:100%"  ref="multipleTable" @row-dblclick="showCustomerDetail" @selection-change="handleSelectionChange">
             <el-table-column type="selection" width="55" prop="clueId" ></el-table-column>
             <el-table-column prop="xh" label="序号" width="60" type="index" align="center"></el-table-column>
             <el-table-column prop="reserveTime" label="邀约来访时间" sortable align="center"  width="180px"></el-table-column>
@@ -186,10 +171,10 @@
                 </template>
             </el-table-column>
         </el-table>
-    </template>
+    </div>
     <table-pagination :pager="pager"  @change="initList"></table-pagination>
     <!--添加到访记录-->
-    <el-dialog title="未到访原因" :visible.sync="notVisitdDialogVisible"   width="70%">
+    <el-dialog title="未到访原因" :visible.sync="notVisitdDialogVisible" width="70%">
         <template>
             <el-form :model="notVisitFlag" ref="notVisitFlag">
                 <el-form-item label="" :label-width="formLabelWidth" :required="true">
@@ -1170,6 +1155,7 @@
     var mainDivVM = new Vue({
         el: '#mainDiv',
         data: {
+            isShow:false,
         	loginUserId:loginUserId,
             editableTabsValue: 0, //tabs标签
             editableTabs: [],
@@ -1223,7 +1209,7 @@
             tasteProArr:proSelect,
             signArr:[{value:0,name:'未签约'},{value:1,name:'已签约'}],
             isSignArr:[{value:0,name:'否'},{value:1,name:'是'}],
-            visitArr:[{value:-1,name:'待处理'},{value:0,name:'未到访'},{value:1,name:'首次到访'},{value:2,name:'2次到访'},{value:3,name:'多次到访'}],
+            visitArr:[{value:-1,name:'待处理'},{value:0,name:'未到访'},{value:1,name:'已到访'}],
             visitTypeArr:[{value:1,name:'预约来访'},{value:2,name:'慕名来访'},{value:3,name:'临时来访'}],
             option2s: [{value: 1, label: '一次性全款'},{value: 2, label: '先付定金'}],
             option3s: [{value: '1', label: '现金'},{value: '2', label: 'POS'},{value: '3', label: '转账'}],
@@ -1710,11 +1696,7 @@
                 if(row.visitStatus==0){
                     resVal='未到访';
                 }else  if(row.visitStatus==1){
-                    resVal='首次到访';
-                }else  if(row.visitStatus==2){
-                    resVal='2次到访';
-                }else  if(row.visitStatus==3){
-                    resVal='多次到访';
+                    resVal='已到坊';
                 }
                 return resVal;
             },
@@ -1799,6 +1781,9 @@
             saveNotVisit(){
                 var param = this.notVisitFlag;
                 // 设置 clueid
+                if( mainDivVM.notVisitButtonAble == true){
+                    return;
+                }
                 this.$refs['notVisitFlag'].validate((valid) => {
                     if (valid) {
                         mainDivVM.notVisitButtonAble = true;
@@ -1891,6 +1876,9 @@
                 this. currentCity(selVal);
             },
             saveVisitRecord(){
+                if( mainDivVM.addVisitButtonAble==true){
+                    return false;
+                }
                 var param = this.addVisitRecord;
                 param.rebutTime = new Date(param.rebutTime)
                 param.createTime = new Date(param.createTime)
@@ -1919,6 +1907,9 @@
 
             updateVisitRecordMethod(){
                 // 设置 clueid
+                if( mainDivVM.updateVisitButtonAble==true){
+                    return false;
+                }
                 this.$refs['updateVisitRecord'].validate((valid) => {
                     if (valid) {
                         mainDivVM.updateVisitButtonAble=true;
@@ -2348,6 +2339,9 @@
                 var param = this.formSigning;
                 // 设置 clueid
                 this.$refs[formName].validate((valid) => {
+                    if(mainDivVM.addSignButtonAble==true){
+                        return;
+                    }
                     if (valid) {
                         mainDivVM.addSignButtonAble = true;
                         axios.post("/businesssign/insert", param)
@@ -2381,6 +2375,9 @@
 
                 // 设置 clueid
                 this.$refs[formName].validate((valid) => {
+                    if(mainDivVM.updateSignButtonAble==true){
+                        return;
+                    }
                     if (valid) {
                         mainDivVM.updateSignButtonAble=true;
                         axios.post("/businesssign/update", param)
@@ -2440,6 +2437,13 @@
             number4(){//编辑签约单业绩金额
                 this.updateFormSigning.performanceAmount=this.updateFormSigning.performanceAmount.replace(/[^\.\d]/g,'');
                 this.updateFormSigning.performanceAmount=this.updateFormSigning.performanceAmount.replace('.','');
+            },
+            toogleClick(){
+                if(this.isShow){
+                    this.isShow=false
+                }else{
+                    this.isShow=true
+                }          
             },
         },
         created(){
