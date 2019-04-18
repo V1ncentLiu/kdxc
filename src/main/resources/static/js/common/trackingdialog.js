@@ -4,7 +4,7 @@ var trackingDialogTempate=
     +'<template>'
     +'<el-table :data="param.tableData" border style="width: 100%" ref="releaseTable">'
     +'<el-table-column prop="xh" label="序号" width="80" type="index" align="center"></el-table-column>'
-    +'<el-table-column prop="callTime" width="180" label="拨打时间" width="170" align="center"></el-table-column>'
+    +'<el-table-column prop="callTime" width="180" label="拨打时间" align="center"></el-table-column>'
     +'<el-table-column prop="customerStatusName" width="180"  label="客户状态"  align="center"></el-table-column>'
     +'<el-table-column prop="isCall" width="180"   :formatter="formatIsCall" label="是否接通" align="center"></el-table-column>'
     // +'<el-table-column prop="resourceStatus" :formatter="formatResourceStatus" label="资源有效性"  align="center" show-overflow-tooltip></el-table-column>'
