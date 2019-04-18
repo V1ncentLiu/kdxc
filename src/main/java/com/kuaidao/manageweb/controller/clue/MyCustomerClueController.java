@@ -601,6 +601,8 @@ public class MyCustomerClueController {
      */
     @RequestMapping("/inviteCustomerSave")
     @ResponseBody
+    @LogRecord(description = "添加预约来访", operationType = OperationType.INSERT,
+        menuName = MenuEnum.TM_MY_CUSTOMER)
     public JSONResult<String> inviteCustomerSave(HttpServletRequest request,
             @RequestBody ClueAppiontmentDTO dto) {
         Subject subject = SecurityUtils.getSubject();
