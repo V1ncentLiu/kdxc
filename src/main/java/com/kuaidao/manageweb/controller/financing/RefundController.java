@@ -418,13 +418,13 @@ public class RefundController {
         List<RoleInfoDTO> roleList = curLoginUser.getRoleList();
         RoleInfoDTO roleInfoDTO = roleList.get(0);
         String roleCode = roleInfoDTO.getRoleCode();
-       if (RoleCodeEnum.QDSJCW.name().equals(roleCode)){
+/*       if (RoleCodeEnum.QDSJCW.name().equals(roleCode)){
            queryDTO.setRoleCode(roleCode);
        }else if(RoleCodeEnum.SJHZCW.name().equals(roleCode)) {
            queryDTO.setRoleCode(roleCode);
        }else {
            return new JSONResult().fail(SysErrorCodeEnum.ERR_NOTEXISTS_DATA.getCode(), "角色没有权限");
-       }
+       }*/
         return refundFeignClient.listRefundApply(queryDTO);
     }
     
