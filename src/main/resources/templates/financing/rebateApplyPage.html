@@ -1,7 +1,10 @@
 <!DOCTYPE html>
 <html>
-<head th:include="_header_include::frag(~{::title},~{},~{})">
+<head th:include="_header_include::frag(~{::title},~{::style},~{})">
     <title>退款申请列表</title>
+    <style>
+        .el-upload-list{width: 200px;}
+    </style>
 </head>
 <body>
 <div id="maindiv" class="maindiv mainPadding" style="display: none;">  
@@ -226,7 +229,7 @@
             <el-table-column align="center" prop="teleDeptName" label="电销事业部"></el-table-column>
             <el-table-column align="center" prop="teleGroupName" label="电销组"></el-table-column>
             <el-table-column align="center" prop="teleSaleName" label="创业顾问"></el-table-column>
-            <el-table-column align="center" prop="isRemoteSign" label="是否远程签约" :formatter="getIsRemoteSign"></el-table-column>
+            <el-table-column align="center" prop="isRemoteSign" label="是否远程签约" :formatter="getIsRemoteSign" width="120"></el-table-column>
         </el-table>
          <table-pagination :pager="pager" @change="searchTable"></table-pagination>
     </el-row>
@@ -242,7 +245,17 @@
             <el-form-item label="驳回原因：" :label-width="formLabelWidth" prop="reason" class="redcolor">
                 {{dialogForm.rejectReason}}
             </el-form-item>
-             <el-form-item label="关联签约单：" :label-width="formLabelWidth" prop="dynamicTags">
+            <el-form-item label="" :label-width="formLabelWidth" prop="">
+                <el-tag
+                  :key="tag"
+                  v-for="tag in dynamicTags"
+                  closable
+                  :disable-transitions="false"
+                  @close="handleClose(tag)">
+                  {{tag}}
+                </el-tag>
+            </el-form-item>
+            <el-form-item label="关联签约单：" :label-width="formLabelWidth" prop="dynamicTags">
                 <el-button type="primary" @click="chooseRelevance">选择关联签约单</el-button>
               </el-form-item>
             <el-form-item label="返款客户金额：" :label-width="formLabelWidth" prop="cusAmount">
@@ -271,7 +284,6 @@
                     :on-remove="handleRemove"
                     multiple
                     :limit="3"
-                    :on-exceed="handleExceed"
                     :file-list="fileList">
                     <el-button size="small" type="primary">点击上传</el-button>
                     <div slot="tip" class="el-upload__tip">只能上传jpg/png文件，且不超过500kb</div>
@@ -442,7 +454,49 @@
             <el-table-column align="center" prop="remarks" label="备注"></el-table-column>
         </el-table>
     </el-dialog>
-    
+    <!-- 关联签约单 -->
+    <!-- dialog -->
+    <el-dialog title="选择关联签约单" :visible.sync="dialogFormChooseVisible">      
+        <el-row class="marginB10 greybg padding20" style="padding-bottom: 0;">
+            <el-form :inline="true" :model="dialogFormChoose" ref="dialogFormChoose">
+              <el-form-item class="formItem" label="签约时间：">
+                  <el-date-picker  v-model="dialogFormChoose.startTime" format="yyyy-MM-dd HH:mm" type="datetime" placeholder="选择日期"></el-date-picker>
+              </el-form-item>
+              <el-form-item class="formItem" label="—">
+                  <el-date-picker  v-model="dialogFormChoose.endTime" format="yyyy-MM-dd HH:mm" type="datetime" placeholder="选择日期"></el-date-picker>
+              </el-form-item>
+              <el-form-item label=""  prop="">
+                <el-input v-model="dialogFormChoose.signNo" placeholder="签约单编号"></el-input>
+              </el-form-item>
+              <el-form-item label=""  prop="">
+                <el-input v-model="dialogFormChoose.cusName" placeholder="客户姓名"></el-input>
+              </el-form-item>
+              <el-form-item label=""  prop="">
+                <el-button type="primary" size="medium" @click="chooseRelevance()" icon="el-icon-search">搜索</el-button>
+              </el-form-item>
+            </el-form>  
+          </el-row>
+          <el-table 
+              tooltip-effect="dark"
+              style="width: 100%"
+              border
+              :row-key="getRowKey"
+              :data="dataTableChoose" 
+               @selection-change="signSelectionChange"
+              class="marginB10">
+              <el-table-column align="center" :reserve-selection="true"  prop="" type="selection" name="type" width="55"></el-table-column>
+              <el-table-column align="center" prop="" label="序号" type="index" name="type" width="55"></el-table-column>
+              <el-table-column align="center" prop="signNo" label="签约单编号"></el-table-column>
+              <el-table-column align="center" prop="signTime" label="签约时间"></el-table-column>
+              <el-table-column align="center" prop="cusName" label="客户姓名"></el-table-column>
+              <el-table-column align="center" prop="phone" label="客户手机号"></el-table-column>
+              <el-table-column align="center" prop="amountReceivable" label="应收金额"></el-table-column>
+          </el-table>
+          <div slot="footer" class="dialog-footer">
+              <el-button type="primary" @click="submitSign('dialogFormChoose')">提交</el-button>
+              <el-button @click="dialogFormChooseVisible = false">取消</el-button>
+          </div>
+    </el-dialog>
 </div>
 </body>
 <!-- import Vue before Element -->
@@ -587,6 +641,17 @@
                 }],
                 recordTableDetail:[],//付款明细data
                 recordDialog:false,//付款明细弹窗
+                dialogFormChooseVisible:false, //关联弹窗
+                dialogFormChoose:{
+                    startTime:'',
+                    endTime:'',
+                    cusName:'',
+                    signNo:'',
+                    startPeojectId:'',
+                    startProvince:''                  
+                },   
+                dataTableChoose:[],   
+                dynamicTags: [],
             }             
         },
         methods: {
@@ -1157,8 +1222,62 @@
                  text="已结算";
                }
                return text;
-             },
-          
+            },            
+            chooseRelevance(){//选择关联签约单
+                var param ={};
+                var startTime = this.dialogFormChoose.startTime;
+                var endTime = this.dialogFormChoose.endTime;
+                if(startTime&&endTime&&startTime> endTime){
+                this.$message({
+                      message: '开始时间不能大于结束时间',
+                      type: 'warning'
+                    });
+                  return;
+                }
+                param.startTime = startTime;
+                param.endTime = endTime;
+                param.cusName = this.dialogFormChoose.cusName;
+                param.signProvince = this.dialogFormChoose.signProvince;
+                param.signProject = this.dialogFormChoose.signProject;
+                param.signNo = this.dialogFormChoose.signNo;
+
+                console.info(param);
+                axios.post('/financing/refundRebate/rebatesignList', param)
+                .then(function (response) {
+                    var result =  response.data;
+                    mainDivVM.dataTableChoose= result.data;
+                })
+                .catch(function (error) {
+                   console.log(error);
+                });
+                this.dialogFormChooseVisible=true;
+            },
+            getRowKey(row) {
+                return row.signNo;
+            },
+            signSelectionChange(val) {
+                this.signSelection = val;
+            },
+            //关联签约单确定
+            submitSign() {
+               var rows = this.signSelection;
+               if(rows.length==0){
+                   this.$message({
+                      message: '请至少选择一条数据进行关联',
+                      type: 'warning'
+                    });
+                   return;
+               }
+               var signList=[];
+               for(var i=0;i<rows.length;i++){
+                    signList.push(rows[i].signNo);
+               }
+               this.dynamicTags =signList;
+               this.dialogFormChooseVisible=false;
+            },
+            handleClose(tag) {
+                this.dynamicTags.splice(this.dynamicTags.indexOf(tag), 1);
+            },
         },
         created(){            
             this.searchTable();
