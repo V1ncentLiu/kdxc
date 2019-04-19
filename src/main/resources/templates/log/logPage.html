@@ -6,71 +6,69 @@
 </head>
 <body>
 <div id="organizationManage" class="organizationManage mainPadding" style="display: none;">  
-  <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
-      <el-breadcrumb-item>Home</el-breadcrumb-item>
-      <el-breadcrumb-item>系统管理</el-breadcrumb-item>
-      <el-breadcrumb-item>日志管理</el-breadcrumb-item>
-  </el-breadcrumb>
-  <el-row>
-    <el-col>
-      <el-row>
-        <el-tabs type="card" v-model="activeName" @tab-click="handleClick" >
-			    <el-tab-pane label="访问日志" name="first"></el-tab-pane>
-			    <el-tab-pane label="操作日志" name="second"></el-tab-pane>
-			  </el-tabs>
-				<div class="block marginB10 greybg padding20" style="padding-bottom: 0">
-          <el-form :inline="true">
-            <el-form-item label="操作时间：">
-    					<el-date-picker value-format="yyyy-MM-dd HH:mm:ss" v-model="beginTime" type="datetime" placeholder="选择日期">
-    					</el-date-picker>
-            </el-form-item>
-            <el-form-item label="结束：">
-    					<el-date-picker value-format="yyyy-MM-dd HH:mm:ss" v-model="endTime" type="datetime" placeholder="选择日期">
-    					</el-date-picker>
-            </el-form-item>
-            <el-form-item label="">
-      				<el-input v-model="content" placeholder="日志内容"></el-input>
-            </el-form-item>
-            <el-form-item label="">
-    					<el-select v-model="queryType" placeholder="请选择" clearable>
-    				    <el-option
-    				      v-for="item in options"
-    				      :key="item.value"
-    				      :label="item.label"
-    				      :value="item.value">
-    				    </el-option>
-    					</el-select>
-            </el-form-item>
-            <el-form-item label="">
-    					<el-input v-model="searchContent" placeholder="请输入查询内容"></el-input>
-            </el-form-item> 
-    				<el-button type="primary" @click="search">搜索</el-button>
-          </el-form>
-				</div>            
-      </el-row>
-      <el-row>
-        <el-table 
-            ref="multipleTable"
-            tooltip-effect="dark"
-            empty-text="无数据"
-            style="width: 100%"
-            border
-            :data="dataTable"
-            >
-            <el-table-column align="center" type="index" prop="name" label="序号" width="55"></el-table-column>
-             <!-- <el-table-column prop="date" label="全选" width="180"></el-table-column>  -->
-            <el-table-column align="center" prop="userName" label="登录名称"></el-table-column>
-            <el-table-column align="center" prop="name" label="姓名"></el-table-column>
-            <el-table-column align="center" prop="phone" label="登录手机号"></el-table-column>
-            <el-table-column align="center" prop="remoteIP" label="登录IP"></el-table-column>
-            <el-table-column align="center" prop="content" label="日志内容"></el-table-column>
-            <el-table-column align="center" prop="reqStartTime" label="操作时间"></el-table-column>
-        </el-table>
-        <table-pagination :pager="pager"  @change="queryLogDataList"></table-pagination>
-      </el-row>
-    </el-col>
-  </el-row>  
-
+    <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
+        <el-breadcrumb-item>Home</el-breadcrumb-item>
+        <el-breadcrumb-item>系统管理</el-breadcrumb-item>
+        <el-breadcrumb-item>日志管理</el-breadcrumb-item>
+    </el-breadcrumb>
+    <el-tabs type="card" v-model="activeName" @tab-click="handleClick" >
+      <el-tab-pane label="访问日志" name="first"></el-tab-pane>
+      <el-tab-pane label="操作日志" name="second"></el-tab-pane>
+    </el-tabs>
+    <div class="mainSearchBg">        
+        <div class="mainSearchFormBox">
+            <el-form :inline="true" class="demo-form-inline mainSearchForm">
+              <el-form-item label="日志内容:">
+        				<el-input v-model="content" placeholder="日志内容"></el-input>
+              </el-form-item>
+              <el-form-item label="请选择:">
+      					<el-select v-model="queryType" placeholder="请选择" clearable>
+      				    <el-option
+      				      v-for="item in options"
+      				      :key="item.value"
+      				      :label="item.label"
+      				      :value="item.value">
+      				    </el-option>
+      					</el-select>
+              </el-form-item>
+              <el-form-item label="查询内容:">
+      					<el-input v-model="searchContent" placeholder="请输入查询内容"></el-input>
+              </el-form-item> 
+              <el-form-item label="操作时间:">
+                <el-date-picker value-format="yyyy-MM-dd HH:mm:ss" v-model="beginTime" type="datetime" placeholder="选择日期">
+                </el-date-picker>
+              </el-form-item>
+              <el-form-item label="—" class="widthauto">
+                <el-date-picker value-format="yyyy-MM-dd HH:mm:ss" v-model="endTime" type="datetime" placeholder="选择日期">
+                </el-date-picker>
+              </el-form-item>
+              <div class="mainSearchBtnBox">
+      				    <el-button type="primary" @click="search" class="searchBtn">搜索</el-button>
+                  <el-button type="info" class="searchBtn">取消</el-button>
+              </div>
+            </el-form>
+        </div>
+        <el-row>
+          <el-table 
+              ref="multipleTable"
+              tooltip-effect="dark"
+              empty-text="无数据"
+              style="width: 100%"
+              border
+              :data="dataTable"
+              >
+              <el-table-column align="center" type="index" prop="name" label="序号" width="55"></el-table-column>
+               <!-- <el-table-column prop="date" label="全选" width="180"></el-table-column>  -->
+              <el-table-column align="center" prop="userName" label="登录名称"></el-table-column>
+              <el-table-column align="center" prop="name" label="姓名"></el-table-column>
+              <el-table-column align="center" prop="phone" label="登录手机号"></el-table-column>
+              <el-table-column align="center" prop="remoteIP" label="登录IP"></el-table-column>
+              <el-table-column align="center" prop="content" label="日志内容"></el-table-column>
+              <el-table-column align="center" prop="reqStartTime" label="操作时间"></el-table-column>
+          </el-table>
+          <table-pagination :pager="pager"  @change="queryLogDataList"></table-pagination>
+        </el-row>
+    </div>
 </div>
 </body>
 <!-- import common js-->

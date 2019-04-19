@@ -737,10 +737,26 @@
                 <el-row>
                     <el-col :span="12">
                         <el-form-item label="赠送金额：" :label-width="formLabelWidth" prop="giveAmount">
-                            <el-input v-model="formSigning.giveAmount"  type="number"  min="0" oninput="if(value.length>10)value=value.slice(0,10)"  onkeypress="return(/[\d]/.test(String.fromCharCode(event.keyCode)))" autocomplete="off" maxLength="10" style="width: 80%;"></el-input><span style="padding-left: 10px;">元</span>
+                            <el-input v-model="formSigning.giveAmount" placeholder="填写售价，非成本价"  type="number"  min="0" oninput="if(value.length>10)value=value.slice(0,10)"  onkeypress="return(/[\d]/.test(String.fromCharCode(event.keyCode)))" autocomplete="off" maxLength="10" style="width: 80%;"></el-input><span style="padding-left: 10px;">元</span>
                         </el-form-item>
                     </el-col>
-                    <el-col :span="12">
+                    <el-col :span="10">
+                        <el-form-item label="赠送类型：" :label-width="formLabelWidth" prop="giveType">
+                            <el-select v-model="formSigning.giveType" @change="selectSigningType" placeholder="请选择赠送类型：" style="width:100%;">
+                                <el-option
+                                        v-for="item in giveTypeList"
+                                        :key="item.value"
+                                        :label="item.name"
+                                        :value="item.value">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+                    </el-col>
+                    
+
+                </el-row>
+                <el-row>
+                <el-col :span="12">
                         <el-form-item label="签约类型：" :label-width="formLabelWidth" prop="signType">
                             <el-select v-model="formSigning.signType" @change="selectSigningType" placeholder="请选择签约类型：" style="width:100%;">
                                 <el-option
@@ -752,9 +768,6 @@
                             </el-select>
                         </el-form-item>
                     </el-col>
-
-                </el-row>
-                <el-row>
                     <el-col :span="12">
                         <el-form-item label="是否远程签约：" :label-width="formLabelWidth" prop="isRemoteSign">
                             <el-select v-model="formSigning.isRemoteSign" placeholder="请选择是否远程签约：" style="width:100%;">
@@ -1036,10 +1049,25 @@
                 <el-row>
                     <el-col :span="12">
                         <el-form-item label="赠送金额：" :label-width="formLabelWidth" prop="giveAmount">
-                            <el-input :disabled="notEditRebutSign" v-model="updateFormSigning.giveAmount"  type="number"  min="0" oninput="if(value.length>10)value=value.slice(0,10)"  onkeypress="return(/[\d]/.test(String.fromCharCode(event.keyCode)))" autocomplete="off" maxLength="10" style="width: 80%;"></el-input><span style="padding-left: 10px;">元</span>
+                            <el-input :disabled="notEditRebutSign" placeholder="填写售价，非成本价" v-model="updateFormSigning.giveAmount"  type="number"  min="0" oninput="if(value.length>10)value=value.slice(0,10)"  onkeypress="return(/[\d]/.test(String.fromCharCode(event.keyCode)))" autocomplete="off" maxLength="10" style="width: 80%;"></el-input><span style="padding-left: 10px;">元</span>
                         </el-form-item>
                     </el-col>
-                    <el-col :span="12">
+                    <el-col :span="10">
+                        <el-form-item label="赠送类型：" :label-width="formLabelWidth" prop="giveType">
+                            <el-select v-model="updateFormSigning.giveType"  @change="selectSigningType" placeholder="请选择赠送类型：" style="width:100%;">
+                                <el-option
+                                        v-for="item in giveTypeList"
+                                        :key="item.value"
+                                        :label="item.name"
+                                        :value="item.value">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+                    </el-col>
+                    
+                </el-row>
+                <el-row>
+                	<el-col :span="12">
                         <el-form-item label="是否远程签约：" :label-width="formLabelWidth" prop="isRemoteSign">
                             <el-select v-model="updateFormSigning.isRemoteSign" placeholder="请选择是否远程签约：" style="width: 100%;">
                                 <el-option
@@ -1151,10 +1179,12 @@
     var dxgwList=[[${teleSaleList}]];
     var proSelect=[[${proSelect}]];
     var loginUserId=[[${loginUserId}]];
+    var giveTypeList =[[${giveTypeList}]];
     // 查询 模块
     var mainDivVM = new Vue({
         el: '#mainDiv',
         data: {
+        	giveTypeList:giveTypeList,
             isShow:false,
         	loginUserId:loginUserId,
             editableTabsValue: 0, //tabs标签
