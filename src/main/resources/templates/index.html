@@ -25,10 +25,13 @@
                 <el-button type="primary" @click="openLoginClientDialog" class="f-fl headerBtn"><img th:src="@{/images/icon_head.png}" alt="" class="f-fl marginR10">{{callTitle}}</el-button>
 
                 <el-button type="primary" @click="openOutboundDialog" class="f-fl headerBtn"><img th:src="@{/images/icon_phone.png}" alt="" class="f-fl marginR10">主动外呼</el-button>
-
-                <img th:src="@{/images/icon_news.png}" alt="" class="f-fl headIco">
-                <el-button type="primary" class="messageBtn f-fl" @click="openMessageCenter"><em style="color: #e37470;" id="messageCount"></em></el-button>                
-
+                <span class="messageCenterBtn" @click="openMessageCenter">
+                    <img th:src="@{/images/icon_news.png}" alt="">
+                    <span id="messageCount"></span>
+                </span>                
+                <!-- <el-button type="primary" class="messageBtn f-fl" @click="openMessageCenter">
+                    <em style="color: #e37470;" id="messageCount"></em>
+                </el-button> -->  
                 <img th:src="@{/images/headIco.png}" alt="" class="headIco">
                 <!-- 下拉 -->
                 <el-dropdown class="elDropdown f-fr" trigger="click"  @command="handleCommand">
@@ -57,16 +60,17 @@
                     :default-openeds="defaultOpeneds"
                     :default-active="defaultActive"
                     background-color="rgb(56, 70, 192)" 
-                    text-color="#fff">  
+                    text-color="rgb(255, 255, 255)">  
                     <!-- foreach menuList start -->
                       <el-submenu :index="index+''" :key="index"  v-for="(item,index) in items">
                         <template slot="title">
                             <!-- <i :class="'fa fa-lg '+ item.iconName"></i> -->
-                            <img th:src="item.iconUrl" alt="" v-if="item.iconUrl">
+                            <img :src="item.iconUrl" alt="" v-if="item.iconUrl">
                             <span slot="title">{{item.name}}</span>
                         </template>
                         <el-menu-item  class="menu" :key="index+subIndex" :data-url="subItem.url" :index="index+'-'+subIndex" @click="menuClick(subItem.url)" v-for="(subItem,subIndex) in item.subList">
-                            <!-- <i :class="'fa fa-lg '+ subItem.iconName"></i> <--><span class="dot"></span></-->{{subItem.name}}
+                            <!-- <i :class="'fa fa-lg '+ subItem.iconName"></i> -->
+                            <span class="dot"></span>{{subItem.name}}
                         </el-menu-item>
                     </el-submenu> 
                     

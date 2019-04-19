@@ -31,64 +31,67 @@
         	<el-button type="danger" @click="deleteFun"><i class="el-icon-delete"></i>删除</el-button>
         </shiro:hasPermission>
     </el-row>
-    <el-row class="marginB20 greybg padding20" style="padding-bottom: 0">
-        <el-form :inline="true" :model="form" ref="form">
-            <el-form-item label="">
-                <el-input v-model="form.assignName" placeholder="规则名称"></el-input>
-            </el-form-item>
-            <el-form-item label="规则有效时间:">
-                <el-date-picker
-                    style="width: 100%;"
-                    v-model="form.startTime"
-                    type="datetime"
-                    placeholder="选择日期时间">
-                </el-date-picker>
-            </el-form-item>
-            <el-form-item label="—">
-                <el-date-picker
-                    style="width: 100%;"
-                    v-model="form.endTime"
-                    type="datetime"
-                    placeholder="选择日期时间">
-                </el-date-picker>
-            </el-form-item>
-            <el-button icon="el-icon-search" type="primary" @click="searchTable('form')">搜索</el-button> 
-        </el-form>
-    </el-row>
-    <el-row>
-        <el-table 
-            ref="dataTable"
-            tooltip-effect="dark"
-            style="width: 100%"
-            border
-            :data="dataTable"
-            @selection-change="handleSelectionChange" 
-            >
-            <el-table-column align="center" type="selection" width="55"></el-table-column>
-            <el-table-column align="center" type="index" label="序号"  width="55"></el-table-column>
-            <el-table-column align="center" prop="assignName" label="规则名称"></el-table-column>
-            <el-table-column align="center" prop="createTime" label="创建时间" :formatter="dateFormat" width="170"></el-table-column>
-            <el-table-column align="center" prop="createUserName" label="创建人"></el-table-column>
-            <el-table-column align="center" prop="category" label="资源类别" :formatter="transformCategory"></el-table-column>
-            <el-table-column align="center" prop="type" label="资源类型" :formatter="transformType"></el-table-column>
-            <el-table-column align="center" prop="searchWord" label="搜索词"  width="130"></el-table-column>
-            <el-table-column align="center" prop="startTime" label="生效时间"  :formatter="dateFormat" width="170"></el-table-column>
-            <el-table-column align="center" prop="endTime" label="截止时间"  :formatter="dateFormat" width="170"></el-table-column>
-            <el-table-column align="center" prop="area" label="地区" width="150"></el-table-column>
-            <el-table-column align="center" prop="status" label="类型" :formatter="transformStatus" ></el-table-column>
-            <el-table-column align="center" prop="handler" label="操作" width="120">
-                <template slot-scope="scope"> 
-                    <span v-if="scope.row.status == '0'">
-                        <el-button size="mini" type="success" @click="updateStatus(scope.row.id,1,'启用')">启用</el-button>
-                    </span>
-                    <span v-else-if="scope.row.status == '1'">
-                        <el-button size="mini" type="danger" @click="updateStatus(scope.row.id,0,'停用')">停用</el-button>
-                    </span>
-                </template>
-            </el-table-column>
-        </el-table>
-        <table-pagination :pager="pager" @change="searchTable"></table-pagination>
-    </el-row>
+    <div class="mainSearchBg">        
+        <div class="mainSearchFormBox">
+            <el-form :inline="true" class="demo-form-inline mainSearchForm" :model="form" ref="form">
+                <el-form-item label="规则名称:" label-width="55px">
+                    <el-input v-model="form.assignName" placeholder="规则名称"></el-input>
+                </el-form-item>
+                <el-form-item label="规则有效时间:">
+                    <el-date-picker
+                        v-model="form.startTime"
+                        type="datetime"
+                        placeholder="选择日期时间">
+                    </el-date-picker>
+                </el-form-item>
+                <el-form-item label="—" class="widthauto" style="margin-right: 10px;">
+                    <el-date-picker
+                        v-model="form.endTime"
+                        type="datetime"
+                        placeholder="选择日期时间">
+                    </el-date-picker>
+                </el-form-item>
+                <el-form-item label="">
+                    <el-button icon="el-icon-search" type="primary" @click="searchTable('form')"  style="width: 90px;">搜索</el-button> 
+                    <el-button type="info" style="width: 90px;">取消</el-button>
+                </el-form-item>
+            </el-form>
+        </div>
+        <el-row>
+            <el-table 
+                ref="dataTable"
+                tooltip-effect="dark"
+                style="width: 100%"
+                border
+                :data="dataTable"
+                @selection-change="handleSelectionChange" 
+                >
+                <el-table-column align="center" type="selection" width="55"></el-table-column>
+                <el-table-column align="center" type="index" label="序号"  width="55"></el-table-column>
+                <el-table-column align="center" prop="assignName" label="规则名称"></el-table-column>
+                <el-table-column align="center" prop="createTime" label="创建时间" :formatter="dateFormat" width="170"></el-table-column>
+                <el-table-column align="center" prop="createUserName" label="创建人"></el-table-column>
+                <el-table-column align="center" prop="category" label="资源类别" :formatter="transformCategory"></el-table-column>
+                <el-table-column align="center" prop="type" label="资源类型" :formatter="transformType"></el-table-column>
+                <el-table-column align="center" prop="searchWord" label="搜索词"  width="130"></el-table-column>
+                <el-table-column align="center" prop="startTime" label="生效时间"  :formatter="dateFormat" width="170"></el-table-column>
+                <el-table-column align="center" prop="endTime" label="截止时间"  :formatter="dateFormat" width="170"></el-table-column>
+                <el-table-column align="center" prop="area" label="地区" width="150"></el-table-column>
+                <el-table-column align="center" prop="status" label="类型" :formatter="transformStatus" ></el-table-column>
+                <el-table-column align="center" prop="handler" label="操作" width="120">
+                    <template slot-scope="scope"> 
+                        <span v-if="scope.row.status == '0'">
+                            <el-button size="mini" type="success" @click="updateStatus(scope.row.id,1,'启用')">启用</el-button>
+                        </span>
+                        <span v-else-if="scope.row.status == '1'">
+                            <el-button size="mini" type="danger" @click="updateStatus(scope.row.id,0,'停用')">停用</el-button>
+                        </span>
+                    </template>
+                </el-table-column>
+            </el-table>
+            <table-pagination :pager="pager" @change="searchTable"></table-pagination>
+        </el-row>
+    </div>
     <!-- dialog -->
     <el-dialog title="规则详情" :visible.sync="dialogFormVisible">
         <el-form :model="dialogForm" ref="dialogForm" class="marginB20 dialogForm">

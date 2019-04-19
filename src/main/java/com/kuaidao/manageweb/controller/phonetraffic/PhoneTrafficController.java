@@ -293,6 +293,8 @@ public class PhoneTrafficController {
      */
     @PostMapping("/toTele")
     @ResponseBody
+    @LogRecord(description = "话务转电销/保存", operationType = LogRecord.OperationType.DISTRIBUTION,
+        menuName = MenuEnum.PHONETRAFFIC_MANAGER)
     public JSONResult toTele(@RequestBody ClueDTO clueDTO) {
         UserInfoDTO user =  CommUtil.getCurLoginUser();
         clueDTO.setOrg(user.getOrgId());

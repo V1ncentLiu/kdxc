@@ -601,6 +601,8 @@ public class MyCustomerClueController {
      */
     @RequestMapping("/inviteCustomerSave")
     @ResponseBody
+    @LogRecord(description = "添加预约来访", operationType = OperationType.INSERT,
+        menuName = MenuEnum.TM_MY_CUSTOMER)
     public JSONResult<String> inviteCustomerSave(HttpServletRequest request,
             @RequestBody ClueAppiontmentDTO dto) {
         Subject subject = SecurityUtils.getSubject();
@@ -912,8 +914,8 @@ public class MyCustomerClueController {
      */
     @RequestMapping("/updateCustomerClue")
     @ResponseBody
-    @LogRecord(description = "商务维护客户资源提交", operationType = OperationType.UPDATE,
-        menuName = MenuEnum.BUS_MY_CUSTOMER)
+    @LogRecord(description = "电销维护客户资源提交", operationType = OperationType.UPDATE,
+        menuName = MenuEnum.TM_MY_CUSTOMER)
     public JSONResult<String> updateCustomerClue(HttpServletRequest request,
             @RequestBody ClueDTO dto) {
 

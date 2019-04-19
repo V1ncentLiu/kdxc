@@ -1363,5 +1363,9 @@ var mainDivVM = new Vue({
     },
     mounted(){
         document.getElementById('mainDiv').style.display = 'block';
+        $(".el-progress__text").css("font-size","35px");
+        $(".el-progress__text").eq(0).css("color","#697df5");
+        $(".el-progress__text").eq(1).css("color","#a978f5");
+        $(".el-progress__text").eq(2).css("color","#32c3bf");
     }
 });

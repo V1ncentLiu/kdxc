@@ -205,14 +205,14 @@ var uploader = new plupload.Uploader({
             set_upload_param(up, file.name, true);
         },
 
-        // UploadProgress: function(up, file) {
-        //     var d = document.getElementById(file.id);
-        //     d.getElementsByTagName('b')[0].innerHTML = '<span>' + file.percent + "%</span>";
-        //     var prog = d.getElementsByTagName('div')[0];
-        //     var progBar = prog.getElementsByTagName('div')[0]
-        //     progBar.style.width= 2*file.percent+'px';
-        //     progBar.setAttribute('aria-valuenow', file.percent);
-        // },
+         UploadProgress: function(up, file) {
+             var d = document.getElementById(file.id);
+             d.getElementsByTagName('b')[0].innerHTML = '<span>' + file.percent + "%</span>";
+             var prog = d.getElementsByTagName('div')[0];
+             var progBar = prog.getElementsByTagName('div')[0]
+             progBar.style.width= 2*file.percent+'px';
+             progBar.setAttribute('aria-valuenow', file.percent);
+         },
 
         FileUploaded: function(up, file, info) {
             if (info.status == 200)
