@@ -98,7 +98,7 @@
             </el-form>
         </div>
         <!--<el-table :data="tableData" border style="width: 100%" tooltip-effect="light"  ref="multipleTable" @selection-change="handleSelectionChange"    @row-dblclick="showClueDetailInfo">-->
-            <!--<el-table-column type="selection" width="55" prop="clueid" align="center"></el-table-column>-->
+            <!--<el-table-column type="selection" width="55" prop="clueId" align="center"></el-table-column>-->
             <!--<el-table-column prop="cusName" label="客户姓名"  align="center"></el-table-column>-->
             <!--<el-table-column prop="sex" label="性别"  align="center">-->
                 <!--<template slot-scope="scope">-->
@@ -119,7 +119,7 @@
             <!--</el-table-column>-->
             <!--<el-table-column prop="isTrack" label="跟进记录"  align="center">-->
                 <!--<template slot-scope="scope">-->
-                    <!--<el-button @click="openTrackingDialog(scope.row.clueid)" type="text" size="small">-->
+                    <!--<el-button @click="openTrackingDialog(scope.row.clueId)" type="text" size="small">-->
                         <!--点击查看-->
                     <!--</el-button>-->
                 <!--</template>-->
@@ -144,7 +144,7 @@
             <!--</el-table-column>-->
         <!--</el-table>-->
         <el-table  ref="multipleTable" border  tooltip-effect="light" @selection-change="handleSelectionChange" @row-dblclick="showClueDetailInfo" style="width: 100%"  :data="tableData" >
-            <el-table-column type="selection" width="55" prop="clueid" align="center"></el-table-column>
+            <el-table-column type="selection" width="55" prop="clueId" align="center"></el-table-column>
             <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width"
                              v-for="(item,key,index) in tableColums" v-if="item.fieldCode == 'sex'">
                 <template slot-scope="scope">
@@ -157,7 +157,7 @@
             <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width" v-else-if="item.fieldCode == 'isTrack'">
                 <template slot-scope="scope">
                     <div v-if="scope.row.isTrack ==1">
-                        <el-button @click="openTrackingDialog(scope.row.clueid)" type="text" size="small">点击查看</el-button>
+                        <el-button @click="openTrackingDialog(scope.row.clueId)" type="text" size="small">点击查看</el-button>
                     </div>
                     <div v-else></div>
                 </template>
@@ -630,7 +630,7 @@
                         param.teleSaleId = this.allocation.saleid;
                         param.cliueIdsList = []
                         for(var i = 0 ; i < this.multipleSelection.length ; i++ ){
-                            param.cliueIdsList.push(this.multipleSelection[i].clueid)
+                            param.cliueIdsList.push(this.multipleSelection[i].clueId)
                         }
                         console.log("==========================================")
                         console.log(param)
@@ -664,7 +664,7 @@
                         param.teleDirectorId = this.trans.director;
                         param.cliueIdsList = []
                         for(var i = 0 ; i < this.multipleSelection.length ; i++ ){
-                            param.cliueIdsList.push(this.multipleSelection[i].clueid)
+                            param.cliueIdsList.push(this.multipleSelection[i].clueId)
                         }
 
                         axios.post('/aggregation/publiccustomer/transferOfResource', param)
@@ -731,10 +731,10 @@
                 this.releaseDialogFormVisible = true
             },
             openreleaseDialog(row){
-            	this.cluereleasetitle = row.cusName+row.clueid;
+            	this.cluereleasetitle = row.cusName+row.clueId;
             	this.cluereleaseFormVisible = true;
             	var param = {};
-            	param.clueId = row.clueid;
+            	param.clueId = row.clueId;
             	axios.post('/aggregation/releaserecord/getReleaseRecordRespByClueId',param).then(function (response) {
                     if(null===response||response.data==null||response.data.code!='0'){
                         if(response.data.code!='0'){
@@ -761,7 +761,7 @@
                     this.$confirm(str, '提示', {confirmButtonText: '确定', cancelButtonText: '取消', type: 'warning'}).then(() => {
                         var rowIds = [];
                         for(var i=0;i<rows.length;i++){
-                            rowIds.push(rows[i].clueid)
+                            rowIds.push(rows[i].clueId)
                         }
                         var param={};
                         param.cliueIdsList = rowIds;
@@ -816,7 +816,7 @@
                 	var param={};
                 	param.idList = []
                 	 for(var i = 0 ; i < this.multipleSelection.length ; i++ ){
-                         param.idList.push(this.multipleSelection[i].clueid)
+                         param.idList.push(this.multipleSelection[i].clueId)
                      }
                 	  axios.post('/clue/cluereceiverecords/receiveClueByClueIds', param)
                       .then(function (response) {
@@ -882,15 +882,15 @@
             },
             //展现详情
             showClueDetailInfo (row, column) {
-                window.location.href='/tele/clueMyCustomerInfo/customerInfoReadOnly?clueId='+row.clueid+"&commonPool=1";
+                window.location.href='/tele/clueMyCustomerInfo/customerInfoReadOnly?clueId='+row.clueId+"&commonPool=1";
             },
             repeatPhonesClick(row) {//重复手机号按钮点击
                 console.log(row);
                 this.repeatPhonesDialog=true;
-                this.dailogTitleType=row.clueid;
+                this.dailogTitleType=row.clueId;
                 var param ={};
-                param.id = row.clueid;
-                param.clueId = row.clueid;
+                param.id = row.clueId;
+                param.clueId = row.clueId;
                 param.cusPhone = row.phone;
                 console.info(param);
                 axios.post('/clue/appiontment/repeatPhoneMap', param)
@@ -923,10 +923,10 @@
                           mainDivVM.repeatPhonesTable3=[];
                           mainDivVM.showPhoneTable3 = false;
                       }
-                      if(map.phone){
+                      if(map.phone4){
                           mainDivVM.phone4 = map.phones[3]
                           mainDivVM.repeatPhonesTable4=map.phone4;
-                          mainDivVM.showPhone4 = true;
+                          mainDivVM.showPhoneTable4 = true;
                       }else{
                           mainDivVM.phone4 = ''
                           mainDivVM.repeatPhonesTable4=[];

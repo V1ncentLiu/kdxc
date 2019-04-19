@@ -151,6 +151,7 @@
     <el-dialog :title="'资源ID'+dailogTitleType+'重复手机号资源信息'"    :visible.sync="repeatPhonesDialog">
         <div v-show="showPhoneTable">
             <span>手机号{{phone}}重复手机号资源</span>
+            <el-table ref="singleTable" tooltip-effect="dark" style="width: 100%" border :data="repeatPhonesTable">
                 <el-table-column align="center" type="index" width="55" label="序号"></el-table-column>
                 <el-table-column align="center" prop="createTime" label="资源创建时间"></el-table-column>
                 <el-table-column align="center" prop="phoneChangeTime" label="联系方式创建时间"></el-table-column>
@@ -482,16 +483,14 @@
               repeatPhonesClick(row) {//重复手机号按钮点击
                   console.log(row);
                   this.repeatPhonesDialog=true;
-                  this.dailogTitleType=row.cusPhone;
+                  this.dailogTitleType=row.clueId;
                   var param ={};
                   param.id = row.clueId;
                   param.clueId = row.clueId;
                   param.cusPhone = row.cusPhone;
                   axios.post('/clue/appiontment/repeatPhoneMap', param).then(function (response) {
-                      // var result =  response.data;
-                      // var table=result.data;
-                      // orgVM.repeatPhonesTable=table;
                       var map = response.data.data;
+                      debugger
                       if(map.phone){
                           orgVM.phone = map.phones[0]
                           orgVM.repeatPhonesTable=map.phone;
@@ -519,10 +518,10 @@
                           orgVM.repeatPhonesTable3=[];
                           orgVM.showPhoneTable3 = false;
                       }
-                      if(map.phone){
+                      if(map.phone4){
                           orgVM.phone4 = map.phones[3]
                           orgVM.repeatPhonesTable4=map.phone4;
-                          orgVM.showPhone4 = true;
+                          orgVM.showPhoneTable4 = true;
                       }else{
                           orgVM.phone4 = ''
                           orgVM.repeatPhonesTable4=[];
