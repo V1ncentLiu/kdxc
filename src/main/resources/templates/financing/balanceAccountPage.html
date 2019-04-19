@@ -16,12 +16,12 @@
     
     <el-row class="marginB10 ">
     		<el-button type="text" @click="dialogFormVisible = true">选择列</el-button>
-    		<!-- <shiro:hasPermission name="financing:balanceaccountManager:reconciliation"> -->
+    		 <shiro:hasPermission name="financing:balanceaccountManager:rejectApply"> 
 		        <el-button type="primary" @click="rejectback">驳回</el-button>
-		   <!--  </shiro:hasPermission>
-    		<shiro:hasPermission name="financing:balanceaccountManager:settlement"> -->
-		        <el-button type="success" @click="settlementConfirmButton">提交对账确认确认</el-button>
-		    <!-- </shiro:hasPermission> -->
+		     </shiro:hasPermission>
+    		<shiro:hasPermission name="financing:balanceaccountManager:settlementConfirm"> 
+		        <el-button type="success" @click="settlementConfirmButton">提交对账确认</el-button>
+		     </shiro:hasPermission> 
 			<el-button type="warning" @click="down">下载结算单</el-button>
 	</el-row>
 	<el-form :inline="true" :model="searchForm" class="demo-form-inline" ref="searchForm"> 
@@ -181,6 +181,12 @@
                         	驳回原因
                         </el-button>
                     </div>
+                </template>
+	        </el-table-column>
+	        <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width"
+	         v-else-if="item.fieldCode == 'statementNo'">
+	               <template slot-scope="scope">
+	               <a :href="'/financing/balanceaccount/settleAccounts?payDetailId='+scope.row.payId+''" target="_blank" style="color: rgb(0, 114, 255);">{{scope.row.statementNo}} </a>
                 </template>
 	        </el-table-column>
             <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width"

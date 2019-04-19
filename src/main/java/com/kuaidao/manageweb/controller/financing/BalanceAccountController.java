@@ -9,6 +9,7 @@ import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.math.BigDecimal;
+import java.net.URL;
 import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -183,7 +184,7 @@ public class BalanceAccountController {
      */
     @PostMapping("/rejectApply")
     @ResponseBody
-    // @RequiresPermissions("financing:balanceaccountManager:reconciliation")
+     @RequiresPermissions("financing:balanceaccountManager:rejectApply")
     @LogRecord(description = "驳回", operationType = OperationType.UPDATE,
             menuName = MenuEnum.REFUNDREBATEAPPLY_MANAGER)
     public JSONResult<Void> rejectApply(@RequestBody ReconciliationConfirmReq req,
@@ -200,7 +201,7 @@ public class BalanceAccountController {
      */
     @PostMapping("/settlementConfirm")
     @ResponseBody
-    // @RequiresPermissions("financing:reconciliationConfirmManager:settlement")
+     @RequiresPermissions("financing:reconciliationConfirmManager:settlementConfirm")
     @LogRecord(description = "结算确认", operationType = OperationType.UPDATE,
             menuName = MenuEnum.RECONCILIATIONCONFIRM_MANAGER)
     public JSONResult<Void> settlementConfirm(@RequestBody ReconciliationConfirmReq req,
@@ -401,33 +402,12 @@ public class BalanceAccountController {
                 bis.close();
             if (bos != null)
                 bos.close();
+            File directory = new File("");
+            boolean success = (new File(directory.getCanonicalPath()+"/"+dataMap.get("statementNo").toString()+".doc")).delete();
         }
         return null;
     }
 
-    public void down(Map dataMap) {
-        // 设置模本装置方法和路径,FreeMarker支持多种模板装载方法。可以重servlet，classpath，数据库装载，
-        // 这里我们的模板是放在com.ftl包下面
-        configuration.setClassForTemplateLoading(this.getClass(), "/excel-templates");
-        Template t = null;
-        // 输出文档路径及名称
-        File outFile = new File("D:/" + dataMap.get("statementNo") + ".doc");
-        Writer out = null;
-
-        try {
-            // test.ftl为要装载的模板
-            t = configuration.getTemplate("04172.ftl");
-            t.setEncoding("utf-8");
-
-            out = new BufferedWriter(
-                    new OutputStreamWriter(new FileOutputStream(outFile), "utf-8"));
-            t.process(dataMap, out);
-            out.close();
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
 
     private File createDoc(Map dataMap) {
         // 获取模板
@@ -436,7 +416,7 @@ public class BalanceAccountController {
         configuration.setClassForTemplateLoading(this.getClass(), "/excel-templates");
         Template t = null;
 
-        String name = "temp" + (int) (Math.random() * 1000) + ".doc";
+        String name = dataMap.get("statementNo")+ ".doc";
         File file = new File(name);
         try {
             t = configuration.getTemplate("balanceaccount.ftl");
@@ -451,5 +431,68 @@ public class BalanceAccountController {
         }
         return file;
     }
+    /**
+     * 申请页面
+     * 
+     * @return
+     */
+    @RequestMapping("/settleAccounts")
+ //   @RequiresPermissions("financing:balanceaccountManager:view")
+    public String settleAccounts(HttpServletRequest request) {
+    	PayDetailAccountDTO queryDTO = new PayDetailAccountDTO();
+        queryDTO.setPayDetailId(Long.parseLong(request.getParameter("payDetailId")));
+        JSONResult<PayDetailAccountDTO> jsonResult =
+                balanceAccountApplyClient.getPayDetailById(queryDTO);
+        Map dataMap = new HashMap<>();
+        PayDetailAccountDTO accountDTO = new PayDetailAccountDTO();
+        if (JSONResult.SUCCESS.equals(jsonResult.getCode()) && jsonResult.getData() != null) {
+            List<DictionaryItemRespDTO> dictionaryItemRespDTOs =
+                    getDictionaryByCode(DicCodeEnum.VISITSTORETYPE.getCode());
 
+            accountDTO = jsonResult.getData();
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            dataMap.put("signShopType", "");
+            // 去字典表查询签约店型
+            if (dictionaryItemRespDTOs != null && dictionaryItemRespDTOs.size() > 0) {
+                for (DictionaryItemRespDTO dictionaryItemRespDTO : dictionaryItemRespDTOs) {
+                    if (dictionaryItemRespDTO.getValue().equals(accountDTO.getSignShopType())) {
+                        accountDTO.setSignShopType(dictionaryItemRespDTO.getName());
+                    }
+                }
+            }
+            String payMode = "";
+            if (accountDTO.getPayMode() == 1) {
+                payMode = "现金";
+            } else if (accountDTO.getPayMode() == 2) {
+                payMode = "POS";
+            } else if (accountDTO.getPayMode() == 3) {
+                payMode = "转账";
+            }
+            accountDTO.setPayModes(payMode);
+            String payType = "";
+            if (accountDTO.getPayType() == 1) {
+                payType = "全款";
+            } else if (accountDTO.getPayType() == 2) {
+                payType = "定金";
+            } else if (accountDTO.getPayType() == 3) {
+                payType = "追加定金";
+            } else if (accountDTO.getPayType() == 4) {
+                payType = "尾款";
+            }
+            accountDTO.setPayTypes(payType);
+            String createTime = sdf.format(accountDTO.getPayTime());
+            accountDTO.setPayTypes(payType);
+            accountDTO.setDay(createTime.substring(8, 10));
+            accountDTO.setMonth(createTime.substring(5, 7));
+            accountDTO.setYear(createTime.substring(0, 4));
+            if (accountDTO.getPayType() != 1 && accountDTO.getPayType() != 2) {
+                accountDTO.setFirstToll(null);
+            	accountDTO.setPreferentialAmount(null);
+            }
+        }
+        request.setAttribute("accountDTO",
+        		accountDTO);
+        return "financing/settleAccountsPage";
+    }
+    
 }
