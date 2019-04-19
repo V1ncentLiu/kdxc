@@ -41,7 +41,7 @@
                   </el-select>
                 </el-form-item>
                 <el-form-item label="电销事业部:">
-                  <el-select filterable v-model="form.deptId" placeholder="请选择电销事业部" style="width: 100%;" clearable >
+                  <el-select filterable v-model="form.deptId" placeholder="请选择电销事业部" clearable >
                       <el-option
                           v-for="item in deptoption"
                           :key="item.id"
@@ -61,17 +61,21 @@
                   </el-select>
                 </el-form-item>                
                 <el-form-item label="生效开始:">
-                  <el-date-picker type="datetime" placeholder="选择日期时间" v-model="form.startTime" style="width: 100%;"></el-date-picker>
+                  <el-date-picker type="datetime" placeholder="选择日期时间" v-model="form.startTime"></el-date-picker>
                 </el-form-item>   
-                <el-form-item label="—">
-                  <el-date-picker type="datetime" placeholder="选择日期时间" v-model="form.endTime" style="width: 100%;"></el-date-picker>
+                <el-form-item label="—" class="widthauto">
+                  <el-date-picker type="datetime" placeholder="选择日期时间" v-model="form.endTime"></el-date-picker>
                 </el-form-item>
-                <el-form-item label="规则名称:" style="margin-right: 10px;">
-                  <el-input  v-model="form.assignName"  placeholder="规则名称" class="input-with-select"></el-input>
-                </el-form-item>
-                <el-form-item label="">
-                  <el-button icon="el-icon-search" type="primary" @click="initTableData" >搜索</el-button>
-                </el-form-item>
+                <el-row v-show="isShow">
+                    <el-form-item label="规则名称:" style="margin-right: 10px;">
+                      <el-input  v-model="form.assignName"  placeholder="规则名称" class="input-with-select"></el-input>
+                    </el-form-item>
+                </el-row>
+                <div class="mainSearchBtnBox">
+                    <el-button icon="el-icon-search" type="primary" @click="initTableData" class="searchBtn">搜索</el-button>
+                    <el-button type="info" class="searchBtn">取消</el-button>
+                    <span style="color: #5c6be8;cursor: pointer;margin:0 10px;" @click="toogleClick">更多搜索<i class="el-icon-arrow-down greycolor paddingL6"></i></span>
+                </div> 
             </el-form>
         </div>
         <el-row>
@@ -130,6 +134,7 @@
         el: '#informationAllot',
         data: function() {
             return {
+                isShow:false,
                 form: {
                     companyId:'',
                     deptId:'',
@@ -329,8 +334,15 @@
                     return;
                 }
               window.location.href='/assignrule/teleAssignRule/preUpdateTeleAssignRule?ruleId='+ rows[0].id;
-            }
-        } ,
+            },
+            toogleClick(){
+                if(this.isShow){
+                    this.isShow=false
+                }else{
+                    this.isShow=true
+                }          
+            },
+        },
    	  created(){
      		//初始化数据列表
      		this.initTableData();
