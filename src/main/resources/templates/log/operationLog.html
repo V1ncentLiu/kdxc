@@ -15,83 +15,83 @@
         <el-breadcrumb-item>系统管理</el-breadcrumb-item>
         <el-breadcrumb-item>日志管理</el-breadcrumb-item>
     </el-breadcrumb>
-    <el-row :gutter="20">
-        <el-col>
-            <el-row class="marginB10">
-               <el-tabs type="card" v-model="activeName" @tab-click="handleClick" >
-			    <el-tab-pane label="访问日志" name="first"></el-tab-pane>
-			    <el-tab-pane label="操作日志" name="second"></el-tab-pane>
-			  </el-tabs>
-				<div class="block marginB10 greybg padding20" style="padding-bottom: 0">
-          <el-form :inline="true">
-            <el-form-item label="操作时间：">
-    					<el-date-picker value-format="yyyy-MM-dd HH:mm:ss" v-model="beginTime" type="datetime" placeholder="选择日期">
-    					</el-date-picker>
-            </el-form-item>
-            <el-form-item label="结束：">
-  					   <el-date-picker value-format="yyyy-MM-dd HH:mm:ss" v-model="endTime" type="datetime" placeholder="选择日期"></el-date-picker>
-            </el-form-item>
-            <el-form-item label="">
-  					   <el-input v-model="content" placeholder="日志内容"></el-input>
-            </el-form-item>
-            <el-form-item label="">
-  					   <el-select v-model="operationType" placeholder="操作类型" clearable>
-  					    <el-option
-  					      v-for="item in operationtypes"
-  					      :key="item.value"
-  					      :label="item.label"
-  					      :value="item.value">
-  					    </el-option>
-    					</el-select>
-            </el-form-item> 
-            <el-form-item label="">
-  					  <el-select v-model="queryType" placeholder="请选择" clearable >
-  					    <el-option
-  					      v-for="item in options"
-  					      :key="item.value"
-  					      :label="item.label"
-  					      :value="item.value">
-  					    </el-option>
-    				  </el-select>
-            </el-form-item>
-            <el-form-item label="">
-    					<el-input v-model="searchContent" placeholder="请输入查询内容"></el-input>
-            </el-form-item>
-    				<el-button type="primary" @click="search">搜索</el-button>
-          </el-form>
-				</div>
-                
-            </el-row>
-            <el-row>
-                <el-table 
-                    ref="multipleTable"
-                    tooltip-effect="dark"
-                    empty-text="无数据"
-                    style="width: 100%"
-                    border
-                    :data="dataTable" 
-                    >
-                    <el-table-column  type="index"  align="center" prop="name" label="序号" width="55"></el-table-column>
-                     <!-- <el-table-column prop="date" label="全选" width="180"></el-table-column>  -->
-                    <el-table-column align="center" prop="userName" label="登录名称"></el-table-column>
-                    <el-table-column align="center" prop="name" label="姓名"></el-table-column>
-                    <el-table-column align="center" prop="phone" label="登录手机号"></el-table-column>
-                    <el-table-column align="center" prop="remoteIP" label="登录IP"></el-table-column>
-                    <el-table-column align="center" prop="menuName" label="操作模块"></el-table-column>
-                    <el-table-column align="center" prop="operationType" :formatter="transformStatus" label="操作类型"></el-table-column>
-                    <el-table-column align="center" prop="requestParam" label="日志内容">
-	                    <template slot-scope="scope" >
-	                    <el-button type="text" @click="open(scope.row.requestParam)">{{scope.row.description}}：{{scope.row.logId}}</el-button>
-						</template>
+    <el-tabs type="card" v-model="activeName" @tab-click="handleClick" >
+      <el-tab-pane label="访问日志" name="first"></el-tab-pane>
+      <el-tab-pane label="操作日志" name="second"></el-tab-pane>
+    </el-tabs>
+    <div class="mainSearchBg">        
+        <div class="mainSearchFormBox">
+            <el-form :inline="true" class="demo-form-inline mainSearchForm">
+              <el-form-item label="日志内容:">
+        			   <el-input v-model="content" placeholder="日志内容"></el-input>
+              </el-form-item>
+              <el-form-item label="操作类型:">
+        			   <el-select v-model="operationType" placeholder="操作类型" clearable>
+        			    <el-option
+        			      v-for="item in operationtypes"
+        			      :key="item.value"
+        			      :label="item.label"
+        			      :value="item.value">
+        			    </el-option>
+        				</el-select>
+              </el-form-item> 
+              <el-form-item label="请选择:">
+        			  <el-select v-model="queryType" placeholder="请选择" clearable >
+        			    <el-option
+        			      v-for="item in options"
+        			      :key="item.value"
+        			      :label="item.label"
+        			      :value="item.value">
+        			    </el-option>
+        			  </el-select>
+              </el-form-item>
+              <el-form-item label="操作时间:">
+                <el-date-picker value-format="yyyy-MM-dd HH:mm:ss" v-model="beginTime" type="datetime" placeholder="选择日期">
+                </el-date-picker>
+              </el-form-item>
+              <el-form-item label="—" class="widthauto">
+                 <el-date-picker value-format="yyyy-MM-dd HH:mm:ss" v-model="endTime" type="datetime" placeholder="选择日期"></el-date-picker>
+              </el-form-item>
+              <el-row v-show="isShow">
+                  <el-form-item label="查询内容:">
+            				<el-input v-model="searchContent" placeholder="请输入查询内容"></el-input>
+                  </el-form-item>
+              </el-row>
+              <div class="mainSearchBtnBox">
+        			    <el-button type="primary" @click="search" class="searchBtn">搜索</el-button>
+                  <el-button type="info" class="searchBtn">取消</el-button>
+                  <span style="color: #5c6be8;cursor: pointer;margin:0 10px;" @click="toogleClick">更多搜索<i class="el-icon-arrow-down greycolor paddingL6"></i></span>
+              </div> 
+            </el-form>
+        </div>    
+        <el-row>
+            <el-table 
+                ref="multipleTable"
+                tooltip-effect="dark"
+                empty-text="无数据"
+                style="width: 100%"
+                border
+                :data="dataTable" 
+                >
+                <el-table-column  type="index"  align="center" prop="name" label="序号" width="55"></el-table-column>
+                 <!-- <el-table-column prop="date" label="全选" width="180"></el-table-column>  -->
+                <el-table-column align="center" prop="userName" label="登录名称"></el-table-column>
+                <el-table-column align="center" prop="name" label="姓名"></el-table-column>
+                <el-table-column align="center" prop="phone" label="登录手机号"></el-table-column>
+                <el-table-column align="center" prop="remoteIP" label="登录IP"></el-table-column>
+                <el-table-column align="center" prop="menuName" label="操作模块"></el-table-column>
+                <el-table-column align="center" prop="operationType" :formatter="transformStatus" label="操作类型"></el-table-column>
+                <el-table-column align="center" prop="requestParam" label="日志内容">
+                  <template slot-scope="scope" >
+                    <el-button type="text" @click="open(scope.row.requestParam)">{{scope.row.description}}：{{scope.row.logId}}</el-button>
+    			        </template>
 
-                    </el-table-column>
-                    <el-table-column align="center" prop="reqStartTime" label="操作时间"></el-table-column>
-                </el-table>
-                 <table-pagination :pager="pager" @change="queryLogDataList"></table-pagination>
-            </el-row>
-        </el-col>
-    </el-row>
-  
+                </el-table-column>
+                <el-table-column align="center" prop="reqStartTime" label="操作时间"></el-table-column>
+            </el-table>
+            <table-pagination :pager="pager" @change="queryLogDataList"></table-pagination>
+        </el-row>
+    </div>  
 </div>
 </body>
 <!-- import common js-->
@@ -104,6 +104,7 @@
         el: '#organizationManage',
         data: function() {
             return {
+              isShow:false,
             	activeName: 'second',
             	beginTime:"",
             	endTime:"",
@@ -206,87 +207,94 @@
         	},
         	queryLogDataList(){//查询按钮
         		var param = {}; 
-          	  var pageSize = this.pager.pageSize;
-                var pageNum = this.pager.currentPage;
-                param.pageNum = pageNum;
-                param.pageSize = pageSize;
-                param.beginTime=this.beginTime;
-                param.endTime=this.endTime;
-                param.content=this.content;
-                param.queryType=this.queryType;
-                param.searchContent=this.searchContent;
-                param.operationType=this.operationType;
-                param.operationType=this.operationType;
-                param.visitType = 2;
-                if(this.beginTime !=null && this.beginTime != '' && this.endTime !=null && this.endTime != '' && this.beginTime>this.endTime){
-              	  this.$message("开始时间不能大于结束时间");
-         	         return;
-                }
-                
-                console.log(param);
-                  axios.post('/log/log/queryLogDataList',param).then(function (response) {
-                  	//  console.log(response);
-                             if(null===response||response.data==null||response.data.code!='0'){
-                          	  alert(response.data.message);
-                          	  return ;
-                             }else{
-                            	 orgVM.dataTable =response.data.data.data; 
-                            	 orgVM.pager.currentPage= response.data.data.currentPage;
-                            	 orgVM.pager.total= response.data.data.total; 
-                             }
-                  })
-                  .catch(function (error) {
-                    console.log(error);
-                  })
-                  .then(function () {
-                  });  
-                  
-              } ,
+        	  var pageSize = this.pager.pageSize;
+            var pageNum = this.pager.currentPage;
+            param.pageNum = pageNum;
+            param.pageSize = pageSize;
+            param.beginTime=this.beginTime;
+            param.endTime=this.endTime;
+            param.content=this.content;
+            param.queryType=this.queryType;
+            param.searchContent=this.searchContent;
+            param.operationType=this.operationType;
+            param.operationType=this.operationType;
+            param.visitType = 2;
+            if(this.beginTime !=null && this.beginTime != '' && this.endTime !=null && this.endTime != '' && this.beginTime>this.endTime){
+          	  this.$message("开始时间不能大于结束时间");
+     	         return;
+            }
             
-              handleClick(tab, event) {
-                if(tab.name='first'){
-                	window.location.href="/log/log/visitLog";
-                }else{
-                	window.location.href="/log/log/operationLog";
-                }
-              },
-              transformStatus(row, column, cellValue, index) {
-            	  var text="";
-                  if(cellValue=="INSERT"){
-                	  text="添加"
-                  }else if(cellValue=="UPDATE"){
-                	  text="修改"
-                  }else if(cellValue=="DELETE"){
-                	  text="删除"
-                  }else if(cellValue=="EXPORT"){
-                	  text="导出"
-                  }else if(cellValue=="PUSH"){
-                	  text="推送"
-                  }else if(cellValue=="DISTRIBUTION"){
-                	  text="分配"
-                  }else if(cellValue=="RELEASE"){
-                	  text="释放"
-                  }else if(cellValue=="TRANSFER"){
-                	  text="转移"
-                  }else if(cellValue=="DISABLE"){
-                	  text="禁用"
-                  }else if(cellValue=="ENABLE"){
-                	  text="启用"
-                  }else if(cellValue=="IMPORTS"){
-                	  text="导入"
-                  }else if(cellValue=="RECEIVE"){
-                    text="领取"
-                  }else if(cellValue=="OUTBOUNDCALL"){
-                    text="外呼"
-                  }
-                  return text;
-              }, 
-              open(param){
-        	         this.$alert(param, '日志详情', { 
-         	           confirmButtonText: '确定'
-         	         
-        	         })
+            console.log(param);
+              axios.post('/log/log/queryLogDataList',param).then(function (response) {
+              	//  console.log(response);
+                         if(null===response||response.data==null||response.data.code!='0'){
+                      	  console.log(response.data.message);
+                      	  return ;
+                         }else{
+                        	 orgVM.dataTable =response.data.data.data; 
+                        	 orgVM.pager.currentPage= response.data.data.currentPage;
+                        	 orgVM.pager.total= response.data.data.total; 
+                         }
+              })
+              .catch(function (error) {
+                console.log(error);
+              })
+              .then(function () {
+              });  
+                
+            } ,
+          
+            handleClick(tab, event) {
+              if(tab.name='first'){
+              	window.location.href="/log/log/visitLog";
+              }else{
+              	window.location.href="/log/log/operationLog";
               }
+            },
+            transformStatus(row, column, cellValue, index) {
+          	  var text="";
+                if(cellValue=="INSERT"){
+              	  text="添加"
+                }else if(cellValue=="UPDATE"){
+              	  text="修改"
+                }else if(cellValue=="DELETE"){
+              	  text="删除"
+                }else if(cellValue=="EXPORT"){
+              	  text="导出"
+                }else if(cellValue=="PUSH"){
+              	  text="推送"
+                }else if(cellValue=="DISTRIBUTION"){
+              	  text="分配"
+                }else if(cellValue=="RELEASE"){
+              	  text="释放"
+                }else if(cellValue=="TRANSFER"){
+              	  text="转移"
+                }else if(cellValue=="DISABLE"){
+              	  text="禁用"
+                }else if(cellValue=="ENABLE"){
+              	  text="启用"
+                }else if(cellValue=="IMPORTS"){
+              	  text="导入"
+                }else if(cellValue=="RECEIVE"){
+                  text="领取"
+                }else if(cellValue=="OUTBOUNDCALL"){
+                  text="外呼"
+                }
+                return text;
+            }, 
+            open(param){
+      	         this.$alert(param, '日志详情', { 
+       	           confirmButtonText: '确定'
+       	         
+      	         })
+            },
+            toogleClick(){
+              if(this.isShow){
+                  this.isShow=false
+              }else{
+                  this.isShow=true
+              }          
+          },
          	
         },
         created(){
