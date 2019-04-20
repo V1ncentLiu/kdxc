@@ -9,7 +9,21 @@ var mainDivVM = new Vue({
         formLabelWidth:"150px",
         // 快速领取新资源
         tableData:[],        
-        repeatPhonesTable2:[],//快速领取新资源重复手机号
+        repeatPhonesTable:[],
+        repeatPhonesTable2:[],
+        repeatPhonesTable3:[],
+        repeatPhonesTable4:[],
+        repeatPhonesTable5:[],
+        showPhoneTable:false,
+        showPhoneTable2:false,
+        showPhoneTable3:false,
+        showPhoneTable4:false,
+        showPhoneTable5:false,
+        phone:'',
+        phone2:'',
+        phone3:'',
+        phone4:'',
+        phone5:'',
         categoryArr:[],
         typeArr:[],
         reasonArr:[],
@@ -24,7 +38,6 @@ var mainDivVM = new Vue({
             trackingDialogVisible:false,
             tableData:[]
         },
-        repeatPhonesTable:[],
         receiveTable:[],
         // 今日待跟进客户资源
         dataTable: [],
@@ -155,22 +168,68 @@ var mainDivVM = new Vue({
             window.location.href='/tele/clueMyCustomerInfo/customerInfoReadOnly?clueId='+row.clueid+"&commonPool=1";
         },
         repeatPhonesClick(row) {//今日待跟进客户资源-我的客户重复手机号按钮点击
+            debugger
             this.repeatPhonesDialog=true;
-            this.dailogTitleType=row.phone;
+            this.dailogTitleType=row.clueId;
             this.repeatPhonesTable=[];
             var param ={};
             param.id = row.clueId;
-                param.cusPhone = row.phone;
-                param.clueId = row.clueId;
-                axios.post('/clue/appiontment/repeatPhonelist', param)
-                .then(function (response) {
-                    var result =  response.data;
-                    var table=result.data;
-                    mainDivVM.repeatPhonesTable=table;
-                    mainDivVM.repeatPhonesDialog=true;
-                })  .catch(function (error) {
-                    console.log(error);
-            });            
+            param.cusPhone = row.phone;
+            param.clueId = row.clueId;
+            axios.post('/clue/appiontment/repeatPhoneMap', param).then(function (response) {
+                // var result =  response.data;
+                // var table=result.data;
+                // mainDivVM.repeatPhonesTable=table;
+                var map = response.data.data;
+                if(map.phone){
+                    mainDivVM.phone = map.phones[0]
+                    mainDivVM.repeatPhonesTable=map.phone;
+                    mainDivVM.showPhoneTable = true;
+                }else{
+                    mainDivVM.phone = '';
+                    mainDivVM.repeatPhonesTable=[];
+                    mainDivVM.showPhoneTable = false;
+                }
+                if(map.phone2){
+                    mainDivVM.phone2 = map.phones[1]
+                    mainDivVM.repeatPhonesTable2=map.phone2;
+                    mainDivVM.showPhoneTable2 = true;
+                }else{
+                    mainDivVM.phone2 ='';
+                    mainDivVM.repeatPhonesTable2=[];
+                    mainDivVM.showPhoneTable2 = false;
+                }
+                if(map.phone3){
+                    mainDivVM.phone3 = map.phones[2]
+                    mainDivVM.repeatPhonesTable3=map.phone3;
+                    mainDivVM.showPhoneTable3 = true;
+                }else{
+                    mainDivVM.phone3 = '';
+                    mainDivVM.repeatPhonesTable3=[];
+                    mainDivVM.showPhoneTable3 = false;
+                }
+                if(map.phone4){
+                    mainDivVM.phone4 = map.phones[3]
+                    mainDivVM.repeatPhonesTable4=map.phone4;
+                    mainDivVM.showPhoneTable4 = true;
+                }else{
+                    mainDivVM.phone4 = ''
+                    mainDivVM.repeatPhonesTable4=[];
+                    mainDivVM.showPhoneTable4 = false;
+                }
+                if(map.phone5){
+                    mainDivVM.phone5 = map.phones[4]
+                    mainDivVM.repeatPhonesTable5=map.phone5;
+                    mainDivVM.showPhoneTable5 = true;
+                }else{
+                    mainDivVM.phone5 = map.phones[4]
+                    mainDivVM.repeatPhonesTable5=[];
+                    mainDivVM.showPhoneTable5 = false;
+                }
+                mainDivVM.repeatPhonesDialog=true;
+            })  .catch(function (error) {
+                console.log(error);
+            });
         },
         repeatPhonesClick2(row) {//重复手机号按钮点击
             this.repeatPhonesDialog2=true;

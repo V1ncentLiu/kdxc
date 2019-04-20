@@ -155,8 +155,6 @@ var mainDivVM = new Vue({
             var param ={};
             param.pageSize = this.pager.pageSize;
             param.pageNum = this.pager.currentPage;
-            console.info(param);
-            // axios.post('/clue/pendingAllocation/list', param)
             axios.post('/console/console/listUnAssignClue', param)
             .then(function (response) {
                 var result =  response.data;
@@ -188,12 +186,11 @@ var mainDivVM = new Vue({
         //查看重复手机号资源
         showRepeatPhone(row) {
             this.repeatPhonesDialog=true;
-            this.dailogTitleType=row.clueId;
+            this.dailogTitleType=row.id;
             this.repeatPhonesTable=[];
             var param ={};
             param.id = row.id;
-            param.cusPhone = row.phone;
-            param.clueId = row.clueId;
+            param.clueId = row.id;
             axios.post('/clue/appiontment/repeatPhoneMap', param).then(function (response) {
                 // var result =  response.data;
                 // var table=result.data;
