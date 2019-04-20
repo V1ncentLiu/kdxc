@@ -23,9 +23,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.client.RestTemplate;
+import com.itextpdf.text.pdf.PdfStructTreeController.returnType;
 import com.kuaidao.aggregation.constant.AggregationConstant;
+import com.kuaidao.aggregation.dto.financing.FinanceLayoutDTO;
 import com.kuaidao.aggregation.dto.financing.RefundAndImgRespDTO;
 import com.kuaidao.aggregation.dto.financing.RefundEditRejectReqDTO;
+import com.kuaidao.aggregation.dto.financing.RefundImgDTO;
 import com.kuaidao.aggregation.dto.financing.RefundImgRespDTO;
 import com.kuaidao.aggregation.dto.financing.RefundInfoQueryDTO;
 import com.kuaidao.aggregation.dto.financing.RefundQueryDTO;
@@ -43,6 +46,7 @@ import com.kuaidao.common.util.CommonUtil;
 import com.kuaidao.manageweb.config.LogRecord;
 import com.kuaidao.manageweb.config.LogRecord.OperationType;
 import com.kuaidao.manageweb.constant.MenuEnum;
+import com.kuaidao.manageweb.feign.financing.FinanceLayoutFeignClient;
 import com.kuaidao.manageweb.feign.financing.RefundFeignClient;
 import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
 import com.kuaidao.manageweb.util.CommUtil;
@@ -76,6 +80,8 @@ public class RefundController {
     @Value("${oss.url.directUpload}")
     private String ossUrl;
 
+    @Autowired
+    FinanceLayoutFeignClient financeLayoutFeignClient;
 
     /**
      * 退款申请页面
@@ -132,9 +138,9 @@ public class RefundController {
         queryDTO.setCurUser(curLoginUser.getId());
         queryDTO.setType(AggregationConstant.REFOUND_REBATE_TYPE.REFOUND_TYPE);
         //处理商务参数
-        handleBusinessReqParam(queryDTO);
+       // handleBusinessReqParam(queryDTO);
         //处理电销参数
-        handleTeleReqParam(queryDTO);
+        //handleTeleReqParam(queryDTO);
         return refundFeignClient.listRefundApply(queryDTO);
     }
     
@@ -184,22 +190,22 @@ public class RefundController {
     //处理商务参数
     private void handleBusinessReqParam(RefundQueryDTO queryDTO) {
        Long busManagerId = queryDTO.getBusManagerId();
-       if(busManagerId!=null) {
+ /*      if(busManagerId!=null) {
            List<Long> busManagerIdList = new ArrayList<Long>();
            busManagerIdList.add(busManagerId);
            queryDTO.setBusManagerIdList(busManagerIdList);
            return;
-       }
+       }*/
        
-       Long busGroupId = queryDTO.getBusGroupId();
+    /*   Long busGroupId = queryDTO.getBusGroupId();
        if(busGroupId!=null) {
            List<Long> busGroupIdList = new ArrayList<Long>();
            busGroupIdList.add(busGroupId);
            queryDTO.setBusGroupIdList(busGroupIdList);
            return;
-       }
+       }*/
        
-       Long busAreaId = queryDTO.getBusAreaId();
+/*       Long busAreaId = queryDTO.getBusAreaId();
        if(busAreaId!=null) {
            // 商务小组
            List<OrganizationDTO> businessGroupList = getBusinessGroupList(busAreaId, OrgTypeConstant.SWZ);
@@ -209,7 +215,7 @@ public class RefundController {
            }
          
            return;
-       }
+       }*/
        
     }
     
@@ -306,7 +312,7 @@ public class RefundController {
         queryDTO.setType(AggregationConstant.REFOUND_REBATE_TYPE.REFOUND_TYPE);
         
         //TODO dev 
-      /*  List<RoleInfoDTO> roleList = curLoginUser.getRoleList();
+        List<RoleInfoDTO> roleList = curLoginUser.getRoleList();
         RoleInfoDTO roleInfoDTO = roleList.get(0);
         String roleCode = roleInfoDTO.getRoleCode();
         if (RoleCodeEnum.QDSJCW.name().equals(roleCode)){
@@ -315,7 +321,7 @@ public class RefundController {
             queryDTO.setRoleCode(roleCode);
         }else {
             return new JSONResult().fail(SysErrorCodeEnum.ERR_NOTEXISTS_DATA.getCode(), "角色没有权限");
-        }*/
+        }
         return refundFeignClient.listRefundApply(queryDTO);
     }
     /**
@@ -418,13 +424,23 @@ public class RefundController {
         List<RoleInfoDTO> roleList = curLoginUser.getRoleList();
         RoleInfoDTO roleInfoDTO = roleList.get(0);
         String roleCode = roleInfoDTO.getRoleCode();
-/*       if (RoleCodeEnum.QDSJCW.name().equals(roleCode)){
+       if (RoleCodeEnum.QDSJCW.name().equals(roleCode) || RoleCodeEnum.SJHZCW.name().equals(roleCode)){
            queryDTO.setRoleCode(roleCode);
-       }else if(RoleCodeEnum.SJHZCW.name().equals(roleCode)) {
-           queryDTO.setRoleCode(roleCode);
+           /*FinanceLayoutDTO financeLayoutDTO = new FinanceLayoutDTO();
+           financeLayoutDTO.setFinanceUsers(curLoginUser.getId()+"");
+           JSONResult<FinanceLayoutDTO> finaceRes = financeLayoutFeignClient.findFinanceLayoutById(financeLayoutDTO);
+           if(finaceRes==null || !JSONResult.SUCCESS.equals(finaceRes.getCode())) {
+               logger.error("listRebateConfirm ,param{{{}},res{{}}",financeLayoutDTO,finaceRes);
+               return new JSONResult().fail(finaceRes.getCode(), finaceRes.getMsg());
+           }
+           FinanceLayoutDTO data = finaceRes.getData();
+           List<Long> busGroupIdList = new ArrayList<Long>();
+           for (FinanceLayoutDTO financeLayout : financeLayoutDTOByParam) {
+               busGroupIdList.add(financeLayout.getBusGroupId());
+           }*/
        }else {
            return new JSONResult().fail(SysErrorCodeEnum.ERR_NOTEXISTS_DATA.getCode(), "角色没有权限");
-       }*/
+       }
         return refundFeignClient.listRefundApply(queryDTO);
     }
     
@@ -517,7 +533,7 @@ public class RefundController {
     }
     
     /***
-     * 根据Id 查询图片列表
+     * 根据退返款Id 查询图片列表
      */
     @PostMapping("/listImgById")
     @ResponseBody
@@ -530,7 +546,7 @@ public class RefundController {
     
     
     /**
-     * 编辑驳回退款
+     * 编辑驳回返款
      * @return
      */
     @PostMapping("/editRejectRebateInfo")
@@ -597,6 +613,11 @@ public class RefundController {
         return refundFeignClient.querySignInfoBySignNo(refundQueryDTO);
     }
     
+    /**
+     * 下载oss 图片
+     * @param url
+     * @return
+     */
     @RequestMapping("/downloadOssImg")
     @ResponseBody
     public ResponseEntity<byte[]> downloadOssImg(String url) {
@@ -606,6 +627,17 @@ public class RefundController {
         ResponseEntity<byte[]> response = restTemplate.exchange(url,HttpMethod.GET, entity, byte[].class);
         byte[] imageBytes = response.getBody();
         return new ResponseEntity<byte[]>(imageBytes,headers,HttpStatus.OK);
+    }
+    
+    /**
+     * 插入图片信息
+     * @param refundImgDTO
+     * @return
+     */
+    @PostMapping("/insertImgInfo")
+    @ResponseBody
+    public JSONResult<Long> insertImgInfo(@RequestBody RefundImgDTO refundImgDTO){
+        return refundFeignClient.insertImgInfo(refundImgDTO);
     }
 
 }
