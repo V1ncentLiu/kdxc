@@ -25,7 +25,8 @@
 		        <el-button type="danger" @click="deleteClueTemplate"><i class="el-icon-delete"></i>删除模板</el-button>
 		    </shiro:hasPermission>
       </el-col>
-      <el-col :span="12" style="text-align: right;">
+	</el-row>
+        <el-row>
         <el-form :inline="true" :model="clueTemplateSearchForm" class="demo-form-inline" ref="clueTemplateSearchForm">
         	<el-form-item label="资源项目:" >
                     <el-select v-model="clueTemplateSearchForm.clueProjectId" placeholder="资源项目" clearable>
@@ -77,13 +78,12 @@
                         </el-option>
                     </el-select>
                 </el-form-item>
-          <el-form-item class="formItem" prop="name">
+          <el-form-item  prop="name" label="模板名称：">
             <el-input v-model="clueTemplateSearchForm.name" placeholder="模板名称" class="input-with-select"></el-input>
           </el-form-item>
           <el-button icon="el-icon-search" type="primary" @click="searchTable()">搜索</el-button>
         </el-form>
-      </el-col>
-	</el-row>
+        </el-row>
 	  <div class="mainSearchBg">
       <el-row>
           <el-table  ref="multipleTable" tooltip-effect="dark" border @selection-change="handleSelectionChange"
@@ -205,6 +205,10 @@ var clueTemplateVM = new Vue({
 	                pageSize: 20,
 	            },
 	            projectOptions:projectList,
+	            sourceTypeOptions:adsenseList,
+	            typeOptions:clueTypeList,
+	            sourceOptions:mediumList,
+	            categoryOptions:clueCategoryList,
 	            multipleSelection:[],
                 formLabelWidth: '150px',
                 formLabelWidth1: '120px',
@@ -230,6 +234,7 @@ var clueTemplateVM = new Vue({
                 axios.post('/aggregation/clueTemplate/list', param)
                 .then(function (response) {
                       var result =  response.data;
+                	  console.info(result);
                       var table=result.data;
                       clueTemplateVM.dataTable= table.data;
                       clueTemplateVM.pager.total =  table.total;
@@ -277,7 +282,13 @@ var clueTemplateVM = new Vue({
                   .then(function (response) {
                       var data =  response.data;
                       if(data.code=='0'){
-                    	  clueTemplateVM.clueTemplateForm= data.data;
+                    	  clueTemplateVM.clueTemplateForm.id= data.data.id;
+                    	  clueTemplateVM.clueTemplateForm.name= data.data.name;
+                    	  clueTemplateVM.clueTemplateForm.clueProjectId= data.data.clueProjectId;
+                    	  clueTemplateVM.clueTemplateForm.category= data.data.category+"";
+                    	  clueTemplateVM.clueTemplateForm.type= data.data.type+"";
+                    	  clueTemplateVM.clueTemplateForm.source= data.data.source+"";
+                    	  clueTemplateVM.clueTemplateForm.sourceType= data.data.sourceType+"";
                       }else{
                       	console.error(data);
                       }
@@ -406,81 +417,52 @@ var clueTemplateVM = new Vue({
               },//end
             //资源类别转换方法
               transformCategory(row, column, cellValue, index) {
-            	   var text="";
-              	   if(clueCategoryList&&cellValue){
-   	            	   var array=cellValue.split(",");
-   	                   for(var i=0;i<array.length;i++){
-   	                	   for(var j=0;j<clueCategoryList.length;j++){
-   	 	                		if(array[i]==clueCategoryList[j].value){
-   	 	                			if(i==0){
-   		 	                			text=clueCategoryList[j].name;
-   	 	                			}else{
-   		 	                			text=text+","+clueCategoryList[j].name;
-   	 	                			}
-   	 	                		}
-   	 	                	}
-   	                	}
-              	    }
-                    return text;
+            	 var text="";
+              	 if(clueCategoryList){
+	                  for(var i=0;i<clueCategoryList.length;i++){
+	                		if(cellValue==clueCategoryList[i].value){
+	                			text=clueCategoryList[i].name;
+	                		}
+	                	}
+            	  }
+                  return text;
                },
             //资源类型转换方法
               transformType(row, column, cellValue, index) {
             	   var text="";
-              	   if(clueTypeList&&cellValue){
-   	            	   var array=cellValue.split(",");
-   	                   for(var i=0;i<array.length;i++){
-   	                	   for(var j=0;j<clueTypeList.length;j++){
-   	 	                		if(array[i]==clueTypeList[j].value){
-   	 	                			if(i==0){
-   		 	                			text=clueTypeList[j].name;
-   	 	                			}else{
-   		 	                			text=text+","+clueTypeList[j].name;
-   	 	                			}
-   	 	                		}
-   	 	                	}
-   	                	}
-              	    }
+              	   if(clueTypeList){
+	                  for(var i=0;i<clueTypeList.length;i++){
+	                		if(cellValue==clueTypeList[i].value){
+	                			text=clueTypeList[i].name;
+	                		}
+	                	}
+           	  		}
                     return text;
                },
             //广告位转换方法
               transformSourceType(row, column, cellValue, index) {
             	   var text="";
-              	   if(adsenseList&&cellValue){
-   	            	   var array=cellValue.split(",");
-   	                   for(var i=0;i<array.length;i++){
-   	                	   for(var j=0;j<adsenseList.length;j++){
-   	 	                		if(array[i]==adsenseList[j].value){
-   	 	                			if(i==0){
-   		 	                			text=adsenseList[j].name;
-   	 	                			}else{
-   		 	                			text=text+","+adsenseList[j].name;
-   	 	                			}
-   	 	                		}
-   	 	                	}
-   	                	}
-              	    }
+              	 if(adsenseList){
+	                  for(var i=0;i<adsenseList.length;i++){
+	                		if(cellValue==adsenseList[i].value){
+	                			text=adsenseList[i].name;
+	                		}
+	                	}
+          	  		}
                     return text;
                },
              //媒介转换方法
                transformSource(row, column, cellValue, index) {
             	   var text="";
-              	   if(mediumList&&cellValue){
-   	            	   var array=cellValue.split(",");
-   	                   for(var i=0;i<array.length;i++){
-   	                	   for(var j=0;j<mediumList.length;j++){
-   	 	                		if(array[i]==mediumList[j].value){
-   	 	                			if(i==0){
-   		 	                			text=mediumList[j].name;
-   	 	                			}else{
-   		 	                			text=text+","+mediumList[j].name;
-   	 	                			}
-   	 	                		}
-   	 	                	}
-   	                	}
-              	    }
+              	 if(mediumList){
+	                  for(var i=0;i<mediumList.length;i++){
+	                		if(cellValue==mediumList[i].value){
+	                			text=mediumList[i].name;
+	                		}
+	                	}
+         	  		}
                     return text;
                },
-          },
           
         },
         created(){
