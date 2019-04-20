@@ -210,7 +210,7 @@
               <el-form-item label="上传图片：" :label-width="formLabelWidth" prop="fileList">
               		<el-upload
                     class="upload-demo"
-                    action="http://huiju-dev.oss-cn-beijing.aliyuncs.com"
+                    :action="uploadOssHost"
                     ref="refundApplyImgUpload"
                     :on-preview="handlePreview"
                     :on-remove="handleRemove"
@@ -278,14 +278,24 @@
               </el-form-item>
               <el-form-item label="上传图片：" :label-width="formLabelWidth" prop="fileList">
                   <el-upload
-                      class="upload-demo"
-                      action="https://jsonplaceholder.typicode.com/posts/"
-                      multiple
-                      :file-list="transferForm.fileList"
-                      >
-                      <el-button size="small" type="primary">点击上传</el-button>
-                      <div slot="tip" class="el-upload__tip">只能上传jpg/png文件，且不超过500kb</div>
-                  </el-upload>
+                    class="upload-demo"
+                    :action="uploadOssHost"
+                    ref="refundApplyImgUpload"
+                    :on-preview="handlePreview"
+                    :on-remove="handleRemove"
+                    :on-success="handleSuccess"
+                    :on-error="handleError"
+                    :before-upload="handleBefore"
+                    multiple
+                    :data="uploadParamData"
+                    :on-change="selectFile"
+                    :on-exceed="handleExceed"
+                    :auto-upload="false"
+                    :file-list="fileList">
+                    <el-button slot="trigger" size="small" type="primary">选择文件</el-button>
+                     <el-button style="margin-left: 10px;" size="small" type="success" @click="submitUpload">上传</el-button>
+                    <div slot="tip" class="el-upload__tip">只能上传jpg/png文件，且不超过500kb</div>
+                </el-upload>
               </el-form-item>
               <el-form-item label="返款原因：" :label-width="formLabelWidth" prop="reason">
                   <el-input
@@ -395,6 +405,7 @@ var teleGroupList=[[${teleGroupList}]];//电销组
 var teleSaleList=[[${teleSaleList}]];//创业顾问
 var provinceList=[[${provinceList}]];//省份
 var vistitStoreTypeList=[[${vistitStoreTypeList}]];//签约店型
+var ossSignatureUrl = [[${ossUrl}]];//上传文件地址
 var clueVM = new Vue({
         el: '#clueManage',
         data: {
@@ -521,7 +532,7 @@ var clueVM = new Vue({
           },   
           dataTableChoose:[],   
           dynamicTags: [],
-          uploadOssHost:[],
+          uploadOssHost:'',
           uploadParamData: {
               key:'22',
               policy:'',
@@ -531,12 +542,12 @@ var clueVM = new Vue({
               'x:params':'',
               'realName':''
            },
-           imgList:[],
            fileList:[],
+           ossUrl:ossSignatureUrl,
         },
         methods: {
         	getUploadParam(){
-                var signUrl = "http://192.168.13.145:8080/v1.0/OSS/directUpload?serviceType=aggregation";
+                var signUrl = this.ossUrl+"?serviceType=aggregation";
                 var param={};
                 
                  axios.get(signUrl, param)
@@ -573,45 +584,43 @@ var clueVM = new Vue({
              
          },
          handleRemove(file,fileList){
-         	 var id = file.id;
-         	 if(!id){
-         		 return;
-         	 }
-              var param = {};
-              var idList = new Array();
-              idList.push(id)
-              param.idList = idList;
-              axios.post('/financing/refund/deleteImgByIdList',param)
-              .then(function (response) {
-                    var result =  response.data;
-                    if(result.code=='0'){
-                        clueVM.$message({message:'删除成功',type:'success'});
-                    }else{
-                        console.error(response);
-                        clueVM.$message({message:result.msg,type:'error'});
-                    }
-                    
-              })
-              .catch(function (error) {
-                   console.log(error);
-              });
-              
+        	 var id = file.id;
+        	 if(!id){
+        		 return;
+        	 }
+             var param = {};
+             var idList = new Array();
+             idList.push(id)
+             param.idList = idList;
+             axios.post('/financing/refund/deleteImgByIdList',param)
+             .then(function (response) {
+                   var result =  response.data;
+                   if(result.code=='0'){
+                       mainDivVM.$message({message:'删除成功',type:'success'});
+                   }else{
+                       console.error(response);
+                       mainDivVM.$message({message:result.msg,type:'error'});
+                   }
+                   
+             })
+             .catch(function (error) {
+                  console.log(error);
+             });
          },
          handleExceed(files, fileList) {
              //this.$message.warning(`当前限制选择 3 个文件，本次选择了 ${files.length} 个文件，共选择了 ${files.length + fileList.length} 个文件`);
            },
            handleSuccess(response, file, fileList){
-               console.info(fileList);
-               console.info(clueVM.fileList);
+        	   console.info(fileList);
+               console.info(mainDivVM.fileList);
                var realName = file.name;
-               var randomName = clueVM.uploadParamData.key;
-               var imgUrl =  clueVM.uploadOssHost+"/"+randomName;
+               var randomName = mainDivVM.uploadParamData.key;
+               var imgUrl =  mainDivVM.uploadOssHost+"/"+randomName;
                var param = {};
                param.realName=realName;
                param.imgUrl = imgUrl;
                var randomNameArr = randomName.split("/");
                param.randomName = randomNameArr[randomNameArr.length-1];
-           
                axios.post('/financing/refund/insertImgInfo', param)
                .then(function (response) {
                    var resData = response.data;
@@ -621,18 +630,20 @@ var clueVM = new Vue({
                        lastFile.name=realName;
                        lastFile.url = imgUrl;
                        lastFile.randomName = randomName; 
-                       var curList = clueVM.fileList;
+                       var curList = mainDivVM.fileList;
                        curList.push(lastFile);
                        
-                       clueVM.$message({message:'上传成功',type:'success'});
+                       mainDivVM.$message({message:'上传成功',type:'success'});
                    }else{
-                       clueVM.$message({message:'上传失败',type:'error'});
+                       mainDivVM.$message({message:'上传失败',type:'error'});
                    }
                    
                })
                .catch(function (error) {
                     console.log(error);
                });
+               
+               
            },
            handleError(err, file, fileList){
                console.info(err);
@@ -828,6 +839,7 @@ var clueVM = new Vue({
             	   if(this.$refs[formName]){
 	            	   this.$refs[formName].resetFields();
             	   }
+           	       this.fileList=[];
            	       var rows = this.multipleSelection;
             	   if(rows.length!=1){
                        this.$message({
@@ -895,6 +907,7 @@ var clueVM = new Vue({
                    if(this.$refs[formName]){
   	            	   this.$refs[formName].resetFields();
               	   }
+                   this.fileList=[];
                    this.dynamicTags =[];
            	       var rows = this.multipleSelection;
             	   if(rows.length!=1){
@@ -1073,7 +1086,7 @@ var clueVM = new Vue({
         created(){
             console.info("create method");
             this.searchTable();
-           
+            this.getUploadParam();
         },
         mounted(){
            console.info("mounted method");
