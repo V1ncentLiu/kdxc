@@ -261,7 +261,7 @@
             <el-form-item label="上传图片：" :label-width="formLabelWidth" prop="fileList">
                 <el-upload
                     class="upload-demo"
-                    action="http://huiju-dev.oss-cn-beijing.aliyuncs.com"
+                    :action="uploadOssHost"
                     ref="refundApplyImgUpload"
                     :on-preview="handlePreview"
                     :on-remove="handleRemove"
@@ -338,7 +338,9 @@
 </body>
 <!-- import Vue before Element -->
 <div th:include="_footer_include :: #jsLib"></div>
-<script th:src="@{/js/custom/callrecord/download.js?v=1.0.0}"></script>
+<script th:inline="javascript">
+   var ossSignatureUrl = [[${ossUrl}]];//上传文件地址
+</script>
 <script>    
     var mainDivVM = new Vue({
         el: '#maindiv',
@@ -350,6 +352,7 @@
                     currentPage: 1,
                     pageSize: 20,
                 },
+                ossUrl:ossSignatureUrl,
                 fileList: [],
                 dialogFormVisible:false,//驳回编辑
                 reasonDialog:false,//驳回原因
@@ -464,7 +467,7 @@
                     value: '4',
                     label: '5000'
                 }],
-                uploadOssHost:[],
+                uploadOssHost:'',
                 uploadParamData: {
                     key:'22',
                     policy:'',
@@ -480,7 +483,7 @@
         },
         methods: {
              getUploadParam(){
-                  var signUrl = "http://192.168.13.145:8080/v1.0/OSS/directUpload?serviceType=aggregation";
+                  var signUrl = this.ossUrl+"?serviceType=aggregation";
                   var param={};
                   
                    axios.get(signUrl, param)
