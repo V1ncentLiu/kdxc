@@ -164,7 +164,7 @@
                 <el-table-column align="center" prop="signNo" label="签约单编号"></el-table-column>
                 <el-table-column align="center" prop="customerName" label="客户姓名"></el-table-column>
                 <el-table-column align="center" prop="cusAmount" label="退款客户金额"></el-table-column>
-                <el-table-column align="center" prop="companyAmount" label="退换餐饮公司金额"></el-table-column>
+                <el-table-column align="center" prop="companyAmount" label="退还餐饮公司金额"></el-table-column>
                 <el-table-column align="center" prop="refundTime" label="退款时间"></el-table-column>
                 <el-table-column align="center" prop="" label="退款图片" width="100">
                     <template slot-scope="scope">
@@ -269,6 +269,7 @@
                     :on-error="handleError"
                     :before-upload="handleBefore"
                     multiple
+                      accept="image/png,image/jpeg"
                     :data="uploadParamData"
                     :on-change="selectFile"
                     :on-exceed="handleExceed"
@@ -292,7 +293,7 @@
         </el-form>
         <div slot="footer" class="dialog-footer">
             <el-button type="primary" @click="submitDialogForm('dialogForm')" :disabled="confirmBtnDisabled">确 定</el-button>
-            <el-button @click="dialogFormVisible = false" type="primary">取 消</el-button>
+            <el-button @click="dialogFormVisible = false" type="info">取 消</el-button>
         </div>
     </el-dialog>
     <!-- 驳回原因 -->
@@ -1044,6 +1045,13 @@
                 console.info(err);
             },
             handleBefore(file){
+            	debugger;
+            	   var isTextComputer = file.type === 'image/png' || file.type==='image/jpeg';
+                   if(!isTextComputer){
+                       this.fileList=[];
+                       this.$message.error('文件格式错误');
+                       return false;
+                   }
             },
             random_string(len) {
                 len = len || 32;

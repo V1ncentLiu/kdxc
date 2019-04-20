@@ -109,7 +109,8 @@ public class RefundController {
      */
     @RequiresPermissions("aggregation:rebateApply:view")
     @RequestMapping("/rebateApplyPage")
-    public String rebateApplayPage() {
+    public String rebateApplayPage(HttpServletRequest request) {
+        request.setAttribute("ossUrl",ossUrl);
         return "financing/rebateApplyPage";
     }
 
@@ -314,13 +315,13 @@ public class RefundController {
         List<RoleInfoDTO> roleList = curLoginUser.getRoleList();
         RoleInfoDTO roleInfoDTO = roleList.get(0);
         String roleCode = roleInfoDTO.getRoleCode();
-      /*  if (RoleCodeEnum.QDSJCW.name().equals(roleCode)){
+        if (RoleCodeEnum.QDSJCW.name().equals(roleCode)){
             queryDTO.setRoleCode(roleCode);
         }else if(RoleCodeEnum.SJHZCW.name().equals(roleCode)) {
             queryDTO.setRoleCode(roleCode);
         }else {
             return new JSONResult().fail(SysErrorCodeEnum.ERR_NOTEXISTS_DATA.getCode(), "角色没有权限");
-        }*/
+        }
         return refundFeignClient.listRefundApply(queryDTO);
     }
     /**
