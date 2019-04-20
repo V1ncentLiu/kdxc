@@ -208,12 +208,26 @@
                   </el-date-picker>
               </el-form-item>
               <el-form-item label="上传图片：" :label-width="formLabelWidth" prop="fileList">
+              		<el-upload
+                    class="upload-demo"
+                    action="http://huiju-dev.oss-cn-beijing.aliyuncs.com"
+                    ref="refundApplyImgUpload"
+                    :on-preview="handlePreview"
+                    :on-remove="handleRemove"
+                    :on-success="handleSuccess"
+                    :on-error="handleError"
+                    :before-upload="handleBefore"
+                    multiple
+                    :data="uploadParamData"
+                    :on-change="selectFile"
+                    :on-exceed="handleExceed"
+                    :auto-upload="false"
+                    :file-list="fileList">
+                    <el-button slot="trigger" size="small" type="primary">选择文件</el-button>
+                     <el-button style="margin-left: 10px;" size="small" type="success" @click="submitUpload">上传</el-button>
+                    <div slot="tip" class="el-upload__tip">只能上传jpg/png文件，且不超过500kb</div>
+                </el-upload>
               </el-form-item>
-                        <a id="selectfiles" href="javascript:void(0);" class='btn'>选择文件</a> 
-                        <a id="postfiles" href="javascript:void(0);" onclick="clueUploadFile()"
-                            class='btn'>开始上传</a>
-                    <div id="ossfile"></div>
-                   <div slot="tip" class="el-upload__tip">只能上传jpg/png文件，且不超过500kb</div>
               <el-form-item label="退款原因：" :label-width="formLabelWidth" prop="reason">
                   <el-input
                       type="textarea"
@@ -507,8 +521,142 @@ var clueVM = new Vue({
           },   
           dataTableChoose:[],   
           dynamicTags: [],
+          uploadOssHost:[],
+          uploadParamData: {
+              key:'22',
+              policy:'',
+              OSSAccessKeyId:'',
+              success_action_status : '200', //让服务端返回200,不然，默认会返回204
+              signature:'', 
+              'x:params':'',
+              'realName':''
+           },
+           imgList:[],
+           fileList:[],
         },
         methods: {
+        	getUploadParam(){
+                var signUrl = "http://192.168.13.145:8080/v1.0/OSS/directUpload?serviceType=aggregation";
+                var param={};
+                
+                 axios.get(signUrl, param)
+                .then(function (response) {
+                   // console.info(response);
+                    var respData= response.data;
+                    var host = respData.host;
+                    var params={};
+                    var new_multipart_params = {
+                            dir:respData.dir,
+                            'policy': respData.policy,
+                            'OSSAccessKeyId': respData.accessid,
+                            'success_action_status' : '200', //让服务端返回200,不然，默认会返回204
+                            'signature': respData.signature,
+                            'x:params':params,//自定义编码，basse64编码后的字符串,
+                            'realName':''
+                   };
+                  clueVM.uploadParamData= new_multipart_params;
+                  clueVM.uploadOssHost = host;
+                })
+                .catch(function (error) {
+                     console.log(error);
+                });
+            },
+            selectFile(file, fileList){
+                clueVM.uploadParamData.key= clueVM.uploadParamData.dir+clueVM.random_string(10)+clueVM.get_suffix(file.name),
+                clueVM.uploadParamData.realName= file.name
+           },
+         submitUpload(){
+             //this.customUpload();
+             this.$refs.refundApplyImgUpload.submit();
+         },
+         handlePreview(file){
+             
+         },
+         handleRemove(file,fileList){
+         	 var id = file.id;
+         	 if(!id){
+         		 return;
+         	 }
+              var param = {};
+              var idList = new Array();
+              idList.push(id)
+              param.idList = idList;
+              axios.post('/financing/refund/deleteImgByIdList',param)
+              .then(function (response) {
+                    var result =  response.data;
+                    if(result.code=='0'){
+                        clueVM.$message({message:'删除成功',type:'success'});
+                    }else{
+                        console.error(response);
+                        clueVM.$message({message:result.msg,type:'error'});
+                    }
+                    
+              })
+              .catch(function (error) {
+                   console.log(error);
+              });
+              
+         },
+         handleExceed(files, fileList) {
+             //this.$message.warning(`当前限制选择 3 个文件，本次选择了 ${files.length} 个文件，共选择了 ${files.length + fileList.length} 个文件`);
+           },
+           handleSuccess(response, file, fileList){
+               console.info(fileList);
+               console.info(clueVM.fileList);
+               var realName = file.name;
+               var randomName = clueVM.uploadParamData.key;
+               var imgUrl =  clueVM.uploadOssHost+"/"+randomName;
+               var param = {};
+               param.realName=realName;
+               param.imgUrl = imgUrl;
+               var randomNameArr = randomName.split("/");
+               param.randomName = randomNameArr[randomNameArr.length-1];
+           
+               axios.post('/financing/refund/insertImgInfo', param)
+               .then(function (response) {
+                   var resData = response.data;
+                   if(resData.code=='0'){
+                       var lastFile = {};
+                       lastFile.id= resData.data;
+                       lastFile.name=realName;
+                       lastFile.url = imgUrl;
+                       lastFile.randomName = randomName; 
+                       var curList = clueVM.fileList;
+                       curList.push(lastFile);
+                       
+                       clueVM.$message({message:'上传成功',type:'success'});
+                   }else{
+                       clueVM.$message({message:'上传失败',type:'error'});
+                   }
+                   
+               })
+               .catch(function (error) {
+                    console.log(error);
+               });
+           },
+           handleError(err, file, fileList){
+               console.info(err);
+           },
+           handleBefore(file){
+           },
+           random_string(len) {
+               len = len || 32;
+               var chars = 'ABCDEFGHJKMNPQRSTWXYZabcdefhijkmnprstwxyz2345678';
+               var maxPos = chars.length;
+               var pwd = '';
+               for (i = 0; i < len; i++) {
+                   pwd += chars.charAt(Math.floor(Math.random() * maxPos));
+               }
+               return pwd;
+           },
+           get_suffix(filename) {
+               var pos = filename.lastIndexOf('.')
+               suffix = ''
+               if (pos != -1) {
+                   suffix = filename.substring(pos);
+               }
+               return suffix;
+           },
           handleClose(tag) {
             this.dynamicTags.splice(this.dynamicTags.indexOf(tag), 1);
           },
