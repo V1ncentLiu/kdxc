@@ -311,7 +311,6 @@ public class RefundController {
         queryDTO.setCurUser(curLoginUser.getId());
         queryDTO.setType(AggregationConstant.REFOUND_REBATE_TYPE.REFOUND_TYPE);
         
-        //TODO dev 
         List<RoleInfoDTO> roleList = curLoginUser.getRoleList();
         RoleInfoDTO roleInfoDTO = roleList.get(0);
         String roleCode = roleInfoDTO.getRoleCode();
@@ -426,18 +425,6 @@ public class RefundController {
         String roleCode = roleInfoDTO.getRoleCode();
        if (RoleCodeEnum.QDSJCW.name().equals(roleCode) || RoleCodeEnum.SJHZCW.name().equals(roleCode)){
            queryDTO.setRoleCode(roleCode);
-           /*FinanceLayoutDTO financeLayoutDTO = new FinanceLayoutDTO();
-           financeLayoutDTO.setFinanceUsers(curLoginUser.getId()+"");
-           JSONResult<FinanceLayoutDTO> finaceRes = financeLayoutFeignClient.findFinanceLayoutById(financeLayoutDTO);
-           if(finaceRes==null || !JSONResult.SUCCESS.equals(finaceRes.getCode())) {
-               logger.error("listRebateConfirm ,param{{{}},res{{}}",financeLayoutDTO,finaceRes);
-               return new JSONResult().fail(finaceRes.getCode(), finaceRes.getMsg());
-           }
-           FinanceLayoutDTO data = finaceRes.getData();
-           List<Long> busGroupIdList = new ArrayList<Long>();
-           for (FinanceLayoutDTO financeLayout : financeLayoutDTOByParam) {
-               busGroupIdList.add(financeLayout.getBusGroupId());
-           }*/
        }else {
            return new JSONResult().fail(SysErrorCodeEnum.ERR_NOTEXISTS_DATA.getCode(), "角色没有权限");
        }
