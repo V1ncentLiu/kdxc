@@ -633,13 +633,19 @@ var clueVM = new Vue({
                },
                down(){
             	   var rows = this.multipleSelection;
-            	   if(rows.length==0){
+            	   if(rows.length ==0){
                        this.$message({
-                          message: '只允许选择一条数据',
+                          message: '请选择数据',
                           type: 'warning'
                         });
                        return;
-                   }  
+                   } else if(rows.length>1){
+                       this.$message({
+                          message: '请选择一条数据进行下载结算单',
+                          type: 'warning'
+                        });
+                       return;
+                   } 
             	   if(status =="待处理" || status =="驳回商务"){
             		   this.$message({
                            message: "未提交对账不允许下载结算单",
@@ -652,9 +658,15 @@ var clueVM = new Vue({
                //驳回
                rejectback() {
            	       var rows = this.multipleSelection;
-            	   if(rows.length !=1){
+            	   if(rows.length ==0){
                        this.$message({
-                          message: '只允许选择一条数据',
+                          message: '请选择数据',
+                          type: 'warning'
+                        });
+                       return;
+                   }else if(rows.length !=1){
+                       this.$message({
+                          message: '请选择一条数据进行驳回',
                           type: 'warning'
                         });
                        return;
@@ -715,12 +727,18 @@ var clueVM = new Vue({
                },
                settlementConfirmButton(){
             	   var rows = this.multipleSelection;
-            	   if(rows.length !=1){
+            	   if(rows.length ==0){
                        this.$message({
-                          message: '只允许选择一条数据',
+                          message: '请选择数据',
                           type: 'warning'
                         });
                        return;
+                   }else if(rows.length >1){
+                          this.$message({
+                             message: '请选择一条数据提交对账确认',
+                             type: 'warning'
+                           });
+                          return;
                    }
             	   var status = rows[0].status;
             	   var statementNo = rows[0].statementNo;
