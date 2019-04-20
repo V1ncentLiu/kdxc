@@ -191,7 +191,11 @@
     	        <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width"
     	         v-else-if="item.fieldCode == 'statementNo'">
     	               <template slot-scope="scope">
-    	               <a :href="'/financing/balanceaccount/settleAccounts?payDetailId='+scope.row.payId+''" target="_blank" class="blueColorBtn">{{scope.row.statementNo}} </a>
+    	               <div v-if="scope.row.status !='驳回商务' && scope.row.status !='待处理'">
+    	               	<a :href="'/financing/balanceaccount/settleAccounts?payDetailId='+scope.row.payId+''" target="_blank" class="blueColorBtn">{{scope.row.statementNo}} </a>
+    	               </div>
+    	           
+    	               
                     </template>
     	        </el-table-column>
                 <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width"
@@ -261,7 +265,7 @@
             </el-form>
             <div slot="footer" class="dialog-footer" style="text-align:center;">
                 <el-button type="primary" @click="reconciliationConfirm('rejectform')">确定</el-button>
-                <el-button @click="notVisitFlagDialogVisible = false">取消</el-button>
+                <el-button @click="rejectVisible = false">取消</el-button>
             </div>
         </template>
     </el-dialog>
@@ -269,19 +273,19 @@
     <el-dialog title="提交对账确认" :visible.sync="submitApplyVisible" width="30%">
         <el-form :model="apply" ref="apply" :rules="allpyrules" class="width500"> 
 	        <el-form-item label="结算金额：" :label-width="formLabelWidth1" prop="money">
-	             <el-input v-model="apply.money" placeholder="" style="width: 60%;" @keyup.native="repeatApplyNumber" maxLength="11"></el-input>
+	             <el-input  type="number" v-model="apply.money" placeholder="" style="width: 60%;" oninput="if(value.length>10)value=value.slice(0,10)" @keyup.native="repeatApplyNumber" maxLength="10"></el-input>元
 	         </el-form-item>
-	         <el-form-item label="是否有疑意："  :label-width="formLabelWidth1" prop="isDoubt">
-	          <el-radio-group v-model="apply.isDoubt">
+	         <el-form-item label="是否有疑意："   :label-width="formLabelWidth1" prop="isDoubt">
+	          <el-radio-group @change="isdoubtbutton" v-model="apply.isDoubt">
 	          	<el-radio  :label="0">否</el-radio>
 	             <el-radio  :label="1">是</el-radio>
 	          </el-radio-group>
 	             
 	         </el-form-item>
 	         <el-form-item label="疑意:"  
-	                              prop="doubtRemark" :label-width="formLabelWidth1">
+	                              prop="doubtRemark" :label-width="formLabelWidth1" v-show="doubtRemarkShow">
 	                    <el-input type="textarea"
-	                              v-model="apply.doubtRemark" maxlength="80" :rows="3"
+	                              v-model="apply.doubtRemark" maxlength="100" :rows="3"
 	                              placeholder="请填写疑意"></el-input>
 	                </el-form-item>
 	          <el-form-item label="结算比例：" :label-width="formLabelWidth1" ><span style="color: red;">{{ratio}}%</span>
@@ -334,6 +338,7 @@ var clueVM = new Vue({
 	       		statementNo: '',
 	       		signNo: ''
             },
+            doubtRemarkShow:false,
             backRemarks:"",
             backVisable:false,
             submitApplyVisible:false,
@@ -434,13 +439,27 @@ var clueVM = new Vue({
                               }else{
                                   callback();
                               }
-                          }, trigger: 'blue'}
+                          },required: true, trigger: 'change'}
                   ],
                   isDoubt: [
                       {required: true, message: '请选择是否有疑意', trigger: 'change'}
                   ],
                   doubtRemark: [
-                      {required: true, message: '请选择疑意内容', trigger: 'blur'}
+                	  {validator:function(rule,value,callback){
+                          if(clueVM.apply.isDoubt ==0){
+                        	  callback(); 
+                          }else{
+                        	  var reg =   /^[1-9]\d*$/; 
+                              if(value ==null || value =="null" || value ==""  ){
+                                  callback(new Error("请输入疑意内容"));
+                                  clueVM.apply.doubtRemark =null;
+
+                              }else{
+                                  callback();
+                              } 
+                          }
+                          
+                      }, required: true,trigger: 'change'}
                   ]
               },
             multipleSelection:[],
@@ -449,6 +468,14 @@ var clueVM = new Vue({
             formLabelWidth1: '120px',
         },
         methods: {
+        	isdoubtbutton(){
+        		if(clueVM.apply.isDoubt==1){
+        			this.doubtRemarkShow = true;
+        		}else{
+        			this.doubtRemarkShow = false;
+        		}
+        		
+        	},
         	searchTable() {
                 var param ={};
                 var startTime = this.searchForm.startTime;
@@ -559,9 +586,9 @@ var clueVM = new Vue({
                    text="全款"
                  }else if(cellValue=="2"){
                    text="订金"
-                 }else if(cellValue=="2"){
+                 }else if(cellValue=="3"){
                    text="追加定金"
-                 }else if(cellValue=="2"){
+                 }else if(cellValue=="4"){
                    text="尾款"
                  }
                  return text;
@@ -610,13 +637,19 @@ var clueVM = new Vue({
                },
                down(){
             	   var rows = this.multipleSelection;
-            	   if(rows.length==0){
+            	   if(rows.length ==0){
                        this.$message({
-                          message: '只允许选择一条数据',
+                          message: '请选择数据',
                           type: 'warning'
                         });
                        return;
-                   }  
+                   } else if(rows.length>1){
+                       this.$message({
+                          message: '请选择一条数据进行下载结算单',
+                          type: 'warning'
+                        });
+                       return;
+                   } 
             	   if(status =="待处理" || status =="驳回商务"){
             		   this.$message({
                            message: "未提交对账不允许下载结算单",
@@ -629,9 +662,15 @@ var clueVM = new Vue({
                //驳回
                rejectback() {
            	       var rows = this.multipleSelection;
-            	   if(rows.length !=1){
+            	   if(rows.length ==0){
                        this.$message({
-                          message: '只允许选择一条数据',
+                          message: '请选择数据',
+                          type: 'warning'
+                        });
+                       return;
+                   }else if(rows.length !=1){
+                       this.$message({
+                          message: '请选择一条数据进行驳回',
                           type: 'warning'
                         });
                        return;
@@ -692,12 +731,18 @@ var clueVM = new Vue({
                },
                settlementConfirmButton(){
             	   var rows = this.multipleSelection;
-            	   if(rows.length !=1){
+            	   if(rows.length ==0){
                        this.$message({
-                          message: '请至少选择一条数据',
+                          message: '请选择数据',
                           type: 'warning'
                         });
                        return;
+                   }else if(rows.length >1){
+                          this.$message({
+                             message: '请选择一条数据提交对账确认',
+                             type: 'warning'
+                           });
+                          return;
                    }
             	   var status = rows[0].status;
             	   var statementNo = rows[0].statementNo;
@@ -727,7 +772,7 @@ var clueVM = new Vue({
                 	   this.apply.isDoubt = 0 ;
                 	   this.apply.doubtRemark = null ;
             	   }
-            	   this.ratio = rows[0].ratio ;
+            	   this.ratio = rows[0].ratio.substring(0,2) ;
             	   this.submitApplyVisible = true;
                },
                //结算确认
