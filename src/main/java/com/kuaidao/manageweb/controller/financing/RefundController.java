@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.slf4j.Logger;
@@ -23,9 +24,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.client.RestTemplate;
-import com.itextpdf.text.pdf.PdfStructTreeController.returnType;
 import com.kuaidao.aggregation.constant.AggregationConstant;
-import com.kuaidao.aggregation.dto.financing.FinanceLayoutDTO;
 import com.kuaidao.aggregation.dto.financing.RefundAndImgRespDTO;
 import com.kuaidao.aggregation.dto.financing.RefundEditRejectReqDTO;
 import com.kuaidao.aggregation.dto.financing.RefundImgDTO;
@@ -89,7 +88,8 @@ public class RefundController {
      */
     @RequiresPermissions("aggregation:refundApply:view")
     @RequestMapping("/refundApplyPage")
-    public String refundApplyPage() {
+    public String refundApplyPage(HttpServletRequest request) {
+        request.setAttribute("ossUrl",ossUrl);
         return "financing/refundApplyPage";
     }
 
@@ -109,7 +109,8 @@ public class RefundController {
      */
     @RequiresPermissions("aggregation:rebateApply:view")
     @RequestMapping("/rebateApplyPage")
-    public String rebateApplayPage() {
+    public String rebateApplayPage(HttpServletRequest request) {
+        request.setAttribute("ossUrl",ossUrl);
         return "financing/rebateApplyPage";
     }
 
@@ -308,7 +309,7 @@ public class RefundController {
     public JSONResult<PageBean<RefundRespDTO>> listRefundConfirm(
             @RequestBody RefundQueryDTO queryDTO) {
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
-        queryDTO.setCurUser(curLoginUser.getId());
+        //queryDTO.setCurUser(curLoginUser.getId());
         queryDTO.setType(AggregationConstant.REFOUND_REBATE_TYPE.REFOUND_TYPE);
         
         List<RoleInfoDTO> roleList = curLoginUser.getRoleList();
@@ -417,7 +418,7 @@ public class RefundController {
     public JSONResult<PageBean<RefundRespDTO>> listRebateConfirm(
             @RequestBody RefundQueryDTO queryDTO) {
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
-        queryDTO.setCurUser(curLoginUser.getId());
+       // queryDTO.setCurUser(curLoginUser.getId());
         queryDTO.setType(AggregationConstant.REFOUND_REBATE_TYPE.REBATE_TYPE);
         
         List<RoleInfoDTO> roleList = curLoginUser.getRoleList();

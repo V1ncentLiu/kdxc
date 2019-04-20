@@ -168,7 +168,7 @@
                 <el-table-column align="center" prop="customerName" label="客户姓名"></el-table-column>
                 <el-table-column align="center" prop="relateSignNoList" label="关联签约单店">
                     <template slot-scope="scope">
-                        <div  v-if="scope.row.relateSignNoList.length>1"   v-for="item in scope.row.relateSignNoList">
+                        <div  v-if="scope.row.relateSignNoList.length>=1"   v-for="item in scope.row.relateSignNoList">
                             <el-button size="mini"  type="text" @click="openSignDialog(item)">{{item}}</el-button>
                         </div>
                     </template>
@@ -178,12 +178,12 @@
                 <el-table-column align="center" prop="refundTime" label="返款时间"></el-table-column>
                 <el-table-column align="center" prop="" label="返款图片" width="100">
                     <template slot-scope="scope">
-                        <el-button @click="download(scope.row)" type="text">下载图片</el-button>
+                        <el-button @click="download(scope.row)" size="small" type="text">下载图片</el-button>
                     </template>
                 </el-table-column>
                 <el-table-column align="center" prop="reason" label="返款原因" width="100">
                     <template slot-scope="scope">
-                        <el-button @click="showReason1(scope.row)" type="text">查看原因</el-button>
+                        <el-button @click="showReason1(scope.row)" size="small" type="text">查看原因</el-button>
                     </template>
                 </el-table-column>
                 <el-table-column align="center" prop="applyTime" label="申请返款时间"></el-table-column>
@@ -191,8 +191,8 @@
                     <template slot-scope="scope">
                     
                         <div v-if="scope.row.status == '2'">
-                            <el-button @click="editDialog(scope.row)" type="text" class="redcolor" style="color: red;">已驳回</el-button>
-                            <el-button @click="showReason(scope.row)" type="text" class="bluecolor">驳回原因</el-button>
+                            <el-button @click="editDialog(scope.row)" size="small" type="text" class="redcolor" style="color: red;">已驳回</el-button>
+                            <el-button @click="showReason(scope.row)" size="small" type="text">驳回原因</el-button>
                         </div>
                         <div v-else-if="scope.row.status == '1'">返款确认中</div>
                         <div v-else-if="scope.row.status == '3'">确认返款</div>
@@ -285,13 +285,22 @@
             <el-form-item label="上传图片：" :label-width="formLabelWidth" prop="drawbackTime" class="redcolor">
                 <el-upload
                     class="upload-demo"
-                    action="https://jsonplaceholder.typicode.com/posts/"
+                    :action="uploadOssHost"
+                    ref="refundApplyImgUpload"
                     :on-preview="handlePreview"
                     :on-remove="handleRemove"
+                    :on-success="handleSuccess"
+                    :on-error="handleError"
+                    :before-upload="handleBefore"
                     multiple
-                    :limit="3"
+                      accept="image/png,image/jpeg"
+                    :data="uploadParamData"
+                    :on-change="selectFile"
+                    :on-exceed="handleExceed"
+                    :auto-upload="false"
                     :file-list="fileList">
-                    <el-button size="small" type="primary">点击上传</el-button>
+                    <el-button slot="trigger" size="small" type="primary">选择文件</el-button>
+                     <el-button style="margin-left: 10px;" size="small" type="success" @click="submitUpload">上传</el-button>
                     <div slot="tip" class="el-upload__tip">只能上传jpg/png文件，且不超过500kb</div>
                 </el-upload>
             </el-form-item>
@@ -500,14 +509,16 @@
           </el-table>
           <div slot="footer" class="dialog-footer">
               <el-button type="primary" @click="submitSign('dialogFormChoose')">提交</el-button>
-              <el-button @click="dialogFormChooseVisible = false">取消</el-button>
+              <el-button @click="dialogFormChooseVisible = false"  type="info">取消</el-button>
           </div>
     </el-dialog>
 </div>
 </body>
 <!-- import Vue before Element -->
 <div th:include="_footer_include :: #jsLib"></div>
-<script th:src="@{/js/custom/callrecord/download.js?v=1.0.0}"></script>
+<script th:inline="javascript">
+   var ossSignatureUrl = [[${ossUrl}]];//上传文件地址
+</script>
 <script>    
     var mainDivVM = new Vue({
         el: '#maindiv',
@@ -519,6 +530,7 @@
                     currentPage: 1,
                     pageSize: 20,
                 },
+                ossUrl:ossSignatureUrl,
                 fileList: [],
                 dialogFormVisible:false,//驳回编辑
                 reasonDialog:false,//驳回原因
@@ -659,6 +671,16 @@
                 },   
                 dataTableChoose:[],   
                 dynamicTags: [],
+                uploadOssHost:'',
+                uploadParamData: {
+                    key:'22',
+                    policy:'',
+                    OSSAccessKeyId:'',
+                    success_action_status : '200', //让服务端返回200,不然，默认会返回204
+                    signature:'', 
+                    'x:params':'',
+                    'realName':''
+                 },
             }             
         },
         methods: {
@@ -666,7 +688,11 @@
                 mainDivVM.confirmBtnDisabled=true;
                 this.$refs[formName].validate((valid) => {
                     if (valid) {
+                    	
+                    	var fileList = mainDivVM.fileList;
                         var param = this.dialogForm;
+                        param.imgList = fileList;
+                        param.relateSignNo = this.dynamicTags;
                         axios.post('/financing/refund/editRejectRebateInfo',param)
                         .then(function (response) {
                             var data =  response.data
@@ -815,28 +841,39 @@
                 this.reason = row.reason;
             },
             editDialog(row){//驳回编辑
-                //this.dialogForm = {};
-                
+            	//get oss param
+                this.getUploadParam();
                 var param={};
                 param.id=row.id;
-                axios.post('/financing/refund/queryRefundInfoById',param)
+                axios.post('/financing/refund/queryRebateInfoById',param)
                 .then(function (response) {
                       var result =  response.data;
                       if(result.code=='0'){
                           var table=result.data;
                           mainDivVM.dialogForm= table;
                           var imgList =  table.imgList;
+                         
                           var imgShowList = new Array();
                           for(var i=0;i<imgList.length;i++){
                               var curImg = imgList[i];
                               var img={};
-                              img.name="上传文件"+(i+1);
-                              img.url = curImg.imgUrl;
-                              img.id=curImg.id;
-                              imgShowList.push(img);
+                               img.name= curImg.realName;
+                               img.url = curImg.imgUrl;
+                               img.id=curImg.id;
+                               img.rebateId=curImg.reId;
+                               imgShowList.push(img);
                           }
                           mainDivVM.editRejectTitle = "编辑驳回（"+table.signNo+"）签约单返款申请";
                           mainDivVM.fileList=imgShowList;
+                          //签约单处理
+                          var relateSignList = table.relateSignList;
+                          var signNoArr = new Array();
+                          for(var i=0;i<relateSignList.length;i++){
+                        	  signNoArr.push(relateSignList[i].signNo);
+                          }
+                          
+                          mainDivVM.dynamicTags = signNoArr;
+                          
                           mainDivVM.dialogFormVisible=true;
                       }else{
                           console.error(response);
@@ -847,30 +884,6 @@
                      console.log(error);
                 });
                 
-            },
-            handlePreview(file){
-                
-            },
-            handleRemove(file,fileList){
-                 var param = {};
-                 var idList = new Array();
-                 idList.push(file.id)
-                 param.idList = idList;
-                 axios.post('/financing/refund/deleteImgByIdList',param)
-                 .then(function (response) {
-                       var result =  response.data;
-                       if(result.code=='0'){
-                           mainDivVM.$message({message:'删除成功',type:'success'});
-                       }else{
-                           console.error(response);
-                           mainDivVM.$message({message:result.msg,type:'error'});
-                       }
-                       
-                 })
-                 .catch(function (error) {
-                      console.log(error);
-                 });
-                 
             },
             initSelect(){
                 this.initBusAreaSelect();
@@ -1248,7 +1261,6 @@
                 param.signProject = this.dialogFormChoose.signProject;
                 param.signNo = this.dialogFormChoose.signNo;
 
-                console.info(param);
                 axios.post('/financing/refundRebate/rebatesignList', param)
                 .then(function (response) {
                     var result =  response.data;
@@ -1292,6 +1304,144 @@
                     this.isShow=true
                 }          
             },
+            handlePreview(file){
+                
+            },
+            handleRemove(file,fileList){
+                var id = file.id;
+                if(!id){
+                    return;
+                }
+                var param = {};
+                var idList = new Array();
+                idList.push(id)
+                param.idList = idList;
+                axios.post('/financing/refund/deleteImgByIdList',param)
+                .then(function (response) {
+                      var result =  response.data;
+                      if(result.code=='0'){
+                          mainDivVM.$message({message:'删除成功',type:'success'});
+                      }else{
+                          console.error(response);
+                          mainDivVM.$message({message:result.msg,type:'error'});
+                      }
+                      
+                })
+                .catch(function (error) {
+                     console.log(error);
+                });
+                
+           },
+           handleExceed(files, fileList) {
+               //this.$message.warning(`当前限制选择 3 个文件，本次选择了 ${files.length} 个文件，共选择了 ${files.length + fileList.length} 个文件`);
+             },
+             
+             handleSuccess(response, file, fileList){
+                 console.info(fileList);
+                 console.info(mainDivVM.fileList);
+                 var realName = file.name;
+                 var randomName = mainDivVM.uploadParamData.key;
+                 var imgUrl =  mainDivVM.uploadOssHost+"/"+randomName;
+                 var param = {};
+                 param.realName=realName;
+                 param.imgUrl = imgUrl;
+                 var randomNameArr = randomName.split("/");
+                 param.randomName = randomNameArr[randomNameArr.length-1];
+                 debugger;
+                 axios.post('/financing/refund/insertImgInfo', param)
+                 .then(function (response) {
+                     var resData = response.data;
+                     if(resData.code=='0'){
+                         var lastFile = {};
+                         lastFile.id= resData.data;
+                         lastFile.name=realName;
+                         lastFile.url = imgUrl;
+                         lastFile.randomName = randomName; 
+                         var curList = mainDivVM.fileList;
+                         curList.push(lastFile);
+                         
+                         mainDivVM.$message({message:'上传成功',type:'success'});
+                     }else{
+                         mainDivVM.$message({message:'上传失败',type:'error'});
+                     }
+                     
+                     
+                 })
+                 .catch(function (error) {
+                      console.log(error);
+                 });
+                 
+                 
+                 
+             },
+             handleError(err, file, fileList){
+                 console.info(err);
+             },
+             handleBefore(file){
+                 debugger;
+                    var isTextComputer = file.type === 'image/png' || file.type==='image/jpeg';
+                    if(!isTextComputer){
+                        this.fileList=[];
+                        this.$message.error('文件格式错误');
+                        return false;
+                    }
+             },
+             random_string(len) {
+                 len = len || 32;
+                 var chars = 'ABCDEFGHJKMNPQRSTWXYZabcdefhijkmnprstwxyz2345678';
+                 var maxPos = chars.length;
+                 var pwd = '';
+                 for (i = 0; i < len; i++) {
+                     pwd += chars.charAt(Math.floor(Math.random() * maxPos));
+                 }
+                 return pwd;
+             },
+             get_suffix(filename) {
+                 var pos = filename.lastIndexOf('.')
+                 suffix = ''
+                 if (pos != -1) {
+                     suffix = filename.substring(pos);
+                 }
+                 return suffix;
+             },
+             submitUpload(){
+                 //this.customUpload();
+                 this.$refs.refundApplyImgUpload.submit();
+             },
+             getUploadParam(){
+                 var signUrl = this.ossUrl+"?serviceType=aggregation";
+                 var param={};
+                 
+                  axios.get(signUrl, param)
+                 .then(function (response) {
+                    // console.info(response);
+                     var respData= response.data;
+                     var host = respData.host;
+                     var params={};
+                     var new_multipart_params = {
+                             dir:respData.dir,
+                             'policy': respData.policy,
+                             'OSSAccessKeyId': respData.accessid,
+                             'success_action_status' : '200', //让服务端返回200,不然，默认会返回204
+                             'signature': respData.signature,
+                             'x:params':params,//自定义编码，basse64编码后的字符串,
+                             'realName':''
+                    };
+                   mainDivVM.uploadParamData= new_multipart_params;
+                   mainDivVM.uploadOssHost = host;
+                 })
+                 .catch(function (error) {
+                      console.log(error);
+                 });
+                 
+                 
+                 
+             },
+            selectFile(file, fileList){
+                  mainDivVM.uploadParamData.key= mainDivVM.uploadParamData.dir+mainDivVM.random_string(10)+mainDivVM.get_suffix(file.name),
+                  mainDivVM.uploadParamData.realName= file.name
+             },
+            
         },
         created(){            
             this.searchTable();
