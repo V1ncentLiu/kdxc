@@ -36,7 +36,7 @@
          	<el-row v-show="businessShow">
                 <el-col :span="6">
                     <el-form-item label="商务小组：" :label-width="formLabelWidth1" prop="businessGroupId">
-                        <el-select filterable v-model="form.businessGroupId" placeholder="请选择">
+                        <el-select filterable v-model="form.businessGroupId" placeholder="请选择"  @change="setProject">
                             <el-option
                                 v-for="item in swList"
                                 :key="item.id"
@@ -192,10 +192,10 @@
                       { required: true, message: '请选择商务小组', trigger: 'change' },
                     ],
                     projectIds: [
-                      { required: true, message: '请选择项目', trigger: 'blur' },
+                      { required: true, message: '请选择项目', trigger: 'change' },
                     ],
                     provincesIds: [
-                      { required: true, message: '请选择省份', trigger: 'blur' },
+                      { required: true, message: '请选择省份', trigger: 'change' },
                     ],
                     telemarketingTeamIds: [
                       { required: true, message: '请选择电销组', trigger: 'change' },
@@ -215,7 +215,32 @@
             }        	  
         },
         methods: {
-        	
+            setProject(value){
+                debugger
+                if(!this.projectShow){
+                    return false;
+                }
+                var groupName = "";
+                for(var i = 0 ; i < swList.length ; i++){
+                    if(swList[i].id == value){
+                        groupName = swList[i].name;
+                        break;
+                    }
+                }
+                var param = {};
+                param.businessGroup = groupName;
+                debugger
+                axios.post("/invitearea/InviteProjects", param).then(function (response) {
+                    var data = response.data;
+                    if(data&&data.length>0){
+                        var arr = [];
+                        for(var i = 0 ; i < data.length ; i++){
+                            arr.push(data[i].id)
+                        }
+                        addUserVm.form.projectIds = arr;
+                    }
+                }).catch(function (error) {console.log(error);});
+            },
         	checkIsShow(val){
         		if(val==1 ){
         			if(isshowBusinessGroup ==0){
@@ -572,7 +597,11 @@
         			this.open("所有数据项必须相同，请重新选择信息！");
         			return ;
         		}
-				this.submitdialogFormVisible = true;
+                this.$refs["form"].validate((valid) => {
+                    if (valid) {
+                        this.submitdialogFormVisible = true;
+                    }
+                });
             }
         },
         created(){
