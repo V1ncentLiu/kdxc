@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head th:include="_header_include::frag(~{::title},~{::style},~{})">
-    <title>退款申请列表</title>
+    <title>返款申请列表</title>
     <style>
         .el-upload-list{width: 200px;}
     </style>
@@ -13,226 +13,232 @@
         <el-breadcrumb-item>财务管理</el-breadcrumb-item>
         <el-breadcrumb-item>返款申请列表</el-breadcrumb-item>
     </el-breadcrumb>
-    <el-row class="marginB10">
+    <el-row class="marginB20">
         <shiro:hasPermission name="aggregation:rebateApply:markRefundFinish">
             <el-button type="primary" @click="openSign">标记返款结束</el-button>
         </shiro:hasPermission>
     </el-row>
-    <el-row class="marginB10 greybg padding20" style="padding-bottom: 0">        
-        <el-form :inline="true" :model="form" ref="form">
-            <el-form-item label="">
-                <el-select v-model="form.busAreaId" placeholder="商务大区" style="width: 100%;" clearable @change="changeBusArea" @clear="clearBusAreaList" >
-                    <el-option
-                        v-for="item in busAreaList"
-                        :key="item.id"
-                        :label="item.name"
-                        :value="item.id">
-                    </el-option>
-                </el-select>
-            </el-form-item> 
-            <el-form-item label="">  
-                <el-select v-model="form.busGroupId" placeholder="签单商务组" style="width: 100%;" clearable @change="changeBusGroup" @clear="clearBusGroupList">
-                    <el-option
-                        v-for="item in busGroupList"
-                        :key="item.id"
-                        :label="item.name"
-                        :value="item.id">
-                    </el-option>
-                </el-select>
-            </el-form-item>    
-            <el-form-item label="">  
-                <el-select v-model="form.busManagerId" placeholder="签单商务经理" style="width: 100%;" clearable>
-                    <el-option
-                        v-for="item in busManagerList"
-                        :key="item.id"
-                        :label="item.name"
-                        :value="item.id">
-                    </el-option>
-                </el-select>
-            </el-form-item> 
-            <el-form-item label="">  
-                <el-select v-model="form.signShopType" placeholder="签约店型" style="width: 100%;" clearable>
-                    <el-option
-                        v-for="item in vistitStoreTypeArr"
-                        :key="item.value"
-                        :label="item.name"
-                        :value="item.value">
-                    </el-option>
-                </el-select>
-            </el-form-item>   
-            <el-form-item label="">  
-                <el-select v-model="form.status" placeholder="处理状态" style="width: 100%;" clearable>
-                    <el-option
-                        v-for="item in statusList"
-                        :key="item.value"
-                        :label="item.name"
-                        :value="item.value">
-                    </el-option>
-                </el-select>
-            </el-form-item>   
-            <el-form-item label="">  
-                <el-select v-model="form.teleDeptId" placeholder="电销事业部" style="width: 100%;" clearable @change="changeTeleDept" @clear="clearTeleDeptList">
-                    <el-option
-                        v-for="item in teleDeptList"
-                        :key="item.id"
-                        :label="item.name"
-                        :value="item.id">
-                    </el-option>
-                </el-select>
-            </el-form-item>  
-            <el-form-item label="">  
-                <el-select v-model="form.teleGroupId" placeholder="电销组" style="width: 100%;" clearable @change="changeTeleGroup" @clear="clearTeleGroupList">
-                    <el-option
-                        v-for="item in teleGroupIdList"
-                        :key="item.id"
-                        :label="item.name"
-                        :value="item.id">
-                    </el-option>
-                </el-select>
-            </el-form-item>   
-            <el-form-item label="">  
-                <el-select v-model="form.teleId" placeholder="创业顾问" style="width: 100%;" clearable>
-                    <el-option
-                        v-for="item in teleIdList"
-                        :key="item.id"
-                        :label="item.name"
-                        :value="item.id">
-                    </el-option>
-                </el-select>
-            </el-form-item>  
-            <el-form-item label="">  
-                <el-select v-model="form.signProvince" placeholder="签约省份" style="width: 100%;" clearable>
-                    <el-option
-                        v-for="item in proviceList"
-                        :key="item.id"
-                        :label="item.name"
-                        :value="item.name">
-                    </el-option>
-                </el-select>
-            </el-form-item>  
-            <el-form-item label="">  
-                <el-select v-model="form.signType" placeholder="签约类型" style="width: 100%;" clearable>
-                    <el-option
-                        v-for="item in signTypeList"
-                        :key="item.value"
-                        :label="item.label"
-                        :value="item.value">
-                    </el-option>
-                </el-select>
-            </el-form-item>                
-            <el-form-item label="">
-                <el-input v-model="form.customerName" placeholder="客户姓名"></el-input>
-            </el-form-item>
-            <el-form-item label="">
-                <el-input v-model="form.phone" placeholder="客户手机号"></el-input>
-            </el-form-item>            
-            <el-form-item label="">
-                <el-input v-model="form.signNo" placeholder="签约单编号"></el-input>
-            </el-form-item>
-            <el-form-item label="返款时间:">
-                <el-date-picker
-                    style="width: 100%;"
-                    v-model="form.startTime"
-                    type="datetime"
-                    placeholder="选择日期时间">
-                </el-date-picker>
-            </el-form-item>
-            <el-form-item label="—">
-                <el-date-picker
-                    style="width: 100%;"
-                    v-model="form.endTime"
-                    type="datetime"
-                    placeholder="选择日期时间">
-                </el-date-picker>
-            </el-form-item>            
-            <el-button type="primary" @click="searchTable()">搜索</el-button>
-        </el-form>       
-    </el-row>
-    <!-- 表格 -->
-    <el-row>
-        <el-table 
-            ref="tableData"
-            tooltip-effect="dark"
-            border
-            :data="tableData"
-            @selection-change="handleSelectionChange" 
-            >
-            <el-table-column align="center" type="selection"></el-table-column>
-            <el-table-column align="center" type="index" label="序号"></el-table-column>
-            <el-table-column align="center" prop="signNo" label="签约单编号"></el-table-column>
-            <el-table-column align="center" prop="customerName" label="客户姓名"></el-table-column>
-            <el-table-column align="center" prop="relateSignNoList" label="关联签约单店">
-                <template slot-scope="scope">
-                    <div  v-if="scope.row.relateSignNoList.length>1"   v-for="item in scope.row.relateSignNoList">
-                        <el-button size="mini"  type="text" @click="openSignDialog(item)">{{item}}</el-button>
-                    </div>
-                </template>
-            </el-table-column>
-            <el-table-column align="center" prop="cusAmount" label="返款客户金额"></el-table-column>
-            <el-table-column align="center" prop="companyAmount" label="返换餐饮公司金额"></el-table-column>
-            <el-table-column align="center" prop="refundTime" label="返款时间"></el-table-column>
-            <el-table-column align="center" prop="" label="返款图片" width="100">
-                <template slot-scope="scope">
-                    <el-button @click="download(scope.row)" type="text">下载图片</el-button>
-                </template>
-            </el-table-column>
-            <el-table-column align="center" prop="reason" label="返款原因" width="100">
-                <template slot-scope="scope">
-                    <el-button @click="showReason1(scope.row)" type="text">查看原因</el-button>
-                </template>
-            </el-table-column>
-            <el-table-column align="center" prop="applyTime" label="申请返款时间"></el-table-column>
-            <el-table-column align="center" prop="status" label="处理状态">
-                <template slot-scope="scope">
-                
-                    <div v-if="scope.row.status == '2'">
-                        <el-button @click="editDialog(scope.row)" type="text" class="redcolor" style="color: red;">已驳回</el-button>
-                        <el-button @click="showReason(scope.row)" type="text" class="bluecolor">驳回原因</el-button>
-                    </div>
-                    <div v-else-if="scope.row.status == '1'">返款确认中</div>
-                    <div v-else-if="scope.row.status == '3'">确认返款</div>
-                    <div v-else-if="scope.row.status == '4'">已返款</div>
-                    <div v-else-if="scope.row.status == '5'">标记返款结束</div>
-                </template>
-            </el-table-column>
-            <el-table-column align="center" prop="signProjectName" label="签约项目"></el-table-column>
-            <el-table-column align="center" prop="signType" label="签约类型" width="100">
-                <template slot-scope="scope">
-                    <div v-if="scope.row.signType == '1'">一次性全款</div>
-                    <div v-else-if="scope.row.signType == '2'">先付定金</div>
-                </template>
-            </el-table-column>
-            <el-table-column align="center" prop="signTime" label="签约时间"></el-table-column>
-            <el-table-column align="center" prop="" label="付款明细" width="100">
-                <!-- <template slot-scope="scope">
-                    <el-button @click="showDetail(scope.row)" type="text">查看明细</el-button>
-                </template> -->
-                <template slot-scope="scope">
-                    <el-button type="text" size="small" @click="recordClick(scope.row)">查看明细
-                    </el-button>
-                </template>
-            </el-table-column>
-            <el-table-column align="center" prop="signShopType" label="签约店型" :formatter="getSignShopTypeText" width="100"></el-table-column>
-            <el-table-column align="center" prop="amountReceivable" label="应收金额"></el-table-column>
-            <el-table-column align="center" prop="firstToll" label="路费"></el-table-column>
-            <el-table-column align="center" prop="preferentialAmount" label="优惠金额"></el-table-column>
-            <el-table-column align="center" prop="giveAmount" label="赠送金额"></el-table-column>
-            <el-table-column align="center" prop="idCard" label="客户身份证号"></el-table-column>
-            <el-table-column align="center" prop="phone" label="手机号"></el-table-column>
-            <el-table-column align="center" prop="signProvince" label="签约省份" width="110"></el-table-column>
-            <el-table-column align="center" prop="signCity" label="签约城市" width="120"></el-table-column>
-            <el-table-column align="center" prop="signDictrict" label="签约区／县" width="130"></el-table-column>
-            <el-table-column align="center" prop="busAreaName" label="商务大区"></el-table-column>
-            <el-table-column align="center" prop="busGroupName" label="商务小组"></el-table-column>
-            <el-table-column align="center" prop="busManagerName" label="商务经理"></el-table-column>
-            <el-table-column align="center" prop="teleCompanyName" label="电销分公司"></el-table-column>
-            <el-table-column align="center" prop="teleDeptName" label="电销事业部"></el-table-column>
-            <el-table-column align="center" prop="teleGroupName" label="电销组"></el-table-column>
-            <el-table-column align="center" prop="teleSaleName" label="创业顾问"></el-table-column>
-            <el-table-column align="center" prop="isRemoteSign" label="是否远程签约" :formatter="getIsRemoteSign" width="120"></el-table-column>
-        </el-table>
-         <table-pagination :pager="pager" @change="searchTable"></table-pagination>
-    </el-row>
+    <div class="mainSearchBg">        
+        <div class="mainSearchFormBox">
+            <el-form :inline="true" :model="form" class="demo-form-inline mainSearchForm" ref="form">
+                <el-form-item label="商务大区:">
+                    <el-select v-model="form.busAreaId" placeholder="商务大区" clearable @change="changeBusArea" @clear="clearBusAreaList" >
+                        <el-option
+                            v-for="item in busAreaList"
+                            :key="item.id"
+                            :label="item.name"
+                            :value="item.id">
+                        </el-option>
+                    </el-select>
+                </el-form-item> 
+                <el-form-item label="签单商务组:">  
+                    <el-select v-model="form.busGroupId" placeholder="签单商务组" clearable @change="changeBusGroup" @clear="clearBusGroupList">
+                        <el-option
+                            v-for="item in busGroupList"
+                            :key="item.id"
+                            :label="item.name"
+                            :value="item.id">
+                        </el-option>
+                    </el-select>
+                </el-form-item>    
+                <el-form-item label="签单商务经理:">  
+                    <el-select v-model="form.busManagerId" placeholder="签单商务经理" clearable>
+                        <el-option
+                            v-for="item in busManagerList"
+                            :key="item.id"
+                            :label="item.name"
+                            :value="item.id">
+                        </el-option>
+                    </el-select>
+                </el-form-item> 
+                <el-form-item label="签约店型:">  
+                    <el-select v-model="form.signShopType" placeholder="签约店型" clearable>
+                        <el-option
+                            v-for="item in vistitStoreTypeArr"
+                            :key="item.value"
+                            :label="item.name"
+                            :value="item.value">
+                        </el-option>
+                    </el-select>
+                </el-form-item>   
+                <el-form-item label="处理状态:">  
+                    <el-select v-model="form.status" placeholder="处理状态" clearable>
+                        <el-option
+                            v-for="item in statusList"
+                            :key="item.value"
+                            :label="item.name"
+                            :value="item.value">
+                        </el-option>
+                    </el-select>
+                </el-form-item>   
+                <el-row v-show="isShow">
+                    <el-form-item label="电销事业部:">  
+                        <el-select v-model="form.teleDeptId" placeholder="电销事业部" clearable @change="changeTeleDept" @clear="clearTeleDeptList">
+                            <el-option
+                                v-for="item in teleDeptList"
+                                :key="item.id"
+                                :label="item.name"
+                                :value="item.id">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>  
+                    <el-form-item label="电销组:">  
+                        <el-select v-model="form.teleGroupId" placeholder="电销组" clearable @change="changeTeleGroup" @clear="clearTeleGroupList">
+                            <el-option
+                                v-for="item in teleGroupIdList"
+                                :key="item.id"
+                                :label="item.name"
+                                :value="item.id">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>   
+                    <el-form-item label="创业顾问:">  
+                        <el-select v-model="form.teleId" placeholder="创业顾问" clearable>
+                            <el-option
+                                v-for="item in teleIdList"
+                                :key="item.id"
+                                :label="item.name"
+                                :value="item.id">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>  
+                    <el-form-item label="签约省份:">  
+                        <el-select v-model="form.signProvince" placeholder="签约省份" clearable>
+                            <el-option
+                                v-for="item in proviceList"
+                                :key="item.id"
+                                :label="item.name"
+                                :value="item.name">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>  
+                    <el-form-item label="签约类型:">  
+                        <el-select v-model="form.signType" placeholder="签约类型" clearable>
+                            <el-option
+                                v-for="item in signTypeList"
+                                :key="item.value"
+                                :label="item.label"
+                                :value="item.value">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>                
+                    <el-form-item label="客户姓名:">
+                        <el-input v-model="form.customerName" placeholder="客户姓名"></el-input>
+                    </el-form-item>
+                    <el-form-item label="客户手机号:">
+                        <el-input v-model="form.phone" placeholder="客户手机号"></el-input>
+                    </el-form-item>            
+                    <el-form-item label="签约单编号:">
+                        <el-input v-model="form.signNo" placeholder="签约单编号"></el-input>
+                    </el-form-item>
+                    <el-form-item label="返款时间:">
+                        <el-date-picker
+                            v-model="form.startTime"
+                            type="datetime"
+                            placeholder="选择日期时间">
+                        </el-date-picker>
+                    </el-form-item>
+                    <el-form-item label="—" class="widthauto">
+                        <el-date-picker
+                            v-model="form.endTime"
+                            type="datetime"
+                            placeholder="选择日期时间">
+                        </el-date-picker>
+                    </el-form-item>     
+                </el-row>
+                <div class="mainSearchBtnBox">
+                    <el-button type="primary" @click="searchTable()" class="searchBtn">搜索</el-button>
+                    <el-button type="info" class="searchBtn">取消</el-button>
+                    <span style="color: #5c6be8;cursor: pointer;margin:0 10px;" @click="toogleClick">更多搜索<i class="el-icon-arrow-down greycolor paddingL6"></i>
+                </div>
+            </el-form>       
+        </div>
+        <!-- 表格 -->
+        <el-row>
+            <el-table 
+                ref="tableData"
+                tooltip-effect="dark"
+                border
+                :data="tableData"
+                @selection-change="handleSelectionChange" 
+                >
+                <el-table-column align="center" type="selection"></el-table-column>
+                <el-table-column align="center" type="index" label="序号" width="55"></el-table-column>
+                <el-table-column align="center" prop="signNo" label="签约单编号"></el-table-column>
+                <el-table-column align="center" prop="customerName" label="客户姓名"></el-table-column>
+                <el-table-column align="center" prop="relateSignNoList" label="关联签约单店">
+                    <template slot-scope="scope">
+                        <div  v-if="scope.row.relateSignNoList.length>1"   v-for="item in scope.row.relateSignNoList">
+                            <el-button size="mini"  type="text" @click="openSignDialog(item)">{{item}}</el-button>
+                        </div>
+                    </template>
+                </el-table-column>
+                <el-table-column align="center" prop="cusAmount" label="返款客户金额"></el-table-column>
+                <el-table-column align="center" prop="companyAmount" label="返换餐饮公司金额"></el-table-column>
+                <el-table-column align="center" prop="refundTime" label="返款时间"></el-table-column>
+                <el-table-column align="center" prop="" label="返款图片" width="100">
+                    <template slot-scope="scope">
+                        <el-button @click="download(scope.row)" size="small" type="text">下载图片</el-button>
+                    </template>
+                </el-table-column>
+                <el-table-column align="center" prop="reason" label="返款原因" width="100">
+                    <template slot-scope="scope">
+                        <el-button @click="showReason1(scope.row)" size="small" type="text">查看原因</el-button>
+                    </template>
+                </el-table-column>
+                <el-table-column align="center" prop="applyTime" label="申请返款时间"></el-table-column>
+                <el-table-column align="center" prop="status" label="处理状态">
+                    <template slot-scope="scope">
+                    
+                        <div v-if="scope.row.status == '2'">
+                            <el-button @click="editDialog(scope.row)" size="small" type="text" class="redcolor" style="color: red;">已驳回</el-button>
+                            <el-button @click="showReason(scope.row)" size="small" type="text">驳回原因</el-button>
+                        </div>
+                        <div v-else-if="scope.row.status == '1'">返款确认中</div>
+                        <div v-else-if="scope.row.status == '3'">确认返款</div>
+                        <div v-else-if="scope.row.status == '4'">已返款</div>
+                        <div v-else-if="scope.row.status == '5'">标记返款结束</div>
+                    </template>
+                </el-table-column>
+                <el-table-column align="center" prop="signProjectName" label="签约项目"></el-table-column>
+                <el-table-column align="center" prop="signType" label="签约类型" width="100">
+                    <template slot-scope="scope">
+                        <div v-if="scope.row.signType == '1'">一次性全款</div>
+                        <div v-else-if="scope.row.signType == '2'">先付定金</div>
+                    </template>
+                </el-table-column>
+                <el-table-column align="center" prop="signTime" label="签约时间"></el-table-column>
+                <el-table-column align="center" prop="" label="付款明细" width="100">
+                    <!-- <template slot-scope="scope">
+                        <el-button @click="showDetail(scope.row)" type="text">查看明细</el-button>
+                    </template> -->
+                    <template slot-scope="scope">
+                        <el-button type="text" size="small" @click="recordClick(scope.row)">查看明细
+                        </el-button>
+                    </template>
+                </el-table-column>
+                <el-table-column align="center" prop="signShopType" label="签约店型" :formatter="getSignShopTypeText" width="100"></el-table-column>
+                <el-table-column align="center" prop="amountReceivable" label="应收金额"></el-table-column>
+                <el-table-column align="center" prop="firstToll" label="路费"></el-table-column>
+                <el-table-column align="center" prop="preferentialAmount" label="优惠金额"></el-table-column>
+                <el-table-column align="center" prop="giveAmount" label="赠送金额"></el-table-column>
+                <el-table-column align="center" prop="idCard" label="客户身份证号"></el-table-column>
+                <el-table-column align="center" prop="phone" label="手机号"></el-table-column>
+                <el-table-column align="center" prop="signProvince" label="签约省份" width="110"></el-table-column>
+                <el-table-column align="center" prop="signCity" label="签约城市" width="120"></el-table-column>
+                <el-table-column align="center" prop="signDictrict" label="签约区／县" width="130"></el-table-column>
+                <el-table-column align="center" prop="busAreaName" label="商务大区"></el-table-column>
+                <el-table-column align="center" prop="busGroupName" label="商务小组"></el-table-column>
+                <el-table-column align="center" prop="busManagerName" label="商务经理"></el-table-column>
+                <el-table-column align="center" prop="teleCompanyName" label="电销分公司"></el-table-column>
+                <el-table-column align="center" prop="teleDeptName" label="电销事业部"></el-table-column>
+                <el-table-column align="center" prop="teleGroupName" label="电销组"></el-table-column>
+                <el-table-column align="center" prop="teleSaleName" label="创业顾问"></el-table-column>
+                <el-table-column align="center" prop="isRemoteSign" label="是否远程签约" :formatter="getIsRemoteSign" width="120"></el-table-column>
+            </el-table>
+             <table-pagination :pager="pager" @change="searchTable"></table-pagination>
+        </el-row>
+    </div>
     <!-- 驳回编辑 -->
     <el-dialog :title="editRejectTitle" :visible.sync="dialogFormVisible" width="870px">
         <el-form :model="dialogForm" ref="dialogForm" :rules="dialogRules">           
@@ -279,13 +285,22 @@
             <el-form-item label="上传图片：" :label-width="formLabelWidth" prop="drawbackTime" class="redcolor">
                 <el-upload
                     class="upload-demo"
-                    action="https://jsonplaceholder.typicode.com/posts/"
+                    :action="uploadOssHost"
+                    ref="refundApplyImgUpload"
                     :on-preview="handlePreview"
                     :on-remove="handleRemove"
+                    :on-success="handleSuccess"
+                    :on-error="handleError"
+                    :before-upload="handleBefore"
                     multiple
-                    :limit="3"
+                      accept="image/png,image/jpeg"
+                    :data="uploadParamData"
+                    :on-change="selectFile"
+                    :on-exceed="handleExceed"
+                    :auto-upload="false"
                     :file-list="fileList">
-                    <el-button size="small" type="primary">点击上传</el-button>
+                    <el-button slot="trigger" size="small" type="primary">选择文件</el-button>
+                     <el-button style="margin-left: 10px;" size="small" type="success" @click="submitUpload">上传</el-button>
                     <div slot="tip" class="el-upload__tip">只能上传jpg/png文件，且不超过500kb</div>
                 </el-upload>
             </el-form-item>
@@ -494,24 +509,28 @@
           </el-table>
           <div slot="footer" class="dialog-footer">
               <el-button type="primary" @click="submitSign('dialogFormChoose')">提交</el-button>
-              <el-button @click="dialogFormChooseVisible = false">取消</el-button>
+              <el-button @click="dialogFormChooseVisible = false"  type="info">取消</el-button>
           </div>
     </el-dialog>
 </div>
 </body>
 <!-- import Vue before Element -->
 <div th:include="_footer_include :: #jsLib"></div>
-<script th:src="@{/js/custom/callrecord/download.js?v=1.0.0}"></script>
+<script th:inline="javascript">
+   var ossSignatureUrl = [[${ossUrl}]];//上传文件地址
+</script>
 <script>    
     var mainDivVM = new Vue({
         el: '#maindiv',
         data: function() {
             return {
-                  pager:{//pager
-                      total: 0,
-                      currentPage: 1,
-                      pageSize: 20,
-                  },
+                isShow:false,
+                pager:{//pager
+                    total: 0,
+                    currentPage: 1,
+                    pageSize: 20,
+                },
+                ossUrl:ossSignatureUrl,
                 fileList: [],
                 dialogFormVisible:false,//驳回编辑
                 reasonDialog:false,//驳回原因
@@ -652,6 +671,16 @@
                 },   
                 dataTableChoose:[],   
                 dynamicTags: [],
+                uploadOssHost:'',
+                uploadParamData: {
+                    key:'22',
+                    policy:'',
+                    OSSAccessKeyId:'',
+                    success_action_status : '200', //让服务端返回200,不然，默认会返回204
+                    signature:'', 
+                    'x:params':'',
+                    'realName':''
+                 },
             }             
         },
         methods: {
@@ -659,7 +688,11 @@
                 mainDivVM.confirmBtnDisabled=true;
                 this.$refs[formName].validate((valid) => {
                     if (valid) {
+                    	
+                    	var fileList = mainDivVM.fileList;
                         var param = this.dialogForm;
+                        param.imgList = fileList;
+                        param.relateSignNo = this.dynamicTags;
                         axios.post('/financing/refund/editRejectRebateInfo',param)
                         .then(function (response) {
                             var data =  response.data
@@ -808,28 +841,39 @@
                 this.reason = row.reason;
             },
             editDialog(row){//驳回编辑
-                //this.dialogForm = {};
-                
+            	//get oss param
+                this.getUploadParam();
                 var param={};
                 param.id=row.id;
-                axios.post('/financing/refund/queryRefundInfoById',param)
+                axios.post('/financing/refund/queryRebateInfoById',param)
                 .then(function (response) {
                       var result =  response.data;
                       if(result.code=='0'){
                           var table=result.data;
                           mainDivVM.dialogForm= table;
                           var imgList =  table.imgList;
+                         
                           var imgShowList = new Array();
                           for(var i=0;i<imgList.length;i++){
                               var curImg = imgList[i];
                               var img={};
-                              img.name="上传文件"+(i+1);
-                              img.url = curImg.imgUrl;
-                              img.id=curImg.id;
-                              imgShowList.push(img);
+                               img.name= curImg.realName;
+                               img.url = curImg.imgUrl;
+                               img.id=curImg.id;
+                               img.rebateId=curImg.reId;
+                               imgShowList.push(img);
                           }
                           mainDivVM.editRejectTitle = "编辑驳回（"+table.signNo+"）签约单返款申请";
                           mainDivVM.fileList=imgShowList;
+                          //签约单处理
+                          var relateSignList = table.relateSignList;
+                          var signNoArr = new Array();
+                          for(var i=0;i<relateSignList.length;i++){
+                        	  signNoArr.push(relateSignList[i].signNo);
+                          }
+                          
+                          mainDivVM.dynamicTags = signNoArr;
+                          
                           mainDivVM.dialogFormVisible=true;
                       }else{
                           console.error(response);
@@ -840,30 +884,6 @@
                      console.log(error);
                 });
                 
-            },
-            handlePreview(file){
-                
-            },
-            handleRemove(file,fileList){
-                 var param = {};
-                 var idList = new Array();
-                 idList.push(file.id)
-                 param.idList = idList;
-                 axios.post('/financing/refund/deleteImgByIdList',param)
-                 .then(function (response) {
-                       var result =  response.data;
-                       if(result.code=='0'){
-                           mainDivVM.$message({message:'删除成功',type:'success'});
-                       }else{
-                           console.error(response);
-                           mainDivVM.$message({message:result.msg,type:'error'});
-                       }
-                       
-                 })
-                 .catch(function (error) {
-                      console.log(error);
-                 });
-                 
             },
             initSelect(){
                 this.initBusAreaSelect();
@@ -1241,7 +1261,6 @@
                 param.signProject = this.dialogFormChoose.signProject;
                 param.signNo = this.dialogFormChoose.signNo;
 
-                console.info(param);
                 axios.post('/financing/refundRebate/rebatesignList', param)
                 .then(function (response) {
                     var result =  response.data;
@@ -1278,6 +1297,151 @@
             handleClose(tag) {
                 this.dynamicTags.splice(this.dynamicTags.indexOf(tag), 1);
             },
+            toogleClick(){
+                if(this.isShow){
+                    this.isShow=false
+                }else{
+                    this.isShow=true
+                }          
+            },
+            handlePreview(file){
+                
+            },
+            handleRemove(file,fileList){
+                var id = file.id;
+                if(!id){
+                    return;
+                }
+                var param = {};
+                var idList = new Array();
+                idList.push(id)
+                param.idList = idList;
+                axios.post('/financing/refund/deleteImgByIdList',param)
+                .then(function (response) {
+                      var result =  response.data;
+                      if(result.code=='0'){
+                          mainDivVM.$message({message:'删除成功',type:'success'});
+                      }else{
+                          console.error(response);
+                          mainDivVM.$message({message:result.msg,type:'error'});
+                      }
+                      
+                })
+                .catch(function (error) {
+                     console.log(error);
+                });
+                
+           },
+           handleExceed(files, fileList) {
+               //this.$message.warning(`当前限制选择 3 个文件，本次选择了 ${files.length} 个文件，共选择了 ${files.length + fileList.length} 个文件`);
+             },
+             
+             handleSuccess(response, file, fileList){
+                 console.info(fileList);
+                 console.info(mainDivVM.fileList);
+                 var realName = file.name;
+                 var randomName = mainDivVM.uploadParamData.key;
+                 var imgUrl =  mainDivVM.uploadOssHost+"/"+randomName;
+                 var param = {};
+                 param.realName=realName;
+                 param.imgUrl = imgUrl;
+                 var randomNameArr = randomName.split("/");
+                 param.randomName = randomNameArr[randomNameArr.length-1];
+                 debugger;
+                 axios.post('/financing/refund/insertImgInfo', param)
+                 .then(function (response) {
+                     var resData = response.data;
+                     if(resData.code=='0'){
+                         var lastFile = {};
+                         lastFile.id= resData.data;
+                         lastFile.name=realName;
+                         lastFile.url = imgUrl;
+                         lastFile.randomName = randomName; 
+                         var curList = mainDivVM.fileList;
+                         curList.push(lastFile);
+                         
+                         mainDivVM.$message({message:'上传成功',type:'success'});
+                     }else{
+                         mainDivVM.$message({message:'上传失败',type:'error'});
+                     }
+                     
+                     
+                 })
+                 .catch(function (error) {
+                      console.log(error);
+                 });
+                 
+                 
+                 
+             },
+             handleError(err, file, fileList){
+                 console.info(err);
+             },
+             handleBefore(file){
+                 debugger;
+                    var isTextComputer = file.type === 'image/png' || file.type==='image/jpeg';
+                    if(!isTextComputer){
+                        this.fileList=[];
+                        this.$message.error('文件格式错误');
+                        return false;
+                    }
+             },
+             random_string(len) {
+                 len = len || 32;
+                 var chars = 'ABCDEFGHJKMNPQRSTWXYZabcdefhijkmnprstwxyz2345678';
+                 var maxPos = chars.length;
+                 var pwd = '';
+                 for (i = 0; i < len; i++) {
+                     pwd += chars.charAt(Math.floor(Math.random() * maxPos));
+                 }
+                 return pwd;
+             },
+             get_suffix(filename) {
+                 var pos = filename.lastIndexOf('.')
+                 suffix = ''
+                 if (pos != -1) {
+                     suffix = filename.substring(pos);
+                 }
+                 return suffix;
+             },
+             submitUpload(){
+                 //this.customUpload();
+                 this.$refs.refundApplyImgUpload.submit();
+             },
+             getUploadParam(){
+                 var signUrl = this.ossUrl+"?serviceType=aggregation";
+                 var param={};
+                 
+                  axios.get(signUrl, param)
+                 .then(function (response) {
+                    // console.info(response);
+                     var respData= response.data;
+                     var host = respData.host;
+                     var params={};
+                     var new_multipart_params = {
+                             dir:respData.dir,
+                             'policy': respData.policy,
+                             'OSSAccessKeyId': respData.accessid,
+                             'success_action_status' : '200', //让服务端返回200,不然，默认会返回204
+                             'signature': respData.signature,
+                             'x:params':params,//自定义编码，basse64编码后的字符串,
+                             'realName':''
+                    };
+                   mainDivVM.uploadParamData= new_multipart_params;
+                   mainDivVM.uploadOssHost = host;
+                 })
+                 .catch(function (error) {
+                      console.log(error);
+                 });
+                 
+                 
+                 
+             },
+            selectFile(file, fileList){
+                  mainDivVM.uploadParamData.key= mainDivVM.uploadParamData.dir+mainDivVM.random_string(10)+mainDivVM.get_suffix(file.name),
+                  mainDivVM.uploadParamData.realName= file.name
+             },
+            
         },
         created(){            
             this.searchTable();

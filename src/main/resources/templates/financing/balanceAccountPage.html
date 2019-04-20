@@ -11,193 +11,198 @@
     <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
         <el-breadcrumb-item>Home</el-breadcrumb-item>
         <el-breadcrumb-item>财务管理</el-breadcrumb-item>
-        <el-breadcrumb-item><a >对账结算申请</a></el-breadcrumb-item>
+        <el-breadcrumb-item>对账结算申请</el-breadcrumb-item>
     </el-breadcrumb>
     
-    <el-row class="marginB10 ">
-    		<el-button type="text" @click="dialogFormVisible = true">选择列</el-button>
+    <el-row class="marginB20 ">
+    		<el-button type="primary" @click="dialogFormVisible = true"><i class="el-icon-menu"></i>选择列</el-button>
     		<!--  <shiro:hasPermission name="financing:balanceaccountManager:rejectApply">  -->
-		        <el-button type="primary" @click="rejectback">驳回</el-button>
+		    <el-button type="success" @click="rejectback">驳回</el-button>
 		    <!--  </shiro:hasPermission> -->
     		<!-- <shiro:hasPermission name="financing:balanceaccountManager:settlementConfirm">  -->
-		        <el-button type="success" @click="settlementConfirmButton">提交对账确认</el-button>
+		    <el-button type="warning" @click="settlementConfirmButton">提交对账确认</el-button>
 		    <!--  </shiro:hasPermission>  -->
-			<el-button type="warning" @click="down">下载结算单</el-button>
-	</el-row>
-	<el-form :inline="true" :model="searchForm" class="demo-form-inline" ref="searchForm"> 
-	    <el-row class=" greybg  padding20" style="padding-bottom: 0;">
-				  <el-form-item class="formItem"  prop="busAreaId">
-				    <el-select v-model="searchForm.busAreaId" clearable filterable  placeholder="商务大区">
-				      <el-option
-					      v-for="item in busAreaOptions"
-					      :key="item.id"
-					      :label="item.name"
-					      :value="item.id">
-					  </el-option>
-				    </el-select>
-				  </el-form-item>
-				  <el-form-item class="formItem"  prop="busGroupId">
-				    <el-select v-model="searchForm.busGroupId" clearable filterable placeholder="签单商务组">
-				      <el-option
-					      v-for="item in busGroupOptions"
-					      :key="item.id"
-					      :label="item.name"
-					      :value="item.id">
-					  </el-option>
-				    </el-select>
-				  </el-form-item>
-				  <el-form-item class="formItem"  prop="busSaleId">
-				    <el-select v-model="searchForm.busSaleId" clearable filterable placeholder="签单商务经理">
-				      <el-option
-					      v-for="item in busSaleOptions"
-					      :key="item.id"
-					      :label="item.name"
-					      :value="item.id">
-					  </el-option>
-				    </el-select>
-				  </el-form-item>
-				  <el-form-item class="formItem"  prop="status">
-				    <el-select v-model="searchForm.status" clearable placeholder="处理状态">
-				      <el-option
-					      v-for="item in statusOptions"
-					      :key="item.value"
-					      :label="item.name"
-					      :value="item.value">
-					  </el-option>
-				    </el-select>
-				  </el-form-item>
-  			  <el-form-item class="formItem"  prop="signProjectId">
-  			    <el-select v-model="searchForm.signProjectId" clearable filterable placeholder="签约项目">
-  			      <el-option
-  				      v-for="item in projectOptions"
-  				      :key="item.id"
-  				      :label="item.projectName"
-  				      :value="item.id">
-  				  </el-option>
-  			    </el-select>
-  			  </el-form-item>
-  		  <el-form-item class="formItem" prop="cusName">
-  			  <el-input v-model="searchForm.cusName" placeholder="客户姓名" class="input-with-select"></el-input>
-  		  </el-form-item>
-	    </el-row>
-	    <el-row class="greybg padding20" style="padding-bottom: 0;">
-				  <el-form-item class="formItem"  prop="teleDeptId">
-				    <el-select v-model="searchForm.teleDeptId" clearable filterable  placeholder="电销事业部">
-				      <el-option
-					      v-for="item in teleDeptOptions"
-					      :key="item.id"
-					      :label="item.name"
-					      :value="item.id">
-					  </el-option>
-				    </el-select>
-				  </el-form-item>
-				  <el-form-item class="formItem"  prop="teleGorupId">
-				    <el-select v-model="searchForm.teleGorupId" clearable filterable  placeholder="电销组">
-				      <el-option
-					      v-for="item in teleGorupOptions"
-					      :key="item.id"
-					      :label="item.name"
-					      :value="item.id">
-					  </el-option>
-				    </el-select>
-				  </el-form-item>
-				  <el-form-item class="formItem"  prop="teleSaleId">
-				    <el-select v-model="searchForm.teleSaleId" clearable filterable placeholder="创业顾问">
-				      <el-option
-					      v-for="item in teleSaleOptions"
-					      :key="item.id"
-					      :label="item.name"
-					      :value="item.id">
-					  </el-option>
-				    </el-select>
-				  </el-form-item>
-  			  <el-form-item class="formItem"  prop="signProvince">
-  			    <el-select v-model="searchForm.signProvince" clearable filterable  placeholder="签约省份">
-  			      <el-option
-  				      v-for="item in provinceOptions"
-  				      :key="item.name"
-  				      :label="item.name"
-  				      :value="item.name">
-  				  </el-option>
-  			    </el-select>
-  			  </el-form-item>
-				  <el-form-item class="formItem"  prop="payType">
-				    <el-select v-model="searchForm.payType" clearable placeholder="付款类型">
-				      <el-option
-					      v-for="item in payTypeOptions"
-					      :key="item.value"
-					      :label="item.name"
-					      :value="item.value">
-					  </el-option>
-				    </el-select>
-				  </el-form-item>
-  		  <el-form-item class="formItem" prop="phone">
-  			  <el-input v-model="searchForm.phone" placeholder="客户手机号" class="input-with-select"></el-input>
-  		  </el-form-item>
-	    </el-row>
-	    <el-row class="greybg padding20" style="padding-bottom: 0;">
-  	      <el-form-item class="formItem" label="签约时间：">
-  	  			<el-date-picker  v-model="searchForm.startTime" format="yyyy-MM-dd HH:mm" type="datetime" placeholder="选择日期"></el-date-picker>
-  	      </el-form-item>
-  	      <el-form-item class="formItem" label="——">
-  				<el-date-picker  v-model="searchForm.endTime" format="yyyy-MM-dd HH:mm" type="datetime" placeholder="选择日期"></el-date-picker>
-  	      </el-form-item>
-  	      <el-form-item class="formItem" label="付款时间：">
-  	  			<el-date-picker  v-model="searchForm.payStartTime" format="yyyy-MM-dd HH:mm" type="datetime" placeholder="选择日期"></el-date-picker>
-  	      </el-form-item>
-  	      <el-form-item class="formItem" label="——">
-  				<el-date-picker  v-model="searchForm.payEndTime" format="yyyy-MM-dd HH:mm" type="datetime" placeholder="选择日期"></el-date-picker>
-  	      </el-form-item>
-  		  <el-form-item class="formItem" prop="statementNo">
-  			    <el-input v-model="searchForm.statementNo" placeholder="结算单编号" class="input-with-select"></el-input>
-  		  </el-form-item>
-  		  <el-form-item class="formItem" prop="signNo">
-  			  <el-input v-model="searchForm.signNO" placeholder="签约单编号" class="input-with-select"></el-input>
-  		  </el-form-item>
-  		  <el-button type="primary" @click="searchTable()">搜索</el-button>
-	    </el-row>
-  	</el-form>
-    <el-row>
-        <el-table  ref="multipleTable" tooltip-effect="dark" border  @selection-change="handleSelectionChange"
-            style="width: 100%"  :data="dataTable" >
-           <el-table-column align="center" type="selection" label="全选" width="55"></el-table-column>
-           <el-table-column align="center" type="index" label="序号" width="55"></el-table-column>
-           
-           <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width"
-	         v-for="(item,key,index) in tableColums" v-if="item.fieldCode == 'isDoubt'">
-	               <template slot-scope="scope">
-           		  	<div v-if="scope.row.isDoubt === 1">
-                        <el-button type="text" size="small" @click="viewDoubt(scope.row)">
-                        	查看疑意
-                        </el-button>
-                    </div>
-                </template>
-	        </el-table-column>
-	        <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width"
-	         v-else-if="item.fieldCode == 'status'">
-	               <template slot-scope="scope">{{scope.row.status}} 
-           		  	<div v-if="scope.row.status ==='驳回商务'">
-                        <el-button type="text" size="small" @click="backRemark(scope.row)">
-                        	驳回原因
-                        </el-button>
-                    </div>
-                </template>
-	        </el-table-column>
-	        <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width"
-	         v-else-if="item.fieldCode == 'statementNo'">
-	               <template slot-scope="scope">
-	               <a :href="'/financing/balanceaccount/settleAccounts?payDetailId='+scope.row.payId+''" target="_blank" style="color: rgb(0, 114, 255);">{{scope.row.statementNo}} </a>
-                </template>
-	        </el-table-column>
-            <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width"
-	         	v-else>
-	        </el-table-column>
-        </el-table>
-        <table-pagination :pager="pager" @change="searchTable"></table-pagination>
-    </el-row>
-     <!--查看疑意-->
-    <el-dialog title="查看疑意" :visible.sync="viewDoubtVisable"
-               width="50%">
+			  <el-button type="danger" @click="down">下载结算单</el-button>
+	  </el-row>
+	  <div class="mainSearchBg">        
+        <div class="mainSearchFormBox">
+            <el-form :inline="true" :model="searchForm" class="demo-form-inline mainSearchForm" ref="searchForm"> 
+                <el-form-item label="商务大区:"  prop="busAreaId">
+                  <el-select v-model="searchForm.busAreaId" clearable filterable  placeholder="商务大区">
+                    <el-option
+                      v-for="item in busAreaOptions"
+                      :key="item.id"
+                      :label="item.name"
+                      :value="item.id">
+                  </el-option>
+                  </el-select>
+                </el-form-item>
+                <el-form-item label="签单商务组:"  prop="busGroupId">
+                  <el-select v-model="searchForm.busGroupId" clearable filterable placeholder="签单商务组">
+                    <el-option
+                      v-for="item in busGroupOptions"
+                      :key="item.id"
+                      :label="item.name"
+                      :value="item.id">
+                  </el-option>
+                  </el-select>
+                </el-form-item>
+                <el-form-item label="签单商务经理:"  prop="busSaleId">
+                  <el-select v-model="searchForm.busSaleId" clearable filterable placeholder="签单商务经理">
+                    <el-option
+                      v-for="item in busSaleOptions"
+                      :key="item.id"
+                      :label="item.name"
+                      :value="item.id">
+                  </el-option>
+                  </el-select>
+                </el-form-item>
+                <el-form-item label="签约时间：">
+                  <el-date-picker  v-model="searchForm.startTime" format="yyyy-MM-dd HH:mm" type="datetime" placeholder="选择日期"></el-date-picker>
+                </el-form-item>
+                <el-form-item label="—" class="widthauto">
+                <el-date-picker  v-model="searchForm.endTime" format="yyyy-MM-dd HH:mm" type="datetime" placeholder="选择日期"></el-date-picker>
+                </el-form-item>
+
+                <el-row v-show="isShow">
+                    <el-form-item label="处理状态:"  prop="status">
+                      <el-select v-model="searchForm.status" clearable placeholder="处理状态">
+                        <el-option
+                          v-for="item in statusOptions"
+                          :key="item.value"
+                          :label="item.name"
+                          :value="item.value">
+                      </el-option>
+                      </el-select>
+                    </el-form-item>
+                    <el-form-item label="签约项目:"  prop="signProjectId">
+                      <el-select v-model="searchForm.signProjectId" clearable filterable placeholder="签约项目">
+                        <el-option
+                          v-for="item in projectOptions"
+                          :key="item.id"
+                          :label="item.projectName"
+                          :value="item.id">
+                      </el-option>
+                      </el-select>
+                    </el-form-item>
+                    <el-form-item label="客户姓名:" prop="cusName">
+                      <el-input v-model="searchForm.cusName" placeholder="客户姓名"></el-input>
+                    </el-form-item>                
+                    <el-form-item label="付款时间：">
+                      <el-date-picker  v-model="searchForm.payStartTime" format="yyyy-MM-dd HH:mm" type="datetime" placeholder="选择日期"></el-date-picker>
+                    </el-form-item>
+                    <el-form-item label="—" class="widthauto">
+                      <el-date-picker  v-model="searchForm.payEndTime" format="yyyy-MM-dd HH:mm" type="datetime" placeholder="选择日期"></el-date-picker>
+                    </el-form-item>
+                    <el-form-item label="电销事业部:"  prop="teleDeptId">
+                      <el-select v-model="searchForm.teleDeptId" clearable filterable  placeholder="电销事业部">
+                        <el-option
+                          v-for="item in teleDeptOptions"
+                          :key="item.id"
+                          :label="item.name"
+                          :value="item.id">
+                      </el-option>
+                      </el-select>
+                    </el-form-item>
+                    <el-form-item label="电销组:"  prop="teleGorupId">
+                      <el-select v-model="searchForm.teleGorupId" clearable filterable  placeholder="电销组">
+                        <el-option
+                          v-for="item in teleGorupOptions"
+                          :key="item.id"
+                          :label="item.name"
+                          :value="item.id">
+                      </el-option>
+                      </el-select>
+                    </el-form-item>
+                    <el-form-item label="创业顾问:"  prop="teleSaleId">
+                      <el-select v-model="searchForm.teleSaleId" clearable filterable placeholder="创业顾问">
+                        <el-option
+                          v-for="item in teleSaleOptions"
+                          :key="item.id"
+                          :label="item.name"
+                          :value="item.id">
+                      </el-option>
+                      </el-select>
+                    </el-form-item>
+                    <el-form-item label="签约省份:"  prop="signProvince">
+                      <el-select v-model="searchForm.signProvince" clearable filterable  placeholder="签约省份">
+                        <el-option
+                          v-for="item in provinceOptions"
+                          :key="item.name"
+                          :label="item.name"
+                          :value="item.name">
+                      </el-option>
+                      </el-select>
+                    </el-form-item>
+                    <el-form-item label="付款类型:"  prop="payType">
+                      <el-select v-model="searchForm.payType" clearable placeholder="付款类型">
+                        <el-option
+                          v-for="item in payTypeOptions"
+                          :key="item.value"
+                          :label="item.name"
+                          :value="item.value">
+                      </el-option>
+                      </el-select>
+                    </el-form-item>
+                    <el-form-item label="客户手机号:" prop="phone">
+                      <el-input v-model="searchForm.phone" placeholder="客户手机号"></el-input>
+                    </el-form-item>
+                    <el-form-item label="结算单编号:" prop="statementNo">
+                        <el-input v-model="searchForm.statementNo" placeholder="结算单编号"></el-input>
+                    </el-form-item>
+                    <el-form-item label="签约单编号:" prop="signNo">
+                      <el-input v-model="searchForm.signNO" placeholder="签约单编号"></el-input>
+                    </el-form-item>
+                </el-row>
+                <div class="mainSearchBtnBox"> 
+                    <el-button type="primary" @click="searchTable()" class="searchBtn">搜索</el-button>
+                    <el-button type="info" class="searchBtn">取消</el-button>
+                    <span style="color: #5c6be8;cursor: pointer;margin:0 10px;" @click="toogleClick">更多搜索<i class="el-icon-arrow-down greycolor paddingL6"></i>
+                    </span>
+                </div>
+            </el-form>
+        </div>
+        <el-row>
+            <el-table  ref="multipleTable" tooltip-effect="dark" border  @selection-change="handleSelectionChange"
+                style="width: 100%"  :data="dataTable" >
+               <el-table-column align="center" type="selection" label="全选" width="55"></el-table-column>
+               <el-table-column align="center" type="index" label="序号" width="55"></el-table-column>
+               
+               <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" width="80px"
+    	         v-for="(item,key,index) in tableColums" v-if="item.fieldCode == 'isDoubt'">
+    	               <template slot-scope="scope">
+               		  	<div v-if="scope.row.isDoubt === 1">
+                            <el-button type="text" size="small" @click="viewDoubt(scope.row)">
+                            	查看疑意
+                            </el-button>
+                        </div>
+                    </template>
+    	        </el-table-column>
+    	        <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width"
+    	         v-else-if="item.fieldCode == 'status'">
+    	               <template slot-scope="scope">{{scope.row.status}} 
+               		  	<div v-if="scope.row.status ==='驳回商务'">
+                            <el-button type="text" size="small" @click="backRemark(scope.row)">
+                            	驳回原因
+                            </el-button>
+                        </div>
+                    </template>
+    	        </el-table-column>
+    	        <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width"
+    	         v-else-if="item.fieldCode == 'statementNo'">
+    	               <template slot-scope="scope">
+    	               <a :href="'/financing/balanceaccount/settleAccounts?payDetailId='+scope.row.payId+''" target="_blank" class="blueColorBtn">{{scope.row.statementNo}} </a>
+                    </template>
+    	        </el-table-column>
+                <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width"
+    	         	v-else>
+    	        </el-table-column>
+            </el-table>
+            <table-pagination :pager="pager" @change="searchTable"></table-pagination>
+        </el-row>
+    </div>
+    <!--查看疑意-->
+    <el-dialog title="查看疑意" :visible.sync="viewDoubtVisable" width="50%">
         <template>
             <el-form :model="viewDoubtForm" ref="viewDoubtForm">
                 <el-form-item label="" :required="true">
@@ -308,6 +313,7 @@ var vistitStoreTypeList=[[${vistitStoreTypeList}]];//签约店型
 var clueVM = new Vue({
         el: '#clueManage',
         data: {
+          isShow:false,
       		searchForm: {
 	       		busAreaId: '',
 	       		busGroupId: '',
@@ -606,7 +612,7 @@ var clueVM = new Vue({
             	   var rows = this.multipleSelection;
             	   if(rows.length==0){
                        this.$message({
-                          message: '请选择一条数据',
+                          message: '只允许选择一条数据',
                           type: 'warning'
                         });
                        return;
@@ -623,9 +629,9 @@ var clueVM = new Vue({
                //驳回
                rejectback() {
            	       var rows = this.multipleSelection;
-            	   if(rows.length==0){
+            	   if(rows.length !=1){
                        this.$message({
-                          message: '请选择一条数据',
+                          message: '只允许选择一条数据',
                           type: 'warning'
                         });
                        return;
@@ -686,7 +692,7 @@ var clueVM = new Vue({
                },
                settlementConfirmButton(){
             	   var rows = this.multipleSelection;
-            	   if(rows.length==0){
+            	   if(rows.length !=1){
                        this.$message({
                           message: '请至少选择一条数据',
                           type: 'warning'
@@ -843,6 +849,13 @@ var clueVM = new Vue({
                   repeatApplyNumber(){//输入手机号才显示查询线索按钮
                       this.commissionMoney = this.apply.money*this.ratio/100;
              		},
+                toogleClick(){
+                    if(this.isShow){
+                        this.isShow=false
+                    }else{
+                        this.isShow=true
+                    }          
+                },
         },
         created(){
             console.info("create method");

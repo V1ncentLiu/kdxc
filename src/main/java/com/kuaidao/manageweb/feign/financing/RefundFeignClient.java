@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.PostMapping;
 import com.kuaidao.aggregation.dto.financing.RefundAndImgRespDTO;
 import com.kuaidao.aggregation.dto.financing.RefundEditRejectReqDTO;
+import com.kuaidao.aggregation.dto.financing.RefundImgDTO;
 import com.kuaidao.aggregation.dto.financing.RefundImgRespDTO;
 import com.kuaidao.aggregation.dto.financing.RefundInfoQueryDTO;
 import com.kuaidao.aggregation.dto.financing.RefundQueryDTO;
@@ -85,6 +86,15 @@ public interface RefundFeignClient {
      */
     @PostMapping("/querySignInfoBySignNo")
     JSONResult<Map<String, Object>> querySignInfoBySignNo(RefundQueryDTO refundQueryDTO);
+    
+    
+/***
+ * 插入图片
+ * @param refundImgDTO
+ * @return
+ */
+    @PostMapping("/insertImgInfo")
+    JSONResult<Long> insertImgInfo(RefundImgDTO refundImgDTO);
 
     
     @Component
@@ -132,6 +142,11 @@ public interface RefundFeignClient {
         public JSONResult<Map<String, Object>> querySignInfoBySignNo(
                 RefundQueryDTO refundQueryDTO) {
             return fallBackError("根据signno查询签约单编号");
+        }
+
+        @Override
+        public JSONResult<Long> insertImgInfo(RefundImgDTO refundImgDTO) {
+            return fallBackError("插入图片");
         }
     }
 
