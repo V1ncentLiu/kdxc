@@ -10,219 +10,225 @@
         <el-breadcrumb-item>财务管理</el-breadcrumb-item>
         <el-breadcrumb-item>退款申请列表</el-breadcrumb-item>
     </el-breadcrumb>
-    <el-row class="marginB10">
+    <el-row class="marginB20">
         <shiro:hasPermission name="aggregation:refundApply:updateRefundFinish">
             <el-button type="primary" @click="openSign">标记退款结束</el-button>
         </shiro:hasPermission>
     </el-row>
-    <el-row class="marginB10 greybg padding20" style="padding-bottom: 0">        
-        <el-form :inline="true" :model="form" ref="form">
-            <el-form-item label="">
-                <el-select v-model="form.busAreaId" placeholder="商务大区" style="width: 100%;" clearable @change="changeBusArea" @clear="clearBusAreaList" >
-                    <el-option
-                        v-for="item in busAreaList"
-                        :key="item.id"
-                        :label="item.name"
-                        :value="item.id">
-                    </el-option>
-                </el-select>
-            </el-form-item> 
-            <el-form-item label="">  
-                <el-select v-model="form.busGroupId" placeholder="签单商务组" style="width: 100%;" clearable @change="changeBusGroup" @clear="clearBusGroupList">
-                    <el-option
-                        v-for="item in busGroupList"
-                        :key="item.id"
-                        :label="item.name"
-                        :value="item.id">
-                    </el-option>
-                </el-select>
-            </el-form-item>    
-            <el-form-item label="">  
-                <el-select v-model="form.busManagerId" placeholder="签单商务经理" style="width: 100%;" clearable>
-                    <el-option
-                        v-for="item in busManagerList"
-                        :key="item.id"
-                        :label="item.name"
-                        :value="item.id">
-                    </el-option>
-                </el-select>
-            </el-form-item> 
-            <el-form-item label="">  
-                <el-select v-model="form.signShopType" placeholder="签约店型" style="width: 100%;" clearable>
-                    <el-option
-                        v-for="item in vistitStoreTypeArr"
-                        :key="item.value"
-                        :label="item.name"
-                        :value="item.value">
-                    </el-option>
-                </el-select>
-            </el-form-item>   
-            <el-form-item label="">  
-                <el-select v-model="form.status" placeholder="处理状态" style="width: 100%;" clearable>
-                    <el-option
-                        v-for="item in statusList"
-                        :key="item.value"
-                        :label="item.name"
-                        :value="item.value">
-                    </el-option>
-                </el-select>
-            </el-form-item>   
-            <el-form-item label="">  
-                <el-select v-model="form.teleDeptId" placeholder="电销事业部" style="width: 100%;" clearable @change="changeTeleDept" @clear="clearTeleDeptList">
-                    <el-option
-                        v-for="item in teleDeptList"
-                        :key="item.id"
-                        :label="item.name"
-                        :value="item.id">
-                    </el-option>
-                </el-select>
-            </el-form-item>  
-            <el-form-item label="">  
-                <el-select v-model="form.teleGroupId" placeholder="电销组" style="width: 100%;" clearable @change="changeTeleGroup" @clear="clearTeleGroupList">
-                    <el-option
-                        v-for="item in teleGroupIdList"
-                        :key="item.id"
-                        :label="item.name"
-                        :value="item.id">
-                    </el-option>
-                </el-select>
-            </el-form-item>   
-            <el-form-item label="">  
-                <el-select v-model="form.teleId" placeholder="创业顾问" style="width: 100%;" clearable>
-                    <el-option
-                        v-for="item in teleIdList"
-                        :key="item.id"
-                        :label="item.name"
-                        :value="item.id">
-                    </el-option>
-                </el-select>
-            </el-form-item>  
-            <el-form-item label="">  
-                <el-select v-model="form.signProvince" placeholder="签约省份" style="width: 100%;" clearable>
-                    <el-option
-                        v-for="item in proviceList"
-                        :key="item.id"
-                        :label="item.name"
-                        :value="item.name">
-                    </el-option>
-                </el-select>
-            </el-form-item>  
-            <el-form-item label="">  
-                <el-select v-model="form.signType" placeholder="签约类型" style="width: 100%;" clearable>
-                    <el-option
-                        v-for="item in signTypeList"
-                        :key="item.value"
-                        :label="item.label"
-                        :value="item.value">
-                    </el-option>
-                </el-select>
-            </el-form-item>                
-            <el-form-item label="">
-                <el-input v-model="form.customerName" placeholder="客户姓名"></el-input>
-            </el-form-item>
-            <el-form-item label="">
-                <el-input v-model="form.phone" placeholder="客户手机号"></el-input>
-            </el-form-item>            
-            <el-form-item label="">
-                <el-input v-model="form.signNo" placeholder="签约单编号"></el-input>
-            </el-form-item>
-            <el-form-item label="退款时间:">
-                <el-date-picker
-                    style="width: 100%;"
-                    v-model="form.startTime"
-                    type="datetime"
-                    placeholder="选择日期时间">
-                </el-date-picker>
-            </el-form-item>
-            <el-form-item label="—">
-                <el-date-picker
-                    style="width: 100%;"
-                    v-model="form.endTime"
-                    type="datetime"
-                    placeholder="选择日期时间">
-                </el-date-picker>
-            </el-form-item>            
-            <el-button type="primary" @click="searchTable()">搜索</el-button>
-        </el-form>       
-    </el-row>
-    <!-- 表格 -->
-    <el-row>
-        <el-table 
-            ref="tableData"
-            tooltip-effect="dark"
-            border
-            :data="tableData"
-            @selection-change="handleSelectionChange" 
-            >
-            <el-table-column align="center" type="selection"></el-table-column>
-            <el-table-column align="center" type="index" label="序号" width="55"></el-table-column>
-            <el-table-column align="center" prop="signNo" label="签约单编号"></el-table-column>
-            <el-table-column align="center" prop="customerName" label="客户姓名"></el-table-column>
-            <el-table-column align="center" prop="cusAmount" label="退款客户金额"></el-table-column>
-            <el-table-column align="center" prop="companyAmount" label="退换餐饮公司金额"></el-table-column>
-            <el-table-column align="center" prop="refundTime" label="退款时间"></el-table-column>
-            <el-table-column align="center" prop="" label="退款图片" width="100">
-                <template slot-scope="scope">
-                    <el-button @click="download(scope.row)" type="text">下载图片</el-button>
-                </template>
-            </el-table-column>
-            <el-table-column align="center" prop="reason" label="返款原因" width="100">
-                <template slot-scope="scope">
-                    <el-button @click="showReason1(scope.row)" type="text">查看原因</el-button>
-                </template>
-            </el-table-column>
-            <el-table-column align="center" prop="applyTime" label="申请退款时间"></el-table-column>
-            <el-table-column align="center" prop="status" label="处理状态">
-                <template slot-scope="scope">
-                
-                    <div v-if="scope.row.status == '2'">
-                        <el-button @click="editDialog(scope.row)" type="text" class="redcolor" style="color: red;">已驳回</el-button>
-                        <el-button @click="showReason(scope.row)" type="text" class="bluecolor">驳回原因</el-button>
-                    </div>
-                    <div v-else-if="scope.row.status == '1'">退款确认中</div>
-                    <div v-else-if="scope.row.status == '3'">确认退款</div>
-                    <div v-else-if="scope.row.status == '4'">已退款</div>
-                    <div v-else-if="scope.row.status == '5'">标记退款结束</div>
-                </template>
-            </el-table-column>
-            <el-table-column align="center" prop="signProjectName" label="签约项目"></el-table-column>
-            <el-table-column align="center" prop="signType" label="签约类型">
-                <template slot-scope="scope">
-                    <div v-if="scope.row.signType == '1'">一次性全款</div>
-                    <div v-else-if="scope.row.signType == '2'">先付定金</div>
-                </template>
-            </el-table-column>
-            <el-table-column align="center" prop="signTime" label="签约时间"></el-table-column>
-            <el-table-column align="center" prop="" label="付款明细" width="100">
-                <!-- <template slot-scope="scope">
-                    <el-button @click="showDetail(scope.row)" type="text">查看明细</el-button>
-                </template> -->
-                <template slot-scope="scope">
-                    <el-button type="text" size="small" @click="recordClick(scope.row)">查看明细
-                    </el-button>
-                </template>
-            </el-table-column>
-            <el-table-column align="center" prop="signShopType" label="签约店型" :formatter="getSignShopTypeText" width="100"></el-table-column>
-            <el-table-column align="center" prop="amountReceivable" label="应收金额"></el-table-column>
-            <el-table-column align="center" prop="firstToll" label="路费"></el-table-column>
-            <el-table-column align="center" prop="preferentialAmount" label="优惠金额"></el-table-column>
-            <el-table-column align="center" prop="giveAmount" label="赠送金额"></el-table-column>
-            <el-table-column align="center" prop="idCard" label="客户身份证号"></el-table-column>
-            <el-table-column align="center" prop="phone" label="手机号"></el-table-column>
-            <el-table-column align="center" prop="signProvince" label="签约省份" width="110"></el-table-column>
-            <el-table-column align="center" prop="signCity" label="签约城市" width="120"></el-table-column>
-            <el-table-column align="center" prop="signDictrict" label="签约区／县" width="130"></el-table-column>
-            <el-table-column align="center" prop="busAreaName" label="商务大区"></el-table-column>
-            <el-table-column align="center" prop="busGroupName" label="商务小组"></el-table-column>
-            <el-table-column align="center" prop="busManagerName" label="商务经理"></el-table-column>
-            <el-table-column align="center" prop="teleCompanyName" label="电销分公司"></el-table-column>
-            <el-table-column align="center" prop="teleDeptName" label="电销事业部"></el-table-column>
-            <el-table-column align="center" prop="teleGroupName" label="电销组"></el-table-column>
-            <el-table-column align="center" prop="teleSaleName" label="创业顾问"></el-table-column>
-            <el-table-column align="center" prop="isRemoteSign" label="是否远程签约" :formatter="getIsRemoteSign" width="120"></el-table-column>
-        </el-table>
-         <table-pagination :pager="pager" @change="searchTable"></table-pagination>
-    </el-row>
+    <div class="mainSearchBg">        
+        <div class="mainSearchFormBox">
+            <el-form :inline="true" class="demo-form-inline mainSearchForm" :model="form" ref="form">
+                <el-form-item label="商务大区:">
+                    <el-select v-model="form.busAreaId" placeholder="商务大区" clearable @change="changeBusArea" @clear="clearBusAreaList" >
+                        <el-option
+                            v-for="item in busAreaList"
+                            :key="item.id"
+                            :label="item.name"
+                            :value="item.id">
+                        </el-option>
+                    </el-select>
+                </el-form-item> 
+                <el-form-item label="签单商务组:">  
+                    <el-select v-model="form.busGroupId" placeholder="签单商务组" clearable @change="changeBusGroup" @clear="clearBusGroupList">
+                        <el-option
+                            v-for="item in busGroupList"
+                            :key="item.id"
+                            :label="item.name"
+                            :value="item.id">
+                        </el-option>
+                    </el-select>
+                </el-form-item>    
+                <el-form-item label="签单商务经理:">  
+                    <el-select v-model="form.busManagerId" placeholder="签单商务经理" clearable>
+                        <el-option
+                            v-for="item in busManagerList"
+                            :key="item.id"
+                            :label="item.name"
+                            :value="item.id">
+                        </el-option>
+                    </el-select>
+                </el-form-item> 
+                <el-form-item label="签约店型:">  
+                    <el-select v-model="form.signShopType" placeholder="签约店型" clearable>
+                        <el-option
+                            v-for="item in vistitStoreTypeArr"
+                            :key="item.value"
+                            :label="item.name"
+                            :value="item.value">
+                        </el-option>
+                    </el-select>
+                </el-form-item>   
+                <el-form-item label="处理状态:">  
+                    <el-select v-model="form.status" placeholder="处理状态" clearable>
+                        <el-option
+                            v-for="item in statusList"
+                            :key="item.value"
+                            :label="item.name"
+                            :value="item.value">
+                        </el-option>
+                    </el-select>
+                </el-form-item>   
+                <el-row v-show="isShow">
+                    <el-form-item label="电销事业部:">  
+                        <el-select v-model="form.teleDeptId" placeholder="电销事业部" clearable @change="changeTeleDept" @clear="clearTeleDeptList">
+                            <el-option
+                                v-for="item in teleDeptList"
+                                :key="item.id"
+                                :label="item.name"
+                                :value="item.id">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>  
+                    <el-form-item label="电销组:">  
+                        <el-select v-model="form.teleGroupId" placeholder="电销组" clearable @change="changeTeleGroup" @clear="clearTeleGroupList">
+                            <el-option
+                                v-for="item in teleGroupIdList"
+                                :key="item.id"
+                                :label="item.name"
+                                :value="item.id">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>   
+                    <el-form-item label="创业顾问:">  
+                        <el-select v-model="form.teleId" placeholder="创业顾问" clearable>
+                            <el-option
+                                v-for="item in teleIdList"
+                                :key="item.id"
+                                :label="item.name"
+                                :value="item.id">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>  
+                    <el-form-item label="签约省份:">  
+                        <el-select v-model="form.signProvince" placeholder="签约省份" clearable>
+                            <el-option
+                                v-for="item in proviceList"
+                                :key="item.id"
+                                :label="item.name"
+                                :value="item.name">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>  
+                    <el-form-item label="签约类型:">  
+                        <el-select v-model="form.signType" placeholder="签约类型" clearable>
+                            <el-option
+                                v-for="item in signTypeList"
+                                :key="item.value"
+                                :label="item.label"
+                                :value="item.value">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>                
+                    <el-form-item label="客户姓名:">
+                        <el-input v-model="form.customerName" placeholder="客户姓名"></el-input>
+                    </el-form-item>
+                    <el-form-item label="客户手机号:">
+                        <el-input v-model="form.phone" placeholder="客户手机号"></el-input>
+                    </el-form-item>            
+                    <el-form-item label="签约单编号:">
+                        <el-input v-model="form.signNo" placeholder="签约单编号"></el-input>
+                    </el-form-item>
+                    <el-form-item label="退款时间:">
+                        <el-date-picker
+                            v-model="form.startTime"
+                            type="datetime"
+                            placeholder="选择日期时间">
+                        </el-date-picker>
+                    </el-form-item>
+                    <el-form-item label="—" class="widthauto">
+                        <el-date-picker
+                            v-model="form.endTime"
+                            type="datetime"
+                            placeholder="选择日期时间">
+                        </el-date-picker>
+                    </el-form-item> 
+                </el-row>
+                <div class="mainSearchBtnBox">
+                    <el-button type="primary" @click="searchTable()" class="searchBtn">搜索</el-button>
+                    <el-button type="info" class="searchBtn">取消</el-button>
+                    <span style="color: #5c6be8;cursor: pointer;margin:0 10px;" @click="toogleClick">更多搜索<i class="el-icon-arrow-down greycolor paddingL6"></i>
+                </div>
+            </el-form>  
+        </div>
+        <!-- 表格 -->
+        <el-row>
+            <el-table 
+                ref="tableData"
+                tooltip-effect="dark"
+                border
+                :data="tableData"
+                @selection-change="handleSelectionChange" 
+                >
+                <el-table-column align="center" type="selection"></el-table-column>
+                <el-table-column align="center" type="index" label="序号" width="55"></el-table-column>
+                <el-table-column align="center" prop="signNo" label="签约单编号"></el-table-column>
+                <el-table-column align="center" prop="customerName" label="客户姓名"></el-table-column>
+                <el-table-column align="center" prop="cusAmount" label="退款客户金额"></el-table-column>
+                <el-table-column align="center" prop="companyAmount" label="退换餐饮公司金额"></el-table-column>
+                <el-table-column align="center" prop="refundTime" label="退款时间"></el-table-column>
+                <el-table-column align="center" prop="" label="退款图片" width="100">
+                    <template slot-scope="scope">
+                        <el-button @click="download(scope.row)" type="text">下载图片</el-button>
+                    </template>
+                </el-table-column>
+                <el-table-column align="center" prop="reason" label="返款原因" width="100">
+                    <template slot-scope="scope">
+                        <el-button @click="showReason1(scope.row)" type="text">查看原因</el-button>
+                    </template>
+                </el-table-column>
+                <el-table-column align="center" prop="applyTime" label="申请退款时间"></el-table-column>
+                <el-table-column align="center" prop="status" label="处理状态">
+                    <template slot-scope="scope">
+                    
+                        <div v-if="scope.row.status == '2'">
+                            <el-button @click="editDialog(scope.row)" type="text" class="redcolor" style="color: red;">已驳回</el-button>
+                            <el-button @click="showReason(scope.row)" type="text" class="bluecolor">驳回原因</el-button>
+                        </div>
+                        <div v-else-if="scope.row.status == '1'">退款确认中</div>
+                        <div v-else-if="scope.row.status == '3'">确认退款</div>
+                        <div v-else-if="scope.row.status == '4'">已退款</div>
+                        <div v-else-if="scope.row.status == '5'">标记退款结束</div>
+                    </template>
+                </el-table-column>
+                <el-table-column align="center" prop="signProjectName" label="签约项目"></el-table-column>
+                <el-table-column align="center" prop="signType" label="签约类型">
+                    <template slot-scope="scope">
+                        <div v-if="scope.row.signType == '1'">一次性全款</div>
+                        <div v-else-if="scope.row.signType == '2'">先付定金</div>
+                    </template>
+                </el-table-column>
+                <el-table-column align="center" prop="signTime" label="签约时间"></el-table-column>
+                <el-table-column align="center" prop="" label="付款明细" width="100">
+                    <!-- <template slot-scope="scope">
+                        <el-button @click="showDetail(scope.row)" type="text">查看明细</el-button>
+                    </template> -->
+                    <template slot-scope="scope">
+                        <el-button type="text" size="small" @click="recordClick(scope.row)">查看明细
+                        </el-button>
+                    </template>
+                </el-table-column>
+                <el-table-column align="center" prop="signShopType" label="签约店型" :formatter="getSignShopTypeText" width="100"></el-table-column>
+                <el-table-column align="center" prop="amountReceivable" label="应收金额"></el-table-column>
+                <el-table-column align="center" prop="firstToll" label="路费"></el-table-column>
+                <el-table-column align="center" prop="preferentialAmount" label="优惠金额"></el-table-column>
+                <el-table-column align="center" prop="giveAmount" label="赠送金额"></el-table-column>
+                <el-table-column align="center" prop="idCard" label="客户身份证号"></el-table-column>
+                <el-table-column align="center" prop="phone" label="手机号"></el-table-column>
+                <el-table-column align="center" prop="signProvince" label="签约省份" width="110"></el-table-column>
+                <el-table-column align="center" prop="signCity" label="签约城市" width="120"></el-table-column>
+                <el-table-column align="center" prop="signDictrict" label="签约区／县" width="130"></el-table-column>
+                <el-table-column align="center" prop="busAreaName" label="商务大区"></el-table-column>
+                <el-table-column align="center" prop="busGroupName" label="商务小组"></el-table-column>
+                <el-table-column align="center" prop="busManagerName" label="商务经理"></el-table-column>
+                <el-table-column align="center" prop="teleCompanyName" label="电销分公司"></el-table-column>
+                <el-table-column align="center" prop="teleDeptName" label="电销事业部"></el-table-column>
+                <el-table-column align="center" prop="teleGroupName" label="电销组"></el-table-column>
+                <el-table-column align="center" prop="teleSaleName" label="创业顾问"></el-table-column>
+                <el-table-column align="center" prop="isRemoteSign" label="是否远程签约" :formatter="getIsRemoteSign" width="120"></el-table-column>
+            </el-table>
+             <table-pagination :pager="pager" @change="searchTable"></table-pagination>
+        </el-row>
+    </div>
     <!-- 驳回编辑 -->
     <el-dialog :title="editRejectTitle" :visible.sync="dialogFormVisible" width="870px">
         <el-form :model="dialogForm" ref="dialogForm" :rules="dialogRules">           
@@ -340,11 +346,12 @@
         el: '#maindiv',
         data: function() {
             return {
-                  pager:{//pager
-                      total: 0,
-                      currentPage: 1,
-                      pageSize: 20,
-                  },
+                isShow:false,
+                pager:{//pager
+                    total: 0,
+                    currentPage: 1,
+                    pageSize: 20,
+                },
                 fileList: [],
                 dialogFormVisible:false,//驳回编辑
                 reasonDialog:false,//驳回原因
@@ -1125,7 +1132,13 @@
                }
                return text;
              },
-            
+            toogleClick(){
+                if(this.isShow){
+                    this.isShow=false
+                }else{
+                    this.isShow=true
+                }          
+            },
           
         },
         created(){            
