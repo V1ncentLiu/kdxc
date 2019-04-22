@@ -164,14 +164,14 @@
                 <el-table-column align="center" prop="signNo" label="签约单编号"></el-table-column>
                 <el-table-column align="center" prop="customerName" label="客户姓名"></el-table-column>
                 <el-table-column align="center" prop="cusAmount" label="退款客户金额"></el-table-column>
-                <el-table-column align="center" prop="companyAmount" label="退还餐饮公司金额"></el-table-column>
+                <!-- <el-table-column align="center" prop="companyAmount" label="退还餐饮公司金额"></el-table-column> -->
                 <el-table-column align="center" prop="refundTime" label="退款时间"></el-table-column>
                 <el-table-column align="center" prop="" label="退款图片" width="100">
                     <template slot-scope="scope">
                         <el-button @click="download(scope.row)" type="text">下载图片</el-button>
                     </template>
                 </el-table-column>
-                <el-table-column align="center" prop="reason" label="返款原因" width="100">
+                <el-table-column align="center" prop="reason" label="退款原因" width="100">
                     <template slot-scope="scope">
                         <el-button @click="showReason1(scope.row)" type="text">查看原因</el-button>
                     </template>
@@ -236,7 +236,7 @@
                 {{dialogForm.auditUserName}}
             </el-form-item>
             <el-form-item label="驳回时间：" :label-width="formLabelWidth" prop="rejectTime">
-                {{dialogForm.rejectTime}}
+                {{dialogForm.rejectTime | getTimeTextFilter}}
             </el-form-item>
             <el-form-item label="驳回原因：" :label-width="formLabelWidth" prop="reason" class="redcolor">
                 {{dialogForm.rejectReason}}
@@ -246,7 +246,7 @@
             </el-form-item>
             <el-form-item  prop="settingStatus" label="" :label-width="formLabelWidth">
                   <div v-if="dialogForm.settingStatus == 1">
-                                                                当前项目为给品牌商结算
+                          <span style="color:red"> 当前项目为给品牌商结算</span>
                  </div> 
                    
             </el-form-item>
@@ -305,7 +305,7 @@
         <div class="fs16 marginB20" >{{reason}}</div>
     </el-dialog>
     <!-- 付款明细 -->
-    <el-dialog title="付款明细" :visible.sync="recordDialog" width="870px">
+    <el-dialog :title="payDetailTitle" :visible.sync="recordDialog" width="870px">
         <el-table
             ref="recordTableDetail" 
             tooltip-effect="dark"
@@ -313,6 +313,7 @@
             border
             :data="recordTableDetail" 
             >
+             <el-table-column type="index" width="50" label="序号"></el-table-column>
             <el-table-column align="center" prop="payType" label="付款类型" :formatter="transformPayType"></el-table-column>
             <el-table-column align="center" prop="statementNo" label="结算单编号" width="200"></el-table-column>
             <el-table-column align="center" prop="payMode" label="付款方式" :formatter="getPayModeText"></el-table-column>
@@ -365,6 +366,7 @@
                 multipleSelection: [],//选择行
                 editRejectTitle:'',//驳回编辑头部
                 confirmBtnDisabled:false,//提交按钮 禁用
+                payDetailTitle:'',
                 form: {
                     busAreaId:'',
                     busGroupId:'',
@@ -1072,6 +1074,8 @@
                 return suffix;
             },
             recordClick(row) {//查看明细
+            	 var signNo = row.signNo;
+            	 this.payDetailTitle = "("+signNo+") 付款明细";
                  // row.signNo;
                  var param = {};
                  param.idList = [row.signId];
@@ -1121,7 +1125,7 @@
              getTimeText(row, column, value, index){
                  var valText="";
                  if(value){
-                     valText =  moment(value).format("YYYY-MM-DD HH:mm:ss");
+                     valText =  moment(Number(value)).format("YYYY-MM-DD HH:mm:ss");
                  }
                  return valText;
              },
@@ -1156,6 +1160,15 @@
         },
         mounted(){
             document.getElementById('maindiv').style.display = 'block';
+        },
+        filters:{
+        	 getTimeTextFilter(value){
+                 var valText="";
+                 if(value){
+                     valText =  moment(Number(value)).format("YYYY-MM-DD HH:mm:ss");
+                 }
+                 return valText;
+             },
         }
     })
 </script>

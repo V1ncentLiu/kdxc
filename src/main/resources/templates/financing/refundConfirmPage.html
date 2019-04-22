@@ -171,14 +171,14 @@
                 <el-table-column align="center" prop="signNo" label="签约单编号"></el-table-column>
                 <el-table-column align="center" prop="customerName" label="客户姓名"></el-table-column>
                 <el-table-column align="center" prop="cusAmount" label="退款客户金额"></el-table-column>
-                <el-table-column align="center" prop="companyAmount" label="退换餐饮公司金额"></el-table-column>
+             <!--    <el-table-column align="center" prop="companyAmount" label="退换餐饮公司金额"></el-table-column> -->
                 <el-table-column align="center" prop="refundTime" label="退款时间"></el-table-column>
                 <el-table-column align="center" prop="" label="退款图片" width="100">
                     <template slot-scope="scope">
                         <el-button @click="download(scope.row)" size="small" type="text">下载图片</el-button>
                     </template>
                 </el-table-column>
-                <el-table-column align="center" prop="reason" label="返款原因" width="100">
+                <el-table-column align="center" prop="reason" label="退款原因" width="100">
                     <template slot-scope="scope">
                         <el-button @click="showReason1(scope.row)" size="small" type="text">查看原因</el-button>
                     </template>
@@ -297,7 +297,7 @@
         <div class="fs16 marginB20" >{{rejectReason}}</div>
     </el-dialog>
     <!-- 返款原因 -->
-    <el-dialog title="返款原因" :visible.sync="reasonDialog1">           
+    <el-dialog title="退款原因" :visible.sync="reasonDialog1">           
         <div class="fs16 marginB20" >{{reason}}</div>
     </el-dialog>
     
@@ -333,7 +333,7 @@
     </el-dialog>
     <!-- 驳回处理结束 -->
     <!-- 付款明细 -->
-    <el-dialog title="付款明细" :visible.sync="recordDialog" width="870px">
+    <el-dialog :title="payDetailTitle" :visible.sync="recordDialog" width="870px">
         <el-table
             ref="recordTable" 
             tooltip-effect="dark"
@@ -341,6 +341,7 @@
             border
             :data="recordTable" 
             >
+             <el-table-column type="index" width="50" label="序号"></el-table-column>
             <el-table-column align="center" prop="payType" label="付款类型" :formatter="transformPayType"></el-table-column>
             <el-table-column align="center" prop="statementNo" label="结算单编号" width="200"></el-table-column>
             <el-table-column align="center" prop="payMode" label="付款方式" :formatter="getPayModeText"></el-table-column>
@@ -386,6 +387,7 @@
                 confirmBtnDisabled:false,//提交按钮 禁用
                 rejectRefundDialogVisible:false,//驳回
                 sigNoTitle:'',//驳回dialog title
+                payDetailTitle:'',
                 rejectRefundDialogForm:{
                 	
                 },
@@ -423,7 +425,7 @@
                 statusList:[
                     {
                         value: 1,
-                        name: '退款确认中'
+                        name: '待处理'
                     }, {
                         value: 2,
                         name: '已驳回'
@@ -445,7 +447,7 @@
                     label: '一次性全款'
                 }, {
                     value: 2,
-                    label: '先交订金'
+                    label: '先交定金'
                 }],
                 dialogForm:{
                     cusAmount:'',
@@ -1035,6 +1037,8 @@
             },
             recordClick(row) {//查看明细
                  // row.signNo;
+                var signNo = row.signNo;
+                this.payDetailTitle = "("+signNo+") 付款明细";
                  var param = {};
                  param.idList = [row.signId];
                  axios.post('/sign/signRecord/listPayDetail', param)
@@ -1061,10 +1065,10 @@
                if(cellValue=="1"){
                  text="全款"
                }else if(cellValue=="2"){
-                 text="订金"
-               }else if(cellValue=="2"){
+                 text="定金"
+               }else if(cellValue=="3"){
                  text="追加定金"
-               }else if(cellValue=="2"){
+               }else if(cellValue=="4"){
                  text="尾款"
                }
                return text;
@@ -1083,7 +1087,7 @@
              getTimeText(row, column, value, index){
                  var valText="";
                  if(value){
-                     valText =  moment(value).format("YYYY-MM-DD HH:mm:ss");
+                     valText =  moment(Number(value)).format("YYYY-MM-DD HH:mm:ss");
                  }
                  return valText;
              },
