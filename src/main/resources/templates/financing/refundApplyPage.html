@@ -236,7 +236,7 @@
                 {{dialogForm.auditUserName}}
             </el-form-item>
             <el-form-item label="驳回时间：" :label-width="formLabelWidth" prop="rejectTime">
-                {{dialogForm.rejectTime}}
+                {{dialogForm.rejectTime | getTimeTextFilter}}
             </el-form-item>
             <el-form-item label="驳回原因：" :label-width="formLabelWidth" prop="reason" class="redcolor">
                 {{dialogForm.rejectReason}}
@@ -246,7 +246,7 @@
             </el-form-item>
             <el-form-item  prop="settingStatus" label="" :label-width="formLabelWidth">
                   <div v-if="dialogForm.settingStatus == 1">
-                                                                当前项目为给品牌商结算
+                          <span style="color:red"> 当前项目为给品牌商结算</span>
                  </div> 
                    
             </el-form-item>
@@ -1125,7 +1125,7 @@
              getTimeText(row, column, value, index){
                  var valText="";
                  if(value){
-                     valText =  moment(value).format("YYYY-MM-DD HH:mm:ss");
+                     valText =  moment(Number(value)).format("YYYY-MM-DD HH:mm:ss");
                  }
                  return valText;
              },
@@ -1160,6 +1160,15 @@
         },
         mounted(){
             document.getElementById('maindiv').style.display = 'block';
+        },
+        filters:{
+        	 getTimeTextFilter(value){
+                 var valText="";
+                 if(value){
+                     valText =  moment(Number(value)).format("YYYY-MM-DD HH:mm:ss");
+                 }
+                 return valText;
+             },
         }
     })
 </script>
