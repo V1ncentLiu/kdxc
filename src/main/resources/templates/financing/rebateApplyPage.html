@@ -341,7 +341,7 @@
     <!-- 下载图片dialog 结束 -->
     
         <!-- 付款明细 -->
-    <el-dialog :title="payDetailTitle" :visible.sync="payDetailDialogVisible">
+    <el-dialog :title="signNoPayDetailTitle" :visible.sync="payDetailDialogVisible">
            <div v-show="signNoShow">
             <div class="fs16 marginB20">签约单基本信息</div>
             <el-table
@@ -351,6 +351,7 @@
                 border
                 :data="signNoTable" 
                 >
+                 <el-table-column type="index" width="50" label="序号"></el-table-column>
                 <el-table-column align="center" prop="signNo" label="签约单编号"></el-table-column>
                 <el-table-column align="center" prop="customerName" label="客户姓名" ></el-table-column>
                 <el-table-column align="center" prop="idCard" label="客户身份证号"></el-table-column>
@@ -449,7 +450,7 @@
         </div>
     </el-dialog>
     <!-- 付款明细 -->
-    <el-dialog title="付款明细" :visible.sync="recordDialog" width="870px">
+    <el-dialog :title="payDetailTitle" :visible.sync="recordDialog" width="870px">
         <el-table
             ref="recordTableDetail" 
             tooltip-effect="dark"
@@ -457,6 +458,7 @@
             border
             :data="recordTableDetail" 
             >
+            <el-table-column type="index" width="50" label="序号"></el-table-column>
             <el-table-column align="center" prop="payType" label="付款类型" :formatter="transformPayType"></el-table-column>
             <el-table-column align="center" prop="statementNo" label="结算单编号" width="200"></el-table-column>
             <el-table-column align="center" prop="payMode" label="付款方式" :formatter="getPayModeText"></el-table-column>
@@ -554,6 +556,7 @@
                 recordTable3:[],
                 recordTable4:[],
                 signNoTable:[],
+                signNoPayDetailTitle:'',
                 payDetailTitle:'',
                 form: {
                     busAreaId:'',
@@ -601,19 +604,19 @@
                 statusList:[
                     {
                         value: 1,
-                        name: '退款确认中'
+                        name: '返款确认中'
                     }, {
                         value: 2,
                         name: '已驳回'
                     }, {
                         value: 3,
-                        name:'确认退款'
+                        name:'确认返款'
                     }, {
                         value: 4,
-                        name: '已退款'
+                        name: '已返款'
                     }, {
                         value: 5,
-                        name: '标记退款结束'
+                        name: '标记返款结束'
                     }
                     
                 ],//处理状态
@@ -1085,7 +1088,7 @@
                 this.paymentDetailsShow2=false;
                 this.paymentDetailsShow3=false;
                 this.paymentDetailsShow4=false;
-                this.payDetailTitle="("+signNo+") 签约单详情";
+                this.signNoPayDetailTitle="("+signNo+") 签约单详情";
                 this.payDetailDialogVisible = true;
                 var param = {};
                 param.signNo = signNo;
@@ -1175,6 +1178,8 @@
              },
              recordClick(row) {//查看明细
                  // row.signNo;
+           	     var signNo = row.signNo;
+                 this.payDetailTitle = "("+signNo+") 付款明细";
                  var param = {};
                  param.idList = [row.signId];
                  axios.post('/sign/signRecord/listPayDetail', param)
