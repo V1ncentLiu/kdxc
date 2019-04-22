@@ -268,7 +268,7 @@
                     :on-success="handleSuccess"
                     :on-error="handleError"
                     :before-upload="handleBefore"
-                    multiple
+                    multiple=false
                       accept="image/png,image/jpeg"
                     :data="uploadParamData"
                     :on-change="selectFile"
@@ -731,6 +731,7 @@
                  .then(function (response) {
                        var result =  response.data;
                        if(result.code=='0'){
+                    	   mainDivVM.deleteFile(id);
                            mainDivVM.$message({message:'删除成功',type:'success'});
                        }else{
                            console.error(response);
@@ -742,6 +743,17 @@
                       console.log(error);
                  });
                  
+            },
+            deleteFile(id){//把imgList中的文件移除
+            	var curImgList = this.imgList;
+            	for(var i=0;i<curImgList.length;i++){
+            		var curImg = curImgList[i];
+            		if(curImg.id==id){
+            			curImgList.splice(i--,1);
+            			break;
+            		}
+            	}
+            	
             },
             handleExceed(files, fileList) {
                 //this.$message.warning(`当前限制选择 3 个文件，本次选择了 ${files.length} 个文件，共选择了 ${files.length + fileList.length} 个文件`);
@@ -967,6 +979,7 @@
                 var realName = file.name;
                 var randomName = mainDivVM.uploadParamData.key;
                 var imgUrl =  mainDivVM.uploadOssHost+"/"+randomName;
+                console.info(imgUrl);
                 var param = {};
                 param.realName=realName;
                 param.imgUrl = imgUrl;
