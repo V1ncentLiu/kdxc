@@ -194,7 +194,7 @@
         <template>
             <el-form :model="allocationForm" ref="allocationForm" :rules="allocationFormRules"> 
               <el-form-item label="退款客户金额：" :label-width="formLabelWidth" prop="cusAmount">
-                  <el-input v-model="allocationForm.cusAmount" placeholder="" style="width:50%"></el-input>
+                  <el-input v-model="allocationForm.cusAmount" maxlength="10" @keyup.native="number" placeholder="" style="width:50%"></el-input>
               </el-form-item>
              <el-form-item label="" v-show="isSettle==1" :label-width="formLabelWidth" class="redcolor">
                   <span style="color:red;">当前项目为给品牌商结算</span>
@@ -228,7 +228,7 @@
                     <div slot="tip" class="el-upload__tip">只能上传jpg/png文件，且不超过500kb</div>
                 </el-upload>
               </el-form-item>
-              <el-form-item label="退款原因：" :label-width="formLabelWidth" prop="reason">
+              <el-form-item label="退款原因：" style="padding-top: 5px;" :label-width="formLabelWidth" prop="reason">
                   <el-input
                       type="textarea"
                       :rows="3"
@@ -263,7 +263,7 @@
                 <el-button type="primary" @click="chooseRelevance">选择关联签约单</el-button>
               </el-form-item>
             	<el-form-item label="返款客户金额：" :label-width="formLabelWidth" prop="cusAmount">
-                <el-input v-model="transferForm.cusAmount" placeholder="" style="width:50%"></el-input>
+                <el-input v-model="transferForm.cusAmount" maxlength="10" @keyup.native="number" placeholder="" style="width:50%"></el-input>
               </el-form-item>
               <el-form-item label="" v-show="isSettle==1" :label-width="formLabelWidth" class="redcolor">
                   <span style="color:red;">当前项目为给品牌商结算</span>
@@ -297,7 +297,7 @@
                     <div slot="tip" class="el-upload__tip">只能上传jpg/png文件，且不超过500kb</div>
                 </el-upload>
               </el-form-item>
-              <el-form-item label="返款原因：" :label-width="formLabelWidth" prop="reason">
+              <el-form-item label="返款原因：" style="padding-top: 5px;" :label-width="formLabelWidth" prop="reason">
                   <el-input
                       type="textarea"
                       :rows="3"
@@ -316,7 +316,7 @@
     </el-dialog>
     <!-- dialog -->
     <!-- 付款明细 -->
-    <el-dialog title="付款明细" :visible.sync="recordDialog">
+    <el-dialog :title="payTitle" :visible.sync="recordDialog">
         <el-table
             ref="recordTable" 
             tooltip-effect="dark"
@@ -484,6 +484,7 @@ var clueVM = new Vue({
           isSettle:0,
           refundTitle:'',
           rebateTitle:'',
+          payTitle:'',
           pager:{
               total: 0,
               currentPage: 1,
@@ -497,7 +498,17 @@ var clueVM = new Vue({
                 { required: true, message: '请选择退款时间', trigger: 'blur' }
             ],
             cusAmount: [
-                { required: true, message: '请输入退款客户金额', trigger: 'blur' }
+                { required: true, message: '请输入退款客户金额', trigger: 'blur' },
+                { validator:function(rule,value,callback){
+                    var reg =  /^[0-9]+[0-9]*]*$/ ;
+                   if(value !=null && value !="null" && value !="" && !reg.test(value) ){
+                        callback(new Error("请输入正整数"));
+                        return;
+                    }else{
+                        callback();
+                    }
+
+                }, trigger: 'blur'}
             ],
             fileList: [
                 { required: true, message: '请上传图片', trigger: 'change' }
@@ -514,7 +525,17 @@ var clueVM = new Vue({
                 { required: true, message: '请选择退款时间', trigger: 'blur' }
             ],
             cusAmount: [
-                { required: true, message: '请输入返款客户金额', trigger: 'blur' }
+                { required: true, message: '请输入返款客户金额', trigger: 'blur' },
+                { validator:function(rule,value,callback){
+                    var reg =  /^[0-9]+[0-9]*]*$/ ;
+                   if(value !=null && value !="null" && value !="" && !reg.test(value) ){
+                        callback(new Error("请输入正整数"));
+                        return;
+                    }else{
+                        callback();
+                    }
+
+                }, trigger: 'blur'}
             ],
             fileList: [
                 { required: true, message: '请上传图片', trigger: 'change' }
@@ -872,6 +893,7 @@ var clueVM = new Vue({
                         return;
             	   }
             	   this.allocationForm.signId=rows[0].signId;
+            	   this.allocationForm.refundTime=new Date();
             	   this.isSettle=rows[0].isSettle;
             	   this.refundTitle="（"+rows[0].signNo+"）签约单申请退款";
                    this.allocationVisible = true;
@@ -941,6 +963,7 @@ var clueVM = new Vue({
                         return;
             	   }
                    this.transferForm.signId = rows[0].signId;
+                   this.transferForm.refundTime=new Date();
                    this.dialogFormChoose.signProjectId = rows[0].signProject;
                    this.dialogFormChoose.signProvince = rows[0].signProvince;
                    this.isSettle=rows[0].isSettle;
@@ -994,6 +1017,7 @@ var clueVM = new Vue({
                  recordClick(row) {//查看明细
                      // row.signNo;
                      var param = {};
+                     this.payTitle="（"+row.signNo+"）付款明细";
                      param.idList = [row.signId];
                      axios.post('/sign/signRecord/listPayDetail', param)
                      .then(function (response) {
@@ -1013,6 +1037,12 @@ var clueVM = new Vue({
                      });
                     
                  },
+                 number(){//添加签约单余款
+            　　　      			this.allocationForm.cusAmount=this.allocationForm.cusAmount.replace(/[^\.\d]/g,'');
+                        this.allocationForm.cusAmount=this.allocationForm.cusAmount.replace('.','');
+            　　　      			this.transferForm.cusAmount=this.transferForm.cusAmount.replace(/[^\.\d]/g,'');
+                        this.transferForm.cusAmount=this.transferForm.cusAmount.replace('.','');
+                　　			},
                  getTimeText(row, column, value, index){
                      var valText="";
                      if(value){
