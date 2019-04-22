@@ -305,7 +305,7 @@
         <div class="fs16 marginB20" >{{reason}}</div>
     </el-dialog>
     <!-- 付款明细 -->
-    <el-dialog title="付款明细" :visible.sync="recordDialog" width="870px">
+    <el-dialog :title="payDetailTitle" :visible.sync="recordDialog" width="870px">
         <el-table
             ref="recordTableDetail" 
             tooltip-effect="dark"
@@ -313,6 +313,7 @@
             border
             :data="recordTableDetail" 
             >
+             <el-table-column type="index" width="50" label="序号"></el-table-column>
             <el-table-column align="center" prop="payType" label="付款类型" :formatter="transformPayType"></el-table-column>
             <el-table-column align="center" prop="statementNo" label="结算单编号" width="200"></el-table-column>
             <el-table-column align="center" prop="payMode" label="付款方式" :formatter="getPayModeText"></el-table-column>
@@ -365,6 +366,7 @@
                 multipleSelection: [],//选择行
                 editRejectTitle:'',//驳回编辑头部
                 confirmBtnDisabled:false,//提交按钮 禁用
+                payDetailTitle:'',
                 form: {
                     busAreaId:'',
                     busGroupId:'',
@@ -1072,6 +1074,8 @@
                 return suffix;
             },
             recordClick(row) {//查看明细
+            	 var signNo = row.signNo;
+            	 this.payDetailTitle = "("+signNo+") 付款明细";
                  // row.signNo;
                  var param = {};
                  param.idList = [row.signId];

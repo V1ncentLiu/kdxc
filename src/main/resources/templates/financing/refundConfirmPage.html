@@ -333,7 +333,7 @@
     </el-dialog>
     <!-- 驳回处理结束 -->
     <!-- 付款明细 -->
-    <el-dialog title="付款明细" :visible.sync="recordDialog" width="870px">
+    <el-dialog :title="payDetailTitle" :visible.sync="recordDialog" width="870px">
         <el-table
             ref="recordTable" 
             tooltip-effect="dark"
@@ -341,6 +341,7 @@
             border
             :data="recordTable" 
             >
+             <el-table-column type="index" width="50" label="序号"></el-table-column>
             <el-table-column align="center" prop="payType" label="付款类型" :formatter="transformPayType"></el-table-column>
             <el-table-column align="center" prop="statementNo" label="结算单编号" width="200"></el-table-column>
             <el-table-column align="center" prop="payMode" label="付款方式" :formatter="getPayModeText"></el-table-column>
@@ -386,6 +387,7 @@
                 confirmBtnDisabled:false,//提交按钮 禁用
                 rejectRefundDialogVisible:false,//驳回
                 sigNoTitle:'',//驳回dialog title
+                payDetailTitle:'',
                 rejectRefundDialogForm:{
                 	
                 },
@@ -423,7 +425,7 @@
                 statusList:[
                     {
                         value: 1,
-                        name: '退款确认中'
+                        name: '待处理'
                     }, {
                         value: 2,
                         name: '已驳回'
@@ -1035,6 +1037,8 @@
             },
             recordClick(row) {//查看明细
                  // row.signNo;
+                var signNo = row.signNo;
+                this.payDetailTitle = "("+signNo+") 付款明细";
                  var param = {};
                  param.idList = [row.signId];
                  axios.post('/sign/signRecord/listPayDetail', param)
