@@ -223,7 +223,7 @@
                     :on-exceed="handleExceed"
                     :auto-upload="false"
                     :file-list="fileList">
-                    <el-button slot="trigger" size="small" type="primary">选择文件</el-button>
+                    <el-button slot="trigger" size="small" type="primary">选择图片</el-button>
                      <el-button style="margin-left: 10px;" size="small" type="success" @click="submitUpload">上传</el-button>
                     <div slot="tip" class="el-upload__tip">只能上传jpg/png文件，且不超过500kb</div>
                 </el-upload>
@@ -252,7 +252,7 @@
               <el-form-item label="" :label-width="formLabelWidth" prop="">
                 <el-tag
                   :key="tag"
-                  v-for="tag in dynamicTags"
+                  v-for="tag in transferForm.dynamicTags"
                   closable
                   :disable-transitions="false"
                   @close="handleClose(tag)">
@@ -292,7 +292,7 @@
                     :on-exceed="handleExceed"
                     :auto-upload="false"
                     :file-list="fileList">
-                    <el-button slot="trigger" size="small" type="primary">选择文件</el-button>
+                    <el-button slot="trigger" size="small" type="primary">选择图片</el-button>
                      <el-button style="margin-left: 10px;" size="small" type="success" @click="submitUpload">上传</el-button>
                     <div slot="tip" class="el-upload__tip">只能上传jpg/png文件，且不超过500kb</div>
                 </el-upload>
@@ -437,6 +437,7 @@ var clueVM = new Vue({
           },
           transferForm: {
         	  signId:'',
+          	  dynamicTags: [],
               reason:'',
               refundTime:'',
               cusAmount:'',
@@ -506,6 +507,9 @@ var clueVM = new Vue({
         	reason : [
                 { required: true, message: '请输入返款原因', trigger: 'blur' }
             ],
+            dynamicTags : [
+                { required: true, message: '请选择关联签约单', trigger: 'change' }
+            ],
             refundTime : [
                 { required: true, message: '请选择退款时间', trigger: 'blur' }
             ],
@@ -531,7 +535,6 @@ var clueVM = new Vue({
         	  
           },   
           dataTableChoose:[],   
-          dynamicTags: [],
           uploadOssHost:'',
           uploadParamData: {
               key:'22',
@@ -682,7 +685,7 @@ var clueVM = new Vue({
                return suffix;
            },
           handleClose(tag) {
-            this.dynamicTags.splice(this.dynamicTags.indexOf(tag), 1);
+            this.transferForm.dynamicTags.splice(this.transferForm.dynamicTags.indexOf(tag), 1);
           },
           chooseRelevance(){
         	  var param ={};
@@ -844,7 +847,7 @@ var clueVM = new Vue({
             	   for(var i=0;i<rows.length;i++){
                			signList.push(rows[i].signNo);
                    }
-            	   this.dynamicTags =signList;
+            	   this.transferForm.dynamicTags =signList;
             	   this.dialogFormChooseVisible=false;
                },
                //打开申请退款
@@ -921,7 +924,7 @@ var clueVM = new Vue({
   	            	   this.$refs[formName].resetFields();
               	   }
                    this.fileList=[];
-                   this.dynamicTags =[];
+                   this.transferForm.dynamicTags =[];
            	       var rows = this.multipleSelection;
             	   if(rows.length!=1){
                        this.$message({
@@ -957,7 +960,7 @@ var clueVM = new Vue({
          	            	  param.reason=this.transferForm.reason;
          	            	  param.refundTime=this.transferForm.refundTime;
          	            	  param.cusAmount=this.transferForm.cusAmount;
-         	            	  param.signNoList=this.dynamicTags;
+         	            	  param.signNoList=this.transferForm.dynamicTags;
          	            	 param.imgList=this.fileList;
 	                          axios.post('/financing/refundRebate/applyRebate',param)
                                .then(function (response) {
