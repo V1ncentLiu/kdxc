@@ -914,8 +914,8 @@ public class MyCustomerClueController {
      */
     @RequestMapping("/updateCustomerClue")
     @ResponseBody
-    @LogRecord(description = "电销维护客户资源提交", operationType = OperationType.UPDATE,
-        menuName = MenuEnum.TM_MY_CUSTOMER)
+    @LogRecord(description = "维护客户资源提交", operationType = OperationType.UPDATE,
+        menuName = MenuEnum.CUSTOMER_INFO)
     public JSONResult<String> updateCustomerClue(HttpServletRequest request,
             @RequestBody ClueDTO dto) {
 
