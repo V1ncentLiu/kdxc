@@ -14,27 +14,30 @@
     <template>
         <el-tabs v-model="activeName" type="card" @tab-click="handleClick">
             <el-tab-pane label="业务消息" name="business" ref="business" >
-                <template>
-                    <el-form :inline="true" :model="businessForm" class="demo-form-inline">
-                        <el-form-item label=""><el-input v-model="businessForm.content" placeholder="消息内容"></el-input></el-form-item>
-                        <el-form-item label="">
-                            <el-select v-model="businessForm.status" placeholder="请选择" width="100">
-                                <el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value"></el-option>
-                            </el-select>
-                        </el-form-item>
-                        <el-form-item label="接收时间">
-                            <el-date-picker v-model="businessForm.date1" type="datetime" placeholder="选择日期时间"></el-date-picker>
-                        </el-form-item>
-                        <el-form-item label="—">   
-                            <el-date-picker v-model="businessForm.date2" type="datetime" placeholder="选择日期时间"></el-date-picker>
-                        </el-form-item>
-                        <el-form-item>
-                            <el-button icon="el-icon-search" type="primary" @click="onBussSubmit">搜索</el-button>
-                            <el-button type="success" @click="changeBussState">标记已读</el-button>
-                        </el-form-item>
-                    </el-form>
-                </template>
-                <template>
+                <el-row class="marginB20">
+                    <el-button type="success" @click="changeBussState">标记已读</el-button>
+                </el-row>
+                <div class="mainSearchBg">        
+                    <div class="mainSearchFormBox">
+                        <el-form :inline="true" :model="businessForm" class="demo-form-inline mainSearchForm">
+                            <el-form-item label="消息内容:" label-width="55px">
+                                <el-input v-model="businessForm.content" placeholder="消息内容"></el-input></el-form-item>
+                            <el-form-item label="请选择:" label-width="84px">
+                                <el-select v-model="businessForm.status" placeholder="请选择" width="100">
+                                    <el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value"></el-option>
+                                </el-select>
+                            </el-form-item>
+                            <el-form-item label="接收时间:" label-width="84px">
+                                <el-date-picker v-model="businessForm.date1" type="datetime" placeholder="选择日期时间"></el-date-picker>
+                            </el-form-item>
+                            <el-form-item label="—" class="widthauto" style="margin-right: 10px;">   
+                                <el-date-picker v-model="businessForm.date2" type="datetime" placeholder="选择日期时间"></el-date-picker>
+                            </el-form-item>
+                            <el-form-item>
+                                <el-button icon="el-icon-search" type="primary" @click="onBussSubmit">搜索</el-button>
+                            </el-form-item>
+                        </el-form>
+                    </div>                    
                     <el-table :data="businessData" border  @selection-change="handleSelectionChange" @row-dblclick="showBussMx" tooltip-effect="light" >
                         <el-table-column type="selection" width="55"></el-table-column>
                         <el-table-column property="title" stripe label="标题" width="150"  show-overflow-tooltip  align="center"> <!--:formatter="formatTitle"-->
@@ -52,50 +55,41 @@
                         <el-table-column property="receiveTime" label="接收时间"  width="200" align="center"></el-table-column>
                         <el-table-column property="status" label="消息状态" :formatter="formatStatus" align="center"></el-table-column>
                     </el-table>
-                </template>
-
-                <template>
-                    <div class="block">
-                        <el-pagination @size-change="handleSizeChange"
-                                       @current-change="handleCurrentChange" :current-page="currentPage"
-                                       :page-sizes="[20, 50, 100]" :page-size="pageSize"
-                                       layout="total, sizes, prev, pager, next, jumper" :total="total">
-                        </el-pagination>
-                    </div>
-                </template>
-
+                    <el-pagination @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page="currentPage" :page-sizes="[20, 50, 100]" :page-size="pageSize" layout="total, sizes, prev, pager, next, jumper" :total="total">
+                    </el-pagination>
+                </div>
             </el-tab-pane>
             <el-tab-pane label="公告通知"  name="announcement"  ref="announcement">
-
-                <template>
-                    <el-form :inline="true" :model="annForm" class="demo-form-inline">
-                        <el-form-item label="">
-                            <el-input v-model="annForm.content" placeholder="消息内容"></el-input>
-                        </el-form-item>
-                        <el-form-item label="">
-                            <el-select v-model="annForm.status" placeholder="请选择" width="100">
-                                <el-option
+                <el-row class="marginB20">
+                    <el-button type="success" @click="changeAnnState">标记已读</el-button>
+                </el-row>
+                <div class="mainSearchBg">        
+                    <div class="mainSearchFormBox">
+                        <el-form :inline="true" :model="annForm" class="demo-form-inline mainSearchForm">
+                            <el-form-item label="消息内容:" label-width="55px">
+                                <el-input v-model="annForm.content" placeholder="消息内容"></el-input>
+                            </el-form-item>
+                            <el-form-item label="请选择:" label-width="84px">
+                                <el-select v-model="annForm.status" placeholder="请选择" width="100">
+                                    <el-option
                                         v-for="item in options"
                                         :key="item.value"
                                         :label="item.label"
                                         :value="item.value">
-                                </el-option>
-                            </el-select>
-                        </el-form-item>
-                        <el-form-item label="接收时间">
-                            <el-date-picker v-model="annForm.date1" type="datetime" placeholder="选择日期时间"></el-date-picker>
-                        </el-form-item>
-                        <el-form-item label="—">
-                            <el-date-picker v-model="annForm.date2" type="datetime" placeholder="选择日期时间"></el-date-picker>
-                        </el-form-item>
-                        <el-form-item>
-                            <el-button icon="el-icon-search" type="primary" @click="onAnnSubmit">搜索</el-button>
-                            <el-button type="success" @click="changeAnnState">标记已读</el-button>
-                        </el-form-item>
-                    </el-form>
-                </template>
-
-                <template>
+                                    </el-option>
+                                </el-select>
+                            </el-form-item>
+                            <el-form-item label="接收时间:" label-width="84px">
+                                <el-date-picker v-model="annForm.date1" type="datetime" placeholder="选择日期时间"></el-date-picker>
+                            </el-form-item>
+                            <el-form-item label="—" class="widthauto" style="margin-right: 10px;">
+                                <el-date-picker v-model="annForm.date2" type="datetime" placeholder="选择日期时间"></el-date-picker>
+                            </el-form-item>
+                            <el-form-item>
+                                <el-button icon="el-icon-search" type="primary" @click="onAnnSubmit">搜索</el-button>
+                            </el-form-item>
+                        </el-form>
+                    </div>
                     <el-table :data="annData" border style=""  @selection-change="handleSelectionChange"  @row-dblclick="showAnnMx"  tooltip-effect="light"  :cell-style="cellStyle">
                         <el-table-column type="selection" width="55"></el-table-column>
                         <el-table-column property="title" label="标题" width="200" show-overflow-tooltip align="center">
@@ -113,17 +107,8 @@
                         <el-table-column property="receiveTime" label="接收时间" width="200" align="center"></el-table-column>
                         <el-table-column property="status" label="消息状态"  :formatter="formatStatus" align="center"></el-table-column>
                     </el-table>
-                </template>
-
-                <template>
-                    <div class="block">
-                        <el-pagination @size-change="handleSizeChange"
-                                       @current-change="handleCurrentChange" :current-page="currentPage"
-                                       :page-sizes="[ 20, 50, 100]" :page-size="pageSize"
-                                       layout="total, sizes, prev, pager, next, jumper" :total="total">
-                        </el-pagination>
-                    </div>
-                </template>
+                    <el-pagination @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page="currentPage" :page-sizes="[ 20, 50, 100]" :page-size="pageSize" layout="total, sizes, prev, pager, next, jumper" :total="total"></el-pagination>
+                </div>
             </el-tab-pane>
         </el-tabs>
     </template>
@@ -403,7 +388,7 @@
             changeAnnState(){
                 var rows = this.multipleSelection;
                 if(rows.length<1){
-                    this.$message({type:"warning",message:"没有勾选消息"})
+                    this.$message({type:"warning",message:"请选择消息"})
                 }else {
                     var rowIds = [];
                     for (var i = 0; i < rows.length; i++) {
@@ -450,7 +435,7 @@
             changeBussState(){
                 var rows = this.multipleSelection;
                 if(rows.length<1){
-                    this.$message({type:"warning",message:"没有勾选消息"})
+                    this.$message({type:"warning",message:"请选择消息"})
                 }else{
                     var rowIds = [];
                     for(var i=0;i<rows.length;i++){
