@@ -212,8 +212,21 @@ public class InviteAreaController {
         proviceslist.add(0, sysRegionDTO);
 
         request.setAttribute("checkbusinessGroupId", inviteAreaDTOs.get(0).getBusinessGroupId().toString());
+        String[] split = inviteAreaDTOs.get(0).getProjectIds().split(",");
+        List<ProjectInfoDTO> data = allProject.getData();
+        List<String> list = new ArrayList<>();
+        if(data!=null){
+            for(int i =0 ; i <split.length ; i++){
+                for(ProjectInfoDTO projectInfoDTO : data){
+                    if(projectInfoDTO.getId().toString().equals(split[i])){
+                        list.add(split[i]);
+                    }
+                }
+            }
+        }
+
         request.setAttribute("checkTelemarketingTeam", inviteAreaDTOs.get(0).getTelemarketingTeamIds().split(","));
-        request.setAttribute("checkProject", inviteAreaDTOs.get(0).getProjectIds().split(","));
+        request.setAttribute("checkProject", list);
         request.setAttribute("checkProvince", inviteAreaDTOs.get(0).getProvincesIds().split(","));
         request.setAttribute("ids", ids);
         request.setAttribute("inviteAreaDTOs", inviteAreaDTOs);
@@ -222,7 +235,7 @@ public class InviteAreaController {
         request.setAttribute("isshowproject", isshowproject);
         request.setAttribute("isshowprovince", isshowprovince);
         request.setAttribute("inviteArea", inviteAreaDTOs == null ? null : inviteAreaDTOs.get(0));
-        request.setAttribute("projectList", allProject.getData());
+        request.setAttribute("projectList", data);
         request.setAttribute("swList", swList.getData());
         request.setAttribute("dxList", dxList.getData());
         request.setAttribute("proviceslist", proviceslist);

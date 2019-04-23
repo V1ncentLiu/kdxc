@@ -10,6 +10,20 @@ var mainDivVM = new Vue({
         },
         repeatPhonesDialog:false,
         repeatPhonesTable:[],
+        repeatPhonesTable2:[],
+        repeatPhonesTable3:[],
+        repeatPhonesTable4:[],
+        repeatPhonesTable5:[],
+        showPhoneTable:false,
+        showPhoneTable2:false,
+        showPhoneTable3:false,
+        showPhoneTable4:false,
+        showPhoneTable5:false,
+        phone:'',
+        phone2:'',
+        phone3:'',
+        phone4:'',
+        phone5:'',
         dailogTitleType:'',
         multipleSelection:[],
         allocationVisible: false,
@@ -141,8 +155,6 @@ var mainDivVM = new Vue({
             var param ={};
             param.pageSize = this.pager.pageSize;
             param.pageNum = this.pager.currentPage;
-            console.info(param);
-            // axios.post('/clue/pendingAllocation/list', param)
             axios.post('/console/console/listUnAssignClue', param)
             .then(function (response) {
                 var result =  response.data;
@@ -173,22 +185,66 @@ var mainDivVM = new Vue({
         },
         //查看重复手机号资源
         showRepeatPhone(row) {
-             this.repeatPhonesDialog=true;
-             this.dailogTitleType=row.phone;
-             var param ={};
-                 param.id = row.id;
-                   param.cusPhone = row.phone;
-                    console.info(param);
-                     axios.post('/clue/appiontment/repeatPhonelist', param)
-                       .then(function (response) {
-                             var result =  response.data;
-                             console.info(result);
-                             var table=result.data;
-                             mainDivVM.repeatPhonesTable= table;
-                             mainDivVM.repeatPhonesDialog=true;
-                       })  .catch(function (error) {
-                                   console.log(error);
-             });
+            this.repeatPhonesDialog=true;
+            this.dailogTitleType=row.id;
+            this.repeatPhonesTable=[];
+            var param ={};
+            param.id = row.id;
+            param.clueId = row.id;
+            axios.post('/clue/appiontment/repeatPhoneMap', param).then(function (response) {
+                // var result =  response.data;
+                // var table=result.data;
+                // mainDivVM.repeatPhonesTable=table;
+                var map = response.data.data;
+                if(map.phone){
+                    mainDivVM.phone = map.phones[0]
+                    mainDivVM.repeatPhonesTable=map.phone;
+                    mainDivVM.showPhoneTable = true;
+                }else{
+                    mainDivVM.phone = '';
+                    mainDivVM.repeatPhonesTable=[];
+                    mainDivVM.showPhoneTable = false;
+                }
+                if(map.phone2){
+                    mainDivVM.phone2 = map.phones[1]
+                    mainDivVM.repeatPhonesTable2=map.phone2;
+                    mainDivVM.showPhoneTable2 = true;
+                }else{
+                    mainDivVM.phone2 ='';
+                    mainDivVM.repeatPhonesTable2=[];
+                    mainDivVM.showPhoneTable2 = false;
+                }
+                if(map.phone3){
+                    mainDivVM.phone3 = map.phones[2]
+                    mainDivVM.repeatPhonesTable3=map.phone3;
+                    mainDivVM.showPhoneTable3 = true;
+                }else{
+                    mainDivVM.phone3 = '';
+                    mainDivVM.repeatPhonesTable3=[];
+                    mainDivVM.showPhoneTable3 = false;
+                }
+                if(map.phone4){
+                    mainDivVM.phone4 = map.phones[3]
+                    mainDivVM.repeatPhonesTable4=map.phone4;
+                    mainDivVM.showPhoneTable4 = true;
+                }else{
+                    mainDivVM.phone4 = ''
+                    mainDivVM.repeatPhonesTable4=[];
+                    mainDivVM.showPhoneTable4 = false;
+                }
+                if(map.phone5){
+                    mainDivVM.phone5 = map.phones[4]
+                    mainDivVM.repeatPhonesTable5=map.phone5;
+                    mainDivVM.showPhoneTable5 = true;
+                }else{
+                    mainDivVM.phone5 = map.phones[4]
+                    mainDivVM.repeatPhonesTable5=[];
+                    mainDivVM.showPhoneTable5 = false;
+                }
+                mainDivVM.repeatPhonesDialog=true;
+            })  .catch(function (error) {
+                console.log(error);
+            });
          },
         //类别转换方法
         transformCategory(cellValue) {

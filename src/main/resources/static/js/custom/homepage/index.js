@@ -11,6 +11,7 @@ var homePageVM=new Vue({
   		
 	    return { 
 	    	formLabelWidth:'130px',
+            formLabelWidth105:'105px',
 	      	isCollapse: false,//侧导航是否展开
 	      	isActive:true,
 	      	dialogModifyPwdVisible:false,//修改密码dialog 是否显示

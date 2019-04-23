@@ -79,7 +79,6 @@ public class BusCustomerManagerController {
         List<RoleInfoDTO> roleList = user.getRoleList();
         if (roleList != null && RoleCodeEnum.GLY.name().equals(roleList.get(0).getRoleCode())) {
             // 管理员 可以选择所有商务组 商务总监
-
             // 查询所有商务组
             List<OrganizationRespDTO> busSaleGroupList =
                     getSaleGroupList(null, OrgTypeConstant.SWZ);
@@ -149,10 +148,8 @@ public class BusCustomerManagerController {
         pageParam.setUserId(user.getId());
         List<RoleInfoDTO> roleList = user.getRoleList();
         if (roleList != null) {
-
             pageParam.setRoleCode(roleList.get(0).getRoleCode());
         }
-
         JSONResult<PageBean<BusCustomerDTO>> busCustomerList =
                 busCustomerFeignClient.busCustomerList(pageParam);
 

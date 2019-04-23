@@ -611,11 +611,7 @@ var mainDivVM = new Vue({
             if(row.visitStatus==0){
                 resVal='未到访';
             }else  if(row.visitStatus==1){
-                resVal='首次到访';
-            }else  if(row.visitStatus==2){
-                resVal='2次到访';
-            }else  if(row.visitStatus==3){
-                resVal='多次到访';
+                resVal='已到访';
             }
             return resVal;
         },
