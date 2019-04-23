@@ -151,8 +151,9 @@
                         <el-input v-model="searchForm.statementNo" placeholder="结算单编号"></el-input>
                     </el-form-item>
                     <el-form-item label="签约单编号:" prop="signNo">
-                      <el-input v-model="searchForm.signNO" placeholder="签约单编号"></el-input>
+                      <el-input v-model="searchForm.signNo" placeholder="签约单编号"></el-input>
                     </el-form-item>
+                    
                 </el-row>
                 <div class="mainSearchBtnBox"> 
                     <el-button type="primary" @click="searchTable()" class="searchBtn">搜索</el-button>
@@ -191,11 +192,11 @@
     	        <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width"
     	         v-else-if="item.fieldCode == 'statementNo'">
     	               <template slot-scope="scope">
-    	               <div v-if="scope.row.status !='驳回商务' && scope.row.status !='待处理'">
+    	               <div v-if="scope.row.status !='驳回商务' && scope.row.status !='待处理' && scope.row.status !='提交对账'">
     	               	<a :href="'/financing/balanceaccount/settleAccounts?payDetailId='+scope.row.payId+''" target="_blank" class="blueColorBtn">{{scope.row.statementNo}} </a>
     	               </div>
-    	           <div v-else-if="scope.row.status =='驳回商务' || scope.row.status =='待处理'">
-    	               	<a>{{scope.row.statementNo}} </a>
+    	           <div v-else-if="scope.row.status =='驳回商务' || scope.row.status =='待处理' || scope.row.status =='提交对账'">
+    	               	<a style="color:#222">{{scope.row.statementNo}} </a>
     	               </div>
     	               
                     </template>
@@ -654,9 +655,10 @@ var clueVM = new Vue({
                         });
                        return;
                    } 
-            	   if(status =="待处理" || status =="驳回商务"){
+            	   var status = rows[0].status;
+            	   if(status =="待处理" || status =="驳回商务"  || status =="提交对账"){
             		   this.$message({
-                           message: "未提交对账不允许下载结算单",
+                           message: "未对账确认不允许下载结算单",
                            type: 'warning'
                          });
                         return;
@@ -768,13 +770,20 @@ var clueVM = new Vue({
             		   this.commissionMoney = null;
                 	   this.apply.money = rows[0].money ;
                 	   this.apply.isDoubt = rows[0].isDoubt ;
-                	   this.apply.doubtRemark = rows[0].doubtRemark ;
                 	   this.commissionMoney = rows[0].commissionMoney ;
+                	   if(rows[0].isDoubt ==1){
+                		   this.doubtRemarkShow = true;
+                		   this.apply.doubtRemark = rows[0].doubtRemark ;
+                	   }else{
+                		   this.doubtRemarkShow = false;
+                		   this.apply.doubtRemark = null;
+                	   }
             	   }else{
             		   this.commissionMoney = null;
                 	   this.apply.money = null ;
                 	   this.apply.isDoubt = 0 ;
                 	   this.apply.doubtRemark = null ;
+                	   this.doubtRemarkShow = false;
             	   }
             	   this.ratio = rows[0].ratio.substring(0,2) ;
             	   this.submitApplyVisible = true;
