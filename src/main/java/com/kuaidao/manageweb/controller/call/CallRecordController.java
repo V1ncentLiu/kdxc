@@ -116,6 +116,22 @@ public class CallRecordController {
     }
     
     /**
+     * 我的通话记录 统计总时长
+     * @param myCallRecordReqDTO
+     * @return
+     */
+    @PostMapping("/countMyCallRecordTalkTime")
+    @ResponseBody
+    public JSONResult<Integer> countMyCallRecordTalkTime(@RequestBody CallRecordReqDTO myCallRecordReqDTO){
+        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+        Long id = curLoginUser.getId();
+        List<Long> accountIdList = new ArrayList<Long>();
+        accountIdList.add(id);
+        myCallRecordReqDTO.setAccountIdList(accountIdList);
+        return callRecordFeign.countMyCallRecordTalkTime(myCallRecordReqDTO);
+    }
+    
+    /**
      * 电销通话记录  分页展示 ，参数模糊匹配
      * @return
      */
