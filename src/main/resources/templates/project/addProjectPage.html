@@ -3,6 +3,19 @@
 <head th:replace="_header_include::frag(~{::title},~{::style},~{})">
     <title>后台管理系统</title>
     <style>
+        .userManage .mainWhitePadding{
+            padding:30px 10% 30px 10% ;
+        }
+        .userManage .mainWhitePadding .el-form-item__content{
+            width: 290px;
+        }
+        .userManage .mainWhitePadding .shopType .el-form-item__content{
+            width: auto;
+        }
+        .userManage .mainWhitePadding .el-checkbox{
+            margin-left: 0;
+            margin-right: 10px!important;
+        }
         /*提示样式修改*/
         .el-tooltip__popper{max-width:500px;}
     </style>
@@ -14,17 +27,16 @@
         <el-breadcrumb-item>业务设置</el-breadcrumb-item>
         <el-breadcrumb-item>项目管理</el-breadcrumb-item>
     </el-breadcrumb>
- 	<div class="marginB20 fs16">添加项目</div>
-    <el-row :gutter="20">
-        <el-form :model="form" :rules="rules" ref="form">
-            <el-row>
-                
-                <el-col :span="8" >
+    <el-row class="mainWhiteBg">
+        <div class="inforTitle">添加项目</div>
+        <el-form :model="form" :rules="rules" ref="form"  class="mainWhitePadding">
+            <el-row>                    
+                <el-col :span="12" >
                     <el-form-item label="项目名称：" :label-width="formLabelWidth1" prop="projectName">
                         <el-input v-model="form.projectName"  maxlength="50"  autocomplete="off" style="width:100%;"></el-input>
                     </el-form-item>
                 </el-col>
-                <el-col :span="8" :offset="4">
+                <el-col :span="12">
                     <el-form-item label="选择所属品牌：" :label-width="formLabelWidth1" prop="brandName">
                         <!-- <el-row>
                             <el-col :span="12">
@@ -34,13 +46,13 @@
                                 <el-button type="primary" size="small" @click="dialogFormChooseBrand = true">选择品牌</el-button>
                             </el-col>    
                         </el-row> -->
-                        <el-input v-model="form.brandName" autocomplete="off" :readonly="brandNameReadonly" style="width:68%"></el-input> 
-                        <el-button type="primary" size="small" @click="dialogFormChooseBrand = true" style="width: 30%; padding:12px 0;">选择品牌</el-button>
+                        <el-input v-model="form.brandName" autocomplete="off" :readonly="brandNameReadonly" style="width:200px;margin-right: 6px;"></el-input>
+                        <el-button type="primary" size="small" @click="dialogFormChooseBrand = true">选择品牌</el-button>
                     </el-form-item>
                 </el-col>
             </el-row>
             <el-row>
-                <el-col :span="8">
+                <el-col :span="12">
                     <el-form-item label="项目品类：" :label-width="formLabelWidth1" prop="category">
                         <el-select v-model="form.category" placeholder="请选择" style="width:100%;">
                             <el-option
@@ -52,7 +64,7 @@
                         </el-select>
                     </el-form-item>
                 </el-col>
-                <el-col :span="8" :offset="4">
+                <el-col :span="12">
                     <el-form-item label="品牌总部所在地：" :label-width="formLabelWidth1" prop="headAddress">
                         <el-input v-model="form.headAddress"  maxlength="50"  autocomplete="off"></el-input>
                     </el-form-item>
@@ -71,7 +83,7 @@
                         </el-select>
                     </el-form-item>
                 </el-col> -->
-                 <el-col :span="8">
+                 <el-col :span="12">
                     <el-form-item label="项目所属集团：" :label-width="formLabelWidth1" prop="groupId">
                         <el-select filterable v-model="form.groupId" placeholder="请选择" style="width:100%">
                             <el-option
@@ -83,14 +95,14 @@
                         </el-select>
                     </el-form-item>
                 </el-col>
-            	<el-col :span="8"  :offset="4">
+            	<el-col :span="12">
                     <el-form-item label="品牌所属公司：" :label-width="formLabelWidth1" prop="brandCompany">
                         <el-input v-model="form.brandCompany"  maxlength="50"  autocomplete="off"></el-input>
                     </el-form-item>
                 </el-col>
             </el-row>
             <el-row>
-                <el-col :span="8" >
+                <el-col :span="12" >
                     <el-form-item label="结算比例：" :label-width="formLabelWidth1" prop="ratio">
                         <el-select v-model="form.ratio" placeholder="请选择" style="width:100%">
                             <el-option
@@ -102,7 +114,7 @@
                         </el-select>
                     </el-form-item>
                 </el-col>
-                 <el-col :span="8"  :offset="4">
+                <el-col :span="12">
                     <el-form-item label="行业类别：" :label-width="formLabelWidth1" prop="classification">
                         <el-select v-model="form.classification" placeholder="请选择"  style="width:100%">
                             <el-option
@@ -114,9 +126,9 @@
                         </el-select>
                     </el-form-item>
                 </el-col>
-             </el-row>
+            </el-row>
             <el-row>
-             <el-col :span="8" >
+                <el-col :span="12">
                     <el-form-item label="是否给品牌商结算：" :label-width="formLabelWidth1" prop="isSettle">
                         <el-select v-model="form.isSettle" placeholder="请选择" style="width:100%">
                             <el-option
@@ -128,41 +140,38 @@
                         </el-select>
                     </el-form-item>
                 </el-col>
-                 <el-col :span="8"  :offset="4">
+                <el-col :span="12">
                     <el-form-item label="市场负责人：" :label-width="formLabelWidth1" prop="marketLeader">
                         <el-input  v-model="form.marketLeader"  maxlength="50"  autocomplete="off"></el-input>
                     </el-form-item>
                 </el-col>
-            </el-row>
-             
+            </el-row>                 
             <el-row>
-                <el-col :span="8">
+                <el-col :span="12">
                     <el-form-item label="推广负责人：" :label-width="formLabelWidth1" prop="promotionLeader">
                         <el-input  v-model="form.promotionLeader"  maxlength="50"  autocomplete="off"></el-input>
                     </el-form-item>
                 </el-col>
-                   <el-col :span="8" :offset="4">
+                <el-col :span="12">
                     <el-form-item label="主营产品：" :label-width="formLabelWidth1" prop="product">
                         <el-input v-model="form.product"  maxlength="50"  autocomplete="off"></el-input>
                     </el-form-item>
-                </el-col>
-                
+                </el-col>                    
             </el-row>
             <el-row>
-                <el-col :span="8">
+                <el-col :span="12">
                     <el-form-item label="推广地域：" :label-width="formLabelWidth1" prop="phone">
                         <el-input  v-model="form.promotionArea"  maxlength="50"  autocomplete="off"></el-input>
                     </el-form-item>
                 </el-col>
-                 <el-col :span="8" :offset="4">
+                 <el-col :span="12">
                     <el-form-item label="投资政策：" :label-width="formLabelWidth1" prop="password">
                         <el-input v-model="form.investmentPolicy"  maxlength="50"  autocomplete="off"></el-input>
                     </el-form-item>
-                </el-col>
-             
+                </el-col>                 
             </el-row>
             <el-row>
-                <el-col :span="8">
+                <el-col :span="12">
                     <el-form-item label="是否不可签约：" :label-width="formLabelWidth1" prop="isNotSign">
                         <el-select v-model="form.isNotSign" placeholder="请选择" style="width:100%">
                             <el-option
@@ -174,16 +183,14 @@
                         </el-select>
                     </el-form-item>
                 </el-col>
-                   </el-col>
-                   <el-col :span="8"  :offset="4">
+                <el-col :span="12">
                     <el-form-item label="招商负责人：" :label-width="formLabelWidth1" prop="investmentLeader">
                         <el-input v-model="form.investmentLeader"  maxlength="50"  autocomplete="off"></el-input>
                     </el-form-item>
-                </el-col>
-             
+                </el-col>                 
             </el-row>
             <el-row>
-                <el-col :span="8">
+                <el-col :span="12">
                     <el-form-item label="项目归属：" :label-width="formLabelWidth1" prop="projectAttributive">
                         <el-select v-model="form.projectAttributive" placeholder="请选择" style="width:100%">
                             <el-option
@@ -194,22 +201,18 @@
                             </el-option>
                         </el-select>
                     </el-form-item>
-                 </el-col>
-               <el-col :span="12" :offset="4">
+                </el-col>
+                <el-col :span="12" class="shopType">
                     <el-form-item label="店型：" :label-width="formLabelWidth1" prop="shopTypeList">
-                        <el-checkbox-group v-model="form.shopTypeList" >
+                        <el-checkbox-group v-model="form.shopTypeList">
                             <el-checkbox v-for="item in shopTypeOptions"  :label="item.value" :key="item.value">{{item.name}}</el-checkbox>
                         </el-checkbox-group>
                     </el-form-item>
                 </el-col>
-            </el-row>
-            
-                <el-col :span="4" :offset="10">
-                    <el-form-item>
-                        <el-button type="primary" :disabled="submitDisabled" @click="onSubmit('form')">确认</el-button>
-                        <el-button @click="goBack()">取消</el-button>
-                    </el-form-item>
-                </el-col>
+            </el-row>                
+            <el-row class="f-tac">
+                <el-button type="primary" :disabled="submitDisabled" @click="onSubmit('form')">确认</el-button>
+                <el-button @click="goBack()">取消</el-button>
             </el-row>
         </el-form>
     </el-row>
@@ -217,24 +220,25 @@
     <el-dialog title="选择品牌" :visible.sync="dialogFormChooseBrand" width="870px">
 		    <el-form :inline="true" :model="brandSearchForm" class="demo-form-inline" ref="brandSearchForm"> 
 			    <el-row class="marginB10 greybg padding20" style="padding-bottom: 0;">
-			            
-						  <el-form-item class="formItem" prop="brandName">
-						    <el-input v-model="brandSearchForm.brandName" placeholder="品牌名" class="input-with-select"></el-input>
-						  </el-form-item>
-			            	<el-form-item  prop="categoryId">
-				                <el-select v-model="brandSearchForm.category" clearable placeholder="选择品类">
-				                    <el-option
-				                        v-for="item in brandCategoryOptions"
-				                        :key="item.id"
-				                        :label="item.category_name"
-				                        :value="item.id">
-				                    </el-option>
-				                </el-select>
-			                </el-form-item>
-						  <el-form-item class="formItem" prop="city">
-						    <el-input v-model="brandSearchForm.city" placeholder="总部所在城市" class="input-with-select"></el-input>
-						  </el-form-item>
-						    <el-button icon="el-icon-search" type="primary" @click="searchTable()">搜索</el-button>
+                    <el-form-item class="formItem" prop="brandName">
+                        <el-input v-model="brandSearchForm.brandName" placeholder="品牌名" class="input-with-select"></el-input>
+                    </el-form-item>
+                    <el-form-item  prop="categoryId">
+                        <el-select v-model="brandSearchForm.category" clearable placeholder="选择品类">
+                            <el-option
+                                v-for="item in brandCategoryOptions"
+                                :key="item.id"
+                                :label="item.category_name"
+                                :value="item.id">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
+                    <el-form-item class="formItem" prop="city">
+                        <el-input v-model="brandSearchForm.city" placeholder="总部所在城市" class="input-with-select"></el-input>
+                    </el-form-item>
+                    <el-form-item class="">
+                        <el-button icon="el-icon-search" type="primary" @click="searchTable()">搜索</el-button>
+                    </el-form-item>
 			    </el-row>
 		  	</el-form>
             <el-table 

@@ -3,12 +3,8 @@
 <head th:replace="_header_include::frag(~{::title},~{::style},~{})">
     <title>后台管理系统</title>
     <style>
-        .userManage .leftBox{/*width: 200px;*/height: auto;border:1px solid #ebeef5;min-height: 480px;}
-        .userManage .leftTitle{background:#ebeef5;text-indent: 20px;height: 40px;line-height: 40px;}
-        .userManage .leftTree{padding:10px;}
-        .userManage .rightTitle{background:#ebeef5;text-indent: 20px;height: 40px;line-height: 40px;}
-		.el-col-6 {
-		    width: 50%;
+        .el-select{
+		    width:350px;
 		}
     </style>
 </head>
@@ -20,110 +16,111 @@
         <el-breadcrumb-item>邀约区域管理</el-breadcrumb-item>
     </el-breadcrumb>
 
-    <div class="marginB20 fs16">修改邀约区域划分</div>
-    <el-row :gutter="20">
-        <el-form :model="form" :rules="rules" ref="form">
-        	<el-row>
-                <el-col :span="6">
-                    <el-form-item label="操作内容：" :label-width="formLabelWidth1" >
-					   <el-checkbox   v-model="bussinessGroupchecked"  label="商务小组"   @change="checkIsShow(1)"></el-checkbox>
-					   <el-checkbox v-model="projectchecked" label="签约项目" @change="checkIsShow(2)"></el-checkbox>
-					   <el-checkbox v-model="provincechecked" label="区域" @change="checkIsShow(3)"></el-checkbox>
-					   <el-checkbox v-model="dxchecked" label="电销组" @change="checkIsShow(4)"></el-checkbox>
-                    </el-form-item>
-                </el-col>
-            </el-row>
-         	<el-row v-show="businessShow">
-                <el-col :span="6">
-                    <el-form-item label="商务小组：" :label-width="formLabelWidth1" prop="businessGroupId">
-                        <el-select filterable v-model="form.businessGroupId" placeholder="请选择"  @change="setProject">
-                            <el-option
-                                v-for="item in swList"
-                                :key="item.id"
-                                :label="item.name"
-                                :value="item.id">
-                            </el-option>
-                        </el-select>
-                    </el-form-item>
-                </el-col>
-            </el-row>
-        	<el-row v-show="projectShow">
-                <el-col :span="6">
-                    <el-form-item label="签约项目：" :label-width="formLabelWidth1" prop="projectIds">
-                        <el-select multiple filterable v-model="form.projectIds" placeholder="请选择">
-                            <el-option
-                                v-for="item in projectList"
-                                :key="item.id"
-                                :label="item.projectName"
-                                :value="item.id">
-                            </el-option>
-                        </el-select>
-                    </el-form-item>
-                </el-col>
-            </el-row>
-        	<el-row v-show="provinceShow">
-                <el-col :span="6">
-                    <el-form-item label="区域（省）：" :label-width="formLabelWidth1" prop="provincesIds">
-                        <el-select filterable v-model="form.provincesIds" @change="selectAll" multiple placeholder="请选择">
-                            <el-option
-                                v-for="item in proviceslist"
-                                :key="item.id"
-                                :label="item.name"
-                                :value="item.id">
-                            </el-option>
-                        </el-select>
-                    </el-form-item>
-                </el-col>
-            </el-row>
-        	<el-row v-show="telemarketingTeamShow">
-                <el-col :span="6">
-                    <el-form-item label="电销组：" :label-width="formLabelWidth1" prop="telemarketingTeamIds">
-                        <el-select filterable multiple v-model="form.telemarketingTeamIds" placeholder="请选择">
-                            <el-option
-                                v-for="item in dxList"
-                                 :key="item.id"
-                                :label="item.name"
-                                :value="item.id">
-                            </el-option>
-                        </el-select>
-                    </el-form-item>
-                </el-col>
-            </el-row>
-        
-          
-            <el-row>
-                <el-col :span="6" :offset="6">
-                    <el-form-item>
+    <el-row class="mainWhiteBg">
+        <div class="inforTitle">修改邀约区域划分</div>
+        <el-row :gutter="20">
+            <el-form :model="form" :rules="rules" ref="form" class="mainWhitePadding">
+            	<el-row>
+                    <el-col :span="12">
+                        <el-form-item label="操作内容：" :label-width="formLabelWidth1" >
+    					   <el-checkbox   v-model="bussinessGroupchecked"  label="商务小组"   @change="checkIsShow(1)"></el-checkbox>
+    					   <el-checkbox v-model="projectchecked" label="签约项目" @change="checkIsShow(2)"></el-checkbox>
+    					   <el-checkbox v-model="provincechecked" label="区域" @change="checkIsShow(3)"></el-checkbox>
+    					   <el-checkbox v-model="dxchecked" label="电销组" @change="checkIsShow(4)"></el-checkbox>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+             	<el-row v-show="businessShow">
+                    <el-col :span="12">
+                        <el-form-item label="商务小组：" :label-width="formLabelWidth1" prop="businessGroupId">
+                            <el-select filterable v-model="form.businessGroupId" placeholder="请选择"  @change="setProject">
+                                <el-option
+                                    v-for="item in swList"
+                                    :key="item.id"
+                                    :label="item.name"
+                                    :value="item.id">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+            	<el-row v-show="projectShow">
+                    <el-col :span="12">
+                        <el-form-item label="签约项目：" :label-width="formLabelWidth1" prop="projectIds">
+                            <el-select multiple filterable v-model="form.projectIds" placeholder="请选择">
+                                <el-option
+                                    v-for="item in projectList"
+                                    :key="item.id"
+                                    :label="item.projectName"
+                                    :value="item.id">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+            	<el-row v-show="provinceShow">
+                    <el-col :span="12">
+                        <el-form-item label="区域（省）：" :label-width="formLabelWidth1" prop="provincesIds">
+                            <el-select filterable v-model="form.provincesIds" @change="selectAll" multiple placeholder="请选择">
+                                <el-option
+                                    v-for="item in proviceslist"
+                                    :key="item.id"
+                                    :label="item.name"
+                                    :value="item.id">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+            	<el-row v-show="telemarketingTeamShow">
+                    <el-col :span="12">
+                        <el-form-item label="电销组：" :label-width="formLabelWidth1" prop="telemarketingTeamIds">
+                            <el-select filterable multiple v-model="form.telemarketingTeamIds" placeholder="请选择">
+                                <el-option
+                                    v-for="item in dxList"
+                                     :key="item.id"
+                                    :label="item.name"
+                                    :value="item.id">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+            
+              
+                <el-row>
+                    <el-form-item class="f-tac">
                     	<el-button type="success" @click="showdetail">预览</el-button>
                         <el-button type="primary" @click="showTips">确定</el-button>
                         <a href="/invitearea/inviteAreaList"><el-button type="info" style="margin-left: 10px;">取消</el-button></a>
                        
                     </el-form-item>
-                </el-col>
-            </el-row>
-        </el-form>
-    </el-row>
-        <el-dialog title="信息详情"  :visible.sync="dialogFormVisible"  width="50%">
-            <el-form>
-                 <el-row>
-                <el-table 
-                    ref="multipleTable"
-                    tooltip-effect="dark"
-                    empty-text="无数据"
-                    style="width: 100%"
-                    border
-                    :data="dataTable"  >
-                    <el-table-column align="center" prop="businessGroup" label="商务小组"></el-table-column>
-                    <el-table-column align="center" prop="provinces" label="区域"></el-table-column>
-                    <el-table-column align="center" prop="telemarketingTeam" label="电销组"></el-table-column>
-                    <el-table-column align="center" prop="projects" label="签约项目"></el-table-column>
-                </el-table>
-            </el-row>
+                </el-row>
             </el-form>
-            <div slot="footer" class="dialog-footer">
-                <el-button type="primary" @click="dialogFormVisible = false">确定</el-button>
-            </div>
-        </el-dialog>
+        </el-row>
+    </el-row>
+
+    <el-dialog title="信息详情"  :visible.sync="dialogFormVisible"  width="50%">
+        <el-form>
+             <el-row>
+            <el-table 
+                ref="multipleTable"
+                tooltip-effect="dark"
+                empty-text="无数据"
+                style="width: 100%"
+                border
+                :data="dataTable"  >
+                <el-table-column align="center" prop="businessGroup" label="商务小组"></el-table-column>
+                <el-table-column align="center" prop="provinces" label="区域"></el-table-column>
+                <el-table-column align="center" prop="telemarketingTeam" label="电销组"></el-table-column>
+                <el-table-column align="center" prop="projects" label="签约项目"></el-table-column>
+            </el-table>
+        </el-row>
+        </el-form>
+        <div slot="footer" class="dialog-footer">
+            <el-button type="primary" @click="dialogFormVisible = false">确定</el-button>
+        </div>
+    </el-dialog>
     <el-dialog title="确定要执行批量操作？" :visible.sync="submitdialogFormVisible" >
        
         <div slot="footer" class="dialog-footer">
