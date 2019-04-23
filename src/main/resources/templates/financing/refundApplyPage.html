@@ -439,7 +439,9 @@
                 dialogForm:{
                     cusAmount:'',
                     refundTime:'',
-                    reason:''
+                    reason:'',
+                    fileList:[]
+                   
                 },
                 dialogRules:{
                     reason : [
@@ -466,7 +468,7 @@
                         
                     ],
                     fileList:[
-                    	{ required: true, message: '选择文件', trigger: 'blur' }
+                    	{ required: true, message: '选择文件', trigger: 'change' }
                     ]
                 
                     
@@ -1019,9 +1021,11 @@
                         lastFile.name=realName;
                         lastFile.url = imgUrl;
                         lastFile.randomName = randomName; 
+                        //mainDivVM.dialogForm.fileList.push(resData.data);
                         var curList = mainDivVM.fileList;
                         curList.push(lastFile);
                         
+                        mainDivVM.$refs['dialogForm'].validateField(["fileList"]);
                         mainDivVM.$message({message:'上传成功',type:'success'});
                     }else{
                         mainDivVM.$message({message:'上传失败',type:'error'});
@@ -1096,9 +1100,9 @@
                  text="全款"
                }else if(cellValue=="2"){
                  text="订金"
-               }else if(cellValue=="2"){
+               }else if(cellValue=="3"){
                  text="追加定金"
-               }else if(cellValue=="2"){
+               }else if(cellValue=="4"){
                  text="尾款"
                }
                return text;
