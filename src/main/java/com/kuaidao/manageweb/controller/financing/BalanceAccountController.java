@@ -348,7 +348,7 @@ public class BalanceAccountController {
             dataMap.put("payMode", payMode);
             dataMap.put("payType", payType);
             dataMap.put("received", accountDTO.getAmountReceived() == null ? ""
-                    : (accountDTO.getAmountReceived() + ""));
+                    : accountDTO.getAmountReceived() );
             dataMap.put("businessManager", accountDTO.getBusinessManagerName() == null ? ""
                     : (accountDTO.getBusinessManagerName() + ""));
             dataMap.put("busarea",
@@ -360,12 +360,12 @@ public class BalanceAccountController {
             dataMap.put("sale",
                     accountDTO.getTeleSaleName() == null ? "" : accountDTO.getTeleSaleName());
             dataMap.put("receivable", accountDTO.getSignAmountReceivable() == null ? ""
-                    : (accountDTO.getSignAmountReceivable() + ""));
+                    : accountDTO.getSignAmountReceivable() );
             if (accountDTO.getPayType() == 1 || accountDTO.getPayType() == 2) {
                 dataMap.put("toll",
-                        accountDTO.getFirstToll() == null ? "" : (accountDTO.getFirstToll() + ""));
+                        accountDTO.getFirstToll() == null ? "" : accountDTO.getFirstToll() );
                 dataMap.put("preferent", accountDTO.getPreferentialAmount() == null ? ""
-                        : (accountDTO.getPreferentialAmount() + ""));
+                        : accountDTO.getPreferentialAmount());
             } else {
                 dataMap.put("toll", "");
                 dataMap.put("preferent", "");

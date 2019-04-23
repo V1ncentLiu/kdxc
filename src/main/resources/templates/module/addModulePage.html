@@ -4,97 +4,109 @@
 <head th:include="_header_include::frag(~{::title},~{},~{::style})">
 	<title>添加模块</title>
     <style>
-.addModule {
-	width: 70%;
-}
- /*去掉type为number的箭头*/
- input::-webkit-outer-spin-button, input::-webkit-inner-spin-button {
-	-webkit-appearance: none;
-  }
-</style>
-    
+      .addModule .borderbox{
+      	/*width: 70%;*/
+        padding:30px 10% 30px 10% ;
+      }
+      .addModule .borderbox .el-input__inner{
+        width: 290px;
+      }
+      .addModule .borderbox .el-checkbox{
+        margin-left: 0;
+        margin-right: 30px!important;
+      }
+     /*去掉type为number的箭头*/
+     input::-webkit-outer-spin-button, input::-webkit-inner-spin-button {
+    	-webkit-appearance: none;
+      }
+    </style>    
 </head>
 <body>
 <div id="addModule" v-loading="loading"  class="addModule mainPadding" style="display: none;"> 
     <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
-        <el-breadcrumb-item>Home</el-breadcrumb-item> <el-breadcrumb-item>系统管理</el-breadcrumb-item>
-        <el-breadcrumb-item> <a href="JavaScript:void(0)">菜单管理</a></el-breadcrumb-item>
+        <el-breadcrumb-item>Home</el-breadcrumb-item> 
+        <el-breadcrumb-item>系统管理</el-breadcrumb-item>
+        <el-breadcrumb-item>菜单管理</el-breadcrumb-item>
     </el-breadcrumb> 
-    <div class="fs16 marginB20"><div class="titleBorderL">添加菜单</div></div>
-    <el-form :model="form" :rules="rules" ref="form">
-        <div class="marginB20 fs16"><em class="redcolor">*</em>必填项</div>
-        <div class="borderbox paddingL20 paddingR20 paddingT10">
-            <el-row>
-                <el-col :span="12">
-                    <el-form-item label="菜单名称："    prop="name" :label-width="formLabelWidth">
-                        <el-input v-model="form.name"   maxlength="50"  autocomplete="off"></el-input>
-                    </el-form-item>
-                </el-col>
-                <el-col :span="12">
-                    <el-form-item label="URL："  prop="url" :label-width="formLabelWidth">
-                        <el-input v-model="form.url" autocomplete="off"  maxlength="100"  placeholder="以#,/或者http开头"></el-input>
-                    </el-form-item>
-                </el-col>
-            </el-row>
-            <el-row>
-                <el-col :span="12">
-                    <el-form-item label="授权名称："   prop="authCode" :label-width="formLabelWidth">
-                        <el-input v-model="form.authCode" maxlength="50" autocomplete="off"></el-input>
-                    </el-form-item>
-                </el-col>
-                <el-col :span="12">
-                    <el-form-item label="优先级：" prop="sortNo" :label-width="formLabelWidth">
-                        <el-input  v-model="form.sortNo"  maxlength="10" @keyup.native="number" label="描述文字"></el-input>
-                    </el-form-item>
-                </el-col>
-            </el-row>
-            <el-row>
-                <el-col :span="21">
-                    <el-form-item label="授权操作权限：" prop="type">
-                        <el-checkbox-group v-model="form.type" @change="handleCheckedChange">
-                            <el-checkbox v-for="item in items"  :label="item" :key="item">{{item}}</el-checkbox>
-                        </el-checkbox-group>
-                    </el-form-item>
-                </el-col>
-                <el-col :span="3">
-                    <el-button type="primary" size="medium" @click="openOperationInfo">新增操作</el-button>
-                </el-col>
-            </el-row>
-        </div>
-        <div class="marginB20 fs16 paddingT20">选填项</div>
-        <div class="borderbox padding20">
-            <el-row>
-                <el-col :span="12">
-                    <el-form-item label="菜单类名：" prop="className"    :label-width="formLabelWidth">
-                        <el-input v-model="form.className"  maxlength="50"  autocomplete="off"></el-input>
-                    </el-form-item>
-                </el-col>
-                <el-col :span="12">
-                    <el-form-item label="图标名称：" prop="iconName" :label-width="formLabelWidth">
-                        <el-input v-model="form.iconName" maxlength="50" autocomplete="off"></el-input>
-                    </el-form-item>
-                </el-col>
-            </el-row>
-           <el-row>
-                <el-col :span="12">
-                    <el-form-item label="图标地址：" prop="iconUrl"  :label-width="formLabelWidth">
-                        <el-input v-model="form.iconUrl" maxlength="100"  autocomplete="off"></el-input>
-                    </el-form-item>
-                </el-col>
-            </el-row>
-            <el-row>
-                <el-col :span="24">
-                    <el-form-item label="描述："  prop="description" :label-width="formLabelWidth">
-                        <el-input type="textarea" :rows="3"   maxlength="200" placeholder="限制200字" v-model="form.description"></el-input>
-                    </el-form-item>
-                </el-col>
-            </el-row>
-        </div>
-        <div class="padding20 f-tac">            
-            <el-button type="primary" @click="submitForm('form')" :disabled="confirmBtnDisabled"  >提交</el-button>
-            <el-button  @click="reBackModule" >取 消</el-button>
-        </div> 
-    </el-form>  
+    <el-row class="mainWhiteBg">
+        <div class="inforTitle">添加菜单</div>
+        <el-form :model="form" :rules="rules" ref="form" class="mainWhitePadding">
+            <div class="inforTitle1"><em class="redcolor">*</em>必填项</div>
+            <div class="borderbox marginB20">
+                <el-row>
+                    <el-col :span="12">
+                        <el-form-item label="菜单名称："    prop="name" :label-width="formLabelWidth">
+                            <el-input v-model="form.name"   maxlength="50"  autocomplete="off"></el-input>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="12">
+                        <el-form-item label="URL："  prop="url" :label-width="formLabelWidth">
+                            <el-input v-model="form.url" autocomplete="off"  maxlength="100"  placeholder="以#,/或者http开头"></el-input>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="12">
+                        <el-form-item label="授权名称："   prop="authCode" :label-width="formLabelWidth">
+                            <el-input v-model="form.authCode" maxlength="50" autocomplete="off"></el-input>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="12">
+                        <el-form-item label="优先级：" prop="sortNo" :label-width="formLabelWidth">
+                            <el-input  v-model="form.sortNo"  maxlength="10" @keyup.native="number" label="描述文字"></el-input>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="24">
+                        <el-form-item label="授权操作权限：" prop="type" :label-width="formLabelWidth" >
+                            <el-checkbox-group v-model="form.type" @change="handleCheckedChange">
+                                <el-checkbox v-for="item in items"  :label="item" :key="item">{{item}}</el-checkbox>
+                            </el-checkbox-group>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="24">
+                        <el-form-item label="" :label-width="formLabelWidth">
+                            <el-button type="primary" size="small" @click="openOperationInfo">新增操作</el-button>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+            </div>
+            <div class="inforTitle1">选填项</div>
+            <div class="borderbox">
+                <el-row>
+                    <el-col :span="12">
+                        <el-form-item label="菜单类名：" prop="className"    :label-width="formLabelWidth">
+                            <el-input v-model="form.className"  maxlength="50"  autocomplete="off"></el-input>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="12">
+                        <el-form-item label="图标名称：" prop="iconName" :label-width="formLabelWidth">
+                            <el-input v-model="form.iconName" maxlength="50" autocomplete="off"></el-input>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+               <el-row>
+                    <el-col :span="12">
+                        <el-form-item label="图标地址：" prop="iconUrl"  :label-width="formLabelWidth">
+                            <el-input v-model="form.iconUrl" maxlength="100"  autocomplete="off"></el-input>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="24">
+                        <el-form-item label="描述："  prop="description" :label-width="formLabelWidth">
+                            <el-input type="textarea" :rows="3"   maxlength="200" placeholder="限制200字" v-model="form.description"></el-input>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+            </div>
+            <div class="padding20 f-tac">            
+                <el-button type="primary" @click="submitForm('form')" :disabled="confirmBtnDisabled"  >提交</el-button>
+                <el-button  @click="reBackModule" >取 消</el-button>
+            </div> 
+        </el-form>  
+    </el-row>
     <!-- dialog -->
     <el-dialog title="新增操作" :visible.sync="dialogFormVisible">
         <el-form :model="dialogForm" :rules="dialogRules" ref="dialogForm">
@@ -295,7 +307,7 @@
             	 window.location.href="/module/moduleManager/initModuleInfo?moduleId="+moduleId; 
             },
             openOperationInfo(){
-            	debugger;
+            	// debugger;
             	addModuleVM.dialogFormVisible = true ;
                 if (this.$refs['dialogForm']) {
              	   this.$refs['dialogForm'].resetFields();
