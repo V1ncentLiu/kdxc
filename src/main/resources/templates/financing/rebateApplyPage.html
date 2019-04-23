@@ -166,7 +166,7 @@
                 <el-table-column align="center" type="index" label="序号" width="55"></el-table-column>
                 <el-table-column align="center" prop="signNo" label="签约单编号"></el-table-column>
                 <el-table-column align="center" prop="customerName" label="客户姓名"></el-table-column>
-                <el-table-column align="center" prop="relateSignNoList" label="关联签约单店">
+                <el-table-column align="center" prop="relateSignNoList" label="关联签约单">
                     <template slot-scope="scope">
                         <div  v-if="scope.row.relateSignNoList.length>=1"   v-for="item in scope.row.relateSignNoList">
                             <el-button size="mini"  type="text" @click="openSignDialog(item)">{{item}}</el-button>
@@ -634,16 +634,29 @@
                 },
                 dialogRules:{
                     reason : [
-                        { required: true, message: '请输入退款原因', trigger: 'blur' }
+                        { required: true, message: '请输入返款原因', trigger: 'blur' }
                     ],
                     refundTime : [
-                        { required: true, message: '请选择退款时间', trigger: 'blur' }
+                        { required: true, message: '请选择返款时间', trigger: 'blur' }
                     ],
                     cusAmount: [
-                        { required: true, message: '请输入退款客户金额', trigger: 'blur' }
+                        { required: true, message: '请输入返款客户金额', trigger: 'blur' },
+                        {validator:function(rule,value,callback){
+                            if(value){
+                                 if(!/^[0-9]*$/.test(value)){
+                                     callback(new Error("只可以输入整数"));     
+                                 }else{
+                                     callback();
+                                 }
+                            }else{
+                                callback();
+                            }
+                           
+                            
+                        },trigger:'blur'},
                     ],
                     fileList:[
-                        { required: true, message: '文件不可以为空', trigger: 'blur' }
+                        { required: true, message: '选择文件', trigger: 'blur' }
                     ],
                     dynamicTags:[
                     	 { required: true, message: '关联签约单不可以为空', trigger: 'blur' }
