@@ -317,8 +317,8 @@
     <!-- 下载图片 dialog 开始 -->
         <el-dialog title="下载图片" :visible.sync="downloadDialogVisible" width="870px">
              <ol>
-                <li v-for="(item,index) in imgList"  >
-                 <a :href="'/financing/refund/downloadOssImg?url='+item.imgUrl" :download="item.realName">{{item.realName}}</a>
+                <li v-for="(item,index) in imgList"  style="margin-bottom:8px">
+                 <a :href="'/financing/refund/downloadOssImg?url='+item.imgUrl" :download="item.realName" style="color:blue;text-decoration:underline">{{item.realName}}</a>
                 </li>
               </ol> 
        </el-dialog>
@@ -327,7 +327,7 @@
     <el-dialog title="提示" :visible.sync="rejectRefundDialogVisible">
         <el-form :model="rejectRefundDialogForm" ref="rejectRefundDialogForm" :rules="rejectRefundDialogRules">            
             <div class="fs16 marginB20">确定要将此 【{{sigNoTitle}}】返款申请驳回吗？</div>
-            <el-form-item label="驳回原因：" label-width="100px" prop="reason"  class="redcolor">
+            <el-form-item label="驳回原因：" label-width="100px" prop="rejectReason"  class="redcolor">
                 <el-input
                     type="textarea"
                     :rows="4"
@@ -521,7 +521,7 @@
                 SignNoPayDetailTitle:'',
                 payDetailTitle:'',
                 rejectRefundDialogForm:{
-                    
+                	rejectReason:''
                 },
                 rejectRefundDialogRules:{
                     rejectReason: [
@@ -684,7 +684,7 @@
                     for(var i=0;i<rows.length;i++){
                         var curRow = rows[i];
                         if(curRow.status!=1){
-                            this.$message({message:'只允许操作已驳回数据',type:'warning'});
+                            this.$message({message:'只允许操作待处理数据',type:'warning'});
                             isPass=false;
                             break;
                         }
@@ -1087,7 +1087,7 @@
                      }
                      
                      this.sigNoTitle= titleArr.join("，");
-                     this.rejectRefundDialogForm.reason='';
+                     this.rejectRefundDialogForm.rejectReason='';
                      this.rejectRefundDialogVisible =true;
                 }
            },
