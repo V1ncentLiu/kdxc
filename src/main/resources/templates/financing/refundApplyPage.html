@@ -268,7 +268,6 @@
                     :on-success="handleSuccess"
                     :on-error="handleError"
                     :before-upload="handleBefore"
-                    multiple=false
                       accept="image/png,image/jpeg"
                     :data="uploadParamData"
                     :on-change="selectFile"
@@ -330,8 +329,8 @@
     <!-- 下载图片 dialog 开始 -->
         <el-dialog title="下载图片" :visible.sync="downloadDialogVisible" width="870px">
           <ol>
-             <li v-for="(item,index) in imgList"  >
-              <a :href="'/financing/refund/downloadOssImg?url='+item.imgUrl" :download="item.realName">{{item.realName}}</a>
+             <li v-for="(item,index) in imgList"  style="margin-bottom:8px">
+              <a :href="'/financing/refund/downloadOssImg?url='+item.imgUrl" :download="item.realName" style="color:blue;text-decoration:underline">{{item.realName}}</a>
              </li>
            </ol> 
        </el-dialog>
@@ -515,6 +514,15 @@
                   
               },
              selectFile(file, fileList){
+            	  var fileLength = fileList.length;
+            	  if(fileLength>2){
+            		  //验证最后2个文件是否都是即将要上传的，如果是，只保留一个
+            		  var lastSecondFile = fileList[fileLength-2];
+            		  if(!lastSecondFile.hasOwnProperty("id")){
+            			  fileList.splice(length-2,1);
+            		  }
+            		  
+            	  }
                    mainDivVM.uploadParamData.key= mainDivVM.uploadParamData.dir+mainDivVM.random_string(10)+mainDivVM.get_suffix(file.name),
                    mainDivVM.uploadParamData.realName= file.name
               },
@@ -988,16 +996,6 @@
                 .then(function (response) {
                     var resData = response.data;
                     if(resData.code=='0'){
-                    /* 	var curFileList = mainDivVM.fileList;
-                    	var fileListLen = fileList.length;
-                    	var lastFile = fileList[fileListLen-1];
-                    	var lastFile = fileList[fileListLen-1];
-                    	lastFile.id= resData.data;
-                    	lastFile.realName=realName;
-                    	lastFile.imgUrl = imgUrl;
-                    	lastFile.randomName = randomName; 
-                    	curFileList.push(lastFile);
-                    	mainDivVM.fileList = curFileList; */
                         var lastFile = {};
                         lastFile.id= resData.data;
                         lastFile.name=realName;
@@ -1011,40 +1009,6 @@
                         mainDivVM.$message({message:'上传失败',type:'error'});
                     }
                     
-                   /*  //查询图片列表 
-                    var id = fileList[0].reId;
-                    var param = {};
-                    param.id = id;
-                    axios.post('/financing/refund/listImgById', param)
-                    .then(function (response) {
-                        var resData = response.data;
-                        if(resData.code=='0'){
-                            var imgList =  resData.data;
-                            var imgShowList = new Array();
-                            for(var i=0;i<imgList.length;i++){
-                                var curImg = imgList[i];
-                                var img={};
-                              //  img.name="上传文件"+(i+1);
-                                img.name= curImg.realName;
-                                img.url = curImg.imgUrl;
-                                img.id=curImg.id;
-                                img.rebateId=curImg.reId;
-                                imgShowList.push(img);
-                            } 
-                            mainDivVM.fileList=imgShowList;
-                            
-                            
-                        }else{
-                            mainDivVM.$message({message:'查询图片失败',type:'error'});
-                            console.error(resData);
-                        }
-                    
-                    })
-                    .catch(function (error) {
-                         console.log(error);
-                    }).then(function(){
-                        
-                    }); */
                     
                 })
                 .catch(function (error) {
@@ -1058,7 +1022,6 @@
                 console.info(err);
             },
             handleBefore(file){
-            	debugger;
             	   var isTextComputer = file.type === 'image/png' || file.type==='image/jpeg';
                    if(!isTextComputer){
                        this.fileList=[];
