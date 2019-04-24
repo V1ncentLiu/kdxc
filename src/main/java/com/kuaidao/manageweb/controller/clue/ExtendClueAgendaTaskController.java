@@ -357,7 +357,7 @@ public class ExtendClueAgendaTaskController {
     @ResponseBody
     public JSONResult importInvitearea(@RequestBody ClueAgendaTaskDTO clueAgendaTaskDTO)
         throws Exception {
-        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         // 存放合法的数据
         List<ClueAgendaTaskDTO> dataList = new ArrayList<ClueAgendaTaskDTO>();
         // 存放非法的数据
@@ -370,16 +370,16 @@ public class ExtendClueAgendaTaskController {
 
         //匹配字典数据
         // 资源类型
-        Map<String, Integer> typeMap = dicMap(
+        Map<String, String> typeMap = dicMap(
             itemFeignClient.queryDicItemsByGroupCode(DicCodeEnum.CLUETYPE.getCode()));
         // 资源类别
-        Map<String, Integer> categoryMap =
+        Map<String, String> categoryMap =
             dicMap(itemFeignClient.queryDicItemsByGroupCode(DicCodeEnum.CLUECATEGORY.getCode()));
         // 广告位
-        Map<String, Integer> sourceTypeMap =
+        Map<String, String> sourceTypeMap =
             dicMap(itemFeignClient.queryDicItemsByGroupCode(DicCodeEnum.ADENSE.getCode()));
         // 媒介
-        Map<String, Integer> sourceMap = dicMap(
+        Map<String, String> sourceMap = dicMap(
             itemFeignClient.queryDicItemsByGroupCode(DicCodeEnum.MEDIUM.getCode()));
 
         if (list != null && list.size() > 0) {
@@ -393,9 +393,9 @@ public class ExtendClueAgendaTaskController {
                             clueAgendaTaskDTO1.setProjectId(projectInfoDTO.getId());
                             break;
                         }
-                        if(clueAgendaTaskDTO1.getProjectId() == null){
-                            islegal = false;
-                        }
+                    }
+                    if(clueAgendaTaskDTO1.getProjectId() == null){
+                        islegal = false;
                     }
                 } else {
                     islegal = false;
@@ -410,9 +410,9 @@ public class ExtendClueAgendaTaskController {
                     {
                         islegal=false;
                     }
-                    if(islegal){
-                        clueAgendaTaskDTO1.setReserveTime1(clueAgendaTaskDTO1.getReserveTime1() + ":00");
-                    }
+//                    if(islegal){
+//                        clueAgendaTaskDTO1.setReserveTime1(clueAgendaTaskDTO1.getReserveTime1() + ":00");
+//                    }
                 }
                 if (islegal && (clueAgendaTaskDTO1.getDate() != null
                     && !"".equals(clueAgendaTaskDTO1.getDate()))) {
@@ -423,9 +423,9 @@ public class ExtendClueAgendaTaskController {
                     {
                         islegal=false;
                     }
-                    if(islegal){
-                        clueAgendaTaskDTO1.setDate(clueAgendaTaskDTO1.getDate() + ":00");
-                    }
+//                    if(islegal){
+//                        clueAgendaTaskDTO1.setDate(clueAgendaTaskDTO1.getDate() + ":00");
+//                    }
                 }
                 if (islegal && (clueAgendaTaskDTO1.getMessageTime1() != null
                     && !"".equals(clueAgendaTaskDTO1.getMessageTime1()))) {
@@ -436,9 +436,9 @@ public class ExtendClueAgendaTaskController {
                     {
                         islegal=false;
                     }
-                    if(islegal){
-                        clueAgendaTaskDTO1.setMessageTime1(clueAgendaTaskDTO1.getMessageTime1() + ":00");
-                    }
+//                    if(islegal){
+//                        clueAgendaTaskDTO1.setMessageTime1(clueAgendaTaskDTO1.getMessageTime1() + ":00");
+//                    }
                 }
                 //判断必填项
                 if (islegal && (clueAgendaTaskDTO1.getTypeName() == null
@@ -456,28 +456,28 @@ public class ExtendClueAgendaTaskController {
                 //判断字典表数据是否匹配
                 if (islegal && (clueAgendaTaskDTO1.getTypeName() != null
                     && !"".equals(clueAgendaTaskDTO1.getTypeName()))){
-                    clueAgendaTaskDTO1.setType(typeMap.get(clueAgendaTaskDTO1.getTypeName()));
+                    clueAgendaTaskDTO1.setType(Integer.valueOf(typeMap.get(clueAgendaTaskDTO1.getTypeName())));
                     if(clueAgendaTaskDTO1.getType() == null){
                         islegal = false;
                     }
                 }
                 if (islegal && (clueAgendaTaskDTO1.getCategoryName() != null
                     && !"".equals(clueAgendaTaskDTO1.getCategoryName()))){
-                    clueAgendaTaskDTO1.setCategory(categoryMap.get(clueAgendaTaskDTO1.getCategoryName()));
+                    clueAgendaTaskDTO1.setCategory(Integer.valueOf(categoryMap.get(clueAgendaTaskDTO1.getCategoryName())));
                     if(clueAgendaTaskDTO1.getCategory() == null){
                         islegal = false;
                     }
                 }
                 if (islegal && (clueAgendaTaskDTO1.getSourceTypeName() != null
                     && !"".equals(clueAgendaTaskDTO1.getSourceTypeName()))){
-                    clueAgendaTaskDTO1.setSourceType(sourceTypeMap.get(clueAgendaTaskDTO1.getSourceTypeName()));
+                    clueAgendaTaskDTO1.setSourceType(Integer.valueOf(sourceTypeMap.get(clueAgendaTaskDTO1.getSourceTypeName())));
                     if(clueAgendaTaskDTO1.getSourceType() == null){
                         islegal = false;
                     }
                 }
                 if (islegal && (clueAgendaTaskDTO1.getSourceName() != null
                     && !"".equals(clueAgendaTaskDTO1.getSourceName()))){
-                    clueAgendaTaskDTO1.setSource(sourceMap.get(clueAgendaTaskDTO1.getSourceName()));
+                    clueAgendaTaskDTO1.setSource(Integer.valueOf(sourceMap.get(clueAgendaTaskDTO1.getSourceName())));
                     if(clueAgendaTaskDTO1.getSource() == null){
                         islegal = false;
                     }
@@ -551,7 +551,6 @@ public class ExtendClueAgendaTaskController {
      * @param
      * @return
      */
-    @RequiresPermissions("aggregation:agendaTaskManager:export")
     @PostMapping("/exportFaultClue")
     @LogRecord(description = "下载导入失败资源", operationType = OperationType.EXPORT,
         menuName = MenuEnum.WAIT_DISTRIBUT_RESOURCE)

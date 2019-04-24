@@ -585,7 +585,7 @@
       },
       uploadSuccess(response, file, fileList){//上传成功后
 
-        if(response.code=='0' && file.list.length>0){
+        if(response.code=='0' && response.data.length>0){
           this.addOrModifyDialogTitle="预览数据";
           //清空文件里列表
           this.$refs.upload.clearFiles();
@@ -607,7 +607,6 @@
         this.$message({message:'上传失败',type:'error'});
       },
       submitUpload() {//提交文件
-        alert("111");
         wdrVM.confirmBtnDisabled = false;
         this.loading = true;
         var fileList = this.fileList;
@@ -619,19 +618,28 @@
         this.$refs.upload.submit();
       },
       submitExportclose(){
-        window.location.href="/exetend/agendaTaskManager/queryPageAgendaTask";
+        window.location.href="/exetend/agendaTaskManager/waitDistributResource";
       },
       downloadFaultClue(){
         var param = {};
         wdrVM.loading = true;
         param.list = wdrVM.exportdataTable;
-        axios.post('/exetend/agendaTaskManager/importInvitearea',param).then(function (response) {
-          wdrVM.loading = false;
+        axios.post('/exetend/agendaTaskManager/exportFaultClue',param,{responseType:'blob'})
+        .then(function (response) {
+          console.log(response)
+          var data =  response.data;
+          var fileName = response.headers.filename;
+          saveAs(data,decodeURI(fileName));
+        })
+        .catch(function (error) {
+          console.log(error);
+        }).then(function(){
+          wdrVM.loading=false;
         });
       },
       submitExport(){
         if($("#showButton").attr("data") ==2){
-          window.location.href="/exetend/agendaTaskManager/queryPageAgendaTask";
+          window.location.href="/exetend/agendaTaskManager/waitDistributResource";
           return;
         }
         this.$alert('<center><strong>确认导入数据</strong></center>', {
