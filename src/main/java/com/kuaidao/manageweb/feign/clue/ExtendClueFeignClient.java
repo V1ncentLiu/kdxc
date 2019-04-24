@@ -1,5 +1,7 @@
 package com.kuaidao.manageweb.feign.clue;
 
+import com.kuaidao.aggregation.dto.clue.PushClueReq;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.netflix.feign.FeignClient;
@@ -23,7 +25,7 @@ public interface ExtendClueFeignClient {
 
     /**
      * 待审核数据分页查询
-     * 
+     *
      * @param queryDto
      * @return
      */
@@ -33,7 +35,7 @@ public interface ExtendClueFeignClient {
 
     /**
      * 已审核列表查询
-     * 
+     *
      * @param queryDto
      * @return
      */
@@ -43,7 +45,7 @@ public interface ExtendClueFeignClient {
 
     /**
      * 已审核列表查询
-     * 
+     *
      * @param queryDto
      * @return
      */
@@ -52,7 +54,7 @@ public interface ExtendClueFeignClient {
 
     /**
      * 新建线索
-     * 
+     *
      * @param queryDto
      * @return
      */
@@ -61,15 +63,24 @@ public interface ExtendClueFeignClient {
 
     /**
      * 编辑线索
-     * 
+     *
      * @param queryDto
      * @return
      */
     @RequestMapping(method = RequestMethod.POST, value = "/updateClue")
     public JSONResult<String> updateClue(@RequestBody PushClueReq pushClueReq);
 
-    @Component
-    static class HystrixClientFallback implements ExtendClueFeignClient {
+	/**
+	 * 导入线索
+	 *
+	 * @param queryDto
+	 * @return
+	 */
+	@RequestMapping(method = RequestMethod.POST, value = "/import")
+	public JSONResult importclue(@RequestBody List<PushClueReq> list);
+
+	@Component
+	static class HystrixClientFallback implements ExtendClueFeignClient {
 
         private static Logger logger = LoggerFactory.getLogger(ExtendClueFeignClient.class);
 
@@ -110,8 +121,16 @@ public interface ExtendClueFeignClient {
             // TODO Auto-generated method stub
             return fallBackError("编辑资源");
         }
+		    @Override
+		    public JSONResult importclue(List<PushClueReq> list) {
+			    // TODO Auto-generated method stub
+			    return fallBackError("导入线索");
+		    }
 
     }
+
+
+
 
 
 
