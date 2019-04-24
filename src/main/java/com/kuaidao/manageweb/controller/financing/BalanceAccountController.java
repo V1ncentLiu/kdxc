@@ -184,7 +184,7 @@ public class BalanceAccountController {
      */
     @PostMapping("/rejectApply")
     @ResponseBody
-     @RequiresPermissions("financing:balanceaccountManager:rejectApply")
+  //   @RequiresPermissions("financing:balanceaccountManager:rejectApply")
     @LogRecord(description = "驳回", operationType = OperationType.UPDATE,
             menuName = MenuEnum.REFUNDREBATEAPPLY_MANAGER)
     public JSONResult<Void> rejectApply(@RequestBody ReconciliationConfirmReq req,
@@ -201,8 +201,8 @@ public class BalanceAccountController {
      */
     @PostMapping("/settlementConfirm")
     @ResponseBody
-     @RequiresPermissions("financing:reconciliationConfirmManager:settlementConfirm")
-    @LogRecord(description = "结算确认", operationType = OperationType.UPDATE,
+//     @RequiresPermissions("financing:reconciliationConfirmManager:settlementConfirm")
+    @LogRecord(description = "结算申请", operationType = OperationType.UPDATE,
             menuName = MenuEnum.RECONCILIATIONCONFIRM_MANAGER)
     public JSONResult<Void> settlementConfirm(@RequestBody ReconciliationConfirmReq req,
             HttpServletRequest request) {
@@ -348,7 +348,7 @@ public class BalanceAccountController {
             dataMap.put("payMode", payMode);
             dataMap.put("payType", payType);
             dataMap.put("received", accountDTO.getAmountReceived() == null ? ""
-                    : (accountDTO.getAmountReceived() + ""));
+                    : accountDTO.getAmountReceived() );
             dataMap.put("businessManager", accountDTO.getBusinessManagerName() == null ? ""
                     : (accountDTO.getBusinessManagerName() + ""));
             dataMap.put("busarea",
@@ -360,12 +360,12 @@ public class BalanceAccountController {
             dataMap.put("sale",
                     accountDTO.getTeleSaleName() == null ? "" : accountDTO.getTeleSaleName());
             dataMap.put("receivable", accountDTO.getSignAmountReceivable() == null ? ""
-                    : (accountDTO.getSignAmountReceivable() + ""));
+                    : accountDTO.getSignAmountReceivable() );
             if (accountDTO.getPayType() == 1 || accountDTO.getPayType() == 2) {
                 dataMap.put("toll",
-                        accountDTO.getFirstToll() == null ? "" : (accountDTO.getFirstToll() + ""));
+                        accountDTO.getFirstToll() == null ? "" : accountDTO.getFirstToll() );
                 dataMap.put("preferent", accountDTO.getPreferentialAmount() == null ? ""
-                        : (accountDTO.getPreferentialAmount() + ""));
+                        : accountDTO.getPreferentialAmount());
             } else {
                 dataMap.put("toll", "");
                 dataMap.put("preferent", "");

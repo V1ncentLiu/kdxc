@@ -13,6 +13,7 @@ import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -66,6 +67,8 @@ public class RefundRebateManagerController {
     private DictionaryItemFeignClient dictionaryItemFeignClient;
     @Autowired
     private SysRegionFeignClient sysRegionFeignClient;
+    @Value("${oss.url.directUpload}")
+    private String ossUrl;
 
     /***
      * 餐饮公司退返款页
@@ -101,7 +104,7 @@ public class RefundRebateManagerController {
         // 查询签约店型集合
         request.setAttribute("vistitStoreTypeList",
                 getDictionaryByCode(DicCodeEnum.VISITSTORETYPE.getCode()));
-
+        request.setAttribute("ossUrl", ossUrl);
         return "financing/refundRebateManagerPage";
     }
 

@@ -233,7 +233,7 @@
     	        <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width"
     	         v-for="(item,key,index) in tableColums" v-if="item.fieldCode == 'phone'">
     	             <template slot-scope="scope" >
-                          <p style="color:#409EFF; cursor:pointer" @click="showClueDetailInfo(scope.row.clueId)">{{scope.row.phone}}</p>
+                          <p class="blueColorBtn" @click="showClueDetailInfo(scope.row.clueId)">{{scope.row.phone}}</p>
                         <input type='hidden'>
                         <el-tag v-if="scope.row.tag">{{scope.row.tag}}</el-tag>
                     </template>
@@ -254,6 +254,8 @@
                       </div>
                     </template>
                 </el-table-column>
+                <el-table-column align="center" sortable  :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" width="250px"
+                                 v-else-if="item.fieldCode == 'createTime'||item.fieldCode == 'storeArea'"></el-table-column>
                 <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width"  v-else>
     	        </el-table-column>
     	        
@@ -357,7 +359,7 @@
         </div>
     </el-dialog>
     <!-- 分配资源 -->
-    <el-dialog title="分配资源" :visible.sync="allocateFormVisible">
+    <el-dialog title="分配资源" :visible.sync="allocateFormVisible" width="540px">
       <el-form :model="formAllocat" ref="formAllocat">
         <el-row>
             <el-form-item 
@@ -384,7 +386,7 @@
       </div>
     </el-dialog>
     <!-- 转移资源 -->
-    <el-dialog title="转移资源" :visible.sync="transferFormVisible">
+    <el-dialog title="转移资源" :visible.sync="transferFormVisible" width="540px">
       <el-form :model="formTransfer" ref="formTransfer">
         <el-form-item 
             label="电销总监" 
@@ -409,7 +411,7 @@
       </div>
     </el-dialog>
     <!-- 批号分配 -->
-    <el-dialog title="信息流批量分配" :visible.sync="batchFormVisible">
+    <el-dialog title="信息流批量分配" :visible.sync="batchFormVisible" width="540px">
       <el-form :model="formBatch" ref="formBatch">
         <el-form-item 
             label="信息流分配规则" 
@@ -430,7 +432,7 @@
       </div>
     </el-dialog>
     <!-- 副总分发 -->
-    <el-dialog title="副总分发" :visible.sync="vicemanagerFormVisible">
+    <el-dialog title="副总分发" :visible.sync="vicemanagerFormVisible" width="540px">
       <el-form :model="formVicemanage" ref="formVicemanage">
         <el-form-item 
             label="电销总监" 
@@ -734,7 +736,7 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
             repeatPhonesClick(row) {
                 console.log(row);
                 this.repeatPhonesDialog=true;
-                this.dailogTitleType=row.phone;
+                this.dailogTitleType=row.clueId;
                 this.repeatPhonesTable=[];
                 var param ={};
                     param.id = row.clueId;

@@ -47,20 +47,27 @@ import com.kuaidao.aggregation.dto.clue.ClueAgendaTaskDTO;
 import com.kuaidao.aggregation.dto.clue.ClueAgendaTaskQueryDTO;
 import com.kuaidao.aggregation.dto.clue.ClueDTO;
 import com.kuaidao.aggregation.dto.clue.ClueQueryDTO;
+import com.kuaidao.aggregation.dto.clue.PushClueReq;
 import com.kuaidao.aggregation.dto.project.ProjectInfoDTO;
+import com.kuaidao.common.constant.DicCodeEnum;
 import com.kuaidao.common.constant.RoleCodeEnum;
 import com.kuaidao.common.entity.IdListLongReq;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
+import com.kuaidao.manageweb.config.LogRecord;
+import com.kuaidao.manageweb.config.LogRecord.OperationType;
+import com.kuaidao.manageweb.constant.MenuEnum;
 import com.kuaidao.manageweb.feign.clue.ExtendClueFeignClient;
 import com.kuaidao.manageweb.feign.clue.MyCustomerFeignClient;
 import com.kuaidao.manageweb.feign.customfield.CustomFieldFeignClient;
+import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
 import com.kuaidao.manageweb.feign.project.ProjectInfoFeignClient;
 import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
 import com.kuaidao.sys.dto.customfield.CustomFieldQueryDTO;
 import com.kuaidao.sys.dto.customfield.QueryFieldByRoleAndMenuReq;
 import com.kuaidao.sys.dto.customfield.QueryFieldByUserAndMenuReq;
 import com.kuaidao.sys.dto.customfield.UserFieldDTO;
+import com.kuaidao.sys.dto.dictionary.DictionaryItemRespDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import com.kuaidao.sys.dto.user.UserOrgRoleReq;
 import org.springframework.web.multipart.MultipartFile;
@@ -85,6 +92,8 @@ public class ExtendClueAgendaTaskController {
     private CustomFieldFeignClient customFieldFeignClient;
     @Autowired
     private DictionaryItemFeignClient itemFeignClient;
+    @Autowired
+    private DictionaryItemFeignClient dictionaryItemFeignClient;
 
     /**
      * 初始化待审核列表
@@ -122,6 +131,101 @@ public class ExtendClueAgendaTaskController {
                 customFieldFeignClient.queryFieldByUserAndMenu(queryFieldByUserAndMenuReq);
         request.setAttribute("userFieldList", queryFieldByUserAndMenu.getData());
         return "clue/waitDistributResource";
+    }
+
+    /**
+     * 跳转新增资源
+     *
+     * @param request
+     * @param model
+     * @return
+     */
+    @RequestMapping("/toAddPage")
+    @RequiresPermissions("waitDistributResource:add")
+    public String toAddPage(HttpServletRequest request, Model model) {
+        UserInfoDTO user = getUser();
+        // 查询所有项目
+        JSONResult<List<ProjectInfoDTO>> allProject = projectInfoFeignClient.allProject();
+        request.setAttribute("projectList", allProject.getData());
+        // 查询非优化字典资源类别集合
+        request.setAttribute("clueCategoryList",
+                getDictionaryByCode(DicCodeEnum.CLUECATEGORY.getCode()));
+        // 查询字典资源类型集合
+        request.setAttribute("clueTypeList", getDictionaryByCode(DicCodeEnum.CLUETYPE.getCode()));
+        // 查询字典广告位集合
+        request.setAttribute("adsenseList", getDictionaryByCode(DicCodeEnum.ADENSE.getCode()));
+        // 查询字典媒介集合
+        request.setAttribute("mediumList", getDictionaryByCode(DicCodeEnum.MEDIUM.getCode()));
+
+        return "clue/addCluePage";
+    }
+
+    /**
+     * 跳转新增资源
+     *
+     * @param request
+     * @param model
+     * @return
+     */
+    @RequestMapping("/toUpdatePage")
+    @RequiresPermissions("waitDistributResource:update")
+    public String toUpdatePage(@RequestParam long id, HttpServletRequest request, Model model) {
+        UserInfoDTO user = getUser();
+        // 查询所有项目
+        JSONResult<List<ProjectInfoDTO>> allProject = projectInfoFeignClient.allProject();
+        request.setAttribute("projectList", allProject.getData());
+        // 查询非优化字典资源类别集合
+        request.setAttribute("clueCategoryList",
+                getDictionaryByCode(DicCodeEnum.CLUECATEGORY.getCode()));
+        // 查询字典资源类型集合
+        request.setAttribute("clueTypeList", getDictionaryByCode(DicCodeEnum.CLUETYPE.getCode()));
+        // 查询字典广告位集合
+        request.setAttribute("adsenseList", getDictionaryByCode(DicCodeEnum.ADENSE.getCode()));
+        // 查询字典媒介集合
+        request.setAttribute("mediumList", getDictionaryByCode(DicCodeEnum.MEDIUM.getCode()));
+
+        return "clue/addCluePage";
+    }
+
+    /**
+     * 新建资源
+     *
+     * @param request
+     * @param clueId
+     * @return
+     */
+    @RequestMapping("/createClue")
+    @RequiresPermissions("waitDistributResource:add")
+    @ResponseBody
+    @LogRecord(description = "新建资源", operationType = OperationType.INSERT,
+            menuName = MenuEnum.WAIT_DISTRIBUT_RESOURCE)
+    public JSONResult<String> createClue(HttpServletRequest request,
+            @RequestBody PushClueReq pushClueReq) {
+        UserInfoDTO user = getUser();
+        pushClueReq.setCreateUser(user.getId());
+        JSONResult<String> clueInfo = extendClueFeignClient.createClue(pushClueReq);
+
+        return clueInfo;
+    }
+
+    /**
+     * 编辑资源
+     *
+     * @param request
+     * @param clueId
+     * @return
+     */
+    @RequestMapping("/updateClue")
+    @RequiresPermissions("waitDistributResource:update")
+    @ResponseBody
+    @LogRecord(description = "编辑资源", operationType = OperationType.UPDATE,
+            menuName = MenuEnum.WAIT_DISTRIBUT_RESOURCE)
+    public JSONResult<String> updateClue(HttpServletRequest request,
+            @RequestBody PushClueReq pushClueReq) {
+
+        JSONResult<String> clueInfo = extendClueFeignClient.updateClue(pushClueReq);
+
+        return clueInfo;
     }
 
     @RequestMapping("/queryPageAgendaTask")
@@ -237,7 +341,7 @@ public class ExtendClueAgendaTaskController {
     @RequiresPermissions("waitDistributResource:distribute")
     @ResponseBody
     @LogRecord(description = "待分发资源自动分配", operationType = OperationType.DISTRIBUTION,
-        menuName = MenuEnum.WAIT_DISTRIBUT_RESOURCE)
+            menuName = MenuEnum.WAIT_DISTRIBUT_RESOURCE)
     public JSONResult<Integer> autoAllocationTask(HttpServletRequest request,
             @RequestBody IdListLongReq queryDto) {
 
@@ -257,6 +361,22 @@ public class ExtendClueAgendaTaskController {
         Object attribute = SecurityUtils.getSubject().getSession().getAttribute("user");
         UserInfoDTO user = (UserInfoDTO) attribute;
         return user;
+    }
+
+    /**
+     * 查询字典表
+     *
+     * @param code
+     * @return
+     */
+    private List<DictionaryItemRespDTO> getDictionaryByCode(String code) {
+        JSONResult<List<DictionaryItemRespDTO>> queryDicItemsByGroupCode =
+                dictionaryItemFeignClient.queryDicItemsByGroupCode(code);
+        if (queryDicItemsByGroupCode != null
+                && JSONResult.SUCCESS.equals(queryDicItemsByGroupCode.getCode())) {
+            return queryDicItemsByGroupCode.getData();
+        }
+        return null;
     }
 
     /**
