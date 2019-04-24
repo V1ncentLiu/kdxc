@@ -440,7 +440,7 @@
                     cusAmount:'',
                     refundTime:'',
                     reason:'',
-                    fileList:[]
+                    fileList: [],
                    
                 },
                 dialogRules:{
@@ -708,9 +708,12 @@
             editDialog(row){//驳回编辑
                 //get oss param
                 this.getUploadParam();
+                 if(this.$refs['dialogForm]']){
+                   this.$refs['dialogForm'].resetFields();
+                  }  
                 var param={};
                 param.id=row.id;
-                axios.post('/financing/refund/queryRefundInfoById',param)
+                 axios.post('/financing/refund/queryRefundInfoById',param)
                 .then(function (response) {
                       var result =  response.data;
                       if(result.code=='0'){
@@ -718,6 +721,7 @@
                           mainDivVM.dialogForm= table;
                           var imgList =  table.imgList;
                           var imgShowList = new Array();
+                          var fileIdList = new Array();
                           for(var i=0;i<imgList.length;i++){
                               var curImg = imgList[i];
                               var img={};
@@ -727,9 +731,13 @@
                               img.id=curImg.id;
                               img.rebateId=curImg.reId;
                               imgShowList.push(img);
+                              fileIdList.push(curImg.id);
+                             
                           } 
+                          mainDivVM.dialogForm.fileList=fileIdList;
                           mainDivVM.editRejectTitle = "编辑驳回（"+table.signNo+"）签约单退款申请";
                           mainDivVM.fileList=imgShowList;
+                          
                           mainDivVM.dialogFormVisible=true;
                       }else{
                           console.error(response);
@@ -738,7 +746,7 @@
                 })
                 .catch(function (error) {
                      console.log(error);
-                });
+                }); 
                 
             },
             handlePreview(file){
@@ -776,6 +784,14 @@
             		var curImg = curImgList[i];
             		if(curImg.id==id){
             			curImgList.splice(i--,1);
+            			break;
+            		}
+            	}
+            	var fileIdList = this.dialogForm.fileList;
+            	for(var i=0;i<fileIdList.length;i++){
+            		var curId = fileIdList[i];
+            		if(curId==id){
+            			fileIdList.splice(i--,1);
             			break;
             		}
             	}
@@ -1021,8 +1037,10 @@
                         lastFile.name=realName;
                         lastFile.url = imgUrl;
                         lastFile.randomName = randomName; 
-                        //mainDivVM.dialogForm.fileList.push(resData.data);
                         var curList = mainDivVM.fileList;
+                        console.info(mainDivVM.dialogForm);
+                        console.info(mainDivVM.dialogForm.fileList);
+                        mainDivVM.dialogForm.fileList.push(resData.data);
                         curList.push(lastFile);
                         
                         mainDivVM.$refs['dialogForm'].validateField(["fileList"]);
