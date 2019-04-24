@@ -440,7 +440,7 @@
                     cusAmount:'',
                     refundTime:'',
                     reason:'',
-                    fileList:[]
+                    fileList: [],
                    
                 },
                 dialogRules:{
@@ -708,6 +708,9 @@
             editDialog(row){//驳回编辑
                 //get oss param
                 this.getUploadParam();
+               /*  if(this.$refs['dialogForm]'){
+                    this.$refs['dialogForm'].resetFields();
+                } */
                 var param={};
                 param.id=row.id;
                 axios.post('/financing/refund/queryRefundInfoById',param)
@@ -718,6 +721,7 @@
                           mainDivVM.dialogForm= table;
                           var imgList =  table.imgList;
                           var imgShowList = new Array();
+                          var fileIdList = new Array();
                           for(var i=0;i<imgList.length;i++){
                               var curImg = imgList[i];
                               var img={};
@@ -727,7 +731,10 @@
                               img.id=curImg.id;
                               img.rebateId=curImg.reId;
                               imgShowList.push(img);
+                              fileIdList.push(curImg.id);
+                             
                           } 
+                          mainDivVM.dialogForm.fileList=fileIdList;
                           mainDivVM.editRejectTitle = "编辑驳回（"+table.signNo+"）签约单退款申请";
                           mainDivVM.fileList=imgShowList;
                           mainDivVM.dialogFormVisible=true;
@@ -1021,8 +1028,10 @@
                         lastFile.name=realName;
                         lastFile.url = imgUrl;
                         lastFile.randomName = randomName; 
-                        //mainDivVM.dialogForm.fileList.push(resData.data);
                         var curList = mainDivVM.fileList;
+                        console.info(mainDivVM.dialogForm);
+                        console.info(mainDivVM.dialogForm.fileList);
+                        mainDivVM.dialogForm.fileList.push(resData.data);
                         curList.push(lastFile);
                         
                         mainDivVM.$refs['dialogForm'].validateField(["fileList"]);
