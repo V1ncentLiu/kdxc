@@ -439,7 +439,9 @@
                 dialogForm:{
                     cusAmount:'',
                     refundTime:'',
-                    reason:''
+                    reason:'',
+                    fileList: [],
+                   
                 },
                 dialogRules:{
                     reason : [
@@ -466,7 +468,7 @@
                         
                     ],
                     fileList:[
-                    	{ required: true, message: '选择文件', trigger: 'blur' }
+                    	{ required: true, message: '选择文件', trigger: 'change' }
                     ]
                 
                     
@@ -706,6 +708,9 @@
             editDialog(row){//驳回编辑
                 //get oss param
                 this.getUploadParam();
+               /*  if(this.$refs['dialogForm]'){
+                    this.$refs['dialogForm'].resetFields();
+                } */
                 var param={};
                 param.id=row.id;
                 axios.post('/financing/refund/queryRefundInfoById',param)
@@ -716,6 +721,7 @@
                           mainDivVM.dialogForm= table;
                           var imgList =  table.imgList;
                           var imgShowList = new Array();
+                          var fileIdList = new Array();
                           for(var i=0;i<imgList.length;i++){
                               var curImg = imgList[i];
                               var img={};
@@ -725,7 +731,10 @@
                               img.id=curImg.id;
                               img.rebateId=curImg.reId;
                               imgShowList.push(img);
+                              fileIdList.push(curImg.id);
+                             
                           } 
+                          mainDivVM.dialogForm.fileList=fileIdList;
                           mainDivVM.editRejectTitle = "编辑驳回（"+table.signNo+"）签约单退款申请";
                           mainDivVM.fileList=imgShowList;
                           mainDivVM.dialogFormVisible=true;
@@ -1020,8 +1029,12 @@
                         lastFile.url = imgUrl;
                         lastFile.randomName = randomName; 
                         var curList = mainDivVM.fileList;
+                        console.info(mainDivVM.dialogForm);
+                        console.info(mainDivVM.dialogForm.fileList);
+                        mainDivVM.dialogForm.fileList.push(resData.data);
                         curList.push(lastFile);
                         
+                        mainDivVM.$refs['dialogForm'].validateField(["fileList"]);
                         mainDivVM.$message({message:'上传成功',type:'success'});
                     }else{
                         mainDivVM.$message({message:'上传失败',type:'error'});
@@ -1096,9 +1109,9 @@
                  text="全款"
                }else if(cellValue=="2"){
                  text="订金"
-               }else if(cellValue=="2"){
+               }else if(cellValue=="3"){
                  text="追加定金"
-               }else if(cellValue=="2"){
+               }else if(cellValue=="4"){
                  text="尾款"
                }
                return text;
