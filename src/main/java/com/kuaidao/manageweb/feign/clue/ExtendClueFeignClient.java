@@ -1,5 +1,7 @@
 package com.kuaidao.manageweb.feign.clue;
 
+import com.kuaidao.aggregation.dto.clue.PushClueReq;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.netflix.feign.FeignClient;
@@ -48,6 +50,15 @@ public interface ExtendClueFeignClient {
 	@RequestMapping(method = RequestMethod.POST, value = "/autoAllocationTask")
 	public JSONResult<Integer> autoAllocationTask(@RequestBody IdListLongReq list);
 
+	/**
+	 * 导入线索
+	 *
+	 * @param queryDto
+	 * @return
+	 */
+	@RequestMapping(method = RequestMethod.POST, value = "/import")
+	public JSONResult importclue(@RequestBody List<PushClueReq> list);
+
 	@Component
 	static class HystrixClientFallback implements ExtendClueFeignClient {
 
@@ -76,6 +87,12 @@ public interface ExtendClueFeignClient {
 		public JSONResult<Integer> autoAllocationTask(IdListLongReq list) {
 			// TODO Auto-generated method stub
 			return fallBackError("自动分配任务");
+		}
+
+		@Override
+		public JSONResult importclue(List<PushClueReq> list) {
+			// TODO Auto-generated method stub
+			return fallBackError("导入线索");
 		}
 
 	}
