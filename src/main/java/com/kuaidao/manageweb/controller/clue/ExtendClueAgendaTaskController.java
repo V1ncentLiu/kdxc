@@ -6,6 +6,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -59,6 +60,8 @@ public class ExtendClueAgendaTaskController {
     private CustomFieldFeignClient customFieldFeignClient;
     @Autowired
     private DictionaryItemFeignClient dictionaryItemFeignClient;
+    @Value("${oss.url.directUpload}")
+    private String ossUrl;
 
     /**
      * 初始化待审核列表
@@ -121,7 +124,7 @@ public class ExtendClueAgendaTaskController {
         request.setAttribute("adsenseList", getDictionaryByCode(DicCodeEnum.ADENSE.getCode()));
         // 查询字典媒介集合
         request.setAttribute("mediumList", getDictionaryByCode(DicCodeEnum.MEDIUM.getCode()));
-
+        request.setAttribute("ossUrl", ossUrl);
         return "clue/addCluePage";
     }
 
@@ -148,7 +151,7 @@ public class ExtendClueAgendaTaskController {
         request.setAttribute("adsenseList", getDictionaryByCode(DicCodeEnum.ADENSE.getCode()));
         // 查询字典媒介集合
         request.setAttribute("mediumList", getDictionaryByCode(DicCodeEnum.MEDIUM.getCode()));
-
+        request.setAttribute("ossUrl", ossUrl);
         return "clue/addCluePage";
     }
 
