@@ -309,13 +309,13 @@ public class RefundController {
     public JSONResult<PageBean<RefundRespDTO>> listRefundConfirm(
             @RequestBody RefundQueryDTO queryDTO) {
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
-        //queryDTO.setCurUser(curLoginUser.getId());
+        queryDTO.setCurUser(curLoginUser.getId());
         queryDTO.setType(AggregationConstant.REFOUND_REBATE_TYPE.REFOUND_TYPE);
         
         List<RoleInfoDTO> roleList = curLoginUser.getRoleList();
         RoleInfoDTO roleInfoDTO = roleList.get(0);
         String roleCode = roleInfoDTO.getRoleCode();
-        if (RoleCodeEnum.QDSJCW.name().equals(roleCode)){
+       if (RoleCodeEnum.QDSJCW.name().equals(roleCode)){
             queryDTO.setRoleCode(roleCode);
         }else if(RoleCodeEnum.SJHZCW.name().equals(roleCode)) {
             queryDTO.setRoleCode(roleCode);
@@ -418,7 +418,7 @@ public class RefundController {
     public JSONResult<PageBean<RefundRespDTO>> listRebateConfirm(
             @RequestBody RefundQueryDTO queryDTO) {
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
-       // queryDTO.setCurUser(curLoginUser.getId());
+        queryDTO.setCurUser(curLoginUser.getId());
         queryDTO.setType(AggregationConstant.REFOUND_REBATE_TYPE.REBATE_TYPE);
         
         List<RoleInfoDTO> roleList = curLoginUser.getRoleList();
@@ -429,6 +429,7 @@ public class RefundController {
        }else {
            return new JSONResult().fail(SysErrorCodeEnum.ERR_NOTEXISTS_DATA.getCode(), "角色没有权限");
        }
+        //queryDTO.setRoleCode(RoleCodeEnum.QDSJCW.name());
         return refundFeignClient.listRefundApply(queryDTO);
     }
     

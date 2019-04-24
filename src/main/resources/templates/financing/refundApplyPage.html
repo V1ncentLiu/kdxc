@@ -268,7 +268,6 @@
                     :on-success="handleSuccess"
                     :on-error="handleError"
                     :before-upload="handleBefore"
-                    multiple
                       accept="image/png,image/jpeg"
                     :data="uploadParamData"
                     :on-change="selectFile"
@@ -330,8 +329,8 @@
     <!-- 下载图片 dialog 开始 -->
         <el-dialog title="下载图片" :visible.sync="downloadDialogVisible" width="870px">
           <ol>
-             <li v-for="(item,index) in imgList"  >
-              <a :href="'/financing/refund/downloadOssImg?url='+item.imgUrl" :download="item.realName">{{item.realName}}</a>
+             <li v-for="(item,index) in imgList"  style="margin-bottom:8px">
+              <a :href="'/financing/refund/downloadOssImg?url='+item.imgUrl" :download="item.realName" style="color:blue;text-decoration:underline">{{item.realName}}</a>
              </li>
            </ol> 
        </el-dialog>
@@ -440,7 +439,9 @@
                 dialogForm:{
                     cusAmount:'',
                     refundTime:'',
-                    reason:''
+                    reason:'',
+                    fileList: [],
+                   
                 },
                 dialogRules:{
                     reason : [
@@ -450,8 +451,26 @@
                         { required: true, message: '请选择退款时间', trigger: 'blur' }
                     ],
                     cusAmount: [
-                        { required: true, message: '请输入退款客户金额', trigger: 'blur' }
+                        { required: true, message: '请输入退款客户金额', trigger: 'blur' },
+                        {validator:function(rule,value,callback){
+                            if(value){
+                                 if(!/^[0-9]*$/.test(value)){
+                                     callback(new Error("只可以输入整数"));     
+                                 }else{
+                                     callback();
+                                 }
+                            }else{
+                                callback();
+                            }
+                           
+                            
+                        },trigger:'blur'},
+                        
                     ],
+                    fileList:[
+                    	{ required: true, message: '选择文件', trigger: 'change' }
+                    ]
+                
                     
                 },          
                 amount: [{
@@ -515,6 +534,15 @@
                   
               },
              selectFile(file, fileList){
+            	  var fileLength = fileList.length;
+            	  if(fileLength>2){
+            		  //验证最后2个文件是否都是即将要上传的，如果是，只保留一个
+            		  var lastSecondFile = fileList[fileLength-2];
+            		  if(!lastSecondFile.hasOwnProperty("id")){
+            			  fileList.splice(length-2,1);
+            		  }
+            		  
+            	  }
                    mainDivVM.uploadParamData.key= mainDivVM.uploadParamData.dir+mainDivVM.random_string(10)+mainDivVM.get_suffix(file.name),
                    mainDivVM.uploadParamData.realName= file.name
               },
@@ -523,8 +551,6 @@
                 this.$refs.refundApplyImgUpload.submit();
             },
             submitDialogForm(formName) {//驳回提交验证
-            	debugger;
-            	console.info(this.fileList);
                 this.confirmBtnDisabled=true;
             
                 this.$refs[formName].validate((valid) => {
@@ -541,7 +567,7 @@
                             var data =  response.data;
                             if(data.code=='0'){
                                 mainDivVM.dialogFormVisible=false;
-                                mainDivVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
+                                mainDivVM.$message({message:'操作成功',type:'success',duration:1500,onClose:function(){
                                     mainDivVM.searchTable();
                                   }});
                                
@@ -682,9 +708,12 @@
             editDialog(row){//驳回编辑
                 //get oss param
                 this.getUploadParam();
+                 if(this.$refs['dialogForm]']){
+                   this.$refs['dialogForm'].resetFields();
+                  }  
                 var param={};
                 param.id=row.id;
-                axios.post('/financing/refund/queryRefundInfoById',param)
+                 axios.post('/financing/refund/queryRefundInfoById',param)
                 .then(function (response) {
                       var result =  response.data;
                       if(result.code=='0'){
@@ -692,6 +721,7 @@
                           mainDivVM.dialogForm= table;
                           var imgList =  table.imgList;
                           var imgShowList = new Array();
+                          var fileIdList = new Array();
                           for(var i=0;i<imgList.length;i++){
                               var curImg = imgList[i];
                               var img={};
@@ -701,9 +731,13 @@
                               img.id=curImg.id;
                               img.rebateId=curImg.reId;
                               imgShowList.push(img);
+                              fileIdList.push(curImg.id);
+                             
                           } 
+                          mainDivVM.dialogForm.fileList=fileIdList;
                           mainDivVM.editRejectTitle = "编辑驳回（"+table.signNo+"）签约单退款申请";
                           mainDivVM.fileList=imgShowList;
+                          
                           mainDivVM.dialogFormVisible=true;
                       }else{
                           console.error(response);
@@ -712,7 +746,7 @@
                 })
                 .catch(function (error) {
                      console.log(error);
-                });
+                }); 
                 
             },
             handlePreview(file){
@@ -731,6 +765,7 @@
                  .then(function (response) {
                        var result =  response.data;
                        if(result.code=='0'){
+                    	   mainDivVM.deleteFile(id);
                            mainDivVM.$message({message:'删除成功',type:'success'});
                        }else{
                            console.error(response);
@@ -742,6 +777,25 @@
                       console.log(error);
                  });
                  
+            },
+            deleteFile(id){//把imgList中的文件移除
+            	var curImgList = this.fileList;
+            	for(var i=0;i<curImgList.length;i++){
+            		var curImg = curImgList[i];
+            		if(curImg.id==id){
+            			curImgList.splice(i--,1);
+            			break;
+            		}
+            	}
+            	var fileIdList = this.dialogForm.fileList;
+            	for(var i=0;i<fileIdList.length;i++){
+            		var curId = fileIdList[i];
+            		if(curId==id){
+            			fileIdList.splice(i--,1);
+            			break;
+            		}
+            	}
+            	
             },
             handleExceed(files, fileList) {
                 //this.$message.warning(`当前限制选择 3 个文件，本次选择了 ${files.length} 个文件，共选择了 ${files.length + fileList.length} 个文件`);
@@ -967,6 +1021,7 @@
                 var realName = file.name;
                 var randomName = mainDivVM.uploadParamData.key;
                 var imgUrl =  mainDivVM.uploadOssHost+"/"+randomName;
+                console.info(imgUrl);
                 var param = {};
                 param.realName=realName;
                 param.imgUrl = imgUrl;
@@ -977,63 +1032,23 @@
                 .then(function (response) {
                     var resData = response.data;
                     if(resData.code=='0'){
-                    /* 	var curFileList = mainDivVM.fileList;
-                    	var fileListLen = fileList.length;
-                    	var lastFile = fileList[fileListLen-1];
-                    	var lastFile = fileList[fileListLen-1];
-                    	lastFile.id= resData.data;
-                    	lastFile.realName=realName;
-                    	lastFile.imgUrl = imgUrl;
-                    	lastFile.randomName = randomName; 
-                    	curFileList.push(lastFile);
-                    	mainDivVM.fileList = curFileList; */
                         var lastFile = {};
                         lastFile.id= resData.data;
                         lastFile.name=realName;
                         lastFile.url = imgUrl;
                         lastFile.randomName = randomName; 
                         var curList = mainDivVM.fileList;
+                        console.info(mainDivVM.dialogForm);
+                        console.info(mainDivVM.dialogForm.fileList);
+                        mainDivVM.dialogForm.fileList.push(resData.data);
                         curList.push(lastFile);
                         
+                        mainDivVM.$refs['dialogForm'].validateField(["fileList"]);
                         mainDivVM.$message({message:'上传成功',type:'success'});
                     }else{
                         mainDivVM.$message({message:'上传失败',type:'error'});
                     }
                     
-                   /*  //查询图片列表 
-                    var id = fileList[0].reId;
-                    var param = {};
-                    param.id = id;
-                    axios.post('/financing/refund/listImgById', param)
-                    .then(function (response) {
-                        var resData = response.data;
-                        if(resData.code=='0'){
-                            var imgList =  resData.data;
-                            var imgShowList = new Array();
-                            for(var i=0;i<imgList.length;i++){
-                                var curImg = imgList[i];
-                                var img={};
-                              //  img.name="上传文件"+(i+1);
-                                img.name= curImg.realName;
-                                img.url = curImg.imgUrl;
-                                img.id=curImg.id;
-                                img.rebateId=curImg.reId;
-                                imgShowList.push(img);
-                            } 
-                            mainDivVM.fileList=imgShowList;
-                            
-                            
-                        }else{
-                            mainDivVM.$message({message:'查询图片失败',type:'error'});
-                            console.error(resData);
-                        }
-                    
-                    })
-                    .catch(function (error) {
-                         console.log(error);
-                    }).then(function(){
-                        
-                    }); */
                     
                 })
                 .catch(function (error) {
@@ -1047,7 +1062,6 @@
                 console.info(err);
             },
             handleBefore(file){
-            	debugger;
             	   var isTextComputer = file.type === 'image/png' || file.type==='image/jpeg';
                    if(!isTextComputer){
                        this.fileList=[];
@@ -1104,9 +1118,9 @@
                  text="全款"
                }else if(cellValue=="2"){
                  text="订金"
-               }else if(cellValue=="2"){
+               }else if(cellValue=="3"){
                  text="追加定金"
-               }else if(cellValue=="2"){
+               }else if(cellValue=="4"){
                  text="尾款"
                }
                return text;

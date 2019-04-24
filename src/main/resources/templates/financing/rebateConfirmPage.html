@@ -169,7 +169,7 @@
                 <el-table-column align="center" type="index" label="序号" width="55"></el-table-column>
                 <el-table-column align="center" prop="signNo" label="签约单编号"></el-table-column>
                 <el-table-column align="center" prop="customerName" label="客户姓名"></el-table-column>
-                <el-table-column align="center" prop="relateSignNoList" label="关联签约单店">
+                <el-table-column align="center" prop="relateSignNoList" label="关联签约单">
                     <template slot-scope="scope">
                         <div  v-if="scope.row.relateSignNoList.length>=1"   v-for="item in scope.row.relateSignNoList">
                             <el-button size="mini"  type="text" @click="openSignDialog(item)">{{item}}</el-button>
@@ -199,7 +199,7 @@
                 <el-table-column align="center" prop="status" label="处理状态">
                     <template slot-scope="scope">
                         <div v-if="scope.row.status == '2'">
-                            <span class="inlineText">已驳回</span><el-button @click="showReason(scope.row)" size="small" type="text">驳回原因</el-button>
+                            <span class="inlineText" style="color:red">已驳回</span><el-button @click="showReason(scope.row)" size="small" type="text">驳回原因</el-button>
                         </div>
                         <div v-else-if="scope.row.status == '1'">返款确认中</div>
                         <div v-else-if="scope.row.status == '3'">确认返款</div>
@@ -317,8 +317,8 @@
     <!-- 下载图片 dialog 开始 -->
         <el-dialog title="下载图片" :visible.sync="downloadDialogVisible" width="870px">
              <ol>
-                <li v-for="(item,index) in imgList"  >
-                 <a :href="'/financing/refund/downloadOssImg?url='+item.imgUrl" :download="item.realName">{{item.realName}}</a>
+                <li v-for="(item,index) in imgList"  style="margin-bottom:8px">
+                 <a :href="'/financing/refund/downloadOssImg?url='+item.imgUrl" :download="item.realName" style="color:blue;text-decoration:underline">{{item.realName}}</a>
                 </li>
               </ol> 
        </el-dialog>
@@ -327,7 +327,7 @@
     <el-dialog title="提示" :visible.sync="rejectRefundDialogVisible">
         <el-form :model="rejectRefundDialogForm" ref="rejectRefundDialogForm" :rules="rejectRefundDialogRules">            
             <div class="fs16 marginB20">确定要将此 【{{sigNoTitle}}】返款申请驳回吗？</div>
-            <el-form-item label="驳回原因：" label-width="100px" prop="reason"  class="redcolor">
+            <el-form-item label="驳回原因：" label-width="100px" prop="rejectReason"  class="redcolor">
                 <el-input
                     type="textarea"
                     :rows="4"
@@ -521,7 +521,7 @@
                 SignNoPayDetailTitle:'',
                 payDetailTitle:'',
                 rejectRefundDialogForm:{
-                    
+                	rejectReason:''
                 },
                 rejectRefundDialogRules:{
                     rejectReason: [
@@ -684,7 +684,7 @@
                     for(var i=0;i<rows.length;i++){
                         var curRow = rows[i];
                         if(curRow.status!=1){
-                            this.$message({message:'只允许操作已驳回数据',type:'warning'});
+                            this.$message({message:'只允许操作待处理数据',type:'warning'});
                             isPass=false;
                             break;
                         }
@@ -1087,7 +1087,7 @@
                      }
                      
                      this.sigNoTitle= titleArr.join("，");
-                     this.rejectRefundDialogForm.reason='';
+                     this.rejectRefundDialogForm.rejectReason='';
                      this.rejectRefundDialogVisible =true;
                 }
            },

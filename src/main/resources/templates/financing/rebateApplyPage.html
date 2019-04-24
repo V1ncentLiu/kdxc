@@ -166,7 +166,7 @@
                 <el-table-column align="center" type="index" label="序号" width="55"></el-table-column>
                 <el-table-column align="center" prop="signNo" label="签约单编号"></el-table-column>
                 <el-table-column align="center" prop="customerName" label="客户姓名"></el-table-column>
-                <el-table-column align="center" prop="relateSignNoList" label="关联签约单店">
+                <el-table-column align="center" prop="relateSignNoList" label="关联签约单">
                     <template slot-scope="scope">
                         <div  v-if="scope.row.relateSignNoList.length>=1"   v-for="item in scope.row.relateSignNoList">
                             <el-button size="mini"  type="text" @click="openSignDialog(item)">{{item}}</el-button>
@@ -282,7 +282,7 @@
                     placeholder="选择日期时间">
                 </el-date-picker>
             </el-form-item>
-            <el-form-item label="上传图片：" :label-width="formLabelWidth" prop="drawbackTime" class="redcolor">
+            <el-form-item label="上传图片：" :label-width="formLabelWidth" prop="fileList" class="redcolor">
                 <el-upload
                     class="upload-demo"
                     :action="uploadOssHost"
@@ -292,7 +292,6 @@
                     :on-success="handleSuccess"
                     :on-error="handleError"
                     :before-upload="handleBefore"
-                    multiple
                       accept="image/png,image/jpeg"
                     :data="uploadParamData"
                     :on-change="selectFile"
@@ -332,8 +331,8 @@
     <!-- 下载图片 dialog 开始 -->
         <el-dialog title="下载图片" :visible.sync="downloadDialogVisible" width="870px">
             <ol>
-                <li v-for="(item,index) in imgList"  >
-                 <a :href="'/financing/refund/downloadOssImg?url='+item.imgUrl" :download="item.realName">{{item.realName}}</a>
+                <li v-for="(item,index) in imgList" style="margin-bottom:8px">
+                 <a :href="'/financing/refund/downloadOssImg?url='+item.imgUrl" :download="item.realName" style="color:blue;text-decoration:underline">{{item.realName}}</a>
                 </li>
               </ol> 
               <!-- <a v-for="(item,index) in imgList"  @click="downloadImg(item.url,index)">上传图片{{index+1}}</a> -->
@@ -635,15 +634,33 @@
                 },
                 dialogRules:{
                     reason : [
-                        { required: true, message: '请输入退款原因', trigger: 'blur' }
+                        { required: true, message: '请输入返款原因', trigger: 'blur' }
                     ],
                     refundTime : [
-                        { required: true, message: '请选择退款时间', trigger: 'blur' }
+                        { required: true, message: '请选择返款时间', trigger: 'blur' }
                     ],
                     cusAmount: [
-                        { required: true, message: '请输入退款客户金额', trigger: 'blur' }
+                        { required: true, message: '请输入返款客户金额', trigger: 'blur' },
+                        {validator:function(rule,value,callback){
+                            if(value){
+                                 if(!/^[0-9]*$/.test(value)){
+                                     callback(new Error("只可以输入整数"));     
+                                 }else{
+                                     callback();
+                                 }
+                            }else{
+                                callback();
+                            }
+                           
+                            
+                        },trigger:'blur'},
                     ],
-                    
+                    fileList:[
+                        { required: true, message: '选择文件', trigger: 'blur' }
+                    ],
+                    dynamicTags:[
+                    	 { required: true, message: '关联签约单不可以为空', trigger: 'blur' }
+                    ]
                 },          
                 amount: [{
                     value: '0',
@@ -1207,9 +1224,9 @@
                  text="全款"
                }else if(cellValue=="2"){
                  text="定金"
-               }else if(cellValue=="2"){
+               }else if(cellValue=="3"){
                  text="追加定金"
-               }else if(cellValue=="2"){
+               }else if(cellValue=="4"){
                  text="尾款"
                }
                return text;
@@ -1318,6 +1335,7 @@
                 .then(function (response) {
                       var result =  response.data;
                       if(result.code=='0'){
+                    	  mainDivVM.deleteFile(id);
                           mainDivVM.$message({message:'删除成功',type:'success'});
                       }else{
                           console.error(response);
@@ -1329,6 +1347,17 @@
                      console.log(error);
                 });
                 
+           },
+           deleteFile(id){//把imgList中的文件移除
+               var curImgList = this.fileList;
+               for(var i=0;i<curImgList.length;i++){
+                   var curImg = curImgList[i];
+                   if(curImg.id==id){
+                       curImgList.splice(i--,1);
+                       break;
+                   }
+               }
+               
            },
            handleExceed(files, fileList) {
                //this.$message.warning(`当前限制选择 3 个文件，本次选择了 ${files.length} 个文件，共选择了 ${files.length + fileList.length} 个文件`);
@@ -1436,6 +1465,15 @@
                  
              },
             selectFile(file, fileList){
+            	 var fileLength = fileList.length;
+                 if(fileLength>2){
+                     //验证最后2个文件是否都是即将要上传的，如果是，只保留一个
+                     var lastSecondFile = fileList[fileLength-2];
+                     if(!lastSecondFile.hasOwnProperty("id")){
+                         fileList.splice(length-2,1);
+                     }
+                     
+                 }
                   mainDivVM.uploadParamData.key= mainDivVM.uploadParamData.dir+mainDivVM.random_string(10)+mainDivVM.get_suffix(file.name),
                   mainDivVM.uploadParamData.realName= file.name
              },
