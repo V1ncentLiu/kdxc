@@ -17,12 +17,12 @@
     <el-row class="marginB20 ">
     		<el-button type="primary" @click="dialogFormVisible = true"><i class="el-icon-menu"></i>选择列</el-button>
     		<!--  <shiro:hasPermission name="financing:balanceaccountManager:rejectApply">  -->
-		    <el-button type="success" @click="rejectback">驳回</el-button>
+		    <el-button type="danger" @click="rejectback">驳回</el-button>
 		    <!--  </shiro:hasPermission> -->
     		<!-- <shiro:hasPermission name="financing:balanceaccountManager:settlementConfirm">  -->
 		    <el-button type="warning" @click="settlementConfirmButton">提交对账确认</el-button>
 		    <!--  </shiro:hasPermission>  -->
-			  <el-button type="danger" @click="down">下载结算单</el-button>
+			  <el-button type="success" @click="down">下载结算单</el-button>
 	  </el-row>
 	  <div class="mainSearchBg">        
         <div class="mainSearchFormBox">
@@ -218,8 +218,7 @@
         </template>
     </el-dialog>
       <!--驳回原因-->
-    <el-dialog title="驳回原因" :visible.sync="backVisable"
-               width="50%">
+    <el-dialog title="驳回原因" :visible.sync="backVisable" width="50%">
         <template>
             <el-form >
                 <el-form-item label="" >
@@ -228,10 +227,10 @@
             </el-form>
         </template>
     </el-dialog>
-    <el-dialog title="自定义列" :visible.sync="dialogFormVisible">
+    <el-dialog title="自定义列" :visible.sync="dialogFormVisible" class="elCheckboxGroup">
 	  <el-form :model="form">
 	    
-		  <el-form-item label="列名" prop="type">
+		  <el-form-item label="" prop="type">
 		    <el-checkbox-group v-model="form.type">
 		      <el-checkbox :label="item.sortNum+'_'+item.fieldCode+'_'+item.displayName+'_'+item.id"  name="type" :key="item.fieldCode"  v-for="(item,index) in  allTableColums ">
 		          {{item.displayName}}
@@ -243,8 +242,8 @@
 	  </el-form>
 	  
 	  <div slot="footer" class="dialog-footer">
-	    <el-button @click="dialogFormVisible = false">取 消</el-button>
-	    <el-button type="primary" @click="confirmColumn">确 定</el-button>
+      <el-button type="primary" @click="confirmColumn">确 定</el-button>
+	    <el-button @click="dialogFormVisible = false">取 消</el-button>	    
 	  </div>
 	</el-dialog>
 	 <!--驳回-->
@@ -415,7 +414,7 @@ var clueVM = new Vue({
               },
               notVisitFlagRules: {
             	  remark: [
-                      {required: true,min: 1, max: 100, message: '长度在 1 到 100 个字符', trigger: 'blur'}
+                      {required: true,min: 1, max: 100, message: '请输入驳回原因', trigger: 'blur'}
                   ],
               },
               allpyrules: {
