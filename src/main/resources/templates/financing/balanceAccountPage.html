@@ -248,10 +248,9 @@
 	  </div>
 	</el-dialog>
 	 <!--驳回-->
-    <el-dialog title="提示" :visible.sync="rejectVisible" width="540px">
+    <el-dialog title="提示" :visible.sync="rejectVisible" width="540px" @close="closeRejectDialog">
         <template>
-            <el-form
-                 :model="rejectform"  ref="rejectform"    :rules="notVisitFlagRules">
+            <el-form :model="rejectform" ref="rejectform" :rules="notVisitFlagRules">
                 <el-form-item label="确定要将此结算单:" >
                     <!--<el-button type="text" disabled style="color: #1e2746; width:100px; word-wrap:break-word; word-break:normal;">{{notVisitFlag.str}}</el-button>-->
                     <span style=" display: block; color: #1e2746; ">{{backQuery}}</span>
@@ -262,12 +261,12 @@
             </el-form>
             <div slot="footer" class="dialog-footer" style="text-align:center;">
                 <el-button type="primary" @click="reconciliationConfirm('rejectform')">确定</el-button>
-                <el-button @click="rejectVisible = false">取消</el-button>
+                <el-button @click="cancelReconciliationFrom('rejectform')">取消</el-button>
             </div>
         </template>
     </el-dialog>
     <!-- dialog -->
-    <el-dialog title="提交对账确认" :visible.sync="submitApplyVisible" width="540px">
+    <el-dialog title="提交对账确认" :visible.sync="submitApplyVisible" width="540px" @close="closeSubmitApplyDialog">
         <el-form :model="apply" ref="apply" :rules="allpyrules" class="width500"> 
 	        <el-form-item label="结算金额：" :label-width="formLabelWidth1" prop="money">
 	             <el-input  type="number" v-model="apply.money" placeholder="" style="width: 60%;" oninput="if(value.length>10)value=value.slice(0,10)" @keyup.native="repeatApplyNumber" maxLength="10"></el-input>元
@@ -292,7 +291,7 @@
           </el-form>
         <div slot="footer" style="text-align: center" class="dialog-footer">
             <el-button type="primary" @click="settlementConfirm('apply')">提交</el-button>
-            <el-button @click="submitApplyVisible= false">取消</el-button>
+            <el-button @click="cancelSubmitApplyFrom('apply')">取消</el-button>
         </div>
     </el-dialog>
 </div>
@@ -913,6 +912,24 @@ var clueVM = new Vue({
                         this.isShow=true
                     }          
                 },
+                closeSubmitApplyDialog(){//关闭提交对账确认
+                    // 点击关闭 数据重置
+                    this.$refs['apply'].resetFields();
+                },
+                cancelSubmitApplyFrom(formName){//提交对账确认取消
+                    this.submitApplyVisible= false;
+                    // 点击取消 数据重置
+                    this.$refs[formName].resetFields();
+                },
+                closeRejectDialog(){//关闭驳回
+                    // 点击关闭 数据重置
+                    this.$refs['rejectform'].resetFields();
+                },
+                cancelReconciliationFrom(formName){//取消驳回
+                    this.rejectVisible = false;
+                    // 点击取消 数据重置
+                    this.$refs[formName].resetFields();
+                }
         },
         created(){
             console.info("create method");
