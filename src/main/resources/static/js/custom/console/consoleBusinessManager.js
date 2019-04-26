@@ -31,6 +31,8 @@ var mainDivVM = new Vue({
                 // {content:'公告3公告3公告3公告3公告3公告3公告3',id:3}
             ]
         },
+        //赠送类型
+        giveTypeList:giveTypeList,
         //待处理邀约来访客户        
         editableTabsValue: 0, //tabs标签
         editableTabs: [],
@@ -154,6 +156,7 @@ var mainDivVM = new Vue({
             rebutReason:""
         },
         formSigning: {
+        	giveType:"",
             clueId:"",
             signNo:'',
             customerName: '',
@@ -187,6 +190,7 @@ var mainDivVM = new Vue({
             amountPerformance:''
         },
         updateFormSigning: {
+        	giveType:"",
             signId:"",
             clueId:"",
             signNo:'',
@@ -1207,6 +1211,7 @@ var mainDivVM = new Vue({
                             mainDivVM.payTypeSelect = true;
                             mainDivVM.payTypeArr = mainDivVM.payTypeArr1.slice(0,2)
                         }
+                        mainDivVM.updateFormSigning.giveType = mainDivVM.updateFormSigning.giveType+"";
                         mainDivVM.currentProvince(mainDivVM.updateFormSigning.signProvince)
                         mainDivVM.currentCity(mainDivVM.updateFormSigning.signCity)
                     }

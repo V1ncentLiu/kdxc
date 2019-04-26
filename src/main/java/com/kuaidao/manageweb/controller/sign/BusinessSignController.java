@@ -36,10 +36,12 @@ import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.common.util.CommonUtil;
 import com.kuaidao.manageweb.config.LogRecord;
+import com.kuaidao.manageweb.constant.Constants;
 import com.kuaidao.manageweb.constant.MenuEnum;
 import com.kuaidao.manageweb.feign.area.SysRegionFeignClient;
 import com.kuaidao.manageweb.feign.clue.ClueBasicFeignClient;
 import com.kuaidao.manageweb.feign.clue.ClueCustomerFeignClient;
+import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
 import com.kuaidao.manageweb.feign.invitearea.InviteareaFeignClient;
 import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
 import com.kuaidao.manageweb.feign.paydetail.PayDetailFeignClient;
@@ -49,6 +51,7 @@ import com.kuaidao.manageweb.feign.sign.BusinessSignFeignClient;
 import com.kuaidao.manageweb.feign.visitrecord.BusVisitRecordFeignClient;
 import com.kuaidao.manageweb.util.CommUtil;
 import com.kuaidao.sys.dto.area.SysRegionDTO;
+import com.kuaidao.sys.dto.dictionary.DictionaryItemRespDTO;
 import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
 import com.kuaidao.sys.dto.organization.OrganizationRespDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
@@ -89,7 +92,8 @@ public class BusinessSignController {
 
     @Autowired
     PayDetailFeignClient payDetailFeignClient;
-
+    @Autowired
+    private DictionaryItemFeignClient dictionaryItemFeignClient;
 
 
     /**
@@ -488,11 +492,26 @@ public class BusinessSignController {
         }else{
             request.setAttribute("showSignButton", "");
         }
-
+        // 查询赠送类型集合
+        request.setAttribute("giveTypeList", getDictionaryByCode(Constants.GIVE_TYPE));
         request.setAttribute("clueId", clueId);
         request.setAttribute("signId", signId);
         request.setAttribute("readyOnly", readyOnly); // readyOnly == 1 页面只读（没有添加按钮）
         return "bus_mycustomer/showSignAndPayDetail";
     }
-
+    /**
+     * 查询字典表
+     * 
+     * @param code
+     * @return
+     */
+    private List<DictionaryItemRespDTO> getDictionaryByCode(String code) {
+        JSONResult<List<DictionaryItemRespDTO>> queryDicItemsByGroupCode =
+                dictionaryItemFeignClient.queryDicItemsByGroupCode(code);
+        if (queryDicItemsByGroupCode != null
+                && JSONResult.SUCCESS.equals(queryDicItemsByGroupCode.getCode())) {
+            return queryDicItemsByGroupCode.getData();
+        }
+        return null;
+    }
 }
