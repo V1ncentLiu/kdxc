@@ -68,6 +68,7 @@ function outboundCallPhone(outboundInputPhone,callSource,clueId,callback){
  			param.clueId = clueId;
  		}
  		param.userId= homePageVM.accountId;
+ 		param.accountType = homePageVM.accountType;
  		 axios.post('/client/client/qimoOutboundCall',param)
           .then(function (response) {
               var data =  response.data;
@@ -104,6 +105,7 @@ function axbOutboundCall(outboundInputPhone,callSource,clueId){
 	var axbParam = {};
 		axbParam.clueId = clueId;
 		axbParam.customerPhone = outboundInputPhone;
+		axbParam.accountType = homePageVM.accountType;
 		 axios.post('/client/client/axbOutCall',axbParam)
       .then(function (response) {
           var data =  response.data;
@@ -132,6 +134,7 @@ function priviewOutbound(outboundInputPhone,callSource,clueId,callback){
 		if(clueId){
 			userField.clueId = clueId;
 		}
+		userField.accountType = homePageVM.accountType;
 		param.userField=userField;
 	
 		
