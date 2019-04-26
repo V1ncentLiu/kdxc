@@ -29,7 +29,7 @@
                     <el-input v-model="form.phone" placeholder="手机号" maxLength="11" @keyup.native="number"></el-input>
                 </el-form-item>
                 <el-form-item label="电销分公司:">
-                    <el-select v-model="form.telemarketingBranch" placeholder="电销分公司" @change="showTele(7)"  clearable >
+                    <el-select v-model="form.telemarketingBranch" placeholder="电销分公司" @change="showTele(7)" clearable filterable>
                         <el-option
                             v-for="item in dxBusinessList"
                             :key="item.id"
@@ -39,7 +39,7 @@
                     </el-select>
                 </el-form-item>
                 <el-form-item label="事业部:">
-                    <el-select v-model="form.businessUnit" placeholder="事业部"  @change="showTele(1)" clearable >
+                    <el-select v-model="form.businessUnit" placeholder="事业部"  @change="showTele(1)" clearable filterable>
                         <el-option
                             v-for="item in dxCauseBList"
                             :key="item.id"
@@ -64,7 +64,7 @@
                 </el-form-item>
                 <el-row v-show="isShow">
                     <el-form-item label="电销组:">
-                        <el-select v-model="form.telemarketingItem" placeholder="电销组" clearable >
+                        <el-select v-model="form.telemarketingItem" placeholder="电销组" clearable filterable>
                             <el-option
                                 v-for="item in dxList"
                                 :key="item.id"
@@ -260,22 +260,19 @@
         </el-form>
     </el-dialog>
     <!-- 选择列 -->
-    <el-dialog title="选择列" :visible.sync="dialogChooseList">
-	  <el-form :model="fieldFrom">
-	    
-		  <el-form-item label="列名" prop="type">
+    <el-dialog title="自定义列" :visible.sync="dialogChooseList" class="elCheckboxGroup">
+	  <el-form :model="fieldFrom">	    
+		  <el-form-item label="" prop="type">
 		    <el-checkbox-group v-model="fieldFrom.type">
 		      <el-checkbox :label="item.sortNum+'_'+item.fieldCode+'_'+item.displayName+'_'+item.id"  name="type" :key="item.fieldCode"  v-for="(item,index) in  allTableColums ">
 		          {{item.displayName}}
 		      </el-checkbox>
 		     </el-checkbox-group>
-		  </el-form-item>
-	    
-	  </el-form>
-	  
+		  </el-form-item>	    
+	  </el-form>	  
 	  <div slot="footer" class="dialog-footer">
-	    <el-button @click="dialogChooseList = false">取 消</el-button>
-	    <el-button type="primary" @click="confirmColumn">确 定</el-button>
+        <el-button type="primary" @click="confirmColumn">确 定</el-button>
+	    <el-button @click="dialogChooseList = false">取 消</el-button>	    
 	  </div>
 	</el-dialog>
 </div>

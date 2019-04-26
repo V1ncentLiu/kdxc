@@ -216,15 +216,9 @@
                 @row-dblclick="showClueDetailInfo"
                 >
                 <el-table-column align="center" type="selection"  prop="clueId"  @selection-change="handleSelectionChange" width="55"></el-table-column>
-                 <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width"
+                <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" width="220"
                  v-for="(item,key,index) in tableColums" v-if="item.fieldCode == 'phone'">
-                       <template slot-scope="scope">
-                            {{scope.row.phone}}
-                            <input type='hidden'>
-                            
-                            <i class="el-icon-phone-outline"  @click="customerEidt(scope.row.clueId)"  style="margin:0 10px;font-size: 16px;cursor: pointer;"></i>  
-                            <el-tag v-if="scope.row.tag">{{scope.row.tag}}</el-tag>
-                        </template>
+                    <template slot-scope="scope">{{scope.row.phone}}<input type='hidden'><!-- <i class="el-icon-phone-outline"  @click="customerEidt(scope.row.clueId)"  style="margin:0 10px;font-size: 16px;cursor: pointer;"></i>   --><img th:src="@{/images/tel.png}" @click="customerEidt(scope.row.clueId)" style="margin:0 10px;width:22px;cursor: pointer;vertical-align: middle;" alt=""><el-tag v-if="scope.row.tag">{{scope.row.tag}}</el-tag></template>
                 </el-table-column>
                 <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width" 
                   v-else-if="item.fieldCode == 'isTrack'">
@@ -249,6 +243,14 @@
                                                                                            男
                           </div>
                           <div v-else-if="scope.row.sex ===2">
+                          </div>
+                       </template>
+                </el-table-column>
+                 <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width" 
+                  v-else-if="item.fieldCode == 'teleReceiveTime'">
+                       <template slot-scope="scope">
+                          <div v-if="scope.row.isTransfer != 0">
+                                {{scope.row.teleReceiveTime}}
                           </div>
                        </template>
                 </el-table-column>
@@ -440,23 +442,19 @@
 
     <dialog-tracking :param="trackingParam"></dialog-tracking>
     <!-- 自定义列 -->
-    <el-dialog title="自定义列" :visible.sync="dialogChooseList">
-      <el-form :model="fieldFrom">
-        
-          <el-form-item label="列名" prop="type">
+    <el-dialog title="自定义列" :visible.sync="dialogChooseList" class="elCheckboxGroup">
+      <el-form :model="fieldFrom">        
+          <el-form-item label="" prop="type">
             <el-checkbox-group v-model="fieldFrom.type">
               <el-checkbox :label="item.sortNum+'_'+item.fieldCode+'_'+item.displayName+'_'+item.id"  name="type" :key="item.fieldCode"  v-for="(item,index) in  allTableColums ">
                   {{item.displayName}}
-              </el-checkbox>
-          
+              </el-checkbox>          
              </el-checkbox-group>
-          </el-form-item>
-        
-      </el-form>
-      
+          </el-form-item>        
+      </el-form>      
       <div slot="footer" class="dialog-footer">
-        <el-button @click="dialogChooseList = false">取 消</el-button>
         <el-button type="primary" @click="confirmColumn">确 定</el-button>
+        <el-button @click="dialogChooseList = false">取 消</el-button>        
       </div>
     </el-dialog>
 </div>

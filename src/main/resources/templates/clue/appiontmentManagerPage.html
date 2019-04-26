@@ -11,7 +11,7 @@
     <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
         <el-breadcrumb-item>Home</el-breadcrumb-item>
         <el-breadcrumb-item>电销管理</el-breadcrumb-item>
-        <el-breadcrumb-item><a >邀约来访</a></el-breadcrumb-item>
+        <el-breadcrumb-item>邀约来访</el-breadcrumb-item>
     </el-breadcrumb>
     
     <el-row class="marginB20">
@@ -36,7 +36,7 @@
                     <el-input v-model="appiontmentSearchForm.cusName" placeholder="请输入客户姓名" class="input-with-select"></el-input>
                 </el-form-item>                
 				<el-form-item label="电销组:" class="formItem"  prop="teleGorupId">
-				    <el-select v-model="appiontmentSearchForm.teleGorupId" clearable @change="getSaleList" placeholder="电销组">
+				    <el-select v-model="appiontmentSearchForm.teleGorupId" clearable @change="getSaleList" placeholder="电销组" filterable>
 				      <el-option
 					      v-for="item in teleGorupOptions"
 					      :key="item.id"
@@ -46,7 +46,7 @@
 				    </el-select>
 				</el-form-item>
 				<el-form-item label="创业顾问:" class="formItem"  prop="teleSaleId">
-				    <el-select v-model="appiontmentSearchForm.teleSaleId" clearable placeholder="创业顾问">
+				    <el-select v-model="appiontmentSearchForm.teleSaleId" clearable placeholder="创业顾问" filterable>
 				      <el-option
 					      v-for="item in teleSaleOptions"
 					      :key="item.id"
@@ -87,8 +87,7 @@
                 style="width: 100%"  :data="dataTable" >
                 <el-table-column align="center" type="selection" label="全选" width="55"></el-table-column>
                 <el-table-column align="center" type="index" width="55" label="序号"></el-table-column>
-                <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width"
-    	         v-for="(item,key,index) in tableColums" v-if="item.fieldCode == 'isRepeatPhone'">
+                <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" width="120" v-for="(item,key,index) in tableColums" v-if="item.fieldCode == 'isRepeatPhone'">
     	               <template slot-scope="scope">
     		               <div v-if="scope.row.isRepeatPhone === 1">
     		                   <el-button @click="repeatPhonesClick(scope.row)" type="text" size="small">点击查看</el-button>
@@ -96,8 +95,7 @@
     	                    <div v-else>无</div>
                     	</template>
     	        </el-table-column>
-                <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width"
-    	         v-else-if="item.fieldCode == 'isTrack'">
+                <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" width="80" v-else-if="item.fieldCode == 'isTrack'">
     	               <template slot-scope="scope">
     		                <div v-if="scope.row.isTrack === 1">
     		                    <el-button @click="recordClick(scope.row)" type="text" size="small">点击查看</el-button>
@@ -274,10 +272,10 @@
         </div>
     </el-dialog>
     
-	<el-dialog title="自定义列" :visible.sync="dialogFormVisible">
+	<el-dialog title="自定义列" :visible.sync="dialogFormVisible" class="elCheckboxGroup">
 	  <el-form :model="form">
 	    
-		  <el-form-item label="列名" prop="type">
+		  <el-form-item label="" prop="type">
 		    <el-checkbox-group v-model="form.type">
 		      <el-checkbox :label="item.sortNum+'_'+item.fieldCode+'_'+item.displayName+'_'+item.id"  name="type" :key="item.fieldCode"  v-for="(item,index) in  allTableColums ">
 		          {{item.displayName}}
@@ -294,10 +292,10 @@
 	  </div>
 	</el-dialog>
 	    <!-- 释放资源 -->
-    <el-dialog title="取消原因"    :visible.sync="cancelFormVisible">
+    <el-dialog title="取消原因"    :visible.sync="cancelFormVisible" width="540px">
         <el-form :model="cancelDigForm" ref="cancelDigForm" :rules="cancelRules">
             <el-row>
-                <div class="fs16 marginB10" style="padding-left: 150px;">确认标记取消选中的邀约来访？</div>
+                <div class="marginB10" style="padding-left: 150px;">确认标记取消选中的邀约来访？</div>
                 <el-form-item label="取消原因：" :label-width="formLabelWidth" prop="cancelReason">
                   <el-input type="textarea" :rows="3" v-model="cancelDigForm.cancelReason" autocomplete="off" maxlength="100" placeholder="100字" style="width: 80%;"></el-input>
                 </el-form-item>
