@@ -29,6 +29,9 @@
 			<el-button type="warning" @click="dialogBatchVisible = true"><i class="el-icon-download"></i>导入</el-button>
 			<!-- 下载批量上传模版: <a href="" download="页面自定义字段导入模板">页面自定义字段模板</a> -->
 			<a href="/excel-templates/importClue.xlsx" download="下载导入模板"><span style="color:#409EFF">下载导入模板</span></a>
+	        <shiro:hasPermission name="waitDistributResource:recall">
+	        	<el-button type="success" @click="toRecall">撤回</el-button>
+	        </shiro:hasPermission>
 		</el-row>
     <div class="mainSearchBg">        
         <div class="mainSearchFormBox">
@@ -88,6 +91,20 @@
                     <el-form-item label="手机号:">
                   		<el-input v-model="form.phone" placeholder="手机号" maxLength="11" @keyup.native="number1"></el-input> 
                     </el-form-item> 
+                    <el-form-item label="是否撤回资源:">
+                  		<el-select v-model="form.medium" placeholder="全部" clearable > 
+                        <el-option v-for="item in recallArr" :key="item.value" :label="item.name"
+                  			:value="item.value"> 
+                        </el-option> 
+                      </el-select> 
+                    </el-form-item> 
+                    <el-form-item label="分发失败原因:">
+                  		<el-select v-model="form.assignFailReason" placeholder="全部" clearable > 
+                        <el-option v-for="item in reasonOptions" :key="item.value" :label="item.name"
+                  			:value="item.value"> 
+                        </el-option> 
+                      </el-select> 
+                    </el-form-item> 
                 </el-row>
                 <div class="mainSearchBtnBox">
                     <el-button icon="el-icon-search" type="primary" @click="initTableData" class="searchBtn">搜索</el-button> 
@@ -116,32 +133,90 @@
 						<el-form-item label="客户姓名：" :label-width="formLabelWidth"> {{customer.cusName}} </el-form-item>
 					</el-col>
 					<el-col :span="12">
-						<el-form-item label="手机号：" :label-width="formLabelWidth"> {{customer.phone}} </el-form-item>
+						<el-form-item label="手机号：" :label-width="formLabelWidth"> {{customer.phone}} 
+							<span @click="phoneVisible = true" v-if="customer.phone2 !=null && customer.phone2 !=''" style="color: rgb(0, 114, 255); cursor: pointer;">查看更多</span>
+						</el-form-item>
 					</el-col>
 				</el-row>
-				<el-row> <el-col :span="12"> <el-form-item
-						label="微信：" :label-width="formLabelWidth"> {{customer.wechat}}<span>/二维码</span>
-				</el-form-item> </el-col> <el-col :span="12"> <el-form-item label="邮箱："
-																																		:label-width="formLabelWidth"> {{customer.email}}</el-form-item> </el-col> </el-row>
-				<el-row> <el-col :span="12"> <el-form-item
-						label="QQ：" :label-width="formLabelWidth"> {{customer.qq}}
-				</el-form-item> </el-col> <el-col :span="12"> <el-form-item label="资源类型："
-																																		:label-width="formLabelWidth">{{basic.typeName}}</el-form-item> </el-col> </el-row>
-				<el-row> <el-col :span="12"> <el-form-item
-						label="资源项目：" :label-width="formLabelWidth">  {{basic.projectName}} </el-form-item> </el-col> <el-col
-						:span="12"> <el-form-item label="资源类别："
-																			:label-width="formLabelWidth"> {{basic.categoryName}}</el-form-item> </el-col> </el-row>
-				<el-row> <el-col :span="12"> <el-form-item
-						label="媒介：" :label-width="formLabelWidth"> {{basic.sourceName}} </el-form-item> </el-col> <el-col
-						:span="12"> <el-form-item label="搜索词："
-																			:label-width="formLabelWidth"> {{basic.searchWord}} </el-form-item> </el-col> </el-row>
-				<el-row> <el-col :span="12"> <el-form-item
-						label="行业类别：" :label-width="formLabelWidth"> {{basic.industryCategoryName}}  </el-form-item> </el-col> <el-col
-						:span="12"> <el-form-item label="留言时间："
-																			:label-width="formLabelWidth"> {{basic.messageTime}} </el-form-item> </el-col> </el-row>
-				<el-row> <el-col :span="24"> <el-form-item
-						label="留言重点：" :label-width="formLabelWidth">
-					{{basic.messagePoint}}</el-form-item> </el-col> </el-row>
+				<el-row> 
+					<el-col :span="12"> 
+						<el-form-item label="微信：" :label-width="formLabelWidth"> {{customer.wechat}}
+							<span @click="wechatVisible = true" v-if="(customer.wechat2 !=null && customer.wechat2 !='')||(customer.wechatCode !=null && customer.wechatCode !='')" style="color: rgb(0, 114, 255); cursor: pointer;">查看更多</span>
+						</el-form-item> 
+					</el-col> 
+					<el-col :span="12"> 
+						<el-form-item label="QQ：" :label-width="formLabelWidth"> {{customer.qq}} </el-form-item> 
+					</el-col> 
+				</el-row>
+				<el-row> 
+					<el-col :span="12"> 
+						<el-form-item label="邮箱：" :label-width="formLabelWidth"> {{customer.email}}</el-form-item> 
+					</el-col> 
+					<el-col :span="12"> 
+						<el-form-item label="性别：" :label-width="formLabelWidth"> {{customer.sex}}</el-form-item> 
+					</el-col> 
+				</el-row>
+				<el-row> 
+					<el-col :span="12"> 
+						<el-form-item label="年龄：" :label-width="formLabelWidth"> {{customer.age}}</el-form-item> 
+					</el-col> 
+					<el-col :span="12"> 
+						<el-form-item label="地址：" :label-width="formLabelWidth"> {{intention.province}}</el-form-item> 
+					</el-col> 
+				</el-row>
+				<el-row> 
+					<el-col :span="12"> 
+						<el-form-item label="预约时间：" :label-width="formLabelWidth"> {{basic.reserveTime}}</el-form-item> 
+					</el-col> 
+					<el-col :span="12"> 
+						<el-form-item label="备注：" :label-width="formLabelWidth"> {{basic.remark}}</el-form-item> 
+					</el-col> 
+				</el-row>
+				<el-row> 
+					<el-col :span="12"> 
+						<el-form-item label="资源类型："  :label-width="formLabelWidth">{{basic.typeName}}</el-form-item> 
+					</el-col> 
+					<el-col :span="12"> 
+						<el-form-item label="资源类别：" :label-width="formLabelWidth"> {{basic.categoryName}}</el-form-item>
+					</el-col> 
+				</el-row>
+				<el-row> 
+					<el-col :span="12"> 
+						<el-form-item label="广告位：" :label-width="formLabelWidth"> {{basic.sourceTypeName}} </el-form-item> 
+					</el-col> 
+					<el-col :span="12"> 
+						<el-form-item label="媒介：" :label-width="formLabelWidth"> {{basic.sourceName}} </el-form-item> 
+					</el-col> 
+				</el-row>
+				<el-row> 
+					<el-col :span="12"> 
+						<el-form-item label="资源项目：" :label-width="formLabelWidth">  {{basic.projectName}} </el-form-item> 
+					</el-col> 
+					<el-col :span="12"> 
+						<el-form-item label="行业类别：" :label-width="formLabelWidth">  {{basic.industryCategoryName}} </el-form-item> 
+					</el-col> 
+				</el-row>
+				<el-row> 
+					<el-col :span="12"> 
+						<el-form-item label="留言时间：" :label-width="formLabelWidth"> {{basic.messageTime}} </el-form-item> 
+					</el-col> 
+					<el-col :span="12"> 
+						<el-form-item label="留言重点：" :label-width="formLabelWidth"> {{basic.messagePoint}}</el-form-item> 
+					</el-col> 
+				</el-row>
+				<el-row> 
+					<el-col :span="12"> 
+						<el-form-item label="搜索词：" :label-width="formLabelWidth"> {{basic.searchWord}} </el-form-item> 
+					</el-col> 
+					<el-col :span="12"> 
+						<el-form-item label="账户名称：" :label-width="formLabelWidth"> {{clueReceive.accountNameDic}} </el-form-item> 
+					</el-col> 
+				</el-row>
+				<el-row> 
+					<el-col :span="12"> 
+						<el-form-item label="url地址：" :label-width="formLabelWidth"> {{clueReceive.urlAddress}} </el-form-item> 
+					</el-col> 
+				</el-row>
 			</div>
 		</el-form> </el-dialog>
 	<!-- 自定义列 -->
@@ -232,12 +307,61 @@
 			<el-button  :disabled="confirmBtnDisabled" @click="submitExport"><span data="1" id="showButton">导入</span></el-button>
 		</div>
 	</el-dialog>
+	
+	<!-- dialog -->
+    <el-dialog title="查看手机号" :visible.sync="phoneVisible">
+    	<el-form :model="dialogForm" ref="dialogForm">
+        <!--展示phone2  phone3  phone4 phone5-->
+            <el-form-item v-show="customer.phone2!=null" label="手机号2：" :label-width="formLabelWidth"  >
+                <el-button type="text" disabled>{{customer.phone2}}</el-button>
+            </el-form-item>
+            <el-form-item   v-show="customer.phone3!=null" label="手机号3：" :label-width="formLabelWidth"  >
+                <el-button type="text" disabled>{{customer.phone3}}</el-button>
+            </el-form-item>
+            <el-form-item  v-show="customer.phone4!=null" label="手机号4：" :label-width="formLabelWidth"  >
+                <el-button type="text" disabled>{{customer.phone4}}</el-button>
+            </el-form-item>
+            <el-form-item  v-show="customer.phone5!=null" label="手机号5：" :label-width="formLabelWidth"  >
+                <el-button type="text" disabled>{{customer.phone5}}</el-button>
+            </el-form-item>
+         </el-form>
+    </el-dialog>
+	<!-- dialog -->
+    <el-dialog title="查看更多手机号" :visible.sync="phoneVisible">
+    	<el-form :model="dialogForm" ref="dialogForm">
+        <!--展示phone2  phone3  phone4 phone5-->
+            <el-form-item v-show="customer.phone2!=null" label="手机号2：" :label-width="formLabelWidth"  >
+                <el-button type="text" disabled>{{customer.phone2}}</el-button>
+            </el-form-item>
+            <el-form-item   v-show="customer.phone3!=null" label="手机号3：" :label-width="formLabelWidth"  >
+                <el-button type="text" disabled>{{customer.phone3}}</el-button>
+            </el-form-item>
+            <el-form-item  v-show="customer.phone4!=null" label="手机号4：" :label-width="formLabelWidth"  >
+                <el-button type="text" disabled>{{customer.phone4}}</el-button>
+            </el-form-item>
+            <el-form-item  v-show="customer.phone5!=null" label="手机号5：" :label-width="formLabelWidth"  >
+                <el-button type="text" disabled>{{customer.phone5}}</el-button>
+            </el-form-item>
+         </el-form>
+    </el-dialog>
+    <el-dialog title="查看微信/二维码" :visible.sync="wechatVisible">
+    	<el-form :model="dialogForm" ref="dialogForm">
+        <!--展示phone2  phone3  phone4 phone5-->
+            <el-form-item  label="微信2：" :label-width="formLabelWidth"  >
+                <el-button type="text" disabled>{{customer.wechat2}}</el-button>
+            </el-form-item>
+            <el-form-item  label="图片二维码：" :label-width="formLabelWidth"  >
+                <img v-show="customer.wechatCode!=''"  :src="customer.wechatCode">
+            </el-form-item>
+         </el-form>
+    </el-dialog>
 </div>
 </body>
 <div th:include="_footer_include :: #jsLib"></div>
 <script th:inline="javascript">
 var proSelect=[[${proSelect}]];
 var userList=[[${userList}]];
+var reasonList=[[${reasonList}]];
 var fieldList=[[${fieldList}]];//自定义字段
 var userFieldList=[[${userFieldList}]];//用户自定义字段
 var wdrVM = new Vue({
@@ -246,6 +370,8 @@ var wdrVM = new Vue({
             return {
                 isShow:false,
                 dialogFormVisible: false,
+                phoneVisible: false,
+                wechatVisible: false,
                 multipleSelection: [],//选择行
               dataNum:"",
               exportFormVisible:false,
@@ -260,6 +386,7 @@ var wdrVM = new Vue({
                     endTime:'',
                     resourceProject:'',
                     resourcePerson:'',
+                    assignFailReason:'',
                     customName:'',
                     resourceId:'',
                     medium:'',
@@ -268,6 +395,7 @@ var wdrVM = new Vue({
                     email:'',
                     qq:'',
                     phone:'',
+                    isRecall:'',
                 },
                 pager:{ 
                     total: 0,
@@ -281,10 +409,20 @@ var wdrVM = new Vue({
                 mediumArry:[],
                 tableData: [],             
                 options: [],
+                reasonOptions: reasonList,
+                recallArr:[{
+                	value:0,
+                	name:"否"
+                },{
+                	value:1,
+                	name:"是"
+                }],
                 proSelectArr:proSelect,
                 userListArr:userList,
                 customer:"",
                 basic:'',
+                intention:'',
+                clueReceive:'',
                 dialogChooseList: false,
                 allTableColums:[],//自定义列
                 tableColums:[],
@@ -315,12 +453,14 @@ var wdrVM = new Vue({
                  param.operationId=this.form.resourcePerson;
                  param.cusName=this.form.customName;
                  param.clueId=this.form.resourceId;
+                 param.assignFailReason=this.form.assignFailReason;
                  param.source=this.form.medium;
                  param.category=this.form.category;
                  param.industryCategory=this.form.industryCategory;
                  param.qq=this.form.qq;
                  param.email=this.form.email;
                  param.phone=this.form.phone;
+                 param.isRecall=this.form.isRecall;
      		    axios.post('/exetend/agendaTaskManager/queryPageAgendaTask',param).then(function (response) {
      				if(!response){
      					wdrVM.$message({
@@ -395,30 +535,15 @@ var wdrVM = new Vue({
 	                      }); 
 						return ;
 					}
-				  var customer=response.data.data.clueCustomer;
-				  var phone = '';
-				  if(customer.phone){
-					  phone+=customer.phone;
-				  }
-				  if(customer.phone2){
-					  if(phone){
-						  phone+=",";
-					  }
-					  phone+=customer.phone2;
-				  }
-				  if(customer.phone3){
-					  if(phone){
-						  phone+=",";
-					  }
-					  phone+=customer.phone3;
-				  }
-				  customer.phone=phone;
-				  wdrVM.customer=customer;
+				  wdrVM.customer=response.data.data.clueCustomer;
+				 
 				  var messageTime= response.data.data.clueBasic.messageTime;
 				  if(null!=messageTime){
 					  response.data.data.clueBasic.messageTime=crtTimeFtt1(messageTime);
 				  }
 				   wdrVM.basic=response.data.data.clueBasic;
+				   wdrVM.intention=response.data.data.clueIntention;
+				   wdrVM.clueReceive=response.data.data.clueReceive;
      			})
             	
             	
@@ -492,6 +617,44 @@ var wdrVM = new Vue({
    		        	}});
       			 
            		  	});
+                    }).catch(() => {
+                        this.$message({
+                            type: 'info',
+                            message: '已取消操作'
+                        });          
+                    });
+                }                
+            },
+            toRecall() {
+                var rows = this.multipleSelection;
+                if(rows.length!=1){
+                    this.$message({
+                        message: '请选择一条数据进行撤回',
+                        type: 'warning'
+                    });
+                    return;
+                }else{
+                    this.$confirm('确定要将该资源进行撤回?', '提示', {
+                        confirmButtonText: '确定',
+                        cancelButtonText: '取消',
+                        type: 'warning'
+                    }).then(() => {
+                    	var param={};
+                        var rows = this.multipleSelection;
+                        param.id=rows[0].clueId;
+               		 	axios.post('/exetend/agendaTaskManager/recallClue',param).then(function (response) {
+           			 		if(!response||!response.data||response.data.code!='0'){
+           					wdrVM.$message({
+      	                        message: "接口调用失败",
+      	                        type: 'error'
+      	                      }); 
+      						return ;
+      						}
+           					var resobj= response.data;
+      				 		wdrVM.$message({message:'撤回成功',type:'success',duration:2000,onClose:function(){
+      							wdrVM.initTableData();
+   		        			}});
+           		  		});
                     }).catch(() => {
                         this.$message({
                             type: 'info',

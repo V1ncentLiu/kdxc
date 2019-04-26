@@ -35,6 +35,7 @@ import com.kuaidao.aggregation.dto.project.ProjectInfoDTO;
 import com.kuaidao.common.constant.DicCodeEnum;
 import com.kuaidao.common.constant.RoleCodeEnum;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
+import com.kuaidao.common.entity.IdEntityLong;
 import com.kuaidao.common.entity.IdListLongReq;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
@@ -101,7 +102,9 @@ public class ExtendClueAgendaTaskController {
         }
 
         List<UserInfoDTO> userList = this.queryUserByRole();
-
+        // 查询字典分发失败原因集合
+        request.setAttribute("reasonList",
+                getDictionaryByCode(DicCodeEnum.ASSIGN_FAIL_REASON.getCode()));
         request.setAttribute("userList", userList);
         // 根据角色查询页面字段
         QueryFieldByRoleAndMenuReq queryFieldByRoleAndMenuReq = new QueryFieldByRoleAndMenuReq();
@@ -144,12 +147,19 @@ public class ExtendClueAgendaTaskController {
         request.setAttribute("adsenseList", getDictionaryByCode(DicCodeEnum.ADENSE.getCode()));
         // 查询字典媒介集合
         request.setAttribute("mediumList", getDictionaryByCode(DicCodeEnum.MEDIUM.getCode()));
+        // 查询字典行业类别集合
+        request.setAttribute("industryCategoryList",
+                getDictionaryByCode(DicCodeEnum.INDUSTRYCATEGORY.getCode()));
+        // 查询字典账户名称集合
+        request.setAttribute("accountNameList",
+                getDictionaryByCode(DicCodeEnum.ACCOUNT_NAME.getCode()));
+
         request.setAttribute("ossUrl", ossUrl);
         return "clue/addCluePage";
     }
 
     /**
-     * 跳转新增资源
+     * 跳转编辑资源
      * 
      * @param request
      * @param model
@@ -225,6 +235,26 @@ public class ExtendClueAgendaTaskController {
         return extendClueFeignClient.queryPageAgendaTask(queryDto);
 
     }
+
+    /**
+     * 撤回资源
+     * 
+     * @param request
+     * @param clueId
+     * @return
+     */
+    @RequestMapping("/recallClue")
+    @ResponseBody
+    @LogRecord(description = "撤回资源", operationType = OperationType.UPDATE,
+            menuName = MenuEnum.WAIT_DISTRIBUT_RESOURCE)
+    public JSONResult<String> recallClue(HttpServletRequest request,
+            @RequestBody IdEntityLong idEntityLong) {
+
+        JSONResult<String> clueInfo = extendClueFeignClient.recallClue(idEntityLong);
+
+        return clueInfo;
+    }
+
 
     /**
      * 查询所有资源专员

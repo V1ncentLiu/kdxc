@@ -1,6 +1,5 @@
 package com.kuaidao.manageweb.feign.clue;
 
-import com.kuaidao.aggregation.dto.clue.PushClueReq;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,6 +14,7 @@ import com.kuaidao.aggregation.dto.clue.ClueDistributionedTaskDTO;
 import com.kuaidao.aggregation.dto.clue.ClueDistributionedTaskQueryDTO;
 import com.kuaidao.aggregation.dto.clue.PushClueReq;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
+import com.kuaidao.common.entity.IdEntityLong;
 import com.kuaidao.common.entity.IdListLongReq;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
@@ -70,17 +70,26 @@ public interface ExtendClueFeignClient {
     @RequestMapping(method = RequestMethod.POST, value = "/updateClue")
     public JSONResult<String> updateClue(@RequestBody PushClueReq pushClueReq);
 
-	/**
-	 * 导入线索
-	 *
-	 * @param queryDto
-	 * @return
-	 */
-	@RequestMapping(method = RequestMethod.POST, value = "/import")
-	public JSONResult importclue(@RequestBody List<PushClueReq> list);
+    /**
+     * 撤回线索
+     *
+     * @param queryDto
+     * @return
+     */
+    @RequestMapping(method = RequestMethod.POST, value = "/recallClue")
+    public JSONResult<String> recallClue(@RequestBody IdEntityLong idEntityLong);
 
-	@Component
-	static class HystrixClientFallback implements ExtendClueFeignClient {
+    /**
+     * 导入线索
+     *
+     * @param queryDto
+     * @return
+     */
+    @RequestMapping(method = RequestMethod.POST, value = "/import")
+    public JSONResult importclue(@RequestBody List<PushClueReq> list);
+
+    @Component
+    static class HystrixClientFallback implements ExtendClueFeignClient {
 
         private static Logger logger = LoggerFactory.getLogger(ExtendClueFeignClient.class);
 
@@ -121,16 +130,20 @@ public interface ExtendClueFeignClient {
             // TODO Auto-generated method stub
             return fallBackError("编辑资源");
         }
-		    @Override
-		    public JSONResult importclue(List<PushClueReq> list) {
-			    // TODO Auto-generated method stub
-			    return fallBackError("导入线索");
-		    }
+
+        @Override
+        public JSONResult<String> recallClue(@RequestBody IdEntityLong idEntityLong) {
+            // TODO Auto-generated method stub
+            return fallBackError("撤回资源");
+        }
+
+        @Override
+        public JSONResult importclue(List<PushClueReq> list) {
+            // TODO Auto-generated method stub
+            return fallBackError("导入线索");
+        }
 
     }
-
-
-
 
 
 

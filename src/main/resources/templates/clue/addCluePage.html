@@ -55,7 +55,12 @@
                     <el-col :span="8">
                         <el-form-item label="微信：" :label-width="formLabelWidth">
                            <el-input v-model="form.wechat" autocomplete="off" style="width: 60%;" maxLength="20"></el-input>
-                           <el-button type="primary"  @click="wechatVisible = true"><i class="el-icon-plus"></i>微信/二维码</el-button>
+                           	<span v-if="form.wechat2 == '' && form.wechatUrl=='' ">
+	                           <el-button type="primary"  @click="wechatVisible = true"><i class="el-icon-plus"></i>微信/二维码</el-button>
+                            </span>
+                            <span v-else="">
+                                <span @click="wechatVisible = true" style="padding-left: 5px; color: rgb(0, 114, 255); cursor: pointer;">查看多个微信/二维码</span>
+                            </span>
                         </el-form-item>
                     </el-col>
                 </el-row>
@@ -152,11 +157,6 @@
                 </el-row>
                 <el-row>
                     <el-col :span="8">
-                        <el-form-item label="搜索词：" :label-width="formLabelWidth">
-                           <el-input v-model="form.searchWord" autocomplete="off" maxlength="50"></el-input>
-                        </el-form-item>
-                    </el-col>
-                    <el-col :span="8">
                         <el-form-item label="资源项目：" :label-width="formLabelWidth">
                             <el-select v-model="form.projectId" placeholder="请选择" style="width: 100%;">
                                 <el-option
@@ -164,6 +164,18 @@
                                     :key="item.id"
                                     :label="item.projectName"
                                     :value="item.id">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="8">
+                        <el-form-item label="行业类别：" :label-width="formLabelWidth">
+                            <el-select v-model="form.industryCategory" placeholder="请选择" style="width: 100%;">
+                                <el-option
+                                    v-for="item in industryCategoryOptions"
+                                    :key="item.value"
+                                    :label="item.name"
+                                    :value="item.value">
                                 </el-option>
                             </el-select>
                         </el-form-item>
@@ -176,7 +188,7 @@
                                 style="width: 100%;"
                                 v-model="form.messageTime"
                                 type="datetime"
-                                format="yyyy-MM-dd HH:mm:ss"
+                                value-format="yyyy-MM-dd HH:mm:ss"
                                 placeholder="输入留言时间">
                             </el-date-picker>
                         </el-form-item>
@@ -184,6 +196,32 @@
                     <el-col :span="8">
                         <el-form-item label="留言重点：" :label-width="formLabelWidth">
                             <el-input v-model="form.messagePoint" placeholder="输入留言内容" autocomplete="off"  maxLength="50" ></el-input>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="8">
+                        <el-form-item label="搜索词：" :label-width="formLabelWidth">
+                           <el-input v-model="form.searchWord" autocomplete="off" maxlength="50"></el-input>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="8">
+                        <el-form-item label="账户名称：" :label-width="formLabelWidth">
+                            <el-select v-model="form.accountName" placeholder="请选择" style="width: 100%;">
+                                <el-option
+                                    v-for="item in accountNameOptions"
+                                    :key="item.value"
+                                    :label="item.name"
+                                    :value="item.value">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="8">
+                        <el-form-item label="URL地址：" :label-width="formLabelWidth">
+                           <el-input v-model="form.urlAddress" autocomplete="off" maxlength="200"></el-input>
                         </el-form-item>
                     </el-col>
                 </el-row>
@@ -343,6 +381,8 @@ var projectList=[[${projectList}]];//项目集合
 var adsenseList=[[${adsenseList}]];//广告位集合
 var clueTypeList=[[${clueTypeList}]];//资源类型集合
 var mediumList=[[${mediumList}]];//媒介集合
+var industryCategoryList=[[${industryCategoryList}]];//行业类别集合
+var accountNameList=[[${accountNameList}]];//账号名称集合
 var ossSignatureUrl = [[${ossUrl}]];//上传文件地址
   var addClueVM=   new Vue({
         el: '#addCustomer',
@@ -375,6 +415,9 @@ var ossSignatureUrl = [[${ossUrl}]];//上传文件地址
                 	category:'',
                 	projectId:'',
                 	searchWord:'',
+                	accountName:'',
+                	urlAddress:'',
+                	industryCategory:'',
                 	messagePoint:'',
                 	messageTime:''
                 },
@@ -402,6 +445,8 @@ var ossSignatureUrl = [[${ossUrl}]];//上传文件地址
 	            typeOptions:clueTypeList,
 	            sourceOptions:mediumList,
 	            categoryOptions:clueCategoryList,
+	            industryCategoryOptions:industryCategoryList,
+	            accountNameOptions:accountNameList,
                 formLabelWidth: '120px',
                 rules:{
                      age:[
@@ -570,7 +615,10 @@ var ossSignatureUrl = [[${ossUrl}]];//上传文件地址
                     	param.searchWord=this.form.searchWord;
                     	param.messagePoint=this.form.messagePoint;
                     	param.messageTime=this.form.messageTime;
-                    	
+                    	param.accountName=this.form.accountName;
+                    	param.urlAddress=this.form.urlAddress;
+                    	param.industryCategory=this.form.industryCategory;
+                    	param.inputType=3;
                    	    var phoneArr=this.dynamicValidateForm.domains;
                 	    if(phoneArr.length>0){
                 	     for(var i=0;i<phoneArr.length;i++){
@@ -669,7 +717,7 @@ var ossSignatureUrl = [[${ossUrl}]];//上传文件地址
             },
             wechatSumbit() {
             	this.form.wechat2=this.wechatForm.wechat2;
-            	this.form.wechat2=this.wechatForm.wechatUrl;
+            	this.form.wechatUrl=this.wechatForm.wechatUrl;
             	this.wechatVisible = false;
             },
             removeDomain(item) {
