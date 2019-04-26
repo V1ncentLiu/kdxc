@@ -74,8 +74,8 @@
                 </el-row>
                 <div class="mainSearchBtnBox"> 
                     <el-button icon="el-icon-search" type="primary" @click="initList" class="searchBtn">搜索</el-button>
-                    <el-button type="info" class="searchBtn">取消</el-button>
-                    <span style="color: #5c6be8;cursor: pointer;margin:0 10px;" @click="toogleClick">更多搜索<i class="el-icon-arrow-down greycolor paddingL6"></i></span>
+                    <!-- <el-button type="info" class="searchBtn">取消</el-button> -->
+                    <span style="color: #5c6be8;cursor: pointer;margin:0 10px;" @click="toogleClick"><span v-if="isShow">收起</span><span v-else>展开更多</span><i :class="{'greycolor paddingL6 el-icon-arrow-up':isShow,'greycolor paddingL6 el-icon-arrow-down':!isShow}"></i></span>
                 </div> 
             </el-form>
         </div>
@@ -745,7 +745,7 @@
                     </el-col>
                     <el-col :span="10">
                         <el-form-item label="赠送类型：" :label-width="formLabelWidth" prop="giveType">
-                            <el-select v-model="formSigning.giveType" @change="selectSigningType" placeholder="请选择赠送类型：" style="width:100%;">
+                            <el-select v-model="formSigning.giveType"  placeholder="请选择赠送类型：" style="width:100%;">
                                 <el-option
                                         v-for="item in giveTypeList"
                                         :key="item.value"
@@ -1057,7 +1057,7 @@
                     </el-col>
                     <el-col :span="10">
                         <el-form-item label="赠送类型：" :label-width="formLabelWidth" prop="giveType">
-                            <el-select v-model="updateFormSigning.giveType"  @change="selectSigningType" placeholder="请选择赠送类型：" style="width:100%;">
+                            <el-select v-model="updateFormSigning.giveType"   placeholder="请选择赠送类型：" style="width:100%;">
                                 <el-option
                                         v-for="item in giveTypeList"
                                         :key="item.value"
@@ -1317,6 +1317,7 @@
                 rebutReason:""
             },
             formSigning: {
+            	giveType:"",
                 clueId:"",
                 signNo:'',
                 customerName: '',
@@ -1351,6 +1352,7 @@
                 performanceAmount:''
             },
             updateFormSigning: {
+            	giveType:"",
                 signId:"",
                 clueId:"",
                 signNo:'',
@@ -2332,6 +2334,7 @@
                                 mainDivVM.payTypeSelect = true;
                                 mainDivVM.payTypeArr = mainDivVM.payTypeArr1.slice(0,2)
                             }
+                            mainDivVM.updateFormSigning.giveType = mainDivVM.updateFormSigning.giveType+"";
                             mainDivVM.currentProvince(mainDivVM.updateFormSigning.signProvince)
                             mainDivVM.currentCity(mainDivVM.updateFormSigning.signCity)
                         }
