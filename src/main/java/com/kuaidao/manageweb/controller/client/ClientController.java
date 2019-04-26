@@ -688,7 +688,7 @@ public class ClientController {
         }
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
         clientLoginRecord.setAccountId(curLoginUser.getId());
-        //TODO dev 需要传一个参数 accountType
+        clientLoginRecord.setAccountType(clientLoginRecord.getAccountType());
         return clientFeignClient.clientLoginRecord(clientLoginRecord);
         
     }
