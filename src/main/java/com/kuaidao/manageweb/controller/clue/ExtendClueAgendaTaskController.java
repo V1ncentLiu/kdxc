@@ -166,9 +166,16 @@ public class ExtendClueAgendaTaskController {
      * @return
      */
     @RequestMapping("/toUpdatePage")
-    @RequiresPermissions("waitDistributResource:update")
+    @RequiresPermissions("waitDistributResource:edit")
     public String toUpdatePage(@RequestParam long id, HttpServletRequest request, Model model) {
         UserInfoDTO user = getUser();
+        ClueQueryDTO queryDTO = new ClueQueryDTO();
+
+        queryDTO.setClueId(id);
+
+        JSONResult<ClueDTO> clueInfo = myCustomerFeignClient.findClueInfo(queryDTO);
+
+        request.setAttribute("clueInfo", clueInfo.getData());
         // 查询所有项目
         JSONResult<List<ProjectInfoDTO>> allProject = projectInfoFeignClient.allProject();
         request.setAttribute("projectList", allProject.getData());
@@ -182,7 +189,7 @@ public class ExtendClueAgendaTaskController {
         // 查询字典媒介集合
         request.setAttribute("mediumList", getDictionaryByCode(DicCodeEnum.MEDIUM.getCode()));
         request.setAttribute("ossUrl", ossUrl);
-        return "clue/addCluePage";
+        return "clue/updateCluePage";
     }
 
     /**
@@ -214,7 +221,7 @@ public class ExtendClueAgendaTaskController {
      * @return
      */
     @RequestMapping("/updateClue")
-    @RequiresPermissions("waitDistributResource:update")
+    @RequiresPermissions("waitDistributResource:edit")
     @ResponseBody
     @LogRecord(description = "编辑资源", operationType = OperationType.UPDATE,
             menuName = MenuEnum.WAIT_DISTRIBUT_RESOURCE)

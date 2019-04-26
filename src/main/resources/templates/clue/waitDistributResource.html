@@ -117,7 +117,20 @@
         		<el-table ref="tableData" tooltip-effect="dark" style="width: 100%" border :data="tableData" @row-dblclick="rowDblClick" @selection-change="handleSelectionChange">
         		<el-table-column align="center" prop="clueId" type="selection" width="55"></el-table-column> 
         		<el-table-column align="center" type="index" label="序号" width="55"></el-table-column> 
-        		<el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width" v-for="(item,key,index) in tableColums" ></el-table-column>
+        		<el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" 
+        		:width="item.width" v-for="(item,key,index) in tableColums" v-if="item.fieldCode == 'cusName'">
+        				<template slot-scope="scope">
+    		               <div v-if="scope.row.isRecall == 1">
+    		                   <el-button @click="toUpdatePage(scope.row)" type="text" size="small">
+    		                   	{{scope.row.cusName}}<span style="color: red;">撤回</span>
+    		                   </el-button>
+    	                    </div>
+    	                    <div v-else>{{scope.row.cusName}}</div>
+                    	</template>
+        		</el-table-column>
+                <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" 
+                :width="item.width" v-else>
+    	        </el-table-column>
         		</el-table> 
             <table-pagination :pager="pager" @change="initTableData"></table-pagination>
     		</el-row>
@@ -554,16 +567,8 @@ var wdrVM = new Vue({
               document.location.href='/exetend/agendaTaskManager/toAddPage';
             },
             //跳转编辑页
-            toUpdatePage() {
-              var rows = this.multipleSelection;
-              if(rows.length!=1){
-                this.$message({
-                  message: '请选择一条数据进行修改',
-                  type: 'warning'
-                });
-                return;
-              }
-              document.location.href='/exetend/agendaTaskManager/toUpdatePage?id='+rows[0].id;
+            toUpdatePage(row) {
+              document.location.href='/exetend/agendaTaskManager/toUpdatePage?id='+row.clueId;
             },
             editFun() {
                 var rows = this.multipleSelection;
