@@ -18,77 +18,87 @@
         <el-breadcrumb-item>电销管理</el-breadcrumb-item>
         <el-breadcrumb-item>我的通话记录</el-breadcrumb-item>
     </el-breadcrumb>
-    <el-row class="marginB20 greybg padding20">
-        <el-form :inline="true">
-            <el-form-item label="">
-                <el-select v-model="searchForm.callStatus" placeholder="接通状态" value-key="value" clearable>
-                    <el-option
-                        v-for="item in callStatus"
-                        :key="item.value"
-                        :label="item.label"
-                        :value="item.value">
-                    </el-option>
-                </el-select>
-            </el-form-item>
-            <el-form-item label="">
-                <el-input placeholder="客户姓名"  v-model="searchForm.customerName">
-            </el-form-item>
-            <el-form-item label="">
-                <el-input placeholder="客户电话"  v-model="searchForm.customerPhone">
-            </el-form-item>
-            <el-form-item label="">
-                <el-select v-model="searchForm.callType" placeholder="通话类型" value-key="value" clearable>
-                    <el-option
-                        v-for="item in callTypeList"
-                        :key="item.value"
-                        :label="item.label"
-                        :value="item.value">
-                    </el-option>
-                </el-select>
-            </el-form-item>  
-            <el-form-item label="通话时间段：">
-                <el-date-picker v-model="searchForm.startTime" type="date" placeholder="选择开始日期"  value-format=" yyyy-MM-dd HH:mm:ss" format="yyyy-MM-dd HH:mm:ss"> </el-date-picker>
-            </el-form-item>
-            <el-form-item label="—">   
-                <el-date-picker v-model="searchForm.endTime" type="date" placeholder="选择结束日期" value-format=" yyyy-MM-dd HH:mm:ss" format="yyyy-MM-dd HH:mm:ss"> </el-date-picker>
-            </el-form-item>
-            <a href="javascript:void(0);" @click="searchYesterday" style="color:blue;font-size:15px;">【昨天】</a>            
-            <a href="javascript:void(0);" @click="searchWeek" style="color:blue;font-size:15px;">【近七天】</a>            
-            <a href="javascript:void(0);" @click="searchMonth" style="color:blue;font-size:15px;margin-right:10px;">【本月】</a>            
-            <el-button icon="el-icon-search" type="primary" @click="initCallRecordData">搜索</el-button>
-        </el-input>
+    <el-row class="marginB20">
+        <el-button type="primary" @click="searchYesterday" >昨天</el-button>
+        <el-button type="success" @click="searchWeek" >近七天</el-button>
+        <el-button type="warning" @click="searchMonth" >本月</el-button>
     </el-row>
-    <div class="fs16 marginB20">通话总时长：<span style="color:red">{{totalTalkTime | fomatSeconds2}}</span></div>
-    <el-table 
-        ref="multipleTable"
-        tooltip-effect="dark"
-        style="width: 100%"
-        border
-        :data="callRecordData" 
-        >
-        <el-table-column type="index" width="50" label="序号"> </el-table-column>
-        <el-table-column align="center" prop="customerName" label="客户姓名"></el-table-column>
-        <el-table-column align="center" prop="customerPhone" label="客户电话"></el-table-column>
-        <el-table-column align="center" prop="serviceTime" label="开始服务时间"></el-table-column>
-        <el-table-column align="center" prop="callType" label="通话类型" :formatter="getCallTypeText"></el-table-column>
-        <el-table-column align="center" prop="startTime" label="通话时间" :formatter="getStartTimeText"></el-table-column>
-        <el-table-column align="center" prop="callStatus" label="接通状态" :formatter="getCallStatusText"></el-table-column>
-        <!-- <el-table-column align="center" prop="isUserStatus" label="状态" :formatter="getIsUserStatusText"></el-table-column> -->
-        <el-table-column align="center" prop="talkTime" label="通话时长" :formatter="getTalkTimeText"></el-table-column>
-        <el-table-column align="center"  label="操作" >
-            <template slot-scope="scope" v-if="scope.row.talkTime >0 ">
-                    <div style="float:left" :id="scope.row.id" class="sound-trigger sound-trigger--type-default sound-trigger--type-click" @click="switchSoundBtn(scope.row.id,scope.row.recordFile,scope.row.callSource)">
-					    <div class="sound-trigger__inner">
-					    <i class="fa fa-play fa-lg"></i>
-					    </div>
-					</div>
-                    <el-button type="danger" size="small" @click="downloadAudio(scope.row.id,scope.row.recordFile,scope.row.callSource)"><i class="el-icon-download"></i>下载</el-button>
-            </template>
-        </el-table-column>
-        
-        
-    </el-table>
-    <table-pagination :pager="pager" @change="initCallRecordData"></table-pagination>    
+    <div class="mainSearchBg">        
+        <div class="mainSearchFormBox">
+            <el-form :inline="true" class="demo-form-inline mainSearchForm">
+                <el-form-item label="接通状态:">
+                    <el-select v-model="searchForm.callStatus" placeholder="接通状态" value-key="value" clearable>
+                        <el-option
+                            v-for="item in callStatus"
+                            :key="item.value"
+                            :label="item.label"
+                            :value="item.value">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="客户姓名:">
+                    <el-input placeholder="客户姓名"  v-model="searchForm.customerName"></el-input>
+                </el-form-item>
+                <el-form-item label="客户电话:">
+                    <el-input placeholder="客户电话"  v-model="searchForm.customerPhone"></el-input>
+                </el-form-item>
+                <el-form-item label="通话时间段:">
+                    <el-date-picker v-model="searchForm.startTime" type="date" placeholder="选择开始日期"  value-format=" yyyy-MM-dd HH:mm:ss" format="yyyy-MM-dd HH:mm:ss"> </el-date-picker>
+                </el-form-item>
+                <el-form-item label="—" class="widthauto">   
+                    <el-date-picker v-model="searchForm.endTime" type="date" placeholder="选择结束日期" value-format=" yyyy-MM-dd HH:mm:ss" format="yyyy-MM-dd HH:mm:ss"> </el-date-picker>
+                </el-form-item>
+                <el-row v-show="isShow">
+                    <el-form-item label="通话类型:">
+                        <el-select v-model="searchForm.callType" placeholder="通话类型" value-key="value" clearable>
+                            <el-option
+                                v-for="item in callTypeList"
+                                :key="item.value"
+                                :label="item.label"
+                                :value="item.value">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>  
+                </el-row>
+                <div class="mainSearchBtnBox">                      
+                    <el-button icon="el-icon-search" type="primary" @click="initCallRecordData" class="searchBtn">搜索</el-button>
+                    <el-button type="info" class="searchBtn">取消</el-button>
+                    <span style="color: #5c6be8;cursor: pointer;margin:0 10px;" @click="toogleClick">更多搜索<i class="el-icon-arrow-down greycolor paddingL6"></i></span>
+                </div> 
+            </el-form>
+        </div>
+        <div class="fs16 marginB20">通话总时长：<span style="color:red">{{totalTalkTime | fomatSeconds2}}</span></div>
+        <el-table 
+            ref="multipleTable"
+            tooltip-effect="dark"
+            style="width: 100%"
+            border
+            :data="callRecordData" 
+            >
+            <el-table-column type="index" width="50" label="序号"> </el-table-column>
+            <el-table-column align="center" prop="customerName" label="客户姓名"></el-table-column>
+            <el-table-column align="center" prop="customerPhone" label="客户电话"></el-table-column>
+            <el-table-column align="center" prop="serviceTime" label="开始服务时间"></el-table-column>
+            <el-table-column align="center" prop="callType" label="通话类型" :formatter="getCallTypeText"></el-table-column>
+            <el-table-column align="center" prop="startTime" label="通话时间" :formatter="getStartTimeText"></el-table-column>
+            <el-table-column align="center" prop="callStatus" label="接通状态" :formatter="getCallStatusText"></el-table-column>
+            <!-- <el-table-column align="center" prop="isUserStatus" label="状态" :formatter="getIsUserStatusText"></el-table-column> -->
+            <el-table-column align="center" prop="talkTime" label="通话时长" :formatter="getTalkTimeText"></el-table-column>
+            <el-table-column align="center"  label="操作" >
+                <template slot-scope="scope" v-if="scope.row.talkTime >0 ">
+                        <div style="float:left" :id="scope.row.id" class="sound-trigger sound-trigger--type-default sound-trigger--type-click" @click="switchSoundBtn(scope.row.id,scope.row.recordFile,scope.row.callSource)">
+    					    <div class="sound-trigger__inner">
+    					    <i class="fa fa-play fa-lg"></i>
+    					    </div>
+    					</div>
+                        <el-button type="danger" size="small" @click="downloadAudio(scope.row.id,scope.row.recordFile,scope.row.callSource)"><i class="el-icon-download"></i>下载</el-button>
+                </template>
+            </el-table-column>
+            
+            
+        </el-table>
+        <table-pagination :pager="pager" @change="initCallRecordData"></table-pagination>   
+    </div>
 </div>
 </body>
 <!-- import common js-->
@@ -98,5 +108,5 @@
 </script>
 <script th:src="@{/js/custom/callrecord/simpleAudio.js?v=1.0.0}"></script>
 <script th:src="@{/js/custom/callrecord/download.js?v=1.0.0}"></script>
-<script th:src="@{/js/custom/callrecord/myCallRecord.js?v=1.0.1}"></script>
+<script th:src="@{/js/custom/callrecord/myCallRecord.js?v=1.0.2}"></script>
 </html>

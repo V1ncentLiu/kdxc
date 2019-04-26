@@ -6,10 +6,14 @@
 </head>
 <body>
 <div id="addCustomer" class="addCustomer mainPadding" style="display: none;"> 
-
+    <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
+        <el-breadcrumb-item>Home</el-breadcrumb-item>
+        <el-breadcrumb-item>电销管理</el-breadcrumb-item>
+        <el-breadcrumb-item>客户管理</el-breadcrumb-item>
+    </el-breadcrumb>
     <el-row class="borderbox">
         <el-form :model="form" :rules="rules" ref="form" class="padding20">
-            <font color="red">线索ID：<span th:text="${clueId}"></span></font>
+            <font color="red" class="fs16">线索ID：<span th:text="${clueId}"></span></font>
             <div class="marginB20 fs16 paddingT20">资源信息</div>
             <div class="borderbox padding20">
                 <el-row>
@@ -26,20 +30,20 @@
                 </el-row>
                 <el-row>
                     <el-col :span="8">
-                        <el-form-item label="搜索词：" :label-width="formLabelWidth" >
-                            <el-button type="text" disabled>{{clueBase.searchWord}}</el-button>
+                        <el-form-item label="留言时间：" :label-width="formLabelWidth" >
+                            <el-button type="text" disabled>{{clueBase.messageTime}}</el-button>
                         </el-form-item>
                     </el-col>
                     <el-col :span="8">
-                        <el-form-item label="留言时间：" :label-width="formLabelWidth" >
-                            <el-button type="text" disabled>{{clueBase.messageTime}}</el-button>
+                        <el-form-item label="留言重点：" :label-width="formLabelWidth" >
+                            <el-button type="text" disabled>{{clueBase.messagePoint}}</el-button>
                         </el-form-item>
                     </el-col>
                 </el-row>
                 <el-row>
                     <el-col :span="8">
-                        <el-form-item label="留言重点：" :label-width="formLabelWidth" >
-                            <el-button type="text" disabled>{{clueBase.messagePoint}}</el-button>
+                        <el-form-item label="搜索词：" :label-width="formLabelWidth" >
+                            <el-button type="text" disabled>{{clueBase.searchWord}}</el-button>
                         </el-form-item>
                     </el-col>
                 </el-row>
@@ -74,22 +78,35 @@
                     </el-col>
                     <el-col :span="8">
                         <el-form-item label="微信：" :label-width="formLabelWidth" >
-                            <el-button type="text" disabled>{{form.ishasWx}}</el-button>
-                            <span v-show="vxShow" style="padding-left: 5px;color: rgb(0, 114, 255);cursor: pointer;" @click="dialogFormImg = true">查看二维码</span>
+                            <div v-if="showPhone">
+                                <el-button type="text" disabled>{{form.ishasWx}}</el-button>
+                                <span v-show="vxShow" style="padding-left: 5px;color: rgb(0, 114, 255);cursor: pointer;" @click="dialogFormImg = true">查看二维码</span>
+                            </div>
+                            <div v-else>
+                                <el-button type="text" disabled>{{(form.ishasWx==null||form.ishasWx=='')?'':'***'}}</el-button>
+                            </div>
                         </el-form-item>
                     </el-col>
                 </el-row>
                 <el-row>
                     <el-col :span="8">
                         <el-form-item label="QQ：" :label-width="formLabelWidth" >
-                            <el-button type="text" disabled>{{form.qq}}</el-button>
+                            <div v-if="showPhone">
+                                <el-button type="text" disabled>{{form.qq}}</el-button>
+                            </div>
+                            <div v-else>
+                                <el-button type="text" disabled>{{(form.qq==null||form.qq=='')?'':'***'}}</el-button>
+                            </div>
                         </el-form-item>
                     </el-col>
                     <el-col :span="8">
                         <el-form-item label="邮箱：" prop="customerEmail" :label-width="formLabelWidth">
-                            <el-button type="text" disabled>
-                                {{form.customerEmail}}
-                            </el-button>
+                            <div v-if="showPhone">
+                                <el-button type="text" disabled>{{form.customerEmail}}</el-button>
+                            </div>
+                            <div v-else>
+                                <el-button type="text" disabled>{{(form.customerEmail==null||form.customerEmail=='')?'':'***'}}</el-button>
+                            </div>
                         </el-form-item>
                     </el-col>
                 </el-row>
@@ -194,59 +211,57 @@
                 </el-row>
             </div>
             <div class="marginB20 fs16 paddingT20">上传资料</div>
-            <div class="borderbox padding20">
-                <el-row>
-                    <el-table
-                            ref="multipleTable"
-                            :data="tableDataC1"
-                            tooltip-effect="dark"
-                            style="width: 100%"
-                            border
-                    >
-                        <el-table-column
-                                type="index" label="序号"
-                                header-align="center" align="center" width="100">
-                        </el-table-column>
-                        <el-table-column
-                                prop="uploadUserName"
-                                label="上传人姓名"
-                                align="center">
-                        </el-table-column>
-                        <el-table-column
-                                prop="uploadTime"
-                                label="上传时间"
-                                align="center">
-                        </el-table-column>
-                        <el-table-column
-                                prop="fileName"
-                                label="文件名称"
-                                align="center">
-                        </el-table-column>
-                        <el-table-column
-                                label="操作"
-                                align="center">
-                            <template slot-scope="scope">
-                                <el-button size="mini"type="text" @click="handleOperateFn(scope.$index, scope.row)">
-                                    {{scope.row.fileType =="mp3"? '下载录音':'查看图片'}}
-                                </el-button>
-                            </template>
-                        </el-table-column>
-                        <el-table-column
-                                prop="delStatus"
-                                label="删除状态"
-                                align="center">
-                            <template slot-scope="scope">
-                                <div v-if="scope.row.delStatus === 0">
-                                    未删除
-                                </div>
-                                <div v-else-if="scope.row.delStatus ===1">
-                                    已删除
-                                </div>
-                            </template>
-                        </el-table-column>
-                    </el-table>
-                </el-row>
-            </div>
+            <el-row>
+                <el-table
+                        ref="multipleTable"
+                        :data="tableDataC1"
+                        tooltip-effect="dark"
+                        style="width: 100%"
+                        border
+                >
+                    <el-table-column
+                            type="index" label="序号"
+                            header-align="center" align="center" width="100">
+                    </el-table-column>
+                    <el-table-column
+                            prop="uploadUserName"
+                            label="上传人姓名"
+                            align="center">
+                    </el-table-column>
+                    <el-table-column
+                            prop="uploadTime"
+                            label="上传时间"
+                            align="center">
+                    </el-table-column>
+                    <el-table-column
+                            prop="fileName"
+                            label="文件名称"
+                            align="center">
+                    </el-table-column>
+                    <el-table-column
+                            label="操作"
+                            align="center">
+                        <template slot-scope="scope">
+                            <el-button size="mini"type="text" @click="handleOperateFn(scope.$index, scope.row)">
+                                {{scope.row.fileType =="mp3"? '下载录音':'查看图片'}}
+                            </el-button>
+                        </template>
+                    </el-table-column>
+                    <el-table-column
+                            prop="delStatus"
+                            label="删除状态"
+                            align="center">
+                        <template slot-scope="scope">
+                            <div v-if="scope.row.delStatus === 0">
+                                未删除
+                            </div>
+                            <div v-else-if="scope.row.delStatus ===1">
+                                已删除
+                            </div>
+                        </template>
+                    </el-table-column>
+                </el-table>
+            </el-row>
             <div class="marginB20 fs16 paddingT20">跟进记录</div>
             <el-table
                 ref="multipleTable"
@@ -328,32 +343,12 @@
                 border
                 @selection-change="handleSelectionChange"
              >
-                <el-table-column
-                  type="index"
-                  width="55"
-                  label="序号"
-                  align="center">
-                </el-table-column>
-                <el-table-column
-                  prop="roleName"
-                  label="服务人员角色"
-                  align="center">
-                </el-table-column>
-                <el-table-column
-                  prop="userName"
-                  label="服务人员姓名"
-                  align="center">
-                </el-table-column>
-                <el-table-column
-                  prop="telRuleValue"
-                  label="分配规则（名称）"
-                  align="center">
-                </el-table-column>
-                <el-table-column
-                  prop="createTime"
-                  label="服务时间"
-                  align="center">
-                </el-table-column>
+                <el-table-column type="index" width="55" label="序号" align="center"></el-table-column>
+                <el-table-column prop="roleName" label="角色" align="center"></el-table-column>
+                <el-table-column prop="orgName" label="所属组(组名)" align="center"></el-table-column>
+                <!--<el-table-column prop="userName" label="服务人员姓名" align="center"></el-table-column>-->
+                <!--<el-table-column prop="telRuleValue" label="分配规则（名称）" align="center"></el-table-column>-->
+                <el-table-column prop="createTime" label="开始服务时间" align="center"></el-table-column>
             </el-table>            
         </el-form>
     </el-row>

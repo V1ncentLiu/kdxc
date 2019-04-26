@@ -79,7 +79,6 @@ public class BusCustomerManagerController {
         List<RoleInfoDTO> roleList = user.getRoleList();
         if (roleList != null && RoleCodeEnum.GLY.name().equals(roleList.get(0).getRoleCode())) {
             // 管理员 可以选择所有商务组 商务总监
-
             // 查询所有商务组
             List<OrganizationRespDTO> busSaleGroupList =
                     getSaleGroupList(null, OrgTypeConstant.SWZ);
@@ -114,12 +113,9 @@ public class BusCustomerManagerController {
         // 查询所有项目
         JSONResult<List<ProjectInfoDTO>> allProject = projectInfoFeignClient.allProject();
         request.setAttribute("projectList", allProject.getData());
-        SysRegionDTO queryDTO = new SysRegionDTO();
         // 查询所有省
-        queryDTO.setType(0);
-        JSONResult<List<SysRegionDTO>> querySysRegionByParam =
-                sysRegionFeignClient.querySysRegionByParam(queryDTO);
-        request.setAttribute("provinceList", querySysRegionByParam.getData());
+        JSONResult<List<SysRegionDTO>> getproviceList = sysRegionFeignClient.getproviceList();
+        request.setAttribute("provinceList", getproviceList.getData());
 
         // 查询字典选址情况集合
         request.setAttribute("optionAddressList", getDictionaryByCode(Constants.OPTION_ADDRESS));
@@ -152,10 +148,8 @@ public class BusCustomerManagerController {
         pageParam.setUserId(user.getId());
         List<RoleInfoDTO> roleList = user.getRoleList();
         if (roleList != null) {
-
             pageParam.setRoleCode(roleList.get(0).getRoleCode());
         }
-
         JSONResult<PageBean<BusCustomerDTO>> busCustomerList =
                 busCustomerFeignClient.busCustomerList(pageParam);
 
@@ -233,18 +227,16 @@ public class BusCustomerManagerController {
 
         Map<Long, OrganizationRespDTO> orgMap = new HashMap<Long, OrganizationRespDTO>();
         // 生成<机构id，机构>map
-        if(groupList!=null){
+        if (groupList != null) {
             for (OrganizationRespDTO org : groupList) {
                 orgMap.put(org.getId(), org);
             }
         }
-
-        if(busAreaLsit!=null){
+        if (busAreaLsit != null) {
             for (OrganizationRespDTO org : busAreaLsit) {
                 orgMap.put(org.getId(), org);
             }
         }
-
         List<Map<String, Object>> result = new ArrayList<Map<String, Object>>();
         // 生成结果集，匹配电销组以及电销总监
         for (UserInfoDTO user : userList) {

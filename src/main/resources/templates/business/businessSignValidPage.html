@@ -15,130 +15,128 @@
 
     <el-breadcrumb separator="/" class="elBreadcrumb marginB20" >
         <el-breadcrumb-item>Home</el-breadcrumb-item>
-        <el-breadcrumb-item>总裁处理确认</el-breadcrumb-item>
+        <el-breadcrumb-item>判单管理</el-breadcrumb-item>
         <el-breadcrumb-item>有效签约单确认</el-breadcrumb-item>
     </el-breadcrumb>
-    <el-row class="marginB10">
-        <el-col :xs="12" :sm="16" :md="16" :lg="18" :xl="12">
-            <el-button type="primary" @click="dealButton">有效性处理</el-button>
-        </el-col>
+    <el-row class="marginB20">
+        <el-button type="primary" @click="dealButton">有效性处理</el-button>
     </el-row>
-    <el-form :inline="true" class="demo-form-inline"> 
-    <el-row class="marginB10 greybg padding20" style="padding-bottom: 0;">
-    <el-row>              
-			<!-- <div class="block marginB10">	 -->
-				<el-form-item class="formItem">
-				<el-select filterable v-model="dealStatus" placeholder="处理状态" clearable>
-				    <el-option
-				      v-for="item in dealStatusList"
-				      :key="item.value"
-				      :label="item.label"
-				      :value="item.value">
-				    </el-option>
-				</el-select>
-				</el-form-item>
-				<el-form-item class="formItem">
-				<el-select filterable v-model="constraint" placeholder="约束不一致" clearable>
-				    <el-option
-				      v-for="item in constraintList"
-				       :key="item.value"
-				      :label="item.label"
-				      :value="item.value">
-				    </el-option>
-				</el-select>
-				</el-form-item>
-				<el-form-item class="formItem">
-				<el-select filterable v-model="signProvince" placeholder="签约省份" clearable>
-				    <el-option
-				      v-for="item in provinceList"
-				      :key="item.name"
-				      :label="item.name"
-				      :value="item.name">
-				    </el-option>
-				</el-select>
-				</el-form-item>
-				<el-form-item class="formItem">
-				<el-select filterable v-model="signProjectId" placeholder="签约项目" clearable>
-				    <el-option
-				      v-for="item in projectList"
-				      :key="item.id"
-				      :label="item.projectName"
-				      :value="item.id">
-				    </el-option>
-				</el-select>
-				</el-form-item>
-				<el-form-item class="formItem">
-			<!-- </div>	
-			<div class="block marginB10 "> -->			
-				<el-select filterable v-model="businessGroupId" placeholder="商务组" clearable>
-				    <el-option
-				      v-for="item in swList"
-				      :key="item.id"
-				      :label="item.name"
-				      :value="item.id">
-				    </el-option>
-				</el-select>
-				</el-form-item>
-				<el-form-item class="formItem">
-				<el-select filterable v-model="teleGroupid" placeholder="电销组" clearable>
-				    <el-option
-				      v-for="item in dxList"
-				      :key="item.id"
-				      :label="item.name"
-				      :value="item.id">
-				    </el-option>
-				</el-select>
-				</el-form-item>
-				<el-form-item class="formItem">
-				<el-select filterable v-model="valid" placeholder="签约单有效性" clearable>
-				    <el-option
-				      v-for="item in validList"
-				       :key="item.value"
-				      :label="item.label"
-				      :value="item.value">
-				    </el-option>
-				</el-select>
-				</el-form-item>
-				<el-form-item class="formItem">
-				<el-input style="width: 200px;" v-model="cusName" placeholder="客户姓名"></el-input>
-				</el-form-item>
-				<el-form-item class="formItem">
-				<el-button icon="el-icon-search" type="primary" @click="search">搜索</el-button>
-				</el-form-item>
-			<!-- </div> -->
-    </el-row>
-    </el-row>
-    </el-form>
-    <el-row>
-        <el-table 
-            ref="multipleTable"
-            tooltip-effect="dark"
-            empty-text="无数据"
-            style="width: 100%"
-            border
-            :data="dataTable"  @selection-change="handleSelectionChange">
-             <el-table-column align="center" prop="id" type="selection" width="55"></el-table-column> 
-             <el-table-column align="center" type="index"  label="序号" width="55"></el-table-column>
-             <!-- <el-table-column prop="date" label="全选" width="180"></el-table-column>  -->
-            <el-table-column align="center" prop="signNo" label="签约单编号"></el-table-column>
-            <el-table-column align="center" prop="customerName" label="客户姓名"></el-table-column>
-            <el-table-column align="center"  prop="businessGroupName" label="商务小组" ></el-table-column>
-            <el-table-column align="center" prop="signProvince" label="签约省份" ></el-table-column>
-            <el-table-column align="center" prop="signCity" label="签约城市" ></el-table-column>
-            <el-table-column align="center" prop="signDictrict" label="签约区/县" ></el-table-column>
-            <el-table-column align="center" prop="signProjectName" label="签约项目" ></el-table-column>
-            <el-table-column align="center" prop="constrainArea" label="约束区域" ></el-table-column>
-            <el-table-column align="center" prop="constrainProject" label="约束项目" ></el-table-column>
-            <el-table-column align="center" prop="teleGroupName" label="电销组" ></el-table-column>
-            <el-table-column align="center" prop="teleSaleName" label="电销顾问" ></el-table-column>
-            <el-table-column align="center" prop="constraintNotConsistency" label="约束不一致" ></el-table-column>
-            <el-table-column align="center" prop="dealStatus" label="处理状态" :formatter="transformStatus"></el-table-column>
-            <el-table-column align="center" prop="valid" label="有效性" :formatter="transvalidStatus"></el-table-column>
-        </el-table>
-         <table-pagination :pager="pager"  @change="inviteAreaListPage"></table-pagination>
-    </el-row>      
+    <div class="mainSearchBg">        
+        <div class="mainSearchFormBox">
+            <el-form :inline="true" class="demo-form-inline mainSearchForm">
+        				<el-form-item label="处理状态:" label-width="55px">
+            				<el-select filterable v-model="dealStatus" placeholder="处理状态" clearable>
+            				    <el-option
+            				      v-for="item in dealStatusList"
+            				      :key="item.value"
+            				      :label="item.label"
+            				      :value="item.value">
+            				    </el-option>
+            				</el-select>
+        				</el-form-item>
+        				<el-form-item label="约束不一致:">
+            				<el-select filterable v-model="constraint" placeholder="约束不一致" clearable>
+            				    <el-option
+            				      v-for="item in constraintList"
+            				       :key="item.value"
+            				      :label="item.label"
+            				      :value="item.value">
+            				    </el-option>
+            				</el-select>
+        				</el-form-item>
+        				<el-form-item label="签约省份:">
+            				<el-select filterable v-model="signProvince" placeholder="签约省份" clearable>
+            				    <el-option
+            				      v-for="item in provinceList"
+            				      :key="item.name"
+            				      :label="item.name"
+            				      :value="item.name">
+            				    </el-option>
+            				</el-select>
+        				</el-form-item>
+        				<el-form-item label="签约项目:">
+            				<el-select filterable v-model="signProjectId" placeholder="签约项目" clearable>
+            				    <el-option
+            				      v-for="item in projectList"
+            				      :key="item.id"
+            				      :label="item.projectName"
+            				      :value="item.id">
+            				    </el-option>
+            				</el-select>
+        				</el-form-item>
+        				<el-form-item label="商务组:">
+            				<el-select filterable v-model="businessGroupId" placeholder="商务组" clearable>
+            				    <el-option
+            				      v-for="item in swList"
+            				      :key="item.id"
+            				      :label="item.name"
+            				      :value="item.id">
+            				    </el-option>
+            				</el-select>
+        				</el-form-item>
+                <el-row v-show="isShow">    
+            				<el-form-item label="电销组:" label-width="55px">
+                				<el-select filterable v-model="teleGroupid" placeholder="电销组" clearable>
+                				    <el-option
+                				      v-for="item in dxList"
+                				      :key="item.id"
+                				      :label="item.name"
+                				      :value="item.id">
+                				    </el-option>
+                				</el-select>
+            				</el-form-item>
+            				<el-form-item label="签约单有效性:">
+                				<el-select filterable v-model="valid" placeholder="签约单有效性" clearable>
+                				    <el-option
+                				      v-for="item in validList"
+                				       :key="item.value"
+                				      :label="item.label"
+                				      :value="item.value">
+                				    </el-option>
+                				</el-select>
+            				</el-form-item>
+            				<el-form-item label="客户姓名:">
+            				    <el-input v-model="cusName" placeholder="请输入客户姓名"></el-input>
+            				</el-form-item>
+                </el-row>
+                <div class="mainSearchBtnBox">
+        				    <el-button icon="el-icon-search" type="primary" @click="search" class="searchBtn">搜索</el-button>
+                    <el-button type="info" class="searchBtn">取消</el-button>
+                    <span style="color: #5c6be8;cursor: pointer;margin:0 10px;" @click="toogleClick">更多搜索<i class="el-icon-arrow-down greycolor paddingL6"></i></span>
+                </div> 
+            </el-form>
+        </div>
+        <el-row>
+            <el-table 
+                ref="multipleTable"
+                tooltip-effect="dark"
+                empty-text="无数据"
+                style="width: 100%"
+                border
+                :data="dataTable"  @selection-change="handleSelectionChange">
+                 <el-table-column align="center" prop="id" type="selection" width="55"></el-table-column> 
+                 <el-table-column align="center" type="index"  label="序号" width="55"></el-table-column>
+                 <!-- <el-table-column prop="date" label="全选" width="180"></el-table-column>  -->
+                <el-table-column align="center" prop="signNo" label="签约单编号"></el-table-column>
+                <el-table-column align="center" prop="customerName" label="客户姓名"></el-table-column>
+                <el-table-column align="center"  prop="businessGroupName" label="商务小组" ></el-table-column>
+                <el-table-column align="center" prop="signProvince" label="签约省份" ></el-table-column>
+                <el-table-column align="center" prop="signCity" label="签约城市" ></el-table-column>
+                <el-table-column align="center" prop="signDictrict" label="签约区/县" ></el-table-column>
+                <el-table-column align="center" prop="signProjectName" label="签约项目" ></el-table-column>
+                <el-table-column align="center" prop="constrainArea" label="约束区域" ></el-table-column>
+                <el-table-column align="center" prop="constrainProject" label="约束项目" ></el-table-column>
+                <el-table-column align="center" prop="teleGroupName" label="电销组" ></el-table-column>
+                <el-table-column align="center" prop="teleSaleName" label="电销顾问" ></el-table-column>
+                <el-table-column align="center" prop="constraintNotConsistency" label="约束不一致" ></el-table-column>
+                <el-table-column align="center" prop="dealStatus" label="处理状态" :formatter="transformStatus"></el-table-column>
+                <el-table-column align="center" prop="valid" label="有效性" :formatter="transvalidStatus"></el-table-column>
+            </el-table>
+             <table-pagination :pager="pager"  @change="inviteAreaListPage"></table-pagination>
+        </el-row>  
+    </div>
     <!-- dialog -->
-    <el-dialog title="有效性处理" :visible.sync="dialogFormVisible" width="40%">
+    <el-dialog title="有效性处理" :visible.sync="dialogFormVisible" width="540px">
         <el-form :model="form" ref="form" :rules="rules">
             <el-form-item label="有效性选择：" :label-width="formLabelWidth"  prop="status">
                 <el-select filterable v-model="form.dealStatus" placeholder="有效性选择" style="width:80%;">
@@ -172,6 +170,7 @@
     var orgVM =  new Vue({
         el: '#organizationManage',
         data: {
+          isShow:false,
         	formLabelWidth: '150px',
         	form:{
         		dealStatus:"1"
@@ -360,19 +359,19 @@
                         return;
                     }
                     var ids="";
- 		            if(null!=rows){
- 		             for ( var i = 0; i <rows.length; i++){
- 		            	if("" == ids){
- 		            		ids = rows[i].id
- 		            	}else{
- 		            		ids = ids+","+rows[i].id
- 		            	}
- 		             }
-                	}
- 		           var param={};
-		           param.ids=ids;
-		           param.valid = this.form.dealStatus;
-		           axios.post('/businesssign/updateBusinessSignDTOValidByIds',param).then(function (response) {
+     		            if(null!=rows){
+     		             for ( var i = 0; i <rows.length; i++){
+     		            	if("" == ids){
+     		            		ids = rows[i].id
+     		            	}else{
+     		            		ids = ids+","+rows[i].id
+     		            	}
+     		             }
+                    	}
+     		           var param={};
+    		           param.ids=ids;
+    		           param.valid = this.form.dealStatus;
+    		           axios.post('/businesssign/updateBusinessSignDTOValidByIds',param).then(function (response) {
 	                  	  console.log(response);
 	                      if(null !==response && response.data !=null && response.data.code=='0'){
 	                    	  window.location.href="/businesssign/businessSignValidPage"; 
@@ -386,7 +385,14 @@
                    .then(function () {
                      // always executed
                    });
-              	}
+              	},
+                toogleClick(){
+                  if(this.isShow){
+                      this.isShow=false
+                  }else{
+                      this.isShow=true
+                  }          
+                },
         },
         created(){
         	this.inviteAreaListPage();

@@ -4,10 +4,13 @@
 <head th:include="_header_include::frag(~{::title},~{},~{::style})">
     <title>组织机构管理</title>
     <style>
-        .organizationManage .leftBox{/*width: 200px;*/height: auto;border:1px solid #C0DEFC;min-height: 480px;}
+        .organizationManage .leftBox{/*width: 200px;*/height: auto;border:1px solid #ebeef5;min-height: 480px;}
         .organizationManage .leftTitle{background:#c0defc;text-indent: 20px;height: 40px;line-height: 40px;}
         .organizationManage .leftTree{padding:10px;}
         .organizationManage .rightTitle{background:#c0defc;padding-left: 20px;height: 40px;line-height: 40px;}
+        .el-dialog {width: 650px;}
+        /*20190419*/
+        .organizationManage .leftTitle, .organizationManage .rightTitle { color: #ffffff; background-color: #5c6be8; border-color: #5c6be8;border-top-left-radius: 4px;border-top-right-radius: 4px; }
     </style>
 </head>
 <body>
@@ -36,7 +39,7 @@
         </el-col>
         <el-col :span="19">
             <el-row class="marginB20">
-                <el-col :xs="12" :sm="16" :md="16" :lg="18" :xl="18">
+                <el-col :span="17">
                   <shiro:hasPermission name="organization:add">
                     <el-button type="primary" @click="addChildOrg"><i class="el-icon-plus"></i>添加下一级组织</el-button>
                  </shiro:hasPermission>
@@ -47,48 +50,50 @@
                     <el-button type="danger" @click="deleteFun"><i class="el-icon-delete"></i>删除</el-button>
                     </shiro:hasPermission>
                 </el-col>
-                <el-col :xs="12" :sm="8" :md="8" :lg="6" :xl="6">
+                <el-col :span="7">
                     <el-input placeholder="按照组织名称进行查询" class="input-with-select" v-model="inputOrgName">                        
                     <el-button slot="append" icon="el-icon-search" @click="getQuery">搜索</el-button>
                     </el-input>
                 </el-col>
             </el-row>
             <el-row class="rightTitle fs16"> {{form2.parentName}} 下一级组织</el-row>
-            <el-row>
-                <el-table 
-                    ref="multipleTable"
-                    tooltip-effect="dark"
-                    empty-text="当前组织无下级组织"
-                    style="width: 100%"
-                    @selection-change="handleSelectionChange"
-                    border
-                    :data="dataTable" 
-                    >
-                    <el-table-column align="center" type="selection" width="55"></el-table-column> 
-                     <!-- <el-table-column prop="date" label="全选" width="180"></el-table-column>  -->
-                    <el-table-column align="center" prop="name" label="组织名称"></el-table-column>
-                    <el-table-column align="center" prop="staffNum" label="组内成员（人）">
-                    
-                    <template slot-scope="scope" v-if="scope.row.staffNum!=0">
-				        <el-button type="text" @click="openStaffNumTable(scope.row.id)">{{ scope.row.staffNum }}</el-button>
-				        
-				      </template>
-				      
-				      <template slot-scope="scope">
-                        <el-button v-if="scope.row.staffNum!=0" type="text" @click="openStaffNumTable(scope.row.id)">{{ scope.row.staffNum }}</el-button>
-                        <span v-else>0</span>
-                      </template>
-                       
-				   
-                    </el-table-column>
-                    <el-table-column align="center" prop="remark" label="备注"></el-table-column>
-                </el-table>
-                 <table-pagination :pager="pager" @change="getQuery"></table-pagination>
-            </el-row>
+            <div class="mainSearchBg">
+                <el-row>
+                    <el-table 
+                        ref="multipleTable"
+                        tooltip-effect="dark"
+                        empty-text="当前组织无下级组织"
+                        style="width: 100%"
+                        @selection-change="handleSelectionChange"
+                        border
+                        :data="dataTable" 
+                        >
+                        <el-table-column align="center" type="selection" width="55"></el-table-column> 
+                         <!-- <el-table-column prop="date" label="全选" width="180"></el-table-column>  -->
+                        <el-table-column align="center" prop="name" label="组织名称"></el-table-column>
+                        <el-table-column align="center" prop="staffNum" label="组内成员（人）">
+                        
+                        <template slot-scope="scope" v-if="scope.row.staffNum!=0">
+          				        <el-button type="text" @click="openStaffNumTable(scope.row.id)">{{ scope.row.staffNum }}</el-button>
+          				        
+          				      </template>
+    				      
+    				            <template slot-scope="scope">
+                          <el-button v-if="scope.row.staffNum!=0" type="text" @click="openStaffNumTable(scope.row.id)">{{ scope.row.staffNum }}</el-button>
+                          <span v-else>0</span>
+                        </template>
+                           
+    				   
+                        </el-table-column>
+                        <el-table-column align="center" prop="remark" label="备注"></el-table-column>
+                    </el-table>
+                    <table-pagination :pager="pager" @change="getQuery"></table-pagination>
+                </el-row>
+            </div>
         </el-col>
     </el-row>
     <!-- dialog -->
-    <el-dialog :title="addOrModifyDialogTitle" :visible.sync="dialogFormVisible" @close="closeAddOrgDialog" width="40%">
+    <el-dialog :title="addOrModifyDialogTitle" :visible.sync="dialogFormVisible" @close="closeAddOrgDialog">
         <el-form :model="form"  ref="ruleForm" :rules="rules">
             <el-form-item label="上级组织：" :label-width="formLabelWidth" prop="parentName">
                    {{form2.parentName}}

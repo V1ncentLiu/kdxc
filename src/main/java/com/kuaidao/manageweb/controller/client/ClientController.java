@@ -688,7 +688,7 @@ public class ClientController {
         }
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
         clientLoginRecord.setAccountId(curLoginUser.getId());
-        //TODO dev 需要传一个参数 accountType
+        clientLoginRecord.setAccountType(clientLoginRecord.getAccountType());
         return clientFeignClient.clientLoginRecord(clientLoginRecord);
         
     }
@@ -700,6 +700,8 @@ public class ClientController {
      */
     @PostMapping("/qimoLogout")
     @ResponseBody
+    @LogRecord(description = "七陌坐席退出登录", operationType = OperationType.LOGINOUT,
+        menuName = MenuEnum.QIMO_CLIENT_MANAGEMENT)
     public JSONResult loginout(HttpServletRequest request) {
         Session session = SecurityUtils.getSubject().getSession();
         if(StringUtils.isBlank((String)session.getAttribute("loginName"))) {
@@ -719,6 +721,8 @@ public class ClientController {
      */
     @PostMapping("/qimoOutboundCall")
     @ResponseBody
+    @LogRecord(description = "七陌外呼", operationType = OperationType.OUTBOUNDCALL,
+        menuName = MenuEnum.QIMO_CLIENT_MANAGEMENT)
     public JSONResult<QimoOutboundCallRespDTO> qimoOutboundCall(@RequestBody QimoOutboundCallDTO  callDTO){
         String customerPhoneNumber = callDTO.getCustomerPhoneNumber();
         if(StringUtils.isBlank(customerPhoneNumber)) {
@@ -738,6 +742,8 @@ public class ClientController {
      */
     @PostMapping("/axbOutCall")
     @ResponseBody
+    @LogRecord(description = "天润axb外呼", operationType = OperationType.OUTBOUNDCALL,
+        menuName = MenuEnum.TR_CLIENT_MANAGEMENT)
     public JSONResult<String> axbOutCall(@RequestBody TrAxbOutCallReqDTO trAxbOutCallReqDTO){
         Session session = SecurityUtils.getSubject().getSession();
         String  cno = (String)session.getAttribute("axb");

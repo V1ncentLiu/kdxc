@@ -15,199 +15,204 @@
         <el-breadcrumb-item>客户签约记录</el-breadcrumb-item>
     </el-breadcrumb>
     <el-row class="marginB20">
-       <shiro:hasPermission name=" aggregation:signRecord:reject">
-          <el-button type="primary" @click="OpenRejectSignRecordDialog">驳回</el-button>
+        <shiro:hasPermission name=" aggregation:signRecord:reject">
+          <el-button type="danger" @click="OpenRejectSignRecordDialog">驳回</el-button>
         </shiro:hasPermission>
         <shiro:hasPermission name=" aggregation:signRecord:pass">
             <el-button type="success" @click="pass">审核通过</el-button>
         </shiro:hasPermission>
     </el-row>
-    <el-row class="marginB20 greybg padding20" style="padding-bottom: 0">        
-        <el-form :inline="true" :model="form" ref="form">
-            <el-form-item label="">
-                <el-select v-model="form.signProjectId" placeholder="签约项目" style="width: 100%;" clearable>
-                    <el-option
-                        v-for="item in projectList"
-                        :key="item.id"
-                        :label="item.projectName"
-                        :value="item.id">
-                    </el-option>
-                </el-select>
-            </el-form-item> 
-            <el-form-item label="">  
-                <el-select v-model="form.businessGroupId" placeholder="商务小组" style="width: 100%;" clearable>
-                    <el-option
-                        v-for="item in businessGroupList"
-                        :key="item.id"
-                        :label="item.name"
-                        :value="item.id">
-                    </el-option>
-                </el-select>
-            </el-form-item>    
-            <el-form-item label="">  
-                <el-select v-model="form.businessManagerId" placeholder="商务经理" style="width: 100%;" clearable>
-                    <el-option
-                        v-for="item in busManagerList"
-                        :key="item.id"
-                        :label="item.name"
-                        :value="item.id">
-                    </el-option>
-                </el-select>
-            </el-form-item>   
-            <el-form-item label="">  
-                <el-select v-model="form.teleGroupid" placeholder="电销组" style="width: 100%;" clearable @change="changeTeleGroup">
-                    <el-option
-                        v-for="item in teleGroupList"
-                        :key="item.id"
-                        :label="item.name"
-                        :value="item.id">
-                    </el-option>
-                </el-select>
-            </el-form-item>   
-            <el-form-item label="">  
-                <el-select v-model="form.teleSaleId" placeholder="创业顾问" style="width: 100%;" clearable>
-                    <el-option
-                        v-for="item in teleSaleList"
-                        :key="item.id"
-                        :label="item.name"
-                        :value="item.id">
-                    </el-option>
-                </el-select>
-            </el-form-item>   
-            <el-form-item label="">  
-                <el-select v-model="form.signType" placeholder="签约类型" style="width: 100%;" clearable>
-                    <el-option
-                        v-for="item in signTypeOpt"
-                        :key="item.value"
-                        :label="item.label"
-                        :value="item.value">
-                    </el-option>
-                </el-select>
-            </el-form-item>   
-            <el-form-item label="">  
-                <el-select v-model="form.status" placeholder="签约单状态" style="width: 100%;" clearable>
-                    <el-option
-                        v-for="item in signOrderStatusOpt"
-                        :key="item.value"
-                        :label="item.label"
-                        :value="item.value">
-                    </el-option>
-                </el-select>
-            </el-form-item>           
-            <el-form-item label="签约时间:">
-                <el-date-picker
-                    style="width: 100%;"
-                    v-model="form.signStartTime"
-                    type="datetime"
-                    placeholder="选择日期时间">
-                </el-date-picker>
-            </el-form-item>
-            <el-form-item label="——">
-                <el-date-picker
-                    style="width: 100%;"
-                    v-model="form.signEndTime"
-                    type="datetime"
-                    placeholder="选择日期时间">
-                </el-date-picker>
-            </el-form-item>
-            <el-form-item label="">
-                <el-input v-model="form.signNo" placeholder="签约单编号"></el-input>
-            </el-form-item>
-            <el-form-item label="">
-                <el-input v-model="form.customerName" placeholder="客户姓名"></el-input>
-            </el-form-item>
-            <el-button icon="el-icon-search" type="primary" @click="initSignRecordData">搜索</el-button>               
-        </el-form>       
-    </el-row>
-    <el-row>
-        <el-table 
-            ref="dataTable"
-            tooltip-effect="dark"
-            style="width: 100%"
-            border
-            height="500px"
-             @selection-change="handleSelectionChange"
-             v-loading="loading"
-            :data="dataTable" 
-            >
-            <el-table-column align="center" type="selection" width="55"></el-table-column>
-            <el-table-column align="center" prop="serialNum" label="序号" width="55"></el-table-column>
-            <el-table-column align="center" prop="signNo" label="签约单编号" width="100"></el-table-column>
-            <el-table-column align="center" prop="signType" label="签约类型" :formatter="getSignTypeText"></el-table-column>
-            <el-table-column align="center" prop="createTime" label="签约时间"></el-table-column>
-            <el-table-column align="center" prop="paymentDetails" label="付款明细">
-                <template slot-scope="scope">
-                    <el-button @click="recordClick(scope.row)" type="text" size="small">查看明细</el-button>
-                </template>
-            </el-table-column>
-            <el-table-column align="center" prop="status" label="签约单状态"  width="120">
-                <template slot-scope="scope">
-                    <span v-if="scope.row.status===0">
-                        驳回&nbsp;<el-button @click="reasonClick(scope.row)" type="text">驳回原因</el-button>
-                    </span>
-                    <span v-else-if="scope.row.status===1">
-                        待审核                                    <span v-if="scope.row.payType ==1">
-                                                                                       (全款)                                                 
-                               </span>
-                              <span v-else-if="scope.row.payType ==2">
-                                                                                       (定金)                                                 
-                               </span>
-                               <span v-else-if="scope.row.payType ==3">
-                                                                                      (追加定金)                                                
-                               </span>
-                               <span v-else-if="scope.row.payType ==4">
-                                                                                      (尾款)                                             
-                               </span>
-                        
-                    </span>
-                    <span v-else-if="scope.row.status===2">
-                         有效               <span v-if="scope.row.payType ==1">
-                                                                                       (全款)                                                 
-                               </span>
-                              <span v-else-if="scope.row.payType ==2">
-                                                                                       (定金)                                                 
-                               </span>
-                               <span v-else-if="scope.row.payType ==3">
-                                                                                      (追加定金)                                                
-                               </span>
-                               <span v-else-if="scope.row.payType ==4">
-                                                                                      (尾款)                                             
-                               </span>
-                    </span>
-                  
-                </template>
-            </el-table-column>
-            <el-table-column align="center" prop="customerName" label="客户姓名"></el-table-column>  
-            <el-table-column align="center" prop="idCard" label="客户身份证号" width="170"></el-table-column> 
-            <el-table-column align="center" prop="phone" label="客户联系电话" width="150"></el-table-column> 
-            <el-table-column align="center" prop="signProjectName" label="签约项目"></el-table-column>   
-            <el-table-column align="center" prop="signProvince" label="签约省份"></el-table-column>
-            <el-table-column align="center" prop="signCity" label="签约城市"></el-table-column> 
-            <el-table-column align="center" prop="signDictrict" label="签约区/县" width="100"></el-table-column>
-            <el-table-column align="center" prop="businessGroupName" label="商务小组"></el-table-column> 
-            <el-table-column align="center" prop="businessManagerName" label="商务经理"></el-table-column> 
-            <el-table-column align="center" prop="teleGroupName" label="电销组"></el-table-column>
-            <el-table-column align="center" prop="teleSaleName" label="创业顾问"></el-table-column>
-            <el-table-column align="center" prop="signShopType" label="签约店型" :formatter="getSignShopTypeText"></el-table-column>
-            <el-table-column align="center" prop="amountReceivable" label="应收金额"></el-table-column>
-            <el-table-column align="center" prop="firstToll" label="路费"></el-table-column>
-            <el-table-column align="center" prop="preferentialAmount" label="优惠金额"></el-table-column>
-            <el-table-column align="center" prop="isRemoteSign" label="是否远程签约">
-                <template slot-scope="scope">
-                    <div v-if="scope.row.isRemoteSign == 0">
-                        否
-                    </div>
-                    <div v-else-if="scope.row.isRemoteSign ==1">
-                        是
-                    </div>
-                </template>
-            </el-table-column>
-        </el-table>
-         <table-pagination :pager="pager" @change="initSignRecordData"></table-pagination>
-    </el-row>
+    <div class="mainSearchBg">        
+        <div class="mainSearchFormBox">
+            <el-form :inline="true" class="demo-form-inline mainSearchForm" :model="form" ref="form">
+                <el-form-item label="签约项目:">
+                    <el-select v-model="form.signProjectId" placeholder="签约项目" style="width: 100%;" clearable filterable>
+                        <el-option
+                            v-for="item in projectList"
+                            :key="item.id"
+                            :label="item.projectName"
+                            :value="item.id">
+                        </el-option>
+                    </el-select>
+                </el-form-item> 
+                <el-form-item label="商务小组:">  
+                    <el-select v-model="form.businessGroupId" placeholder="商务小组" style="width: 100%;" clearable filterable>
+                        <el-option
+                            v-for="item in businessGroupList"
+                            :key="item.id"
+                            :label="item.name"
+                            :value="item.id">
+                        </el-option>
+                    </el-select>
+                </el-form-item>    
+                <el-form-item label="商务经理:">  
+                    <el-select v-model="form.businessManagerId" placeholder="商务经理" style="width: 100%;" clearable filterable>
+                        <el-option
+                            v-for="item in busManagerList"
+                            :key="item.id"
+                            :label="item.name"
+                            :value="item.id">
+                        </el-option>
+                    </el-select>
+                </el-form-item>  
+                <el-form-item label="签约时间:">
+                    <el-date-picker
+                        v-model="form.signStartTime"
+                        type="datetime"
+                        placeholder="选择日期时间">
+                    </el-date-picker>
+                </el-form-item>
+                <el-form-item label="—" class="widthauto">
+                    <el-date-picker
+                        v-model="form.signEndTime"
+                        type="datetime"
+                        placeholder="选择日期时间">
+                    </el-date-picker>
+                </el-form-item>
+                <el-row v-show="isShow">
+                    <el-form-item label="电销组:">  
+                        <el-select v-model="form.teleGroupid" placeholder="电销组" style="width: 100%;" clearable @change="changeTeleGroup" filterable>
+                            <el-option
+                                v-for="item in teleGroupList"
+                                :key="item.id"
+                                :label="item.name"
+                                :value="item.id">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>   
+                    <el-form-item label="创业顾问:">  
+                        <el-select v-model="form.teleSaleId" placeholder="创业顾问" style="width: 100%;" clearable filterable>
+                            <el-option
+                                v-for="item in teleSaleList"
+                                :key="item.id"
+                                :label="item.name"
+                                :value="item.id">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>   
+                    <el-form-item label="签约类型:">  
+                        <el-select v-model="form.signType" placeholder="签约类型" clearable>
+                            <el-option
+                                v-for="item in signTypeOpt"
+                                :key="item.value"
+                                :label="item.label"
+                                :value="item.value">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>   
+                    <el-form-item label="签约单状态:">  
+                        <el-select v-model="form.status" placeholder="签约单状态" clearable>
+                            <el-option
+                                v-for="item in signOrderStatusOpt"
+                                :key="item.value"
+                                :label="item.label"
+                                :value="item.value">
+                            </el-option>
+                        </el-select>
+                    </el-form-item> 
+                    <el-form-item label="签约单编号:">
+                        <el-input v-model="form.signNo" placeholder="签约单编号"></el-input>
+                    </el-form-item>
+                    <el-form-item label="客户姓名:">
+                        <el-input v-model="form.customerName" placeholder="客户姓名"></el-input>
+                    </el-form-item>
+                </el-row>
+                <div class="mainSearchBtnBox"> 
+                    <el-button icon="el-icon-search" type="primary" @click="initSignRecordData" class="searchBtn">搜索</el-button>  
+                    <el-button type="info" class="searchBtn">取消</el-button>
+                    <span style="color: #5c6be8;cursor: pointer;margin:0 10px;" @click="toogleClick">更多搜索<i class="el-icon-arrow-down greycolor paddingL6"></i></span>
+                </div>            
+            </el-form>
+        </div>       
+        <el-row>
+            <el-table 
+                ref="dataTable"
+                tooltip-effect="dark"
+                style="width: 100%"
+                border
+                 @selection-change="handleSelectionChange"
+                 v-loading="loading"
+                :data="dataTable" 
+                >
+                <el-table-column align="center" type="selection" width="55"></el-table-column>
+                <el-table-column align="center" prop="serialNum" label="序号" width="55"></el-table-column>
+                <el-table-column align="center" prop="signNo" label="签约单编号"></el-table-column>
+                <el-table-column align="center" prop="signType" label="签约类型" :formatter="getSignTypeText" width="100"></el-table-column>
+                <el-table-column align="center" prop="createTime" label="签约时间"></el-table-column>
+                <el-table-column align="center" prop="paymentDetails" label="付款明细" width="100px">
+                    <template slot-scope="scope">
+                        <el-button @click="recordClick(scope.row)" type="text" size="small">查看明细</el-button>
+                    </template>
+                </el-table-column>
+                <el-table-column align="center" prop="status" label="签约单状态"  width="120">
+                    <template slot-scope="scope">
+                        <span v-if="scope.row.status===0">
+                            驳回&nbsp;<el-button @click="reasonClick(scope.row)" type="text">驳回原因</el-button>
+                        </span>
+                        <span v-else-if="scope.row.status===1">
+                            待审核                                    <span v-if="scope.row.payType ==1">
+                                                                                           (全款)                                                 
+                                   </span>
+                                  <span v-else-if="scope.row.payType ==2">
+                                                                                           (定金)                                                 
+                                   </span>
+                                   <span v-else-if="scope.row.payType ==3">
+                                                                                          (追加定金)                                                
+                                   </span>
+                                   <span v-else-if="scope.row.payType ==4">
+                                                                                          (尾款)                                             
+                                   </span>
+                            
+                        </span>
+                        <span v-else-if="scope.row.status===2">
+                             有效               <span v-if="scope.row.payType ==1">
+                                                                                           (全款)                                                 
+                                   </span>
+                                  <span v-else-if="scope.row.payType ==2">
+                                                                                           (定金)                                                 
+                                   </span>
+                                   <span v-else-if="scope.row.payType ==3">
+                                                                                          (追加定金)                                                
+                                   </span>
+                                   <span v-else-if="scope.row.payType ==4">
+                                                                                          (尾款)                                             
+                                   </span>
+                        </span>
+                      
+                    </template>
+                </el-table-column>
+                <el-table-column align="center" prop="customerName" label="客户姓名"></el-table-column>  
+                <el-table-column align="center" prop="idCard" label="客户身份证号" width="170"></el-table-column> 
+                <el-table-column align="center" prop="phone" label="客户联系电话" width="150"></el-table-column> 
+                <el-table-column align="center" prop="signProjectName" label="签约项目"></el-table-column>   
+                <el-table-column align="center" prop="signProvince" label="签约省份"></el-table-column>
+                <el-table-column align="center" prop="signCity" label="签约城市"></el-table-column> 
+                <el-table-column align="center" prop="signDictrict" label="签约区/县" width="100"></el-table-column>
+                <el-table-column align="center" prop="businessGroupName" label="商务小组"></el-table-column> 
+                <el-table-column align="center" prop="businessManagerName" label="商务经理"></el-table-column> 
+                <el-table-column align="center" prop="teleGroupName" label="电销组"></el-table-column>
+                <el-table-column align="center" prop="teleSaleName" label="创业顾问"></el-table-column>
+                <el-table-column align="center" prop="signShopType" label="签约店型" :formatter="getSignShopTypeText"></el-table-column>
+                <el-table-column align="center" prop="amountReceivable" label="应收金额"></el-table-column>
+                <el-table-column align="center" prop="firstToll" label="路费"></el-table-column>
+                <el-table-column align="center" prop="preferentialAmount" label="优惠金额"></el-table-column>
+                <el-table-column align="center" prop="isRemoteSign" label="是否远程签约">
+                    <template slot-scope="scope">
+                        <div v-if="scope.row.isRemoteSign == 0">
+                            否
+                        </div>
+                        <div v-else-if="scope.row.isRemoteSign ==1">
+                            是
+                        </div>
+                    </template>
+                </el-table-column>
+            </el-table>
+             <table-pagination :pager="pager" @change="initSignRecordData"></table-pagination>
+        </el-row>
+    </div>
     <!-- dialog -->
     <!-- 驳回处理 -->
-    <el-dialog title="提示" :visible.sync="dialogFormVisible">
+    <el-dialog title="提示" :visible.sync="dialogFormVisible" width="540px">
         <el-form :model="dialogForm" ref="dialogForm" :rules="dialogRules">            
             <div class="fs16 marginB20">确定要将此{{signRecordArrTitle}} 签约单驳回吗？</div>
             <el-form-item label="驳回原因：" label-width="100px" prop="reason">
@@ -227,11 +232,11 @@
         </div>
     </el-dialog>
     <!-- 驳回原因 -->
-    <el-dialog title="驳回原因" :visible.sync="reasonDialog">           
+    <el-dialog title="驳回原因" :visible.sync="reasonDialog" width="540px">           
         <div class="fs16 marginB20" >{{rebutReason}}</div>
     </el-dialog>
     <!-- 付款明细 -->
-    <el-dialog title="付款明细" :visible.sync="recordDialog">
+    <el-dialog title="付款明细" :visible.sync="recordDialog" width="950px">
         <div v-show="visitRecordShow" class="fs16 marginB20">签约单编号({{curRow.signNo}})付款明细以及付款绑定到访记录</div>
         <div v-show="paymentDetailsShow">
             <div class="fs16 marginB20">全款付款明细</div>
@@ -242,11 +247,12 @@
                 border
                 :data="recordTable" 
                 >
-                <el-table-column align="center" prop="payMode" label="付款方式" :formatter="getPayModeText"></el-table-column>
-                <el-table-column align="center" prop="payTime" label="付款时间" :formatter="getTimeText"></el-table-column>
-                <el-table-column align="center" prop="amountReceived" label="实收金额"></el-table-column>
-                <el-table-column align="center" prop="amountPerformance" label="业绩金额"></el-table-column>
-                <el-table-column align="center" prop="status" label="明细状态" :formatter="getStatusText"></el-table-column>
+                <el-table-column align="center" prop="statementNo" label="结算单编号"></el-table-column>
+                <el-table-column align="center" prop="payMode" label="付款方式" :formatter="getPayModeText" width="80"></el-table-column>
+                <el-table-column align="center" prop="payTime" label="付款时间" :formatter="getTimeText" width="140"></el-table-column>
+                <el-table-column align="center" prop="amountReceived" label="实收金额" width="100"></el-table-column>
+                <el-table-column align="center" prop="amountPerformance" label="业绩金额" width="100"></el-table-column>
+                <el-table-column align="center" prop="status" label="明细状态" :formatter="getStatusText" width="100"></el-table-column>
                 <el-table-column align="center" prop="remarks" label="备注"></el-table-column>
             </el-table>
         </div>        
@@ -259,13 +265,14 @@
                 border
                 :data="recordTable2" 
                 >
-                <el-table-column align="center" prop="payMode" label="付款方式" :formatter="getPayModeText"></el-table-column>
-                <el-table-column align="center" prop="payTime" label="付款时间" :formatter="getTimeText"></el-table-column>
-                <el-table-column align="center" prop="amountReceived" label="实收金额"></el-table-column>
-                <el-table-column align="center" prop="amountPerformance" label="业绩金额"></el-table-column>
-                <el-table-column align="center" prop="amountBalance" label="余款金额"></el-table-column>
-                <el-table-column align="center" prop="makeUpTime" label="预计余款补齐时间" :formatter="getTimeText"></el-table-column>                
-                <el-table-column align="center" prop="status" label="明细状态" :formatter="getStatusText"></el-table-column>
+                <el-table-column align="center" prop="statementNo" label="结算单编号"></el-table-column>
+                <el-table-column align="center" prop="payMode" label="付款方式" :formatter="getPayModeText" width="80"></el-table-column>
+                <el-table-column align="center" prop="payTime" label="付款时间" :formatter="getTimeText" width="140"></el-table-column>
+                <el-table-column align="center" prop="amountReceived" label="实收金额" width="100"></el-table-column>
+                <el-table-column align="center" prop="amountPerformance" label="业绩金额" width="100"></el-table-column>
+                <el-table-column align="center" prop="amountBalance" label="余款金额" width="100"></el-table-column>
+                <el-table-column align="center" prop="makeUpTime" label="预计余款补齐时间" :formatter="getTimeText" width="140"></el-table-column>                
+                <el-table-column align="center" prop="status" label="明细状态" :formatter="getStatusText" width="100"></el-table-column>
                 <el-table-column align="center" prop="remarks" label="备注"></el-table-column>
             </el-table>
         </div>
@@ -278,13 +285,14 @@
                 border
                 :data="recordTable3" 
                 >
-                <el-table-column align="center" prop="payMode" label="付款方式" :formatter="getPayModeText"></el-table-column>
-                <el-table-column align="center" prop="payTime" label="付款时间" :formatter="getTimeText"></el-table-column>
-                <el-table-column align="center" prop="amountReceived" label="实收金额"></el-table-column>
-                <el-table-column align="center" prop="amountPerformance" label="业绩金额"></el-table-column>
-                <el-table-column align="center" prop="amountBalance" label="余款金额"></el-table-column>
-                <el-table-column align="center" prop="makeUpTime" label="预计余款补齐时间" :formatter="getTimeText"></el-table-column>                
-                <el-table-column align="center" prop="status" label="明细状态" :formatter="getStatusText"></el-table-column>
+                <el-table-column align="center" prop="statementNo" label="结算单编号"></el-table-column>
+                <el-table-column align="center" prop="payMode" label="付款方式" :formatter="getPayModeText" width="80"></el-table-column>
+                <el-table-column align="center" prop="payTime" label="付款时间" :formatter="getTimeText" width="140"></el-table-column>
+                <el-table-column align="center" prop="amountReceived" label="实收金额" width="100"></el-table-column>
+                <el-table-column align="center" prop="amountPerformance" label="业绩金额" width="100"></el-table-column>
+                <el-table-column align="center" prop="amountBalance" label="余款金额" width="100"></el-table-column>
+                <el-table-column align="center" prop="makeUpTime" label="预计余款补齐时间" :formatter="getTimeText" width="140"></el-table-column>                
+                <el-table-column align="center" prop="status" label="明细状态" :formatter="getStatusText" width="100"></el-table-column>
                 <el-table-column align="center" prop="remarks" label="备注"></el-table-column>
             </el-table>
         </div>
@@ -297,6 +305,7 @@
                 border
                 :data="recordTable4" 
                 >
+                <el-table-column align="center" prop="statementNo" label="结算单编号"></el-table-column>
                 <el-table-column align="center" prop="payMode" label="付款方式" :formatter="getPayModeText"></el-table-column>
                 <el-table-column align="center" prop="payTime" label="付款时间" :formatter="getTimeText"></el-table-column>
                 <el-table-column align="center" prop="amountReceived" label="实收金额"></el-table-column>
@@ -308,9 +317,9 @@
         <div v-show="visitRecordShow">
             <div class="fs16 marginB20">关联到访记录</div>
             <el-table ref="recordTable" tooltip-effect="dark" style="width: 100%;margin-bottom: 20px;" border :data="visitRecordTable">
-                <el-table-column align="center" prop="vistitTime" label="到访时间"></el-table-column>
-                <el-table-column align="center" prop="vistitStoreTypeName" label="到访店铺类型"></el-table-column>
-                <el-table-column align="center" prop="visitType" label="到访类型">
+                <el-table-column align="center" prop="vistitTime" label="到访时间" width="140"></el-table-column>
+                <el-table-column align="center" prop="vistitStoreTypeName" label="到访店铺类型" width="120"></el-table-column>
+                <el-table-column align="center" prop="visitType" label="到访类型" width="90">
                     <template slot-scope="scope">
                         <div v-if="scope.row.visitType == 1">
                             预约来访
@@ -324,24 +333,9 @@
                     </template>
                 </el-table-column>
                 <el-table-column align="center" prop="visitCity" label="到访城市"></el-table-column>
-                <el-table-column align="center" prop="createTime" label="创建时间"></el-table-column>
-                <el-table-column align="center" prop="visitNum" label="到访批次">
-                    <template slot-scope="scope">
-                        <div v-if="scope.row.visitNum == 1">
-                            首次到访
-                        </div>
-                        <div v-else-if="scope.row.visitNum == 2">
-                            二次到访
-                        </div>
-                        <div v-else-if="scope.row.visitNum > 2">
-                            多次到访
-                        </div>
-                        <div v-else>
-                            待处理
-                        </div>
-                    </template>
-                </el-table-column>
-                <el-table-column align="center" prop="status" label="到访有效性" :formatter="getStatusText"></el-table-column>
+                <el-table-column align="center" prop="createTime" label="创建时间" width="140"></el-table-column>
+                <el-table-column align="center" prop="visitNum" label="到访次数"  :formatter="transVisitNum" width="90"></el-table-column>
+                <el-table-column align="center" prop="status" label="到访有效性" :formatter="getStatusText" width="100"></el-table-column>
             </el-table>
         </div>
         <div v-show="showbutton" slot="footer" class="dialog-footer f-tac">
@@ -373,6 +367,7 @@
         el: '#businessContractRecord',
         data: function() {
             return {
+                isShow:false,
                 showbutton:false,
                 loading: true,
                 dialogFormVisible:false,
@@ -447,6 +442,34 @@
             }        	  
         },
         methods: {
+            transVisitNum(row, column, cellValue, index){
+                var text = "";
+                if (cellValue == "1") {
+                    text = "首次到访"
+                }else if (cellValue == "2") {
+                    text = "二次到访"
+                }else{
+                    text = this.toChinesNum(cellValue)+"次到访"
+                }
+                return text;
+            },
+            toChinesNum(num){
+                let changeNum = ['零', '一', '二', '三', '四', '五', '六', '七', '八', '九']; //changeNum[0] = "零"
+                let unit = ["", "十", "百", "千", "万"];
+                num = parseInt(num);
+                let getWan = (temp) => {
+                    let strArr = temp.toString().split("").reverse();
+                    let newNum = "";
+                    for (var i = 0; i < strArr.length; i++) {
+                        newNum = (i == 0 && strArr[i] == 0 ? "" : (i > 0 && strArr[i] == 0 && strArr[i - 1] == 0 ? "" : changeNum[strArr[i]] + (strArr[i] == 0 ? unit[0] : unit[i]))) + newNum;
+                    }
+                    return newNum;
+                }
+                let overWan = Math.floor(num / 10000);
+                let noWan = num % 10000;
+                if (noWan.toString().length < 4) noWan = "0" + noWan;
+                return overWan ? getWan(overWan) + "万" + getWan(noWan) : getWan(num);
+            },
             submitDialogForm(formName) {
                 this.$refs[formName].validate((valid) => {
                     if (valid) {
@@ -753,7 +776,7 @@
                 if(value==1){
                     valText="一次性全款";
                 }else if(value==2){
-                    valText="先交订金";
+                    valText="先交定金";
                 }
                 return valText;
             },
@@ -856,47 +879,54 @@
                 .catch(function (error) {
                      console.log(error);
                 });
-         },
-         queryBusGroupList(){//根据组织机构Id查询所有商务经理 
-             axios.post('/organization/organization/queryBusGroupList', {})
-             .then(function (response) {
-                   var result =  response.data;
-                   if(result.code=='0'){
-                       var table=result.data;
-                       signRecordVM.businessGroupList= table;
-                   }else{
-                       console.error(response);
-                   }
-                   
-             })
-             .catch(function (error) {
-                  console.log(error);
-             });
-        	 
-         },
-         queryTeleGroupList(){//根据组织机构Id查询所有电销组 
-             axios.post('/organization/organization/queryTeleGroupList', {})
-             .then(function (response) {
-                   var result =  response.data;
-                   if(result.code=='0'){
-                       var table=result.data;
-                       signRecordVM.teleGroupList= table;
-                   }else{
-                       console.error(response);
-                   }
-                   
-             })
-             .catch(function (error) {
-                  console.log(error);
-             });
-             
-         },
-         initSelect(){//初始下拉框
-        	 this.getProjectList();
-        	 this.queryBusManagerByOrgId();
-        	 this.queryBusGroupList();
-        	 this.queryTeleGroupList();
-         }
+             },
+             queryBusGroupList(){//根据组织机构Id查询所有商务经理 
+                 axios.post('/organization/organization/queryBusGroupList', {})
+                 .then(function (response) {
+                       var result =  response.data;
+                       if(result.code=='0'){
+                           var table=result.data;
+                           signRecordVM.businessGroupList= table;
+                       }else{
+                           console.error(response);
+                       }
+                       
+                 })
+                 .catch(function (error) {
+                      console.log(error);
+                 });
+            	 
+             },
+             queryTeleGroupList(){//根据组织机构Id查询所有电销组 
+                 axios.post('/organization/organization/queryTeleGroupList', {})
+                 .then(function (response) {
+                       var result =  response.data;
+                       if(result.code=='0'){
+                           var table=result.data;
+                           signRecordVM.teleGroupList= table;
+                       }else{
+                           console.error(response);
+                       }
+                       
+                 })
+                 .catch(function (error) {
+                      console.log(error);
+                 });
+                 
+             },
+             initSelect(){//初始下拉框
+            	 this.getProjectList();
+            	 this.queryBusManagerByOrgId();
+            	 this.queryBusGroupList();
+            	 this.queryTeleGroupList();
+             },
+             toogleClick(){
+                if(this.isShow){
+                    this.isShow=false
+                }else{
+                    this.isShow=true
+                }          
+            },
             
 
         },

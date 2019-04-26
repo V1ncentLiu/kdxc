@@ -1,7 +1,7 @@
 var clientVm = new Vue({
      el: '#trClientManage',
      data: {
-    	 formLabelWidth:'120px',
+    	 formLabelWidth:'130px',
          clientData:[],
          multipleSelection:[],
          dialogFormVisible:false,

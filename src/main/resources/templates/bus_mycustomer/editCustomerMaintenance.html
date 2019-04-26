@@ -17,8 +17,7 @@
     <el-row class="borderbox">
         <!--<div class="inforTitle">维护客户</div> -->
         <el-form :model="form" :rules="rules" ref="form" class="padding20">
-
-            <div class="marginB20 fs16 paddingT20">资源信息</div>
+            <div class="marginB20 fs16 paddingT20">资源信息 <span style="padding-left: 20px; color: red;">线索ID{{clueId}}</span></div>
             <div class="borderbox padding20">
                 <el-row>
                     <el-col :span="8">
@@ -35,20 +34,20 @@
 
                 <el-row>
                     <el-col :span="8">
-                        <el-form-item label="搜索词：" :label-width="formLabelWidth">
-                            <div class="lineFeed">{{clueBase.searchWord}}</div>
+                        <el-form-item label="留言时间：" :label-width="formLabelWidth">
+                            <el-button type="text" disabled>{{this.formatTimeFn(clueBase.messageTime)}}</el-button>
                         </el-form-item>
                     </el-col>
                     <el-col :span="8">
-                        <el-form-item label="留言时间：" :label-width="formLabelWidth">
-                            <el-button type="text" disabled>{{this.formatTimeFn(clueBase.messageTime)}}</el-button>
+                        <el-form-item label="留言重点：" :label-width="formLabelWidth">
+                            <div class="lineFeed lineFeed2">{{clueBase.messagePoint}}</div>
                         </el-form-item>
                     </el-col>
                 </el-row>
                 <el-row>
                     <el-col :span="8">
-                        <el-form-item label="留言重点：" :label-width="formLabelWidth">
-                            <div class="lineFeed lineFeed2">{{clueBase.messagePoint}}</div>
+                        <el-form-item label="搜索词：" :label-width="formLabelWidth">
+                            <div class="lineFeed">{{clueBase.searchWord}}</div>
                         </el-form-item>
                     </el-col>
                 </el-row>
@@ -311,9 +310,9 @@
                             </el-input><span style="padding-left: 5px;">之前启动</span>
                         </el-form-item>
                     </el-col>
-                    <el-col :span="6">
-                        <el-form-item label="开店区域：" :label-width="formLabelWidth">
-                           <el-select v-model="form.province" placeholder="省" style="width: 100%;"  @change="changeProvince">
+                    <el-col :span="16">
+                        <el-form-item label="开店区域：" :label-width="formLabelWidth" style="float: left;">
+                           <el-select v-model="form.province" placeholder="省" style="width: 180px;margin-right: 10px;"  @change="changeProvince">
                                 <el-option
                                     v-for="item in provinceArr"
                                     :key="item.name"
@@ -322,10 +321,8 @@
                                 </el-option>
                             </el-select>
                         </el-form-item>
-                    </el-col>    
-                    <el-col :span="5">
-                        <el-form-item label="">
-                           <el-select v-model="form.city" placeholder="市" style="width: 100%;" @change="changeCity">
+                        <el-form-item label="" style="float: left;">
+                           <el-select v-model="form.city" placeholder="市" style="width: 180px;margin-right: 10px;" @change="changeCity">
                                 <el-option
                                     v-for="item in cityArr"
                                     :key="item.name"
@@ -334,10 +331,8 @@
                                 </el-option>
                             </el-select>
                         </el-form-item>
-                    </el-col>
-                    <el-col :span="5">
-                        <el-form-item label="">
-                           <el-select v-model="form.district" placeholder="区/县" style="width: 100%;">
+                        <el-form-item label="" style="float: left;">
+                           <el-select v-model="form.district" placeholder="区/县" style="width: 180px;">
                                 <el-option
                                     v-for="item in districtArr"
                                     :key="item.name"
@@ -350,199 +345,195 @@
                 </el-row>
             </div>
             <div class="marginB20 fs16 paddingT20">上传资料</div>
-            <div class="borderbox padding20">
-                <el-row>
-                    <el-col :span="16" >
-                        <el-button size="small" type="danger" @click="deteleClueFile">删除</el-button>
-                        <el-button type="text" disabled>只允许上传图片／音频文件。</el-button>
-                    </el-col>
-			<div id="container" class="f-fr">
-				<a id="selectfiles" href="javascript:void(0);" class='btn'>选择文件</a>
-				<a id="postfiles" href="javascript:void(0);" onclick="clueUploadFile()" class='btn'>开始上传</a>
-			</div>
-			<div id="ossfile">你的浏览器不支持flash,Silverlight或者HTML5！</div>
-			<span v-show="false">上传到指定目录:<input type="text" id='dirname' placeholder="如果不填，默认是上传到根目录" size=50></span>
-			<pre id="console"></pre>
-			</el-row>
-                <el-row>
-                    <el-table
-                        ref="multipleTable"
-                        :data="tableDataC1"
-                        tooltip-effect="dark"
-                        style="width: 100%"
-                        border
-                        @selection-change="handleFileSelectionChange"
-                     >
-                        <el-table-column
-                          type="selection"
-                           prop="id"
-                          width="55"
-                          @selection-change="handleFileSelectionChange"
-                          align="center">
-                        </el-table-column>
-                        <el-table-column
-                          prop="uploadUserName"
-                          label="上传人姓名"
-                          align="center">
-                        </el-table-column>
-                        <el-table-column
-                          prop="uploadTime"
-                          label="上传时间"
-                          align="center">
-                        </el-table-column>
-                        <el-table-column
-                          prop="fileName"
-                          label="文件名称"
-                          align="center">
-                        </el-table-column>
-                        <el-table-column
-                          label="操作"
-                          align="center">
-                          <template slot-scope="scope">
-                            <!-- <el-button
-                                size="mini"
-                                type="text"
-                                @click="handleOperateFn(scope.$index, scope.row)">
-                                {{ scope.row.operate }}
-                            </el-button> -->
-                            <el-button 
-                                size="mini" 
-                                type="text"
-                                @click="handleOperateFn(scope.$index, scope.row)">
-                                {{scope.row.fileType=="mp3"? '下载录音':'查看图片'}} 
-                            </el-button>
-                          </template>
-                        </el-table-column>
-                        <el-table-column
-                          prop="delStatus"
-                          label="删除状态"
-                          align="center">
-                       <template slot-scope="scope">
-	                      <div v-if="scope.row.delStatus === 0">
-	                                                                               未删除
-	                      </div>
-	                       <div v-else-if="scope.row.delStatus ===1">
-	                                                                               已删除
-	                       </div>
-	                     </template>
-                        </el-table-column>
-                    </el-table>
-                </el-row>
-            </div>
+            <el-row class="marginB10">
+                <el-col :span="16" >
+                    <el-button size="small" type="danger" @click="deteleClueFile">删除</el-button>
+                    <el-button type="text" disabled>只允许上传图片／音频文件。</el-button>
+                </el-col>
+    			<div id="container" class="f-fr">
+    				<a id="selectfiles" href="javascript:void(0);" class='btn'>选择文件</a>
+    				<a id="postfiles" href="javascript:void(0);" onclick="clueUploadFile()" class='btn'>开始上传</a>
+    			</div>
+		        <div id="ossfile">你的浏览器不支持flash,Silverlight或者HTML5！</div>
+		        <span v-show="false">上传到指定目录:<input type="text" id='dirname' placeholder="如果不填，默认是上传到根目录" size=50></span>
+		        <pre id="console"></pre>
+		    </el-row>
+            <el-row>
+                <el-table
+                    ref="multipleTable"
+                    :data="tableDataC1"
+                    tooltip-effect="dark"
+                    style="width: 100%"
+                    border
+                    @selection-change="handleFileSelectionChange"
+                 >
+                    <el-table-column
+                      type="selection"
+                       prop="id"
+                      width="55"
+                      @selection-change="handleFileSelectionChange"
+                      align="center">
+                    </el-table-column>
+                    <el-table-column
+                      prop="uploadUserName"
+                      label="上传人姓名"
+                      align="center">
+                    </el-table-column>
+                    <el-table-column
+                      prop="uploadTime"
+                      label="上传时间"
+                      align="center">
+                    </el-table-column>
+                    <el-table-column
+                      prop="fileName"
+                      label="文件名称"
+                      align="center">
+                    </el-table-column>
+                    <el-table-column
+                      label="操作"
+                      align="center">
+                      <template slot-scope="scope">
+                        <!-- <el-button
+                            size="mini"
+                            type="text"
+                            @click="handleOperateFn(scope.$index, scope.row)">
+                            {{ scope.row.operate }}
+                        </el-button> -->
+                        <el-button 
+                            size="mini" 
+                            type="text"
+                            @click="handleOperateFn(scope.$index, scope.row)">
+                            {{scope.row.fileType=="mp3"? '下载录音':'查看图片'}} 
+                        </el-button>
+                      </template>
+                    </el-table-column>
+                    <el-table-column
+                      prop="delStatus"
+                      label="删除状态"
+                      align="center">
+                   <template slot-scope="scope">
+                      <div v-if="scope.row.delStatus === 0">
+                                                                               未删除
+                      </div>
+                       <div v-else-if="scope.row.delStatus ===1">
+                                                                               已删除
+                       </div>
+                     </template>
+                    </el-table-column>
+                </el-table>
+            </el-row>
             <div class="marginB20 fs16 paddingT20">跟进记录</div>
-            <div class="borderbox padding20">
-              <!--  
-                <el-row>
-                    <el-col :span="16" class="paddingTB">
-                        <el-button size="small" type="danger" @click="deteleTracking">删除</el-button>
-                        <el-button size="small" type="info" @click="editRecord">编辑</el-button>
-                    </el-col>
-                    <el-col :span="4" :offset="4" class="f-tar">
-                        <el-button size="small" type="primary" @click="lineFormShow=true">添加</el-button>
-                    </el-col>
-                </el-row>
-                -->
-                <el-row>
-                    <el-table
-                        ref="multipleTable"
-                        :data="tableDataC2"
-                        tooltip-effect="dark"
-                        style="width: 100%"
-                        border
-                        @selection-change="handleTrackingSelection"
-                     >
-                        <el-table-column
-                                type="index" label="序号"
-                                header-align="center" align="center" width="100">
-                        </el-table-column>
-                        <el-table-column
-                          prop="callTime"
-                          label="拨打时间"
-                          align="center">
-                        </el-table-column>
-                        <el-table-column
-                          prop="customerStatusName"
-                          label="客户状态"
-                          align="center">
-                        </el-table-column>
-                        <el-table-column
-                          prop="isCall"
-                          label="是否接通"
-                          align="center">
-	                     <template slot-scope="scope">
-	                      <div v-if="scope.row.isCall === 0">
-	                                                                                未接通
-	                      </div>
-	                       <div v-else-if="scope.row.isCall ===1">
-	                                                                                已接通
-	                       </div>
-	                     </template>
-                        </el-table-column>
-                        <el-table-column
-                          prop="focusPoint"
-                          label="客户关注点"
-                          align="center">
-                        </el-table-column>
-                        <el-table-column
-                          prop="nextVisitTime"
-                          label="下次回访时间"
-                          align="center">
-                        </el-table-column>
-                        <el-table-column
-                          prop="createUserName"
-                          label="创建人"
-                          align="center">
-                        </el-table-column>
-                        <div slot="append" v-show="lineFormShow">
-                          <el-form :inline="true" :model="formInline" class="demo-form-inline">
-                            <el-row class="paddingL55">
-                                  <el-date-picker
-                                    v-model="formInline.callTime"
-                                    type="datetime"
-                                    size="mini"
-                                    placeholder="选择日期时间">
-                                  </el-date-picker>
-                                  <el-form-item label="" size="mini">
-                                    <el-select v-model="formInline.customerStatus" placeholder="客户状态">
-                                     <el-option
-				                        v-for="item in cusStatusArr"
-				                        :key="item.value"
-				                        :label="item.name"
-				                        :value="item.value">
-				                    </el-option>
-                                    </el-select>
-                                  </el-form-item>
-                                  <el-form-item label="" size="mini">
-                                    <el-select v-model="formInline.isCall" placeholder="是否接通">
-                                      <el-option label="是" value="1"></el-option>
-                                      <el-option label="否" value="0"></el-option>
-                                    </el-select>
-                                  </el-form-item>
-                                  <el-form-item label="" size="mini">
-                                    <el-select v-model="formInline.resourceStatus" placeholder="无效资源">
-                                      <el-option label="无效资源" value="0"></el-option>
-                                      <el-option label="有效资源" value="1"></el-option>
-                                    </el-select>
-                                  </el-form-item>
-                                  <el-form-item label="" size="mini">
-                                    <el-input v-model="formInline.focusPoint" size="mini" placeholder="客户关注点"></el-input>
-                                  </el-form-item>
-                                  <el-date-picker
-                                    v-model="formInline.nextVisitTime"
-                                    type="datetime"
-                                    format="yyyy-MM-dd HH:mm"
-                                    size="mini"
-                                    placeholder="选择日期时间">
-                                  </el-date-picker>
-                                      <el-form-item  class="lineInherit">
-                                    <el-button type="primary" size="mini" @click="onConfirmAdd">确认添加</el-button>
-                                  </el-form-item>
-                            </el-row>
-                          </el-form>
-                        </div>
-                    </el-table>
-                </el-row>
-            </div>
+            <!--  
+            <el-row>
+                <el-col :span="16" class="paddingTB">
+                    <el-button size="small" type="danger" @click="deteleTracking">删除</el-button>
+                    <el-button size="small" type="info" @click="editRecord">编辑</el-button>
+                </el-col>
+                <el-col :span="4" :offset="4" class="f-tar">
+                    <el-button size="small" type="primary" @click="lineFormShow=true">添加</el-button>
+                </el-col>
+            </el-row>
+            -->
+            <el-row>
+                <el-table
+                    ref="multipleTable"
+                    :data="tableDataC2"
+                    tooltip-effect="dark"
+                    style="width: 100%"
+                    border
+                    @selection-change="handleTrackingSelection"
+                 >
+                    <el-table-column
+                            type="index" label="序号"
+                            header-align="center" align="center" width="100">
+                    </el-table-column>
+                    <el-table-column
+                      prop="callTime"
+                      label="拨打时间"
+                      align="center">
+                    </el-table-column>
+                    <el-table-column
+                      prop="customerStatusName"
+                      label="客户状态"
+                      align="center">
+                    </el-table-column>
+                    <el-table-column
+                      prop="isCall"
+                      label="是否接通"
+                      align="center">
+                     <template slot-scope="scope">
+                      <div v-if="scope.row.isCall === 0">
+                                                                                未接通
+                      </div>
+                       <div v-else-if="scope.row.isCall ===1">
+                                                                                已接通
+                       </div>
+                     </template>
+                    </el-table-column>
+                    <el-table-column
+                      prop="focusPoint"
+                      label="客户关注点"
+                      align="center">
+                    </el-table-column>
+                    <el-table-column
+                      prop="nextVisitTime"
+                      label="下次回访时间"
+                      align="center">
+                    </el-table-column>
+                    <el-table-column
+                      prop="createUserName"
+                      label="创建人"
+                      align="center">
+                    </el-table-column>
+                    <div slot="append" v-show="lineFormShow">
+                      <el-form :inline="true" :model="formInline" class="demo-form-inline">
+                        <el-row class="paddingL55">
+                              <el-date-picker
+                                v-model="formInline.callTime"
+                                type="datetime"
+                                size="mini"
+                                placeholder="选择日期时间">
+                              </el-date-picker>
+                              <el-form-item label="" size="mini">
+                                <el-select v-model="formInline.customerStatus" placeholder="客户状态">
+                                 <el-option
+			                        v-for="item in cusStatusArr"
+			                        :key="item.value"
+			                        :label="item.name"
+			                        :value="item.value">
+			                    </el-option>
+                                </el-select>
+                              </el-form-item>
+                              <el-form-item label="" size="mini">
+                                <el-select v-model="formInline.isCall" placeholder="是否接通">
+                                  <el-option label="是" value="1"></el-option>
+                                  <el-option label="否" value="0"></el-option>
+                                </el-select>
+                              </el-form-item>
+                              <el-form-item label="" size="mini">
+                                <el-select v-model="formInline.resourceStatus" placeholder="无效资源">
+                                  <el-option label="无效资源" value="0"></el-option>
+                                  <el-option label="有效资源" value="1"></el-option>
+                                </el-select>
+                              </el-form-item>
+                              <el-form-item label="" size="mini">
+                                <el-input v-model="formInline.focusPoint" size="mini" placeholder="客户关注点"></el-input>
+                              </el-form-item>
+                              <el-date-picker
+                                v-model="formInline.nextVisitTime"
+                                type="datetime"
+                                format="yyyy-MM-dd HH:mm"
+                                size="mini"
+                                placeholder="选择日期时间">
+                              </el-date-picker>
+                                  <el-form-item  class="lineInherit">
+                                <el-button type="primary" size="mini" @click="onConfirmAdd">确认添加</el-button>
+                              </el-form-item>
+                        </el-row>
+                      </el-form>
+                    </div>
+                </el-table>
+            </el-row>
             <div class="marginB20 fs16 paddingT20">通话记录</div>
             <el-table ref="multipleTable" :data="tableDataC3" tooltip-effect="dark" style="width: 100%" border @selection-change="handleSelectionChange">
                 <el-table-column type="index" width="55" label="序号" align="center"></el-table-column>
@@ -562,47 +553,49 @@
                     </template>
                 </el-table-column>
             </el-table>
-
             <div class="marginB20 fs16 paddingT20">流转人员</div>
-            <div class="borderbox padding20">
-                <el-row>
-                    <el-table
-                        ref="multipleTable"
-                        :data="tableDataC4"
-                        tooltip-effect="dark"
-                        style="width: 100%"
-                        border
-                        @selection-change="handleSelectionChange"
-                     >
-                        <el-table-column
-                          type="index"
-                          width="55"
-                          label="序号"
-                          align="center">
-                        </el-table-column>
-                        <el-table-column
-                          prop="roleName"
-                          label="服务人员角色"
-                          align="center">
-                        </el-table-column>
-                        <el-table-column
-                          prop="userName"
-                          label="服务人员姓名"
-                          align="center">
-                        </el-table-column>
-                        <el-table-column
-                          prop="telRuleValue"
-                          label="分配规则（名称）"
-                          align="center">
-                        </el-table-column>
-                        <el-table-column
-                          prop="createTime"
-                          label="服务时间"
-                          align="center">
-                        </el-table-column>
-                    </el-table>
-                </el-row>
-            </div>
+            <el-row>
+                <el-table
+                    ref="multipleTable"
+                    :data="tableDataC4"
+                    tooltip-effect="dark"
+                    style="width: 100%"
+                    border
+                    @selection-change="handleSelectionChange"
+                 >
+                    <el-table-column
+                      type="index"
+                      width="55"
+                      label="序号"
+                      align="center">
+                    </el-table-column>
+                    <el-table-column
+                      prop="roleName"
+                      label="角色"
+                      align="center">
+                    </el-table-column>
+                    <el-table-column
+                            prop="orgName"
+                            label="所属组(组名)"
+                            align="center">
+                    </el-table-column>
+                    <!--<el-table-column-->
+                      <!--prop="userName"-->
+                      <!--label="服务人员姓名"-->
+                      <!--align="center">-->
+                    <!--</el-table-column>-->
+                    <!--<el-table-column-->
+                      <!--prop="telRuleValue"-->
+                      <!--label="分配规则（名称）"-->
+                      <!--align="center">-->
+                    <!--</el-table-column>-->
+                    <el-table-column
+                      prop="createTime"
+                      label="开始服务时间"
+                      align="center">
+                    </el-table-column>
+                </el-table>
+            </el-row>
             <div class="padding20 f-tac">            
                 <el-button type="primary" @click="submitForm('form')">提交资料</el-button>
                
@@ -714,6 +707,7 @@ var loginUserId=[[${loginUserId}]];
         el: '#addCustomer',
         data: function() {
             return {
+                clueId:clueId,
                 loginUserId:loginUserId,
                 dialogFormUploadImg: false, //上传资源图片弹框
                 dialogFormUploadImgSrc: '', //上传资源图片弹框
@@ -773,7 +767,7 @@ var loginUserId=[[${loginUserId}]];
                 cityArr:[],
                 districtArr:[],
                 proSelect:proSelect,
-                formLabelWidth: '150px',
+                formLabelWidth: '120px',
                 rules:{
                     // customerName: [
                     //     { required: true, message: '客户姓名不能为空', trigger: 'blur' }
@@ -856,14 +850,16 @@ var loginUserId=[[${loginUserId}]];
         },
         methods: {
         	formatTimeFn(date) {
-        	  var dateNew = new Date( date );
-       		  var year = dateNew.getFullYear()
-       		  var month = dateNew.getMonth() + 1
-       		  var day = dateNew.getDate()
-       		  var hour = dateNew.getHours()
-       		  var minute = dateNew.getMinutes()
-       		  var second = dateNew.getSeconds()
-			  return year+"-"+this.formatNumberFn(month)+"-"+this.formatNumberFn(day)+" "+this.formatNumberFn(hour)+":"+this.formatNumberFn(minute)+":"+this.formatNumberFn(second);
+        	    if(date){
+                    var dateNew = new Date( date );
+                    var year = dateNew.getFullYear()
+                    var month = dateNew.getMonth() + 1
+                    var day = dateNew.getDate()
+                    var hour = dateNew.getHours()
+                    var minute = dateNew.getMinutes()
+                    var second = dateNew.getSeconds()
+                    return year+"-"+this.formatNumberFn(month)+"-"+this.formatNumberFn(day)+" "+this.formatNumberFn(hour)+":"+this.formatNumberFn(minute)+":"+this.formatNumberFn(second);
+                }
        		},
         	formatNumberFn(n) {
        		  n = n.toString()

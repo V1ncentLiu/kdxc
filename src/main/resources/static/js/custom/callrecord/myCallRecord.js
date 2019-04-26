@@ -1,6 +1,7 @@
 var myCallRecordVm = new Vue({
     el: '#myCallRecordVm',
     data: {
+        isShow:false,
     	formLabelWidth:'120px',
 	    pager:{//组织列表pager
           total: 0,
@@ -72,11 +73,28 @@ var myCallRecordVm = new Vue({
                  	var resData = data.data;
                  	var callRecordData = resData.data;
                  	myCallRecordVm.callRecordData= callRecordData.data;
-                 	myCallRecordVm.totalTalkTime = resData.totalTalkTime;
                   //3.分页组件
                  	myCallRecordVm.pager.total= callRecordData.total;
                  	myCallRecordVm.pager.currentPage = callRecordData.currentPage;
                  	myCallRecordVm.pager.pageSize = callRecordData.pageSize;
+                     
+                 }else{
+                	 myCallRecordVm.$message({message:data.msg,type:'error'});
+                 	 console.error(data);
+                 }
+             
+             })
+             .catch(function (error) {
+                  console.log(error);
+             }).then(function(){
+             });
+        	 
+         	 axios.post('/call/callRecord/countMyCallRecordTalkTime',param)
+             .then(function (response) {
+            	 console.info(response);
+            	 var data =  response.data;
+                 if(data.code=='0'){
+                	 myCallRecordVm.totalTalkTime = data.data;
                      
                  }else{
                 	 myCallRecordVm.$message({message:data.msg,type:'error'});
@@ -258,7 +276,14 @@ var myCallRecordVm = new Vue({
                   console.log(error);
              }).then(function(){
              });
-    	}
+    	},
+        toogleClick(){
+            if(this.isShow){
+                this.isShow=false
+            }else{
+                this.isShow=true
+            }          
+        },
     },
     created(){
     	var a = new Date();

@@ -1,9 +1,11 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:th="http://www.thymeleaf.org">
-<head th:include="_header_include::frag(~{::title},~{},~{})">
+<head th:include="_header_include::frag(~{::title},~{::style},~{})">
     <title>数据字典</title>
-
+    <style>
+        .formBox .el-form-item__content{width: 100%;}
+    </style>
 </head>
 <body>
 
@@ -22,8 +24,8 @@
             <el-button type="danger" @click="deleteDic()"><i class="el-icon-delete"></i>删除数据字典主题</el-button>
         </el-col>
         <el-col :span="6" style="text-align: right;">
-            <el-form :inline="true" :model="formInline" ref="queryForm" >
-                <el-form-item label="" prop="name" style="margin-right: 0;">
+            <el-form :inline="true" :model="formInline" class="formBox" ref="queryForm" >
+                <el-form-item label="" prop="name" style="margin-right: 0;width: 100%">
                     <el-input v-model="formInline.name" placeholder="请输入名称进行查询">
                         <el-button slot="append" icon="el-icon-search" @click="onSubmit">搜索</el-button>
                     </el-input>
@@ -34,6 +36,7 @@
 </div>
 
 <div id="pagination" class="mainPadding" style="padding-top: 0;">
+    <div class="mainSearchBg">
     <template>
         <el-table :data="tableData3" style="width: 100%" tooltip-effect="dark"  ref="multipleTable"  @select="selectRow" @row-dblclick="rowDblClick()" @selection-change="handleSelectionChange" border>
             <el-table-column type="selection" width="55" prop="id" align="center"></el-table-column>
@@ -63,20 +66,21 @@
         </div>
     </template>
 </div>
+</div>
 
 <!--添加弹窗-->
 <div id="addDialog">
     <template>
-        <el-dialog title="添加字典"  :visible.sync="dialogFormVisible"  width="30%">
+        <el-dialog title="添加字典" :visible.sync="dialogFormVisible" width="650px">
             <el-form :model="add" ref="add" :rules="rules">
-                <el-form-item label="名称"  :label-width="formLabelWidth"  prop="name">
+                <el-form-item label="名称:" :label-width="formLabelWidth" prop="name">
                     <el-input v-model="add.name" autocomplete="off"  maxlength="20" ></el-input>
                 </el-form-item>
-                <el-form-item label="编码"  :label-width="formLabelWidth"    prop="code">
+                <el-form-item label="编码:" :label-width="formLabelWidth" prop="code">
                     <el-input v-model="add.code" autocomplete="off" maxlength="20"  ></el-input>
                 </el-form-item>
-                <el-form-item label="描述" :label-width="formLabelWidth"    prop="description">
-                    <el-input  type="textarea" v-model="add.description" autocomplete="off" maxlength="200"  placeholder="填写描述信息（200字以内）" ></el-input>
+                <el-form-item label="描述:" :label-width="formLabelWidth" prop="description">
+                    <el-input type="textarea" v-model="add.description" autocomplete="off" maxlength="200"  placeholder="填写描述信息（200字以内）" ></el-input>
                 </el-form-item>
             </el-form>
             <div slot="footer" class="dialog-footer" style="text-align:center;">

@@ -13,9 +13,6 @@
 	width: 100%;
 }
 
-.el-pagination {
-	padding: 0 0 3px;
-}
 /*去掉type为number的箭头*/
 input::-webkit-outer-spin-button, input::-webkit-inner-spin-button {
 	-webkit-appearance: none;
@@ -34,7 +31,7 @@ input[type="number"] {
 		<el-breadcrumb-item>访问IP管理</el-breadcrumb-item> </el-breadcrumb>
 		<template> 
 		<el-tabs type="card" v-model="ipManager" @tab-click="handleClick"> <el-tab-pane label="访问IP库" name="first"> 
-		<el-row class="marginB10 greybg padding20" style="padding-bottom: 0">
+		<el-row>
 			<el-form :inline="true" :model="iprepositoryForm" class="demo-form-inline" ref="iprepositoryForm"> 			
 				<el-col :span="18"> 
 					<el-button type="primary" @click="openIpAddData"><i class="el-icon-plus"></i>添加IP</el-button>
@@ -50,7 +47,8 @@ input[type="number"] {
 				</el-col> 
 			
 			</el-form>
-		</el-row> 
+		</el-row>
+		<div class="mainSearchBg">
 		<el-table border id="ipManagerTable" ref="customFieldTable" :data="ipTableData" tooltip-effect="dark" tyle="width: 100%,height:750px" @selection-change="changeIpTableFun"> 
 			<el-table-column type="selection" width="55" prop="id" @selection-change="changeIpTableFun" align="center"></el-table-column> 
 			<el-table-column prop="ipAddress" label="IP地址" align="center"></el-table-column> 
@@ -58,9 +56,10 @@ input[type="number"] {
 			</el-table-column> 
 		</el-table> 
 		<table-pagination :pager="ippager" @change="queryIpDataList"></table-pagination>
+		</div>
 	</el-tab-pane> 
 	<el-tab-pane label="访问IP包" name="second"> 
-		<el-row class="marginB10 greybg padding20" style="padding-bottom: 0">
+		<el-row>
 			<el-form :inline="true" :model="ippackageForm" class="demo-form-inline" ref="customFieldQueryForm">
 				<el-col :span="12"> 
 					<el-button type="primary" @click="openAddIpPackage"><i class="el-icon-plus"></i>创建IP包</el-button> 
@@ -68,27 +67,29 @@ input[type="number"] {
 					<el-button type="danger" @click="delpackageGroup"><i class="el-icon-delete"></i>删除</el-button> 
 				</el-col> 
 				<el-col :span="12" style="text-align: right;"> 
-					<el-form-item prop="ipAddress"> 
+					<el-form-item label="IP包名:" prop="ipAddress" label-width="55px"> 
 						<el-input v-model="ippackageForm.ipPackageName" placeholder="输入IP包名查询"></el-input>
 					</el-form-item> 
-					<el-form-item prop="ipAddress"> 
+					<el-form-item label="包含IP:" prop="ipAddress" label-width="55px"> 
 						<el-input v-model="ippackageForm.ipAddress" placeholder="输入包含IP查询"></el-input> 
 					</el-form-item> 
-					<el-form-item> 
-						<el-button type="primary" @click="queryPackageDataList">搜索</el-button> 
+					<el-form-item label=""> 
+						<el-button icon="el-icon-search" type="primary" @click="queryPackageDataList" style="margin-left: 10px;">搜索</el-button> 
 					</el-form-item> 
 				</el-col> 			 
 			</el-form> 
 		</el-row>
-		<el-table id="ipPackageTable" border ref="customFieldTable" :data="packageTableData" tooltip-effect="dark" @selection-change="changePackageTableFun">
-			<el-table-column align="center" type="selection" prop="id" width="55" @selection-change="changePackageTableFun"> 
-			</el-table-column> 
-			<el-table-column align="center" prop="name" label="包名" width="180"></el-table-column> 
-			<el-table-column align="center" prop="ipAddress" label="IP地址" width="500"></el-table-column> 
-			<el-table-column align="center" prop="createTime" :formatter="dateFormat" label="创建时间"></el-table-column> 
-		</el-table> 
-		<table-pagination :pager="packpager" @change="queryPackageDataList"></table-pagination>
-		</el-tab-pane> 
+		<div class="mainSearchBg">
+			<el-table id="ipPackageTable" border ref="customFieldTable" :data="packageTableData" tooltip-effect="dark" @selection-change="changePackageTableFun">
+				<el-table-column align="center" type="selection" prop="id" width="55" @selection-change="changePackageTableFun"> 
+				</el-table-column> 
+				<el-table-column align="center" prop="name" label="包名" width="180"></el-table-column> 
+				<el-table-column align="center" prop="ipAddress" label="IP地址" width="500"></el-table-column> 
+				<el-table-column align="center" prop="createTime" :formatter="dateFormat" label="创建时间"></el-table-column> 
+			</el-table> 
+			<table-pagination :pager="packpager" @change="queryPackageDataList"></table-pagination>
+			</el-tab-pane> 
+	    </div>
 	</el-tabs> 
 	<!-- 添加IP库弹框 --> 
 		<!-- <el-dialog title="添加IP" :visible.sync="dialogIpVisible" width="30%" :before-close="handleClose">  -->

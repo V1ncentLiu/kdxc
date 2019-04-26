@@ -20,15 +20,18 @@
                 <img th:src="@{/images/logoimg.png}" alt="">
             </div>   
             <div class="f-fr">
-                <el-button  v-if="consoleBtnVisible" type="primary" @click="openConsolePage" class="f-fl headerBtn"><img th:src="@{/images/icon_stage.png}" alt="" class="f-fl marginR10">我的工作台</el-button>
+                <el-button  v-if="consoleBtnVisible" type="primary" @click="openConsolePage" class="f-fl headerBtn headerBtn1"><img th:src="@{/images/icon_stage.png}" alt="" class="f-fl marginR10">我的工作台</el-button>
 
                 <el-button type="primary" @click="openLoginClientDialog" class="f-fl headerBtn"><img th:src="@{/images/icon_head.png}" alt="" class="f-fl marginR10">{{callTitle}}</el-button>
 
                 <el-button type="primary" @click="openOutboundDialog" class="f-fl headerBtn"><img th:src="@{/images/icon_phone.png}" alt="" class="f-fl marginR10">主动外呼</el-button>
-
-                <img th:src="@{/images/icon_news.png}" alt="" class="f-fl headIco">
-                <el-button type="primary" class="messageBtn f-fl" @click="openMessageCenter">消息中心<em style="color: #e37470;" id="messageCount"></em></el-button>                
-
+                <span class="messageCenterBtn" @click="openMessageCenter">
+                    <img th:src="@{/images/icon_news.png}" alt="">
+                    <span id="messageCount"></span>
+                </span>                
+                <!-- <el-button type="primary" class="messageBtn f-fl" @click="openMessageCenter">
+                    <em style="color: #e37470;" id="messageCount"></em>
+                </el-button> -->  
                 <img th:src="@{/images/headIco.png}" alt="" class="headIco">
                 <!-- 下拉 -->
                 <el-dropdown class="elDropdown f-fr" trigger="click"  @command="handleCommand">
@@ -56,17 +59,18 @@
                     :collapse="isCollapse" 
                     :default-openeds="defaultOpeneds"
                     :default-active="defaultActive"
-                    background-color="rgb(26, 83, 161)" 
-                    text-color="#fff">  
+                    background-color="rgb(56, 70, 192)" 
+                    text-color="rgb(255, 255, 255)">  
                     <!-- foreach menuList start -->
                       <el-submenu :index="index+''" :key="index"  v-for="(item,index) in items">
                         <template slot="title">
                             <!-- <i :class="'fa fa-lg '+ item.iconName"></i> -->
-                            <img th:src="item.iconUrl" alt="" v-if="item.iconUrl">
+                            <img :src="item.iconUrl" alt="" v-if="item.iconUrl">
                             <span slot="title">{{item.name}}</span>
                         </template>
                         <el-menu-item  class="menu" :key="index+subIndex" :data-url="subItem.url" :index="index+'-'+subIndex" @click="menuClick(subItem.url)" v-for="(subItem,subIndex) in item.subList">
-                            <!-- <i :class="'fa fa-lg '+ subItem.iconName"></i> <--><span class="dot"></span></-->{{subItem.name}}
+                            <!-- <i :class="'fa fa-lg '+ subItem.iconName"></i> -->
+                            <span class="dot"></span>{{subItem.name}}
                         </el-menu-item>
                     </el-submenu> 
                     
@@ -84,16 +88,16 @@
     </el-container>
     
      <!-- 修改密码 dialog start -->
-     <el-dialog title="修改密码" :visible.sync="dialogModifyPwdVisible" @close="closeModifyPwdDialog">
+     <el-dialog title="修改密码" :visible.sync="dialogModifyPwdVisible" @close="closeModifyPwdDialog" width="540px">
         <el-form :model="modifyForm" ref="modifyForm" :rules="modifyFormRules">
             <el-form-item label="当前密码：" :label-width="formLabelWidth" prop="oldPassword">
-                <el-input type="password" v-model="modifyForm.oldPassword" autocomplete="off" maxlength="30"></el-input>
+                <el-input type="password" v-model="modifyForm.oldPassword" autocomplete="off" maxlength="30" style="width:290px;"></el-input>
             </el-form-item>
             <el-form-item label="新密码：" :label-width="formLabelWidth" prop="newPassword">
-                <el-input  type="password" v-model="modifyForm.newPassword" autocomplete="off"  maxlength="30"></el-input>
+                <el-input  type="password" v-model="modifyForm.newPassword" autocomplete="off"  maxlength="30" style="width:290px;"></el-input>
             </el-form-item>
             <el-form-item label="确认密码：" :label-width="formLabelWidth" prop="confirmPwd">
-                <el-input type="password" v-model="modifyForm.confirmPwd" autocomplete="off"  maxlength="30"></el-input>
+                <el-input type="password" v-model="modifyForm.confirmPwd" autocomplete="off"  maxlength="30" style="width:290px;"></el-input>
             </el-form-item>
         </el-form>
         <div slot="footer" class="dialog-footer" center="true">
@@ -103,8 +107,8 @@
     </el-dialog>
  <!-- 修改密码 dialog end -->
  <!-- 退出登录 dialog start -->
-	 <el-dialog title="提示" :visible.sync="dialogLogoutVisible" width="660px">
-    	<span>确认退出系统吗？</span>
+	 <el-dialog title="提示" :visible.sync="dialogLogoutVisible" width="350px" class="logoutDialog" :close-on-click-modal="false">
+    	<p style="text-align: center;">确认退出系统吗？</p>
     	<span slot="footer" class="dialog-footer">
     	    <el-button type="primary" @click="confirmLogout">确认</el-button>
     	</span>
@@ -112,11 +116,11 @@
  <!-- 退出登录 dialog start -->
  
  <!-- 呼叫中心登录 dialog start -->
-     <el-dialog title="呼叫中心" :visible.sync="dialogLoginClientVisible" class="callCenterDialog" :close-on-click-modal="false" width="660px">
+     <el-dialog title="呼叫中心" :visible.sync="dialogLoginClientVisible" class="callCenterDialog" :close-on-click-modal="false" width="515px">
      	<el-button type="text" icon="el-icon-minus" class="minDialog" @click="handleMin"></el-button>
         <el-form :model="loginClientForm" ref="loginClientForm" :rules="loginClientForm.clientType==1?trClientFormRules:qimoClientFormRules">
-            <el-form-item label="选择呼叫中心：" :label-width="formLabelWidth" prop="clientType">
-                <el-select v-model="loginClientForm.clientType" placeholder="请选择" value-key="value" @change="changeClientType" style="width: 470px;">
+            <el-form-item label="选择呼叫中心：" :label-width="formLabelWidth105" prop="clientType">
+                <el-select v-model="loginClientForm.clientType" placeholder="请选择" value-key="value" @change="changeClientType" style="width: 350px;">
                     <el-option
                         v-for="item in clientTypeOptions"
                         :key="item.value"
@@ -126,20 +130,20 @@
                 </el-select>
             </el-form-item>
             <template v-if="loginClientForm.clientType==1">
-	            <el-form-item label="坐席号：" :label-width="formLabelWidth" prop="cno">
-	                <el-input   v-model="loginClientForm.cno" autocomplete="off"  maxlength="10" style="width: 470px;" @keyup.native="cnoNumber"></el-input>
+	            <el-form-item label="坐席号：" :label-width="formLabelWidth105" prop="cno">
+	                <el-input   v-model="loginClientForm.cno" autocomplete="off"  maxlength="10" style="width: 350px;" @keyup.native="cnoNumber"></el-input>
 	            </el-form-item>
-	             <el-form-item label="绑定电话：" :label-width="formLabelWidth" prop="bindPhone">
-	                <el-input   v-model="loginClientForm.bindPhone" autocomplete="off"  maxlength="11" style="width: 470px;" @keyup.native="bindPhoneNumber"></el-input>
+	             <el-form-item label="绑定电话：" :label-width="formLabelWidth105" prop="bindPhone">
+	                <el-input   v-model="loginClientForm.bindPhone" autocomplete="off"  maxlength="11" style="width: 350px;" @keyup.native="bindPhoneNumber"></el-input>
 	            </el-form-item>
             </template>
             <template v-if="loginClientForm.clientType==2">
-                <el-form-item label="登录坐席：" :label-width="formLabelWidth" prop="loginClient">
-                    <el-input   v-model="loginClientForm.loginClient" autocomplete="off"  maxlength="10" style="width: 470px;"></el-input>
+                <el-form-item label="登录坐席：" :label-width="formLabelWidth105" prop="loginClient">
+                    <el-input   v-model="loginClientForm.loginClient" autocomplete="off"  maxlength="10" style="width: 350px;"></el-input>
                 </el-form-item>
             </template>
-            <el-form-item label="绑定类型：" :label-width="formLabelWidth" prop="bindPhoneType">
-               <el-select v-model="loginClientForm.bindPhoneType" placeholder="请选择" value-key="value" style="width: 470px;">
+            <el-form-item label="绑定类型：" :label-width="formLabelWidth105" prop="bindPhoneType">
+               <el-select v-model="loginClientForm.bindPhoneType" placeholder="请选择" value-key="value" style="width: 350px;">
                    <el-option
                        v-for="item in bindPhoneTypeOptions"
                        :key="item.value"
@@ -152,32 +156,32 @@
         </el-form>
         <div slot="footer" class="dialog-footer" center="true">
             <el-button type="primary" @click="loginClient('loginClientForm')">登录</el-button>
-            <el-button @click="cancelLoginClientForm('loginClientForm')">取 消</el-button>
+            <el-button type="info" @click="cancelLoginClientForm('loginClientForm')">取 消</el-button>
         </div>
     </el-dialog>
  <!-- 呼叫中心登录  dialog end -->
  
  <!-- 呼叫中心退出dialog start -->
-     <el-dialog title="呼叫中心" :visible.sync="dialogLogoutClientVisible" class="callCenterDialog" :close-on-click-modal="false" width="660px">
+     <el-dialog title="呼叫中心" :visible.sync="dialogLogoutClientVisible" class="callCenterDialog" :close-on-click-modal="false" width="515px">
      <el-button type="text" icon="el-icon-minus" class="minDialog" @click="logoutMin"></el-button>
         <el-form :model="loginClientForm" ref="logoutClientForm" :rules="loginClientForm.clientType==1?trClientFormRules:qimoClientFormRules">
              <span v-if="loginClientForm.clientType==1">已登录天润呼叫中心</span>
              <span v-if="loginClientForm.clientType==2">已登录七陌呼叫中心</span>
             
             <template v-if="loginClientForm.clientType==1">
-                <el-form-item label="坐席号：" :label-width="formLabelWidth" prop="cno">
+                <el-form-item label="坐席号：" :label-width="formLabelWidth105" prop="cno">
                     {{loginClientForm.cno}}
                 </el-form-item>
-                 <el-form-item label="绑定电话：" :label-width="formLabelWidth" prop="bindPhone">
+                 <el-form-item label="绑定电话：" :label-width="formLabelWidth105" prop="bindPhone">
                     {{loginClientForm.bindPhone}}
                 </el-form-item>
             </template>
             <template v-if="loginClientForm.clientType==2">
-                <el-form-item label="登录坐席：" :label-width="formLabelWidth" prop="loginClient">
+                <el-form-item label="登录坐席：" :label-width="formLabelWidth105" prop="loginClient">
                     {{loginClientForm.loginClient}}
                 </el-form-item>
             </template>
-            <el-form-item label="绑定类型：" :label-width="formLabelWidth" prop="bindPhoneType">
+            <el-form-item label="绑定类型：" :label-width="formLabelWidth105" prop="bindPhoneType">
                 <span v-if="loginClientForm.bindPhoneType==1">普通电话</span>
                 <span v-if="loginClientForm.bindPhoneType==2">手机外显</span>
             </el-form-item>
@@ -189,13 +193,13 @@
     </el-dialog>
  <!-- 呼叫中心退出  dialog end -->
   <!--外呼 dialog start -->
-     <el-dialog title="主动外呼" :visible.sync="dialogOutboundVisible" :close-on-click-modal="false" class="callCenterDialog1" @close="closeOutboundDialog" width="660px">
+     <el-dialog title="主动外呼" :visible.sync="dialogOutboundVisible" :close-on-click-modal="false" class="callCenterDialog1" @close="closeOutboundDialog" width="540px">
         <el-button type="text" icon="el-icon-minus" class="minDialog1" @click="outboundMin"></el-button>
         <el-form>
-             <el-form-item  :label-width="formLabelWidth">
-                 <el-input style="float: left;width: 60%;margin-right: 10px;" autocomplete="off"  maxlength="11" v-model="outboundInputPhone"></el-input>
-                 <el-button type="primary" @click="clickOutbound" style="background: #62a8ec;border-color: #62a8ec;padding: 6px 15px;"><img th:src="@{/images/icon_call2.png}" alt=""></el-button>
-             </el-form-item>
+            <el-form-item  label-width="35px">
+                <el-input style="float: left;width: 385px;margin-right: 10px;" autocomplete="off"  maxlength="11" v-model="outboundInputPhone"></el-input>
+                <el-button type="primary" @click="clickOutbound" class="callCenterBtn"><img th:src="@{/images/icon_call2.png}" alt=""></el-button>
+            </el-form-item>
         </el-form>
            <!--   <input  type="hidden" id="outboundCallStartTime"/> -->
             <div id="outboundCallTimeDiv" class="outboundCallTimeDiv"><img th:src="@{/images/icon_clock.png}" alt="" class="headIco">本次通话时长：<span id="outboundCallTime"></span></div> 
@@ -286,16 +290,18 @@
     	showBtnIndex.push("0");
     	defaultActive="0-0";
     }
+    
+    var accountType = [[${accountType}]];
 </script>
 <style>
     .el-dialog__footer {text-align: center;}    
     /* 最小化按钮 */
     .el-dialog__wrapper.callCenterDialog  button.el-dialog__headerbtn {display:none!important; }
-    .minDialog,.minDialog:hover {position: absolute;top: 12px;right: 14px;background: #fff;width: 35px;height: 35px;font-size: 18px;color: #62a8ec;border-radius: 50%;opacity: 0.5;}
+    .minDialog,.minDialog:hover {position: absolute;top: 12px;right: 14px;background: #fff;width: 18px;height: 18px;color: #5c6be8;border-radius: 50%;padding: 0;line-height: 18px;font-size: 12px;}
 
-    .minDialog1,.minDialog1:hover {position: absolute;top: 12px;right: 58px;background: #fff;width: 35px;height: 35px;font-size: 18px;color: #62a8ec;border-radius: 50%;opacity: 0.5;}
+    .minDialog1,.minDialog1:hover {position: absolute;top: 12px;right: 40px;background: #fff;width: 18px;height: 18px;color: #5c6be8;border-radius: 50%;padding: 0;line-height: 18px;font-size: 12px;}
     .minDialog:hover,.minDialog1:hover{opacity: 0.6;}
-    .minDialog i,.minDialog1 i{margin-top: -4px;float: left;margin-left: 7px;}
+    /*.minDialog i,.minDialog1 i{margin-top: -4px;float: left;margin-left: 7px;}*/
 
 </style>
 
@@ -405,7 +411,7 @@
     var ws_url_https = '[[${wsUrlHttps}]]';
     var mqUserName = '[[${mqUserName}]]';
     var mqPassword = '[[${mqPassword}]]';
-    var userId = '[[${userId}]]'
+    var userId = '[[${userId}]]';
 
     // var sessionid = '[[${sessionid}]]'
     console.log(userId)

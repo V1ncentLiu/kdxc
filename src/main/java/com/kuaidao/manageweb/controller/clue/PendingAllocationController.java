@@ -173,13 +173,10 @@ public class PendingAllocationController {
         pageParam.setUserId(user.getId());
         List<RoleInfoDTO> roleList = user.getRoleList();
         if (roleList != null) {
-
             pageParam.setRoleCode(roleList.get(0).getRoleCode());
         }
-
         JSONResult<PageBean<PendingAllocationClueDTO>> pendingAllocationList =
                 clueBasicFeignClient.pendingAllocationList(pageParam);
-
         return pendingAllocationList;
     }
 
@@ -194,7 +191,7 @@ public class PendingAllocationController {
     @ResponseBody
     @RequiresPermissions("aggregation:pendingAllocationManager:allocation")
     @LogRecord(description = "分配资源", operationType = OperationType.DISTRIBUTION,
-            menuName = MenuEnum.PENDING_ALLOCATION_CLUE)
+            menuName = MenuEnum.TELE_CUSTOMER_MANAGER)
     public JSONResult allocationClue(@Valid @RequestBody AllocationClueReq allocationClueReq,
             BindingResult result) {
 
@@ -206,11 +203,10 @@ public class PendingAllocationController {
         allocationClueReq.setUserId(user.getId());
         List<RoleInfoDTO> roleList = user.getRoleList();
         if (roleList != null) {
-
             allocationClueReq.setRoleId(roleList.get(0).getId());
             allocationClueReq.setRoleCode(roleList.get(0).getRoleCode());
         }
-
+        allocationClueReq.setOrg(user.getOrgId());
         return clueBasicFeignClient.allocationClue(allocationClueReq);
     }
 
@@ -236,11 +232,10 @@ public class PendingAllocationController {
         allocationClueReq.setUserId(user.getId());
         List<RoleInfoDTO> roleList = user.getRoleList();
         if (roleList != null) {
-
             allocationClueReq.setRoleId(roleList.get(0).getId());
             allocationClueReq.setRoleCode(roleList.get(0).getRoleCode());
         }
-
+        allocationClueReq.setOrg(user.getOrgId());
         return clueBasicFeignClient.transferClue(allocationClueReq);
     }
 
@@ -270,7 +265,7 @@ public class PendingAllocationController {
             allocationClueReq.setRoleId(roleList.get(0).getId());
             allocationClueReq.setRoleCode(roleList.get(0).getRoleCode());
         }
-
+        allocationClueReq.setOrg(user.getOrgId());
         return clueBasicFeignClient.batchDistributionClue(allocationClueReq);
     }
 
@@ -296,11 +291,10 @@ public class PendingAllocationController {
         allocationClueReq.setUserId(user.getId());
         List<RoleInfoDTO> roleList = user.getRoleList();
         if (roleList != null) {
-
             allocationClueReq.setRoleId(roleList.get(0).getId());
             allocationClueReq.setRoleCode(roleList.get(0).getRoleCode());
         }
-
+        allocationClueReq.setOrg(user.getOrgId());
         return clueBasicFeignClient.ceoDistributionClue(allocationClueReq);
     }
 

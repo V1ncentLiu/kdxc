@@ -4,12 +4,20 @@
     <title>资源释放领取规则管理</title>
     <style type="text/css">
         .el-input__inner{height: 32px;line-height:32px;width: 150px;}
-        #tableBox{border-collapse:collapse;border:1px solid #c6e1fc;width: 100%}
-        #tableBox th{background:#a1cdfa; border:1px solid #c6e1fc;padding: 12px 0;text-align: center;}
-        #tableBox td{border:1px solid #c6e1fc;padding: 14px 0;text-align: center;}
+        #tableBox{border-collapse:collapse;border:1px solid #eaecf3;width: 100%}
+        #tableBox th{background:#ecedf2; border:1px solid #eaecf3;padding: 12px 0;text-align: center;}
+        #tableBox td{border:1px solid #eaecf3;padding: 14px 0;text-align: center;}
         #tableBox td .el-form-item{margin-bottom: 2px}
         #tableBox .el-form-item__error{top: 100%;left: -50%;width: 200%;}
         .selectIpt .el-input__inner{width: 200px;}
+        /*不显示input的number样式*/
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+        }
+        input[type="number"]{
+            -moz-appearance: textfield;
+        }
     </style>
 </head>
 <body>
@@ -20,10 +28,10 @@
         <el-breadcrumb-item>资源释放领取规则管理</el-breadcrumb-item>
     </el-breadcrumb> 
     
-    <el-row class="borderbox fs16">
+    <el-row class="mainWhiteBg">
         <div class="inforTitle">资源释放领取规则管理</div> 
         <el-form :model="form" :rules="rules" ref="form" class="padding20" :inline="true">
-            <div class="marginB20 paddingT20 redcolor">提示：复选框选中则启用此约束，不选中复选框则不
+            <div class="marginB20 redcolor">提示：复选框选中则启用此约束，不选中复选框则不
             启用此约束。</div>
             <el-row>
                 <el-checkbox v-model="checked1" class="marginR10 paddingT10"></el-checkbox>
@@ -249,10 +257,10 @@
                     <el-form-item label="条资源。"></el-form-item>
                 </el-row>
                 <el-row>
-                    <el-button class="f-fl marginR10 f-tdu bluecolor cursorP" @click="addDomains" :disabled="isAddAble" style="border: none;height: 25px;line-height: 25px;padding: 0;">添加设置电销总监的特殊限制</el-button>
+                    <el-button class="f-fl marginR10 f-tdu bluecolor cursorP" @click="addDomains" :disabled="isAddAble" style="border: none;height: 25px;line-height: 25px;padding: 0;background: none">添加设置电销总监的特殊限制</el-button>
                     <!-- <span class="f-fl marginR10 f-tdu bluecolor cursorP" @click="addDomains">添加设置电销总监的特殊限制</span> -->
                     <span class="f-fl" v-if="isShow">
-                        <el-button class="f-fl marginR10" type="primary" size="mini" @click="addDomain"><i class="el-icon-plus"></i></el-button>
+                        <el-button class="f-fl marginR10" type="primary" size="mini" @click="addDomain"><i class="el-icon-plus mrgRightNone"></i></el-button>
                         <span class="f-fl">
                             <div v-for="(domain, index) in form.domains" :key="domain.key">
                                 <el-form-item  
@@ -277,7 +285,7 @@
                                     >                            
                                     <el-input v-model="domain.limitNum" placeholder="1-5000以内整数" maxLength="4" type="number" min="1" max="5000" ></el-input>
                                 </el-form-item>
-                                <el-button type="danger" size="mini" @click.prevent="removeDomain(domain)">删除</el-button>
+                                <el-button type="danger" size="small" @click.prevent="removeDomain(domain)">删除</el-button>
                             </div>
                         </span>
                     </span>
@@ -916,6 +924,15 @@
                                  unSign.isEnabled=autoReleaseRuleIsEnabled;
                                  isAutoReleaseBl=true;
                                  autoReleaseRule.push(unSign);
+                             }
+                             
+                             var inviteId = form.id11;
+                             if(inviteId){
+                            	 var invite = {};
+                            	 invite.id = inviteId;
+                            	 invite.isEnabled=autoReleaseRuleIsEnabled;
+                                 isAutoReleaseBl=true;
+                                 autoReleaseRule.push(invite);
                              }
                              
                         	 

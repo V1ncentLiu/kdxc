@@ -19,80 +19,41 @@
         <!--<div class="inforTitle">维护客户</div>-->
         <el-form :model="form" :rules="rules" ref="form" class="padding20">
             <div class="marginB20 fs16 paddingT20">
-                资源信息 <span v-show="isShowTip" style="padding-left: 20px; color: red;">{{showTipInfo}}</span>
-                <el-button v-show="isShowBtn" type="primary" @click="keepCustomer"
-                           style="margin-left: 10px;">保留客户
+                资源信息 <span style="padding-left: 20px; color: red;">线索ID{{clueId}}  </span> <span v-show="isShowTip" style="padding-left: 20px; color: red;">{{showTipInfo}}</span>
+                <el-button v-show="isShowBtn" type="primary" @click="keepCustomer" style="margin-left: 10px;">保留客户
                 </el-button>
             </div>
 
             <div class="borderbox padding20">
                 <el-row>
                     <el-col :span="8">
-                        <el-form-item
-                                label="资源类型：" :label-width="formLabelWidth">
-                            <el-button
-                                    type="text" disabled>{{clueBase.typeName}}
-                            </el-button>
+                        <el-form-item label="资源类型：" :label-width="formLabelWidth">
+                            <el-button type="text" disabled>{{clueBase.typeName}}</el-button>
                         </el-form-item>
                     </el-col>
-                    <el-col
-                            :span="8">
-                        <el-form-item label="资源类别："
-                                      :label-width="formLabelWidth">
-                            <el-button type="text"
-                                       disabled>{{clueBase.categoryName}}
-                            </el-button>
+                    <el-col :span="8">
+                        <el-form-item label="资源类别：" :label-width="formLabelWidth">
+                            <el-button type="text" disabled>{{clueBase.categoryName}}</el-button>
                         </el-form-item>
                     </el-col>
                 </el-row>
-                <!--<el-row>-->
-                    <!--<el-col :span="8">-->
-                        <!--<el-form-item-->
-                                <!--label="广告位：" :label-width="formLabelWidth">-->
-                            <!--<el-button-->
-                                    <!--type="text" disabled>{{clueBase.sourceTypeName}}-->
-                            <!--</el-button>-->
-                        <!--</el-form-item>-->
-                    <!--</el-col>-->
-                    <!--<el-col-->
-                            <!--:span="8">-->
-                        <!--<el-form-item label="媒介："-->
-                                      <!--:label-width="formLabelWidth">-->
-                            <!--<el-button type="text"-->
-                                       <!--disabled>{{clueBase.sourceName}}-->
-                            <!--</el-button>-->
-                        <!--</el-form-item>-->
-                    <!--</el-col>-->
-                <!--</el-row>-->
+                <el-row>
+                    <el-col :span="8">
+                        <el-form-item label="留言时间：" :label-width="formLabelWidth">
+                            <el-button type="text" disabled>{{this.formatTimeFn(clueBase.messageTime)}}</el-button>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="8">
+                        <el-form-item label="留言重点：" :label-width="formLabelWidth">
+                            <div class="lineFeed lineFeed2">{{clueBase.messagePoint}}</div>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
                 <el-row>
                     <el-col :span="8">
                         <el-form-item
                                 label="搜索词：" :label-width="formLabelWidth">
                             <div class="lineFeed">{{clueBase.searchWord}}</div>
-                        </el-form-item>
-                    </el-col>
-                    <!--<el-col :span="8">-->
-                        <!--<el-form-item label="资源项目："-->
-                                      <!--:label-width="formLabelWidth">-->
-                            <!--<el-button type="text"-->
-                                       <!--disabled>{{clueBase.projectName}}-->
-                            <!--</el-button>-->
-                        <!--</el-form-item>-->
-                    <!--</el-col>-->
-                    <el-col :span="8">
-                        <el-form-item
-                                label="留言时间：" :label-width="formLabelWidth">
-                            <el-button
-                                    type="text" disabled>{{this.formatTimeFn(clueBase.messageTime)}}
-                            </el-button>
-                        </el-form-item>
-                    </el-col>
-                </el-row>
-                <el-row>
-                    <el-col :span="8">
-                        <el-form-item label="留言重点："
-                                      :label-width="formLabelWidth">
-                            <div class="lineFeed lineFeed2">{{clueBase.messagePoint}}</div>
                         </el-form-item>
                     </el-col>
                 </el-row>
@@ -101,19 +62,14 @@
             <div class="borderbox padding20">
                 <el-row>
                     <el-col :span="8">
-                        <el-form-item
-                                label="客户姓名：" prop="customerName" :label-width="formLabelWidth">
-                            <el-input v-model="form.customerName" autocomplete="off"
-                                      maxLength="10"></el-input>
+                        <el-form-item label="客户姓名：" prop="customerName" :label-width="formLabelWidth">
+                            <el-input v-model="form.customerName" autocomplete="off" maxLength="10"></el-input>
                         </el-form-item>
                     </el-col>
                     <el-col :span="8">
-                        <el-form-item
-                                label="客户级别：" :label-width="formLabelWidth">
-                            <el-select
-                                    v-model="form.customerLevel" placeholder="请选择" style="width: 100%;">
-                                <el-option v-for="item in customerLevelArr" :key="item.value"
-                                           :label="item.name" :value="item.value"></el-option>
+                        <el-form-item label="客户级别：" :label-width="formLabelWidth">
+                            <el-select v-model="form.customerLevel" placeholder="请选择" style="width: 100%;">
+                                <el-option v-for="item in customerLevelArr" :key="item.value" :label="item.name" :value="item.value"></el-option>
                             </el-select>
                         </el-form-item>
                     </el-col>
@@ -121,7 +77,11 @@
                 <el-row>
                     <el-col :span="8">
                         <el-form-item label="手机号：" prop="customerPhone" :label-width="formLabelWidth">
-                            <a>{{form.customerPhone}} <i class="el-icon-phone-outline" @click="gettelNumberIcon(form.customerPhone)"></i></a>
+                            <a>
+                                {{form.customerPhone}} 
+                                <!-- <i class="el-icon-phone-outline" @click="gettelNumberIcon(form.customerPhone)"></i> -->
+                                <img th:src="@{/images/tel.png}" @click="gettelNumberIcon(form.customerPhone)" style="margin:0 5px;width:22px;cursor: pointer;vertical-align: middle;" alt="">
+                            </a>
                             <span v-if="buttonType === 'A'">
                                 <el-button type="primary" @click="dialogFormVisible = true"><i class="el-icon-plus"></i>手机号</el-button>
 			                </span>
@@ -327,66 +287,44 @@
                             </el-input>
                             <span style="padding-left: 5px;">之前启动</span></el-form-item>
                     </el-col>
-                    <el-col :span="6">
-                        <el-form-item
-                                label="开店区域：" :label-width="formLabelWidth" prop="province">
-                            <el-select filterable v-model="form.province" placeholder="省"
-                                       style="width: 100%;" @change="currentProvince">
+                    <el-col :span="16">
+                        <el-form-item label="开店区域：" :label-width="formLabelWidth" prop="province" style="float: left;">
+                            <el-select filterable v-model="form.province" placeholder="省" style="width: 180px;margin-right: 10px;" @change="currentProvince">
                                 <el-option
                                         v-for="item in provinceArr" :key="item.name" :label="item.name"
                                         :value="item.name"></el-option>
                             </el-select>
                         </el-form-item>
-                    </el-col>
-                    <el-col :span="5">
-                        <el-form-item filterable
-                                label="" prop="city">
-                            <el-select filterable v-model="form.city" placeholder="市" style="width: 100%;"
-                                       @change="currentCity">
-                                <el-option
-                                        v-for="item in cityArr" :key="item.name" :label="item.name"
-                                        :value="item.name"></el-option>
+                        <el-form-item label="" prop="city" style="float: left;">
+                            <el-select filterable v-model="form.city" placeholder="市" style="width: 180px;margin-right: 10px;" @change="currentCity">
+                                <el-option v-for="item in cityArr" :key="item.name" :label="item.name" :value="item.name"></el-option>
                             </el-select>
                         </el-form-item>
-                    </el-col>
-                    <el-col :span="5">
-                        <el-form-item label="" >
-                            <el-select filterable
-                                    v-model="form.district" placeholder="区/县" style="width: 100%;">
-                                <el-option v-for="item in districtArr" :key="item.name"
-                                           :label="item.name" :value="item.name"></el-option>
+                        <el-form-item label=""  style="float: left;">
+                            <el-select filterable v-model="form.district" placeholder="区/县" style="width: 180px;">
+                                <el-option v-for="item in districtArr" :key="item.name" :label="item.name" :value="item.name"></el-option>
                             </el-select>
                         </el-form-item>
                     </el-col>
                 </el-row>
             </div>
             <div class="marginB20 fs16 paddingT20">上传资料</div>
-            <el-row>
+            <el-row class="marginB10">
                 <el-col :span="8">
-                    <el-button size="small"
-                               type="danger" @click="deteleClueFile">删除
-                    </el-button>
-                    <el-button
-                            type="text" disabled>只允许上传图片／音频文件。
-                    </el-button>
+                    <el-button size="small" type="danger" @click="deteleClueFile">删除</el-button>
+                    <el-button type="text" disabled>只允许上传图片／音频文件。</el-button>
                 </el-col>
                 <el-col :span="5"
                         class="f-fr">
                     <form name=theform v-show="false">
-                        <input type="radio" name="myradio" value="local_name" checked=true/>
-                        上传文件名字保持本地文件名字 <input type="radio" name="myradio" value="random_name"/>
-                        上传文件名字是随机文件名 <br/> 上传到指定目录:<input type="text" id='dirname'
-                                                          placeholder="如果不填，默认是上传到根目录" size=50>
+                        <input type="radio" name="myradio" value="local_name" checked=true/>上传文件名字保持本地文件名字 <input type="radio" name="myradio" value="random_name"/>上传文件名字是随机文件名 <br/>上传到指定目录:<input type="text" id='dirname' placeholder="如果不填，默认是上传到根目录" size=50>
                     </form>
                     <div id="container" style="text-align:right;">
-                        <a id="selectfiles" href="javascript:void(0);" class='btn'>选择文件</a> <a
-                            id="postfiles" href="javascript:void(0);" onclick="clueUploadFile()"
-                            class='btn'>开始上传</a>
+                        <a id="selectfiles" href="javascript:void(0);" class='btn'>选择文件</a> 
+                        <a id="postfiles" href="javascript:void(0);" onclick="clueUploadFile()" class='btn'>开始上传</a>
                     </div>
                     <div id="ossfile">你的浏览器不支持flash,Silverlight或者HTML5！</div>
-                    <span v-show="false">上传到指定目录:<input type="text" id='dirname'
-                                                        placeholder="如果不填，默认是上传到根目录" size=50> <pre
-                            id="console"></pre></span>
+                    <span v-show="false">上传到指定目录:<input type="text" id='dirname' placeholder="如果不填，默认是上传到根目录" size=50><pre id="console"></pre></span>
                 </el-col>
             </el-row>
             <el-row>
@@ -423,8 +361,8 @@
                 </el-table>
             </el-row>
             <div class="marginB20 fs16 paddingT20">跟进记录</div>
-            <el-row>
-                <el-col :span="16" class="paddingTB">
+            <el-row class="marginB10">
+                <el-col :span="16">
                     <el-button
                             size="small" type="danger" @click="deteleTracking">删除
                     </el-button>
@@ -432,10 +370,8 @@
                             size="small" type="primary" @click="editRecord">编辑
                     </el-button>
                 </el-col>
-                <el-col
-                        :span="4" :offset="4" class="f-tar">
-                    <el-button size="small"
-                               type="primary" @click="lineFormShowFun">添加
+                <el-col :span="4" :offset="4" class="f-tar">
+                    <el-button size="small" type="primary" @click="lineFormShowFun">添加
                     </el-button> <!-- <el-button size="small" type="primary" @click="addRecord">添加</el-button> -->
                 </el-col>
             </el-row>
@@ -447,7 +383,7 @@
                     <el-table-column prop="id" type="selection" width="55"
                                      @selection-change="handleTrackingSelection" align="center">
                     </el-table-column>
-                    <el-table-column prop="callTime" label="拨打时间" align="center" width="210">
+                    <el-table-column prop="callTime" label="拨打时间" align="center" width="220">
                     </el-table-column>
                     <el-table-column
                             prop="customerStatusName"
@@ -488,7 +424,7 @@
                             <!--<div v-else-if="scope.row.visitStatus ==1">是</div>-->
                         <!--</template>-->
                     <!--</el-table-column>-->
-                    <el-table-column prop="nextVisitTime" label="下次回访时间" align="center" width="210">
+                    <el-table-column prop="nextVisitTime" label="下次回访时间" align="center" width="220">
                     </el-table-column>
                     <el-table-column prop="createUserName" label="创建人" align="center">
                     </el-table-column>
@@ -497,12 +433,11 @@
                                  :rules="rules" ref="LineRuleForm">
                             <el-row
                                     class="paddingL55">
-                                <el-form-item prop="callTime">
+                                <el-form-item prop="callTime" class="lineForm_callTime">
                                     <el-date-picker v-model="formInline.callTime" type="datetime"
                                                     size="mini" placeholder="选择日期时间"></el-date-picker>
                                 </el-form-item>
-                                <el-form-item
-                                        label="" size="mini">
+                                <el-form-item label="" size="mini" class="lineForm_customerStatus">
                                     <el-select
                                             v-model="formInline.customerStatus" @change="customerStatusChange"
                                             placeholder="客户状态">
@@ -511,7 +446,7 @@
                                                 :value="item.value"></el-option>
                                     </el-select>
                                 </el-form-item>
-                                <el-form-item label="" size="mini" prop="customerStatusSub" v-show="!substatus">
+                                <el-form-item label="" size="mini" prop="customerStatusSub" v-show="!substatus" class="lineForm_customerStatusSub">
                                     <el-select
                                             v-model="formInline.customerStatusSub" placeholder="客户状态"
                                             :disabled="substatus"
@@ -520,8 +455,7 @@
                                                    :label="item.name" :value="item.value"></el-option>
                                     </el-select>
                                 </el-form-item>
-                                <el-form-item
-                                        label="" size="mini" prop="isCall">
+                                <el-form-item label="" size="mini" prop="isCall" class="lineForm_isCall">
                                     <el-select
                                             v-model="formInline.isCall" placeholder="是否接通">
                                         <el-option
@@ -536,8 +470,7 @@
                                     </el-select>
                                   </el-form-item>
                                   -->
-                                <el-form-item label="" size="mini"
-                                              prop="focusPoint">
+                                <el-form-item label="" size="mini" prop="focusPoint" class="lineForm_focusPoint">
                                     <el-input
                                             v-model="formInline.focusPoint" size="mini" placeholder="客户关注点"></el-input>
                                 </el-form-item>
@@ -549,13 +482,13 @@
                                         <!--<el-option label="否" value="0"></el-option>-->
                                     <!--</el-select>-->
                                 <!--</el-form-item>-->
-                                <el-form-item prop="nextVisitTime">
+                                <el-form-item prop="nextVisitTime" class="lineForm_nextVisitTime">
                                     <el-date-picker
                                             v-model="formInline.nextVisitTime" type="datetime"
                                             format="yyyy-MM-dd HH:mm" size="mini" placeholder="下次回访时间">
                                     </el-date-picker>
                                 </el-form-item>
-                                <el-form-item class="lineInherit">
+                                 <el-form-item class="lineInherit">
                                     <el-button
                                             type="primary" size="mini" @click="onConfirmAdd" :disabled="addBtnDisabled">
                                         确认
@@ -614,20 +547,19 @@
                           tooltip-effect="dark" style="width: 100%"
                           border
                           @selection-change="handleSelectionChange">
-                    <el-table-column type="index" width="55" label="序号" align="center">
-                    </el-table-column>
-                    <el-table-column prop="roleName" label="服务人员角色" align="center">
-                    </el-table-column>
-                    <el-table-column prop="userName" label="服务人员姓名" align="center">
-                    </el-table-column>
-                    <el-table-column prop="telRuleValue" label="分配规则（名称）" align="center">
-                    </el-table-column>
-                    <el-table-column prop="createTime" label="服务时间" align="center">
+                    <el-table-column type="index" width="55" label="序号" align="center"></el-table-column>
+                    <el-table-column prop="roleName" label="角色" align="center"></el-table-column>
+                    <el-table-column prop="orgName" label="所属组(组名)" align="center"></el-table-column>
+                    <!--<el-table-column prop="userName" label="服务人员姓名" align="center">-->
+                    <!--</el-table-column>-->
+                    <!--<el-table-column prop="telRuleValue" label="分配规则（名称）" align="center">-->
+                    <!--</el-table-column>-->
+                    <el-table-column prop="createTime" label="开始服务时间" align="center">
                     </el-table-column>
                 </el-table>
                 <div class="padding20 f-tac">
-                    <el-button type="primary" @click="submitForm('form')">提交客户资源</el-button>
-                    <el-button type="primary" :disabled="inviteBtnDisabled" @click="inviteCustomer('form')">邀约来访
+                    <el-button type="primary" @click="submitForm('form')">保存客户信息</el-button>
+                    <el-button type="success" :disabled="inviteBtnDisabled" @click="inviteCustomer('form')">邀约来访
                     </el-button>
                     <el-button @click="rebackClue">取 消</el-button>
                 </div>
@@ -635,14 +567,13 @@
     </el-row>
 
     <!-- dialog -->
-    <el-dialog title="添加手机号" :visible.sync="dialogFormVisible">
+    <el-dialog title="添加手机号" :visible.sync="dialogFormVisible" width="540px">
         <!-- <button type="button" aria-label="Close" class="el-dialog__headerbtn"
                 style="position: absolute; z-index: 9; background: #fff;"
                 @click="clearDialog">
             <i class="el-dialog__close el-icon el-icon-close"></i>
         </button> -->
-        <el-form :model="dynamicValidateForm" ref="dynamicValidateForm"
-                 style="width: 540px;">
+        <el-form :model="dynamicValidateForm" ref="dynamicValidateForm">
             <el-form-item
                     :label-width="formLabelWidth"
                     v-for="(domain, index) in dynamicValidateForm.domains"
@@ -651,20 +582,16 @@
                     :rules="{
                     required: true, message: '手机号不能为空', trigger: 'blur',
                 }">
-                <el-input v-model="domain.value" maxLength="11"
-                          @keyup.native="phoneNumber" style="width: 300px;margin-right: 10px;"></el-input>
-                <i class="el-icon-phone-outline telNumberIcon"
-                   @click="gettelNumberIcon(domain.value)"></i>
-                <el-button
-                        @click.prevent="removeDomain(domain)" v-show="deleteShow">删除
-                </el-button>
+                <el-input v-model="domain.value" maxLength="11" @keyup.native="phoneNumber" style="width: 200px;margin-right: 10px;"></el-input>
+                <el-button type="danger" @click.prevent="removeDomain(domain)" v-show="deleteShow">删除</el-button>
+                <!-- <i class="el-icon-phone-outline telNumberIcon" @click="gettelNumberIcon(domain.value)"></i> -->
+                <img th:src="@{/images/tel.png}" @click="gettelNumberIcon(domain.value)" style="margin:0 10px;width:22px;cursor: pointer;vertical-align: middle;" alt="">
             </el-form-item>
         </el-form>
         <div slot="footer" class="f-tac">
-            <el-button type="primary"
-                       @click="submitDialogForm('dynamicValidateForm')">提 交
+            <el-button type="primary" @click="submitDialogForm('dynamicValidateForm')">提 交
             </el-button>
-            <el-button @click="addDomain">添加更多手机号</el-button>
+            <el-button type="success" @click="addDomain">添加更多手机号</el-button>
         </div>
     </el-dialog>
     <!-- dialog -->
@@ -712,12 +639,20 @@
         width: 100% !important;
     }
 
+    #ossfile {
+        text-align: right;
+    }
+
+    /*.paddingL55 {
+        width: 1700px;
+    }
+    .paddingL55 .el-form-item__content {
+        line-height: 28px;
+    }
     @media screen and (width: 1920px) {
         .paddingL55 .el-date-editor.el-input {
             width: 218px;
         }
-
-        /*.paddingL55 div.el-form-item:nth-of-type(2) { width: 100px; }*/
         .paddingL55 div.el-form-item, .paddingL55 .el-input--mini .el-input__inner {
             width: 202px;
         }
@@ -726,19 +661,6 @@
             width: 186px;
             text-align: center;
         }
-
-    }
-
-    .paddingL55 {
-        width: 1700px;
-    }
-
-    .paddingL55 .el-form-item__content {
-        line-height: 28px;
-    }
-
-    #ossfile {
-        text-align: right;
     }
 
     @media screen and (max-width: 1190px) {
@@ -747,10 +669,6 @@
             line-height: 28px;
         }
 
-        /* .paddingL55 .el-date-editor.el-input {
-		width: 200px;
-	} */
-        /*.paddingL55 div.el-form-item:nth-of-type(2) { width: 100px; }*/
         .paddingL55 div.el-form-item, .paddingL55 .el-input--mini .el-input__inner {
             width: 200px;
         }
@@ -812,7 +730,6 @@
             width: 184px;
         }
 
-        /*.paddingL55 div.el-form-item:nth-of-type(2) { width: 100px; }*/
         .paddingL55 div.el-form-item, .paddingL55 .el-input--mini .el-input__inner {
             width: 200px;
         }
@@ -833,7 +750,23 @@
             width: 90px;
             text-align: center;
         }
+    }*/
+
+    /*20190423 start*/
+    .paddingL55 { width: 1665px; }
+    .paddingL55 .el-form-item__content {
+        width: 100%;
+        line-height: 28px;
     }
+    .paddingL55 .el-select { width: 100%; }
+    .paddingL55 .lineForm_callTime { width: 220px; }
+    .paddingL55 .lineForm_customerStatus { width: 420px; }
+    .paddingL55 .lineForm_customerStatusSub { width: 210px; }
+    .paddingL55 .lineForm_isCall { width: 200px; }
+    .paddingL55 .lineForm_focusPoint { width: 210px; }
+    .paddingL55 .lineForm_nextVisitTime { width: 220px; }
+    .paddingL55 .lineForm_confirm_btn {}
+    /*20190423 end*/
 
     i.el-icon-phone-outline {
         width: 20px;
@@ -901,6 +834,7 @@
         el: '#addCustomer',
         data: function () {
             return {
+                clueId:clueId,
             	loginUserId:loginUserId,
                 customerStatusRequired:false,
                 isShowTip: false,//是否显示释放公有池提示信息
@@ -1040,18 +974,18 @@
                     focusPoint: [
                         {required: true, message: '请填写客户关注点', trigger: 'blur'}
                     ],
-                    nextVisitTime: [
-                        {required: true, message: '请选择下次回访时间', trigger: 'blur'}
-                    ],
+                    // nextVisitTime: [
+                    //     {required: true, message: '请选择下次回访时间', trigger: 'blur'}
+                    // ],
                     isCall: [
                         {required: true, message: '请选择是否接通', trigger: 'change'}
                     ],
                     resourceStatus: [
                         {required: true, message: '请选择资源是否有效', trigger: 'change'}
                     ],
-                    nextVisitTime: [
-                        {required: true, message: '请选择下次回访时间', trigger: 'change'}
-                    ]
+                    // nextVisitTime: [
+                    //     {required: true, message: '请选择下次回访时间', trigger: 'change'}
+                    // ]
                 },
                 dynamicValidateForm: {//新增手机号弹窗数据
                     domains: [{
@@ -1149,8 +1083,10 @@
             customerStatusChange(selVal) {
                 if (selVal == '3') {
                     this.substatus = false;
+                    $(".paddingL55 .lineForm_customerStatus").css("width","210px");
                 } else {
                     this.substatus = true;
+                    $(".paddingL55 .lineForm_customerStatus").css("width","420px");
                 }
             },
             projectChangeSelect(selVal) {
@@ -1319,7 +1255,7 @@
                             for (var j = 0; j < ary.length; j++) {
                                 console.log(ary[j])
                                 if (ary[j] != "") {
-                                    if (s.replace(ary[j] + ",", "").indexOf(ary[j] + ",") > -1) {
+                                	if((","+s.replace(ary[j]+",","")).indexOf(","+ary[j]+",")>-1) {
                                         this.$message({
                                             message: '请不要提交重复手机号',
                                             type: 'warning'
@@ -1496,121 +1432,21 @@
                        param.resourceStatus=this.formInline.resourceStatus;
                        param.focusPoint=this.formInline.focusPoint;
                        param.visitStatus=this.formInline.visitStatus;
-                       var nextVisitTime=this.formInline.nextVisitTime;
-                       if(typeof(nextVisitTime)=='string'){
-                        	  param.nextVisitTime=new Date(Date.parse(nextVisitTime.replace(/-/g, "/")));
-                       }else{
-                           param.nextVisitTime=this.formInline.nextVisitTime; 
+                       if(this.formInline.nextVisitTime){
+                           var nextVisitTime=this.formInline.nextVisitTime;
+                           if(typeof(nextVisitTime)=='string'){
+                               param.nextVisitTime=new Date(Date.parse(nextVisitTime.replace(/-/g, "/")));
+                           }else{
+                               param.nextVisitTime=this.formInline.nextVisitTime;
+                           }
                        }
+
 
                        if(this.formInline.customerStatus=='3'){//如果选择的是不跟进在传此字段
                             param.customerStatusSub=this.formInline.customerStatusSub;
                        }
                        
                        this.addBtnDisabled=true;
-         /*               if(param.customerStatus=='3'&&param.customerStatusSub=='1'){
-                    	      this.$confirm("客户不跟进空号将释放废弃池，我的客户列表将消失", '提示', {
-                                  confirmButtonText: '确定',
-                                  cancelButtonText: '取消',
-                                  type: 'warning'
-                              }).then(() => {
-                                  //如果是编辑跟进记录
-                                  if( isEdit){
-                                      param.id=this.formInline.id;
-                                 	 axios.post('/tele/clueMyCustomerInfo/updateClueTracking',param)
-                                      .then(function (response) {
-                                    	  addCustomerVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
-                                    	    axios.post('/tele/clueMyCustomerInfo/findClueTracking',param)
-                                         .then(function (response) {
-                                       	  isEdit=false;
-                                       	  addCustomerVM.lineFormShow=false;
-                                       	  addCustomerVM.addBtnDisabled=false;
-                                          addCustomerVM.tableDataC2=response.data.data;
-                                          window.location.href = "/tele/clueMyCustomerInfo/initmyCustomer";
-                                          }); 
-                         	          }}); 	 
-                                      });
-                                  }else{
-                                 	 //如果是新增跟进记录
-                                      axios.post('/tele/clueMyCustomerInfo/saveClueTracking',param)
-                                      .then(function (response) {
-                                    	  addCustomerVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
-                                    	    axios.post('/tele/clueMyCustomerInfo/findClueTracking',param)
-                                         .then(function (response) {
-                                         	addCustomerVM.lineFormShow=false;
-                                      	     addCustomerVM.addBtnDisabled=false;
-                                         	 addCustomerVM.tableDataC2=response.data.data;
-                                             window.location.href = "/tele/clueMyCustomerInfo/initmyCustomer";
-                                         	 //新增
-                                         	 _this.$refs['LineRuleForm'].resetFields();
-                                          }); 
-                         	          }}); 
-                                    }); 
-                                }
-                            	//end
-                              }).catch(() => {
-                            	  addCustomerVM.addBtnDisabled=false;
-                                  this.$message({
-                                      type: 'info',
-                                      message: '已取消操作'
-                                  });          
-                              });
-                    	   
-                    	   
-                    	   
-                    	   
-                       }else if(param.customerStatus=='3'){
-                    	   this.$confirm("客户不跟进将释放公有池，我的客户列表将消失", '提示', {
-                               confirmButtonText: '确定',
-                               cancelButtonText: '取消',
-                               type: 'warning'
-                           }).then(() => {
-                         	  
-                               //如果是编辑跟进记录
-                               if( isEdit){
-                                   param.id=this.formInline.id;
-                              	 axios.post('/tele/clueMyCustomerInfo/updateClueTracking',param)
-                                   .then(function (response) {
-                                 	  addCustomerVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
-                                 	    axios.post('/tele/clueMyCustomerInfo/findClueTracking',param)
-                                      .then(function (response) {
-                                    	  isEdit=false;
-                                    	 addCustomerVM.lineFormShow=false;
-                                    	 addCustomerVM.addBtnDisabled=false;
-                                       	addCustomerVM.tableDataC2=response.data.data;
-                                        window.location.href = "/tele/clueMyCustomerInfo/initmyCustomer";
-                                       }); 
-                      	          }}); 	 
-                                   });
-                               }else{
-                              	 //如果是新增跟进记录
-                                   axios.post('/tele/clueMyCustomerInfo/saveClueTracking',param)
-                                   .then(function (response) {
-                                 	  addCustomerVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
-                                 	    axios.post('/tele/clueMyCustomerInfo/findClueTracking',param)
-                                      .then(function (response) {
-                                      	addCustomerVM.lineFormShow=false;
-                                   	     addCustomerVM.addBtnDisabled=false;
-                                      	 addCustomerVM.tableDataC2=response.data.data;
-                                      	 //新增
-                                      	 _this.$refs['LineRuleForm'].resetFields();
-                                         window.location.href = "/tele/clueMyCustomerInfo/initmyCustomer";
-
-                                       }); 
-                      	          }}); 
-                                 }); 
-                               }   
-                         	//end
-                        	   
-                           }).catch(() => {
-                         	  addCustomerVM.addBtnDisabled=false;
-                               this.$message({
-                                   type: 'info',
-                                   message: '已取消操作'
-                               });          
-                           });
-                    	   
-                       }else{ */
                            //如果是编辑跟进记录
                            if( isEdit){
                                param.id=this.formInline.id;

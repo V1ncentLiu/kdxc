@@ -1,5 +1,8 @@
 package com.kuaidao.manageweb.controller.clue;
 
+import com.kuaidao.manageweb.config.LogRecord;
+import com.kuaidao.manageweb.config.LogRecord.OperationType;
+import com.kuaidao.manageweb.constant.MenuEnum;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -598,13 +601,14 @@ public class MyCustomerClueController {
      */
     @RequestMapping("/inviteCustomerSave")
     @ResponseBody
+    @LogRecord(description = "添加预约来访", operationType = OperationType.INSERT,
+        menuName = MenuEnum.TM_MY_CUSTOMER)
     public JSONResult<String> inviteCustomerSave(HttpServletRequest request,
             @RequestBody ClueAppiontmentDTO dto) {
         Subject subject = SecurityUtils.getSubject();
         UserInfoDTO user = (UserInfoDTO) subject.getSession().getAttribute("user");
         if (null != user) {
             dto.setCreateUser(user.getId());
-
             // 保存流转记录
             CirculationInsertOrUpdateDTO circul = new CirculationInsertOrUpdateDTO();
             circul.setAllotUserId(user.getId());
@@ -612,6 +616,7 @@ public class MyCustomerClueController {
             if (null != roleListAll && roleListAll.size() > 0) {
                 circul.setAllotRoleId(roleListAll.get(0).getId());
             }
+            circul.setAllotOrg(user.getOrgId());
             circul.setClueId(dto.getClueId());
             if (null != dto.getBusDirectorId()) {
                 IdEntityLong id = new IdEntityLong();
@@ -624,6 +629,7 @@ public class MyCustomerClueController {
                     if (null != roleList && roleList.size() > 0) {
                         circul.setRoleId(roleList.get(0).getId());
                     }
+                    circul.setOrg(dirUser.getData().getOrgId());
                 }
                 // 保存流转信息
                 circulationFeignClient.saveCirculation(circul);
@@ -761,6 +767,8 @@ public class MyCustomerClueController {
 
     @RequestMapping("/saveRepeatClue")
     @ResponseBody
+    @LogRecord(description = "重单申请保存", operationType = OperationType.INSERT,
+        menuName = MenuEnum.TM_MY_CUSTOMER)
     public JSONResult<String> saveRepeatClue(HttpServletRequest request,
             @RequestBody RepeatClueSaveDTO dto) {
 
@@ -791,6 +799,8 @@ public class MyCustomerClueController {
      */
     @RequestMapping("/saveCreateClue")
     @ResponseBody
+    @LogRecord(description = "新建资源保存", operationType = OperationType.INSERT,
+        menuName = MenuEnum.TM_MY_CUSTOMER)
     public JSONResult<String> saveCreateClue(HttpServletRequest request, @RequestBody ClueDTO dto) {
         Subject subject = SecurityUtils.getSubject();
         UserInfoDTO user = (UserInfoDTO) subject.getSession().getAttribute("user");
@@ -884,10 +894,12 @@ public class MyCustomerClueController {
             circul.setAllotRoleId(user.getRoleList().get(0).getId());
         }
         circul.setClueId(dto.getClueId());
+        circul.setAllotOrg(user.getOrgId());
         circul.setUserId(user.getId());
         if (null != user.getRoleList() && user.getRoleList().size() > 0) {
             circul.setRoleId(user.getRoleList().get(0).getId());
         }
+        circul.setOrg(user.getOrgId());
         dto.setCirculationInsertOrUpdateDTO(circul);
         JSONResult<String> customerClue = myCustomerFeignClient.createCustomerClue(dto);
         return customerClue;
@@ -902,6 +914,8 @@ public class MyCustomerClueController {
      */
     @RequestMapping("/updateCustomerClue")
     @ResponseBody
+    @LogRecord(description = "维护客户资源提交", operationType = OperationType.UPDATE,
+        menuName = MenuEnum.CUSTOMER_INFO)
     public JSONResult<String> updateCustomerClue(HttpServletRequest request,
             @RequestBody ClueDTO dto) {
 
@@ -929,8 +943,6 @@ public class MyCustomerClueController {
 
     /**
      * 获取当前登录账号
-     * 
-     * @param orgDTO
      * @return
      */
     private UserInfoDTO getUser() {

@@ -1,5 +1,8 @@
 package com.kuaidao.manageweb.controller.buscustomer;
 
+import com.kuaidao.manageweb.config.LogRecord;
+import com.kuaidao.manageweb.config.LogRecord.OperationType;
+import com.kuaidao.manageweb.constant.MenuEnum;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -26,10 +29,13 @@ import com.kuaidao.aggregation.dto.project.ProjectInfoDTO;
 import com.kuaidao.common.entity.IdEntityLong;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
+import com.kuaidao.manageweb.constant.Constants;
 import com.kuaidao.manageweb.feign.busmycustomer.BusMyCustomerFeignClient;
+import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
 import com.kuaidao.manageweb.feign.project.CompanyInfoFeignClient;
 import com.kuaidao.manageweb.feign.project.ProjectInfoFeignClient;
 import com.kuaidao.manageweb.util.CommUtil;
+import com.kuaidao.sys.dto.dictionary.DictionaryItemRespDTO;
 import com.kuaidao.sys.dto.organization.OrganizationDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 
@@ -51,6 +57,9 @@ public class BusinessMyCustomerController {
 
     @Autowired
     private ProjectInfoFeignClient projectInfoFeignClient;
+    
+    @Autowired
+    private DictionaryItemFeignClient dictionaryItemFeignClient;
 
     @RequestMapping("/listPage")
     public String listPage(HttpServletRequest request) {
@@ -117,7 +126,8 @@ public class BusinessMyCustomerController {
         if (JSONResult.SUCCESS.equals(listJSONResult.getCode())) {
             request.setAttribute("companySelect", proJson.getData());
         }
-
+     // 查询赠送类型集合
+        request.setAttribute("giveTypeList", getDictionaryByCode(Constants.GIVE_TYPE));
         request.setAttribute("teleGroupList", teleGroupList);
         request.setAttribute("teleSaleList", teleSaleList);
         request.setAttribute("tasteProList", tasteProList);
@@ -171,6 +181,8 @@ public class BusinessMyCustomerController {
      */
     @PostMapping("/notVisit")
     @ResponseBody
+    @LogRecord(description = "标记未到访", operationType = OperationType.UPDATE,
+        menuName = MenuEnum.BUS_MY_CUSTOMER)
     public JSONResult<Boolean> notVisit(@RequestBody BusMyCustomerReqDTO param) {
         return busMyCustomerFeignClient.notVisit(param);
     }
@@ -190,5 +202,19 @@ public class BusinessMyCustomerController {
         JSONResult<List<CompanyInfoDTO>> list = companyInfoFeignClient.allCompany();
         return list;
     }
-
+    /**
+     * 查询字典表
+     * 
+     * @param code
+     * @return
+     */
+    private List<DictionaryItemRespDTO> getDictionaryByCode(String code) {
+        JSONResult<List<DictionaryItemRespDTO>> queryDicItemsByGroupCode =
+                dictionaryItemFeignClient.queryDicItemsByGroupCode(code);
+        if (queryDicItemsByGroupCode != null
+                && JSONResult.SUCCESS.equals(queryDicItemsByGroupCode.getCode())) {
+            return queryDicItemsByGroupCode.getData();
+        }
+        return null;
+    }
 }

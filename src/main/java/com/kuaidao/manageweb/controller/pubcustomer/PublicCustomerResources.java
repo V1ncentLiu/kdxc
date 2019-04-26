@@ -157,8 +157,8 @@ public class PublicCustomerResources {
                     dxzIdsList.add(organizationRespDTO.getId());
                 }
             }
-//            dxcygwList = dxcygws(dxzIdsList);
-//            dxzjsList = dxzjs(dxzIdsList);
+//            dxcygwList = dxcygws(dxzIdsList); // 查询电销创业顾问
+//            dxzjsList = dxzjs(dxzIdsList);    // 查询电销总监
         }
         long endTime2=System.currentTimeMillis();
         System.out.println("电销组： "+(endTime2-startTime2)+"ms");
@@ -239,6 +239,13 @@ public class PublicCustomerResources {
             if(date3.getTime()>date4.getTime()){
                 return new JSONResult().fail("-1","释放时间，开始时间大于结束时间!");
             }
+        }
+        UserInfoDTO user =  CommUtil.getCurLoginUser();
+        List<RoleInfoDTO> roleList = user.getRoleList();
+        RoleInfoDTO roleInfoDTO = roleList.get(0);
+        String roleName = roleInfoDTO.getRoleName();
+        if (RoleCodeEnum.DXZJ.value().equals(roleName)||RoleCodeEnum.DXCYGW.value().equals(roleName)){
+            dto.setRoleCode(roleInfoDTO.getRoleCode());
         }
         return publicCustomerFeignClient.queryListPage(dto);
     }

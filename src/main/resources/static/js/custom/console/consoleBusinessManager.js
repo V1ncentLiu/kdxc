@@ -79,7 +79,7 @@ var mainDivVM = new Vue({
         tasteProArr:proSelect,
         signArr:[{value:0,name:'未签约'},{value:1,name:'已签约'}],
         isSignArr:[{value:0,name:'否'},{value:1,name:'是'}],
-        visitArr:[{value:-1,name:'待处理'},{value:0,name:'未到访'},{value:1,name:'首次到访'},{value:2,name:'2次到访'},{value:3,name:'多次到访'}],
+        visitArr:[{value:-1,name:'待处理'},{value:0,name:'未到访'},{value:1,name:'已到访'}],
         visitTypeArr:[{value:1,name:'预约来访'},{value:2,name:'慕名来访'},{value:3,name:'临时来访'}],
         option2s: [{value: 1, label: '一次性全款'},{value: 2, label: '先付定金'}],
         option3s: [{value: '1', label: '现金'},{value: '2', label: 'POS'},{value: '3', label: '转账'}],
@@ -611,11 +611,7 @@ var mainDivVM = new Vue({
             if(row.visitStatus==0){
                 resVal='未到访';
             }else  if(row.visitStatus==1){
-                resVal='首次到访';
-            }else  if(row.visitStatus==2){
-                resVal='2次到访';
-            }else  if(row.visitStatus==3){
-                resVal='多次到访';
+                resVal='已到访';
             }
             return resVal;
         },
@@ -1363,5 +1359,9 @@ var mainDivVM = new Vue({
     },
     mounted(){
         document.getElementById('mainDiv').style.display = 'block';
+        $(".el-progress__text").css("font-size","35px");
+        $(".el-progress__text").eq(0).css("color","#697df5");
+        $(".el-progress__text").eq(1).css("color","#a978f5");
+        $(".el-progress__text").eq(2).css("color","#32c3bf");
     }
 });

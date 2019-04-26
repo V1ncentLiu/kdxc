@@ -11,16 +11,16 @@
     <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
         <el-breadcrumb-item>Home</el-breadcrumb-item>
         <el-breadcrumb-item>电销管理</el-breadcrumb-item>
-        <el-breadcrumb-item><a >待分配新资源</a></el-breadcrumb-item>
+        <el-breadcrumb-item>待分配新资源</el-breadcrumb-item>
     </el-breadcrumb>
     
-    <el-row class="marginB10">
-    		<el-button type="text" @click="dialogFormVisible = true"><i class="el-icon-menu"></i>选择列</el-button>
+    <el-row class="marginB20">
+    		<el-button type="primary" @click="dialogFormVisible = true"><i class="el-icon-menu"></i>选择列</el-button>
     		<shiro:hasPermission name="aggregation:pendingAllocationManager:allocation">
-		        <el-button type="primary" @click="toAllocationClue">分配资源</el-button>
+		        <el-button type="success" @click="toAllocationClue">分配资源</el-button>
 		    </shiro:hasPermission>
     		<shiro:hasPermission name="aggregation:pendingAllocationManager:transfer">
-		        <el-button type="success" @click="toTransferClue">转移资源</el-button>
+		        <el-button type="warning" @click="toTransferClue">转移资源</el-button>
 		    </shiro:hasPermission>
     		<!-- <shiro:hasPermission name="aggregation:pendingAllocationManager:batch">
 		        <el-button type="warning" @click="toBatchClue">批量分发</el-button>
@@ -29,94 +29,99 @@
 		        <el-button type="danger" @click="toCeoClue">副总分发</el-button>
 		    </shiro:hasPermission>
 	</el-row>
-	<el-form :inline="true" :model="clueSearchForm" class="demo-form-inline" ref="clueSearchForm"> 
-	    <el-row class="marginB10 greybg padding20" style="padding-bottom: 0;">
-	     <el-row>
-				  <el-form-item class="formItem" prop="phone">
-				    <el-input v-model="clueSearchForm.phone" placeholder="客户手机号" class="input-with-select"></el-input>
-				  </el-form-item>
-				  <el-form-item class="formItem" prop="cusName">
-				    <el-input v-model="clueSearchForm.cusName" placeholder="客户姓名" class="input-with-select"></el-input>
-				  </el-form-item>
-				  <el-form-item class="formItem"  prop="type">
-				    <el-select v-model="clueSearchForm.type" clearable placeholder="资源类型" style="width: 100%;">
-				      <el-option
-					      v-for="item in typeOptions"
-					      :key="item.value"
-					      :label="item.name"
-					      :value="item.value">
-					  </el-option>
-				    </el-select>
-				  </el-form-item>
-				  <el-form-item class="formItem"  prop="category">
-				    <el-select v-model="clueSearchForm.category" clearable placeholder="资源类别">
-				      <el-option
-					      v-for="item in categoryOptions"
-					      :key="item.value"
-					      :label="item.name"
-					      :value="item.value">
-					  </el-option>
-				    </el-select>
-				  </el-form-item>
-          <el-form-item class="formItem" label="创建时间：">
-  					<el-date-picker format="yyyy-MM-dd HH:mm:ss" v-model="clueSearchForm.startTime" type="datetime" placeholder="选择日期"></el-date-picker>
-          </el-form-item>
-          <el-form-item class="formItem" label="——">
-					   <el-date-picker format="yyyy-MM-dd HH:mm:ss" v-model="clueSearchForm.endTime" type="datetime" placeholder="选择日期"></el-date-picker>
-          </el-form-item>
-				  <el-form-item class="formItem" prop="messagePoint">
-				    <el-input v-model="clueSearchForm.messagePoint" placeholder="留言重点" class="input-with-select"></el-input>
-				  </el-form-item>
-				  <el-form-item class="formItem" prop="searchWord">
-				    <el-input v-model="clueSearchForm.searchWord" placeholder="搜索词" class="input-with-select"></el-input>
-				  </el-form-item>
-				  <el-form-item class="formItem" prop="address">
-				    <el-input v-model="clueSearchForm.address" placeholder="地址" class="input-with-select"></el-input>
-				  </el-form-item>
-				    <el-button type="primary" @click="searchTable()">搜索</el-button>
-				
-	        </el-row>
-	    </el-row>
-  	</el-form>
-    <el-row>
-        <el-table  ref="multipleTable" tooltip-effect="dark" border @selection-change="handleSelectionChange"
-            style="width: 100%"  :data="dataTable" key="multipleTable">
-            <el-table-column align="center" type="selection" label="全选" width="50"></el-table-column>
-	        <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width"
-	         v-for="(item,key,index) in tableColums" v-if="item.fieldCode == 'releaseNum'">
-	               <template slot-scope="scope">
-		               <div v-if="scope.row.releaseNum > 0">
-		                   <el-button @click="showRelease(scope.row)" type="text" size="small">{{scope.row.releaseNum}}</el-button>
-	                    </div>
-	                    <div v-else>无</div>
-                	</template>
-	        </el-table-column>
-	        <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width"
-	          v-else-if="item.fieldCode == 'isRepeatPhone'">
-	               <template slot-scope="scope">
-		               <div v-if="scope.row.isRepeatPhone ==1">
-		                   <el-button @click="showRepeatPhone(scope.row)" type="text" size="small">点击查看</el-button>
-	                    </div>
-	                    <div v-else></div>
-                	</template>
-	        </el-table-column>
-            <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width"
-	         v-else>
-	        </el-table-column>
-	        
-        </el-table>
-        <table-pagination :pager="pager" @change="searchTable"></table-pagination>
-    </el-row>
-      <!-- dialog -->
-      <el-dialog  title="分配资源"  :visible.sync="allocationVisible"  width="30%">
+    <div class="mainSearchBg">        
+        <div class="mainSearchFormBox">
+    	   <el-form :inline="true" :model="clueSearchForm" class="demo-form-inline mainSearchForm" ref="clueSearchForm"> 
+                <el-form-item label="客户手机号:" prop="phone">
+                    <el-input v-model="clueSearchForm.phone" placeholder="客户手机号" class="input-with-select"></el-input>
+                </el-form-item>
+                <el-form-item label="客户姓名:" prop="cusName">
+                    <el-input v-model="clueSearchForm.cusName" placeholder="客户姓名" class="input-with-select"></el-input>
+                </el-form-item>
+                <el-form-item label="资源类型:" prop="type">
+                    <el-select v-model="clueSearchForm.type" clearable placeholder="资源类型" style="width: 100%;">
+                      <el-option
+                	      v-for="item in typeOptions"
+                	      :key="item.value"
+                	      :label="item.name"
+                	      :value="item.value">
+                	  </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="创建时间:">
+                    <el-date-picker format="yyyy-MM-dd HH:mm:ss" v-model="clueSearchForm.startTime" type="datetime" placeholder="选择日期"></el-date-picker>
+                </el-form-item>
+                <el-form-item label="—" class="widthauto">
+                   <el-date-picker format="yyyy-MM-dd HH:mm:ss" v-model="clueSearchForm.endTime" type="datetime" placeholder="选择日期"></el-date-picker>
+                </el-form-item>
+                <el-row v-show="isShow">
+        		    <el-form-item label="资源类别:" prop="category">
+        			    <el-select v-model="clueSearchForm.category" clearable placeholder="资源类别">
+        			      <el-option
+        				      v-for="item in categoryOptions"
+        				      :key="item.value"
+        				      :label="item.name"
+        				      :value="item.value">
+        				  </el-option>
+        			    </el-select>
+        		    </el-form-item>                
+                    <el-form-item label="留言重点:" prop="messagePoint">
+                        <el-input v-model="clueSearchForm.messagePoint" placeholder="留言重点" class="input-with-select"></el-input>
+                    </el-form-item>
+                    <el-form-item label="搜索词:" prop="searchWord">
+                        <el-input v-model="clueSearchForm.searchWord" placeholder="搜索词" class="input-with-select"></el-input>
+                    </el-form-item>
+                    <el-form-item label="地址:" prop="address">
+                        <el-input v-model="clueSearchForm.address" placeholder="地址" class="input-with-select"></el-input>
+                    </el-form-item>
+                </el-row>
+    			<div class="mainSearchBtnBox">
+                    <el-button type="primary" @click="searchTable()" class="searchBtn">搜索</el-button>
+                    <el-button type="info" class="searchBtn">取消</el-button>
+                    <span style="color: #5c6be8;cursor: pointer;margin:0 10px;" @click="toogleClick">更多搜索<i class="el-icon-arrow-down greycolor paddingL6"></i></span>
+    			</div> 	
+            </el-form>
+        </div>
+        <el-row>
+            <el-table  ref="multipleTable" tooltip-effect="dark" border @selection-change="handleSelectionChange"
+                style="width: 100%"  :data="dataTable" key="multipleTable">
+                <el-table-column align="center" type="selection" label="全选" width="50"></el-table-column>
+    	        <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width"
+    	         v-for="(item,key,index) in tableColums" v-if="item.fieldCode == 'releaseNum'">
+    	               <template slot-scope="scope">
+    		               <div v-if="scope.row.releaseNum > 0">
+    		                   <el-button @click="showRelease(scope.row)" type="text" size="small">{{scope.row.releaseNum}}</el-button>
+    	                    </div>
+    	                    <div v-else>无</div>
+                    	</template>
+    	        </el-table-column>
+    	        <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width"
+    	          v-else-if="item.fieldCode == 'isRepeatPhone'">
+    	               <template slot-scope="scope">
+    		               <div v-if="scope.row.isRepeatPhone ==1">
+    		                   <el-button @click="showRepeatPhone(scope.row)" type="text" size="small">点击查看</el-button>
+    	                    </div>
+    	                    <div v-else></div>
+                    	</template>
+    	        </el-table-column>
+                <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width"
+    	         v-else>
+    	        </el-table-column>
+    	        
+            </el-table>
+            <table-pagination :pager="pager" @change="searchTable"></table-pagination>
+        </el-row>
+    </div>
+    <!-- dialog -->
+    <el-dialog  title="分配资源"  :visible.sync="allocationVisible"  width="540px">
         <template>
             <el-form :model="allocationForm" ref="allocationForm" :rules="allocationFormRules">
-                <el-form-item label="电销顾问"    :label-width="formLabelWidth"  prop="saleId">
-                    <el-select v-model="allocationForm.saleId" placeholder="组内电销员工" style="width: 80%">
+                <el-form-item label="电销顾问：" :label-width="formLabelWidth"  prop="saleId">
+                    <el-select v-model="allocationForm.saleId" placeholder="组内电销员工" style="width: 290px;">
                         <el-option v-for="item in saleOptions" 
-                        			:key="item.id" 
-                        			:label="item.name" 
-                        			:value="item.id">
+                			:key="item.id" 
+                			:label="item.name" 
+                			:value="item.id">
                         </el-option>
                     </el-select>
                 </el-form-item>
@@ -129,15 +134,15 @@
     </el-dialog>
     <!-- dialog -->
       <!-- dialog -->
-      <el-dialog  title="转移资源"  :visible.sync="transferVisible"  width="30%">
+      <el-dialog  title="转移资源"  :visible.sync="transferVisible"  width="540px">
         <template>
             <el-form :model="transferForm" ref="transferForm" :rules="transferFormRules">
-                <el-form-item label="电销总监"    :label-width="formLabelWidth"  prop="id">
-                    <el-select v-model="transferForm.id" placeholder="同事业部的组名（总监姓名）" style="width: 80%">
+                <el-form-item label="电销总监："  :label-width="formLabelWidth"  prop="id">
+                    <el-select v-model="transferForm.id" placeholder="同事业部的组名（总监姓名）" style="width: 290px;">
                         <el-option v-for="item in saleGroupOptions" 
-                        			:key="item.id" 
-                        			:label="item.name" 
-                        			:value="item.id">
+                			:key="item.id" 
+                			:label="item.name" 
+                			:value="item.id">
                         </el-option>
                     </el-select>
                 </el-form-item>
@@ -150,15 +155,15 @@
     </el-dialog>
     <!-- dialog -->
       <!-- dialog -->
-      <el-dialog  title="信息流批量分发"  :visible.sync="batchVisible"  width="30%">
+      <el-dialog  title="信息流批量分发"  :visible.sync="batchVisible"  width="540px">
         <template>
             <el-form :model="batchForm" ref="batchForm" :rules="batchFormRules">
-                <el-form-item label="信息流分配规则"    :label-width="formLabelWidth"  prop="ruleId">
-                    <el-select v-model="batchForm.ruleId" style="width: 80%">
+                <el-form-item label="信息流分配规则" :label-width="formLabelWidth"  prop="ruleId">
+                    <el-select v-model="batchForm.ruleId">
                         <el-option v-for="item in ruleOptions" 
-                        			:key="item.id" 
-                        			:label="item.assignName" 
-                        			:value="item.id">
+                			:key="item.id" 
+                			:label="item.assignName" 
+                			:value="item.id">
                         </el-option>
                     </el-select>
                 </el-form-item>
@@ -171,24 +176,24 @@
     </el-dialog>
     <!-- dialog -->
       <!-- dialog -->
-      <el-dialog  title="副总分发"  :visible.sync="ceoVisible"  width="30%">
+      <el-dialog  title="副总分发"  :visible.sync="ceoVisible"  width="540px">
         <template>
             <el-form :model="ceoForm" ref="ceoForm" :rules="ceoFormRules">
-                <el-form-item label="电销总监"    :label-width="formLabelWidth"  prop="id">
-                    <el-select v-model="ceoForm.id" placeholder="同事业部的组名（总监姓名）" @change="getSaleList" style="width: 80%">
+                <el-form-item label="电销总监：" :label-width="formLabelWidth"  prop="id">
+                    <el-select v-model="ceoForm.id" placeholder="同事业部的组名（总监姓名）" @change="getSaleList" style="width: 290px;">
                         <el-option v-for="item in orgOptions" 
-                        			:key="item.id" 
-                        			:label="item.name" 
-                        			:value="item.id">
+                			:key="item.id" 
+                			:label="item.name" 
+                			:value="item.id">
                         </el-option>
                     </el-select>
                 </el-form-item>
-                <el-form-item label="电销员工"    :label-width="formLabelWidth"  prop="teleSaleId">
-                    <el-select v-model="ceoForm.teleSaleId"  style="width: 80%">
+                <el-form-item label="电销员工：" :label-width="formLabelWidth"  prop="teleSaleId">
+                    <el-select v-model="ceoForm.teleSaleId" style="width: 290px;">
                         <el-option v-for="item in teleSaleOptions" 
-                        			:key="item.id" 
-                        			:label="item.name" 
-                        			:value="item.id">
+                			:key="item.id" 
+                			:label="item.name" 
+                			:value="item.id">
                         </el-option>
                     </el-select>
                 </el-form-item>
@@ -217,23 +222,19 @@
         
     </el-dialog>
     <!-- dialog -->
-    <el-dialog title="自定义列" :visible.sync="dialogFormVisible">
-	  <el-form :model="form">
-	    
-		  <el-form-item label="列名" prop="type">
+    <el-dialog title="自定义列" :visible.sync="dialogFormVisible" class="elCheckboxGroup">
+	  <el-form :model="form">	    
+		  <el-form-item label="" prop="type">
 		    <el-checkbox-group v-model="form.type">
 		      <el-checkbox :label="item.sortNum+'_'+item.fieldCode+'_'+item.displayName+'_'+item.id"  name="type" :key="item.fieldCode"  v-for="(item,index) in  allTableColums ">
 		          {{item.displayName}}
-		      </el-checkbox>
-		  
+		      </el-checkbox>		  
 		     </el-checkbox-group>
-		  </el-form-item>
-	    
-	  </el-form>
-	  
+		  </el-form-item>	    
+	  </el-form>	  
 	  <div slot="footer" class="dialog-footer">
+        <el-button type="primary" @click="confirmColumn">确 定</el-button>        
 	    <el-button @click="dialogFormVisible = false">取 消</el-button>
-	    <el-button type="primary" @click="confirmColumn">确 定</el-button>
 	  </div>
 	</el-dialog>
     <el-dialog :title="'资源ID'+dailogTitleType+'重复手机号资源信息'"    :visible.sync="repeatPhonesDialog">
@@ -329,99 +330,100 @@ var phCustomerStatusSubList=[[${phCustomerStatusSubList}]];//话务二级客户�
 var clueVM = new Vue({
         el: '#clueManage',
         data: {
-        		clueSearchForm: {
-	        		phone: '',
-	        		cusName: '',
-	        		category: '',
-	        		type: '',
-	        		startTime: '',
-	        		endTime: '',
-	        		messagePoint: '',
-	        		searchWord: '',
-	        		address: ''
-	            },
-	            allocationForm: {
-	            	saleId:''
-                },
-                transferForm: {
-                	id:''
-                },
-                batchForm: {
-                	ruleId:''
-                },
-                ceoForm: {
-                	id:'',
-                	teleSaleId:''
-                },
-                allocationFormRules: {
-                	saleId: [
-                        { required: true, message: '请选择电销顾问', trigger: 'blur' }
-                    ]
-                  },
-                transferFormRules: {
-                	id: [
-                        { required: true, message: '请选择电销总监', trigger: 'blur' }
-                    ]
-                  },
-                batchFormRules: {
-                	ruleId: [
-                        { required: true, message: '请选择分配规则', trigger: 'blur' }
-                    ]
-                  },
-                ceoFormRules: {
-                	id: [
-                        { required: true, message: '请选择电销总监', trigger: 'blur' }
-                    ],
-                    teleSaleId: [
-                        { required: true, message: '请选择电销员工', trigger: 'blur' }
-                    ]
-                  },
-	            dataTable:[],
-	            loading: true,
-	             allTableColums:[],
-	             tableColums:[],
-                repeatPhonesTable:[],
-                repeatPhonesTable2:[],
-                repeatPhonesTable3:[],
-                repeatPhonesTable4:[],
-                repeatPhonesTable5:[],
-                showPhoneTable:false,
-                showPhoneTable2:false,
-                showPhoneTable3:false,
-                showPhoneTable4:false,
-                showPhoneTable5:false,
-                phone:'',
-                phone2:'',
-                phone3:'',
-                phone4:'',
-                phone5:'',
-	             dialogFormVisible: false,
-	             repeatPhonesDialog:false,
-	             form: {
-	               type: [],
-	             },
-	             dailogTitleType:"",
-	            orgOptions:orgList,
-	            saleOptions:saleList,
-	            ruleOptions:ruleList,
-	            saleGroupOptions:saleGroupList,
-	            categoryOptions:clueCategoryList,
-	            typeOptions:clueTypeList,
-	            teleSaleOptions:[],
-	            releaseTable:[],
-	            allocationVisible: false,
-	            transferVisible: false,
-	            batchVisible: false,
-	            ceoVisible: false,
-	            releaseDialog:false,
-	            pager:{
-	                total: 0,
-	                currentPage: 1,
-	                pageSize: 20,
-	            },
-	            multipleSelection:[],
-                formLabelWidth: '150px',
-                formLabelWidth1: '120px',
+            isShow:false,
+    		clueSearchForm: {
+        		phone: '',
+        		cusName: '',
+        		category: '',
+        		type: '',
+        		startTime: '',
+        		endTime: '',
+        		messagePoint: '',
+        		searchWord: '',
+        		address: ''
+            },
+            allocationForm: {
+            	saleId:''
+            },
+            transferForm: {
+            	id:''
+            },
+            batchForm: {
+            	ruleId:''
+            },
+            ceoForm: {
+            	id:'',
+            	teleSaleId:''
+            },
+            allocationFormRules: {
+            	saleId: [
+                    { required: true, message: '请选择电销顾问', trigger: 'blur' }
+                ]
+              },
+            transferFormRules: {
+            	id: [
+                    { required: true, message: '请选择电销总监', trigger: 'blur' }
+                ]
+              },
+            batchFormRules: {
+            	ruleId: [
+                    { required: true, message: '请选择分配规则', trigger: 'blur' }
+                ]
+              },
+            ceoFormRules: {
+            	id: [
+                    { required: true, message: '请选择电销总监', trigger: 'blur' }
+                ],
+                teleSaleId: [
+                    { required: true, message: '请选择电销员工', trigger: 'blur' }
+                ]
+              },
+            dataTable:[],
+            loading: true,
+             allTableColums:[],
+             tableColums:[],
+            repeatPhonesTable:[],
+            repeatPhonesTable2:[],
+            repeatPhonesTable3:[],
+            repeatPhonesTable4:[],
+            repeatPhonesTable5:[],
+            showPhoneTable:false,
+            showPhoneTable2:false,
+            showPhoneTable3:false,
+            showPhoneTable4:false,
+            showPhoneTable5:false,
+            phone:'',
+            phone2:'',
+            phone3:'',
+            phone4:'',
+            phone5:'',
+             dialogFormVisible: false,
+             repeatPhonesDialog:false,
+             form: {
+               type: [],
+             },
+             dailogTitleType:"",
+            orgOptions:orgList,
+            saleOptions:saleList,
+            ruleOptions:ruleList,
+            saleGroupOptions:saleGroupList,
+            categoryOptions:clueCategoryList,
+            typeOptions:clueTypeList,
+            teleSaleOptions:[],
+            releaseTable:[],
+            allocationVisible: false,
+            transferVisible: false,
+            batchVisible: false,
+            ceoVisible: false,
+            releaseDialog:false,
+            pager:{
+                total: 0,
+                currentPage: 1,
+                pageSize: 20,
+            },
+            multipleSelection:[],
+            formLabelWidth: '150px',
+            formLabelWidth1: '120px',
                 
         },
         methods: {
@@ -525,62 +527,73 @@ var clueVM = new Vue({
                  }
                  return moment(cellValue).format("YYYY-MM-DD HH:mm");
                },
+            transformReason(row, column, cellValue, index) {
+                var text="";
+                if(releaseReasonList){
+                    for(var i=0;i<releaseReasonList.length;i++){
+                        if(cellValue==releaseReasonList[i].value){
+                            text=releaseReasonList[i].name;
+                        }
+                    }
+                }
+                return text;
+            },
              //释放原因转换方法
-               transformReason(row, column, cellValue, index) {
-             	  var text="";
-             	  if(cellValue){
-	            	  var arr= cellValue.split(",");
-	            	  //用释放原因转换
-	            	  if(arr.length==1){
-		             	  if(releaseReasonList){
-		 	                  for(var i=0;i<releaseReasonList.length;i++){
-		 	                		if(cellValue==releaseReasonList[i].value){
-		 	                			text=releaseReasonList[i].name;
-		 	                		}
-		 	                	}
-		             	  }
-	            	  }else if(arr.length>1){
-	            		//用电销状态转换
-	            		  if(arr[0]=="track"){
-	            			//电销一级状态
-	            			  if(customerStatusList){
-			 	                  for(var i=0;i<customerStatusList.length;i++){
-			 	                	if(arr[1]==customerStatusList[i].value){
-			 	                		text+=customerStatusList[i].name;
-			 	                	}
-			 	                  }
-			             	  }
-	            			//电销二级状态
-	            			  if(customerStatusSubList&&arr.length==3){
-	            				  for(var i=0;i<customerStatusSubList.length;i++){
-				 	                if(arr[2]==customerStatusSubList[i].value){
-				 	                	text+="-"+customerStatusSubList[i].name;
-				 	                }
-				 	              }
-	            			  }
-	            			//用话务状态转换
-	            		  }else if(arr[0]=="phtrack"){
-	            			//话务一级状态
-	            			  if(phCustomerStatusList){
-			 	                  for(var i=0;i<phCustomerStatusList.length;i++){
-			 	                	if(arr[1]==phCustomerStatusList[i].value){
-			 	                		text+=phCustomerStatusList[i].name;
-			 	                	}
-			 	                  }
-			             	  }
-	            			//话务二级状态
-	            			  if(phCustomerStatusSubList&&arr.length==3){
-	            				  for(var i=0;i<phCustomerStatusSubList.length;i++){
-				 	                if(arr[2]==phCustomerStatusSubList[i].value){
-				 	                	text+="-"+phCustomerStatusSubList[i].name;
-				 	                }
-				 	              }
-	            			  }
-	            		  }
-	            	  }
-             	  }
-                  return text;
-               },
+             //   transformReason(row, column, cellValue, index) {
+             // 	  var text="";
+             // 	  if(cellValue){
+	         //    	  var arr= cellValue.split(",");
+	         //    	  //用释放原因转换
+	         //    	  if(arr.length==1){
+		     //         	  if(releaseReasonList){
+		 	 //                  for(var i=0;i<releaseReasonList.length;i++){
+		 	 //                		if(cellValue==releaseReasonList[i].value){
+		 	 //                			text=releaseReasonList[i].name;
+		 	 //                		}
+		 	 //                	}
+		     //         	  }
+	         //    	  }else if(arr.length>1){
+	         //    		//用电销状态转换
+	         //    		  if(arr[0]=="track"){
+	         //    			//电销一级状态
+	         //    			  if(customerStatusList){
+			 // 	                  for(var i=0;i<customerStatusList.length;i++){
+			 // 	                	if(arr[1]==customerStatusList[i].value){
+			 // 	                		text+=customerStatusList[i].name;
+			 // 	                	}
+			 // 	                  }
+			 //             	  }
+	         //    			//电销二级状态
+	         //    			  if(customerStatusSubList&&arr.length==3){
+	         //    				  for(var i=0;i<customerStatusSubList.length;i++){
+				//  	                if(arr[2]==customerStatusSubList[i].value){
+				//  	                	text+="-"+customerStatusSubList[i].name;
+				//  	                }
+				//  	              }
+	         //    			  }
+	         //    			//用话务状态转换
+	         //    		  }else if(arr[0]=="phtrack"){
+	         //    			//话务一级状态
+	         //    			  if(phCustomerStatusList){
+			 // 	                  for(var i=0;i<phCustomerStatusList.length;i++){
+			 // 	                	if(arr[1]==phCustomerStatusList[i].value){
+			 // 	                		text+=phCustomerStatusList[i].name;
+			 // 	                	}
+			 // 	                  }
+			 //             	  }
+	         //    			//话务二级状态
+	         //    			  if(phCustomerStatusSubList&&arr.length==3){
+	         //    				  for(var i=0;i<phCustomerStatusSubList.length;i++){
+				//  	                if(arr[2]==phCustomerStatusSubList[i].value){
+				//  	                	text+="-"+phCustomerStatusSubList[i].name;
+				//  	                }
+				//  	              }
+	         //    			  }
+	         //    		  }
+	         //    	  }
+             // 	  }
+             //      return text;
+             //   },
                //打开分配资源
                toAllocationClue() {
            	       var rows = this.multipleSelection;
@@ -822,7 +835,7 @@ var clueVM = new Vue({
                  },
                  showRepeatPhone(row) {
                 	 this.repeatPhonesDialog=true;
-                     this.dailogTitleType=row.phone;
+                     this.dailogTitleType=row.id;
                      var param ={};
                      param.id = row.id;
                      param.clueId = row.id;
@@ -859,10 +872,10 @@ var clueVM = new Vue({
                              clueVM.repeatPhonesTable3=[];
                              clueVM.showPhoneTable3 = false;
                          }
-                         if(map.phone){
+                         if(map.phone4){
                              clueVM.phone4 = map.phones[3]
                              clueVM.repeatPhonesTable4=map.phone4;
-                             clueVM.showPhone4 = true;
+                             clueVM.showPhoneTable4 = true;
                          }else{
                              clueVM.phone4 = ''
                              clueVM.repeatPhonesTable4=[];
@@ -963,7 +976,14 @@ var clueVM = new Vue({
                 sortNumber(a,b) {
                     //对数组中元素，按照数字 从小到大 排序
                     return a.split("_")[0] - b.split("_")[0];
-                   }
+                },
+                toogleClick(){
+                    if(this.isShow){
+                        this.isShow=false
+                    }else{
+                        this.isShow=true
+                    }          
+                },
         },
         created(){
             console.info("create method");

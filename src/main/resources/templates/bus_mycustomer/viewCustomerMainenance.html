@@ -3,14 +3,17 @@
 <head th:include="_header_include::frag(~{::title},~{},~{})" >
     <title>客户详情信息</title>
     <meta charset="UTF-8">
-
 </head>
 <body>
 <div id="addCustomer" class="addCustomer mainPadding" style="display: none;"> 
-
+    <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
+        <el-breadcrumb-item>Home</el-breadcrumb-item>
+        <el-breadcrumb-item>商务管理</el-breadcrumb-item>
+        <el-breadcrumb-item>客户管理</el-breadcrumb-item>
+    </el-breadcrumb>
     <el-row class="borderbox">
         <el-form :model="form" :rules="rules" ref="form" class="padding20">
-             <font color="red">线索ID：<span th:text="${clueId}"></span></font>
+             <font color="red" class="fs16">线索ID：<span th:text="${clueId}"></span></font>
             <div class="marginB20 fs16 paddingT20">资源信息</div>
             <div class="borderbox padding20">
                 <el-row>
@@ -27,20 +30,20 @@
                 </el-row>
                 <el-row>
                     <el-col :span="8">
-                        <el-form-item label="搜索词：" :label-width="formLabelWidth" >
-                            <el-button type="text" disabled>{{clueBase.searchWord}}</el-button>
+                        <el-form-item label="留言时间：" :label-width="formLabelWidth" >
+                            <el-button type="text" disabled>{{clueBase.messageTime}}</el-button>
                         </el-form-item>
                     </el-col>
                     <el-col :span="8">
-                        <el-form-item label="留言时间：" :label-width="formLabelWidth" >
-                            <el-button type="text" disabled>{{clueBase.messageTime}}</el-button>
+                        <el-form-item label="留言重点：" :label-width="formLabelWidth" >
+                            <el-button type="text" disabled>{{clueBase.messagePoint}}</el-button>
                         </el-form-item>
                     </el-col>
                 </el-row>
                 <el-row>
                     <el-col :span="8">
-                        <el-form-item label="留言重点：" :label-width="formLabelWidth" >
-                            <el-button type="text" disabled>{{clueBase.messagePoint}}</el-button>
+                        <el-form-item label="搜索词：" :label-width="formLabelWidth" >
+                            <el-button type="text" disabled>{{clueBase.searchWord}}</el-button>
                         </el-form-item>
                     </el-col>
                 </el-row>
@@ -89,7 +92,7 @@
                     <el-col :span="8">
                         <el-form-item label="性别：" :label-width="formLabelWidth" >
                             <el-button type="text" disabled>
-                                {{form.customerSex==1?'男':'女'}}
+                                {{form.customerSex==1?'男':form.customerSex==2?'女':''}}
                             </el-button>
                         </el-form-item>
                     </el-col>
@@ -309,10 +312,10 @@
                     </el-table-column>
                 </el-table>
             </el-row>
-            <el-row class="fs16 paddingT20" style="overflow: hidden;">
+            <el-row class="fs16 paddingT20" style="overflow: hidden;" v-if="clueBase.transferRemark">
                 <span class="f-fl">外调备注：</span>
                 <span class="f-fl" style="word-wrap: break-word;word-break: break-all;white-space: pre-wrap !important;">{{clueBase.transferRemark}}</span></el-row>
-            <el-row class="fs16 paddingT20" style="overflow: hidden;">
+            <el-row class="fs16 paddingT20" style="overflow: hidden;" v-if="clueBase.allocateRemark">
                 <span class="f-fl">分发备注：</span>
                 <span class="f-fl" style="word-wrap: break-word;word-break: break-all;white-space: pre-wrap !important;">{{clueBase.allocateRemark}}</span></el-row>
             <div class="marginB20 fs16 paddingT20">通话记录</div>
@@ -353,17 +356,22 @@
                 </el-table-column>
                 <el-table-column
                   prop="roleName"
-                  label="服务人员角色"
+                  label="角色"
                   align="center">
                 </el-table-column>
                 <el-table-column
-                  prop="userName"
-                  label="服务人员姓名"
-                  align="center">
+                        prop="orgName"
+                        label="所属组(组名)"
+                        align="center">
                 </el-table-column>
+                <!--<el-table-column-->
+                  <!--prop="userName"-->
+                  <!--label="服务人员姓名"-->
+                  <!--align="center">-->
+                <!--</el-table-column>-->
                 <el-table-column
                   prop="createTime"
-                  label="服务时间"
+                  label="开始服务时间"
                   align="center">
                 </el-table-column>
             </el-table>

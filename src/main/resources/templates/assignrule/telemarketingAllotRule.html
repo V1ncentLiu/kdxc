@@ -27,10 +27,10 @@
           <el-button type="danger" @click="deleteDialog"><i class="el-icon-delete"></i>删除</el-button>
          </shiro:hasPermission>
     </el-row>
-    <el-row class="marginB20 greybg padding20" style="padding-bottom: 0">
-        <el-row type="flex">
-            <el-form :inline="true" :model="form" ref="form">
-                <el-form-item label="">
+     <div class="mainSearchBg">        
+        <div class="mainSearchFormBox">
+            <el-form :inline="true" class="demo-form-inline mainSearchForm" :model="form" ref="form">
+                <el-form-item label="分公司:">
                   <el-select filterable v-model="form.companyId" placeholder="请选择分公司" style="width: 100%;" clearable >
                       <el-option
                           v-for="item in comoption"
@@ -40,8 +40,8 @@
                       </el-option>
                   </el-select>
                 </el-form-item>
-                <el-form-item label="">
-                  <el-select filterable v-model="form.deptId" placeholder="请选择电销事业部" style="width: 100%;" clearable >
+                <el-form-item label="电销事业部:">
+                  <el-select filterable v-model="form.deptId" placeholder="请选择电销事业部" clearable >
                       <el-option
                           v-for="item in deptoption"
                           :key="item.id"
@@ -50,7 +50,7 @@
                       </el-option>
                   </el-select>
                 </el-form-item>
-                <el-form-item label="">
+                <el-form-item label="电销组:">
                   <el-select filterable v-model="form.orgId" placeholder="请选择电销组" style="width: 100%;" clearable >
                       <el-option
                           v-for="item in orgoption"
@@ -61,58 +61,62 @@
                   </el-select>
                 </el-form-item>                
                 <el-form-item label="生效开始:">
-                  <el-date-picker type="datetime" placeholder="选择日期时间" v-model="form.startTime" style="width: 100%;"></el-date-picker>
+                  <el-date-picker type="datetime" placeholder="选择日期时间" v-model="form.startTime"></el-date-picker>
                 </el-form-item>   
-                <el-form-item label="—">
-                  <el-date-picker type="datetime" placeholder="选择日期时间" v-model="form.endTime" style="width: 100%;"></el-date-picker>
+                <el-form-item label="—" class="widthauto">
+                  <el-date-picker type="datetime" placeholder="选择日期时间" v-model="form.endTime"></el-date-picker>
                 </el-form-item>
-                <el-form-item label="">
-                  <el-input  v-model="form.assignName"  placeholder="规则名称" class="input-with-select"></el-input>
-                </el-form-item>
-                <el-form-item label="">
-                  <el-button icon="el-icon-search" type="primary" @click="initTableData" >搜索</el-button>
-                </el-form-item>
+                <el-row v-show="isShow">
+                    <el-form-item label="规则名称:" style="margin-right: 10px;">
+                      <el-input  v-model="form.assignName"  placeholder="规则名称" class="input-with-select"></el-input>
+                    </el-form-item>
+                </el-row>
+                <div class="mainSearchBtnBox">
+                    <el-button icon="el-icon-search" type="primary" @click="initTableData" class="searchBtn">搜索</el-button>
+                    <el-button type="info" class="searchBtn">取消</el-button>
+                    <span style="color: #5c6be8;cursor: pointer;margin:0 10px;" @click="toogleClick">更多搜索<i class="el-icon-arrow-down greycolor paddingL6"></i></span>
+                </div> 
             </el-form>
+        </div>
+        <el-row>
+            <el-table 
+                ref="multipleTable"
+                tooltip-effect="dark"
+                style="width: 100%"
+                @selection-change="handleSelectionChange"
+                border
+                :data="dataTable" 
+                >
+                <el-table-column align="center" type="selection"  @selection-change="handleSelectionChange" width="55"></el-table-column>
+                <el-table-column align="center" prop="assignName" label="规则名称"></el-table-column>
+                <el-table-column align="center" prop="createTime" label="创建时间" :formatter="dateFormat"  width="170"></el-table-column>
+                <el-table-column align="center" prop="createName" label="创建人"></el-table-column>
+                <el-table-column align="center" prop="category" label="资源类别"></el-table-column>
+                <el-table-column align="center" prop="type" label="资源类型"></el-table-column>
+                <el-table-column align="center" prop="searchWord" label="搜索词"></el-table-column>
+                <el-table-column align="center" prop="startTime" label="生效时间" :formatter="dateFormat"  width="170"></el-table-column>
+                <el-table-column align="center" prop="endTime" label="截止时间"   :formatter="dateFormat"  width="170"></el-table-column>
+                <el-table-column align="center" prop="area" label="地区"></el-table-column>
+                <el-table-column align="center" prop="status" label="状态" :formatter="transformStatus"></el-table-column>
+                <el-table-column align="center" prop="handle" label="操作">
+                    <template slot-scope="scope">
+                        <div v-if="scope.row.status === 1">
+                            <el-button  @click="updateStatus(scope.row.id,0,'停用')" type="danger"  size="small">
+                                       停用
+                            </el-button>
+                        </div>
+                    
+                        <div v-else-if="scope.row.status === 0">
+                            <el-button @click="updateStatus(scope.row.id,1,'启用')"  type="success"  size="small">
+                                       启用
+                            </el-button>
+                        </div>
+                    </template>
+                </el-table-column>
+            </el-table>
+             <table-pagination :pager="pager" @change="initTableData"></table-pagination> 
         </el-row>
-    </el-row>
-    <el-row>
-        <el-table 
-            ref="multipleTable"
-            tooltip-effect="dark"
-            style="width: 100%"
-            @selection-change="handleSelectionChange"
-            border
-            :data="dataTable" 
-            >
-            <el-table-column align="center" type="selection"  @selection-change="handleSelectionChange" width="55"></el-table-column>
-            <el-table-column align="center" prop="assignName" label="规则名称"></el-table-column>
-            <el-table-column align="center" prop="createTime" label="创建时间" :formatter="dateFormat"  width="170"></el-table-column>
-            <el-table-column align="center" prop="createName" label="创建人"></el-table-column>
-            <el-table-column align="center" prop="category" label="资源类别"></el-table-column>
-            <el-table-column align="center" prop="type" label="资源类型"></el-table-column>
-            <el-table-column align="center" prop="searchWord" label="搜索词"></el-table-column>
-            <el-table-column align="center" prop="startTime" label="生效时间" :formatter="dateFormat"  width="170"></el-table-column>
-            <el-table-column align="center" prop="endTime" label="截止时间"   :formatter="dateFormat"  width="170"></el-table-column>
-            <el-table-column align="center" prop="area" label="地区"></el-table-column>
-            <el-table-column align="center" prop="status" label="状态" :formatter="transformStatus"></el-table-column>
-            <el-table-column align="center" prop="handle" label="操作">
-                <template slot-scope="scope">
-                    <div v-if="scope.row.status === 1">
-                        <el-button  @click="updateStatus(scope.row.id,0,'停用')" type="danger"  size="small">
-                                   停用
-                        </el-button>
-                    </div>
-                
-                    <div v-else-if="scope.row.status === 0">
-                        <el-button @click="updateStatus(scope.row.id,1,'启用')"  type="success"  size="small">
-                                   启用
-                        </el-button>
-                    </div>
-                </template>
-            </el-table-column>
-        </el-table>
-         <table-pagination :pager="pager" @change="initTableData"></table-pagination> 
-    </el-row>
+     </div>
 </div>
 </body>
 <!-- import Vue before Element -->
@@ -130,6 +134,7 @@
         el: '#informationAllot',
         data: function() {
             return {
+                isShow:false,
                 form: {
                     companyId:'',
                     deptId:'',
@@ -329,8 +334,15 @@
                     return;
                 }
               window.location.href='/assignrule/teleAssignRule/preUpdateTeleAssignRule?ruleId='+ rows[0].id;
-            }
-        } ,
+            },
+            toogleClick(){
+                if(this.isShow){
+                    this.isShow=false
+                }else{
+                    this.isShow=true
+                }          
+            },
+        },
    	  created(){
      		//初始化数据列表
      		this.initTableData();

@@ -3,12 +3,8 @@
 <head th:replace="_header_include::frag(~{::title},~{::style},~{})">
     <title>后台管理系统</title>
     <style>
-        .userManage .leftBox{/*width: 200px;*/height: auto;border:1px solid #ebeef5;min-height: 480px;}
-        .userManage .leftTitle{background:#ebeef5;text-indent: 20px;height: 40px;line-height: 40px;}
-        .userManage .leftTree{padding:10px;}
-        .userManage .rightTitle{background:#ebeef5;text-indent: 20px;height: 40px;line-height: 40px;}
-		.el-col-6 {
-		    width: 50%;
+        .el-select{
+		    width:350px;
 		}
     </style>
 </head>
@@ -17,118 +13,119 @@
     <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
         <el-breadcrumb-item>Home</el-breadcrumb-item>
         <el-breadcrumb-item>业务设置</el-breadcrumb-item>
-        <el-breadcrumb-item><a href="JavaScript:void(0)" data-url="a.html">邀约区域管理</a></el-breadcrumb-item>
+        <el-breadcrumb-item>邀约区域管理</el-breadcrumb-item>
     </el-breadcrumb>
 
-    <div class="marginB20 fs16">修改邀约区域划分</div>
-    <el-row :gutter="20">
-        <el-form :model="form" :rules="rules" ref="form">
-        	<el-row>
-                <el-col :span="6">
-                    <el-form-item label="操作内容：" :label-width="formLabelWidth1" >
-					   <el-checkbox   v-model="bussinessGroupchecked"  label="商务小组"   @change="checkIsShow(1)"></el-checkbox>
-					   <el-checkbox v-model="projectchecked" label="签约项目" @change="checkIsShow(2)"></el-checkbox>
-					   <el-checkbox v-model="provincechecked" label="区域" @change="checkIsShow(3)"></el-checkbox>
-					   <el-checkbox v-model="dxchecked" label="电销组" @change="checkIsShow(4)"></el-checkbox>
-                    </el-form-item>
-                </el-col>
-            </el-row>
-         	<el-row v-show="businessShow">
-                <el-col :span="6">
-                    <el-form-item label="商务小组：" :label-width="formLabelWidth1" prop="businessGroupId">
-                        <el-select filterable v-model="form.businessGroupId" placeholder="请选择">
-                            <el-option
-                                v-for="item in swList"
-                                :key="item.id"
-                                :label="item.name"
-                                :value="item.id">
-                            </el-option>
-                        </el-select>
-                    </el-form-item>
-                </el-col>
-            </el-row>
-        	<el-row v-show="projectShow">
-                <el-col :span="6">
-                    <el-form-item label="签约项目：" :label-width="formLabelWidth1" prop="projectIds">
-                        <el-select multiple filterable v-model="form.projectIds" placeholder="请选择">
-                            <el-option
-                                v-for="item in projectList"
-                                :key="item.id"
-                                :label="item.projectName"
-                                :value="item.id">
-                            </el-option>
-                        </el-select>
-                    </el-form-item>
-                </el-col>
-            </el-row>
-        	<el-row v-show="provinceShow">
-                <el-col :span="6">
-                    <el-form-item label="区域（省）：" :label-width="formLabelWidth1" prop="provincesIds">
-                        <el-select filterable v-model="form.provincesIds" @change="selectAll" multiple placeholder="请选择">
-                            <el-option
-                                v-for="item in proviceslist"
-                                :key="item.id"
-                                :label="item.name"
-                                :value="item.id">
-                            </el-option>
-                        </el-select>
-                    </el-form-item>
-                </el-col>
-            </el-row>
-        	<el-row v-show="telemarketingTeamShow">
-                <el-col :span="6">
-                    <el-form-item label="电销组：" :label-width="formLabelWidth1" prop="telemarketingTeamId">
-                        <el-select filterable v-model="form.telemarketingTeamId" placeholder="请选择">
-                            <el-option
-                                v-for="item in dxList"
-                                 :key="item.id"
-                                :label="item.name"
-                                :value="item.id">
-                            </el-option>
-                        </el-select>
-                    </el-form-item>
-                </el-col>
-            </el-row>
-        
-          
-            <el-row>
-                <el-col :span="6" :offset="6">
-                    <el-form-item>
+    <el-row class="mainWhiteBg">
+        <div class="inforTitle">修改邀约区域划分</div>
+        <el-row :gutter="20">
+            <el-form :model="form" :rules="rules" ref="form" class="mainWhitePadding">
+            	<el-row>
+                    <el-col :span="12">
+                        <el-form-item label="操作内容：" :label-width="formLabelWidth1" >
+    					   <el-checkbox   v-model="bussinessGroupchecked"  label="商务小组"   @change="checkIsShow(1)"></el-checkbox>
+    					   <el-checkbox v-model="projectchecked" label="签约项目" @change="checkIsShow(2)"></el-checkbox>
+    					   <el-checkbox v-model="provincechecked" label="区域" @change="checkIsShow(3)"></el-checkbox>
+    					   <el-checkbox v-model="dxchecked" label="电销组" @change="checkIsShow(4)"></el-checkbox>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+             	<el-row v-show="businessShow">
+                    <el-col :span="12">
+                        <el-form-item label="商务小组：" :label-width="formLabelWidth1" prop="businessGroupId">
+                            <el-select filterable v-model="form.businessGroupId" placeholder="请选择"  @change="setProject">
+                                <el-option
+                                    v-for="item in swList"
+                                    :key="item.id"
+                                    :label="item.name"
+                                    :value="item.id">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+            	<el-row v-show="projectShow">
+                    <el-col :span="12">
+                        <el-form-item label="签约项目：" :label-width="formLabelWidth1" prop="projectIds">
+                            <el-select multiple filterable v-model="form.projectIds" placeholder="请选择">
+                                <el-option
+                                    v-for="item in projectList"
+                                    :key="item.id"
+                                    :label="item.projectName"
+                                    :value="item.id">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+            	<el-row v-show="provinceShow">
+                    <el-col :span="12">
+                        <el-form-item label="区域（省）：" :label-width="formLabelWidth1" prop="provincesIds">
+                            <el-select filterable v-model="form.provincesIds" @change="selectAll" multiple placeholder="请选择">
+                                <el-option
+                                    v-for="item in proviceslist"
+                                    :key="item.id"
+                                    :label="item.name"
+                                    :value="item.id">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+            	<el-row v-show="telemarketingTeamShow">
+                    <el-col :span="12">
+                        <el-form-item label="电销组：" :label-width="formLabelWidth1" prop="telemarketingTeamIds">
+                            <el-select filterable multiple v-model="form.telemarketingTeamIds" placeholder="请选择">
+                                <el-option
+                                    v-for="item in dxList"
+                                     :key="item.id"
+                                    :label="item.name"
+                                    :value="item.id">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+            
+              
+                <el-row>
+                    <el-form-item class="f-tac">
                     	<el-button type="success" @click="showdetail">预览</el-button>
                         <el-button type="primary" @click="showTips">确定</el-button>
-                        <a href="/invitearea/inviteAreaList"><el-button style="margin-left: 10px;">取消</el-button></a>
+                        <a href="/invitearea/inviteAreaList"><el-button type="info" style="margin-left: 10px;">取消</el-button></a>
                        
                     </el-form-item>
-                </el-col>
-            </el-row>
-        </el-form>
-    </el-row>
-        <el-dialog title="信息详情"  :visible.sync="dialogFormVisible"  width="50%">
-            <el-form>
-                 <el-row>
-                <el-table 
-                    ref="multipleTable"
-                    tooltip-effect="dark"
-                    empty-text="无数据"
-                    style="width: 100%"
-                    border
-                    :data="dataTable"  >
-                    <el-table-column align="center" prop="businessGroup" label="商务小组"></el-table-column>
-                    <el-table-column align="center" prop="provinces" label="区域"></el-table-column>
-                    <el-table-column align="center" prop="telemarketingTeam" label="电销组"></el-table-column>
-                    <el-table-column align="center" prop="projects" label="签约项目"></el-table-column>
-                </el-table>
-            </el-row>
+                </el-row>
             </el-form>
-            <div slot="footer" class="dialog-footer">
-                <el-button @click="dialogFormVisible = false">确定</el-button>
-            </div>
-        </el-dialog>
+        </el-row>
+    </el-row>
+
+    <el-dialog title="信息详情"  :visible.sync="dialogFormVisible"  width="50%">
+        <el-form>
+             <el-row>
+            <el-table 
+                ref="multipleTable"
+                tooltip-effect="dark"
+                empty-text="无数据"
+                style="width: 100%"
+                border
+                :data="dataTable"  >
+                <el-table-column align="center" prop="businessGroup" label="商务小组"></el-table-column>
+                <el-table-column align="center" prop="provinces" label="区域"></el-table-column>
+                <el-table-column align="center" prop="telemarketingTeam" label="电销组"></el-table-column>
+                <el-table-column align="center" prop="projects" label="签约项目"></el-table-column>
+            </el-table>
+        </el-row>
+        </el-form>
+        <div slot="footer" class="dialog-footer">
+            <el-button type="primary" @click="dialogFormVisible = false">确定</el-button>
+        </div>
+    </el-dialog>
     <el-dialog title="确定要执行批量操作？" :visible.sync="submitdialogFormVisible" >
        
         <div slot="footer" class="dialog-footer">
-            <el-button @click="submitdialogFormVisible =false">取 消</el-button>
             <el-button type="primary" @click="onSubmit('form')">确 定</el-button>
+            <el-button type="info" @click="submitdialogFormVisible =false">取 消</el-button>
         </div>
     </el-dialog>
 </div>
@@ -183,7 +180,7 @@
                 form: {
                 	businessGroupId: checkbusinessGroupId,
                 	provincesIds: checkProvince,
-                	telemarketingTeamId: checkTelemarketingTeam,
+                	telemarketingTeamIds: checkTelemarketingTeam,
                 	projectIds:checkProject
                     
                 },
@@ -192,12 +189,12 @@
                       { required: true, message: '请选择商务小组', trigger: 'change' },
                     ],
                     projectIds: [
-                      { required: true, message: '请选择项目', trigger: 'blur' },
+                      { required: true, message: '请选择项目', trigger: 'change' },
                     ],
                     provincesIds: [
-                      { required: true, message: '请选择省份', trigger: 'blur' },
+                      { required: true, message: '请选择省份', trigger: 'change' },
                     ],
-                    telemarketingTeamId: [
+                    telemarketingTeamIds: [
                       { required: true, message: '请选择电销组', trigger: 'change' },
                     ]
                     
@@ -215,7 +212,32 @@
             }        	  
         },
         methods: {
-        	
+            setProject(value){
+                debugger
+                if(!this.projectShow){
+                    return false;
+                }
+                var groupName = "";
+                for(var i = 0 ; i < swList.length ; i++){
+                    if(swList[i].id == value){
+                        groupName = swList[i].name;
+                        break;
+                    }
+                }
+                var param = {};
+                param.businessGroup = groupName;
+                debugger
+                axios.post("/invitearea/InviteProjects", param).then(function (response) {
+                    var data = response.data;
+                    if(data&&data.length>0){
+                        var arr = [];
+                        for(var i = 0 ; i < data.length ; i++){
+                            arr.push(data[i].id)
+                        }
+                        addUserVm.form.projectIds = arr;
+                    }
+                }).catch(function (error) {console.log(error);});
+            },
         	checkIsShow(val){
         		if(val==1 ){
         			if(isshowBusinessGroup ==0){
@@ -281,12 +303,8 @@
                   obj = this.swList.find((item)=>{
                       return item.id === formData.businessGroupId;
                   });
-                  let telemarketingTeamobj = {};
-                  telemarketingTeamobj = this.dxList.find((item)=>{
-                      return item.id === formData.telemarketingTeamId;
-                  });
-                  
-                  
+
+
                   var businessGroupName  = "";
                   var telemarketingTeamName = "";
        	          var projectstrs ="";
@@ -297,7 +315,25 @@
        	        	businessGroupName  = obj.name;
             	  }
 	       	      if(isshowTelemarketingTeam ==0){
-	       	    	telemarketingTeamName = telemarketingTeamobj.name;
+                      var teamNames ="";
+                      var teamIds ="";
+                      for ( var i = 0; i <formData.telemarketingTeamIds.length; i++){
+                          for(var j = 0 ; j < this.dxList.length ; j++){
+                              if(formData.telemarketingTeamIds[i] ==this.dxList[j].id){
+                                  if(teamIds !=""){
+                                      teamIds = teamIds+","+formData.telemarketingTeamIds[i];
+                                  }else{
+                                      teamIds = formData.telemarketingTeamIds[i];
+                                  }
+                                  if(teamNames !=""){
+                                      teamNames = teamNames+","+ this.dxList[i].name;
+                                  }else{
+                                      teamNames = this.dxList[i].name;
+                                  }
+                              }
+                          }
+                      }
+                      telemarketingTeamName = teamNames;
 	       		  }
 	       	   	  if(isshowprovince==0){
 		       	   	 	for ( var i = 0; i <formData.provincesIds.length; i++){
@@ -395,11 +431,8 @@
        	             var formData = addUserVm.form;
        	             var param={};
 	       	          let obj = {};
-	                 
 	                  let telemarketingTeamobj = {};
-	                  
-	                  
-	                  
+
 	                  if(isshowBusinessGroup ==0){
 	                	  param.businessGroupId= formData.businessGroupId;
 	                	  obj = this.swList.find((item)=>{
@@ -408,11 +441,26 @@
 	                	  param.businessGroup = obj.name;
 	                  }
 	                  if(isshowTelemarketingTeam ==0){
-	                	  param.telemarketingTeamId = formData.telemarketingTeamId;
-	                	  telemarketingTeamobj = this.dxList.find((item)=>{
-		                      return item.id === param.telemarketingTeamId;
-		                  });
-	                	  param.telemarketingTeam = telemarketingTeamobj.name;
+                          var teamNames ="";
+                          var teamIds ="";
+                          for ( var i = 0; i <formData.telemarketingTeamIds.length; i++){
+                              for(var j = 0 ; j < this.dxList.length ; j++){
+                                  if(formData.telemarketingTeamIds[i] ==this.dxList[j].id){
+                                      if(teamIds !=""){
+                                          teamIds = teamIds+","+formData.telemarketingTeamIds[i];
+                                      }else{
+                                          teamIds = formData.telemarketingTeamIds[i];
+                                      }
+                                      if(teamNames !=""){
+                                          teamNames = teamNames+","+ this.dxList[i].name;
+                                      }else{
+                                          teamNames = this.dxList[i].name;
+                                      }
+                                  }
+                              }
+                          }
+                          param.telemarketingTeams = teamNames;
+                          param.telemarketingTeamIds = teamIds;
 	                  }
 	                  
 	       	          var projectstrs ="";
@@ -546,7 +594,11 @@
         			this.open("所有数据项必须相同，请重新选择信息！");
         			return ;
         		}
-				this.submitdialogFormVisible = true;
+                this.$refs["form"].validate((valid) => {
+                    if (valid) {
+                        this.submitdialogFormVisible = true;
+                    }
+                });
             }
         },
         created(){

@@ -719,17 +719,35 @@ var mainDivVM = new Vue({
             }
             return valText;
         },
-        getVisitNumText(row, column, value, index){
-            var valText="";
-            if(value==1){
-                valText="首次到访";
-            }else if(value==2){
-                valText="二次来访";
-            }else if(value>=3){
-                valText="多次来访";
+        getVisitNumText(row, column, cellValue, index){
+            var text = "";
+            if (cellValue == "1") {
+                text = "首次到访"
+            }else if (cellValue == "2") {
+                text = "二次到访"
+            }else{
+                text = this.toChinesNum(cellValue)+"次到访"
             }
-            return valText;
+            return text;
         },
+        toChinesNum(num){
+            let changeNum = ['零', '一', '二', '三', '四', '五', '六', '七', '八', '九']; //changeNum[0] = "零"
+            let unit = ["", "十", "百", "千", "万"];
+            num = parseInt(num);
+            let getWan = (temp) => {
+                let strArr = temp.toString().split("").reverse();
+                let newNum = "";
+                for (var i = 0; i < strArr.length; i++) {
+                    newNum = (i == 0 && strArr[i] == 0 ? "" : (i > 0 && strArr[i] == 0 && strArr[i - 1] == 0 ? "" : changeNum[strArr[i]] + (strArr[i] == 0 ? unit[0] : unit[i]))) + newNum;
+                }
+                return newNum;
+            }
+            let overWan = Math.floor(num / 10000);
+            let noWan = num % 10000;
+            if (noWan.toString().length < 4) noWan = "0" + noWan;
+            return overWan ? getWan(overWan) + "万" + getWan(noWan) : getWan(num);
+        },
+
         OpenRejectVisitRecordDialog(){//待审批到访记录驳回
            this.signRecordArrTitle='';
            var rows = this.multipleSelection2;
@@ -1001,5 +1019,9 @@ var mainDivVM = new Vue({
     },
     mounted(){
         document.getElementById('mainDiv').style.display = 'block';
+        $(".el-progress__text").css("font-size","35px");
+        $(".el-progress__text").eq(0).css("color","#697df5");
+        $(".el-progress__text").eq(1).css("color","#a978f5");
+        $(".el-progress__text").eq(2).css("color","#32c3bf");
     }
 });
