@@ -5,7 +5,8 @@
     <title>我的客户</title>
     <style>
         button a{color:#fff!important;}
-        .formItem,.formItem .el-form-item__content{width:100%}
+        /*.formItem,.formItem .el-form-item__content{width:100%}*/
+        .el-select,.el-date-editor{width: 100%!important;}
     </style>
 </head>
 <body>
@@ -18,184 +19,192 @@
             <el-breadcrumb-item>我的客户</el-breadcrumb-item>
         </el-breadcrumb>
 
+        <div class="mainSearchBg">
+            <div v-show="showVisitAduitDatas.oneShow" class="marginB10" style="overflow: hidden;">
+                <div class="marginB10">
+                    <span class="fs14" style="margin-right: 10px;">首次到访</span>  
+                    <el-button size="medium" type="primary" @click="openEditVisitRecord">添加到访记录</el-button>
+                </div>                
+                <el-table :data="showVisitAduitDatas.one" style="width: 100%" tooltip-effect="dark" border ref="multipleTable" class="marginB10">
+                    <el-table-column prop="customerName" label="客户姓名" align="center" width="110"></el-table-column>
+                    <el-table-column prop="projectName" label="考察项目" align="center"></el-table-column>
+                    <el-table-column prop="companyName" label="考察公司" align="center"></el-table-column>
+                    <el-table-column prop="vistitTime" label="到访时间" :formatter="formatVisitTime" align="center" width="130"></el-table-column>
+                    <el-table-column prop="signProvince" label="预签约省份" align="center" width="100"></el-table-column>
+                    <el-table-column prop="signCity" label="预签约市" align="center"></el-table-column>
+                    <el-table-column prop="signDistrict" label="预签约区/县" align="center"></el-table-column>
+                    <el-table-column prop="vistitStoreTypeName" label="到访店铺类型" align="center" width="110"></el-table-column>
+                    <el-table-column prop="visitType" label="到访类型" align="center" width="80">
+                        <template slot-scope="scope">
+                            <div v-if="scope.row.status === 1">
+                                预约来访
+                            </div>
+                            <div v-else-if="scope.row.status === 2">
+                                慕名来访
+                            </div>
+                            <div v-else-if="scope.row.status === 3">
+                                临时来访
+                            </div>
+                        </template>
+                    </el-table-column>
+                    <el-table-column prop="visitCity" label="来访城市" align="center"></el-table-column>
+                    <el-table-column prop="visitPeopleNum" label="到访人数" align="center" width="80"></el-table-column>
+                    <el-table-column prop="createTime" label="创建时间" align="center" width="150"></el-table-column>
+                    <el-table-column prop="isSign" label="是否签约" align="center" width="80">
+                        <template slot-scope="scope">
+                            <div v-if="scope.row.isSign === 0">
+                                否
+                            </div>
+                            <div v-else-if="scope.row.isSign ===1">
+                                是
+                            </div>
+                        </template>
+                    </el-table-column>
+                    <el-table-column prop="status" label="到访有效性" align="center" width="100">
+                        <template slot-scope="scope">
+                            <div v-if="scope.row.status === 1">
+                                审核中
+                            </div>
+                            <div v-else-if="scope.row.status ===2">
+                                有效
+                            </div>
+                            <div v-else-if="scope.row.status ===0">
+                                无效
+                            </div>
+                        </template>
+                    </el-table-column>
+                </el-table>
+                <p v-show="showVisitAduitDatas.oneNotSignShow" style = "color: #1e2746;margin-bottom: 10px;">未签约原因：{{showVisitAduitDatas.oneNotSignReason}}</p>
+                <p v-show="showVisitAduitDatas.oneRebutShow"  style = "color:red;margin-bottom: 10px;">驳回原因：{{showVisitAduitDatas.oneRebutReason}}</p>
+            </div>
 
-        <div v-show="showVisitAduitDatas.oneShow">
-            <el-button size="mini"  type="text" style = "color: #1e2746">首次到访</el-button>  <el-button size="mini"  type="primary" style = "color: #1e2746" @click="openEditVisitRecord">添加到访记录</el-button>
-            <el-table :data="showVisitAduitDatas.one" style="width: 100%" tooltip-effect="dark"  ref="multipleTable">
-                <el-table-column prop="customerName" label="客户姓名"   align="center"></el-table-column>
-                <el-table-column prop="projectName" label="考察项目"   align="center"></el-table-column>
-                <el-table-column prop="companyName" label="考察公司"   align="center"></el-table-column>
-                <el-table-column prop="vistitTime" label="到访时间" :formatter="formatVisitTime" align="center"></el-table-column>
-                <el-table-column prop="signProvince" label="预签约省份"   align="center"></el-table-column>
-                <el-table-column prop="signCity" label="预签约市"   align="center"></el-table-column>
-                <el-table-column prop="signDistrict" label="预签约区/县"   align="center"></el-table-column>
-                <el-table-column prop="vistitStoreTypeName" label="到访店铺类型"   align="center"></el-table-column>
-                <el-table-column prop="visitType" label="到访类型"   align="center">
-                    <template slot-scope="scope">
-                        <div v-if="scope.row.status === 1">
-                            预约来访
-                        </div>
-                        <div v-else-if="scope.row.status === 2">
-                            慕名来访
-                        </div>
-                        <div v-else-if="scope.row.status === 3">
-                            临时来访
-                        </div>
-                    </template>
-                </el-table-column>
-                <el-table-column prop="visitCity" label="来访城市"   align="center"></el-table-column>
-                <el-table-column prop="visitPeopleNum" label="到访人数"   align="center"></el-table-column>
-                <el-table-column prop="createTime" label="创建时间"   align="center"></el-table-column>
-                <el-table-column prop="isSign" label="是否签约"   align="center">
-                    <template slot-scope="scope">
-                        <div v-if="scope.row.isSign === 0">
-                            否
-                        </div>
-                        <div v-else-if="scope.row.isSign ===1">
-                            是
-                        </div>
-                    </template>
-                </el-table-column>
-                <el-table-column prop="status" label="到访有效性"   align="center">
-                    <template slot-scope="scope">
-                        <div v-if="scope.row.status === 1">
-                            审核中
-                        </div>
-                        <div v-else-if="scope.row.status ===2">
-                            有效
-                        </div>
-                        <div v-else-if="scope.row.status ===0">
-                            无效
-                        </div>
-                    </template>
-                </el-table-column>
-            </el-table>
-            <p v-show="showVisitAduitDatas.oneNotSignShow" style = "color: #1e2746">未签约原因：{{showVisitAduitDatas.oneNotSignReason}}</p>
-            <p v-show="showVisitAduitDatas.oneRebutShow"  style = "color:red">驳回原因：{{showVisitAduitDatas.oneRebutReason}}</p>
+            <div v-show="showVisitAduitDatas.twoShow" class="marginB10" style="overflow: hidden;">
+                <div class="marginB10">
+                    <span class="fs14">2次到访</span>  
+                </div>
+                <!-- <el-button size="mini"  type="text" style = "color: #1e2746">2次到访</el-button> -->
+                <el-table :data="showVisitAduitDatas.two" style="width: 100%" tooltip-effect="dark" border ref="multipleTable" class="marginB10">
+                    <el-table-column prop="customerName" label="客户姓名" align="center" width="110"></el-table-column>
+                    <el-table-column prop="projectName" label="考察项目" align="center"></el-table-column>
+                    <el-table-column prop="companyName" label="考察公司" align="center"></el-table-column>
+                    <el-table-column prop="vistitTime" label="到访时间" :formatter="formatVisitTime" align="center" width="130"></el-table-column>
+                    <el-table-column prop="signProvince" label="预签约省份" align="center" width="100"></el-table-column>
+                    <el-table-column prop="signCity" label="预签约市" align="center"></el-table-column>
+                    <el-table-column prop="signDistrict" label="预签约区/县" align="center"></el-table-column>
+                    <el-table-column prop="vistitStoreTypeName" label="到访店铺类型" align="center" width="110"></el-table-column>
+                    <el-table-column prop="visitType" label="到访类型" align="center" width="80">
+                        <template slot-scope="scope">
+                            <div v-if="scope.row.status === 1">
+                                预约来访
+                            </div>
+                            <div v-else-if="scope.row.status === 2">
+                                慕名来访
+                            </div>
+                            <div v-else-if="scope.row.status === 3">
+                                临时来访
+                            </div>
+                        </template>
+                    </el-table-column>
+                    <el-table-column prop="visitCity" label="来访城市" align="center"></el-table-column>
+                    <el-table-column prop="visitPeopleNum" label="到访人数" align="center" width="80"></el-table-column>
+                    <el-table-column prop="createTime" label="创建时间" align="center" width="150"></el-table-column>
+                    <el-table-column prop="isSign" label="是否签约" align="center" width="80">
+                        <template slot-scope="scope">
+                            <div v-if="scope.row.isSign === 0">
+                                否
+                            </div>
+                            <div v-else-if="scope.row.isSign ===1">
+                                是
+                            </div>
+                        </template>
+                    </el-table-column>
+                    <el-table-column prop="status" label="到访有效性" align="center" width="100">
+                        <template slot-scope="scope">
+                            <div v-if="scope.row.status === 1">
+                                审核中
+                            </div>
+                            <div v-else-if="scope.row.status ===2">
+                                有效
+                            </div>
+                            <div v-else-if="scope.row.status ===0">
+                                无效
+                            </div>
+                        </template>
+                    </el-table-column>
+                </el-table>
+                <p  v-show="showVisitAduitDatas.twoNotSignShow"  style = "color: #1e2746;margin-bottom: 10px;">未签约原因：{{showVisitAduitDatas.twoNotSignReason}}</p>
+                <p v-show="showVisitAduitDatas.twoRebutShow" style = "color: red;margin-bottom: 10px;">驳回原因：{{showVisitAduitDatas.twoRebutReason}}</p>
+            </div>
+
+            <div v-show="showVisitAduitDatas.threeShow" class="marginB10" style="overflow: hidden;">
+                <div class="marginB10">
+                    <span class="fs14">多次到访</span>  
+                </div>
+                <!-- <el-button size="mini"  type="text" style = "color: #1e2746">多次到访</el-button> -->
+                <el-table :data="showVisitAduitDatas.three" style="width: 100%" tooltip-effect="light" border ref="multipleTable" class="marginB10">
+                    <el-table-column prop="customerName" label="客户姓名" align="center" width="110"></el-table-column>
+                    <el-table-column prop="projectName" label="考察项目" align="center"></el-table-column>
+                    <el-table-column prop="companyName" label="考察公司" align="center"></el-table-column>
+                    <el-table-column prop="vistitTime" label="到访时间" :formatter="formatVisitTime" align="center" width="130"></el-table-column>
+                    <el-table-column prop="signProvince" label="预签约省份" align="center" width="100"></el-table-column>
+                    <el-table-column prop="signCity" label="预签约市" align="center"></el-table-column>
+                    <el-table-column prop="signDistrict" label="预签约区/县" align="center"></el-table-column>
+                    <el-table-column prop="vistitStoreTypeName" label="到访店铺类型" align="center" width="110"></el-table-column>
+                    <el-table-column prop="visitType" label="到访类型" align="center" width="80">
+                        <template slot-scope="scope">
+                            <div v-if="scope.row.status === 1">
+                                预约来访
+                            </div>
+                            <div v-else-if="scope.row.status === 2">
+                                慕名来访
+                            </div>
+                            <div v-else-if="scope.row.status === 3">
+                                临时来访
+                            </div>
+                        </template>
+                    </el-table-column>
+                    <el-table-column prop="visitCity" label="来访城市" align="center"></el-table-column>
+                    <el-table-column prop="visitPeopleNum" label="到访人数" align="center" width="80"></el-table-column>
+                    <el-table-column prop="createTime" label="创建时间" align="center" width="150"></el-table-column>
+                    <el-table-column prop="isSign" label="是否签约" align="center" width="80">
+                        <template slot-scope="scope">
+                            <div v-if="scope.row.isSign === 0">
+                                否
+                            </div>
+                            <div v-else-if="scope.row.isSign ===1">
+                                是
+                            </div>
+                        </template>
+                    </el-table-column>
+                    <el-table-column prop="notSignReason" label="未签约原因"  width="200"  show-overflow-tooltip="true" align="center"></el-table-column>
+                    <el-table-column prop="rebutReason" label="驳回原因"  width="200"   show-overflow-tooltip="true" align="center"></el-table-column>
+
+                    <el-table-column prop="status" label="到访有效性" align="center" width="100">
+                        <template slot-scope="scope">
+                            <div v-if="scope.row.status === 1">
+                                审核中
+                            </div>
+                            <div v-else-if="scope.row.status ===2">
+                                有效
+                            </div>
+                            <div v-else-if="scope.row.status ===0">
+                                无效
+                            </div>
+                        </template>
+                    </el-table-column>
+                </el-table>
+                <!--<p v-show="showVisitAduitDatas.threeNotSignShow" style = "color: #1e2746">未签约原因：{{showVisitAduitDatas.threeNotSignReason}}</p><br>-->
+                <!--<p v-show="showVisitAduitDatas.threeRebutShow" style = "color: red">驳回原因：{{showVisitAduitDatas.threeRebutReason}}</p>-->
+            </div>
         </div>
-        <br>
-        <div v-show="showVisitAduitDatas.twoShow">
-            <el-button size="mini"  type="text" style = "color: #1e2746">2次到访</el-button>
-            <el-table :data="showVisitAduitDatas.two" style="width: 100%" tooltip-effect="dark"  ref="multipleTable">
-                <el-table-column prop="customerName" label="客户姓名"   align="center"></el-table-column>
-                <el-table-column prop="projectName" label="考察项目"   align="center"></el-table-column>
-                <el-table-column prop="companyName" label="考察公司"   align="center"></el-table-column>
-                <el-table-column prop="vistitTime" label="到访时间" :formatter="formatVisitTime" align="center"></el-table-column>
-                <el-table-column prop="signProvince" label="预签约省份"   align="center"></el-table-column>
-                <el-table-column prop="signCity" label="预签约市"   align="center"></el-table-column>
-                <el-table-column prop="signDistrict" label="预签约区/县"   align="center"></el-table-column>
-                <el-table-column prop="vistitStoreTypeName" label="到访店铺类型"   align="center"></el-table-column>
-                <el-table-column prop="visitType" label="到访类型"   align="center">
-                    <template slot-scope="scope">
-                        <div v-if="scope.row.status === 1">
-                            预约来访
-                        </div>
-                        <div v-else-if="scope.row.status === 2">
-                            慕名来访
-                        </div>
-                        <div v-else-if="scope.row.status === 3">
-                            临时来访
-                        </div>
-                    </template>
-                </el-table-column>
-                <el-table-column prop="visitCity" label="来访城市"   align="center"></el-table-column>
-                <el-table-column prop="visitPeopleNum" label="到访人数"   align="center"></el-table-column>
-                <el-table-column prop="createTime" label="创建时间"   align="center"></el-table-column>
-                <el-table-column prop="isSign" label="是否签约"   align="center">
-                    <template slot-scope="scope">
-                        <div v-if="scope.row.isSign === 0">
-                            否
-                        </div>
-                        <div v-else-if="scope.row.isSign ===1">
-                            是
-                        </div>
-                    </template>
-                </el-table-column>
-                <el-table-column prop="status" label="到访有效性"   align="center">
-                    <template slot-scope="scope">
-                        <div v-if="scope.row.status === 1">
-                            审核中
-                        </div>
-                        <div v-else-if="scope.row.status ===2">
-                            有效
-                        </div>
-                        <div v-else-if="scope.row.status ===0">
-                            无效
-                        </div>
-                    </template>
-                </el-table-column>
-            </el-table>
-            <p  v-show="showVisitAduitDatas.twoNotSignShow"  style = "color: #1e2746">未签约原因：{{showVisitAduitDatas.twoNotSignReason}}</p>
-            <p v-show="showVisitAduitDatas.twoRebutShow" style = "color: red">驳回原因：{{showVisitAduitDatas.twoRebutReason}}</p>
-        </div>
-        <br>
-        <div v-show="showVisitAduitDatas.threeShow">
-            <el-button size="mini"  type="text" style = "color: #1e2746">多次到访</el-button>
-            <el-table :data="showVisitAduitDatas.three" style="width: 100%" tooltip-effect="light"  ref="multipleTable">
-                <el-table-column prop="customerName" label="客户姓名"   align="center"></el-table-column>
-                <el-table-column prop="projectName" label="考察项目"   align="center"></el-table-column>
-                <el-table-column prop="companyName" label="考察公司"   align="center"></el-table-column>
-                <el-table-column prop="vistitTime" label="到访时间" :formatter="formatVisitTime" align="center"></el-table-column>
-                <el-table-column prop="signProvince" label="预签约省份"   align="center"></el-table-column>
-                <el-table-column prop="signCity" label="预签约市"   align="center"></el-table-column>
-                <el-table-column prop="signDistrict" label="预签约区/县"   align="center"></el-table-column>
-                <el-table-column prop="vistitStoreTypeName" label="到访店铺类型"   align="center"></el-table-column>
-                <el-table-column prop="visitType" label="到访类型"   align="center">
-                    <template slot-scope="scope">
-                        <div v-if="scope.row.status === 1">
-                            预约来访
-                        </div>
-                        <div v-else-if="scope.row.status === 2">
-                            慕名来访
-                        </div>
-                        <div v-else-if="scope.row.status === 3">
-                            临时来访
-                        </div>
-                    </template>
-                </el-table-column>
-                <el-table-column prop="visitCity" label="来访城市"   align="center"></el-table-column>
-                <el-table-column prop="visitPeopleNum" label="到访人数"   align="center"></el-table-column>
-                <el-table-column prop="createTime" label="创建时间"   align="center"></el-table-column>
-                <el-table-column prop="isSign" label="是否签约"   align="center">
-                    <template slot-scope="scope">
-                        <div v-if="scope.row.isSign === 0">
-                            否
-                        </div>
-                        <div v-else-if="scope.row.isSign ===1">
-                            是
-                        </div>
-                    </template>
-                </el-table-column>
-                <el-table-column prop="notSignReason" label="未签约原因"  width="200"  show-overflow-tooltip="true" align="center"></el-table-column>
-                <el-table-column prop="rebutReason" label="驳回原因"  width="200"   show-overflow-tooltip="true" align="center"></el-table-column>
-
-                <el-table-column prop="status" label="到访有效性"   align="center">
-                    <template slot-scope="scope">
-                        <div v-if="scope.row.status === 1">
-                            审核中
-                        </div>
-                        <div v-else-if="scope.row.status ===2">
-                            有效
-                        </div>
-                        <div v-else-if="scope.row.status ===0">
-                            无效
-                        </div>
-                    </template>
-                </el-table-column>
-            </el-table>
-            <!--<p v-show="showVisitAduitDatas.threeNotSignShow" style = "color: #1e2746">未签约原因：{{showVisitAduitDatas.threeNotSignReason}}</p><br>-->
-            <!--<p v-show="showVisitAduitDatas.threeRebutShow" style = "color: red">驳回原因：{{showVisitAduitDatas.threeRebutReason}}</p>-->
-        </div>
-
-
 
         <!--添加到访记录-->
-        <el-dialog title="添加到访记录" :visible.sync="addVisitRecordDialogVisible"  width="70%">
+        <el-dialog title="添加到访记录" :visible.sync="addVisitRecordDialogVisible"  width="870px">
             <template>
                 <el-form :model="addVisitRecord" ref="addVisitRecord" :rules="rules">
                     <el-row :gutter="20">
                         <el-col :span="10">
-                            <el-form-item label="考察公司"  :label-width="formLabelWidth"  prop="companyid">
+                            <el-form-item label="考察公司："  :label-width="formLabelWidth"  prop="companyid">
                                 <el-select v-model="addVisitRecord.companyid" placeholder="考察公司"  clearable >
                                     <el-option v-for="item in companyArr" :key="item.id" :label="item.companyName" :value="item.id"></el-option>
                                 </el-select>
@@ -203,7 +212,7 @@
                         </el-col>
 
                         <el-col :span="10">
-                            <el-form-item label="到访时间"    :label-width="formLabelWidth"  prop="vistitTime">
+                            <el-form-item label="到访时间："    :label-width="formLabelWidth"  prop="vistitTime">
                                 <el-date-picker v-model="addVisitRecord.vistitTime" format="yyyy-MM-dd HH:mm" type="datetime" placeholder="选择日期时间"></el-date-picker>
                             </el-form-item>
                         </el-col>
@@ -211,12 +220,12 @@
 
                     <el-row :gutter="20">
                         <el-col :span="10">
-                            <el-form-item label="客户姓名"  :label-width="formLabelWidth"  prop="customerName" >
+                            <el-form-item label="客户姓名："  :label-width="formLabelWidth"  prop="customerName" >
                                 <el-input v-model="addVisitRecord.customerName" autocomplete="off"  maxlength="10"    ></el-input>
                             </el-form-item>
                         </el-col>
                         <el-col :span="10">
-                            <el-form-item label="考察项目"    :label-width="formLabelWidth"  prop="projectId">
+                            <el-form-item label="考察项目："    :label-width="formLabelWidth"  prop="projectId">
                                 <el-select v-model="addVisitRecord.projectId" placeholder="请选择"  clearable >
                                     <el-option v-for="item in projectArr" :key="item.id" :label="item.projectName" :value="item.id"></el-option>
                                 </el-select>
@@ -226,14 +235,14 @@
 
                     <el-row :gutter="20">
                         <el-col :span="10">
-                            <el-form-item label="到访类型"  :label-width="formLabelWidth"  prop="visitType">
+                            <el-form-item label="到访类型："  :label-width="formLabelWidth"  prop="visitType">
                                 <el-select v-model="addVisitRecord.visitType"  clearable >
                                     <el-option v-for="item in visitTypeArr" :key="item.value" :label="item.name" :value="item.value"></el-option>
                                 </el-select>
                             </el-form-item>
                         </el-col>
                         <el-col :span="10">
-                            <el-form-item label="到访店铺类型"    :label-width="formLabelWidth"  prop="vistitStoreType">
+                            <el-form-item label="到访店铺类型："    :label-width="formLabelWidth"  prop="vistitStoreType">
                                 <el-select v-model="addVisitRecord.vistitStoreType" placeholder="请选择"  clearable >
                                     <el-option v-for="item in vistitStoreTypeArr" :key="item.value" :label="item.name" :value="item.value"></el-option>
                                 </el-select>
@@ -242,14 +251,14 @@
                     </el-row>
                     <el-row :gutter="20">
                         <el-col :span="10">
-                            <el-form-item label="签约省份"  :label-width="formLabelWidth"  prop="signProvince"  >
+                            <el-form-item label="签约省份："  :label-width="formLabelWidth"  prop="signProvince"  >
                                 <el-select v-model="addVisitRecord.signProvince" placeholder="请选择"  @change="changeVisitProvince" clearable>
                                     <el-option v-for="item in provinceArr" :key="item.name" :label="item.name" :value="item.name"></el-option>
                                 </el-select>
                             </el-form-item>
                         </el-col>
                         <el-col :span="10">
-                            <el-form-item label="签约城市"    :label-width="formLabelWidth"  prop="signCity" clearable >
+                            <el-form-item label="签约城市："    :label-width="formLabelWidth"  prop="signCity" clearable >
                                 <el-select v-model="addVisitRecord.signCity" placeholder="请选择"  @change="currentCity">
                                     <el-option v-for="item in cityArr" :key="item.name" :label="item.name" :value="item.name"></el-option>
                                 </el-select>
@@ -258,35 +267,35 @@
                     </el-row>
                     <el-row :gutter="20">
                         <el-col :span="10">
-                            <el-form-item label="签约区/县"  :label-width="formLabelWidth"  prop="signDistrict">
+                            <el-form-item label="签约区/县："  :label-width="formLabelWidth"  prop="signDistrict">
                                 <el-select v-model="addVisitRecord.signDistrict" placeholder="请选择" clearable >
                                     <el-option v-for="item in districtArr" :key="item.name" :label="item.name" :value="item.name"></el-option>
                                 </el-select>
                             </el-form-item>
                         </el-col>
                         <el-col :span="10">
-                            <el-form-item label="来访城市"    :label-width="formLabelWidth"  prop="visitCity">
+                            <el-form-item label="来访城市："    :label-width="formLabelWidth"  prop="visitCity">
                                 <el-input v-model="addVisitRecord.visitCity" autocomplete="off"  maxlength="10"    ></el-input>
                             </el-form-item>
                         </el-col>
                     </el-row>
                     <el-row :gutter="20">
                         <el-col :span="10">
-                            <el-form-item label="是否签约"  :label-width="formLabelWidth"  prop="isSign" clearable >
+                            <el-form-item label="是否签约："  :label-width="formLabelWidth"  prop="isSign" clearable >
                                 <el-select v-model="addVisitRecord.isSign" placeholder="请选择" @change="showNotSignReason">
                                     <el-option v-for="item in isSignArr" :key="item.value" :label="item.name" :value="item.value"></el-option>
                                 </el-select>
                             </el-form-item>
                         </el-col>
                         <el-col :span="10">
-                            <el-form-item label="到访人数"    :label-width="formLabelWidth"  prop="visitPeopleNum">
+                            <el-form-item label="到访人数："    :label-width="formLabelWidth"  prop="visitPeopleNum">
                                 <el-input v-model="addVisitRecord.visitPeopleNum" type="number" min="0"   oninput="if(value.length>2)value=value.slice(0,2)"  autocomplete="off"     ></el-input>
                             </el-form-item>
                         </el-col>
                     </el-row>
                     <el-row :gutter="20">
                         <el-col :span="20">
-                            <el-form-item label="未签约原因" style="display: none" id="notSignReason" :label-width="formLabelWidth"  prop="notSignReason">
+                            <el-form-item label="未签约原因：" style="display: none" id="notSignReason" :label-width="formLabelWidth"  prop="notSignReason">
                                 <el-input type="textarea" v-model="addVisitRecord.notSignReason"  maxlength="100" :rows="3" placeholder="请输入内容(限制100字)"></el-input>
                             </el-form-item>
                         </el-col>
@@ -1290,31 +1299,5 @@
     });
 
 </script>
-<style>
-
-    .dialog-footer{
-        text-align: center;
-    }
-    .el-table th {
-        font-weight: bolder;
-    }
-    .el-input__inner{
-    //   width: 200px;
-    }
-    .el-button--danger:focus, .el-button--danger:hover{
-        background: #6f7180;
-        border: #6f7180;
-    }
-    .el-button--danger{
-        background: #6f7180;
-        border: #6f7180;
-    }
-
-    .el-tooltip__popper {
-        max-width: 50%;
-        line-height: 130%;
-        margin-left: 2%;
-    }
-</style>
 </body>
 </html>

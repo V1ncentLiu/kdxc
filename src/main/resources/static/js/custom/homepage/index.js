@@ -134,6 +134,7 @@ var homePageVM=new Vue({
             outboundDialogMin:false,//外呼dialog 是否最小化
             tmOutboundCallDialogVisible:false,//电销页面外呼 dialog 
             consoleBtnVisible:isShowConsoleBtn,//控制台按鈕是否可見
+            accountType:accountType,
 	    }
 	},
  	methods: {
@@ -448,6 +449,7 @@ var homePageVM=new Vue({
 			                     recordParam.clientType=homePageVM.loginClientForm.clientType;
 			                     recordParam.bindPhone= bindPhone;
 			                     recordParam.cno= cno;
+			                     recordParam.accountType=homePageVM.accountType;
 			                     //记录坐席登录
 			                     axios.post('/client/client/clientLoginRecord',recordParam)
 			                     .then(function (response) {
