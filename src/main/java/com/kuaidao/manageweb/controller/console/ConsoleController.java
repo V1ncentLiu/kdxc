@@ -165,6 +165,8 @@ public class ConsoleController {
             if (JSONResult.SUCCESS.equals(proJson.getCode())) {
                 request.setAttribute("proSelect", proJson.getData());
             }
+         // 查询赠送类型集合
+            request.setAttribute("giveTypeList", getDictionaryByCode(Constants.GIVE_TYPE));
             path = "console/consoleBusinessManager";
         } else if (RoleCodeEnum.SWZJ.name().equals(roleCode)) {
             // 商务总监

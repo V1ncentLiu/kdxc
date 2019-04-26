@@ -38,6 +38,7 @@
             <el-table-column align="center" prop="firstToll" label="路费" width="90"></el-table-column>
             <el-table-column align="center" prop="preferentialAmount" label="优惠金额" width="90"></el-table-column>
             <el-table-column align="center" prop="giveAmount" label="赠送金额" width="90"></el-table-column>
+            <el-table-column align="center" prop="giveType" label="赠送类型" width="90" :formatter="transGiveType"></el-table-column>
             <el-table-column align="center" prop="signType" label="签约类型" width="90">
                 <template slot-scope="scope">
                     <div v-if="scope.row.signType == 1">
@@ -463,6 +464,18 @@
                                 <el-input v-model="formSigning.giveAmount"  type="number"  min="0" oninput="if(value.length>10)value=value.slice(0,10)"  onkeypress="return(/[\d]/.test(String.fromCharCode(event.keyCode)))" autocomplete="off" maxLength="10" style="width: 80%;"></el-input><span style="padding-left: 10px;">元</span>
                             </el-form-item>
                         </el-col>
+                         <el-col :span="10">
+	                        <el-form-item label="赠送类型：" :label-width="formLabelWidth" prop="giveType">
+	                            <el-select v-model="formSigning.giveType"  placeholder="请选择赠送类型：" style="width:100%;">
+	                                <el-option
+	                                        v-for="item in giveTypeList"
+	                                        :key="item.value"
+	                                        :label="item.name"
+	                                        :value="item.value">
+	                                </el-option>
+	                            </el-select>
+	                        </el-form-item>
+	                    </el-col>
                         <el-col :span="12">
                             <el-form-item label="签约类型：" :label-width="formLabelWidth" prop="signType">
                                 <el-select v-model="formSigning.signType" @change="selectSigningType" placeholder="请选择签约类型：" style="width: 100%;">
@@ -655,7 +668,7 @@
     var twoData = [[${twoData}]];
     var threeData = [[${threeData}]];
     var proSelect=[[${proSelect}]];
-
+    var giveTypeList =[[${giveTypeList}]];
 
     var one ;
     var two ;
@@ -702,6 +715,7 @@
     var mainDivVM = new Vue({
         el: '#businessContractRecord',
         data: {
+        	giveTypeList:giveTypeList,
             addSignButtonAble:false,
             addPayDetailButtonAble:false,
             shouAddVisitButton:false,
@@ -1091,6 +1105,18 @@
             
         },
         methods: {
+        	transGiveType(row, column, cellValue, index) {
+        		
+            	  var text="";
+            	  for(var i=0;i<giveTypeList.length;i++) {
+            		 if(giveTypeList[i].value ==cellValue){
+            			 text = giveTypeList[i].name;
+            		 }
+            	  }
+            	  
+                 
+                  return text;
+              },
             formMoneyDetailAmountPerformance() {
                 this.formMoneyDetail.performanceAmount= this.formMoneyDetail.amountReceived;
             },
