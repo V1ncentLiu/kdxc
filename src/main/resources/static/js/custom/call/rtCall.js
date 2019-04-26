@@ -17,7 +17,7 @@ $(function(){
 			clientInfo.loginClientForm.clientType = clientInfoObj.clientType;
 			clientInfo.loginClientForm.loginClient = clientInfoObj.loginClient;
             clientInfo.loginClientForm.bindType = clientInfoObj.bindPhoneType;
-            homePageVM.loginTrClient();
+            homePageVM.loginQimoClient();
 		}
 	}
 	
@@ -28,12 +28,16 @@ $(function(){
 /**
  * 外呼
  * @param outboundInputPhone  客户手机号
- * @param callSource  来源 1:首页外呼 2:电销管理外呼
+ * @param callSource  来源 1:首页外呼 2:电销管理外呼 3.话务 外呼
  * @param clueId    线索id
  * @param callback 回调函数
  * @returns
  */ 
 function outboundCallPhone(outboundInputPhone,callSource,clueId,callback){
+	if(callSource==3){//话务和电销用一样的逻辑
+		callSource=2;
+	}
+	
 	stopSound();//停止播放录音
 	clearTimer();//清除定时器
 	if(!homePageVM.isQimoClient && !homePageVM.isTrClient ){
