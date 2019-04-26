@@ -1226,7 +1226,6 @@
                     // ---------------------  下面的事儿跟跟进记录的保存/修改 ---------------------
                     var tracking = {};
                     tracking = this.onConfirmAdd();
-
                     var clue = {};
                     clue.clueId = clueId;
                     clue.clueCustomer = clueCustomer;
@@ -1650,13 +1649,21 @@
             //邀约来访
             inviteCustomer(form) {
                 var valid = true;
-                this.$refs[form].validateField(["customerName", "province", "city"], (error) => {
-                    if (error) {
-                        valid = false;
-                    }
-                });
-                if (valid) {
+                // this.$refs[form].validateField(["customerName", "province", "city"], (error) => {
+                //     if (error) {
+                //         valid = false;
+                //     }
+                // });
+                //跟进记录校验
+                if(this.lineFormShow){ // 如果存在编辑/新增操作 进行跟进记录校验
+                    this.$refs['LineRuleForm'].validate((error) => {valid = error;});
+                }
+                if(valid){
+                    this.$refs[form].validateField(["customerName", "province", "city"], (error) => {
+                        if (error) {valid = false;}});
+                }
 
+                if (valid) {
                     var clueCustomer = {};
                     //客户姓名
                     var customerName = this.form.customerName;
@@ -1761,10 +1768,17 @@
                     //区县
                     var district = this.form.district;
                     clueIntention.district = district;
+                    var tracking = {};
+                    tracking = this.onConfirmAdd();
+                    if(tracking.customerStatus==3){
+                        addCustomerVM.$message({message: '选择客户状态为不跟进的状态不允许提交邀约来访', type: 'warning'});
+                        return false;
+                    }
                     var clue = {};
                     clue.clueId = clueId;
                     clue.clueCustomer = clueCustomer;
                     clue.clueIntention = clueIntention;
+                    clue.tracking = tracking;
                     this.inviteBtnDisabled = true;
                     clue.isInvitation = 1;
                     axios.post('/tele/clueMyCustomerInfo/updateCustomerClue', clue)
