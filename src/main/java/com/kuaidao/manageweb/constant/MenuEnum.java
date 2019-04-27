@@ -39,7 +39,7 @@ public enum MenuEnum {
     /**
      * 线索管理
      */
-    WAIT_DISTRIBUT_RESOURCE("待分发资源"),
+    WAIT_DISTRIBUT_RESOURCE("待分发资源"), CLUE_TEMPLATE_MANAGEMENT("资源模板管理"),
     /**
      * 财务
      */

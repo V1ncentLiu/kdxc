@@ -76,9 +76,9 @@
     				</el-form-item>	
                 </el-row>			
                 <div class="mainSearchBtnBox">
-				    <el-button type="primary" @click="searchTable()" class="searchBtn">搜索</el-button>
-                    <el-button type="info" class="searchBtn">取消</el-button>
-                    <span style="color: #5c6be8;cursor: pointer;margin:0 10px;" @click="toogleClick">更多搜索<i class="el-icon-arrow-down greycolor paddingL6"></i></span>
+				    <el-button icon="el-icon-search" type="primary" @click="searchTable()" class="searchBtn">搜索</el-button>
+                    <!-- <el-button type="info" class="searchBtn">取消</el-button> -->
+                    <span style="color: #5c6be8;cursor: pointer;margin:0 10px;" @click="toogleClick"><span v-if="isShow">收起</span><span v-else>展开更多</span><i :class="{'greycolor paddingL6 el-icon-arrow-up':isShow,'greycolor paddingL6 el-icon-arrow-down':!isShow}"></i></span>
                 </div>
             </el-form>
         </div>
@@ -101,6 +101,15 @@
     		                    <el-button @click="recordClick(scope.row)" type="text" size="small">点击查看</el-button>
     	                    </div>
     	                    <div v-else>无</div>
+    	                </template>
+    	        </el-table-column>
+    	        <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width"
+    	         v-else-if="item.fieldCode == 'cusPhone'">
+    	               <template slot-scope="scope">
+    		                <div v-if="scope.row.phase === 7">
+    		                    <el-button @click="recordClick(scope.row)" type="text" size="small">***</el-button>
+    	                    </div>
+    	                    <div v-else>{{scope.row.cusPhone}}</div>
     	                </template>
     	        </el-table-column>
                 <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width"
@@ -886,17 +895,32 @@ var appiontmentVM = new Vue({
                        });
                       return;
                   }
+                  if(rows[0].phase==7){
+              		this.$message({
+                          message: "当前线索已释放到公有池，不允许进行详细信息的查看",
+                          type: 'error'
+                        }); 
+              		return;
+              	}
                   window.location.href="/tele/clueMyCustomerInfo/customerInfoReadOnly?clueId="+rows[0].clueId;
               },
               //查看重复手机号资源
             repeatPhonesClick(row) {
-                this.repeatPhonesDialog=true;
                 this.dailogTitleType=row.clueId;
                 this.repeatPhonesTable=[];
                 var param ={};
                 param.id = row.clueId;
                 param.cusPhone = row.phone;
                 param.clueId = row.clueId;
+                
+                if(row.phase==7){
+            		this.$message({
+                        message: "当前线索已释放到公有池，不允许进行重复手机号资源的查看",
+                        type: 'error'
+                      }); 
+            		return;
+            	}
+                this.repeatPhonesDialog=true;
                 // axios.post('/clue/appiontment/repeatPhonelist', param)
                 axios.post('/clue/appiontment/repeatPhoneMap', param).then(function (response) {
                     // var result =  response.data;
