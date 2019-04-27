@@ -188,6 +188,12 @@ public class ExtendClueAgendaTaskController {
         request.setAttribute("adsenseList", getDictionaryByCode(DicCodeEnum.ADENSE.getCode()));
         // 查询字典媒介集合
         request.setAttribute("mediumList", getDictionaryByCode(DicCodeEnum.MEDIUM.getCode()));
+        // 查询字典行业类别集合
+        request.setAttribute("industryCategoryList",
+                getDictionaryByCode(DicCodeEnum.INDUSTRYCATEGORY.getCode()));
+        // 查询字典账户名称集合
+        request.setAttribute("accountNameList",
+                getDictionaryByCode(DicCodeEnum.ACCOUNT_NAME.getCode()));
         request.setAttribute("ossUrl", ossUrl);
         return "clue/updateCluePage";
     }
@@ -228,7 +234,7 @@ public class ExtendClueAgendaTaskController {
     public JSONResult<String> updateClue(HttpServletRequest request,
             @RequestBody PushClueReq pushClueReq) {
 
-        JSONResult<String> clueInfo = extendClueFeignClient.updateClue(pushClueReq);
+        JSONResult<String> clueInfo = extendClueFeignClient.createClue(pushClueReq);
 
         return clueInfo;
     }
@@ -533,8 +539,8 @@ public class ExtendClueAgendaTaskController {
         Map<String, String> sourceMap =
                 dicMap(itemFeignClient.queryDicItemsByGroupCode(DicCodeEnum.MEDIUM.getCode()));
         // 行业类别
-        Map<String, String> industryCategoryMap =
-            dicMap(itemFeignClient.queryDicItemsByGroupCode(DicCodeEnum.INDUSTRYCATEGORY.getCode()));
+        Map<String, String> industryCategoryMap = dicMap(
+                itemFeignClient.queryDicItemsByGroupCode(DicCodeEnum.INDUSTRYCATEGORY.getCode()));
 
         if (list != null && list.size() > 0) {
 
@@ -557,37 +563,37 @@ public class ExtendClueAgendaTaskController {
                 }
                 // 判断时间格式是否正确
                 if (islegal && (clueAgendaTaskDTO1.getReserveTime1() != null
-                    && !"".equals(clueAgendaTaskDTO1.getReserveTime1()))) {
+                        && !"".equals(clueAgendaTaskDTO1.getReserveTime1()))) {
                     try {
                         Date date = format.parse(clueAgendaTaskDTO1.getReserveTime1());
                     } catch (ParseException e) {
                         islegal = false;
                     }
-//                     if(islegal && clueAgendaTaskDTO1.getReserveTime1().length()<19){
-//                        islegal = false;
-//                     }
+                    // if(islegal && clueAgendaTaskDTO1.getReserveTime1().length()<19){
+                    // islegal = false;
+                    // }
                 }
                 if (islegal && (clueAgendaTaskDTO1.getDate() != null
-                    && !"".equals(clueAgendaTaskDTO1.getDate()))) {
+                        && !"".equals(clueAgendaTaskDTO1.getDate()))) {
                     try {
                         Date date = format.parse(clueAgendaTaskDTO1.getDate());
                     } catch (ParseException e) {
                         islegal = false;
                     }
-//                    if(islegal && clueAgendaTaskDTO1.getDate().length()<19){
-//                        islegal = false;
-//                    }
+                    // if(islegal && clueAgendaTaskDTO1.getDate().length()<19){
+                    // islegal = false;
+                    // }
                 }
                 if (islegal && (clueAgendaTaskDTO1.getMessageTime1() != null
-                    && !"".equals(clueAgendaTaskDTO1.getMessageTime1()))) {
+                        && !"".equals(clueAgendaTaskDTO1.getMessageTime1()))) {
                     try {
                         Date date = format.parse(clueAgendaTaskDTO1.getMessageTime1());
                     } catch (ParseException e) {
                         islegal = false;
                     }
-//                    if(islegal && clueAgendaTaskDTO1.getMessageTime1().length()<19){
-//                        islegal = false;
-//                    }
+                    // if(islegal && clueAgendaTaskDTO1.getMessageTime1().length()<19){
+                    // islegal = false;
+                    // }
                 }
                 // 判断必填项
                 if (islegal && (clueAgendaTaskDTO1.getTypeName() == null
@@ -636,9 +642,9 @@ public class ExtendClueAgendaTaskController {
                     }
                 }
                 if (islegal && (clueAgendaTaskDTO1.getIndustryCategoryName() != null
-                    && !"".equals(clueAgendaTaskDTO1.getIndustryCategoryName()))) {
-                    clueAgendaTaskDTO1.setIndustryCategory(
-                        Integer.valueOf(industryCategoryMap.get(clueAgendaTaskDTO1.getIndustryCategoryName())));
+                        && !"".equals(clueAgendaTaskDTO1.getIndustryCategoryName()))) {
+                    clueAgendaTaskDTO1.setIndustryCategory(Integer.valueOf(
+                            industryCategoryMap.get(clueAgendaTaskDTO1.getIndustryCategoryName())));
                     if (clueAgendaTaskDTO1.getIndustryCategory() == null) {
                         islegal = false;
                     }
@@ -677,7 +683,8 @@ public class ExtendClueAgendaTaskController {
                     pushClueReq.setInputType(4);
                     pushClueReq.setAccountName(clueAgendaTaskDTO1.getAccountName());
                     pushClueReq.setUrlAddress(clueAgendaTaskDTO1.getUrlAddress());
-                    pushClueReq.setIndustryCategory(String.valueOf(clueAgendaTaskDTO1.getIndustryCategory()));
+                    pushClueReq.setIndustryCategory(
+                            String.valueOf(clueAgendaTaskDTO1.getIndustryCategory()));
                     pushClueReq.setProjectId(clueAgendaTaskDTO1.getProjectId());
                     list1.add(pushClueReq);
                 } else {
