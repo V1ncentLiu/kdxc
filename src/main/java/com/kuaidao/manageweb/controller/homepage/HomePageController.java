@@ -4,6 +4,7 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 
 import com.kuaidao.aggregation.constant.AggregationConstant;
+import com.kuaidao.common.constant.StageContant;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.subject.Subject;
@@ -67,14 +68,14 @@ public class HomePageController {
         request.setAttribute("mqUserName", mqUserName);
         request.setAttribute("mqPassword", mqPassword);
         request.setAttribute("userId", user.getId());
-//        RoleInfoDTO roleInfoDTO1 = user.getRoleList().get(0);
-//        if(roleInfoDTO1!=null){
-//            if(roleInfoDTO1.getRoleCode().equals(RoleCodeEnum.HWY.name())||roleInfoDTO1.getRoleCode().equals(RoleCodeEnum.XXLY.name())){
-//                request.setAttribute("accountType", AggregationConstant.YES);
-//            }else{
-//                request.setAttribute("accountType", AggregationConstant.NO);
-//            }
-//        }
+        RoleInfoDTO roleInfoDTO1 = user.getRoleList().get(0);
+        if(roleInfoDTO1!=null){
+            if(roleInfoDTO1.getRoleCode().equals(RoleCodeEnum.HWY.name())||roleInfoDTO1.getRoleCode().equals(RoleCodeEnum.XXLY.name())){
+                request.setAttribute("accountType", StageContant.STAGE_PHONE_TRAFFIC);
+            }else{
+                request.setAttribute("accountType", StageContant.STAGE_TELE);
+            }
+        }
         Long orgId = user.getOrgId();
         if (orgId != null) {
             IdEntity idEntity = new IdEntity(orgId + "");
