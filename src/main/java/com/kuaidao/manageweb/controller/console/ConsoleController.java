@@ -682,6 +682,8 @@ public class ConsoleController {
         busGroupIdList.add(curLoginUser.getOrgId());
         visitRecordReqDTO.setBusGroupIdList(busGroupIdList);
         visitRecordReqDTO.setStatus(1);
+        //待审核
+        visitRecordReqDTO.setVisitStatus(1);
         return visitRecordFeignClient.listVisitRecordNoPage(visitRecordReqDTO);
     }
 
