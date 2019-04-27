@@ -676,21 +676,20 @@ var clueInfo = [[${clueInfo}]];//资源信息
                     	  }
                     	  if(response.data.code!='0'){
                     		  addClueVM.$message({
-      	                        message:response.data.message,
-      	                        type: 'error'
+      	                        message:response.data.msg,
+      	                        type: 'error',duration:2000,onClose:function(){
+    	                   	  		window.location.href="/exetend/agendaTaskManager/waitDistributResource"; 
+       		        	   		}
       	                      }); 
-      						  return ;
-                    	  }
-                    	  if(response.data.date==1){
+                    	  }else if(response.data.date==1){
 	                   	  	addClueVM.$message({message:'自动分发成功',type:'success',duration:2000,onClose:function(){
 	                   	  		window.location.href="/exetend/agendaTaskManager/waitDistributResource"; 
    		        	   		}});
-                    	  }else(){
+                    	  }else{
 	                   	  	addClueVM.$message({message:'自动分发失败',type:'success',duration:2000,onClose:function(){
 	                   	  		window.location.href="/exetend/agendaTaskManager/waitDistributResource"; 
    		        	   		}});
                     	  }
-   		        	   }});
                      }).then(function(){
                  		
                    });
@@ -935,11 +934,15 @@ var clueInfo = [[${clueInfo}]];//资源信息
 	        	this.form.searchWord=clueInfo.clueBasic.searchWord;
 	        	this.form.messagePoint=clueInfo.clueBasic.messagePoint;
 	        	this.form.messageTime=clueInfo.clueBasic.messageTime;
-	        	this.form.industryCategory=clueInfo.clueBasic.industryCategory+"";
+	        	if(clueInfo.clueBasic.industryCategory){
+		        	this.form.industryCategory=clueInfo.clueBasic.industryCategory+"";
+	        	}
             }
             if(clueInfo.clueCustomer){
 	            this.form.cusId=clueInfo.clueCustomer.id;
-	            this.form.sex=clueInfo.clueCustomer.sex+"";
+	            if(clueInfo.clueCustomer.sex){
+		            this.form.sex=clueInfo.clueCustomer.sex+"";
+	            }
 	        	this.form.phone=clueInfo.clueCustomer.phone;
 	        	this.form.wechat=clueInfo.clueCustomer.wechat;
 	        	this.form.wechat2=clueInfo.clueCustomer.wechat2;
