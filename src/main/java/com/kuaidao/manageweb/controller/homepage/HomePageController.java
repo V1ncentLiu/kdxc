@@ -104,8 +104,6 @@ public class HomePageController {
            }
         }
         request.setAttribute("isShowConsoleBtn", isShowConsoleBtn);
-        request.setAttribute("accountType",2);
-
         return "index";
     }
 
