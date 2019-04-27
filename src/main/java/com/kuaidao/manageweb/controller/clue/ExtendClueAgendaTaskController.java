@@ -188,6 +188,12 @@ public class ExtendClueAgendaTaskController {
         request.setAttribute("adsenseList", getDictionaryByCode(DicCodeEnum.ADENSE.getCode()));
         // 查询字典媒介集合
         request.setAttribute("mediumList", getDictionaryByCode(DicCodeEnum.MEDIUM.getCode()));
+        // 查询字典行业类别集合
+        request.setAttribute("industryCategoryList",
+                getDictionaryByCode(DicCodeEnum.INDUSTRYCATEGORY.getCode()));
+        // 查询字典账户名称集合
+        request.setAttribute("accountNameList",
+                getDictionaryByCode(DicCodeEnum.ACCOUNT_NAME.getCode()));
         request.setAttribute("ossUrl", ossUrl);
         return "clue/updateCluePage";
     }
@@ -228,7 +234,7 @@ public class ExtendClueAgendaTaskController {
     public JSONResult<String> updateClue(HttpServletRequest request,
             @RequestBody PushClueReq pushClueReq) {
 
-        JSONResult<String> clueInfo = extendClueFeignClient.updateClue(pushClueReq);
+        JSONResult<String> clueInfo = extendClueFeignClient.createClue(pushClueReq);
 
         return clueInfo;
     }
@@ -436,7 +442,7 @@ public class ExtendClueAgendaTaskController {
             for (int j = 0; j < rowList.size(); j++) {
                 Object object = rowList.get(j);
                 String value = (String) object;
-                if (j == 0) {// 日期
+                if (j == 0) {// 创建时间
                     rowDto.setDate(value);
                 } else if (j == 1) {// 资源类型
                     rowDto.setTypeName(value);
@@ -448,34 +454,40 @@ public class ExtendClueAgendaTaskController {
                     rowDto.setSourceName(value);
                 } else if (j == 5) {// 资源项目
                     rowDto.setProjectName(value);
-                } else if (j == 6) {// 姓名
+                } else if (j == 6) {// 行业类别
+                    rowDto.setIndustryCategoryName(value);
+                } else if (j == 7) {// 姓名
                     rowDto.setCusName(value);
-                } else if (j == 7) {// 手机
+                } else if (j == 8) {// 手机
                     rowDto.setPhone(value);
-                } else if (j == 8) {// 手机2
+                } else if (j == 9) {// 手机2
                     rowDto.setPhone2(value);
-                } else if (j == 9) {// 微信
+                } else if (j == 10) {// 微信
                     rowDto.setWechat(value);
-                } else if (j == 10) {// 微信2
+                } else if (j == 11) {// 微信2
                     rowDto.setWechat2(value);
-                } else if (j == 11) {// QQ
+                } else if (j == 12) {// QQ
                     rowDto.setQq(value);
-                } else if (j == 12) {// 邮箱
+                } else if (j == 13) {// 邮箱
                     rowDto.setEmail(value);
-                } else if (j == 13) {// 性别
+                } else if (j == 14) {// 性别
                     rowDto.setSex1(value);
-                } else if (j == 14) {// 年龄
+                } else if (j == 15) {// 年龄
                     rowDto.setAge1(value);
-                } else if (j == 15) {// 地址
+                } else if (j == 16) {// 地址
                     rowDto.setAddress(value);
-                } else if (j == 16) {// 留言时间
+                } else if (j == 17) {// 留言时间
                     rowDto.setMessageTime1(value);
-                } else if (j == 17) {// 留言内容
+                } else if (j == 18) {// 留言内容
                     rowDto.setMessagePoint(value);
-                } else if (j == 18) {// 搜索词
+                } else if (j == 19) {// 搜索词
                     rowDto.setSearchWord(value);
-                } else if (j == 19) {// 预约时间
+                } else if (j == 20) {// 预约时间
                     rowDto.setReserveTime1(value);
+                } else if (j == 21) {// 账户名称
+                    rowDto.setAccountName(value);
+                } else if (j == 22) {// url地址
+                    rowDto.setUrlAddress(value);
                 }
             } // inner foreach end
             dataList.add(rowDto);
@@ -526,6 +538,9 @@ public class ExtendClueAgendaTaskController {
         // 媒介
         Map<String, String> sourceMap =
                 dicMap(itemFeignClient.queryDicItemsByGroupCode(DicCodeEnum.MEDIUM.getCode()));
+        // 行业类别
+        Map<String, String> industryCategoryMap = dicMap(
+                itemFeignClient.queryDicItemsByGroupCode(DicCodeEnum.INDUSTRYCATEGORY.getCode()));
 
         if (list != null && list.size() > 0) {
 
@@ -546,7 +561,7 @@ public class ExtendClueAgendaTaskController {
                 } else {
                     islegal = false;
                 }
-                // 判断时间格式是否正确,如果正确则添加秒
+                // 判断时间格式是否正确
                 if (islegal && (clueAgendaTaskDTO1.getReserveTime1() != null
                         && !"".equals(clueAgendaTaskDTO1.getReserveTime1()))) {
                     try {
@@ -554,9 +569,8 @@ public class ExtendClueAgendaTaskController {
                     } catch (ParseException e) {
                         islegal = false;
                     }
-                    // if(islegal){
-                    // clueAgendaTaskDTO1.setReserveTime1(clueAgendaTaskDTO1.getReserveTime1() +
-                    // ":00");
+                    // if(islegal && clueAgendaTaskDTO1.getReserveTime1().length()<19){
+                    // islegal = false;
                     // }
                 }
                 if (islegal && (clueAgendaTaskDTO1.getDate() != null
@@ -566,8 +580,8 @@ public class ExtendClueAgendaTaskController {
                     } catch (ParseException e) {
                         islegal = false;
                     }
-                    // if(islegal){
-                    // clueAgendaTaskDTO1.setDate(clueAgendaTaskDTO1.getDate() + ":00");
+                    // if(islegal && clueAgendaTaskDTO1.getDate().length()<19){
+                    // islegal = false;
                     // }
                 }
                 if (islegal && (clueAgendaTaskDTO1.getMessageTime1() != null
@@ -577,9 +591,8 @@ public class ExtendClueAgendaTaskController {
                     } catch (ParseException e) {
                         islegal = false;
                     }
-                    // if(islegal){
-                    // clueAgendaTaskDTO1.setMessageTime1(clueAgendaTaskDTO1.getMessageTime1() +
-                    // ":00");
+                    // if(islegal && clueAgendaTaskDTO1.getMessageTime1().length()<19){
+                    // islegal = false;
                     // }
                 }
                 // 判断必填项
@@ -628,6 +641,14 @@ public class ExtendClueAgendaTaskController {
                         islegal = false;
                     }
                 }
+                if (islegal && (clueAgendaTaskDTO1.getIndustryCategoryName() != null
+                        && !"".equals(clueAgendaTaskDTO1.getIndustryCategoryName()))) {
+                    clueAgendaTaskDTO1.setIndustryCategory(Integer.valueOf(
+                            industryCategoryMap.get(clueAgendaTaskDTO1.getIndustryCategoryName())));
+                    if (clueAgendaTaskDTO1.getIndustryCategory() == null) {
+                        islegal = false;
+                    }
+                }
                 // 判断性别
                 if (islegal && (clueAgendaTaskDTO1.getSex1() != null
                         && !"".equals(clueAgendaTaskDTO1.getSex1()))) {
@@ -659,6 +680,12 @@ public class ExtendClueAgendaTaskController {
                     pushClueReq.setMessageTime(clueAgendaTaskDTO1.getMessageTime1());
                     pushClueReq.setAppointTime(clueAgendaTaskDTO1.getReserveTime1());
                     pushClueReq.setCreateTime(clueAgendaTaskDTO1.getDate());
+                    pushClueReq.setInputType(4);
+                    pushClueReq.setAccountName(clueAgendaTaskDTO1.getAccountName());
+                    pushClueReq.setUrlAddress(clueAgendaTaskDTO1.getUrlAddress());
+                    pushClueReq.setIndustryCategory(
+                            String.valueOf(clueAgendaTaskDTO1.getIndustryCategory()));
+                    pushClueReq.setProjectId(clueAgendaTaskDTO1.getProjectId());
                     list1.add(pushClueReq);
                 } else {
                     illegalDataList.add(clueAgendaTaskDTO1);
@@ -718,6 +745,7 @@ public class ExtendClueAgendaTaskController {
                 curList.add(clueAgendaTaskDTO.getSourceTypeName());
                 curList.add(clueAgendaTaskDTO.getSource());
                 curList.add(clueAgendaTaskDTO.getProjectName());
+                curList.add(clueAgendaTaskDTO.getIndustryCategoryName());
                 curList.add(clueAgendaTaskDTO.getCusName());
                 curList.add(clueAgendaTaskDTO.getPhone());
                 curList.add(clueAgendaTaskDTO.getPhone2());
@@ -732,6 +760,8 @@ public class ExtendClueAgendaTaskController {
                 curList.add(clueAgendaTaskDTO.getMessagePoint());
                 curList.add(clueAgendaTaskDTO.getSearchWord());
                 curList.add(clueAgendaTaskDTO.getReserveTime1());
+                curList.add(clueAgendaTaskDTO.getAccountName());
+                curList.add(clueAgendaTaskDTO.getUrlAddress());
                 dataList.add(curList);
             }
 
@@ -756,12 +786,13 @@ public class ExtendClueAgendaTaskController {
 
     private List<Object> getHeadTitleList() {
         List<Object> headTitleList = new ArrayList<>();
-        headTitleList.add("日期");
+        headTitleList.add("创建时间");
         headTitleList.add("资源类型");
         headTitleList.add("资源类别");
         headTitleList.add("广告位");
         headTitleList.add("媒介");
         headTitleList.add("资源项目");
+        headTitleList.add("行业类别");
         headTitleList.add("姓名");
         headTitleList.add("手机");
         headTitleList.add("手机2");
@@ -776,6 +807,8 @@ public class ExtendClueAgendaTaskController {
         headTitleList.add("留言内容");
         headTitleList.add("搜索词");
         headTitleList.add("预约时间");
+        headTitleList.add("账户名称");
+        headTitleList.add("url地址");
         return headTitleList;
     }
 }
