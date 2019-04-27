@@ -228,7 +228,7 @@ public class ExtendClueAgendaTaskController {
     public JSONResult<String> updateClue(HttpServletRequest request,
             @RequestBody PushClueReq pushClueReq) {
 
-        JSONResult<String> clueInfo = extendClueFeignClient.updateClue(pushClueReq);
+        JSONResult<String> clueInfo = extendClueFeignClient.createClue(pushClueReq);
 
         return clueInfo;
     }
