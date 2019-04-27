@@ -444,7 +444,7 @@ var homePageVM=new Vue({
 			                     clientInfo.enterpriseId = homePageVM.enterpriseId;
 			                     clientInfo.token=homePageVM.token;
 			                     localStorage.setItem("clientInfo",JSON.stringify(clientInfo));
-			                     
+			                     console.info("clientInfo"+JSON.stringify(clientInfo));
 			                     var recordParam = {};
 			                     recordParam.clientType=homePageVM.loginClientForm.clientType;
 			                     recordParam.bindPhone= bindPhone;

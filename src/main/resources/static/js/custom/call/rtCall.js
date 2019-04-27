@@ -8,7 +8,7 @@ $(function(){
 		if(loginClientType=="tr"){
 			homePageVM.loginClientForm.clientType = clientInfoObj.clientType;
 			homePageVM.loginClientForm.bindPhone = clientInfoObj.bindTel;
-			homePageVM.loginClientForm.bindType = clientInfoObj.bindType;
+			homePageVM.loginClientForm.bindPhoneType = clientInfoObj.bindType;
 			homePageVM.loginClientForm.cno = clientInfoObj.cno;
 			homePageVM.enterpriseId = clientInfoObj.enterpriseId;
 			homePageVM.token = clientInfoObj.token;
