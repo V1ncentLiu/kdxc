@@ -37,7 +37,7 @@ var mainDivVM = new Vue({
             message:''
         },
         allocationVisible: false,
-        formLabelWidth: '150px',
+        formLabelWidth: '130px',
         allocationFormRules: {
             saleId: [
                 { required: true, message: '请选择商务经理', trigger: 'change' }
@@ -410,6 +410,8 @@ var mainDivVM = new Vue({
                     if(resData.code=='0'){
                         mainDivVM.dialogFormVisible = false;
                         mainDivVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
+                            mainDivVM.initSignRecordData();
+                            // 待审批到访记录也刷新列表
                             mainDivVM.initSignRecordData();
                         }});
                     }else{
