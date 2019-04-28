@@ -427,10 +427,10 @@ public class ExtendClueAgendaTaskController {
             return new JSONResult<>().fail(SysErrorCodeEnum.ERR_EXCLE_DATA.getCode(),
                     SysErrorCodeEnum.ERR_EXCLE_DATA.getMessage());
         }
-        if (excelDataList.size() > 10000) {
-            logger.error("上传自定义字段,大于10000条，条数{{}}", excelDataList.size());
+        if (excelDataList.size() > 1000) {
+            logger.error("上传自定义字段,大于1000条，条数{{}}", excelDataList.size());
             return new JSONResult<>().fail(SysErrorCodeEnum.ERR_EXCLE_OUT_SIZE.getCode(),
-                    "导入数据过多，已超过10000条！");
+                    "导入数据过多，已超过1000条！");
         }
 
         // 存放合法的数据
@@ -693,7 +693,7 @@ public class ExtendClueAgendaTaskController {
                 }
             }
         }
-        if (dataList != null && dataList.size() > 0) {
+        if (list1 != null && list1.size() > 0) {
             JSONResult jsonResult = extendClueFeignClient.importclue(list1);
             if (!jsonResult.getCode().equals("0")) {
                 return new JSONResult<>().success(list);
