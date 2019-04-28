@@ -15,6 +15,7 @@ var mainDivVM = new Vue({
         secondSignedNum:'',//当月二次来访签约数
         unPaymentNum:'',//未收齐尾款笔数
         workDay:'',//工作天数
+        visitedNum:'',//当月首访数
         //公告  
         afficheBox:false,     
         items: [ 
