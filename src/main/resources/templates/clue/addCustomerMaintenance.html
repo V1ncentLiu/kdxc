@@ -1429,8 +1429,14 @@
             },
             onConfirmAdd(index ,row) {
              // var _this = this;
-           	//  this.$refs['LineRuleForm'].validate((valid) => {
-             //       if (valid) {
+                var flag = false;
+           	 this.$refs['LineRuleForm'].validate((valid) => {
+                 flag = valid;
+             })
+
+             if(!flag){
+                 return null;
+             }
                 	 //跟进记录保存
                var param={};
                param.clueId=clueId;
@@ -1461,29 +1467,7 @@
                // 如果是编辑跟进记录
                if( isEdit){
                    param.id=this.formInline.id;
-                //    axios.post('/tele/clueMyCustomerInfo/updateClueTracking',param).then(function (response) {
-                 // 	  addCustomerVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
-                 // 	      axios.post('/tele/clueMyCustomerInfo/findClueTracking',param).then(function (response) {
-                 //    	  isEdit=false;
-                 //    	  addCustomerVM.lineFormShow=false;
-                 //    	  addCustomerVM.addBtnDisabled=false;
-                 //      	  addCustomerVM.tableDataC2=response.data.data;
-                 //       });
-               //    }});
-                 // });
                }else{
-                 //   axios.post('/tele/clueMyCustomerInfo/saveClueTracking',param).then(function (response) {
-                 // 	  addCustomerVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
-                 // 	    axios.post('/tele/clueMyCustomerInfo/findClueTracking',param)
-                 //      .then(function (response) {
-                 //      	addCustomerVM.lineFormShow=false;
-                 //   	     addCustomerVM.addBtnDisabled=false;
-                 //      	 addCustomerVM.tableDataC2=response.data.data;
-                 //      	 //新增
-                 //      	 _this.$refs['LineRuleForm'].resetFields();
-                 //       });
-               //    }});
-                 // });
                }
                return param;
                         // }
@@ -1770,7 +1754,7 @@
                     clueIntention.district = district;
                     var tracking = {};
                     tracking = this.onConfirmAdd();
-                    if(tracking.customerStatus==3){
+                    if(tracking&&tracking.customerStatus==3){
                         addCustomerVM.$message({message: '选择客户状态为不跟进的状态不允许提交邀约来访', type: 'warning'});
                         return false;
                     }
@@ -1778,7 +1762,9 @@
                     clue.clueId = clueId;
                     clue.clueCustomer = clueCustomer;
                     clue.clueIntention = clueIntention;
-                    clue.tracking = tracking;
+                    if(tracking){
+                        clue.tracking = tracking;
+                    }
                     this.inviteBtnDisabled = true;
                     clue.isInvitation = 1;
                     axios.post('/tele/clueMyCustomerInfo/updateCustomerClue', clue)
