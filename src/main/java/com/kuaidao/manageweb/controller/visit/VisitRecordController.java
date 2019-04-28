@@ -302,10 +302,10 @@ public class VisitRecordController {
         logger.info("listVisitRecord,curLoginUser{{}},reqParam{{}}", curLoginUser,
                 visitNoRecordReqDTO);
 
-        if (null == visitNoRecordReqDTO.getStatus()) {
-            visitNoRecordReqDTO.setStatus(Constants.IS_LOGIN_UP);
-
-        }
+//        if (null == visitNoRecordReqDTO.getStatus()) {
+//            visitNoRecordReqDTO.setStatus(Constants.IS_LOGIN_UP);
+//
+//        }
 
         JSONResult<PageBean<VisitNoRecordRespDTO>> visitList =
                 visitRecordFeignClient.listNoVisitRecord(visitNoRecordReqDTO);
