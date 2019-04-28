@@ -92,7 +92,7 @@
                   		<el-input v-model="form.phone" placeholder="手机号" maxLength="11" @keyup.native="number1"></el-input> 
                     </el-form-item> 
                     <el-form-item label="是否撤回资源:">
-                  		<el-select v-model="form.medium" placeholder="全部" clearable > 
+                  		<el-select v-model="form.isRecall" placeholder="全部" clearable > 
                         <el-option v-for="item in recallArr" :key="item.value" :label="item.name"
                   			:value="item.value"> 
                         </el-option> 
@@ -568,6 +568,15 @@ var wdrVM = new Vue({
 					  response.data.data.clueBasic.messageTime=crtTimeFtt1(messageTime);
 				  }
 				   wdrVM.basic=response.data.data.clueBasic;
+				   wdrVM.basic.reserveTime=wdrVM.dateFormat1(wdrVM.basic.reserveTime);
+				   var sex =wdrVM.customer.sex;
+				   if(sex==1){
+					   wdrVM.customer.sex="男";
+				   }else if (sex==2){
+					   wdrVM.customer.sex="女";
+				   }else {
+					   wdrVM.customer.sex="";
+				   }
 				   wdrVM.intention=response.data.data.clueIntention;
 				   wdrVM.clueReceive=response.data.data.clueReceive;
      			})
@@ -762,6 +771,13 @@ var wdrVM = new Vue({
           //时间格式化
           dateFormat(row, column){
             var date = row[column.property];
+            if (date == undefined || date ==null || date =="") {
+              return "";
+            }
+            return moment(new Date(date)).format("YYYY-MM-DD HH:mm:ss");
+          } ,
+          //时间格式化
+          dateFormat1(date){
             if (date == undefined || date ==null || date =="") {
               return "";
             }
