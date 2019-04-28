@@ -9,7 +9,7 @@
 <div  v-loading="loading" id="addCustomer" class="addCustomer mainPadding" style="display: none;"> 
     <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
         <el-breadcrumb-item>Home</el-breadcrumb-item>
-        <el-breadcrumb-item>推广管理</el-breadcrumb-item>
+        <el-breadcrumb-item>线索管理</el-breadcrumb-item>
         <el-breadcrumb-item>编辑线索</el-breadcrumb-item>
     </el-breadcrumb> 
     
@@ -84,7 +84,7 @@
                     </el-col>
                 	<el-col :span="8">
                         <el-form-item label="地址：" :label-width="formLabelWidth" prop="province" >
-                           <el-input  v-model="form.province" autocomplete="off" placeholder="输入地址" maxLength="50"></el-input>
+                           <el-input  v-model="form.province" autocomplete="off" placeholder="输入地址" maxLength="20"></el-input>
                         </el-form-item>
                     </el-col>
                 </el-row>
@@ -282,7 +282,7 @@
                     :file-list="fileList">
                     <el-button slot="trigger" size="small" type="primary">选择图片</el-button>
                      <el-button style="margin-left: 10px;" size="small" type="success" @click="submitUpload">上传</el-button>
-                    <div slot="tip" class="el-upload__tip">只能上传jpg/png文件，且不超过2M</div>
+                    <div slot="tip" class="el-upload__tip">只能上传jpg/png文件，且不超过2MB</div>
                 </el-upload>
               </el-form-item>
               <el-form-item label="" :label-width="formLabelWidth" >
@@ -588,6 +588,17 @@ var clueInfo = [[${clueInfo}]];//资源信息
                console.info(err);
            },
            handleBefore(file){
+        	   var isTextComputer = file.type === 'image/png' || file.type==='image/jpeg';
+               if(!isTextComputer){
+                   this.fileList=[];
+                   this.$message.error('文件格式错误');
+                   return false;
+               }
+               if(file.size>2*1024*1024){
+                   this.fileList=[];
+                   this.$message.error('图片最大为2MB');
+                   return false;
+               }
            },
            random_string(len) {
                len = len || 32;
@@ -760,6 +771,7 @@ var clueInfo = [[${clueInfo}]];//资源信息
             wechatSumbit() {
             	this.form.wechat2=this.wechatForm.wechat2;
             	this.form.wechatUrl=this.wechatForm.wechatUrl;
+            	addClueVM.$message({ message: "提交成功", type: 'success' }); 
             	this.wechatVisible = false;
             },
             removeDomain(item) {
