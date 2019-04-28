@@ -978,6 +978,7 @@ public class MyCustomerClueController {
         UserInfoDTO user = (UserInfoDTO) subject.getSession().getAttribute("user");
         if (null != user) {
             dto.setUpdateUser(user.getId());
+            dto.setOrg(user.getOrgId());
         }
         return myCustomerFeignClient.updateCustomerClue(dto);
     }
