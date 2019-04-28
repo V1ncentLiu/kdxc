@@ -282,7 +282,7 @@
                     :file-list="fileList">
                     <el-button slot="trigger" size="small" type="primary">选择图片</el-button>
                      <el-button style="margin-left: 10px;" size="small" type="success" @click="submitUpload">上传</el-button>
-                    <div slot="tip" class="el-upload__tip">只能上传jpg/png文件，且不超过2M</div>
+                    <div slot="tip" class="el-upload__tip">只能上传jpg/png文件，且不超过2MB</div>
                 </el-upload>
               </el-form-item>
               <el-form-item label="" :label-width="formLabelWidth" >
@@ -581,6 +581,17 @@ var ossSignatureUrl = [[${ossUrl}]];//上传文件地址
                console.info(err);
            },
            handleBefore(file){
+        	   var isTextComputer = file.type === 'image/png' || file.type==='image/jpeg';
+               if(!isTextComputer){
+                   this.fileList=[];
+                   this.$message.error('文件格式错误');
+                   return false;
+               }
+               if(file.size>2*1024*1024){
+                   this.fileList=[];
+                   this.$message.error('图片最大为2MB');
+                   return false;
+               }
            },
            random_string(len) {
                len = len || 32;
