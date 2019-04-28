@@ -427,7 +427,7 @@ public class ExtendClueAgendaTaskController {
             return new JSONResult<>().fail(SysErrorCodeEnum.ERR_EXCLE_DATA.getCode(),
                     SysErrorCodeEnum.ERR_EXCLE_DATA.getMessage());
         }
-        if (excelDataList.size() > 1000) {
+        if (excelDataList.size() > 30) {
             logger.error("上传自定义字段,大于1000条，条数{{}}", excelDataList.size());
             return new JSONResult<>().fail(SysErrorCodeEnum.ERR_EXCLE_OUT_SIZE.getCode(),
                     "导入数据过多，已超过1000条！");
