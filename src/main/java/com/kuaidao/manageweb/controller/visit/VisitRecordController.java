@@ -252,8 +252,6 @@ public class VisitRecordController {
             return new JSONResult().fail(SysErrorCodeEnum.ERR_NOTEXISTS_DATA.getCode(), "角色没有权限");
         }
 
-        logger.info("listVisitRecord,curLoginUser{{}},reqParam{{}}", curLoginUser,
-                visitRecordReqDTO);
         return visitRecordFeignClient.listVisitRecord(visitRecordReqDTO);
     }
 

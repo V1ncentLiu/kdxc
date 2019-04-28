@@ -49,15 +49,15 @@
             <li class="border_wraper">
                 <div class="wraper_dl f-fl">
                     <p class="top_title"><em></em>当月签约率</p>
-                    <el-progress type="circle" :percentage="20" stroke-width="20" width="168" color="#697df5"></el-progress>
+                    <el-progress type="circle" :percentage="20" :stroke-width="20" :width="168" color="#697df5"></el-progress>
                 </div>
                 <div class="wraper_dl f-fl">
                     <p class="top_title"><em></em>当月首访签约率</p>
-                    <el-progress type="circle" :percentage="30" stroke-width="20" width="168" color="#a978f5"></el-progress>
+                    <el-progress type="circle" :percentage="30" :stroke-width="20" :width="168" color="#a978f5"></el-progress>
                 </div>
                 <div class="wraper_dl f-fl">
                     <p class="top_title"><em></em>当月全款率</p>
-                    <el-progress type="circle" :percentage="10" stroke-width="20" width="168" color="#32c3bf"></el-progress>
+                    <el-progress type="circle" :percentage="10" :stroke-width="20" :width="168" color="#32c3bf"></el-progress>
                 </div>
             </li>
         </ul>
@@ -225,7 +225,7 @@
                 <el-button type="primary" size="small" class="f-fr btn" @click="toAllocationClue">快速分配资源</el-button>
             </div>
         </div>
-        <el-row class="marginB20">
+        <el-row class="mainWhiteBg mainWhitePadding">
             <el-table  ref="multipleTable" tooltip-effect="dark" border @row-dblclick="showCustomerDetail" @selection-change="handleSelectionChange"
                 style="width: 100%"  :data="dataTable">
                <el-table-column align="center" type="selection" label="全选" width="55"></el-table-column>
@@ -247,20 +247,20 @@
             </el-table>
         </el-row>
         <!-- 分发资源 -->
-        <el-dialog  title="分发资源"  :visible.sync="allocationVisible">
+        <el-dialog  title="分发资源"  :visible.sync="allocationVisible" width="540px" @close="allocationCloseDialog">
             <template>
                 <el-form :model="allocationForm" ref="allocationForm" :rules="allocationFormRules">
                     <el-form-item >
                         {{allocationForm.message}}
                     </el-form-item>
-                    <el-form-item label="商务经理"    
+                    <el-form-item label="商务经理："    
                         :label-width="formLabelWidth"  
                         prop="saleId"
                         :rules="[
                             { required: true, message: '商务经理不能为空'},
                         ]"
                         >
-                        <el-select v-model="allocationForm.saleId" placeholder="组内商务经理姓名" style="width: 400px;">
+                        <el-select v-model="allocationForm.saleId" placeholder="组内商务经理姓名" style="width: 290px;">
                             <el-option v-for="item in saleOptions" 
                                 :key="item.id" 
                                 :label="item.name" 
@@ -268,8 +268,8 @@
                             </el-option>
                         </el-select>
                     </el-form-item>
-                    <el-form-item label="备注"    :label-width="formLabelWidth"  prop="remark">
-                        <el-input type="textarea" v-model="allocationForm.remark" class="input-with-select" maxlength="200" style="width: 400px;" :rows="4" placeholder="输入分发备注"></el-input>
+                    <el-form-item label="备注：" :label-width="formLabelWidth"  prop="remark">
+                        <el-input type="textarea" v-model="allocationForm.remark" class="input-with-select" maxlength="200" style="width: 290px;" :rows="4" placeholder="输入分发备注"></el-input>
                     </el-form-item>
                 </el-form>
                 <div slot="footer" class="dialog-footer">
@@ -291,53 +291,55 @@
                 <el-button type="danger" size="small" class="f-fr btn" @click="OpenRejectVisitRecordDialog">驳回</el-button>
             </div>
         </div>
-        <el-table 
-            ref="dataTable2"
-            tooltip-effect="dark"
-            style="width: 100%"
-            border
-            @selection-change="handleSelectionChange2"
-            :data="dataTable2" 
-            >
-            <el-table-column align="center" type="selection" width="55"></el-table-column>
-            <el-table-column align="center" prop="serialNum" label="序号" width="55"></el-table-column>
-            <el-table-column align="center" prop="customerName" label="客户姓名"></el-table-column>  
-            <el-table-column align="center" prop="projectName" label="考察项目" width="100"></el-table-column>
-            <el-table-column align="center" prop="companyName" label="考察公司"></el-table-column>
-            <el-table-column align="center" prop="vistitTime" label="到访时间"></el-table-column>
-            <el-table-column align="center" prop="vistitStoreType" label="到访店铺类型" width="120" :formatter="getSignShopTypeText"></el-table-column>
-            <el-table-column align="center" prop="visitType" label="到访类型" :formatter="getVisitTypeText"></el-table-column>
-            <el-table-column align="center" prop="visitCity" label="来访城市"></el-table-column> 
-            <el-table-column align="center" prop="signProvince" label="预签约省份" width="100"></el-table-column> 
-            <el-table-column align="center" prop="signCity" label="预签约城市" width="100"></el-table-column>   
-            <el-table-column align="center" prop="signDistrict" label="预签约区／县" width="120"></el-table-column>
-            <el-table-column align="center" prop="businessGroupName" label="商务小组"></el-table-column> 
-            <el-table-column align="center" prop="businessManagerName" label="商务经理" width="100"></el-table-column>
-            <el-table-column align="center" prop="teleGroupName" label="电销组"></el-table-column> 
-            <el-table-column align="center" prop="teleSaleName" label="创业顾问"></el-table-column> 
-            <el-table-column align="center" prop="isSign" label="是否签约" width="100">
-                <template slot-scope="scope">
-                    <span v-if="scope.row.isSign===0">
-                        否&nbsp;<el-button @click="notSignedReasonClick(scope.row)" type="text">未签约原因</el-button>
-                    </span>
-                    <span v-else-if="scope.row.isSign===1">是</span>
-                </template>
-            </el-table-column>
-            <el-table-column align="center" prop="createTime" label="创建时间" width="170"></el-table-column> 
-            <el-table-column align="center" prop="visitNum" label="到访次数" :formatter="getVisitNumText">
-            </el-table-column>
-            <el-table-column align="center" prop="status" label="到访有效性" width="100">
-                <template slot-scope="scope">
-                    <span v-if="scope.row.status===0">
-                        驳回&nbsp;<el-button @click="reasonClick(scope.row)" type="text">驳回原因</el-button>
-                    </span>
-                    <span v-else-if="scope.row.status===1">待审核</span>
-                    <span v-else-if="scope.row.status===2">有效</span> 
-                </template>
-            </el-table-column>
-        </el-table>
+        <div class="mainWhiteBg mainWhitePadding">
+            <el-table 
+                ref="dataTable2"
+                tooltip-effect="dark"
+                style="width: 100%"
+                border
+                @selection-change="handleSelectionChange2"
+                :data="dataTable2" 
+                >
+                <el-table-column align="center" type="selection" width="55"></el-table-column>
+                <el-table-column align="center" prop="serialNum" label="序号" width="55"></el-table-column>
+                <el-table-column align="center" prop="customerName" label="客户姓名"></el-table-column>  
+                <el-table-column align="center" prop="projectName" label="考察项目" width="100"></el-table-column>
+                <el-table-column align="center" prop="companyName" label="考察公司"></el-table-column>
+                <el-table-column align="center" prop="vistitTime" label="到访时间"></el-table-column>
+                <el-table-column align="center" prop="vistitStoreType" label="到访店铺类型" width="120" :formatter="getSignShopTypeText"></el-table-column>
+                <el-table-column align="center" prop="visitType" label="到访类型" :formatter="getVisitTypeText"></el-table-column>
+                <el-table-column align="center" prop="visitCity" label="来访城市"></el-table-column> 
+                <el-table-column align="center" prop="signProvince" label="预签约省份" width="100"></el-table-column> 
+                <el-table-column align="center" prop="signCity" label="预签约城市" width="100"></el-table-column>   
+                <el-table-column align="center" prop="signDistrict" label="预签约区／县" width="120"></el-table-column>
+                <el-table-column align="center" prop="businessGroupName" label="商务小组"></el-table-column> 
+                <el-table-column align="center" prop="businessManagerName" label="商务经理" width="100"></el-table-column>
+                <el-table-column align="center" prop="teleGroupName" label="电销组"></el-table-column> 
+                <el-table-column align="center" prop="teleSaleName" label="创业顾问"></el-table-column> 
+                <el-table-column align="center" prop="isSign" label="是否签约" width="100">
+                    <template slot-scope="scope">
+                        <span v-if="scope.row.isSign===0">
+                            否&nbsp;<el-button @click="notSignedReasonClick(scope.row)" type="text">未签约原因</el-button>
+                        </span>
+                        <span v-else-if="scope.row.isSign===1">是</span>
+                    </template>
+                </el-table-column>
+                <el-table-column align="center" prop="createTime" label="创建时间" width="170"></el-table-column> 
+                <el-table-column align="center" prop="visitNum" label="到访次数" :formatter="getVisitNumText">
+                </el-table-column>
+                <el-table-column align="center" prop="status" label="到访有效性" width="100">
+                    <template slot-scope="scope">
+                        <span v-if="scope.row.status===0">
+                            驳回&nbsp;<el-button @click="reasonClick(scope.row)" type="text">驳回原因</el-button>
+                        </span>
+                        <span v-else-if="scope.row.status===1">待审核</span>
+                        <span v-else-if="scope.row.status===2">有效</span> 
+                    </template>
+                </el-table-column>
+            </el-table>
+        </div>
         <!-- 驳回处理 -->
-        <el-dialog title="提示" :visible.sync="dialogFormVisibleVisit">
+        <el-dialog title="提示" :visible.sync="dialogFormVisibleVisit" width="540px">
             <el-form :model="dialogForm" ref="dialogForm" :rules="dialogRules">
                 <div class="fs16 marginB20">确定要将此 {{signRecordArrTitle}} 到访记录驳回吗？</div>
                 <el-form-item label="驳回原因：" label-width="100px" prop="reason">
@@ -357,7 +359,7 @@
             </div>
         </el-dialog>
         <!-- 未签约原因 -->
-        <el-dialog title="未签约原因" :visible.sync="notSignedReasonDialog">           
+        <el-dialog title="未签约原因" :visible.sync="notSignedReasonDialog">         
             <div class="fs16 marginB20" >{{notSignReason}}</div>
         </el-dialog>
     </el-row>
@@ -373,34 +375,36 @@
                 <el-button type="danger" size="small" class="f-fr btn" @click="OpenRejectUnVisitRecordDialog">驳回</el-button>
             </div>
         </div>
-        <el-table 
-            ref="dataTable3"
-            tooltip-effect="dark"
-            style="width: 100%"
-            border
-            @selection-change="handleSelectionChange3"
-            :data="dataTable3" 
-            >
-            <el-table-column align="center" type="selection" width="55"></el-table-column>
-            <el-table-column align="center" type="index" label="序号" width="55"></el-table-column>
-            <el-table-column align="center" prop="cusName" label="客户姓名"></el-table-column>  
-            <el-table-column align="center" prop="tasteProjectId" label="品尝项目" width="100" :formatter="transformProject"></el-table-column>
-            <!-- <el-table-column align="center" prop="companyName" label="签约店型"></el-table-column> -->
-            <el-table-column align="center" prop="createTime" label="提交邀约时间"></el-table-column>
-            <el-table-column align="center" prop="reserveTime" label="邀约来访时间" width="120"></el-table-column>
-            <!-- <el-table-column align="center" prop="visitCity" label="来访城市"></el-table-column>  -->
-            <el-table-column align="center" prop="province" label="预签约省份" width="100"></el-table-column> 
-            <el-table-column align="center" prop="city" label="预签约城市" width="100"></el-table-column>   
-            <el-table-column align="center" prop="district" label="预签约区／县" width="120"></el-table-column>
-            <el-table-column align="center" prop="busGroupName" label="商务小组"></el-table-column> 
-            <el-table-column align="center" prop="busSaleName" label="商务经理" width="100"></el-table-column>
-            <el-table-column align="center" prop="teleGorupName" label="电销组"></el-table-column> 
-            <el-table-column align="center" prop="teleSaleName" label="电销顾问"></el-table-column> 
-            <el-table-column align="center" prop="createTime" label="创建时间" width="170"></el-table-column> 
-            <el-table-column align="center" prop="notVisitReason" label="未到访原因" width="170"></el-table-column> 
-        </el-table>
+        <div class="mainWhiteBg mainWhitePadding">
+            <el-table 
+                ref="dataTable3"
+                tooltip-effect="dark"
+                style="width: 100%"
+                border
+                @selection-change="handleSelectionChange3"
+                :data="dataTable3" 
+                >
+                <el-table-column align="center" type="selection" width="55"></el-table-column>
+                <el-table-column align="center" type="index" label="序号" width="55"></el-table-column>
+                <el-table-column align="center" prop="cusName" label="客户姓名"></el-table-column>  
+                <el-table-column align="center" prop="tasteProjectId" label="品尝项目" width="100" :formatter="transformProject"></el-table-column>
+                <!-- <el-table-column align="center" prop="companyName" label="签约店型"></el-table-column> -->
+                <el-table-column align="center" prop="createTime" label="提交邀约时间"></el-table-column>
+                <el-table-column align="center" prop="reserveTime" label="邀约来访时间" width="170"></el-table-column>
+                <!-- <el-table-column align="center" prop="visitCity" label="来访城市"></el-table-column>  -->
+                <el-table-column align="center" prop="province" label="预签约省份" width="100"></el-table-column> 
+                <el-table-column align="center" prop="city" label="预签约城市" width="100"></el-table-column>   
+                <el-table-column align="center" prop="district" label="预签约区／县" width="120"></el-table-column>
+                <el-table-column align="center" prop="busGroupName" label="商务小组"></el-table-column> 
+                <el-table-column align="center" prop="busSaleName" label="商务经理" width="100"></el-table-column>
+                <el-table-column align="center" prop="teleGorupName" label="电销组"></el-table-column> 
+                <el-table-column align="center" prop="teleSaleName" label="电销顾问"></el-table-column> 
+                <el-table-column align="center" prop="createTime" label="创建时间" width="170"></el-table-column> 
+                <el-table-column align="center" prop="notVisitReason" label="未到访原因" width="170"></el-table-column> 
+            </el-table>
+        </div>
         <!-- 驳回处理 -->
-        <el-dialog title="提示" :visible.sync="dialogFormVisibleUnVisit">
+        <el-dialog title="提示" :visible.sync="dialogFormVisibleUnVisit" width="540px">
             <el-form :model="dialogForm" ref="dialogForm" :rules="dialogRules">
                 <div class="fs16 marginB20">确定要将此 {{signRecordArrTitle}} 未到访记录驳回吗？</div>
                 <el-form-item label="驳回原因：" label-width="100px" prop="reason">
@@ -422,7 +426,7 @@
     </el-row>
     <!-- 待审批未到访记录 end -->
     <!-- 待审批签约记录 -->
-    <el-row class="marginB20">
+    <el-row>
         <div class="title">
             <div class="leftbox f-fl">待审批签约记录</div>
             <div class="rightbox f-fr">
@@ -432,61 +436,63 @@
                 <el-button type="danger" size="small" class="f-fr btn" @click="OpenRejectSignRecordDialog">驳回</el-button>
             </div>
         </div>
-        <el-table 
-            ref="dataTable4"
-            tooltip-effect="dark"
-            style="width: 100%"
-            border
-             @selection-change="handleSelectionChange4"
-            :data="dataTable4" 
-            >
-            <el-table-column align="center" type="selection" width="55"></el-table-column>
-            <el-table-column align="center" prop="serialNum" label="序号" width="55"></el-table-column>
-            <el-table-column align="center" prop="signNo" label="签约单编号" width="180"></el-table-column>
-            <el-table-column align="center" prop="signType" label="签约类型" width="150" :formatter="getSignTypeText"></el-table-column>
-            <el-table-column align="center" prop="createTime"  width="170" label="签约时间"></el-table-column>
-            <el-table-column align="center" prop="paymentDetails" label="付款明细">
-                <template slot-scope="scope">
-                    <el-button @click="recordClick(scope.row)" type="text" size="small">查看明细</el-button>
-                </template>
-            </el-table-column>
-            <el-table-column align="center" prop="status" label="签约单状态"  width="120">
-                <template slot-scope="scope">
-                    <span v-if="scope.row.status===0">
-                        驳回&nbsp;<el-button @click="reasonClick(scope.row)" type="text">驳回原因</el-button>
-                    </span>
-                    <span v-else-if="scope.row.status===1">待审核                                    
-                        <span v-if="scope.row.payType ==1">(全款)</span>
-                        <span v-else-if="scope.row.payType ==2">(定金)</span>
-                        <span v-else-if="scope.row.payType ==3">(追加定金)</span>
-                        <span v-else-if="scope.row.payType ==4">(尾款)</span>
-                    </span>
-                    <span v-else-if="scope.row.status===2">有效               
-                        <span v-if="scope.row.payType ==1">(全款)</span>
-                        <span v-else-if="scope.row.payType ==2">(定金)</span>
-                        <span v-else-if="scope.row.payType ==3">(追加定金)</span>
-                        <span v-else-if="scope.row.payType ==4">(尾款)</span>
-                    </span>                  
-                </template>
-            </el-table-column>
-            <el-table-column align="center" prop="customerName" label="客户姓名"></el-table-column>  
-            <el-table-column align="center" prop="idCard" label="客户身份证号" width="170"></el-table-column> 
-            <el-table-column align="center" prop="phone" label="客户联系电话" width="150"></el-table-column> 
-            <el-table-column align="center" prop="signProjectName" label="签约项目"></el-table-column>   
-            <el-table-column align="center" prop="signProvince" label="签约省份"></el-table-column>
-            <el-table-column align="center" prop="signCity" label="签约城市"></el-table-column> 
-            <el-table-column align="center" prop="signDictrict" label="签约区/县" width="100"></el-table-column>
-            <el-table-column align="center" prop="businessGroupName" label="商务小组"></el-table-column> 
-            <el-table-column align="center" prop="businessManagerName" label="商务经理"></el-table-column> 
-            <el-table-column align="center" prop="teleGroupName" label="电销组"></el-table-column>
-            <el-table-column align="center" prop="teleSaleName" label="创业顾问"></el-table-column>
-            <el-table-column align="center" prop="amountReceivable" label="应收金额"></el-table-column>
-            <el-table-column align="center" prop="firstToll" label="路费"></el-table-column>
-            <el-table-column align="center" prop="preferentialAmount" label="优惠金额"></el-table-column>
-        </el-table>
+        <div class="mainWhiteBg mainWhitePadding">
+            <el-table 
+                ref="dataTable4"
+                tooltip-effect="dark"
+                style="width: 100%"
+                border
+                 @selection-change="handleSelectionChange4"
+                :data="dataTable4" 
+                >
+                <el-table-column align="center" type="selection" width="55"></el-table-column>
+                <el-table-column align="center" prop="serialNum" label="序号" width="55"></el-table-column>
+                <el-table-column align="center" prop="signNo" label="签约单编号" width="180"></el-table-column>
+                <el-table-column align="center" prop="signType" label="签约类型" width="150" :formatter="getSignTypeText"></el-table-column>
+                <el-table-column align="center" prop="createTime"  width="170" label="签约时间"></el-table-column>
+                <el-table-column align="center" prop="paymentDetails" label="付款明细">
+                    <template slot-scope="scope">
+                        <el-button @click="recordClick(scope.row)" type="text" size="small">查看明细</el-button>
+                    </template>
+                </el-table-column>
+                <el-table-column align="center" prop="status" label="签约单状态"  width="120">
+                    <template slot-scope="scope">
+                        <span v-if="scope.row.status===0">
+                            驳回&nbsp;<el-button @click="reasonClick(scope.row)" type="text">驳回原因</el-button>
+                        </span>
+                        <span v-else-if="scope.row.status===1">待审核                                    
+                            <span v-if="scope.row.payType ==1">(全款)</span>
+                            <span v-else-if="scope.row.payType ==2">(定金)</span>
+                            <span v-else-if="scope.row.payType ==3">(追加定金)</span>
+                            <span v-else-if="scope.row.payType ==4">(尾款)</span>
+                        </span>
+                        <span v-else-if="scope.row.status===2">有效               
+                            <span v-if="scope.row.payType ==1">(全款)</span>
+                            <span v-else-if="scope.row.payType ==2">(定金)</span>
+                            <span v-else-if="scope.row.payType ==3">(追加定金)</span>
+                            <span v-else-if="scope.row.payType ==4">(尾款)</span>
+                        </span>                  
+                    </template>
+                </el-table-column>
+                <el-table-column align="center" prop="customerName" label="客户姓名"></el-table-column>  
+                <el-table-column align="center" prop="idCard" label="客户身份证号" width="170"></el-table-column> 
+                <el-table-column align="center" prop="phone" label="客户联系电话" width="150"></el-table-column> 
+                <el-table-column align="center" prop="signProjectName" label="签约项目"></el-table-column>   
+                <el-table-column align="center" prop="signProvince" label="签约省份"></el-table-column>
+                <el-table-column align="center" prop="signCity" label="签约城市"></el-table-column> 
+                <el-table-column align="center" prop="signDictrict" label="签约区/县" width="100"></el-table-column>
+                <el-table-column align="center" prop="businessGroupName" label="商务小组"></el-table-column> 
+                <el-table-column align="center" prop="businessManagerName" label="商务经理"></el-table-column> 
+                <el-table-column align="center" prop="teleGroupName" label="电销组"></el-table-column>
+                <el-table-column align="center" prop="teleSaleName" label="创业顾问"></el-table-column>
+                <el-table-column align="center" prop="amountReceivable" label="应收金额"></el-table-column>
+                <el-table-column align="center" prop="firstToll" label="路费"></el-table-column>
+                <el-table-column align="center" prop="preferentialAmount" label="优惠金额"></el-table-column>
+            </el-table>
+        </div>
         <!-- 驳回处理 -->
-        <el-dialog title="提示" :visible.sync="dialogFormVisible">
-            <el-form :model="dialogForm" ref="dialogForm" :rules="dialogRules">            
+        <el-dialog title="提示" :visible.sync="dialogFormVisible" width="540px">
+            <el-form :model="dialogForm" ref="dialogForm" :rules="dialogRules">
                 <div class="fs16 marginB20">确定要将此{{signRecordArrTitle}} 签约单驳回吗？</div>
                 <el-form-item label="驳回原因：" label-width="100px" prop="reason">
                     <el-input

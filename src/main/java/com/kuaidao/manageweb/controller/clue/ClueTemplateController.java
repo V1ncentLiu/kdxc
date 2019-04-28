@@ -139,7 +139,7 @@ public class ClueTemplateController {
      */
     @PostMapping("/save")
     @ResponseBody
-    @RequiresPermissions("aggregation:CompanyManager:add")
+    @RequiresPermissions("aggregation:clueTemplate:add")
     @LogRecord(description = "新增资源模板", operationType = OperationType.INSERT,
             menuName = MenuEnum.CLUE_TEMPLATE_MANAGEMENT)
     public JSONResult save(@Valid @RequestBody ClueTemplateReq clueTemplateReq,
