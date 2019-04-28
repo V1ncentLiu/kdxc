@@ -723,31 +723,6 @@ public class ConsoleController {
         return signRecordFeignClient.listSignRecordNoPage(reqDTO);
     }
 
-
-    public static void main(String[] args) {
-        Date curDate = new Date();
-        Date addDays = DateUtil.addDays(curDate, -7);
-     /*   System.out.println(addDays);
-        System.out.println(DateFormatUtils.format(new Date(), "yyyy-MM-dd 00:00:00"));
-        // 获取当天凌晨0点0分0秒Date
-        Calendar calendar1 = Calendar.getInstance();
-        calendar1.set(calendar1.get(Calendar.YEAR), calendar1.get(Calendar.MONTH),
-                calendar1.get(Calendar.DAY_OF_MONTH), 0, 0, 0);
-        Date beginOfDate = calendar1.getTime();
-        System.out.println(beginOfDate);
-        Date disableTime = DateUtil.convert2Date("2019-03-18 14:00:48", DateUtil.ymdhms);
-        Date addDays2 = DateUtil.addDays(disableTime, 1);
-        System.out.println(addDays2);
-        System.out.println(DateUtil.diffTimes(addDays2, new Date()));*/
-        
-        //long diffTimes = DateUtil.diffTimes(DateUtil.addDays(startTimeDate,limitDays),curDate);
-        Date startTimeDate = DateUtil.convert2Date("2019-04-11 15:42:17", DateUtil.ymdhms);
-        Date curDate2 =  DateUtil.convert2Date("2019-04-11 17:45:00", DateUtil.ymdhms);
-        Date endDate = DateUtil.addDays(startTimeDate, 2);
-        System.out.println( DateUtil.diffTimes(endDate,curDate2));
-       
-    }
-
     /**
      * 根据机构和角色类型获取用户
      * 
