@@ -42,6 +42,7 @@ import com.kuaidao.aggregation.dto.visitrecord.VisitRecordRespDTO;
 import com.kuaidao.common.constant.CluePhase;
 import com.kuaidao.common.constant.OrgTypeConstant;
 import com.kuaidao.common.constant.RoleCodeEnum;
+import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.IdEntityLong;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
@@ -678,12 +679,19 @@ public class ConsoleController {
     public JSONResult<List<VisitRecordRespDTO>> listVisitRecord(
             @RequestBody VisitRecordReqDTO visitRecordReqDTO) {
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
-        List<Long> busGroupIdList = new ArrayList<>();
+        /*List<Long> busGroupIdList = new ArrayList<>();
         busGroupIdList.add(curLoginUser.getOrgId());
-        visitRecordReqDTO.setBusGroupIdList(busGroupIdList);
+        visitRecordReqDTO.setBusGroupIdList(busGroupIdList);*/
+        
+        List<Long> accountIdList = getAccountIdList(curLoginUser.getOrgId(), RoleCodeEnum.SWJL.name());
+        if (CollectionUtils.isEmpty(accountIdList)) {
+            return new JSONResult().fail(SysErrorCodeEnum.ERR_NOTEXISTS_DATA.getCode(),
+                    "该用户下没有下属");
+        }
+        visitRecordReqDTO.setBusManagerIdList(accountIdList);
         visitRecordReqDTO.setStatus(1);
         //待审核
-        visitRecordReqDTO.setVisitStatus(1);
+        //visitRecordReqDTO.setVisitStatus(1);
         return visitRecordFeignClient.listVisitRecordNoPage(visitRecordReqDTO);
     }
 
