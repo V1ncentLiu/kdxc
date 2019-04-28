@@ -240,7 +240,7 @@
         </el-row>
     </div>
     <!-- 驳回编辑 -->
-    <el-dialog :title="editRejectTitle" :visible.sync="dialogFormVisible" width="870px">
+    <el-dialog :title="editRejectTitle" :visible.sync="dialogFormVisible" width="870px" @close="closeEditRebateDialog">
         <el-form :model="dialogForm" ref="dialogForm" :rules="dialogRules">           
             <el-form-item label="驳回人员：" :label-width="formLabelWidth" prop="person">
                 {{dialogForm.auditUserName}}
@@ -316,7 +316,7 @@
         </el-form>
         <div slot="footer" class="dialog-footer">
             <el-button type="primary" @click="submitDialogForm('dialogForm')" :disabled="confirmBtnDisabled">确 定</el-button>
-            <el-button @click="dialogFormVisible = false" >取 消</el-button>
+            <el-button @click="cancleRebateEditDialog" >取 消</el-button>
         </div>
     </el-dialog>
     <!-- 驳回原因 -->
@@ -630,7 +630,9 @@
                 dialogForm:{
                     cusAmount:'',
                     refundTime:'',
-                    reason:''
+                    reason:'',
+                    fileList: [],
+                    dynamicTags:[]
                 },
                 dialogRules:{
                     reason : [
@@ -874,6 +876,7 @@
                           var imgList =  table.imgList;
                          
                           var imgShowList = new Array();
+                          var fileIdList = new Array();
                           for(var i=0;i<imgList.length;i++){
                               var curImg = imgList[i];
                               var img={};
@@ -882,7 +885,9 @@
                                img.id=curImg.id;
                                img.rebateId=curImg.reId;
                                imgShowList.push(img);
+                               fileIdList.push(curImg.id);
                           }
+                          mainDivVM.dialogForm.fileList=fileIdList;
                           mainDivVM.editRejectTitle = "编辑驳回（"+table.signNo+"）签约单返款申请";
                           mainDivVM.fileList=imgShowList;
                           //签约单处理
@@ -893,7 +898,7 @@
                           }
                           
                           mainDivVM.dynamicTags = signNoArr;
-                          
+                          mainDivVM.dialogForm.dynamicTags=signNoArr;
                           mainDivVM.dialogFormVisible=true;
                       }else{
                           console.error(response);
@@ -1306,11 +1311,15 @@
                for(var i=0;i<rows.length;i++){
                     signList.push(rows[i].signNo);
                }
+               debugger;
                this.dynamicTags =signList;
+               this.dialogForm.dynamicTags =signList;
                this.dialogFormChooseVisible=false;
+               this.$refs['dialogForm'].validateField(["dynamicTags"]);
             },
             handleClose(tag) {
                 this.dynamicTags.splice(this.dynamicTags.indexOf(tag), 1);
+                this.dialogForm.dynamicTags.splice(this.dialogForm.dynamicTags.indexOf(tag), 1);
             },
             toogleClick(){
                 if(this.isShow){
@@ -1358,6 +1367,15 @@
                    }
                }
                
+               var fileIdList = this.dialogForm.fileList;
+               for(var i=0;i<fileIdList.length;i++){
+                   var curId = fileIdList[i];
+                   if(curId==id){
+                       fileIdList.splice(i--,1);
+                       break;
+                   }
+               }
+               
            },
            handleExceed(files, fileList) {
                //this.$message.warning(`当前限制选择 3 个文件，本次选择了 ${files.length} 个文件，共选择了 ${files.length + fileList.length} 个文件`);
@@ -1385,8 +1403,9 @@
                          lastFile.url = imgUrl;
                          lastFile.randomName = randomName; 
                          var curList = mainDivVM.fileList;
+                         mainDivVM.dialogForm.fileList.push(resData.data);
                          curList.push(lastFile);
-                         
+                         mainDivVM.$refs['dialogForm'].validateField(["fileList"]);
                          mainDivVM.$message({message:'上传成功',type:'success'});
                      }else{
                          mainDivVM.$message({message:'上传失败',type:'error'});
@@ -1477,6 +1496,13 @@
                   mainDivVM.uploadParamData.key= mainDivVM.uploadParamData.dir+mainDivVM.random_string(10)+mainDivVM.get_suffix(file.name),
                   mainDivVM.uploadParamData.realName= file.name
              },
+             closeEditRebateDialog(){
+                   this.$refs['dialogForm'].resetFields();
+             },
+             cancleRebateEditDialog(){
+                 this.dialogFormVisible = false;
+                 this.closeEditRebateDialog();
+             }
             
         },
         created(){            
