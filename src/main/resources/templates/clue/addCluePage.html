@@ -375,8 +375,8 @@
               <el-table-column align="center" prop="clueProjectName" label="资源项目"></el-table-column>
               <el-table-column align="center" prop="source" label="媒介"  :formatter="transformSource"></el-table-column>
               <el-table-column align="center" prop="sourceType" label="广告位"  :formatter="transformSourceType"></el-table-column>
-              <el-table-column align="center" prop="type" label="资源类型"  :formatter="transformType"></el-table-column>
               <el-table-column align="center" prop="category" label="资源类别"  :formatter="transformCategory"></el-table-column>
+              <el-table-column align="center" prop="type" label="资源类型"  :formatter="transformType"></el-table-column>
        </el-table>
        <table-pagination :pager="pager" @change="searchTable"></table-pagination>
     </el-dialog>
@@ -507,19 +507,19 @@ var ossSignatureUrl = [[${ossUrl}]];//上传文件地址
                          }, trigger: 'change'}
                     ],
                     source: [
-                        { required: true, message: '媒介不能为空', trigger: 'blur' }
+                        { required: true, message: '媒介不能为空', trigger: 'change' }
                     ],
                     sourceType: [
-                        { required: true, message: '广告位不能为空', trigger: 'blur' }
+                        { required: true, message: '广告位不能为空', trigger: 'change' }
                     ],
                     type: [
-                        { required: true, message: '资源类型不能为空', trigger: 'blur' }
+                        { required: true, message: '资源类型不能为空', trigger: 'change' }
                     ],
                     category: [
-                        { required: true, message: '资源类别不能为空', trigger: 'blur' }
+                        { required: true, message: '资源类别不能为空', trigger: 'change' }
                     ],
                     projectId: [
-                        { required: true, message: '资源项目不能为空', trigger: 'blur' }
+                        { required: true, message: '资源项目不能为空', trigger: 'change' }
                     ]
                 },
                 dynamicValidateForm: {//新增手机号弹窗数据
@@ -744,8 +744,19 @@ var ossSignatureUrl = [[${ossUrl}]];//上传文件地址
                 });
             },
             rebackMV(){
-            	  window.location.href="/exetend/agendaTaskManager/waitDistributResource"; 
-            },
+          	  this.$confirm('编辑的资源未保存，是否离开?', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }).then(() => {
+	            	  window.location.href="/exetend/agendaTaskManager/waitDistributResource"; 
+                }).catch(() => {
+                    this.$message({
+                        type: 'info',
+                        message: '已取消操作'
+                    });          
+                });
+          },
             submitDialogForm(formName) {
                 this.$refs[formName].validate((valid) => {
                     if (valid) {  
@@ -884,11 +895,21 @@ var ossSignatureUrl = [[${ossUrl}]];//上传文件地址
     　　　 	 	},
     　　　 	 	clickTemplate(row){
     　　　     			this.chooseVisible=false;
-		    　                    this.form.projectId=row.clueProjectId;
-		    　                    this.form.category=row.category+'';
-		    　                   this.form.type=row.type+'';
-		    　                  this.form.source=row.source+'';
-		    　                   this.form.sourceType=row.sourceType+'';
+    　　　     			if(row.clueProjectId){
+		    　                    	this.form.projectId=row.clueProjectId;
+    　　　     			}
+    　　　     			if(row.category){
+		    　                  	  this.form.category=row.category+'';
+    　　　     			}
+    　　　     			if(row.type){
+		    　                 	  this.form.type=row.type+'';
+    　　　     			}
+    　　　     			if(row.source){
+		    　              	    this.form.source=row.source+'';
+    　　　     			}
+    　　　     			if(row.sourceType){
+			    　                   this.form.sourceType=row.sourceType+'';
+    　　　     			}
                this.searchTable();
     　　　 	 	},
     　　　 	 	searchTable() {
