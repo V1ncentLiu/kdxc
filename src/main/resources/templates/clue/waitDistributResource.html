@@ -800,7 +800,7 @@ var wdrVM = new Vue({
             wdrVM.fileShow = false;
           },
           beforeUpload(file){//上传之前 文件校验
-            var isTextComputer = file.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+            var isTextComputer = file.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' || 'application/vnd.ms-excel';
             if(!isTextComputer){
               this.$message.error('文件格式错误');
               wdrVM.loading = false;
@@ -810,7 +810,7 @@ var wdrVM = new Vue({
           },
           uploadSuccess(response, file, fileList){//上传成功后
 
-            if(response.code=='0' && response.data.length>0){
+            if(response.code=='0' && response.data.length>0 && response.data.length<=30){
               this.addOrModifyDialogTitle="预览数据";
               //清空文件里列表
               this.$refs.upload.clearFiles();
@@ -821,7 +821,10 @@ var wdrVM = new Vue({
               wdrVM.exportFormVisible = true;
               wdrVM.dataNum="预览数据，共"+wdrVM.exportdataTable.length+"条数据"
 
-            }else{
+            }else if(response.code=='0' && response.data.length>30){
+              wdrVM.loading = false;
+              this.$message('每次最多1000条数据');
+						}else {
               wdrVM.loading = false;
               this.$message('文件读取失败，请稍后再试！');
             }
