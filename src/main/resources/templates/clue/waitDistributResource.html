@@ -818,7 +818,7 @@ var wdrVM = new Vue({
           },
           uploadSuccess(response, file, fileList){//上传成功后
 
-            if(response.code=='0' && response.data.length>0 && response.data.length<=10){
+            if(response.code=='0' && response.data.length>0 && response.data.length<=1000){
               this.addOrModifyDialogTitle="预览数据";
               //清空文件里列表
               this.$refs.upload.clearFiles();
@@ -829,7 +829,7 @@ var wdrVM = new Vue({
               wdrVM.exportFormVisible = true;
               wdrVM.dataNum="预览数据，共"+wdrVM.exportdataTable.length+"条数据"
 
-            }else if(response.code=='0' && response.data.length>10){
+            }else if(response.code=='0' && response.data.length>1000){
               wdrVM.loading = false;
               this.$message('每次最多1000条数据');
 						}else {
@@ -884,6 +884,7 @@ var wdrVM = new Vue({
               center:true
             }).then(() => {
               $("#showButton").html("导入中");
+              wdrVM.confirmBtnDisabled = true;
               var param = {};
               wdrVM.loading = true;
               param.list = wdrVM.exportdataTable;
@@ -897,6 +898,7 @@ var wdrVM = new Vue({
                 console.log(response);
                 if(null !==response && response.data !=null && response.data.code=='0'){
                   if(response.data.data !=null  && response.data.data.length !=0){
+                    wdrVM.confirmBtnDisabled = false;
                     $("#showButton").html("知道了");
                     $("#showButton").attr("data",2);
                     wdrVM.downloadButtonShow = true;
