@@ -552,6 +552,8 @@ public class ExtendClueAgendaTaskController {
     @ResponseBody
     public JSONResult importInvitearea(@RequestBody ClueAgendaTaskDTO clueAgendaTaskDTO)
             throws Exception {
+        UserInfoDTO user =
+            (UserInfoDTO) SecurityUtils.getSubject().getSession().getAttribute("user");
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         // 存放合法的数据
         List<ClueAgendaTaskDTO> dataList = new ArrayList<ClueAgendaTaskDTO>();
@@ -725,6 +727,7 @@ public class ExtendClueAgendaTaskController {
                             String.valueOf(clueAgendaTaskDTO1.getIndustryCategory()));
                     pushClueReq.setProjectId(clueAgendaTaskDTO1.getProjectId());
                     pushClueReq.setImportTime(format.format(new Date()));
+                    pushClueReq.setCreateUser(user.getId());
                     list1.add(pushClueReq);
                 } else {
                     illegalDataList.add(clueAgendaTaskDTO1);
