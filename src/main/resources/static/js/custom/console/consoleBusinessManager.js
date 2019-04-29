@@ -16,6 +16,10 @@ var mainDivVM = new Vue({
         unPaymentNum:'',//未收齐尾款笔数
         workDay:'',//工作天数
         visitedNum:'',//当月首访数
+        activeName9:'',
+        hisDatas:[],
+        editableTabs:[],
+        showHisVisitRecordDialog:false,
         //公告  
         afficheBox:false,     
         items: [ 
@@ -945,69 +949,89 @@ var mainDivVM = new Vue({
                     }
                     return false;
                 }else{
-                    //mainDivVM.showVisitAduitDatas.visitTableData =response.data.data;
-                    // mainDivVM.showVisitAduitDatas.visitStatus = row.visitStatus
-                    // if(response.data.data.length>0){
-                    //     mainDivVM.showVisitAduitDatas.notSignReason = response.data.data[0].notSignReason
-                    // }
                     var dataList = response.data.data;
-                    // 首次到访
-                    var first = [];
-                    if(dataList.length>=1){
-                        first.push(dataList[dataList.length-1])
-                        mainDivVM.showVisitAduitDatas.one = first;
-                        if(first[0].isSign==0){
-                            mainDivVM.showVisitAduitDatas.oneNotSignReason = first[0].notSignReason;
-                            mainDivVM.showVisitAduitDatas.oneNotSignShow = true;
-                        }
-                        if(first[0].rebutReason){
-                            mainDivVM.showVisitAduitDatas.oneRebutReason = first[0].rebutReason;
-                            mainDivVM.showVisitAduitDatas.oneRebutShow = true;
-                        }
-                    }else{
-                        mainDivVM.showVisitAduitDatas.one = first;
-                    }
-
-                    // 二次到访
-                    var two = [];
-                    if(dataList.length>=2){
-                        two.push(dataList[dataList.length-2])
-                        mainDivVM.showVisitAduitDatas.two = two;
-                        mainDivVM.showVisitAduitDatas.twoShow = true;
-                        if(two[0].isSign==0){
-                            mainDivVM.showVisitAduitDatas.twoNotSignReason = two[0].notSignReason;
-                            mainDivVM.showVisitAduitDatas.twoNotSignShow = true;
-                        }
-                        if(two[0].rebutReason){
-                            mainDivVM.showVisitAduitDatas.twoRebutReason = two[0].rebutReason;
-                            mainDivVM.showVisitAduitDatas.twoRebutShow = true;
-                        }
-                    }else{
-                        mainDivVM.showVisitAduitDatas.two = two;
-                        mainDivVM.showVisitAduitDatas.twoShow = false;
-                    }
-                    // 多次到访
-                    var three = []
-                    if(dataList.length>=3){
-                        three = dataList.slice(0,dataList.length-2)
-                        mainDivVM.showVisitAduitDatas.three = three;
-                        mainDivVM.showVisitAduitDatas.threeShow = true;
-                        if(three[0].isSign==0){
-                            mainDivVM.showVisitAduitDatas.threeNotSignReason = three[0].notSignReason;
-                            mainDivVM.showVisitAduitDatas.threeNotSignShow = true;
-                        }
-                        if(three[0].rebutReason){
-                            mainDivVM.showVisitAduitDatas.threeRebutReason = three[0].rebutReason;
-                            mainDivVM.showVisitAduitDatas.threeRebutShow = true;
-                        }
-                    }else{
-                        mainDivVM.showVisitAduitDatas.three = three;
-                        mainDivVM.showVisitAduitDatas.threeShow = false;
-                    }
-                //
+                    mainDivVM.setVisitRecordData(dataList);
                 }
 
             })
+        },
+        handleClick(tab, event){
+            mainDivVM.setVisitRecordData( mainDivVM.hisDatas[tab.name]);
+        },
+        showHistory(row){
+            var param = {};
+            mainDivVM.editableTabs = [];
+            this.showHisVisitRecordDialog = true;
+            this.activeName9 = "0"; // 通过名称设置默认显示
+            param.clueId = row.clueId
+            axios.post('/busVisitRecord/queryHisList',param).then(function (response) {
+                // 动态生成tab
+                var tabs = [];
+                for(var i = 0 ; i < response.data.length ; i++){
+                    var tab = {};
+                    tab.title =  response.data[i][0].createUserName+"-客户到访记录";
+                    tab.name = ""+i;
+                    tabs.push(tab)
+                }
+                mainDivVM.editableTabs = tabs;
+                mainDivVM.hisDatas = response.data;
+                mainDivVM.setVisitRecordData( mainDivVM.hisDatas[0]);
+            });
+        },
+        setVisitRecordData(dataList){
+
+            // 首次到访
+            var first = [];
+            if(dataList.length>=1){
+                first.push(dataList[dataList.length-1])
+                mainDivVM.showVisitAduitDatas.one = first;
+                if(first[0].isSign==0){
+                    mainDivVM.showVisitAduitDatas.oneNotSignReason = first[0].notSignReason;
+                    mainDivVM.showVisitAduitDatas.oneNotSignShow = true;
+                }
+                if(first[0].rebutReason){
+                    mainDivVM.showVisitAduitDatas.oneRebutReason = first[0].rebutReason;
+                    mainDivVM.showVisitAduitDatas.oneRebutShow = true;
+                }
+            }else{
+                mainDivVM.showVisitAduitDatas.one = first;
+            }
+            // 二次到访
+            var two = [];
+            if(dataList.length>=2){
+                two.push(dataList[dataList.length-2])
+                mainDivVM.showVisitAduitDatas.two = two;
+                mainDivVM.showVisitAduitDatas.twoShow = true;
+                if(two[0].isSign==0){
+                    mainDivVM.showVisitAduitDatas.twoNotSignReason = two[0].notSignReason;
+                    mainDivVM.showVisitAduitDatas.twoNotSignShow = true;
+                }
+                if(two[0].rebutReason){
+                    mainDivVM.showVisitAduitDatas.twoRebutReason = two[0].rebutReason;
+                    mainDivVM.showVisitAduitDatas.twoRebutShow = true;
+                }
+            }else{
+                mainDivVM.showVisitAduitDatas.two = two;
+                mainDivVM.showVisitAduitDatas.twoShow = false;
+            }
+            // 多次到访
+            var three = []
+            if(dataList.length>=3){
+                three = dataList.slice(0,dataList.length-2)
+                mainDivVM.showVisitAduitDatas.three = three;
+                mainDivVM.showVisitAduitDatas.threeShow = true;
+                if(three[0].isSign==0){
+                    mainDivVM.showVisitAduitDatas.threeNotSignReason = three[0].notSignReason;
+                    mainDivVM.showVisitAduitDatas.threeNotSignShow = true;
+                }
+                if(three[0].rebutReason){
+                    mainDivVM.showVisitAduitDatas.threeRebutReason = three[0].rebutReason;
+                    mainDivVM.showVisitAduitDatas.threeRebutShow = true;
+                }
+            }else{
+                mainDivVM.showVisitAduitDatas.three = three;
+                mainDivVM.showVisitAduitDatas.threeShow = false;
+            }
         },
         toVisitRecordPage(row){
             window.location.href='/busVisitRecord/visitRecordPage?clueId='+row.clueId+"&visitStatus="+row.visitStatus+"&signAuditStatus="+row.signAuditStatus;
