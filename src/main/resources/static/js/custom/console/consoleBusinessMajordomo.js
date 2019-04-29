@@ -347,6 +347,9 @@ var mainDivVM = new Vue({
             this.$refs[formName].resetFields();
             this.allocationVisible = false;
         },
+        allocationCloseDialog(){//分发资源关闭
+            this.$refs['allocationForm'].resetFields();
+        },
         // 待审签约记录
         initSignRecordData(){
             var param = {};
@@ -402,8 +405,7 @@ var mainDivVM = new Vue({
                 type: 'warning'
             }).then(() => {
                 var param={};
-                param.idList = idArr;
-               
+                param.idList = idArr;               
                 axios.post('/sign/signRecord/passAuditSignOrder', param)
                 .then(function (response) {
                     var resData = response.data;
