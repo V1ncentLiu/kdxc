@@ -249,26 +249,23 @@
 		</el-form> </el-dialog>
 	<!-- 自定义列 -->
 	<!-- 选择列 -->
-	<el-dialog title="选择列" :visible.sync="dialogChooseList">
+	<el-dialog title="自定义列" :visible.sync="dialogChooseList" class="elCheckboxGroup">
 		<el-form :model="fieldFrom">
-
-			<el-form-item label="列名" prop="type">
+			<el-form-item label="" prop="type">
 				<el-checkbox-group v-model="fieldFrom.type">
 					<el-checkbox :label="item.sortNum+'_'+item.fieldCode+'_'+item.displayName+'_'+item.id"  name="type" :key="item.fieldCode"  v-for="(item,index) in  allTableColums ">
 						{{item.displayName}}
 					</el-checkbox>
 				</el-checkbox-group>
 			</el-form-item>
-
 		</el-form>
-
 		<div slot="footer" class="dialog-footer">
-			<el-button @click="dialogChooseList = false">取 消</el-button>
 			<el-button type="primary" @click="confirmColumn">确 定</el-button>
+			<el-button @click="dialogChooseList = false">取 消</el-button>
 		</div>
 	</el-dialog>
 	<!-- 批量添加 自定义字段弹窗 start -->
-	<el-dialog title="导入excel" :visible.sync="dialogBatchVisible" @close="closeUploadFileDialog">
+	<el-dialog title="导入excel" :visible.sync="dialogBatchVisible" @close="closeUploadFileDialog" width="540px">
 
 		<el-row>
 			<el-upload
@@ -285,7 +282,7 @@
 
 					:auto-upload="false">
 				<div class="marginB20 fs16 paddingT20">选中文件:
-					<el-button slot="trigger" size="small" type="primary" style="margin-right: 10px;">选中文件</el-button>
+					<el-button slot="trigger" size="small" type="success" style="margin-right: 10px;">选中文件</el-button>
 				</div>
 				<span slot="tip" class="el-upload__tip" v-show="fileShow">未选择文件</span>
 			</el-upload>
@@ -570,13 +567,9 @@ var wdrVM = new Vue({
 						return ;
 					}
 				  wdrVM.customer=response.data.data.clueCustomer;
-				 
-				  var messageTime= response.data.data.clueBasic.messageTime;
-				  if(null!=messageTime){
-					  response.data.data.clueBasic.messageTime=crtTimeFtt1(messageTime);
-				  }
 				   wdrVM.basic=response.data.data.clueBasic;
 				   wdrVM.basic.reserveTime=wdrVM.dateFormat1(wdrVM.basic.reserveTime);
+				   wdrVM.basic.messageTime=wdrVM.dateFormat1(wdrVM.basic.messageTime);
 				   var sex =wdrVM.customer.sex;
 				   if(sex==1){
 					   wdrVM.customer.sex="男";

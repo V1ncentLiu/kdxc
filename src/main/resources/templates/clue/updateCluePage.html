@@ -62,11 +62,11 @@
                         <el-form-item label="微信：" prop="wechat" :label-width="formLabelWidth">
                             <span style="position: absolute;left: -50px;top: 4px;color: #f56c6c;z-index: 1;">*</span>
                             <el-input v-model="form.wechat" autocomplete="off" style="width: 260px;margin-right: 10px;" maxLength="20"></el-input>
-                           	<span v-if="form.wechat2 == '' && form.wechatUrl=='' ">
-	                           <el-button type="primary"  @click="wechatVisible = true"><i class="el-icon-plus"></i>微信/二维码</el-button>
+                           	<span v-if="form.wechat2 || form.wechatUrl">
+                                <span @click="wechatVisible = true" style="padding-left: 5px; color: rgb(0, 114, 255); cursor: pointer;">查看多个微信/二维码</span>
                             </span>
                             <span v-else="">
-                                <span @click="wechatVisible = true" style="padding-left: 5px; color: rgb(0, 114, 255); cursor: pointer;">查看多个微信/二维码</span>
+	                           <el-button type="primary"  @click="wechatVisible = true"><i class="el-icon-plus"></i>微信/二维码</el-button>
                             </span>
                         </el-form-item>
                     </el-col>
@@ -739,11 +739,11 @@ var clueInfo = [[${clueInfo}]];//资源信息
     	                   	  		return;
        		        	   		}
       	                      }); 
-                    	  }else if(response.data.date==1){
+                    	  }else if(response.data.data>0){
 	                   	  	addClueVM.$message({message:'自动分发成功',type:'success',duration:2000,onClose:function(){
 	                   	  		window.location.href="/exetend/agendaTaskManager/waitDistributResource"; 
    		        	   		}});
-                    	  }else if(response.data.date==0){
+                    	  }else{
 	                   	  	addClueVM.$message({message:'自动分发失败',type:'success',duration:2000,onClose:function(){
 	                   	  		window.location.href="/exetend/agendaTaskManager/waitDistributResource"; 
    		        	   		}});
@@ -1009,42 +1009,64 @@ var clueInfo = [[${clueInfo}]];//资源信息
 	        	}
             }
             if(clueInfo.clueCustomer){
+            	var customer=clueInfo.clueCustomer;
 	            this.form.cusId=clueInfo.clueCustomer.id;
 	            if(clueInfo.clueCustomer.sex){
 		            this.form.sex=clueInfo.clueCustomer.sex+"";
 	            }
 	        	this.form.cusName=clueInfo.clueCustomer.cusName;
 	        	this.form.phone=clueInfo.clueCustomer.phone;
+	        	if(clueInfo.clueCustomer.phone.length==11){
+	        		this.isDisabled=false;
+	        	}
 	        	this.form.wechat=clueInfo.clueCustomer.wechat;
 	        	this.form.wechat2=clueInfo.clueCustomer.wechat2;
-	        	this.form.wechatUrl=clueInfo.clueCustomer.wechatUrl;
+	        	this.form.wechatUrl=clueInfo.clueCustomer.wechatCode;
 	        	this.form.qq=clueInfo.clueCustomer.qq;
 	        	this.form.email=clueInfo.clueCustomer.email;
 	        	this.form.age=clueInfo.clueCustomer.age;
-	        	if(clueInfo.clueCustomer.phone2){
-	        		 this.dynamicValidateForm.domains.push({
-	                     value: clueInfo.clueCustomer.phone2,
-	                     key: Date.now()
-	                 });
-	        	}
-	        	if(clueInfo.clueCustomer.phone3){
-	        		 this.dynamicValidateForm.domains.push({
-	                     value: clueInfo.clueCustomer.phone3,
-	                     key: Date.now()
-	                 });
-	        	}
-	        	if(clueInfo.clueCustomer.phone4){
-	        		 this.dynamicValidateForm.domains.push({
-	                     value: clueInfo.clueCustomer.phone4,
-	                     key: Date.now()
-	                 });
-	        	}
-	        	if(clueInfo.clueCustomer.phone5){
-	        		 this.dynamicValidateForm.domains.push({
-	                     value: clueInfo.clueCustomer.phone5,
-	                     key: Date.now()
-	                 });
-	        	}
+	        	var phoneArr = [];
+                if (customer.phone2) {
+                    var phone2 = {};
+                    phone2.value = customer.phone2;
+                    phoneArr.push(phone2);
+
+                }
+                if (customer.phone3) {
+                    var phone3 = {};
+                    phone3.value = customer.phone3;
+                    phoneArr.push(phone3);
+
+                }
+
+                if (customer.phone4) {
+                    var phone4 = {};
+                    phone4.value = customer.phone4;
+                    phoneArr.push(phone4);
+
+                }
+                if (customer.phone5) {
+                    var phone5 = {};
+                    phone5.value = customer.phone5;
+                    phoneArr.push(phone5);
+                }
+                this.dynamicValidateForm.domains = phoneArr;
+                if(phoneArr.length>0){
+                    this.buttonType = 'B';//按钮状态
+                }else{
+                	var phone5 = {};
+                    phone5.value = "";
+                	this.dynamicValidateForm.domains.push(phone5);
+                    this.buttonType = 'A';//按钮状态
+                }
+                if(phoneArr.length>1){                    
+                    this.deleteShow=true;// 删除默认显示
+                }else{                    
+                    this.deleteShow=false;// 删除默认不显示
+                }
+                if(customer.phone ==null || customer.phone=='' ||  phoneArr.length<1){
+					this.isshowPhone = true;
+                }
             }
             if(clueInfo.clueIntention){
 	            this.form.intentionId=clueInfo.clueIntention.id;
