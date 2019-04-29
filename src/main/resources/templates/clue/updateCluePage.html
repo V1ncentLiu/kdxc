@@ -16,8 +16,9 @@
     <el-row class="borderbox">
         <div class="inforTitle">编辑线索</div> 
         <el-form :model="form" :rules="rules" ref="form" class="padding20">
-        	<div class="marginB20 fs16 paddingT20">基本信息 
+        	<div class="marginB20 fs16 paddingT20">基本信息 &nbsp;&nbsp;
         			<!-- <el-button type="primary"  @click="chooseTemplate">选择模板</el-button> -->
+        			<span>线索ID：<span>{{form.clueId}}</span></span>
         	</div>
             <div class="borderbox padding20">
                 <el-row>
@@ -469,19 +470,19 @@ var clueInfo = [[${clueInfo}]];//资源信息
                          }, trigger: 'change'}
                     ],
                     source: [
-                        { required: true, message: '媒介不能为空', trigger: 'blur' }
+                        { required: true, message: '媒介不能为空', trigger: 'change' }
                     ],
                     sourceType: [
-                        { required: true, message: '广告位不能为空', trigger: 'blur' }
+                        { required: true, message: '广告位不能为空', trigger: 'change' }
                     ],
                     type: [
-                        { required: true, message: '资源类型不能为空', trigger: 'blur' }
+                        { required: true, message: '资源类型不能为空', trigger: 'change' }
                     ],
                     category: [
-                        { required: true, message: '资源类别不能为空', trigger: 'blur' }
+                        { required: true, message: '资源类别不能为空', trigger: 'change' }
                     ],
                     projectId: [
-                        { required: true, message: '资源项目不能为空', trigger: 'blur' }
+                        { required: true, message: '资源项目不能为空', trigger: 'change' }
                     ]
                 },
                 dynamicValidateForm: {//新增手机号弹窗数据
@@ -712,7 +713,18 @@ var clueInfo = [[${clueInfo}]];//资源信息
                 });
             },
             rebackMV(){
-            	  window.location.href="/exetend/agendaTaskManager/waitDistributResource"; 
+            	  this.$confirm('编辑的资源未保存，是否离开?', '提示', {
+                      confirmButtonText: '确定',
+                      cancelButtonText: '取消',
+                      type: 'warning'
+                  }).then(() => {
+	            	  window.location.href="/exetend/agendaTaskManager/waitDistributResource"; 
+                  }).catch(() => {
+                      this.$message({
+                          type: 'info',
+                          message: '已取消操作'
+                      });          
+                  });
             },
             submitDialogForm(formName) {
                 this.$refs[formName].validate((valid) => {
@@ -956,6 +968,7 @@ var clueInfo = [[${clueInfo}]];//资源信息
 	            if(clueInfo.clueCustomer.sex){
 		            this.form.sex=clueInfo.clueCustomer.sex+"";
 	            }
+	        	this.form.cusName=clueInfo.clueCustomer.cusName;
 	        	this.form.phone=clueInfo.clueCustomer.phone;
 	        	this.form.wechat=clueInfo.clueCustomer.wechat;
 	        	this.form.wechat2=clueInfo.clueCustomer.wechat2;
