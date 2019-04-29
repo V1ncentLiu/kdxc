@@ -543,7 +543,6 @@ public class ExtendClueAgendaTaskController {
         JSONResult<List<ProjectInfoDTO>> allProject = projectInfoFeignClient.allProject();
         List<ClueAgendaTaskDTO> list = clueAgendaTaskDTO.getList();
         List<PushClueReq> list1 = new ArrayList<PushClueReq>();
-        PushClueReq pushClueReq = new PushClueReq();
 
         // 匹配字典数据
         // 资源类型
@@ -682,6 +681,7 @@ public class ExtendClueAgendaTaskController {
                 }
 
                 if (islegal) {
+                    PushClueReq pushClueReq = new PushClueReq();
                     pushClueReq.setCategory(String.valueOf(clueAgendaTaskDTO1.getCategory()));
                     pushClueReq.setCusName(clueAgendaTaskDTO1.getCusName());
                     pushClueReq.setSex(clueAgendaTaskDTO1.getSex());
