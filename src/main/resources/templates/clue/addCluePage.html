@@ -5,7 +5,7 @@
     <title>新建线索</title>
     <meta charset="UTF-8">
     <style>
-        .addCustomer .borderbox .el-row{width: 1061px;margin:0 auto;}
+        .addCustomer .borderbox .el-row{width: 1065px;margin:0 auto;}
     </style>
 </head>
 <body>
@@ -74,7 +74,7 @@
                 	<el-col :span="12">
                         <el-form-item label="QQ：" prop="qq" :label-width="formLabelWidth" >
                             <span style="position: absolute;left: -45px;top: 4px;color: #f56c6c;z-index: 1;">*</span>
-                           <el-input v-model="form.qq" autocomplete="off" maxLength="20" @keyup.native="qqnumber" style="width: 260px;"></el-input>
+                            <el-input v-model="form.qq" autocomplete="off" maxLength="20" @keyup.native="qqnumber" style="width: 260px;"></el-input>
                         </el-form-item>
                     </el-col>
                 	<el-col :span="12">
@@ -265,13 +265,13 @@
             <el-button type="success" @click="addDomain">添加更多手机号</el-button>
         </div>
     </el-dialog>    
-    <el-dialog title="添加微信" :visible.sync="wechatVisible">
+    <el-dialog title="添加微信" :visible.sync="wechatVisible" width="540px">
         <template>
             <el-form :model="wechatForm" ref="wechatForm" > 
-              <el-form-item label="微信2：" :label-width="formLabelWidth" >
-                  <el-input v-model="wechatForm.wechat2" placeholder="" maxLength="20" style="width:50%"></el-input>
+              <el-form-item label="微信2：" :label-width="formLabelWidth1" >
+                  <el-input v-model="wechatForm.wechat2" placeholder="" maxLength="20" style="width: 290px;"></el-input>
               </el-form-item>
-              <el-form-item label="添加微信二维码：" :label-width="formLabelWidth" prop="fileList">
+              <el-form-item label="添加微信二维码：" :label-width="formLabelWidth1" prop="fileList">
               	<el-upload
                     class="upload-demo"
                     :action="uploadOssHost"
@@ -294,7 +294,7 @@
                     <div slot="tip" class="el-upload__tip">只能上传jpg/png文件，且不超过2MB</div>
                 </el-upload>
               </el-form-item>
-              <el-form-item label="" :label-width="formLabelWidth" >
+              <el-form-item label="" :label-width="formLabelWidth1" >
                   <img v-show="wechatForm.wechatUrl!=''" :src="wechatForm.wechatUrl">
               </el-form-item>
             </el-form>
@@ -375,8 +375,8 @@
               <el-table-column align="center" prop="clueProjectName" label="资源项目"></el-table-column>
               <el-table-column align="center" prop="source" label="媒介"  :formatter="transformSource"></el-table-column>
               <el-table-column align="center" prop="sourceType" label="广告位"  :formatter="transformSourceType"></el-table-column>
-              <el-table-column align="center" prop="type" label="资源类型"  :formatter="transformType"></el-table-column>
               <el-table-column align="center" prop="category" label="资源类别"  :formatter="transformCategory"></el-table-column>
+              <el-table-column align="center" prop="type" label="资源类型"  :formatter="transformType"></el-table-column>
        </el-table>
        <table-pagination :pager="pager" @change="searchTable"></table-pagination>
     </el-dialog>
@@ -457,6 +457,7 @@ var ossSignatureUrl = [[${ossUrl}]];//上传文件地址
 	            industryCategoryOptions:industryCategoryList,
 	            accountNameOptions:accountNameList,
                 formLabelWidth: '120px',
+                formLabelWidth1: '150px',
                 rules:{
                     phone:[
                         { validator:function(rule,value,callback){
@@ -507,19 +508,19 @@ var ossSignatureUrl = [[${ossUrl}]];//上传文件地址
                          }, trigger: 'change'}
                     ],
                     source: [
-                        { required: true, message: '媒介不能为空', trigger: 'blur' }
+                        { required: true, message: '媒介不能为空', trigger: 'change' }
                     ],
                     sourceType: [
-                        { required: true, message: '广告位不能为空', trigger: 'blur' }
+                        { required: true, message: '广告位不能为空', trigger: 'change' }
                     ],
                     type: [
-                        { required: true, message: '资源类型不能为空', trigger: 'blur' }
+                        { required: true, message: '资源类型不能为空', trigger: 'change' }
                     ],
                     category: [
-                        { required: true, message: '资源类别不能为空', trigger: 'blur' }
+                        { required: true, message: '资源类别不能为空', trigger: 'change' }
                     ],
                     projectId: [
-                        { required: true, message: '资源项目不能为空', trigger: 'blur' }
+                        { required: true, message: '资源项目不能为空', trigger: 'change' }
                     ]
                 },
                 dynamicValidateForm: {//新增手机号弹窗数据
@@ -744,8 +745,19 @@ var ossSignatureUrl = [[${ossUrl}]];//上传文件地址
                 });
             },
             rebackMV(){
-            	  window.location.href="/exetend/agendaTaskManager/waitDistributResource"; 
-            },
+          	  this.$confirm('编辑的资源未保存，是否离开?', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }).then(() => {
+	            	  window.location.href="/exetend/agendaTaskManager/waitDistributResource"; 
+                }).catch(() => {
+                    this.$message({
+                        type: 'info',
+                        message: '已取消操作'
+                    });          
+                });
+          },
             submitDialogForm(formName) {
                 this.$refs[formName].validate((valid) => {
                     if (valid) {  
@@ -884,11 +896,21 @@ var ossSignatureUrl = [[${ossUrl}]];//上传文件地址
     　　　 	 	},
     　　　 	 	clickTemplate(row){
     　　　     			this.chooseVisible=false;
-		    　                    this.form.projectId=row.clueProjectId;
-		    　                    this.form.category=row.category+'';
-		    　                   this.form.type=row.type+'';
-		    　                  this.form.source=row.source+'';
-		    　                   this.form.sourceType=row.sourceType+'';
+    　　　     			if(row.clueProjectId){
+		    　                    	this.form.projectId=row.clueProjectId;
+    　　　     			}
+    　　　     			if(row.category){
+		    　                  	  this.form.category=row.category+'';
+    　　　     			}
+    　　　     			if(row.type){
+		    　                 	  this.form.type=row.type+'';
+    　　　     			}
+    　　　     			if(row.source){
+		    　              	    this.form.source=row.source+'';
+    　　　     			}
+    　　　     			if(row.sourceType){
+			    　                   this.form.sourceType=row.sourceType+'';
+    　　　     			}
                this.searchTable();
     　　　 	 	},
     　　　 	 	searchTable() {
