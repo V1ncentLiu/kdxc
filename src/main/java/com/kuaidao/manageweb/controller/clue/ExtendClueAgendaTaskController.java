@@ -465,7 +465,7 @@ public class ExtendClueAgendaTaskController {
             return new JSONResult<>().fail(SysErrorCodeEnum.ERR_EXCLE_DATA.getCode(),
                     SysErrorCodeEnum.ERR_EXCLE_DATA.getMessage());
         }
-        if (excelDataList.size() > 30) {
+        if (excelDataList.size() > 1000) {
             logger.error("上传自定义字段,大于1000条，条数{{}}", excelDataList.size());
             return new JSONResult<>().fail(SysErrorCodeEnum.ERR_EXCLE_OUT_SIZE.getCode(),
                     "导入数据过多，已超过1000条！");
@@ -785,7 +785,7 @@ public class ExtendClueAgendaTaskController {
                 curList.add(clueAgendaTaskDTO.getTypeName());
                 curList.add(clueAgendaTaskDTO.getCategoryName());
                 curList.add(clueAgendaTaskDTO.getSourceTypeName());
-                curList.add(clueAgendaTaskDTO.getSource());
+                curList.add(clueAgendaTaskDTO.getSourceName());
                 curList.add(clueAgendaTaskDTO.getProjectName());
                 curList.add(clueAgendaTaskDTO.getIndustryCategoryName());
                 curList.add(clueAgendaTaskDTO.getCusName());
