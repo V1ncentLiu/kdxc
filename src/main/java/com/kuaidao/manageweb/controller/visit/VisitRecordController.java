@@ -296,7 +296,7 @@ public class VisitRecordController {
             return new JSONResult().fail(SysErrorCodeEnum.ERR_NOTEXISTS_DATA.getCode(), "角色没有权限");
         }
         visitNoRecordReqDTO.setBusGroupIdList(busGroupIdList);
-
+        visitNoRecordReqDTO.setStatus(1);
         logger.info("listVisitRecord,curLoginUser{{}},reqParam{{}}", curLoginUser,
                 visitNoRecordReqDTO);
 
