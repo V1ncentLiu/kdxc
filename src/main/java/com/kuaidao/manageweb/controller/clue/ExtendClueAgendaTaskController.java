@@ -55,6 +55,7 @@ import com.kuaidao.sys.dto.customfield.QueryFieldByRoleAndMenuReq;
 import com.kuaidao.sys.dto.customfield.QueryFieldByUserAndMenuReq;
 import com.kuaidao.sys.dto.customfield.UserFieldDTO;
 import com.kuaidao.sys.dto.dictionary.DictionaryItemRespDTO;
+import com.kuaidao.sys.dto.role.RoleInfoDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import com.kuaidao.sys.dto.user.UserOrgRoleReq;
 
@@ -244,6 +245,25 @@ public class ExtendClueAgendaTaskController {
     @ResponseBody
     public JSONResult<PageBean<ClueAgendaTaskDTO>> queryPageAgendaTask(HttpServletRequest request,
             @RequestBody ClueAgendaTaskQueryDTO queryDto) {
+        UserInfoDTO user = getUser();
+        RoleInfoDTO roleInfoDTO = user.getRoleList().get(0);
+        // 处理数据权限
+        if (RoleCodeEnum.TGKF.name().equals(roleInfoDTO.getRoleCode())
+                || RoleCodeEnum.NQWY.name().equals(roleInfoDTO.getRoleCode())) {
+            // 推广客服、内勤文员 能看自己的数据
+        } else if (RoleCodeEnum.KFZG.name().equals(roleInfoDTO.getRoleCode())
+                || RoleCodeEnum.NQZG.name().equals(roleInfoDTO.getRoleCode())) {
+            // 客服主管、内勤主管 能看自己组员数据
+
+        } else if (RoleCodeEnum.NQJL.name().equals(roleInfoDTO.getRoleCode())) {
+            // 内勤经理 能看下属组的数据
+
+        } else if (RoleCodeEnum.GLY.name().equals(roleInfoDTO.getRoleCode())) {
+
+        } else {
+            return new JSONResult<PageBean<ClueAgendaTaskDTO>>()
+                    .fail(SysErrorCodeEnum.ERR_NOTEXISTS_DATA.getCode(), "角色没有权限");
+        }
 
         return extendClueFeignClient.queryPageAgendaTask(queryDto);
 
