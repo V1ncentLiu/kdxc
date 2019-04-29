@@ -875,6 +875,7 @@ var mainDivVM = new Vue({
             var param = {};
             param.pageSize = 0;
             param.pageNum = 0;
+            param.status=1;
             axios.post('/visit/visitRecord/listNoVisitRecord',param)            
             .then(function (response) {
                 var data =  response.data
