@@ -1,5 +1,7 @@
 package com.kuaidao.manageweb.controller.clue;
 
+import com.google.common.collect.Maps;
+import com.kuaidao.aggregation.dto.project.ProjectInfoPageParam;
 import java.net.URLEncoder;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -559,8 +561,14 @@ public class ExtendClueAgendaTaskController {
         List<ClueAgendaTaskDTO> dataList = new ArrayList<ClueAgendaTaskDTO>();
         // 存放非法的数据
         List<ClueAgendaTaskDTO> illegalDataList = new ArrayList<ClueAgendaTaskDTO>();
-        // 查询项目列表
-        JSONResult<List<ProjectInfoDTO>> allProject = projectInfoFeignClient.allProject();
+        // 项目处理
+        ProjectInfoPageParam projectInfoPageParam = new ProjectInfoPageParam();
+        List<ProjectInfoDTO> proList = projectInfoFeignClient.listNoPage(projectInfoPageParam).getData();
+        Map<String, Long> projectMap = new HashMap<String, Long>();
+        // 遍历项目list集生成<id,name>map
+        for (ProjectInfoDTO projectInfoDTO : proList) {
+            projectMap.put(projectInfoDTO.getProjectName(), projectInfoDTO.getId());
+        }
         List<ClueAgendaTaskDTO> list = clueAgendaTaskDTO.getList();
         List<PushClueReq> list1 = new ArrayList<PushClueReq>();
 
@@ -587,13 +595,7 @@ public class ExtendClueAgendaTaskController {
                 boolean islegal = true;// true合法 false不合法
                 if (islegal && clueAgendaTaskDTO1.getProjectName() != null
                         && !"".equals(clueAgendaTaskDTO1.getProjectName())) {
-                    for (ProjectInfoDTO projectInfoDTO : allProject.getData()) {
-                        if ((projectInfoDTO.getProjectName().trim())
-                                .equals(clueAgendaTaskDTO1.getProjectName())) {
-                            clueAgendaTaskDTO1.setProjectId(projectInfoDTO.getId());
-                            break;
-                        }
-                    }
+                    clueAgendaTaskDTO1.setProjectId(projectMap.get(clueAgendaTaskDTO1.getProjectName()));
                     if (clueAgendaTaskDTO1.getProjectId() == null) {
                         islegal = false;
                     }
