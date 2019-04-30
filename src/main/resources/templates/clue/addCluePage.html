@@ -5,7 +5,7 @@
     <title>新建线索</title>
     <meta charset="UTF-8">
     <style>
-        .addCustomer .borderbox .el-row{width: 1061px;margin:0 auto;}
+        .addCustomer .borderbox .el-row{width: 1065px;margin:0 auto;}
     </style>
 </head>
 <body>
@@ -62,10 +62,10 @@
                             <span style="position: absolute;left: -50px;top: 4px;color: #f56c6c;z-index: 1;">*</span>
                             <el-input v-model="form.wechat" autocomplete="off" style="width: 260px;margin-right: 10px;" maxLength="20"></el-input>
                            	<span v-if="form.wechat2 == '' && form.wechatUrl=='' ">
-	                           <el-button type="primary"  @click="wechatVisible = true"><i class="el-icon-plus"></i>微信/二维码</el-button>
+	                           <el-button type="primary"  @click="openWechat"><i class="el-icon-plus"></i>微信/二维码</el-button>
                             </span>
                             <span v-else="">
-                                <span @click="wechatVisible = true" style="padding-left: 5px; color: rgb(0, 114, 255); cursor: pointer;">查看多个微信/二维码</span>
+                                <span @click="openWechat" style="padding-left: 5px; color: rgb(0, 114, 255); cursor: pointer;">查看多个微信/二维码</span>
                             </span>
                         </el-form-item>
                     </el-col>
@@ -74,7 +74,7 @@
                 	<el-col :span="12">
                         <el-form-item label="QQ：" prop="qq" :label-width="formLabelWidth" >
                             <span style="position: absolute;left: -45px;top: 4px;color: #f56c6c;z-index: 1;">*</span>
-                           <el-input v-model="form.qq" autocomplete="off" maxLength="20" @keyup.native="qqnumber" style="width: 260px;"></el-input>
+                            <el-input v-model="form.qq" autocomplete="off" maxLength="20" @keyup.native="qqnumber" style="width: 260px;"></el-input>
                         </el-form-item>
                     </el-col>
                 	<el-col :span="12">
@@ -178,8 +178,8 @@
                         </el-form-item>
                     </el-col>
                     <el-col :span="12">
-                        <el-form-item label="行业类别：" :label-width="formLabelWidth">
-                            <el-select v-model="form.industryCategory" placeholder="请选择" style="width: 260px;">
+                        <el-form-item label="行业类别："  :label-width="formLabelWidth">
+                            <el-select v-model="form.industryCategory" clearable placeholder="请选择" style="width: 260px;">
                                 <el-option
                                     v-for="item in industryCategoryOptions"
                                     :key="item.value"
@@ -216,7 +216,7 @@
                     </el-col>
                     <el-col :span="12">
                         <el-form-item label="账户名称：" :label-width="formLabelWidth">
-                            <el-select v-model="form.accountName" placeholder="请选择" style="width: 260px;">
+                            <el-select v-model="form.accountName" clearable placeholder="请选择" style="width: 260px;">
                                 <el-option
                                     v-for="item in accountNameOptions"
                                     :key="item.value"
@@ -265,13 +265,13 @@
             <el-button type="success" @click="addDomain">添加更多手机号</el-button>
         </div>
     </el-dialog>    
-    <el-dialog title="添加微信" :visible.sync="wechatVisible">
+    <el-dialog title="添加微信" :visible.sync="wechatVisible" width="540px">
         <template>
             <el-form :model="wechatForm" ref="wechatForm" > 
-              <el-form-item label="微信2：" :label-width="formLabelWidth" >
-                  <el-input v-model="wechatForm.wechat2" placeholder="" maxLength="20" style="width:50%"></el-input>
+              <el-form-item label="微信2：" :label-width="formLabelWidth1" >
+                  <el-input v-model="wechatForm.wechat2" placeholder="" maxLength="20" style="width: 290px;"></el-input>
               </el-form-item>
-              <el-form-item label="添加微信二维码：" :label-width="formLabelWidth" prop="fileList">
+              <el-form-item label="添加微信二维码：" :label-width="formLabelWidth1" prop="fileList">
               	<el-upload
                     class="upload-demo"
                     :action="uploadOssHost"
@@ -294,8 +294,8 @@
                     <div slot="tip" class="el-upload__tip">只能上传jpg/png文件，且不超过2MB</div>
                 </el-upload>
               </el-form-item>
-              <el-form-item label="" :label-width="formLabelWidth" >
-                  <img v-show="wechatForm.wechatUrl!=''" :src="wechatForm.wechatUrl">
+              <el-form-item label="" :label-width="formLabelWidth1" >
+                  <img v-show="wechatForm.wechatUrl!=''" :src="wechatForm.wechatUrl" width="290px" style="border-radius:6px;">
               </el-form-item>
             </el-form>
             <div slot="footer" class="dialog-footer">
@@ -375,8 +375,8 @@
               <el-table-column align="center" prop="clueProjectName" label="资源项目"></el-table-column>
               <el-table-column align="center" prop="source" label="媒介"  :formatter="transformSource"></el-table-column>
               <el-table-column align="center" prop="sourceType" label="广告位"  :formatter="transformSourceType"></el-table-column>
-              <el-table-column align="center" prop="type" label="资源类型"  :formatter="transformType"></el-table-column>
               <el-table-column align="center" prop="category" label="资源类别"  :formatter="transformCategory"></el-table-column>
+              <el-table-column align="center" prop="type" label="资源类型"  :formatter="transformType"></el-table-column>
        </el-table>
        <table-pagination :pager="pager" @change="searchTable"></table-pagination>
     </el-dialog>
@@ -457,10 +457,11 @@ var ossSignatureUrl = [[${ossUrl}]];//上传文件地址
 	            industryCategoryOptions:industryCategoryList,
 	            accountNameOptions:accountNameList,
                 formLabelWidth: '120px',
+                formLabelWidth1: '140px',
                 rules:{
                     phone:[
                         { validator:function(rule,value,callback){
-                            if(addClueVM.form.qq==""&&addClueVM.form.wechat==""&&addClueVM.form.email==""&&addClueVM.form.phone==""){
+                            if(addClueVM.form.qq==""&&addClueVM.form.wechat==""&&addClueVM.wechatForm.wechat2==""&&addClueVM.wechatForm.wechatUrl==""&&addClueVM.form.email==""&&addClueVM.form.phone==""){
                                 callback(new Error("至少填一项"));
                             }else{
                                  callback();
@@ -469,7 +470,7 @@ var ossSignatureUrl = [[${ossUrl}]];//上传文件地址
                     ],
                     wechat:[
                         { validator:function(rule,value,callback){
-                            if(addClueVM.form.qq==""&&addClueVM.form.wechat==""&&addClueVM.form.email==""&&addClueVM.form.phone==""){
+                            if(addClueVM.form.qq==""&&addClueVM.form.wechat==""&&addClueVM.wechatForm.wechat2==""&&addClueVM.wechatForm.wechatUrl==""&&addClueVM.form.email==""&&addClueVM.form.phone==""){
                                 callback(new Error("至少填一项"));
                             }else{
                                  callback();
@@ -478,7 +479,7 @@ var ossSignatureUrl = [[${ossUrl}]];//上传文件地址
                     ],
                     qq:[
                         { validator:function(rule,value,callback){
-                            if(addClueVM.form.qq==""&&addClueVM.form.wechat==""&&addClueVM.form.email==""&&addClueVM.form.phone==""){
+                            if(addClueVM.form.qq==""&&addClueVM.form.wechat==""&&addClueVM.wechatForm.wechat2==""&&addClueVM.wechatForm.wechatUrl==""&&addClueVM.form.email==""&&addClueVM.form.phone==""){
                                 callback(new Error("至少填一项"));
                             }else{
                                  callback();
@@ -487,7 +488,7 @@ var ossSignatureUrl = [[${ossUrl}]];//上传文件地址
                     ],
                     email:[
                         { validator:function(rule,value,callback){
-                            if(addClueVM.form.qq==""&&addClueVM.form.wechat==""&&addClueVM.form.email==""&&addClueVM.form.phone==""){
+                            if(addClueVM.form.qq==""&&addClueVM.form.wechat==""&&addClueVM.wechatForm.wechat2==""&&addClueVM.wechatForm.wechatUrl==""&&addClueVM.form.email==""&&addClueVM.form.phone==""){
                                 callback(new Error("至少填一项"));
                             }else{
                                  callback();
@@ -507,19 +508,19 @@ var ossSignatureUrl = [[${ossUrl}]];//上传文件地址
                          }, trigger: 'change'}
                     ],
                     source: [
-                        { required: true, message: '媒介不能为空', trigger: 'blur' }
+                        { required: true, message: '媒介不能为空', trigger: 'change' }
                     ],
                     sourceType: [
-                        { required: true, message: '广告位不能为空', trigger: 'blur' }
+                        { required: true, message: '广告位不能为空', trigger: 'change' }
                     ],
                     type: [
-                        { required: true, message: '资源类型不能为空', trigger: 'blur' }
+                        { required: true, message: '资源类型不能为空', trigger: 'change' }
                     ],
                     category: [
-                        { required: true, message: '资源类别不能为空', trigger: 'blur' }
+                        { required: true, message: '资源类别不能为空', trigger: 'change' }
                     ],
                     projectId: [
-                        { required: true, message: '资源项目不能为空', trigger: 'blur' }
+                        { required: true, message: '资源项目不能为空', trigger: 'change' }
                     ]
                 },
                 dynamicValidateForm: {//新增手机号弹窗数据
@@ -725,7 +726,7 @@ var ossSignatureUrl = [[${ossUrl}]];//上传文件地址
      	                   	  		return;
         		        	   	}
        	                      }); 
-                    	  }else if(response.data.date==1){
+                    	  }else if(response.data.data>0){
 	                   	  	addClueVM.$message({message:'自动分发成功',type:'success',duration:2000,onClose:function(){
 	                   	  		window.location.href="/exetend/agendaTaskManager/waitDistributResource"; 
    		        	   		}});
@@ -744,61 +745,78 @@ var ossSignatureUrl = [[${ossUrl}]];//上传文件地址
                 });
             },
             rebackMV(){
-            	  window.location.href="/exetend/agendaTaskManager/waitDistributResource"; 
-            },
-            submitDialogForm(formName) {
-                this.$refs[formName].validate((valid) => {
-                    if (valid) {  
-                        var domains=this.dynamicValidateForm.domains;
-                        var phone=this.form.phone; 
-                        var ary=[];   
-                        console.log(domains)                  
-                        for(var i=0;i<domains.length;i++){
-                            // 判断弹框里的值是否与页面的手机号1重复
-                            if(domains[i].value==phone){
-                                this.$message({
-                                    message: '请不要提交重复手机号',
-                                    type: 'warning'
-                                });
-                                return;
-                            }
-                            // 判断输入框里4个值是否重复(判断对象数组的value是否有重复值)
-                            ary.push(domains[i].value);//把输入的手机号放入一个数组
-                            var s = ary.join(",")+",";                            
-                            console.log(ary)
-                            for(var j=0;j<ary.length;j++) {
-                                console.log(ary[j])
-                                if(ary[j]!=""){
-                                    if(s.replace(ary[j]+",","").indexOf(ary[j]+",")>-1) {
-                                        this.$message({
-                                            message: '请不要提交重复手机号',
-                                            type: 'warning'
-                                        });
-                                        return;
-                                    }
-                                }
-                                
-                            }   
-                            // 如果输入的是非数字
-                            if(/^[0-9]*$/.test(domains[i].value) == false){
-                                this.$message({
-                                    message: '请输入数字',
-                                    type: 'warning'
-                                });
-                                return;
-                            }
-
-                        }
-                        // 按钮变化
-                        this.buttonType='B';
-                        console.log('submit!!');
-                        // 关闭弹窗
-                        this.dialogFormVisible = false;
-                    } else {
-                        console.log('error submit!!');
-                        return false;
-                    }
+          	  this.$confirm('编辑的资源未保存，是否离开?', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }).then(() => {
+	            	  window.location.href="/exetend/agendaTaskManager/waitDistributResource"; 
+                }).catch(() => {
+                    this.$message({
+                        type: 'info',
+                        message: '已取消操作'
+                    });          
                 });
+          },
+          submitDialogForm(formName) {
+              this.$refs[formName].validate((valid) => {
+                  if (valid) {  
+                  	
+                      var domains=this.dynamicValidateForm.domains;
+                      var phone=this.form.phone; 
+                      var ary=[];   
+                      console.log(domains)                  
+                      for(var i=0;i<domains.length;i++){
+                          // 判断弹框里的值是否与页面的手机号1重复
+                          if(domains[i].value==phone){
+                              this.$message({
+                                  message: '请不要提交重复手机号',
+                                  type: 'warning'
+                              });
+                              return;
+                          }
+                          // 判断输入框里4个值是否重复(判断对象数组的value是否有重复值)
+                          ary.push(domains[i].value);//把输入的手机号放入一个数组
+                          var s = ary.join(",")+",";                            
+                          console.log(ary)
+                          for(var j=0;j<ary.length;j++) {
+                              console.log(ary[j])
+                              if(ary[j]!=""){
+                                  if((","+s.replace(ary[j]+",","")).indexOf(","+ary[j]+",")>-1) {
+                                      this.$message({
+                                          message: '请不要提交重复手机号',
+                                          type: 'warning'
+                                      });
+                                      return;
+                                  }
+                              }
+                              
+                          }   
+                          // 如果输入的是非数字
+                          if(/^[0-9]*$/.test(domains[i].value) == false){
+                              this.$message({
+                                  message: '请输入数字',
+                                  type: 'warning'
+                              });
+                              return;
+                          }
+
+                      }
+                      // 按钮变化
+                      this.buttonType='B';
+                      console.log('submit!!');
+                      // 关闭弹窗
+                      this.dialogFormVisible = false;
+                  } else {
+                      console.log('error submit!!');
+                      return false;
+                  }
+              });
+          },
+            openWechat() {
+        	  	this.wechatVisible = true
+            	this.wechatForm.wechat2=this.form.wechat2;
+            	this.wechatForm.wechatUrl=this.form.wechatUrl;
             },
             wechatSumbit() {
             	this.form.wechat2=this.wechatForm.wechat2;
@@ -884,11 +902,21 @@ var ossSignatureUrl = [[${ossUrl}]];//上传文件地址
     　　　 	 	},
     　　　 	 	clickTemplate(row){
     　　　     			this.chooseVisible=false;
-		    　                    this.form.projectId=row.clueProjectId;
-		    　                    this.form.category=row.category+'';
-		    　                   this.form.type=row.type+'';
-		    　                  this.form.source=row.source+'';
-		    　                   this.form.sourceType=row.sourceType+'';
+    　　　     			if(row.clueProjectId){
+		    　                    	this.form.projectId=row.clueProjectId;
+    　　　     			}
+    　　　     			if(row.category){
+		    　                  	  this.form.category=row.category+'';
+    　　　     			}
+    　　　     			if(row.type){
+		    　                 	  this.form.type=row.type+'';
+    　　　     			}
+    　　　     			if(row.source){
+		    　              	    this.form.source=row.source+'';
+    　　　     			}
+    　　　     			if(row.sourceType){
+			    　                   this.form.sourceType=row.sourceType+'';
+    　　　     			}
                this.searchTable();
     　　　 	 	},
     　　　 	 	searchTable() {

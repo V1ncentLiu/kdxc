@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html>
-<head th:include="_header_include::frag(~{::title},~{},~{})">
+<head th:include="_header_include::frag(~{::title},~{::style},~{})">
 	<title>待分发资源</title>
 	<meta charset="UTF-8">
 	<!-- import CSS -->
@@ -151,8 +151,8 @@
 		<!-- dialog -->
 		<el-dialog title="线索详细信息" :visible.sync="dialogFormVisible" width="870px">
 		<el-form :model="dialogForm" ref="dialogForm" class="marginB20 dialogForm" >
-			<div class="fs16 redcolor marginB20">线索ID：{{basic.id}}</div>
-			<div class="borderbox padding20">
+			<div class="fs16 marginB10">基本信息<span class="redcolor" style="padding-left: 20px;">线索ID：{{basic.id}}</span></div>
+			<div class="borderbox" style="padding:10px 0;">
 				<el-row>
 					<el-col :span="12">
 						<el-form-item label="客户姓名：" :label-width="formLabelWidth"> {{customer.cusName}} </el-form-item>
@@ -197,6 +197,9 @@
 						<el-form-item label="备注：" :label-width="formLabelWidth"><span style="word-wrap: break-word;word-break: break-all;white-space: pre-wrap !important;">{{basic.remark}}</span></el-form-item> 
 					</el-col> 
 				</el-row>
+			</div>
+			<div class="fs16 marginB10" style="padding-top: 20px;">资源信息</div>
+			<div class="borderbox" style="padding:10px 0;">
 				<el-row> 
 					<el-col :span="12"> 
 						<el-form-item label="资源类型："  :label-width="formLabelWidth">{{basic.typeName}}</el-form-item> 
@@ -246,26 +249,23 @@
 		</el-form> </el-dialog>
 	<!-- 自定义列 -->
 	<!-- 选择列 -->
-	<el-dialog title="选择列" :visible.sync="dialogChooseList">
+	<el-dialog title="自定义列" :visible.sync="dialogChooseList" class="elCheckboxGroup">
 		<el-form :model="fieldFrom">
-
-			<el-form-item label="列名" prop="type">
+			<el-form-item label="" prop="type">
 				<el-checkbox-group v-model="fieldFrom.type">
 					<el-checkbox :label="item.sortNum+'_'+item.fieldCode+'_'+item.displayName+'_'+item.id"  name="type" :key="item.fieldCode"  v-for="(item,index) in  allTableColums ">
 						{{item.displayName}}
 					</el-checkbox>
 				</el-checkbox-group>
 			</el-form-item>
-
 		</el-form>
-
 		<div slot="footer" class="dialog-footer">
-			<el-button @click="dialogChooseList = false">取 消</el-button>
 			<el-button type="primary" @click="confirmColumn">确 定</el-button>
+			<el-button @click="dialogChooseList = false">取 消</el-button>
 		</div>
 	</el-dialog>
 	<!-- 批量添加 自定义字段弹窗 start -->
-	<el-dialog title="导入excel" :visible.sync="dialogBatchVisible" @close="closeUploadFileDialog">
+	<el-dialog title="导入excel" :visible.sync="dialogBatchVisible" @close="closeUploadFileDialog" width="540px">
 
 		<el-row>
 			<el-upload
@@ -282,7 +282,7 @@
 
 					:auto-upload="false">
 				<div class="marginB20 fs16 paddingT20">选中文件:
-					<el-button slot="trigger" size="small" type="primary" style="margin-right: 10px;">选中文件</el-button>
+					<el-button slot="trigger" size="small" type="success" style="margin-right: 10px;">选中文件</el-button>
 				</div>
 				<span slot="tip" class="el-upload__tip" v-show="fileShow">未选择文件</span>
 			</el-upload>
@@ -306,7 +306,7 @@
 						style="width: 100%"
 						border
 						:data="exportdataTable"  >
-					<el-table-column align="center" prop="date" label="创建时间" :formatter="dateFormat"></el-table-column>
+					<el-table-column align="center" prop="date" label="创建时间"></el-table-column>
 					<el-table-column align="center" prop="typeName" label="资源类型"></el-table-column>
 					<el-table-column align="center" prop="categoryName" label="资源类别"></el-table-column>
 					<el-table-column align="center" prop="sourceTypeName" label="广告位"></el-table-column>
@@ -323,10 +323,10 @@
 					<el-table-column align="center" prop="sex1" label="性别"></el-table-column>
 					<el-table-column align="center" prop="age1" label="年龄"></el-table-column>
 					<el-table-column align="center" prop="address" label="地址"></el-table-column>
-					<el-table-column align="center" prop="messageTime1" label="留言时间" :formatter="dateFormat"></el-table-column>
+					<el-table-column align="center" prop="messageTime1" label="留言时间"></el-table-column>
 					<el-table-column align="center" prop="messagePoint" label="留言内容"></el-table-column>
 					<el-table-column align="center" prop="searchWord" label="搜索词"></el-table-column>
-					<el-table-column align="center" prop="reserveTime1" label="预约时间" :formatter="dateFormat"></el-table-column>
+					<el-table-column align="center" prop="reserveTime1" label="预约时间"></el-table-column>
 					<el-table-column align="center" prop="accountName" label="账户名称"></el-table-column>
 					<el-table-column align="center" prop="urlAddress" label="url地址"></el-table-column>
 				</el-table>
@@ -567,13 +567,9 @@ var wdrVM = new Vue({
 						return ;
 					}
 				  wdrVM.customer=response.data.data.clueCustomer;
-				 
-				  var messageTime= response.data.data.clueBasic.messageTime;
-				  if(null!=messageTime){
-					  response.data.data.clueBasic.messageTime=crtTimeFtt1(messageTime);
-				  }
 				   wdrVM.basic=response.data.data.clueBasic;
 				   wdrVM.basic.reserveTime=wdrVM.dateFormat1(wdrVM.basic.reserveTime);
+				   wdrVM.basic.messageTime=wdrVM.dateFormat1(wdrVM.basic.messageTime);
 				   var sex =wdrVM.customer.sex;
 				   if(sex==1){
 					   wdrVM.customer.sex="男";
@@ -797,17 +793,32 @@ var wdrVM = new Vue({
             wdrVM.fileShow = false;
           },
           beforeUpload(file){//上传之前 文件校验
-            var isTextComputer = file.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
-            if(!isTextComputer){
-              this.$message.error('文件格式错误');
-              wdrVM.loading = false;
-              wdrVM.fileList = [];
-              return false;
-            }
+            var isTextComputer = file.type ;
+            if(file.type=== 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'){
+              if(!isTextComputer){
+                this.$message.error('文件格式错误');
+                wdrVM.loading = false;
+                wdrVM.fileList = [];
+                return false;
+              }
+						}else if(file.type=== 'application/vnd.ms-excel'){
+              if(!isTextComputer){
+                this.$message.error('文件格式错误');
+                wdrVM.loading = false;
+                wdrVM.fileList = [];
+                return false;
+              }
+						}else {
+                this.$message.error('文件格式错误');
+                wdrVM.loading = false;
+                wdrVM.fileList = [];
+                return false;
+						}
+
           },
           uploadSuccess(response, file, fileList){//上传成功后
 
-            if(response.code=='0' && response.data.length>0){
+            if(response.code=='0' && response.data.length>0 && response.data.length<=1000){
               this.addOrModifyDialogTitle="预览数据";
               //清空文件里列表
               this.$refs.upload.clearFiles();
@@ -818,7 +829,10 @@ var wdrVM = new Vue({
               wdrVM.exportFormVisible = true;
               wdrVM.dataNum="预览数据，共"+wdrVM.exportdataTable.length+"条数据"
 
-            }else{
+            }else if(response.code=='0' && response.data.length>1000){
+              wdrVM.loading = false;
+              this.$message('每次最多1000条数据');
+						}else {
               wdrVM.loading = false;
               this.$message('文件读取失败，请稍后再试！');
             }
@@ -870,6 +884,7 @@ var wdrVM = new Vue({
               center:true
             }).then(() => {
               $("#showButton").html("导入中");
+              wdrVM.confirmBtnDisabled = true;
               var param = {};
               wdrVM.loading = true;
               param.list = wdrVM.exportdataTable;
@@ -883,14 +898,15 @@ var wdrVM = new Vue({
                 console.log(response);
                 if(null !==response && response.data !=null && response.data.code=='0'){
                   if(response.data.data !=null  && response.data.data.length !=0){
+                    wdrVM.confirmBtnDisabled = false;
                     $("#showButton").html("知道了");
                     $("#showButton").attr("data",2);
                     wdrVM.downloadButtonShow = true;
                     wdrVM.loading = false;
-                    wdrVM.addOrModifyDialogTitle="以下内容";
+                    wdrVM.addOrModifyDialogTitle="导入失败";
 
                     wdrVM.exportdataTable =response.data.data;
-                    wdrVM.dataNum="导入失败"
+                    wdrVM.dataNum="以下内容导入失败，请重新导入"
                   }else{
                     wdrVM.$message({message:'导入成功',type:'success',duration:2000,onClose:function(){
                       wdrVM.exportFormVisible = false;

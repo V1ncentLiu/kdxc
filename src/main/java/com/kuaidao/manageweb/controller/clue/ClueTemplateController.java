@@ -101,7 +101,6 @@ public class ClueTemplateController {
      */
     @PostMapping("/list")
     @ResponseBody
-    @RequiresPermissions("aggregation:clueTemplate:view")
     public JSONResult<PageBean<ClueTemplateDTO>> list(
             @RequestBody ClueTemplatePageParam clueTemplatePageParam, HttpServletRequest request) {
 

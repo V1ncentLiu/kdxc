@@ -559,7 +559,7 @@
                     </el-table-column>
                 </el-table>
                 <div class="padding20 f-tac">
-                    <el-button type="primary" @click="submitForm('form')">保存客户信息</el-button>
+                    <el-button type="primary" :disabled="saveDisabled" @click="submitForm('form')">保存客户信息</el-button>
                     <el-button type="success" :disabled="inviteBtnDisabled" @click="inviteCustomer('form')">邀约来访
                     </el-button>
                     <el-button @click="rebackClue">取 消</el-button>
@@ -586,7 +586,7 @@
                 <el-input v-model="domain.value" maxLength="11" @keyup.native="phoneNumber" style="width: 200px;margin-right: 10px;"></el-input>
                 <el-button type="danger" @click.prevent="removeDomain(domain)" v-show="deleteShow">删除</el-button>
                 <!-- <i class="el-icon-phone-outline telNumberIcon" @click="gettelNumberIcon(domain.value)"></i> -->
-                <img th:src="@{/images/tel.png}" @click="gettelNumberIcon(domain.value)" style="margin:0 10px;width:22px;cursor: pointer;vertical-align: middle;" alt="">
+                <img th:src="@{/images/icon_tele2.png}" @click="gettelNumberIcon(domain.value)" style="margin:0 10px;width:31px;cursor: pointer;vertical-align: middle;" alt="">
             </el-form-item>
         </el-form>
         <div slot="footer" class="f-tac">
@@ -853,6 +853,7 @@
                 deleteShow: false,//删除新增手机号输入框
                 addBtnDisabled: false,
                 inviteBtnDisabled: false,
+                saveDisabled:false,
                 isshowPhone:false,
                 form: {
                 	phone:"",
@@ -1113,6 +1114,7 @@
                 }
 
                 if (valid) {
+                	this.saveDisabled = true;
                     //----客户基本信息---//
                     var clueCustomer = {};
                     //客户姓名
