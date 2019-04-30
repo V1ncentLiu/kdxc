@@ -588,6 +588,9 @@ public class ExtendClueAgendaTaskController {
         // 行业类别
         Map<String, String> industryCategoryMap = dicMap(
                 itemFeignClient.queryDicItemsByGroupCode(DicCodeEnum.INDUSTRYCATEGORY.getCode()));
+        // 账户名称
+        Map<String, String> accountNameMap = dicMap(
+            itemFeignClient.queryDicItemsByGroupCode(DicCodeEnum.ACCOUNT_NAME.getCode()));
 
         if (list != null && list.size() > 0) {
 
@@ -691,6 +694,14 @@ public class ExtendClueAgendaTaskController {
                         islegal = false;
                     }
                 }
+                if (islegal && (clueAgendaTaskDTO1.getAccountName() != null
+                    && !"".equals(clueAgendaTaskDTO1.getAccountName()))) {
+                    clueAgendaTaskDTO1.setAccountNameVaule(
+                        accountNameMap.get(clueAgendaTaskDTO1.getAccountName()));
+                    if (clueAgendaTaskDTO1.getAccountNameVaule() == null) {
+                        islegal = false;
+                    }
+                }
                 // 判断性别
                 if (islegal && (clueAgendaTaskDTO1.getSex1() != null
                         && !"".equals(clueAgendaTaskDTO1.getSex1()))) {
@@ -724,7 +735,7 @@ public class ExtendClueAgendaTaskController {
                     pushClueReq.setAppointTime(clueAgendaTaskDTO1.getReserveTime1());
                     pushClueReq.setCreateTime(clueAgendaTaskDTO1.getDate());
                     pushClueReq.setInputType(4);
-                    pushClueReq.setAccountName(clueAgendaTaskDTO1.getAccountName());
+                    pushClueReq.setAccountName(String.valueOf(clueAgendaTaskDTO1.getAccountNameVaule()));
                     pushClueReq.setUrlAddress(clueAgendaTaskDTO1.getUrlAddress());
                     pushClueReq.setIndustryCategory(
                             String.valueOf(clueAgendaTaskDTO1.getIndustryCategory()));
