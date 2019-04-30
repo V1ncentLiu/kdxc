@@ -364,6 +364,7 @@
       <el-table 
           tooltip-effect="dark"
           style="width: 100%"
+          ref="chooseSignTable"
           border
           :row-key="getRowKey"
           :data="dataTableChoose" 
@@ -379,7 +380,7 @@
       </el-table>
       <div slot="footer" class="dialog-footer">
           <el-button type="primary" @click="submitSign('dialogFormChoose')">提交</el-button>
-          <el-button @click="dialogFormChooseVisible = false">取消</el-button>
+          <el-button @click="dialogFormChooseVisibleCancel">取消</el-button>
       </div>
     </el-dialog>
 </div>
@@ -909,6 +910,11 @@ var clueVM = new Vue({
             	   this.dialogFormChooseVisible=false;
             	   this.$refs['transferForm'].validateField(["dynamicTags"]);
                },
+               //关联签约单取消
+               dialogFormChooseVisibleCancel() {
+            	   this.dialogFormChooseVisible = false;
+            	   this.$refs.chooseSignTable.clearSelection();
+               },
                //打开申请退款
                toAllocationClue(formName) {
             	   if(this.$refs[formName]){
@@ -1012,6 +1018,7 @@ var clueVM = new Vue({
                transferClueCancel(formName){//外调经理取消
             	   this.$refs[formName].resetFields();
             	   this.transferVisible = false;
+            	   this.dialogFormChooseVisibleCancel();
                },
                transferClue(formName){//外调经理
             	   this.$refs[formName].validate((valid) => {
