@@ -18,6 +18,8 @@ var mainDivVM = new Vue({
         visitedNum:'',//当月首访数
         activeName9:'',
         hisDatas:[],
+        notVisitData:[],
+        showTabNotVisitData:false,
         editableTabs:[],
         showHisVisitRecordDialog:false,
         //公告  
@@ -955,27 +957,71 @@ var mainDivVM = new Vue({
 
             })
         },
+        // handleClick(tab, event){
+        //     mainDivVM.setVisitRecordData( mainDivVM.hisDatas[tab.name]);
+        // },
+        // showHistory(row){
+        //     var param = {};
+        //     mainDivVM.editableTabs = [];
+        //     this.showHisVisitRecordDialog = true;
+        //     this.activeName9 = "0"; // 通过名称设置默认显示
+        //     param.clueId = row.clueId
+        //     axios.post('/busVisitRecord/queryHisList',param).then(function (response) {
+        //         // 动态生成tab
+        //         var tabs = [];
+        //         for(var i = 0 ; i < response.data.length ; i++){
+        //             var tab = {};
+        //             tab.title =  response.data[i][0].createUserName+"-客户到访记录";
+        //             tab.name = ""+i;
+        //             tabs.push(tab)
+        //         }
+        //         mainDivVM.editableTabs = tabs;
+        //         mainDivVM.hisDatas = response.data;
+        //         mainDivVM.setVisitRecordData( mainDivVM.hisDatas[0]);
+        //     });
+        // },
         handleClick(tab, event){
-            mainDivVM.setVisitRecordData( mainDivVM.hisDatas[tab.name]);
+            console.log(tab)
+            if(tab.label=='未到访记录'){
+                this.showTabNotVisitData = true;
+                mainDivVM.notVisitData =  mainDivVM.hisDatas[tab.name];
+            }else{
+                this.showTabNotVisitData = false;
+                mainDivVM.setVisitRecordData( mainDivVM.hisDatas[tab.name]);
+            }
         },
         showHistory(row){
             var param = {};
             mainDivVM.editableTabs = [];
             this.showHisVisitRecordDialog = true;
-            this.activeName9 = "0"; // 通过名称设置默认显示
+            this.activeName = "0"; // 通过名称设置默认显示
             param.clueId = row.clueId
             axios.post('/busVisitRecord/queryHisList',param).then(function (response) {
                 // 动态生成tab
                 var tabs = [];
                 for(var i = 0 ; i < response.data.length ; i++){
                     var tab = {};
-                    tab.title =  response.data[i][0].createUserName+"-客户到访记录";
-                    tab.name = ""+i;
-                    tabs.push(tab)
+                    if(response.data[i][0]){
+                        if(response.data[i][0].isVisit==0){
+                            tab.title =  "未到访记录";
+                        }else{
+                            tab.title =  response.data[i][0].createUserName+"-客户到访记录";
+                        }
+                        tab.name = ""+i;
+                        tabs.push(tab)
+                    }
                 }
                 mainDivVM.editableTabs = tabs;
                 mainDivVM.hisDatas = response.data;
-                mainDivVM.setVisitRecordData( mainDivVM.hisDatas[0]);
+                if(mainDivVM.hisDatas[0][0]){
+                    if(response.data[0][0].isVisit==0){
+                        mainDivVM.notVisitData =  mainDivVM.hisDatas[0];
+                        this.showTabNotVisitData = true;
+                    }else{
+                        mainDivVM.setVisitRecordData( mainDivVM.hisDatas[0]);
+                        mainDivVM.showTabNotVisitData = false;
+                    }
+                }
             });
         },
         setVisitRecordData(dataList){
