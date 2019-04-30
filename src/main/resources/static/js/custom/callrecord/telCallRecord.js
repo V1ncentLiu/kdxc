@@ -85,8 +85,28 @@ var myCallRecordVm = new Vue({
         	 param.pageSize=this.pager.pageSize;
         	 axios.post('/call/callRecord/listAllTmCallRecord',param)
              .then(function (response) {
-            	 var data =  response.data
+            	 
+            	 var data =  response.data;
                  if(data.code=='0'){
+                	 //获取通话总时长
+                /*	 axios.post('/call/callRecord/countAllTeleCallRecordTalkTime',param)
+                     .then(function (response) {
+                    	 console.info(response);
+                    	 var data =  response.data;
+                         if(data.code=='0'){
+                        	 myCallRecordVm.totalTalkTime = data.data;
+                             
+                         }else{
+                        	 myCallRecordVm.$message({message:data.msg,type:'error'});
+                         	 console.error(data);
+                         }
+                     
+                     })
+                     .catch(function (error) {
+                          console.log(error);
+                     }).then(function(){
+                     });*/
+                	 
                  	var resData = data.data;
                  	var callRecordData = resData.data;
                  	myCallRecordVm.callRecordData= callRecordData.data;
