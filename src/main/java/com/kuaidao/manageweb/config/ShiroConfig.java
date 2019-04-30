@@ -2,6 +2,8 @@ package com.kuaidao.manageweb.config;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+
+import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.mgt.SecurityManager;
 import org.apache.shiro.spring.LifecycleBeanPostProcessor;
 import org.apache.shiro.spring.security.interceptor.AuthorizationAttributeSourceAdvisor;
@@ -28,6 +30,13 @@ public class ShiroConfig {
     @Value("${spring.redis.timeout}")
     private int timeout;
 
+    @Value("${spring.redis.password}")
+    private String password;
+    /**
+     * 运行环境
+     */
+    @Value("${spring.profiles.active}")
+    private String environment;
     @Bean
     public ShiroFilterFactoryBean shirFilter(org.apache.shiro.mgt.SecurityManager securityManager) {
         System.out.println("ShiroConfiguration.shirFilter()");
@@ -109,6 +118,9 @@ public class ShiroConfig {
         redisManager.setPort(port);
         // redisManager.setExpire(1800);// 配置缓存过期时间
         redisManager.setTimeout(timeout);
+        if(StringUtils.isNotBlank(environment)&&StringUtils.equals(environment,"prod")){
+            redisManager.setPassword(password);
+        }
         // redisManager.setPassword(password);
         return redisManager;
     }

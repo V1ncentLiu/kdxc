@@ -825,7 +825,7 @@ public class ExtendClueAgendaTaskController {
             logger.error("export trucking_order param{{}},res{{}}", dto, list);
         }
 
-        XSSFWorkbook wbWorkbook = ExcelUtil.creat2007Excel(dataList);
+        XSSFWorkbook wbWorkbook = ExcelUtil.creatFailClueExcel(dataList);
 
 
         String name = DateUtil.convert2String(new Date(), DateUtil.ymdhms2) + ".xlsx";
