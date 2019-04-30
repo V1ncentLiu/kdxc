@@ -1,7 +1,5 @@
 package com.kuaidao.manageweb.controller.clue;
 
-import com.google.common.collect.Maps;
-import com.kuaidao.aggregation.dto.project.ProjectInfoPageParam;
 import java.net.URLEncoder;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -34,6 +32,7 @@ import com.kuaidao.aggregation.dto.clue.ClueDTO;
 import com.kuaidao.aggregation.dto.clue.ClueQueryDTO;
 import com.kuaidao.aggregation.dto.clue.PushClueReq;
 import com.kuaidao.aggregation.dto.project.ProjectInfoDTO;
+import com.kuaidao.aggregation.dto.project.ProjectInfoPageParam;
 import com.kuaidao.common.constant.DicCodeEnum;
 import com.kuaidao.common.constant.RoleCodeEnum;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
@@ -279,7 +278,7 @@ public class ExtendClueAgendaTaskController {
             }
 
         } else if (RoleCodeEnum.GLY.name().equals(roleInfoDTO.getRoleCode())) {
-
+            idList = null;
         } else {
             return new JSONResult<PageBean<ClueAgendaTaskDTO>>()
                     .fail(SysErrorCodeEnum.ERR_NOTEXISTS_DATA.getCode(), "角色没有权限");
@@ -555,7 +554,7 @@ public class ExtendClueAgendaTaskController {
     public JSONResult importInvitearea(@RequestBody ClueAgendaTaskDTO clueAgendaTaskDTO)
             throws Exception {
         UserInfoDTO user =
-            (UserInfoDTO) SecurityUtils.getSubject().getSession().getAttribute("user");
+                (UserInfoDTO) SecurityUtils.getSubject().getSession().getAttribute("user");
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         // 存放合法的数据
         List<ClueAgendaTaskDTO> dataList = new ArrayList<ClueAgendaTaskDTO>();
@@ -563,7 +562,8 @@ public class ExtendClueAgendaTaskController {
         List<ClueAgendaTaskDTO> illegalDataList = new ArrayList<ClueAgendaTaskDTO>();
         // 项目处理
         ProjectInfoPageParam projectInfoPageParam = new ProjectInfoPageParam();
-        List<ProjectInfoDTO> proList = projectInfoFeignClient.listNoPage(projectInfoPageParam).getData();
+        List<ProjectInfoDTO> proList =
+                projectInfoFeignClient.listNoPage(projectInfoPageParam).getData();
         Map<String, Long> projectMap = new HashMap<String, Long>();
         // 遍历项目list集生成<id,name>map
         for (ProjectInfoDTO projectInfoDTO : proList) {
@@ -588,6 +588,9 @@ public class ExtendClueAgendaTaskController {
         // 行业类别
         Map<String, String> industryCategoryMap = dicMap(
                 itemFeignClient.queryDicItemsByGroupCode(DicCodeEnum.INDUSTRYCATEGORY.getCode()));
+        // 账户名称
+        Map<String, String> accountNameMap = dicMap(
+            itemFeignClient.queryDicItemsByGroupCode(DicCodeEnum.ACCOUNT_NAME.getCode()));
 
         if (list != null && list.size() > 0) {
 
@@ -595,7 +598,8 @@ public class ExtendClueAgendaTaskController {
                 boolean islegal = true;// true合法 false不合法
                 if (islegal && clueAgendaTaskDTO1.getProjectName() != null
                         && !"".equals(clueAgendaTaskDTO1.getProjectName())) {
-                    clueAgendaTaskDTO1.setProjectId(projectMap.get(clueAgendaTaskDTO1.getProjectName()));
+                    clueAgendaTaskDTO1
+                            .setProjectId(projectMap.get(clueAgendaTaskDTO1.getProjectName()));
                     if (clueAgendaTaskDTO1.getProjectId() == null) {
                         islegal = false;
                     }
@@ -690,6 +694,14 @@ public class ExtendClueAgendaTaskController {
                         islegal = false;
                     }
                 }
+                if (islegal && (clueAgendaTaskDTO1.getAccountName() != null
+                    && !"".equals(clueAgendaTaskDTO1.getAccountName()))) {
+                    clueAgendaTaskDTO1.setAccountNameVaule(
+                        accountNameMap.get(clueAgendaTaskDTO1.getAccountName()));
+                    if (clueAgendaTaskDTO1.getAccountNameVaule() == null) {
+                        islegal = false;
+                    }
+                }
                 // 判断性别
                 if (islegal && (clueAgendaTaskDTO1.getSex1() != null
                         && !"".equals(clueAgendaTaskDTO1.getSex1()))) {
@@ -723,7 +735,7 @@ public class ExtendClueAgendaTaskController {
                     pushClueReq.setAppointTime(clueAgendaTaskDTO1.getReserveTime1());
                     pushClueReq.setCreateTime(clueAgendaTaskDTO1.getDate());
                     pushClueReq.setInputType(4);
-                    pushClueReq.setAccountName(clueAgendaTaskDTO1.getAccountName());
+                    pushClueReq.setAccountName(String.valueOf(clueAgendaTaskDTO1.getAccountNameVaule()));
                     pushClueReq.setUrlAddress(clueAgendaTaskDTO1.getUrlAddress());
                     pushClueReq.setIndustryCategory(
                             String.valueOf(clueAgendaTaskDTO1.getIndustryCategory()));

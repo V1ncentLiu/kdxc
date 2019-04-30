@@ -151,6 +151,7 @@ public class AppiontmentController {
         UserInfoDTO user = getUser();
         // 插入当前用户、角色信息
         pageParam.setUserId(user.getId());
+        pageParam.setOrgId(user.getOrgId());
         List<RoleInfoDTO> roleList = user.getRoleList();
         if (roleList != null) {
 
@@ -177,11 +178,13 @@ public class AppiontmentController {
 
     /***
      * 重复手机号资源信息
+     * 
      * @return
      */
     @PostMapping("/repeatPhoneMap")
     @ResponseBody
-    public JSONResult<Map> repeatPhoneMap(@RequestBody ClueAppiontmentReq param, HttpServletRequest request) {
+    public JSONResult<Map> repeatPhoneMap(@RequestBody ClueAppiontmentReq param,
+            HttpServletRequest request) {
         JSONResult<Map> map = appiontmentFeignClient.repeatPhoneMap(param);
         return map;
     }
@@ -209,7 +212,7 @@ public class AppiontmentController {
     @ResponseBody
     @RequiresPermissions("aggregation:appiontmentManager:cancel")
     @LogRecord(description = "取消预约来访数据", operationType = OperationType.UPDATE,
-        menuName = MenuEnum.APPIONTMENT_MANAGEMENT)
+            menuName = MenuEnum.APPIONTMENT_MANAGEMENT)
     public JSONResult<String> cancelAppiontment(@RequestBody AppiontmentCancelDTO dto,
             HttpServletRequest request) {
 
@@ -266,7 +269,7 @@ public class AppiontmentController {
     @PostMapping("/deleteAppiontment")
     @ResponseBody
     @LogRecord(description = "删除预约来访信息", operationType = OperationType.DELETE,
-        menuName = MenuEnum.APPIONTMENT_MANAGEMENT)
+            menuName = MenuEnum.APPIONTMENT_MANAGEMENT)
     public JSONResult deleteAppiontment(@RequestBody IdListLongReq idList) {
 
         return appiontmentFeignClient.delete(idList);
