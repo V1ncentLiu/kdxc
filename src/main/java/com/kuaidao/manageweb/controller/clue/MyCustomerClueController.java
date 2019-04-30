@@ -7,6 +7,8 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
+
 import javax.servlet.http.HttpServletRequest;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
@@ -229,9 +231,39 @@ public class MyCustomerClueController {
      */
     @RequestMapping("/customerEditInfo")
     public String customerEditInfo(HttpServletRequest request, @RequestParam String clueId) {
+    	UserInfoDTO user = getUser();
+    	List<Long> accountList = new ArrayList<Long>();
+        if (null != user.getRoleList() && user.getRoleList().size() > 0) {
+            String roleCode = user.getRoleList().get(0).getRoleCode();
+            if (null != roleCode) {
+                if (roleCode.equals(RoleCodeEnum.GLY.name())) {
+                    // 管理员查看所有
 
+                } else if (roleCode.equals(RoleCodeEnum.DXZJ.name())) {
+                	UserOrgRoleReq userOrgRoleReq = new UserOrgRoleReq();
+            		userOrgRoleReq.setOrgId(user.getOrgId());
+            		userOrgRoleReq.setRoleCode(RoleCodeEnum.DXCYGW.name());
+            		JSONResult<List<UserInfoDTO>> listByOrgAndRole = userInfoFeignClient.listByOrgAndRole(userOrgRoleReq);
+            		if (listByOrgAndRole.getCode().equals(JSONResult.SUCCESS) && null != listByOrgAndRole.getData()
+							&& listByOrgAndRole.getData().size() > 0) {
+            			accountList =
+            					listByOrgAndRole.getData().stream().map(c -> c.getId() ).collect(Collectors.toList());
+            		}
+                } else if (roleCode.equals(RoleCodeEnum.DXCYGW.name())) {
+                	accountList.add(user.getId());
+                }
+            }
+        }
+        // 获取资源跟进记录数据
+        TrackingReqDTO dto = new TrackingReqDTO();
+        // 获取已上传的文件数据
+        ClueQueryDTO fileDto = new ClueQueryDTO();
         CallRecordReqDTO call = new CallRecordReqDTO();
         call.setClueId(clueId);
+        if(accountList.size()>0) {
+        	call.setAccountIdList(accountList);
+        	fileDto.setIdList(accountList);
+        }
         JSONResult<List<CallRecordRespDTO>> callRecord =
                 callRecordFeign.listTmCallReacordByParamsNoPage(call);
         // 资源通话记录
@@ -270,8 +302,7 @@ public class MyCustomerClueController {
                 request.setAttribute("customer", new ArrayList());
             }
         }
-        // 获取资源跟进记录数据
-        TrackingReqDTO dto = new TrackingReqDTO();
+       
         dto.setClueId(new Long(clueId));
         JSONResult<List<TrackingRespDTO>> trackingList = trackingFeignClient.queryList(dto);
         if (trackingList != null && trackingList.SUCCESS.equals(trackingList.getCode())
@@ -300,15 +331,12 @@ public class MyCustomerClueController {
             request.setAttribute("proSelect", new ArrayList());
         }
 
-        // 获取已上传的文件数据
-        ClueQueryDTO fileDto = new ClueQueryDTO();
         fileDto.setClueId(new Long(clueId));
         JSONResult<List<ClueFileDTO>> clueFileList = myCustomerFeignClient.findClueFile(fileDto);
         if (clueFileList != null && clueFileList.SUCCESS.equals(clueFileList.getCode())
                 && clueFileList.getData() != null) {
             request.setAttribute("clueFileList", clueFileList.getData());
         }
-        UserInfoDTO user = getUser();
         request.setAttribute("loginUserId", user.getId());
         return "clue/addCustomerMaintenance";
     }
@@ -323,7 +351,36 @@ public class MyCustomerClueController {
     @RequestMapping("/customerInfoReadOnly")
     public String customerInfoReadOnly(HttpServletRequest request, @RequestParam String clueId,
             @RequestParam(required = false) String commonPool) {
+    	UserInfoDTO user = getUser();
+    	List<Long> accountList = new ArrayList<Long>();
+        if (null != user.getRoleList() && user.getRoleList().size() > 0) {
+            String roleCode = user.getRoleList().get(0).getRoleCode();
+            if (null != roleCode) {
+                if (roleCode.equals(RoleCodeEnum.GLY.name())) {
+                    // 管理员查看所有
+
+                } else if (roleCode.equals(RoleCodeEnum.DXZJ.name())) {
+                	UserOrgRoleReq userOrgRoleReq = new UserOrgRoleReq();
+            		userOrgRoleReq.setOrgId(user.getOrgId());
+            		userOrgRoleReq.setRoleCode(RoleCodeEnum.DXCYGW.name());
+            		JSONResult<List<UserInfoDTO>> listByOrgAndRole = userInfoFeignClient.listByOrgAndRole(userOrgRoleReq);
+            		if (listByOrgAndRole.getCode().equals(JSONResult.SUCCESS) && null != listByOrgAndRole.getData()
+							&& listByOrgAndRole.getData().size() > 0) {
+            			accountList =
+            					listByOrgAndRole.getData().stream().map(c -> c.getId() ).collect(Collectors.toList());
+            		}
+                } else if (roleCode.equals(RoleCodeEnum.DXCYGW.name())) {
+                	accountList.add(user.getId());
+                }
+            }
+        }
+        // 获取已上传的文件数据
+        ClueQueryDTO fileDto = new ClueQueryDTO();
         CallRecordReqDTO call = new CallRecordReqDTO();
+        if(accountList.size()>0) {
+        	call.setAccountIdList(accountList);
+        	fileDto.setIdList(accountList);
+        }
         call.setClueId(clueId);
         JSONResult<List<CallRecordRespDTO>> callRecord =
                 callRecordFeign.listTmCallReacordByParamsNoPage(call);
@@ -394,14 +451,12 @@ public class MyCustomerClueController {
         }
 
         // 获取已上传的文件数据
-        ClueQueryDTO fileDto = new ClueQueryDTO();
         fileDto.setClueId(new Long(clueId));
         JSONResult<List<ClueFileDTO>> clueFileList = myCustomerFeignClient.findClueFile(fileDto);
         if (clueFileList != null && clueFileList.SUCCESS.equals(clueFileList.getCode())
                 && clueFileList.getData() != null) {
             request.setAttribute("clueFileList", clueFileList.getData());
         }
-        UserInfoDTO user = getUser();
         request.setAttribute("commonPool", commonPool);
         request.setAttribute("loginUserId", user.getId());
         return "clue/CustomerMaintenanceReadOnly";
@@ -417,6 +472,32 @@ public class MyCustomerClueController {
     @ResponseBody
     public JSONResult<List<ClueFileDTO>> findClueFile(HttpServletRequest request,
             @RequestBody ClueQueryDTO dto) {
+    	UserInfoDTO user = getUser();
+    	List<Long> accountList = new ArrayList<Long>();
+        if (null != user.getRoleList() && user.getRoleList().size() > 0) {
+            String roleCode = user.getRoleList().get(0).getRoleCode();
+            if (null != roleCode) {
+                if (roleCode.equals(RoleCodeEnum.GLY.name())) {
+                    // 管理员查看所有
+
+                } else if (roleCode.equals(RoleCodeEnum.DXZJ.name())) {
+                	UserOrgRoleReq userOrgRoleReq = new UserOrgRoleReq();
+            		userOrgRoleReq.setOrgId(user.getOrgId());
+            		userOrgRoleReq.setRoleCode(RoleCodeEnum.DXCYGW.name());
+            		JSONResult<List<UserInfoDTO>> listByOrgAndRole = userInfoFeignClient.listByOrgAndRole(userOrgRoleReq);
+            		if (listByOrgAndRole.getCode().equals(JSONResult.SUCCESS) && null != listByOrgAndRole.getData()
+							&& listByOrgAndRole.getData().size() > 0) {
+            			accountList =
+            					listByOrgAndRole.getData().stream().map(c -> c.getId() ).collect(Collectors.toList());
+            		}
+                } else if (roleCode.equals(RoleCodeEnum.DXCYGW.name())) {
+                	accountList.add(user.getId());
+                }
+            }
+        }
+        if(accountList.size()>0) {
+        	dto.setIdList(accountList);
+        }
         // 获取已上传的文件数据
         return myCustomerFeignClient.findClueFile(dto);
     }
@@ -923,6 +1004,7 @@ public class MyCustomerClueController {
         UserInfoDTO user = (UserInfoDTO) subject.getSession().getAttribute("user");
         if (null != user) {
             dto.setUpdateUser(user.getId());
+            dto.setOrg(user.getOrgId());
         }
         return myCustomerFeignClient.updateCustomerClue(dto);
     }

@@ -42,6 +42,7 @@ import com.kuaidao.aggregation.dto.visitrecord.VisitRecordRespDTO;
 import com.kuaidao.common.constant.CluePhase;
 import com.kuaidao.common.constant.OrgTypeConstant;
 import com.kuaidao.common.constant.RoleCodeEnum;
+import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.IdEntityLong;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
@@ -165,6 +166,8 @@ public class ConsoleController {
             if (JSONResult.SUCCESS.equals(proJson.getCode())) {
                 request.setAttribute("proSelect", proJson.getData());
             }
+         // 查询赠送类型集合
+            request.setAttribute("giveTypeList", getDictionaryByCode(Constants.GIVE_TYPE));
             path = "console/consoleBusinessManager";
         } else if (RoleCodeEnum.SWZJ.name().equals(roleCode)) {
             // 商务总监
@@ -676,10 +679,19 @@ public class ConsoleController {
     public JSONResult<List<VisitRecordRespDTO>> listVisitRecord(
             @RequestBody VisitRecordReqDTO visitRecordReqDTO) {
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
-        List<Long> busGroupIdList = new ArrayList<>();
+        /*List<Long> busGroupIdList = new ArrayList<>();
         busGroupIdList.add(curLoginUser.getOrgId());
-        visitRecordReqDTO.setBusGroupIdList(busGroupIdList);
+        visitRecordReqDTO.setBusGroupIdList(busGroupIdList);*/
+        
+        List<Long> accountIdList = getAccountIdList(curLoginUser.getOrgId(), RoleCodeEnum.SWJL.name());
+        if (CollectionUtils.isEmpty(accountIdList)) {
+            return new JSONResult().fail(SysErrorCodeEnum.ERR_NOTEXISTS_DATA.getCode(),
+                    "该用户下没有下属");
+        }
+        visitRecordReqDTO.setBusManagerIdList(accountIdList);
         visitRecordReqDTO.setStatus(1);
+        //待审核
+        //visitRecordReqDTO.setVisitStatus(1);
         return visitRecordFeignClient.listVisitRecordNoPage(visitRecordReqDTO);
     }
 
@@ -709,31 +721,6 @@ public class ConsoleController {
         reqDTO.setBusinessManagerIdList(accountIdList);
         reqDTO.setStatus(AggregationConstant.SIGN_ORDER_STATUS.AUDITING);
         return signRecordFeignClient.listSignRecordNoPage(reqDTO);
-    }
-
-
-    public static void main(String[] args) {
-        Date curDate = new Date();
-        Date addDays = DateUtil.addDays(curDate, -7);
-     /*   System.out.println(addDays);
-        System.out.println(DateFormatUtils.format(new Date(), "yyyy-MM-dd 00:00:00"));
-        // 获取当天凌晨0点0分0秒Date
-        Calendar calendar1 = Calendar.getInstance();
-        calendar1.set(calendar1.get(Calendar.YEAR), calendar1.get(Calendar.MONTH),
-                calendar1.get(Calendar.DAY_OF_MONTH), 0, 0, 0);
-        Date beginOfDate = calendar1.getTime();
-        System.out.println(beginOfDate);
-        Date disableTime = DateUtil.convert2Date("2019-03-18 14:00:48", DateUtil.ymdhms);
-        Date addDays2 = DateUtil.addDays(disableTime, 1);
-        System.out.println(addDays2);
-        System.out.println(DateUtil.diffTimes(addDays2, new Date()));*/
-        
-        //long diffTimes = DateUtil.diffTimes(DateUtil.addDays(startTimeDate,limitDays),curDate);
-        Date startTimeDate = DateUtil.convert2Date("2019-04-11 15:42:17", DateUtil.ymdhms);
-        Date curDate2 =  DateUtil.convert2Date("2019-04-11 17:45:00", DateUtil.ymdhms);
-        Date endDate = DateUtil.addDays(startTimeDate, 2);
-        System.out.println( DateUtil.diffTimes(endDate,curDate2));
-       
     }
 
     /**

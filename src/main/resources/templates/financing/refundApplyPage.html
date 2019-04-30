@@ -145,8 +145,8 @@
                 </el-row>
                 <div class="mainSearchBtnBox">
                     <el-button type="primary" @click="searchTable()" class="searchBtn">搜索</el-button>
-                    <el-button type="info" class="searchBtn">取消</el-button>
-                    <span style="color: #5c6be8;cursor: pointer;margin:0 10px;" @click="toogleClick">更多搜索<i class="el-icon-arrow-down greycolor paddingL6"></i>
+                    <!-- <el-button type="info" class="searchBtn">取消</el-button> -->
+                    <span style="color: #5c6be8;cursor: pointer;margin:0 10px;" @click="toogleClick"><span v-if="isShow">收起</span><span v-else>展开更多</span><i :class="{'greycolor paddingL6 el-icon-arrow-up':isShow,'greycolor paddingL6 el-icon-arrow-down':!isShow}"></i></span>
                 </div>
             </el-form>  
         </div>
@@ -230,7 +230,7 @@
         </el-row>
     </div>
     <!-- 驳回编辑 -->
-    <el-dialog :title="editRejectTitle" :visible.sync="dialogFormVisible" width="870px">
+    <el-dialog :title="editRejectTitle" :visible.sync="dialogFormVisible" width="870px" @close="closeEditRefundDialog">
         <el-form :model="dialogForm" ref="dialogForm" :rules="dialogRules">           
             <el-form-item label="驳回人员：" :label-width="formLabelWidth" prop="person">
                 {{dialogForm.auditUserName}}
@@ -292,7 +292,7 @@
         </el-form>
         <div slot="footer" class="dialog-footer">
             <el-button type="primary" @click="submitDialogForm('dialogForm')" :disabled="confirmBtnDisabled">确 定</el-button>
-            <el-button @click="dialogFormVisible = false" type="info">取 消</el-button>
+            <el-button @click="cancleRefundEditDialog" type="info">取 消</el-button>
         </div>
     </el-dialog>
     <!-- 驳回原因 -->
@@ -534,8 +534,9 @@
                   
               },
              selectFile(file, fileList){
+            	  debugger;
             	  var fileLength = fileList.length;
-            	  if(fileLength>2){
+            	  if(fileLength>=2){
             		  //验证最后2个文件是否都是即将要上传的，如果是，只保留一个
             		  var lastSecondFile = fileList[fileLength-2];
             		  if(!lastSecondFile.hasOwnProperty("id")){
@@ -708,9 +709,9 @@
             editDialog(row){//驳回编辑
                 //get oss param
                 this.getUploadParam();
-                 if(this.$refs['dialogForm]']){
+               /*   if(this.$refs['dialogForm]']){
                    this.$refs['dialogForm'].resetFields();
-                  }  
+                  }  */ 
                 var param={};
                 param.id=row.id;
                  axios.post('/financing/refund/queryRefundInfoById',param)
@@ -737,7 +738,6 @@
                           mainDivVM.dialogForm.fileList=fileIdList;
                           mainDivVM.editRejectTitle = "编辑驳回（"+table.signNo+"）签约单退款申请";
                           mainDivVM.fileList=imgShowList;
-                          
                           mainDivVM.dialogFormVisible=true;
                       }else{
                           console.error(response);
@@ -1016,12 +1016,9 @@
                  this.form.teleId='';
             },
             handleSuccess(response, file, fileList){
-                console.info(fileList);
-                console.info(mainDivVM.fileList);
                 var realName = file.name;
                 var randomName = mainDivVM.uploadParamData.key;
                 var imgUrl =  mainDivVM.uploadOssHost+"/"+randomName;
-                console.info(imgUrl);
                 var param = {};
                 param.realName=realName;
                 param.imgUrl = imgUrl;
@@ -1038,8 +1035,6 @@
                         lastFile.url = imgUrl;
                         lastFile.randomName = randomName; 
                         var curList = mainDivVM.fileList;
-                        console.info(mainDivVM.dialogForm);
-                        console.info(mainDivVM.dialogForm.fileList);
                         mainDivVM.dialogForm.fileList.push(resData.data);
                         curList.push(lastFile);
                         
@@ -1166,6 +1161,13 @@
                     this.isShow=true
                 }          
             },
+            closeEditRefundDialog(){
+            	  this.$refs['dialogForm'].resetFields();
+            },
+            cancleRefundEditDialog(){
+            	this.dialogFormVisible = false;
+            	this.closeEditRefundDialog();
+            }
           
         },
         created(){            

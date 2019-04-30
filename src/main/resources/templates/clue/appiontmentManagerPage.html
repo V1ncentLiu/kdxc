@@ -2,9 +2,6 @@
 <html xmlns="http://www.w3.org/1999/xhtml"  xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
 <head th:replace="_header_include::frag(~{::title},~{},~{})">
     <title>后台管理系统</title>
-    <style>
-        button a{color:#fff!important;}
-    </style>
 </head>
 <body>
 <div id="appiontmentManage" class="appiontmentManage mainPadding" style="display: none;">  
@@ -76,9 +73,9 @@
     				</el-form-item>	
                 </el-row>			
                 <div class="mainSearchBtnBox">
-				    <el-button type="primary" @click="searchTable()" class="searchBtn">搜索</el-button>
-                    <el-button type="info" class="searchBtn">取消</el-button>
-                    <span style="color: #5c6be8;cursor: pointer;margin:0 10px;" @click="toogleClick">更多搜索<i class="el-icon-arrow-down greycolor paddingL6"></i></span>
+				    <el-button icon="el-icon-search" type="primary" @click="searchTable()" class="searchBtn">搜索</el-button>
+                    <!-- <el-button type="info" class="searchBtn">取消</el-button> -->
+                    <span style="color: #5c6be8;cursor: pointer;margin:0 10px;" @click="toogleClick"><span v-if="isShow">收起</span><span v-else>展开更多</span><i :class="{'greycolor paddingL6 el-icon-arrow-up':isShow,'greycolor paddingL6 el-icon-arrow-down':!isShow}"></i></span>
                 </div>
             </el-form>
         </div>
@@ -103,6 +100,15 @@
     	                    <div v-else>无</div>
     	                </template>
     	        </el-table-column>
+    	        <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width"
+    	         v-else-if="item.fieldCode == 'cusPhone'">
+    	               <template slot-scope="scope">
+    		                <div v-if="scope.row.phase === 7">
+    		                    <el-button @click="recordClick(scope.row)" type="text" size="small">***</el-button>
+    	                    </div>
+    	                    <div v-else>{{scope.row.cusPhone}}</div>
+    	                </template>
+    	        </el-table-column>
                 <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width"
     	         v-else>
     	        </el-table-column>
@@ -112,10 +118,10 @@
         </el-row>
     </div>
     <!-- dialog -->
-    <el-dialog title="编辑邀约来访" :visible.sync="appiontmentFormVisible" >
+    <el-dialog title="编辑邀约来访" :visible.sync="appiontmentFormVisible" width="540px">
         <el-form :model="appiontmentForm" ref="appiontmentForm" :rules="appiontmentFormRule">
             <el-form-item label="地区：" :label-width="formLabelWidth" prop="area">
-                <el-select v-model="appiontmentForm.area" disabled placeholder="请选择" style="width: 70%;" @change="currentBusGroup" >
+                <el-select v-model="appiontmentForm.area" disabled placeholder="请选择" style="width: 290px;" @change="currentBusGroup" >
                     <el-option
                         v-for="item in areaOptions"
                         :key="item.id"
@@ -125,7 +131,7 @@
                 </el-select>
             </el-form-item>
             <el-form-item label="分公司：" :label-width="formLabelWidth" prop="busCompay">
-                <el-select v-model="appiontmentForm.busCompay" disabled placeholder="请选择" style="width: 70%;" @change="currentBusSale">
+                <el-select v-model="appiontmentForm.busCompay" disabled placeholder="请选择" style="width: 290px;" @change="currentBusSale">
                     <el-option
                         v-for="item in busCompayOptions"
                         :key="item.id"
@@ -135,7 +141,7 @@
                 </el-select>
             </el-form-item>
             <el-form-item label="商务总监：" :label-width="formLabelWidth" prop="busDirectorId">
-                <el-select v-model="appiontmentForm.busDirectorId" disabled placeholder="请选择" style="width: 70%;">
+                <el-select v-model="appiontmentForm.busDirectorId" disabled placeholder="请选择" style="width: 290px;">
                     <el-option
                         v-for="item in busDirectorOptions"
                         :key="item.id"
@@ -149,7 +155,7 @@
                     <el-select 
                         v-model="appiontmentForm.tasteProjectId" 
                         placeholder="品尝项目" 
-                        style="width: 70%;" 
+                        style="width: 290px;" 
                         multiple 
                         >
                         <el-option
@@ -163,14 +169,14 @@
             </el-form-item>
             <el-form-item label="预约时间：" :label-width="formLabelWidth" prop="reserveTime">
                 <el-date-picker
-                    style="width: 70%;"
+                    style="width: 290px;"
                     v-model="appiontmentForm.reserveTime"
                     type="datetime"
                     placeholder="选择日期时间">
                 </el-date-picker>
             </el-form-item>
             <el-form-item label="备注：" :label-width="formLabelWidth" prop="remark">
-                <el-input type="textarea" :rows="2" v-model="appiontmentForm.remark" maxlength="500" style="width: 70%;"></el-input>
+                <el-input type="textarea" :rows="2" v-model="appiontmentForm.remark" maxlength="500" style="width: 290px;"></el-input>
             </el-form-item>
         </el-form>
         <div slot="footer" class="dialog-footer">
@@ -273,22 +279,18 @@
     </el-dialog>
     
 	<el-dialog title="自定义列" :visible.sync="dialogFormVisible" class="elCheckboxGroup">
-	  <el-form :model="form">
-	    
+	  <el-form :model="form">	    
 		  <el-form-item label="" prop="type">
 		    <el-checkbox-group v-model="form.type">
 		      <el-checkbox :label="item.sortNum+'_'+item.fieldCode+'_'+item.displayName+'_'+item.id"  name="type" :key="item.fieldCode"  v-for="(item,index) in  allTableColums ">
 		          {{item.displayName}}
-		      </el-checkbox>
-		  
+		      </el-checkbox>		  
 		     </el-checkbox-group>
-		  </el-form-item>
-	    
-	  </el-form>
-	  
+		  </el-form-item>	    
+	  </el-form>	  
 	  <div slot="footer" class="dialog-footer">
+        <el-button type="primary" @click="confirmColumn">确 定</el-button>
 	    <el-button @click="dialogFormVisible = false">取 消</el-button>
-	    <el-button type="primary" @click="confirmColumn">确 定</el-button>
 	  </div>
 	</el-dialog>
 	    <!-- 释放资源 -->
@@ -296,7 +298,7 @@
         <el-form :model="cancelDigForm" ref="cancelDigForm" :rules="cancelRules">
             <el-row>
                 <div class="marginB10" style="padding-left: 150px;">确认标记取消选中的邀约来访？</div>
-                <el-form-item label="取消原因：" :label-width="formLabelWidth" prop="cancelReason">
+                <el-form-item label="取消原因：" :label-width="formLabelWidth1" prop="cancelReason">
                   <el-input type="textarea" :rows="3" v-model="cancelDigForm.cancelReason" autocomplete="off" maxlength="100" placeholder="100字" style="width: 80%;"></el-input>
                 </el-form-item>
             </el-row>
@@ -384,8 +386,8 @@ var appiontmentVM = new Vue({
                 pageSize: 20,
             },
             multipleSelection:[],
-            formLabelWidth: '150px',
-            formLabelWidth1: '120px',
+            formLabelWidth: '120px',
+            formLabelWidth1: '150px',
             cancelRules:{
             	cancelReason: [
                     { required: true, message: '请填写取消原因', trigger: 'blur' }
@@ -886,17 +888,32 @@ var appiontmentVM = new Vue({
                        });
                       return;
                   }
+                  if(rows[0].phase==7){
+              		this.$message({
+                          message: "当前线索已释放到公有池，不允许进行详细信息的查看",
+                          type: 'error'
+                        }); 
+              		return;
+              	}
                   window.location.href="/tele/clueMyCustomerInfo/customerInfoReadOnly?clueId="+rows[0].clueId;
               },
               //查看重复手机号资源
             repeatPhonesClick(row) {
-                this.repeatPhonesDialog=true;
                 this.dailogTitleType=row.clueId;
                 this.repeatPhonesTable=[];
                 var param ={};
                 param.id = row.clueId;
                 param.cusPhone = row.phone;
                 param.clueId = row.clueId;
+                
+                if(row.phase==7){
+            		this.$message({
+                        message: "当前线索已释放到公有池，不允许进行重复手机号资源的查看",
+                        type: 'error'
+                      }); 
+            		return;
+            	}
+                this.repeatPhonesDialog=true;
                 // axios.post('/clue/appiontment/repeatPhonelist', param)
                 axios.post('/clue/appiontment/repeatPhoneMap', param).then(function (response) {
                     // var result =  response.data;

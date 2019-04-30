@@ -21,6 +21,10 @@
     </el-breadcrumb>
     <el-row class="marginB20">
         <el-button type="primary" @click="dialogChooseList = true"><i class="el-icon-menu"></i>选择列</el-button>
+        
+        <shiro:hasPermission name="DistributiveResource:recall">
+	        	<el-button type="success" @click="toRecall">撤回</el-button>
+	        </shiro:hasPermission>
     </el-row>
     <div class="mainSearchBg">        
         <div class="mainSearchFormBox">    
@@ -150,8 +154,8 @@
                 </el-row>
                 <div class="mainSearchBtnBox">
                     <el-button icon="el-icon-search" type="primary" @click="initTableData" class="searchBtn">搜索</el-button>
-                    <el-button type="info" class="searchBtn">取消</el-button>
-                    <span style="color: #5c6be8;cursor: pointer;margin:0 10px;" @click="toogleClick">更多搜索<i class="el-icon-arrow-down greycolor paddingL6"></i></span>
+                    <!-- <el-button type="info" class="searchBtn">取消</el-button> -->
+                    <span style="color: #5c6be8;cursor: pointer;margin:0 10px;" @click="toogleClick"><span v-if="isShow">收起</span><span v-else>展开更多</span><i :class="{'greycolor paddingL6 el-icon-arrow-up':isShow,'greycolor paddingL6 el-icon-arrow-down':!isShow}"></i></span>
                 </div>
             </el-form>
         </div>
@@ -165,6 +169,7 @@
                 @row-dblclick="rowDblClick"
                 @selection-change="handleSelectionChange"
                 >
+                <el-table-column align="center" prop="clueId" type="selection" width="55"></el-table-column> 
                 <el-table-column align="center" type="index" label="序号" width="55"></el-table-column>
                 <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width" v-for="(item,key,index) in tableColums" >
     	        </el-table-column>
@@ -593,7 +598,51 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                     this.isShow=true
                 }          
             },
-
+            toRecall() {
+                var rows = this.multipleSelection;
+                if(rows.length!=1){
+                    this.$message({
+                        message: '请选择一条数据进行撤回',
+                        type: 'warning'
+                    });
+                    return;
+                }else{
+                	if(rows[0].phase>3){
+                		this.$message({
+                            message: '已分配电销经理，不可撤回',
+                            type: 'warning'
+                        });
+                        return;
+                	}
+                    this.$confirm('撤回线索后分配人员不可见，同时该线索转移至待分发资源中，确定将线索撤回?', '提示', {
+                        confirmButtonText: '确定',
+                        cancelButtonText: '取消',
+                        type: 'warning'
+                    }).then(() => {
+                    	var param={};
+                        var rows = this.multipleSelection;
+                        param.id=rows[0].clueId;
+               		 	axios.post('/exetend/agendaTaskManager/recallClue',param).then(function (response) {
+           			 		if(!response||!response.data||response.data.code!='0'){
+	           					ocmVM.$message({
+	      	                        message: "接口调用失败",
+	      	                        type: 'error'
+	      	                      }); 
+	      						return ;
+      						}
+           					var resobj= response.data;
+      				 		ocmVM.$message({message:'撤回成功',type:'success',duration:2000,onClose:function(){
+      							ocmVM.initTableData();
+   		        			}});
+           		  		});
+                    }).catch(() => {
+                        this.$message({
+                            type: 'info',
+                            message: '已取消操作'
+                        });          
+                    });
+                }                
+            },
         },
         mounted(){
 
