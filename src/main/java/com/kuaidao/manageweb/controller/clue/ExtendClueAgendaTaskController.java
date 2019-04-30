@@ -1,7 +1,5 @@
 package com.kuaidao.manageweb.controller.clue;
 
-import com.google.common.collect.Maps;
-import com.kuaidao.aggregation.dto.project.ProjectInfoPageParam;
 import java.net.URLEncoder;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -34,6 +32,7 @@ import com.kuaidao.aggregation.dto.clue.ClueDTO;
 import com.kuaidao.aggregation.dto.clue.ClueQueryDTO;
 import com.kuaidao.aggregation.dto.clue.PushClueReq;
 import com.kuaidao.aggregation.dto.project.ProjectInfoDTO;
+import com.kuaidao.aggregation.dto.project.ProjectInfoPageParam;
 import com.kuaidao.common.constant.DicCodeEnum;
 import com.kuaidao.common.constant.RoleCodeEnum;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
@@ -279,7 +278,7 @@ public class ExtendClueAgendaTaskController {
             }
 
         } else if (RoleCodeEnum.GLY.name().equals(roleInfoDTO.getRoleCode())) {
-
+            idList = null;
         } else {
             return new JSONResult<PageBean<ClueAgendaTaskDTO>>()
                     .fail(SysErrorCodeEnum.ERR_NOTEXISTS_DATA.getCode(), "角色没有权限");
@@ -555,7 +554,7 @@ public class ExtendClueAgendaTaskController {
     public JSONResult importInvitearea(@RequestBody ClueAgendaTaskDTO clueAgendaTaskDTO)
             throws Exception {
         UserInfoDTO user =
-            (UserInfoDTO) SecurityUtils.getSubject().getSession().getAttribute("user");
+                (UserInfoDTO) SecurityUtils.getSubject().getSession().getAttribute("user");
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         // 存放合法的数据
         List<ClueAgendaTaskDTO> dataList = new ArrayList<ClueAgendaTaskDTO>();
@@ -563,7 +562,8 @@ public class ExtendClueAgendaTaskController {
         List<ClueAgendaTaskDTO> illegalDataList = new ArrayList<ClueAgendaTaskDTO>();
         // 项目处理
         ProjectInfoPageParam projectInfoPageParam = new ProjectInfoPageParam();
-        List<ProjectInfoDTO> proList = projectInfoFeignClient.listNoPage(projectInfoPageParam).getData();
+        List<ProjectInfoDTO> proList =
+                projectInfoFeignClient.listNoPage(projectInfoPageParam).getData();
         Map<String, Long> projectMap = new HashMap<String, Long>();
         // 遍历项目list集生成<id,name>map
         for (ProjectInfoDTO projectInfoDTO : proList) {
@@ -595,7 +595,8 @@ public class ExtendClueAgendaTaskController {
                 boolean islegal = true;// true合法 false不合法
                 if (islegal && clueAgendaTaskDTO1.getProjectName() != null
                         && !"".equals(clueAgendaTaskDTO1.getProjectName())) {
-                    clueAgendaTaskDTO1.setProjectId(projectMap.get(clueAgendaTaskDTO1.getProjectName()));
+                    clueAgendaTaskDTO1
+                            .setProjectId(projectMap.get(clueAgendaTaskDTO1.getProjectName()));
                     if (clueAgendaTaskDTO1.getProjectId() == null) {
                         islegal = false;
                     }
