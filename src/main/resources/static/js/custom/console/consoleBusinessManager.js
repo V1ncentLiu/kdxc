@@ -979,7 +979,7 @@ var mainDivVM = new Vue({
             });
         },
         setVisitRecordData(dataList){
-
+            console.log(dataList);
             // 首次到访
             var first = [];
             if(dataList.length>=1){
@@ -1032,6 +1032,7 @@ var mainDivVM = new Vue({
                 mainDivVM.showVisitAduitDatas.three = three;
                 mainDivVM.showVisitAduitDatas.threeShow = false;
             }
+            console.log(mainDivVM.showVisitAduitDatas)
         },
         toVisitRecordPage(row){
             window.location.href='/busVisitRecord/visitRecordPage?clueId='+row.clueId+"&visitStatus="+row.visitStatus+"&signAuditStatus="+row.signAuditStatus;
