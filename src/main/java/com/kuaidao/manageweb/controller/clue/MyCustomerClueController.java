@@ -1,14 +1,10 @@
 package com.kuaidao.manageweb.controller.clue;
 
-import com.kuaidao.manageweb.config.LogRecord;
-import com.kuaidao.manageweb.config.LogRecord.OperationType;
-import com.kuaidao.manageweb.constant.MenuEnum;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
-
 import javax.servlet.http.HttpServletRequest;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
@@ -52,6 +48,9 @@ import com.kuaidao.common.entity.IdEntityLong;
 import com.kuaidao.common.entity.IdListLongReq;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
+import com.kuaidao.manageweb.config.LogRecord;
+import com.kuaidao.manageweb.config.LogRecord.OperationType;
+import com.kuaidao.manageweb.constant.MenuEnum;
 import com.kuaidao.manageweb.feign.call.CallRecordFeign;
 import com.kuaidao.manageweb.feign.circulation.CirculationFeignClient;
 import com.kuaidao.manageweb.feign.clue.MyCustomerFeignClient;
@@ -231,8 +230,8 @@ public class MyCustomerClueController {
      */
     @RequestMapping("/customerEditInfo")
     public String customerEditInfo(HttpServletRequest request, @RequestParam String clueId) {
-    	UserInfoDTO user = getUser();
-    	List<Long> accountList = new ArrayList<Long>();
+        UserInfoDTO user = getUser();
+        List<Long> accountList = new ArrayList<Long>();
         if (null != user.getRoleList() && user.getRoleList().size() > 0) {
             String roleCode = user.getRoleList().get(0).getRoleCode();
             if (null != roleCode) {
@@ -240,17 +239,19 @@ public class MyCustomerClueController {
                     // 管理员查看所有
 
                 } else if (roleCode.equals(RoleCodeEnum.DXZJ.name())) {
-                	UserOrgRoleReq userOrgRoleReq = new UserOrgRoleReq();
-            		userOrgRoleReq.setOrgId(user.getOrgId());
-            		userOrgRoleReq.setRoleCode(RoleCodeEnum.DXCYGW.name());
-            		JSONResult<List<UserInfoDTO>> listByOrgAndRole = userInfoFeignClient.listByOrgAndRole(userOrgRoleReq);
-            		if (listByOrgAndRole.getCode().equals(JSONResult.SUCCESS) && null != listByOrgAndRole.getData()
-							&& listByOrgAndRole.getData().size() > 0) {
-            			accountList =
-            					listByOrgAndRole.getData().stream().map(c -> c.getId() ).collect(Collectors.toList());
-            		}
+                    UserOrgRoleReq userOrgRoleReq = new UserOrgRoleReq();
+                    userOrgRoleReq.setOrgId(user.getOrgId());
+                    userOrgRoleReq.setRoleCode(RoleCodeEnum.DXCYGW.name());
+                    JSONResult<List<UserInfoDTO>> listByOrgAndRole =
+                            userInfoFeignClient.listByOrgAndRole(userOrgRoleReq);
+                    if (listByOrgAndRole.getCode().equals(JSONResult.SUCCESS)
+                            && null != listByOrgAndRole.getData()
+                            && listByOrgAndRole.getData().size() > 0) {
+                        accountList = listByOrgAndRole.getData().stream().map(c -> c.getId())
+                                .collect(Collectors.toList());
+                    }
                 } else if (roleCode.equals(RoleCodeEnum.DXCYGW.name())) {
-                	accountList.add(user.getId());
+                    accountList.add(user.getId());
                 }
             }
         }
@@ -260,9 +261,9 @@ public class MyCustomerClueController {
         ClueQueryDTO fileDto = new ClueQueryDTO();
         CallRecordReqDTO call = new CallRecordReqDTO();
         call.setClueId(clueId);
-        if(accountList.size()>0) {
-        	call.setAccountIdList(accountList);
-        	fileDto.setIdList(accountList);
+        if (accountList.size() > 0) {
+            call.setAccountIdList(accountList);
+            fileDto.setIdList(accountList);
         }
         JSONResult<List<CallRecordRespDTO>> callRecord =
                 callRecordFeign.listTmCallReacordByParamsNoPage(call);
@@ -302,7 +303,7 @@ public class MyCustomerClueController {
                 request.setAttribute("customer", new ArrayList());
             }
         }
-       
+
         dto.setClueId(new Long(clueId));
         JSONResult<List<TrackingRespDTO>> trackingList = trackingFeignClient.queryList(dto);
         if (trackingList != null && trackingList.SUCCESS.equals(trackingList.getCode())
@@ -351,8 +352,8 @@ public class MyCustomerClueController {
     @RequestMapping("/customerInfoReadOnly")
     public String customerInfoReadOnly(HttpServletRequest request, @RequestParam String clueId,
             @RequestParam(required = false) String commonPool) {
-    	UserInfoDTO user = getUser();
-    	List<Long> accountList = new ArrayList<Long>();
+        UserInfoDTO user = getUser();
+        List<Long> accountList = new ArrayList<Long>();
         if (null != user.getRoleList() && user.getRoleList().size() > 0) {
             String roleCode = user.getRoleList().get(0).getRoleCode();
             if (null != roleCode) {
@@ -360,26 +361,28 @@ public class MyCustomerClueController {
                     // 管理员查看所有
 
                 } else if (roleCode.equals(RoleCodeEnum.DXZJ.name())) {
-                	UserOrgRoleReq userOrgRoleReq = new UserOrgRoleReq();
-            		userOrgRoleReq.setOrgId(user.getOrgId());
-            		userOrgRoleReq.setRoleCode(RoleCodeEnum.DXCYGW.name());
-            		JSONResult<List<UserInfoDTO>> listByOrgAndRole = userInfoFeignClient.listByOrgAndRole(userOrgRoleReq);
-            		if (listByOrgAndRole.getCode().equals(JSONResult.SUCCESS) && null != listByOrgAndRole.getData()
-							&& listByOrgAndRole.getData().size() > 0) {
-            			accountList =
-            					listByOrgAndRole.getData().stream().map(c -> c.getId() ).collect(Collectors.toList());
-            		}
+                    UserOrgRoleReq userOrgRoleReq = new UserOrgRoleReq();
+                    userOrgRoleReq.setOrgId(user.getOrgId());
+                    userOrgRoleReq.setRoleCode(RoleCodeEnum.DXCYGW.name());
+                    JSONResult<List<UserInfoDTO>> listByOrgAndRole =
+                            userInfoFeignClient.listByOrgAndRole(userOrgRoleReq);
+                    if (listByOrgAndRole.getCode().equals(JSONResult.SUCCESS)
+                            && null != listByOrgAndRole.getData()
+                            && listByOrgAndRole.getData().size() > 0) {
+                        accountList = listByOrgAndRole.getData().stream().map(c -> c.getId())
+                                .collect(Collectors.toList());
+                    }
                 } else if (roleCode.equals(RoleCodeEnum.DXCYGW.name())) {
-                	accountList.add(user.getId());
+                    accountList.add(user.getId());
                 }
             }
         }
         // 获取已上传的文件数据
         ClueQueryDTO fileDto = new ClueQueryDTO();
         CallRecordReqDTO call = new CallRecordReqDTO();
-        if(accountList.size()>0) {
-        	call.setAccountIdList(accountList);
-        	fileDto.setIdList(accountList);
+        if (accountList.size() > 0) {
+            call.setAccountIdList(accountList);
+            fileDto.setIdList(accountList);
         }
         call.setClueId(clueId);
         JSONResult<List<CallRecordRespDTO>> callRecord =
@@ -472,8 +475,8 @@ public class MyCustomerClueController {
     @ResponseBody
     public JSONResult<List<ClueFileDTO>> findClueFile(HttpServletRequest request,
             @RequestBody ClueQueryDTO dto) {
-    	UserInfoDTO user = getUser();
-    	List<Long> accountList = new ArrayList<Long>();
+        UserInfoDTO user = getUser();
+        List<Long> accountList = new ArrayList<Long>();
         if (null != user.getRoleList() && user.getRoleList().size() > 0) {
             String roleCode = user.getRoleList().get(0).getRoleCode();
             if (null != roleCode) {
@@ -481,22 +484,24 @@ public class MyCustomerClueController {
                     // 管理员查看所有
 
                 } else if (roleCode.equals(RoleCodeEnum.DXZJ.name())) {
-                	UserOrgRoleReq userOrgRoleReq = new UserOrgRoleReq();
-            		userOrgRoleReq.setOrgId(user.getOrgId());
-            		userOrgRoleReq.setRoleCode(RoleCodeEnum.DXCYGW.name());
-            		JSONResult<List<UserInfoDTO>> listByOrgAndRole = userInfoFeignClient.listByOrgAndRole(userOrgRoleReq);
-            		if (listByOrgAndRole.getCode().equals(JSONResult.SUCCESS) && null != listByOrgAndRole.getData()
-							&& listByOrgAndRole.getData().size() > 0) {
-            			accountList =
-            					listByOrgAndRole.getData().stream().map(c -> c.getId() ).collect(Collectors.toList());
-            		}
+                    UserOrgRoleReq userOrgRoleReq = new UserOrgRoleReq();
+                    userOrgRoleReq.setOrgId(user.getOrgId());
+                    userOrgRoleReq.setRoleCode(RoleCodeEnum.DXCYGW.name());
+                    JSONResult<List<UserInfoDTO>> listByOrgAndRole =
+                            userInfoFeignClient.listByOrgAndRole(userOrgRoleReq);
+                    if (listByOrgAndRole.getCode().equals(JSONResult.SUCCESS)
+                            && null != listByOrgAndRole.getData()
+                            && listByOrgAndRole.getData().size() > 0) {
+                        accountList = listByOrgAndRole.getData().stream().map(c -> c.getId())
+                                .collect(Collectors.toList());
+                    }
                 } else if (roleCode.equals(RoleCodeEnum.DXCYGW.name())) {
-                	accountList.add(user.getId());
+                    accountList.add(user.getId());
                 }
             }
         }
-        if(accountList.size()>0) {
-        	dto.setIdList(accountList);
+        if (accountList.size() > 0) {
+            dto.setIdList(accountList);
         }
         // 获取已上传的文件数据
         return myCustomerFeignClient.findClueFile(dto);
@@ -683,13 +688,14 @@ public class MyCustomerClueController {
     @RequestMapping("/inviteCustomerSave")
     @ResponseBody
     @LogRecord(description = "添加预约来访", operationType = OperationType.INSERT,
-        menuName = MenuEnum.TM_MY_CUSTOMER)
+            menuName = MenuEnum.TM_MY_CUSTOMER)
     public JSONResult<String> inviteCustomerSave(HttpServletRequest request,
             @RequestBody ClueAppiontmentDTO dto) {
         Subject subject = SecurityUtils.getSubject();
         UserInfoDTO user = (UserInfoDTO) subject.getSession().getAttribute("user");
         if (null != user) {
             dto.setCreateUser(user.getId());
+            dto.setOrgId(user.getOrgId());
             // 保存流转记录
             CirculationInsertOrUpdateDTO circul = new CirculationInsertOrUpdateDTO();
             circul.setAllotUserId(user.getId());
@@ -849,7 +855,7 @@ public class MyCustomerClueController {
     @RequestMapping("/saveRepeatClue")
     @ResponseBody
     @LogRecord(description = "重单申请保存", operationType = OperationType.INSERT,
-        menuName = MenuEnum.TM_MY_CUSTOMER)
+            menuName = MenuEnum.TM_MY_CUSTOMER)
     public JSONResult<String> saveRepeatClue(HttpServletRequest request,
             @RequestBody RepeatClueSaveDTO dto) {
 
@@ -881,7 +887,7 @@ public class MyCustomerClueController {
     @RequestMapping("/saveCreateClue")
     @ResponseBody
     @LogRecord(description = "新建资源保存", operationType = OperationType.INSERT,
-        menuName = MenuEnum.TM_MY_CUSTOMER)
+            menuName = MenuEnum.TM_MY_CUSTOMER)
     public JSONResult<String> saveCreateClue(HttpServletRequest request, @RequestBody ClueDTO dto) {
         Subject subject = SecurityUtils.getSubject();
         UserInfoDTO user = (UserInfoDTO) subject.getSession().getAttribute("user");
@@ -996,7 +1002,7 @@ public class MyCustomerClueController {
     @RequestMapping("/updateCustomerClue")
     @ResponseBody
     @LogRecord(description = "维护客户资源提交", operationType = OperationType.UPDATE,
-        menuName = MenuEnum.CUSTOMER_INFO)
+            menuName = MenuEnum.CUSTOMER_INFO)
     public JSONResult<String> updateCustomerClue(HttpServletRequest request,
             @RequestBody ClueDTO dto) {
 
@@ -1025,6 +1031,7 @@ public class MyCustomerClueController {
 
     /**
      * 获取当前登录账号
+     * 
      * @return
      */
     private UserInfoDTO getUser() {

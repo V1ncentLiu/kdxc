@@ -42,6 +42,15 @@ public interface VisitRecordFeignClient {
 	JSONResult<PageBean<VisitRecordRespDTO>> listVisitRecord(@RequestBody VisitRecordReqDTO visitRecordReqDTO);
 
 	/**
+	 * 查询为到访记录
+	 * @param visitNoRecordReqDTO
+	 * @return
+	 */
+	@PostMapping("/listNoVisitRecordNoPage")
+	public JSONResult<List<VisitNoRecordRespDTO>> listNoVisitRecordNoPage(
+			@RequestBody VisitNoRecordReqDTO visitNoRecordReqDTO);
+
+	/**
 	 * 签约记录驳回
 	 * 
 	 * @param reqDTO
@@ -116,6 +125,11 @@ public interface VisitRecordFeignClient {
 		@Override
 		public JSONResult<PageBean<VisitRecordRespDTO>> listVisitRecord(VisitRecordReqDTO visitRecordReqDTO) {
 			return fallBackError("查询签约记录");
+		}
+
+		@Override
+		public JSONResult<List<VisitNoRecordRespDTO>> listNoVisitRecordNoPage(VisitNoRecordReqDTO visitNoRecordReqDTO) {
+			return fallBackError("未到访记录（不分页）");
 		}
 
 		@Override

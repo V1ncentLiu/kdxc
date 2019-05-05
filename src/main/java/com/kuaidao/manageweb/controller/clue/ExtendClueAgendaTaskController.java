@@ -32,6 +32,7 @@ import com.kuaidao.aggregation.dto.clue.ClueDTO;
 import com.kuaidao.aggregation.dto.clue.ClueQueryDTO;
 import com.kuaidao.aggregation.dto.clue.PushClueReq;
 import com.kuaidao.aggregation.dto.project.ProjectInfoDTO;
+import com.kuaidao.aggregation.dto.project.ProjectInfoPageParam;
 import com.kuaidao.common.constant.DicCodeEnum;
 import com.kuaidao.common.constant.RoleCodeEnum;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
@@ -48,6 +49,7 @@ import com.kuaidao.manageweb.feign.clue.ExtendClueFeignClient;
 import com.kuaidao.manageweb.feign.clue.MyCustomerFeignClient;
 import com.kuaidao.manageweb.feign.customfield.CustomFieldFeignClient;
 import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
+import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
 import com.kuaidao.manageweb.feign.project.ProjectInfoFeignClient;
 import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
 import com.kuaidao.sys.dto.customfield.CustomFieldQueryDTO;
@@ -55,6 +57,9 @@ import com.kuaidao.sys.dto.customfield.QueryFieldByRoleAndMenuReq;
 import com.kuaidao.sys.dto.customfield.QueryFieldByUserAndMenuReq;
 import com.kuaidao.sys.dto.customfield.UserFieldDTO;
 import com.kuaidao.sys.dto.dictionary.DictionaryItemRespDTO;
+import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
+import com.kuaidao.sys.dto.organization.OrganizationRespDTO;
+import com.kuaidao.sys.dto.role.RoleInfoDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import com.kuaidao.sys.dto.user.UserOrgRoleReq;
 
@@ -80,6 +85,8 @@ public class ExtendClueAgendaTaskController {
     private DictionaryItemFeignClient itemFeignClient;
     @Autowired
     private DictionaryItemFeignClient dictionaryItemFeignClient;
+    @Autowired
+    private OrganizationFeignClient organizationFeignClient;
 
     @Value("${oss.url.directUpload}")
     private String ossUrl;
@@ -244,7 +251,39 @@ public class ExtendClueAgendaTaskController {
     @ResponseBody
     public JSONResult<PageBean<ClueAgendaTaskDTO>> queryPageAgendaTask(HttpServletRequest request,
             @RequestBody ClueAgendaTaskQueryDTO queryDto) {
+        UserInfoDTO user = getUser();
+        RoleInfoDTO roleInfoDTO = user.getRoleList().get(0);
+        List<Long> idList = new ArrayList<Long>();
+        // 处理数据权限
+        if (RoleCodeEnum.TGKF.name().equals(roleInfoDTO.getRoleCode())
+                || RoleCodeEnum.NQWY.name().equals(roleInfoDTO.getRoleCode())) {
+            // 推广客服、内勤文员 能看自己的数据
+            idList.add(user.getId());
+        } else if (RoleCodeEnum.KFZG.name().equals(roleInfoDTO.getRoleCode())
+                || RoleCodeEnum.NQZG.name().equals(roleInfoDTO.getRoleCode())) {
+            // 客服主管、内勤主管 能看自己组员数据
+            List<UserInfoDTO> userList = getUserList(user.getOrgId(), null, null);
+            for (UserInfoDTO userInfoDTO : userList) {
+                idList.add(userInfoDTO.getId());
+            }
 
+        } else if (RoleCodeEnum.NQJL.name().equals(roleInfoDTO.getRoleCode())) {
+            // 内勤经理 能看下属组的数据
+            List<OrganizationRespDTO> groupList = getGroupList(user.getOrgId(), null);
+            for (OrganizationRespDTO organizationRespDTO : groupList) {
+                List<UserInfoDTO> userList = getUserList(organizationRespDTO.getId(), null, null);
+                for (UserInfoDTO userInfoDTO : userList) {
+                    idList.add(userInfoDTO.getId());
+                }
+            }
+
+        } else if (RoleCodeEnum.GLY.name().equals(roleInfoDTO.getRoleCode())) {
+            idList = null;
+        } else {
+            return new JSONResult<PageBean<ClueAgendaTaskDTO>>()
+                    .fail(SysErrorCodeEnum.ERR_NOTEXISTS_DATA.getCode(), "角色没有权限");
+        }
+        queryDto.setResourceDirectorList(idList);
         return extendClueFeignClient.queryPageAgendaTask(queryDto);
 
     }
@@ -427,7 +466,7 @@ public class ExtendClueAgendaTaskController {
             return new JSONResult<>().fail(SysErrorCodeEnum.ERR_EXCLE_DATA.getCode(),
                     SysErrorCodeEnum.ERR_EXCLE_DATA.getMessage());
         }
-        if (excelDataList.size() > 30) {
+        if (excelDataList.size() > 1000) {
             logger.error("上传自定义字段,大于1000条，条数{{}}", excelDataList.size());
             return new JSONResult<>().fail(SysErrorCodeEnum.ERR_EXCLE_OUT_SIZE.getCode(),
                     "导入数据过多，已超过1000条！");
@@ -514,13 +553,22 @@ public class ExtendClueAgendaTaskController {
     @ResponseBody
     public JSONResult importInvitearea(@RequestBody ClueAgendaTaskDTO clueAgendaTaskDTO)
             throws Exception {
+        UserInfoDTO user =
+                (UserInfoDTO) SecurityUtils.getSubject().getSession().getAttribute("user");
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         // 存放合法的数据
         List<ClueAgendaTaskDTO> dataList = new ArrayList<ClueAgendaTaskDTO>();
         // 存放非法的数据
         List<ClueAgendaTaskDTO> illegalDataList = new ArrayList<ClueAgendaTaskDTO>();
-        // 查询项目列表
-        JSONResult<List<ProjectInfoDTO>> allProject = projectInfoFeignClient.allProject();
+        // 项目处理
+        ProjectInfoPageParam projectInfoPageParam = new ProjectInfoPageParam();
+        List<ProjectInfoDTO> proList =
+                projectInfoFeignClient.listNoPage(projectInfoPageParam).getData();
+        Map<String, Long> projectMap = new HashMap<String, Long>();
+        // 遍历项目list集生成<id,name>map
+        for (ProjectInfoDTO projectInfoDTO : proList) {
+            projectMap.put(projectInfoDTO.getProjectName(), projectInfoDTO.getId());
+        }
         List<ClueAgendaTaskDTO> list = clueAgendaTaskDTO.getList();
         List<PushClueReq> list1 = new ArrayList<PushClueReq>();
 
@@ -540,6 +588,9 @@ public class ExtendClueAgendaTaskController {
         // 行业类别
         Map<String, String> industryCategoryMap = dicMap(
                 itemFeignClient.queryDicItemsByGroupCode(DicCodeEnum.INDUSTRYCATEGORY.getCode()));
+        // 账户名称
+        Map<String, String> accountNameMap = dicMap(
+            itemFeignClient.queryDicItemsByGroupCode(DicCodeEnum.ACCOUNT_NAME.getCode()));
 
         if (list != null && list.size() > 0) {
 
@@ -547,13 +598,8 @@ public class ExtendClueAgendaTaskController {
                 boolean islegal = true;// true合法 false不合法
                 if (islegal && clueAgendaTaskDTO1.getProjectName() != null
                         && !"".equals(clueAgendaTaskDTO1.getProjectName())) {
-                    for (ProjectInfoDTO projectInfoDTO : allProject.getData()) {
-                        if ((projectInfoDTO.getProjectName().trim())
-                                .equals(clueAgendaTaskDTO1.getProjectName())) {
-                            clueAgendaTaskDTO1.setProjectId(projectInfoDTO.getId());
-                            break;
-                        }
-                    }
+                    clueAgendaTaskDTO1
+                            .setProjectId(projectMap.get(clueAgendaTaskDTO1.getProjectName()));
                     if (clueAgendaTaskDTO1.getProjectId() == null) {
                         islegal = false;
                     }
@@ -648,6 +694,14 @@ public class ExtendClueAgendaTaskController {
                         islegal = false;
                     }
                 }
+                if (islegal && (clueAgendaTaskDTO1.getAccountName() != null
+                    && !"".equals(clueAgendaTaskDTO1.getAccountName()))) {
+                    clueAgendaTaskDTO1.setAccountNameVaule(
+                        accountNameMap.get(clueAgendaTaskDTO1.getAccountName()));
+                    if (clueAgendaTaskDTO1.getAccountNameVaule() == null) {
+                        islegal = false;
+                    }
+                }
                 // 判断性别
                 if (islegal && (clueAgendaTaskDTO1.getSex1() != null
                         && !"".equals(clueAgendaTaskDTO1.getSex1()))) {
@@ -681,12 +735,13 @@ public class ExtendClueAgendaTaskController {
                     pushClueReq.setAppointTime(clueAgendaTaskDTO1.getReserveTime1());
                     pushClueReq.setCreateTime(clueAgendaTaskDTO1.getDate());
                     pushClueReq.setInputType(4);
-                    pushClueReq.setAccountName(clueAgendaTaskDTO1.getAccountName());
+                    pushClueReq.setAccountName(String.valueOf(clueAgendaTaskDTO1.getAccountNameVaule()));
                     pushClueReq.setUrlAddress(clueAgendaTaskDTO1.getUrlAddress());
                     pushClueReq.setIndustryCategory(
                             String.valueOf(clueAgendaTaskDTO1.getIndustryCategory()));
                     pushClueReq.setProjectId(clueAgendaTaskDTO1.getProjectId());
                     pushClueReq.setImportTime(format.format(new Date()));
+                    pushClueReq.setCreateUser(user.getId());
                     list1.add(pushClueReq);
                 } else {
                     illegalDataList.add(clueAgendaTaskDTO1);
@@ -744,7 +799,7 @@ public class ExtendClueAgendaTaskController {
                 curList.add(clueAgendaTaskDTO.getTypeName());
                 curList.add(clueAgendaTaskDTO.getCategoryName());
                 curList.add(clueAgendaTaskDTO.getSourceTypeName());
-                curList.add(clueAgendaTaskDTO.getSource());
+                curList.add(clueAgendaTaskDTO.getSourceName());
                 curList.add(clueAgendaTaskDTO.getProjectName());
                 curList.add(clueAgendaTaskDTO.getIndustryCategoryName());
                 curList.add(clueAgendaTaskDTO.getCusName());
@@ -770,7 +825,7 @@ public class ExtendClueAgendaTaskController {
             logger.error("export trucking_order param{{}},res{{}}", dto, list);
         }
 
-        XSSFWorkbook wbWorkbook = ExcelUtil.creat2007Excel(dataList);
+        XSSFWorkbook wbWorkbook = ExcelUtil.creatFailClueExcel(dataList);
 
 
         String name = DateUtil.convert2String(new Date(), DateUtil.ymdhms2) + ".xlsx";
@@ -812,4 +867,38 @@ public class ExtendClueAgendaTaskController {
         headTitleList.add("url地址");
         return headTitleList;
     }
+
+    /**
+     * 根据机构和角色类型获取用户
+     * 
+     * @param orgDTO
+     * @return
+     */
+    private List<UserInfoDTO> getUserList(Long orgId, String roleCode, List<Integer> statusList) {
+        UserOrgRoleReq userOrgRoleReq = new UserOrgRoleReq();
+        userOrgRoleReq.setOrgId(orgId);
+        userOrgRoleReq.setRoleCode(roleCode);
+        userOrgRoleReq.setStatusList(statusList);
+        JSONResult<List<UserInfoDTO>> listByOrgAndRole =
+                userInfoFeignClient.listByOrgAndRole(userOrgRoleReq);
+        return listByOrgAndRole.getData();
+    }
+
+    /**
+     * 获取所有组织组
+     * 
+     * @param orgDTO
+     * @return
+     */
+    private List<OrganizationRespDTO> getGroupList(Long parentId, Integer type) {
+        OrganizationQueryDTO queryDTO = new OrganizationQueryDTO();
+        queryDTO.setParentId(parentId);
+        queryDTO.setOrgType(type);
+        // 查询所有组织
+        JSONResult<List<OrganizationRespDTO>> queryOrgByParam =
+                organizationFeignClient.queryOrgByParam(queryDTO);
+        List<OrganizationRespDTO> data = queryOrgByParam.getData();
+        return data;
+    }
+
 }

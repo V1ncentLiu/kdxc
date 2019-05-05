@@ -1,5 +1,6 @@
 package com.kuaidao.manageweb.controller.visitrecord;
 
+import com.kuaidao.aggregation.dto.visitrecord.*;
 import com.kuaidao.manageweb.config.LogRecord;
 import com.kuaidao.manageweb.config.LogRecord.OperationType;
 import com.kuaidao.manageweb.constant.MenuEnum;
@@ -11,6 +12,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
 import com.kuaidao.aggregation.constant.AggregationConstant;
+import com.kuaidao.manageweb.feign.visit.VisitRecordFeignClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,9 +24,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import com.kuaidao.aggregation.dto.project.CompanyInfoDTO;
 import com.kuaidao.aggregation.dto.project.ProjectInfoDTO;
-import com.kuaidao.aggregation.dto.visitrecord.BusVisitRecordInsertOrUpdateDTO;
-import com.kuaidao.aggregation.dto.visitrecord.BusVisitRecordReqDTO;
-import com.kuaidao.aggregation.dto.visitrecord.BusVisitRecordRespDTO;
 import com.kuaidao.common.entity.IdEntityLong;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.util.CommonUtil;
@@ -51,6 +50,8 @@ public class BusinessVisitRecordController {
 
     @Autowired
     private BusVisitRecordFeignClient visitRecordFeignClient;
+    @Autowired
+    private VisitRecordFeignClient visitRecordFeignClient1;
 
     @Autowired
     private CompanyInfoFeignClient companyInfoFeignClient;
@@ -60,6 +61,8 @@ public class BusinessVisitRecordController {
     public String listPage(HttpServletRequest request, @RequestParam String clueId) {
         BusVisitRecordReqDTO recordReqDTO = new BusVisitRecordReqDTO();
         recordReqDTO.setClueId(Long.valueOf(clueId));
+        recordReqDTO.setIsVisit(AggregationConstant.YES);
+        recordReqDTO.setIsHistory(AggregationConstant.NO);
         JSONResult<List<BusVisitRecordRespDTO>> listJSONResult =
                 visitRecordFeignClient.queryList(recordReqDTO);
         List<BusVisitRecordRespDTO> data = new ArrayList<>();
@@ -121,7 +124,67 @@ public class BusinessVisitRecordController {
     public JSONResult<List<BusVisitRecordRespDTO>> queryList(@RequestBody BusVisitRecordReqDTO dto)
             throws Exception {
         dto.setIsVisit(AggregationConstant.YES);
+        dto.setIsHistory(AggregationConstant.NO);
         return visitRecordFeignClient.queryList(dto);
+    }
+
+    /**
+     *  用于查看历史记录:
+     */
+    @RequestMapping("/queryHisList")
+    @ResponseBody
+    public List<List<BusVisitRecordRespDTO>> queryHisList(@RequestBody BusVisitRecordReqDTO dto) throws Exception {
+        dto.setIsVisit(AggregationConstant.YES);
+        dto.setIsHistory(AggregationConstant.YES);
+        JSONResult<List<BusVisitRecordRespDTO>> listJSONResult = visitRecordFeignClient.queryList(dto);
+        List<List<BusVisitRecordRespDTO>> list = new ArrayList<>();
+        if(JSONResult.SUCCESS.equals(listJSONResult.getCode())){
+            List<BusVisitRecordRespDTO> data = listJSONResult.getData();
+            String createUser = "";
+            for(int i = 0 ; i < data.size() ; i ++){
+                BusVisitRecordRespDTO visitRecordRespDTO = data.get(i);
+                if(!createUser.equals(visitRecordRespDTO.getCreateUser())){
+                    ArrayList<BusVisitRecordRespDTO> busVisitRecordRespDTOS = new ArrayList<>();
+                    busVisitRecordRespDTOS.add(visitRecordRespDTO);
+                    list.add(busVisitRecordRespDTOS);
+                }else{
+                    List<BusVisitRecordRespDTO> visitRecordRespDTOS = list.get(list.size() - 1);
+                    visitRecordRespDTOS.add(visitRecordRespDTO);
+                }
+                createUser = visitRecordRespDTO.getCreateUser();
+            }
+        }
+        // 查询为到访记录：
+        VisitNoRecordReqDTO visitNoRecordReqDTO = new VisitNoRecordReqDTO();
+        visitNoRecordReqDTO.setClueId(dto.getClueId());
+        visitNoRecordReqDTO.setIsHistory(AggregationConstant.YES);
+        visitNoRecordReqDTO.setIsVisit(AggregationConstant.NO);
+        JSONResult<List<VisitNoRecordRespDTO>> listJSONResult1 = visitRecordFeignClient1.listNoVisitRecordNoPage(visitNoRecordReqDTO);
+        if(JSONResult.SUCCESS.equals(listJSONResult1.getCode())){
+            List<VisitNoRecordRespDTO> data = listJSONResult1.getData();
+            List<BusVisitRecordRespDTO> noVisitList = new ArrayList<BusVisitRecordRespDTO>();
+            for(VisitNoRecordRespDTO noRecord : data){
+                BusVisitRecordRespDTO busVisitRecordRespDTO = new BusVisitRecordRespDTO();
+                busVisitRecordRespDTO.setCreateTime(noRecord.getCreateTime());
+                busVisitRecordRespDTO.setCreateUser(noRecord.getCreateUser());
+                busVisitRecordRespDTO.setCreateUserName(noRecord.getCreateUserName());
+                busVisitRecordRespDTO.setIsVisit(AggregationConstant.NO);
+                busVisitRecordRespDTO.setCustomerName(noRecord.getCusName());
+                busVisitRecordRespDTO.setProjectName(noRecord.getTasteProjectName());
+                busVisitRecordRespDTO.setSignProvince(noRecord.getProvince());
+                busVisitRecordRespDTO.setSignCity(noRecord.getCity());
+                busVisitRecordRespDTO.setSignDistrict(noRecord.getDistrict());
+                busVisitRecordRespDTO.setNotVisitReason(noRecord.getNotVisitReason());
+                busVisitRecordRespDTO.setStatus(noRecord.getStatus());
+                busVisitRecordRespDTO.setRebutTime(noRecord.getRebutTime());
+                busVisitRecordRespDTO.setRebutReason(noRecord.getRebutReason());
+                noVisitList.add(busVisitRecordRespDTO);
+            }
+            list.add(noVisitList);
+        }
+
+
+        return list;
     }
 
 
@@ -205,7 +268,6 @@ public class BusinessVisitRecordController {
                 if (split.length > 0 && !"".equals(split[0])) {
                     recordRespDTO.setProjectId(Long.valueOf(split[0]));
                 }
-
                 recordRespDTO.setSignProvince((String) data.get("signProvince"));
                 recordRespDTO.setSignCity((String) data.get("signCity"));
                 recordRespDTO.setSignDistrict((String) data.get("signDistrict"));

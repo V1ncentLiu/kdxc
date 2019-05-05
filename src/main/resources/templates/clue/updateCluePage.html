@@ -180,7 +180,7 @@
                     </el-col>
                     <el-col :span="12">
                         <el-form-item label="行业类别：" :label-width="formLabelWidth">
-                            <el-select v-model="form.industryCategory" placeholder="请选择" style="width: 260px;">
+                            <el-select v-model="form.industryCategory" clearable placeholder="请选择" style="width: 260px;">
                                 <el-option
                                     v-for="item in industryCategoryOptions"
                                     :key="item.value"
@@ -217,7 +217,7 @@
                     </el-col>
                     <el-col :span="12">
                         <el-form-item label="账户名称：" :label-width="formLabelWidth">
-                            <el-select v-model="form.accountName" placeholder="请选择" style="width: 260px;">
+                            <el-select v-model="form.accountName" clearable placeholder="请选择" style="width: 260px;">
                                 <el-option
                                     v-for="item in accountNameOptions"
                                     :key="item.value"
@@ -245,7 +245,7 @@
 
     <!-- dialog -->
     <el-dialog title="添加手机号" :visible.sync="dialogFormVisible">
-        <button type="button" aria-label="Close" class="el-dialog__headerbtn" style="position: absolute;z-index: 9;background: #fff;" @click="clearDialog"><i class="el-dialog__close el-icon el-icon-close"></i></button>
+        <button type="button" aria-label="Close" class="el-dialog__headerbtn" style="position: absolute;z-index: 9;background: #fff;border-radius:50%;" @click="clearDialog"><i class="el-dialog__close el-icon el-icon-close"></i></button>
         <el-form :model="dynamicValidateForm" ref="dynamicValidateForm">
             <el-form-item  
                 :label-width="formLabelWidth"
@@ -258,21 +258,21 @@
                 }"
             >
                 <el-input v-model="domain.value" maxLength="11" @keyup.native="phoneNumber" style="width: 300px;margin-right: 10px;"></el-input>
-                <el-button @click.prevent="removeDomain(domain)" v-show="deleteShow">删除</el-button>
+                <el-button type="danger" @click.prevent="removeDomain(domain)" v-show="deleteShow">删除</el-button>
             </el-form-item>
         </el-form>
         <div slot="footer" class="f-tac">            
             <el-button type="primary" @click="submitDialogForm('dynamicValidateForm')"  >提 交</el-button>
-            <el-button @click="addDomain">添加更多手机号</el-button>
+            <el-button type="success" @click="addDomain">添加更多手机号</el-button>
         </div>
     </el-dialog>    
-    <el-dialog title="添加微信" :visible.sync="wechatVisible">
+    <el-dialog title="添加微信" :visible.sync="wechatVisible" width="540px">
         <template>
             <el-form :model="wechatForm" ref="wechatForm" > 
-              <el-form-item label="微信2：" :label-width="formLabelWidth" >
-                  <el-input v-model="wechatForm.wechat2" placeholder="" maxLength="20" style="width:50%"></el-input>
+              <el-form-item label="微信2：" :label-width="formLabelWidth1" >
+                  <el-input v-model="wechatForm.wechat2" placeholder="" maxLength="20" style="width: 290px;"></el-input>
               </el-form-item>
-              <el-form-item label="添加微信二维码：" :label-width="formLabelWidth" prop="fileList">
+              <el-form-item label="添加微信二维码：" :label-width="formLabelWidth1" prop="fileList">
               	<el-upload
                     class="upload-demo"
                     :action="uploadOssHost"
@@ -295,8 +295,8 @@
                     <div slot="tip" class="el-upload__tip">只能上传jpg/png文件，且不超过2MB</div>
                 </el-upload>
               </el-form-item>
-              <el-form-item label="" :label-width="formLabelWidth" >
-                  <img v-show="wechatForm.wechatUrl!=''" :src="wechatForm.wechatUrl">
+              <el-form-item label="" :label-width="formLabelWidth1" >
+                  <img v-show="wechatForm.wechatUrl!=''" :src="wechatForm.wechatUrl" width="290px" style="border-radius:6px;">
               </el-form-item>
             </el-form>
             <div slot="footer" class="dialog-footer">
@@ -465,10 +465,12 @@ var clueInfo = [[${clueInfo}]];//资源信息
 	            industryCategoryOptions:industryCategoryList,
 	            accountNameOptions:accountNameList,
                 formLabelWidth: '120px',
+                formLabelWidth1: '140px',
                 rules:{
                     phone:[
                         { validator:function(rule,value,callback){
-                            if(addClueVM.form.qq==""&&addClueVM.form.wechat==""&&addClueVM.wechatForm.wechat2==""&&addClueVM.wechatForm.wechatUrl==""&&addClueVM.form.email==""&&addClueVM.form.phone==""){
+                            debugger
+                            if(addClueVM.form.qq==""&&addClueVM.form.wechat==""&&addClueVM.form.wechat2==""&&addClueVM.form.wechatUrl==null&&addClueVM.form.email==""&&addClueVM.form.phone==""){
                                 callback(new Error("至少填一项"));
                             }else{
                                  callback();
@@ -477,7 +479,7 @@ var clueInfo = [[${clueInfo}]];//资源信息
                     ],
                     wechat:[
                         { validator:function(rule,value,callback){
-                            if(addClueVM.form.qq==""&&addClueVM.form.wechat==""&&addClueVM.wechatForm.wechat2==""&&addClueVM.wechatForm.wechatUrl==""&&addClueVM.form.email==""&&addClueVM.form.phone==""){
+                            if(addClueVM.form.qq==""&&addClueVM.form.wechat==""&&addClueVM.form.wechat2==""&&addClueVM.form.wechatUrl==null&&addClueVM.form.email==""&&addClueVM.form.phone==""){
                                 callback(new Error("至少填一项"));
                             }else{
                                  callback();
@@ -486,7 +488,7 @@ var clueInfo = [[${clueInfo}]];//资源信息
                     ],
                     qq:[
                         { validator:function(rule,value,callback){
-                            if(addClueVM.form.qq==""&&addClueVM.form.wechat==""&&addClueVM.wechatForm.wechat2==""&&addClueVM.wechatForm.wechatUrl==""&&addClueVM.form.email==""&&addClueVM.form.phone==""){
+                            if(addClueVM.form.qq==""&&addClueVM.form.wechat==""&&addClueVM.form.wechat2==""&&addClueVM.form.wechatUrl==null&&addClueVM.form.email==""&&addClueVM.form.phone==""){
                                 callback(new Error("至少填一项"));
                             }else{
                                  callback();
@@ -495,7 +497,7 @@ var clueInfo = [[${clueInfo}]];//资源信息
                     ],
                     email:[
                         { validator:function(rule,value,callback){
-                            if(addClueVM.form.qq==""&&addClueVM.form.wechat==""&&addClueVM.wechatForm.wechat2==""&&addClueVM.wechatForm.wechatUrl==""&&addClueVM.form.email==""&&addClueVM.form.phone==""){
+                            if(addClueVM.form.qq==""&&addClueVM.form.wechat==""&&addClueVM.form.wechat2==""&&addClueVM.form.wechatUrl==null&&addClueVM.form.email==""&&addClueVM.form.phone==""){
                                 callback(new Error("至少填一项"));
                             }else{
                                  callback();
@@ -774,6 +776,7 @@ var clueInfo = [[${clueInfo}]];//资源信息
             submitDialogForm(formName) {
                 this.$refs[formName].validate((valid) => {
                     if (valid) {  
+                    	
                         var domains=this.dynamicValidateForm.domains;
                         var phone=this.form.phone; 
                         var ary=[];   
@@ -794,7 +797,7 @@ var clueInfo = [[${clueInfo}]];//资源信息
                             for(var j=0;j<ary.length;j++) {
                                 console.log(ary[j])
                                 if(ary[j]!=""){
-                                    if(s.replace(ary[j]+",","").indexOf(ary[j]+",")>-1) {
+                                    if((","+s.replace(ary[j]+",","")).indexOf(","+ary[j]+",")>-1) {
                                         this.$message({
                                             message: '请不要提交重复手机号',
                                             type: 'warning'
@@ -1081,8 +1084,8 @@ var clueInfo = [[${clueInfo}]];//资源信息
 	            this.form.clueProjectId=clueInfo.clueProject.id;
 	        	this.form.projectId=clueInfo.clueProject.projectId;
             }
-            if(clueInfo.ClueRelate){
-	            this.form.clueRelateId=clueInfo.ClueRelate.id;
+            if(clueInfo.clueRelate){
+	            this.form.clueRelateId=clueInfo.clueRelate.id;
             }
             if(clueInfo.clueReceive){
 	            this.form.clueReceiveId=clueInfo.clueReceive.id;
