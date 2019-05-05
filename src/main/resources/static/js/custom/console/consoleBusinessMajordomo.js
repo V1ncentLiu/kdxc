@@ -417,7 +417,7 @@ var mainDivVM = new Vue({
                         mainDivVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
                             mainDivVM.initSignRecordData();
                             // 待审批到访记录也刷新列表
-                            mainDivVM.initSignRecordData();
+                            mainDivVM.initCustomerVisitRecord();
                         }});
                     }else{
                         mainDivVM.$message({message:resData.msg,type:'error'});
