@@ -388,7 +388,7 @@
     <!-- dialog -->
     <el-dialog title="二维码" :visible.sync="dialogFormImg">
         <div class="padding20" style="text-align: center;">
-            <img th:src="@{/images/errorIcon.jpg}" alt=""
+            <img :src="showwchatcode" alt=""
                  style="width: 250px; height: 250px;">
         </div>
     </el-dialog>
@@ -576,6 +576,7 @@
         }
     }
 
+    var showwchatcode = '/images/errorIcon.jpg';
     var vform;
     if(customer==null){
         vform= {
@@ -656,6 +657,11 @@
             decisionMakerOther: customer.decideNamePhone,//其它决策人的姓名及联系方式
             customerPartnerDetail:customer.partnerNamePhone//合伙人姓名及联系方式
         }
+        if(customer.wechat !=null && customer.wechat!=''){
+            showwchatcode = customer.wechat;
+        }else{
+            showwchatcode = "/images/errorIcon.jpg";
+        }
     }
     var vxShow = false;
     if(vform.ishasWx!=null&&vform.ishasWx!=''){
@@ -684,6 +690,7 @@
                 isShowPhoneButton:false,
                 vxShow:vxShow,
             	loginUserId:loginUserId,
+                showwchatcode:showwchatcode,
                 isShowTip: false,//是否显示释放公有池提示信息
                 isShowBtn: false,//是否显示保留客户按钮
                 radio: '1',
