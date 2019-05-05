@@ -728,9 +728,9 @@ $(function () {
 	//初始化 天润坐席 相关参数
 	//documentReady();
 	
-	var mainBoxH=$(".elMain").height()-4;
+	// var mainBoxH=$(".elMain").height()-4;
 	// 设置ifream高度
-	$("#iframeBox").height(mainBoxH)
+	// $("#iframeBox").height(mainBoxH)
 	$(document).on('click','.menu',function(){
 	    // console.log(0)
 	    // console.log($(this).attr("data-url"))
