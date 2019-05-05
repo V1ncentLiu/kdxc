@@ -624,7 +624,8 @@
     <!-- dialog -->
     <el-dialog title="二维码" :visible.sync="dialogFormImg">
         <div class="padding20" style="text-align: center;">
-            <img th:src="@{/images/errorIcon.jpg}" alt="" style="width: 250px;height: 250px;">
+            <img :src="showwchatcode" alt=""
+                 style="width: 250px; height: 250px;">
         </div>
     </el-dialog>
     <!-- 上传资源dialog -->
@@ -717,6 +718,7 @@ var loginUserId=[[${loginUserId}]];
                 outsideProjectShow:false,//外部项目默认不显示
                 dialogFormVisible: false,
                 dialogFormImg:false,
+                showwchatcode:'',
                 form: { 
                     domains: [{ //同行业品牌数据
                         value: ''
@@ -1515,6 +1517,14 @@ var loginUserId=[[${loginUserId}]];
         	   this.form.sponsorOther=customer.investorsNamePhone==null?"":customer.investorsNamePhone;
         	   this.form.decisionMaker=customer.decide==null?"":customer.decide+"";
         	   this.form.decisionMakerOther=customer.decideNamePhone==null?"":customer.decideNamePhone;
+               // if(customer.phone ==null || customer.phone=='' ||  phoneArr.length<1){
+               //     this.isshowPhone = true;
+               // }
+               if(customer.wechat !=null && customer.wechat!=''){
+                   this.showwchatcode = customer.wechat;
+               }else{
+                   this.showwchatcode = "/images/errorIcon.jpg";
+               }
            } 
            if(intention){
         	   this.form.money=intention.advanceAmount==null?"":intention.advanceAmount+"";
@@ -1533,8 +1543,6 @@ var loginUserId=[[${loginUserId}]];
         	   if(this.form.city){
                    this.currentCity(this.form.city)
                }
-
-
         	   if(intention.purProjectType==2){
          		  this.outsideProjectShow=true; //外部项目默认显示   
          		  this.insideProjectShow=false; //内部项目不默认显示
