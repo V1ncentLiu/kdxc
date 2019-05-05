@@ -87,6 +87,7 @@ var mainDivVM = new Vue({
         dataTable3:[],
         multipleSelection3:[],
         dialogFormVisibleUnVisit:false,
+        confirmBtnDisabled:false,//提交按钮 禁用
 
     },
     methods: {
@@ -302,6 +303,7 @@ var mainDivVM = new Vue({
         allocationClue(formName){//分发资源                   
             this.$refs[formName].validate((valid) => {
                 if (valid) {
+                	mainDivVM.confirmBtnDisabled=true;//禁用提交按钮
                     var rows = this.multipleSelection;
                     var idList = [];
                     var clueIdList = [];
@@ -335,7 +337,8 @@ var mainDivVM = new Vue({
                     .catch(function (error) {
                     console.log(error);
                     })
-                    .then(function () {                        
+                    .then(function () {   
+                    	mainDivVM.confirmBtnDisabled=false;
                     });
                 } else {
                     console.log('error submit!!');

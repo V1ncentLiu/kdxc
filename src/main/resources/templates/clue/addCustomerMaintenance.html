@@ -76,7 +76,7 @@
                 </el-row>
                 <el-row>
                     <el-col :span="8">
-                        <el-form-item label="手机号：" prop="customerPhone" :label-width="formLabelWidth">
+                        <el-form-item label="手机号：" prop="phone" :label-width="formLabelWidth">
                             <a>
                                 <el-input v-model="form.phone" maxLength="11"
                           @keyup.native="phoneNumber" style="width: 300px;margin-right: 10px;" v-show="isshowPhone"></el-input>{{form.customerPhone}}
@@ -87,7 +87,7 @@
                                 <el-button type="primary" @click="dialogFormVisible = true"><i class="el-icon-plus"></i>手机号</el-button>
 			                </span>
                             <span v-else-if="buttonType === 'B'">
-                                <span @click="dialogFormVisible = true" style="padding-left: 5px; color: rgb(0, 114, 255); cursor: pointer;"><span v-if="form.customerPhone2 ==null || form.customerPhone2==''">添加多个手机号</span><span v-else-if="form.customerPhone2 !=null && form.customerPhone2 !=''">查看多个手机号</span></span>
+                                <span @click="dialogFormVisible = true" style="padding-left: 5px; color: rgb(0, 114, 255); cursor: pointer;"><span v-if="form.customerPhone !=null && (form.customerPhone2 ==null || form.customerPhone2=='')">添加多个手机号</span><span v-else-if="form.customerPhone2 !=null && form.customerPhone2 !=''">查看多个手机号</span></span>
                             </span>
                         </el-form-item>
                     </el-col>
@@ -918,6 +918,19 @@
                     city: [
                         {required: true, message: '开店区域城市不能为空', trigger: 'change'}
                     ],
+                    phone: [
+                    	
+                   	 { validator:function(rule,value,callback){
+                         if((value ==null && value =="null") || addCustomerVM.isshowPhone ){
+                             callback(new Error("手机号不能为空"));
+                             addCustomerVM.form.customerAge =null;
+                         }else{
+                             callback();
+                         }
+
+                     },required: true, trigger: 'change'}
+                    ],
+                    
                     customerAge:[
                     	 { validator:function(rule,value,callback){
                              var reg =  /^[1-9]+[0-9]*]*$/ ;
@@ -1993,6 +2006,7 @@
                 }else{                    
                     this.deleteShow=false;// 删除默认不显示
                 }
+
                 if(customer.phone ==null || customer.phone=='' ||  phoneArr.length<1){
 					this.isshowPhone = true;
                 }

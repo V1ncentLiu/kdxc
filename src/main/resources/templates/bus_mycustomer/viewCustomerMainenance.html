@@ -398,7 +398,8 @@
     <!-- dialog -->
     <el-dialog title="二维码" :visible.sync="dialogFormImg">
         <div class="padding20" style="text-align: center;">
-            <img th:src="@{/images/errorIcon.jpg}" alt="" style="width: 250px;height: 250px;">
+            <img :src="showwchatcode" alt=""
+                 style="width: 250px; height: 250px;">
         </div>
     </el-dialog>
     <!-- 上传资源dialog -->
@@ -480,6 +481,7 @@ for(var i = 0 ; i < proSelect.length ; i++){
         intention.purInProject =  proSelect[i].projectName;
     }
  }
+var showwchatcode = '/images/errorIcon.jpg';
 if(customer==null){
     vform= {
     		loginUserId:loginUserId,
@@ -546,6 +548,11 @@ if(customer==null){
         decisionMaker: customer.decide==null?"":customer.decide,//决策人
         decisionMakerOther: customer.decideNamePhone==null?"":customer.decideNamePhone,//其它决策人的姓名及联系方式
         customerPartnerDetail:customer.partnerNamePhone==null?"":customer.partnerNamePhone//合伙人姓名及联系方式
+    }
+    if(customer.wechatCode !=null && customer.wechatCode!=''){
+        showwchatcode = customer.wechatCode;
+    }else{
+        showwchatcode = "/images/errorIcon.jpg";
     }
 }
 
@@ -614,6 +621,7 @@ function crtTimeFtt(val, row) {
                 radioProject:'',
                 dialogFormVisible: false,
                 dialogFormImg:false,
+                showwchatcode:showwchatcode,
                 form:vform,
                 clueBase:base,
                 categoryArr:[],
