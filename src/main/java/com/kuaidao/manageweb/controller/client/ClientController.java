@@ -689,6 +689,7 @@ public class ClientController {
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
         clientLoginRecord.setAccountId(curLoginUser.getId());
         clientLoginRecord.setAccountType(clientLoginRecord.getAccountType());
+        clientLoginRecord.setOrgId(curLoginUser.getOrgId());
         return clientFeignClient.clientLoginRecord(clientLoginRecord);
         
     }
