@@ -7,15 +7,21 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
+import javax.validation.Valid;
+
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.apache.shiro.subject.Subject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.kuaidao.aggregation.dto.clue.AllocationClueReq;
 import com.kuaidao.aggregation.dto.clue.CustomerManagerDTO;
 import com.kuaidao.aggregation.dto.clue.CustomerManagerQueryDTO;
 import com.kuaidao.common.constant.OrgTypeConstant;
@@ -23,6 +29,11 @@ import com.kuaidao.common.constant.RoleCodeEnum;
 import com.kuaidao.common.entity.IdEntity;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
+import com.kuaidao.common.util.CommonUtil;
+import com.kuaidao.manageweb.config.LogRecord;
+import com.kuaidao.manageweb.config.LogRecord.OperationType;
+import com.kuaidao.manageweb.constant.MenuEnum;
+import com.kuaidao.manageweb.feign.clue.ClueBasicFeignClient;
 import com.kuaidao.manageweb.feign.clue.CustomerManagerFeignClient;
 import com.kuaidao.manageweb.feign.customfield.CustomFieldFeignClient;
 import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
@@ -55,7 +66,9 @@ public class CustomerManagerController {
     @Autowired
     private CustomFieldFeignClient customFieldFeignClient;
 
-
+    @Autowired
+    private ClueBasicFeignClient clueBasicFeignClient;
+    
     @RequiresPermissions("customerManager:view")
     @RequestMapping("/initcustomerManager")
     public String initmyCustomer(HttpServletRequest request, Model model) {
@@ -243,5 +256,32 @@ public class CustomerManagerController {
         }
         return result;
     }
+    /**
+     * 转移资源
+     * 
+     * @param orgDTO
+     * @return
+     */
+    @PostMapping("/transferClue")
+    @ResponseBody
+    @RequiresPermissions("customerManager:transferclue")
+    @LogRecord(description = "转移资源", operationType = OperationType.TRANSFER,
+            menuName = MenuEnum.TELE_CUSTOMER_MANAGER)
+    public JSONResult transferClue(@Valid @RequestBody AllocationClueReq allocationClueReq,
+            BindingResult result) {
 
+        if (result.hasErrors()) {
+            return CommonUtil.validateParam(result);
+        }
+        UserInfoDTO user = getUser();
+        // 插入当前用户、角色信息
+        allocationClueReq.setUserId(user.getId());
+        List<RoleInfoDTO> roleList = user.getRoleList();
+        if (roleList != null) {
+            allocationClueReq.setRoleId(roleList.get(0).getId());
+            allocationClueReq.setRoleCode(roleList.get(0).getRoleCode());
+        }
+        allocationClueReq.setOrg(user.getOrgId());
+        return clueBasicFeignClient.transferClue(allocationClueReq);
+    }
 }
