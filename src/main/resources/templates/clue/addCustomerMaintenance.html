@@ -598,7 +598,7 @@
     <!-- dialog -->
     <el-dialog title="二维码" :visible.sync="dialogFormImg">
         <div class="padding20" style="text-align: center;">
-            <img th:src="@{/images/errorIcon.jpg}" alt=""
+            <img :src="showwchatcode" alt=""
                  style="width: 250px; height: 250px;">
         </div>
     </el-dialog>
@@ -844,6 +844,7 @@
                 radio1: '1',
                 dialogFormUploadImg: false, //上传资源图片弹框
                 dialogFormUploadImgSrc: '', //上传资源图片弹框
+                showwchatcode:'',
                 insideProjectShow: true,//内部项目默认显示
                 outsideProjectShow: false,//外部项目默认不显示
                 dialogFormImg: false,
@@ -1989,6 +1990,12 @@
                 if(customer.phone ==null || customer.phone=='' ||  phoneArr.length<1){
 					this.isshowPhone = true;
                 }
+                if(customer.wechatCode !=null && customer.wechatCode!=''){
+                	this.showwchatcode = customer.wechatCode;
+                }else{
+                	this.showwchatcode = "/images/errorIcon.jpg";
+                }
+                
             }
             if (base) {
                 if (null != base.releaseTime && base.releaseTime != 0) {
@@ -1998,6 +2005,7 @@
                 if (null != base.reserve && base.reserve == 0) {
                     this.isShowBtn = true;
                 }
+               
             }
             if (intention) {
                 this.form.money = intention.advanceAmount == null ? "" : intention.advanceAmount + "";
