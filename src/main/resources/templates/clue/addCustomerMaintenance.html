@@ -921,8 +921,13 @@
                     phone: [
                     	
                    	 { validator:function(rule,value,callback){
-                         if((value ==null && value =="null") || addCustomerVM.isshowPhone ){
-                             callback(new Error("手机号不能为空"));
+                         if((value ==null && value =="null") || addCustomerVM.isshowPhone){
+                         	if(value ==null && value =="null"){
+                         		callback(new Error("手机号不能为空"));
+                         	}else if(value.length<11){
+                         		callback(new Error("手机号位数为11位"));
+                        	 }
+                             
                              addCustomerVM.form.customerAge =null;
                          }else{
                              callback();
@@ -2031,7 +2036,12 @@
                 this.form.money = intention.advanceAmount == null ? "" : intention.advanceAmount + "";
                 this.form.area = intention.area == null ? "" : intention.area + "";
                 this.form.intentionCategory = intention.purType == null ? "" : intention.purType + "";
-                this.form.radioProject = intention.purProjectType + "";
+                if(intention.purProjectType ==null || intention.purProjectType ==""){
+                	this.form.radioProject = "1";
+                }else{
+                	this.form.radioProject = intention.purProjectType + "";
+                }
+                
                 this.form.insideProject = intention.purInProject == null ? "" : intention.purInProject + "";
                 this.form.outsideProject = intention.purOutProject;
                 if (intention.province) {
