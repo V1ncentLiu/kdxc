@@ -566,9 +566,14 @@ public class ExtendClueAgendaTaskController {
         List<ProjectInfoDTO> proList =
                 projectInfoFeignClient.listNoPage(projectInfoPageParam).getData();
         Map<String, Long> projectMap = new HashMap<String, Long>();
+        Map<Long, String> projectMap2 = new HashMap<Long, String>();
         // 遍历项目list集生成<id,name>map
         for (ProjectInfoDTO projectInfoDTO : proList) {
             projectMap.put(projectInfoDTO.getProjectName(), projectInfoDTO.getId());
+        }
+        // 遍历项目list集生成<id,name>map
+        for (ProjectInfoDTO projectInfoDTO : proList) {
+            projectMap2.put(projectInfoDTO.getId(), projectInfoDTO.getProjectName());
         }
         List<ClueAgendaTaskDTO> list = clueAgendaTaskDTO.getList();
         List<PushClueReq> list1 = new ArrayList<PushClueReq>();
@@ -577,20 +582,32 @@ public class ExtendClueAgendaTaskController {
         // 资源类型
         Map<String, String> typeMap =
                 dicMap(itemFeignClient.queryDicItemsByGroupCode(DicCodeEnum.CLUETYPE.getCode()));
+        Map<String, String> typeMap2 =
+            dicMapTwo(itemFeignClient.queryDicItemsByGroupCode(DicCodeEnum.CLUETYPE.getCode()));
         // 资源类别
         Map<String, String> categoryMap = dicMap(
                 itemFeignClient.queryDicItemsByGroupCode(DicCodeEnum.CLUECATEGORY.getCode()));
+        Map<String, String> categoryMap2 = dicMapTwo(
+            itemFeignClient.queryDicItemsByGroupCode(DicCodeEnum.CLUECATEGORY.getCode()));
         // 广告位
         Map<String, String> sourceTypeMap =
-                dicMap(itemFeignClient.queryDicItemsByGroupCode(DicCodeEnum.ADENSE.getCode()));
+            dicMap(itemFeignClient.queryDicItemsByGroupCode(DicCodeEnum.ADENSE.getCode()));
+        Map<String, String> sourceTypeMap2 =
+            dicMapTwo(itemFeignClient.queryDicItemsByGroupCode(DicCodeEnum.ADENSE.getCode()));
         // 媒介
         Map<String, String> sourceMap =
                 dicMap(itemFeignClient.queryDicItemsByGroupCode(DicCodeEnum.MEDIUM.getCode()));
+        Map<String, String> sourceMap2 =
+            dicMapTwo(itemFeignClient.queryDicItemsByGroupCode(DicCodeEnum.MEDIUM.getCode()));
         // 行业类别
         Map<String, String> industryCategoryMap = dicMap(
                 itemFeignClient.queryDicItemsByGroupCode(DicCodeEnum.INDUSTRYCATEGORY.getCode()));
+        Map<String, String> industryCategoryMap2 = dicMapTwo(
+            itemFeignClient.queryDicItemsByGroupCode(DicCodeEnum.INDUSTRYCATEGORY.getCode()));
         // 账户名称
         Map<String, String> accountNameMap = dicMap(
+            itemFeignClient.queryDicItemsByGroupCode(DicCodeEnum.ACCOUNT_NAME.getCode()));
+        Map<String, String> accountNameMap2 = dicMapTwo(
             itemFeignClient.queryDicItemsByGroupCode(DicCodeEnum.ACCOUNT_NAME.getCode()));
 
         if (list != null && list.size() > 0) {
@@ -749,6 +766,9 @@ public class ExtendClueAgendaTaskController {
                     pushClueReq.setProjectId(clueAgendaTaskDTO1.getProjectId());
                     pushClueReq.setImportTime(format.format(new Date()));
                     pushClueReq.setCreateUser(user.getId());
+                    if(StringUtils.isNotBlank(clueAgendaTaskDTO1.getAge1())) {
+                        pushClueReq.setAge(Integer.valueOf(clueAgendaTaskDTO1.getAge1()));
+                    }
                     list1.add(pushClueReq);
                 } else {
                     illegalDataList.add(clueAgendaTaskDTO1);
@@ -756,9 +776,47 @@ public class ExtendClueAgendaTaskController {
             }
         }
         if (list1 != null && list1.size() > 0) {
-            JSONResult jsonResult = extendClueFeignClient.importclue(list1);
-            if (!jsonResult.getCode().equals("0")) {
-                return new JSONResult<>().success(list);
+            JSONResult<List<PushClueReq>> jsonResult = extendClueFeignClient.importclue(list1);
+            if(null!=jsonResult && jsonResult.getCode().equals("0")) {
+                List<PushClueReq> list2 = jsonResult.getData();
+                if (list2 != null && list2.size() > 0) {
+                    for (PushClueReq pushClueReq : list2) {
+                        ClueAgendaTaskDTO clueAgendaTaskDTO2 = new ClueAgendaTaskDTO();
+                        clueAgendaTaskDTO2.setDate(pushClueReq.getCreateTime());
+                        clueAgendaTaskDTO2.setTypeName(typeMap2.get(pushClueReq.getType()));
+                        clueAgendaTaskDTO2
+                            .setCategoryName(categoryMap2.get(pushClueReq.getCategory()));
+                        clueAgendaTaskDTO2
+                            .setSourceTypeName(sourceTypeMap2.get(pushClueReq.getSourceType()));
+                        clueAgendaTaskDTO2.setSourceName(sourceMap2.get(pushClueReq.getSource()));
+                        clueAgendaTaskDTO2
+                            .setProjectName(projectMap2.get(pushClueReq.getProjectId()));
+                        clueAgendaTaskDTO2.setIndustryCategoryName(
+                            industryCategoryMap2.get(pushClueReq.getIndustryCategory()));
+                        clueAgendaTaskDTO2.setCusName(pushClueReq.getCusName());
+                        clueAgendaTaskDTO2.setPhone(pushClueReq.getPhone());
+                        clueAgendaTaskDTO2.setPhone2(pushClueReq.getPhone2());
+                        clueAgendaTaskDTO2.setWechat(pushClueReq.getWechat());
+                        clueAgendaTaskDTO2.setWechat2(pushClueReq.getWechat2());
+                        clueAgendaTaskDTO2.setQq(pushClueReq.getQq());
+                        clueAgendaTaskDTO2.setEmail(pushClueReq.getEmail());
+                        if (null != pushClueReq.getSex() && pushClueReq.getSex() == 1) {
+                            clueAgendaTaskDTO2.setSex1("男");
+                        } else if (null != pushClueReq.getSex() && pushClueReq.getSex() == 2) {
+                            clueAgendaTaskDTO2.setSex1("女");
+                        }
+                        clueAgendaTaskDTO2.setAge1(String.valueOf(pushClueReq.getAge()));
+                        clueAgendaTaskDTO2.setAddress(pushClueReq.getProvince());
+                        clueAgendaTaskDTO2.setMessageTime1(pushClueReq.getMessageTime());
+                        clueAgendaTaskDTO2.setMessagePoint(pushClueReq.getMessagePoint());
+                        clueAgendaTaskDTO2.setSearchWord(pushClueReq.getSearchWord());
+                        clueAgendaTaskDTO2.setReserveTime1(pushClueReq.getAppointTime());
+                        clueAgendaTaskDTO2
+                            .setAccountName(accountNameMap2.get(pushClueReq.getAccountName()));
+                        clueAgendaTaskDTO2.setUrlAddress(pushClueReq.getUrlAddress());
+                        illegalDataList.add(clueAgendaTaskDTO2);
+                    }
+                }
             }
         }
         return new JSONResult<>().success(illegalDataList);
@@ -775,6 +833,22 @@ public class ExtendClueAgendaTaskController {
             List<DictionaryItemRespDTO> data = result.getData();
             for (DictionaryItemRespDTO itemRespDTO : data) {
                 map.put(itemRespDTO.getName(), itemRespDTO.getValue());
+            }
+        }
+        return map;
+    }
+
+    /**
+     * 数据字典-词条转换Map
+     *
+     * @return
+     */
+    public Map dicMapTwo(JSONResult<List<DictionaryItemRespDTO>> result) {
+        Map map = new HashMap();
+        if (JSONResult.SUCCESS.equals(result.getCode())) {
+            List<DictionaryItemRespDTO> data = result.getData();
+            for (DictionaryItemRespDTO itemRespDTO : data) {
+                map.put(itemRespDTO.getValue(), itemRespDTO.getName());
             }
         }
         return map;
