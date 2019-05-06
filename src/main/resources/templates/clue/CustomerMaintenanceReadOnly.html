@@ -374,7 +374,7 @@
     <!-- dialog -->
     <el-dialog title="二维码" :visible.sync="dialogFormImg">
         <div class="padding20" style="text-align: center;">
-            <img th:src="@{/images/errorIcon.jpg}" alt="" style="width: 250px;height: 250px;">
+            <img :src="showwchatcode" alt="" style="width: 250px; height: 250px;">
         </div>
     </el-dialog>
     <!-- 上传资源dialog -->
@@ -628,6 +628,7 @@ function crtTimeFtt1(val, row) {
 }
 
 var vform;
+var showwchatcode = "/images/errorIcon.jpg";
 if(customer==null){
     vform= {
         customerName:"",
@@ -709,9 +710,15 @@ if(customer==null){
         decisionMakerOther: customer.decideNamePhone,//其它决策人的姓名及联系方式
         customerPartnerDetail:customer.partnerNamePhone//合伙人姓名及联系方式
     }
+    if(customer.wechatCode !=null && customer.wechatCode!=''){
+        showwchatcode = customer.wechatCode;
+    }else{
+        showwchatcode = "/images/errorIcon.jpg";
+    }
 }
 
-var vxShow = false;
+
+var vxShow = true;
 if(vform.ishasWx!=null&&vform.ishasWx!=''){
     vxShow = true;
 }
@@ -737,6 +744,7 @@ if(base==null){
             return {
             	loginUserId:loginUserId,
                 showPhone:showPhone,
+                showwchatcode:showwchatcode,
                 isDisabled:true,//默认不可点击
                 dialogFormUploadImgSrc: '',
                 radioProject:'',
