@@ -949,7 +949,7 @@ var mainDivVM = new Vue({
             }).then(() => {
                 var param={};
                 param.idList = idArr;
-               
+                param.type = 2;
                 axios.post('/visit/visitRecord/passAuditSignOrder', param)
                 .then(function (response) {
                     var resData = response.data;
