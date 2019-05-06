@@ -11,6 +11,7 @@ import java.util.Map;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
@@ -659,49 +660,56 @@ public class ExtendClueAgendaTaskController {
                 // 判断字典表数据是否匹配
                 if (islegal && (clueAgendaTaskDTO1.getTypeName() != null
                         && !"".equals(clueAgendaTaskDTO1.getTypeName()))) {
-                    clueAgendaTaskDTO1.setType(
-                            Integer.valueOf(typeMap.get(clueAgendaTaskDTO1.getTypeName())));
-                    if (clueAgendaTaskDTO1.getType() == null) {
+                    String type = typeMap.get(clueAgendaTaskDTO1.getTypeName());
+                    if (StringUtils.isNotBlank(type)) {
+                        clueAgendaTaskDTO1.setType(Integer.valueOf(type));
+                    } else {
                         islegal = false;
                     }
                 }
                 if (islegal && (clueAgendaTaskDTO1.getCategoryName() != null
                         && !"".equals(clueAgendaTaskDTO1.getCategoryName()))) {
-                    clueAgendaTaskDTO1.setCategory(
-                            Integer.valueOf(categoryMap.get(clueAgendaTaskDTO1.getCategoryName())));
-                    if (clueAgendaTaskDTO1.getCategory() == null) {
+                    String category = categoryMap.get(clueAgendaTaskDTO1.getCategoryName());
+                    if (StringUtils.isNotBlank(category)) {
+                        clueAgendaTaskDTO1.setCategory(Integer.valueOf(category));
+                    } else {
                         islegal = false;
                     }
                 }
                 if (islegal && (clueAgendaTaskDTO1.getSourceTypeName() != null
                         && !"".equals(clueAgendaTaskDTO1.getSourceTypeName()))) {
-                    clueAgendaTaskDTO1.setSourceType(Integer
-                            .valueOf(sourceTypeMap.get(clueAgendaTaskDTO1.getSourceTypeName())));
-                    if (clueAgendaTaskDTO1.getSourceType() == null) {
+                    String sourceType = sourceTypeMap.get(clueAgendaTaskDTO1.getSourceTypeName());
+                    if (StringUtils.isNotBlank(sourceType)) {
+                        clueAgendaTaskDTO1.setSourceType(Integer.valueOf(sourceType));
+                    } else {
                         islegal = false;
                     }
                 }
                 if (islegal && (clueAgendaTaskDTO1.getSourceName() != null
                         && !"".equals(clueAgendaTaskDTO1.getSourceName()))) {
-                    clueAgendaTaskDTO1.setSource(
-                            Integer.valueOf(sourceMap.get(clueAgendaTaskDTO1.getSourceName())));
-                    if (clueAgendaTaskDTO1.getSource() == null) {
+                    String source = sourceMap.get(clueAgendaTaskDTO1.getSourceName());
+                    if (StringUtils.isNotBlank(source)) {
+                        clueAgendaTaskDTO1.setSource(Integer.valueOf(source));
+                    } else {
                         islegal = false;
                     }
                 }
                 if (islegal && (clueAgendaTaskDTO1.getIndustryCategoryName() != null
                         && !"".equals(clueAgendaTaskDTO1.getIndustryCategoryName()))) {
-                    clueAgendaTaskDTO1.setIndustryCategory(Integer.valueOf(
-                            industryCategoryMap.get(clueAgendaTaskDTO1.getIndustryCategoryName())));
-                    if (clueAgendaTaskDTO1.getIndustryCategory() == null) {
+                    String industryCategory =
+                            industryCategoryMap.get(clueAgendaTaskDTO1.getIndustryCategoryName());
+                    if (StringUtils.isNotBlank(industryCategory)) {
+                        clueAgendaTaskDTO1.setIndustryCategory(Integer.valueOf(industryCategory));
+                    } else {
                         islegal = false;
                     }
                 }
                 if (islegal && (clueAgendaTaskDTO1.getAccountName() != null
                         && !"".equals(clueAgendaTaskDTO1.getAccountName()))) {
-                    clueAgendaTaskDTO1.setAccountNameVaule(
-                            accountNameMap.get(clueAgendaTaskDTO1.getAccountName()));
-                    if (clueAgendaTaskDTO1.getAccountNameVaule() == null) {
+                    String account = accountNameMap.get(clueAgendaTaskDTO1.getAccountName());
+                    if (StringUtils.isNotBlank(account)) {
+                        clueAgendaTaskDTO1.setAccountNameVaule(account);
+                    } else {
                         islegal = false;
                     }
                 }
