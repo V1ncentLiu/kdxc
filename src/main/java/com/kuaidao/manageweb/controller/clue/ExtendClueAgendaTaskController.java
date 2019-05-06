@@ -255,20 +255,23 @@ public class ExtendClueAgendaTaskController {
         UserInfoDTO user = getUser();
         RoleInfoDTO roleInfoDTO = user.getRoleList().get(0);
         List<Long> idList = new ArrayList<Long>();
-        // 处理数据权限
+        // 处理数据权限，客户经理、客户主管、客户专员；内勤经理、内勤主管、内勤专员；优化经理、优化主管、优化文员
         if (RoleCodeEnum.TGKF.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.NQWY.name().equals(roleInfoDTO.getRoleCode())) {
+                || RoleCodeEnum.NQWY.name().equals(roleInfoDTO.getRoleCode())
+                || RoleCodeEnum.YHWY.name().equals(roleInfoDTO.getRoleCode())) {
             // 推广客服、内勤文员 能看自己的数据
             idList.add(user.getId());
         } else if (RoleCodeEnum.KFZG.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.NQZG.name().equals(roleInfoDTO.getRoleCode())) {
+                || RoleCodeEnum.NQZG.name().equals(roleInfoDTO.getRoleCode())
+                || RoleCodeEnum.YHZG.name().equals(roleInfoDTO.getRoleCode())) {
             // 客服主管、内勤主管 能看自己组员数据
             List<UserInfoDTO> userList = getUserList(user.getOrgId(), null, null);
             for (UserInfoDTO userInfoDTO : userList) {
                 idList.add(userInfoDTO.getId());
             }
-
-        } else if (RoleCodeEnum.NQJL.name().equals(roleInfoDTO.getRoleCode())) {
+        } else if (RoleCodeEnum.KFJL.name().equals(roleInfoDTO.getRoleCode())
+                || RoleCodeEnum.YHJL.name().equals(roleInfoDTO.getRoleCode())
+                || RoleCodeEnum.NQJL.name().equals(roleInfoDTO.getRoleCode())) {
             // 内勤经理 能看下属组的数据
             List<OrganizationRespDTO> groupList = getGroupList(user.getOrgId(), null);
             for (OrganizationRespDTO organizationRespDTO : groupList) {
@@ -591,7 +594,7 @@ public class ExtendClueAgendaTaskController {
                 itemFeignClient.queryDicItemsByGroupCode(DicCodeEnum.INDUSTRYCATEGORY.getCode()));
         // 账户名称
         Map<String, String> accountNameMap = dicMap(
-            itemFeignClient.queryDicItemsByGroupCode(DicCodeEnum.ACCOUNT_NAME.getCode()));
+                itemFeignClient.queryDicItemsByGroupCode(DicCodeEnum.ACCOUNT_NAME.getCode()));
 
         if (list != null && list.size() > 0) {
 
@@ -658,54 +661,55 @@ public class ExtendClueAgendaTaskController {
                 if (islegal && (clueAgendaTaskDTO1.getTypeName() != null
                         && !"".equals(clueAgendaTaskDTO1.getTypeName()))) {
                     String type = typeMap.get(clueAgendaTaskDTO1.getTypeName());
-                    if(StringUtils.isNotBlank(type)) {
+                    if (StringUtils.isNotBlank(type)) {
                         clueAgendaTaskDTO1.setType(Integer.valueOf(type));
-                    }else {
+                    } else {
                         islegal = false;
                     }
                 }
                 if (islegal && (clueAgendaTaskDTO1.getCategoryName() != null
                         && !"".equals(clueAgendaTaskDTO1.getCategoryName()))) {
                     String category = categoryMap.get(clueAgendaTaskDTO1.getCategoryName());
-                    if(StringUtils.isNotBlank(category)) {
+                    if (StringUtils.isNotBlank(category)) {
                         clueAgendaTaskDTO1.setCategory(Integer.valueOf(category));
-                    }else {
+                    } else {
                         islegal = false;
                     }
                 }
                 if (islegal && (clueAgendaTaskDTO1.getSourceTypeName() != null
                         && !"".equals(clueAgendaTaskDTO1.getSourceTypeName()))) {
                     String sourceType = sourceTypeMap.get(clueAgendaTaskDTO1.getSourceTypeName());
-                    if(StringUtils.isNotBlank(sourceType)) {
+                    if (StringUtils.isNotBlank(sourceType)) {
                         clueAgendaTaskDTO1.setSourceType(Integer.valueOf(sourceType));
-                    }else {
+                    } else {
                         islegal = false;
                     }
                 }
                 if (islegal && (clueAgendaTaskDTO1.getSourceName() != null
                         && !"".equals(clueAgendaTaskDTO1.getSourceName()))) {
                     String source = sourceMap.get(clueAgendaTaskDTO1.getSourceName());
-                    if(StringUtils.isNotBlank(source)) {
+                    if (StringUtils.isNotBlank(source)) {
                         clueAgendaTaskDTO1.setSource(Integer.valueOf(source));
-                    }else {
+                    } else {
                         islegal = false;
                     }
                 }
                 if (islegal && (clueAgendaTaskDTO1.getIndustryCategoryName() != null
                         && !"".equals(clueAgendaTaskDTO1.getIndustryCategoryName()))) {
-                    String industryCategory = industryCategoryMap.get(clueAgendaTaskDTO1.getIndustryCategoryName());
-                    if(StringUtils.isNotBlank(industryCategory)) {
+                    String industryCategory =
+                            industryCategoryMap.get(clueAgendaTaskDTO1.getIndustryCategoryName());
+                    if (StringUtils.isNotBlank(industryCategory)) {
                         clueAgendaTaskDTO1.setIndustryCategory(Integer.valueOf(industryCategory));
-                    }else {
+                    } else {
                         islegal = false;
                     }
                 }
                 if (islegal && (clueAgendaTaskDTO1.getAccountName() != null
-                    && !"".equals(clueAgendaTaskDTO1.getAccountName()))) {
+                        && !"".equals(clueAgendaTaskDTO1.getAccountName()))) {
                     String account = accountNameMap.get(clueAgendaTaskDTO1.getAccountName());
-                    if(StringUtils.isNotBlank(account)) {
+                    if (StringUtils.isNotBlank(account)) {
                         clueAgendaTaskDTO1.setAccountNameVaule(account);
-                    }else {
+                    } else {
                         islegal = false;
                     }
                 }
@@ -742,7 +746,8 @@ public class ExtendClueAgendaTaskController {
                     pushClueReq.setAppointTime(clueAgendaTaskDTO1.getReserveTime1());
                     pushClueReq.setCreateTime(clueAgendaTaskDTO1.getDate());
                     pushClueReq.setInputType(4);
-                    pushClueReq.setAccountName(String.valueOf(clueAgendaTaskDTO1.getAccountNameVaule()));
+                    pushClueReq.setAccountName(
+                            String.valueOf(clueAgendaTaskDTO1.getAccountNameVaule()));
                     pushClueReq.setUrlAddress(clueAgendaTaskDTO1.getUrlAddress());
                     pushClueReq.setIndustryCategory(
                             String.valueOf(clueAgendaTaskDTO1.getIndustryCategory()));
