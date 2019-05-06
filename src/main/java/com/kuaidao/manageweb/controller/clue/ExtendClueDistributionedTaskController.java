@@ -139,7 +139,7 @@ public class ExtendClueDistributionedTaskController {
         List<UserInfoDTO> userList = new ArrayList<UserInfoDTO>();
 
         UserOrgRoleReq userRole = new UserOrgRoleReq();
-        userRole.setRoleCode(RoleCodeEnum.TGZXZJ.name());
+        userRole.setRoleCode(RoleCodeEnum.TGKF.name());
         JSONResult<List<UserInfoDTO>> userZxzjList = userInfoFeignClient.listByOrgAndRole(userRole);
 
         if (JSONResult.SUCCESS.equals(userZxzjList.getCode()) && null != userZxzjList.getData()
@@ -147,21 +147,21 @@ public class ExtendClueDistributionedTaskController {
             userList.addAll(userZxzjList.getData());
         }
 
-        userRole.setRoleCode(RoleCodeEnum.YHZG.name());
+        userRole.setRoleCode(RoleCodeEnum.NQWY.name());
         JSONResult<List<UserInfoDTO>> userYhZgList = userInfoFeignClient.listByOrgAndRole(userRole);
 
         if (JSONResult.SUCCESS.equals(userYhZgList.getCode()) && null != userYhZgList.getData()
                 && userYhZgList.getData().size() > 0) {
             userList.addAll(userYhZgList.getData());
         }
-        userRole.setRoleCode(RoleCodeEnum.TGYHWY.name());
+        userRole.setRoleCode(RoleCodeEnum.YHWY.name());
         JSONResult<List<UserInfoDTO>> userYhWyList = userInfoFeignClient.listByOrgAndRole(userRole);
 
         if (JSONResult.SUCCESS.equals(userYhWyList.getCode()) && null != userYhWyList.getData()
                 && userYhWyList.getData().size() > 0) {
             userList.addAll(userYhWyList.getData());
         }
-        userRole.setRoleCode(RoleCodeEnum.TGKF.name());
+        userRole.setRoleCode(RoleCodeEnum.KFZG.name());
         JSONResult<List<UserInfoDTO>> userKfList = userInfoFeignClient.listByOrgAndRole(userRole);
 
         if (JSONResult.SUCCESS.equals(userKfList.getCode()) && null != userKfList.getData()
@@ -169,7 +169,7 @@ public class ExtendClueDistributionedTaskController {
             userList.addAll(userKfList.getData());
         }
 
-        userRole.setRoleCode(RoleCodeEnum.KFZG.name());
+        userRole.setRoleCode(RoleCodeEnum.NQZG.name());
         JSONResult<List<UserInfoDTO>> userKfZgList = userInfoFeignClient.listByOrgAndRole(userRole);
 
         if (JSONResult.SUCCESS.equals(userKfZgList.getCode()) && null != userKfZgList.getData()
@@ -177,21 +177,13 @@ public class ExtendClueDistributionedTaskController {
             userList.addAll(userKfZgList.getData());
         }
 
-        userRole.setRoleCode(RoleCodeEnum.TGNQWY.name());
+        userRole.setRoleCode(RoleCodeEnum.YHZG.name());
         JSONResult<List<UserInfoDTO>> userKNqWyList =
                 userInfoFeignClient.listByOrgAndRole(userRole);
 
         if (JSONResult.SUCCESS.equals(userKNqWyList.getCode()) && null != userKNqWyList.getData()
                 && userKNqWyList.getData().size() > 0) {
             userList.addAll(userKNqWyList.getData());
-        }
-
-        userRole.setRoleCode(RoleCodeEnum.NQZG.name());
-        JSONResult<List<UserInfoDTO>> userNqZgList = userInfoFeignClient.listByOrgAndRole(userRole);
-
-        if (JSONResult.SUCCESS.equals(userNqZgList.getCode()) && null != userNqZgList.getData()
-                && userNqZgList.getData().size() > 0) {
-            userList.addAll(userNqZgList.getData());
         }
 
         return userList;
