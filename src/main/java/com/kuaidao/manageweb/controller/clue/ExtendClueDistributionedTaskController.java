@@ -91,20 +91,23 @@ public class ExtendClueDistributionedTaskController {
         UserInfoDTO user = getUser();
         RoleInfoDTO roleInfoDTO = user.getRoleList().get(0);
         List<Long> idList = new ArrayList<Long>();
-        // 处理数据权限
+        // 处理数据权限，客户经理、客户主管、客户专员；内勤经理、内勤主管、内勤专员；优化经理、优化主管、优化文员
         if (RoleCodeEnum.TGKF.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.NQWY.name().equals(roleInfoDTO.getRoleCode())) {
+                || RoleCodeEnum.NQWY.name().equals(roleInfoDTO.getRoleCode())
+                || RoleCodeEnum.YHWY.name().equals(roleInfoDTO.getRoleCode())) {
             // 推广客服、内勤文员 能看自己的数据
             idList.add(user.getId());
         } else if (RoleCodeEnum.KFZG.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.NQZG.name().equals(roleInfoDTO.getRoleCode())) {
+                || RoleCodeEnum.NQZG.name().equals(roleInfoDTO.getRoleCode())
+                || RoleCodeEnum.YHZG.name().equals(roleInfoDTO.getRoleCode())) {
             // 客服主管、内勤主管 能看自己组员数据
             List<UserInfoDTO> userList = getUserList(user.getOrgId(), null, null);
             for (UserInfoDTO userInfoDTO : userList) {
                 idList.add(userInfoDTO.getId());
             }
-
-        } else if (RoleCodeEnum.NQJL.name().equals(roleInfoDTO.getRoleCode())) {
+        } else if (RoleCodeEnum.KFJL.name().equals(roleInfoDTO.getRoleCode())
+                || RoleCodeEnum.YHJL.name().equals(roleInfoDTO.getRoleCode())
+                || RoleCodeEnum.NQJL.name().equals(roleInfoDTO.getRoleCode())) {
             // 内勤经理 能看下属组的数据
             List<OrganizationRespDTO> groupList = getGroupList(user.getOrgId(), null);
             for (OrganizationRespDTO organizationRespDTO : groupList) {
@@ -113,7 +116,6 @@ public class ExtendClueDistributionedTaskController {
                     idList.add(userInfoDTO.getId());
                 }
             }
-
         } else if (RoleCodeEnum.GLY.name().equals(roleInfoDTO.getRoleCode())) {
             idList = null;
         } else {
