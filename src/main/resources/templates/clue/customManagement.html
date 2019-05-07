@@ -679,6 +679,13 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
             }        	  
         },
         methods: {
+        	//日期数据格式化方法
+    		dateFormat(row, column, cellValue, index) {
+               	if (cellValue == undefined) {
+    	               return "";
+              	}
+               	return moment(cellValue).format("YYYY-MM");
+    		},
         	//初始化页面
         	 initTableData(){
                  var param = {};
@@ -735,6 +742,10 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
      		    axios.post('/tele/customerManager/findcustomerManagerPage',param).then(function (response) {
      				var resobj= response.data;
      		    	var pageData=resobj.data;
+     		    	var data=pageData.data;
+     		    	for(var i=0;i<data.length;i++){
+    		    		data[i].urgentDate=customerManVM.dateFormat(null,null,data[i].urgentDate,null);
+                    }
      		    	customerManVM.pager.total=pageData.total;
      		    	customerManVM.pager.currentPage = pageData.currentPage;
      		    	customerManVM.pager.pageSize = pageData.pageSize;
