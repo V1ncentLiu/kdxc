@@ -324,7 +324,7 @@ public class ExtendClueAgendaTaskController {
         List<UserInfoDTO> userList = new ArrayList<UserInfoDTO>();
 
         UserOrgRoleReq userRole = new UserOrgRoleReq();
-        userRole.setRoleCode(RoleCodeEnum.TGZXZJ.name());
+        userRole.setRoleCode(RoleCodeEnum.TGKF.name());
         JSONResult<List<UserInfoDTO>> userZxzjList = userInfoFeignClient.listByOrgAndRole(userRole);
 
         if (JSONResult.SUCCESS.equals(userZxzjList.getCode()) && null != userZxzjList.getData()
@@ -332,21 +332,21 @@ public class ExtendClueAgendaTaskController {
             userList.addAll(userZxzjList.getData());
         }
 
-        userRole.setRoleCode(RoleCodeEnum.YHZG.name());
+        userRole.setRoleCode(RoleCodeEnum.NQWY.name());
         JSONResult<List<UserInfoDTO>> userYhZgList = userInfoFeignClient.listByOrgAndRole(userRole);
 
         if (JSONResult.SUCCESS.equals(userYhZgList.getCode()) && null != userYhZgList.getData()
                 && userYhZgList.getData().size() > 0) {
             userList.addAll(userYhZgList.getData());
         }
-        userRole.setRoleCode(RoleCodeEnum.TGYHWY.name());
+        userRole.setRoleCode(RoleCodeEnum.YHWY.name());
         JSONResult<List<UserInfoDTO>> userYhWyList = userInfoFeignClient.listByOrgAndRole(userRole);
 
         if (JSONResult.SUCCESS.equals(userYhWyList.getCode()) && null != userYhWyList.getData()
                 && userYhWyList.getData().size() > 0) {
             userList.addAll(userYhWyList.getData());
         }
-        userRole.setRoleCode(RoleCodeEnum.TGKF.name());
+        userRole.setRoleCode(RoleCodeEnum.KFZG.name());
         JSONResult<List<UserInfoDTO>> userKfList = userInfoFeignClient.listByOrgAndRole(userRole);
 
         if (JSONResult.SUCCESS.equals(userKfList.getCode()) && null != userKfList.getData()
@@ -354,7 +354,7 @@ public class ExtendClueAgendaTaskController {
             userList.addAll(userKfList.getData());
         }
 
-        userRole.setRoleCode(RoleCodeEnum.KFZG.name());
+        userRole.setRoleCode(RoleCodeEnum.NQZG.name());
         JSONResult<List<UserInfoDTO>> userKfZgList = userInfoFeignClient.listByOrgAndRole(userRole);
 
         if (JSONResult.SUCCESS.equals(userKfZgList.getCode()) && null != userKfZgList.getData()
@@ -362,21 +362,13 @@ public class ExtendClueAgendaTaskController {
             userList.addAll(userKfZgList.getData());
         }
 
-        userRole.setRoleCode(RoleCodeEnum.TGNQWY.name());
+        userRole.setRoleCode(RoleCodeEnum.YHZG.name());
         JSONResult<List<UserInfoDTO>> userKNqWyList =
                 userInfoFeignClient.listByOrgAndRole(userRole);
 
         if (JSONResult.SUCCESS.equals(userKNqWyList.getCode()) && null != userKNqWyList.getData()
                 && userKNqWyList.getData().size() > 0) {
             userList.addAll(userKNqWyList.getData());
-        }
-
-        userRole.setRoleCode(RoleCodeEnum.NQZG.name());
-        JSONResult<List<UserInfoDTO>> userNqZgList = userInfoFeignClient.listByOrgAndRole(userRole);
-
-        if (JSONResult.SUCCESS.equals(userNqZgList.getCode()) && null != userNqZgList.getData()
-                && userNqZgList.getData().size() > 0) {
-            userList.addAll(userNqZgList.getData());
         }
 
         return userList;
@@ -569,9 +561,14 @@ public class ExtendClueAgendaTaskController {
         List<ProjectInfoDTO> proList =
                 projectInfoFeignClient.listNoPage(projectInfoPageParam).getData();
         Map<String, Long> projectMap = new HashMap<String, Long>();
+        Map<Long, String> projectMap2 = new HashMap<Long, String>();
         // 遍历项目list集生成<id,name>map
         for (ProjectInfoDTO projectInfoDTO : proList) {
             projectMap.put(projectInfoDTO.getProjectName(), projectInfoDTO.getId());
+        }
+        // 遍历项目list集生成<id,name>map
+        for (ProjectInfoDTO projectInfoDTO : proList) {
+            projectMap2.put(projectInfoDTO.getId(), projectInfoDTO.getProjectName());
         }
         List<ClueAgendaTaskDTO> list = clueAgendaTaskDTO.getList();
         List<PushClueReq> list1 = new ArrayList<PushClueReq>();
@@ -580,21 +577,33 @@ public class ExtendClueAgendaTaskController {
         // 资源类型
         Map<String, String> typeMap =
                 dicMap(itemFeignClient.queryDicItemsByGroupCode(DicCodeEnum.CLUETYPE.getCode()));
+        Map<String, String> typeMap2 =
+            dicMapTwo(itemFeignClient.queryDicItemsByGroupCode(DicCodeEnum.CLUETYPE.getCode()));
         // 资源类别
         Map<String, String> categoryMap = dicMap(
                 itemFeignClient.queryDicItemsByGroupCode(DicCodeEnum.CLUECATEGORY.getCode()));
+        Map<String, String> categoryMap2 = dicMapTwo(
+            itemFeignClient.queryDicItemsByGroupCode(DicCodeEnum.CLUECATEGORY.getCode()));
         // 广告位
         Map<String, String> sourceTypeMap =
-                dicMap(itemFeignClient.queryDicItemsByGroupCode(DicCodeEnum.ADENSE.getCode()));
+            dicMap(itemFeignClient.queryDicItemsByGroupCode(DicCodeEnum.ADENSE.getCode()));
+        Map<String, String> sourceTypeMap2 =
+            dicMapTwo(itemFeignClient.queryDicItemsByGroupCode(DicCodeEnum.ADENSE.getCode()));
         // 媒介
         Map<String, String> sourceMap =
                 dicMap(itemFeignClient.queryDicItemsByGroupCode(DicCodeEnum.MEDIUM.getCode()));
+        Map<String, String> sourceMap2 =
+            dicMapTwo(itemFeignClient.queryDicItemsByGroupCode(DicCodeEnum.MEDIUM.getCode()));
         // 行业类别
         Map<String, String> industryCategoryMap = dicMap(
                 itemFeignClient.queryDicItemsByGroupCode(DicCodeEnum.INDUSTRYCATEGORY.getCode()));
+        Map<String, String> industryCategoryMap2 = dicMapTwo(
+            itemFeignClient.queryDicItemsByGroupCode(DicCodeEnum.INDUSTRYCATEGORY.getCode()));
         // 账户名称
         Map<String, String> accountNameMap = dicMap(
-                itemFeignClient.queryDicItemsByGroupCode(DicCodeEnum.ACCOUNT_NAME.getCode()));
+            itemFeignClient.queryDicItemsByGroupCode(DicCodeEnum.ACCOUNT_NAME.getCode()));
+        Map<String, String> accountNameMap2 = dicMapTwo(
+            itemFeignClient.queryDicItemsByGroupCode(DicCodeEnum.ACCOUNT_NAME.getCode()));
 
         if (list != null && list.size() > 0) {
 
@@ -746,14 +755,19 @@ public class ExtendClueAgendaTaskController {
                     pushClueReq.setAppointTime(clueAgendaTaskDTO1.getReserveTime1());
                     pushClueReq.setCreateTime(clueAgendaTaskDTO1.getDate());
                     pushClueReq.setInputType(4);
-                    pushClueReq.setAccountName(
+                    if(StringUtils.isNotBlank(clueAgendaTaskDTO1.getAccountNameVaule())) {
+                        pushClueReq.setAccountName(
                             String.valueOf(clueAgendaTaskDTO1.getAccountNameVaule()));
+                    }
                     pushClueReq.setUrlAddress(clueAgendaTaskDTO1.getUrlAddress());
                     pushClueReq.setIndustryCategory(
                             String.valueOf(clueAgendaTaskDTO1.getIndustryCategory()));
                     pushClueReq.setProjectId(clueAgendaTaskDTO1.getProjectId());
                     pushClueReq.setImportTime(format.format(new Date()));
                     pushClueReq.setCreateUser(user.getId());
+                    if(StringUtils.isNotBlank(clueAgendaTaskDTO1.getAge1())) {
+                        pushClueReq.setAge(Integer.valueOf(clueAgendaTaskDTO1.getAge1()));
+                    }
                     list1.add(pushClueReq);
                 } else {
                     illegalDataList.add(clueAgendaTaskDTO1);
@@ -761,9 +775,47 @@ public class ExtendClueAgendaTaskController {
             }
         }
         if (list1 != null && list1.size() > 0) {
-            JSONResult jsonResult = extendClueFeignClient.importclue(list1);
-            if (!jsonResult.getCode().equals("0")) {
-                return new JSONResult<>().success(list);
+            JSONResult<List<PushClueReq>> jsonResult = extendClueFeignClient.importclue(list1);
+            if(null!=jsonResult && jsonResult.getCode().equals("0")) {
+                List<PushClueReq> list2 = jsonResult.getData();
+                if (list2 != null && list2.size() > 0) {
+                    for (PushClueReq pushClueReq : list2) {
+                        ClueAgendaTaskDTO clueAgendaTaskDTO2 = new ClueAgendaTaskDTO();
+                        clueAgendaTaskDTO2.setDate(pushClueReq.getCreateTime());
+                        clueAgendaTaskDTO2.setTypeName(typeMap2.get(pushClueReq.getType()));
+                        clueAgendaTaskDTO2
+                            .setCategoryName(categoryMap2.get(pushClueReq.getCategory()));
+                        clueAgendaTaskDTO2
+                            .setSourceTypeName(sourceTypeMap2.get(pushClueReq.getSourceType()));
+                        clueAgendaTaskDTO2.setSourceName(sourceMap2.get(pushClueReq.getSource()));
+                        clueAgendaTaskDTO2
+                            .setProjectName(projectMap2.get(pushClueReq.getProjectId()));
+                        clueAgendaTaskDTO2.setIndustryCategoryName(
+                            industryCategoryMap2.get(pushClueReq.getIndustryCategory()));
+                        clueAgendaTaskDTO2.setCusName(pushClueReq.getCusName());
+                        clueAgendaTaskDTO2.setPhone(pushClueReq.getPhone());
+                        clueAgendaTaskDTO2.setPhone2(pushClueReq.getPhone2());
+                        clueAgendaTaskDTO2.setWechat(pushClueReq.getWechat());
+                        clueAgendaTaskDTO2.setWechat2(pushClueReq.getWechat2());
+                        clueAgendaTaskDTO2.setQq(pushClueReq.getQq());
+                        clueAgendaTaskDTO2.setEmail(pushClueReq.getEmail());
+                        if (null != pushClueReq.getSex() && pushClueReq.getSex() == 1) {
+                            clueAgendaTaskDTO2.setSex1("男");
+                        } else if (null != pushClueReq.getSex() && pushClueReq.getSex() == 2) {
+                            clueAgendaTaskDTO2.setSex1("女");
+                        }
+                        clueAgendaTaskDTO2.setAge1(String.valueOf(pushClueReq.getAge()));
+                        clueAgendaTaskDTO2.setAddress(pushClueReq.getProvince());
+                        clueAgendaTaskDTO2.setMessageTime1(pushClueReq.getMessageTime());
+                        clueAgendaTaskDTO2.setMessagePoint(pushClueReq.getMessagePoint());
+                        clueAgendaTaskDTO2.setSearchWord(pushClueReq.getSearchWord());
+                        clueAgendaTaskDTO2.setReserveTime1(pushClueReq.getAppointTime());
+                        clueAgendaTaskDTO2
+                            .setAccountName(accountNameMap2.get(pushClueReq.getAccountName()));
+                        clueAgendaTaskDTO2.setUrlAddress(pushClueReq.getUrlAddress());
+                        illegalDataList.add(clueAgendaTaskDTO2);
+                    }
+                }
             }
         }
         return new JSONResult<>().success(illegalDataList);
@@ -780,6 +832,22 @@ public class ExtendClueAgendaTaskController {
             List<DictionaryItemRespDTO> data = result.getData();
             for (DictionaryItemRespDTO itemRespDTO : data) {
                 map.put(itemRespDTO.getName(), itemRespDTO.getValue());
+            }
+        }
+        return map;
+    }
+
+    /**
+     * 数据字典-词条转换Map
+     *
+     * @return
+     */
+    public Map dicMapTwo(JSONResult<List<DictionaryItemRespDTO>> result) {
+        Map map = new HashMap();
+        if (JSONResult.SUCCESS.equals(result.getCode())) {
+            List<DictionaryItemRespDTO> data = result.getData();
+            for (DictionaryItemRespDTO itemRespDTO : data) {
+                map.put(itemRespDTO.getValue(), itemRespDTO.getName());
             }
         }
         return map;
