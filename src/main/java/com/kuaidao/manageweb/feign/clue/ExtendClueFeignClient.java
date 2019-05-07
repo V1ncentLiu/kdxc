@@ -86,7 +86,7 @@ public interface ExtendClueFeignClient {
      * @return
      */
     @RequestMapping(method = RequestMethod.POST, value = "/import")
-    public JSONResult importclue(@RequestBody List<PushClueReq> list);
+    public JSONResult<List<PushClueReq>> importclue(@RequestBody List<PushClueReq> list);
 
     @Component
     static class HystrixClientFallback implements ExtendClueFeignClient {
@@ -138,7 +138,7 @@ public interface ExtendClueFeignClient {
         }
 
         @Override
-        public JSONResult importclue(List<PushClueReq> list) {
+        public JSONResult<List<PushClueReq>> importclue(List<PushClueReq> list) {
             // TODO Auto-generated method stub
             return fallBackError("导入线索");
         }
