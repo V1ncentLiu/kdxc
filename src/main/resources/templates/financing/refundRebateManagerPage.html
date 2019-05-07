@@ -27,7 +27,7 @@
         <div class="mainSearchFormBox">
     	      <el-form :inline="true" :model="searchForm" class="demo-form-inline mainSearchForm" ref="searchForm"> 
                 <el-form-item label="商务大区:"  prop="busAreaId">
-                  <el-select v-model="searchForm.busAreaId" clearable  placeholder="商务大区">
+                  <el-select v-model="searchForm.busAreaId" clearable  placeholder="商务大区" @change="changeBusArea" @clear="clearBusAreaList" >
                     <el-option
                       v-for="item in busAreaOptions"
                       :key="item.id"
@@ -37,7 +37,7 @@
                   </el-select>
                 </el-form-item>
                 <el-form-item label="签单商务组:"  prop="busGroupId">
-                  <el-select v-model="searchForm.busGroupId" clearable placeholder="签单商务组">
+                  <el-select v-model="searchForm.busGroupId" clearable placeholder="签单商务组"  @change="changeBusGroup" @clear="clearBusGroupList">
                     <el-option
                       v-for="item in busGroupOptions"
                       :key="item.id"
@@ -87,7 +87,7 @@
                     <el-input v-model="searchForm.cusName" placeholder="客户姓名"></el-input>
                     </el-form-item>
                     <el-form-item label="电销事业部:"  prop="teleDeptId">
-                      <el-select v-model="searchForm.teleDeptId" clearable  placeholder="电销事业部">
+                      <el-select v-model="searchForm.teleDeptId" clearable  placeholder="电销事业部"  @change="changeTeleDept" @clear="clearTeleDeptList">
                         <el-option
                           v-for="item in teleDeptOptions"
                           :key="item.id"
@@ -97,7 +97,7 @@
                       </el-select>
                     </el-form-item>
                     <el-form-item label="电销组:"  prop="teleGorupId">
-                      <el-select v-model="searchForm.teleGorupId" clearable  placeholder="电销组">
+                      <el-select v-model="searchForm.teleGorupId" clearable  placeholder="电销组"  @change="changeTeleGroup" @clear="clearTeleGroupList">
                         <el-option
                           v-for="item in teleGorupOptions"
                           :key="item.id"
@@ -402,11 +402,7 @@
         th:src="@{'/js/custom/financing/file_upload.js'}"></script>
 <script th:inline="javascript">
 var busAreaList=[[${busAreaList}]];//商务大区
-var busGroupList=[[${busGroupList}]];//商务组
-var busSaleList=[[${busSaleList}]];//商务经理
 var teleDeptList=[[${teleDeptList}]];//电销事业部
-var teleGroupList=[[${teleGroupList}]];//电销组
-var teleSaleList=[[${teleSaleList}]];//创业顾问
 var provinceList=[[${provinceList}]];//省份
 var vistitStoreTypeList=[[${vistitStoreTypeList}]];//签约店型
 var ossSignatureUrl = [[${ossUrl}]];//上传文件地址
@@ -453,11 +449,11 @@ var clueVM = new Vue({
           recordDialog:false,
           recordTable:[],
           busAreaOptions:busAreaList,
-          busGroupOptions:busGroupList,
-          busSaleOptions:busSaleList,
+          busGroupOptions:[],
+          busSaleOptions:[],
           teleDeptOptions:teleDeptList,
-          teleGorupOptions:teleGroupList,
-          teleSaleOptions:teleSaleList,
+          teleGorupOptions:[],
+          teleSaleOptions:[],
           provinceOptions:provinceList,
           signShopTypeOptions:vistitStoreTypeList,
           signTypeOptions:[{
@@ -915,6 +911,94 @@ var clueVM = new Vue({
             	   this.dialogFormChooseVisible = false;
             	   this.$refs.chooseSignTable.clearSelection();
                },
+               changeTeleDept(selectedValue){//电销事业部
+                   this.clearTeleDeptList();
+                   if(!selectedValue){
+                       return;
+                   }
+                   var param ={};
+                   param.id = selectedValue;
+                   axios.post('/organization/organization/queryTeleGroupListByParentId', param)
+                   .then(function (response) {
+                         var result =  response.data;
+                         var table=result.data;
+                         clueVM.teleGorupOptions= table;
+                   })
+                   .catch(function (error) {
+                        console.log(error);
+                   });
+               },
+               changeTeleGroup(selectedValue){//改变电销组
+                   this.clearTeleGroupList();
+                   if(!selectedValue){
+                       return;
+                   }
+                   var param ={};
+                   param.id = selectedValue;
+                   axios.post('/organization/organization/queryTeleSaleByOrgId', param)
+                   .then(function (response) {
+                         var result =  response.data;
+                         var table=result.data;
+                         clueVM.teleSaleOptions= table;
+                   })
+                   .catch(function (error) {
+                        console.log(error);
+                   });
+               },
+               clearTeleDeptList(){
+                   this.teleGorupOptions=[];
+                   this.searchForm.teleGorupId='';
+                   this.clearTeleGroupList();
+                   
+               },
+               clearTeleGroupList(){
+                    this.teleSaleOptions=[];
+                    this.searchForm.teleSaleId='';
+               },
+               changeBusArea(selectedValue){//改变商务大区
+                   this.clearBusAreaList();
+                   if(!selectedValue){
+                       return;
+                   }
+                   var param ={};
+                   param.id = selectedValue;
+                   axios.post('/organization/organization/queryBusGroupListByParentId', param)
+                   .then(function (response) {
+                         var result =  response.data;
+                         var table=result.data;
+                         clueVM.busGroupOptions= table;
+                   })
+                   .catch(function (error) {
+                        console.log(error);
+                   });
+               },
+               changeBusGroup(selectedValue){//改变商务组
+                   this.clearBusGroupList();
+                   if(!selectedValue){
+                       return;
+                   }
+                   var param ={};
+                   param.id = selectedValue;
+                   axios.post('/organization/organization/queryBusManagerByOrgId', param)
+                   .then(function (response) {
+                         var result =  response.data;
+                         var table=result.data;
+                         clueVM.busSaleOptions= table;
+                   })
+                   .catch(function (error) {
+                        console.log(error);
+                   });
+               },
+               clearBusAreaList(){
+                   this.busGroupOptions=[];
+                   this.searchForm.busGroupId='';
+                   this.clearBusGroupList();
+                   
+               },
+               clearBusGroupList(){
+                    this.busSaleOptions=[];
+                    this.searchForm.busSaleId='';
+               },
                //打开申请退款
                toAllocationClue(formName) {
             	   if(this.$refs[formName]){
@@ -1092,7 +1176,7 @@ var clueVM = new Vue({
                  getTimeText(row, column, value, index){
                      var valText="";
                      if(value){
-                         valText =  moment(value).format("YYYY-MM-DD HH:mm:ss");
+                         valText =  moment(value).format("YYYY-MM-DD");
                      }
                      return valText;
                  },

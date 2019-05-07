@@ -88,22 +88,9 @@ public class ReconciliationConfirmController {
         // 查询所有商务大区
         List<OrganizationRespDTO> busAreaList = getOrgList(null, OrgTypeConstant.SWDQ);
         request.setAttribute("busAreaList", busAreaList);
-        // 查询所有商务组
-        List<OrganizationRespDTO> busGroupList = getOrgList(null, OrgTypeConstant.SWZ);
-        request.setAttribute("busGroupList", busGroupList);
         // 查询所有电销事业部
         List<OrganizationRespDTO> teleDeptList = getOrgList(null, OrgTypeConstant.DZSYB);
         request.setAttribute("teleDeptList", teleDeptList);
-        // 查询所有电销组
-        List<OrganizationRespDTO> teleGroupList = getOrgList(null, OrgTypeConstant.DXZ);
-        request.setAttribute("teleGroupList", teleGroupList);
-        // 查询所有商务经理
-        List<UserInfoDTO> busSaleList = getUserList(null, RoleCodeEnum.SWJL.name(), null);
-        request.setAttribute("busSaleList", busSaleList);
-        // 查询所有电销创业顾问
-        List<UserInfoDTO> teleSaleList = getUserList(null, RoleCodeEnum.DXCYGW.name(), null);
-        request.setAttribute("teleSaleList", teleSaleList);
-
         // 查询所有项目
         JSONResult<List<ProjectInfoDTO>> allProject = projectInfoFeignClient.allProject();
         request.setAttribute("projectList", allProject.getData());

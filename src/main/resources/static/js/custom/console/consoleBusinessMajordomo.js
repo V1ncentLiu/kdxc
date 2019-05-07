@@ -621,9 +621,11 @@ var mainDivVM = new Vue({
                         if(resData.code=='0'){
                             mainDivVM.dialogForm.reason='';
                             mainDivVM.dialogFormVisible = false;
-                             mainDivVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
-                                 mainDivVM.initSignRecordData();
-                                 mainDivVM.recordDialog = false;
+                            mainDivVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
+                                mainDivVM.initSignRecordData();
+                                mainDivVM.recordDialog = false;
+                                // 待审批到访记录也刷新列表
+                                mainDivVM.initCustomerVisitRecord();
                             }});
                         }else{
                             mainDivVM.$message({message:resData.msg,type:'error'});
@@ -683,6 +685,8 @@ var mainDivVM = new Vue({
                             mainDivVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
                                     mainDivVM.initSignRecordData();// 刷新列表
                                     mainDivVM.recordDialog = false;
+                                    // 待审批到访记录也刷新列表
+                                    mainDivVM.initCustomerVisitRecord();
                                 }});
                         }else{
                             mainDivVM.$message({message:resData.msg,type:'error'});
