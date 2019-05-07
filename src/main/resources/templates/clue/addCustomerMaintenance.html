@@ -333,8 +333,7 @@
                           tooltip-effect="dark" style="width: 100%"
                           border
                           @selection-change="handleFileSelectionChange">
-                    <el-table-column type="selection" prop="id" width="55"
-                                     @selection-change="handleFileSelectionChange" align="center">
+                    <el-table-column type="selection" prop="id" width="55" @selection-change="handleFileSelectionChange" align="center">
                     </el-table-column>
                     <el-table-column prop="uploadUserName" label="上传人姓名" align="center">
                     </el-table-column>
@@ -343,18 +342,14 @@
                     <el-table-column prop="fileName" label="文件名称" align="center">
                     </el-table-column>
                     <el-table-column label="操作" align="center">
-                        <template
-                                slot-scope="scope">
-                            <el-button size="mini" type="text"
-                                       @click="handleOperateFn(scope.$index, scope.row)">{{scope.row.fileType
+                        <template slot-scope="scope">
+                            <el-button size="mini" type="text" @click="handleOperateFn(scope.$index, scope.row)">{{scope.row.fileType
                                 =="mp3"? '下载录音':'查看图片'}}
                             </el-button>
                         </template>
                     </el-table-column>
-                    <el-table-column prop="delStatus"
-                                     label="删除状态" align="center">
-                        <template
-                                slot-scope="scope">
+                    <el-table-column prop="delStatus" label="删除状态" align="center">
+                        <template slot-scope="scope">
                             <div v-if="scope.row.delStatus === 0">未删除</div>
                             <div v-else-if="scope.row.delStatus ===1" class="redcolor">已删除</div>
                         </template>
@@ -377,28 +372,14 @@
                 </el-col>
             </el-row>
             <el-row>
-                <el-table ref="multipleTable" :data="tableDataC2"
-                          tooltip-effect="dark" style="width: 100%"
-                          border
-                          @selection-change="handleTrackingSelection">
-                    <el-table-column prop="id" type="selection" width="55"
-                                     @selection-change="handleTrackingSelection" align="center">
+                <el-table ref="multipleTable" :data="tableDataC2" tooltip-effect="dark" style="width: 100%" border @selection-change="handleTrackingSelection">
+                    <el-table-column prop="id" type="selection" min-width="10%" @selection-change="handleTrackingSelection" align="center"></el-table-column>
+                    <el-table-column prop="callTime" label="拨打时间" align="center" min-width="12%">
                     </el-table-column>
-                    <el-table-column prop="callTime" label="拨打时间" align="center" width="220">
+                    <el-table-column prop="customerStatusName" label="客户状态" align="center" min-width="20%">
                     </el-table-column>
-                    <el-table-column
-                            prop="customerStatusName"
-                            label="客户状态"
-                            align="center"
-                            width="420">
-                    </el-table-column>
-                    <el-table-column
-                            width="210"
-                            prop="isCall"
-                            label="是否接通"
-                            align="center">
-                        <template
-                                slot-scope="scope">
+                    <el-table-column min-width="10%" prop="isCall" label="是否接通" align="center">
+                        <template slot-scope="scope">
                             <div v-if="scope.row.isCall === 0">未接通</div>
                             <div v-else-if="scope.row.isCall ===1">已接通</div>
                         </template>
@@ -415,8 +396,7 @@
 	                       </div>
 	                     </template>
                         </el-table-column> -->
-                    <el-table-column
-                            prop="focusPoint" label="客户关注点" align="center" width="210"></el-table-column>
+                    <el-table-column prop="focusPoint" label="客户关注点" align="center" min-width="16%"></el-table-column>
                     <!--<el-table-column-->
                             <!--prop="visitStatus" label="是否继续回访" align="center" width="210">-->
                         <!--<template-->
@@ -425,45 +405,35 @@
                             <!--<div v-else-if="scope.row.visitStatus ==1">是</div>-->
                         <!--</template>-->
                     <!--</el-table-column>-->
-                    <el-table-column prop="nextVisitTime" label="下次回访时间" align="center" width="220">
+                    <el-table-column prop="nextVisitTime" label="下次回访时间" align="center" min-width="12%">
                     </el-table-column>
-                    <el-table-column prop="createUserName" label="创建人" align="center">
+                    <el-table-column prop="createUserName" label="创建人" align="center" min-width="10%">
                     </el-table-column>
-                    <div slot="append" v-show="lineFormShow">
-                        <el-form :inline="true" :model="formInline" class="demo-form-inline"
-                                 :rules="rules" ref="LineRuleForm">
-                            <el-row
-                                    class="paddingL55">
-                                <el-form-item prop="callTime" class="lineForm_callTime">
-                                    <el-date-picker v-model="formInline.callTime" type="datetime"
-                                                    size="mini" placeholder="选择日期时间"></el-date-picker>
+                    <div slot="append" v-show="lineFormShow" class="lineFormShow">
+                        <el-form :inline="true" :model="formInline" class="demo-form-inline" :rules="rules" ref="LineRuleForm">
+                                <div style="float: left; width: 48px;">&nbsp;</div>
+                                <el-form-item prop="callTime" class="lineForm_callTime"  style="width: 14.5%;float: left;">
+                                    <el-date-picker v-model="formInline.callTime" type="datetime" placeholder="选择日期时间" style="width: 90%;display: block;margin:0 auto;"></el-date-picker>
                                 </el-form-item>
-                                <el-form-item label="" size="mini" class="lineForm_customerStatus">
-                                    <el-select
-                                            v-model="formInline.customerStatus" @change="customerStatusChange"
-                                            placeholder="客户状态">
-                                        <el-option
-                                                v-for="item in cusStatusArr" :key="item.value" :label="item.name"
-                                                :value="item.value"></el-option>
-                                    </el-select>
-                                </el-form-item>
-                                <el-form-item label="" size="mini" prop="customerStatusSub" v-show="!substatus" class="lineForm_customerStatusSub">
-                                    <el-select
-                                            v-model="formInline.customerStatusSub" placeholder="客户状态"
-                                            :disabled="substatus"
-                                            :required="customerStatusRequired">
-                                        <el-option v-for="item in customerStatusSubArr" :key="item.value"
-                                                   :label="item.name" :value="item.value"></el-option>
-                                    </el-select>
-                                </el-form-item>
-                                <el-form-item label="" size="mini" prop="isCall" class="lineForm_isCall">
-                                    <el-select
-                                            v-model="formInline.isCall" placeholder="是否接通">
-                                        <el-option
-                                                label="是" value="1"></el-option>
+                                <div  style="width: 24%;float: left;text-align: center;">                                
+                                    <el-form-item label="" class="lineForm_customerStatus" style="width: 100px;">
+                                        <el-select v-model="formInline.customerStatus" @change="customerStatusChange" placeholder="客户状态" style="width: 100%;display: block;margin:0 auto;">
+                                            <el-option v-for="item in cusStatusArr" :key="item.value" :label="item.name" :value="item.value"></el-option>
+                                        </el-select>
+                                    </el-form-item>
+                                    <el-form-item label="" prop="customerStatusSub" v-show="!substatus" class="lineForm_customerStatusSub"  style="width: 160px;">
+                                        <el-select v-model="formInline.customerStatusSub" placeholder="客户状态" :disabled="substatus" :required="customerStatusRequired" style="width: 100%;height: 35px!important;">
+                                            <el-option v-for="item in customerStatusSubArr" :key="item.value" :label="item.name" :value="item.value"></el-option>
+                                        </el-select>
+                                    </el-form-item>
+                                </div>
+                                <el-form-item label="" prop="isCall" class="lineForm_isCall"  style="width: 12.5%;float: left;">
+                                    <el-select v-model="formInline.isCall" placeholder="是否接通" style="width: 70%;display: block;margin:0 auto;">
+                                        <el-option label="是" value="1"></el-option>
                                         <el-option label="否" value="0"></el-option>
                                     </el-select>
-                                </el-form-item> <!--
+                                </el-form-item> 
+                                <!--
                                   <el-form-item label="" size="mini" prop="resourceStatus">
                                     <el-select v-model="formInline.resourceStatus" placeholder="无效资源">
                                       <el-option label="无效资源" value="0"></el-option>
@@ -471,9 +441,8 @@
                                     </el-select>
                                   </el-form-item>
                                   -->
-                                <el-form-item label="" size="mini" prop="focusPoint" class="lineForm_focusPoint">
-                                    <el-input
-                                            v-model="formInline.focusPoint" size="mini" placeholder="客户关注点"></el-input>
+                                <el-form-item label="" prop="focusPoint" class="lineForm_focusPoint"  style="width: 19%;float: left;">
+                                    <el-input v-model="formInline.focusPoint" placeholder="客户关注点" style="width: 80%;display:block;margin:0 auto;"></el-input>
                                 </el-form-item>
                                 <!--<el-form-item label="" size="mini">-->
                                     <!--<el-select-->
@@ -483,19 +452,13 @@
                                         <!--<el-option label="否" value="0"></el-option>-->
                                     <!--</el-select>-->
                                 <!--</el-form-item>-->
-                                <el-form-item prop="nextVisitTime" class="lineForm_nextVisitTime">
-                                    <el-date-picker
-                                            v-model="formInline.nextVisitTime" type="datetime"
-                                            format="yyyy-MM-dd HH:mm" size="mini" placeholder="下次回访时间">
+                                <el-form-item prop="nextVisitTime" class="lineForm_nextVisitTime"  style="width: 14%;float: left;">
+                                    <el-date-picker v-model="formInline.nextVisitTime" type="datetime" format="yyyy-MM-dd HH:mm"  placeholder="下次回访时间" style="width: 85%;display: block;margin:0 auto;">
                                     </el-date-picker>
                                 </el-form-item>
-                            <!--      <el-form-item class="lineInherit">
-                                    <el-button
-                                            type="primary" size="mini" @click="onConfirmAdd" :disabled="addBtnDisabled">
-                                        确认
-                                    </el-button>
+                                <!--<el-form-item class="lineInherit">
+                                    <el-button type="primary" size="mini" @click="onConfirmAdd" :disabled="addBtnDisabled">确认</el-button>
                                 </el-form-item> -->
-                            </el-row>
                         </el-form>
                     </div>
                 </el-table>
@@ -503,10 +466,7 @@
 
             <div class="marginB20 fs16 paddingT20">通话记录</div>
             <el-row>
-                <el-table ref="multipleTable" :data="tableDataC3"
-                          tooltip-effect="dark" style="width: 100%"
-                          border
-                          @selection-change="handleSelectionChange">
+                <el-table ref="multipleTable" :data="tableDataC3" tooltip-effect="dark" style="width: 100%" border @selection-change="handleSelectionChange">
                     <el-table-column type="index" width="55" label="序号" align="center">
                     </el-table-column>
                     <el-table-column prop="accountName" label="姓名" align="center">
@@ -523,18 +483,10 @@
                     </el-table-column>
                     <el-table-column label="操作" align="center">
                         <template slot-scope="scope" v-if="scope.row.talkTime >0 ">
-                            <!-- <div style="float:left" :id="scope.row.id" class="sound-trigger sound-trigger--type-default sound-trigger--type-click" @click="switchSoundBtn(scope.row.id,scope.row.recordFile,scope.row.callSource)">
-				 <div class="sound-trigger__inner">
-					 <i class="fa fa-play-1 fa-lg"></i>
-					 </div>
-				 </div>
-             <el-button type="primary" size="small" @click="downloadAudio(scope.row.id,scope.row.recordFile,scope.row.callSource)"><i class="el-icon-download"></i>下载</el-button> -->
-                            <a :id="scope.row.id"
-                               class="sound-trigger sound-trigger--type-default sound-trigger--type-click"
-                               @click="switchSoundBtn(scope.row.id,scope.row.recordFile,scope.row.callSource)">
-				 <span class="sound-trigger__inner">
-		           <i class="fa fa-play-1 fa-lg"></i>
-			 	</span>
+                            <a :id="scope.row.id" class="sound-trigger sound-trigger--type-default sound-trigger--type-click" @click="switchSoundBtn(scope.row.id,scope.row.recordFile,scope.row.callSource)">
+                				<span class="sound-trigger__inner">
+                		           <i class="fa fa-play-1 fa-lg"></i>
+                			 	</span>
                             </a>
                             <a class="download_img"  v-if="scope.row.accountId==loginUserId"
                                @click="downloadAudio(scope.row.id,scope.row.recordFile,scope.row.callSource)"></a>
@@ -544,10 +496,7 @@
             </el-row>
             <div class="marginB20 fs16 paddingT20">流转人员</div>
             <el-row>
-                <el-table ref="multipleTable" :data="tableDataC4"
-                          tooltip-effect="dark" style="width: 100%"
-                          border
-                          @selection-change="handleSelectionChange">
+                <el-table ref="multipleTable" :data="tableDataC4" tooltip-effect="dark" style="width: 100%" border @selection-change="handleSelectionChange">
                     <el-table-column type="index" width="55" label="序号" align="center"></el-table-column>
                     <el-table-column prop="roleName" label="角色" align="center"></el-table-column>
                     <el-table-column prop="orgName" label="所属组(组名)" align="center"></el-table-column>
@@ -754,7 +703,7 @@
     }*/
 
     /*20190423 start*/
-    .paddingL55 { width: 1665px; }
+    /*.paddingL55 { width: 1665px; }
     .paddingL55 .el-form-item__content {
         width: 100%;
         line-height: 28px;
@@ -766,8 +715,11 @@
     .paddingL55 .lineForm_isCall { width: 200px; }
     .paddingL55 .lineForm_focusPoint { width: 210px; }
     .paddingL55 .lineForm_nextVisitTime { width: 220px; }
-    .paddingL55 .lineForm_confirm_btn {}
+    .paddingL55 .lineForm_confirm_btn {}*/
     /*20190423 end*/
+    .lineFormShow .el-form-item__content{width: 100%;}
+    .lineFormShow .el-input__inner{height: 35px!important;}
+    .lineFormShow .el-form-item__error{text-align: center;width: 100%;}
 
     i.el-icon-phone-outline {
         width: 20px;
@@ -1106,10 +1058,10 @@
             customerStatusChange(selVal) {
                 if (selVal == '3') {
                     this.substatus = false;
-                    $(".paddingL55 .lineForm_customerStatus").css("width","210px");
+                    // $(".paddingL55 .lineForm_customerStatus").css("width","210px");
                 } else {
                     this.substatus = true;
-                    $(".paddingL55 .lineForm_customerStatus").css("width","420px");
+                    // $(".paddingL55 .lineForm_customerStatus").css("width","420px");
                 }
             },
             projectChangeSelect(selVal) {
