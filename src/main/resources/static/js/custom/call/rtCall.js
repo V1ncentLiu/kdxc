@@ -83,9 +83,11 @@ function outboundCallPhone(outboundInputPhone,callSource,clueId,callback){
      		          }
       				
              	  }else{
+             		 clearTimer();//清除定时器
                		  homePageVM.$message({message:resData.Message,type:'error'});
              	  }
               }else{
+            	   clearTimer();//清除定时器
              		homePageVM.$message({message:data.msg,type:'error'});
               }
           })
@@ -111,9 +113,10 @@ function axbOutboundCall(outboundInputPhone,callSource,clueId){
           var data =  response.data;
           if(data.code=='0'){
      		  //10分钟后红色字体显示
-     		  intervalTimer("outboundCallTime",10,1);
+     		 // intervalTimer("outboundCallTime",1,2);
      		  homePageVM.$message({message:"外呼中",type:'success'});
           }else{
+        	  clearTimer();//清除定时器
          		homePageVM.$message({message:data.msg,type:'error'});
           }
       })
