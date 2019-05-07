@@ -755,8 +755,10 @@ public class ExtendClueAgendaTaskController {
                     pushClueReq.setAppointTime(clueAgendaTaskDTO1.getReserveTime1());
                     pushClueReq.setCreateTime(clueAgendaTaskDTO1.getDate());
                     pushClueReq.setInputType(4);
-                    pushClueReq.setAccountName(
+                    if(StringUtils.isNotBlank(clueAgendaTaskDTO1.getAccountNameVaule())) {
+                        pushClueReq.setAccountName(
                             String.valueOf(clueAgendaTaskDTO1.getAccountNameVaule()));
+                    }
                     pushClueReq.setUrlAddress(clueAgendaTaskDTO1.getUrlAddress());
                     pushClueReq.setIndustryCategory(
                             String.valueOf(clueAgendaTaskDTO1.getIndustryCategory()));
@@ -802,7 +804,9 @@ public class ExtendClueAgendaTaskController {
                         } else if (null != pushClueReq.getSex() && pushClueReq.getSex() == 2) {
                             clueAgendaTaskDTO2.setSex1("女");
                         }
-                        clueAgendaTaskDTO2.setAge1(String.valueOf(pushClueReq.getAge()));
+                        if(null!=pushClueReq.getAge()) {
+                            clueAgendaTaskDTO2.setAge1(String.valueOf(pushClueReq.getAge()));
+                        }
                         clueAgendaTaskDTO2.setAddress(pushClueReq.getProvince());
                         clueAgendaTaskDTO2.setMessageTime1(pushClueReq.getMessageTime());
                         clueAgendaTaskDTO2.setMessagePoint(pushClueReq.getMessagePoint());
