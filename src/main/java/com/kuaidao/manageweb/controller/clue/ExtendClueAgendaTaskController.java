@@ -804,7 +804,9 @@ public class ExtendClueAgendaTaskController {
                         } else if (null != pushClueReq.getSex() && pushClueReq.getSex() == 2) {
                             clueAgendaTaskDTO2.setSex1("女");
                         }
-                        clueAgendaTaskDTO2.setAge1(String.valueOf(pushClueReq.getAge()));
+                        if(null!=pushClueReq.getAge()) {
+                            clueAgendaTaskDTO2.setAge1(String.valueOf(pushClueReq.getAge()));
+                        }
                         clueAgendaTaskDTO2.setAddress(pushClueReq.getProvince());
                         clueAgendaTaskDTO2.setMessageTime1(pushClueReq.getMessageTime());
                         clueAgendaTaskDTO2.setMessagePoint(pushClueReq.getMessagePoint());
