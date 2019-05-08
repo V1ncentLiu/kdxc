@@ -133,7 +133,7 @@ public class AbandonController {
                 && userYhWyList.getData().size() > 0) {
             userList.addAll(userYhWyList.getData());
         }
-        userRole.setRoleCode(RoleCodeEnum.TGKF.name());
+        userRole.setRoleCode(RoleCodeEnum.KFZY.name());
         JSONResult<List<UserInfoDTO>> userKfList = userInfoFeignClient.listByOrgAndRole(userRole);
 
         if (JSONResult.SUCCESS.equals(userKfList.getCode()) && null != userKfList.getData()
