@@ -110,6 +110,9 @@ public class LoginController {
     private String wsUrlHttps;
     @Value("${session_time_out}")
     private int sessionTimeOut;
+    /**是否显示验证码**/
+    @Value("${VerificationCodeShow}")
+    private boolean verificationCodeShow;
 
     /***
      * 登录页
@@ -132,6 +135,7 @@ public class LoginController {
                 SecurityUtils.getSubject().getSession().getAttribute("isShowLogoutBox");
         SecurityUtils.getSubject().getSession().removeAttribute("isShowLogoutBox");
         request.setAttribute("isShowLogoutBox", isShowLogoutBox);
+        request.setAttribute("verificationCodeShow", verificationCodeShow);
         return "login/login";
     }
 
@@ -172,17 +176,24 @@ public class LoginController {
         loginRecord.setIp(ipAddr);
         loginRecord.setLoginTime(date);
         // * 校验验证码
-        SmsCodeAndMobileValidReq smsCodeAndMobileValidReq = new SmsCodeAndMobileValidReq();
-        smsCodeAndMobileValidReq.setCode(loginReq.getCode());
-        smsCodeAndMobileValidReq.setMobile(user.getPhone());
-        String msgId = redisTemplate.opsForValue().get(Constants.MSG_ID + user.getId());
-        smsCodeAndMobileValidReq.setMsgId(msgId);
-        JSONResult result = msgPushFeignClient.validCodeAndMobile(smsCodeAndMobileValidReq);
-        if (!JSONResult.SUCCESS.equals(result.getCode())) {
-            logger.error(result.getMsg());
-            errorMessage = "验证码错误";
-            loginRecord.setLoginStatus(Constants.LOGIN_STATUS_PASSWORD_ERROR);
-        } else {
+        //只有正式环境校验验证码 其他环境不校验 by fanjd  2019/5/8
+        //是否继续判断标识
+        boolean  flag  = true;
+        if(verificationCodeShow){
+            SmsCodeAndMobileValidReq smsCodeAndMobileValidReq = new SmsCodeAndMobileValidReq();
+            smsCodeAndMobileValidReq.setCode(loginReq.getCode());
+            smsCodeAndMobileValidReq.setMobile(user.getPhone());
+            String msgId = redisTemplate.opsForValue().get(Constants.MSG_ID + user.getId());
+            smsCodeAndMobileValidReq.setMsgId(msgId);
+            JSONResult result = msgPushFeignClient.validCodeAndMobile(smsCodeAndMobileValidReq);
+            if (!JSONResult.SUCCESS.equals(result.getCode())) {
+                flag = false;
+                logger.error(result.getMsg());
+                errorMessage = "验证码错误";
+                loginRecord.setLoginStatus(Constants.LOGIN_STATUS_PASSWORD_ERROR);
+            }
+        }
+        if (flag) {
             try {
                 if (null != user) {
                     // 判断账号是否禁用
