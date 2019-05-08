@@ -56,7 +56,7 @@ function outboundCallPhone(outboundInputPhone,callSource,clueId,callback){
  	if(homePageVM.isTrClient){//天润呼叫
  		var bindType = homePageVM.loginClientForm.bindPhoneType;
  		if(bindType==2){//abx外呼
- 			axbOutboundCall(outboundInputPhone,callSource,clueId，callback);
+ 			axbOutboundCall(outboundInputPhone,callSource,clueId,callback);
  			return;
  		}
  		priviewOutbound(outboundInputPhone,callSource,clueId,callback);
