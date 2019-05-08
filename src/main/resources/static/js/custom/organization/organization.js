@@ -425,6 +425,8 @@
               closeStaffNumDialog(){//
             	this.$refs['staffNumSearch'].resetFields();
             	this.selectedOrgId='';//把当前的组织ID设为''
+            	this.pagerStaffNum.pageSize = 20;
+                this.pagerStaffNum.currentPage = 1;
               }
               
               
