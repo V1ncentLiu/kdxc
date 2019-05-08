@@ -63,7 +63,7 @@ public class Constants {
     // 店铺面积字典Code
     public static String STOREFRONT_AREA = "StorefrontArea";
     // 投资金额字典Code
-    public static String USSM = "ussm";
+    public static String USSM = "investmentAmount";
     // 释放原因字典Code
     public static String RELEASE_REASON = "releaseReason";
 
