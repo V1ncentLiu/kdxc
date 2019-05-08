@@ -19,12 +19,14 @@
                 	orgType:'',
                     name: '',
                     remark: '',
-                    id:''
+                    id:'',
+                    businessLine:''
                 },
                 form2:{
                 	parentName:''	
                 },
                 orgTypeList:[],
+                businessLineList:[],
                 staffNumSearch:{//组内组成搜索框
                 	name:'',
                 	userName:'',
