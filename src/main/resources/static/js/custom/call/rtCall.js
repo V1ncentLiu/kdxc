@@ -56,7 +56,7 @@ function outboundCallPhone(outboundInputPhone,callSource,clueId,callback){
  	if(homePageVM.isTrClient){//天润呼叫
  		var bindType = homePageVM.loginClientForm.bindPhoneType;
  		if(bindType==2){//abx外呼
- 			axbOutboundCall(outboundInputPhone,callSource,clueId);
+ 			axbOutboundCall(outboundInputPhone,callSource,clueId，callback);
  			return;
  		}
  		priviewOutbound(outboundInputPhone,callSource,clueId,callback);
@@ -102,7 +102,7 @@ function outboundCallPhone(outboundInputPhone,callSource,clueId,callback){
 } 
 
 //abx外呼
-function axbOutboundCall(outboundInputPhone,callSource,clueId){
+function axbOutboundCall(outboundInputPhone,callSource,clueId,callback){
 	console.log("axb outbound call");
 	var axbParam = {};
 		axbParam.clueId = clueId;
@@ -115,6 +115,9 @@ function axbOutboundCall(outboundInputPhone,callSource,clueId){
      		  //10分钟后红色字体显示
      		 // intervalTimer("outboundCallTime",1,2);
      		  homePageVM.$message({message:"外呼中",type:'success'});
+     		   if (typeof callback === 'function') {
+ 	            callback();
+     		   }
           }else{
         	  clearTimer();//清除定时器
          		homePageVM.$message({message:data.msg,type:'error'});
