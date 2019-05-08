@@ -70,7 +70,7 @@ public class ProjectController {
         request.setAttribute("categoryList", getDictionaryByCode(Constants.PROJECT_CATEGORY));
         // 查询字典类别集合
         request.setAttribute("classificationList",
-                getDictionaryByCode(Constants.PROJECT_CLASSIFICATION));
+                getDictionaryByCode(Constants.INDUSTRY_CATEGORY));
         // 查询字典店型集合
         request.setAttribute("shopTypeList", getDictionaryByCode(Constants.PROJECT_SHOPTYPE));
         return "project/projectManagerPage";
@@ -88,7 +88,7 @@ public class ProjectController {
         request.setAttribute("categoryList", getDictionaryByCode(Constants.PROJECT_CATEGORY));
         // 查询字典类别集合
         request.setAttribute("classificationList",
-                getDictionaryByCode(Constants.PROJECT_CLASSIFICATION));
+                getDictionaryByCode(Constants.INDUSTRY_CATEGORY));
         // 查询字典店型集合
         request.setAttribute("shopTypeList", getDictionaryByCode(Constants.PROJECT_SHOPTYPE));
         // 查询字典项目归属集合
@@ -143,7 +143,7 @@ public class ProjectController {
         request.setAttribute("categoryList", getDictionaryByCode(Constants.PROJECT_CATEGORY));
         // 查询字典类别集合
         request.setAttribute("classificationList",
-                getDictionaryByCode(Constants.PROJECT_CLASSIFICATION));
+                getDictionaryByCode(Constants.INDUSTRY_CATEGORY));
         // 查询字典店型集合
         request.setAttribute("shopTypeList", getDictionaryByCode(Constants.PROJECT_SHOPTYPE));
         // 查询字典项目归属集合

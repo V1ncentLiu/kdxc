@@ -35,11 +35,11 @@ public class Constants {
     public static String TR_CLIENT_KEY = "huiju:aggregation:client:tr";
 
     // 品类字典Code
-    public static String PROJECT_CLASSIFICATION = "classification";
+    public static String PROJECT_CLASSIFICATION = "industryCategory";
     // 类别字典Code
     public static String PROJECT_CATEGORY = "project_category";
     // 店型字典Code
-    public static String PROJECT_SHOPTYPE = "project_shopType";
+    public static String PROJECT_SHOPTYPE = "vistitStoreType"; //project_shopType
     // 项目归属字典Code
     public static String PROJECT_ATTRIBUTIVE = "project_attributive";
     // 广告位字典Code
