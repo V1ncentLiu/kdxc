@@ -325,12 +325,12 @@ public class MyCustomerClueController {
             request.setAttribute("circulationList", new ArrayList());
         }
         // 项目
-        JSONResult<List<ProjectInfoDTO>> proJson = projectInfoFeignClient.allProject();
-        if (proJson.getCode().equals(JSONResult.SUCCESS)) {
-            request.setAttribute("proSelect", proJson.getData());
-        } else {
-            request.setAttribute("proSelect", new ArrayList());
-        }
+//        JSONResult<List<ProjectInfoDTO>> proJson = projectInfoFeignClient.allProject();
+//        if (proJson.getCode().equals(JSONResult.SUCCESS)) {
+//            request.setAttribute("proSelect", proJson.getData());
+//        } else {
+//            request.setAttribute("proSelect", new ArrayList());
+//        }
 
         fileDto.setClueId(new Long(clueId));
         JSONResult<List<ClueFileDTO>> clueFileList = myCustomerFeignClient.findClueFile(fileDto);
