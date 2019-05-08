@@ -116,7 +116,7 @@
         </div>
         <el-row>
             <el-table  ref="multipleTable" tooltip-effect="dark" border @selection-change="handleSelectionChange" style="width: 100%"  :data="dataTable" @row-dblclick="showClueDetailInfo">
-                <el-table-column align="center" type="selection" label="全选" width="50" :prop="clueId"></el-table-column>
+                <el-table-column align="center" type="selection" label="全选" width="50" prop="clueId"></el-table-column>
     	        <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width"
     	         v-for="(item,key,index) in tableColums" v-if="item.fieldCode == 'phone'">
     	             <template slot-scope="scope" >
@@ -417,10 +417,12 @@ var phoneButton = false;
                     }else{
                         var resobj= response.data;
                         var pageData=resobj.data;
-                        customerManVM.pager.total=pageData.total;
-                        customerManVM.pager.currentPage = pageData.currentPage;
-                        customerManVM.pager.pageSize = pageData.pageSize;
-                        customerManVM.dataTable =pageData.data;
+                        if(pageData){
+                            customerManVM.pager.total=pageData.total;
+                            customerManVM.pager.currentPage = pageData.currentPage;
+                            customerManVM.pager.pageSize = pageData.pageSize;
+                            customerManVM.dataTable =pageData.data;
+                        }
                     }
      			})
          	},
@@ -606,6 +608,7 @@ var phoneButton = false;
                    var  param={};
                    param.idList=idArr;
                    param.operatorId=operatorId;
+                   console.log(param)
                    this.allocateFormVisible = false; 
                    axios.post('/phonetraffic/allocationClue', param)
                    .then(function (response) {
@@ -705,6 +708,7 @@ var phoneButton = false;
                 customerColumn.sort(this.sortNumber);//对选择的列排序
                 var idList=[];
                 for(var i=0;i<customerColumn.length;i++){
+                    console.log(curItem)
                     var curItem = customerColumn[i];
                     var itemArr = curItem.split("_");
                     var obj = {};
@@ -718,6 +722,7 @@ var phoneButton = false;
                 param.fieldIdList = idList;
                 param.menuCode = "aggregation:PhoneTraffic";
                 if(idList.length!=0){
+                    console.log(param)
                     axios.post('/customfield/customField/saveUserField', param)
                         .then(function (response) {
                         }).catch(function (error) {
