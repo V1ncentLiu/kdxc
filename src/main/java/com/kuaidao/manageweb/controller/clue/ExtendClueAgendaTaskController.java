@@ -280,6 +280,7 @@ public class ExtendClueAgendaTaskController {
                     idList.add(userInfoDTO.getId());
                 }
             }
+            idList.add(user.getId());
 
         } else if (RoleCodeEnum.GLY.name().equals(roleInfoDTO.getRoleCode())) {
             idList = null;
@@ -616,7 +617,7 @@ public class ExtendClueAgendaTaskController {
 
             for (ClueAgendaTaskDTO clueAgendaTaskDTO1 : list) {
                 boolean islegal = true;// true合法 false不合法
-                    //判断是否存在该项目
+                // 判断是否存在该项目
                 if (islegal && clueAgendaTaskDTO1.getProjectName() != null
                         && !"".equals(clueAgendaTaskDTO1.getProjectName())) {
                     clueAgendaTaskDTO1
@@ -741,7 +742,7 @@ public class ExtendClueAgendaTaskController {
                         islegal = false;
                     }
                 }
-                //全部符合则进行匹配站点、去重、分发，不符合进入导入失败列表
+                // 全部符合则进行匹配站点、去重、分发，不符合进入导入失败列表
                 if (islegal) {
                     PushClueReq pushClueReq = new PushClueReq();
                     pushClueReq.setCategory(String.valueOf(clueAgendaTaskDTO1.getCategory()));
@@ -788,7 +789,7 @@ public class ExtendClueAgendaTaskController {
         }
         if (list1 != null && list1.size() > 0) {
             JSONResult<List<PushClueReq>> jsonResult = extendClueFeignClient.importclue(list1);
-            //导入失败数据进入导入失败列表
+            // 导入失败数据进入导入失败列表
             if (null != jsonResult && jsonResult.getCode().equals("0")) {
                 List<PushClueReq> list2 = jsonResult.getData();
                 if (list2 != null && list2.size() > 0) {
