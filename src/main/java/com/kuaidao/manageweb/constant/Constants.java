@@ -35,11 +35,11 @@ public class Constants {
     public static String TR_CLIENT_KEY = "huiju:aggregation:client:tr";
 
     // 品类字典Code
-    public static String PROJECT_CLASSIFICATION = "classification";
+    public static String PROJECT_CLASSIFICATION = "industryCategory";
     // 类别字典Code
     public static String PROJECT_CATEGORY = "project_category";
     // 店型字典Code
-    public static String PROJECT_SHOPTYPE = "project_shopType";
+    public static String PROJECT_SHOPTYPE = "vistitStoreType"; //project_shopType
     // 项目归属字典Code
     public static String PROJECT_ATTRIBUTIVE = "project_attributive";
     // 广告位字典Code
@@ -63,7 +63,7 @@ public class Constants {
     // 店铺面积字典Code
     public static String STOREFRONT_AREA = "StorefrontArea";
     // 投资金额字典Code
-    public static String USSM = "ussm";
+    public static String USSM = "investmentAmount";
     // 释放原因字典Code
     public static String RELEASE_REASON = "releaseReason";
 
