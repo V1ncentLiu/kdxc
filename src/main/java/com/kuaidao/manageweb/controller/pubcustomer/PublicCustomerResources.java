@@ -245,7 +245,8 @@ public class PublicCustomerResources {
         List<RoleInfoDTO> roleList = user.getRoleList();
         RoleInfoDTO roleInfoDTO = roleList.get(0);
         String roleName = roleInfoDTO.getRoleName();
-        if (RoleCodeEnum.DXZJ.value().equals(roleName)||RoleCodeEnum.DXCYGW.value().equals(roleName)){
+        String roleCode = roleInfoDTO.getRoleCode();
+        if (RoleCodeEnum.DXZJ.name().equals(roleCode)||RoleCodeEnum.DXCYGW.name().equals(roleCode)){
             dto.setRoleCode(roleInfoDTO.getRoleCode());
         }
         return publicCustomerFeignClient.queryListPage(dto);
