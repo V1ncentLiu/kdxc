@@ -530,7 +530,7 @@
                     :label="'手机号' + (parseInt(index)+2) + ':'" :key="domain.key"
                     :prop="'domains.' + index + '.value'"
                     :rules="{
-                    required: true, message: '手机号不能为空', trigger: 'blur',
+                       required: true, message: '手机号不能为空', trigger: 'blur',
                 }">
                 <el-input v-model="domain.value" maxLength="11" @keyup.native="phoneNumber" style="width: 200px;margin-right: 10px;"></el-input>
                 <el-button type="danger" @click.prevent="removeDomain(domain)" v-show="deleteShow">删除</el-button>
@@ -966,7 +966,8 @@
                 },
                 dynamicValidateForm: {//新增手机号弹窗数据
                     domains: [{
-                        value: ''
+                        value: '',
+                        key: Date.now()
                     }]
                 },
                 statusOptions: [{
@@ -1155,15 +1156,21 @@
                         for (var i = 0; i < phoneArr.length; i++) {
                             if (i == 0) {
                                 clueCustomer.phone2 = phoneArr[i].value;
+                                if(clueCustomer.phone2){
+                                    clueCustomer.phone2CreateTime = phoneArr[i].key;
+                                }
                             }
                             if (i == 1) {
                                 clueCustomer.phone3 = phoneArr[i].value;
+                                clueCustomer.phone3CreateTime = phoneArr[i].key;
                             }
                             if (i == 2) {
                                 clueCustomer.phone4 = phoneArr[i].value;
+                                clueCustomer.phone4CreateTime = phoneArr[i].key;
                             }
                             if (i == 3) {
                                 clueCustomer.phone5 = phoneArr[i].value;
+                                clueCustomer.phone5CreateTime =phoneArr[i].key;
                             }
                         }
                     }
@@ -1312,6 +1319,7 @@
                 var domains = this.dynamicValidateForm.domains
                 for (var i = 0; i < domains.length; i++) {
                     domains[i].value = ""
+                    domains[i].key = ""
                 }
                 // 2、重置表单
                 this.$refs['dynamicValidateForm'].resetFields()
@@ -1692,15 +1700,21 @@
                         for (var i = 0; i < phoneArr.length; i++) {
                             if (i == 0) {
                                 clueCustomer.phone2 = phoneArr[i].value;
+                                if(clueCustomer.phone2){
+                                    clueCustomer.phone2CreateTime = phoneArr[i].key;
+                                }
                             }
                             if (i == 1) {
                                 clueCustomer.phone3 = phoneArr[i].value;
+                                clueCustomer.phone3CreateTime = phoneArr[i].key;
                             }
                             if (i == 2) {
                                 clueCustomer.phone4 = phoneArr[i].value;
+                                clueCustomer.phone4CreateTime = phoneArr[i].key;
                             }
                             if (i == 3) {
                                 clueCustomer.phone5 = phoneArr[i].value;
+                                clueCustomer.phone5CreateTime = phoneArr[i].key;
                             }
                         }
                     }
@@ -1928,12 +1942,13 @@
                 if (customer.phone2) {
                     var phone2 = {};
                     phone2.value = customer.phone2;
+                    phone2.key = customer.phone2CreateTime;
                     phoneArr.push(phone2);
-
                 }
                 if (customer.phone3) {
                     var phone3 = {};
                     phone3.value = customer.phone3;
+                    phone3.key = customer.phone3CreateTime;
                     phoneArr.push(phone3);
 
                 }
@@ -1941,20 +1956,24 @@
                 if (customer.phone4) {
                     var phone4 = {};
                     phone4.value = customer.phone4;
+                    phone4.key = customer.phone4CreateTime;
                     phoneArr.push(phone4);
 
                 }
                 if (customer.phone5) {
                     var phone5 = {};
                     phone5.value = customer.phone5;
+                    phone5.key = customer.phone5CreateTime;
                     phoneArr.push(phone5);
                 }
                 if (phoneArr.length < 1) {
                     var phone5 = {};
                     phone5.value = "";
+                    phone5.key = Date.now();
                     phoneArr.push(phone5);
                 }
                 this.dynamicValidateForm.domains = phoneArr;
+                console.log(phoneArr)
                 if(phoneArr.length>0){
                     this.buttonType = 'B';//按钮状态
                 }else{
