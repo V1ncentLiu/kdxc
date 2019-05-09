@@ -92,7 +92,7 @@ public class ExtendClueDistributionedTaskController {
         RoleInfoDTO roleInfoDTO = user.getRoleList().get(0);
         List<Long> idList = new ArrayList<Long>();
         // 处理数据权限，客户经理、客户主管、客户专员；内勤经理、内勤主管、内勤专员；优化经理、优化主管、优化文员
-        if (RoleCodeEnum.TGKF.name().equals(roleInfoDTO.getRoleCode())
+        if (RoleCodeEnum.KFZY.name().equals(roleInfoDTO.getRoleCode())
                 || RoleCodeEnum.NQWY.name().equals(roleInfoDTO.getRoleCode())
                 || RoleCodeEnum.YHWY.name().equals(roleInfoDTO.getRoleCode())) {
             // 推广客服、内勤文员 能看自己的数据
@@ -141,7 +141,7 @@ public class ExtendClueDistributionedTaskController {
         List<UserInfoDTO> userList = new ArrayList<UserInfoDTO>();
 
         UserOrgRoleReq userRole = new UserOrgRoleReq();
-        userRole.setRoleCode(RoleCodeEnum.TGKF.name());
+        userRole.setRoleCode(RoleCodeEnum.KFZY.name());
         JSONResult<List<UserInfoDTO>> userZxzjList = userInfoFeignClient.listByOrgAndRole(userRole);
 
         if (JSONResult.SUCCESS.equals(userZxzjList.getCode()) && null != userZxzjList.getData()
