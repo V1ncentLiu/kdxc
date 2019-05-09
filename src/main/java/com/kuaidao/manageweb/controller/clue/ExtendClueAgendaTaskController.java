@@ -544,6 +544,7 @@ public class ExtendClueAgendaTaskController {
      * @throws Exception
      */
     @RequestMapping("/importInvitearea")
+    @RequiresPermissions("waitDistributResource:importExcel")
     @LogRecord(description = "导入线索", operationType = LogRecord.OperationType.IMPORTS,
             menuName = MenuEnum.WAIT_DISTRIBUT_RESOURCE)
     @ResponseBody
