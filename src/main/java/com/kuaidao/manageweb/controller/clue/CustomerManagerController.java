@@ -122,6 +122,7 @@ public class CustomerManagerController {
         request.setAttribute("fieldList", queryFieldByRoleAndMenu.getData());
         // 根据用户查询页面字段
         QueryFieldByUserAndMenuReq queryFieldByUserAndMenuReq = new QueryFieldByUserAndMenuReq();
+        queryFieldByUserAndMenuReq.setRoleId(user.getRoleList().get(0).getId());
         queryFieldByUserAndMenuReq.setId(user.getId());
         queryFieldByUserAndMenuReq.setMenuCode("customerManager");
         JSONResult<List<UserFieldDTO>> queryFieldByUserAndMenu =
