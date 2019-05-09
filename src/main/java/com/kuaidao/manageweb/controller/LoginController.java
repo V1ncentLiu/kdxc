@@ -1,27 +1,29 @@
 /**
- * 
+ *
  */
 package com.kuaidao.manageweb.controller;
 
 import java.awt.image.BufferedImage;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import javax.imageio.ImageIO;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.SecurityUtils;
-import org.apache.shiro.authc.AuthenticationException;
-import org.apache.shiro.authc.IncorrectCredentialsException;
-import org.apache.shiro.authc.UnknownAccountException;
-import org.apache.shiro.authc.UsernamePasswordToken;
+import org.apache.shiro.authc.*;
+import org.apache.shiro.session.Session;
+import org.apache.shiro.subject.PrincipalCollection;
+import org.apache.shiro.subject.SimplePrincipalCollection;
 import org.apache.shiro.subject.Subject;
+import org.apache.shiro.subject.support.DefaultSubjectContext;
+import org.apache.shiro.web.mgt.DefaultWebSecurityManager;
+import org.apache.shiro.web.session.mgt.DefaultWebSessionManager;
+import org.crazycake.shiro.RedisSessionDAO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.AmqpTemplate;
@@ -74,10 +76,10 @@ import com.kuaidao.sys.dto.user.UserInfoReq;
 
 /**
  * 登录
- * 
+ *
+ * @version V1.0
  * @author:zxy
  * @date: 2018年12月28日 下午1:45:12
- * @version V1.0
  */
 @Controller
 public class LoginController {
@@ -95,6 +97,8 @@ public class LoginController {
     private DefaultKaptcha captchaProducer;
     @Autowired
     private StringRedisTemplate redisTemplate;
+    @Autowired
+    private RedisSessionDAO redisSessionDAO;
 
     private Logger logger = LoggerFactory.getLogger(this.getClass());
     @Autowired
@@ -110,13 +114,15 @@ public class LoginController {
     private String wsUrlHttps;
     @Value("${session_time_out}")
     private int sessionTimeOut;
-    /**是否显示验证码**/
+    /**
+     * 是否显示验证码
+     **/
     @Value("${VerificationCodeShow}")
     private boolean verificationCodeShow;
 
     /***
      * 登录页
-     * 
+     *
      * @return
      */
     @GetMapping("/")
@@ -126,7 +132,7 @@ public class LoginController {
 
     /***
      * 登录页
-     * 
+     *
      * @return
      */
     @RequestMapping("/login")
@@ -141,7 +147,7 @@ public class LoginController {
 
     /***
      * 修改密码页
-     * 
+     *
      * @return
      */
     @RequestMapping("/login/resetPwd")
@@ -153,7 +159,7 @@ public class LoginController {
     @ResponseBody
     @LogRecord(description = "登录", operationType = OperationType.LOGIN, menuName = MenuEnum.LOGIN)
     public JSONResult login(@RequestBody LoginReq loginReq, HttpServletRequest request, Model model,
-            RedirectAttributes redirectAttributes) throws Exception {
+                            RedirectAttributes redirectAttributes) throws Exception {
         String username = loginReq.getUsername();
         String password = loginReq.getPassword();
         redirectAttributes.addFlashAttribute("username", username);
@@ -178,8 +184,8 @@ public class LoginController {
         // * 校验验证码
         //只有正式环境校验验证码 其他环境不校验 by fanjd  2019/5/8
         //是否继续判断标识
-        boolean  flag  = true;
-        if(verificationCodeShow){
+        boolean flag = true;
+        if (verificationCodeShow) {
             SmsCodeAndMobileValidReq smsCodeAndMobileValidReq = new SmsCodeAndMobileValidReq();
             smsCodeAndMobileValidReq.setCode(loginReq.getCode());
             smsCodeAndMobileValidReq.setMobile(user.getPhone());
@@ -224,6 +230,8 @@ public class LoginController {
                         }
                     }
                 }
+                /**强制清空session，防止非正常退出导致权限不刷新**/
+                kickOutUser(username);
                 // 用户登陆
                 UsernamePasswordToken token = new UsernamePasswordToken(username,
                         MD5Util.StringToMd5(MD5Util.StringToMd5(password + user.getSalt())));
@@ -369,7 +377,7 @@ public class LoginController {
 
     /**
      * 发送短信或语音验证码验证
-     * 
+     *
      * @param dataPackage
      * @param jsonResult
      * @param request
@@ -443,7 +451,7 @@ public class LoginController {
 
     /**
      * 发送短信或语音验证码验证
-     * 
+     *
      * @param dataPackage
      * @param jsonResult
      * @param request
@@ -482,7 +490,7 @@ public class LoginController {
 
     /**
      * 忘记密码
-     * 
+     *
      * @param orgDTO
      * @return
      */
@@ -491,7 +499,7 @@ public class LoginController {
     @LogRecord(description = "修改密码", operationType = OperationType.UPDATE,
             menuName = MenuEnum.UPDATE_PASSWORD)
     public JSONResult updateMenu(@Valid @RequestBody UpdateUserPasswordReq updateUserPasswordReq,
-            BindingResult result) {
+                                 BindingResult result) {
 
         if (result.hasErrors()) {
             return CommonUtil.validateParam(result);
@@ -565,7 +573,7 @@ public class LoginController {
     @LogRecord(description = "退出登录", operationType = OperationType.LOGINOUT,
             menuName = MenuEnum.LOGINOUT)
     public String logout(String type, Model model, HttpServletRequest request,
-            RedirectAttributes redirectAttributes) throws Exception {
+                         RedirectAttributes redirectAttributes) throws Exception {
         Subject subject = SecurityUtils.getSubject();
         Object attribute = subject.getSession().getAttribute("user");
         UserInfoDTO user = null;
@@ -593,7 +601,7 @@ public class LoginController {
 
     /**
      * 查询登录记录
-     * 
+     *
      * @param username
      * @param ipAddr
      * @param startTime
@@ -603,7 +611,7 @@ public class LoginController {
      * @return
      */
     private List<LoginRecordDTO> findLoginRecordList(String username, String ipAddr, Date startTime,
-            Date endTime, Integer loginStatus, Integer isChangeMachine) {
+                                                     Date endTime, Integer loginStatus, Integer isChangeMachine) {
         LoginRecordReq loginRecordVo = new LoginRecordReq();
         loginRecordVo.setUsername(username);
         loginRecordVo.setIp(ipAddr);
@@ -620,7 +628,7 @@ public class LoginController {
 
     /**
      * 查询系统参数
-     * 
+     *
      * @param code
      * @return
      */
@@ -636,7 +644,7 @@ public class LoginController {
 
     /**
      * 发送验证码
-     * 
+     *
      * @param code
      * @return
      */
@@ -666,7 +674,7 @@ public class LoginController {
 
     /**
      * 是否提醒修改密码
-     * 
+     *
      * @param code
      * @return
      */
@@ -689,5 +697,35 @@ public class LoginController {
             }
         }
         return false;
+    }
+
+
+    /**
+     * 删除用户缓存信息(防止非正常登录事session存在导致权限不刷新)
+     * @author fanjd  2019/05/9  20:05:08
+     * @param username 当前登陆用户名
+     */
+    private  void kickOutUser(String username) {
+        //处理session
+        DefaultWebSecurityManager securityManager = (DefaultWebSecurityManager) SecurityUtils.getSecurityManager();
+        DefaultWebSessionManager sessionManager = (DefaultWebSessionManager) securityManager.getSessionManager();
+        //获取当前已登录的用户session列表
+        Collection<Session> sessions = sessionManager.getSessionDAO().getActiveSessions();
+        String sessionUserName = "";
+        for (Session session : sessions) {
+            //清除该用户以前登录时保存的session，强制退出
+            Object attribute = session.getAttribute(DefaultSubjectContext.PRINCIPALS_SESSION_KEY);
+            if (attribute == null) {
+                continue;
+            }
+            sessionUserName = (String) session.getAttribute("userName");
+            //判断是否当前用户
+            if (username.equals(sessionUserName)) {
+                Authenticator authc = securityManager.getAuthenticator();
+                //删除cache，登录成功后重新授权
+                ((LogoutAware) authc).onLogout((PrincipalCollection) attribute);
+            }
+
+        }
     }
 }
