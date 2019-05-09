@@ -133,7 +133,7 @@ var mainDivVM = new Vue({
             // for(var i = 0 ; i < this.multipleSelection.length ; i++ ){
             //     param.idList.push(this.multipleSelection[i].clueid)
             // }
-            param.idList.push(row.clueid)
+            param.idList.push(row.clueId)
             axios.post('/clue/cluereceiverecords/receiveClueByClueIds', param)
               .then(function (response) {
                     var result =  response.data;
@@ -165,7 +165,7 @@ var mainDivVM = new Vue({
         },
         //快速领取新资源进入公有池展现详情
         showClueDetailInfo2 (row, column) {
-            window.location.href='/tele/clueMyCustomerInfo/customerInfoReadOnly?clueId='+row.clueid+"&commonPool=1";
+            window.location.href='/tele/clueMyCustomerInfo/customerInfoReadOnly?clueId='+row.clueId+"&commonPool=1";
         },
         repeatPhonesClick(row) {//今日待跟进客户资源-我的客户重复手机号按钮点击
             debugger
