@@ -92,7 +92,17 @@
                             </el-option>
                         </el-select>
                     </el-form-item>
-                    <el-form-item label="全部资源:" >
+                     <el-form-item label="是否邀约:" >  
+                        <el-select v-model="form.hasInvite" placeholder="是否邀约" clearable>
+                            <el-option
+                                v-for="item in hasInvite"
+                                :key="item.value"
+                                :label="item.label"
+                                :value="item.value">
+                            </el-option>
+                        </el-select>
+                    </el-form-item> 
+                   <!--  <el-form-item label="全部资源:" >
                         <el-select v-model="form.isTransfer" placeholder="全部资源" clearable >
                             <el-option
                                 v-for="item in isTransfer"
@@ -101,8 +111,8 @@
                                 :value="item.value">
                             </el-option>
                         </el-select>
-                    </el-form-item>
-                    <el-form-item label="分配时间:">
+                    </el-form-item> -->
+                   <!--  <el-form-item label="分配时间:">
                         <el-date-picker
                             
                             v-model="form.distributionTimeStart"
@@ -114,6 +124,22 @@
                         <el-date-picker
                             
                             v-model="form.distributionTimeEnd"
+                            type="datetime"
+                            placeholder="选择日期时间">
+                        </el-date-picker>
+                    </el-form-item> -->
+                     <el-form-item label="创建时间:">
+                        <el-date-picker
+                            
+                            v-model="form.createTimeStart"
+                            type="datetime"
+                            placeholder="选择日期时间">
+                        </el-date-picker>
+                    </el-form-item>
+                    <el-form-item label="—" class="widthauto">
+                        <el-date-picker
+                            
+                            v-model="form.createTimeEnd"
                             type="datetime"
                             placeholder="选择日期时间">
                         </el-date-picker>
@@ -148,22 +174,7 @@
                             </el-option>
                         </el-select>
                     </el-form-item> 
-                    <el-form-item label="创建时间:">
-                        <el-date-picker
-                            
-                            v-model="form.createTimeStart"
-                            type="datetime"
-                            placeholder="选择日期时间">
-                        </el-date-picker>
-                    </el-form-item>
-                    <el-form-item label="—" class="widthauto">
-                        <el-date-picker
-                            
-                            v-model="form.createTimeEnd"
-                            type="datetime"
-                            placeholder="选择日期时间">
-                        </el-date-picker>
-                    </el-form-item>
+                   
                     <el-form-item label="今日是否拨打:" >
                         <el-select v-model="form.dayTel" placeholder="今日是否拨打" clearable>
                             <el-option
@@ -187,16 +198,7 @@
                             </el-option>
                         </el-select>
                     </el-form-item>
-                    <el-form-item label="是否邀约:" >  
-                        <el-select v-model="form.hasInvite" placeholder="是否邀约" clearable>
-                            <el-option
-                                v-for="item in hasInvite"
-                                :key="item.value"
-                                :label="item.label"
-                                :value="item.value">
-                            </el-option>
-                        </el-select>
-                    </el-form-item>                         
+                                           
                 </el-row>
                 <div class="mainSearchBtnBox">
                     <el-button icon="el-icon-search" type="primary" @click="search" class="searchBtn">搜索</el-button>
@@ -251,9 +253,9 @@
                  <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width" 
                   v-else-if="item.fieldCode == 'teleReceiveTime'">
                        <template slot-scope="scope">
-                          <div v-if="scope.row.isTransfer != 0">
+                           <div v-if="scope.row.teleReceiveSource == 1 || scope.row.teleReceiveSource == 2 || scope.row.teleReceiveSource == 5"> 
                                 {{scope.row.teleReceiveTime}}
-                          </div>
+                           </div> 
                        </template>
                 </el-table-column>
                 <el-table-column align="center" sortable  :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" width="250px"

@@ -182,6 +182,7 @@ public class PublicCustomerResources {
         QueryFieldByUserAndMenuReq queryFieldByUserAndMenuReq = new QueryFieldByUserAndMenuReq();
         queryFieldByUserAndMenuReq.setId(user.getId());
         queryFieldByUserAndMenuReq.setMenuCode("PublicCustomer");
+        queryFieldByUserAndMenuReq.setRoleId(user.getRoleList().get(0).getId());
         JSONResult<List<UserFieldDTO>> queryFieldByUserAndMenu =
                 customFieldFeignClient.queryFieldByUserAndMenu(queryFieldByUserAndMenuReq);
         request.setAttribute("userFieldList", queryFieldByUserAndMenu.getData());
@@ -244,7 +245,8 @@ public class PublicCustomerResources {
         List<RoleInfoDTO> roleList = user.getRoleList();
         RoleInfoDTO roleInfoDTO = roleList.get(0);
         String roleName = roleInfoDTO.getRoleName();
-        if (RoleCodeEnum.DXZJ.value().equals(roleName)||RoleCodeEnum.DXCYGW.value().equals(roleName)){
+        String roleCode = roleInfoDTO.getRoleCode();
+        if (RoleCodeEnum.DXZJ.name().equals(roleCode)||RoleCodeEnum.DXCYGW.name().equals(roleCode)){
             dto.setRoleCode(roleInfoDTO.getRoleCode());
         }
         return publicCustomerFeignClient.queryListPage(dto);

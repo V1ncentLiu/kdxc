@@ -61,16 +61,16 @@ public class DictionaryItemController {
         logger.info("--------------------------------------跳转到词条页面-----------------------------------------------");
         String dicid = request.getParameter("dicid");
         String groupCode = request.getParameter("groupCode");
-        DictionaryItemQueryDTO dto = new DictionaryItemQueryDTO();
-        dto.setDicId(Long.valueOf(dicid));
-        dto.setPageNum(1);
-        dto.setPageSize(10);
-        JSONResult<PageBean<DictionaryItemRespDTO>> list = dictionaryItemFeignClient.queryDictionaryItem(dto);
-        if (list!=null) {
-            request.setAttribute("resList",new ArrayList());
-        }else{
-            request.setAttribute("resList",new ArrayList());
-        }
+//        DictionaryItemQueryDTO dto = new DictionaryItemQueryDTO();
+//        dto.setDicId(Long.valueOf(dicid));
+//        dto.setPageNum(1);
+//        dto.setPageSize(20);
+//        JSONResult<PageBean<DictionaryItemRespDTO>> list = dictionaryItemFeignClient.queryDictionaryItem(dto);
+//        if (list!=null) {
+//            request.setAttribute("resList",new ArrayList());
+//        }else{
+//            request.setAttribute("resList",new ArrayList());
+//        }
         request.setAttribute("dicid",dicid);
         request.setAttribute("groupCode",groupCode);
         return "dictionary/dicItemListPage";

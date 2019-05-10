@@ -280,6 +280,7 @@ public class ExtendClueAgendaTaskController {
                     idList.add(userInfoDTO.getId());
                 }
             }
+            idList.add(user.getId());
 
         } else if (RoleCodeEnum.GLY.name().equals(roleInfoDTO.getRoleCode())) {
             idList = null;
@@ -544,6 +545,7 @@ public class ExtendClueAgendaTaskController {
      * @throws Exception
      */
     @RequestMapping("/importInvitearea")
+    @RequiresPermissions("waitDistributResource:importExcel")
     @LogRecord(description = "导入线索", operationType = LogRecord.OperationType.IMPORTS,
             menuName = MenuEnum.WAIT_DISTRIBUT_RESOURCE)
     @ResponseBody
@@ -562,7 +564,7 @@ public class ExtendClueAgendaTaskController {
                 projectInfoFeignClient.listNoPage(projectInfoPageParam).getData();
         Map<String, Long> projectMap = new HashMap<String, Long>();
         Map<Long, String> projectMap2 = new HashMap<Long, String>();
-        // 遍历项目list集生成<id,name>map
+        // 遍历项目list集生成<name,id>map
         for (ProjectInfoDTO projectInfoDTO : proList) {
             projectMap.put(projectInfoDTO.getProjectName(), projectInfoDTO.getId());
         }
@@ -574,34 +576,40 @@ public class ExtendClueAgendaTaskController {
         List<PushClueReq> list1 = new ArrayList<PushClueReq>();
 
         // 匹配字典数据
-        // 资源类型
+        // 资源类型<name,value>
         Map<String, String> typeMap =
                 dicMap(itemFeignClient.queryDicItemsByGroupCode(DicCodeEnum.CLUETYPE.getCode()));
+        // 资源类型<value,name>
         Map<String, String> typeMap2 =
                 dicMapTwo(itemFeignClient.queryDicItemsByGroupCode(DicCodeEnum.CLUETYPE.getCode()));
-        // 资源类别
+        // 资源类别<name,value>
         Map<String, String> categoryMap = dicMap(
                 itemFeignClient.queryDicItemsByGroupCode(DicCodeEnum.CLUECATEGORY.getCode()));
+        // 资源类型<value,name>
         Map<String, String> categoryMap2 = dicMapTwo(
                 itemFeignClient.queryDicItemsByGroupCode(DicCodeEnum.CLUECATEGORY.getCode()));
-        // 广告位
+        // 广告位<name,value>
         Map<String, String> sourceTypeMap =
                 dicMap(itemFeignClient.queryDicItemsByGroupCode(DicCodeEnum.ADENSE.getCode()));
+        // 资源类型<value,name>
         Map<String, String> sourceTypeMap2 =
                 dicMapTwo(itemFeignClient.queryDicItemsByGroupCode(DicCodeEnum.ADENSE.getCode()));
-        // 媒介
+        // 媒介<name,value>
         Map<String, String> sourceMap =
                 dicMap(itemFeignClient.queryDicItemsByGroupCode(DicCodeEnum.MEDIUM.getCode()));
+        // 资源类型<value,name>
         Map<String, String> sourceMap2 =
                 dicMapTwo(itemFeignClient.queryDicItemsByGroupCode(DicCodeEnum.MEDIUM.getCode()));
-        // 行业类别
+        // 行业类别<name,value>
         Map<String, String> industryCategoryMap = dicMap(
                 itemFeignClient.queryDicItemsByGroupCode(DicCodeEnum.INDUSTRYCATEGORY.getCode()));
+        // 资源类型<value,name>
         Map<String, String> industryCategoryMap2 = dicMapTwo(
                 itemFeignClient.queryDicItemsByGroupCode(DicCodeEnum.INDUSTRYCATEGORY.getCode()));
-        // 账户名称
+        // 账户名称<name,value>
         Map<String, String> accountNameMap = dicMap(
                 itemFeignClient.queryDicItemsByGroupCode(DicCodeEnum.ACCOUNT_NAME.getCode()));
+        // 资源类型<value,name>
         Map<String, String> accountNameMap2 = dicMapTwo(
                 itemFeignClient.queryDicItemsByGroupCode(DicCodeEnum.ACCOUNT_NAME.getCode()));
 
@@ -609,6 +617,7 @@ public class ExtendClueAgendaTaskController {
 
             for (ClueAgendaTaskDTO clueAgendaTaskDTO1 : list) {
                 boolean islegal = true;// true合法 false不合法
+                // 判断是否存在该项目
                 if (islegal && clueAgendaTaskDTO1.getProjectName() != null
                         && !"".equals(clueAgendaTaskDTO1.getProjectName())) {
                     clueAgendaTaskDTO1
@@ -733,7 +742,7 @@ public class ExtendClueAgendaTaskController {
                         islegal = false;
                     }
                 }
-
+                // 全部符合则进行匹配站点、去重、分发，不符合进入导入失败列表
                 if (islegal) {
                     PushClueReq pushClueReq = new PushClueReq();
                     pushClueReq.setCategory(String.valueOf(clueAgendaTaskDTO1.getCategory()));
@@ -780,6 +789,7 @@ public class ExtendClueAgendaTaskController {
         }
         if (list1 != null && list1.size() > 0) {
             JSONResult<List<PushClueReq>> jsonResult = extendClueFeignClient.importclue(list1);
+            // 导入失败数据进入导入失败列表
             if (null != jsonResult && jsonResult.getCode().equals("0")) {
                 List<PushClueReq> list2 = jsonResult.getData();
                 if (list2 != null && list2.size() > 0) {
@@ -832,7 +842,7 @@ public class ExtendClueAgendaTaskController {
     }
 
     /**
-     * 数据字典-词条转换Map
+     * 数据字典-词条转换Map（name-value）
      *
      * @return
      */
@@ -848,7 +858,7 @@ public class ExtendClueAgendaTaskController {
     }
 
     /**
-     * 数据字典-词条转换Map
+     * 数据字典-词条转换Map（value-name）
      *
      * @return
      */
