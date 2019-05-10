@@ -60,8 +60,8 @@
                                     
                                 </el-col>    
                             </el-row> -->
-                            <el-input v-model="form.roleName" autocomplete="off" prop="roleName" style="margin-right: 6px;"></el-input>
-                            <el-button type="primary" size="small" @click="dialogFormChooseRole = true">选择角色</el-button>
+                            <el-input v-model="form.roleName" autocomplete="off" prop="roleName" style="width:185px;margin-right: 6px;"></el-input>
+                            <el-button type="primary" @click="dialogFormChooseRole = true">选择角色</el-button>
                         </el-form-item>
                     </el-col>
                     <el-col :span="12">
@@ -74,10 +74,38 @@
                                     <el-button type="primary" size="small" @click="dialogFormChooseOrg = true">选择组织</el-button>
                                 </el-col>    
                             </el-row> -->
-                            <el-input v-model="form.orgName" autocomplete="off" prop="orgName" style="margin-right: 6px;"></el-input>
-                            <el-button type="primary" size="small" @click="dialogFormChooseOrg = true">选择组织</el-button>
+                            <el-input v-model="form.orgName" autocomplete="off" prop="orgName" style="width:185px;margin-right: 6px;"></el-input>
+                            <el-button type="primary" @click="dialogFormChooseOrg = true">选择组织</el-button>
                         </el-form-item>
                     </el-col>
+                </el-row>
+                <el-row>
+                    <p class="fs16 marginB20">设定查看已分发资源数据权限：</p>
+                    <el-table 
+                        ref="multipleTable"
+                        tooltip-effect="dark"
+                        style="width: 100%"
+                        border
+                        :data="dataTableCheckbox"
+                        highlight-current-row
+                        class="marginB20"
+                        >
+                        <el-table-column align="center" width="55" label="序号" type="index"></el-table-column>
+                        <el-table-column align="center" prop="roleName" label="业务线">
+                            <template scope="scope">
+                                <el-checkbox :indeterminate="scope.row.isIndeterminate" v-model="scope.row.checkAll" @change="handleCheckAllChange">{{scope.row.name}}</el-checkbox>
+                            </template>
+                        </el-table-column>
+                        <el-table-column align="center" prop="description" label="本业务线下的可查看资源类别">
+                            <template scope="scope">
+
+                                <el-checkbox-group v-model="scope.row.checkedCities" @change="handleCheckedCitiesChange">
+                                    <el-checkbox v-for="city in scope.row.cityOptions" :label="city" :key="city">{{city}}</el-checkbox>
+                                </el-checkbox-group>
+
+                            </template>
+                        </el-table-column>
+                    </el-table>
                 </el-row>
                 <el-row>
                     <el-col :span="12">
@@ -104,7 +132,7 @@
     </el-row>
 
     <el-dialog title="选择角色" :visible.sync="dialogFormChooseRole">
-            <el-table 
+        <el-table 
             ref="multipleTable"
             tooltip-effect="dark"
             style="width: 100%"
@@ -154,10 +182,17 @@ for(var i=0;i<orgData.length;i++){
 	
 }
 var roleList=[[${roleList}]];//当前字段所属的菜单组
-   var addUserVm= new Vue({
+
+
+var addUserVm= new Vue({
         el: '#userManage',
         data: function() {
             return {
+                // checkAll: true,
+                // checkedCities: ['联展竞价', '优化'],
+                // cities: cityOptions,
+                // isIndeterminate: false,
+
                 tableRadio:'',
                 dialogFormChooseRole: false,
                 dialogFormChooseOrg: false,
@@ -247,6 +282,19 @@ var roleList=[[${roleList}]];//当前字段所属的菜单组
                 },{
                     value: 3,
                     label: '锁定'
+                }],
+                dataTableCheckbox:[{
+                    'name':'小物种',
+                    'cityOptions':['联展竞价', '优化', '信息流', '官网'],
+                    'checkedCities': [],
+                    'checkAll': false,
+                    'isIndeterminate': false,
+                },{
+                    'name':'商机盒子',
+                    'cityOptions':['联展竞价2', '优化2', '信息流2', '官网2'],
+                    'checkedCities': [],
+                    'checkAll': false,
+                    'isIndeterminate': false,
                 }]
             }        	  
         },
@@ -319,7 +367,29 @@ var roleList=[[${roleList}]];//当前字段所属的菜单组
             number(){
     　　　     this.form.phone=this.form.phone.replace(/[^\.\d]/g,'');
                this.form.phone=this.form.phone.replace('.','');
-        　　}
+        　　},
+
+            handleCheckAllChange(val) {
+                // this.checkedCities = val ? cityOptions : [];
+                // this.isIndeterminate = false;
+                var tabledata=this.dataTableCheckbox;
+                for(var i=0;i<tabledata.length;i++){
+                    tabledata[i].checkedCities = val ? tabledata[i].cityOptions : [];
+                    tabledata[i].isIndeterminate = false;
+                }
+            },
+            handleCheckedCitiesChange(value) {
+                // let checkedCount = value.length;
+                // this.checkAll = checkedCount === this.cities.length;
+                // this.isIndeterminate = checkedCount > 0 && checkedCount < this.cities.length;
+
+                var checkedCount = value.length;
+                var tabledata=this.dataTableCheckbox;
+                for(var i=0;i<tabledata.length;i++){
+                    tabledata[i].checkAll = checkedCount === tabledata[i].cityOptions.length;
+                    tabledata[i].isIndeterminate = checkedCount > 0 && checkedCount < tabledata[i].cityOptions.length;
+                }
+            }
         },
         mounted(){
             document.getElementById('userManage').style.display = 'block';
