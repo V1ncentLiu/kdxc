@@ -27,9 +27,9 @@
                 </el-checkbox-group>
             </el-form-item>
             <el-form-item  label="接收范围：">
-                    <el-form-item  prop="redio" style="float: left;margin-right: 20px;">
+                    <el-form-item v-show="isShowAll"  prop="redio" style="float: left;margin-right: 20px;">
                         <el-radio-group v-model="annForm.radio" @change="redioChange">
-                            <el-radio  label="0">系统全用户</el-radio>
+                            <el-radio   label="0">系统全用户</el-radio>
                             <el-radio  label="1">指定组织</el-radio>
                         </el-radio-group>
                     </el-form-item>
@@ -76,7 +76,8 @@
 
 <div th:include="_footer_include :: #jsLib"></div>
 
-<script>
+<script th:inline="javascript">
+var roleCode = [[${roleCode}]];//搜索商务组
     Array.prototype.remove = function(val) {
         var index = this.indexOf(val);
         if (index > -1) {
@@ -87,6 +88,7 @@
     var vm = new Vue({
         el:'#form',
         data:{
+        	isShowAll:true,
             isDisabled:false,
             expandedKeys:[],
             dataTree:[],
@@ -297,6 +299,10 @@
         },
         created(){
             console.info("create method");
+            if(roleCode=="YWGLY"){
+            	this.isShowAll=false;
+            	document.getElementById("org").setAttribute('style', 'display:block');
+            }
            // this.getFormData();
         },
         mounted(){

@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import com.kuaidao.common.constant.DicCodeEnum;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.IdEntityLong;
 import com.kuaidao.common.entity.JSONResult;
@@ -37,12 +38,14 @@ import com.kuaidao.manageweb.config.LogRecord.OperationType;
 import com.kuaidao.manageweb.constant.Constants;
 import com.kuaidao.manageweb.constant.MenuEnum;
 import com.kuaidao.manageweb.entity.UpdatePasswordSettingReq;
+import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
 import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
 import com.kuaidao.manageweb.feign.role.RoleManagerFeignClient;
 import com.kuaidao.manageweb.feign.user.SysSettingFeignClient;
 import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
 import com.kuaidao.sys.constant.SysConstant;
 import com.kuaidao.sys.constant.UserErrorCodeEnum;
+import com.kuaidao.sys.dto.dictionary.DictionaryItemRespDTO;
 import com.kuaidao.sys.dto.role.RoleInfoDTO;
 import com.kuaidao.sys.dto.role.RoleQueryDTO;
 import com.kuaidao.sys.dto.user.SysSettingDTO;
@@ -72,6 +75,8 @@ public class UserController {
     private OrganizationFeignClient organizationFeignClient;
     @Autowired
     private SysSettingFeignClient sysSettingFeignClient;
+    @Autowired
+    private DictionaryItemFeignClient dictionaryItemFeignClient;
     @Autowired
     private AmqpTemplate amqpTemplate;
     @Autowired
@@ -144,6 +149,12 @@ public class UserController {
         }
         // 查询角色列表
         JSONResult<List<RoleInfoDTO>> list = userInfoFeignClient.roleList(new RoleQueryDTO());
+        // 查询字典业务线集合
+        request.setAttribute("businessLineList",
+                getDictionaryByCode(DicCodeEnum.BUSINESS_LINE.getCode()));
+        // 查询字典资源类别集合
+        request.setAttribute("clueCategoryList",
+                getDictionaryByCode(DicCodeEnum.CLUECATEGORY.getCode()));
 
         request.setAttribute("roleList", list.getData());
         return "user/addUserPage";
@@ -509,4 +520,19 @@ public class UserController {
 
     }
 
+    /**
+     * 查询字典表
+     * 
+     * @param code
+     * @return
+     */
+    private List<DictionaryItemRespDTO> getDictionaryByCode(String code) {
+        JSONResult<List<DictionaryItemRespDTO>> queryDicItemsByGroupCode =
+                dictionaryItemFeignClient.queryDicItemsByGroupCode(code);
+        if (queryDicItemsByGroupCode != null
+                && JSONResult.SUCCESS.equals(queryDicItemsByGroupCode.getCode())) {
+            return queryDicItemsByGroupCode.getData();
+        }
+        return null;
+    }
 }
