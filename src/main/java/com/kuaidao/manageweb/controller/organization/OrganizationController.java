@@ -35,6 +35,7 @@ import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
 import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
 import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
 import com.kuaidao.manageweb.util.CommUtil;
+import com.kuaidao.sys.constant.SysConstant;
 import com.kuaidao.sys.dto.dictionary.DictionaryItemRespDTO;
 import com.kuaidao.sys.dto.organization.OrganizationAddAndUpdateDTO;
 import com.kuaidao.sys.dto.organization.OrganizationDTO;
@@ -82,6 +83,7 @@ public class OrganizationController {
         } else {
             logger.error("query organization tree,res{{}}", treeJsonRes);
         }
+        request.setAttribute("tgzxBusinessLine",SysConstant.PROMOTION_BUSINESS_LINE);
         return "organization/organizationPage";
     }
 
