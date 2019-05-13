@@ -27,7 +27,7 @@ import com.kuaidao.sys.dto.user.UserAndRoleRespDTO;
  * @date: 2019年1月3日 下午5:06:53
  * @version V1.0
  */
-@FeignClient(name = "sys-service", path = "/sys/organization/organization",
+@FeignClient(name = "sys-service-zhang", path = "/sys/organization/organization",
         fallback = OrganizationFeignClient.HystrixClientFallback.class)
 public interface OrganizationFeignClient {
 
@@ -125,14 +125,25 @@ public interface OrganizationFeignClient {
      */
     @PostMapping("/listLeafOrg")
     JSONResult<List<OrganizationDTO>> listLeafOrg(@RequestBody OrganizationQueryDTO reqDto);
-    
+
     /**
      * 根据id 查询所有的父级
+     * 
      * @param reqDto systemCode 系统代码 ;id 组织机构ID
      * @return
      */
     @PostMapping("/listParentsUntilOrg")
-    public JSONResult<List<OrganizationDTO>> listParentsUntilOrg(@RequestBody OrganizationQueryDTO reqDto);
+    public JSONResult<List<OrganizationDTO>> listParentsUntilOrg(
+            @RequestBody OrganizationQueryDTO reqDto);
+
+    /**
+     * 查询根节点下所有业务线
+     * 
+     * @param reqDto
+     * @return
+     */
+    @PostMapping("/listBusinessLineOrg")
+    public JSONResult<List<OrganizationDTO>> listBusinessLineOrg();
 
     @Component
     static class HystrixClientFallback implements OrganizationFeignClient {
@@ -224,6 +235,11 @@ public interface OrganizationFeignClient {
         @Override
         public JSONResult<List<OrganizationDTO>> listParentsUntilOrg(OrganizationQueryDTO reqDto) {
             return fallBackError("根据ID查询所有父级");
+        }
+
+        @Override
+        public JSONResult<List<OrganizationDTO>> listBusinessLineOrg() {
+            return fallBackError("查询根节点下所有业务线");
         }
     }
 

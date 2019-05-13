@@ -44,6 +44,7 @@ import com.kuaidao.manageweb.feign.rule.ClueAssignRuleFeignClient;
 import com.kuaidao.manageweb.feign.user.SysSettingFeignClient;
 import com.kuaidao.sys.constant.SysConstant;
 import com.kuaidao.sys.dto.dictionary.DictionaryItemRespDTO;
+import com.kuaidao.sys.dto.organization.OrganizationDTO;
 import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
 import com.kuaidao.sys.dto.organization.OrganizationRespDTO;
 import com.kuaidao.sys.dto.role.RoleInfoDTO;
@@ -102,8 +103,12 @@ public class NotOptRuleController {
     @RequestMapping("/initCreate")
     @RequiresPermissions("clueAssignRule:notOptRuleManager:add")
     public String initCreateProject(HttpServletRequest request) {
-        // 查询电销组加话务组
-        request.setAttribute("orgList", getTeleAndTrafficGroup());
+        // 查询话务组
+        request.setAttribute("trafficList", getTrafficGroup());
+        JSONResult<List<OrganizationDTO>> listBusinessLineOrg =
+                organizationFeignClient.listBusinessLineOrg();
+        // 查询所有业务线
+        request.setAttribute("businessLineList", listBusinessLineOrg.getData());
         // 查询所有项目
         JSONResult<List<ProjectInfoDTO>> allProject = projectInfoFeignClient.allProject();
         request.setAttribute("projectList", allProject.getData());
@@ -130,8 +135,12 @@ public class NotOptRuleController {
         JSONResult<ClueAssignRuleDTO> jsonResult =
                 clueAssignRuleFeignClient.get(new IdEntityLong(id));
         request.setAttribute("clueAssignRule", jsonResult.getData());
-        // 查询电销组加话务组
-        request.setAttribute("orgList", getTeleAndTrafficGroup());
+        // 查询话务组
+        request.setAttribute("trafficList", getTrafficGroup());
+        JSONResult<List<OrganizationDTO>> listBusinessLineOrg =
+                organizationFeignClient.listBusinessLineOrg();
+        // 查询所有业务线
+        request.setAttribute("businessLineList", listBusinessLineOrg.getData());
         // 查询所有项目
         JSONResult<List<ProjectInfoDTO>> allProject = projectInfoFeignClient.allProject();
         request.setAttribute("projectList", allProject.getData());
@@ -355,17 +364,12 @@ public class NotOptRuleController {
      * 
      * @return
      */
-    private List<OrganizationRespDTO> getTeleAndTrafficGroup() {
+    private List<OrganizationRespDTO> getTrafficGroup() {
         OrganizationQueryDTO organizationQueryDTO = new OrganizationQueryDTO();
-        organizationQueryDTO.setOrgType(OrgTypeConstant.DXZ);
-        JSONResult<List<OrganizationRespDTO>> teleResult =
-                organizationFeignClient.queryOrgByParam(organizationQueryDTO);
         organizationQueryDTO.setOrgType(OrgTypeConstant.HWZ);
         JSONResult<List<OrganizationRespDTO>> trafficResult =
                 organizationFeignClient.queryOrgByParam(organizationQueryDTO);
-        List<OrganizationRespDTO> list = teleResult.getData();
-        list.addAll(trafficResult.getData());
-        return list;
+        return trafficResult.getData();
     }
 
     /**
