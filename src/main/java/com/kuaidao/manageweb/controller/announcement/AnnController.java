@@ -95,13 +95,15 @@ public class AnnController {
         }else{
             dto.setCreateUser(user.getId());
         }
-
+        logger.info("==============公告发布  开始=============");
+        logger.info("发布人：{}"+user);
         long annId = IdUtil.getUUID();
         dto.setId(annId);  //公告ID
         JSONResult jsonResult = announcementFeignClient.publishAnnouncement(dto);
         if(jsonResult.getCode().equals(JSONResult.SUCCESS)){
             announceService.sendMessage(dto);
         }
+        logger.info("==============公告发布  结束=============");
         return jsonResult;
     }
 
