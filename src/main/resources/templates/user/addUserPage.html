@@ -91,18 +91,26 @@
                         class="marginB20"
                         >
                         <el-table-column align="center" width="55" label="序号" type="index"></el-table-column>
-                        <el-table-column align="center" prop="roleName" label="业务线">
-                            <template scope="scope">
+                        <el-table-column align="center" label="业务线">
+                            <!-- <template scope="scope">
                                 <el-checkbox :indeterminate="scope.row.isIndeterminate" v-model="scope.row.checkAll" @change="handleCheckAllChange">{{scope.row.name}}</el-checkbox>
+                            </template> -->
+                            <template slot-scope="{ row, index }">
+                                <el-checkbox :indeterminate="row.isIndeterminate" v-model="row.checkAll" @change="handleCheckAllChange(row,index)">{{row.name}}</el-checkbox>
                             </template>
                         </el-table-column>
-                        <el-table-column align="center" prop="description" label="本业务线下的可查看资源类别">
-                            <template scope="scope">
-
+                        <el-table-column align="center" label="本业务线下的可查看资源类别">
+                            <!-- <template scope="scope">
                                 <el-checkbox-group v-model="scope.row.checkedCities" @change="handleCheckedCitiesChange">
                                     <el-checkbox v-for="city in scope.row.cityOptions" :label="city" :key="city">{{city}}</el-checkbox>
                                 </el-checkbox-group>
-
+                            </template> -->
+                            <template slot-scope="{ row, index }">
+                                <el-checkbox-group v-model="row.checkedCities"
+                                    @change="handleCheckedCitiesChange(row,index)">
+                                    <el-checkbox v-for="city in row.cityOptions" :label="city" :key="city">{{city}}
+                                    </el-checkbox>
+                                </el-checkbox-group>
                             </template>
                         </el-table-column>
                     </el-table>
@@ -368,27 +376,17 @@ var addUserVm= new Vue({
     　　　     this.form.phone=this.form.phone.replace(/[^\.\d]/g,'');
                this.form.phone=this.form.phone.replace('.','');
         　　},
-
-            handleCheckAllChange(val) {
-                // this.checkedCities = val ? cityOptions : [];
-                // this.isIndeterminate = false;
-                var tabledata=this.dataTableCheckbox;
-                for(var i=0;i<tabledata.length;i++){
-                    tabledata[i].checkedCities = val ? tabledata[i].cityOptions : [];
-                    tabledata[i].isIndeterminate = false;
-                }
+            simpleClone(data) {
+                return JSON.parse(JSON.stringify(data));
             },
-            handleCheckedCitiesChange(value) {
-                // let checkedCount = value.length;
-                // this.checkAll = checkedCount === this.cities.length;
-                // this.isIndeterminate = checkedCount > 0 && checkedCount < this.cities.length;
-
-                var checkedCount = value.length;
-                var tabledata=this.dataTableCheckbox;
-                for(var i=0;i<tabledata.length;i++){
-                    tabledata[i].checkAll = checkedCount === tabledata[i].cityOptions.length;
-                    tabledata[i].isIndeterminate = checkedCount > 0 && checkedCount < tabledata[i].cityOptions.length;
-                }
+            handleCheckAllChange(item,index) {
+                var tabledata = item.cityOptions;
+                item.checkedCities = item.checkAll ? this.simpleClone(tabledata) : [];
+            },
+            handleCheckedCitiesChange(item,index) {
+                var checkedCount = item.checkedCities.length;
+                item.checkAll = checkedCount === item.cityOptions.length;
+                item.isIndeterminate = (checkedCount > 0) && (checkedCount < item.cityOptions.length);
             }
         },
         mounted(){
