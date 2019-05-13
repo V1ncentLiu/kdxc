@@ -1,13 +1,33 @@
 package com.kuaidao.manageweb.controller.sign;
 
+import com.kuaidao.aggregation.dto.financing.RefundRebateDTO;
+import com.kuaidao.manageweb.config.LogRecord.OperationType;
+
+import java.util.*;
+import javax.servlet.http.HttpServletRequest;
+import javax.validation.Valid;
+
+import com.kuaidao.manageweb.feign.financing.RefundFeignClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import com.kuaidao.aggregation.dto.busmycustomer.SignRecordReqDTO;
 import com.kuaidao.aggregation.dto.clue.CustomerClueDTO;
-import com.kuaidao.aggregation.dto.financing.RefundRebateDTO;
 import com.kuaidao.aggregation.dto.paydetail.PayDetailReqDTO;
 import com.kuaidao.aggregation.dto.paydetail.PayDetailRespDTO;
 import com.kuaidao.aggregation.dto.project.CompanyInfoDTO;
 import com.kuaidao.aggregation.dto.project.ProjectInfoDTO;
-import com.kuaidao.aggregation.dto.sign.*;
+import com.kuaidao.aggregation.dto.sign.BusSignInsertOrUpdateDTO;
+import com.kuaidao.aggregation.dto.sign.BusSignRespDTO;
+import com.kuaidao.aggregation.dto.sign.BusinessSignDTO;
+import com.kuaidao.aggregation.dto.sign.PayDetailDTO;
+import com.kuaidao.aggregation.dto.sign.SignParamDTO;
 import com.kuaidao.aggregation.dto.visitrecord.BusVisitRecordRespDTO;
 import com.kuaidao.common.constant.OrgTypeConstant;
 import com.kuaidao.common.constant.SystemCodeConstant;
@@ -17,14 +37,12 @@ import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.common.util.CommonUtil;
 import com.kuaidao.manageweb.config.LogRecord;
-import com.kuaidao.manageweb.config.LogRecord.OperationType;
 import com.kuaidao.manageweb.constant.Constants;
 import com.kuaidao.manageweb.constant.MenuEnum;
 import com.kuaidao.manageweb.feign.area.SysRegionFeignClient;
 import com.kuaidao.manageweb.feign.clue.ClueBasicFeignClient;
 import com.kuaidao.manageweb.feign.clue.ClueCustomerFeignClient;
 import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
-import com.kuaidao.manageweb.feign.financing.RefundFeignClient;
 import com.kuaidao.manageweb.feign.invitearea.InviteareaFeignClient;
 import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
 import com.kuaidao.manageweb.feign.paydetail.PayDetailFeignClient;
@@ -38,22 +56,6 @@ import com.kuaidao.sys.dto.dictionary.DictionaryItemRespDTO;
 import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
 import com.kuaidao.sys.dto.organization.OrganizationRespDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.shiro.SecurityUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.validation.Valid;
-import java.math.BigDecimal;
-import java.util.*;
 
 /**
  * @Auther: admin
@@ -405,123 +407,7 @@ public class BusinessSignController {
         }
         return linkPhone;
     }
-    /**
-     * 跳转到 电销我的客户，客户管理签约单明细页面
-     */
-    @RequestMapping("/myCustomSignRecordPage")
-    public String myCustomSignRecordPage(HttpServletRequest request, @RequestParam String clueId,
-                                  @RequestParam String signId, @RequestParam String readyOnly,@RequestParam(required = false) String showSignButton) throws Exception {
-        UserInfoDTO user = getUser();
-        IdEntityLong idEntityLong = new IdEntityLong();
-        idEntityLong.setId(Long.valueOf(signId));
-        SignParamDTO paramDTO = new SignParamDTO();
-        paramDTO.setClueId(Long.valueOf(clueId));
-        paramDTO.setSignId(Long.valueOf(signId));
-        JSONResult<BusSignRespDTO> busSign = queryOne(paramDTO);
 
-        // tab页面显示逻辑
-        // SignRecordReqDTO recordReqDTO = new SignRecordReqDTO();
-        // recordReqDTO.setClueId(Long.valueOf(clueId));
-        // if("1".equals(readyOnly)){
-        // recordReqDTO.setStatus(0); // 审核中
-        // }else{
-        // recordReqDTO.setStatus(1); // 查看到访记录
-        // }
-        // JSONResult<List<BusSignRespDTO>> resSignListJson = querySignList(recordReqDTO);
-        // List<BusSignRespDTO> data = resSignListJson.getData();
-        // BusSignRespDTO sign = data.get(0);
-        BusSignRespDTO sign = busSign.getData();
-        List<BusSignRespDTO> signData = new ArrayList();
-        signData.add(sign);
-        List<BusSignRespDTO> PayAllData = new ArrayList();
-        PayAllData.add(sign);
-        // 签约基本信息
-        request.setAttribute("signData", signData);
-        request.setAttribute("payType", sign.getPayType()); // 最新一次付款类型： 用来判断显示行数
-        if ("4".equals(sign.getPayType())) {
-            readyOnly = "1";
-        }
-        if ("1".equals(sign.getPayType())) {
-            /**
-             * 全款时候：不存在定金 尾款 以及 追加定金的情况
-             */
-            request.setAttribute("PayAllData", PayAllData);
-        } else {
-            PayDetailReqDTO detailReqDTO = new PayDetailReqDTO();
-            detailReqDTO.setSignId(Long.valueOf(signId));
-            JSONResult<List<PayDetailRespDTO>> resListJson =
-                    payDetailFeignClient.queryList(detailReqDTO);
-            if (JSONResult.SUCCESS.equals(resListJson.getCode())) {
-                List<PayDetailRespDTO> list = resListJson.getData();
-                // 定金
-                List<PayDetailRespDTO> one = new ArrayList();
-                // 追加定金
-                List<PayDetailRespDTO> two = new ArrayList();
-                // 尾款
-                List<PayDetailRespDTO> three = new ArrayList();
-                for (int i = 0; i < list.size(); i++) {
-                    PayDetailRespDTO dto = list.get(i);
-                    if ("2".equals(dto.getPayType())) {
-                        one.add(dto);
-                    } else if ("3".equals(dto.getPayType())) {
-                        this.handlerData(dto,user);
-                        two.add(dto);
-                    } else if ("4".equals(dto.getPayType())) {
-                        this.handlerData(dto,user);
-                        three.add(dto);
-                    }
-                }
-                request.setAttribute("oneData", one);
-                request.setAttribute("twoData", two);
-                request.setAttribute("threeData", three);
-            }
-        }
-
-        // 项目
-        JSONResult<List<ProjectInfoDTO>> proJson = projectInfoFeignClient.allProject();
-        if (JSONResult.SUCCESS.equals(proJson.getCode())) {
-            request.setAttribute("proSelect", proJson.getData());
-        }
-
-        JSONResult<List<CompanyInfoDTO>> listJSONResult = companyInfoFeignClient.allCompany();
-        if (JSONResult.SUCCESS.equals(listJSONResult.getCode())) {
-            request.setAttribute("companySelect", proJson.getData());
-        }
-
-
-        if(showSignButton!=null){
-            request.setAttribute("showSignButton", showSignButton);
-        }else{
-            request.setAttribute("showSignButton", "");
-        }
-        // 查询赠送类型集合
-        request.setAttribute("giveTypeList", getDictionaryByCode(Constants.GIVE_TYPE));
-        request.setAttribute("clueId", clueId);
-        request.setAttribute("signId", signId);
-        request.setAttribute("readyOnly", readyOnly); // readyOnly == 1 页面只读（没有添加按钮）
-        return "clue/showSignAndPayDetail";
-    }
-
-    /**
-     * 计算判单金额
-     * @param dto
-     * @param user
-     */
-    private void handlerData(PayDetailRespDTO dto, UserInfoDTO user){
-        Long userId = user.getId();
-        if(StringUtils.isNotBlank(dto.getRepeatRatio())){
-            String[] ratioArr = dto.getRepeatRatio().split(",",-1);
-            for(String ratio : ratioArr){
-                if(ratio.contains(String.valueOf(userId))){
-                    Double scale = Double.valueOf(ratio.split(":",-1)[1]);
-                    BigDecimal scaleRatio = new BigDecimal((scale/100));
-                    BigDecimal repeatMoney = dto.getAmountPerformance().multiply(scaleRatio);
-                    dto.setRepeatMoney(repeatMoney.toString());
-                    dto.setRepeatRatio(scale.toString()+"%");
-                }
-            }
-        }
-    }
     /**
      * 跳转到 到访记录明细页面
      */
@@ -643,15 +529,5 @@ public class BusinessSignController {
             return queryDicItemsByGroupCode.getData();
         }
         return null;
-    }
-    /**
-     * 获取当前登录账号
-     *
-     * @return
-     */
-    private UserInfoDTO getUser() {
-        Object attribute = SecurityUtils.getSubject().getSession().getAttribute("user");
-        UserInfoDTO user = (UserInfoDTO) attribute;
-        return user;
     }
 }
