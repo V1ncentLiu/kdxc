@@ -2,19 +2,13 @@ package com.kuaidao.manageweb.feign.financing;
 
 import java.util.List;
 import java.util.Map;
+
+import com.kuaidao.aggregation.dto.financing.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.netflix.feign.FeignClient;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.PostMapping;
-import com.kuaidao.aggregation.dto.financing.RefundAndImgRespDTO;
-import com.kuaidao.aggregation.dto.financing.RefundEditRejectReqDTO;
-import com.kuaidao.aggregation.dto.financing.RefundImgDTO;
-import com.kuaidao.aggregation.dto.financing.RefundImgRespDTO;
-import com.kuaidao.aggregation.dto.financing.RefundInfoQueryDTO;
-import com.kuaidao.aggregation.dto.financing.RefundQueryDTO;
-import com.kuaidao.aggregation.dto.financing.RefundRespDTO;
-import com.kuaidao.aggregation.dto.financing.RefundUpdateDTO;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.IdEntityLong;
 import com.kuaidao.common.entity.IdListLongReq;
@@ -86,6 +80,14 @@ public interface RefundFeignClient {
      */
     @PostMapping("/querySignInfoBySignNo")
     JSONResult<Map<String, Object>> querySignInfoBySignNo(RefundQueryDTO refundQueryDTO);
+
+    /**
+     * 条件查询签约单退款信息
+     * @param
+     * @return
+     */
+    @PostMapping("/getRefundInfo")
+    JSONResult<RefundRebateDTO> getRefundInfo(Map<String, Object> map);
     
     
 /***
@@ -142,6 +144,11 @@ public interface RefundFeignClient {
         public JSONResult<Map<String, Object>> querySignInfoBySignNo(
                 RefundQueryDTO refundQueryDTO) {
             return fallBackError("根据signno查询签约单编号");
+        }
+
+        @Override
+        public JSONResult<RefundRebateDTO> getRefundInfo(Map<String, Object> map) {
+            return fallBackError("条件查询签约单退款信息");
         }
 
         @Override
