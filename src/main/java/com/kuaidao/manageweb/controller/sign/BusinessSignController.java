@@ -419,17 +419,6 @@ public class BusinessSignController {
         paramDTO.setSignId(Long.valueOf(signId));
         JSONResult<BusSignRespDTO> busSign = queryOne(paramDTO);
 
-        // tab页面显示逻辑
-        // SignRecordReqDTO recordReqDTO = new SignRecordReqDTO();
-        // recordReqDTO.setClueId(Long.valueOf(clueId));
-        // if("1".equals(readyOnly)){
-        // recordReqDTO.setStatus(0); // 审核中
-        // }else{
-        // recordReqDTO.setStatus(1); // 查看到访记录
-        // }
-        // JSONResult<List<BusSignRespDTO>> resSignListJson = querySignList(recordReqDTO);
-        // List<BusSignRespDTO> data = resSignListJson.getData();
-        // BusSignRespDTO sign = data.get(0);
         BusSignRespDTO sign = busSign.getData();
         List<BusSignRespDTO> signData = new ArrayList();
         signData.add(sign);
@@ -476,7 +465,17 @@ public class BusinessSignController {
                 request.setAttribute("threeData", three);
             }
         }
-
+        //查询签约单退款信息
+        if (sign.getSignStatus() == 6) {
+            Map map = new HashMap();
+            map.put("signId", Long.valueOf(signId));
+            map.put("type", 1);
+            map.put("status", 4);
+            JSONResult<RefundRebateDTO> refundRebateDTOs = refundFeignClient.getRefundInfo(map);
+            List<RefundRebateDTO> refundRebateList = new ArrayList<>();
+            refundRebateList.add( refundRebateDTOs.getData());
+            request.setAttribute("refundData", refundRebateList);
+        }
         // 项目
         JSONResult<List<ProjectInfoDTO>> proJson = projectInfoFeignClient.allProject();
         if (JSONResult.SUCCESS.equals(proJson.getCode())) {
@@ -499,6 +498,7 @@ public class BusinessSignController {
         request.setAttribute("clueId", clueId);
         request.setAttribute("signId", signId);
         request.setAttribute("readyOnly", readyOnly); // readyOnly == 1 页面只读（没有添加按钮）
+        request.setAttribute("signStatus",sign.getSignStatus());
         return "clue/showSignAndPayDetail";
     }
 
