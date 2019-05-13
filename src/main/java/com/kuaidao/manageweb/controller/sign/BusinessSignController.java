@@ -466,7 +466,7 @@ public class BusinessSignController {
             }
         }
         //查询签约单退款信息
-        if (sign.getSignStatus() == 6) {
+        if (sign.getSignStatus() == 1 && sign.getRefundStatus() == 6) {
             Map map = new HashMap();
             map.put("signId", Long.valueOf(signId));
             map.put("type", 1);
