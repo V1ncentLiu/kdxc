@@ -56,9 +56,9 @@ import java.util.List;
  */
 @Controller
 @RequestMapping("/aggregation/publiccustomer")
-public class PublicCustomerResources {
+public class PublicCustomerResourcesController {
 
-    private static Logger logger = LoggerFactory.getLogger(PublicCustomerResources.class);
+    private static Logger logger = LoggerFactory.getLogger(PublicCustomerResourcesController.class);
 
     @Autowired
     private  DictionaryItemFeignClient dictionaryItemFeignClient;
