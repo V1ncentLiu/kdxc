@@ -2,6 +2,7 @@ package com.kuaidao.manageweb.controller.sign;
 
 import com.kuaidao.aggregation.dto.busmycustomer.SignRecordReqDTO;
 import com.kuaidao.aggregation.dto.clue.CustomerClueDTO;
+import com.kuaidao.aggregation.dto.financing.RefundRebateDTO;
 import com.kuaidao.aggregation.dto.paydetail.PayDetailReqDTO;
 import com.kuaidao.aggregation.dto.paydetail.PayDetailRespDTO;
 import com.kuaidao.aggregation.dto.project.CompanyInfoDTO;
@@ -23,6 +24,7 @@ import com.kuaidao.manageweb.feign.area.SysRegionFeignClient;
 import com.kuaidao.manageweb.feign.clue.ClueBasicFeignClient;
 import com.kuaidao.manageweb.feign.clue.ClueCustomerFeignClient;
 import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
+import com.kuaidao.manageweb.feign.financing.RefundFeignClient;
 import com.kuaidao.manageweb.feign.invitearea.InviteareaFeignClient;
 import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
 import com.kuaidao.manageweb.feign.paydetail.PayDetailFeignClient;
@@ -51,10 +53,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @Auther: admin
@@ -81,6 +80,8 @@ public class BusinessSignController {
     private ClueBasicFeignClient clueBasicFeignClient;
     @Autowired
     private ClueCustomerFeignClient clueCustomerFeignClient;
+    @Autowired
+    private RefundFeignClient refundFeignClient;
 
     @Autowired
     CompanyInfoFeignClient companyInfoFeignClient;
@@ -554,6 +555,7 @@ public class BusinessSignController {
         // 签约基本信息
         request.setAttribute("signData", signData);
         request.setAttribute("payType", sign.getPayType()); // 最新一次付款类型： 用来判断显示行数
+        request.setAttribute("refundStatus", sign.getRefundStatus()); // 判断退款信息是否显示
         if ("4".equals(sign.getPayType())) {
             readyOnly = "1";
         }
@@ -589,6 +591,18 @@ public class BusinessSignController {
                 request.setAttribute("twoData", two);
                 request.setAttribute("threeData", three);
             }
+        }
+
+        //查询签约单退款信息
+        if (sign.getSignStatus() == 2 && sign.getRefundStatus() == 6) {
+            Map map = new HashMap();
+            map.put("signId", Long.valueOf(signId));
+            map.put("type", 1);
+            map.put("status", 4);
+            JSONResult<RefundRebateDTO> refundRebateDTOs = refundFeignClient.getRefundInfo(map);
+            List<RefundRebateDTO> refundRebateList = new ArrayList<>();
+            refundRebateList.add( refundRebateDTOs.getData());
+            request.setAttribute("refundData", refundRebateList);
         }
 
         // 项目
