@@ -472,9 +472,11 @@ public class BusinessSignController {
             map.put("type", 1);
             map.put("status", 3);
             JSONResult<RefundRebateDTO> refundRebateDTOs = refundFeignClient.getRefundInfo(map);
-            List<RefundRebateDTO> refundRebateList = new ArrayList<>();
-            refundRebateList.add( refundRebateDTOs.getData());
-            request.setAttribute("refundData", refundRebateList);
+            if(refundRebateDTOs != null){
+                List<RefundRebateDTO> refundRebateList = new ArrayList<>();
+                refundRebateList.add( refundRebateDTOs.getData());
+                request.setAttribute("refundData", refundRebateList);
+            }
         }
         // 项目
         JSONResult<List<ProjectInfoDTO>> proJson = projectInfoFeignClient.allProject();
@@ -597,12 +599,14 @@ public class BusinessSignController {
         if (sign.getSignStatus() == 2 && sign.getRefundStatus() == 6) {
             Map map = new HashMap();
             map.put("signId", Long.valueOf(signId));
-            map.put("type", 1);
-            map.put("status", 3);
+            map.put("type", 1);//退款
+            map.put("status", 3);//确认退款
             JSONResult<RefundRebateDTO> refundRebateDTOs = refundFeignClient.getRefundInfo(map);
-            List<RefundRebateDTO> refundRebateList = new ArrayList<>();
-            refundRebateList.add( refundRebateDTOs.getData());
-            request.setAttribute("refundData", refundRebateList);
+            if (refundRebateDTOs != null) {
+                List<RefundRebateDTO> refundRebateList = new ArrayList<>();
+                refundRebateList.add( refundRebateDTOs.getData());
+                request.setAttribute("refundData", refundRebateList);
+            }
         }
 
         // 项目
