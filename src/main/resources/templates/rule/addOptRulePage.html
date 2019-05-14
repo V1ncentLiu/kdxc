@@ -185,12 +185,12 @@
                 <el-table-column align="center" prop="businessLine" label="业务线*">
                     <template slot-scope="scope">
                             <el-form-item :prop="'teleRuleTeamList.' + scope.$index + '.businessLine'" :rules='rules.businessLine' style="width: 200px;margin:0 auto;height: 57px;">
-                            <el-select filterable v-model="scope.row.businessLine" placeholder="请选择" @change.native.prevent="getTeleGroupList(scope.$index, form.teleRuleTeamList)">
+                            <el-select filterable v-model="scope.row.businessLine" placeholder="请选择" @change="getTeleGroupList(scope.$index, form.teleRuleTeamList)">
                                 <el-option
                                     v-for="item in businessLineOptions"
-                                    :key="item.id"
+                                    :key="item.businessLine"
                                     :label="item.name"
-                                    :value="item.id">
+                                    :value="item.businessLine">
                                 </el-option>
                             </el-select>
                         </el-form-item>
@@ -201,7 +201,7 @@
                             <el-form-item :prop="'teleRuleTeamList.' + scope.$index + '.orgId'" :rules='rules.orgId' style="width: 160px;margin:0 auto;height: 57px;">
                             <el-select filterable v-model="scope.row.orgId" placeholder="请选择">
                                 <el-option
-                                    v-for="item in 'teleRuleTeamList.' + scope.$index + '.teleOptions'"
+                                    v-for="item in scope.row.teleOptions"
                                     :key="item.id+','+item.orgType"
                                     :label="item.name"
                                     :value="item.id+','+item.orgType">
@@ -389,17 +389,20 @@ var businessLineList=[[${businessLineList}]];//业务线集合
                         { required: true, required: true, message: '请选择是否启用', trigger: 'change' }
                     ],                    
                     chooseTeam: [
-                        { validator:function(rule,value,callback){
-                            if(aorVM.form.teleRuleTeamList.length==0){
-                                callback(new Error("请添加电销组"));
-                                return;
-                            }
-                            callback();
-                        }, trigger: 'change'}
-                    ],                    
+                                 { validator:function(rule,value,callback){
+                                     if(aorVM.form.teleRuleTeamList.length==0&&aorVM.form.trafficRuleTeamList.length==0){
+                                         callback(new Error("请添加电销组或话务组"));
+                                         return;
+                                     }
+                                     callback();
+                                 }, trigger: 'change'}
+                             ],                    
                     orgId: [
                         { required: true, required: true, message: '请选择电销组', trigger: 'change' }
                     ],
+                    businessLine: [
+                                   { required: true, required: true, message: '请选择业务线', trigger: 'change' }
+                               ],
                     proportion: [
                         { required: true, required: true, message: '请输入比例', trigger: 'change'},
                         { validator:function(rule,value,callback){               
@@ -529,8 +532,8 @@ var businessLineList=[[${businessLineList}]];//业务线集合
                         param.startTime=this.form.startTime;
                         param.endTime=this.form.endTime;
                         param.status=this.form.status;
-                        param.teleRuleTeamList=this.form.teleRuleTeamList;
-                        param.trafficRuleTeamList=this.form.trafficRuleTeamList;
+                        param.teleList=this.form.teleRuleTeamList;
+                        param.trafficList=this.form.trafficRuleTeamList;
                         param.source=this.form.source.join(',');
                         param.industryCategory=this.form.industryCategory.join(',');
                         param.category=this.form.category.join(',');
@@ -647,12 +650,13 @@ var businessLineList=[[${businessLineList}]];//业务线集合
             },
           //根据电销组查询电销总监
             getTeleGroupList(index,rows) {
+              rows[index].orgId= '';
           	  var param ={};
           	  param.systemCode = "HUIJU";
           	  param.orgType = 1;
           	  param.businessLine = rows[index].businessLine;
                 console.info(param);
-                axios.post('/organization/organization/queryOrgByParam', param)
+                axios.post('/organization/organization/queryOrgByBusinessline', param)
                 .then(function (response) {
                       var result =  response.data;
                       console.info(result);

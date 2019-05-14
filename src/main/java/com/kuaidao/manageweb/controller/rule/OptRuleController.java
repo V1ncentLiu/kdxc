@@ -22,11 +22,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import com.kuaidao.aggregation.constant.AggregationConstant;
+import com.kuaidao.aggregation.dto.rule.AssignRuleTeamDTO;
 import com.kuaidao.aggregation.dto.rule.ClueAssignRuleDTO;
 import com.kuaidao.aggregation.dto.rule.ClueAssignRulePageParam;
 import com.kuaidao.aggregation.dto.rule.ClueAssignRuleReq;
 import com.kuaidao.common.constant.OrgTypeConstant;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
+import com.kuaidao.common.constant.SystemCodeConstant;
 import com.kuaidao.common.entity.IdEntityLong;
 import com.kuaidao.common.entity.IdListLongReq;
 import com.kuaidao.common.entity.JSONResult;
@@ -122,7 +124,22 @@ public class OptRuleController {
         // 查询优化规则信息
         JSONResult<ClueAssignRuleDTO> jsonResult =
                 clueAssignRuleFeignClient.get(new IdEntityLong(id));
-        request.setAttribute("clueAssignRule", jsonResult.getData());
+        ClueAssignRuleDTO data = jsonResult.getData();
+        if (data != null && data.getTeleList() != null) {
+            List<AssignRuleTeamDTO> teleList = data.getTeleList();
+            for (AssignRuleTeamDTO assignRuleTeamDTO : teleList) {
+                OrganizationQueryDTO queryDTO = new OrganizationQueryDTO();
+                queryDTO.setSystemCode(SystemCodeConstant.HUI_JU);
+                queryDTO.setOrgType(OrgTypeConstant.DXZ);
+                queryDTO.setBusinessLine(assignRuleTeamDTO.getBusinessLine());
+                JSONResult<List<OrganizationRespDTO>> orgList =
+                        organizationFeignClient.queryOrgByParam(queryDTO);
+                assignRuleTeamDTO.setTeleOptions(orgList.getData());
+            }
+        }
+
+
+        request.setAttribute("clueAssignRule", data);
         // 查询话务组
         request.setAttribute("trafficList", getTrafficGroup());
         JSONResult<List<OrganizationDTO>> listBusinessLineOrg =

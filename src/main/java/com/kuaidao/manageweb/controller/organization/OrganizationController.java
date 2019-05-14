@@ -218,6 +218,22 @@ public class OrganizationController {
     }
 
     /**
+     * 查询组织信息 根据组织机构代码，组织名称，父级ID
+     * 
+     * @param queryDTO
+     * @return
+     */
+    @PostMapping("/queryOrgByBusinessline")
+    @ResponseBody
+    public JSONResult<List<OrganizationRespDTO>> queryOrgByBusinessline(
+            @RequestBody OrganizationQueryDTO queryDTO) {
+        queryDTO.setSystemCode(SystemCodeConstant.HUI_JU);
+        JSONResult<List<OrganizationRespDTO>> orgList =
+                organizationFeignClient.queryOrgByParam(queryDTO);
+        return orgList;
+    }
+
+    /**
      * 查询组织机构树
      * 
      * @return
