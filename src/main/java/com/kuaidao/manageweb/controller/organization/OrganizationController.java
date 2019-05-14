@@ -1,6 +1,5 @@
 package com.kuaidao.manageweb.controller.organization;
 
-import java.util.ArrayList;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
@@ -64,7 +63,7 @@ public class OrganizationController {
 
     @Autowired
     DictionaryItemFeignClient dictionaryItemFeignClient;
-    
+
     @Autowired
     UserInfoFeignClient userInfoFeignClient;
 
@@ -83,7 +82,7 @@ public class OrganizationController {
         } else {
             logger.error("query organization tree,res{{}}", treeJsonRes);
         }
-        request.setAttribute("tgzxBusinessLine",SysConstant.PROMOTION_BUSINESS_LINE);
+        request.setAttribute("tgzxBusinessLine", SysConstant.PROMOTION_BUSINESS_LINE);
         return "organization/organizationPage";
     }
 
@@ -308,26 +307,28 @@ public class OrganizationController {
         return dictionaryItemFeignClient
                 .queryDicItemsByGroupCode(DicCodeEnum.ORGANIZATIONTYPE.getCode());
     }
-    
+
     /**
      * 查询所有的商务小组
+     * 
      * @param request
      * @return
      */
     @RequestMapping("/queryBusGroupList")
     @ResponseBody
-    public JSONResult<List<OrganizationDTO>> queryBusGroupList(){
+    public JSONResult<List<OrganizationDTO>> queryBusGroupList() {
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
-     // 商务小组
+        // 商务小组
         OrganizationQueryDTO busGroupReqDTO = new OrganizationQueryDTO();
         busGroupReqDTO.setSystemCode(SystemCodeConstant.HUI_JU);
         busGroupReqDTO.setParentId(curLoginUser.getOrgId());
         busGroupReqDTO.setOrgType(OrgTypeConstant.SWZ);
         return organizationFeignClient.listDescenDantByParentId(busGroupReqDTO);
     }
-    
+
     /**
      * 查询所有的电销组
+     * 
      * @param result
      * @return
      */
@@ -340,23 +341,25 @@ public class OrganizationController {
         busGroupReqDTO.setOrgType(OrgTypeConstant.DXZ);
         return organizationFeignClient.queryOrgByParam(busGroupReqDTO);
     }
-    
-    
+
+
     /**
      * 查询所有的商务组
+     * 
      * @return
      */
     @PostMapping("/queryAllBusGroup")
     @ResponseBody
-    public JSONResult<List<OrganizationRespDTO>> queryAllBusGroup(){
+    public JSONResult<List<OrganizationRespDTO>> queryAllBusGroup() {
         OrganizationQueryDTO companyDto = new OrganizationQueryDTO();
         companyDto.setSystemCode(SystemCodeConstant.HUI_JU);
         companyDto.setOrgType(OrgTypeConstant.SWZ);
-        return    organizationFeignClient.queryOrgByParam(companyDto);
+        return organizationFeignClient.queryOrgByParam(companyDto);
     }
-    
+
     /**
      * 查询所有的商务大区
+     * 
      * @param result
      * @return
      */
@@ -369,9 +372,10 @@ public class OrganizationController {
         busGroupReqDTO.setOrgType(OrgTypeConstant.SWDQ);
         return organizationFeignClient.queryOrgByParam(busGroupReqDTO);
     }
-    
+
     /**
      * 查询所有的电销事业部
+     * 
      * @param result
      * @return
      */
@@ -384,35 +388,39 @@ public class OrganizationController {
         busGroupReqDTO.setOrgType(OrgTypeConstant.DZSYB);
         return organizationFeignClient.queryOrgByParam(busGroupReqDTO);
     }
-    
-    
+
+
     /**
      * 根据父级Id查询所有的商务小组
+     * 
      * @param request
      * @return
      */
     @RequestMapping("/queryBusGroupListByParentId")
     @ResponseBody
-    public JSONResult<List<OrganizationDTO>> queryBusGroupListByParentId(@RequestBody IdEntityLong idEntityLong){
-     // 商务小组
+    public JSONResult<List<OrganizationDTO>> queryBusGroupListByParentId(
+            @RequestBody IdEntityLong idEntityLong) {
+        // 商务小组
         OrganizationQueryDTO busGroupReqDTO = new OrganizationQueryDTO();
         busGroupReqDTO.setSystemCode(SystemCodeConstant.HUI_JU);
         busGroupReqDTO.setParentId(idEntityLong.getId());
         busGroupReqDTO.setOrgType(OrgTypeConstant.SWZ);
         return organizationFeignClient.listDescenDantByParentId(busGroupReqDTO);
     }
-    
+
     /**
-     * 根据组织机构Id查询所有商务经理 
+     * 根据组织机构Id查询所有商务经理
+     * 
      * @return
      */
     @PostMapping("/queryBusManagerByOrgId")
     @ResponseBody
-    public JSONResult<List<UserInfoDTO>> queryBusManagerByOrgId(@RequestBody IdEntityLong idEntityLong) {
+    public JSONResult<List<UserInfoDTO>> queryBusManagerByOrgId(
+            @RequestBody IdEntityLong idEntityLong) {
         // 商务经理
         UserOrgRoleReq req = new UserOrgRoleReq();
         Long id = idEntityLong.getId();
-        if(id==null) {
+        if (id == null) {
             UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
             id = curLoginUser.getId();
         }
@@ -420,24 +428,26 @@ public class OrganizationController {
         req.setRoleCode(RoleCodeEnum.SWJL.name());
         return userInfoFeignClient.listByOrgAndRole(req);
     }
-    
-    
+
+
     /**
      * 根据父级Id查询所有的电销组
+     * 
      * @param result
      * @return
      */
     @PostMapping("/queryTeleGroupListByParentId")
     @ResponseBody
-    public JSONResult<List<OrganizationRespDTO>> queryTeleGroupListByParentId(@RequestBody IdEntityLong idEntityLong) {
+    public JSONResult<List<OrganizationRespDTO>> queryTeleGroupListByParentId(
+            @RequestBody IdEntityLong idEntityLong) {
         // 电销组
         OrganizationQueryDTO busGroupReqDTO = new OrganizationQueryDTO();
-        busGroupReqDTO.setParentId(idEntityLong.getId()); 
+        busGroupReqDTO.setParentId(idEntityLong.getId());
         busGroupReqDTO.setSystemCode(SystemCodeConstant.HUI_JU);
         busGroupReqDTO.setOrgType(OrgTypeConstant.DXZ);
         return organizationFeignClient.queryOrgByParam(busGroupReqDTO);
     }
-    
+
     /**
      * 根据orgId 查询下属 创业顾问
      * 
@@ -446,11 +456,26 @@ public class OrganizationController {
      */
     @PostMapping("/queryTeleSaleByOrgId")
     @ResponseBody
-    public JSONResult<List<UserInfoDTO>> queryTeleSaleByOrgId(@RequestBody IdEntityLong idEntityLong) {
+    public JSONResult<List<UserInfoDTO>> queryTeleSaleByOrgId(
+            @RequestBody IdEntityLong idEntityLong) {
         UserOrgRoleReq req = new UserOrgRoleReq();
         req.setOrgId(idEntityLong.getId());
         req.setRoleCode(RoleCodeEnum.DXCYGW.name());
         return userInfoFeignClient.listByOrgAndRole(req);
     }
-    
+
+    /**
+     * 根据父级id 查询 它的组织机构树
+     * 
+     * @param idEntityLong
+     * @return
+     */
+    @RequestMapping("/listOrgTreeDataByParentId")
+    @ResponseBody
+    public JSONResult<List<TreeData>> listOrgTreeDataByParentId(HttpServletRequest request,
+            @RequestBody IdEntityLong idEntityLong) {
+        JSONResult<List<TreeData>> orgJson =
+                organizationFeignClient.listOrgTreeDataByParentId(idEntityLong);
+        return orgJson;
+    }
 }

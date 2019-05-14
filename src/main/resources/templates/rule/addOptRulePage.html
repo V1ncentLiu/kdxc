@@ -185,7 +185,7 @@
                 <el-table-column align="center" prop="businessLine" label="业务线*">
                     <template slot-scope="scope">
                             <el-form-item :prop="'teleRuleTeamList.' + scope.$index + '.businessLine'" :rules='rules.businessLine' style="width: 200px;margin:0 auto;height: 57px;">
-                            <el-select filterable v-model="scope.row.businessLine" placeholder="请选择" onchange="getTeleGroupList('teleRuleTeamList.' + scope.$index)">
+                            <el-select filterable v-model="scope.row.businessLine" placeholder="请选择" @change.native.prevent="getTeleGroupList(scope.$index, form.teleRuleTeamList)">
                                 <el-option
                                     v-for="item in businessLineOptions"
                                     :key="item.id"
@@ -646,18 +646,18 @@ var businessLineList=[[${businessLineList}]];//业务线集合
             	document.location.href='/clueAssignRule/optRule/initRuleList';
             },
           //根据电销组查询电销总监
-            getTeleGroupList(row) {
+            getTeleGroupList(index,rows) {
           	  var param ={};
           	  param.systemCode = "HUIJU";
           	  param.orgType = 1;
-          	  param.businessLine = row.businessLine;
+          	  param.businessLine = rows[index].businessLine;
                 console.info(param);
                 axios.post('/organization/organization/queryOrgByParam', param)
                 .then(function (response) {
                       var result =  response.data;
                       console.info(result);
                       var table=result.data;
-                      row.teleOptions= table;
+                      rows[index].teleOptions= table;
                 })
                 .catch(function (error) {
                      console.log(error);

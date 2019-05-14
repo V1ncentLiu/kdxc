@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.IdEntity;
+import com.kuaidao.common.entity.IdEntityLong;
 import com.kuaidao.common.entity.IdListReq;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
@@ -145,6 +146,16 @@ public interface OrganizationFeignClient {
     @PostMapping("/listBusinessLineOrg")
     public JSONResult<List<OrganizationDTO>> listBusinessLineOrg();
 
+    /**
+     * 根据父级id 查询 它的组织机构树
+     * 
+     * @param idEntityLong
+     * @return
+     */
+    @PostMapping("/listOrgTreeDataByParentId")
+    public JSONResult<List<TreeData>> listOrgTreeDataByParentId(
+            @RequestBody IdEntityLong idEntityLong);
+
     @Component
     static class HystrixClientFallback implements OrganizationFeignClient {
 
@@ -240,6 +251,11 @@ public interface OrganizationFeignClient {
         @Override
         public JSONResult<List<OrganizationDTO>> listBusinessLineOrg() {
             return fallBackError("查询根节点下所有业务线");
+        }
+
+        @Override
+        public JSONResult<List<TreeData>> listOrgTreeDataByParentId(IdEntityLong idEntityLong) {
+            return fallBackError("根据父级id 查询 它的组织机构树");
         }
     }
 
