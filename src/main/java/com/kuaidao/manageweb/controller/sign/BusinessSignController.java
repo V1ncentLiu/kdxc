@@ -598,7 +598,7 @@ public class BusinessSignController {
             Map map = new HashMap();
             map.put("signId", Long.valueOf(signId));
             map.put("type", 1);
-            map.put("status", 4);
+            map.put("status", 3);
             JSONResult<RefundRebateDTO> refundRebateDTOs = refundFeignClient.getRefundInfo(map);
             List<RefundRebateDTO> refundRebateList = new ArrayList<>();
             refundRebateList.add( refundRebateDTOs.getData());
