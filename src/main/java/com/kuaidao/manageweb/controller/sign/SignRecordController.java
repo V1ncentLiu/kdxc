@@ -414,7 +414,7 @@ public class SignRecordController {
         Map map = new HashMap();
         map = JSONObject.parseObject(signId);
         map.put("type", 1);
-        map.put("status", 4);
+        map.put("status", 3);
         JSONResult<RefundRebateDTO> refundRebateDTOs = refundFeignClient.getRefundInfo(map);
         return refundRebateDTOs;
     }
