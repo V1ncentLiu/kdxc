@@ -92,19 +92,11 @@
                         >
                         <el-table-column align="center" width="55" label="序号" type="index"></el-table-column>
                         <el-table-column align="center" label="业务线">
-                            <!-- <template scope="scope">
-                                <el-checkbox :indeterminate="scope.row.isIndeterminate" v-model="scope.row.checkAll" @change="handleCheckAllChange">{{scope.row.name}}</el-checkbox>
-                            </template> -->
                             <template slot-scope="{ row, index }">
                                 <el-checkbox :indeterminate="row.isIndeterminate" v-model="row.checkAll" @change="handleCheckAllChange(row,index)">{{row.name}}</el-checkbox>
                             </template>
                         </el-table-column>
                         <el-table-column align="center" label="本业务线下的可查看资源类别">
-                            <!-- <template scope="scope">
-                                <el-checkbox-group v-model="scope.row.checkedCities" @change="handleCheckedCitiesChange">
-                                    <el-checkbox v-for="city in scope.row.cityOptions" :label="city" :key="city">{{city}}</el-checkbox>
-                                </el-checkbox-group>
-                            </template> -->
                             <template slot-scope="{ row, index }">
                                 <el-checkbox-group v-model="row.checkedCities"
                                     @change="handleCheckedCitiesChange(row,index)">
@@ -291,18 +283,32 @@ var addUserVm= new Vue({
                     value: 3,
                     label: '锁定'
                 }],
-                dataTableCheckbox:[{
-                    'name':'小物种',
-                    'cityOptions':['联展竞价', '优化', '信息流', '官网'],
+                dataTableCheckbox: [{
+                    'name': '小物种',
+                    'cityOptionsObj': [
+                        {'label':'联展竞价','value':'0','isChecked':false}, 
+                        {'label':'优化','value':'1','isChecked':false}, 
+                        {'label':'信息流','value':'2','isChecked':false}, 
+                        {'label':'官网','value':'3','isChecked':false}],
+                    'cityOptions': [],
+                    'checkedCitiesObj': [
+                        {'label':'联展竞价','value':'0','isChecked':true}],
                     'checkedCities': [],
                     'checkAll': false,
-                    'isIndeterminate': false,
-                },{
-                    'name':'商机盒子',
-                    'cityOptions':['联展竞价2', '优化2', '信息流2', '官网2'],
+                    'isIndeterminate': true,
+                }, {
+                    'name': '商机盒子',
+                    'cityOptionsObj': [
+                        {'label':'联展竞价2','value':'0','isChecked':false}, 
+                        {'label':'优化2','value':'1','isChecked':false}, 
+                        {'label':'信息流2','value':'2','isChecked':false}, 
+                        {'label':'官网2','value':'3','isChecked':false}],
+                    'cityOptions': [],
+                    'checkedCitiesObj': [
+                        {'label':'联展竞价2','value':'0','isChecked':true}],
                     'checkedCities': [],
                     'checkAll': false,
-                    'isIndeterminate': false,
+                    'isIndeterminate': true,
                 }]
             }        	  
         },
@@ -380,17 +386,48 @@ var addUserVm= new Vue({
                 return JSON.parse(JSON.stringify(data));
             },
             handleCheckAllChange(item,index) {
-                var tabledata = item.cityOptions;
-                item.checkedCities = item.checkAll ? this.simpleClone(tabledata) : [];
+                var tabledata = item.cityOptionsObj;
+                var tabledata1=[]
+                for(i=0;i<tabledata.length;i++){
+                    tabledata1.push(tabledata[i].label)
+                }
+                item.checkedCities = item.checkAll ? this.simpleClone(tabledata1) : [];
             },
             handleCheckedCitiesChange(item,index) {
+                var tabledata = item.cityOptionsObj;
+                var tabledata1=[]
+                for(i=0;i<tabledata.length;i++){
+                    tabledata1.push(tabledata[i].label)
+                }
                 var checkedCount = item.checkedCities.length;
-                item.checkAll = checkedCount === item.cityOptions.length;
-                item.isIndeterminate = (checkedCount > 0) && (checkedCount < item.cityOptions.length);
-            }
+                item.checkAll = checkedCount === tabledata1.length;
+                item.isIndeterminate = (checkedCount > 0) && (checkedCount < tabledata1.length);
+            },
+            checkboxFun1(){//获取查看资源数据中的数组
+                var tabledata = this.dataTableCheckbox;
+                for(i=0;i<tabledata.length;i++){
+                    var cityOptionsList=tabledata[i].cityOptionsObj;
+                    var cityOptions=tabledata[i].cityOptions;
+                    for(j=0;j<cityOptionsList.length;j++){
+                        cityOptions.push(cityOptionsList[j].label)
+                    }                
+                }
+            },
+            checkboxFun2(){//获取已选中数据中的数组
+                var checkedCitiesData = this.dataTableCheckbox;
+                for(i=0;i<checkedCitiesData.length;i++){
+                    var checkedCitiesList=checkedCitiesData[i].checkedCitiesObj;
+                    var checkedCities=checkedCitiesData[i].checkedCities;
+                    for(j=0;j<checkedCitiesList.length;j++){
+                        checkedCities.push(checkedCitiesList[j].label)
+                    }                
+                }
+            },
         },
         mounted(){
             document.getElementById('userManage').style.display = 'block';
+            this.checkboxFun1();
+            this.checkboxFun2();
         }
     })
 </script>
