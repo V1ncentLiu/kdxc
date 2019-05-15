@@ -283,7 +283,9 @@
                         		businessLine = null;
                         		orgVM.tgzxBusinessLine = businessLine;
                         	}
-                        	orgVM.form.businessLine= businessLine;
+                        	orgVM.form.businessLine= businessLine+"";
+                    	}else{
+                    		orgVM.form.businessLine ="";
                     	}
                     }
                    
