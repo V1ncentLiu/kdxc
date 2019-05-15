@@ -269,7 +269,7 @@
                 });*/
                 
                 //获取父级业务线
-        /*        var id = curData.id;
+               var id = curData.id;
                 var param = {};
                 param.id = id;
                 //根据id获取数据
@@ -288,7 +288,7 @@
                     }
                    
                 })
-                */
+                
                 
              /*   axios.post('/organization/organization/queryDictionaryItemsByGroupCode',{})
                 .then(function (response) {
