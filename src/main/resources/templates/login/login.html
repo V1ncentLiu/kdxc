@@ -40,23 +40,26 @@
                         <span class="iconImg iconRight"><img th:src="@{/images/loginIco04.jpg}" alt=""></span>
                     </el-form-item>
                 </el-row>
-                <el-row>
-                    <el-col :span="14">
-                        <el-form-item  prop="codeInput">
-                          <span class="iconImg"><img th:src="@{/images/loginIco03.jpg}" alt=""></span>
-                          <el-input type="number" v-model="loginForm.codeInput" @keyup.native="checkLogin('loginForm')" oninput="if(value.length>6)value=value.slice(0,6)"  placeholder="输入验证码"></el-input>
-                        </el-form-item>
-                    </el-col>
-                    <el-col :span="10">
-                    	<el-button type="primary" class="codeBtn" @click="sendCode('loginForm','2');" :disabled="isDisabled">{{buttonName}}</el-button>
-                    </el-col>
-                </el-row>
-                <div id="codeTipDiv" class="codeTip">
-                    未收到验证码，使用<span class="link">
-                      <el-button class="msgBtn" type="submit" id="msgHref" :disabled="isDisabled" @click="sendCode('loginForm','1');">短信验证码</el-button>
-                      <!-- <a id="msgHref" type="submit" @click="sendCode('loginForm','1');">短信验证码</a> -->
-                    </span> 
-                </div>  
+                <!-- 验证码是否显示增加判断，测试开发环境不显示，线上环境显示 -->
+                <div  v-if="verificationCodeShow">
+                    <el-row>
+                        <el-col :span="14">
+                            <el-form-item  prop="codeInput">
+                              <span class="iconImg"><img th:src="@{/images/loginIco03.jpg}" alt=""></span>
+                              <el-input type="number" v-model="loginForm.codeInput" @keyup.native="checkLogin('loginForm')" oninput="if(value.length>6)value=value.slice(0,6)"  placeholder="输入验证码"></el-input>
+                            </el-form-item>
+                        </el-col>
+                        <el-col :span="10">
+                            <el-button type="primary" class="codeBtn" @click="sendCode('loginForm','2');" :disabled="isDisabled">{{buttonName}}</el-button>
+                        </el-col>
+                    </el-row>
+                    <div id="codeTipDiv" class="codeTip">
+                        未收到验证码，使用<span class="link">
+                          <el-button class="msgBtn" type="submit" id="msgHref" :disabled="isDisabled" @click="sendCode('loginForm','1');">短信验证码</el-button>
+                          <!-- <a id="msgHref" type="submit" @click="sendCode('loginForm','1');">短信验证码</a> -->
+                        </span>
+                    </div>
+                </div>
                 <!-- //登录后是否显示修改密码  2-不显示 1-显示 -->
                 <input type="hidden" id="isUpdatePassword" name="isUpdatePassword" value="2">
 
@@ -104,6 +107,7 @@
 <div th:include="_footer_include :: #jsLib"></div>
 <script th:inline="javascript">
 var error=[[${error}]];
+var verificationCodeShow = [[${verificationCodeShow}]];
 var disType="";
 var vm =  new Vue({
         el: '#loginbox',
@@ -111,6 +115,7 @@ var vm =  new Vue({
             buttonName: "获取语音验证码",
             isDisabled: false,
             loginDisabled: true,
+            verificationCodeShow: true,
             time: 60,
             loginForm: {
             	nameInput: '',
@@ -287,10 +292,12 @@ var vm =  new Vue({
        	      },
        	   	  checkLogin(formName) {
        	    	 var formData = this.loginForm;
-       	    	  if(formData.nameInput!=""&&formData.pswInput!=""&&formData.codeInput!=""){
-         	        this.loginDisabled=false;
-       	    	  }else{
-         	        this.loginDisabled=true;
+                  if(verificationCodeShow&&formData.nameInput!=""&&formData.pswInput!=""&&formData.codeInput!=""){
+                        this.loginDisabled=false;
+                  }else if(!verificationCodeShow&&formData.nameInput!=""&&formData.pswInput!=""){
+                        this.loginDisabled=false;
+                  }else{
+         	            this.loginDisabled=true;
        	    	  }
        	      },
        	   	  toCodeImg() {
@@ -329,7 +336,14 @@ var vm =  new Vue({
     			$("#isShowNotUserBox").removeClass("f-dn");
     			isShowLogoutBox="2";
     		}
-            
+    		if(!verificationCodeShow){
+                this.verificationCodeShow =false;
+
+            }
+            //初始化页面跳转，为了防止从iframe跳转到login页面直接在iframe中显示login页面
+            if(window.top != window.self){
+                top.location.href = location.href;
+            }
         }
     })
 </script>

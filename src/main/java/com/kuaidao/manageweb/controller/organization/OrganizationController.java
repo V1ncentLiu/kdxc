@@ -35,11 +35,13 @@ import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
 import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
 import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
 import com.kuaidao.manageweb.util.CommUtil;
+import com.kuaidao.sys.constant.SysConstant;
 import com.kuaidao.sys.dto.dictionary.DictionaryItemRespDTO;
 import com.kuaidao.sys.dto.organization.OrganizationAddAndUpdateDTO;
 import com.kuaidao.sys.dto.organization.OrganizationDTO;
 import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
 import com.kuaidao.sys.dto.organization.OrganizationRespDTO;
+import com.kuaidao.sys.dto.role.RoleInfoDTO;
 import com.kuaidao.sys.dto.user.OrgUserReqDTO;
 import com.kuaidao.sys.dto.user.UserAndRoleRespDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
@@ -75,13 +77,35 @@ public class OrganizationController {
     @RequiresPermissions("organization:view")
     @RequestMapping("/organizationPage")
     public String organizationPage(HttpServletRequest request) {
-        JSONResult<List<TreeData>> treeJsonRes = organizationFeignClient.query();
+        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+        RoleInfoDTO roleInfoDTO = curLoginUser.getRoleList().get(0);
+        String roleCode = roleInfoDTO.getRoleCode();
+        //JSONResult<List<TreeData>> treeJsonRes = organizationFeignClient.query();
+        JSONResult<List<TreeData>> treeJsonRes = null;
+        if(RoleCodeEnum.GLY.name().equals(roleCode)) {
+            //管理员
+            treeJsonRes = organizationFeignClient.query();
+        }else {
+            //业务管理员
+            Long orgId = curLoginUser.getOrgId();   
+            OrganizationQueryDTO reqDto  = new OrganizationQueryDTO();
+            reqDto.setParentId(orgId);
+            treeJsonRes = organizationFeignClient.queryByOrg(reqDto);
+        }
         if (treeJsonRes != null && JSONResult.SUCCESS.equals(treeJsonRes.getCode())
                 && treeJsonRes.getData() != null) {
             request.setAttribute("orgData", treeJsonRes.getData());
         } else {
             logger.error("query organization tree,res{{}}", treeJsonRes);
         }
+        request.setAttribute("tgzxBusinessLine",SysConstant.PROMOTION_BUSINESS_LINE);
+        
+        JSONResult<List<DictionaryItemRespDTO>> orgTypeJR = dictionaryItemFeignClient.queryDicItemsByGroupCode(DicCodeEnum.ORGANIZATIONTYPE.getCode());
+        request.setAttribute("orgTypeList", orgTypeJR.getData());
+        
+        JSONResult<List<DictionaryItemRespDTO>> businessLineJR = dictionaryItemFeignClient.queryDicItemsByGroupCode(DicCodeEnum.BUSINESS_LINE.getCode());
+        request.setAttribute("businessLineList", businessLineJR.getData());
+        
         return "organization/organizationPage";
     }
 
@@ -224,7 +248,20 @@ public class OrganizationController {
     @PostMapping("/query")
     @ResponseBody
     public JSONResult<List<TreeData>> query() {
-        return organizationFeignClient.query();
+        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+        
+        RoleInfoDTO roleInfoDTO = curLoginUser.getRoleList().get(0);
+        String roleCode = roleInfoDTO.getRoleCode();
+        if(RoleCodeEnum.GLY.name().equals(roleCode)) {
+            //管理员
+            return organizationFeignClient.query();
+        }else {
+            //业务管理员
+            Long orgId = curLoginUser.getOrgId();   
+            OrganizationQueryDTO reqDto  = new OrganizationQueryDTO();
+            reqDto.setParentId(orgId);
+            return organizationFeignClient.queryByOrg(reqDto);
+        }
     }
 
     /**
@@ -451,5 +488,4 @@ public class OrganizationController {
         return userInfoFeignClient.listByOrgAndRole(req);
     }
     
-
 }

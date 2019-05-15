@@ -69,6 +69,7 @@ function outboundCallPhone(outboundInputPhone,callSource,clueId,callback){
  		}
  		param.userId= homePageVM.accountId;
  		param.accountType = homePageVM.accountType;
+ 		param.bindType = homePageVM.loginClientForm.bindPhoneType;
  		 axios.post('/client/client/qimoOutboundCall',param)
           .then(function (response) {
               var data =  response.data;
@@ -84,7 +85,7 @@ function outboundCallPhone(outboundInputPhone,callSource,clueId,callback){
       				
              	  }else{
              		 clearTimer();//清除定时器
-               		  homePageVM.$message({message:resData.Message,type:'error'});
+               		  homePageVM.$message({message:"外呼失败【"+resData.Message+"】",type:'error'});
              	  }
               }else{
             	   clearTimer();//清除定时器

@@ -56,9 +56,9 @@ import java.util.List;
  */
 @Controller
 @RequestMapping("/aggregation/publiccustomer")
-public class PublicCustomerResources {
+public class PublicCustomerResourcesController {
 
-    private static Logger logger = LoggerFactory.getLogger(PublicCustomerResources.class);
+    private static Logger logger = LoggerFactory.getLogger(PublicCustomerResourcesController.class);
 
     @Autowired
     private  DictionaryItemFeignClient dictionaryItemFeignClient;
@@ -150,7 +150,7 @@ public class PublicCustomerResources {
             dto.setOrgType(OrgTypeConstant.DXZ);
             JSONResult<List<OrganizationRespDTO>> dzList = organizationFeignClient.queryOrgByParam(dto);
             long endTime2=System.currentTimeMillis();
-            System.out.println("组织机构： "+(endTime2-startTime2)+"ms");
+//            System.out.println("组织机构： "+(endTime2-startTime2)+"ms");
             dxzList = dzList.getData();
             if(dzList!=null&&dzList.getData()!=null){
                 for(OrganizationRespDTO organizationRespDTO:dzList.getData()){
@@ -161,7 +161,7 @@ public class PublicCustomerResources {
 //            dxzjsList = dxzjs(dxzIdsList);    // 查询电销总监
         }
         long endTime2=System.currentTimeMillis();
-        System.out.println("电销组： "+(endTime2-startTime2)+"ms");
+//        System.out.println("电销组： "+(endTime2-startTime2)+"ms");
         // 查询字典释放原因集合
         request.setAttribute("releaseReasonList", getDictionaryByCode(Constants.RELEASE_REASON));
         request.setAttribute("dzList", dxzList);
@@ -187,7 +187,7 @@ public class PublicCustomerResources {
                 customFieldFeignClient.queryFieldByUserAndMenu(queryFieldByUserAndMenuReq);
         request.setAttribute("userFieldList", queryFieldByUserAndMenu.getData());
         long endTime=System.currentTimeMillis();
-        System.out.println("公共列： "+(endTime-startTime)+"ms");
+//        System.out.println("公共列： "+(endTime-startTime)+"ms");
 
         long startTime1=System.currentTimeMillis();
         // 查询字典话务一级客户状态集合
@@ -203,7 +203,7 @@ public class PublicCustomerResources {
         request.setAttribute("customerStatusSubList",
                 getDictionaryByCode(DicCodeEnum.CUSTOMERSTATUSSUB.getCode()));
         long endTime1=System.currentTimeMillis();
-        System.out.println("数据字典： "+(endTime1-startTime1)+"ms");
+//        System.out.println("数据字典： "+(endTime1-startTime1)+"ms");
         return "pubcustomer/publicCustomer";
     }
     /**
@@ -245,7 +245,11 @@ public class PublicCustomerResources {
         List<RoleInfoDTO> roleList = user.getRoleList();
         RoleInfoDTO roleInfoDTO = roleList.get(0);
         String roleName = roleInfoDTO.getRoleName();
-        if (RoleCodeEnum.DXZJ.value().equals(roleName)||RoleCodeEnum.DXCYGW.value().equals(roleName)){
+        String roleCode = roleInfoDTO.getRoleCode();
+        logger.info("共有池权限roleCode:{}",roleCode);
+        logger.info("共有池权限roleName:{}",roleName);
+        if (RoleCodeEnum.DXZJ.name().equals(roleCode)||RoleCodeEnum.DXCYGW.name().equals(roleCode)){
+            logger.info("共有池电销相关角色:{}",roleCode);
             dto.setRoleCode(roleInfoDTO.getRoleCode());
         }
         return publicCustomerFeignClient.queryListPage(dto);
