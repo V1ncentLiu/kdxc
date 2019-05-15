@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-
 import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.IdEntityLong;
 import com.kuaidao.common.entity.IdListLongReq;
@@ -112,6 +111,7 @@ public interface UserInfoFeignClient {
 
     @RequestMapping(method = RequestMethod.POST, value = "/sys/userInfo/listById")
     public JSONResult<List<UserInfoDTO>> listById(@RequestBody IdListLongReq idList);
+
     @Component
     static class HystrixClientFallback implements UserInfoFeignClient {
 
@@ -173,11 +173,11 @@ public interface UserInfoFeignClient {
             return fallBackError("根据机构和角色Code查询账号集合");
         }
 
-		@Override
-		public JSONResult<List<UserInfoDTO>> listById(IdListLongReq idList) {
-			// TODO Auto-generated method stub
-			return fallBackError("根据idlist查询用户集合");
-		}
+        @Override
+        public JSONResult<List<UserInfoDTO>> listById(IdListLongReq idList) {
+            // TODO Auto-generated method stub
+            return fallBackError("根据idlist查询用户集合");
+        }
 
     }
 

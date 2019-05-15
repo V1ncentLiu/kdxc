@@ -6,10 +6,13 @@ package com.kuaidao.manageweb.controller.user;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.apache.shiro.subject.Subject;
@@ -51,6 +54,7 @@ import com.kuaidao.sys.dto.role.RoleQueryDTO;
 import com.kuaidao.sys.dto.user.SysSettingDTO;
 import com.kuaidao.sys.dto.user.SysSettingReq;
 import com.kuaidao.sys.dto.user.UpdateUserPasswordReq;
+import com.kuaidao.sys.dto.user.UserDataAuthReq;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import com.kuaidao.sys.dto.user.UserInfoPageParam;
 import com.kuaidao.sys.dto.user.UserInfoParamListReqDTO;
@@ -149,14 +153,35 @@ public class UserController {
         }
         // 查询角色列表
         JSONResult<List<RoleInfoDTO>> list = userInfoFeignClient.roleList(new RoleQueryDTO());
-        // 查询字典业务线集合
-        request.setAttribute("businessLineList",
-                getDictionaryByCode(DicCodeEnum.BUSINESS_LINE.getCode()));
-        // 查询字典资源类别集合
-        request.setAttribute("clueCategoryList",
-                getDictionaryByCode(DicCodeEnum.CLUECATEGORY.getCode()));
-
         request.setAttribute("roleList", list.getData());
+        // 查询字典业务线集合
+        List<DictionaryItemRespDTO> businessLineList =
+                getDictionaryByCode(DicCodeEnum.BUSINESS_LINE.getCode());
+        List<DictionaryItemRespDTO> clueCategoryList =
+                getDictionaryByCode(DicCodeEnum.CLUECATEGORY.getCode());
+        List<Map<String, Object>> dataList = new ArrayList<Map<String, Object>>();
+        for (DictionaryItemRespDTO businessLine : businessLineList) {
+            Map<String, Object> map = new HashMap<String, Object>();
+            map.put("value", businessLine.getValue());
+            map.put("name", businessLine.getName());
+            map.put("checkedCitiesObj", new ArrayList<String>());
+            map.put("checkedCities", new ArrayList<String>());
+            map.put("checkAll", false);
+            map.put("isIndeterminate", false);
+            map.put("dicCode", DicCodeEnum.CLUECATEGORY.getCode());
+            List<Map<String, Object>> categoryList = new ArrayList<Map<String, Object>>();
+            for (DictionaryItemRespDTO clueCategory : clueCategoryList) {
+                Map<String, Object> categoryMap = new HashMap<String, Object>();
+                categoryMap.put("value", clueCategory.getValue());
+                categoryMap.put("label", clueCategory.getName());
+                categoryMap.put("isChecked", false);
+                categoryList.add(categoryMap);
+            }
+            map.put("categoryList", categoryList);
+            dataList.add(map);
+        }
+        request.setAttribute("dataList", dataList);
+
         return "user/addUserPage";
     }
 
@@ -171,7 +196,8 @@ public class UserController {
         JSONResult<List<TreeData>> treeJsonRes = organizationFeignClient.query();
         // 查询用户信息
         JSONResult<UserInfoDTO> jsonResult = userInfoFeignClient.get(new IdEntityLong(id));
-        request.setAttribute("user", jsonResult.getData());
+        UserInfoDTO user = jsonResult.getData();
+        request.setAttribute("user", user);
         // 查询组织机构树
         if (treeJsonRes != null && JSONResult.SUCCESS.equals(treeJsonRes.getCode())
                 && treeJsonRes.getData() != null) {
@@ -183,7 +209,49 @@ public class UserController {
         JSONResult<List<RoleInfoDTO>> list = userInfoFeignClient.roleList(new RoleQueryDTO());
 
         request.setAttribute("roleList", list.getData());
+        // 查询字典业务线集合
+        List<DictionaryItemRespDTO> businessLineList =
+                getDictionaryByCode(DicCodeEnum.BUSINESS_LINE.getCode());
+        List<DictionaryItemRespDTO> clueCategoryList =
+                getDictionaryByCode(DicCodeEnum.CLUECATEGORY.getCode());
+        List<Map<String, Object>> dataList = new ArrayList<Map<String, Object>>();
 
+        List<UserDataAuthReq> userDataAuthList = user.getUserDataAuthList();
+        Map<String, String> authMap = new HashMap<String, String>();
+        for (UserDataAuthReq userDataAuthReq : userDataAuthList) {
+            if (userDataAuthReq.getBusinessLine() != null
+                    && StringUtils.isNotBlank(userDataAuthReq.getDicValue())) {
+                authMap.put(userDataAuthReq.getBusinessLine() + "", userDataAuthReq.getDicValue());
+            }
+        }
+
+        for (DictionaryItemRespDTO businessLine : businessLineList) {
+            Map<String, Object> map = new HashMap<String, Object>();
+            map.put("value", businessLine.getValue());
+            map.put("name", businessLine.getName());
+            map.put("checkedCitiesObj", new ArrayList<String>());
+            String string = authMap.get(businessLine.getValue());
+            if (string != null) {
+                map.put("checkedCities", string.split(","));
+                map.put("isIndeterminate", true);
+            } else {
+                map.put("checkedCities", new ArrayList<String>());
+                map.put("isIndeterminate", false);
+            }
+            map.put("checkAll", false);
+            map.put("dicCode", DicCodeEnum.CLUECATEGORY.getCode());
+            List<Map<String, Object>> categoryList = new ArrayList<Map<String, Object>>();
+            for (DictionaryItemRespDTO clueCategory : clueCategoryList) {
+                Map<String, Object> categoryMap = new HashMap<String, Object>();
+                categoryMap.put("value", clueCategory.getValue());
+                categoryMap.put("label", clueCategory.getName());
+                categoryMap.put("isChecked", false);
+                categoryList.add(categoryMap);
+            }
+            map.put("categoryList", categoryList);
+            dataList.add(map);
+        }
+        request.setAttribute("dataList", dataList);
         return "user/editUserPage";
     }
 

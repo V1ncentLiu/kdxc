@@ -77,7 +77,8 @@
 <div th:include="_footer_include :: #jsLib"></div>
 
 <script th:inline="javascript">
-var roleCode = [[${roleCode}]];//搜索商务组
+var roleCode = [[${roleCode}]];//当前用户角色
+var orgId = [[${orgId}]];//当前用户机构
     Array.prototype.remove = function(val) {
         var index = this.indexOf(val);
         if (index > -1) {
@@ -132,7 +133,12 @@ var roleCode = [[${roleCode}]];//搜索商务组
             //  打开 组织机构多选框
                 vm.OraTreeMuliCheckDialog = true;
                 var param = {};
-                axios.post("/organization/organization/query", param).then(function (response) {
+                var url="/organization/organization/query";
+                if(roleCode=="YWGLY"){
+                	param.id=orgId;
+                	url="/organization/organization/listOrgTreeDataByParentId";
+                }
+                axios.post(url, param).then(function (response) {
                     console.log(response.data)
                     vm.expandedKeys = [];
                     vm.dataTree = response.data.data;
@@ -301,6 +307,7 @@ var roleCode = [[${roleCode}]];//搜索商务组
             console.info("create method");
             if(roleCode=="YWGLY"){
             	this.isShowAll=false;
+            	this.annForm.radio=1;
             	document.getElementById("org").setAttribute('style', 'display:block');
             }
            // this.getFormData();
