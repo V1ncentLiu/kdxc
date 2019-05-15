@@ -166,8 +166,20 @@
                 </el-table-column>
                 <el-table-column align="center" label="签约单" width="240">
                     <template slot-scope="scope">
+                        <!--<div  v-if="scope.row.signList.length>=1"   v-for="item in scope.row.signList">
+                            <el-button size="mini"  type="text" @click="toSignPage(item)">{{item.signNo}}</el-button>
+                        </div>-->
                         <div  v-if="scope.row.signList.length>=1"   v-for="item in scope.row.signList">
-                            <el-button size="mini"  type="text" @click="toSignPage(item)">查看签约单({{item.signNo}})</el-button>
+                            <el-button size="mini"  v-if="item.signStatus==0" type="text"  style="color: red" @click="toSignPage(item)">
+                                <span style="color: blue">{{item.signNo}}</span><span style="color: red">（被驳回）</span>
+                            </el-button>
+                            <el-button size="mini"  v-else-if="item.signStatus==1" type="text" style="color:#4ab65c" @click="toSignPage(item)">
+                                <span style="color: blue">{{item.signNo}}</span><span style="color: green">（审核中）</span>
+                            </el-button>
+                            <el-button size="mini"  v-else-if="item.signStatus==2 && item.refundStatus==6" type="text" style="color:red" @click="toSignPage(item)">
+                                <span style="color: blue">{{item.signNo}}</span><span style="color: red">（已退款）</span>
+                            </el-button>
+                            <el-button size="mini"  v-else-if="item.signStatus==2 && item.refundStatus != 6" type="text" @click="toSignPage(item)">{{item.signNo}} </el-button>
                         </div>
                     </template>
                 </el-table-column>

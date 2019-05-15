@@ -1,11 +1,16 @@
 package com.kuaidao.manageweb.controller.sign;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+
+import com.alibaba.fastjson.JSONObject;
+import com.kuaidao.aggregation.dto.financing.RefundRebateDTO;
+import com.kuaidao.manageweb.feign.financing.RefundFeignClient;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.slf4j.Logger;
@@ -13,10 +18,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 import com.kuaidao.aggregation.constant.AggregationConstant;
 import com.kuaidao.aggregation.dto.busmycustomer.RejectSignOrderReqDTO;
 import com.kuaidao.aggregation.dto.busmycustomer.SignRecordReqDTO;
@@ -73,6 +75,9 @@ public class SignRecordController {
 
     @Autowired
     BusVisitRecordFeignClient visitRecordFeignClient;
+
+    @Autowired
+    private RefundFeignClient refundFeignClient;
 
 
     /**
@@ -399,6 +404,21 @@ public class SignRecordController {
         req.setRoleCode(RoleCodeEnum.SWJL.name());
         return userInfoFeignClient.listByOrgAndRole(req);
     }
+
+    /**
+     * 根据签约单id获取退款信息
+     */
+    @PostMapping("/getRefundInfo")
+    @ResponseBody
+    public JSONResult<RefundRebateDTO> getRefundInfo(@RequestBody String signId){
+        Map map = new HashMap();
+        map = JSONObject.parseObject(signId);
+        map.put("type", 1);
+        map.put("status", 3);
+        JSONResult<RefundRebateDTO> refundRebateDTOs = refundFeignClient.getRefundInfo(map);
+        return refundRebateDTOs;
+    }
+
 
 
 }
