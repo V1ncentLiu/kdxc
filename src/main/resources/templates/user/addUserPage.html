@@ -313,11 +313,24 @@ var addUserVm= new Vue({
             clickOrgNode(data,node,obj){//点击左侧节点
                 	addUserVm.form.orgId=data.id;
                 	addUserVm.form.orgName=data.label;
-                	if(data.businessLine==255){
-                		isAuth=true;
-                	}else{
-                		isAuth=false;
-                	}
+                     var param = {};
+                     param.id = data.id;
+                     //根据id获取数据
+                     axios.post('/organization/organization/queryOrgById',param)
+                     .then(function (response) {
+                         var data =  response.data;
+                         if(data.code=='0'){
+                         	var businessLine = data.data.businessLine;
+                         	if(businessLine){
+                         		if(businessLine==127){
+                         			addUserVm.isAuth=true;
+                            	}else{
+                            		addUserVm.isAuth=false;
+                            	}
+                         	}
+                         }
+                        
+                     })
                 	addUserVm.dialogFormChooseOrg=false;
             },
           //返回
