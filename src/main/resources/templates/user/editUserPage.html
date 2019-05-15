@@ -392,6 +392,24 @@ var updateUserVm= new Vue({
         },
         mounted(){
             document.getElementById('userManage').style.display = 'block';
+            var param = {};
+            param.id = user.orgId;
+            //根据id获取数据
+            axios.post('/organization/organization/queryOrgById',param)
+            .then(function (response) {
+                var data =  response.data;
+                if(data.code=='0'){
+                	var businessLine = data.data.businessLine;
+                	if(businessLine){
+                		if(businessLine==127){
+                			addUserVm.isAuth=true;
+                   		}else{
+                   			addUserVm.isAuth=false;
+                   		}
+                	}
+                }
+               
+            })
         }
     })
 </script>
