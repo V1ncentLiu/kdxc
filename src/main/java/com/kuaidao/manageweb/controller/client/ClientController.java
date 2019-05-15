@@ -648,12 +648,15 @@ public class ClientController {
     
     
     /**
-     *  天润坐席登录
+     *  七陌坐席登录
      * @param result
      * @return
      */
     @PostMapping("/qimoLogin")
     @ResponseBody
+    @RequiresPermissions("aggregation:qimoClient:import")
+    @LogRecord(description = "七陌坐席", operationType = OperationType.LOGIN,
+            menuName = MenuEnum.QIMO_CLIENT_MANAGEMENT)
     public JSONResult qimoLogin(@RequestBody QimoLoginReqDTO reqDTO ) {
         String loginName = reqDTO.getLoginName();
         String bindType = reqDTO.getBindType();
@@ -667,6 +670,17 @@ public class ClientController {
                 session.setAttribute("loginName", loginName);
                 if("2".equals(bindType)) {
                     session.setAttribute("bindType", bindType);
+                }
+                UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+                ClientLoginReCordDTO clientLoginRecord = new ClientLoginReCordDTO();
+                clientLoginRecord.setAccountId(curLoginUser.getId());
+                clientLoginRecord.setAccountType(reqDTO.getAccountType());
+                clientLoginRecord.setOrgId(curLoginUser.getOrgId());
+                clientLoginRecord.setCno(qimoClient.getClientNo());
+                clientLoginRecord.setClientType(reqDTO.getClientType());
+                JSONResult<Boolean> loginRecordJr = clientFeignClient.clientLoginRecord(clientLoginRecord);
+                if(!JSONResult.SUCCESS.equals(loginRecordJr.getCode())) {
+                    logger.error("qimo_login_put_redis,param{{}},res{{}}",clientLoginRecord,loginRecordJr);
                 }
                 return new JSONResult<>().success(true);
             }
