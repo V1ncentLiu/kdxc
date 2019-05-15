@@ -42,7 +42,7 @@
                     </el-col>
                     <el-col :span="12">
                         <el-form-item label="所属角色：" :label-width="formLabelWidth1" prop="roleName">
-                            <el-input v-model="form.roleName" autocomplete="off" style="margin-right: 6px;"></el-input>
+                            <el-input v-model="form.roleName" autocomplete="off" style="width:185px;margin-right: 6px;"></el-input>
                             <el-button type="primary" size="small" @click="dialogFormChooseRole = true">选择角色</el-button>
                         </el-form-item>
                     </el-col>
@@ -50,8 +50,8 @@
                 <el-row>
                     <el-col :span="12">
                         <el-form-item label="所属组织：" :label-width="formLabelWidth1" prop="orgName">
-                            <el-input v-model="form.orgName" autocomplete="off" style="margin-right: 6px;"></el-input>
-                            <el-button type="primary" size="small" @click="dialogFormChooseOrg = true">选择组织</el-button>
+                            <el-input v-model="form.orgName" autocomplete="off" style="width:185px;margin-right: 6px;"></el-input>
+                            <el-button type="primary" @click="dialogFormChooseOrg = true">选择组织</el-button>
                         </el-form-item>
                     </el-col>
                     <el-col :span="12">
@@ -75,6 +75,34 @@
                         <!--</el-form-item>-->
                     <!--</el-col>-->
                 <!--</el-row>-->
+                <el-row v-show="isAuth">
+                    <p class="fs16 marginB20">设定查看已分发资源数据权限：</p>
+                    <el-table 
+                        ref="multipleTable"
+                        tooltip-effect="dark"
+                        style="width: 100%"
+                        border
+                        :data="dataTableCheckbox"
+                        highlight-current-row
+                        class="marginB20"
+                        >
+                        <el-table-column align="center" width="55" label="序号" type="index"></el-table-column>
+                        <el-table-column align="center" label="业务线">
+                            <template slot-scope="{ row, index }">
+                                <el-checkbox :indeterminate="row.isIndeterminate" v-model="row.checkAll" @change="handleCheckAllChange(row,index)">{{row.name}}</el-checkbox>
+                            </template>
+                        </el-table-column>
+                        <el-table-column align="center" label="本业务线下的可查看资源类别">
+                            <template slot-scope="{ row, index }">
+                                <el-checkbox-group v-model="row.checkedCities"
+                                    @change="handleCheckedCitiesChange(row,index)">
+                                    <el-checkbox v-for="item in row.categoryList" :label="item.value"  :key="item.value">{{item.label}}
+                                    </el-checkbox>
+                                </el-checkbox-group>
+                            </template>
+                        </el-table-column>
+                    </el-table>
+                </el-row>
                 <el-row style="margin-top: 10px;">
                     <el-form-item class="f-tac">
                         <el-button type="primary" @click="onSubmit('form')">提交</el-button>
@@ -123,6 +151,7 @@
 </body>
 <script th:inline="javascript">
 var orgData=[[${orgData}]];
+var dataList=[[${dataList}]];
 
 var expandedKeys =[];//默认展开节点
 for(var i=0;i<orgData.length;i++){
@@ -154,6 +183,7 @@ var updateUserVm= new Vue({
                 tableRadio:roleId,
                 dialogFormChooseRole: false,
                 dialogFormChooseOrg: false,
+                isAuth: true,
                 form: {
                 	name: user.name,
                     username: user.username,
@@ -229,7 +259,8 @@ var updateUserVm= new Vue({
                 },{
                     value: 3,
                     label: '锁定'
-                }]
+                }],
+                dataTableCheckbox: dataList
             }        	  
         },
         methods: {
@@ -256,6 +287,11 @@ var updateUserVm= new Vue({
             clickOrgNode(data,node,obj){//点击左侧节点
                 	updateUserVm.form.orgId=data.id;
                 	updateUserVm.form.orgName=data.label;
+                	if(data.businessLine==255){
+                		isAuth=true;
+                	}else{
+                		isAuth=false;
+                	}
                 	updateUserVm.dialogFormChooseOrg=false;
                 	updateUserVm.isShow=true;
             },
@@ -275,6 +311,20 @@ var updateUserVm= new Vue({
        	             param.phone = formData.phone;
        	             param.status = formData.status;
        	             param.orgId = formData.orgId;
+       	          if(this.isAuth){
+	       	             var list = [];
+	       	             var dataTableCheckbox=this.dataTableCheckbox;
+		       	         for(i=0;i<dataTableCheckbox.length;i++){
+		       	        	 if(dataTableCheckbox[i].checkedCities.length!=0){
+		       	        		 var userDataAuth={};
+		       	        		 userDataAuth.businessLine=dataTableCheckbox[i].value;
+		       	        		 userDataAuth.dicCode=dataTableCheckbox[i].dicCode;
+		       	        		 userDataAuth.dicValue=dataTableCheckbox[i].checkedCities.join(',');
+			       	        	 list.push(userDataAuth);
+		       	        	 }
+		                 }
+	       	             param.userDataAuthList = list;
+    	             }
        	             console.info(param);
        	             var roleList=new Array();
        	          	 roleList.push(formData.roleId);
@@ -299,7 +349,33 @@ var updateUserVm= new Vue({
           	            return false;
           	          }
           	        });
-            }
+            },
+            simpleClone(data) {
+                return JSON.parse(JSON.stringify(data));
+            },
+            handleCheckAllChange(item,index) {
+                var tabledata = item.categoryList;
+                var tabledata1=[]
+                for(i=0;i<tabledata.length;i++){
+                    tabledata1.push(tabledata[i].value)
+                }
+                if(item.checkAll){
+                	item.checkedCities=this.simpleClone(tabledata1);
+                }else{
+                	item.checkedCities=[];
+                }
+                item.isIndeterminate=false;
+            },
+            handleCheckedCitiesChange(item,index) {
+                var tabledata = item.categoryList;
+                var tabledata1=[]
+                for(i=0;i<tabledata.length;i++){
+                    tabledata1.push(tabledata[i].value)
+                }
+                var checkedCount = item.checkedCities.length;
+                item.checkAll = checkedCount === tabledata1.length;
+                item.isIndeterminate = (checkedCount > 0) && (checkedCount < tabledata1.length);
+            },
         },
         mounted(){
             document.getElementById('userManage').style.display = 'block';

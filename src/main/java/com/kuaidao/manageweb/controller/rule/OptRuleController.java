@@ -359,7 +359,7 @@ public class OptRuleController {
         String reminderTime = getSysSetting(SysConstant.OPT_CATEGORY);
         List<DictionaryItemRespDTO> dictionaryByCode = getDictionaryByCode(Constants.CLUE_CATEGORY);
         List<DictionaryItemRespDTO> notOptCategory = new ArrayList<DictionaryItemRespDTO>();
-        if (StringUtils.isNoneBlank(reminderTime) && dictionaryByCode != null) {
+        if (StringUtils.isNotBlank(reminderTime) && dictionaryByCode != null) {
             String[] split = reminderTime.split(",");
             for (DictionaryItemRespDTO dictionaryItemRespDTO : dictionaryByCode) {
                 for (int i = 0; i < split.length; i++) {
