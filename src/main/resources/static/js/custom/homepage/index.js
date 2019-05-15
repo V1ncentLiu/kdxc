@@ -321,6 +321,8 @@ var homePageVM=new Vue({
         	var param={};
         	param.bindType = bindType+"";
         	param.loginName = loginClient;
+        	param.accountType = homePageVM.accountType;
+        	param.clientType = homePageVM.loginClientForm.clientType;
         	 axios.post('/client/client/qimoLogin',param)
              .then(function (response) {
                  var data =  response.data;
@@ -340,6 +342,22 @@ var homePageVM=new Vue({
                      clientInfo.clientType = homePageVM.loginClientForm.clientType;
                      clientInfo.bindType = homePageVM.loginClientForm.bindPhoneType;
                      localStorage.setItem("clientInfo",JSON.stringify(clientInfo));
+                     
+                    /* var recordParam = {};
+                     recordParam.clientType=homePageVM.loginClientForm.clientType;
+                     recordParam.bindPhone= bindPhone;
+                     recordParam.cno= loginClient;
+                     recordParam.accountType=homePageVM.accountType;
+                     //记录坐席登录
+                     axios.post('/client/client/clientLoginRecord',recordParam)
+                     .then(function (response) {
+                     })
+                     .catch(function (error) {
+                        console.log(error);
+                     })
+                     .then(function () {
+                       // always executed
+                     });*/
                      
                  }else{
                 	 console.error(data);
