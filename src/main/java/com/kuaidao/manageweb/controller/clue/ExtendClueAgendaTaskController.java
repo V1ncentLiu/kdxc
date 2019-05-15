@@ -547,7 +547,7 @@ public class ExtendClueAgendaTaskController {
     @RequestMapping("/importInvitearea")
     @RequiresPermissions("waitDistributResource:importExcel")
     @LogRecord(description = "导入线索", operationType = LogRecord.OperationType.IMPORTS,
-            menuName = MenuEnum.WAIT_DISTRIBUT_RESOURCE)
+        menuName = MenuEnum.WAIT_DISTRIBUT_RESOURCE)
     @ResponseBody
     public JSONResult importInvitearea(@RequestBody ClueAgendaTaskDTO clueAgendaTaskDTO)
             throws Exception {
@@ -616,6 +616,7 @@ public class ExtendClueAgendaTaskController {
         if (list != null && list.size() > 0) {
 
             for (ClueAgendaTaskDTO clueAgendaTaskDTO1 : list) {
+                logger.info("clue import:{{}}", clueAgendaTaskDTO1);
                 boolean islegal = true;// true合法 false不合法
                 // 判断是否存在该项目
                 if (islegal && clueAgendaTaskDTO1.getProjectName() != null

@@ -153,38 +153,42 @@
                 <el-table-column align="center" prop="status" label="签约单状态"  width="120">
                     <template slot-scope="scope">
                         <span v-if="scope.row.status===0">
-                            驳回&nbsp;<el-button @click="reasonClick(scope.row)" type="text">驳回原因</el-button>
+                            驳回&nbsp;<el-button size="mini" @click="reasonClick(scope.row)" type="text" style="color: blue">驳回原因</el-button>
                         </span>
                         <span v-else-if="scope.row.status===1">
-                            待审核                                    <span v-if="scope.row.payType ==1">
-                                                                                           (全款)                                                 
+                            待审核 <span v-if="scope.row.payType ==1">
+                                      (全款)
                                    </span>
-                                  <span v-else-if="scope.row.payType ==2">
-                                                                                           (定金)                                                 
-                                   </span>
-                                   <span v-else-if="scope.row.payType ==3">
-                                                                                          (追加定金)                                                
-                                   </span>
-                                   <span v-else-if="scope.row.payType ==4">
-                                                                                          (尾款)                                             
-                                   </span>
-                            
-                        </span>
-                        <span v-else-if="scope.row.status===2">
-                             有效               <span v-if="scope.row.payType ==1">
-                                                                                           (全款)                                                 
-                                   </span>
-                                  <span v-else-if="scope.row.payType ==2">
-                                                                                           (定金)                                                 
+                                   <span v-else-if="scope.row.payType ==2">
+                                      (定金)
                                    </span>
                                    <span v-else-if="scope.row.payType ==3">
-                                                                                          (追加定金)                                                
+                                       (追加定金)
                                    </span>
                                    <span v-else-if="scope.row.payType ==4">
-                                                                                          (尾款)                                             
+                                       (尾款)
                                    </span>
                         </span>
-                      
+                        <span v-else-if="scope.row.status===2 && scope.row.signStatus !=6 ">
+                             有效  <span v-if="scope.row.payType ==1">
+                                     (全款)
+                                   </span>
+                                   <span v-else-if="scope.row.payType ==2">
+                                      (定金)
+                                   </span>
+                                   <span v-else-if="scope.row.payType ==3">
+                                       (追加定金)
+                                   </span>
+                                   <span v-else-if="scope.row.payType ==4">
+                                       (尾款)
+                                   </span>
+                                   <span v-else-if="scope.row.signStatus == 6">
+                                       (尾款)
+                                   </span>
+                        </span>
+                        <span v-else-if="scope.row.status===2 && scope.row.signStatus === 6" >
+                             已退款&nbsp; <el-button size="mini" @click="refundClick(scope.row)" type="text" style="color: red">退款信息</el-button>
+                        </span>
                     </template>
                 </el-table-column>
                 <el-table-column align="center" prop="customerName" label="客户姓名"></el-table-column>  
@@ -240,6 +244,20 @@
     <!-- 驳回原因 -->
     <el-dialog title="驳回原因" :visible.sync="reasonDialog" width="540px">           
         <div class="fs16 marginB20" >{{rebutReason}}</div>
+    </el-dialog>
+    <!-- 退款信息 -->
+    <el-dialog title="退款信息" :visible.sync="refundDialog" width="500px" >
+        <template>
+            <el-row>
+                <p class="marginB10">退款时间：{{refundTable.refundTime}}</p>
+            </el-row>
+            <el-row>
+                <p class="marginB10">退款金额：{{refundTable.cusAmount}}</p>
+            </el-row>
+            <el-row>
+                <p class="marginB10" style="color: red">退款原因：{{refundTable.reason}}</p>
+            </el-row>
+        </template>
     </el-dialog>
     <!-- 付款明细 -->
     <el-dialog title="付款明细" :visible.sync="recordDialog" width="950px">
@@ -364,6 +382,9 @@
     var businessGroupList = [[${businessGroupList}]];
     var teleGroupList = [[${teleGroupList}]]; */
     //var teleSaleList = [[${teleSaleList}]];
+
+   //退款信息数据
+   var refundData = [[${refundData}]];
 </script>
 
 </body>
@@ -379,6 +400,7 @@
                 dialogFormVisible:false,
                 recordDialog:false,
                 reasonDialog:false,
+                refundDialog:false,
                 paymentDetailsShow:false,//判断全款付款明细表格是否显示
                 paymentDetailsShow2:false,//判断定金付款明细表格是否显示
                 paymentDetailsShow3:false,//判断二次定金付款明细表格是否显示
@@ -406,6 +428,7 @@
                 businessGroupList:[],
                 teleGroupList:[],
                 teleSaleList:[],
+                refundTable:[],
                 signTypeOpt: [{
                     value: 1,
                     label: '一次性全款'
@@ -588,6 +611,24 @@
                this.rebutReason = row.rebutReason;
                 this.reasonDialog=true;
             },
+
+            refundClick(row) {//退款信息
+                var param ={};
+                param.signId = row.id;
+                axios.post('/sign/signRecord/getRefundInfo', param)
+                    .then(function (response) {
+                        var result =  response.data;
+                        signRecordVM.refundTable = result;
+                        signRecordVM.refundTable.refundTime = result.data.refundTime;
+                        signRecordVM.refundTable.cusAmount = result.data.cusAmount;
+                        signRecordVM.refundTable.reason = result.data.reason;
+                    })
+                    .catch(function (error) {
+                        console.log(error);
+                    });
+                this.refundDialog=true;
+            },
+
             pass(){//审核通过
             	var rows = this.multipleSelection;
                 if(rows.length<1){

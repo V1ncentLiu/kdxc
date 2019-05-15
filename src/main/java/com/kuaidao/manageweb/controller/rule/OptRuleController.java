@@ -22,11 +22,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import com.kuaidao.aggregation.constant.AggregationConstant;
+import com.kuaidao.aggregation.dto.rule.AssignRuleTeamDTO;
 import com.kuaidao.aggregation.dto.rule.ClueAssignRuleDTO;
 import com.kuaidao.aggregation.dto.rule.ClueAssignRulePageParam;
 import com.kuaidao.aggregation.dto.rule.ClueAssignRuleReq;
 import com.kuaidao.common.constant.OrgTypeConstant;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
+import com.kuaidao.common.constant.SystemCodeConstant;
 import com.kuaidao.common.entity.IdEntityLong;
 import com.kuaidao.common.entity.IdListLongReq;
 import com.kuaidao.common.entity.JSONResult;
@@ -42,6 +44,7 @@ import com.kuaidao.manageweb.feign.rule.ClueAssignRuleFeignClient;
 import com.kuaidao.manageweb.feign.user.SysSettingFeignClient;
 import com.kuaidao.sys.constant.SysConstant;
 import com.kuaidao.sys.dto.dictionary.DictionaryItemRespDTO;
+import com.kuaidao.sys.dto.organization.OrganizationDTO;
 import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
 import com.kuaidao.sys.dto.organization.OrganizationRespDTO;
 import com.kuaidao.sys.dto.role.RoleInfoDTO;
@@ -93,8 +96,12 @@ public class OptRuleController {
     @RequestMapping("/initCreate")
     @RequiresPermissions("clueAssignRule:optRuleManager:add")
     public String initCreateProject(HttpServletRequest request) {
-        // 查询电销组和话务组
-        request.setAttribute("orgList", getTeleAndTrafficGroup());
+        // 查询话务组
+        request.setAttribute("trafficList", getTrafficGroup());
+        JSONResult<List<OrganizationDTO>> listBusinessLineOrg =
+                organizationFeignClient.listBusinessLineOrg();
+        // 查询所有业务线
+        request.setAttribute("businessLineList", listBusinessLineOrg.getData());
 
         // 查询优化类资源类别集合
         request.setAttribute("clueCategoryList", getOptCategory());
@@ -117,9 +124,28 @@ public class OptRuleController {
         // 查询优化规则信息
         JSONResult<ClueAssignRuleDTO> jsonResult =
                 clueAssignRuleFeignClient.get(new IdEntityLong(id));
-        request.setAttribute("clueAssignRule", jsonResult.getData());
-        // 查询电销组和话务组
-        request.setAttribute("orgList", getTeleAndTrafficGroup());
+        ClueAssignRuleDTO data = jsonResult.getData();
+        if (data != null && data.getTeleList() != null) {
+            List<AssignRuleTeamDTO> teleList = data.getTeleList();
+            for (AssignRuleTeamDTO assignRuleTeamDTO : teleList) {
+                OrganizationQueryDTO queryDTO = new OrganizationQueryDTO();
+                queryDTO.setSystemCode(SystemCodeConstant.HUI_JU);
+                queryDTO.setOrgType(OrgTypeConstant.DXZ);
+                queryDTO.setBusinessLine(assignRuleTeamDTO.getBusinessLine());
+                JSONResult<List<OrganizationRespDTO>> orgList =
+                        organizationFeignClient.queryOrgByParam(queryDTO);
+                assignRuleTeamDTO.setTeleOptions(orgList.getData());
+            }
+        }
+
+
+        request.setAttribute("clueAssignRule", data);
+        // 查询话务组
+        request.setAttribute("trafficList", getTrafficGroup());
+        JSONResult<List<OrganizationDTO>> listBusinessLineOrg =
+                organizationFeignClient.listBusinessLineOrg();
+        // 查询所有业务线
+        request.setAttribute("businessLineList", listBusinessLineOrg.getData());
         // 查询优化类资源类别集合
         request.setAttribute("clueCategoryList", getOptCategory());
         // 查询字典行业类别集合
@@ -310,21 +336,16 @@ public class OptRuleController {
     }
 
     /***
-     * 查询电销组加 话务组的集合
+     * 查询话务组的集合
      * 
      * @return
      */
-    private List<OrganizationRespDTO> getTeleAndTrafficGroup() {
+    private List<OrganizationRespDTO> getTrafficGroup() {
         OrganizationQueryDTO organizationQueryDTO = new OrganizationQueryDTO();
-        organizationQueryDTO.setOrgType(OrgTypeConstant.DXZ);
-        JSONResult<List<OrganizationRespDTO>> teleResult =
-                organizationFeignClient.queryOrgByParam(organizationQueryDTO);
         organizationQueryDTO.setOrgType(OrgTypeConstant.HWZ);
         JSONResult<List<OrganizationRespDTO>> trafficResult =
                 organizationFeignClient.queryOrgByParam(organizationQueryDTO);
-        List<OrganizationRespDTO> list = teleResult.getData();
-        list.addAll(trafficResult.getData());
-        return list;
+        return trafficResult.getData();
     }
 
     /**
@@ -338,7 +359,7 @@ public class OptRuleController {
         String reminderTime = getSysSetting(SysConstant.OPT_CATEGORY);
         List<DictionaryItemRespDTO> dictionaryByCode = getDictionaryByCode(Constants.CLUE_CATEGORY);
         List<DictionaryItemRespDTO> notOptCategory = new ArrayList<DictionaryItemRespDTO>();
-        if (StringUtils.isNoneBlank(reminderTime) && dictionaryByCode != null) {
+        if (StringUtils.isNotBlank(reminderTime) && dictionaryByCode != null) {
             String[] split = reminderTime.split(",");
             for (DictionaryItemRespDTO dictionaryItemRespDTO : dictionaryByCode) {
                 for (int i = 0; i < split.length; i++) {

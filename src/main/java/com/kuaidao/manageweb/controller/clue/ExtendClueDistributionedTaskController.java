@@ -123,6 +123,7 @@ public class ExtendClueDistributionedTaskController {
                     .fail(SysErrorCodeEnum.ERR_NOTEXISTS_DATA.getCode(), "角色没有权限");
         }
         queryDto.setResourceDirectorList(idList);
+        queryDto.setUserDataAuthList(user.getUserDataAuthList());
         JSONResult<PageBean<ClueDistributionedTaskDTO>> pageBeanJSONResult =
                 extendClueFeignClient.queryPageDistributionedTask(queryDto);
         return pageBeanJSONResult;
