@@ -140,6 +140,7 @@ public class AnnController {
             String roleCode = roleList.get(0).getRoleCode();
             request.setAttribute("roleCode", roleCode);
         }
+        request.setAttribute("orgId", user.getOrgId().toString());
         return "ann/annPublishPage";
     }
 

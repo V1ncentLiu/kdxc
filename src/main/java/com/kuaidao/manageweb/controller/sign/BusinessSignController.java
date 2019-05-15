@@ -451,6 +451,7 @@ public class BusinessSignController {
                 for (int i = 0; i < list.size(); i++) {
                     PayDetailRespDTO dto = list.get(i);
                     if ("2".equals(dto.getPayType())) {
+                        this.handlerData(dto,user);
                         one.add(dto);
                     } else if ("3".equals(dto.getPayType())) {
                         this.handlerData(dto,user);
@@ -515,11 +516,13 @@ public class BusinessSignController {
             String[] ratioArr = dto.getRepeatRatio().split(",",-1);
             for(String ratio : ratioArr){
                 if(ratio.contains(String.valueOf(userId))){
-                    Double scale = Double.valueOf(ratio.split(":",-1)[1]);
-                    BigDecimal scaleRatio = new BigDecimal((scale/100));
-                    BigDecimal repeatMoney = dto.getAmountPerformance().multiply(scaleRatio);
+                    String scale = ratio.split(":",-1)[2];
+                    double ss = Double.valueOf(scale)/100;
+                    BigDecimal scaleRatio = new BigDecimal(ss).setScale(2,   BigDecimal.ROUND_HALF_UP);
+                    BigDecimal repeatMoney = dto.getAmountPerformance().multiply(scaleRatio).setScale(2,   BigDecimal.ROUND_HALF_UP);
                     dto.setRepeatMoney(repeatMoney.toString());
                     dto.setRepeatRatio(scale.toString()+"%");
+                    break;
                 }
             }
         }

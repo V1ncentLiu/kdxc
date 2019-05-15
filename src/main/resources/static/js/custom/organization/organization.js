@@ -283,7 +283,9 @@
                         		businessLine = null;
                         		orgVM.tgzxBusinessLine = businessLine;
                         	}
-                        	orgVM.form.businessLine= businessLine;
+                        	orgVM.form.businessLine= businessLine+"";
+                    	}else{
+                    		orgVM.form.businessLine ="";
                     	}
                     }
                    
@@ -348,11 +350,19 @@
                 });
               },
               cancelForm(formName) {
-            	  //TODO dev
-                 //this.$refs[formName].resetFields();
-                 this.$refs[formName].clearValidate();
+                  //this.$refs[formName].resetFields();
+                  this.$refs[formName].clearValidate();
                   this.dialogFormVisible = false;
+                  this.resetOrgForm();
               },
+              resetOrgForm(){
+            	  this.form.orgType ='';
+            	  this.form.name='';
+            	  this.form.remark='';
+            	  this.form.id='';
+            	  this.form.businessLine=null;
+              },
+              
               initOrgTree(){//刷新根节点tree
             	  axios.post('/organization/organization/query',{})
                   .then(function (response) {
@@ -423,6 +433,20 @@
                     		  data.data.businessLine = null;
                     		  orgVM.tgzxBusinessLine=127;
                     	  }
+                    	  var orgData = data.data;
+                    	  var orgType = orgData.orgType;
+                    	  if(orgType){
+                    		  orgData.orgType = orgType+"";
+                    	  }else{
+                    		  orgData.orgType  = "";
+                    	  }
+                    	  var businessLine = orgData.businessLine;
+                    	  if(businessLine){
+                    		  orgData.businessLine = businessLine+"";
+                    	  }else{
+                    		  orgData.businessLine  = "";
+                    	  }
+                    	  
                           orgVM.form= data.data;
                           orgVM.form2.parentName=parentName;
                           //把当前的值存在临时变量里，当修改时，旧值和新值对比
@@ -449,8 +473,9 @@
               },
               closeAddOrgDialog(){//close 添加组织弹框
             	  this.tgzxBusinessLine = '';
-            	  //this.$refs['ruleForm'].resetFields();
-            	  this.$refs['ruleForm'].clearValidate();
+            	  // this.$refs['ruleForm'].resetFields();
+            	   this.$refs['ruleForm'].clearValidate();
+            	  this.resetOrgForm();
               },
               openStaffNumTable(orgId){//打开组内成员弹框
             	   this.dialogStaffNumVisible = true;
