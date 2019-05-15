@@ -8,7 +8,7 @@
     </style>
 </head>
 <body>
-<div id="businessContractRecord" class="businessContractRecord mainPadding" style="display: none;">  
+<div id="businessContractRecord" class="businessContractRecord mainPadding" style="display: none;">
     <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
         <el-breadcrumb-item>Home</el-breadcrumb-item>
         <el-breadcrumb-item>商务管理</el-breadcrumb-item>
@@ -22,7 +22,7 @@
             <el-button type="success" @click="pass">审核通过</el-button>
         </shiro:hasPermission>
     </el-row>
-    <div class="mainSearchBg">        
+    <div class="mainSearchBg">
         <div class="mainSearchFormBox">
             <el-form :inline="true" class="demo-form-inline mainSearchForm" :model="form" ref="form">
                 <el-form-item label="签约项目:">
@@ -34,8 +34,8 @@
                             :value="item.id">
                         </el-option>
                     </el-select>
-                </el-form-item> 
-                <el-form-item label="商务小组:">  
+                </el-form-item>
+                <el-form-item label="商务小组:">
                     <el-select v-model="form.businessGroupId" placeholder="商务小组" style="width: 100%;" clearable filterable>
                         <el-option
                             v-for="item in businessGroupList"
@@ -44,8 +44,8 @@
                             :value="item.id">
                         </el-option>
                     </el-select>
-                </el-form-item>    
-                <el-form-item label="商务经理:">  
+                </el-form-item>
+                <el-form-item label="商务经理:">
                     <el-select v-model="form.businessManagerId" placeholder="商务经理" style="width: 100%;" clearable filterable>
                         <el-option
                             v-for="item in busManagerList"
@@ -54,7 +54,7 @@
                             :value="item.id">
                         </el-option>
                     </el-select>
-                </el-form-item>  
+                </el-form-item>
                 <el-form-item label="签约时间:">
                     <el-date-picker
                         v-model="form.signStartTime"
@@ -70,7 +70,7 @@
                     </el-date-picker>
                 </el-form-item>
                 <el-row v-show="isShow">
-                    <el-form-item label="电销组:">  
+                    <el-form-item label="电销组:">
                         <el-select v-model="form.teleGroupid" placeholder="电销组" style="width: 100%;" clearable @change="changeTeleGroup" filterable>
                             <el-option
                                 v-for="item in teleGroupList"
@@ -79,8 +79,8 @@
                                 :value="item.id">
                             </el-option>
                         </el-select>
-                    </el-form-item>   
-                    <el-form-item label="创业顾问:">  
+                    </el-form-item>
+                    <el-form-item label="创业顾问:">
                         <el-select v-model="form.teleSaleId" placeholder="创业顾问" style="width: 100%;" clearable filterable>
                             <el-option
                                 v-for="item in teleSaleList"
@@ -89,8 +89,8 @@
                                 :value="item.id">
                             </el-option>
                         </el-select>
-                    </el-form-item>   
-                    <el-form-item label="签约类型:">  
+                    </el-form-item>
+                    <el-form-item label="签约类型:">
                         <el-select v-model="form.signType" placeholder="签约类型" clearable>
                             <el-option
                                 v-for="item in signTypeOpt"
@@ -99,8 +99,8 @@
                                 :value="item.value">
                             </el-option>
                         </el-select>
-                    </el-form-item>   
-                    <el-form-item label="签约单状态:">  
+                    </el-form-item>
+                    <el-form-item label="签约单状态:">
                         <el-select v-model="form.status" placeholder="签约单状态" clearable>
                             <el-option
                                 v-for="item in signOrderStatusOpt"
@@ -109,7 +109,7 @@
                                 :value="item.value">
                             </el-option>
                         </el-select>
-                    </el-form-item> 
+                    </el-form-item>
                     <el-form-item label="签约单编号:">
                         <el-input v-model="form.signNo" placeholder="签约单编号"></el-input>
                     </el-form-item>
@@ -123,22 +123,22 @@
                         </el-select>
                     </el-form-item>
                 </el-row>
-                <div class="mainSearchBtnBox"> 
-                    <el-button icon="el-icon-search" type="primary" @click="initSignRecordData" class="searchBtn">搜索</el-button>  
+                <div class="mainSearchBtnBox">
+                    <el-button icon="el-icon-search" type="primary" @click="initSignRecordData" class="searchBtn">搜索</el-button>
                     <!-- <el-button type="info" class="searchBtn">取消</el-button> -->
                     <span style="color: #5c6be8;cursor: pointer;margin:0 10px;" @click="toogleClick"><span v-if="isShow">收起</span><span v-else>展开更多</span><i :class="{'greycolor paddingL6 el-icon-arrow-up':isShow,'greycolor paddingL6 el-icon-arrow-down':!isShow}"></i></span>
-                </div>            
+                </div>
             </el-form>
-        </div>       
+        </div>
         <el-row>
-            <el-table 
+            <el-table
                 ref="dataTable"
                 tooltip-effect="dark"
                 style="width: 100%"
                 border
                  @selection-change="handleSelectionChange"
                  v-loading="loading"
-                :data="dataTable" 
+                :data="dataTable"
                 >
                 <el-table-column align="center" type="selection" width="55"></el-table-column>
                 <el-table-column align="center" prop="serialNum" label="序号" width="55"></el-table-column>
@@ -191,15 +191,15 @@
                         </span>
                     </template>
                 </el-table-column>
-                <el-table-column align="center" prop="customerName" label="客户姓名"></el-table-column>  
-                <el-table-column align="center" prop="idCard" label="客户身份证号" width="170"></el-table-column> 
-                <el-table-column align="center" prop="phone" label="客户联系电话" width="150"></el-table-column> 
-                <el-table-column align="center" prop="signProjectName" label="签约项目"></el-table-column>   
+                <el-table-column align="center" prop="customerName" label="客户姓名"></el-table-column>
+                <el-table-column align="center" prop="idCard" label="客户身份证号" width="170"></el-table-column>
+                <el-table-column align="center" prop="phone" label="客户联系电话" width="150"></el-table-column>
+                <el-table-column align="center" prop="signProjectName" label="签约项目"></el-table-column>
                 <el-table-column align="center" prop="signProvince" label="签约省份"></el-table-column>
-                <el-table-column align="center" prop="signCity" label="签约城市"></el-table-column> 
+                <el-table-column align="center" prop="signCity" label="签约城市"></el-table-column>
                 <el-table-column align="center" prop="signDictrict" label="签约区/县" width="100"></el-table-column>
-                <el-table-column align="center" prop="businessGroupName" label="商务小组"></el-table-column> 
-                <el-table-column align="center" prop="businessManagerName" label="商务经理"></el-table-column> 
+                <el-table-column align="center" prop="businessGroupName" label="商务小组"></el-table-column>
+                <el-table-column align="center" prop="businessManagerName" label="商务经理"></el-table-column>
                 <el-table-column align="center" prop="teleGroupName" label="电销组"></el-table-column>
                 <el-table-column align="center" prop="teleSaleName" label="创业顾问"></el-table-column>
                 <el-table-column align="center" prop="signShopType" label="签约店型" :formatter="getSignShopTypeText"></el-table-column>
@@ -223,7 +223,7 @@
     <!-- dialog -->
     <!-- 驳回处理 -->
     <el-dialog title="提示" :visible.sync="dialogFormVisible" width="540px">
-        <el-form :model="dialogForm" ref="dialogForm" :rules="dialogRules">            
+        <el-form :model="dialogForm" ref="dialogForm" :rules="dialogRules">
             <div class="fs16 marginB20">确定要将此{{signRecordArrTitle}} 签约单驳回吗？</div>
             <el-form-item label="驳回原因：" label-width="100px" prop="reason">
                 <el-input
@@ -242,7 +242,7 @@
         </div>
     </el-dialog>
     <!-- 驳回原因 -->
-    <el-dialog title="驳回原因" :visible.sync="reasonDialog" width="540px">           
+    <el-dialog title="驳回原因" :visible.sync="reasonDialog" width="540px">
         <div class="fs16 marginB20" >{{rebutReason}}</div>
     </el-dialog>
     <!-- 退款信息 -->
@@ -265,11 +265,11 @@
         <div v-show="paymentDetailsShow">
             <div class="fs16 marginB20">全款付款明细</div>
             <el-table
-                ref="recordTable" 
+                ref="recordTable"
                 tooltip-effect="dark"
                 style="width: 100%;margin-bottom: 20px;"
                 border
-                :data="recordTable" 
+                :data="recordTable"
                 >
                 <el-table-column align="center" prop="statementNo" label="结算单编号"></el-table-column>
                 <el-table-column align="center" prop="payMode" label="付款方式" :formatter="getPayModeText" width="80"></el-table-column>
@@ -279,15 +279,15 @@
                 <el-table-column align="center" prop="status" label="明细状态" :formatter="getStatusText" width="100"></el-table-column>
                 <el-table-column align="center" prop="remarks" label="备注"></el-table-column>
             </el-table>
-        </div>        
+        </div>
         <div v-show="paymentDetailsShow2">
             <div class="fs16 marginB20">定金付款明细</div>
             <el-table
-                ref="recordTable2" 
+                ref="recordTable2"
                 tooltip-effect="dark"
                 style="width: 100%;margin-bottom: 20px;"
                 border
-                :data="recordTable2" 
+                :data="recordTable2"
                 >
                 <el-table-column align="center" prop="statementNo" label="结算单编号"></el-table-column>
                 <el-table-column align="center" prop="payMode" label="付款方式" :formatter="getPayModeText" width="80"></el-table-column>
@@ -295,7 +295,7 @@
                 <el-table-column align="center" prop="amountReceived" label="实收金额" width="100"></el-table-column>
                 <el-table-column align="center" prop="amountPerformance" label="业绩金额" width="100"></el-table-column>
                 <el-table-column align="center" prop="amountBalance" label="余款金额" width="100"></el-table-column>
-                <el-table-column align="center" prop="makeUpTime" label="预计余款补齐时间" :formatter="getTimeText" width="140"></el-table-column>                
+                <el-table-column align="center" prop="makeUpTime" label="预计余款补齐时间" :formatter="getTimeText" width="140"></el-table-column>
                 <el-table-column align="center" prop="status" label="明细状态" :formatter="getStatusText" width="100"></el-table-column>
                 <el-table-column align="center" prop="remarks" label="备注"></el-table-column>
             </el-table>
@@ -303,11 +303,11 @@
         <div v-show="paymentDetailsShow3">
             <div class="fs16 marginB20">二次定金付款明细</div>
             <el-table
-                ref="recordTable3" 
+                ref="recordTable3"
                 tooltip-effect="dark"
                 style="width: 100%;margin-bottom: 20px;"
                 border
-                :data="recordTable3" 
+                :data="recordTable3"
                 >
                 <el-table-column align="center" prop="statementNo" label="结算单编号"></el-table-column>
                 <el-table-column align="center" prop="payMode" label="付款方式" :formatter="getPayModeText" width="80"></el-table-column>
@@ -315,7 +315,7 @@
                 <el-table-column align="center" prop="amountReceived" label="实收金额" width="100"></el-table-column>
                 <el-table-column align="center" prop="amountPerformance" label="业绩金额" width="100"></el-table-column>
                 <el-table-column align="center" prop="amountBalance" label="余款金额" width="100"></el-table-column>
-                <el-table-column align="center" prop="makeUpTime" label="预计余款补齐时间" :formatter="getTimeText" width="140"></el-table-column>                
+                <el-table-column align="center" prop="makeUpTime" label="预计余款补齐时间" :formatter="getTimeText" width="140"></el-table-column>
                 <el-table-column align="center" prop="status" label="明细状态" :formatter="getStatusText" width="100"></el-table-column>
                 <el-table-column align="center" prop="remarks" label="备注"></el-table-column>
             </el-table>
@@ -323,11 +323,11 @@
         <div v-show="paymentDetailsShow4">
             <div class="fs16 marginB20">尾款付款明细</div>
             <el-table
-                ref="recordTable" 
+                ref="recordTable"
                 tooltip-effect="dark"
                 style="width: 100%;margin-bottom: 20px;"
                 border
-                :data="recordTable4" 
+                :data="recordTable4"
                 >
                 <el-table-column align="center" prop="statementNo" label="结算单编号"></el-table-column>
                 <el-table-column align="center" prop="payMode" label="付款方式" :formatter="getPayModeText"></el-table-column>
@@ -464,7 +464,7 @@
                 rebutReason:'',//驳回原因
                 multipleSelection:[],
                 signRecordArrTitle:'',
-            }        	  
+            }
         },
         methods: {
             transVisitNum(row, column, cellValue, index){
@@ -498,7 +498,7 @@
             submitDialogForm(formName) {
                 this.$refs[formName].validate((valid) => {
                     if (valid) {
-                    	var param ={};	
+                    	var param ={};
                     	var rows = this.multipleSelection;
                     	if(rows.length==0){
                             rows.push(this.curRow);
@@ -517,8 +517,8 @@
                         if(!isPass){
                             return;
                         }
-                        
-                        
+
+
                         param.idList = idArr;
                         param.rebutReason = this.dialogForm.reason;
                         axios.post('/sign/signRecord/rejectSignOrder', param)
@@ -535,14 +535,14 @@
                             	signRecordVM.$message({message:resData.msg,type:'error'});
                                 console.error(resData);
                             }
-                        
+
                         })
                         .catch(function (error) {
                              console.log(error);
                         }).then(function(){
                         });
 
-                    	
+
                     } else {
                         console.log('error submit!!');
                         return false;
@@ -599,13 +599,13 @@
                         console.error(resData);
                     }
                     signRecordVM.recordDialog=true;
-                
+
                 })
                 .catch(function (error) {
                      console.log(error);
                 }).then(function(){
                 });
-               
+
             },
             reasonClick(row) {//驳回原因
                this.rebutReason = row.rebutReason;
@@ -654,7 +654,7 @@
                 if(!isPass){
                 	return;
                 }
-            	
+
                 this.$confirm('确定要将此 '+title+' 签约单审核通过吗？', '提示', {
                     confirmButtonText: '确定',
                     cancelButtonText: '取消',
@@ -662,7 +662,7 @@
                 }).then(() => {
                 	var param={};
                 	param.idList = idArr;
-                   
+
                     axios.post('/sign/signRecord/passAuditSignOrder', param)
                     .then(function (response) {
                         var resData = response.data;
@@ -675,18 +675,18 @@
                             signRecordVM.$message({message:resData.msg,type:'error'});
                             console.error(resData);
                         }
-                    
+
                     })
                     .catch(function (error) {
                          console.log(error);
                     }).then(function(){
                     });
-                    
+
                 }).catch(() => {
                     this.$message({
                         type: 'info',
                         message: '已取消审核'
-                    });          
+                    });
                 });
             },
 
@@ -723,7 +723,7 @@
             },
 
             initSignRecordData(){
-            	
+
                 var startTime = this.form.signStartTime;
                 var endTime = this.form.signEndTime;
                 var startTimestamp = Date.parse(new Date(startTime));
@@ -750,19 +750,19 @@
                         signRecordVM.pager.total= resData.total;
                         signRecordVM.pager.currentPage = resData.currentPage;
                         signRecordVM.pager.pageSize = resData.pageSize;
-                         
+
                      }else{
                     	 signRecordVM.$message({message:data.msg,type:'error'});
                          console.error(data);
                      }
-                 
+
                  })
                  .catch(function (error) {
                       console.log(error);
                  }).then(function(){
                 	 signRecordVM.loading=false;
                  });
-            	
+
             },
             OpenRejectSignRecordDialog(){
             	this.signRecordArrTitle='';
@@ -894,7 +894,7 @@
                      console.log(error);
                 });
             },
-            getProjectList(){//获取projectLits 
+            getProjectList(){//获取projectLits
             	   axios.post('/sign/signRecord/queryProjectList', {})
                    .then(function (response) {
                          var result =  response.data;
@@ -902,15 +902,15 @@
                         	 var table=result.data;
                              signRecordVM.projectList= table;
                          }else{
-                        	  console.error(response); 
+                        	  console.error(response);
                          }
-                         
+
                    })
                    .catch(function (error) {
                         console.log(error);
                    });
             },
-            queryBusManagerByOrgId(){//获取所有商务经理  
+            queryBusManagerByOrgId(){//获取所有商务经理
                 axios.post('/sign/signRecord/queryBusManagerByOrgId', {})
                 .then(function (response) {
                       var result =  response.data;
@@ -920,13 +920,13 @@
                       }else{
                     	  console.error(response);
                       }
-                      
+
                 })
                 .catch(function (error) {
                      console.log(error);
                 });
              },
-             queryBusGroupList(){//根据组织机构Id查询所有商务经理 
+             queryBusGroupList(){//根据组织机构Id查询所有商务经理
                  axios.post('/organization/organization/queryBusGroupList', {})
                  .then(function (response) {
                        var result =  response.data;
@@ -936,14 +936,14 @@
                        }else{
                            console.error(response);
                        }
-                       
+
                  })
                  .catch(function (error) {
                       console.log(error);
                  });
-            	 
+
              },
-             queryTeleGroupList(){//根据组织机构Id查询所有电销组 
+             queryTeleGroupList(){//根据组织机构Id查询所有电销组
                  axios.post('/organization/organization/queryTeleGroupList', {})
                  .then(function (response) {
                        var result =  response.data;
@@ -953,12 +953,12 @@
                        }else{
                            console.error(response);
                        }
-                       
+
                  })
                  .catch(function (error) {
                       console.log(error);
                  });
-                 
+
              },
              initSelect(){//初始下拉框
             	 this.getProjectList();
@@ -971,9 +971,9 @@
                     this.isShow=false
                 }else{
                     this.isShow=true
-                }          
+                }
             },
-            
+
 
         },
         mounted(){
