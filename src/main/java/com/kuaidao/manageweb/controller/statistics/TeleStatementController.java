@@ -53,6 +53,91 @@ public class TeleStatementController {
     }
     
     
+    /**
+     * 电销顾问跟踪表页面
+    * @return
+     */
+    @RequestMapping("/telemarketingFollowTable")
+    public String telemarketingFollowTable() {
+        return "reportforms/telemarketingFollowTable";
+    }
+    
+    
+    /**
+     * 电销顾问跟踪表页面 合计
+    * @return
+     */
+    @RequestMapping("/telemarketingFollowTableSum")
+    public String telemarketingFollowTableSum() {
+        return "reportforms/telemarketingFollowTableSum";
+    }
+    
+    
+    /**
+     * 电销顾问跟踪表页面 组
+    * @return
+     */
+    @RequestMapping("/telemarketingFollowTableTeam")
+    public String telemarketingFollowTableTeam() {
+        return "reportforms/telemarketingFollowTableTeam";
+    }
+    
+    /**
+     * 电销顾问跟踪表页面 个人
+    * @return
+     */
+    @RequestMapping("/telemarketingFollowTablePerson")
+    public String telemarketingFollowTablePerson() {
+        return "reportforms/telemarketingFollowTablePerson";
+    }
+    
+    
+    /**
+     * 电销顾问通话时长表页面
+    * @return
+     */
+    @RequestMapping("/telemarketingCallTable")
+    public String telemarketingCallTable() {
+        return "reportforms/telemarketingCallTable";
+    }
+    
+    /**
+     * 电销顾问通话时长表页面  合计
+    * @return
+     */
+    @RequestMapping("/telemarketingCallTableSum")
+    public String telemarketingCallTableSum() {
+        return "reportforms/telemarketingCallTableSum";
+    }
+    
+    
+    
+    /**
+     * 电销顾问通话时长表页面  组
+    * @return
+     */
+    @RequestMapping("/telemarketingCallTableTeam")
+    public String telemarketingCallTableTeam() {
+        return "reportforms/telemarketingCallTableTeam";
+    }
+    
+    
+    /**
+     * 电销顾问通话时长表页面  个人
+    * @return
+     */
+    @RequestMapping("/telemarketingCallTablePerson")
+    public String telemarketingCallTablePerson() {
+        return "reportforms/telemarketingCallTablePerson";
+    }
+    
+    
+    
+    
+    
+    
+    
+    
     
     
 }
