@@ -157,6 +157,40 @@
                             </el-option>
                         </el-select>
                     </el-form-item>
+
+                  <el-form-item label="首次是否接通:">
+                    <el-select v-model="form.firstCall" placeholder="首次是否接通" clearable >
+                      <el-option
+                          v-for="item in comArr"
+                          :key="item.value"
+                          :label="item.name"
+                          :value="item.value">
+                      </el-option>
+                    </el-select>
+                  </el-form-item>
+                  <el-form-item label="资源是否有效:">
+                    <el-select v-model="form.status" placeholder="资源是否有效" clearable >
+                      <el-option
+                          v-for="item in comArr"
+                          :key="item.value"
+                          :label="item.name"
+                          :value="item.value">
+                      </el-option>
+                    </el-select>
+                  </el-form-item>
+                  <el-form-item label="是否接通:">
+                    <el-select v-model="form.isCall" placeholder="是否接通" clearable >
+                      <el-option
+                          v-for="item in comArr"
+                          :key="item.value"
+                          :label="item.name"
+                          :value="item.value">
+                      </el-option>
+                    </el-select>
+                  </el-form-item>
+                  <el-form-item label="资源ID:">
+                    <el-input v-model="form.clueId" placeholder="资源ID"  @keyup.native="number"></el-input>
+                  </el-form-item>
                 </el-row>
                 <div class="mainSearchBtnBox">
                     <el-button icon="el-icon-search" type="primary" @click="initTableData" class="searchBtn">搜索</el-button>
@@ -349,6 +383,10 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                     resourceStage:'',
                     resourcePerson:'',
                     phone:'',
+                    clueId:'',
+                    isCall:"",
+                    status:"",
+                    firstCall:"",
                 },
                 pager:{
                     total: 0,
@@ -371,6 +409,11 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                 proSelectArr:proSelect,
                 dxBusinessList:[],
                 userArr:userList,
+                comArr:[
+                  {value:"",name:"全部"},
+                  {value:"1",name:"是"},
+                  {value:"0",name:"否"}
+                ],
                 tableData:[],
                 customer:'',
                 basic:'',
@@ -432,6 +475,10 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                 param.phone=this.form.phone;
                 param.category=this.form.resourceType;
                 param.industryCategory=this.form.tradeType;
+                param.status = this.form.status;
+                param.clueId = this.form.clueId;
+                param.isCall = this.form.isCall;
+                param.firstCall = this.form.firstCall;
                 var starTime=this.form.starTime;
                 var endTime=this.form.endTime;
                 if(endTime){
