@@ -36,7 +36,6 @@ public interface ExtendClueFeignClient {
     /**
      * 已审核列表查询
      *
-     * @param queryDto
      * @return
      */
     @RequestMapping(method = RequestMethod.POST, value = "/queryPageDistributionedTask")
@@ -46,7 +45,6 @@ public interface ExtendClueFeignClient {
     /**
      * 已审核列表查询
      *
-     * @param queryDto
      * @return
      */
     @RequestMapping(method = RequestMethod.POST, value = "/autoAllocationTask")
@@ -55,7 +53,6 @@ public interface ExtendClueFeignClient {
     /**
      * 新建线索
      *
-     * @param queryDto
      * @return
      */
     @RequestMapping(method = RequestMethod.POST, value = "/createClue")
@@ -64,7 +61,6 @@ public interface ExtendClueFeignClient {
     /**
      * 编辑线索
      *
-     * @param queryDto
      * @return
      */
     @RequestMapping(method = RequestMethod.POST, value = "/updateClue")
@@ -73,7 +69,6 @@ public interface ExtendClueFeignClient {
     /**
      * 撤回线索
      *
-     * @param queryDto
      * @return
      */
     @RequestMapping(method = RequestMethod.POST, value = "/recallClue")
@@ -82,11 +77,21 @@ public interface ExtendClueFeignClient {
     /**
      * 导入线索
      *
-     * @param queryDto
      * @return
      */
     @RequestMapping(method = RequestMethod.POST, value = "/import")
     public JSONResult<List<PushClueReq>> importclue(@RequestBody List<PushClueReq> list);
+
+    /**
+     * 导出线索：线索情况
+     */
+    @RequestMapping("/findClues")
+    public JSONResult<List<ClueDistributionedTaskDTO>> findClues(@RequestBody ClueDistributionedTaskQueryDTO queryDto);
+    /**
+     * 导出线索：资源沟通记录
+     */
+    @RequestMapping("/findCommunicateRecords")
+    public JSONResult<List<ClueDistributionedTaskDTO>> findCommunicateRecords(@RequestBody ClueDistributionedTaskQueryDTO queryDto);
 
     @Component
     static class HystrixClientFallback implements ExtendClueFeignClient {
@@ -143,8 +148,18 @@ public interface ExtendClueFeignClient {
             return fallBackError("导入线索");
         }
 
+        @Override
+        public JSONResult<List<ClueDistributionedTaskDTO>> findClues(
+            ClueDistributionedTaskQueryDTO queryDto) {
+            return fallBackError("导出线索：资源沟通记录");
+        }
+
+        @Override
+        public JSONResult<List<ClueDistributionedTaskDTO>> findCommunicateRecords(
+            ClueDistributionedTaskQueryDTO queryDto) {
+            return fallBackError("导出线索：资源情况");
+        }
+
     }
-
-
 
 }
