@@ -6,7 +6,7 @@
     </style>
 </head>
 <body>
-<div id="maindiv" class="maindiv mainPadding" style="display: none;">   
+<div id="maindiv" class="maindiv mainPadding" style="display: none;">    
     <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
         <el-breadcrumb-item>Home</el-breadcrumb-item>
         <el-breadcrumb-item>数据报表</el-breadcrumb-item>
@@ -16,24 +16,60 @@
         <el-button type="primary">昨天</el-button>
         <el-button type="success">近七天</el-button>
         <el-button type="warning">本月</el-button>  
-        <el-button type="danger">导出</el-button>  
+        <el-button type="danger">导出Excel报表</el-button>  
     </el-row>
     <div class="mainSearchBg">        
         <div class="mainSearchFormBox">
-           <el-form :inline="true" :model="clueSearchForm" class="demo-form-inline mainSearchForm" ref="clueSearchForm">                 
+           <el-form :inline="true" :model="form" class="demo-form-inline mainSearchForm" ref="form">                 
                 <el-form-item label="起止时间:">
-                    <el-date-picker format="yyyy-MM-dd HH:mm:ss" v-model="clueSearchForm.startTime" type="datetime" placeholder="选择日期"></el-date-picker>
+                    <el-date-picker format="yyyy-MM-dd HH:mm:ss" v-model="form.startTime" type="datetime" placeholder="选择日期"></el-date-picker>
                 </el-form-item>
                 <el-form-item label="—" class="widthauto">
-                   <el-date-picker format="yyyy-MM-dd HH:mm:ss" v-model="clueSearchForm.endTime" type="datetime" placeholder="选择日期"></el-date-picker>
+                   <el-date-picker format="yyyy-MM-dd HH:mm:ss" v-model="form.endTime" type="datetime" placeholder="选择日期"></el-date-picker>
                 </el-form-item>
-                <el-row v-show="isShow">
-                    
-                </el-row>
+                <el-form-item label="电销组:">  
+                    <el-select v-model="form.teleorg" placeholder="电销组" style="width: 100%;" clearable @change="currentTelSale" filterable>
+                        <el-option
+                            v-for="item in orgTeleArr"
+                            :key="item.id"
+                            :label="item.name"
+                            :value="item.id">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="电销顾问:">  
+                    <el-select 
+                        v-model="form.teleSaleId" 
+                        placeholder="电销顾问" 
+                        style="width: 100%;" 
+                        filterable 
+                        multiple 
+                        clearable  >
+                        <el-option
+                            v-for="item in busSaleArr"
+                            :key="item.id"
+                            :label="item.name"
+                            :value="item.id">
+                            <el-checkbox-group v-model="form.teleSaleId">
+                                <el-checkbox :label="item.id">{{item.name}}</el-checkbox>
+                            </el-checkbox-group>
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="分配来源:">  
+                    <el-select v-model="form.source" placeholder="分配来源" style="width: 100%;" clearable filterable>
+                        <el-option
+                            v-for="item in distributionSource"
+                            :key="item.id"
+                            :label="item.name"
+                            :value="item.id">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
                 <div class="mainSearchBtnBox">
                     <el-button icon="el-icon-search" type="primary" @click="searchTable()" class="searchBtn">搜索</el-button>
                     <!-- <el-button type="info" class="searchBtn">取消</el-button> -->
-                    <span style="color: #5c6be8;cursor: pointer;margin:0 10px;" @click="toogleClick"><span v-if="isShow">收起</span><span v-else>展开更多</span><i :class="{'greycolor paddingL6 el-icon-arrow-up':isShow,'greycolor paddingL6 el-icon-arrow-down':!isShow}"></i></span>
+                    <!-- <span style="color: #5c6be8;cursor: pointer;margin:0 10px;" @click="toogleClick"><span v-if="isShow">收起</span><span v-else>展开更多</span><i :class="{'greycolor paddingL6 el-icon-arrow-up':isShow,'greycolor paddingL6 el-icon-arrow-down':!isShow}"></i></span> -->
                 </div>  
             </el-form>
         </div>
@@ -75,6 +111,8 @@
 <div th:include="_footer_include :: #jsLib"></div>
 </body>
 <script th:inline="javascript">
+    var queryOrg=[[${queryOrg}]];//电销组
+    var distributionSource=[[${queryOrg}]];//分配来源
     var mainDivVM = new Vue({
         el: '#maindiv',
         data: function() {
@@ -129,7 +167,10 @@
                     amount1: '539',
                     amount2: '4.1',
                     amount3: 15
-                }]
+                }],
+                orgTeleArr:queryOrg,//电销组
+                busSaleArr:[],//创业顾问
+                distributionSource:distributionSource,//分配来源
             }             
         },
         methods: {            
@@ -138,8 +179,8 @@
                 this.multipleSelection = val;
             }, 
             searchTable() { 
-                var starTime=this.form.timeFrom;
-                var endTime=this.form.timeTo;
+                var starTime=this.form.startTime;
+                var endTime=this.form.endTime;
                 if(endTime){
                     if(starTime>endTime){
                         this.$message({
@@ -150,6 +191,17 @@
                     }
                 }
                 console.log('search')
+            },
+            currentTelSale(seleVal){//根据电销组选择创业顾问
+                if(null==seleVal||seleVal==""){
+                    return ;
+                }
+                param={};
+                param.orgId=seleVal;
+                param.roleCode="DXCYGW";
+                axios.post('/user/userManager/listByOrgAndRole' ,param).then(function (response) {  
+                    mainDivVM.busSaleArr=response.data.data;
+                });
             },
 
         },
