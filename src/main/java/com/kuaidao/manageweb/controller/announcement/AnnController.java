@@ -84,7 +84,7 @@ public class AnnController {
             dto.setCreateUser(user.getId());
         }
         logger.info("==============公告发布  开始=============");
-        logger.info("发布人：{}"+user);
+        logger.info("发布人：{}" + user);
         long annId = IdUtil.getUUID();
         dto.setId(annId); // 公告ID
         JSONResult jsonResult = announcementFeignClient.publishAnnouncement(dto);
@@ -113,7 +113,11 @@ public class AnnController {
                 return new JSONResult().fail("-1", "时间选项，开始时间大于结束时间!");
             }
         }
-
+        UserInfoDTO user = getUser();
+        dto.setCreateUser(user.getId());
+        if (user.getRoleList() != null && user.getRoleList().size() != 0) {
+            dto.setRoleCode(user.getRoleList().get(0).getRoleCode());
+        }
         JSONResult<PageBean<AnnouncementRespDTO>> pageBeanJSONResult =
                 announcementFeignClient.queryAnnouncement(dto);
         return pageBeanJSONResult;
