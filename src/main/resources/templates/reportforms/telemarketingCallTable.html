@@ -10,7 +10,7 @@
     <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
         <el-breadcrumb-item>Home</el-breadcrumb-item>
         <el-breadcrumb-item>数据报表</el-breadcrumb-item>
-        <el-breadcrumb-item>资源分配表</el-breadcrumb-item>
+        <el-breadcrumb-item>电销顾问跟踪表</el-breadcrumb-item>
     </el-breadcrumb>    
     <el-row class="marginB20">
         <el-button type="primary">昨天</el-button>
@@ -28,7 +28,7 @@
                    <el-date-picker format="yyyy-MM-dd HH:mm:ss" v-model="form.endTime" type="datetime" placeholder="选择日期"></el-date-picker>
                 </el-form-item>
                 <el-form-item label="电销组:">  
-                    <el-select v-model="form.teleorg" placeholder="电销组" style="width: 100%;" clearable @change="currentTelSale" filterable>
+                    <el-select v-model="form.teleorg" placeholder="电销组" style="width: 100%;" clearable filterable>
                         <el-option
                             v-for="item in orgTeleArr"
                             :key="item.id"
@@ -37,29 +37,10 @@
                         </el-option>
                     </el-select>
                 </el-form-item>
-                <el-form-item label="电销顾问:">  
-                    <el-select 
-                        v-model="form.teleSaleId" 
-                        placeholder="电销顾问" 
-                        style="width: 100%;" 
-                        filterable 
-                        multiple 
-                        clearable  >
+                <el-form-item label="客户级别:">  
+                    <el-select v-model="form.source" placeholder="客户级别" style="width: 100%;" clearable filterable>
                         <el-option
-                            v-for="item in busSaleArr"
-                            :key="item.id"
-                            :label="item.name"
-                            :value="item.id">
-                            <el-checkbox-group v-model="form.teleSaleId">
-                                <el-checkbox :label="item.id">{{item.name}}</el-checkbox>
-                            </el-checkbox-group>
-                        </el-option>
-                    </el-select>
-                </el-form-item>
-                <el-form-item label="分配来源:">  
-                    <el-select v-model="form.source" placeholder="分配来源" style="width: 100%;" clearable filterable>
-                        <el-option
-                            v-for="item in distributionSource"
+                            v-for="item in clientRank"
                             :key="item.id"
                             :label="item.name"
                             :value="item.id">
@@ -77,30 +58,40 @@
             <el-table
                 :data="tableData"
                 border
+                show-summary
                 style="width: 100%">
                 <el-table-column
                     prop="id"
-                    label="ID"
-                    width="180">
+                    label="序号"
+                    width="55">
                 </el-table-column>
                 <el-table-column
                     prop="name"
-                    label="姓名">
+                    label="电销组">
                 </el-table-column>
                 <el-table-column
                     prop="amount1"
-                    sortable
-                    label="数值 1">
+                    label="电销顾问">
                 </el-table-column>
                 <el-table-column
                     prop="amount2"
-                    sortable
-                    label="数值 2">
+                    label="客户级别">
                 </el-table-column>
                 <el-table-column
                     prop="amount3"
-                    sortable
-                    label="数值 3">
+                    label="资源数">
+                </el-table-column>
+                <el-table-column
+                    prop="amount4"
+                    label="回访次数">
+                </el-table-column>
+                <el-table-column
+                    prop="amount5"
+                    label="回访资源数">
+                </el-table-column>
+                <el-table-column
+                    prop="amount6"
+                    label="人均回访次数">
                 </el-table-column>
             </el-table>
             <!-- <table-pagination :pager="pager" @change="searchTable"></table-pagination> -->
@@ -112,65 +103,34 @@
 </body>
 <script th:inline="javascript">
     var queryOrg=[[${queryOrg}]];//电销组
-    var distributionSource=[[${queryOrg}]];//分配来源
+    var clientRank=[[${queryOrg}]];//分配来源
     var mainDivVM = new Vue({
         el: '#maindiv',
         data: function() {
             return {
                 multipleSelection: [],//选择行
                 form: {},
-                formLabelWidth: '150px',
-                dataTable: [],
-                options: [{
-                    value: '选项1',
-                    label: '黄金糕'
-                }, {
-                    value: '选项2',
-                    label: '双皮奶'
-                }, {
-                    value: '选项3',
-                    label: '蚵仔煎'
-                }, {
-                    value: '选项4',
-                    label: '龙须面'
-                }, {
-                    value: '选项5',
-                    label: '北京烤鸭'
-                }],
                 tableData: [{
                     id: '12987122',
                     name: '王小虎',
                     amount1: '234',
                     amount2: '3.2',
-                    amount3: 10
+                    amount3: 10,
+                    amount4: 10,
+                    amount5: 10,
+                    amount6: 10,
                 }, {
                     id: '12987123',
                     name: '王小虎',
                     amount1: '165',
                     amount2: '4.43',
-                    amount3: 12
-                }, {
-                    id: '12987124',
-                    name: '王小虎',
-                    amount1: '324',
-                    amount2: '1.9',
-                    amount3: 9
-                }, {
-                    id: '12987125',
-                    name: '王小虎',
-                    amount1: '621',
-                    amount2: '2.2',
-                    amount3: 17
-                }, {
-                    id: '12987126',
-                    name: '王小虎',
-                    amount1: '539',
-                    amount2: '4.1',
-                    amount3: 15
+                    amount3: 12,
+                    amount4: 10,
+                    amount5: 10,
+                    amount6: 10,
                 }],
                 orgTeleArr:queryOrg,//电销组
-                busSaleArr:[],//创业顾问
-                distributionSource:distributionSource,//分配来源
+                clientRank:clientRank,//分配来源
             }             
         },
         methods: {            
@@ -191,19 +151,7 @@
                     }
                 }
                 console.log('search')
-            },
-            currentTelSale(seleVal){//根据电销组选择创业顾问
-                if(null==seleVal||seleVal==""){
-                    return ;
-                }
-                param={};
-                param.orgId=seleVal;
-                param.roleCode="DXCYGW";
-                axios.post('/user/userManager/listByOrgAndRole' ,param).then(function (response) {  
-                    mainDivVM.busSaleArr=response.data.data;
-                });
-            },
-
+            }
         },
         created(){            
             this.searchTable();
