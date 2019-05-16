@@ -280,10 +280,12 @@
                     	var businessLine = data.data.businessLine;
                     	if(businessLine){
                     		if(businessLine==127){
-                        		businessLine = null;
-                        		orgVM.tgzxBusinessLine = businessLine;
+                        		orgVM.tgzxBusinessLine = 127;
+                        		businessLine = "";
+                        	}else{
+                        		orgVM.form.businessLine= businessLine+"";
                         	}
-                        	orgVM.form.businessLine= businessLine+"";
+                    		
                     	}else{
                     		orgVM.form.businessLine ="";
                     	}
@@ -430,7 +432,7 @@
                       var data =  response.data;
                       if(data.code=='0'){
                     	  if(data.data.businessLine==127){
-                    		  data.data.businessLine = null;
+                    		  data.data.businessLine = "";
                     		  orgVM.tgzxBusinessLine=127;
                     	  }
                     	  var orgData = data.data;
