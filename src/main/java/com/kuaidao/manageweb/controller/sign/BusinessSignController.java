@@ -99,7 +99,7 @@ public class BusinessSignController {
 
     /**
      * 有效性签约单确认列表页面
-     * 
+     *
      * @return
      */
     @RequestMapping("/businessSignValidPage")
@@ -109,11 +109,11 @@ public class BusinessSignController {
         orgDto.setSystemCode(SystemCodeConstant.HUI_JU);
         // 商务小组
         JSONResult<List<OrganizationRespDTO>> swList =
-                organizationFeignClient.queryOrgByParam(orgDto);
+            organizationFeignClient.queryOrgByParam(orgDto);
         orgDto.setOrgType(OrgTypeConstant.DXZ);
         // 电销小组
         JSONResult<List<OrganizationRespDTO>> dxList =
-                organizationFeignClient.queryOrgByParam(orgDto);
+            organizationFeignClient.queryOrgByParam(orgDto);
 
         // 查询项目列表
         JSONResult<List<ProjectInfoDTO>> allProject = projectInfoFeignClient.allProject();
@@ -129,26 +129,26 @@ public class BusinessSignController {
 
     /**
      * 有效性签约单确认列表
-     * 
+     *
      * @return
      */
     @RequestMapping("/businessSignValidList")
     @ResponseBody
     public JSONResult<PageBean<BusinessSignDTO>> businessSignValidList(HttpServletRequest request,
-            @RequestBody BusinessSignDTO businessSignDTO) {
+        @RequestBody BusinessSignDTO businessSignDTO) {
         JSONResult<PageBean<BusinessSignDTO>> list =
-                businessSignFeignClient.businessSignValidList(businessSignDTO);
+            businessSignFeignClient.businessSignValidList(businessSignDTO);
         return list;
     }
 
     /**
      * 签约有效性判断
-     * 
+     *
      * @return
      */
     @RequestMapping("/updateBusinessSignDTOValidByIds")
     @LogRecord(description = "签约有效性修改", operationType = LogRecord.OperationType.UPDATE,
-            menuName = MenuEnum.BUSINESSSIGNVALID)
+        menuName = MenuEnum.BUSINESSSIGNVALID)
     @ResponseBody
     public JSONResult addTelemarketingLayout(@RequestBody BusinessSignDTO businessSignDTO) {
         return businessSignFeignClient.updateBusinessSignDTOValidByIds(businessSignDTO);
@@ -174,7 +174,7 @@ public class BusinessSignController {
     @LogRecord(description = "添加签约单", operationType = OperationType.INSERT,
         menuName = MenuEnum.SIGN_ORDER)
     public JSONResult<Boolean> saveSign(@Valid @RequestBody BusSignInsertOrUpdateDTO dto,
-            BindingResult result) throws Exception {
+        BindingResult result) throws Exception {
         if (result.hasErrors()) {
             return CommonUtil.validateParam(result);
         }
@@ -193,7 +193,7 @@ public class BusinessSignController {
     @RequestMapping("/update")
     @ResponseBody
     public JSONResult<Boolean> updateSign(@Valid @RequestBody BusSignInsertOrUpdateDTO dto,
-            BindingResult result) throws Exception {
+        BindingResult result) throws Exception {
         if (result.hasErrors()) {
             return CommonUtil.validateParam(result);
         }
@@ -234,7 +234,7 @@ public class BusinessSignController {
     @RequestMapping("/querySignList")
     @ResponseBody
     public JSONResult<List<BusSignRespDTO>> querySignList(@RequestBody SignRecordReqDTO dto)
-            throws Exception {
+        throws Exception {
         return businessSignFeignClient.querySignList(dto);
     }
 
@@ -244,7 +244,7 @@ public class BusinessSignController {
     @RequestMapping("/queryRebuts")
     @ResponseBody
     public JSONResult<List<BusSignRespDTO>> queryRebuts(@RequestBody SignRecordReqDTO dto)
-            throws Exception {
+        throws Exception {
         dto.setStatus(0);
         JSONResult<List<BusSignRespDTO>> listRes = businessSignFeignClient.querySignList(dto);
         return listRes;
@@ -257,7 +257,7 @@ public class BusinessSignController {
     @RequestMapping("/echo")
     @ResponseBody
     public JSONResult<BusSignRespDTO> echo(@RequestBody IdEntityLong idEntityLong)
-            throws Exception {
+        throws Exception {
         BusSignRespDTO signDTO = new BusSignRespDTO();
         // 查询需要进行回显的信息，并进行映射
         // 最新一次的邀约
@@ -266,7 +266,7 @@ public class BusinessSignController {
         String linkPhone = linkPhone(idEntityLong);
         // 查询最新一次到访
         JSONResult<BusVisitRecordRespDTO> maxNewOne =
-                visitRecordFeignClient.findMaxNewOne(idEntityLong);
+            visitRecordFeignClient.findMaxNewOne(idEntityLong);
         // 查询最新一次签约记录
         JSONResult<BusSignRespDTO> maxNewOne1 = businessSignFeignClient.findMaxNewOne(idEntityLong);
 
@@ -351,7 +351,7 @@ public class BusinessSignController {
     @RequestMapping("/visitEcho")
     @ResponseBody
     public JSONResult<BusSignRespDTO> visitEcho(@RequestBody IdEntityLong idEntityLong)
-            throws Exception {
+        throws Exception {
         BusSignRespDTO signDTO = new BusSignRespDTO();
         // 查询需要进行回显的信息，并进行映射
         // 最新一次的邀约
@@ -360,7 +360,7 @@ public class BusinessSignController {
         String linkPhone = linkPhone(idEntityLong);
         // 查询最新一次到访
         JSONResult<BusVisitRecordRespDTO> maxNewOne =
-                visitRecordFeignClient.findMaxNewOne(idEntityLong);
+            visitRecordFeignClient.findMaxNewOne(idEntityLong);
         Boolean flag = true;
         if (JSONResult.SUCCESS.equals(maxNewOne.getCode())) {
             BusVisitRecordRespDTO data = maxNewOne.getData();
@@ -393,15 +393,15 @@ public class BusinessSignController {
         IdListLongReq idListLongReq = new IdListLongReq();
         idListLongReq.setIdList(list);
         JSONResult<List<CustomerClueDTO>> listJSONResult =
-                clueCustomerFeignClient.findcustomersByClueIds(idListLongReq);
+            clueCustomerFeignClient.findcustomersByClueIds(idListLongReq);
         String linkPhone = "";
         if (JSONResult.SUCCESS.equals(listJSONResult.getCode())) {
             List<CustomerClueDTO> data = listJSONResult.getData();
             if(data !=null && data.size()>0) {
-            	CustomerClueDTO customerClueDTO = data.get(0);
+                CustomerClueDTO customerClueDTO = data.get(0);
                 linkPhone = customerClueDTO.getLinkPhone();
             }
-            
+
         }
         return linkPhone;
     }
@@ -410,7 +410,7 @@ public class BusinessSignController {
      */
     @RequestMapping("/myCustomSignRecordPage")
     public String myCustomSignRecordPage(HttpServletRequest request, @RequestParam String clueId,
-                                  @RequestParam String signId, @RequestParam String readyOnly,@RequestParam(required = false) String showSignButton) throws Exception {
+        @RequestParam String signId, @RequestParam String readyOnly,@RequestParam(required = false) String showSignButton) throws Exception {
         UserInfoDTO user = getUser();
         IdEntityLong idEntityLong = new IdEntityLong();
         idEntityLong.setId(Long.valueOf(signId));
@@ -439,7 +439,11 @@ public class BusinessSignController {
             PayDetailReqDTO detailReqDTO = new PayDetailReqDTO();
             detailReqDTO.setSignId(Long.valueOf(signId));
             JSONResult<List<PayDetailRespDTO>> resListJson =
-                    payDetailFeignClient.queryList(detailReqDTO);
+                payDetailFeignClient.queryList(detailReqDTO);
+
+            boolean oneRepeatStatus = false;//定金判单是否显示
+            boolean twoRepeatStatus = false;//追加定金判单是否显示
+            boolean threeRepeatStatus = false;//尾款判单是否显示
             if (JSONResult.SUCCESS.equals(resListJson.getCode())) {
                 List<PayDetailRespDTO> list = resListJson.getData();
                 // 定金
@@ -453,21 +457,33 @@ public class BusinessSignController {
                     if ("2".equals(dto.getPayType())) {
                         this.handlerData(dto,user);
                         one.add(dto);
+                        if(dto.getRepeatStatus() != null && dto.getRepeatStatus() ==1){
+                            oneRepeatStatus =true;
+                        }
                     } else if ("3".equals(dto.getPayType())) {
                         this.handlerData(dto,user);
                         two.add(dto);
+                        if(dto.getRepeatStatus() != null && dto.getRepeatStatus() ==1){
+                            twoRepeatStatus =true;
+                        }
                     } else if ("4".equals(dto.getPayType())) {
                         this.handlerData(dto,user);
                         three.add(dto);
+                        if(dto.getRepeatStatus() != null && dto.getRepeatStatus() ==1){
+                            threeRepeatStatus =true;
+                        }
                     }
                 }
                 request.setAttribute("oneData", one);
                 request.setAttribute("twoData", two);
                 request.setAttribute("threeData", three);
+                request.setAttribute("oneRepeatStatus", oneRepeatStatus);
+                request.setAttribute("twoRepeatStatus", twoRepeatStatus);
+                request.setAttribute("threeRepeatStatus", threeRepeatStatus);
             }
         }
         //查询签约单退款信息
-        if (sign.getSignStatus() == 1 && sign.getRefundStatus() == 6) {
+        if (sign.getSignStatus() == 2 && sign.getRefundStatus() == 6) {
             Map map = new HashMap();
             map.put("signId", Long.valueOf(signId));
             map.put("type", 1);
@@ -512,7 +528,8 @@ public class BusinessSignController {
      */
     private void handlerData(PayDetailRespDTO dto, UserInfoDTO user){
         Long userId = user.getId();
-        if(StringUtils.isNotBlank(dto.getRepeatRatio())){
+        if(StringUtils.isNotBlank(dto.getRepeatRatio()) && dto.getRepeatRatio().contains(String.valueOf(userId))){
+            //dto.setRepeatStatus(1);
             String[] ratioArr = dto.getRepeatRatio().split(",",-1);
             for(String ratio : ratioArr){
                 if(ratio.contains(String.valueOf(userId))){
@@ -525,6 +542,9 @@ public class BusinessSignController {
                     break;
                 }
             }
+        }else {
+            dto.setRepeatMoney("");
+            dto.setRepeatRatio("");
         }
     }
     /**
@@ -532,7 +552,7 @@ public class BusinessSignController {
      */
     @RequestMapping("/visitRecordPage")
     public String visitRecordPage(HttpServletRequest request, @RequestParam String clueId,
-            @RequestParam String signId, @RequestParam String readyOnly,@RequestParam(required = false) String showSignButton) throws Exception {
+        @RequestParam String signId, @RequestParam String readyOnly,@RequestParam(required = false) String showSignButton) throws Exception {
 
         IdEntityLong idEntityLong = new IdEntityLong();
         idEntityLong.setId(Long.valueOf(signId));
@@ -573,7 +593,7 @@ public class BusinessSignController {
             PayDetailReqDTO detailReqDTO = new PayDetailReqDTO();
             detailReqDTO.setSignId(Long.valueOf(signId));
             JSONResult<List<PayDetailRespDTO>> resListJson =
-                    payDetailFeignClient.queryList(detailReqDTO);
+                payDetailFeignClient.queryList(detailReqDTO);
             if (JSONResult.SUCCESS.equals(resListJson.getCode())) {
                 List<PayDetailRespDTO> list = resListJson.getData();
                 // 定金
@@ -638,15 +658,15 @@ public class BusinessSignController {
     }
     /**
      * 查询字典表
-     * 
+     *
      * @param code
      * @return
      */
     private List<DictionaryItemRespDTO> getDictionaryByCode(String code) {
         JSONResult<List<DictionaryItemRespDTO>> queryDicItemsByGroupCode =
-                dictionaryItemFeignClient.queryDicItemsByGroupCode(code);
+            dictionaryItemFeignClient.queryDicItemsByGroupCode(code);
         if (queryDicItemsByGroupCode != null
-                && JSONResult.SUCCESS.equals(queryDicItemsByGroupCode.getCode())) {
+            && JSONResult.SUCCESS.equals(queryDicItemsByGroupCode.getCode())) {
             return queryDicItemsByGroupCode.getData();
         }
         return null;
