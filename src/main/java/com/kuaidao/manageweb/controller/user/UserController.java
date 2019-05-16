@@ -49,6 +49,7 @@ import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
 import com.kuaidao.sys.constant.SysConstant;
 import com.kuaidao.sys.constant.UserErrorCodeEnum;
 import com.kuaidao.sys.dto.dictionary.DictionaryItemRespDTO;
+import com.kuaidao.sys.dto.organization.OrganizationDTO;
 import com.kuaidao.sys.dto.role.RoleInfoDTO;
 import com.kuaidao.sys.dto.role.RoleQueryDTO;
 import com.kuaidao.sys.dto.user.SysSettingDTO;
@@ -155,15 +156,15 @@ public class UserController {
         JSONResult<List<RoleInfoDTO>> list = userInfoFeignClient.roleList(new RoleQueryDTO());
         request.setAttribute("roleList", list.getData());
         // 查询字典业务线集合
-        List<DictionaryItemRespDTO> businessLineList =
-                getDictionaryByCode(DicCodeEnum.BUSINESS_LINE.getCode());
+        JSONResult<List<OrganizationDTO>> listBusinessLineOrg =
+                organizationFeignClient.listBusinessLineOrg();
         List<DictionaryItemRespDTO> clueCategoryList =
                 getDictionaryByCode(DicCodeEnum.CLUECATEGORY.getCode());
         List<Map<String, Object>> dataList = new ArrayList<Map<String, Object>>();
-        for (DictionaryItemRespDTO businessLine : businessLineList) {
+        for (OrganizationDTO organizationDTO : listBusinessLineOrg.getData()) {
             Map<String, Object> map = new HashMap<String, Object>();
-            map.put("value", businessLine.getValue());
-            map.put("name", businessLine.getName());
+            map.put("value", organizationDTO.getBusinessLine());
+            map.put("name", organizationDTO.getName());
             map.put("checkedCitiesObj", new ArrayList<String>());
             map.put("checkedCities", new ArrayList<String>());
             map.put("checkAll", false);
@@ -210,8 +211,9 @@ public class UserController {
 
         request.setAttribute("roleList", list.getData());
         // 查询字典业务线集合
-        List<DictionaryItemRespDTO> businessLineList =
-                getDictionaryByCode(DicCodeEnum.BUSINESS_LINE.getCode());
+        // 查询字典业务线集合
+        JSONResult<List<OrganizationDTO>> listBusinessLineOrg =
+                organizationFeignClient.listBusinessLineOrg();
         List<DictionaryItemRespDTO> clueCategoryList =
                 getDictionaryByCode(DicCodeEnum.CLUECATEGORY.getCode());
         List<Map<String, Object>> dataList = new ArrayList<Map<String, Object>>();
@@ -225,12 +227,12 @@ public class UserController {
             }
         }
 
-        for (DictionaryItemRespDTO businessLine : businessLineList) {
+        for (OrganizationDTO organizationDTO : listBusinessLineOrg.getData()) {
             Map<String, Object> map = new HashMap<String, Object>();
-            map.put("value", businessLine.getValue());
-            map.put("name", businessLine.getName());
+            map.put("value", organizationDTO.getBusinessLine());
+            map.put("name", organizationDTO.getName());
             map.put("checkedCitiesObj", new ArrayList<String>());
-            String string = authMap.get(businessLine.getValue());
+            String string = authMap.get(organizationDTO.getBusinessLine());
             if (string != null) {
                 map.put("checkedCities", string.split(","));
                 map.put("isIndeterminate", true);

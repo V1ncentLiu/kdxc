@@ -197,7 +197,7 @@
                 <el-row>
                     <el-col :span="12">
                         <el-form-item label="微信：" :label-width="formLabelWidth">
-                          {{customer.wechat}}<span v-show="customer.wechat">/二维码</span>
+                          {{customer.wechat}}<span @click="wechatVisible = true" v-if="(customer.wechat2 !=null && customer.wechat2 !='')||(customer.wechatCode !=null && customer.wechatCode !='')" style="color: rgb(0, 114, 255); cursor: pointer;">查看更多</span>
                         </el-form-item>
                     </el-col>
                     <el-col :span="12">
@@ -280,6 +280,17 @@
 	    <el-button @click="dialogChooseList = false">取 消</el-button>	    
 	  </div>
 	</el-dialog>
+	<el-dialog title="查看微信/二维码" :visible.sync="wechatVisible">
+    	<el-form :model="dialogForm" ref="dialogForm">
+        <!--展示phone2  phone3  phone4 phone5-->
+            <el-form-item  label="微信2：" :label-width="formLabelWidth"  >
+                <el-button type="text" disabled>{{customer.wechat2}}</el-button>
+            </el-form-item>
+            <el-form-item  label="图片二维码：" :label-width="formLabelWidth"  >
+                <img v-show="customer.wechatCode!=''"  :src="customer.wechatCode">
+            </el-form-item>
+         </el-form>
+    </el-dialog>
 </div>
 </body>
 <!-- import Vue before Element -->
@@ -296,6 +307,7 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                 isShow:false,
                 dialogFormVisible: false,
                 dialogChooseList: false,
+                wechatVisible: false,
                 multipleSelection: [],//选择行
                 allTableColums:[],//自定义列
                 tableColums:[],
