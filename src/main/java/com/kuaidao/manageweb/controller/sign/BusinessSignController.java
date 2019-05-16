@@ -488,7 +488,12 @@ public class BusinessSignController {
             Map map = new HashMap();
             map.put("signId", Long.valueOf(signId));
             map.put("type", 1);
-            map.put("status", 4);
+            if ("4".equals(sign.getRefundStatus())) {
+                map.put("status", 3);// 确认退款
+            }
+            if ("6".equals(sign.getRefundStatus())) {
+                map.put("status", 4);// 已退款
+            }
             JSONResult<RefundRebateDTO> refundRebateDTOs = refundFeignClient.getRefundInfo(map);
             if(refundRebateDTOs != null){
                 List<RefundRebateDTO> refundRebateList = new ArrayList<>();
