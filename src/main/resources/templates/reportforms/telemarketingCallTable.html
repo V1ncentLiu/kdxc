@@ -10,7 +10,7 @@
     <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
         <el-breadcrumb-item>Home</el-breadcrumb-item>
         <el-breadcrumb-item>数据报表</el-breadcrumb-item>
-        <el-breadcrumb-item>电销顾问跟踪表</el-breadcrumb-item>
+        <el-breadcrumb-item>电销顾问通话时长表</el-breadcrumb-item>
     </el-breadcrumb>    
     <el-row class="marginB20">
         <el-button type="primary">昨天</el-button>
@@ -37,8 +37,8 @@
                         </el-option>
                     </el-select>
                 </el-form-item>
-                <el-form-item label="客户级别:">  
-                    <el-select v-model="form.source" placeholder="客户级别" style="width: 100%;" clearable filterable>
+                <el-form-item label="客户状态:">  
+                    <el-select v-model="form.source" placeholder="客户状态" style="width: 100%;" clearable filterable>
                         <el-option
                             v-for="item in clientRank"
                             :key="item.id"
@@ -59,9 +59,11 @@
                 :data="tableData"
                 border
                 show-summary
+                :summary-method="summaryFun"
                 style="width: 100%">
                 <el-table-column
                     prop="id"
+                    type="index"
                     label="序号"
                     width="55">
                 </el-table-column>
@@ -70,28 +72,38 @@
                     label="电销组">
                 </el-table-column>
                 <el-table-column
-                    prop="amount1"
-                    label="电销顾问">
-                </el-table-column>
-                <el-table-column
                     prop="amount2"
-                    label="客户级别">
+                    label="通话次数">
                 </el-table-column>
                 <el-table-column
                     prop="amount3"
-                    label="资源数">
+                    label="通话接通次数">
                 </el-table-column>
                 <el-table-column
                     prop="amount4"
-                    label="回访次数">
+                    label="通话接通率">
                 </el-table-column>
                 <el-table-column
                     prop="amount5"
-                    label="回访资源数">
+                    label="通话量">
                 </el-table-column>
                 <el-table-column
                     prop="amount6"
-                    label="人均回访次数">
+                    label="接通量">
+                </el-table-column>
+                <el-table-column
+                    prop="amount7"
+                    label="资源接通率">
+                </el-table-column>
+                <el-table-column
+                    prop="amount8"
+                    label="总有效通话时长"
+                    :formatter="timeFormat">
+                </el-table-column>
+                <el-table-column
+                    prop="amount9"
+                    label="人均天有效通话时长"
+                    :formatter="timeFormat">
                 </el-table-column>
             </el-table>
             <!-- <table-pagination :pager="pager" @change="searchTable"></table-pagination> -->
@@ -111,23 +123,27 @@
                 multipleSelection: [],//选择行
                 form: {},
                 tableData: [{
-                    id: '12987122',
-                    name: '王小虎',
-                    amount1: '234',
-                    amount2: '3.2',
+                    id: '',
+                    name: '王-1-1-1',
+                    amount2: 1000,
                     amount3: 10,
-                    amount4: 10,
+                    amount4: '10%',
                     amount5: 10,
                     amount6: 10,
+                    amount7: '10%',
+                    amount8: 155799,
+                    amount9: 155799
                 }, {
-                    id: '12987123',
-                    name: '王小虎',
-                    amount1: '165',
-                    amount2: '4.43',
+                    id: '',
+                    name: '王-1-1-2',
+                    amount2: 1000,
                     amount3: 12,
-                    amount4: 10,
+                    amount4: '10%',
                     amount5: 10,
                     amount6: 10,
+                    amount7: '10%',
+                    amount8: 100000,
+                    amount9: 0,
                 }],
                 orgTeleArr:queryOrg,//电销组
                 clientRank:clientRank,//分配来源
@@ -135,7 +151,6 @@
         },
         methods: {            
             handleSelectionChange(val) {//选择节点的事件
-                console.log(val)
                 this.multipleSelection = val;
             }, 
             searchTable() { 
@@ -151,7 +166,73 @@
                     }
                 }
                 console.log('search')
-            }
+            },
+            summaryFun (param) {
+                const { columns, data } = param;
+                const sums = [];
+                columns.forEach((column, index) => {
+                    if (index === 0) {
+                        sums[index] = '合计';
+                        return;
+                    }
+                    if (index === 1) {
+                        sums[index] = '';
+                        return;
+                    }
+                    const values = data.map(item => Number(item[column.property]));
+                    if (!values.every(value => isNaN(value))) {
+                        sums[index] = values.reduce((prev, curr) => {
+                            const value = Number(curr);
+                            if (!isNaN(value)) {
+                                return prev + curr;
+                            } 
+                        }, 0);
+                    }
+                });
+                sums[sums.length-2] = this.timeFun (sums[sums.length-2]);
+                sums[sums.length-1] = this.timeFun (sums[sums.length-1]);
+                return sums;
+            },
+            timeFormat (row, column) {
+                var time = row[column.property];
+                var timeResult = this.timeFun (time); 
+                return timeResult;
+            },
+    //         timeFun (time) {
+    //             if (time == undefined) {
+    //                  return "";
+    //             } 
+    //             if (time >= 60 && time <= 3600) {
+    //                 time = parseInt(time / 60) + "分" + time % 60 + "秒";
+    //             } else {
+    //                 if (time > 3600) {
+    //                     time = parseInt(time / 3600) + "时" + parseInt(((time % 3600) / 60)) + "分" + time % 60 + "秒";
+    //                 }
+    //                 else {
+    //                     time = time + "秒";
+    //                 }
+    //             }
+    //             return time;   
+    //         },
+            timeFun(s){
+                var t="";
+                var hour = Math.floor(s/3600);
+                var min = Math.floor(s/60) % 60;
+                var sec = s % 60;
+                if(hour<10){
+                    t+="0";
+                }
+                t+=hour+"时"
+                if(min < 10){
+                    t += "0";
+                }
+                t += min + "分";
+                if(sec < 10){
+                    t += "0";
+                }
+                t += sec + "秒";
+                return t;
+            },
         },
         created(){            
             this.searchTable();
