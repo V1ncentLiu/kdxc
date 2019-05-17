@@ -55,7 +55,7 @@
             </el-form>
         </div>
         <el-row>
-            <el-table
+            <!-- <el-table
                 :data="tableData"
                 border
                 show-summary
@@ -84,6 +84,25 @@
                     sortable
                     label="数值 3">
                 </el-table-column>
+            </el-table> -->
+            <el-table 
+                ref="tableData"
+                tooltip-effect="dark"
+                style="width: 100%"
+                border
+                :data="tableData"
+                show-summary
+                >
+                <el-table-column align="center" type="index" label="序号" width="55"></el-table-column>
+                <!-- 组列 -->
+                <el-table-column align="center" :key="index" :prop="item.fieldCode" :label="item.displayName" v-for="(item,key,index) in tableColums" v-if="item.fieldCode == 'telemarketingTeam'">
+                    <template slot-scope="scope">
+                        <el-button @click="gotoTeam(scope.row)" type="text" size="small">{{scope.row.teamVal}}</el-button>
+                    </template>
+                </el-table-column>
+                <!-- 其他列 -->
+                <el-table-column align="center" width="150" :key="index" :prop="item.fieldCode" :label="item.displayName" v-else>
+                </el-table-column>
             </el-table>
             <table-pagination :pager="pager" @change="searchTable"></table-pagination>
         </el-row>
@@ -95,61 +114,114 @@
 <script th:inline="javascript">
     var queryOrg=[[${queryOrg}]];//电销组
     var distributionSource=[[${queryOrg}]];//分配来源
+    var fieldList=[{//表头假数据
+        displayName:"电销组",
+        fieldCode:"telemarketingTeam",//需要改成后端返回的字段名称
+        fieldName:"电销组",
+        id:"1",
+        menuCode:null,
+        menuId:null,
+        pageNum:0,
+        pageSize:0,
+        sortNum:1
+    },{
+        displayName:"分配资源数",
+        fieldCode:"amount1",
+        fieldName:"分配资源数",
+        id:"2",
+        menuCode:null,
+        menuId:null,
+        pageNum:0,
+        pageSize:0,
+        sortNum:2
+    },{
+        displayName:"联展",
+        fieldCode:"amount2",
+        fieldName:"联展",
+        id:"2",
+        menuCode:null,
+        menuId:null,
+        pageNum:0,
+        pageSize:0,
+        sortNum:3
+    },{
+        displayName:"竞价",
+        fieldCode:"amount3",
+        fieldName:"竞价",
+        id:"2",
+        menuCode:null,
+        menuId:null,
+        pageNum:0,
+        pageSize:0,
+        sortNum:4
+    },{
+        displayName:"优化",
+        fieldCode:"amount4",
+        fieldName:"优化",
+        id:"2",
+        menuCode:null,
+        menuId:null,
+        pageNum:0,
+        pageSize:0,
+        sortNum:5
+    },{
+        displayName:"信息流",
+        fieldCode:"amount5",
+        fieldName:"信息流",
+        id:"2",
+        menuCode:null,
+        menuId:null,
+        pageNum:0,
+        pageSize:0,
+        sortNum:6
+    },{
+        displayName:"官网",
+        fieldCode:"amount6",
+        fieldName:"官网",
+        id:"2",
+        menuCode:null,
+        menuId:null,
+        pageNum:0,
+        pageSize:0,
+        sortNum:7
+    },{
+        displayName:"行业",
+        fieldCode:"amount7",
+        fieldName:"行业",
+        id:"2",
+        menuCode:null,
+        menuId:null,
+        pageNum:0,
+        pageSize:0,
+        sortNum:8
+    },{
+        displayName:"其他",
+        fieldCode:"amount8",
+        fieldName:"其他",
+        id:"2",
+        menuCode:null,
+        menuId:null,
+        pageNum:0,
+        pageSize:0,
+        sortNum:9
+    },{
+        displayName:"完美未接",
+        fieldCode:"amount9",
+        fieldName:"完美未接",
+        id:"2",
+        menuCode:null,
+        menuId:null,
+        pageNum:0,
+        pageSize:0,
+        sortNum:10
+    }]
     var mainDivVM = new Vue({
         el: '#maindiv',
         data: function() {
             return {
-                multipleSelection: [],//选择行
                 form: {},
-                formLabelWidth: '150px',
-                dataTable: [],
-                options: [{
-                    value: '选项1',
-                    label: '黄金糕'
-                }, {
-                    value: '选项2',
-                    label: '双皮奶'
-                }, {
-                    value: '选项3',
-                    label: '蚵仔煎'
-                }, {
-                    value: '选项4',
-                    label: '龙须面'
-                }, {
-                    value: '选项5',
-                    label: '北京烤鸭'
-                }],
-                tableData: [{
-                    id: '12987122',
-                    name: '王小虎',
-                    amount1: '234',
-                    amount2: '3.2',
-                    amount3: 10
-                }, {
-                    id: '12987123',
-                    name: '王小虎',
-                    amount1: '165',
-                    amount2: '4.43',
-                    amount3: 12
-                }, {
-                    id: '12987124',
-                    name: '王小虎',
-                    amount1: '324',
-                    amount2: '1.9',
-                    amount3: 9
-                }, {
-                    id: '12987125',
-                    name: '王小虎',
-                    amount1: '621',
-                    amount2: '2.2',
-                    amount3: 17
-                }, {
-                    id: '12987126',
-                    name: '王小虎',
-                    amount1: '539',
-                    amount2: '4.1',
-                    amount3: 15
-                }],
+                tableData: [],//表格数据
+                tableColums: [],//表头list
                 orgTeleArr:queryOrg,//电销组
                 distributionSource:distributionSource,//分配来源
                 pager:{
@@ -159,12 +231,10 @@
                 },
             }             
         },
-        methods: {            
-            handleSelectionChange(val) {//选择节点的事件
-                console.log(val)
-                this.multipleSelection = val;
-            }, 
+        methods: { 
             searchTable() { 
+                // 表头数据渲染
+                this.tableColums= fieldList;
                 var starTime=this.form.startTime;
                 var endTime=this.form.endTime;
                 if(endTime){
@@ -176,8 +246,41 @@
                         return;
                     }
                 }
-                console.log('search')
+
+                // 返回的数据               
+                var data=[
+                    {
+                        teamVal:'电销组1',
+                        amount1:'1',
+                        amount2:'2',
+                        amount3:'3',
+                        amount4:'4',
+                        amount5:'5',
+                        amount6:'6',
+                        amount7:'7',
+                        amount8:'8',
+                        amount9:'9',
+                    },
+                    {
+                        teamVal:'电销组2',
+                        amount1:'1',
+                        amount2:'2',
+                        amount3:'3',
+                        amount4:'4',
+                        amount5:'5',
+                        amount6:'6',
+                        amount7:'7',
+                        amount8:'8',
+                        amount9:'9',
+                    }
+                ]; 
+                // 表格数据渲染                               
+                this.tableData= data;
             },
+            gotoTeam(val){
+                console.log(val)
+                
+            }
 
         },
         created(){            
