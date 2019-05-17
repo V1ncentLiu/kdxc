@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"  xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head th:replace="_header_include::frag(~{::title},~{},~{})">
+    <title>后台管理系统</title>
+    <style>
+    </style>
+</head>
+<body>
+<div id="maindiv" class="maindiv mainPadding" style="display: none;">    
+    <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
+        <el-breadcrumb-item>Home</el-breadcrumb-item>
+        <el-breadcrumb-item>数据报表</el-breadcrumb-item>
+        <el-breadcrumb-item>电销顾问通话时长表</el-breadcrumb-item>
+    </el-breadcrumb>    
+    <el-row class="marginB20">
+        <el-button type="primary">昨天</el-button>
+        <el-button type="success">近七天</el-button>
+        <el-button type="warning">本月</el-button>  
+        <el-button type="danger">导出Excel报表</el-button>  
+    </el-row>
+    <div class="mainSearchBg">        
+        <div class="mainSearchFormBox">
+           <el-form :inline="true" :model="form" class="demo-form-inline mainSearchForm" ref="form">                 
+                <el-form-item label="起止时间:">
+                    <el-date-picker format="yyyy-MM-dd HH:mm:ss" v-model="form.startTime" type="datetime" placeholder="选择日期"></el-date-picker>
+                </el-form-item>
+                <el-form-item label="—" class="widthauto">
+                   <el-date-picker format="yyyy-MM-dd HH:mm:ss" v-model="form.endTime" type="datetime" placeholder="选择日期"></el-date-picker>
+                </el-form-item>
+                <el-form-item label="电销组:">  
+                    <el-select v-model="form.teleorg" placeholder="电销组" style="width: 100%;" clearable @change="currentTelSale" filterable>
+                        <el-option
+                            v-for="item in orgTeleArr"
+                            :key="item.id"
+                            :label="item.name"
+                            :value="item.id">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="电销顾问:">  
+                    <el-select 
+                        v-model="form.teleSaleId" 
+                        placeholder="电销顾问" 
+                        style="width: 100%;" 
+                        filterable 
+                        multiple 
+                        clearable  >
+                        <el-option
+                            v-for="item in busSaleArr"
+                            :key="item.id"
+                            :label="item.name"
+                            :value="item.id">
+                            <el-checkbox-group v-model="form.teleSaleId">
+                                <el-checkbox :label="item.id">{{item.name}}</el-checkbox>
+                            </el-checkbox-group>
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="客户状态:">  
+                    <el-select v-model="form.source" placeholder="客户状态" style="width: 100%;" clearable filterable>
+                        <el-option
+                            v-for="item in distributionSource"
+                            :key="item.id"
+                            :label="item.name"
+                            :value="item.id">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <div class="mainSearchBtnBox">
+                    <el-button icon="el-icon-search" type="primary" @click="searchTable()" class="searchBtn">搜索</el-button>
+                    <!-- <el-button type="info" class="searchBtn">取消</el-button> -->
+                    <!-- <span style="color: #5c6be8;cursor: pointer;margin:0 10px;" @click="toogleClick"><span v-if="isShow">收起</span><span v-else>展开更多</span><i :class="{'greycolor paddingL6 el-icon-arrow-up':isShow,'greycolor paddingL6 el-icon-arrow-down':!isShow}"></i></span> -->
+                </div>  
+            </el-form>
+        </div>
+        <el-row>
+            <el-table
+                :data="tableData"
+                border
+                style="width: 100%">
+                <el-table-column
+                    prop="id"
+                    type="index"
+                    label="序号"
+                    align="center"
+                    width="55">
+                </el-table-column>
+                <el-table-column
+                    prop="name"
+                    align="center"
+                    label="电销">
+                    <template slot-scope="scope">
+                        <el-button type="text" size="small" @click="toLink(scope.row)">{{scope.row.name}}</el-button>
+                    </template>
+                </el-table-column>
+                <el-table-column
+                    prop="amount1"
+                    align="center"
+                    label="通话次数">
+                </el-table-column>
+                <el-table-column
+                    prop="amount2"
+                    align="center"
+                    label="通话接通次数">
+                </el-table-column>
+                <el-table-column
+                    prop="amount3"
+                    align="center"
+                    label="通话接通率">
+                </el-table-column>
+                <el-table-column
+                    prop="amount4"
+                    align="center"
+                    label="通话量">
+                </el-table-column>
+                <el-table-column
+                    prop="amount5"
+                    align="center"
+                    label="接通量">
+                </el-table-column>
+                <el-table-column
+                    prop="amount6"
+                    align="center"
+                    label="资源接通率">
+                </el-table-column>
+                <el-table-column
+                    prop="amount7"
+                    label="总有效通话时长"
+                    :formatter="timeFormat"
+                    align="center">
+                </el-table-column>
+                <el-table-column
+                    prop="amount8"
+                    label="人均天有效通话时长"
+                    :formatter="timeFormat"
+                    align="center">
+                </el-table-column>
+            </el-table>
+            <!-- <table-pagination :pager="pager" @change="searchTable"></table-pagination> -->
+        </el-row>
+    </div>
+</div>
+<!-- import common js-->
+<div th:include="_footer_include :: #jsLib"></div>
+</body>
+<script th:inline="javascript">
+    var queryOrg=[[${queryOrg}]];//电销组
+    var distributionSource=[[${queryOrg}]];//分配来源
+    var mainDivVM = new Vue({
+        el: '#maindiv',
+        data: function() {
+            return {
+                multipleSelection: [],//选择行
+                form: {},
+                tableData: [{
+                    id: '11',
+                    name: '王大狗',
+                    amount1: 100,
+                    amount2: 100,
+                    amount3: '10%',
+                    amount4: 100,
+                    amount5: 100,
+                    amount6: '10%',
+                    amount7: 155799,
+                    amount8: 155799,
+                }, {
+                    id: '12',
+                    name: '王二狗',
+                    amount1: 100,
+                    amount2: 100,
+                    amount3: '10%',
+                    amount4: 100,
+                    amount5: 100,
+                    amount6: '10%',
+                    amount7: 155798,
+                    amount8: 155798,
+                },{
+                    id: '',
+                    name: '王小狗',
+                    amount1: 100,
+                    amount2: 100,
+                    amount3: '10%',
+                    amount4: 100,
+                    amount5: 100,
+                    amount6: '10%',
+                    amount7: 155798,
+                    amount8: 155798,
+                }],
+                orgTeleArr:queryOrg,//电销组
+                busSaleArr:[],//创业顾问
+                distributionSource:distributionSource,//分配来源
+            }             
+        },
+        methods: {            
+            handleSelectionChange(val) {//选择节点的事件
+                console.log(val)
+                this.multipleSelection = val;
+            }, 
+            searchTable() { 
+                var starTime=this.form.startTime;
+                var endTime=this.form.endTime;
+                if(endTime){
+                    if(starTime>endTime){
+                        this.$message({
+                            message: '开始时间不能大于结束时间',
+                            type: 'warning'
+                        });
+                        return;
+                    }
+                }
+                console.log('search')
+            },
+            currentTelSale(seleVal){//根据电销组选择创业顾问
+                if(null==seleVal||seleVal==""){
+                    return ;
+                }
+                param={};
+                param.orgId=seleVal;
+                param.roleCode="DXCYGW";
+                axios.post('/user/userManager/listByOrgAndRole' ,param).then(function (response) {  
+                    mainDivVM.busSaleArr=response.data.data;
+                });
+            },
+            toLink (item) {
+                var clueId = item.id;
+                if(clueId){
+                    window.location.href="/statistics/teleStatement/telemarketingCallTablePerson?clueId=" + clueId; 
+                }
+            }, 
+            timeFormat (row, column) {
+                var time = row[column.property];
+                var timeResult = this.timeFun (time); 
+                return timeResult;
+            },
+            timeFun (s) {
+                var t="";
+                var hour = Math.floor(s/3600);
+                var min = Math.floor(s/60) % 60;
+                var sec = s % 60;
+                if(hour<10){
+                    t+="0";
+                }
+                t+=hour+"时"
+                if(min < 10){
+                    t += "0";
+                }
+                t += min + "分";
+                if(sec < 10){
+                    t += "0";
+                }
+                t += sec + "秒";
+                return t;
+            },
+        },
+        created(){            
+            this.searchTable();
+        },
+        mounted(){
+            document.getElementById('maindiv').style.display = 'block';
+        }
+    })
+    
+</script>
+</html>
