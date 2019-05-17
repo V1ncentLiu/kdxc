@@ -629,10 +629,10 @@ public class BusinessSignController {
       Map map = new HashMap();
       map.put("signId", Long.valueOf(signId));
       map.put("type", 1);// 退款
-      if ("4".equals(sign.getRefundStatus())) {
+      if (sign.getRefundStatus() == 4) {
         map.put("status", 3);// 确认退款
       }
-      if ("6".equals(sign.getRefundStatus())) {
+      if (sign.getRefundStatus() == 6) {
         map.put("status", 4);// 已退款
       }
       JSONResult<RefundRebateDTO> refundRebateDTOs = refundFeignClient.getRefundInfo(map);
