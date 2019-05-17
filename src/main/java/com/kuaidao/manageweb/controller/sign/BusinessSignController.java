@@ -483,21 +483,21 @@ public class BusinessSignController {
                 request.setAttribute("threeRepeatStatus", threeRepeatStatus);
             }
         }
-        //查询签约单退款信息
-        if (sign.getSignStatus() == 2 && sign.getRefundStatus() == 6) {
+        // 查询签约单退款信息
+        if (sign.getSignStatus() == 2 && (sign.getRefundStatus() == 4 || sign.getRefundStatus() == 6)) {
             Map map = new HashMap();
             map.put("signId", Long.valueOf(signId));
-            map.put("type", 1);
-            if ("4".equals(sign.getRefundStatus())) {
+            map.put("type", 1);// 退款
+            if (sign.getRefundStatus() == 4) {
                 map.put("status", 3);// 确认退款
             }
-            if ("6".equals(sign.getRefundStatus())) {
+            if (sign.getRefundStatus() == 6) {
                 map.put("status", 4);// 已退款
             }
             JSONResult<RefundRebateDTO> refundRebateDTOs = refundFeignClient.getRefundInfo(map);
-            if(refundRebateDTOs != null){
+            if (refundRebateDTOs != null) {
                 List<RefundRebateDTO> refundRebateList = new ArrayList<>();
-                refundRebateList.add( refundRebateDTOs.getData());
+                refundRebateList.add(refundRebateDTOs.getData());
                 request.setAttribute("refundData", refundRebateList);
             }
         }
