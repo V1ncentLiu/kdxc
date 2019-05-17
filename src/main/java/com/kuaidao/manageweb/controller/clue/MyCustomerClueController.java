@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import com.kuaidao.aggregation.constant.ClueCirculationConstant;
 import com.kuaidao.aggregation.dto.call.CallRecordReqDTO;
 import com.kuaidao.aggregation.dto.call.CallRecordRespDTO;
 import com.kuaidao.aggregation.dto.circulation.CirculationInsertOrUpdateDTO;
@@ -981,14 +982,19 @@ public class MyCustomerClueController {
         if (null != user.getRoleList() && user.getRoleList().size() > 0) {
             circul.setAllotRoleId(user.getRoleList().get(0).getId());
         }
+        //add_cluecirculation
+        circul.setTeleReceiveSource(ClueCirculationConstant.TELE_RECEIVE_SOURCE.TELE_CREATE.getCode());
+        circul.setServiceStaffRole(ClueCirculationConstant.SERVICE_STAFF_ROLE.TELE_SALE.getCode());
         circul.setClueId(dto.getClueId());
         circul.setAllotOrg(user.getOrgId());
         circul.setUserId(user.getId());
+        
         if (null != user.getRoleList() && user.getRoleList().size() > 0) {
             circul.setRoleId(user.getRoleList().get(0).getId());
         }
         circul.setOrg(user.getOrgId());
         dto.setCirculationInsertOrUpdateDTO(circul);
+        
         JSONResult<String> customerClue = myCustomerFeignClient.createCustomerClue(dto);
         return customerClue;
     }
