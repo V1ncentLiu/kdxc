@@ -558,22 +558,49 @@ var adsenseList=[[${adsenseList}]];//广告位集合
                 this.tags2.splice(this.tags2.indexOf(tag), 1);
             },
             addDomain() {
-                this.form.teleRuleTeamList.push({
-                    orgId: '',                    
-                    businessLine: '',                    
-                    teleOptions:[],                    
-                    orgType: '',                    
-                    proportion:'',
-                    resourceMaxNum:'',
-                    isPrior: 0,//默认非优先
-                    unlimited:'',//不限层
-                    unlimitedVal:'',//不限层取值
-                    unlimitedShow:false,//默认不显示
-                });
+                console.log(businessLineList)
+                // 取第一条
+                var first=null;
+                for(var i=0;i<businessLineList.length;i++){
+                    first=businessLineList[0].businessLine;
+                }
+                var param ={};
+            	  param.systemCode = "HUIJU";
+            	  param.orgType = 1;
+            	  param.businessLine = first;
+                  console.info(param);
+                  axios.post('/organization/organization/queryOrgByBusinessline', param)
+                  .then(function (response) {
+                        var result =  response.data;
+                        console.info(result);
+                        var table=result.data;
+                        aorVM.form.teleRuleTeamList.push({
+                            orgId: '',                    
+                            businessLine: first,//业务线取第一条                 
+                            teleOptions:table,                    
+                            orgType: '',                    
+                            proportion:'',
+                            resourceMaxNum:'',
+                            isPrior: 0,//默认非优先
+                            unlimited:'',//不限层
+                            unlimitedVal:'',//不限层取值
+                            unlimitedShow:false,//默认不显示
+                        });
+                  })
+                  .catch(function (error) {
+                       console.log(error);
+                  });
+                
             },
             addDomainTraffic() {
+                console.log(trafficList)
+                // 取第一条
+                var first="";
+                for(var i=0;i<trafficList.length;i++){
+                    first=trafficList[0].id+","+trafficList[0].orgType;
+                }
                 this.form.trafficRuleTeamList.push({
-                    orgId: '',                    
+                    orgId: first,                    
                     orgType: '',                    
                     proportion:'',
                     resourceMaxNum:'',
