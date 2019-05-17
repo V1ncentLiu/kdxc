@@ -551,6 +551,7 @@ public class BusinessSignController {
         }else {
             dto.setRepeatMoney("");
             dto.setRepeatRatio("");
+            dto.setRepeatStatus(0);
         }
     }
     /**
