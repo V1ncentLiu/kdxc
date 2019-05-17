@@ -251,29 +251,23 @@
                 <el-row>
                     <el-col :span="8">
                         <el-form-item label="意向品类：" :label-width="formLabelWidth">
-                           <el-select v-model="form.intentionCategory" placeholder="请选择" @change="projectChangeSelect1" style="width: 100%;">
+                           <el-select v-model="form.intentionCategory" filterable placeholder="请选择" @change="projectChangeSelect1" style="width: 100%;">
                                 <el-option
-                                    v-for="item in IntentionalCategoryArr"
-                                    :key="item.value"
-                                    :label="item.name"
-                                    :value="item.value">
+                                    v-for="item in IntentionalCategoryArr" :key="item.value" :label="item.name" :value="item.value">
                                 </el-option>
                             </el-select>
                         </el-form-item>
                     </el-col>
-                    <el-col :span="16">
+                    <el-col :span="8">
                         <el-form-item label="意向项目：" :label-width="formLabelWidth">
-                            <el-radio v-model="form.radioProject" label="1" @change="projectChange" style="margin-right: 10px;">内部项目</el-radio>
-                            <el-select v-model="form.insideProject" v-show="insideProjectShow" placeholder="请选择" style="margin-right: 10px;">
+                            <!--<el-radio v-model="form.radioProject" label="1" @change="projectChange" style="margin-right: 10px;">内部项目</el-radio>-->
+                            <el-select v-model="form.insideProject" filterable v-show="insideProjectShow" placeholder="请选择" style="width: 100%;">
                                 <el-option
-                                    v-for="item in proSelect"
-                                    :key="item.id"
-                                    :label="item.projectName"
-                                    :value="item.id">
+                                    v-for="item in proSelect" :key="item.id" :label="item.projectName"  :value="item.id">
                                 </el-option>
                             </el-select>
-                            <el-radio v-model="form.radioProject" label="2" @change="projectChange" style="margin-right: 10px;">外部项目</el-radio>
-                            <el-input v-model="form.outsideProject" v-show="outsideProjectShow" autocomplete="off" style="width: 25%;" maxLength="20"></el-input>
+                           <!-- <el-radio v-model="form.radioProject" label="2" @change="projectChange" style="margin-right: 10px;">外部项目</el-radio>
+                            <el-input v-model="form.outsideProject" v-show="outsideProjectShow" autocomplete="off" style="width: 25%;" maxLength="20"></el-input>-->
                         </el-form-item>
                     </el-col>
                 </el-row>
@@ -1629,6 +1623,10 @@ var loginUserId=[[${loginUserId}]];
             param.groupCode = "project_category";
             axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode', param).then(function (response) {
                 addCustomerVM.IntentionalCategoryArr = response.data.data;
+            });
+            //意向项目
+            axios.post('/aggregation/projectManager/listNoPage').then(function (response) {
+                addCustomerVM.proSelect = response.data.data;
             });
         //投资金额
           param={};
