@@ -37,33 +37,23 @@
                         </el-option>
                     </el-select>
                 </el-form-item>
-                <el-form-item label="客户状态:">  
-                    <el-select v-model="form.source" placeholder="客户状态" style="width: 100%;" clearable filterable>
-                        <el-option
-                            v-for="item in clientRank"
-                            :key="item.id"
-                            :label="item.name"
-                            :value="item.id">
-                        </el-option>
-                    </el-select>
-                </el-form-item>
                 <div class="mainSearchBtnBox">
                     <el-button icon="el-icon-search" type="primary" @click="searchTable()" class="searchBtn">搜索</el-button>
-                    <!-- <el-button type="info" class="searchBtn">取消</el-button> -->
-                    <!-- <span style="color: #5c6be8;cursor: pointer;margin:0 10px;" @click="toogleClick"><span v-if="isShow">收起</span><span v-else>展开更多</span><i :class="{'greycolor paddingL6 el-icon-arrow-up':isShow,'greycolor paddingL6 el-icon-arrow-down':!isShow}"></i></span> -->
                 </div>  
             </el-form>
         </div>
         <el-row>
+            <!-- 
+               show-summary :summary-method="summaryFun" -->
             <el-table
                 :data="tableData"
                 border
-                show-summary
-                :summary-method="summaryFun"
-                style="width: 100%">
+                style="width: 100%" 
+                :span-method="arraySpanMethod">
                 <el-table-column
                     prop="id"
                     type="index"
+                    :index="indexFun"
                     label="序号"
                     align="center"
                     width="55">
@@ -73,7 +63,7 @@
                     align="center"
                     label="电销组">
                     <template slot-scope="scope">
-                        <el-button type="text" size="small" @click="toLink(scope.row)">{{scope.row.name}}</el-button>
+                        <el-button type="text" size="small" @click="gotoTeam(scope.row)">{{scope.row.name}}</el-button>
                     </template>
                 </el-table-column>
                 <el-table-column
@@ -119,7 +109,7 @@
                     :formatter="timeFormat">
                 </el-table-column>
             </el-table>
-            <!-- <table-pagination :pager="pager" @change="searchTable"></table-pagination> -->
+            <table-pagination :pager="pager" @change="searchTable"></table-pagination>
         </el-row>
     </div>
 </div>
@@ -160,6 +150,12 @@
                 }],
                 orgTeleArr:queryOrg,//电销组
                 clientRank:clientRank,//分配来源
+
+                pager:{ 
+                    total: 0,
+                    currentPage: 1,
+                    pageSize: 3,
+                },
             }             
         },
         methods: {            
@@ -178,17 +174,44 @@
                         return;
                     }
                 }
-                console.log('search')
+                // console.log('search');
             },
-            toLink (item) {
+            arraySpanMethod({ row, column, rowIndex, columnIndex }) { // 合并第一行
+                if (rowIndex === 0) {
+                    if (columnIndex === 0) {
+                        return [0, 0];
+                    } else if (columnIndex === 1) {
+                        return [1, 2];
+                    }
+                }
+            },
+            gotoTeam (item) { // 页面跳转
                 var clueId = item.id;
-                if(clueId){
+                if(clueId == "合计"){
+                    window.location.href="/statistics/teleStatement/telemarketingCallTableSum";
+                }else{
                     window.location.href="/statistics/teleStatement/telemarketingCallTableTeam?clueId=" + clueId; 
                 }
             },
-            summaryFun (param) {
-                const { columns, data } = param;
-                const sums = ["合计", '', 2, 2, '2%', 2, 2, '2%', 1234, 1234];
+            indexFun (index) { // 表格序号
+                return index;
+            },
+            summaryFun () { // 将合计插入数据中：如果是分页，记得每次获取数据都要执行这个函数
+                // const { columns, data } = param;
+                // const sums = ["合计", '', 2, 2, '2%', 2, 2, '2%', 1234, 1234];
+                var obj = {
+                    id: '合计',
+                    name: '合计',
+                    amount2: 1000,
+                    amount3: 1000,
+                    amount4: '100%',
+                    amount5: 1000,
+                    amount6: 1000,
+                    amount7: '100%',
+                    amount8: 155799,
+                    amount9: 155799
+                };
+                this.tableData.unshift(obj);
                 // const sums = [];
                 // columns.forEach((column, index) => {
                 //     if (index === 0) {
@@ -211,9 +234,9 @@
                 // });
                 // sums[sums.length-2] = this.timeFun (sums[sums.length-2]);
                 // sums[sums.length-1] = this.timeFun (sums[sums.length-1]);
-                return sums;
+                // return sums;
             },
-            timeFormat (row, column) {
+            timeFormat (row, column) { // 时间格式化：时分秒
                 var time = row[column.property];
                 var timeResult = this.timeFun (time); 
                 return timeResult;
@@ -258,6 +281,7 @@
             this.searchTable();
         },
         mounted(){
+            this.summaryFun();
             document.getElementById('maindiv').style.display = 'block';
         }
     })

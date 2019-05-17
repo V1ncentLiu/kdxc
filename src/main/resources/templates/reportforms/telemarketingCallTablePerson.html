@@ -17,6 +17,7 @@
         <el-button type="success">近七天</el-button>
         <el-button type="warning">本月</el-button>  
         <el-button type="danger">导出Excel报表</el-button>  
+        <el-button type="primary" @click="goBack" style="float: right;">返回</el-button>
     </el-row>
     <div class="mainSearchBg">        
         <div class="mainSearchFormBox">
@@ -56,20 +57,8 @@
                         </el-option>
                     </el-select>
                 </el-form-item>
-                <el-form-item label="客户状态:">  
-                    <el-select v-model="form.source" placeholder="客户状态" style="width: 100%;" clearable filterable>
-                        <el-option
-                            v-for="item in distributionSource"
-                            :key="item.id"
-                            :label="item.name"
-                            :value="item.id">
-                        </el-option>
-                    </el-select>
-                </el-form-item>
                 <div class="mainSearchBtnBox">
                     <el-button icon="el-icon-search" type="primary" @click="searchTable()" class="searchBtn">搜索</el-button>
-                    <!-- <el-button type="info" class="searchBtn">取消</el-button> -->
-                    <!-- <span style="color: #5c6be8;cursor: pointer;margin:0 10px;" @click="toogleClick"><span v-if="isShow">收起</span><span v-else>展开更多</span><i :class="{'greycolor paddingL6 el-icon-arrow-up':isShow,'greycolor paddingL6 el-icon-arrow-down':!isShow}"></i></span> -->
                 </div>  
             </el-form>
         </div>
@@ -140,7 +129,7 @@
                     label="人均天有效通话时长">
                 </el-table-column>
             </el-table>
-            <!-- <table-pagination :pager="pager" @change="searchTable"></table-pagination> -->
+            <table-pagination :pager="pager" @change="searchTable"></table-pagination>
         </el-row>
     </div>
 </div>
@@ -184,6 +173,12 @@
                 orgTeleArr:queryOrg,//电销组
                 busSaleArr:[],//创业顾问
                 distributionSource:distributionSource,//分配来源
+
+                pager:{ 
+                    total: 0,
+                    currentPage: 1,
+                    pageSize: 3,
+                },
             }             
         },
         methods: {            
@@ -203,7 +198,7 @@
                         return;
                     }
                 }
-                console.log('search');
+                // console.log('search');
             },
             currentTelSale(seleVal){//根据电销组选择创业顾问
                 if(null==seleVal||seleVal==""){
@@ -215,6 +210,9 @@
                 axios.post('/user/userManager/listByOrgAndRole' ,param).then(function (response) {  
                     mainDivVM.busSaleArr=response.data.data;
                 });
+            },
+            goBack () {
+                window.history.go(-1);
             },
             dateFormat (row, column) { 
                 var date = row[column.property];
