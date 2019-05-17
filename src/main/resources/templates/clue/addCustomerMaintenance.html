@@ -270,8 +270,7 @@
                         <el-form-item label="意向项目：" :label-width="formLabelWidth">
                            <!-- <el-radio  v-model="form.radioProject" label="1" @change="projectChange"  style="margin-right: 10px;">内部项目</el-radio>-->
                             <el-select  v-model="form.insideProject" filterable v-show="insideProjectShow" placeholder="请选择" style="width: 100%;">
-                                <el-option
-                                        v-for="item in proSelect" :key="item.id" :label="item.projectName"  :value="item.id"></el-option>
+                                <el-option  v-for="item in proSelect" :key="item.id" :label="item.projectName"  :value="item.id"></el-option>
                             </el-select>
                             <!--<el-radio
                                     v-model="form.radioProject" label="2" @change="projectChange" style="margin-right: 10px;">外部项目
@@ -1109,7 +1108,7 @@
                 this.lineFormShow = true
                 // 跟进记录初始化
                 this.$refs.LineRuleForm.resetFields(); //移除校验结果并重置字段值
-                this.formInline.customerStatus = '1';
+                this.formInline.customerStatus = '';
                 this.formInline.visitStatus = "1";
 
             },
@@ -2278,10 +2277,11 @@
             param = {};
             param.groupCode = "customerStatus";
             axios.post('/dictionary/DictionaryItem/queryTeleMyCusCustomerStatus', param).then(function (response) {
-                var arr = response.data.data;
-                for(let i = 0, len = arr.length; i < len; i++) {
-                   if(arr[i].name == "未联系"){
-                       arr.splice(arr[i]);
+                var data = response.data.data;
+                var  arr = new Array();
+                for(let i = 0, len = data.length; i < len; i++) {
+                   if(data[i].name != "未联系"){
+                       arr.push(data[i]);
                    };
                 }
 

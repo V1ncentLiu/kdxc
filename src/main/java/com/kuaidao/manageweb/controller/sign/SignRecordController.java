@@ -4,8 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.slf4j.Logger;
@@ -17,6 +19,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+
 import com.kuaidao.aggregation.constant.AggregationConstant;
 import com.kuaidao.aggregation.dto.busmycustomer.RejectSignOrderReqDTO;
 import com.kuaidao.aggregation.dto.busmycustomer.SignRecordReqDTO;
@@ -126,7 +129,7 @@ public class SignRecordController {
         JSONResult<List<UserInfoDTO>> userJr = userInfoFeignClient.listByOrgAndRole(req);
         if (userJr == null || !JSONResult.SUCCESS.equals(userJr.getCode())) {
             logger.error(
-                    "查询电销通话记录-获取组内顾问-userInfoFeignClient.listByOrgAndRole(req),param{{}},res{{}}",
+                    "查询电销通话记录-获取电销顾问-userInfoFeignClient.listByOrgAndRole(req),param{{}},res{{}}",
                     req, userJr);
             return null;
         }
@@ -236,7 +239,7 @@ public class SignRecordController {
         JSONResult<List<UserInfoDTO>> userJr = userInfoFeignClient.listByOrgAndRole(req);
         if (userJr == null || !JSONResult.SUCCESS.equals(userJr.getCode())) {
             logger.error(
-                    "查询电销通话记录-获取组内顾问-userInfoFeignClient.listByOrgAndRole(req),param{{}},res{{}}",
+                    "查询电销通话记录-获取电销顾问-userInfoFeignClient.listByOrgAndRole(req),param{{}},res{{}}",
                     req, userJr);
             return null;
         }
