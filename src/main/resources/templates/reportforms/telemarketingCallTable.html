@@ -65,43 +65,56 @@
                     prop="id"
                     type="index"
                     label="序号"
+                    align="center"
                     width="55">
                 </el-table-column>
                 <el-table-column
                     prop="name"
+                    align="center"
                     label="电销组">
+                    <template slot-scope="scope">
+                        <el-button type="text" size="small" @click="toLink(scope.row)">{{scope.row.name}}</el-button>
+                    </template>
                 </el-table-column>
                 <el-table-column
                     prop="amount2"
+                    align="center"
                     label="通话次数">
                 </el-table-column>
                 <el-table-column
                     prop="amount3"
+                    align="center"
                     label="通话接通次数">
                 </el-table-column>
                 <el-table-column
                     prop="amount4"
+                    align="center"
                     label="通话接通率">
                 </el-table-column>
                 <el-table-column
                     prop="amount5"
+                    align="center"
                     label="通话量">
                 </el-table-column>
                 <el-table-column
                     prop="amount6"
+                    align="center"
                     label="接通量">
                 </el-table-column>
                 <el-table-column
                     prop="amount7"
+                    align="center"
                     label="资源接通率">
                 </el-table-column>
                 <el-table-column
                     prop="amount8"
+                    align="center"
                     label="总有效通话时长"
                     :formatter="timeFormat">
                 </el-table-column>
                 <el-table-column
                     prop="amount9"
+                    align="center"
                     label="人均天有效通话时长"
                     :formatter="timeFormat">
                 </el-table-column>
@@ -123,7 +136,7 @@
                 multipleSelection: [],//选择行
                 form: {},
                 tableData: [{
-                    id: '',
+                    id: '11111',
                     name: '王-1-1-1',
                     amount2: 1000,
                     amount3: 10,
@@ -134,7 +147,7 @@
                     amount8: 155799,
                     amount9: 155799
                 }, {
-                    id: '',
+                    id: '11112',
                     name: '王-1-1-2',
                     amount2: 1000,
                     amount3: 12,
@@ -167,30 +180,37 @@
                 }
                 console.log('search')
             },
+            toLink (item) {
+                var clueId = item.id;
+                if(clueId){
+                    window.location.href="/statistics/teleStatement/telemarketingCallTableTeam?clueId=" + clueId; 
+                }
+            },
             summaryFun (param) {
                 const { columns, data } = param;
-                const sums = [];
-                columns.forEach((column, index) => {
-                    if (index === 0) {
-                        sums[index] = '合计';
-                        return;
-                    }
-                    if (index === 1) {
-                        sums[index] = '';
-                        return;
-                    }
-                    const values = data.map(item => Number(item[column.property]));
-                    if (!values.every(value => isNaN(value))) {
-                        sums[index] = values.reduce((prev, curr) => {
-                            const value = Number(curr);
-                            if (!isNaN(value)) {
-                                return prev + curr;
-                            } 
-                        }, 0);
-                    }
-                });
-                sums[sums.length-2] = this.timeFun (sums[sums.length-2]);
-                sums[sums.length-1] = this.timeFun (sums[sums.length-1]);
+                const sums = ["合计", '', 2, 2, '2%', 2, 2, '2%', 1234, 1234];
+                // const sums = [];
+                // columns.forEach((column, index) => {
+                //     if (index === 0) {
+                //         sums[index] = '合计';
+                //         return;
+                //     }
+                //     if (index === 1) {
+                //         sums[index] = '';
+                //         return;
+                //     }
+                //     const values = data.map(item => Number(item[column.property]));
+                //     if (!values.every(value => isNaN(value))) {
+                //         sums[index] = values.reduce((prev, curr) => {
+                //             const value = Number(curr);
+                //             if (!isNaN(value)) {
+                //                 return prev + curr;
+                //             } 
+                //         }, 0);
+                //     }
+                // });
+                // sums[sums.length-2] = this.timeFun (sums[sums.length-2]);
+                // sums[sums.length-1] = this.timeFun (sums[sums.length-1]);
                 return sums;
             },
             timeFormat (row, column) {

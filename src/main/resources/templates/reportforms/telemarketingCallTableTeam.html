@@ -82,45 +82,58 @@
                     prop="id"
                     type="index"
                     label="序号"
+                    align="center"
                     width="55">
                 </el-table-column>
                 <el-table-column
                     prop="name"
+                    align="center"
                     label="电销">
+                    <template slot-scope="scope">
+                        <el-button type="text" size="small" @click="toLink(scope.row)">{{scope.row.name}}</el-button>
+                    </template>
                 </el-table-column>
                 <el-table-column
                     prop="amount1"
+                    align="center"
                     label="通话次数">
                 </el-table-column>
                 <el-table-column
                     prop="amount2"
+                    align="center"
                     label="通话接通次数">
                 </el-table-column>
                 <el-table-column
                     prop="amount3"
+                    align="center"
                     label="通话接通率">
                 </el-table-column>
                 <el-table-column
                     prop="amount4"
+                    align="center"
                     label="通话量">
                 </el-table-column>
                 <el-table-column
                     prop="amount5"
+                    align="center"
                     label="接通量">
                 </el-table-column>
                 <el-table-column
                     prop="amount6"
+                    align="center"
                     label="资源接通率">
                 </el-table-column>
                 <el-table-column
                     prop="amount7"
                     label="总有效通话时长"
-                    :formatter="timeFormat">
+                    :formatter="timeFormat"
+                    align="center">
                 </el-table-column>
                 <el-table-column
                     prop="amount8"
                     label="人均天有效通话时长"
-                    :formatter="timeFormat">
+                    :formatter="timeFormat"
+                    align="center">
                 </el-table-column>
             </el-table>
             <!-- <table-pagination :pager="pager" @change="searchTable"></table-pagination> -->
@@ -140,7 +153,7 @@
                 multipleSelection: [],//选择行
                 form: {},
                 tableData: [{
-                    id: '',
+                    id: '11',
                     name: '王大狗',
                     amount1: 100,
                     amount2: 100,
@@ -151,8 +164,19 @@
                     amount7: 155799,
                     amount8: 155799,
                 }, {
-                    id: '',
+                    id: '12',
                     name: '王二狗',
+                    amount1: 100,
+                    amount2: 100,
+                    amount3: '10%',
+                    amount4: 100,
+                    amount5: 100,
+                    amount6: '10%',
+                    amount7: 155798,
+                    amount8: 155798,
+                },{
+                    id: '',
+                    name: '王小狗',
                     amount1: 100,
                     amount2: 100,
                     amount3: '10%',
@@ -196,6 +220,12 @@
                 axios.post('/user/userManager/listByOrgAndRole' ,param).then(function (response) {  
                     mainDivVM.busSaleArr=response.data.data;
                 });
+            },
+            toLink (item) {
+                var clueId = item.id;
+                if(clueId){
+                    window.location.href="/statistics/teleStatement/telemarketingCallTablePerson?clueId=" + clueId; 
+                }
             }, 
             timeFormat (row, column) {
                 var time = row[column.property];
