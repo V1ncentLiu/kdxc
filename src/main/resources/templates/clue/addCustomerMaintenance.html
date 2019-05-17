@@ -883,9 +883,7 @@
                 isshowPhone: false,
                 domainShow: false,//默认不显示输入同行品牌名称
                 form: {
-                    domains: [{ //同行业品牌数据
-                        value: ''
-                    }],
+                    domains: [],
                     phone: "",
                     radioSelect: '0',//是否考虑同行业
                     radioProject: '1', //意向项目单选默认选项
@@ -1544,7 +1542,6 @@
                 this.formInline.isCall = rows[0].isCall + "";
                 //  this.formInline.resourceStatus = rows[0].resourceStatus + "";
                 this.formInline.focusPoint = rows[0].focusPoint;
-                // alert(rows[0].visitStatus);
                 this.formInline.visitStatus = rows[0].visitStatus + "";
                 this.formInline.nextVisitTime = rows[0].nextVisitTime;
                 isEdit = true;
@@ -2170,8 +2167,20 @@
                 }
                 //是否考虑同行业
                 this.form.radioSelect = intention.istrade == null ? "" : intention.istrade + "";
-
                 //同行业项目
+                if (intention.tradeProject != null) {
+                    this.domainShow = true;
+                }
+
+                var tradeProjectArr = intention.tradeProject.split(",");
+                for(var i=0;i<tradeProjectArr.length;i++){
+                    this.form.domains.push({
+                        value: tradeProjectArr[i],
+                    });
+                }
+
+
+                //意向内部项目
                 this.form.insideProject = intention.purInProject == null ? "" : intention.purInProject + "";
 
                 this.form.outsideProject = intention.purOutProject;
