@@ -17,7 +17,7 @@
         <el-button type="success">近七天</el-button>
         <el-button type="warning">本月</el-button>  
         <el-button type="danger">导出Excel报表</el-button>  
-        <el-button type="primary" style="float: right;">返回</el-button>  
+        <el-button type="primary" style="float: right;" @click="goback()">返回</el-button>  
     </el-row>
     <div class="mainSearchBg">        
         <div class="mainSearchFormBox">
@@ -75,36 +75,25 @@
             </el-form>
         </div>
         <el-row>
-            <el-table
-                :data="tableData"
+            <el-table 
+                ref="tableData"
+                tooltip-effect="dark"
+                style="width: 100%"
                 border
-                style="width: 100%">
-                <el-table-column
-                    prop="id"
-                    label="ID"
-                    width="180">
+                :data="tableData"
+                >
+                <el-table-column align="center" type="index" label="序号" width="55"></el-table-column>
+                <!-- 个人列 -->
+                <el-table-column align="center" :key="index" :prop="item.fieldCode" :label="item.displayName" v-for="(item,key,index) in tableColums" v-if="item.fieldCode == 'telemarketingPerson'" width="120">
+                    <template slot-scope="scope">
+                        <el-button @click="gotoPerson(scope.row)" type="text" size="small">{{scope.row.telemarketingPerson}}</el-button>
+                    </template>
                 </el-table-column>
-                <el-table-column
-                    prop="name"
-                    label="姓名">
-                </el-table-column>
-                <el-table-column
-                    prop="amount1"
-                    sortable
-                    label="数值 1">
-                </el-table-column>
-                <el-table-column
-                    prop="amount2"
-                    sortable
-                    label="数值 2">
-                </el-table-column>
-                <el-table-column
-                    prop="amount3"
-                    sortable
-                    label="数值 3">
+                <!-- 其他列 -->
+                <el-table-column align="center" width="130" :key="index" :prop="item.fieldCode" :label="item.displayName" v-else>
                 </el-table-column>
             </el-table>
-            <!-- <table-pagination :pager="pager" @change="searchTable"></table-pagination> -->
+            <table-pagination :pager="pager" @change="searchTable"></table-pagination>
         </el-row>
     </div>
 </div>
@@ -114,85 +103,125 @@
 <script th:inline="javascript">
     var queryOrg=[[${queryOrg}]];//电销组
     var distributionSource=[[${queryOrg}]];//分配来源
+    var fieldList=[{//表头假数据
+        displayName:"电销",
+        fieldCode:"telemarketingPerson",//需要改成后端返回的字段名称
+        fieldName:"电销",
+        id:"1",
+        menuCode:null,
+        menuId:null,
+        pageNum:0,
+        pageSize:0,
+        sortNum:1
+    },{
+        displayName:"分配资源数",
+        fieldCode:"amount1",
+        fieldName:"分配资源数",
+        id:"2",
+        menuCode:null,
+        menuId:null,
+        pageNum:0,
+        pageSize:0,
+        sortNum:2
+    },{
+        displayName:"联展",
+        fieldCode:"amount2",
+        fieldName:"联展",
+        id:"3",
+        menuCode:null,
+        menuId:null,
+        pageNum:0,
+        pageSize:0,
+        sortNum:3
+    },{
+        displayName:"竞价",
+        fieldCode:"amount3",
+        fieldName:"竞价",
+        id:"4",
+        menuCode:null,
+        menuId:null,
+        pageNum:0,
+        pageSize:0,
+        sortNum:4
+    },{
+        displayName:"优化",
+        fieldCode:"amount4",
+        fieldName:"优化",
+        id:"5",
+        menuCode:null,
+        menuId:null,
+        pageNum:0,
+        pageSize:0,
+        sortNum:5
+    },{
+        displayName:"信息流",
+        fieldCode:"amount5",
+        fieldName:"信息流",
+        id:"6",
+        menuCode:null,
+        menuId:null,
+        pageNum:0,
+        pageSize:0,
+        sortNum:6
+    },{
+        displayName:"官网",
+        fieldCode:"amount6",
+        fieldName:"官网",
+        id:"7",
+        menuCode:null,
+        menuId:null,
+        pageNum:0,
+        pageSize:0,
+        sortNum:7
+    },{
+        displayName:"行业",
+        fieldCode:"amount7",
+        fieldName:"行业",
+        id:"8",
+        menuCode:null,
+        menuId:null,
+        pageNum:0,
+        pageSize:0,
+        sortNum:8
+    },{
+        displayName:"其他",
+        fieldCode:"amount8",
+        fieldName:"其他",
+        id:"9",
+        menuCode:null,
+        menuId:null,
+        pageNum:0,
+        pageSize:0,
+        sortNum:9
+    },{
+        displayName:"网民未接",
+        fieldCode:"amount9",
+        fieldName:"网民未接",
+        id:"10",
+        menuCode:null,
+        menuId:null,
+        pageNum:0,
+        pageSize:0,
+        sortNum:10
+    }]
     var mainDivVM = new Vue({
         el: '#maindiv',
         data: function() {
             return {
-                multipleSelection: [],//选择行
                 form: {},
-                formLabelWidth: '150px',
-                dataTable: [],
-                options: [{
-                    value: '选项1',
-                    label: '黄金糕'
-                }, {
-                    value: '选项2',
-                    label: '双皮奶'
-                }, {
-                    value: '选项3',
-                    label: '蚵仔煎'
-                }, {
-                    value: '选项4',
-                    label: '龙须面'
-                }, {
-                    value: '选项5',
-                    label: '北京烤鸭'
-                }],
-                tableData: [{
-                    id: '12987122',
-                    name: '王小虎',
-                    amount1: '234',
-                    amount2: '3.2',
-                    amount3: 10
-                }, {
-                    id: '12987123',
-                    name: '王小虎',
-                    amount1: '165',
-                    amount2: '4.43',
-                    amount3: 12
-                }, {
-                    id: '12987124',
-                    name: '王小虎',
-                    amount1: '324',
-                    amount2: '1.9',
-                    amount3: 9
-                }, {
-                    id: '12987125',
-                    name: '王小虎',
-                    amount1: '621',
-                    amount2: '2.2',
-                    amount3: 17
-                }, {
-                    id: '12987126',
-                    name: '王小虎',
-                    amount1: '539',
-                    amount2: '4.1',
-                    amount3: 15
-                }],
+                tableData: [],//表格数据
+                tableColums: [],//表头list
                 orgTeleArr:queryOrg,//电销组
                 busSaleArr:[],//创业顾问
                 distributionSource:distributionSource,//分配来源
+                pager:{
+                    total: 0,
+                    currentPage: 1,
+                    pageSize: 20,
+                },
             }             
         },
-        methods: {            
-            handleSelectionChange(val) {//选择节点的事件
-                console.log(val)
-                this.multipleSelection = val;
-            }, 
-            searchTable() { 
-                var starTime=this.form.startTime;
-                var endTime=this.form.endTime;
-                if(endTime){
-                    if(starTime>endTime){
-                        this.$message({
-                            message: '开始时间不能大于结束时间',
-                            type: 'warning'
-                        });
-                        return;
-                    }
-                }
-                console.log('search')
-            },
+        methods: {  
             currentTelSale(seleVal){//根据电销组选择创业顾问
                 if(null==seleVal||seleVal==""){
                     return ;
@@ -204,6 +233,65 @@
                     mainDivVM.busSaleArr=response.data.data;
                 });
             },
+            searchTable() { 
+                // 表头数据渲染
+                this.tableColums= fieldList;
+                var starTime=this.form.startTime;
+                var endTime=this.form.endTime;
+                if(endTime){
+                    if(starTime>endTime){
+                        this.$message({
+                            message: '开始时间不能大于结束时间',
+                            type: 'warning'
+                        });
+                        return;
+                    }
+                }
+
+                // 返回的数据               
+                var data=[
+                    {
+                        id:"0",
+                        telemarketingPerson:'张三',
+                        amount1:'1',
+                        amount2:'2',
+                        amount3:'3',
+                        amount4:'4',
+                        amount5:'5',
+                        amount6:'6',
+                        amount7:'7',
+                        amount8:'8',
+                        amount9:'9',
+                    },
+                    {
+                        id:"1",
+                        telemarketingPerson:'李四',
+                        amount1:'1',
+                        amount2:'2',
+                        amount3:'3',
+                        amount4:'4',
+                        amount5:'5',
+                        amount6:'6',
+                        amount7:'7',
+                        amount8:'8',
+                        amount9:'9',
+                    }
+                ]; 
+                // 表格数据渲染                               
+                this.tableData= data;
+            },
+            gotoPerson(item){
+                console.log(item)
+                var clueId = item.id;
+                if(clueId){
+                    // 点击个人跳转到此人的资源分配信息
+                    window.location.href="/statistics/teleStatement/resourceAllocationTablePerson?clueId=" + clueId; 
+                }
+            },
+            goback(){
+                // 返回资源分配表页面
+                window.location.href="/statistics/teleStatement/resourceAllocation";
+            }
 
         },
         created(){            
