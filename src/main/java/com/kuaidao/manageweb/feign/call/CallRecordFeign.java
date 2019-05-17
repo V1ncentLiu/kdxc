@@ -2,12 +2,14 @@ package com.kuaidao.manageweb.feign.call;
 
 import java.util.List;
 import java.util.Map;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.netflix.feign.FeignClient;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+
 import com.kuaidao.aggregation.dto.call.CallRecordCountDTO;
 import com.kuaidao.aggregation.dto.call.CallRecordReqDTO;
 import com.kuaidao.aggregation.dto.call.CallRecordRespDTO;
@@ -134,7 +136,7 @@ public interface CallRecordFeign {
         @Override
         public JSONResult<List<CallRecordCountDTO>> countCallRecordTotalByClueIdList(
                 CallRecordReqDTO myCallRecordReqDTO) {
-            return fallBackError("根据线索Id统计拨打次数");
+            return fallBackError("根据资源Id统计拨打次数");
         }
         @Override
         public JSONResult<Integer> countTodayTalkTime(TeleConsoleReqDTO teleConsoleReqDTO) {

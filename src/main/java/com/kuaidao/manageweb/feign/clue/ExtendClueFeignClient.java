@@ -1,6 +1,7 @@
 package com.kuaidao.manageweb.feign.clue;
 
 import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.netflix.feign.FeignClient;
@@ -8,11 +9,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import com.kuaidao.aggregation.dto.clue.ClueAgendaTaskDTO;
-import com.kuaidao.aggregation.dto.clue.ClueAgendaTaskQueryDTO;
-import com.kuaidao.aggregation.dto.clue.ClueDistributionedTaskDTO;
-import com.kuaidao.aggregation.dto.clue.ClueDistributionedTaskQueryDTO;
-import com.kuaidao.aggregation.dto.clue.PushClueReq;
+
+import com.kuaidao.aggregation.dto.clue.*;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.IdEntityLong;
 import com.kuaidao.common.entity.IdListLongReq;
@@ -51,7 +49,7 @@ public interface ExtendClueFeignClient {
     public JSONResult<Integer> autoAllocationTask(@RequestBody IdListLongReq list);
 
     /**
-     * 新建线索
+     * 新建资源
      *
      * @return
      */
@@ -59,7 +57,7 @@ public interface ExtendClueFeignClient {
     public JSONResult<String> createClue(@RequestBody PushClueReq pushClueReq);
 
     /**
-     * 编辑线索
+     * 编辑资源
      *
      * @return
      */
@@ -67,7 +65,7 @@ public interface ExtendClueFeignClient {
     public JSONResult<String> updateClue(@RequestBody PushClueReq pushClueReq);
 
     /**
-     * 撤回线索
+     * 撤回资源
      *
      * @return
      */
@@ -75,7 +73,7 @@ public interface ExtendClueFeignClient {
     public JSONResult<String> recallClue(@RequestBody IdEntityLong idEntityLong);
 
     /**
-     * 导入线索
+     * 导入资源
      *
      * @return
      */
@@ -145,7 +143,7 @@ public interface ExtendClueFeignClient {
         @Override
         public JSONResult<List<PushClueReq>> importclue(List<PushClueReq> list) {
             // TODO Auto-generated method stub
-            return fallBackError("导入线索");
+            return fallBackError("导入资源");
         }
 
         @Override
