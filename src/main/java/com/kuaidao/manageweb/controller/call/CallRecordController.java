@@ -46,8 +46,16 @@ public class CallRecordController {
     CallRecordFeign callRecordFeign;
     @Autowired
     UserInfoFeignClient userInfoFeignClient;
-    
-    
+
+    /**
+     * 记录拨打时间
+     */
+    @PostMapping("/recodeCallTime")
+    @ResponseBody
+    public void recodeCallTime(@RequestBody CallRecordReqDTO myCallRecordReqDTO){
+        callRecordFeign.recodeCallTime(myCallRecordReqDTO);
+    }
+
     /**
      * 我的通话记录
      * @return
