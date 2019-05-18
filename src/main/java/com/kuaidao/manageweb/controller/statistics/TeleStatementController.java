@@ -1,5 +1,6 @@
 package com.kuaidao.manageweb.controller.statistics;
 
+import com.kuaidao.aggregation.dto.financing.FinanceLayoutDTO;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.common.util.DateUtil;
@@ -13,7 +14,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
@@ -37,19 +40,27 @@ public class TeleStatementController {
     @Autowired
     private StatisticsFeignClient statisticsFeignClient;
 
+
+    @RequestMapping("/resourceAllocation")
+    public String resourceAllocationTable() {
+        return "/reportforms/resourceAllocationTable";
+    }
+
     /**
      * 资源分配页面
     * @return
      */
-    @RequestMapping("/resourceAllocation")
-    public String resourceAllocationTable() {
+    @RequestMapping("/getResourceAllocationTable")
+    @ResponseBody
+    public JSONResult<PageBean<ResourceAllocationDto>> getResourceAllocationTable() {
         ResourceAllocationQueryDto resourceAllocationQueryDto = new ResourceAllocationQueryDto();
         resourceAllocationQueryDto.setPageSize(10);
         resourceAllocationQueryDto.setPageNum(1);
         JSONResult<PageBean<ResourceAllocationDto>> resourceAllocationPage = statisticsFeignClient.getResourceAllocationPage(resourceAllocationQueryDto);
         System.out.println(resourceAllocationPage);
-        return "/reportforms/resourceAllocationTable";
+        return resourceAllocationPage;
     }
+
 
     @PostMapping("/exportResourceAllocationGroup")
     public void exportResourceAllocation(HttpServletResponse response) throws Exception {
@@ -73,6 +84,7 @@ public class TeleStatementController {
             curList.add(ra.getIndustry());
             curList.add(ra.getOther());
             curList.add(ra.getNetizensMissed());
+            dataList.add(curList);
         }
         XSSFWorkbook wbWorkbook = ExcelUtil.creat2007Excel(dataList);
         String name = "分配记录表" + DateUtil.convert2String(new Date(), DateUtil.ymdhms2) + ".xlsx";

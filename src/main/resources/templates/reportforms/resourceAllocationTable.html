@@ -16,7 +16,7 @@
         <el-button type="primary" @click="searchYesterday">昨天</el-button>
         <el-button type="success" @click="searchWeek">近七天</el-button>
         <el-button type="warning" @click="searchMonth">本月</el-button>  
-        <el-button type="danger">导出Excel报表</el-button>  
+        <el-button type="danger"  @click="exportRs">导出Excel报表</el-button>
     </el-row>
     <div class="mainSearchBg">        
         <div class="mainSearchFormBox">
@@ -203,7 +203,6 @@
         },
         methods: { 
             searchTable() { 
-                debugger
                 // 表头数据渲染
                 this.tableColums= fieldList;
                 var starTime=this.form.startTime;
@@ -246,11 +245,37 @@
                         amount8:'8',
                         amount9:'9',
                     }
-                ];                 
-                // 表格数据渲染                               
-                this.tableData= data;
-                // 插入合计一行
-                this.summaryFun();
+                ];
+                axios.post('/statistics/teleStatement/getResourceAllocationTable',null).then(function (response) {
+                    debugger
+                    console.log(response)
+                    if(!response){
+                        mainDivVM.$message({
+                            message: "接口调用失败",
+                            type: 'error'
+                        });
+                        return ;
+                    }
+                    var resobj= response.data;
+                    if(!resobj){
+                        mainDivVM.$message({
+                            message: "接口调用失败",
+                            type: 'error'
+                        });
+                        return ;
+                    }
+                    if(resobj.code!='0'){
+                        mainDivVM.$message({
+                            message: "接口调用失败",
+                            type: 'error'
+                        });
+                        return ;
+                    }
+                    // 表格数据渲染
+                    this.tableData= data;
+                    // 插入合计一行
+                    this.summaryFun();
+                })
             },
             gotoTeam(item){
                 console.log(item)
@@ -358,7 +383,20 @@
                 this.form.endTime=year+"-"+(month+1)+"-"+date+" 23:59:59";
                 this.searchTable();
             },
-
+            exportRs(){
+                axios.post('/statistics/teleStatement/exportResourceAllocationGroup',null,{responseType:'blob'})
+                    .then(function (response) {
+                        console.log(response)
+                        var data =  response.data;
+                        var fileName = response.headers.filename;
+                        saveAs(data,decodeURI(fileName));
+                    })
+                    .catch(function (error) {
+                        console.log(error);
+                    }).then(function(){
+                    signRecordVM.loading=false;
+                });
+            }
         },
         created(){            
             this.searchTable();
