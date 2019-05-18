@@ -13,10 +13,10 @@
         <el-breadcrumb-item>电销顾问通话时长表</el-breadcrumb-item>
     </el-breadcrumb>    
     <el-row class="marginB20">
-        <el-button type="primary">昨天</el-button>
-        <el-button type="success">近七天</el-button>
-        <el-button type="warning">本月</el-button>  
-        <el-button type="danger">导出Excel报表</el-button>  
+        <el-button type="primary" @click="searchYesterday">昨天</el-button>
+        <el-button type="success" @click="searchWeek">近七天</el-button>
+        <el-button type="warning" @click="searchMonth">本月</el-button>  
+        <el-button type="danger">导出Excel报表</el-button>   
     </el-row>
     <div class="mainSearchBg">        
         <div class="mainSearchFormBox">
@@ -38,13 +38,12 @@
                     </el-select>
                 </el-form-item>
                 <div class="mainSearchBtnBox">
-                    <el-button icon="el-icon-search" type="primary" @click="searchTable()" class="searchBtn">搜索</el-button>
+                    <el-button icon="el-icon-search" type="primary" @click="searchTable" class="searchBtn">搜索</el-button>
                 </div>  
             </el-form>
         </div>
         <el-row>
-            <!-- 
-               show-summary :summary-method="summaryFun" -->
+            <!-- 表格合计 show-summary :summary-method="summaryFun" -->
             <el-table
                 :data="tableData"
                 border
@@ -109,7 +108,7 @@
                     :formatter="timeFormat">
                 </el-table-column>
             </el-table>
-            <table-pagination :pager="pager" @change="searchTable"></table-pagination>
+            <table-pagination :pager="pager" @change="searchTable()"></table-pagination>
         </el-row>
     </div>
 </div>
@@ -118,12 +117,10 @@
 </body>
 <script th:inline="javascript">
     var queryOrg=[[${queryOrg}]];//电销组
-    var clientRank=[[${queryOrg}]];//分配来源
     var mainDivVM = new Vue({
         el: '#maindiv',
         data: function() {
             return {
-                multipleSelection: [],//选择行
                 form: {},
                 tableData: [{
                     id: '11111',
@@ -149,8 +146,6 @@
                     amount9: 0,
                 }],
                 orgTeleArr:queryOrg,//电销组
-                clientRank:clientRank,//分配来源
-
                 pager:{ 
                     total: 0,
                     currentPage: 1,
@@ -159,14 +154,12 @@
             }             
         },
         methods: {            
-            handleSelectionChange(val) {//选择节点的事件
-                this.multipleSelection = val;
-            }, 
             searchTable() { 
-                var starTime=this.form.startTime;
+                var param ={};
+                var startTime=this.form.startTime;
                 var endTime=this.form.endTime;
                 if(endTime){
-                    if(starTime>endTime){
+                    if(startTime>endTime){
                         this.$message({
                             message: '开始时间不能大于结束时间',
                             type: 'warning'
@@ -174,7 +167,20 @@
                         return;
                     }
                 }
-                // console.log('search');
+                console.log('search');       
+                param.startTime = startTime;
+                param.endTime = endTime;
+                param.pageSize = this.pager.pageSize;
+                param.pageNum = this.pager.currentPage;
+                console.log(param);
+                // axios.post('/financing/balanceaccount/applyList', param)
+                // .then(function (response) {
+                //       var result =  response.data;  
+                //       mainDivVM.tableData= result;
+                // })
+                // .catch(function (error) {
+                //      console.log(error);
+                // });
             },
             arraySpanMethod({ row, column, rowIndex, columnIndex }) { // 合并第一行
                 if (rowIndex === 0) {
@@ -185,8 +191,8 @@
                     }
                 }
             },
-            gotoTeam (item) { // 页面跳转
-                var clueId = item.id;
+            gotoTeam (row) { // 页面跳转
+                var clueId = row.id;
                 if(clueId == "合计"){
                     window.location.href="/statistics/teleStatement/telemarketingCallTableSum";
                 }else{
@@ -241,22 +247,6 @@
                 var timeResult = this.timeFun (time); 
                 return timeResult;
             },
-    //         timeFun (time) {
-    //             if (time == undefined) {
-    //                  return "";
-    //             } 
-    //             if (time >= 60 && time <= 3600) {
-    //                 time = parseInt(time / 60) + "分" + time % 60 + "秒";
-    //             } else {
-    //                 if (time > 3600) {
-    //                     time = parseInt(time / 3600) + "时" + parseInt(((time % 3600) / 60)) + "分" + time % 60 + "秒";
-    //                 }
-    //                 else {
-    //                     time = time + "秒";
-    //                 }
-    //             }
-    //             return time;   
-    //         },
             timeFun(s){
                 var t="";
                 var hour = Math.floor(s/3600);
@@ -275,6 +265,42 @@
                 }
                 t += sec + "秒";
                 return t;
+            },
+            searchYesterday(){ // 昨天
+               var today = new Date();
+               today.setTime(today.getTime()-24*60*60*1000);
+               var startTime = today.getFullYear()+"-" + (today.getMonth()+1) + "-" + today.getDate()+" 00:00:00";
+               var endTime =today.getFullYear()+"-" + (today.getMonth()+1) + "-" + today.getDate()+" 23:59:59";
+               this.form.startTime=startTime;
+               this.form.endTime=endTime;
+               this.searchTable();
+            },
+            searchWeek(){ // 近七天
+                 var a = new Date();
+                 var year = a.getFullYear();
+                 var month = a.getMonth();
+                 var date = a.getDate();
+                 var b = new Date(year,month,date);
+                 var c = b.valueOf()-6*24*60*60*1000;
+                 var d = b.valueOf();
+                 var startTime= new Date(c);
+                 var endTime = new Date(d);
+                 this.form.startTime=startTime.getFullYear()+"-" + (startTime.getMonth()+1) + "-" + startTime.getDate()+" 00:00:00";
+                 this.form.endTime=endTime.getFullYear()+"-" + (endTime.getMonth()+1) + "-" + endTime.getDate()+" 23:59:59";
+                 this.searchTable();
+            },
+            searchMonth(){ // 本月
+                var a = new Date();
+                var year = a.getFullYear();
+                var month = a.getMonth();
+                var date = a.getDate();
+                var b = new Date(year,month,date);
+                var f= new Date(year,month,01);
+                var c = f.valueOf();
+                var startTime= new Date(c);
+                this.form.startTime=startTime.getFullYear()+"-" + (startTime.getMonth()+1) + "-" + startTime.getDate()+" 00:00:00";;
+                this.form.endTime=year+"-"+(month+1)+"-"+date+" 23:59:59";
+                this.searchTable();
             },
         },
         created(){            
