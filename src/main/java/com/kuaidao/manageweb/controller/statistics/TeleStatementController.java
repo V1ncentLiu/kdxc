@@ -1,6 +1,5 @@
 package com.kuaidao.manageweb.controller.statistics;
 
-import com.kuaidao.aggregation.dto.financing.FinanceLayoutDTO;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.common.util.DateUtil;
@@ -40,32 +39,36 @@ public class TeleStatementController {
     @Autowired
     private StatisticsFeignClient statisticsFeignClient;
 
-
+    /**
+     * 资源分配（组）
+     * @return
+     */
     @RequestMapping("/resourceAllocation")
     public String resourceAllocationTable() {
         return "/reportforms/resourceAllocationTable";
     }
 
     /**
-     * 资源分配页面
+     * 资源分配页面（组）
     * @return
      */
     @RequestMapping("/getResourceAllocationTable")
     @ResponseBody
-    public JSONResult<PageBean<ResourceAllocationDto>> getResourceAllocationTable() {
-        ResourceAllocationQueryDto resourceAllocationQueryDto = new ResourceAllocationQueryDto();
-        resourceAllocationQueryDto.setPageSize(10);
-        resourceAllocationQueryDto.setPageNum(1);
+    public JSONResult<PageBean<ResourceAllocationDto>> getResourceAllocationTable(@RequestBody ResourceAllocationQueryDto resourceAllocationQueryDto) {
         JSONResult<PageBean<ResourceAllocationDto>> resourceAllocationPage = statisticsFeignClient.getResourceAllocationPage(resourceAllocationQueryDto);
         System.out.println(resourceAllocationPage);
         return resourceAllocationPage;
     }
 
-
+    /**
+     * 导出（组）
+     * @param response
+     * @throws Exception
+     */
     @PostMapping("/exportResourceAllocationGroup")
-    public void exportResourceAllocation(HttpServletResponse response) throws Exception {
-        ResourceAllocationQueryDto resourceAllocationQueryDto = new ResourceAllocationQueryDto();
-        resourceAllocationQueryDto.setOrg_Id(1l);
+    public void exportResourceAllocation(
+            @RequestBody ResourceAllocationQueryDto resourceAllocationQueryDto,
+            HttpServletResponse response) throws Exception {
         JSONResult<List<ResourceAllocationDto>> resourceAllocationList = statisticsFeignClient.getResourceAllocationList(resourceAllocationQueryDto);
         List<List<Object>> dataList = new ArrayList<List<Object>>();
         dataList.add(getHeadTitleList());
@@ -96,7 +99,61 @@ public class TeleStatementController {
         wbWorkbook.write(outputStream);
         outputStream.close();
     }
-    
+
+
+    /**
+     * 资源分配页面（个人）
+     * @return
+     */
+    @RequestMapping("/getResourceAllocationPersionTable")
+    @ResponseBody
+    public JSONResult<PageBean<ResourceAllocationDto>> getResourceAllocationPersionTable(@RequestBody ResourceAllocationQueryDto resourceAllocationQueryDto) {
+        JSONResult<PageBean<ResourceAllocationDto>> resourceAllocationPage = statisticsFeignClient.getResourceAllocationPagePersion(resourceAllocationQueryDto);
+        System.out.println(resourceAllocationPage);
+        return resourceAllocationPage;
+    }
+
+    /**
+     * 导出个人
+     * @param resourceAllocationQueryDto
+     * @param response
+     * @throws Exception
+     */
+    @PostMapping("/exportResourceAllocationPersion")
+    public void exportResourceAllocationPersion(
+            @RequestBody ResourceAllocationQueryDto resourceAllocationQueryDto,
+            HttpServletResponse response) throws Exception {
+        JSONResult<List<ResourceAllocationDto>> resourceAllocationList = statisticsFeignClient.getResourceAllocationsPersion(resourceAllocationQueryDto);
+        List<List<Object>> dataList = new ArrayList<List<Object>>();
+        dataList.add(getHeadTitleListPersion());
+        List<ResourceAllocationDto> orderList = resourceAllocationList.getData();
+        for(int i = 0; i<orderList.size(); i++){
+            ResourceAllocationDto ra = orderList.get(i);
+            List<Object> curList = new ArrayList<>();
+            curList.add(i + 1);
+            curList.add(ra.getUserName());
+            curList.add(ra.getAssignClueCount());
+            curList.add(ra.getJointExhibition());
+            curList.add(ra.getPriceCompetition());
+            curList.add(ra.getOptimization());
+            curList.add(ra.getInformationFlow());
+            curList.add(ra.getOfficialWebsite());
+            curList.add(ra.getIndustry());
+            curList.add(ra.getOther());
+            curList.add(ra.getNetizensMissed());
+            dataList.add(curList);
+        }
+        XSSFWorkbook wbWorkbook = ExcelUtil.creat2007Excel(dataList);
+        String name = "分配记录表" + DateUtil.convert2String(new Date(), DateUtil.ymdhms2) + ".xlsx";
+        response.addHeader("Content-Disposition",
+                "attachment;filename=" + new String(name.getBytes("UTF-8"), "ISO8859-1"));
+        response.addHeader("fileName", URLEncoder.encode(name, "utf-8"));
+        response.setContentType("application/octet-stream");
+        ServletOutputStream outputStream = response.getOutputStream();
+        wbWorkbook.write(outputStream);
+        outputStream.close();
+    }
+
     /**
      * 资源分配页面 合计 
     * @return
@@ -216,6 +273,22 @@ public class TeleStatementController {
         List<Object> headTitleList = new ArrayList<>();
         headTitleList.add("序号");
         headTitleList.add("电销组");
+        headTitleList.add("分配资源数");
+        headTitleList.add("联展");
+        headTitleList.add("竞价");
+        headTitleList.add("优化");
+        headTitleList.add("信息流");
+        headTitleList.add("官网");
+        headTitleList.add("行业");
+        headTitleList.add("其他");
+        headTitleList.add("网民未接");
+        return headTitleList;
+    }
+
+    private List<Object> getHeadTitleListPersion() {
+        List<Object> headTitleList = new ArrayList<>();
+        headTitleList.add("序号");
+        headTitleList.add("电销人员");
         headTitleList.add("分配资源数");
         headTitleList.add("联展");
         headTitleList.add("竞价");

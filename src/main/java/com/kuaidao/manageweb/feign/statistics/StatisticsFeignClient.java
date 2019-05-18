@@ -18,11 +18,38 @@ import java.util.List;
 @FeignClient(name = "statstics-service", path = "/statstics/resourceAllocation", fallback = StatisticsFeignClient.HystrixClientFallback.class)
 public interface StatisticsFeignClient {
 
+    /**
+     * 资源分配组
+     * @param resourceAllocationQueryDto
+     * @return
+     */
     @PostMapping("/getResourceAllocationList")
     JSONResult<List<ResourceAllocationDto>> getResourceAllocationList(@RequestBody ResourceAllocationQueryDto resourceAllocationQueryDto);
 
+    /**
+     * 资源分配组分页
+     * @param
+     * @return
+     */
     @PostMapping("/getResourceAllocationPage")
     JSONResult<PageBean<ResourceAllocationDto>> getResourceAllocationPage(@RequestBody ResourceAllocationQueryDto resourceAllocationQueryDto);
+
+
+    /**
+     * 资源分配 个人
+     * @param resourceAllocationQueryDto
+     * @return
+     */
+    @PostMapping("/getResourceAllocationsPersion")
+    JSONResult<List<ResourceAllocationDto>> getResourceAllocationsPersion(@RequestBody ResourceAllocationQueryDto resourceAllocationQueryDto);
+
+    /**
+     * 资源分配个人分页
+     * @param
+     * @return
+     */
+    @PostMapping("/getResourceAllocationPagePersion")
+    JSONResult<PageBean<ResourceAllocationDto>> getResourceAllocationPagePersion(@RequestBody ResourceAllocationQueryDto resourceAllocationQueryDto);
 
     @Component
     class HystrixClientFallback implements StatisticsFeignClient {
@@ -37,12 +64,22 @@ public interface StatisticsFeignClient {
 
         @Override
         public JSONResult<List<ResourceAllocationDto>> getResourceAllocationList(ResourceAllocationQueryDto resourceAllocationQueryDto) {
-            return fallBackError("查询分配列表失败");
+            return fallBackError("查询组分配列表失败");
         }
 
         @Override
         public JSONResult<PageBean<ResourceAllocationDto>> getResourceAllocationPage(ResourceAllocationQueryDto resourceAllocationQueryDto) {
-            return fallBackError("分页查询分配列表失败");
+            return fallBackError("分页查询组分配列表失败");
+        }
+
+        @Override
+        public JSONResult<List<ResourceAllocationDto>> getResourceAllocationsPersion(ResourceAllocationQueryDto resourceAllocationQueryDto) {
+            return fallBackError("查询个人分配列表失败");
+        }
+
+        @Override
+        public JSONResult<PageBean<ResourceAllocationDto>> getResourceAllocationPagePersion(ResourceAllocationQueryDto resourceAllocationQueryDto) {
+            return fallBackError("查询个人分配列表失败");
         }
     }
 }
