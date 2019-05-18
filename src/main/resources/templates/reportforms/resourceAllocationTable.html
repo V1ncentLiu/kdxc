@@ -63,13 +63,14 @@
                 border
                 :data="tableData"
                 show-summary
+                v-loading="loading"
                 >
                 <!-- <el-table-column align="center" type="index" label="序号" width="55" :index="indexFun"></el-table-column> -->
                 <el-table-column align="center" type="index" label="序号" width="55"></el-table-column>
                 <!-- 组列 -->
                 <el-table-column align="center" :key="index" :prop="item.fieldCode" :label="item.displayName" v-for="(item,key,index) in tableColums" v-if="item.fieldCode == 'orgId'">
                     <template slot-scope="scope">
-                        <el-button @click="gotoTeam(scope.row)" type="text" size="small">{{scope.row.orgId}}</el-button>
+                        <el-button @click="gotoTeam(scope.row)" type="text" size="small">{{scope.row.orgName}}</el-button>
                     </template>
                 </el-table-column>
                 <!-- 其他列 -->
@@ -191,6 +192,7 @@
         el: '#maindiv',
         data: function() {
             return {
+                loading:false,
                 form: {
                     startTime:'',
                     endTime:'',
@@ -203,7 +205,7 @@
                 pager:{
                     total: 0,
                     currentPage: 1,
-                    pageSize: 1,
+                    pageSize: 20,
                 },
             }             
         },
@@ -228,6 +230,7 @@
                 param.endTime =  this.form.endTime;
                 param.org_Id =  this.form.org_Id;//电销组
                 console.log(param)
+                this.loading=true;
                 axios.post('/statistics/teleStatement/getResourceAllocationTable',param).then(function (response) { 
                     if(!response){
                         mainDivVM.$message({
@@ -259,8 +262,9 @@
                     mainDivVM.tableColums= fieldList;
                     // 插入合计一行
                     // mainDivVM.summaryFun();
-                    mainDivVM.pager.currentPage= resobjData.currentPage;
-                    mainDivVM.pager.total= resobjData.total;
+                    mainDivVM.pager.currentPage= resobj.data.currentPage;
+                    mainDivVM.pager.total= resobj.data.total;
+                    mainDivVM.loading=false;
                 })
             },
             gotoTeam(item){
@@ -268,14 +272,14 @@
                 var clueId = item.id;
                 if(clueId){
                     // 点击组跳转到资源组
-                    window.location.href="/statistics/teleStatement/resourceAllocationTableTeam?clueId=" + clueId; 
+                    window.location.href="/statistics/teleStatement/resourceAllocationTableTeam?id=" + clueId; 
                 }
-                var clueId = item.id;
-                if(clueId == "合计"){
-                    window.location.href="/statistics/teleStatement/resourceAllocationTableSum";
-                }else{
-                    window.location.href="/statistics/teleStatement/resourceAllocationTableTeam?clueId=" + clueId; 
-                }
+                // var clueId = item.id;
+                // if(clueId == "合计"){
+                //     window.location.href="/statistics/teleStatement/resourceAllocationTableSum";
+                // }else{
+                //     window.location.href="/statistics/teleStatement/resourceAllocationTableTeam?id=" + id; 
+                // }
             },
             arraySpanMethod({ row, column, rowIndex, columnIndex }) { // 合并第一行
                 if (rowIndex === 0) {
