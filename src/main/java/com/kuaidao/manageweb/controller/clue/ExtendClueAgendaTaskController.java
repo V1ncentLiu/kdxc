@@ -614,7 +614,7 @@ public class ExtendClueAgendaTaskController {
     @RequestMapping("/importInvitearea")
     @RequiresPermissions("waitDistributResource:importExcel")
     @LogRecord(description = "导入线索", operationType = LogRecord.OperationType.IMPORTS,
-        menuName = MenuEnum.WAIT_DISTRIBUT_RESOURCE)
+            menuName = MenuEnum.WAIT_DISTRIBUT_RESOURCE)
     @ResponseBody
     public JSONResult importInvitearea(@RequestBody ClueAgendaTaskDTO clueAgendaTaskDTO)
             throws Exception {
@@ -1056,7 +1056,10 @@ public class ExtendClueAgendaTaskController {
                         pushClueReq.setMessageTime(DateUtil.convert2Date(
                                 clueAgendaTaskDTO1.getMessageTime1(), DateUtil.ymdhms));
                     }
-                    pushClueReq.setAppointTime(clueAgendaTaskDTO1.getReserveTime1());
+                    if (StringUtils.isNotBlank(clueAgendaTaskDTO1.getReserveTime1())) {
+                        pushClueReq.setReserveTime(DateUtil.convert2Date(
+                                clueAgendaTaskDTO1.getReserveTime1(), DateUtil.ymdhms));
+                    }
                     pushClueReq.setCreateTime(format.format(new Date()));
                     pushClueReq.setInputType(4);
                     if (StringUtils.isNotBlank(clueAgendaTaskDTO1.getAccountNameVaule())) {
@@ -1122,7 +1125,10 @@ public class ExtendClueAgendaTaskController {
 
                         clueAgendaTaskDTO2.setMessagePoint(pushClueReq.getMessagePoint());
                         clueAgendaTaskDTO2.setSearchWord(pushClueReq.getSearchWord());
-                        clueAgendaTaskDTO2.setReserveTime1(pushClueReq.getAppointTime());
+                        if (pushClueReq.getReserveTime() != null) {
+                            clueAgendaTaskDTO2.setReserveTime1(DateUtil
+                                    .convert2String(pushClueReq.getReserveTime(), DateUtil.ymdhms));
+                        }
                         clueAgendaTaskDTO2
                                 .setAccountName(accountNameMap2.get(pushClueReq.getAccountName()));
                         clueAgendaTaskDTO2.setUrlAddress(pushClueReq.getUrlAddress());
