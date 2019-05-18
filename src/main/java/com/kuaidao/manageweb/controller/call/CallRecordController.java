@@ -5,7 +5,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
 import javax.servlet.http.HttpServletRequest;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.slf4j.Logger;
@@ -16,6 +18,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+
 import com.kuaidao.aggregation.dto.call.CallRecordCountDTO;
 import com.kuaidao.aggregation.dto.call.CallRecordReqDTO;
 import com.kuaidao.aggregation.dto.call.CallRecordRespDTO;
@@ -43,8 +46,16 @@ public class CallRecordController {
     CallRecordFeign callRecordFeign;
     @Autowired
     UserInfoFeignClient userInfoFeignClient;
-    
-    
+
+    /**
+     * 记录拨打时间
+     */
+    @PostMapping("/recodeCallTime")
+    @ResponseBody
+    public void recodeCallTime(@RequestBody CallRecordReqDTO myCallRecordReqDTO){
+        callRecordFeign.recodeCallTime(myCallRecordReqDTO);
+    }
+
     /**
      * 我的通话记录
      * @return
@@ -76,7 +87,7 @@ public class CallRecordController {
                 req.setRoleCode(RoleCodeEnum.DXCYGW.name());
                 JSONResult<List<UserInfoDTO>> userJr = userInfoFeignClient.listByOrgAndRole(req);
                 if(userJr==null || !JSONResult.SUCCESS.equals(userJr.getCode())) {
-                    logger.error("查询电销通话记录-获取组内顾问-userInfoFeignClient.listByOrgAndRole(req),param{{}},res{{}}",req,userJr);
+                    logger.error("查询电销通话记录-获取电销顾问-userInfoFeignClient.listByOrgAndRole(req),param{{}},res{{}}",req,userJr);
                 }
                 request.setAttribute("tmList",userJr.getData());
             }
@@ -154,7 +165,7 @@ public class CallRecordController {
                     req.setRoleCode(RoleCodeEnum.DXCYGW.name());
                     JSONResult<List<UserInfoDTO>> userJr = userInfoFeignClient.listByOrgAndRole(req);
                     if(userJr==null || !JSONResult.SUCCESS.equals(userJr.getCode())) {
-                        logger.error("查询电销通话记录-获取组内顾问-userInfoFeignClient.listByOrgAndRole(req),param{{}},res{{}}",req,userJr);
+                        logger.error("查询电销通话记录-获取电销顾问-userInfoFeignClient.listByOrgAndRole(req),param{{}},res{{}}",req,userJr);
                         return new JSONResult().fail(SysErrorCodeEnum.ERR_REST_FAIL.getCode(),SysErrorCodeEnum.ERR_REST_FAIL.getMessage());
                     }
                     
@@ -202,7 +213,7 @@ public class CallRecordController {
                     req.setRoleCode(RoleCodeEnum.DXCYGW.name());
                     JSONResult<List<UserInfoDTO>> userJr = userInfoFeignClient.listByOrgAndRole(req);
                     if(userJr==null || !JSONResult.SUCCESS.equals(userJr.getCode())) {
-                        logger.error("查询电销通话记录-获取组内顾问-userInfoFeignClient.listByOrgAndRole(req),param{{}},res{{}}",req,userJr);
+                        logger.error("查询电销通话记录-获取电销顾问-userInfoFeignClient.listByOrgAndRole(req),param{{}},res{{}}",req,userJr);
                         return new JSONResult().fail(SysErrorCodeEnum.ERR_REST_FAIL.getCode(),SysErrorCodeEnum.ERR_REST_FAIL.getMessage());
                     }
                     
