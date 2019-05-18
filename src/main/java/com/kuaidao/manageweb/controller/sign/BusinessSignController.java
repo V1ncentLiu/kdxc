@@ -458,19 +458,19 @@ public class BusinessSignController {
                     if ("2".equals(dto.getPayType())) {
                         this.handlerData(dto,user);
                         one.add(dto);
-                        if(dto.getRepeatStatus() != null && dto.getRepeatStatus() ==1){
+                        if(StringUtils.isNotBlank(dto.getRepeatRatio())){
                             oneRepeatStatus =true;
                         }
                     } else if ("3".equals(dto.getPayType())) {
                         this.handlerData(dto,user);
                         two.add(dto);
-                        if(dto.getRepeatStatus() != null && dto.getRepeatStatus() ==1){
+                        if(StringUtils.isNotBlank(dto.getRepeatRatio())){
                             twoRepeatStatus =true;
                         }
                     } else if ("4".equals(dto.getPayType())) {
                         this.handlerData(dto,user);
                         three.add(dto);
-                        if(dto.getRepeatStatus() != null && dto.getRepeatStatus() ==1){
+                        if(StringUtils.isNotBlank(dto.getRepeatRatio())){
                             threeRepeatStatus =true;
                         }
                     }
