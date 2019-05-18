@@ -37,7 +37,7 @@ public enum MenuEnum {
      */
     PHONETRAFFIC_MANAGER("话务管理"),
     /**
-     * 线索管理
+     * 资源管理
      */
     WAIT_DISTRIBUT_RESOURCE("待分发资源"), CLUE_TEMPLATE_MANAGEMENT("资源模板管理"),
     /**

@@ -1,16 +1,16 @@
 package com.kuaidao.manageweb.controller.clue;
 
+import com.kuaidao.manageweb.constant.Constants;
+import com.sun.xml.internal.bind.v2.TODO;
 import java.net.URLEncoder;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.shiro.SecurityUtils;
@@ -21,17 +21,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import com.kuaidao.aggregation.dto.clue.ClueAgendaTaskDTO;
-import com.kuaidao.aggregation.dto.clue.ClueAgendaTaskQueryDTO;
-import com.kuaidao.aggregation.dto.clue.ClueDTO;
-import com.kuaidao.aggregation.dto.clue.ClueQueryDTO;
-import com.kuaidao.aggregation.dto.clue.PushClueReq;
+
+import com.kuaidao.aggregation.dto.clue.*;
 import com.kuaidao.aggregation.dto.project.ProjectInfoDTO;
 import com.kuaidao.aggregation.dto.project.ProjectInfoPageParam;
 import com.kuaidao.common.constant.DicCodeEnum;
@@ -115,7 +108,7 @@ public class ExtendClueAgendaTaskController {
             request.setAttribute("proSelect", proJson.getData());
         }
 
-        List<UserInfoDTO> userList = this.queryUserByRole();
+        List<UserInfoDTO> userList = queryUserByRole();
         // 查询字典分发失败原因集合
         request.setAttribute("reasonList",
                 getDictionaryByCode(DicCodeEnum.ASSIGN_FAIL_REASON.getCode()));
@@ -488,63 +481,128 @@ public class ExtendClueAgendaTaskController {
 
         // 存放合法的数据
         List<ClueAgendaTaskDTO> dataList = new ArrayList<ClueAgendaTaskDTO>();
-
-        for (int i = 1; i < excelDataList.size(); i++) {
-            List<Object> rowList = excelDataList.get(i);
-            ClueAgendaTaskDTO rowDto = new ClueAgendaTaskDTO();
-            for (int j = 0; j < rowList.size(); j++) {
-                Object object = rowList.get(j);
-                String value = (String) object;
-                if (j == 0) {// 创建时间
-                    rowDto.setDate(value);
-                } else if (j == 1) {// 资源类型
-                    rowDto.setTypeName(value);
-                } else if (j == 2) {// 资源类别
-                    rowDto.setCategoryName(value);
-                } else if (j == 3) {// 广告位
-                    rowDto.setSourceTypeName(value);
-                } else if (j == 4) {// 媒介
-                    rowDto.setSourceName(value);
-                } else if (j == 5) {// 资源项目
-                    rowDto.setProjectName(value);
-                } else if (j == 6) {// 行业类别
-                    rowDto.setIndustryCategoryName(value);
-                } else if (j == 7) {// 姓名
-                    rowDto.setCusName(value);
-                } else if (j == 8) {// 手机
-                    rowDto.setPhone(value);
-                } else if (j == 9) {// 手机2
-                    rowDto.setPhone2(value);
-                } else if (j == 10) {// 微信
-                    rowDto.setWechat(value);
-                } else if (j == 11) {// 微信2
-                    rowDto.setWechat2(value);
-                } else if (j == 12) {// QQ
-                    rowDto.setQq(value);
-                } else if (j == 13) {// 邮箱
-                    rowDto.setEmail(value);
-                } else if (j == 14) {// 性别
-                    rowDto.setSex1(value);
-                } else if (j == 15) {// 年龄
-                    rowDto.setAge1(value);
-                } else if (j == 16) {// 地址
-                    rowDto.setAddress(value);
-                } else if (j == 17) {// 留言时间
-                    rowDto.setMessageTime1(value);
-                } else if (j == 18) {// 留言内容
-                    rowDto.setMessagePoint(value);
-                } else if (j == 19) {// 搜索词
-                    rowDto.setSearchWord(value);
-                } else if (j == 20) {// 预约时间
-                    rowDto.setReserveTime1(value);
-                } else if (j == 21) {// 账户名称
-                    rowDto.setAccountName(value);
-                } else if (j == 22) {// url地址
-                    rowDto.setUrlAddress(value);
-                }
-            } // inner foreach end
-            dataList.add(rowDto);
-        } // outer foreach end
+        //判断有效列
+        Integer titleNotNull = 0;
+        for (int i = 0;i < excelDataList.get(0).size();i++){
+            if(StringUtils.isBlank(String.valueOf(excelDataList.get(0).get(i)))){
+                titleNotNull = i;
+                break;
+            }
+        }
+        //根据excel列数判断模板类型
+        if(titleNotNull.equals(Constants.UNOPTIMIZE)) {
+            for (int i = 1; i < excelDataList.size(); i++) {
+                List<Object> rowList = excelDataList.get(i);
+                ClueAgendaTaskDTO rowDto = new ClueAgendaTaskDTO();
+                for (int j = 0; j < rowList.size(); j++) {
+                    Object object = rowList.get(j);
+                    String value = (String) object;
+                    if (j == 0) {// 日期
+                        rowDto.setDate(value);
+                    } else if (j == 1) {// 资源类型
+                        rowDto.setTypeName(value);
+                    } else if (j == 2) {// 资源类别
+                        rowDto.setCategoryName(value);
+                    } else if (j == 3) {// 广告位
+                        rowDto.setSourceTypeName(value);
+                    } else if (j == 4) {// 媒介
+                        rowDto.setSourceName(value);
+                    } else if (j == 5) {// 资源项目
+                        rowDto.setProjectName(value);
+                    } else if (j == 6) {// 行业类别
+                        rowDto.setIndustryCategoryName(value);
+                    } else if (j == 7) {// 姓名
+                        rowDto.setCusName(value);
+                    } else if (j == 8) {// 手机
+                        rowDto.setPhone(value);
+                    } else if (j == 9) {// 手机2
+                        rowDto.setPhone2(value);
+                    } else if (j == 10) {// 微信
+                        rowDto.setWechat(value);
+                    } else if (j == 11) {// 微信2
+                        rowDto.setWechat2(value);
+                    } else if (j == 12) {// QQ
+                        rowDto.setQq(value);
+                    } else if (j == 13) {// 邮箱
+                        rowDto.setEmail(value);
+                    } else if (j == 14) {// 性别
+                        rowDto.setSex1(value);
+                    } else if (j == 15) {// 年龄
+                        rowDto.setAge1(value);
+                    } else if (j == 16) {// 开店区域
+                        rowDto.setAddress(value);
+                    } else if (j == 17) {// 留言时间
+                        rowDto.setMessageTime1(value);
+                    } else if (j == 18) {// 留言内容
+                        rowDto.setMessagePoint(value);
+                    } else if (j == 19) {// 搜索词
+                        rowDto.setSearchWord(value);
+                    } else if (j == 20) {// 预约回访时间
+                        rowDto.setReserveTime1(value);
+                    } else if (j == 21) {// url地址
+                        rowDto.setUrlAddress(value);
+                    } else if (j == 22) {// 账户名称
+                        rowDto.setAccountName(value);
+                    }
+                } // inner foreach end
+                rowDto.setIsOptimize(Constants.IS_NOT_OPTIMIZE);
+                dataList.add(rowDto);
+            }
+        }else if(titleNotNull.equals(Constants.OPTIMIZE)){
+            for (int i = 1; i < excelDataList.size(); i++) {
+                List<Object> rowList = excelDataList.get(i);
+                ClueAgendaTaskDTO rowDto = new ClueAgendaTaskDTO();
+                for (int j = 0; j < rowList.size(); j++) {
+                    Object object = rowList.get(j);
+                    String value = (String) object;
+                    if (j == 0) {// 日期
+                        rowDto.setDate(value);
+                    } else if (j == 1) {// 资源类型
+                        rowDto.setTypeName(value);
+                    } else if (j == 2) {// 资源类别
+                        rowDto.setCategoryName(value);
+                    } else if (j == 3) {// 媒介
+                        rowDto.setSourceName(value);
+                    } else if (j == 4) {// 行业类别
+                        rowDto.setIndustryCategoryName(value);
+                    } else if (j == 5) {// 姓名
+                        rowDto.setCusName(value);
+                    } else if (j == 6) {// 手机
+                        rowDto.setPhone(value);
+                    } else if (j == 7) {// 手机2
+                        rowDto.setPhone2(value);
+                    } else if (j == 8) {// 微信
+                        rowDto.setWechat(value);
+                    } else if (j == 9) {// 微信2
+                        rowDto.setWechat2(value);
+                    } else if (j == 10) {// QQ
+                        rowDto.setQq(value);
+                    } else if (j == 11) {// 邮箱
+                        rowDto.setEmail(value);
+                    } else if (j == 12) {// 性别
+                        rowDto.setSex1(value);
+                    } else if (j == 13) {// 年龄
+                        rowDto.setAge1(value);
+                    } else if (j == 14) {// 开店区域
+                        rowDto.setAddress(value);
+                    } else if (j == 15) {// 留言时间
+                        rowDto.setMessageTime1(value);
+                    } else if (j == 16) {// 留言内容
+                        rowDto.setMessagePoint(value);
+                    } else if (j == 17) {// 搜索词
+                        rowDto.setSearchWord(value);
+                    } else if (j == 18) {// 预约回访时间
+                        rowDto.setReserveTime1(value);
+                    } else if (j == 19) {// url地址
+                        rowDto.setUrlAddress(value);
+                    } else if (j == 20) {// 账户名称
+                        rowDto.setAccountName(value);
+                    }
+                } // inner foreach end
+                rowDto.setIsOptimize(Constants.IS_OPTIMIZE);
+                dataList.add(rowDto);
+            }
+        }// outer foreach end
         logger.info("upload custom filed, valid success num{{}}", dataList.size());
         /*
          * JSONResult uploadRs = customFieldFeignClient.saveBatchCustomField(dataList);
@@ -556,14 +614,14 @@ public class ExtendClueAgendaTaskController {
 
 
     /**
-     * 导入线索
+     * 导入资源
      *
      * @return
      * @throws Exception
      */
     @RequestMapping("/importInvitearea")
     @RequiresPermissions("waitDistributResource:importExcel")
-    @LogRecord(description = "导入线索", operationType = LogRecord.OperationType.IMPORTS,
+    @LogRecord(description = "导入资源", operationType = LogRecord.OperationType.IMPORTS,
             menuName = MenuEnum.WAIT_DISTRIBUT_RESOURCE)
     @ResponseBody
     public JSONResult importInvitearea(@RequestBody ClueAgendaTaskDTO clueAgendaTaskDTO)
@@ -633,138 +691,361 @@ public class ExtendClueAgendaTaskController {
         if (list != null && list.size() > 0) {
 
             for (ClueAgendaTaskDTO clueAgendaTaskDTO1 : list) {
-                logger.info("clue import:{{}}", clueAgendaTaskDTO1);
+                logger.info("clue import list:{{}}", clueAgendaTaskDTO1);
                 boolean islegal = true;// true合法 false不合法
-                // 判断是否存在该项目
-                if (islegal && clueAgendaTaskDTO1.getProjectName() != null
-                        && !"".equals(clueAgendaTaskDTO1.getProjectName())) {
-                    clueAgendaTaskDTO1
-                            .setProjectId(projectMap.get(clueAgendaTaskDTO1.getProjectName()));
-                    if (clueAgendaTaskDTO1.getProjectId() == null) {
-                        islegal = false;
-                    }
-                } else {
-                    islegal = false;
-                }
+                //存放失败原因
+                StringBuilder failReason = new StringBuilder();
+                //时间格式错误原因
+                StringBuilder reasonInTime = new StringBuilder();
                 // 判断时间格式是否正确
-                if (islegal && (clueAgendaTaskDTO1.getReserveTime1() != null
-                        && !"".equals(clueAgendaTaskDTO1.getReserveTime1()))) {
+                if (clueAgendaTaskDTO1.getReserveTime1() != null
+                        && !"".equals(clueAgendaTaskDTO1.getReserveTime1())) {
+                    //去掉前后空格
+                    clueAgendaTaskDTO1.setReserveTime1(clueAgendaTaskDTO1.getReserveTime1().trim());
                     try {
                         Date date = format.parse(clueAgendaTaskDTO1.getReserveTime1());
                     } catch (ParseException e) {
                         islegal = false;
+                        reasonInTime.append("预约回访时间");
                     }
                     // if(islegal && clueAgendaTaskDTO1.getReserveTime1().length()<19){
                     // islegal = false;
                     // }
                 }
-                if (islegal && (clueAgendaTaskDTO1.getDate() != null
-                        && !"".equals(clueAgendaTaskDTO1.getDate()))) {
+                if (clueAgendaTaskDTO1.getDate() != null
+                        && !"".equals(clueAgendaTaskDTO1.getDate())) {
+                    //去掉前后空格
+                    clueAgendaTaskDTO1.setDate(clueAgendaTaskDTO1.getDate().trim());
                     try {
                         Date date = format.parse(clueAgendaTaskDTO1.getDate());
                     } catch (ParseException e) {
                         islegal = false;
+                        if(StringUtils.isBlank(reasonInTime)){
+                            reasonInTime.append("日期");
+                        } else {
+                            reasonInTime.append("、日期");
+                        }
                     }
                     // if(islegal && clueAgendaTaskDTO1.getDate().length()<19){
                     // islegal = false;
                     // }
                 }
-                if (islegal && (clueAgendaTaskDTO1.getMessageTime1() != null
-                        && !"".equals(clueAgendaTaskDTO1.getMessageTime1()))) {
+                if (clueAgendaTaskDTO1.getMessageTime1() != null
+                        && !"".equals(clueAgendaTaskDTO1.getMessageTime1())) {
+                    //去掉前后空格
+                    clueAgendaTaskDTO1.setMessageTime1(clueAgendaTaskDTO1.getMessageTime1().trim());
                     try {
                         Date date = format.parse(clueAgendaTaskDTO1.getMessageTime1());
                     } catch (ParseException e) {
                         islegal = false;
+                        if(StringUtils.isBlank(reasonInTime)){
+                            reasonInTime.append("留言时间");
+                        } else {
+                            reasonInTime.append("、留言时间");
+                        }
                     }
                     // if(islegal && clueAgendaTaskDTO1.getMessageTime1().length()<19){
                     // islegal = false;
                     // }
                 }
-                // 判断必填项
-                if (islegal && (clueAgendaTaskDTO1.getTypeName() == null
-                        || "".equals(clueAgendaTaskDTO1.getTypeName())
-                        || "".equals(clueAgendaTaskDTO1.getCategoryName())
-                        || clueAgendaTaskDTO1.getCategoryName() == null
-                        || clueAgendaTaskDTO1.getSourceTypeName() == null
-                        || "".equals(clueAgendaTaskDTO1.getSourceTypeName())
-                        || clueAgendaTaskDTO1.getTypeName() == null
-                        || "".equals(clueAgendaTaskDTO1.getTypeName())
-                        || clueAgendaTaskDTO1.getCusName() == null
-                        || "".equals(clueAgendaTaskDTO1.getCusName()))) {
-                    islegal = false;
+                if(StringUtils.isNotBlank(reasonInTime)){
+                    failReason.append(reasonInTime + "时间格式错误；");
                 }
                 // 判断字典表数据是否匹配
-                if (islegal && (clueAgendaTaskDTO1.getTypeName() != null
-                        && !"".equals(clueAgendaTaskDTO1.getTypeName()))) {
-                    String type = typeMap.get(clueAgendaTaskDTO1.getTypeName());
-                    if (StringUtils.isNotBlank(type)) {
-                        clueAgendaTaskDTO1.setType(Integer.valueOf(type));
+                if(clueAgendaTaskDTO1.getIsOptimize().equals(Constants.IS_NOT_OPTIMIZE)) {//非优化类
+                    StringBuilder reasonIsNull = new StringBuilder();//导入失败原因：必填项为空
+                    StringBuilder reasonIsNotMatch = new StringBuilder();//导入失败原因：字典匹配失败
+                    if (clueAgendaTaskDTO1.getTypeName() != null
+                        && !"".equals(clueAgendaTaskDTO1.getTypeName())) {
+                        //去掉前后空格
+                        clueAgendaTaskDTO1.setTypeName(clueAgendaTaskDTO1.getTypeName().trim());
+                        String type = typeMap.get(clueAgendaTaskDTO1.getTypeName());
+                        if (StringUtils.isNotBlank(type)) {
+                            clueAgendaTaskDTO1.setType(Integer.valueOf(type));
+                        } else {
+                            islegal = false;
+                            reasonIsNotMatch.append("资源类别");
+                        }
                     } else {
                         islegal = false;
+                        reasonIsNull.append("资源类别");
                     }
-                }
-                if (islegal && (clueAgendaTaskDTO1.getCategoryName() != null
-                        && !"".equals(clueAgendaTaskDTO1.getCategoryName()))) {
-                    String category = categoryMap.get(clueAgendaTaskDTO1.getCategoryName());
-                    if (StringUtils.isNotBlank(category)) {
-                        clueAgendaTaskDTO1.setCategory(Integer.valueOf(category));
+                    if (clueAgendaTaskDTO1.getCategoryName() != null
+                        && !"".equals(clueAgendaTaskDTO1.getCategoryName())) {
+                        //去掉前后空格
+                        clueAgendaTaskDTO1
+                            .setCategoryName(clueAgendaTaskDTO1.getCategoryName().trim());
+                        String category = categoryMap.get(clueAgendaTaskDTO1.getCategoryName());
+                        if (StringUtils.isNotBlank(category)) {
+                            clueAgendaTaskDTO1.setCategory(Integer.valueOf(category));
+                        } else {
+                            islegal = false;
+                            if(StringUtils.isBlank(reasonIsNotMatch)){
+                                reasonIsNotMatch.append("资源类型");
+                            } else {
+                                reasonIsNotMatch.append("、资源类型");
+                            }
+                        }
                     } else {
                         islegal = false;
+                        if(StringUtils.isBlank(reasonIsNull)){
+                            reasonIsNull.append("资源类型");
+                        } else {
+                            reasonIsNull.append("、资源类型");
+                        }
                     }
-                }
-                if (islegal && (clueAgendaTaskDTO1.getSourceTypeName() != null
-                        && !"".equals(clueAgendaTaskDTO1.getSourceTypeName()))) {
-                    String sourceType = sourceTypeMap.get(clueAgendaTaskDTO1.getSourceTypeName());
-                    if (StringUtils.isNotBlank(sourceType)) {
-                        clueAgendaTaskDTO1.setSourceType(Integer.valueOf(sourceType));
+                    if (clueAgendaTaskDTO1.getSourceTypeName() != null
+                        && !"".equals(clueAgendaTaskDTO1.getSourceTypeName())) {
+                        //去掉前后空格
+                        clueAgendaTaskDTO1
+                            .setSourceTypeName(clueAgendaTaskDTO1.getSourceTypeName().trim());
+                        String sourceType = sourceTypeMap
+                            .get(clueAgendaTaskDTO1.getSourceTypeName());
+                        if (StringUtils.isNotBlank(sourceType)) {
+                            clueAgendaTaskDTO1.setSourceType(Integer.valueOf(sourceType));
+                        } else {
+                            islegal = false;
+                            if(StringUtils.isBlank(reasonIsNotMatch)){
+                                reasonIsNotMatch.append("广告位");
+                            } else {
+                                reasonIsNotMatch.append("、广告位");
+                            }
+                        }
                     } else {
                         islegal = false;
+                        if(StringUtils.isBlank(reasonIsNull)){
+                            reasonIsNull.append("广告位");
+                        } else {
+                            reasonIsNull.append("、广告位");
+                        }
                     }
-                }
-                if (islegal && (clueAgendaTaskDTO1.getSourceName() != null
-                        && !"".equals(clueAgendaTaskDTO1.getSourceName()))) {
-                    String source = sourceMap.get(clueAgendaTaskDTO1.getSourceName());
-                    if (StringUtils.isNotBlank(source)) {
-                        clueAgendaTaskDTO1.setSource(Integer.valueOf(source));
+                    if (clueAgendaTaskDTO1.getSourceName() != null
+                        && !"".equals(clueAgendaTaskDTO1.getSourceName())) {
+                        //去掉前后空格
+                        clueAgendaTaskDTO1.setSourceName(clueAgendaTaskDTO1.getSourceName().trim());
+                        String source = sourceMap.get(clueAgendaTaskDTO1.getSourceName());
+                        if (StringUtils.isNotBlank(source)) {
+                            clueAgendaTaskDTO1.setSource(Integer.valueOf(source));
+                        } else {
+                            islegal = false;
+                            if(StringUtils.isBlank(reasonIsNotMatch)){
+                                reasonIsNotMatch.append("媒介");
+                            } else {
+                                reasonIsNotMatch.append("、媒介");
+                            }
+                        }
                     } else {
                         islegal = false;
+                        if(StringUtils.isBlank(reasonIsNull)){
+                            reasonIsNull.append("媒介");
+                        } else {
+                            reasonIsNull.append("、媒介");
+                        }
                     }
-                }
-                if (islegal && (clueAgendaTaskDTO1.getIndustryCategoryName() != null
-                        && !"".equals(clueAgendaTaskDTO1.getIndustryCategoryName()))) {
-                    String industryCategory =
+                    // 判断是否存在该项目
+                    if (clueAgendaTaskDTO1.getProjectName() != null
+                        && !"".equals(clueAgendaTaskDTO1.getProjectName())) {
+                        //去掉前后空格
+                        clueAgendaTaskDTO1
+                            .setProjectName(clueAgendaTaskDTO1.getProjectName().trim());
+                        clueAgendaTaskDTO1
+                            .setProjectId(projectMap.get(clueAgendaTaskDTO1.getProjectName()));
+                        if (clueAgendaTaskDTO1.getProjectId() == null) {
+                            islegal = false;
+                            if(StringUtils.isBlank(reasonIsNotMatch)){
+                                reasonIsNotMatch.append("资源项目");
+                            } else {
+                                reasonIsNotMatch.append("、资源项目");
+                            }
+                        }
+                    } else {
+                        islegal = false;
+                        if(StringUtils.isBlank(reasonIsNull)){
+                            reasonIsNull.append("资源项目");
+                        } else {
+                            reasonIsNull.append("、资源项目");
+                        }
+                    }
+                    if (clueAgendaTaskDTO1.getIndustryCategoryName() != null
+                        && !"".equals(clueAgendaTaskDTO1.getIndustryCategoryName())) {
+                        //去掉前后空格
+                        clueAgendaTaskDTO1.setIndustryCategoryName(
+                            clueAgendaTaskDTO1.getIndustryCategoryName().trim());
+                        String industryCategory =
                             industryCategoryMap.get(clueAgendaTaskDTO1.getIndustryCategoryName());
-                    if (StringUtils.isNotBlank(industryCategory)) {
-                        clueAgendaTaskDTO1.setIndustryCategory(Integer.valueOf(industryCategory));
-                    } else {
-                        islegal = false;
+                        if (StringUtils.isNotBlank(industryCategory)) {
+                            clueAgendaTaskDTO1
+                                .setIndustryCategory(Integer.valueOf(industryCategory));
+                        } else {
+                            islegal = false;
+                            if(StringUtils.isBlank(reasonIsNotMatch)){
+                                reasonIsNotMatch.append("行业类别");
+                            } else {
+                                reasonIsNotMatch.append("、行业类别");
+                            }
+                        }
                     }
-                }
-                if (islegal && (clueAgendaTaskDTO1.getAccountName() != null
-                        && !"".equals(clueAgendaTaskDTO1.getAccountName()))) {
-                    String account = accountNameMap.get(clueAgendaTaskDTO1.getAccountName());
-                    if (StringUtils.isNotBlank(account)) {
-                        clueAgendaTaskDTO1.setAccountNameVaule(account);
+                    if (clueAgendaTaskDTO1.getAccountName() != null
+                        && !"".equals(clueAgendaTaskDTO1.getAccountName())) {
+                        //去掉前后空格
+                        clueAgendaTaskDTO1
+                            .setAccountName(clueAgendaTaskDTO1.getAccountName().trim());
+                        String account = accountNameMap.get(clueAgendaTaskDTO1.getAccountName());
+                        if (StringUtils.isNotBlank(account)) {
+                            clueAgendaTaskDTO1.setAccountNameVaule(account);
+                        } else {
+                            islegal = false;
+                            if(StringUtils.isBlank(reasonIsNotMatch)){
+                                reasonIsNotMatch.append("账户名称");
+                            } else {
+                                reasonIsNotMatch.append("、账户名称");
+                            }
+                        }
+                    }
+                    if(StringUtils.isNotBlank(reasonIsNull)) {
+                        failReason.append(reasonIsNull + "为必填项；");
+                    }
+                    if(StringUtils.isNotBlank(reasonIsNotMatch)) {
+                        failReason.append(reasonIsNotMatch + "与数据字典字段不匹配；");
+                    }
+                } else if(clueAgendaTaskDTO1.getIsOptimize().equals(Constants.IS_OPTIMIZE)){//优化类
+                    StringBuilder reasonIsNull = new StringBuilder();//导入失败原因：必填项为空
+                    StringBuilder reasonIsNotMatch = new StringBuilder();//导入失败原因：字典匹配失败
+                    if (clueAgendaTaskDTO1.getTypeName() != null
+                        && !"".equals(clueAgendaTaskDTO1.getTypeName())) {
+                        //去掉前后空格
+                        clueAgendaTaskDTO1.setTypeName(clueAgendaTaskDTO1.getTypeName().trim());
+                        String type = typeMap.get(clueAgendaTaskDTO1.getTypeName());
+                        if (StringUtils.isNotBlank(type)) {
+                            clueAgendaTaskDTO1.setType(Integer.valueOf(type));
+                        } else {
+                            islegal = false;
+                            reasonIsNotMatch.append("资源类别");
+                        }
                     } else {
                         islegal = false;
+                        reasonIsNull.append("资源类别");
+                    }
+                    if (clueAgendaTaskDTO1.getCategoryName() != null
+                        && !"".equals(clueAgendaTaskDTO1.getCategoryName())) {
+                        //去掉前后空格
+                        clueAgendaTaskDTO1
+                            .setCategoryName(clueAgendaTaskDTO1.getCategoryName().trim());
+                        String category = categoryMap.get(clueAgendaTaskDTO1.getCategoryName());
+                        if (StringUtils.isNotBlank(category)) {
+                            clueAgendaTaskDTO1.setCategory(Integer.valueOf(category));
+                        } else {
+                            islegal = false;
+                            if(StringUtils.isBlank(reasonIsNotMatch)){
+                                reasonIsNotMatch.append("资源类型");
+                            } else {
+                                reasonIsNotMatch.append("、资源类型");
+                            }
+                        }
+                    } else {
+                        islegal = false;
+                        if(StringUtils.isBlank(reasonIsNull)){
+                            reasonIsNull.append("资源类型");
+                        } else {
+                            reasonIsNull.append("、资源类型");
+                        }
+                    }
+                    if (clueAgendaTaskDTO1.getSourceName() != null
+                        && !"".equals(clueAgendaTaskDTO1.getSourceName())) {
+                        //去掉前后空格
+                        clueAgendaTaskDTO1.setSourceName(clueAgendaTaskDTO1.getSourceName().trim());
+                        String source = sourceMap.get(clueAgendaTaskDTO1.getSourceName());
+                        if (StringUtils.isNotBlank(source)) {
+                            clueAgendaTaskDTO1.setSource(Integer.valueOf(source));
+                        } else {
+                            islegal = false;
+                            if(StringUtils.isBlank(reasonIsNotMatch)){
+                                reasonIsNotMatch.append("媒介");
+                            } else {
+                                reasonIsNotMatch.append("、媒介");
+                            }
+                        }
+                    } else {
+                        islegal = false;
+                        if(StringUtils.isBlank(reasonIsNull)){
+                            reasonIsNull.append("媒介");
+                        } else {
+                            reasonIsNull.append("、媒介");
+                        }
+                    }
+                    if (clueAgendaTaskDTO1.getIndustryCategoryName() != null
+                        && !"".equals(clueAgendaTaskDTO1.getIndustryCategoryName())) {
+                        //去掉前后空格
+                        clueAgendaTaskDTO1.setIndustryCategoryName(
+                            clueAgendaTaskDTO1.getIndustryCategoryName().trim());
+                        String industryCategory =
+                            industryCategoryMap.get(clueAgendaTaskDTO1.getIndustryCategoryName());
+                        if (StringUtils.isNotBlank(industryCategory)) {
+                            clueAgendaTaskDTO1
+                                .setIndustryCategory(Integer.valueOf(industryCategory));
+                        } else {
+                            islegal = false;
+                            if(StringUtils.isBlank(reasonIsNotMatch)){
+                                reasonIsNotMatch.append("行业类别");
+                            } else {
+                                reasonIsNotMatch.append("、行业类别");
+                            }
+                        }
+                    }
+                    if (clueAgendaTaskDTO1.getAccountName() != null
+                        && !"".equals(clueAgendaTaskDTO1.getAccountName())) {
+                        //去掉前后空格
+                        clueAgendaTaskDTO1
+                            .setAccountName(clueAgendaTaskDTO1.getAccountName().trim());
+                        String account = accountNameMap.get(clueAgendaTaskDTO1.getAccountName());
+                        if (StringUtils.isNotBlank(account)) {
+                            clueAgendaTaskDTO1.setAccountNameVaule(account);
+                        } else {
+                            islegal = false;
+                            if(StringUtils.isBlank(reasonIsNotMatch)){
+                                reasonIsNotMatch.append("账户名称");
+                            } else {
+                                reasonIsNotMatch.append("、账户名称");
+                            }
+                        }
+                    }
+                    if(StringUtils.isNotBlank(reasonIsNull)) {
+                        failReason.append(reasonIsNull + "需至少填写一项；");
+                    }
+                    if(StringUtils.isNotBlank(reasonIsNotMatch)) {
+                        failReason.append(reasonIsNotMatch + "与数据字典字段不匹配；");
                     }
                 }
                 // 判断性别
-                if (islegal && (clueAgendaTaskDTO1.getSex1() != null
-                        && !"".equals(clueAgendaTaskDTO1.getSex1()))) {
+                if (clueAgendaTaskDTO1.getSex1() != null
+                        && !"".equals(clueAgendaTaskDTO1.getSex1())) {
+                    //去掉前后空格
+                    clueAgendaTaskDTO1.setSex1(clueAgendaTaskDTO1.getSex1().trim());
                     if (clueAgendaTaskDTO1.getSex1().equals("男")) {
                         clueAgendaTaskDTO1.setSex(1);
                     } else if (clueAgendaTaskDTO1.getSex1().equals("女")) {
                         clueAgendaTaskDTO1.setSex(2);
-                    } else {
-                        islegal = false;
                     }
+                }
+                //判断联系方式
+                if(StringUtils.isBlank(clueAgendaTaskDTO1.getPhone())
+                    && StringUtils.isBlank(clueAgendaTaskDTO1.getPhone2())
+                    && StringUtils.isBlank(clueAgendaTaskDTO1.getWechat())
+                    && StringUtils.isBlank(clueAgendaTaskDTO1.getWechat2())
+                    && StringUtils.isBlank(clueAgendaTaskDTO1.getQq())
+                    && StringUtils.isBlank(clueAgendaTaskDTO1.getEmail())){
+                    islegal = false;
+                    failReason.append("联系方式需至少填写一项；");
                 }
                 // 全部符合则进行匹配站点、去重、分发，不符合进入导入失败列表
                 if (islegal) {
                     PushClueReq pushClueReq = new PushClueReq();
                     pushClueReq.setCategory(String.valueOf(clueAgendaTaskDTO1.getCategory()));
-                    pushClueReq.setCusName(clueAgendaTaskDTO1.getCusName());
+                    if(StringUtils.isNotBlank(clueAgendaTaskDTO1.getCusName())) {
+                        pushClueReq.setCusName(clueAgendaTaskDTO1.getCusName());
+                    } else {
+                        pushClueReq.setCusName("未知");
+                    }
                     pushClueReq.setSex(clueAgendaTaskDTO1.getSex());
                     pushClueReq.setPhone(clueAgendaTaskDTO1.getPhone());
                     pushClueReq.setPhone2(clueAgendaTaskDTO1.getPhone2());
@@ -772,7 +1053,7 @@ public class ExtendClueAgendaTaskController {
                     pushClueReq.setWechat2(clueAgendaTaskDTO1.getWechat2());
                     pushClueReq.setQq(clueAgendaTaskDTO1.getQq());
                     pushClueReq.setEmail(clueAgendaTaskDTO1.getEmail());
-                    pushClueReq.setProvince(clueAgendaTaskDTO1.getAddress());
+                    pushClueReq.setRemark(clueAgendaTaskDTO1.getAddress());
                     pushClueReq.setSearchWord(clueAgendaTaskDTO1.getSearchWord());
                     pushClueReq.setSource(String.valueOf(clueAgendaTaskDTO1.getSource()));
                     pushClueReq.setSourceType(String.valueOf(clueAgendaTaskDTO1.getSourceType()));
@@ -787,7 +1068,7 @@ public class ExtendClueAgendaTaskController {
                         pushClueReq.setReserveTime(DateUtil.convert2Date(
                                 clueAgendaTaskDTO1.getReserveTime1(), DateUtil.ymdhms));
                     }
-                    pushClueReq.setCreateTime(clueAgendaTaskDTO1.getDate());
+                    pushClueReq.setCreateTime(format.format(new Date()));
                     pushClueReq.setInputType(4);
                     if (StringUtils.isNotBlank(clueAgendaTaskDTO1.getAccountNameVaule())) {
                         pushClueReq.setAccountName(
@@ -797,17 +1078,19 @@ public class ExtendClueAgendaTaskController {
                     pushClueReq.setIndustryCategory(
                             String.valueOf(clueAgendaTaskDTO1.getIndustryCategory()));
                     pushClueReq.setProjectId(clueAgendaTaskDTO1.getProjectId());
-                    pushClueReq.setImportTime(format.format(new Date()));
                     pushClueReq.setCreateUser(user.getId());
                     if (StringUtils.isNotBlank(clueAgendaTaskDTO1.getAge1())) {
                         pushClueReq.setAge(Integer.valueOf(clueAgendaTaskDTO1.getAge1()));
                     }
                     list1.add(pushClueReq);
                 } else {
+                    clueAgendaTaskDTO1.setImportFailReason(failReason.toString());
                     illegalDataList.add(clueAgendaTaskDTO1);
                 }
             }
         }
+        logger.info("clue import:{{}}", list1);
+        logger.info("clue not import:{{}}", illegalDataList);
         if (list1 != null && list1.size() > 0) {
             JSONResult<List<PushClueReq>> jsonResult = extendClueFeignClient.importclue(list1);
             // 导入失败数据进入导入失败列表

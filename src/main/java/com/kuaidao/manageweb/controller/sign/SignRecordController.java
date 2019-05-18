@@ -5,8 +5,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.slf4j.Logger;
@@ -18,6 +20,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+
 import com.alibaba.fastjson.JSONObject;
 import com.kuaidao.aggregation.constant.AggregationConstant;
 import com.kuaidao.aggregation.dto.busmycustomer.RejectSignOrderReqDTO;
@@ -84,7 +87,7 @@ public class SignRecordController {
 
   /**
    * 签约记录 页面
-   * 
+   *
    * @return
    */
   @RequiresPermissions("aggregation:signRecord:view")
@@ -98,7 +101,7 @@ public class SignRecordController {
      * List<OrganizationRespDTO> teleGroupList = getTeleGroupList(OrgTypeConstant.DXZ); // 商务经理
      * List<UserInfoDTO> busManagerList = getUserInfo(orgId, RoleCodeEnum.SWJL.name()); // 电销人员 //
      * List<UserInfoDTO> teleSaleList = getUserInfo(null, RoleCodeEnum.DXCYGW.name());
-     * 
+     *
      * request.setAttribute("projectList", projectList); request.setAttribute("busManagerList",
      * busManagerList); request.setAttribute("businessGroupList", businessGroupList);
      * request.setAttribute("teleGroupList", teleGroupList);
@@ -110,7 +113,7 @@ public class SignRecordController {
 
   /**
    * 获取所有的项目
-   * 
+   *
    * @return
    */
   private List<ProjectInfoDTO> getProjectList() {
@@ -140,7 +143,7 @@ public class SignRecordController {
 
   /**
    * 获取商务组
-   * 
+   *
    * @param orgId
    * @param orgType
    * @return
@@ -162,7 +165,7 @@ public class SignRecordController {
 
   /**
    * 获取所有的 组
-   * 
+   *
    * @param orgType
    * @return
    */
@@ -182,7 +185,7 @@ public class SignRecordController {
 
   /**
    * 签约记录 分页
-   * 
+   *
    * @param reqDTO
    * @return
    */
@@ -228,7 +231,7 @@ public class SignRecordController {
 
   /**
    * 获取当前组织机构下 角色信息
-   * 
+   *
    * @param orgId
    * @param roleCode
    * @return
@@ -285,7 +288,7 @@ public class SignRecordController {
 
   /**
    * 驳回签约单
-   * 
+   *
    * @return
    */
   @PostMapping("/rejectSignOrder")
@@ -304,7 +307,7 @@ public class SignRecordController {
 
   /**
    * 审核通过 签约单
-   * 
+   *
    * @return
    */
   @PostMapping("/passAuditSignOrder")
@@ -324,7 +327,7 @@ public class SignRecordController {
 
   /**
    * 根据sign_Id 查询 付款明细
-   * 
+   *
    * @param idListLongReq
    * @return
    */
@@ -363,7 +366,7 @@ public class SignRecordController {
 
   /**
    * 根据sign_Id 查询 付款明细
-   * 
+   *
    * @param idListLongReq
    * @return
    */
@@ -389,7 +392,7 @@ public class SignRecordController {
 
   /**
    * 根据组织机构Id查询所有商务经理
-   * 
+   *
    * @return
    */
   @PostMapping("/queryBusManagerByOrgId")

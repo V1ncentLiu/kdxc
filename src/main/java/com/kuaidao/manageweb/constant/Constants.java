@@ -18,6 +18,10 @@ public class Constants {
     public static Integer IS_LOGIN_UP = 1;
     // 是否已登录 2-未登录
     public static Integer IS_LOGIN_DOWN = 2;
+    // 是否是优化类资源1是
+    public static Integer IS_OPTIMIZE = 1;
+    // 是否是优化类资源2否
+    public static Integer IS_NOT_OPTIMIZE = 2;
     // redis前缀 验证码
     public static String CAPTCHA_CODE = "huiju:sys:captchaCode:";
     // redis前缀 是否展示验证码
@@ -70,5 +74,9 @@ public class Constants {
     public static String SETTLEMENT_RATIO = "settlement_ratio";
     // 释放原因字典Code
     public static String GIVE_TYPE = "give_type";
+    // 非优化类资源导入模板列数
+    public static Integer UNOPTIMIZE = 23;
+    // 优化类资源导入模板列数
+    public static Integer OPTIMIZE = 21;
 
 }
