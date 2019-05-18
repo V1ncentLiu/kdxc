@@ -127,8 +127,8 @@
                         </el-form-item>
                     </el-col>
                     <el-col :span="12">
-                        <el-form-item label="资源类别：" :label-width="formLabelWidth" prop="category">
-                            <el-select v-model="form.category" placeholder="请选择" style="width: 260px;">
+                        <el-form-item label="资源类别：" :label-width="formLabelWidth" prop="category" >
+                            <el-select v-model="form.category" placeholder="请选择" style="width: 260px;" @change="categoryChange">
                                 <el-option
                                     v-for="item in categoryOptions"
                                     :key="item.value"
@@ -142,7 +142,7 @@
                 <el-row>
                     <el-col :span="12">
                         <el-form-item label="广告位：" :label-width="formLabelWidth" prop="sourceType">
-                            <el-select v-model="form.sourceType" placeholder="请选择" style="width: 260px;">
+                            <el-select v-model="form.sourceType" placeholder="请选择" style="width: 260px;" :disabled="sourceTypeDisabled">
                                 <el-option
                                     v-for="item in sourceTypeOptions"
                                     :key="item.value"
@@ -154,7 +154,7 @@
                     </el-col>
                     <el-col :span="12">
                         <el-form-item label="媒介：" :label-width="formLabelWidth" prop="source">
-                            <el-select v-model="form.source" placeholder="请选择" style="width: 260px;">
+                            <el-select v-model="form.source" placeholder="请选择" style="width: 260px;" >
                                 <el-option
                                     v-for="item in sourceOptions"
                                     :key="item.value"
@@ -330,7 +330,7 @@
                     </el-select>
                 </el-form-item>
                 <el-form-item label="广告位:" >
-                    <el-select v-model="clueTemplateSearchForm.sourceType" placeholder="广告位" clearable>
+                    <el-select v-model="clueTemplateSearchForm.sourceType" placeholder="广告位" clearable >
                         <el-option
                             v-for="item in sourceTypeOptions"
                             :key="item.value"
@@ -394,11 +394,22 @@ var industryCategoryList=[[${industryCategoryList}]];//行业类别集合
 var accountNameList=[[${accountNameList}]];//账号名称集合
 var ossSignatureUrl = [[${ossUrl}]];//上传文件地址
 var clueInfo = [[${clueInfo}]];//资源信息
+var optList = [[${optList}]];//优化资源类别
+var notOptList = [[${notOptList}]];//非优化资源类别
+var opt=[];
+var notOpt=[];
+if(optList){
+	opt=optList.split(',');
+}
+if(notOptList){
+	notOpt=notOptList.split(',');
+}
   var addClueVM=   new Vue({
         el: '#addCustomer',
         data: function() {
             return {
                 isDisabled:true,//默认不可点击  
+                sourceTypeDisabled:false,//广告位是否可选  
                 dialogFormVisible: false,//新增手机号
                 wechatVisible: false,//新增微信号
                 chooseVisible: false,//选择模板
@@ -827,6 +838,14 @@ var clueInfo = [[${clueInfo}]];//资源信息
                     }
                 });
             },
+            categoryChange(value) {
+        	  	if(opt.indexOf(value)!=-1){
+        	  		this.form.sourceType="99";
+        	  		this.sourceTypeDisabled=true;
+        	  	}else if(notOpt.indexOf(value)!=-1){
+        	  		this.sourceTypeDisabled=false;
+        	  	}
+            },
             openWechat() {
         	  	this.wechatVisible = true
             	this.wechatForm.wechat2=this.form.wechat2;
@@ -1009,6 +1028,7 @@ var clueInfo = [[${clueInfo}]];//资源信息
 	        	}
 	        	if(clueInfo.clueBasic.sourceType){
 		        	this.form.sourceType=clueInfo.clueBasic.sourceType+"";
+		        	this.categoryChange(this.form.sourceType);
 	        	}
 	        	if(clueInfo.clueBasic.type){
 		        	this.form.type=clueInfo.clueBasic.type+"";
