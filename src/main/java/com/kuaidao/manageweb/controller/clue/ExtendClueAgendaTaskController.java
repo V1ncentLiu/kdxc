@@ -5,14 +5,12 @@ import com.sun.xml.internal.bind.v2.TODO;
 import java.net.URLEncoder;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.shiro.SecurityUtils;
@@ -23,17 +21,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import com.kuaidao.aggregation.dto.clue.ClueAgendaTaskDTO;
-import com.kuaidao.aggregation.dto.clue.ClueAgendaTaskQueryDTO;
-import com.kuaidao.aggregation.dto.clue.ClueDTO;
-import com.kuaidao.aggregation.dto.clue.ClueQueryDTO;
-import com.kuaidao.aggregation.dto.clue.PushClueReq;
+
+import com.kuaidao.aggregation.dto.clue.*;
 import com.kuaidao.aggregation.dto.project.ProjectInfoDTO;
 import com.kuaidao.aggregation.dto.project.ProjectInfoPageParam;
 import com.kuaidao.common.constant.DicCodeEnum;
@@ -111,7 +102,7 @@ public class ExtendClueAgendaTaskController {
             request.setAttribute("proSelect", proJson.getData());
         }
 
-        List<UserInfoDTO> userList = this.queryUserByRole();
+        List<UserInfoDTO> userList = queryUserByRole();
         // 查询字典分发失败原因集合
         request.setAttribute("reasonList",
                 getDictionaryByCode(DicCodeEnum.ASSIGN_FAIL_REASON.getCode()));
@@ -606,14 +597,14 @@ public class ExtendClueAgendaTaskController {
 
 
     /**
-     * 导入线索
+     * 导入资源
      *
      * @return
      * @throws Exception
      */
     @RequestMapping("/importInvitearea")
     @RequiresPermissions("waitDistributResource:importExcel")
-    @LogRecord(description = "导入线索", operationType = LogRecord.OperationType.IMPORTS,
+    @LogRecord(description = "导入资源", operationType = LogRecord.OperationType.IMPORTS,
             menuName = MenuEnum.WAIT_DISTRIBUT_RESOURCE)
     @ResponseBody
     public JSONResult importInvitearea(@RequestBody ClueAgendaTaskDTO clueAgendaTaskDTO)

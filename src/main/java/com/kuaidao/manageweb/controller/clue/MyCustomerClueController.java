@@ -5,7 +5,9 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
+
 import javax.servlet.http.HttpServletRequest;
+
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.apache.shiro.subject.Subject;
@@ -19,23 +21,14 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.kuaidao.aggregation.constant.ClueCirculationConstant;
 import com.kuaidao.aggregation.dto.call.CallRecordReqDTO;
 import com.kuaidao.aggregation.dto.call.CallRecordRespDTO;
 import com.kuaidao.aggregation.dto.circulation.CirculationInsertOrUpdateDTO;
 import com.kuaidao.aggregation.dto.circulation.CirculationReqDTO;
 import com.kuaidao.aggregation.dto.circulation.CirculationRespDTO;
-import com.kuaidao.aggregation.dto.clue.ClueBasicDTO;
-import com.kuaidao.aggregation.dto.clue.ClueCustomerDTO;
-import com.kuaidao.aggregation.dto.clue.ClueDTO;
-import com.kuaidao.aggregation.dto.clue.ClueFileDTO;
-import com.kuaidao.aggregation.dto.clue.ClueQueryDTO;
-import com.kuaidao.aggregation.dto.clue.ClueRelateDTO;
-import com.kuaidao.aggregation.dto.clue.CustomerClueDTO;
-import com.kuaidao.aggregation.dto.clue.CustomerClueQueryDTO;
-import com.kuaidao.aggregation.dto.clue.ReleaseClueDTO;
-import com.kuaidao.aggregation.dto.clue.RepeatClueDTO;
-import com.kuaidao.aggregation.dto.clue.RepeatClueQueryDTO;
-import com.kuaidao.aggregation.dto.clue.RepeatClueSaveDTO;
+import com.kuaidao.aggregation.dto.clue.*;
 import com.kuaidao.aggregation.dto.clueappiont.ClueAppiontmentDTO;
 import com.kuaidao.aggregation.dto.project.ProjectInfoDTO;
 import com.kuaidao.aggregation.dto.tracking.TrackingInsertOrUpdateDTO;
@@ -524,7 +517,7 @@ public class MyCustomerClueController {
     }
 
     /**
-     * 获取线索拨打记录
+     * 获取资源拨打记录
      * 
      * @param request
      * @return
@@ -985,6 +978,8 @@ public class MyCustomerClueController {
         circul.setClueId(dto.getClueId());
         circul.setAllotOrg(user.getOrgId());
         circul.setUserId(user.getId());
+        //新资源类型，电销自己创建的和话务主管转给话务的新资源类型一致
+        circul.setNewResource(ClueCirculationConstant.NewResource.OTHER_RESOURCE.getCode());
         if (null != user.getRoleList() && user.getRoleList().size() > 0) {
             circul.setRoleId(user.getRoleList().get(0).getId());
         }
