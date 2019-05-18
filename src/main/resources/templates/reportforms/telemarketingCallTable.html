@@ -16,7 +16,7 @@
         <el-button type="primary" @click="searchYesterday">昨天</el-button>
         <el-button type="success" @click="searchWeek">近七天</el-button>
         <el-button type="warning" @click="searchMonth">本月</el-button>  
-        <el-button type="danger">导出Excel报表</el-button>   
+        <el-button type="danger" @click="exportRs">导出Excel报表</el-button>   
     </el-row>
     <div class="mainSearchBg">        
         <div class="mainSearchFormBox">
@@ -43,69 +43,37 @@
             </el-form>
         </div>
         <el-row>
-            <!-- 表格合计 show-summary :summary-method="summaryFun" -->
-            <el-table
-                :data="tableData"
+            <el-table 
+                ref="tableData"
+                tooltip-effect="dark"
+                style="width: 100%"
                 border
-                style="width: 100%" 
+                :data="tableData"
                 :span-method="arraySpanMethod">
+                <el-table-column align="center" type="index" label="序号" width="55" :index="indexFun"></el-table-column>
                 <el-table-column
-                    prop="id"
-                    type="index"
-                    :index="indexFun"
-                    label="序号"
+                    prop="telemarketingTeam"
                     align="center"
-                    width="55">
-                </el-table-column>
-                <el-table-column
-                    prop="name"
-                    align="center"
-                    label="电销组">
+                    label="电销">
                     <template slot-scope="scope">
-                        <el-button type="text" size="small" @click="gotoTeam(scope.row)">{{scope.row.name}}</el-button>
+                        <el-button type="text" size="small" @click="gotoTeam(scope.row)">{{scope.row.telemarketingTeam}}</el-button>
                     </template>
                 </el-table-column>
-                <el-table-column
-                    prop="amount2"
-                    align="center"
-                    label="通话次数">
+                <el-table-column prop="amount1" align="center" label="通话次数">
                 </el-table-column>
-                <el-table-column
-                    prop="amount3"
-                    align="center"
-                    label="通话接通次数">
+                <el-table-column prop="amount2" align="center" label="通话接通次数">
                 </el-table-column>
-                <el-table-column
-                    prop="amount4"
-                    align="center"
-                    label="通话接通率">
+                <el-table-column prop="amount3" align="center" label="通话接通率">
                 </el-table-column>
-                <el-table-column
-                    prop="amount5"
-                    align="center"
-                    label="通话量">
+                <el-table-column prop="amount4" align="center" label="通话量">
                 </el-table-column>
-                <el-table-column
-                    prop="amount6"
-                    align="center"
-                    label="接通量">
+                <el-table-column prop="amount5" align="center" label="接通量">
                 </el-table-column>
-                <el-table-column
-                    prop="amount7"
-                    align="center"
-                    label="资源接通率">
+                <el-table-column prop="amount6" align="center" label="资源接通率">
                 </el-table-column>
-                <el-table-column
-                    prop="amount8"
-                    align="center"
-                    label="总有效通话时长"
-                    :formatter="timeFormat">
+                <el-table-column prop="telemarketingTime1" align="center"  :formatter="timeFormat" label="总有效通话时长">
                 </el-table-column>
-                <el-table-column
-                    prop="amount9"
-                    align="center"
-                    label="人均天有效通话时长"
-                    :formatter="timeFormat">
+                <el-table-column prop="telemarketingTime2" align="center" :formatter="timeFormat" label="人均天有效通话时长">
                 </el-table-column>
             </el-table>
             <table-pagination :pager="pager" @change="searchTable()"></table-pagination>
@@ -116,40 +84,44 @@
 <div th:include="_footer_include :: #jsLib"></div>
 </body>
 <script th:inline="javascript">
-    var queryOrg=[[${queryOrg}]];//电销组
+    var queryOrg=[[${queryOrg}]]; // 电销组
     var mainDivVM = new Vue({
         el: '#maindiv',
         data: function() {
             return {
-                form: {},
-                tableData: [{
-                    id: '11111',
-                    name: '王-1-1-1',
-                    amount2: 1000,
-                    amount3: 10,
-                    amount4: '10%',
-                    amount5: 10,
-                    amount6: 10,
-                    amount7: '10%',
-                    amount8: 155799,
-                    amount9: 155799
-                }, {
-                    id: '11112',
-                    name: '王-1-1-2',
-                    amount2: 1000,
-                    amount3: 12,
-                    amount4: '10%',
-                    amount5: 10,
-                    amount6: 10,
-                    amount7: '10%',
-                    amount8: 100000,
-                    amount9: 0,
-                }],
-                orgTeleArr:queryOrg,//电销组
+                form: {
+
+                },
+                tableData: [
+                    {
+                        id: "0",
+                        telemarketingTeam: '王-1-1-1',
+                        amount1: 1000,
+                        amount2: 10,
+                        amount3: '10%',
+                        amount4: 10,
+                        amount5: 10,
+                        amount6: '10%',
+                        telemarketingTime1: 155799,
+                        telemarketingTime2: 155799
+                    }, {
+                        id: "1",
+                        telemarketingTeam: '王-2-2-2',
+                        amount1: 1000,
+                        amount2: 10,
+                        amount3: '10%',
+                        amount4: 10,
+                        amount5: 10,
+                        amount6: '10%',
+                        telemarketingTime1: 155799,
+                        telemarketingTime2: 155799
+                    }
+                ],
+                orgTeleArr:queryOrg, // 电销组
                 pager:{ 
                     total: 0,
                     currentPage: 1,
-                    pageSize: 3,
+                    pageSize: 3
                 },
             }             
         },
@@ -180,7 +152,12 @@
                 // })
                 // .catch(function (error) {
                 //      console.log(error);
+                        // this.$message({
+                        //     message: '请求失败，请稍后重试',
+                        //     type: 'error'
+                        // });
                 // });
+                this.summaryFun(); // 数据返回就插入合计
             },
             arraySpanMethod({ row, column, rowIndex, columnIndex }) { // 合并第一行
                 if (rowIndex === 0) {
@@ -193,7 +170,7 @@
             },
             gotoTeam (row) { // 页面跳转
                 var clueId = row.id;
-                if(clueId == "合计"){
+                if(clueId === "合计"){
                     window.location.href="/statistics/teleStatement/telemarketingCallTableSum";
                 }else{
                     window.location.href="/statistics/teleStatement/telemarketingCallTableTeam?clueId=" + clueId; 
@@ -205,19 +182,19 @@
             summaryFun () { // 将合计插入数据中：如果是分页，记得每次获取数据都要执行这个函数
                 // const { columns, data } = param;
                 // const sums = ["合计", '', 2, 2, '2%', 2, 2, '2%', 1234, 1234];
-                var obj = {
-                    id: '合计',
-                    name: '合计',
-                    amount2: 1000,
-                    amount3: 1000,
-                    amount4: '100%',
-                    amount5: 1000,
-                    amount6: 1000,
-                    amount7: '100%',
-                    amount8: 155799,
-                    amount9: 155799
+                var total = {
+                    id: "合计",
+                    telemarketingTeam: '合计',
+                    amount1: 1000,
+                    amount2: 10,
+                    amount3: '10%',
+                    amount4: 10,
+                    amount5: 10,
+                    amount6: '10%',
+                    telemarketingTime1: 155799,
+                    telemarketingTime2: 155799
                 };
-                this.tableData.unshift(obj);
+                this.tableData.unshift(total);
                 // const sums = [];
                 // columns.forEach((column, index) => {
                 //     if (index === 0) {
@@ -241,6 +218,20 @@
                 // sums[sums.length-2] = this.timeFun (sums[sums.length-2]);
                 // sums[sums.length-1] = this.timeFun (sums[sums.length-1]);
                 // return sums;
+            },
+            exportRs(){
+                // axios.post('/statistics/teleStatement/exportResourceAllocationGroup',null,{responseType:'blob'})
+                //     .then(function (response) {
+                //         console.log(response)
+                //         var data =  response.data;
+                //         var fileName = response.headers.filename;
+                //         saveAs(data,decodeURI(fileName));
+                //     })
+                //     .catch(function (error) {
+                //         console.log(error);
+                //     }).then(function(){
+                //     signRecordVM.loading=false;
+                // });
             },
             timeFormat (row, column) { // 时间格式化：时分秒
                 var time = row[column.property];
@@ -307,7 +298,6 @@
             this.searchTable();
         },
         mounted(){
-            this.summaryFun();
             document.getElementById('maindiv').style.display = 'block';
         }
     })

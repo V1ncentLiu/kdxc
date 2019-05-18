@@ -28,7 +28,7 @@
                    <el-date-picker format="yyyy-MM-dd HH:mm:ss" v-model="form.endTime" type="datetime" placeholder="选择日期"></el-date-picker>
                 </el-form-item>
                 <el-form-item label="电销组:">  
-                    <el-select v-model="form.teleorg" placeholder="电销组" style="width: 100%;" clearable filterable>
+                    <el-select v-model="form.org_Id" placeholder="电销组" style="width: 100%;" clearable filterable>
                         <el-option
                             v-for="item in orgTeleArr"
                             :key="item.id"
@@ -55,19 +55,22 @@
             </el-form>
         </div>
         <el-row>
+            <!-- :span-method="arraySpanMethod" -->
             <el-table 
                 ref="tableData"
                 tooltip-effect="dark"
                 style="width: 100%"
                 border
                 :data="tableData"
-                :span-method="arraySpanMethod"
+                show-summary
+                v-loading="loading"
                 >
-                <el-table-column align="center" type="index" label="序号" width="55" :index="indexFun"></el-table-column>
+                <!-- <el-table-column align="center" type="index" label="序号" width="55" :index="indexFun"></el-table-column> -->
+                <el-table-column align="center" type="index" label="序号" width="55"></el-table-column>
                 <!-- 组列 -->
-                <el-table-column align="center" :key="index" :prop="item.fieldCode" :label="item.displayName" v-for="(item,key,index) in tableColums" v-if="item.fieldCode == 'telemarketingTeam'">
+                <el-table-column align="center" :key="index" :prop="item.fieldCode" :label="item.displayName" v-for="(item,key,index) in tableColums" v-if="item.fieldCode == 'orgId'">
                     <template slot-scope="scope">
-                        <el-button @click="gotoTeam(scope.row)" type="text" size="small">{{scope.row.telemarketingTeam}}</el-button>
+                        <el-button @click="gotoTeam(scope.row)" type="text" size="small">{{scope.row.orgName}}</el-button>
                     </template>
                 </el-table-column>
                 <!-- 其他列 -->
@@ -86,7 +89,7 @@
     var distributionSource=[[${queryOrg}]];//分配来源
     var fieldList=[{//表头假数据
         displayName:"电销组",
-        fieldCode:"telemarketingTeam",//需要改成后端返回的字段名称
+        fieldCode:"orgId",//需要改成后端返回的字段名称
         fieldName:"电销组",
         id:"1",
         menuCode:null,
@@ -96,7 +99,7 @@
         sortNum:1
     },{
         displayName:"分配资源数",
-        fieldCode:"amount1",
+        fieldCode:"assignClueCount",
         fieldName:"分配资源数",
         id:"2",
         menuCode:null,
@@ -106,7 +109,7 @@
         sortNum:2
     },{
         displayName:"联展",
-        fieldCode:"amount2",
+        fieldCode:"jointExhibition",
         fieldName:"联展",
         id:"3",
         menuCode:null,
@@ -116,7 +119,7 @@
         sortNum:3
     },{
         displayName:"竞价",
-        fieldCode:"amount3",
+        fieldCode:"priceCompetition",
         fieldName:"竞价",
         id:"4",
         menuCode:null,
@@ -126,7 +129,7 @@
         sortNum:4
     },{
         displayName:"优化",
-        fieldCode:"amount4",
+        fieldCode:"optimization",
         fieldName:"优化",
         id:"5",
         menuCode:null,
@@ -136,7 +139,7 @@
         sortNum:5
     },{
         displayName:"信息流",
-        fieldCode:"amount5",
+        fieldCode:"informationFlow",
         fieldName:"信息流",
         id:"6",
         menuCode:null,
@@ -146,7 +149,7 @@
         sortNum:6
     },{
         displayName:"官网",
-        fieldCode:"amount6",
+        fieldCode:"officialWebsite",
         fieldName:"官网",
         id:"7",
         menuCode:null,
@@ -156,7 +159,7 @@
         sortNum:7
     },{
         displayName:"行业",
-        fieldCode:"amount7",
+        fieldCode:"industry",
         fieldName:"行业",
         id:"8",
         menuCode:null,
@@ -166,7 +169,7 @@
         sortNum:8
     },{
         displayName:"其他",
-        fieldCode:"amount8",
+        fieldCode:"other",
         fieldName:"其他",
         id:"9",
         menuCode:null,
@@ -176,7 +179,7 @@
         sortNum:9
     },{
         displayName:"网民未接",
-        fieldCode:"amount9",
+        fieldCode:"netizensMissed",
         fieldName:"网民未接",
         id:"10",
         menuCode:null,
@@ -189,7 +192,12 @@
         el: '#maindiv',
         data: function() {
             return {
-                form: {},
+                loading:false,
+                form: {
+                    startTime:'',
+                    endTime:'',
+                    org_Id:'',
+                },
                 tableData: [],//表格数据
                 tableColums: [],//表头list
                 orgTeleArr:queryOrg,//电销组
@@ -202,9 +210,7 @@
             }             
         },
         methods: { 
-            searchTable() { 
-                // 表头数据渲染
-                this.tableColums= fieldList;
+            searchTable() {                 
                 var starTime=this.form.startTime;
                 var endTime=this.form.endTime;
                 if(endTime){
@@ -216,39 +222,16 @@
                         return;
                     }
                 }
-
-                // 返回的数据               
-                var data=[
-                    {
-                        id:"0",
-                        telemarketingTeam:'电销组1',
-                        amount1:'1',
-                        amount2:'2',
-                        amount3:'3',
-                        amount4:'4',
-                        amount5:'5',
-                        amount6:'6',
-                        amount7:'7',
-                        amount8:'8',
-                        amount9:'9',
-                    },
-                    {
-                        id:"1",
-                        telemarketingTeam:'电销组2',
-                        amount1:'1',
-                        amount2:'2',
-                        amount3:'3',
-                        amount4:'4',
-                        amount5:'5',
-                        amount6:'6',
-                        amount7:'7',
-                        amount8:'8',
-                        amount9:'9',
-                    }
-                ];
-                axios.post('/statistics/teleStatement/getResourceAllocationTable',null).then(function (response) {
-                    debugger
-                    console.log(response)
+                var param = {};
+                param.pageSize = this.pager.pageSize;
+                param.pageNum =  this.pager.currentPage;
+                // 搜索条件
+                param.startTime = this.form.startTime;
+                param.endTime =  this.form.endTime;
+                param.org_Id =  this.form.org_Id;//电销组
+                console.log(param)
+                this.loading=true;
+                axios.post('/statistics/teleStatement/getResourceAllocationTable',param).then(function (response) { 
                     if(!response){
                         mainDivVM.$message({
                             message: "接口调用失败",
@@ -257,6 +240,7 @@
                         return ;
                     }
                     var resobj= response.data;
+                    console.log(resobj)
                     if(!resobj){
                         mainDivVM.$message({
                             message: "接口调用失败",
@@ -270,11 +254,17 @@
                             type: 'error'
                         });
                         return ;
-                    }
+                    }  
+                    var resobjData=resobj.data.data          
                     // 表格数据渲染
-                    this.tableData= data;
+                    mainDivVM.tableData=resobjData;
+                    // 表头数据渲染 
+                    mainDivVM.tableColums= fieldList;
                     // 插入合计一行
-                    this.summaryFun();
+                    // mainDivVM.summaryFun();
+                    mainDivVM.pager.currentPage= resobj.data.currentPage;
+                    mainDivVM.pager.total= resobj.data.total;
+                    mainDivVM.loading=false;
                 })
             },
             gotoTeam(item){
@@ -282,14 +272,14 @@
                 var clueId = item.id;
                 if(clueId){
                     // 点击组跳转到资源组
-                    window.location.href="/statistics/teleStatement/resourceAllocationTableTeam?clueId=" + clueId; 
+                    window.location.href="/statistics/teleStatement/resourceAllocationTableTeam?id=" + clueId; 
                 }
-                var clueId = item.id;
-                if(clueId == "合计"){
-                    window.location.href="/statistics/teleStatement/resourceAllocationTableSum";
-                }else{
-                    window.location.href="/statistics/teleStatement/resourceAllocationTableTeam?clueId=" + clueId; 
-                }
+                // var clueId = item.id;
+                // if(clueId == "合计"){
+                //     window.location.href="/statistics/teleStatement/resourceAllocationTableSum";
+                // }else{
+                //     window.location.href="/statistics/teleStatement/resourceAllocationTableTeam?id=" + id; 
+                // }
             },
             arraySpanMethod({ row, column, rowIndex, columnIndex }) { // 合并第一行
                 if (rowIndex === 0) {
@@ -308,16 +298,16 @@
                 // const sums = ["合计", '', 2, 2, '2%', 2, 2, '2%', 1234, 1234];
                 var obj = {
                     id: '合计',
-                    telemarketingTeam: '合计',
-                    amount1: '2',
-                    amount2: '4',
-                    amount3: '6',
-                    amount4: '8',
-                    amount5: '10',
-                    amount6: '12',
-                    amount7: '14',
-                    amount8: '16',
-                    amount9: '18'
+                    orgId: '合计',
+                    assignClueCount: '2',
+                    jointExhibition: '4',
+                    priceCompetition: '6',
+                    optimization: '8',
+                    informationFlow: '10',
+                    officialWebsite: '12',
+                    industry: '14',
+                    other: '16',
+                    netizensMissed: '18'
                 };
                 this.tableData.unshift(obj);
                 // const sums = [];
@@ -394,7 +384,6 @@
                     .catch(function (error) {
                         console.log(error);
                     }).then(function(){
-                    signRecordVM.loading=false;
                 });
             }
         },
