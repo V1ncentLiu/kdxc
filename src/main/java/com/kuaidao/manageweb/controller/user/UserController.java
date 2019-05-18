@@ -232,7 +232,7 @@ public class UserController {
             map.put("value", organizationDTO.getBusinessLine());
             map.put("name", organizationDTO.getName());
             map.put("checkedCitiesObj", new ArrayList<String>());
-            String string = authMap.get(organizationDTO.getBusinessLine());
+            String string = authMap.get(organizationDTO.getBusinessLine() + "");
             if (string != null) {
                 map.put("checkedCities", string.split(","));
                 map.put("isIndeterminate", true);

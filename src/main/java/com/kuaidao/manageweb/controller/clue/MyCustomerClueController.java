@@ -190,6 +190,7 @@ public class MyCustomerClueController {
         if (proJson.getCode().equals(JSONResult.SUCCESS)) {
             model.addAttribute("proSelect", proJson.getData());
         }
+        model.addAttribute("ossUrl", ossUrl);
 
         return "clue/addCustomerResources";
     }
