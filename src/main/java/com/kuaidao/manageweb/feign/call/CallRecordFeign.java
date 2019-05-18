@@ -95,7 +95,14 @@ public interface CallRecordFeign {
     @PostMapping("/countMyCallRecordTalkTime")
     JSONResult<Integer> countMyCallRecordTalkTime(CallRecordReqDTO myCallRecordReqDTO);
 
-    
+    /**
+     * 记录拨打时间
+     * @param myCallRecordReqDTO
+     */
+    @PostMapping("/recodeCallTime")
+    JSONResult<Boolean> recodeCallTime(CallRecordReqDTO myCallRecordReqDTO);
+
+
     @Component
     static class HystrixClientFallback implements CallRecordFeign {
         
@@ -146,7 +153,12 @@ public interface CallRecordFeign {
         public JSONResult<Integer> countMyCallRecordTalkTime(CallRecordReqDTO myCallRecordReqDTO) {
             return fallBackError("我的通话记录-总时长");
         }
-        
+
+        @Override
+        public JSONResult<Boolean> recodeCallTime(CallRecordReqDTO myCallRecordReqDTO) {
+            return fallBackError("记录拨打时间");
+        }
+
     }
 
 }
