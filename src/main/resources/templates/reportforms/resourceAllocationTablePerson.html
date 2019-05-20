@@ -81,6 +81,7 @@
                 style="width: 100%"
                 border
                 :data="tableData"
+                v-loading="loading"
                 >
                 <el-table-column align="center" type="index" label="序号" width="55"></el-table-column>
                 <!-- 日期列 -->
@@ -268,6 +269,12 @@
                 param.startTime = this.form.startTime;
                 param.endTime =  this.form.endTime;
                 param.org_Id =  this.form.org_Id;//电销组
+                console.log(window.location.href)
+                param.uesr_id = this.getQueryString('groupId');
+                // 判断电销组是否有值
+                if(this.form.uesr_id){
+                    param.uesr_id = this.form.uesr_id;//电销组
+                }
                 // 返回的数据               
                 // var data=[
                 //     {
@@ -306,6 +313,7 @@
                             message: "接口调用失败",
                             type: 'error'
                         });
+                        mainDivVM.loading=false;
                         return ;
                     }
                     var resobj= response.data;
@@ -315,6 +323,7 @@
                             message: "接口调用失败",
                             type: 'error'
                         });
+                        mainDivVM.loading=false;
                         return ;
                     }
                     if(resobj.code!='0'){
@@ -322,6 +331,7 @@
                             message: "接口调用失败",
                             type: 'error'
                         });
+                        mainDivVM.loading=false;
                         return ;
                     }  
                     var resobjData=resobj.data.data          
@@ -337,6 +347,11 @@
             goback(){
                 // 返回资源组
                 window.history.go(-1);
+            },
+            getQueryString(name){//获取url地址栏参数的方法
+                var reg = new RegExp("(^|&)"+ name +"=([^&]*)(&|$)");
+                var r = window.location.search.substr(1).match(reg);
+                if(r!=null)return  unescape(r[2]); return null;
             },
             dateFormat (row, column) { 
                 var date = row[column.property];
