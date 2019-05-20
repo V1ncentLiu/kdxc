@@ -280,7 +280,8 @@ public class TeleStatementController {
     * @return
      */
     @RequestMapping("/telemarketingCallTableTeam")
-    public String telemarketingCallTableTeam() {
+    public String telemarketingCallTableTeam(Long orgId,HttpServletRequest request) {
+        request.setAttribute("parentOrgId",orgId);
         return "reportforms/telemarketingCallTableTeam";
     }
     
@@ -290,7 +291,8 @@ public class TeleStatementController {
     * @return
      */
     @RequestMapping("/telemarketingCallTablePerson")
-    public String telemarketingCallTablePerson() {
+    public String telemarketingCallTablePerson(Long userId,HttpServletRequest request) {
+        request.setAttribute("curUserId",userId);
         return "reportforms/telemarketingCallTablePerson";
     }
 

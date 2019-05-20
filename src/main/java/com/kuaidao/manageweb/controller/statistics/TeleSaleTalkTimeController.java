@@ -119,9 +119,9 @@ public class TeleSaleTalkTimeController {
     * 昨日 七天 导出
     * 电销顾问通话总时长统计 不分頁
    */
-  @RequestMapping("/exportTeleSaleTalkTimeNoPage")
-  public void exportTeleSaleTalkTimeNoPage(@RequestBody TeleSaleTalkTimeQueryDTO teleSaleTalkTimeQueryDTO,HttpServletResponse response) throws Exception{
-       JSONResult<List<TeleTalkTimeRespDTO>> teleSaleTalkTimeJr = teleTalkTimeFeignClient.listTeleSaleTalkTimeNoPage(teleSaleTalkTimeQueryDTO);
+  @RequestMapping("/exportTeleSaleTalkTime")
+ public void exportTeleSaleTalkTimeNoPage(@RequestBody TeleSaleTalkTimeQueryDTO teleSaleTalkTimeQueryDTO,HttpServletResponse response) throws Exception{
+      JSONResult<List<TeleTalkTimeRespDTO>> teleSaleTalkTimeJr = teleTalkTimeFeignClient.listTeleSaleTalkTimeNoPage(teleSaleTalkTimeQueryDTO);
        List<List<Object>> dataList = new ArrayList<List<Object>>();
        dataList.add(getTeleSaleHeadTitleList());
        List<TeleTalkTimeRespDTO> teleSaleList   = teleSaleTalkTimeJr.getData();
@@ -129,7 +129,7 @@ public class TeleSaleTalkTimeController {
            TeleTalkTimeRespDTO teleTalkTimeRespDTO = teleSaleList.get(i);
            List<Object> curList = new ArrayList<>();
            curList.add(i + 1);
-           curList.add(teleTalkTimeRespDTO.getUserId());
+           curList.add(teleTalkTimeRespDTO.getUserName());
            curList.add(teleTalkTimeRespDTO.getCallCount());
            curList.add(teleTalkTimeRespDTO.getCalledClueCount());
            curList.add(teleTalkTimeRespDTO.getCallPercent());
@@ -142,7 +142,7 @@ public class TeleSaleTalkTimeController {
        }
        teleSaleTalkTimeJr  = null;
        XSSFWorkbook wbWorkbook = ExcelUtil.creat2007Excel(dataList);
-       String name = "电销组通话时长表" + DateUtil.convert2String(new Date(), DateUtil.ymdhms2) + ".xlsx";
+       String name = "电销顾问通话时长表" + DateUtil.convert2String(new Date(), DateUtil.ymdhms2) + ".xlsx";
        response.addHeader("Content-Disposition",
                "attachment;filename=" + new String(name.getBytes("UTF-8"), "ISO8859-1"));
        response.addHeader("fileName", URLEncoder.encode(name, "utf-8"));
