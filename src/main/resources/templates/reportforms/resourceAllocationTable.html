@@ -56,19 +56,20 @@
         </div>
         <el-row>
             <!-- :span-method="arraySpanMethod" -->
+            <!-- show-summary -->
             <el-table 
                 ref="tableData"
                 tooltip-effect="dark"
                 style="width: 100%"
                 border
                 :data="tableData"
-                show-summary
                 v-loading="loading"
+                :span-method="arraySpanMethod"
                 >
-                <!-- <el-table-column align="center" type="index" label="序号" width="55" :index="indexFun"></el-table-column> -->
-                <el-table-column align="center" type="index" label="序号" width="55"></el-table-column>
+                <el-table-column align="center" type="index" label="序号" width="55" :index="indexFun"></el-table-column>
+                <!-- <el-table-column align="center" type="index" label="序号" width="55"></el-table-column> -->
                 <!-- 组列 -->
-                <el-table-column align="center" :key="index" :prop="item.fieldCode" :label="item.displayName" v-for="(item,key,index) in tableColums" v-if="item.fieldCode == 'orgId'">
+                <el-table-column align="center" :key="index" :prop="item.fieldCode" :label="item.displayName" v-for="(item,key,index) in tableColums" v-if="item.fieldCode == 'orgName'">
                     <template slot-scope="scope">
                         <el-button @click="gotoTeam(scope.row)" type="text" size="small">{{scope.row.orgName}}</el-button>
                     </template>
@@ -85,109 +86,110 @@
 <div th:include="_footer_include :: #jsLib"></div>
 </body>
 <script th:inline="javascript">
-    var queryOrg=[[${queryOrg}]];//电销组
+    var queryOrg=[[${saleGroupList}]];//电销组
     var distributionSource=[[${queryOrg}]];//分配来源
-    var fieldList=[{//表头假数据
-        displayName:"电销组",
-        fieldCode:"orgId",//需要改成后端返回的字段名称
-        fieldName:"电销组",
-        id:"1",
-        menuCode:null,
-        menuId:null,
-        pageNum:0,
-        pageSize:0,
-        sortNum:1
-    },{
-        displayName:"分配资源数",
-        fieldCode:"assignClueCount",
-        fieldName:"分配资源数",
-        id:"2",
-        menuCode:null,
-        menuId:null,
-        pageNum:0,
-        pageSize:0,
-        sortNum:2
-    },{
-        displayName:"联展",
-        fieldCode:"jointExhibition",
-        fieldName:"联展",
-        id:"3",
-        menuCode:null,
-        menuId:null,
-        pageNum:0,
-        pageSize:0,
-        sortNum:3
-    },{
-        displayName:"竞价",
-        fieldCode:"priceCompetition",
-        fieldName:"竞价",
-        id:"4",
-        menuCode:null,
-        menuId:null,
-        pageNum:0,
-        pageSize:0,
-        sortNum:4
-    },{
-        displayName:"优化",
-        fieldCode:"optimization",
-        fieldName:"优化",
-        id:"5",
-        menuCode:null,
-        menuId:null,
-        pageNum:0,
-        pageSize:0,
-        sortNum:5
-    },{
-        displayName:"信息流",
-        fieldCode:"informationFlow",
-        fieldName:"信息流",
-        id:"6",
-        menuCode:null,
-        menuId:null,
-        pageNum:0,
-        pageSize:0,
-        sortNum:6
-    },{
-        displayName:"官网",
-        fieldCode:"officialWebsite",
-        fieldName:"官网",
-        id:"7",
-        menuCode:null,
-        menuId:null,
-        pageNum:0,
-        pageSize:0,
-        sortNum:7
-    },{
-        displayName:"行业",
-        fieldCode:"industry",
-        fieldName:"行业",
-        id:"8",
-        menuCode:null,
-        menuId:null,
-        pageNum:0,
-        pageSize:0,
-        sortNum:8
-    },{
-        displayName:"其他",
-        fieldCode:"other",
-        fieldName:"其他",
-        id:"9",
-        menuCode:null,
-        menuId:null,
-        pageNum:0,
-        pageSize:0,
-        sortNum:9
-    },{
-        displayName:"网民未接",
-        fieldCode:"netizensMissed",
-        fieldName:"网民未接",
-        id:"10",
-        menuCode:null,
-        menuId:null,
-        pageNum:0,
-        pageSize:0,
-        sortNum:10
-    }]
+    var fieldList=[[${fieldList}]];//表头list
+    // var fieldList=[{//表头假数据
+    //     displayName:"电销组",
+    //     fieldCode:"orgName",//需要改成后端返回的字段名称
+    //     fieldName:"电销组",
+    //     id:"1",
+    //     menuCode:null,
+    //     menuId:null,
+    //     pageNum:0,
+    //     pageSize:0,
+    //     sortNum:1
+    // },{
+    //     displayName:"分配资源数",
+    //     fieldCode:"assignClueCount",
+    //     fieldName:"分配资源数",
+    //     id:"2",
+    //     menuCode:null,
+    //     menuId:null,
+    //     pageNum:0,
+    //     pageSize:0,
+    //     sortNum:2
+    // },{
+    //     displayName:"联展",
+    //     fieldCode:"jointExhibition",
+    //     fieldName:"联展",
+    //     id:"3",
+    //     menuCode:null,
+    //     menuId:null,
+    //     pageNum:0,
+    //     pageSize:0,
+    //     sortNum:3
+    // },{
+    //     displayName:"竞价",
+    //     fieldCode:"priceCompetition",
+    //     fieldName:"竞价",
+    //     id:"4",
+    //     menuCode:null,
+    //     menuId:null,
+    //     pageNum:0,
+    //     pageSize:0,
+    //     sortNum:4
+    // },{
+    //     displayName:"优化",
+    //     fieldCode:"optimization",
+    //     fieldName:"优化",
+    //     id:"5",
+    //     menuCode:null,
+    //     menuId:null,
+    //     pageNum:0,
+    //     pageSize:0,
+    //     sortNum:5
+    // },{
+    //     displayName:"信息流",
+    //     fieldCode:"informationFlow",
+    //     fieldName:"信息流",
+    //     id:"6",
+    //     menuCode:null,
+    //     menuId:null,
+    //     pageNum:0,
+    //     pageSize:0,
+    //     sortNum:6
+    // },{
+    //     displayName:"官网",
+    //     fieldCode:"officialWebsite",
+    //     fieldName:"官网",
+    //     id:"7",
+    //     menuCode:null,
+    //     menuId:null,
+    //     pageNum:0,
+    //     pageSize:0,
+    //     sortNum:7
+    // },{
+    //     displayName:"行业",
+    //     fieldCode:"industry",
+    //     fieldName:"行业",
+    //     id:"8",
+    //     menuCode:null,
+    //     menuId:null,
+    //     pageNum:0,
+    //     pageSize:0,
+    //     sortNum:8
+    // },{
+    //     displayName:"其他",
+    //     fieldCode:"other",
+    //     fieldName:"其他",
+    //     id:"9",
+    //     menuCode:null,
+    //     menuId:null,
+    //     pageNum:0,
+    //     pageSize:0,
+    //     sortNum:9
+    // },{
+    //     displayName:"网民未接",
+    //     fieldCode:"netizensMissed",
+    //     fieldName:"网民未接",
+    //     id:"10",
+    //     menuCode:null,
+    //     menuId:null,
+    //     pageNum:0,
+    //     pageSize:0,
+    //     sortNum:10
+    // }]
     var mainDivVM = new Vue({
         el: '#maindiv',
         data: function() {
@@ -236,15 +238,16 @@
                             message: "接口调用失败",
                             type: 'error'
                         });
+                        mainDivVM.loading=false;
                         return ;
                     }
                     var resobj= response.data;
-                    console.log(resobj)
                     if(!resobj){
                         mainDivVM.$message({
                             message: "接口调用失败",
                             type: 'error'
                         });
+                        mainDivVM.loading=false;
                         return ;
                     }
                     if(resobj.code!='0'){
@@ -252,6 +255,7 @@
                             message: "接口调用失败",
                             type: 'error'
                         });
+                        mainDivVM.loading=false;
                         return ;
                     }  
                     var resobjData=resobj.data.data          
@@ -260,25 +264,28 @@
                     // 表头数据渲染 
                     mainDivVM.tableColums= fieldList;
                     // 插入合计一行
-                    // mainDivVM.summaryFun();
+                    mainDivVM.summaryFun();
+                    // 分页
                     mainDivVM.pager.currentPage= resobj.data.currentPage;
                     mainDivVM.pager.total= resobj.data.total;
+                    // loading
                     mainDivVM.loading=false;
                 })
             },
             gotoTeam(item){
-                console.log(item)
-                var clueId = item.id;
-                if(clueId){
-                    // 点击组跳转到资源组
-                    window.location.href="/statistics/teleStatement/resourceAllocationTableTeam?id=" + clueId; 
-                }
-                // var clueId = item.id;
-                // if(clueId == "合计"){
-                //     window.location.href="/statistics/teleStatement/resourceAllocationTableSum";
-                // }else{
-                //     window.location.href="/statistics/teleStatement/resourceAllocationTableTeam?id=" + id; 
+                var orgId = item.orgId;
+                var orgName = item.orgName;
+                // if(clueId){
+                //     // alert("id = " + clueId);
+                //     // 点击组跳转到资源组
+                //     window.location.href="/statistics/teleStatement/resourceAllocationTableTeam?groupId=" + clueId;
                 // }
+                console.log(item)
+                if(orgName == "合计"){
+                    window.location.href="/statistics/teleStatement/resourceAllocationTableSum";
+                }else{
+                    window.location.href="/statistics/teleStatement/resourceAllocationTableTeam?groupId=" + orgId;
+                }
             },
             arraySpanMethod({ row, column, rowIndex, columnIndex }) { // 合并第一行
                 if (rowIndex === 0) {
@@ -297,7 +304,7 @@
                 // const sums = ["合计", '', 2, 2, '2%', 2, 2, '2%', 1234, 1234];
                 var obj = {
                     id: '合计',
-                    orgId: '合计',
+                    orgName: '合计',
                     assignClueCount: '2',
                     jointExhibition: '4',
                     priceCompetition: '6',
@@ -334,13 +341,21 @@
                 // return sums;
             },
             searchYesterday(){//昨天
-               var today = new Date();
-               today.setTime(today.getTime()-24*60*60*1000);
-               var startTime = today.getFullYear()+"-" + (today.getMonth()+1) + "-" + today.getDate()+" 00:00:00";
-               var endTime =today.getFullYear()+"-" + (today.getMonth()+1) + "-" + today.getDate()+" 23:59:59";
-               this.form.startTime=startTime;
-               this.form.endTime=endTime;
-               this.searchTable();
+                var today = new Date();
+                today.setTime(today.getTime()-24*60*60*1000);
+                var month=""
+                var getMonth=today.getMonth()+1;
+                if(getMonth<10){
+                    month=0+(getMonth+"")
+                }else{
+                    month=getMonth
+                }
+                console.log(month)
+                var startTime = today.getFullYear()+"" + month + today.getDate()+"0000";
+                var endTime =today.getFullYear()+"" + month + today.getDate()+"2359";
+                this.form.startTime=startTime;
+                this.form.endTime=endTime;
+                this.searchTable();
             },
             searchWeek(){//近七天
                  var a = new Date();
@@ -380,7 +395,6 @@
                 param.org_Id =  this.form.org_Id;//电销组
                 axios.post('/statistics/teleStatement/exportResourceAllocationGroup',param,{responseType:'blob'})
                     .then(function (response) {
-                        console.log(response)
                         var data =  response.data;
                         var fileName = response.headers.filename;
                         saveAs(data,decodeURI(fileName));
