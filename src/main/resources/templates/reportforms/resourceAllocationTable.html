@@ -56,17 +56,18 @@
         </div>
         <el-row>
             <!-- :span-method="arraySpanMethod" -->
+            <!-- show-summary -->
             <el-table 
                 ref="tableData"
                 tooltip-effect="dark"
                 style="width: 100%"
                 border
                 :data="tableData"
-                show-summary
                 v-loading="loading"
+                :span-method="arraySpanMethod"
                 >
-                <!-- <el-table-column align="center" type="index" label="序号" width="55" :index="indexFun"></el-table-column> -->
-                <el-table-column align="center" type="index" label="序号" width="55"></el-table-column>
+                <el-table-column align="center" type="index" label="序号" width="55" :index="indexFun"></el-table-column>
+                <!-- <el-table-column align="center" type="index" label="序号" width="55"></el-table-column> -->
                 <!-- 组列 -->
                 <el-table-column align="center" :key="index" :prop="item.fieldCode" :label="item.displayName" v-for="(item,key,index) in tableColums" v-if="item.fieldCode == 'orgName'">
                     <template slot-scope="scope">
@@ -88,7 +89,6 @@
     var queryOrg=[[${saleGroupList}]];//电销组
     var distributionSource=[[${queryOrg}]];//分配来源
     var fieldList=[[${fieldList}]];//表头list
-    console.log(fieldList)
     // var fieldList=[{//表头假数据
     //     displayName:"电销组",
     //     fieldCode:"orgName",//需要改成后端返回的字段名称
@@ -238,15 +238,16 @@
                             message: "接口调用失败",
                             type: 'error'
                         });
+                        mainDivVM.loading=false;
                         return ;
                     }
                     var resobj= response.data;
-                    console.log(resobj)
                     if(!resobj){
                         mainDivVM.$message({
                             message: "接口调用失败",
                             type: 'error'
                         });
+                        mainDivVM.loading=false;
                         return ;
                     }
                     if(resobj.code!='0'){
@@ -254,6 +255,7 @@
                             message: "接口调用失败",
                             type: 'error'
                         });
+                        mainDivVM.loading=false;
                         return ;
                     }  
                     var resobjData=resobj.data.data          
@@ -262,26 +264,28 @@
                     // 表头数据渲染 
                     mainDivVM.tableColums= fieldList;
                     // 插入合计一行
-                    // mainDivVM.summaryFun();
+                    mainDivVM.summaryFun();
+                    // 分页
                     mainDivVM.pager.currentPage= resobj.data.currentPage;
                     mainDivVM.pager.total= resobj.data.total;
+                    // loading
                     mainDivVM.loading=false;
                 })
             },
             gotoTeam(item){
-                console.log(item)
-                var clueId = item.orgId;
-                if(clueId){
-                    // alert("id = " + clueId);
-                    // 点击组跳转到资源组
-                    window.location.href="/statistics/teleStatement/resourceAllocationTableTeam?groupId=" + clueId;
-                }
-                // var clueId = item.id;
-                // if(clueId == "合计"){
-                //     window.location.href="/statistics/teleStatement/resourceAllocationTableSum";
-                // }else{
-                //     window.location.href="/statistics/teleStatement/resourceAllocationTableTeam?id=" + id; 
+                var orgId = item.orgId;
+                var orgName = item.orgName;
+                // if(clueId){
+                //     // alert("id = " + clueId);
+                //     // 点击组跳转到资源组
+                //     window.location.href="/statistics/teleStatement/resourceAllocationTableTeam?groupId=" + clueId;
                 // }
+                console.log(item)
+                if(orgName == "合计"){
+                    window.location.href="/statistics/teleStatement/resourceAllocationTableSum";
+                }else{
+                    window.location.href="/statistics/teleStatement/resourceAllocationTableTeam?groupId=" + orgId;
+                }
             },
             arraySpanMethod({ row, column, rowIndex, columnIndex }) { // 合并第一行
                 if (rowIndex === 0) {
@@ -383,7 +387,6 @@
                 param.org_Id =  this.form.org_Id;//电销组
                 axios.post('/statistics/teleStatement/exportResourceAllocationGroup',param,{responseType:'blob'})
                     .then(function (response) {
-                        console.log(response)
                         var data =  response.data;
                         var fileName = response.headers.filename;
                         saveAs(data,decodeURI(fileName));
