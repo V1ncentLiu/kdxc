@@ -107,52 +107,40 @@
             return {
                 form: {},
                 tableData: [
-                {
-                    orgId: "1",
-                    date: 1558059184348,
-                    orgName: '电销组1',
-                    userName: '电销人员1',
-                    callCount: 1000,
-                    calledCount: 10,
-                    callPercent: 10,
-                    callClueCount: 10,
-                    calledClueCount: 10,
-                    clueCallecdPrecent: 10,
-                    validCallTime: 155799,
-                    userAvgDayValidCallTime: 155799
-                },{
-                    orgId: "2",
-                    date: 1558059184348,
-                    orgName: '电销组2',
-                    userName: '电销人员2',
-                    callCount: 1000,
-                    calledCount: 10,
-                    callPercent: 10,
-                    callClueCount: 10,
-                    calledClueCount: 10,
-                    clueCallecdPrecent: 10,
-                    validCallTime: 155799,
-                    userAvgDayValidCallTime: 155799
-                }, {
-                    orgId: "3",
-                    date: 1558059184348,
-                    orgName: '电销组3',
-                    userName: '电销人员3',
-                    callCount: 1000,
-                    calledCount: 10,
-                    callPercent: 10,
-                    callClueCount: 10,
-                    calledClueCount: 10,
-                    clueCallecdPrecent: 10,
-                    validCallTime: 155799,
-                    userAvgDayValidCallTime: 155799
-                }],
+                // {
+                //     orgId: "1",
+                //     date: 1558059184348,
+                //     orgName: '电销组1',
+                //     userName: '电销人员1',
+                //     callCount: 1000,
+                //     calledCount: 10,
+                //     callPercent: 10,
+                //     callClueCount: 10,
+                //     calledClueCount: 10,
+                //     clueCallecdPrecent: 10,
+                //     validCallTime: 155799,
+                //     userAvgDayValidCallTime: 155799
+                // },{
+                //     orgId: "2",
+                //     date: 1558059184348,
+                //     orgName: '电销组2',
+                //     userName: '电销人员2',
+                //     callCount: 1000,
+                //     calledCount: 10,
+                //     callPercent: 10,
+                //     callClueCount: 10,
+                //     calledClueCount: 10,
+                //     clueCallecdPrecent: 10,
+                //     validCallTime: 155799,
+                //     userAvgDayValidCallTime: 155799
+                // }
+            ],
                 orgTeleArr:queryOrg, // 电销组
                 busSaleArr:[], // 创业顾问
                 pager:{ 
                     total: 0,
                     currentPage: 1,
-                    pageSize: 3
+                    pageSize: 20
                 },
             }             
         },
@@ -283,8 +271,8 @@
             searchYesterday(){ // 昨天
                var today = new Date();
                today.setTime(today.getTime()-24*60*60*1000);
-               var startTime = today.getFullYear()+"-" + (today.getMonth()+1) + "-" + today.getDate()+" 00:00:00";
-               var endTime =today.getFullYear()+"-" + (today.getMonth()+1) + "-" + today.getDate()+" 23:59:59";
+               var startTime = today.getFullYear()+"-" + (today.getMonth()+1) + "-" + today.getDate()+" 00:00";
+               var endTime =today.getFullYear()+"-" + (today.getMonth()+1) + "-" + today.getDate()+" 23:59";
                this.form.startTime=startTime;
                this.form.endTime=endTime;
                this.searchTable();
@@ -299,8 +287,8 @@
                  var d = b.valueOf();
                  var startTime= new Date(c);
                  var endTime = new Date(d);
-                 this.form.startTime=startTime.getFullYear()+"-" + (startTime.getMonth()+1) + "-" + startTime.getDate()+" 00:00:00";
-                 this.form.endTime=endTime.getFullYear()+"-" + (endTime.getMonth()+1) + "-" + endTime.getDate()+" 23:59:59";
+                 this.form.startTime=startTime.getFullYear()+"-" + (startTime.getMonth()+1) + "-" + startTime.getDate()+" 00:00";
+                 this.form.endTime=endTime.getFullYear()+"-" + (endTime.getMonth()+1) + "-" + endTime.getDate()+" 23:59";
                  this.searchTable();
             },
             searchMonth(){ // 本月 
@@ -312,12 +300,18 @@
                 var f= new Date(year,month,01);
                 var c = f.valueOf();
                 var startTime= new Date(c);
-                this.form.startTime=startTime.getFullYear()+"-" + (startTime.getMonth()+1) + "-" + startTime.getDate()+" 00:00:00";;
-                this.form.endTime=year+"-"+(month+1)+"-"+date+" 23:59:59";
+                this.form.startTime=startTime.getFullYear()+"-" + (startTime.getMonth()+1) + "-" + startTime.getDate()+" 00:00";
+                this.form.endTime=year+"-"+(month+1)+"-"+date+" 23:59";
                 this.searchTable();
             },
         },
-        created(){            
+        created(){    
+            var today = new Date();
+            today.setTime(today.getTime());
+            var startTime = today.getFullYear()+"-"+ (today.getMonth()+1) + "-" + today.getDate()+" 00:00";
+            var endTime =today.getFullYear()+"-"+ (today.getMonth()+1) + "-" + today.getDate()+" 23:59";
+            this.form.startTime=startTime;
+            this.form.endTime=endTime;         
             this.searchTable();
         },
         mounted(){

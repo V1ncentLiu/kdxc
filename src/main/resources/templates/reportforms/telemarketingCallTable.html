@@ -101,35 +101,35 @@
                     orgId:''
                 },
                 tableData: [
-                    {
-                        orgId: "1",
-                        orgName: '电销组1',
-                        callCount: 1000,
-                        calledCount: 10,
-                        callPercent: 10,
-                        callClueCount: 10,
-                        calledClueCount: 10,
-                        clueCallecdPrecent: 10,
-                        validCallTime: 155799,
-                        userAvgDayValidCallTime: 155799
-                    }, {
-                        orgId: "2",
-                        orgName: '电销组2',
-                        callCount: 1000,
-                        calledCount: 10,
-                        callPercent: 10,
-                        callClueCount: 10,
-                        calledClueCount: 10,
-                        clueCallecdPrecent: 10,
-                        validCallTime: 155799,
-                        userAvgDayValidCallTime: 155799
-                    }
+                    // {
+                    //     orgId: "1",
+                    //     orgName: '电销组1',
+                    //     callCount: 1000,
+                    //     calledCount: 10,
+                    //     callPercent: 10,
+                    //     callClueCount: 10,
+                    //     calledClueCount: 10,
+                    //     clueCallecdPrecent: 10,
+                    //     validCallTime: 155799,
+                    //     userAvgDayValidCallTime: 155799
+                    // }, {
+                    //     orgId: "2",
+                    //     orgName: '电销组2',
+                    //     callCount: 1000,
+                    //     calledCount: 10,
+                    //     callPercent: 10,
+                    //     callClueCount: 10,
+                    //     calledClueCount: 10,
+                    //     clueCallecdPrecent: 10,
+                    //     validCallTime: 155799,
+                    //     userAvgDayValidCallTime: 155799
+                    // }
                 ],
                 orgTeleArr: queryOrg, // 电销组
                 pager:{ 
                     total: 0,
                     currentPage: 1,
-                    pageSize: 1
+                    pageSize: 2
                 },
             }             
         },
@@ -212,11 +212,11 @@
                 }
             },
             gotoTeam (row) { // 页面跳转
-                var clueId = row.orgId;
-                if(clueId === "合计"){
+                var orgId = row.orgId;
+                if(orgId === "合计"){
                     window.location.href="/statistics/teleStatement/telemarketingCallTableSum";
                 }else{
-                    window.location.href="/statistics/teleStatement/telemarketingCallTableTeam?clueId=" + clueId; 
+                    window.location.href="/statistics/teleStatement/telemarketingCallTableTeam?orgId=" + orgId; 
                 }
             },
             indexFun (index) { // 表格序号
@@ -228,9 +228,7 @@
                  }
                 return moment(m).format("YYYYMMDDHHmm");
             },
-            summaryFun () { // 将合计插入数据中：如果是分页，记得每次获取数据都要执行这个函数
-                // const { columns, data } = param;
-                // const sums = ["合计", '', 2, 2, '2%', 2, 2, '2%', 1234, 1234];
+            summaryFun () {
                 var total = {
                     orgId: "合计",
                     orgName: '合计',
@@ -244,29 +242,6 @@
                     userAvgDayValidCallTime: 155799
                 };
                 this.tableData.unshift(total);
-                // const sums = [];
-                // columns.forEach((column, index) => {
-                //     if (index === 0) {
-                //         sums[index] = '合计';
-                //         return;
-                //     }
-                //     if (index === 1) {
-                //         sums[index] = '';
-                //         return;
-                //     }
-                //     const values = data.map(item => Number(item[column.property]));
-                //     if (!values.every(value => isNaN(value))) {
-                //         sums[index] = values.reduce((prev, curr) => {
-                //             const value = Number(curr);
-                //             if (!isNaN(value)) {
-                //                 return prev + curr;
-                //             } 
-                //         }, 0);
-                //     }
-                // });
-                // sums[sums.length-2] = this.timeFun (sums[sums.length-2]);
-                // sums[sums.length-1] = this.timeFun (sums[sums.length-1]);
-                // return sums;
             },
             percentFormat (row, column) {
                 var percent = row[column.property];
@@ -335,7 +310,6 @@
             },
             exportRs(){
                 var param = {};
-                // 搜索条件
                 param.startTime = this.export.startTime;
                 param.endTime =  this.export.endTime;
                 param.orgId =  this.export.orgId; 
@@ -355,7 +329,13 @@
                     });
             }
         },
-        created(){            
+        created(){
+            var today = new Date();
+            today.setTime(today.getTime());
+            var startTime = today.getFullYear()+"-"+ (today.getMonth()+1) + "-" + today.getDate()+" 00:00";
+            var endTime =today.getFullYear()+"-"+ (today.getMonth()+1) + "-" + today.getDate()+" 23:59";
+            this.form.startTime=startTime;
+            this.form.endTime=endTime;            
             this.searchTable();
         },
         mounted(){
