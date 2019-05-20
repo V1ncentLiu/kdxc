@@ -226,7 +226,6 @@
                     currentPage: 1,
                     pageSize: 20,
                 },
-                urlOrg_Id:'',//地址栏里的组id
             }             
         },
         methods: {  
@@ -263,7 +262,7 @@
                 if(this.form.org_Id){
                     param.org_Id = this.form.org_Id;//电销组
                 }else{
-                    param.org_Id = this.urlOrg_Id;
+                    param.org_Id = this.getQueryString('groupId');
                 }
                 
                 console.log(param)
@@ -343,9 +342,10 @@
                 // 返回资源分配表页面
                 window.location.href="/statistics/teleStatement/resourceAllocation";
             },
-            getUrlId(){
-                var url=window.location.href;
-                
+            getQueryString(name){//获取url地址栏参数的方法
+                var reg = new RegExp("(^|&)"+ name +"=([^&]*)(&|$)");
+                var r = window.location.search.substr(1).match(reg);
+                if(r!=null)return  unescape(r[2]); return null;
             },
             searchYesterday(){//昨天
                var today = new Date();
@@ -400,7 +400,7 @@
                 });
             }
         },
-        created(){            
+        created(){    
             this.searchTable();
         },
         mounted(){
