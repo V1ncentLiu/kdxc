@@ -54,7 +54,7 @@ public interface TeleTalkTimeFeignClient {
     @Component
     class HystrixClientFallback implements TeleTalkTimeFeignClient {
 
-        private static Logger logger = LoggerFactory.getLogger(StatisticsFeignClient.class);
+        private static Logger logger = LoggerFactory.getLogger(TeleTalkTimeFeignClient.class);
 
         private JSONResult fallBackError(String name) {
             logger.error(name + "接口调用失败：无法获取目标服务");

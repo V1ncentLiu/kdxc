@@ -1,13 +1,20 @@
-package com.kuaidao.manageweb.controller.statistics;
+package com.kuaidao.manageweb.controller.statistics.resourceAllocation;
 
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.common.util.DateUtil;
 import com.kuaidao.common.util.ExcelUtil;
-import com.kuaidao.manageweb.feign.statistics.StatisticsFeignClient;
-import com.kuaidao.stastics.dto.ResourceAllocationDto;
-import com.kuaidao.stastics.dto.ResourceAllocationQueryDto;
+import com.kuaidao.manageweb.feign.customfield.CustomFieldFeignClient;
+import com.kuaidao.manageweb.feign.statistics.resourceAllocation.StatisticsFeignClient;
+import com.kuaidao.stastics.dto.resourceAllocation.ResourceAllocationDto;
+import com.kuaidao.stastics.dto.resourceAllocation.ResourceAllocationQueryDto;
+import com.kuaidao.sys.dto.customfield.CustomFieldQueryDTO;
+import com.kuaidao.sys.dto.customfield.QueryFieldByRoleAndMenuReq;
+import com.kuaidao.sys.dto.customfield.QueryFieldByUserAndMenuReq;
+import com.kuaidao.sys.dto.customfield.UserFieldDTO;
+import com.kuaidao.sys.dto.user.UserInfoDTO;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.shiro.SecurityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +25,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.net.URLEncoder;
 import java.util.ArrayList;
@@ -39,12 +47,31 @@ public class TeleStatementController {
     @Autowired
     private StatisticsFeignClient statisticsFeignClient;
 
+    @Autowired
+    private CustomFieldFeignClient customFieldFeignClient;
+
     /**
      * 资源分配（组）
      * @return
      */
     @RequestMapping("/resourceAllocation")
-    public String resourceAllocationTable() {
+    public String resourceAllocationTable(HttpServletRequest request) {
+        UserInfoDTO user = getUser();
+        // 根据角色查询页面字段
+        QueryFieldByRoleAndMenuReq queryFieldByRoleAndMenuReq = new QueryFieldByRoleAndMenuReq();
+        queryFieldByRoleAndMenuReq.setMenuCode("statistics:teleStatement:resourceAllocation");
+        queryFieldByRoleAndMenuReq.setId(user.getRoleList().get(0).getId());
+        JSONResult<List<CustomFieldQueryDTO>> queryFieldByRoleAndMenu =
+                customFieldFeignClient.queryFieldByRoleAndMenu(queryFieldByRoleAndMenuReq);
+        request.setAttribute("fieldList", queryFieldByRoleAndMenu.getData());
+        // 根据用户查询页面字段
+        QueryFieldByUserAndMenuReq queryFieldByUserAndMenuReq = new QueryFieldByUserAndMenuReq();
+        queryFieldByUserAndMenuReq.setRoleId(user.getRoleList().get(0).getId());
+        queryFieldByUserAndMenuReq.setId(user.getId());
+        queryFieldByUserAndMenuReq.setMenuCode("statistics:teleStatement:resourceAllocation");
+        JSONResult<List<UserFieldDTO>> queryFieldByUserAndMenu =
+                customFieldFeignClient.queryFieldByUserAndMenu(queryFieldByUserAndMenuReq);
+        request.setAttribute("userFieldList", queryFieldByUserAndMenu.getData());
         return "/reportforms/resourceAllocationTable";
     }
 
@@ -300,8 +327,12 @@ public class TeleStatementController {
         headTitleList.add("网民未接");
         return headTitleList;
     }
-    
-    
+
+    private UserInfoDTO getUser() {
+        Object attribute = SecurityUtils.getSubject().getSession().getAttribute("user");
+        UserInfoDTO user = (UserInfoDTO) attribute;
+        return user;
+    }
     
     
     
