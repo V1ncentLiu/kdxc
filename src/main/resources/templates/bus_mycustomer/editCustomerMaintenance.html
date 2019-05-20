@@ -296,11 +296,7 @@
                         </el-form-item>
                           <span v-if="domainShow">
                             <el-form-item
-                                style="width: 300px;float: left;margin-right: 10px;"
-                                v-for="(domain, index) in form.domains"
-                                :key="domain.key"
-                                :prop="'domains.' + index + '.value'" 
-                                :rules='rules.domainsValue'
+                                style="width: 300px;float: left;margin-right: 10px;" v-for="(domain, index) in form.domains" :key="domain.key" :prop="'domains.' + index + '.value'" :rules='rules.domainsValue'
                                   >
                                 <el-input v-model="domain.value" placeholder="输入品牌名称" maxLength="15" style="width: 210px;float: left;"></el-input><el-button @click.prevent="removeDomain(domain)" type="danger">删除</el-button>
                             </el-form-item>
@@ -1170,7 +1166,6 @@ var loginUserId=[[${loginUserId}]];
                         //同行业项目
                         var domains=this.form.domains;
                         var ary=[];   
-                        console.log(domains)                  
                         for(var i=0;i<domains.length;i++){
                             // 判断输入框里4个值是否重复(判断对象数组的value是否有重复值)
                             ary.push(domains[i].value);//把输入的手机号放入一个数组
@@ -1193,8 +1188,8 @@ var loginUserId=[[${loginUserId}]];
                         clueIntention.tradeProject=tradeProject;
                         var clue={};
               	        clue.clueId=clueId;
-                 	    clue.clueCustomer=clueCustomer;
-                 	    clue.clueIntention=clueIntention; 
+                 	      clue.clueCustomer=clueCustomer;
+                 	      clue.clueIntention=clueIntention;
                         axios.post('/tele/clueMyCustomerInfo/updateCustomerClue',clue)
                         .then(function (response) {
                      	  addCustomerVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
@@ -1702,7 +1697,6 @@ var loginUserId=[[${loginUserId}]];
 //                   this.showwchatcode = "/images/errorIcon.jpg";
 //                   this.showWxCodeFalg = false;
 //               }
-
            }
            if(intention){
         	   this.form.money=intention.advanceAmount==null?"":intention.advanceAmount+"";
@@ -1726,6 +1720,28 @@ var loginUserId=[[${loginUserId}]];
          		//   this.outsideProjectShow=true; //外部项目默认显示
          		//   this.insideProjectShow=false; //内部项目不默认显示
          	  //  }
+             //是否考虑同行业
+             this.form.radioSelect = intention.istrade == null ? "" : intention.istrade + "";
+        	   console.log( intention.istrade)
+             //同行业项目
+             if (intention.tradeProject) {
+               this.domainShow = true;
+               console.log("--------------")
+               console.log(intention.tradeProject)
+               console.log("--------------")
+               this.form.domains = [];
+               var tradeProjectArr = intention.tradeProject.split(",");
+               for(var i=0;i<tradeProjectArr.length;i++){
+                 this.form.domains.push({
+                   value: tradeProjectArr[i],
+                 });
+               }
+             }else{
+               // //同行业品牌占位
+               // this.form.domains.push({
+               //   value: ''
+               // });
+             }
 
         	   if(this.form.intentionCategory){
                    this.projectChangeSelect(this.form.intentionCategory)
