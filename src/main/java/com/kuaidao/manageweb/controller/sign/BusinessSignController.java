@@ -7,7 +7,11 @@ import com.kuaidao.aggregation.dto.paydetail.PayDetailReqDTO;
 import com.kuaidao.aggregation.dto.paydetail.PayDetailRespDTO;
 import com.kuaidao.aggregation.dto.project.CompanyInfoDTO;
 import com.kuaidao.aggregation.dto.project.ProjectInfoDTO;
-import com.kuaidao.aggregation.dto.sign.*;
+import com.kuaidao.aggregation.dto.sign.BusSignInsertOrUpdateDTO;
+import com.kuaidao.aggregation.dto.sign.BusSignRespDTO;
+import com.kuaidao.aggregation.dto.sign.BusinessSignDTO;
+import com.kuaidao.aggregation.dto.sign.PayDetailDTO;
+import com.kuaidao.aggregation.dto.sign.SignParamDTO;
 import com.kuaidao.aggregation.dto.visitrecord.BusVisitRecordRespDTO;
 import com.kuaidao.common.constant.OrgTypeConstant;
 import com.kuaidao.common.constant.SystemCodeConstant;
@@ -38,8 +42,15 @@ import com.kuaidao.sys.dto.dictionary.DictionaryItemRespDTO;
 import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
 import com.kuaidao.sys.dto.organization.OrganizationRespDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import javax.servlet.http.HttpServletRequest;
+import javax.validation.Valid;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.shiro.SecurityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,11 +60,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.validation.Valid;
-import java.math.BigDecimal;
-import java.util.*;
 
 /**
  * @Auther: admin
@@ -410,8 +416,7 @@ public class BusinessSignController {
      */
     @RequestMapping("/myCustomSignRecordPage")
     public String myCustomSignRecordPage(HttpServletRequest request, @RequestParam String clueId,
-        @RequestParam String signId, @RequestParam String readyOnly,@RequestParam(required = false) String showSignButton) throws Exception {
-        UserInfoDTO user = getUser();
+        @RequestParam String signId, @RequestParam String readyOnly,@RequestParam String createUser,@RequestParam(required = false) String showSignButton) throws Exception {
         IdEntityLong idEntityLong = new IdEntityLong();
         idEntityLong.setId(Long.valueOf(signId));
         SignParamDTO paramDTO = new SignParamDTO();
@@ -456,19 +461,19 @@ public class BusinessSignController {
                 for (int i = 0; i < list.size(); i++) {
                     PayDetailRespDTO dto = list.get(i);
                     if ("2".equals(dto.getPayType())) {
-                        this.handlerData(dto,user);
+                        this.handlerData(dto,createUser);
                         one.add(dto);
                         if(StringUtils.isNotBlank(dto.getRepeatRatio())){
                             oneRepeatStatus =true;
                         }
                     } else if ("3".equals(dto.getPayType())) {
-                        this.handlerData(dto,user);
+                        this.handlerData(dto,createUser);
                         two.add(dto);
                         if(StringUtils.isNotBlank(dto.getRepeatRatio())){
                             twoRepeatStatus =true;
                         }
                     } else if ("4".equals(dto.getPayType())) {
-                        this.handlerData(dto,user);
+                        this.handlerData(dto,createUser);
                         three.add(dto);
                         if(StringUtils.isNotBlank(dto.getRepeatRatio())){
                             threeRepeatStatus =true;
@@ -530,10 +535,13 @@ public class BusinessSignController {
     /**
      * 计算判单金额
      * @param dto
-     * @param user
+     * @param createUser
      */
-    private void handlerData(PayDetailRespDTO dto, UserInfoDTO user){
-        Long userId = user.getId();
+    private void handlerData(PayDetailRespDTO dto, String createUser){
+        Long userId = null;
+        if(StringUtils.isNotBlank(createUser)){
+            userId = Long.valueOf(createUser);
+        }
         if(StringUtils.isNotBlank(dto.getRepeatRatio()) && dto.getRepeatRatio().contains(String.valueOf(userId))){
             //dto.setRepeatStatus(1);
             String[] ratioArr = dto.getRepeatRatio().split(",",-1);
@@ -683,14 +691,14 @@ public class BusinessSignController {
         }
         return null;
     }
-    /**
-     * 获取当前登录账号
-     *
-     * @return
-     */
-    private UserInfoDTO getUser() {
-        Object attribute = SecurityUtils.getSubject().getSession().getAttribute("user");
-        UserInfoDTO user = (UserInfoDTO) attribute;
-        return user;
-    }
+//    /**
+//     * 获取当前登录账号
+//     *
+//     * @return
+//     */
+//    private UserInfoDTO getUser() {
+//        Object attribute = SecurityUtils.getSubject().getSession().getAttribute("user");
+//        UserInfoDTO user = (UserInfoDTO) attribute;
+//        return user;
+//    }
 }
