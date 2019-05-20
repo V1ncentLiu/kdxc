@@ -23,10 +23,10 @@
         <div class="mainSearchFormBox">
            <el-form :inline="true" :model="form" class="demo-form-inline mainSearchForm" ref="form">                 
                 <el-form-item label="起止时间:">
-                    <el-date-picker format="yyyy-MM-dd HH:mm:ss" v-model="form.startTime" type="datetime" placeholder="选择日期"></el-date-picker>
+                    <el-date-picker format="yyyy-MM-dd HH:mm" v-model="form.startTime" type="datetime" placeholder="选择日期"></el-date-picker>
                 </el-form-item>
                 <el-form-item label="—" class="widthauto">
-                   <el-date-picker format="yyyy-MM-dd HH:mm:ss" v-model="form.endTime" type="datetime" placeholder="选择日期"></el-date-picker>
+                   <el-date-picker format="yyyy-MM-dd HH:mm" v-model="form.endTime" type="datetime" placeholder="选择日期"></el-date-picker>
                 </el-form-item>
                 <el-form-item label="电销组:">  
                     <el-select v-model="form.orgId" placeholder="电销组" style="width: 100%;" clearable @change="currentTelSale" filterable>
@@ -69,7 +69,7 @@
                 style="width: 100%">
                 <el-table-column prop="id" type="index" label="序号" align="center" width="55">
                 </el-table-column>
-                <el-table-column prop="date" align="center" :formatter="dateFormat" label="日期">
+                <el-table-column prop="dateId" align="center" :formatter="dateFormat" label="日期">
                 </el-table-column>
                 <el-table-column prop="userName" align="center" label="电销">
                 </el-table-column>
@@ -77,13 +77,13 @@
                 </el-table-column>
                 <el-table-column prop="calledCount" align="center" label="通话接通次数">
                 </el-table-column>
-                <el-table-column prop="callPercent" align="center" label="通话接通率">
+                <el-table-column prop="callPercent" align="center" label="通话接通率" :formatter="percentFormat">
                 </el-table-column>
                 <el-table-column prop="callClueCount" align="center" label="通话量">
                 </el-table-column>
                 <el-table-column prop="calledClueCount" align="center" label="接通量">
                 </el-table-column>
-                <el-table-column prop="clueCallecdPrecent" align="center" label="资源接通率">
+                <el-table-column prop="clueCallecdPrecent" align="center" label="资源接通率" :formatter="percentFormat">
                 </el-table-column>
                 <el-table-column prop="validCallTime" align="center" :formatter="timeFormat" label="总有效通话时长">
                 </el-table-column>
@@ -108,8 +108,9 @@
                 form: {},
                 tableData: [
                 {
+                    id: 1,
                     orgId: "1",
-                    date: 1558059184348,
+                    dateId: 1558059184348,
                     userName: '电销人员1',
                     callCount: 1000,
                     calledCount: 10,
@@ -120,30 +121,33 @@
                     validCallTime: 155799,
                     userAvgDayValidCallTime: 155799
                 },{
+                    id: 2,
                     orgId: "2",
-                    date: 1558059184348,
+                    dateId: 1558059184348,
                     userName: '电销人员2',
                     callCount: 1000,
                     calledCount: 10,
-                    callPercent: '10%',
+                    callPercent: 10,
                     callClueCount: 10,
                     calledClueCount: 10,
-                    clueCallecdPrecent: '10%',
+                    clueCallecdPrecent: 10,
                     validCallTime: 155799,
                     userAvgDayValidCallTime: 155799
                 }, {
+                    id: 3,
                     orgId: "3",
-                    date: 1558059184348,
+                    dateId: 1558059184348,
                     userName: '电销人员3',
                     callCount: 1000,
                     calledCount: 10,
-                    callPercent: '10%',
+                    callPercent: 10,
                     callClueCount: 10,
                     calledClueCount: 10,
-                    clueCallecdPrecent: '10%',
+                    clueCallecdPrecent: 10,
                     validCallTime: 155799,
                     userAvgDayValidCallTime: 155799
-                }],
+                }
+            ],
                 orgTeleArr: queryOrg, // 电销组
                 busSaleArr:[], // 创业顾问
 
@@ -204,8 +208,6 @@
                     var resobjData = resobj.data.data          
                     // 表格数据渲染
                     mainDivVM.tableData = resobjData;
-                    // 插入合计一行
-                    mainDivVM.summaryFun();
                     mainDivVM.pager.currentPage = resobj.data.currentPage;
                     mainDivVM.pager.total = resobj.data.total;
                     mainDivVM.loading = false;
@@ -215,6 +217,7 @@
                         message: "请求失败，请稍后重试",
                         type: "error"
                     });
+                    mainDivVM.loading = false;
                 });
             },
             currentTelSale(seleVal){ // 根据电销组选择创业顾问
@@ -236,7 +239,13 @@
                  if (!date) {
                    return "";
                  }
-                return moment(date).format("YYYY-MM-DD");
+                var d = date.toString();
+                var oYear = d.slice(0,4);
+                var oMonth = d.slice(5,6);
+                oMonth = oMonth > 10 ? oMonth : "0" + oMonth;
+                var oDay = d.slice(7);
+                oDay = oDay > 10 ? oDay : "0" + oDay;
+                return oYear+"-"+oMonth+"-"+oDay;
             }, 
             timeFormat (row, column) {
                 var time = row[column.property];
@@ -262,22 +271,27 @@
                 t += sec + "秒";
                 return t;
             },
+            percentFormat (row, column) {
+                var percent = row[column.property];
+                percent = parseInt(percent) * 100 + "%";
+                return percent;
+            },
             minuteFormat (m) {
                 if (!m) {
                    return "";
                  }
                 return moment(m).format("YYYYMMDDHHmm");
             },
-            searchYesterday(){ // 昨天 min
+            searchYesterday(){ // 昨天
                var today = new Date();
                today.setTime(today.getTime()-24*60*60*1000);
-               var startTime = today.getFullYear()+"" + (today.getMonth()+1) + "" + today.getDate()+"0000";
-               var endTime =today.getFullYear()+"" + (today.getMonth()+1) + "" + today.getDate()+"2359";
+               var startTime = today.getFullYear()+"-" + (today.getMonth()+1) + "-" + today.getDate()+" 00:00:00";
+               var endTime =today.getFullYear()+"-" + (today.getMonth()+1) + "-" + today.getDate()+" 23:59:59";
                this.form.startTime=startTime;
                this.form.endTime=endTime;
                this.searchTable();
             },
-            searchWeek(){ // 近七天 min
+            searchWeek(){ // 近七天
                  var a = new Date();
                  var year = a.getFullYear();
                  var month = a.getMonth();
@@ -287,11 +301,11 @@
                  var d = b.valueOf();
                  var startTime= new Date(c);
                  var endTime = new Date(d);
-                 this.form.startTime=startTime.getFullYear()+"" + (startTime.getMonth()+1) + "" + startTime.getDate()+"0000";
-                 this.form.endTime=endTime.getFullYear()+"" + (endTime.getMonth()+1) + "" + endTime.getDate()+"2359";
+                 this.form.startTime=startTime.getFullYear()+"-" + (startTime.getMonth()+1) + "-" + startTime.getDate()+" 00:00:00";
+                 this.form.endTime=endTime.getFullYear()+"-" + (endTime.getMonth()+1) + "-" + endTime.getDate()+" 23:59:59";
                  this.searchTable();
             },
-            searchMonth(){ // 本月 min
+            searchMonth(){ // 本月 
                 var a = new Date();
                 var year = a.getFullYear();
                 var month = a.getMonth();
@@ -300,8 +314,8 @@
                 var f= new Date(year,month,01);
                 var c = f.valueOf();
                 var startTime= new Date(c);
-                this.form.startTime=startTime.getFullYear()+"" + (startTime.getMonth()+1) + "" + startTime.getDate()+"0000";
-                this.form.endTime=year+""+(month+1)+""+date+" 2359";
+                this.form.startTime=startTime.getFullYear()+"-" + (startTime.getMonth()+1) + "-" + startTime.getDate()+" 00:00:00";;
+                this.form.endTime=year+"-"+(month+1)+"-"+date+" 23:59:59";
                 this.searchTable();
             },
         },
