@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml"
     xmlns:th="http://www.thymeleaf.org">
 <head  th:include="_header_include::frag(~{::title},~{::style},~{})">
-    <title>编辑线索</title>
+    <title>编辑资源</title>
     <meta charset="UTF-8">
     <style>
         .addCustomer .borderbox .el-row{width: 1065px;margin:0 auto;}
@@ -12,16 +12,16 @@
 <div  v-loading="loading" id="addCustomer" class="addCustomer mainPadding" style="display: none;"> 
     <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
         <el-breadcrumb-item>Home</el-breadcrumb-item>
-        <el-breadcrumb-item>线索管理</el-breadcrumb-item>
-        <el-breadcrumb-item>编辑线索</el-breadcrumb-item>
+        <el-breadcrumb-item>资源管理</el-breadcrumb-item>
+        <el-breadcrumb-item>编辑资源</el-breadcrumb-item>
     </el-breadcrumb> 
     
     <el-row class="borderbox">
-        <div class="inforTitle">编辑线索</div> 
+        <div class="inforTitle">编辑资源</div>
         <el-form :model="form" :rules="rules" ref="form" class="padding20">
         	<div class="marginB20 fs16 paddingT20">基本信息 &nbsp;&nbsp;
         			<!-- <el-button type="primary"  @click="chooseTemplate">选择模板</el-button> -->
-        			<span>线索ID：<span>{{form.clueId}}</span></span>
+        			<span>资源ID：<span>{{form.clueId}}</span></span>
         	</div>
             <div class="borderbox padding20">
                 <el-row>
@@ -93,14 +93,41 @@
                         </el-form-item>
                     </el-col>
                 	<el-col :span="12">
-                        <el-form-item label="地址：" :label-width="formLabelWidth" prop="province" >
-                           <el-input  v-model="form.province" autocomplete="off" placeholder="输入地址" maxLength="20" style="width: 260px;"></el-input>
-                        </el-form-item>
+                    <el-form-item label="开店区域：" :label-width="formLabelWidth" style="float: left;margin-right: 10px;">
+                      <el-select filterable v-model="form.province" placeholder="省" style="width: 80px;"  @change="currentProvince">
+                        <el-option
+                            v-for="item in provinceArr"
+                            :key="item.name"
+                            :label="item.name"
+                            :value="item.name">
+                        </el-option>
+                      </el-select>
+                    </el-form-item>
+                    <el-form-item label="" style="float: left;">
+                      <el-select filterable v-model="form.city" placeholder="市" style="width: 80px;margin-right: 10px;" @change="currentCity" >
+                        <el-option
+                            v-for="item in cityArr"
+                            :key="item.name"
+                            :label="item.name"
+                            :value="item.name">
+                        </el-option>
+                      </el-select>
+                    </el-form-item>
+                    <el-form-item label="" style="float: left;">
+                      <el-select filterable v-model="form.district" placeholder="区/县" style="width: 80px;">
+                        <el-option
+                            v-for="item in districtArr"
+                            :key="item.name"
+                            :label="item.name"
+                            :value="item.name">
+                        </el-option>
+                      </el-select>
+                    </el-form-item>
                     </el-col>
                 </el-row>
                 <el-row>
                 	<el-col :span="12">
-                        <el-form-item label="预约时间：" :label-width="formLabelWidth" prop="reserveTime" >
+                        <el-form-item label="预约回访时间：" :label-width="formLabelWidth" prop="reserveTime" >
                         	<el-date-picker v-model="form.reserveTime"  type="datetime" placeholder="输入客户方便联系的时间" style="width: 260px;"></el-date-picker>
                         </el-form-item>
                     </el-col>
@@ -127,8 +154,8 @@
                         </el-form-item>
                     </el-col>
                     <el-col :span="12">
-                        <el-form-item label="资源类别：" :label-width="formLabelWidth" prop="category">
-                            <el-select v-model="form.category" placeholder="请选择" style="width: 260px;">
+                        <el-form-item label="资源类别：" :label-width="formLabelWidth" prop="category" >
+                            <el-select v-model="form.category" placeholder="请选择" style="width: 260px;" clearable filterable  @change="categoryChange">
                                 <el-option
                                     v-for="item in categoryOptions"
                                     :key="item.value"
@@ -142,7 +169,7 @@
                 <el-row>
                     <el-col :span="12">
                         <el-form-item label="广告位：" :label-width="formLabelWidth" prop="sourceType">
-                            <el-select v-model="form.sourceType" placeholder="请选择" style="width: 260px;">
+                            <el-select v-model="form.sourceType" placeholder="请选择" style="width: 260px;" clearable filterable :disabled="sourceTypeDisabled">
                                 <el-option
                                     v-for="item in sourceTypeOptions"
                                     :key="item.value"
@@ -154,7 +181,7 @@
                     </el-col>
                     <el-col :span="12">
                         <el-form-item label="媒介：" :label-width="formLabelWidth" prop="source">
-                            <el-select v-model="form.source" placeholder="请选择" style="width: 260px;">
+                            <el-select v-model="form.source" placeholder="请选择" style="width: 260px;" clearable filterable>
                                 <el-option
                                     v-for="item in sourceOptions"
                                     :key="item.value"
@@ -168,7 +195,7 @@
                 <el-row>
                     <el-col :span="12">
                         <el-form-item label="资源项目：" :label-width="formLabelWidth" prop="projectId">
-                            <el-select v-model="form.projectId" placeholder="请选择" style="width: 260px;">
+                            <el-select v-model="form.projectId" placeholder="请选择" style="width: 260px;" clearable filterable>
                                 <el-option
                                     v-for="item in projectOptions"
                                     :key="item.id"
@@ -180,7 +207,7 @@
                     </el-col>
                     <el-col :span="12">
                         <el-form-item label="行业类别：" :label-width="formLabelWidth">
-                            <el-select v-model="form.industryCategory" clearable placeholder="请选择" style="width: 260px;">
+                            <el-select v-model="form.industryCategory" clearable placeholder="请选择" style="width: 260px;" filterable>
                                 <el-option
                                     v-for="item in industryCategoryOptions"
                                     :key="item.value"
@@ -214,25 +241,25 @@
                            <el-input v-model="form.searchWord" autocomplete="off" maxlength="50" style="width: 260px;"></el-input>
                         </el-form-item>
                     </el-col>
-                    <el-col :span="12">
-                        <el-form-item label="账户名称：" :label-width="formLabelWidth">
-                            <el-select v-model="form.accountName" clearable placeholder="请选择" style="width: 260px;">
-                                <el-option
-                                    v-for="item in accountNameOptions"
-                                    :key="item.value"
-                                    :label="item.name"
-                                    :value="item.value">
-                                </el-option>
-                            </el-select>
-                        </el-form-item>
-                    </el-col>
+                  <el-col :span="12">
+                    <el-form-item label="URL地址：" :label-width="formLabelWidth">
+                      <el-input v-model="form.urlAddress" autocomplete="off" maxlength="2000" style="width: 260px;"></el-input>
+                    </el-form-item>
+                  </el-col>
                 </el-row>
                 <el-row>
-                    <el-col :span="12">
-                        <el-form-item label="URL地址：" :label-width="formLabelWidth">
-                           <el-input v-model="form.urlAddress" autocomplete="off" maxlength="200" style="width: 260px;"></el-input>
-                        </el-form-item>
-                    </el-col>
+                  <el-col :span="12">
+                    <el-form-item label="账户名称：" :label-width="formLabelWidth">
+                      <el-select v-model="form.accountName" clearable placeholder="请选择" style="width: 260px;">
+                        <el-option
+                            v-for="item in accountNameOptions"
+                            :key="item.value"
+                            :label="item.name"
+                            :value="item.value">
+                        </el-option>
+                      </el-select>
+                    </el-form-item>
+                  </el-col>
                 </el-row>
             </div>
             <div class="padding20 f-tac">            
@@ -330,7 +357,7 @@
                     </el-select>
                 </el-form-item>
                 <el-form-item label="广告位:" >
-                    <el-select v-model="clueTemplateSearchForm.sourceType" placeholder="广告位" clearable>
+                    <el-select v-model="clueTemplateSearchForm.sourceType" placeholder="广告位" clearable >
                         <el-option
                             v-for="item in sourceTypeOptions"
                             :key="item.value"
@@ -394,11 +421,22 @@ var industryCategoryList=[[${industryCategoryList}]];//行业类别集合
 var accountNameList=[[${accountNameList}]];//账号名称集合
 var ossSignatureUrl = [[${ossUrl}]];//上传文件地址
 var clueInfo = [[${clueInfo}]];//资源信息
+var optList = [[${optList}]];//优化资源类别
+var notOptList = [[${notOptList}]];//非优化资源类别
+var opt=[];
+var notOpt=[];
+if(optList){
+	opt=optList.split(',');
+}
+if(notOptList){
+	notOpt=notOptList.split(',');
+}
   var addClueVM=   new Vue({
         el: '#addCustomer',
         data: function() {
             return {
                 isDisabled:true,//默认不可点击  
+                sourceTypeDisabled:false,//广告位是否可选  
                 dialogFormVisible: false,//新增手机号
                 wechatVisible: false,//新增微信号
                 chooseVisible: false,//选择模板
@@ -422,7 +460,6 @@ var clueInfo = [[${clueInfo}]];//资源信息
                 	qq:'',
                 	email:'',
                 	age:'',
-                	province:'',
                 	reserveTime:'',
                 	remark:'',
                 	source:'',
@@ -435,7 +472,10 @@ var clueInfo = [[${clueInfo}]];//资源信息
                 	urlAddress:'',
                 	industryCategory:'',
                 	messagePoint:'',
-                	messageTime:''
+                	messageTime:'',
+                  province:'',
+                  city:'',
+                  district:''
                 },
                 wechatForm: {
                 	wechat2:'',
@@ -465,6 +505,9 @@ var clueInfo = [[${clueInfo}]];//资源信息
 	            accountNameOptions:accountNameList,
                 formLabelWidth: '120px',
                 formLabelWidth1: '140px',
+              provinceArr:[],
+              cityArr:[],
+              districtArr:[],
                 rules:{
                     phone:[
                         { validator:function(rule,value,callback){
@@ -526,10 +569,10 @@ var clueInfo = [[${clueInfo}]];//资源信息
                     ],
                     category: [
                         { required: true, message: '资源类别不能为空', trigger: 'change' }
-                    ],
-                    projectId: [
-                        { required: true, message: '资源项目不能为空', trigger: 'change' }
                     ]
+//                    projectId: [
+//                        { required: true, message: '资源项目不能为空', trigger: 'change' }
+//                    ]
                 },
                 dynamicValidateForm: {//新增手机号弹窗数据
                     domains: [{
@@ -668,7 +711,7 @@ var clueInfo = [[${clueInfo}]];//资源信息
             submitForm(form) {
                 this.$refs[form].validate((valid) => {
                     if (valid) {
-                        //----线索基本信息---//
+                        //----资源基本信息---//
                     	 var param={};
                      	//资源类型
                     	 if(this.form.cusName){
@@ -691,6 +734,8 @@ var clueInfo = [[${clueInfo}]];//资源信息
                     	param.email=this.form.email;
                     	param.age=this.form.age;
                     	param.province=this.form.province;
+                      param.city=this.form.city;
+                      param.district=this.form.district;
                     	param.reserveTime=this.form.reserveTime;
                     	param.remark=this.form.remark;
                     	param.source=this.form.source;
@@ -827,6 +872,14 @@ var clueInfo = [[${clueInfo}]];//资源信息
                     }
                 });
             },
+            categoryChange(value) {
+        	  	if(opt.indexOf(value)!=-1){
+        	  		this.form.sourceType="99";
+        	  		this.sourceTypeDisabled=true;
+        	  	}else if(notOpt.indexOf(value)!=-1){
+        	  		this.sourceTypeDisabled=false;
+        	  	}
+            },
             openWechat() {
         	  	this.wechatVisible = true
             	this.wechatForm.wechat2=this.form.wechat2;
@@ -949,6 +1002,27 @@ var clueInfo = [[${clueInfo}]];//资源信息
                     });
                     
                   },
+          //开店区域联动方法
+          currentProvince(selVal){
+            param={};
+            param.type="1";
+            param.name=selVal;
+            this.form.district=null;
+            this.form.city=null;
+            this.districtArr =null;
+            axios.post('/area/sysregion/querySysRegionByParam',param).then(function (response) {
+              addClueVM.cityArr=response.data.data.data;
+            });
+          },
+          currentCity(selVal){
+            param={};
+            param.type="2";
+            param.name=selVal;
+            this.form.district=null;
+            axios.post('/area/sysregion/querySysRegionByParam',param).then(function (response) {
+              addClueVM.districtArr=response.data.data.data;
+            });
+          },
         	 	//资源类别转换方法
                 transformCategory(row, column, cellValue, index) {
               	 var text="";
@@ -1009,6 +1083,7 @@ var clueInfo = [[${clueInfo}]];//资源信息
 	        	}
 	        	if(clueInfo.clueBasic.sourceType){
 		        	this.form.sourceType=clueInfo.clueBasic.sourceType+"";
+		        	this.categoryChange(this.form.sourceType);
 	        	}
 	        	if(clueInfo.clueBasic.type){
 		        	this.form.type=clueInfo.clueBasic.type+"";
@@ -1086,6 +1161,8 @@ var clueInfo = [[${clueInfo}]];//资源信息
             if(clueInfo.clueIntention){
 	            this.form.intentionId=clueInfo.clueIntention.id;
 	        	this.form.province=clueInfo.clueIntention.province;
+              this.form.city=clueInfo.clueIntention.city;
+              this.form.district=clueInfo.clueIntention.district;
             }
             if(clueInfo.clueProject){
 	            this.form.clueProjectId=clueInfo.clueProject.id;
@@ -1103,6 +1180,11 @@ var clueInfo = [[${clueInfo}]];//资源信息
         created(){
              //初始资源类别数据
         	this.getUploadParam();
+          var  param={};
+          param.type="0";
+          axios.post('/area/sysregion/querySysRegionByParam',param).then(function (response) {
+            addClueVM.provinceArr=response.data.data.data;
+          });
          }
     })
 </script>

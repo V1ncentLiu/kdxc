@@ -1,6 +1,7 @@
 package com.kuaidao.manageweb.feign.clue;
 
 import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.netflix.feign.FeignClient;
@@ -8,15 +9,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import com.kuaidao.aggregation.dto.clue.ClueDTO;
-import com.kuaidao.aggregation.dto.clue.ClueFileDTO;
-import com.kuaidao.aggregation.dto.clue.ClueQueryDTO;
-import com.kuaidao.aggregation.dto.clue.CustomerClueDTO;
-import com.kuaidao.aggregation.dto.clue.CustomerClueQueryDTO;
-import com.kuaidao.aggregation.dto.clue.ReleaseClueDTO;
-import com.kuaidao.aggregation.dto.clue.RepeatClueDTO;
-import com.kuaidao.aggregation.dto.clue.RepeatClueQueryDTO;
-import com.kuaidao.aggregation.dto.clue.RepeatClueSaveDTO;
+
+import com.kuaidao.aggregation.dto.clue.*;
 import com.kuaidao.aggregation.dto.clueappiont.ClueAppiontmentDTO;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.JSONResult;
@@ -172,25 +166,25 @@ public interface MyCustomerFeignClient {
         public JSONResult<PageBean<CustomerClueDTO>> findTeleClueInfo(
                 CustomerClueQueryDTO queryDTO) {
             // TODO Auto-generated method stub
-            return fallBackError("分页查询线索数据失败");
+            return fallBackError("分页查询资源数据失败");
         }
 
         @Override
         public JSONResult<String> createCustomerClue(ClueDTO dto) {
             // TODO Auto-generated method stub
-            return fallBackError("创建线索数据失败");
+            return fallBackError("创建资源数据失败");
         }
 
         @Override
         public JSONResult<String> updateCustomerClue(ClueDTO dto) {
             // TODO Auto-generated method stub
-            return fallBackError("维护线索数据失败");
+            return fallBackError("维护资源数据失败");
         }
 
         @Override
         public JSONResult<String> uploadClueFile(ClueFileDTO dto) {
             // TODO Auto-generated method stub
-            return fallBackError("上传线索文件失败");
+            return fallBackError("上传资源文件失败");
         }
 
         @Override

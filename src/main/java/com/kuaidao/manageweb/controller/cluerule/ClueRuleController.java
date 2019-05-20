@@ -1,7 +1,9 @@
 package com.kuaidao.manageweb.controller.cluerule;
 
 import java.util.List;
+
 import javax.servlet.http.HttpServletRequest;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.slf4j.Logger;
@@ -12,6 +14,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+
 import com.kuaidao.aggregation.dto.cluerule.ClueReleaseAndReceiveRuleDTO;
 import com.kuaidao.common.constant.RoleCodeEnum;
 import com.kuaidao.common.entity.IdEntityLong;
@@ -50,7 +53,7 @@ public class ClueRuleController {
         req.setRoleCode(RoleCodeEnum.DXZJ.name());
         JSONResult<List<UserInfoDTO>> userJr = userInfoFeignClient.listByOrgAndRole(req);
         if(userJr==null || !JSONResult.SUCCESS.equals(userJr.getCode())) {
-            logger.error("查询电销通话记录-获取组内顾问-userInfoFeignClient.listByOrgAndRole(req),param{{}},res{{}}",req,userJr);
+            logger.error("查询电销通话记录-获取电销顾问-userInfoFeignClient.listByOrgAndRole(req),param{{}},res{{}}",req,userJr);
         } 
         
         List<UserInfoDTO> data = userJr.getData();
