@@ -196,10 +196,9 @@ public class TeleStatementController {
     * @return
      */
     @RequestMapping("/resourceAllocationTableTeam")
-    public String resourceAllocationTableTeam() {
+    public String resourceAllocationTableTeam(String groupId) {
         ResourceAllocationQueryDto resourceAllocationQueryDto = new ResourceAllocationQueryDto();
-        resourceAllocationQueryDto.setPageSize(1);
-        resourceAllocationQueryDto.setPageNum(10);
+        resourceAllocationQueryDto.setOrg_Id(Long.parseLong(groupId));
         JSONResult<PageBean<ResourceAllocationDto>> resourceAllocationPage = statisticsFeignClient.getResourceAllocationPage(resourceAllocationQueryDto);
         System.out.println(resourceAllocationPage);
         return "/reportforms/resourceAllocationTableTeam";
