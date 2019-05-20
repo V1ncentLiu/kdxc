@@ -16,7 +16,7 @@
         <el-button type="primary" @click="searchYesterday">昨天</el-button>
         <el-button type="success" @click="searchWeek">近七天</el-button>
         <el-button type="warning" @click="searchMonth">本月</el-button>  
-        <el-button type="danger">导出Excel报表</el-button>  
+        <el-button type="danger" @click="exportRs">导出Excel报表</el-button>  
         <el-button type="primary" style="float: right;" @click="goback()">返回</el-button>  
     </el-row>
     <div class="mainSearchBg">        
@@ -29,7 +29,7 @@
                    <el-date-picker format="yyyy-MM-dd HH:mm:ss" v-model="form.endTime" type="datetime" placeholder="选择日期"></el-date-picker>
                 </el-form-item>
                 <el-form-item label="电销组:">  
-                    <el-select v-model="form.teleorg" placeholder="电销组" style="width: 100%;" clearable @change="currentTelSale" filterable>
+                    <el-select v-model="form.org_Id" placeholder="电销组" style="width: 100%;" clearable @change="currentTelSale" filterable>
                         <el-option
                             v-for="item in orgTeleArr"
                             :key="item.id"
@@ -40,7 +40,7 @@
                 </el-form-item>
                 <el-form-item label="电销顾问:">  
                     <el-select 
-                        v-model="form.teleSaleId" 
+                        v-model="form.uesr_id" 
                         placeholder="电销顾问" 
                         style="width: 100%;" 
                         filterable 
@@ -84,9 +84,9 @@
                 >
                 <el-table-column align="center" type="index" label="序号" width="55"></el-table-column>
                 <!-- 个人列 -->
-                <el-table-column align="center" :key="index" :prop="item.fieldCode" :label="item.displayName" v-for="(item,key,index) in tableColums" v-if="item.fieldCode == 'telemarketingPerson'" width="120">
+                <el-table-column align="center" :key="index" :prop="item.fieldCode" :label="item.displayName" v-for="(item,key,index) in tableColums" v-if="item.fieldCode == 'orgId'" width="120">
                     <template slot-scope="scope">
-                        <el-button @click="gotoPerson(scope.row)" type="text" size="small">{{scope.row.telemarketingPerson}}</el-button>
+                        <el-button @click="gotoPerson(scope.row)" type="text" size="small">{{scope.row.orgName}}</el-button>
                     </template>
                 </el-table-column>
                 <!-- 其他列 -->
@@ -104,9 +104,9 @@
     var queryOrg=[[${queryOrg}]];//电销组
     var distributionSource=[[${queryOrg}]];//分配来源
     var fieldList=[{//表头假数据
-        displayName:"电销",
-        fieldCode:"telemarketingPerson",//需要改成后端返回的字段名称
-        fieldName:"电销",
+        displayName:"电销组",
+        fieldCode:"orgId",//需要改成后端返回的字段名称
+        fieldName:"电销组",
         id:"1",
         menuCode:null,
         menuId:null,
@@ -115,7 +115,7 @@
         sortNum:1
     },{
         displayName:"分配资源数",
-        fieldCode:"amount1",
+        fieldCode:"assignClueCount",
         fieldName:"分配资源数",
         id:"2",
         menuCode:null,
@@ -125,7 +125,7 @@
         sortNum:2
     },{
         displayName:"联展",
-        fieldCode:"amount2",
+        fieldCode:"jointExhibition",
         fieldName:"联展",
         id:"3",
         menuCode:null,
@@ -135,7 +135,7 @@
         sortNum:3
     },{
         displayName:"竞价",
-        fieldCode:"amount3",
+        fieldCode:"priceCompetition",
         fieldName:"竞价",
         id:"4",
         menuCode:null,
@@ -145,7 +145,7 @@
         sortNum:4
     },{
         displayName:"优化",
-        fieldCode:"amount4",
+        fieldCode:"optimization",
         fieldName:"优化",
         id:"5",
         menuCode:null,
@@ -155,7 +155,7 @@
         sortNum:5
     },{
         displayName:"信息流",
-        fieldCode:"amount5",
+        fieldCode:"informationFlow",
         fieldName:"信息流",
         id:"6",
         menuCode:null,
@@ -165,7 +165,7 @@
         sortNum:6
     },{
         displayName:"官网",
-        fieldCode:"amount6",
+        fieldCode:"officialWebsite",
         fieldName:"官网",
         id:"7",
         menuCode:null,
@@ -175,7 +175,7 @@
         sortNum:7
     },{
         displayName:"行业",
-        fieldCode:"amount7",
+        fieldCode:"industry",
         fieldName:"行业",
         id:"8",
         menuCode:null,
@@ -185,7 +185,7 @@
         sortNum:8
     },{
         displayName:"其他",
-        fieldCode:"amount8",
+        fieldCode:"other",
         fieldName:"其他",
         id:"9",
         menuCode:null,
@@ -195,7 +195,7 @@
         sortNum:9
     },{
         displayName:"网民未接",
-        fieldCode:"amount9",
+        fieldCode:"netizensMissed",
         fieldName:"网民未接",
         id:"10",
         menuCode:null,
@@ -208,7 +208,12 @@
         el: '#maindiv',
         data: function() {
             return {
-                form: {},
+                loading:false,
+                form: {
+                    startTime:'',
+                    endTime:'',
+                    org_Id:'',
+                },
                 tableData: [],//表格数据
                 tableColums: [],//表头list
                 orgTeleArr:queryOrg,//电销组
@@ -233,9 +238,7 @@
                     mainDivVM.busSaleArr=response.data.data;
                 });
             },
-            searchTable() { 
-                // 表头数据渲染
-                this.tableColums= fieldList;
+            searchTable() {                 
                 var starTime=this.form.startTime;
                 var endTime=this.form.endTime;
                 if(endTime){
@@ -247,38 +250,76 @@
                         return;
                     }
                 }
-
+                var param = {};
+                param.pageSize = this.pager.pageSize;
+                param.pageNum =  this.pager.currentPage;
+                // 搜索条件
+                param.startTime = this.form.startTime;
+                param.endTime =  this.form.endTime;
+                param.org_Id =  this.form.org_Id;//电销组
                 // 返回的数据               
-                var data=[
-                    {
-                        id:"0",
-                        telemarketingPerson:'张三',
-                        amount1:'1',
-                        amount2:'2',
-                        amount3:'3',
-                        amount4:'4',
-                        amount5:'5',
-                        amount6:'6',
-                        amount7:'7',
-                        amount8:'8',
-                        amount9:'9',
-                    },
-                    {
-                        id:"1",
-                        telemarketingPerson:'李四',
-                        amount1:'1',
-                        amount2:'2',
-                        amount3:'3',
-                        amount4:'4',
-                        amount5:'5',
-                        amount6:'6',
-                        amount7:'7',
-                        amount8:'8',
-                        amount9:'9',
+                // var data=[
+                //     {
+                //         id:"0",
+                //         telemarketingPerson:'张三',
+                //         amount1:'1',
+                //         amount2:'2',
+                //         amount3:'3',
+                //         amount4:'4',
+                //         amount5:'5',
+                //         amount6:'6',
+                //         amount7:'7',
+                //         amount8:'8',
+                //         amount9:'9',
+                //     },
+                //     {
+                //         id:"1",
+                //         telemarketingPerson:'李四',
+                //         amount1:'1',
+                //         amount2:'2',
+                //         amount3:'3',
+                //         amount4:'4',
+                //         amount5:'5',
+                //         amount6:'6',
+                //         amount7:'7',
+                //         amount8:'8',
+                //         amount9:'9',
+                //     }
+                // ]; 
+                this.loading=true;
+                axios.post('/statistics/teleStatement/getResourceAllocationPersionTable',param).then(function (response) { 
+                    if(!response){
+                        mainDivVM.$message({
+                            message: "接口调用失败",
+                            type: 'error'
+                        });
+                        return ;
                     }
-                ]; 
-                // 表格数据渲染                               
-                this.tableData= data;
+                    var resobj= response.data;
+                    console.log(resobj)
+                    if(!resobj){
+                        mainDivVM.$message({
+                            message: "接口调用失败",
+                            type: 'error'
+                        });
+                        return ;
+                    }
+                    if(resobj.code!='0'){
+                        mainDivVM.$message({
+                            message: "接口调用失败",
+                            type: 'error'
+                        });
+                        return ;
+                    }  
+                    var resobjData=resobj.data.data          
+                    // 表格数据渲染
+                    mainDivVM.tableData=resobjData;
+                    // 表头数据渲染 
+                    mainDivVM.tableColums= fieldList;
+                    mainDivVM.pager.currentPage= resobj.data.currentPage;
+                    mainDivVM.pager.total= resobj.data.total;
+                    mainDivVM.loading=false;
+                })                
             },
             gotoPerson(item){
                 console.log(item)
@@ -331,6 +372,19 @@
                 this.form.endTime=year+"-"+(month+1)+"-"+date+" 23:59:59";
                 this.searchTable();
             },
+            exportRs(){
+                axios.post('/statistics/teleStatement/exportResourceAllocationPersion',null,{responseType:'blob'})
+                    .then(function (response) {
+                        console.log(response)
+                        var data =  response.data;
+                        var fileName = response.headers.filename;
+                        saveAs(data,decodeURI(fileName));
+                    })
+                    .catch(function (error) {
+                        console.log(error);
+                    }).then(function(){
+                });
+            }
         },
         created(){            
             this.searchTable();
