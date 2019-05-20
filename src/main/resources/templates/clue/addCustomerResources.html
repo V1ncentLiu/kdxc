@@ -33,7 +33,7 @@
                     </el-col>
                     <el-col :span="8">
                         <el-form-item label="资源类别：" :label-width="formLabelWidth">
-                            <el-select v-model="form.resourceType" placeholder="请选择" style="width: 200px;">
+                            <el-select v-model="form.resourceType" placeholder="请选择" style="width: 200px;"  @change="categoryChange">
                                 <el-option
                                     v-for="item in categoryArr"
                                     :key="item.value"
@@ -47,7 +47,7 @@
                 <el-row>
                     <el-col :span="8">
                         <el-form-item label="广告位：" :label-width="formLabelWidth">
-                            <el-select v-model="form.adPosition" placeholder="请选择" style="width: 200px;">
+                            <el-select v-model="form.adPosition" placeholder="请选择" style="width: 200px;" :disabled="sourceTypeDisabled">
                                 <el-option
                                     v-for="item in adsenseArr"
                                     :key="item.value"
@@ -412,6 +412,16 @@
   var proSelect=[[${proSelect}]];
   var purProSelect=[[${proSelect}]];
   var ossSignatureUrl = [[${ossUrl}]];//上传文件地址
+  var optList = [[${optList}]];//优化资源类别
+  var notOptList = [[${notOptList}]];//非优化资源类别
+  var opt=[];
+  var notOpt=[];
+  if(optList){
+  	opt=optList.split(',');
+  }
+  if(notOptList){
+  	notOpt=notOptList.split(',');
+  }
   var addCustomerVM=   new Vue({
         el: '#addCustomer',
         data: function() {
@@ -422,6 +432,7 @@
                 dialogFormVisible: false,//新增手机号
                 buttonType: 'A',//添加手机号按钮形式
                 deleteShow:false,//删除新增手机号输入框
+                sourceTypeDisabled:false,//广告位是否可选  
                 wechatVisible: false,//新增微信号
                 loading:false,
                 confirmBtnDisabled:false,//提交按钮 是否禁用
@@ -830,6 +841,14 @@
                     // 显示删除按钮
                     this.deleteShow=true;                    
                 }                              
+            },
+            categoryChange(value) {
+        	  	if(opt.indexOf(value)!=-1){
+        	  		this.form.adPosition="99";
+        	  		this.sourceTypeDisabled=true;
+        	  	}else if(notOpt.indexOf(value)!=-1){
+        	  		this.sourceTypeDisabled=false;
+        	  	}
             },
             clearDialog(){
                 console.log('清空')
