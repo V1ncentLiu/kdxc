@@ -252,11 +252,33 @@ public class TeleStatementController {
     * @return
      */
     @RequestMapping("/resourceAllocationTablePerson")
-    public String resourceAllocationTablePerson() {
+    public String resourceAllocationTablePerson(HttpServletRequest request) {
+        UserInfoDTO user = getUser();
+        // 查询所有电销组
+        List<OrganizationRespDTO> saleGroupList = getSaleGroupList();
+        request.setAttribute("saleGroupList", saleGroupList);
+        // 根据角色查询页面字段
+        QueryFieldByRoleAndMenuReq queryFieldByRoleAndMenuReq = new QueryFieldByRoleAndMenuReq();
+        queryFieldByRoleAndMenuReq.setMenuCode("statistics:teleStatement:resourceAllocation");
+        queryFieldByRoleAndMenuReq.setId(user.getRoleList().get(0).getId());
+        JSONResult<List<CustomFieldQueryDTO>> queryFieldByRoleAndMenu =
+                customFieldFeignClient.queryFieldByRoleAndMenu(queryFieldByRoleAndMenuReq);
+        request.setAttribute("fieldList", queryFieldByRoleAndMenu.getData());
         return "reportforms/resourceAllocationTablePerson";
     }
+
+    /**
+     * 资源分配页面  个人
+     * @return
+     */
+    @RequestMapping("/getResourceAllocationDayPagePersion")
+    @ResponseBody
+    public JSONResult<PageBean<ResourceAllocationDto>> getResourceAllocationDayPagePersion(@RequestBody ResourceAllocationQueryDto resourceAllocationQueryDto) {
+        JSONResult<PageBean<ResourceAllocationDto>> resourceAllocationPage = statisticsFeignClient.getResourceAllocationDayPagePersion(resourceAllocationQueryDto);
+        return resourceAllocationPage;
+    }
     
-    
+
     /**
      * 电销顾问跟踪表页面
     * @return

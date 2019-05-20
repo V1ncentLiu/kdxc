@@ -51,6 +51,22 @@ public interface StatisticsFeignClient {
     @PostMapping("/getResourceAllocationPagePersion")
     JSONResult<PageBean<ResourceAllocationDto>> getResourceAllocationPagePersion(@RequestBody ResourceAllocationQueryDto resourceAllocationQueryDto);
 
+    /**
+     * 资源分配 个人 按天
+     * @param
+     * @return
+     */
+    @PostMapping("/getResourceAllocationsDayPersion")
+    JSONResult<List<ResourceAllocationDto>> getResourceAllocationsDayPersion(@RequestBody ResourceAllocationQueryDto resourceAllocationQueryDto);
+
+    /**
+     * 资源分配个人分页 按天
+     * @param
+     * @return
+     */
+    @PostMapping("/getResourceAllocationDayPagePersion")
+    JSONResult<PageBean<ResourceAllocationDto>> getResourceAllocationDayPagePersion(@RequestBody ResourceAllocationQueryDto resourceAllocationQueryDto);
+
     @Component
     class HystrixClientFallback implements StatisticsFeignClient {
 
@@ -80,6 +96,16 @@ public interface StatisticsFeignClient {
         @Override
         public JSONResult<PageBean<ResourceAllocationDto>> getResourceAllocationPagePersion(ResourceAllocationQueryDto resourceAllocationQueryDto) {
             return fallBackError("查询个人分配列表失败");
+        }
+
+        @Override
+        public JSONResult<List<ResourceAllocationDto>> getResourceAllocationsDayPersion(ResourceAllocationQueryDto resourceAllocationQueryDto) {
+            return fallBackError("查询个人按天分配列表失败");
+        }
+
+        @Override
+        public JSONResult<PageBean<ResourceAllocationDto>> getResourceAllocationDayPagePersion(ResourceAllocationQueryDto resourceAllocationQueryDto) {
+            return fallBackError("查询个人按天分配列表失败");
         }
     }
 }
