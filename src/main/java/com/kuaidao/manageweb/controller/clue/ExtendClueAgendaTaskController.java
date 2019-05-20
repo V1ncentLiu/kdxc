@@ -480,16 +480,8 @@ public class ExtendClueAgendaTaskController {
 
         // 存放合法的数据
         List<ClueAgendaTaskDTO> dataList = new ArrayList<ClueAgendaTaskDTO>();
-        //判断有效列
-        Integer titleNotNull = 0;
-        for (int i = 0;i < excelDataList.get(0).size();i++){
-            if(StringUtils.isBlank(String.valueOf(excelDataList.get(0).get(i)))){
-                titleNotNull = i;
-                break;
-            }
-        }
-        //根据excel列数判断模板类型
-        if(titleNotNull.equals(Constants.UNOPTIMIZE)) {
+        //判断导入文件是否为优化类文件
+        if(String.valueOf(excelDataList.get(0).get(3)).trim().equals("广告位")) {
             for (int i = 1; i < excelDataList.size(); i++) {
                 List<Object> rowList = excelDataList.get(i);
                 ClueAgendaTaskDTO rowDto = new ClueAgendaTaskDTO();
@@ -547,7 +539,7 @@ public class ExtendClueAgendaTaskController {
                 rowDto.setIsOptimize(Constants.IS_NOT_OPTIMIZE);
                 dataList.add(rowDto);
             }
-        }else if(titleNotNull.equals(Constants.OPTIMIZE)){
+        }else if(String.valueOf(excelDataList.get(0).get(3)).trim().equals("媒介")){
             for (int i = 1; i < excelDataList.size(); i++) {
                 List<Object> rowList = excelDataList.get(i);
                 ClueAgendaTaskDTO rowDto = new ClueAgendaTaskDTO();
@@ -1009,7 +1001,7 @@ public class ExtendClueAgendaTaskController {
                         }
                     }
                     if(StringUtils.isNotBlank(reasonIsNull)) {
-                        failReason.append(reasonIsNull + "需至少填写一项；");
+                        failReason.append(reasonIsNull + "为必填项；");
                     }
                     if(StringUtils.isNotBlank(reasonIsNotMatch)) {
                         failReason.append(reasonIsNotMatch + "与数据字典字段不匹配；");
@@ -1225,6 +1217,7 @@ public class ExtendClueAgendaTaskController {
                 curList.add(clueAgendaTaskDTO.getReserveTime1());
                 curList.add(clueAgendaTaskDTO.getAccountName());
                 curList.add(clueAgendaTaskDTO.getUrlAddress());
+                curList.add(clueAgendaTaskDTO.getImportFailReason());
                 dataList.add(curList);
             }
 
@@ -1272,6 +1265,7 @@ public class ExtendClueAgendaTaskController {
         headTitleList.add("预约时间");
         headTitleList.add("账户名称");
         headTitleList.add("url地址");
+        headTitleList.add("导入失败原因");
         return headTitleList;
     }
 
