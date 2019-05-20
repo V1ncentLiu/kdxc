@@ -1,11 +1,11 @@
-package com.kuaidao.manageweb.feign.statistics;
+package com.kuaidao.manageweb.feign.statistics.resourceAllocation;
 
 
 import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
-import com.kuaidao.stastics.dto.ResourceAllocationDto;
-import com.kuaidao.stastics.dto.ResourceAllocationQueryDto;
+import com.kuaidao.stastics.dto.resourceAllocation.ResourceAllocationDto;
+import com.kuaidao.stastics.dto.resourceAllocation.ResourceAllocationQueryDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.netflix.feign.FeignClient;
