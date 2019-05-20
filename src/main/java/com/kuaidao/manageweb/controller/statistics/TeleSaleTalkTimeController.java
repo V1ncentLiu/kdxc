@@ -8,6 +8,7 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -26,7 +27,7 @@ import com.kuaidao.stastics.dto.callrecord.TeleTalkTimeRespDTO;
  * @version V1.0
  */
 @RestController
-@RequestMapping("/statistics/teleSaleTalkTime")
+@RequestMapping("/callrecord/teleSaleTalkTime")
 public class TeleSaleTalkTimeController {
     
     @Autowired
@@ -36,7 +37,7 @@ public class TeleSaleTalkTimeController {
      * 昨日 七天 查询
       * 电销组通话总时长统计 分頁
      */
-    @RequestMapping("/listTeleGroupTalkTime")
+    @PostMapping("/listTeleGroupTalkTime")
     public JSONResult<PageBean<TeleTalkTimeRespDTO>> listTeleGroupTalkTime(@RequestBody TeleSaleTalkTimeQueryDTO teleSaleTalkTimeQueryDTO) {
         return teleTalkTimeFeignClient.listTeleGroupTalkTime(teleSaleTalkTimeQueryDTO);
     }
@@ -102,12 +103,23 @@ public class TeleSaleTalkTimeController {
        return headTitleList;
     }
 
+   
+
+/**
+   * 昨日 七天
+   * 电销顾问通话总时长统计 
+  */
+ @RequestMapping("/listTeleSaleTalkTime")
+ public JSONResult<PageBean<TeleTalkTimeRespDTO>> listTeleSaleTalkTime(@RequestBody TeleSaleTalkTimeQueryDTO teleSaleTalkTimeQueryDTO) {
+     return teleTalkTimeFeignClient.listTeleSaleTalkTime(teleSaleTalkTimeQueryDTO);
+ }
+
 
 /**
     * 昨日 七天 导出
-    * 电销通话总时长统计 不分頁
+    * 电销顾问通话总时长统计 不分頁
    */
-  @RequestMapping("/listTeleSaleTalkTimeNoPage")
+  @RequestMapping("/exportTeleSaleTalkTimeNoPage")
   public void exportTeleSaleTalkTimeNoPage(@RequestBody TeleSaleTalkTimeQueryDTO teleSaleTalkTimeQueryDTO,HttpServletResponse response) throws Exception{
        JSONResult<List<TeleTalkTimeRespDTO>> teleSaleTalkTimeJr = teleTalkTimeFeignClient.listTeleSaleTalkTimeNoPage(teleSaleTalkTimeQueryDTO);
        List<List<Object>> dataList = new ArrayList<List<Object>>();
@@ -161,15 +173,5 @@ public class TeleSaleTalkTimeController {
       return headTitleList;
 
   }
-
-
-/**
-   * 昨日 七天
-   * 电销通话总时长统计 
-  */
- @RequestMapping("/listTeleSaleTalkTime")
- public JSONResult<PageBean<TeleTalkTimeRespDTO>> listTeleSaleTalkTime(@RequestBody TeleSaleTalkTimeQueryDTO teleSaleTalkTimeQueryDTO) {
-     return teleTalkTimeFeignClient.listTeleSaleTalkTime(teleSaleTalkTimeQueryDTO);
- }
 
 }
