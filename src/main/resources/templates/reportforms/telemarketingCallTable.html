@@ -63,13 +63,13 @@
                 </el-table-column>
                 <el-table-column prop="calledCount" align="center" label="通话接通次数">
                 </el-table-column>
-                <el-table-column prop="callPercent" align="center" label="通话接通率">
+                <el-table-column prop="callPercent" align="center" label="通话接通率" :formatter="percentFormat">
                 </el-table-column>
                 <el-table-column prop="callClueCount" align="center" label="通话量">
                 </el-table-column>
                 <el-table-column prop="calledClueCount" align="center" label="接通量">
                 </el-table-column>
-                <el-table-column prop="clueCallecdPrecent" align="center" label="资源接通率">
+                <el-table-column prop="clueCallecdPrecent" align="center" label="资源接通率" :formatter="percentFormat">
                 </el-table-column>
                 <el-table-column prop="validCallTime" align="center" :formatter="timeFormat" label="总有效通话时长">
                 </el-table-column>
@@ -95,16 +95,21 @@
                     endTime:'',
                     orgId:'',
                 },
+                export: {
+                    startTime:'',
+                    endTime:'',
+                    orgId:''
+                },
                 tableData: [
                     {
                         orgId: "1",
                         orgName: '电销组1',
                         callCount: 1000,
                         calledCount: 10,
-                        callPercent: '10%',
+                        callPercent: 10,
                         callClueCount: 10,
                         calledClueCount: 10,
-                        clueCallecdPrecent: '10%',
+                        clueCallecdPrecent: 10,
                         validCallTime: 155799,
                         userAvgDayValidCallTime: 155799
                     }, {
@@ -112,10 +117,10 @@
                         orgName: '电销组2',
                         callCount: 1000,
                         calledCount: 10,
-                        callPercent: '10%',
+                        callPercent: 10,
                         callClueCount: 10,
                         calledClueCount: 10,
-                        clueCallecdPrecent: '10%',
+                        clueCallecdPrecent: 10,
                         validCallTime: 155799,
                         userAvgDayValidCallTime: 155799
                     }
@@ -124,7 +129,7 @@
                 pager:{ 
                     total: 0,
                     currentPage: 1,
-                    pageSize: 3
+                    pageSize: 1
                 },
             }             
         },
@@ -148,10 +153,11 @@
                 param.endTime = this.minuteFormat(endTime);
                 param.pageSize = this.pager.pageSize;
                 param.pageNum = this.pager.currentPage;
-                param.orgId =  this.form.orgId; // 电销组
+                param.orgId = this.form.orgId; // 电销组
                 console.log(param);
                 this.loading = true; 
                 axios.post('/callrecord/teleSaleTalkTime/listTeleGroupTalkTime',param).then(function (response) { 
+                    console.log(response,'response');
                     if(!response){
                         mainDivVM.$message({
                             message: "接口调用失败",
@@ -183,12 +189,17 @@
                     mainDivVM.pager.currentPage = resobj.data.currentPage;
                     mainDivVM.pager.total = resobj.data.total;
                     mainDivVM.loading = false;
+                      
+                    mainDivVM.export.startTime = mainDivVM.minuteFormat(startTime);
+                    mainDivVM.export.endTime = mainDivVM.minuteFormat(endTime);
+                    mainDivVM.export.orgId = mainDivVM.form.orgId;
                 }).catch(function (error) {
                     console.log(error);
                     mainDivVM.$message({
                         message: "请求失败，请稍后重试",
                         type: "error"
                     });
+                    mainDivVM.loading = false;
                 });
             },
             arraySpanMethod({ row, column, rowIndex, columnIndex }) { // 合并第一行
@@ -225,10 +236,10 @@
                     orgName: '合计',
                     callCount: 1000,
                     calledCount: 10,
-                    callPercent: '10%',
+                    callPercent: 10,
                     callClueCount: 10,
                     calledClueCount: 10,
-                    clueCallecdPrecent: '10%',
+                    clueCallecdPrecent: 10,
                     validCallTime: 155799,
                     userAvgDayValidCallTime: 155799
                 };
@@ -257,21 +268,10 @@
                 // sums[sums.length-1] = this.timeFun (sums[sums.length-1]);
                 // return sums;
             },
-            exportRs(){
-                axios.post('/callrecord/teleSaleTalkTime/exportTeleGroupTalkTime',null,{responseType:'blob'})
-                    .then(function (response) {
-                        console.log(response)
-                        var data =  response.data;
-                        var fileName = response.headers.filename;
-                        saveAs(data,decodeURI(fileName));
-                    })
-                    .catch(function (error) {
-                        console.log(error);
-                        mainDivVM.$message({
-                            message: "请求失败，请稍后重试",
-                            type: "error"
-                        });
-                    });
+            percentFormat (row, column) {
+                var percent = row[column.property];
+                percent = parseInt(percent) * 100 + "%";
+                return percent;
             },
             timeFormat (row, column) { // 时间格式化：时分秒
                 var time = row[column.property];
@@ -297,16 +297,16 @@
                 t += sec + "秒";
                 return t;
             },
-            searchYesterday(){ // 昨天 min
+            searchYesterday(){ // 昨天
                var today = new Date();
                today.setTime(today.getTime()-24*60*60*1000);
-               var startTime = today.getFullYear()+"" + (today.getMonth()+1) + "" + today.getDate()+"0000";
-               var endTime =today.getFullYear()+"" + (today.getMonth()+1) + "" + today.getDate()+"2359";
+               var startTime = today.getFullYear()+"-" + (today.getMonth()+1) + "-" + today.getDate()+" 00:00";
+               var endTime =today.getFullYear()+"-" + (today.getMonth()+1) + "-" + today.getDate()+" 23:59";
                this.form.startTime=startTime;
                this.form.endTime=endTime;
                this.searchTable();
             },
-            searchWeek(){ // 近七天 min
+            searchWeek(){ // 近七天
                  var a = new Date();
                  var year = a.getFullYear();
                  var month = a.getMonth();
@@ -316,11 +316,11 @@
                  var d = b.valueOf();
                  var startTime= new Date(c);
                  var endTime = new Date(d);
-                 this.form.startTime=startTime.getFullYear()+"" + (startTime.getMonth()+1) + "" + startTime.getDate()+"0000";
-                 this.form.endTime=endTime.getFullYear()+"" + (endTime.getMonth()+1) + "" + endTime.getDate()+"2359";
+                 this.form.startTime=startTime.getFullYear()+"-" + (startTime.getMonth()+1) + "-" + startTime.getDate()+" 00:00";
+                 this.form.endTime=endTime.getFullYear()+"-" + (endTime.getMonth()+1) + "-" + endTime.getDate()+" 23:59";
                  this.searchTable();
             },
-            searchMonth(){ // 本月 min
+            searchMonth(){ // 本月 
                 var a = new Date();
                 var year = a.getFullYear();
                 var month = a.getMonth();
@@ -329,10 +329,31 @@
                 var f= new Date(year,month,01);
                 var c = f.valueOf();
                 var startTime= new Date(c);
-                this.form.startTime=startTime.getFullYear()+"" + (startTime.getMonth()+1) + "" + startTime.getDate()+"0000";
-                this.form.endTime=year+""+(month+1)+""+date+" 2359";
+                this.form.startTime=startTime.getFullYear()+"-" + (startTime.getMonth()+1) + "-" + startTime.getDate()+" 00:00";;
+                this.form.endTime=year+"-"+(month+1)+"-"+date+" 23:59";
                 this.searchTable();
             },
+            exportRs(){
+                var param = {};
+                // 搜索条件
+                param.startTime = this.export.startTime;
+                param.endTime =  this.export.endTime;
+                param.orgId =  this.export.orgId; 
+                axios.post('/callrecord/teleSaleTalkTime/exportTeleGroupTalkTime',param,{responseType:'blob'})
+                    .then(function (response) {
+                        console.log(response);
+                        var data =  response.data;
+                        var fileName = response.headers.filename;
+                        saveAs(data,decodeURI(fileName));
+                    })
+                    .catch(function (error) {
+                        console.log(error);
+                        mainDivVM.$message({
+                            message: "导出失败，请稍后重试",
+                            type: "error"
+                        });
+                    });
+            }
         },
         created(){            
             this.searchTable();
