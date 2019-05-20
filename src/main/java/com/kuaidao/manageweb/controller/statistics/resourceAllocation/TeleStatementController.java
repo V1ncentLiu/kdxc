@@ -220,11 +220,18 @@ public class TeleStatementController {
     * @return
      */
     @RequestMapping("/resourceAllocationTableTeam")
-    public String resourceAllocationTableTeam(String groupId) {
-        ResourceAllocationQueryDto resourceAllocationQueryDto = new ResourceAllocationQueryDto();
-        resourceAllocationQueryDto.setOrg_Id(Long.parseLong(groupId));
-        JSONResult<PageBean<ResourceAllocationDto>> resourceAllocationPage = statisticsFeignClient.getResourceAllocationPage(resourceAllocationQueryDto);
-        System.out.println(resourceAllocationPage);
+    public String resourceAllocationTableTeam(String groupId,HttpServletRequest request) {
+        UserInfoDTO user = getUser();
+        // 查询所有电销组
+        List<OrganizationRespDTO> saleGroupList = getSaleGroupList();
+        request.setAttribute("saleGroupList", saleGroupList);
+        // 根据角色查询页面字段
+        QueryFieldByRoleAndMenuReq queryFieldByRoleAndMenuReq = new QueryFieldByRoleAndMenuReq();
+        queryFieldByRoleAndMenuReq.setMenuCode("statistics:teleStatement:resourceAllocation");
+        queryFieldByRoleAndMenuReq.setId(user.getRoleList().get(0).getId());
+        JSONResult<List<CustomFieldQueryDTO>> queryFieldByRoleAndMenu =
+                customFieldFeignClient.queryFieldByRoleAndMenu(queryFieldByRoleAndMenuReq);
+        request.setAttribute("fieldList", queryFieldByRoleAndMenu.getData());
         return "/reportforms/resourceAllocationTableTeam";
     }
     
