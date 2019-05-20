@@ -1,18 +1,25 @@
 package com.kuaidao.manageweb.controller.statistics.resourceAllocation;
 
+import com.kuaidao.common.constant.OrgTypeConstant;
+import com.kuaidao.common.constant.RoleCodeEnum;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.common.util.DateUtil;
 import com.kuaidao.common.util.ExcelUtil;
 import com.kuaidao.manageweb.feign.customfield.CustomFieldFeignClient;
+import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
 import com.kuaidao.manageweb.feign.statistics.resourceAllocation.StatisticsFeignClient;
+import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
 import com.kuaidao.stastics.dto.resourceAllocation.ResourceAllocationDto;
 import com.kuaidao.stastics.dto.resourceAllocation.ResourceAllocationQueryDto;
 import com.kuaidao.sys.dto.customfield.CustomFieldQueryDTO;
 import com.kuaidao.sys.dto.customfield.QueryFieldByRoleAndMenuReq;
 import com.kuaidao.sys.dto.customfield.QueryFieldByUserAndMenuReq;
 import com.kuaidao.sys.dto.customfield.UserFieldDTO;
+import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
+import com.kuaidao.sys.dto.organization.OrganizationRespDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
+import com.kuaidao.sys.dto.user.UserOrgRoleReq;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.shiro.SecurityUtils;
 import org.slf4j.Logger;
@@ -46,9 +53,12 @@ public class TeleStatementController {
 
     @Autowired
     private StatisticsFeignClient statisticsFeignClient;
-
     @Autowired
     private CustomFieldFeignClient customFieldFeignClient;
+    @Autowired
+    private OrganizationFeignClient organizationFeignClient;
+    @Autowired
+    private UserInfoFeignClient userInfoFeignClient;
 
     /**
      * 资源分配（组）
@@ -57,6 +67,9 @@ public class TeleStatementController {
     @RequestMapping("/resourceAllocation")
     public String resourceAllocationTable(HttpServletRequest request) {
         UserInfoDTO user = getUser();
+        // 查询所有电销组
+        List<OrganizationRespDTO> saleGroupList = getSaleGroupList();
+        request.setAttribute("saleGroupList", saleGroupList);
         // 根据角色查询页面字段
         QueryFieldByRoleAndMenuReq queryFieldByRoleAndMenuReq = new QueryFieldByRoleAndMenuReq();
         queryFieldByRoleAndMenuReq.setMenuCode("statistics:teleStatement:resourceAllocation");
@@ -134,7 +147,18 @@ public class TeleStatementController {
      */
     @RequestMapping("/getResourceAllocationPersionTable")
     @ResponseBody
-    public JSONResult<PageBean<ResourceAllocationDto>> getResourceAllocationPersionTable(@RequestBody ResourceAllocationQueryDto resourceAllocationQueryDto) {
+    public JSONResult<PageBean<ResourceAllocationDto>> getResourceAllocationPersionTable(@RequestBody ResourceAllocationQueryDto resourceAllocationQueryDto, HttpServletRequest request) {
+        UserInfoDTO user = getUser();
+        // 查询所有电销组
+        List<OrganizationRespDTO> saleGroupList = getSaleGroupList();
+        request.setAttribute("saleGroupList", saleGroupList);
+        // 根据角色查询页面字段
+        QueryFieldByRoleAndMenuReq queryFieldByRoleAndMenuReq = new QueryFieldByRoleAndMenuReq();
+        queryFieldByRoleAndMenuReq.setMenuCode("statistics:teleStatement:resourceAllocation");
+        queryFieldByRoleAndMenuReq.setId(user.getRoleList().get(0).getId());
+        JSONResult<List<CustomFieldQueryDTO>> queryFieldByRoleAndMenu =
+                customFieldFeignClient.queryFieldByRoleAndMenu(queryFieldByRoleAndMenuReq);
+        request.setAttribute("fieldList", queryFieldByRoleAndMenu.getData());
         JSONResult<PageBean<ResourceAllocationDto>> resourceAllocationPage = statisticsFeignClient.getResourceAllocationPagePersion(resourceAllocationQueryDto);
         System.out.println(resourceAllocationPage);
         return resourceAllocationPage;
@@ -334,8 +358,33 @@ public class TeleStatementController {
         UserInfoDTO user = (UserInfoDTO) attribute;
         return user;
     }
-    
-    
-    
-    
+
+
+    /**
+     * 获取电销组
+     */
+    private List<OrganizationRespDTO> getSaleGroupList() {
+        OrganizationQueryDTO queryDTO = new OrganizationQueryDTO();
+        queryDTO.setOrgType(OrgTypeConstant.DXZ);
+        // 查询下级电销组
+        JSONResult<List<OrganizationRespDTO>> queryOrgByParam =
+                organizationFeignClient.queryOrgByParam(queryDTO);
+        List<OrganizationRespDTO> data = queryOrgByParam.getData();
+        return data;
+    }
+
+    /***
+     * 下属电销员工列表
+     *
+     * @return
+     */
+    @PostMapping("/getSaleList")
+    @ResponseBody
+    public JSONResult<List<UserInfoDTO>> getSaleList(@RequestBody UserOrgRoleReq userOrgRoleReq,
+                                                     HttpServletRequest request) {
+        userOrgRoleReq.setRoleCode(RoleCodeEnum.DXCYGW.name());
+        JSONResult<List<UserInfoDTO>> listByOrgAndRole =
+                userInfoFeignClient.listByOrgAndRole(userOrgRoleReq);
+        return listByOrgAndRole;
+    }
 }
