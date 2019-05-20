@@ -154,7 +154,7 @@
                     </el-col>
                     <el-col :span="12">
                         <el-form-item label="资源类别：" :label-width="formLabelWidth" prop="category">
-                            <el-select v-model="form.category" placeholder="请选择" style="width: 260px;" clearable filterable>
+                            <el-select v-model="form.category" placeholder="请选择" style="width: 260px;" @change="categoryChange" clearable filterable>
                                 <el-option
                                     v-for="item in categoryOptions"
                                     :key="item.value"
@@ -168,7 +168,7 @@
                 <el-row>
                     <el-col :span="12">
                         <el-form-item label="广告位：" :label-width="formLabelWidth" prop="sourceType">
-                            <el-select v-model="form.sourceType" placeholder="请选择" style="width: 260px;" clearable filterable>
+                            <el-select v-model="form.sourceType" placeholder="请选择" style="width: 260px;" clearable filterable :disabled="sourceTypeDisabled">
                                 <el-option
                                     v-for="item in sourceTypeOptions"
                                     :key="item.value"
@@ -249,7 +249,7 @@
                 <el-row>
                     <el-col :span="12">
                         <el-form-item label="账户名称：" :label-width="formLabelWidth">
-                            <el-select v-model="form.accountName" clearable placeholder="请选择" style="width: 260px;">
+                            <el-select v-model="form.accountName"  placeholder="请选择" style="width: 260px;" clearable filterable>
                                 <el-option
                                     v-for="item in accountNameOptions"
                                     :key="item.value"
@@ -418,11 +418,22 @@ var mediumList=[[${mediumList}]];//媒介集合
 var industryCategoryList=[[${industryCategoryList}]];//行业类别集合
 var accountNameList=[[${accountNameList}]];//账号名称集合
 var ossSignatureUrl = [[${ossUrl}]];//上传文件地址
+var optList = [[${optList}]];//优化资源类别
+var notOptList = [[${notOptList}]];//非优化资源类别
+var opt=[];
+var notOpt=[];
+if(optList){
+	opt=optList.split(',');
+}
+if(notOptList){
+	notOpt=notOptList.split(',');
+}
   var addClueVM=new Vue({
         el: '#addCustomer',
         data: function() {
             return {
                 isDisabled:true,//默认不可点击  
+                sourceTypeDisabled:false,//广告位是否可选  
                 dialogFormVisible: false,//新增手机号
                 wechatVisible: false,//新增微信号
                 chooseVisible: false,//选择模板
@@ -707,6 +718,8 @@ var ossSignatureUrl = [[${ossUrl}]];//上传文件地址
                     	param.email=this.form.email;
                     	param.age=this.form.age;
                     	param.province=this.form.province;
+                    	param.city=this.form.city;
+                        param.district=this.form.district;
                     	param.reserveTime=this.form.reserveTime;
                     	param.remark=this.form.remark;
                     	param.source=this.form.source;
@@ -843,6 +856,14 @@ var ossSignatureUrl = [[${ossUrl}]];//上传文件地址
                   }
               });
           },
+           categoryChange(value) {
+        	  	if(opt.indexOf(value)!=-1){
+        	  		this.form.sourceType="99";
+        	  		this.sourceTypeDisabled=true;
+        	  	}else if(notOpt.indexOf(value)!=-1){
+        	  		this.sourceTypeDisabled=false;
+        	  	}
+            },
             openWechat() {
         	  	this.wechatVisible = true
             	this.wechatForm.wechat2=this.form.wechat2;

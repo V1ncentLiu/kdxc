@@ -1,7 +1,6 @@
 package com.kuaidao.manageweb.controller.clue;
 
 import com.kuaidao.manageweb.constant.Constants;
-import com.sun.xml.internal.bind.v2.TODO;
 import java.net.URLEncoder;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -45,7 +44,9 @@ import com.kuaidao.manageweb.feign.customfield.CustomFieldFeignClient;
 import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
 import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
 import com.kuaidao.manageweb.feign.project.ProjectInfoFeignClient;
+import com.kuaidao.manageweb.feign.user.SysSettingFeignClient;
 import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
+import com.kuaidao.sys.constant.SysConstant;
 import com.kuaidao.sys.dto.customfield.CustomFieldQueryDTO;
 import com.kuaidao.sys.dto.customfield.QueryFieldByRoleAndMenuReq;
 import com.kuaidao.sys.dto.customfield.QueryFieldByUserAndMenuReq;
@@ -54,6 +55,8 @@ import com.kuaidao.sys.dto.dictionary.DictionaryItemRespDTO;
 import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
 import com.kuaidao.sys.dto.organization.OrganizationRespDTO;
 import com.kuaidao.sys.dto.role.RoleInfoDTO;
+import com.kuaidao.sys.dto.user.SysSettingDTO;
+import com.kuaidao.sys.dto.user.SysSettingReq;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import com.kuaidao.sys.dto.user.UserOrgRoleReq;
 
@@ -81,6 +84,8 @@ public class ExtendClueAgendaTaskController {
     private DictionaryItemFeignClient dictionaryItemFeignClient;
     @Autowired
     private OrganizationFeignClient organizationFeignClient;
+    @Autowired
+    private SysSettingFeignClient sysSettingFeignClient;
 
     @Value("${oss.url.directUpload}")
     private String ossUrl;
@@ -154,7 +159,12 @@ public class ExtendClueAgendaTaskController {
         // 查询字典账户名称集合
         request.setAttribute("accountNameList",
                 getDictionaryByCode(DicCodeEnum.ACCOUNT_NAME.getCode()));
-
+        // 系统参数优化资源类别
+        String optList = getSysSetting(SysConstant.OPT_CATEGORY);
+        request.setAttribute("optList", optList);
+        // 系统参数非优化资源类别
+        String notOptList = getSysSetting(SysConstant.NOPT_CATEGORY);
+        request.setAttribute("notOptList", notOptList);
         request.setAttribute("ossUrl", ossUrl);
         return "clue/addCluePage";
     }
@@ -180,7 +190,7 @@ public class ExtendClueAgendaTaskController {
         // 查询所有项目
         JSONResult<List<ProjectInfoDTO>> allProject = projectInfoFeignClient.allProject();
         request.setAttribute("projectList", allProject.getData());
-        // 查询非优化字典资源类别集合
+        // 查询字典资源类别集合
         request.setAttribute("clueCategoryList",
                 getDictionaryByCode(DicCodeEnum.CLUECATEGORY.getCode()));
         // 查询字典资源类型集合
@@ -196,6 +206,12 @@ public class ExtendClueAgendaTaskController {
         request.setAttribute("accountNameList",
                 getDictionaryByCode(DicCodeEnum.ACCOUNT_NAME.getCode()));
         request.setAttribute("ossUrl", ossUrl);
+        // 系统参数优化资源类别
+        String optList = getSysSetting(SysConstant.OPT_CATEGORY);
+        request.setAttribute("optList", optList);
+        // 系统参数非优化资源类别
+        String notOptList = getSysSetting(SysConstant.NOPT_CATEGORY);
+        request.setAttribute("notOptList", notOptList);
         return "clue/updateCluePage";
     }
 
@@ -1039,6 +1055,7 @@ public class ExtendClueAgendaTaskController {
                     pushClueReq.setRemark(clueAgendaTaskDTO1.getAddress());
                     pushClueReq.setSearchWord(clueAgendaTaskDTO1.getSearchWord());
                     pushClueReq.setSource(String.valueOf(clueAgendaTaskDTO1.getSource()));
+                    pushClueReq.setSourceName(clueAgendaTaskDTO1.getSourceName());
                     pushClueReq.setSourceType(String.valueOf(clueAgendaTaskDTO1.getSourceType()));
                     pushClueReq.setType(String.valueOf(clueAgendaTaskDTO1.getType()));
                     pushClueReq.setMessagePoint(clueAgendaTaskDTO1.getMessagePoint());
@@ -1291,4 +1308,19 @@ public class ExtendClueAgendaTaskController {
         return data;
     }
 
+    /**
+     * 查询系统参数
+     * 
+     * @param code
+     * @return
+     */
+    private String getSysSetting(String code) {
+        SysSettingReq sysSettingReq = new SysSettingReq();
+        sysSettingReq.setCode(code);
+        JSONResult<SysSettingDTO> byCode = sysSettingFeignClient.getByCode(sysSettingReq);
+        if (byCode != null && JSONResult.SUCCESS.equals(byCode.getCode())) {
+            return byCode.getData().getValue();
+        }
+        return null;
+    }
 }
