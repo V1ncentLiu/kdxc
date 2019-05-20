@@ -463,19 +463,19 @@ public class BusinessSignController {
                     if ("2".equals(dto.getPayType())) {
                         this.handlerData(dto,createUser);
                         one.add(dto);
-                        if(StringUtils.isNotBlank(dto.getRepeatRatio())){
+                        if(dto.getRepeatStatus() != null && dto.getRepeatStatus() == 1){
                             oneRepeatStatus =true;
                         }
                     } else if ("3".equals(dto.getPayType())) {
                         this.handlerData(dto,createUser);
                         two.add(dto);
-                        if(StringUtils.isNotBlank(dto.getRepeatRatio())){
+                        if(dto.getRepeatStatus() != null && dto.getRepeatStatus() == 1){
                             twoRepeatStatus =true;
                         }
                     } else if ("4".equals(dto.getPayType())) {
                         this.handlerData(dto,createUser);
                         three.add(dto);
-                        if(StringUtils.isNotBlank(dto.getRepeatRatio())){
+                        if(dto.getRepeatStatus() != null && dto.getRepeatStatus() == 1){
                             threeRepeatStatus =true;
                         }
                     }
@@ -559,7 +559,6 @@ public class BusinessSignController {
         }else {
             dto.setRepeatMoney("");
             dto.setRepeatRatio("");
-            dto.setRepeatStatus(0);
         }
     }
     /**
