@@ -1,9 +1,11 @@
 package com.kuaidao.manageweb.controller.statistics;
 
+import java.math.BigDecimal;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -49,10 +51,16 @@ public class TeleSaleTalkTimeController {
     */
    @RequestMapping("/exportTeleGroupTalkTime")
    public void exportTeleGroupTalkTime(@RequestBody TeleSaleTalkTimeQueryDTO teleSaleTalkTimeQueryDTO,HttpServletResponse response) throws Exception {
-       JSONResult<List<TeleTalkTimeRespDTO>> teleGroupTalkTimeJr = teleTalkTimeFeignClient.listTeleGroupTalkTimeNoPage(teleSaleTalkTimeQueryDTO);
+       JSONResult<Map<String,Object>> teleGroupTalkTimeJr = teleTalkTimeFeignClient.listTeleGroupTalkTimeNoPage(teleSaleTalkTimeQueryDTO);
+       Map<String, Object> resData = teleGroupTalkTimeJr.getData();
+       //获取合计 
+       TeleTalkTimeRespDTO totalTalkTimeDTO = (TeleTalkTimeRespDTO)resData.get("totalData");
+       
        List<List<Object>> dataList = new ArrayList<List<Object>>();
        dataList.add(getGroupHeadTitleList());
-       List<TeleTalkTimeRespDTO> teleGroupList   = teleGroupTalkTimeJr.getData();
+       //合计 放进excel 
+       addTotalTalkTimeToList(totalTalkTimeDTO,dataList);
+       List<TeleTalkTimeRespDTO> teleGroupList   = (List<TeleTalkTimeRespDTO>)resData.get("tableData");
        for(int i = 0; i<teleGroupList.size(); i++){
            TeleTalkTimeRespDTO teleTalkTimeRespDTO = teleGroupList.get(i);
            List<Object> curList = new ArrayList<>();
@@ -82,8 +90,28 @@ public class TeleSaleTalkTimeController {
         
    }
    
-   
    /**
+    * 把合计放进total 
+   * @param totalTalkTimeDTO
+   * @param dataList
+    */
+   private void addTotalTalkTimeToList(TeleTalkTimeRespDTO totalTalkTimeDTO,List<List<Object>> dataList) {
+       List<Object> totalList = new ArrayList<>();
+       totalList.add("合计");
+       totalList.add("");
+       totalList.add("");
+       totalList.add(totalTalkTimeDTO.getCallCount());
+       totalList.add(totalTalkTimeDTO.getCalledCount());
+       totalList.add(totalTalkTimeDTO.getCallPercent().multiply(new BigDecimal(100))+"%");
+       totalList.add(totalTalkTimeDTO.getCallClueCount());
+       totalList.add(totalTalkTimeDTO.getCalledClueCount());
+       totalList.add(totalTalkTimeDTO.getClueCallecdPrecent());
+       totalList.add(totalTalkTimeDTO.getValidCallTime());
+       totalList.add(totalTalkTimeDTO.getUserAvgDayValidCallTime());
+    }
+
+
+/**
     * 电销组通话时长 导出 头部
    * @return
     */
