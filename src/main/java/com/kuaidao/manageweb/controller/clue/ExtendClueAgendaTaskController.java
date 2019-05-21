@@ -755,11 +755,11 @@ public class ExtendClueAgendaTaskController {
                             clueAgendaTaskDTO1.setType(Integer.valueOf(type));
                         } else {
                             islegal = false;
-                            reasonIsNotMatch.append("资源类别");
+                            reasonIsNotMatch.append("资源类型");
                         }
                     } else {
                         islegal = false;
-                        reasonIsNull.append("资源类别");
+                        reasonIsNull.append("资源类型");
                     }
                     if (clueAgendaTaskDTO1.getCategoryName() != null
                         && !"".equals(clueAgendaTaskDTO1.getCategoryName())) {
@@ -772,17 +772,17 @@ public class ExtendClueAgendaTaskController {
                         } else {
                             islegal = false;
                             if(StringUtils.isBlank(reasonIsNotMatch)){
-                                reasonIsNotMatch.append("资源类型");
+                                reasonIsNotMatch.append("资源类别");
                             } else {
-                                reasonIsNotMatch.append("、资源类型");
+                                reasonIsNotMatch.append("、资源类别");
                             }
                         }
                     } else {
                         islegal = false;
                         if(StringUtils.isBlank(reasonIsNull)){
-                            reasonIsNull.append("资源类型");
+                            reasonIsNull.append("资源类别");
                         } else {
-                            reasonIsNull.append("、资源类型");
+                            reasonIsNull.append("、资源类别");
                         }
                     }
                     if (clueAgendaTaskDTO1.getSourceTypeName() != null
@@ -911,11 +911,11 @@ public class ExtendClueAgendaTaskController {
                             clueAgendaTaskDTO1.setType(Integer.valueOf(type));
                         } else {
                             islegal = false;
-                            reasonIsNotMatch.append("资源类别");
+                            reasonIsNotMatch.append("资源类型");
                         }
                     } else {
                         islegal = false;
-                        reasonIsNull.append("资源类别");
+                        reasonIsNull.append("资源类型");
                     }
                     if (clueAgendaTaskDTO1.getCategoryName() != null
                         && !"".equals(clueAgendaTaskDTO1.getCategoryName())) {
@@ -928,17 +928,17 @@ public class ExtendClueAgendaTaskController {
                         } else {
                             islegal = false;
                             if(StringUtils.isBlank(reasonIsNotMatch)){
-                                reasonIsNotMatch.append("资源类型");
+                                reasonIsNotMatch.append("资源类别");
                             } else {
-                                reasonIsNotMatch.append("、资源类型");
+                                reasonIsNotMatch.append("、资源类别");
                             }
                         }
                     } else {
                         islegal = false;
                         if(StringUtils.isBlank(reasonIsNull)){
-                            reasonIsNull.append("资源类型");
+                            reasonIsNull.append("资源类别");
                         } else {
-                            reasonIsNull.append("、资源类型");
+                            reasonIsNull.append("、资源类别");
                         }
                     }
                     if (clueAgendaTaskDTO1.getSourceName() != null
