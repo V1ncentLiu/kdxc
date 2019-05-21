@@ -38,7 +38,7 @@
                     </el-select>
                 </el-form-item>
                 <el-form-item label="分配来源:">  
-                    <el-select v-model="form.source" placeholder="分配来源" style="width: 100%;" clearable filterable>
+                    <el-select v-model="form.new_resource" placeholder="分配来源" style="width: 100%;" clearable filterable>
                         <el-option
                             v-for="item in distributionSource"
                             :key="item.id"
@@ -98,16 +98,30 @@
                     startTime:'',
                     endTime:'',
                     org_Id:'',
+                    new_resource:''
                 },
                 export: {
                     startTime:'',
                     endTime:'',
-                    org_Id:''
+                    org_Id:'',
+                    new_resource:''
                 },
                 tableData: [],//表格数据
                 tableColums: [],//表头list
                 orgTeleArr:queryOrg,//电销组
-                distributionSource:[],//分配来源
+                distributionSource:[{
+                    id:'1',
+                    name:'话务新资源'
+                },{
+                    id:'2',
+                    name:'推广新资源'
+                },{
+                    id:'3',
+                    name:'非新资源'
+                },{
+                    id:'99',
+                    name:'其他(资源未分配)'
+                }],//分配来源
                 pager:{
                     total: 0,
                     currentPage: 1,
@@ -184,13 +198,18 @@
                 })
             },
             gotoTeam(item){
-                var org_Id = item.orgId;
                 var orgName = item.orgName;
+                var org_Id = item.orgId;//组id
+                // 搜索条件
+                var startTime = this.form.startTime;
+                var endTime = this.form.endTime;
+                var new_resource = this.form.new_resource;//来源
+                
                 console.log(item)
                 if(orgName == "合计"){
                     window.location.href="/statistics/teleStatement/resourceAllocationTableSum";
                 }else{
-                    window.location.href="/statistics/teleStatement/resourceAllocationTableTeam?groupId=" + org_Id;
+                    window.location.href="/statistics/teleStatement/resourceAllocationTableTeam?groupId=" + org_Id+"&startTime="+ startTime+"&endTime="+ endTime+"&startTime="+ startTime;
                 }
             },
             arraySpanMethod({ row, column, rowIndex, columnIndex }) { // 合并第一行
