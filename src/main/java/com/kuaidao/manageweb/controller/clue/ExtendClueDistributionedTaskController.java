@@ -179,6 +179,7 @@ public class ExtendClueDistributionedTaskController {
             idList = null;
         }
         queryDto.setResourceDirectorList(idList);
+        queryDto.setUserDataAuthList(user.getUserDataAuthList());
         JSONResult<List<ClueDistributionedTaskDTO>> listJSONResult =
             extendClueFeignClient.findClues(queryDto);
         List<List<Object>> dataList = new ArrayList<List<Object>>();
@@ -267,6 +268,7 @@ public class ExtendClueDistributionedTaskController {
             idList = null;
         }
         queryDto.setResourceDirectorList(idList);
+        queryDto.setUserDataAuthList(user.getUserDataAuthList());
         JSONResult<List<ClueDistributionedTaskDTO>> listJSONResult =
             extendClueFeignClient.findCommunicateRecords(queryDto);
         List<List<Object>> dataList = new ArrayList<List<Object>>();
@@ -305,7 +307,7 @@ public class ExtendClueDistributionedTaskController {
             }
         }
         XSSFWorkbook wbWorkbook = ExcelUtil.creat2007Excel(dataList);
-        String name = "资源沟通情况" + DateUtil.convert2String(new Date(), DateUtil.ymdhms2) + ".xlsx";
+        String name = "资源沟通记录" + DateUtil.convert2String(new Date(), DateUtil.ymdhms2) + ".xlsx";
         response.addHeader("Content-Disposition",
             "attachment;filename=" + new String(name.getBytes("UTF-8"), "ISO8859-1"));
         response.addHeader("fileName", URLEncoder.encode(name, "utf-8"));

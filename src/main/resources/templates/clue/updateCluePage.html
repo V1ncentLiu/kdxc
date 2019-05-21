@@ -250,7 +250,7 @@
                 <el-row>
                   <el-col :span="12">
                     <el-form-item label="账户名称：" :label-width="formLabelWidth">
-                      <el-select v-model="form.accountName" clearable placeholder="请选择" style="width: 260px;">
+                      <el-select v-model="form.accountName"  placeholder="请选择" style="width: 260px;" clearable filterable >
                         <el-option
                             v-for="item in accountNameOptions"
                             :key="item.value"
@@ -734,8 +734,8 @@ if(notOptList){
                     	param.email=this.form.email;
                     	param.age=this.form.age;
                     	param.province=this.form.province;
-                      param.city=this.form.city;
-                      param.district=this.form.district;
+	                    param.city=this.form.city;
+	                    param.district=this.form.district;
                     	param.reserveTime=this.form.reserveTime;
                     	param.remark=this.form.remark;
                     	param.source=this.form.source;
@@ -1083,13 +1083,13 @@ if(notOptList){
 	        	}
 	        	if(clueInfo.clueBasic.sourceType){
 		        	this.form.sourceType=clueInfo.clueBasic.sourceType+"";
-		        	this.categoryChange(this.form.sourceType);
 	        	}
 	        	if(clueInfo.clueBasic.type){
 		        	this.form.type=clueInfo.clueBasic.type+"";
 	        	}
 	        	if(clueInfo.clueBasic.category){
 		        	this.form.category=clueInfo.clueBasic.category+"";
+		        	this.categoryChange(this.form.category);
 	        	}
 	        	this.form.searchWord=clueInfo.clueBasic.searchWord;
 	        	this.form.messagePoint=clueInfo.clueBasic.messagePoint;
@@ -1185,6 +1185,22 @@ if(notOptList){
           axios.post('/area/sysregion/querySysRegionByParam',param).then(function (response) {
             addClueVM.provinceArr=response.data.data.data;
           });
+          if(clueInfo.clueIntention.province) {
+            var param = {};
+            param.type = "1";
+            param.name=clueInfo.clueIntention.province;
+            axios.post('/area/sysregion/querySysRegionByParam', param).then(function (response) {
+              addClueVM.cityArr = response.data.data.data;
+            });
+          }
+          if(clueInfo.clueIntention.city) {
+            var param = {};
+            param.type = "2";
+            param.name=clueInfo.clueIntention.city;
+            axios.post('/area/sysregion/querySysRegionByParam', param).then(function (response) {
+              addClueVM.districtArr = response.data.data.data;
+            });
+          }
          }
     })
 </script>
