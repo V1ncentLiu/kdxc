@@ -55,7 +55,11 @@
                         <el-table-column property="receiveTime" label="接收时间"  width="200" align="center"></el-table-column>
                         <el-table-column property="status" label="消息状态" :formatter="formatStatus" align="center"></el-table-column>
                     </el-table>
-                    <el-pagination @size-change="handleSizeChange" background current-change="handleCurrentChange" :current-page="currentPage" :page-sizes="[20, 50, 100]" :page-size="pageSize" layout="total, sizes, prev, pager, next, jumper" :total="total">
+                    <el-pagination @size-change="handleSizeChange"
+                                   background @current-change="handleCurrentChange"
+                                   :current-page="currentPage" :page-sizes="[20, 50, 100]"
+                                   :page-size="pageSize"
+                                   layout="total, sizes, prev, pager, next, jumper" :total="total">
                     </el-pagination>
                 </div>
             </el-tab-pane>
@@ -107,7 +111,7 @@
                         <el-table-column property="receiveTime" label="接收时间" width="200" align="center"></el-table-column>
                         <el-table-column property="status" label="消息状态"  :formatter="formatStatus" align="center"></el-table-column>
                     </el-table>
-                    <el-pagination @size-change="handleSizeChange" background current-change="handleCurrentChange" :current-page="currentPage" :page-sizes="[ 20, 50, 100]" :page-size="pageSize" layout="total, sizes, prev, pager, next, jumper" :total="total"></el-pagination>
+                    <el-pagination @size-change="handleSizeChange" background @current-change="handleCurrentChange" :current-page="currentPage" :page-sizes="[ 20, 50, 100]" :page-size="pageSize" layout="total, sizes, prev, pager, next, jumper" :total="total"></el-pagination>
                 </div>
             </el-tab-pane>
         </el-tabs>
@@ -517,6 +521,10 @@
                                 vm.total = data.total;
                                 vm.pageSize = data.pageSize;
                                 vm.currentPage = data.currentPage;
+                            }else{
+                                vm.total = 0;
+                                vm.pageSize = 20;
+                                vm.currentPage = 0;
                             }
                         }
                     })
@@ -543,6 +551,10 @@
                                 vm.total = data.total;
                                 vm.pageSize = data.pageSize;
                                 vm.currentPage = data.currentPage;
+                            }else{
+                                vm.total = 0;
+                                vm.pageSize = 20;
+                                vm.currentPage = 0;
                             }
                         }
                     })
@@ -568,10 +580,11 @@
                 setTimeout(function(){
                     if(vm.businessData.length==0&&vm.annData.length!=0){
                         vm.activeName='announcement';
+                        vm.initAnnTableData(1,20);
                     }else{
                         vm.activeName='business';
+                        vm.initBussTableData(1,20);
                     }
-
                 },1000);
             }
             console.info("updated method");
