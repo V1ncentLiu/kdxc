@@ -70,7 +70,7 @@
                 v-loading="loading">
                 <el-table-column prop="id" type="index" label="序号" align="center" width="55">
                 </el-table-column>
-                <el-table-column prop="date" align="center" :formatter="dateFormat" label="日期">
+                <el-table-column prop="dateId" align="center" :formatter="dateFormat" label="日期">
                 </el-table-column>
                 <el-table-column prop="orgName" align="center" label="电销组">
                 </el-table-column>
@@ -102,6 +102,12 @@
 </body>
 <script th:inline="javascript">
     var queryOrg=[[${queryOrg}]]; // 电销组
+    var form = {
+        startTime: '2019-5-20 00:00',
+        endTime: '2019-5-21 23:59',
+        orgId: '',
+        userId: ''
+    };
     var mainDivVM = new Vue({
         el: '#maindiv',
         data: function() {
@@ -116,7 +122,7 @@
                 tableData: [
                 // {
                 //     orgId: "1",
-                //     date: 1558059184348,
+                //     dateId: "20150505",
                 //     orgName: '电销组1',
                 //     userName: '电销人员1',
                 //     callCount: 1000,
@@ -129,7 +135,7 @@
                 //     userAvgDayValidCallTime: 155799
                 // },{
                 //     orgId: "2",
-                //     date: 1558059184348,
+                //     dateId: "20150505",
                 //     orgName: '电销组2',
                 //     userName: '电销人员2',
                 //     callCount: 1000,
@@ -172,6 +178,7 @@
                 param.pageSize = this.pager.pageSize;
                 param.pageNum = this.pager.currentPage;
                 param.orgId =  this.form.orgId; // 电销组
+                param.userId =  this.form.userId; // 电销
                 console.log(param);
                 this.loading = true; 
                 axios.post('/callrecord/teleSaleTalkTime/listTeleSaleTalkTime',param).then(function (response) { 
@@ -207,11 +214,11 @@
                     mainDivVM.loading = false;
                 }).catch(function (error) {
                     console.log(error);
+                    mainDivVM.loading = false;
                     mainDivVM.$message({
                         message: "请求失败，请稍后重试",
                         type: "error"
                     });
-                    mainDivVM.loading = false;
                 });
             },
             currentTelSale(seleVal){ // 根据电销组选择创业顾问
@@ -322,13 +329,13 @@
                 this.searchTable();
             },
         },
-        created(){    
-            var today = new Date();
-            today.setTime(today.getTime());
-            var startTime = today.getFullYear()+"-"+ (today.getMonth()+1) + "-" + today.getDate()+" 00:00";
-            var endTime =today.getFullYear()+"-"+ (today.getMonth()+1) + "-" + today.getDate()+" 23:59";
-            this.form.startTime=startTime;
-            this.form.endTime=endTime;         
+        created(){ 
+            this.form.startTime=form.startTime;
+            this.form.endTime=form.endTime; 
+            this.form.orgId=form.orgId; 
+            this.form.userId=form.userId; 
+            console.log(this.form); 
+
             this.searchTable();
         },
         mounted(){
