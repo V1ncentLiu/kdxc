@@ -10,14 +10,13 @@
     <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
         <el-breadcrumb-item>Home</el-breadcrumb-item>
         <el-breadcrumb-item>数据报表</el-breadcrumb-item>
-        <el-breadcrumb-item>电销顾问通话时长表</el-breadcrumb-item>
+        <el-breadcrumb-item>资源接通有效率表</el-breadcrumb-item>
     </el-breadcrumb>    
     <el-row class="marginB20">
         <el-button type="primary" @click="searchYesterday">昨天</el-button>
         <el-button type="success" @click="searchWeek">近七天</el-button>
         <el-button type="warning" @click="searchMonth">本月</el-button>  
-        <el-button type="danger">导出Excel报表</el-button>  
-        <el-button type="primary" @click="goBack" style="float: right;">返回</el-button>
+        <el-button type="danger" @click="exportRs">导出Excel报表</el-button>   
     </el-row>
     <div class="mainSearchBg">        
         <div class="mainSearchFormBox">
@@ -29,31 +28,12 @@
                    <el-date-picker format="yyyy-MM-dd HH:mm" v-model="form.endTime" type="datetime" placeholder="选择日期"></el-date-picker>
                 </el-form-item>
                 <el-form-item label="电销组:">  
-                    <el-select v-model="form.orgId" placeholder="电销组" style="width: 100%;" clearable @change="currentTelSale" filterable>
+                    <el-select v-model="form.orgId" placeholder="电销组" style="width: 100%;" clearable filterable>
                         <el-option
                             v-for="item in orgTeleArr"
                             :key="item.id"
                             :label="item.name"
                             :value="item.id">
-                        </el-option>
-                    </el-select>
-                </el-form-item>
-                <el-form-item label="电销顾问:">  
-                    <el-select 
-                        v-model="form.userId" 
-                        placeholder="电销顾问" 
-                        style="width: 100%;" 
-                        filterable 
-                        multiple 
-                        clearable  >
-                        <el-option
-                            v-for="item in busSaleArr"
-                            :key="item.id"
-                            :label="item.name"
-                            :value="item.id">
-                            <el-checkbox-group v-model="form.teleSaleId">
-                                <el-checkbox :label="item.id">{{item.name}}</el-checkbox>
-                            </el-checkbox-group>
                         </el-option>
                     </el-select>
                 </el-form-item>
@@ -63,16 +43,21 @@
             </el-form>
         </div>
         <el-row>
-            <el-table
-                :data="tableData"
-                border
+            <el-table 
+                ref="tableData"
+                tooltip-effect="dark"
                 style="width: 100%"
-                v-loading="loading">
-                <el-table-column prop="id" type="index" label="序号" align="center" width="55">
-                </el-table-column>
-                <el-table-column prop="userName" align="center" label="电销">
+                border
+                :data="tableData"
+                v-loading="loading"
+                :span-method="arraySpanMethod">
+                <el-table-column type="index" label="序号" align="center" width="55" :index="indexFun"></el-table-column>
+                <el-table-column
+                    prop="orgName"
+                    align="center"
+                    label="电销组">
                     <template slot-scope="scope">
-                        <el-button type="text" size="small" @click="gotoPerson(scope.row)">{{scope.row.userName}}</el-button>
+                        <el-button type="text" size="small" @click="gotoTeam(scope.row)">{{scope.row.orgName}}</el-button>
                     </template>
                 </el-table-column>
                 <el-table-column prop="callCount" align="center" label="通话次数">
@@ -89,10 +74,10 @@
                 </el-table-column>
                 <el-table-column prop="validCallTime" align="center" :formatter="timeFormat" label="总有效通话时长">
                 </el-table-column>
-                <el-table-column prop="userAvgDayValidCallTime" align="center" :formatter="timeFormat" label="人均天有效通话时长" >
+                <el-table-column prop="userAvgDayValidCallTime" align="center" :formatter="timeFormat" label="人均天有效通话时长">
                 </el-table-column>
             </el-table>
-            <table-pagination :pager="pager" @change="searchTable"></table-pagination>
+            <table-pagination :pager="pager" @change="searchTable()"></table-pagination>
         </el-row>
     </div>
 </div>
@@ -100,56 +85,57 @@
 <div th:include="_footer_include :: #jsLib"></div>
 </body>
 <script th:inline="javascript">
-    var queryOrg=[[${queryOrg}]];//电销组
-    var parentOrgId = [[${parentOrgId}]];
+    var queryOrg=[[${queryOrg}]]; // 电销组
+    console.log(queryOrg,'电销组');
     var mainDivVM = new Vue({
         el: '#maindiv',
         data: function() {
             return {
                 loading: false,
                 form: {
-                    startTime: '',
-                    endTime: '',
+                    startTime:'',
+                    endTime:'',
                     orgId:'',
-                    userId: ''
+                },
+                export: {
+                    startTime:'',
+                    endTime:'',
+                    orgId:''
                 },
                 tableData: [
-                // {
-                //     orgId: "1",
-                //     date: 1558059184348,
-                //     userName: '电销人员1',
-                //     callCount: 1000,
-                //     calledCount: 10,
-                //     callPercent: 10,
-                //     callClueCount: 10,
-                //     calledClueCount: 10,
-                //     clueCallecdPrecent: 10,
-                //     validCallTime: 155799,
-                //     userAvgDayValidCallTime: 155799
-                // },{
-                //     orgId: "2",
-                //     date: 1558059184348,
-                //     userName: '电销人员2',
-                //     callCount: 1000,
-                //     calledCount: 10,
-                //     callPercent: 10,
-                //     callClueCount: 10,
-                //     calledClueCount: 10,
-                //     clueCallecdPrecent: 10,
-                //     validCallTime: 155799,
-                //     userAvgDayValidCallTime: 155799
-                // }
-            ],
+                    // {
+                    //     orgId: "1",
+                    //     orgName: '电销组1',
+                    //     callCount: 1000,
+                    //     calledCount: 10,
+                    //     callPercent: 10,
+                    //     callClueCount: 10,
+                    //     calledClueCount: 10,
+                    //     clueCallecdPrecent: 10,
+                    //     validCallTime: 155799,
+                    //     userAvgDayValidCallTime: 155799
+                    // }, {
+                    //     orgId: "2",
+                    //     orgName: '电销组2',
+                    //     callCount: 1000,
+                    //     calledCount: 10,
+                    //     callPercent: 10,
+                    //     callClueCount: 10,
+                    //     calledClueCount: 10,
+                    //     clueCallecdPrecent: 10,
+                    //     validCallTime: 155799,
+                    //     userAvgDayValidCallTime: 155799
+                    // }
+                ],
                 orgTeleArr: queryOrg, // 电销组
-                busSaleArr: [], // 创业顾问
-                pager: { 
+                pager:{ 
                     total: 0,
                     currentPage: 1,
-                    pageSize: 20
+                    pageSize: 2
                 },
             }             
         },
-        methods: { 
+        methods: {            
             searchTable() { 
                 var startTime = this.form.startTime;
                 var endTime = this.form.endTime;
@@ -169,10 +155,11 @@
                 param.endTime = this.minuteFormat(endTime);
                 param.pageSize = this.pager.pageSize;
                 param.pageNum = this.pager.currentPage;
-                param.orgId =  this.form.orgId; // 电销组
+                param.orgId = this.form.orgId; // 电销组
                 console.log(param);
                 this.loading = true; 
-                axios.post('/callrecord/teleSaleTalkTime/listTeleSaleTalkTime',param).then(function (response) { 
+                axios.post('/callrecord/teleSaleTalkTime/listTeleGroupTalkTime',param).then(function (response) { 
+                    console.log(response,'response');
                     if(!response){
                         mainDivVM.$message({
                             message: "接口调用失败",
@@ -196,13 +183,22 @@
                             type: 'error'
                         });
                         return ;
+                    }else if(resobj.data && resobj.data.data){
+                        var resobjData = resobj.data.data;          
+                        // 表格数据渲染
+                        mainDivVM.tableData = resobjData;
+                        // 插入合计一行
+                        mainDivVM.summaryFun();
+                        mainDivVM.pager.currentPage = resobj.data.currentPage;
+                        mainDivVM.pager.total = resobj.data.total;
+                        mainDivVM.loading = false;
+                        
+                        mainDivVM.export.startTime = mainDivVM.minuteFormat(startTime);
+                        mainDivVM.export.endTime = mainDivVM.minuteFormat(endTime);
+                        mainDivVM.export.orgId = mainDivVM.form.orgId;
+                    }else{
+                        mainDivVM.loading = false;
                     }  
-                    var resobjData = resobj.data.data          
-                    // 表格数据渲染
-                    mainDivVM.tableData = resobjData;
-                    mainDivVM.pager.currentPage = resobj.data.currentPage;
-                    mainDivVM.pager.total = resobj.data.total;
-                    mainDivVM.loading = false;
                 }).catch(function (error) {
                     console.log(error);
                     mainDivVM.$message({
@@ -212,30 +208,25 @@
                     mainDivVM.loading = false;
                 });
             },
-            currentTelSale(seleVal){ // 根据电销组选择创业顾问
-                if(null==seleVal||seleVal==""){
-                    return ;
+            arraySpanMethod({ row, column, rowIndex, columnIndex }) { // 合并第一行
+                if (rowIndex === 0) {
+                    if (columnIndex === 0) {
+                        return [0, 0];
+                    } else if (columnIndex === 1) {
+                        return [1, 2];
+                    }
                 }
-                param={};
-                param.orgId=seleVal;
-                param.roleCode="DXCYGW";
-                axios.post('/user/userManager/listByOrgAndRole' ,param).then(function (response) {  
-                    mainDivVM.busSaleArr=response.data.data;
-                });
             },
-            goBack () {
-                window.history.go(-1);
-            },
-            gotoPerson (item) {
-                var userId = item.userId;
-                if(userId){
-                    window.location.href="/statistics/teleStatement/telemarketingCallTablePerson?userId=" + userId; 
+            gotoTeam (row) { // 页面跳转
+                var orgId = row.orgId;
+                if(orgId === "合计"){
+                    window.location.href="/statistics/teleStatement/telemarketingCallTableSum";
+                }else{
+                    window.location.href="/statistics/teleStatement/telemarketingCallTableTeam?orgId=" + orgId; 
                 }
-            }, 
-            percentFormat (row, column) {
-                var percent = row[column.property];
-                percent = parseInt(percent) * 100 + "%";
-                return percent;
+            },
+            indexFun (index) { // 表格序号
+                return index;
             },
             minuteFormat (m) {
                 if (!m) {return "";}
@@ -252,12 +243,32 @@
                 var timeRes = "" + yearRes + monthRea + dateRes + hoursRes + minRes;
                 return timeRes;
             },
-            timeFormat (row, column) {
+            summaryFun () {
+                var total = {
+                    orgId: "合计",
+                    orgName: '合计',
+                    callCount: 1000,
+                    calledCount: 10,
+                    callPercent: 10,
+                    callClueCount: 10,
+                    calledClueCount: 10,
+                    clueCallecdPrecent: 10,
+                    validCallTime: 155799,
+                    userAvgDayValidCallTime: 155799
+                };
+                this.tableData.unshift(total);
+            },
+            percentFormat (row, column) {
+                var percent = row[column.property];
+                percent = parseInt(percent) * 100 + "%";
+                return percent;
+            },
+            timeFormat (row, column) { // 时间格式化：时分秒
                 var time = row[column.property];
                 var timeResult = this.timeFun (time); 
                 return timeResult;
             },
-            timeFun (s) {
+            timeFun(s){
                 var t="";
                 var hour = Math.floor(s/3600);
                 var min = Math.floor(s/60) % 60;
@@ -308,18 +319,39 @@
                 var f= new Date(year,month,01);
                 var c = f.valueOf();
                 var startTime= new Date(c);
-                this.form.startTime=startTime.getFullYear()+"-" + (startTime.getMonth()+1) + "-" + startTime.getDate()+" 00:00";
+                this.form.startTime=startTime.getFullYear()+"-" + (startTime.getMonth()+1) + "-" + startTime.getDate()+" 00:00";;
                 this.form.endTime=year+"-"+(month+1)+"-"+date+" 23:59";
                 this.searchTable();
             },
+            exportRs(){
+                var param = {};
+                param.startTime = this.export.startTime;
+                param.endTime =  this.export.endTime;
+                param.orgId =  this.export.orgId; 
+                axios.post('/callrecord/teleSaleTalkTime/exportTeleGroupTalkTime',param,{responseType:'blob'})
+                    .then(function (response) {
+                        console.log(response);
+                        var data =  response.data;
+                        var fileName = response.headers.filename;
+                        saveAs(data,decodeURI(fileName));
+                    })
+                    .catch(function (error) {
+                        console.log(error);
+                        mainDivVM.$message({
+                            message: "导出失败，请稍后重试",
+                            type: "error"
+                        });
+                    });
+            }
         },
-        created(){     
+        created(){
+            // 默认进入显示当天时间
             var today = new Date();
             today.setTime(today.getTime());
             var startTime = today.getFullYear()+"-"+ (today.getMonth()+1) + "-" + today.getDate()+" 00:00";
             var endTime =today.getFullYear()+"-"+ (today.getMonth()+1) + "-" + today.getDate()+" 23:59";
             this.form.startTime=startTime;
-            this.form.endTime=endTime;        
+            this.form.endTime=endTime;            
             this.searchTable();
         },
         mounted(){
