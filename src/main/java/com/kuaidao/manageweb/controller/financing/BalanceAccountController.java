@@ -40,6 +40,7 @@ import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.manageweb.config.LogRecord;
 import com.kuaidao.manageweb.config.LogRecord.OperationType;
+import com.kuaidao.manageweb.constant.Constants;
 import com.kuaidao.manageweb.constant.MenuEnum;
 import com.kuaidao.manageweb.feign.area.SysRegionFeignClient;
 import com.kuaidao.manageweb.feign.customfield.CustomFieldFeignClient;
@@ -298,15 +299,26 @@ public class BalanceAccountController {
         if (JSONResult.SUCCESS.equals(jsonResult.getCode()) && jsonResult.getData() != null) {
             List<DictionaryItemRespDTO> dictionaryItemRespDTOs =
                     getDictionaryByCode(DicCodeEnum.VISITSTORETYPE.getCode());
+            List<DictionaryItemRespDTO> giveTypeDTOs =
+                    getDictionaryByCode(Constants.GIVE_TYPE);
 
             PayDetailAccountDTO accountDTO = jsonResult.getData();
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             dataMap.put("signShopType", "");
+            dataMap.put("giveTypeName", "");
             // 去字典表查询签约店型
             if (dictionaryItemRespDTOs != null && dictionaryItemRespDTOs.size() > 0) {
                 for (DictionaryItemRespDTO dictionaryItemRespDTO : dictionaryItemRespDTOs) {
                     if (dictionaryItemRespDTO.getValue().equals(accountDTO.getSignShopType())) {
                         dataMap.put("signShopType", dictionaryItemRespDTO.getName());
+                    }
+                }
+            }
+            // 去字典表查询赠送类型
+            if (giveTypeDTOs != null && giveTypeDTOs.size() > 0) {
+                for (DictionaryItemRespDTO dictionaryItemRespDTO : giveTypeDTOs) {
+                	if (accountDTO.getGiveType() !=null && dictionaryItemRespDTO.getValue().equals(accountDTO.getGiveType().toString())) {
+                        dataMap.put("giveTypeName", dictionaryItemRespDTO.getName());
                     }
                 }
             }
@@ -377,8 +389,6 @@ public class BalanceAccountController {
                     : accountDTO.getAmountPerformance());
             dataMap.put("giveAmount", accountDTO.getGiveAmount() == null ? ""
                     : accountDTO.getGiveAmount());
-            dataMap.put("giveType", accountDTO.getAmountPerformance() == null ? ""
-                    : accountDTO.getAmountPerformance());
         }
         File file = createDoc(dataMap);
         response.setContentType("text/html;charset=utf-8");
@@ -423,7 +433,7 @@ public class BalanceAccountController {
         String name = dataMap.get("statementNo")+ ".doc";
         File file = new File(name);
         try {
-            t = configuration.getTemplate("2521.ftl");
+            t = configuration.getTemplate("balanceaccount.ftl");
             t.setEncoding("UTF-8");
 
             Writer out =
@@ -455,12 +465,23 @@ public class BalanceAccountController {
 
             accountDTO = jsonResult.getData();
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            List<DictionaryItemRespDTO> giveTypeDTOs =
+                    getDictionaryByCode(Constants.GIVE_TYPE);
             dataMap.put("signShopType", "");
+            dataMap.put("giveType", "");
             // 去字典表查询签约店型
             if (dictionaryItemRespDTOs != null && dictionaryItemRespDTOs.size() > 0) {
                 for (DictionaryItemRespDTO dictionaryItemRespDTO : dictionaryItemRespDTOs) {
                     if (dictionaryItemRespDTO.getValue().equals(accountDTO.getSignShopType())) {
                         accountDTO.setSignShopType(dictionaryItemRespDTO.getName());
+                    }
+                }
+            }
+            // 去字典表查询赠送类型
+            if (giveTypeDTOs != null && giveTypeDTOs.size() > 0) {
+                for (DictionaryItemRespDTO dictionaryItemRespDTO : giveTypeDTOs) {
+                    if (accountDTO.getGiveType() !=null && dictionaryItemRespDTO.getValue().equals(accountDTO.getGiveType().toString())) {
+                        accountDTO.setGiveTypeName(dictionaryItemRespDTO.getName());
                     }
                 }
             }
@@ -483,6 +504,7 @@ public class BalanceAccountController {
             } else if (accountDTO.getPayType() == 4) {
                 payType = "尾款";
             }
+            accountDTO.setGiveAmount(accountDTO.getGiveAmount());
             accountDTO.setPayTypes(payType);
             String createTime = sdf.format(accountDTO.getPayTime());
             accountDTO.setPayTypes(payType);
