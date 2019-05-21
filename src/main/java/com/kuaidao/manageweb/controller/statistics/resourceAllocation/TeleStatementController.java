@@ -239,6 +239,44 @@ public class TeleStatementController {
     }
 
     /**
+     * 个人按天导出
+     */
+    @PostMapping("/exportResourceAllocationDayPersion")
+    public void exportResourceAllocationDayPersion(
+            @RequestBody ResourceAllocationQueryDto resourceAllocationQueryDto,
+            HttpServletResponse response) throws Exception {
+        JSONResult<List<ResourceAllocationDto>> resourceAllocationsDayPersion = statisticsFeignClient.getResourceAllocationsDayPersion(resourceAllocationQueryDto);
+        List<List<Object>> dataList = new ArrayList<List<Object>>();
+        dataList.add(getHeadTitleListDayPersion());
+        List<ResourceAllocationDto> orderList = resourceAllocationsDayPersion.getData();
+        for(int i = 0; i<orderList.size(); i++){
+            ResourceAllocationDto ra = orderList.get(i);
+            List<Object> curList = new ArrayList<>();
+            curList.add(i + 1);
+            curList.add(ra.getDay());
+            curList.add(ra.getUserName());
+            curList.add(ra.getAssignClueCount());
+            curList.add(ra.getJointExhibition());
+            curList.add(ra.getPriceCompetition());
+            curList.add(ra.getOptimization());
+            curList.add(ra.getInformationFlow());
+            curList.add(ra.getOfficialWebsite());
+            curList.add(ra.getIndustry());
+            curList.add(ra.getOther());
+            curList.add(ra.getNetizensMissed());
+            dataList.add(curList);
+        }
+        XSSFWorkbook wbWorkbook = ExcelUtil.creat2007Excel(dataList);
+        String name = "分配记录表" + DateUtil.convert2String(new Date(), DateUtil.ymdhms2) + ".xlsx";
+        response.addHeader("Content-Disposition",
+                "attachment;filename=" + new String(name.getBytes("UTF-8"), "ISO8859-1"));
+        response.addHeader("fileName", URLEncoder.encode(name, "utf-8"));
+        response.setContentType("application/octet-stream");
+        ServletOutputStream outputStream = response.getOutputStream();
+        wbWorkbook.write(outputStream);
+        outputStream.close();
+    }
+    /**
      * 资源分配页面 合计 
     * @return
      */
@@ -413,6 +451,23 @@ public class TeleStatementController {
     private List<Object> getHeadTitleListPersion() {
         List<Object> headTitleList = new ArrayList<>();
         headTitleList.add("序号");
+        headTitleList.add("电销人员");
+        headTitleList.add("分配资源数");
+        headTitleList.add("联展");
+        headTitleList.add("竞价");
+        headTitleList.add("优化");
+        headTitleList.add("信息流");
+        headTitleList.add("官网");
+        headTitleList.add("行业");
+        headTitleList.add("其他");
+        headTitleList.add("网民未接");
+        return headTitleList;
+    }
+
+    private List<Object> getHeadTitleListDayPersion() {
+        List<Object> headTitleList = new ArrayList<>();
+        headTitleList.add("序号");
+        headTitleList.add("日期");
         headTitleList.add("电销人员");
         headTitleList.add("分配资源数");
         headTitleList.add("联展");
