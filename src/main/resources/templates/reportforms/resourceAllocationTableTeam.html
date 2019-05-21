@@ -216,6 +216,11 @@
                     endTime:'',
                     org_Id:'',
                 },
+                export: {
+                    startTime:'',
+                    endTime:'',
+                    org_Id:''
+                },
                 tableData: [],//表格数据
                 tableColums: [],//表头list
                 orgTeleArr:queryOrg,//电销组
@@ -241,10 +246,10 @@
                 });
             },
             searchTable() {                 
-                var starTime=this.form.startTime;
+                var startTime=this.form.startTime;
                 var endTime=this.form.endTime;
                 if(endTime){
-                    if(starTime>endTime){
+                    if(startTime>endTime){
                         this.$message({
                             message: '开始时间不能大于结束时间',
                             type: 'warning'
@@ -256,8 +261,8 @@
                 param.pageSize = this.pager.pageSize;
                 param.pageNum =  this.pager.currentPage;
                 // 搜索条件
-                param.startTime = this.form.startTime;
-                param.endTime =  this.form.endTime;
+                param.startTime = this.minuteFormat(startTime);
+                param.endTime = this.minuteFormat(endTime);
                 param.org_Id = this.getQueryString('groupId');
                 // 判断电销组是否有值
                 if(this.form.org_Id){
@@ -297,9 +302,15 @@
                     mainDivVM.tableData=resobjData;
                     // 表头数据渲染 
                     mainDivVM.tableColums= fieldList;
+                    // 分页
                     mainDivVM.pager.currentPage= resobj.data.currentPage;
                     mainDivVM.pager.total= resobj.data.total;
+                    // loading
                     mainDivVM.loading=false;
+                    // 给导出参数赋值
+                    mainDivVM.export.startTime = mainDivVM.minuteFormat(startTime);
+                    mainDivVM.export.endTime = mainDivVM.minuteFormat(endTime);
+                    mainDivVM.export.org_Id = mainDivVM.form.org_Id;                  
                 })                
             },
             gotoPerson(item){
@@ -318,6 +329,12 @@
                 var reg = new RegExp("(^|&)"+ name +"=([^&]*)(&|$)");
                 var r = window.location.search.substr(1).match(reg);
                 if(r!=null)return  unescape(r[2]); return null;
+            },
+            minuteFormat (m) {
+                if (!m) {
+                   return "";
+                 }
+                return moment(m).format("YYYYMMDDHHmm");
             },
             searchYesterday(){//昨天
                var today = new Date();
@@ -359,7 +376,12 @@
                 this.searchTable();
             },
             exportRs(){
-                axios.post('/statistics/teleStatement/exportResourceAllocationPersion',null,{responseType:'blob'})
+                var param = {};
+                // 搜索条件
+                param.startTime = this.export.startTime;
+                param.endTime =  this.export.endTime;
+                param.org_Id =  this.export.org_Id;//电销组
+                axios.post('/statistics/teleStatement/exportResourceAllocationPersion',param,{responseType:'blob'})
                     .then(function (response) {
                         console.log(response)
                         var data =  response.data;

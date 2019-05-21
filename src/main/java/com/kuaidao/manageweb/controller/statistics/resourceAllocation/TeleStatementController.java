@@ -76,6 +76,9 @@ public class TeleStatementController {
         queryFieldByRoleAndMenuReq.setId(user.getRoleList().get(0).getId());
         JSONResult<List<CustomFieldQueryDTO>> queryFieldByRoleAndMenu =
                 customFieldFeignClient.queryFieldByRoleAndMenu(queryFieldByRoleAndMenuReq);
+        List<CustomFieldQueryDTO> data = queryFieldByRoleAndMenu.getData();
+        data.removeIf(s -> s.getFieldCode().equals("day"));
+        data.removeIf(s -> s.getFieldCode().equals("userName"));
         request.setAttribute("fieldList", queryFieldByRoleAndMenu.getData());
         // 根据用户查询页面字段
         QueryFieldByUserAndMenuReq queryFieldByUserAndMenuReq = new QueryFieldByUserAndMenuReq();
@@ -96,8 +99,19 @@ public class TeleStatementController {
     @ResponseBody
     public JSONResult<PageBean<ResourceAllocationDto>> getResourceAllocationTable(@RequestBody ResourceAllocationQueryDto resourceAllocationQueryDto) {
         JSONResult<PageBean<ResourceAllocationDto>> resourceAllocationPage = statisticsFeignClient.getResourceAllocationPage(resourceAllocationQueryDto);
-        System.out.println(resourceAllocationPage);
         return resourceAllocationPage;
+    }
+
+    /**
+     * 获取分配页面统计数据
+     * @param resourceAllocationQueryDto
+     * @return
+     */
+    @RequestMapping("/getResourceAllocationCount")
+    @ResponseBody
+    public JSONResult<List<ResourceAllocationDto>> getGroupCountTotal(@RequestBody ResourceAllocationQueryDto resourceAllocationQueryDto){
+        JSONResult<List<ResourceAllocationDto>> countRes = statisticsFeignClient.getResourceAllocationCount(resourceAllocationQueryDto);
+        return countRes;
     }
 
     /**
@@ -110,8 +124,14 @@ public class TeleStatementController {
             @RequestBody ResourceAllocationQueryDto resourceAllocationQueryDto,
             HttpServletResponse response) throws Exception {
         JSONResult<List<ResourceAllocationDto>> resourceAllocationList = statisticsFeignClient.getResourceAllocationList(resourceAllocationQueryDto);
+        JSONResult<List<ResourceAllocationDto>> countRes = statisticsFeignClient.getResourceAllocationCount(resourceAllocationQueryDto);
+        List<ResourceAllocationDto> total = countRes.getData();
+        ResourceAllocationDto resTotal = total.get(0);
         List<List<Object>> dataList = new ArrayList<List<Object>>();
+        //加表头
         dataList.add(getHeadTitleList());
+        //加合计
+        addTotalTexportResourceAllocation(resTotal,dataList);
         List<ResourceAllocationDto> orderList = resourceAllocationList.getData();
         for(int i = 0; i<orderList.size(); i++){
             ResourceAllocationDto ra = orderList.get(i);
@@ -141,6 +161,22 @@ public class TeleStatementController {
     }
 
 
+    private void addTotalTexportResourceAllocation(ResourceAllocationDto resTotal, List<List<Object>> dataList) {
+        List<Object> totalList = new ArrayList<>();
+        totalList.add("");
+        totalList.add("合计");
+        totalList.add("");
+        totalList.add(resTotal.getJointExhibition());
+        totalList.add(resTotal.getPriceCompetition());
+        totalList.add(resTotal.getOptimization());
+        totalList.add(resTotal.getInformationFlow());
+        totalList.add(resTotal.getOfficialWebsite());
+        totalList.add(resTotal.getIndustry());
+        totalList.add(resTotal.getOther());
+        totalList.add(resTotal.getNetizensMissed());
+        dataList.add(totalList);
+    }
+
     /**
      * 资源分配页面（个人）
      * @return
@@ -158,6 +194,9 @@ public class TeleStatementController {
         queryFieldByRoleAndMenuReq.setId(user.getRoleList().get(0).getId());
         JSONResult<List<CustomFieldQueryDTO>> queryFieldByRoleAndMenu =
                 customFieldFeignClient.queryFieldByRoleAndMenu(queryFieldByRoleAndMenuReq);
+        List<CustomFieldQueryDTO> data = queryFieldByRoleAndMenu.getData();
+        data.removeIf(s -> s.getFieldCode().equals("orgName"));
+        data.removeIf(s -> s.getFieldCode().equals("day"));
         request.setAttribute("fieldList", queryFieldByRoleAndMenu.getData());
         JSONResult<PageBean<ResourceAllocationDto>> resourceAllocationPage = statisticsFeignClient.getResourceAllocationPagePersion(resourceAllocationQueryDto);
         System.out.println(resourceAllocationPage);
@@ -206,6 +245,44 @@ public class TeleStatementController {
     }
 
     /**
+     * 个人按天导出
+     */
+    @PostMapping("/exportResourceAllocationDayPersion")
+    public void exportResourceAllocationDayPersion(
+            @RequestBody ResourceAllocationQueryDto resourceAllocationQueryDto,
+            HttpServletResponse response) throws Exception {
+        JSONResult<List<ResourceAllocationDto>> resourceAllocationsDayPersion = statisticsFeignClient.getResourceAllocationsDayPersion(resourceAllocationQueryDto);
+        List<List<Object>> dataList = new ArrayList<List<Object>>();
+        dataList.add(getHeadTitleListDayPersion());
+        List<ResourceAllocationDto> orderList = resourceAllocationsDayPersion.getData();
+        for(int i = 0; i<orderList.size(); i++){
+            ResourceAllocationDto ra = orderList.get(i);
+            List<Object> curList = new ArrayList<>();
+            curList.add(i + 1);
+            curList.add(ra.getDay());
+            curList.add(ra.getUserName());
+            curList.add(ra.getAssignClueCount());
+            curList.add(ra.getJointExhibition());
+            curList.add(ra.getPriceCompetition());
+            curList.add(ra.getOptimization());
+            curList.add(ra.getInformationFlow());
+            curList.add(ra.getOfficialWebsite());
+            curList.add(ra.getIndustry());
+            curList.add(ra.getOther());
+            curList.add(ra.getNetizensMissed());
+            dataList.add(curList);
+        }
+        XSSFWorkbook wbWorkbook = ExcelUtil.creat2007Excel(dataList);
+        String name = "分配记录表" + DateUtil.convert2String(new Date(), DateUtil.ymdhms2) + ".xlsx";
+        response.addHeader("Content-Disposition",
+                "attachment;filename=" + new String(name.getBytes("UTF-8"), "ISO8859-1"));
+        response.addHeader("fileName", URLEncoder.encode(name, "utf-8"));
+        response.setContentType("application/octet-stream");
+        ServletOutputStream outputStream = response.getOutputStream();
+        wbWorkbook.write(outputStream);
+        outputStream.close();
+    }
+    /**
      * 资源分配页面 合计 
     * @return
      */
@@ -221,6 +298,8 @@ public class TeleStatementController {
         queryFieldByRoleAndMenuReq.setId(user.getRoleList().get(0).getId());
         JSONResult<List<CustomFieldQueryDTO>> queryFieldByRoleAndMenu =
                 customFieldFeignClient.queryFieldByRoleAndMenu(queryFieldByRoleAndMenuReq);
+        List<CustomFieldQueryDTO> data = queryFieldByRoleAndMenu.getData();
+        data.removeIf(s -> s.getFieldCode().equals("day"));
         request.setAttribute("fieldList", queryFieldByRoleAndMenu.getData());
         return "/reportforms/resourceAllocationTableSum";
     }
@@ -242,6 +321,8 @@ public class TeleStatementController {
         queryFieldByRoleAndMenuReq.setId(user.getRoleList().get(0).getId());
         JSONResult<List<CustomFieldQueryDTO>> queryFieldByRoleAndMenu =
                 customFieldFeignClient.queryFieldByRoleAndMenu(queryFieldByRoleAndMenuReq);
+        List<CustomFieldQueryDTO> data = queryFieldByRoleAndMenu.getData();
+        data.removeIf(s -> s.getFieldCode().equals("day"));
         request.setAttribute("fieldList", queryFieldByRoleAndMenu.getData());
         return "/reportforms/resourceAllocationTableTeam";
     }
@@ -393,6 +474,23 @@ public class TeleStatementController {
         return headTitleList;
     }
 
+    private List<Object> getHeadTitleListDayPersion() {
+        List<Object> headTitleList = new ArrayList<>();
+        headTitleList.add("序号");
+        headTitleList.add("日期");
+        headTitleList.add("电销人员");
+        headTitleList.add("分配资源数");
+        headTitleList.add("联展");
+        headTitleList.add("竞价");
+        headTitleList.add("优化");
+        headTitleList.add("信息流");
+        headTitleList.add("官网");
+        headTitleList.add("行业");
+        headTitleList.add("其他");
+        headTitleList.add("网民未接");
+        return headTitleList;
+    }
+
     private UserInfoDTO getUser() {
         Object attribute = SecurityUtils.getSubject().getSession().getAttribute("user");
         UserInfoDTO user = (UserInfoDTO) attribute;
@@ -463,5 +561,26 @@ public class TeleStatementController {
     public String firstRATablePerson() {
         return "reportforms/firstRATablePerson";
     }
+
+
+    /**
+     *资源接通有效率表
+     * @return
+     */
+    @RequestMapping("/resourceConnectEfficientTable")
+    public String resourceConectEfficientTable() {
+        return "reportforms/resourceConnectEfficientTable";
+    }
+
+    /**
+     *电销组资源接通有效率表
+     * @return
+     */
+    @RequestMapping("/resourceConectTelEfficientTable")
+    public String resourceConectTelEfficientTable() {
+        return "reportforms/resourceConectTelEfficientTable";
+    }
+
+
     
 }

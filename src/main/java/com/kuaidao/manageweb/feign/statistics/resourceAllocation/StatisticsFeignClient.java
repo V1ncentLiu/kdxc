@@ -67,6 +67,14 @@ public interface StatisticsFeignClient {
     @PostMapping("/getResourceAllocationDayPagePersion")
     JSONResult<PageBean<ResourceAllocationDto>> getResourceAllocationDayPagePersion(@RequestBody ResourceAllocationQueryDto resourceAllocationQueryDto);
 
+    /**
+     * 合计
+     * @param
+     * @return
+     */
+    @PostMapping("/getResourceAllocationCount")
+    JSONResult<List<ResourceAllocationDto>> getResourceAllocationCount(@RequestBody ResourceAllocationQueryDto resourceAllocationQueryDto);
+
     @Component
     class HystrixClientFallback implements StatisticsFeignClient {
 
@@ -106,6 +114,11 @@ public interface StatisticsFeignClient {
         @Override
         public JSONResult<PageBean<ResourceAllocationDto>> getResourceAllocationDayPagePersion(ResourceAllocationQueryDto resourceAllocationQueryDto) {
             return fallBackError("查询个人按天分配列表失败");
+        }
+
+        @Override
+        public JSONResult<List<ResourceAllocationDto>> getResourceAllocationCount(ResourceAllocationQueryDto resourceAllocationQueryDto) {
+            return fallBackError("查询组合计失败");
         }
     }
 }
