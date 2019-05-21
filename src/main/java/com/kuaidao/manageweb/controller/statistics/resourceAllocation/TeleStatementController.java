@@ -567,9 +567,9 @@ public class TeleStatementController {
      *资源接通有效率表
      * @return
      */
-    @RequestMapping("/resourceConectEfficientTable")
+    @RequestMapping("/resourceConnectEfficientTable")
     public String resourceConectEfficientTable() {
-        return "reportforms/resourceConectEfficientTable";
+        return "reportforms/resourceConnectEfficientTable";
     }
 
     /**
