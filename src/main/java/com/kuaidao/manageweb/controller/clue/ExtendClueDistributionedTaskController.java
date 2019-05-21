@@ -219,7 +219,7 @@ public class ExtendClueDistributionedTaskController {
             }
         }
 
-        XSSFWorkbook wbWorkbook = ExcelUtil.creat2007Excel(dataList);
+        XSSFWorkbook wbWorkbook = ExcelUtil.creat2007Excel1(dataList);
         String name = "资源情况" + DateUtil.convert2String(new Date(), DateUtil.ymdhms2) + ".xlsx";
         response.addHeader("Content-Disposition",
             "attachment;filename=" + new String(name.getBytes("UTF-8"), "ISO8859-1"));
@@ -306,7 +306,7 @@ public class ExtendClueDistributionedTaskController {
                 dataList.add(curList);
             }
         }
-        XSSFWorkbook wbWorkbook = ExcelUtil.creat2007Excel(dataList);
+        XSSFWorkbook wbWorkbook = ExcelUtil.creat2007Excel1(dataList);
         String name = "资源沟通记录" + DateUtil.convert2String(new Date(), DateUtil.ymdhms2) + ".xlsx";
         response.addHeader("Content-Disposition",
             "attachment;filename=" + new String(name.getBytes("UTF-8"), "ISO8859-1"));

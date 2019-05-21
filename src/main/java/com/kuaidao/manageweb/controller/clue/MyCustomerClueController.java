@@ -5,7 +5,9 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
+
 import javax.servlet.http.HttpServletRequest;
+
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.apache.shiro.subject.Subject;
@@ -19,24 +21,14 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+
 import com.kuaidao.aggregation.constant.ClueCirculationConstant;
 import com.kuaidao.aggregation.dto.call.CallRecordReqDTO;
 import com.kuaidao.aggregation.dto.call.CallRecordRespDTO;
 import com.kuaidao.aggregation.dto.circulation.CirculationInsertOrUpdateDTO;
 import com.kuaidao.aggregation.dto.circulation.CirculationReqDTO;
 import com.kuaidao.aggregation.dto.circulation.CirculationRespDTO;
-import com.kuaidao.aggregation.dto.clue.ClueBasicDTO;
-import com.kuaidao.aggregation.dto.clue.ClueCustomerDTO;
-import com.kuaidao.aggregation.dto.clue.ClueDTO;
-import com.kuaidao.aggregation.dto.clue.ClueFileDTO;
-import com.kuaidao.aggregation.dto.clue.ClueQueryDTO;
-import com.kuaidao.aggregation.dto.clue.ClueRelateDTO;
-import com.kuaidao.aggregation.dto.clue.CustomerClueDTO;
-import com.kuaidao.aggregation.dto.clue.CustomerClueQueryDTO;
-import com.kuaidao.aggregation.dto.clue.ReleaseClueDTO;
-import com.kuaidao.aggregation.dto.clue.RepeatClueDTO;
-import com.kuaidao.aggregation.dto.clue.RepeatClueQueryDTO;
-import com.kuaidao.aggregation.dto.clue.RepeatClueSaveDTO;
+import com.kuaidao.aggregation.dto.clue.*;
 import com.kuaidao.aggregation.dto.clueappiont.ClueAppiontmentDTO;
 import com.kuaidao.aggregation.dto.project.ProjectInfoDTO;
 import com.kuaidao.aggregation.dto.tracking.TrackingInsertOrUpdateDTO;
@@ -49,6 +41,7 @@ import com.kuaidao.common.entity.IdEntityLong;
 import com.kuaidao.common.entity.IdListLongReq;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
+import com.kuaidao.common.util.SortUtils;
 import com.kuaidao.manageweb.config.LogRecord;
 import com.kuaidao.manageweb.config.LogRecord.OperationType;
 import com.kuaidao.manageweb.constant.MenuEnum;
@@ -341,7 +334,8 @@ public class MyCustomerClueController {
         // 项目
         JSONResult<List<ProjectInfoDTO>> proJson = projectInfoFeignClient.allProject();
         if (proJson.getCode().equals(JSONResult.SUCCESS)) {
-            request.setAttribute("proSelect", proJson.getData());
+            List<ProjectInfoDTO> result = SortUtils.sortList(proJson.getData(),"projectName");
+            request.setAttribute("proSelect", result);
         } else {
             request.setAttribute("proSelect", new ArrayList());
         }
