@@ -76,6 +76,9 @@ public class TeleStatementController {
         queryFieldByRoleAndMenuReq.setId(user.getRoleList().get(0).getId());
         JSONResult<List<CustomFieldQueryDTO>> queryFieldByRoleAndMenu =
                 customFieldFeignClient.queryFieldByRoleAndMenu(queryFieldByRoleAndMenuReq);
+        List<CustomFieldQueryDTO> data = queryFieldByRoleAndMenu.getData();
+        data.removeIf(s -> s.getFieldCode().equals("day"));
+        data.removeIf(s -> s.getFieldCode().equals("userName"));
         request.setAttribute("fieldList", queryFieldByRoleAndMenu.getData());
         // 根据用户查询页面字段
         QueryFieldByUserAndMenuReq queryFieldByUserAndMenuReq = new QueryFieldByUserAndMenuReq();
@@ -191,6 +194,9 @@ public class TeleStatementController {
         queryFieldByRoleAndMenuReq.setId(user.getRoleList().get(0).getId());
         JSONResult<List<CustomFieldQueryDTO>> queryFieldByRoleAndMenu =
                 customFieldFeignClient.queryFieldByRoleAndMenu(queryFieldByRoleAndMenuReq);
+        List<CustomFieldQueryDTO> data = queryFieldByRoleAndMenu.getData();
+        data.removeIf(s -> s.getFieldCode().equals("orgName"));
+        data.removeIf(s -> s.getFieldCode().equals("day"));
         request.setAttribute("fieldList", queryFieldByRoleAndMenu.getData());
         JSONResult<PageBean<ResourceAllocationDto>> resourceAllocationPage = statisticsFeignClient.getResourceAllocationPagePersion(resourceAllocationQueryDto);
         System.out.println(resourceAllocationPage);
@@ -292,6 +298,8 @@ public class TeleStatementController {
         queryFieldByRoleAndMenuReq.setId(user.getRoleList().get(0).getId());
         JSONResult<List<CustomFieldQueryDTO>> queryFieldByRoleAndMenu =
                 customFieldFeignClient.queryFieldByRoleAndMenu(queryFieldByRoleAndMenuReq);
+        List<CustomFieldQueryDTO> data = queryFieldByRoleAndMenu.getData();
+        data.removeIf(s -> s.getFieldCode().equals("day"));
         request.setAttribute("fieldList", queryFieldByRoleAndMenu.getData());
         return "/reportforms/resourceAllocationTableSum";
     }
@@ -313,6 +321,8 @@ public class TeleStatementController {
         queryFieldByRoleAndMenuReq.setId(user.getRoleList().get(0).getId());
         JSONResult<List<CustomFieldQueryDTO>> queryFieldByRoleAndMenu =
                 customFieldFeignClient.queryFieldByRoleAndMenu(queryFieldByRoleAndMenuReq);
+        List<CustomFieldQueryDTO> data = queryFieldByRoleAndMenu.getData();
+        data.removeIf(s -> s.getFieldCode().equals("day"));
         request.setAttribute("fieldList", queryFieldByRoleAndMenu.getData());
         return "/reportforms/resourceAllocationTableTeam";
     }
