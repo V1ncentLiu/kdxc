@@ -1,13 +1,11 @@
 package com.kuaidao.manageweb.controller.dictionary;
 
-import com.kuaidao.common.constant.SysErrorCodeEnum;
-import com.kuaidao.common.entity.IdEntity;
-import com.kuaidao.common.entity.JSONResult;
-import com.kuaidao.common.entity.PageBean;
-import com.kuaidao.manageweb.config.LogRecord;
-import com.kuaidao.manageweb.constant.MenuEnum;
-import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
-import com.kuaidao.sys.dto.dictionary.*;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.validation.Valid;
+
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,13 +13,22 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.validation.Valid;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import com.kuaidao.common.constant.SysErrorCodeEnum;
+import com.kuaidao.common.entity.IdEntity;
+import com.kuaidao.common.entity.JSONResult;
+import com.kuaidao.common.entity.PageBean;
+import com.kuaidao.common.util.SortUtils;
+import com.kuaidao.manageweb.config.LogRecord;
+import com.kuaidao.manageweb.constant.MenuEnum;
+import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
+import com.kuaidao.sys.dto.dictionary.DictionaryItemAddAndUpdateDTO;
+import com.kuaidao.sys.dto.dictionary.DictionaryItemQueryDTO;
+import com.kuaidao.sys.dto.dictionary.DictionaryItemRespDTO;
 
 /**
  * @author  yangbiao
@@ -41,10 +48,16 @@ public class DictionaryItemController {
 
 
     @SuppressWarnings("unchecked")
-	@PostMapping("/dicItemsByGroupCode")
+    @PostMapping("/dicItemsByGroupCode")
     @ResponseBody
-    public JSONResult<List<DictionaryItemRespDTO>> itemsByGroupCode(@RequestBody DictionaryItemQueryDTO queryDTO){
-        JSONResult result = dictionaryItemFeignClient.queryDicItemsByGroupCode(queryDTO.getGroupCode());
+    public JSONResult<List<DictionaryItemRespDTO>> itemsByGroupCode(@RequestBody DictionaryItemQueryDTO queryDTO) {
+        JSONResult<List<DictionaryItemRespDTO>> result = new JSONResult<>();
+        result = dictionaryItemFeignClient.queryDicItemsByGroupCode(queryDTO.getGroupCode());
+        if (result.getCode().equals(JSONResult.SUCCESS)) {
+            //对结果集进行排序
+            List<DictionaryItemRespDTO> resultList = SortUtils.sortList(result.getData(), "name");
+            result.setData(resultList);
+        }
         return result;
     }
 
@@ -96,7 +109,9 @@ public class DictionaryItemController {
     @RequestMapping("/saveDictionaryItem")
     @ResponseBody
     public JSONResult saveDictionary(@Valid @RequestBody DictionaryItemAddAndUpdateDTO dictionaryItemDTO  , BindingResult result){
-        if (result.hasErrors()) return validateParam(result);
+        if (result.hasErrors()) {
+            return validateParam(result);
+        }
         return  dictionaryItemFeignClient.saveDictionaryItem(dictionaryItemDTO);
     }
     @LogRecord(description = "更新词条",operationType = LogRecord.OperationType.UPDATE,menuName = MenuEnum.DICTIONARY_MANAGEMENT_ITEM)
@@ -104,7 +119,9 @@ public class DictionaryItemController {
     @RequestMapping("/updateDictionaryItem")
     @ResponseBody
     public JSONResult updateDictionary(@Valid @RequestBody DictionaryItemAddAndUpdateDTO dictionaryDTO , BindingResult result){
-        if (result.hasErrors()) return validateParam(result);
+        if (result.hasErrors()) {
+            return validateParam(result);
+        }
         return dictionaryItemFeignClient.updateDictionaryItem(dictionaryDTO);
     }
 
