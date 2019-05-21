@@ -22,10 +22,10 @@
         <div class="mainSearchFormBox">
            <el-form :inline="true" :model="form" class="demo-form-inline mainSearchForm" ref="form">                 
                 <el-form-item label="起止时间:">
-                    <el-date-picker format="yyyy-MM-dd HH:mm:ss" v-model="form.startTime" type="datetime" placeholder="选择日期"></el-date-picker>
+                    <el-date-picker format="yyyy-MM-dd HH:mm" v-model="form.startTime" type="datetime" placeholder="选择日期"></el-date-picker>
                 </el-form-item>
                 <el-form-item label="—" class="widthauto">
-                   <el-date-picker format="yyyy-MM-dd HH:mm:ss" v-model="form.endTime" type="datetime" placeholder="选择日期"></el-date-picker>
+                   <el-date-picker format="yyyy-MM-dd HH:mm" v-model="form.endTime" type="datetime" placeholder="选择日期"></el-date-picker>
                 </el-form-item>
                 <el-form-item label="电销组:">  
                     <el-select v-model="form.org_Id" placeholder="电销组" style="width: 100%;" clearable filterable>
@@ -38,7 +38,7 @@
                     </el-select>
                 </el-form-item>
                 <el-form-item label="分配来源:">  
-                    <el-select v-model="form.source" placeholder="分配来源" style="width: 100%;" clearable filterable>
+                    <el-select v-model="form.new_resource" placeholder="分配来源" style="width: 100%;" clearable filterable>
                         <el-option
                             v-for="item in distributionSource"
                             :key="item.id"
@@ -98,16 +98,30 @@
                     startTime:'',
                     endTime:'',
                     org_Id:'',
+                    new_resource:''
                 },
                 export: {
                     startTime:'',
                     endTime:'',
-                    org_Id:''
+                    org_Id:'',
+                    new_resource:''
                 },
                 tableData: [],//表格数据
                 tableColums: [],//表头list
                 orgTeleArr:queryOrg,//电销组
-                distributionSource:[],//分配来源
+                distributionSource:[{
+                    id:'1',
+                    name:'话务新资源'
+                },{
+                    id:'2',
+                    name:'推广新资源'
+                },{
+                    id:'3',
+                    name:'非新资源'
+                },{
+                    id:'99',
+                    name:'其他(资源未分配)'
+                }],//分配来源
                 pager:{
                     total: 0,
                     currentPage: 1,
@@ -173,9 +187,10 @@
                     // 插入合计一行
                     if(resobjData.length>0){
                         mainDivVM.summaryFun(param);
-                    } 
-                    // loading
-                    mainDivVM.loading=false;
+                    }else{
+                        // loading
+                        mainDivVM.loading=false;
+                    }
                     // 给导出参数赋值
                     mainDivVM.export.startTime = mainDivVM.minuteFormat(startTime);
                     mainDivVM.export.endTime = mainDivVM.minuteFormat(endTime);
@@ -183,13 +198,18 @@
                 })
             },
             gotoTeam(item){
-                var org_Id = item.orgId;
                 var orgName = item.orgName;
+                var org_Id = item.orgId;//组id
+                // 搜索条件
+                var startTime = this.form.startTime;
+                var endTime = this.form.endTime;
+                var new_resource = this.form.new_resource;//来源
+                
                 console.log(item)
                 if(orgName == "合计"){
                     window.location.href="/statistics/teleStatement/resourceAllocationTableSum";
                 }else{
-                    window.location.href="/statistics/teleStatement/resourceAllocationTableTeam?groupId=" + org_Id;
+                    window.location.href="/statistics/teleStatement/resourceAllocationTableTeam?groupId=" + org_Id+"&startTime="+ startTime+"&endTime="+ endTime+"&startTime="+ startTime;
                 }
             },
             arraySpanMethod({ row, column, rowIndex, columnIndex }) { // 合并第一行
@@ -219,6 +239,7 @@
                 //     other: '16',
                 //     netizensMissed: '18'
                 // };
+                mainDivVM.loading=true;
                 axios.post('/statistics/teleStatement/getResourceAllocationCount',param).then(function (response) {
                     console.log(response) 
                     if(!response){
@@ -248,7 +269,9 @@
                     }  
                     var resobjData=resobj.data;
                     // 插入合计一行
-                    mainDivVM.tableData.unshift(resobjData[0]);                    
+                    mainDivVM.tableData.unshift(resobjData[0]); 
+                    // loading
+                    mainDivVM.loading=false;                   
                 })
                 
                 // const sums = [];
@@ -284,8 +307,8 @@
             searchYesterday(){//昨天
                 var today = new Date();
                today.setTime(today.getTime()-24*60*60*1000);
-               var startTime = today.getFullYear()+"-" + (today.getMonth()+1) + "-" + today.getDate()+" 00:00:00";
-               var endTime =today.getFullYear()+"-" + (today.getMonth()+1) + "-" + today.getDate()+" 23:59:59";
+               var startTime = today.getFullYear()+"-" + (today.getMonth()+1) + "-" + today.getDate()+" 00:00";
+               var endTime =today.getFullYear()+"-" + (today.getMonth()+1) + "-" + today.getDate()+" 23:59";
                this.form.startTime=startTime;
                this.form.endTime=endTime;
                this.searchTable();
@@ -301,8 +324,8 @@
                  var d = b.valueOf();
                  var startTime= new Date(c);
                  var endTime = new Date(d);
-                 this.form.startTime=startTime.getFullYear()+"-" + (startTime.getMonth()+1) + "-" + startTime.getDate()+" 00:00:00";
-                 this.form.endTime=endTime.getFullYear()+"-" + (endTime.getMonth()+1) + "-" + endTime.getDate()+" 23:59:59";
+                 this.form.startTime=startTime.getFullYear()+"-" + (startTime.getMonth()+1) + "-" + startTime.getDate()+" 00:00";
+                 this.form.endTime=endTime.getFullYear()+"-" + (endTime.getMonth()+1) + "-" + endTime.getDate()+" 23:59";
                  this.searchTable();
             },
             searchMonth(){//本月
@@ -316,8 +339,8 @@
               //  var d = b.valueOf()+1*24*60*60*1000;
                 var startTime= new Date(c);
                // var endTime = new Date(d);
-                this.form.startTime=startTime.getFullYear()+"-" + (startTime.getMonth()+1) + "-" + startTime.getDate()+" 00:00:00";;
-                this.form.endTime=year+"-"+(month+1)+"-"+date+" 23:59:59";
+                this.form.startTime=startTime.getFullYear()+"-" + (startTime.getMonth()+1) + "-" + startTime.getDate()+" 00:00";;
+                this.form.endTime=year+"-"+(month+1)+"-"+date+" 23:59";
                 this.searchTable();
             },
             exportRs(){
@@ -340,12 +363,13 @@
         },
         created(){    
             // 默认进入显示当天时间
-            // var today = new Date();
-            // today.setTime(today.getTime());
-            // var startTime = today.getFullYear()+"-"+ (today.getMonth()+1) + "-" + today.getDate()+" 00:00";
-            // var endTime =today.getFullYear()+"-"+ (today.getMonth()+1) + "-" + today.getDate()+" 23:59";
-            // this.form.startTime=startTime;
-            // this.form.endTime=endTime;         
+            var today = new Date();
+            today.setTime(today.getTime());
+            var startTime = today.getFullYear()+"-"+ (today.getMonth()+1) + "-" + today.getDate()+" 00:00";
+            var endTime =today.getFullYear()+"-"+ (today.getMonth()+1) + "-" + today.getDate()+" 23:59";
+            this.form.startTime=startTime;
+            this.form.endTime=endTime;
+            // 列表搜索         
             this.searchTable();
         },
         mounted(){            
