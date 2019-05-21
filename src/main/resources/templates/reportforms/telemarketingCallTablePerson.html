@@ -28,15 +28,16 @@
                 <el-form-item label="—" class="widthauto">
                    <el-date-picker format="yyyy-MM-dd HH:mm" v-model="form.endTime" type="datetime" placeholder="选择日期"></el-date-picker>
                 </el-form-item>
-                <el-form-item label="电销组:">  
-                    <el-select v-model="form.orgId" placeholder="电销组" style="width: 100%;" clearable @change="currentTelSale" filterable>
+                <el-form-item label="电销组:"> 
+                    <el-input v-model="form.orgId" :readOnly="isReadOnly"></el-input> 
+                    <!-- <el-select v-model="form.orgId" placeholder="电销组" style="width: 100%;" clearable @change="currentTelSale" filterable>
                         <el-option
                             v-for="item in orgTeleArr"
                             :key="item.id"
                             :label="item.name"
                             :value="item.id">
                         </el-option>
-                    </el-select>
+                    </el-select> -->
                 </el-form-item>
                 <el-form-item label="电销顾问:">  
                     <el-select 
@@ -102,22 +103,30 @@
 <script th:inline="javascript">
     var queryOrg=[[${queryOrg}]]; // 电销组
     var curUserId = [[${curUserId}]]; 
+    var form = {
+        startTime: '2019-05-20 00:00',
+        endTime: '2019-05-21 23:59',
+        orgId: '电销组1',
+        userId: '电销人员1'
+    };
     var mainDivVM = new Vue({
         el: '#maindiv',
         data: function() {
             return {
+                isReadOnly: true,
                 loading: false,
                 form: {
                     startTime: '',
                     endTime: '',
                     orgId: '',
-                    userId: curUserId
+                    userId: ''
                 },
                 tableData: [
                 // {
                 //     id: 1,
                 //     orgId: "1",
-                //     dateId: 1558059184348,
+                //     userId: '2',
+                //     dateId: "20130505",
                 //     userName: '电销人员1',
                 //     callCount: 1000,
                 //     calledCount: 10,
@@ -130,7 +139,8 @@
                 // },{
                 //     id: 2,
                 //     orgId: "2",
-                //     dateId: 1558059184348,
+                //     userId: '2',
+                //     dateId: "20130505",
                 //     userName: '电销人员2',
                 //     callCount: 1000,
                 //     calledCount: 10,
@@ -172,7 +182,8 @@
                 param.endTime = this.minuteFormat(endTime);
                 param.pageSize = this.pager.pageSize;
                 param.pageNum = this.pager.currentPage;
-                param.curUserId =  this.form.curUserId; // 电销
+                param.orgId =  this.form.orgId; // 电销组
+                param.userId =  this.form.userId; // 电销顾问
                 console.log(param);
                 this.loading = true; 
                 axios.post('/callrecord/teleSaleTalkTime/listTeleSaleTalkTime',param).then(function (response) { 
@@ -207,11 +218,11 @@
                     mainDivVM.loading = false;
                 }).catch(function (error) {
                     console.log(error);
+                    mainDivVM.loading = false;
                     mainDivVM.$message({
                         message: "请求失败，请稍后重试",
                         type: "error"
                     });
-                    mainDivVM.loading = false;
                 });
             },
             currentTelSale(seleVal){ // 根据电销组选择创业顾问
@@ -323,12 +334,11 @@
             },
         },
         created(){ 
-            var today = new Date();
-            today.setTime(today.getTime());
-            var startTime = today.getFullYear()+"-"+ (today.getMonth()+1) + "-" + today.getDate()+" 00:00";
-            var endTime =today.getFullYear()+"-"+ (today.getMonth()+1) + "-" + today.getDate()+" 23:59";
-            this.form.startTime=startTime;
-            this.form.endTime=endTime;            
+            this.form.startTime=form.startTime;
+            this.form.endTime=form.endTime;   
+            this.form.orgId=form.orgId;   
+            this.form.userId=form.userId;   
+            console.log(this.form);
             this.searchTable();
         },
         mounted(){
