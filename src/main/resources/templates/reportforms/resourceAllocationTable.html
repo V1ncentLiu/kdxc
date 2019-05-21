@@ -87,109 +87,11 @@
 </body>
 <script th:inline="javascript">
     var queryOrg=[[${saleGroupList}]];//电销组
-    var distributionSource=[[${queryOrg}]];//分配来源
+    // var distributionSource=[[${queryOrg}]];//分配来源
+    var resTotalList=[[${resTotalList}]];//合计
     var fieldList=[[${fieldList}]];//表头list
-    // var fieldList=[{//表头假数据
-    //     displayName:"电销组",
-    //     fieldCode:"orgName",//需要改成后端返回的字段名称
-    //     fieldName:"电销组",
-    //     id:"1",
-    //     menuCode:null,
-    //     menuId:null,
-    //     pageNum:0,
-    //     pageSize:0,
-    //     sortNum:1
-    // },{
-    //     displayName:"分配资源数",
-    //     fieldCode:"assignClueCount",
-    //     fieldName:"分配资源数",
-    //     id:"2",
-    //     menuCode:null,
-    //     menuId:null,
-    //     pageNum:0,
-    //     pageSize:0,
-    //     sortNum:2
-    // },{
-    //     displayName:"联展",
-    //     fieldCode:"jointExhibition",
-    //     fieldName:"联展",
-    //     id:"3",
-    //     menuCode:null,
-    //     menuId:null,
-    //     pageNum:0,
-    //     pageSize:0,
-    //     sortNum:3
-    // },{
-    //     displayName:"竞价",
-    //     fieldCode:"priceCompetition",
-    //     fieldName:"竞价",
-    //     id:"4",
-    //     menuCode:null,
-    //     menuId:null,
-    //     pageNum:0,
-    //     pageSize:0,
-    //     sortNum:4
-    // },{
-    //     displayName:"优化",
-    //     fieldCode:"optimization",
-    //     fieldName:"优化",
-    //     id:"5",
-    //     menuCode:null,
-    //     menuId:null,
-    //     pageNum:0,
-    //     pageSize:0,
-    //     sortNum:5
-    // },{
-    //     displayName:"信息流",
-    //     fieldCode:"informationFlow",
-    //     fieldName:"信息流",
-    //     id:"6",
-    //     menuCode:null,
-    //     menuId:null,
-    //     pageNum:0,
-    //     pageSize:0,
-    //     sortNum:6
-    // },{
-    //     displayName:"官网",
-    //     fieldCode:"officialWebsite",
-    //     fieldName:"官网",
-    //     id:"7",
-    //     menuCode:null,
-    //     menuId:null,
-    //     pageNum:0,
-    //     pageSize:0,
-    //     sortNum:7
-    // },{
-    //     displayName:"行业",
-    //     fieldCode:"industry",
-    //     fieldName:"行业",
-    //     id:"8",
-    //     menuCode:null,
-    //     menuId:null,
-    //     pageNum:0,
-    //     pageSize:0,
-    //     sortNum:8
-    // },{
-    //     displayName:"其他",
-    //     fieldCode:"other",
-    //     fieldName:"其他",
-    //     id:"9",
-    //     menuCode:null,
-    //     menuId:null,
-    //     pageNum:0,
-    //     pageSize:0,
-    //     sortNum:9
-    // },{
-    //     displayName:"网民未接",
-    //     fieldCode:"netizensMissed",
-    //     fieldName:"网民未接",
-    //     id:"10",
-    //     menuCode:null,
-    //     menuId:null,
-    //     pageNum:0,
-    //     pageSize:0,
-    //     sortNum:10
-    // }]
+    console.log(resTotalList);
+    
     var mainDivVM = new Vue({
         el: '#maindiv',
         data: function() {
@@ -200,10 +102,15 @@
                     endTime:'',
                     org_Id:'',
                 },
+                export: {
+                    startTime:'',
+                    endTime:'',
+                    orgId:''
+                },
                 tableData: [],//表格数据
                 tableColums: [],//表头list
                 orgTeleArr:queryOrg,//电销组
-                distributionSource:distributionSource,//分配来源
+                distributionSource:[],//分配来源
                 pager:{
                     total: 0,
                     currentPage: 1,
@@ -213,10 +120,10 @@
         },
         methods: { 
             searchTable() {                 
-                var starTime=this.form.startTime;
+                var startTime=this.form.startTime;
                 var endTime=this.form.endTime;
                 if(endTime){
-                    if(starTime>endTime){
+                    if(startTime>endTime){
                         this.$message({
                             message: '开始时间不能大于结束时间',
                             type: 'warning'
@@ -228,11 +135,13 @@
                 param.pageSize = this.pager.pageSize;
                 param.pageNum =  this.pager.currentPage;
                 // 搜索条件
-                param.startTime = this.form.startTime;
-                param.endTime =  this.form.endTime;
+                param.startTime = this.minuteFormat(startTime);
+                param.endTime = this.minuteFormat(endTime);
                 param.org_Id =  this.form.org_Id;//电销组
                 this.loading=true;
                 axios.post('/statistics/teleStatement/getResourceAllocationTable',param).then(function (response) { 
+                    console.log(response) 
+
                     if(!response){
                         mainDivVM.$message({
                             message: "接口调用失败",
@@ -258,18 +167,24 @@
                         mainDivVM.loading=false;
                         return ;
                     }  
-                    var resobjData=resobj.data.data          
+                    var resobjData=resobj.data.data;
                     // 表格数据渲染
                     mainDivVM.tableData=resobjData;
                     // 表头数据渲染 
                     mainDivVM.tableColums= fieldList;
                     // 插入合计一行
-                    mainDivVM.summaryFun();
+                    if(resobjData.length>0){
+                        mainDivVM.summaryFun();
+                    }                    
                     // 分页
                     mainDivVM.pager.currentPage= resobj.data.currentPage;
                     mainDivVM.pager.total= resobj.data.total;
                     // loading
                     mainDivVM.loading=false;
+
+                    mainDivVM.export.startTime = mainDivVM.minuteFormat(startTime);
+                    mainDivVM.export.endTime = mainDivVM.minuteFormat(endTime);
+                    mainDivVM.export.orgId = mainDivVM.form.orgId;
                 })
             },
             gotoTeam(item){
@@ -302,20 +217,20 @@
             summaryFun () { // 将合计插入数据中：如果是分页，记得每次获取数据都要执行这个函数
                 // const { columns, data } = param;
                 // const sums = ["合计", '', 2, 2, '2%', 2, 2, '2%', 1234, 1234];
-                var obj = {
-                    id: '合计',
-                    orgName: '合计',
-                    assignClueCount: '2',
-                    jointExhibition: '4',
-                    priceCompetition: '6',
-                    optimization: '8',
-                    informationFlow: '10',
-                    officialWebsite: '12',
-                    industry: '14',
-                    other: '16',
-                    netizensMissed: '18'
-                };
-                this.tableData.unshift(obj);
+                // var obj = {
+                //     id: '合计',
+                //     orgName: '合计',
+                //     assignClueCount: '2',
+                //     jointExhibition: '4',
+                //     priceCompetition: '6',
+                //     optimization: '8',
+                //     informationFlow: '10',
+                //     officialWebsite: '12',
+                //     industry: '14',
+                //     other: '16',
+                //     netizensMissed: '18'
+                // };
+                this.tableData.unshift(resTotalList);
                 // const sums = [];
                 // columns.forEach((column, index) => {
                 //     if (index === 0) {
@@ -339,6 +254,12 @@
                 // sums[sums.length-2] = this.timeFun (sums[sums.length-2]);
                 // sums[sums.length-1] = this.timeFun (sums[sums.length-1]);
                 // return sums;
+            },
+            minuteFormat (m) {
+                if (!m) {
+                   return "";
+                 }
+                return moment(m).format("YYYYMMDDHHmm");
             },
             searchYesterday(){//昨天
                 var today = new Date();
@@ -390,9 +311,9 @@
             exportRs(){
                 var param = {};
                 // 搜索条件
-                param.startTime = this.form.startTime;
-                param.endTime =  this.form.endTime;
-                param.org_Id =  this.form.org_Id;//电销组
+                param.startTime = this.export.startTime;
+                param.endTime =  this.export.endTime;
+                param.org_Id =  this.export.org_Id;//电销组
                 axios.post('/statistics/teleStatement/exportResourceAllocationGroup',param,{responseType:'blob'})
                     .then(function (response) {
                         var data =  response.data;
@@ -405,7 +326,14 @@
                 });
             }
         },
-        created(){            
+        created(){    
+            // 默认进入显示当天时间
+            // var today = new Date();
+            // today.setTime(today.getTime());
+            // var startTime = today.getFullYear()+"-"+ (today.getMonth()+1) + "-" + today.getDate()+" 00:00";
+            // var endTime =today.getFullYear()+"-"+ (today.getMonth()+1) + "-" + today.getDate()+" 23:59";
+            // this.form.startTime=startTime;
+            // this.form.endTime=endTime;         
             this.searchTable();
         },
         mounted(){            
