@@ -685,9 +685,6 @@ public class ExtendClueAgendaTaskController {
                         islegal = false;
                         reasonInTime.append("预约回访时间");
                     }
-                    // if(islegal && clueAgendaTaskDTO1.getReserveTime1().length()<19){
-                    // islegal = false;
-                    // }
                 }
                 if (clueAgendaTaskDTO1.getDate() != null
                         && !"".equals(clueAgendaTaskDTO1.getDate())) {
@@ -703,9 +700,6 @@ public class ExtendClueAgendaTaskController {
                             reasonInTime.append("、日期");
                         }
                     }
-                    // if(islegal && clueAgendaTaskDTO1.getDate().length()<19){
-                    // islegal = false;
-                    // }
                 }
                 if (clueAgendaTaskDTO1.getMessageTime1() != null
                         && !"".equals(clueAgendaTaskDTO1.getMessageTime1())) {
@@ -721,9 +715,6 @@ public class ExtendClueAgendaTaskController {
                             reasonInTime.append("、留言时间");
                         }
                     }
-                    // if(islegal && clueAgendaTaskDTO1.getMessageTime1().length()<19){
-                    // islegal = false;
-                    // }
                 }
                 if (StringUtils.isNotBlank(reasonInTime)) {
                     failReason.append(reasonInTime + "时间格式错误；");
