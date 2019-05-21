@@ -361,19 +361,23 @@ public class BalanceAccountController {
                     accountDTO.getTeleSaleName() == null ? "" : accountDTO.getTeleSaleName());
             dataMap.put("receivable", accountDTO.getSignAmountReceivable() == null ? ""
                     : accountDTO.getSignAmountReceivable() );
-            if (accountDTO.getPayType() == 1 || accountDTO.getPayType() == 2) {
+           // if (accountDTO.getPayType() == 1 || accountDTO.getPayType() == 2) {
                 dataMap.put("toll",
                         accountDTO.getFirstToll() == null ? "" : accountDTO.getFirstToll() );
                 dataMap.put("preferent", accountDTO.getPreferentialAmount() == null ? ""
                         : accountDTO.getPreferentialAmount());
-            } else {
+           /* } else {
                 dataMap.put("toll", "");
                 dataMap.put("preferent", "");
-            }
+            }*/
             dataMap.put("settle",
                     accountDTO.getSettlementMoney() == null ? "" : accountDTO.getSettlementMoney());
 
             dataMap.put("amount", accountDTO.getAmountPerformance() == null ? ""
+                    : accountDTO.getAmountPerformance());
+            dataMap.put("giveAmount", accountDTO.getGiveAmount() == null ? ""
+                    : accountDTO.getGiveAmount());
+            dataMap.put("giveType", accountDTO.getAmountPerformance() == null ? ""
                     : accountDTO.getAmountPerformance());
         }
         File file = createDoc(dataMap);
@@ -419,7 +423,7 @@ public class BalanceAccountController {
         String name = dataMap.get("statementNo")+ ".doc";
         File file = new File(name);
         try {
-            t = configuration.getTemplate("balanceaccount.ftl");
+            t = configuration.getTemplate("2521.ftl");
             t.setEncoding("UTF-8");
 
             Writer out =
