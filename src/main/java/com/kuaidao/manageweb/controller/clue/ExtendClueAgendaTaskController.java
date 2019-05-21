@@ -34,6 +34,7 @@ import com.kuaidao.aggregation.dto.clue.ClueQueryDTO;
 import com.kuaidao.aggregation.dto.clue.PushClueReq;
 import com.kuaidao.aggregation.dto.project.ProjectInfoDTO;
 import com.kuaidao.aggregation.dto.project.ProjectInfoPageParam;
+import com.kuaidao.common.constant.BusinessLineConstant;
 import com.kuaidao.common.constant.DicCodeEnum;
 import com.kuaidao.common.constant.RoleCodeEnum;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
@@ -116,7 +117,7 @@ public class ExtendClueAgendaTaskController {
             request.setAttribute("proSelect", proJson.getData());
         }
 
-        List<UserInfoDTO> userList = queryUserByRole();
+        List<UserInfoDTO> userList = queryUserByRole(user);
         // 查询字典分发失败原因集合
         request.setAttribute("reasonList",
                 getDictionaryByCode(DicCodeEnum.ASSIGN_FAIL_REASON.getCode()));
@@ -352,60 +353,22 @@ public class ExtendClueAgendaTaskController {
      * @return
      */
 
-    private List<UserInfoDTO> queryUserByRole() {
+    private List<UserInfoDTO> queryUserByRole(UserInfoDTO user) {
 
         List<UserInfoDTO> userList = new ArrayList<UserInfoDTO>();
-
+        String roleCode = user.getRoleList().get(0).getRoleCode();
         UserOrgRoleReq userRole = new UserOrgRoleReq();
-        userRole.setRoleCode(RoleCodeEnum.KFZY.name());
+        if (RoleCodeEnum.GLY.name().equals(roleCode)
+                || RoleCodeEnum.YWGLY.name().equals(roleCode)) {
+            userRole.setBusinessLine(BusinessLineConstant.TGZX);
+        } else {
+            userRole.setOrgId(user.getOrgId());
+        }
         JSONResult<List<UserInfoDTO>> userZxzjList = userInfoFeignClient.listByOrgAndRole(userRole);
-
-        if (JSONResult.SUCCESS.equals(userZxzjList.getCode()) && null != userZxzjList.getData()
-                && userZxzjList.getData().size() > 0) {
-            userList.addAll(userZxzjList.getData());
+        if (JSONResult.SUCCESS.equals(userZxzjList.getCode()) && null != userZxzjList.getData()) {
+            userList = userZxzjList.getData();
         }
-
-        userRole.setRoleCode(RoleCodeEnum.NQWY.name());
-        JSONResult<List<UserInfoDTO>> userYhZgList = userInfoFeignClient.listByOrgAndRole(userRole);
-
-        if (JSONResult.SUCCESS.equals(userYhZgList.getCode()) && null != userYhZgList.getData()
-                && userYhZgList.getData().size() > 0) {
-            userList.addAll(userYhZgList.getData());
-        }
-        userRole.setRoleCode(RoleCodeEnum.YHWY.name());
-        JSONResult<List<UserInfoDTO>> userYhWyList = userInfoFeignClient.listByOrgAndRole(userRole);
-
-        if (JSONResult.SUCCESS.equals(userYhWyList.getCode()) && null != userYhWyList.getData()
-                && userYhWyList.getData().size() > 0) {
-            userList.addAll(userYhWyList.getData());
-        }
-        userRole.setRoleCode(RoleCodeEnum.KFZG.name());
-        JSONResult<List<UserInfoDTO>> userKfList = userInfoFeignClient.listByOrgAndRole(userRole);
-
-        if (JSONResult.SUCCESS.equals(userKfList.getCode()) && null != userKfList.getData()
-                && userKfList.getData().size() > 0) {
-            userList.addAll(userKfList.getData());
-        }
-
-        userRole.setRoleCode(RoleCodeEnum.NQZG.name());
-        JSONResult<List<UserInfoDTO>> userKfZgList = userInfoFeignClient.listByOrgAndRole(userRole);
-
-        if (JSONResult.SUCCESS.equals(userKfZgList.getCode()) && null != userKfZgList.getData()
-                && userKfZgList.getData().size() > 0) {
-            userList.addAll(userKfZgList.getData());
-        }
-
-        userRole.setRoleCode(RoleCodeEnum.YHZG.name());
-        JSONResult<List<UserInfoDTO>> userKNqWyList =
-                userInfoFeignClient.listByOrgAndRole(userRole);
-
-        if (JSONResult.SUCCESS.equals(userKNqWyList.getCode()) && null != userKNqWyList.getData()
-                && userKNqWyList.getData().size() > 0) {
-            userList.addAll(userKNqWyList.getData());
-        }
-
         return userList;
-
     }
 
     /**
@@ -722,9 +685,6 @@ public class ExtendClueAgendaTaskController {
                         islegal = false;
                         reasonInTime.append("预约回访时间");
                     }
-                    // if(islegal && clueAgendaTaskDTO1.getReserveTime1().length()<19){
-                    // islegal = false;
-                    // }
                 }
                 if (clueAgendaTaskDTO1.getDate() != null
                         && !"".equals(clueAgendaTaskDTO1.getDate())) {
@@ -740,9 +700,6 @@ public class ExtendClueAgendaTaskController {
                             reasonInTime.append("、日期");
                         }
                     }
-                    // if(islegal && clueAgendaTaskDTO1.getDate().length()<19){
-                    // islegal = false;
-                    // }
                 }
                 if (clueAgendaTaskDTO1.getMessageTime1() != null
                         && !"".equals(clueAgendaTaskDTO1.getMessageTime1())) {
@@ -758,9 +715,6 @@ public class ExtendClueAgendaTaskController {
                             reasonInTime.append("、留言时间");
                         }
                     }
-                    // if(islegal && clueAgendaTaskDTO1.getMessageTime1().length()<19){
-                    // islegal = false;
-                    // }
                 }
                 if (StringUtils.isNotBlank(reasonInTime)) {
                     failReason.append(reasonInTime + "时间格式错误；");

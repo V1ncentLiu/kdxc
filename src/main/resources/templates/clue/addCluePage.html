@@ -93,7 +93,7 @@
                     </el-col>
                 	<el-col :span="12">
                       <el-form-item label="开店区域：" :label-width="formLabelWidth" style="float: left;margin-right: 10px;">
-                          <el-select filterable v-model="form.province" placeholder="省" style="width: 80px;"  @change="currentProvince">
+                          <el-select filterable v-model="form.province" placeholder="省" style="width: 80px;"  @change="currentProvince" clearable>
                               <el-option
                                   v-for="item in provinceArr"
                                   :key="item.name"
@@ -103,7 +103,7 @@
                           </el-select>
                       </el-form-item>
                       <el-form-item label="" style="float: left;">
-                          <el-select filterable v-model="form.city" placeholder="市" style="width: 80px;margin-right: 10px;" @change="currentCity" >
+                          <el-select filterable v-model="form.city" placeholder="市" style="width: 80px;margin-right: 10px;" @change="currentCity" clearable>
                               <el-option
                                   v-for="item in cityArr"
                                   :key="item.name"
@@ -113,7 +113,7 @@
                           </el-select>
                       </el-form-item>
                       <el-form-item label="" style="float: left;">
-                          <el-select filterable v-model="form.district" placeholder="区/县" style="width: 80px;">
+                          <el-select filterable v-model="form.district" placeholder="区/县" style="width: 80px;" clearable>
                               <el-option
                                   v-for="item in districtArr"
                                   :key="item.name"
@@ -1001,21 +1001,33 @@ if(notOptList){
             param={};
             param.type="1";
             param.name=selVal;
-            this.form.district=null;
-            this.form.city=null;
-            this.districtArr =null;
-            axios.post('/area/sysregion/querySysRegionByParam',param).then(function (response) {
-              addClueVM.cityArr=response.data.data.data;
-            });
+            if(selVal) {
+              this.form.district = null;
+              this.form.city = null;
+              this.districtArr = null;
+              axios.post('/area/sysregion/querySysRegionByParam', param).then(function (response) {
+                addClueVM.cityArr = response.data.data.data;
+              });
+            } else {
+              this.form.district = null;
+              this.form.city = null;
+              this.districtArr = null;
+              addClueVM.cityArr = null;
+            }
           },
           currentCity(selVal){
             param={};
             param.type="2";
             param.name=selVal;
-            this.form.district=null;
-            axios.post('/area/sysregion/querySysRegionByParam',param).then(function (response) {
-              addClueVM.districtArr=response.data.data.data;
-            });
+            if(selVal) {
+              this.form.district = null;
+              axios.post('/area/sysregion/querySysRegionByParam', param).then(function (response) {
+                addClueVM.districtArr = response.data.data.data;
+              });
+            }else {
+              this.form.district = null;
+              addClueVM.districtArr = null;
+            }
           },
         	 	//资源类别转换方法
                 transformCategory(row, column, cellValue, index) {
