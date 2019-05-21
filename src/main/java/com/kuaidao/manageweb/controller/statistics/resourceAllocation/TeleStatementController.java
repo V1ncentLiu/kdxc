@@ -551,5 +551,26 @@ public class TeleStatementController {
     public String firstRATablePerson() {
         return "reportforms/firstRATablePerson";
     }
+
+
+    /**
+     *资源接通有效率表
+     * @return
+     */
+    @RequestMapping("/resourceConectEfficientTable")
+    public String resourceConectEfficientTable() {
+        return "reportforms/resourceConectEfficientTable";
+    }
+
+    /**
+     *电销组资源接通有效率表
+     * @return
+     */
+    @RequestMapping("/resourceConectTelEfficientTable")
+    public String resourceConectTelEfficientTable() {
+        return "reportforms/resourceConectTelEfficientTable";
+    }
+
+
     
 }
