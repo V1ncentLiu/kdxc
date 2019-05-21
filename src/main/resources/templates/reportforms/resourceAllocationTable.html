@@ -148,7 +148,8 @@
                 // 搜索条件
                 param.startTime = this.minuteFormat(startTime);
                 param.endTime = this.minuteFormat(endTime);
-                param.org_Id =  this.form.org_Id;//电销组
+                param.org_Id = this.form.org_Id;//电销组
+                param.new_resource = this.form.new_resource;//分配来源
                 this.loading=true;
                 axios.post('/statistics/teleStatement/getResourceAllocationTable',param).then(function (response) { 
                     if(!response){
@@ -195,21 +196,25 @@
                     mainDivVM.export.startTime = mainDivVM.minuteFormat(startTime);
                     mainDivVM.export.endTime = mainDivVM.minuteFormat(endTime);
                     mainDivVM.export.org_Id = mainDivVM.form.org_Id;
+                    mainDivVM.export.new_resource = mainDivVM.form.new_resource;
                 })
             },
             gotoTeam(item){
                 var orgName = item.orgName;
                 var org_Id = item.orgId;//组id
                 // 搜索条件
-                var startTime = this.form.startTime;
-                var endTime = this.form.endTime;
-                var new_resource = this.form.new_resource;//来源
-                
+                var startTime=null;
+                var endTime=null;
+                var startTime1 = this.form.startTime;
+                var endTime1 = this.form.endTime;
+                startTime=this.minuteFormat(startTime);
+                endTime=this.minuteFormat(endTime);
+                var new_resource = this.form.new_resource;//来源                
                 console.log(item)
                 if(orgName == "合计"){
-                    window.location.href="/statistics/teleStatement/resourceAllocationTableSum";
+                    window.location.href="/statistics/teleStatement/resourceAllocationTableSum?org_Id=" + org_Id+"&startTime="+ startTime+"&endTime="+ endTime+"&new_resource="+ new_resource;
                 }else{
-                    window.location.href="/statistics/teleStatement/resourceAllocationTableTeam?groupId=" + org_Id+"&startTime="+ startTime+"&endTime="+ endTime+"&startTime="+ startTime;
+                    window.location.href="/statistics/teleStatement/resourceAllocationTableTeam?org_Id=" + org_Id+"&startTime="+ startTime+"&endTime="+ endTime+"&new_resource="+ new_resource;
                 }
             },
             arraySpanMethod({ row, column, rowIndex, columnIndex }) { // 合并第一行
@@ -349,6 +354,7 @@
                 param.startTime = this.export.startTime;
                 param.endTime =  this.export.endTime;
                 param.org_Id =  this.export.org_Id;//电销组
+                param.new_resource =  this.export.new_resource;//电销组
                 axios.post('/statistics/teleStatement/exportResourceAllocationGroup',param,{responseType:'blob'})
                     .then(function (response) {
                         var data =  response.data;
