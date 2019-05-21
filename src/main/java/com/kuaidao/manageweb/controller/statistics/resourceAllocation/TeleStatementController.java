@@ -427,4 +427,41 @@ public class TeleStatementController {
                 userInfoFeignClient.listByOrgAndRole(userOrgRoleReq);
         return listByOrgAndRole;
     }
+    
+    
+    /**
+     * 
+    * @return
+     */
+    @RequestMapping("/firstRATable")
+    public String firstRATable() {
+        return "reportforms/firstRATable";
+    }
+    
+    /**
+     * 
+    * @return
+     */
+    @RequestMapping("/firstRATableSum")
+    public String firstRATableSum() {
+        return "reportforms/firstRATableSum";
+    }
+    /**
+     * 
+    * @return
+     */
+    @RequestMapping("/firstRATableTeam")
+    public String firstRATableTeam() {
+        return "reportforms/firstRATableTeam";
+    }
+    
+    /**
+     * 
+    * @return
+     */
+    @RequestMapping("/firstRATablePerson")
+    public String firstRATablePerson() {
+        return "reportforms/firstRATablePerson";
+    }
+    
 }
