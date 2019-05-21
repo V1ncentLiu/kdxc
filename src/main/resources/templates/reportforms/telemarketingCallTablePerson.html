@@ -102,13 +102,7 @@
 </body>
 <script th:inline="javascript">
     var queryOrg=[[${queryOrg}]]; // 电销组
-    var curUserId = [[${curUserId}]]; 
-    var form = {
-        startTime: '2019-05-20 00:00',
-        endTime: '2019-05-21 23:59',
-        orgId: '电销组1',
-        userId: '电销人员1'
-    };
+    var parentParam = [[${parentParam}]];
     var mainDivVM = new Vue({
         el: '#maindiv',
         data: function() {
@@ -281,6 +275,20 @@
                 percent = parseInt(percent) * 100 + "%";
                 return percent;
             },
+            dateTimeFormat (dt) { 
+                 if (!dt) {return "";}
+                var d = dt.toString();
+                var oYear = d.slice(0,4);
+                var oMonth = d.slice(5,6);
+                oMonth = oMonth < 10 ? "0" + oMonth : oMonth;
+                var oDay = d.slice(7,8);
+                oDay = oDay < 10 ? "0" + oDay : oDay;
+                var oHour = d.slice(8,9);
+                oHour = oHour < 10 ? "0" + oHour : oHour;
+                var oMinute = d.slice(8,9);
+                oMinute = oMinute < 10 ? "0" + oMinute : oMinute;
+                return oYear+"-"+oMonth+"-"+oDay+" "+oHour+":"+oMinute;
+            }, 
             minuteFormat (m) {
                 if (!m) {return "";}
                 var timeStr = new Date(m);
@@ -334,11 +342,10 @@
             },
         },
         created(){ 
-            this.form.startTime=form.startTime;
-            this.form.endTime=form.endTime;   
-            this.form.orgId=form.orgId;   
-            this.form.userId=form.userId;   
-            console.log(this.form);
+            this.form.startTime=this.dateTimeFormat(parentParam.startTime);
+            this.form.endTime=this.dateTimeFormat(parentParam.endTime);    
+            this.form.orgId=parentParam.orgId; 
+            this.form.orgId = this.form.orgId ? this.form.orgId.toString():this.form.orgId; 
             this.searchTable();
         },
         mounted(){
