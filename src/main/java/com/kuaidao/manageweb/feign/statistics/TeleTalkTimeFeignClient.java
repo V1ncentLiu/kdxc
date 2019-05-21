@@ -1,6 +1,7 @@
 package com.kuaidao.manageweb.feign.statistics;
 
 import java.util.List;
+import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.netflix.feign.FeignClient;
@@ -31,7 +32,7 @@ public interface TeleTalkTimeFeignClient {
     * @return
      */
     @PostMapping("/listTeleGroupTalkTimeNoPage")
-    public JSONResult<List<TeleTalkTimeRespDTO>> listTeleGroupTalkTimeNoPage(@RequestBody TeleSaleTalkTimeQueryDTO teleSaleTalkTimeQueryDTO);
+    public JSONResult<Map<String,Object>> listTeleGroupTalkTimeNoPage(@RequestBody TeleSaleTalkTimeQueryDTO teleSaleTalkTimeQueryDTO);
     
 
     /**
@@ -51,6 +52,14 @@ public interface TeleTalkTimeFeignClient {
     @RequestMapping("/listTeleSaleTalkTime")
     public JSONResult<PageBean<TeleTalkTimeRespDTO>> listTeleSaleTalkTime(@RequestBody TeleSaleTalkTimeQueryDTO teleSaleTalkTimeQueryDTO);
     
+    /**
+     * 电销组 合计
+    * @param teleSaleTalkTimeQueryDTO
+    * @return
+     */
+    @PostMapping("/totalTeleGroupTalkTime")
+    public JSONResult<TeleTalkTimeRespDTO> totalTeleGroupTalkTime(TeleSaleTalkTimeQueryDTO teleSaleTalkTimeQueryDTO);
+    
     @Component
     class HystrixClientFallback implements TeleTalkTimeFeignClient {
 
@@ -69,7 +78,7 @@ public interface TeleTalkTimeFeignClient {
         }
 
         @Override
-        public JSONResult<List<TeleTalkTimeRespDTO>> listTeleGroupTalkTimeNoPage(
+        public JSONResult<Map<String,Object>> listTeleGroupTalkTimeNoPage(
                 TeleSaleTalkTimeQueryDTO teleSaleTalkTimeQueryDTO) {
             return fallBackError("昨日-七天-电销组通话时长不分页");
         }
@@ -84,6 +93,12 @@ public interface TeleTalkTimeFeignClient {
         public JSONResult<PageBean<TeleTalkTimeRespDTO>> listTeleSaleTalkTime(
                 TeleSaleTalkTimeQueryDTO teleSaleTalkTimeQueryDTO) {
             return fallBackError("昨日-七天电销顾问 通话时长表");
+        }
+
+        @Override
+        public JSONResult<TeleTalkTimeRespDTO> totalTeleGroupTalkTime(
+                TeleSaleTalkTimeQueryDTO teleSaleTalkTimeQueryDTO) {
+            return fallBackError("电销组通话时长合计");
         }
 
     }
