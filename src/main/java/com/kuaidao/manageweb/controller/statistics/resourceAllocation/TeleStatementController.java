@@ -104,7 +104,7 @@ public class TeleStatementController {
      * @param resourceAllocationQueryDto
      * @return
      */
-    @RequestMapping("/getGroupCountTotal")
+    @RequestMapping("/getResourceAllocationCount")
     @ResponseBody
     public JSONResult<List<ResourceAllocationDto>> getGroupCountTotal(@RequestBody ResourceAllocationQueryDto resourceAllocationQueryDto){
         JSONResult<List<ResourceAllocationDto>> countRes = statisticsFeignClient.getResourceAllocationCount(resourceAllocationQueryDto);
