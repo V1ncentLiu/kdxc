@@ -94,9 +94,11 @@ public class TeleStatementController {
      */
     @RequestMapping("/getResourceAllocationTable")
     @ResponseBody
-    public JSONResult<PageBean<ResourceAllocationDto>> getResourceAllocationTable(@RequestBody ResourceAllocationQueryDto resourceAllocationQueryDto) {
+    public JSONResult<PageBean<ResourceAllocationDto>> getResourceAllocationTable(@RequestBody ResourceAllocationQueryDto resourceAllocationQueryDto
+            ,HttpServletRequest request) {
+        JSONResult<List<ResourceAllocationDto>> countRes = statisticsFeignClient.getResourceAllocationCount(resourceAllocationQueryDto);
+        request.setAttribute("resTotalList", countRes);
         JSONResult<PageBean<ResourceAllocationDto>> resourceAllocationPage = statisticsFeignClient.getResourceAllocationPage(resourceAllocationQueryDto);
-        System.out.println(resourceAllocationPage);
         return resourceAllocationPage;
     }
 
