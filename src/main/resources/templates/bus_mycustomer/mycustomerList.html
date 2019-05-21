@@ -247,7 +247,10 @@
             <el-form :model="notVisitFlag" ref="notVisitFlag">
                 <el-form-item label="" :label-width="formLabelWidth" :required="true">
                     <!--<el-button type="text" disabled style="color: #1e2746">{{notVisitFlag.str}}</el-button>-->
-                    <span style="display:block;color: #1e2746; width:90%; word-wrap:break-word; word-break:normal;">{{notVisitFlag.str}}</span>
+                    <span style="display:block;color: #1e2746; width:90%; word-wrap:break-word; word-break:normal;">标记未到访人员：<br>{{notVisitFlag.str}}</span>
+                    <span style="display:block;color: #1e2746; width:90%; word-wrap:break-word; word-break:normal;">标记未到访时间：<br>{{notVisitFlag.str}}</span>
+                    <br>
+                    <span style="display:block;color: #1e2746; width:90%; word-wrap:break-word; word-break:normal;">未到访原因：<br>{{notVisitFlag.str}}</span>
                 </el-form-item>
             </el-form>
             <div slot="footer" class="dialog-footer" style="text-align: center">
@@ -1695,7 +1698,9 @@
                 clueId: "",
                 str: "",
                 clueIds: [],
-                notVisitReason: ""
+                notVisitReason: "",
+                notVisitUser:"",
+                notVisitTime:""
             },
             queryForm: {
                 visitStatus: "",
@@ -2269,6 +2274,8 @@
                     this.notVisitFlag.clueIds = rowIds;
                     this.notVisitFlag.str = str;
                     this.notVisitFlag.notVisitReason = "";
+                    this.notVisitFlag.notVisitUser="";
+                    this.notVisitFlag.notVisitTime="";
                     this.notVisitFlagDialogVisible = true;
                 }
             },
@@ -2531,7 +2538,9 @@
                 mainDivVM.notVisitFlag.clueId = row.clueId;
                 axios.post('/busVisitRecord/one', param).then(function (response) {
                     mainDivVM.notVisitdDialogVisible = true;
+                    console.log(response.data.data);
                     mainDivVM.notVisitFlag.str = response.data.data.notVisitReason
+                    mainDivVM.notVisitFlag.notVisitTime = response.data.data.createTime
                 });
             },
             showNotVisitReason1(row) {
