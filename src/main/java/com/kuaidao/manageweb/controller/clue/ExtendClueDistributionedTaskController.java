@@ -294,8 +294,24 @@ public class ExtendClueDistributionedTaskController {
                 curList.add(taskDTO.getTeleGorupName()); // 电销组
                 curList.add(taskDTO.getTeleSaleName()); // 电销顾问
                 // 这两个要进行转换
-                curList.add(taskDTO.getIsCall()); // 是否接通
-                curList.add(taskDTO.getStatus()); // 是否有效
+                String isCall = null;
+                if(taskDTO.getIsCall()!=null){
+                    if(taskDTO.getIsCall()==1){
+                        isCall = "是";
+                    }else{
+                        isCall = "否";
+                    }
+                }
+                curList.add(isCall); // 是否接通
+                String status = null;
+                if(taskDTO.getStatus()!=null){
+                    if(taskDTO.getStatus()==1){
+                        status = "是";
+                    }else{
+                        status = "否";
+                    }
+                }
+                curList.add(status); // 是否有效
                 curList.add(taskDTO.getFirstCallTime()); // 第一次拨打时间
                 curList.add(taskDTO.getFirstCommunicateTime()); // 第一次沟通时间
                 curList.add(taskDTO.getFirstCommunicateContent()); // 第一次沟通内容

@@ -112,13 +112,13 @@ public class AbandonController {
         List<UserInfoDTO> userList = new ArrayList<UserInfoDTO>();
 
         UserOrgRoleReq userRole = new UserOrgRoleReq();
-        userRole.setRoleCode(RoleCodeEnum.TGZXZJ.name());
-        JSONResult<List<UserInfoDTO>> userZxzjList = userInfoFeignClient.listByOrgAndRole(userRole);
-
-        if (JSONResult.SUCCESS.equals(userZxzjList.getCode()) && null != userZxzjList.getData()
-                && userZxzjList.getData().size() > 0) {
-            userList.addAll(userZxzjList.getData());
-        }
+//        userRole.setRoleCode(RoleCodeEnum.TGZXZJ.name());
+//        JSONResult<List<UserInfoDTO>> userZxzjList = userInfoFeignClient.listByOrgAndRole(userRole);
+//
+//        if (JSONResult.SUCCESS.equals(userZxzjList.getCode()) && null != userZxzjList.getData()
+//                && userZxzjList.getData().size() > 0) {
+//            userList.addAll(userZxzjList.getData());
+//        }
 
         userRole.setRoleCode(RoleCodeEnum.YHZG.name());
         JSONResult<List<UserInfoDTO>> userYhZgList = userInfoFeignClient.listByOrgAndRole(userRole);
