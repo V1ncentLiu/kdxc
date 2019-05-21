@@ -23,10 +23,10 @@
         <div class="mainSearchFormBox">
            <el-form :inline="true" :model="form" class="demo-form-inline mainSearchForm" ref="form">                 
                 <el-form-item label="起止时间:">
-                    <el-date-picker format="yyyy-MM-dd HH:mm:ss" v-model="form.startTime" type="datetime" placeholder="选择日期"></el-date-picker>
+                    <el-date-picker format="yyyy-MM-dd HH:mm" v-model="form.startTime" type="datetime" placeholder="选择日期"></el-date-picker>
                 </el-form-item>
                 <el-form-item label="—" class="widthauto">
-                   <el-date-picker format="yyyy-MM-dd HH:mm:ss" v-model="form.endTime" type="datetime" placeholder="选择日期"></el-date-picker>
+                   <el-date-picker format="yyyy-MM-dd HH:mm" v-model="form.endTime" type="datetime" placeholder="选择日期"></el-date-picker>
                 </el-form-item>
                 <el-form-item label="电销组:">  
                     <el-select v-model="form.teleorg" placeholder="电销组" style="width: 100%;" clearable @change="currentTelSale" filterable>
@@ -59,7 +59,7 @@
                 </el-form-item>
                 <el-form-item label="话务转入:">  
                     <el-select v-model="form.telOperatorTransferIn" placeholder="话务转入" style="width: 100%;" clearable filterable>
-                        <el-option label="全部" :value="0"></el-option>
+                        <el-option label="全部" value="0"></el-option>
                         <el-option label="是" value="1"></el-option>
                         <el-option label="否" value="2"></el-option>
                     </el-select>
@@ -78,7 +78,7 @@
                 :data="tableData"
                 >
                 <el-table-column align="center" type="index" label="序号" width="55"></el-table-column>
-                <el-table-column align="center" :key="index" :prop="item.fieldCode" :label="item.displayName" v-for="(item,key,index) in tableColums" width="130">
+                <el-table-column align="center" :key="index" :prop="item.fieldCode" :label="item.displayName" v-for="(item,key,index) in tableColums">
                 </el-table-column>
             </el-table>
             <table-pagination :pager="pager" @change="searchTable"></table-pagination>
@@ -91,128 +91,166 @@
 <script th:inline="javascript">
     var queryOrg=[[${queryOrg}]];//电销组
     var distributionSource=[[${queryOrg}]];//分配来源
-    var fieldList=[{//表头假数据
-        displayName:"电销组",
-        fieldCode:"telemarketingTeam",//需要改成后端返回的字段名称
-        fieldName:"电销组",
-        id:"0",
-        menuCode:null,
-        menuId:null,
-        pageNum:0,
-        pageSize:0,
-        sortNum:1
-    },{
-        displayName:"电销",
-        fieldCode:"telemarketingPerson",
-        fieldName:"电销",
-        id:"1",
-        menuCode:null,
-        menuId:null,
-        pageNum:0,
-        pageSize:0,
-        sortNum:1
-    },{
-        displayName:"分配资源数",
-        fieldCode:"amount1",
-        fieldName:"分配资源数",
-        id:"2",
-        menuCode:null,
-        menuId:null,
-        pageNum:0,
-        pageSize:0,
-        sortNum:2
-    },{
-        displayName:"联展",
-        fieldCode:"amount2",
-        fieldName:"联展",
-        id:"3",
-        menuCode:null,
-        menuId:null,
-        pageNum:0,
-        pageSize:0,
-        sortNum:3
-    },{
-        displayName:"竞价",
-        fieldCode:"amount3",
-        fieldName:"竞价",
-        id:"4",
-        menuCode:null,
-        menuId:null,
-        pageNum:0,
-        pageSize:0,
-        sortNum:4
-    },{
-        displayName:"优化",
-        fieldCode:"amount4",
-        fieldName:"优化",
-        id:"5",
-        menuCode:null,
-        menuId:null,
-        pageNum:0,
-        pageSize:0,
-        sortNum:5
-    },{
-        displayName:"信息流",
-        fieldCode:"amount5",
-        fieldName:"信息流",
-        id:"6",
-        menuCode:null,
-        menuId:null,
-        pageNum:0,
-        pageSize:0,
-        sortNum:6
-    },{
-        displayName:"官网",
-        fieldCode:"amount6",
-        fieldName:"官网",
-        id:"7",
-        menuCode:null,
-        menuId:null,
-        pageNum:0,
-        pageSize:0,
-        sortNum:7
-    },{
-        displayName:"行业",
-        fieldCode:"amount7",
-        fieldName:"行业",
-        id:"8",
-        menuCode:null,
-        menuId:null,
-        pageNum:0,
-        pageSize:0,
-        sortNum:8
-    },{
-        displayName:"其他",
-        fieldCode:"amount8",
-        fieldName:"其他",
-        id:"9",
-        menuCode:null,
-        menuId:null,
-        pageNum:0,
-        pageSize:0,
-        sortNum:9
-    },{
-        displayName:"网民未接",
-        fieldCode:"amount9",
-        fieldName:"网民未接",
-        id:"10",
-        menuCode:null,
-        menuId:null,
-        pageNum:0,
-        pageSize:0,
-        sortNum:10
-    }]
+    var fieldList=[
+        {//表头假数据
+            displayName:"电销组",
+            fieldCode:"orgName",//需要改成后端返回的字段名称
+            fieldName:"电销组",
+            id:"1",
+            menuCode:null,
+            menuId:null,
+            pageNum:0,
+            pageSize:0,
+            sortNum:1
+        },{
+            displayName:"电销",
+            fieldCode:"userName",
+            fieldName:"电销",
+            id:"1",
+            menuCode:null,
+            menuId:null,
+            pageNum:0,
+            pageSize:0,
+            sortNum:1
+        },{
+            displayName:"首次分配资源数",
+            fieldCode:"assignClueCount",
+            fieldName:"首次分配资源数",
+            id:"2",
+            menuCode:null,
+            menuId:null,
+            pageNum:0,
+            pageSize:0,
+            sortNum:2
+        },{
+            displayName:"联展",
+            fieldCode:"jointExhibition",
+            fieldName:"联展",
+            id:"3",
+            menuCode:null,
+            menuId:null,
+            pageNum:0,
+            pageSize:0,
+            sortNum:3
+        },{
+            displayName:"竞价",
+            fieldCode:"priceCompetition",
+            fieldName:"竞价",
+            id:"4",
+            menuCode:null,
+            menuId:null,
+            pageNum:0,
+            pageSize:0,
+            sortNum:4
+        },{
+            displayName:"优化",
+            fieldCode:"optimization",
+            fieldName:"优化",
+            id:"5",
+            menuCode:null,
+            menuId:null,
+            pageNum:0,
+            pageSize:0,
+            sortNum:5
+        },{
+            displayName:"信息流",
+            fieldCode:"informationFlow",
+            fieldName:"信息流",
+            id:"6",
+            menuCode:null,
+            menuId:null,
+            pageNum:0,
+            pageSize:0,
+            sortNum:6
+        },{
+            displayName:"官网",
+            fieldCode:"officialWebsite",
+            fieldName:"官网",
+            id:"7",
+            menuCode:null,
+            menuId:null,
+            pageNum:0,
+            pageSize:0,
+            sortNum:7
+        },{
+            displayName:"行业",
+            fieldCode:"industry",
+            fieldName:"行业",
+            id:"8",
+            menuCode:null,
+            menuId:null,
+            pageNum:0,
+            pageSize:0,
+            sortNum:8
+        },{
+            displayName:"其他",
+            fieldCode:"other",
+            fieldName:"其他",
+            id:"9",
+            menuCode:null,
+            menuId:null,
+            pageNum:0,
+            pageSize:0,
+            sortNum:9
+        },{
+            displayName:"网民未接",
+            fieldCode:"netizensMissed",
+            fieldName:"网民未接",
+            id:"10",
+            menuCode:null,
+            menuId:null,
+            pageNum:0,
+            pageSize:0,
+            sortNum:10
+        }
+    ];
     var mainDivVM = new Vue({
         el: '#maindiv',
         data: function() {
             return {
+                loading: false,
                 form: {
                     startTime:'',
                     endTime:'',
                     org_Id:'',
-                    telOperatorTransferIn: ''
+                    telOperatorTransferIn: '全部'
                 },
-                tableData: [],//表格数据
+                tableData: [
+                    {
+                        id: 1,
+                        // timeId: 20190505,
+                        orgId: 1,
+                        orgName: '电销组1',
+                        userName: '电销1',
+                        assignClueCount: 100,
+                        jointExhibition: 100,
+                        priceCompetition: 100,
+                        optimization: 100,
+                        informationFlow: 1000,
+                        officialWebsite: 1000,
+                        industry: 1000,
+                        other: 1000,
+                        netizensMissed: 1000,
+                        // uesrId: ''
+                    },
+                    {
+                        id: 2,
+                        // timeId: 20190505,
+                        orgId: 2,
+                        orgName: '电销组2',
+                        userName: '电销2',
+                        assignClueCount: 100,
+                        jointExhibition: 100,
+                        priceCompetition: 100,
+                        optimization: 100,
+                        informationFlow: 1000,
+                        officialWebsite: 1000,
+                        industry: 1000,
+                        other: 1000,
+                        netizensMissed: 1000,
+                        // uesrId: ''
+                    },
+                ],//表格数据
                 tableColums: [],//表头list
                 orgTeleArr:queryOrg,//电销组
                 busSaleArr:[],//创业顾问
@@ -237,12 +275,11 @@
                 });
             },
             searchTable() { 
-                // 表头数据渲染
-                this.tableColums= fieldList;
-                var starTime=this.form.startTime;
+                this.tableColums= fieldList; // 表头数据渲染
+                var startTime=this.form.startTime;
                 var endTime=this.form.endTime;
                 if(endTime){
-                    if(starTime>endTime){
+                    if(startTime>endTime){
                         this.$message({
                             message: '开始时间不能大于结束时间',
                             type: 'warning'
@@ -250,44 +287,73 @@
                         return;
                     }
                 }
-
-                // 返回的数据               
-                var data=[
-                    {
-                        id:"0",
-                        telemarketingTeam:'电销组1',
-                        telemarketingPerson:'张三',
-                        amount1:'1',
-                        amount2:'2',
-                        amount3:'3',
-                        amount4:'4',
-                        amount5:'5',
-                        amount6:'6',
-                        amount7:'7',
-                        amount8:'8',
-                        amount9:'9',
-                    },
-                    {
-                        id:"1",
-                        telemarketingTeam:'电销组2',
-                        telemarketingPerson:'李四',
-                        amount1:'1',
-                        amount2:'2',
-                        amount3:'3',
-                        amount4:'4',
-                        amount5:'5',
-                        amount6:'6',
-                        amount7:'7',
-                        amount8:'8',
-                        amount9:'9',
-                    }
-                ]; 
-                // 表格数据渲染                               
-                this.tableData= data;
+                
+                var param = {};
+                param.pageSize = this.pager.pageSize;
+                param.pageNum =  this.pager.currentPage;
+                // 搜索条件
+                param.startTime = this.minuteFormat(startTime);
+                param.endTime =  this.minuteFormat(endTime);
+                param.org_Id =  this.form.org_Id;//电销组
+                // 判断电销组是否有值
+                if(this.form.uesr_id){
+                    param.uesr_id = this.form.uesr_id;//电销组
+                }
+                console.log(param);
+                // this.loading=true;
+                // axios.post('/statistics/teleStatement/getResourceAllocationDayPagePersion',param).then(function (response) { 
+                //     if(!response){
+                //         mainDivVM.$message({
+                //             message: "接口调用失败",
+                //             type: 'error'
+                //         });
+                //         mainDivVM.loading=false;
+                //         return ;
+                //     }
+                //     var resobj= response.data;
+                //     console.log(resobj)
+                //     if(!resobj){
+                //         mainDivVM.$message({
+                //             message: "接口调用失败",
+                //             type: 'error'
+                //         });
+                //         mainDivVM.loading=false;
+                //         return ;
+                //     }
+                //     if(resobj.code!='0'){
+                //         mainDivVM.$message({
+                //             message: "接口调用失败",
+                //             type: 'error'
+                //         });
+                //         mainDivVM.loading=false;
+                //         return ;
+                //     }  
+                //     var resobjData=resobj.data.data          
+                //     // 表格数据渲染
+                //     mainDivVM.tableData=resobjData;
+                //     // 表头数据渲染 
+                //     mainDivVM.tableColums= fieldList;
+                //     mainDivVM.pager.currentPage= resobj.data.currentPage;
+                //     mainDivVM.pager.total= resobj.data.total;
+                //     mainDivVM.loading=false;
+                // }).catch(function (error) {
+                //     console.log(error);
+                //     mainDivVM.$message({
+                //         message: "请求失败，请稍后重试",
+                //         type: "error"
+                //     });
+                //     mainDivVM.loading = false;
+                // });  
             },
             goback(){
                 // 返回资源分配表页面
-                window.location.href="/statistics/teleStatement/resourceAllocation";
+                window.history.go(-1);
+            },
+            minuteFormat (m) {
+                if (!m) {
+                   return "";
+                 }
+                return moment(m).format("YYYYMMDDHHmm");
             },
             searchYesterday(){ // 昨天
                var today = new Date();

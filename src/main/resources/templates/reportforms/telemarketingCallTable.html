@@ -49,6 +49,7 @@
                 style="width: 100%"
                 border
                 :data="tableData"
+                v-loading="loading"
                 :span-method="arraySpanMethod">
                 <el-table-column type="index" label="序号" align="center" width="55" :index="indexFun"></el-table-column>
                 <el-table-column
@@ -90,6 +91,7 @@
         el: '#maindiv',
         data: function() {
             return {
+                loading: false,
                 form: {
                     startTime:'',
                     endTime:'',
@@ -175,24 +177,28 @@
                         return ;
                     }
                     if(resobj.code!='0'){
+                        mainDivVM.loading = false;
                         mainDivVM.$message({
                             message: resobj.msg,
                             type: 'error'
                         });
                         return ;
+                    }else if(resobj.data && resobj.data.data){
+                        var resobjData = resobj.data.data;          
+                        // 表格数据渲染
+                        mainDivVM.tableData = resobjData;
+                        // 插入合计一行
+                        mainDivVM.summaryFun();
+                        mainDivVM.pager.currentPage = resobj.data.currentPage;
+                        mainDivVM.pager.total = resobj.data.total;
+                        mainDivVM.loading = false;
+                        
+                        mainDivVM.export.startTime = mainDivVM.minuteFormat(startTime);
+                        mainDivVM.export.endTime = mainDivVM.minuteFormat(endTime);
+                        mainDivVM.export.orgId = mainDivVM.form.orgId;
+                    }else{
+                        mainDivVM.loading = false;
                     }  
-                    var resobjData = resobj.data.data          
-                    // 表格数据渲染
-                    mainDivVM.tableData = resobjData;
-                    // 插入合计一行
-                    mainDivVM.summaryFun();
-                    mainDivVM.pager.currentPage = resobj.data.currentPage;
-                    mainDivVM.pager.total = resobj.data.total;
-                    mainDivVM.loading = false;
-                      
-                    mainDivVM.export.startTime = mainDivVM.minuteFormat(startTime);
-                    mainDivVM.export.endTime = mainDivVM.minuteFormat(endTime);
-                    mainDivVM.export.orgId = mainDivVM.form.orgId;
                 }).catch(function (error) {
                     console.log(error);
                     mainDivVM.$message({
