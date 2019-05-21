@@ -94,12 +94,21 @@ public class TeleStatementController {
      */
     @RequestMapping("/getResourceAllocationTable")
     @ResponseBody
-    public JSONResult<PageBean<ResourceAllocationDto>> getResourceAllocationTable(@RequestBody ResourceAllocationQueryDto resourceAllocationQueryDto
-            ,HttpServletRequest request) {
-        JSONResult<List<ResourceAllocationDto>> countRes = statisticsFeignClient.getResourceAllocationCount(resourceAllocationQueryDto);
-        request.setAttribute("resTotalList", countRes);
+    public JSONResult<PageBean<ResourceAllocationDto>> getResourceAllocationTable(@RequestBody ResourceAllocationQueryDto resourceAllocationQueryDto) {
         JSONResult<PageBean<ResourceAllocationDto>> resourceAllocationPage = statisticsFeignClient.getResourceAllocationPage(resourceAllocationQueryDto);
         return resourceAllocationPage;
+    }
+
+    /**
+     * 获取分配页面统计数据
+     * @param resourceAllocationQueryDto
+     * @return
+     */
+    @RequestMapping("/getGroupCountTotal")
+    @ResponseBody
+    public JSONResult<List<ResourceAllocationDto>> getGroupCountTotal(@RequestBody ResourceAllocationQueryDto resourceAllocationQueryDto){
+        JSONResult<List<ResourceAllocationDto>> countRes = statisticsFeignClient.getResourceAllocationCount(resourceAllocationQueryDto);
+        return countRes;
     }
 
     /**
@@ -112,8 +121,14 @@ public class TeleStatementController {
             @RequestBody ResourceAllocationQueryDto resourceAllocationQueryDto,
             HttpServletResponse response) throws Exception {
         JSONResult<List<ResourceAllocationDto>> resourceAllocationList = statisticsFeignClient.getResourceAllocationList(resourceAllocationQueryDto);
+        JSONResult<List<ResourceAllocationDto>> countRes = statisticsFeignClient.getResourceAllocationCount(resourceAllocationQueryDto);
+        List<ResourceAllocationDto> total = countRes.getData();
+        ResourceAllocationDto resTotal = total.get(0);
         List<List<Object>> dataList = new ArrayList<List<Object>>();
+        //加表头
         dataList.add(getHeadTitleList());
+        //加合计
+        addTotalTexportResourceAllocation(resTotal,dataList);
         List<ResourceAllocationDto> orderList = resourceAllocationList.getData();
         for(int i = 0; i<orderList.size(); i++){
             ResourceAllocationDto ra = orderList.get(i);
@@ -142,6 +157,22 @@ public class TeleStatementController {
         outputStream.close();
     }
 
+
+    private void addTotalTexportResourceAllocation(ResourceAllocationDto resTotal, List<List<Object>> dataList) {
+        List<Object> totalList = new ArrayList<>();
+        totalList.add("");
+        totalList.add("合计");
+        totalList.add("");
+        totalList.add(resTotal.getJointExhibition());
+        totalList.add(resTotal.getPriceCompetition());
+        totalList.add(resTotal.getOptimization());
+        totalList.add(resTotal.getInformationFlow());
+        totalList.add(resTotal.getOfficialWebsite());
+        totalList.add(resTotal.getIndustry());
+        totalList.add(resTotal.getOther());
+        totalList.add(resTotal.getNetizensMissed());
+        dataList.add(totalList);
+    }
 
     /**
      * 资源分配页面（个人）
