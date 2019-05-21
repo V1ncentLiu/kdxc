@@ -102,11 +102,9 @@ public class ExtendClueDistributionedTaskController {
         // 处理数据权限，客户经理、客户主管、客户专员；内勤经理、内勤主管、内勤专员；优化经理、优化主管、优化文员
         if (RoleCodeEnum.KFZY.name().equals(roleInfoDTO.getRoleCode())
                 || RoleCodeEnum.NQWY.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.NQZY.name().equals(roleInfoDTO.getRoleCode())
                 || RoleCodeEnum.TGZY.name().equals(roleInfoDTO.getRoleCode())
                 || RoleCodeEnum.YXZY.name().equals(roleInfoDTO.getRoleCode())
                 || RoleCodeEnum.WLYHZY.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.YHZY.name().equals(roleInfoDTO.getRoleCode())
                 || RoleCodeEnum.YHWY.name().equals(roleInfoDTO.getRoleCode())) {
             // 推广客服、内勤文员 能看自己的数据
             idList.add(user.getId());
@@ -166,11 +164,9 @@ public class ExtendClueDistributionedTaskController {
         // 处理数据权限，客户经理、客户主管、客户专员；内勤经理、内勤主管、内勤专员；优化经理、优化主管、优化文员
         if (RoleCodeEnum.KFZY.name().equals(roleInfoDTO.getRoleCode())
                 || RoleCodeEnum.NQWY.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.NQZY.name().equals(roleInfoDTO.getRoleCode())
                 || RoleCodeEnum.TGZY.name().equals(roleInfoDTO.getRoleCode())
                 || RoleCodeEnum.YXZY.name().equals(roleInfoDTO.getRoleCode())
                 || RoleCodeEnum.WLYHZY.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.YHZY.name().equals(roleInfoDTO.getRoleCode())
                 || RoleCodeEnum.YHWY.name().equals(roleInfoDTO.getRoleCode())) {
             // 推广客服、内勤文员 能看自己的数据
             idList.add(user.getId());
@@ -272,11 +268,9 @@ public class ExtendClueDistributionedTaskController {
         // 处理数据权限，客户经理、客户主管、客户专员；内勤经理、内勤主管、内勤专员；优化经理、优化主管、优化文员
         if (RoleCodeEnum.KFZY.name().equals(roleInfoDTO.getRoleCode())
                 || RoleCodeEnum.NQWY.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.NQZY.name().equals(roleInfoDTO.getRoleCode())
                 || RoleCodeEnum.TGZY.name().equals(roleInfoDTO.getRoleCode())
                 || RoleCodeEnum.YXZY.name().equals(roleInfoDTO.getRoleCode())
                 || RoleCodeEnum.WLYHZY.name().equals(roleInfoDTO.getRoleCode())
-                || RoleCodeEnum.YHZY.name().equals(roleInfoDTO.getRoleCode())
                 || RoleCodeEnum.YHWY.name().equals(roleInfoDTO.getRoleCode())) {
             // 推广客服、内勤文员 能看自己的数据
             idList.add(user.getId());
