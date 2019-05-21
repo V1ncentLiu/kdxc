@@ -710,7 +710,52 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                 }          
             },
             exportFun(falg){ // 导出
-                var param = this.form;
+                var param = {};
+                var pageSize = this.pager.pageSize;
+                var pageNum = this.pager.currentPage;
+                param.pageNum=pageNum;
+                param.pageSize=pageSize;
+                param.createTimeStart=this.form.starTime;
+                param.createTimeEnd=this.form.endTime;
+                param.spreadAssignTimeStart=this.form.assignTimeStart;
+                param.spreadAssignTimeEnd=this.form.assignTimeEnd;
+                param.teleCompanyId=this.form.telemarketingBranch;
+                param.teleDeptId=this.form.businessUnit;
+                param.teleGorupId=this.form.telemarketingItem;
+                param.teleGorupId=this.form.telemarketingItem;
+                param.projectId=this.form.resourceProject;
+                param.operationId=this.form.resourcePerson;
+                param.phase=this.form.resourceStage;
+                param.source=this.form.medium;
+                param.phone=this.form.phone;
+                param.category=this.form.resourceType;
+                param.industryCategory=this.form.tradeType;
+                param.status = this.form.status;
+                param.clueId = this.form.clueId;
+                param.isCall = this.form.isCall;
+                param.firstCall = this.form.firstCall;
+                var starTime=this.form.starTime;
+                var endTime=this.form.endTime;
+                if(endTime){
+                    if(starTime>endTime){
+                        this.$message({
+                            message: '创建开始时间不能大于结束时间',
+                            type: 'warning'
+                        });
+                        return;
+                    }
+                }
+                var start=this.form.assignTimeStart;
+                var end=this.form.assignTimeEnd;
+                if(end){
+                    if(start>end){
+                        this.$message({
+                            message: '分发开始时间不能大于结束时间',
+                            type: 'warning'
+                        });
+                        return;
+                    }
+                }
                 var methodStr;
                 if(falg==1){ // 沟通情况
                     methodStr = 'findCommunicateRecords';
