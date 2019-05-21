@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.servlet.ServletOutputStream;
@@ -21,6 +22,7 @@ import com.kuaidao.common.util.ExcelUtil;
 import com.kuaidao.manageweb.feign.statistics.TeleTalkTimeFeignClient;
 import com.kuaidao.stastics.dto.callrecord.TeleSaleTalkTimeQueryDTO;
 import com.kuaidao.stastics.dto.callrecord.TeleTalkTimeRespDTO;
+import com.kuaidao.stastics.dto.callrecord.TotalDataDTO;
 
 /**
  * 通话时长  
@@ -40,8 +42,13 @@ public class TeleSaleTalkTimeController {
       * 电销组通话总时长统计 分頁
      */
     @PostMapping("/listTeleGroupTalkTime")
-    public JSONResult<PageBean<TeleTalkTimeRespDTO>> listTeleGroupTalkTime(@RequestBody TeleSaleTalkTimeQueryDTO teleSaleTalkTimeQueryDTO) {
-        return teleTalkTimeFeignClient.listTeleGroupTalkTime(teleSaleTalkTimeQueryDTO);
+    public JSONResult<Map<String,Object>> listTeleGroupTalkTime(@RequestBody TeleSaleTalkTimeQueryDTO teleSaleTalkTimeQueryDTO) {
+        JSONResult<PageBean<TeleTalkTimeRespDTO>> talkTimeList = teleTalkTimeFeignClient.listTeleGroupTalkTime(teleSaleTalkTimeQueryDTO);
+        JSONResult<TeleTalkTimeRespDTO> totalTeleGroupTalkTime = teleTalkTimeFeignClient.totalTeleGroupTalkTime(teleSaleTalkTimeQueryDTO);
+        HashMap<String,Object> resMap = new HashMap<>();
+        resMap.put("totalData",totalTeleGroupTalkTime.getData());
+        resMap.put("tableData", talkTimeList.getData());
+        return new JSONResult<Map<String,Object>>().success(resMap);
     }
     
     
@@ -51,16 +58,16 @@ public class TeleSaleTalkTimeController {
     */
    @RequestMapping("/exportTeleGroupTalkTime")
    public void exportTeleGroupTalkTime(@RequestBody TeleSaleTalkTimeQueryDTO teleSaleTalkTimeQueryDTO,HttpServletResponse response) throws Exception {
-       JSONResult<Map<String,Object>> teleGroupTalkTimeJr = teleTalkTimeFeignClient.listTeleGroupTalkTimeNoPage(teleSaleTalkTimeQueryDTO);
-       Map<String, Object> resData = teleGroupTalkTimeJr.getData();
+       JSONResult<TotalDataDTO<TeleTalkTimeRespDTO, TeleTalkTimeRespDTO>> teleGroupTalkTimeJr = teleTalkTimeFeignClient.listTeleGroupTalkTimeNoPage(teleSaleTalkTimeQueryDTO);
+        TotalDataDTO<TeleTalkTimeRespDTO, TeleTalkTimeRespDTO> resData = teleGroupTalkTimeJr.getData();
        //获取合计 
-       TeleTalkTimeRespDTO totalTalkTimeDTO = (TeleTalkTimeRespDTO)resData.get("totalData");
+       TeleTalkTimeRespDTO totalTalkTimeDTO = resData.getTotalData();
        
        List<List<Object>> dataList = new ArrayList<List<Object>>();
        dataList.add(getGroupHeadTitleList());
        //合计 放进excel 
        addTotalTalkTimeToList(totalTalkTimeDTO,dataList);
-       List<TeleTalkTimeRespDTO> teleGroupList   = (List<TeleTalkTimeRespDTO>)resData.get("tableData");
+       List<TeleTalkTimeRespDTO> teleGroupList   = resData.getTableData();
        for(int i = 0; i<teleGroupList.size(); i++){
            TeleTalkTimeRespDTO teleTalkTimeRespDTO = teleGroupList.get(i);
            List<Object> curList = new ArrayList<>();
@@ -102,7 +109,10 @@ public class TeleSaleTalkTimeController {
        totalList.add("");
        totalList.add(totalTalkTimeDTO.getCallCount());
        totalList.add(totalTalkTimeDTO.getCalledCount());
-       totalList.add(totalTalkTimeDTO.getCallPercent().multiply(new BigDecimal(100))+"%");
+       BigDecimal callPercent = totalTalkTimeDTO.getCallPercent();
+       if(callPercent!=null) {
+           totalList.add(callPercent.multiply(new BigDecimal(100))+"%"); 
+       }
        totalList.add(totalTalkTimeDTO.getCallClueCount());
        totalList.add(totalTalkTimeDTO.getCalledClueCount());
        totalList.add(totalTalkTimeDTO.getClueCallecdPrecent());

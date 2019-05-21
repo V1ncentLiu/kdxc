@@ -14,6 +14,7 @@ import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.stastics.dto.callrecord.TeleSaleTalkTimeQueryDTO;
 import com.kuaidao.stastics.dto.callrecord.TeleTalkTimeRespDTO;
+import com.kuaidao.stastics.dto.callrecord.TotalDataDTO;
 
 @FeignClient(name = "statstics-service-chen", path = "/statstics/callrecord/teleSaleTalkTime", fallback = TeleTalkTimeFeignClient.HystrixClientFallback.class)
 public interface TeleTalkTimeFeignClient {
@@ -32,7 +33,7 @@ public interface TeleTalkTimeFeignClient {
     * @return
      */
     @PostMapping("/listTeleGroupTalkTimeNoPage")
-    public JSONResult<Map<String,Object>> listTeleGroupTalkTimeNoPage(@RequestBody TeleSaleTalkTimeQueryDTO teleSaleTalkTimeQueryDTO);
+    public JSONResult<TotalDataDTO<TeleTalkTimeRespDTO,TeleTalkTimeRespDTO>> listTeleGroupTalkTimeNoPage(@RequestBody TeleSaleTalkTimeQueryDTO teleSaleTalkTimeQueryDTO);
     
 
     /**
@@ -78,7 +79,7 @@ public interface TeleTalkTimeFeignClient {
         }
 
         @Override
-        public JSONResult<Map<String,Object>> listTeleGroupTalkTimeNoPage(
+        public JSONResult<TotalDataDTO<TeleTalkTimeRespDTO,TeleTalkTimeRespDTO>> listTeleGroupTalkTimeNoPage(
                 TeleSaleTalkTimeQueryDTO teleSaleTalkTimeQueryDTO) {
             return fallBackError("昨日-七天-电销组通话时长不分页");
         }
