@@ -310,11 +310,12 @@ public class TeleStatementController {
     * @return
      */
     @RequestMapping("/resourceAllocationTableTeam")
-    public String resourceAllocationTableTeam(String groupId,HttpServletRequest request) {
+    public String resourceAllocationTableTeam(ResourceAllocationQueryDto resourceAllocationQueryDto,HttpServletRequest request) {
         UserInfoDTO user = getUser();
         // 查询所有电销组
         List<OrganizationRespDTO> saleGroupList = getSaleGroupList();
         request.setAttribute("saleGroupList", saleGroupList);
+        request.setAttribute("resourceAllocationQueryDto",resourceAllocationQueryDto);
         // 根据角色查询页面字段
         QueryFieldByRoleAndMenuReq queryFieldByRoleAndMenuReq = new QueryFieldByRoleAndMenuReq();
         queryFieldByRoleAndMenuReq.setMenuCode("statistics:teleStatement:resourceAllocation");
