@@ -22,10 +22,10 @@
         <div class="mainSearchFormBox">
            <el-form :inline="true" :model="form" class="demo-form-inline mainSearchForm" ref="form">                 
                 <el-form-item label="起止时间:">
-                    <el-date-picker format="yyyy-MM-dd HH:mm:ss" v-model="form.startTime" type="datetime" placeholder="选择日期"></el-date-picker>
+                    <el-date-picker format="yyyy-MM-dd HH:mm" v-model="form.startTime" type="datetime" placeholder="选择日期"></el-date-picker>
                 </el-form-item>
                 <el-form-item label="—" class="widthauto">
-                   <el-date-picker format="yyyy-MM-dd HH:mm:ss" v-model="form.endTime" type="datetime" placeholder="选择日期"></el-date-picker>
+                   <el-date-picker format="yyyy-MM-dd HH:mm" v-model="form.endTime" type="datetime" placeholder="选择日期"></el-date-picker>
                 </el-form-item>
                 <el-form-item label="电销组:">  
                     <el-select v-model="form.org_Id" placeholder="电销组" style="width: 100%;" clearable filterable>
@@ -173,9 +173,10 @@
                     // 插入合计一行
                     if(resobjData.length>0){
                         mainDivVM.summaryFun(param);
-                    } 
-                    // loading
-                    mainDivVM.loading=false;
+                    }else{
+                        // loading
+                        mainDivVM.loading=false;
+                    }
                     // 给导出参数赋值
                     mainDivVM.export.startTime = mainDivVM.minuteFormat(startTime);
                     mainDivVM.export.endTime = mainDivVM.minuteFormat(endTime);
@@ -219,6 +220,7 @@
                 //     other: '16',
                 //     netizensMissed: '18'
                 // };
+                mainDivVM.loading=true;
                 axios.post('/statistics/teleStatement/getResourceAllocationCount',param).then(function (response) {
                     console.log(response) 
                     if(!response){
@@ -248,7 +250,9 @@
                     }  
                     var resobjData=resobj.data;
                     // 插入合计一行
-                    mainDivVM.tableData.unshift(resobjData[0]);                    
+                    mainDivVM.tableData.unshift(resobjData[0]); 
+                    // loading
+                    mainDivVM.loading=false;                   
                 })
                 
                 // const sums = [];
@@ -284,8 +288,8 @@
             searchYesterday(){//昨天
                 var today = new Date();
                today.setTime(today.getTime()-24*60*60*1000);
-               var startTime = today.getFullYear()+"-" + (today.getMonth()+1) + "-" + today.getDate()+" 00:00:00";
-               var endTime =today.getFullYear()+"-" + (today.getMonth()+1) + "-" + today.getDate()+" 23:59:59";
+               var startTime = today.getFullYear()+"-" + (today.getMonth()+1) + "-" + today.getDate()+" 00:00";
+               var endTime =today.getFullYear()+"-" + (today.getMonth()+1) + "-" + today.getDate()+" 23:59";
                this.form.startTime=startTime;
                this.form.endTime=endTime;
                this.searchTable();
@@ -301,8 +305,8 @@
                  var d = b.valueOf();
                  var startTime= new Date(c);
                  var endTime = new Date(d);
-                 this.form.startTime=startTime.getFullYear()+"-" + (startTime.getMonth()+1) + "-" + startTime.getDate()+" 00:00:00";
-                 this.form.endTime=endTime.getFullYear()+"-" + (endTime.getMonth()+1) + "-" + endTime.getDate()+" 23:59:59";
+                 this.form.startTime=startTime.getFullYear()+"-" + (startTime.getMonth()+1) + "-" + startTime.getDate()+" 00:00";
+                 this.form.endTime=endTime.getFullYear()+"-" + (endTime.getMonth()+1) + "-" + endTime.getDate()+" 23:59";
                  this.searchTable();
             },
             searchMonth(){//本月
@@ -316,8 +320,8 @@
               //  var d = b.valueOf()+1*24*60*60*1000;
                 var startTime= new Date(c);
                // var endTime = new Date(d);
-                this.form.startTime=startTime.getFullYear()+"-" + (startTime.getMonth()+1) + "-" + startTime.getDate()+" 00:00:00";;
-                this.form.endTime=year+"-"+(month+1)+"-"+date+" 23:59:59";
+                this.form.startTime=startTime.getFullYear()+"-" + (startTime.getMonth()+1) + "-" + startTime.getDate()+" 00:00";;
+                this.form.endTime=year+"-"+(month+1)+"-"+date+" 23:59";
                 this.searchTable();
             },
             exportRs(){
@@ -340,12 +344,13 @@
         },
         created(){    
             // 默认进入显示当天时间
-            // var today = new Date();
-            // today.setTime(today.getTime());
-            // var startTime = today.getFullYear()+"-"+ (today.getMonth()+1) + "-" + today.getDate()+" 00:00";
-            // var endTime =today.getFullYear()+"-"+ (today.getMonth()+1) + "-" + today.getDate()+" 23:59";
-            // this.form.startTime=startTime;
-            // this.form.endTime=endTime;         
+            var today = new Date();
+            today.setTime(today.getTime());
+            var startTime = today.getFullYear()+"-"+ (today.getMonth()+1) + "-" + today.getDate()+" 00:00";
+            var endTime =today.getFullYear()+"-"+ (today.getMonth()+1) + "-" + today.getDate()+" 23:59";
+            this.form.startTime=startTime;
+            this.form.endTime=endTime;
+            // 列表搜索         
             this.searchTable();
         },
         mounted(){            
