@@ -37,7 +37,9 @@ import javax.servlet.http.HttpServletResponse;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 电销相关报表
@@ -416,7 +418,13 @@ public class TeleStatementController {
     * @return
      */
     @RequestMapping("/telemarketingCallTableSum")
-    public String telemarketingCallTableSum() {
+    public String telemarketingCallTableSum(Long orgId,Long startTime,Long endTime,Long userId,HttpServletRequest request) {
+        Map<String, Object> paramMap = new HashMap<>();
+        paramMap.put("orgId", orgId);
+        paramMap.put("startTime", startTime);
+        paramMap.put("endTime", endTime);
+        paramMap.put("userId", userId);
+        request.setAttribute("parentParam",paramMap);
         return "reportforms/telemarketingCallTableSum";
     }
     
@@ -427,8 +435,13 @@ public class TeleStatementController {
     * @return
      */
     @RequestMapping("/telemarketingCallTableTeam")
-    public String telemarketingCallTableTeam(Long orgId,HttpServletRequest request) {
-        request.setAttribute("parentOrgId",orgId);
+    public String telemarketingCallTableTeam(Long orgId,Long startTime,Long endTime,Long userId,HttpServletRequest request) {
+        Map<String, Object> paramMap = new HashMap<>();
+        paramMap.put("orgId", orgId);
+        paramMap.put("startTime", startTime);
+        paramMap.put("endTime", endTime);
+        paramMap.put("userId", userId);
+        request.setAttribute("parentParam",paramMap);
         return "reportforms/telemarketingCallTableTeam";
     }
     
@@ -438,8 +451,13 @@ public class TeleStatementController {
     * @return
      */
     @RequestMapping("/telemarketingCallTablePerson")
-    public String telemarketingCallTablePerson(Long userId,HttpServletRequest request) {
-        request.setAttribute("curUserId",userId);
+    public String telemarketingCallTablePerson(Long orgId,Long startTime,Long endTime,Long userId,HttpServletRequest request) {
+        Map<String, Object> paramMap = new HashMap<>();
+        paramMap.put("orgId", orgId);
+        paramMap.put("startTime", startTime);
+        paramMap.put("endTime", endTime);
+        paramMap.put("userId", userId);
+        request.setAttribute("parentParam",paramMap);
         return "reportforms/telemarketingCallTablePerson";
     }
 
