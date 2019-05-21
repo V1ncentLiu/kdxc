@@ -87,11 +87,8 @@
 </body>
 <script th:inline="javascript">
     var queryOrg=[[${saleGroupList}]];//电销组
-    // var distributionSource=[[${queryOrg}]];//分配来源
-    var resTotalList=[[${resTotalList}]];//合计
-    var fieldList=[[${fieldList}]];//表头list
-    console.log(resTotalList);
-    
+    // var distributionSource=[[${queryOrg}]];//分配来源    
+    var fieldList=[[${fieldList}]];//表头list    
     var mainDivVM = new Vue({
         el: '#maindiv',
         data: function() {
@@ -105,7 +102,7 @@
                 export: {
                     startTime:'',
                     endTime:'',
-                    orgId:''
+                    org_Id:''
                 },
                 tableData: [],//表格数据
                 tableColums: [],//表头list
@@ -140,8 +137,6 @@
                 param.org_Id =  this.form.org_Id;//电销组
                 this.loading=true;
                 axios.post('/statistics/teleStatement/getResourceAllocationTable',param).then(function (response) { 
-                    console.log(response) 
-
                     if(!response){
                         mainDivVM.$message({
                             message: "接口调用失败",
@@ -174,32 +169,27 @@
                     mainDivVM.tableColums= fieldList;
                     // 插入合计一行
                     if(resobjData.length>0){
-                        mainDivVM.summaryFun();
+                        mainDivVM.summaryFun(param);
                     }                    
                     // 分页
                     mainDivVM.pager.currentPage= resobj.data.currentPage;
                     mainDivVM.pager.total= resobj.data.total;
                     // loading
                     mainDivVM.loading=false;
-
+                    // 给导出参数赋值
                     mainDivVM.export.startTime = mainDivVM.minuteFormat(startTime);
                     mainDivVM.export.endTime = mainDivVM.minuteFormat(endTime);
-                    mainDivVM.export.orgId = mainDivVM.form.orgId;
+                    mainDivVM.export.org_Id = mainDivVM.form.org_Id;
                 })
             },
             gotoTeam(item){
-                var orgId = item.orgId;
+                var org_Id = item.orgId;
                 var orgName = item.orgName;
-                // if(clueId){
-                //     // alert("id = " + clueId);
-                //     // 点击组跳转到资源组
-                //     window.location.href="/statistics/teleStatement/resourceAllocationTableTeam?groupId=" + clueId;
-                // }
                 console.log(item)
                 if(orgName == "合计"){
                     window.location.href="/statistics/teleStatement/resourceAllocationTableSum";
                 }else{
-                    window.location.href="/statistics/teleStatement/resourceAllocationTableTeam?groupId=" + orgId;
+                    window.location.href="/statistics/teleStatement/resourceAllocationTableTeam?groupId=" + org_Id;
                 }
             },
             arraySpanMethod({ row, column, rowIndex, columnIndex }) { // 合并第一行
@@ -214,23 +204,57 @@
             indexFun (index) { // 表格序号
                 return index;
             },
-            summaryFun () { // 将合计插入数据中：如果是分页，记得每次获取数据都要执行这个函数
+            summaryFun (param) { // 将合计插入数据中：如果是分页，记得每次获取数据都要执行这个函数
                 // const { columns, data } = param;
                 // const sums = ["合计", '', 2, 2, '2%', 2, 2, '2%', 1234, 1234];
-                var resTotalList = {
-                    id: '合计',
-                    orgName: '合计',
-                    assignClueCount: '2',
-                    jointExhibition: '4',
-                    priceCompetition: '6',
-                    optimization: '8',
-                    informationFlow: '10',
-                    officialWebsite: '12',
-                    industry: '14',
-                    other: '16',
-                    netizensMissed: '18'
-                };
-                this.tableData.unshift(resTotalList);
+                // var resTotalList = {
+                //     id: '合计',
+                //     orgName: '合计',
+                //     assignClueCount: '2',
+                //     jointExhibition: '4',
+                //     priceCompetition: '6',
+                //     optimization: '8',
+                //     informationFlow: '10',
+                //     officialWebsite: '12',
+                //     industry: '14',
+                //     other: '16',
+                //     netizensMissed: '18'
+                // };
+
+                axios.post('/statistics/teleStatement/getGroupCountTotal',param).then(function (response) { 
+                    console.log(response) 
+
+                    if(!response){
+                        mainDivVM.$message({
+                            message: "合计接口调用失败",
+                            type: 'error'
+                        });
+                        mainDivVM.loading=false;
+                        return ;
+                    }
+                    var resobj= response.data;
+                    if(!resobj){
+                        mainDivVM.$message({
+                            message: "合计接口调用失败",
+                            type: 'error'
+                        });
+                        mainDivVM.loading=false;
+                        return ;
+                    }
+                    if(resobj.code!='0'){
+                        mainDivVM.$message({
+                            message: "合计接口调用失败",
+                            type: 'error'
+                        });
+                        mainDivVM.loading=false;
+                        return ;
+                    }  
+                    var resobjData=resobj.data.data;
+                    // 插入合计一行
+                    mainDivVM.tableData.unshift(resobjData);
+                    
+                })
+                
                 // const sums = [];
                 // columns.forEach((column, index) => {
                 //     if (index === 0) {
@@ -263,20 +287,12 @@
             },
             searchYesterday(){//昨天
                 var today = new Date();
-                today.setTime(today.getTime()-24*60*60*1000);
-                var month=""
-                var getMonth=today.getMonth()+1;
-                if(getMonth<10){
-                    month=0+(getMonth+"")
-                }else{
-                    month=getMonth
-                }
-                console.log(month)
-                var startTime = today.getFullYear()+"" + month + today.getDate()+"0000";
-                var endTime =today.getFullYear()+"" + month + today.getDate()+"2359";
-                this.form.startTime=startTime;
-                this.form.endTime=endTime;
-                this.searchTable();
+               today.setTime(today.getTime()-24*60*60*1000);
+               var startTime = today.getFullYear()+"-" + (today.getMonth()+1) + "-" + today.getDate()+" 00:00:00";
+               var endTime =today.getFullYear()+"-" + (today.getMonth()+1) + "-" + today.getDate()+" 23:59:59";
+               this.form.startTime=startTime;
+               this.form.endTime=endTime;
+               this.searchTable();
             },
             searchWeek(){//近七天
                  var a = new Date();
