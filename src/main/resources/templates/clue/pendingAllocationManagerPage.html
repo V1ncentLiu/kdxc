@@ -95,8 +95,7 @@
             </el-form>
         </div>
         <el-row>
-            <el-table  ref="multipleTable" tooltip-effect="dark" border @selection-change="handleSelectionChange"
-                style="width: 100%"  :data="dataTable" key="multipleTable">
+            <el-table  ref="multipleTable" tooltip-effect="dark" border @selection-change="handleSelectionChange" @row-click="clickRow" @row-dblclick="showClueDetailInfo" style="width: 100%"  :data="dataTable" key="multipleTable">
                 <el-table-column align="center" type="selection" label="全选" width="50"></el-table-column>
     	        <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width"
     	         v-for="(item,key,index) in tableColums" v-if="item.fieldCode == 'releaseNum'">
@@ -443,6 +442,13 @@ var clueVM = new Vue({
                 
         },
         methods: {
+            //展现详情
+            showClueDetailInfo (row, column) {
+                window.location.href='/tele/clueMyCustomerInfo/customerInfoReadOnly?clueId='+row.id;
+            },
+            clickRow(row){
+                this.$refs.multipleTable.toggleRowSelection(row)
+            },
         	searchTable() {
                 var param ={};
 
