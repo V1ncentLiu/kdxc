@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"  xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head th:replace="_header_include::frag(~{::title},~{},~{})">
+    <title>后台管理系统</title>
+    <style>
+    </style>
+</head>
+<body>
+<div id="maindiv" class="maindiv mainPadding" style="display: none;">    
+    <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
+        <el-breadcrumb-item>Home</el-breadcrumb-item>
+        <el-breadcrumb-item>数据报表</el-breadcrumb-item>
+        <el-breadcrumb-item>首次资源分配表</el-breadcrumb-item>
+    </el-breadcrumb>    
+    <el-row class="marginB20">
+        <el-button type="primary" @click="searchYesterday">昨天</el-button>
+        <el-button type="success" @click="searchWeek">近七天</el-button>
+        <el-button type="warning" @click="searchMonth">本月</el-button>  
+        <el-button type="danger">导出Excel报表</el-button>  
+        <el-button type="primary" style="float: right;" @click="goback()">返回</el-button>  
+    </el-row>
+    <div class="mainSearchBg">        
+        <div class="mainSearchFormBox">
+           <el-form :inline="true" :model="form" class="demo-form-inline mainSearchForm" ref="form">                 
+                <el-form-item label="起止时间:">
+                    <el-date-picker format="yyyy-MM-dd HH:mm" v-model="form.startTime" type="datetime" value-format="yyyy-MM-dd HH:mm" placeholder="选择日期"></el-date-picker>
+                </el-form-item>
+                <el-form-item label="—" class="widthauto">
+                    <el-date-picker format="yyyy-MM-dd HH:mm" v-model="form.endTime" type="datetime" value-format="yyyy-MM-dd HH:mm" placeholder="选择日期"></el-date-picker>
+                </el-form-item>
+                <el-form-item label="电销组:">  
+                    <el-select v-model="form.teleorg" placeholder="电销组" style="width: 100%;" clearable @change="currentTelSale" filterable>
+                        <el-option
+                            v-for="item in orgTeleArr"
+                            :key="item.id"
+                            :label="item.name"
+                            :value="item.id">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="电销顾问:">  
+                    <el-select 
+                        v-model="form.teleSaleId" 
+                        placeholder="电销顾问" 
+                        style="width: 100%;" 
+                        filterable 
+                        multiple 
+                        clearable  >
+                        <el-option
+                            v-for="item in busSaleArr"
+                            :key="item.id"
+                            :label="item.name"
+                            :value="item.id">
+                            <el-checkbox-group v-model="form.teleSaleId">
+                                <el-checkbox :label="item.id">{{item.name}}</el-checkbox>
+                            </el-checkbox-group>
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="话务转入:">  
+                    <el-select v-model="form.telOperatorTransferIn" placeholder="话务转入" style="width: 100%;" clearable filterable>
+                        <el-option label="是" value="1"></el-option>
+                        <el-option label="否" value="2"></el-option>
+                    </el-select>
+                </el-form-item>
+                <div class="mainSearchBtnBox">
+                    <el-button icon="el-icon-search" type="primary" @click="searchTable()" class="searchBtn">搜索</el-button>
+                </div>  
+            </el-form>
+        </div>
+        <el-row>
+            <el-table 
+                ref="tableData"
+                tooltip-effect="dark"
+                style="width: 100%"
+                border
+                :data="tableData"
+                >
+                <el-table-column align="center" type="index" label="序号" width="55"></el-table-column>
+                <el-table-column align="center" :key="index" :prop="item.fieldCode" :label="item.displayName" v-for="(item,key,index) in tableColums">
+                </el-table-column>
+            </el-table>
+            <table-pagination :pager="pager" @change="searchTable"></table-pagination>
+        </el-row>
+    </div>
+</div>
+<!-- import common js-->
+<div th:include="_footer_include :: #jsLib"></div>
+</body>
+<script th:inline="javascript">
+    var queryOrg=[[${queryOrg}]];//电销组
+    var distributionSource=[[${queryOrg}]];//分配来源
+    var fieldList=[
+        {//表头假数据
+            displayName:"电销组",
+            fieldCode:"orgName",//需要改成后端返回的字段名称
+            fieldName:"电销组",
+            id:"1",
+            menuCode:null,
+            menuId:null,
+            pageNum:0,
+            pageSize:0,
+            sortNum:1
+        },{
+            displayName:"电销",
+            fieldCode:"userName",
+            fieldName:"电销",
+            id:"1",
+            menuCode:null,
+            menuId:null,
+            pageNum:0,
+            pageSize:0,
+            sortNum:1
+        },{
+            displayName:"首次分配资源数",
+            fieldCode:"assignClueCount",
+            fieldName:"首次分配资源数",
+            id:"2",
+            menuCode:null,
+            menuId:null,
+            pageNum:0,
+            pageSize:0,
+            sortNum:2
+        },{
+            displayName:"联展",
+            fieldCode:"jointExhibition",
+            fieldName:"联展",
+            id:"3",
+            menuCode:null,
+            menuId:null,
+            pageNum:0,
+            pageSize:0,
+            sortNum:3
+        },{
+            displayName:"竞价",
+            fieldCode:"priceCompetition",
+            fieldName:"竞价",
+            id:"4",
+            menuCode:null,
+            menuId:null,
+            pageNum:0,
+            pageSize:0,
+            sortNum:4
+        },{
+            displayName:"优化",
+            fieldCode:"optimization",
+            fieldName:"优化",
+            id:"5",
+            menuCode:null,
+            menuId:null,
+            pageNum:0,
+            pageSize:0,
+            sortNum:5
+        },{
+            displayName:"信息流",
+            fieldCode:"informationFlow",
+            fieldName:"信息流",
+            id:"6",
+            menuCode:null,
+            menuId:null,
+            pageNum:0,
+            pageSize:0,
+            sortNum:6
+        },{
+            displayName:"官网",
+            fieldCode:"officialWebsite",
+            fieldName:"官网",
+            id:"7",
+            menuCode:null,
+            menuId:null,
+            pageNum:0,
+            pageSize:0,
+            sortNum:7
+        },{
+            displayName:"行业",
+            fieldCode:"industry",
+            fieldName:"行业",
+            id:"8",
+            menuCode:null,
+            menuId:null,
+            pageNum:0,
+            pageSize:0,
+            sortNum:8
+        },{
+            displayName:"其他",
+            fieldCode:"other",
+            fieldName:"其他",
+            id:"9",
+            menuCode:null,
+            menuId:null,
+            pageNum:0,
+            pageSize:0,
+            sortNum:9
+        },{
+            displayName:"网民未接",
+            fieldCode:"netizensMissed",
+            fieldName:"网民未接",
+            id:"10",
+            menuCode:null,
+            menuId:null,
+            pageNum:0,
+            pageSize:0,
+            sortNum:10
+        }
+    ];
+    var mainDivVM = new Vue({
+        el: '#maindiv',
+        data: function() {
+            return {
+                loading: false,
+                pager:{
+                    total: 0,
+                    currentPage: 1,
+                    pageSize: 20,
+                },
+                form: {
+                    startTime:'',
+                    endTime:'',
+                    org_Id:'',
+                    telOperatorTransferIn: ''
+                },
+                export: {
+                    startTime:'',
+                    endTime:'',
+                    org_Id:'',
+                    telOperatorTransferIn: ''
+                },
+                tableData: [
+                    {
+                        id: 1,
+                        timeId: "20190505",
+                        orgId: 1,
+                        orgName: '电销组1',
+                        userName: '电销1',
+                        assignClueCount: 100,
+                        jointExhibition: 100,
+                        priceCompetition: 100,
+                        optimization: 100,
+                        informationFlow: 1000,
+                        officialWebsite: 1000,
+                        industry: 1000,
+                        other: 1000,
+                        netizensMissed: 1000,
+                        // uesrId: ''
+                    },
+                    {
+                        id: 2,
+                        timeId: "20190505",
+                        orgId: 2,
+                        orgName: '电销组2',
+                        userName: '电销2',
+                        assignClueCount: 100,
+                        jointExhibition: 100,
+                        priceCompetition: 100,
+                        optimization: 100,
+                        informationFlow: 1000,
+                        officialWebsite: 1000,
+                        industry: 1000,
+                        other: 1000,
+                        netizensMissed: 1000,
+                        // uesrId: ''
+                    },
+                ],//表格数据
+                tableColums: [],//表头list
+                orgTeleArr:queryOrg,//电销组
+                busSaleArr:[],//创业顾问
+                distributionSource:distributionSource,//分配来源
+                
+            }             
+        },
+        methods: {  
+            currentTelSale(seleVal){//根据电销组选择创业顾问
+                if(null==seleVal||seleVal==""){
+                    return ;
+                }
+                param={};
+                param.orgId=seleVal;
+                param.roleCode="DXCYGW";
+                axios.post('/user/userManager/listByOrgAndRole' ,param).then(function (response) {  
+                    mainDivVM.busSaleArr=response.data.data;
+                });
+            },
+            searchTable() { 
+                this.tableColums= fieldList; // 表头数据渲染
+                var startTime = new Date(this.form.startTime);
+                var endTime = new Date(this.form.endTime);
+                if(endTime && startTime){
+                    if(startTime>endTime){
+                        this.$message({
+                            message: '开始时间不能大于结束时间',
+                            type: 'warning'
+                        });
+                        return;
+                    }
+                    var date = new Date();
+                    var currentDate = moment(date).format("YYYY-MM-DD 23:59");
+                    date.setMonth(date.getMonth()-5);
+                    var beforeSixMonth = moment(date).format("YYYY-MM-DD 00:00");
+                    var currentDateRes = new Date(currentDate);
+                    var beforeSixMonthRes = new Date(beforeSixMonth);
+                    if(startTime < beforeSixMonthRes || endTime > currentDateRes){
+                        this.$message({
+                            message: '请选择近6个月内的时间',
+                            type: 'warning'
+                        });
+                        return;
+                    }
+                }else{
+                    this.$message({
+                        message: '请选择近6个月内的时间',
+                        type: 'warning'
+                    });
+                    return;
+                }
+                console.log('search');   
+                
+                var param = {};
+                param.pageSize = this.pager.pageSize;
+                param.pageNum =  this.pager.currentPage;
+                // 搜索条件
+                param.startTime = this.minuteFormat(startTime);
+                param.endTime =  this.minuteFormat(endTime);
+                param.org_Id =  this.form.org_Id;//电销组
+                // 判断电销组是否有值
+                if(this.form.uesr_id){
+                    param.uesr_id = this.form.uesr_id;//电销组
+                }
+                console.log(param);
+                // this.loading=true;
+                // axios.post('/statistics/teleStatement/getResourceAllocationDayPagePersion',param).then(function (response) { 
+                //     if(!response){
+                //         mainDivVM.$message({
+                //             message: "接口调用失败",
+                //             type: 'error'
+                //         });
+                //         mainDivVM.loading=false;
+                //         return ;
+                //     }
+                //     var resobj= response.data;
+                //     console.log(resobj)
+                //     if(!resobj){
+                //         mainDivVM.$message({
+                //             message: "接口调用失败",
+                //             type: 'error'
+                //         });
+                //         mainDivVM.loading=false;
+                //         return ;
+                //     }
+                //     if(resobj.code!='0'){
+                //         mainDivVM.$message({
+                //             message: "接口调用失败",
+                //             type: 'error'
+                //         });
+                //         mainDivVM.loading=false;
+                //         return ;
+                //     }  
+                //     var resobjData=resobj.data.data          
+                //     // 表格数据渲染
+                //     mainDivVM.tableData=resobjData;
+                //     // 表头数据渲染 
+                //     mainDivVM.tableColums= fieldList;
+                //     mainDivVM.pager.currentPage= resobj.data.currentPage;
+                //     mainDivVM.pager.total= resobj.data.total;
+                //     mainDivVM.loading=false;
+                // }).catch(function (error) {
+                //     console.log(error);
+                //     mainDivVM.$message({
+                //         message: "请求失败，请稍后重试",
+                //         type: "error"
+                //     });
+                //     mainDivVM.loading = false;
+                // });  
+            },
+            goback(){window.history.go(-1);},
+            dateFormat (row, column) { 
+                var date = row[column.property];
+                 if (!date) {return "";}
+                var d = date.toString();
+                var oYear = d.slice(0,4);
+                var oMonth = d.slice(5,6);
+                oMonth = oMonth < 10 ? "0" + oMonth : oMonth;
+                var oDay = d.slice(7);
+                oDay = oDay < 10 ? "0" + oDay : oDay;
+                return oYear+"-"+oMonth+"-"+oDay;
+            }, 
+            minuteFormat (m) {
+                if (!m) {return "";}
+                var timeStr = new Date(m);
+                var yearRes = timeStr.getFullYear()
+                var monthRea = timeStr.getMonth()+1;
+                monthRea = monthRea < 10 ?  "0" + monthRea : monthRea;
+                var dateRes = timeStr.getDate();
+                dateRes = dateRes < 10 ?  "0" + dateRes : dateRes;  
+                var hoursRes = timeStr.getHours();
+                hoursRes = hoursRes < 10 ?  "0" + hoursRes : hoursRes;  
+                var minRes = timeStr.getMinutes();
+                minRes = minRes < 10 ?  "0" + minRes : minRes;                
+                var timeRes = "" + yearRes + monthRea + dateRes + hoursRes + minRes;
+                return timeRes;
+            },
+            searchYesterday(){ // 昨天
+               var today = new Date();
+               today.setTime(today.getTime()-24*60*60*1000);
+               var startTime = today.getFullYear()+"-" + (today.getMonth()+1) + "-" + today.getDate()+" 00:00";
+               var endTime =today.getFullYear()+"-" + (today.getMonth()+1) + "-" + today.getDate()+" 23:59";
+               this.form.startTime=startTime;
+               this.form.endTime=endTime;
+               this.searchTable();
+            },
+            searchWeek(){ // 近七天
+                 var a = new Date();
+                 var year = a.getFullYear();
+                 var month = a.getMonth();
+                 var date = a.getDate();
+                 var b = new Date(year,month,date);
+                 var c = b.valueOf()-6*24*60*60*1000;
+                 var d = b.valueOf();
+                 var startTime= new Date(c);
+                 var endTime = new Date(d);
+                 this.form.startTime=startTime.getFullYear()+"-" + (startTime.getMonth()+1) + "-" + startTime.getDate()+" 00:00";
+                 this.form.endTime=endTime.getFullYear()+"-" + (endTime.getMonth()+1) + "-" + endTime.getDate()+" 23:59";
+                 this.searchTable();
+            },
+            searchMonth(){ // 本月 
+                var a = new Date();
+                var year = a.getFullYear();
+                var month = a.getMonth();
+                var date = a.getDate();
+                var b = new Date(year,month,date);
+                var f= new Date(year,month,01);
+                var c = f.valueOf();
+                var startTime= new Date(c);
+                this.form.startTime=startTime.getFullYear()+"-" + (startTime.getMonth()+1) + "-" + startTime.getDate()+" 00:00";
+                this.form.endTime=year+"-"+(month+1)+"-"+date+" 23:59";
+                this.searchTable();
+            },
+            exportRs(){
+                var param = {};
+                param.startTime = this.export.startTime;
+                param.endTime =  this.export.endTime;
+                param.orgId =  this.export.orgId; 
+                axios.post('/callrecord/teleSaleTalkTime/exportTeleGroupTalkTime',param,{responseType:'blob'})
+                    .then(function (response) {
+                        console.log(response);
+                        var data =  response.data;
+                        var fileName = response.headers.filename;
+                        saveAs(data,decodeURI(fileName));
+                    })
+                    .catch(function (error) {
+                        console.log(error);
+                        mainDivVM.$message({
+                            message: "导出失败，请稍后重试",
+                            type: "error"
+                        });
+                    });
+            }
+        },
+        created(){    
+            var today = new Date();
+            today.setTime(today.getTime());
+            var startTime = today.getFullYear()+"-"+ (today.getMonth()+1) + "-" + today.getDate()+" 00:00";
+            var endTime =today.getFullYear()+"-"+ (today.getMonth()+1) + "-" + today.getDate()+" 23:59";
+            this.form.startTime=startTime;
+            this.form.endTime=endTime;  
+            console.log(this.form);      
+            this.searchTable();
+        },
+        mounted(){
+            document.getElementById('maindiv').style.display = 'block';
+        }
+    })
+    
+</script>
+</html>
