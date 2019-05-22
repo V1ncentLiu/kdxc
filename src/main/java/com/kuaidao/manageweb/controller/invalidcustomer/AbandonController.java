@@ -112,7 +112,7 @@ public class AbandonController {
         List<UserInfoDTO> userList = new ArrayList<UserInfoDTO>();
 
         UserOrgRoleReq userRole = new UserOrgRoleReq();
-        userRole.setRoleCode(RoleCodeEnum.TGZXZJ.name());
+        userRole.setRoleCode(RoleCodeEnum.TGZJ.name());
         JSONResult<List<UserInfoDTO>> userZxzjList = userInfoFeignClient.listByOrgAndRole(userRole);
 
         if (JSONResult.SUCCESS.equals(userZxzjList.getCode()) && null != userZxzjList.getData()

@@ -91,7 +91,7 @@ var mainDivVM = new Vue({
         visitArr:[{value:-1,name:'待处理'},{value:0,name:'未到访'},{value:1,name:'已到访'}],
         visitTypeArr:[{value:1,name:'预约来访'},{value:2,name:'慕名来访'},{value:3,name:'临时来访'}],
         option2s: [{value: 1, label: '一次性全款'},{value: 2, label: '先付定金'}],
-        option3s: [{value: '1', label: '现金'},{value: '2', label: 'POS'},{value: '3', label: '转账'}],
+        option3s: [{value: '1', label: '现金'},{value: '2', label: 'POS'},{value: '3', label: '转账'},{value: '4', label: '微信'},{value: '5', label: '支付宝'}],
         payTypeArr:[{value: "1", label: '全款'},{value: "2", label: '定金'},{value: "3", label: '追加定金'},{value: "4", label: '尾款'}],
         payTypeArr1:[{value: "1", label: '全款'},{value: "2", label: '定金'},{value: "3", label: '追加定金'},{value: "4", label: '尾款'}],
         vistitStoreTypeArr:[],
