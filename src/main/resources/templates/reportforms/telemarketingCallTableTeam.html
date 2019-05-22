@@ -124,7 +124,18 @@
             return {
                 isDisabled: true,
                 loading: false,
+                pager: { 
+                    total: 0,
+                    currentPage: 1,
+                    pageSize: 20
+                },
                 form: {
+                    startTime: '',
+                    endTime: '',
+                    orgId: '',
+                    userId: ''
+                },
+                export: {
                     startTime: '',
                     endTime: '',
                     orgId: '',
@@ -159,18 +170,13 @@
             ],
                 orgTeleArr: queryOrg, // 电销组
                 userTeleArr: [], // 创业顾问
-                pager: { 
-                    total: 0,
-                    currentPage: 1,
-                    pageSize: 20
-                },
             }             
         },
         methods: { 
             searchTable() { 
                 var startTime = this.form.startTime;
                 var endTime = this.form.endTime;
-                if(endTime){
+                if(endTime && startTime){
                     if(startTime>endTime){
                         this.$message({
                             message: '开始时间不能大于结束时间',
@@ -178,6 +184,25 @@
                         });
                         return;
                     }
+                    var date = new Date();
+                    var currentDate = moment(date).format("YYYY-MM-DD 23:59");
+                    date.setMonth(date.getMonth()-5);
+                    var beforeSixMonth = moment(date).format("YYYY-MM-DD 00:00");
+                    var currentDateRes = new Date(currentDate);
+                    var beforeSixMonthRes = new Date(beforeSixMonth);
+                    if(startTime < beforeSixMonthRes || endTime > currentDateRes){
+                        this.$message({
+                            message: '请选择近6个月内的时间',
+                            type: 'warning'
+                        });
+                        return;
+                    }
+                }else{
+                    this.$message({
+                        message: '请选择近6个月内的时间',
+                        type: 'warning'
+                    });
+                    return;
                 }
                 console.log('search');   
                 
@@ -215,12 +240,15 @@
                         });
                         return ;
                     }  
-                    var resobjData = resobj.data.data          
-                    // 表格数据渲染
+                    var resobjData = resobj.data.data; 
                     mainDivVM.tableData = resobjData;
                     mainDivVM.pager.currentPage = resobj.data.currentPage;
                     mainDivVM.pager.total = resobj.data.total;
                     mainDivVM.loading = false;
+                    mainDivVM.export.startTime = mainDivVM.minuteFormat(startTime);
+                    mainDivVM.export.endTime = mainDivVM.minuteFormat(endTime);
+                    mainDivVM.export.orgId = mainDivVM.form.orgId;
+                    mainDivVM.export.userId = mainDivVM.form.userId;
                 }).catch(function (error) {
                     console.log(error);
                     mainDivVM.loading = false;
@@ -253,21 +281,24 @@
             gotoPerson (item) {
                 var userId = item.userId;
                 console.log(userId);
+                var startTime = this.export.startTime;
+                var endTime = this.export.endTime;
+                var orgId = this.export.orgId;
                 if(userId){
-                    window.location.href="/statistics/teleStatement/telemarketingCallTablePerson?userId=" + userId + "&orgId=" + this.form.orgId + "&startTime=" + this.form.startTime + "&endTime=" + this.form.endTime; 
+                    window.location.href="/statistics/teleStatement/telemarketingCallTablePerson?userId=" + userId + "&orgId=" + orgId + "&startTime=" + startTime + "&endTime=" + endTime; 
                 }
             }, 
             dateTimeFormat (dt) { 
-                 if (!dt) {return "";}
+                if (!dt) {return "";}
                 var d = dt.toString();
                 var oYear = d.slice(0,4);
                 var oMonth = d.slice(5,6);
                 oMonth = oMonth < 10 ? "0" + oMonth : oMonth;
                 var oDay = d.slice(7,8);
                 oDay = oDay < 10 ? "0" + oDay : oDay;
-                var oHour = d.slice(8,9);
+                var oHour = d.slice(9,10);
                 oHour = oHour < 10 ? "0" + oHour : oHour;
-                var oMinute = d.slice(8,9);
+                var oMinute = d.slice(11);
                 oMinute = oMinute < 10 ? "0" + oMinute : oMinute;
                 return oYear+"-"+oMonth+"-"+oDay+" "+oHour+":"+oMinute;
             }, 
@@ -296,22 +327,16 @@
                 var timeResult = this.timeFun (time); 
                 return timeResult;
             },
-            timeFun (s) {
+            timeFun(s){
                 var t="";
                 var hour = Math.floor(s/3600);
                 var min = Math.floor(s/60) % 60;
                 var sec = s % 60;
-                if(hour<10){
-                    t+="0";
-                }
+                if(hour<10){t+="0";}
                 t+=hour+"时"
-                if(min < 10){
-                    t += "0";
-                }
+                if(min < 10){t += "0";}
                 t += min + "分";
-                if(sec < 10){
-                    t += "0";
-                }
+                if(sec < 10){t += "0";}
                 t += sec + "秒";
                 return t;
             },
@@ -351,13 +376,36 @@
                 this.form.endTime=year+"-"+(month+1)+"-"+date+" 23:59";
                 this.searchTable();
             },
+            exportRs(){
+                var param = {};
+                param.startTime = this.export.startTime;
+                param.endTime =  this.export.endTime;
+                param.orgId =  this.export.orgId; 
+                axios.post('/callrecord/teleSaleTalkTime/exportTeleGroupTalkTime',param,{responseType:'blob'})
+                    .then(function (response) {
+                        console.log(response);
+                        var data =  response.data;
+                        var fileName = response.headers.filename;
+                        saveAs(data,decodeURI(fileName));
+                    })
+                    .catch(function (error) {
+                        console.log(error);
+                        mainDivVM.$message({
+                            message: "导出失败，请稍后重试",
+                            type: "error"
+                        });
+                    });
+            }
         },
         created(){
             this.form.startTime=this.dateTimeFormat(parentParam.startTime);
             this.form.endTime=this.dateTimeFormat(parentParam.endTime);    
             this.form.orgId=parentParam.orgId; 
             this.form.orgId = this.form.orgId ? this.form.orgId.toString():this.form.orgId; 
-            console.log(this.form);       
+            this.export.startTime = this.minuteFormat(this.form.startTime);
+            this.export.endTime = this.minuteFormat(this.form.endTime);
+            this.export.orgId = this.form.orgId;
+            console.log(this.form); 
             this.searchTable();
         },
         mounted(){
