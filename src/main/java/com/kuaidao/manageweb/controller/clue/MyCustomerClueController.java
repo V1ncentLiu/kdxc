@@ -126,6 +126,7 @@ public class MyCustomerClueController {
         JSONResult<List<UserFieldDTO>> queryFieldByUserAndMenu =
                 customFieldFeignClient.queryFieldByUserAndMenu(queryFieldByUserAndMenuReq);
         request.setAttribute("userFieldList", queryFieldByUserAndMenu.getData());
+        request.setAttribute("ossUrl", ossUrl);
         return "clue/myCustom";
     }
 
