@@ -29,32 +29,22 @@
                    <el-date-picker format="yyyy-MM-dd HH:mm" v-model="form.endTime" type="datetime" placeholder="选择日期"></el-date-picker>
                 </el-form-item>
                 <el-form-item label="电销组:"> 
-                    <el-input v-model="form.orgId" :readOnly="isReadOnly"></el-input> 
-                    <!-- <el-select v-model="form.orgId" placeholder="电销组" style="width: 100%;" clearable @change="currentTelSale" filterable>
+                    <el-select v-model="form.orgId" placeholder="电销组" style="width: 100%;" clearable @change="currentTelSale" filterable :disabled="isDisabled">
                         <el-option
                             v-for="item in orgTeleArr"
                             :key="item.id"
                             :label="item.name"
                             :value="item.id">
                         </el-option>
-                    </el-select> -->
+                    </el-select>
                 </el-form-item>
                 <el-form-item label="电销顾问:">  
-                    <el-select 
-                        v-model="form.userId" 
-                        placeholder="电销顾问" 
-                        style="width: 100%;" 
-                        filterable 
-                        multiple 
-                        clearable  >
+                    <el-select v-model="form.userId" placeholder="电销顾问" style="width: 100%;" clearable @change="currentTelSale" filterable>
                         <el-option
-                            v-for="item in busSaleArr"
+                            v-for="item in userTeleArr"
                             :key="item.id"
                             :label="item.name"
                             :value="item.id">
-                            <el-checkbox-group v-model="form.teleSaleId">
-                                <el-checkbox :label="item.id">{{item.name}}</el-checkbox>
-                            </el-checkbox-group>
                         </el-option>
                     </el-select>
                 </el-form-item>
@@ -102,12 +92,13 @@
 </body>
 <script th:inline="javascript">
     var queryOrg=[[${queryOrg}]]; // 电销组
+    // 电销
     var parentParam = [[${parentParam}]];
     var mainDivVM = new Vue({
         el: '#maindiv',
         data: function() {
             return {
-                isReadOnly: true,
+                isDisabled: true,
                 loading: false,
                 form: {
                     startTime: '',
@@ -147,8 +138,7 @@
                 // }
             ],
                 orgTeleArr: queryOrg, // 电销组
-                busSaleArr:[], // 创业顾问
-                curUserId: curUserId,
+                userTeleArr: [], // 创业顾问
                 pager:{ 
                     total: 0,
                     currentPage: 1,
@@ -227,7 +217,7 @@
                 param.orgId=seleVal;
                 param.roleCode="DXCYGW";
                 axios.post('/user/userManager/listByOrgAndRole' ,param).then(function (response) {  
-                    mainDivVM.busSaleArr=response.data.data;
+                    mainDivVM.userTeleArr=response.data.data;
                 });
             },
             goBack () {

@@ -139,8 +139,7 @@
             searchTable() { 
                 var startTime = this.form.startTime;
                 var endTime = this.form.endTime;
-                // TODO 1.时间6个月内 2.时间控件必填提示
-                if(endTime){
+                if(endTime && startTime){
                     if(startTime>endTime){
                         this.$message({
                             message: '开始时间不能大于结束时间',
@@ -148,6 +147,25 @@
                         });
                         return;
                     }
+                    var date = new Date();
+                    var currentDate = moment(date).format("YYYY-MM-DD 23:59");
+                    date.setMonth(date.getMonth()-5);
+                    var beforeSixMonth = moment(date).format("YYYY-MM-DD 00:00");
+                    var currentDateRes = new Date(currentDate);
+                    var beforeSixMonthRes = new Date(beforeSixMonth);
+                    if(startTime < beforeSixMonthRes || endTime > currentDateRes){
+                        this.$message({
+                            message: '请选择近6个月内的时间',
+                            type: 'warning'
+                        });
+                        return;
+                    }
+                }else{
+                    this.$message({
+                        message: '请选择近6个月内的时间',
+                        type: 'warning'
+                    });
+                    return;
                 }
                 console.log('search');   
                 
@@ -157,7 +175,6 @@
                 param.pageSize = this.pager.pageSize;
                 param.pageNum = this.pager.currentPage;
                 param.orgId = this.form.orgId; // 电销组
-                console.log(param);
                 this.loading = true; 
                 axios.post('/callrecord/teleSaleTalkTime/listTeleGroupTalkTime',param).then(function (response) { 
                     if(!response){
@@ -187,11 +204,12 @@
                         var resobjData = resobj.data;    
                         var tableData = resobjData.tableData;
                         mainDivVM.tableData = tableData.data;
+                        // 假数据
                         tableData.data.map( (item,index)=>{
-                            console.log(item);
                             item.orgName = '电销组' + (index + 1);
                             return item;
                         })
+
                         if(tableData.data && tableData.data.length){
                             var totalData = resobjData.totalData;
                             mainDivVM.tableData.unshift(totalData);
@@ -224,12 +242,12 @@
                 }
             },
             gotoTeam (row) { // 页面跳转
-                var orgId = row.orgId;
-                var orgName = row.orgName;
-                var startTime = this.minuteFormat(this.form.startTime);
-                var endTime = this.minuteFormat(this.form.endTime);
+                var orgId = row.orgId; // 电销组id
+                var orgName = row.orgName; // 电销组name
+                var startTime = this.export.startTime;
+                var endTime = this.export.endTime;
                 if(orgId === "0" && orgName === "合计"){
-                    window.location.href="/statistics/teleStatement/telemarketingCallTableSum?orgId=" + this.form.orgId + "&startTime=" + startTime + "&endTime=" + endTime;
+                    window.location.href="/statistics/teleStatement/telemarketingCallTableSum?orgId=" + this.export.orgId + "&startTime=" + startTime + "&endTime=" + endTime;
                 }else{
                     window.location.href="/statistics/teleStatement/telemarketingCallTableTeam?orgId=" + orgId + "&startTime=" + startTime + "&endTime=" + endTime; 
                 }
@@ -252,21 +270,6 @@
                 var timeRes = "" + yearRes + monthRea + dateRes + hoursRes + minRes;
                 return timeRes;
             },
-            // summaryFun () {
-            //     var total = {
-            //         orgId: "0",
-            //         orgName: '合计',
-            //         callCount: 1000,
-            //         calledCount: 10,
-            //         callPercent: 10,
-            //         callClueCount: 10,
-            //         calledClueCount: 10,
-            //         clueCallecdPrecent: 10,
-            //         validCallTime: 155799,
-            //         userAvgDayValidCallTime: 155799
-            //     };
-            //     this.tableData.unshift(total);
-            // },
             percentFormat (row, column) {
                 var percent = row[column.property];
                 percent = parseInt(percent) * 100 + "%";
@@ -282,17 +285,11 @@
                 var hour = Math.floor(s/3600);
                 var min = Math.floor(s/60) % 60;
                 var sec = s % 60;
-                if(hour<10){
-                    t+="0";
-                }
+                if(hour<10){t+="0";}
                 t+=hour+"时"
-                if(min < 10){
-                    t += "0";
-                }
+                if(min < 10){t += "0";}
                 t += min + "分";
-                if(sec < 10){
-                    t += "0";
-                }
+                if(sec < 10){t += "0";}
                 t += sec + "秒";
                 return t;
             },
@@ -328,7 +325,7 @@
                 var f= new Date(year,month,01);
                 var c = f.valueOf();
                 var startTime= new Date(c);
-                this.form.startTime=startTime.getFullYear()+"-" + (startTime.getMonth()+1) + "-" + startTime.getDate()+" 00:00";;
+                this.form.startTime=startTime.getFullYear()+"-" + (startTime.getMonth()+1) + "-" + startTime.getDate()+" 00:00";
                 this.form.endTime=year+"-"+(month+1)+"-"+date+" 23:59";
                 this.searchTable();
             },
@@ -362,7 +359,11 @@
             var startTime = "2019-01-01 01:01";
             var endTime = "2019-01-01 01:02";
             this.form.startTime=startTime;
-            this.form.endTime=endTime;            
+            this.form.endTime=endTime; 
+
+            this.export.startTime = this.minuteFormat(this.form.startTime);
+            this.export.endTime = this.minuteFormat(this.form.endTime);
+
             this.searchTable();
         },
         mounted(){
