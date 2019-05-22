@@ -58,7 +58,7 @@
                     </el-select>
                 </el-form-item>
                 <el-form-item label="分配来源:">  
-                    <el-select v-model="form.source" placeholder="分配来源" style="width: 100%;" clearable filterable>
+                    <el-select v-model="form.new_resource" placeholder="分配来源" style="width: 100%;" clearable filterable>
                         <el-option
                             v-for="item in distributionSource"
                             :key="item.id"
@@ -96,7 +96,8 @@
 </body>
 <script th:inline="javascript">
     var queryOrg=[[${saleGroupList}]];//电销组
-    var distributionSource=[[${queryOrg}]];//分配来源
+    // var distributionSource=[[${queryOrg}]];//分配来源
+    var resourceQueryDto=[[${resourceAllocationQueryDto}]];//参数list
     var fieldList=[[${fieldList}]];//表头list
     var mainDivVM = new Vue({
         el: '#maindiv',
@@ -107,17 +108,33 @@
                     startTime:'',
                     endTime:'',
                     org_Id:'',
+                    user_id:'',
+                    new_resource:''
                 },
                 export: {
                     startTime:'',
                     endTime:'',
-                    org_Id:''
+                    org_Id:'',
+                    user_id:'',
+                    new_resource:''
                 },
                 tableData: [],//表格数据
                 tableColums: [],//表头list
                 orgTeleArr:queryOrg,//电销组
                 busSaleArr:[],//创业顾问
-                distributionSource:distributionSource,//分配来源
+                distributionSource:[{
+                    id:'1',
+                    name:'话务新资源'
+                },{
+                    id:'2',
+                    name:'推广新资源'
+                },{
+                    id:'3',
+                    name:'非新资源'
+                },{
+                    id:'99',
+                    name:'其他(资源未分配)'
+                }],//分配来源
                 pager:{
                     total: 0,
                     currentPage: 1,
@@ -140,7 +157,8 @@
             searchTable() { 
                 var startTime=this.form.startTime;
                 var endTime=this.form.endTime;
-                if(endTime){
+                if(endTime && startTime){
+                    console.log(startTime,endTime);
                     if(startTime>endTime){
                         this.$message({
                             message: '开始时间不能大于结束时间',
@@ -148,6 +166,25 @@
                         });
                         return;
                     }
+                    var date = new Date();
+                    var currentDate = moment(date).format("YYYY-MM-DD 23:59");
+                    date.setMonth(date.getMonth()-5);
+                    var beforeSixMonth = moment(date).format("YYYY-MM-DD 00:00");
+                    var currentDateRes = new Date(currentDate);
+                    var beforeSixMonthRes = new Date(beforeSixMonth);
+                    if(new Date(startTime) < beforeSixMonthRes || new Date(endTime) > currentDateRes){
+                        this.$message({
+                            message: '请选择近6个月内的时间',
+                            type: 'warning'
+                        });
+                        return;
+                    }
+                }else{
+                    this.$message({
+                        message: '请选择起止时间',
+                        type: 'warning'
+                    });
+                    return;
                 }
                 var param = {};
                 param.pageSize = this.pager.pageSize;
@@ -156,7 +193,8 @@
                 param.startTime = this.minuteFormat(startTime);
                 param.endTime = this.minuteFormat(endTime);
                 param.org_Id = this.form.org_Id;//电销组
-
+                param.user_id = this.form.user_id;//电销顾问
+                param.new_resource = this.form.new_resource;//分配来源
                 this.loading=true;
                 axios.post('/statistics/teleStatement/getResourceAllocationPersionTable',param).then(function (response) { 
                     if(!response){
@@ -199,6 +237,8 @@
                     mainDivVM.export.startTime = mainDivVM.minuteFormat(startTime);
                     mainDivVM.export.endTime = mainDivVM.minuteFormat(endTime);
                     mainDivVM.export.org_Id = mainDivVM.form.org_Id;
+                    mainDivVM.export.user_id = mainDivVM.form.user_id;
+                    mainDivVM.export.new_resource = mainDivVM.form.new_resource;
                 })  
             },
             goback(){
@@ -256,7 +296,9 @@
                 param.startTime = this.export.startTime;
                 param.endTime =  this.export.endTime;
                 param.org_Id =  this.export.org_Id;//电销组
-                axios.post('/statistics/teleStatement/exportResourceAllocationGroup',param,{responseType:'blob'})
+                param.user_id =  this.export.user_id;//电销顾问
+                param.new_resource =  this.export.new_resource;//分配来源
+                axios.post('/statistics/teleStatement/exportResourceAllocationPersion',param,{responseType:'blob'})
                     .then(function (response) {
                         var data =  response.data;
                         var fileName = response.headers.filename;
@@ -268,7 +310,13 @@
                 });
             }
         },
-        created(){            
+        created(){    
+            // 接收参数
+            // console.log(resourceQueryDto)
+            this.form.startTime=resourceQueryDto.startTime;
+            this.form.endTime=resourceQueryDto.endTime;
+            this.form.org_Id=resourceQueryDto.org_Id;
+            this.form.new_resource=resourceQueryDto.new_resource;
             this.searchTable();
         },
         mounted(){

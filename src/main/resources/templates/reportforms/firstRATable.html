@@ -22,10 +22,10 @@
         <div class="mainSearchFormBox">
            <el-form :inline="true" :model="form" class="demo-form-inline mainSearchForm" ref="form">                 
                 <el-form-item label="起止时间:">
-                    <el-date-picker format="yyyy-MM-dd HH:mm" v-model="form.startTime" type="datetime" placeholder="选择日期"></el-date-picker>
+                    <el-date-picker format="yyyy-MM-dd HH:mm" v-model="form.startTime" type="datetime" value-format="yyyy-MM-dd HH:mm" placeholder="选择日期"></el-date-picker>
                 </el-form-item>
                 <el-form-item label="—" class="widthauto">
-                   <el-date-picker format="yyyy-MM-dd HH:mm" v-model="form.endTime" type="datetime" placeholder="选择日期"></el-date-picker>
+                <el-date-picker format="yyyy-MM-dd HH:mm" v-model="form.endTime" type="datetime" value-format="yyyy-MM-dd HH:mm" placeholder="选择日期"></el-date-picker>
                 </el-form-item>
                 <el-form-item label="电销组:">  
                     <el-select v-model="form.org_Id" placeholder="电销组" style="width: 100%;" clearable filterable>
@@ -39,7 +39,6 @@
                 </el-form-item>
                 <el-form-item label="话务转入:">  
                     <el-select v-model="form.telOperatorTransferIn" placeholder="话务转入" style="width: 100%;" clearable filterable>
-                        <el-option label="全部" value="0"></el-option>
                         <el-option label="是" value="1"></el-option>
                         <el-option label="否" value="2"></el-option>
                     </el-select>
@@ -190,16 +189,25 @@
         data: function() {
             return {
                 loading: false,
+                pager:{ 
+                    total: 0,
+                    currentPage: 1,
+                    pageSize: 2
+                },
                 form: {
+                    startTime: '',
+                    endTime: '',
+                    orgId: '',
+                    telOperatorTransferIn: ''
+                },
+                export: {
                     startTime:'',
                     endTime:'',
-                    org_Id:'',
-                    telOperatorTransferIn: '全部'
+                    orgId:'',
+                    telOperatorTransferIn: ''                    
                 },
                 tableData: [
                     {
-                        // id: 1,
-                        // timeId: 20190505,
                         orgId: 1,
                         orgName: '电销组1',
                         assignClueCount: 100,
@@ -211,12 +219,8 @@
                         industry: 1000,
                         other: 1000,
                         netizensMissed: 1000,
-                        // userName: '',
-                        // uesrId: ''
                     },
                     {
-                        // id: 2,
-                        // timeId: 20190505,
                         orgId: 2,
                         orgName: '电销组2',
                         assignClueCount: 100,
@@ -228,26 +232,20 @@
                         industry: 1000,
                         other: 1000,
                         netizensMissed: 1000,
-                        // userName: '',
-                        // uesrId: ''
                     },
                 ],//表格数据
                 tableColums: [],//表头list
                 orgTeleArr: queryOrg,//电销组
                 distributionSource: distributionSource,//分配来源
-                pager:{
-                    total: 0,
-                    currentPage: 1,
-                    pageSize: 3,
-                },
             }             
         },
         methods: { 
             searchTable() {   
                 this.tableColums = fieldList; // 表头数据渲染             
-                var startTime=this.form.startTime;
-                var endTime=this.form.endTime;
-                if(endTime){
+                var startTime = new Date(this.form.startTime);
+                var endTime = new Date(this.form.endTime);
+                console.log(startTime,endTime);
+                if(endTime && startTime){
                     if(startTime>endTime){
                         this.$message({
                             message: '开始时间不能大于结束时间',
@@ -255,6 +253,25 @@
                         });
                         return;
                     }
+                    var date = new Date();
+                    var currentDate = moment(date).format("YYYY-MM-DD 23:59");
+                    date.setMonth(date.getMonth()-5);
+                    var beforeSixMonth = moment(date).format("YYYY-MM-DD 00:00");
+                    var currentDateRes = new Date(currentDate);
+                    var beforeSixMonthRes = new Date(beforeSixMonth);
+                    if(startTime < beforeSixMonthRes || endTime > currentDateRes){
+                        this.$message({
+                            message: '请选择近6个月内的时间',
+                            type: 'warning'
+                        });
+                        return;
+                    }
+                }else{
+                    this.$message({
+                        message: '请选择近6个月内的时间',
+                        type: 'warning'
+                    });
+                    return;
                 }
                 var param = {};
                 param.pageSize = this.pager.pageSize;
@@ -263,6 +280,7 @@
                 param.startTime = this.minuteFormat(startTime);
                 param.endTime =  this.minuteFormat(endTime);
                 param.org_Id =  this.form.org_Id; // 电销组
+                param.ti = this.form.telOperatorTransferIn;
                 // this.loading=true;
                 // axios.post('/statistics/teleStatement/getResourceAllocationTable',param).then(function (response) { 
                 //     if(!response){
@@ -296,9 +314,13 @@
                 //     mainDivVM.tableColums= fieldList;
                 //     // 插入合计一行
                     this.summaryFun();
-                //     mainDivVM.pager.currentPage= resobj.data.currentPage;
-                //     mainDivVM.pager.total= resobj.data.total;
-                //     mainDivVM.loading=false;
+                    // this.pager.currentPage = tableData.currentPage;
+                    // this.pager.total = tableData.total;
+                    // this.loading = false;
+                    this.export.startTime = this.minuteFormat(startTime);
+                    this.export.endTime = this.minuteFormat(endTime);
+                    this.export.orgId = this.form.orgId;
+                    this.export.telOperatorTransferIn = this.form.telOperatorTransferIn;
                 // }).catch(function (error) {
                 //     console.log(error);
                 //     mainDivVM.$message({
@@ -307,16 +329,6 @@
                 //     });
                 //     mainDivVM.loading = false;
                 // });
-            },
-            gotoTeam (item) {
-                console.log(item);
-                var clueId = item.orgId;
-                var orgName = item.orgName;
-                if(orgName == "合计"){
-                    window.location.href="/statistics/teleStatement/firstRATableSum";
-                }else{
-                    window.location.href="/statistics/teleStatement/firstRATableTeam?groupId=" + clueId; 
-                }
             },
             arraySpanMethod({ row, column, rowIndex, columnIndex }) { // 合并第一行
                 if (rowIndex === 0) {
@@ -332,9 +344,7 @@
             },
             summaryFun () { 
                 var obj = {
-                        // id: 0,
-                        // timeId: 20190505,
-                        orgId: '合计',
+                        orgId: '0',
                         orgName: '合计',
                         assignClueCount: 100,
                         jointExhibition: 100,
@@ -345,15 +355,25 @@
                         industry: 1000,
                         other: 1000,
                         netizensMissed: 1000,
-                        // userName: '',
-                        // uesrId: ''
                     };
                 this.tableData.unshift(obj);
             },
+            gotoTeam (row) { // 页面跳转
+                var orgId = row.orgId; // 电销组id
+                var orgName = row.orgName; // 电销组name
+                var startTime = this.export.startTime;
+                var endTime = this.export.endTime;
+                var ti = this.export.telOperatorTransferIn;
+                if(orgId === "0" && orgName === "合计"){
+                    window.location.href="/statistics/teleStatement/firstRATableSum?orgId=" + this.export.orgId + "&startTime=" + startTime + "&endTime=" + endTime + "&ti=" + ti;
+                }else if(orgId){
+                    window.location.href="/statistics/teleStatement/firstRATableTeam?orgId=" + orgId + "&startTime=" + startTime + "&endTime=" + endTime+ "&ti=" + ti; 
+                }
+            },
             minuteFormat (m) {
                 if (!m) {return "";}
-                var timeStr = new Date(m);
-                var yearRes = timeStr.getFullYear()
+                var timeStr = new Date(m);
+                var yearRes = timeStr.getFullYear();
                 var monthRea = timeStr.getMonth()+1;
                 monthRea = monthRea < 10 ?  "0" + monthRea : monthRea;
                 var dateRes = timeStr.getDate();
@@ -397,36 +417,42 @@
                 var f= new Date(year,month,01);
                 var c = f.valueOf();
                 var startTime= new Date(c);
-                this.form.startTime=startTime.getFullYear()+"-" + (startTime.getMonth()+1) + "-" + startTime.getDate()+" 00:00";;
+                this.form.startTime=startTime.getFullYear()+"-" + (startTime.getMonth()+1) + "-" + startTime.getDate()+" 00:00";
                 this.form.endTime=year+"-"+(month+1)+"-"+date+" 23:59";
                 this.searchTable();
             },
             exportRs(){
                 var param = {};
-                // 搜索条件
-                param.startTime = this.form.startTime;
-                param.endTime =  this.form.endTime;
-                param.org_Id =  this.form.org_Id;//电销组
-                axios.post('/statistics/teleStatement/exportResourceAllocationGroup',param,{responseType:'blob'})
+                param.startTime = this.export.startTime;
+                param.endTime =  this.export.endTime;
+                param.orgId =  this.export.orgId; 
+                axios.post('/callrecord/teleSaleTalkTime/exportTeleGroupTalkTime',param,{responseType:'blob'})
                     .then(function (response) {
-                        console.log(response)
+                        console.log(response);
                         var data =  response.data;
                         var fileName = response.headers.filename;
                         saveAs(data,decodeURI(fileName));
                     })
                     .catch(function (error) {
                         console.log(error);
-                    }).then(function(){
-                });
+                        mainDivVM.$message({
+                            message: "导出失败，请稍后重试",
+                            type: "error"
+                        });
+                    });
             }
         },
-        created(){     
+        created(){
+            // 默认进入显示当天时间
             var today = new Date();
-            today.setTime(today.getTime());
-            var startTime = today.getFullYear()+"-"+ (today.getMonth()+1) + "-" + today.getDate()+" 00:00";
-            var endTime =today.getFullYear()+"-"+ (today.getMonth()+1) + "-" + today.getDate()+" 23:59";
+            var startTime = moment(today).format("YYYY-MM-DD 00:00");
+            var endTime = moment(today).format("YYYY-MM-DD 23:59");
             this.form.startTime=startTime;
-            this.form.endTime=endTime;       
+            this.form.endTime=endTime; 
+
+            this.export.startTime = this.minuteFormat(this.form.startTime);
+            this.export.endTime = this.minuteFormat(this.form.endTime);
+
             this.searchTable();
         },
         mounted(){            

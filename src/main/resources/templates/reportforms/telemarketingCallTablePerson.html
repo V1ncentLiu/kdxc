@@ -16,45 +16,35 @@
         <el-button type="primary" @click="searchYesterday">昨天</el-button>
         <el-button type="success" @click="searchWeek">近七天</el-button>
         <el-button type="warning" @click="searchMonth">本月</el-button> 
-        <el-button type="danger">导出Excel报表</el-button>  
+        <el-button type="danger" @click="exportRs">导出Excel报表</el-button>  
         <el-button type="primary" @click="goBack" style="float: right;">返回</el-button>
     </el-row>
     <div class="mainSearchBg">        
         <div class="mainSearchFormBox">
            <el-form :inline="true" :model="form" class="demo-form-inline mainSearchForm" ref="form">                 
                 <el-form-item label="起止时间:">
-                    <el-date-picker format="yyyy-MM-dd HH:mm" v-model="form.startTime" type="datetime" placeholder="选择日期"></el-date-picker>
+                    <el-date-picker format="yyyy-MM-dd HH:mm" v-model="form.startTime" type="datetime" value-format="yyyy-MM-dd HH:mm" placeholder="选择日期"></el-date-picker>
                 </el-form-item>
                 <el-form-item label="—" class="widthauto">
-                   <el-date-picker format="yyyy-MM-dd HH:mm" v-model="form.endTime" type="datetime" placeholder="选择日期"></el-date-picker>
+                   <el-date-picker format="yyyy-MM-dd HH:mm" v-model="form.endTime" type="datetime" value-format="yyyy-MM-dd HH:mm" placeholder="选择日期"></el-date-picker>
                 </el-form-item>
                 <el-form-item label="电销组:"> 
-                    <el-input v-model="form.orgId" :readOnly="isReadOnly"></el-input> 
-                    <!-- <el-select v-model="form.orgId" placeholder="电销组" style="width: 100%;" clearable @change="currentTelSale" filterable>
+                    <el-select v-model="form.orgId" placeholder="电销组" style="width: 100%;" clearable @change="currentTelSale" filterable :disabled="isDisabled">
                         <el-option
                             v-for="item in orgTeleArr"
                             :key="item.id"
                             :label="item.name"
                             :value="item.id">
                         </el-option>
-                    </el-select> -->
+                    </el-select>
                 </el-form-item>
                 <el-form-item label="电销顾问:">  
-                    <el-select 
-                        v-model="form.userId" 
-                        placeholder="电销顾问" 
-                        style="width: 100%;" 
-                        filterable 
-                        multiple 
-                        clearable  >
+                    <el-select v-model="form.userId" placeholder="电销顾问" style="width: 100%;" clearable @change="currentTelSale" filterable>
                         <el-option
-                            v-for="item in busSaleArr"
+                            v-for="item in userTeleArr"
                             :key="item.id"
                             :label="item.name"
                             :value="item.id">
-                            <el-checkbox-group v-model="form.teleSaleId">
-                                <el-checkbox :label="item.id">{{item.name}}</el-checkbox>
-                            </el-checkbox-group>
                         </el-option>
                     </el-select>
                 </el-form-item>
@@ -102,23 +92,55 @@
 </body>
 <script th:inline="javascript">
     var queryOrg=[[${queryOrg}]]; // 电销组
-    var curUserId = [[${curUserId}]]; 
-    var form = {
-        startTime: '2019-05-20 00:00',
-        endTime: '2019-05-21 23:59',
-        orgId: '电销组1',
-        userId: '电销人员1'
-    };
+    queryOrg = [
+        {
+            id: "1",
+            name: "电销一组",
+            orgType: 1,
+            parentId: "1",
+            remark: "集团2",
+            staffNum: 0
+        },
+        {
+            id: "2",
+            name: "电销二组",
+            orgType: 1,
+            parentId: "1",
+            remark: "集团2",
+            staffNum: 0
+        },
+        {
+            id: "3",
+            name: "电销三组",
+            orgType: 1,
+            parentId: "1",
+            remark: "集团2",
+            staffNum: 0
+        },
+    ];
+    // 电销
+    var parentParam = [[${parentParam}]];
     var mainDivVM = new Vue({
         el: '#maindiv',
         data: function() {
             return {
-                isReadOnly: true,
+                isDisabled: true,
                 loading: false,
+                pager:{ 
+                    total: 0,
+                    currentPage: 1,
+                    pageSize: 20
+                },
                 form: {
                     startTime: '',
                     endTime: '',
                     orgId: '',
+                    userId: ''
+                },
+                export: {
+                    startTime:'',
+                    endTime:'',
+                    orgId:'',
                     userId: ''
                 },
                 tableData: [
@@ -153,20 +175,14 @@
                 // }
             ],
                 orgTeleArr: queryOrg, // 电销组
-                busSaleArr:[], // 创业顾问
-                curUserId: curUserId,
-                pager:{ 
-                    total: 0,
-                    currentPage: 1,
-                    pageSize: 20
-                },
+                userTeleArr: [], // 创业顾问
             }             
         },
         methods: {
             searchTable() { 
-                var startTime = this.form.startTime;
-                var endTime = this.form.endTime;
-                if(endTime){
+                var startTime = new Date(this.form.startTime);
+                var endTime = new Date(this.form.endTime);
+                if(endTime && startTime){
                     if(startTime>endTime){
                         this.$message({
                             message: '开始时间不能大于结束时间',
@@ -174,6 +190,25 @@
                         });
                         return;
                     }
+                    var date = new Date();
+                    var currentDate = moment(date).format("YYYY-MM-DD 23:59");
+                    date.setMonth(date.getMonth()-5);
+                    var beforeSixMonth = moment(date).format("YYYY-MM-DD 00:00");
+                    var currentDateRes = new Date(currentDate);
+                    var beforeSixMonthRes = new Date(beforeSixMonth);
+                    if(startTime < beforeSixMonthRes || endTime > currentDateRes){
+                        this.$message({
+                            message: '请选择近6个月内的时间',
+                            type: 'warning'
+                        });
+                        return;
+                    }
+                }else{
+                    this.$message({
+                        message: '请选择近6个月内的时间',
+                        type: 'warning'
+                    });
+                    return;
                 }
                 console.log('search');   
                 
@@ -216,6 +251,10 @@
                     mainDivVM.pager.currentPage = resobj.data.currentPage;
                     mainDivVM.pager.total = resobj.data.total;
                     mainDivVM.loading = false;
+                    mainDivVM.export.startTime = mainDivVM.minuteFormat(startTime);
+                    mainDivVM.export.endTime = mainDivVM.minuteFormat(endTime);
+                    mainDivVM.export.orgId = mainDivVM.form.orgId;
+                    mainDivVM.export.userId = mainDivVM.form.userId;
                 }).catch(function (error) {
                     console.log(error);
                     mainDivVM.loading = false;
@@ -233,7 +272,13 @@
                 param.orgId=seleVal;
                 param.roleCode="DXCYGW";
                 axios.post('/user/userManager/listByOrgAndRole' ,param).then(function (response) {  
-                    mainDivVM.busSaleArr=response.data.data;
+                    mainDivVM.userTeleArr=response.data.data;
+                }).catch(function (error) {
+                    console.log(error);
+                    mainDivVM.$message({
+                        message: "电销顾问请求失败，请稍后重试",
+                        type: "error"
+                    });
                 });
             },
             goBack () {
@@ -241,9 +286,7 @@
             },
             dateFormat (row, column) { 
                 var date = row[column.property];
-                 if (!date) {
-                   return "";
-                 }
+                 if (!date) {return "";}
                 var d = date.toString();
                 var oYear = d.slice(0,4);
                 var oMonth = d.slice(5,6);
@@ -262,17 +305,11 @@
                 var hour = Math.floor(s/3600);
                 var min = Math.floor(s/60) % 60;
                 var sec = s % 60;
-                if(hour<10){
-                    t+="0";
-                }
+                if(hour<10){t+="0";}
                 t+=hour+"时"
-                if(min < 10){
-                    t += "0";
-                }
+                if(min < 10){t += "0";}
                 t += min + "分";
-                if(sec < 10){
-                    t += "0";
-                }
+                if(sec < 10){t += "0";}
                 t += sec + "秒";
                 return t;
             },
@@ -281,6 +318,20 @@
                 percent = parseInt(percent) * 100 + "%";
                 return percent;
             },
+            dateTimeFormat (dt) { 
+                if (!dt) {return "";}
+                var d = dt.toString();
+                var oYear = d.slice(0,4);
+                var oMonth = d.slice(5,6);
+                oMonth = oMonth < 10 ? "0" + oMonth : oMonth;
+                var oDay = d.slice(7,8);
+                oDay = oDay < 10 ? "0" + oDay : oDay;
+                var oHour = d.slice(9,10);
+                oHour = oHour < 10 ? "0" + oHour : oHour;
+                var oMinute = d.slice(11);
+                oMinute = oMinute < 10 ? "0" + oMinute : oMinute;
+                return oYear+"-"+oMonth+"-"+oDay+" "+oHour+":"+oMinute;
+            }, 
             minuteFormat (m) {
                 if (!m) {return "";}
                 var timeStr = new Date(m);
@@ -332,12 +383,35 @@
                 this.form.endTime=year+"-"+(month+1)+"-"+date+" 23:59";
                 this.searchTable();
             },
+            exportRs(){
+                var param = {};
+                param.startTime = this.export.startTime;
+                param.endTime =  this.export.endTime;
+                param.orgId =  this.export.orgId; 
+                axios.post('/callrecord/teleSaleTalkTime/exportTeleGroupTalkTime',param,{responseType:'blob'})
+                    .then(function (response) {
+                        console.log(response);
+                        var data =  response.data;
+                        var fileName = response.headers.filename;
+                        saveAs(data,decodeURI(fileName));
+                    })
+                    .catch(function (error) {
+                        console.log(error);
+                        mainDivVM.$message({
+                            message: "导出失败，请稍后重试",
+                            type: "error"
+                        });
+                    });
+            }
         },
         created(){ 
-            this.form.startTime=form.startTime;
-            this.form.endTime=form.endTime;   
-            this.form.orgId=form.orgId;   
-            this.form.userId=form.userId;   
+            this.form.startTime=this.dateTimeFormat(parentParam.startTime);
+            this.form.endTime=this.dateTimeFormat(parentParam.endTime);    
+            this.form.orgId=parentParam.orgId; 
+            this.form.orgId = this.form.orgId ? this.form.orgId.toString():this.form.orgId; 
+            this.export.startTime = this.minuteFormat(this.form.startTime);
+            this.export.endTime = this.minuteFormat(this.form.endTime);
+            this.export.orgId = this.form.orgId;
             console.log(this.form);
             this.searchTable();
         },
