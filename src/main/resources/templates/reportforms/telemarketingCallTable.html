@@ -22,10 +22,10 @@
         <div class="mainSearchFormBox">
            <el-form :inline="true" :model="form" class="demo-form-inline mainSearchForm" ref="form">                 
                 <el-form-item label="起止时间:">
-                    <el-date-picker format="yyyy-MM-dd HH:mm" v-model="form.startTime" type="datetime" placeholder="选择日期"></el-date-picker>
+                    <el-date-picker format="yyyy-MM-dd HH:mm" v-model="form.startTime" type="datetime" value-format="yyyy-MM-dd HH:mm" placeholder="选择日期"></el-date-picker>
                 </el-form-item>
                 <el-form-item label="—" class="widthauto">
-                   <el-date-picker format="yyyy-MM-dd HH:mm" v-model="form.endTime" type="datetime" placeholder="选择日期"></el-date-picker>
+                   <el-date-picker format="yyyy-MM-dd HH:mm" v-model="form.endTime" type="datetime" value-format="yyyy-MM-dd HH:mm" placeholder="选择日期"></el-date-picker>
                 </el-form-item>
                 <el-form-item label="电销组:">  
                     <el-select v-model="form.orgId" placeholder="电销组" style="width: 100%;" clearable filterable>
@@ -139,7 +139,9 @@
             searchTable() { 
                 var startTime = this.form.startTime;
                 var endTime = this.form.endTime;
+                console.log(startTime,endTime);
                 if(endTime && startTime){
+                    console.log(startTime,endTime);
                     if(startTime>endTime){
                         this.$message({
                             message: '开始时间不能大于结束时间',
@@ -153,7 +155,7 @@
                     var beforeSixMonth = moment(date).format("YYYY-MM-DD 00:00");
                     var currentDateRes = new Date(currentDate);
                     var beforeSixMonthRes = new Date(beforeSixMonth);
-                    if(startTime < beforeSixMonthRes || endTime > currentDateRes){
+                    if(new Date(startTime) < beforeSixMonthRes || new Date(endTime) > currentDateRes){
                         this.$message({
                             message: '请选择近6个月内的时间',
                             type: 'warning'
@@ -248,7 +250,7 @@
                 var endTime = this.export.endTime;
                 if(orgId === "0" && orgName === "合计"){
                     window.location.href="/statistics/teleStatement/telemarketingCallTableSum?orgId=" + this.export.orgId + "&startTime=" + startTime + "&endTime=" + endTime;
-                }else{
+                }else if(orgId){
                     window.location.href="/statistics/teleStatement/telemarketingCallTableTeam?orgId=" + orgId + "&startTime=" + startTime + "&endTime=" + endTime; 
                 }
             },
