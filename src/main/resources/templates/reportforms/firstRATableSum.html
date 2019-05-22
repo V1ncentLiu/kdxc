@@ -23,10 +23,10 @@
         <div class="mainSearchFormBox">
            <el-form :inline="true" :model="form" class="demo-form-inline mainSearchForm" ref="form">                 
                 <el-form-item label="起止时间:">
-                    <el-date-picker format="yyyy-MM-dd HH:mm" v-model="form.startTime" type="datetime" placeholder="选择日期"></el-date-picker>
+                    <el-date-picker format="yyyy-MM-dd HH:mm" v-model="form.startTime" type="datetime" value-format="yyyy-MM-dd HH:mm" placeholder="选择日期"></el-date-picker>
                 </el-form-item>
                 <el-form-item label="—" class="widthauto">
-                   <el-date-picker format="yyyy-MM-dd HH:mm" v-model="form.endTime" type="datetime" placeholder="选择日期"></el-date-picker>
+                    <el-date-picker format="yyyy-MM-dd HH:mm" v-model="form.endTime" type="datetime" value-format="yyyy-MM-dd HH:mm" placeholder="选择日期"></el-date-picker>
                 </el-form-item>
                 <el-form-item label="电销组:">  
                     <el-select v-model="form.teleorg" placeholder="电销组" style="width: 100%;" clearable @change="currentTelSale" filterable>
@@ -209,7 +209,18 @@
         data: function() {
             return {
                 loading: false,
+                pager:{
+                    total: 0,
+                    currentPage: 1,
+                    pageSize: 20,
+                },
                 form: {
+                    startTime:'',
+                    endTime:'',
+                    org_Id:'',
+                    telOperatorTransferIn: '全部'
+                },
+                export: {
                     startTime:'',
                     endTime:'',
                     org_Id:'',
@@ -218,7 +229,7 @@
                 tableData: [
                     {
                         id: 1,
-                        // timeId: 20190505,
+                        timeId: "20190505",
                         orgId: 1,
                         orgName: '电销组1',
                         userName: '电销1',
@@ -235,7 +246,7 @@
                     },
                     {
                         id: 2,
-                        // timeId: 20190505,
+                        timeId: "20190505",
                         orgId: 2,
                         orgName: '电销组2',
                         userName: '电销2',
@@ -255,11 +266,7 @@
                 orgTeleArr:queryOrg,//电销组
                 busSaleArr:[],//创业顾问
                 distributionSource:distributionSource,//分配来源
-                pager:{
-                    total: 0,
-                    currentPage: 1,
-                    pageSize: 20,
-                },
+                
             }             
         },
         methods: {  
@@ -276,9 +283,9 @@
             },
             searchTable() { 
                 this.tableColums= fieldList; // 表头数据渲染
-                var startTime=this.form.startTime;
-                var endTime=this.form.endTime;
-                if(endTime){
+                var startTime = new Date(this.form.startTime);
+                var endTime = new Date(this.form.endTime);
+                if(endTime && startTime){
                     if(startTime>endTime){
                         this.$message({
                             message: '开始时间不能大于结束时间',
@@ -286,7 +293,27 @@
                         });
                         return;
                     }
+                    var date = new Date();
+                    var currentDate = moment(date).format("YYYY-MM-DD 23:59");
+                    date.setMonth(date.getMonth()-5);
+                    var beforeSixMonth = moment(date).format("YYYY-MM-DD 00:00");
+                    var currentDateRes = new Date(currentDate);
+                    var beforeSixMonthRes = new Date(beforeSixMonth);
+                    if(startTime < beforeSixMonthRes || endTime > currentDateRes){
+                        this.$message({
+                            message: '请选择近6个月内的时间',
+                            type: 'warning'
+                        });
+                        return;
+                    }
+                }else{
+                    this.$message({
+                        message: '请选择近6个月内的时间',
+                        type: 'warning'
+                    });
+                    return;
                 }
+                console.log('search');   
                 
                 var param = {};
                 param.pageSize = this.pager.pageSize;
@@ -345,10 +372,18 @@
                 //     mainDivVM.loading = false;
                 // });  
             },
-            goback(){
-                // 返回资源分配表页面
-                window.history.go(-1);
-            },
+            goback(){window.history.go(-1);},
+            dateFormat (row, column) { 
+                var date = row[column.property];
+                 if (!date) {return "";}
+                var d = date.toString();
+                var oYear = d.slice(0,4);
+                var oMonth = d.slice(5,6);
+                oMonth = oMonth < 10 ? "0" + oMonth : oMonth;
+                var oDay = d.slice(7);
+                oDay = oDay < 10 ? "0" + oDay : oDay;
+                return oYear+"-"+oMonth+"-"+oDay;
+            }, 
             minuteFormat (m) {
                 if (!m) {return "";}
                 var timeStr = new Date(m);
@@ -396,10 +431,30 @@
                 var f= new Date(year,month,01);
                 var c = f.valueOf();
                 var startTime= new Date(c);
-                this.form.startTime=startTime.getFullYear()+"-" + (startTime.getMonth()+1) + "-" + startTime.getDate()+" 00:00";;
+                this.form.startTime=startTime.getFullYear()+"-" + (startTime.getMonth()+1) + "-" + startTime.getDate()+" 00:00";
                 this.form.endTime=year+"-"+(month+1)+"-"+date+" 23:59";
                 this.searchTable();
             },
+            exportRs(){
+                var param = {};
+                param.startTime = this.export.startTime;
+                param.endTime =  this.export.endTime;
+                param.orgId =  this.export.orgId; 
+                axios.post('/callrecord/teleSaleTalkTime/exportTeleGroupTalkTime',param,{responseType:'blob'})
+                    .then(function (response) {
+                        console.log(response);
+                        var data =  response.data;
+                        var fileName = response.headers.filename;
+                        saveAs(data,decodeURI(fileName));
+                    })
+                    .catch(function (error) {
+                        console.log(error);
+                        mainDivVM.$message({
+                            message: "导出失败，请稍后重试",
+                            type: "error"
+                        });
+                    });
+            }
         },
         created(){    
             var today = new Date();
@@ -407,7 +462,8 @@
             var startTime = today.getFullYear()+"-"+ (today.getMonth()+1) + "-" + today.getDate()+" 00:00";
             var endTime =today.getFullYear()+"-"+ (today.getMonth()+1) + "-" + today.getDate()+" 23:59";
             this.form.startTime=startTime;
-            this.form.endTime=endTime;        
+            this.form.endTime=endTime;  
+            console.log(this.form);      
             this.searchTable();
         },
         mounted(){
