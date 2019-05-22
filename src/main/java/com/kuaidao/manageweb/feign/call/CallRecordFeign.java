@@ -100,7 +100,7 @@ public interface CallRecordFeign {
      * @param myCallRecordReqDTO
      */
     @PostMapping("/recodeCallTime")
-    JSONResult<Boolean> recodeCallTime(CallRecordReqDTO myCallRecordReqDTO);
+    JSONResult<Boolean> recodeCallTime(@RequestBody CallRecordReqDTO myCallRecordReqDTO);
 
 
     @Component

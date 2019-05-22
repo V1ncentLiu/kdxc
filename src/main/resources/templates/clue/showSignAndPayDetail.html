@@ -2,238 +2,264 @@
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:th="http://www.thymeleaf.org">
 <head th:replace="_header_include::frag(~{::title},~{::style},~{})">
-    <title>我的客户</title>
-    <style>
-        button a{color:#fff!important;}
-        .el-input{
-            width: 90%;
-        }
-    </style>
+  <title>我的客户</title>
+  <style>
+    button a{color:#fff!important;}
+    .el-input{
+      width: 90%;
+    }
+  </style>
 </head>
 <body>
 
 <div id="businessContractRecord" class="businessContractRecord mainPadding" style="display: none;">
-    <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
-        <el-breadcrumb-item>Home</el-breadcrumb-item>
-        <el-breadcrumb-item>电销</el-breadcrumb-item>
-        <el-breadcrumb-item>我的客户</el-breadcrumb-item>
-    </el-breadcrumb>
-    <div class="mainSearchBg">
-        <div class="fs14 marginB10">签约单基本信息</div>
-        <el-table ref="recordTableInfo" tooltip-effect="dark" style="width: 100%;margin-bottom: 20px;" border :data="recordTableInfo">
-            <el-table-column align="center" prop="signNo" label="签约单编号"></el-table-column>
-            <el-table-column align="center" prop="customerName" label="客户姓名"></el-table-column>
-            <el-table-column align="center" prop="idCard" label="客户身份证号" width="150"></el-table-column>
-            <el-table-column align="center" prop="phone" label="客户联系电话" width="110"></el-table-column>
-            <el-table-column align="center" prop="signCompanyName" label="签约餐饮公司" width="150"></el-table-column>
-            <el-table-column align="center" prop="signProjectName" label="签约项目"></el-table-column>
-            <el-table-column align="center" prop="signProvince" label="签约省份" width="100"></el-table-column>
-            <el-table-column align="center" prop="signCity" label="签约城市" width="120"></el-table-column>
-            <el-table-column align="center" prop="signDictrict" label="签约区／县" width="120"></el-table-column>
-            <el-table-column align="center" prop="signShopTypeName" label="签约店型" width="100"></el-table-column>
-            <el-table-column align="center" prop="amountReceivable" label="应收金额" width="90"></el-table-column>
-            <el-table-column align="center" prop="firstToll" label="路费" width="90"></el-table-column>
-            <el-table-column align="center" prop="preferentialAmount" label="优惠金额" width="90"></el-table-column>
-            <el-table-column align="center" prop="giveAmount" label="赠送金额" width="90"></el-table-column>
-            <el-table-column align="center" prop="giveType" label="赠送类型" width="90" :formatter="transGiveType"></el-table-column>
-            <el-table-column align="center" prop="signType" label="签约类型" width="90">
-                <template slot-scope="scope">
-                    <div v-if="scope.row.signType == 1">
-                        一次性全款
-                    </div>
-                    <div v-else-if="scope.row.signType ==2">
-                        先交定金
-                    </div>
-                </template>
-            </el-table-column>
+  <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
+    <el-breadcrumb-item>Home</el-breadcrumb-item>
+    <el-breadcrumb-item>电销</el-breadcrumb-item>
+    <el-breadcrumb-item>我的客户</el-breadcrumb-item>
+  </el-breadcrumb>
+  <div class="mainSearchBg">
+    <div class="fs14 marginB10">签约单基本信息</div>
+    <el-table ref="recordTableInfo" tooltip-effect="dark" style="width: 100%;margin-bottom: 20px;" border :data="recordTableInfo">
+      <el-table-column align="center" prop="signNo" label="签约单编号"></el-table-column>
+      <el-table-column align="center" prop="customerName" label="客户姓名"></el-table-column>
+      <el-table-column align="center" prop="idCard" label="客户身份证号" width="150"></el-table-column>
+      <el-table-column align="center" prop="phone" label="客户联系电话" width="110"></el-table-column>
+      <el-table-column align="center" prop="signCompanyName" label="签约餐饮公司" width="150"></el-table-column>
+      <el-table-column align="center" prop="signProjectName" label="签约项目"></el-table-column>
+      <el-table-column align="center" prop="signProvince" label="签约省份" width="100"></el-table-column>
+      <el-table-column align="center" prop="signCity" label="签约城市" width="120"></el-table-column>
+      <el-table-column align="center" prop="signDictrict" label="签约区／县" width="120"></el-table-column>
+      <el-table-column align="center" prop="signShopTypeName" label="签约店型" width="100"></el-table-column>
+      <el-table-column align="center" prop="amountReceivable" label="应收金额" width="90"></el-table-column>
+      <el-table-column align="center" prop="firstToll" label="路费" width="90"></el-table-column>
+      <el-table-column align="center" prop="preferentialAmount" label="优惠金额" width="90"></el-table-column>
+      <el-table-column align="center" prop="giveAmount" label="赠送金额" width="90"></el-table-column>
+      <el-table-column align="center" prop="giveType" label="赠送类型" width="90" :formatter="transGiveType"></el-table-column>
+      <el-table-column align="center" prop="signType" label="签约类型" width="90">
+        <template slot-scope="scope">
+          <div v-if="scope.row.signType == 1">
+            一次性全款
+          </div>
+          <div v-else-if="scope.row.signType ==2">
+            先交定金
+          </div>
+        </template>
+      </el-table-column>
 
-            <el-table-column align="center" prop="isRemoteSign" label="是否远程签约" width="110">
-                <template slot-scope="scope">
-                    <div v-if="scope.row.isRemoteSign == 0">
-                        否
-                    </div>
-                    <div v-else-if="scope.row.isRemoteSign ==1">
-                        是
-                    </div>
-                </template>
-            </el-table-column>
-        </el-table>
-        <div v-show="paymentDetailsShow">
-            <div class="fs14 marginB10">全款付款明细</div>
-            <el-table
-                ref="recordTable"
-                tooltip-effect="dark"
-                style="width: 100%;margin-bottom: 20px;"
-                border
-                :data="recordTable"
-                >
-                <el-table-column align="center" prop="payMode" label="付款方式" width="100">
-                    <template slot-scope="scope">
-                    <div v-if="scope.row.payMode == 1">
-                        现金
-                    </div>
-                    <div v-else-if="scope.row.payMode ==2">
-                        POS
-                    </div>
-                    <div v-else-if="scope.row.payMode ==3">
-                        转账
-                    </div>
-                    </template>
-                </el-table-column>
-                <el-table-column align="center" prop="statementNo" label="结算单编号"></el-table-column>
-                <el-table-column align="center" prop="payTime" label="付款时间" width="150"></el-table-column>
-                <el-table-column align="center" prop="amountReceived" label="实收金额" width="150"></el-table-column>
-                <el-table-column align="center" prop="amountPerformance" label="业绩金额" width="150"></el-table-column>
-                <el-table-column align="center" prop="detailStatus" label="明细状态" width="150">
-                    <template slot-scope="scope">
-                        <div v-if="scope.row.detailStatus ==1">
-                            审核中
-                        </div>
-                        <div v-else-if="scope.row.detailStatus ==2">
-                            有效
-                        </div>
-                    </template>
-                </el-table-column>
-                <el-table-column align="center" prop="remarks" label="备注"></el-table-column>
-            </el-table>
-        </div>
-        <div v-show="paymentDetailsShow2">
-            <div class="fs14 marginB10">定金付款明细<el-button  v-show="readonlyFalg" @click="recordDialogClick(1)" type="primary" size="small" class="f-fr">添加付款</el-button></div>
-            <el-table
-                ref="recordTable2"
-                tooltip-effect="dark"
-                style="width: 100%;margin-bottom: 20px;"
-                border
-                :data="recordTable2"
-                >
-                <el-table-column align="center" prop="payMode" label="付款方式" width="90">
-                    <template slot-scope="scope">
-                        <div v-if="scope.row.payMode == 1">
-                            现金
-                        </div>
-                        <div v-else-if="scope.row.payMode ==2">
-                            POS
-                        </div>
-                        <div v-else-if="scope.row.payMode ==3">
-                            转账
-                        </div>
-                    </template>
-                </el-table-column>
-                <el-table-column align="center" prop="statementNo" label="结算单编号"></el-table-column>
-                <el-table-column align="center" prop="payTime" label="付款时间" width="100"></el-table-column>
-                <el-table-column align="center" prop="amountReceived" label="实收金额" width="110"></el-table-column>
-                <el-table-column align="center" prop="amountPerformance" label="业绩金额" width="110"></el-table-column>
-                <el-table-column align="center" prop="amountBalance" label="余款金额" width="110"></el-table-column>
-                <el-table-column align="center" prop="makeUpTime" label="预计余款补齐时间" width="150"></el-table-column>
-                <el-table-column align="center" prop="detailStatus" label="明细状态" width="90">
-                    <template slot-scope="scope">
-                        <div v-if="scope.row.status ==1">
-                            审核中
-                        </div>
-                        <div v-else-if="scope.row.status ==2">
-                            有效
-                        </div>
-                    </template>
-                </el-table-column>
-                <el-table-column align="center" prop="remarks" label="备注"></el-table-column>
-                <el-table-column align="center" prop="repeatRatio" label="判单比例" v-if="oneRepeatStatus"></el-table-column>
-                <el-table-column align="center" prop="repeatMoney" label="判单业绩"v-if="oneRepeatStatus "></el-table-column>
-            </el-table>
-        </div>
-        <div v-show="paymentDetailsShow3">
-            <div class="fs14 marginB10">二次定金付款明细<!--<el-button @click="recordDialogClick(2)" type="primary" size="small" class="f-fr">添加付款</el-button>--></div>
-            <el-table
-                ref="recordTable3"
-                tooltip-effect="dark"
-                style="width: 100%;margin-bottom: 20px;"
-                border
-                :data="recordTable3"
-                >
-                <el-table-column align="center" prop="payMode" label="付款方式" width="90">
-                    <template slot-scope="scope">
-                        <div v-if="scope.row.payMode ==1">
-                            现金
-                        </div>
-                        <div v-else-if="scope.row.payMode ==2">
-                            POS
-                        </div>
-                        <div v-else-if="scope.row.payMode ==3">
-                            转账
-                        </div>
-                    </template>
-                </el-table-column>
-                <el-table-column align="center" prop="statementNo" label="结算单编号"></el-table-column>
-                <el-table-column align="center" prop="payTime" label="付款时间" width="100"></el-table-column>
-                <el-table-column align="center" prop="amountReceived" label="实收金额" width="110"></el-table-column>
-                <el-table-column align="center" prop="amountPerformance" label="业绩金额" width="110"></el-table-column>
-                <el-table-column align="center" prop="amountBalance" label="余款金额" width="110"></el-table-column>
-                <el-table-column align="center" prop="makeUpTime" label="预计余款补齐时间" width="150"></el-table-column>
-                <el-table-column align="center" prop="detailStatus" label="明细状态" width="150">
-                    <template slot-scope="scope">
-                        <div v-if="scope.row.status ==1">
-                            审核中
-                        </div>
-                        <div v-else-if="scope.row.status ==2">
-                            有效
-                        </div>
-                    </template>
-                </el-table-column>
-                <el-table-column align="center" prop="remarks" label="备注"></el-table-column>
-                <el-table-column align="center" prop="repeatRatio" label="判单比例" v-if="twoRepeatStatus"></el-table-column>
-                <el-table-column align="center" prop="repeatMoney" label="判单业绩" v-if="twoRepeatStatus"></el-table-column>
-            </el-table>
-        </div>
-        <div v-show="paymentDetailsShow4">
-            <div class="fs16 marginB20">尾款付款明细<!--<el-button @click="recordDialogClick(3)" type="primary" size="small" class="f-fr">添加付款</el-button>--></div>
-            <el-table
-                ref="recordTable"
-                tooltip-effect="dark"
-                style="width: 100%;margin-bottom: 20px;"
-                border
-                :data="recordTable4"
-                >
-                <el-table-column align="center" prop="payMode" label="付款方式" width="100">
-                    <template slot-scope="scope">
-                        <div v-if="scope.row.payMode ==1">
-                            现金
-                        </div>
-                        <div v-else-if="scope.row.payMode ==2">
-                            POS
-                        </div>
-                        <div v-else-if="scope.row.payMode ==3">
-                            转账
-                        </div>
-                    </template>
-                </el-table-column>
-                <el-table-column align="center" prop="statementNo" label="结算单编号"></el-table-column>
-                <el-table-column align="center" prop="payTime" label="付款时间" width="150"></el-table-column>
-                <el-table-column align="center" prop="amountReceived" label="实收金额" width="150"></el-table-column>
-                <el-table-column align="center" prop="amountPerformance" label="业绩金额" width="150"></el-table-column>
-                <el-table-column align="center" prop="detailStatus" label="明细状态" width="150">
-                    <template slot-scope="scope">
-                        <div v-if="scope.row.status == 1">
-                            审核中
-                        </div>
-                        <div v-else-if="scope.row.status ==2">
-                            有效
-                        </div>
-                    </template>
-                </el-table-column>
-                <el-table-column align="center" prop="remarks" label="备注"></el-table-column>
-                <el-table-column align="center" prop="repeatRatio" label="判单比例" v-if="threeRepeatStatus"></el-table-column>
-                <el-table-column align="center" prop="repeatMoney" label="判单业绩" v-if="threeRepeatStatus"></el-table-column>
-            </el-table>
-        </div>
-
-        <div v-show="refundDetailsShow">
-            <div class="fs14 marginB10" style="color: red">该签约已退款</div>
-            <el-table ref="refundTable" tooltip-effect="dark" style="width: 100%;margin-bottom: 20px;" border :data="refundTableData">
-                <el-table-column align="center" prop="refundTime" label="退款时间" width="250"></el-table-column>
-                <el-table-column align="center" prop="cusAmount" label="退款金额" width="250"></el-table-column>
-                <el-table-column align="center" prop="reason" label="退款原因"></el-table-column>
-            </el-table>
-        </div>
+      <el-table-column align="center" prop="isRemoteSign" label="是否远程签约" width="110">
+        <template slot-scope="scope">
+          <div v-if="scope.row.isRemoteSign == 0">
+            否
+          </div>
+          <div v-else-if="scope.row.isRemoteSign ==1">
+            是
+          </div>
+        </template>
+      </el-table-column>
+    </el-table>
+    <div v-show="paymentDetailsShow">
+      <div class="fs14 marginB10">全款付款明细</div>
+      <el-table
+          ref="recordTable"
+          tooltip-effect="dark"
+          style="width: 100%;margin-bottom: 20px;"
+          border
+          :data="recordTable"
+      >
+        <el-table-column align="center" prop="payMode" label="付款方式" width="100">
+          <template slot-scope="scope">
+            <div v-if="scope.row.payMode == 1">
+              现金
+            </div>
+            <div v-else-if="scope.row.payMode ==2">
+              POS
+            </div>
+            <div v-else-if="scope.row.payMode ==3">
+              转账
+            </div>
+            <div v-else-if="scope.row.payMode ==4">
+                微信
+            </div>
+            <div v-else-if="scope.row.payMode ==5">
+                支付宝
+            </div>
+          </template>
+        </el-table-column>
+        <el-table-column align="center" prop="statementNo" label="结算单编号"></el-table-column>
+        <el-table-column align="center" prop="payTime" label="付款时间" width="150"></el-table-column>
+        <el-table-column align="center" prop="amountReceived" label="实收金额" width="150"></el-table-column>
+        <el-table-column align="center" prop="amountPerformance" label="业绩金额" width="150"></el-table-column>
+        <el-table-column align="center" prop="detailStatus" label="明细状态" width="150">
+          <template slot-scope="scope">
+            <div v-if="scope.row.status ==1">
+              审核中
+            </div>
+            <div v-else-if="scope.row.status ==2">
+              有效
+            </div>
+          </template>
+        </el-table-column>
+        <el-table-column align="center" prop="remarks" label="备注"></el-table-column>
+        <el-table-column align="center" prop="repeatRatio" label="判单比例" v-if="allRepeatStatus"></el-table-column>
+        <el-table-column align="center" prop="repeatMoney" label="判单业绩"v-if="allRepeatStatus "></el-table-column>
+      </el-table>
     </div>
+    <div v-show="paymentDetailsShow2">
+      <div class="fs14 marginB10">定金付款明细<el-button  v-show="readonlyFalg" @click="recordDialogClick(1)" type="primary" size="small" class="f-fr">添加付款</el-button></div>
+      <el-table
+          ref="recordTable2"
+          tooltip-effect="dark"
+          style="width: 100%;margin-bottom: 20px;"
+          border
+          :data="recordTable2"
+      >
+        <el-table-column align="center" prop="payMode" label="付款方式" width="90">
+          <template slot-scope="scope">
+            <div v-if="scope.row.payMode == 1">
+              现金
+            </div>
+            <div v-else-if="scope.row.payMode ==2">
+              POS
+            </div>
+            <div v-else-if="scope.row.payMode ==3">
+              转账
+            </div>
+            <div v-else-if="scope.row.payMode ==4">
+                微信
+            </div>
+            <div v-else-if="scope.row.payMode ==5">
+                支付宝
+            </div>
+          </template>
+        </el-table-column>
+        <el-table-column align="center" prop="statementNo" label="结算单编号"></el-table-column>
+        <el-table-column align="center" prop="payTime" label="付款时间" width="100"></el-table-column>
+        <el-table-column align="center" prop="amountReceived" label="实收金额" width="110"></el-table-column>
+        <el-table-column align="center" prop="amountPerformance" label="业绩金额" width="110"></el-table-column>
+        <el-table-column align="center" prop="amountBalance" label="余款金额" width="110"></el-table-column>
+        <el-table-column align="center" prop="makeUpTime" label="预计余款补齐时间" width="150"></el-table-column>
+        <el-table-column align="center" prop="detailStatus" label="明细状态" width="90">
+          <template slot-scope="scope">
+            <div v-if="scope.row.status ==1">
+              审核中
+            </div>
+            <div v-else-if="scope.row.status ==2">
+              有效
+            </div>
+          </template>
+        </el-table-column>
+        <el-table-column align="center" prop="remarks" label="备注"></el-table-column>
+        <el-table-column align="center" prop="repeatRatio" label="判单比例" v-if="oneRepeatStatus"></el-table-column>
+        <el-table-column align="center" prop="repeatMoney" label="判单业绩"v-if="oneRepeatStatus "></el-table-column>
+      </el-table>
+    </div>
+    <div v-show="paymentDetailsShow3">
+      <div class="fs14 marginB10">二次定金付款明细<!--<el-button @click="recordDialogClick(2)" type="primary" size="small" class="f-fr">添加付款</el-button>--></div>
+      <el-table
+          ref="recordTable3"
+          tooltip-effect="dark"
+          style="width: 100%;margin-bottom: 20px;"
+          border
+          :data="recordTable3"
+      >
+        <el-table-column align="center" prop="payMode" label="付款方式" width="90">
+          <template slot-scope="scope">
+            <div v-if="scope.row.payMode ==1">
+              现金
+            </div>
+            <div v-else-if="scope.row.payMode ==2">
+              POS
+            </div>
+            <div v-else-if="scope.row.payMode ==3">
+              转账
+            </div>
+            <div v-else-if="scope.row.payMode ==4">
+                微信
+            </div>
+            <div v-else-if="scope.row.payMode ==5">
+                支付宝
+            </div>
+          </template>
+        </el-table-column>
+        <el-table-column align="center" prop="statementNo" label="结算单编号"></el-table-column>
+        <el-table-column align="center" prop="payTime" label="付款时间" width="100"></el-table-column>
+        <el-table-column align="center" prop="amountReceived" label="实收金额" width="110"></el-table-column>
+        <el-table-column align="center" prop="amountPerformance" label="业绩金额" width="110"></el-table-column>
+        <el-table-column align="center" prop="amountBalance" label="余款金额" width="110"></el-table-column>
+        <el-table-column align="center" prop="makeUpTime" label="预计余款补齐时间" width="150"></el-table-column>
+        <el-table-column align="center" prop="detailStatus" label="明细状态" width="150">
+          <template slot-scope="scope">
+            <div v-if="scope.row.status ==1">
+              审核中
+            </div>
+            <div v-else-if="scope.row.status ==2">
+              有效
+            </div>
+          </template>
+        </el-table-column>
+        <el-table-column align="center" prop="remarks" label="备注"></el-table-column>
+        <el-table-column align="center" prop="repeatRatio" label="判单比例" v-if="twoRepeatStatus"></el-table-column>
+        <el-table-column align="center" prop="repeatMoney" label="判单业绩" v-if="twoRepeatStatus"></el-table-column>
+      </el-table>
+    </div>
+    <div v-show="paymentDetailsShow4">
+      <div class="fs16 marginB20">尾款付款明细<!--<el-button @click="recordDialogClick(3)" type="primary" size="small" class="f-fr">添加付款</el-button>--></div>
+      <el-table
+          ref="recordTable"
+          tooltip-effect="dark"
+          style="width: 100%;margin-bottom: 20px;"
+          border
+          :data="recordTable4"
+      >
+        <el-table-column align="center" prop="payMode" label="付款方式" width="100">
+          <template slot-scope="scope">
+            <div v-if="scope.row.payMode ==1">
+              现金
+            </div>
+            <div v-else-if="scope.row.payMode ==2">
+              POS
+            </div>
+            <div v-else-if="scope.row.payMode ==3">
+              转账
+            </div>
+            <div v-else-if="scope.row.payMode ==4">
+                微信
+            </div>
+            <div v-else-if="scope.row.payMode ==5">
+                支付宝
+            </div>
+          </template>
+        </el-table-column>
+        <el-table-column align="center" prop="statementNo" label="结算单编号"></el-table-column>
+        <el-table-column align="center" prop="payTime" label="付款时间" width="150"></el-table-column>
+        <el-table-column align="center" prop="amountReceived" label="实收金额" width="150"></el-table-column>
+        <el-table-column align="center" prop="amountPerformance" label="业绩金额" width="150"></el-table-column>
+        <el-table-column align="center" prop="detailStatus" label="明细状态" width="150">
+          <template slot-scope="scope">
+            <div v-if="scope.row.status == 1">
+              审核中
+            </div>
+            <div v-else-if="scope.row.status ==2">
+              有效
+            </div>
+          </template>
+        </el-table-column>
+        <el-table-column align="center" prop="remarks" label="备注"></el-table-column>
+        <el-table-column align="center" prop="repeatRatio" label="判单比例" v-if="threeRepeatStatus"></el-table-column>
+        <el-table-column align="center" prop="repeatMoney" label="判单业绩" v-if="threeRepeatStatus"></el-table-column>
+      </el-table>
+    </div>
+
+    <div v-show="refundDetailsShow">
+      <div class="fs14 marginB10" style="color: red">该签约已退款</div>
+      <el-table ref="refundTable" tooltip-effect="dark" style="width: 100%;margin-bottom: 20px;" border :data="refundTableData">
+        <el-table-column align="center" prop="refundTime" label="退款时间" width="250"></el-table-column>
+        <el-table-column align="center" prop="cusAmount" label="退款金额" width="250"></el-table-column>
+        <el-table-column align="center" prop="reason" label="退款原因"></el-table-column>
+      </el-table>
+    </div>
+  </div>
 
 
 
@@ -243,376 +269,378 @@
 <div th:include="_footer_include :: #jsLib"></div>
 <!--<script th:src="@{/js/excel/xlsx.min.js}" src="../static/js/excel/xlsx.min.js"></script>-->
 <script th:inline="javascript">
-    var vclueId = [[${clueId}]];
-    var vsignId = [[${signId}]];
-    var readOnly = [[${readyOnly}]];
-    var showSignButton = [[${showSignButton}]]
-    var payType = [[${payType}]];
-    var signData = [[${signData}]];
-    var PayAllData = [[${PayAllData}]];
-    var oneData = [[${oneData}]];
-    var twoData = [[${twoData}]];
-    var threeData = [[${threeData}]];
-    var proSelect=[[${proSelect}]];
-    var giveTypeList =[[${giveTypeList}]];
-    var refundData=[[${refundData}]];
-    var oneRepeatStatus = [[${oneRepeatStatus}]];
-    var twoRepeatStatus = [[${twoRepeatStatus}]];
-    var threeRepeatStatus = [[${threeRepeatStatus}]];
-    var refundStatus = [[${refundStatus}]];
-    var one ;
-    var two ;
-    var three;
-    var four ;
-    if(payType==1){
-        one = true;
-        two = false;
-        three = false;
-        four = false;
-    }else if(payType==2){
-        one = false;
-        two = true;
-        three = false;
-        four = false;
-    }else if(payType==3){
-        one = false;
-        two = true;
-        three = true;
-        four = false;
+  var vclueId = [[${clueId}]];
+  var vsignId = [[${signId}]];
+  var readOnly = [[${readyOnly}]];
+  var showSignButton = [[${showSignButton}]]
+  var payType = [[${payType}]];
+  var signData = [[${signData}]];
+  var allData = [[${allData}]];
+  var oneData = [[${oneData}]];
+  var twoData = [[${twoData}]];
+  var threeData = [[${threeData}]];
+  var proSelect=[[${proSelect}]];
+  var giveTypeList =[[${giveTypeList}]];
+  var refundData=[[${refundData}]];
+  var allRepeatStatus = [[${allRepeatStatus}]];
+  var oneRepeatStatus = [[${oneRepeatStatus}]];
+  var twoRepeatStatus = [[${twoRepeatStatus}]];
+  var threeRepeatStatus = [[${threeRepeatStatus}]];
+  var refundStatus = [[${refundStatus}]];
+  var one ;
+  var two ;
+  var three;
+  var four ;
+  if(payType==1){
+    one = true;
+    two = false;
+    three = false;
+    four = false;
+  }else if(payType==2){
+    one = false;
+    two = true;
+    three = false;
+    four = false;
+  }else if(payType==3){
+    one = false;
+    two = true;
+    three = true;
+    four = false;
+  }else{
+    one = false;
+    two = true;
+    if(twoData.length==0){
+      three = false;
     }else{
-        one = false;
-        two = true;
-        if(twoData.length==0){
-            three = false;
+      three = true;
+    }
+    four = true;
+  }
+
+  var vreadonlyFalg = true;
+  if(readOnly==1){
+    vreadonlyFalg = false;
+  }
+
+  var showSignButtonFlag = true;
+  if(showSignButton==1){
+    showSignButtonFlag = false;
+  }
+  if(refundStatus == 6){
+    refundDetailsShow = true;
+  }else {
+    refundDetailsShow = false;
+  }
+
+  // 查询 模块
+  var mainDivVM = new Vue({
+    el: '#businessContractRecord',
+    data: {
+      giveTypeList:giveTypeList,
+      addSignButtonAble:false,
+      addPayDetailButtonAble:false,
+      shouAddVisitButton:false,
+      dialogFormVisible:false,//弹窗是否显示
+      paymentDetailsShow:one,//判断全款付款明细表格是否显示
+      paymentDetailsShow2:two,//判断定金付款明细表格是否显示
+      paymentDetailsShow3:three,//判断二次定金付款明细表格是否显示
+      paymentDetailsShow4:four,//判断尾款付款明细表格是否显示
+      refundDetailsShow:refundDetailsShow,//判断退款信息是否展示
+      allRepeatStatus:allRepeatStatus,
+      oneRepeatStatus:oneRepeatStatus,
+      twoRepeatStatus:twoRepeatStatus,
+      threeRepeatStatus:threeRepeatStatus,
+      refundTableData:refundData,
+      readonlyFalg:vreadonlyFalg,
+      showSignButtonFlag:showSignButtonFlag,
+      showfalg:true,
+      dialogFormType:'',
+      formLabelWidth: '150px',
+      recordTableInfo:signData,
+      recordTable:allData,
+      recordTable2:oneData,
+      recordTable3:twoData,
+      recordTable4:threeData,
+      vistitStoreTypeArr:[],
+      provinceArr:[],
+      districtArr:[],
+      cityArr:[],
+      companyArr:[],
+      projectArr:proSelect,
+      isAllMoney:false,
+      suppWrap:false,
+      dialogForm:{
+        reason:''
+      },
+      formMoneyDetail: {
+        clueId:"",
+        visitTime:"",
+        visitCity:"",
+        visitType:"",
+        visitShopType:"",
+        visitNum:"",
+
+        signId:'',
+        payType:'',
+        payMode:'',
+        amountReceived: '',
+        amountBalance: '',
+        makeUpTime:'',
+        payTime: new Date(),
+        amountPerformance:'',
+        performanceAmount:'',
+        remarks:""
+      },
+
+      formSigning: {
+        clueId:"",
+        signNo:'',
+        customerName: '',
+        idCard: '',
+        phone: '',
+        signCompanyId:'',
+        signProjectId: '',
+        signProvince:'',
+        signCity: '',
+        signDictrict:'',
+        signShopType:'',
+        amountReceivable:'',
+        firstToll:'',
+        preferentialAmount:'',
+        signType:'',
+        giveAmount:'',
+        isRemoteSign:'',
+
+        visitTime:"",
+        visitCity:"",
+        visitType:"",
+        visitShopType:"",
+        visitNum:"",
+
+        payType:1,
+        payMode:'',
+        amountReceived: '',
+        amountBalance: '',
+        makeUpTime:'',
+        payTime: new Date(),
+        amountPerformance:'',
+        remarks:"",
+        performanceAmount:'',//业绩金额
+      },
+      option2s: [{
+        value: '1',
+        label: '一次性全款'
+      },{
+        value: '2',
+        label: '先交订金'
+      }],
+      option3s: [{
+        value: '1',
+        label: '现金'
+      },{
+        value: '2',
+        label: 'POS'
+      },{
+        value: '3',
+        label: '转账'
+      }],
+      isSignArr:[{value:0,name:'否'},{value:1,name:'是'}],
+      visitTypeArr:[{value:1,name:'预约来访'},{value:2,name:'慕名来访'},{value:3,name:'临时来访'}],
+      option2s: [{value: 1, label: '一次性全款'},{value: 2, label: '先付定金'}],
+      option3s: [{value: '1', label: '现金'},{value: '2', label: 'POS'},{value: '3', label: '转账'}],
+      payTypeArr:[{value: "1", label: '全款'},{value: "2", label: '定金'},{value: "3", label: '追加定金'},{value: "4", label: '尾款'}],
+      payTypeArr1:[{value: "1", label: '全款'},{value: "2", label: '定金'},{value: "3", label: '追加定金'},{value: "4", label: '尾款'}],
+    },
+    computed: {
+
+
+    },
+    methods: {
+      transGiveType(row, column, cellValue, index) {
+
+        var text="";
+        for(var i=0;i<giveTypeList.length;i++) {
+          if(giveTypeList[i].value ==cellValue){
+            text = giveTypeList[i].name;
+          }
+        }
+
+
+        return text;
+      },
+      formMoneyDetailAmountPerformance() {
+        this.formMoneyDetail.performanceAmount= this.formMoneyDetail.amountReceived;
+      },
+      formSigningAmountPerformance(){
+        var aone = parseFloat(this.formSigning.amountReceived);
+        var atwo = parseFloat(this.formSigning.firstToll);
+        if(isNaN(aone)) aone = 0
+        if(isNaN(atwo)) atwo = 0
+        // return (aone + atwo)+""
+        this.formSigning.performanceAmount=(aone + atwo)+ ""
+      },
+      number4(){
+        this.formMoneyDetail.amountReceived=this.formMoneyDetail.amountReceived.replace(/[^\.\d]/g,'');
+        this.formMoneyDetail.amountReceived=this.formMoneyDetail.amountReceived.replace('.','');
+      },
+      number5(){
+        this.formMoneyDetail.amountBalance=this.formMoneyDetail.amountBalance.replace(/[^\.\d]/g,'');
+        this.formMoneyDetail.amountBalance=this.formMoneyDetail.amountBalance.replace('.','');
+      },
+      number6(){
+        this.formMoneyDetail.amountPerformance=this.formMoneyDetail.amountPerformance.replace(/[^\.\d]/g,'');
+        this.formMoneyDetail.amountPerformance=this.formMoneyDetail.amountPerformance.replace('.','');
+      },
+      recordDialogClick(type){
+        this.suppWrap =false; // 默认关闭 到访记录 填写部分
+        if(type==1){//定金添加付款按钮点击
+          this.dialogFormVisible=true
+        }else if(type==2){//二次定金添加付款按钮点击
+          this.dialogFormVisible=true
+        }else if(type==3){//尾款添加付款按钮点击
+          this.dialogFormVisible=true
+          this.payType='3'
+        }
+        // this.formMoneyDetail={}; // 将formMoneyDetail设置为空
+        this.resetForm('formMoneyDetail'); //重置校验状态
+        this.shouAddVisitButton = true;
+        this.suppWrap = false;
+      },
+      payTypeChange(val){
+        if(val==3){
+          this.showfalg = true;
         }else{
-            three = true;
+          this.showfalg = false;
         }
-        four = true;
-    }
-
-    var vreadonlyFalg = true;
-    if(readOnly==1){
-        vreadonlyFalg = false;
-    }
-
-    var showSignButtonFlag = true;
-    if(showSignButton==1){
-        showSignButtonFlag = false;
-    }
-    if(refundStatus == 6){
-        refundDetailsShow = true;
-    }else {
-        refundDetailsShow = false;
-    }
-
-    // 查询 模块
-    var mainDivVM = new Vue({
-        el: '#businessContractRecord',
-        data: {
-        	giveTypeList:giveTypeList,
-            addSignButtonAble:false,
-            addPayDetailButtonAble:false,
-            shouAddVisitButton:false,
-            dialogFormVisible:false,//弹窗是否显示
-            paymentDetailsShow:one,//判断全款付款明细表格是否显示
-            paymentDetailsShow2:two,//判断定金付款明细表格是否显示
-            paymentDetailsShow3:three,//判断二次定金付款明细表格是否显示
-            paymentDetailsShow4:four,//判断尾款付款明细表格是否显示
-            refundDetailsShow:refundDetailsShow,//判断退款信息是否展示
-            oneRepeatStatus:oneRepeatStatus,
-            twoRepeatStatus:twoRepeatStatus,
-            threeRepeatStatus:threeRepeatStatus,
-            refundTableData:refundData,
-            readonlyFalg:vreadonlyFalg,
-            showSignButtonFlag:showSignButtonFlag,
-            showfalg:true,
-            dialogFormType:'',
-            formLabelWidth: '150px',
-            recordTableInfo:signData,
-            recordTable:PayAllData,
-            recordTable2:oneData,
-            recordTable3:twoData,
-            recordTable4:threeData,
-            vistitStoreTypeArr:[],
-            provinceArr:[],
-            districtArr:[],
-            cityArr:[],
-            companyArr:[],
-            projectArr:proSelect,
-            isAllMoney:false,
-            suppWrap:false,
-            dialogForm:{
-                reason:''
-            },
-            formMoneyDetail: {
-                clueId:"",
-                visitTime:"",
-                visitCity:"",
-                visitType:"",
-                visitShopType:"",
-                visitNum:"",
-
-                signId:'',
-                payType:'',
-                payMode:'',
-                amountReceived: '',
-                amountBalance: '',
-                makeUpTime:'',
-                payTime: new Date(),
-                amountPerformance:'',
-                performanceAmount:'',
-                remarks:""
-            },
-
-            formSigning: {
-                clueId:"",
-                signNo:'',
-                customerName: '',
-                idCard: '',
-                phone: '',
-                signCompanyId:'',
-                signProjectId: '',
-                signProvince:'',
-                signCity: '',
-                signDictrict:'',
-                signShopType:'',
-                amountReceivable:'',
-                firstToll:'',
-                preferentialAmount:'',
-                signType:'',
-                giveAmount:'',
-                isRemoteSign:'',
-
-                visitTime:"",
-                visitCity:"",
-                visitType:"",
-                visitShopType:"",
-                visitNum:"",
-
-                payType:1,
-                payMode:'',
-                amountReceived: '',
-                amountBalance: '',
-                makeUpTime:'',
-                payTime: new Date(),
-                amountPerformance:'',
-                remarks:"",
-                performanceAmount:'',//业绩金额
-            },
-            option2s: [{
-                value: '1',
-                label: '一次性全款'
-            },{
-                value: '2',
-                label: '先交订金'
-            }],
-            option3s: [{
-                value: '1',
-                label: '现金'
-            },{
-                value: '2',
-                label: 'POS'
-            },{
-                value: '3',
-                label: '转账'
-            }],
-            isSignArr:[{value:0,name:'否'},{value:1,name:'是'}],
-            visitTypeArr:[{value:1,name:'预约来访'},{value:2,name:'慕名来访'},{value:3,name:'临时来访'}],
-            option2s: [{value: 1, label: '一次性全款'},{value: 2, label: '先付定金'}],
-            option3s: [{value: '1', label: '现金'},{value: '2', label: 'POS'},{value: '3', label: '转账'}],
-            payTypeArr:[{value: "1", label: '全款'},{value: "2", label: '定金'},{value: "3", label: '追加定金'},{value: "4", label: '尾款'}],
-            payTypeArr1:[{value: "1", label: '全款'},{value: "2", label: '定金'},{value: "3", label: '追加定金'},{value: "4", label: '尾款'}],
-        },
-        computed: {
-
-            
-        },
-        methods: {
-        	transGiveType(row, column, cellValue, index) {
-        		
-            	  var text="";
-            	  for(var i=0;i<giveTypeList.length;i++) {
-            		 if(giveTypeList[i].value ==cellValue){
-            			 text = giveTypeList[i].name;
-            		 }
-            	  }
-            	  
-                 
-                  return text;
-              },
-            formMoneyDetailAmountPerformance() {
-                this.formMoneyDetail.performanceAmount= this.formMoneyDetail.amountReceived;
-            },
-            formSigningAmountPerformance(){
-                var aone = parseFloat(this.formSigning.amountReceived);
-                var atwo = parseFloat(this.formSigning.firstToll);
-                if(isNaN(aone)) aone = 0
-                if(isNaN(atwo)) atwo = 0
-                // return (aone + atwo)+""
-                this.formSigning.performanceAmount=(aone + atwo)+ ""
-            },
-            number4(){
-                this.formMoneyDetail.amountReceived=this.formMoneyDetail.amountReceived.replace(/[^\.\d]/g,'');
-                this.formMoneyDetail.amountReceived=this.formMoneyDetail.amountReceived.replace('.','');
-            },
-            number5(){
-                this.formMoneyDetail.amountBalance=this.formMoneyDetail.amountBalance.replace(/[^\.\d]/g,'');
-                this.formMoneyDetail.amountBalance=this.formMoneyDetail.amountBalance.replace('.','');
-            },
-            number6(){
-                this.formMoneyDetail.amountPerformance=this.formMoneyDetail.amountPerformance.replace(/[^\.\d]/g,'');
-                this.formMoneyDetail.amountPerformance=this.formMoneyDetail.amountPerformance.replace('.','');
-            },
-            recordDialogClick(type){
-                this.suppWrap =false; // 默认关闭 到访记录 填写部分
-                if(type==1){//定金添加付款按钮点击
-                    this.dialogFormVisible=true
-                }else if(type==2){//二次定金添加付款按钮点击
-                    this.dialogFormVisible=true
-                }else if(type==3){//尾款添加付款按钮点击
-                    this.dialogFormVisible=true
-                    this.payType='3'
-                }
-                // this.formMoneyDetail={}; // 将formMoneyDetail设置为空
-                this.resetForm('formMoneyDetail'); //重置校验状态
-                this.shouAddVisitButton = true;
-                this.suppWrap = false;
-            },
-            payTypeChange(val){
-                if(val==3){
-                    this.showfalg = true;
-                }else{
-                    this.showfalg = false;
-                }
-            },
-            selectSigningType(pa1) { //是不是全款
-                // this.formSigning.amountBalance = null;
-                // this.formSigning.makeUpTime = null;
-                if( pa1=='1' ){
-                    this.formSigning.payType = '1';
-                    this.isAllMoney = false;
-                }else{
-                    this.formSigning.payType = '2';
-                    this.isAllMoney = true;
-                }
-            },
-            currentProvince(selVal){
-                if(!selVal){
-                    return false;
-                }
-                param={};
-                param.type="1";
-                param.name=selVal;
-                axios.post('/area/sysregion/querySysRegionByParam',param).then(function (response) {
-                    mainDivVM.cityArr=response.data.data.data;
-                });
-            },
-            currentCity(selVal){
-                if(!selVal){
-                    return false;
-                }
-                param={};
-                param.type="2";
-                param.name=selVal;
-                axios.post('/area/sysregion/querySysRegionByParam',param).then(function (response) {
-                    mainDivVM.districtArr=response.data.data.data;
-                });
-            },
-
-            changeProvince(selVal){
-                mainDivVM.formSigning.signCity = '';
-                mainDivVM.formSigning.signDictrict='';
-                this.currentProvince(selVal);
-            },
-            changeCity(selVal){
-                mainDivVM.formSigning.signDictrict='';
-                this.currentCity(selVal);
-            },
-            selectIsRemoteSign (pa1) { //是否远程签约event
-                if( pa1==1 ){
-                    this.suppWrap = false;
-                }else{
-                    this.suppWrap = true;
-                }
-            },
-            suppShow(){ //补充到访记录展开
-                this.suppWrap = true;
-                this.shouAddVisitButton = false;
-                //清空补充到访记录数据
-                var param = {};
-                param.id = vclueId;
-                axios.post('/businesssign/visitEcho',param).then(function (response) {
-                    var echoData = response.data.data;
-                    mainDivVM.formSigning.visitCity = echoData.visitCity;
-                    if(echoData.visitNum>0){
-                        mainDivVM.formSigning.visitNum=echoData.visitNum;
-                    }
-                    mainDivVM.formSigning.visitType= 1;
-                    mainDivVM.formSigning.visitTime=new Date();
-                });
-            },
-            suppHide(){
-                this.suppWrap = false;
-                this.shouAddVisitButton = true;
-                this.formSigning.visitCity = '';
-                this.formSigning.visitNum='';
-                this.formSigning.visitShopType='';
-                this.formSigning.visitTime='';
-                this.formSigning.visitType='';
-            },
-
-            suppDetailShow(){ //补充到访记录展开
-                this.suppWrap = true;
-                this.shouAddVisitButton = false;
-                //清空补充到访记录数据
-                var param = {};
-                param.id = vclueId;
-                axios.post('/businesssign/visitEcho',param).then(function (response) {
-                    var echoData = response.data.data;
-                    mainDivVM.formMoneyDetail.visitCity = echoData.visitCity;
-                    if(echoData.visitNum>0){
-                        mainDivVM.formMoneyDetail.visitNum=echoData.visitNum;
-                    }
-                    mainDivVM.formMoneyDetail.visitType= 1;
-                    mainDivVM.formMoneyDetail.visitTime=new Date();
-                });
-            },
-            suppDetailHide(){
-                this.suppWrap = false;
-                this.shouAddVisitButton = true;
-                this.formMoneyDetail.visitCity = '';
-                this.formMoneyDetail.visitNum='';
-                this.formMoneyDetail.visitShopType='';
-                this.formMoneyDetail.visitTime='';
-                this.formMoneyDetail.visitType='';
-            }
-        },
-        created(){
-            // this.initList();
-            //  到访店铺类型 vistitStoreTypeArr
-            var param={};
-            param.groupCode="vistitStoreType";
-            axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {
-                mainDivVM.vistitStoreTypeArr=response.data.data;
-            });
-
-            //初始化省份
-            param={};
-            param.type="0";
-            axios.post('/area/sysregion/querySysRegionByParam',param).then(function (response) {
-                mainDivVM.provinceArr=response.data.data.data;
-            });
-
-            // 考察公司
-            param={};
-            axios.post('/aggregation/businessMyCustomer/listNoPage',param).then(function (response) {
-                mainDivVM.companyArr=response.data.data;
-            });
-        },
-        mounted(){
-            document.getElementById('businessContractRecord').style.display = 'block';
+      },
+      selectSigningType(pa1) { //是不是全款
+        // this.formSigning.amountBalance = null;
+        // this.formSigning.makeUpTime = null;
+        if( pa1=='1' ){
+          this.formSigning.payType = '1';
+          this.isAllMoney = false;
+        }else{
+          this.formSigning.payType = '2';
+          this.isAllMoney = true;
         }
-    });
+      },
+      currentProvince(selVal){
+        if(!selVal){
+          return false;
+        }
+        param={};
+        param.type="1";
+        param.name=selVal;
+        axios.post('/area/sysregion/querySysRegionByParam',param).then(function (response) {
+          mainDivVM.cityArr=response.data.data.data;
+        });
+      },
+      currentCity(selVal){
+        if(!selVal){
+          return false;
+        }
+        param={};
+        param.type="2";
+        param.name=selVal;
+        axios.post('/area/sysregion/querySysRegionByParam',param).then(function (response) {
+          mainDivVM.districtArr=response.data.data.data;
+        });
+      },
+
+      changeProvince(selVal){
+        mainDivVM.formSigning.signCity = '';
+        mainDivVM.formSigning.signDictrict='';
+        this.currentProvince(selVal);
+      },
+      changeCity(selVal){
+        mainDivVM.formSigning.signDictrict='';
+        this.currentCity(selVal);
+      },
+      selectIsRemoteSign (pa1) { //是否远程签约event
+        if( pa1==1 ){
+          this.suppWrap = false;
+        }else{
+          this.suppWrap = true;
+        }
+      },
+      suppShow(){ //补充到访记录展开
+        this.suppWrap = true;
+        this.shouAddVisitButton = false;
+        //清空补充到访记录数据
+        var param = {};
+        param.id = vclueId;
+        axios.post('/businesssign/visitEcho',param).then(function (response) {
+          var echoData = response.data.data;
+          mainDivVM.formSigning.visitCity = echoData.visitCity;
+          if(echoData.visitNum>0){
+            mainDivVM.formSigning.visitNum=echoData.visitNum;
+          }
+          mainDivVM.formSigning.visitType= 1;
+          mainDivVM.formSigning.visitTime=new Date();
+        });
+      },
+      suppHide(){
+        this.suppWrap = false;
+        this.shouAddVisitButton = true;
+        this.formSigning.visitCity = '';
+        this.formSigning.visitNum='';
+        this.formSigning.visitShopType='';
+        this.formSigning.visitTime='';
+        this.formSigning.visitType='';
+      },
+
+      suppDetailShow(){ //补充到访记录展开
+        this.suppWrap = true;
+        this.shouAddVisitButton = false;
+        //清空补充到访记录数据
+        var param = {};
+        param.id = vclueId;
+        axios.post('/businesssign/visitEcho',param).then(function (response) {
+          var echoData = response.data.data;
+          mainDivVM.formMoneyDetail.visitCity = echoData.visitCity;
+          if(echoData.visitNum>0){
+            mainDivVM.formMoneyDetail.visitNum=echoData.visitNum;
+          }
+          mainDivVM.formMoneyDetail.visitType= 1;
+          mainDivVM.formMoneyDetail.visitTime=new Date();
+        });
+      },
+      suppDetailHide(){
+        this.suppWrap = false;
+        this.shouAddVisitButton = true;
+        this.formMoneyDetail.visitCity = '';
+        this.formMoneyDetail.visitNum='';
+        this.formMoneyDetail.visitShopType='';
+        this.formMoneyDetail.visitTime='';
+        this.formMoneyDetail.visitType='';
+      }
+    },
+    created(){
+      // this.initList();
+      //  到访店铺类型 vistitStoreTypeArr
+      var param={};
+      param.groupCode="vistitStoreType";
+      axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {
+        mainDivVM.vistitStoreTypeArr=response.data.data;
+      });
+
+      //初始化省份
+      param={};
+      param.type="0";
+      axios.post('/area/sysregion/querySysRegionByParam',param).then(function (response) {
+        mainDivVM.provinceArr=response.data.data.data;
+      });
+
+      // 考察公司
+      param={};
+      axios.post('/aggregation/businessMyCustomer/listNoPage',param).then(function (response) {
+        mainDivVM.companyArr=response.data.data;
+      });
+    },
+    mounted(){
+      document.getElementById('businessContractRecord').style.display = 'block';
+    }
+  });
 
 </script>
 </body>

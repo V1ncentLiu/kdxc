@@ -317,6 +317,10 @@ public class BalanceAccountController {
                 payMode = "POS";
             } else if (accountDTO.getPayMode() == 3) {
                 payMode = "转账";
+            } else if (accountDTO.getPayMode() == 4) {
+                payMode = "微信";
+            } else if (accountDTO.getPayMode() == 5) {
+                payMode = "支付宝";
             }
             String payType = "";
             if (accountDTO.getPayType() == 1) {
@@ -467,6 +471,10 @@ public class BalanceAccountController {
                 payMode = "POS";
             } else if (accountDTO.getPayMode() == 3) {
                 payMode = "转账";
+            }else if (accountDTO.getPayMode() == 4) {
+                payMode = "微信";
+            }else if (accountDTO.getPayMode() == 5) {
+                payMode = "支付宝";
             }
             accountDTO.setPayModes(payMode);
             String payType = "";
