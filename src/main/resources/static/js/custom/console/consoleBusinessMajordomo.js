@@ -561,6 +561,10 @@ var mainDivVM = new Vue({
                 valText="POS";
             }else if(value==3){
                 valText="转账";
+            }else if(value==4){
+                valText="微信";
+            }else if(value==5){
+                valText="支付宝";
             }
             return valText;
         },

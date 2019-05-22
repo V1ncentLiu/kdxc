@@ -16,7 +16,7 @@
 <div id="optimizeClueManagement" class="optimizeClueManagement mainPadding" style="display: none;">
     <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
         <el-breadcrumb-item>Home</el-breadcrumb-item>
-        <el-breadcrumb-item>线索管理</el-breadcrumb-item>
+        <el-breadcrumb-item>资源管理</el-breadcrumb-item>
         <el-breadcrumb-item>已分发资源</el-breadcrumb-item>
     </el-breadcrumb>
     <el-row class="marginB20">
@@ -24,7 +24,13 @@
         
         <shiro:hasPermission name="DistributiveResource:recall">
 	        	<el-button type="success" @click="toRecall">撤回</el-button>
-	        </shiro:hasPermission>
+        </shiro:hasPermission>
+        <shiro:hasPermission name="DistributiveResource:exportCRecord">
+            <el-button icon="el-icon-upload2" type="primary" @click="exportFun(1)">导出资源沟通记录</el-button>
+        </shiro:hasPermission>
+        <shiro:hasPermission name="DistributiveResource:exportClues">
+            <el-button icon="el-icon-upload2" type="primary" @click="exportFun(2)">导出资源情况</el-button>
+        </shiro:hasPermission>
     </el-row>
     <div class="mainSearchBg">        
         <div class="mainSearchFormBox">    
@@ -142,7 +148,7 @@
                         </el-select>
                     </el-form-item>
                     <el-form-item label="资源专员:">
-                        <el-select v-model="form.resourcePerson" placeholder="资源专员" clearable >
+                        <el-select v-model="form.resourcePerson" placeholder="资源专员" clearable   filterable >
                             <el-option
                                 v-for="item in userArr"
                                 :key="item.id"
@@ -151,6 +157,40 @@
                             </el-option>
                         </el-select>
                     </el-form-item>
+
+                  <el-form-item label="首次是否接通:">
+                    <el-select v-model="form.firstCall" placeholder="首次是否接通" clearable >
+                      <el-option
+                          v-for="item in comArr"
+                          :key="item.value"
+                          :label="item.name"
+                          :value="item.value">
+                      </el-option>
+                    </el-select>
+                  </el-form-item>
+                  <el-form-item label="资源是否有效:">
+                    <el-select v-model="form.status" placeholder="资源是否有效" clearable >
+                      <el-option
+                          v-for="item in comArr"
+                          :key="item.value"
+                          :label="item.name"
+                          :value="item.value">
+                      </el-option>
+                    </el-select>
+                  </el-form-item>
+                  <el-form-item label="是否接通:">
+                    <el-select v-model="form.isCall" placeholder="是否接通" clearable >
+                      <el-option
+                          v-for="item in comArr"
+                          :key="item.value"
+                          :label="item.name"
+                          :value="item.value">
+                      </el-option>
+                    </el-select>
+                  </el-form-item>
+                  <el-form-item label="资源ID:">
+                    <el-input v-model="form.clueId" placeholder="资源ID"  @keyup.native="number"></el-input>
+                  </el-form-item>
                 </el-row>
                 <div class="mainSearchBtnBox">
                     <el-button icon="el-icon-search" type="primary" @click="initTableData" class="searchBtn">搜索</el-button>
@@ -171,16 +211,47 @@
                 >
                 <el-table-column align="center" prop="clueId" type="selection" width="55"></el-table-column> 
                 <el-table-column align="center" type="index" label="序号" width="55"></el-table-column>
-                <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width" v-for="(item,key,index) in tableColums" >
-    	        </el-table-column>
+                <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width" v-for="(item,key,index) in tableColums"  v-if="item.fieldCode == 'isTrack'">
+                    <template slot-scope="scope">
+                        <div v-if="scope.row.isTrack ==1">
+                            <el-button @click="openTrackingDialog(scope.row.clueId)" type="text" size="small">点击查看</el-button>
+                        </div>
+                        <div v-else></div>
+                    </template>
+                </el-table-column>
+                <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width" v-else-if="item.fieldCode == 'status'">
+                    <template slot-scope="scope">
+                        <div v-if="scope.row.status == 0">否</div>
+                        <div v-else-if="scope.row.status ==1">是</div>
+                    </template>
+                </el-table-column>
+                <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width" v-else-if="item.fieldCode == 'firstCall'">
+                    <template slot-scope="scope">
+                        <div v-if="scope.row.firstCall == 0">否</div>
+                        <div v-else-if="scope.row.firstCall ==1">是</div>
+                    </template>
+                </el-table-column>
+                <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width" v-else-if="item.fieldCode == 'isCall'">
+                    <template slot-scope="scope">
+                        <div v-if="scope.row.isCall == 0">否</div>
+                        <div v-else-if="scope.row.isCall ==1">是</div>
+                    </template>
+                </el-table-column>
+                <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" 
+        		:width="item.width"  v-else-if="item.fieldCode == 'province'">
+                    	<template slot-scope="scope">
+    		                   	{{scope.row.province}}{{scope.row.city}}{{scope.row.district}}
+                    	</template>
+        		</el-table-column>
+                <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width" v-else></el-table-column>
             </el-table>
             <table-pagination :pager="pager" @change="initTableData"></table-pagination>
         </el-row>
     </div>
     <!-- dialog -->
-    <el-dialog title="线索详细信息" :visible.sync="dialogFormVisible">
+    <el-dialog title="资源详细信息" :visible.sync="dialogFormVisible">
         <el-form :model="dialogForm" ref="dialogForm" class="marginB20 dialogForm">
-            <div class="fs16 redcolor marginB20">线索ID：{{basic.id}}</div>
+            <div class="fs16 redcolor marginB20">资源ID：{{basic.id}}</div>
             <div class="borderbox padding20">
                 <el-row>
                     <el-col :span="12">
@@ -264,6 +335,7 @@
             </div>
         </el-form>
     </el-dialog>
+    <dialog-tracking :param="trackingParam"></dialog-tracking>
     <!-- 选择列 -->
     <el-dialog title="自定义列" :visible.sync="dialogChooseList" class="elCheckboxGroup">
 	  <el-form :model="fieldFrom">	    
@@ -329,11 +401,19 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                     resourceStage:'',
                     resourcePerson:'',
                     phone:'',
+                    clueId:'',
+                    isCall:"",
+                    status:"",
+                    firstCall:"",
                 },
                 pager:{
                     total: 0,
                     currentPage: 1,
                     pageSize: 20,
+                },
+                trackingParam:{
+                    trackingDialogVisible:false,
+                    tableData:[]
                 },
                 dialogForm:{},
                 formLabelWidth: '120px',
@@ -347,6 +427,11 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                 proSelectArr:proSelect,
                 dxBusinessList:[],
                 userArr:userList,
+                comArr:[
+                  {value:"",name:"全部"},
+                  {value:"1",name:"是"},
+                  {value:"0",name:"否"}
+                ],
                 tableData:[],
                 customer:'',
                 basic:'',
@@ -371,6 +456,22 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                     }
                 }
             },
+            openTrackingDialog(cid){
+                var param = {};
+                param.clueId = cid;
+                axios.post('/aggregation/tracking/queryList', param)
+                .then(function (response) {
+                    console.log(response.data)
+                    if (response.data.code == 0) {
+                        ocmVM.trackingParam.tableData = response.data.data
+                        ocmVM.trackingParam.trackingDialogVisible = true;
+                    } else {
+                        ocmVM.$message.error(response.data.msg);
+                    }
+                }).catch(function (error) {
+                    console.log(error);
+                });
+            },
        	      initTableData(){
                 var param = {};
                 var pageSize = this.pager.pageSize;
@@ -392,6 +493,10 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                 param.phone=this.form.phone;
                 param.category=this.form.resourceType;
                 param.industryCategory=this.form.tradeType;
+                param.status = this.form.status;
+                param.clueId = this.form.clueId;
+                param.isCall = this.form.isCall;
+                param.firstCall = this.form.firstCall;
                 var starTime=this.form.starTime;
                 var endTime=this.form.endTime;
                 if(endTime){
@@ -610,6 +715,71 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                     this.isShow=true
                 }          
             },
+            exportFun(falg){ // 导出
+                var param = {};
+                var pageSize = this.pager.pageSize;
+                var pageNum = this.pager.currentPage;
+                param.pageNum=pageNum;
+                param.pageSize=pageSize;
+                param.createTimeStart=this.form.starTime;
+                param.createTimeEnd=this.form.endTime;
+                param.spreadAssignTimeStart=this.form.assignTimeStart;
+                param.spreadAssignTimeEnd=this.form.assignTimeEnd;
+                param.teleCompanyId=this.form.telemarketingBranch;
+                param.teleDeptId=this.form.businessUnit;
+                param.teleGorupId=this.form.telemarketingItem;
+                param.teleGorupId=this.form.telemarketingItem;
+                param.projectId=this.form.resourceProject;
+                param.operationId=this.form.resourcePerson;
+                param.phase=this.form.resourceStage;
+                param.source=this.form.medium;
+                param.phone=this.form.phone;
+                param.category=this.form.resourceType;
+                param.industryCategory=this.form.tradeType;
+                param.status = this.form.status;
+                param.clueId = this.form.clueId;
+                param.isCall = this.form.isCall;
+                param.firstCall = this.form.firstCall;
+                var starTime=this.form.starTime;
+                var endTime=this.form.endTime;
+                if(endTime){
+                    if(starTime>endTime){
+                        this.$message({
+                            message: '创建开始时间不能大于结束时间',
+                            type: 'warning'
+                        });
+                        return;
+                    }
+                }
+                var start=this.form.assignTimeStart;
+                var end=this.form.assignTimeEnd;
+                if(end){
+                    if(start>end){
+                        this.$message({
+                            message: '分发开始时间不能大于结束时间',
+                            type: 'warning'
+                        });
+                        return;
+                    }
+                }
+                var methodStr;
+                if(falg==1){ // 沟通情况
+                    methodStr = 'findCommunicateRecords';
+                }else{ // 资源记录
+                    methodStr = 'findClues';
+                }
+                axios.post('/exetend/distributionedTaskManager/'+methodStr,param,{responseType:'blob'})
+                .then(function (response) {
+                    var data =  response.data;
+                    var fileName = response.headers.filename;
+                    saveAs(data,decodeURI(fileName));
+                }).catch(function (error) {
+                    console.log(error);
+                }).then(function(){
+                    signRecordVM.loading=false;
+                });
+            },
+
             toRecall() {
                 var rows = this.multipleSelection;
                 if(rows.length!=1){
@@ -626,7 +796,7 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                         });
                         return;
                 	}
-                    this.$confirm('撤回线索后分配人员不可见，同时该线索转移至待分发资源中，确定将线索撤回?', '提示', {
+                    this.$confirm('撤回资源后分配人员不可见，同时该资源转移至待分发资源中，确定将资源撤回?', '提示', {
                         confirmButtonText: '确定',
                         cancelButtonText: '取消',
                         type: 'warning'

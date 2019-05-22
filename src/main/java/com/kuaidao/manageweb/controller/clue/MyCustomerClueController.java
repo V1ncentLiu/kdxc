@@ -5,7 +5,9 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
+
 import javax.servlet.http.HttpServletRequest;
+
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.apache.shiro.subject.Subject;
@@ -19,23 +21,14 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.kuaidao.aggregation.constant.ClueCirculationConstant;
 import com.kuaidao.aggregation.dto.call.CallRecordReqDTO;
 import com.kuaidao.aggregation.dto.call.CallRecordRespDTO;
 import com.kuaidao.aggregation.dto.circulation.CirculationInsertOrUpdateDTO;
 import com.kuaidao.aggregation.dto.circulation.CirculationReqDTO;
 import com.kuaidao.aggregation.dto.circulation.CirculationRespDTO;
-import com.kuaidao.aggregation.dto.clue.ClueBasicDTO;
-import com.kuaidao.aggregation.dto.clue.ClueCustomerDTO;
-import com.kuaidao.aggregation.dto.clue.ClueDTO;
-import com.kuaidao.aggregation.dto.clue.ClueFileDTO;
-import com.kuaidao.aggregation.dto.clue.ClueQueryDTO;
-import com.kuaidao.aggregation.dto.clue.ClueRelateDTO;
-import com.kuaidao.aggregation.dto.clue.CustomerClueDTO;
-import com.kuaidao.aggregation.dto.clue.CustomerClueQueryDTO;
-import com.kuaidao.aggregation.dto.clue.ReleaseClueDTO;
-import com.kuaidao.aggregation.dto.clue.RepeatClueDTO;
-import com.kuaidao.aggregation.dto.clue.RepeatClueQueryDTO;
-import com.kuaidao.aggregation.dto.clue.RepeatClueSaveDTO;
+import com.kuaidao.aggregation.dto.clue.*;
 import com.kuaidao.aggregation.dto.clueappiont.ClueAppiontmentDTO;
 import com.kuaidao.aggregation.dto.project.ProjectInfoDTO;
 import com.kuaidao.aggregation.dto.tracking.TrackingInsertOrUpdateDTO;
@@ -48,6 +41,7 @@ import com.kuaidao.common.entity.IdEntityLong;
 import com.kuaidao.common.entity.IdListLongReq;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
+import com.kuaidao.common.util.SortUtils;
 import com.kuaidao.manageweb.config.LogRecord;
 import com.kuaidao.manageweb.config.LogRecord.OperationType;
 import com.kuaidao.manageweb.constant.MenuEnum;
@@ -58,7 +52,9 @@ import com.kuaidao.manageweb.feign.customfield.CustomFieldFeignClient;
 import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
 import com.kuaidao.manageweb.feign.project.ProjectInfoFeignClient;
 import com.kuaidao.manageweb.feign.tracking.TrackingFeignClient;
+import com.kuaidao.manageweb.feign.user.SysSettingFeignClient;
 import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
+import com.kuaidao.sys.constant.SysConstant;
 import com.kuaidao.sys.dto.customfield.CustomFieldQueryDTO;
 import com.kuaidao.sys.dto.customfield.QueryFieldByRoleAndMenuReq;
 import com.kuaidao.sys.dto.customfield.QueryFieldByUserAndMenuReq;
@@ -66,6 +62,8 @@ import com.kuaidao.sys.dto.customfield.UserFieldDTO;
 import com.kuaidao.sys.dto.organization.OrganizationDTO;
 import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
 import com.kuaidao.sys.dto.role.RoleInfoDTO;
+import com.kuaidao.sys.dto.user.SysSettingDTO;
+import com.kuaidao.sys.dto.user.SysSettingReq;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import com.kuaidao.sys.dto.user.UserOrgRoleReq;
 
@@ -78,6 +76,9 @@ public class MyCustomerClueController {
 
     @Autowired
     private MyCustomerFeignClient myCustomerFeignClient;
+
+    @Autowired
+    private SysSettingFeignClient sysSettingFeignClient;
 
     @Autowired
     private UserInfoFeignClient userInfoFeignClient;
@@ -197,7 +198,13 @@ public class MyCustomerClueController {
         if (proJson.getCode().equals(JSONResult.SUCCESS)) {
             model.addAttribute("proSelect", proJson.getData());
         }
-
+        model.addAttribute("ossUrl", ossUrl);
+        // 系统参数优化资源类别
+        String optList = getSysSetting(SysConstant.OPT_CATEGORY);
+        request.setAttribute("optList", optList);
+        // 系统参数非优化资源类别
+        String notOptList = getSysSetting(SysConstant.NOPT_CATEGORY);
+        request.setAttribute("notOptList", notOptList);
         return "clue/addCustomerResources";
     }
 
@@ -327,7 +334,8 @@ public class MyCustomerClueController {
         // 项目
         JSONResult<List<ProjectInfoDTO>> proJson = projectInfoFeignClient.allProject();
         if (proJson.getCode().equals(JSONResult.SUCCESS)) {
-            request.setAttribute("proSelect", proJson.getData());
+            List<ProjectInfoDTO> result = SortUtils.sortList(proJson.getData(),"projectName");
+            request.setAttribute("proSelect", result);
         } else {
             request.setAttribute("proSelect", new ArrayList());
         }
@@ -439,7 +447,7 @@ public class MyCustomerClueController {
         circDto.setClueId(new Long(clueId));
         JSONResult<List<CirculationRespDTO>> circulationList =
                 circulationFeignClient.queryList(circDto);
-        logger.error("流转记录返回值："+circulationList);
+        logger.error("流转记录返回值：" + circulationList);
         if (circulationList != null && circulationList.SUCCESS.equals(circulationList.getCode())
                 && circulationList.getData() != null) {
             request.setAttribute("circulationList", circulationList.getData());
@@ -523,7 +531,7 @@ public class MyCustomerClueController {
     }
 
     /**
-     * 获取线索拨打记录
+     * 获取资源拨打记录
      * 
      * @param request
      * @return
@@ -984,6 +992,8 @@ public class MyCustomerClueController {
         circul.setClueId(dto.getClueId());
         circul.setAllotOrg(user.getOrgId());
         circul.setUserId(user.getId());
+        // 新资源类型，电销自己创建的和话务主管转给话务的新资源类型一致
+        circul.setNewResource(ClueCirculationConstant.NewResource.OTHER_RESOURCE.getCode());
         if (null != user.getRoleList() && user.getRoleList().size() > 0) {
             circul.setRoleId(user.getRoleList().get(0).getId());
         }
@@ -1041,4 +1051,19 @@ public class MyCustomerClueController {
         return user;
     }
 
+    /**
+     * 查询系统参数
+     * 
+     * @param code
+     * @return
+     */
+    private String getSysSetting(String code) {
+        SysSettingReq sysSettingReq = new SysSettingReq();
+        sysSettingReq.setCode(code);
+        JSONResult<SysSettingDTO> byCode = sysSettingFeignClient.getByCode(sysSettingReq);
+        if (byCode != null && JSONResult.SUCCESS.equals(byCode.getCode())) {
+            return byCode.getData().getValue();
+        }
+        return null;
+    }
 }

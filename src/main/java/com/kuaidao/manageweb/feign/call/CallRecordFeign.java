@@ -2,12 +2,14 @@ package com.kuaidao.manageweb.feign.call;
 
 import java.util.List;
 import java.util.Map;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.netflix.feign.FeignClient;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+
 import com.kuaidao.aggregation.dto.call.CallRecordCountDTO;
 import com.kuaidao.aggregation.dto.call.CallRecordReqDTO;
 import com.kuaidao.aggregation.dto.call.CallRecordRespDTO;
@@ -93,7 +95,14 @@ public interface CallRecordFeign {
     @PostMapping("/countMyCallRecordTalkTime")
     JSONResult<Integer> countMyCallRecordTalkTime(CallRecordReqDTO myCallRecordReqDTO);
 
-    
+    /**
+     * 记录拨打时间
+     * @param myCallRecordReqDTO
+     */
+    @PostMapping("/recodeCallTime")
+    JSONResult<Boolean> recodeCallTime(@RequestBody CallRecordReqDTO myCallRecordReqDTO);
+
+
     @Component
     static class HystrixClientFallback implements CallRecordFeign {
         
@@ -134,7 +143,7 @@ public interface CallRecordFeign {
         @Override
         public JSONResult<List<CallRecordCountDTO>> countCallRecordTotalByClueIdList(
                 CallRecordReqDTO myCallRecordReqDTO) {
-            return fallBackError("根据线索Id统计拨打次数");
+            return fallBackError("根据资源Id统计拨打次数");
         }
         @Override
         public JSONResult<Integer> countTodayTalkTime(TeleConsoleReqDTO teleConsoleReqDTO) {
@@ -144,7 +153,12 @@ public interface CallRecordFeign {
         public JSONResult<Integer> countMyCallRecordTalkTime(CallRecordReqDTO myCallRecordReqDTO) {
             return fallBackError("我的通话记录-总时长");
         }
-        
+
+        @Override
+        public JSONResult<Boolean> recodeCallTime(CallRecordReqDTO myCallRecordReqDTO) {
+            return fallBackError("记录拨打时间");
+        }
+
     }
 
 }

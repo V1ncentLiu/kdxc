@@ -70,8 +70,7 @@ public class AbnormalController {
     @RequestMapping("/AbnoramlType")
     @ResponseBody
     public JSONResult<List<DictionaryItemRespDTO>> abnoramlType() {
-        JSONResult result = dictionaryItemFeignClient
-                .queryDicItemsByGroupCode(DicCodeEnum.DIC_ABNORMALUSER.getCode());
+        JSONResult result = dictionaryItemFeignClient.queryDicItemsByGroupCode(DicCodeEnum.DIC_ABNORMALUSER.getCode());
         return result;
     }
 

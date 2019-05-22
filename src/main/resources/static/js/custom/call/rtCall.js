@@ -34,10 +34,11 @@ $(function(){
  * @returns
  */ 
 function outboundCallPhone(outboundInputPhone,callSource,clueId,callback){
+
+	var callSource1 = callSource;
 	if(callSource==3){//话务和电销用一样的逻辑
 		callSource=2;
 	}
-	
 	stopSound();//停止播放录音
 	clearTimer();//清除定时器
 	if(!homePageVM.isQimoClient && !homePageVM.isTrClient ){
@@ -45,14 +46,15 @@ function outboundCallPhone(outboundInputPhone,callSource,clueId,callback){
 		   return ;
  	}
  	
- 	 if(!/^[0-9]*$/.test(outboundInputPhone)){
-			 homePageVM.$message({message:"只可以输入数字,不超过11位",type:'warning'});
-		     return ; 
- 	  }
+	if(!/^[0-9]*$/.test(outboundInputPhone)){
+			homePageVM.$message({message:"只可以输入数字,不超过11位",type:'warning'});
+			return ;
+	}
  	
  	sessionStorage.setItem("callSource",callSource);//1:表示 首页头部外呼 2：表示 电销管理外呼
+	// 记录拨打时间
+	recodeCallTime(callSource1,clueId)
 
- 	
  	if(homePageVM.isTrClient){//天润呼叫
  		var bindType = homePageVM.loginClientForm.bindPhoneType;
  		if(bindType==2){//abx外呼
@@ -99,8 +101,20 @@ function outboundCallPhone(outboundInputPhone,callSource,clueId,callback){
             // always executed
           });
  	}
-	
 } 
+
+function recodeCallTime(callSource,clueId){
+	 var param = {};
+	 param.callSource = callSource;
+	 param.clueId = clueId;
+	 axios.post('/call/callRecord/recodeCallTime',param).then(function (response) {
+		 console.log("拨打时间记录");
+	 }).catch(function (error) {
+		 console.log(error);
+	 }).then(function () {
+ 	 });
+}
+
 
 //abx外呼
 function axbOutboundCall(outboundInputPhone,callSource,clueId,callback){
