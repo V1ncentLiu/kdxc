@@ -40,7 +40,7 @@
                 </el-form-item>
                 <el-form-item label="电销顾问:">  
                     <el-select 
-                        v-model="form.teleSaleId" 
+                        v-model="form.user_id" 
                         placeholder="电销顾问" 
                         style="width: 100%;" 
                         filterable 
@@ -51,14 +51,14 @@
                             :key="item.id"
                             :label="item.name"
                             :value="item.id">
-                            <el-checkbox-group v-model="form.teleSaleId">
+                            <el-checkbox-group v-model="form.user_id">
                                 <el-checkbox :label="item.id">{{item.name}}</el-checkbox>
                             </el-checkbox-group>
                         </el-option>
                     </el-select>
                 </el-form-item>
                 <el-form-item label="分配来源:">  
-                    <el-select v-model="form.source" placeholder="分配来源" style="width: 100%;" clearable filterable>
+                    <el-select v-model="form.new_resource" placeholder="分配来源" style="width: 100%;" clearable filterable>
                         <el-option
                             v-for="item in distributionSource"
                             :key="item.id"
@@ -111,17 +111,33 @@
                     startTime:'',
                     endTime:'',
                     org_Id:'',
+                    user_id:'',
+                    new_resource:''
                 },
                 export: {
                     startTime:'',
                     endTime:'',
-                    org_Id:''
+                    org_Id:'',
+                    user_id:'',
+                    new_resource:''
                 },
                 tableData: [],//表格数据
                 tableColums: [],//表头list
                 orgTeleArr:queryOrg,//电销组
                 busSaleArr:[],//创业顾问
-                distributionSource:distributionSource,//分配来源
+                distributionSource:[{
+                    id:'1',
+                    name:'话务新资源'
+                },{
+                    id:'2',
+                    name:'推广新资源'
+                },{
+                    id:'3',
+                    name:'非新资源'
+                },{
+                    id:'99',
+                    name:'其他(资源未分配)'
+                }],//分配来源
                 pager:{
                     total: 0,
                     currentPage: 1,
@@ -165,6 +181,7 @@
                 if(this.form.uesr_id){
                     param.uesr_id = this.form.uesr_id;//电销组
                 }
+                param.new_resource = this.form.new_resource;//分配来源
                 console.log(param)
                 this.loading=true;
                 axios.post('/statistics/teleStatement/getResourceAllocationDayPagePersion',param).then(function (response) { 
@@ -207,7 +224,9 @@
                     // 给导出参数赋值
                     mainDivVM.export.startTime = mainDivVM.minuteFormat(startTime);
                     mainDivVM.export.endTime = mainDivVM.minuteFormat(endTime);
-                    mainDivVM.export.org_Id = mainDivVM.form.org_Id;  
+                    mainDivVM.export.org_Id = mainDivVM.form.org_Id; 
+                    mainDivVM.export.user_Id = mainDivVM.form.user_Id;  
+                    mainDivVM.export.new_resource = mainDivVM.form.new_resource;  
                 })     
             },
             goback(){
@@ -277,6 +296,8 @@
                 param.startTime = this.export.startTime;
                 param.endTime =  this.export.endTime;
                 param.org_Id =  this.export.org_Id;//电销组
+                param.user_Id =  this.export.user_Id;//电销顾问
+                param.new_resource =  this.export.new_resource;//分配来源
                 axios.post('/statistics/teleStatement/exportResourceAllocationDayPersion',param,{responseType:'blob'})
                     .then(function (response) {
                         console.log(response)
@@ -290,7 +311,14 @@
                 });
             }
         },
-        created(){            
+        created(){   
+            // 接收参数
+            // console.log(resourceQueryDto)
+            this.form.startTime=resourceQueryDto.startTime;
+            this.form.endTime=resourceQueryDto.endTime;
+            this.form.org_Id=resourceQueryDto.org_Id;
+            this.form.user_id=resourceQueryDto.user_id;
+            this.form.new_resource=resourceQueryDto.new_resource;
             this.searchTable();
         },
         mounted(){
