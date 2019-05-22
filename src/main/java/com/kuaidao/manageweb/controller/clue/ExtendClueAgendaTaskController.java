@@ -1145,7 +1145,10 @@ public class ExtendClueAgendaTaskController {
                     pushClueReq.setSearchWord(clueAgendaTaskDTO1.getSearchWord());
                     pushClueReq.setSource(String.valueOf(clueAgendaTaskDTO1.getSource()));
                     pushClueReq.setSourceName(clueAgendaTaskDTO1.getSourceName());
-                    pushClueReq.setSourceType(String.valueOf(clueAgendaTaskDTO1.getSourceType()));
+                    if(null != clueAgendaTaskDTO1.getSourceType()) {
+                        pushClueReq
+                            .setSourceType(String.valueOf(clueAgendaTaskDTO1.getSourceType()));
+                    }
                     pushClueReq.setType(String.valueOf(clueAgendaTaskDTO1.getType()));
                     pushClueReq.setMessagePoint(clueAgendaTaskDTO1.getMessagePoint());
                     if (StringUtils.isNotBlank(clueAgendaTaskDTO1.getMessageTime1())) {
