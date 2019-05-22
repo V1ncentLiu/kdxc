@@ -7,23 +7,33 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import com.itextpdf.text.pdf.PdfStructTreeController.returnType;
+import com.kuaidao.common.constant.OrgTypeConstant;
+import com.kuaidao.common.constant.SystemCodeConstant;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.common.util.CommonUtil;
 import com.kuaidao.common.util.DateUtil;
 import com.kuaidao.common.util.ExcelUtil;
+import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
 import com.kuaidao.manageweb.feign.statistics.TeleTalkTimeFeignClient;
+import com.kuaidao.manageweb.util.CommUtil;
 import com.kuaidao.stastics.dto.callrecord.TeleSaleTalkTimeQueryDTO;
 import com.kuaidao.stastics.dto.callrecord.TeleTalkTimeRespDTO;
 import com.kuaidao.stastics.dto.callrecord.TotalDataDTO;
+import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
+import com.kuaidao.sys.dto.organization.OrganizationRespDTO;
+import com.kuaidao.sys.dto.user.UserInfoDTO;
 
 /**
  * 通话时长  
@@ -38,15 +48,39 @@ public class TeleSaleTalkTimeController {
     @Autowired
     TeleTalkTimeFeignClient teleTalkTimeFeignClient;
     
+    @Autowired
+    OrganizationFeignClient organizationFeignClient;
+    
     /**
      * 昨日 七天 查询
       * 电销组通话总时长统计 分頁
      */
     @PostMapping("/listTeleGroupTalkTime")
     public JSONResult<Map<String,Object>> listTeleGroupTalkTime(@RequestBody TeleSaleTalkTimeQueryDTO teleSaleTalkTimeQueryDTO) {
+        HashMap<String,Object> resMap = new HashMap<>();
+        
+        Long orgId = teleSaleTalkTimeQueryDTO.getOrgId();
+        if(orgId==null) {
+            //查询当前组织机构下电销组织
+          /*  UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+            JSONResult<List<OrganizationRespDTO>> orgGroupJr = getOrgGroupByOrgId(curLoginUser.getOrgId(),OrgTypeConstant.DXZ);
+            if (!JSONResult.SUCCESS.equals(orgGroupJr.getCode())) {
+                return new JSONResult<Map<String,Object>>().fail(orgGroupJr.getCode(),orgGroupJr.getMsg());
+            }
+            List<OrganizationRespDTO> orgGroup = orgGroupJr.getData();
+            if(CollectionUtils.isEmpty(orgGroup)) {
+                resMap.put("totalData", null);
+                resMap.put("tableData", null);
+                return new JSONResult<Map<String,Object>>().success(resMap);
+            }
+            List<Long> orgIdList = orgGroup.parallelStream().map(OrganizationRespDTO::getId).collect(Collectors.toList());
+            teleSaleTalkTimeQueryDTO.setOrgIdList(orgIdList);*/
+        }
+    
+        
         JSONResult<PageBean<TeleTalkTimeRespDTO>> talkTimeList = teleTalkTimeFeignClient.listTeleGroupTalkTime(teleSaleTalkTimeQueryDTO);
         JSONResult<TeleTalkTimeRespDTO> totalTeleGroupTalkTime = teleTalkTimeFeignClient.totalTeleGroupTalkTime(teleSaleTalkTimeQueryDTO);
-        HashMap<String,Object> resMap = new HashMap<>();
+        
         resMap.put("totalData",totalTeleGroupTalkTime.getData());
         resMap.put("tableData", talkTimeList.getData());
         return new JSONResult<Map<String,Object>>().success(resMap);
@@ -118,6 +152,7 @@ public class TeleSaleTalkTimeController {
        totalList.add(formatPercent(totalTalkTimeDTO.getClueCallecdPrecent()));
        totalList.add(totalTalkTimeDTO.getValidCallTime());
        totalList.add(totalTalkTimeDTO.getUserAvgDayValidCallTime());
+       dataList.add(totalList);
     }
 
    /**
@@ -308,5 +343,21 @@ public class TeleSaleTalkTimeController {
         return headTitleList;
     }
    
+    
+    /**
+     * 查询组织结构下 组织
+    * @param orgId
+    * @param orgType
+    * @return
+     */
+    private JSONResult<List<OrganizationRespDTO>> getOrgGroupByOrgId(Long orgId,Integer orgType) {
+        // 电销组
+        OrganizationQueryDTO busGroupReqDTO = new OrganizationQueryDTO();
+        busGroupReqDTO.setParentId(orgId);
+        busGroupReqDTO.setSystemCode(SystemCodeConstant.HUI_JU);
+        busGroupReqDTO.setOrgType(orgType);
+        JSONResult<List<OrganizationRespDTO>> orgJr = organizationFeignClient.queryOrgByParam(busGroupReqDTO);
+        return orgJr;
+    }
 
 }

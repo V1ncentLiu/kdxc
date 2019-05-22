@@ -2,14 +2,17 @@ package com.kuaidao.manageweb.controller.statistics.resourceAllocation;
 
 import com.kuaidao.common.constant.OrgTypeConstant;
 import com.kuaidao.common.constant.RoleCodeEnum;
+import com.kuaidao.common.constant.SystemCodeConstant;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
+import com.kuaidao.common.util.CommonUtil;
 import com.kuaidao.common.util.DateUtil;
 import com.kuaidao.common.util.ExcelUtil;
 import com.kuaidao.manageweb.feign.customfield.CustomFieldFeignClient;
 import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
 import com.kuaidao.manageweb.feign.statistics.resourceAllocation.StatisticsFeignClient;
 import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
+import com.kuaidao.manageweb.util.CommUtil;
 import com.kuaidao.stastics.dto.resourceAllocation.ResourceAllocationDto;
 import com.kuaidao.stastics.dto.resourceAllocation.ResourceAllocationQueryDto;
 import com.kuaidao.sys.dto.customfield.CustomFieldQueryDTO;
@@ -409,9 +412,38 @@ public class TeleStatementController {
     * @return
      */
     @RequestMapping("/telemarketingCallTable")
-    public String telemarketingCallTable() {
+    public String telemarketingCallTable(HttpServletRequest request) {
+        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+        request.setAttribute("teleGroupList",getOrgGroupByOrgId(curLoginUser.getOrgId(),OrgTypeConstant.DXZ));
         return "reportforms/telemarketingCallTable";
     }
+    
+    
+    private List<OrganizationRespDTO> getOrgGroupByOrgId(Long orgId,Integer orgType) {
+        // 电销组
+        OrganizationQueryDTO busGroupReqDTO = new OrganizationQueryDTO();
+        busGroupReqDTO.setParentId(orgId);
+        busGroupReqDTO.setSystemCode(SystemCodeConstant.HUI_JU);
+        busGroupReqDTO.setOrgType(orgType);
+        JSONResult<List<OrganizationRespDTO>> orgJr = organizationFeignClient.queryOrgByParam(busGroupReqDTO);
+        if(!JSONResult.SUCCESS.equals(orgJr.getCode())) {
+            return null;
+        }
+        return orgJr.getData();
+    }
+    
+    
+   private List<UserInfoDTO> getUserInfoByOrgId(Long orgId,String roleCode){
+      
+       UserOrgRoleReq req = new UserOrgRoleReq();
+       req.setOrgId(orgId);
+       req.setRoleCode(RoleCodeEnum.DXCYGW.name());
+       JSONResult<List<UserInfoDTO>> userJr = userInfoFeignClient.listByOrgAndRole(req);
+       if(userJr==null || !JSONResult.SUCCESS.equals(userJr.getCode())) {
+           logger.error("查询电销组-userInfoFeignClient.listByOrgAndRole(req),param{{}},res{{}}",req,userJr);
+       }
+       return userJr.getData();
+   }
     
     /**
      * 电销顾问通话时长表页面  合计
@@ -425,6 +457,8 @@ public class TeleStatementController {
         paramMap.put("endTime", endTime);
         paramMap.put("userId", userId);
         request.setAttribute("parentParam",paramMap);
+        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+        request.setAttribute("teleGroupList",getOrgGroupByOrgId(curLoginUser.getOrgId(),OrgTypeConstant.DXZ));
         return "reportforms/telemarketingCallTableSum";
     }
     
@@ -442,6 +476,8 @@ public class TeleStatementController {
         paramMap.put("endTime", endTime);
         paramMap.put("userId", userId);
         request.setAttribute("parentParam",paramMap);
+        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+        request.setAttribute("teleGroupList",getOrgGroupByOrgId(curLoginUser.getOrgId(),OrgTypeConstant.DXZ));
         return "reportforms/telemarketingCallTableTeam";
     }
     
@@ -458,6 +494,8 @@ public class TeleStatementController {
         paramMap.put("endTime", endTime);
         paramMap.put("userId", userId);
         request.setAttribute("parentParam",paramMap);
+        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+        request.setAttribute("teleGroupList",getOrgGroupByOrgId(curLoginUser.getOrgId(),OrgTypeConstant.DXZ));
         return "reportforms/telemarketingCallTablePerson";
     }
 
