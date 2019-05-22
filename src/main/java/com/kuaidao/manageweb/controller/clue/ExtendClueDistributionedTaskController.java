@@ -237,10 +237,18 @@ public class ExtendClueDistributionedTaskController {
                 curList.add(taskDTO.getSearchWord()); // 搜索词
                 curList.add(taskDTO.getOperationName()); // 资源专员
                 curList.add(taskDTO.getIndustryCategoryName()); // 行业类别
-                curList.add(null); // 备注
+                curList.add(taskDTO.getRemark()); // 备注
                 curList.add(taskDTO.getTeleDirectorName()); // 电销组总监
                 curList.add(taskDTO.getTeleGorupName()); // 电销组
-                curList.add(null); // 是否重复
+                String flag = null;
+                if(taskDTO.getIsRepeatPhone()!=null){
+                    if(taskDTO.getIsRepeatPhone()==0){
+                        flag = "否";
+                    }else{
+                        flag = "是";
+                    }
+                }
+                curList.add(flag); // 是否重复
                 dataList.add(curList);
             }
         }
@@ -438,7 +446,6 @@ public class ExtendClueDistributionedTaskController {
     /**
      * 查询所有资源专员
      * 
-     * @param request
      * @return
      */
 
