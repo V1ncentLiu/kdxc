@@ -97,6 +97,7 @@
 <script th:inline="javascript">
     var queryOrg=[[${saleGroupList}]];//电销组
     // var distributionSource=[[${queryOrg}]];//分配来源
+    var resourceQueryDto=[[${resourceAllocationQueryDto}]];//参数list
     var fieldList=[[${fieldList}]];//表头list
     var mainDivVM = new Vue({
         el: '#maindiv',
@@ -107,12 +108,14 @@
                     startTime:'',
                     endTime:'',
                     org_Id:'',
+                    user_id:'',
                     new_resource:''
                 },
                 export: {
                     startTime:'',
                     endTime:'',
                     org_Id:'',
+                    user_id:'',
                     new_resource:''
                 },
                 tableData: [],//表格数据
@@ -170,7 +173,8 @@
                 param.startTime = this.minuteFormat(startTime);
                 param.endTime = this.minuteFormat(endTime);
                 param.org_Id = this.form.org_Id;//电销组
-
+                param.user_id = this.form.user_id;//电销顾问
+                param.new_resource = this.form.new_resource;//分配来源
                 this.loading=true;
                 axios.post('/statistics/teleStatement/getResourceAllocationPersionTable',param).then(function (response) { 
                     if(!response){
@@ -213,6 +217,8 @@
                     mainDivVM.export.startTime = mainDivVM.minuteFormat(startTime);
                     mainDivVM.export.endTime = mainDivVM.minuteFormat(endTime);
                     mainDivVM.export.org_Id = mainDivVM.form.org_Id;
+                    mainDivVM.export.user_id = mainDivVM.form.user_id;
+                    mainDivVM.export.new_resource = mainDivVM.form.new_resource;
                 })  
             },
             goback(){
@@ -270,7 +276,9 @@
                 param.startTime = this.export.startTime;
                 param.endTime =  this.export.endTime;
                 param.org_Id =  this.export.org_Id;//电销组
-                axios.post('/statistics/teleStatement/exportResourceAllocationGroup',param,{responseType:'blob'})
+                param.user_id =  this.export.user_id;//电销顾问
+                param.new_resource =  this.export.new_resource;//分配来源
+                axios.post('/statistics/teleStatement/exportResourceAllocationPersion',param,{responseType:'blob'})
                     .then(function (response) {
                         var data =  response.data;
                         var fileName = response.headers.filename;
@@ -282,7 +290,13 @@
                 });
             }
         },
-        created(){            
+        created(){    
+            // 接收参数
+            // console.log(resourceQueryDto)
+            this.form.startTime=resourceQueryDto.startTime;
+            this.form.endTime=resourceQueryDto.endTime;
+            this.form.org_Id=resourceQueryDto.org_Id;
+            this.form.new_resource=resourceQueryDto.new_resource;
             this.searchTable();
         },
         mounted(){
