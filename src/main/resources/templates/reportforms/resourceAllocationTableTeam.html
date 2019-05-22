@@ -29,7 +29,7 @@
                    <el-date-picker format="yyyy-MM-dd HH:mm" v-model="form.endTime" type="datetime" placeholder="选择日期"></el-date-picker>
                 </el-form-item>
                 <el-form-item label="电销组:">  
-                    <el-select v-model="form.org_Id" placeholder="电销组" style="width: 100%;" clearable @change="currentTelSale" filterable>
+                    <el-select v-model="form.org_Id" placeholder="电销组" style="width: 100%;" clearable @change="currentTelSale" filterable disabled>
                         <el-option
                             v-for="item in orgTeleArr"
                             :key="item.id"
@@ -105,7 +105,7 @@
     var queryOrg=[[${saleGroupList}]];//电销组
     // var distributionSource=[[${queryOrg}]];//分配来源
     var fieldList=[[${fieldList}]];//表头list
-    var resourceQueryDto=[[${resourceAllocationQueryDto}]];//表头list
+    var resourceQueryDto=[[${resourceAllocationQueryDto}]];//参数list
     var mainDivVM = new Vue({
         el: '#maindiv',
         data: function() {
@@ -314,9 +314,11 @@
         },
         created(){    
             // 接收参数
-            console.log(resourceQueryDto)
-            // this.form.startTime=startTime;
-            // this.form.endTime=endTime;
+            // console.log(resourceQueryDto)
+            this.form.startTime=resourceQueryDto.startTime;
+            this.form.endTime=resourceQueryDto.endTime;
+            this.form.org_Id=resourceQueryDto.org_Id;
+            this.form.new_resource=resourceQueryDto.new_resource;
             this.searchTable();
         },
         mounted(){
