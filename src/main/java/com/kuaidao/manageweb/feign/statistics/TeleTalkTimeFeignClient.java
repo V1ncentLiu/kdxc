@@ -61,6 +61,23 @@ public interface TeleTalkTimeFeignClient {
     @PostMapping("/totalTeleGroupTalkTime")
     public JSONResult<TeleTalkTimeRespDTO> totalTeleGroupTalkTime(TeleSaleTalkTimeQueryDTO teleSaleTalkTimeQueryDTO);
     
+    /**
+     * 电销顾问通话时长  查询该组下电销顾问
+    * @param teleSaleTalkTimeQueryDTO
+    * @return
+     */
+    @PostMapping("/listGroupTeleSaleTalkTime")
+    JSONResult<PageBean<TeleTalkTimeRespDTO>> listGroupTeleSaleTalkTime(TeleSaleTalkTimeQueryDTO teleSaleTalkTimeQueryDTO);
+    
+    
+    /**
+     * 电销顾问通话时长  查询该组下电销顾问  导出时使用
+    * @param teleSaleTalkTimeQueryDTO
+    * @return
+     */
+    @PostMapping("/listGroupTeleSaleTalkTimeNoPage")
+    JSONResult<List<TeleTalkTimeRespDTO>> listGroupTeleSaleTalkTimeNoPage(TeleSaleTalkTimeQueryDTO teleSaleTalkTimeQueryDTO);
+    
     @Component
     class HystrixClientFallback implements TeleTalkTimeFeignClient {
 
@@ -102,6 +119,19 @@ public interface TeleTalkTimeFeignClient {
             return fallBackError("电销组通话时长合计");
         }
 
+        @Override
+        public JSONResult<PageBean<TeleTalkTimeRespDTO>> listGroupTeleSaleTalkTime(
+                TeleSaleTalkTimeQueryDTO teleSaleTalkTimeQueryDTO) {
+            return fallBackError("查询该组下电销顾问");
+        }
+
+        @Override
+        public JSONResult<List<TeleTalkTimeRespDTO>> listGroupTeleSaleTalkTimeNoPage(
+                TeleSaleTalkTimeQueryDTO teleSaleTalkTimeQueryDTO) {
+            return fallBackError("查询该组下电销顾问-不分页");
+        }
+
     }
+
 
 }
