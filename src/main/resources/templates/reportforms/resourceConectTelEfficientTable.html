@@ -13,22 +13,18 @@
         <el-breadcrumb-item>电销组资源接通有效率表</el-breadcrumb-item>
     </el-breadcrumb>    
     <el-row class="marginB20">
-        <el-button type="primary" @click="searchYesterday">昨天</el-button>
+        <el-button type="primary" @click="searchTable">昨天</el-button>
         <el-button type="success" @click="searchWeek">近七天</el-button>
         <el-button type="warning" @click="searchMonth">本月</el-button>  
         <el-button type="danger" @click="exportRs">导出Excel报表</el-button>   
     </el-row>
     <div class="mainSearchBg">        
         <div class="mainSearchFormBox">
-           <el-form :inline="true" :model="form" class="demo-form-inline mainSearchForm" ref="form">                 
-                <el-form-item label="起止时间:">
-                    <el-date-picker format="yyyy-MM-dd HH:mm" v-model="form.startTime" type="datetime" placeholder="选择日期"></el-date-picker>
-                </el-form-item>
-                <el-form-item label="—" class="widthauto">
-                   <el-date-picker format="yyyy-MM-dd HH:mm" v-model="form.endTime" type="datetime" placeholder="选择日期"></el-date-picker>
-                </el-form-item>
-                <el-form-item label="电销组:">  
-                    <el-select v-model="form.orgId" placeholder="电销组" style="width: 100%;" clearable filterable>
+          
+            <el-form :inline="true" :model="form" class="demo-form-inline mainSearchForm" ref="form1">
+                               
+                <el-form-item label="资源类别:">  
+                    <el-select v-model="form.orgId" placeholder="资源类别" style="width: 100%;" clearable filterable>
                         <el-option
                             v-for="item in orgTeleArr"
                             :key="item.id"
@@ -37,8 +33,68 @@
                         </el-option>
                     </el-select>
                 </el-form-item>
+                <el-form-item label="媒介:">  
+                    <el-select v-model="form.orgId" placeholder="媒介" style="width: 100%;" clearable filterable>
+                        <el-option
+                            v-for="item in orgTeleArr"
+                            :key="item.id"
+                            :label="item.name"
+                            :value="item.id">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="资源项目:">  
+                    <el-select v-model="form.orgId" placeholder="资源项目" style="width: 100%;" clearable filterable>
+                        <el-option
+                            v-for="item in orgTeleArr"
+                            :key="item.id"
+                            :label="item.name"
+                            :value="item.id">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="起止时间:">
+                        <el-date-picker format="yyyy-MM-dd HH:mm" v-model="form.startTime" type="datetime" placeholder="选择日期"></el-date-picker>
+                    </el-form-item>
+                    <el-form-item label="—" class="widthauto">
+                       <el-date-picker format="yyyy-MM-dd HH:mm" v-model="form.endTime" type="datetime" placeholder="选择日期"></el-date-picker>
+                    </el-form-item>   
+                <el-row v-show="isShow">
+                        <el-form-item label="电销分公司:">  
+                                <el-select v-model="form.orgId" placeholder="电销分公司" style="width: 100%;" clearable filterable>
+                                    <el-option
+                                        v-for="item in orgTeleArr"
+                                        :key="item.id"
+                                        :label="item.name"
+                                        :value="item.id">
+                                    </el-option>
+                                </el-select>
+                            </el-form-item>
+                    <el-form-item label="电销事业部:">  
+                        <el-select v-model="form.orgId" placeholder="电销事业部" style="width: 100%;" clearable filterable>
+                            <el-option
+                                v-for="item in orgTeleArr"
+                                :key="item.id"
+                                :label="item.name"
+                                :value="item.id">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
+                    <el-form-item label="电销组:">  
+                        <el-select v-model="form.orgId" placeholder="电销组" style="width: 100%;" clearable filterable>
+                            <el-option
+                                v-for="item in orgTeleArr"
+                                :key="item.id"
+                                :label="item.name"
+                                :value="item.id">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
+                </el-row>
+               
                 <div class="mainSearchBtnBox">
                     <el-button icon="el-icon-search" type="primary" @click="searchTable" class="searchBtn">搜索</el-button>
+                    <span style="color: #5c6be8;cursor: pointer;margin:0 10px;" @click="toogleClick"><span v-if="isShow">收起</span><span v-else>展开更多</span><i :class="{'greycolor paddingL6 el-icon-arrow-up':isShow,'greycolor paddingL6 el-icon-arrow-down':!isShow}"></i></span>
                 </div>  
             </el-form>
         </div>
@@ -56,25 +112,61 @@
                     prop="orgName"
                     align="center"
                     label="电销组">
-                    <template slot-scope="scope">
-                        <el-button type="text" size="small" @click="gotoTeam(scope.row)">{{scope.row.orgName}}</el-button>
-                    </template>
                 </el-table-column>
-                <el-table-column prop="callCount" align="center" label="通话次数">
+                <el-table-column prop="callCount" align="center" label="资源类别">
+                        <template slot-scope="scope">
+                                <el-button type="text" size="small" >{{scope.row.orgName}}</el-button>
+                            </template>
                 </el-table-column>
-                <el-table-column prop="calledCount" align="center" label="通话接通次数">
+                <el-table-column prop="calledCount" align="center" label="媒介">
                 </el-table-column>
-                <el-table-column prop="callPercent" align="center" label="通话接通率" :formatter="percentFormat">
+                <el-table-column prop="callPercent" align="center" label="资源项目" :formatter="percentFormat">
                 </el-table-column>
-                <el-table-column prop="callClueCount" align="center" label="通话量">
+                <el-table-column prop="callClueCount" align="center" label="下发资源量">
                 </el-table-column>
-                <el-table-column prop="calledClueCount" align="center" label="接通量">
+                <el-table-column prop="calledClueCount" align="center" label="跟访资源量">
                 </el-table-column>
-                <el-table-column prop="clueCallecdPrecent" align="center" label="资源接通率" :formatter="percentFormat">
+                <el-table-column prop="clueCallecdPrecent" align="center" label="首次接通资源量" :formatter="percentFormat">
                 </el-table-column>
-                <el-table-column prop="validCallTime" align="center" :formatter="timeFormat" label="总有效通话时长">
+                <el-table-column prop="validCallTime" align="center" :formatter="timeFormat" label="接通资源量">
                 </el-table-column>
-                <el-table-column prop="userAvgDayValidCallTime" align="center" :formatter="timeFormat" label="人均天有效通话时长">
+                <el-table-column prop="userAvgDayValidCallTime" align="center" label="未接通资源量">
+                </el-table-column>
+                <el-table-column prop="userAvgDayValidCallTime" align="center"  label="接通有效资源量">
+                </el-table-column>
+                <el-table-column prop="userAvgDayValidCallTime" align="center"  label="接通无效资源量">
+                </el-table-column>
+                <el-table-column prop="userAvgDayValidCallTime" align="center"  label="未接通有效资源量">
+                </el-table-column>
+                <el-table-column prop="userAvgDayValidCallTime" align="center"  label="跟访率">
+                </el-table-column>
+                <el-table-column prop="userAvgDayValidCallTime" align="center"  label="首次接通率">
+                </el-table-column>
+                <el-table-column prop="userAvgDayValidCallTime" align="center"  label="资源接通率">
+                </el-table-column>
+                <el-table-column prop="userAvgDayValidCallTime" align="center"  label="资源有效率">
+                </el-table-column>
+                <el-table-column prop="userAvgDayValidCallTime" align="center"  label="首日跟访资源量">
+                </el-table-column>
+                <el-table-column prop="userAvgDayValidCallTime" align="center"  label="首日接通资源量">
+                </el-table-column>
+                <el-table-column prop="userAvgDayValidCallTime" align="center"  label="首日未接通资源量">
+                </el-table-column>
+                <el-table-column prop="userAvgDayValidCallTime" align="center"  label="首日接通有效资源量">
+                </el-table-column>
+                <el-table-column prop="userAvgDayValidCallTime" align="center"  label="首日接通无效资源量">
+                </el-table-column>
+                <el-table-column prop="userAvgDayValidCallTime" align="center"  label="首日未接通有效资源量">
+                </el-table-column>
+                <el-table-column prop="userAvgDayValidCallTime" align="center"  label="首日未接通无效资源量">
+                </el-table-column>
+                <el-table-column prop="userAvgDayValidCallTime" align="center"  label="首日跟访率">
+                </el-table-column>
+                <el-table-column prop="userAvgDayValidCallTime" align="center"  label="首日资源接通率">
+                </el-table-column>
+                <el-table-column prop="userAvgDayValidCallTime" align="center"  label="首日资源有效率">
+                </el-table-column>
+                <el-table-column prop="userAvgDayValidCallTime" align="center"  label="首日接通有效率">
                 </el-table-column>
             </el-table>
             <table-pagination :pager="pager" @change="searchTable()"></table-pagination>
@@ -91,6 +183,7 @@
         el: '#maindiv',
         data: function() {
             return {
+                isShow:false,
                 loading: false,
                 form: {
                     startTime:'',
@@ -135,12 +228,15 @@
                 },
             }             
         },
-        methods: {            
+        methods: {
+            toogleClick(){
+                this.isShow = !this.isShow       
+                },            
             searchTable() { 
                 var startTime = this.form.startTime;
                 var endTime = this.form.endTime;
                 if(endTime){
-                    if(startTime>endTime){
+                    if( this.minuteFormat(startTime)>this.minuteFormat(endTime)){
                         this.$message({
                             message: '开始时间不能大于结束时间',
                             type: 'warning'
@@ -148,7 +244,7 @@
                         return;
                     }
                 }
-                console.log('search');   
+
                 
                 var param = {};
                 param.startTime = this.minuteFormat(startTime);
@@ -210,11 +306,17 @@
             },
             arraySpanMethod({ row, column, rowIndex, columnIndex }) { // 合并第一行
                 if (rowIndex === 0) {
-                    if (columnIndex === 0) {
-                        return [0, 0];
-                    } else if (columnIndex === 1) {
-                        return [1, 2];
+                    if (columnIndex === 2) {
+                        return {
+                            rowspan:1,
+                            colspan:3
+                            
+                        }
                     }
+                    // else if (columnIndex === 3) {
+                    //     return [1, 2];
+                    // }
+                    
                 }
             },
             gotoTeam (row) { // 页面跳转
@@ -245,7 +347,7 @@
             },
             summaryFun () {
                 var total = {
-                    orgId: "合计",
+                    orgId: 123,
                     orgName: '合计',
                     callCount: 1000,
                     calledCount: 10,
@@ -254,7 +356,7 @@
                     calledClueCount: 10,
                     clueCallecdPrecent: 10,
                     validCallTime: 155799,
-                    userAvgDayValidCallTime: 155799
+                    // userAvgDayValidCallTime: 155799
                 };
                 this.tableData.unshift(total);
             },
