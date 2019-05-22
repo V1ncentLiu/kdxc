@@ -51,6 +51,18 @@
                         </el-form-item>
                     </el-col>
                 </el-row>
+                <el-row>
+                    <el-col :span="8">
+                        <el-form-item label="地域信息：" :label-width="formLabelWidth">
+                            <el-button type="text" disabled>{{intention.address}}</el-button>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="8">
+                        <el-form-item label="备注：" :label-width="formLabelWidth">
+                            <el-button type="text" disabled>{{clueBase.remark}}</el-button>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
             </div>
             <div class="marginB20 fs16 paddingT20">基本信息</div>
             <div class="borderbox padding20">
@@ -81,14 +93,11 @@
                         </el-form-item>
                     </el-col>
                     <el-col :span="8">
-                        <el-form-item label="微信：" :label-width="formLabelWidth" >
-                            <div v-if="showPhone">
-                                <el-button type="text" disabled>{{form.ishasWx}}</el-button>
-                                <span v-show="vxShow" style="padding-left: 5px;color: rgb(0, 114, 255);cursor: pointer;" @click="dialogFormImg = true">查看二维码</span>
-                            </div>
-                            <div v-else>
-                                <el-button type="text" disabled>{{(form.ishasWx==null||form.ishasWx=='')?'':'***'}}</el-button>
-                            </div>
+                        <el-form-item label="微信：" prop="wechat" :label-width="formLabelWidth">
+                            <el-button type="text" disabled>{{form.wechat}}</el-button>
+                            <span v-if="form.wechat2 || form.wechatUrl">
+                                <span @click="openWechat" style="padding-left: 5px; color: rgb(0, 114, 255); cursor: pointer;">查看多个微信/二维码</span>
+                            </span>
                         </el-form-item>
                     </el-col>
                 </el-row>
@@ -355,6 +364,19 @@
             <img :src="dialogFormUploadImgSrc" alt="" style="width: 250px;height: 250px;">
         </div>
     </el-dialog>
+    <!-- dialog -->
+    <el-dialog title="查看微信" :visible.sync="wechatVisible" width="540px">
+        <template>
+            <el-form :model="wechatForm" ref="wechatForm" >
+                <el-form-item label="微信2：" :label-width="formLabelWidth1" >
+                    <el-input v-model="wechatForm.wechat2" placeholder="" maxLength="20" style="width: 290px;"></el-input>
+                </el-form-item>
+                <el-form-item label="" :label-width="formLabelWidth1" >
+                    <img v-show="wechatForm.wechatUrl!=''" :src="wechatForm.wechatUrl" width="290px" style="border-radius:6px;">
+                </el-form-item>
+            </el-form>
+        </template>
+    </el-dialog>
 </div>
 
 <style type="text/css">
@@ -553,6 +575,7 @@ var commonPool=[[${commonPool}]];//上传文件
 var callRecord=[[${callRecord}]];//上传文件
 var loginUserId=[[${loginUserId}]];
 var showPhone = true;
+var ossUrl = [[${ossUrl}]];//上传文件地址
 if(commonPool==1){
     showPhone = false;
 }
@@ -612,7 +635,9 @@ if(customer==null){
             phone4:"",
             phone5:"",
             customerSex:"",
-            ishasWx:"",
+            wechat:'',
+            wechat2:'',
+            wechatUrl:'',
             experience:"",
             customerAge:"",
             customerJob:"",
@@ -654,7 +679,9 @@ if(customer==null){
         phone4:customer.phone4,
         phone5:customer.phone5,
         customerSex:customer.sex,
-        ishasWx:customer.wechat,
+        wechat:customer.wechat,
+        wechat2:customer.wechat2,
+        wechatUrl:customer.wechatCode,
         experience:customer.hasExperience,
         customerAge:customer.age,
         customerJob:customer.profession,
@@ -717,15 +744,16 @@ if(base==null){
                 showPhone:showPhone,
                 showwchatcode:showwchatcode,
                 isDisabled:true,//默认不可点击
+              wechatVisible: false,//查看微信号
                 dialogFormUploadImgSrc: '',
                 radioProject:'',
                 dialogFormVisible: false,
                 dialogFormImg:false,
                 deleteShow:false,//删除新增手机号输入框
                 dialogFormUploadImg:false,
-                vxShow:vxShow,
                 form:vform,
                 clueBase:base,
+              intention:intention,
                 categoryArr:[],
                 typeArr:[],
                 mediumArry:[],
@@ -742,7 +770,13 @@ if(base==null){
                 cityArr:[],
                 districtArr:[],
                 proSelect:proSelect,
+              wechatForm: {
+                wechat2:'',
+                wechatUrl:'',
+                fileList:[]
+              },
                 formLabelWidth: '150px',
+              formLabelWidth1: '140px',
                 rules:{
                     // customerName: [
                     //     { required: true, message: '客户姓名不能为空', trigger: 'blur' }
@@ -810,12 +844,50 @@ if(base==null){
                 	visitStatus:'',
                 	nextVisitTime:'',
                 },
+              uploadOssHost:'',
+              uploadParamData: {
+                key:'22',
+                policy:'',
+                OSSAccessKeyId:'',
+                success_action_status : '200', //让服务端返回200,不然，默认会返回204
+                signature:'',
+                'x:params':'',
+                'realName':''
+              },
+              ossUrl:ossUrl,
+              limit:1,
                 tableDataC2: trackingList,//跟进记录
                 tableDataC3: callRecord,  //通话记录
                 tableDataC4:circulationList//流转记录
             }             
         },
         methods: {
+          getUploadParam(){
+            var signUrl = this.ossUrl+"?serviceType=aggregation";
+            var param={};
+
+            axios.get(signUrl, param)
+            .then(function (response) {
+              // console.info(response);
+              var respData= response.data;
+              var host = respData.host;
+              var params={};
+              var new_multipart_params = {
+                dir:respData.dir,
+                'policy': respData.policy,
+                'OSSAccessKeyId': respData.accessid,
+                'success_action_status' : '200', //让服务端返回200,不然，默认会返回204
+                'signature': respData.signature,
+                'x:params':params,//自定义编码，basse64编码后的字符串,
+                'realName':''
+              };
+              addCustomerVM.uploadParamData= new_multipart_params;
+              addCustomerVM.uploadOssHost = host;
+            })
+            .catch(function (error) {
+              console.log(error);
+            });
+          },
              rebackClue(){
             	 window.location.href="/tele/clueMyCustomerInfo/initmyCustomer"; 	
             },
@@ -1077,6 +1149,11 @@ if(base==null){
                 $(".downloadMp3:eq("+index+") a").prop("download","true");
                 $(".downloadMp3:eq("+index+") a>p").trigger("click");
             },
+          openWechat() {
+            this.wechatVisible = true
+            this.wechatForm.wechat2=this.form.wechat2;
+            this.wechatForm.wechatUrl=this.form.wechatUrl;
+          },
         },
         mounted(){
             document.getElementById('addCustomer').style.display = 'block';
