@@ -2,8 +2,6 @@
 <html xmlns="http://www.w3.org/1999/xhtml"  xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
 <head th:replace="_header_include::frag(~{::title},~{},~{})">
     <title>后台管理系统</title>
-    <style>
-    </style>
 </head>
 <body>
 <div id="maindiv" class="maindiv mainPadding" style="display: none;">    
@@ -28,33 +26,23 @@
                 <el-form-item label="—" class="widthauto">
                    <el-date-picker format="yyyy-MM-dd HH:mm" v-model="form.endTime" type="datetime" placeholder="选择日期"></el-date-picker>
                 </el-form-item>
-                <el-form-item label="电销组:"> 
-                    <el-input v-model="form.orgId" :readOnly="isReadOnly"></el-input> 
-                    <!-- <el-select v-model="form.orgId" placeholder="电销组" style="width: 100%;" clearable @change="currentTelSale" filterable>
+                <el-form-item label="电销组:">
+                    <el-select v-model="form.orgId" placeholder="电销组" style="width: 100%;" clearable @change="currentTelSale" filterable :disabled="isDisabled">
                         <el-option
                             v-for="item in orgTeleArr"
                             :key="item.id"
                             :label="item.name"
                             :value="item.id">
                         </el-option>
-                    </el-select> -->
+                    </el-select>
                 </el-form-item>
                 <el-form-item label="电销顾问:">  
-                    <el-select 
-                        v-model="form.userId" 
-                        placeholder="电销顾问" 
-                        style="width: 100%;" 
-                        filterable 
-                        multiple 
-                        clearable  >
+                    <el-select v-model="form.org_Id" placeholder="电销组" style="width: 100%;" clearable @change="currentTelSale" filterable>
                         <el-option
-                            v-for="item in busSaleArr"
+                            v-for="item in orgTeleArr"
                             :key="item.id"
                             :label="item.name"
                             :value="item.id">
-                            <el-checkbox-group v-model="form.teleSaleId">
-                                <el-checkbox :label="item.id">{{item.name}}</el-checkbox>
-                            </el-checkbox-group>
                         </el-option>
                     </el-select>
                 </el-form-item>
@@ -102,17 +90,39 @@
 </body>
 <script th:inline="javascript">
     var queryOrg=[[${queryOrg}]];//电销组
-    var parentOrgId = [[${parentOrgId}]];
-    var form = {
-        startTime: '2019-5-20 00:00',
-        endTime: '2019-5-21 23:59',
-        orgId: '电销组1',
-    };
+    queryOrg = [
+        {
+            id: "1",
+            name: "电销一组",
+            orgType: 1,
+            parentId: "1",
+            remark: "集团2",
+            staffNum: 0
+        },
+        {
+            id: "2",
+            name: "电销二组",
+            orgType: 1,
+            parentId: "1",
+            remark: "集团2",
+            staffNum: 0
+        },
+        {
+            id: "3",
+            name: "电销三组",
+            orgType: 1,
+            parentId: "1",
+            remark: "集团2",
+            staffNum: 0
+        },
+    ];
+    var parentParam = [[${parentParam}]];
+    console.log(parentParam);
     var mainDivVM = new Vue({
         el: '#maindiv',
         data: function() {
             return {
-                isReadOnly: true,
+                isDisabled: true,
                 loading: false,
                 form: {
                     startTime: '',
@@ -227,15 +237,15 @@
                 param={};
                 param.orgId=seleVal;
                 param.roleCode="DXCYGW";
-                axios.post('/user/userManager/listByOrgAndRole' ,param).then(function (response) {  
-                    mainDivVM.busSaleArr=response.data.data;
-                }).catch(function (error) {
-                    console.log(error);
-                    mainDivVM.$message({
-                        message: "电销顾问请求失败，请稍后重试",
-                        type: "error"
-                    });
-                });
+                // axios.post('/user/userManager/listByOrgAndRole' ,param).then(function (response) {  
+                //     mainDivVM.busSaleArr=response.data.data;
+                // }).catch(function (error) {
+                //     console.log(error);
+                //     mainDivVM.$message({
+                //         message: "电销顾问请求失败，请稍后重试",
+                //         type: "error"
+                //     });
+                // });
             },
             goBack () {
                 window.history.go(-1);
@@ -246,6 +256,20 @@
                 if(userId){
                     window.location.href="/statistics/teleStatement/telemarketingCallTablePerson?userId=" + userId + "&orgId=" + this.form.orgId + "&startTime=" + this.form.startTime + "&endTime=" + this.form.endTime; 
                 }
+            }, 
+            dateTimeFormat (dt) { 
+                 if (!dt) {return "";}
+                var d = dt.toString();
+                var oYear = d.slice(0,4);
+                var oMonth = d.slice(5,6);
+                oMonth = oMonth < 10 ? "0" + oMonth : oMonth;
+                var oDay = d.slice(7,8);
+                oDay = oDay < 10 ? "0" + oDay : oDay;
+                var oHour = d.slice(8,9);
+                oHour = oHour < 10 ? "0" + oHour : oHour;
+                var oMinute = d.slice(8,9);
+                oMinute = oMinute < 10 ? "0" + oMinute : oMinute;
+                return oYear+"-"+oMonth+"-"+oDay+" "+oHour+":"+oMinute;
             }, 
             percentFormat (row, column) {
                 var percent = row[column.property];
@@ -329,10 +353,10 @@
             },
         },
         created(){
-            this.form.startTime=form.startTime;
-            this.form.endTime=form.endTime;        
-            this.form.orgId=form.orgId; 
-            this.currentTelSale(this.form.orgId);
+            this.form.startTime=this.dateTimeFormat(parentParam.startTime);
+            this.form.endTime=this.dateTimeFormat(parentParam.endTime);    
+            this.form.orgId=parentParam.orgId; 
+            this.form.orgId = this.form.orgId ? this.form.orgId.toString():this.form.orgId; 
             console.log(this.form);       
             this.searchTable();
         },
