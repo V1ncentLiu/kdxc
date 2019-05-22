@@ -39,7 +39,6 @@
                 </el-form-item>
                 <el-form-item label="话务转入:">  
                     <el-select v-model="form.telOperatorTransferIn" placeholder="话务转入" style="width: 100%;" clearable filterable>
-                        <el-option label="全部" value="0"></el-option>
                         <el-option label="是" value="1"></el-option>
                         <el-option label="否" value="2"></el-option>
                     </el-select>
@@ -199,13 +198,13 @@
                     startTime: '',
                     endTime: '',
                     orgId: '',
-                    telOperatorTransferIn: '1'
+                    telOperatorTransferIn: ''
                 },
                 export: {
                     startTime:'',
                     endTime:'',
                     orgId:'',
-                    telOperatorTransferIn: '1'                    
+                    telOperatorTransferIn: ''                    
                 },
                 tableData: [
                     {
@@ -281,6 +280,7 @@
                 param.startTime = this.minuteFormat(startTime);
                 param.endTime =  this.minuteFormat(endTime);
                 param.org_Id =  this.form.org_Id; // 电销组
+                param.ti = this.form.telOperatorTransferIn;
                 // this.loading=true;
                 // axios.post('/statistics/teleStatement/getResourceAllocationTable',param).then(function (response) { 
                 //     if(!response){
@@ -320,6 +320,7 @@
                     this.export.startTime = this.minuteFormat(startTime);
                     this.export.endTime = this.minuteFormat(endTime);
                     this.export.orgId = this.form.orgId;
+                    this.export.telOperatorTransferIn = this.form.telOperatorTransferIn;
                 // }).catch(function (error) {
                 //     console.log(error);
                 //     mainDivVM.$message({
@@ -362,10 +363,11 @@
                 var orgName = row.orgName; // 电销组name
                 var startTime = this.export.startTime;
                 var endTime = this.export.endTime;
+                var ti = this.export.telOperatorTransferIn;
                 if(orgId === "0" && orgName === "合计"){
-                    window.location.href="/statistics/teleStatement/firstRATableSum?orgId=" + this.export.orgId + "&startTime=" + startTime + "&endTime=" + endTime;
+                    window.location.href="/statistics/teleStatement/firstRATableSum?orgId=" + this.export.orgId + "&startTime=" + startTime + "&endTime=" + endTime + "&ti=" + ti;
                 }else if(orgId){
-                    window.location.href="/statistics/teleStatement/firstRATableTeam?orgId=" + orgId + "&startTime=" + startTime + "&endTime=" + endTime; 
+                    window.location.href="/statistics/teleStatement/firstRATableTeam?orgId=" + orgId + "&startTime=" + startTime + "&endTime=" + endTime+ "&ti=" + ti; 
                 }
             },
             minuteFormat (m) {
@@ -443,9 +445,8 @@
         created(){
             // 默认进入显示当天时间
             var today = new Date();
-            today.setTime(today.getTime());
-            var startTime = today.getFullYear()+"-"+ (today.getMonth()+1) + "-" + today.getDate()+" 00:00";
-            var endTime =today.getFullYear()+"-"+ (today.getMonth()+1) + "-" + today.getDate()+" 23:59";
+            var startTime = moment(today).format("YYYY-MM-DD 00:00");
+            var endTime = moment(today).format("YYYY-MM-DD 23:59");
             this.form.startTime=startTime;
             this.form.endTime=endTime; 
 
