@@ -1,5 +1,6 @@
 package com.kuaidao.manageweb.controller.visitrecord;
 
+import com.kuaidao.aggregation.dto.clue.ClueBasicDTO;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -13,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -286,5 +288,12 @@ public class BusinessVisitRecordController {
         return new JSONResult<BusVisitRecordRespDTO>().success(recordRespDTO);
     }
 
-
+    /**
+     * 未到访原因查看
+     */
+    @PostMapping("/notVisitReason")
+    @ResponseBody
+    public JSONResult<VisitNoRecordRespDTO> notVisitReason(@RequestBody IdEntityLong idEntityLong) {
+        return visitRecordFeignClient.findMaxNewNotVisitOne(idEntityLong);
+    }
 }
