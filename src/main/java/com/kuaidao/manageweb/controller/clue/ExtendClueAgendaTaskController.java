@@ -690,25 +690,25 @@ public class ExtendClueAgendaTaskController {
                     }
                   }
                 }
-                if (clueAgendaTaskDTO1.getDate() != null
-                        && !"".equals(clueAgendaTaskDTO1.getDate())) {
-                    // 去掉前后空格
-                    clueAgendaTaskDTO1.setDate(clueAgendaTaskDTO1.getDate().trim());
-                  //去掉前后空格后是否为空
-                  if (clueAgendaTaskDTO1.getDate() != null
-                      && !"".equals(clueAgendaTaskDTO1.getDate())) {
-                    try {
-                      Date date = format.parse(clueAgendaTaskDTO1.getDate());
-                    } catch (ParseException e) {
-                      islegal = false;
-                      if (StringUtils.isBlank(reasonInTime)) {
-                        reasonInTime.append("日期");
-                      } else {
-                        reasonInTime.append("、日期");
-                      }
-                    }
-                  }
-                }
+//                if (clueAgendaTaskDTO1.getDate() != null
+//                        && !"".equals(clueAgendaTaskDTO1.getDate())) {
+//                    // 去掉前后空格
+//                    clueAgendaTaskDTO1.setDate(clueAgendaTaskDTO1.getDate().trim());
+//                  //去掉前后空格后是否为空
+//                  if (clueAgendaTaskDTO1.getDate() != null
+//                      && !"".equals(clueAgendaTaskDTO1.getDate())) {
+//                    try {
+//                      Date date = format.parse(clueAgendaTaskDTO1.getDate());
+//                    } catch (ParseException e) {
+//                      islegal = false;
+//                      if (StringUtils.isBlank(reasonInTime)) {
+//                        reasonInTime.append("日期");
+//                      } else {
+//                        reasonInTime.append("、日期");
+//                      }
+//                    }
+//                  }
+//                }
                 if (clueAgendaTaskDTO1.getMessageTime1() != null
                         && !"".equals(clueAgendaTaskDTO1.getMessageTime1())) {
                     // 去掉前后空格
