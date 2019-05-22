@@ -137,11 +137,10 @@
         },
         methods: {            
             searchTable() { 
-                var startTime = this.form.startTime;
-                var endTime = this.form.endTime;
+                var startTime = new Date(this.form.startTime);
+                var endTime = new Date(this.form.endTime);
                 console.log(startTime,endTime);
                 if(endTime && startTime){
-                    console.log(startTime,endTime);
                     if(startTime>endTime){
                         this.$message({
                             message: '开始时间不能大于结束时间',
@@ -155,7 +154,7 @@
                     var beforeSixMonth = moment(date).format("YYYY-MM-DD 00:00");
                     var currentDateRes = new Date(currentDate);
                     var beforeSixMonthRes = new Date(beforeSixMonth);
-                    if(new Date(startTime) < beforeSixMonthRes || new Date(endTime) > currentDateRes){
+                    if(startTime < beforeSixMonthRes || endTime > currentDateRes){
                         this.$message({
                             message: '请选择近6个月内的时间',
                             type: 'warning'
@@ -354,12 +353,12 @@
         },
         created(){
             // 默认进入显示当天时间
-            // var today = new Date();
-            // today.setTime(today.getTime());
-            // var startTime = today.getFullYear()+"-"+ (today.getMonth()+1) + "-" + today.getDate()+" 00:00";
-            // var endTime =today.getFullYear()+"-"+ (today.getMonth()+1) + "-" + today.getDate()+" 23:59";
-            var startTime = "2019-01-01 01:01";
-            var endTime = "2019-01-01 01:02";
+            var today = new Date();
+            today.setTime(today.getTime());
+            var startTime = today.getFullYear()+"-"+ (today.getMonth()+1) + "-" + today.getDate()+" 00:00";
+            var endTime =today.getFullYear()+"-"+ (today.getMonth()+1) + "-" + today.getDate()+" 23:59";
+            // var startTime = "2019-01-01 01:01";
+            // var endTime = "2019-01-01 01:02";
             this.form.startTime=startTime;
             this.form.endTime=endTime; 
 
