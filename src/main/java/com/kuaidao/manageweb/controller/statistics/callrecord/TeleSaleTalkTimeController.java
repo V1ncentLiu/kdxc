@@ -1,4 +1,4 @@
-package com.kuaidao.manageweb.controller.statistics;
+package com.kuaidao.manageweb.controller.statistics.callrecord;
 
 import java.math.BigDecimal;
 import java.net.URLEncoder;
@@ -7,23 +7,35 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import com.kuaidao.common.constant.OrgTypeConstant;
+import com.kuaidao.common.constant.SystemCodeConstant;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.common.util.CommonUtil;
 import com.kuaidao.common.util.DateUtil;
 import com.kuaidao.common.util.ExcelUtil;
+import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
 import com.kuaidao.manageweb.feign.statistics.TeleTalkTimeFeignClient;
+import com.kuaidao.manageweb.util.CommUtil;
 import com.kuaidao.stastics.dto.callrecord.TeleSaleTalkTimeQueryDTO;
 import com.kuaidao.stastics.dto.callrecord.TeleTalkTimeRespDTO;
 import com.kuaidao.stastics.dto.callrecord.TotalDataDTO;
+import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
+import com.kuaidao.sys.dto.organization.OrganizationRespDTO;
+import com.kuaidao.sys.dto.user.UserInfoDTO;
 
 /**
  * 通话时长  
@@ -35,8 +47,13 @@ import com.kuaidao.stastics.dto.callrecord.TotalDataDTO;
 @RequestMapping("/callrecord/teleSaleTalkTime")
 public class TeleSaleTalkTimeController {
     
+    private static Logger logger = LoggerFactory.getLogger(TeleSaleTalkTimeController.class);
+    
     @Autowired
     TeleTalkTimeFeignClient teleTalkTimeFeignClient;
+    
+    @Autowired
+    OrganizationFeignClient organizationFeignClient;
     
     /**
      * 昨日 七天 查询
@@ -44,9 +61,31 @@ public class TeleSaleTalkTimeController {
      */
     @PostMapping("/listTeleGroupTalkTime")
     public JSONResult<Map<String,Object>> listTeleGroupTalkTime(@RequestBody TeleSaleTalkTimeQueryDTO teleSaleTalkTimeQueryDTO) {
+        HashMap<String,Object> resMap = new HashMap<>();
+        
+        Long orgId = teleSaleTalkTimeQueryDTO.getOrgId();
+        if(orgId==null) {
+            //查询当前组织机构下电销组织
+            UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+            JSONResult<List<OrganizationRespDTO>> orgGroupJr = getOrgGroupByOrgId(curLoginUser.getOrgId(),OrgTypeConstant.DXZ);
+            if (!JSONResult.SUCCESS.equals(orgGroupJr.getCode())) {
+                logger.info("listTeleGroupTalkTime get tele group param{{}},res{{}}",curLoginUser.getOrgId(),orgGroupJr);
+                return new JSONResult<Map<String,Object>>().fail(orgGroupJr.getCode(),orgGroupJr.getMsg());
+            }
+            List<OrganizationRespDTO> orgGroup = orgGroupJr.getData();
+            if(CollectionUtils.isEmpty(orgGroup)) {
+                resMap.put("totalData", null);
+                resMap.put("tableData", null);
+                return new JSONResult<Map<String,Object>>().success(resMap);
+            }
+            List<Long> orgIdList = orgGroup.parallelStream().map(OrganizationRespDTO::getId).collect(Collectors.toList());
+            teleSaleTalkTimeQueryDTO.setOrgIdList(orgIdList);
+        }
+    
+        
         JSONResult<PageBean<TeleTalkTimeRespDTO>> talkTimeList = teleTalkTimeFeignClient.listTeleGroupTalkTime(teleSaleTalkTimeQueryDTO);
         JSONResult<TeleTalkTimeRespDTO> totalTeleGroupTalkTime = teleTalkTimeFeignClient.totalTeleGroupTalkTime(teleSaleTalkTimeQueryDTO);
-        HashMap<String,Object> resMap = new HashMap<>();
+        
         resMap.put("totalData",totalTeleGroupTalkTime.getData());
         resMap.put("tableData", talkTimeList.getData());
         return new JSONResult<Map<String,Object>>().success(resMap);
@@ -57,6 +96,7 @@ public class TeleSaleTalkTimeController {
      * 昨日 七天
      * 电销组通话总时长统计 不分頁
     */
+   @RequiresPermissions("statistics:teleSaleTalkTime:export")
    @RequestMapping("/exportTeleGroupTalkTime")
    public void exportTeleGroupTalkTime(@RequestBody TeleSaleTalkTimeQueryDTO teleSaleTalkTimeQueryDTO,HttpServletResponse response) throws Exception {
        JSONResult<TotalDataDTO<TeleTalkTimeRespDTO, TeleTalkTimeRespDTO>> teleGroupTalkTimeJr = teleTalkTimeFeignClient.listTeleGroupTalkTimeNoPage(teleSaleTalkTimeQueryDTO);
@@ -118,6 +158,7 @@ public class TeleSaleTalkTimeController {
        totalList.add(formatPercent(totalTalkTimeDTO.getClueCallecdPrecent()));
        totalList.add(totalTalkTimeDTO.getValidCallTime());
        totalList.add(totalTalkTimeDTO.getUserAvgDayValidCallTime());
+       dataList.add(totalList);
     }
 
    /**
@@ -167,9 +208,10 @@ public class TeleSaleTalkTimeController {
 
 
 /**
-    * 昨日 七天 导出
+    * 合计 和个人  页面  导出
     * 电销顾问通话总时长统计 不分頁
    */
+ @RequiresPermissions("statistics:teleSaleTalkTime:export")
   @RequestMapping("/exportTeleSaleTalkTime")
   public void exportTeleSaleTalkTimeNoPage(@RequestBody TeleSaleTalkTimeQueryDTO teleSaleTalkTimeQueryDTO,HttpServletResponse response) throws Exception{
       JSONResult<List<TeleTalkTimeRespDTO>> teleSaleTalkTimeJr = teleTalkTimeFeignClient.listTeleSaleTalkTimeNoPage(teleSaleTalkTimeQueryDTO);
@@ -251,7 +293,7 @@ public class TeleSaleTalkTimeController {
     * 点击电销组 导出
     * 电销通话总时长统计 不分頁
    */
-    
+   @RequiresPermissions("statistics:teleSaleTalkTime:export")
    @RequestMapping("/exportGroupTeleSaleTalkTimeNoPage")
     public void exportGroupTeleSaleTalkTimeNoPage(@RequestBody TeleSaleTalkTimeQueryDTO teleSaleTalkTimeQueryDTO
             ,HttpServletResponse response) throws Exception{
@@ -308,5 +350,21 @@ public class TeleSaleTalkTimeController {
         return headTitleList;
     }
    
+    
+    /**
+     * 查询组织结构下 组织
+    * @param orgId
+    * @param orgType
+    * @return
+     */
+    private JSONResult<List<OrganizationRespDTO>> getOrgGroupByOrgId(Long orgId,Integer orgType) {
+        // 电销组
+        OrganizationQueryDTO busGroupReqDTO = new OrganizationQueryDTO();
+        busGroupReqDTO.setParentId(orgId);
+        busGroupReqDTO.setSystemCode(SystemCodeConstant.HUI_JU);
+        busGroupReqDTO.setOrgType(orgType);
+        JSONResult<List<OrganizationRespDTO>> orgJr = organizationFeignClient.queryOrgByParam(busGroupReqDTO);
+        return orgJr;
+    }
 
 }

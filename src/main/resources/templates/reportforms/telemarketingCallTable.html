@@ -15,8 +15,10 @@
     <el-row class="marginB20">
         <el-button type="primary" @click="searchYesterday">昨天</el-button>
         <el-button type="success" @click="searchWeek">近七天</el-button>
-        <el-button type="warning" @click="searchMonth">本月</el-button>  
+        <el-button type="warning" @click="searchMonth">本月</el-button> 
+         <shiro:hasPermission name="statistics:teleSaleTalkTime:export"> 
         <el-button type="danger" @click="exportRs">导出Excel报表</el-button>   
+        </shiro:hasPermission>
     </el-row>
     <div class="mainSearchBg">        
         <div class="mainSearchFormBox">
@@ -85,7 +87,7 @@
 <div th:include="_footer_include :: #jsLib"></div>
 </body>
 <script th:inline="javascript">
-    var queryOrg=[[${queryOrg}]]; // 电销组
+    var queryOrg=[[${teleGroupList}]]; // 电销组
     console.log(queryOrg,'电销组');
     var mainDivVM = new Vue({
         el: '#maindiv',
@@ -206,10 +208,10 @@
                         var tableData = resobjData.tableData;
                         mainDivVM.tableData = tableData.data;
                         // 假数据
-                        tableData.data.map( (item,index)=>{
-                            item.orgName = '假数据电销组' + (index + 1);
-                            return item;
-                        })
+                        // tableData.data.map( (item,index)=>{
+                        //     item.orgName = '假数据电销组' + (index + 1);
+                        //     return item;
+                        // })
 
                         if(tableData.data && tableData.data.length){
                             var totalData = resobjData.totalData;
@@ -273,7 +275,7 @@
             },
             percentFormat (row, column) {
                 var percent = row[column.property];
-                percent = parseInt(percent) * 100 + "%";
+                percent = percent * 100 + "%";
                 return percent;
             },
             timeFormat (row, column) { // 时间格式化：时分秒
@@ -353,11 +355,9 @@
         },
         created(){
             // 默认进入显示当天时间
-            // var today = new Date();
-            // var startTime = moment(today).format("YYYY-MM-DD 00:00");
-            // var endTime = moment(today).format("YYYY-MM-DD 23:59");
-            var startTime = "2019-01-01 01:01";
-            var endTime = "2019-01-01 01:02";
+            var today = new Date();
+            var startTime = moment(today).format("YYYY-MM-DD 00:00");
+            var endTime = moment(today).format("YYYY-MM-DD 23:59");
             this.form.startTime=startTime;
             this.form.endTime=endTime; 
 
