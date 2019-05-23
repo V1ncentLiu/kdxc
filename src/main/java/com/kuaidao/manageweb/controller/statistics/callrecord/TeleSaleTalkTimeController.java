@@ -1,4 +1,4 @@
-package com.kuaidao.manageweb.controller.statistics;
+package com.kuaidao.manageweb.controller.statistics.callrecord;
 
 import java.math.BigDecimal;
 import java.net.URLEncoder;
@@ -12,12 +12,14 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import com.itextpdf.text.pdf.PdfStructTreeController.returnType;
 import com.kuaidao.common.constant.OrgTypeConstant;
 import com.kuaidao.common.constant.SystemCodeConstant;
 import com.kuaidao.common.entity.JSONResult;
@@ -45,6 +47,8 @@ import com.kuaidao.sys.dto.user.UserInfoDTO;
 @RequestMapping("/callrecord/teleSaleTalkTime")
 public class TeleSaleTalkTimeController {
     
+    private static Logger logger = LoggerFactory.getLogger(TeleSaleTalkTimeController.class);
+    
     @Autowired
     TeleTalkTimeFeignClient teleTalkTimeFeignClient;
     
@@ -62,9 +66,10 @@ public class TeleSaleTalkTimeController {
         Long orgId = teleSaleTalkTimeQueryDTO.getOrgId();
         if(orgId==null) {
             //查询当前组织机构下电销组织
-          /*  UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+            UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
             JSONResult<List<OrganizationRespDTO>> orgGroupJr = getOrgGroupByOrgId(curLoginUser.getOrgId(),OrgTypeConstant.DXZ);
             if (!JSONResult.SUCCESS.equals(orgGroupJr.getCode())) {
+                logger.info("listTeleGroupTalkTime get tele group param{{}},res{{}}",curLoginUser.getOrgId(),orgGroupJr);
                 return new JSONResult<Map<String,Object>>().fail(orgGroupJr.getCode(),orgGroupJr.getMsg());
             }
             List<OrganizationRespDTO> orgGroup = orgGroupJr.getData();
@@ -74,7 +79,7 @@ public class TeleSaleTalkTimeController {
                 return new JSONResult<Map<String,Object>>().success(resMap);
             }
             List<Long> orgIdList = orgGroup.parallelStream().map(OrganizationRespDTO::getId).collect(Collectors.toList());
-            teleSaleTalkTimeQueryDTO.setOrgIdList(orgIdList);*/
+            teleSaleTalkTimeQueryDTO.setOrgIdList(orgIdList);
         }
     
         
@@ -91,6 +96,7 @@ public class TeleSaleTalkTimeController {
      * 昨日 七天
      * 电销组通话总时长统计 不分頁
     */
+   @RequiresPermissions("statistics:teleSaleTalkTime:export")
    @RequestMapping("/exportTeleGroupTalkTime")
    public void exportTeleGroupTalkTime(@RequestBody TeleSaleTalkTimeQueryDTO teleSaleTalkTimeQueryDTO,HttpServletResponse response) throws Exception {
        JSONResult<TotalDataDTO<TeleTalkTimeRespDTO, TeleTalkTimeRespDTO>> teleGroupTalkTimeJr = teleTalkTimeFeignClient.listTeleGroupTalkTimeNoPage(teleSaleTalkTimeQueryDTO);
@@ -202,9 +208,10 @@ public class TeleSaleTalkTimeController {
 
 
 /**
-    * 昨日 七天 导出
+    * 合计 和个人  页面  导出
     * 电销顾问通话总时长统计 不分頁
    */
+ @RequiresPermissions("statistics:teleSaleTalkTime:export")
   @RequestMapping("/exportTeleSaleTalkTime")
   public void exportTeleSaleTalkTimeNoPage(@RequestBody TeleSaleTalkTimeQueryDTO teleSaleTalkTimeQueryDTO,HttpServletResponse response) throws Exception{
       JSONResult<List<TeleTalkTimeRespDTO>> teleSaleTalkTimeJr = teleTalkTimeFeignClient.listTeleSaleTalkTimeNoPage(teleSaleTalkTimeQueryDTO);
@@ -286,7 +293,7 @@ public class TeleSaleTalkTimeController {
     * 点击电销组 导出
     * 电销通话总时长统计 不分頁
    */
-    
+   @RequiresPermissions("statistics:teleSaleTalkTime:export")
    @RequestMapping("/exportGroupTeleSaleTalkTimeNoPage")
     public void exportGroupTeleSaleTalkTimeNoPage(@RequestBody TeleSaleTalkTimeQueryDTO teleSaleTalkTimeQueryDTO
             ,HttpServletResponse response) throws Exception{
