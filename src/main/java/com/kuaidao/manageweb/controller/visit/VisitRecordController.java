@@ -229,9 +229,9 @@ public class VisitRecordController {
         Long orgId = curLoginUser.getOrgId();
         List<RoleInfoDTO> roleList = curLoginUser.getRoleList();
         RoleInfoDTO roleInfoDTO = roleList.get(0);
-        String roleName = roleInfoDTO.getRoleName();
-        if (RoleCodeEnum.SWDQZJ.value().equals(roleName)
-                || RoleCodeEnum.SWZJ.value().equals(roleName)) {
+        String roleCode = roleInfoDTO.getRoleCode();
+        if (RoleCodeEnum.SWDQZJ.name().equals(roleCode)
+                || RoleCodeEnum.SWZJ.name().equals(roleCode)) {
             Long busManagerId = visitRecordReqDTO.getBusManagerId();
             if (busManagerId == null) {
                 List<Long> accountIdList = getAccountIdList(orgId, RoleCodeEnum.SWJL.name());
