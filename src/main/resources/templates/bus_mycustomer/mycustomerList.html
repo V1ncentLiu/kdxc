@@ -104,7 +104,7 @@
                 </div>
             </el-form>
         </div>
-        <el-table :data="tableData" border tooltip-effect="dark" style="width:100%" ref="multipleTable"
+        <el-table :data="tableData" border tooltip-effect="dark" style="width:100%" ref="multipleTable" @row-click="clickRow"
                   @row-dblclick="showCustomerDetail" @selection-change="handleSelectionChange">
             <el-table-column type="selection" width="55" prop="clueId"></el-table-column>
             <el-table-column prop="xh" label="序号" width="60" type="index" align="center"></el-table-column>
@@ -2134,6 +2134,9 @@
             },
         },
         methods: {
+            clickRow(row){
+                this.$refs.multipleTable.toggleRowSelection(row)
+            },
             formSigningAmountPerformance() {
                 var aone = parseFloat(this.formSigning.amountReceived);
                 var atwo = parseFloat(this.formSigning.firstToll);
@@ -2325,8 +2328,9 @@
                     }
                 });
             },
-            showCustomerDetail(row, column) { // 客户详情
-                window.location.href = '/bus/BusinessCustomer/viewCustomerInfo?clueId=' + row.clueId;
+            showCustomerDetail(row, column) { // 客户详情改成编辑（客户维护）
+                // window.location.href = '/bus/BusinessCustomer/viewCustomerInfo?clueId=' + row.clueId;
+                window.location.href = '/bus/BusinessCustomer/editCustomerInfo?clueId=' + row.clueId;
             },
             editCustomerDetail(row, column) { // 客户维护
                 window.location.href = '/bus/BusinessCustomer/editCustomerInfo?clueId=' + row.clueId;
