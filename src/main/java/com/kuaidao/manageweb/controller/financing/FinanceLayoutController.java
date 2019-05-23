@@ -77,8 +77,10 @@ public class FinanceLayoutController {
             request.setAttribute("projectList", proJson.getData());
         }
         // 查询所有省
-        JSONResult<List<SysRegionDTO>> getproviceList = sysRegionFeignClient.getproviceList();
-        request.setAttribute("provinceList", getproviceList.getData());
+        JSONResult<List<SysRegionDTO>> getProviceList = sysRegionFeignClient.getproviceList();
+        if (getProviceList.getCode().equals(JSONResult.SUCCESS)) {
+            request.setAttribute("provinceList", getProviceList.getData());
+        }
         List<UserInfoDTO> userList = getUserList();
         request.setAttribute("swList", swList.getData());
         request.setAttribute("userList", userList);
@@ -180,5 +182,5 @@ public class FinanceLayoutController {
         return financeLayoutFeignClient.deleFinanceLayout(financeLayoutDTO);
     }
 
- 
+
 }
