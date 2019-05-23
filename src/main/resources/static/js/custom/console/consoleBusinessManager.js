@@ -108,10 +108,12 @@ var mainDivVM = new Vue({
             ],
         },
         notVisitFlag:{
-            clueId:"",
-            str:"",
-            clueIds:[],
-            notVisitReason:""
+            clueId: "",
+            str: "",
+            clueIds: [],
+            notVisitReason: "",
+            createUserName:"",
+            notVisitTime:""
         },
         queryForm:{
             visitStatus:"",
@@ -927,7 +929,10 @@ var mainDivVM = new Vue({
             mainDivVM.notVisitFlag.clueId = row.clueId;
             axios.post('/busVisitRecord/one',param).then(function (response) {
                 mainDivVM.notVisitdDialogVisible = true;
+                console.log( response.data.data)
                 mainDivVM.notVisitFlag.str = response.data.data.notVisitReason
+                mainDivVM.notVisitFlag.createUserName = response.data.data.createUserName
+                mainDivVM.notVisitFlag.notVisitTime = response.data.data.createTime
             });
         },
         showNotVisitReason1(row){
@@ -936,7 +941,10 @@ var mainDivVM = new Vue({
             mainDivVM.notVisitFlag.clueId = row.clueId;
             axios.post('/busVisitRecord/one',param).then(function (response) {
                 mainDivVM.notVisitdDialogVisible1 = true;
+                console.log( response.data.data)
                 mainDivVM.notVisitFlag.str = response.data.data.notVisitReason
+                mainDivVM.notVisitFlag.createUserName = response.data.data.createUserName
+                mainDivVM.notVisitFlag.notVisitTime = response.data.data.createTime
             });
         },
         showVisitRecord(row){
