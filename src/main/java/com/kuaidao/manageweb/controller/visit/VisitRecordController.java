@@ -231,7 +231,7 @@ public class VisitRecordController {
         RoleInfoDTO roleInfoDTO = roleList.get(0);
         String roleCode = roleInfoDTO.getRoleCode();
         if (RoleCodeEnum.SWDQZJ.name().equals(roleCode)
-                || RoleCodeEnum.SWZJ.value().equals(roleCode)) {
+                || RoleCodeEnum.SWZJ.name().equals(roleCode)) {
             Long busManagerId = visitRecordReqDTO.getBusManagerId();
             if (busManagerId == null) {
                 List<Long> accountIdList = getAccountIdList(orgId, RoleCodeEnum.SWJL.name());
