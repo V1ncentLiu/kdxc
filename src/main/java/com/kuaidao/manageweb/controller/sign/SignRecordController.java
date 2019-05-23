@@ -199,9 +199,9 @@ public class SignRecordController {
     Long orgId = curLoginUser.getOrgId();
     List<RoleInfoDTO> roleList = curLoginUser.getRoleList();
     RoleInfoDTO roleInfoDTO = roleList.get(0);
-    String roleName = roleInfoDTO.getRoleName();
-    if (RoleCodeEnum.SWDQZJ.value().equals(roleName)
-        || RoleCodeEnum.SWZJ.value().equals(roleName)) {
+    String roleCode = roleInfoDTO.getRoleCode();
+    if (RoleCodeEnum.SWDQZJ.name().equals(roleCode)
+        || RoleCodeEnum.SWZJ.name().equals(roleCode)) {
       Long businessManagerId = reqDTO.getBusinessManagerId();
       if (businessManagerId != null) {
         List<Long> businessManagerIdList = new ArrayList<>();

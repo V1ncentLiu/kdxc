@@ -113,8 +113,8 @@ public class TruckingOrderController {
         List<RoleInfoDTO> roleList = curLoginUser.getRoleList();
         if (roleList != null && roleList.size() != 0) {
             RoleInfoDTO roleInfoDTO = roleList.get(0);
-            String roleName = roleInfoDTO.getRoleName();
-            if (RoleCodeEnum.SWDQZJ.value().equals(roleName)) {
+            String roleCode = roleInfoDTO.getRoleCode();
+            if (RoleCodeEnum.SWDQZJ.name().equals(roleCode)) {
                 UserOrgRoleReq req = new UserOrgRoleReq();
                 req.setOrgId(orgId);
                 req.setRoleCode(RoleCodeEnum.SWZJ.name());
@@ -137,7 +137,7 @@ public class TruckingOrderController {
                     reqDTO.setAccountIdList(accountIdList);
                 }
 
-            } else if (RoleCodeEnum.SWZJ.value().equals(roleName)) {// 商务总监
+            } else if (RoleCodeEnum.SWZJ.name().equals(roleCode)) {// 商务总监
                 List<Long> idList = new ArrayList<>();
                 idList.add(curLoginUser.getId());
                 reqDTO.setBusDirectorIdList(idList);
@@ -182,8 +182,8 @@ public class TruckingOrderController {
         List<RoleInfoDTO> roleList = curLoginUser.getRoleList();
         if (roleList != null && roleList.size() != 0) {
             RoleInfoDTO roleInfoDTO = roleList.get(0);
-            String roleName = roleInfoDTO.getRoleName();
-            if (RoleCodeEnum.SWDQZJ.value().equals(roleName)) {
+            String roleCode = roleInfoDTO.getRoleCode();
+            if (RoleCodeEnum.SWDQZJ.name().equals(roleCode)) {
                 UserOrgRoleReq req = new UserOrgRoleReq();
                 req.setOrgId(orgId);
                 req.setRoleCode(RoleCodeEnum.SWZJ.name());
@@ -206,7 +206,7 @@ public class TruckingOrderController {
                     reqDTO.setAccountIdList(accountIdList);
                 }
 
-            } else if (RoleCodeEnum.SWZJ.value().equals(roleName)) {// 商务总监
+            } else if (RoleCodeEnum.SWZJ.name().equals(roleCode)) {// 商务总监
                 List<Long> idList = new ArrayList<>();
                 idList.add(curLoginUser.getId());
                 reqDTO.setBusDirectorIdList(idList);
