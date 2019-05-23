@@ -8,6 +8,9 @@
         .el-input{
             width: 90%;
         }
+        .borderboxInfo .el-row{font-size: 14px;}
+        .borderboxInfo .el-row .el-col{margin-bottom: 10px;width: 357px;}
+        .borderboxInfo .el-row .el-col span:first-child{width:110px;text-align: right;float: left;}
     </style>
 </head>
 <body>
@@ -15,12 +18,69 @@
 <div id="businessContractRecord" class="businessContractRecord mainPadding" style="display: none;">
     <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
         <el-breadcrumb-item>Home</el-breadcrumb-item>
-        <el-breadcrumb-item>电销</el-breadcrumb-item>
+        <el-breadcrumb-item>电销管理</el-breadcrumb-item>
         <el-breadcrumb-item>我的客户</el-breadcrumb-item>
     </el-breadcrumb>
     <div class="mainSearchBg">
         <div class="fs14 marginB10">签约单基本信息</div>
-        <el-table ref="recordTableInfo" tooltip-effect="dark" style="width: 100%;margin-bottom: 20px;" border :data="recordTableInfo">
+        <div class="borderbox padding20 marginB20 borderboxInfo">
+            <el-row>
+                <el-col>
+                    <span>签约单编号：</span><span>{{signOrderBaseInfo[0].signNo}}</span>
+                </el-col>
+                <el-col>
+                    <span>客户姓名：</span><span>{{signOrderBaseInfo[0].customerName}}</span>
+                </el-col>
+                <el-col>
+                    <span>客户身份证号：</span><span>{{signOrderBaseInfo[0].idCard}}</span>
+                </el-col>            
+                <el-col>
+                    <span>客户联系电话：</span><span>{{signOrderBaseInfo[0].phone}}</span>
+                </el-col>
+                <el-col>
+                    <span>签约餐饮公司：</span><span>{{signOrderBaseInfo[0].signCompanyName}}</span>
+                </el-col>
+                <el-col>
+                    <span>签约项目：</span><span>{{signOrderBaseInfo[0].signProjectName}}</span>
+                </el-col>
+                <el-col>
+                    <span>签约省份：</span><span>{{signOrderBaseInfo[0].signProvince}}</span>
+                </el-col>
+                <el-col>
+                    <span>签约城市：</span><span>{{signOrderBaseInfo[0].signCity}}</span>
+                </el-col>
+                <el-col>
+                    <span>签约区／县：</span><span>{{signOrderBaseInfo[0].signDictrict}}</span>
+                </el-col>
+                <el-col>
+                    <span>签约店型：</span><span>{{signOrderBaseInfo[0].signShopTypeName}}</span>
+                </el-col>
+                <el-col>
+                    <span>应收金额：</span><span>{{signOrderBaseInfo[0].amountReceivable}}</span>
+                </el-col>
+                <el-col>
+                    <span>路费：</span><span>{{signOrderBaseInfo[0].firstToll}}</span>
+                </el-col>
+                <el-col>
+                    <span>优惠金额：</span><span>{{signOrderBaseInfo[0].preferentialAmount}}</span>
+                </el-col>
+                <el-col>
+                    <span>赠送金额：</span><span>{{signOrderBaseInfo[0].giveAmount}}</span>
+                </el-col>
+                <el-col>
+                    <span>赠送类型：</span><span>{{signOrderBaseInfo[0].giveType}}</span>
+                </el-col>              
+                <el-col>
+                    <span>签约类型：</span>
+                    <span>{{this.formatTypeFn(signOrderBaseInfo[0].signType)}}</span>
+                </el-col>
+                <el-col>
+                    <span>是否远程签约：</span>
+                    <span>{{this.formatRemoteFn(signOrderBaseInfo[0].isRemoteSign)}}</span>
+                </el-col>
+            </el-row>
+        </div>
+        <!-- <el-table ref="recordTableInfo" tooltip-effect="dark" style="width: 100%;margin-bottom: 20px;" border :data="recordTableInfo">
             <el-table-column align="center" prop="signNo" label="签约单编号"></el-table-column>
             <el-table-column align="center" prop="customerName" label="客户姓名"></el-table-column>
             <el-table-column align="center" prop="idCard" label="客户身份证号" width="150"></el-table-column>
@@ -57,7 +117,7 @@
                     </div>
                 </template>
             </el-table-column>
-        </el-table>
+        </el-table> -->
         <div v-show="paymentDetailsShow">
             <div class="fs14 marginB10">全款付款明细</div>
             <el-table
@@ -184,7 +244,7 @@
             </el-table>
         </div>
         <div v-show="paymentDetailsShow4">
-            <div class="fs16 marginB20">尾款付款明细<!--<el-button @click="recordDialogClick(3)" type="primary" size="small" class="f-fr">添加付款</el-button>--></div>
+            <div class="fs14 marginB20">尾款付款明细<!--<el-button @click="recordDialogClick(3)" type="primary" size="small" class="f-fr">添加付款</el-button>--></div>
             <el-table
                 ref="recordTable"
                 tooltip-effect="dark"
@@ -304,11 +364,12 @@
     }else {
         refundDetailsShow = false;
     }
-
+    console.log(signData)
     // 查询 模块
     var mainDivVM = new Vue({
         el: '#businessContractRecord',
         data: {
+            signOrderBaseInfo:signData,//签约单基本信息
         	giveTypeList:giveTypeList,
             addSignButtonAble:false,
             addPayDetailButtonAble:false,
@@ -428,6 +489,22 @@
             
         },
         methods: {
+            formatTypeFn(value){//
+                if(value=="1"){
+                    value="一次性全款"
+                }else if(value=="2"){
+                   value="先交定金"
+                }
+                return value;
+            },
+            formatRemoteFn(value){//
+                if(value=="0"){
+                    value="否"
+                }else if(value=="1"){
+                   value="是"
+                }
+                return value;
+            },
         	transGiveType(row, column, cellValue, index) {
         		
             	  var text="";

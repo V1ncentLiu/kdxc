@@ -104,11 +104,12 @@
                 </div>
             </el-form>
         </div>
-        <el-table :data="tableData" border tooltip-effect="dark" style="width:100%" ref="multipleTable"
+        <el-table :data="tableData" border tooltip-effect="dark" style="width:100%" ref="multipleTable" @row-click="clickRow"
                   @row-dblclick="showCustomerDetail" @selection-change="handleSelectionChange">
             <el-table-column type="selection" width="55" prop="clueId"></el-table-column>
             <el-table-column prop="xh" label="序号" width="60" type="index" align="center"></el-table-column>
             <el-table-column prop="reserveTime" label="邀约来访时间" sortable align="center" width="180px"></el-table-column>
+            <el-table-column prop="isInviteLetter" label="是否有邀请函" align="center" width="120px" :formatter="transformLetter" ></el-table-column>
             <el-table-column prop="cusName" label="客户姓名" align="center" width="200">
                 <template slot-scope="scope">
                     <el-button size="mini" type="text" @click="editCustomerDetail(scope.row)">{{scope.row.cusName}}
@@ -2133,6 +2134,9 @@
             },
         },
         methods: {
+            clickRow(row){
+                this.$refs.multipleTable.toggleRowSelection(row)
+            },
             formSigningAmountPerformance() {
                 var aone = parseFloat(this.formSigning.amountReceived);
                 var atwo = parseFloat(this.formSigning.firstToll);
@@ -2205,6 +2209,16 @@
                 }
 
                 return resVal;
+            },
+            //是否有邀请函
+            transformLetter(row, column, cellValue, index) {
+                var text="";
+                if(cellValue == "0"){
+                    text="否"
+                }else if(cellValue == "1"){
+                    text="是"
+                }
+                return text;
             },
             setAddPerformanceAmount(value) {
                 this.formSigning.performanceAmount = this.formSigning.amountReceived
@@ -2314,8 +2328,9 @@
                     }
                 });
             },
-            showCustomerDetail(row, column) { // 客户详情
-                window.location.href = '/bus/BusinessCustomer/viewCustomerInfo?clueId=' + row.clueId;
+            showCustomerDetail(row, column) { // 客户详情改成编辑（客户维护）
+                // window.location.href = '/bus/BusinessCustomer/viewCustomerInfo?clueId=' + row.clueId;
+                window.location.href = '/bus/BusinessCustomer/editCustomerInfo?clueId=' + row.clueId;
             },
             editCustomerDetail(row, column) { // 客户维护
                 window.location.href = '/bus/BusinessCustomer/editCustomerInfo?clueId=' + row.clueId;
