@@ -376,13 +376,12 @@
                     </el-button>
                 </el-col>
                 <el-col :span="4" :offset="4" class="f-tar">
-                    <el-button size="small" type="primary" @click="lineFormShowFun">添加
+                    <el-button size="small" type="primary" @click="lineFormShowFun"><span v-if="lineFormShow">取消添加</span><span v-else>添加</span>
                     </el-button> <!-- <el-button size="small" type="primary" @click="addRecord">添加</el-button> -->
                 </el-col>
             </el-row>
             <el-row>
-                <el-table ref="multipleTable" :data="tableDataC2" tooltip-effect="dark" style="width: 100%" border
-                          @selection-change="handleTrackingSelection">
+                <el-table ref="multipleTable" :data="tableDataC2" tooltip-effect="dark" style="width: 100%" border @selection-change="handleTrackingSelection">
                     <el-table-column prop="id" type="selection" min-width="10%" @selection-change="handleTrackingSelection" align="center"></el-table-column>
                     <el-table-column prop="callTime" label="拨打时间" align="center" min-width="12%">
                     </el-table-column>
@@ -419,8 +418,7 @@
                     <el-table-column prop="createUserName" label="创建人" align="center" min-width="10%">
                     </el-table-column>
                     <div slot="append" v-show="lineFormShow" class="lineFormShow">
-                        <el-form :inline="true" :model="formInline" class="demo-form-inline" :rules="rules"
-                                 ref="LineRuleForm">
+                        <el-form :inline="true" :model="formInline" class="demo-form-inline" :rules="rules" ref="LineRuleForm">
                             <div style="float: left; width: 48px;">&nbsp;</div>
                             <el-form-item prop="callTime" class="lineForm_callTime" style="width: 14.5%;float: left;">
                                 <el-date-picker v-model="formInline.callTime" type="datetime" placeholder="选择日期时间" style="width: 90%;display: block;margin:0 auto;"></el-date-picker>
@@ -1136,7 +1134,11 @@
                 addCustomerVM.uploadParamData.realName= file.name
           },
             lineFormShowFun() {
-                this.lineFormShow = true
+                if(this.lineFormShow){
+                    this.lineFormShow = false
+                }else{
+                    this.lineFormShow = true
+                }                
                 // 跟进记录初始化
                 this.$refs.LineRuleForm.resetFields(); //移除校验结果并重置字段值
                 this.formInline.customerStatus = '';
