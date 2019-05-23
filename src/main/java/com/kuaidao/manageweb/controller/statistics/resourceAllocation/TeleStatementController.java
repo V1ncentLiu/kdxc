@@ -13,6 +13,7 @@ import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
 import com.kuaidao.manageweb.feign.statistics.resourceAllocation.StatisticsFeignClient;
 import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
 import com.kuaidao.manageweb.util.CommUtil;
+import com.kuaidao.stastics.dto.callrecord.TeleSaleTempDTO;
 import com.kuaidao.stastics.dto.resourceAllocation.ResourceAllocationDto;
 import com.kuaidao.stastics.dto.resourceAllocation.ResourceAllocationQueryDto;
 import com.kuaidao.sys.dto.customfield.CustomFieldQueryDTO;
@@ -451,12 +452,12 @@ public class TeleStatementController {
      */
     @RequestMapping("/telemarketingCallTableSum")
     public String telemarketingCallTableSum(Long orgId,Long startTime,Long endTime,Long userId,HttpServletRequest request) {
-        Map<String, Object> paramMap = new HashMap<>();
-        paramMap.put("orgId", orgId);
-        paramMap.put("startTime", startTime);
-        paramMap.put("endTime", endTime);
-        paramMap.put("userId", userId);
-        request.setAttribute("parentParam",paramMap);
+        TeleSaleTempDTO teleSaleTempDTO = new TeleSaleTempDTO();
+        teleSaleTempDTO.setStartTime(startTime);
+        teleSaleTempDTO.setEndTime(endTime);
+        teleSaleTempDTO.setOrgId(orgId);
+        teleSaleTempDTO.setUserId(userId);
+        request.setAttribute("parentParam",teleSaleTempDTO);
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
         request.setAttribute("teleGroupList",getOrgGroupByOrgId(curLoginUser.getOrgId(),OrgTypeConstant.DXZ));
         return "reportforms/telemarketingCallTableSum";
@@ -470,12 +471,12 @@ public class TeleStatementController {
      */
     @RequestMapping("/telemarketingCallTableTeam")
     public String telemarketingCallTableTeam(Long orgId,Long startTime,Long endTime,Long userId,HttpServletRequest request) {
-        Map<String, Object> paramMap = new HashMap<>();
-        paramMap.put("orgId", orgId);
-        paramMap.put("startTime", startTime);
-        paramMap.put("endTime", endTime);
-        paramMap.put("userId", userId);
-        request.setAttribute("parentParam",paramMap);
+        TeleSaleTempDTO teleSaleTempDTO = new TeleSaleTempDTO();
+        teleSaleTempDTO.setStartTime(startTime);
+        teleSaleTempDTO.setEndTime(endTime);
+        teleSaleTempDTO.setOrgId(orgId);
+        teleSaleTempDTO.setUserId(userId);
+        request.setAttribute("parentParam",teleSaleTempDTO);
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
         request.setAttribute("teleGroupList",getOrgGroupByOrgId(curLoginUser.getOrgId(),OrgTypeConstant.DXZ));
         return "reportforms/telemarketingCallTableTeam";
@@ -488,12 +489,12 @@ public class TeleStatementController {
      */
     @RequestMapping("/telemarketingCallTablePerson")
     public String telemarketingCallTablePerson(Long orgId,Long startTime,Long endTime,Long userId,HttpServletRequest request) {
-        Map<String, Object> paramMap = new HashMap<>();
-        paramMap.put("orgId", orgId);
-        paramMap.put("startTime", startTime);
-        paramMap.put("endTime", endTime);
-        paramMap.put("userId", userId);
-        request.setAttribute("parentParam",paramMap);
+        TeleSaleTempDTO teleSaleTempDTO = new TeleSaleTempDTO();
+        teleSaleTempDTO.setStartTime(startTime);
+        teleSaleTempDTO.setEndTime(endTime);
+        teleSaleTempDTO.setOrgId(orgId);
+        teleSaleTempDTO.setUserId(userId);
+        request.setAttribute("parentParam",teleSaleTempDTO);
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
         request.setAttribute("teleGroupList",getOrgGroupByOrgId(curLoginUser.getOrgId(),OrgTypeConstant.DXZ));
         return "reportforms/telemarketingCallTablePerson";
