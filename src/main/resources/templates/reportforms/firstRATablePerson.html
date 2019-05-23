@@ -29,7 +29,7 @@
                     <el-date-picker format="yyyy-MM-dd HH:mm" v-model="form.endTime" type="datetime" value-format="yyyy-MM-dd HH:mm" placeholder="选择日期"></el-date-picker>
                 </el-form-item>
                 <el-form-item label="电销组:">  
-                    <el-select v-model="form.teleorg" placeholder="电销组" style="width: 100%;" clearable @change="currentTelSale" filterable:disabled="isDisabled">
+                    <el-select v-model="form.teleorg" placeholder="电销组" style="width: 100%;" clearable @change="currentTelSale" filterable :disabled="isDisabled">
                         <el-option
                             v-for="item in orgTeleArr"
                             :key="item.id"
@@ -74,8 +74,7 @@
                 tooltip-effect="dark"
                 style="width: 100%"
                 border
-                :data="tableData"
-                >
+                :data="tableData">
                 <el-table-column align="center" type="index" label="序号" width="55"></el-table-column>
                 <!-- 日期列 -->
                 <el-table-column align="center" :key="index" :prop="item.fieldCode" :label="item.displayName" v-for="(item,key,index) in tableColums" v-if="item.fieldCode == 'timeId'" :formatter="dateFormat">
@@ -267,7 +266,6 @@
                 tableColums: [],//表头list
                 orgTeleArr:queryOrg,//电销组
                 busSaleArr:[],//创业顾问
-                distributionSource:distributionSource,//分配来源
                 
             }             
         },
@@ -320,7 +318,8 @@
                 param.pageNum =  this.pager.currentPage;
                 param.startTime = this.minuteFormat(startTime);
                 param.endTime =  this.minuteFormat(endTime);
-                param.org_Id =  this.form.org_Id;//电销组
+                param.orgId =  this.form.orgId;//电销组
+                param.userId =  this.form.userId;
                 console.log(param);
                 // this.loading=true;
                 // axios.post('/statistics/teleStatement/getResourceAllocationPersionTable',param).then(function (response) { 
@@ -432,6 +431,7 @@
                 param.startTime = this.export.startTime;
                 param.endTime =  this.export.endTime;
                 param.orgId =  this.export.orgId; 
+                param.userId =  this.export.userId; 
                 axios.post('/callrecord/teleSaleTalkTime/exportTeleGroupTalkTime',param,{responseType:'blob'})
                     .then(function (response) {
                         console.log(response);
@@ -450,11 +450,13 @@
         },
         created(){      
             var today = new Date();
-            today.setTime(today.getTime());
-            var startTime = today.getFullYear()+"-"+ (today.getMonth()+1) + "-" + today.getDate()+" 00:00";
-            var endTime =today.getFullYear()+"-"+ (today.getMonth()+1) + "-" + today.getDate()+" 23:59";
+            var startTime = moment(today).format("YYYY-MM-DD 00:00");
+            var endTime = moment(today).format("YYYY-MM-DD 23:59");
             this.form.startTime=startTime;
-            this.form.endTime=endTime;      
+            this.form.endTime=endTime; 
+
+            this.export.startTime = this.minuteFormat(this.form.startTime);
+            this.export.endTime = this.minuteFormat(this.form.endTime);    
             this.searchTable();
         },
         mounted(){

@@ -259,7 +259,6 @@
                 tableColums: [],//表头list
                 orgTeleArr:queryOrg,//电销组
                 busSaleArr:[],//创业顾问
-                distributionSource:distributionSource,//分配来源
                
             }             
         },
@@ -314,6 +313,7 @@
                 param.startTime = this.minuteFormat(startTime);
                 param.endTime =  this.minuteFormat(endTime);
                 param.orgId =  this.form.orgId;//电销组
+                param.userId =  this.form.userId;
                 // this.loading=true;
                 // axios.post('/statistics/teleStatement/getResourceAllocationPersionTable',param).then(function (response) { 
                 //     if(!response){
@@ -358,7 +358,6 @@
             },
             gotoPerson (item) {
                 var userId = item.userId;
-                console.log(userId);
                 var startTime = this.export.startTime;
                 var endTime = this.export.endTime;
                 var orgId = this.export.orgId;
@@ -423,6 +422,7 @@
                 param.startTime = this.export.startTime;
                 param.endTime =  this.export.endTime;
                 param.orgId =  this.export.orgId; 
+                param.userId =  this.export.userId;
                 axios.post('/callrecord/teleSaleTalkTime/exportTeleGroupTalkTime',param,{responseType:'blob'})
                     .then(function (response) {
                         console.log(response);
@@ -441,11 +441,13 @@
         },
         created(){  
             var today = new Date();
-            today.setTime(today.getTime());
-            var startTime = today.getFullYear()+"-"+ (today.getMonth()+1) + "-" + today.getDate()+" 00:00";
-            var endTime =today.getFullYear()+"-"+ (today.getMonth()+1) + "-" + today.getDate()+" 23:59";
+            var startTime = moment(today).format("YYYY-MM-DD 00:00");
+            var endTime = moment(today).format("YYYY-MM-DD 23:59");
             this.form.startTime=startTime;
-            this.form.endTime=endTime;          
+            this.form.endTime=endTime; 
+
+            this.export.startTime = this.minuteFormat(this.form.startTime);
+            this.export.endTime = this.minuteFormat(this.form.endTime);          
             this.searchTable();
         },
         mounted(){
