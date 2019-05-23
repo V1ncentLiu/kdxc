@@ -201,6 +201,8 @@ public class ClueRepetitionController {
     @ResponseBody
     @LogRecord(description = "重单审核",operationType = LogRecord.OperationType.UPDATE,menuName = MenuEnum.REPETITION)
     public JSONResult updatePetitionById(HttpServletRequest request,@RequestBody ClueRepetitionDTO clueRepetitionDTO) {
+		UserInfoDTO user = getUser();
+		clueRepetitionDTO.setLoginUserId(user.getId());
     	return clueRepetitionFeignClient.updatePetitionById(clueRepetitionDTO);
     }
     

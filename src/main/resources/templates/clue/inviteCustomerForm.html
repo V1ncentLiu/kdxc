@@ -89,6 +89,20 @@
                         </el-form-item>
                     </el-col>
                 </el-row>
+                <el-row>
+                    <el-col :span="8">
+                        <el-form-item label="是否有邀请函：" :label-width="formLabelWidth" prop="isInviteLetter">
+                            <el-select v-model="form.isInviteLetter"  style="width: 100%;" >
+                                <el-option
+                                        v-for="item in isInviteLetterList"
+                                        :key="item.value"
+                                        :label="item.label"
+                                        :value="item.value">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
             </div>
             <div class="marginB20 fs16 paddingT20">派车单</div>
             <div class="borderbox padding20">
@@ -205,7 +219,18 @@
                     city:'',
                     delayDescription:'',
                     pickUpStation:'',
+                    isInviteLetter:'1'
                 },
+                isInviteLetterList:[
+                    {
+                        value: '1',
+                        label: '是'
+                    },
+                    {
+                        value: '0',
+                        label: '否'
+                    }
+                ],
                 orgAreaList:[],
                 busGroupArr:[],
                 busSaleArr:[],
@@ -260,6 +285,9 @@
                     ],
                     tastingItem: [
                         { required: true, message: '品尝项目不能为空', trigger: 'change' }
+                    ],
+                    isInviteLetter: [
+                        { required: true, message: '是否有邀请函不能为空', trigger: 'change' }
                     ]
                 },
                 statusOptions: [{
@@ -311,6 +339,7 @@
                         param.tasteProjectId=this.form.tastingItem.join(',');
                         param.busDirectorId=this.form.businessDirector;
                         param.remark=this.form.remark;
+                        param.isInviteLetter=this.form.isInviteLetter;
                         param.cusNum=this.form.customersNum;
                         param.cusPhone=this.form.customerPhone;
                         param.cusName=this.form.customerName;
