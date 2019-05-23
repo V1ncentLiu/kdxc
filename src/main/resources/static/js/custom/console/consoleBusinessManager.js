@@ -308,12 +308,12 @@ var mainDivVM = new Vue({
             signProvince: [
                 { required: true, message: '请选择签约省份', trigger: 'change' }
             ],
-            signDictrict: [
-                { required: true, message: '请选择签约区/县', trigger: 'change' }
-            ],
-            signCity: [
-                { required: true, message: '请选择签约城市', trigger: 'change' }
-            ],
+            // signDictrict: [
+            //     { required: true, message: '请选择签约区/县', trigger: 'change' }
+            // ],
+            // signCity: [
+            //     { required: true, message: '请选择签约城市', trigger: 'change' }
+            // ],
             signShopType: [
                 { required: true, message: '请选择签约店型', trigger: 'change' }
             ],
