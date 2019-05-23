@@ -563,7 +563,7 @@ public class BusinessSignController {
           double ss = Double.valueOf(scale)/100;
           BigDecimal scaleRatio = new BigDecimal(ss).setScale(2,   BigDecimal.ROUND_HALF_UP);
           BigDecimal repeatMoney = dto.getAmountPerformance().multiply(scaleRatio).setScale(2,   BigDecimal.ROUND_HALF_UP);
-          dto.setRepeatMoney(repeatMoney.toString());
+          dto.setRepeatMoney(repeatMoney.toString()+"(元)");
           dto.setRepeatRatio(scale.toString()+"%");
           break;
         }
