@@ -37,9 +37,9 @@
                     </el-select>
                 </el-form-item>
                 <el-form-item label="电销顾问:">  
-                    <el-select v-model="form.userId" placeholder="电销顾问" style="width: 100%;" clearable @change="currentTelSale" filterable>
+                    <el-select v-model="form.userId" placeholder="电销顾问" style="width: 100%;" clearable filterable>
                         <el-option
-                            v-for="item in userTeleArr"
+                            v-for="item in teleIdList"
                             :key="item.id"
                             :label="item.name"
                             :value="item.id">
@@ -89,35 +89,10 @@
 <div th:include="_footer_include :: #jsLib"></div>
 </body>
 <script th:inline="javascript">
-    var queryOrg=[[${queryOrg}]];//电销组
-    queryOrg = [
-        {
-            id: "1",
-            name: "电销一组",
-            orgType: 1,
-            parentId: "1",
-            remark: "集团2",
-            staffNum: 0
-        },
-        {
-            id: "2",
-            name: "电销二组",
-            orgType: 1,
-            parentId: "1",
-            remark: "集团2",
-            staffNum: 0
-        },
-        {
-            id: "3",
-            name: "电销三组",
-            orgType: 1,
-            parentId: "1",
-            remark: "集团2",
-            staffNum: 0
-        },
-    ];
+    var queryOrg=[[${teleGroupList}]]; // 电销组
+    console.log(queryOrg,'电销组');
     var parentParam = [[${parentParam}]];
-    console.log(parentParam);
+    console.log(parentParam,'parentParam');
     var mainDivVM = new Vue({
         el: '#maindiv',
         data: function() {
@@ -169,7 +144,7 @@
                 // }
             ],
                 orgTeleArr: queryOrg, // 电销组
-                userTeleArr: [], // 创业顾问
+                teleIdList: [], // 创业顾问
             }             
         },
         methods: { 
@@ -262,25 +237,27 @@
                 if(null==seleVal||seleVal==""){
                     return ;
                 }
-                param={};
-                param.orgId=seleVal;
-                param.roleCode="DXCYGW";
-                // axios.post('/user/userManager/listByOrgAndRole' ,param).then(function (response) {  
-                //     mainDivVM.userTeleArr=response.data.data;
-                // }).catch(function (error) {
-                //     console.log(error);
-                //     mainDivVM.$message({
-                //         message: "电销顾问请求失败，请稍后重试",
-                //         type: "error"
-                //     });
-                // });
+                var param ={};
+                param.id = seleVal;
+                axios.post('/organization/organization/queryTeleSaleByOrgId', param)
+                .then(function (response) {
+                      var result =  response.data;
+                      var table=result.data;
+                      mainDivVM.teleIdList= table;
+                })
+                .catch(function (error) {
+                     console.log(error);
+                     mainDivVM.$message({
+                        message: "电销顾问请求失败，请稍后重试",
+                        type: "error"
+                    });
+                });
             },
             goBack () {
                 window.history.go(-1);
             },
             gotoPerson (item) {
                 var userId = item.userId;
-                console.log(userId);
                 var startTime = this.export.startTime;
                 var endTime = this.export.endTime;
                 var orgId = this.export.orgId;
@@ -402,11 +379,12 @@
             this.form.startTime=this.dateTimeFormat(parentParam.startTime);
             this.form.endTime=this.dateTimeFormat(parentParam.endTime);    
             this.form.orgId=parentParam.orgId; 
-            this.form.orgId = this.form.orgId ? this.form.orgId.toString():this.form.orgId; 
+            this.form.orgId = this.form.orgId ? this.form.orgId.toString():""; 
             this.export.startTime = this.minuteFormat(this.form.startTime);
             this.export.endTime = this.minuteFormat(this.form.endTime);
             this.export.orgId = this.form.orgId;
-            console.log(this.form); 
+            console.log(this.form);
+            this.currentTelSale(this.export.orgId); 
             this.searchTable();
         },
         mounted(){
