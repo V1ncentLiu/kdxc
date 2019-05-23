@@ -6,10 +6,13 @@ package com.kuaidao.manageweb.controller.user;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.apache.shiro.subject.Subject;
@@ -25,6 +28,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import com.kuaidao.common.constant.DicCodeEnum;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.IdEntityLong;
 import com.kuaidao.common.entity.JSONResult;
@@ -37,17 +41,21 @@ import com.kuaidao.manageweb.config.LogRecord.OperationType;
 import com.kuaidao.manageweb.constant.Constants;
 import com.kuaidao.manageweb.constant.MenuEnum;
 import com.kuaidao.manageweb.entity.UpdatePasswordSettingReq;
+import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
 import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
 import com.kuaidao.manageweb.feign.role.RoleManagerFeignClient;
 import com.kuaidao.manageweb.feign.user.SysSettingFeignClient;
 import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
 import com.kuaidao.sys.constant.SysConstant;
 import com.kuaidao.sys.constant.UserErrorCodeEnum;
+import com.kuaidao.sys.dto.dictionary.DictionaryItemRespDTO;
+import com.kuaidao.sys.dto.organization.OrganizationDTO;
 import com.kuaidao.sys.dto.role.RoleInfoDTO;
 import com.kuaidao.sys.dto.role.RoleQueryDTO;
 import com.kuaidao.sys.dto.user.SysSettingDTO;
 import com.kuaidao.sys.dto.user.SysSettingReq;
 import com.kuaidao.sys.dto.user.UpdateUserPasswordReq;
+import com.kuaidao.sys.dto.user.UserDataAuthReq;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import com.kuaidao.sys.dto.user.UserInfoPageParam;
 import com.kuaidao.sys.dto.user.UserInfoParamListReqDTO;
@@ -72,6 +80,8 @@ public class UserController {
     private OrganizationFeignClient organizationFeignClient;
     @Autowired
     private SysSettingFeignClient sysSettingFeignClient;
+    @Autowired
+    private DictionaryItemFeignClient dictionaryItemFeignClient;
     @Autowired
     private AmqpTemplate amqpTemplate;
     @Autowired
@@ -144,8 +154,35 @@ public class UserController {
         }
         // 查询角色列表
         JSONResult<List<RoleInfoDTO>> list = userInfoFeignClient.roleList(new RoleQueryDTO());
-
         request.setAttribute("roleList", list.getData());
+        // 查询字典业务线集合
+        JSONResult<List<OrganizationDTO>> listBusinessLineOrg =
+                organizationFeignClient.listBusinessLineOrg();
+        List<DictionaryItemRespDTO> clueCategoryList =
+                getDictionaryByCode(DicCodeEnum.CLUECATEGORY.getCode());
+        List<Map<String, Object>> dataList = new ArrayList<Map<String, Object>>();
+        for (OrganizationDTO organizationDTO : listBusinessLineOrg.getData()) {
+            Map<String, Object> map = new HashMap<String, Object>();
+            map.put("value", organizationDTO.getBusinessLine());
+            map.put("name", organizationDTO.getName());
+            map.put("checkedCitiesObj", new ArrayList<String>());
+            map.put("checkedCities", new ArrayList<String>());
+            map.put("checkAll", false);
+            map.put("isIndeterminate", false);
+            map.put("dicCode", DicCodeEnum.CLUECATEGORY.getCode());
+            List<Map<String, Object>> categoryList = new ArrayList<Map<String, Object>>();
+            for (DictionaryItemRespDTO clueCategory : clueCategoryList) {
+                Map<String, Object> categoryMap = new HashMap<String, Object>();
+                categoryMap.put("value", clueCategory.getValue());
+                categoryMap.put("label", clueCategory.getName());
+                categoryMap.put("isChecked", false);
+                categoryList.add(categoryMap);
+            }
+            map.put("categoryList", categoryList);
+            dataList.add(map);
+        }
+        request.setAttribute("dataList", dataList);
+
         return "user/addUserPage";
     }
 
@@ -160,7 +197,8 @@ public class UserController {
         JSONResult<List<TreeData>> treeJsonRes = organizationFeignClient.query();
         // 查询用户信息
         JSONResult<UserInfoDTO> jsonResult = userInfoFeignClient.get(new IdEntityLong(id));
-        request.setAttribute("user", jsonResult.getData());
+        UserInfoDTO user = jsonResult.getData();
+        request.setAttribute("user", user);
         // 查询组织机构树
         if (treeJsonRes != null && JSONResult.SUCCESS.equals(treeJsonRes.getCode())
                 && treeJsonRes.getData() != null) {
@@ -172,7 +210,50 @@ public class UserController {
         JSONResult<List<RoleInfoDTO>> list = userInfoFeignClient.roleList(new RoleQueryDTO());
 
         request.setAttribute("roleList", list.getData());
+        // 查询字典业务线集合
+        // 查询字典业务线集合
+        JSONResult<List<OrganizationDTO>> listBusinessLineOrg =
+                organizationFeignClient.listBusinessLineOrg();
+        List<DictionaryItemRespDTO> clueCategoryList =
+                getDictionaryByCode(DicCodeEnum.CLUECATEGORY.getCode());
+        List<Map<String, Object>> dataList = new ArrayList<Map<String, Object>>();
 
+        List<UserDataAuthReq> userDataAuthList = user.getUserDataAuthList();
+        Map<String, String> authMap = new HashMap<String, String>();
+        for (UserDataAuthReq userDataAuthReq : userDataAuthList) {
+            if (userDataAuthReq.getBusinessLine() != null
+                    && StringUtils.isNotBlank(userDataAuthReq.getDicValue())) {
+                authMap.put(userDataAuthReq.getBusinessLine() + "", userDataAuthReq.getDicValue());
+            }
+        }
+
+        for (OrganizationDTO organizationDTO : listBusinessLineOrg.getData()) {
+            Map<String, Object> map = new HashMap<String, Object>();
+            map.put("value", organizationDTO.getBusinessLine());
+            map.put("name", organizationDTO.getName());
+            map.put("checkedCitiesObj", new ArrayList<String>());
+            String string = authMap.get(organizationDTO.getBusinessLine() + "");
+            if (string != null) {
+                map.put("checkedCities", string.split(","));
+                map.put("isIndeterminate", true);
+            } else {
+                map.put("checkedCities", new ArrayList<String>());
+                map.put("isIndeterminate", false);
+            }
+            map.put("checkAll", false);
+            map.put("dicCode", DicCodeEnum.CLUECATEGORY.getCode());
+            List<Map<String, Object>> categoryList = new ArrayList<Map<String, Object>>();
+            for (DictionaryItemRespDTO clueCategory : clueCategoryList) {
+                Map<String, Object> categoryMap = new HashMap<String, Object>();
+                categoryMap.put("value", clueCategory.getValue());
+                categoryMap.put("label", clueCategory.getName());
+                categoryMap.put("isChecked", false);
+                categoryList.add(categoryMap);
+            }
+            map.put("categoryList", categoryList);
+            dataList.add(map);
+        }
+        request.setAttribute("dataList", dataList);
         return "user/editUserPage";
     }
 
@@ -509,4 +590,19 @@ public class UserController {
 
     }
 
+    /**
+     * 查询字典表
+     * 
+     * @param code
+     * @return
+     */
+    private List<DictionaryItemRespDTO> getDictionaryByCode(String code) {
+        JSONResult<List<DictionaryItemRespDTO>> queryDicItemsByGroupCode =
+                dictionaryItemFeignClient.queryDicItemsByGroupCode(code);
+        if (queryDicItemsByGroupCode != null
+                && JSONResult.SUCCESS.equals(queryDicItemsByGroupCode.getCode())) {
+            return queryDicItemsByGroupCode.getData();
+        }
+        return null;
+    }
 }

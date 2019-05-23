@@ -21,6 +21,7 @@ import com.kuaidao.common.entity.IdEntityLong;
 import com.kuaidao.common.entity.IdListLongReq;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
+import org.springframework.web.bind.annotation.RequestParam;
 
 /**
  * 预约来访
@@ -43,7 +44,7 @@ public interface AppiontmentFeignClient {
 	 * @return
 	 */
 	@PostMapping("/delete")
-	public JSONResult delete(@RequestBody IdListLongReq idList);
+	public JSONResult delete(@RequestBody IdListLongReq idList, @RequestParam("loginUserId") Long loginUserId);
 
 	/**
 	 * 查询预约来访集合
@@ -139,7 +140,7 @@ public interface AppiontmentFeignClient {
 		}
 
 		@Override
-		public JSONResult delete(@RequestBody IdListLongReq idList) {
+		public JSONResult delete(@RequestBody IdListLongReq idList, @RequestParam("loginUserId") Long loginUserId) {
 			return fallBackError("删除预约来访信息");
 		}
 

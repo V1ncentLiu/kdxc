@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml"
     xmlns:th="http://www.thymeleaf.org">
 <head  th:include="_header_include::frag(~{::title},~{},~{})">
-<title>添加线索</title>
+<title>添加资源</title>
     <meta charset="UTF-8">
 </head>
 <body>
@@ -33,7 +33,7 @@
                     </el-col>
                     <el-col :span="8">
                         <el-form-item label="资源类别：" :label-width="formLabelWidth">
-                            <el-select v-model="form.resourceType" placeholder="请选择" style="width: 200px;">
+                            <el-select v-model="form.resourceType" placeholder="请选择" style="width: 200px;"  @change="categoryChange">
                                 <el-option
                                     v-for="item in categoryArr"
                                     :key="item.value"
@@ -47,7 +47,7 @@
                 <el-row>
                     <el-col :span="8">
                         <el-form-item label="广告位：" :label-width="formLabelWidth">
-                            <el-select v-model="form.adPosition" placeholder="请选择" style="width: 200px;">
+                            <el-select v-model="form.adPosition" placeholder="请选择" style="width: 200px;" :disabled="sourceTypeDisabled">
                                 <el-option
                                     v-for="item in adsenseArr"
                                     :key="item.value"
@@ -141,10 +141,16 @@
                             </el-select>
                         </el-form-item>
                     </el-col>
-                    <el-col :span="8">
-                        <el-form-item label="微信：" :label-width="formLabelWidth">
-                           <el-input v-model="form.ishasWx" autocomplete="off" style="width: 200px;" maxLength="20"></el-input>
-                        </el-form-item>
+                    <el-col :span="16">
+                      <el-form-item label="微信：" prop="wechat" :label-width="formLabelWidth">
+                        <el-input v-model="form.wechat" autocomplete="off" style="width: 200px;margin-right: 10px;" maxLength="20"></el-input>
+                        <span v-if="form.wechat2 == '' && form.wechatUrl=='' ">
+	                           <el-button type="primary"  @click="openWechat"><i class="el-icon-plus"></i>微信/二维码</el-button>
+                            </span>
+                        <span v-else="">
+                                <span @click="openWechat" style="padding-left: 5px; color: rgb(0, 114, 255); cursor: pointer;">查看多个微信/二维码</span>
+                            </span>
+                      </el-form-item>
                     </el-col>
                 </el-row>
                 <el-row>
@@ -356,7 +362,47 @@
             <el-button type="primary" @click="submitDialogForm('dynamicValidateForm')"  >提 交</el-button>
             <el-button type="success" @click="addDomain">添加更多手机号</el-button>
         </div>
-    </el-dialog>    
+    </el-dialog>
+  <!-- dialog -->
+  <el-dialog title="添加微信" :visible.sync="wechatVisible" width="540px">
+    <template>
+      <el-form :model="wechatForm" ref="wechatForm" >
+        <el-form-item label="微信2：" :label-width="formLabelWidth1" >
+          <el-input v-model="wechatForm.wechat2" placeholder="" maxLength="20" style="width: 290px;"></el-input>
+        </el-form-item>
+        <el-form-item label="添加微信二维码：" :label-width="formLabelWidth1" prop="fileList">
+          <el-upload
+              class="upload-demo"
+              :action="uploadOssHost"
+              ref="refundApplyImgUpload"
+              :on-preview="handlePreview"
+              :on-remove="handleRemove"
+              :on-success="handleSuccess"
+              :on-error="handleError"
+              :before-upload="handleBefore"
+              accept=".jpg,.png"
+              multiple
+              :data="uploadParamData"
+              :limit='1'
+              :on-change="selectFile"
+              :on-exceed="handleExceed"
+              :auto-upload="false"
+              :file-list="fileList">
+            <el-button slot="trigger" size="small" type="primary">选择图片</el-button>
+            <el-button style="margin-left: 10px;" size="small" type="success" @click="submitUpload">上传</el-button>
+            <div slot="tip" class="el-upload__tip">只能上传jpg/png文件，且不超过2MB</div>
+          </el-upload>
+        </el-form-item>
+        <el-form-item label="" :label-width="formLabelWidth1" >
+          <img v-show="wechatForm.wechatUrl!=''" :src="wechatForm.wechatUrl" width="290px" style="border-radius:6px;">
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button type="primary" @click="wechatSumbit()">提 交</el-button>
+        <el-button  @click="wechatVisible=false">取 消</el-button>
+      </div>
+    </template>
+  </el-dialog>
 </div>
 </body>
 <!-- import Vue before Element -->
@@ -365,6 +411,17 @@
   //下拉项目数据
   var proSelect=[[${proSelect}]];
   var purProSelect=[[${proSelect}]];
+  var ossUrl = [[${ossUrl}]];//上传文件地址
+  var optList = [[${optList}]];//优化资源类别
+  var notOptList = [[${notOptList}]];//非优化资源类别
+  var opt=[];
+  var notOpt=[];
+  if(optList){
+  	opt=optList.split(',');
+  }
+  if(notOptList){
+  	notOpt=notOptList.split(',');
+  }
   var addCustomerVM=   new Vue({
         el: '#addCustomer',
         data: function() {
@@ -375,6 +432,8 @@
                 dialogFormVisible: false,//新增手机号
                 buttonType: 'A',//添加手机号按钮形式
                 deleteShow:false,//删除新增手机号输入框
+                sourceTypeDisabled:false,//广告位是否可选  
+                wechatVisible: false,//新增微信号
                 loading:false,
                 confirmBtnDisabled:false,//提交按钮 是否禁用
                 form: {  
@@ -390,7 +449,9 @@
                     customerName:'',
                     customerPhone:'',
                     customerSex:'',
-                    ishasWx:'',
+                    wechat:'',
+                    wechat2:'',
+                    wechatUrl:'',
                     experience:'',
                     customerAge:'',
                     customerJob:'',
@@ -408,6 +469,11 @@
                     city:'',
                     district:''
                 },
+              wechatForm: {
+                wechat2:'',
+                wechatUrl:'',
+                fileList:[]
+              },
                 categoryArr:[],
                 typeArr:[],
                 mediumArry:[],
@@ -426,6 +492,7 @@
                 projectSelect:proSelect,
                 proSelect:purProSelect, 
                 formLabelWidth: '120px',
+              formLabelWidth1: '140px',
                 rules:{
                     // customerName: [
                     //     { required: true, message: '客户姓名不能为空', trigger: 'blur' }
@@ -459,6 +526,19 @@
                         value: ''
                     }]
                 },
+              uploadOssHost:'',
+              uploadParamData: {
+                key:'22',
+                policy:'',
+                OSSAccessKeyId:'',
+                success_action_status : '200', //让服务端返回200,不然，默认会返回204
+                signature:'',
+                'x:params':'',
+                'realName':''
+              },
+              fileList:[],
+              limit:1,
+              ossUrl:ossUrl,
                 statusOptions: [{
                     value: '0',
                     label: '推广列表'
@@ -491,10 +571,40 @@
             }        	  
         },
         methods: {
+          getUploadParam(){
+            var signUrl = this.ossUrl+"?serviceType=aggregation";
+            var param={};
+
+            axios.get(signUrl, param)
+            .then(function (response) {
+              // console.info(response);
+              var respData= response.data;
+              var host = respData.host;
+              var params={};
+              var new_multipart_params = {
+                dir:respData.dir,
+                'policy': respData.policy,
+                'OSSAccessKeyId': respData.accessid,
+                'success_action_status' : '200', //让服务端返回200,不然，默认会返回204
+                'signature': respData.signature,
+                'x:params':params,//自定义编码，basse64编码后的字符串,
+                'realName':''
+              };
+              addCustomerVM.uploadParamData= new_multipart_params;
+              addCustomerVM.uploadOssHost = host;
+            })
+            .catch(function (error) {
+              console.log(error);
+            });
+          },
+          selectFile(file, fileList){
+            addCustomerVM.uploadParamData.key= addCustomerVM.uploadParamData.dir+addCustomerVM.random_string(10)+addCustomerVM.get_suffix(file.name),
+                addCustomerVM.uploadParamData.realName= file.name
+          },
             submitForm(form) {
                 this.$refs[form].validate((valid) => {
                     if (valid) {
-                        //----线索基本信息---//
+                        //----资源基本信息---//
                     	 var clueBasic={};
                     	 var clueProject={};
                      	//资源类型
@@ -533,9 +643,15 @@
                    	    //性别
                     	var customerSex=this.form.customerSex;
                     	clueCustomer.sex=customerSex;
-                	    //微信
-                    	var  ishasWx=this.form.ishasWx;
-                    	clueCustomer.wechat=ishasWx;
+                      //微信
+                      var wechat = this.form.wechat;
+                      clueCustomer.wechat = wechat;
+                      //微信2
+                      var wechat2 = this.form.wechat2;
+                      clueCustomer.wechat2 = wechat2;
+                      //微信二维码
+                      var wechatUrl = this.form.wechatUrl;
+                      clueCustomer.wechatCode = wechatUrl;
                 	    //餐饮经验
                     	var experience=this.form.experience;
                     	clueCustomer.hasExperience=experience;
@@ -726,6 +842,14 @@
                     this.deleteShow=true;                    
                 }                              
             },
+            categoryChange(value) {
+        	  	if(opt.indexOf(value)!=-1){
+        	  		this.form.adPosition="99";
+        	  		this.sourceTypeDisabled=true;
+        	  	}else if(notOpt.indexOf(value)!=-1){
+        	  		this.sourceTypeDisabled=false;
+        	  	}
+            },
             clearDialog(){
                 console.log('清空')
 
@@ -785,6 +909,76 @@
     　　　/*      this.form.customerAge=this.form.customerAge.replace(/[^\.\d]/g,'');
                this.form.customerAge=this.form.customerAge.replace('.',''); */
     　　　  },
+          openWechat() {
+            this.wechatVisible = true
+            this.wechatForm.wechat2=this.form.wechat2;
+            this.wechatForm.wechatUrl=this.form.wechatUrl;
+          },
+          wechatSumbit() {
+            this.form.wechat2=this.wechatForm.wechat2;
+            this.form.wechatUrl=this.wechatForm.wechatUrl;
+            addCustomerVM.$message({ message: "提交成功", type: 'success' });
+            this.wechatVisible = false;
+          },
+          submitUpload(){
+            //this.customUpload();
+            this.$refs.refundApplyImgUpload.submit();
+          },
+          handlePreview(file){
+
+          },
+          handleRemove(file,fileList){
+            this.fileList=[];
+            this.wechatForm.fileList=[];
+          },
+          handleExceed(files, fileList) {
+            //this.$message.warning(`当前限制选择 3 个文件，本次选择了 ${files.length} 个文件，共选择了 ${files.length + fileList.length} 个文件`);
+          },
+          handleSuccess(response, file, fileList){
+            console.info(fileList);
+            console.info(addCustomerVM.fileList);
+            var realName = file.name;
+            var randomName = addCustomerVM.uploadParamData.key;
+            var imgUrl =  addCustomerVM.uploadOssHost+"/"+randomName;
+            this.wechatForm.wechatUrl=imgUrl;
+            this.wechatForm.fileList.push(realName);
+            this.fileList=[];
+            this.wechatForm.fileList=[];
+          },
+          handleError(err, file, fileList){
+            console.info(err);
+          },
+          random_string(len) {
+            len = len || 32;
+            var chars = 'ABCDEFGHJKMNPQRSTWXYZabcdefhijkmnprstwxyz2345678';
+            var maxPos = chars.length;
+            var pwd = '';
+            for (i = 0; i < len; i++) {
+              pwd += chars.charAt(Math.floor(Math.random() * maxPos));
+            }
+            return pwd;
+          },
+          get_suffix(filename) {
+            var pos = filename.lastIndexOf('.')
+            suffix = ''
+            if (pos != -1) {
+              suffix = filename.substring(pos);
+            }
+            return suffix;
+          },
+          handleBefore(file){
+            var isTextComputer = file.type === 'image/png' || file.type==='image/jpeg';
+            if(!isTextComputer){
+              this.fileList=[];
+              this.$message.error('文件格式错误');
+              return false;
+            }
+            if(file.size>2*1024*1024){
+              this.fileList=[];
+              this.$message.error('图片最大为2MB');
+              return false;
+            }
+          },
             // 单选切换
             projectChange(){
                 if(this.form.radioProject=="1"){//内部项目
@@ -803,6 +997,7 @@
          },
         created(){
              //初始资源类别数据
+          this.getUploadParam();
            	var  param={};
            	param.groupCode="clueCategory";
              axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {  

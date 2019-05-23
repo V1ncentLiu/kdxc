@@ -19,12 +19,14 @@
                 	orgType:'',
                     name: '',
                     remark: '',
-                    id:''
+                    id:'',
+                    businessLine:''
                 },
                 form2:{
                 	parentName:''	
                 },
-                orgTypeList:[],
+                orgTypeList:orgTypeList,
+                businessLineList:businessLineList,
                 staffNumSearch:{//组内组成搜索框
                 	name:'',
                 	userName:'',
@@ -81,6 +83,8 @@
                 },
                 inputOrgName:'',//搜索框 组织名称
                 multipleSelection:[],//选择的列
+                businessLineDisabledSelect:false,//是否禁用业务线下拉框
+                tgzxBusinessLine:''//临时业务线编码
             }             
         },
         methods: {
@@ -236,6 +240,7 @@
             },
             addChildOrg(){
             	this.form.id='';
+            
             	var curData = this.selectedNode;
             	if(!curData){
             		this.$message({
@@ -246,8 +251,50 @@
             	}
                 this.addOrModifyDialogTitle="添加下级组织";
                 this.submitUrl = 'save';
+                var level = curData.level;
+                if(level!=0){
+                	//禁用业务线下拉框
+                	this.businessLineDisabledSelect=true;
+                }else{
+                	this.businessLineDisabledSelect=false;
+                }
+                //查询业务线
+         /*       var param={};
+                param.groupCode="businessLine";
+                axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {
+                	orgVM.businessLineList=response.data.data;
+                	
+                   
+                    
+                });*/
                 
-                axios.post('/organization/organization/queryDictionaryItemsByGroupCode',{})
+                //获取父级业务线
+               var id = curData.id;
+                var param = {};
+                param.id = id;
+                //根据id获取数据
+                axios.post('/organization/organization/queryOrgById',param)
+                .then(function (response) {
+                    var data =  response.data;
+                    if(data.code=='0'){
+                    	var businessLine = data.data.businessLine;
+                    	if(businessLine){
+                    		if(businessLine==127){
+                        		orgVM.tgzxBusinessLine = 127;
+                        		businessLine = "";
+                        	}else{
+                        		orgVM.form.businessLine= businessLine+"";
+                        	}
+                    		
+                    	}else{
+                    		orgVM.form.businessLine ="";
+                    	}
+                    }
+                   
+                })
+                
+                
+             /*   axios.post('/organization/organization/queryDictionaryItemsByGroupCode',{})
                 .then(function (response) {
                	 var data =  response.data
                     if(data.code=='0'){
@@ -261,9 +308,8 @@
                 .catch(function (error) {
                      console.log(error);
                 }).then(function(){
-                });
-                
-                
+                });*/
+        
             	this.dialogFormVisible = true;
             	
             },
@@ -272,6 +318,10 @@
                   if (valid) {
                      var param=this.form;
                      param.parentId=this.selectedNode.id;
+                     var businessLine = this.form.businessLine;
+                     if(!businessLine && this.tgzxBusinessLine){
+                    	 this.form.businessLine = this.tgzxBusinessLine;
+                     }
                  
                      
                     axios.post('/organization/organization/'+this.submitUrl, param)
@@ -302,9 +352,19 @@
                 });
               },
               cancelForm(formName) {
-                  this.$refs[formName].resetFields();
+                  //this.$refs[formName].resetFields();
+                  this.$refs[formName].clearValidate();
                   this.dialogFormVisible = false;
+                  this.resetOrgForm();
               },
+              resetOrgForm(){
+            	  this.form.orgType ='';
+            	  this.form.name='';
+            	  this.form.remark='';
+            	  this.form.id='';
+            	  this.form.businessLine=null;
+              },
+              
               initOrgTree(){//刷新根节点tree
             	  axios.post('/organization/organization/query',{})
                   .then(function (response) {
@@ -339,7 +399,7 @@
                   this.addOrModifyDialogTitle="修改组织信息";
                   this.submitUrl = 'update';
                   //查询组织机构
-                  axios.post('/organization/organization/queryDictionaryItemsByGroupCode',{})
+       /*           axios.post('/organization/organization/queryDictionaryItemsByGroupCode',{})
                   .then(function (response) {
                  	 var data =  response.data
                       if(data.code=='0'){
@@ -353,7 +413,16 @@
                   .catch(function (error) {
                        console.log(error);
                   }).then(function(){
+                  });*/
+                 
+                  
+                //查询业务线
+           /*       var param={};
+                  param.groupCode="businessLine";
+                  axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {
+                  	orgVM.businessLineList=response.data.data;
                   });
+                  */
                   
                  var parentName =  orgVM.form2.parentName;
                   var param={id:rows[0].id};
@@ -362,10 +431,33 @@
                   .then(function (response) {
                       var data =  response.data;
                       if(data.code=='0'){
+                    	  if(data.data.businessLine==127){
+                    		  data.data.businessLine = "";
+                    		  orgVM.tgzxBusinessLine=127;
+                    	  }
+                    	  var orgData = data.data;
+                    	  var orgType = orgData.orgType;
+                    	  if(orgType){
+                    		  orgData.orgType = orgType+"";
+                    	  }else{
+                    		  orgData.orgType  = "";
+                    	  }
+                    	  var businessLine = orgData.businessLine;
+                    	  if(businessLine){
+                    		  orgData.businessLine = businessLine+"";
+                    	  }else{
+                    		  orgData.businessLine  = "";
+                    	  }
+                    	  
                           orgVM.form= data.data;
                           orgVM.form2.parentName=parentName;
                           //把当前的值存在临时变量里，当修改时，旧值和新值对比
                           orgVM.oldName = data.data.name;
+                          if(data.data.disabled == 1 ){
+                        	  orgVM.businessLineDisabledSelect=true;
+                          }else{
+                        	  orgVM.businessLineDisabledSelect=false;
+                          }
                       }
                       
                      
@@ -382,7 +474,10 @@
             	 
               },
               closeAddOrgDialog(){//close 添加组织弹框
-            	  this.$refs['ruleForm'].resetFields();
+            	  this.tgzxBusinessLine = '';
+            	  // this.$refs['ruleForm'].resetFields();
+            	   this.$refs['ruleForm'].clearValidate();
+            	  this.resetOrgForm();
               },
               openStaffNumTable(orgId){//打开组内成员弹框
             	   this.dialogStaffNumVisible = true;

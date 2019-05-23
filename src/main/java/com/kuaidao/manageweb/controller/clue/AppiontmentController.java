@@ -271,8 +271,9 @@ public class AppiontmentController {
     @LogRecord(description = "删除预约来访信息", operationType = OperationType.DELETE,
             menuName = MenuEnum.APPIONTMENT_MANAGEMENT)
     public JSONResult deleteAppiontment(@RequestBody IdListLongReq idList) {
-
-        return appiontmentFeignClient.delete(idList);
+        UserInfoDTO user = getUser();
+        Long loginUserId = user.getId();
+        return appiontmentFeignClient.delete(idList,loginUserId);
     }
 
     /***

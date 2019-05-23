@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.IdEntity;
+import com.kuaidao.common.entity.IdEntityLong;
 import com.kuaidao.common.entity.IdListReq;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
@@ -125,14 +126,45 @@ public interface OrganizationFeignClient {
      */
     @PostMapping("/listLeafOrg")
     JSONResult<List<OrganizationDTO>> listLeafOrg(@RequestBody OrganizationQueryDTO reqDto);
-    
+
     /**
      * 根据id 查询所有的父级
+     * 
      * @param reqDto systemCode 系统代码 ;id 组织机构ID
      * @return
      */
     @PostMapping("/listParentsUntilOrg")
-    public JSONResult<List<OrganizationDTO>> listParentsUntilOrg(@RequestBody OrganizationQueryDTO reqDto);
+    public JSONResult<List<OrganizationDTO>> listParentsUntilOrg(
+            @RequestBody OrganizationQueryDTO reqDto);
+
+    /***
+     * 查询组织机构树 （ 业务管理员）
+     * 
+     * @param reqDto
+     * @return
+     */
+
+    @PostMapping("/queryByOrg")
+    public JSONResult<List<TreeData>> queryByOrg(OrganizationQueryDTO reqDto);
+
+    /**
+     * 查询根节点下所有业务线
+     * 
+     * @param reqDto
+     * @return
+     */
+    @PostMapping("/listBusinessLineOrg")
+    public JSONResult<List<OrganizationDTO>> listBusinessLineOrg();
+
+    /**
+     * 根据父级id 查询 它的组织机构树
+     * 
+     * @param idEntityLong
+     * @return
+     */
+    @PostMapping("/listOrgTreeDataByParentId")
+    public JSONResult<List<TreeData>> listOrgTreeDataByParentId(
+            @RequestBody IdEntityLong idEntityLong);
 
     @Component
     static class HystrixClientFallback implements OrganizationFeignClient {
@@ -224,6 +256,22 @@ public interface OrganizationFeignClient {
         @Override
         public JSONResult<List<OrganizationDTO>> listParentsUntilOrg(OrganizationQueryDTO reqDto) {
             return fallBackError("根据ID查询所有父级");
+        }
+
+
+        @Override
+        public JSONResult<List<TreeData>> queryByOrg(OrganizationQueryDTO reqDto) {
+            return fallBackError("业务管理员-查询组织机构树");
+        }
+
+        @Override
+        public JSONResult<List<OrganizationDTO>> listBusinessLineOrg() {
+            return fallBackError("查询根节点下所有业务线");
+        }
+
+        @Override
+        public JSONResult<List<TreeData>> listOrgTreeDataByParentId(IdEntityLong idEntityLong) {
+            return fallBackError("根据父级id 查询 它的组织机构树");
         }
     }
 

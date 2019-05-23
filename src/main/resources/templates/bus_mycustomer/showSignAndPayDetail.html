@@ -81,6 +81,12 @@
                     <div v-else-if="scope.row.payMode ==3">
                         转账
                     </div>
+                    <div v-else-if="scope.row.payMode ==4">
+                        微信
+                    </div>
+                    <div v-else-if="scope.row.payMode ==5">
+                        支付宝
+                    </div>
                     </template>
                 </el-table-column>
                 <el-table-column align="center" prop="statementNo" label="结算单编号"></el-table-column>
@@ -89,7 +95,10 @@
                 <el-table-column align="center" prop="amountPerformance" label="业绩金额" width="150"></el-table-column>
                 <el-table-column align="center" prop="detailStatus" label="明细状态" width="150">
                     <template slot-scope="scope">
-                        <div v-if="scope.row.detailStatus ==1">
+                        <div v-if="scope.row.detailStatus ==0">
+                            被驳回
+                        </div>
+                        <div v-else-if="scope.row.detailStatus ==1">
                             审核中
                         </div>
                         <div v-else-if="scope.row.detailStatus ==2">
@@ -119,6 +128,12 @@
                         </div>
                         <div v-else-if="scope.row.payMode ==3">
                             转账
+                        </div>
+                        <div v-else-if="scope.row.payMode ==4">
+                            微信
+                        </div>
+                        <div v-else-if="scope.row.payMode ==5">
+                            支付宝
                         </div>
                     </template>
                 </el-table-column>
@@ -161,6 +176,12 @@
                         <div v-else-if="scope.row.payMode ==3">
                             转账
                         </div>
+                        <div v-else-if="scope.row.payMode ==4">
+                            微信
+                        </div>
+                        <div v-else-if="scope.row.payMode ==5">
+                            支付宝
+                        </div>
                     </template>
                 </el-table-column>
                 <el-table-column align="center" prop="statementNo" label="结算单编号"></el-table-column>
@@ -202,6 +223,12 @@
                         <div v-else-if="scope.row.payMode ==3">
                             转账
                         </div>
+                        <div v-else-if="scope.row.payMode ==4">
+                            微信
+                        </div>
+                        <div v-else-if="scope.row.payMode ==5">
+                            支付宝
+                        </div>
                     </template>
                 </el-table-column>
                 <el-table-column align="center" prop="statementNo" label="结算单编号"></el-table-column>
@@ -219,6 +246,16 @@
                     </template>
                 </el-table-column>
                 <el-table-column align="center" prop="remarks" label="备注"></el-table-column>
+            </el-table>
+        </div>
+
+
+        <div v-show="refundDetailsShow">
+            <div class="fs14 marginB10" style="color: red">该签约已退款</div>
+            <el-table ref="refundTable" tooltip-effect="dark" style="width: 100%;margin-bottom: 20px;" border :data="refundTable">
+                <el-table-column align="center" prop="refundTime" label="退款时间" width="250"></el-table-column>
+                <el-table-column align="center" prop="cusAmount" label="退款金额" width="250"></el-table-column>
+                <el-table-column align="center" prop="reason" label="退款原因"></el-table-column>
             </el-table>
         </div>
     </div>
@@ -666,11 +703,15 @@
     var threeData = [[${threeData}]];
     var proSelect=[[${proSelect}]];
     var giveTypeList =[[${giveTypeList}]];
+    //退款信息数据
+    var refundData = [[${refundData}]];
+    var refundStatus = [[${refundStatus}]];
 
     var one ;
     var two ;
     var three;
     var four ;
+    var may
     if(payType==1){
         one = true;
         two = false;
@@ -696,6 +737,12 @@
         }
         four = true;
     }
+    if (refundStatus == 4 || refundStatus == 6) {
+        may = true;
+    }else{
+        may = false;
+    }
+
 
     var vreadonlyFalg = true;
     if(readOnly==1){
@@ -722,6 +769,7 @@
             paymentDetailsShow2:two,//判断定金付款明细表格是否显示
             paymentDetailsShow3:three,//判断二次定金付款明细表格是否显示
             paymentDetailsShow4:four,//判断尾款付款明细表格是否显示
+            refundDetailsShow: may,//判断退款明细表格是否显示
             readonlyFalg:vreadonlyFalg,
             showSignButtonFlag:showSignButtonFlag,
             showfalg:true,
@@ -732,6 +780,7 @@
             recordTable2:oneData,
             recordTable3:twoData,
             recordTable4:threeData,
+            refundTable:refundData,
             vistitStoreTypeArr:[],
             provinceArr:[],
             districtArr:[],
@@ -1089,6 +1138,12 @@
             },{
                 value: '3',
                 label: '转账'
+            },{
+                value: '4',
+                label: '微信'
+            },{
+                value: '5',
+                label: '支付宝'
             }],
             isSignArr:[{value:0,name:'否'},{value:1,name:'是'}],
             visitTypeArr:[{value:1,name:'预约来访'},{value:2,name:'慕名来访'},{value:3,name:'临时来访'}],

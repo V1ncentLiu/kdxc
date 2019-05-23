@@ -168,7 +168,7 @@
                             </el-option>
                         </el-select>
                     </el-form-item>
-                    <!-- <el-form-item label="分配时间:">
+                     <el-form-item label="分配时间:">
                         <el-date-picker
                             style="width: 100%;"
                             v-model="form.assignTimeStart"
@@ -183,7 +183,7 @@
                             type="datetime"
                             placeholder="选择日期时间">
                         </el-date-picker>
-                    </el-form-item>  -->
+                    </el-form-item>  
                   
                     <el-form-item label="电销组:">  
                         <el-select v-model="form.teleorg" placeholder="电销组" style="width: 100%;" clearable @change="currentTelSale" filterable>
@@ -195,10 +195,10 @@
                             </el-option>
                         </el-select>
                     </el-form-item>
-                    <el-form-item label="创业顾问:">  
+                    <el-form-item label="电销顾问:">
                         <el-select 
                             v-model="form.teleSaleId" 
-                            placeholder="创业顾问" 
+                            placeholder="电销顾问"
                             style="width: 100%;" 
                             filterable 
                             multiple 
@@ -239,6 +239,15 @@
                         <el-tag v-if="scope.row.tag">{{scope.row.tag}}</el-tag>
                     </template>
                 </el-table-column>
+                <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" width="220" v-else-if="item.fieldCode == 'customerStatusName'">
+                    <template slot-scope="scope">
+                        {{scope.row.customerStatusName}}
+                        <div v-if="scope.row.signList.length >=1"  v-for="it in scope.row.signList">
+                            <el-button size="mini"  v-if="it.refundStatus==4 || it.refundStatus==6" type="text"  style="color: blue" @click="toReadOnlySignPage(it,scope.row)">{{it.signNo}}<span  style="color: red" >(已退款)</span></el-button>
+                            <el-button size="mini"  v-else-if="it.refundStatus!=4 && it.refundStatus !=6" type="text"  style="color: blue" @click="toReadOnlySignPage(it,scope.row)">{{it.signNo}}</el-button>
+                        </div>
+                    </template>
+                </el-table-column>
                 <el-table-column :prop="item.fieldCode" :key="item.fieldCode" :label="item.displayName" :width="item.width" align="center" v-else-if="item.fieldCode == 'record'">
                     <template slot-scope="scope">
                        <div v-if="scope.row.isTrack === 1">
@@ -265,6 +274,14 @@
                           <el-button @click="repeatPhonesClick(scope.row)" type="text" size="small">点击查看</el-button>
                       </div>
                     </template>
+                </el-table-column>
+                <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width" 
+                  v-else-if="item.fieldCode == 'assignTime'">
+                       <template slot-scope="scope">
+                           <div v-if="scope.row.teleReceiveSource == 1 || scope.row.teleReceiveSource == 2 || scope.row.teleReceiveSource == 5"> 
+                                {{scope.row.teleReceiveTime}}
+                           </div> 
+                       </template>
                 </el-table-column>
                 <el-table-column align="center" sortable  :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" width="250px"
                                  v-else-if="item.fieldCode == 'createTime'||item.fieldCode == 'storeArea'"></el-table-column>
@@ -306,7 +323,7 @@
                 <el-table-column align="center" prop="createTime" label="资源创建时间" width="150"></el-table-column>
                 <el-table-column align="center" prop="phoneChangeTime" label="联系方式创建时间" width="150"></el-table-column>
                 <el-table-column align="center" prop="teleDirectorName" label="电销总监"></el-table-column>
-                <el-table-column align="center" prop="teleSaleName" label="创业顾问"></el-table-column>
+                <el-table-column align="center" prop="teleSaleName" label="电销顾问"></el-table-column>
                 <el-table-column align="center" prop="teleGorupName" label="电销组"></el-table-column>
                 <el-table-column align="center" prop="teleProject" label="电销组负责项目"></el-table-column>
                 <el-table-column align="center" prop="createUserRoleName" label="资源创建人角色"></el-table-column>
@@ -320,7 +337,7 @@
                 <el-table-column align="center" prop="createTime" label="资源创建时间"></el-table-column>
                 <el-table-column align="center" prop="phoneChangeTime" label="联系方式创建时间"></el-table-column>
                 <el-table-column align="center" prop="teleDirectorName" label="电销总监"></el-table-column>
-                <el-table-column align="center" prop="teleSaleName" label="创业顾问"></el-table-column>
+                <el-table-column align="center" prop="teleSaleName" label="电销顾问"></el-table-column>
                 <el-table-column align="center" prop="teleGorupName" label="电销组"></el-table-column>
                 <el-table-column align="center" prop="teleProject" label="电销组负责项目"></el-table-column>
                 <el-table-column align="center" prop="createUserRoleName" label="资源创建人角色"></el-table-column>
@@ -334,7 +351,7 @@
                 <el-table-column align="center" prop="createTime" label="资源创建时间"></el-table-column>
                 <el-table-column align="center" prop="phoneChangeTime" label="联系方式创建时间"></el-table-column>
                 <el-table-column align="center" prop="teleDirectorName" label="电销总监"></el-table-column>
-                <el-table-column align="center" prop="teleSaleName" label="创业顾问"></el-table-column>
+                <el-table-column align="center" prop="teleSaleName" label="电销顾问"></el-table-column>
                 <el-table-column align="center" prop="teleGorupName" label="电销组"></el-table-column>
                 <el-table-column align="center" prop="teleProject" label="电销组负责项目"></el-table-column>
                 <el-table-column align="center" prop="createUserRoleName" label="资源创建人角色"></el-table-column>
@@ -348,7 +365,7 @@
                 <el-table-column align="center" prop="createTime" label="资源创建时间"></el-table-column>
                 <el-table-column align="center" prop="phoneChangeTime" label="联系方式创建时间"></el-table-column>
                 <el-table-column align="center" prop="teleDirectorName" label="电销总监"></el-table-column>
-                <el-table-column align="center" prop="teleSaleName" label="创业顾问"></el-table-column>
+                <el-table-column align="center" prop="teleSaleName" label="电销顾问"></el-table-column>
                 <el-table-column align="center" prop="teleGorupName" label="电销组"></el-table-column>
                 <el-table-column align="center" prop="teleProject" label="电销组负责项目"></el-table-column>
                 <el-table-column align="center" prop="createUserRoleName" label="资源创建人角色"></el-table-column>
@@ -362,7 +379,7 @@
                 <el-table-column align="center" prop="createTime" label="资源创建时间"></el-table-column>
                 <el-table-column align="center" prop="phoneChangeTime" label="联系方式创建时间"></el-table-column>
                 <el-table-column align="center" prop="teleDirectorName" label="电销总监"></el-table-column>
-                <el-table-column align="center" prop="teleSaleName" label="创业顾问"></el-table-column>
+                <el-table-column align="center" prop="teleSaleName" label="电销顾问"></el-table-column>
                 <el-table-column align="center" prop="teleGorupName" label="电销组"></el-table-column>
                 <el-table-column align="center" prop="teleProject" label="电销组负责项目"></el-table-column>
                 <el-table-column align="center" prop="createUserRoleName" label="资源创建人角色"></el-table-column>
@@ -463,10 +480,10 @@
            </el-select>
         </el-form-item>
         <el-form-item 
-            label="电销员工：" 
+            label="电销顾问："
             prop="salesstaff"
             :rules="[
-                { required: true, message: '请选择电销员工', trigger: 'change' }
+                { required: true, message: '请选择电销顾问', trigger: 'change' }
             ]"
             :label-width="formLabelWidth">
            <el-select v-model="formVicemanage.salesstaff" placeholder="请选择" style="width: 80%;">
@@ -511,7 +528,7 @@
 <div th:include="_footer_include :: #jsLib"></div>
 <script th:inline="javascript" >
 var orgList=[[${orgList}]];//电销组
-var saleList=[[${saleList}]];//电销创业顾问
+var saleList=[[${saleList}]];//电销顾问
 var saleGroupList=[[${saleGroupList}]];//同事业部下电销组
 var queryOrg=[[${queryOrg}]];//电销组
 var fieldList=[[${fieldList}]];//自定义字段
@@ -552,7 +569,7 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                     trackingDialogVisible:false,
                     tableData:[]
                 },
-                adviserValue: '', //创业顾问
+                adviserValue: '', //电销顾问
                 isTransfer:[
                             {
                                value: '0',
@@ -754,6 +771,9 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
      			})
          	
          	},
+            toReadOnlySignPage(row,tele){  // 进入签约单明细
+                window.location.href='/businesssign/myCustomSignRecordPage?clueId='+row.clueId+"&signId="+row.signId+"&readyOnly=1&createUser="+tele.teleSaleId;
+            },
             currentTelSale(seleVal){
          		if(null==seleVal||seleVal==""){
          			return ;

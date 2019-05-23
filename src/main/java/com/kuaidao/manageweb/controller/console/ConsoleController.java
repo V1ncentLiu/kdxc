@@ -1,16 +1,12 @@
 package com.kuaidao.manageweb.controller.console;
 
 import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
+
 import javax.servlet.http.HttpServletRequest;
+
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang3.time.DateFormatUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,24 +15,19 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+
 import com.kuaidao.aggregation.constant.AggregationConstant;
 import com.kuaidao.aggregation.constant.AggregationConstant.DelFlag;
 import com.kuaidao.aggregation.dto.busmycustomer.BusMyCustomerRespDTO;
 import com.kuaidao.aggregation.dto.busmycustomer.MyCustomerParamDTO;
 import com.kuaidao.aggregation.dto.busmycustomer.SignRecordReqDTO;
 import com.kuaidao.aggregation.dto.busmycustomer.SignRecordRespDTO;
-import com.kuaidao.aggregation.dto.clue.BusPendingAllocationDTO;
-import com.kuaidao.aggregation.dto.clue.BusPendingAllocationPageParam;
-import com.kuaidao.aggregation.dto.clue.CustomerClueDTO;
-import com.kuaidao.aggregation.dto.clue.CustomerClueQueryDTO;
-import com.kuaidao.aggregation.dto.clue.PendingAllocationClueDTO;
-import com.kuaidao.aggregation.dto.clue.PendingAllocationCluePageParam;
+import com.kuaidao.aggregation.dto.clue.*;
 import com.kuaidao.aggregation.dto.console.BusinessConsolePanelRespDTO;
 import com.kuaidao.aggregation.dto.console.BusinessConsoleReqDTO;
 import com.kuaidao.aggregation.dto.console.BusinessDirectorConsolePanelRespDTO;
 import com.kuaidao.aggregation.dto.console.TeleConsoleReqDTO;
 import com.kuaidao.aggregation.dto.project.ProjectInfoDTO;
-import com.kuaidao.aggregation.dto.project.ProjectInfoPageParam;
 import com.kuaidao.aggregation.dto.visitrecord.VisitRecordReqDTO;
 import com.kuaidao.aggregation.dto.visitrecord.VisitRecordRespDTO;
 import com.kuaidao.common.constant.CluePhase;
@@ -861,7 +852,7 @@ public class ConsoleController {
         JSONResult<List<UserInfoDTO>> userJr = userInfoFeignClient.listByOrgAndRole(req);
         if (userJr == null || !JSONResult.SUCCESS.equals(userJr.getCode())) {
             logger.error(
-                    "查询电销通话记录-获取组内顾问-userInfoFeignClient.listByOrgAndRole(req),param{{}},res{{}}",
+                    "查询电销通话记录-获取电销顾问-userInfoFeignClient.listByOrgAndRole(req),param{{}},res{{}}",
                     req, userJr);
             return null;
         }

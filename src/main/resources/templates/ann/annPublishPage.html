@@ -27,13 +27,13 @@
                 </el-checkbox-group>
             </el-form-item>
             <el-form-item  label="接收范围：">
-                    <el-form-item  prop="redio" style="float: left;margin-right: 20px;">
+                    <el-form-item v-show="isShowAll"  prop="redio" style="float: left;margin-right: 20px;">
                         <el-radio-group v-model="annForm.radio" @change="redioChange">
-                            <el-radio  label="0">系统全用户</el-radio>
+                            <el-radio   label="0">系统全用户</el-radio>
                             <el-radio  label="1">指定组织</el-radio>
                         </el-radio-group>
                     </el-form-item>
-                    <el-form-item prop="org" id="org" style="display: none;">
+                    <el-form-item prop="org" id="org" v-show="showOrg" style="float: left;">
                         <el-input v-model="annForm.org" readonly placeholder="请选择指定组织" style="float: left;width: 300px;margin-top: 4px;">
                             <el-button slot="append" size="small"  @click="selectOrgs">选择组织</el-button> <!--icon="el-icon-search"-->
                         </el-input>
@@ -76,7 +76,9 @@
 
 <div th:include="_footer_include :: #jsLib"></div>
 
-<script>
+<script th:inline="javascript">
+var roleCode = [[${roleCode}]];//当前用户角色
+var orgId = [[${orgId}]];//当前用户机构
     Array.prototype.remove = function(val) {
         var index = this.indexOf(val);
         if (index > -1) {
@@ -87,6 +89,8 @@
     var vm = new Vue({
         el:'#form',
         data:{
+            showOrg:false,
+        	isShowAll:true,
             isDisabled:false,
             expandedKeys:[],
             dataTree:[],
@@ -119,7 +123,7 @@
         },
         methods:{
             reListPage:function(){
-                window.location.href = '/ann/annPublishPage'
+                window.location.href = '/ann/annlistPage';
             },
             selectOrgs:function(){
                 console.log("--------选择组织结构---多选-------------")
@@ -130,7 +134,12 @@
             //  打开 组织机构多选框
                 vm.OraTreeMuliCheckDialog = true;
                 var param = {};
-                axios.post("/organization/organization/query", param).then(function (response) {
+                var url="/organization/organization/query";
+                if(roleCode=="YWGLY"){
+                	param.id=orgId;
+                	url="/organization/organization/listOrgTreeDataByParentId";
+                }
+                axios.post(url, param).then(function (response) {
                     console.log(response.data)
                     vm.expandedKeys = [];
                     vm.dataTree = response.data.data;
@@ -225,11 +234,13 @@
 
                 if(val==0){//全体用户
                     console.log("选择了全体用户")
-                    document.getElementById("org").setAttribute('style', 'display:none');
+                    // document.getElementById("org").setAttribute('style', 'display:none');
+                    vm.showOrg=false;
                     vm.multipleSelection =[];
                     vm.multipleSelectionName = [];
                 }else{//指定组织:多选
-                    document.getElementById("org").setAttribute('style', 'display:block');
+                    // document.getElementById("org").setAttribute('style', 'display:block');
+                    vm.showOrg=true;
                     console.log("选择了指定组织")
                 }
             },
@@ -297,6 +308,11 @@
         },
         created(){
             console.info("create method");
+            if(roleCode=="YWGLY"){
+            	this.isShowAll=false;
+            	this.annForm.radio=1;
+            	this.showOrg=true;
+            }
            // this.getFormData();
         },
         mounted(){

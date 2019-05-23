@@ -25,7 +25,7 @@
     <div class="mainSearchBg">        
         <div class="mainSearchFormBox">
           	<el-form :inline="true">
-              <el-form-item label="商务小组:" label-width="60px">			
+              <el-form-item label="商务小组:" label-width="60px">
         				<el-select filterable v-model="busGroupId" placeholder="商务小组" clearable>
         			    <el-option
         			      v-for="item in swList"
@@ -62,6 +62,8 @@
                  <!-- <el-table-column prop="date" label="全选" width="180"></el-table-column>  -->
                 <el-table-column align="center" prop="busGroupName" label="商务小组"></el-table-column>
                 <el-table-column align="center" prop="financeUsers" label="负责财务人员姓名"></el-table-column>
+                <el-table-column align="center" prop="signProjectNames" label="签约项目"></el-table-column>
+                <el-table-column align="center" prop="signProvinces" label="签约省份"></el-table-column>
                 <el-table-column align="center" prop="createTime" label="创建时间" :formatter="dateFormatTime"></el-table-column>
             </el-table>
              <table-pagination :pager="pager"  @change="inviteAreaListPage"></table-pagination>
@@ -81,9 +83,28 @@
                     </el-option>
                 </el-select>
             </el-form-item>
-			
+            <el-form-item label="签约项目：" :label-width="formLabelWidth" prop="signProjects">
+                <el-select multiple-limit=10  filterable v-model="form.signProjects" multiple  placeholder="签约项目" style="width: 290px;">
+                    <el-option
+                            v-for="item in projectList"
+                            :key="item.id"
+                            :label="item.projectName"
+                            :value="item.id">
+                    </el-option>
+                </el-select>
+            </el-form-item>
+            <el-form-item label="签约省份：" :label-width="formLabelWidth" prop="signProvinces">
+                <el-select multiple-limit=10  filterable v-model="form.signProvinces" multiple  placeholder="选择财务" style="width: 290px;">
+                    <el-option
+                            v-for="item in provinceList"
+                            :key="item.id"
+                            :label="item.name"
+                            :value="item.name">
+                    </el-option>
+                </el-select>
+            </el-form-item>
             <el-form-item label="负责财务：" :label-width="formLabelWidth" prop="financeUsers">
-                <el-select multiple-limit=10  filterable v-model="form.financeUsers"  placeholder="选择财务" style="width: 290px;">
+                <el-select multiple-limit=10  filterable v-model="form.financeUsers" multiple  placeholder="选择财务" style="width: 290px;">
                     <el-option
                         v-for="item in cwList"
                         :key="item.id"
@@ -91,9 +112,10 @@
                         :value="item.id">
                     </el-option>
                 </el-select>
-            </el-form-item>		
-          
+            </el-form-item>
+
         </el-form>
+
         <div slot="footer" style="text-align: center" class="dialog-footer">
             <el-button type="primary" @click="submitForm('form')">提交</el-button>
             <el-button @click="dialogFormVisible= false">取消</el-button>
@@ -110,6 +132,10 @@
 
     var swList=[[${swList}]];
 	var cwList = [[${userList}]];
+	//项目列表
+	var projectList = [[${projectList}]];
+	//省份列表
+	var provinceList = [[${provinceList}]];
    var orgVM =  new Vue({
         el: '#organizationManage',
         data: {
@@ -125,6 +151,8 @@
         	multipleSelection: [],
         	swList:swList,
         	cwList:cwList,
+            projectList:projectList,
+            provinceList:provinceList,
         	financeUsers:"",
         	form:{
         		busGroupId: '',
@@ -217,6 +245,26 @@
                          	     }
                          	   }
                     	    orgVM.form.financeUsers=valueMultiple;
+                          //签约项目
+                          var signProjects = financeLayout.signProjects;
+                          var signProjectsMultiple=[];
+                          var signProjectsObj = signProjects.split(',');
+                          if(null!=signProjects && signProjectsObj.length>0) {
+                              for(var i=0;i<signProjectsObj.length;i++){
+                                  signProjectsMultiple.push(signProjectsObj[i]+"");
+                              }
+                          }
+                          orgVM.form.signProjects = signProjectsMultiple;
+                          //签约省份
+                          var signProvinces = financeLayout.signProvinces;
+                          var signProvincesMultiple=[];
+                          var signProvincesObj = signProvinces.split(',');
+                          if(null!=signProvinces && signProvincesObj.length>0) {
+                              for(var i=0;i<signProvincesObj.length;i++){
+                                  signProvincesMultiple.push(signProvincesObj[i]+"");
+                              }
+                          }
+                          orgVM.form.signProvinces=signProvincesMultiple;
                      }else{
                     	 orgVM.$message({message: response.data.msg, type: 'warning'});
 	                  	  	return ;
@@ -335,6 +383,24 @@
                         	   }
                         	}
                           param.financeUsers = strs;
+                        var signProjectsStrs ="";
+                        for ( var i = 0; i <formData.signProjects.length; i++){
+                            if(signProjectsStrs !=""){
+                                signProjectsStrs = signProjectsStrs+","+formData.signProjects[i];
+                            }else{
+                                signProjectsStrs = formData.signProjects[i];
+                            }
+                        }
+                        param.signProjects = signProjectsStrs;
+                            var signProvincesStrs ="";
+                            for ( var i = 0; i <formData.signProvinces.length; i++){
+                                if(signProvincesStrs !=""){
+                                    signProvincesStrs = signProvincesStrs+","+formData.signProvinces[i];
+                                }else{
+                                    signProvincesStrs = formData.signProvinces[i];
+                                }
+                            }
+                            param.signProvinces = signProvincesStrs;
                           param.busGroupId = formData.busGroupId;
                           var str = "";
                           var rows = this.multipleSelection;

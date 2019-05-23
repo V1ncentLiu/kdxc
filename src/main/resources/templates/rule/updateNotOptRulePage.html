@@ -11,7 +11,7 @@
 <div id="addOptimizeRule" class="addOptimizeRule mainPadding" style="display: none;">  
     <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
         <el-breadcrumb-item>Home</el-breadcrumb-item>
-        <el-breadcrumb-item>线索管理</el-breadcrumb-item>
+        <el-breadcrumb-item>资源管理</el-breadcrumb-item>
         <el-breadcrumb-item>非优化分配规则管理</el-breadcrumb-item>
     </el-breadcrumb>
     <div class="inforTitle">编辑非优化分配规则</div> 
@@ -129,14 +129,28 @@
                 <span style="position: absolute;left: -85px;color: #f56c6c;">*</span>
                 <el-button type="primary" @click="addDomain">添加电销组</el-button>
             </el-form-item>
-            <el-table :data="form.assignRuleTeamList" style="width: 100%" border>
+            <el-table :data="form.teleRuleTeamList" style="width: 100%;margin-bottom: 20px" border>
                 <el-table-column type="index" align="center" prop="rank" label="序号" width="55"></el-table-column>
+                <el-table-column align="center" prop="businessLine" label="业务线*">
+                    <template slot-scope="scope">
+                            <el-form-item :prop="'teleRuleTeamList.' + scope.$index + '.businessLine'" :rules='rules.businessLine' style="width: 200px;margin:0 auto;height: 57px;">
+                            <el-select filterable v-model="scope.row.businessLine" placeholder="请选择" @change="getTeleGroupList(scope.$index, form.teleRuleTeamList)">
+                                <el-option
+                                    v-for="item in businessLineOptions"
+                                    :key="item.businessLine"
+                                    :label="item.name"
+                                    :value="item.businessLine">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+                    </template>
+                </el-table-column>
                 <el-table-column align="center" prop="orgId" label="电销组*">
                     <template slot-scope="scope">
-                            <el-form-item :prop="'assignRuleTeamList.' + scope.$index + '.orgId'" :rules='rules.orgId' style="width: 200px;margin:0 auto;height: 57px;">
+                            <el-form-item :prop="'teleRuleTeamList.' + scope.$index + '.orgId'" :rules='rules.orgId' style="width: 160px;margin:0 auto;height: 57px;">
                             <el-select filterable v-model="scope.row.orgId" placeholder="请选择">
                                 <el-option
-                                    v-for="item in orgOptions"
+                                    v-for="item in scope.row.teleOptions"
                                     :key="item.id+','+item.orgType"
                                     :label="item.name"
                                     :value="item.id+','+item.orgType">
@@ -148,26 +162,26 @@
                 <el-table-column align="center" prop="proportion" label="比例*">
                     <span style="color: #f56c6c;">*</span>
                     <template slot-scope="scope">
-                        <el-form-item :prop="'assignRuleTeamList.' + scope.$index + '.proportion'" :rules='rules.proportion' style="width: 200px;margin:0 auto;height: 57px;">
-                            <el-input @keyup.native.prevent="resourceMaxNumber(scope.$index, form.assignRuleTeamList)" v-model="scope.row.proportion"></el-input>
+                        <el-form-item :prop="'teleRuleTeamList.' + scope.$index + '.proportion'" :rules='rules.proportion' style="width: 160px;margin:0 auto;height: 57px;">
+                            <el-input @keyup.native.prevent="resourceMaxNumber(scope.$index, form.teleRuleTeamList)" v-model="scope.row.proportion"></el-input>
                         </el-form-item>
                     </template>
                 </el-table-column>
                 <el-table-column align="center" prop="resourceMaxNum" label="资源条数*">
                     <template slot-scope="scope">
-                        <el-form-item :prop="'assignRuleTeamList.' + scope.$index + '.resourceMaxNum'" :rules='rules.resourceMaxNum' style="width: 200px;margin:0 auto;height: 57px;">                            
+                        <el-form-item :prop="'teleRuleTeamList.' + scope.$index + '.resourceMaxNum'" :rules='rules.resourceMaxNum' style="width: 160px;margin:0 auto;height: 57px;">
                             <!-- input值 -->
-                            <el-input @keyup.native.prevent="resourceMaxNumber1(scope.$index, form.assignRuleTeamList)" v-model="scope.row.resourceMaxNum" ></el-input>
+                            <el-input @keyup.native.prevent="resourceMaxNumber1(scope.$index, form.teleRuleTeamList)" v-model="scope.row.resourceMaxNum" ></el-input>
                             <!-- 不限按钮    -->
-                            <el-button type="primary" size="mini" style="position: absolute;top: 6px;right: 4px;z-index: 2;" @click="unlimitedBtn(scope.$index, form.assignRuleTeamList)" >不限</el-button>
+                            <el-button type="primary" size="mini" style="position: absolute;top: 6px;right: 4px;z-index: 2;" @click="unlimitedBtn(scope.$index, form.teleRuleTeamList)" >不限</el-button>
                             <!-- 不限input -->
-                            <el-input style="position: absolute;top: 0;right: 0;z-index: 1;" @focus="unlimitedIpt(scope.$index, form.assignRuleTeamList)"  v-if="scope.row.unlimitedShow" v-model="scope.row.unlimited"></el-input>
+                            <el-input style="position: absolute;top: 0;right: 0;z-index: 1;" @focus="unlimitedIpt(scope.$index, form.teleRuleTeamList)"  v-if="scope.row.unlimitedShow" v-model="scope.row.unlimited"></el-input>
                         </el-form-item>
                     </template>
                 </el-table-column>
                 <el-table-column align="center" prop="isPrior" label="优先分配*">
                     <template slot-scope="scope">
-                            <el-form-item :prop="'assignRuleTeamList.' + scope.$index + '.isPrior'" :rules='rules.isPrior' style="width: 200px;margin:0 auto;height: 57px;">
+                            <el-form-item :prop="'teleRuleTeamList.' + scope.$index + '.isPrior'" :rules='rules.isPrior' style="width: 160px;margin:0 auto;height: 57px;">
                             <el-select v-model="scope.row.isPrior" placeholder="请选择">
                                 <el-option
                                     v-for="item in priorOptions"
@@ -181,9 +195,69 @@
                 </el-table-column>
                 <el-table-column align="center" label="操作" width="120">
                     <template slot-scope="scope">
-                        <el-button @click.native.prevent="deleteRow(scope.$index, form.assignRuleTeamList)" type="text" size="small">删除</el-button>
+                        <el-button @click.native.prevent="deleteRow(scope.$index, form.teleRuleTeamList)" type="text" size="small">删除</el-button>
                     </template>
-            </el-table-column>
+            	</el-table-column>
+            </el-table>
+            <el-form-item label="选择话务组：" prop="chooseTeam" :label-width="formLabelWidth">
+                <span style="position: absolute;left: -85px;color: #f56c6c;">*</span>
+                <el-button type="primary" @click="addDomainTraffic">添加话务组</el-button>
+            </el-form-item>
+            <el-table :data="form.trafficRuleTeamList" style="width: 100%" border>
+                <el-table-column type="index" align="center" prop="rank" label="序号" width="55"></el-table-column>
+                <el-table-column align="center" prop="orgId" label="话务组*">
+                    <template slot-scope="scope">
+                            <el-form-item :prop="'trafficRuleTeamList.' + scope.$index + '.orgId'" :rules='rules.orgId' style="width: 200px;margin:0 auto;height: 57px;">
+                            <el-select filterable v-model="scope.row.orgId" placeholder="请选择">
+                                <el-option
+                                    v-for="item in trafficOptions"
+                                    :key="item.id+','+item.orgType"
+                                    :label="item.name"
+                                    :value="item.id+','+item.orgType">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+                    </template>
+                </el-table-column>
+                <el-table-column align="center" prop="proportion" label="比例*">
+                    <span style="color: #f56c6c;">*</span>
+                    <template slot-scope="scope">
+                        <el-form-item :prop="'trafficRuleTeamList.' + scope.$index + '.proportion'" :rules='rules.proportion' style="width: 200px;margin:0 auto;height: 57px;">
+                            <el-input @keyup.native.prevent="resourceMaxNumber(scope.$index, form.teleRuleTeamList)" v-model="scope.row.proportion"></el-input>
+                        </el-form-item>
+                    </template>
+                </el-table-column>
+                <el-table-column align="center" prop="resourceMaxNum" label="资源条数*">
+                    <template slot-scope="scope">
+                        <el-form-item :prop="'trafficRuleTeamList.' + scope.$index + '.resourceMaxNum'" :rules='rules.resourceMaxNum' style="width: 200px;margin:0 auto;height: 57px;">
+                            <!-- input值 -->
+                            <el-input @keyup.native.prevent="resourceMaxNumber1(scope.$index, form.trafficRuleTeamList)" v-model="scope.row.resourceMaxNum" ></el-input>
+                            <!-- 不限按钮    -->
+                            <el-button type="primary" size="mini" style="position: absolute;top: 6px;right: 4px;z-index: 2;" @click="unlimitedBtn(scope.$index, form.trafficRuleTeamList)" >不限</el-button>
+                            <!-- 不限input -->
+                            <el-input style="position: absolute;top: 0;right: 0;z-index: 1;" @focus="unlimitedIpt(scope.$index, form.trafficRuleTeamList)"  v-if="scope.row.unlimitedShow" v-model="scope.row.unlimited"></el-input>
+                        </el-form-item>
+                    </template>
+                </el-table-column>
+                <el-table-column align="center" prop="isPrior" label="优先分配*">
+                    <template slot-scope="scope">
+                            <el-form-item :prop="'trafficRuleTeamList.' + scope.$index + '.isPrior'" :rules='rules.isPrior' style="width: 200px;margin:0 auto;height: 57px;">
+                            <el-select v-model="scope.row.isPrior" placeholder="请选择">
+                                <el-option
+                                    v-for="item in priorOptions"
+                                    :key="item.value"
+                                    :label="item.name"
+                                    :value="item.value">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+                    </template>
+                </el-table-column>
+                <el-table-column align="center" label="操作" width="120">
+                    <template slot-scope="scope">
+                        <el-button @click.native.prevent="deleteRow(scope.$index, form.trafficRuleTeamList)" type="text" size="small">删除</el-button>
+                    </template>
+            	</el-table-column>
             </el-table>
             <div class="padding20 f-tac">            
                 <el-button type="primary" :disabled="submitDisabled" @click="submitForm('form')">确认</el-button>
@@ -199,7 +273,8 @@
 var clueAssignRule=[[${clueAssignRule}]];//规则信息
 var clueCategoryList=[[${clueCategoryList}]];//资源类别集合
 var clueTypeList=[[${clueTypeList}]];//资源类别集合
-var orgList=[[${orgList}]];//小组集合
+var trafficList=[[${trafficList}]];//话务组集合
+var businessLineList=[[${businessLineList}]];//业务线集合
 var mediumList=[[${mediumList}]];//媒介集合
 var projectList=[[${projectList}]];//项目集合
 var adsenseList=[[${adsenseList}]];//广告位集合
@@ -220,7 +295,8 @@ var adsenseList=[[${adsenseList}]];//广告位集合
                     searchWord:'',
                     notSearchWord:'',
                     status:1,
-                    assignRuleTeamList: []
+                    teleRuleTeamList: [],
+                    trafficRuleTeamList: []
                 },
                 formLabelWidth: '150px',
                 rules:{
@@ -249,17 +325,20 @@ var adsenseList=[[${adsenseList}]];//广告位集合
                         { required: true, required: true, message: '请选择是否启用', trigger: 'change' }
                     ],                    
                     chooseTeam: [
-                        { validator:function(rule,value,callback){
-                            if(aorVM.form.assignRuleTeamList.length==0){
-                                callback(new Error("请添加电销组"));
-                                return;
-                            }
-                            callback();
-                        }, trigger: 'change'}
-                    ],                    
+                                 { validator:function(rule,value,callback){
+                                     if(aorVM.form.teleRuleTeamList.length==0&&aorVM.form.trafficRuleTeamList.length==0){
+                                         callback(new Error("请添加电销组或话务组"));
+                                         return;
+                                     }
+                                     callback();
+                                 }, trigger: 'change'}
+                             ],                   
                     orgId: [
                         { required: true, required: true, message: '请选择电销组', trigger: 'change' }
                     ],
+                    businessLine: [
+                                   { required: true, required: true, message: '请选择业务线', trigger: 'change' }
+                               ],
                     proportion: [
                         { required: true, required: true, message: '请输入比例', trigger: 'change'},
                         { validator:function(rule,value,callback){               
@@ -284,7 +363,8 @@ var adsenseList=[[${adsenseList}]];//广告位集合
                     ],
                 },
                 submitDisabled:false,
-                orgOptions:orgList,
+                trafficOptions:trafficList,
+                businessLineOptions:businessLineList,
                 sourceOptions:mediumList,
                 categoryOptions:clueCategoryList,
                 typeOptions:clueTypeList ,
@@ -341,7 +421,7 @@ var adsenseList=[[${adsenseList}]];//广告位集合
                             return;
                         }
                         // 不能选择重复电销组
-                        var orgIdChoose=this.form.assignRuleTeamList; 
+                        var orgIdChoose=this.form.teleRuleTeamList; 
                         var ary=[];                   
                         for(var i=0;i<orgIdChoose.length;i++){
                         	var split=orgIdChoose[i].orgId.split(",");
@@ -361,13 +441,35 @@ var adsenseList=[[${adsenseList}]];//广告位集合
                                 }                                
                             }
                         }
+                     // 不能选择重复话务组
+                        orgIdChoose=this.form.trafficRuleTeamList; 
+                        var ary=[];
+                        for(var i=0;i<orgIdChoose.length;i++){
+                        	var split=orgIdChoose[i].orgId.split(",");
+                        	orgIdChoose[i].orgId=split[0];
+                        	orgIdChoose[i].orgType=split[1];
+                            ary.push(orgIdChoose[i].orgId);//把选择的值放入一个数组
+                            var s = ary.join(",")+","; 
+                            for(var j=0;j<ary.length;j++) {
+                                if(ary[j]!=""){
+                                    if(s.replace(ary[j]+",","").indexOf(ary[j]+",")>-1) {
+                                        this.$message({
+                                            message: '请不要选择相同的话务组',
+                                            type: 'warning'
+                                        });
+                                        return;
+                                    }
+                                }                                
+                            }
+                        }
        	            	aorVM.submitDisabled=true;
                         var param=this.form;
                         param.ruleName=this.form.ruleName;
                         param.startTime=this.form.startTime;
                         param.endTime=this.form.endTime;
                         param.status=this.form.status;
-                        param.assignRuleTeamList=this.form.assignRuleTeamList;
+                        param.teleList=this.form.teleRuleTeamList;
+                        param.trafficList=this.form.trafficRuleTeamList;
                         param.source=this.form.source.join(',');
                         param.type=this.form.type.join(',');
                         param.sourceType=this.form.sourceType.join(',');
@@ -399,15 +501,56 @@ var adsenseList=[[${adsenseList}]];//广告位集合
                 rows.splice(index, 1);
             },
             addDomain() {
-                this.form.assignRuleTeamList.push({
-                    orgId: '',     
-                    orgType: '', 
+                console.log(businessLineList)
+                // 取第一条
+                var first=null;
+                for(var i=0;i<businessLineList.length;i++){
+                    first=businessLineList[0].businessLine;
+                }
+                var param ={};
+            	  param.systemCode = "HUIJU";
+            	  param.orgType = 1;
+            	  param.businessLine = first;
+                  console.info(param);
+                  axios.post('/organization/organization/queryOrgByBusinessline', param)
+                  .then(function (response) {
+                        var result =  response.data;
+                        console.info(result);
+                        var table=result.data;
+                        aorVM.form.teleRuleTeamList.push({
+                            orgId: '',                    
+                            businessLine: first,//业务线取第一条                 
+                            teleOptions:table,                    
+                            orgType: '',                    
+                            proportion:'',
+                            resourceMaxNum:'',
+                            isPrior: 0,//默认非优先
+                            unlimited:'',//不限层
+                            unlimitedVal:'',//不限层取值
+                            unlimitedShow:false,//默认不显示
+                        });
+                  })
+                  .catch(function (error) {
+                       console.log(error);
+                  });
+                
+            },
+            addDomainTraffic() {
+                console.log(trafficList)
+                // 取第一条
+                var first="";
+                for(var i=0;i<trafficList.length;i++){
+                    first=trafficList[0].id+","+trafficList[0].orgType;
+                }
+                this.form.trafficRuleTeamList.push({
+                    orgId: first,                    
+                    orgType: '',                    
                     proportion:'',
                     resourceMaxNum:'',
                     isPrior: 0,//默认非优先
                     unlimited:'',//不限层
                     unlimitedVal:'',//不限层取值
-                    unlimitedShow:false,//是否显示不限input
+                    unlimitedShow:false,//默认不显示
                 });
             },
             resourceMaxNumber(index, rows){
@@ -425,6 +568,25 @@ var adsenseList=[[${adsenseList}]];//广告位集合
       		cancelForm(){
             	document.location.href='/clueAssignRule/notOptRule/initRuleList';
             },
+          //根据电销组查询电销总监
+            getTeleGroupList(index,rows) {
+              rows[index].orgId= '';
+          	  var param ={};
+          	  param.systemCode = "HUIJU";
+          	  param.orgType = 1;
+          	  param.businessLine = rows[index].businessLine;
+                console.info(param);
+                axios.post('/organization/organization/queryOrgByBusinessline', param)
+                .then(function (response) {
+                      var result =  response.data;
+                      console.info(result);
+                      var table=result.data;
+                      rows[index].teleOptions= table;
+                })
+                .catch(function (error) {
+                     console.log(error);
+                });
+            },
         },
         mounted(){
             document.getElementById('addOptimizeRule').style.display = 'block';
@@ -439,13 +601,24 @@ var adsenseList=[[${adsenseList}]];//广告位集合
             this.form.category=clueAssignRule.category.split(',');
             this.form.status=clueAssignRule.status;
             var orgIdChoose=clueAssignRule.assignRuleTeamList;
-            for(var i=0;i<orgIdChoose.length;i++){
-            	orgIdChoose[i].orgId=orgIdChoose[i].orgId+","+orgIdChoose[i].orgType;
-            	if(orgIdChoose[i].resourceMaxNum==-1){
-            		this.unlimitedBtn(i,orgIdChoose);
+            var teleRuleTeamList=clueAssignRule.teleList;
+            for(var i=0;i<teleRuleTeamList.length;i++){
+            	teleRuleTeamList[i].orgId=teleRuleTeamList[i].orgId+","+teleRuleTeamList[i].orgType;
+            	if(teleRuleTeamList[i].resourceMaxNum==-1){
+            		this.unlimitedBtn(i,teleRuleTeamList);
             	}
             }
-            this.form.assignRuleTeamList=orgIdChoose;
+            this.form.teleRuleTeamList=teleRuleTeamList;
+            
+            var trafficRuleTeamList=clueAssignRule.trafficList;
+            for(var i=0;i<trafficRuleTeamList.length;i++){
+            	trafficRuleTeamList[i].orgId=trafficRuleTeamList[i].orgId+","+trafficRuleTeamList[i].orgType;
+            	if(trafficRuleTeamList[i].resourceMaxNum==-1){
+            		this.unlimitedBtn(i,trafficRuleTeamList);
+            	}
+            }
+            this.form.trafficRuleTeamList=trafficRuleTeamList;
+            
             this.form.searchWord=clueAssignRule.searchWord;
             this.form.notSearchWord=clueAssignRule.notSearchWord;
         }
