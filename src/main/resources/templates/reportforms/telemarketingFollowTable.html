@@ -141,7 +141,6 @@
                 var startTime=this.form.startTime;
                 var endTime=this.form.endTime;
                 if(endTime && startTime){
-                    console.log(startTime,endTime);
                     if(startTime>endTime){
                         this.$message({
                             message: '开始时间不能大于结束时间',
@@ -224,36 +223,29 @@
                     mainDivVM.export.cusLevelList = mainDivVM.form.cusLevelList;
                 })
             },
-            arraySpanMethod({ row, column, rowIndex, columnIndex }) { // 合并第一行
-                if (rowIndex === 0) {
-                    if (columnIndex === 0) {
-                        return [0, 0];
-                    } else if (columnIndex === 1) {
-                        return [1, 2];
-                    }
-                }
-            },
-            indexFun (index) { // 表格序号
-                return index;
-            },
             gotoTeam(item){
                 console.log(item)
                 var orgName = item.orgName;
                 var orgId = item.orgId;//组id
                 // 搜索条件
-                var startTime=null;
-                var endTime=null;
-                var startTime1 = this.form.startTime;
-                var endTime1 = this.form.endTime;
-                startTime=this.minuteFormat(startTime);
-                endTime=this.minuteFormat(endTime);
-                // if(orgName == "合计"){
+                var startTime=this.minuteFormat(this.form.startTime);
+                var endTime=this.minuteFormat(this.form.endTime);
+                var cusLevelList=null;
+                if(this.form.cusLevelList.length!=0){
+                    cusLevelList=this.form.cusLevelList;
+                }else{
+                    cusLevelList=""
+                }
+                console.log(startTime)
+                console.log(endTime)
+                console.log(cusLevelList)
+                if(orgName == "合计"){
                     // 点击组跳转到合计
                     window.location.href="/statistics/teleStatement/telemarketingFollowTableSum?orgId=" + this.form.orgId+"&startTime="+ startTime+"&endTime="+ endTime+"&cusLevel="+ this.form.cusLevel;
-                // }else{
-                    // 点击组跳转到组
-                    // window.location.href="/statistics/teleStatement/telemarketingFollowTableTeam?orgId=" + orgId+"&startTime="+ startTime+"&endTime="+ endTime+"&cusLevel="+ this.form.cusLevel;
-                // }
+                }else{
+                    // 点击组跳转到组个人
+                    window.location.href="/statistics/teleStatement/telemarketingFollowTableTeam?orgId=" + orgId+"&startTime="+ startTime+"&endTime="+ endTime+"&cusLevel="+ this.form.cusLevel;
+                }
             },
             arraySpanMethod({ row, column, rowIndex, columnIndex }) { // 合并第一行
                 if (rowIndex === 0) {
@@ -280,7 +272,6 @@
                 // };
                 mainDivVM.loading=true;
                 axios.post('/statistics/teleStatement/getRecordByGroupPageOneCount',param).then(function (response) {
-                    console.log(response) 
                     if(!response){
                         mainDivVM.$message({
                             message: "合计接口调用失败",
@@ -392,7 +383,6 @@
                 param.cusLevelList =  this.export.cusLevelList;//客户级别
                 axios.post('/statistics/teleStatement/exportRecordByGroupPageOne',param,{responseType:'blob'})
                 .then(function (response) {
-                    console.log(response)
                     var data =  response.data;
                     var fileName = response.headers.filename;
                     saveAs(data,decodeURI(fileName));

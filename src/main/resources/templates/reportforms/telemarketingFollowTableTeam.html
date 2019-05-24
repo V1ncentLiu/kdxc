@@ -16,7 +16,8 @@
         <el-button type="primary" @click="searchYesterday">昨天</el-button>
         <el-button type="success" @click="searchWeek">近七天</el-button>
         <el-button type="warning" @click="searchMonth">本月</el-button>  
-        <el-button type="danger" @click="exportRs">导出Excel报表</el-button>  
+        <el-button type="danger" @click="exportRs">导出Excel报表</el-button>
+        <el-button type="primary" style="float: right;" @click="goback()">返回</el-button>    
     </el-row>
     <div class="mainSearchBg">        
         <div class="mainSearchFormBox">
@@ -28,12 +29,31 @@
                    <el-date-picker format="yyyy-MM-dd HH:mm" v-model="form.endTime" type="datetime" placeholder="选择日期"></el-date-picker>
                 </el-form-item>
                 <el-form-item label="电销组:">  
-                    <el-select v-model="form.orgId" placeholder="电销组" style="width: 100%;" clearable filterable>
+                    <el-select v-model="form.orgId" placeholder="电销组" style="width: 100%;" clearable filterable @change="currentTelSale" disabled>
                         <el-option
                             v-for="item in orgTeleArr"
                             :key="item.id"
                             :label="item.name"
                             :value="item.id">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="电销顾问:">  
+                    <el-select 
+                        v-model="form.userId" 
+                        placeholder="电销顾问" 
+                        style="width: 100%;" 
+                        filterable 
+                        multiple 
+                        clearable  >
+                        <el-option
+                            v-for="item in busSaleArr"
+                            :key="item.id"
+                            :label="item.name"
+                            :value="item.id">
+                            <el-checkbox-group v-model="form.userId">
+                                <el-checkbox :label="item.id">{{item.name}}</el-checkbox>
+                            </el-checkbox-group>
                         </el-option>
                     </el-select>
                 </el-form-item>
@@ -47,25 +67,6 @@
                         </el-option>
                     </el-select>
                 </el-form-item>
-                <!-- <el-form-item label="客户级别:">  
-                    <el-select 
-                        v-model="form.cusLevelList" 
-                        placeholder="客户级别" 
-                        style="width: 100%;" 
-                        filterable 
-                        multiple 
-                        clearable  >
-                        <el-option
-                            v-for="item in clientRank"
-                            :key="item.id"
-                            :label="item.name"
-                            :value="item.id">
-                            <el-checkbox-group v-model="form.cusLevelList">
-                                <el-checkbox :label="item.id">{{item.name}}</el-checkbox>
-                            </el-checkbox-group>
-                        </el-option>
-                    </el-select>
-                </el-form-item> -->
                 <div class="mainSearchBtnBox">
                     <el-button icon="el-icon-search" type="primary" @click="searchTable()" class="searchBtn">搜索</el-button>
                     <!-- <el-button type="info" class="searchBtn">取消</el-button> -->
@@ -82,12 +83,12 @@
                 :data="tableData"
                 v-loading="loading"
                 :cell-style="centerStyle"
-                :header-cell-style="centerStyle"
-                :span-method="arraySpanMethod">
-                <el-table-column type="index" label="序号" align="center" width="55" :index="indexFun"></el-table-column>
-                <el-table-column prop="orgName" label="电销组">
+                :header-cell-style="centerStyle">
+                <el-table-column type="index" label="序号" align="center" width="55"></el-table-column>
+                <el-table-column prop="dateId" label="日期" :formatter="dateFormat"></el-table-column>
+                <el-table-column prop="userId" label="顾问">
                     <template slot-scope="scope">
-                        <el-button @click="gotoTeam(scope.row)" type="text" size="small">{{scope.row.orgName}}</el-button>
+                        <el-button @click="gotoPerson(scope.row)" type="text">{{scope.row.userId}}</el-button>
                     </template>
                 </el-table-column>
                 <el-table-column prop="cusLevel" label="客户级别"></el-table-column>
@@ -116,16 +117,19 @@
                     startTime:'',
                     endTime:'',
                     orgId:'',
+                    userId:'',
                     cusLevelList:[],
                 },
                 export: {
                     startTime:'',
                     endTime:'',
                     orgId:'',
+                    userId:'',
                     cusLevelList:[],
                 },
                 tableData: [],
                 orgTeleArr:orgIdList,//电销组
+                busSaleArr:[],//创业顾问
                 clientRank:clientRankIdList,//客户级别
                 pager:{
                     total: 0,
@@ -138,6 +142,17 @@
             centerStyle(){
                 return "text-align:center"
             },  
+            currentTelSale(seleVal){//根据电销组选择创业顾问
+                if(null==seleVal||seleVal==""){
+                    return ;
+                }
+                param={};
+                param.orgId=seleVal;
+                param.roleCode="DXCYGW";
+                axios.post('/user/userManager/listByOrgAndRole' ,param).then(function (response) {  
+                    mainDivVM.busSaleArr=response.data.data;
+                });
+            },
             searchTable() {                 
                 var startTime=this.form.startTime;
                 var endTime=this.form.endTime;
@@ -177,9 +192,10 @@
                 param.startTime = this.minuteFormat(startTime);
                 param.endTime = this.minuteFormat(endTime);
                 param.orgId = this.form.orgId;//电销组
+                param.userId = this.form.userId;//电销顾问
                 param.cusLevelList = this.form.cusLevelList;//客户级别
                 this.loading=true;
-                axios.post('/statistics/teleStatement/getRecordByGroupPageOne',param).then(function (response) { 
+                axios.post('/statistics/teleStatement/getRecordByGroupLevelUserIdDate',param).then(function (response) { 
                     if(!response){
                         mainDivVM.$message({
                             message: "接口调用失败",
@@ -211,140 +227,74 @@
                     // 分页
                     mainDivVM.pager.currentPage= resobj.data.currentPage;
                     mainDivVM.pager.total= resobj.data.total;
-                    // 插入合计一行
-                    if(resobjData.length>0){
-                        mainDivVM.summaryFun(param);
-                    }else{
-                        // loading
-                        mainDivVM.loading=false;
-                    }
+                    // loading
+                    mainDivVM.loading=false;
                     // 给导出参数赋值
                     mainDivVM.export.startTime = mainDivVM.minuteFormat(startTime);
                     mainDivVM.export.endTime = mainDivVM.minuteFormat(endTime);
                     mainDivVM.export.orgId = mainDivVM.form.orgId;
+                    mainDivVM.export.userId = mainDivVM.form.userId;
                     mainDivVM.export.cusLevelList = mainDivVM.form.cusLevelList;
                 })
             },
-            arraySpanMethod({ row, column, rowIndex, columnIndex }) { // 合并第一行
-                if (rowIndex === 0) {
-                    if (columnIndex === 0) {
-                        return [0, 0];
-                    } else if (columnIndex === 1) {
-                        return [1, 2];
-                    }
-                }
-            },
-            indexFun (index) { // 表格序号
-                return index;
-            },
-            gotoTeam(item){
+            gotoPerson(item){
+                debugger
                 console.log(item)
-                var orgName = item.orgName;
-                var orgId = item.orgId;//组id
+                var userId = item.userId;
                 // 搜索条件
-                var startTime=null;
-                var endTime=null;
-                var startTime1 = this.form.startTime;
-                var endTime1 = this.form.endTime;
-                startTime=this.minuteFormat(startTime);
-                endTime=this.minuteFormat(endTime);
-                // if(orgName == "合计"){
-                    // 点击组跳转到合计
-                    window.location.href="/statistics/teleStatement/telemarketingFollowTableSum?orgId=" + this.form.orgId+"&startTime="+ startTime+"&endTime="+ endTime+"&cusLevel="+ this.form.cusLevel;
-                // }else{
-                    // 点击组跳转到组
-                    // window.location.href="/statistics/teleStatement/telemarketingFollowTableTeam?orgId=" + orgId+"&startTime="+ startTime+"&endTime="+ endTime+"&cusLevel="+ this.form.cusLevel;
-                // }
-            },
-            arraySpanMethod({ row, column, rowIndex, columnIndex }) { // 合并第一行
-                if (rowIndex === 0) {
-                    if (columnIndex === 0) {
-                        return [0, 0];
-                    } else if (columnIndex === 1) {
-                        return [1, 2];
-                    }
+                var startTime=this.minuteFormat(this.form.startTime);
+                var endTime=this.minuteFormat(this.form.endTime);
+                var orgId=null;
+                var cusLevelList=null;
+                if(this.form.orgId){
+                    orgId=this.form.orgId;
+                }else{
+                    orgId=""
+                }
+                if(this.form.cusLevelList){
+                    cusLevelList=this.form.cusLevelList;
+                }else{
+                    cusLevelList=""
+                }
+                if(userId){
+                    // 点击个人跳转到此人的资源分配信息
+                    window.location.href="/statistics/teleStatement/telemarketingFollowTablePerson?userId=" + userId + "&orgId=" + orgId+"&startTime="+ startTime+"&endTime="+ endTime+"&cusLevelList="+ cusLevelList;
                 }
             },
-            indexFun (index) { // 表格序号
-                return index;
+            goback () {
+                window.history.go(-1);
             },
-            summaryFun (param) { // 将合计插入数据中：如果是分页，记得每次获取数据都要执行这个函数
-                // const { columns, data } = param;
-                // const sums = ["合计", '', 2, 2, '2%', 2, 2, '2%', 1234, 1234];
-                // var resTotalList = {
-                //     orgName: '合计',
-                //     cusLevel: '2',
-                //     countResource: '4',
-                //     countClueId: '6',
-                //     countDistinctClue: '8',
-                //     dayOfPer: '10',
-                // };
-                mainDivVM.loading=true;
-                axios.post('/statistics/teleStatement/getRecordByGroupPageOneCount',param).then(function (response) {
-                    console.log(response) 
-                    if(!response){
-                        mainDivVM.$message({
-                            message: "合计接口调用失败",
-                            type: 'error'
-                        });
-                        mainDivVM.loading=false;
-                        return ;
-                    }
-                    var resobj= response.data;
-                    if(!resobj){
-                        mainDivVM.$message({
-                            message: "合计接口调用失败",
-                            type: 'error'
-                        });
-                        mainDivVM.loading=false;
-                        return ;
-                    }
-                    if(resobj.code!='0'){
-                        mainDivVM.$message({
-                            message: "合计接口调用失败",
-                            type: 'error'
-                        });
-                        mainDivVM.loading=false;
-                        return ;
-                    }  
-                    var resobjData=resobj.data;
-                    // 插入合计一行
-                    mainDivVM.tableData.unshift(resobjData[0]); 
-                    // mainDivVM.tableData.unshift(resTotalList); 
-                    // loading
-                    mainDivVM.loading=false;                   
-                })
-                
-                // const sums = [];
-                // columns.forEach((column, index) => {
-                //     if (index === 0) {
-                //         sums[index] = '合计';
-                //         return;
-                //     }
-                //     if (index === 1) {
-                //         sums[index] = '';
-                //         return;
-                //     }
-                //     const values = data.map(item => Number(item[column.property]));
-                //     if (!values.every(value => isNaN(value))) {
-                //         sums[index] = values.reduce((prev, curr) => {
-                //             const value = Number(curr);
-                //             if (!isNaN(value)) {
-                //                 return prev + curr;
-                //             } 
-                //         }, 0);
-                //     }
-                // });
-                // sums[sums.length-2] = this.timeFun (sums[sums.length-2]);
-                // sums[sums.length-1] = this.timeFun (sums[sums.length-1]);
-                // return sums;
-            },
+            dateFormat (row, column) { 
+                var date = row[column.property];
+                 if (!date) {return "";}
+                var d = date.toString();
+                var oYear = d.slice(0,4);
+                var oMonth = d.slice(5,6);
+                oMonth = oMonth < 10 ? "0" + oMonth : oMonth;
+                var oDay = d.slice(7);
+                oDay = oDay < 10 ? "0" + oDay : oDay;
+                return oYear+"-"+oMonth+"-"+oDay;
+            }, 
             minuteFormat (m) {
                 if (!m) {
                    return "";
                  }
                 return moment(m).format("YYYYMMDDHHmm");
             },
+            dateTimeFormat (dt) { 
+                if (!dt) {return "";}
+                var d = dt.toString();
+                var oYear = d.slice(0,4);
+                var oMonth = d.slice(5,6);
+                oMonth = oMonth < 10 ? "0" + oMonth : oMonth;
+                var oDay = d.slice(7,8);
+                oDay = oDay < 10 ? "0" + oDay : oDay;
+                var oHour = d.slice(9,10);
+                oHour = oHour < 10 ? "0" + oHour : oHour;
+                var oMinute = d.slice(11);
+                oMinute = oMinute < 10 ? "0" + oMinute : oMinute;
+                return oYear+"-"+oMonth+"-"+oDay+" "+oHour+":"+oMinute;
+            }, 
             searchYesterday(){//昨天
                 var today = new Date();
                today.setTime(today.getTime()-24*60*60*1000);
@@ -390,6 +340,7 @@
                 param.startTime = this.export.startTime;
                 param.endTime =  this.export.endTime;
                 param.orgId =  this.export.orgId;//电销组
+                param.userId =  this.export.userId;//电销顾问
                 param.cusLevelList =  this.export.cusLevelList;//客户级别
                 axios.post('/statistics/teleStatement/exportRecordByGroupPageOne',param,{responseType:'blob'})
                 .then(function (response) {
@@ -406,11 +357,12 @@
         },
         created(){     
             // 接收参数
-            // console.log(trackingQuery)
-            this.form.startTime=trackingQuery.startTime;
-            this.form.endTime=trackingQuery.endTime;
+            console.log(trackingQuery)
+            this.form.startTime=this.dateTimeFormat(trackingQuery.startTime);
+            this.form.endTime=this.dateTimeFormat(trackingQuery.endTime);
             this.form.org_Id=trackingQuery.org_Id;
             this.form.new_resource=trackingQuery.new_resource; 
+
             this.searchTable();
         },
         mounted(){
