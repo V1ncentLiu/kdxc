@@ -45,6 +45,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * 电销相关报表
@@ -75,8 +76,9 @@ public class TeleStatementController {
     public String resourceAllocationTable(HttpServletRequest request) {
         UserInfoDTO user = getUser();
         // 查询所有电销组
-        List<OrganizationRespDTO> saleGroupList = getSaleGroupList();
-        request.setAttribute("saleGroupList", saleGroupList);
+        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+        request.setAttribute("saleGroupList",getOrgGroupByOrgId(curLoginUser.getOrgId(),OrgTypeConstant.DXZ));
+
         // 根据角色查询页面字段
         QueryFieldByRoleAndMenuReq queryFieldByRoleAndMenuReq = new QueryFieldByRoleAndMenuReq();
         queryFieldByRoleAndMenuReq.setMenuCode("statistics:teleStatement:resourceAllocation");
@@ -130,6 +132,7 @@ public class TeleStatementController {
     public void exportResourceAllocation(
             @RequestBody ResourceAllocationQueryDto resourceAllocationQueryDto,
             HttpServletResponse response) throws Exception {
+        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
         JSONResult<List<ResourceAllocationDto>> resourceAllocationList = statisticsFeignClient.getResourceAllocationList(resourceAllocationQueryDto);
         JSONResult<List<ResourceAllocationDto>> countRes = statisticsFeignClient.getResourceAllocationCount(resourceAllocationQueryDto);
         List<ResourceAllocationDto> total = countRes.getData();
@@ -193,8 +196,9 @@ public class TeleStatementController {
     public JSONResult<PageBean<ResourceAllocationDto>> getResourceAllocationPersionTable(@RequestBody ResourceAllocationQueryDto resourceAllocationQueryDto, HttpServletRequest request) {
         UserInfoDTO user = getUser();
         // 查询所有电销组
-        List<OrganizationRespDTO> saleGroupList = getSaleGroupList();
-        request.setAttribute("saleGroupList", saleGroupList);
+        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+        request.setAttribute("saleGroupList",getOrgGroupByOrgId(curLoginUser.getOrgId(),OrgTypeConstant.DXZ));
+
         // 根据角色查询页面字段
         QueryFieldByRoleAndMenuReq queryFieldByRoleAndMenuReq = new QueryFieldByRoleAndMenuReq();
         queryFieldByRoleAndMenuReq.setMenuCode("statistics:teleStatement:resourceAllocation");
@@ -296,8 +300,8 @@ public class TeleStatementController {
     public String resourceAllocationTableSum(ResourceAllocationQueryDto resourceAllocationQueryDto,HttpServletRequest request) {
         UserInfoDTO user = getUser();
         // 查询所有电销组
-        List<OrganizationRespDTO> saleGroupList = getSaleGroupList();
-        request.setAttribute("saleGroupList", saleGroupList);
+        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+        request.setAttribute("saleGroupList",getOrgGroupByOrgId(curLoginUser.getOrgId(),OrgTypeConstant.DXZ));
         request.setAttribute("resourceAllocationQueryDto",resourceAllocationQueryDto);
         // 根据角色查询页面字段
         QueryFieldByRoleAndMenuReq queryFieldByRoleAndMenuReq = new QueryFieldByRoleAndMenuReq();
@@ -320,8 +324,8 @@ public class TeleStatementController {
     public String resourceAllocationTableTeam(ResourceAllocationQueryDto resourceAllocationQueryDto,HttpServletRequest request) {
         UserInfoDTO user = getUser();
         // 查询所有电销组
-        List<OrganizationRespDTO> saleGroupList = getSaleGroupList();
-        request.setAttribute("saleGroupList", saleGroupList);
+        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+        request.setAttribute("saleGroupList",getOrgGroupByOrgId(curLoginUser.getOrgId(),OrgTypeConstant.DXZ));
         request.setAttribute("resourceAllocationQueryDto",resourceAllocationQueryDto);
         // 根据角色查询页面字段
         QueryFieldByRoleAndMenuReq queryFieldByRoleAndMenuReq = new QueryFieldByRoleAndMenuReq();
@@ -344,8 +348,8 @@ public class TeleStatementController {
     public String resourceAllocationTablePerson(ResourceAllocationQueryDto resourceAllocationQueryDto,HttpServletRequest request) {
         UserInfoDTO user = getUser();
         // 查询所有电销组
-        List<OrganizationRespDTO> saleGroupList = getSaleGroupList();
-        request.setAttribute("saleGroupList", saleGroupList);
+        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+        request.setAttribute("saleGroupList",getOrgGroupByOrgId(curLoginUser.getOrgId(),OrgTypeConstant.DXZ));
         request.setAttribute("resourceAllocationQueryDto",resourceAllocationQueryDto);
         // 根据角色查询页面字段
         QueryFieldByRoleAndMenuReq queryFieldByRoleAndMenuReq = new QueryFieldByRoleAndMenuReq();
