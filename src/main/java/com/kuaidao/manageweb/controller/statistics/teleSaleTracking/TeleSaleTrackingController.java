@@ -53,6 +53,7 @@ public class TeleSaleTrackingController {
     @ResponseBody
     JSONResult<PageBean<TeleSaleTrackingDto>> getRecordByGroupPageOne(@RequestBody TeleSaleTrackingQueryDto trackingQueryDto,
                                                                       HttpServletRequest request){
+        String strCusLevelList = trackingQueryDto.getStrCusLevelList();
         request.setAttribute("trackingQueryDto",trackingQueryDto);
 //        Long orgId = trackingQueryDto.getOrgId();
 //        if(null == orgId){
@@ -249,7 +250,7 @@ public class TeleSaleTrackingController {
      * @return
      */
     @RequestMapping("/telemarketingFollowTableSum")
-    public String telemarketingFollowTableSum(@RequestBody TeleSaleTrackingQueryDto trackingQueryDto,HttpServletRequest request) {
+    public String telemarketingFollowTableSum(TeleSaleTrackingQueryDto trackingQueryDto,HttpServletRequest request) {
         request.setAttribute("trackingQueryDto",trackingQueryDto);
         // 查询所有电销组
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
@@ -265,7 +266,7 @@ public class TeleSaleTrackingController {
      * @return
      */
     @RequestMapping("/telemarketingFollowTableTeam")
-    public String telemarketingFollowTableTeam(@RequestBody TeleSaleTrackingQueryDto trackingQueryDto,HttpServletRequest request) {
+    public String telemarketingFollowTableTeam(TeleSaleTrackingQueryDto trackingQueryDto,HttpServletRequest request) {
         request.setAttribute("trackingQueryDto",trackingQueryDto);
         // 查询所有电销组
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
