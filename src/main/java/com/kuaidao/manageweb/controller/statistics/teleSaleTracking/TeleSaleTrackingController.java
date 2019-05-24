@@ -1,13 +1,19 @@
 package com.kuaidao.manageweb.controller.statistics.teleSaleTracking;
 
 
+import com.kuaidao.common.constant.OrgTypeConstant;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.common.util.DateUtil;
 import com.kuaidao.common.util.ExcelUtil;
+import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
+import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
 import com.kuaidao.manageweb.feign.statistics.teleSaleTracking.TeleSaleTrackingFeignClient;
 import com.kuaidao.stastics.dto.teleSaleTracking.TeleSaleTrackingDto;
 import com.kuaidao.stastics.dto.teleSaleTracking.TeleSaleTrackingQueryDto;
+import com.kuaidao.sys.dto.dictionary.DictionaryItemRespDTO;
+import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
+import com.kuaidao.sys.dto.organization.OrganizationRespDTO;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -17,6 +23,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.net.URLEncoder;
 import java.util.ArrayList;
@@ -29,6 +36,10 @@ public class TeleSaleTrackingController {
 
     @Autowired
     private TeleSaleTrackingFeignClient teleSaleTrackingFeignClient;
+    @Autowired
+    private OrganizationFeignClient organizationFeignClient;
+    @Autowired
+    DictionaryItemFeignClient dictionaryItemFeignClient;
 
     /**
      * 一级页面查询
@@ -188,7 +199,12 @@ public class TeleSaleTrackingController {
      * @return
      */
     @RequestMapping("/telemarketingFollowTable")
-    public String telemarketingFollowTable() {
+    public String telemarketingFollowTable(HttpServletRequest request) {
+        // 查询所有电销组
+        List<OrganizationRespDTO> saleGroupList = getSaleGroupList();
+        request.setAttribute("saleGroupList", saleGroupList);
+        JSONResult<List<DictionaryItemRespDTO>> customerLevel = dictionaryItemFeignClient.queryDicItemsByGroupCode("customerLevel");
+        request.setAttribute("cusLevelList",customerLevel.getData());
         return "reportforms/telemarketingFollowTable";
     }
 
@@ -233,5 +249,16 @@ public class TeleSaleTrackingController {
         return headTitleList;
     }
 
-
+    /**
+     * 获取电销组
+     */
+    private List<OrganizationRespDTO> getSaleGroupList() {
+        OrganizationQueryDTO queryDTO = new OrganizationQueryDTO();
+        queryDTO.setOrgType(OrgTypeConstant.DXZ);
+        // 查询下级电销组
+        JSONResult<List<OrganizationRespDTO>> queryOrgByParam =
+                organizationFeignClient.queryOrgByParam(queryDTO);
+        List<OrganizationRespDTO> data = queryOrgByParam.getData();
+        return data;
+    }
 }
