@@ -38,7 +38,7 @@
                     </el-select>
                 </el-form-item>
                 <el-form-item label="客户级别:">  
-                    <el-select v-model="form.cusLevel" placeholder="客户级别" style="width: 100%;" clearable filterable>
+                    <el-select v-model="form.cusLevelList" placeholder="客户级别" style="width: 100%;" clearable filterable multiple>
                         <el-option
                             v-for="item in clientRank"
                             :key="item.id"
@@ -47,6 +47,25 @@
                         </el-option>
                     </el-select>
                 </el-form-item>
+                <!-- <el-form-item label="客户级别:">  
+                    <el-select 
+                        v-model="form.cusLevelList" 
+                        placeholder="客户级别" 
+                        style="width: 100%;" 
+                        filterable 
+                        multiple 
+                        clearable  >
+                        <el-option
+                            v-for="item in clientRank"
+                            :key="item.id"
+                            :label="item.name"
+                            :value="item.id">
+                            <el-checkbox-group v-model="form.cusLevelList">
+                                <el-checkbox :label="item.id">{{item.name}}</el-checkbox>
+                            </el-checkbox-group>
+                        </el-option>
+                    </el-select>
+                </el-form-item> -->
                 <div class="mainSearchBtnBox">
                     <el-button icon="el-icon-search" type="primary" @click="searchTable()" class="searchBtn">搜索</el-button>
                     <!-- <el-button type="info" class="searchBtn">取消</el-button> -->
@@ -98,13 +117,13 @@
                     startTime:'',
                     endTime:'',
                     orgId:'',
-                    cusLevel:'',
+                    cusLevelList:'',
                 },
                 export: {
                     startTime:'',
                     endTime:'',
                     orgId:'',
-                    cusLevel:'',
+                    cusLevelList:'',
                 },
                 tableData: [],
                 orgTeleArr:orgIdList,//电销组
@@ -158,9 +177,8 @@
                 // 搜索条件
                 param.startTime = this.minuteFormat(startTime);
                 param.endTime = this.minuteFormat(endTime);
-                // param.orgID = this.form.orgID;//电销组
-                param.orgID = "1";//电销组
-                param.cusLevel = this.form.cusLevel;//客户级别
+                param.orgId = this.form.orgId;//电销组
+                param.cusLevelList = this.form.cusLevelList;//客户级别
                 this.loading=true;
                 axios.post('/statistics/teleStatement/getRecordByGroupPageOne',param).then(function (response) { 
                     if(!response){
@@ -205,7 +223,7 @@
                     mainDivVM.export.startTime = mainDivVM.minuteFormat(startTime);
                     mainDivVM.export.endTime = mainDivVM.minuteFormat(endTime);
                     mainDivVM.export.orgId = mainDivVM.form.orgId;
-                    mainDivVM.export.cusLevel = mainDivVM.form.cusLevel;
+                    mainDivVM.export.cusLevelList = mainDivVM.form.cusLevelList;
                 })
             },
             arraySpanMethod({ row, column, rowIndex, columnIndex }) { // 合并第一行
@@ -373,7 +391,7 @@
                 param.startTime = this.export.startTime;
                 param.endTime =  this.export.endTime;
                 param.orgId =  this.export.orgId;//电销组
-                param.cusLevel =  this.export.cusLevel;//客户级别
+                param.cusLevelList =  this.export.cusLevelList;//客户级别
                 axios.post('/statistics/teleStatement/exportRecordByGroupPageOne',param,{responseType:'blob'})
                 .then(function (response) {
                     console.log(response)
