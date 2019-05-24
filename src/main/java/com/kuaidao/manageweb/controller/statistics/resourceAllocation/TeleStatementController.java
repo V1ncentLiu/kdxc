@@ -107,6 +107,8 @@ public class TeleStatementController {
     @RequestMapping("/getResourceAllocationTable")
     @ResponseBody
     public JSONResult<PageBean<ResourceAllocationDto>> getResourceAllocationTable(@RequestBody ResourceAllocationQueryDto resourceAllocationQueryDto) {
+        Long org_id = resourceAllocationQueryDto.getOrg_Id();
+//        buildOrgIdList(resourceAllocationQueryDto, org_id);
         JSONResult<PageBean<ResourceAllocationDto>> resourceAllocationPage = statisticsFeignClient.getResourceAllocationPage(resourceAllocationQueryDto);
         return resourceAllocationPage;
     }
@@ -132,7 +134,8 @@ public class TeleStatementController {
     public void exportResourceAllocation(
             @RequestBody ResourceAllocationQueryDto resourceAllocationQueryDto,
             HttpServletResponse response) throws Exception {
-        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+        Long org_id = resourceAllocationQueryDto.getOrg_Id();
+//        buildOrgIdList(resourceAllocationQueryDto, org_id);
         JSONResult<List<ResourceAllocationDto>> resourceAllocationList = statisticsFeignClient.getResourceAllocationList(resourceAllocationQueryDto);
         JSONResult<List<ResourceAllocationDto>> countRes = statisticsFeignClient.getResourceAllocationCount(resourceAllocationQueryDto);
         List<ResourceAllocationDto> total = countRes.getData();
@@ -168,6 +171,15 @@ public class TeleStatementController {
         ServletOutputStream outputStream = response.getOutputStream();
         wbWorkbook.write(outputStream);
         outputStream.close();
+    }
+
+    private void buildOrgIdList(@RequestBody ResourceAllocationQueryDto resourceAllocationQueryDto, Long org_id) {
+        if(null == org_id){
+            UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+            List<OrganizationRespDTO> orgGroupByOrgId = getOrgGroupByOrgId(curLoginUser.getOrgId(), OrgTypeConstant.DXZ);
+            List<Long> orgIdList = orgGroupByOrgId.parallelStream().map(OrganizationRespDTO::getId).collect(Collectors.toList());
+            resourceAllocationQueryDto.setOrgIdList(orgIdList);
+        }
     }
 
 
