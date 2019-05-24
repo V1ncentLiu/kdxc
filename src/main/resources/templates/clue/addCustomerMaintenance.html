@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html>
-<head th:include="_header_include::frag(~{::title},~{},~{})">
+<head th:include="_header_include::frag(~{::title},~{::style},~{})">
     <title>维护客户</title>
     <meta charset="UTF-8">
     <style type="text/css">
+        .el-message-box__btns {text-align: center;}
     </style>
 </head>
 <body>
@@ -18,9 +19,8 @@
     <el-row class="borderbox">
         <!--<div class="inforTitle">维护客户</div>-->
         <el-form :model="form" :rules="rules" ref="form" class="padding20">
-            <div class="marginB20 fs16 paddingT20">
-                资源信息 <span style="padding-left: 20px; color: red;">资源ID{{clueId}}  </span> <span v-show="isShowTip"
-                                                                                                 style="padding-left: 20px; color: red;">{{showTipInfo}}</span>
+            <div class="marginB20 fs16 paddingT20">资源信息 <span style="padding-left: 20px; color: red;">资源ID{{clueId}}  </span> 
+                <span v-show="isShowTip" style="padding-left: 20px; color: red;">{{showTipInfo}}</span>
                 <el-button v-show="isShowBtn" type="primary" @click="keepCustomer" style="margin-left: 10px;">保留客户
                 </el-button>
             </div>
@@ -57,14 +57,14 @@
                             <div class="lineFeed">{{clueBase.searchWord}}</div>
                         </el-form-item>
                     </el-col>
-                </el-row>
-                <el-row>
                     <el-col :span="8">
                         <el-form-item label="地域信息：" :label-width="formLabelWidth">
                             <el-button type="text" disabled>{{intention.address}}</el-button>
                         </el-form-item>
                     </el-col>
-                    <el-col :span="8">
+                </el-row>
+                <el-row>                    
+                    <el-col :span="16">
                         <el-form-item label="备注：" :label-width="formLabelWidth">
                             <el-button type="text" disabled>{{clueBase.remark}}</el-button>
                         </el-form-item>
@@ -81,9 +81,8 @@
                     </el-col>
                     <el-col :span="8">
                         <el-form-item label="客户级别：" :label-width="formLabelWidth">
-                            <el-select v-model="form.customerLevel" placeholder="请选择" style="width: 100%;">
-                                <el-option v-for="item in customerLevelArr" :key="item.value" :label="item.name"
-                                           :value="item.value"></el-option>
+                            <el-select v-model="form.customerLevel" placeholder="请选择" style="width: 100%;" clearable>
+                                <el-option v-for="item in customerLevelArr" :key="item.value" :label="item.name" :value="item.value" clearable></el-option>
                             </el-select>
                         </el-form-item>
                     </el-col>
@@ -127,8 +126,7 @@
                 <el-row>
                     <el-col :span="8">
                         <el-form-item label="QQ：" :label-width="formLabelWidth">
-                            <el-input v-model="form.qq" autocomplete="off" maxLength="20"
-                                      @keyup.native="qqnumber"></el-input>
+                            <el-input v-model="form.qq" autocomplete="off" maxLength="20" @keyup.native="qqnumber"></el-input>
                         </el-form-item>
                     </el-col>
                     <el-col :span="8">
@@ -141,83 +139,63 @@
                 </el-row>
                 <el-row>
                     <el-col :span="8">
-                        <el-form-item
-                                label="性别：" :label-width="formLabelWidth">
-                            <el-select
-                                    v-model="form.customerSex" placeholder="请选择" style="width: 100%;">
-                                <el-option v-for="item in optsex" :key="item.value"
-                                           :label="item.label" :value="item.value"></el-option>
+                        <el-form-item label="性别：" :label-width="formLabelWidth">
+                            <el-select v-model="form.customerSex" placeholder="请选择" style="width: 100%;" clearable>
+                                <el-option v-for="item in optsex" :key="item.value" :label="item.label" :value="item.value"></el-option>
                             </el-select>
                         </el-form-item>
                     </el-col>
                     <el-col :span="8">
-                        <el-form-item
-                                label="年龄：" :label-width="formLabelWidth" prop="customerAge">
-                            <el-input type="number" min="1"
-                                      v-model="form.customerAge" autocomplete="off" maxLength="3"
-                                      @keyup.native="agenumber"></el-input>
+                        <el-form-item label="年龄：" :label-width="formLabelWidth" prop="customerAge">
+                            <el-input type="number" min="1" v-model="form.customerAge" autocomplete="off" maxLength="3" @keyup.native="agenumber"></el-input>
                         </el-form-item>
                     </el-col>
                 </el-row>
                 <el-row>
                     <el-col :span="8">
-                        <el-form-item
-                                label="职业：" :label-width="formLabelWidth">
-                            <el-select
-                                    v-model="form.customerJob" placeholder="请选择" style="width: 100%;">
-                                <el-option v-for="item in occupationArr" :key="item.value"
-                                           :label="item.name" :value="item.value"></el-option>
+                        <el-form-item label="职业：" :label-width="formLabelWidth">
+                            <el-select v-model="form.customerJob" placeholder="请选择" style="width: 100%;" clearable>
+                                <el-option v-for="item in occupationArr" :key="item.value" :label="item.name" :value="item.value"></el-option>
                             </el-select>
                         </el-form-item>
                     </el-col>
                     <el-col :span="8">
                         <el-form-item
                                 label="餐饮经验：" :label-width="formLabelWidth">
-                            <el-select v-model="form.experience" placeholder="请选择" style="width: 100%;">
-                                <el-option v-for="item in CateringExperienceArr" :key="item.value" :label="item.name"
-                                           :value="item.value"></el-option>
+                            <el-select v-model="form.experience" placeholder="请选择" style="width: 100%;" clearable>
+                                <el-option v-for="item in CateringExperienceArr" :key="item.value" :label="item.name" :value="item.value"></el-option>
                             </el-select>
-                            <el-input v-model="form.cateringType" v-show="form.experience!=''&&form.experience!='0'"
-                                      autocomplete="off" maxLength="50" placeholder="请输入曾从事餐饮类型"
-                                      style="margin-top:10px;"></el-input>
+                            <el-input v-model="form.cateringType" v-show="form.experience!=''&&form.experience!='0'" autocomplete="off" maxLength="50" placeholder="请输入曾从事餐饮类型" style="margin-top:10px;"></el-input>
                         </el-form-item>
                     </el-col>
                 </el-row>
                 <el-row>
                     <el-col :span="8">
-                        <el-form-item
-                                label="选址情况：" :label-width="formLabelWidth">
-                            <el-select
-                                    v-model="form.address" placeholder="请选择" style="width: 100%;">
-                                <el-option v-for="item in optionAddressArr" :key="item.value"
-                                           :label="item.name" :value="item.value"></el-option>
+                        <el-form-item label="选址情况：" :label-width="formLabelWidth">
+                            <el-select v-model="form.address" placeholder="请选择" style="width: 100%;" clearable>
+                                <el-option v-for="item in optionAddressArr" :key="item.value" :label="item.name" :value="item.value"></el-option>
                             </el-select>
                         </el-form-item>
                     </el-col>
                     <el-col :span="8">
                         <el-form-item label="合伙人：" :label-width="formLabelWidth">
-                            <el-select v-model="form.customerPartner" placeholder="请选择"
-                                       style="width: 100%;">
-                                <el-option v-for="item in partnerArr"
-                                           :key="item.value" :label="item.name"
-                                           :value="item.value">
+                            <el-select v-model="form.customerPartner" placeholder="请选择" style="width: 48%;" clearable>
+                                <el-option v-for="item in partnerArr" :key="item.value" :label="item.name" :value="item.value">
                                 </el-option>
                             </el-select>
                             <el-input v-model="form.customerPartnerDetail"
                                       v-show="form.customerPartner!='' && form.customerPartner!='1'"
                                       autocomplete="off" maxLength="30"
                                       placeholder="请输入合伙人姓名以及联系方式"
-                                      style="margin-top:10px;">
+                                      style="width: 48%;float: right;">
                             </el-input>
                         </el-form-item>
                     </el-col>
                 </el-row>
                 <el-row>
                     <el-col :span="8">
-                        <el-form-item
-                                label="决策人：" :label-width="formLabelWidth">
-                            <el-radio-group
-                                    v-model="form.decisionMaker">
+                        <el-form-item label="决策人：" :label-width="formLabelWidth">
+                            <el-radio-group v-model="form.decisionMaker">
                                 <el-radio label="1">自己本人</el-radio>
                                 <el-radio label="2">他人</el-radio>
                             </el-radio-group>
@@ -230,10 +208,8 @@
                     </el-col>
                     <el-col
                             :span="8">
-                        <el-form-item label="出资人："
-                                      :label-width="formLabelWidth">
-                            <el-radio-group
-                                    v-model="form.sponsor">
+                        <el-form-item label="出资人：" :label-width="formLabelWidth">
+                            <el-radio-group v-model="form.sponsor">
                                 <el-radio label="1">自己本人</el-radio>
                                 <el-radio label="2">他人</el-radio>
                             </el-radio-group>
@@ -249,35 +225,25 @@
             <div class="borderbox padding20">
                 <el-row>
                     <el-col :span="8">
-                        <el-form-item
-                                label="投资金额：" :label-width="formLabelWidth">
-                            <el-select
-                                    v-model="form.money" placeholder="请选择" style="width: 100%;">
-                                <el-option v-for="item in ussmArr" :key="item.value"
-                                           :label="item.name" :value="item.value"></el-option>
+                        <el-form-item label="投资金额：" :label-width="formLabelWidth">
+                            <el-select v-model="form.money" placeholder="请选择" style="width: 100%;" clearable>
+                                <el-option v-for="item in ussmArr" :key="item.value" :label="item.name" :value="item.value"></el-option>
                             </el-select>
                         </el-form-item>
                     </el-col>
-                    <el-col
-                            :span="8">
-                        <el-form-item label="店面大小："
-                                      :label-width="formLabelWidth">
-                            <el-select
-                                    v-model="form.area" placeholder="请选择" style="width: 100%;">
-                                <el-option v-for="item in StorefrontAreaArr" :key="item.value"
-                                           :label="item.name" :value="item.value"></el-option>
+                    <el-col :span="8">
+                        <el-form-item label="店面大小：" :label-width="formLabelWidth">
+                            <el-select v-model="form.area" placeholder="请选择" style="width: 100%;" clearable>
+                                <el-option v-for="item in StorefrontAreaArr" :key="item.value" :label="item.name" :value="item.value"></el-option>
                             </el-select>
                         </el-form-item>
                     </el-col>
                 </el-row>
                 <el-row>
                     <el-col :span="8">
-                        <el-form-item
-                                label="意向品类：" :label-width="formLabelWidth">
-                            <el-select
-                                    v-model="form.intentionCategory" filterable placeholder="请选择" @change="projectChangeSelect"  style="width: 100%;">
-                                <el-option
-                                        v-for="item in IntentionalCategoryArr" :key="item.value"  :label="item.name" :value="item.value">
+                        <el-form-item label="意向品类：" :label-width="formLabelWidth">
+                            <el-select v-model="form.intentionCategory" filterable placeholder="请选择" @change="projectChangeSelect"  style="width: 100%;" clearable>
+                                <el-option v-for="item in IntentionalCategoryArr" :key="item.value"  :label="item.name" :value="item.value">
                                 </el-option>
                             </el-select>
                         </el-form-item>
@@ -285,7 +251,7 @@
                     <el-col :span="8">
                         <el-form-item label="意向项目：" :label-width="formLabelWidth">
                            <!-- <el-radio  v-model="form.radioProject" label="1" @change="projectChange"  style="margin-right: 10px;">内部项目</el-radio>-->
-                            <el-select  v-model="form.insideProject" filterable v-show="insideProjectShow" placeholder="请选择" style="width: 100%;">
+                            <el-select  v-model="form.insideProject" filterable v-show="insideProjectShow" placeholder="请选择" style="width: 100%;" clearable>
                                 <el-option  v-for="item in proSelect" :key="item.id" :label="item.projectName"  :value="item.id"></el-option>
                             </el-select>
                             <!--<el-radio
@@ -326,31 +292,25 @@
                         <el-form-item
                                 label="开店紧迫性：" :label-width="formLabelWidth">
                             <!-- <el-input v-model="form.urgency" autocomplete="off" style='width: 60%;'> -->
-                            <el-date-picker style='width: 60%;' v-model="form.urgency"
-                                            type="month" placeholder="选择月"></el-date-picker>
+                            <el-date-picker style='width: 60%;' v-model="form.urgency" type="month" placeholder="选择月"></el-date-picker>
                             </el-input>
                             <span style="padding-left: 5px;">之前启动</span></el-form-item>
                     </el-col>
                     <el-col :span="16">
                         <el-form-item label="开店区域：" :label-width="formLabelWidth" prop="province" style="float: left;">
-                            <el-select filterable v-model="form.province" placeholder="省"
-                                       style="width: 180px;margin-right: 10px;" @change="currentProvince">
-                                <el-option
-                                        v-for="item in provinceArr" :key="item.name" :label="item.name"
+                            <el-select filterable v-model="form.province" placeholder="省" style="width: 180px;margin-right: 10px;" @change="currentProvince" clearable>
+                                <el-option v-for="item in provinceArr" :key="item.name" :label="item.name"
                                         :value="item.name"></el-option>
                             </el-select>
                         </el-form-item>
                         <el-form-item label="" prop="city" style="float: left;">
-                            <el-select filterable v-model="form.city" placeholder="市"
-                                       style="width: 180px;margin-right: 10px;" @change="currentCity">
-                                <el-option v-for="item in cityArr" :key="item.name" :label="item.name"
-                                           :value="item.name"></el-option>
+                            <el-select filterable v-model="form.city" placeholder="市" style="width: 180px;margin-right: 10px;" @change="currentCity" clearable>
+                                <el-option v-for="item in cityArr" :key="item.name" :label="item.name" :value="item.name"></el-option>
                             </el-select>
                         </el-form-item>
                         <el-form-item label="" style="float: left;">
-                            <el-select filterable v-model="form.district" placeholder="区/县" style="width: 180px;">
-                                <el-option v-for="item in districtArr" :key="item.name" :label="item.name"
-                                           :value="item.name"></el-option>
+                            <el-select filterable v-model="form.district" placeholder="区/县" style="width: 180px;" clearable>
+                                <el-option v-for="item in districtArr" :key="item.name" :label="item.name" :value="item.name"></el-option>
                             </el-select>
                         </el-form-item>
                     </el-col>
@@ -411,23 +371,19 @@
             <div class="marginB20 fs16 paddingT20">跟进记录</div>
             <el-row class="marginB10">
                 <el-col :span="16">
-                    <el-button
-                            size="small" type="danger" @click="deteleTracking">删除
+                    <el-button size="small" type="danger" @click="deteleTracking">删除
                     </el-button>
-                    <el-button
-                            size="small" type="primary" @click="editRecord">编辑
+                    <el-button size="small" type="primary" @click="editRecord">编辑
                     </el-button>
                 </el-col>
                 <el-col :span="4" :offset="4" class="f-tar">
-                    <el-button size="small" type="primary" @click="lineFormShowFun">添加
+                    <el-button size="small" type="primary" @click="lineFormShowFun"><span v-if="lineFormShow">取消添加</span><span v-else>添加</span>
                     </el-button> <!-- <el-button size="small" type="primary" @click="addRecord">添加</el-button> -->
                 </el-col>
             </el-row>
             <el-row>
-                <el-table ref="multipleTable" :data="tableDataC2" tooltip-effect="dark" style="width: 100%" border
-                          @selection-change="handleTrackingSelection">
-                    <el-table-column prop="id" type="selection" min-width="10%"
-                                     @selection-change="handleTrackingSelection" align="center"></el-table-column>
+                <el-table ref="multipleTable" :data="tableDataC2" tooltip-effect="dark" style="width: 100%" border @selection-change="handleTrackingSelection">
+                    <el-table-column prop="id" type="selection" min-width="10%" @selection-change="handleTrackingSelection" align="center"></el-table-column>
                     <el-table-column prop="callTime" label="拨打时间" align="center" min-width="12%">
                     </el-table-column>
                     <el-table-column prop="customerStatusName" label="客户状态" align="center" min-width="20%">
@@ -437,16 +393,15 @@
                             <div v-if="scope.row.isCall === 0">未接通</div>
                             <div v-else-if="scope.row.isCall ===1">已接通</div>
                         </template>
-                    </el-table-column> <!-- <el-table-column
+                    </el-table-column> 
+                    <!-- <el-table-column
                           prop="resourceStatus"
                           label="资源有效性"
                           align="center">
                           <template slot-scope="scope">
-	                      <div v-if="scope.row.resourceStatus === 0">
-	                                                                           无效资源
+	                      <div v-if="scope.row.resourceStatus === 0">无效资源
 	                      </div>
-	                       <div v-else-if="scope.row.resourceStatus ===1">
-	                                                                           有效资源
+	                       <div v-else-if="scope.row.resourceStatus ===1">有效资源
 	                       </div>
 	                     </template>
                         </el-table-column> -->
@@ -464,35 +419,25 @@
                     <el-table-column prop="createUserName" label="创建人" align="center" min-width="10%">
                     </el-table-column>
                     <div slot="append" v-show="lineFormShow" class="lineFormShow">
-                        <el-form :inline="true" :model="formInline" class="demo-form-inline" :rules="rules"
-                                 ref="LineRuleForm">
+                        <el-form :inline="true" :model="formInline" class="demo-form-inline" :rules="rules" ref="LineRuleForm">
                             <div style="float: left; width: 48px;">&nbsp;</div>
                             <el-form-item prop="callTime" class="lineForm_callTime" style="width: 14.5%;float: left;">
-                                <el-date-picker v-model="formInline.callTime" type="datetime" placeholder="选择日期时间"
-                                                style="width: 90%;display: block;margin:0 auto;"></el-date-picker>
+                                <el-date-picker v-model="formInline.callTime" type="datetime" placeholder="选择日期时间" style="width: 90%;display: block;margin:0 auto;"></el-date-picker>
                             </el-form-item>
                             <div style="width: 24%;float: left;text-align: center;">
                                 <el-form-item label="" class="lineForm_customerStatus" style="width: 100px;">
-                                    <el-select v-model="formInline.customerStatus" @change="customerStatusChange"
-                                               placeholder="客户状态" style="width: 100%;display: block;margin:0 auto;">
-                                        <el-option v-for="item in cusStatusArr" :key="item.value" :label="item.name"
-                                                   :value="item.value"></el-option>
+                                    <el-select v-model="formInline.customerStatus" @change="customerStatusChange" placeholder="客户状态" style="width: 100%;display: block;margin:0 auto;" clearable>
+                                        <el-option v-for="item in cusStatusArr" :key="item.value" :label="item.name" :value="item.value"></el-option>
                                     </el-select>
                                 </el-form-item>
-                                <el-form-item label="" prop="customerStatusSub" v-show="!substatus"
-                                              class="lineForm_customerStatusSub" style="width: 160px;">
-                                    <el-select v-model="formInline.customerStatusSub" placeholder="客户状态"
-                                               :disabled="substatus" :required="customerStatusRequired"
-                                               style="width: 100%;height: 35px!important;">
-                                        <el-option v-for="item in customerStatusSubArr" :key="item.value"
-                                                   :label="item.name" :value="item.value"></el-option>
+                                <el-form-item label="" prop="customerStatusSub" v-show="!substatus" class="lineForm_customerStatusSub" style="width: 160px;">
+                                    <el-select v-model="formInline.customerStatusSub" placeholder="客户状态" :disabled="substatus" :required="customerStatusRequired" style="width: 100%;height: 35px!important;" clearable>
+                                        <el-option v-for="item in customerStatusSubArr" :key="item.value" :label="item.name" :value="item.value"></el-option>
                                     </el-select>
                                 </el-form-item>
                             </div>
-                            <el-form-item label="" prop="isCall" class="lineForm_isCall"
-                                          style="width: 12.5%;float: left;">
-                                <el-select v-model="formInline.isCall" placeholder="是否接通"
-                                           style="width: 70%;display: block;margin:0 auto;">
+                            <el-form-item label="" prop="isCall" class="lineForm_isCall" style="width: 12.5%;float: left;">
+                                <el-select v-model="formInline.isCall" placeholder="是否接通" style="width: 70%;display: block;margin:0 auto;" clearable>
                                     <el-option label="是" value="1"></el-option>
                                     <el-option label="否" value="0"></el-option>
                                 </el-select>
@@ -505,10 +450,8 @@
                                 </el-select>
                               </el-form-item>
                               -->
-                            <el-form-item label="" prop="focusPoint" class="lineForm_focusPoint"
-                                          style="width: 19%;float: left;">
-                                <el-input v-model="formInline.focusPoint" placeholder="客户关注点"
-                                          style="width: 80%;display:block;margin:0 auto;"></el-input>
+                            <el-form-item label="" prop="focusPoint" class="lineForm_focusPoint" style="width: 19%;float: left;">
+                                <el-input v-model="formInline.focusPoint" placeholder="客户关注点" style="width: 80%;display:block;margin:0 auto;"></el-input>
                             </el-form-item>
                             <!--<el-form-item label="" size="mini">-->
                             <!--<el-select-->
@@ -518,11 +461,8 @@
                             <!--<el-option label="否" value="0"></el-option>-->
                             <!--</el-select>-->
                             <!--</el-form-item>-->
-                            <el-form-item prop="nextVisitTime" class="lineForm_nextVisitTime"
-                                          style="width: 14%;float: left;">
-                                <el-date-picker v-model="formInline.nextVisitTime" type="datetime"
-                                                format="yyyy-MM-dd HH:mm" placeholder="下次回访时间"
-                                                style="width: 85%;display: block;margin:0 auto;">
+                            <el-form-item prop="nextVisitTime" class="lineForm_nextVisitTime" style="width: 14%;float: left;">
+                                <el-date-picker v-model="formInline.nextVisitTime" type="datetime" format="yyyy-MM-dd HH:mm" placeholder="下次回访时间" style="width: 85%;display: block;margin:0 auto;">
                                 </el-date-picker>
                             </el-form-item>
                             <!--<el-form-item class="lineInherit">
@@ -988,13 +928,13 @@
               formLabelWidth1: '140px',
                 rules: {
                     customerName: [
-                        {required: true, message: '客户姓名不能为空', trigger: 'change'}
+                        {required: true, message: '客户姓名不能为空', trigger: 'blur'}
                     ],
                     province: [
-                        {required: true, message: '开店区域省份不能为空', trigger: 'change'}
+                        {required: true, message: '开店区域省份不能为空', trigger: 'blur'}
                     ],
                     city: [
-                        {required: true, message: '开店区域城市不能为空', trigger: 'change'}
+                        {required: true, message: '开店区域城市不能为空', trigger: 'blur'}
                     ],
                     phone: [
 
@@ -1195,7 +1135,11 @@
                 addCustomerVM.uploadParamData.realName= file.name
           },
             lineFormShowFun() {
-                this.lineFormShow = true
+                if(this.lineFormShow){
+                    this.lineFormShow = false
+                }else{
+                    this.lineFormShow = true
+                }                
                 // 跟进记录初始化
                 this.$refs.LineRuleForm.resetFields(); //移除校验结果并重置字段值
                 this.formInline.customerStatus = '';
@@ -1436,11 +1380,20 @@
                     var province = this.form.province;
                     clueIntention.province = province;
                     //市
-                    var city = this.form.city;
-                    clueIntention.city = city
+                    var city = this.form.city; 
                     //区县
                     var district = this.form.district;
-                    clueIntention.district = district;
+                    if(province){
+                        clueIntention.city = city
+                        if(city){
+                            clueIntention.district = district;
+                        }else{
+                            clueIntention.district=""
+                        }
+                    }else{
+                        clueIntention.city = ""
+                        clueIntention.district=""
+                    }                   
 
                     // ---------------------  以上为客户的基本信息 ---------------
                     // ---------------------  下面的事儿跟跟进记录的保存/修改 ---------------------
@@ -1869,6 +1822,7 @@
                     this.$refs[form].validateField(["customerName", "province", "city"], (error) => {
                         if (error) {
                             valid = false;
+                            this.$alert('客户姓名，开店区域不能为空', '提示');
                         }
                     });
                 }
