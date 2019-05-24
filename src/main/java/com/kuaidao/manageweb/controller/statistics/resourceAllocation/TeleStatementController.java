@@ -22,6 +22,7 @@ import com.kuaidao.sys.dto.customfield.QueryFieldByUserAndMenuReq;
 import com.kuaidao.sys.dto.customfield.UserFieldDTO;
 import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
 import com.kuaidao.sys.dto.organization.OrganizationRespDTO;
+import com.kuaidao.sys.dto.role.RoleInfoDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import com.kuaidao.sys.dto.user.UserOrgRoleReq;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -378,6 +379,14 @@ public class TeleStatementController {
     public String telemarketingCallTable(HttpServletRequest request) {
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
         request.setAttribute("teleGroupList",getOrgGroupByOrgId(curLoginUser.getOrgId(),OrgTypeConstant.DXZ));
+        List<RoleInfoDTO> roleList = curLoginUser.getRoleList();
+        RoleInfoDTO roleInfoDTO = roleList.get(0);
+        String roleCode = roleInfoDTO.getRoleCode();
+        String curOrgId = "";
+        if(RoleCodeEnum.DXZJ.name().equals(roleCode)) {
+            curOrgId = String.valueOf(curLoginUser.getOrgId());
+        }
+        request.setAttribute("curOrgId",curOrgId);
         return "reportforms/telemarketingCallTable";
     }
     
