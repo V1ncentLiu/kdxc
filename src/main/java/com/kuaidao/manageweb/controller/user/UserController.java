@@ -531,8 +531,9 @@ public class UserController {
      **/
     @PostMapping("/getUserInfoListByParam")
     @ResponseBody
-    public JSONResult<List<UserInfoDTO>> getUserInfoListByParam(@RequestBody  UserInfoParamListReqDTO reqDTO) {
-        return userInfoFeignClient.listUserInfoByParam(reqDTO);
+    public JSONResult<List<UserInfoDTO>> getUserInfoListByParam(@RequestBody  UserOrgRoleReq reqDTO) {
+        JSONResult<List<UserInfoDTO>> jsonResult = userInfoFeignClient.getUserInfoListByParam(reqDTO);
+        return jsonResult;
     }
     /**
      * 首页 修改密码

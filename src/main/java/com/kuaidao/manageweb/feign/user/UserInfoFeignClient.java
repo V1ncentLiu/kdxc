@@ -1,6 +1,7 @@
 package com.kuaidao.manageweb.feign.user;
 
 import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.netflix.feign.FeignClient;
@@ -9,19 +10,12 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+
 import com.kuaidao.common.constant.SysErrorCodeEnum;
-import com.kuaidao.common.entity.IdEntityLong;
-import com.kuaidao.common.entity.IdListLongReq;
-import com.kuaidao.common.entity.JSONResult;
-import com.kuaidao.common.entity.PageBean;
-import com.kuaidao.common.entity.PhoneEntity;
+import com.kuaidao.common.entity.*;
 import com.kuaidao.sys.dto.role.RoleInfoDTO;
 import com.kuaidao.sys.dto.role.RoleQueryDTO;
-import com.kuaidao.sys.dto.user.UserInfoDTO;
-import com.kuaidao.sys.dto.user.UserInfoPageParam;
-import com.kuaidao.sys.dto.user.UserInfoParamListReqDTO;
-import com.kuaidao.sys.dto.user.UserInfoReq;
-import com.kuaidao.sys.dto.user.UserOrgRoleReq;
+import com.kuaidao.sys.dto.user.*;
 
 /**
  * 用户
@@ -102,7 +96,11 @@ public interface UserInfoFeignClient {
      */
     @PostMapping("/listUserInfoByParam")
     JSONResult<List<UserInfoDTO>> listUserInfoByParam(@RequestBody UserInfoParamListReqDTO reqDTO);
-
+    /**
+     * 根据条件查询用户集合
+     */
+    @PostMapping("/getUserInfoListByParam")
+    JSONResult<List<UserInfoDTO>> getUserInfoListByParam(@RequestBody UserOrgRoleReq userOrgRoleReq);
     /**
      * 根据机构和角色Code查询账号集合
      */
@@ -165,6 +163,11 @@ public interface UserInfoFeignClient {
         @Override
         public JSONResult<List<UserInfoDTO>> listUserInfoByParam(UserInfoParamListReqDTO reqDTO) {
             return fallBackError("根据状态列表或用户名称查询 用户");
+        }
+
+        @Override
+        public JSONResult<List<UserInfoDTO>> getUserInfoListByParam(UserOrgRoleReq userOrgRoleReq) {
+            return fallBackError("根据条件查询用户集合");
         }
 
         @Override
