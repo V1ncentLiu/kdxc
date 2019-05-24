@@ -2,6 +2,7 @@ package com.kuaidao.manageweb.controller.statistics.teleSaleTracking;
 
 
 import com.kuaidao.common.constant.OrgTypeConstant;
+import com.kuaidao.common.constant.SystemCodeConstant;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.common.util.DateUtil;
@@ -9,11 +10,13 @@ import com.kuaidao.common.util.ExcelUtil;
 import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
 import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
 import com.kuaidao.manageweb.feign.statistics.teleSaleTracking.TeleSaleTrackingFeignClient;
+import com.kuaidao.manageweb.util.CommUtil;
 import com.kuaidao.stastics.dto.teleSaleTracking.TeleSaleTrackingDto;
 import com.kuaidao.stastics.dto.teleSaleTracking.TeleSaleTrackingQueryDto;
 import com.kuaidao.sys.dto.dictionary.DictionaryItemRespDTO;
 import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
 import com.kuaidao.sys.dto.organization.OrganizationRespDTO;
+import com.kuaidao.sys.dto.user.UserInfoDTO;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -87,26 +90,7 @@ public class TeleSaleTrackingController {
     @RequestMapping("/getRecordByGroupPageOneCount")
     @ResponseBody
     public JSONResult<List<TeleSaleTrackingDto>> getRecordByGroupPageOneCount(@RequestBody TeleSaleTrackingQueryDto trackingQueryDto){
-        List<TeleSaleTrackingDto> list = teleSaleTrackingFeignClient.getRecordByGroup(trackingQueryDto).getData();
-        if(null != trackingQueryDto.getCusLevel()){
-            list = teleSaleTrackingFeignClient.getRecordByGroupLevel(trackingQueryDto).getData();
-        }
-        //资源数
-        Integer countResouce = list.stream().mapToInt(TeleSaleTrackingDto::getCountResource).sum();
-        //回访次数
-        Integer countClueId = list.stream().mapToInt(TeleSaleTrackingDto::getCountClueId).sum();
-        //回访资源数
-        Integer countDistinctClue = list.stream().mapToInt(TeleSaleTrackingDto::getCountDistinctClue).sum();
-        //人均天回访次数
-        Integer dayOfper = list.stream().mapToInt(TeleSaleTrackingDto::getDayOfPer).sum();
-        List<TeleSaleTrackingDto> countList = new ArrayList<>();
-        TeleSaleTrackingDto res = new TeleSaleTrackingDto();
-        res.setCountResource(countResouce);
-        res.setCountClueId(countClueId);
-        res.setCountDistinctClue(countDistinctClue);
-        res.setDayOfPer(dayOfper);
-        res.setOrgName("合计");
-        countList.add(res);
+        List countList = getCountTotal(trackingQueryDto);
         return new JSONResult<List<TeleSaleTrackingDto>>().success(countList);
     }
 
@@ -121,8 +105,13 @@ public class TeleSaleTrackingController {
         if(null != trackingQueryDto.getCusLevel()){
             teleSaleTrackingFeignClient.getRecordByGroupLevel(trackingQueryDto);
         }
+        List<TeleSaleTrackingDto> countList = getCountTotal(trackingQueryDto);
+        TeleSaleTrackingDto resTotal = countList.get(0);
         List<List<Object>> dataList = new ArrayList<List<Object>>();
+        //加表头
         dataList.add(getHeadTitleList());
+        //加合计
+        addTotalTeportResourceAllocation(resTotal,dataList);
         List<TeleSaleTrackingDto> orderList = list.getData();
         for(int i = 0; i<orderList.size(); i++){
             TeleSaleTrackingDto ra = orderList.get(i);
@@ -231,8 +220,8 @@ public class TeleSaleTrackingController {
     @RequestMapping("/telemarketingFollowTable")
     public String telemarketingFollowTable(HttpServletRequest request) {
         // 查询所有电销组
-        List<OrganizationRespDTO> saleGroupList = getSaleGroupList();
-        request.setAttribute("saleGroupList", saleGroupList);
+        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+        request.setAttribute("saleGroupList",getOrgGroupByOrgId(curLoginUser.getOrgId(),OrgTypeConstant.DXZ));
         JSONResult<List<DictionaryItemRespDTO>> customerLevel = dictionaryItemFeignClient.queryDicItemsByGroupCode("customerLevel");
         request.setAttribute("cusLevelListArray",customerLevel.getData());
         return "reportforms/telemarketingFollowTable";
@@ -246,8 +235,8 @@ public class TeleSaleTrackingController {
     @RequestMapping("/telemarketingFollowTableSum")
     public String telemarketingFollowTableSum(HttpServletRequest request) {
         // 查询所有电销组
-        List<OrganizationRespDTO> saleGroupList = getSaleGroupList();
-        request.setAttribute("saleGroupList", saleGroupList);
+        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+        request.setAttribute("saleGroupList",getOrgGroupByOrgId(curLoginUser.getOrgId(),OrgTypeConstant.DXZ));
         JSONResult<List<DictionaryItemRespDTO>> customerLevel = dictionaryItemFeignClient.queryDicItemsByGroupCode("customerLevel");
         request.setAttribute("cusLevelListArray",customerLevel.getData());
         return "reportforms/telemarketingFollowTableSum";
@@ -261,8 +250,8 @@ public class TeleSaleTrackingController {
     @RequestMapping("/telemarketingFollowTableTeam")
     public String telemarketingFollowTableTeam(HttpServletRequest request) {
         // 查询所有电销组
-        List<OrganizationRespDTO> saleGroupList = getSaleGroupList();
-        request.setAttribute("saleGroupList", saleGroupList);
+        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+        request.setAttribute("saleGroupList",getOrgGroupByOrgId(curLoginUser.getOrgId(),OrgTypeConstant.DXZ));
         JSONResult<List<DictionaryItemRespDTO>> customerLevel = dictionaryItemFeignClient.queryDicItemsByGroupCode("customerLevel");
         request.setAttribute("cusLevelListArray",customerLevel.getData());
         return "reportforms/telemarketingFollowTableTeam";
@@ -305,5 +294,53 @@ public class TeleSaleTrackingController {
                 organizationFeignClient.queryOrgByParam(queryDTO);
         List<OrganizationRespDTO> data = queryOrgByParam.getData();
         return data;
+    }
+    private List<OrganizationRespDTO> getOrgGroupByOrgId(Long orgId,Integer orgType) {
+        // 电销组
+        OrganizationQueryDTO busGroupReqDTO = new OrganizationQueryDTO();
+        busGroupReqDTO.setParentId(orgId);
+        busGroupReqDTO.setSystemCode(SystemCodeConstant.HUI_JU);
+        busGroupReqDTO.setOrgType(orgType);
+        JSONResult<List<OrganizationRespDTO>> orgJr = organizationFeignClient.queryOrgByParam(busGroupReqDTO);
+        if(!JSONResult.SUCCESS.equals(orgJr.getCode())) {
+            return null;
+        }
+        return orgJr.getData();
+    }
+
+    private void addTotalTeportResourceAllocation(TeleSaleTrackingDto resTotal, List<List<Object>> dataList) {
+        List<Object> totalList = new ArrayList<>();
+        totalList.add("");
+        totalList.add("合计");
+        totalList.add("");
+        totalList.add(resTotal.getCountResource());
+        totalList.add(resTotal.getCountClueId());
+        totalList.add(resTotal.getCountDistinctClue());
+        totalList.add(resTotal.getDayOfPer());
+        dataList.add(totalList);
+    }
+
+    private List getCountTotal(TeleSaleTrackingQueryDto trackingQueryDto){
+        List<TeleSaleTrackingDto> list = teleSaleTrackingFeignClient.getRecordByGroup(trackingQueryDto).getData();
+        if(null != trackingQueryDto.getCusLevel()){
+            list = teleSaleTrackingFeignClient.getRecordByGroupLevel(trackingQueryDto).getData();
+        }
+        //资源数
+        Integer countResouce = list.stream().mapToInt(TeleSaleTrackingDto::getCountResource).sum();
+        //回访次数
+        Integer countClueId = list.stream().mapToInt(TeleSaleTrackingDto::getCountClueId).sum();
+        //回访资源数
+        Integer countDistinctClue = list.stream().mapToInt(TeleSaleTrackingDto::getCountDistinctClue).sum();
+        //人均天回访次数
+        Integer dayOfper = list.stream().mapToInt(TeleSaleTrackingDto::getDayOfPer).sum();
+        List<TeleSaleTrackingDto> countList = new ArrayList<>();
+        TeleSaleTrackingDto res = new TeleSaleTrackingDto();
+        res.setCountResource(countResouce);
+        res.setCountClueId(countClueId);
+        res.setCountDistinctClue(countDistinctClue);
+        res.setDayOfPer(dayOfper);
+        res.setOrgName("合计");
+        countList.add(res);
+        return countList;
     }
 }
