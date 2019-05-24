@@ -130,6 +130,7 @@
                 border
                 :data="recordTable"
                 >
+                <el-table-column align="center" prop="payName" label="付款人姓名"></el-table-column>
                 <el-table-column align="center" prop="payMode" label="付款方式" width="100">
                     <template slot-scope="scope">
                     <div v-if="scope.row.payMode == 1">
@@ -172,6 +173,7 @@
                 border
                 :data="recordTable2"
                 >
+                <el-table-column align="center" prop="payName" label="付款人姓名"></el-table-column>
                 <el-table-column align="center" prop="payMode" label="付款方式" width="90">
                     <template slot-scope="scope">
                         <div v-if="scope.row.payMode == 1">
@@ -213,6 +215,7 @@
                 border
                 :data="recordTable3"
                 >
+                <el-table-column align="center" prop="payName" label="付款人姓名"></el-table-column>
                 <el-table-column align="center" prop="payMode" label="付款方式" width="90">
                     <template slot-scope="scope">
                         <div v-if="scope.row.payMode ==1">
@@ -254,6 +257,7 @@
                 border
                 :data="recordTable4"
                 >
+                <el-table-column align="center" prop="payName" label="付款人姓名"></el-table-column>
                 <el-table-column align="center" prop="payMode" label="付款方式" width="100">
                     <template slot-scope="scope">
                         <div v-if="scope.row.payMode ==1">
@@ -309,15 +313,8 @@
                     </el-form-item>
                 </el-col>
                 <el-col :span="12">
-                    <el-form-item label="付款方式：" :label-width="formLabelWidth" prop="payMode">
-                        <el-select v-model="formMoneyDetail.payMode" placeholder="请选择付款方式：" style="width:100%">
-                            <el-option
-                                    v-for="item in option3s"
-                                    :key="item.value"
-                                    :label="item.label"
-                                    :value="item.value">
-                            </el-option>
-                        </el-select>
+                    <el-form-item label="付款人姓名：" :label-width="formLabelWidth" prop="payName">
+                        <el-input v-model="formMoneyDetail.payName" maxLength="10"></el-input>
                     </el-form-item>
                 </el-col>
             </el-row>
@@ -333,9 +330,15 @@
                     </el-form-item>
                 </el-col>
                 <el-col :span="12">
-                    <el-form-item label="实收金额：" :label-width="formLabelWidth" prop="amountReceived">
-                        <el-input v-model="formMoneyDetail.amountReceived"  @input="formMoneyDetailAmountPerformance" type="number" min="0" oninput="if(value.length>10)value=value.slice(0,10)"  onkeypress="return(/[\d]/.test(String.fromCharCode(event.keyCode)))" autocomplete="off" width="80%"></el-input>
-                        <span style="padding-left: 10px;">元</span>
+                    <el-form-item label="付款方式：" :label-width="formLabelWidth" prop="payMode">
+                        <el-select v-model="formMoneyDetail.payMode" placeholder="请选择付款方式：" style="width:100%">
+                            <el-option
+                                    v-for="item in option3s"
+                                    :key="item.value"
+                                    :label="item.label"
+                                    :value="item.value">
+                            </el-option>
+                        </el-select>
                     </el-form-item>
                 </el-col>
             </el-row>
@@ -358,6 +361,12 @@
                 </el-col>
             </el-row>
             <el-row>
+                <el-col :span="12">
+                    <el-form-item label="实收金额：" :label-width="formLabelWidth" prop="amountReceived">
+                        <el-input v-model="formMoneyDetail.amountReceived"  @input="formMoneyDetailAmountPerformance" type="number" min="0" oninput="if(value.length>10)value=value.slice(0,10)"  onkeypress="return(/[\d]/.test(String.fromCharCode(event.keyCode)))" autocomplete="off" width="80%"></el-input>
+                        <span style="padding-left: 10px;">元</span>
+                    </el-form-item>
+                </el-col>
                 <el-col :span="12">
                     <el-form-item label="业绩金额：" :label-width="formLabelWidth" prop="performanceAmount">
                         <el-input v-model="formMoneyDetail.performanceAmount"  type="number"oninput="if(value.length>10)value=value.slice(0,10)"  onkeypress="return(/[\d]/.test(String.fromCharCode(event.keyCode)))" min="0" maxLength="10" style="width:80%"></el-input>
@@ -647,15 +656,8 @@
                             </el-form-item>
                         </el-col>
                         <el-col :span="12">
-                            <el-form-item label="付款方式：" :label-width="formLabelWidth" prop="payMode">
-                                <el-select v-model="formSigning.payMode" placeholder="请选择付款方式：" style="width: 100%;">
-                                    <el-option
-                                            v-for="item in option3s"
-                                            :key="item.value"
-                                            :label="item.label"
-                                            :value="item.value">
-                                    </el-option>
-                                </el-select>
+                            <el-form-item label="付款人姓名：" :label-width="formLabelWidth" prop="payName">
+                                <el-input v-model="formSigning.payName" maxLength="10"></el-input>
                             </el-form-item>
                         </el-col>
                     </el-row>
@@ -671,10 +673,15 @@
                             </el-form-item>
                         </el-col>
                         <el-col :span="12">
-                            <el-form-item label="实收金额：" :label-width="formLabelWidth" prop="amountReceived">
-                                <!-- <el-input maxLength="10" v-model="formSigning.amountReceived"  type="number"  min="0" oninput="if(value.length>10)value=value.slice(0,10)"  onkeypress="return(/[\d]/.test(String.fromCharCode(event.keyCode)))"  style="width: 80%;" ></el-input> -->
-                                <el-input @input="formSigningAmountPerformance" maxLength="10" v-model="formSigning.amountReceived"  type="number"  min="0" oninput="if(value.length>10)value=value.slice(0,10)"  onkeypress="return(/[\d]/.test(String.fromCharCode(event.keyCode)))"  style="width: 80%;" ></el-input>
-                                <span style="padding-left: 10px;">元</span>
+                            <el-form-item label="付款方式：" :label-width="formLabelWidth" prop="payMode">
+                                <el-select v-model="formSigning.payMode" placeholder="请选择付款方式：" style="width: 100%;">
+                                    <el-option
+                                            v-for="item in option3s"
+                                            :key="item.value"
+                                            :label="item.label"
+                                            :value="item.value">
+                                    </el-option>
+                                </el-select>
                             </el-form-item>
                         </el-col>
                     </el-row>
@@ -697,6 +704,13 @@
                         </el-col>
                     </el-row>
                     <el-row>
+                        <el-col :span="12">
+                            <el-form-item label="实收金额：" :label-width="formLabelWidth" prop="amountReceived">
+                                <!-- <el-input maxLength="10" v-model="formSigning.amountReceived"  type="number"  min="0" oninput="if(value.length>10)value=value.slice(0,10)"  onkeypress="return(/[\d]/.test(String.fromCharCode(event.keyCode)))"  style="width: 80%;" ></el-input> -->
+                                <el-input @input="formSigningAmountPerformance" maxLength="10" v-model="formSigning.amountReceived"  type="number"  min="0" oninput="if(value.length>10)value=value.slice(0,10)"  onkeypress="return(/[\d]/.test(String.fromCharCode(event.keyCode)))"  style="width: 80%;" ></el-input>
+                                <span style="padding-left: 10px;">元</span>
+                            </el-form-item>
+                        </el-col>
                         <el-col :span="12">
                             <el-form-item label="业绩金额：" :label-width="formLabelWidth" prop="performanceAmount">
                                 <!-- <el-input maxLength="10" v-model="formSigningAmountPerformance"  type="number"  min="0" oninput="if(value.length>10)value=value.slice(0,10)"  onkeypress="return(/[\d]/.test(String.fromCharCode(event.keyCode)))"  style="width: 80%;"></el-input> -->
@@ -1018,6 +1032,9 @@
                 payType: [
                 	{ required: true, message: '请选择付款类型', trigger: 'change' }
                 ],
+                payName: [
+                    {required: true, message: '付款人姓名', trigger: 'blur'}
+                ],
                 payMode: [
                     { required: true, message: '请选择付款方式', trigger: 'change' }
                 ],
@@ -1158,6 +1175,7 @@
                 amountPerformance:'',
                 remarks:"",
                 performanceAmount:'',//业绩金额
+                payName:''
             },
             option2s: [{
                 value: '1',
@@ -1285,6 +1303,8 @@
                     mainDivVM.dialogFormSigningVisible = true;
                     mainDivVM.currentProvince(mainDivVM.formSigning.signProvince)
                     mainDivVM.currentCity(mainDivVM.formSigning.signCity)
+                    mainDivVM.formSigning.payName = response.data.data.customerName;
+
                 });
 
             },
