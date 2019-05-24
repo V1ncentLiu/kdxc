@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
 
-@FeignClient(name = "statstics-service", path = "/statstics/teleSaleTracking", fallback = TeleSaleTrackingFeignClient.HystrixClientFallback.class)
+@FeignClient(name = "statstics-service-wyp", path = "/statstics/teleSaleTracking", fallback = TeleSaleTrackingFeignClient.HystrixClientFallback.class)
 public interface TeleSaleTrackingFeignClient {
 
     /**
@@ -48,6 +48,12 @@ public interface TeleSaleTrackingFeignClient {
     JSONResult<PageBean<TeleSaleTrackingDto>> getRecordByGroupLevelUserIdDatePage(@RequestBody TeleSaleTrackingQueryDto trackingQueryDto);
 
     /**
+     *  根据电销组+用户+日期 查询集合 分页
+     */
+    @PostMapping("/getRecordByGroupUserIdDatePage")
+    JSONResult<PageBean<TeleSaleTrackingDto>> getRecordByGroupUserIdDatePage(@RequestBody TeleSaleTrackingQueryDto trackingQueryDto);
+
+    /**
      *  根据电销组查询集合 不分页
      */
     @PostMapping("/getRecordByGroup")
@@ -76,6 +82,12 @@ public interface TeleSaleTrackingFeignClient {
      */
     @PostMapping("/getRecordByGroupLevelUserIdDate")
     JSONResult<List<TeleSaleTrackingDto>> getRecordByGroupLevelUserIdDate(@RequestBody TeleSaleTrackingQueryDto trackingQueryDto);
+
+    /**
+     *  根据电销组+用户+日期 查询集合 不分页
+     */
+    @PostMapping("/getRecordByGroupUserIdDate")
+    JSONResult<List<TeleSaleTrackingDto>> getRecordByGroupUserIdDate(@RequestBody TeleSaleTrackingQueryDto trackingQueryDto);
 
     @Component
     class HystrixClientFallback implements TeleSaleTrackingFeignClient {
@@ -114,6 +126,11 @@ public interface TeleSaleTrackingFeignClient {
         }
 
         @Override
+        public JSONResult<PageBean<TeleSaleTrackingDto>> getRecordByGroupUserIdDatePage(TeleSaleTrackingQueryDto trackingQueryDto) {
+            return fallBackError("根据电销组+用户+日期 查询集合");
+        }
+
+        @Override
         public JSONResult<List<TeleSaleTrackingDto>> getRecordByGroup(TeleSaleTrackingQueryDto trackingQueryDto) {
             return fallBackError("导出根据电销组查询集合");
         }
@@ -136,6 +153,11 @@ public interface TeleSaleTrackingFeignClient {
         @Override
         public JSONResult<List<TeleSaleTrackingDto>> getRecordByGroupLevelUserIdDate(TeleSaleTrackingQueryDto trackingQueryDto) {
             return fallBackError("导出根据电销组+级别+用户+日期 查询集合");
+        }
+
+        @Override
+        public JSONResult<List<TeleSaleTrackingDto>> getRecordByGroupUserIdDate(TeleSaleTrackingQueryDto trackingQueryDto) {
+            return fallBackError("导出根据电销组+用户+日期 查询集合");
         }
     }
 
