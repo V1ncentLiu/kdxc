@@ -51,11 +51,13 @@ public class TeleSaleTrackingController {
      */
     @RequestMapping("/getRecordByGroupPageOne")
     @ResponseBody
-    JSONResult<PageBean<TeleSaleTrackingDto>> getRecordByGroupPageOne(@RequestBody TeleSaleTrackingQueryDto trackingQueryDto){
-        Long orgId = trackingQueryDto.getOrgId();
-        if(null == orgId){
-            buildOrgIdList(trackingQueryDto, orgId);
-        }
+    JSONResult<PageBean<TeleSaleTrackingDto>> getRecordByGroupPageOne(@RequestBody TeleSaleTrackingQueryDto trackingQueryDto,
+                                                                      HttpServletRequest request){
+        request.setAttribute("trackingQueryDto",trackingQueryDto);
+//        Long orgId = trackingQueryDto.getOrgId();
+//        if(null == orgId){
+//            buildOrgIdList(trackingQueryDto, orgId);
+//        }
         if(null != trackingQueryDto.getCusLevel()){
             return teleSaleTrackingFeignClient.getRecordByGroupLevelPage(trackingQueryDto);
         }else{
@@ -68,7 +70,9 @@ public class TeleSaleTrackingController {
      */
     @RequestMapping("/getRecordByGroupLevelUserId")
     @ResponseBody
-    JSONResult<PageBean<TeleSaleTrackingDto>> getRecordByGroupLevelUserId(@RequestBody TeleSaleTrackingQueryDto trackingQueryDto){
+    JSONResult<PageBean<TeleSaleTrackingDto>> getRecordByGroupLevelUserId(@RequestBody TeleSaleTrackingQueryDto trackingQueryDto,
+                                                                          HttpServletRequest request){
+        request.setAttribute("trackingQueryDto",trackingQueryDto);
         if(null != trackingQueryDto.getCusLevel()){
             return teleSaleTrackingFeignClient.getRecordByGroupLevelUserIdPage(trackingQueryDto);
         }else{
@@ -81,7 +85,9 @@ public class TeleSaleTrackingController {
      */
     @RequestMapping("/getRecordByGroupLevelUserIdDate")
     @ResponseBody
-    JSONResult<PageBean<TeleSaleTrackingDto>> getRecordByGroupLevelUserIdDate(@RequestBody TeleSaleTrackingQueryDto trackingQueryDto){
+    JSONResult<PageBean<TeleSaleTrackingDto>> getRecordByGroupLevelUserIdDate(@RequestBody TeleSaleTrackingQueryDto trackingQueryDto,
+                                                                              HttpServletRequest request){
+        request.setAttribute("trackingQueryDto",trackingQueryDto);
         if(null != trackingQueryDto.getCusLevel()){
             return teleSaleTrackingFeignClient.getRecordByGroupLevelUserIdDatePage(trackingQueryDto);
         }else{
@@ -107,10 +113,10 @@ public class TeleSaleTrackingController {
     public void exportRecordByGroupPageOne(
             @RequestBody TeleSaleTrackingQueryDto trackingQueryDto,
             HttpServletResponse response) throws Exception {
-        Long orgId = trackingQueryDto.getOrgId();
-        if(null == orgId){
-            buildOrgIdList(trackingQueryDto, orgId);
-        }
+//        Long orgId = trackingQueryDto.getOrgId();
+//        if(null == orgId){
+//            buildOrgIdList(trackingQueryDto, orgId);
+//        }
         JSONResult<List<TeleSaleTrackingDto>> list = teleSaleTrackingFeignClient.getRecordByGroup(trackingQueryDto);
         if(null != trackingQueryDto.getCusLevel()){
             teleSaleTrackingFeignClient.getRecordByGroupLevel(trackingQueryDto);
@@ -243,7 +249,8 @@ public class TeleSaleTrackingController {
      * @return
      */
     @RequestMapping("/telemarketingFollowTableSum")
-    public String telemarketingFollowTableSum(HttpServletRequest request) {
+    public String telemarketingFollowTableSum(@RequestBody TeleSaleTrackingQueryDto trackingQueryDto,HttpServletRequest request) {
+        request.setAttribute("trackingQueryDto",trackingQueryDto);
         // 查询所有电销组
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
         request.setAttribute("saleGroupList",getOrgGroupByOrgId(curLoginUser.getOrgId(),OrgTypeConstant.DXZ));
@@ -258,7 +265,8 @@ public class TeleSaleTrackingController {
      * @return
      */
     @RequestMapping("/telemarketingFollowTableTeam")
-    public String telemarketingFollowTableTeam(HttpServletRequest request) {
+    public String telemarketingFollowTableTeam(@RequestBody TeleSaleTrackingQueryDto trackingQueryDto,HttpServletRequest request) {
+        request.setAttribute("trackingQueryDto",trackingQueryDto);
         // 查询所有电销组
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
         request.setAttribute("saleGroupList",getOrgGroupByOrgId(curLoginUser.getOrgId(),OrgTypeConstant.DXZ));
