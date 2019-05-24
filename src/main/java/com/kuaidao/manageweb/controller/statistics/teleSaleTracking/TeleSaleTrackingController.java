@@ -234,7 +234,7 @@ public class TeleSaleTrackingController {
         List<OrganizationRespDTO> saleGroupList = getSaleGroupList();
         request.setAttribute("saleGroupList", saleGroupList);
         JSONResult<List<DictionaryItemRespDTO>> customerLevel = dictionaryItemFeignClient.queryDicItemsByGroupCode("customerLevel");
-        request.setAttribute("cusLevelList",customerLevel.getData());
+        request.setAttribute("cusLevelListArray",customerLevel.getData());
         return "reportforms/telemarketingFollowTable";
     }
 
@@ -249,7 +249,7 @@ public class TeleSaleTrackingController {
         List<OrganizationRespDTO> saleGroupList = getSaleGroupList();
         request.setAttribute("saleGroupList", saleGroupList);
         JSONResult<List<DictionaryItemRespDTO>> customerLevel = dictionaryItemFeignClient.queryDicItemsByGroupCode("customerLevel");
-        request.setAttribute("cusLevelList",customerLevel.getData());
+        request.setAttribute("cusLevelListArray",customerLevel.getData());
         return "reportforms/telemarketingFollowTableSum";
     }
 
@@ -264,7 +264,7 @@ public class TeleSaleTrackingController {
         List<OrganizationRespDTO> saleGroupList = getSaleGroupList();
         request.setAttribute("saleGroupList", saleGroupList);
         JSONResult<List<DictionaryItemRespDTO>> customerLevel = dictionaryItemFeignClient.queryDicItemsByGroupCode("customerLevel");
-        request.setAttribute("cusLevelList",customerLevel.getData());
+        request.setAttribute("cusLevelListArray",customerLevel.getData());
         return "reportforms/telemarketingFollowTableTeam";
     }
 
@@ -278,7 +278,7 @@ public class TeleSaleTrackingController {
         List<OrganizationRespDTO> saleGroupList = getSaleGroupList();
         request.setAttribute("saleGroupList", saleGroupList);
         JSONResult<List<DictionaryItemRespDTO>> customerLevel = dictionaryItemFeignClient.queryDicItemsByGroupCode("customerLevel");
-        request.setAttribute("cusLevelList",customerLevel.getData());
+        request.setAttribute("cusLevelListArray",customerLevel.getData());
         return "reportforms/telemarketingFollowTablePerson";
     }
 
