@@ -2,7 +2,6 @@ package com.kuaidao.manageweb.controller.assignrule;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.shiro.SecurityUtils;
@@ -32,10 +31,7 @@ import com.kuaidao.sys.constant.SysConstant;
 import com.kuaidao.sys.dto.organization.OrganizationDTO;
 import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
 import com.kuaidao.sys.dto.organization.OrganizationRespDTO;
-import com.kuaidao.sys.dto.role.RoleInfoDTO;
-import com.kuaidao.sys.dto.role.RoleQueryDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
-import com.kuaidao.sys.dto.user.UserInfoPageParam;
 import com.kuaidao.sys.dto.user.UserOrgRoleReq;
 
 @Controller
@@ -302,49 +298,15 @@ public class TelemarketingAssignRuleContoller {
     @RequestMapping("/preSaveTeleAssignRule")
     @RequiresPermissions("teleAssignRule:add")
     public String preSaveTeleAssignRule(HttpServletRequest request, Model model) {
-        RoleQueryDTO query = new RoleQueryDTO();
-        query.setRoleCode(RoleCodeEnum.DXCYGW.name());
         Subject subject = SecurityUtils.getSubject();
         UserInfoDTO user = (UserInfoDTO) subject.getSession().getAttribute("user");
-        JSONResult<List<RoleInfoDTO>> roleJson = roleManagerFeignClient.qeuryRoleByName(query);
-        if (roleJson.getCode().equals(JSONResult.SUCCESS)) {
-            List<RoleInfoDTO> roleList = roleJson.getData();
-            if (null != roleList && roleList.size() > 0) {
-                RoleInfoDTO roleDto = roleList.get(0);
-                UserInfoPageParam param = new UserInfoPageParam();
-                if (user.getRoleList() != null && user.getRoleList().size() > 0 && user
-                        .getRoleList().get(0).getRoleCode().equals(RoleCodeEnum.DXZJ.name())) {
-                    param.setOrgId(user.getOrgId());
-                }
-                if (user.getRoleList() != null && user.getRoleList().size() > 0 && user
-                        .getRoleList().get(0).getRoleCode().equals(RoleCodeEnum.DXFZ.name())) {
-                    OrganizationQueryDTO orgDto = new OrganizationQueryDTO();
-                    // 查询电销分公司
-                    orgDto = new OrganizationQueryDTO();
-                    orgDto.setOrgType(OrgTypeConstant.DXZ);
-                    orgDto.setParentId(user.getOrgId());
-                    JSONResult<List<OrganizationDTO>> orgComJson =
-                            organizationFeignClient.listDescenDantByParentId(orgDto);
-                    if (orgComJson != null && orgComJson.getData() != null
-                            && orgComJson.getData().size() > 0) {
-                        List<Long> idList = orgComJson.getData().stream().map(c -> c.getId())
-                                .collect(Collectors.toList());
-                        param.setOrgIdList(idList);
-                    }
-
-                }
-                param.setRoleId(roleDto.getId());
-                param.setPageSize(10000);
-                param.setPageNum(1);
-                JSONResult<PageBean<UserInfoDTO>> userListJson = userInfoFeignClient.list(param);
-                if (userListJson.getCode().equals(JSONResult.SUCCESS)) {
-                    PageBean<UserInfoDTO> pageList = userListJson.getData();
-                    List<UserInfoDTO> userList = pageList.getData();
-                    model.addAttribute("orgUserList", userList);
-
-                }
-            }
-        }
+        // 查询组织下电销顾问
+        List<Integer> statusList = new ArrayList<Integer>();
+        statusList.add(SysConstant.USER_STATUS_ENABLE);
+        statusList.add(SysConstant.USER_STATUS_LOCK);
+        List<UserInfoDTO> saleList =
+                getUserList(user.getOrgId(), RoleCodeEnum.DXCYGW.name(), statusList);
+        model.addAttribute("orgUserList", saleList);
         return "assignrule/addtelemarketingRule";
     }
 
@@ -358,13 +320,12 @@ public class TelemarketingAssignRuleContoller {
     public String preUpdateTeleAssignRule(HttpServletRequest request, Model model) {
         Subject subject = SecurityUtils.getSubject();
         UserInfoDTO user = (UserInfoDTO) subject.getSession().getAttribute("user");
-        // 查询组织下商务经理
+        // 查询组织下电销顾问
         List<Integer> statusList = new ArrayList<Integer>();
         statusList.add(SysConstant.USER_STATUS_ENABLE);
         statusList.add(SysConstant.USER_STATUS_LOCK);
         List<UserInfoDTO> saleList =
                 getUserList(user.getOrgId(), RoleCodeEnum.DXCYGW.name(), statusList);
-        request.setAttribute("busSaleList", saleList);
         model.addAttribute("orgUserList", saleList);
         String ruleId = request.getParameter("ruleId");
         TeleAssignRuleQueryDTO dto = new TeleAssignRuleQueryDTO();
