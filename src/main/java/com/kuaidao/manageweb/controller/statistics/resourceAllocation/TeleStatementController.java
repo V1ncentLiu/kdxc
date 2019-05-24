@@ -95,7 +95,7 @@ public class TeleStatementController {
         JSONResult<List<UserFieldDTO>> queryFieldByUserAndMenu =
                 customFieldFeignClient.queryFieldByUserAndMenu(queryFieldByUserAndMenuReq);
         request.setAttribute("userFieldList", queryFieldByUserAndMenu.getData());
-        return "/reportforms/resourceAllocationTable";
+        return "reportforms/resourceAllocationTable";
     }
 
     /**
@@ -206,7 +206,6 @@ public class TeleStatementController {
         data.removeIf(s -> s.getFieldCode().equals("day"));
         request.setAttribute("fieldList", queryFieldByRoleAndMenu.getData());
         JSONResult<PageBean<ResourceAllocationDto>> resourceAllocationPage = statisticsFeignClient.getResourceAllocationPagePersion(resourceAllocationQueryDto);
-        System.out.println(resourceAllocationPage);
         return resourceAllocationPage;
     }
 
@@ -309,7 +308,7 @@ public class TeleStatementController {
         List<CustomFieldQueryDTO> data = queryFieldByRoleAndMenu.getData();
         data.removeIf(s -> s.getFieldCode().equals("day"));
         request.setAttribute("fieldList", queryFieldByRoleAndMenu.getData());
-        return "/reportforms/resourceAllocationTableSum";
+        return "reportforms/resourceAllocationTableSum";
     }
     
     
@@ -333,7 +332,7 @@ public class TeleStatementController {
         List<CustomFieldQueryDTO> data = queryFieldByRoleAndMenu.getData();
         data.removeIf(s -> s.getFieldCode().equals("day"));
         request.setAttribute("fieldList", queryFieldByRoleAndMenu.getData());
-        return "/reportforms/resourceAllocationTableTeam";
+        return "reportforms/resourceAllocationTableTeam";
     }
     
     
