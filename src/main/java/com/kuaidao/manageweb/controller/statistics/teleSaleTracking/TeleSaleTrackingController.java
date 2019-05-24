@@ -11,6 +11,7 @@ import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
 import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
 import com.kuaidao.manageweb.feign.statistics.teleSaleTracking.TeleSaleTrackingFeignClient;
 import com.kuaidao.manageweb.util.CommUtil;
+import com.kuaidao.stastics.dto.resourceAllocation.ResourceAllocationQueryDto;
 import com.kuaidao.stastics.dto.teleSaleTracking.TeleSaleTrackingDto;
 import com.kuaidao.stastics.dto.teleSaleTracking.TeleSaleTrackingQueryDto;
 import com.kuaidao.sys.dto.dictionary.DictionaryItemRespDTO;
@@ -32,6 +33,7 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/statistics/teleStatement")
@@ -50,6 +52,10 @@ public class TeleSaleTrackingController {
     @RequestMapping("/getRecordByGroupPageOne")
     @ResponseBody
     JSONResult<PageBean<TeleSaleTrackingDto>> getRecordByGroupPageOne(@RequestBody TeleSaleTrackingQueryDto trackingQueryDto){
+        Long orgId = trackingQueryDto.getOrgId();
+        if(null == orgId){
+            buildOrgIdList(trackingQueryDto, orgId);
+        }
         if(null != trackingQueryDto.getCusLevel()){
             return teleSaleTrackingFeignClient.getRecordByGroupLevelPage(trackingQueryDto);
         }else{
@@ -95,12 +101,16 @@ public class TeleSaleTrackingController {
     }
 
     /**
-     * 一级页面查询
+     * 一级页面导出
      */
     @PostMapping("/exportRecordByGroupPageOne")
     public void exportRecordByGroupPageOne(
             @RequestBody TeleSaleTrackingQueryDto trackingQueryDto,
             HttpServletResponse response) throws Exception {
+        Long orgId = trackingQueryDto.getOrgId();
+        if(null == orgId){
+            buildOrgIdList(trackingQueryDto, orgId);
+        }
         JSONResult<List<TeleSaleTrackingDto>> list = teleSaleTrackingFeignClient.getRecordByGroup(trackingQueryDto);
         if(null != trackingQueryDto.getCusLevel()){
             teleSaleTrackingFeignClient.getRecordByGroupLevel(trackingQueryDto);
@@ -342,5 +352,14 @@ public class TeleSaleTrackingController {
         res.setOrgName("合计");
         countList.add(res);
         return countList;
+    }
+
+    private void buildOrgIdList(@RequestBody TeleSaleTrackingQueryDto teleSaleTrackingQueryDto, Long org_id) {
+        if(null == org_id){
+            UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+            List<OrganizationRespDTO> orgGroupByOrgId = getOrgGroupByOrgId(curLoginUser.getOrgId(), OrgTypeConstant.DXZ);
+            List<Long> orgIdList = orgGroupByOrgId.parallelStream().map(OrganizationRespDTO::getId).collect(Collectors.toList());
+            teleSaleTrackingQueryDto.setOrgIdList(orgIdList);
+        }
     }
 }
