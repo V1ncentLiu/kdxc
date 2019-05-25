@@ -193,8 +193,11 @@
                 console.log('search');   
                 
                 var param = {};
-                param.startTime = this.minuteFormat(startTime);
-                param.endTime = this.minuteFormat(endTime);
+                var s = this.minuteFormat(startTime);
+                var e = this.minuteFormat(endTime);
+                
+                param.startTime = this.limitTime (s, null);
+                param.endTime = this.limitTime (null, e);
                 param.pageSize = this.pager.pageSize;
                 param.pageNum = this.pager.currentPage;
                 param.orgId =  this.form.orgId; // 电销组
@@ -232,10 +235,10 @@
                     mainDivVM.pager.currentPage = resobj.data.currentPage;
                     mainDivVM.pager.total = resobj.data.total;
                     mainDivVM.loading = false;
-                    mainDivVM.export.startTime = param.startTime;
-                    mainDivVM.export.endTime = param.endTime;
-                    mainDivVM.export.orgId = param.orgId;
-                    mainDivVM.export.userId = param.userId;
+                    mainDivVM.export.startTime = mainDivVM.minuteFormat(startTime);
+                    mainDivVM.export.endTime = mainDivVM.minuteFormat(endTime);
+                    mainDivVM.export.orgId = mainDivVM.form.orgId;
+                    mainDivVM.export.userId = mainDivVM.form.userId;
                 }).catch(function (error) {
                     console.log(error);
                     mainDivVM.loading = false;
@@ -244,6 +247,25 @@
                         type: "error"
                     });
                 });
+            },
+            limitTime (startTime, endTime) {
+                var date = new Date();
+                data = this.minuteFormat (date);// 现在的时间
+                data = data.slice(0,8);
+                if(startTime){
+                    var s = startTime.slice(0,8);
+                    if(s < data){
+                        return s + "0000";
+                    }
+                    return startTime;
+                }
+                if(endTime){
+                    var e = endTime.slice(0,8);
+                    if(e < data){
+                        return e + "2359";
+                    }
+                    return endTime;
+                }
             },
             currentTelSale(seleVal){ // 根据电销组选择创业顾问
                 if(null==seleVal||seleVal==""){
@@ -369,8 +391,10 @@
             },
             exportRs(){
                 var param = {};
-                param.startTime = this.export.startTime;
-                param.endTime =  this.export.endTime;
+                var startTime = this.export.startTime;
+                var endTime = this.export.endTime;
+                param.startTime = this.limitTime (startTime, null);
+                param.endTime = this.limitTime (null, endTime);
                 param.orgId =  this.export.orgId; 
                 param.userId =  this.export.userId;
                 axios.post
