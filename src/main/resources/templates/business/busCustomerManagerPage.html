@@ -141,6 +141,12 @@
                             </el-option>
                         </el-select>
                     </el-form-item>
+                    <el-form-item label="资源Id:">
+                        <el-input v-model="searchForm.clueId" placeholder="请输入资源Id"></el-input>
+                    </el-form-item>
+                    <el-form-item label="联系方式:">
+                        <el-input v-model="searchForm.linkPhone" placeholder="请输入联系方式"></el-input>
+                    </el-form-item>
                 </el-row>
                 <div class="mainSearchBtnBox">
                     <el-button icon="el-icon-search" type="primary" @click="searchTable()" class="searchBtn">搜索
@@ -161,7 +167,10 @@
                 <el-table-column align="center" type="index" width="55" label="序号"></el-table-column>
                 <el-table-column align="center" prop="reserveTime" sortable label="邀约来访时间" :formatter="dateFormat"
                                  width="170"></el-table-column>
+                <el-table-column align="center" prop="isInviteLetter" label="是否有邀请函" :formatter="transformLetter"
+                                 width="120"></el-table-column>
                 <el-table-column align="center" prop="cusName" label="客户姓名"></el-table-column>
+                <el-table-column prop="linkPhone" label="联系方式" align="center" width="200"></el-table-column>
                 <el-table-column align="center" prop="visitStatus" label="到访状态" :formatter="transformVisit"
                                  width="90"></el-table-column>
                 <el-table-column align="center" prop="isSign" label="签约状态" :formatter="transformSign"
@@ -317,7 +326,10 @@
         <template>
             <el-form :model="notVisitFlag" ref="notVisitFlag">
                 <el-form-item label="" :required="true">
-                    <div class="lineFeed">{{notVisitFlag.str}}</div>
+                    <span style="display:block;color: #1e2746; width:90%; word-wrap:break-word; word-break:normal;">标记未到访人员：{{notVisitFlag.createUserName}}</span>
+                    <span style="display:block;color: #1e2746; width:90%; word-wrap:break-word; word-break:normal;">标记未到访时间：{{notVisitFlag.notVisitTime}}</span>
+                    <br>
+                    <span style="display:block;color: #1e2746; width:90%; word-wrap:break-word; word-break:normal;">未到访原因：<br>{{notVisitFlag.str}}</span>
                     <!-- <el-button type="text" disabled style="color: #1e2746">{{notVisitFlag.str}}</el-button> -->
                 </el-form-item>
             </el-form>
@@ -912,9 +924,12 @@
                 message: ''
             },
             notVisitFlag: {
+                clueId: "",
                 str: "",
                 clueIds: [],
-                notVisitReason: ""
+                notVisitReason: "",
+                createUserName:"",
+                notVisitTime:""
             },
             showVisitAduitDatas: {
                 one: [],
@@ -1204,6 +1219,16 @@
                 }
                 return text;
             },
+            //是否有邀请函
+            transformLetter(row, column, cellValue, index) {
+                var text="";
+                if(cellValue == "0"){
+                    text="否"
+                }else if(cellValue == "1"){
+                    text="是"
+                }
+                return text;
+            },
             //签约店型转换方法
             transformShop(row, column, cellValue, index) {
                 var text = "";
@@ -1436,10 +1461,13 @@
                 // 展示未到访原因
                 var param = {};
                 param.id = row.clueId;
-                axios.post('/aggregation/businessMyCustomer/notVisitReason', param).then(function (response) {
+                axios.post('/busVisitRecord/notVisitReason', param).then(function (response) {
                     customerVM.notVisitdDialogVisible = true;
                     console.log(response)
                     customerVM.notVisitFlag.str = response.data.data.notVisitReason
+                    customerVM.notVisitFlag.str = response.data.data.notVisitReason
+                    customerVM.notVisitFlag.createUserName = response.data.data.createUserName
+                    customerVM.notVisitFlag.notVisitTime = response.data.data.createTime
                 });
             },
             showVisitRecord(row) {

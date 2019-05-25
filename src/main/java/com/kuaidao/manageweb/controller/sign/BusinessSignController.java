@@ -51,6 +51,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.shiro.SecurityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -157,6 +158,8 @@ public class BusinessSignController {
       menuName = MenuEnum.BUSINESSSIGNVALID)
   @ResponseBody
   public JSONResult addTelemarketingLayout(@RequestBody BusinessSignDTO businessSignDTO) {
+        UserInfoDTO user = getUser();
+        businessSignDTO.setLoginUserId(user.getId());
     return businessSignFeignClient.updateBusinessSignDTOValidByIds(businessSignDTO);
   }
 
@@ -571,6 +574,7 @@ public class BusinessSignController {
     }else {
       dto.setRepeatMoney("");
       dto.setRepeatRatio("");
+            dto.setRepeatRatio("");
     }
   }
   /**
@@ -702,6 +706,19 @@ public class BusinessSignController {
     }
     return null;
   }
+
+    /**
+     * 获取当前登录账号
+     *
+     * @return
+     */
+    private UserInfoDTO getUser() {
+        Object attribute = SecurityUtils.getSubject().getSession().getAttribute("user");
+        UserInfoDTO user = (UserInfoDTO) attribute;
+        return user;
+    }
+
+
 //    /**
 //     * 获取当前登录账号
 //     *
