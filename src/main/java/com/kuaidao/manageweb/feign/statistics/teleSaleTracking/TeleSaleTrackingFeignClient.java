@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
 
-@FeignClient(name = "statstics-service-wyp", path = "/statstics/teleSaleTracking", fallback = TeleSaleTrackingFeignClient.HystrixClientFallback.class)
+@FeignClient(name = "statstics-service", path = "/statstics/teleSaleTracking", fallback = TeleSaleTrackingFeignClient.HystrixClientFallback.class)
 public interface TeleSaleTrackingFeignClient {
 
     /**
