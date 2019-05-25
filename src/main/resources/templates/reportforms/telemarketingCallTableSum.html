@@ -155,9 +155,11 @@
         },
         methods: { 
             searchTable() { 
-                var startTime = new Date(this.form.startTime);
-                var endTime = new Date(this.form.endTime);
+                var startTime = this.form.startTime;
+                var endTime = this.form.endTime;
                 if(endTime && startTime){
+                    startTime = new Date(this.form.startTime);
+                    endTime = new Date(this.form.endTime);
                     if(startTime>endTime){
                         this.$message({
                             message: '开始时间不能大于结束时间',
@@ -180,7 +182,7 @@
                     }
                 }else{
                     this.$message({
-                        message: '请选择近6个月内的时间',
+                        message: '请选择起止时间',
                         type: 'warning'
                     });
                     return;
@@ -272,14 +274,10 @@
                 if (!dt) {return "";}
                 var d = dt.toString();
                 var oYear = d.slice(0,4);
-                var oMonth = d.slice(5,6);
-                oMonth = oMonth < 10 ? "0" + oMonth : oMonth;
-                var oDay = d.slice(7,8);
-                oDay = oDay < 10 ? "0" + oDay : oDay;
-                var oHour = d.slice(9,10);
-                oHour = oHour < 10 ? "0" + oHour : oHour;
-                var oMinute = d.slice(11);
-                oMinute = oMinute < 10 ? "0" + oMinute : oMinute;
+                var oMonth = d.slice(4,6);
+                var oDay = d.slice(6,8);
+                var oHour = d.slice(8,10);
+                var oMinute = d.slice(10);
                 return oYear+"-"+oMonth+"-"+oDay+" "+oHour+":"+oMinute;
             }, 
             dateFormat (row, column) { //日期数据格式化方法
