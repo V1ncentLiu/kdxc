@@ -400,11 +400,10 @@ public class TeleStatementController {
         List<RoleInfoDTO> roleList = curLoginUser.getRoleList();
         RoleInfoDTO roleInfoDTO = roleList.get(0);
         String roleCode = roleInfoDTO.getRoleCode();
-        String curOrgId = "";
+        String curOrgId = String.valueOf(curLoginUser.getOrgId());
         List<OrganizationRespDTO>  teleGroupList = new ArrayList<>();
         if(RoleCodeEnum.DXZJ.name().equals(roleCode)) {
             //电销总监查他自己的组
-            curOrgId = String.valueOf(curLoginUser.getOrgId());
             OrganizationDTO curOrgGroupByOrgId = getCurOrgGroupByOrgId(curOrgId);
             if(curOrgGroupByOrgId!=null) {
                 OrganizationRespDTO organizationRespDTO = new OrganizationRespDTO();
@@ -436,6 +435,7 @@ public class TeleStatementController {
         idEntity.setId(orgId+"");
         JSONResult<OrganizationDTO> orgJr = organizationFeignClient.queryOrgById(idEntity);
         if(!JSONResult.SUCCESS.equals(orgJr.getCode())) {
+            logger.error("getCurOrgGroupByOrgId,param{{}},res{{}}",idEntity,orgJr);
             return null;
         }
         return orgJr.getData();
@@ -490,11 +490,11 @@ public class TeleStatementController {
         List<RoleInfoDTO> roleList = curLoginUser.getRoleList();
         RoleInfoDTO roleInfoDTO = roleList.get(0);
         String roleCode = roleInfoDTO.getRoleCode();
-        String curOrgId = "";
+        String curOrgId = String.valueOf(curLoginUser.getOrgId());
         List<OrganizationRespDTO>  teleGroupList = new ArrayList<>();
         if(RoleCodeEnum.DXZJ.name().equals(roleCode)) {
             //电销总监查他自己的组
-            curOrgId = String.valueOf(curLoginUser.getOrgId());
+            
             OrganizationDTO curOrgGroupByOrgId = getCurOrgGroupByOrgId(curOrgId);
             if(curOrgGroupByOrgId!=null) {
                 OrganizationRespDTO organizationRespDTO = new OrganizationRespDTO();
@@ -507,7 +507,7 @@ public class TeleStatementController {
         }
         
         request.setAttribute("teleGroupList",teleGroupList);
-        request.setAttribute("curOrgId",curLoginUser.getOrgId());
+        request.setAttribute("curOrgId",curOrgId);
         return "reportforms/telemarketingCallTableSum";
     }
     
@@ -530,11 +530,11 @@ public class TeleStatementController {
         List<RoleInfoDTO> roleList = curLoginUser.getRoleList();
         RoleInfoDTO roleInfoDTO = roleList.get(0);
         String roleCode = roleInfoDTO.getRoleCode();
-        String curOrgId = "";
+        String  curOrgId = String.valueOf(curLoginUser.getOrgId());;
         List<OrganizationRespDTO>  teleGroupList = new ArrayList<>();
         if(RoleCodeEnum.DXZJ.name().equals(roleCode)) {
             //电销总监查他自己的组
-            curOrgId = String.valueOf(curLoginUser.getOrgId());
+           
             OrganizationDTO curOrgGroupByOrgId = getCurOrgGroupByOrgId(curOrgId);
             if(curOrgGroupByOrgId!=null) {
                 OrganizationRespDTO organizationRespDTO = new OrganizationRespDTO();
@@ -548,7 +548,7 @@ public class TeleStatementController {
         
         request.setAttribute("teleGroupList",teleGroupList);
         
-        request.setAttribute("curOrgId",curLoginUser.getOrgId());
+        request.setAttribute("curOrgId",curOrgId);
         return "reportforms/telemarketingCallTableTeam";
     }
     
@@ -569,11 +569,11 @@ public class TeleStatementController {
         List<RoleInfoDTO> roleList = curLoginUser.getRoleList();
         RoleInfoDTO roleInfoDTO = roleList.get(0);
         String roleCode = roleInfoDTO.getRoleCode();
-        String curOrgId = "";
+        String  curOrgId = String.valueOf(curLoginUser.getOrgId());;
         List<OrganizationRespDTO>  teleGroupList = new ArrayList<>();
         if(RoleCodeEnum.DXZJ.name().equals(roleCode)) {
             //电销总监查他自己的组
-            curOrgId = String.valueOf(curLoginUser.getOrgId());
+           
             OrganizationDTO curOrgGroupByOrgId = getCurOrgGroupByOrgId(curOrgId);
             if(curOrgGroupByOrgId!=null) {
                 OrganizationRespDTO organizationRespDTO = new OrganizationRespDTO();
@@ -586,7 +586,7 @@ public class TeleStatementController {
         }
         
         request.setAttribute("teleGroupList",teleGroupList);
-        request.setAttribute("curOrgId",curLoginUser.getOrgId());
+        request.setAttribute("curOrgId",curOrgId);
         return "reportforms/telemarketingCallTablePerson";
     }
 
