@@ -157,8 +157,8 @@ public class BusinessMyCustomerController {
             }
         }
 
-        Date date5 = param.getCreateTime1();
-        Date date6 = param.getCreateTime2();
+        Date date5 = param.getAppiontmentCreateTime1();
+        Date date6 = param.getAppiontmentCreateTime2();
         if (date5 != null && date6 != null) {
             if (date5.getTime() > date6.getTime()) {
                 return new JSONResult().fail("-1", "提交邀约时间，结束时间不能早于开始时间!");

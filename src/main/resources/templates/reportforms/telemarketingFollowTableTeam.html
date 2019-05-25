@@ -10,25 +10,26 @@
     <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
         <el-breadcrumb-item>Home</el-breadcrumb-item>
         <el-breadcrumb-item>数据报表</el-breadcrumb-item>
-        <el-breadcrumb-item>资源分配表</el-breadcrumb-item>
+        <el-breadcrumb-item>电销顾问跟踪表</el-breadcrumb-item>
     </el-breadcrumb>    
     <el-row class="marginB20">
-        <el-button type="primary">昨天</el-button>
-        <el-button type="success">近七天</el-button>
-        <el-button type="warning">本月</el-button>  
-        <el-button type="danger">导出Excel报表</el-button>  
+        <el-button type="primary" @click="searchYesterday">昨天</el-button>
+        <el-button type="success" @click="searchWeek">近七天</el-button>
+        <el-button type="warning" @click="searchMonth">本月</el-button>  
+        <el-button type="danger" @click="exportRs">导出Excel报表</el-button>
+        <el-button type="primary" style="float: right;" @click="goback()">返回</el-button>    
     </el-row>
     <div class="mainSearchBg">        
         <div class="mainSearchFormBox">
            <el-form :inline="true" :model="form" class="demo-form-inline mainSearchForm" ref="form">                 
                 <el-form-item label="起止时间:">
-                    <el-date-picker format="yyyy-MM-dd HH:mm:ss" v-model="form.startTime" type="datetime" placeholder="选择日期"></el-date-picker>
+                    <el-date-picker format="yyyy-MM-dd HH:mm" v-model="form.startTime" type="datetime" placeholder="选择日期"></el-date-picker>
                 </el-form-item>
                 <el-form-item label="—" class="widthauto">
-                   <el-date-picker format="yyyy-MM-dd HH:mm:ss" v-model="form.endTime" type="datetime" placeholder="选择日期"></el-date-picker>
+                   <el-date-picker format="yyyy-MM-dd HH:mm" v-model="form.endTime" type="datetime" placeholder="选择日期"></el-date-picker>
                 </el-form-item>
                 <el-form-item label="电销组:">  
-                    <el-select v-model="form.teleorg" placeholder="电销组" style="width: 100%;" clearable @change="currentTelSale" filterable>
+                    <el-select v-model="form.orgId" placeholder="电销组" style="width: 100%;" clearable filterable @change="currentTelSale" disabled>
                         <el-option
                             v-for="item in orgTeleArr"
                             :key="item.id"
@@ -38,28 +39,19 @@
                     </el-select>
                 </el-form-item>
                 <el-form-item label="电销顾问:">  
-                    <el-select 
-                        v-model="form.teleSaleId" 
-                        placeholder="电销顾问" 
-                        style="width: 100%;" 
-                        filterable 
-                        multiple 
-                        clearable  >
+                    <el-select v-model="form.userId" placeholder="电销顾问" style="width: 100%;" filterable clearable>
                         <el-option
                             v-for="item in busSaleArr"
                             :key="item.id"
                             :label="item.name"
                             :value="item.id">
-                            <el-checkbox-group v-model="form.teleSaleId">
-                                <el-checkbox :label="item.id">{{item.name}}</el-checkbox>
-                            </el-checkbox-group>
                         </el-option>
                     </el-select>
                 </el-form-item>
-                <el-form-item label="分配来源:">  
-                    <el-select v-model="form.source" placeholder="分配来源" style="width: 100%;" clearable filterable>
+                <el-form-item label="客户级别:">  
+                    <el-select v-model="form.cusLevelList" placeholder="客户级别" style="width: 100%;" clearable filterable multiple>
                         <el-option
-                            v-for="item in distributionSource"
+                            v-for="item in clientRank"
                             :key="item.id"
                             :label="item.name"
                             :value="item.id">
@@ -74,45 +66,29 @@
             </el-form>
         </div>
         <el-row>
-            <el-table
-                :data="tableData"
+            <el-table 
+                ref="tableData"
+                tooltip-effect="dark"
+                style="width: 100%"
                 border
-                style="width: 100%">
-                <el-table-column
-                    prop="id"
-                    label="序号"
-                    width="55">
+                :data="tableData"
+                v-loading="loading"
+                :cell-style="centerStyle"
+                :header-cell-style="centerStyle">
+                <el-table-column type="index" label="序号" align="center" width="55"></el-table-column>
+                <el-table-column prop="dateId" label="日期" :formatter="dateFormat"></el-table-column>
+                <el-table-column prop="userId" label="顾问">
+                    <template slot-scope="scope">
+                        <el-button @click="gotoPerson(scope.row)" type="text">{{scope.row.userId}}</el-button>
+                    </template>
                 </el-table-column>
-                <el-table-column
-                    prop="name"
-                    label="电销组">
-                </el-table-column>
-                <el-table-column
-                    prop="amount1"
-                    label="电销顾问">
-                </el-table-column>
-                <el-table-column
-                    prop="amount2"
-                    label="客户级别">
-                </el-table-column>
-                <el-table-column
-                    prop="amount3"
-                    label="资源数">
-                </el-table-column>
-                <el-table-column
-                    prop="amount4"
-                    label="回访次数">
-                </el-table-column>
-                <el-table-column
-                    prop="amount5"
-                    label="回访资源数">
-                </el-table-column>
-                <el-table-column
-                    prop="amount6"
-                    label="人均回访次数">
-                </el-table-column>
+                <el-table-column prop="cusLevel" label="客户级别"></el-table-column>
+                <el-table-column prop="countResource" label="资源数"></el-table-column>
+                <el-table-column prop="countClueId" label="回访次数"></el-table-column>
+                <el-table-column prop="countDistinctClue" label="回访资源数"></el-table-column>
+                <el-table-column prop="dayOfPer" label="人均天回访次数"></el-table-column>
             </el-table>
-            <!-- <table-pagination :pager="pager" @change="searchTable"></table-pagination> -->
+            <table-pagination :pager="pager" @change="searchTable"></table-pagination>
         </el-row>
     </div>
 </div>
@@ -120,57 +96,43 @@
 <div th:include="_footer_include :: #jsLib"></div>
 </body>
 <script th:inline="javascript">
-    var queryOrg=[[${queryOrg}]];//电销组
-    var distributionSource=[[${queryOrg}]];//分配来源
+    var orgIdList=[[${saleGroupList}]];//电销组
+    var clientRankIdList=[[${cusLevelListArray}]];//客户级别
+    var trackingQuery=[[${trackingQueryDto}]];//参数list    
     var mainDivVM = new Vue({
         el: '#maindiv',
         data: function() {
             return {
-                multipleSelection: [],//选择行
-                form: {},
-                tableData: [{
-                    id: '12987122',
-                    name: '王小虎',
-                    amount1: '234',
-                    amount2: '3.2',
-                    amount3: 10,
-                    amount4: 10,
-                    amount5: 10,
-                    amount6: 10,
-                }, {
-                    id: '12987123',
-                    name: '王小虎',
-                    amount1: '165',
-                    amount2: '4.43',
-                    amount3: 12,
-                    amount4: 10,
-                    amount5: 10,
-                    amount6: 10,
-                }],
-                orgTeleArr:queryOrg,//电销组
-                busSaleArr:[],//创业顾问
-                distributionSource:distributionSource,//分配来源
+                loading:false,
+                form: {
+                    startTime:'',
+                    endTime:'',
+                    orgId:'',
+                    userId:'',
+                    cusLevelList:[],
+                },
+                export: {
+                    startTime:'',
+                    endTime:'',
+                    orgId:'',
+                    userId:'',
+                    cusLevelList:[],
+                },
+                tableData: [],
+                orgTeleArr:orgIdList,//电销组
+                busSaleArr:'',//创业顾问
+                clientRank:clientRankIdList,//客户级别
+                pager:{
+                    total: 0,
+                    currentPage: 1,
+                    pageSize: 20,
+                },
             }             
         },
-        methods: {            
-            handleSelectionChange(val) {//选择节点的事件
-                console.log(val)
-                this.multipleSelection = val;
-            }, 
-            searchTable() { 
-                var starTime=this.form.startTime;
-                var endTime=this.form.endTime;
-                if(endTime){
-                    if(starTime>endTime){
-                        this.$message({
-                            message: '开始时间不能大于结束时间',
-                            type: 'warning'
-                        });
-                        return;
-                    }
-                }
-                console.log('search')
-            },
+        methods: {    
+            centerStyle(){
+                return "text-align:center"
+            },  
             currentTelSale(seleVal){//根据电销组选择创业顾问
                 if(null==seleVal||seleVal==""){
                     return ;
@@ -182,9 +144,217 @@
                     mainDivVM.busSaleArr=response.data.data;
                 });
             },
-
+            searchTable() {                 
+                var startTime=this.form.startTime;
+                var endTime=this.form.endTime;
+                if(endTime && startTime){
+                    console.log(startTime,endTime);
+                    if(startTime>endTime){
+                        this.$message({
+                            message: '开始时间不能大于结束时间',
+                            type: 'warning'
+                        });
+                        return;
+                    }
+                    var date = new Date();
+                    var currentDate = moment(date).format("YYYY-MM-DD 23:59");
+                    date.setMonth(date.getMonth()-5);
+                    var beforeSixMonth = moment(date).format("YYYY-MM-DD 00:00");
+                    var currentDateRes = new Date(currentDate);
+                    var beforeSixMonthRes = new Date(beforeSixMonth);
+                    if(new Date(startTime) < beforeSixMonthRes || new Date(endTime) > currentDateRes){
+                        this.$message({
+                            message: '请选择近6个月内的时间',
+                            type: 'warning'
+                        });
+                        return;
+                    }
+                }else{
+                    this.$message({
+                        message: '请选择起止时间',
+                        type: 'warning'
+                    });
+                    return;
+                }
+                var param = {};
+                param.pageSize = this.pager.pageSize;
+                param.pageNum =  this.pager.currentPage;
+                // 搜索条件
+                param.startTime = this.minuteFormat(startTime);
+                param.endTime = this.minuteFormat(endTime);
+                param.orgId = this.form.orgId;//电销组
+                param.userId = this.form.userId;//电销顾问
+                param.cusLevelList = this.form.cusLevelList;//客户级别
+                this.loading=true;
+                axios.post('/statistics/teleStatement/getRecordByGroupLevelUserIdDate',param).then(function (response) { 
+                    if(!response){
+                        mainDivVM.$message({
+                            message: "接口调用失败",
+                            type: 'error'
+                        });
+                        mainDivVM.loading=false;
+                        return ;
+                    }
+                    var resobj= response.data;
+                    if(!resobj){
+                        mainDivVM.$message({
+                            message: "接口调用失败",
+                            type: 'error'
+                        });
+                        mainDivVM.loading=false;
+                        return ;
+                    }
+                    if(resobj.code!='0'){
+                        mainDivVM.$message({
+                            message: "接口调用失败",
+                            type: 'error'
+                        });
+                        mainDivVM.loading=false;
+                        return ;
+                    }  
+                    var resobjData=resobj.data.data;                    
+                    // 表格数据渲染
+                    mainDivVM.tableData=resobjData;
+                    // 分页
+                    mainDivVM.pager.currentPage= resobj.data.currentPage;
+                    mainDivVM.pager.total= resobj.data.total;
+                    // loading
+                    mainDivVM.loading=false;
+                    // 给导出参数赋值
+                    mainDivVM.export.startTime = mainDivVM.minuteFormat(startTime);
+                    mainDivVM.export.endTime = mainDivVM.minuteFormat(endTime);
+                    mainDivVM.export.orgId = mainDivVM.form.orgId;
+                    mainDivVM.export.userId = mainDivVM.form.userId;
+                    mainDivVM.export.cusLevelList = mainDivVM.form.cusLevelList;
+                })
+            },
+            gotoPerson(item){
+                debugger
+                console.log(item)
+                var userId = item.userId;
+                // 搜索条件
+                var startTime=this.minuteFormat(this.form.startTime);
+                var endTime=this.minuteFormat(this.form.endTime);
+                var orgId=null;
+                var cusLevelList=null;
+                if(this.form.orgId){
+                    orgId=this.form.orgId;
+                }else{
+                    orgId=""
+                }
+                if(this.form.cusLevelList){
+                    cusLevelList=this.form.cusLevelList;
+                }else{
+                    cusLevelList=""
+                }
+                if(userId){
+                    // 点击个人跳转到此人的资源分配信息
+                    window.location.href="/statistics/teleStatement/telemarketingFollowTablePerson?userId=" + userId + "&orgId=" + orgId+"&startTime="+ startTime+"&endTime="+ endTime+"&cusLevelList="+ cusLevelList;
+                }
+            },
+            goback () {
+                window.history.go(-1);
+            },
+            dateFormat (row, column) { 
+                var date = row[column.property];
+                 if (!date) {return "";}
+                var d = date.toString();
+                var oYear = d.slice(0,4);
+                var oMonth = d.slice(5,6);
+                oMonth = oMonth < 10 ? "0" + oMonth : oMonth;
+                var oDay = d.slice(7);
+                oDay = oDay < 10 ? "0" + oDay : oDay;
+                return oYear+"-"+oMonth+"-"+oDay;
+            }, 
+            minuteFormat (m) {
+                if (!m) {
+                   return "";
+                 }
+                return moment(m).format("YYYYMMDDHHmm");
+            },
+            dateTimeFormat (dt) { 
+                if (!dt) {return "";}
+                var d = dt.toString();
+                var oYear = d.slice(0,4);
+                var oMonth = d.slice(5,6);
+                oMonth = oMonth < 10 ? "0" + oMonth : oMonth;
+                var oDay = d.slice(7,8);
+                oDay = oDay < 10 ? "0" + oDay : oDay;
+                var oHour = d.slice(9,10);
+                oHour = oHour < 10 ? "0" + oHour : oHour;
+                var oMinute = d.slice(11);
+                oMinute = oMinute < 10 ? "0" + oMinute : oMinute;
+                return oYear+"-"+oMonth+"-"+oDay+" "+oHour+":"+oMinute;
+            }, 
+            searchYesterday(){//昨天
+                var today = new Date();
+               today.setTime(today.getTime()-24*60*60*1000);
+               var startTime = today.getFullYear()+"-" + (today.getMonth()+1) + "-" + today.getDate()+" 00:00";
+               var endTime =today.getFullYear()+"-" + (today.getMonth()+1) + "-" + today.getDate()+" 23:59";
+               this.form.startTime=startTime;
+               this.form.endTime=endTime;
+               this.searchTable();
+            },
+            searchWeek(){//近七天
+                 var a = new Date();
+                 var year = a.getFullYear();
+                 var month = a.getMonth();
+                 var date = a.getDate();
+                 var b = new Date(year,month,date);
+                 var c = b.valueOf()-6*24*60*60*1000;
+                // var d = b.valueOf()+1*24*60*60*1000;
+                 var d = b.valueOf();
+                 var startTime= new Date(c);
+                 var endTime = new Date(d);
+                 this.form.startTime=startTime.getFullYear()+"-" + (startTime.getMonth()+1) + "-" + startTime.getDate()+" 00:00";
+                 this.form.endTime=endTime.getFullYear()+"-" + (endTime.getMonth()+1) + "-" + endTime.getDate()+" 23:59";
+                 this.searchTable();
+            },
+            searchMonth(){//本月
+                var a = new Date();
+                var year = a.getFullYear();
+                var month = a.getMonth();
+                var date = a.getDate();
+                var b = new Date(year,month,date);
+                var f= new Date(year,month,01);
+                var c = f.valueOf();
+              //  var d = b.valueOf()+1*24*60*60*1000;
+                var startTime= new Date(c);
+               // var endTime = new Date(d);
+                this.form.startTime=startTime.getFullYear()+"-" + (startTime.getMonth()+1) + "-" + startTime.getDate()+" 00:00";;
+                this.form.endTime=year+"-"+(month+1)+"-"+date+" 23:59";
+                this.searchTable();
+            },
+            exportRs(){
+                var param = {};
+                // 搜索条件
+                param.startTime = this.export.startTime;
+                param.endTime =  this.export.endTime;
+                param.orgId =  this.export.orgId;//电销组
+                param.userId =  this.export.userId;//电销顾问
+                param.cusLevelList =  this.export.cusLevelList;//客户级别
+                axios.post('/statistics/teleStatement/exportRecordByGroupPageOne',param,{responseType:'blob'})
+                .then(function (response) {
+                    console.log(response)
+                    var data =  response.data;
+                    var fileName = response.headers.filename;
+                    saveAs(data,decodeURI(fileName));
+                })
+                .catch(function (error) {
+                    console.log(error);
+                }).then(function(){
+                });
+            }
         },
-        created(){            
+        created(){     
+            // 接收参数
+            console.log(trackingQuery)
+            this.form.startTime=this.dateTimeFormat(trackingQuery.startTime);
+            this.form.endTime=this.dateTimeFormat(trackingQuery.endTime);
+            this.form.orgId=trackingQuery.orgId;
+            // this.form.cusLevelList=trackingQuery.cusLevelList; 
+            this.form.cusLevelList=[]; 
+
             this.searchTable();
         },
         mounted(){

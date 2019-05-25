@@ -30,7 +30,7 @@
                    <el-date-picker format="yyyy-MM-dd HH:mm" v-model="form.endTime" type="datetime" value-format="yyyy-MM-dd HH:mm" placeholder="选择日期"></el-date-picker>
                 </el-form-item>
                 <el-form-item label="电销组:">  
-                    <el-select v-model="form.orgId" placeholder="电销组" style="width: 100%;" clearable filterable>
+                    <el-select v-model="form.orgId" placeholder="电销组" style="width: 100%;" clearable filterable :disabled="isDisabled">
                         <el-option
                             v-for="item in orgTeleArr"
                             :key="item.id"
@@ -88,12 +88,15 @@
 </body>
 <script th:inline="javascript">
     var queryOrg=[[${teleGroupList}]]; // 电销组
-    console.log(queryOrg,'电销组');
+    console.log(queryOrg,'电销组'); 
+    var curOrgId = [[${curOrgId}]];
+    console.log(curOrgId);
     var mainDivVM = new Vue({
         el: '#maindiv',
         data: function() {
             return {
                 loading: false,
+                isDisabled: false,
                 pager:{ 
                     total: 0,
                     currentPage: 1,
@@ -102,12 +105,12 @@
                 form: {
                     startTime: '',
                     endTime: '',
-                    orgId: '',
+                    orgId: curOrgId,
                 },
                 export: {
-                    startTime:'',
-                    endTime:'',
-                    orgId:''
+                    startTime: '',
+                    endTime: '',
+                    orgId: curOrgId
                 },
                 tableData: [
                     // {
@@ -139,10 +142,12 @@
         },
         methods: {            
             searchTable() { 
-                var startTime = new Date(this.form.startTime);
-                var endTime = new Date(this.form.endTime);
+                var startTime = this.form.startTime;
+                var endTime = this.form.endTime;
                 console.log(startTime,endTime);
                 if(endTime && startTime){
+                    startTime = new Date(this.form.startTime);
+                    endTime = new Date(this.form.endTime);
                     if(startTime>endTime){
                         this.$message({
                             message: '开始时间不能大于结束时间',
@@ -165,7 +170,7 @@
                     }
                 }else{
                     this.$message({
-                        message: '请选择近6个月内的时间',
+                        message: '请选择起止时间',
                         type: 'warning'
                     });
                     return;
@@ -177,7 +182,7 @@
                 param.endTime = this.minuteFormat(endTime);
                 param.pageSize = this.pager.pageSize;
                 param.pageNum = this.pager.currentPage;
-                param.orgId = this.form.orgId; // 电销组
+                param.orgId = this.form.orgId; 
                 this.loading = true; 
                 axios.post('/callrecord/teleSaleTalkTime/listTeleGroupTalkTime',param).then(function (response) { 
                     if(!response){
@@ -360,6 +365,8 @@
             var endTime = moment(today).format("YYYY-MM-DD 23:59");
             this.form.startTime=startTime;
             this.form.endTime=endTime; 
+
+            if(curOrgId){this.isDisabled= true;}
 
             this.export.startTime = this.minuteFormat(this.form.startTime);
             this.export.endTime = this.minuteFormat(this.form.endTime);

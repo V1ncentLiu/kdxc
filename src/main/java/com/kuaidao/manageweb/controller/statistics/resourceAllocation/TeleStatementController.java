@@ -22,6 +22,7 @@ import com.kuaidao.sys.dto.customfield.QueryFieldByUserAndMenuReq;
 import com.kuaidao.sys.dto.customfield.UserFieldDTO;
 import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
 import com.kuaidao.sys.dto.organization.OrganizationRespDTO;
+import com.kuaidao.sys.dto.role.RoleInfoDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import com.kuaidao.sys.dto.user.UserOrgRoleReq;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -44,6 +45,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * 电销相关报表
@@ -74,8 +76,9 @@ public class TeleStatementController {
     public String resourceAllocationTable(HttpServletRequest request) {
         UserInfoDTO user = getUser();
         // 查询所有电销组
-        List<OrganizationRespDTO> saleGroupList = getSaleGroupList();
-        request.setAttribute("saleGroupList", saleGroupList);
+        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+        request.setAttribute("saleGroupList",getOrgGroupByOrgId(curLoginUser.getOrgId(),OrgTypeConstant.DXZ));
+
         // 根据角色查询页面字段
         QueryFieldByRoleAndMenuReq queryFieldByRoleAndMenuReq = new QueryFieldByRoleAndMenuReq();
         queryFieldByRoleAndMenuReq.setMenuCode("statistics:teleStatement:resourceAllocation");
@@ -104,6 +107,8 @@ public class TeleStatementController {
     @RequestMapping("/getResourceAllocationTable")
     @ResponseBody
     public JSONResult<PageBean<ResourceAllocationDto>> getResourceAllocationTable(@RequestBody ResourceAllocationQueryDto resourceAllocationQueryDto) {
+        Long org_id = resourceAllocationQueryDto.getOrg_Id();
+//        buildOrgIdList(resourceAllocationQueryDto, org_id);
         JSONResult<PageBean<ResourceAllocationDto>> resourceAllocationPage = statisticsFeignClient.getResourceAllocationPage(resourceAllocationQueryDto);
         return resourceAllocationPage;
     }
@@ -129,6 +134,8 @@ public class TeleStatementController {
     public void exportResourceAllocation(
             @RequestBody ResourceAllocationQueryDto resourceAllocationQueryDto,
             HttpServletResponse response) throws Exception {
+        Long org_id = resourceAllocationQueryDto.getOrg_Id();
+//        buildOrgIdList(resourceAllocationQueryDto, org_id);
         JSONResult<List<ResourceAllocationDto>> resourceAllocationList = statisticsFeignClient.getResourceAllocationList(resourceAllocationQueryDto);
         JSONResult<List<ResourceAllocationDto>> countRes = statisticsFeignClient.getResourceAllocationCount(resourceAllocationQueryDto);
         List<ResourceAllocationDto> total = countRes.getData();
@@ -166,6 +173,15 @@ public class TeleStatementController {
         outputStream.close();
     }
 
+    private void buildOrgIdList(@RequestBody ResourceAllocationQueryDto resourceAllocationQueryDto, Long org_id) {
+        if(null == org_id){
+            UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+            List<OrganizationRespDTO> orgGroupByOrgId = getOrgGroupByOrgId(curLoginUser.getOrgId(), OrgTypeConstant.DXZ);
+            List<Long> orgIdList = orgGroupByOrgId.parallelStream().map(OrganizationRespDTO::getId).collect(Collectors.toList());
+            resourceAllocationQueryDto.setOrgIdList(orgIdList);
+        }
+    }
+
 
     private void addTotalTexportResourceAllocation(ResourceAllocationDto resTotal, List<List<Object>> dataList) {
         List<Object> totalList = new ArrayList<>();
@@ -192,8 +208,9 @@ public class TeleStatementController {
     public JSONResult<PageBean<ResourceAllocationDto>> getResourceAllocationPersionTable(@RequestBody ResourceAllocationQueryDto resourceAllocationQueryDto, HttpServletRequest request) {
         UserInfoDTO user = getUser();
         // 查询所有电销组
-        List<OrganizationRespDTO> saleGroupList = getSaleGroupList();
-        request.setAttribute("saleGroupList", saleGroupList);
+        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+        request.setAttribute("saleGroupList",getOrgGroupByOrgId(curLoginUser.getOrgId(),OrgTypeConstant.DXZ));
+
         // 根据角色查询页面字段
         QueryFieldByRoleAndMenuReq queryFieldByRoleAndMenuReq = new QueryFieldByRoleAndMenuReq();
         queryFieldByRoleAndMenuReq.setMenuCode("statistics:teleStatement:resourceAllocation");
@@ -295,8 +312,8 @@ public class TeleStatementController {
     public String resourceAllocationTableSum(ResourceAllocationQueryDto resourceAllocationQueryDto,HttpServletRequest request) {
         UserInfoDTO user = getUser();
         // 查询所有电销组
-        List<OrganizationRespDTO> saleGroupList = getSaleGroupList();
-        request.setAttribute("saleGroupList", saleGroupList);
+        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+        request.setAttribute("saleGroupList",getOrgGroupByOrgId(curLoginUser.getOrgId(),OrgTypeConstant.DXZ));
         request.setAttribute("resourceAllocationQueryDto",resourceAllocationQueryDto);
         // 根据角色查询页面字段
         QueryFieldByRoleAndMenuReq queryFieldByRoleAndMenuReq = new QueryFieldByRoleAndMenuReq();
@@ -319,8 +336,8 @@ public class TeleStatementController {
     public String resourceAllocationTableTeam(ResourceAllocationQueryDto resourceAllocationQueryDto,HttpServletRequest request) {
         UserInfoDTO user = getUser();
         // 查询所有电销组
-        List<OrganizationRespDTO> saleGroupList = getSaleGroupList();
-        request.setAttribute("saleGroupList", saleGroupList);
+        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+        request.setAttribute("saleGroupList",getOrgGroupByOrgId(curLoginUser.getOrgId(),OrgTypeConstant.DXZ));
         request.setAttribute("resourceAllocationQueryDto",resourceAllocationQueryDto);
         // 根据角色查询页面字段
         QueryFieldByRoleAndMenuReq queryFieldByRoleAndMenuReq = new QueryFieldByRoleAndMenuReq();
@@ -343,8 +360,8 @@ public class TeleStatementController {
     public String resourceAllocationTablePerson(ResourceAllocationQueryDto resourceAllocationQueryDto,HttpServletRequest request) {
         UserInfoDTO user = getUser();
         // 查询所有电销组
-        List<OrganizationRespDTO> saleGroupList = getSaleGroupList();
-        request.setAttribute("saleGroupList", saleGroupList);
+        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+        request.setAttribute("saleGroupList",getOrgGroupByOrgId(curLoginUser.getOrgId(),OrgTypeConstant.DXZ));
         request.setAttribute("resourceAllocationQueryDto",resourceAllocationQueryDto);
         // 根据角色查询页面字段
         QueryFieldByRoleAndMenuReq queryFieldByRoleAndMenuReq = new QueryFieldByRoleAndMenuReq();
@@ -368,43 +385,6 @@ public class TeleStatementController {
     }
     
 
-    /**
-     * 电销顾问跟踪表页面
-    * @return
-     */
-    @RequestMapping("/telemarketingFollowTable")
-    public String telemarketingFollowTable() {
-        return "reportforms/telemarketingFollowTable";
-    }
-    
-    
-    /**
-     * 电销顾问跟踪表页面 合计
-    * @return
-     */
-    @RequestMapping("/telemarketingFollowTableSum")
-    public String telemarketingFollowTableSum() {
-        return "reportforms/telemarketingFollowTableSum";
-    }
-    
-    
-    /**
-     * 电销顾问跟踪表页面 组
-    * @return
-     */
-    @RequestMapping("/telemarketingFollowTableTeam")
-    public String telemarketingFollowTableTeam() {
-        return "reportforms/telemarketingFollowTableTeam";
-    }
-    
-    /**
-     * 电销顾问跟踪表页面 个人
-    * @return
-     */
-    @RequestMapping("/telemarketingFollowTablePerson")
-    public String telemarketingFollowTablePerson() {
-        return "reportforms/telemarketingFollowTablePerson";
-    }
     
     
     /**
@@ -415,6 +395,14 @@ public class TeleStatementController {
     public String telemarketingCallTable(HttpServletRequest request) {
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
         request.setAttribute("teleGroupList",getOrgGroupByOrgId(curLoginUser.getOrgId(),OrgTypeConstant.DXZ));
+        List<RoleInfoDTO> roleList = curLoginUser.getRoleList();
+        RoleInfoDTO roleInfoDTO = roleList.get(0);
+        String roleCode = roleInfoDTO.getRoleCode();
+        String curOrgId = "";
+        if(RoleCodeEnum.DXZJ.name().equals(roleCode)) {
+            curOrgId = String.valueOf(curLoginUser.getOrgId());
+        }
+        request.setAttribute("curOrgId",curOrgId);
         return "reportforms/telemarketingCallTable";
     }
     
