@@ -88,9 +88,9 @@
 </body>
 <script th:inline="javascript">
     var queryOrg=[[${teleGroupList}]]; // 电销组
-    console.log(queryOrg,'电销组'); 
+    // console.log(queryOrg,'电销组'); 
     var curOrgId = [[${curOrgId}]];
-    console.log(curOrgId);
+    // console.log(curOrgId);
     var mainDivVM = new Vue({
         el: '#maindiv',
         data: function() {
@@ -156,7 +156,7 @@
             searchTable() { 
                 var startTime = this.form.startTime;
                 var endTime = this.form.endTime;
-                console.log(startTime,endTime);
+                // console.log(startTime,endTime);
                 if(endTime && startTime){
                     startTime = new Date(this.form.startTime);
                     endTime = new Date(this.form.endTime);
@@ -190,11 +190,15 @@
                 console.log('search');   
                 
                 var param = {};
-                param.startTime = this.minuteFormat(startTime);
-                param.endTime = this.minuteFormat(endTime);
+                var s = this.minuteFormat(startTime);
+                var e = this.minuteFormat(endTime);
+                
+                param.startTime = this.limitTime (s, null);
+                param.endTime = this.limitTime (null, e);
                 param.pageSize = this.pager.pageSize;
                 param.pageNum = this.pager.currentPage;
                 param.orgId = this.form.orgId; 
+                console.log(param);
                 this.loading = true; 
                 axios.post('/callrecord/teleSaleTalkTime/listTeleGroupTalkTime',param).then(function (response) { 
                     if(!response){
@@ -237,9 +241,10 @@
                         mainDivVM.pager.currentPage = tableData.currentPage;
                         mainDivVM.pager.total = tableData.total;
                         mainDivVM.loading = false;
-                        mainDivVM.export.startTime = param.startTime;
-                        mainDivVM.export.endTime = param.endTime;
-                        mainDivVM.export.orgId = param.orgId;
+                        mainDivVM.export.startTime = mainDivVM.minuteFormat(startTime);
+                        mainDivVM.export.endTime = mainDivVM.minuteFormat(endTime);
+                        mainDivVM.export.orgId = mainDivVM.form.orgId;
+                        console.log(mainDivVM.export);
                     }else{
                         mainDivVM.loading = false;
                     }  
@@ -251,6 +256,25 @@
                         type: "error"
                     });
                 });
+            },
+            limitTime (startTime, endTime) {
+                var date = new Date();
+                data = this.minuteFormat (date);// 现在的时间
+                data = data.slice(0,8);
+                if(startTime){
+                    var s = startTime.slice(0,8);
+                    if(s < data){
+                        return s + "0000";
+                    }
+                    return startTime;
+                }
+                if(endTime){
+                    var e = endTime.slice(0,8);
+                    if(e < data){
+                        return e + "2359";
+                    }
+                    return endTime;
+                }
             },
             arraySpanMethod({ row, column, rowIndex, columnIndex }) { // 合并第一行
                 if (rowIndex === 0) {
@@ -269,6 +293,7 @@
                 var orgName = row.orgName; // 电销组name
                 var startTime = this.export.startTime;
                 var endTime = this.export.endTime;
+                console.log(startTime,endTime);
                 if(orgId === "0" && orgName === "合计"){
                     window.location.href="/statistics/teleStatement/telemarketingCallTableSum?orgId=" + this.export.orgId + "&startTime=" + startTime + "&endTime=" + endTime;
                 }else if(orgId){
@@ -355,9 +380,12 @@
             },
             exportRs(){
                 var param = {};
-                param.startTime = this.export.startTime;
-                param.endTime =  this.export.endTime;
+                var startTime = this.export.startTime;
+                var endTime = this.export.endTime;
+                param.startTime = this.limitTime (startTime, null);
+                param.endTime = this.limitTime (null, endTime);
                 param.orgId =  this.export.orgId; 
+                console.log(param);
                 axios.post('/callrecord/teleSaleTalkTime/exportTeleGroupTalkTime',param,{responseType:'blob'})
                     .then(function (response) {
                         console.log(response);
