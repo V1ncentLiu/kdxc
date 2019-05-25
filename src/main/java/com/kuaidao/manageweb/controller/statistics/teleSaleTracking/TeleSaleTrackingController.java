@@ -340,6 +340,8 @@ public class TeleSaleTrackingController {
         totalList.add("");
         totalList.add("合计");
         totalList.add("");
+        totalList.add("");
+        totalList.add("");
         totalList.add(resTotal.getCountResource());
         totalList.add(resTotal.getCountClueId());
         totalList.add(resTotal.getCountDistinctClue());
