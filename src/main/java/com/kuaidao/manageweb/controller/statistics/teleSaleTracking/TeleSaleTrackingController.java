@@ -134,7 +134,9 @@ public class TeleSaleTrackingController {
             TeleSaleTrackingDto ra = orderList.get(i);
             List<Object> curList = new ArrayList<>();
             curList.add(i + 1);
+            curList.add(ra.getDateId());
             curList.add(ra.getOrgName());
+            curList.add(ra.getUserName());
             curList.add(ra.getCusLevel());
             curList.add(ra.getCountResource());
             curList.add(ra.getCountClueId());
@@ -172,7 +174,9 @@ public class TeleSaleTrackingController {
             TeleSaleTrackingDto ra = orderList.get(i);
             List<Object> curList = new ArrayList<>();
             curList.add(i + 1);
+            curList.add(ra.getDateId());
             curList.add(ra.getOrgName());
+            curList.add(ra.getUserName());
             curList.add(ra.getCusLevel());
             curList.add(ra.getCountResource());
             curList.add(ra.getCountClueId());
@@ -210,7 +214,9 @@ public class TeleSaleTrackingController {
             TeleSaleTrackingDto ra = orderList.get(i);
             List<Object> curList = new ArrayList<>();
             curList.add(i + 1);
+            curList.add(ra.getDateId());
             curList.add(ra.getOrgName());
+            curList.add(ra.getUserName());
             curList.add(ra.getCusLevel());
             curList.add(ra.getCountResource());
             curList.add(ra.getCountClueId());
@@ -293,7 +299,9 @@ public class TeleSaleTrackingController {
     private List<Object> getHeadTitleList() {
         List<Object> headTitleList = new ArrayList<>();
         headTitleList.add("序号");
+        headTitleList.add("日期");
         headTitleList.add("电销组");
+        headTitleList.add("电销顾问");
         headTitleList.add("客户级别");
         headTitleList.add("资源数");
         headTitleList.add("回访次数");
