@@ -401,17 +401,25 @@ public class TeleStatementController {
         RoleInfoDTO roleInfoDTO = roleList.get(0);
         String roleCode = roleInfoDTO.getRoleCode();
         String curOrgId = "";
+        List<OrganizationRespDTO>  teleGroupList = new ArrayList<>();
         if(RoleCodeEnum.DXZJ.name().equals(roleCode)) {
+            //电销总监查他自己的组
             curOrgId = String.valueOf(curLoginUser.getOrgId());
-          //  getCurOrgGroupByOrgId
+            OrganizationDTO curOrgGroupByOrgId = getCurOrgGroupByOrgId(curOrgId);
+            if(curOrgGroupByOrgId!=null) {
+                OrganizationRespDTO organizationRespDTO = new OrganizationRespDTO();
+                organizationRespDTO.setId(curOrgGroupByOrgId.getId());
+                organizationRespDTO.setName(curOrgGroupByOrgId.getName());
+                teleGroupList.add(organizationRespDTO);
+            }
         }else {
-            request.setAttribute("teleGroupList",getOrgGroupByOrgId(curLoginUser.getOrgId(),OrgTypeConstant.DXZ));
+            teleGroupList =  getOrgGroupByOrgId(curLoginUser.getOrgId(),OrgTypeConstant.DXZ);
         }
         OrganizationQueryDTO organizationQueryDTO  = new OrganizationQueryDTO();
         organizationQueryDTO.setParentId(curLoginUser.getOrgId());
         
-         JSONResult<List<OrganizationDTO>> listDescenDantByParentId = organizationFeignClient.listDescenDantByParentId(organizationQueryDTO);
         request.setAttribute("curOrgId",curOrgId);
+        request.setAttribute("teleGroupList",teleGroupList);
         return "reportforms/telemarketingCallTable";
     }
     
@@ -422,7 +430,7 @@ public class TeleStatementController {
     * @param orgType
     * @return
      */
-    private OrganizationDTO getCurOrgGroupByOrgId(Long orgId,Integer orgType) {
+    private OrganizationDTO getCurOrgGroupByOrgId(String orgId) {
         // 电销组
         IdEntity idEntity = new IdEntity();
         idEntity.setId(orgId+"");
@@ -477,8 +485,28 @@ public class TeleStatementController {
         teleSaleTempDTO.setOrgId(orgId);
         teleSaleTempDTO.setUserId(userId);
         request.setAttribute("parentParam",teleSaleTempDTO);
+        
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
-        request.setAttribute("teleGroupList",getOrgGroupByOrgId(curLoginUser.getOrgId(),OrgTypeConstant.DXZ));
+        List<RoleInfoDTO> roleList = curLoginUser.getRoleList();
+        RoleInfoDTO roleInfoDTO = roleList.get(0);
+        String roleCode = roleInfoDTO.getRoleCode();
+        String curOrgId = "";
+        List<OrganizationRespDTO>  teleGroupList = new ArrayList<>();
+        if(RoleCodeEnum.DXZJ.name().equals(roleCode)) {
+            //电销总监查他自己的组
+            curOrgId = String.valueOf(curLoginUser.getOrgId());
+            OrganizationDTO curOrgGroupByOrgId = getCurOrgGroupByOrgId(curOrgId);
+            if(curOrgGroupByOrgId!=null) {
+                OrganizationRespDTO organizationRespDTO = new OrganizationRespDTO();
+                organizationRespDTO.setId(curOrgGroupByOrgId.getId());
+                organizationRespDTO.setName(curOrgGroupByOrgId.getName());
+                teleGroupList.add(organizationRespDTO);
+            }
+        }else {
+            teleGroupList =  getOrgGroupByOrgId(curLoginUser.getOrgId(),OrgTypeConstant.DXZ);
+        }
+        
+        request.setAttribute("teleGroupList",teleGroupList);
         request.setAttribute("curOrgId",curLoginUser.getOrgId());
         return "reportforms/telemarketingCallTableSum";
     }
@@ -498,7 +526,28 @@ public class TeleStatementController {
         teleSaleTempDTO.setUserId(userId);
         request.setAttribute("parentParam",teleSaleTempDTO);
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
-        request.setAttribute("teleGroupList",getOrgGroupByOrgId(curLoginUser.getOrgId(),OrgTypeConstant.DXZ));
+
+        List<RoleInfoDTO> roleList = curLoginUser.getRoleList();
+        RoleInfoDTO roleInfoDTO = roleList.get(0);
+        String roleCode = roleInfoDTO.getRoleCode();
+        String curOrgId = "";
+        List<OrganizationRespDTO>  teleGroupList = new ArrayList<>();
+        if(RoleCodeEnum.DXZJ.name().equals(roleCode)) {
+            //电销总监查他自己的组
+            curOrgId = String.valueOf(curLoginUser.getOrgId());
+            OrganizationDTO curOrgGroupByOrgId = getCurOrgGroupByOrgId(curOrgId);
+            if(curOrgGroupByOrgId!=null) {
+                OrganizationRespDTO organizationRespDTO = new OrganizationRespDTO();
+                organizationRespDTO.setId(curOrgGroupByOrgId.getId());
+                organizationRespDTO.setName(curOrgGroupByOrgId.getName());
+                teleGroupList.add(organizationRespDTO);
+            }
+        }else {
+            teleGroupList =  getOrgGroupByOrgId(curLoginUser.getOrgId(),OrgTypeConstant.DXZ);
+        }
+        
+        request.setAttribute("teleGroupList",teleGroupList);
+        
         request.setAttribute("curOrgId",curLoginUser.getOrgId());
         return "reportforms/telemarketingCallTableTeam";
     }
@@ -517,7 +566,26 @@ public class TeleStatementController {
         teleSaleTempDTO.setUserId(userId);
         request.setAttribute("parentParam",teleSaleTempDTO);
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
-        request.setAttribute("teleGroupList",getOrgGroupByOrgId(curLoginUser.getOrgId(),OrgTypeConstant.DXZ));
+        List<RoleInfoDTO> roleList = curLoginUser.getRoleList();
+        RoleInfoDTO roleInfoDTO = roleList.get(0);
+        String roleCode = roleInfoDTO.getRoleCode();
+        String curOrgId = "";
+        List<OrganizationRespDTO>  teleGroupList = new ArrayList<>();
+        if(RoleCodeEnum.DXZJ.name().equals(roleCode)) {
+            //电销总监查他自己的组
+            curOrgId = String.valueOf(curLoginUser.getOrgId());
+            OrganizationDTO curOrgGroupByOrgId = getCurOrgGroupByOrgId(curOrgId);
+            if(curOrgGroupByOrgId!=null) {
+                OrganizationRespDTO organizationRespDTO = new OrganizationRespDTO();
+                organizationRespDTO.setId(curOrgGroupByOrgId.getId());
+                organizationRespDTO.setName(curOrgGroupByOrgId.getName());
+                teleGroupList.add(organizationRespDTO);
+            }
+        }else {
+            teleGroupList =  getOrgGroupByOrgId(curLoginUser.getOrgId(),OrgTypeConstant.DXZ);
+        }
+        
+        request.setAttribute("teleGroupList",teleGroupList);
         request.setAttribute("curOrgId",curLoginUser.getOrgId());
         return "reportforms/telemarketingCallTablePerson";
     }
