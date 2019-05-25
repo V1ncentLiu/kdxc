@@ -118,7 +118,7 @@
                     //     orgName: '电销组1',
                     //     callCount: 1000,
                     //     calledCount: 10,
-                    //     callPercent: 10,
+                    //     callPercent: 0.1,
                     //     callClueCount: 10,
                     //     calledClueCount: 10,
                     //     clueCallecdPrecent: 10,
@@ -129,12 +129,24 @@
                     //     orgName: '电销组2',
                     //     callCount: 1000,
                     //     calledCount: 10,
-                    //     callPercent: 10,
+                    //     callPercent: 0,
                     //     callClueCount: 10,
                     //     calledClueCount: 10,
                     //     clueCallecdPrecent: 10,
                     //     validCallTime: 155799,
-                    //     userAvgDayValidCallTime: 155799
+                    //     userAvgDayValidCallTime: 0
+                    // },
+                    // {
+                    //     orgId: "3",
+                    //     orgName: '电销组3',
+                    //     callCount: 1000,
+                    //     calledCount: 10,
+                    //     // callPercent: 0,
+                    //     callClueCount: 10,
+                    //     calledClueCount: 10,
+                    //     clueCallecdPrecent: 10,
+                    //     validCallTime: 155799,
+                    //     // userAvgDayValidCallTime: 155799
                     // }
                 ],
                 orgTeleArr: queryOrg, // 电销组
@@ -225,9 +237,9 @@
                         mainDivVM.pager.currentPage = tableData.currentPage;
                         mainDivVM.pager.total = tableData.total;
                         mainDivVM.loading = false;
-                        mainDivVM.export.startTime = mainDivVM.minuteFormat(startTime);
-                        mainDivVM.export.endTime = mainDivVM.minuteFormat(endTime);
-                        mainDivVM.export.orgId = mainDivVM.form.orgId;
+                        mainDivVM.export.startTime = param.startTime;
+                        mainDivVM.export.endTime = param.endTime;
+                        mainDivVM.export.orgId = param.orgId;
                     }else{
                         mainDivVM.loading = false;
                     }  
@@ -280,11 +292,15 @@
             },
             percentFormat (row, column) {
                 var percent = row[column.property];
+                if(!percent){ // 如果没有值或值为0
+                    return 0 + "%";
+                }
                 percent = percent * 100 + "%";
                 return percent;
             },
             timeFormat (row, column) { // 时间格式化：时分秒
                 var time = row[column.property];
+                if(!time){return "00时00分00秒";}
                 var timeResult = this.timeFun (time); 
                 return timeResult;
             },

@@ -224,10 +224,10 @@
                     mainDivVM.pager.currentPage = resobj.data.currentPage;
                     mainDivVM.pager.total = resobj.data.total;
                     mainDivVM.loading = false;
-                    mainDivVM.export.startTime = mainDivVM.minuteFormat(startTime);
-                    mainDivVM.export.endTime = mainDivVM.minuteFormat(endTime);
-                    mainDivVM.export.orgId = mainDivVM.form.orgId;
-                    mainDivVM.export.userId = mainDivVM.form.userId;
+                    mainDivVM.export.startTime = param.startTime;
+                    mainDivVM.export.endTime = param.endTime;
+                    mainDivVM.export.orgId = param.orgId;
+                    mainDivVM.export.userId = param.userId;
                 }).catch(function (error) {
                     console.log(error);
                     mainDivVM.loading = false;
@@ -281,6 +281,9 @@
             }, 
             percentFormat (row, column) {
                 var percent = row[column.property];
+                if(!percent){ // 如果没有值或值为0
+                    return 0 + "%";
+                }
                 percent = percent * 100 + "%";
                 return percent;
             },
@@ -299,8 +302,9 @@
                 var timeRes = "" + yearRes + monthRea + dateRes + hoursRes + minRes;
                 return timeRes;
             },
-            timeFormat (row, column) {
+            timeFormat (row, column) { // 时间格式化：时分秒
                 var time = row[column.property];
+                if(!time){return "00时00分00秒";}
                 var timeResult = this.timeFun (time); 
                 return timeResult;
             },
@@ -380,8 +384,8 @@
             this.form.endTime=this.dateTimeFormat(parentParam.endTime);    
             this.form.orgId=parentParam.orgId; 
             this.form.orgId = this.form.orgId ? this.form.orgId.toString():""; 
-            this.export.startTime = this.minuteFormat(this.form.startTime);
-            this.export.endTime = this.minuteFormat(this.form.endTime);
+            this.export.startTime = parentParam.startTime;
+            this.export.endTime = parentParam.startTime;
             this.export.orgId = this.form.orgId;
             console.log(this.form);
             this.currentTelSale(this.export.orgId); 
