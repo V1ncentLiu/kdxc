@@ -249,16 +249,12 @@
                 if (!dt) {return "";}
                 var d = dt.toString();
                 var oYear = d.slice(0,4);
-                var oMonth = d.slice(5,6);
-                oMonth = oMonth < 10 ? "0" + oMonth : oMonth;
-                var oDay = d.slice(7,8);
-                oDay = oDay < 10 ? "0" + oDay : oDay;
-                var oHour = d.slice(9,10);
-                oHour = oHour < 10 ? "0" + oHour : oHour;
-                var oMinute = d.slice(11);
-                oMinute = oMinute < 10 ? "0" + oMinute : oMinute;
+                var oMonth = d.slice(4,6);
+                var oDay = d.slice(6,8);
+                var oHour = d.slice(8,10);
+                var oMinute = d.slice(10);
                 return oYear+"-"+oMonth+"-"+oDay+" "+oHour+":"+oMinute;
-            }, 
+            },   
             searchYesterday(){//昨天
                 var today = new Date();
                today.setTime(today.getTime()-24*60*60*1000);
@@ -325,8 +321,19 @@
             this.form.startTime=this.dateTimeFormat(trackingQuery.startTime);
             this.form.endTime=this.dateTimeFormat(trackingQuery.endTime);
             this.form.orgId=trackingQuery.orgId;
-            // this.form.cusLevelList=trackingQuery.cusLevelList; 
-            this.form.cusLevelList=[];  
+
+            this.export.startTime=this.dateTimeFormat(trackingQuery.startTime);
+            this.export.endTime=this.dateTimeFormat(trackingQuery.endTime);
+            this.export.orgId=trackingQuery.orgId;
+
+            var strCusLevelList=trackingQuery.strCusLevelList
+            if(strCusLevelList){
+                this.form.cusLevelList=strCusLevelList.split(','); 
+                this.export.cusLevelList=strCusLevelList.split(','); 
+            }else{
+                this.form.cusLevelList=[]; 
+                this.export.cusLevelList=[]; 
+            }
 
             this.searchTable();
         },

@@ -232,24 +232,25 @@
                 debugger
                 console.log(item)
                 var userId = item.userId;
-                // 搜索条件
-                var startTime=this.minuteFormat(this.form.startTime);
-                var endTime=this.minuteFormat(this.form.endTime);
-                var orgId=null;
-                var cusLevelList=null;
+                var orgId="";
                 if(this.form.orgId){
                     orgId=this.form.orgId;
                 }else{
                     orgId=""
                 }
-                if(this.form.cusLevelList){
-                    cusLevelList=this.form.cusLevelList;
+                // 搜索条件
+                var startTime=this.minuteFormat(this.form.startTime);
+                var endTime=this.minuteFormat(this.form.endTime);
+                var cusLevelList=this.export.cusLevelList;
+                var strCusLevelList="";
+                if(cusLevelList!=0){
+                    strCusLevelList=cusLevelList.join(",");
                 }else{
-                    cusLevelList=""
-                }
+                    strCusLevelList=""
+                }  
                 if(userId){
                     // 点击个人跳转到此人的资源分配信息
-                    window.location.href="/statistics/teleStatement/telemarketingFollowTablePerson?userId=" + userId + "&orgId=" + orgId+"&startTime="+ startTime+"&endTime="+ endTime+"&cusLevelList="+ cusLevelList;
+                    window.location.href="/statistics/teleStatement/telemarketingFollowTableTeam?orgId=" + orgId+"&startTime="+ startTime+"&endTime="+ endTime+"&strCusLevelList="+ strCusLevelList;
                 }
             },
             goback () {
@@ -272,20 +273,16 @@
                  }
                 return moment(m).format("YYYYMMDDHHmm");
             },
-            dateTimeFormat (dt) { 
+             dateTimeFormat (dt) { 
                 if (!dt) {return "";}
                 var d = dt.toString();
                 var oYear = d.slice(0,4);
-                var oMonth = d.slice(5,6);
-                oMonth = oMonth < 10 ? "0" + oMonth : oMonth;
-                var oDay = d.slice(7,8);
-                oDay = oDay < 10 ? "0" + oDay : oDay;
-                var oHour = d.slice(9,10);
-                oHour = oHour < 10 ? "0" + oHour : oHour;
-                var oMinute = d.slice(11);
-                oMinute = oMinute < 10 ? "0" + oMinute : oMinute;
+                var oMonth = d.slice(4,6);
+                var oDay = d.slice(6,8);
+                var oHour = d.slice(8,10);
+                var oMinute = d.slice(10);
                 return oYear+"-"+oMonth+"-"+oDay+" "+oHour+":"+oMinute;
-            }, 
+            },  
             searchYesterday(){//昨天
                 var today = new Date();
                today.setTime(today.getTime()-24*60*60*1000);
@@ -333,7 +330,7 @@
                 param.orgId =  this.export.orgId;//电销组
                 param.userId =  this.export.userId;//电销顾问
                 param.cusLevelList =  this.export.cusLevelList;//客户级别
-                axios.post('/statistics/teleStatement/exportRecordByGroupPageOne',param,{responseType:'blob'})
+                axios.post('/statistics/teleStatement/exportRecordByGroupLevelUserIdDate',param,{responseType:'blob'})
                 .then(function (response) {
                     console.log(response)
                     var data =  response.data;
@@ -346,15 +343,27 @@
                 });
             }
         },
-        created(){     
+        created(){ 
+            debugger    
             // 接收参数
             console.log(trackingQuery)
             this.form.startTime=this.dateTimeFormat(trackingQuery.startTime);
             this.form.endTime=this.dateTimeFormat(trackingQuery.endTime);
             this.form.orgId=trackingQuery.orgId;
-            // this.form.cusLevelList=trackingQuery.cusLevelList; 
-            this.form.cusLevelList=[]; 
 
+            this.export.startTime=this.dateTimeFormat(trackingQuery.startTime);
+            this.export.endTime=this.dateTimeFormat(trackingQuery.endTime);
+            this.export.orgId=trackingQuery.orgId;
+
+            var strCusLevelList=trackingQuery.strCusLevelList
+            if(strCusLevelList){
+                this.form.cusLevelList=strCusLevelList.split(','); 
+                this.export.cusLevelList=strCusLevelList.split(','); 
+            }else{
+                this.form.cusLevelList=[]; 
+                this.export.cusLevelList=[]; 
+            }
+            
             this.searchTable();
         },
         mounted(){
