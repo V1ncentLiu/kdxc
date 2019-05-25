@@ -31,7 +31,7 @@
                    <el-date-picker format="yyyy-MM-dd HH:mm" v-model="form.endTime" type="datetime" value-format="yyyy-MM-dd HH:mm" placeholder="选择日期"></el-date-picker>
                 </el-form-item>
                 <el-form-item label="电销组:">  
-                    <el-select v-model="form.orgId" placeholder="电销组" style="width: 100%;" clearable @change="currentTelSale" filterable>
+                    <el-select v-model="form.orgId" placeholder="电销组" style="width: 100%;" clearable @change="currentTelSale" filterable :disabled="isDisabled">
                         <el-option
                             v-for="item in orgTeleArr"
                             :key="item.id"
@@ -98,11 +98,14 @@
     console.log(queryOrg,'电销组');
     var parentParam = [[${parentParam}]];
     console.log(parentParam,'parentParam');
+    var curOrgId = [[${curOrgId}]];
+    console.log(curOrgId);
     var mainDivVM = new Vue({
         el: '#maindiv',
         data: function() {
             return {
                 loading: false,
+                isDisabled: false,
                 pager:{ 
                     total: 0,
                     currentPage: 1,
@@ -395,6 +398,7 @@
             this.export.startTime = parentParam.startTime;
             this.export.endTime = parentParam.endTime;
             this.export.orgId = this.form.orgId;
+            if(curOrgId){this.isDisabled= true;}
             this.currentTelSale(this.export.orgId); 
             this.searchTable();
         },
