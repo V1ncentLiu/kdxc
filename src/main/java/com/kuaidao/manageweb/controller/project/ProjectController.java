@@ -5,8 +5,10 @@ package com.kuaidao.manageweb.controller.project;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.slf4j.Logger;
@@ -14,24 +16,16 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
-import com.kuaidao.aggregation.dto.project.BrandListDTO;
-import com.kuaidao.aggregation.dto.project.BrandListPageParam;
-import com.kuaidao.aggregation.dto.project.CategoryDTO;
-import com.kuaidao.aggregation.dto.project.CompanyInfoDTO;
-import com.kuaidao.aggregation.dto.project.ProjectInfoDTO;
-import com.kuaidao.aggregation.dto.project.ProjectInfoPageParam;
-import com.kuaidao.aggregation.dto.project.ProjectInfoReq;
+import org.springframework.web.bind.annotation.*;
+
+import com.kuaidao.aggregation.dto.project.*;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.IdEntityLong;
 import com.kuaidao.common.entity.IdListLongReq;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.common.util.CommonUtil;
+import com.kuaidao.common.util.SortUtils;
 import com.kuaidao.manageweb.config.LogRecord;
 import com.kuaidao.manageweb.config.LogRecord.OperationType;
 import com.kuaidao.manageweb.constant.Constants;
@@ -195,12 +189,13 @@ public class ProjectController {
      */
     @PostMapping("/listNoPage")
     @ResponseBody
-    public JSONResult<List<ProjectInfoDTO>> listNoPage(
-            @RequestBody ProjectInfoPageParam projectInfoPageParam, HttpServletRequest request) {
+    public JSONResult<List<ProjectInfoDTO>> listNoPage(@RequestBody ProjectInfoPageParam projectInfoPageParam, HttpServletRequest request) {
 
-        JSONResult<List<ProjectInfoDTO>> list =
-                projectInfoFeignClient.listNoPage(projectInfoPageParam);
-
+        JSONResult<List<ProjectInfoDTO>> list = projectInfoFeignClient.listNoPage(projectInfoPageParam);
+        if (list.getCode().equals(JSONResult.SUCCESS)) {
+            List<ProjectInfoDTO> result = SortUtils.sortList(list.getData(), "projectName");
+        return  new JSONResult<List<ProjectInfoDTO>>().success(result);
+        }
         return list;
     }
 
