@@ -94,6 +94,12 @@
                             </el-option>
                         </el-select>
                     </el-form-item>
+                    <el-form-item label="资源Id:">
+                        <el-input v-model="queryForm.clueId" placeholder="请输入资源Id"></el-input>
+                    </el-form-item>
+                    <el-form-item label="联系方式:">
+                        <el-input v-model="queryForm.linkPhone" placeholder="请输入联系方式"></el-input>
+                    </el-form-item>
                 </el-row>
                 <div class="mainSearchBtnBox">
                     <el-button icon="el-icon-search" type="primary" @click="initList" class="searchBtn">搜索</el-button>
@@ -104,17 +110,19 @@
                 </div>
             </el-form>
         </div>
-        <el-table :data="tableData" border tooltip-effect="dark" style="width:100%" ref="multipleTable"
+        <el-table :data="tableData" border tooltip-effect="dark" style="width:100%" ref="multipleTable" @row-click="clickRow"
                   @row-dblclick="showCustomerDetail" @selection-change="handleSelectionChange">
             <el-table-column type="selection" width="55" prop="clueId"></el-table-column>
             <el-table-column prop="xh" label="序号" width="60" type="index" align="center"></el-table-column>
             <el-table-column prop="reserveTime" label="邀约来访时间" sortable align="center" width="180px"></el-table-column>
+            <el-table-column prop="isInviteLetter" label="是否有邀请函" align="center" width="120px" :formatter="transformLetter" ></el-table-column>
             <el-table-column prop="cusName" label="客户姓名" align="center" width="200">
                 <template slot-scope="scope">
                     <el-button size="mini" type="text" @click="editCustomerDetail(scope.row)">{{scope.row.cusName}}
                     </el-button>
                 </template>
             </el-table-column>
+            <el-table-column prop="linkPhone" label="联系方式" align="center" width="200"></el-table-column>
             <el-table-column prop="visitStatus" label="到访状态" :formatter="formatVisitStatus" align="center" width="88">
             </el-table-column>
             <el-table-column prop="isSign" label="签约状态" :formatter="formatSignStatus" align="center"
@@ -249,7 +257,10 @@
             <el-form :model="notVisitFlag" ref="notVisitFlag">
                 <el-form-item label="" :label-width="formLabelWidth" :required="true">
                     <!--<el-button type="text" disabled style="color: #1e2746">{{notVisitFlag.str}}</el-button>-->
-                    <span style="display:block;color: #1e2746; width:90%; word-wrap:break-word; word-break:normal;">{{notVisitFlag.str}}</span>
+                    <span style="display:block;color: #1e2746; width:90%; word-wrap:break-word; word-break:normal;">标记未到访人员：{{notVisitFlag.createUserName}}</span>
+                    <span style="display:block;color: #1e2746; width:90%; word-wrap:break-word; word-break:normal;">标记未到访时间：{{notVisitFlag.notVisitTime}}</span>
+                    <br>
+                    <span style="display:block;color: #1e2746; width:90%; word-wrap:break-word; word-break:normal;">未到访原因：<br>{{notVisitFlag.str}}</span>
                 </el-form-item>
             </el-form>
             <div slot="footer" class="dialog-footer" style="text-align: center">
@@ -262,8 +273,10 @@
         <template>
             <el-form :model="notVisitFlag" ref="notVisitFlag">
                 <el-form-item label="" :label-width="formLabelWidth" :required="true">
-                    <!--<el-button type="text" disabled style="color: #1e2746">{{notVisitFlag.str}}</el-button>-->
-                    <span style="display:block;color: #1e2746; width:90%; word-wrap:break-word; word-break:normal;">{{notVisitFlag.str}}</span>
+                    <span style="display:block;color: #1e2746; width:90%; word-wrap:break-word; word-break:normal;">标记未到访人员：{{notVisitFlag.createUserName}}</span>
+                    <span style="display:block;color: #1e2746; width:90%; word-wrap:break-word; word-break:normal;">标记未到访时间：{{notVisitFlag.notVisitTime}}</span>
+                    <br>
+                    <span style="display:block;color: #1e2746; width:90%; word-wrap:break-word; word-break:normal;">未到访原因：<br>{{notVisitFlag.str}}</span>
                 </el-form-item>
             </el-form>
         </template>
@@ -274,9 +287,9 @@
             <el-form :model="notVisitFlag" ref="notVisitFlag" :rules="notVisitFlagRules">
                 <el-form-item>
                     <!--<el-button type="text" disabled style="color: #1e2746; width:100px; word-wrap:break-word; word-break:normal;">{{notVisitFlag.str}}</el-button>-->
-                    <span style="display:block;color: #1e2746; width:100%; word-wrap:break-word; word-break:normal;">{{notVisitFlag.str}}</span>
+                    <span style="display:block;color: #1e2746; width:100%; word-wrap:break-word; word-break:normal;"><span style="color:red;">* </span>{{notVisitFlag.str}}</span>
                 </el-form-item>
-                <el-form-item label="未到访原因" :label-width="formLabelWidth2" prop="notVisitReason">
+                <el-form-item label=""  prop="notVisitReason">
                     <el-input type="textarea" v-model="notVisitFlag.notVisitReason" maxlength="100" :rows="3"
                               placeholder="请输入内容(限制100字)"></el-input>
                 </el-form-item>
@@ -829,7 +842,7 @@
                     <el-row>
                         <el-col :span="12">
                             <el-form-item label="签约城市：" :label-width="formLabelWidth" prop="signCity">
-                                <el-select v-model="formSigning.signCity" placeholder="请选择签约城市："
+                                <el-select v-model="formSigning.signCity" clearable placeholder="请选择签约城市："
                                            @change="changeSignCity" style="width:100%">
                                     <el-option v-for="item in cityArr" :key="item.name" :label="item.name"
                                                :value="item.name"></el-option>
@@ -838,7 +851,7 @@
                         </el-col>
                         <el-col :span="12">
                             <el-form-item label="签约区/县：" :label-width="formLabelWidth" prop="signDictrict">
-                                <el-select v-model="formSigning.signDictrict" placeholder="请选择签约区/县" style="width:100%">
+                                <el-select v-model="formSigning.signDictrict" clearable placeholder="请选择签约区/县" style="width:100%">
                                     <el-option v-for="item in districtArr" :key="item.name" :label="item.name"
                                                :value="item.name"></el-option>
                                 </el-select>
@@ -1014,15 +1027,8 @@
                             </el-form-item>
                         </el-col>
                         <el-col :span="12">
-                            <el-form-item label="付款方式：" :label-width="formLabelWidth" prop="payMode">
-                                <el-select v-model="formSigning.payMode" placeholder="请选择付款方式：" style="width:100%">
-                                    <el-option
-                                            v-for="item in option3s"
-                                            :key="item.value"
-                                            :label="item.label"
-                                            :value="item.value">
-                                    </el-option>
-                                </el-select>
+                            <el-form-item label="付款人姓名：" :label-width="formLabelWidth" prop="payName">
+                                <el-input v-model="formSigning.payName" maxLength="10"></el-input>
                             </el-form-item>
                         </el-col>
                     </el-row>
@@ -1038,13 +1044,15 @@
                             </el-form-item>
                         </el-col>
                         <el-col :span="12">
-                            <el-form-item label="实收金额：" :label-width="formLabelWidth" prop="amountReceived">
-                                <!-- <el-input maxLength="10" v-model="formSigning.amountReceived"  type="number"  min="0" oninput="if(value.length>10)value=value.slice(0,10)"  onkeypress="return(/[\d]/.test(String.fromCharCode(event.keyCode)))"  style="width: 80%;" @change="setAddPerformanceAmount"></el-input> -->
-                                <el-input maxLength="10" v-model="formSigning.amountReceived" type="number" min="0"
-                                          oninput="if(value.length>10)value=value.slice(0,10)"
-                                          onkeypress="return(/[\d]/.test(String.fromCharCode(event.keyCode)))"
-                                          style="width: 80%;" @input="formSigningAmountPerformance"></el-input>
-                                <span style="padding-left: 10px;">元</span>
+                            <el-form-item label="付款方式：" :label-width="formLabelWidth" prop="payMode">
+                                <el-select v-model="formSigning.payMode" placeholder="请选择付款方式：" style="width:100%">
+                                    <el-option
+                                            v-for="item in option3s"
+                                            :key="item.value"
+                                            :label="item.label"
+                                            :value="item.value">
+                                    </el-option>
+                                </el-select>
                             </el-form-item>
                         </el-col>
                     </el-row>
@@ -1071,6 +1079,16 @@
                         </el-col>
                     </el-row>
                     <el-row>
+                        <el-col :span="12">
+                            <el-form-item label="实收金额：" :label-width="formLabelWidth" prop="amountReceived">
+                                <!-- <el-input maxLength="10" v-model="formSigning.amountReceived"  type="number"  min="0" oninput="if(value.length>10)value=value.slice(0,10)"  onkeypress="return(/[\d]/.test(String.fromCharCode(event.keyCode)))"  style="width: 80%;" @change="setAddPerformanceAmount"></el-input> -->
+                                <el-input maxLength="10" v-model="formSigning.amountReceived" type="number" min="0"
+                                          oninput="if(value.length>10)value=value.slice(0,10)"
+                                          onkeypress="return(/[\d]/.test(String.fromCharCode(event.keyCode)))"
+                                          style="width: 80%;" @input="formSigningAmountPerformance"></el-input>
+                                <span style="padding-left: 10px;">元</span>
+                            </el-form-item>
+                        </el-col>
                         <el-col :span="12">
                             <el-form-item label="业绩金额：" :label-width="formLabelWidth" prop="performanceAmount">
                                 <!-- <el-input maxLength="10" v-model="formSigningAmountPerformance"  type="number"  min="0" oninput="if(value.length>10)value=value.slice(0,10)"  onkeypress="return(/[\d]/.test(String.fromCharCode(event.keyCode)))"  style="width: 80%;"></el-input> -->
@@ -1376,7 +1394,7 @@
                         <el-col :span="12">
                             <el-form-item label="签约城市：" :label-width="formLabelWidth" prop="signCity">
                                 <el-select :disabled="notEditRebutSign" v-model="updateFormSigning.signCity"
-                                           placeholder="请选择签约城市：" @change="changeUpdateSignCity" style="width:100%;">
+                                           placeholder="请选择签约城市：" clearable @change="changeUpdateSignCity" style="width:100%;">
                                     <el-option v-for="item in cityArr" :key="item.name" :label="item.name"
                                                :value="item.name"></el-option>
                                 </el-select>
@@ -1386,7 +1404,7 @@
                     <el-row>
                         <el-col :span="12">
                             <el-form-item label="签约区/县：" :label-width="formLabelWidth" prop="signDictrict">
-                                <el-select :disabled="notEditRebutSign" v-model="updateFormSigning.signDictrict"
+                                <el-select :disabled="notEditRebutSign" clearable v-model="updateFormSigning.signDictrict"
                                            placeholder="请选择签约区/县" style="width:100%;">
                                     <el-option v-for="item in districtArr" :key="item.name" :label="item.name"
                                                :value="item.name"></el-option>
@@ -1697,7 +1715,9 @@
                 clueId: "",
                 str: "",
                 clueIds: [],
-                notVisitReason: ""
+                notVisitReason: "",
+                createUserName:"",
+                notVisitTime:""
             },
             queryForm: {
                 visitStatus: "",
@@ -1782,7 +1802,8 @@
                 makeUpTime: '',
                 payTime: new Date(),
                 amountPerformance: '',
-                performanceAmount: ''
+                performanceAmount: '',
+                payName:''
             },
             updateFormSigning: {
                 giveType: "",
@@ -1900,12 +1921,12 @@
                 signProvince: [
                     {required: true, message: '请选择签约省份', trigger: 'change'}
                 ],
-                signDictrict: [
-                    {required: true, message: '请选择签约区/县', trigger: 'change'}
-                ],
-                signCity: [
-                    {required: true, message: '请选择签约城市', trigger: 'change'}
-                ],
+                // signDictrict: [
+                //     {required: true, message: '请选择签约区/县', trigger: 'change'}
+                // ],
+                // signCity: [
+                //     {required: true, message: '请选择签约城市', trigger: 'change'}
+                // ],
                 signShopType: [
                     {required: true, message: '请选择签约店型', trigger: 'change'}
                 ],
@@ -2002,6 +2023,9 @@
                 // ],
                 payMode: [
                     {required: true, message: '请选择付款方式', trigger: 'change'}
+                ],
+                payName: [
+                    {required: true, message: '付款人姓名', trigger: 'blur'}
                 ],
                 payTime: [
                     {type: 'date', required: true, message: '请选择时间', trigger: 'change'}
@@ -2128,6 +2152,9 @@
             },
         },
         methods: {
+            clickRow(row){
+                this.$refs.multipleTable.toggleRowSelection(row)
+            },
             formSigningAmountPerformance() {
                 var aone = parseFloat(this.formSigning.amountReceived);
                 var atwo = parseFloat(this.formSigning.firstToll);
@@ -2201,6 +2228,16 @@
 
                 return resVal;
             },
+            //是否有邀请函
+            transformLetter(row, column, cellValue, index) {
+                var text="";
+                if(cellValue == "0"){
+                    text="否"
+                }else if(cellValue == "1"){
+                    text="是"
+                }
+                return text;
+            },
             setAddPerformanceAmount(value) {
                 this.formSigning.performanceAmount = this.formSigning.amountReceived
             },
@@ -2267,10 +2304,12 @@
                         names = names + '【' + rows[i].cusName + '】';
                         rowIds.push(rows[i].clueId);
                     }
-                    var str = '确定要将此' + names + '标记为未到访吗?';
+                    var str = '请填写客户姓名' + names + '未到访的原因?';
                     this.notVisitFlag.clueIds = rowIds;
                     this.notVisitFlag.str = str;
                     this.notVisitFlag.notVisitReason = "";
+                    this.notVisitFlag.notVisitUser="";
+                    this.notVisitFlag.notVisitTime="";
                     this.notVisitFlagDialogVisible = true;
                 }
             },
@@ -2307,8 +2346,9 @@
                     }
                 });
             },
-            showCustomerDetail(row, column) { // 客户详情
-                window.location.href = '/bus/BusinessCustomer/viewCustomerInfo?clueId=' + row.clueId;
+            showCustomerDetail(row, column) { // 客户详情改成编辑（客户维护）
+                // window.location.href = '/bus/BusinessCustomer/viewCustomerInfo?clueId=' + row.clueId;
+                window.location.href = '/bus/BusinessCustomer/editCustomerInfo?clueId=' + row.clueId;
             },
             editCustomerDetail(row, column) { // 客户维护
                 window.location.href = '/bus/BusinessCustomer/editCustomerInfo?clueId=' + row.clueId;
@@ -2533,7 +2573,10 @@
                 mainDivVM.notVisitFlag.clueId = row.clueId;
                 axios.post('/busVisitRecord/one', param).then(function (response) {
                     mainDivVM.notVisitdDialogVisible = true;
+                    console.log(response.data.data);
                     mainDivVM.notVisitFlag.str = response.data.data.notVisitReason
+                    mainDivVM.notVisitFlag.createUserName = response.data.data.createUserName
+                    mainDivVM.notVisitFlag.notVisitTime = response.data.data.createTime
                 });
             },
             showNotVisitReason1(row) {
@@ -2543,6 +2586,8 @@
                 axios.post('/busVisitRecord/one', param).then(function (response) {
                     mainDivVM.notVisitdDialogVisible1 = true;
                     mainDivVM.notVisitFlag.str = response.data.data.notVisitReason
+                    mainDivVM.notVisitFlag.createUserName = response.data.data.createUserName
+                    mainDivVM.notVisitFlag.notVisitTime = response.data.data.createTime
                 });
             },
             showVisitRecord(row) {
@@ -2826,6 +2871,7 @@
                     mainDivVM.dialogFormSigningVisible = true;
                     mainDivVM.currentProvince(mainDivVM.formSigning.signProvince)
                     mainDivVM.currentCity(mainDivVM.formSigning.signCity)
+                    mainDivVM.formSigning.payName = response.data.data.customerName;
                     //  设置默认时间
                     //     mainDivVM.formSigning.payTime = new Date()
                     //     mainDivVM.formSigning.isRemoteSign = 0;

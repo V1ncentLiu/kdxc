@@ -74,6 +74,18 @@
                     <el-form-item label="地址:" prop="address">
                         <el-input v-model="clueSearchForm.address" placeholder="地址" class="input-with-select"></el-input>
                     </el-form-item>
+                  <el-form-item label="资源ID:">
+                    <el-input v-model="clueSearchForm.clueId" placeholder="资源ID"  @keyup.native="number"></el-input>
+                  </el-form-item>
+                  <el-form-item label="QQ:">
+                    <el-input v-model="clueSearchForm.qq" placeholder="QQ" maxLength="20" @keyup.native="number"></el-input>
+                  </el-form-item>
+                  <el-form-item label="微信:">
+                    <el-input v-model="clueSearchForm.wechat" placeholder="微信"></el-input>
+                  </el-form-item>
+                  <el-form-item label="邮箱:">
+                    <el-input v-model="clueSearchForm.email" placeholder="邮箱"></el-input>
+                  </el-form-item>
                 </el-row>
     			<div class="mainSearchBtnBox">
                     <el-button icon="el-icon-search" type="primary" @click="searchTable()" class="searchBtn">搜索</el-button>
@@ -83,8 +95,7 @@
             </el-form>
         </div>
         <el-row>
-            <el-table  ref="multipleTable" tooltip-effect="dark" border @selection-change="handleSelectionChange"
-                style="width: 100%"  :data="dataTable" key="multipleTable">
+            <el-table  ref="multipleTable" tooltip-effect="dark" border @selection-change="handleSelectionChange" @row-click="clickRow" @row-dblclick="showClueDetailInfo" style="width: 100%"  :data="dataTable" key="multipleTable">
                 <el-table-column align="center" type="selection" label="全选" width="50"></el-table-column>
     	        <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width"
     	         v-for="(item,key,index) in tableColums" v-if="item.fieldCode == 'releaseNum'">
@@ -340,7 +351,11 @@ var clueVM = new Vue({
         		endTime: '',
         		messagePoint: '',
         		searchWord: '',
-        		address: ''
+        		address: '',
+            clueId:'',
+            qq:'',
+            email:'',
+            wechat:''
             },
             allocationForm: {
             	saleId:''
@@ -427,6 +442,13 @@ var clueVM = new Vue({
                 
         },
         methods: {
+            //展现详情
+            showClueDetailInfo (row, column) {
+                window.location.href='/tele/clueMyCustomerInfo/customerInfoReadOnly?clueId='+row.id;
+            },
+            clickRow(row){
+                this.$refs.multipleTable.toggleRowSelection(row)
+            },
         	searchTable() {
                 var param ={};
 
@@ -450,6 +472,10 @@ var clueVM = new Vue({
                 param.cusName = this.clueSearchForm.cusName;
                 param.category = this.clueSearchForm.category;
                 param.type = this.clueSearchForm.type;
+                param.clueId = this.clueSearchForm.clueId;
+                param.qq = this.clueSearchForm.qq;
+                param.email = this.clueSearchForm.email;
+                param.wechat = this.clueSearchForm.wechat;
                 console.info(param);
                 axios.post('/clue/pendingAllocation/list', param)
                 .then(function (response) {

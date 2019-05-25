@@ -3,6 +3,7 @@ package com.kuaidao.manageweb.feign.visitrecord;
 import com.kuaidao.aggregation.dto.visitrecord.BusVisitRecordReqDTO;
 import com.kuaidao.aggregation.dto.visitrecord.BusVisitRecordInsertOrUpdateDTO;
 import com.kuaidao.aggregation.dto.visitrecord.BusVisitRecordRespDTO;
+import com.kuaidao.aggregation.dto.visitrecord.VisitNoRecordRespDTO;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.IdEntityLong;
 import com.kuaidao.common.entity.IdListLongReq;
@@ -38,6 +39,8 @@ public interface BusVisitRecordFeignClient {
 	@PostMapping("/findByIds")
 	public JSONResult<List<BusVisitRecordRespDTO>> findByIds(@RequestBody IdListLongReq idListLongReq);
 
+	@RequestMapping("/notVisitMaxNewone")
+	public JSONResult<VisitNoRecordRespDTO> findMaxNewNotVisitOne(@RequestBody IdEntityLong idEntityLong);
 
 	@Component
 	static class HystrixClientFallback implements BusVisitRecordFeignClient {
@@ -83,6 +86,11 @@ public interface BusVisitRecordFeignClient {
 		@Override
 		public JSONResult<List<BusVisitRecordRespDTO>> findByIds(IdListLongReq idListLongReq) {
 			return fallBackError("通过IDS查询到访记录");
+		}
+
+		@Override
+		public JSONResult<VisitNoRecordRespDTO> findMaxNewNotVisitOne(IdEntityLong idEntityLong) {
+			return fallBackError("查询最新一条未到访记录");
 		}
 	}
 }
