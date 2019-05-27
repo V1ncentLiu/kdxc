@@ -236,8 +236,9 @@ public class TeleStatementController {
     @ResponseBody
     public JSONResult<PageBean<ResourceAllocationDto>> getResourceAllocationPersionTable(
             @RequestBody ResourceAllocationQueryDto resourceAllocationQueryDto,HttpServletRequest request) {
-        logger.info("getResourceAllocationPersionTable onefirst orgName:{},startTime:{},endTime:{}",resourceAllocationQueryDto.getOrg_Id(),
-                resourceAllocationQueryDto.getStartTime(),resourceAllocationQueryDto.getEndTime());
+        logger.info("getResourceAllocationPersionTable onefirst orgName:{},startTime:{},endTime:{},userId:{},new_resource:{},orgIdList {}",
+                resourceAllocationQueryDto.getOrg_Id(),resourceAllocationQueryDto.getStartTime(),resourceAllocationQueryDto.getEndTime(),
+                resourceAllocationQueryDto.getUser_Id(),resourceAllocationQueryDto.getNew_resource(),resourceAllocationQueryDto.getOrgIdList().toArray());
         UserInfoDTO user = getUser();
         // 查询所有电销组
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
