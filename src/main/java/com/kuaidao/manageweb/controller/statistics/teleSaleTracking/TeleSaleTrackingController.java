@@ -64,10 +64,10 @@ public class TeleSaleTrackingController {
         String strCusLevelList = trackingQueryDto.getStrCusLevelList();
         trackingQueryDto.setStrCusLevelList(strCusLevelList);
         request.setAttribute("trackingQueryDto",trackingQueryDto);
-//        Long orgId = trackingQueryDto.getOrgId();
-//        if(null == orgId){
-//            buildOrgIdList(trackingQueryDto, orgId);
-//        }
+        Long orgId = trackingQueryDto.getOrgId();
+        if(null == orgId){
+            buildOrgIdList(trackingQueryDto, orgId);
+        }
         if(null != trackingQueryDto.getCusLevel()){
             return teleSaleTrackingFeignClient.getRecordByGroupLevelPage(trackingQueryDto);
         }else{
@@ -111,7 +111,7 @@ public class TeleSaleTrackingController {
      */
     @RequestMapping("/getRecordByGroupPageOneCount")
     @ResponseBody
-    public JSONResult<List<TeleSaleTrackingDto>> getRecordByGroupPageOneCount(@RequestBody TeleSaleTrackingQueryDto trackingQueryDto){
+    public JSONResult<List<TeleSaleTrackingDto>> getRecordByGroupPageOneCount(TeleSaleTrackingQueryDto trackingQueryDto){
         List countList = getCountTotal(trackingQueryDto);
         return new JSONResult<List<TeleSaleTrackingDto>>().success(countList);
     }
@@ -125,9 +125,9 @@ public class TeleSaleTrackingController {
             @RequestBody TeleSaleTrackingQueryDto trackingQueryDto,
             HttpServletResponse response) throws Exception {
         Long orgId = trackingQueryDto.getOrgId();
-//        if(null == orgId){
-//            buildOrgIdList(trackingQueryDto, orgId);
-//        }
+        if(null == orgId){
+            buildOrgIdList(trackingQueryDto, orgId);
+        }
         JSONResult<List<TeleSaleTrackingDto>> list = teleSaleTrackingFeignClient.getRecordByGroup(trackingQueryDto);
         if(null != trackingQueryDto.getCusLevel()){
             teleSaleTrackingFeignClient.getRecordByGroupLevel(trackingQueryDto);
