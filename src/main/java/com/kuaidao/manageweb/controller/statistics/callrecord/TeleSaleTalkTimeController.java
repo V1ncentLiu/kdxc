@@ -114,15 +114,14 @@ public class TeleSaleTalkTimeController {
            List<Object> curList = new ArrayList<>();
            curList.add(i + 1);
            curList.add(teleTalkTimeRespDTO.getOrgName());
-           curList.add("");
            curList.add(teleTalkTimeRespDTO.getCallCount());
            curList.add(teleTalkTimeRespDTO.getCalledClueCount());
-           curList.add(teleTalkTimeRespDTO.getCallPercent());
+           curList.add(formatPercent(teleTalkTimeRespDTO.getCallPercent()));
            curList.add(teleTalkTimeRespDTO.getCallClueCount());
            curList.add(teleTalkTimeRespDTO.getCalledClueCount());
-           curList.add(teleTalkTimeRespDTO.getClueCallecdPrecent());
-           curList.add(teleTalkTimeRespDTO.getValidCallTime());
-           curList.add(teleTalkTimeRespDTO.getUserAvgDayValidCallTime());
+           curList.add(formatPercent(teleTalkTimeRespDTO.getClueCallecdPrecent()));
+           curList.add(formatSeconds(teleTalkTimeRespDTO.getValidCallTime()));
+           curList.add(formatSeconds(teleTalkTimeRespDTO.getUserAvgDayValidCallTime()));
            dataList.add(curList);
        }
        teleGroupTalkTimeJr  = null;
@@ -140,6 +139,13 @@ public class TeleSaleTalkTimeController {
         
    }
    
+   private String formatSeconds(Integer seconds) {
+       if(seconds==null) {
+           return "00时:00分:00秒";
+       }
+       return DateUtil.second2TimeWithUnit(seconds);
+   }
+   
    /**
     * 把合计放进total 
    * @param totalTalkTimeDTO
@@ -147,17 +153,16 @@ public class TeleSaleTalkTimeController {
     */
    private void addTotalTalkTimeToList(TeleTalkTimeRespDTO totalTalkTimeDTO,List<List<Object>> dataList) {
        List<Object> totalList = new ArrayList<>();
+       totalList.add("");
        totalList.add("合计");
-       totalList.add("");
-       totalList.add("");
        totalList.add(totalTalkTimeDTO.getCallCount());
        totalList.add(totalTalkTimeDTO.getCalledCount());
        totalList.add(formatPercent(totalTalkTimeDTO.getCallPercent()));
        totalList.add(totalTalkTimeDTO.getCallClueCount());
        totalList.add(totalTalkTimeDTO.getCalledClueCount());
        totalList.add(formatPercent(totalTalkTimeDTO.getClueCallecdPrecent()));
-       totalList.add(totalTalkTimeDTO.getValidCallTime());
-       totalList.add(totalTalkTimeDTO.getUserAvgDayValidCallTime());
+       totalList.add(formatSeconds(totalTalkTimeDTO.getValidCallTime()));
+       totalList.add(formatSeconds(totalTalkTimeDTO.getUserAvgDayValidCallTime()));
        dataList.add(totalList);
     }
 
@@ -183,7 +188,6 @@ public class TeleSaleTalkTimeController {
        List<Object> headTitleList = new ArrayList<>();
        headTitleList.add("序号");
        headTitleList.add("电销组");
-       headTitleList.add("电销顾问");
        headTitleList.add("通话次数");
        headTitleList.add("通话接通次数");
        headTitleList.add("通话接通率");
@@ -231,8 +235,8 @@ public class TeleSaleTalkTimeController {
            curList.add(teleTalkTimeRespDTO.getCallClueCount());
            curList.add(teleTalkTimeRespDTO.getCalledClueCount());
            curList.add(formatPercent(teleTalkTimeRespDTO.getClueCallecdPrecent()));
-           curList.add(teleTalkTimeRespDTO.getValidCallTime());
-           curList.add(teleTalkTimeRespDTO.getUserAvgDayValidCallTime());
+           curList.add(formatSeconds(teleTalkTimeRespDTO.getValidCallTime()));
+           curList.add(formatSeconds(teleTalkTimeRespDTO.getUserAvgDayValidCallTime()));
            dataList.add(curList);
        }
        teleSaleTalkTimeJr  = null;
@@ -317,8 +321,8 @@ public class TeleSaleTalkTimeController {
             curList.add(teleTalkTimeRespDTO.getCallClueCount());
             curList.add(teleTalkTimeRespDTO.getCalledClueCount());
             curList.add(formatPercent(teleTalkTimeRespDTO.getClueCallecdPrecent()));
-            curList.add(teleTalkTimeRespDTO.getValidCallTime());
-            curList.add(teleTalkTimeRespDTO.getUserAvgDayValidCallTime());
+            curList.add(formatSeconds(teleTalkTimeRespDTO.getValidCallTime()));
+            curList.add(formatSeconds(teleTalkTimeRespDTO.getUserAvgDayValidCallTime()));
             dataList.add(curList);
         }
         teleSaleListJr  = null;
