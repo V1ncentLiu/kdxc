@@ -2,7 +2,9 @@ package com.kuaidao.manageweb.controller.statistics.teleSaleTracking;
 
 
 import com.kuaidao.common.constant.OrgTypeConstant;
+import com.kuaidao.common.constant.RoleCodeEnum;
 import com.kuaidao.common.constant.SystemCodeConstant;
+import com.kuaidao.common.entity.IdEntity;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.common.util.DateUtil;
@@ -11,14 +13,18 @@ import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
 import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
 import com.kuaidao.manageweb.feign.statistics.teleSaleTracking.TeleSaleTrackingFeignClient;
 import com.kuaidao.manageweb.util.CommUtil;
-import com.kuaidao.stastics.dto.resourceAllocation.ResourceAllocationQueryDto;
 import com.kuaidao.stastics.dto.teleSaleTracking.TeleSaleTrackingDto;
 import com.kuaidao.stastics.dto.teleSaleTracking.TeleSaleTrackingQueryDto;
 import com.kuaidao.sys.dto.dictionary.DictionaryItemRespDTO;
+import com.kuaidao.sys.dto.organization.OrganizationDTO;
 import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
 import com.kuaidao.sys.dto.organization.OrganizationRespDTO;
+import com.kuaidao.sys.dto.role.RoleInfoDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -46,6 +52,8 @@ public class TeleSaleTrackingController {
     @Autowired
     DictionaryItemFeignClient dictionaryItemFeignClient;
 
+    private static Logger logger = LoggerFactory.getLogger(TeleSaleTrackingController.class);
+
     /**
      * 一级页面查询
      */
@@ -54,6 +62,7 @@ public class TeleSaleTrackingController {
     JSONResult<PageBean<TeleSaleTrackingDto>> getRecordByGroupPageOne(@RequestBody TeleSaleTrackingQueryDto trackingQueryDto,
                                                                       HttpServletRequest request){
         String strCusLevelList = trackingQueryDto.getStrCusLevelList();
+        trackingQueryDto.setStrCusLevelList(strCusLevelList);
         request.setAttribute("trackingQueryDto",trackingQueryDto);
 //        Long orgId = trackingQueryDto.getOrgId();
 //        if(null == orgId){
@@ -110,11 +119,12 @@ public class TeleSaleTrackingController {
     /**
      * 一级页面导出
      */
+    @RequiresPermissions("statistics:telemarketingFollow:export")
     @PostMapping("/exportRecordByGroupPageOne")
     public void exportRecordByGroupPageOne(
             @RequestBody TeleSaleTrackingQueryDto trackingQueryDto,
             HttpServletResponse response) throws Exception {
-//        Long orgId = trackingQueryDto.getOrgId();
+        Long orgId = trackingQueryDto.getOrgId();
 //        if(null == orgId){
 //            buildOrgIdList(trackingQueryDto, orgId);
 //        }
@@ -159,6 +169,7 @@ public class TeleSaleTrackingController {
     /**
      * 组+级别+用户
      */
+    @RequiresPermissions("statistics:telemarketingFollow:export")
     @PostMapping("/exportRecordByGroupLevelUserId")
     public void exportRecordByGroupLevelUserId(
             @RequestBody TeleSaleTrackingQueryDto trackingQueryDto,
@@ -199,6 +210,7 @@ public class TeleSaleTrackingController {
     /**
      * 组+级别+用户+日期
      */
+    @RequiresPermissions("statistics:telemarketingFollow:export")
     @PostMapping("/exportRecordByGroupLevelUserIdDate")
     public void exportRecordByGroupLevelUserIdDate(
             @RequestBody TeleSaleTrackingQueryDto trackingQueryDto,
@@ -244,7 +256,28 @@ public class TeleSaleTrackingController {
     public String telemarketingFollowTable(HttpServletRequest request) {
         // 查询所有电销组
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
-        request.setAttribute("saleGroupList",getOrgGroupByOrgId(curLoginUser.getOrgId(),OrgTypeConstant.DXZ));
+        List<RoleInfoDTO> roleList = curLoginUser.getRoleList();
+        RoleInfoDTO roleInfoDTO = roleList.get(0);
+        String roleCode = roleInfoDTO.getRoleCode();
+        String curOrgId = "";
+        List<OrganizationRespDTO>  teleGroupList = new ArrayList<>();
+        if(RoleCodeEnum.DXZJ.name().equals(roleCode)) {
+            curOrgId =  String.valueOf(curLoginUser.getOrgId());
+            //电销总监查他自己的组
+            OrganizationDTO curOrgGroupByOrgId = getCurOrgGroupByOrgId(curOrgId);
+            if(curOrgGroupByOrgId!=null) {
+                OrganizationRespDTO organizationRespDTO = new OrganizationRespDTO();
+                organizationRespDTO.setId(curOrgGroupByOrgId.getId());
+                organizationRespDTO.setName(curOrgGroupByOrgId.getName());
+                teleGroupList.add(organizationRespDTO);
+            }
+        }else {
+            teleGroupList =  getOrgGroupByOrgId(curLoginUser.getOrgId(),OrgTypeConstant.DXZ);
+        }
+        OrganizationQueryDTO organizationQueryDTO  = new OrganizationQueryDTO();
+        organizationQueryDTO.setParentId(curLoginUser.getOrgId());
+        request.setAttribute("curOrgId",curOrgId);
+        request.setAttribute("saleGroupList",teleGroupList);
         JSONResult<List<DictionaryItemRespDTO>> customerLevel = dictionaryItemFeignClient.queryDicItemsByGroupCode("customerLevel");
         request.setAttribute("cusLevelListArray",customerLevel.getData());
         return "reportforms/telemarketingFollowTable";
@@ -260,7 +293,28 @@ public class TeleSaleTrackingController {
         request.setAttribute("trackingQueryDto",trackingQueryDto);
         // 查询所有电销组
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
-        request.setAttribute("saleGroupList",getOrgGroupByOrgId(curLoginUser.getOrgId(),OrgTypeConstant.DXZ));
+        List<RoleInfoDTO> roleList = curLoginUser.getRoleList();
+        RoleInfoDTO roleInfoDTO = roleList.get(0);
+        String roleCode = roleInfoDTO.getRoleCode();
+        String curOrgId = "";
+        List<OrganizationRespDTO>  teleGroupList = new ArrayList<>();
+        if(RoleCodeEnum.DXZJ.name().equals(roleCode)) {
+            curOrgId =  String.valueOf(curLoginUser.getOrgId());
+            //电销总监查他自己的组
+            OrganizationDTO curOrgGroupByOrgId = getCurOrgGroupByOrgId(curOrgId);
+            if(curOrgGroupByOrgId!=null) {
+                OrganizationRespDTO organizationRespDTO = new OrganizationRespDTO();
+                organizationRespDTO.setId(curOrgGroupByOrgId.getId());
+                organizationRespDTO.setName(curOrgGroupByOrgId.getName());
+                teleGroupList.add(organizationRespDTO);
+            }
+        }else {
+            teleGroupList =  getOrgGroupByOrgId(curLoginUser.getOrgId(),OrgTypeConstant.DXZ);
+        }
+        OrganizationQueryDTO organizationQueryDTO  = new OrganizationQueryDTO();
+        organizationQueryDTO.setParentId(curLoginUser.getOrgId());
+        request.setAttribute("curOrgId",curOrgId);
+        request.setAttribute("saleGroupList",teleGroupList);
         JSONResult<List<DictionaryItemRespDTO>> customerLevel = dictionaryItemFeignClient.queryDicItemsByGroupCode("customerLevel");
         request.setAttribute("cusLevelListArray",customerLevel.getData());
         return "reportforms/telemarketingFollowTableSum";
@@ -276,7 +330,28 @@ public class TeleSaleTrackingController {
         request.setAttribute("trackingQueryDto",trackingQueryDto);
         // 查询所有电销组
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
-        request.setAttribute("saleGroupList",getOrgGroupByOrgId(curLoginUser.getOrgId(),OrgTypeConstant.DXZ));
+        List<RoleInfoDTO> roleList = curLoginUser.getRoleList();
+        RoleInfoDTO roleInfoDTO = roleList.get(0);
+        String roleCode = roleInfoDTO.getRoleCode();
+        String curOrgId = "";
+        List<OrganizationRespDTO>  teleGroupList = new ArrayList<>();
+        if(RoleCodeEnum.DXZJ.name().equals(roleCode)) {
+            curOrgId =  String.valueOf(curLoginUser.getOrgId());
+            //电销总监查他自己的组
+            OrganizationDTO curOrgGroupByOrgId = getCurOrgGroupByOrgId(curOrgId);
+            if(curOrgGroupByOrgId!=null) {
+                OrganizationRespDTO organizationRespDTO = new OrganizationRespDTO();
+                organizationRespDTO.setId(curOrgGroupByOrgId.getId());
+                organizationRespDTO.setName(curOrgGroupByOrgId.getName());
+                teleGroupList.add(organizationRespDTO);
+            }
+        }else {
+            teleGroupList =  getOrgGroupByOrgId(curLoginUser.getOrgId(),OrgTypeConstant.DXZ);
+        }
+        OrganizationQueryDTO organizationQueryDTO  = new OrganizationQueryDTO();
+        organizationQueryDTO.setParentId(curLoginUser.getOrgId());
+        request.setAttribute("curOrgId",curOrgId);
+        request.setAttribute("saleGroupList",teleGroupList);
         JSONResult<List<DictionaryItemRespDTO>> customerLevel = dictionaryItemFeignClient.queryDicItemsByGroupCode("customerLevel");
         request.setAttribute("cusLevelListArray",customerLevel.getData());
         return "reportforms/telemarketingFollowTableTeam";
@@ -289,8 +364,29 @@ public class TeleSaleTrackingController {
     @RequestMapping("/telemarketingFollowTablePerson")
     public String telemarketingFollowTablePerson(HttpServletRequest request) {
         // 查询所有电销组
-        List<OrganizationRespDTO> saleGroupList = getSaleGroupList();
-        request.setAttribute("saleGroupList", saleGroupList);
+        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+        List<RoleInfoDTO> roleList = curLoginUser.getRoleList();
+        RoleInfoDTO roleInfoDTO = roleList.get(0);
+        String roleCode = roleInfoDTO.getRoleCode();
+        String curOrgId = "";
+        List<OrganizationRespDTO>  teleGroupList = new ArrayList<>();
+        if(RoleCodeEnum.DXZJ.name().equals(roleCode)) {
+            curOrgId =  String.valueOf(curLoginUser.getOrgId());
+            //电销总监查他自己的组
+            OrganizationDTO curOrgGroupByOrgId = getCurOrgGroupByOrgId(curOrgId);
+            if(curOrgGroupByOrgId!=null) {
+                OrganizationRespDTO organizationRespDTO = new OrganizationRespDTO();
+                organizationRespDTO.setId(curOrgGroupByOrgId.getId());
+                organizationRespDTO.setName(curOrgGroupByOrgId.getName());
+                teleGroupList.add(organizationRespDTO);
+            }
+        }else {
+            teleGroupList =  getOrgGroupByOrgId(curLoginUser.getOrgId(),OrgTypeConstant.DXZ);
+        }
+        OrganizationQueryDTO organizationQueryDTO  = new OrganizationQueryDTO();
+        organizationQueryDTO.setParentId(curLoginUser.getOrgId());
+        request.setAttribute("curOrgId",curOrgId);
+        request.setAttribute("saleGroupList",teleGroupList);
         JSONResult<List<DictionaryItemRespDTO>> customerLevel = dictionaryItemFeignClient.queryDicItemsByGroupCode("customerLevel");
         request.setAttribute("cusLevelListArray",customerLevel.getData());
         return "reportforms/telemarketingFollowTablePerson";
@@ -308,19 +404,6 @@ public class TeleSaleTrackingController {
         headTitleList.add("回访资源数");
         headTitleList.add("人均天回访次数");
         return headTitleList;
-    }
-
-    /**
-     * 获取电销组
-     */
-    private List<OrganizationRespDTO> getSaleGroupList() {
-        OrganizationQueryDTO queryDTO = new OrganizationQueryDTO();
-        queryDTO.setOrgType(OrgTypeConstant.DXZ);
-        // 查询下级电销组
-        JSONResult<List<OrganizationRespDTO>> queryOrgByParam =
-                organizationFeignClient.queryOrgByParam(queryDTO);
-        List<OrganizationRespDTO> data = queryOrgByParam.getData();
-        return data;
     }
     private List<OrganizationRespDTO> getOrgGroupByOrgId(Long orgId,Integer orgType) {
         // 电销组
@@ -380,5 +463,16 @@ public class TeleSaleTrackingController {
             List<Long> orgIdList = orgGroupByOrgId.parallelStream().map(OrganizationRespDTO::getId).collect(Collectors.toList());
             teleSaleTrackingQueryDto.setOrgIdList(orgIdList);
         }
+    }
+    private OrganizationDTO getCurOrgGroupByOrgId(String orgId) {
+        // 电销组
+        IdEntity idEntity = new IdEntity();
+        idEntity.setId(orgId+"");
+        JSONResult<OrganizationDTO> orgJr = organizationFeignClient.queryOrgById(idEntity);
+        if(!JSONResult.SUCCESS.equals(orgJr.getCode())) {
+            logger.error("getCurOrgGroupByOrgId,param{{}},res{{}}",idEntity,orgJr);
+            return null;
+        }
+        return orgJr.getData();
     }
 }
