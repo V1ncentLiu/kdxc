@@ -75,7 +75,7 @@ public class TeleStatementController {
      * @return
      */
     @RequestMapping("/resourceAllocation")
-    public String resourceAllocationTable(HttpServletRequest request) {
+    public String resourceAllocationTable(HttpServletRequest request) throws Exception{
         UserInfoDTO user = getUser();
         // 查询所有电销组
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
@@ -400,9 +400,10 @@ public class TeleStatementController {
         List<RoleInfoDTO> roleList = curLoginUser.getRoleList();
         RoleInfoDTO roleInfoDTO = roleList.get(0);
         String roleCode = roleInfoDTO.getRoleCode();
-        String curOrgId = String.valueOf(curLoginUser.getOrgId());
+        String curOrgId = "";
         List<OrganizationRespDTO>  teleGroupList = new ArrayList<>();
         if(RoleCodeEnum.DXZJ.name().equals(roleCode)) {
+            curOrgId =  String.valueOf(curLoginUser.getOrgId());
             //电销总监查他自己的组
             OrganizationDTO curOrgGroupByOrgId = getCurOrgGroupByOrgId(curOrgId);
             if(curOrgGroupByOrgId!=null) {
@@ -490,11 +491,11 @@ public class TeleStatementController {
         List<RoleInfoDTO> roleList = curLoginUser.getRoleList();
         RoleInfoDTO roleInfoDTO = roleList.get(0);
         String roleCode = roleInfoDTO.getRoleCode();
-        String curOrgId = String.valueOf(curLoginUser.getOrgId());
+        String curOrgId = "";
         List<OrganizationRespDTO>  teleGroupList = new ArrayList<>();
         if(RoleCodeEnum.DXZJ.name().equals(roleCode)) {
             //电销总监查他自己的组
-            
+            curOrgId = String.valueOf(curLoginUser.getOrgId());
             OrganizationDTO curOrgGroupByOrgId = getCurOrgGroupByOrgId(curOrgId);
             if(curOrgGroupByOrgId!=null) {
                 OrganizationRespDTO organizationRespDTO = new OrganizationRespDTO();
@@ -530,11 +531,11 @@ public class TeleStatementController {
         List<RoleInfoDTO> roleList = curLoginUser.getRoleList();
         RoleInfoDTO roleInfoDTO = roleList.get(0);
         String roleCode = roleInfoDTO.getRoleCode();
-        String  curOrgId = String.valueOf(curLoginUser.getOrgId());;
+        String  curOrgId = "";
         List<OrganizationRespDTO>  teleGroupList = new ArrayList<>();
         if(RoleCodeEnum.DXZJ.name().equals(roleCode)) {
             //电销总监查他自己的组
-           
+            curOrgId =  String.valueOf(curLoginUser.getOrgId());
             OrganizationDTO curOrgGroupByOrgId = getCurOrgGroupByOrgId(curOrgId);
             if(curOrgGroupByOrgId!=null) {
                 OrganizationRespDTO organizationRespDTO = new OrganizationRespDTO();
@@ -569,11 +570,11 @@ public class TeleStatementController {
         List<RoleInfoDTO> roleList = curLoginUser.getRoleList();
         RoleInfoDTO roleInfoDTO = roleList.get(0);
         String roleCode = roleInfoDTO.getRoleCode();
-        String  curOrgId = String.valueOf(curLoginUser.getOrgId());;
+        String  curOrgId = "";
         List<OrganizationRespDTO>  teleGroupList = new ArrayList<>();
         if(RoleCodeEnum.DXZJ.name().equals(roleCode)) {
             //电销总监查他自己的组
-           
+            curOrgId = String.valueOf(curLoginUser.getOrgId());
             OrganizationDTO curOrgGroupByOrgId = getCurOrgGroupByOrgId(curOrgId);
             if(curOrgGroupByOrgId!=null) {
                 OrganizationRespDTO organizationRespDTO = new OrganizationRespDTO();
