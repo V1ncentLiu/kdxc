@@ -29,7 +29,7 @@
                    <el-date-picker format="yyyy-MM-dd HH:mm" v-model="form.endTime" type="datetime" placeholder="选择日期"></el-date-picker>
                 </el-form-item>
                 <el-form-item label="电销组:">  
-                    <el-select v-model="form.orgId" placeholder="电销组" style="width: 100%;" clearable filterable @change="currentTelSale">
+                    <el-select v-model="form.orgId" placeholder="电销组" style="width: 100%;" clearable filterable @change="currentTelSale" :disabled="isDisabled">
                         <el-option
                             v-for="item in orgTeleArr"
                             :key="item.id"
@@ -95,12 +95,15 @@
 <script th:inline="javascript">
     var orgIdList=[[${saleGroupList}]];//电销组
     var clientRankIdList=[[${cusLevelListArray}]];//客户级别
-    var trackingQuery=[[${trackingQueryDto}]];//参数list    
+    var trackingQuery=[[${trackingQueryDto}]];//参数list  
+    var curOrgId = [[${curOrgId}]];//当前电销组
+    // console.log(curOrgId);  
     var mainDivVM = new Vue({
         el: '#maindiv',
         data: function() {
             return {
                 loading:false,
+                isDisabled:false,
                 form: {
                     startTime:'',
                     endTime:'',
@@ -179,9 +182,21 @@
                 // 搜索条件
                 param.startTime = this.minuteFormat(startTime);
                 param.endTime = this.minuteFormat(endTime);
-                param.orgId = this.form.orgId;//电销组
-                param.userId = this.form.userId;//电销顾问
-                param.cusLevelList = this.form.cusLevelList;//客户级别
+                if(this.form.orgId){
+                    param.orgId = this.form.orgId;//电销组
+                }else{
+                    param.orgId = null;//电销组
+                }
+                if(this.form.userId){
+                    param.userId = this.form.userId;//电销顾问
+                }else{
+                    param.userId = null;//电销顾问
+                }
+                if(this.form.cusLevelList){
+                    param.cusLevelList = this.form.cusLevelList;//客户级别
+                }else{
+                    param.cusLevelList = null;//客户级别
+                }
                 this.loading=true;
                 axios.post('/statistics/teleStatement/getRecordByGroupLevelUserId',param).then(function (response) { 
                     if(!response){
@@ -220,9 +235,21 @@
                     // 给导出参数赋值
                     mainDivVM.export.startTime = mainDivVM.minuteFormat(startTime);
                     mainDivVM.export.endTime = mainDivVM.minuteFormat(endTime);
-                    mainDivVM.export.orgId = mainDivVM.form.orgId;
-                    mainDivVM.export.userId = mainDivVM.form.userId;
-                    mainDivVM.export.cusLevelList = mainDivVM.form.cusLevelList;
+                    if(mainDivVM.form.orgId){
+                        mainDivVM.export.orgId = mainDivVM.form.orgId;
+                    }else{
+                        mainDivVM.export.orgId = null;
+                    }
+                    if(mainDivVM.form.userId){
+                        mainDivVM.export.userId = mainDivVM.form.userId;
+                    }else{
+                        mainDivVM.export.userId = null;
+                    }
+                    if(mainDivVM.form.cusLevelList){
+                        mainDivVM.export.cusLevelList = mainDivVM.form.cusLevelList;
+                    }else{
+                        mainDivVM.export.cusLevelList = null;
+                    }
                 })
             },
             goback () {
@@ -322,8 +349,8 @@
             this.form.endTime=this.dateTimeFormat(trackingQuery.endTime);
             this.form.orgId=trackingQuery.orgId;
 
-            this.export.startTime=this.dateTimeFormat(trackingQuery.startTime);
-            this.export.endTime=this.dateTimeFormat(trackingQuery.endTime);
+            this.export.startTime=trackingQuery.startTime;
+            this.export.endTime=trackingQuery.endTime;
             this.export.orgId=trackingQuery.orgId;
 
             var strCusLevelList=trackingQuery.strCusLevelList
@@ -334,6 +361,9 @@
                 this.form.cusLevelList=[]; 
                 this.export.cusLevelList=[]; 
             }
+
+            if(curOrgId){this.isDisabled= true;}
+            this.currentTelSale(this.export.orgId);
 
             this.searchTable();
         },

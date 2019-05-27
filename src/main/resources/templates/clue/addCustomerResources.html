@@ -301,6 +301,29 @@
                     </el-col>
                 </el-row>
                 <el-row>
+                    <el-col :span="24">
+                        <el-form-item label="是否在考虑同行业：" :label-width="formLabelWidth" style="width: 300px;float: left;">
+                            <el-radio v-model="form.radioSelect" label="0" @change="professionChange">否</el-radio>
+                            <el-radio v-model="form.radioSelect" label="1" @change="professionChange">是</el-radio>
+                        </el-form-item>
+                        <span v-if="domainShow">
+                            <el-form-item
+                                    style="width: 300px;float: left;margin-right: 10px;"
+                                    v-for="(domain, index) in form.domains"
+                                    :key="domain.key"
+                                    :prop="'domains.' + index + '.value'"
+                                    :rules='rules.domainsValue'
+                            >
+                                <el-input v-model="domain.value" placeholder="输入品牌名称" maxLength="15"
+                                          style="width: 210px;float: left;"></el-input><el-button
+                                    @click.prevent="removeProjectDomain(domain)" type="danger">删除</el-button>
+                            </el-form-item>
+                            <el-button type="primary" @click="addProjectDomain"><i class="el-icon-plus"></i></el-button>
+                            </el-input>
+                        </span>
+                    </el-col>
+                </el-row>
+                <el-row>
                     <el-form-item label="开店区域：" :label-width="formLabelWidth" style="float: left;margin-right: 10px;">
                        <el-select filterable v-model="form.province" placeholder="省" style="width: 200px;"  @change="currentProvince">
                             <el-option
@@ -436,7 +459,12 @@
                 wechatVisible: false,//新增微信号
                 loading:false,
                 confirmBtnDisabled:false,//提交按钮 是否禁用
-                form: {  
+                domainShow: false,//默认不显示输入同行品牌名称
+                form: {
+                    domains: [{
+                        value: '',
+                        key: Date.now()
+                    }],
                     radioProject:'1',//意向项目单选默认选项               
                     resource:'',
                     resourceType:'',
@@ -711,11 +739,34 @@
                 	    //意向内部项目
                 	    var  insideProject=this.form.insideProject;
                 	    clueIntention.purInProject=insideProject;
-                	    
-                	   
                 	    //意向外部项目
                 	    var  outsideProject= this.form.outsideProject;
                 	    clueIntention.purOutProject=outsideProject;
+                        //是否考虑同行
+                        var radioSelect = this.form.radioSelect;
+                        clueIntention.istrade = radioSelect;
+                        //同行业项目
+                        var domains = this.form.domains;
+                        var tradeProjectAry = [];
+                        for (var i = 0; i < domains.length; i++) {
+                            // 判断输入框里4个值是否重复(判断对象数组的value是否有重复值)
+                            tradeProjectAry.push(domains[i].value);//把输入的品牌名称放入一个数组
+                            var s = tradeProjectAry.join(",") + ",";
+                            for (var j = 0; j < tradeProjectAry.length; j++) {
+                                console.log(tradeProjectAry[j])
+                                if (tradeProjectAry[j] != "") {
+                                    if (s.replace(tradeProjectAry[j] + ",", "").indexOf(tradeProjectAry[j] + ",") > -1) {
+                                        this.$message({
+                                            message: '请不要输入相同品牌',
+                                            type: 'warning'
+                                        });
+                                        return;
+                                    }
+                                }
+                            }
+                        }
+                        var  tradeProject = tradeProjectAry.join(',');
+                        clueIntention.tradeProject=tradeProject;
                 	    //省
                 	    var province= this.form.province;
                 	    clueIntention.province=province;
@@ -758,14 +809,41 @@
                     addCustomerVM.proSelect = response.data.data;
                 });
             },
+            // 是否同行业
+            professionChange() {
+                if (this.form.radioSelect == "0") {//否
+                    this.domainShow = false
+                } else if (this.form.radioSelect == "1") {//是
+                    this.domainShow = true
+                }
+            },
+            addProjectDomain() {
+                if (this.form.domains.length > 2) {
+                    this.$message({
+                        message: '最多输入三个品牌',
+                        type: 'warning'
+                    });
+                } else {
+                    this.form.domains.push({
+                        value: '',
+                        key: Date.now()
+                    });
+                }
+            },
+            removeProjectDomain(item) {//移除
+                var index = this.form.domains.indexOf(item)
+                if (index !== -1) {
+                    this.form.domains.splice(index, 1)
+                }
+            },
             submitDialogForm(formName) {
                 this.$refs[formName].validate((valid) => {
                     if (valid) {  
                     	
                         var domains=this.dynamicValidateForm.domains;
                         var customerPhone=this.form.customerPhone; 
-                        var ary=[];   
-                        console.log(domains)                  
+                        var ary=[];
+                        console.log(domains)
                         for(var i=0;i<domains.length;i++){
                             // 判断弹框里的值是否与页面的手机号1重复
                             if(domains[i].value==customerPhone){
