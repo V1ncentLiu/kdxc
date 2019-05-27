@@ -327,6 +327,10 @@ public class TeleSaleTrackingController {
      */
     @RequestMapping("/telemarketingFollowTableTeam")
     public String telemarketingFollowTableTeam(TeleSaleTrackingQueryDto trackingQueryDto,HttpServletRequest request) {
+        Long orgId = trackingQueryDto.getOrgId();
+        if(orgId == -1){
+            trackingQueryDto.setOrgId(null);
+        }
         request.setAttribute("trackingQueryDto",trackingQueryDto);
         // 查询所有电销组
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
