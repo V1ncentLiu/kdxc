@@ -186,9 +186,21 @@
                 // 搜索条件
                 param.startTime = this.minuteFormat(startTime);
                 param.endTime = this.minuteFormat(endTime);
-                param.org_Id = this.form.org_Id;//电销组
-                param.user_id = this.form.user_id;//电销顾问
-                param.new_resource = this.form.new_resource;//分配来源
+                if(this.form.org_Id){
+                    param.org_Id = this.form.org_Id;//电销组
+                }else{
+                    param.org_Id = null;//电销组
+                }
+                if(this.form.user_id){
+                    param.user_id = this.form.user_id;//电销顾问
+                }else{
+                    param.user_id = null;//电销顾问
+                }
+                if(this.form.new_resource){
+                    param.new_resource = this.form.new_resource;//分配来源
+                }else{
+                    param.new_resource = null;//分配来源
+                }
                 this.loading=true;
                 axios.post('/statistics/teleStatement/getResourceAllocationPersionTable',param).then(function (response) { 
                     if(!response){
@@ -230,9 +242,21 @@
                     // 给导出参数赋值
                     mainDivVM.export.startTime = mainDivVM.minuteFormat(startTime);
                     mainDivVM.export.endTime = mainDivVM.minuteFormat(endTime);
-                    mainDivVM.export.org_Id = mainDivVM.form.org_Id;
-                    mainDivVM.export.user_id = mainDivVM.form.user_id;
-                    mainDivVM.export.new_resource = mainDivVM.form.new_resource;
+                    if(mainDivVM.form.org_Id){
+                        mainDivVM.export.org_Id = mainDivVM.form.org_Id; 
+                    }else{
+                        mainDivVM.export.org_Id = null; 
+                    }
+                    if(mainDivVM.form.user_id){
+                        mainDivVM.export.user_id = mainDivVM.form.user_id; 
+                    }else{
+                        mainDivVM.export.user_id = null; 
+                    }
+                    if(mainDivVM.form.new_resource){
+                        mainDivVM.export.new_resource = mainDivVM.form.new_resource;
+                    }else{
+                        mainDivVM.export.new_resource = null;
+                    }
                 })  
             },
             goback(){
@@ -322,8 +346,8 @@
             this.form.org_Id=resourceQueryDto.org_Id;
             this.form.new_resource=resourceQueryDto.new_resource;
 
-            this.export.startTime=this.dateTimeFormat(resourceQueryDto.startTime);
-            this.export.endTime=this.dateTimeFormat(resourceQueryDto.endTime);
+            this.export.startTime=trackingQuery.startTime;
+            this.export.endTime=trackingQuery.endTime;
             this.export.org_Id=resourceQueryDto.org_Id;
             this.export.new_resource=resourceQueryDto.new_resource;
 
