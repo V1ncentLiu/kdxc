@@ -360,7 +360,6 @@ public class TeleStatementController {
     public String resourceAllocationTableSum(ResourceAllocationQueryDto resourceAllocationQueryDto,HttpServletRequest request) {
         UserInfoDTO user = getUser();
         // 查询所有电销组
-        // 查询所有电销组
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
         List<RoleInfoDTO> roleList = curLoginUser.getRoleList();
         RoleInfoDTO roleInfoDTO = roleList.get(0);

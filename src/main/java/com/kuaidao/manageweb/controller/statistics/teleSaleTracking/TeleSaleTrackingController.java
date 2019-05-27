@@ -433,6 +433,7 @@ public class TeleSaleTrackingController {
     }
 
     private List getCountTotal(TeleSaleTrackingQueryDto trackingQueryDto){
+        logger.info("跟踪查询参数"+trackingQueryDto.toString());
         List<TeleSaleTrackingDto> list = teleSaleTrackingFeignClient.getRecordByGroup(trackingQueryDto).getData();
         if(null != trackingQueryDto.getCusLevel()){
             list = teleSaleTrackingFeignClient.getRecordByGroupLevel(trackingQueryDto).getData();
