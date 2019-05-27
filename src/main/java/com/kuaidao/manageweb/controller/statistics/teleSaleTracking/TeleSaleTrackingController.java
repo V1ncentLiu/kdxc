@@ -63,10 +63,10 @@ public class TeleSaleTrackingController {
         String strCusLevelList = trackingQueryDto.getStrCusLevelList();
         trackingQueryDto.setStrCusLevelList(strCusLevelList);
         request.setAttribute("trackingQueryDto",trackingQueryDto);
-        Long orgId = trackingQueryDto.getOrgId();
-        if(null == orgId){
-            buildOrgIdList(trackingQueryDto, orgId);
-        }
+//        Long orgId = trackingQueryDto.getOrgId();
+//        if(null == orgId){
+//            buildOrgIdList(trackingQueryDto, orgId);
+//        }
         if(null != trackingQueryDto.getCusLevel()){
             return teleSaleTrackingFeignClient.getRecordByGroupLevelPage(trackingQueryDto);
         }else{
@@ -123,9 +123,9 @@ public class TeleSaleTrackingController {
             @RequestBody TeleSaleTrackingQueryDto trackingQueryDto,
             HttpServletResponse response) throws Exception {
         Long orgId = trackingQueryDto.getOrgId();
-        if(null == orgId){
-            buildOrgIdList(trackingQueryDto, orgId);
-        }
+//        if(null == orgId){
+//            buildOrgIdList(trackingQueryDto, orgId);
+//        }
         JSONResult<List<TeleSaleTrackingDto>> list = teleSaleTrackingFeignClient.getRecordByGroup(trackingQueryDto);
         if(null != trackingQueryDto.getCusLevel()){
             teleSaleTrackingFeignClient.getRecordByGroupLevel(trackingQueryDto);
