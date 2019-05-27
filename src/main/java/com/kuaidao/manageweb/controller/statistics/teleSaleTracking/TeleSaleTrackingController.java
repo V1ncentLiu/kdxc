@@ -22,6 +22,7 @@ import com.kuaidao.sys.dto.organization.OrganizationRespDTO;
 import com.kuaidao.sys.dto.role.RoleInfoDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -118,6 +119,7 @@ public class TeleSaleTrackingController {
     /**
      * 一级页面导出
      */
+    @RequiresPermissions("statistics:telemarketingFollow:export")
     @PostMapping("/exportRecordByGroupPageOne")
     public void exportRecordByGroupPageOne(
             @RequestBody TeleSaleTrackingQueryDto trackingQueryDto,
@@ -167,6 +169,7 @@ public class TeleSaleTrackingController {
     /**
      * 组+级别+用户
      */
+    @RequiresPermissions("statistics:telemarketingFollow:export")
     @PostMapping("/exportRecordByGroupLevelUserId")
     public void exportRecordByGroupLevelUserId(
             @RequestBody TeleSaleTrackingQueryDto trackingQueryDto,
@@ -207,6 +210,7 @@ public class TeleSaleTrackingController {
     /**
      * 组+级别+用户+日期
      */
+    @RequiresPermissions("statistics:telemarketingFollow:export")
     @PostMapping("/exportRecordByGroupLevelUserIdDate")
     public void exportRecordByGroupLevelUserIdDate(
             @RequestBody TeleSaleTrackingQueryDto trackingQueryDto,
