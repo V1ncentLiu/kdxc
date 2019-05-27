@@ -289,7 +289,12 @@ public class TeleSaleTrackingController {
      * @return
      */
     @RequestMapping("/telemarketingFollowTableSum")
-    public String telemarketingFollowTableSum(TeleSaleTrackingQueryDto trackingQueryDto,HttpServletRequest request) {
+    public String telemarketingFollowTableSum(Long orgId,Long startTime,Long endTime,String strCusLevelList,HttpServletRequest request) {
+        TeleSaleTrackingQueryDto trackingQueryDto = new TeleSaleTrackingQueryDto();
+        trackingQueryDto.setOrgId(orgId);
+        trackingQueryDto.setStartTime(startTime);
+        trackingQueryDto.setEndTime(endTime);
+        trackingQueryDto.setStrCusLevelList(strCusLevelList);
         request.setAttribute("trackingQueryDto",trackingQueryDto);
         // 查询所有电销组
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
@@ -326,11 +331,12 @@ public class TeleSaleTrackingController {
      * @return
      */
     @RequestMapping("/telemarketingFollowTableTeam")
-    public String telemarketingFollowTableTeam(TeleSaleTrackingQueryDto trackingQueryDto,HttpServletRequest request) {
-        Long orgId = trackingQueryDto.getOrgId();
-        if(orgId == -1){
-            trackingQueryDto.setOrgId(null);
-        }
+    public String telemarketingFollowTableTeam(Long orgId,Long startTime,Long endTime,String strCusLevelList,HttpServletRequest request) {
+        TeleSaleTrackingQueryDto trackingQueryDto = new TeleSaleTrackingQueryDto();
+        trackingQueryDto.setOrgId(orgId);
+        trackingQueryDto.setStartTime(startTime);
+        trackingQueryDto.setEndTime(endTime);
+        trackingQueryDto.setStrCusLevelList(strCusLevelList);
         request.setAttribute("trackingQueryDto",trackingQueryDto);
         // 查询所有电销组
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
