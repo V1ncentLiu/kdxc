@@ -75,7 +75,7 @@ public class TeleStatementController {
      * @return
      */
     @RequestMapping("/resourceAllocation")
-    public String resourceAllocationTable(HttpServletRequest request) {
+    public String resourceAllocationTable(HttpServletRequest request) throws Exception{
         UserInfoDTO user = getUser();
         // 查询所有电销组
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
