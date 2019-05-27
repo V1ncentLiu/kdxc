@@ -29,6 +29,7 @@ import com.kuaidao.sys.dto.user.UserInfoDTO;
 import com.kuaidao.sys.dto.user.UserOrgRoleReq;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -153,6 +154,7 @@ public class TeleStatementController {
      * @param response
      * @throws Exception
      */
+    @RequiresPermissions("statistics:teleStatement:resourceAllocation:export")
     @PostMapping("/exportResourceAllocationGroup")
     public void exportResourceAllocation(
             @RequestBody ResourceAllocationQueryDto resourceAllocationQueryDto,
@@ -275,6 +277,7 @@ public class TeleStatementController {
      * @param response
      * @throws Exception
      */
+    @RequiresPermissions("statistics:teleStatement:resourceAllocation:export")
     @PostMapping("/exportResourceAllocationPersion")
     public void exportResourceAllocationPersion(
             @RequestBody ResourceAllocationQueryDto resourceAllocationQueryDto,
@@ -313,6 +316,7 @@ public class TeleStatementController {
     /**
      * 个人按天导出
      */
+    @RequiresPermissions("statistics:teleStatement:resourceAllocation:export")
     @PostMapping("/exportResourceAllocationDayPersion")
     public void exportResourceAllocationDayPersion(
             @RequestBody ResourceAllocationQueryDto resourceAllocationQueryDto,
