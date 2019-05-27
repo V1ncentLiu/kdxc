@@ -132,7 +132,7 @@ public class TeleStatementController {
     @ResponseBody
     public JSONResult<PageBean<ResourceAllocationDto>> getResourceAllocationTable(@RequestBody ResourceAllocationQueryDto resourceAllocationQueryDto) {
         Long org_id = resourceAllocationQueryDto.getOrg_Id();
-//        buildOrgIdList(resourceAllocationQueryDto, org_id);
+        buildOrgIdList(resourceAllocationQueryDto, org_id);
         JSONResult<PageBean<ResourceAllocationDto>> resourceAllocationPage = statisticsFeignClient.getResourceAllocationPage(resourceAllocationQueryDto);
         return resourceAllocationPage;
     }
@@ -160,7 +160,7 @@ public class TeleStatementController {
             @RequestBody ResourceAllocationQueryDto resourceAllocationQueryDto,
             HttpServletResponse response) throws Exception {
         Long org_id = resourceAllocationQueryDto.getOrg_Id();
-//        buildOrgIdList(resourceAllocationQueryDto, org_id);
+        buildOrgIdList(resourceAllocationQueryDto, org_id);
         JSONResult<List<ResourceAllocationDto>> resourceAllocationList = statisticsFeignClient.getResourceAllocationList(resourceAllocationQueryDto);
         JSONResult<List<ResourceAllocationDto>> countRes = statisticsFeignClient.getResourceAllocationCount(resourceAllocationQueryDto);
         List<ResourceAllocationDto> total = countRes.getData();
@@ -359,7 +359,6 @@ public class TeleStatementController {
     @RequestMapping("/resourceAllocationTableSum")
     public String resourceAllocationTableSum(ResourceAllocationQueryDto resourceAllocationQueryDto,HttpServletRequest request) {
         UserInfoDTO user = getUser();
-        // 查询所有电销组
         // 查询所有电销组
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
         List<RoleInfoDTO> roleList = curLoginUser.getRoleList();
