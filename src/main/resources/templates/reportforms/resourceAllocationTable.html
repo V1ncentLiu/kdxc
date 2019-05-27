@@ -171,8 +171,16 @@
                 // 搜索条件
                 param.startTime = this.minuteFormat(startTime);
                 param.endTime = this.minuteFormat(endTime);
-                param.org_Id = this.form.org_Id;//电销组
-                param.new_resource = this.form.new_resource;//分配来源
+                if(this.form.org_Id){
+                    param.org_Id = this.form.org_Id;//电销组
+                }else{
+                    param.org_Id = null;//电销组
+                }
+                if(this.form.new_resource){
+                    param.new_resource = this.form.new_resource;//分配来源
+                }else{
+                    param.new_resource = null;//分配来源
+                }
                 this.loading=true;
                 axios.post('/statistics/teleStatement/getResourceAllocationTable',param).then(function (response) { 
                     if(!response){
@@ -218,8 +226,16 @@
                     // 给导出参数赋值
                     mainDivVM.export.startTime = mainDivVM.minuteFormat(startTime);
                     mainDivVM.export.endTime = mainDivVM.minuteFormat(endTime);
-                    mainDivVM.export.org_Id = mainDivVM.form.org_Id;
-                    mainDivVM.export.new_resource = mainDivVM.form.new_resource;
+                    if(mainDivVM.form.org_Id){
+                        mainDivVM.export.org_Id = mainDivVM.form.org_Id;
+                    }else{
+                        mainDivVM.export.org_Id = null;
+                    }
+                    if(mainDivVM.form.new_resource){
+                        mainDivVM.export.new_resource = mainDivVM.form.new_resource;
+                    }else{
+                        mainDivVM.export.new_resource = null
+                    }                    
                 })
             },
             gotoTeam(item){
@@ -233,11 +249,16 @@
                 // 搜索条件
                 var startTime=this.export.startTime;
                 var endTime=this.export.endTime;
-                console.log(item)
+                var new_resource=null;
+                if(new_resource){
+                    new_resource = this.form.new_resource;
+                }else{
+                    new_resource = null;
+                }
                 if(orgName == "合计"){
                     window.location.href="/statistics/teleStatement/resourceAllocationTableSum?org_Id=" + this.export.org_Id+"&startTime="+ startTime+"&endTime="+ endTime+"&new_resource="+ this.export.new_resource;
                 }else{
-                    window.location.href="/statistics/teleStatement/resourceAllocationTableTeam?org_Id=" + org_Id+"&startTime="+ startTime+"&endTime="+ endTime+"&new_resource="+ this.form.new_resource;
+                    window.location.href="/statistics/teleStatement/resourceAllocationTableTeam?org_Id=" + org_Id+"&startTime="+ startTime+"&endTime="+ endTime+"&new_resource="+ new_resource;
                 }
             },
             arraySpanMethod({ row, column, rowIndex, columnIndex }) { // 合并第一行
