@@ -131,8 +131,12 @@ public class TeleStatementController {
     @RequestMapping("/getResourceAllocationTable")
     @ResponseBody
     public JSONResult<PageBean<ResourceAllocationDto>> getResourceAllocationTable(@RequestBody ResourceAllocationQueryDto resourceAllocationQueryDto) {
+        logger.info("onefirst orgName:{},startTime:{},endTime:{}",resourceAllocationQueryDto.getOrg_Id(),
+                resourceAllocationQueryDto.getStartTime(),resourceAllocationQueryDto.getEndTime());
         Long org_id = resourceAllocationQueryDto.getOrg_Id();
         buildOrgIdList(resourceAllocationQueryDto, org_id);
+        logger.info("sendfirst orgName:{},startTime:{},endTime:{}",resourceAllocationQueryDto.getOrg_Id(),
+                resourceAllocationQueryDto.getStartTime(),resourceAllocationQueryDto.getEndTime());
         JSONResult<PageBean<ResourceAllocationDto>> resourceAllocationPage = statisticsFeignClient.getResourceAllocationPage(resourceAllocationQueryDto);
         return resourceAllocationPage;
     }
@@ -230,7 +234,10 @@ public class TeleStatementController {
      */
     @RequestMapping("/getResourceAllocationPersionTable")
     @ResponseBody
-    public JSONResult<PageBean<ResourceAllocationDto>> getResourceAllocationPersionTable(@RequestBody ResourceAllocationQueryDto resourceAllocationQueryDto, HttpServletRequest request) {
+    public JSONResult<PageBean<ResourceAllocationDto>> getResourceAllocationPersionTable(
+            @RequestBody ResourceAllocationQueryDto resourceAllocationQueryDto,HttpServletRequest request) {
+        logger.info("getResourceAllocationPersionTable onefirst orgName:{},startTime:{},endTime:{}",resourceAllocationQueryDto.getOrg_Id(),
+                resourceAllocationQueryDto.getStartTime(),resourceAllocationQueryDto.getEndTime());
         UserInfoDTO user = getUser();
         // 查询所有电销组
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
