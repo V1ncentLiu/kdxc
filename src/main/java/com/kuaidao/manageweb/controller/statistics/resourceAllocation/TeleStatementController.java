@@ -29,6 +29,7 @@ import com.kuaidao.sys.dto.user.UserInfoDTO;
 import com.kuaidao.sys.dto.user.UserOrgRoleReq;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -79,7 +80,28 @@ public class TeleStatementController {
         UserInfoDTO user = getUser();
         // 查询所有电销组
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
-        request.setAttribute("saleGroupList",getOrgGroupByOrgId(curLoginUser.getOrgId(),OrgTypeConstant.DXZ));
+        List<RoleInfoDTO> roleList = curLoginUser.getRoleList();
+        RoleInfoDTO roleInfoDTO = roleList.get(0);
+        String roleCode = roleInfoDTO.getRoleCode();
+        String curOrgId = "";
+        List<OrganizationRespDTO>  teleGroupList = new ArrayList<>();
+        if(RoleCodeEnum.DXZJ.name().equals(roleCode)) {
+            curOrgId =  String.valueOf(curLoginUser.getOrgId());
+            //电销总监查他自己的组
+            OrganizationDTO curOrgGroupByOrgId = getCurOrgGroupByOrgId(curOrgId);
+            if(curOrgGroupByOrgId!=null) {
+                OrganizationRespDTO organizationRespDTO = new OrganizationRespDTO();
+                organizationRespDTO.setId(curOrgGroupByOrgId.getId());
+                organizationRespDTO.setName(curOrgGroupByOrgId.getName());
+                teleGroupList.add(organizationRespDTO);
+            }
+        }else {
+            teleGroupList =  getOrgGroupByOrgId(curLoginUser.getOrgId(),OrgTypeConstant.DXZ);
+        }
+        OrganizationQueryDTO organizationQueryDTO  = new OrganizationQueryDTO();
+        organizationQueryDTO.setParentId(curLoginUser.getOrgId());
+        request.setAttribute("curOrgId",curOrgId);
+        request.setAttribute("saleGroupList",teleGroupList);
 
         // 根据角色查询页面字段
         QueryFieldByRoleAndMenuReq queryFieldByRoleAndMenuReq = new QueryFieldByRoleAndMenuReq();
@@ -132,6 +154,7 @@ public class TeleStatementController {
      * @param response
      * @throws Exception
      */
+    @RequiresPermissions("statistics:teleStatement:resourceAllocation:export")
     @PostMapping("/exportResourceAllocationGroup")
     public void exportResourceAllocation(
             @RequestBody ResourceAllocationQueryDto resourceAllocationQueryDto,
@@ -211,7 +234,28 @@ public class TeleStatementController {
         UserInfoDTO user = getUser();
         // 查询所有电销组
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
-        request.setAttribute("saleGroupList",getOrgGroupByOrgId(curLoginUser.getOrgId(),OrgTypeConstant.DXZ));
+        List<RoleInfoDTO> roleList = curLoginUser.getRoleList();
+        RoleInfoDTO roleInfoDTO = roleList.get(0);
+        String roleCode = roleInfoDTO.getRoleCode();
+        String curOrgId = "";
+        List<OrganizationRespDTO>  teleGroupList = new ArrayList<>();
+        if(RoleCodeEnum.DXZJ.name().equals(roleCode)) {
+            curOrgId =  String.valueOf(curLoginUser.getOrgId());
+            //电销总监查他自己的组
+            OrganizationDTO curOrgGroupByOrgId = getCurOrgGroupByOrgId(curOrgId);
+            if(curOrgGroupByOrgId!=null) {
+                OrganizationRespDTO organizationRespDTO = new OrganizationRespDTO();
+                organizationRespDTO.setId(curOrgGroupByOrgId.getId());
+                organizationRespDTO.setName(curOrgGroupByOrgId.getName());
+                teleGroupList.add(organizationRespDTO);
+            }
+        }else {
+            teleGroupList =  getOrgGroupByOrgId(curLoginUser.getOrgId(),OrgTypeConstant.DXZ);
+        }
+        OrganizationQueryDTO organizationQueryDTO  = new OrganizationQueryDTO();
+        organizationQueryDTO.setParentId(curLoginUser.getOrgId());
+        request.setAttribute("curOrgId",curOrgId);
+        request.setAttribute("saleGroupList",teleGroupList);
 
         // 根据角色查询页面字段
         QueryFieldByRoleAndMenuReq queryFieldByRoleAndMenuReq = new QueryFieldByRoleAndMenuReq();
@@ -233,6 +277,7 @@ public class TeleStatementController {
      * @param response
      * @throws Exception
      */
+    @RequiresPermissions("statistics:teleStatement:resourceAllocation:export")
     @PostMapping("/exportResourceAllocationPersion")
     public void exportResourceAllocationPersion(
             @RequestBody ResourceAllocationQueryDto resourceAllocationQueryDto,
@@ -271,6 +316,7 @@ public class TeleStatementController {
     /**
      * 个人按天导出
      */
+    @RequiresPermissions("statistics:teleStatement:resourceAllocation:export")
     @PostMapping("/exportResourceAllocationDayPersion")
     public void exportResourceAllocationDayPersion(
             @RequestBody ResourceAllocationQueryDto resourceAllocationQueryDto,
@@ -315,7 +361,28 @@ public class TeleStatementController {
         UserInfoDTO user = getUser();
         // 查询所有电销组
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
-        request.setAttribute("saleGroupList",getOrgGroupByOrgId(curLoginUser.getOrgId(),OrgTypeConstant.DXZ));
+        List<RoleInfoDTO> roleList = curLoginUser.getRoleList();
+        RoleInfoDTO roleInfoDTO = roleList.get(0);
+        String roleCode = roleInfoDTO.getRoleCode();
+        String curOrgId = "";
+        List<OrganizationRespDTO>  teleGroupList = new ArrayList<>();
+        if(RoleCodeEnum.DXZJ.name().equals(roleCode)) {
+            curOrgId =  String.valueOf(curLoginUser.getOrgId());
+            //电销总监查他自己的组
+            OrganizationDTO curOrgGroupByOrgId = getCurOrgGroupByOrgId(curOrgId);
+            if(curOrgGroupByOrgId!=null) {
+                OrganizationRespDTO organizationRespDTO = new OrganizationRespDTO();
+                organizationRespDTO.setId(curOrgGroupByOrgId.getId());
+                organizationRespDTO.setName(curOrgGroupByOrgId.getName());
+                teleGroupList.add(organizationRespDTO);
+            }
+        }else {
+            teleGroupList =  getOrgGroupByOrgId(curLoginUser.getOrgId(),OrgTypeConstant.DXZ);
+        }
+        OrganizationQueryDTO organizationQueryDTO  = new OrganizationQueryDTO();
+        organizationQueryDTO.setParentId(curLoginUser.getOrgId());
+        request.setAttribute("curOrgId",curOrgId);
+        request.setAttribute("saleGroupList",teleGroupList);
         request.setAttribute("resourceAllocationQueryDto",resourceAllocationQueryDto);
         // 根据角色查询页面字段
         QueryFieldByRoleAndMenuReq queryFieldByRoleAndMenuReq = new QueryFieldByRoleAndMenuReq();
@@ -427,7 +494,7 @@ public class TeleStatementController {
     /**
      * 获取当前 orgId所在的组织
     * @param orgId
-    * @param orgType
+    * @param
     * @return
      */
     private OrganizationDTO getCurOrgGroupByOrgId(String orgId) {

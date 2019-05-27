@@ -28,7 +28,7 @@
                    <el-date-picker format="yyyy-MM-dd HH:mm" v-model="form.endTime" type="datetime" placeholder="选择日期"></el-date-picker>
                 </el-form-item>
                 <el-form-item label="电销组:">  
-                    <el-select v-model="form.orgId" placeholder="电销组" style="width: 100%;" clearable filterable>
+                    <el-select v-model="form.orgId" placeholder="电销组" style="width: 100%;" clearable filterable :disabled="isDisabled">
                         <el-option
                             v-for="item in orgTeleArr"
                             :key="item.id"
@@ -87,21 +87,24 @@
 <script th:inline="javascript">
     var orgIdList=[[${saleGroupList}]];//电销组
     var clientRankIdList=[[${cusLevelListArray}]];//客户级别
+    var curOrgId = [[${curOrgId}]];//当前电销组
+    // console.log(curOrgId);
     var mainDivVM = new Vue({
         el: '#maindiv',
         data: function() {
             return {
                 loading:false,
+                isDisabled:false,
                 form: {
                     startTime:'',
                     endTime:'',
-                    orgId:'',
+                    orgId:curOrgId,
                     cusLevelList:[],
                 },
                 export: {
                     startTime:'',
                     endTime:'',
-                    orgId:'',
+                    orgId:curOrgId,
                     cusLevelList:[],
                 },
                 tableData: [],
@@ -210,8 +213,8 @@
                 var orgName = item.orgName;
                 var orgId = item.orgId;//组id
                 // 搜索条件
-                var startTime=this.minuteFormat(this.form.startTime);
-                var endTime=this.minuteFormat(this.form.endTime);
+                var startTime=this.export.startTime;
+                var endTime=this.export.endTime;
                 var cusLevelList=this.export.cusLevelList;
                 var strCusLevelList="";
                 if(cusLevelList!=0){
@@ -380,7 +383,10 @@
             var startTime = today.getFullYear()+"-"+ (today.getMonth()+1) + "-" + today.getDate()+" 00:00";
             var endTime =today.getFullYear()+"-"+ (today.getMonth()+1) + "-" + today.getDate()+" 23:59";
             this.form.startTime=startTime;
-            this.form.endTime=endTime;       
+            this.form.endTime=endTime;  
+
+            if(curOrgId){this.isDisabled= true;}
+
             this.searchTable();
         },
         mounted(){
