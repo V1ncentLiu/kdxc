@@ -148,7 +148,7 @@ public class TeleSaleTrackingController {
         TeleSaleTrackingDto resTotal = countList.get(0);
         List<List<Object>> dataList = new ArrayList<List<Object>>();
         //加表头
-        dataList.add(getHeadTitleList());
+        dataList.add(getHeadOneTitleList());
         //加合计
         addTotalTeportResourceAllocation(resTotal,dataList);
         List<TeleSaleTrackingDto> orderList = list.getData();
@@ -158,7 +158,6 @@ public class TeleSaleTrackingController {
             curList.add(i + 1);
             curList.add(ra.getDateId());
             curList.add(ra.getOrgName());
-            curList.add(ra.getUserName());
             curList.add(ra.getCusLevel());
             curList.add(ra.getCountResource());
             curList.add(ra.getCountClueId());
@@ -188,6 +187,10 @@ public class TeleSaleTrackingController {
     public void exportRecordByGroupLevelUserId(
             @RequestBody TeleSaleTrackingQueryDto trackingQueryDto,
             HttpServletResponse response) throws Exception {
+        Long orgId = trackingQueryDto.getOrgId();
+        if(null == orgId){
+            buildOrgIdList(trackingQueryDto, orgId);
+        }
         JSONResult<List<TeleSaleTrackingDto>> list = teleSaleTrackingFeignClient.getRecordByGroupUserId(trackingQueryDto);
         if(null != trackingQueryDto.getCusLevel()){
             teleSaleTrackingFeignClient.getRecordByGroupLevelUserId(trackingQueryDto);
@@ -451,6 +454,19 @@ public class TeleSaleTrackingController {
         headTitleList.add("人均天回访次数");
         return headTitleList;
     }
+
+    private List<Object> getHeadOneTitleList() {
+        List<Object> headTitleList = new ArrayList<>();
+        headTitleList.add("序号");
+        headTitleList.add("日期");
+        headTitleList.add("电销组");
+        headTitleList.add("客户级别");
+        headTitleList.add("资源数");
+        headTitleList.add("回访次数");
+        headTitleList.add("回访资源数");
+        headTitleList.add("人均天回访次数");
+        return headTitleList;
+    }
     private List<OrganizationRespDTO> getOrgGroupByOrgId(Long orgId,Integer orgType) {
         // 电销组
         OrganizationQueryDTO busGroupReqDTO = new OrganizationQueryDTO();
@@ -491,7 +507,7 @@ public class TeleSaleTrackingController {
         //回访资源数
         Integer countDistinctClue = list.stream().mapToInt(TeleSaleTrackingDto::getCountDistinctClue).sum();
         //人均天回访次数
-        Integer dayOfper = list.stream().mapToInt(TeleSaleTrackingDto::getDayOfPer).sum();
+        Double dayOfper = list.stream().mapToDouble(TeleSaleTrackingDto::getDayOfPer).sum();
         List<TeleSaleTrackingDto> countList = new ArrayList<>();
         TeleSaleTrackingDto res = new TeleSaleTrackingDto();
         res.setCountResource(countResouce);
