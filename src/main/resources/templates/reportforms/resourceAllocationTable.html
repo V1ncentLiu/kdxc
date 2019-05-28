@@ -48,7 +48,7 @@
                     </el-select>
                 </el-form-item>
                 <div class="mainSearchBtnBox">
-                    <el-button icon="el-icon-search" type="primary" @click="searchTable()" class="searchBtn">搜索</el-button>
+                    <el-button icon="el-icon-search" type="primary" @click="searchTable()" class="searchBtn" :disabled="btnDisabled">搜索</el-button>
                     <!-- <el-button type="info" class="searchBtn">取消</el-button> -->
                     <!-- <span style="color: #5c6be8;cursor: pointer;margin:0 10px;" @click="toogleClick"><span v-if="isShow">收起</span><span v-else>展开更多</span><i :class="{'greycolor paddingL6 el-icon-arrow-up':isShow,'greycolor paddingL6 el-icon-arrow-down':!isShow}"></i></span> -->
                 </div>  
@@ -97,6 +97,7 @@
             return {
                 loading:false,
                 isDisabled:false,
+                btnDisabled:false,
                 form: {
                     startTime:'',
                     endTime:'',
@@ -174,6 +175,7 @@
                 param.org_Id = this.form.org_Id;//电销组
                 param.new_resource = this.form.new_resource;//分配来源
                 this.loading=true;
+                this.btnDisabled=true;
                 axios.post('/statistics/teleStatement/getResourceAllocationTable',param).then(function (response) { 
                     if(!response){
                         mainDivVM.$message({
@@ -181,6 +183,7 @@
                             type: 'error'
                         });
                         mainDivVM.loading=false;
+                        mainDivVM.btnDisabled=false;
                         return ;
                     }
                     var resobj= response.data;
@@ -190,6 +193,7 @@
                             type: 'error'
                         });
                         mainDivVM.loading=false;
+                        mainDivVM.btnDisabled=false;
                         return ;
                     }
                     if(resobj.code!='0'){
@@ -198,6 +202,7 @@
                             type: 'error'
                         });
                         mainDivVM.loading=false;
+                        mainDivVM.btnDisabled=false;
                         return ;
                     }  
                     var resobjData=resobj.data.data;                    
@@ -215,6 +220,7 @@
                         // loading
                         mainDivVM.loading=false;
                     }
+                    mainDivVM.btnDisabled=false;//按钮可点
                     // 给导出参数赋值
                     mainDivVM.export.startTime = mainDivVM.minuteFormat(startTime);
                     mainDivVM.export.endTime = mainDivVM.minuteFormat(endTime);
