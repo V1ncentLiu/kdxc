@@ -27,7 +27,7 @@ function switchSound(id,url){
 			myAudio.currentTime = 0;
 			myAudio.play();
 			$("#"+soundId).removeClass("sound-trigger--type-default-2").addClass("sound-trigger--type-default");
-            $("#"+soundId).find("i").removeClass("fa-stop").addClass("fa-play");
+            $("#"+soundId).find("i").removeClass("fa-stop-1").addClass("fa-play-1");
 			$("#"+id).removeClass("sound-trigger--type-default").addClass("sound-trigger--type-default-2");
             $("#"+id).find("i").removeClass("fa-play-1").addClass("fa-stop-1");
 			soundId = id;
