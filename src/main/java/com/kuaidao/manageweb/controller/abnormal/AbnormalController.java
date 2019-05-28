@@ -33,9 +33,9 @@ import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
 import com.kuaidao.manageweb.util.CommUtil;
 import com.kuaidao.sys.dto.dictionary.DictionaryItemRespDTO;
 import com.kuaidao.sys.dto.role.RoleInfoDTO;
-import com.kuaidao.sys.dto.role.RoleQueryDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import com.kuaidao.sys.dto.user.UserInfoPageParam;
+import com.kuaidao.sys.dto.user.UserOrgRoleReq;
 
 /**
  * @author yangbiao
@@ -70,7 +70,8 @@ public class AbnormalController {
     @RequestMapping("/AbnoramlType")
     @ResponseBody
     public JSONResult<List<DictionaryItemRespDTO>> abnoramlType() {
-        JSONResult result = dictionaryItemFeignClient.queryDicItemsByGroupCode(DicCodeEnum.DIC_ABNORMALUSER.getCode());
+        JSONResult result = dictionaryItemFeignClient
+                .queryDicItemsByGroupCode(DicCodeEnum.DIC_ABNORMALUSER.getCode());
         return result;
     }
 
@@ -177,31 +178,13 @@ public class AbnormalController {
      * @return
      */
     private List dxcygws() {
-        RoleQueryDTO query = new RoleQueryDTO();
-        query.setRoleCode(RoleCodeEnum.DXCYGW.name());
         UserInfoDTO user = CommUtil.getCurLoginUser();
-        JSONResult<List<RoleInfoDTO>> roleJson = roleManagerFeignClient.qeuryRoleByName(query);
-        ArrayList resList = new ArrayList();
-        if (JSONResult.SUCCESS.equals(roleJson.getCode())) {
-            List<RoleInfoDTO> roleList = roleJson.getData();
-            if (null != roleList && roleList.size() > 0) {
-                RoleInfoDTO roleDto = roleList.get(0);
-                UserInfoPageParam param = new UserInfoPageParam();
-                param.setRoleId(roleDto.getId());
-                param.setOrgId(user.getOrgId());
-                param.setPageSize(10000);
-                param.setPageNum(1);
-                JSONResult<PageBean<UserInfoDTO>> userListJson = userInfoFeignClient.list(param);
-                if (JSONResult.SUCCESS.equals(userListJson.getCode())) {
-                    PageBean<UserInfoDTO> pageList = userListJson.getData();
-                    List<UserInfoDTO> userList = pageList.getData();
-                    for (UserInfoDTO dto : userList) {
-                        resList.add(dto.getId());
-                    }
-                }
-            }
-        }
-        return resList;
+        UserOrgRoleReq userOrgRoleReq = new UserOrgRoleReq();
+        userOrgRoleReq.setOrgId(user.getOrgId());
+        userOrgRoleReq.setRoleCode(RoleCodeEnum.DXCYGW.name());
+        JSONResult<List<UserInfoDTO>> listByOrgAndRole =
+                userInfoFeignClient.listByOrgAndRole(userOrgRoleReq);
+        return listByOrgAndRole.getData();
     }
 
     /**
