@@ -111,7 +111,7 @@ public class TeleSaleTrackingController {
      */
     @RequestMapping("/getRecordByGroupPageOneCount")
     @ResponseBody
-    public JSONResult<List<TeleSaleTrackingDto>> getRecordByGroupPageOneCount(TeleSaleTrackingQueryDto trackingQueryDto){
+    public JSONResult<List<TeleSaleTrackingDto>> getRecordByGroupPageOneCount(@RequestBody TeleSaleTrackingQueryDto trackingQueryDto){
         Long orgId = trackingQueryDto.getOrgId();
         if(null == orgId){
             buildOrgIdList(trackingQueryDto, orgId);
