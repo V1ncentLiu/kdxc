@@ -176,21 +176,19 @@
                         });
                         return;
                     }
+                    startTime = this.limitTime(startTime, null);
+                    endTime = this.limitTime(null, endTime);
                 }else{
                     this.$message({
                         message: '请选择起止时间',
                         type: 'warning'
                     });
                     return;
-                }
-                console.log('search');   
+                }   
                 
                 var param = {};
-                var s = this.minuteFormat(startTime);
-                var e = this.minuteFormat(endTime);
-                
-                param.startTime = this.limitTime (s, null);
-                param.endTime = this.limitTime (null, e);
+                param.startTime = this.minuteFormat(startTime);
+                param.endTime = this.minuteFormat(endTime);
                 param.pageSize = this.pager.pageSize;
                 param.pageNum = this.pager.currentPage;
                 param.orgId =  this.form.orgId; // 电销组
@@ -240,23 +238,27 @@
                     });
                 });
             },
-            limitTime (startTime, endTime) {
+            limitTime (start, end) {
+                var endTime = this.minuteFormat (end);
+                var startTime = this.minuteFormat (start);
                 var date = new Date();
                 data = this.minuteFormat (date);// 现在的时间
                 data = data.slice(0,8);
                 if(startTime){
                     var s = startTime.slice(0,8);
                     if(s < data){
-                        return s + "0000";
+                        this.form.startTime = moment(start).format("YYYY-MM-DD 00:00");
+                        return this.form.startTime;
                     }
-                    return startTime;
+                    return start;
                 }
                 if(endTime){
                     var e = endTime.slice(0,8);
                     if(e < data){
-                        return e + "2359";
+                        this.form.endTime = moment(end).format("YYYY-MM-DD 23:59");
+                        return this.form.endTime;                        
                     }
-                    return endTime;
+                    return end;
                 }
             },
             currentTelSale(seleVal){ // 根据电销组选择创业顾问
@@ -306,7 +308,7 @@
                 if(!percent){ // 如果没有值或值为0
                     return 0 + "%";
                 }
-                percent = percent * 100 + "%";
+                percent = (percent * 1000)/10 + "%";
                 return percent;
             },
             minuteFormat (m) {
@@ -381,11 +383,8 @@
             },
             exportRs(){
                 var param = {};
-                var startTime = this.export.startTime;
-                var endTime = this.export.endTime;
-                param.startTime = this.limitTime (startTime, null);
-                param.endTime = this.limitTime (null, endTime);
-
+                param.startTime = this.export.startTime;
+                param.endTime = this.export.endTime;
                 param.orgId =  this.export.orgId; 
                 param.userId =  this.export.userId; 
                 axios.post('/callrecord/teleSaleTalkTime/exportGroupTeleSaleTalkTimeNoPage',param,{responseType:'blob'})

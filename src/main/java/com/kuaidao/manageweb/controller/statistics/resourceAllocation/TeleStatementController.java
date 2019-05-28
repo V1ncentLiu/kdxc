@@ -465,7 +465,14 @@ public class TeleStatementController {
     * @return
      */
     @RequestMapping("/resourceAllocationTablePerson")
-    public String resourceAllocationTablePerson(ResourceAllocationQueryDto resourceAllocationQueryDto,HttpServletRequest request) {
+    public String resourceAllocationTablePerson(Long user_id,Long org_Id,Long startTime,Long endTime,Integer new_resource,HttpServletRequest request) {
+        ResourceAllocationQueryDto resourceAllocationQueryDto = new ResourceAllocationQueryDto();
+        resourceAllocationQueryDto.setUser_Id(user_id);
+        resourceAllocationQueryDto.setOrg_Id(org_Id);
+        resourceAllocationQueryDto.setStartTime(startTime);
+        resourceAllocationQueryDto.setEndTime(endTime);
+        resourceAllocationQueryDto.setNew_resource(new_resource);
+        request.setAttribute("resourceAllocationQueryDto",resourceAllocationQueryDto);
         UserInfoDTO user = getUser();
         // 查询所有电销组
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
