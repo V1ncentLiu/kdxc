@@ -82,6 +82,10 @@ public class TeleSaleTrackingController {
     @ResponseBody
     JSONResult<PageBean<TeleSaleTrackingDto>> getRecordByGroupLevelUserId(@RequestBody TeleSaleTrackingQueryDto trackingQueryDto,
                                                                           HttpServletRequest request){
+        Long orgId = trackingQueryDto.getOrgId();
+        if(null == orgId){
+            buildOrgIdList(trackingQueryDto, orgId);
+        }
         request.setAttribute("trackingQueryDto",trackingQueryDto);
         if(null != trackingQueryDto.getCusLevel()){
             return teleSaleTrackingFeignClient.getRecordByGroupLevelUserIdPage(trackingQueryDto);
@@ -97,6 +101,10 @@ public class TeleSaleTrackingController {
     @ResponseBody
     JSONResult<PageBean<TeleSaleTrackingDto>> getRecordByGroupLevelUserIdDate(@RequestBody TeleSaleTrackingQueryDto trackingQueryDto,
                                                                               HttpServletRequest request){
+        Long orgId = trackingQueryDto.getOrgId();
+        if(null == orgId){
+            buildOrgIdList(trackingQueryDto, orgId);
+        }
         request.setAttribute("trackingQueryDto",trackingQueryDto);
         if(null != trackingQueryDto.getCusLevel()){
             return teleSaleTrackingFeignClient.getRecordByGroupLevelUserIdDatePage(trackingQueryDto);
@@ -223,6 +231,10 @@ public class TeleSaleTrackingController {
     public void exportRecordByGroupLevelUserIdDate(
             @RequestBody TeleSaleTrackingQueryDto trackingQueryDto,
             HttpServletResponse response) throws Exception {
+        Long orgId = trackingQueryDto.getOrgId();
+        if(null == orgId){
+            buildOrgIdList(trackingQueryDto, orgId);
+        }
         JSONResult<List<TeleSaleTrackingDto>> list = teleSaleTrackingFeignClient.getRecordByGroupUserIdDate(trackingQueryDto);
         if(null != trackingQueryDto.getCusLevel()){
             teleSaleTrackingFeignClient.getRecordByGroupLevelUserIdDate(trackingQueryDto);
