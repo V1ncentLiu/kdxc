@@ -39,7 +39,7 @@
                     </el-select>
                 </el-form-item>
                 <el-form-item label="电销顾问:">  
-                    <el-select v-model="form.user_id" placeholder="电销顾问" style="width: 100%;" filterable clearable>
+                    <el-select v-model="form.user_Id" placeholder="电销顾问" style="width: 100%;" filterable clearable>
                         <el-option
                             v-for="item in busSaleArr"
                             :key="item.id"
@@ -103,14 +103,14 @@
                     startTime:'',
                     endTime:'',
                     org_Id:'',
-                    user_id:'',
+                    user_Id:'',
                     new_resource:''
                 },
                 export: {
                     startTime:'',
                     endTime:'',
                     org_Id:'',
-                    user_id:'',
+                    user_Id:'',
                     new_resource:''
                 },
                 tableData: [],//表格数据
@@ -188,7 +188,7 @@
                 param.startTime = this.minuteFormat(startTime);
                 param.endTime = this.minuteFormat(endTime);
                 param.org_Id = this.form.org_Id;//电销组
-                param.user_id = this.form.user_id;//电销顾问
+                param.user_Id = this.form.user_Id;//电销顾问
                 param.new_resource = this.form.new_resource;//分配来源
                 console.log(param)
                 this.loading=true;
@@ -232,24 +232,9 @@
                     // 给导出参数赋值
                     mainDivVM.export.startTime = mainDivVM.minuteFormat(startTime);
                     mainDivVM.export.endTime = mainDivVM.minuteFormat(endTime);
-                    // mainDivVM.export.org_Id = mainDivVM.form.org_Id; 
-                    // mainDivVM.export.user_Id = mainDivVM.form.user_Id;  
-                    // mainDivVM.export.new_resource = mainDivVM.form.new_resource;  
-                    if(mainDivVM.form.org_Id){
-                        mainDivVM.export.org_Id = mainDivVM.form.org_Id; 
-                    }else{
-                        mainDivVM.export.org_Id = null; 
-                    }
-                    if(mainDivVM.form.user_id){
-                        mainDivVM.export.user_id = mainDivVM.form.user_id; 
-                    }else{
-                        mainDivVM.export.user_id = null; 
-                    }
-                    if(mainDivVM.form.new_resource){
-                        mainDivVM.export.new_resource = mainDivVM.form.new_resource;
-                    }else{
-                        mainDivVM.export.new_resource = null;
-                    }
+                    mainDivVM.export.org_Id = mainDivVM.form.org_Id; 
+                    mainDivVM.export.user_Id = mainDivVM.form.user_Id;  
+                    mainDivVM.export.new_resource = mainDivVM.form.new_resource;
                 })     
             },
             goback(){
@@ -263,10 +248,12 @@
             },
             dateFormat (row, column) { 
                 var date = row[column.property];
-                 if (!date) {
-                   return "";
-                 }
-                return moment(date).format("YYYY-MM-DD");
+                 if (!date) {return "";}
+                var d = date.toString();
+                var oYear = d.slice(0,4);
+                var oMonth = d.slice(4,6);
+                var oDay = d.slice(6);
+                return oYear+"-"+oMonth+"-"+oDay;
             }, 
             minuteFormat (m) {
                 if (!m) {
@@ -350,14 +337,16 @@
             this.form.startTime=this.dateTimeFormat(resourceQueryDto.startTime);
             this.form.endTime=this.dateTimeFormat(resourceQueryDto.endTime);
             this.form.org_Id=resourceQueryDto.org_Id;
-            this.form.user_id=resourceQueryDto.user_id;
+            this.form.user_Id=resourceQueryDto.user_Id;
             this.form.new_resource=resourceQueryDto.new_resource;
             
             this.export.startTime=this.dateTimeFormat(resourceQueryDto.startTime);
             this.export.endTime=this.dateTimeFormat(resourceQueryDto.endTime);
             this.export.org_Id=resourceQueryDto.org_Id;
-            this.export.user_id=resourceQueryDto.user_id;
+            this.export.user_Id=resourceQueryDto.user_Id;
             this.export.new_resource=resourceQueryDto.new_resource;
+
+            this.currentTelSale(this.export.org_Id);
 
             this.searchTable();
         },

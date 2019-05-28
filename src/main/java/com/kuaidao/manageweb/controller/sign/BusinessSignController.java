@@ -611,6 +611,7 @@ public class BusinessSignController {
     request.setAttribute("signData", signData);
     request.setAttribute("payType", sign.getPayType()); // 最新一次付款类型： 用来判断显示行数
     request.setAttribute("refundStatus", sign.getRefundStatus()); // 判断退款信息是否显示
+    request.setAttribute("customerName", sign.getCustomerName()); // 带出到页面客户姓名
     if ("4".equals(sign.getPayType())) {
       readyOnly = "1";
     }
