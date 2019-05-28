@@ -80,8 +80,8 @@ public class CallRecordController {
         List<RoleInfoDTO> roleList = curLoginUser.getRoleList();
         if(roleList!=null && roleList.size()!=0) {
             RoleInfoDTO roleInfoDTO = roleList.get(0);
-            String roleName = roleInfoDTO.getRoleName();
-            if(RoleCodeEnum.DXZJ.value().equals(roleName)) {
+            String roleCode = roleInfoDTO.getRoleCode();
+            if(RoleCodeEnum.DXZJ.name().equals(roleCode)) {
                 UserOrgRoleReq req = new UserOrgRoleReq();
                 req.setOrgId(orgId);
                 req.setRoleCode(RoleCodeEnum.DXCYGW.name());
@@ -156,8 +156,8 @@ public class CallRecordController {
         List<RoleInfoDTO> roleList = curLoginUser.getRoleList();
         if(roleList!=null && roleList.size()!=0) {
             RoleInfoDTO roleInfoDTO = roleList.get(0);
-            String roleName = roleInfoDTO.getRoleName();
-            if(RoleCodeEnum.DXZJ.value().equals(roleName)) {
+            String roleCode = roleInfoDTO.getRoleCode();
+            if(RoleCodeEnum.DXZJ.name().equals(roleCode)) {
                 List<Long> accountIdList = myCallRecordReqDTO.getAccountIdList();
                 if(accountIdList==null || accountIdList.size()==0) {
                     UserOrgRoleReq req = new UserOrgRoleReq();
@@ -204,8 +204,8 @@ public class CallRecordController {
         List<RoleInfoDTO> roleList = curLoginUser.getRoleList();
         if(roleList!=null && roleList.size()!=0) {
             RoleInfoDTO roleInfoDTO = roleList.get(0);
-            String roleName = roleInfoDTO.getRoleName();
-            if(RoleCodeEnum.DXZJ.value().equals(roleName)) {
+            String roleCode = roleInfoDTO.getRoleCode();
+            if(RoleCodeEnum.DXZJ.name().equals(roleCode)) {
                 String accoutName = myCallRecordReqDTO.getAccoutName();
                 if(StringUtils.isBlank(accoutName)) {
                     UserOrgRoleReq req = new UserOrgRoleReq();
