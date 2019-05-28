@@ -77,11 +77,7 @@
                     :header-cell-style="centerStyle">
                 <el-table-column type="index" label="序号" align="center" width="55"></el-table-column>
                 <el-table-column prop="dateId" label="日期" :formatter="dateFormat"></el-table-column>
-                <el-table-column prop="userName" label="顾问">
-                    <template slot-scope="scope">
-                        <el-button @click="gotoPerson(scope.row)" type="text">{{scope.row.userName}}</el-button>
-                    </template>
-                </el-table-column>
+                <el-table-column prop="userName" label="顾问"></el-table-column>
                 <el-table-column prop="cusLevel" label="客户级别"></el-table-column>
                 <el-table-column prop="countResource" label="资源数"></el-table-column>
                 <el-table-column prop="countClueId" label="回访次数"></el-table-column>
@@ -228,39 +224,18 @@
                     mainDivVM.export.cusLevelList = mainDivVM.form.cusLevelList;
                 })
             },
-            gotoPerson(item){
-                console.log(item)
-                var userId = item.userId;
-                var orgId=this.export.orgId;
-                // 搜索条件
-                var startTime=this.export.startTime;
-                var endTime=this.export.endTime;
-                var cusLevelList=this.export.cusLevelList;
-                var strCusLevelList="";
-                if(cusLevelList!=0){
-                    strCusLevelList=cusLevelList.join(",");
-                }else{
-                    strCusLevelList=""
-                }
-                if(userId){
-                    // 点击个人跳转到此人的资源分配信息
-                    window.location.href="/statistics/teleStatement/telemarketingFollowTablePerson?userId="+userId+"&orgId=" + orgId+"&startTime="+ startTime+"&endTime="+ endTime+"&strCusLevelList="+ strCusLevelList;
-                }
-            },
             goback () {
                 window.history.go(-1);
             },
-            dateFormat (row, column) {
+            dateFormat (row, column) { 
                 var date = row[column.property];
-                if (!date) {return "";}
+                 if (!date) {return "";}
                 var d = date.toString();
                 var oYear = d.slice(0,4);
-                var oMonth = d.slice(5,6);
-                oMonth = oMonth < 10 ? "0" + oMonth : oMonth;
-                var oDay = d.slice(7);
-                oDay = oDay < 10 ? "0" + oDay : oDay;
-                return oYear+"-"+oMonth+"-"+oDay;
-            },
+                var oMonth = d.slice(4,6);
+                var oDay = d.slice(6);
+                return oYear+"-"+oMonth+"-"+oDay;
+            }, 
             minuteFormat (m) {
                 if (!m) {
                     return "";
