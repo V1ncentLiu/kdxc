@@ -131,12 +131,12 @@ public class TeleStatementController {
     @RequestMapping("/getResourceAllocationTable")
     @ResponseBody
     public JSONResult<PageBean<ResourceAllocationDto>> getResourceAllocationTable(@RequestBody ResourceAllocationQueryDto resourceAllocationQueryDto) {
-        logger.info("onefirst orgName:{},startTime:{},endTime:{}",resourceAllocationQueryDto.getOrg_Id(),
-                resourceAllocationQueryDto.getStartTime(),resourceAllocationQueryDto.getEndTime());
+//        logger.info("onefirst orgName:{},startTime:{},endTime:{}",resourceAllocationQueryDto.getOrg_Id(),
+//                resourceAllocationQueryDto.getStartTime(),resourceAllocationQueryDto.getEndTime());
         Long org_id = resourceAllocationQueryDto.getOrg_Id();
         buildOrgIdList(resourceAllocationQueryDto, org_id);
-        logger.info("sendfirst orgName:{},startTime:{},endTime:{}",resourceAllocationQueryDto.getOrg_Id(),
-                resourceAllocationQueryDto.getStartTime(),resourceAllocationQueryDto.getEndTime());
+//        logger.info("sendfirst orgName:{},startTime:{},endTime:{}",resourceAllocationQueryDto.getOrg_Id(),
+//                resourceAllocationQueryDto.getStartTime(),resourceAllocationQueryDto.getEndTime());
         JSONResult<PageBean<ResourceAllocationDto>> resourceAllocationPage = statisticsFeignClient.getResourceAllocationPage(resourceAllocationQueryDto);
         return resourceAllocationPage;
     }
@@ -236,9 +236,9 @@ public class TeleStatementController {
     @ResponseBody
     public JSONResult<PageBean<ResourceAllocationDto>> getResourceAllocationPersionTable(
             @RequestBody ResourceAllocationQueryDto resourceAllocationQueryDto,HttpServletRequest request) {
-        logger.info("getResourceAllocationPersionTable onefirst orgName:{},startTime:{},endTime:{},userId:{},new_resource:{},orgIdList {}",
-                resourceAllocationQueryDto.getOrg_Id(),resourceAllocationQueryDto.getStartTime(),resourceAllocationQueryDto.getEndTime(),
-                resourceAllocationQueryDto.getUser_Id(),resourceAllocationQueryDto.getNew_resource(),resourceAllocationQueryDto.getOrgIdList().toArray());
+//        logger.info("getResourceAllocationPersionTable onefirst orgName:{},startTime:{},endTime:{},userId:{},new_resource:{},orgIdList {}",
+//                resourceAllocationQueryDto.getOrg_Id(),resourceAllocationQueryDto.getStartTime(),resourceAllocationQueryDto.getEndTime(),
+//                resourceAllocationQueryDto.getUser_Id(),resourceAllocationQueryDto.getNew_resource(),resourceAllocationQueryDto.getOrgIdList().toArray());
         UserInfoDTO user = getUser();
         // 查询所有电销组
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
@@ -425,7 +425,28 @@ public class TeleStatementController {
         UserInfoDTO user = getUser();
         // 查询所有电销组
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
-        request.setAttribute("saleGroupList",getOrgGroupByOrgId(curLoginUser.getOrgId(),OrgTypeConstant.DXZ));
+        List<RoleInfoDTO> roleList = curLoginUser.getRoleList();
+        RoleInfoDTO roleInfoDTO = roleList.get(0);
+        String roleCode = roleInfoDTO.getRoleCode();
+        String curOrgId = "";
+        List<OrganizationRespDTO>  teleGroupList = new ArrayList<>();
+        if(RoleCodeEnum.DXZJ.name().equals(roleCode)) {
+            curOrgId =  String.valueOf(curLoginUser.getOrgId());
+            //电销总监查他自己的组
+            OrganizationDTO curOrgGroupByOrgId = getCurOrgGroupByOrgId(curOrgId);
+            if(curOrgGroupByOrgId!=null) {
+                OrganizationRespDTO organizationRespDTO = new OrganizationRespDTO();
+                organizationRespDTO.setId(curOrgGroupByOrgId.getId());
+                organizationRespDTO.setName(curOrgGroupByOrgId.getName());
+                teleGroupList.add(organizationRespDTO);
+            }
+        }else {
+            teleGroupList =  getOrgGroupByOrgId(curLoginUser.getOrgId(),OrgTypeConstant.DXZ);
+        }
+        OrganizationQueryDTO organizationQueryDTO  = new OrganizationQueryDTO();
+        organizationQueryDTO.setParentId(curLoginUser.getOrgId());
+        request.setAttribute("curOrgId",curOrgId);
+        request.setAttribute("saleGroupList",teleGroupList);
         // 根据角色查询页面字段
         QueryFieldByRoleAndMenuReq queryFieldByRoleAndMenuReq = new QueryFieldByRoleAndMenuReq();
         queryFieldByRoleAndMenuReq.setMenuCode("statistics:teleStatement:resourceAllocation");
@@ -444,12 +465,39 @@ public class TeleStatementController {
     * @return
      */
     @RequestMapping("/resourceAllocationTablePerson")
-    public String resourceAllocationTablePerson(ResourceAllocationQueryDto resourceAllocationQueryDto,HttpServletRequest request) {
+    public String resourceAllocationTablePerson(Long user_id,Long org_Id,Long startTime,Long endTime,Integer new_resource,HttpServletRequest request) {
+        ResourceAllocationQueryDto resourceAllocationQueryDto = new ResourceAllocationQueryDto();
+        resourceAllocationQueryDto.setUser_Id(user_id);
+        resourceAllocationQueryDto.setOrg_Id(org_Id);
+        resourceAllocationQueryDto.setStartTime(startTime);
+        resourceAllocationQueryDto.setEndTime(endTime);
+        resourceAllocationQueryDto.setNew_resource(new_resource);
+        request.setAttribute("resourceAllocationQueryDto",resourceAllocationQueryDto);
         UserInfoDTO user = getUser();
         // 查询所有电销组
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
-        request.setAttribute("saleGroupList",getOrgGroupByOrgId(curLoginUser.getOrgId(),OrgTypeConstant.DXZ));
-        request.setAttribute("resourceAllocationQueryDto",resourceAllocationQueryDto);
+        List<RoleInfoDTO> roleList = curLoginUser.getRoleList();
+        RoleInfoDTO roleInfoDTO = roleList.get(0);
+        String roleCode = roleInfoDTO.getRoleCode();
+        String curOrgId = "";
+        List<OrganizationRespDTO>  teleGroupList = new ArrayList<>();
+        if(RoleCodeEnum.DXZJ.name().equals(roleCode)) {
+            curOrgId =  String.valueOf(curLoginUser.getOrgId());
+            //电销总监查他自己的组
+            OrganizationDTO curOrgGroupByOrgId = getCurOrgGroupByOrgId(curOrgId);
+            if(curOrgGroupByOrgId!=null) {
+                OrganizationRespDTO organizationRespDTO = new OrganizationRespDTO();
+                organizationRespDTO.setId(curOrgGroupByOrgId.getId());
+                organizationRespDTO.setName(curOrgGroupByOrgId.getName());
+                teleGroupList.add(organizationRespDTO);
+            }
+        }else {
+            teleGroupList =  getOrgGroupByOrgId(curLoginUser.getOrgId(),OrgTypeConstant.DXZ);
+        }
+        OrganizationQueryDTO organizationQueryDTO  = new OrganizationQueryDTO();
+        organizationQueryDTO.setParentId(curLoginUser.getOrgId());
+        request.setAttribute("curOrgId",curOrgId);
+        request.setAttribute("saleGroupList",teleGroupList);
         // 根据角色查询页面字段
         QueryFieldByRoleAndMenuReq queryFieldByRoleAndMenuReq = new QueryFieldByRoleAndMenuReq();
         queryFieldByRoleAndMenuReq.setMenuCode("statistics:teleStatement:resourceAllocation");
