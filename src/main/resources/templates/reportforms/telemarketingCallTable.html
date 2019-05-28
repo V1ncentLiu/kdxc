@@ -88,9 +88,7 @@
 </body>
 <script th:inline="javascript">
     var queryOrg=[[${teleGroupList}]]; // 电销组
-    // console.log(queryOrg,'电销组'); 
     var curOrgId = [[${curOrgId}]];
-    // console.log(curOrgId);
     var mainDivVM = new Vue({
         el: '#maindiv',
         data: function() {
@@ -100,7 +98,7 @@
                 pager:{ 
                     total: 0,
                     currentPage: 1,
-                    pageSize: 2
+                    pageSize: 20
                 },
                 form: {
                     startTime: '',
@@ -156,7 +154,6 @@
             searchTable() { 
                 var startTime = this.form.startTime;
                 var endTime = this.form.endTime;
-                // console.log(startTime,endTime);
                 if(endTime && startTime){
                     startTime = new Date(this.form.startTime);
                     endTime = new Date(this.form.endTime);
@@ -180,21 +177,25 @@
                         });
                         return;
                     }
+                    startTime = this.limitTime(startTime, null);
+                    endTime = this.limitTime(null, endTime);
                 }else{
                     this.$message({
                         message: '请选择起止时间',
                         type: 'warning'
                     });
                     return;
-                }
-                console.log('search');   
+                }   
                 
                 var param = {};
-                var s = this.minuteFormat(startTime);
-                var e = this.minuteFormat(endTime);
-                
-                param.startTime = this.limitTime (s, null);
-                param.endTime = this.limitTime (null, e);
+                // var s = this.minuteFormat(startTime);
+                // var e = this.minuteFormat(endTime);
+                // startTime = this.limitTime (startTime, null);
+                // endTime = this.limitTime (null, endTime);
+                // param.startTime = this.limitTime (startTime, null);
+                // param.endTime = this.limitTime (null, endTime);
+                param.startTime = this.minuteFormat(startTime);
+                param.endTime = this.minuteFormat(endTime);
                 param.pageSize = this.pager.pageSize;
                 param.pageNum = this.pager.currentPage;
                 param.orgId = this.form.orgId; 
@@ -257,23 +258,27 @@
                     });
                 });
             },
-            limitTime (startTime, endTime) {
+            limitTime (start, end) {
+                var startTime = this.minuteFormat (start);
+                var endTime = this.minuteFormat (end);
                 var date = new Date();
                 data = this.minuteFormat (date);// 现在的时间
                 data = data.slice(0,8);
                 if(startTime){
                     var s = startTime.slice(0,8);
                     if(s < data){
-                        return s + "0000";
+                        this.form.startTime = moment(start).format("YYYY-MM-DD 00:00");
+                        return this.form.startTime;
                     }
-                    return startTime;
+                    return start;
                 }
                 if(endTime){
                     var e = endTime.slice(0,8);
                     if(e < data){
-                        return e + "2359";
+                        this.form.endTime = moment(end).format("YYYY-MM-DD 23:59");
+                        return this.form.endTime;                        
                     }
-                    return endTime;
+                    return end;
                 }
             },
             arraySpanMethod({ row, column, rowIndex, columnIndex }) { // 合并第一行
@@ -300,7 +305,7 @@
                     window.location.href="/statistics/teleStatement/telemarketingCallTableTeam?orgId=" + orgId + "&startTime=" + startTime + "&endTime=" + endTime; 
                 }
             },
-            minuteFormat (m) {
+            minuteFormat (m) { // 时间格式化201905050505fn
                 if (!m) {return "";}
                 var timeStr = new Date(m);
                 var yearRes = timeStr.getFullYear();
@@ -315,15 +320,15 @@
                 var timeRes = "" + yearRes + monthRea + dateRes + hoursRes + minRes;
                 return timeRes;
             },
-            percentFormat (row, column) {
+            percentFormat (row, column) { // 百分比格式化fn
                 var percent = row[column.property];
                 if(!percent){ // 如果没有值或值为0
                     return 0 + "%";
                 }
-                percent = percent * 100 + "%";
+                percent = (percent * 1000)/10 + "%";
                 return percent;
             },
-            timeFormat (row, column) { // 时间格式化：时分秒
+            timeFormat (row, column) { // 时间格式化：时分秒fn
                 var time = row[column.property];
                 if(!time){return "00时00分00秒";}
                 var timeResult = this.timeFun (time); 
@@ -380,10 +385,12 @@
             },
             exportRs(){
                 var param = {};
-                var startTime = this.export.startTime;
-                var endTime = this.export.endTime;
-                param.startTime = this.limitTime (startTime, null);
-                param.endTime = this.limitTime (null, endTime);
+                param.startTime = this.export.startTime;
+                param.endTime = this.export.endTime;
+                // var startTime = this.export.startTime;
+                // var endTime = this.export.endTime;
+                // param.startTime = this.limitTime (startTime, null);
+                // param.endTime = this.limitTime (null, endTime);
                 param.orgId =  this.export.orgId; 
                 console.log(param);
                 axios.post('/callrecord/teleSaleTalkTime/exportTeleGroupTalkTime',param,{responseType:'blob'})

@@ -64,10 +64,10 @@ import com.kuaidao.sys.dto.user.UserOrgRoleReq;
 @Controller
 public class SignRecordController {
 
-  private static Logger logger = LoggerFactory.getLogger(SignRecordController.class);
+    private static Logger logger = LoggerFactory.getLogger(SignRecordController.class);
 
-  @Autowired
-  SignRecordFeignClient signRecordFeignClient;
+    @Autowired
+    SignRecordFeignClient signRecordFeignClient;
 
   @Autowired
   OrganizationFeignClient organizationFeignClient;
@@ -379,15 +379,15 @@ public class SignRecordController {
   }
 
 
-  /**
-   * 查询所有的签约项目
-   */
-  @RequestMapping("/queryProjectList")
-  @ResponseBody
-  public JSONResult<List<ProjectInfoDTO>> queryProjectList() {
-    // 签约项目
-    return projectInfoFeignClient.allProject();
-  }
+    /**
+     * 查询所有的签约项目
+     */
+    @RequestMapping("/queryProjectList")
+    @ResponseBody
+    public JSONResult<List<ProjectInfoDTO>> queryProjectList() {
+        // 签约项目
+        return projectInfoFeignClient.allProject();
+    }
 
 
   /**
@@ -427,4 +427,7 @@ public class SignRecordController {
     JSONResult<RefundRebateDTO> refundRebateDTOs = refundFeignClient.getRefundInfo(map);
     return refundRebateDTOs;
   }
+
+
+
 }

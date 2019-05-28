@@ -102,6 +102,13 @@ public interface ClueBasicFeignClient {
     public JSONResult<PageBean<PendingAllocationClueDTO>> listUnAssignClue(
             PendingAllocationCluePageParam pageParam);
 
+    /**
+     * 根据资源id查询是否有邀请函
+     * @return
+     */
+    @PostMapping("/getIsInviteLetterById")
+    public JSONResult<Integer> getIsInviteLetterById(@RequestBody Long clueId);
+
     @Component
     static class HystrixClientFallback implements ClueBasicFeignClient {
 
@@ -159,6 +166,11 @@ public interface ClueBasicFeignClient {
         public JSONResult<PageBean<PendingAllocationClueDTO>> listUnAssignClue(
                 PendingAllocationCluePageParam pageParam) {
             return fallBackError("查询待分配资源");
+        }
+
+        @Override
+        public JSONResult<Integer> getIsInviteLetterById(Long clueId) {
+            return fallBackError("查询是否有邀请函");
         }
 
 

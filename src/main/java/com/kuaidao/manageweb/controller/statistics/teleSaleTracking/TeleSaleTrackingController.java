@@ -111,7 +111,11 @@ public class TeleSaleTrackingController {
      */
     @RequestMapping("/getRecordByGroupPageOneCount")
     @ResponseBody
-    public JSONResult<List<TeleSaleTrackingDto>> getRecordByGroupPageOneCount(TeleSaleTrackingQueryDto trackingQueryDto){
+    public JSONResult<List<TeleSaleTrackingDto>> getRecordByGroupPageOneCount(@RequestBody TeleSaleTrackingQueryDto trackingQueryDto){
+        Long orgId = trackingQueryDto.getOrgId();
+        if(null == orgId){
+            buildOrgIdList(trackingQueryDto, orgId);
+        }
         List countList = getCountTotal(trackingQueryDto);
         return new JSONResult<List<TeleSaleTrackingDto>>().success(countList);
     }
@@ -155,7 +159,9 @@ public class TeleSaleTrackingController {
             dataList.add(curList);
         }
         XSSFWorkbook wbWorkbook = ExcelUtil.creat2007Excel(dataList);
-        String name = "电销跟踪记录" + DateUtil.convert2String(new Date(), DateUtil.ymdhms2) + ".xlsx";
+        Long startTime = trackingQueryDto.getStartTime();
+        Long endTime = trackingQueryDto.getEndTime();
+        String name = "电销跟踪记录" +startTime+"-"+endTime + ".xlsx";
         response.addHeader("Content-Disposition",
                 "attachment;filename=" + new String(name.getBytes("UTF-8"), "ISO8859-1"));
         response.addHeader("fileName", URLEncoder.encode(name, "utf-8"));
@@ -196,7 +202,9 @@ public class TeleSaleTrackingController {
             dataList.add(curList);
         }
         XSSFWorkbook wbWorkbook = ExcelUtil.creat2007Excel(dataList);
-        String name = "电销跟踪记录" + DateUtil.convert2String(new Date(), DateUtil.ymdhms2) + ".xlsx";
+        Long startTime = trackingQueryDto.getStartTime();
+        Long endTime = trackingQueryDto.getEndTime();
+        String name = "电销跟踪记录" +startTime+"-"+endTime + ".xlsx";
         response.addHeader("Content-Disposition",
                 "attachment;filename=" + new String(name.getBytes("UTF-8"), "ISO8859-1"));
         response.addHeader("fileName", URLEncoder.encode(name, "utf-8"));
@@ -226,7 +234,14 @@ public class TeleSaleTrackingController {
             TeleSaleTrackingDto ra = orderList.get(i);
             List<Object> curList = new ArrayList<>();
             curList.add(i + 1);
-            curList.add(ra.getDateId());
+            String str = null;
+            if(ra.getDateId() != null){
+                StringBuilder sb = new StringBuilder(ra.getDateId().toString());
+                sb.insert(6,"-");
+                sb.insert(4,"-");
+                str = sb.toString();
+            }
+            curList.add(str);
             curList.add(ra.getOrgName());
             curList.add(ra.getUserName());
             curList.add(ra.getCusLevel());
@@ -237,7 +252,9 @@ public class TeleSaleTrackingController {
             dataList.add(curList);
         }
         XSSFWorkbook wbWorkbook = ExcelUtil.creat2007Excel(dataList);
-        String name = "电销跟踪记录" + DateUtil.convert2String(new Date(), DateUtil.ymdhms2) + ".xlsx";
+        Long startTime = trackingQueryDto.getStartTime();
+        Long endTime = trackingQueryDto.getEndTime();
+        String name = "电销跟踪记录" +startTime+"-"+endTime + ".xlsx";
         response.addHeader("Content-Disposition",
                 "attachment;filename=" + new String(name.getBytes("UTF-8"), "ISO8859-1"));
         response.addHeader("fileName", URLEncoder.encode(name, "utf-8"));
@@ -289,7 +306,12 @@ public class TeleSaleTrackingController {
      * @return
      */
     @RequestMapping("/telemarketingFollowTableSum")
-    public String telemarketingFollowTableSum(TeleSaleTrackingQueryDto trackingQueryDto,HttpServletRequest request) {
+    public String telemarketingFollowTableSum(Long orgId,Long startTime,Long endTime,String strCusLevelList,HttpServletRequest request) {
+        TeleSaleTrackingQueryDto trackingQueryDto = new TeleSaleTrackingQueryDto();
+        trackingQueryDto.setOrgId(orgId);
+        trackingQueryDto.setStartTime(startTime);
+        trackingQueryDto.setEndTime(endTime);
+        trackingQueryDto.setStrCusLevelList(strCusLevelList);
         request.setAttribute("trackingQueryDto",trackingQueryDto);
         // 查询所有电销组
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
@@ -326,7 +348,12 @@ public class TeleSaleTrackingController {
      * @return
      */
     @RequestMapping("/telemarketingFollowTableTeam")
-    public String telemarketingFollowTableTeam(TeleSaleTrackingQueryDto trackingQueryDto,HttpServletRequest request) {
+    public String telemarketingFollowTableTeam(Long orgId,Long startTime,Long endTime,String strCusLevelList,HttpServletRequest request) {
+        TeleSaleTrackingQueryDto trackingQueryDto = new TeleSaleTrackingQueryDto();
+        trackingQueryDto.setOrgId(orgId);
+        trackingQueryDto.setStartTime(startTime);
+        trackingQueryDto.setEndTime(endTime);
+        trackingQueryDto.setStrCusLevelList(strCusLevelList);
         request.setAttribute("trackingQueryDto",trackingQueryDto);
         // 查询所有电销组
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
@@ -362,7 +389,14 @@ public class TeleSaleTrackingController {
      * @return
      */
     @RequestMapping("/telemarketingFollowTablePerson")
-    public String telemarketingFollowTablePerson(HttpServletRequest request) {
+    public String telemarketingFollowTablePerson(Long userId,Long orgId,Long startTime,Long endTime,String strCusLevelList,HttpServletRequest request) {
+        TeleSaleTrackingQueryDto trackingQueryDto = new TeleSaleTrackingQueryDto();
+        trackingQueryDto.setOrgId(orgId);
+        trackingQueryDto.setStartTime(startTime);
+        trackingQueryDto.setEndTime(endTime);
+        trackingQueryDto.setStrCusLevelList(strCusLevelList);
+        trackingQueryDto.setUserId(userId);
+        request.setAttribute("trackingQueryDto",trackingQueryDto);
         // 查询所有电销组
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
         List<RoleInfoDTO> roleList = curLoginUser.getRoleList();

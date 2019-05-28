@@ -6,6 +6,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
+
+import com.kuaidao.manageweb.feign.clue.ClueBasicFeignClient;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.apache.shiro.subject.Subject;
@@ -105,6 +107,10 @@ public class MyCustomerClueController {
 
     @Autowired
     private CustomFieldFeignClient customFieldFeignClient;
+
+    @Autowired
+    private ClueBasicFeignClient clueBasicFeignClient;
+
     @Value("${oss.url.directUpload}")
     private String ossUrl;
 
@@ -689,6 +695,10 @@ public class MyCustomerClueController {
         request.setAttribute("clueId", clueId);
         request.setAttribute("cusName", cusName);
         request.setAttribute("cusPhone", cusPhone);
+        JSONResult<Integer> result = clueBasicFeignClient.getIsInviteLetterById(Long.valueOf(clueId));
+        if (result.getCode().equals(JSONResult.SUCCESS)) {
+            request.setAttribute("isInviteLetter", result.getData());
+        }
         // 项目
         JSONResult<List<ProjectInfoDTO>> proJson = projectInfoFeignClient.allProject();
         if (proJson.getCode().equals(JSONResult.SUCCESS)) {

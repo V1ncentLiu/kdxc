@@ -71,7 +71,7 @@
                     <span>赠送金额：</span><span>{{signOrderBaseInfo[0].giveAmount}}</span>
                 </el-col>
                 <el-col>
-                    <span>赠送类型：</span><span>{{signOrderBaseInfo[0].giveType}}</span>
+                    <span>赠送类型：</span><span>{{this.transGiveType(signOrderBaseInfo[0].giveType)}}</span>
                 </el-col>              
                 <el-col>
                     <span>签约类型：</span>
@@ -780,6 +780,8 @@
     //退款信息数据
     var refundData = [[${refundData}]];
     var refundStatus = [[${refundStatus}]];
+    var customerName = [[${customerName}]];
+
 
     var one ;
     var two ;
@@ -875,6 +877,9 @@
             detailRules:{
                 payType: [
                     { required: true, message: '请选择付款类型', trigger: 'change' }
+                ],
+                payName: [
+                    {required: true, message: '付款人姓名', trigger: 'blur'}
                 ],
                 payMode: [
                     { required: true, message: '请选择付款方式', trigger: 'change' }
@@ -1162,7 +1167,8 @@
                 payTime: new Date(),
                 amountPerformance:'',
                 performanceAmount:'',
-                remarks:""
+                remarks:"",
+                payName:customerName
             },
 
             formSigning: {
@@ -1252,16 +1258,14 @@
                 }
                 return value;
             },
-        	transGiveType(row, column, cellValue, index) {
+        	transGiveType(value) {
         		
             	  var text="";
             	  for(var i=0;i<giveTypeList.length;i++) {
-            		 if(giveTypeList[i].value ==cellValue){
+            		 if(giveTypeList[i].value ==value){
             			 text = giveTypeList[i].name;
             		 }
             	  }
-            	  
-                 
                   return text;
               },
             formMoneyDetailAmountPerformance() {
@@ -1334,7 +1338,6 @@
                     mainDivVM.currentProvince(mainDivVM.formSigning.signProvince)
                     mainDivVM.currentCity(mainDivVM.formSigning.signCity)
                     mainDivVM.formSigning.payName = response.data.data.customerName;
-
                 });
 
             },

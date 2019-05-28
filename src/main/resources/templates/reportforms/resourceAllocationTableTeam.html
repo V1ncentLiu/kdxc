@@ -190,21 +190,9 @@
                 // 搜索条件
                 param.startTime = this.minuteFormat(startTime);
                 param.endTime = this.minuteFormat(endTime);
-                if(this.form.org_Id){
-                    param.org_Id = this.form.org_Id;//电销组
-                }else{
-                    param.org_Id = null;//电销组
-                }
-                if(this.form.user_id){
-                    param.user_id = this.form.user_id;//电销顾问
-                }else{
-                    param.user_id = null;//电销顾问
-                }
-                if(this.form.new_resource){
-                    param.new_resource = this.form.new_resource;//分配来源
-                }else{
-                    param.new_resource = null;//分配来源
-                }
+                param.org_Id = this.form.org_Id;//电销组
+                param.user_id = this.form.user_id;//电销顾问
+                param.new_resource = this.form.new_resource;//分配来源
                               
                 console.log(param)
                 this.loading=true;
@@ -248,21 +236,9 @@
                     // 给导出参数赋值
                     mainDivVM.export.startTime = mainDivVM.minuteFormat(startTime);
                     mainDivVM.export.endTime = mainDivVM.minuteFormat(endTime);
-                    if(mainDivVM.form.org_Id){
-                        mainDivVM.export.org_Id = mainDivVM.form.org_Id; 
-                    }else{
-                        mainDivVM.export.org_Id = null; 
-                    }
-                    if(mainDivVM.form.user_id){
-                        mainDivVM.export.user_id = mainDivVM.form.user_id; 
-                    }else{
-                        mainDivVM.export.user_id = null; 
-                    }
-                    if(mainDivVM.form.new_resource){
-                        mainDivVM.export.new_resource = mainDivVM.form.new_resource;
-                    }else{
-                        mainDivVM.export.new_resource = null;
-                    }
+                    mainDivVM.export.org_Id = mainDivVM.form.org_Id;
+                    mainDivVM.export.user_id = mainDivVM.form.user_id;
+                    mainDivVM.export.new_resource = mainDivVM.form.new_resource;
                     
                 })                
             },
@@ -273,17 +249,10 @@
                 // 搜索条件
                 var startTime=this.export.startTime;
                 var endTime=this.export.endTime;
-                var org_Id=null;
-                var new_resource=null;
-                if(this.export.org_Id){
-                    org_Id=this.export.org_Id;
-                }else{
-                    org_Id=null
-                }
-                if(this.export.new_resource){
-                    new_resource=this.export.new_resource;
-                }else{
-                    new_resource=null
+                var org_Id=this.export.org_Id;
+                var new_resource=this.export.new_resource;
+                if(new_resource == null){
+                    new_resource = "";
                 }
                 if(userId){
                     // 点击个人跳转到此人的资源分配信息
@@ -383,10 +352,12 @@
             this.form.org_Id=resourceQueryDto.org_Id;
             this.form.new_resource=resourceQueryDto.new_resource;
 
-            this.export.startTime=trackingQuery.startTime;
-            this.export.endTime=trackingQuery.endTime;
+            this.export.startTime=resourceQueryDto.startTime;
+            this.export.endTime=resourceQueryDto.endTime;
             this.export.org_Id=resourceQueryDto.org_Id;
             this.export.new_resource=resourceQueryDto.new_resource;
+
+            this.currentTelSale(this.export.org_Id);
             
             this.searchTable();
         },
