@@ -192,7 +192,9 @@ public class TeleStatementController {
             dataList.add(curList);
         }
         XSSFWorkbook wbWorkbook = ExcelUtil.creat2007Excel(dataList);
-        String name = "分配记录表" + DateUtil.convert2String(new Date(), DateUtil.ymdhms2) + ".xlsx";
+        Long startTime = resourceAllocationQueryDto.getStartTime();
+        Long endTime = resourceAllocationQueryDto.getEndTime();
+        String name = "分配记录表" +startTime+"-"+endTime + ".xlsx";
         response.addHeader("Content-Disposition",
                 "attachment;filename=" + new String(name.getBytes("UTF-8"), "ISO8859-1"));
         response.addHeader("fileName", URLEncoder.encode(name, "utf-8"));
@@ -311,7 +313,9 @@ public class TeleStatementController {
             dataList.add(curList);
         }
         XSSFWorkbook wbWorkbook = ExcelUtil.creat2007Excel(dataList);
-        String name = "分配记录表" + DateUtil.convert2String(new Date(), DateUtil.ymdhms2) + ".xlsx";
+        Long startTime = resourceAllocationQueryDto.getStartTime();
+        Long endTime = resourceAllocationQueryDto.getEndTime();
+        String name = "分配记录表" +startTime+"-"+endTime + ".xlsx";
         response.addHeader("Content-Disposition",
                 "attachment;filename=" + new String(name.getBytes("UTF-8"), "ISO8859-1"));
         response.addHeader("fileName", URLEncoder.encode(name, "utf-8"));
@@ -351,7 +355,9 @@ public class TeleStatementController {
             dataList.add(curList);
         }
         XSSFWorkbook wbWorkbook = ExcelUtil.creat2007Excel(dataList);
-        String name = "分配记录表" + DateUtil.convert2String(new Date(), DateUtil.ymdhms2) + ".xlsx";
+        Long startTime = resourceAllocationQueryDto.getStartTime();
+        Long endTime = resourceAllocationQueryDto.getEndTime();
+        String name = "分配记录表" +startTime+"-"+endTime + ".xlsx";
         response.addHeader("Content-Disposition",
                 "attachment;filename=" + new String(name.getBytes("UTF-8"), "ISO8859-1"));
         response.addHeader("fileName", URLEncoder.encode(name, "utf-8"));
