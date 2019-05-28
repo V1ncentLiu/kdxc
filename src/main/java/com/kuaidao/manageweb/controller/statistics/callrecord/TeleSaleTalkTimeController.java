@@ -152,7 +152,7 @@ public class TeleSaleTalkTimeController {
            curList.add(i + 1);
            curList.add(teleTalkTimeRespDTO.getOrgName());
            curList.add(teleTalkTimeRespDTO.getCallCount());
-           curList.add(teleTalkTimeRespDTO.getCalledClueCount());
+           curList.add(teleTalkTimeRespDTO.getCalledCount());
            curList.add(formatPercent(teleTalkTimeRespDTO.getCallPercent()));
            curList.add(teleTalkTimeRespDTO.getCallClueCount());
            curList.add(teleTalkTimeRespDTO.getCalledClueCount());
