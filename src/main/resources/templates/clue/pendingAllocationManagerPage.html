@@ -138,7 +138,7 @@
                 </el-form-item>
             </el-form>
             <div slot="footer" class="dialog-footer">
-                <el-button type="primary" @click="allocationClue('allocationForm')">提 交</el-button>
+                <el-button type="primary" :disabled="isDisabled" @click="allocationClue('allocationForm')">提 交</el-button>
                 <el-button  @click="allocationVisible = false">取 消</el-button>
             </div>
         </template>
@@ -341,6 +341,7 @@ var phCustomerStatusSubList=[[${phCustomerStatusSubList}]];//话务二级客户�
 var clueVM = new Vue({
         el: '#clueManage',
         data: {
+        	isDisabled:false,//默认不可点击  
             isShow:false,
     		clueSearchForm: {
         		phone: '',
@@ -636,6 +637,7 @@ var clueVM = new Vue({
                allocationClue(formName){//分配资源
             	   this.$refs[formName].validate((valid) => {
            	          if (valid) {
+           	        	  this.isDisabled = true;
            	        	 var rows = this.multipleSelection;
                          var rowIds = [];
                          for(var i=0;i<rows.length;i++){
@@ -655,6 +657,7 @@ var clueVM = new Vue({
                               		clueVM.searchTable();
                           	    }});
                               }else{
+                            	  clueVM.isDisabled = true;
                               	clueVM.$message({
                                       message: "接口调用失败",
                                       type: 'error'
