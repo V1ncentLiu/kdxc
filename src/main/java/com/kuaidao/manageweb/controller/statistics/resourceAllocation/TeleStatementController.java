@@ -341,7 +341,14 @@ public class TeleStatementController {
             ResourceAllocationDto ra = orderList.get(i);
             List<Object> curList = new ArrayList<>();
             curList.add(i + 1);
-            curList.add(ra.getDay());
+            String str = null;
+            if(ra.getDateId() != null){
+                StringBuilder sb = new StringBuilder(ra.getDateId().toString());
+                sb.insert(6,"-");
+                sb.insert(4,"-");
+                str = sb.toString();
+            }
+            curList.add(str);
             curList.add(ra.getUserName());
             curList.add(ra.getAssignClueCount());
             curList.add(ra.getJointExhibition());
