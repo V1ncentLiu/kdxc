@@ -6,55 +6,55 @@
     </style>
 </head>
 <body>
-<div id="maindiv" class="maindiv mainPadding" style="display: none;">    
+<div id="maindiv" class="maindiv mainPadding" style="display: none;">
     <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
         <el-breadcrumb-item>Home</el-breadcrumb-item>
         <el-breadcrumb-item>数据报表</el-breadcrumb-item>
         <el-breadcrumb-item>电销顾问跟踪表</el-breadcrumb-item>
-    </el-breadcrumb>    
+    </el-breadcrumb>
     <el-row class="marginB20">
         <el-button type="primary" @click="searchYesterday">昨天</el-button>
         <el-button type="success" @click="searchWeek">近七天</el-button>
-        <el-button type="warning" @click="searchMonth">本月</el-button>  
+        <el-button type="warning" @click="searchMonth">本月</el-button>
         <el-button type="danger" @click="exportRs">导出Excel报表</el-button>
-        <el-button type="primary" style="float: right;" @click="goback()">返回</el-button>    
+        <el-button type="primary" style="float: right;" @click="goback()">返回</el-button>
     </el-row>
-    <div class="mainSearchBg">        
+    <div class="mainSearchBg">
         <div class="mainSearchFormBox">
-           <el-form :inline="true" :model="form" class="demo-form-inline mainSearchForm" ref="form">                 
+            <el-form :inline="true" :model="form" class="demo-form-inline mainSearchForm" ref="form">
                 <el-form-item label="起止时间:">
                     <el-date-picker format="yyyy-MM-dd HH:mm" v-model="form.startTime" type="datetime" placeholder="选择日期"></el-date-picker>
                 </el-form-item>
                 <el-form-item label="—" class="widthauto">
-                   <el-date-picker format="yyyy-MM-dd HH:mm" v-model="form.endTime" type="datetime" placeholder="选择日期"></el-date-picker>
+                    <el-date-picker format="yyyy-MM-dd HH:mm" v-model="form.endTime" type="datetime" placeholder="选择日期"></el-date-picker>
                 </el-form-item>
-                <el-form-item label="电销组:">  
+                <el-form-item label="电销组:">
                     <el-select v-model="form.orgId" placeholder="电销组" style="width: 100%;" clearable filterable @change="currentTelSale" disabled>
                         <el-option
-                            v-for="item in orgTeleArr"
-                            :key="item.id"
-                            :label="item.name"
-                            :value="item.id">
+                                v-for="item in orgTeleArr"
+                                :key="item.id"
+                                :label="item.name"
+                                :value="item.id">
                         </el-option>
                     </el-select>
                 </el-form-item>
-                <el-form-item label="电销顾问:">  
+                <el-form-item label="电销顾问:">
                     <el-select v-model="form.userId" placeholder="电销顾问" style="width: 100%;" filterable clearable>
                         <el-option
-                            v-for="item in busSaleArr"
-                            :key="item.id"
-                            :label="item.name"
-                            :value="item.id">
+                                v-for="item in busSaleArr"
+                                :key="item.id"
+                                :label="item.name"
+                                :value="item.id">
                         </el-option>
                     </el-select>
                 </el-form-item>
-                <el-form-item label="客户级别:">  
+                <el-form-item label="客户级别:">
                     <el-select v-model="form.cusLevelList" placeholder="客户级别" style="width: 100%;" clearable filterable multiple>
                         <el-option
-                            v-for="item in clientRank"
-                            :key="item.id"
-                            :label="item.name"
-                            :value="item.id">
+                                v-for="item in clientRank"
+                                :key="item.id"
+                                :label="item.name"
+                                :value="item.id">
                         </el-option>
                     </el-select>
                 </el-form-item>
@@ -62,22 +62,26 @@
                     <el-button icon="el-icon-search" type="primary" @click="searchTable()" class="searchBtn">搜索</el-button>
                     <!-- <el-button type="info" class="searchBtn">取消</el-button> -->
                     <!-- <span style="color: #5c6be8;cursor: pointer;margin:0 10px;" @click="toogleClick"><span v-if="isShow">收起</span><span v-else>展开更多</span><i :class="{'greycolor paddingL6 el-icon-arrow-up':isShow,'greycolor paddingL6 el-icon-arrow-down':!isShow}"></i></span> -->
-                </div>  
+                </div>
             </el-form>
         </div>
         <el-row>
-            <el-table 
-                ref="tableData"
-                tooltip-effect="dark"
-                style="width: 100%"
-                border
-                :data="tableData"
-                v-loading="loading"
-                :cell-style="centerStyle"
-                :header-cell-style="centerStyle">
+            <el-table
+                    ref="tableData"
+                    tooltip-effect="dark"
+                    style="width: 100%"
+                    border
+                    :data="tableData"
+                    v-loading="loading"
+                    :cell-style="centerStyle"
+                    :header-cell-style="centerStyle">
                 <el-table-column type="index" label="序号" align="center" width="55"></el-table-column>
                 <el-table-column prop="dateId" label="日期" :formatter="dateFormat"></el-table-column>
-                <el-table-column prop="userId" label="顾问"></el-table-column>
+                <el-table-column prop="userName" label="顾问">
+                    <template slot-scope="scope">
+                        <el-button @click="gotoPerson(scope.row)" type="text">{{scope.row.userName}}</el-button>
+                    </template>
+                </el-table-column>
                 <el-table-column prop="cusLevel" label="客户级别"></el-table-column>
                 <el-table-column prop="countResource" label="资源数"></el-table-column>
                 <el-table-column prop="countClueId" label="回访次数"></el-table-column>
@@ -94,7 +98,7 @@
 <script th:inline="javascript">
     var orgIdList=[[${saleGroupList}]];//电销组
     var clientRankIdList=[[${cusLevelListArray}]];//客户级别
-    var trackingQuery=[[${trackingQueryDto}]];//参数list    
+    var trackingQuery=[[${trackingQueryDto}]];//参数list
     var mainDivVM = new Vue({
         el: '#maindiv',
         data: function() {
@@ -123,12 +127,12 @@
                     currentPage: 1,
                     pageSize: 20,
                 },
-            }             
+            }
         },
-        methods: {    
+        methods: {
             centerStyle(){
                 return "text-align:center"
-            },  
+            },
             currentTelSale(seleVal){//根据电销组选择创业顾问
                 if(null==seleVal||seleVal==""){
                     return ;
@@ -136,11 +140,11 @@
                 param={};
                 param.orgId=seleVal;
                 param.roleCode="DXCYGW";
-                axios.post('/user/userManager/listByOrgAndRole' ,param).then(function (response) {  
+                axios.post('/user/userManager/listByOrgAndRole' ,param).then(function (response) {
                     mainDivVM.busSaleArr=response.data.data;
                 });
             },
-            searchTable() {                 
+            searchTable() {
                 var startTime=this.form.startTime;
                 var endTime=this.form.endTime;
                 if(endTime && startTime){
@@ -182,7 +186,7 @@
                 param.userId = this.form.userId;//电销顾问
                 param.cusLevelList = this.form.cusLevelList;//客户级别
                 this.loading=true;
-                axios.post('/statistics/teleStatement/getRecordByGroupLevelUserIdDate',param).then(function (response) { 
+                axios.post('/statistics/teleStatement/getRecordByGroupLevelUserIdDate',param).then(function (response) {
                     if(!response){
                         mainDivVM.$message({
                             message: "接口调用失败",
@@ -207,8 +211,8 @@
                         });
                         mainDivVM.loading=false;
                         return ;
-                    }  
-                    var resobjData=resobj.data.data;                    
+                    }
+                    var resobjData=resobj.data.data;
                     // 表格数据渲染
                     mainDivVM.tableData=resobjData;
                     // 分页
@@ -224,59 +228,78 @@
                     mainDivVM.export.cusLevelList = mainDivVM.form.cusLevelList;
                 })
             },
+            gotoPerson(item){
+                console.log(item)
+                var userId = item.userId;
+                var orgId=this.export.orgId;
+                // 搜索条件
+                var startTime=this.export.startTime;
+                var endTime=this.export.endTime;
+                var cusLevelList=this.export.cusLevelList;
+                var strCusLevelList="";
+                if(cusLevelList!=0){
+                    strCusLevelList=cusLevelList.join(",");
+                }else{
+                    strCusLevelList=""
+                }
+                if(userId){
+                    // 点击个人跳转到此人的资源分配信息
+                    window.location.href="/statistics/teleStatement/telemarketingFollowTablePerson?userId="+userId+"&orgId=" + orgId+"&startTime="+ startTime+"&endTime="+ endTime+"&strCusLevelList="+ strCusLevelList;
+                }
+            },
             goback () {
                 window.history.go(-1);
             },
-            dateFormat (row, column) { 
+            dateFormat (row, column) {
                 var date = row[column.property];
-                 if (!date) {return "";}
+                if (!date) {return "";}
                 var d = date.toString();
                 var oYear = d.slice(0,4);
                 var oMonth = d.slice(5,6);
                 oMonth = oMonth < 10 ? "0" + oMonth : oMonth;
                 var oDay = d.slice(7);
                 oDay = oDay < 10 ? "0" + oDay : oDay;
-                return oYear+"-"+oMonth+"-"+oDay;
-            }, 
+                return oYear+"-"+oMonth+"-"+oDay;
+            },
             minuteFormat (m) {
                 if (!m) {
-                   return "";
-                 }
-                return moment(m).format("YYYYMMDDHHmm");
+                    return "";
+                }
+                return moment(m).format("YYYYMMDDHHmm");
             },
-             dateTimeFormat (dt) { 
-                if (!dt) {return "";}
+            dateTimeFormat (dt) {
+                if (!dt) {return "";}
                 var d = dt.toString();
                 var oYear = d.slice(0,4);
                 var oMonth = d.slice(4,6);
                 var oDay = d.slice(6,8);
                 var oHour = d.slice(8,10);
                 var oMinute = d.slice(10);
-                return oYear+"-"+oMonth+"-"+oDay+" "+oHour+":"+oMinute;
-            },  
+                return oYear+"-"+oMonth+"-"+oDay+" "+oHour+":"+oMinute;
+            },
             searchYesterday(){//昨天
                 var today = new Date();
-               today.setTime(today.getTime()-24*60*60*1000);
-               var startTime = today.getFullYear()+"-" + (today.getMonth()+1) + "-" + today.getDate()+" 00:00";
-               var endTime =today.getFullYear()+"-" + (today.getMonth()+1) + "-" + today.getDate()+" 23:59";
-               this.form.startTime=startTime;
-               this.form.endTime=endTime;
-               this.searchTable();
+                today.setTime(today.getTime()-24*60*60*1000);
+                var startTime = today.getFullYear()+"-" + (today.getMonth()+1) + "-" + today.getDate()+" 00:00";
+                var endTime =today.getFullYear()+"-" + (today.getMonth()+1) + "-" + today.getDate()+" 23:59";
+                this.form.startTime=startTime;
+                this.form.endTime=endTime;
+                this.searchTable();
             },
             searchWeek(){//近七天
-                 var a = new Date();
-                 var year = a.getFullYear();
-                 var month = a.getMonth();
-                 var date = a.getDate();
-                 var b = new Date(year,month,date);
-                 var c = b.valueOf()-6*24*60*60*1000;
+                var a = new Date();
+                var year = a.getFullYear();
+                var month = a.getMonth();
+                var date = a.getDate();
+                var b = new Date(year,month,date);
+                var c = b.valueOf()-6*24*60*60*1000;
                 // var d = b.valueOf()+1*24*60*60*1000;
-                 var d = b.valueOf();
-                 var startTime= new Date(c);
-                 var endTime = new Date(d);
-                 this.form.startTime=startTime.getFullYear()+"-" + (startTime.getMonth()+1) + "-" + startTime.getDate()+" 00:00";
-                 this.form.endTime=endTime.getFullYear()+"-" + (endTime.getMonth()+1) + "-" + endTime.getDate()+" 23:59";
-                 this.searchTable();
+                var d = b.valueOf();
+                var startTime= new Date(c);
+                var endTime = new Date(d);
+                this.form.startTime=startTime.getFullYear()+"-" + (startTime.getMonth()+1) + "-" + startTime.getDate()+" 00:00";
+                this.form.endTime=endTime.getFullYear()+"-" + (endTime.getMonth()+1) + "-" + endTime.getDate()+" 23:59";
+                this.searchTable();
             },
             searchMonth(){//本月
                 var a = new Date();
@@ -286,9 +309,9 @@
                 var b = new Date(year,month,date);
                 var f= new Date(year,month,01);
                 var c = f.valueOf();
-              //  var d = b.valueOf()+1*24*60*60*1000;
+                //  var d = b.valueOf()+1*24*60*60*1000;
                 var startTime= new Date(c);
-               // var endTime = new Date(d);
+                // var endTime = new Date(d);
                 this.form.startTime=startTime.getFullYear()+"-" + (startTime.getMonth()+1) + "-" + startTime.getDate()+" 00:00";;
                 this.form.endTime=year+"-"+(month+1)+"-"+date+" 23:59";
                 this.searchTable();
@@ -302,20 +325,20 @@
                 param.userId =  this.export.userId;//电销顾问
                 param.cusLevelList =  this.export.cusLevelList;//客户级别
                 axios.post('/statistics/teleStatement/exportRecordByGroupLevelUserIdDate',param,{responseType:'blob'})
-                .then(function (response) {
-                    console.log(response)
-                    var data =  response.data;
-                    var fileName = response.headers.filename;
-                    saveAs(data,decodeURI(fileName));
-                })
-                .catch(function (error) {
-                    console.log(error);
-                }).then(function(){
+                    .then(function (response) {
+                        console.log(response)
+                        var data =  response.data;
+                        var fileName = response.headers.filename;
+                        saveAs(data,decodeURI(fileName));
+                    })
+                    .catch(function (error) {
+                        console.log(error);
+                    }).then(function(){
                 });
             }
         },
-        created(){ 
-            debugger    
+        created(){
+            debugger
             // 接收参数
             console.log(trackingQuery)
             this.form.startTime=this.dateTimeFormat(trackingQuery.startTime);
@@ -323,26 +346,26 @@
             this.form.orgId=trackingQuery.orgId;
             this.form.userId=trackingQuery.userId;
 
-            this.export.startTime=this.dateTimeFormat(trackingQuery.startTime);
-            this.export.endTime=this.dateTimeFormat(trackingQuery.endTime);
+            this.export.startTime=trackingQuery.startTime;
+            this.export.endTime=trackingQuery.endTime;
             this.export.orgId=trackingQuery.orgId;
             this.export.userId=trackingQuery.userId;
 
             var strCusLevelList=trackingQuery.strCusLevelList
             if(strCusLevelList){
-                this.form.cusLevelList=strCusLevelList.split(','); 
-                this.export.cusLevelList=strCusLevelList.split(','); 
+                this.form.cusLevelList=strCusLevelList.split(',');
+                this.export.cusLevelList=strCusLevelList.split(',');
             }else{
-                this.form.cusLevelList=[]; 
-                this.export.cusLevelList=[]; 
+                this.form.cusLevelList=[];
+                this.export.cusLevelList=[];
             }
-            
+
             this.searchTable();
         },
         mounted(){
             document.getElementById('maindiv').style.display = 'block';
         }
     })
-    
+
 </script>
 </html>
