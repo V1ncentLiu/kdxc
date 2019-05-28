@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import com.itextpdf.text.pdf.PdfStructTreeController.returnType;
 import com.kuaidao.common.constant.OrgTypeConstant;
 import com.kuaidao.common.constant.SystemCodeConstant;
 import com.kuaidao.common.entity.JSONResult;
@@ -91,6 +92,25 @@ public class TeleSaleTalkTimeController {
         return new JSONResult<Map<String,Object>>().success(resMap);
     }
     
+    /**
+     * 获取当前组织机构
+    * @param teleSaleTalkTimeQueryDTO
+    * @return
+     */
+    private List<Long> getOrgList(){
+        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+        JSONResult<List<OrganizationRespDTO>> orgGroupJr = getOrgGroupByOrgId(curLoginUser.getOrgId(),OrgTypeConstant.DXZ);
+        if (!JSONResult.SUCCESS.equals(orgGroupJr.getCode())) {
+            logger.info("listTeleGroupTalkTime get tele group param{{}},res{{}}",curLoginUser.getOrgId(),orgGroupJr);
+            return null;
+        }
+        List<OrganizationRespDTO> orgGroup = orgGroupJr.getData();
+        if(CollectionUtils.isEmpty(orgGroup)) {
+            return null;
+        }
+        List<Long> orgIdList = orgGroup.parallelStream().map(OrganizationRespDTO::getId).collect(Collectors.toList());
+        return orgIdList;
+    }
     
     /**
      * 昨日 七天
@@ -99,16 +119,33 @@ public class TeleSaleTalkTimeController {
    @RequiresPermissions("statistics:teleSaleTalkTime:export")
    @RequestMapping("/exportTeleGroupTalkTime")
    public void exportTeleGroupTalkTime(@RequestBody TeleSaleTalkTimeQueryDTO teleSaleTalkTimeQueryDTO,HttpServletResponse response) throws Exception {
-       JSONResult<TotalDataDTO<TeleTalkTimeRespDTO, TeleTalkTimeRespDTO>> teleGroupTalkTimeJr = teleTalkTimeFeignClient.listTeleGroupTalkTimeNoPage(teleSaleTalkTimeQueryDTO);
-        TotalDataDTO<TeleTalkTimeRespDTO, TeleTalkTimeRespDTO> resData = teleGroupTalkTimeJr.getData();
-       //获取合计 
-       TeleTalkTimeRespDTO totalTalkTimeDTO = resData.getTotalData();
+      
+       boolean isReqData = true;
+       Long orgId = teleSaleTalkTimeQueryDTO.getOrgId();
+       if(orgId==null) {
+           List<Long> orgIdList = getOrgList();
+           if(orgIdList==null) {
+               isReqData= false;
+           }
+           teleSaleTalkTimeQueryDTO.setOrgIdList(orgIdList);
+       }
+       
+       TeleTalkTimeRespDTO totalTalkTimeDTO = null;
+       List<TeleTalkTimeRespDTO> teleGroupList = new ArrayList<>();
+       JSONResult<TotalDataDTO<TeleTalkTimeRespDTO, TeleTalkTimeRespDTO>> teleGroupTalkTimeJr  = null;
+       if(isReqData) {
+           teleGroupTalkTimeJr = teleTalkTimeFeignClient.listTeleGroupTalkTimeNoPage(teleSaleTalkTimeQueryDTO);
+           TotalDataDTO<TeleTalkTimeRespDTO, TeleTalkTimeRespDTO> resData = teleGroupTalkTimeJr.getData();
+          //获取合计 
+          totalTalkTimeDTO = resData.getTotalData();
+          teleGroupList   = resData.getTableData();
+       }
        
        List<List<Object>> dataList = new ArrayList<List<Object>>();
        dataList.add(getGroupHeadTitleList());
        //合计 放进excel 
        addTotalTalkTimeToList(totalTalkTimeDTO,dataList);
-       List<TeleTalkTimeRespDTO> teleGroupList   = resData.getTableData();
+       
        for(int i = 0; i<teleGroupList.size(); i++){
            TeleTalkTimeRespDTO teleTalkTimeRespDTO = teleGroupList.get(i);
            List<Object> curList = new ArrayList<>();
@@ -152,6 +189,9 @@ public class TeleSaleTalkTimeController {
    * @param dataList
     */
    private void addTotalTalkTimeToList(TeleTalkTimeRespDTO totalTalkTimeDTO,List<List<Object>> dataList) {
+       if(totalTalkTimeDTO==null) {
+           return;
+       }
        List<Object> totalList = new ArrayList<>();
        totalList.add("");
        totalList.add("合计");
