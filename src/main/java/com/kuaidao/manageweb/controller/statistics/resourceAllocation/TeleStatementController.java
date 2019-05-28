@@ -192,7 +192,9 @@ public class TeleStatementController {
             dataList.add(curList);
         }
         XSSFWorkbook wbWorkbook = ExcelUtil.creat2007Excel(dataList);
-        String name = "分配记录表" + DateUtil.convert2String(new Date(), DateUtil.ymdhms2) + ".xlsx";
+        Long startTime = resourceAllocationQueryDto.getStartTime();
+        Long endTime = resourceAllocationQueryDto.getEndTime();
+        String name = "分配记录表" +startTime+"-"+endTime + ".xlsx";
         response.addHeader("Content-Disposition",
                 "attachment;filename=" + new String(name.getBytes("UTF-8"), "ISO8859-1"));
         response.addHeader("fileName", URLEncoder.encode(name, "utf-8"));
@@ -311,7 +313,9 @@ public class TeleStatementController {
             dataList.add(curList);
         }
         XSSFWorkbook wbWorkbook = ExcelUtil.creat2007Excel(dataList);
-        String name = "分配记录表" + DateUtil.convert2String(new Date(), DateUtil.ymdhms2) + ".xlsx";
+        Long startTime = resourceAllocationQueryDto.getStartTime();
+        Long endTime = resourceAllocationQueryDto.getEndTime();
+        String name = "分配记录表" +startTime+"-"+endTime + ".xlsx";
         response.addHeader("Content-Disposition",
                 "attachment;filename=" + new String(name.getBytes("UTF-8"), "ISO8859-1"));
         response.addHeader("fileName", URLEncoder.encode(name, "utf-8"));
@@ -337,7 +341,14 @@ public class TeleStatementController {
             ResourceAllocationDto ra = orderList.get(i);
             List<Object> curList = new ArrayList<>();
             curList.add(i + 1);
-            curList.add(ra.getDay());
+            String str = null;
+            if(ra.getDateId() != null){
+                StringBuilder sb = new StringBuilder(ra.getDateId().toString());
+                sb.insert(6,"-");
+                sb.insert(4,"-");
+                str = sb.toString();
+            }
+            curList.add(str);
             curList.add(ra.getUserName());
             curList.add(ra.getAssignClueCount());
             curList.add(ra.getJointExhibition());
@@ -351,7 +362,9 @@ public class TeleStatementController {
             dataList.add(curList);
         }
         XSSFWorkbook wbWorkbook = ExcelUtil.creat2007Excel(dataList);
-        String name = "分配记录表" + DateUtil.convert2String(new Date(), DateUtil.ymdhms2) + ".xlsx";
+        Long startTime = resourceAllocationQueryDto.getStartTime();
+        Long endTime = resourceAllocationQueryDto.getEndTime();
+        String name = "分配记录表" +startTime+"-"+endTime + ".xlsx";
         response.addHeader("Content-Disposition",
                 "attachment;filename=" + new String(name.getBytes("UTF-8"), "ISO8859-1"));
         response.addHeader("fileName", URLEncoder.encode(name, "utf-8"));

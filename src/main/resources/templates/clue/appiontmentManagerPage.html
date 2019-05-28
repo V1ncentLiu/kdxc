@@ -116,13 +116,7 @@
           </template>
         </el-table-column>
         <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width"
-                         v-else-if="item.fieldCode == 'cusPhone'">
-          <template slot-scope="scope">
-            <div v-if="scope.row.phase === 7 || (roleCode =='DXCYGW' && userId !=teleSaleId) ||  (roleCode =='DXZJ' && orgId !=teleGorupId)">
-              ***
-            </div>
-            <div v-else>{{scope.row.cusPhone}}</div>
-          </template>
+                         v-else-if="item.fieldCode == 'cusPhone'" >
         </el-table-column>
         <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width"
                          v-else>
@@ -336,6 +330,9 @@
   var fieldList=[[${fieldList}]];//自定义字段
   var userFieldList=[[${userFieldList}]];//用户自定义字段
   var clueCategoryList=[[${clueCategoryList}]];//资源类别
+  var userId = [[${userId}]];
+  var roleCode = [[${roleCode}]];
+  var orgId = [[${orgId}]];
   var appiontmentVM = new Vue({
     el: '#appiontmentManage',
     data: {
@@ -423,6 +420,15 @@
       },
     },
     methods: {
+    	transCusPhone(row) {
+    		var text="";
+    		if((roleCode =='DXCYGW' && row.teleSaleId != userId) ||  (roleCode =='DXZJ' && orgId !=row.teleGorupId) || row.phase ==7){
+    			text ="***"
+    		}else{
+    			text = row.cusPhone;
+    		}
+             return text;
+         },
       searchTable() {
         var param ={};
 
@@ -465,6 +471,7 @@
             data[i].category=appiontmentVM.transformCategory(data[i].category);
             data[i].visitStatus=appiontmentVM.transformVisitStatus(data[i].visitStatus);
             data[i].delFalg=appiontmentVM.transformDelFalg(data[i].delFalg);
+            data[i].cusPhone=appiontmentVM.transCusPhone(data[i]);
           }
           appiontmentVM.dataTable= data;
 
@@ -913,7 +920,7 @@
           });
           return;
         }
-        if(rows[0].phase==7){
+        if((roleCode =='DXCYGW' && rows.teleSaleId != userId) ||  (roleCode =='DXZJ' && orgId !=rows.teleGorupId) || rows.phase ==7){
           this.$message({
             message: "当前资源已释放到公有池，不允许进行详细信息的查看",
             type: 'error'
@@ -930,8 +937,7 @@
         param.id = row.clueId;
         param.cusPhone = row.phone;
         param.clueId = row.clueId;
-
-        if(row.phase==7){
+        if((roleCode =='DXCYGW' && row.teleSaleId != userId) ||  (roleCode =='DXZJ' && orgId !=rows.teleGorupId) || row.phase ==7){
           this.$message({
             message: "当前资源已释放到公有池，不允许进行重复手机号资源的查看",
             type: 'error'
