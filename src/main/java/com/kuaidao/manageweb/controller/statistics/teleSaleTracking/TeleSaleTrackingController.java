@@ -112,6 +112,10 @@ public class TeleSaleTrackingController {
     @RequestMapping("/getRecordByGroupPageOneCount")
     @ResponseBody
     public JSONResult<List<TeleSaleTrackingDto>> getRecordByGroupPageOneCount(TeleSaleTrackingQueryDto trackingQueryDto){
+        Long orgId = trackingQueryDto.getOrgId();
+        if(null == orgId){
+            buildOrgIdList(trackingQueryDto, orgId);
+        }
         List countList = getCountTotal(trackingQueryDto);
         return new JSONResult<List<TeleSaleTrackingDto>>().success(countList);
     }
@@ -372,7 +376,14 @@ public class TeleSaleTrackingController {
      * @return
      */
     @RequestMapping("/telemarketingFollowTablePerson")
-    public String telemarketingFollowTablePerson(HttpServletRequest request) {
+    public String telemarketingFollowTablePerson(Long userId,Long orgId,Long startTime,Long endTime,String strCusLevelList,HttpServletRequest request) {
+        TeleSaleTrackingQueryDto trackingQueryDto = new TeleSaleTrackingQueryDto();
+        trackingQueryDto.setOrgId(orgId);
+        trackingQueryDto.setStartTime(startTime);
+        trackingQueryDto.setEndTime(endTime);
+        trackingQueryDto.setStrCusLevelList(strCusLevelList);
+        trackingQueryDto.setUserId(userId);
+        request.setAttribute("trackingQueryDto",trackingQueryDto);
         // 查询所有电销组
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
         List<RoleInfoDTO> roleList = curLoginUser.getRoleList();

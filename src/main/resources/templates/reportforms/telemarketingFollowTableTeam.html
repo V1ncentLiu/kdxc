@@ -76,7 +76,7 @@
                 :cell-style="centerStyle"
                 :header-cell-style="centerStyle">
                 <el-table-column type="index" label="序号" align="center" width="55"></el-table-column>
-                <el-table-column prop="dateId" label="日期" :formatter="dateFormat"></el-table-column>
+                <!--<el-table-column prop="dateId" label="日期" :formatter="dateFormat"></el-table-column>-->
                 <el-table-column prop="userName" label="顾问">
                     <template slot-scope="scope">
                         <el-button @click="gotoPerson(scope.row)" type="text">{{scope.row.userName}}</el-button>
@@ -182,23 +182,11 @@
                 // 搜索条件
                 param.startTime = this.minuteFormat(startTime);
                 param.endTime = this.minuteFormat(endTime);
-                if(this.form.orgId){
-                    param.orgId = this.form.orgId;//电销组
-                }else{
-                    param.orgId = null;//电销组
-                }
-                if(this.form.userId){
-                    param.userId = this.form.userId;//电销顾问
-                }else{
-                    param.userId = null;//电销顾问
-                }
-                if(this.form.cusLevelList){
-                    param.cusLevelList = this.form.cusLevelList;//客户级别
-                }else{
-                    param.cusLevelList = null;//客户级别
-                }
+                param.orgId = this.form.orgId;//电销组
+                param.userId = this.form.userId;//电销顾问
+                param.cusLevelList = this.form.cusLevelList;//客户级别
                 this.loading=true;
-                axios.post('/statistics/teleStatement/getRecordByGroupLevelUserIdDate',param).then(function (response) { 
+                axios.post('/statistics/teleStatement/getRecordByGroupLevelUserId',param).then(function (response) {
                     if(!response){
                         mainDivVM.$message({
                             message: "接口调用失败",
@@ -243,12 +231,7 @@
             gotoPerson(item){
                 console.log(item)
                 var userId = item.userId;
-                var orgId=null;
-                if(this.export.orgId){
-                    orgId=this.export.orgId;
-                }else{
-                    orgId=null
-                }
+                var orgId=this.export.orgId;;
                 // 搜索条件
                 var startTime=this.export.startTime;
                 var endTime=this.export.endTime;
@@ -261,7 +244,7 @@
                 }  
                 if(userId){
                     // 点击个人跳转到此人的资源分配信息
-                    window.location.href="/statistics/teleStatement/telemarketingFollowTableTeam?userId="+userId+"&orgId=" + orgId+"&startTime="+ startTime+"&endTime="+ endTime+"&strCusLevelList="+ strCusLevelList;
+                    window.location.href="/statistics/teleStatement/telemarketingFollowTablePerson?userId="+userId+"&orgId=" + orgId+"&startTime="+ startTime+"&endTime="+ endTime+"&strCusLevelList="+ strCusLevelList;
                 }
             },
             goback () {
@@ -341,7 +324,7 @@
                 param.orgId =  this.export.orgId;//电销组
                 param.userId =  this.export.userId;//电销顾问
                 param.cusLevelList =  this.export.cusLevelList;//客户级别
-                axios.post('/statistics/teleStatement/exportRecordByGroupLevelUserIdDate',param,{responseType:'blob'})
+                axios.post('/statistics/teleStatement/exportRecordByGroupLevelUserId',param,{responseType:'blob'})
                 .then(function (response) {
                     console.log(response)
                     var data =  response.data;
