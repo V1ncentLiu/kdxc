@@ -131,7 +131,7 @@ public class AbnormalController {
 
         UserInfoDTO user = CommUtil.getCurLoginUser();
         List<RoleInfoDTO> roleList = user.getRoleList();
-        List dxList = new ArrayList();
+        List<Long> dxList = new ArrayList();
         /**
          * 数据权限说明： 管理员权限： 能够看见全部数据 电销顾问： 能够看见自己以及所在电销组下电销创业顾问创建的数据 其他的只能够看见自己创建的数据
          */
@@ -146,7 +146,6 @@ public class AbnormalController {
                 dto.setCreateUserList(dxList);
             }
         }
-
 
         Date date1 = dto.getTime1();
         Date date2 = dto.getTime2();
@@ -184,7 +183,16 @@ public class AbnormalController {
         userOrgRoleReq.setRoleCode(RoleCodeEnum.DXCYGW.name());
         JSONResult<List<UserInfoDTO>> listByOrgAndRole =
                 userInfoFeignClient.listByOrgAndRole(userOrgRoleReq);
-        return listByOrgAndRole.getData();
+        List<Long> list = new ArrayList<>();
+        if(JSONResult.SUCCESS.equals(listByOrgAndRole.getCode())){
+            List<UserInfoDTO> data = listByOrgAndRole.getData();
+            if(data!=null&&data.size()>0){
+                for(UserInfoDTO infoDTO:data){
+                    list.add(infoDTO.getId());
+                }
+            }
+        }
+        return list;
     }
 
     /**

@@ -20,8 +20,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import com.itextpdf.text.pdf.PdfStructTreeController.returnType;
 import com.kuaidao.common.constant.OrgTypeConstant;
+import com.kuaidao.common.constant.RoleCodeEnum;
 import com.kuaidao.common.constant.SystemCodeConstant;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
@@ -36,6 +36,7 @@ import com.kuaidao.stastics.dto.callrecord.TeleTalkTimeRespDTO;
 import com.kuaidao.stastics.dto.callrecord.TotalDataDTO;
 import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
 import com.kuaidao.sys.dto.organization.OrganizationRespDTO;
+import com.kuaidao.sys.dto.role.RoleInfoDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 
 /**
@@ -178,7 +179,7 @@ public class TeleSaleTalkTimeController {
    
    private String formatSeconds(Integer seconds) {
        if(seconds==null) {
-           return "00时:00分:00秒";
+           return "00时00分00秒";
        }
        return DateUtil.second2TimeWithUnit(seconds);
    }
@@ -242,11 +243,46 @@ public class TeleSaleTalkTimeController {
    
 
 /**
-   * 昨日 七天
+   * 合计
    * 电销顾问通话总时长统计 
   */
  @RequestMapping("/listTeleSaleTalkTime")
  public JSONResult<PageBean<TeleTalkTimeRespDTO>> listTeleSaleTalkTime(@RequestBody TeleSaleTalkTimeQueryDTO teleSaleTalkTimeQueryDTO) {
+     Long orgId = teleSaleTalkTimeQueryDTO.getOrgId();
+     if(orgId==null) {
+         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+         List<RoleInfoDTO> roleList = curLoginUser.getRoleList();
+         RoleInfoDTO roleInfoDTO = roleList.get(0);
+         String roleCode = roleInfoDTO.getRoleCode();
+         if(RoleCodeEnum.DXZJ.name().equals(roleCode)) {
+             teleSaleTalkTimeQueryDTO.setOrgId(orgId);
+         }else {
+             Long curOrgId = curLoginUser.getOrgId();
+             OrganizationQueryDTO busGroupReqDTO = new OrganizationQueryDTO();
+             busGroupReqDTO.setParentId(curOrgId);
+             busGroupReqDTO.setSystemCode(SystemCodeConstant.HUI_JU);
+             busGroupReqDTO.setOrgType(OrgTypeConstant.DXZ);
+             JSONResult<List<OrganizationRespDTO>> orgJr = organizationFeignClient.queryOrgByParam(busGroupReqDTO);
+             if(!JSONResult.SUCCESS.equals(orgJr.getCode())) {
+                 logger.error("listTeleSaleTalkTime queryOrgByParam,param{{}},res{{}}",busGroupReqDTO,orgJr);
+                 return new JSONResult<PageBean<TeleTalkTimeRespDTO>>().fail(orgJr.getCode(),orgJr.getMsg());
+             }
+             List<OrganizationRespDTO> orgRespDTOList = orgJr.getData();
+             if(CollectionUtils.isNotEmpty(orgRespDTOList)) {
+                 List<Long> orgIdList = orgRespDTOList.parallelStream().map(OrganizationRespDTO::getId).collect(Collectors.toList());
+                 teleSaleTalkTimeQueryDTO.setOrgIdList(orgIdList);
+             }else {
+                 logger.error("listTeleSaleTalkTime queryOrgByParam,param{{}},res{{}}",busGroupReqDTO,orgJr);
+                 return new JSONResult<PageBean<TeleTalkTimeRespDTO>>().success(PageBean.getEmptyDataPageBean(teleSaleTalkTimeQueryDTO.getPageNum()
+                         , teleSaleTalkTimeQueryDTO.getPageSize()));
+                 
+             }
+             
+         }
+         
+     }
+     
+     
      return teleTalkTimeFeignClient.listTeleSaleTalkTime(teleSaleTalkTimeQueryDTO);
  }
 
@@ -258,10 +294,50 @@ public class TeleSaleTalkTimeController {
  @RequiresPermissions("statistics:teleSaleTalkTime:export")
   @RequestMapping("/exportTeleSaleTalkTime")
   public void exportTeleSaleTalkTimeNoPage(@RequestBody TeleSaleTalkTimeQueryDTO teleSaleTalkTimeQueryDTO,HttpServletResponse response) throws Exception{
-      JSONResult<List<TeleTalkTimeRespDTO>> teleSaleTalkTimeJr = teleTalkTimeFeignClient.listTeleSaleTalkTimeNoPage(teleSaleTalkTimeQueryDTO);
+     Long orgId = teleSaleTalkTimeQueryDTO.getOrgId();
+     //是否需要远程调用接口 获取数据
+     boolean isReqData = true;
+     if(orgId==null) {
+         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+         List<RoleInfoDTO> roleList = curLoginUser.getRoleList();
+         RoleInfoDTO roleInfoDTO = roleList.get(0);
+         String roleCode = roleInfoDTO.getRoleCode();
+         if(RoleCodeEnum.DXZJ.name().equals(roleCode)) {
+             teleSaleTalkTimeQueryDTO.setOrgId(orgId);
+         }else {
+             Long curOrgId = curLoginUser.getOrgId();
+             OrganizationQueryDTO busGroupReqDTO = new OrganizationQueryDTO();
+             busGroupReqDTO.setParentId(curOrgId);
+             busGroupReqDTO.setSystemCode(SystemCodeConstant.HUI_JU);
+             busGroupReqDTO.setOrgType(OrgTypeConstant.DXZ);
+             JSONResult<List<OrganizationRespDTO>> orgJr = organizationFeignClient.queryOrgByParam(busGroupReqDTO);
+             if(!JSONResult.SUCCESS.equals(orgJr.getCode())) {
+                 logger.error("exportTeleSaleTalkTimeNoPage queryOrgByParam,param{{}},res{{}}",busGroupReqDTO,orgJr);
+                 isReqData = false;
+             }else {
+                 List<OrganizationRespDTO> orgRespDTOList = orgJr.getData();
+                 if(CollectionUtils.isNotEmpty(orgRespDTOList)) {
+                     List<Long> orgIdList = orgRespDTOList.parallelStream().map(OrganizationRespDTO::getId).collect(Collectors.toList());
+                     teleSaleTalkTimeQueryDTO.setOrgIdList(orgIdList);
+                 }else {
+                     isReqData = false;
+                     logger.error("exportTeleSaleTalkTimeNoPage queryOrgByParam,param{{}},res{{}}",busGroupReqDTO,orgJr);
+                 } 
+             }
+         }
+         
+     }
+     JSONResult<List<TeleTalkTimeRespDTO>> teleSaleTalkTimeJr = null;
+     List<TeleTalkTimeRespDTO> teleSaleList  = new ArrayList<>();
+     if(isReqData) {
+         
+         teleSaleTalkTimeJr = teleTalkTimeFeignClient.listTeleSaleTalkTimeNoPage(teleSaleTalkTimeQueryDTO);
+         teleSaleList   = teleSaleTalkTimeJr.getData();
+     }
+
        List<List<Object>> dataList = new ArrayList<List<Object>>();
        dataList.add(getTeleSaleHeadTitleList());
-       List<TeleTalkTimeRespDTO> teleSaleList   = teleSaleTalkTimeJr.getData();
+      
        for(int i = 0; i<teleSaleList.size(); i++){
            TeleTalkTimeRespDTO teleTalkTimeRespDTO = teleSaleList.get(i);
            List<Object> curList = new ArrayList<>();
