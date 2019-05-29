@@ -178,6 +178,8 @@
                         });
                         return;
                     }
+                    startTime = this.limitTime(startTime, null);
+                    endTime = this.limitTime(null, endTime);
                 }else{
                     this.$message({
                         message: '请选择起止时间',
@@ -285,7 +287,30 @@
                 var oHour = d.slice(8,10);
                 var oMinute = d.slice(10);
                 return oYear+"-"+oMonth+"-"+oDay+" "+oHour+":"+oMinute;
-            },  
+            }, 
+            limitTime (start, end) {
+                var startTime = this.minuteFormat (start);
+                var endTime = this.minuteFormat (end);
+                var date = new Date();
+                data = this.minuteFormat (date);// 现在的时间
+                data = data.slice(0,8);
+                if(startTime){
+                    var s = startTime.slice(0,8);
+                    if(s < data){
+                        this.form.startTime = moment(start).format("YYYY-MM-DD 00:00");
+                        return this.form.startTime;
+                    }
+                    return start;
+                }
+                if(endTime){
+                    var e = endTime.slice(0,8);
+                    if(e < data){
+                        this.form.endTime = moment(end).format("YYYY-MM-DD 23:59");
+                        return this.form.endTime;                        
+                    }
+                    return end;
+                }
+            }, 
             searchYesterday(){//昨天
                var today = new Date();
                today.setTime(today.getTime()-24*60*60*1000);
