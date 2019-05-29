@@ -184,6 +184,8 @@ public class BusinessMyCustomerController {
     @LogRecord(description = "标记未到访", operationType = OperationType.UPDATE,
         menuName = MenuEnum.BUS_MY_CUSTOMER)
     public JSONResult<Boolean> notVisit(@RequestBody BusMyCustomerReqDTO param) {
+        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+        param.setUserId(curLoginUser.getId());
         return busMyCustomerFeignClient.notVisit(param);
     }
 

@@ -77,8 +77,10 @@ public class FinanceLayoutController {
             request.setAttribute("projectList", proJson.getData());
         }
         // 查询所有省
-        JSONResult<List<SysRegionDTO>> getproviceList = sysRegionFeignClient.getproviceList();
-        request.setAttribute("provinceList", getproviceList.getData());
+        JSONResult<List<SysRegionDTO>> getProviceList = sysRegionFeignClient.getproviceList();
+        if (getProviceList.getCode().equals(JSONResult.SUCCESS)) {
+            request.setAttribute("provinceList", getProviceList.getData());
+        }
         List<UserInfoDTO> userList = getUserList();
         request.setAttribute("swList", swList.getData());
         request.setAttribute("userList", userList);
@@ -96,35 +98,32 @@ public class FinanceLayoutController {
         return financeLayoutFeignClient.getFinanceLayoutList(financeLayoutDTO);
     }
 
-    public List<UserInfoDTO> getUserList(){
+    public List<UserInfoDTO> getUserList() {
         UserOrgRoleReq userOrgRoleReq = new UserOrgRoleReq();
         userOrgRoleReq.setRoleCode(RoleCodeEnum.CYCW.name());
-     // 商务小组
-        JSONResult<List<UserInfoDTO>> cycwList =
-        		userInfoFeignClient.listByOrgAndRole(userOrgRoleReq);
+        // 商务小组
+        JSONResult<List<UserInfoDTO>> cycwList = userInfoFeignClient.listByOrgAndRole(userOrgRoleReq);
         userOrgRoleReq.setRoleCode(RoleCodeEnum.QDSJCW.name());
         // 商务小组
-        JSONResult<List<UserInfoDTO>> qdsjcwList =
-           		userInfoFeignClient.listByOrgAndRole(userOrgRoleReq);
+        JSONResult<List<UserInfoDTO>> qdsjcwList = userInfoFeignClient.listByOrgAndRole(userOrgRoleReq);
         userOrgRoleReq.setRoleCode(RoleCodeEnum.SJHZCW.name());
-           // 商务小组
-        JSONResult<List<UserInfoDTO>> shgzcwList =
-      		userInfoFeignClient.listByOrgAndRole(userOrgRoleReq);
+        // 商务小组
+        JSONResult<List<UserInfoDTO>> shgzcwList = userInfoFeignClient.listByOrgAndRole(userOrgRoleReq);
         List<UserInfoDTO> userList = new ArrayList<>();
-        if(JSONResult.SUCCESS.equals(cycwList.getCode()) && cycwList.getData() !=null && cycwList.getData().size()>0) {
-        	for (UserInfoDTO userInfoDTO : cycwList.getData()) {
-        		userList.add(userInfoDTO);
-			}
+        if (JSONResult.SUCCESS.equals(cycwList.getCode()) && cycwList.getData() != null && cycwList.getData().size() > 0) {
+            for (UserInfoDTO userInfoDTO : cycwList.getData()) {
+                userList.add(userInfoDTO);
+            }
         }
-        if(JSONResult.SUCCESS.equals(qdsjcwList.getCode()) && qdsjcwList.getData() !=null && qdsjcwList.getData().size()>0) {
-        	for (UserInfoDTO userInfoDTO : qdsjcwList.getData()) {
-        		userList.add(userInfoDTO);
-			}
+        if (JSONResult.SUCCESS.equals(qdsjcwList.getCode()) && qdsjcwList.getData() != null && qdsjcwList.getData().size() > 0) {
+            for (UserInfoDTO userInfoDTO : qdsjcwList.getData()) {
+                userList.add(userInfoDTO);
+            }
         }
-        if(JSONResult.SUCCESS.equals(shgzcwList.getCode()) && shgzcwList.getData() !=null && shgzcwList.getData().size()>0) {
-        	for (UserInfoDTO userInfoDTO : shgzcwList.getData()) {
-        		userList.add(userInfoDTO);
-			}
+        if (JSONResult.SUCCESS.equals(shgzcwList.getCode()) && shgzcwList.getData() != null && shgzcwList.getData().size() > 0) {
+            for (UserInfoDTO userInfoDTO : shgzcwList.getData()) {
+                userList.add(userInfoDTO);
+            }
         }
         return userList;
     }
@@ -180,5 +179,5 @@ public class FinanceLayoutController {
         return financeLayoutFeignClient.deleFinanceLayout(financeLayoutDTO);
     }
 
- 
+
 }

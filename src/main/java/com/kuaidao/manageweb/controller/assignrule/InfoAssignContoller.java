@@ -28,10 +28,8 @@ import com.kuaidao.manageweb.feign.role.RoleManagerFeignClient;
 import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
 import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
 import com.kuaidao.sys.dto.organization.OrganizationRespDTO;
-import com.kuaidao.sys.dto.role.RoleInfoDTO;
-import com.kuaidao.sys.dto.role.RoleQueryDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
-import com.kuaidao.sys.dto.user.UserInfoPageParam;
+import com.kuaidao.sys.dto.user.UserOrgRoleReq;
 
 @Controller
 @RequestMapping("/assignrule/infoAssign")
@@ -161,30 +159,15 @@ public class InfoAssignContoller {
 
         }
         if (null != orgId) {
-            RoleQueryDTO query = new RoleQueryDTO();
-            query.setRoleCode(RoleCodeEnum.DXZJ.name());
-            JSONResult<List<RoleInfoDTO>> roleJson = roleManagerFeignClient.qeuryRoleByName(query);
-            if (roleJson.getCode().equals(JSONResult.SUCCESS)) {
-                List<RoleInfoDTO> roleList = roleJson.getData();
-                if (null != roleList && roleList.size() > 0) {
-                    RoleInfoDTO roleDto = roleList.get(0);
-                    UserInfoPageParam param = new UserInfoPageParam();
-                    param.setRoleId(roleDto.getId());
-                    param.setOrgId(orgId);
-                    param.setPageSize(200);
-                    param.setPageNum(1);
-                    JSONResult<PageBean<UserInfoDTO>> userListJson =
-                            userInfoFeignClient.list(param);
-                    if (userListJson.getCode().equals(JSONResult.SUCCESS)) {
-                        PageBean<UserInfoDTO> pageList = userListJson.getData();
-                        List<UserInfoDTO> userList = pageList.getData();
-                        if (null != userList && userList.size() > 0) {
-                            dto.setTelemarketingDirectorId(userList.get(0).getId());
+            UserOrgRoleReq userOrgRoleReq = new UserOrgRoleReq();
+            userOrgRoleReq.setOrgId(orgId);
+            userOrgRoleReq.setRoleCode(RoleCodeEnum.DXZJ.name());
+            JSONResult<List<UserInfoDTO>> listByOrgAndRole =
+                    userInfoFeignClient.listByOrgAndRole(userOrgRoleReq);
+            List<UserInfoDTO> userList = listByOrgAndRole.getData();
+            if (null != userList && userList.size() > 0) {
+                dto.setTelemarketingDirectorId(userList.get(0).getId());
 
-                        }
-
-                    }
-                }
             }
         }
 

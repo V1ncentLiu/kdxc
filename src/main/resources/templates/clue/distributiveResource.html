@@ -39,7 +39,7 @@
                     <el-input v-model="form.phone" placeholder="手机号" maxLength="11" @keyup.native="number"></el-input>
                 </el-form-item>
                 <el-form-item label="电销分公司:">
-                    <el-select v-model="form.telemarketingBranch" placeholder="电销分公司" @change="showTele(7)" clearable filterable>
+                    <el-select v-model="form.telemarketingBranch" placeholder="电销分公司" clearable filterable>
                         <el-option
                             v-for="item in dxBusinessList"
                             :key="item.id"
@@ -49,7 +49,7 @@
                     </el-select>
                 </el-form-item>
                 <el-form-item label="事业部:">
-                    <el-select v-model="form.businessUnit" placeholder="事业部"  @change="showTele(1)" clearable filterable>
+                    <el-select v-model="form.businessUnit" placeholder="事业部"   clearable filterable>
                         <el-option
                             v-for="item in dxCauseBList"
                             :key="item.id"
@@ -191,6 +191,15 @@
                   <el-form-item label="资源ID:">
                     <el-input v-model="form.clueId" placeholder="资源ID"  @keyup.native="number"></el-input>
                   </el-form-item>
+                    <el-form-item label="QQ:">
+                        <el-input v-model="form.qq" placeholder="QQ" maxLength="20" @keyup.native="number"></el-input>
+                    </el-form-item>
+                    <el-form-item label="微信:">
+                        <el-input v-model="form.wechat" placeholder="微信"></el-input>
+                    </el-form-item>
+                    <el-form-item label="邮箱:">
+                        <el-input v-model="form.email" placeholder="邮箱"></el-input>
+                    </el-form-item>
                 </el-row>
                 <div class="mainSearchBtnBox">
                     <el-button icon="el-icon-search" type="primary" @click="initTableData" class="searchBtn">搜索</el-button>
@@ -405,6 +414,9 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                     isCall:"",
                     status:"",
                     firstCall:"",
+                    qq:"",
+                    wechat:"",
+                    email:""
                 },
                 pager:{
                     total: 0,
@@ -497,6 +509,9 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                 param.clueId = this.form.clueId;
                 param.isCall = this.form.isCall;
                 param.firstCall = this.form.firstCall;
+                param.qq = this.form.qq;
+                param.email = this.form.email;
+                param.wechat = this.form.wechat;
                 var starTime=this.form.starTime;
                 var endTime=this.form.endTime;
                 if(endTime){
@@ -634,10 +649,10 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
          	   var param={};
  	           if(type==1){
  	        	   param.orgType="1";
- 	        	   param.parentId = this.form.businessUnit;
+ 	        	   // param.parentId = this.form.businessUnit;
  	           }else if(type ==7){
  	        	   param.orgType="7";
- 	        	   param.parentId = this.form.telemarketingBranch;
+ 	        	   // param.parentId = this.form.telemarketingBranch;
  	           }else if(type ==0){
  	        	   param.orgType="8";
  	           }
@@ -866,12 +881,21 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                param={};
                param.groupCode="phase";
                 axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {
-             	   ocmVM.phaseArr=response.data.data;
+                    var phaseArr = response.data.data;
+                    var resArr = [];
+
+                    for(var i = 0 ; i < phaseArr.length ; i++){
+                        if(phaseArr[i].value != '0'){
+                            resArr.push(phaseArr[i])
+                        }
+                    }
+                    ocmVM.phaseArr=resArr;
                });
 
                //初始化电销分公司
                this.showTele(0);
-
+               this.showTele(7);
+               this.showTele(1);
         }
     })
 
