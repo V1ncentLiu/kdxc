@@ -141,8 +141,8 @@ public class TeleSaleTrackingController {
             buildOrgIdList(trackingQueryDto, orgId);
         }
         JSONResult<List<TeleSaleTrackingDto>> list = teleSaleTrackingFeignClient.getRecordByGroup(trackingQueryDto);
-        if(null != trackingQueryDto.getCusLevel()){
-            teleSaleTrackingFeignClient.getRecordByGroupLevel(trackingQueryDto);
+        if(null != trackingQueryDto.getCusLevelList() && trackingQueryDto.getCusLevelList().size() > 0){
+            list = teleSaleTrackingFeignClient.getRecordByGroupLevel(trackingQueryDto);
         }
         List<TeleSaleTrackingDto> countList = getCountTotal(trackingQueryDto);
         TeleSaleTrackingDto resTotal = countList.get(0);
@@ -157,7 +157,7 @@ public class TeleSaleTrackingController {
             List<Object> curList = new ArrayList<>();
             curList.add(i + 1);
             curList.add(ra.getOrgName());
-            curList.add(ra.getCusLevel());
+            curList.add(getCusLeveName(ra.getCusLevel()));
             curList.add(ra.getCountResource());
             curList.add(ra.getCountClueId());
             curList.add(ra.getCountDistinctClue());
@@ -191,8 +191,8 @@ public class TeleSaleTrackingController {
             buildOrgIdList(trackingQueryDto, orgId);
         }
         JSONResult<List<TeleSaleTrackingDto>> list = teleSaleTrackingFeignClient.getRecordByGroupUserId(trackingQueryDto);
-        if(null != trackingQueryDto.getCusLevel()){
-            teleSaleTrackingFeignClient.getRecordByGroupLevelUserId(trackingQueryDto);
+        if(null != trackingQueryDto.getCusLevelList() && trackingQueryDto.getCusLevelList().size() > 0){
+            list = teleSaleTrackingFeignClient.getRecordByGroupLevelUserId(trackingQueryDto);
         }
         List<List<Object>> dataList = new ArrayList<List<Object>>();
         dataList.add(getHeadTitleList());
@@ -204,7 +204,7 @@ public class TeleSaleTrackingController {
             curList.add(ra.getDateId());
             curList.add(ra.getOrgName());
             curList.add(ra.getUserName());
-            curList.add(ra.getCusLevel());
+            curList.add(getCusLeveName(ra.getCusLevel()));
             curList.add(ra.getCountResource());
             curList.add(ra.getCountClueId());
             curList.add(ra.getCountDistinctClue());
@@ -238,8 +238,8 @@ public class TeleSaleTrackingController {
             buildOrgIdList(trackingQueryDto, orgId);
         }
         JSONResult<List<TeleSaleTrackingDto>> list = teleSaleTrackingFeignClient.getRecordByGroupUserIdDate(trackingQueryDto);
-        if(null != trackingQueryDto.getCusLevel()){
-            teleSaleTrackingFeignClient.getRecordByGroupLevelUserIdDate(trackingQueryDto);
+        if(null != trackingQueryDto.getCusLevelList() && trackingQueryDto.getCusLevelList().size() > 0){
+            list = teleSaleTrackingFeignClient.getRecordByGroupLevelUserIdDate(trackingQueryDto);
         }
         List<List<Object>> dataList = new ArrayList<List<Object>>();
         dataList.add(getHeadTitleList());
@@ -258,7 +258,7 @@ public class TeleSaleTrackingController {
             curList.add(str);
             curList.add(ra.getOrgName());
             curList.add(ra.getUserName());
-            curList.add(ra.getCusLevel());
+            curList.add(getCusLeveName(ra.getCusLevel()));
             curList.add(ra.getCountResource());
             curList.add(ra.getCountClueId());
             curList.add(ra.getCountDistinctClue());
@@ -516,12 +516,12 @@ public class TeleSaleTrackingController {
     }
 
     private void buildOrgIdList(@RequestBody TeleSaleTrackingQueryDto teleSaleTrackingQueryDto, Long org_id) {
-//        if(null == org_id){
-//            UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
-//            List<OrganizationRespDTO> orgGroupByOrgId = getOrgGroupByOrgId(curLoginUser.getOrgId(), OrgTypeConstant.DXZ);
-//            List<Long> orgIdList = orgGroupByOrgId.parallelStream().map(OrganizationRespDTO::getId).collect(Collectors.toList());
-//            teleSaleTrackingQueryDto.setOrgIdList(orgIdList);
-//        }
+        if(null == org_id){
+            UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+            List<OrganizationRespDTO> orgGroupByOrgId = getOrgGroupByOrgId(curLoginUser.getOrgId(), OrgTypeConstant.DXZ);
+            List<Long> orgIdList = orgGroupByOrgId.parallelStream().map(OrganizationRespDTO::getId).collect(Collectors.toList());
+            teleSaleTrackingQueryDto.setOrgIdList(orgIdList);
+        }
     }
     private OrganizationDTO getCurOrgGroupByOrgId(String orgId) {
         // 电销组
@@ -533,5 +533,21 @@ public class TeleSaleTrackingController {
             return null;
         }
         return orgJr.getData();
+    }
+
+    private static String getCusLeveName(Long code){
+        if(code == null){
+            return "";
+        }
+        if(code == 1){
+            return "VIP";
+        }
+        if(code == 2){
+            return "重要";
+        }
+        if (code == 3){
+            return "普通";
+        }
+        return "";
     }
 }
