@@ -88,9 +88,9 @@ public class TeleSaleTrackingController {
         }
         request.setAttribute("trackingQueryDto",trackingQueryDto);
         if(null != trackingQueryDto.getCusLevelList() && trackingQueryDto.getCusLevelList().size() > 0){
-            return teleSaleTrackingFeignClient.getRecordByGroupLevelUserIdDatePage(trackingQueryDto);
+            return teleSaleTrackingFeignClient.getRecordByGroupLevelUserIdPage(trackingQueryDto);
         }else{
-            return teleSaleTrackingFeignClient.getRecordByGroupUserIdDatePage(trackingQueryDto);
+            return teleSaleTrackingFeignClient.getRecordByGroupUserIdPage(trackingQueryDto);
         }
     }
 
@@ -516,12 +516,12 @@ public class TeleSaleTrackingController {
     }
 
     private void buildOrgIdList(@RequestBody TeleSaleTrackingQueryDto teleSaleTrackingQueryDto, Long org_id) {
-        if(null == org_id){
-            UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
-            List<OrganizationRespDTO> orgGroupByOrgId = getOrgGroupByOrgId(curLoginUser.getOrgId(), OrgTypeConstant.DXZ);
-            List<Long> orgIdList = orgGroupByOrgId.parallelStream().map(OrganizationRespDTO::getId).collect(Collectors.toList());
-            teleSaleTrackingQueryDto.setOrgIdList(orgIdList);
-        }
+//        if(null == org_id){
+//            UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+//            List<OrganizationRespDTO> orgGroupByOrgId = getOrgGroupByOrgId(curLoginUser.getOrgId(), OrgTypeConstant.DXZ);
+//            List<Long> orgIdList = orgGroupByOrgId.parallelStream().map(OrganizationRespDTO::getId).collect(Collectors.toList());
+//            teleSaleTrackingQueryDto.setOrgIdList(orgIdList);
+//        }
     }
     private OrganizationDTO getCurOrgGroupByOrgId(String orgId) {
         // 电销组
