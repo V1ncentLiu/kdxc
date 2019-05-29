@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.SecurityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -65,8 +66,11 @@ public class FinanceLayoutController {
      */
     @RequestMapping("/financeLayoutPage")
     public String financeLayoutList(HttpServletRequest request) {
-
+        UserInfoDTO userInfoDTO = getUser();
         OrganizationQueryDTO orgDto = new OrganizationQueryDTO();
+        if(StringUtils.isNotBlank(userInfoDTO.getBusinessLine())){
+            orgDto.setBusinessLine(Integer.parseInt(userInfoDTO.getBusinessLine()));
+        }
         orgDto.setOrgType(OrgTypeConstant.SWZ);
         orgDto.setSystemCode(SystemCodeConstant.HUI_JU);
         // 商务小组
@@ -178,6 +182,15 @@ public class FinanceLayoutController {
             @RequestBody FinanceLayoutDTO financeLayoutDTO) {
         return financeLayoutFeignClient.deleFinanceLayout(financeLayoutDTO);
     }
-
+    /**
+     * 获取当前登录账号
+     *
+     * @return
+     */
+    private UserInfoDTO getUser() {
+        Object attribute = SecurityUtils.getSubject().getSession().getAttribute("user");
+        UserInfoDTO user = (UserInfoDTO) attribute;
+        return user;
+    }
 
 }

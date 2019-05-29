@@ -83,6 +83,9 @@
                     </el-option>
                 </el-select>
             </el-form-item>
+            <el-form-item label="业务线：" :label-width="formLabelWidth" prop="businessLine" v-if="0">
+                <el-input v-model="form.businessLine" placeholder="业务线"></el-input>
+            </el-form-item>
             <el-form-item label="签约项目：" :label-width="formLabelWidth" prop="signProjects">
                 <el-select multiple-limit=10  filterable v-model="form.signProjects" multiple  placeholder="选择签约项目" style="width: 290px;">
                     <el-option
@@ -140,6 +143,7 @@
         el: '#organizationManage',
         data: {
         	showTitle:"",
+          businessLine:"",
         	dialogBatchVisible:false,
         	confirmBtnDisabled:false,
         	formLabelWidth: '130px',
@@ -156,7 +160,8 @@
         	financeUsers:"",
         	form:{
         		busGroupId: '',
-        		financeUsers: ''
+        		financeUsers: '',
+            businessLine:''
         	},
         
             pager:{
@@ -184,6 +189,7 @@
             //根据商务小组查询
             userChangeSelect(selVal) {
         	    if(null != selVal.businessLine  ){
+                    orgVM.form.businessLine = selVal.businessLine;
                     var param = {};
                     param.roleList = ["QDSJCW","SJHZCW","CYCW"];
                     param.businessLine = selVal.businessLine;
@@ -382,6 +388,7 @@
               	} ,
              submitForm(formName) {
                     this.$refs[formName].validate((valid) => {
+                      debugger;
                         if (valid) {
                           var formData = this.form;
                           var param={};
@@ -389,9 +396,9 @@
                             for (var i = 0; i < formData.financeUsers.length; i++) {
                                 var user = formData.financeUsers[i];
                                 if (strs != "") {
-                                    strs = strs + "," + user.id;
+                                    strs = strs + "," + user;
                                 } else {
-                                    strs = user.id;
+                                    strs = user;
                                 }
                             }
                             param.financeUsers = strs;
@@ -414,6 +421,7 @@
                             }
                             param.signProvinces = signProvincesStrs;
                           param.busGroupId = formData.busGroupId.id;
+                          param.businessLine = formData.businessLine;
                           var str = "";
                           var rows = this.multipleSelection;
                           for ( var i = 0; i <rows.length; i++){
