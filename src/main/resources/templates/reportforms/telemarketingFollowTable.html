@@ -15,8 +15,10 @@
     <el-row class="marginB20">
         <el-button type="primary" @click="searchYesterday">昨天</el-button>
         <el-button type="success" @click="searchWeek">近七天</el-button>
-        <el-button type="warning" @click="searchMonth">本月</el-button>  
-        <el-button type="danger" @click="exportRs">导出Excel报表</el-button>  
+        <el-button type="warning" @click="searchMonth">本月</el-button>
+        <shiro:hasPermission name="statistics:telemarketingFollow:export">
+        <el-button type="danger" @click="exportRs">导出Excel报表</el-button>
+        </shiro:hasPermission>
     </el-row>
     <div class="mainSearchBg">        
         <div class="mainSearchFormBox">
@@ -75,7 +77,7 @@
                 <el-table-column prop="countResource" label="资源数"></el-table-column>
                 <el-table-column prop="countClueId" label="回访次数"></el-table-column>
                 <el-table-column prop="countDistinctClue" label="回访资源数"></el-table-column>
-                <el-table-column prop="dayOfPer" label="人均天回访次数"></el-table-column>
+                <el-table-column prop="dayOfPer" label="人均天回访次数" :formatter="numFormat"></el-table-column>
             </el-table>
             <table-pagination :pager="pager" @change="searchTable()"></table-pagination>
         </el-row>
@@ -324,10 +326,13 @@
                 // sums[sums.length-1] = this.timeFun (sums[sums.length-1]);
                 // return sums;
             },
-            numFormat(val){
-                if(val){
-                    return Math.floor(val * 100) / 100;
-                }
+            numFormat(row, column){
+                var percent = row[column.property];
+                console.log(percent)
+                if(percent){
+                    percent = Math.floor(percent * 100) / 100;
+                }                
+                return percent;
             },
             minuteFormat (m) {
                 if (!m) {
