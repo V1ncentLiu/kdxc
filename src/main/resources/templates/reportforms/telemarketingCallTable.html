@@ -40,7 +40,7 @@
                     </el-select>
                 </el-form-item>
                 <div class="mainSearchBtnBox">
-                    <el-button icon="el-icon-search" type="primary" @click="searchTable" class="searchBtn">搜索</el-button>
+                    <el-button icon="el-icon-search" type="primary" @click="searchTable(1)" class="searchBtn">搜索</el-button>
                 </div>  
             </el-form>
         </div>
@@ -151,7 +151,7 @@
             }             
         },
         methods: {            
-            searchTable() { 
+            searchTable(firstPage) { 
                 var startTime = this.form.startTime;
                 var endTime = this.form.endTime;
                 if(endTime && startTime){
@@ -188,16 +188,14 @@
                 }   
                 
                 var param = {};
-                // var s = this.minuteFormat(startTime);
-                // var e = this.minuteFormat(endTime);
-                // startTime = this.limitTime (startTime, null);
-                // endTime = this.limitTime (null, endTime);
-                // param.startTime = this.limitTime (startTime, null);
-                // param.endTime = this.limitTime (null, endTime);
                 param.startTime = this.minuteFormat(startTime);
                 param.endTime = this.minuteFormat(endTime);
                 param.pageSize = this.pager.pageSize;
-                param.pageNum = this.pager.currentPage;
+                if(firstPage){
+                    param.pageNum = firstPage;
+                }else{
+                    param.pageNum = this.pager.currentPage;
+                }
                 param.orgId = this.form.orgId; 
                 console.log(param);
                 this.loading = true; 
@@ -354,7 +352,7 @@
                var endTime =today.getFullYear()+"-" + (today.getMonth()+1) + "-" + today.getDate()+" 23:59";
                this.form.startTime=startTime;
                this.form.endTime=endTime;
-               this.searchTable();
+               this.searchTable(1);
             },
             searchWeek(){ // 近七天
                  var a = new Date();
@@ -368,7 +366,7 @@
                  var endTime = new Date(d);
                  this.form.startTime=startTime.getFullYear()+"-" + (startTime.getMonth()+1) + "-" + startTime.getDate()+" 00:00";
                  this.form.endTime=endTime.getFullYear()+"-" + (endTime.getMonth()+1) + "-" + endTime.getDate()+" 23:59";
-                 this.searchTable();
+                 this.searchTable(1);
             },
             searchMonth(){ // 本月 
                 var a = new Date();
@@ -381,7 +379,7 @@
                 var startTime= new Date(c);
                 this.form.startTime=startTime.getFullYear()+"-" + (startTime.getMonth()+1) + "-" + startTime.getDate()+" 00:00";
                 this.form.endTime=year+"-"+(month+1)+"-"+date+" 23:59";
-                this.searchTable();
+                this.searchTable(1);
             },
             exportRs(){
                 var param = {};
