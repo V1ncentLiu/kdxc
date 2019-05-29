@@ -257,8 +257,9 @@ public class TeleSaleTalkTimeController {
          if(RoleCodeEnum.DXZJ.name().equals(roleCode)) {
              teleSaleTalkTimeQueryDTO.setOrgId(orgId);
          }else {
+             Long curOrgId = curLoginUser.getOrgId();
              OrganizationQueryDTO busGroupReqDTO = new OrganizationQueryDTO();
-             busGroupReqDTO.setParentId(orgId);
+             busGroupReqDTO.setParentId(curOrgId);
              busGroupReqDTO.setSystemCode(SystemCodeConstant.HUI_JU);
              busGroupReqDTO.setOrgType(OrgTypeConstant.DXZ);
              JSONResult<List<OrganizationRespDTO>> orgJr = organizationFeignClient.queryOrgByParam(busGroupReqDTO);
