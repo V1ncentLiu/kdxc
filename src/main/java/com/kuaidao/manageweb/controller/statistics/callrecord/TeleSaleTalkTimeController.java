@@ -249,7 +249,7 @@ public class TeleSaleTalkTimeController {
  @RequestMapping("/listTeleSaleTalkTime")
  public JSONResult<PageBean<TeleTalkTimeRespDTO>> listTeleSaleTalkTime(@RequestBody TeleSaleTalkTimeQueryDTO teleSaleTalkTimeQueryDTO) {
      Long orgId = teleSaleTalkTimeQueryDTO.getOrgId();
-     if(orgId!=null) {
+     if(orgId==null) {
          UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
          List<RoleInfoDTO> roleList = curLoginUser.getRoleList();
          RoleInfoDTO roleInfoDTO = roleList.get(0);
