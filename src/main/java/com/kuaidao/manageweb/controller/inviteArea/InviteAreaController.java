@@ -10,6 +10,7 @@ import com.kuaidao.aggregation.dto.project.CompanyInfoDTO;
 import com.kuaidao.aggregation.dto.project.CompanyInfoPageParam;
 import com.kuaidao.aggregation.dto.project.ProjectInfoPageParam;
 import com.kuaidao.manageweb.feign.project.CompanyInfoFeignClient;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.SecurityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -108,11 +109,15 @@ public class InviteAreaController {
      */
     @RequestMapping("/addInviteAreaPage")
     public String addInviteArea(HttpServletRequest request) {
+        UserInfoDTO userInfoDTO = getUser();
         // 获取省份
         List<SysRegionDTO> proviceslist = sysRegionFeignClient.getproviceList().getData();
         OrganizationQueryDTO orgDto = new OrganizationQueryDTO();
         orgDto.setOrgType(OrgTypeConstant.SWZ);
         orgDto.setSystemCode(SystemCodeConstant.HUI_JU);
+        if(StringUtils.isNotBlank(userInfoDTO.getBusinessLine())){
+            orgDto.setBusinessLine(Integer.parseInt(userInfoDTO.getBusinessLine()));
+        }
         // 商务小组
         JSONResult<List<OrganizationRespDTO>> swList =
                 organizationFeignClient.queryOrgByParam(orgDto);
@@ -135,7 +140,25 @@ public class InviteAreaController {
     }
 
     /**
-     * 添加邀约区域页面
+     * 根据业务线获取电销组
+     * @param inviteAreaDTO
+     * @return
+     */
+    @PostMapping("/getDxOrganizations")
+    @ResponseBody
+    public JSONResult<List<OrganizationRespDTO>> getDxOrganizations(@RequestBody InviteAreaDTO inviteAreaDTO){
+        Integer businessLine = inviteAreaDTO.getBusinessLine();
+        OrganizationQueryDTO orgDto = new OrganizationQueryDTO();
+        orgDto.setOrgType(OrgTypeConstant.SWZ);
+        orgDto.setSystemCode(SystemCodeConstant.HUI_JU);
+        orgDto.setBusinessLine(businessLine);
+        // 电销小组
+        JSONResult<List<OrganizationRespDTO>> dxList =
+            organizationFeignClient.queryOrgByParam(orgDto);
+        return dxList;
+    }
+    /**
+     * 修改邀约区域页面
      * 
      * @return
      */
@@ -149,18 +172,21 @@ public class InviteAreaController {
         OrganizationQueryDTO orgDto = new OrganizationQueryDTO();
         orgDto.setOrgType(OrgTypeConstant.SWZ);
         orgDto.setSystemCode(SystemCodeConstant.HUI_JU);
-        // 商务小组
-        JSONResult<List<OrganizationRespDTO>> swList =
-                organizationFeignClient.queryOrgByParam(orgDto);
-        orgDto.setOrgType(OrgTypeConstant.DXZ);
-        // 电销小组
-        JSONResult<List<OrganizationRespDTO>> dxList =
-                organizationFeignClient.queryOrgByParam(orgDto);
         // 查询项目列表
         JSONResult<List<ProjectInfoDTO>> allProject = projectInfoFeignClient.allProject();
 
         List<InviteAreaDTO> inviteAreaDTOs =
                 inviteareaFeignClient.getInviteAreaListByIds(inviteAreaDTO).getData();
+        if(inviteAreaDTOs.get(0).getBusinessLine() != null){
+            orgDto.setBusinessLine(inviteAreaDTOs.get(0).getBusinessLine());
+        }
+        // 商务小组
+        JSONResult<List<OrganizationRespDTO>> swList =
+            organizationFeignClient.queryOrgByParam(orgDto);
+        orgDto.setOrgType(OrgTypeConstant.DXZ);
+        // 电销小组
+        JSONResult<List<OrganizationRespDTO>> dxList =
+            organizationFeignClient.queryOrgByParam(orgDto);
         int isshowBusinessGroup = 0;
         int isshowTelemarketingTeam = 0;
         int isshowprovince = 0;
@@ -494,5 +520,15 @@ public class InviteAreaController {
             }
         }
         return list;
+    }
+    /**
+     * 获取当前登录账号
+     *
+     * @return
+     */
+    private UserInfoDTO getUser() {
+        Object attribute = SecurityUtils.getSubject().getSession().getAttribute("user");
+        UserInfoDTO user = (UserInfoDTO) attribute;
+        return user;
     }
 }
