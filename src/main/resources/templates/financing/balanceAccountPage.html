@@ -144,8 +144,8 @@
                       </el-option>
                       </el-select>
                     </el-form-item>
-                    <el-form-item label="客户手机号:" prop="phone">
-                      <el-input v-model="searchForm.phone" placeholder="客户手机号"></el-input>
+                    <el-form-item label="客户联系方式:" prop="phone">
+                      <el-input v-model="searchForm.phone" placeholder="客户联系方式"></el-input>
                     </el-form-item>
                     <el-form-item label="结算单编号:" prop="statementNo">
                         <el-input v-model="searchForm.statementNo" placeholder="结算单编号"></el-input>
@@ -155,7 +155,7 @@
                     </el-form-item>
                     
                 </el-row>
-                <div class="mainSearchBtnBox"> 
+                <div class="mainSearchBtnBox">
                     <el-button icon="el-icon-search" type="primary" @click="searchTable()" class="searchBtn">搜索</el-button>
                     <!-- <el-button type="info" class="searchBtn">取消</el-button> -->
                     <span style="color: #5c6be8;cursor: pointer;margin:0 10px;" @click="toogleClick"><span v-if="isShow">收起</span><span v-else>展开更多</span><i :class="{'greycolor paddingL6 el-icon-arrow-up':isShow,'greycolor paddingL6 el-icon-arrow-down':!isShow}"></i></span>
@@ -190,10 +190,10 @@
     	        <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width"
     	         v-else-if="item.fieldCode == 'statementNo'">
     	               <template slot-scope="scope">
-    	               <div v-if="scope.row.status !='驳回商务' && scope.row.status !='待处理' && scope.row.status !='提交对账'">
+    	               <div v-if="scope.row.status !='驳回商务' && scope.row.status !='待处理'">
     	               	<a :href="'/financing/balanceaccount/settleAccounts?payDetailId='+scope.row.payId+''" target="_blank" class="blueColorBtn">{{scope.row.statementNo}} </a>
     	               </div>
-    	           <div v-else-if="scope.row.status =='驳回商务' || scope.row.status =='待处理' || scope.row.status =='提交对账'">
+    	           <div v-else-if="scope.row.status =='驳回商务' || scope.row.status =='待处理'">
     	               	<a style="color:#222">{{scope.row.statementNo}} </a>
     	               </div>
     	               
@@ -660,9 +660,9 @@ var clueVM = new Vue({
                        return;
                    } 
             	   var status = rows[0].status;
-            	   if(status =="待处理" || status =="驳回商务"  || status =="提交对账"){
+            	   if(status =="待处理" || status =="驳回商务" ){
             		   this.$message({
-                           message: "未对账确认不允许下载结算单",
+                           message: "未提交对账不允许下载结算单",
                            type: 'warning'
                          });
                         return;

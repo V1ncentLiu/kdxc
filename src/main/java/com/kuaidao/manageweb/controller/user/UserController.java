@@ -4,14 +4,12 @@
 package com.kuaidao.manageweb.controller.user;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
@@ -23,11 +21,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
+
 import com.kuaidao.common.constant.DicCodeEnum;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.IdEntityLong;
@@ -52,15 +47,7 @@ import com.kuaidao.sys.dto.dictionary.DictionaryItemRespDTO;
 import com.kuaidao.sys.dto.organization.OrganizationDTO;
 import com.kuaidao.sys.dto.role.RoleInfoDTO;
 import com.kuaidao.sys.dto.role.RoleQueryDTO;
-import com.kuaidao.sys.dto.user.SysSettingDTO;
-import com.kuaidao.sys.dto.user.SysSettingReq;
-import com.kuaidao.sys.dto.user.UpdateUserPasswordReq;
-import com.kuaidao.sys.dto.user.UserDataAuthReq;
-import com.kuaidao.sys.dto.user.UserInfoDTO;
-import com.kuaidao.sys.dto.user.UserInfoPageParam;
-import com.kuaidao.sys.dto.user.UserInfoParamListReqDTO;
-import com.kuaidao.sys.dto.user.UserInfoReq;
-import com.kuaidao.sys.dto.user.UserOrgRoleReq;
+import com.kuaidao.sys.dto.user.*;
 
 /**
  * @author gpc
@@ -534,6 +521,20 @@ public class UserController {
         return userInfoFeignClient.listUserInfoByParam(reqDTO);
     }
 
+    /**
+     * 根据条件查询用户集合
+     * @param
+     * @author: Fanjd
+     * @return:
+     * @Date: 2019/5/22 15:46
+     * @since: 1.0.0
+     **/
+    @PostMapping("/getUserInfoListByParam")
+    @ResponseBody
+    public JSONResult<List<UserInfoDTO>> getUserInfoListByParam(@RequestBody  UserOrgRoleReq reqDTO) {
+        JSONResult<List<UserInfoDTO>> jsonResult = userInfoFeignClient.getUserInfoListByParam(reqDTO);
+        return jsonResult;
+    }
     /**
      * 首页 修改密码
      * 

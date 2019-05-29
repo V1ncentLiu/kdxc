@@ -7,6 +7,7 @@ import java.awt.image.BufferedImage;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+
 import javax.imageio.ImageIO;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
@@ -18,7 +19,6 @@ import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.*;
 import org.apache.shiro.session.Session;
 import org.apache.shiro.subject.PrincipalCollection;
-import org.apache.shiro.subject.SimplePrincipalCollection;
 import org.apache.shiro.subject.Subject;
 import org.apache.shiro.subject.support.DefaultSubjectContext;
 import org.apache.shiro.web.mgt.DefaultWebSecurityManager;
@@ -34,14 +34,10 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
 import com.google.code.kaptcha.impl.DefaultKaptcha;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.JSONResult;
@@ -65,13 +61,7 @@ import com.kuaidao.msgpush.dto.SmsCodeSendReq;
 import com.kuaidao.msgpush.dto.SmsVoiceCodeReq;
 import com.kuaidao.sys.constant.SysConstant;
 import com.kuaidao.sys.constant.UserErrorCodeEnum;
-import com.kuaidao.sys.dto.user.LoginRecordDTO;
-import com.kuaidao.sys.dto.user.LoginRecordReq;
-import com.kuaidao.sys.dto.user.SysSettingDTO;
-import com.kuaidao.sys.dto.user.SysSettingReq;
-import com.kuaidao.sys.dto.user.UpdateUserPasswordReq;
-import com.kuaidao.sys.dto.user.UserInfoDTO;
-import com.kuaidao.sys.dto.user.UserInfoReq;
+import com.kuaidao.sys.dto.user.*;
 
 
 /**
@@ -100,7 +90,7 @@ public class LoginController {
     @Autowired
     private RedisSessionDAO redisSessionDAO;
 
-    private Logger logger = LoggerFactory.getLogger(this.getClass());
+    private Logger logger = LoggerFactory.getLogger(getClass());
     @Autowired
     private AmqpTemplate amqpTemplate;
 
@@ -713,6 +703,9 @@ public class LoginController {
         Collection<Session> sessions = sessionManager.getSessionDAO().getActiveSessions();
         String sessionUserName = "";
         for (Session session : sessions) {
+            if (null == session) {
+                continue;
+            }
             //清除该用户以前登录时保存的session，强制退出
             Object attribute = session.getAttribute(DefaultSubjectContext.PRINCIPALS_SESSION_KEY);
             if (attribute == null) {

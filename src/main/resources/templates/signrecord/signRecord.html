@@ -129,6 +129,12 @@
                             </el-option>
                         </el-select>
                     </el-form-item>
+                    <el-form-item label="资源Id:">
+                        <el-input v-model="form.clueId" placeholder="资源Id"></el-input>
+                    </el-form-item>
+                    <el-form-item label="客户联系方式:">
+                        <el-input v-model="form.cusPhone" placeholder="客户联系方式"></el-input>
+                    </el-form-item>
                 </el-row>
                 <div class="mainSearchBtnBox">
                     <el-button icon="el-icon-search" type="primary" @click="initSignRecordData" class="searchBtn">搜索
@@ -282,6 +288,7 @@
                     :data="recordTable"
             >
                 <el-table-column align="center" prop="statementNo" label="结算单编号"></el-table-column>
+                <el-table-column align="center" prop="payName" label="付款人姓名"></el-table-column>
                 <el-table-column align="center" prop="payMode" label="付款方式" :formatter="getPayModeText"
                                  width="80"></el-table-column>
                 <el-table-column align="center" prop="payTime" label="付款时间" :formatter="getTimeText"
@@ -303,6 +310,7 @@
                     :data="recordTable2"
             >
                 <el-table-column align="center" prop="statementNo" label="结算单编号"></el-table-column>
+                <el-table-column align="center" prop="payName" label="付款人姓名"></el-table-column>
                 <el-table-column align="center" prop="payMode" label="付款方式" :formatter="getPayModeText"
                                  width="80"></el-table-column>
                 <el-table-column align="center" prop="payTime" label="付款时间" :formatter="getTimeText"
@@ -327,6 +335,7 @@
                     :data="recordTable3"
             >
                 <el-table-column align="center" prop="statementNo" label="结算单编号"></el-table-column>
+                <el-table-column align="center" prop="payName" label="付款人姓名"></el-table-column>
                 <el-table-column align="center" prop="payMode" label="付款方式" :formatter="getPayModeText"
                                  width="80"></el-table-column>
                 <el-table-column align="center" prop="payTime" label="付款时间" :formatter="getTimeText"
@@ -351,6 +360,7 @@
                     :data="recordTable4"
             >
                 <el-table-column align="center" prop="statementNo" label="结算单编号"></el-table-column>
+                <el-table-column align="center" prop="payName" label="付款人姓名"></el-table-column>
                 <el-table-column align="center" prop="payMode" label="付款方式"
                                  :formatter="getPayModeText"></el-table-column>
                 <el-table-column align="center" prop="payTime" label="付款时间" :formatter="getTimeText"></el-table-column>
@@ -782,7 +792,7 @@
                 param.pageSize = this.pager.pageSize;
                 axios.post('/sign/signRecord/listSignRecord', param)
                     .then(function (response) {
-                        var data = response.data
+                        var data = response.data;
                         if (data.code == '0') {
                             var resData = data.data;
                             signRecordVM.dataTable = resData.data;

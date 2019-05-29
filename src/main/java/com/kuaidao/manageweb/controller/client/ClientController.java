@@ -654,7 +654,6 @@ public class ClientController {
      */
     @PostMapping("/qimoLogin")
     @ResponseBody
-    @RequiresPermissions("aggregation:qimoClient:import")
     @LogRecord(description = "七陌坐席", operationType = OperationType.LOGIN,
             menuName = MenuEnum.QIMO_CLIENT_MANAGEMENT)
     public JSONResult qimoLogin(@RequestBody QimoLoginReqDTO reqDTO ) {

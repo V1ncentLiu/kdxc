@@ -99,6 +99,16 @@ public class ClueRepetitionController {
 			idList = userList.stream().map(c -> c.getId() ).collect(Collectors.toList());
 		}else if (roleList != null && RoleCodeEnum.DXCYGW.name().equals(roleList.get(0).getRoleCode())) {
 			idList.add(user.getId()) ;
+		}else if (roleList != null && RoleCodeEnum.DXFZ.name().equals(roleList.get(0).getRoleCode())) {
+			OrganizationQueryDTO reqDto = new OrganizationQueryDTO();
+			reqDto.setParentId(user.getOrgId());
+			JSONResult<List<OrganizationDTO>> jsonResult = organizationFeignClient.listDescenDantByParentId(reqDto);
+			if (JSONResult.SUCCESS.equals(jsonResult.getCode())) {
+				List<Long> idLists =
+						jsonResult.getData().stream().map(c -> c.getId() ).collect(Collectors.toList());
+				List<UserInfoDTO> userList = getUserLists(idLists, RoleCodeEnum.DXCYGW.name());
+				idList = userList.stream().map(c -> c.getId() ).collect(Collectors.toList());
+			}
 		}
 		JSONResult<PageBean<ClueRepetitionDTO>> list = new JSONResult<>();
 		if(idList !=null && idList.size()>0) {
@@ -123,6 +133,19 @@ public class ClueRepetitionController {
 		JSONResult<List<UserInfoDTO>> listByOrgAndRole = userInfoFeignClient.listByOrgAndRole(userOrgRoleReq);
 		return listByOrgAndRole.getData();
 	}
+	 /**
+		 * 根据机构和角色类型获取用户
+		 * 
+		 * @param orgDTO
+		 * @return
+		 */
+		private List<UserInfoDTO> getUserLists(List<Long> orgIds, String roleCode) {
+			UserOrgRoleReq userOrgRoleReq = new UserOrgRoleReq();
+			userOrgRoleReq.setOrgIdList(orgIds);
+			userOrgRoleReq.setRoleCode(roleCode);
+			JSONResult<List<UserInfoDTO>> listByOrgAndRole = userInfoFeignClient.listByOrgAndRole(userOrgRoleReq);
+			return listByOrgAndRole.getData();
+		}
     /**
 	 * 获取当前登录账号
 	 * 
@@ -201,6 +224,8 @@ public class ClueRepetitionController {
     @ResponseBody
     @LogRecord(description = "重单审核",operationType = LogRecord.OperationType.UPDATE,menuName = MenuEnum.REPETITION)
     public JSONResult updatePetitionById(HttpServletRequest request,@RequestBody ClueRepetitionDTO clueRepetitionDTO) {
+		UserInfoDTO user = getUser();
+		clueRepetitionDTO.setLoginUserId(user.getId());
     	return clueRepetitionFeignClient.updatePetitionById(clueRepetitionDTO);
     }
     
