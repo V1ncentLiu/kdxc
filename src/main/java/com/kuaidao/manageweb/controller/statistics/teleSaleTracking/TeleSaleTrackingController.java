@@ -88,9 +88,9 @@ public class TeleSaleTrackingController {
         }
         request.setAttribute("trackingQueryDto",trackingQueryDto);
         if(null != trackingQueryDto.getCusLevelList() && trackingQueryDto.getCusLevelList().size() > 0){
-            return teleSaleTrackingFeignClient.getRecordByGroupLevelUserIdPage(trackingQueryDto);
+            return teleSaleTrackingFeignClient.getRecordByGroupLevelUserIdDatePage(trackingQueryDto);
         }else{
-            return teleSaleTrackingFeignClient.getRecordByGroupUserIdPage(trackingQueryDto);
+            return teleSaleTrackingFeignClient.getRecordByGroupUserIdDatePage(trackingQueryDto);
         }
     }
 

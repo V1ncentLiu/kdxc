@@ -92,7 +92,6 @@
     // var distributionSource=[[${queryOrg}]];//分配来源    
     var fieldList=[[${fieldList}]];//表头list 
     var curOrgId = [[${curOrgId}]];//当前电销组
-    // console.log(curOrgId);   
     var mainDivVM = new Vue({
         el: '#maindiv',
         data: function() {
@@ -124,9 +123,6 @@
                 },{
                     id:3,
                     name:'非新资源'
-                },{
-                    id:99,
-                    name:'其他(资源未分配)'
                 }],//分配来源
                 pager:{
                     total: 0,
@@ -140,7 +136,6 @@
                 var startTime=this.form.startTime;
                 var endTime=this.form.endTime;
                 if(endTime && startTime){
-                    console.log(startTime,endTime);
                     if(startTime>endTime){
                         this.$message({
                             message: '开始时间不能大于结束时间',
@@ -161,6 +156,8 @@
                         });
                         return;
                     }
+                    startTime = this.limitTime(startTime, null);
+                    endTime = this.limitTime(null, endTime);
                 }else{
                     this.$message({
                         message: '请选择起止时间',
@@ -277,7 +274,6 @@
                 // };
                 mainDivVM.loading=true;
                 axios.post('/statistics/teleStatement/getResourceAllocationCount',param).then(function (response) {
-                    console.log(response) 
                     if(!response){
                         mainDivVM.$message({
                             message: "合计接口调用失败",
@@ -339,6 +335,29 @@
                    return "";
                  }
                 return moment(m).format("YYYYMMDDHHmm");
+            },
+            limitTime (start, end) {
+                var startTime = this.minuteFormat (start);
+                var endTime = this.minuteFormat (end);
+                var date = new Date();
+                data = this.minuteFormat (date);// 现在的时间
+                data = data.slice(0,8);
+                if(startTime){
+                    var s = startTime.slice(0,8);
+                    if(s < data){
+                        this.form.startTime = moment(start).format("YYYY-MM-DD 00:00");
+                        return this.form.startTime;
+                    }
+                    return start;
+                }
+                if(endTime){
+                    var e = endTime.slice(0,8);
+                    if(e < data){
+                        this.form.endTime = moment(end).format("YYYY-MM-DD 23:59");
+                        return this.form.endTime;                        
+                    }
+                    return end;
+                }
             },
             searchYesterday(){//昨天
                 var today = new Date();

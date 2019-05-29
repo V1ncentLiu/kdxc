@@ -87,6 +87,14 @@ public class TeleSaleTalkTimeController {
         
         JSONResult<PageBean<TeleTalkTimeRespDTO>> talkTimeList = teleTalkTimeFeignClient.listTeleGroupTalkTime(teleSaleTalkTimeQueryDTO);
         JSONResult<TeleTalkTimeRespDTO> totalTeleGroupTalkTime = teleTalkTimeFeignClient.totalTeleGroupTalkTime(teleSaleTalkTimeQueryDTO);
+        if(!JSONResult.SUCCESS.equals(talkTimeList.getCode())) {
+          return new JSONResult<Map<String,Object>>().fail(talkTimeList.getCode(), talkTimeList.getMsg());  
+        }
+        
+        if(!JSONResult.SUCCESS.equals(totalTeleGroupTalkTime.getCode())) {
+            return new JSONResult<Map<String,Object>>().fail(totalTeleGroupTalkTime.getCode(), totalTeleGroupTalkTime.getMsg());  
+          }
+        
         
         resMap.put("totalData",totalTeleGroupTalkTime.getData());
         resMap.put("tableData", talkTimeList.getData());

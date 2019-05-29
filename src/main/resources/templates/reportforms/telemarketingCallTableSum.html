@@ -95,11 +95,8 @@
 </body>
 <script th:inline="javascript">
     var queryOrg=[[${teleGroupList}]]; // 电销组
-    console.log(queryOrg,'电销组');
     var parentParam = [[${parentParam}]];
-    console.log(parentParam,'parentParam');
     var curOrgId = [[${curOrgId}]];
-    console.log(curOrgId);
     var mainDivVM = new Vue({
         el: '#maindiv',
         data: function() {
@@ -204,7 +201,6 @@
                 }
                 param.orgId =  this.form.orgId; // 电销组
                 param.userId =  this.form.userId; // 电销
-                console.log(param);
                 this.loading = true; 
                 axios.post('/callrecord/teleSaleTalkTime/listTeleSaleTalkTime',param).then(function (response) { 
                     if(!response){
@@ -215,7 +211,6 @@
                         return ;
                     }
                     var resobj= response.data;
-                    console.log(resobj)
                     if(!resobj){
                         mainDivVM.$message({
                             message: "接口调用失败",
@@ -242,7 +237,6 @@
                     mainDivVM.export.orgId = mainDivVM.form.orgId;
                     mainDivVM.export.userId = mainDivVM.form.userId;
                 }).catch(function (error) {
-                    console.log(error);
                     mainDivVM.loading = false;
                     mainDivVM.$message({
                         message: "请求失败，请稍后重试",
@@ -281,12 +275,11 @@
                 param.id = seleVal;
                 axios.post('/organization/organization/queryTeleSaleByOrgId', param)
                 .then(function (response) {
-                      var result =  response.data;
+                      var result = response.data;
                       var table=result.data;
                       mainDivVM.teleIdList= table;
                 })
                 .catch(function (error) {
-                     console.log(error);
                      mainDivVM.$message({
                         message: "电销顾问请求失败，请稍后重试",
                         type: "error"
@@ -408,13 +401,11 @@
                 axios.post
                 ('/callrecord/teleSaleTalkTime/exportTeleSaleTalkTime',param,{responseType:'blob'})
                     .then(function (response) {
-                        console.log(response);
                         var data =  response.data;
                         var fileName = response.headers.filename;
                         saveAs(data,decodeURI(fileName));
                     })
                     .catch(function (error) {
-                        console.log(error);
                         mainDivVM.$message({
                             message: "导出失败，请稍后重试",
                             type: "error"
