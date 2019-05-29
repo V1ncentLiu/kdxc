@@ -68,7 +68,7 @@ public class TeleSaleTrackingController {
         if(null == orgId){
             buildOrgIdList(trackingQueryDto, orgId);
         }
-        if(null != trackingQueryDto.getCusLevel()){
+        if(null != trackingQueryDto.getCusLevelList() && trackingQueryDto.getCusLevelList().size() > 0){
             return teleSaleTrackingFeignClient.getRecordByGroupLevelPage(trackingQueryDto);
         }else{
             return teleSaleTrackingFeignClient.getRecordByGroupPage(trackingQueryDto);
@@ -87,10 +87,10 @@ public class TeleSaleTrackingController {
             buildOrgIdList(trackingQueryDto, orgId);
         }
         request.setAttribute("trackingQueryDto",trackingQueryDto);
-        if(null != trackingQueryDto.getCusLevel()){
-            return teleSaleTrackingFeignClient.getRecordByGroupLevelUserIdPage(trackingQueryDto);
+        if(null != trackingQueryDto.getCusLevelList() && trackingQueryDto.getCusLevelList().size() > 0){
+            return teleSaleTrackingFeignClient.getRecordByGroupLevelUserIdDatePage(trackingQueryDto);
         }else{
-            return teleSaleTrackingFeignClient.getRecordByGroupUserIdPage(trackingQueryDto);
+            return teleSaleTrackingFeignClient.getRecordByGroupUserIdDatePage(trackingQueryDto);
         }
     }
 
@@ -106,7 +106,7 @@ public class TeleSaleTrackingController {
             buildOrgIdList(trackingQueryDto, orgId);
         }
         request.setAttribute("trackingQueryDto",trackingQueryDto);
-        if(null != trackingQueryDto.getCusLevel()){
+        if(null != trackingQueryDto.getCusLevelList() && trackingQueryDto.getCusLevelList().size() > 0){
             return teleSaleTrackingFeignClient.getRecordByGroupLevelUserIdDatePage(trackingQueryDto);
         }else{
             return teleSaleTrackingFeignClient.getRecordByGroupUserIdDatePage(trackingQueryDto);
@@ -156,7 +156,6 @@ public class TeleSaleTrackingController {
             TeleSaleTrackingDto ra = orderList.get(i);
             List<Object> curList = new ArrayList<>();
             curList.add(i + 1);
-            curList.add(ra.getDateId());
             curList.add(ra.getOrgName());
             curList.add(ra.getCusLevel());
             curList.add(ra.getCountResource());
@@ -457,9 +456,8 @@ public class TeleSaleTrackingController {
 
     private List<Object> getHeadOneTitleList() {
         List<Object> headTitleList = new ArrayList<>();
-        headTitleList.add("序号");
-        headTitleList.add("日期");
-        headTitleList.add("电销组");
+        headTitleList.add("");
+        headTitleList.add("合计");
         headTitleList.add("客户级别");
         headTitleList.add("资源数");
         headTitleList.add("回访次数");
@@ -483,8 +481,6 @@ public class TeleSaleTrackingController {
     private void addTotalTeportResourceAllocation(TeleSaleTrackingDto resTotal, List<List<Object>> dataList) {
         List<Object> totalList = new ArrayList<>();
         totalList.add("");
-        totalList.add("合计");
-        totalList.add("");
         totalList.add("");
         totalList.add("");
         totalList.add(resTotal.getCountResource());
@@ -497,7 +493,7 @@ public class TeleSaleTrackingController {
     private List getCountTotal(TeleSaleTrackingQueryDto trackingQueryDto){
         logger.info("跟踪查询参数"+trackingQueryDto.toString());
         List<TeleSaleTrackingDto> list = teleSaleTrackingFeignClient.getRecordByGroup(trackingQueryDto).getData();
-        if(null != trackingQueryDto.getCusLevel()){
+        if(null != trackingQueryDto.getCusLevelList() && trackingQueryDto.getCusLevelList().size() > 0){
             list = teleSaleTrackingFeignClient.getRecordByGroupLevel(trackingQueryDto).getData();
         }
         //资源数
