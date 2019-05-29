@@ -28,7 +28,7 @@
                 <el-date-picker format="yyyy-MM-dd HH:mm" v-model="form.endTime" type="datetime" value-format="yyyy-MM-dd HH:mm" placeholder="选择日期"></el-date-picker>
                 </el-form-item>
                 <el-form-item label="电销组:">  
-                    <el-select v-model="form.org_Id" placeholder="电销组" style="width: 100%;" clearable filterable>
+                    <el-select v-model="form.org_Id" placeholder="电销组" style="width: 100%;" clearable filterable :disabled="isDisabled">
                         <el-option
                             v-for="item in orgTeleArr"
                             :key="item.id"
@@ -44,7 +44,7 @@
                     </el-select>
                 </el-form-item>
                 <div class="mainSearchBtnBox">
-                    <el-button icon="el-icon-search" type="primary" @click="searchTable()" class="searchBtn">搜索</el-button>
+                    <el-button icon="el-icon-search" type="primary" @click="searchTable(1)" class="searchBtn">搜索</el-button>
                 </div>  
             </el-form>
         </div>
@@ -188,6 +188,7 @@
         data: function() {
             return {
                 loading: false,
+                isDisabled: false,
                 pager:{ 
                     total: 0,
                     currentPage: 1,
@@ -238,8 +239,8 @@
             }             
         },
         methods: { 
-            searchTable() {   
-                this.tableColums = fieldList; // 表头数据渲染             
+            searchTable(firstPage) {   
+                this.tableColums= fieldList;
                 var startTime = this.form.startTime;
                 var endTime = this.form.endTime;
                 if(endTime && startTime){
@@ -265,19 +266,25 @@
                         });
                         return;
                     }
+                    startTime = this.limitTime(startTime, null);
+                    endTime = this.limitTime(null, endTime);
                 }else{
                     this.$message({
                         message: '请选择起止时间',
                         type: 'warning'
                     });
                     return;
-                }
+                }   
+                
                 var param = {};
-                param.pageSize = this.pager.pageSize;
-                param.pageNum =  this.pager.currentPage;
-                // 搜索条件
                 param.startTime = this.minuteFormat(startTime);
-                param.endTime =  this.minuteFormat(endTime);
+                param.endTime = this.minuteFormat(endTime);
+                param.pageSize = this.pager.pageSize;
+                if(firstPage){
+                    param.pageNum = firstPage;
+                }else{
+                    param.pageNum = this.pager.currentPage;
+                }
                 param.org_Id =  this.form.org_Id; // 电销组
                 param.ti = this.form.telOperatorTransferIn;
                 // this.loading=true;
@@ -329,13 +336,36 @@
                 //     mainDivVM.loading = false;
                 // });
             },
+            limitTime (start, end) {
+                var startTime = this.minuteFormat (start);
+                var endTime = this.minuteFormat (end);
+                var date = new Date();
+                data = this.minuteFormat (date);// 现在的时间
+                data = data.slice(0,8);
+                if(startTime){
+                    var s = startTime.slice(0,8);
+                    if(s < data){
+                        this.form.startTime = moment(start).format("YYYY-MM-DD 00:00");
+                        return this.form.startTime;
+                    }
+                    return start;
+                }
+                if(endTime){
+                    var e = endTime.slice(0,8);
+                    if(e < data){
+                        this.form.endTime = moment(end).format("YYYY-MM-DD 23:59");
+                        return this.form.endTime;                        
+                    }
+                    return end;
+                }
+            },
             arraySpanMethod({ row, column, rowIndex, columnIndex }) { // 合并第一行
                 if (rowIndex === 0) {
                     if (columnIndex === 0) {
                         return [0, 0];
                     } else if (columnIndex === 1) {
                         return [1, 2];
-                    }
+                    }  
                 }
             },
             indexFun (index) { // 表格序号
