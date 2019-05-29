@@ -196,8 +196,7 @@
                 }else{
                     param.pageNum = this.pager.currentPage;
                 }
-                param.orgId = this.form.orgId; 
-                console.log(param);
+                param.orgId = this.form.orgId;
                 this.loading = true; 
                 axios.post('/callrecord/teleSaleTalkTime/listTeleGroupTalkTime',param).then(function (response) { 
                     if(!response){
@@ -208,7 +207,6 @@
                         return ;
                     }
                     var resobj= response.data;
-                    console.log(resobj);
                     if(!resobj){
                         mainDivVM.$message({
                             message: "接口调用失败",
@@ -227,12 +225,6 @@
                         var resobjData = resobj.data;    
                         var tableData = resobjData.tableData;
                         mainDivVM.tableData = tableData.data;
-                        // 假数据
-                        // tableData.data.map( (item,index)=>{
-                        //     item.orgName = '假数据电销组' + (index + 1);
-                        //     return item;
-                        // })
-
                         if(tableData.data && tableData.data.length){
                             var totalData = resobjData.totalData;
                             mainDivVM.tableData.unshift(totalData);
@@ -243,12 +235,10 @@
                         mainDivVM.export.startTime = mainDivVM.minuteFormat(startTime);
                         mainDivVM.export.endTime = mainDivVM.minuteFormat(endTime);
                         mainDivVM.export.orgId = mainDivVM.form.orgId;
-                        console.log(mainDivVM.export);
                     }else{
                         mainDivVM.loading = false;
                     }  
                 }).catch(function (error) {
-                    console.log(error);
                     mainDivVM.loading = false;
                     mainDivVM.$message({
                         message: "请求失败，请稍后重试",
@@ -302,7 +292,6 @@
                 var orgName = row.orgName; // 电销组name
                 var startTime = this.export.startTime;
                 var endTime = this.export.endTime;
-                console.log(startTime,endTime);
                 if(orgId === "0" && orgName === "合计"){
                     window.location.href="/statistics/teleStatement/telemarketingCallTableSum?orgId=" + this.export.orgId + "&startTime=" + startTime + "&endTime=" + endTime;
                 }else if(orgId){
@@ -391,21 +380,14 @@
                 var param = {};
                 param.startTime = this.export.startTime;
                 param.endTime = this.export.endTime;
-                // var startTime = this.export.startTime;
-                // var endTime = this.export.endTime;
-                // param.startTime = this.limitTime (startTime, null);
-                // param.endTime = this.limitTime (null, endTime);
                 param.orgId =  this.export.orgId; 
-                console.log(param);
                 axios.post('/callrecord/teleSaleTalkTime/exportTeleGroupTalkTime',param,{responseType:'blob'})
                     .then(function (response) {
-                        console.log(response);
                         var data =  response.data;
                         var fileName = response.headers.filename;
                         saveAs(data,decodeURI(fileName));
                     })
                     .catch(function (error) {
-                        console.log(error);
                         mainDivVM.$message({
                             message: "导出失败，请稍后重试",
                             type: "error"
@@ -420,12 +402,9 @@
             var endTime = moment(today).format("YYYY-MM-DD 23:59");
             this.form.startTime=startTime;
             this.form.endTime=endTime; 
-
             if(curOrgId){this.isDisabled= true;}
-
             this.export.startTime = this.minuteFormat(this.form.startTime);
             this.export.endTime = this.minuteFormat(this.form.endTime);
-
             this.searchTable();
         },
         mounted(){

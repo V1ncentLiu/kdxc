@@ -43,9 +43,9 @@
                     <el-select v-model="form.cusLevelList" placeholder="客户级别" style="width: 100%;" clearable filterable multiple>
                         <el-option
                             v-for="item in clientRank"
-                            :key="item.id"
+                            :key="item.value"
                             :label="item.name"
-                            :value="item.id">
+                            :value="item.value">
                         </el-option>
                     </el-select>
                 </el-form-item>
@@ -73,7 +73,13 @@
                         <el-button @click="gotoTeam(scope.row)" type="text" size="small">{{scope.row.orgName}}</el-button>
                     </template>
                 </el-table-column>
-                <el-table-column prop="cusLevel" label="客户级别"></el-table-column>
+                <el-table-column prop="cusLevel" label="客户级别">
+                    <template slot-scope="scope">
+                        <div v-if="scope.row.cusLevel == 1">VIP</div>
+                        <div v-else-if="scope.row.cusLevel ==2">重要</div>
+                        <div v-else="scope.row.cusLevel ==3">普通</div>
+                    </template>
+                </el-table-column>
                 <el-table-column prop="countResource" label="资源数"></el-table-column>
                 <el-table-column prop="countClueId" label="回访次数"></el-table-column>
                 <el-table-column prop="countDistinctClue" label="回访资源数"></el-table-column>
@@ -89,8 +95,8 @@
 <script th:inline="javascript">
     var orgIdList=[[${saleGroupList}]];//电销组
     var clientRankIdList=[[${cusLevelListArray}]];//客户级别
+    console.log(clientRankIdList)
     var curOrgId = [[${curOrgId}]];//当前电销组
-    // console.log(curOrgId);
     var mainDivVM = new Vue({
         el: '#maindiv',
         data: function() {
@@ -148,6 +154,8 @@
                         });
                         return;
                     }
+                    startTime = this.limitTime(startTime, null);
+                    endTime = this.limitTime(null, endTime);
                 }else{
                     this.$message({
                         message: '请选择起止时间',
@@ -222,8 +230,6 @@
                 })
             },
             gotoTeam(item){
-                debugger
-                console.log(item)
                 var orgName = item.orgName;
                 var orgId = item.orgId;
                 // 搜索条件
@@ -245,12 +251,21 @@
                 }
             },
             arraySpanMethod({ row, column, rowIndex, columnIndex }) { // 合并第一行
+                // if (rowIndex === 0) {
+                //     if (columnIndex === 0) {
+                //         return [0, 0];
+                //     } else if (columnIndex === 1) {
+                //         return [1, 2];
+                //     }
+                // }
                 if (rowIndex === 0) {
                     if (columnIndex === 0) {
                         return [0, 0];
                     } else if (columnIndex === 1) {
-                        return [1, 2];
-                    }
+                        return [1, 3];
+                    }  else if (columnIndex === 2) {
+                        return [0, 0];
+                    } 
                 }
             },
             indexFun (index) { // 表格序号
@@ -328,7 +343,6 @@
             },
             numFormat(row, column){
                 var percent = row[column.property];
-                console.log(percent)
                 if(percent){
                     percent = Math.floor(percent * 100) / 100;
                 }                
@@ -339,6 +353,29 @@
                    return "";
                  }
                 return moment(m).format("YYYYMMDDHHmm");
+            },
+            limitTime (start, end) {
+                var startTime = this.minuteFormat (start);
+                var endTime = this.minuteFormat (end);
+                var date = new Date();
+                data = this.minuteFormat (date);// 现在的时间
+                data = data.slice(0,8);
+                if(startTime){
+                    var s = startTime.slice(0,8);
+                    if(s < data){
+                        this.form.startTime = moment(start).format("YYYY-MM-DD 00:00");
+                        return this.form.startTime;
+                    }
+                    return start;
+                }
+                if(endTime){
+                    var e = endTime.slice(0,8);
+                    if(e < data){
+                        this.form.endTime = moment(end).format("YYYY-MM-DD 23:59");
+                        return this.form.endTime;                        
+                    }
+                    return end;
+                }
             },
             searchYesterday(){//昨天
                 var today = new Date();
