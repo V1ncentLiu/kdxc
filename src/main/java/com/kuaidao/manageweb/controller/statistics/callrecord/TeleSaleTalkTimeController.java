@@ -161,10 +161,10 @@ public class TeleSaleTalkTimeController {
            curList.add(i + 1);
            curList.add(teleTalkTimeRespDTO.getOrgName());
            curList.add(teleTalkTimeRespDTO.getCallCount());
-           curList.add(teleTalkTimeRespDTO.getCalledCount());
+           curList.add(CommUtil.nullIntegerToZero(teleTalkTimeRespDTO.getCalledCount()));
            curList.add(formatPercent(teleTalkTimeRespDTO.getCallPercent()));
            curList.add(teleTalkTimeRespDTO.getCallClueCount());
-           curList.add(teleTalkTimeRespDTO.getCalledClueCount());
+           curList.add(CommUtil.nullIntegerToZero(teleTalkTimeRespDTO.getCalledClueCount()));
            curList.add(formatPercent(teleTalkTimeRespDTO.getClueCallecdPrecent()));
            curList.add(formatSeconds(teleTalkTimeRespDTO.getValidCallTime()));
            curList.add(formatSeconds(teleTalkTimeRespDTO.getUserAvgDayValidCallTime()));
@@ -354,10 +354,10 @@ public class TeleSaleTalkTimeController {
            curList.add(teleTalkTimeRespDTO.getOrgName());
            curList.add(teleTalkTimeRespDTO.getUserName());
            curList.add(teleTalkTimeRespDTO.getCallCount());
-           curList.add(teleTalkTimeRespDTO.getCalledCount());
+           curList.add(CommUtil.nullIntegerToZero(teleTalkTimeRespDTO.getCalledCount()));
            curList.add(formatPercent(teleTalkTimeRespDTO.getCallPercent()));
            curList.add(teleTalkTimeRespDTO.getCallClueCount());
-           curList.add(teleTalkTimeRespDTO.getCalledClueCount());
+           curList.add(CommUtil.nullIntegerToZero(teleTalkTimeRespDTO.getCalledClueCount()));
            curList.add(formatPercent(teleTalkTimeRespDTO.getClueCallecdPrecent()));
            curList.add(formatSeconds(teleTalkTimeRespDTO.getValidCallTime()));
            curList.add(formatSeconds(teleTalkTimeRespDTO.getUserAvgDayValidCallTime()));
@@ -440,10 +440,10 @@ public class TeleSaleTalkTimeController {
             curList.add(i + 1);
             curList.add(teleTalkTimeRespDTO.getUserName());
             curList.add(teleTalkTimeRespDTO.getCallCount());
-            curList.add(teleTalkTimeRespDTO.getCalledCount());
+            curList.add(CommUtil.nullIntegerToZero(teleTalkTimeRespDTO.getCalledCount()));
             curList.add(formatPercent(teleTalkTimeRespDTO.getCallPercent()));
             curList.add(teleTalkTimeRespDTO.getCallClueCount());
-            curList.add(teleTalkTimeRespDTO.getCalledClueCount());
+            curList.add(CommUtil.nullIntegerToZero(teleTalkTimeRespDTO.getCalledClueCount()));
             curList.add(formatPercent(teleTalkTimeRespDTO.getClueCallecdPrecent()));
             curList.add(formatSeconds(teleTalkTimeRespDTO.getValidCallTime()));
             curList.add(formatSeconds(teleTalkTimeRespDTO.getUserAvgDayValidCallTime()));

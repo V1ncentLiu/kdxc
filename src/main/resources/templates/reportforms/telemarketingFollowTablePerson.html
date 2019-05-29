@@ -80,11 +80,18 @@
                 <el-table-column type="index" label="序号" align="center" width="55"></el-table-column>
                 <el-table-column prop="dateId" label="日期" :formatter="dateFormat"></el-table-column>
                 <el-table-column prop="userName" label="顾问"></el-table-column>
-                <el-table-column prop="cusLevel" label="客户级别"></el-table-column>
+                <el-table-column prop="cusLevel" label="客户级别">
+                    <template slot-scope="scope">
+                        <div v-if="scope.row.cusLevel == 1">VIP</div>
+                        <div v-else-if="scope.row.cusLevel ==2">重要</div>
+                        <div v-else-if="scope.row.cusLevel ==3">普通</div>
+                        <div v-else></div>
+                    </template>
+                </el-table-column>
                 <el-table-column prop="countResource" label="资源数"></el-table-column>
                 <el-table-column prop="countClueId" label="回访次数"></el-table-column>
                 <el-table-column prop="countDistinctClue" label="回访资源数"></el-table-column>
-                <el-table-column prop="dayOfPer" label="人均天回访次数"></el-table-column>
+                <el-table-column prop="dayOfPer" label="人均天回访次数" :formatter="numFormat"></el-table-column>
             </el-table>
             <table-pagination :pager="pager" @change="searchTable()"></table-pagination>
         </el-row>
@@ -166,6 +173,8 @@
                         });
                         return;
                     }
+                    startTime = this.limitTime(startTime, null);
+                    endTime = this.limitTime(null, endTime);
                 }else{
                     this.$message({
                         message: '请选择起止时间',
@@ -244,6 +253,13 @@
                 var oDay = d.slice(6);
                 return oYear+"-"+oMonth+"-"+oDay;
             }, 
+            numFormat(row, column){
+                var percent = row[column.property];
+                if(percent){
+                    percent = Math.floor(percent * 100) / 100;
+                }                
+                return percent;
+            },
             minuteFormat (m) {
                 if (!m) {
                     return "";
@@ -259,6 +275,29 @@
                 var oHour = d.slice(8,10);
                 var oMinute = d.slice(10);
                 return oYear+"-"+oMonth+"-"+oDay+" "+oHour+":"+oMinute;
+            },
+            limitTime (start, end) {
+                var startTime = this.minuteFormat (start);
+                var endTime = this.minuteFormat (end);
+                var date = new Date();
+                data = this.minuteFormat (date);// 现在的时间
+                data = data.slice(0,8);
+                if(startTime){
+                    var s = startTime.slice(0,8);
+                    if(s < data){
+                        this.form.startTime = moment(start).format("YYYY-MM-DD 00:00");
+                        return this.form.startTime;
+                    }
+                    return start;
+                }
+                if(endTime){
+                    var e = endTime.slice(0,8);
+                    if(e < data){
+                        this.form.endTime = moment(end).format("YYYY-MM-DD 23:59");
+                        return this.form.endTime;                        
+                    }
+                    return end;
+                }
             },
             searchYesterday(){//昨天
                 var today = new Date();

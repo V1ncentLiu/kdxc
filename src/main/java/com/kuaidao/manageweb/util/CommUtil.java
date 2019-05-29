@@ -26,4 +26,18 @@ public class CommUtil {
         logger.info("当前登录人：{}",user);
         return user;
     }
+    
+    /**
+     * 把 Integer 为null 转为 0
+    * @param source
+    * @return
+     */
+    public static Integer nullIntegerToZero(Integer source) {
+        if(source==null) {
+            return 0;
+        }
+        return source;
+    }
+    
+    
 }

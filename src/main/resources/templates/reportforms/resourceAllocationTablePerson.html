@@ -78,7 +78,7 @@
                 >
                 <el-table-column align="center" type="index" label="序号" width="55"></el-table-column>
                 <!-- 日期列 -->
-                <el-table-column align="center" :key="index" :prop="item.fieldCode" :label="item.displayName" v-for="(item,key,index) in tableColums" v-if="item.fieldCode == 'timeId'" :formatter="dateFormat">
+                <el-table-column align="center" :key="index" :prop="item.fieldCode" :label="item.displayName" v-for="(item,key,index) in tableColums" v-if="item.fieldCode == 'timeId'">
                 </el-table-column>
                 <!-- 其他列 -->
                 <el-table-column align="center" width="130" :key="index" :prop="item.fieldCode" :label="item.displayName" v-else>
@@ -227,6 +227,10 @@
                     mainDivVM.tableData=resobjData;
                     // 表头数据渲染 
                     mainDivVM.tableColums= fieldList;
+                    // 日期格式转换
+                    for(var i=0;i<resobjData.length;i++){
+                        resobjData[i].day=mainDivVM.dateFormat(resobjData[i].day);
+                    }
                     // 分页
                     mainDivVM.pager.currentPage= resobj.data.currentPage;
                     mainDivVM.pager.total= resobj.data.total;
@@ -249,12 +253,10 @@
                 var r = window.location.search.substr(1).match(reg);
                 if(r!=null)return  unescape(r[2]); return null;
             },
-            dateFormat (row, column) { 
-                console.log(row)
-                console.log(column)
-                var date = row[column.property];
-                 if (!date) {return "";}
-                var d = date.toString();
+            dateFormat (column) { 
+                console.log(column)                
+                 if (!column) {return "";}
+                var d = column.toString();
                 var oYear = d.slice(0,4);
                 var oMonth = d.slice(4,6);
                 var oDay = d.slice(6);
