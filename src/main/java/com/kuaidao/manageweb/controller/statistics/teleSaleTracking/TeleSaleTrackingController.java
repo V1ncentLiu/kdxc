@@ -457,7 +457,7 @@ public class TeleSaleTrackingController {
     private List<Object> getHeadOneTitleList() {
         List<Object> headTitleList = new ArrayList<>();
         headTitleList.add("");
-        headTitleList.add("合计");
+        headTitleList.add("电销组");
         headTitleList.add("客户级别");
         headTitleList.add("资源数");
         headTitleList.add("回访次数");
@@ -481,7 +481,7 @@ public class TeleSaleTrackingController {
     private void addTotalTeportResourceAllocation(TeleSaleTrackingDto resTotal, List<List<Object>> dataList) {
         List<Object> totalList = new ArrayList<>();
         totalList.add("");
-        totalList.add("");
+        totalList.add("合计");
         totalList.add("");
         totalList.add(resTotal.getCountResource());
         totalList.add(resTotal.getCountClueId());
