@@ -228,7 +228,7 @@ public class TeleStatementController {
         List<Object> totalList = new ArrayList<>();
         totalList.add("");
         totalList.add("合计");
-        totalList.add("");
+        totalList.add(resTotal.getAssignClueCount());
         totalList.add(resTotal.getJointExhibition());
         totalList.add(resTotal.getPriceCompetition());
         totalList.add(resTotal.getOptimization());
@@ -237,6 +237,7 @@ public class TeleStatementController {
         totalList.add(resTotal.getIndustry());
         totalList.add(resTotal.getOther());
         totalList.add(resTotal.getNetizensMissed());
+        totalList.add(resTotal.getOther2());
         dataList.add(totalList);
     }
 
@@ -299,7 +300,7 @@ public class TeleStatementController {
     public void exportResourceAllocationPersion(
             @RequestBody ResourceAllocationQueryDto resourceAllocationQueryDto,
             HttpServletResponse response) throws Exception {
-        JSONResult<List<ResourceAllocationDto>> resourceAllocationList = statisticsFeignClient.getResourceAllocationsPersion(resourceAllocationQueryDto);
+        JSONResult<List<ResourceAllocationDto>> resourceAllocationList = statisticsFeignClient.getResourceAllocationsDayPersion(resourceAllocationQueryDto);
         List<List<Object>> dataList = new ArrayList<List<Object>>();
         dataList.add(getHeadTitleListPersion());
         List<ResourceAllocationDto> orderList = resourceAllocationList.getData();
@@ -307,6 +308,7 @@ public class TeleStatementController {
             ResourceAllocationDto ra = orderList.get(i);
             List<Object> curList = new ArrayList<>();
             curList.add(i + 1);
+            curList.add(ra.getDay());
             curList.add(ra.getUserName());
             curList.add(ra.getAssignClueCount());
             curList.add(ra.getJointExhibition());
@@ -317,6 +319,7 @@ public class TeleStatementController {
             curList.add(ra.getIndustry());
             curList.add(ra.getOther());
             curList.add(ra.getNetizensMissed());
+            curList.add(ra.getOther2());
             dataList.add(curList);
         }
         XSSFWorkbook wbWorkbook = ExcelUtil.creat2007Excel(dataList);
@@ -342,7 +345,7 @@ public class TeleStatementController {
             HttpServletResponse response) throws Exception {
         JSONResult<List<ResourceAllocationDto>> resourceAllocationsDayPersion = statisticsFeignClient.getResourceAllocationsDayPersion(resourceAllocationQueryDto);
         List<List<Object>> dataList = new ArrayList<List<Object>>();
-        dataList.add(getHeadTitleListDayPersion());
+        dataList.add(getHeadTitleListPersion());
         List<ResourceAllocationDto> orderList = resourceAllocationsDayPersion.getData();
         for(int i = 0; i<orderList.size(); i++){
             ResourceAllocationDto ra = orderList.get(i);
@@ -366,6 +369,7 @@ public class TeleStatementController {
             curList.add(ra.getIndustry());
             curList.add(ra.getOther());
             curList.add(ra.getNetizensMissed());
+            curList.add(ra.getOther2());
             dataList.add(curList);
         }
         XSSFWorkbook wbWorkbook = ExcelUtil.creat2007Excel(dataList);
@@ -766,6 +770,7 @@ public class TeleStatementController {
     private List<Object> getHeadTitleListPersion() {
         List<Object> headTitleList = new ArrayList<>();
         headTitleList.add("序号");
+        headTitleList.add("日期");
         headTitleList.add("电销人员");
         headTitleList.add("分配资源数");
         headTitleList.add("联展");
@@ -776,6 +781,7 @@ public class TeleStatementController {
         headTitleList.add("行业");
         headTitleList.add("其他");
         headTitleList.add("网民未接");
+        headTitleList.add("其他2");
         return headTitleList;
     }
 
