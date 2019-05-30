@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import com.itextpdf.text.pdf.PdfStructTreeController.returnType;
 import com.kuaidao.common.constant.OrgTypeConstant;
 import com.kuaidao.common.constant.RoleCodeEnum;
 import com.kuaidao.common.constant.SystemCodeConstant;
@@ -63,6 +64,14 @@ public class TeleSaleTalkTimeController {
      */
     @PostMapping("/listTeleGroupTalkTime")
     public JSONResult<Map<String,Object>> listTeleGroupTalkTime(@RequestBody TeleSaleTalkTimeQueryDTO teleSaleTalkTimeQueryDTO) {
+        Long startTime = teleSaleTalkTimeQueryDTO.getStartTime();
+        Long endTime = teleSaleTalkTimeQueryDTO.getEndTime();
+        if(startTime==null || endTime==null) {
+            logger.error("listTeleSaleGroupTalkTime illegal param,startTime{{}},endTime{{}}",startTime,endTime);
+            return CommonUtil.getParamIllegalJSONResult();
+        }
+        //设置 startDate 和 endDate
+        setQueryStartDateAndEndDate(teleSaleTalkTimeQueryDTO);
         HashMap<String,Object> resMap = new HashMap<>();
         
         Long orgId = teleSaleTalkTimeQueryDTO.getOrgId();
@@ -251,11 +260,19 @@ public class TeleSaleTalkTimeController {
    
 
 /**
-   * 合计
+   * 合计 个人
    * 电销顾问通话总时长统计 
   */
  @RequestMapping("/listTeleSaleTalkTime")
  public JSONResult<PageBean<TeleTalkTimeRespDTO>> listTeleSaleTalkTime(@RequestBody TeleSaleTalkTimeQueryDTO teleSaleTalkTimeQueryDTO) {
+     Long startTime = teleSaleTalkTimeQueryDTO.getStartTime();
+     Long endTime = teleSaleTalkTimeQueryDTO.getEndTime();
+     if(startTime==null || endTime==null) {
+         logger.error("listTeleSaleTalkTimeBySaleId illegal param（合计、个人）,startTime{{}},endTime{{}}",startTime,endTime);
+         return CommonUtil.getParamIllegalJSONResult();
+     }
+     //设置 startDate 和 endDate
+     setQueryStartDateAndEndDate(teleSaleTalkTimeQueryDTO);
      Long orgId = teleSaleTalkTimeQueryDTO.getOrgId();
      if(orgId==null) {
          UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
@@ -407,9 +424,14 @@ public class TeleSaleTalkTimeController {
    @PostMapping("/listGroupTeleSaleTalkTime")
    public JSONResult<PageBean<TeleTalkTimeRespDTO>> listGroupTeleSaleTalkTime(@RequestBody TeleSaleTalkTimeQueryDTO teleSaleTalkTimeQueryDTO) {
        Long orgId = teleSaleTalkTimeQueryDTO.getOrgId();
+       Long startTime = teleSaleTalkTimeQueryDTO.getStartTime();
+       Long endTime = teleSaleTalkTimeQueryDTO.getEndTime();
        if(orgId==null) {
+           logger.error("listTeleSaleTalkTimeByOrgId illegal param,startTime{{}},endTime{{}},orgId{{}}",startTime,endTime,orgId);
            return CommonUtil.getParamIllegalJSONResult();
        }
+       //设置 startDate 和 endDate
+       setQueryStartDateAndEndDate(teleSaleTalkTimeQueryDTO);
        List<Long> orgIdList = new ArrayList<>();
        orgIdList.add(orgId);
        teleSaleTalkTimeQueryDTO.setOrgIdList(orgIdList);
@@ -493,6 +515,19 @@ public class TeleSaleTalkTimeController {
         busGroupReqDTO.setOrgType(orgType);
         JSONResult<List<OrganizationRespDTO>> orgJr = organizationFeignClient.queryOrgByParam(busGroupReqDTO);
         return orgJr;
+    }
+    
+    /**
+     * 根据 开始时间和结束时间设置  开始日期和结束日期，优化hive 查询速度
+    * @param teleSaleTalkTimeQueryDTO
+     */
+    private void setQueryStartDateAndEndDate(@RequestBody TeleSaleTalkTimeQueryDTO teleSaleTalkTimeQueryDTO) {
+        Long startTime = teleSaleTalkTimeQueryDTO.getStartTime();
+        Long  startDate = Long.valueOf(String.valueOf(startTime).substring(0,8));
+        Long endTime = teleSaleTalkTimeQueryDTO.getEndTime();
+        Long endDate = Long.valueOf(String.valueOf(endTime).substring(0,8));
+        teleSaleTalkTimeQueryDTO.setStartDate(startDate);
+        teleSaleTalkTimeQueryDTO.setEndDate(endDate);
     }
 
 }
