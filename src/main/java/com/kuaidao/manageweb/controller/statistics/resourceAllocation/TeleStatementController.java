@@ -308,6 +308,7 @@ public class TeleStatementController {
             ResourceAllocationDto ra = orderList.get(i);
             List<Object> curList = new ArrayList<>();
             curList.add(i + 1);
+            curList.add(ra.getOrgName());
             curList.add(ra.getDay());
             curList.add(ra.getUserName());
             curList.add(ra.getAssignClueCount());
@@ -351,6 +352,7 @@ public class TeleStatementController {
             ResourceAllocationDto ra = orderList.get(i);
             List<Object> curList = new ArrayList<>();
             curList.add(i + 1);
+            curList.add(ra.getOrgName());
             String str = null;
             if(ra.getDateId() != null){
                 StringBuilder sb = new StringBuilder(ra.getDateId().toString());
@@ -753,7 +755,7 @@ public class TeleStatementController {
     private List<Object> getHeadTitleList() {
         List<Object> headTitleList = new ArrayList<>();
         headTitleList.add("序号");
-        headTitleList.add("电销组");
+        headTitleList.add("电销组名称");
         headTitleList.add("分配资源数");
         headTitleList.add("联展");
         headTitleList.add("竞价");
@@ -770,6 +772,7 @@ public class TeleStatementController {
     private List<Object> getHeadTitleListPersion() {
         List<Object> headTitleList = new ArrayList<>();
         headTitleList.add("序号");
+        headTitleList.add("电销组名称");
         headTitleList.add("日期");
         headTitleList.add("电销人员");
         headTitleList.add("分配资源数");
