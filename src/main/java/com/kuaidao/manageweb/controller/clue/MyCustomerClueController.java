@@ -933,6 +933,10 @@ public class MyCustomerClueController {
                     basic.setCreateUser(user.getId());
                     basic.setCreateTime(new Date());
                 }
+                if(user.getBusinessLine() != null){
+                    basic.setBusinessLine(user.getBusinessLine());
+                }
+                dto.setClueBasic(basic);
             }
             // 电销关联数据
             ClueRelateDTO relation = new ClueRelateDTO();
