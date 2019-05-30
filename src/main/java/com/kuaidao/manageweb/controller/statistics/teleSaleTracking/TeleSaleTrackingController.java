@@ -69,7 +69,7 @@ public class TeleSaleTrackingController {
             buildOrgIdList(trackingQueryDto, orgId);
             List<Long> orgIdList = trackingQueryDto.getOrgIdList();
             if(orgIdList == null || orgIdList.size() == 0){
-                PageBean emptyDataPageBean = PageBean.getEmptyDataPageBean(trackingQueryDto.getPageNum(), trackingQueryDto.getPageSize());
+                PageBean emptyDataPageBean = PageBean.getEmptyListDataPageBean(trackingQueryDto.getPageNum(), trackingQueryDto.getPageSize());
                 return new JSONResult<PageBean<TeleSaleTrackingDto>>().success(emptyDataPageBean);
             }
         }
