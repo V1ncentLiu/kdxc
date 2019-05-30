@@ -17,6 +17,7 @@ import com.kuaidao.manageweb.util.CommUtil;
 import com.kuaidao.stastics.dto.callrecord.TeleSaleTempDTO;
 import com.kuaidao.stastics.dto.resourceAllocation.ResourceAllocationDto;
 import com.kuaidao.stastics.dto.resourceAllocation.ResourceAllocationQueryDto;
+import com.kuaidao.stastics.dto.teleSaleTracking.TeleSaleTrackingDto;
 import com.kuaidao.sys.dto.customfield.CustomFieldQueryDTO;
 import com.kuaidao.sys.dto.customfield.QueryFieldByRoleAndMenuReq;
 import com.kuaidao.sys.dto.customfield.QueryFieldByUserAndMenuReq;
@@ -146,6 +147,11 @@ public class TeleStatementController {
     public JSONResult<PageBean<ResourceAllocationDto>> getResourceAllocationTable(@RequestBody ResourceAllocationQueryDto resourceAllocationQueryDto) {
         Long org_id = resourceAllocationQueryDto.getOrg_Id();
         buildOrgIdList(resourceAllocationQueryDto, org_id);
+        List<Long> orgIdList = resourceAllocationQueryDto.getOrgIdList();
+        if(orgIdList == null || orgIdList.size() == 0){
+            PageBean emptyDataPageBean = PageBean.getEmptyDataPageBean(resourceAllocationQueryDto.getPageNum(), resourceAllocationQueryDto.getPageSize());
+            return new JSONResult<PageBean<TeleSaleTrackingDto>>().success(emptyDataPageBean);
+        }
         JSONResult<PageBean<ResourceAllocationDto>> resourceAllocationPage = statisticsFeignClient.getResourceAllocationPage(resourceAllocationQueryDto);
         return resourceAllocationPage;
     }
