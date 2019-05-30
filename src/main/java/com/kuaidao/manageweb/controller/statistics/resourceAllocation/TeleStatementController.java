@@ -6,8 +6,6 @@ import com.kuaidao.common.constant.SystemCodeConstant;
 import com.kuaidao.common.entity.IdEntity;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
-import com.kuaidao.common.util.CommonUtil;
-import com.kuaidao.common.util.DateUtil;
 import com.kuaidao.common.util.ExcelUtil;
 import com.kuaidao.manageweb.feign.customfield.CustomFieldFeignClient;
 import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
@@ -17,7 +15,6 @@ import com.kuaidao.manageweb.util.CommUtil;
 import com.kuaidao.stastics.dto.callrecord.TeleSaleTempDTO;
 import com.kuaidao.stastics.dto.resourceAllocation.ResourceAllocationDto;
 import com.kuaidao.stastics.dto.resourceAllocation.ResourceAllocationQueryDto;
-import com.kuaidao.stastics.dto.teleSaleTracking.TeleSaleTrackingDto;
 import com.kuaidao.sys.dto.customfield.CustomFieldQueryDTO;
 import com.kuaidao.sys.dto.customfield.QueryFieldByRoleAndMenuReq;
 import com.kuaidao.sys.dto.customfield.QueryFieldByUserAndMenuReq;
@@ -45,10 +42,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.net.URLEncoder;
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -146,11 +140,13 @@ public class TeleStatementController {
     @ResponseBody
     public JSONResult<PageBean<ResourceAllocationDto>> getResourceAllocationTable(@RequestBody ResourceAllocationQueryDto resourceAllocationQueryDto) {
         Long org_id = resourceAllocationQueryDto.getOrg_Id();
-        buildOrgIdList(resourceAllocationQueryDto, org_id);
-        List<Long> orgIdList = resourceAllocationQueryDto.getOrgIdList();
-        if(orgIdList == null || orgIdList.size() == 0){
-            PageBean emptyDataPageBean = PageBean.getEmptyDataPageBean(resourceAllocationQueryDto.getPageNum(), resourceAllocationQueryDto.getPageSize());
-            return new JSONResult<PageBean<TeleSaleTrackingDto>>().success(emptyDataPageBean);
+        if(null == org_id){
+            buildOrgIdList(resourceAllocationQueryDto, org_id);
+            List<Long> orgIdList = resourceAllocationQueryDto.getOrgIdList();
+            if(orgIdList == null || orgIdList.size() == 0){
+                PageBean emptyDataPageBean = PageBean.getEmptyDataPageBean(resourceAllocationQueryDto.getPageNum(), resourceAllocationQueryDto.getPageSize());
+                return new JSONResult<PageBean<ResourceAllocationDto>>().success(emptyDataPageBean);
+            }
         }
         JSONResult<PageBean<ResourceAllocationDto>> resourceAllocationPage = statisticsFeignClient.getResourceAllocationPage(resourceAllocationQueryDto);
         return resourceAllocationPage;
