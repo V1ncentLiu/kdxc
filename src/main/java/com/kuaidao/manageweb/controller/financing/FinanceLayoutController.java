@@ -1,20 +1,5 @@
 package com.kuaidao.manageweb.controller.financing;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.servlet.http.HttpServletRequest;
-
-import org.apache.commons.lang3.StringUtils;
-import org.apache.shiro.SecurityUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
-
 import com.kuaidao.aggregation.dto.financing.FinanceLayoutDTO;
 import com.kuaidao.aggregation.dto.project.ProjectInfoDTO;
 import com.kuaidao.common.constant.OrgTypeConstant;
@@ -34,6 +19,17 @@ import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
 import com.kuaidao.sys.dto.organization.OrganizationRespDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import com.kuaidao.sys.dto.user.UserOrgRoleReq;
+import java.util.ArrayList;
+import java.util.List;
+import javax.servlet.http.HttpServletRequest;
+import org.apache.shiro.SecurityUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 /**
  * @Auther: admin
@@ -68,8 +64,8 @@ public class FinanceLayoutController {
     public String financeLayoutList(HttpServletRequest request) {
         UserInfoDTO userInfoDTO = getUser();
         OrganizationQueryDTO orgDto = new OrganizationQueryDTO();
-        if(StringUtils.isNotBlank(userInfoDTO.getBusinessLine())){
-            orgDto.setBusinessLine(Integer.parseInt(userInfoDTO.getBusinessLine()));
+        if(userInfoDTO.getBusinessLine() !=null){
+            orgDto.setBusinessLine(userInfoDTO.getBusinessLine());
         }
         orgDto.setOrgType(OrgTypeConstant.SWZ);
         orgDto.setSystemCode(SystemCodeConstant.HUI_JU);
