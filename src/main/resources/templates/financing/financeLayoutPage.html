@@ -248,7 +248,13 @@
                   	  console.log(response);
                       if(null !==response && response.data !=null && response.data.code=='0'){
                     	  var financeLayout = response.data.data;
-                    	  orgVM.form.busGroupId = financeLayout.busGroupId;
+                          /*var param = {};
+                          param.id = financeLayout.busGroupId;
+                          axios.post('/organization/organization/queryOrgById', param).then(function (response) {
+                              console.log(response.data.data);
+                              orgVM.form.busGroupId = response.data.data;
+                          });*/
+                          orgVM.form.busGroupId = financeLayout.busGroupId;
                     	  var financeUsers = financeLayout.financeUsers;
                     	  var valueMultiple=[];
                     	  var obj = financeUsers.split(',');
@@ -262,22 +268,31 @@
                           var signProjects = financeLayout.signProjects;
                           var signProjectsMultiple=[];
                           var signProjectsObj = signProjects.split(',');
-                          if(null!=signProjects && signProjectsObj.length>0) {
-                              for(var i=0;i<signProjectsObj.length;i++){
-                                  signProjectsMultiple.push(signProjectsObj[i]+"");
+
+                          if (null != signProjects && signProjectsObj.length > 0) {
+                              for (var i = 0; i < signProjectsObj.length; i++) {
+                                  signProjectsMultiple.push(signProjectsObj[i] + "");
                               }
+                              if (signProjectsMultiple != null && signProjectsMultiple != "") {
+                                  orgVM.form.signProjects = signProjectsMultiple;
+                              }
+
+                          } else {
+                              orgVM.form.signProjects = projectList;
                           }
-                          orgVM.form.signProjects = signProjectsMultiple;
                           //签约省份
                           var signProvinces = financeLayout.signProvinces;
-                          var signProvincesMultiple=[];
+                          var signProvincesMultiple = [];
                           var signProvincesObj = signProvinces.split(',');
-                          if(null!=signProvinces && signProvincesObj.length>0) {
-                              for(var i=0;i<signProvincesObj.length;i++){
-                                  signProvincesMultiple.push(signProvincesObj[i]+"");
+                          if (null != signProvinces && signProvincesObj.length > 0) {
+                              for (var i = 0; i < signProvincesObj.length; i++) {
+                                  signProvincesMultiple.push(signProvincesObj[i] + "");
+                              }
+                              if (signProvincesMultiple != null && signProvincesMultiple != "") {
+                                  orgVM.form.signProvinces = signProvincesMultiple;
                               }
                           }
-                          orgVM.form.signProvinces=signProvincesMultiple;
+
                      }else{
                     	 orgVM.$message({message: response.data.msg, type: 'warning'});
 	                  	  	return ;
