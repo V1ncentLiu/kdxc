@@ -144,7 +144,7 @@ public class TeleStatementController {
             buildOrgIdList(resourceAllocationQueryDto, org_id);
             List<Long> orgIdList = resourceAllocationQueryDto.getOrgIdList();
             if(orgIdList == null || orgIdList.size() == 0){
-                PageBean emptyDataPageBean = PageBean.getEmptyDataPageBean(resourceAllocationQueryDto.getPageNum(), resourceAllocationQueryDto.getPageSize());
+                PageBean emptyDataPageBean = PageBean.getEmptyListDataPageBean(resourceAllocationQueryDto.getPageNum(), resourceAllocationQueryDto.getPageSize());
                 return new JSONResult<PageBean<ResourceAllocationDto>>().success(emptyDataPageBean);
             }
         }
