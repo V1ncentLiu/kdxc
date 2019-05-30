@@ -189,6 +189,8 @@ public class ReconciliationConfirmController {
     @RequiresPermissions("financing:reconciliationConfirmManager:view")
     public JSONResult<BigDecimal> sumCommissionMoney(
             @RequestBody ReconciliationConfirmPageParam pageParam, HttpServletRequest request) {
+        UserInfoDTO user = getUser();
+        pageParam.setUserId(user.getId());
         JSONResult<BigDecimal> sumCommissionMoney =
                 reconciliationConfirmFeignClient.sumCommissionMoney(pageParam);
         return sumCommissionMoney;
