@@ -28,7 +28,7 @@
         <div class="mainSearchFormBox">
             <el-form :inline="true" :model="searchForm" class="demo-form-inline mainSearchForm" ref="searchForm"> 
                 <el-form-item label="商务大区:"  prop="busAreaId">
-                  <el-select v-model="searchForm.busAreaId" clearable filterable  placeholder="商务大区">
+                  <el-select v-model="searchForm.busAreaId" clearable filterable  placeholder="商务大区" @change="changeBusArea"  @clear="clearBusAreaList" >
                     <el-option
                       v-for="item in busAreaOptions"
                       :key="item.id"
@@ -38,7 +38,7 @@
                   </el-select>
                 </el-form-item>
                 <el-form-item label="签单商务组:"  prop="busGroupId">
-                  <el-select v-model="searchForm.busGroupId" clearable filterable placeholder="签单商务组">
+                  <el-select v-model="searchForm.busGroupId" clearable filterable placeholder="签单商务组"  @change="changeBusGroup"  @clear="clearBusGroupList">
                     <el-option
                       v-for="item in busGroupOptions"
                       :key="item.id"
@@ -95,7 +95,7 @@
                       <el-date-picker  v-model="searchForm.payEndTime" format="yyyy-MM-dd HH:mm" type="datetime" placeholder="选择日期"></el-date-picker>
                     </el-form-item>
                     <el-form-item label="电销事业部:"  prop="teleDeptId">
-                      <el-select v-model="searchForm.teleDeptId" clearable filterable  placeholder="电销事业部">
+                      <el-select v-model="searchForm.teleDeptId" clearable filterable  placeholder="电销事业部" @change="changeTeleDept"  @clear="clearTeleDeptList">
                         <el-option
                           v-for="item in teleDeptOptions"
                           :key="item.id"
@@ -105,7 +105,7 @@
                       </el-select>
                     </el-form-item>
                     <el-form-item label="电销组:"  prop="teleGorupId">
-                      <el-select v-model="searchForm.teleGorupId" clearable filterable  placeholder="电销组">
+                      <el-select v-model="searchForm.teleGorupId" clearable filterable @change="changeTeleGroup" placeholder="电销组" @clear="clearTeleGroupList">
                         <el-option
                           v-for="item in teleGorupOptions"
                           :key="item.id"
@@ -935,7 +935,96 @@ var clueVM = new Vue({
                     this.rejectVisible = false;
                     // 点击取消 数据重置
                     this.$refs[formName].resetFields();
-                }
+                },
+                changeTeleDept(selectedValue){//电销事业部
+                    this.clearTeleDeptList();
+                    if(!selectedValue){
+                        return;
+                    }
+                    var param ={};
+                    param.id = selectedValue;
+                    axios.post('/organization/organization/queryTeleGroupListByParentId', param)
+                    .then(function (response) {
+                          var result =  response.data;
+                          var table=result.data;
+                          clueVM.teleGorupOptions= table;
+                    })
+                    .catch(function (error) {
+                         console.log(error);
+                    });
+                },
+                clearTeleDeptList(){
+                    this.teleGorupOptions=[];
+                    this.searchForm.teleGorupId='';
+                    this.clearTeleGroupList();
+                    
+                },
+                clearTeleGroupList(){
+                     this.teleSaleOptions=[];
+                     this.searchForm.teleSaleId='';
+                },
+                changeTeleGroup(selectedValue){//改变电销组
+                    this.clearTeleGroupList();
+                    if(!selectedValue){
+                        return;
+                    }
+                    var param ={};
+                    param.id = selectedValue;
+                    axios.post('/organization/organization/queryTeleSaleByOrgId', param)
+                    .then(function (response) {
+                          var result =  response.data;
+                          var table=result.data;
+                          clueVM.teleSaleOptions= table;
+                    })
+                    .catch(function (error) {
+                         console.log(error);
+                    });
+                },
+                changeBusArea(selectedValue){//改变商务大区
+                    this.clearBusAreaList();
+                    if(!selectedValue){
+                        return;
+                    }
+                    var param ={};
+                    param.id = selectedValue;
+                    axios.post('/organization/organization/queryBusGroupListByParentId', param)
+                    .then(function (response) {
+                          var result =  response.data;
+                          var table=result.data;
+                          clueVM.busGroupOptions= table;
+                    })
+                    .catch(function (error) {
+                         console.log(error);
+                    });
+                },
+                changeBusGroup(selectedValue){//改变商务组
+                    this.clearBusGroupList();
+                    if(!selectedValue){
+                        return;
+                    }
+                    var param ={};
+                    param.id = selectedValue;
+                    axios.post('/organization/organization/queryBusManagerByOrgId', param)
+                    .then(function (response) {
+                          var result =  response.data;
+                          var table=result.data;
+                          clueVM.busSaleOptions= table;
+                    })
+                    .catch(function (error) {
+                         console.log(error);
+                    });
+                },
+                clearBusAreaList(){
+                    this.busGroupOptions=[];
+                    this.searchForm.busGroupId='';
+                    this.clearBusGroupList();
+                    
+                },
+                clearBusGroupList(){
+                     this.busSaleOptions=[];
+                     this.searchForm.busSaleId='';
+                },
+                
         },
         created(){
             console.info("create method");
