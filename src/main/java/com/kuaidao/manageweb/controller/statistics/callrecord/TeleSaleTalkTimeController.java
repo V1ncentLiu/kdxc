@@ -136,7 +136,7 @@ public class TeleSaleTalkTimeController {
    @RequiresPermissions("statistics:teleSaleTalkTime:export")
    @RequestMapping("/exportTeleGroupTalkTime")
    public void exportTeleGroupTalkTime(@RequestBody TeleSaleTalkTimeQueryDTO teleSaleTalkTimeQueryDTO,HttpServletResponse response) throws Exception {
-      
+      setQueryStartDateAndEndDate(teleSaleTalkTimeQueryDTO);
        boolean isReqData = true;
        Long orgId = teleSaleTalkTimeQueryDTO.getOrgId();
        if(orgId==null) {
@@ -318,6 +318,7 @@ public class TeleSaleTalkTimeController {
  @RequiresPermissions("statistics:teleSaleTalkTime:export")
   @RequestMapping("/exportTeleSaleTalkTime")
   public void exportTeleSaleTalkTimeNoPage(@RequestBody TeleSaleTalkTimeQueryDTO teleSaleTalkTimeQueryDTO,HttpServletResponse response) throws Exception{
+     setQueryStartDateAndEndDate(teleSaleTalkTimeQueryDTO);
      Long orgId = teleSaleTalkTimeQueryDTO.getOrgId();
      //是否需要远程调用接口 获取数据
      boolean isReqData = true;
@@ -446,6 +447,7 @@ public class TeleSaleTalkTimeController {
    @RequestMapping("/exportGroupTeleSaleTalkTimeNoPage")
     public void exportGroupTeleSaleTalkTimeNoPage(@RequestBody TeleSaleTalkTimeQueryDTO teleSaleTalkTimeQueryDTO
             ,HttpServletResponse response) throws Exception{
+       setQueryStartDateAndEndDate(teleSaleTalkTimeQueryDTO);
         Long orgId = teleSaleTalkTimeQueryDTO.getOrgId();
         List<Long> orgIdList = new ArrayList<>();
         orgIdList.add(orgId);
