@@ -110,8 +110,8 @@ public class TeleStatementController {
         JSONResult<List<CustomFieldQueryDTO>> queryFieldByRoleAndMenu =
                 customFieldFeignClient.queryFieldByRoleAndMenu(queryFieldByRoleAndMenuReq);
         List<CustomFieldQueryDTO> data = queryFieldByRoleAndMenu.getData();
-//        data.removeIf(s -> s.getFieldCode().equals("day"));
-//        data.removeIf(s -> s.getFieldCode().equals("userName"));
+        data.removeIf(s -> s.getFieldCode().equals("day"));
+        data.removeIf(s -> s.getFieldCode().equals("userName"));
         request.setAttribute("fieldList", queryFieldByRoleAndMenu.getData());
         // 根据用户查询页面字段
         QueryFieldByUserAndMenuReq queryFieldByUserAndMenuReq = new QueryFieldByUserAndMenuReq();
@@ -198,6 +198,7 @@ public class TeleStatementController {
             curList.add(ra.getIndustry());
             curList.add(ra.getOther());
             curList.add(ra.getNetizensMissed());
+            curList.add(ra.getOther2());
             dataList.add(curList);
         }
         XSSFWorkbook wbWorkbook = ExcelUtil.creat2007Excel(dataList);
@@ -473,7 +474,7 @@ public class TeleStatementController {
         JSONResult<List<CustomFieldQueryDTO>> queryFieldByRoleAndMenu =
                 customFieldFeignClient.queryFieldByRoleAndMenu(queryFieldByRoleAndMenuReq);
         List<CustomFieldQueryDTO> data = queryFieldByRoleAndMenu.getData();
-//        data.removeIf(s -> s.getFieldCode().equals("day"));
+        data.removeIf(s -> s.getFieldCode().equals("day"));
         request.setAttribute("fieldList", queryFieldByRoleAndMenu.getData());
         return "reportforms/resourceAllocationTableTeam";
     }
@@ -758,6 +759,7 @@ public class TeleStatementController {
         headTitleList.add("行业");
         headTitleList.add("其他");
         headTitleList.add("网民未接");
+        headTitleList.add("其他2");
         return headTitleList;
     }
 
