@@ -3,22 +3,62 @@
  */
 package com.kuaidao.manageweb.controller;
 
+import com.google.code.kaptcha.impl.DefaultKaptcha;
+import com.kuaidao.common.constant.SysErrorCodeEnum;
+import com.kuaidao.common.entity.IdEntity;
+import com.kuaidao.common.entity.JSONResult;
+import com.kuaidao.common.util.CommonUtil;
+import com.kuaidao.common.util.DateUtil;
+import com.kuaidao.common.util.MD5Util;
+import com.kuaidao.manageweb.config.LogRecord;
+import com.kuaidao.manageweb.config.LogRecord.OperationType;
+import com.kuaidao.manageweb.constant.Constants;
+import com.kuaidao.manageweb.constant.ManagerWebErrorCodeEnum;
+import com.kuaidao.manageweb.constant.MenuEnum;
+import com.kuaidao.manageweb.entity.LoginReq;
+import com.kuaidao.manageweb.feign.msgpush.MsgPushFeignClient;
+import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
+import com.kuaidao.manageweb.feign.role.RoleManagerFeignClient;
+import com.kuaidao.manageweb.feign.user.LoginRecordFeignClient;
+import com.kuaidao.manageweb.feign.user.SysSettingFeignClient;
+import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
+import com.kuaidao.manageweb.util.IdUtil;
+import com.kuaidao.msgpush.dto.SmsCodeAndMobileValidReq;
+import com.kuaidao.msgpush.dto.SmsCodeSendReq;
+import com.kuaidao.msgpush.dto.SmsVoiceCodeReq;
+import com.kuaidao.sys.constant.SysConstant;
+import com.kuaidao.sys.constant.UserErrorCodeEnum;
+import com.kuaidao.sys.dto.organization.OrganizationDTO;
+import com.kuaidao.sys.dto.user.LoginRecordDTO;
+import com.kuaidao.sys.dto.user.LoginRecordReq;
+import com.kuaidao.sys.dto.user.SysSettingDTO;
+import com.kuaidao.sys.dto.user.SysSettingReq;
+import com.kuaidao.sys.dto.user.UpdateUserPasswordReq;
+import com.kuaidao.sys.dto.user.UserInfoDTO;
+import com.kuaidao.sys.dto.user.UserInfoReq;
 import java.awt.image.BufferedImage;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Date;
+import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import javax.imageio.ImageIO;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.SecurityUtils;
-import org.apache.shiro.authc.*;
+import org.apache.shiro.authc.AuthenticationException;
+import org.apache.shiro.authc.Authenticator;
+import org.apache.shiro.authc.IncorrectCredentialsException;
+import org.apache.shiro.authc.LogoutAware;
+import org.apache.shiro.authc.UnknownAccountException;
+import org.apache.shiro.authc.UsernamePasswordToken;
 import org.apache.shiro.session.Session;
 import org.apache.shiro.subject.PrincipalCollection;
-import org.apache.shiro.subject.SimplePrincipalCollection;
 import org.apache.shiro.subject.Subject;
 import org.apache.shiro.subject.support.DefaultSubjectContext;
 import org.apache.shiro.web.mgt.DefaultWebSecurityManager;
@@ -42,36 +82,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import com.google.code.kaptcha.impl.DefaultKaptcha;
-import com.kuaidao.common.constant.SysErrorCodeEnum;
-import com.kuaidao.common.entity.JSONResult;
-import com.kuaidao.common.util.CommonUtil;
-import com.kuaidao.common.util.DateUtil;
-import com.kuaidao.common.util.MD5Util;
-import com.kuaidao.manageweb.config.LogRecord;
-import com.kuaidao.manageweb.config.LogRecord.OperationType;
-import com.kuaidao.manageweb.constant.Constants;
-import com.kuaidao.manageweb.constant.ManagerWebErrorCodeEnum;
-import com.kuaidao.manageweb.constant.MenuEnum;
-import com.kuaidao.manageweb.entity.LoginReq;
-import com.kuaidao.manageweb.feign.msgpush.MsgPushFeignClient;
-import com.kuaidao.manageweb.feign.role.RoleManagerFeignClient;
-import com.kuaidao.manageweb.feign.user.LoginRecordFeignClient;
-import com.kuaidao.manageweb.feign.user.SysSettingFeignClient;
-import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
-import com.kuaidao.manageweb.util.IdUtil;
-import com.kuaidao.msgpush.dto.SmsCodeAndMobileValidReq;
-import com.kuaidao.msgpush.dto.SmsCodeSendReq;
-import com.kuaidao.msgpush.dto.SmsVoiceCodeReq;
-import com.kuaidao.sys.constant.SysConstant;
-import com.kuaidao.sys.constant.UserErrorCodeEnum;
-import com.kuaidao.sys.dto.user.LoginRecordDTO;
-import com.kuaidao.sys.dto.user.LoginRecordReq;
-import com.kuaidao.sys.dto.user.SysSettingDTO;
-import com.kuaidao.sys.dto.user.SysSettingReq;
-import com.kuaidao.sys.dto.user.UpdateUserPasswordReq;
-import com.kuaidao.sys.dto.user.UserInfoDTO;
-import com.kuaidao.sys.dto.user.UserInfoReq;
 
 
 /**
@@ -119,7 +129,8 @@ public class LoginController {
      **/
     @Value("${VerificationCodeShow}")
     private boolean verificationCodeShow;
-
+    @Autowired
+    OrganizationFeignClient organizationFeignClient;
     /***
      * 登录页
      *
@@ -175,6 +186,14 @@ public class LoginController {
             return getbyUserName;
         }
         UserInfoDTO user = getbyUserName.getData();
+        //查询登录用户所属业务线放入登录对象中
+        JSONResult<OrganizationDTO> organizationDTOJSONResult = organizationFeignClient.queryOrgById(new IdEntity(String.valueOf(user.getOrgId())));
+        if (JSONResult.SUCCESS.equals(organizationDTOJSONResult.getCode())) {
+            OrganizationDTO organizationDTO = organizationDTOJSONResult.getData();
+            if(organizationDTO.getBusinessLine() != null){
+                user.setBusinessLine(organizationDTO.getBusinessLine());
+            }
+        }
         Date date = new Date();
         LoginRecordReq loginRecord = new LoginRecordReq();
         loginRecord.setId(IdUtil.getUUID());
