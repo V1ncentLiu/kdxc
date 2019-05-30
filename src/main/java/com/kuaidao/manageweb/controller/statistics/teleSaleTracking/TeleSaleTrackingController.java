@@ -101,6 +101,7 @@ public class TeleSaleTrackingController {
     @ResponseBody
     JSONResult<PageBean<TeleSaleTrackingDto>> getRecordByGroupLevelUserIdDate(@RequestBody TeleSaleTrackingQueryDto trackingQueryDto,
                                                                               HttpServletRequest request){
+        logger.info("电销跟踪合计查询参数：{}",trackingQueryDto.toString());
         Long orgId = trackingQueryDto.getOrgId();
         if(null == orgId){
             buildOrgIdList(trackingQueryDto, orgId);
@@ -519,7 +520,9 @@ public class TeleSaleTrackingController {
         if(null == org_id){
             UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
             List<OrganizationRespDTO> orgGroupByOrgId = getOrgGroupByOrgId(curLoginUser.getOrgId(), OrgTypeConstant.DXZ);
+            logger.info("查询结果OrganizationRespDTO{}",orgGroupByOrgId.toArray());
             List<Long> orgIdList = orgGroupByOrgId.parallelStream().map(OrganizationRespDTO::getId).collect(Collectors.toList());
+            logger.info("查询出电销组：{}",orgIdList.toArray());
             teleSaleTrackingQueryDto.setOrgIdList(orgIdList);
         }
     }
