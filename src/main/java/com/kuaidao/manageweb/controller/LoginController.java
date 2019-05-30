@@ -190,7 +190,7 @@ public class LoginController {
         JSONResult<OrganizationDTO> organizationDTOJSONResult = organizationFeignClient.queryOrgById(new IdEntity(String.valueOf(user.getOrgId())));
         if (JSONResult.SUCCESS.equals(organizationDTOJSONResult.getCode())) {
             OrganizationDTO organizationDTO = organizationDTOJSONResult.getData();
-            if(organizationDTO.getBusinessLine() != null){
+            if(organizationDTO != null && organizationDTO.getBusinessLine() != null){
                 user.setBusinessLine(organizationDTO.getBusinessLine());
             }
         }
