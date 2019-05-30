@@ -106,6 +106,7 @@ public class TeleSaleTrackingController {
         if(null == orgId){
             buildOrgIdList(trackingQueryDto, orgId);
         }
+        logger.info("赋值后电销跟踪合计查询参数：{}",trackingQueryDto.toString());
         request.setAttribute("trackingQueryDto",trackingQueryDto);
         if(null != trackingQueryDto.getCusLevelList() && trackingQueryDto.getCusLevelList().size() > 0){
             return teleSaleTrackingFeignClient.getRecordByGroupLevelUserIdDatePage(trackingQueryDto);
