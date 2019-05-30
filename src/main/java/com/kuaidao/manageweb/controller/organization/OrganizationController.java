@@ -14,6 +14,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import com.kuaidao.common.constant.DicCodeEnum;
 import com.kuaidao.common.constant.OrgTypeConstant;
@@ -418,11 +419,13 @@ public class OrganizationController {
      */
     @PostMapping("/queryBusinessAreaList")
     @ResponseBody
-    public JSONResult<List<OrganizationRespDTO>> queryBusinessAreaList() {
+    public JSONResult<List<OrganizationRespDTO>> queryBusinessAreaList(
+            @RequestParam Integer businessLine) {
         // 电销组
         OrganizationQueryDTO busGroupReqDTO = new OrganizationQueryDTO();
         busGroupReqDTO.setSystemCode(SystemCodeConstant.HUI_JU);
         busGroupReqDTO.setOrgType(OrgTypeConstant.SWDQ);
+        busGroupReqDTO.setBusinessLine(businessLine);
         return organizationFeignClient.queryOrgByParam(busGroupReqDTO);
     }
 
@@ -434,11 +437,13 @@ public class OrganizationController {
      */
     @PostMapping("/queryTeleDeptList")
     @ResponseBody
-    public JSONResult<List<OrganizationRespDTO>> queryTeleDeptList() {
+    public JSONResult<List<OrganizationRespDTO>> queryTeleDeptList(
+            @RequestParam Integer businessLine) {
         // 电销组
         OrganizationQueryDTO busGroupReqDTO = new OrganizationQueryDTO();
         busGroupReqDTO.setSystemCode(SystemCodeConstant.HUI_JU);
         busGroupReqDTO.setOrgType(OrgTypeConstant.DZSYB);
+        busGroupReqDTO.setBusinessLine(businessLine);
         return organizationFeignClient.queryOrgByParam(busGroupReqDTO);
     }
 

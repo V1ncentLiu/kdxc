@@ -9,33 +9,39 @@ import org.springframework.web.bind.annotation.RequestBody;
 import com.kuaidao.aggregation.dto.cluerule.ClueReleaseAndReceiveRuleDTO;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.IdEntityLong;
+import com.kuaidao.common.entity.IntegerEntity;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.manageweb.feign.client.ClientFeignClient;
 
 
 /**
  * 签约记录
- * @author  Chen
- * @date 2019年3月1日 下午6:36:23   
+ * 
+ * @author Chen
+ * @date 2019年3月1日 下午6:36:23
  * @version V1.0
  */
-@FeignClient(name = "aggregation-service", path = "/aggregation/cluerule/clueRule", fallback = ClueRuleFeignClient.HystrixClientFallback.class)
+@FeignClient(name = "aggregation-service", path = "/aggregation/cluerule/clueRule",
+        fallback = ClueRuleFeignClient.HystrixClientFallback.class)
 public interface ClueRuleFeignClient {
-    
+
     @PostMapping("/queryAllClueRule")
-    public JSONResult<ClueReleaseAndReceiveRuleDTO> queryAllClueRule();
-    
+    public JSONResult<ClueReleaseAndReceiveRuleDTO> queryAllClueRule(
+            @RequestBody IntegerEntity integerEntity);
+
     @PostMapping("/insertAndUpdateClueRule")
-    public JSONResult<Boolean> insertAndUpdateClueRule(@RequestBody ClueReleaseAndReceiveRuleDTO reqAndReceiveRuleDTO);
-    
+    public JSONResult<Boolean> insertAndUpdateClueRule(
+            @RequestBody ClueReleaseAndReceiveRuleDTO reqAndReceiveRuleDTO);
+
     /**
-     * 删除电销规则  -具体人员的规则
+     * 删除电销规则 -具体人员的规则
+     * 
      * @param idEntityLong
      * @return
      */
     @PostMapping("/deleteTeleDirectorRuleById")
     public JSONResult<Boolean> deleteTeleDirectorRuleById(IdEntityLong idEntityLong);
-    
+
     @Component
     static class HystrixClientFallback implements ClueRuleFeignClient {
 
@@ -48,12 +54,14 @@ public interface ClueRuleFeignClient {
         }
 
         @Override
-        public JSONResult<ClueReleaseAndReceiveRuleDTO> queryAllClueRule() {
+        public JSONResult<ClueReleaseAndReceiveRuleDTO> queryAllClueRule(
+                IntegerEntity integerEntity) {
             return fallBackError("查询所有的规则");
         }
 
         @Override
-        public JSONResult<Boolean> insertAndUpdateClueRule(ClueReleaseAndReceiveRuleDTO reqAndReceiveRuleDTO) {
+        public JSONResult<Boolean> insertAndUpdateClueRule(
+                ClueReleaseAndReceiveRuleDTO reqAndReceiveRuleDTO) {
             return fallBackError("插入或更新规则");
         }
 
