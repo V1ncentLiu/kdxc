@@ -1,7 +1,6 @@
 package com.kuaidao.manageweb.feign.statistics;
 
 import java.util.List;
-import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.netflix.feign.FeignClient;
@@ -16,7 +15,7 @@ import com.kuaidao.stastics.dto.callrecord.TeleSaleTalkTimeQueryDTO;
 import com.kuaidao.stastics.dto.callrecord.TeleTalkTimeRespDTO;
 import com.kuaidao.stastics.dto.callrecord.TotalDataDTO;
 
-@FeignClient(name = "statstics-service", path = "/statstics/callrecord/teleSaleTalkTime", fallback = TeleTalkTimeFeignClient.HystrixClientFallback.class)
+@FeignClient(name = "statstics-service-chen", path = "/statstics/callrecord/teleSaleTalkTime", fallback = TeleTalkTimeFeignClient.HystrixClientFallback.class)
 public interface TeleTalkTimeFeignClient {
 
     /***
