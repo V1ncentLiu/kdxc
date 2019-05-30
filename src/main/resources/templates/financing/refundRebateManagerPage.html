@@ -241,7 +241,7 @@
               </el-form-item>
             </el-form>
             <div slot="footer" class="dialog-footer">
-                <el-button type="primary" @click="allocationClue('allocationForm')">提 交</el-button>
+                <el-button type="primary" @click="allocationClue('allocationForm')" :disabled="btnDisabled">提 交</el-button>
                 <el-button  @click="allocationClueCancel('allocationForm')">取 消</el-button>
             </div>
         </template>
@@ -311,14 +311,14 @@
               </el-form-item>
             </el-form>
             <div slot="footer" class="dialog-footer">
-                <el-button type="primary" @click="transferClue('transferForm')">提 交</el-button>
+                <el-button type="primary" @click="transferClue('transferForm')" :disabled="btnDisabled1">提 交</el-button>
                 <el-button  @click="transferClueCancel('transferForm')">取 消</el-button>
             </div>
         </template>
     </el-dialog>
     <!-- dialog -->
     <!-- 付款明细 -->
-    <el-dialog :title="payTitle" :visible.sync="recordDialog">
+    <el-dialog :title="payTitle" :visible.sync="recordDialog" width="1000px">
         <el-table
             ref="recordTable" 
             tooltip-effect="dark"
@@ -411,6 +411,8 @@ var clueVM = new Vue({
         el: '#clueManage',
         data: {
           isShow:false,
+          btnDisabled:false,
+          btnDisabled1:false,
       		searchForm: {
 	       		busAreaId: '',
 	       		busGroupId: '',
@@ -1026,13 +1028,14 @@ var clueVM = new Vue({
             	   this.isSettle=rows[0].isSettle;
             	   this.refundTitle="（"+rows[0].signNo+"）签约单申请退款";
                    this.allocationVisible = true;
+                   this.btnDisabled=false;
                },
                allocationClueCancel(formName){//申请退款取消
             	   this.$refs[formName].resetFields();
             	   this.allocationVisible = false;
                },
                allocationClue(formName){//申请退款
-            	   
+            	   this.btnDisabled=true;
             	   this.$refs[formName].validate((valid) => {
             	          if (valid) {
            	            	  var param  = {};
@@ -1048,23 +1051,27 @@ var clueVM = new Vue({
 	                                  	clueVM.$message({message:'申请成功',type:'success',duration:1000,onClose:function(){
 	                                  		clueVM.allocationVisible = false;
 	                                  		clueVM.searchTable();
+                                        this.btnDisabled=false;
 	                              	    }});
 	                                  }else{
 	                                  	clueVM.$message({
 	                                          message: "接口调用失败",
 	                                          type: 'error'
 	                                        }); 
+                                      this.btnDisabled=false;
 	                                  }
 	                              })
 	                              .catch(function (error) {
+                                  this.btnDisabled=false;
 	                                console.log(error);
 	                              })
 	                              .then(function () {
-	                              	
+	                              	this.btnDisabled=false;
 	                              });
             	            //end
             	          } else {
             	            console.log('error submit!!');
+                          this.btnDisabled=false;
             	            return false;
             	          }
             	    });
@@ -1099,6 +1106,7 @@ var clueVM = new Vue({
                    this.isSettle=rows[0].isSettle;
                    this.rebateTitle="（"+rows[0].signNo+"）签约单申请返款";
                    this.transferVisible = true;
+                   this.btnDisabled1=false;
                },
                transferClueCancel(formName){//外调经理取消
             	   this.$refs[formName].resetFields();
@@ -1106,6 +1114,7 @@ var clueVM = new Vue({
             	   this.dialogFormChooseVisibleCancel();
                },
                transferClue(formName){//外调经理
+                this.btnDisabled1=true;
             	   this.$refs[formName].validate((valid) => {
             	          if (valid) {
                            	  //外调
@@ -1123,23 +1132,27 @@ var clueVM = new Vue({
                                    	clueVM.$message({message:'申请成功',type:'success',duration:1000,onClose:function(){
                                    		clueVM.transferVisible = false;
                                    		clueVM.searchTable();
+                                      this.btnDisabled1=false;
                                	    }});
                                    }else{
                                    	clueVM.$message({
                                            message: "接口调用失败",
                                            type: 'error'
                                          }); 
+                                    this.btnDisabled1=false;
                                    }
                                })
                                .catch(function (error) {
                                  console.log(error);
+                                 this.btnDisabled1=false;
                                })
                                .then(function () {
-                               	
+                               	  this.btnDisabled1=false;
                                });
             	            //end
             	          } else {
             	            console.log('error submit!!');
+                          this.btnDisabled1=false;
             	            return false;
             	          }
             	  });
