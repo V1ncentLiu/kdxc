@@ -67,6 +67,11 @@ public class TeleSaleTrackingController {
         Long orgId = trackingQueryDto.getOrgId();
         if(null == orgId){
             buildOrgIdList(trackingQueryDto, orgId);
+            List<Long> orgIdList = trackingQueryDto.getOrgIdList();
+            if(orgIdList == null || orgIdList.size() == 0){
+                PageBean emptyDataPageBean = PageBean.getEmptyListDataPageBean(trackingQueryDto.getPageNum(), trackingQueryDto.getPageSize());
+                return new JSONResult<PageBean<TeleSaleTrackingDto>>().success(emptyDataPageBean);
+            }
         }
         if(null != trackingQueryDto.getCusLevelList() && trackingQueryDto.getCusLevelList().size() > 0){
             return teleSaleTrackingFeignClient.getRecordByGroupLevelPage(trackingQueryDto);
