@@ -863,12 +863,16 @@ public class MyCustomerClueController {
     @RequestMapping("/listByOrgAndRole")
     @ResponseBody
     public JSONResult<List<UserInfoDTO>> listByOrgAndRole(HttpServletRequest request) {
+        UserInfoDTO user = getUser();
         UserOrgRoleReq userRole = new UserOrgRoleReq();
         List<Integer> status = new ArrayList();
         status.add(1);
         status.add(3);
         userRole.setRoleCode(RoleCodeEnum.DXCYGW.name());
         userRole.setStatusList(status);
+        if(user.getBusinessLine() != null ){
+            userRole.setBusinessLine(user.getBusinessLine());
+        }
         return userInfoFeignClient.listByOrgAndRole(userRole);
     }
 
@@ -892,6 +896,9 @@ public class MyCustomerClueController {
         if (null != user) {
             dto.setOrgId(user.getOrgId());
             dto.setUserId(user.getId());
+            if(dto.getBusinessLine() != null){
+                dto.setBusinessLine(user.getBusinessLine());
+            }
         }
         if (null != dto.getRepeatUserId()) {
             IdEntityLong id = new IdEntityLong();
