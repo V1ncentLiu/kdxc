@@ -176,6 +176,10 @@ public class ClueRepetitionController {
     @RequestMapping("/dealPetitionList")
     @ResponseBody
     public JSONResult<PageBean<ClueRepetitionDTO>> dealPetitionList(HttpServletRequest request,@RequestBody ClueRepetitionDTO clueRepetitionDTO) {
+			UserInfoDTO userInfoDTO = getUser();
+			if(userInfoDTO.getBusinessLine() != null){
+				clueRepetitionDTO.setBusinessLine(userInfoDTO.getBusinessLine());
+			}
     	JSONResult<PageBean<ClueRepetitionDTO>> list = clueRepetitionFeignClient.dealPetitionList(clueRepetitionDTO);
     	return list;
     }
