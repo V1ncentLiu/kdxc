@@ -231,6 +231,9 @@ public class BusinessSignController {
       idLong.setId(param.getClueId());
       String linkPhone = linkPhone(idLong);
       data.setPhone(linkPhone);
+      if(data.getGiveType() ==null) {
+    	  data.setGiveType(-1);
+      }
       res.setData(data);
       data.setPerformanceAmount(data.getAmountPerformance());
     }
