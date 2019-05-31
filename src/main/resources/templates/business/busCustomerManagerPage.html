@@ -165,7 +165,7 @@
                       :data="dataTable" @sort-change="sort_change">
                 <el-table-column align="center" type="selection" label="全选" width="55"></el-table-column>
                 <el-table-column align="center" type="index" width="55" label="序号"></el-table-column>
-                <el-table-column align="center" prop="appiontmentCreateTime" sortable label="提交邀约时间" :formatter="dateFormat" width="170"></el-table-column>                
+                <el-table-column align="center" prop="appiontmentCreateTime" sortable label="提交邀约来访时间" :formatter="dateFormat" width="170"></el-table-column>                
                 <el-table-column align="center" prop="reserveTime" sortable label="邀约来访时间" :formatter="dateFormat" width="170"></el-table-column>
                 <el-table-column align="center" prop="allocateTime" sortable label="接收邀约时间" :formatter="dateFormat" width="170"></el-table-column>
                 <el-table-column prop="delFalg" label="邀约来访状态" align="center" width="120px">
@@ -191,7 +191,7 @@
                 <el-table-column align="center" prop="province" label="开店省份"></el-table-column>
                 <el-table-column align="center" prop="city" label="开店城市"></el-table-column>
                 <el-table-column align="center" prop="district" label="开店区／县" width="120"></el-table-column>
-                <el-table-column align="center" prop="purProjectType" label="意向项目" :formatter="transformPurProject"></el-table-column>
+                <el-table-column align="center" prop="purType" label="意向品类" :formatter="transformPurProject"></el-table-column>
                 <el-table-column align="center" prop="visitStatus" label="到访状态" :formatter="transformVisit" width="90"></el-table-column>
                 <el-table-column align="center" prop="visit" label="到访情况" width="100">
                     <template slot-scope="scope">
@@ -870,6 +870,7 @@
     var shopTyleList = [[${shopTyleList}]];//签约店型
     var storefrontAreaList = [[${storefrontAreaList}]];//店铺面积
     var ussmList = [[${ussmList}]];//投资金额
+    var purTypeList = [[${purTypeList}]] // 意向品类
 
     var customerVM = new Vue({
         el: '#clueManage',
@@ -1144,19 +1145,15 @@
                 }
                 return text;
             },
-            //意向项目转换方法
+            //意向品类转换方法
             transformPurProject(row, column, cellValue, index) {
                 var text = "";
-                if (cellValue == 1) {
-                    if (projectList) {
-                        for (var i = 0; i < projectList.length; i++) {
-                            if (row.purInProject == projectList[i].id) {
-                                text = projectList[i].projectName;
-                            }
+                if (purTypeList) {
+                    for (var i = 0; i < purTypeList.length; i++) {
+                        if (row.purType == purTypeList[i].value) {
+                            text = purTypeList[i].name;
                         }
                     }
-                } else {
-                    text = row.purOutProject;
                 }
                 return text;
             },
