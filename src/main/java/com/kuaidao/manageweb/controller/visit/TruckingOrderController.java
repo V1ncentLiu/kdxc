@@ -238,28 +238,28 @@ public class TruckingOrderController {
                 TrackingOrderRespDTO trackingOrderRespDTO = orderList.get(i);
                 List<Object> curList = new ArrayList<>();
                 curList.add(i + 1);
-                curList.add(getTimeStr(trackingOrderRespDTO.getReserveTime()));
-                curList.add(trackingOrderRespDTO.getBusDirectorName());
-                curList.add(trackingOrderRespDTO.getBusCompanyName());
-                curList.add(getProjectNameStr(allProjectList,
-                        trackingOrderRespDTO.getTasteProjectId()));
                 curList.add(getTimeStr(trackingOrderRespDTO.getCreateTime()));
                 curList.add(trackingOrderRespDTO.getSubmitGroup());
                 curList.add(trackingOrderRespDTO.getTelSaleName());
                 curList.add(trackingOrderRespDTO.getAccountPhone());
+                curList.add(getTimeStr(trackingOrderRespDTO.getReserveTime()));
                 curList.add(trackingOrderRespDTO.getCustomerName());
-                curList.add(trackingOrderRespDTO.getCusNum());
                 curList.add(trackingOrderRespDTO.getCusPhone());
+                curList.add(trackingOrderRespDTO.getCusNum());
                 curList.add(trackingOrderRespDTO.getCusName());
-                curList.add(getTimeStr(trackingOrderRespDTO.getArrivalTime()));
                 curList.add(getTimeStr(trackingOrderRespDTO.getDepartTime()));
                 curList.add(trackingOrderRespDTO.getCity());
+                curList.add(trackingOrderRespDTO.getFlight());
+                curList.add(getTimeStr(trackingOrderRespDTO.getArrivalTime()));
+                curList.add(trackingOrderRespDTO.getPickUpPlace());
                 curList.add(getTimeStr(trackingOrderRespDTO.getPickUpTime()));
                 curList.add(trackingOrderRespDTO.getDelayMark());
-                curList.add(trackingOrderRespDTO.getFlight());
-                curList.add(trackingOrderRespDTO.getPickUpPlace());
-                curList.add(trackingOrderRespDTO.getTerminal());
-                curList.add(trackingOrderRespDTO.getReceivedPlace());
+                curList.add(trackingOrderRespDTO.getBusCompanyName());
+                curList.add(getProjectNameStr(allProjectList,
+                        trackingOrderRespDTO.getTasteProjectId()));
+                curList.add(trackingOrderRespDTO.getBusDirectorName());
+        /*        curList.add(trackingOrderRespDTO.getTerminal());
+                curList.add(trackingOrderRespDTO.getReceivedPlace());*/
                 dataList.add(curList);
             }
 
@@ -325,27 +325,27 @@ public class TruckingOrderController {
     private List<Object> getHeadTitleList() {
         List<Object> headTitleList = new ArrayList<>();
         headTitleList.add("序号");
-        headTitleList.add("邀约来访时间");
-        headTitleList.add("商务总监");
-        headTitleList.add("餐饮公司");
-        headTitleList.add("品尝项目");
         headTitleList.add("申请提交时间");
         headTitleList.add("申请电销组");
         headTitleList.add("申请顾问");
         headTitleList.add("顾问电话");
+        headTitleList.add("邀约来访时间");
         headTitleList.add("客户姓名");
-        headTitleList.add("客户人数");
         headTitleList.add("客户手机号");
+        headTitleList.add("客户人数");
         headTitleList.add("客户联系人姓名");
-        headTitleList.add("到站时间");
         headTitleList.add("出发时间");
         headTitleList.add("出车城市");
+        headTitleList.add("车次／航班");
+        headTitleList.add("到站时间");
+        headTitleList.add("接站地");
         headTitleList.add("接站时间");
         headTitleList.add("延误说明");
-        headTitleList.add("车次／航班");
-        headTitleList.add("接站地");
-        headTitleList.add("航站楼");
-        headTitleList.add("接到地（酒店／公司）");
+        headTitleList.add("餐饮公司");
+        headTitleList.add("品尝项目");
+        headTitleList.add("商务总监");
+//        headTitleList.add("航站楼");
+//        headTitleList.add("接到地（酒店／公司）");
         return headTitleList;
     }
     
