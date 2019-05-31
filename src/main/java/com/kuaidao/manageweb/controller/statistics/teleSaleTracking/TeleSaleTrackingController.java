@@ -74,9 +74,9 @@ public class TeleSaleTrackingController {
             }
         }
         if(null != trackingQueryDto.getCusLevelList() && trackingQueryDto.getCusLevelList().size() > 0){
-            return teleSaleTrackingFeignClient.getRecordByGroupLevelPage(trackingQueryDto);
+            return  teleSaleTrackingFeignClient.getRecordByGroupLevelPage(trackingQueryDto);
         }else{
-            return teleSaleTrackingFeignClient.getRecordByGroupPage(trackingQueryDto);
+            return  teleSaleTrackingFeignClient.getRecordByGroupPage(trackingQueryDto);
         }
     }
 
@@ -168,7 +168,12 @@ public class TeleSaleTrackingController {
             curList.add(ra.getCountResource());
             curList.add(ra.getCountClueId());
             curList.add(ra.getCountDistinctClue());
-            curList.add(ra.getDayOfPer());
+            double dayOfPer = ra.getDayOfPer();
+            if(dayOfPer == 0){
+                curList.add(0);
+            }else{
+                curList.add(ra.getDayOfPer());
+            }
             dataList.add(curList);
         }
         XSSFWorkbook wbWorkbook = ExcelUtil.creat2007Excel(dataList);
@@ -202,20 +207,24 @@ public class TeleSaleTrackingController {
             list = teleSaleTrackingFeignClient.getRecordByGroupLevelUserId(trackingQueryDto);
         }
         List<List<Object>> dataList = new ArrayList<List<Object>>();
-        dataList.add(getHeadTitleList());
+        dataList.add(getHeadSumTitleList());
         List<TeleSaleTrackingDto> orderList = list.getData();
         for(int i = 0; i<orderList.size(); i++){
             TeleSaleTrackingDto ra = orderList.get(i);
             List<Object> curList = new ArrayList<>();
             curList.add(i + 1);
-            curList.add(ra.getDateId());
             curList.add(ra.getOrgName());
             curList.add(ra.getUserName());
             curList.add(getCusLeveName(ra.getCusLevel()));
             curList.add(ra.getCountResource());
             curList.add(ra.getCountClueId());
             curList.add(ra.getCountDistinctClue());
-            curList.add(ra.getDayOfPer());
+            double dayOfPer = ra.getDayOfPer();
+            if(dayOfPer == 0){
+                curList.add(0);
+            }else{
+                curList.add(ra.getDayOfPer());
+            }
             dataList.add(curList);
         }
         XSSFWorkbook wbWorkbook = ExcelUtil.creat2007Excel(dataList);
@@ -269,7 +278,12 @@ public class TeleSaleTrackingController {
             curList.add(ra.getCountResource());
             curList.add(ra.getCountClueId());
             curList.add(ra.getCountDistinctClue());
-            curList.add(ra.getDayOfPer());
+            Double dayOfPer = ra.getDayOfPer();
+            if(dayOfPer == 0){
+                curList.add(0);
+            }else {
+                curList.add(ra.getDayOfPer());
+            }
             dataList.add(curList);
         }
         XSSFWorkbook wbWorkbook = ExcelUtil.creat2007Excel(dataList);
@@ -461,6 +475,19 @@ public class TeleSaleTrackingController {
         return headTitleList;
     }
 
+    private List<Object> getHeadSumTitleList() {
+        List<Object> headTitleList = new ArrayList<>();
+        headTitleList.add("序号");
+        headTitleList.add("电销组");
+        headTitleList.add("电销顾问");
+        headTitleList.add("客户级别");
+        headTitleList.add("资源数");
+        headTitleList.add("回访次数");
+        headTitleList.add("回访资源数");
+        headTitleList.add("人均天回访次数");
+        return headTitleList;
+    }
+
     private List<Object> getHeadOneTitleList() {
         List<Object> headTitleList = new ArrayList<>();
         headTitleList.add("");
@@ -493,7 +520,12 @@ public class TeleSaleTrackingController {
         totalList.add(resTotal.getCountResource());
         totalList.add(resTotal.getCountClueId());
         totalList.add(resTotal.getCountDistinctClue());
-        totalList.add(resTotal.getDayOfPer());
+        Double dayOfPer = resTotal.getDayOfPer();
+        if(dayOfPer == 0){
+            totalList.add(0);
+        }else {
+            totalList.add(resTotal.getDayOfPer());
+        }
         dataList.add(totalList);
     }
 
