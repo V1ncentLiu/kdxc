@@ -196,7 +196,8 @@ var mainDivVM = new Vue({
             amountBalance: '',
             makeUpTime:'',
             payTime: new Date(),
-            amountPerformance:''
+            amountPerformance:'',
+            payName:''
         },
         updateFormSigning: {
         	giveType:"",
@@ -223,6 +224,7 @@ var mainDivVM = new Vue({
 
             payDetailId:"",
             payType:'1',
+            payName:'',
             payMode:'',
             amountReceived: '',
             amountBalance: '',
@@ -402,6 +404,9 @@ var mainDivVM = new Vue({
             // ],
             payMode: [
                 { required: true, message: '请选择付款方式', trigger: 'change' }
+            ],
+            payName: [
+                {required: true, message: '请输入付款人姓名', trigger: 'blur'}
             ],
             payTime: [
                 { type: 'date', required: true, message: '请选择时间', trigger: 'change' }
@@ -1232,6 +1237,7 @@ var mainDivVM = new Vue({
                 mainDivVM.dialogFormSigningVisible = true;
                 mainDivVM.currentProvince(mainDivVM.formSigning.signProvince)
                 mainDivVM.currentCity(mainDivVM.formSigning.signCity)
+                mainDivVM.formSigning.payName = response.data.data.customerName;
             //  设置默认时间
             //     mainDivVM.formSigning.payTime = new Date()
             //     mainDivVM.formSigning.isRemoteSign = 0;
@@ -1272,6 +1278,9 @@ var mainDivVM = new Vue({
 
                     //设置显示数据
                     mainDivVM.updateFormSigning =response.data.data;
+                    if(response.data.data.payName == null || response.data.data.payName == ''){
+                        mainDivVM.updateFormSigning.payName=mainDivVM.updateFormSigning.customerName;
+                    }
                     if( mainDivVM.updateFormSigning){
                         if(mainDivVM.updateFormSigning.payType > 2){
                             if(mainDivVM.updateFormSigning.payType == 3){

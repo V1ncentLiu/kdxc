@@ -519,10 +519,10 @@ public class BalanceAccountController {
             accountDTO.setDay(createTime.substring(8, 10));
             accountDTO.setMonth(createTime.substring(5, 7));
             accountDTO.setYear(createTime.substring(0, 4));
-            if (accountDTO.getPayType() != 1 && accountDTO.getPayType() != 2) {
+            /*if (accountDTO.getPayType() != 1 && accountDTO.getPayType() != 2) {
                 accountDTO.setFirstToll(null);
             	accountDTO.setPreferentialAmount(null);
-            }
+            }*/
         }
         request.setAttribute("accountDTO",
         		accountDTO);
