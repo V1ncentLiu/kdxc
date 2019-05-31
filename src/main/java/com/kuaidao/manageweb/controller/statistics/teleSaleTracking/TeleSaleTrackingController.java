@@ -490,7 +490,7 @@ public class TeleSaleTrackingController {
 
     private List<Object> getHeadOneTitleList() {
         List<Object> headTitleList = new ArrayList<>();
-        headTitleList.add("");
+        headTitleList.add("序号");
         headTitleList.add("电销组");
         headTitleList.add("客户级别");
         headTitleList.add("资源数");
