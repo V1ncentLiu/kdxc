@@ -168,7 +168,12 @@ public class TeleSaleTrackingController {
             curList.add(ra.getCountResource());
             curList.add(ra.getCountClueId());
             curList.add(ra.getCountDistinctClue());
-            curList.add(ra.getDayOfPer());
+            double dayOfPer = ra.getDayOfPer();
+            if(dayOfPer == 0){
+                curList.add(0);
+            }else{
+                curList.add(ra.getDayOfPer());
+            }
             dataList.add(curList);
         }
         XSSFWorkbook wbWorkbook = ExcelUtil.creat2007Excel(dataList);
@@ -214,7 +219,12 @@ public class TeleSaleTrackingController {
             curList.add(ra.getCountResource());
             curList.add(ra.getCountClueId());
             curList.add(ra.getCountDistinctClue());
-            curList.add(ra.getDayOfPer());
+            double dayOfPer = ra.getDayOfPer();
+            if(dayOfPer == 0){
+                curList.add(0);
+            }else{
+                curList.add(ra.getDayOfPer());
+            }
             dataList.add(curList);
         }
         XSSFWorkbook wbWorkbook = ExcelUtil.creat2007Excel(dataList);
@@ -268,7 +278,12 @@ public class TeleSaleTrackingController {
             curList.add(ra.getCountResource());
             curList.add(ra.getCountClueId());
             curList.add(ra.getCountDistinctClue());
-            curList.add(ra.getDayOfPer());
+            Double dayOfPer = ra.getDayOfPer();
+            if(dayOfPer == 0){
+                curList.add(0);
+            }else {
+                curList.add(ra.getDayOfPer());
+            }
             dataList.add(curList);
         }
         XSSFWorkbook wbWorkbook = ExcelUtil.creat2007Excel(dataList);
@@ -505,7 +520,12 @@ public class TeleSaleTrackingController {
         totalList.add(resTotal.getCountResource());
         totalList.add(resTotal.getCountClueId());
         totalList.add(resTotal.getCountDistinctClue());
-        totalList.add(resTotal.getDayOfPer());
+        Double dayOfPer = resTotal.getDayOfPer();
+        if(dayOfPer == 0){
+            totalList.add(0);
+        }else {
+            totalList.add(resTotal.getDayOfPer());
+        }
         dataList.add(totalList);
     }
 
