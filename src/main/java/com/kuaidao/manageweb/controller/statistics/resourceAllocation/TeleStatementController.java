@@ -160,6 +160,15 @@ public class TeleStatementController {
     @RequestMapping("/getResourceAllocationCount")
     @ResponseBody
     public JSONResult<List<ResourceAllocationDto>> getGroupCountTotal(@RequestBody ResourceAllocationQueryDto resourceAllocationQueryDto){
+        Long org_id = resourceAllocationQueryDto.getOrg_Id();
+        if(null == org_id){
+            buildOrgIdList(resourceAllocationQueryDto, org_id);
+            List<Long> orgIdList = resourceAllocationQueryDto.getOrgIdList();
+            if(orgIdList == null || orgIdList.size() == 0){
+                PageBean emptyDataPageBean = PageBean.getEmptyListDataPageBean(resourceAllocationQueryDto.getPageNum(), resourceAllocationQueryDto.getPageSize());
+                return new JSONResult<PageBean<ResourceAllocationDto>>().success(emptyDataPageBean);
+            }
+        }
         JSONResult<List<ResourceAllocationDto>> countRes = statisticsFeignClient.getResourceAllocationCount(resourceAllocationQueryDto);
         return countRes;
     }
