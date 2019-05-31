@@ -655,9 +655,10 @@ var clueVM = new Vue({
                               	clueVM.$message({message:'分配成功',type:'success',duration:1500,onClose:function(){
                               		clueVM.allocationVisible = false;
                               		clueVM.searchTable();
+                            	  clueVM.isDisabled = false;
                           	    }});
                               }else{
-                            	  clueVM.isDisabled = true;
+                            	  clueVM.isDisabled = false;
                               	clueVM.$message({
                                       message: "接口调用失败",
                                       type: 'error'
@@ -665,6 +666,7 @@ var clueVM = new Vue({
                               }
                           })
                           .catch(function (error) {
+                            clueVM.isDisabled = false;
                             console.log(error);
                           })
                           .then(function () {
@@ -693,6 +695,7 @@ var clueVM = new Vue({
                transferClue(formName){//转移资源
             	   this.$refs[formName].validate((valid) => {
            	          if (valid) {
+           	        	 this.isDisabled = true;
            	        	 var rows = this.multipleSelection;
                          var rowIds = [];
                          for(var i=0;i<rows.length;i++){
@@ -713,8 +716,10 @@ var clueVM = new Vue({
                               	clueVM.$message({message:'转移成功',type:'success',duration:1500,onClose:function(){
                               		clueVM.transferVisible = false;
                               		clueVM.searchTable();
+                              		clueVM.isDisabled = false;
                           	    }});
                               }else{
+                            	  clueVM.isDisabled = false;
                               	clueVM.$message({
                                       message: "接口调用失败",
                                       type: 'error'
@@ -722,6 +727,7 @@ var clueVM = new Vue({
                               }
                           })
                           .catch(function (error) {
+                        	  clueVM.isDisabled = false;
                             console.log(error);
                           })
                           .then(function () {

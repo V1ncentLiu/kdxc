@@ -194,7 +194,7 @@
                 param.user_Id = this.form.user_Id;//电销顾问
                 param.new_resource = this.form.new_resource;//分配来源
                 this.loading=true;
-·                axios.post('/statistics/teleStatement/getResourceAllocationsDayPersion',param).then(function (response) {
+                axios.post('/statistics/teleStatement/getResourceAllocationsDayPersion',param).then(function (response) {
                     if(!response){
                         mainDivVM.$message({
                             message: "接口调用失败",
@@ -225,6 +225,12 @@
                     mainDivVM.tableData=resobjData;
                     // 表头数据渲染 
                     mainDivVM.tableColums= fieldList;
+                    // 日期格式转换
+                    for(var i=0;i<resobjData.length;i++){
+                        if(resobjData[i].day){
+                            resobjData[i].day=mainDivVM.dateFormat(resobjData[i].day);
+                        }                        
+                    }
                     // 分页
                     mainDivVM.pager.currentPage= resobj.data.currentPage;
                     mainDivVM.pager.total= resobj.data.total;
@@ -242,6 +248,15 @@
                 // 返回资源分配表页面
                 window.location.href="/statistics/teleStatement/resourceAllocation";
             },
+            dateFormat (column) { 
+                console.log(column)                
+                 if (!column) {return "";}
+                var d = column.toString();
+                var oYear = d.slice(0,4);
+                var oMonth = d.slice(4,6);
+                var oDay = d.slice(6);
+                return oYear+"-"+oMonth+"-"+oDay;
+            }, 
             minuteFormat (m) {
                 if (!m) {
                    return "";

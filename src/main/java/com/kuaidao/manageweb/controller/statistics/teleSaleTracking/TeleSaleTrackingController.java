@@ -67,6 +67,11 @@ public class TeleSaleTrackingController {
         Long orgId = trackingQueryDto.getOrgId();
         if(null == orgId){
             buildOrgIdList(trackingQueryDto, orgId);
+            List<Long> orgIdList = trackingQueryDto.getOrgIdList();
+            if(orgIdList == null || orgIdList.size() == 0){
+                PageBean emptyDataPageBean = PageBean.getEmptyListDataPageBean(trackingQueryDto.getPageNum(), trackingQueryDto.getPageSize());
+                return new JSONResult<PageBean<TeleSaleTrackingDto>>().success(emptyDataPageBean);
+            }
         }
         if(null != trackingQueryDto.getCusLevelList() && trackingQueryDto.getCusLevelList().size() > 0){
             return teleSaleTrackingFeignClient.getRecordByGroupLevelPage(trackingQueryDto);
@@ -101,10 +106,12 @@ public class TeleSaleTrackingController {
     @ResponseBody
     JSONResult<PageBean<TeleSaleTrackingDto>> getRecordByGroupLevelUserIdDate(@RequestBody TeleSaleTrackingQueryDto trackingQueryDto,
                                                                               HttpServletRequest request){
+        logger.info("电销跟踪合计查询参数：{}",trackingQueryDto.toString());
         Long orgId = trackingQueryDto.getOrgId();
         if(null == orgId){
             buildOrgIdList(trackingQueryDto, orgId);
         }
+        logger.info("赋值后电销跟踪合计查询参数：{}",trackingQueryDto.toString());
         request.setAttribute("trackingQueryDto",trackingQueryDto);
         if(null != trackingQueryDto.getCusLevelList() && trackingQueryDto.getCusLevelList().size() > 0){
             return teleSaleTrackingFeignClient.getRecordByGroupLevelUserIdDatePage(trackingQueryDto);
@@ -519,7 +526,9 @@ public class TeleSaleTrackingController {
         if(null == org_id){
             UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
             List<OrganizationRespDTO> orgGroupByOrgId = getOrgGroupByOrgId(curLoginUser.getOrgId(), OrgTypeConstant.DXZ);
+            logger.info("查询结果OrganizationRespDTO{}",orgGroupByOrgId.toArray());
             List<Long> orgIdList = orgGroupByOrgId.parallelStream().map(OrganizationRespDTO::getId).collect(Collectors.toList());
+            logger.info("查询出电销组：{}",orgIdList.toArray());
             teleSaleTrackingQueryDto.setOrgIdList(orgIdList);
         }
     }

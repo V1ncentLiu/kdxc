@@ -134,9 +134,9 @@ public class AppiontmentController {
         JSONResult<List<UserFieldDTO>> queryFieldByUserAndMenu =
                 customFieldFeignClient.queryFieldByUserAndMenu(queryFieldByUserAndMenuReq);
         request.setAttribute("userFieldList", queryFieldByUserAndMenu.getData());
-        request.setAttribute("userId", user.getId());
+        request.setAttribute("userId", user.getId().toString());
         request.setAttribute("roleCode", roleList.get(0).getRoleCode());
-        request.setAttribute("orgId", user.getOrgId());
+        request.setAttribute("orgId", user.getOrgId().toString());
         return "clue/appiontmentManagerPage";
     }
 
