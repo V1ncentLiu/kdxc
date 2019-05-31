@@ -327,13 +327,13 @@ public class TruckingOrderController {
         headTitleList.add("序号");
         headTitleList.add("申请提交时间");
         headTitleList.add("申请电销组");
-        headTitleList.add("申请顾问");
-        headTitleList.add("顾问电话");
+        headTitleList.add("申请电销顾问");
+        headTitleList.add("申请顾问电话");
         headTitleList.add("邀约来访时间");
         headTitleList.add("客户姓名");
-        headTitleList.add("客户手机号");
+        headTitleList.add("联系方式");
         headTitleList.add("客户人数");
-        headTitleList.add("客户联系人姓名");
+        headTitleList.add("联系人姓名");
         headTitleList.add("出发时间");
         headTitleList.add("出车城市");
         headTitleList.add("车次／航班");
