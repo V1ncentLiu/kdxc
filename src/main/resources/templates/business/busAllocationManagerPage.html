@@ -118,22 +118,16 @@
               <el-table-column align="center" prop="province" label="开店省份" ></el-table-column>
                <el-table-column align="center" prop="city" label="开店城市" ></el-table-column>
                <el-table-column align="center" prop="district" label="开店区／县"></el-table-column>
-               <el-table-column align="center" prop="purProjectType" label="意向品类" :formatter="transformPurProject" ></el-table-column>
+               <el-table-column align="center" prop="purType" label="意向品类" :formatter="transformPurProject" ></el-table-column>
               <el-table-column align="center" prop="partnerType" label="合伙人" :formatter="transformPartner" width="120"></el-table-column>
                <el-table-column align="center" prop="hasExperience" label="餐饮经验" :formatter="transformExperience" width="150"></el-table-column>
               <el-table-column align="center" prop="advanceAmount" label="投资金额" :formatter="transformUssm" width="130"></el-table-column>
                <el-table-column align="center" prop="hasAddress" label="选址情况" :formatter="transformAddress" width="150"></el-table-column>
-               <el-table-column align="center" prop="area" label="店面面积" :formatter="transformArea" width="150"></el-table-column>
+               <el-table-column align="center" prop="area" label="店铺面积" :formatter="transformArea" width="150"></el-table-column>
                <el-table-column align="center" prop="teleSaleName" label="电销顾问"></el-table-column>
                <el-table-column align="center" prop="teleGorupName" label="电销组"></el-table-column>
                <el-table-column align="center" prop="teleDirectorName" label="电销总监"></el-table-column>
                <el-table-column align="center" prop="teleProjectId" label="电销组项目" :formatter="transformProject"></el-table-column>
-               
-               
-               
-               
-               
-               
             </el-table>
             <table-pagination :pager="pager" @change="searchTable"></table-pagination>
         </el-row>
@@ -216,6 +210,7 @@ var partnerList=[[${partnerList}]];//合伙人
 var cateringExperienceList=[[${cateringExperienceList}]];//餐饮经验
 var storefrontAreaList=[[${storefrontAreaList}]];//店铺面积
 var ussmList=[[${ussmList}]];//投资金额
+var purTypeList = [[${purTypeList}]] // 意向品类
 var clueVM = new Vue({
         el: '#clueManage',
         data: {
@@ -376,17 +371,13 @@ var clueVM = new Vue({
              //意向项目转换方法
                transformPurProject(row, column, cellValue, index) {
             	   var text="";
-            	   if(cellValue==1){
-	            	   if(projectList){
-	  	                  for(var i=0;i<projectList.length;i++){
-	  	                		if(row.purInProject==projectList[i].id){
-	  	                			text=projectList[i].projectName;
-	  	                		}
-	  	                	}
-	              	  }
-            	   }else{
-             	    	text=row.purOutProject;
-             	   }
+                 if (purTypeList) {
+                   for (var i = 0; i < purTypeList.length; i++) {
+                     if (row.purType == purTypeList[i].value) {
+                       text = purTypeList[i].name;
+                     }
+                   }
+                 }
                    return text;
                },
                //性别转换方法

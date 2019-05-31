@@ -111,6 +111,8 @@ public class BusPendingAllocationController {
         request.setAttribute("storefrontAreaList", getDictionaryByCode(Constants.STOREFRONT_AREA));
         // 查询字典投资金额集合
         request.setAttribute("ussmList", getDictionaryByCode(Constants.USSM));
+        // 意向品类
+        request.setAttribute("purTypeList", getDictionaryByCode(Constants.PROJECT_CATEGORY));
         return "business/busAllocationManagerPage";
     }
 

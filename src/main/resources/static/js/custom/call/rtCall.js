@@ -176,7 +176,7 @@ function priviewOutbound(outboundInputPhone,callSource,clueId,callback){
 				
 			}else{
 				console.error(token);
-				homePageVM.$message({message:"外呼失败",type:'error'});
+				homePageVM.$message({message:"外呼失败:"+token.msg,type:'error'});
 			}
 		});
 }
