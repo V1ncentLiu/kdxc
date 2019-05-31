@@ -74,12 +74,12 @@
         <!-- <el-form :model="form" ref="form" :rules="rules" class="width500"> -->
         <el-form :model="form" ref="form" :rules="rules" >
             <el-form-item label="商务小组：" :label-width="formLabelWidth" prop="busGroupId">
-                <el-select filterable v-model="form.busGroupId"  value-key="id" placeholder="选择电商务小组" @change="userChangeSelect"  style="width: 290px;">
+                <el-select filterable v-model="form.busGroupId"   placeholder="选择电商务小组" @change="userChangeSelect"  style="width: 290px;">
                     <el-option
                         v-for="item in swList"
                         :key="item.id"
                         :label="item.name"
-                        :value="item">
+                        :value="item.id">
                     </el-option>
                 </el-select>
             </el-form-item>
@@ -183,16 +183,25 @@
         	},
             //根据商务小组查询
             userChangeSelect(selVal) {
-        	    if(null != selVal.businessLine  ){
+                orgVM.cwList = cwList;
+                if (null != selVal) {
                     var param = {};
-                    param.roleList = ["QDSJCW","SJHZCW","CYCW"];
-                    param.businessLine = selVal.businessLine;
-                    axios.post('/user/userManager/getUserInfoListByParam', param).then(function (response) {
-                        console.log(response.data.data);
-                        orgVM.cwList = response.data.data;
+                    param.id = selVal;
+                    //根据商务小组id获取业务线
+                    axios.post('/organization/organization/queryOrgById', param).then(function (response) {
+                        if (null != response || response.data != null || response.data.code == '0') {
+                            var param = {};
+                            param.roleList = ["QDSJCW", "SJHZCW", "CYCW"];
+                            param.businessLine = response.data.data.businessLine;
+                            //根据业务线获取财务集合
+                            axios.post('/user/userManager/getUserInfoListByParam', param).then(function (response) {
+                                console.log(response.data.data);
+                                if (null != response || response.data != null || response.data.code == '0') {
+                                    orgVM.cwList = response.data.data;
+                                }
+                            });
+                        }
                     });
-                }else{
-                    orgVM.cwList = cwList;
                 }
             },
         	inviteAreaListPage(){//查询按钮
@@ -248,12 +257,6 @@
                   	  console.log(response);
                       if(null !==response && response.data !=null && response.data.code=='0'){
                     	  var financeLayout = response.data.data;
-                          /*var param = {};
-                          param.id = financeLayout.busGroupId;
-                          axios.post('/organization/organization/queryOrgById', param).then(function (response) {
-                              console.log(response.data.data);
-                              orgVM.form.busGroupId = response.data.data;
-                          });*/
                           orgVM.form.busGroupId = financeLayout.busGroupId;
                     	  var financeUsers = financeLayout.financeUsers;
                     	  var valueMultiple=[];
@@ -399,7 +402,6 @@
               	} ,
              submitForm(formName) {
                     this.$refs[formName].validate((valid) => {
-                       debugger
                         if (valid) {
                           var formData = this.form;
                           var param={};
@@ -431,7 +433,7 @@
                                 }
                             }
                             param.signProvinces = signProvincesStrs;
-                          param.busGroupId = formData.busGroupId.id;
+                          param.busGroupId = formData.busGroupId;
                           var str = "";
                          
 
