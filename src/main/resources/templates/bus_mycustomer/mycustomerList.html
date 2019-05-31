@@ -1526,16 +1526,8 @@
                             </el-form-item>
                         </el-col>
                         <el-col :span="12">
-                            <el-form-item label="付款方式：" :label-width="formLabelWidth" prop="payMode">
-                                <el-select v-model="updateFormSigning.payMode" placeholder="请选择付款方式："
-                                           style="width:100%;">
-                                    <el-option
-                                            v-for="item in option3s"
-                                            :key="item.value"
-                                            :label="item.label"
-                                            :value="item.value">
-                                    </el-option>
-                                </el-select>
+                            <el-form-item label="付款人姓名：" :label-width="formLabelWidth" prop="payName">
+                                <el-input v-model="updateFormSigning.payName" maxLength="10"></el-input>
                             </el-form-item>
                         </el-col>
                     </el-row>
@@ -1550,12 +1542,16 @@
                             </el-form-item>
                         </el-col>
                         <el-col :span="12">
-                            <el-form-item label="实收金额：" :label-width="formLabelWidth" prop="amountReceived">
-                                <el-input maxLength="10" @input="updateFormSigningAmountPerformance"
-                                          v-model="updateFormSigning.amountReceived" style="width: 80%;" type="number"
-                                          min="0" oninput="if(value.length>10)value=value.slice(0,10)"
-                                          onkeypress="return(/[\d]/.test(String.fromCharCode(event.keyCode)))"></el-input>
-                                <span style="padding-left: 10px;">元</span>
+                            <el-form-item label="付款方式：" :label-width="formLabelWidth" prop="payMode">
+                                <el-select v-model="updateFormSigning.payMode" placeholder="请选择付款方式："
+                                           style="width:100%;">
+                                    <el-option
+                                            v-for="item in option3s"
+                                            :key="item.value"
+                                            :label="item.label"
+                                            :value="item.value">
+                                    </el-option>
+                                </el-select>
                             </el-form-item>
                         </el-col>
                     </el-row>
@@ -1581,6 +1577,15 @@
                         </el-col>
                     </el-row>
                     <el-row>
+                        <el-col :span="12">
+                            <el-form-item label="实收金额：" :label-width="formLabelWidth" prop="amountReceived">
+                                <el-input maxLength="10" @input="updateFormSigningAmountPerformance"
+                                          v-model="updateFormSigning.amountReceived" style="width: 80%;" type="number"
+                                          min="0" oninput="if(value.length>10)value=value.slice(0,10)"
+                                          onkeypress="return(/[\d]/.test(String.fromCharCode(event.keyCode)))"></el-input>
+                                <span style="padding-left: 10px;">元</span>
+                            </el-form-item>
+                        </el-col>
                         <el-col :span="12">
                             <el-form-item label="业绩金额：" :label-width="formLabelWidth" prop="performanceAmount">
                                 <el-input maxLength="10" v-model="updateFormSigning.performanceAmount"
@@ -1830,6 +1835,7 @@
 
                 payDetailId: "",
                 payType: '1',
+                payName: '',
                 payMode: '',
                 amountReceived: '',
                 amountBalance: '',
@@ -2898,6 +2904,9 @@
                     } else {
                         //设置显示数据
                         mainDivVM.updateFormSigning = response.data.data;
+                        if(response.data.data.payName == null || response.data.data.payName == ''){
+                            mainDivVM.updateFormSigning.payName=mainDivVM.updateFormSigning.customerName;
+                        }
                         if (mainDivVM.updateFormSigning) {
                             if (mainDivVM.updateFormSigning.payType > 2) {
                                 if (mainDivVM.updateFormSigning.payType == 3) {
