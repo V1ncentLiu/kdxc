@@ -172,7 +172,7 @@ public class TeleSaleTrackingController {
             if(dayOfPer == 0){
                 curList.add(0);
             }else{
-                curList.add(ra.getDayOfPer());
+                curList.add(String.valueOf(ra.getDayOfPer()));
             }
             dataList.add(curList);
         }
@@ -223,7 +223,7 @@ public class TeleSaleTrackingController {
             if(dayOfPer == 0){
                 curList.add(0);
             }else{
-                curList.add(ra.getDayOfPer());
+                curList.add(String.valueOf(ra.getDayOfPer()));
             }
             dataList.add(curList);
         }
@@ -282,7 +282,7 @@ public class TeleSaleTrackingController {
             if(dayOfPer == 0){
                 curList.add(0);
             }else {
-                curList.add(ra.getDayOfPer());
+                curList.add(String.valueOf(ra.getDayOfPer()));
             }
             dataList.add(curList);
         }
@@ -490,7 +490,7 @@ public class TeleSaleTrackingController {
 
     private List<Object> getHeadOneTitleList() {
         List<Object> headTitleList = new ArrayList<>();
-        headTitleList.add("");
+        headTitleList.add("序号");
         headTitleList.add("电销组");
         headTitleList.add("客户级别");
         headTitleList.add("资源数");
