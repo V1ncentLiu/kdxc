@@ -172,7 +172,7 @@ public class TeleSaleTrackingController {
             if(dayOfPer == 0){
                 curList.add(0);
             }else{
-                curList.add(String.valueOf(ra.getDayOfPer()));
+                curList.add(ra.getDayOfPer());
             }
             dataList.add(curList);
         }
@@ -223,7 +223,7 @@ public class TeleSaleTrackingController {
             if(dayOfPer == 0){
                 curList.add(0);
             }else{
-                curList.add(String.valueOf(ra.getDayOfPer()));
+                curList.add(ra.getDayOfPer());
             }
             dataList.add(curList);
         }
@@ -282,7 +282,7 @@ public class TeleSaleTrackingController {
             if(dayOfPer == 0){
                 curList.add(0);
             }else {
-                curList.add(String.valueOf(ra.getDayOfPer()));
+                curList.add(ra.getDayOfPer());
             }
             dataList.add(curList);
         }
