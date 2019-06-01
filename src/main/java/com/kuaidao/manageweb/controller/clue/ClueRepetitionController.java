@@ -1,6 +1,8 @@
 package com.kuaidao.manageweb.controller.clue;
 
 
+import com.kuaidao.common.util.CommonUtil;
+import com.kuaidao.manageweb.util.CommUtil;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -240,6 +242,10 @@ public class ClueRepetitionController {
     @RequestMapping("/businessSignDealList")
     @ResponseBody
     public JSONResult<PageBean<BusinessSignDTO>> businessSignDealList(HttpServletRequest request,@RequestBody BusinessSignDTO businessSignDTO) {
+    	UserInfoDTO user = CommUtil.getCurLoginUser();
+    	if(user.getBusinessLine() != null ){
+    		businessSignDTO.setBusinessLine(user.getBusinessLine());
+			}
     	JSONResult<PageBean<BusinessSignDTO>> list = businessSignFeignClient.businessSignDealList(businessSignDTO);
     	return list;
     }

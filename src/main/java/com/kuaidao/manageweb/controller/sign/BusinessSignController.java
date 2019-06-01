@@ -111,9 +111,13 @@ public class BusinessSignController {
    */
   @RequestMapping("/businessSignValidPage")
   public String businessSignValidPage(HttpServletRequest request) {
+    UserInfoDTO user = CommUtil.getCurLoginUser();
     OrganizationQueryDTO orgDto = new OrganizationQueryDTO();
     orgDto.setOrgType(OrgTypeConstant.SWZ);
     orgDto.setSystemCode(SystemCodeConstant.HUI_JU);
+    if(user.getBusinessLine() != null){
+      orgDto.setBusinessLine(user.getBusinessLine());
+    }
     // 商务小组
     JSONResult<List<OrganizationRespDTO>> swList =
         organizationFeignClient.queryOrgByParam(orgDto);
@@ -143,6 +147,10 @@ public class BusinessSignController {
   @ResponseBody
   public JSONResult<PageBean<BusinessSignDTO>> businessSignValidList(HttpServletRequest request,
       @RequestBody BusinessSignDTO businessSignDTO) {
+    UserInfoDTO user = CommUtil.getCurLoginUser();
+    if(user.getBusinessLine() != null){
+      businessSignDTO.setBusinessLine(user.getBusinessLine());
+    }
     JSONResult<PageBean<BusinessSignDTO>> list =
         businessSignFeignClient.businessSignValidList(businessSignDTO);
     return list;
