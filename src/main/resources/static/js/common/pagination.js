@@ -1,7 +1,7 @@
 var paginationTempate= '<div>' 
      +  '<el-pagination @size-change="handleSizeChange" background  '
      +  '        @current-change="handleCurrentChange" :current-page="pager.currentPage" '
-     +  '       :page-sizes="[3, 20, 50, 100]" :page-size="pager.pageSize" '
+     +  '       :page-sizes="[20, 50, 100]" :page-size="pager.pageSize" '
      +  '           layout="total, sizes, prev, pager, next, jumper" :total="pager.total"> '
      +  '       </el-pagination>'
      +'</div>'
