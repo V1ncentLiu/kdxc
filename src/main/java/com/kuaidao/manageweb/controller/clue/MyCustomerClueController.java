@@ -817,6 +817,9 @@ public class MyCustomerClueController {
             dto.setOrgId(user.getOrgId());
             dto.setUserId(user.getId());
         }
+        if(user.getBusinessLine() != null){
+            dto.setBusinessLine(user.getBusinessLine());
+        }
         if (null != dto.getRepeatUserId() && null != dto.getApplyUserId()) {
             IdListLongReq idListLongReq = new IdListLongReq();
             List<Long> idList = new ArrayList<>();
