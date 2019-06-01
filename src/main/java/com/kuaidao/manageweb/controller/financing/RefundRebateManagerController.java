@@ -71,7 +71,7 @@ public class RefundRebateManagerController {
     private String ossUrl;
 
     /***
-     * 餐饮公司退返款页
+     * 退返款申请页
      * 
      * @return
      */
@@ -96,7 +96,7 @@ public class RefundRebateManagerController {
     }
 
     /***
-     * 餐饮公司退返款列表
+     * 退返款申请列表
      * 
      * @return
      */

@@ -40,7 +40,7 @@ var mainDivVM = new Vue({
         },
         //赠送类型
         giveTypeList:giveTypeList,
-        //待处理邀约来访客户        
+        //待处理邀约来访记录        
         editableTabsValue: 0, //tabs标签
         editableTabs: [],
         suppWrap: true,
@@ -583,7 +583,7 @@ var mainDivVM = new Vue({
                 mainDivVM.workDay=response.data.data;
             });
         },
-        // 待处理邀约来访客户
+        // 待处理邀约来访记录
         tabClick(tab, event){
             this.updateFormSigning = this.editableTabs[tab.index].updateFormSigning;
         },
@@ -1429,7 +1429,7 @@ var mainDivVM = new Vue({
     created(){        
         // 工作台
         this.initBoard();
-        // 待处理邀约来访客户
+        // 待处理邀约来访记录
         this.initList();
         //  到访店铺类型 vistitStoreTypeArr
         var param={};
