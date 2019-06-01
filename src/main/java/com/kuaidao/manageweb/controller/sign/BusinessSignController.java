@@ -193,6 +193,9 @@ public class BusinessSignController {
       dto.setMakeUpTime(null);
       dto.setAmountBalance(null);
     }
+    if(user.getBusinessLine() != null){
+      dto.setBusinessLine(user.getBusinessLine());
+    }
     return businessSignFeignClient.saveSign(dto);
   }
 
@@ -211,6 +214,9 @@ public class BusinessSignController {
     if(dto.getSignType()==1){ // 全款
       dto.setMakeUpTime(null);
       dto.setAmountBalance(null);
+    }
+    if(user.getBusinessLine() != null){
+      dto.setBusinessLine(user.getBusinessLine());
     }
     return businessSignFeignClient.updateSign(dto);
   }
