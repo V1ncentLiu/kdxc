@@ -6,6 +6,15 @@
     <meta charset="UTF-8">
     <style>
         .addCustomer .borderbox .el-row{width: 1065px;margin:0 auto;}
+        .templateBox{cursor: pointer;}
+        .elCardBox{border:0;}
+        .elCardBox .el-card__body{height: 115px;}
+        .elCardBox .title{margin-bottom: 15px;padding: 0 30px;}
+        .elCardBox ul{overflow: hidden;width: 405px;margin: 0 auto;}
+        .elCardBox ul li{float: left;width: 125px;height: 32px;line-height: 32px;background: rgba(92,107,232,0.9);margin-right:10px;text-align: center;border-radius: 4px;color: #fff;margin-bottom: 10px;font-size: 13px;overflow: hidden;white-space: nowrap;text-overflow: ellipsis;}
+        .elCardBox ul li.bg1{background: rgba(74,182,92,0.9);}
+        .elCardBox ul li.bg2{background: rgba(230,162,60,0.9);}
+        .elCardBox ul li.bg3{background: rgba(227,116,112,0.9);}
     </style>
 </head>
 <body>
@@ -333,7 +342,7 @@
     <!-- 选择模板 -->
     <!-- dialog -->
     <el-dialog title="选择资源模板" :visible.sync="chooseVisible" width="1060px">
-        <el-row class="marginB10 greybg padding20" style="padding-bottom: 0;">
+        <el-row class="marginB20 greybg padding20" style="padding-bottom: 0;">
             <el-form :inline="true" :model="clueTemplateSearchForm" class="demo-form-inline" ref="clueTemplateSearchForm">
         	    <el-form-item label="资源项目:" >
                     <el-select v-model="clueTemplateSearchForm.clueProjectId" placeholder="资源项目" clearable>
@@ -391,7 +400,23 @@
                 <el-button icon="el-icon-search" type="primary" @click="searchTable()">搜索</el-button>
             </el-form> 
         </el-row>
-        <el-table  ref="multipleTable" tooltip-effect="dark" border @row-dblclick="clickTemplate" style="width: 100%"  :data="dataTable" >
+        <el-row :gutter="12">            
+            <el-col :span="12" v-for="item in dataTable">
+                <el-card shadow="always" class="elCardBox marginB20">
+                    <div class="templateBox" @click="clickTemplate(item)">
+                        <div class="title fs16">{{item.name}}</div>
+                        <ul>
+                            <li v-if="item.clueProjectName">{{item.clueProjectName}}</li>
+                            <li v-if="item.source" class="bg1">{{item.source}}</li>
+                            <li v-if="item.sourceType" class="bg2">{{item.sourceType}}</li>
+                            <li v-if="item.category" class="bg3">{{item.category}}</li>
+                            <li v-if="item.type">{{item.type}}</li>
+                        </ul>
+                    </div>                    
+                </el-card>
+            </el-col>
+        </el-row>
+        <!-- <el-table  ref="multipleTable" tooltip-effect="dark" border @row-dblclick="clickTemplate" style="width: 100%"  :data="dataTable" >
             <el-table-column align="center" prop="name" label="模板名称">
               	<template slot-scope="scope">
                     <el-button @click="clickTemplate(scope.row)" type="text" size="small">{{scope.row.name}}</el-button>
@@ -402,7 +427,7 @@
             <el-table-column align="center" prop="sourceType" label="广告位" :formatter="transformSourceType"></el-table-column>
             <el-table-column align="center" prop="category" label="资源类别" :formatter="transformCategory" width="120"></el-table-column>
             <el-table-column align="center" prop="type" label="资源类型" :formatter="transformType" width="120"></el-table-column>
-        </el-table>
+        </el-table> -->
         <table-pagination :pager="pager" @change="searchTable"></table-pagination>
     </el-dialog>
 </div>
@@ -959,23 +984,24 @@ if(notOptList){
                this.searchTable();
     　　　 	 	},
     　　　 	 	clickTemplate(row){
-    　　　     			this.chooseVisible=false;
-    　　　     			if(row.clueProjectId){
-		    　                    	this.form.projectId=row.clueProjectId;
-    　　　     			}
-    　　　     			if(row.category){
-		    　                  	  this.form.category=row.category+'';
-    　　　     			}
-    　　　     			if(row.type){
-		    　                 	  this.form.type=row.type+'';
-    　　　     			}
-    　　　     			if(row.source){
-		    　              	    this.form.source=row.source+'';
-    　　　     			}
-    　　　     			if(row.sourceType){
-			    　                   this.form.sourceType=row.sourceType+'';
-    　　　     			}
-               this.searchTable();
+                    debugger
+　　　     			this.chooseVisible=false;
+　　　     			if(row.clueProjectId){
+	    　                    	this.form.projectId=row.clueProjectId;
+　　　     			}
+　　　     			if(row.category){
+	    　                  	  this.form.category=row.category+'';
+　　　     			}
+　　　     			if(row.type){
+	    　                 	  this.form.type=row.type+'';
+　　　     			}
+　　　     			if(row.source){
+	    　              	    this.form.source=row.source+'';
+　　　     			}
+　　　     			if(row.sourceType){
+		    　                   this.form.sourceType=row.sourceType+'';
+　　　     			}
+                    this.searchTable();
     　　　 	 	},
     　　　 	 	searchTable() {
                     var param ={};
@@ -991,12 +1017,36 @@ if(notOptList){
                     console.info(param);
                     axios.post('/aggregation/clueTemplate/list', param)
                     .then(function (response) {
-                          var result =  response.data;
-                    	  console.info(result);
-                          var table=result.data;
-                          addClueVM.dataTable= table.data;
-                          addClueVM.pager.total =  table.total;
-                          addClueVM.pager.currentPage = table.currentPage;
+                            var result =  response.data;
+                    	    console.info(result);
+                            var table=result.data;
+                            addClueVM.dataTable= table.data;
+                            addClueVM.pager.total =  table.total;
+                            addClueVM.pager.currentPage = table.currentPage;
+                            // 媒介转换
+                            for(var i=0;i<table.data.length;i++){
+                                if(table.data[i].source){
+                                    table.data[i].source=addClueVM.transformSource(table.data[i].source);
+                                }                        
+                            }
+                            // 广告位转换
+                            for(var i=0;i<table.data.length;i++){
+                                if(table.data[i].sourceType){
+                                    table.data[i].sourceType=addClueVM.transformSourceType(table.data[i].sourceType);
+                                }                        
+                            }
+                            // 资源类别转换
+                            for(var i=0;i<table.data.length;i++){
+                                if(table.data[i].category){
+                                    table.data[i].category=addClueVM.transformCategory(table.data[i].category);
+                                }                        
+                            }
+                            // 资源类型转换
+                            for(var i=0;i<table.data.length;i++){
+                                if(table.data[i].type){
+                                    table.data[i].type=addClueVM.transformType(table.data[i].type);
+                                }                        
+                            }
                     })
                     .catch(function (error) {
                          console.log(error);
@@ -1037,7 +1087,8 @@ if(notOptList){
             }
           },
         	 	//资源类别转换方法
-                transformCategory(row, column, cellValue, index) {
+                // transformCategory(row, column, cellValue, index) {
+                transformCategory(cellValue) {
               	 var text="";
                 	 if(clueCategoryList){
   	                  for(var i=0;i<clueCategoryList.length;i++){
@@ -1049,7 +1100,8 @@ if(notOptList){
                     return text;
                  },
               //资源类型转换方法
-                transformType(row, column, cellValue, index) {
+                // transformType(row, column, cellValue, index) {
+                transformType(cellValue) {
               	   var text="";
                 	   if(clueTypeList){
   	                  for(var i=0;i<clueTypeList.length;i++){
@@ -1061,7 +1113,8 @@ if(notOptList){
                       return text;
                  },
               //广告位转换方法
-                transformSourceType(row, column, cellValue, index) {
+                // transformSourceType(row, column, cellValue, index) {
+                transformSourceType(cellValue) {
               	   var text="";
                 	 if(adsenseList){
   	                  for(var i=0;i<adsenseList.length;i++){
@@ -1073,7 +1126,8 @@ if(notOptList){
                       return text;
                  },
                //媒介转换方法
-                 transformSource(row, column, cellValue, index) {
+                 // transformSource(row, column, cellValue, index) {
+                 transformSource(cellValue) {
               	   var text="";
                 	 if(mediumList){
   	                  for(var i=0;i<mediumList.length;i++){
