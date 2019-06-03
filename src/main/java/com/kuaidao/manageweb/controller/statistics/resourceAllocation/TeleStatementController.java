@@ -315,7 +315,7 @@ public class TeleStatementController {
             HttpServletResponse response) throws Exception {
         Long org_id = resourceAllocationQueryDto.getOrg_Id();
         buildOrgIdList(resourceAllocationQueryDto, org_id);
-        JSONResult<List<ResourceAllocationDto>> resourceAllocationList = statisticsFeignClient.getResourceAllocationsDayPersion(resourceAllocationQueryDto);
+        JSONResult<List<ResourceAllocationDto>> resourceAllocationList = statisticsFeignClient.getResourceAllocationsPersion(resourceAllocationQueryDto);
         List<List<Object>> dataList = new ArrayList<List<Object>>();
         dataList.add(getHeadTitleListPersion());
         List<ResourceAllocationDto> orderList = resourceAllocationList.getData();
@@ -324,7 +324,6 @@ public class TeleStatementController {
             List<Object> curList = new ArrayList<>();
             curList.add(i + 1);
             curList.add(ra.getOrgName());
-            curList.add(ra.getDay());
             curList.add(ra.getUserName());
             curList.add(ra.getAssignClueCount());
             curList.add(ra.getJointExhibition());
@@ -363,7 +362,7 @@ public class TeleStatementController {
         buildOrgIdList(resourceAllocationQueryDto, org_id);
         JSONResult<List<ResourceAllocationDto>> resourceAllocationsDayPersion = statisticsFeignClient.getResourceAllocationsDayPersion(resourceAllocationQueryDto);
         List<List<Object>> dataList = new ArrayList<List<Object>>();
-        dataList.add(getHeadTitleListPersion());
+        dataList.add(getHeadTitleListDayPersion());
         List<ResourceAllocationDto> orderList = resourceAllocationsDayPersion.getData();
         for(int i = 0; i<orderList.size(); i++){
             ResourceAllocationDto ra = orderList.get(i);
@@ -790,7 +789,6 @@ public class TeleStatementController {
         List<Object> headTitleList = new ArrayList<>();
         headTitleList.add("序号");
         headTitleList.add("电销组名称");
-        headTitleList.add("日期");
         headTitleList.add("电销人员");
         headTitleList.add("分配资源数");
         headTitleList.add("联展");
@@ -808,6 +806,7 @@ public class TeleStatementController {
     private List<Object> getHeadTitleListDayPersion() {
         List<Object> headTitleList = new ArrayList<>();
         headTitleList.add("序号");
+        headTitleList.add("电销组名称");
         headTitleList.add("日期");
         headTitleList.add("电销人员");
         headTitleList.add("分配资源数");
@@ -819,6 +818,7 @@ public class TeleStatementController {
         headTitleList.add("行业");
         headTitleList.add("其他");
         headTitleList.add("网民未接");
+        headTitleList.add("其他2");
         return headTitleList;
     }
 
