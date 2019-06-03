@@ -73,7 +73,14 @@ public interface ReconciliationConfirmFeignClient {
      */
     @PostMapping("/rejectApply")
     public JSONResult<Void> rejectApply(@RequestBody ReconciliationConfirmReq req);
-
+    /**
+     * 对账、申请
+     * 
+     * @param idEntity
+     * @return
+     */
+    @PostMapping("/applyConfirm")
+    public JSONResult<Void> applyConfirm(@RequestBody ReconciliationConfirmReq req);
 
     @Component
     static class HystrixClientFallback implements ReconciliationConfirmFeignClient {
@@ -121,6 +128,13 @@ public interface ReconciliationConfirmFeignClient {
             // TODO Auto-generated method stub
             return fallBackError("对账驳回");
         }
+
+
+
+		@Override
+		public JSONResult<Void> applyConfirm(ReconciliationConfirmReq req) {
+			 return fallBackError("对账申请");
+		}
 
 
 
