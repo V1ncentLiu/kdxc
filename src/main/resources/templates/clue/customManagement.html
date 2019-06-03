@@ -216,7 +216,21 @@
                     </el-form-item>
                     <el-form-item label="搜索词:">
                         <el-input v-model="form.searchWord" placeholder="搜索词"></el-input>
-                    </el-form-item>                     
+                    </el-form-item>    
+                    <el-form-item label="最后拨打时间:">
+	                    <el-date-picker
+	                        v-model="form.telEndTimeStart"
+	                        type="datetime"
+	                        placeholder="选择日期时间">
+	                    </el-date-picker>
+	                </el-form-item>
+	                <el-form-item label="—" class="widthauto">
+	                    <el-date-picker
+	                        v-model="form.telEndTimeEnd"
+	                        type="datetime"
+	                        placeholder="选择日期时间">
+	                    </el-date-picker>
+	                </el-form-item>                 
                     <!--    <el-form-item label="">
                         <el-input v-model="form.address" placeholder="地址"></el-input>
                     </el-form-item> -->
@@ -231,6 +245,26 @@
                   </el-form-item>
                   <el-form-item label="邮箱:">
                     <el-input v-model="form.email" placeholder="邮箱"></el-input>
+                  </el-form-item>
+                  <el-form-item label="资源是否有效:">
+                    <el-select v-model="form.status" placeholder="资源是否有效" clearable >
+                      <el-option
+                          v-for="item in comArr"
+                          :key="item.value"
+                          :label="item.name"
+                          :value="item.value">
+                      </el-option>
+                    </el-select>
+                  </el-form-item>
+                  <el-form-item label="是否接通:">
+                    <el-select v-model="form.isCall" placeholder="是否接通" clearable >
+                      <el-option
+                          v-for="item in comArr"
+                          :key="item.value"
+                          :label="item.name"
+                          :value="item.value">
+                      </el-option>
+                    </el-select>
                   </el-form-item>
                 </el-row>  
                 <div class="mainSearchBtnBox">                        
@@ -294,6 +328,18 @@
                                 {{scope.row.teleReceiveTime}}
                            </div> 
                        </template>
+                </el-table-column>
+                <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width" v-else-if="item.fieldCode == 'isCall'">
+                    <template slot-scope="scope">
+                        <div v-if="scope.row.isCall == 0">否</div>
+                        <div v-else-if="scope.row.isCall ==1">是</div>
+                    </template>
+                </el-table-column>
+                <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width" v-else-if="item.fieldCode == 'status'">
+                    <template slot-scope="scope">
+                        <div v-if="scope.row.status == 0">否</div>
+                        <div v-else-if="scope.row.status ==1">是</div>
+                    </template>
                 </el-table-column>
                 <el-table-column align="center" sortable  :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" width="250px"
                                  v-else-if="item.fieldCode == 'createTime'||item.fieldCode == 'storeArea'"></el-table-column>
@@ -654,6 +700,8 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                 	createTimeEnd:'',
                 	assignTimeStart:'',
                 	assignTimeEnd:'',
+                	telEndTimeStart:'',
+                    telEndTimeEnd:'',
                 	dayTel:'',
                 	hasInvite:'',
                 	repeatStatus:'',
@@ -669,10 +717,17 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                   qq:"",
                   wechat:"",
                   email:"",
+                  status:"",
+                  isCall:"",
                 },
                 form1: {
                     type: [],
                 },
+                comArr:[
+                   {value:"",name:"全部"},
+                   {value:"1",name:"是"},
+                   {value:"0",name:"否"}
+                 ],
                 cusLevelArr:[],
                 categoryArr:[],
                 provinceArr:[],
@@ -739,6 +794,10 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                  param.createTimeEnd=this.form.createTimeEnd;
                  param.assignTimeStart=this.form.assignTimeStart;
                  param.assignTimeEnd=this.form.assignTimeEnd;
+                 param.telEndTimeStart=this.form.telEndTimeStart;
+                 param.telEndTimeEnd=this.form.telEndTimeEnd;
+                 param.isCall=this.form.isCall;
+                 param.status=this.form.status;
                  param.dayTel=this.form.dayTel;
                  param.hasInvite=this.form.hasInvite;
                  param.repeatStatus=this.form.repeatStatus;
@@ -772,6 +831,13 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                  if(this.form.assignTimeStart !=null && this.form.assignTimeStart != '' && this.form.assignTimeEnd !=null && this.form.assignTimeEnd != '' && this.form.assignTimeStart>this.form.assignTimeEnd){
                 	 this.$message({
                          message: '分配开始时间不能大于结束时间',
+                         type: 'warning'
+                       }); 
+           	         return;
+                  }
+                 if(this.form.telEndTimeStart !=null && this.form.telEndTimeStart != '' && this.form.telEndTimeEnd !=null && this.form.telEndTimeEnd != '' && this.form.telEndTimeStart>this.form.telEndTimeEnd){
+                	 this.$message({
+                         message: '最后拨打开始时间不能大于结束时间',
                          type: 'warning'
                        }); 
            	         return;
