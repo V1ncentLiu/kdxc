@@ -108,6 +108,9 @@
     <!-- dialog -->
     <el-dialog :title="addOrModifyDialogTitle" :visible.sync="dialogFormVisible" @close="closeAddCustomFieldDialog" width="540px">
         <el-form :model="clueTemplateForm" ref="clueTemplateForm" :rules="rules">
+            <el-form-item v-show="isShowPrompt" label="" :label-width="formLabelWidth" >
+                <span style="color: red;">有相同的资源模版，请勿重复提交！</span>
+            </el-form-item>
             <el-form-item label="模板名称：" :label-width="formLabelWidth" prop="name">
                 <el-input v-model="clueTemplateForm.name" autocomplete="off"  maxlength="20" style="width: 290px;"></el-input>
             </el-form-item>
@@ -181,6 +184,7 @@ var userId=[[${userId}]];//媒介集合
 var clueTemplateVM = new Vue({
         el: '#clueTemplateManage',
         data: {
+        	isShowPrompt:false,
             isShow:false,
         		clueTemplateSearchForm: {
 	        		name: '',
@@ -260,10 +264,12 @@ var clueTemplateVM = new Vue({
 	               		this.$refs['clueTemplateForm'].resetFields();
 	               	}
                   	this.dialogFormVisible = true;
+                  	this.isShowPrompt=false;
                   	this.addOrModifyDialogTitle="新建模板";
               },
               //跳转修改模板页
               toUpdateClueTemplate() {
+            	  this.isShowPrompt=false;
             	  var rows = this.multipleSelection;
                   if(rows.length!=1){
                       this.$message({
@@ -338,6 +344,7 @@ var clueTemplateVM = new Vue({
 	               	}
                },
                saveClueTemplate(formName){//保存自定义字段
+            	  this.isShowPrompt=false;
                   this.$refs[formName].validate((valid) => {
                       if (valid) {
                     	 clueTemplateVM.submitDisabled=true;
@@ -357,6 +364,8 @@ var clueTemplateVM = new Vue({
                             	clueTemplateVM.$message({message:'提交成功',type:'success',duration:1000,onClose:function(){
                             		clueTemplateVM.searchTable();
                           	    }});
+                            }else if(resData.code=='21916'){
+                            	clueTemplateVM.isShowPrompt=true;
                             }else{
                             	clueTemplateVM.$message('提交失败');
                                 console.error(resData);
