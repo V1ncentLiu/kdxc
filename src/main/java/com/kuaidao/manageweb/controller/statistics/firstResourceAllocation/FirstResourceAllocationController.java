@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import javax.servlet.http.HttpServletResponse;
+import java.util.ArrayList;
 import java.util.List;
 
 @Controller
@@ -90,7 +91,6 @@ public class FirstResourceAllocationController {
     public void exportFirstResourceAllocationDayPagePersion(
             @RequestBody(required=false) FirstResourceAllocationQueryDto firstResourceAllocationQueryDto,
                                                             HttpServletResponse response){
-
     }
 
     /**
@@ -126,6 +126,92 @@ public class FirstResourceAllocationController {
     @RequestMapping("/firstRATablePerson")
     public String firstRATablePerson() {
         return "reportforms/firstRATablePerson";
+    }
+
+
+    private List<Object> getHeadTitleGroup() {
+        List<Object> headTitleList = new ArrayList<>();
+        headTitleList.add("序号");
+        headTitleList.add("电销组");
+        headTitleList.add("首次分配资源数");
+        headTitleList.add("联展");
+        headTitleList.add("竞价");
+        headTitleList.add("优化");
+        headTitleList.add("信息流");
+        headTitleList.add("官网");
+        headTitleList.add("行业");
+        headTitleList.add("其他");
+        headTitleList.add("网民未接");
+        return headTitleList;
+    }
+
+    private List<Object> getHeadTitleListPersion() {
+        List<Object> headTitleList = new ArrayList<>();
+        headTitleList.add("序号");
+        headTitleList.add("电销组");
+        headTitleList.add("电销");
+        headTitleList.add("首次分配资源数\n");
+        headTitleList.add("联展");
+        headTitleList.add("竞价");
+        headTitleList.add("优化");
+        headTitleList.add("信息流");
+        headTitleList.add("官网");
+        headTitleList.add("行业");
+        headTitleList.add("其他");
+        headTitleList.add("网民未接");
+        return headTitleList;
+    }
+
+    private List<Object> getHeadTitleListDayPersion() {
+        List<Object> headTitleList = new ArrayList<>();
+        headTitleList.add("序号");
+        headTitleList.add("日期");
+        headTitleList.add("电销");
+        headTitleList.add("首次分配资源数");
+        headTitleList.add("联展");
+        headTitleList.add("竞价");
+        headTitleList.add("优化");
+        headTitleList.add("信息流");
+        headTitleList.add("官网");
+        headTitleList.add("行业");
+        headTitleList.add("其他");
+        headTitleList.add("网民未接");
+        return headTitleList;
+    }
+
+    /**
+     * 查询合计
+     */
+    private FirstResourceAllocationDto getCountTotal(List<FirstResourceAllocationDto> list){
+        FirstResourceAllocationDto firstResourceAllocationDto = new FirstResourceAllocationDto();
+        //首次分配资源数
+        Long assignClueCount = list.stream().mapToLong(FirstResourceAllocationDto::getAssignClueCount).sum();
+        //联展
+        Long jointExhibition = list.stream().mapToLong(FirstResourceAllocationDto::getJointExhibition).sum();
+        //竞价
+        Long priceCompetition = list.stream().mapToLong(FirstResourceAllocationDto::getPriceCompetition).sum();
+        //优化
+        Long optimization = list.stream().mapToLong(FirstResourceAllocationDto::getOptimization).sum();
+        //信息流
+        Long informationFlow = list.stream().mapToLong(FirstResourceAllocationDto::getInformationFlow).sum();
+        //官网
+        Long officialWebsite = list.stream().mapToLong(FirstResourceAllocationDto::getOfficialWebsite).sum();
+        //行业
+        Long industry = list.stream().mapToLong(FirstResourceAllocationDto::getIndustry).sum();
+        //其他
+        Long other = list.stream().mapToLong(FirstResourceAllocationDto::getOther).sum();
+        //网民未接
+        Long netizensMissed = list.stream().mapToLong(FirstResourceAllocationDto::getNetizensMissed).sum();
+        firstResourceAllocationDto.setAssignClueCount(assignClueCount);
+        firstResourceAllocationDto.setJointExhibition(jointExhibition);
+        firstResourceAllocationDto.setPriceCompetition(priceCompetition);
+        firstResourceAllocationDto.setOptimization(optimization);
+        firstResourceAllocationDto.setInformationFlow(informationFlow);
+        firstResourceAllocationDto.setOfficialWebsite(officialWebsite);
+        firstResourceAllocationDto.setIndustry(industry);
+        firstResourceAllocationDto.setOther(other);
+        firstResourceAllocationDto.setNetizensMissed(netizensMissed);
+        return firstResourceAllocationDto;
     }
 
 
