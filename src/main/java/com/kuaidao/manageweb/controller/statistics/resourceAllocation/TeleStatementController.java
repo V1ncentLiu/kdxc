@@ -260,6 +260,8 @@ public class TeleStatementController {
     @ResponseBody
     public JSONResult<PageBean<ResourceAllocationDto>> getResourceAllocationPersionTable(
             @RequestBody ResourceAllocationQueryDto resourceAllocationQueryDto,HttpServletRequest request) {
+        Long org_id = resourceAllocationQueryDto.getOrg_Id();
+        buildOrgIdList(resourceAllocationQueryDto, org_id);
         UserInfoDTO user = getUser();
         // 查询所有电销组
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
@@ -311,6 +313,8 @@ public class TeleStatementController {
     public void exportResourceAllocationPersion(
             @RequestBody ResourceAllocationQueryDto resourceAllocationQueryDto,
             HttpServletResponse response) throws Exception {
+        Long org_id = resourceAllocationQueryDto.getOrg_Id();
+        buildOrgIdList(resourceAllocationQueryDto, org_id);
         JSONResult<List<ResourceAllocationDto>> resourceAllocationList = statisticsFeignClient.getResourceAllocationsDayPersion(resourceAllocationQueryDto);
         List<List<Object>> dataList = new ArrayList<List<Object>>();
         dataList.add(getHeadTitleListPersion());
@@ -355,6 +359,8 @@ public class TeleStatementController {
     public void exportResourceAllocationDayPersion(
             @RequestBody ResourceAllocationQueryDto resourceAllocationQueryDto,
             HttpServletResponse response) throws Exception {
+        Long org_id = resourceAllocationQueryDto.getOrg_Id();
+        buildOrgIdList(resourceAllocationQueryDto, org_id);
         JSONResult<List<ResourceAllocationDto>> resourceAllocationsDayPersion = statisticsFeignClient.getResourceAllocationsDayPersion(resourceAllocationQueryDto);
         List<List<Object>> dataList = new ArrayList<List<Object>>();
         dataList.add(getHeadTitleListPersion());
