@@ -44,7 +44,7 @@ public interface BusMyCustomerFeignClient {
     public JSONResult<ClueBasicDTO> notVisitReason(@RequestBody IdEntityLong idEntityLong);
     
     /**
-     * 商务经理控制台  待处理邀约来访客户
+     * 商务经理控制台  待处理邀约来访记录
      * @param param
      * @return
      */
@@ -86,7 +86,7 @@ public interface BusMyCustomerFeignClient {
         @Override
         public JSONResult<PageBean<BusMyCustomerRespDTO>> listPendingInviteCustomer(
                 MyCustomerParamDTO param) {
-            return fallBackError("商务经理控制台-待处理邀约来访客户");
+            return fallBackError("商务经理控制台-待处理邀约来访记录");
         }
     }
 

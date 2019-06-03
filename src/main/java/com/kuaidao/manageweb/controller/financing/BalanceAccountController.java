@@ -216,7 +216,7 @@ public class BalanceAccountController {
                 bigDecimal.multiply(new BigDecimal(req.getRatio())).divide(new BigDecimal(100)));
         req.setStatus(AggregationConstant.RECONCILIATION_STATUS.STATUS_2);
         JSONResult<Void> reconciliationConfirm =
-                reconciliationConfirmFeignClient.reconciliationConfirm(req);
+                reconciliationConfirmFeignClient.applyConfirm(req);
         return reconciliationConfirm;
     }
 

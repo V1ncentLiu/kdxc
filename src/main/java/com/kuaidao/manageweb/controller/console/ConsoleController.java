@@ -531,7 +531,7 @@ public class ConsoleController {
 
 
     /**
-     * 商务经理控制台 待处理邀约来访客户
+     * 商务经理控制台 待处理邀约来访记录
      * 
      * @param param
      * @return
