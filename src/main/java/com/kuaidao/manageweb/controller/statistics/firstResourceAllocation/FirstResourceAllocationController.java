@@ -451,6 +451,7 @@ public class FirstResourceAllocationController {
         Long other = list.stream().mapToLong(FirstResourceAllocationDto::getOther).sum();
         //网民未接
         Long netizensMissed = list.stream().mapToLong(FirstResourceAllocationDto::getNetizensMissed).sum();
+        firstResourceAllocationDto.setOrgId(0l);
         firstResourceAllocationDto.setOrgName("合计");
         firstResourceAllocationDto.setAssignClueCount(assignClueCount);
         firstResourceAllocationDto.setJointExhibition(jointExhibition);
