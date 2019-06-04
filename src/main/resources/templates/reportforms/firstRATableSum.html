@@ -89,119 +89,9 @@
 </body>
 <script th:inline="javascript">
     var queryOrg=[[${queryOrg}]];//电销组
-    // var fieldList=[
-    //     {//表头假数据
-    //         displayName:"电销组",
-    //         fieldCode:"orgName",//需要改成后端返回的字段名称
-    //         fieldName:"电销组",
-    //         id:"1",
-    //         menuCode:null,
-    //         menuId:null,
-    //         pageNum:0,
-    //         pageSize:0,
-    //         sortNum:1
-    //     },{
-    //         displayName:"电销",
-    //         fieldCode:"userName",
-    //         fieldName:"电销",
-    //         id:"1",
-    //         menuCode:null,
-    //         menuId:null,
-    //         pageNum:0,
-    //         pageSize:0,
-    //         sortNum:1
-    //     },{
-    //         displayName:"首次分配资源数",
-    //         fieldCode:"assignClueCount",
-    //         fieldName:"首次分配资源数",
-    //         id:"2",
-    //         menuCode:null,
-    //         menuId:null,
-    //         pageNum:0,
-    //         pageSize:0,
-    //         sortNum:2
-    //     },{
-    //         displayName:"联展",
-    //         fieldCode:"jointExhibition",
-    //         fieldName:"联展",
-    //         id:"3",
-    //         menuCode:null,
-    //         menuId:null,
-    //         pageNum:0,
-    //         pageSize:0,
-    //         sortNum:3
-    //     },{
-    //         displayName:"竞价",
-    //         fieldCode:"priceCompetition",
-    //         fieldName:"竞价",
-    //         id:"4",
-    //         menuCode:null,
-    //         menuId:null,
-    //         pageNum:0,
-    //         pageSize:0,
-    //         sortNum:4
-    //     },{
-    //         displayName:"优化",
-    //         fieldCode:"optimization",
-    //         fieldName:"优化",
-    //         id:"5",
-    //         menuCode:null,
-    //         menuId:null,
-    //         pageNum:0,
-    //         pageSize:0,
-    //         sortNum:5
-    //     },{
-    //         displayName:"信息流",
-    //         fieldCode:"informationFlow",
-    //         fieldName:"信息流",
-    //         id:"6",
-    //         menuCode:null,
-    //         menuId:null,
-    //         pageNum:0,
-    //         pageSize:0,
-    //         sortNum:6
-    //     },{
-    //         displayName:"官网",
-    //         fieldCode:"officialWebsite",
-    //         fieldName:"官网",
-    //         id:"7",
-    //         menuCode:null,
-    //         menuId:null,
-    //         pageNum:0,
-    //         pageSize:0,
-    //         sortNum:7
-    //     },{
-    //         displayName:"行业",
-    //         fieldCode:"industry",
-    //         fieldName:"行业",
-    //         id:"8",
-    //         menuCode:null,
-    //         menuId:null,
-    //         pageNum:0,
-    //         pageSize:0,
-    //         sortNum:8
-    //     },{
-    //         displayName:"其他",
-    //         fieldCode:"other",
-    //         fieldName:"其他",
-    //         id:"9",
-    //         menuCode:null,
-    //         menuId:null,
-    //         pageNum:0,
-    //         pageSize:0,
-    //         sortNum:9
-    //     },{
-    //         displayName:"网民未接",
-    //         fieldCode:"netizensMissed",
-    //         fieldName:"网民未接",
-    //         id:"10",
-    //         menuCode:null,
-    //         menuId:null,
-    //         pageNum:0,
-    //         pageSize:0,
-    //         sortNum:10
-    //     }
-    // ];
+    var fieldList=[[${fieldList}]];//表头list
+    var parentParam=[[${fraQueryDto}]];
+    console.log(parentParam);
     var mainDivVM = new Vue({
         el: '#maindiv',
         data: function() {
@@ -216,13 +106,13 @@
                 form: {
                     startTime:'',
                     endTime:'',
-                    org_Id:'',
+                    orgId:'',
                     isTransfer: ''
                 },
                 export: {
                     startTime:'',
                     endTime:'',
-                    org_Id:'',
+                    orgId:'',
                     isTransfer: ''
                 },
                 tableData: [
@@ -259,10 +149,9 @@
                     //     netizensMissed: 1000,
                     // },
                 ],//表格数据
-                tableColums: [],//表头list
+                tableColums: fieldList,//表头list
                 orgTeleArr:queryOrg,//电销组
                 busSaleArr:[],//创业顾问
-                
             }             
         },
         methods: {  
@@ -491,15 +380,15 @@
             }
         },
         created(){    
-            var today = new Date();
-            var startTime = moment(today).format("YYYY-MM-DD 00:00");
-            var endTime = moment(today).format("YYYY-MM-DD 23:59");
-            this.form.startTime=startTime;
-            this.form.endTime=endTime; 
-
-            this.export.startTime = this.minuteFormat(this.form.startTime);
-            this.export.endTime = this.minuteFormat(this.form.endTime);  
-            console.log(this.form);      
+            this.form.startTime=this.dateTimeFormat(parentParam.startTime);
+            this.form.endTime=this.dateTimeFormat(parentParam.endTime);    
+            this.form.orgId=parentParam.orgId; 
+            this.form.orgId = this.form.orgId ? this.form.orgId.toString():"";
+            this.export.startTime = parentParam.startTime;
+            this.export.endTime = parentParam.endTime;
+            this.export.orgId = this.form.orgId;
+            if(curOrgId){this.isDisabled= true;}
+            this.currentTelSale(this.export.orgId); 
             this.searchTable();
         },
         mounted(){
