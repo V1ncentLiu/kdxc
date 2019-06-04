@@ -29,7 +29,7 @@
                     <el-date-picker format="yyyy-MM-dd HH:mm" v-model="form.endTime" type="datetime" value-format="yyyy-MM-dd HH:mm" placeholder="选择日期"></el-date-picker>
                 </el-form-item>
                 <el-form-item label="电销组:">  
-                    <el-select v-model="form.teleorg" placeholder="电销组" style="width: 100%;" clearable @change="currentTelSale" filterable :disabled="isDisabled">
+                    <el-select v-model="form.orgId" placeholder="电销组" style="width: 100%;" clearable @change="currentTelSale" filterable :disabled="isDisabled">
                         <el-option
                             v-for="item in orgTeleArr"
                             :key="item.id"
@@ -39,21 +39,12 @@
                     </el-select>
                 </el-form-item>
                 <el-form-item label="电销顾问:">  
-                    <el-select 
-                        v-model="form.teleSaleId" 
-                        placeholder="电销顾问" 
-                        style="width: 100%;" 
-                        filterable 
-                        multiple 
-                        clearable  >
+                    <el-select v-model="form.userId" placeholder="电销顾问" style="width: 100%;" filterable clearable>
                         <el-option
                             v-for="item in busSaleArr"
                             :key="item.id"
                             :label="item.name"
                             :value="item.id">
-                            <el-checkbox-group v-model="form.teleSaleId">
-                                <el-checkbox :label="item.id">{{item.name}}</el-checkbox>
-                            </el-checkbox-group>
                         </el-option>
                     </el-select>
                 </el-form-item>
@@ -109,50 +100,52 @@
                 form: {
                     startTime:'',
                     endTime:'',
-                    orgId:'',
+                    orgId: '',
+                    userId: '',
                     isTransfer: ''
                 },
                 export: {
                     startTime:'',
                     endTime:'',
-                    orgId:'',
+                    orgId: '',
+                    userId: '',
                     isTransfer: ''
                 },
                 tableData: [
-                {
-                        id: 1,
-                        timeId: 20190505,
-                        orgId: 1,
-                        userName: '电销1',
-                        assignClueCount: 100,
-                        jointExhibition: 100,
-                        priceCompetition: 100,
-                        optimization: 100,
-                        informationFlow: 1000,
-                        officialWebsite: 1000,
-                        industry: 1000,
-                        other: 1000,
-                        netizensMissed: 1000,
-                    },
-                    {
-                        id: 2,
-                        timeId: 20190505,
-                        orgId: 2,
-                        userName: '电销1',
-                        assignClueCount: 100,
-                        jointExhibition: 100,
-                        priceCompetition: 100,
-                        optimization: 100,
-                        informationFlow: 1000,
-                        officialWebsite: 1000,
-                        industry: 1000,
-                        other: 1000,
-                        netizensMissed: 1000,
-                    },
+                // {
+                //         id: 1,
+                //         timeId: 20190505,
+                //         orgId: 1,
+                //         userName: '电销1',
+                //         assignClueCount: 100,
+                //         jointExhibition: 100,
+                //         priceCompetition: 100,
+                //         optimization: 100,
+                //         informationFlow: 1000,
+                //         officialWebsite: 1000,
+                //         industry: 1000,
+                //         other: 1000,
+                //         netizensMissed: 1000,
+                //     },
+                //     {
+                //         id: 2,
+                //         timeId: 20190505,
+                //         orgId: 2,
+                //         userName: '电销1',
+                //         assignClueCount: 100,
+                //         jointExhibition: 100,
+                //         priceCompetition: 100,
+                //         optimization: 100,
+                //         informationFlow: 1000,
+                //         officialWebsite: 1000,
+                //         industry: 1000,
+                //         other: 1000,
+                //         netizensMissed: 1000,
+                //     },
                 ],//表格数据
-                tableColums: [],//表头list
-                orgTeleArr:queryOrg,//电销组
-                busSaleArr:[],//创业顾问
+                tableColums: fieldList,//表头list
+                orgTeleArr: queryOrg,//电销组
+                busSaleArr: [],//创业顾问
                 
             }             
         },
@@ -166,6 +159,11 @@
                 param.roleCode="DXCYGW";
                 axios.post('/user/userManager/listByOrgAndRole' ,param).then(function (response) {  
                     mainDivVM.busSaleArr=response.data.data;
+                }).catch(function (error) {
+                     mainDivVM.$message({
+                        message: "电销顾问请求失败，请稍后重试",
+                        type: "error"
+                    });
                 });
             },
             searchTable(firstPage) { 
@@ -213,50 +211,51 @@
                 }else{
                     param.pageNum = this.pager.currentPage;
                 }
-                param.orgId =  this.form.orgId;//电销组
+                param.orgId =  this.form.orgId; 
                 param.userId =  this.form.userId;
-                console.log(param);
-                // this.loading=true;
-                // axios.post('/statistics/teleStatement/getResourceAllocationPersionTable',param).then(function (response) { 
-                //     if(!response){
-                //         mainDivVM.$message({
-                //             message: "接口调用失败",
-                //             type: 'error'
-                //         });
-                //         return ;
-                //     }
-                //     var resobj= response.data;
-                //     console.log(resobj)
-                //     if(!resobj){
-                //         mainDivVM.$message({
-                //             message: "接口调用失败",
-                //             type: 'error'
-                //         });
-                //         return ;
-                //     }
-                //     if(resobj.code!='0'){
-                //         mainDivVM.$message({
-                //             message: "接口调用失败",
-                //             type: 'error'
-                //         });
-                //         return ;
-                //     }  
-                //     var resobjData=resobj.data.data          
-                //     // 表格数据渲染
-                //     mainDivVM.tableData=resobjData;
-                //     // 表头数据渲染 
-                //     mainDivVM.tableColums= fieldList;
-                //     mainDivVM.pager.currentPage= resobj.data.currentPage;
-                //     mainDivVM.pager.total= resobj.data.total;
-                //     mainDivVM.loading=false;
-                // }).catch(function (error) {
-                //     console.log(error);
-                //     mainDivVM.$message({
-                //         message: "请求失败，请稍后重试",
-                //         type: "error"
-                //     });
-                //     mainDivVM.loading = false;
-                // });     
+                param.isTransfer = this.form.isTransfer;
+                this.loading=true;
+                axios.post('/callrecord/teleSaleTalkTime/listTeleSaleTalkTime',param).then(function (response) { 
+                    if(!response){
+                        mainDivVM.$message({
+                            message: "接口调用失败",
+                            type: 'error'
+                        });
+                        return ;
+                    }
+                    var resobj= response.data;
+                    if(!resobj){
+                        mainDivVM.$message({
+                            message: "接口调用失败",
+                            type: 'error'
+                        });
+                        return ;
+                    }
+                    if(resobj.code!='0'){
+                        mainDivVM.loading = false;
+                        mainDivVM.$message({
+                            message: resobj.msg,
+                            type: 'error'
+                        });
+                        return ;
+                    }  
+                    var resobjData = resobj.data.data; 
+                    mainDivVM.tableData = resobjData;
+                    mainDivVM.pager.currentPage = resobj.data.currentPage;
+                    mainDivVM.pager.total = resobj.data.total;
+                    mainDivVM.loading = false;
+                    mainDivVM.export.startTime = mainDivVM.minuteFormat(startTime);
+                    mainDivVM.export.endTime = mainDivVM.minuteFormat(endTime);
+                    mainDivVM.export.orgId = mainDivVM.form.orgId;
+                    mainDivVM.export.userId = mainDivVM.form.userId;
+                    mainDivVM.export.isTransfer = mainDivVM.form.isTransfer;
+                }).catch(function (error) {
+                    mainDivVM.loading = false;
+                    mainDivVM.$message({
+                        message: "请求失败，请稍后重试",
+                        type: "error"
+                    });
+                });   
             },
             limitTime (start, end) {
                 var startTime = this.minuteFormat (start);
