@@ -64,6 +64,7 @@ public class FirstResourceAllocationController {
      * 组页面查询
      */
     @RequestMapping("/getFirstResourceAllocationPage")
+    @ResponseBody
     public JSONResult<PageBean<FirstResourceAllocationDto>> getFirstResourceAllocationPage(
             @RequestBody(required=false) FirstResourceAllocationQueryDto firstResourceAllocationQueryDto){
         return firstResourceAllocationFeignClient.getFirstResourceAllocationPage(firstResourceAllocationQueryDto);
@@ -123,6 +124,7 @@ public class FirstResourceAllocationController {
      * 个人页面查询
      */
     @RequestMapping("/getFirstResourceAllocationPagePersion")
+    @ResponseBody
     public JSONResult<PageBean<FirstResourceAllocationDto>> getFirstResourceAllocationPagePersion(
             @RequestBody(required=false) FirstResourceAllocationQueryDto firstResourceAllocationQueryDto){
         return firstResourceAllocationFeignClient.getFirstResourceAllocationPagePersion(firstResourceAllocationQueryDto);
@@ -174,6 +176,7 @@ public class FirstResourceAllocationController {
      * 个人按天查询
      */
     @RequestMapping("/getFirstResourceAllocationDayPagePersion")
+    @ResponseBody
     public JSONResult<PageBean<FirstResourceAllocationDto>> getFirstResourceAllocationDayPagePersion(
             @RequestBody(required=false) FirstResourceAllocationQueryDto firstResourceAllocationQueryDto){
         return firstResourceAllocationFeignClient.getFirstResourceAllocationDayPagePersion(firstResourceAllocationQueryDto);
@@ -242,7 +245,6 @@ public class FirstResourceAllocationController {
         List<OrganizationRespDTO> teleGroupList = (List<OrganizationRespDTO>) orgList.get("teleGroupList");
         request.setAttribute("curOrgId",curOrgId);
         request.setAttribute("saleGroupList",teleGroupList);
-
         // 根据角色查询页面字段
         QueryFieldByRoleAndMenuReq queryFieldByRoleAndMenuReq = new QueryFieldByRoleAndMenuReq();
         queryFieldByRoleAndMenuReq.setMenuCode("statistics:firstResourceAllocation");
@@ -283,6 +285,30 @@ public class FirstResourceAllocationController {
      */
     @RequestMapping("/firstRATableSum")
     public String firstRATableSum(HttpServletRequest request) {
+        UserInfoDTO user = getUser();
+        Map<String, Object> orgList = getOrgList();
+        String curOrgId = (String) orgList.get("curOrgId");
+        List<OrganizationRespDTO> teleGroupList = (List<OrganizationRespDTO>) orgList.get("teleGroupList");
+        request.setAttribute("curOrgId",curOrgId);
+        request.setAttribute("saleGroupList",teleGroupList);
+        // 根据角色查询页面字段
+        QueryFieldByRoleAndMenuReq queryFieldByRoleAndMenuReq = new QueryFieldByRoleAndMenuReq();
+        queryFieldByRoleAndMenuReq.setMenuCode("statistics:firstResourceAllocation");
+        queryFieldByRoleAndMenuReq.setId(user.getRoleList().get(0).getId());
+        JSONResult<List<CustomFieldQueryDTO>> queryFieldByRoleAndMenu =
+                customFieldFeignClient.queryFieldByRoleAndMenu(queryFieldByRoleAndMenuReq);
+        List<CustomFieldQueryDTO> data = queryFieldByRoleAndMenu.getData();
+        data.removeIf(s -> s.getFieldCode().equals("day"));
+        data.removeIf(s -> s.getFieldCode().equals("userName"));
+        request.setAttribute("fieldList", queryFieldByRoleAndMenu.getData());
+        // 根据用户查询页面字段
+        QueryFieldByUserAndMenuReq queryFieldByUserAndMenuReq = new QueryFieldByUserAndMenuReq();
+        queryFieldByUserAndMenuReq.setRoleId(user.getRoleList().get(0).getId());
+        queryFieldByUserAndMenuReq.setId(user.getId());
+        queryFieldByUserAndMenuReq.setMenuCode("statistics:firstResourceAllocation");
+        JSONResult<List<UserFieldDTO>> queryFieldByUserAndMenu =
+                customFieldFeignClient.queryFieldByUserAndMenu(queryFieldByUserAndMenuReq);
+        request.setAttribute("userFieldList", queryFieldByUserAndMenu.getData());
         return "reportforms/firstRATableSum";
     }
     /**
@@ -291,6 +317,30 @@ public class FirstResourceAllocationController {
      */
     @RequestMapping("/firstRATableTeam")
     public String firstRATableTeam(HttpServletRequest request) {
+        UserInfoDTO user = getUser();
+        Map<String, Object> orgList = getOrgList();
+        String curOrgId = (String) orgList.get("curOrgId");
+        List<OrganizationRespDTO> teleGroupList = (List<OrganizationRespDTO>) orgList.get("teleGroupList");
+        request.setAttribute("curOrgId",curOrgId);
+        request.setAttribute("saleGroupList",teleGroupList);
+        // 根据角色查询页面字段
+        QueryFieldByRoleAndMenuReq queryFieldByRoleAndMenuReq = new QueryFieldByRoleAndMenuReq();
+        queryFieldByRoleAndMenuReq.setMenuCode("statistics:firstResourceAllocation");
+        queryFieldByRoleAndMenuReq.setId(user.getRoleList().get(0).getId());
+        JSONResult<List<CustomFieldQueryDTO>> queryFieldByRoleAndMenu =
+                customFieldFeignClient.queryFieldByRoleAndMenu(queryFieldByRoleAndMenuReq);
+        List<CustomFieldQueryDTO> data = queryFieldByRoleAndMenu.getData();
+        data.removeIf(s -> s.getFieldCode().equals("day"));
+        data.removeIf(s -> s.getFieldCode().equals("userName"));
+        request.setAttribute("fieldList", queryFieldByRoleAndMenu.getData());
+        // 根据用户查询页面字段
+        QueryFieldByUserAndMenuReq queryFieldByUserAndMenuReq = new QueryFieldByUserAndMenuReq();
+        queryFieldByUserAndMenuReq.setRoleId(user.getRoleList().get(0).getId());
+        queryFieldByUserAndMenuReq.setId(user.getId());
+        queryFieldByUserAndMenuReq.setMenuCode("statistics:firstResourceAllocation");
+        JSONResult<List<UserFieldDTO>> queryFieldByUserAndMenu =
+                customFieldFeignClient.queryFieldByUserAndMenu(queryFieldByUserAndMenuReq);
+        request.setAttribute("userFieldList", queryFieldByUserAndMenu.getData());
         return "reportforms/firstRATableTeam";
     }
 
@@ -300,6 +350,30 @@ public class FirstResourceAllocationController {
      */
     @RequestMapping("/firstRATablePerson")
     public String firstRATablePerson(HttpServletRequest request) {
+        UserInfoDTO user = getUser();
+        Map<String, Object> orgList = getOrgList();
+        String curOrgId = (String) orgList.get("curOrgId");
+        List<OrganizationRespDTO> teleGroupList = (List<OrganizationRespDTO>) orgList.get("teleGroupList");
+        request.setAttribute("curOrgId",curOrgId);
+        request.setAttribute("saleGroupList",teleGroupList);
+        // 根据角色查询页面字段
+        QueryFieldByRoleAndMenuReq queryFieldByRoleAndMenuReq = new QueryFieldByRoleAndMenuReq();
+        queryFieldByRoleAndMenuReq.setMenuCode("statistics:firstResourceAllocation");
+        queryFieldByRoleAndMenuReq.setId(user.getRoleList().get(0).getId());
+        JSONResult<List<CustomFieldQueryDTO>> queryFieldByRoleAndMenu =
+                customFieldFeignClient.queryFieldByRoleAndMenu(queryFieldByRoleAndMenuReq);
+        List<CustomFieldQueryDTO> data = queryFieldByRoleAndMenu.getData();
+        data.removeIf(s -> s.getFieldCode().equals("day"));
+        data.removeIf(s -> s.getFieldCode().equals("userName"));
+        request.setAttribute("fieldList", queryFieldByRoleAndMenu.getData());
+        // 根据用户查询页面字段
+        QueryFieldByUserAndMenuReq queryFieldByUserAndMenuReq = new QueryFieldByUserAndMenuReq();
+        queryFieldByUserAndMenuReq.setRoleId(user.getRoleList().get(0).getId());
+        queryFieldByUserAndMenuReq.setId(user.getId());
+        queryFieldByUserAndMenuReq.setMenuCode("statistics:firstResourceAllocation");
+        JSONResult<List<UserFieldDTO>> queryFieldByUserAndMenu =
+                customFieldFeignClient.queryFieldByUserAndMenu(queryFieldByUserAndMenuReq);
+        request.setAttribute("userFieldList", queryFieldByUserAndMenu.getData());
         return "reportforms/firstRATablePerson";
     }
 
@@ -377,6 +451,7 @@ public class FirstResourceAllocationController {
         Long other = list.stream().mapToLong(FirstResourceAllocationDto::getOther).sum();
         //网民未接
         Long netizensMissed = list.stream().mapToLong(FirstResourceAllocationDto::getNetizensMissed).sum();
+        firstResourceAllocationDto.setOrgName("合计");
         firstResourceAllocationDto.setAssignClueCount(assignClueCount);
         firstResourceAllocationDto.setJointExhibition(jointExhibition);
         firstResourceAllocationDto.setPriceCompetition(priceCompetition);
