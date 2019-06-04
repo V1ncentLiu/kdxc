@@ -238,7 +238,13 @@ public class FirstResourceAllocationController {
      * @return
      */
     @RequestMapping("/firstRATable")
-    public String firstRATable(HttpServletRequest request) {
+    public String firstRATable(Long orgId,Long startTime,Long endTime,Integer isTransfer,HttpServletRequest request) {
+        FirstResourceAllocationQueryDto fraQueryDto = new FirstResourceAllocationQueryDto();
+        fraQueryDto.setOrgId(orgId);
+        fraQueryDto.setStartTime(startTime);
+        fraQueryDto.setEndTime(endTime);
+        fraQueryDto.setIsTransfer(isTransfer);
+        request.setAttribute("fraQueryDto",fraQueryDto);
         UserInfoDTO user = getUser();
         Map<String, Object> orgList = getOrgList();
         String curOrgId = (String) orgList.get("curOrgId");
@@ -284,7 +290,13 @@ public class FirstResourceAllocationController {
      * @return
      */
     @RequestMapping("/firstRATableSum")
-    public String firstRATableSum(HttpServletRequest request) {
+    public String firstRATableSum(Long orgId,Long startTime,Long endTime,Integer isTransfer,HttpServletRequest request) {
+        FirstResourceAllocationQueryDto fraQueryDto = new FirstResourceAllocationQueryDto();
+        fraQueryDto.setOrgId(orgId);
+        fraQueryDto.setStartTime(startTime);
+        fraQueryDto.setEndTime(endTime);
+        fraQueryDto.setIsTransfer(isTransfer);
+        request.setAttribute("fraQueryDto",fraQueryDto);
         UserInfoDTO user = getUser();
         Map<String, Object> orgList = getOrgList();
         String curOrgId = (String) orgList.get("curOrgId");
@@ -316,7 +328,13 @@ public class FirstResourceAllocationController {
      * @return
      */
     @RequestMapping("/firstRATableTeam")
-    public String firstRATableTeam(HttpServletRequest request) {
+    public String firstRATableTeam(Long orgId,Long startTime,Long endTime,Integer isTransfer,HttpServletRequest request) {
+        FirstResourceAllocationQueryDto fraQueryDto = new FirstResourceAllocationQueryDto();
+        fraQueryDto.setOrgId(orgId);
+        fraQueryDto.setStartTime(startTime);
+        fraQueryDto.setEndTime(endTime);
+        fraQueryDto.setIsTransfer(isTransfer);
+        request.setAttribute("fraQueryDto",fraQueryDto);
         UserInfoDTO user = getUser();
         Map<String, Object> orgList = getOrgList();
         String curOrgId = (String) orgList.get("curOrgId");
@@ -349,7 +367,14 @@ public class FirstResourceAllocationController {
      * @return
      */
     @RequestMapping("/firstRATablePerson")
-    public String firstRATablePerson(HttpServletRequest request) {
+    public String firstRATablePerson(Long orgId,Long startTime,Long endTime,Integer isTransfer,Long userId,HttpServletRequest request) {
+        FirstResourceAllocationQueryDto fraQueryDto = new FirstResourceAllocationQueryDto();
+        fraQueryDto.setOrgId(orgId);
+        fraQueryDto.setStartTime(startTime);
+        fraQueryDto.setEndTime(endTime);
+        fraQueryDto.setIsTransfer(isTransfer);
+        fraQueryDto.setUserId(userId);
+        request.setAttribute("fraQueryDto",fraQueryDto);
         UserInfoDTO user = getUser();
         Map<String, Object> orgList = getOrgList();
         String curOrgId = (String) orgList.get("curOrgId");
