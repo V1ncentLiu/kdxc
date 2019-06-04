@@ -14,8 +14,10 @@ import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
 import com.kuaidao.manageweb.util.CommUtil;
 import com.kuaidao.stastics.dto.firstResourceAllocation.FirstResourceAllocationDto;
 import com.kuaidao.stastics.dto.firstResourceAllocation.FirstResourceAllocationQueryDto;
-import com.kuaidao.stastics.dto.resourceAllocation.ResourceAllocationDto;
-import com.kuaidao.stastics.dto.resourceAllocation.ResourceAllocationQueryDto;
+import com.kuaidao.sys.dto.customfield.CustomFieldQueryDTO;
+import com.kuaidao.sys.dto.customfield.QueryFieldByRoleAndMenuReq;
+import com.kuaidao.sys.dto.customfield.QueryFieldByUserAndMenuReq;
+import com.kuaidao.sys.dto.customfield.UserFieldDTO;
 import com.kuaidao.sys.dto.organization.OrganizationDTO;
 import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
 import com.kuaidao.sys.dto.organization.OrganizationRespDTO;
@@ -30,6 +32,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
@@ -233,13 +236,46 @@ public class FirstResourceAllocationController {
      */
     @RequestMapping("/firstRATable")
     public String firstRATable(HttpServletRequest request) {
+        UserInfoDTO user = getUser();
         Map<String, Object> orgList = getOrgList();
         String curOrgId = (String) orgList.get("curOrgId");
         List<OrganizationRespDTO> teleGroupList = (List<OrganizationRespDTO>) orgList.get("teleGroupList");
         request.setAttribute("curOrgId",curOrgId);
         request.setAttribute("saleGroupList",teleGroupList);
+
+        // 根据角色查询页面字段
+        QueryFieldByRoleAndMenuReq queryFieldByRoleAndMenuReq = new QueryFieldByRoleAndMenuReq();
+        queryFieldByRoleAndMenuReq.setMenuCode("statistics:firstResourceAllocation");
+        queryFieldByRoleAndMenuReq.setId(user.getRoleList().get(0).getId());
+        JSONResult<List<CustomFieldQueryDTO>> queryFieldByRoleAndMenu =
+                customFieldFeignClient.queryFieldByRoleAndMenu(queryFieldByRoleAndMenuReq);
+        List<CustomFieldQueryDTO> data = queryFieldByRoleAndMenu.getData();
+        data.removeIf(s -> s.getFieldCode().equals("day"));
+        data.removeIf(s -> s.getFieldCode().equals("userName"));
+        request.setAttribute("fieldList", queryFieldByRoleAndMenu.getData());
+        // 根据用户查询页面字段
+        QueryFieldByUserAndMenuReq queryFieldByUserAndMenuReq = new QueryFieldByUserAndMenuReq();
+        queryFieldByUserAndMenuReq.setRoleId(user.getRoleList().get(0).getId());
+        queryFieldByUserAndMenuReq.setId(user.getId());
+        queryFieldByUserAndMenuReq.setMenuCode("statistics:firstResourceAllocation");
+        JSONResult<List<UserFieldDTO>> queryFieldByUserAndMenu =
+                customFieldFeignClient.queryFieldByUserAndMenu(queryFieldByUserAndMenuReq);
+        request.setAttribute("userFieldList", queryFieldByUserAndMenu.getData());
         return "reportforms/firstRATable";
     }
+
+
+    @RequestMapping("/getFirstResourceAllocationCount")
+    @ResponseBody
+    public JSONResult<List<FirstResourceAllocationDto>> getGroupCountTotal(@RequestBody FirstResourceAllocationQueryDto firstResourceAllocationQueryDto){
+        JSONResult<List<FirstResourceAllocationDto>> firstResourceAllocationList =
+                firstResourceAllocationFeignClient.getFirstResourceAllocationList(firstResourceAllocationQueryDto);
+        FirstResourceAllocationDto countTotal = getCountTotal(firstResourceAllocationList.getData());
+        List<FirstResourceAllocationDto> list = new ArrayList<>();
+        list.add(countTotal);
+        return new JSONResult<List<FirstResourceAllocationDto>>().success(list);
+    }
+
 
     /**
      * 合计
