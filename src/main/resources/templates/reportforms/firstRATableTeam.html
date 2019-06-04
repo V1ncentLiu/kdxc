@@ -88,6 +88,7 @@
 <script th:inline="javascript">
     var queryOrg=[[${saleGroupList}]];//电销组
     var fieldList=[[${fieldList}]];//表头list
+    console.log(fieldList);
     var parentParam=[[${fraQueryDto}]];
     console.log(parentParam);
     var mainDivVM = new Vue({
@@ -152,27 +153,17 @@
                 busSaleArr: [],//创业顾问
             }             
         },
-        methods: {  
+        methods: {
             currentTelSale(seleVal){//根据电销组选择创业顾问
                 if(null==seleVal||seleVal==""){
                     return ;
                 }
-                // param={};
-                // param.orgId=seleVal;
-                // param.roleCode="DXCYGW";
-                // axios.post('/user/userManager/listByOrgAndRole' ,param).then(function (response) {  
-                //     mainDivVM.busSaleArr=response.data.data;
-                // });
-
-                var param ={};
-                param.id = seleVal;
-                axios.post('/organization/organization/queryTeleSaleByOrgId', param)
-                .then(function (response) {
-                      var result =  response.data;
-                      var table=result.data;
-                      mainDivVM.teleIdList= table;
-                })
-                .catch(function (error) {
+                var param={};
+                param.orgId=seleVal;
+                param.roleCode="DXCYGW";
+                axios.post('/user/userManager/listByOrgAndRole' ,param).then(function (response) {  
+                    mainDivVM.busSaleArr=response.data.data;
+                }).catch(function (error) {
                      mainDivVM.$message({
                         message: "电销顾问请求失败，请稍后重试",
                         type: "error"
