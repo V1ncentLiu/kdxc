@@ -271,7 +271,7 @@
                 </el-row>
             </div>
             <div class="padding20 f-tac">            
-                <el-button type="primary" @click="submitForm('form')"  :disabled="confirmBtnDisabled" >提交</el-button>
+                <el-button type="primary" @click="openViewForm('form')"  :disabled="confirmBtnDisabled" >提交</el-button>
                 <el-button  @click="rebackMV">取 消</el-button>
             </div> 
         </el-form> 
@@ -526,6 +526,10 @@
 					</el-col> 
 				</el-row>
 			</div>
+			<div class="padding20 f-tac">            
+                <el-button type="primary" @click="submitForm('form')"   >提交</el-button>
+                <el-button  @click="viewFormVisible=false">取 消</el-button>
+            </div> 
 		</el-form> 
 	</el-dialog>
 </div>
@@ -848,9 +852,87 @@ if(notOptList){
                }
                return suffix;
            },
-            submitForm(form) {
+            openViewForm(form) {
                 this.$refs[form].validate((valid) => {
                     if (valid) {
+                        //----资源基本信息---//
+                        this.viewFormVisible=true;
+                        this.viewForm=true;
+                        this.viewForm=this.form;
+                    	param.sex=this.form.sex;
+                    	if(this.form.source){
+                    		for(var i=0;i<mediumList.length;i++){
+     	                		if(this.form.source==mediumList[i].value){
+     	                			this.viewForm.source=mediumList[i].name;
+     	                		}
+     	                	}
+                    	}
+                    	if(this.form.sourceType){
+                    		for(var i=0;i<adsenseList.length;i++){
+     	                		if(this.form.sourceType==adsenseList[i].value){
+     	                			this.viewForm.sourceType=adsenseList[i].name;
+     	                		}
+     	                	}
+                    	}
+                    	if(this.form.type){
+                    		for(var i=0;i<clueTypeList.length;i++){
+     	                		if(this.form.type==clueTypeList[i].value){
+     	                			this.viewForm.type=clueTypeList[i].name;
+     	                		}
+     	                	}
+                    	}
+                    	if(this.form.category){
+                    		for(var i=0;i<clueCategoryList.length;i++){
+     	                		if(this.form.category==clueCategoryList[i].value){
+     	                			this.viewForm.category=clueCategoryList[i].name;
+     	                		}
+     	                	}
+                    	}
+                    	if(this.form.accountName){
+                    		for(var i=0;i<accountNameList.length;i++){
+     	                		if(this.form.accountName==accountNameList[i].value){
+     	                			this.viewForm.accountName=accountNameList[i].name;
+     	                		}
+     	                	}
+                    	}
+                    	if(this.form.industryCategory){
+                    		for(var i=0;i<industryCategoryList.length;i++){
+     	                		if(this.form.industryCategory==industryCategoryList[i].value){
+     	                			this.viewForm.industryCategory=industryCategoryList[i].name;
+     	                		}
+     	                	}
+                    	}
+                    	if(this.form.projectId){
+                    		for(var i=0;i<projectList.length;i++){
+     	                		if(this.form.projectId==projectList[i].id){
+     	                			this.viewForm.projectId=projectList[i].projectName;
+     	                		}
+     	                	}
+                    	}
+                   	   /*  var phoneArr=this.dynamicValidateForm.domains;
+                	    if(phoneArr.length>0){
+                	     for(var i=0;i<phoneArr.length;i++){
+                	    	 if(i==0)  {
+                	    		 param.phone2=phoneArr[i].value;	 
+                	         }
+                	    	 if(i==1)  {
+                	    		 param.phone3=phoneArr[i].value;	
+                	         }
+                	    	 if(i==2)  {
+                	    		 param.phone4=phoneArr[i].value;	 
+                	         }
+                	    	 if(i==3)  {
+                	    		 param.phone5=phoneArr[i].value;	 
+                	         }
+                	      }
+                	    } */
+                    } else {
+                        console.log('error submit!!');
+                        return false;
+                    }
+                });
+            },
+            submitForm(form) {
                         //----资源基本信息---//
                     	 var param={};
                      	//资源类型
@@ -938,11 +1020,6 @@ if(notOptList){
                      }).then(function(){
                  		
                    });
-                    } else {
-                        console.log('error submit!!');
-                        return false;
-                    }
-                });
             },
             rebackMV(){
           	  this.$confirm('编辑的资源未保存，是否离开?', '提示', {
