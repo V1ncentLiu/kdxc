@@ -58,7 +58,7 @@
                     </el-select>
                 </el-form-item>
                 <el-form-item label="话务转入:">  
-                    <el-select v-model="form.telOperatorTransferIn" placeholder="话务转入" style="width: 100%;" clearable filterable>
+                    <el-select v-model="form.isTransfer" placeholder="话务转入" style="width: 100%;" clearable filterable>
                         <el-option label="是" value="1"></el-option>
                         <el-option label="否" value="2"></el-option>
                     </el-select>
@@ -95,8 +95,8 @@
 <div th:include="_footer_include :: #jsLib"></div>
 </body>
 <script th:inline="javascript">
-    var queryOrg=[[${queryOrg}]];//电销组
-    console.log(queryOrg,'queryOrg');
+    var queryOrg=[[${saleGroupList}]];//电销组
+    var fieldList=[[${fieldList}]];//表头list
     var resourceQueryDto=[[${resourceAllocationQueryDto}]];//参数list
     var fieldList=[
         {
@@ -216,13 +216,13 @@
                     startTime:'',
                     endTime:'',
                     orgId:'',
-                    telOperatorTransferIn: '1'
+                    isTransfer: '1'
                 },
                 export: {
                     startTime:'',
                     endTime:'',
                     orgId:'',
-                    telOperatorTransferIn: '1'
+                    isTransfer: '1'
                 },
                 tableData: [
                 {
@@ -259,7 +259,6 @@
                 tableColums: [],//表头list
                 orgTeleArr:queryOrg,//电销组
                 busSaleArr:[],//创业顾问
-               
             }             
         },
         methods: {  
@@ -322,7 +321,7 @@
                 param.orgId =  this.form.orgId;//电销组
                 param.userId =  this.form.userId;
                 // this.loading=true;
-                // axios.post('/statistics/teleStatement/getResourceAllocationPersionTable',param).then(function (response) { 
+                // axios.post('statistics/firstResourceAllocation/exportFirstResourceAllocationPage',param).then(function (response) { 
                 //     if(!response){
                 //         mainDivVM.$message({
                 //             message: "接口调用失败",
@@ -392,7 +391,7 @@
                 var endTime = this.export.endTime;
                 var orgId = this.export.orgId;
                 if(userId){
-                    window.location.href="/statistics/teleStatement/firstRATablePerson?userId=" + userId + "&orgId=" + orgId + "&startTime=" + startTime + "&endTime=" + endTime; 
+                    window.location.href="/statistics/firstResourceAllocation/firstRATablePerson?userId=" + userId + "&orgId=" + orgId + "&startTime=" + startTime + "&endTime=" + endTime; 
                 }
             }, 
             goback(){window.history.go(-1);},
@@ -463,7 +462,7 @@
                 param.endTime =  this.export.endTime;
                 param.orgId =  this.export.orgId; 
                 param.userId =  this.export.userId;
-                axios.post('/callrecord/teleSaleTalkTime/exportTeleGroupTalkTime',param,{responseType:'blob'})
+                axios.post('/statistics/firstResourceAllocation/getFirstResourceAllocationPagePersion',param,{responseType:'blob'})
                     .then(function (response) {
                         console.log(response);
                         var data =  response.data;
@@ -480,14 +479,14 @@
             }
         },
         created(){  
-            var today = new Date();
-            var startTime = moment(today).format("YYYY-MM-DD 00:00");
-            var endTime = moment(today).format("YYYY-MM-DD 23:59");
-            this.form.startTime=startTime;
-            this.form.endTime=endTime; 
-
-            this.export.startTime = this.minuteFormat(this.form.startTime);
-            this.export.endTime = this.minuteFormat(this.form.endTime);          
+            this.form.startTime=this.dateTimeFormat(parentParam.startTime);
+            this.form.endTime=this.dateTimeFormat(parentParam.endTime);    
+            this.form.orgId=parentParam.orgId; 
+            this.form.orgId = this.form.orgId ? this.form.orgId.toString():""; 
+            this.export.startTime = parentParam.startTime;
+            this.export.endTime = parentParam.startTime;
+            this.export.orgId = this.form.orgId;
+            this.currentTelSale(this.export.orgId); 
             this.searchTable();
         },
         mounted(){
