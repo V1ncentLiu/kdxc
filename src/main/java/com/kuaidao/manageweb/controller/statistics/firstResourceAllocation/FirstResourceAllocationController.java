@@ -309,9 +309,6 @@ public class FirstResourceAllocationController {
         queryFieldByRoleAndMenuReq.setId(user.getRoleList().get(0).getId());
         JSONResult<List<CustomFieldQueryDTO>> queryFieldByRoleAndMenu =
                 customFieldFeignClient.queryFieldByRoleAndMenu(queryFieldByRoleAndMenuReq);
-        List<CustomFieldQueryDTO> data = queryFieldByRoleAndMenu.getData();
-        data.removeIf(s -> s.getFieldCode().equals("day"));
-        data.removeIf(s -> s.getFieldCode().equals("userName"));
         request.setAttribute("fieldList", queryFieldByRoleAndMenu.getData());
         // 根据用户查询页面字段
         QueryFieldByUserAndMenuReq queryFieldByUserAndMenuReq = new QueryFieldByUserAndMenuReq();
@@ -387,9 +384,6 @@ public class FirstResourceAllocationController {
         queryFieldByRoleAndMenuReq.setId(user.getRoleList().get(0).getId());
         JSONResult<List<CustomFieldQueryDTO>> queryFieldByRoleAndMenu =
                 customFieldFeignClient.queryFieldByRoleAndMenu(queryFieldByRoleAndMenuReq);
-        List<CustomFieldQueryDTO> data = queryFieldByRoleAndMenu.getData();
-        data.removeIf(s -> s.getFieldCode().equals("day"));
-        data.removeIf(s -> s.getFieldCode().equals("userName"));
         request.setAttribute("fieldList", queryFieldByRoleAndMenu.getData());
         // 根据用户查询页面字段
         QueryFieldByUserAndMenuReq queryFieldByUserAndMenuReq = new QueryFieldByUserAndMenuReq();
