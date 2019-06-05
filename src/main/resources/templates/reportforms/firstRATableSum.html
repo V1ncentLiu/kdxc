@@ -68,7 +68,11 @@
                 :data="tableData"
                 >
                 <el-table-column align="center" type="index" label="序号" width="55"></el-table-column>
-                <el-table-column align="center" :key="index" :prop="item.fieldCode" :label="item.displayName" v-for="(item,key,index) in tableColums">
+                <!-- 日期列 -->
+                <el-table-column align="center" :key="index" :prop="item.fieldCode" :label="item.displayName" v-for="(item,key,index) in tableColums" v-if="item.fieldCode == 'day'" :formatter="dateFormat">
+                </el-table-column>
+                <!-- 其他列 -->
+                <el-table-column align="center" :key="index" :prop="item.fieldCode" :label="item.displayName" v-else>
                 </el-table-column>
             </el-table>
             <table-pagination :pager="pager" @change="searchTable"></table-pagination>
@@ -81,9 +85,9 @@
 <script th:inline="javascript">
     var queryOrg=[[${queryOrg}]];//电销组
     var fieldList=[[${fieldList}]];//表头list
+    console.log(fieldList);
     var curOrgId = [[${curOrgId}]];
     var parentParam=[[${fraQueryDto}]];
-    console.log(parentParam);
     var mainDivVM = new Vue({
         el: '#maindiv',
         data: function() {
@@ -362,7 +366,6 @@
                 param.userId =  this.export.userId;
                 axios.post('/statistics/firstResourceAllocation/exportFirstResourceAllocationDayPagePersion',param,{responseType:'blob'})
                     .then(function (response) {
-                        console.log(response);
                         var data =  response.data;
                         var fileName = response.headers.filename;
                         saveAs(data,decodeURI(fileName));
