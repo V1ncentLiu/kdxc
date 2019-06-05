@@ -223,6 +223,7 @@
                 this.loading=true;
                 axios.post('/statistics/firstResourceAllocation/getFirstResourceAllocationPagePersion',param).then(function (response) { 
                     if(!response){
+                        mainDivVM.loading=false;
                         mainDivVM.$message({
                             message: "接口调用失败",
                             type: 'error'
@@ -232,6 +233,7 @@
                     var resobj= response.data;
                     console.log(resobj)
                     if(!resobj){
+                        mainDivVM.loading=false;
                         mainDivVM.$message({
                             message: "接口调用失败",
                             type: 'error'
@@ -239,6 +241,7 @@
                         return ;
                     }
                     if(resobj.code!='0'){
+                        mainDivVM.loading=false;
                         mainDivVM.$message({
                             message: resobj.msg,
                             type: 'error'
@@ -257,11 +260,11 @@
                     mainDivVM.export.isTransfer = mainDivVM.form.isTransfer;
                 }).catch(function (error) {
                     console.log(error);
+                    mainDivVM.loading = false;
                     mainDivVM.$message({
                         message: "请求失败，请稍后重试",
                         type: "error"
                     });
-                    mainDivVM.loading = false;
                 });                
             },
             limitTime (start, end) {
