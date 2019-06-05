@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.util.List;
 
-@FeignClient(name = "statstics-service-wyp", path = "/statstics/firstResourceAllocation", fallback = FirstResourceAllocationFeignClient.HystrixClientFallback.class)
+@FeignClient(name = "statstics-service", path = "/statstics/firstResourceAllocation", fallback = FirstResourceAllocationFeignClient.HystrixClientFallback.class)
 public interface FirstResourceAllocationFeignClient {
 
 
