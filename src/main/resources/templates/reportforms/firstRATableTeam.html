@@ -78,7 +78,7 @@
                 <el-table-column align="center" :key="index" :prop="item.fieldCode" :label="item.displayName" v-else>
                 </el-table-column>
             </el-table>
-            <table-pagination :pager="pager" @change="searchTable"></table-pagination>
+            <table-pagination :pager="pager" :papernum="papernum" @change="searchTable"></table-pagination>
         </el-row>
     </div>
 </div>
@@ -100,8 +100,9 @@
                 pager:{
                     total: 0,
                     currentPage: 1,
-                    pageSize: 20,
+                    pageSize: 3,
                 },
+                papernum: [3, 20, 50, 100],
                 form: {
                     startTime:'',
                     endTime:'',
@@ -290,8 +291,9 @@
                 var startTime = this.export.startTime;
                 var endTime = this.export.endTime;
                 var orgId = this.export.orgId;
+                var isTransfer = this.export.isTransfer;
                 if(userId){
-                    window.location.href="/statistics/firstResourceAllocation/firstRATablePerson?userId=" + userId + "&orgId=" + orgId + "&startTime=" + startTime + "&endTime=" + endTime; 
+                    window.location.href="/statistics/firstResourceAllocation/firstRATablePerson?userId=" + userId + "&orgId=" + orgId + "&startTime=" + startTime + "&endTime=" + endTime + "&isTransfer=" + isTransfer; 
                 }
             }, 
             goback(){window.history.go(-1);},
@@ -362,6 +364,7 @@
                 param.endTime =  this.export.endTime;
                 param.orgId =  this.export.orgId; 
                 param.userId =  this.export.userId;
+                param.isTransfer = this.export.isTransfer;
                 axios.post('/statistics/firstResourceAllocation/exportFirstResourceAllocationPagePersion',param,{responseType:'blob'})
                     .then(function (response) {
                         var data =  response.data;

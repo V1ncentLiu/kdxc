@@ -16,7 +16,7 @@
         <el-button type="primary" @click="searchYesterday">昨天</el-button>
         <el-button type="success" @click="searchWeek">近七天</el-button>
         <el-button type="warning" @click="searchMonth">本月</el-button>  
-        <el-button type="danger">导出Excel报表</el-button>  
+        <el-button type="danger" @click="exportRs">导出Excel报表</el-button>  
         <el-button type="primary" style="float: right;" @click="goback()">返回</el-button>  
     </el-row>
     <div class="mainSearchBg">        
@@ -75,7 +75,7 @@
                 <el-table-column align="center" :key="index" :prop="item.fieldCode" :label="item.displayName" v-else>
                 </el-table-column>
             </el-table>
-            <table-pagination :pager="pager" @change="searchTable"></table-pagination>
+            <table-pagination :pager="pager" :papernum="papernum" @change="searchTable"></table-pagination>
         </el-row>
     </div>
 </div>
@@ -97,8 +97,9 @@
                 pager:{
                     total: 0,
                     currentPage: 1,
-                    pageSize: 20,
+                    pageSize: 3,
                 },
+                papernum: [3, 20, 50, 100],
                 form: {
                     startTime:'',
                     endTime:'',
@@ -364,6 +365,7 @@
                 param.endTime =  this.export.endTime;
                 param.orgId =  this.export.orgId; 
                 param.userId =  this.export.userId;
+                param.isTransfer = this.export.isTransfer;
                 axios.post('/statistics/firstResourceAllocation/exportFirstResourceAllocationDayPagePersion',param,{responseType:'blob'})
                     .then(function (response) {
                         var data =  response.data;

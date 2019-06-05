@@ -74,7 +74,7 @@
                 <el-table-column align="center" :key="index" :prop="item.fieldCode" :label="item.displayName" v-else>
                 </el-table-column>
             </el-table>
-            <table-pagination :pager="pager" @change="searchTable"></table-pagination>
+            <table-pagination :pager="pager" :papernum="papernum" @change="searchTable"></table-pagination>
         </el-row>
     </div>
 </div>
@@ -95,8 +95,9 @@
                 pager:{
                     total: 0,
                     currentPage: 1,
-                    pageSize: 20,
+                    pageSize: 3,
                 },
+                papernum: [3, 20, 50, 100],
                 form: {
                     startTime:'',
                     endTime:'',
@@ -146,7 +147,6 @@
                 tableColums: fieldList,//表头list
                 orgTeleArr: queryOrg,//电销组
                 busSaleArr: [],//创业顾问
-                
             }             
         },
         methods: { 
@@ -357,6 +357,7 @@
                 param.endTime =  this.export.endTime;
                 param.orgId =  this.export.orgId; 
                 param.userId =  this.export.userId; 
+                param.isTransfer = this.export.isTransfer;
                 axios.post('/statistics/firstResourceAllocation/exportFirstResourceAllocationDayPagePersion',param,{responseType:'blob'})
                     .then(function (response) {
                         var data =  response.data;

@@ -69,7 +69,7 @@
                 <el-table-column align="center" :key="index" :prop="item.fieldCode" :label="item.displayName" v-else>
                 </el-table-column>
             </el-table>
-            <table-pagination :pager="pager" @change="searchTable"></table-pagination>
+            <table-pagination :pager="pager" :papernum="papernum" @change="searchTable"></table-pagination>
         </el-row>
     </div>
 </div>
@@ -79,6 +79,7 @@
 <script th:inline="javascript">
     var queryOrg=[[${saleGroupList}]];//电销组
     var fieldList=[[${fieldList}]];//表头list
+    var curOrgId = [[${curOrgId}]];
     // var fieldList=[
     //     {//表头假数据
     //         displayName:"电销组",
@@ -192,18 +193,19 @@
                 pager:{ 
                     total: 0,
                     currentPage: 1,
-                    pageSize: 2
+                    pageSize: 3
                 },
+                papernum: [3, 20, 50, 100],
                 form: {
                     startTime: '',
                     endTime: '',
-                    orgId: '',
+                    orgId: curOrgId,
                     isTransfer: ''
                 },
                 export: {
                     startTime:'',
                     endTime:'',
-                    orgId:'',
+                    orgId: curOrgId,
                     isTransfer: ''                    
                 },
                 tableData: [
@@ -489,6 +491,7 @@
                 param.startTime = this.export.startTime;
                 param.endTime =  this.export.endTime;
                 param.orgId =  this.export.orgId; 
+                param.isTransfer = this.export.isTransfer;
                 axios.post('/statistics/firstResourceAllocation/exportFirstResourceAllocationPage',param,{responseType:'blob'})
                     .then(function (response) {
                         var data =  response.data;
@@ -511,10 +514,9 @@
             var endTime = moment(today).format("YYYY-MM-DD 23:59");
             this.form.startTime=startTime;
             this.form.endTime=endTime; 
-
+            if(curOrgId){this.isDisabled= true;}
             this.export.startTime = this.minuteFormat(this.form.startTime);
             this.export.endTime = this.minuteFormat(this.form.endTime);
-
             this.searchTable();
         },
         mounted(){            
