@@ -484,7 +484,7 @@ public class ExtendClueAgendaTaskController {
                         rowDto.setSourceTypeName(value);
                     } else if (j == 4) {// 媒介
                         rowDto.setSourceName(value);
-                    } else if (j == 5) {// 资源项目
+                    } else if (j == 5) {// 资源项目(项目名称)
                         rowDto.setProjectName(value);
                     } else if (j == 6) {// 行业类别
                         rowDto.setIndustryCategoryName(value);
@@ -540,39 +540,41 @@ public class ExtendClueAgendaTaskController {
                         rowDto.setCategoryName(value);
                     } else if (j == 3) {// 媒介
                         rowDto.setSourceName(value);
-                    } else if (j == 4) {// 行业类别
+                    } else if (j == 4) {// 资源项目(项目名称)
+                        rowDto.setProjectName(value);
+                    } else if (j == 5) {// 行业类别
                         rowDto.setIndustryCategoryName(value);
-                    } else if (j == 5) {// 姓名
+                    } else if (j == 6) {// 姓名
                         rowDto.setCusName(value);
-                    } else if (j == 6) {// 手机
+                    } else if (j == 7) {// 手机
                         rowDto.setPhone(value);
-                    } else if (j == 7) {// 手机2
+                    } else if (j == 8) {// 手机2
                         rowDto.setPhone2(value);
-                    } else if (j == 8) {// 微信
+                    } else if (j == 9) {// 微信
                         rowDto.setWechat(value);
-                    } else if (j == 9) {// 微信2
+                    } else if (j == 10) {// 微信2
                         rowDto.setWechat2(value);
-                    } else if (j == 10) {// QQ
+                    } else if (j == 11) {// QQ
                         rowDto.setQq(value);
-                    } else if (j == 11) {// 邮箱
+                    } else if (j == 12) {// 邮箱
                         rowDto.setEmail(value);
-                    } else if (j == 12) {// 性别
+                    } else if (j == 13) {// 性别
                         rowDto.setSex1(value);
-                    } else if (j == 13) {// 年龄
+                    } else if (j == 14) {// 年龄
                         rowDto.setAge1(value);
-                    } else if (j == 14) {// 开店区域
+                    } else if (j == 15) {// 开店区域
                         rowDto.setAddress(value);
-                    } else if (j == 15) {// 留言时间
+                    } else if (j == 16) {// 留言时间
                         rowDto.setMessageTime1(value);
-                    } else if (j == 16) {// 留言内容
+                    } else if (j == 17) {// 留言内容
                         rowDto.setMessagePoint(value);
-                    } else if (j == 17) {// 搜索词
+                    } else if (j == 18) {// 搜索词
                         rowDto.setSearchWord(value);
-                    } else if (j == 18) {// 预约回访时间
+                    } else if (j == 19) {// 预约回访时间
                         rowDto.setReserveTime1(value);
-                    } else if (j == 19) {// url地址
+                    } else if (j == 20) {// url地址
                         rowDto.setUrlAddress(value);
-                    } else if (j == 20) {// 账户名称
+                    } else if (j == 21) {// 账户名称
                         rowDto.setAccountName(value);
                     }
                 } // inner foreach end
@@ -876,25 +878,25 @@ public class ExtendClueAgendaTaskController {
                         if (clueAgendaTaskDTO1.getProjectId() == null) {
                           islegal = false;
                           if (StringUtils.isBlank(reasonIsNotMatch)) {
-                            reasonIsNotMatch.append("资源项目");
+                            reasonIsNotMatch.append("资源项目(项目名称)");
                           } else {
-                            reasonIsNotMatch.append("、资源项目");
+                            reasonIsNotMatch.append("、资源项目(项目名称)");
                           }
                         }
                       }else {
                         islegal = false;
                         if (StringUtils.isBlank(reasonIsNull)) {
-                          reasonIsNull.append("资源项目");
+                          reasonIsNull.append("资源项目(项目名称)");
                         } else {
-                          reasonIsNull.append("、资源项目");
+                          reasonIsNull.append("、资源项目(项目名称)");
                         }
                       }
                     } else {
                         islegal = false;
                         if (StringUtils.isBlank(reasonIsNull)) {
-                            reasonIsNull.append("资源项目");
+                            reasonIsNull.append("资源项目(项目名称)");
                         } else {
-                            reasonIsNull.append("、资源项目");
+                            reasonIsNull.append("、资源项目(项目名称)");
                         }
                     }
                     if (clueAgendaTaskDTO1.getIndustryCategoryName() != null
@@ -1041,6 +1043,41 @@ public class ExtendClueAgendaTaskController {
                       reasonIsNull.append("、媒介");
                     }
                   }
+                    // 判断是否存在该项目
+                    if (clueAgendaTaskDTO1.getProjectName() != null
+                        && !"".equals(clueAgendaTaskDTO1.getProjectName())) {
+                        // 去掉前后空格
+                        clueAgendaTaskDTO1
+                            .setProjectName(clueAgendaTaskDTO1.getProjectName().trim());
+                        //去掉前后空格后是否为空
+                        if (clueAgendaTaskDTO1.getProjectName() != null
+                            && !"".equals(clueAgendaTaskDTO1.getProjectName())) {
+                            clueAgendaTaskDTO1
+                                .setProjectId(projectMap.get(clueAgendaTaskDTO1.getProjectName()));
+                            if (clueAgendaTaskDTO1.getProjectId() == null) {
+                                islegal = false;
+                                if (StringUtils.isBlank(reasonIsNotMatch)) {
+                                    reasonIsNotMatch.append("资源项目(项目名称)");
+                                } else {
+                                    reasonIsNotMatch.append("、资源项目(项目名称)");
+                                }
+                            }
+                        }else {
+                            islegal = false;
+                            if (StringUtils.isBlank(reasonIsNull)) {
+                                reasonIsNull.append("资源项目(项目名称)");
+                            } else {
+                                reasonIsNull.append("、资源项目(项目名称)");
+                            }
+                        }
+                    } else {
+                        islegal = false;
+                        if (StringUtils.isBlank(reasonIsNull)) {
+                            reasonIsNull.append("资源项目(项目名称)");
+                        } else {
+                            reasonIsNull.append("、资源项目(项目名称)");
+                        }
+                    }
                   if (clueAgendaTaskDTO1.getIndustryCategoryName() != null
                       && !"".equals(clueAgendaTaskDTO1.getIndustryCategoryName())) {
                     // 去掉前后空格
@@ -1347,7 +1384,7 @@ public class ExtendClueAgendaTaskController {
         headTitleList.add("资源类别");
         headTitleList.add("广告位");
         headTitleList.add("媒介");
-        headTitleList.add("资源项目");
+        headTitleList.add("资源项目(项目名称)");
         headTitleList.add("行业类别");
         headTitleList.add("姓名");
         headTitleList.add("手机");
