@@ -279,7 +279,7 @@ public class FirstResourceAllocationController {
         UserInfoDTO user = getUser();
         Map<String, Object> orgList = getOrgList();
         String curOrgId = (String) orgList.get("curOrgId");
-        List<OrganizationRespDTO> teleGroupList = (List<OrganizationRespDTO>) orgList.get("teleGroupList");
+        List<OrganizationRespDTO> teleGroupList = (List<OrganizationRespDTO>) orgList.get("saleGroupList");
         request.setAttribute("curOrgId",curOrgId);
         request.setAttribute("saleGroupList",teleGroupList);
         // 根据角色查询页面字段
@@ -333,7 +333,7 @@ public class FirstResourceAllocationController {
         UserInfoDTO user = getUser();
         Map<String, Object> orgList = getOrgList();
         String curOrgId = (String) orgList.get("curOrgId");
-        List<OrganizationRespDTO> teleGroupList = (List<OrganizationRespDTO>) orgList.get("teleGroupList");
+        List<OrganizationRespDTO> teleGroupList = (List<OrganizationRespDTO>) orgList.get("saleGroupList");
         request.setAttribute("curOrgId",curOrgId);
         request.setAttribute("saleGroupList",teleGroupList);
         // 根据角色查询页面字段
@@ -368,7 +368,7 @@ public class FirstResourceAllocationController {
         UserInfoDTO user = getUser();
         Map<String, Object> orgList = getOrgList();
         String curOrgId = (String) orgList.get("curOrgId");
-        List<OrganizationRespDTO> teleGroupList = (List<OrganizationRespDTO>) orgList.get("teleGroupList");
+        List<OrganizationRespDTO> teleGroupList = (List<OrganizationRespDTO>) orgList.get("saleGroupList");
         request.setAttribute("curOrgId",curOrgId);
         request.setAttribute("saleGroupList",teleGroupList);
         // 根据角色查询页面字段
@@ -408,7 +408,7 @@ public class FirstResourceAllocationController {
         UserInfoDTO user = getUser();
         Map<String, Object> orgList = getOrgList();
         String curOrgId = (String) orgList.get("curOrgId");
-        List<OrganizationRespDTO> teleGroupList = (List<OrganizationRespDTO>) orgList.get("teleGroupList");
+        List<OrganizationRespDTO> teleGroupList = (List<OrganizationRespDTO>) orgList.get("saleGroupList");
         request.setAttribute("curOrgId",curOrgId);
         request.setAttribute("saleGroupList",teleGroupList);
         // 根据角色查询页面字段
