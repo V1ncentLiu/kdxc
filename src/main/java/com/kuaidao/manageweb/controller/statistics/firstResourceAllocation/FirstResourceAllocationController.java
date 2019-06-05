@@ -26,6 +26,7 @@ import com.kuaidao.sys.dto.role.RoleInfoDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -69,26 +70,27 @@ public class FirstResourceAllocationController {
     public JSONResult<PageBean<FirstResourceAllocationDto>> getFirstResourceAllocationPage(
             @RequestBody(required=false) FirstResourceAllocationQueryDto firstResourceAllocationQueryDto){
         Long orgId = firstResourceAllocationQueryDto.getOrgId();
-//        if(null == orgId){
-//            buildOrgIdList(firstResourceAllocationQueryDto, orgId);
-//            List<Long> orgIdList = firstResourceAllocationQueryDto.getOrgIdList();
-//            if(orgIdList == null || orgIdList.size() == 0){
-//                PageBean emptyDataPageBean = PageBean.getEmptyListDataPageBean(firstResourceAllocationQueryDto.getPageNum(), firstResourceAllocationQueryDto.getPageSize());
-//                return new JSONResult<PageBean<ResourceAllocationDto>>().success(emptyDataPageBean);
-//            }
-//        }
+        if(null == orgId){
+            buildOrgIdList(firstResourceAllocationQueryDto, orgId);
+            List<Long> orgIdList = firstResourceAllocationQueryDto.getOrgIdList();
+            if(orgIdList == null || orgIdList.size() == 0){
+                PageBean emptyDataPageBean = PageBean.getEmptyListDataPageBean(firstResourceAllocationQueryDto.getPageNum(), firstResourceAllocationQueryDto.getPageSize());
+                return new JSONResult<PageBean<ResourceAllocationDto>>().success(emptyDataPageBean);
+            }
+        }
         return firstResourceAllocationFeignClient.getFirstResourceAllocationPage(firstResourceAllocationQueryDto);
     }
 
     /**
      * 组页面导出
      */
+    @RequiresPermissions("statistics:firstResourceAllocation:export")
     @PostMapping("/exportFirstResourceAllocationPage")
     public void exportFirstResourceAllocationPage(
             @RequestBody(required=false) FirstResourceAllocationQueryDto firstResourceAllocationQueryDto,
             HttpServletResponse response) throws IOException {
         Long orgId = firstResourceAllocationQueryDto.getOrgId();
-//        buildOrgIdList(firstResourceAllocationQueryDto, orgId);
+        buildOrgIdList(firstResourceAllocationQueryDto, orgId);
         JSONResult<List<FirstResourceAllocationDto>> firstResourceAllocationList =
                 firstResourceAllocationFeignClient.getFirstResourceAllocationList(firstResourceAllocationQueryDto);
         List<FirstResourceAllocationDto> orderList = firstResourceAllocationList.getData();
@@ -137,20 +139,21 @@ public class FirstResourceAllocationController {
     public JSONResult<PageBean<FirstResourceAllocationDto>> getFirstResourceAllocationPagePersion(
             @RequestBody(required=false) FirstResourceAllocationQueryDto firstResourceAllocationQueryDto){
         Long orgId = firstResourceAllocationQueryDto.getOrgId();
-//        if(null == orgId){
-//            buildOrgIdList(firstResourceAllocationQueryDto, orgId);
-//            List<Long> orgIdList = firstResourceAllocationQueryDto.getOrgIdList();
-//            if(orgIdList == null || orgIdList.size() == 0){
-//                PageBean emptyDataPageBean = PageBean.getEmptyListDataPageBean(firstResourceAllocationQueryDto.getPageNum(), firstResourceAllocationQueryDto.getPageSize());
-//                return new JSONResult<PageBean<ResourceAllocationDto>>().success(emptyDataPageBean);
-//            }
-//        }
+        if(null == orgId){
+            buildOrgIdList(firstResourceAllocationQueryDto, orgId);
+            List<Long> orgIdList = firstResourceAllocationQueryDto.getOrgIdList();
+            if(orgIdList == null || orgIdList.size() == 0){
+                PageBean emptyDataPageBean = PageBean.getEmptyListDataPageBean(firstResourceAllocationQueryDto.getPageNum(), firstResourceAllocationQueryDto.getPageSize());
+                return new JSONResult<PageBean<ResourceAllocationDto>>().success(emptyDataPageBean);
+            }
+        }
         return firstResourceAllocationFeignClient.getFirstResourceAllocationPagePersion(firstResourceAllocationQueryDto);
     }
 
     /**
      * 个人页面导出
      */
+    @RequiresPermissions("statistics:firstResourceAllocation:export")
     @PostMapping("/exportFirstResourceAllocationPagePersion")
     public void exportFirstResourceAllocationPagePersion(
             @RequestBody(required=false) FirstResourceAllocationQueryDto firstResourceAllocationQueryDto,
@@ -158,7 +161,7 @@ public class FirstResourceAllocationController {
         JSONResult<List<FirstResourceAllocationDto>> firstResourceAllocationsPersion =
                 firstResourceAllocationFeignClient.getFirstResourceAllocationsPersion(firstResourceAllocationQueryDto);
         Long orgId = firstResourceAllocationQueryDto.getOrgId();
-//        buildOrgIdList(firstResourceAllocationQueryDto, orgId);
+        buildOrgIdList(firstResourceAllocationQueryDto, orgId);
         List<List<Object>> dataList = new ArrayList<List<Object>>();
         dataList.add(getHeadTitleListPersion());
         List<FirstResourceAllocationDto> orderList = firstResourceAllocationsPersion.getData();
@@ -200,20 +203,21 @@ public class FirstResourceAllocationController {
     public JSONResult<PageBean<FirstResourceAllocationDto>> getFirstResourceAllocationDayPagePersion(
             @RequestBody(required=false) FirstResourceAllocationQueryDto firstResourceAllocationQueryDto){
         Long orgId = firstResourceAllocationQueryDto.getOrgId();
-//        if(null == orgId){
-//            buildOrgIdList(firstResourceAllocationQueryDto, orgId);
-//            List<Long> orgIdList = firstResourceAllocationQueryDto.getOrgIdList();
-//            if(orgIdList == null || orgIdList.size() == 0){
-//                PageBean emptyDataPageBean = PageBean.getEmptyListDataPageBean(firstResourceAllocationQueryDto.getPageNum(), firstResourceAllocationQueryDto.getPageSize());
-//                return new JSONResult<PageBean<ResourceAllocationDto>>().success(emptyDataPageBean);
-//            }
-//        }
+        if(null == orgId){
+            buildOrgIdList(firstResourceAllocationQueryDto, orgId);
+            List<Long> orgIdList = firstResourceAllocationQueryDto.getOrgIdList();
+            if(orgIdList == null || orgIdList.size() == 0){
+                PageBean emptyDataPageBean = PageBean.getEmptyListDataPageBean(firstResourceAllocationQueryDto.getPageNum(), firstResourceAllocationQueryDto.getPageSize());
+                return new JSONResult<PageBean<ResourceAllocationDto>>().success(emptyDataPageBean);
+            }
+        }
         return firstResourceAllocationFeignClient.getFirstResourceAllocationDayPagePersion(firstResourceAllocationQueryDto);
     }
 
     /**
      * 个人按天导出
      */
+    @RequiresPermissions("statistics:firstResourceAllocation:export")
     @PostMapping("/exportFirstResourceAllocationDayPagePersion")
     public void exportFirstResourceAllocationDayPagePersion(
             @RequestBody(required=false) FirstResourceAllocationQueryDto firstResourceAllocationQueryDto,
@@ -309,7 +313,7 @@ public class FirstResourceAllocationController {
         JSONResult<List<FirstResourceAllocationDto>> firstResourceAllocationList =
                 firstResourceAllocationFeignClient.getFirstResourceAllocationList(firstResourceAllocationQueryDto);
         Long orgId = firstResourceAllocationQueryDto.getOrgId();
-//        buildOrgIdList(firstResourceAllocationQueryDto, orgId);
+        buildOrgIdList(firstResourceAllocationQueryDto, orgId);
         FirstResourceAllocationDto countTotal = getCountTotal(firstResourceAllocationList.getData());
         List<FirstResourceAllocationDto> list = new ArrayList<>();
         list.add(countTotal);
