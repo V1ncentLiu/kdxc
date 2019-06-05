@@ -14,6 +14,7 @@ import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
 import com.kuaidao.manageweb.util.CommUtil;
 import com.kuaidao.stastics.dto.firstResourceAllocation.FirstResourceAllocationDto;
 import com.kuaidao.stastics.dto.firstResourceAllocation.FirstResourceAllocationQueryDto;
+import com.kuaidao.stastics.dto.resourceAllocation.ResourceAllocationDto;
 import com.kuaidao.sys.dto.customfield.CustomFieldQueryDTO;
 import com.kuaidao.sys.dto.customfield.QueryFieldByRoleAndMenuReq;
 import com.kuaidao.sys.dto.customfield.QueryFieldByUserAndMenuReq;
@@ -67,6 +68,15 @@ public class FirstResourceAllocationController {
     @ResponseBody
     public JSONResult<PageBean<FirstResourceAllocationDto>> getFirstResourceAllocationPage(
             @RequestBody(required=false) FirstResourceAllocationQueryDto firstResourceAllocationQueryDto){
+        Long orgId = firstResourceAllocationQueryDto.getOrgId();
+//        if(null == orgId){
+//            buildOrgIdList(firstResourceAllocationQueryDto, orgId);
+//            List<Long> orgIdList = firstResourceAllocationQueryDto.getOrgIdList();
+//            if(orgIdList == null || orgIdList.size() == 0){
+//                PageBean emptyDataPageBean = PageBean.getEmptyListDataPageBean(firstResourceAllocationQueryDto.getPageNum(), firstResourceAllocationQueryDto.getPageSize());
+//                return new JSONResult<PageBean<ResourceAllocationDto>>().success(emptyDataPageBean);
+//            }
+//        }
         return firstResourceAllocationFeignClient.getFirstResourceAllocationPage(firstResourceAllocationQueryDto);
     }
 
@@ -77,19 +87,18 @@ public class FirstResourceAllocationController {
     public void exportFirstResourceAllocationPage(
             @RequestBody(required=false) FirstResourceAllocationQueryDto firstResourceAllocationQueryDto,
             HttpServletResponse response) throws IOException {
-
         Long orgId = firstResourceAllocationQueryDto.getOrgId();
-        buildOrgIdList(firstResourceAllocationQueryDto, orgId);
+//        buildOrgIdList(firstResourceAllocationQueryDto, orgId);
         JSONResult<List<FirstResourceAllocationDto>> firstResourceAllocationList =
                 firstResourceAllocationFeignClient.getFirstResourceAllocationList(firstResourceAllocationQueryDto);
         List<FirstResourceAllocationDto> orderList = firstResourceAllocationList.getData();
         List<List<Object>> dataList = new ArrayList<List<Object>>();
         //获取合计
         FirstResourceAllocationDto countTotal = getCountTotal(orderList);
-        //增加合计列
-        addTotalTexportData(countTotal,dataList);
         //加表头
         dataList.add(getHeadTitleGroup());
+        //增加合计列
+        addTotalTexportData(countTotal,dataList);
         for(int i = 0; i<orderList.size(); i++){
             FirstResourceAllocationDto ra = orderList.get(i);
             List<Object> curList = new ArrayList<>();
@@ -127,6 +136,15 @@ public class FirstResourceAllocationController {
     @ResponseBody
     public JSONResult<PageBean<FirstResourceAllocationDto>> getFirstResourceAllocationPagePersion(
             @RequestBody(required=false) FirstResourceAllocationQueryDto firstResourceAllocationQueryDto){
+        Long orgId = firstResourceAllocationQueryDto.getOrgId();
+//        if(null == orgId){
+//            buildOrgIdList(firstResourceAllocationQueryDto, orgId);
+//            List<Long> orgIdList = firstResourceAllocationQueryDto.getOrgIdList();
+//            if(orgIdList == null || orgIdList.size() == 0){
+//                PageBean emptyDataPageBean = PageBean.getEmptyListDataPageBean(firstResourceAllocationQueryDto.getPageNum(), firstResourceAllocationQueryDto.getPageSize());
+//                return new JSONResult<PageBean<ResourceAllocationDto>>().success(emptyDataPageBean);
+//            }
+//        }
         return firstResourceAllocationFeignClient.getFirstResourceAllocationPagePersion(firstResourceAllocationQueryDto);
     }
 
@@ -139,6 +157,8 @@ public class FirstResourceAllocationController {
                                                           HttpServletResponse response) throws IOException {
         JSONResult<List<FirstResourceAllocationDto>> firstResourceAllocationsPersion =
                 firstResourceAllocationFeignClient.getFirstResourceAllocationsPersion(firstResourceAllocationQueryDto);
+        Long orgId = firstResourceAllocationQueryDto.getOrgId();
+//        buildOrgIdList(firstResourceAllocationQueryDto, orgId);
         List<List<Object>> dataList = new ArrayList<List<Object>>();
         dataList.add(getHeadTitleListPersion());
         List<FirstResourceAllocationDto> orderList = firstResourceAllocationsPersion.getData();
@@ -179,6 +199,15 @@ public class FirstResourceAllocationController {
     @ResponseBody
     public JSONResult<PageBean<FirstResourceAllocationDto>> getFirstResourceAllocationDayPagePersion(
             @RequestBody(required=false) FirstResourceAllocationQueryDto firstResourceAllocationQueryDto){
+        Long orgId = firstResourceAllocationQueryDto.getOrgId();
+//        if(null == orgId){
+//            buildOrgIdList(firstResourceAllocationQueryDto, orgId);
+//            List<Long> orgIdList = firstResourceAllocationQueryDto.getOrgIdList();
+//            if(orgIdList == null || orgIdList.size() == 0){
+//                PageBean emptyDataPageBean = PageBean.getEmptyListDataPageBean(firstResourceAllocationQueryDto.getPageNum(), firstResourceAllocationQueryDto.getPageSize());
+//                return new JSONResult<PageBean<ResourceAllocationDto>>().success(emptyDataPageBean);
+//            }
+//        }
         return firstResourceAllocationFeignClient.getFirstResourceAllocationDayPagePersion(firstResourceAllocationQueryDto);
     }
 
@@ -191,6 +220,8 @@ public class FirstResourceAllocationController {
                                                             HttpServletResponse response) throws IOException {
         JSONResult<List<FirstResourceAllocationDto>> firstResourceAllocationsDayPersion =
                 firstResourceAllocationFeignClient.getFirstResourceAllocationsDayPersion(firstResourceAllocationQueryDto);
+        Long orgId = firstResourceAllocationQueryDto.getOrgId();
+        buildOrgIdList(firstResourceAllocationQueryDto, orgId);
         List<List<Object>> dataList = new ArrayList<List<Object>>();
         dataList.add(getHeadTitleListDayPersion());
         List<FirstResourceAllocationDto> orderList = firstResourceAllocationsDayPersion.getData();
@@ -278,6 +309,8 @@ public class FirstResourceAllocationController {
     public JSONResult<List<FirstResourceAllocationDto>> getGroupCountTotal(@RequestBody FirstResourceAllocationQueryDto firstResourceAllocationQueryDto){
         JSONResult<List<FirstResourceAllocationDto>> firstResourceAllocationList =
                 firstResourceAllocationFeignClient.getFirstResourceAllocationList(firstResourceAllocationQueryDto);
+        Long orgId = firstResourceAllocationQueryDto.getOrgId();
+//        buildOrgIdList(firstResourceAllocationQueryDto, orgId);
         FirstResourceAllocationDto countTotal = getCountTotal(firstResourceAllocationList.getData());
         List<FirstResourceAllocationDto> list = new ArrayList<>();
         list.add(countTotal);
