@@ -68,7 +68,7 @@
                 :data="tableData">
                 <el-table-column align="center" type="index" label="序号" width="55"></el-table-column>
                 <!-- 日期列 -->
-                <el-table-column align="center" :key="index" :prop="item.fieldCode" :label="item.displayName" v-for="(item,key,index) in tableColums" v-if="item.fieldCode == 'timeId'" :formatter="dateFormat">
+                <el-table-column align="center" :key="index" :prop="item.fieldCode" :label="item.displayName" v-for="(item,key,index) in tableColums" v-if="item.fieldCode == 'day'" :formatter="dateFormat">
                 </el-table-column>
                 <!-- 其他列 -->
                 <el-table-column align="center" :key="index" :prop="item.fieldCode" :label="item.displayName" v-else>
@@ -215,7 +215,7 @@
                 param.userId =  this.form.userId;
                 param.isTransfer = this.form.isTransfer;
                 this.loading=true;
-                axios.post('/callrecord/teleSaleTalkTime/listTeleSaleTalkTime',param).then(function (response) { 
+                axios.post('/statistics/firstResourceAllocation/getFirstResourceAllocationDayPagePersion',param).then(function (response) { 
                     if(!response){
                         mainDivVM.$message({
                             message: "接口调用失败",
@@ -357,9 +357,8 @@
                 param.endTime =  this.export.endTime;
                 param.orgId =  this.export.orgId; 
                 param.userId =  this.export.userId; 
-                axios.post('/callrecord/teleSaleTalkTime/exportTeleGroupTalkTime',param,{responseType:'blob'})
+                axios.post('/statistics/firstResourceAllocation/exportFirstResourceAllocationDayPagePersion',param,{responseType:'blob'})
                     .then(function (response) {
-                        console.log(response);
                         var data =  response.data;
                         var fileName = response.headers.filename;
                         saveAs(data,decodeURI(fileName));

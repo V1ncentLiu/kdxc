@@ -236,6 +236,7 @@
                 ],//表格数据
                 tableColums: fieldList,//表头list
                 orgTeleArr: queryOrg,//电销组
+                variateTable: []
             }             
         },
         methods: { 
@@ -321,9 +322,8 @@
                     var resobjData=resobj.data.data;  
                     console.log(resobjData);                  
                     // 表格数据渲染
-                    mainDivVM.tableData=resobjData;
-                    // 表头数据渲染 
-                    // mainDivVM.tableColums= fieldList;         
+                    mainDivVM.variateTable=resobjData;       
+                    // mainDivVM.tableData=resobjData;       
                     // 分页
                     mainDivVM.pager.currentPage= resobj.data.currentPage;
                     mainDivVM.pager.total= resobj.data.total;
@@ -380,7 +380,8 @@
                     }  
                     var resobjData=resobj.data;
                     // 插入合计一行
-                    mainDivVM.tableData.unshift(resobjData[0]); 
+                    mainDivVM.variateTable.unshift(resobjData[0]); 
+                    mainDivVM.tableData = mainDivVM.variateTable;
                     // loading
                     mainDivVM.loading=false;                   
                 });
@@ -490,7 +491,6 @@
                 param.orgId =  this.export.orgId; 
                 axios.post('/statistics/firstResourceAllocation/exportFirstResourceAllocationPage',param,{responseType:'blob'})
                     .then(function (response) {
-                        console.log(response);
                         var data =  response.data;
                         var fileName = response.headers.filename;
                         saveAs(data,decodeURI(fileName));
