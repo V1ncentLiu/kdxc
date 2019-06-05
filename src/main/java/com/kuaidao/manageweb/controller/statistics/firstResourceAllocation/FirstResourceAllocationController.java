@@ -229,7 +229,6 @@ public class FirstResourceAllocationController {
             FirstResourceAllocationDto ra = orderList.get(i);
             List<Object> curList = new ArrayList<>();
             curList.add(i + 1);
-            curList.add(ra.getOrgName());
             String str = null;
             if(ra.getDateId() != null){
                 StringBuilder sb = new StringBuilder(ra.getDateId().toString());
@@ -238,6 +237,7 @@ public class FirstResourceAllocationController {
                 str = sb.toString();
             }
             curList.add(str);
+            curList.add(ra.getOrgName());
             curList.add(ra.getUserName());
             curList.add(ra.getAssignClueCount());
             curList.add(ra.getJointExhibition());
@@ -248,7 +248,6 @@ public class FirstResourceAllocationController {
             curList.add(ra.getIndustry());
             curList.add(ra.getOther());
             curList.add(ra.getNetizensMissed());
-            curList.add(ra.getOther2());
             dataList.add(curList);
         }
         XSSFWorkbook wbWorkbook = ExcelUtil.creat2007Excel(dataList);
@@ -449,7 +448,7 @@ public class FirstResourceAllocationController {
         List<Object> headTitleList = new ArrayList<>();
         headTitleList.add("序号");
         headTitleList.add("电销组");
-        headTitleList.add("电销");
+        headTitleList.add("电销名称");
         headTitleList.add("首次分配资源数");
         headTitleList.add("联展");
         headTitleList.add("竞价");
@@ -466,7 +465,8 @@ public class FirstResourceAllocationController {
         List<Object> headTitleList = new ArrayList<>();
         headTitleList.add("序号");
         headTitleList.add("日期");
-        headTitleList.add("电销");
+        headTitleList.add("电销组");
+        headTitleList.add("电销名称");
         headTitleList.add("首次分配资源数");
         headTitleList.add("联展");
         headTitleList.add("竞价");
