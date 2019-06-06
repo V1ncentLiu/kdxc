@@ -42,10 +42,12 @@ var myCallRecordVm = new Vue({
         	endTime:'',
         	cno:'',
         	bindPhone:'',
-        	accountId:''
+        	accountId:'',
+        	teleGroupId:'',
         		
         },
         tmList:tmList,//组内电销顾问
+        teleGroupList:teleGroupList,//电销组
         
     },
     methods:{
@@ -307,6 +309,30 @@ var myCallRecordVm = new Vue({
                 this.isShow=true
             }          
         },
+        changeTeleGroup(selectedValue){
+        	this.tmList=[];
+        	if(!selectedValue){
+                return;
+            }
+            var param ={};
+            param.id = selectedValue;
+            axios.post('/organization/organization/queryTeleSaleByOrgId', param)
+            .then(function (response) {
+                  var result =  response.data;
+                  var table=result.data;
+                  myCallRecordVm.tmList= table;
+            })
+            .catch(function (error) {
+                 console.log(error);
+            });
+        },
+        clearTeleGroupList(selectedValue){
+        	this.teleGroupList= [];
+        	this.tmList=[];
+        	this.searchForm.accountId='';
+        	this.searchForm.teleGroupId='';
+        }
+        
     	
     },
     created(){
