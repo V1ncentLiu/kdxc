@@ -524,7 +524,8 @@ public class OrganizationController {
         UserOrgRoleReq req = new UserOrgRoleReq();
         req.setOrgId(idEntityLong.getId());
         req.setRoleCode(RoleCodeEnum.DXCYGW.name());
-        return userInfoFeignClient.listByOrgAndRole(req);
+        JSONResult<List<UserInfoDTO>> userInfo = userInfoFeignClient.listByOrgAndRole(req);
+        return userInfo;
     }
 
     /**
