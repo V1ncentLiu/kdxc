@@ -429,28 +429,4 @@ public class SignRecordController {
     JSONResult<RefundRebateDTO> refundRebateDTOs = refundFeignClient.getRefundInfo(map);
     return refundRebateDTOs;
   }
-
-
-
-    /**
-     * 根据签约单id获取退款信息
-     */
-    @PostMapping("/getRefundInfo")
-    @ResponseBody
-    public JSONResult<RefundRebateDTO> getRefundInfo(@RequestBody String params) {
-        JSONObject jsonObject = JSONObject.parseObject(params);
-        String signStatus = jsonObject.getString("signStatus");
-        String signId = jsonObject.getString("signId");
-        Map map = new HashMap();
-        map.put("signId", signId);
-        map.put("type", 1);
-        if ("4".equals(signStatus)) {
-            map.put("status", 3);
-        }
-        if ("6".equals(signStatus)) {
-            map.put("status", 4);
-        }
-        JSONResult<RefundRebateDTO> refundRebateDTOs = refundFeignClient.getRefundInfo(map);
-        return refundRebateDTOs;
-    }
 }
