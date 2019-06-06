@@ -116,9 +116,13 @@ public class UserController {
     @ResponseBody
     public JSONResult<List<UserInfoDTO>> listByOrgAndRole(HttpServletRequest request,
             @RequestBody UserOrgRoleReq req) {
+        UserInfoDTO userInfoDTO = getUser();
         UserOrgRoleReq userRole = new UserOrgRoleReq();
         userRole.setOrgId(req.getOrgId());
         userRole.setRoleCode(req.getRoleCode());
+        if(userInfoDTO.getBusinessLine() != null){
+            userRole.setBusinessLine(userInfoDTO.getBusinessLine());
+        }
         return userInfoFeignClient.listByOrgAndRole(userRole);
     }
 
@@ -605,5 +609,15 @@ public class UserController {
             return queryDicItemsByGroupCode.getData();
         }
         return null;
+    }
+    /**
+     * 获取当前登录账号
+     *
+     * @return
+     */
+    private UserInfoDTO getUser() {
+        Object attribute = SecurityUtils.getSubject().getSession().getAttribute("user");
+        UserInfoDTO user = (UserInfoDTO) attribute;
+        return user;
     }
 }
