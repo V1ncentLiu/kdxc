@@ -27,6 +27,9 @@
                                 </el-option>
                             </el-select>
                         </el-form-item>
+                        <el-form-item label="业务线：" :label-width="formLabelWidth" prop="businessLine" v-if="0">
+                            <el-input v-model="form.businessLine" placeholder="业务线"></el-input>
+                        </el-form-item>
                     </el-col>
                     <el-col :span="8" :offset="4">
                         <el-form-item label="签约项目：" :label-width="formLabelWidth1" prop="projectIds">
@@ -128,11 +131,13 @@
                 dxList:dxList,
                 projectList:projectList,
                 proviceslist:proviceslist,
+                businessLine:'',
                 form: {
                 	businessGroupId:'',
                 	provincesIds:'',
                 	telemarketingTeamIds:[],
                 	projectIds:'',
+                  businessLine:''
                     
                 },
                 rules: {
@@ -164,9 +169,12 @@
         methods: {
             setProject(value){
                 var groupName = "";
+                var businessLine ="";
                 for(var i = 0 ; i < swList.length ; i++){
                     if(swList[i].id == value){
                         groupName = swList[i].name;
+                        addUserVm.form.businessLine = swList[i].businessLine;
+                        businessLine = swList[i].businessLine;
                         break;
                     }
                 }
@@ -183,6 +191,16 @@
                         addUserVm.form.projectIds = arr;
                     }
                 }).catch(function (error) {console.log(error);});
+                //根据所选商务小组所属业务线查询电销组
+              console.log("businessLine: "+businessLine);
+                if(businessLine != null){
+                  var busParam ={};
+                  busParam.businessLine = businessLine;
+                  axios.post("/invitearea/getDxOrganizations", busParam).then(function (response) {
+                    var data = response.data;
+                    addUserVm.dxList = data.data;
+                  }).catch(function (error) {console.log(error);});
+                }
             },
             onSubmit(formName) {
             	 this.$refs[formName].validate((valid) => {
@@ -196,7 +214,7 @@
 	                      return item.id === param.businessGroupId;
                      });
        	             param.businessGroup  = obj.name;
-
+                     param.businessLine = formData.businessLine;
                      var teamNames ="";
                      var teamIds ="";
                      for ( var i = 0; i <formData.telemarketingTeamIds.length; i++){

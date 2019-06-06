@@ -488,6 +488,9 @@
 <!-- import Vue before Element -->
 <div th:include="_footer_include :: #jsLib"></div>
 <script th:src="@{/js/custom/callrecord/download.js?v=1.0.0}"></script>
+<script th:inline="javascript">
+   var businessLine = [[${businessLine}]];//业务线
+</script>
 <script>    
     var mainDivVM = new Vue({
         el: '#maindiv',
@@ -858,7 +861,7 @@
                 this.initTeleDeptId();
             },
             initBusAreaSelect(){//商务大区下拉框
-                 axios.post('/organization/organization/queryBusinessAreaList', {})
+                 axios.post('/organization/organization/queryBusinessAreaList?businessLine='+businessLine,{})
                  .then(function (response) {
                        var result =  response.data;
                        if(result.code=='0'){
@@ -1007,7 +1010,7 @@
                 
             },
             initTeleDeptId(){//电销事业部
-                axios.post('/organization/organization/queryTeleDeptList', {})
+                axios.post('/organization/organization/queryTeleDeptList?businessLine='+businessLine,{})
                 .then(function (response) {
                       var result =  response.data;
                       if(result.code=='0'){

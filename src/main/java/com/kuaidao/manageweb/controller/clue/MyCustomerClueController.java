@@ -817,6 +817,9 @@ public class MyCustomerClueController {
             dto.setOrgId(user.getOrgId());
             dto.setUserId(user.getId());
         }
+        if(user.getBusinessLine() != null){
+            dto.setBusinessLine(user.getBusinessLine());
+        }
         if (null != dto.getRepeatUserId() && null != dto.getApplyUserId()) {
             IdListLongReq idListLongReq = new IdListLongReq();
             List<Long> idList = new ArrayList<>();
@@ -863,12 +866,16 @@ public class MyCustomerClueController {
     @RequestMapping("/listByOrgAndRole")
     @ResponseBody
     public JSONResult<List<UserInfoDTO>> listByOrgAndRole(HttpServletRequest request) {
+        UserInfoDTO user = getUser();
         UserOrgRoleReq userRole = new UserOrgRoleReq();
         List<Integer> status = new ArrayList();
         status.add(1);
         status.add(3);
         userRole.setRoleCode(RoleCodeEnum.DXCYGW.name());
         userRole.setStatusList(status);
+        if(user.getBusinessLine() != null ){
+            userRole.setBusinessLine(user.getBusinessLine());
+        }
         return userInfoFeignClient.listByOrgAndRole(userRole);
     }
 
@@ -892,6 +899,9 @@ public class MyCustomerClueController {
         if (null != user) {
             dto.setOrgId(user.getOrgId());
             dto.setUserId(user.getId());
+            if(dto.getBusinessLine() != null){
+                dto.setBusinessLine(user.getBusinessLine());
+            }
         }
         if (null != dto.getRepeatUserId()) {
             IdEntityLong id = new IdEntityLong();
@@ -933,6 +943,10 @@ public class MyCustomerClueController {
                     basic.setCreateUser(user.getId());
                     basic.setCreateTime(new Date());
                 }
+                if(user.getBusinessLine() != null){
+                    basic.setBusinessLine(user.getBusinessLine());
+                }
+                dto.setClueBasic(basic);
             }
             // 电销关联数据
             ClueRelateDTO relation = new ClueRelateDTO();

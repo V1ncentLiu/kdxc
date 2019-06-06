@@ -83,6 +83,9 @@
                     </el-option>
                 </el-select>
             </el-form-item>
+            <el-form-item label="业务线：" :label-width="formLabelWidth" prop="businessLine" v-if="0">
+                <el-input v-model="form.businessLine" placeholder="业务线"></el-input>
+            </el-form-item>
             <el-form-item label="签约项目：" :label-width="formLabelWidth" prop="signProjects">
                 <el-select   filterable v-model="form.signProjects" multiple  placeholder="选择签约项目" style="width: 290px;">
                     <el-option
@@ -140,6 +143,7 @@
         el: '#organizationManage',
         data: {
         	showTitle:"",
+          businessLine:"",
         	dialogBatchVisible:false,
         	confirmBtnDisabled:false,
         	formLabelWidth: '130px',
@@ -156,7 +160,8 @@
         	financeUsers:"",
         	form:{
         		busGroupId: '',
-        		financeUsers: ''
+        		financeUsers: '',
+            businessLine:''
         	},
         
             pager:{
@@ -185,6 +190,8 @@
             userChangeSelect(selVal) {
                 orgVM.cwList = cwList;
                 if (null != selVal) {
+        	    if(null != selVal.businessLine  ){
+                    orgVM.form.businessLine = selVal.businessLine;
                     var param = {};
                     param.id = selVal;
                     //根据商务小组id获取业务线
@@ -402,6 +409,7 @@
               	} ,
              submitForm(formName) {
                     this.$refs[formName].validate((valid) => {
+                      debugger;
                         if (valid) {
                           var formData = this.form;
                           var param={};
@@ -433,9 +441,10 @@
                                 }
                             }
                             param.signProvinces = signProvincesStrs;
-                          param.busGroupId = formData.busGroupId;
+                          param.busGroupId = formData.busGroupId.id;
+                          param.businessLine = formData.businessLine;
                           var str = "";
-                         
+
 
                           var url = "/financing/financelayout/addFinanceLayout";
                           if($("#addOrUpdate").val() ==2){
