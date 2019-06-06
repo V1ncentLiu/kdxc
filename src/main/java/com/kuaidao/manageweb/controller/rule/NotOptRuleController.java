@@ -96,7 +96,7 @@ public class NotOptRuleController {
         // 查询字典媒介集合
         request.setAttribute("mediumList", getDictionaryByCode(Constants.MEDIUM));
         // 当前人员id
-        request.setAttribute("userId", user.getId());
+        request.setAttribute("userId", user.getId() + "");
         return "rule/notOptRuleManagerPage";
     }
 
