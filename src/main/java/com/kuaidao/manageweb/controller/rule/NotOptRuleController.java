@@ -82,6 +82,7 @@ public class NotOptRuleController {
     @RequestMapping("/initRuleList")
     @RequiresPermissions("clueAssignRule:notOptRuleManager:view")
     public String initCompanyList(HttpServletRequest request) {
+        UserInfoDTO user = getUser();
         // 查询所有项目
         JSONResult<List<ProjectInfoDTO>> allProject = projectInfoFeignClient.allProject();
         request.setAttribute("projectList", allProject.getData());
@@ -94,6 +95,8 @@ public class NotOptRuleController {
         request.setAttribute("adsenseList", getDictionaryByCode(Constants.ADSENSE));
         // 查询字典媒介集合
         request.setAttribute("mediumList", getDictionaryByCode(Constants.MEDIUM));
+        // 当前人员id
+        request.setAttribute("userId", user.getId() + "");
         return "rule/notOptRuleManagerPage";
     }
 
@@ -219,6 +222,7 @@ public class NotOptRuleController {
         // 插入创建人信息
         UserInfoDTO user = getUser();
         clueAssignRuleReq.setCreateUser(user.getId());
+        clueAssignRuleReq.setUpdateUser(user.getId());
         clueAssignRuleReq.setOrgId(user.getOrgId());
         // 插入类型为优化
         clueAssignRuleReq.setRuleType(AggregationConstant.RULE_TYPE.NOT_OPT);
@@ -242,7 +246,9 @@ public class NotOptRuleController {
         if (result.hasErrors()) {
             return CommonUtil.validateParam(result);
         }
-
+        // 插入修改人信息
+        UserInfoDTO user = getUser();
+        clueAssignRuleReq.setUpdateUser(user.getId());
         Long id = clueAssignRuleReq.getId();
         if (id == null) {
             return new JSONResult().fail(SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getCode(),

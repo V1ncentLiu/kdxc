@@ -78,6 +78,7 @@ public class OptRuleController {
     @RequestMapping("/initRuleList")
     @RequiresPermissions("clueAssignRule:optRuleManager:view")
     public String initCompanyList(HttpServletRequest request) {
+        UserInfoDTO user = getUser();
         // 查询优化类资源类别集合
         request.setAttribute("clueCategoryList", getOptCategory());
         // 查询字典行业类别集合
@@ -85,6 +86,8 @@ public class OptRuleController {
                 getDictionaryByCode(Constants.INDUSTRY_CATEGORY));
         // 查询字典媒介集合
         request.setAttribute("mediumList", getDictionaryByCode(Constants.MEDIUM));
+        // 当前人员id
+        request.setAttribute("userId", user.getId() + "");
         return "rule/optRuleManagerPage";
     }
 
@@ -205,6 +208,7 @@ public class OptRuleController {
         // 插入创建人信息
         UserInfoDTO user = getUser();
         clueAssignRuleReq.setCreateUser(user.getId());
+        clueAssignRuleReq.setUpdateUser(user.getId());
         clueAssignRuleReq.setOrgId(user.getOrgId());
         // 插入类型为优化
         clueAssignRuleReq.setRuleType(AggregationConstant.RULE_TYPE.OPT);
@@ -228,7 +232,9 @@ public class OptRuleController {
         if (result.hasErrors()) {
             return CommonUtil.validateParam(result);
         }
-
+        // 插入修改人信息
+        UserInfoDTO user = getUser();
+        clueAssignRuleReq.setUpdateUser(user.getId());
         Long id = clueAssignRuleReq.getId();
         if (id == null) {
             return new JSONResult().fail(SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getCode(),
