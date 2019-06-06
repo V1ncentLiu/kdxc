@@ -5,6 +5,8 @@ package com.kuaidao.manageweb.controller.rule;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
@@ -88,6 +90,14 @@ public class OptRuleController {
         request.setAttribute("mediumList", getDictionaryByCode(Constants.MEDIUM));
         // 当前人员id
         request.setAttribute("userId", user.getId() + "");
+        OrganizationQueryDTO orgDto = new OrganizationQueryDTO();
+        orgDto.setOrgType(OrgTypeConstant.DXZ);
+        orgDto.setSystemCode(SystemCodeConstant.HUI_JU);
+        // 电销小组
+        JSONResult<List<OrganizationRespDTO>> dzList =
+            organizationFeignClient.queryOrgByParam(orgDto);
+        List<OrganizationRespDTO> data = dzList.getData();
+        request.setAttribute("queryOrg", data);
         return "rule/optRuleManagerPage";
     }
 
@@ -100,7 +110,9 @@ public class OptRuleController {
     @RequiresPermissions("clueAssignRule:optRuleManager:add")
     public String initCreateProject(HttpServletRequest request) {
         // 查询话务组
-        request.setAttribute("trafficList", getTrafficGroup());
+        List<OrganizationRespDTO> orgList = getTrafficGroup();
+        Collections.sort(orgList, Comparator.comparing(OrganizationRespDTO::getCreateTime).reversed());
+        request.setAttribute("trafficList", orgList);
         JSONResult<List<OrganizationDTO>> listBusinessLineOrg =
                 organizationFeignClient.listBusinessLineOrg();
         // 查询所有业务线
@@ -144,7 +156,9 @@ public class OptRuleController {
 
         request.setAttribute("clueAssignRule", data);
         // 查询话务组
-        request.setAttribute("trafficList", getTrafficGroup());
+        List<OrganizationRespDTO> orgList = getTrafficGroup();
+        Collections.sort(orgList, Comparator.comparing(OrganizationRespDTO::getCreateTime).reversed());
+        request.setAttribute("trafficList", orgList);
         JSONResult<List<OrganizationDTO>> listBusinessLineOrg =
                 organizationFeignClient.listBusinessLineOrg();
         // 查询所有业务线
