@@ -273,7 +273,7 @@
         </el-row>
       </el-form>
       <div slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="submitAllocatForm('formAllocat')">提交</el-button>
+        <el-button type="primary" :disabled="btnDisabled" @click="submitAllocatForm('formAllocat')">提交</el-button>
         <el-button @click="resetForm('formAllocat');allocateFormVisible = false;">取 消</el-button>
       </div>
     </el-dialog>
@@ -321,6 +321,7 @@ var phoneButton = false;
         data: function() {
             return {
                 isShow:false,
+                btnDisabled: false, 
                 phoneButton:phoneButton,
                 recordDialog:false,
                 repeatPhonesDialog:false,
@@ -607,8 +608,12 @@ var phoneButton = false;
                    param.idList=idArr;
                    param.operatorId=operatorId;
                    this.allocateFormVisible = false; 
+
+                   this.btnDisabled = true; 
+
                    axios.post('/phonetraffic/allocationClue', param)
                    .then(function (response) {
+                       customerManVM.btnDisabled = false; 
                        if(response.data.code==-1){
                            customerManVM.$message.error(response.data.msg);
                        }else {
@@ -618,6 +623,7 @@ var phoneButton = false;
                        }
                    }).catch(function (error) {
                        console.log(error);
+                       customerManVM.btnDisabled = false; 
                    });
                    
                   } else {

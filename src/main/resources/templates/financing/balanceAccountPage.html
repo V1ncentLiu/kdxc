@@ -285,7 +285,7 @@
 	          </el-form-item>
           </el-form>
         <div slot="footer" style="text-align: center" class="dialog-footer">
-            <el-button type="primary" @click="settlementConfirm('apply')">提交</el-button>
+            <el-button type="primary" :disabled="btnDisabled" @click="settlementConfirm('apply')">提交</el-button>
             <el-button @click="cancelSubmitApplyFrom('apply')">取消</el-button>
         </div>
     </el-dialog>
@@ -309,6 +309,7 @@ var clueVM = new Vue({
         el: '#clueManage',
         data: {
           isShow:false,
+          btnDisabled: false,
       		searchForm: {
 	       		busAreaId: '',
 	       		busGroupId: '',
@@ -799,41 +800,49 @@ var clueVM = new Vue({
                settlementConfirm(form) {
             	   var rows = this.multipleSelection;
             	   this.$refs[form].validate((valid) => {
-                       if (valid) {
-                    	   var idList = [];
-           	               for(var i=0;i<rows.length;i++){
-           	            	   var curRow = rows[i];
-           	            	   idList.push(curRow.accountId);
-           	               } 
-	           	           var param  = {};
-	       	           	  param.idList=idList;
-	       	           	  param.money = clueVM.apply.money;
-		       	          param.isDoubt = clueVM.apply.isDoubt;
-		       	          param.doubtRemark = clueVM.apply.doubtRemark;
-		       	       param.ratio = clueVM.ratio;
-                          axios.post('/financing/balanceaccount/settlementConfirm',param)
-                          .then(function (response) {
-                              var data =  response.data;
-                              if(response.status==200){
-                              	clueVM.$message({message:'提交对账成功',type:'success',duration:1000,onClose:function(){
-                              		window.location.href="/financing/balanceaccount/balanceAccountPage";
-                          	    }});
-                              }else{
-                              	clueVM.$message({
-                                      message: "接口调用失败",
-                                      type: 'error'
-                                    }); 
-                              }
-                          })
-                          .catch(function (error) {
-                            console.log(error);
-                          })
-                          .then(function () {
-                          	
-                          });
-                       }
-            	   })
-        
+                    if (valid) {
+                      var idList = [];
+                        for(var i=0;i<rows.length;i++){
+                          var curRow = rows[i];
+                          idList.push(curRow.accountId);
+                        } 
+                      var param  = {};
+                      param.idList=idList;
+                      param.money = clueVM.apply.money;
+                      param.isDoubt = clueVM.apply.isDoubt;
+                      param.doubtRemark = clueVM.apply.doubtRemark;
+                      param.ratio = clueVM.ratio;
+
+                      this.btnDisabled = true;
+
+                      axios.post('/financing/balanceaccount/settlementConfirm',param)
+                        .then(function (response) {
+                            var data =  response.data;
+                            if(response.status==200){
+
+                              clueVM.btnDisabled = false;
+
+                              clueVM.$message({message:'提交对账成功',type:'success',duration:1000,onClose:function(){
+                                window.location.href="/financing/balanceaccount/balanceAccountPage";
+                              }});
+                            }else{
+
+                              clueVM.btnDisabled = false;
+
+                              clueVM.$message({
+                                message: "接口调用失败",
+                                type: 'error'
+                              }); 
+                            }
+                        })
+                        .catch(function (error) {
+                          console.log(error);
+
+                          clueVM.btnDisabled = false;
+
+                        });
+                      }
+            	    })
                },
                viewDoubt(row) {
                    // 查看疑意
