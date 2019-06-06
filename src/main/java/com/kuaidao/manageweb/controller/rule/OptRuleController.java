@@ -312,6 +312,22 @@ public class OptRuleController {
         return clueAssignRuleFeignClient.delete(idList);
     }
 
+    /**
+     * 复制规则
+     * 
+     * @param orgDTO
+     * @return
+     */
+    @PostMapping("/copy")
+    @ResponseBody
+    @LogRecord(description = "复制规则", operationType = OperationType.DELETE,
+            menuName = MenuEnum.OPT_RULE_MANAGEMENT)
+    public JSONResult copy(@RequestBody ClueAssignRuleReq clueAssignRuleReq) {
+        UserInfoDTO user = getUser();
+        clueAssignRuleReq.setCreateUser(user.getId());
+        return clueAssignRuleFeignClient.copy(clueAssignRuleReq);
+    }
+
 
     /**
      * 获取当前登录账号
