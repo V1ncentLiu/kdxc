@@ -189,7 +189,7 @@
       </el-form-item>
     </el-form>
     <div slot="footer" class="dialog-footer">
-      <el-button type="primary" @click="saveAppiontment('appiontmentForm')">确 定</el-button>
+      <el-button type="primary" :disabled="btnDisabled" @click="saveAppiontment('appiontmentForm')">确 定</el-button>
       <el-button @click="appiontmentFormVisible = false">取 消</el-button>
     </div>
   </el-dialog>
@@ -337,6 +337,7 @@
     el: '#appiontmentManage',
     data: {
       isShow:false,
+      btnDisabled: false,  
       appiontmentSearchForm: {
         startTime: '',
         endTime: '',
@@ -686,7 +687,11 @@
             var param=appiontmentVM.appiontmentForm;
             param.tasteProjectId=appiontmentVM.appiontmentForm.tasteProjectId.join(',');
             var url="/clue/appiontment/updateAppiontment";
+
+            this.btnDisabled = true;
+
             axios.post(url, param).then(function (response) {
+              appiontmentVM.btnDisabled = false; 
               var resData = response.data;
               if(resData.code=='0'){
                 appiontmentVM.cancelForm(formName);
@@ -700,6 +705,7 @@
             })
             .catch(function (error) {
               console.log(error);
+              appiontmentVM.btnDisabled = false;
             });
           } else {
             console.log('error submit!!');
