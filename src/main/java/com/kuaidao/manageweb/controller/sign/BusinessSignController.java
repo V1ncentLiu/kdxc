@@ -562,6 +562,7 @@ public class BusinessSignController {
     request.setAttribute("signId", signId);
     request.setAttribute("readyOnly", readyOnly); // readyOnly == 1 页面只读（没有添加按钮）
     request.setAttribute("signStatus",sign.getSignStatus());
+    request.setAttribute("payModeItem", getDictionaryByCode(DicCodeEnum.PAYMODE.getCode()));
     return "clue/showSignAndPayDetail";
   }
 
