@@ -613,15 +613,15 @@
                         this.btnDisabled = true;  
 
 		                axios.post('/clue/cluerepetition/updatePetitionById',param).then(function (response) {
-                            console.log(response);
-                            orgVM.btnDisabled = false; 
-		                  	if(null===response||response.data==null||response.data.code!='0'){
-		                  		orgVM.$message({
-	   	                            message: response.data.msg,
-	   	                            type: 'warning'
-	   	                          });
-			                  	  return ;
+                            if(null===response||response.data==null||response.data.code!='0'){
+                                orgVM.$message({
+                                    message: response.data.msg,
+                                    type: 'warning'
+                                });
+                                orgVM.btnDisabled = false; 
+                                return ;
 		                 	}else{
+                                orgVM.btnDisabled = false; 
 		                 		window.location.href="/clue/cluerepetition/dealPetitionListPage";
 		                 	} 
 		              	})
@@ -878,18 +878,17 @@
 
                     axios.post('/tele/clueMyCustomerInfo/officesaveRepeatClue', param)
                     .then(function (response) {
-                        console.log(response);
-                        orgVM.btnDisabled = false; 
-                    	if (response.data.code == 0) {
-                    		orgVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
-                         	   
+                        if (response.data.code == 0) {
+                            orgVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
+                               orgVM.btnDisabled = false; 
                          	   orgVM.initTableData();  
              		         }});
                     	}else{
                     		orgVM.$message({
-	                             message: response.data.msg,
-	                             type: 'warning'
-	                           });
+                                message: response.data.msg,
+                                type: 'warning'
+                            });
+                            orgVM.btnDisabled = false;
                     	}
                        
                     }).catch(function (error) {

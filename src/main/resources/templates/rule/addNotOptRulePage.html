@@ -496,7 +496,6 @@ var adsenseList=[[${adsenseList}]];//广告位集合
                                 }                                
                             }
                         }
-       	            	aorVM.submitDisabled=true;
                         var param=this.form;
                         param.ruleName=this.form.ruleName;
                         param.startTime=this.form.startTime;
@@ -511,22 +510,24 @@ var adsenseList=[[${adsenseList}]];//广告位集合
                         param.category=this.form.category.join(',');
                         param.searchWord=this.tags1.join(',');
                         param.notSearchWord=this.tags2.join(',');
+                        aorVM.submitDisabled=true;
                         axios.post('/clueAssignRule/notOptRule/save', param)
 	       	            .then(function (response) {
-	       	            	aorVM.submitDisabled=false;
-	       	            	console.info(response);
+                               console.info(response);
 	       	            	var data =response.data;
 	       	            	if(data.code!="0"){
-	       	            		aorVM.$message(data.msg);
+                                aorVM.$message(data.msg);
+                                aorVM.submitDisabled=false;
 	       	            	}else{
 	       	            		aorVM.$message({message:'提交成功',type:'success',duration:1000,onClose:function(){
+                                    aorVM.submitDisabled=false;
 		       	                	document.location.href='/clueAssignRule/notOptRule/initRuleList';
 	                      	    }});
 	       	            	}
 	       	            })
 	       	            .catch(function (error) {
 	       	            	aorVM.submitDisabled=false;
-	       	                 console.log(error);
+                            console.log(error);
 	       	            });
                     } else {
                         console.log('error submit!!');

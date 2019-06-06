@@ -496,7 +496,6 @@ var businessLineList=[[${businessLineList}]];//业务线集合
                                 }                                
                             }
                         }
-       	            	aorVM.submitDisabled=true;
                         var param=this.form;
                         param.ruleName=this.form.ruleName;
                         param.startTime=this.form.startTime;
@@ -508,31 +507,32 @@ var businessLineList=[[${businessLineList}]];//业务线集合
                         param.industryCategory=this.form.industryCategory.join(',');
                         param.category=this.form.category.join(',');
                         if(this.tags1){
-	                        param.searchWord=this.tags1.join(',');
+                            param.searchWord=this.tags1.join(',');
                         }else{
-                        	param.searchWord='';
+                            param.searchWord='';
                         }
                         if(this.tags2){
-	                        param.notSearchWord=this.tags2.join(',');
+                            param.notSearchWord=this.tags2.join(',');
                         }else{
-                        	param.notSearchWord='';
+                            param.notSearchWord='';
                         }
+                        aorVM.submitDisabled=true;
                         axios.post('/clueAssignRule/optRule/update', param)
 	       	            .then(function (response) {
-	       	            	aorVM.submitDisabled=false;
-	       	            	console.info(response);
 	       	            	var data =response.data;
 	       	            	if(data.code!="0"){
+                                aorVM.submitDisabled=false;
 	       	            		aorVM.$message(data.msg);
 	       	            	}else{
 	       	            		aorVM.$message({message:'提交成功',type:'success',duration:1000,onClose:function(){
+                                    aorVM.submitDisabled=false;
 		       	                	document.location.href='/clueAssignRule/optRule/initRuleList';
 	                      	    }});
 	       	            	}
 	       	            })
 	       	            .catch(function (error) {
 	       	            	aorVM.submitDisabled=false;
-	       	                 console.log(error);
+                            console.log(error);
 	       	            });
                     } else {
                         console.log('error submit!!');
