@@ -327,9 +327,10 @@ var myCallRecordVm = new Vue({
             });
         },
         clearTeleGroupList(selectedValue){
+        	this.teleGroupList= [];
         	this.tmList=[];
-        	this.accountId='';
-        	this.teleGroupId='';
+        	this.searchForm.accountId='';
+        	this.searchForm.teleGroupId='';
         }
         
     	
