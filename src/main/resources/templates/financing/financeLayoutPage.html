@@ -190,25 +190,26 @@
             userChangeSelect(selVal) {
                 orgVM.cwList = cwList;
                 if (null != selVal) {
-        	    if(null != selVal.businessLine  ){
-                    orgVM.form.businessLine = selVal.businessLine;
-                    var param = {};
-                    param.id = selVal;
-                    //根据商务小组id获取业务线
-                    axios.post('/organization/organization/queryOrgById', param).then(function (response) {
-                        if (null != response || response.data != null || response.data.code == '0') {
-                            var param = {};
-                            param.roleList = ["QDSJCW", "SJHZCW", "CYCW"];
-                            param.businessLine = response.data.data.businessLine;
-                            //根据业务线获取财务集合
-                            axios.post('/user/userManager/getUserInfoListByParam', param).then(function (response) {
-                                console.log(response.data.data);
-                                if (null != response || response.data != null || response.data.code == '0') {
-                                    orgVM.cwList = response.data.data;
-                                }
-                            });
-                        }
-                    });
+	        	    if(null != selVal.businessLine  ){
+	                    orgVM.form.businessLine = selVal.businessLine;
+	                    var param = {};
+	                    param.id = selVal;
+	                    //根据商务小组id获取业务线
+	                    axios.post('/organization/organization/queryOrgById', param).then(function (response) {
+	                        if (null != response || response.data != null || response.data.code == '0') {
+	                            var param = {};
+	                            param.roleList = ["QDSJCW", "SJHZCW", "CYCW"];
+	                            param.businessLine = response.data.data.businessLine;
+	                            //根据业务线获取财务集合
+	                            axios.post('/user/userManager/getUserInfoListByParam', param).then(function (response) {
+	                                console.log(response.data.data);
+	                                if (null != response || response.data != null || response.data.code == '0') {
+	                                    orgVM.cwList = response.data.data;
+	                                }
+	                            });
+	                        }
+	                    });
+	                }
                 }
             },
         	inviteAreaListPage(){//查询按钮

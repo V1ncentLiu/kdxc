@@ -469,7 +469,8 @@
         </el-row>
       </el-form>
       <div slot="footer" class="dialog-footer" style="text-align:center;">
-        <el-button type="primary" @click="submitAllocatForm('formAllocat')">提交</el-button>
+        <el-button type="primary" 
+        :disabled="btnDisabled" @click="submitAllocatForm('formAllocat')">提交</el-button>
         <el-button @click="resetForm('formAllocat');allocateFormVisible = false;">取 消</el-button>
       </div>
     </el-dialog>
@@ -494,7 +495,7 @@
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer" style="text-align:center;">
-        <el-button type="primary" @click="submitTransferForm('formTransfer')">提交</el-button>
+        <el-button type="primary" :disabled="btnDisabled" @click="submitTransferForm('formTransfer')">提交</el-button>
         <el-button @click="resetForm('formTransfer');transferFormVisible=false;">取 消</el-button>
       </div>
     </el-dialog>
@@ -556,7 +557,7 @@
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer" style="text-align:center;">
-        <el-button type="primary" @click="submitVicemanagerForm('formVicemanage')">提交</el-button>
+        <el-button type="primary" :disabled="btnDisabled" @click="submitVicemanagerForm('formVicemanage')">提交</el-button>
         <el-button @click="resetForm('formVicemanage');vicemanagerFormVisible=false;">取 消</el-button>
       </div>
     </el-dialog>
@@ -598,6 +599,7 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
         data: function() {
             return {
                 isShow:false,
+                btnDisabled: false,
                 recordDialog:false,
                 dialogChooseList:false,
                 repeatPhonesDialog:false,
@@ -1039,9 +1041,13 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                    var  param={};
                    param.idList=idArr;
                    param.teleSaleId=telSale;
-                   this.allocateFormVisible = false; 
-                   axios.post('/clue/pendingAllocation/allocationClue', param)
+                   this.allocateFormVisible = false;
+
+                   this.btnDisabled = true; 
+
+                   axios.post('/clue/pendingAllocation/allocationClue123', param)
                    .then(function (response) {
+                       customerManVM.btnDisabled = false; 
                        if(response.data.code==-1){
                            customerManVM.$message.error(response.data.msg);
                        }else {
@@ -1051,6 +1057,7 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                        }
                    }).catch(function (error) {
                        console.log(error);
+                       customerManVM.btnDisabled = false; 
                    });
                    
                   } else {
@@ -1091,13 +1098,18 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                      param.teleGorupId=directorArr[0];
                      param.teleDirectorId=directorArr[1];
                      this.transferFormVisible = false;
+
+                     this.btnDisabled = true; 
+
                      axios.post('/tele/customerManager/transferClue', param)
                      .then(function (response) {
+                      customerManVM.btnDisabled = false; 
                   	  customerManVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
                   	  		customerManVM.initTableData();
                          }});
                       }).catch(function (error) {
                          console.log(error);
+                         customerManVM.btnDisabled = false;
                      });
                   } else {
                     console.log('error submit!!');
@@ -1140,13 +1152,18 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                       param.teleDirectorId=directorArr[1];
                       param.teleSaleId=saleId;
                       this.vicemanagerFormVisible = false;
+
+                      this.btnDisabled = true; 
+
                       axios.post('/clue/pendingAllocation/ceoDistributionClue', param)
                       .then(function (response) {
+                        customerManVM.btnDisabled = false; 
                    	  customerManVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
                    	  		customerManVM.initTableData();
                           }});
                        }).catch(function (error) {
                           console.log(error);
+                          customerManVM.btnDisabled = false; 
                       });
                   } else {
                     console.log('error submit!!');
