@@ -226,15 +226,18 @@ var clientVm = new Vue({
              .then(function (response) {
                  var resData = response.data;
                  if(resData.code=='0'){
-              	    clientVm.form = resData.data;                     
+                      clientVm.form = resData.data;  
+                      clientVm.confirmBtnDisabled=false;//启用提交按钮                   
                  }else{
-              	     clientVm.$message({message:'查询失败',type:'error'});
+                       clientVm.$message({message:'查询失败',type:'error'});
+                       clientVm.confirmBtnDisabled=false;//启用提交按钮
                      console.error(resData);
                  }
              
              })
              .catch(function (error) {
                   console.log(error);
+                  clientVm.confirmBtnDisabled=false;//启用提交按钮
              }).then(function(){
           	   clientVm.confirmBtnDisabled=false;//启用提交按钮
              });

@@ -356,16 +356,18 @@ var clientVm = new Vue({
                        if(resData.code=='0'){
                     	   clientVm.cancelForm(formName);
                     	   clientVm.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
+                               clientVm.confirmBtnDisabled=false;//启用提交按钮
                     		   clientVm.initClientData();
                      	    }});
                            
                        }else{
                     	   clientVm.$message({message:'操作失败',type:'error'});
+                           clientVm.confirmBtnDisabled=false;//启用提交按钮
                            console.error(resData);
                        }
-                   
                    })
                    .catch(function (error) {
+                        clientVm.confirmBtnDisabled=false;//启用提交按钮
                         console.log(error);
                    }).then(function(){
                 	   clientVm.confirmBtnDisabled=false;//启用提交按钮
