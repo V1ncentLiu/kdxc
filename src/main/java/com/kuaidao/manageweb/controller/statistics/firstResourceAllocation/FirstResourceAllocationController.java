@@ -158,10 +158,10 @@ public class FirstResourceAllocationController {
     public void exportFirstResourceAllocationPagePersion(
             @RequestBody(required=false) FirstResourceAllocationQueryDto firstResourceAllocationQueryDto,
                                                           HttpServletResponse response) throws IOException {
-        JSONResult<List<FirstResourceAllocationDto>> firstResourceAllocationsPersion =
-                firstResourceAllocationFeignClient.getFirstResourceAllocationsPersion(firstResourceAllocationQueryDto);
         Long orgId = firstResourceAllocationQueryDto.getOrgId();
         buildOrgIdList(firstResourceAllocationQueryDto, orgId);
+        JSONResult<List<FirstResourceAllocationDto>> firstResourceAllocationsPersion =
+                firstResourceAllocationFeignClient.getFirstResourceAllocationsPersion(firstResourceAllocationQueryDto);
         List<List<Object>> dataList = new ArrayList<List<Object>>();
         dataList.add(getHeadTitleListPersion());
         List<FirstResourceAllocationDto> orderList = firstResourceAllocationsPersion.getData();
@@ -222,10 +222,10 @@ public class FirstResourceAllocationController {
     public void exportFirstResourceAllocationDayPagePersion(
             @RequestBody(required=false) FirstResourceAllocationQueryDto firstResourceAllocationQueryDto,
                                                             HttpServletResponse response) throws IOException {
-        JSONResult<List<FirstResourceAllocationDto>> firstResourceAllocationsDayPersion =
-                firstResourceAllocationFeignClient.getFirstResourceAllocationsDayPersion(firstResourceAllocationQueryDto);
         Long orgId = firstResourceAllocationQueryDto.getOrgId();
         buildOrgIdList(firstResourceAllocationQueryDto, orgId);
+        JSONResult<List<FirstResourceAllocationDto>> firstResourceAllocationsDayPersion =
+                firstResourceAllocationFeignClient.getFirstResourceAllocationsDayPersion(firstResourceAllocationQueryDto);
         List<List<Object>> dataList = new ArrayList<List<Object>>();
         dataList.add(getHeadTitleListDayPersion());
         List<FirstResourceAllocationDto> orderList = firstResourceAllocationsDayPersion.getData();
@@ -310,10 +310,10 @@ public class FirstResourceAllocationController {
     @RequestMapping("/getFirstResourceAllocationCount")
     @ResponseBody
     public JSONResult<List<FirstResourceAllocationDto>> getGroupCountTotal(@RequestBody FirstResourceAllocationQueryDto firstResourceAllocationQueryDto){
-        JSONResult<List<FirstResourceAllocationDto>> firstResourceAllocationList =
-                firstResourceAllocationFeignClient.getFirstResourceAllocationList(firstResourceAllocationQueryDto);
         Long orgId = firstResourceAllocationQueryDto.getOrgId();
         buildOrgIdList(firstResourceAllocationQueryDto, orgId);
+        JSONResult<List<FirstResourceAllocationDto>> firstResourceAllocationList =
+                firstResourceAllocationFeignClient.getFirstResourceAllocationList(firstResourceAllocationQueryDto);
         FirstResourceAllocationDto countTotal = getCountTotal(firstResourceAllocationList.getData());
         List<FirstResourceAllocationDto> list = new ArrayList<>();
         list.add(countTotal);
