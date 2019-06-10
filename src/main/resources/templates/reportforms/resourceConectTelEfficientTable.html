@@ -1,242 +1,392 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml"  xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org"
+    xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+
 <head th:replace="_header_include::frag(~{::title},~{},~{})">
     <title>后台管理系统</title>
     <style>
     </style>
 </head>
+
 <body>
-<div id="maindiv" class="maindiv mainPadding" style="display: none;">    
-    <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
-        <el-breadcrumb-item>Home</el-breadcrumb-item>
-        <el-breadcrumb-item>数据报表</el-breadcrumb-item>
-        <el-breadcrumb-item>电销组资源接通有效率表</el-breadcrumb-item>
-    </el-breadcrumb>    
-    <el-row class="marginB20">
-        <el-button type="primary" @click="searchTable">昨天</el-button>
-        <el-button type="success" @click="searchWeek">近七天</el-button>
-        <el-button type="warning" @click="searchMonth">本月</el-button>  
-        <el-button type="danger" @click="exportRs">导出Excel报表</el-button>   
-    </el-row>
-    <div class="mainSearchBg">        
-        <div class="mainSearchFormBox">
-          
-            <el-form :inline="true" :model="form" class="demo-form-inline mainSearchForm" ref="form1">
-                               
-                <el-form-item label="资源类别:">  
-                    <el-select v-model="form.orgId" placeholder="资源类别" style="width: 100%;" clearable filterable>
-                        <el-option
-                            v-for="item in orgTeleArr"
-                            :key="item.id"
-                            :label="item.name"
-                            :value="item.id">
-                        </el-option>
-                    </el-select>
-                </el-form-item>
-                <el-form-item label="媒介:">  
-                    <el-select v-model="form.orgId" placeholder="媒介" style="width: 100%;" clearable filterable>
-                        <el-option
-                            v-for="item in orgTeleArr"
-                            :key="item.id"
-                            :label="item.name"
-                            :value="item.id">
-                        </el-option>
-                    </el-select>
-                </el-form-item>
-                <el-form-item label="资源项目:">  
-                    <el-select v-model="form.orgId" placeholder="资源项目" style="width: 100%;" clearable filterable>
-                        <el-option
-                            v-for="item in orgTeleArr"
-                            :key="item.id"
-                            :label="item.name"
-                            :value="item.id">
-                        </el-option>
-                    </el-select>
-                </el-form-item>
-                <el-form-item label="起止时间:">
-                        <el-date-picker format="yyyy-MM-dd HH:mm" v-model="form.startTime" type="datetime" placeholder="选择日期"></el-date-picker>
+    <div id="maindiv" class="maindiv mainPadding" style="display: none;">
+        <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
+            <el-breadcrumb-item>Home</el-breadcrumb-item>
+            <el-breadcrumb-item>数据报表</el-breadcrumb-item>
+            <el-breadcrumb-item>电销组资源接通有效率表</el-breadcrumb-item>
+        </el-breadcrumb>
+        <el-row class="marginB20">
+            <el-button type="primary" @click="searchTable">昨天</el-button>
+            <el-button type="success" @click="searchWeek">近七天</el-button>
+            <el-button type="warning" @click="searchMonth">本月</el-button>
+            <el-button type="danger" @click="exportRs">导出Excel报表</el-button>
+        </el-row>
+        <div class="mainSearchBg">
+            <div class="mainSearchFormBox">
+
+                <el-form :inline="true" :model="form" class="demo-form-inline mainSearchForm" ref="form1">
+
+                    <el-form-item label="资源类别:">
+                        <el-select v-model="form.resourceId" placeholder="资源类别" style="width: 100%;" clearable
+                            filterable>
+                            <el-option v-for="item in resourceClassList" :key="item.id" :label="item.name"
+                                :value="item.id">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
+                    <el-form-item label="媒介:">
+                        <el-select v-model="form.mediumId" placeholder="媒介" style="width: 100%;" clearable filterable>
+                            <el-option v-for="item in mediumList" :key="item.id" :label="item.name" :value="item.id">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
+                    <el-form-item label="资源项目:">
+                        <el-select v-model="form.resourceItemId" placeholder="资源项目" style="width: 100%;" clearable
+                            filterable>
+                            <el-option v-for="item in resourceItemList" :key="item.id" :label="item.name"
+                                :value="item.id">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
+                    <el-form-item label="起止时间:">
+                        <el-date-picker format="yyyy-MM-dd HH:mm" v-model="form.startTime" type="datetime"
+                            placeholder="选择日期"></el-date-picker>
                     </el-form-item>
                     <el-form-item label="—" class="widthauto">
-                       <el-date-picker format="yyyy-MM-dd HH:mm" v-model="form.endTime" type="datetime" placeholder="选择日期"></el-date-picker>
-                    </el-form-item>   
-                <el-row v-show="isShow">
-                        <el-form-item label="电销分公司:">  
-                                <el-select v-model="form.orgId" placeholder="电销分公司" style="width: 100%;" clearable filterable>
-                                    <el-option
-                                        v-for="item in orgTeleArr"
-                                        :key="item.id"
-                                        :label="item.name"
-                                        :value="item.id">
-                                    </el-option>
-                                </el-select>
-                            </el-form-item>
-                    <el-form-item label="电销事业部:">  
-                        <el-select v-model="form.orgId" placeholder="电销事业部" style="width: 100%;" clearable filterable>
-                            <el-option
-                                v-for="item in orgTeleArr"
-                                :key="item.id"
-                                :label="item.name"
-                                :value="item.id">
-                            </el-option>
-                        </el-select>
+                        <el-date-picker format="yyyy-MM-dd HH:mm" v-model="form.endTime" type="datetime"
+                            placeholder="选择日期"></el-date-picker>
                     </el-form-item>
-                    <el-form-item label="电销组:">  
-                        <el-select v-model="form.orgId" placeholder="电销组" style="width: 100%;" clearable filterable>
-                            <el-option
-                                v-for="item in orgTeleArr"
-                                :key="item.id"
-                                :label="item.name"
-                                :value="item.id">
-                            </el-option>
-                        </el-select>
-                    </el-form-item>
-                </el-row>
-               
-                <div class="mainSearchBtnBox">
-                    <el-button icon="el-icon-search" type="primary" @click="searchTable" class="searchBtn">搜索</el-button>
-                    <span style="color: #5c6be8;cursor: pointer;margin:0 10px;" @click="toogleClick"><span v-if="isShow">收起</span><span v-else>展开更多</span><i :class="{'greycolor paddingL6 el-icon-arrow-up':isShow,'greycolor paddingL6 el-icon-arrow-down':!isShow}"></i></span>
-                </div>  
-            </el-form>
+                    <el-row v-show="isShow">
+                        <el-form-item label="电销分公司:">
+                            <el-select v-model="teleCompanyId" placeholder="电销分公司" @change="showTele(7)"
+                                style="width: 100%;" clearable filterable>
+                                <el-option v-for="item in dxBusinessList" :key="item.id" :label="item.name"
+                                    :value="item.id">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+                        <el-form-item label="电销事业部:">
+                            <el-select v-model="teleDeptId" placeholder="电销事业部" @change="showTele(1)"
+                                style="width: 100%;" clearable filterable>
+                                <el-option v-for="item in dxCauseBList" :key="item.id" :label="item.name"
+                                    :value="item.id">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+                        <el-form-item label="电销组:">
+                            <el-select v-model="teleGorupId" placeholder="电销组" style="width: 100%;" clearable
+                                filterable>
+                                <el-option v-for="item in dxList" :key="item.id" :label="item.name" :value="item.id">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+                    </el-row>
+
+                    <div class="mainSearchBtnBox">
+                        <el-button icon="el-icon-search" type="primary" @click="searchTable" class="searchBtn">搜索
+                        </el-button>
+                        <span style="color: #5c6be8;cursor: pointer;margin:0 10px;" @click="toogleClick"><span
+                                v-if="isShow">收起</span><span v-else>展开更多</span><i
+                                :class="{'greycolor paddingL6 el-icon-arrow-up':isShow,'greycolor paddingL6 el-icon-arrow-down':!isShow}"></i></span>
+                    </div>
+                </el-form>
+            </div>
+            <el-row>
+                <el-table ref="tableData" tooltip-effect="dark" style="width: 100%" border :data="tableData"
+                    v-loading="loading" :span-method="arraySpanMethod">
+                    <el-table-column type="index" label="序号" align="center" width="55" :index="indexFun">
+                    </el-table-column>
+                    <el-table-column prop="orgName" align="center" label="电销组">
+                    </el-table-column>
+                    <el-table-column prop="zylb" align="center" label="资源类别">
+                        <!-- <template slot-scope="scope" >
+                            <el-button v-if = 'scope.row.total != ""' type="text" size="small">{{scope.row.total}}</el-button>
+                        </template> -->
+                    </el-table-column>
+                    <el-table-column prop="mj" align="center" label="媒介">
+                    </el-table-column>
+                    <el-table-column prop="zyxm" align="center" label="资源项目">
+                    </el-table-column>
+                    <el-table-column prop="callClueCount" align="center" label="下发资源量">
+                    </el-table-column>
+                    <el-table-column prop="calledClueCount" align="center" label="跟访资源量">
+                    </el-table-column>
+                    <el-table-column prop="clueCallecdPrecent" align="center" label="首次接通资源量"
+                        :formatter="percentFormat">
+                    </el-table-column>
+                    <el-table-column prop="validCallTime" align="center" :formatter="timeFormat" label="接通资源量">
+                    </el-table-column>
+                    <el-table-column prop="userAvgDayValidCallTime" align="center" label="未接通资源量">
+                    </el-table-column>
+                    <el-table-column prop="userAvgDayValidCallTime" align="center" label="接通有效资源量">
+                    </el-table-column>
+                    <el-table-column prop="userAvgDayValidCallTime" align="center" label="接通无效资源量">
+                    </el-table-column>
+                    <el-table-column prop="userAvgDayValidCallTime" align="center" label="未接通有效资源量">
+                    </el-table-column>
+                    <el-table-column prop="userAvgDayValidCallTime" align="center" label="跟访率">
+                    </el-table-column>
+                    <el-table-column prop="userAvgDayValidCallTime" align="center" label="首次接通率">
+                    </el-table-column>
+                    <el-table-column prop="userAvgDayValidCallTime" align="center" label="资源接通率">
+                    </el-table-column>
+                    <el-table-column prop="userAvgDayValidCallTime" align="center" label="资源有效率">
+                    </el-table-column>
+                    <el-table-column prop="userAvgDayValidCallTime" align="center" label="首日跟访资源量">
+                    </el-table-column>
+                    <el-table-column prop="userAvgDayValidCallTime" align="center" label="首日接通资源量">
+                    </el-table-column>
+                    <el-table-column prop="userAvgDayValidCallTime" align="center" label="首日未接通资源量">
+                    </el-table-column>
+                    <el-table-column prop="userAvgDayValidCallTime" align="center" label="首日接通有效资源量">
+                    </el-table-column>
+                    <el-table-column prop="userAvgDayValidCallTime" align="center" label="首日接通无效资源量">
+                    </el-table-column>
+                    <el-table-column prop="userAvgDayValidCallTime" align="center" label="首日未接通有效资源量">
+                    </el-table-column>
+                    <el-table-column prop="userAvgDayValidCallTime" align="center" label="首日未接通无效资源量">
+                    </el-table-column>
+                    <el-table-column prop="userAvgDayValidCallTime" align="center" label="首日跟访率">
+                    </el-table-column>
+                    <el-table-column prop="userAvgDayValidCallTime" align="center" label="首日资源接通率">
+                    </el-table-column>
+                    <el-table-column prop="userAvgDayValidCallTime" align="center" label="首日资源有效率">
+                    </el-table-column>
+                    <el-table-column prop="userAvgDayValidCallTime" align="center" label="首日接通有效率">
+                    </el-table-column>
+                </el-table>
+                <table-pagination :pager="pager" @change="searchTable()"></table-pagination>
+            </el-row>
         </div>
-        <el-row>
-            <el-table 
-                ref="tableData"
-                tooltip-effect="dark"
-                style="width: 100%"
-                border
-                :data="tableData"
-                v-loading="loading"
-                :span-method="arraySpanMethod">
-                <el-table-column type="index" label="序号" align="center" width="55" :index="indexFun"></el-table-column>
-                <el-table-column
-                    prop="orgName"
-                    align="center"
-                    label="电销组">
-                </el-table-column>
-                <el-table-column prop="callCount" align="center" label="资源类别">
-                        <template slot-scope="scope">
-                                <el-button type="text" size="small" >{{scope.row.orgName}}</el-button>
-                            </template>
-                </el-table-column>
-                <el-table-column prop="calledCount" align="center" label="媒介">
-                </el-table-column>
-                <el-table-column prop="callPercent" align="center" label="资源项目" :formatter="percentFormat">
-                </el-table-column>
-                <el-table-column prop="callClueCount" align="center" label="下发资源量">
-                </el-table-column>
-                <el-table-column prop="calledClueCount" align="center" label="跟访资源量">
-                </el-table-column>
-                <el-table-column prop="clueCallecdPrecent" align="center" label="首次接通资源量" :formatter="percentFormat">
-                </el-table-column>
-                <el-table-column prop="validCallTime" align="center" :formatter="timeFormat" label="接通资源量">
-                </el-table-column>
-                <el-table-column prop="userAvgDayValidCallTime" align="center" label="未接通资源量">
-                </el-table-column>
-                <el-table-column prop="userAvgDayValidCallTime" align="center"  label="接通有效资源量">
-                </el-table-column>
-                <el-table-column prop="userAvgDayValidCallTime" align="center"  label="接通无效资源量">
-                </el-table-column>
-                <el-table-column prop="userAvgDayValidCallTime" align="center"  label="未接通有效资源量">
-                </el-table-column>
-                <el-table-column prop="userAvgDayValidCallTime" align="center"  label="跟访率">
-                </el-table-column>
-                <el-table-column prop="userAvgDayValidCallTime" align="center"  label="首次接通率">
-                </el-table-column>
-                <el-table-column prop="userAvgDayValidCallTime" align="center"  label="资源接通率">
-                </el-table-column>
-                <el-table-column prop="userAvgDayValidCallTime" align="center"  label="资源有效率">
-                </el-table-column>
-                <el-table-column prop="userAvgDayValidCallTime" align="center"  label="首日跟访资源量">
-                </el-table-column>
-                <el-table-column prop="userAvgDayValidCallTime" align="center"  label="首日接通资源量">
-                </el-table-column>
-                <el-table-column prop="userAvgDayValidCallTime" align="center"  label="首日未接通资源量">
-                </el-table-column>
-                <el-table-column prop="userAvgDayValidCallTime" align="center"  label="首日接通有效资源量">
-                </el-table-column>
-                <el-table-column prop="userAvgDayValidCallTime" align="center"  label="首日接通无效资源量">
-                </el-table-column>
-                <el-table-column prop="userAvgDayValidCallTime" align="center"  label="首日未接通有效资源量">
-                </el-table-column>
-                <el-table-column prop="userAvgDayValidCallTime" align="center"  label="首日未接通无效资源量">
-                </el-table-column>
-                <el-table-column prop="userAvgDayValidCallTime" align="center"  label="首日跟访率">
-                </el-table-column>
-                <el-table-column prop="userAvgDayValidCallTime" align="center"  label="首日资源接通率">
-                </el-table-column>
-                <el-table-column prop="userAvgDayValidCallTime" align="center"  label="首日资源有效率">
-                </el-table-column>
-                <el-table-column prop="userAvgDayValidCallTime" align="center"  label="首日接通有效率">
-                </el-table-column>
-            </el-table>
-            <table-pagination :pager="pager" @change="searchTable()"></table-pagination>
-        </el-row>
     </div>
-</div>
-<!-- import common js-->
-<div th:include="_footer_include :: #jsLib"></div>
+    <!-- import common js-->
+    <div th:include="_footer_include :: #jsLib"></div>
 </body>
 <script th:inline="javascript">
-    var queryOrg=[[${queryOrg}]]; // 电销组
-    console.log(queryOrg,'电销组');
+       var queryOrg = [[${queryOrg}]]; // 电销组
+        var proSelect = [[${proSelect}]]; //项目组
+
+    function List() {
+        this.dataStore = [];
+        this.append = function (data) {
+            //根据当前数组的长度插入新的数据
+            this.dataStore[this.length()] = data;
+        }
+
+        this.length = function () {
+            //获得数组的长度
+            var length = this.dataStore.length;
+            return length;
+        }
+
+        //如果找到当前的数据，就返回当前数据的下标，如果没有找到数据就返回-1
+        this.find = function (data) {
+            //1,获得数组的长度
+            var length = this.length();
+            //2,设置返回数据的下标
+            var index = -1;
+            //3,遍历数据
+            for (var i = 0; i < length; i++) {
+                if (data == this.dataStore[i]) {
+                    index = i;
+                    return index;
+                }
+            }
+            return index;
+        }
+
+        this.forEach = function (call) {
+            //1,获得数组的长度
+            var length = this.length();
+            //2,遍历数据
+            for (var i = 0; i < length; i++) {
+                call(this.dataStore[i]);
+            }
+        }
+
+        //在before前面插入数据,如果before有数据，就插入在before前面，如果before没有数据，就把data插入到最前面的数据
+        this.insertBefore = function (data, before) {
+            //1，找到当前before数据的下标
+            var index = this.find(before);
+            var length = this.length();
+            if (index == -1) {
+                for (var i = length - 1; i >= 0; i--) {
+                    this.dataStore[i + 1] = this.dataStore[i]
+                }
+                this.dataStore[0] = data;
+            } else {
+                for (var i = length - 1; i >= index; i--) {
+                    this.dataStore[i + 1] = this.dataStore[i]
+                }
+                this.dataStore[index] = data;
+            }
+        }
+    }
     var mainDivVM = new Vue({
         el: '#maindiv',
-        data: function() {
+        data: function () {
             return {
-                isShow:false,
+                teleCompanyId: '', //电销分公司id
+                teleDeptId: '', //电销事业部id
+                teleGorupId: '', //电销组id
+                dxBusinessList: '', //电销分公司list
+                dxCauseBList: '', //电销事业部List
+                dxList: '', //电销组List
+                resourceClassList: [{
+                        id: 1,
+                        value: 1,
+                        name: '全部'
+                    },
+                    {
+                        id: 2,
+                        value: 2,
+                        name: '联展'
+                    },
+                    {
+                        id: 3,
+                        value: 3,
+                        name: '优化'
+                    },
+                    {
+                        id: 4,
+                        value: 4,
+                        name: '信息流'
+                    },
+                ],
+                mediumList: [{
+                        id: 1,
+                        value: 1,
+                        name: '全部'
+                    },
+                    {
+                        id: 2,
+                        value: 2,
+                        name: '百度'
+                    },
+                    {
+                        id: 3,
+                        value: 3,
+                        name: '搜狐'
+                    },
+                    {
+                        id: 4,
+                        value: 4,
+                        name: '360'
+                    },
+                    {
+                        id: 5,
+                        value: 5,
+                        name: '搜狗'
+                    },
+                ],
+                resourceItemList: [{
+                        id: 1,
+                        value: 1,
+                        name: '全部'
+                    },
+                    {
+                        id: 2,
+                        value: 2,
+                        name: '项目1'
+                    },
+                    {
+                        id: 3,
+                        value: 3,
+                        name: '项目2'
+                    },
+                    {
+                        id: 4,
+                        value: 4,
+                        name: '项目3'
+                    },
+                    {
+                        id: 5,
+                        value: 5,
+                        name: '项目4'
+                    },
+                ],
+                isShow: false,
                 loading: false,
                 form: {
-                    startTime:'',
-                    endTime:'',
-                    orgId:'',
+                    startTime: '',
+                    endTime: '',
+                    resourceId: '', //资源类别
+                    mediumId: '', //媒介
+                    resourceItemId: '全部', //资源项目
                 },
                 export: {
-                    startTime:'',
-                    endTime:'',
-                    orgId:''
+                    startTime: '',
+                    endTime: '',
+                    orgId: ''
                 },
                 tableData: [
-                    // {
-                    //     orgId: "1",
-                    //     orgName: '电销组1',
-                    //     callCount: 1000,
-                    //     calledCount: 10,
-                    //     callPercent: 10,
-                    //     callClueCount: 10,
-                    //     calledClueCount: 10,
-                    //     clueCallecdPrecent: 10,
-                    //     validCallTime: 155799,
-                    //     userAvgDayValidCallTime: 155799
-                    // }, {
-                    //     orgId: "2",
-                    //     orgName: '电销组2',
-                    //     callCount: 1000,
-                    //     calledCount: 10,
-                    //     callPercent: 10,
-                    //     callClueCount: 10,
-                    //     calledClueCount: 10,
-                    //     clueCallecdPrecent: 10,
-                    //     validCallTime: 155799,
-                    //     userAvgDayValidCallTime: 155799
-                    // }
+                    
                 ],
                 orgTeleArr: queryOrg, // 电销组
-                pager:{ 
+                pager: {
                     total: 0,
                     currentPage: 1,
                     pageSize: 2
                 },
-            }             
+            }
         },
         methods: {
-            toogleClick(){
-                this.isShow = !this.isShow       
-                },            
-            searchTable() { 
+            //获取媒介
+            getMediumOptions() {
+                var _this = this
+                axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode', {
+                    groupCode: 'medium'
+                }).then(function (response) {
+                    if (response.data.code == '0') {
+                        _this.mediumList = response.data.data
+                        _this.mediumList.unshift({
+                            dicId: '',
+                            groupCode: "medium",
+                            id: '',
+                            sortNo: 0,
+                            value: 0,
+                            name: '全部'
+                        })
+                        console.log('媒介', _this.mediumList)
+                    }
+                });
+            },
+            //电销联动
+            showTele(type) {
+                var param = {};
+                if (type == 1) {
+                    param.orgType = "1";
+                    param.parentId = mainDivVM.teleDeptId;
+                } else if (type == 7) {
+                    param.orgType = "7";
+                    param.parentId = mainDivVM.teleCompanyId;
+                } else if (type == 0) {
+                    param.orgType = "8";
+                }
+                axios.post('/organization/organization/queryOrgByType', param).then(function (response) {
+                        console.log(response);
+                        if (type == 1) {
+                            mainDivVM.dxList = response.data.data;
+                        } else if (type == 7) {
+                            mainDivVM.dxCauseBList = response.data.data;
+                        } else {
+                            mainDivVM.dxBusinessList = response.data.data;
+                        }
+                    }).catch(function (error) {
+                        console.log(error);
+                    })
+                    .then(function () {
+                        // always executed
+                    });
+            },
+            toogleClick() {
+                this.isShow = !this.isShow
+            },
+            searchTable() {
                 var startTime = this.form.startTime;
                 var endTime = this.form.endTime;
-                if(endTime){
-                    if( this.minuteFormat(startTime)>this.minuteFormat(endTime)){
+                if (endTime) {
+                    if (this.minuteFormat(startTime) > this.minuteFormat(endTime)) {
                         this.$message({
                             message: '开始时间不能大于结束时间',
                             type: 'warning'
@@ -244,8 +394,21 @@
                         return;
                     }
                 }
+                var date = new Date();
+                var currentDate = moment(date).format("YYYY-MM-DD 23:59");
+                date.setMonth(date.getMonth() - 5);
+                var beforeSixMonth = moment(date).format("YYYY-MM-DD 00:00");
+                var currentDateRes = new Date(currentDate);
+                var beforeSixMonthRes = new Date(beforeSixMonth);
+                if (startTime < beforeSixMonthRes || endTime > currentDateRes) {
+                    this.$message({
+                        message: '请选择近6个月内的时间',
+                        type: 'warning'
+                    });
+                    return;
+                }
 
-                
+
                 var param = {};
                 param.startTime = this.minuteFormat(startTime);
                 param.endTime = this.minuteFormat(endTime);
@@ -253,50 +416,53 @@
                 param.pageNum = this.pager.currentPage;
                 param.orgId = this.form.orgId; // 电销组
                 console.log(param);
-                this.loading = true; 
-                axios.post('/callrecord/teleSaleTalkTime/listTeleGroupTalkTime',param).then(function (response) { 
-                    console.log(response,'response');
-                    if(!response){
-                        mainDivVM.$message({
-                            message: "接口调用失败",
-                            type: 'error'
-                        });
-                        return ;
-                    }
-                    var resobj= response.data;
-                    console.log(resobj)
-                    if(!resobj){
-                        mainDivVM.$message({
-                            message: "接口调用失败",
-                            type: 'error'
-                        });
-                        return ;
-                    }
-                    if(resobj.code!='0'){
-                        mainDivVM.loading = false;
-                        mainDivVM.$message({
-                            message: resobj.msg,
-                            type: 'error'
-                        });
-                        return ;
-                    }else if(resobj.data && resobj.data.data){
-                        var resobjData = resobj.data.data;          
-                        // 表格数据渲染
-                        mainDivVM.tableData = resobjData;
-                        // 插入合计一行
-                        mainDivVM.summaryFun();
-                        mainDivVM.pager.currentPage = resobj.data.currentPage;
-                        mainDivVM.pager.total = resobj.data.total;
-                        mainDivVM.loading = false;
-                        
-                        mainDivVM.export.startTime = mainDivVM.minuteFormat(startTime);
-                        mainDivVM.export.endTime = mainDivVM.minuteFormat(endTime);
-                        mainDivVM.export.orgId = mainDivVM.form.orgId;
-                    }else{
-                        mainDivVM.loading = false;
-                    }  
+                this.loading = true;
+                axios.post('/callrecord/teleSaleTalkTime/listTeleGroupTalkTime', param).then(function (
+                    response) {
+                    // console.log(response, 'response');
+                    // if (!response) {
+                    //     mainDivVM.$message({
+                    //         message: "接口调用失败",
+                    //         type: 'error'
+                    //     });
+                    //     return;
+                    // }
+                    var resobj = response.data;
+                    // console.log(resobj)
+                    // if (!resobj) {
+                    //     mainDivVM.$message({
+                    //         message: "接口调用失败",
+                    //         type: 'error'
+                    //     });
+                    //     return;
+                    // }
+                    // if (resobj.code != '0') {
+                    //     mainDivVM.loading = false;
+                    //     mainDivVM.$message({
+                    //         message: resobj.msg,
+                    //         type: 'error'
+                    //     });
+                    //     return;
+                    // } else if (resobj.data && resobj.data.data) {
+
+                    var resobjData = resobj.data.data;
+                    // 表格数据渲染
+                    // mainDivVM.tableData = resobjData;
+                    // 插入合计一行
+                    mainDivVM.summaryFun();
+                    mainDivVM.pager.currentPage = resobj.data.currentPage;
+                    mainDivVM.pager.total = resobj.data.total;
+                    mainDivVM.loading = false;
+
+                    mainDivVM.export.startTime = mainDivVM.minuteFormat(startTime);
+                    mainDivVM.export.endTime = mainDivVM.minuteFormat(endTime);
+                    mainDivVM.export.orgId = mainDivVM.form.orgId;
+                    // } 
+                    // else {
+                    //     mainDivVM.loading = false;
+                    // }
                 }).catch(function (error) {
-                    console.log(error);
+                    console.log('error', error);
                     mainDivVM.$message({
                         message: "请求失败，请稍后重试",
                         type: "error"
@@ -304,138 +470,324 @@
                     mainDivVM.loading = false;
                 });
             },
-            arraySpanMethod({ row, column, rowIndex, columnIndex }) { // 合并第一行
-                if (rowIndex === 0) {
+            arraySpanMethod({
+                row,
+                column,
+                rowIndex,
+                columnIndex
+            }) { // 合并第一行
+            if(row.total && row.total == '合计'){
                     if (columnIndex === 2) {
                         return {
-                            rowspan:1,
-                            colspan:3
-                            
+                            rowspan: 1,
+                            colspan: 3
                         }
                     }
-                    // else if (columnIndex === 3) {
-                    //     return [1, 2];
-                    // }
-                    
-                }
+            }
+               
             },
-            gotoTeam (row) { // 页面跳转
+            gotoTeam(row) { // 页面跳转
                 var orgId = row.orgId;
-                if(orgId === "合计"){
-                    window.location.href="/statistics/teleStatement/telemarketingCallTableSum";
-                }else{
-                    window.location.href="/statistics/teleStatement/telemarketingCallTableTeam?orgId=" + orgId; 
+                if (orgId === "合计") {
+                    window.location.href = "/statistics/teleStatement/telemarketingCallTableSum";
+                } else {
+                    window.location.href = "/statistics/teleStatement/telemarketingCallTableTeam?orgId=" +
+                        orgId;
                 }
             },
-            indexFun (index) { // 表格序号
+            indexFun(index) { // 表格序号
                 return index;
             },
-            minuteFormat (m) {
-                if (!m) {return "";}
+            minuteFormat(m) {
+                if (!m) {
+                    return "";
+                }
                 var timeStr = new Date(m);
                 var yearRes = timeStr.getFullYear()
-                var monthRea = timeStr.getMonth()+1;
-                monthRea = monthRea < 10 ?  "0" + monthRea : monthRea;
+                var monthRea = timeStr.getMonth() + 1;
+                monthRea = monthRea < 10 ? "0" + monthRea : monthRea;
                 var dateRes = timeStr.getDate();
-                dateRes = dateRes < 10 ?  "0" + dateRes : dateRes;  
+                dateRes = dateRes < 10 ? "0" + dateRes : dateRes;
                 var hoursRes = timeStr.getHours();
-                hoursRes = hoursRes < 10 ?  "0" + hoursRes : hoursRes;  
+                hoursRes = hoursRes < 10 ? "0" + hoursRes : hoursRes;
                 var minRes = timeStr.getMinutes();
-                minRes = minRes < 10 ?  "0" + minRes : minRes;                
+                minRes = minRes < 10 ? "0" + minRes : minRes;
                 var timeRes = "" + yearRes + monthRea + dateRes + hoursRes + minRes;
                 return timeRes;
             },
-            summaryFun () {
-                var total = {
-                    orgId: 123,
-                    orgName: '合计',
-                    callCount: 1000,
-                    calledCount: 10,
-                    callPercent: 10,
-                    callClueCount: 10,
-                    calledClueCount: 10,
-                    clueCallecdPrecent: 10,
-                    validCallTime: 155799,
-                    // userAvgDayValidCallTime: 155799
-                };
-                this.tableData.unshift(total);
+            summaryFun() {
+                var tableData = [{
+                        id: '1-1',
+                        orgName: '秦-1-1-1',
+                        total: '合计',
+                        zylb: '合计',
+                        mj: '',
+                        zyxm: '',
+                        callClueCount: 10,
+                        calledClueCount: 10,
+                        clueCallecdPrecent: 10,
+                        validCallTime: 155799,
+                    },
+                    {
+                        id: '1-2',
+                        orgName: '秦-1-1-1',
+                        total: '合计',
+                        zylb: '合计',
+                        mj: '',
+                        zyxm: '',
+                        callClueCount: 10,
+                        calledClueCount: 10,
+                        clueCallecdPrecent: 10,
+                        validCallTime: 155799,
+                    },
+                    {
+                        id: '1-3',
+                        orgName: '秦-1-1-1',
+                        total: '合计',
+                        zylb: '合计',
+                        mj: '',
+                        zyxm: '',
+                        callClueCount: 10,
+                        calledClueCount: 10,
+                        clueCallecdPrecent: 10,
+                        validCallTime: 155799,
+                    },
+                    {
+                        id: '1-4',
+                        orgName: '秦-1-1-1',
+                        total: '合计',
+                        zylb: '合计',
+                        mj: '',
+                        zyxm: '',
+                        callClueCount: 10,
+                        calledClueCount: 10,
+                        clueCallecdPrecent: 10,
+                        validCallTime: 155799,
+                    }
+                ];
+                var totalArr = [{
+                        id: '1-1',
+                        orgName: '',
+                        total: '',
+                        zylb: '竞价',
+                        mj: '百度',
+                        zyxm: '项目1',
+                        calledCount: 10,
+                        callPercent: 10,
+                        callClueCount: 10,
+                        calledClueCount: 10,
+                        clueCallecdPrecent: 10,
+                        validCallTime: 155799,
+                    },
+                    {
+                        id: '1-2',
+                        orgName: '',
+                        total: '',
+                        zylb: '竞价',
+                        mj: '百度',
+                        zyxm: '项目1',
+                        calledCount: 10,
+                        callPercent: 10,
+                        callClueCount: 10,
+                        calledClueCount: 10,
+                        clueCallecdPrecent: 10,
+                        validCallTime: 155799,
+                    }, {
+                        id: '1-2',
+                        orgName: '',
+                        total: '',
+                        zylb: '竞价',
+                        mj: '百度',
+                        zyxm: '项目1',
+                        calledCount: 10,
+                        callPercent: 10,
+                        callClueCount: 10,
+                        calledClueCount: 10,
+                        clueCallecdPrecent: 10,
+                        validCallTime: 155799,
+                    },
+                    {
+                        id: '1-2',
+                        orgName: '',
+                        total: '',
+                        zylb: '竞价',
+                        mj: '百度',
+                        zyxm: '项目1',
+                        calledCount: 10,
+                        callPercent: 10,
+                        callClueCount: 10,
+                        calledClueCount: 10,
+                        clueCallecdPrecent: 10,
+                        validCallTime: 155799,
+                    },
+                    {
+                        id: '1-3',
+                        orgName: '',
+                        total: '',
+                        zylb: '竞价',
+                        mj: '百度',
+                        zyxm: '项目1',
+                        calledCount: 10,
+                        callPercent: 10,
+                        callClueCount: 10,
+                        calledClueCount: 10,
+                        clueCallecdPrecent: 10,
+                        validCallTime: 155799,
+                    },
+                    {
+                        id: '1-3',
+                        orgName: '',
+                        total: '',
+                        zylb: '竞价',
+                        mj: '百度',
+                        zyxm: '项目1',
+                        calledCount: 10,
+                        callPercent: 10,
+                        callClueCount: 10,
+                        calledClueCount: 10,
+                        clueCallecdPrecent: 10,
+                        validCallTime: 155799,
+                    },
+                    {
+                        id: '1-3',
+                        orgName: '',
+                        total: '',
+                        zylb: '竞价',
+                        mj: '百度',
+                        zyxm: '项目1',
+                        calledCount: 10,
+                        callPercent: 10,
+                        callClueCount: 10,
+                        calledClueCount: 10,
+                        clueCallecdPrecent: 10,
+                        validCallTime: 155799,
+                    },
+                    {
+                        id: '1-4',
+                        orgName: '',
+                        total: '',
+                        zylb: '竞价',
+                        mj: '百度',
+                        zyxm: '项目1',
+                        calledCount: 10,
+                        callPercent: 10,
+                        callClueCount: 10,
+                        calledClueCount: 10,
+                        clueCallecdPrecent: 10,
+                        validCallTime: 155799,
+                    }
+                ];
+
+                var list = new List();
+                for (var i = 0; i < totalArr.length; i++) {
+                    list.append(totalArr[i]);
+                }
+                for (var i = 0; i < tableData.length; i++) {
+                    for (var j = 0; j < totalArr.length; j++) {
+                        if (tableData[i].id == totalArr[j].id) {
+                            list.insertBefore(tableData[i], totalArr[j])
+                        }
+                    }
+                }
+
+                var arr = []
+                list.forEach(function (data) {
+                    arr.push(data)
+                });
+                mainDivVM.tableData = this.repeatArr(arr)
+                
+
+
             },
-            percentFormat (row, column) {
+            //去重
+            repeatArr(arr) {
+                var x = new Set(arr);
+                return [...x];
+            },
+
+            percentFormat(row, column) {
                 var percent = row[column.property];
                 percent = parseInt(percent) * 100 + "%";
                 return percent;
             },
-            timeFormat (row, column) { // 时间格式化：时分秒
+            timeFormat(row, column) { // 时间格式化：时分秒
                 var time = row[column.property];
-                var timeResult = this.timeFun (time); 
+                var timeResult = this.timeFun(time);
                 return timeResult;
             },
-            timeFun(s){
-                var t="";
-                var hour = Math.floor(s/3600);
-                var min = Math.floor(s/60) % 60;
+            timeFun(s) {
+                var t = "";
+                var hour = Math.floor(s / 3600);
+                var min = Math.floor(s / 60) % 60;
                 var sec = s % 60;
-                if(hour<10){
-                    t+="0";
+                if (hour < 10) {
+                    t += "0";
                 }
-                t+=hour+"时"
-                if(min < 10){
+                t += hour + "时"
+                if (min < 10) {
                     t += "0";
                 }
                 t += min + "分";
-                if(sec < 10){
+                if (sec < 10) {
                     t += "0";
                 }
                 t += sec + "秒";
                 return t;
             },
-            searchYesterday(){ // 昨天
-               var today = new Date();
-               today.setTime(today.getTime()-24*60*60*1000);
-               var startTime = today.getFullYear()+"-" + (today.getMonth()+1) + "-" + today.getDate()+" 00:00";
-               var endTime =today.getFullYear()+"-" + (today.getMonth()+1) + "-" + today.getDate()+" 23:59";
-               this.form.startTime=startTime;
-               this.form.endTime=endTime;
-               this.searchTable();
+            searchYesterday() { // 昨天
+                var today = new Date();
+                today.setTime(today.getTime() - 24 * 60 * 60 * 1000);
+                var startTime = today.getFullYear() + "-" + (today.getMonth() + 1) + "-" + today.getDate() +
+                    " 00:00";
+                var endTime = today.getFullYear() + "-" + (today.getMonth() + 1) + "-" + today.getDate() +
+                    " 23:59";
+                this.form.startTime = startTime;
+                this.form.endTime = endTime;
+                this.searchTable();
             },
-            searchWeek(){ // 近七天
-                 var a = new Date();
-                 var year = a.getFullYear();
-                 var month = a.getMonth();
-                 var date = a.getDate();
-                 var b = new Date(year,month,date);
-                 var c = b.valueOf()-6*24*60*60*1000;
-                 var d = b.valueOf();
-                 var startTime= new Date(c);
-                 var endTime = new Date(d);
-                 this.form.startTime=startTime.getFullYear()+"-" + (startTime.getMonth()+1) + "-" + startTime.getDate()+" 00:00";
-                 this.form.endTime=endTime.getFullYear()+"-" + (endTime.getMonth()+1) + "-" + endTime.getDate()+" 23:59";
-                 this.searchTable();
-            },
-            searchMonth(){ // 本月 
+            searchWeek() { // 近七天
                 var a = new Date();
                 var year = a.getFullYear();
                 var month = a.getMonth();
                 var date = a.getDate();
-                var b = new Date(year,month,date);
-                var f= new Date(year,month,01);
-                var c = f.valueOf();
-                var startTime= new Date(c);
-                this.form.startTime=startTime.getFullYear()+"-" + (startTime.getMonth()+1) + "-" + startTime.getDate()+" 00:00";;
-                this.form.endTime=year+"-"+(month+1)+"-"+date+" 23:59";
+                var b = new Date(year, month, date);
+                var c = b.valueOf() - 6 * 24 * 60 * 60 * 1000;
+                var d = b.valueOf();
+                var startTime = new Date(c);
+                var endTime = new Date(d);
+                this.form.startTime = startTime.getFullYear() + "-" + (startTime.getMonth() + 1) + "-" +
+                    startTime.getDate() + " 00:00";
+                this.form.endTime = endTime.getFullYear() + "-" + (endTime.getMonth() + 1) + "-" + endTime
+                    .getDate() + " 23:59";
                 this.searchTable();
             },
-            exportRs(){
+            searchMonth() { // 本月 
+                var a = new Date();
+                var year = a.getFullYear();
+                var month = a.getMonth();
+                var date = a.getDate();
+                var b = new Date(year, month, date);
+                var f = new Date(year, month, 01);
+                var c = f.valueOf();
+                var startTime = new Date(c);
+                this.form.startTime = startTime.getFullYear() + "-" + (startTime.getMonth() + 1) + "-" +
+                    startTime.getDate() + " 00:00";;
+                this.form.endTime = year + "-" + (month + 1) + "-" + date + " 23:59";
+                this.searchTable();
+            },
+            exportRs() {
                 var param = {};
                 param.startTime = this.export.startTime;
-                param.endTime =  this.export.endTime;
-                param.orgId =  this.export.orgId; 
-                axios.post('/callrecord/teleSaleTalkTime/exportTeleGroupTalkTime',param,{responseType:'blob'})
+                param.endTime = this.export.endTime;
+                param.orgId = this.export.orgId;
+                axios.post('/callrecord/teleSaleTalkTime/exportTeleGroupTalkTime', param, {
+                        responseType: 'blob'
+                    })
                     .then(function (response) {
                         console.log(response);
-                        var data =  response.data;
+                        var data = response.data;
                         var fileName = response.headers.filename;
-                        saveAs(data,decodeURI(fileName));
+                        saveAs(data, decodeURI(fileName));
                     })
                     .catch(function (error) {
                         console.log(error);
@@ -446,20 +798,23 @@
                     });
             }
         },
-        created(){
+        created() {
+            this.getMediumOptions() //媒介
+            this.showTele(0) //电销筛选联动
             // 默认进入显示当天时间
             var today = new Date();
             today.setTime(today.getTime());
-            var startTime = today.getFullYear()+"-"+ (today.getMonth()+1) + "-" + today.getDate()+" 00:00";
-            var endTime =today.getFullYear()+"-"+ (today.getMonth()+1) + "-" + today.getDate()+" 23:59";
+            var startTime = today.getFullYear() + "-" + (today.getMonth() + 1) + "-" + today.getDate() +
+                " 00:00";
+            var endTime = today.getFullYear() + "-" + (today.getMonth() + 1) + "-" + today.getDate() + " 23:59";
             this.form.startTime = startTime;
-            this.form.endTime=endTime;            
+            this.form.endTime = endTime;
             this.searchTable();
         },
-        mounted(){
+        mounted() {
             document.getElementById('maindiv').style.display = 'block';
         }
     })
-    
 </script>
+
 </html>
