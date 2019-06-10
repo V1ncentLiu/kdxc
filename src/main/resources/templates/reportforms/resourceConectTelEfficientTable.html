@@ -91,6 +91,12 @@
                     </div>
                 </el-form>
             </div>
+            <el-row class="marginB20">
+                <el-tabs type="card" v-model="tableActive" @tab-click="handleClick" >
+                    <el-tab-pane label="资源有效" name="0"></el-tab-pane>
+                    <el-tab-pane label="首日资源有效" name="1"></el-tab-pane>
+                </el-tabs>
+            </el-row>
             <el-row>
                 <el-table ref="tableData" tooltip-effect="dark" style="width: 100%" border :data="tableData"
                     v-loading="loading" :span-method="arraySpanMethod">
@@ -102,7 +108,6 @@
                        <template slot-scope="scope" >
                             {{scope.row.total == ''?scope.row.zylb:scope.row.total}}
                         </template>
-                         
                     </el-table-column>
                     <el-table-column prop="mj" align="center" label="媒介">
                     </el-table-column>
@@ -110,20 +115,21 @@
                     </el-table-column>
                     <el-table-column prop="callClueCount" align="center" label="下发资源量">
                     </el-table-column>
-                    <el-table-column prop="calledClueCount" align="center" label="跟访资源量">
+                    <el-table-column prop="calledClueCount" align="center" :label="tableActive == 0 ?'跟访资源量':'首日跟访资源量'">
                     </el-table-column>
-                    <el-table-column prop="clueCallecdPrecent" align="center" label="首次接通资源量"
-                        :formatter="percentFormat">
+                    <el-table-column prop="clueCallecdPrecent" align="center" :label="tableActive == 0 ?'首次接通资源量':'首日接通资源量'">
                     </el-table-column>
-                    <el-table-column prop="validCallTime" align="center" :formatter="timeFormat" label="接通资源量">
+                    <!-- :formatter="percentFormat" -->
+                    <!-- :formatter="timeFormat"  -->
+                    <el-table-column prop="validCallTime" align="center"  label="接通资源量" v-if = 'tableActive == 0'>
                     </el-table-column>
-                    <el-table-column prop="userAvgDayValidCallTime" align="center" label="未接通资源量">
+                    <el-table-column prop="userAvgDayValidCallTime" align="center"  :label="tableActive == 0 ?'未接通资源量':'首日未接通资源量'" >
                     </el-table-column>
-                    <el-table-column prop="userAvgDayValidCallTime" align="center" label="接通有效资源量">
+                    <el-table-column prop="userAvgDayValidCallTime" align="center"  :label="tableActive == 0 ?'接通有效资源量':'首日接通有效资源量'">
                     </el-table-column>
-                    <el-table-column prop="userAvgDayValidCallTime" align="center" label="接通无效资源量">
+                    <el-table-column prop="userAvgDayValidCallTime" align="center"  :label="tableActive == 0 ?'接通无效资源量':'首日接通无效资源量'">
                     </el-table-column>
-                    <el-table-column prop="userAvgDayValidCallTime" align="center" label="未接通有效资源量">
+                    <el-table-column prop="userAvgDayValidCallTime" align="center"  :label="tableActive == 0 ?'未接通有效资源量':'首日未接通有效资源量'">
                     </el-table-column>
                     <el-table-column prop="userAvgDayValidCallTime" align="center" label="跟访率">
                     </el-table-column>
@@ -227,6 +233,7 @@
         el: '#maindiv',
         data: function () {
             return {
+                tableActive:0,
                 teleCompanyId: '', //电销分公司id
                 teleDeptId: '', //电销事业部id
                 teleGorupId: '', //电销组id
@@ -313,7 +320,7 @@
                     endTime: '',
                     resourceId: '', //资源类别
                     mediumId: '', //媒介
-                    resourceItemId: '全部', //资源项目
+                    resourceItemId: '', //资源项目
                 },
                 export: {
                     startTime: '',
@@ -340,15 +347,7 @@
                 }).then(function (response) {
                     if (response.data.code == '0') {
                         _this.mediumList = response.data.data
-                        _this.mediumList.unshift({
-                            dicId: '',
-                            groupCode: "medium",
-                            id: '',
-                            sortNo: 0,
-                            value: 0,
-                            name: '全部'
-                        })
-                        console.log('媒介', _this.mediumList)
+                       
                     }
                 });
             },
