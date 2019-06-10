@@ -602,7 +602,7 @@
                 </el-table>
             </el-row>
             <div class="padding20 f-tac">            
-                <el-button type="primary" @click="submitForm('form')">提交资料</el-button>
+                <el-button type="primary" :disabled="btnDisabled" @click="submitForm('form')">提交资料</el-button>
                
                 <el-button @click="rebackClue">取 消</el-button>
             </div> 
@@ -768,6 +768,7 @@ var loginUserId=[[${loginUserId}]];
         el: '#addCustomer',
         data: function() {
             return {
+                btnDisabled: false,    
                 clueId:clueId,
                 loginUserId:loginUserId,
                 wechatVisible: false,//新增微信号
@@ -1208,7 +1209,7 @@ var loginUserId=[[${loginUserId}]];
                             // 判断输入框里4个值是否重复(判断对象数组的value是否有重复值)
                             ary.push(domains[i].value);//把输入的手机号放入一个数组
                             var s = ary.join(",")+",";                            
-                            console.log(ary)
+                            // console.log(ary)
                             for(var j=0;j<ary.length;j++) {
                                 console.log(ary[j])
                                 if(ary[j]!=""){
@@ -1226,11 +1227,13 @@ var loginUserId=[[${loginUserId}]];
                         clueIntention.tradeProject=tradeProject;
                         var clue={};
               	        clue.clueId=clueId;
-                 	      clue.clueCustomer=clueCustomer;
-                 	      clue.clueIntention=clueIntention;
+                        clue.clueCustomer=clueCustomer;
+                        clue.clueIntention=clueIntention;
+                        addCustomerVM.btnDisabled = true;
                         axios.post('/tele/clueMyCustomerInfo/updateCustomerClue',clue)
                         .then(function (response) {
                      	  addCustomerVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
+                              addCustomerVM.btnDisabled = false;
                     		  window.location.href="/aggregation/businessMyCustomer/listPage"; 
     		        	}});
                       });
