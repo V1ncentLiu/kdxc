@@ -309,15 +309,17 @@ var clientVm = new Vue({
                   	    if(isEnabled){
                   	    	clientVm.form.userId='';
                   	    }
-                  	    
+                        clientVm.confirmBtnDisabled=false;//启用提交按钮
                      }else{
                   	     clientVm.$message({message:'查询七陌坐席失败',type:'error'});
                          console.error(resData);
+                         clientVm.confirmBtnDisabled=false;//启用提交按钮
                      }
                  
                  })
                  .catch(function (error) {
                       console.log(error);
+                      clientVm.confirmBtnDisabled=false;//启用提交按钮
                  }).then(function(){
               	   clientVm.confirmBtnDisabled=false;//启用提交按钮
                  });
