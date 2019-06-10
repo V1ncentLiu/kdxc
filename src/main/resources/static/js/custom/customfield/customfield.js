@@ -182,8 +182,8 @@ var fieldMenuVM = new Vue({
                       
                       })
                       .catch(function (error) {
-                    	
-                           console.log(error);
+                        fieldMenuVM.confirmBtnDisabled=false;//启用提交按钮
+                        console.log(error);
                       }).then(function(){
                     		//fieldMenuVM.$refs.confirmBtn.disabled=false;
                     		fieldMenuVM.confirmBtnDisabled=false;//启用提交按钮

@@ -1,8 +1,8 @@
    var orgVM =  new Vue({
         el: '#organizationManage',
         data: function() {
-            return {
-            	expandedKeys:expandedKeys,//树形结构  默认展开的
+            return {   
+                expandedKeys:expandedKeys,//树形结构  默认展开的
                 dataTree: orgData,//组织结构tree
                 dataTable:[],//
                 staffNumTable:[],//组织人员table
@@ -83,6 +83,7 @@
                 },
                 inputOrgName:'',//搜索框 组织名称
                 multipleSelection:[],//选择的列
+                btnDisabled: false, 
                 businessLineDisabledSelect:false,//是否禁用业务线下拉框
                 tgzxBusinessLine:''//临时业务线编码
             }             
@@ -323,12 +324,13 @@
                     	 this.form.businessLine = this.tgzxBusinessLine;
                      }
                  
-                     
+                    orgVM.btnDisabled = true;  
                     axios.post('/organization/organization/'+this.submitUrl, param)
                     .then(function (response) {
                     	var resData = response.data;
                     	if(resData.code=='0'){
                     	    orgVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
+                              orgVM.btnDisabled = false;  
                     	        orgVM.initOrgTree();
                          	    orgVM.getQuery();
                     	    }});
@@ -336,14 +338,17 @@
                     	    orgVM.dialogFormVisible = false;
                     	   
                     	}else{
-                    		orgVM.$message('操作失败');
+                        orgVM.$message('操作失败');
+                        orgVM.btnDisabled = false;  
                     	}
                     	
                     	
                     
                     })
-                    .catch(function (error) {
-                         console.log(error);
+                    .catch(function (error) 
+                    {
+                      orgVM.btnDisabled = false;  
+                      console.log(error);
                     });
                      
                   } else {

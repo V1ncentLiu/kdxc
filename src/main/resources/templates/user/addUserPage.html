@@ -126,7 +126,7 @@
                 </el-row>
                 <el-row>
                     <el-form-item class="f-tac">
-                        <el-button type="primary" @click="onSubmit('form')">提交</el-button>
+                        <el-button type="primary" :disabled="btnDisabled" @click="onSubmit('form')">提交</el-button>
                         <el-button @click="goBack()">取消</el-button>
                     </el-form-item>
                 </el-row>
@@ -196,7 +196,7 @@ var addUserVm= new Vue({
                 // checkedCities: ['联展竞价', '优化'],
                 // cities: cityOptions,
                 // isIndeterminate: false,
-
+                btnDisabled: false,  
                 tableRadio:'',
                 dialogFormChooseRole: false,
                 dialogFormChooseOrg: false,
@@ -339,7 +339,7 @@ var addUserVm= new Vue({
             	document.location.href='/user/userManager/initUserList';
             },
             onSubmit(formName) {
-       	             console.info(this.dataTableCheckbox);
+                //  console.info(this.dataTableCheckbox);
             	 this.$refs[formName].validate((valid) => {
           	       if (valid) {
        	             var formData = addUserVm.form;
@@ -364,23 +364,28 @@ var addUserVm= new Vue({
 		                 }
 	       	             param.userDataAuthList = list;
        	             }
-       	             console.info(param);
+       	            //  console.info(param);
        	             var roleList=new Array();
        	          	 roleList.push(formData.roleId);
-       	             param.roleList=roleList;
+                    param.roleList=roleList;
+                        
+                    addUserVm.btnDisabled = true;  
        	            axios.post("/user/userManager/saveUser", param)
        	            .then(function (response) {
        	            	console.info(response);
        	            	var data =response.data;
        	            	if(data.code!="0"){
-       	            		addUserVm.$message(data.msg);
+                            addUserVm.$message(data.msg);
+                            addUserVm.btnDisabled = false; 
        	            	}else{
-       	            		addUserVm.$message('新增成功');
+                            addUserVm.$message('新增成功');
+                            addUserVm.btnDisabled = false; 
        	                	document.location.href='/user/userManager/initUserList';
        	            	}
        	            })
        	            .catch(function (error) {
-       	                 console.log(error);
+                        addUserVm.btnDisabled = false;
+                        console.log(error);
        	            });
        	             
           	          } else {
