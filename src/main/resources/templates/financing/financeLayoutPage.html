@@ -120,7 +120,7 @@
         </el-form>
 
         <div slot="footer" style="text-align: center" class="dialog-footer">
-            <el-button type="primary" @click="submitForm('form')">提交</el-button>
+            <el-button type="primary" :disabled="btnDisabled" @click="submitForm('form')">提交</el-button>
             <el-button @click="dialogFormVisible= false">取消</el-button>
         </div>
     </el-dialog>
@@ -142,8 +142,9 @@
    var orgVM =  new Vue({
         el: '#organizationManage',
         data: {
+            btnDisabled: false,
         	showTitle:"",
-          businessLine:"",
+            businessLine:"",
         	dialogBatchVisible:false,
         	confirmBtnDisabled:false,
         	formLabelWidth: '130px',
@@ -202,7 +203,7 @@
 	                            param.businessLine = response.data.data.businessLine;
 	                            //根据业务线获取财务集合
 	                            axios.post('/user/userManager/getUserInfoListByParam', param).then(function (response) {
-	                                console.log(response.data.data);
+	                                // console.log(response.data.data);
 	                                if (null != response || response.data != null || response.data.code == '0') {
 	                                    orgVM.cwList = response.data.data;
 	                                }
@@ -222,7 +223,7 @@
                   param.busGroupId=this.busGroupId;
                  
                   axios.post('/financing/financelayout/getFinanceLayoutList',param).then(function (response) {
-                  	  console.log(response);
+                  	//   console.log(response);
                       if(null===response||response.data==null||response.data.code!='0'){
                     	  orgVM.$message({message: response.data.msg, type: 'warning'});
 	                  	  return ;
@@ -262,7 +263,7 @@
                   }
                   param.id = str;
                   axios.post('/financing/financelayout/findFinanceLayoutById',param).then(function (response) {
-                  	  console.log(response);
+                  	//   console.log(response);
                       if(null !==response && response.data !=null && response.data.code=='0'){
                     	  var financeLayout = response.data.data;
                           orgVM.form.busGroupId = financeLayout.busGroupId;
@@ -350,7 +351,7 @@
      		             var param={};
      		             param.ids=ids;
     	                 axios.post('/financing/financelayout/deleFinanceLayout',param).then(function (response) {
-    	                  	  console.log(response);
+    	                  	//   console.log(response);
     	                      if(null !==response && response.data !=null && response.data.code=='0'){
     	                    	  window.location.href="/financing/financelayout/financeLayoutPage"; 
     	                     }else{
@@ -410,7 +411,7 @@
               	} ,
              submitForm(formName) {
                     this.$refs[formName].validate((valid) => {
-                      debugger;
+                    //   debugger;
                         if (valid) {
                           var formData = this.form;
                           var param={};
@@ -456,17 +457,20 @@
                               param.id = str;
                         	  url = "/financing/financelayout/updateFinanceLayout"
                           }
-                         
+                          this.btnDisabled = true;
                        	  axios.post(url,param).then(function (response) {
-       	                  	  console.log(response);
+       	                  	//   console.log(response);
        	                      if(null !==response && response.data !=null && response.data.code=='0'){
+                                  orgVM.btnDisabled = false; 
        	                    	  window.location.href="/financing/financelayout/financeLayoutPage"; 
        	                     }else{
-       	                    	orgVM.$message({message: response.data.msg, type: 'warning'});
+                                   orgVM.$message({message: response.data.msg, type: 'warning'});
+                                   orgVM.btnDisabled = false; 
         	                  	  	return ;
        	                     } 
        	                  }).catch(function (error) {
                                  console.log(error);
+                                 orgVM.btnDisabled = false; 
                              })
                              .then(function () {
                                // always executed

@@ -1025,31 +1025,33 @@ if(notOptList){
                   .then(function (response) {
                 	  if(!response||!response.data){
                 		  addClueVM.$message({
-    	                        message: "接口调用失败",
-    	                        type: 'error'
-    	                      }); 
-    						  return ;
+                                message: "接口调用失败",
+                                type: 'error'
+                            }); 
+                            addClueVM.confirmBtnDisabled=false;
+                            return ;
                 	  }
                 	  if(response.data.code!='0'){
                 		  addClueVM.$message({
     	                        message:response.data.msg,
     	                        type: 'error',duration:2000,onClose:function(){
+                                    addClueVM.confirmBtnDisabled=false;
     	                   	  		window.location.href="/exetend/agendaTaskManager/waitDistributResource"; 
     	                   	  		return;
     		        	   	}
-    	                      }); 
+                          }); 
                 	  }else if(response.data.data>0){
                    	  	addClueVM.$message({message:'自动分发成功',type:'success',duration:2000,onClose:function(){
+                            addClueVM.confirmBtnDisabled=false;
                    	  		window.location.href="/exetend/agendaTaskManager/waitDistributResource"; 
     	        	   		}});
                 	  }else{
                    	  	addClueVM.$message({message:'自动分发失败',type:'error',duration:2000,onClose:function(){
+                            addClueVM.confirmBtnDisabled=false;
                    	  		window.location.href="/exetend/agendaTaskManager/waitDistributResource"; 
     	        	   		}});
                 	  }
-                 }).then(function(){
-             		
-               });
+                 });
             },
             rebackMV(){
           	    this.$confirm('编辑的资源未保存，是否离开?', '提示', {

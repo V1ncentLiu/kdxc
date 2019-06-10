@@ -357,23 +357,25 @@ var clueTemplateVM = new Vue({
                          }
                         axios.post(url, param)
                         .then(function (response) {
-                        	clueTemplateVM.submitDisabled=false;
                             var resData = response.data;
                             if(resData.code=='0'){
                             	clueTemplateVM.cancelForm(formName);
                             	clueTemplateVM.$message({message:'提交成功',type:'success',duration:1000,onClose:function(){
+                                    clueTemplateVM.submitDisabled=false;
                             		clueTemplateVM.searchTable();
                           	    }});
                             }else if(resData.code=='21916'){
                             	clueTemplateVM.isShowPrompt=true;
+                                clueTemplateVM.submitDisabled=false;
                             }else{
                             	clueTemplateVM.$message('提交失败');
+                                clueTemplateVM.submitDisabled=false;
                                 console.error(resData);
                             }
                         })
                         .catch(function (error) {
                         	clueTemplateVM.submitDisabled=false;
-                             console.log(error);
+                            console.log(error);
                         });
                          
                       } else {
