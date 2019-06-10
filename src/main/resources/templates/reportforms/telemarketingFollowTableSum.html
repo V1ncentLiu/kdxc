@@ -25,10 +25,10 @@
         <div class="mainSearchFormBox">
            <el-form :inline="true" :model="form" class="demo-form-inline mainSearchForm" ref="form">                 
                 <el-form-item label="起止时间:">
-                    <el-date-picker format="yyyy-MM-dd HH:mm" v-model="form.startTime" type="datetime" placeholder="选择日期"></el-date-picker>
+                    <el-date-picker format="yyyy-MM-dd HH:mm" v-model="form.startTime" type="datetime" placeholder="选择日期" :picker-options="pickerOptions0"></el-date-picker>
                 </el-form-item>
                 <el-form-item label="—" class="widthauto">
-                   <el-date-picker format="yyyy-MM-dd HH:mm" v-model="form.endTime" type="datetime" placeholder="选择日期"></el-date-picker>
+                   <el-date-picker format="yyyy-MM-dd HH:mm" v-model="form.endTime" type="datetime" placeholder="选择日期" :picker-options="pickerOptions0"></el-date-picker>
                 </el-form-item>
                 <el-form-item label="电销组:">  
                     <el-select v-model="form.orgId" placeholder="电销组" style="width: 100%;" clearable filterable @change="currentTelSale" :disabled="isDisabled">
@@ -134,6 +134,11 @@
                     total: 0,
                     currentPage: 1,
                     pageSize: 3,
+                },
+                pickerOptions0: {
+                  disabledDate(time) {
+                    return time.getTime() > Date.now() - 8.64e6;//如果没有后面的-8.64e6就是不可以选择今天的
+                  }
                 },
             }             
         },
