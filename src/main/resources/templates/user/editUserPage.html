@@ -108,7 +108,7 @@
                 </el-row>
                 <el-row style="margin-top: 10px;">
                     <el-form-item class="f-tac">
-                        <el-button type="primary" @click="onSubmit('form')">提交</el-button>
+                        <el-button type="primary" :disabled="btnDisabled" @click="onSubmit('form')">提交</el-button>
                         <el-button @click="goBack()">取消</el-button>
                     </el-form-item>
                 </el-row>
@@ -181,6 +181,7 @@ var updateUserVm= new Vue({
         el: '#userManage',
         data: function() {
             return {
+                btnDisabled: false,  
                 statusRadio:'0',
                 isShow:false,
                 tableRadio:roleId,
@@ -339,23 +340,27 @@ var updateUserVm= new Vue({
 		                 }
 	       	             param.userDataAuthList = list;
     	             }
-       	             console.info(param);
+       	            //  console.info(param);
        	             var roleList=new Array();
        	          	 roleList.push(formData.roleId);
-       	             param.roleList=roleList;
+                    param.roleList=roleList;
+                    addUserVm.btnDisabled = true;
        	            axios.post("/user/userManager/updateUser", param)
        	            .then(function (response) {
-       	            	console.info(response);
+       	            	// console.info(response);
        	            	var data =response.data;
        	            	if(data.code!="0"){
-       	            		updateUserVm.$message('修改失败');
+                            updateUserVm.$message('修改失败');
+                            addUserVm.btnDisabled = false;
        	            	}else{
-       	            		updateUserVm.$message('修改成功');
+                            updateUserVm.$message('修改成功');
+                            addUserVm.btnDisabled = false;
        	                	document.location.href='/user/userManager/initUserList';
        	            	}
        	            })
        	            .catch(function (error) {
-       	                 console.log(error);
+                        addUserVm.btnDisabled = false;
+                        console.log(error);
        	            });
        	             
           	          } else {
