@@ -899,7 +899,7 @@ public class MyCustomerClueController {
         if (null != user) {
             dto.setOrgId(user.getOrgId());
             dto.setUserId(user.getId());
-            if(dto.getBusinessLine() != null){
+            if(user.getBusinessLine() != null){
                 dto.setBusinessLine(user.getBusinessLine());
             }
         }
