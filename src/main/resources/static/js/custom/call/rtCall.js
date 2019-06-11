@@ -210,12 +210,12 @@ function getPhoneLocale(phone,callSource){
         		 } 
     		 }else{
     			 console.error(resData);
-    			 homePageVM.$message({message:resData.description,type:'error'});
+    			 homePageVM.$message({message:"查询手机归属地 "+resData.description,type:'error'});
     		 }
     		 
          }else{
         	 console.error("查询手机号归属地：%o",response);
-        	 homePageVM.$message({message:data.msg,type:'error'});
+        	 homePageVM.$message({message:"查询手机归属地  "+data.msg,type:'error'});
          }
      })
      .catch(function (error) {
