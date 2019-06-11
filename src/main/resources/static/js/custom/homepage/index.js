@@ -570,6 +570,7 @@ var homePageVM=new Vue({
         		$("#outboundCallTimeDiv").show();
         	}else{
         		$('#outboundCallTime').html("");
+        		$('#outboundPhoneLocaleArea').html("");
         		this.outboundInputPhone="";
         	}
         	this.outboundDialogMin = false;
