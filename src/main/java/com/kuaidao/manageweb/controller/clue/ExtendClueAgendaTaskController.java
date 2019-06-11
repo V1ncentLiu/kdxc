@@ -1052,16 +1052,16 @@ public class ExtendClueAgendaTaskController {
                         //去掉前后空格后是否为空
                         if (clueAgendaTaskDTO1.getProjectName() != null
                             && !"".equals(clueAgendaTaskDTO1.getProjectName())) {
-                            clueAgendaTaskDTO1
-                                .setProjectId(projectMap.get(clueAgendaTaskDTO1.getProjectName()));
-                            if (clueAgendaTaskDTO1.getProjectId() == null) {
-                                islegal = false;
-                                if (StringUtils.isBlank(reasonIsNotMatch)) {
-                                    reasonIsNotMatch.append("资源项目(项目名称)");
-                                } else {
-                                    reasonIsNotMatch.append("、资源项目(项目名称)");
-                                }
-                            }
+//                            clueAgendaTaskDTO1
+//                                .setProjectId(projectMap.get(clueAgendaTaskDTO1.getProjectName()));
+//                            if (clueAgendaTaskDTO1.getProjectId() == null) {
+//                                islegal = false;
+//                                if (StringUtils.isBlank(reasonIsNotMatch)) {
+//                                    reasonIsNotMatch.append("资源项目(项目名称)");
+//                                } else {
+//                                    reasonIsNotMatch.append("、资源项目(项目名称)");
+//                                }
+//                            }
                         }else {
                             islegal = false;
                             if (StringUtils.isBlank(reasonIsNull)) {
