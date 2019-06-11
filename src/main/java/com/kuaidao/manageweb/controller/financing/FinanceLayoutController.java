@@ -64,9 +64,9 @@ public class FinanceLayoutController {
     public String financeLayoutList(HttpServletRequest request) {
         UserInfoDTO userInfoDTO = getUser();
         OrganizationQueryDTO orgDto = new OrganizationQueryDTO();
-        if(userInfoDTO.getBusinessLine() !=null){
-            orgDto.setBusinessLine(userInfoDTO.getBusinessLine());
-        }
+//        if(userInfoDTO.getBusinessLine() !=null){
+//            orgDto.setBusinessLine(userInfoDTO.getBusinessLine());
+//        }
         orgDto.setOrgType(OrgTypeConstant.SWZ);
         orgDto.setSystemCode(SystemCodeConstant.HUI_JU);
         // 商务小组
