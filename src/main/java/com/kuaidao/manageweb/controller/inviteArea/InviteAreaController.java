@@ -113,9 +113,9 @@ public class InviteAreaController {
         OrganizationQueryDTO orgDto = new OrganizationQueryDTO();
         orgDto.setOrgType(OrgTypeConstant.SWZ);
         orgDto.setSystemCode(SystemCodeConstant.HUI_JU);
-        if(userInfoDTO.getBusinessLine() != null){
-            orgDto.setBusinessLine(userInfoDTO.getBusinessLine());
-        }
+//        if(userInfoDTO.getBusinessLine() != null){
+//            orgDto.setBusinessLine(userInfoDTO.getBusinessLine());
+//        }
         // 商务小组
         JSONResult<List<OrganizationRespDTO>> swList =
                 organizationFeignClient.queryOrgByParam(orgDto);
@@ -147,7 +147,7 @@ public class InviteAreaController {
     public JSONResult<List<OrganizationRespDTO>> getDxOrganizations(@RequestBody InviteAreaDTO inviteAreaDTO){
         Integer businessLine = inviteAreaDTO.getBusinessLine();
         OrganizationQueryDTO orgDto = new OrganizationQueryDTO();
-        orgDto.setOrgType(OrgTypeConstant.SWZ);
+        orgDto.setOrgType(OrgTypeConstant.DXZ);
         orgDto.setSystemCode(SystemCodeConstant.HUI_JU);
         orgDto.setBusinessLine(businessLine);
         // 电销小组
@@ -175,9 +175,9 @@ public class InviteAreaController {
 
         List<InviteAreaDTO> inviteAreaDTOs =
                 inviteareaFeignClient.getInviteAreaListByIds(inviteAreaDTO).getData();
-        if(inviteAreaDTOs.get(0).getBusinessLine() != null){
-            orgDto.setBusinessLine(inviteAreaDTOs.get(0).getBusinessLine());
-        }
+//        if(inviteAreaDTOs.get(0).getBusinessLine() != null){
+//            orgDto.setBusinessLine(inviteAreaDTOs.get(0).getBusinessLine());
+//        }
         // 商务小组
         JSONResult<List<OrganizationRespDTO>> swList =
             organizationFeignClient.queryOrgByParam(orgDto);
