@@ -216,7 +216,7 @@
             <div class="f-tar">最多100字</div>
         </el-form>
         <div slot="footer" class="dialog-footer">
-            <el-button type="primary" @click="submitDialogForm('dialogForm')">确 定</el-button>
+            <el-button type="primary" :disabled="btnDisabled" @click="submitDialogForm('dialogForm')">确 定</el-button>
             <el-button @click="dialogFormVisible = false" >取 消</el-button>
         </div>
     </el-dialog>
@@ -245,6 +245,7 @@
         el: '#customerVisitRecord',
         data: function() {
             return {
+                btnDisabled: false, 
                 isShow:false,
             	activeName: 'second',//tabs:到访记录
             	loading:true,
@@ -334,6 +335,7 @@
                         param.idList = idArr;
                         param.rebutReason = this.dialogForm.reason;
                         param.type = 2;//标记是未到访记录
+                        this.btnDisabled = true;  
                         axios.post('/visit/visitRecord/rejectVisitRecord', param)
                         .then(function (response) {
                             var resData = response.data;
@@ -341,16 +343,20 @@
                             	customerVisitRecordVm.dialogForm.reason='';
                                 customerVisitRecordVm.dialogFormVisible = false;
                                 customerVisitRecordVm.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
+                                    customerVisitRecordVm.btnDisabled = false;  
                                 	customerVisitRecordVm.initCustomerVisitRecord();
                                 }});
                             }else{
-                            	customerVisitRecordVm.$message({message:resData.msg,type:'error'});
+                            	customerVisitRecordVm.$message({message:resData.msg,type:'error'}
+                                );
+                                customerVisitRecordVm.btnDisabled = false;  
                                 console.error(resData);
                             }
                         
                         })
                         .catch(function (error) {
                              console.log(error);
+                             customerVisitRecordVm.btnDisabled = false;  
                         }).then(function(){
                         });
                     	
@@ -363,12 +369,12 @@
                // });
             },
             notSignedReasonClick(row) {//未签约原因
-                console.log(row);
+                // console.log(row);
                 this.notSignReason=row.notSignReason;
                 this.notSignedReasonDialog=true;
             },
             reasonClick(row) {//驳回原因
-                console.log(row);
+                // console.log(row);
                 this.rebutReason =row.rebutReason;
                 this.reasonDialog=true;
             },
@@ -543,8 +549,8 @@
                    this.dialogFormVisible=true;
             },
             reasonClick(row) {//驳回原因
-                console.log(row);
-               this.rebutReason = row.rebutReason;
+                // console.log(row);
+                this.rebutReason = row.rebutReason;
                 this.reasonDialog=true;
             },
             getSignShopTypeText(row, column, value, index){
