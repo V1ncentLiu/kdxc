@@ -222,6 +222,7 @@ var projectList=[[${projectList}]];//项目
 var fieldList=[[${fieldList}]];//自定义字段
 var userFieldList=[[${userFieldList}]];//用户自定义字段
 var vistitStoreTypeList=[[${vistitStoreTypeList}]];//签约店型
+var payModeItem =[[${payModeItem}]];
 var clueVM = new Vue({
         el: '#clueManage',
         data: {
@@ -443,20 +444,24 @@ var clueVM = new Vue({
                  return text;
                },
                //付款方式转换方法
-               transformPayMode(row, column, cellValue, index) {
-                 var text="";
-                 if(cellValue=="1"){
-                   text="现金"
-                 }else if(cellValue=="2"){
-                   text="POS"
-                 }else if(cellValue=="3"){
-                   text="转账"
-                 }else if(cellValue=="4"){
-									 text="微信"
-								 }else if(cellValue=="5"){
-									 text="支付宝"
+               transformPayMode(row, column, value, index) {
+								 var valText="";
+								 var vals = value.split(",");
+								 if(payModeItem){
+									 for(var j = 0 ; j < vals.length;j++  ){
+										 for(var i = 0; i < payModeItem.length ; i++){
+											 if(payModeItem[i].value == vals[j]){
+												 if(j==0){
+													 valText += payModeItem[i].name;
+												 }else{
+													 valText += ","+payModeItem[i].name;
+												 }
+
+											 }
+										 }
+									 }
 								 }
-                 return text;
+								 return valText;
                },
                //处理状态转换方法
                transformStatus(row, column, cellValue, index) {

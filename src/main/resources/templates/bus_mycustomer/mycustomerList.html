@@ -1044,13 +1044,13 @@
                             </el-form-item>
                         </el-col>
                         <el-col :span="12">
-                            <el-form-item label="付款方式：" :label-width="formLabelWidth" prop="payMode">
-                                <el-select v-model="formSigning.payMode" placeholder="请选择付款方式：" style="width:100%">
+                            <el-form-item label="付款方式：" :label-width="formLabelWidth" prop="payModes">
+                                <el-select v-model="formSigning.payModes" multiple placeholder="请选择付款方式：" style="width:100%">
                                     <el-option
                                             v-for="item in option3s"
                                             :key="item.value"
                                             :label="item.label"
-                                            :value="item.value">
+                                            :value="item.name">
                                     </el-option>
                                 </el-select>
                             </el-form-item>
@@ -1542,14 +1542,14 @@
                             </el-form-item>
                         </el-col>
                         <el-col :span="12">
-                            <el-form-item label="付款方式：" :label-width="formLabelWidth" prop="payMode">
-                                <el-select v-model="updateFormSigning.payMode" placeholder="请选择付款方式："
+                            <el-form-item label="付款方式：" :label-width="formLabelWidth" prop="payModes">
+                                <el-select v-model="updateFormSigning.payModes" multiple placeholder="请选择付款方式："
                                            style="width:100%;">
                                     <el-option
                                             v-for="item in option3s"
                                             :key="item.value"
                                             :label="item.label"
-                                            :value="item.value">
+                                            :value="item.name">
                                     </el-option>
                                 </el-select>
                             </el-form-item>
@@ -1693,7 +1693,7 @@
             }],
             visitTypeArr: [{value: 1, name: '预约来访'}, {value: 2, name: '慕名来访'}, {value: 3, name: '临时来访'}],
             option2s: [{value: 1, label: '一次性全款'}, {value: 2, label: '先付定金'}],
-            option3s: [{value: '1', label: '现金'}, {value: '2', label: 'POS'}, {value: '3', label: '转账'}, {value: '4', label: '微信'}, {value: '5', label: '支付宝'}],
+            option3s: [],
             payTypeArr: [{value: "1", label: '全款'}, {value: "2", label: '定金'}, {value: "3", label: '追加定金'}, {
                 value: "4",
                 label: '尾款'
@@ -1801,6 +1801,7 @@
                 visitNum: "",
 
                 payType: 1,
+                payModes: [],
                 payMode: '',
                 amountReceived: '',
                 amountBalance: '',
@@ -1836,6 +1837,7 @@
                 payDetailId: "",
                 payType: '1',
                 payName: '',
+                payModes: [],
                 payMode: '',
                 amountReceived: '',
                 amountBalance: '',
@@ -2029,6 +2031,15 @@
                 // ],
                 payMode: [
                     {required: true, message: '请选择付款方式', trigger: 'change'}
+                ],
+                payModes: [
+                    { required: true,validator:function(rule,value,callback){
+                            if(value.length==0){
+                                callback(new Error("请选择付款方式"));
+                            }else{
+                                callback();
+                            }
+                        }, trigger: 'change' }
                 ],
                 payName: [
                     {required: true, message: '请输入付款人姓名', trigger: 'blur'}
@@ -2871,6 +2882,7 @@
                 // this.dialogFormSigningVisible = true;
                 this.resetForm('formSigning')
                 this.isAllMoney = false;
+                //ainDivVM.formSigning.payModes = [];
                 var param = {};
                 param.id = row.clueId;
                 axios.post('/businesssign/echo', param).then(function (response) {
@@ -2936,6 +2948,9 @@
                             }else{
                             	mainDivVM.updateFormSigning.giveType = mainDivVM.updateFormSigning.giveType + "";
                             }
+                            //
+                            var modeArr = mainDivVM.updateFormSigning.payMode.split(",");
+                            mainDivVM.updateFormSigning.payModes = mainDivVM.tansPayModeValueToName(modeArr);
                         }
                         mainDivVM.dialogUpdateFormSigningVisible = true;
                     }
@@ -2970,10 +2985,35 @@
                 }
             },
 
+            tansPayModeNameToValue(payModes){
+                var payModeArr = [];
+                for(var i = 0 ; i < payModes.length;i++){
+                    for(var j = 0 ; j < mainDivVM.option3s.length ; j++){
+                        if(payModes[i]== mainDivVM.option3s[j].name){
+                            payModeArr.push( mainDivVM.option3s[j].value);
+                        }
+                    }
+                }
+                return payModeArr.join(",");
+            },
+
+            tansPayModeValueToName(payModes){
+                var payModeArr = [];
+                for(var i = 0 ; i < payModes.length;i++){
+                    for(var j = 0 ; j < mainDivVM.option3s.length ; j++){
+                        if(payModes[i]== mainDivVM.option3s[j].value){
+                            payModeArr.push( mainDivVM.option3s[j].name);
+                        }
+                    }
+                }
+                return payModeArr;
+            },
+
             submitForm(formName) {
                 this.formSigning.visitTime = new Date(this.formSigning.visitTime);
                 this.formSigning.payTime = new Date(this.formSigning.payTime);
                 this.formSigning.amountPerformance = this.formSigning.performanceAmount;
+                this.formSigning.payMode = mainDivVM.tansPayModeNameToValue(this.formSigning.payModes);
                 var param = this.formSigning;
                 // 设置 clueid
                 this.$refs[formName].validate((valid) => {
@@ -3017,7 +3057,7 @@
                 if (param.payTime) {
                     param.payTime = new Date(param.payTime)
                 }
-
+                this.updateFormSigning.payMode = mainDivVM.tansPayModeNameToValue(this.updateFormSigning.payModes);
                 // 设置 clueid
                 this.$refs[formName].validate((valid) => {
                     if (mainDivVM.updateSignButtonAble == true) {
@@ -3107,6 +3147,12 @@
                 mainDivVM.vistitStoreTypeArr = response.data.data;
             });
 
+            param = {};
+            param.groupCode = "payMode";
+            axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode', param).then(function (response) {
+                mainDivVM.option3s = response.data.data;
+            });
+
             //初始化省份
             param = {};
             param.type = "0";
@@ -3119,6 +3165,7 @@
             axios.post('/aggregation/companyManager/listNoPage', param).then(function (response) {
                 mainDivVM.companyArr = response.data.data;
             });
+
         },
         mounted() {
             document.getElementById('mainDiv').style.display = 'block';

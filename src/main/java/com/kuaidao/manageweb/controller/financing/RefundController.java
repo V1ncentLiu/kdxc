@@ -1,5 +1,8 @@
 package com.kuaidao.manageweb.controller.financing;
 
+import com.kuaidao.common.constant.DicCodeEnum;
+import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
+import com.kuaidao.sys.dto.dictionary.DictionaryItemRespDTO;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -69,6 +72,9 @@ public class RefundController {
     private static Logger logger = LoggerFactory.getLogger(RefundController.class);
 
     @Autowired
+    private DictionaryItemFeignClient dictionaryItemFeignClient;
+
+    @Autowired
     RefundFeignClient refundFeignClient;
 
     @Autowired
@@ -94,6 +100,7 @@ public class RefundController {
         request.setAttribute("ossUrl", ossUrl);
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
         request.setAttribute("businessLine", curLoginUser.getBusinessLine());
+        request.setAttribute("payModeItem", getDictionaryByCode(DicCodeEnum.PAYMODE.getCode()));
         return "financing/refundApplyPage";
     }
 
@@ -107,6 +114,7 @@ public class RefundController {
     public String refundConfirmPage(HttpServletRequest request) {
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
         request.setAttribute("businessLine", curLoginUser.getBusinessLine());
+        request.setAttribute("payModeItem", getDictionaryByCode(DicCodeEnum.PAYMODE.getCode()));
         return "financing/refundConfirmPage";
     }
 
@@ -121,6 +129,7 @@ public class RefundController {
         request.setAttribute("ossUrl", ossUrl);
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
         request.setAttribute("businessLine", curLoginUser.getBusinessLine());
+        request.setAttribute("payModeItem", getDictionaryByCode(DicCodeEnum.PAYMODE.getCode()));
         return "financing/rebateApplyPage";
     }
 
@@ -134,9 +143,25 @@ public class RefundController {
     public String rebateConfirmPage(HttpServletRequest request) {
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
         request.setAttribute("businessLine", curLoginUser.getBusinessLine());
+        request.setAttribute("payModeItem", getDictionaryByCode(DicCodeEnum.PAYMODE.getCode()));
         return "financing/rebateConfirmPage";
     }
 
+    /**
+     * 查询字典表
+     *
+     * @param code
+     * @return
+     */
+    private List<DictionaryItemRespDTO> getDictionaryByCode(String code) {
+        JSONResult<List<DictionaryItemRespDTO>> queryDicItemsByGroupCode =
+            dictionaryItemFeignClient.queryDicItemsByGroupCode(code);
+        if (queryDicItemsByGroupCode != null
+            && JSONResult.SUCCESS.equals(queryDicItemsByGroupCode.getCode())) {
+            return queryDicItemsByGroupCode.getData();
+        }
+        return null;
+    }
 
     /***
      * 退款申请列表
@@ -260,7 +285,6 @@ public class RefundController {
     /**
      * 查询退款详情 根据Id
      * 
-     * @param idEntityLong
      * @return
      */
     @PostMapping("/queryRefundInfoById")
@@ -371,7 +395,6 @@ public class RefundController {
     /**
      * 驳回退款
      * 
-     * @param result
      * @return
      */
     @RequiresPermissions("aggregation:refundConfirm:rejectRefund")
@@ -394,7 +417,6 @@ public class RefundController {
     /**
      * 标记退款
      * 
-     * @param result
      * @return
      */
     @RequiresPermissions("aggregation:refundConfirm:markRefund")
@@ -418,7 +440,6 @@ public class RefundController {
     /***
      * 返款申请列表
      * 
-     * @param queryDTO
      * @return
      */
     @RequiresPermissions("aggregation:rebateApply:view")
@@ -436,7 +457,6 @@ public class RefundController {
     /***
      * 返款确认列表
      * 
-     * @param queryDTO
      * @return
      */
     @RequiresPermissions("aggregation:rebateConfirm:view")
@@ -487,7 +507,6 @@ public class RefundController {
     /**
      * 更新返款确认
      * 
-     * @param result
      * @return
      */
     @RequiresPermissions("aggregation:rebateConfirm:confirmRebate")
@@ -510,7 +529,6 @@ public class RefundController {
     /**
      * 驳回返款
      * 
-     * @param result
      * @return
      */
     @RequiresPermissions("aggregation:rebateConfirm:rejectRebate")
@@ -533,7 +551,6 @@ public class RefundController {
     /**
      * 标记返款
      * 
-     * @param result
      * @return
      */
     @RequiresPermissions("aggregation:rebateConfirm:markRebate")
@@ -608,7 +625,6 @@ public class RefundController {
     /**
      * 查询返款详情 根据Id
      * 
-     * @param idEntityLong
      * @return
      */
     @PostMapping("/queryRebateInfoById")

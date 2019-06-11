@@ -1,21 +1,6 @@
 package com.kuaidao.manageweb.controller.organization;
 
-import java.util.List;
-import javax.servlet.http.HttpServletRequest;
-import javax.validation.Valid;
-import org.apache.shiro.SecurityUtils;
-import org.apache.shiro.authz.annotation.RequiresPermissions;
-import org.apache.shiro.subject.Subject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import com.itextpdf.text.pdf.PdfStructTreeController.returnType;
 import com.kuaidao.common.constant.DicCodeEnum;
 import com.kuaidao.common.constant.OrgTypeConstant;
 import com.kuaidao.common.constant.RoleCodeEnum;
@@ -46,6 +31,26 @@ import com.kuaidao.sys.dto.user.OrgUserReqDTO;
 import com.kuaidao.sys.dto.user.UserAndRoleRespDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import com.kuaidao.sys.dto.user.UserOrgRoleReq;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.forwardedUrl;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import javax.servlet.http.HttpServletRequest;
+import javax.validation.Valid;
+import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
+import org.apache.shiro.subject.Subject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 /**
  * 组织机构类
@@ -255,6 +260,9 @@ public class OrganizationController {
         queryDTO.setSystemCode(SystemCodeConstant.HUI_JU);
         JSONResult<List<OrganizationRespDTO>> orgList =
                 organizationFeignClient.queryOrgByParam(queryDTO);
+        List<OrganizationRespDTO> list =orgList.getData();
+        Collections.sort(list, Comparator.comparing(OrganizationRespDTO::getCreateTime).reversed());
+        orgList.setData(list);
         return orgList;
     }
 
@@ -519,7 +527,21 @@ public class OrganizationController {
         UserOrgRoleReq req = new UserOrgRoleReq();
         req.setOrgId(idEntityLong.getId());
         req.setRoleCode(RoleCodeEnum.DXCYGW.name());
-        return userInfoFeignClient.listByOrgAndRole(req);
+        JSONResult<List<UserInfoDTO>> userInfo = userInfoFeignClient.listByOrgAndRole(req);
+        if(!JSONResult.SUCCESS.equals(userInfo.getCode())) {
+            return userInfo;
+        }
+        List<UserInfoDTO> data = userInfo.getData();
+        //salt pwd 处理下
+        List<UserInfoDTO> resList = new ArrayList<UserInfoDTO>();
+        for (UserInfoDTO userInfoDTO : data) {
+             UserInfoDTO resDto = new UserInfoDTO();
+             resDto.setId(userInfoDTO.getId());
+             resDto.setName(userInfoDTO.getName());
+             resDto.setOrgId(userInfoDTO.getOrgId());
+             resList.add(resDto);
+        }   
+        return new JSONResult<List<UserInfoDTO>>().success(resList);
     }
 
     /**

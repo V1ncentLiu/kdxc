@@ -343,6 +343,7 @@
 <script th:inline="javascript">
    var ossSignatureUrl = [[${ossUrl}]];//上传文件地址
    var businessLine = [[${businessLine}]];//业务线
+   var payModeItem =[[${payModeItem}]];
 </script>
 <script>    
     var mainDivVM = new Vue({
@@ -1125,17 +1126,21 @@
                return text;
              },
              getPayModeText(row, column, value, index){
-                var valText="";
-                 if(value==1){
-                     valText="现金";
-                 }else if(value==2){
-                     valText="POS";
-                 }else if(value==3){
-                     valText="转账";
-                 }else if(value==4){
-                     valText="微信";
-                 }else if(value==5){
-                     valText="支付宝";
+                 var valText="";
+                 var vals = value.split(",");
+                 if(payModeItem){
+                     for(var j = 0 ; j < vals.length;j++  ){
+                         for(var i = 0; i < payModeItem.length ; i++){
+                             if(payModeItem[i].value == vals[j]){
+                                 if(j==0){
+                                     valText += payModeItem[i].name;
+                                 }else{
+                                     valText += ","+payModeItem[i].name;
+                                 }
+
+                             }
+                         }
+                     }
                  }
                  return valText;
              },

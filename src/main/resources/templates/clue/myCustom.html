@@ -269,7 +269,9 @@
                 <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" width="220"
                  v-for="(item,key,index) in tableColums" v-if="item.fieldCode == 'phone'">
                    <!--  <template slot-scope="scope">{{scope.row.phone}}<input type='hidden'><img th:src="@{/images/tel.png}" @click="customerEidt(scope.row.clueId)" style="margin:0 10px;width:22px;cursor: pointer;vertical-align: middle;" alt=""><el-tag v-if="scope.row.tag">{{scope.row.tag}}</el-tag></template> -->
-                    <template slot-scope="scope">{{scope.row.phone}}<input type='hidden'><img th:src="@{/images/tel.png}" @click="gettelNumberIcon(scope.row.phone,scope.row.clueId)" style="margin:0 10px;width:22px;cursor: pointer;vertical-align: middle;" alt=""><el-tag v-if="scope.row.tag">{{scope.row.tag}}</el-tag></template>
+                    <template slot-scope="scope">
+                      {{scope.row.phone}}
+                    <input type='hidden'><img th:src="@{/images/tel.png}" @click="gettelNumberIcon(scope.row.phone,scope.row.clueId)" style="margin:0 10px;width:22px;cursor: pointer;vertical-align: middle;" alt=""><el-tag v-if="scope.row.tag">{{scope.row.tag}}</el-tag></template>
                 </el-table-column>
                 <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" width="220" v-else-if="item.fieldCode == 'customerStatusName'">
                     <template slot-scope="scope">
@@ -796,10 +798,13 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                 //外呼手机
                 var param = {};
                 param.clueId = clueId;
+                //跳转页面
+                this.showClueDetailInfo2(clueId);
                 window.parent.parent.outboundCallPhone(tel, 2, clueId, function (res) {
                     axios.post('/tele/clueMyCustomerInfo/updateCallTime', param).then(function (response) {
                     });
                 });
+               
             },
             clickRow(row){
                 this.$refs.multipleTable.toggleRowSelection(row)
@@ -895,6 +900,10 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
             //展现详情
             showClueDetailInfo (row, column) {
               window.location.href='/tele/clueMyCustomerInfo/customerInfoReadOnly?clueId='+row.clueId;
+            },
+            //展现详情
+            showClueDetailInfo2 (clueId) {
+              window.location.href='/tele/clueMyCustomerInfo/customerInfoReadOnly?clueId='+clueId;
             },
             createClueData(){
               window.location.href='/tele/clueMyCustomerInfo/createClue';
@@ -1023,12 +1032,6 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                         param.repeatUserId=employee;
                         
                         param.repeatPhone=repeatPhone;
-                        if(clue ==repeatClue){
-                        	this.$message({
-                                message: '不能提交重复资源数据',
-                                type: 'warning'
-                              });
-                        }
                         param.remark=textarea;
                         this.dialogFormVisible = false;
 
