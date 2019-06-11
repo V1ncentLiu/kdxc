@@ -504,7 +504,7 @@
                     </div>
                 </el-form>
                 <div slot="footer" class="dialog-footer f-tac">
-                    <el-button type="primary" @click="submitForm('formSigning')">提 交</el-button>
+                    <el-button type="primary" :disabled="addVisitAble" @click="submitForm('formSigning')">提 交</el-button>
                     <el-button @click="dialogFormSigningVisible = false">取 消</el-button>
                 </div>
             </template>
@@ -711,7 +711,7 @@
                     </div>
                 </el-form>
                 <div slot="footer" class="dialog-footer f-tac">
-                    <el-button type="primary" @click="submitUpdateForm('updateFormSigning')">提交</el-button>
+                    <el-button type="primary" @click="submitUpdateForm('updateFormSigning')" :disabled="addVisitAble">提交</el-button>
                     <el-button @click="dialogUpdateFormSigningVisible = false">取 消</el-button>
                 </div>
             </template>
@@ -1006,7 +1006,7 @@
                                     mainDivVM.$message({type: 'success', message: '来访记录保存成功!',duration:2000,onClose:function(){
                                             mainDivVM.initList();
                                             mainDivVM.addVisitRecordDialogVisible = false;
-                                            // mainDivVM.addVisitAble = false;
+                                            mainDivVM.addVisitAble = false;
                                         //  跳转到我的客户页面
                                             window.location.href='/aggregation/businessMyCustomer/listPage';
                                         }});
@@ -1083,10 +1083,11 @@
             submitForm(formName) {
                 var param = this.formSigning;
                 param.amountPerformance =  this.amountPerformance;
-                console.log("................................")
-                console.log(param)
+                // console.log("................................")
+                // console.log(param)
                 this.$refs[formName].validate((valid) => {
                     if (valid) {
+                        this.addVisitAble = true;
                         axios.post("/businesssign/insert", param)
                             .then(function (response) {
                                 if (response.data.code == 0) {
@@ -1095,12 +1096,14 @@
                                             // mainDivVM.initList();
                                             mainDivVM.dialogFormSigningVisible = false;
                                             // mainDivVM.formSigning.clueId = "";
+                                            mainDivVM.addVisitAble = false; 
                                             window.location.href='/aggregation/businessMyCustomer/listPage';
                                     }});
                                 } else {
                                     mainDivVM.$message.error(response.data.msg);
+                                    mainDivVM.addVisitAble = false;
                                 }
-                            }).catch(function (error) {console.log(error);});
+                            }).catch(function (error) {mainDivVM.addVisitAble = false;console.log(error);});
                     } else {return false;}
                 });
             },
@@ -1112,17 +1115,20 @@
                 // 设置 clueid
                 this.$refs[formName].validate((valid) => {
                     if (valid) {
+                        this.addVisitAble = true; 
                         axios.post("/businesssign/update", param)
                             .then(function (response) {
                                 if (response.data.code == 0) {
                                     mainDivVM.$message({type: 'success', message: '签约单更新成功!',duration:2000,onClose:function(){
                                             mainDivVM.dialogUpdateFormSigningVisible = false;
+                                            mainDivVM.addVisitAble = false; 
                                             window.location.href='/aggregation/businessMyCustomer/listPage';
                                     }});
                                 } else {
                                     mainDivVM.$message.error(response.data.msg);
+                                    mainDivVM.addVisitAble = false;
                                 }
-                            }).catch(function (error) {console.log(error);});
+                            }).catch(function (error) {mainDivVM.addVisitAble = false;console.log(error);});
                     } else {return false;}
                 });
             },
