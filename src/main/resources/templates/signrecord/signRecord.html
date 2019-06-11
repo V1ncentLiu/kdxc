@@ -252,7 +252,7 @@
             <div class="f-tar">最多100字</div>
         </el-form>
         <div slot="footer" class="dialog-footer">
-            <el-button type="primary" @click="submitDialogForm('dialogForm')">确 定</el-button>
+            <el-button type="primary" :disabled="btnDisabled" @click="submitDialogForm('dialogForm')">确 定</el-button>
             <el-button @click="dialogFormVisible = false">取 消</el-button>
         </div>
     </el-dialog>
@@ -428,6 +428,7 @@
         el: '#businessContractRecord',
         data: function () {
             return {
+                btnDisabled: false,    
                 isShow: false,
                 showbutton: false,
                 loading: true,
@@ -555,6 +556,7 @@
 
                         param.idList = idArr;
                         param.rebutReason = this.dialogForm.reason;
+                        this.btnDisabled = true; 
                         axios.post('/sign/signRecord/rejectSignOrder', param)
                             .then(function (response) {
                                 var resData = response.data;
@@ -563,18 +565,21 @@
                                     signRecordVM.dialogFormVisible = false;
                                     signRecordVM.$message({
                                         message: '操作成功', type: 'success', duration: 2000, onClose: function () {
+                                            signRecordVM.btnDisabled = false; 
                                             signRecordVM.initSignRecordData();
                                             signRecordVM.recordDialog = false;
                                         }
                                     });
                                 } else {
                                     signRecordVM.$message({message: resData.msg, type: 'error'});
+                                    signRecordVM.btnDisabled = false; 
                                     console.error(resData);
                                 }
 
                             })
                             .catch(function (error) {
                                 console.log(error);
+                                signRecordVM.btnDisabled = false; 
                             }).then(function () {
                         });
 
