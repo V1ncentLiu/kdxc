@@ -156,6 +156,7 @@ public class BalanceAccountController {
         // 查询签约店型集合
         request.setAttribute("vistitStoreTypeList",
                 getDictionaryByCode(DicCodeEnum.VISITSTORETYPE.getCode()));
+        request.setAttribute("payModeItem", getDictionaryByCode(DicCodeEnum.PAYMODE.getCode()));
         return "financing/balanceAccountPage";
     }
 
@@ -228,7 +229,6 @@ public class BalanceAccountController {
     /**
      * 获取当前登录账号
      * 
-     * @param orgDTO
      * @return
      */
     private UserInfoDTO getUser() {
@@ -240,7 +240,6 @@ public class BalanceAccountController {
     /**
      * 根据机构和角色类型获取用户
      * 
-     * @param orgDTO
      * @return
      */
     private List<UserInfoDTO> getUserList(Long orgId, String roleCode, List<Integer> statusList,
@@ -258,7 +257,6 @@ public class BalanceAccountController {
     /**
      * 获取所有组织组
      * 
-     * @param orgDTO
      * @return
      */
     private List<OrganizationRespDTO> getOrgList(Long parentId, Integer type,
@@ -293,7 +291,6 @@ public class BalanceAccountController {
     /***
      * 下载模板
      * 
-     * @param queryDTO
      * @return
      * @throws Exception
      */
@@ -309,6 +306,10 @@ public class BalanceAccountController {
             List<DictionaryItemRespDTO> dictionaryItemRespDTOs =
                     getDictionaryByCode(DicCodeEnum.VISITSTORETYPE.getCode());
             List<DictionaryItemRespDTO> giveTypeDTOs = getDictionaryByCode(Constants.GIVE_TYPE);
+
+            List<DictionaryItemRespDTO> payModeItem =
+                getDictionaryByCode(DicCodeEnum.PAYMODE.getCode());
+
 
             PayDetailAccountDTO accountDTO = jsonResult.getData();
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -331,18 +332,44 @@ public class BalanceAccountController {
                     }
                 }
             }
-            String payMode = "";
-            if (accountDTO.getPayMode() == 1) {
-                payMode = "现金";
-            } else if (accountDTO.getPayMode() == 2) {
-                payMode = "POS";
-            } else if (accountDTO.getPayMode() == 3) {
-                payMode = "转账";
-            } else if (accountDTO.getPayMode() == 4) {
-                payMode = "微信";
-            } else if (accountDTO.getPayMode() == 5) {
-                payMode = "支付宝";
+
+            // 去字典表查询赠送类型
+            if (giveTypeDTOs != null && giveTypeDTOs.size() > 0) {
+                for (DictionaryItemRespDTO dictionaryItemRespDTO : giveTypeDTOs) {
+                    if (accountDTO.getGiveType() != null && dictionaryItemRespDTO.getValue()
+                        .equals(accountDTO.getGiveType().toString())) {
+                        dataMap.put("giveTypeName", dictionaryItemRespDTO.getName());
+                    }
+                }
             }
+
+            String payMode1 = accountDTO.getPayMode();
+            String[] split = payMode1.split(",");
+            String payMode = "";
+            for(int i = 0 ; i < split.length ; i++){
+                for(DictionaryItemRespDTO item : payModeItem){
+                    if(item.getValue().equals(split[i])){
+                        if(i==0){
+                            payMode = item.getName();
+                        }else{
+                            payMode = payMode +","+ item.getName();
+                        }
+                    }
+                }
+            }
+//            if (accountDTO.getPayMode() == 1) {
+//                payMode = "现金";
+//            } else if (accountDTO.getPayMode() == 2) {
+//                payMode = "POS";
+//            } else if (accountDTO.getPayMode() == 3) {
+//                payMode = "转账";
+//            } else if (accountDTO.getPayMode() == 4) {
+//                payMode = "微信";
+//            } else if (accountDTO.getPayMode() == 5) {
+//                payMode = "支付宝";
+//            }
+
+
             String payType = "";
             if (accountDTO.getPayType() == 1) {
                 payType = "全款";
@@ -475,6 +502,8 @@ public class BalanceAccountController {
         if (JSONResult.SUCCESS.equals(jsonResult.getCode()) && jsonResult.getData() != null) {
             List<DictionaryItemRespDTO> dictionaryItemRespDTOs =
                     getDictionaryByCode(DicCodeEnum.VISITSTORETYPE.getCode());
+            List<DictionaryItemRespDTO> payModeItem =
+                getDictionaryByCode(DicCodeEnum.PAYMODE.getCode());
 
             accountDTO = jsonResult.getData();
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -498,18 +527,33 @@ public class BalanceAccountController {
                     }
                 }
             }
+
+            String payMode1 = accountDTO.getPayMode();
+            String[] split = payMode1.split(",");
             String payMode = "";
-            if (accountDTO.getPayMode() == 1) {
-                payMode = "现金";
-            } else if (accountDTO.getPayMode() == 2) {
-                payMode = "POS";
-            } else if (accountDTO.getPayMode() == 3) {
-                payMode = "转账";
-            } else if (accountDTO.getPayMode() == 4) {
-                payMode = "微信";
-            } else if (accountDTO.getPayMode() == 5) {
-                payMode = "支付宝";
+            for(int i = 0 ; i < split.length ; i++){
+                for(DictionaryItemRespDTO item : payModeItem){
+                    if(item.getValue().equals(split[i])){
+                        if(i==0){
+                            payMode = item.getName();
+                        }else{
+                            payMode = payMode +","+ item.getName();
+                        }
+                    }
+                }
             }
+//            String payMode = "";
+//            if (accountDTO.getPayMode() == 1) {
+//                payMode = "现金";
+//            } else if (accountDTO.getPayMode() == 2) {
+//                payMode = "POS";
+//            } else if (accountDTO.getPayMode() == 3) {
+//                payMode = "转账";
+//            } else if (accountDTO.getPayMode() == 4) {
+//                payMode = "微信";
+//            } else if (accountDTO.getPayMode() == 5) {
+//                payMode = "支付宝";
+//            }
             accountDTO.setPayModes(payMode);
             String payType = "";
             if (accountDTO.getPayType() == 1) {

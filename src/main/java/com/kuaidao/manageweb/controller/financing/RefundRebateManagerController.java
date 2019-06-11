@@ -95,6 +95,7 @@ public class RefundRebateManagerController {
         request.setAttribute("vistitStoreTypeList",
                 getDictionaryByCode(DicCodeEnum.VISITSTORETYPE.getCode()));
         request.setAttribute("ossUrl", ossUrl);
+        request.setAttribute("payModeItem", getDictionaryByCode(DicCodeEnum.PAYMODE.getCode()));
         return "financing/refundRebateManagerPage";
     }
 

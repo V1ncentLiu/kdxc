@@ -32,7 +32,7 @@
     <div class="mainSearchBg">        
         <div class="mainSearchFormBox">
             <el-form :inline="true" class="demo-form-inline mainSearchForm" :model="form" ref="form">
-                <el-form-item label="规则名称:" label-width="60px">
+                <el-form-item label="规则名称:" label-width="80px">
                     <el-input v-model="form.ruleName" placeholder="规则名称"></el-input>
                 </el-form-item>
                 <el-form-item label="资源项目:">
@@ -69,9 +69,36 @@
                         placeholder="选择日期时间">
                     </el-date-picker>
                 </el-form-item>
+                <el-row v-show="isShow">
+                    <el-form-item label="分配电销组:" label-width="80px">
+                        <el-select v-model="form.teleorg" placeholder="选择分配电销组"  clearable  filterable>
+                            <el-option
+                                v-for="item in orgTeleArr"
+                                :key="item.id"
+                                :label="item.name"
+                                :value="item.id">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
+                    <el-form-item label="最后编辑时间:">
+                        <el-date-picker
+                            v-model="form.updateTimeBegin"
+                            type="datetime"
+                            placeholder="选择日期时间">
+                        </el-date-picker>
+                    </el-form-item>
+                    <el-form-item label="—" class="widthauto">
+                        <el-date-picker
+                            v-model="form.updateTimeEnd"
+                            type="datetime"
+                            placeholder="选择日期时间">
+                        </el-date-picker>
+                    </el-form-item>
+                </el-row>
                 <div class="mainSearchBtnBox"> 
                     <el-button icon="el-icon-search" type="primary" @click="searchTable('form')"  class="searchBtn">搜索</el-button>
                     <!-- <el-button type="info" class="searchBtn">取消</el-button>  -->
+                    <span style="color: #5c6be8;cursor: pointer;margin:0 10px;" @click="toogleClick"><span v-if="isShow">收起</span><span v-else>展开更多</span><i :class="{'greycolor paddingL6 el-icon-arrow-up':isShow,'greycolor paddingL6 el-icon-arrow-down':!isShow}"></i></span>
                 </div> 
             </el-form>
         </div>
@@ -95,6 +122,7 @@
                 <el-table-column align="center" prop="projectId" label="资源项目" :formatter="transformProject"></el-table-column>
                 <el-table-column align="center" prop="searchWord" label="包含搜索词"  width="130"></el-table-column>
                 <el-table-column align="center" prop="notSearchWord" label="不包含搜索词" width="150"></el-table-column>
+                <el-table-column align="center" prop="updateTime" label="最后编辑时间"  :formatter="dateFormat"></el-table-column>
                 <el-table-column align="center" prop="createTime" label="创建时间" :formatter="dateFormat" width="170"></el-table-column>
                 <el-table-column align="center" prop="startTime" label="规则有效开始时间"  :formatter="dateFormat" width="170"></el-table-column>
                 <el-table-column align="center" prop="endTime" label="规则有效结束时间"  :formatter="dateFormat" width="170"></el-table-column>
@@ -207,10 +235,12 @@ var adsenseList=[[${adsenseList}]];//广告位集合
 var clueTypeList=[[${clueTypeList}]];//资源类型集合
 var mediumList=[[${mediumList}]];//媒介集合
 var userId=[[${userId}]];//登录人账号id
+var queryOrg=[[${queryOrg}]];//电销组
     var ocmVM = new Vue({
         el: '#optimizeClueManagement',
         data: function() {
             return {
+                isShow:false,
                 dialogFormVisible: false,
                 multipleSelection: [],//选择行
                 pager:{
@@ -224,6 +254,9 @@ var userId=[[${userId}]];//登录人账号id
                     status:'',
                     searchStartTime:'',
                     searchEndTime:'',
+                    teleorg:'',
+                    updateTimeBegin:'',
+                    updateTimeEnd:''
                 },
                 dialogForm:{
                 	 ruleName:'',
@@ -241,6 +274,7 @@ var userId=[[${userId}]];//登录人账号id
                 dataTable: [],
                 dialogTableData:[],
                 projectOptions:projectList,
+                orgTeleArr:queryOrg,
                 statusOptions: [{
                     value: 1,
                     name: '有效'
@@ -393,6 +427,15 @@ var userId=[[${userId}]];//登录人账号id
                     });
                     return;
                 }
+              var updateTimeBegin=this.form.updateTimeBegin;
+              var updateTimeEnd=this.form.updateTimeEnd;
+              if(updateTimeEnd && updateTimeBegin>updateTimeEnd){
+                this.$message({
+                  message: '最后编辑时间的结束时间不允许选择早于开始时间',
+                  type: 'warning'
+                });
+                return;
+              }
                 var param =this.form;
                 param.pageSize = this.pager.pageSize;
                 param.pageNum = this.pager.currentPage;
@@ -559,6 +602,13 @@ var userId=[[${userId}]];//登录人账号id
             	    }
                   return text;
              },
+              toogleClick(){
+                if(this.isShow){
+                  this.isShow=false
+                }else{
+                  this.isShow=true
+                }
+              },
         },
         created(){
             console.info("create method");

@@ -1,7 +1,10 @@
 package com.kuaidao.manageweb.util;
 
+import java.util.List;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.subject.Subject;
+import com.itextpdf.text.pdf.PdfStructTreeController.returnType;
+import com.kuaidao.sys.dto.role.RoleInfoDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 
 /**
@@ -21,6 +24,17 @@ public class CommUtil {
         Subject subject = SecurityUtils.getSubject();
         UserInfoDTO user = (UserInfoDTO) subject.getSession().getAttribute("user");
         return user;
+    }
+    
+    /**
+     * 获取当前登陆者 角色code
+    * @param userInfoDTO
+    * @return
+     */
+    public static String getRoleCode(UserInfoDTO curLoginUser) {
+        List<RoleInfoDTO> roleList = curLoginUser.getRoleList();
+        RoleInfoDTO roleInfoDTO = roleList.get(0);
+        return roleInfoDTO.getRoleCode();
     }
     
     /**

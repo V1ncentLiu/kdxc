@@ -1,5 +1,8 @@
 package com.kuaidao.manageweb.controller.sign;
 
+import com.kuaidao.common.constant.DicCodeEnum;
+import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
+import com.kuaidao.sys.dto.dictionary.DictionaryItemRespDTO;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -63,6 +66,10 @@ public class SignRecordController {
 
     private static Logger logger = LoggerFactory.getLogger(SignRecordController.class);
 
+
+    @Autowired
+    private DictionaryItemFeignClient dictionaryItemFeignClient;
+
     @Autowired
     SignRecordFeignClient signRecordFeignClient;
 
@@ -105,7 +112,7 @@ public class SignRecordController {
          * request.setAttribute("teleGroupList", teleGroupList);
          */
         // request.setAttribute("teleSaleList",teleSaleList);
-
+        request.setAttribute("payModeItem", getDictionaryByCode(DicCodeEnum.PAYMODE.getCode()));
         return "signrecord/signRecord";
     }
 
@@ -429,4 +436,21 @@ public class SignRecordController {
     JSONResult<RefundRebateDTO> refundRebateDTOs = refundFeignClient.getRefundInfo(map);
     return refundRebateDTOs;
   }
+
+    /**
+     * 查询字典表
+     *
+     * @param code
+     * @return
+     */
+    private List<DictionaryItemRespDTO> getDictionaryByCode(String code) {
+        JSONResult<List<DictionaryItemRespDTO>> queryDicItemsByGroupCode =
+            dictionaryItemFeignClient.queryDicItemsByGroupCode(code);
+        if (queryDicItemsByGroupCode != null
+            && JSONResult.SUCCESS.equals(queryDicItemsByGroupCode.getCode())) {
+            return queryDicItemsByGroupCode.getData();
+        }
+        return null;
+    }
+
 }

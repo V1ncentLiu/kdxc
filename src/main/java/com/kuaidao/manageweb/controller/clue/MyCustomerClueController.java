@@ -330,6 +330,12 @@ public class MyCustomerClueController {
         JSONResult<List<TrackingRespDTO>> trackingList = trackingFeignClient.queryList(dto);
         if (trackingList != null && trackingList.SUCCESS.equals(trackingList.getCode())
                 && trackingList.getData() != null) {
+            List<TrackingRespDTO> trackingRespDTOList = trackingList.getData();
+            for(TrackingRespDTO trackingRespDTO : trackingRespDTOList){
+                if(trackingRespDTO.getCallTime() == null ){
+                    trackingRespDTO.setCallTime(new Date());
+                }
+            }
             request.setAttribute("trackingList", trackingList.getData());
         } else {
             request.setAttribute("trackingList", new ArrayList());
