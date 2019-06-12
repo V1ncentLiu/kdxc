@@ -811,6 +811,14 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                 //外呼手机
                 var param = {};
                 param.clueId = clueId;
+                // 存储选中信息--start
+                this.setSessionStore("telemarketingStoreForm", this.storeForm);
+                var otherVal = {
+                    "currentPage": this.pager.currentPage,
+                    "clueId": clueId
+                }
+                this.setSessionStore("telemarketingOtherVal", otherVal);
+                // 存储选中信息--end
                 window.parent.parent.outboundCallPhone(tel, 2, clueId, function (res) {
                     axios.post('/tele/clueMyCustomerInfo/updateCallTime', param).then(function (response) {
                     });
@@ -935,6 +943,15 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                 }
             },
             toReadOnlySignPage(row,tele){  // 进入签约单明细
+                var clueId=row.clueId;
+                // 存储选中信息--start
+                this.setSessionStore("telemarketingStoreForm", this.storeForm);
+                var otherVal = {
+                    "currentPage": this.pager.currentPage,
+                    "clueId": clueId
+                }
+                this.setSessionStore("telemarketingOtherVal", otherVal);
+                // 存储选中信息--end
                 window.location.href='/businesssign/myCustomSignRecordPage?clueId='+row.clueId+"&signId="+row.signId+"&readyOnly=1&createUser="+tele.teleSaleId;
             },
             currentTelSale(seleVal){
@@ -1195,19 +1212,27 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
             },
           	//展现详情
          	showClueDetailInfo (clueId) {
-         	    window.location.href='/tele/clueMyCustomerInfo/customerInfoReadOnly?clueId='+clueId;
-            },
-            //展现详情
-            showClueDetailInfo1 (row, column) {
-                var clueId=row.clueId;
-
+                // 存储选中信息--start
                 this.setSessionStore("telemarketingStoreForm", this.storeForm);
                 var otherVal = {
                     "currentPage": this.pager.currentPage,
                     "clueId": clueId
                 }
                 this.setSessionStore("telemarketingOtherVal", otherVal);
-
+                // 存储选中信息--end
+         	    window.location.href='/tele/clueMyCustomerInfo/customerInfoReadOnly?clueId='+clueId;
+            },
+            //展现详情
+            showClueDetailInfo1 (row, column) {
+                var clueId=row.clueId;
+                // 存储选中信息--start
+                this.setSessionStore("telemarketingStoreForm", this.storeForm);
+                var otherVal = {
+                    "currentPage": this.pager.currentPage,
+                    "clueId": clueId
+                }
+                this.setSessionStore("telemarketingOtherVal", otherVal);
+                // 存储选中信息--end
                 window.location.href='/tele/clueMyCustomerInfo/customerInfoReadOnly?clueId='+clueId;
             },
             submitVicemanagerForm(formName) {
