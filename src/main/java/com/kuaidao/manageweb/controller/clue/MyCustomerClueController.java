@@ -2,6 +2,7 @@ package com.kuaidao.manageweb.controller.clue;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -255,8 +256,8 @@ public class MyCustomerClueController {
         logger.info("customerEditInfo_clueId {{}}",clueId);
         UserInfoDTO user = getUser();
         logger.info("customerEditInfo_clueId {{}}",user);
-        List<Long> accountList = new ArrayList<Long>();
         try {
+            List<Long> accountList = new ArrayList<Long>();
             if (null != user.getRoleList() && user.getRoleList().size() > 0) {
                 String roleCode = user.getRoleList().get(0).getRoleCode();
                 if (null != roleCode) {
@@ -297,6 +298,10 @@ public class MyCustomerClueController {
                     && callRecord.getData() != null) {
 
                 request.setAttribute("callRecord", callRecord.getData());
+                CallRecordRespDTO callRecordRespDTO = callRecord.getData().stream().max(Comparator.comparing(CallRecordRespDTO::getStartTime)).get();
+                request.setAttribute("teleEndTime",new Date(callRecordRespDTO.getStartTime()));
+            }else {
+                request.setAttribute("teleEndTime",new Date());
             }
             ClueQueryDTO queryDTO = new ClueQueryDTO();
 
@@ -371,7 +376,7 @@ public class MyCustomerClueController {
                 request.setAttribute("clueFileList", clueFileList.getData());
             }
         } catch (Exception e) {
-            logger.info("customerEditInfo_clueId",e);
+            logger.error("customerEditInfo_clueId ",e);
         }
         request.setAttribute("loginUserId", user.getId());
         return "clue/addCustomerMaintenance";
