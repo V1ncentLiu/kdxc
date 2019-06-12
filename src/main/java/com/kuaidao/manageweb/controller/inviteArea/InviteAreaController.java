@@ -182,6 +182,9 @@ public class InviteAreaController {
         JSONResult<List<OrganizationRespDTO>> swList =
             organizationFeignClient.queryOrgByParam(orgDto);
         orgDto.setOrgType(OrgTypeConstant.DXZ);
+        if(inviteAreaDTOs.get(0).getBusinessLine() != null){
+            orgDto.setBusinessLine(inviteAreaDTOs.get(0).getBusinessLine());
+        }
         // 电销小组
         JSONResult<List<OrganizationRespDTO>> dxList =
             organizationFeignClient.queryOrgByParam(orgDto);
@@ -263,6 +266,7 @@ public class InviteAreaController {
         request.setAttribute("swList", swList.getData());
         request.setAttribute("dxList", dxList.getData());
         request.setAttribute("proviceslist", proviceslist);
+        request.setAttribute("businessLine", inviteAreaDTOs.get(0).getBusinessLine());
         return "inviteArea/updateInviteAreaPage";
     }
 

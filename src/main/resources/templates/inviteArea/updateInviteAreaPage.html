@@ -42,6 +42,9 @@
                                 </el-option>
                             </el-select>
                         </el-form-item>
+                        <el-form-item label="业务线：" :label-width="formLabelWidth" prop="businessLine" v-if="0">
+                            <el-input v-model="form.businessLine" placeholder="业务线"></el-input>
+                        </el-form-item>
                     </el-col>
                 </el-row>
             	<el-row v-show="projectShow">
@@ -75,7 +78,7 @@
             	<el-row v-show="telemarketingTeamShow">
                     <el-col :span="12">
                         <el-form-item label="电销组：" :label-width="formLabelWidth1" prop="telemarketingTeamIds">
-                            <el-select filterable multiple v-model="form.telemarketingTeamIds" placeholder="请选择">
+                            <el-select filterable multiple v-model="form.telemarketingTeamIds" placeholder="请选择" @change="changeDx">
                                 <el-option
                                     v-for="item in dxList"
                                      :key="item.id"
@@ -83,6 +86,9 @@
                                     :value="item.id">
                                 </el-option>
                             </el-select>
+                        </el-form-item>
+                        <el-form-item label="电销组业务线：" :label-width="formLabelWidth" prop="dxBusinessLine" v-if="0">
+                            <el-input v-model="form.dxBusinessLine" placeholder="业务线"></el-input>
                         </el-form-item>
                     </el-col>
                 </el-row>
@@ -151,6 +157,7 @@
 	var checkTelemarketingTeam = [[${checkTelemarketingTeam}]];
 	var checkProject = [[${checkProject}]];
 	var checkProvince = [[${checkProvince}]];
+  var businessLine=[[${businessLine}]];//规则信息
 	var ids = [[${ids}]];
     var addUserVm= new Vue({
         el: '#userManage',
@@ -214,20 +221,33 @@
         },
         methods: {
             setProject(value){
-                debugger
-                if(!this.projectShow){
-                    return false;
-                }
+                var businessLine ="";
                 var groupName = "";
                 for(var i = 0 ; i < swList.length ; i++){
                     if(swList[i].id == value){
                         groupName = swList[i].name;
+                        addUserVm.form.businessLine = swList[i].businessLine;
+                        businessLine = swList[i].businessLine;
                         break;
                     }
                 }
+              //根据所选商务小组所属业务线查询电销组
+              console.log("businessLine: "+businessLine);
+              addUserVm.form.telemarketingTeamIds=[];
+              if(businessLine != null){
+                var busParam ={};
+                busParam.businessLine = businessLine;
+                axios.post("/invitearea/getDxOrganizations", busParam).then(function (response) {
+                  var data = response.data;
+                  addUserVm.dxList = data.data;
+                  console.log(data.data);
+                }).catch(function (error) {console.log(error);});
+              }
+              if(!this.projectShow){
+                return false;
+              }
                 var param = {};
                 param.businessGroup = groupName;
-                debugger
                 axios.post("/invitearea/InviteProjects", param).then(function (response) {
                     var data = response.data;
                     if(data&&data.length>0){
@@ -239,6 +259,14 @@
                     }
                 }).catch(function (error) {console.log(error);});
             },
+          changeDx(value){
+            for(var i = 0 ; i < dxList.length ; i++){
+              if(dxList[i].id == value){
+                addUserVm.form.dxBusinessLine = dxList[i].businessLine;
+                break;
+              }
+            }
+          },
         	checkIsShow(val){
         		if(val==1 ){
         			if(isshowBusinessGroup ==0){
@@ -599,6 +627,20 @@
         			this.open("所有数据项必须相同，请重新选择信息！");
         			return ;
         		}
+              if(addUserVm.form.telemarketingTeamIds.length == 0){
+                this.$message({
+                  message: '请选择电销组',
+                  type: 'warning'
+                });
+                return ;
+              }
+              if(addUserVm.form.businessLine != addUserVm.form.dxBusinessLine){
+                this.$message({
+                  message: '请选择与商务组同业务线的电销组！',
+                  type: 'warning'
+                });
+                return ;
+              }
                 this.$refs["form"].validate((valid) => {
                     if (valid) {
                         this.submitdialogFormVisible = true;
@@ -610,6 +652,8 @@
         },//created方法 结束
         mounted(){
             document.getElementById('userManage').style.display = 'block';
+          this.form.businessLine=businessLine;
+          this.form.dxBusinessLine=businessLine;
         }
     })
 </script>
