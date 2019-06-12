@@ -22,10 +22,10 @@
         <div class="mainSearchFormBox">
            <el-form :inline="true" :model="form" class="demo-form-inline mainSearchForm" ref="form">                 
                 <el-form-item label="起止时间:">
-                    <el-date-picker format="yyyy-MM-dd HH:mm" v-model="form.startTime" type="datetime" placeholder="选择日期"></el-date-picker>
+                    <el-date-picker format="yyyy-MM-dd HH:mm" v-model="form.startTime" value-format="yyyy-MM-dd HH:mm" type="datetime" placeholder="选择日期"></el-date-picker>
                 </el-form-item>
                 <el-form-item label="—" class="widthauto">
-                   <el-date-picker format="yyyy-MM-dd HH:mm" v-model="form.endTime" type="datetime" placeholder="选择日期"></el-date-picker>
+                   <el-date-picker format="yyyy-MM-dd HH:mm" v-model="form.endTime" value-format="yyyy-MM-dd HH:mm" type="datetime" placeholder="选择日期"></el-date-picker>
                 </el-form-item>
                 <el-form-item label="资源类别:">  
                     <el-select v-model="form.resourceClassId" placeholder="资源类别" style="width: 100%;" clearable filterable>
@@ -53,12 +53,12 @@
                             v-for="item in resourceProjectArr"
                             :key="item.id"
                             :label="item.name"
-                            :value="item.value">
+                            :value="item.id">
                         </el-option>
                     </el-select>
                 </el-form-item>
                 <div class="mainSearchBtnBox">
-                    <el-button icon="el-icon-search" type="primary" @click="searchTable" class="searchBtn">搜索</el-button>
+                    <el-button icon="el-icon-search" type="primary" @click="searchTable()" class="searchBtn">搜索</el-button>
                 </div>  
             </el-form>
         </div>
@@ -158,86 +158,6 @@
     		 </el-tabs>
         </el-row>
         <!-- tabs -->
-        <!-- <br />
-        <el-row>
-            <el-table 
-                ref="tableData"
-                tooltip-effect="dark"
-                style="width: 100%"
-                border
-                :data="tableData"
-                v-loading="loading"
-                :span-method="arraySpanMethod">
-                <el-table-column type="index" label="序号" align="center" width="55" :index="indexFun"></el-table-column>
-                <el-table-column prop="callCount" align="center" label="资源类别">
-                </el-table-column>
-                <el-table-column prop="callCount" align="center" label="媒介">
-                </el-table-column>
-                <el-table-column prop="callCount" align="center" label="资源项目">
-                </el-table-column>
-                <el-table-column prop="callCount" align="center" label="下发资源量">
-                </el-table-column>
-                <el-table-column prop="callCount" align="center" label="跟访资源量">
-                </el-table-column>
-                <el-table-column prop="callCount" align="center" label="首次接通资源量">
-                </el-table-column>
-                <el-table-column prop="callCount" align="center" label="接通资源量">
-                </el-table-column>
-                <el-table-column prop="callCount" align="center" label="未接通资源量">
-                </el-table-column>
-                <el-table-column prop="callCount" align="center" label="接通有效资源量">
-                </el-table-column>
-                <el-table-column prop="callCount" align="center" label="接通无效资源量">
-                </el-table-column>
-                <el-table-column prop="callCount" align="center" label="未接通有效资源量">
-                </el-table-column>
-                <el-table-column prop="callCount" align="center" label="未接通无效资源量">
-                </el-table-column>
-                <el-table-column prop="callCount" align="center" label="跟访率" :formatter="percentFormat">
-                </el-table-column>
-                <el-table-column prop="callCount" align="center" label="首次接通率" :formatter="percentFormat">
-                </el-table-column>
-                <el-table-column prop="callCount" align="center" label="资源接通率" :formatter="percentFormat">
-                </el-table-column>
-                <el-table-column prop="callCount" align="center" label="资源有效率" :formatter="percentFormat">
-                </el-table-column>
-                <el-table-column prop="callCount" align="center" label="接通有效率" :formatter="percentFormat">
-                </el-table-column>
-
-                <el-table-column prop="callCount" align="center" label="首日跟访资源量">
-                </el-table-column>
-                <el-table-column prop="callCount" align="center" label="首日接通资源量">
-                </el-table-column>
-                <el-table-column prop="callCount" align="center" label="首日未接通资源量">
-                </el-table-column>
-                <el-table-column prop="callCount" align="center" label="首日接通有效资源量">
-                </el-table-column>
-                <el-table-column prop="callCount" align="center" label="首日接通无效资源量">
-                </el-table-column>
-                <el-table-column prop="callCount" align="center" label="首日未接通有效资源量">
-                </el-table-column>
-                <el-table-column prop="callCount" align="center" label="首日未接通无效资源量">
-                </el-table-column>
-                <el-table-column prop="callCount" align="center" label="首日跟访率" :formatter="percentFormat">
-                </el-table-column>
-                <el-table-column prop="callCount" align="center" label="首日资源接通率" :formatter="percentFormat">
-                </el-table-column>
-                <el-table-column prop="callCount" align="center" label="首日资源有效率" :formatter="percentFormat">
-                </el-table-column>
-                 <el-table-column prop="callCount" align="center" label="首日接通有效率" :formatter="percentFormat">
-                </el-table-column>
-
-                <el-table-column align="center" :key="index" :prop="item.fieldCode" :label="item.displayName" v-for="(item,key,index) in tableColums" v-if="item.fieldCode == 'orgName'">
-                    <template slot-scope="scope">
-                        <el-button @click="gotoTeam(scope.row)" type="text" size="small">{{scope.row.orgName}}</el-button>
-                    </template>
-                </el-table-column>
-                <el-table-column align="center" width="130" :key="index" :prop="item.fieldCode" :label="item.displayName" v-else>
-                </el-table-column>
-            </el-table>
-            <table-pagination :pager="pager" @change="searchTable()"></table-pagination>
-        </el-row>
-        <br /> -->
     </div>
 </div>
 <!-- import common js-->
@@ -306,7 +226,7 @@
                 pager:{ 
                     total: 0,
                     currentPage: 1,
-                    pageSize: 3
+                    pageSize: 20
                 },
                 resourceClassArr: resourceClassArr,
                 mediumArr: mediumArr,
@@ -636,9 +556,9 @@
                 var param = {};
                 param.startTime = this.export.startTime;
                 param.endTime = this.export.endTime;
-                // param.resourceCategory =  this.export.resourceClassId; 
-                // param.resourceMedium =  this.export.mediumId; 
-                // param.projectType =  this.export.resourceProjectId; 
+                param.resourceCategory =  this.export.resourceClassId; 
+                param.resourceMedium =  this.export.mediumId; 
+                param.projectType =  this.export.resourceProjectId; 
                 axios.post('/statistics/resourceEfficiency/exportResourceEfficiency',param,{responseType:'blob'})
                     .then(function (response) {
                         var data =  response.data;
