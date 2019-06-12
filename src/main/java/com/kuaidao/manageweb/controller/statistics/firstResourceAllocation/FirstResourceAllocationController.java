@@ -75,7 +75,7 @@ public class FirstResourceAllocationController {
             List<Long> orgIdList = firstResourceAllocationQueryDto.getOrgIdList();
             if(orgIdList == null || orgIdList.size() == 0){
                 PageBean emptyDataPageBean = PageBean.getEmptyListDataPageBean(firstResourceAllocationQueryDto.getPageNum(), firstResourceAllocationQueryDto.getPageSize());
-                return new JSONResult<PageBean<ResourceAllocationDto>>().success(emptyDataPageBean);
+                return new JSONResult<PageBean<FirstResourceAllocationDto>>().success(emptyDataPageBean);
             }
         }
         return firstResourceAllocationFeignClient.getFirstResourceAllocationPage(firstResourceAllocationQueryDto);
@@ -144,7 +144,7 @@ public class FirstResourceAllocationController {
             List<Long> orgIdList = firstResourceAllocationQueryDto.getOrgIdList();
             if(orgIdList == null || orgIdList.size() == 0){
                 PageBean emptyDataPageBean = PageBean.getEmptyListDataPageBean(firstResourceAllocationQueryDto.getPageNum(), firstResourceAllocationQueryDto.getPageSize());
-                return new JSONResult<PageBean<ResourceAllocationDto>>().success(emptyDataPageBean);
+                return new JSONResult<PageBean<FirstResourceAllocationDto>>().success(emptyDataPageBean);
             }
         }
         return firstResourceAllocationFeignClient.getFirstResourceAllocationPagePersion(firstResourceAllocationQueryDto);
@@ -208,7 +208,7 @@ public class FirstResourceAllocationController {
             List<Long> orgIdList = firstResourceAllocationQueryDto.getOrgIdList();
             if(orgIdList == null || orgIdList.size() == 0){
                 PageBean emptyDataPageBean = PageBean.getEmptyListDataPageBean(firstResourceAllocationQueryDto.getPageNum(), firstResourceAllocationQueryDto.getPageSize());
-                return new JSONResult<PageBean<ResourceAllocationDto>>().success(emptyDataPageBean);
+                return new JSONResult<PageBean<FirstResourceAllocationDto>>().success(emptyDataPageBean);
             }
         }
         return firstResourceAllocationFeignClient.getFirstResourceAllocationDayPagePersion(firstResourceAllocationQueryDto);
