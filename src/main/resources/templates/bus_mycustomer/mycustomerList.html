@@ -249,7 +249,7 @@
             <el-table-column prop="teleDirectorName" label="电销总监" align="center" width="120px"></el-table-column>
             <el-table-column prop="teleProjectName" label="电销组项目" align="center" width="180px"></el-table-column>
         </el-table>
-        <table-pagination :pager="pager" @change="initList"></table-pagination>
+        <table-pagination v-if="paginationShow" :pager="pager" @change="initList"></table-pagination>
     </div>
     <!--添加到访记录-->
     <el-dialog title="未到访原因" :visible.sync="notVisitdDialogVisible" width="70%">
@@ -1627,6 +1627,7 @@
     var mainDivVM = new Vue({
         el: '#mainDiv',
         data: {
+            paginationShow: false,
             giveTypeList: giveTypeList,
             isShow: false,
             loginUserId: loginUserId,
@@ -1725,6 +1726,21 @@
                 notVisitTime:""
             },
             queryForm: {
+                visitStatus: "",
+                isSign: "",
+                teleGroupId: "",
+                teleSaleId: "",
+                tasteProjectId: "",
+                cusName: "",
+                reserveTime1: "",
+                reserveTime2: "",
+                appiontmentCreateTime1: "",
+                appiontmentCreateTime2: "",
+                allocateTime1: "",
+                allocateTime2: "",
+                isTailMoney: '',
+            },
+            storeForm: {
                 visitStatus: "",
                 isSign: "",
                 teleGroupId: "",
@@ -2365,11 +2381,31 @@
                 });
             },
             showCustomerDetail(row, column) { // 客户详情改成编辑（客户维护）
+                var clueId=row.clueId;
+                // 存储选中信息--start
+                this.setSessionStore("myCustomerListStoreForm", this.storeForm);
+                var otherVal = {
+                    "currentPage": this.pager.currentPage,
+                    "clueId": clueId
+                }
+                this.setSessionStore("myCustomerListOtherVal", otherVal);
+                // 存储选中信息--end
+
                 // window.location.href = '/bus/BusinessCustomer/viewCustomerInfo?clueId=' + row.clueId;
-                window.location.href = '/bus/BusinessCustomer/editCustomerInfo?clueId=' + row.clueId;
+                window.location.href = '/bus/BusinessCustomer/editCustomerInfo?clueId=' + clueId;
             },
             editCustomerDetail(row, column) { // 客户维护
-                window.location.href = '/bus/BusinessCustomer/editCustomerInfo?clueId=' + row.clueId;
+                var clueId=row.clueId;
+                // 存储选中信息--start
+                this.setSessionStore("myCustomerListStoreForm", this.storeForm);
+                var otherVal = {
+                    "currentPage": this.pager.currentPage,
+                    "clueId": clueId
+                }
+                this.setSessionStore("myCustomerListOtherVal", otherVal);
+                // 存储选中信息--end
+
+                window.location.href = '/bus/BusinessCustomer/editCustomerInfo?clueId=' + clueId;
             },
             currentProvince(selVal) {
                 if (!selVal) {
@@ -2634,7 +2670,16 @@
                 })
             },
             toVisitRecordPage(row) {
-                window.location.href = '/busVisitRecord/visitRecordPage?clueId=' + row.clueId + "&visitStatus=" + row.visitStatus + "&signAuditStatus=" + row.signAuditStatus;
+                var clueId=row.clueId;
+                // 存储选中信息--start
+                this.setSessionStore("myCustomerListStoreForm", this.storeForm);
+                var otherVal = {
+                    "currentPage": this.pager.currentPage,
+                    "clueId": clueId
+                }
+                this.setSessionStore("myCustomerListOtherVal", otherVal);
+                // 存储选中信息--end
+                window.location.href = '/busVisitRecord/visitRecordPage?clueId=' + clueId + "&visitStatus=" + row.visitStatus + "&signAuditStatus=" + row.signAuditStatus;
             },
             handleClick(tab, event) {
                 console.log(tab)
@@ -2957,10 +3002,28 @@
                 })
             },
             toSignPage(row) {  // 进入签约单明细  能够 新增付款
-                window.location.href = '/businesssign/visitRecordPage?clueId=' + row.clueId + "&signId=" + row.signId + "&readyOnly=0";
+                var clueId=row.clueId;
+                // 存储选中信息--start
+                this.setSessionStore("myCustomerListStoreForm", this.storeForm);
+                var otherVal = {
+                    "currentPage": this.pager.currentPage,
+                    "clueId": clueId
+                }
+                this.setSessionStore("myCustomerListOtherVal", otherVal);
+                // 存储选中信息--end
+                window.location.href = '/businesssign/visitRecordPage?clueId=' + clueId + "&signId=" + row.signId + "&readyOnly=0";
             },
             toReadOnlySignPage(row) {  // 进入签约单明细  能够 新增付款
-                window.location.href = '/businesssign/visitRecordPage?clueId=' + row.clueId + "&signId=" + row.signId + "&readyOnly=1";
+                var clueId=row.clueId;
+                // 存储选中信息--start
+                this.setSessionStore("myCustomerListStoreForm", this.storeForm);
+                var otherVal = {
+                    "currentPage": this.pager.currentPage,
+                    "clueId": clueId
+                }
+                this.setSessionStore("myCustomerListOtherVal", otherVal);
+                // 存储选中信息--end
+                window.location.href = '/businesssign/visitRecordPage?clueId=' + clueId + "&signId=" + row.signId + "&readyOnly=1";
             },
             selectSigningType(pa1) { //是不是全款
                 // this.formSigning.amountBalance = null;
@@ -3111,8 +3174,38 @@
                         mainDivVM.pager.total = response.data.data.total;
                         mainDivVM.pager.pageSize = response.data.data.pageSize;
                         console.log(mainDivVM.tableData)
+
+                        // 取出存储的id
+                         if(!mainDivVM.paginationShow){
+                             if(mainDivVM.storeId){
+                                 mainDivVM.$nextTick(function(){
+                                    var storage = [];
+                                    mainDivVM.tableData.forEach(function(item, index){
+                                        if(item.clueId === mainDivVM.storeId ){
+                                            storage.push(mainDivVM.tableData[index]);
+                                        }
+                                    })
+                                    mainDivVM.toggleSelection(storage);
+                                })
+                            }
+                         }else{
+                            mainDivVM.removeSessionStore ("myCustomerListStoreForm");
+                            mainDivVM.removeSessionStore ("myCustomerListOtherVal");
+                         }
+                        mainDivVM.paginationShow = true;
+                        mainDivVM.storeForm = mainDivVM.queryForm;
+
                     }
                 })
+            },
+            toggleSelection(rows) { // table select 默认选中fn
+                if (rows) {
+                    rows.forEach(row => {
+                        this.$refs.multipleTable.toggleRowSelection(row,true);
+                    });
+                } else {
+                    this.$refs.multipleTable.clearSelection();
+                }
             },
             number() {//添加签约单余款
                 this.formSigning.amountBalance = this.formSigning.amountBalance.replace(/[^\.\d]/g, '');
@@ -3137,8 +3230,39 @@
                     this.isShow = true
                 }
             },
+            setSessionStore (name, content) {
+                if (!name) return
+                if (typeof content !== 'string') {
+                content = JSON.stringify(content)
+                }
+                window.sessionStorage.setItem(name, content)
+            },
+            getSessionStore (name) {
+                if (!name) return;
+                var content = window.sessionStorage.getItem(name);
+                if (typeof content == 'string') {
+                    content = JSON.parse(content)
+                }
+                return content;
+            },
+            removeSessionStore (name) {
+                if (!name) return
+                return window.sessionStorage.removeItem(name)
+            },
         },
         created() {
+            // window.sessionStorage.clear(); // 点击侧边栏-清除所有cookie
+            // 进入页面判断有是否有存储值
+            if(!this.paginationShow){
+                var storeVal = this.getSessionStore("myCustomerListStoreForm");
+                var otherVal = this.getSessionStore("myCustomerListOtherVal");
+                if(storeVal && otherVal){
+                    this.form = storeVal;
+                    this.$set(this.pager,"currentPage",otherVal.currentPage);
+                    this.storeId = otherVal.clueId;
+                }
+            };
+            //初始化数据列表
             this.initList();
             //  到访店铺类型 vistitStoreTypeArr
             var param = {};
