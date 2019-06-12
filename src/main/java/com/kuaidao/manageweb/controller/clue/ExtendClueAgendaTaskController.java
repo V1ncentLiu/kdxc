@@ -1207,6 +1207,7 @@ public class ExtendClueAgendaTaskController {
                     pushClueReq.setIndustryCategory(
                             String.valueOf(clueAgendaTaskDTO1.getIndustryCategory()));
                     pushClueReq.setProjectId(clueAgendaTaskDTO1.getProjectId());
+                    pushClueReq.setProjectName(clueAgendaTaskDTO.getProjectName());
                     pushClueReq.setCreateUser(user.getId());
                     if (StringUtils.isNotBlank(clueAgendaTaskDTO1.getAge1())) {
                         pushClueReq.setAge(Integer.valueOf(clueAgendaTaskDTO1.getAge1()));
