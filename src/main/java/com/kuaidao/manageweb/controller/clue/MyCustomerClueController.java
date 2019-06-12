@@ -2,6 +2,7 @@ package com.kuaidao.manageweb.controller.clue;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -294,6 +295,10 @@ public class MyCustomerClueController {
                 && callRecord.getData() != null) {
 
             request.setAttribute("callRecord", callRecord.getData());
+            CallRecordRespDTO callRecordRespDTO = callRecord.getData().stream().max(Comparator.comparing(CallRecordRespDTO::getStartTime)).get();
+            request.setAttribute("teleEndTime",new Date(callRecordRespDTO.getStartTime()));
+        }else {
+            request.setAttribute("teleEndTime",new Date());
         }
         ClueQueryDTO queryDTO = new ClueQueryDTO();
 
