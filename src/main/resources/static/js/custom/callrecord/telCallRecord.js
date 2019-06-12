@@ -42,10 +42,12 @@ var myCallRecordVm = new Vue({
         	endTime:'',
         	cno:'',
         	bindPhone:'',
-        	accountId:''
+        	accountId:'',
+        	teleGroupId:'',
         		
         },
         tmList:tmList,//组内电销顾问
+        teleGroupList:teleGroupList,//电销组
         
     },
     methods:{
@@ -277,7 +279,8 @@ var myCallRecordVm = new Vue({
     	},
     	switchSoundBtn(id,url,callSource){
     		if(callSource=='2'){
-    			switchSound(id,url);
+                // switchSound(id,url);
+    			switchSound(id);
     			return;
     		}
     		 var param = {};
@@ -287,7 +290,9 @@ var myCallRecordVm = new Vue({
             	 var data =  response.data
                  if(data.code=='0'){
                 	 var url = data.data;
-                	 switchSound(id,url);
+                	 // switchSound(id,url);
+                     switchSound(id);
+                     document.getElementById('audio').src=url
                      
                  }else{
                 	 console.error(data);
@@ -307,6 +312,30 @@ var myCallRecordVm = new Vue({
                 this.isShow=true
             }          
         },
+        changeTeleGroup(selectedValue){
+        	this.tmList=[];
+        	if(!selectedValue){
+                return;
+            }
+            var param ={};
+            param.id = selectedValue;
+            axios.post('/organization/organization/queryTeleSaleByOrgId', param)
+            .then(function (response) {
+                  var result =  response.data;
+                  var table=result.data;
+                  myCallRecordVm.tmList= table;
+            })
+            .catch(function (error) {
+                 console.log(error);
+            });
+        },
+        clearTeleGroupList(selectedValue){
+        	this.teleGroupList= [];
+        	this.tmList=[];
+        	this.searchForm.accountId='';
+        	this.searchForm.teleGroupId='';
+        }
+        
     	
     },
     created(){

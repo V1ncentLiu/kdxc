@@ -86,10 +86,12 @@ public class ReconciliationConfirmController {
     public String initReconciliationConfirmManager(HttpServletRequest request) {
         UserInfoDTO user = getUser();
         // 查询所有商务大区
-        List<OrganizationRespDTO> busAreaList = getOrgList(null, OrgTypeConstant.SWDQ);
+        List<OrganizationRespDTO> busAreaList =
+                getOrgList(null, OrgTypeConstant.SWDQ, user.getBusinessLine());
         request.setAttribute("busAreaList", busAreaList);
         // 查询所有电销事业部
-        List<OrganizationRespDTO> teleDeptList = getOrgList(null, OrgTypeConstant.DZSYB);
+        List<OrganizationRespDTO> teleDeptList =
+                getOrgList(null, OrgTypeConstant.DZSYB, user.getBusinessLine());
         request.setAttribute("teleDeptList", teleDeptList);
         // 查询所有项目
         JSONResult<List<ProjectInfoDTO>> allProject = projectInfoFeignClient.allProject();
@@ -116,6 +118,7 @@ public class ReconciliationConfirmController {
         JSONResult<List<UserFieldDTO>> queryFieldByUserAndMenu =
                 customFieldFeignClient.queryFieldByUserAndMenu(queryFieldByUserAndMenuReq);
         request.setAttribute("userFieldList", queryFieldByUserAndMenu.getData());
+        request.setAttribute("payModeItem", getDictionaryByCode(DicCodeEnum.PAYMODE.getCode()));
         return "financing/reconciliationConfirmPage";
     }
 
@@ -137,7 +140,7 @@ public class ReconciliationConfirmController {
 
             pageParam.setRoleCode(roleList.get(0).getRoleCode());
         }
-
+        pageParam.setBusinessLine(user.getBusinessLine());
         JSONResult<PageBean<ReconciliationConfirmDTO>> list =
                 reconciliationConfirmFeignClient.list(pageParam);
         return list;
@@ -191,6 +194,7 @@ public class ReconciliationConfirmController {
             @RequestBody ReconciliationConfirmPageParam pageParam, HttpServletRequest request) {
         UserInfoDTO user = getUser();
         pageParam.setUserId(user.getId());
+        pageParam.setBusinessLine(user.getBusinessLine());
         JSONResult<BigDecimal> sumCommissionMoney =
                 reconciliationConfirmFeignClient.sumCommissionMoney(pageParam);
         return sumCommissionMoney;
@@ -214,10 +218,12 @@ public class ReconciliationConfirmController {
      * @param orgDTO
      * @return
      */
-    private List<OrganizationRespDTO> getOrgList(Long parentId, Integer type) {
+    private List<OrganizationRespDTO> getOrgList(Long parentId, Integer type,
+            Integer businessLine) {
         OrganizationQueryDTO queryDTO = new OrganizationQueryDTO();
         queryDTO.setParentId(parentId);
         queryDTO.setOrgType(type);
+        queryDTO.setBusinessLine(businessLine);
         // 查询所有组织
         JSONResult<List<OrganizationRespDTO>> queryOrgByParam =
                 organizationFeignClient.queryOrgByParam(queryDTO);

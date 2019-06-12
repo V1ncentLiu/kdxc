@@ -166,19 +166,63 @@ function priviewOutbound(outboundInputPhone,callSource,clueId,callback){
 					//清空 显示时间
 					//$("#outboundCallStartTime").html("");
 					$('#outboundCallTime').html("");
+					$("#outboundPhoneLocaleArea").html();
+					//查询手机号归属地
+					getPhoneLocale(outboundInputPhone,callSource);
 				}else if(callSource==2){//电销页面外呼
 					homePageVM.tmOutboundCallDialogVisible =true;
 					$("#tmOutboundCallTime").html("");
+					$('#tmOutboundPhoneLocaleArea').html("");
+					//查询手机号归属地
+					getPhoneLocale(outboundInputPhone,callSource);
 				}
 				if (typeof callback === 'function') {
-	            callback();
-	        }
+		            callback();
+		        }
 				
 			}else{
 				console.error(token);
 				homePageVM.$message({message:"外呼失败:"+token.msg,type:'error'});
 			}
 		});
+}
+/**
+ * 查询手机号归属地
+ * @param phone 客户电话
+ * @param callSource 
+ * @returns
+ */
+function getPhoneLocale(phone,callSource){
+	 var param={phone:phone};
+	 axios.post('/call/callRecord/queryPhoneLocale',param)
+     .then(function (response) {
+         var data =  response.data;
+         if(data.code=='0'){
+    		 console.info(data);
+    		 var resData = data.data;
+    		 var result = resData.result;
+    		 if(result=="0"){
+    			 var phoneArea = resData.data;
+    			 if(callSource==1){
+    				 $('#outboundPhoneLocaleArea').html(phoneArea.province+","+phoneArea.city);
+        		 }else if(callSource==2){
+        			 $('#tmOutboundPhoneLocaleArea').html(phoneArea.province+","+phoneArea.city);
+        		 } 
+    		 }else{
+    			 console.error(resData);
+    			 homePageVM.$message({message:"查询手机归属地 "+resData.description,type:'error'});
+    		 }
+    		 
+         }else{
+        	 console.error("查询手机号归属地：%o",response);
+        	 homePageVM.$message({message:"查询手机归属地  "+data.msg,type:'error'});
+         }
+     })
+     .catch(function (error) {
+        console.log(error);
+     })
+     .then(function () {
+     });
 }
 
 

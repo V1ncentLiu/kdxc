@@ -84,7 +84,7 @@
                 </el-form-item>
             </el-form>
             <div slot="footer" class="dialog-footer" style="text-align:center;">
-                <el-button type="primary" @click="saveOneDictionary">确 定</el-button>
+                <el-button type="primary" :disabled="btnDisabled" @click="saveOneDictionary">确 定</el-button>
                 <el-button @click="dialogFormVisible = false">取 消</el-button>
             </div>
         </el-dialog>
@@ -107,7 +107,7 @@
                 </el-form-item>
             </el-form>
             <div slot="footer" class="dialog-footer"  style="text-align:center;">
-                <el-button type="primary" @click="update">确 定</el-button>
+                <el-button type="primary" :disabled="btnDisabled" @click="update">确 定</el-button>
                 <el-button @click="updateDialogFormVisible = false">取 消</el-button>
             </div>
         </el-dialog>
@@ -124,6 +124,7 @@
     var updateDialogVm = new Vue({
         el: '#updateDialog',
         data:{
+            btnDisabled: false,    
             formLabelWidth:"120px",
             updateDialogFormVisible:false,
             add:{
@@ -160,20 +161,23 @@
             update(){
                 var param =  updateDialogVm.add;
                 param.id =  paginationVm.multipleSelection[0].id;
-
+                this.btnDisabled = true; 
                 axios.post('/dictionary/Dictionary/updateDictionary', param)
                     .then(function (response) {
                         console.log(response.data)
                         if(response.data.code==0){
                             updateDialogVm.updateDialogFormVisible=false;
                             updateDialogVm.$message({type: 'success', message: '更新成功!',duration:2000,onClose:function(){
+                                updateDialogVm.btnDisabled = false; 
                                     paginationVm.initTableData(paginationVm.pageNum);
                             }});
                         }else{
                             updateDialogVm.$message.error(response.data.msg);
+                            updateDialogVm.btnDisabled = false;
                         }
                     })
                     .catch(function (error) {
+                        updateDialogVm.btnDisabled = false;
                         console.log(error);
                     });
             },
@@ -195,6 +199,7 @@
     var addDialogVm = new Vue({
         el: '#addDialog',
         data:{
+            btnDisabled: false,  
             formLabelWidth:"120px",
             dialogFormVisible:false,
             add:{
@@ -228,10 +233,12 @@
                 var param = addDialogVm.add;
                 this.$refs['add'].validate((valid) => {
                     if (valid) {
+                        addDialogVm.btnDisabled = true;  
                         axios.post('/dictionary/Dictionary/saveDictionary', param)
                             .then(function (response) {
                                 if (response.data.code == 0) {
                                     addDialogVm.$message({type: 'success', message: '插入成功!',duration:2000,onClose:function(){
+                                            paginationVm.btnDisabled = false;  
                                             paginationVm.initTableData(1);
                                         }});
                                     addDialogVm.dialogFormVisible = false;
@@ -239,9 +246,11 @@
                                 } else {
                                     console.log(response.data)
                                     addDialogVm.$message.error(response.data.msg);
+                                    paginationVm.btnDisabled = false; 
                                 }
                             })
                             .catch(function (error) {
+                                paginationVm.btnDisabled = false; 
                                 console.log(error);
                             });
                     } else {

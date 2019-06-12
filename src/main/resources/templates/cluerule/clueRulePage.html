@@ -29,7 +29,7 @@
     </el-breadcrumb> 
     
     <el-row class="mainWhiteBg">
-        <div class="inforTitle">资源释放领取规则管理</div> 
+        <div class="inforTitle">（{{businessLineName}}）业务线-资源释放领取规则管理</div> 
         <el-form :model="form" :rules="rules" ref="form" class="padding20" :inline="true">
             <div class="marginB20 redcolor">提示：复选框选中则启用此约束，不选中复选框则不
             启用此约束。</div>
@@ -309,7 +309,7 @@
                 <shiro:hasPermission name="aggregation:clueRule:add">       
                    <el-button type="primary" @click="submitForm('form')" :disabled="clueRuleSubmitBtnDiabled">提交</el-button>
                 </shiro:hasPermission>
-                <el-button>取 消</el-button>
+                <el-button @click="cancel">取 消</el-button>
             </div> 
         </el-form> 
     </el-row>
@@ -319,6 +319,8 @@
 <div th:include="_footer_include :: #jsLib"></div>
 <script th:inline="javascript">
     var accountList = [[${accountList}]];
+    var businessLineName = [[${businessLineName}]];
+    var businessLine = [[${businessLine}]];
 </script>
 <script>
     var releaseRuleVM=new Vue({
@@ -328,6 +330,7 @@
             	clueRuleSubmitBtnDiabled:false,
                 isAddAble:true,
                 isShow:false,           
+                businessLineName:businessLineName,
                 checked1:0,
                 checked2:0,     
                 checked3:0,     
@@ -846,7 +849,7 @@
         },
         methods: {
             submitForm(form) {
-            	 this.clueRuleSubmitBtnDiabled = true;
+                this.clueRuleSubmitBtnDiabled = true;
                 this.$refs[form].validate((valid) => {
                     if (valid) {
                         var startTime=releaseRuleVM.form.startTime;
@@ -873,6 +876,7 @@
                         		 var festivalRule ={};
                                  festivalRule.id=festivalRuleId;
                                  festivalRule.isEnabled=festivalRuleIsEnabled;
+                                 festivalRule.businessLine=businessLine;
                                  isFestivalRuleBl=true;
                                  param.festivalRule= festivalRule;
                         	 }
@@ -883,6 +887,7 @@
                         	 festivalRule.startTime=startTime;
                         	 festivalRule.endTime=endTime;
                         	 festivalRule.isEnabled=festivalRuleIsEnabled;
+                        	 festivalRule.businessLine=businessLine;
                         	 isFestivalRuleBl=true;
                         	 param.festivalRule= festivalRule;
                          }
@@ -898,6 +903,7 @@
                             	 var noFollow = {};
                             	 noFollow.id=noFollowId;
                             	 noFollow.isEnabled=autoReleaseRuleIsEnabled;
+                            	 noFollow.businessLine=businessLine;
                             	 isAutoReleaseBl=true;
                             	 autoReleaseRule.push(noFollow);
                              }
@@ -906,6 +912,7 @@
                             	  var follow={};
                                   follow.id=followId;
                                   follow.isEnabled=autoReleaseRuleIsEnabled;
+                                  follow.businessLine=businessLine;
                                   isAutoReleaseBl=true;
                                   autoReleaseRule.push(follow);
                              }
@@ -914,6 +921,7 @@
                             	 var notVisit={};
                                  notVisit.id=noVisitId;
                                  notVisit.isEnabled=autoReleaseRuleIsEnabled;
+                                 notVisit.businessLine=businessLine;
                                  isAutoReleaseBl=true;
                                  autoReleaseRule.push(notVisit);
                              }
@@ -922,6 +930,7 @@
                             	 var unSign={};
                             	 unSign.id=unSignId;
                                  unSign.isEnabled=autoReleaseRuleIsEnabled;
+                                 unSign.businessLine=businessLine;
                                  isAutoReleaseBl=true;
                                  autoReleaseRule.push(unSign);
                              }
@@ -931,6 +940,7 @@
                             	 var invite = {};
                             	 invite.id = inviteId;
                             	 invite.isEnabled=autoReleaseRuleIsEnabled;
+                            	 invite.businessLine=businessLine;
                                  isAutoReleaseBl=true;
                                  autoReleaseRule.push(invite);
                              }
@@ -948,6 +958,7 @@
                             noFollow.retentionDay = form.number3;
                             noFollow.isReleaseRemind = form.remindValue1;
                             noFollow.remindTime = form.number13;
+                            noFollow.businessLine = businessLine;
                             autoReleaseRule.push(noFollow);
                             //2.
                             var follow={};
@@ -959,11 +970,13 @@
                             follow.retentionDay = form.number6;
                             follow.isReleaseRemind = form.remindValue2;
                             follow.remindTime = form.number13;
+                            follow.businessLine = businessLine;
                             autoReleaseRule.push(follow);
                             //4.invite
                             var invite={};
                             invite.id=form.id11;
                             invite.isEnabled=autoReleaseRuleIsEnabled;
+                            invite.businessLine=businessLine;
                             invite.customerStatus=4;
                             invite.timeoutRelease=form.number19;
                             invite.retentionTimes=form.number20;
@@ -978,6 +991,7 @@
                             var notVisit={};
                             notVisit.id=form.id3;
                             notVisit.isEnabled=autoReleaseRuleIsEnabled;
+                            notVisit.businessLine=businessLine;
                             notVisit.customerStatus=5;
                             notVisit.timeoutRelease=form.number7;
                             notVisit.retentionTimes=form.number8;
@@ -989,6 +1003,7 @@
                             var  unSign={};
                             unSign.id=form.id4;
                             unSign.isEnabled=autoReleaseRuleIsEnabled;
+                            unSign.businessLine=businessLine;
                             unSign.customerStatus=6;
                             unSign.timeoutRelease=form.number10;
                             unSign.retentionTimes=form.number11;
@@ -1012,6 +1027,7 @@
                         		  var dismissionTeleRule ={};
                                   dismissionTeleRule.id=dismissionId;
                                   dismissionTeleRule.isEnabled=dismissionTeleRuleIsEnabled;
+                                  dismissionTeleRule.businessLine=businessLine;
                                   forceRuleList.push(dismissionTeleRule);
                                   isDismissionBl=true;
                         	  }
@@ -1020,6 +1036,7 @@
                         	  var dismissionTeleRule ={};
                               dismissionTeleRule.id=form.id5;
                               dismissionTeleRule.isEnabled=dismissionTeleRuleIsEnabled;
+                              dismissionTeleRule.businessLine=businessLine;
                               dismissionTeleRule.days=form.number14;
                               dismissionTeleRule.recycleType=1;
                               isDismissionBl=true;
@@ -1034,6 +1051,7 @@
                         		  var teleRule ={};
                                   teleRule.id=teleForceRuleId;
                                   teleRule.isEnabled=isTeleForceRuleIsEnabled;
+                                  teleRule.businessLine=businessLine;
                                   forceRuleList.push(teleRule);
                                   isTeleForceRule = true;
                         	  }
@@ -1042,6 +1060,7 @@
                         	  var teleRule ={};
                               teleRule.id=form.id6;
                               teleRule.isEnabled=isTeleForceRuleIsEnabled;
+                              teleRule.businessLine=businessLine;
                               teleRule.days=form.number15;
                               teleRule.recycleType=2;
                               forceRuleList.push(teleRule);
@@ -1066,6 +1085,7 @@
                         		 var teleDirectorRule={};
                                  teleDirectorRule.id=form.id7;
                                  teleDirectorRule.isEnabled=teleDirectorRuleIsEnabled;
+                                 teleDirectorRule.businessLine=businessLine;
                                  publicPoolRuleList.push(teleDirectorRule);
                                  isTeleDirectorRuleBl=true;
                         	 }
@@ -1075,6 +1095,7 @@
                              var teleDirectorRule={};
                              teleDirectorRule.id=form.id7;
                              teleDirectorRule.isEnabled=teleDirectorRuleIsEnabled;
+                             teleDirectorRule.businessLine=businessLine;
                              teleDirectorRule.limitNum=form.number16;
                              teleDirectorRule.type=1;
                              publicPoolRuleList.push(teleDirectorRule);
@@ -1117,6 +1138,7 @@
                         		  var teleRule={};
                                   teleRule.id=form.id8;
                                   teleRule.isEnabled=telRuleIsEnabled;
+                                  teleRule.businessLine=businessLine;
                                   publicPoolRuleList.push(teleRule);
                                   isTelRuleBl = true;
                         	 }
@@ -1124,6 +1146,7 @@
                         	   var teleRule={};
                                teleRule.id=form.id8;
                                teleRule.isEnabled=telRuleIsEnabled;
+                               teleRule.businessLine=businessLine;
                                teleRule.limitNum=form.number17;
                                teleRule.type=2;
                                publicPoolRuleList.push(teleRule);
@@ -1138,6 +1161,7 @@
                         		 var busGroupRule={};
                                  busGroupRule.id=form.id9;
                                  busGroupRule.isEnabled=busGroupRuleIsEnabled;
+                                 busGroupRule.businessLine=businessLine;
                                  publicPoolRuleList.push(busGroupRule);
                                  isBusGroupRuleBl = true;
                         	 }
@@ -1146,6 +1170,7 @@
                         	 var busGroupRule={};
                              busGroupRule.id=form.id9;
                              busGroupRule.isEnabled=busGroupRuleIsEnabled;
+                             busGroupRule.businessLine=businessLine;
                              busGroupRule.limitNum=form.number18;
                              busGroupRule.type=3;
                              publicPoolRuleList.push(busGroupRule);
@@ -1162,7 +1187,7 @@
                         	  this.clueRuleSubmitBtnDiabled=false;
                         	return ;
                         }
-                         
+                        param.businessLine=businessLine;
                         axios.post('/cluerule/clueRule/insertAndUpdateClueRule',param)
                         .then(function (response) {
                             var data =  response.data
@@ -1171,17 +1196,20 @@
                                 
                                releaseRuleVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
                             	   //releaseRuleVM.initClueRule();
+                                   releaseRuleVM.clueRuleSubmitBtnDiabled=false;
                             	   location.reload();
                             	   
                                }});  ;  
                             }else{
                             	releaseRuleVM.$message({message:data.msg,type:'error'});
+                                releaseRuleVM.clueRuleSubmitBtnDiabled=false;
                                 console.error(data);
                             }
                         
                         })
                         .catch(function (error) {
-                             console.log(error);
+                            releaseRuleVM.clueRuleSubmitBtnDiabled=false;
+                            console.log(error);
                         }).then(function(){
                         	releaseRuleVM.clueRuleSubmitBtnDiabled=false;
                         });
@@ -1239,11 +1267,15 @@
                 this.form.domains.push({
                 	teleDirectorId:'',
                 	limitNum: '',
+                	businessLine: businessLine,
                     key: Date.now()
                 });
             },
             addDomains(){
                 this.isShow=true
+            },
+            cancel(){//取消
+            	location.reload();
             },
             checked6Change(value){
                 if(value==false){

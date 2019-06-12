@@ -2,6 +2,7 @@ package com.kuaidao.manageweb.controller.clue;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -294,6 +295,10 @@ public class MyCustomerClueController {
                 && callRecord.getData() != null) {
 
             request.setAttribute("callRecord", callRecord.getData());
+            CallRecordRespDTO callRecordRespDTO = callRecord.getData().stream().max(Comparator.comparing(CallRecordRespDTO::getStartTime)).get();
+            request.setAttribute("teleEndTime",new Date(callRecordRespDTO.getStartTime()));
+        }else {
+            request.setAttribute("teleEndTime",new Date());
         }
         ClueQueryDTO queryDTO = new ClueQueryDTO();
 
@@ -330,6 +335,12 @@ public class MyCustomerClueController {
         JSONResult<List<TrackingRespDTO>> trackingList = trackingFeignClient.queryList(dto);
         if (trackingList != null && trackingList.SUCCESS.equals(trackingList.getCode())
                 && trackingList.getData() != null) {
+            List<TrackingRespDTO> trackingRespDTOList = trackingList.getData();
+            for(TrackingRespDTO trackingRespDTO : trackingRespDTOList){
+                if(trackingRespDTO.getCallTime() == null ){
+                    trackingRespDTO.setCallTime(new Date());
+                }
+            }
             request.setAttribute("trackingList", trackingList.getData());
         } else {
             request.setAttribute("trackingList", new ArrayList());
@@ -817,6 +828,9 @@ public class MyCustomerClueController {
             dto.setOrgId(user.getOrgId());
             dto.setUserId(user.getId());
         }
+        if(user.getBusinessLine() != null){
+            dto.setBusinessLine(user.getBusinessLine());
+        }
         if (null != dto.getRepeatUserId() && null != dto.getApplyUserId()) {
             IdListLongReq idListLongReq = new IdListLongReq();
             List<Long> idList = new ArrayList<>();
@@ -863,12 +877,16 @@ public class MyCustomerClueController {
     @RequestMapping("/listByOrgAndRole")
     @ResponseBody
     public JSONResult<List<UserInfoDTO>> listByOrgAndRole(HttpServletRequest request) {
+        UserInfoDTO user = getUser();
         UserOrgRoleReq userRole = new UserOrgRoleReq();
         List<Integer> status = new ArrayList();
         status.add(1);
         status.add(3);
         userRole.setRoleCode(RoleCodeEnum.DXCYGW.name());
         userRole.setStatusList(status);
+        if(user.getBusinessLine() != null ){
+            userRole.setBusinessLine(user.getBusinessLine());
+        }
         return userInfoFeignClient.listByOrgAndRole(userRole);
     }
 
@@ -892,6 +910,9 @@ public class MyCustomerClueController {
         if (null != user) {
             dto.setOrgId(user.getOrgId());
             dto.setUserId(user.getId());
+            if(user.getBusinessLine() != null){
+                dto.setBusinessLine(user.getBusinessLine());
+            }
         }
         if (null != dto.getRepeatUserId()) {
             IdEntityLong id = new IdEntityLong();
@@ -933,6 +954,10 @@ public class MyCustomerClueController {
                     basic.setCreateUser(user.getId());
                     basic.setCreateTime(new Date());
                 }
+                if(user.getBusinessLine() != null){
+                    basic.setBusinessLine(user.getBusinessLine());
+                }
+                dto.setClueBasic(basic);
             }
             // 电销关联数据
             ClueRelateDTO relation = new ClueRelateDTO();

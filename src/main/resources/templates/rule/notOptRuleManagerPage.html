@@ -27,11 +27,12 @@
     	<shiro:hasPermission name="clueAssignRule:notOptRuleManager:delete">
         	<el-button type="danger" @click="deleteFun"><i class="el-icon-delete"></i>删除</el-button>
         </shiro:hasPermission>
+        	<el-button type="primary" @click="copyFun"><i class="el-icon-edit"></i>复制规则</el-button>
     </el-row>
     <div class="mainSearchBg">        
         <div class="mainSearchFormBox">
             <el-form :inline="true" class="demo-form-inline mainSearchForm" :model="form" ref="form">
-                <el-form-item label="规则名称:" label-width="60px">
+                <el-form-item label="规则名称:" label-width="80px">
                     <el-input v-model="form.ruleName" placeholder="规则名称"></el-input>
                 </el-form-item>
                 <el-form-item label="资源项目:">
@@ -68,9 +69,36 @@
                         placeholder="选择日期时间">
                     </el-date-picker>
                 </el-form-item>
+                <el-row v-show="isShow">
+                    <el-form-item label="分配电销组:" label-width="80px">
+                        <el-select v-model="form.teleorg" placeholder="选择分配电销组"  clearable  filterable>
+                            <el-option
+                                v-for="item in orgTeleArr"
+                                :key="item.id"
+                                :label="item.name"
+                                :value="item.id">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
+                    <el-form-item label="最后编辑时间:">
+                        <el-date-picker
+                            v-model="form.updateTimeBegin"
+                            type="datetime"
+                            placeholder="选择日期时间">
+                        </el-date-picker>
+                    </el-form-item>
+                    <el-form-item label="—" class="widthauto">
+                        <el-date-picker
+                            v-model="form.updateTimeEnd"
+                            type="datetime"
+                            placeholder="选择日期时间">
+                        </el-date-picker>
+                    </el-form-item>
+                </el-row>
                 <div class="mainSearchBtnBox"> 
                     <el-button icon="el-icon-search" type="primary" @click="searchTable('form')"  class="searchBtn">搜索</el-button>
                     <!-- <el-button type="info" class="searchBtn">取消</el-button>  -->
+                    <span style="color: #5c6be8;cursor: pointer;margin:0 10px;" @click="toogleClick"><span v-if="isShow">收起</span><span v-else>展开更多</span><i :class="{'greycolor paddingL6 el-icon-arrow-up':isShow,'greycolor paddingL6 el-icon-arrow-down':!isShow}"></i></span>
                 </div> 
             </el-form>
         </div>
@@ -94,10 +122,12 @@
                 <el-table-column align="center" prop="projectId" label="资源项目" :formatter="transformProject"></el-table-column>
                 <el-table-column align="center" prop="searchWord" label="包含搜索词"  width="130"></el-table-column>
                 <el-table-column align="center" prop="notSearchWord" label="不包含搜索词" width="150"></el-table-column>
+                <el-table-column align="center" prop="updateTime" label="最后编辑时间"  :formatter="dateFormat"></el-table-column>
                 <el-table-column align="center" prop="createTime" label="创建时间" :formatter="dateFormat" width="170"></el-table-column>
                 <el-table-column align="center" prop="startTime" label="规则有效开始时间"  :formatter="dateFormat" width="170"></el-table-column>
                 <el-table-column align="center" prop="endTime" label="规则有效结束时间"  :formatter="dateFormat" width="170"></el-table-column>
                 <el-table-column align="center" prop="createUserName" label="创建人"></el-table-column>
+                <el-table-column align="center" prop="updateUserName" label="最后编辑人"></el-table-column>
                 <el-table-column align="center" prop="teamName" label="分配小组"  width="200"></el-table-column>
                 <el-table-column align="center" prop="handler" label="操作" width="120">
                     <template slot-scope="scope"> 
@@ -204,10 +234,13 @@ var projectList=[[${projectList}]];//项目集合
 var adsenseList=[[${adsenseList}]];//广告位集合
 var clueTypeList=[[${clueTypeList}]];//资源类型集合
 var mediumList=[[${mediumList}]];//媒介集合
+var userId=[[${userId}]];//登录人账号id
+var queryOrg=[[${queryOrg}]];//电销组
     var ocmVM = new Vue({
         el: '#optimizeClueManagement',
         data: function() {
             return {
+                isShow:false,
                 dialogFormVisible: false,
                 multipleSelection: [],//选择行
                 pager:{
@@ -221,6 +254,9 @@ var mediumList=[[${mediumList}]];//媒介集合
                     status:'',
                     searchStartTime:'',
                     searchEndTime:'',
+                    teleorg:'',
+                    updateTimeBegin:'',
+                    updateTimeEnd:''
                 },
                 dialogForm:{
                 	 ruleName:'',
@@ -238,6 +274,7 @@ var mediumList=[[${mediumList}]];//媒介集合
                 dataTable: [],
                 dialogTableData:[],
                 projectOptions:projectList,
+                orgTeleArr:queryOrg,
                 statusOptions: [{
                     value: 1,
                     name: '有效'
@@ -272,6 +309,13 @@ var mediumList=[[${mediumList}]];//媒介集合
                 var rowIds = [];
                 for(var i=0;i<rows.length;i++){
              	   var curRow = rows[i];
+             	   if(curRow.createUser+""!=userId){
+             		  this.$message({
+                          message: '不允许删除非本人创建的规则',
+                          type: 'warning'
+                        });
+                       return;
+             	   }
                     rowIds.push(curRow.id);
                     rowNames.push("【"+curRow.ruleName+"】");
                 }
@@ -287,6 +331,47 @@ var mediumList=[[${mediumList}]];//媒介集合
                      var data =  response.data;
                      if(data.code=='0'){
                     	 ocmVM.$message({message:'删除成功',type:'success',duration:1000,onClose:function(){
+                     		ocmVM.searchTable();
+                 	    }});
+                         
+                     }else{
+                    	 ocmVM.$message({
+                             message: "接口调用失败",
+                             type: 'error'
+                           }); 
+                     }
+                 })
+                 .catch(function (error) {
+                   console.log(error);
+                 })
+                 .then(function () {
+                 	
+                 });
+             }).catch(() => {
+                    
+             });
+            },
+            copyFun() {
+            	var rows = this.multipleSelection;
+                if(rows.length!=1){
+                    this.$message({
+                       message: '请选择一条数据操作',
+                       type: 'warning'
+                     });
+                    return;
+                }
+             this.$confirm('确定要复制此规则吗？', '提示', {
+                 confirmButtonText: '确定',
+                 cancelButtonText: '取消',
+                 type: 'warning'
+             }).then(() => {
+             	  //复制
+             	var param  = {id:rows[0].id};
+                 axios.post('/clueAssignRule/optRule/copy',param)
+                 .then(function (response) {
+                     var data =  response.data;
+                     if(data.code=='0'){
+                    	 ocmVM.$message({message:'复制成功',type:'success',duration:1000,onClose:function(){
                      		ocmVM.searchTable();
                  	    }});
                          
@@ -342,6 +427,15 @@ var mediumList=[[${mediumList}]];//媒介集合
                     });
                     return;
                 }
+              var updateTimeBegin=this.form.updateTimeBegin;
+              var updateTimeEnd=this.form.updateTimeEnd;
+              if(updateTimeEnd && updateTimeBegin>updateTimeEnd){
+                this.$message({
+                  message: '最后编辑时间的结束时间不允许选择早于开始时间',
+                  type: 'warning'
+                });
+                return;
+              }
                 var param =this.form;
                 param.pageSize = this.pager.pageSize;
                 param.pageNum = this.pager.currentPage;
@@ -508,6 +602,13 @@ var mediumList=[[${mediumList}]];//媒介集合
             	    }
                   return text;
              },
+              toogleClick(){
+                if(this.isShow){
+                  this.isShow=false
+                }else{
+                  this.isShow=true
+                }
+              },
         },
         created(){
             console.info("create method");
