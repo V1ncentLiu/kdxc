@@ -147,6 +147,7 @@ public class PublicCustomerResourcesController {
             OrganizationQueryDTO dto = new OrganizationQueryDTO();
             dto.setSystemCode(SystemCodeConstant.HUI_JU);
             dto.setOrgType(OrgTypeConstant.DXZ);
+            dto.setBusinessLine(user.getBusinessLine());
             JSONResult<List<OrganizationRespDTO>> dzList =
                     organizationFeignClient.queryOrgByParam(dto);
             long endTime2 = System.currentTimeMillis();
@@ -255,6 +256,7 @@ public class PublicCustomerResourcesController {
             logger.info("共有池电销相关角色:{}", roleCode);
             dto.setRoleCode(roleInfoDTO.getRoleCode());
         }
+        dto.setBusinessLine(user.getBusinessLine());
         return publicCustomerFeignClient.queryListPage(dto);
     }
 

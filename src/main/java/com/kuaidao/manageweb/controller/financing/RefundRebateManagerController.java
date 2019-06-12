@@ -78,11 +78,14 @@ public class RefundRebateManagerController {
     @RequestMapping("/initRefundRebateManager")
     @RequiresPermissions("financing:refundRebateManager:view")
     public String initRefundRebateManager(HttpServletRequest request) {
+        UserInfoDTO user = getUser();
         // 查询所有商务大区
-        List<OrganizationRespDTO> busAreaList = getOrgList(null, OrgTypeConstant.SWDQ);
+        List<OrganizationRespDTO> busAreaList =
+                getOrgList(null, OrgTypeConstant.SWDQ, user.getBusinessLine());
         request.setAttribute("busAreaList", busAreaList);
         // 查询所有电销事业部
-        List<OrganizationRespDTO> teleDeptList = getOrgList(null, OrgTypeConstant.DZSYB);
+        List<OrganizationRespDTO> teleDeptList =
+                getOrgList(null, OrgTypeConstant.DZSYB, user.getBusinessLine());
         request.setAttribute("teleDeptList", teleDeptList);
         // 查询所有省
         JSONResult<List<SysRegionDTO>> getproviceList = sysRegionFeignClient.getproviceList();
@@ -92,6 +95,7 @@ public class RefundRebateManagerController {
         request.setAttribute("vistitStoreTypeList",
                 getDictionaryByCode(DicCodeEnum.VISITSTORETYPE.getCode()));
         request.setAttribute("ossUrl", ossUrl);
+        request.setAttribute("payModeItem", getDictionaryByCode(DicCodeEnum.PAYMODE.getCode()));
         return "financing/refundRebateManagerPage";
     }
 
@@ -113,7 +117,7 @@ public class RefundRebateManagerController {
 
             pageParam.setRoleCode(roleList.get(0).getRoleCode());
         }
-
+        pageParam.setBusinessLine(user.getBusinessLine());
         JSONResult<PageBean<RefundRebateListDTO>> list = refundRebateFeignClient.list(pageParam);
         return list;
     }
@@ -148,6 +152,7 @@ public class RefundRebateManagerController {
         // 插入申请人id
         req.setCreateUser(user.getId());
         req.setType(AggregationConstant.REFOUND_REBATE_TYPE.REFOUND_TYPE);
+        req.setBusinessLine(user.getBusinessLine());
         JSONResult<Long> applyRefund = refundRebateFeignClient.applyRefundRebate(req);
         return applyRefund;
     }
@@ -168,6 +173,7 @@ public class RefundRebateManagerController {
         // 插入申请人id
         req.setCreateUser(user.getId());
         req.setType(AggregationConstant.REFOUND_REBATE_TYPE.REBATE_TYPE);
+        req.setBusinessLine(user.getBusinessLine());
         JSONResult<Long> applyRebate = refundRebateFeignClient.applyRefundRebate(req);
         return applyRebate;
     }
@@ -190,10 +196,12 @@ public class RefundRebateManagerController {
      * @param orgDTO
      * @return
      */
-    private List<OrganizationRespDTO> getOrgList(Long parentId, Integer type) {
+    private List<OrganizationRespDTO> getOrgList(Long parentId, Integer type,
+            Integer businessLine) {
         OrganizationQueryDTO queryDTO = new OrganizationQueryDTO();
         queryDTO.setParentId(parentId);
         queryDTO.setOrgType(type);
+        queryDTO.setBusinessLine(businessLine);
         // 查询所有组织
         JSONResult<List<OrganizationRespDTO>> queryOrgByParam =
                 organizationFeignClient.queryOrgByParam(queryDTO);

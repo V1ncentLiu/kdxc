@@ -157,7 +157,7 @@
             </el-form-item>
         </el-form>
         <div slot="footer" style="text-align: center" class="dialog-footer">
-            <el-button type="primary" @click="addbutton">提交</el-button>
+            <el-button type="primary" :disabled="btnDisabled" @click="addbutton">提交</el-button>
             <el-button @click="dialogFormVisible= false">取消</el-button>
         </div>
     </el-dialog>
@@ -177,7 +177,8 @@
     var orgVM =  new Vue({
         el: '#organizationManage',
         data: {
-          isShow:false,
+            isShow:false,
+            btnDisabled: false,
         	formLabelWidth: '150px',
         	form:{
         		dealStatus:"1"
@@ -379,17 +380,23 @@
                     	}
      		           var param={};
     		           param.ids=ids;
-    		           param.valid = this.form.dealStatus;
+                       param.valid = this.form.dealStatus;
+                       
+                       this.btnDisabled = true;  
+
     		           axios.post('/businesssign/updateBusinessSignDTOValidByIds',param).then(function (response) {
-	                  	  console.log(response);
-	                      if(null !==response && response.data !=null && response.data.code=='0'){
+                            console.log(response);
+                            if(null !==response && response.data !=null && response.data.code=='0'){
+                              orgVM.btnDisabled = false; 
 	                    	  window.location.href="/businesssign/businessSignValidPage"; 
 	                     }else{
-	                    	 alert(response.data.data.message);
+                            alert(response.data.data.message);
+                            orgVM.btnDisabled = false; 
 	                  	  	return ;
 	                     } 
 	                  }).catch(function (error) {
                        console.log(error);
+                       orgVM.btnDisabled = false; 
                    })
                    .then(function () {
                      // always executed

@@ -17,7 +17,7 @@
     </el-breadcrumb>
 
     <el-row class="mainWhiteBg">
-        <div class="inforTitle">修改邀约区域划分</div>
+        <div class="inforTitle">修改商务布局管理</div>
         <el-row :gutter="20">
             <el-form :model="form" :rules="rules" ref="form" class="mainWhitePadding">
             	<el-row>
@@ -124,7 +124,7 @@
     <el-dialog title="确定要执行批量操作？" :visible.sync="submitdialogFormVisible" >
        
         <div slot="footer" class="dialog-footer">
-            <el-button type="primary" @click="onSubmit('form')">确 定</el-button>
+            <el-button type="primary" :disabled="btnDisabled" @click="onSubmit('form')">确 定</el-button>
             <el-button type="info" @click="submitdialogFormVisible =false">取 消</el-button>
         </div>
     </el-dialog>
@@ -156,6 +156,7 @@
         el: '#userManage',
         data: function() {
             return {
+				btnDisabled: false,
             	inviteAreaDTOs:"",
             	submitdialogFormVisible:false,
             	add:"",
@@ -512,19 +513,23 @@
 	                  provinceobj = this.proviceslist.find((item)=>{
 	                     // return (','+provincestrs+',').includes('选项0')item.id === param.telemarketingTeamId;
 	                  });
-	      	             console.info(param);
+					    // console.info(param);
+						addUserVm.btnDisabled = true; 
 	      	            axios.post("/invitearea/updateInviteArea", param)
 	      	            .then(function (response) {
 	      	            	console.info(response);
 	      	            	var data =response.data;
 	      	            	if(data.code!="0"){
 	      	            		addUserVm.$message(data.msg);
+								addUserVm.btnDisabled = false; 
 	      	            	}else{
+								addUserVm.btnDisabled = false; 
 	      	                	document.location.href='/invitearea/inviteAreaList';
 	      	            	}
 	      	            })
 	      	            .catch(function (error) {
-	      	                 console.log(error);
+							console.log(error);
+							addUserVm.btnDisabled = false; 
 	      	            });
       	             
          	          } else {

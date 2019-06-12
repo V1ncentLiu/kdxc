@@ -102,7 +102,7 @@
                 </el-row>
             </div>
             <div class="padding20 f-tac">            
-                <el-button type="primary" @click="submitForm('form')">提交</el-button>
+                <el-button type="primary" :disabled="btnDisabled" @click="submitForm('form')">提交</el-button>
                 <el-button  @click="reBackModule">取 消</el-button>
             </div> 
         </el-form>
@@ -159,6 +159,7 @@
         el: '#addModule',
         data: function() {
             return {
+                btnDisabled: false,   
                 items: checkOptions,
                 dialogFormVisible: false,
                 form: moduleData,
@@ -281,21 +282,25 @@
                         param.iconName=submitData.iconName;
                         param.iconUrl=submitData.iconUrl;
                         param.description=submitData.description;
-                    	 this.loading = true;
+                        this.loading = true;
+                        this.btnDisabled = true; 
                         axios.post('/module/moduleManager/updateModuleInfo',param)
                         .then(function (response) {
                         	addModuleVM.loading = false;
                             var data =  response.data
                             if(data.code=='0'){
                             	 addModuleVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
+                                    addModuleVM.btnDisabled = false; 
                             	 window.location.href="/module/moduleManager/initModuleInfo?moduleId="+moduleData.parentId; 
                             	 }}); 
                             }else{
+                                addModuleVM.btnDisabled = false; 
                             	console.error(data);
                             }
                            
                         }) .catch(function (error) {
-                        	addModuleVM.loading = false;
+                            addModuleVM.loading = false;
+                            addModuleVM.btnDisabled = false; 
                           console.log(error);
                         })  .then(function () {
                         	addModuleVM.loading = false;

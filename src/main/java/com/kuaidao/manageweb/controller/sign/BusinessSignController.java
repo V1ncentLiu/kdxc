@@ -13,6 +13,7 @@ import com.kuaidao.aggregation.dto.sign.BusinessSignDTO;
 import com.kuaidao.aggregation.dto.sign.PayDetailDTO;
 import com.kuaidao.aggregation.dto.sign.SignParamDTO;
 import com.kuaidao.aggregation.dto.visitrecord.BusVisitRecordRespDTO;
+import com.kuaidao.common.constant.DicCodeEnum;
 import com.kuaidao.common.constant.OrgTypeConstant;
 import com.kuaidao.common.constant.SystemCodeConstant;
 import com.kuaidao.common.entity.IdEntityLong;
@@ -111,9 +112,13 @@ public class BusinessSignController {
    */
   @RequestMapping("/businessSignValidPage")
   public String businessSignValidPage(HttpServletRequest request) {
+    UserInfoDTO user = CommUtil.getCurLoginUser();
     OrganizationQueryDTO orgDto = new OrganizationQueryDTO();
     orgDto.setOrgType(OrgTypeConstant.SWZ);
     orgDto.setSystemCode(SystemCodeConstant.HUI_JU);
+    if(user.getBusinessLine() != null){
+      orgDto.setBusinessLine(user.getBusinessLine());
+    }
     // 商务小组
     JSONResult<List<OrganizationRespDTO>> swList =
         organizationFeignClient.queryOrgByParam(orgDto);
@@ -143,6 +148,10 @@ public class BusinessSignController {
   @ResponseBody
   public JSONResult<PageBean<BusinessSignDTO>> businessSignValidList(HttpServletRequest request,
       @RequestBody BusinessSignDTO businessSignDTO) {
+    UserInfoDTO user = CommUtil.getCurLoginUser();
+    if(user.getBusinessLine() != null){
+      businessSignDTO.setBusinessLine(user.getBusinessLine());
+    }
     JSONResult<PageBean<BusinessSignDTO>> list =
         businessSignFeignClient.businessSignValidList(businessSignDTO);
     return list;
@@ -193,6 +202,9 @@ public class BusinessSignController {
       dto.setMakeUpTime(null);
       dto.setAmountBalance(null);
     }
+    if(user.getBusinessLine() != null){
+      dto.setBusinessLine(user.getBusinessLine());
+    }
     return businessSignFeignClient.saveSign(dto);
   }
 
@@ -211,6 +223,9 @@ public class BusinessSignController {
     if(dto.getSignType()==1){ // 全款
       dto.setMakeUpTime(null);
       dto.setAmountBalance(null);
+    }
+    if(user.getBusinessLine() != null){
+      dto.setBusinessLine(user.getBusinessLine());
     }
     return businessSignFeignClient.updateSign(dto);
   }
@@ -547,6 +562,7 @@ public class BusinessSignController {
     request.setAttribute("signId", signId);
     request.setAttribute("readyOnly", readyOnly); // readyOnly == 1 页面只读（没有添加按钮）
     request.setAttribute("signStatus",sign.getSignStatus());
+    request.setAttribute("payModeItem", getDictionaryByCode(DicCodeEnum.PAYMODE.getCode()));
     return "clue/showSignAndPayDetail";
   }
 
@@ -693,6 +709,7 @@ public class BusinessSignController {
     request.setAttribute("clueId", clueId);
     request.setAttribute("signId", signId);
     request.setAttribute("readyOnly", readyOnly); // readyOnly == 1 页面只读（没有添加按钮）
+    request.setAttribute("payModeItem", getDictionaryByCode(DicCodeEnum.PAYMODE.getCode()));
     return "bus_mycustomer/showSignAndPayDetail";
   }
   /**

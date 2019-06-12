@@ -435,39 +435,40 @@ var ratioList = [[${ratioList}]];//比例集合
             onSubmit(formName) {
             	 this.$refs[formName].validate((valid) => {
           	       if (valid) {
-	       	            projectVm.submitDisabled=true;
-          	    	   
-	       	            var param = projectVm.form;
-	       	          	var shopType='';
-	       	          	for(var i=0;i<param.shopTypeList.length;i++){
-	                       if(i==0){
-	                    	   shopType = param.shopTypeList[i];
-	                       }else{
-	                    	   shopType = shopType+","+param.shopTypeList[i];
-	                       }
-	                    }
-	       	      param.ratio =  param.ratio.replace("%","");
+                         
+                         var param = projectVm.form;
+                         var shopType='';
+                         for(var i=0;i<param.shopTypeList.length;i++){
+                             if(i==0){
+                                 shopType = param.shopTypeList[i];
+                                }else{
+                                    shopType = shopType+","+param.shopTypeList[i];
+                                }
+                            }
+                            param.ratio =  param.ratio.replace("%","");
 	       	         	param.shopType=shopType;
 	       	         	var url="/aggregation/projectManager/saveProject";
 	       	         	if(param.id!=""){
-	       	         		url="/aggregation/projectManager/updateProject";
+                                url="/aggregation/projectManager/updateProject";
 	       	         	}
+                        projectVm.submitDisabled=true;
 	       	            axios.post(url, param)
 	       	            .then(function (response) {
-	       	            	projectVm.submitDisabled=false;
-	       	            	console.info(response);
+                            // console.info(response);
 	       	            	var data =response.data;
 	       	            	if(data.code!="0"){
-	       	            		projectVm.$message(data.msg);
-	       	            	}else{
-	       	            		projectVm.$message({message:'提交成功',type:'success',duration:1000,onClose:function(){
-		       	                	document.location.href='/aggregation/projectManager/initProjectList';
+                                   projectVm.$message(data.msg);
+                                   projectVm.submitDisabled=false;
+                                }else{
+                                    projectVm.$message({message:'提交成功',type:'success',duration:1000,onClose:function(){
+                                        projectVm.submitDisabled=false;
+                                        document.location.href='/aggregation/projectManager/initProjectList';
 	                      	    }});
 	       	            	}
 	       	            })
 	       	            .catch(function (error) {
 	       	            	projectVm.submitDisabled=false;
-	       	                 console.log(error);
+                            console.log(error);
 	       	            });
 	          	    } else {
          	        	console.log('数据未通过校验！');

@@ -258,7 +258,8 @@ var myCallRecordVm = new Vue({
     	},
     	switchSoundBtn(id,url,callSource){
     		if(callSource=='2'){
-    			switchSound(id,url);
+    			// switchSound(id,url);
+                switchSound(id);
     			return;
     		}
     		 var param = {};
@@ -268,8 +269,9 @@ var myCallRecordVm = new Vue({
             	 var data =  response.data
                  if(data.code=='0'){
                 	 var url = data.data;
-                	 switchSound(id,url);
-                     
+                     // switchSound(id,url);
+                	 switchSound(id);
+                     document.getElementById('audio').src=url
                  }else{
                 	 console.error(data);
                 	 myCallRecordVm.$message({message:data.msg,type:'error'});

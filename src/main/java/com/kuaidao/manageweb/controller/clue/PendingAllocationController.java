@@ -99,14 +99,14 @@ public class PendingAllocationController {
             JSONResult<OrganizationDTO> queryOrgById =
                     organizationFeignClient.queryOrgById(new IdEntity(orgId.toString()));
             List<Map<String, Object>> saleGroupList =
-                    getSaleGroupList(queryOrgById.getData().getParentId());
+                    getSaleGroupList(queryOrgById.getData().getParentId(), user);
             request.setAttribute("saleGroupList", saleGroupList);
 
 
         } else if (roleList != null
                 && RoleCodeEnum.DXFZ.name().equals(roleList.get(0).getRoleCode())) {
             // 如果当前登录的为电销副总,查询所有下属电销组
-            List<Map<String, Object>> saleGroupList = getSaleGroupList(user.getOrgId());
+            List<Map<String, Object>> saleGroupList = getSaleGroupList(user.getOrgId(), user);
             request.setAttribute("orgList", saleGroupList);
             request.setAttribute("saleGroupList", saleGroupList);
         }
@@ -207,6 +207,7 @@ public class PendingAllocationController {
             allocationClueReq.setRoleCode(roleList.get(0).getRoleCode());
         }
         allocationClueReq.setOrg(user.getOrgId());
+        allocationClueReq.setBusinessLine(user.getBusinessLine());
         return clueBasicFeignClient.allocationClue(allocationClueReq);
     }
 
@@ -337,10 +338,13 @@ public class PendingAllocationController {
      * @param orgDTO
      * @return
      */
-    private List<Map<String, Object>> getSaleGroupList(Long orgId) {
+    private List<Map<String, Object>> getSaleGroupList(Long orgId, UserInfoDTO userInfo) {
         OrganizationQueryDTO organizationQueryDTO = new OrganizationQueryDTO();
         organizationQueryDTO.setParentId(orgId);
         organizationQueryDTO.setOrgType(OrgTypeConstant.DXZ);
+        if (userInfo.getBusinessLine() != null) {
+            organizationQueryDTO.setBusinessLine(userInfo.getBusinessLine());
+        }
         // 查询下级电销组
         JSONResult<List<OrganizationDTO>> listDescenDantByParentId =
                 organizationFeignClient.listDescenDantByParentId(organizationQueryDTO);

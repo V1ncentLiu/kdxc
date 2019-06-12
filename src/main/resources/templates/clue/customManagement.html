@@ -216,7 +216,21 @@
                     </el-form-item>
                     <el-form-item label="搜索词:">
                         <el-input v-model="form.searchWord" placeholder="搜索词"></el-input>
-                    </el-form-item>                     
+                    </el-form-item>    
+                    <el-form-item label="最后拨打时间:">
+	                    <el-date-picker
+	                        v-model="form.telEndTimeStart"
+	                        type="datetime"
+	                        placeholder="选择日期时间">
+	                    </el-date-picker>
+	                </el-form-item>
+	                <el-form-item label="—" class="widthauto">
+	                    <el-date-picker
+	                        v-model="form.telEndTimeEnd"
+	                        type="datetime"
+	                        placeholder="选择日期时间">
+	                    </el-date-picker>
+	                </el-form-item>                 
                     <!--    <el-form-item label="">
                         <el-input v-model="form.address" placeholder="地址"></el-input>
                     </el-form-item> -->
@@ -232,6 +246,26 @@
                   <el-form-item label="邮箱:">
                     <el-input v-model="form.email" placeholder="邮箱"></el-input>
                   </el-form-item>
+                  <el-form-item label="资源是否有效:">
+                    <el-select v-model="form.status" placeholder="资源是否有效" clearable >
+                      <el-option
+                          v-for="item in comArr"
+                          :key="item.value"
+                          :label="item.name"
+                          :value="item.value">
+                      </el-option>
+                    </el-select>
+                  </el-form-item>
+                  <el-form-item label="是否接通:">
+                    <el-select v-model="form.isCall" placeholder="是否接通" clearable >
+                      <el-option
+                          v-for="item in comArr"
+                          :key="item.value"
+                          :label="item.name"
+                          :value="item.value">
+                      </el-option>
+                    </el-select>
+                  </el-form-item>
                 </el-row>  
                 <div class="mainSearchBtnBox">                        
                     <el-button type="primary" icon="el-icon-search" @click="initTableData" class="searchBtn">搜索</el-button>
@@ -246,8 +280,9 @@
     	        <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width"
     	         v-for="(item,key,index) in tableColums" v-if="item.fieldCode == 'phone'">
     	             <template slot-scope="scope" >
-                          <p class="blueColorBtn" @click="showClueDetailInfo(scope.row.clueId)">{{scope.row.phone}}</p>
+                          <span class="blueColorBtn" @click="showClueDetailInfo(scope.row.clueId)">{{scope.row.phone}}</span>
                         <input type='hidden'>
+                        <img th:src="@{/images/tel.png}" @click="gettelNumberIcon(scope.row.phone,scope.row.clueId)" style="margin:0 10px;width:22px;cursor: pointer;vertical-align: middle;" alt="">
                         <el-tag v-if="scope.row.tag">{{scope.row.tag}}</el-tag>
                     </template>
                 </el-table-column>
@@ -295,13 +330,25 @@
                            </div> 
                        </template>
                 </el-table-column>
+                <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width" v-else-if="item.fieldCode == 'isCall'">
+                    <template slot-scope="scope">
+                        <div v-if="scope.row.isCall == 0">否</div>
+                        <div v-else-if="scope.row.isCall ==1">是</div>
+                    </template>
+                </el-table-column>
+                <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width" v-else-if="item.fieldCode == 'status'">
+                    <template slot-scope="scope">
+                        <div v-if="scope.row.status == 0">否</div>
+                        <div v-else-if="scope.row.status ==1">是</div>
+                    </template>
+                </el-table-column>
                 <el-table-column align="center" sortable  :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" width="250px"
                                  v-else-if="item.fieldCode == 'createTime'||item.fieldCode == 'storeArea'"></el-table-column>
                 <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width"  v-else>
     	        </el-table-column>
     	        
             </el-table>
-             <table-pagination :pager="pager" @change="initTableData"></table-pagination> 
+             <table-pagination v-if="paginationShow" :pager="pager" @change="initTableData"></table-pagination> 
         </el-row>
     </div>
     <!-- dialog -->
@@ -422,7 +469,8 @@
         </el-row>
       </el-form>
       <div slot="footer" class="dialog-footer" style="text-align:center;">
-        <el-button type="primary" @click="submitAllocatForm('formAllocat')">提交</el-button>
+        <el-button type="primary" 
+        :disabled="btnDisabled" @click="submitAllocatForm('formAllocat')">提交</el-button>
         <el-button @click="resetForm('formAllocat');allocateFormVisible = false;">取 消</el-button>
       </div>
     </el-dialog>
@@ -447,7 +495,7 @@
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer" style="text-align:center;">
-        <el-button type="primary" @click="submitTransferForm('formTransfer')">提交</el-button>
+        <el-button type="primary" :disabled="btnDisabled" @click="submitTransferForm('formTransfer')">提交</el-button>
         <el-button @click="resetForm('formTransfer');transferFormVisible=false;">取 消</el-button>
       </div>
     </el-dialog>
@@ -509,7 +557,7 @@
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer" style="text-align:center;">
-        <el-button type="primary" @click="submitVicemanagerForm('formVicemanage')">提交</el-button>
+        <el-button type="primary" :disabled="btnDisabled" @click="submitVicemanagerForm('formVicemanage')">提交</el-button>
         <el-button @click="resetForm('formVicemanage');vicemanagerFormVisible=false;">取 消</el-button>
       </div>
     </el-dialog>
@@ -550,7 +598,9 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
         el: '#myCustom',
         data: function() {
             return {
+                paginationShow: false,//分页是否显示
                 isShow:false,
+                btnDisabled: false,
                 recordDialog:false,
                 dialogChooseList:false,
                 repeatPhonesDialog:false,
@@ -654,6 +704,8 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                 	createTimeEnd:'',
                 	assignTimeStart:'',
                 	assignTimeEnd:'',
+                	telEndTimeStart:'',
+                    telEndTimeEnd:'',
                 	dayTel:'',
                 	hasInvite:'',
                 	repeatStatus:'',
@@ -669,10 +721,17 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                   qq:"",
                   wechat:"",
                   email:"",
+                  status:"",
+                  isCall:"",
                 },
                 form1: {
                     type: [],
                 },
+                comArr:[
+                   {value:"",name:"全部"},
+                   {value:"1",name:"是"},
+                   {value:"0",name:"否"}
+                 ],
                 cusLevelArr:[],
                 categoryArr:[],
                 provinceArr:[],
@@ -710,9 +769,53 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                 },
                 allTableColums:[],
                 tableColums:[],
+
+                storeForm: {
+                    isTransfer:'',
+                    cluesta:'',
+                    customerPhone:'',
+                    customerName:'',
+                    cusStatus:'',
+                    cusLeve:'',
+                    updateTimeStart:'',
+                    updateTimeEnd:'',
+                    createTimeStart:'',
+                    createTimeEnd:'',
+                    assignTimeStart:'',
+                    assignTimeEnd:'',
+                    telEndTimeStart:'',
+                    telEndTimeEnd:'',
+                    dayTel:'',
+                    hasInvite:'',
+                    repeatStatus:'',
+                    province:'',
+                    category:'',
+                    category:'',
+                    searchWord:'',
+                    address:'',
+                    trackingDay:'',
+                    teleorg:'',
+                    teleSaleId:'',
+                  clueId:'',
+                  qq:"",
+                  wechat:"",
+                  email:"",
+                  status:"",
+                  isCall:"",
+                },
             }        	  
         },
         methods: {
+            gettelNumberIcon(tel,clueId) {
+            	this.showClueDetailInfo(clueId);
+                //外呼手机
+                var param = {};
+                param.clueId = clueId;
+                window.parent.parent.outboundCallPhone(tel, 2, clueId, function (res) {
+                    axios.post('/tele/clueMyCustomerInfo/updateCallTime', param).then(function (response) {
+                    });
+                });
+            },
         	//日期数据格式化方法
     		dateFormat(row, column, cellValue, index) {
                	if (cellValue == undefined) {
@@ -739,6 +842,10 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                  param.createTimeEnd=this.form.createTimeEnd;
                  param.assignTimeStart=this.form.assignTimeStart;
                  param.assignTimeEnd=this.form.assignTimeEnd;
+                 param.telEndTimeStart=this.form.telEndTimeStart;
+                 param.telEndTimeEnd=this.form.telEndTimeEnd;
+                 param.isCall=this.form.isCall;
+                 param.status=this.form.status;
                  param.dayTel=this.form.dayTel;
                  param.hasInvite=this.form.hasInvite;
                  param.repeatStatus=this.form.repeatStatus;
@@ -776,6 +883,13 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                        }); 
            	         return;
                   }
+                 if(this.form.telEndTimeStart !=null && this.form.telEndTimeStart != '' && this.form.telEndTimeEnd !=null && this.form.telEndTimeEnd != '' && this.form.telEndTimeStart>this.form.telEndTimeEnd){
+                	 this.$message({
+                         message: '最后拨打开始时间不能大于结束时间',
+                         type: 'warning'
+                       }); 
+           	         return;
+                  }
                  
      		    axios.post('/tele/customerManager/findcustomerManagerPage',param).then(function (response) {
      				var resobj= response.data;
@@ -787,10 +901,39 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
      		    	customerManVM.pager.total=pageData.total;
      		    	customerManVM.pager.currentPage = pageData.currentPage;
      		    	customerManVM.pager.pageSize = pageData.pageSize;
-     		    	customerManVM.dataTable =pageData.data; 	
+     		    	customerManVM.dataTable =pageData.data; 
+
+                    // 取出存储的id
+                     if(!customerManVM.paginationShow){
+                         if(customerManVM.storeId){
+                             customerManVM.$nextTick(function(){
+                                var storage = [];
+                                customerManVM.dataTable.forEach(function(item, index){
+                                    if(item.clueId === customerManVM.storeId ){
+                                        storage.push(customerManVM.dataTable[index]);
+                                    }
+                                })
+                                customerManVM.toggleSelection(storage);
+                            })
+                        }
+                     }else{
+                        customerManVM.removeSessionStore ("telemarketingStoreForm");
+                        customerManVM.removeSessionStore ("telemarketingOtherVal");
+                     }
+                    customerManVM.paginationShow = true;
+                    customerManVM.storeForm = customerManVM.form;
      			})
          	
          	},
+            toggleSelection(rows) { // table select 默认选中fn
+                if (rows) {
+                    rows.forEach(row => {
+                        this.$refs.multipleTable.toggleRowSelection(row,true);
+                    });
+                } else {
+                    this.$refs.multipleTable.clearSelection();
+                }
+            },
             toReadOnlySignPage(row,tele){  // 进入签约单明细
                 window.location.href='/businesssign/myCustomSignRecordPage?clueId='+row.clueId+"&signId="+row.signId+"&readyOnly=1&createUser="+tele.teleSaleId;
             },
@@ -963,18 +1106,24 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                    var  param={};
                    param.idList=idArr;
                    param.teleSaleId=telSale;
-                   this.allocateFormVisible = false; 
+                   this.allocateFormVisible = false;
+
+                   this.btnDisabled = true; 
+
                    axios.post('/clue/pendingAllocation/allocationClue', param)
                    .then(function (response) {
                        if(response.data.code==-1){
                            customerManVM.$message.error(response.data.msg);
+                           customerManVM.btnDisabled = false; 
                        }else {
                            customerManVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
+                                   customerManVM.btnDisabled = false;
                                    customerManVM.initTableData();
                                }});
                        }
                    }).catch(function (error) {
                        console.log(error);
+                       customerManVM.btnDisabled = false; 
                    });
                    
                   } else {
@@ -1015,13 +1164,18 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                      param.teleGorupId=directorArr[0];
                      param.teleDirectorId=directorArr[1];
                      this.transferFormVisible = false;
+
+                     this.btnDisabled = true; 
+
                      axios.post('/tele/customerManager/transferClue', param)
                      .then(function (response) {
-                  	  customerManVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
+                         customerManVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
+                            customerManVM.btnDisabled = false; 
                   	  		customerManVM.initTableData();
                          }});
                       }).catch(function (error) {
                          console.log(error);
+                         customerManVM.btnDisabled = false;
                      });
                   } else {
                     console.log('error submit!!');
@@ -1045,7 +1199,16 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
             },
             //展现详情
             showClueDetailInfo1 (row, column) {
-                window.location.href='/tele/clueMyCustomerInfo/customerInfoReadOnly?clueId='+row.clueId;
+                var clueId=row.clueId;
+
+                this.setSessionStore("telemarketingStoreForm", this.storeForm);
+                var otherVal = {
+                    "currentPage": this.pager.currentPage,
+                    "clueId": clueId
+                }
+                this.setSessionStore("telemarketingOtherVal", otherVal);
+
+                window.location.href='/tele/clueMyCustomerInfo/customerInfoReadOnly?clueId='+clueId;
             },
             submitVicemanagerForm(formName) {
                 this.$refs[formName].validate((valid) => {
@@ -1064,13 +1227,18 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                       param.teleDirectorId=directorArr[1];
                       param.teleSaleId=saleId;
                       this.vicemanagerFormVisible = false;
+
+                      this.btnDisabled = true; 
+
                       axios.post('/clue/pendingAllocation/ceoDistributionClue', param)
                       .then(function (response) {
-                   	  customerManVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
+                          customerManVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
+                            customerManVM.btnDisabled = false; 
                    	  		customerManVM.initTableData();
                           }});
                        }).catch(function (error) {
                           console.log(error);
+                          customerManVM.btnDisabled = false; 
                       });
                   } else {
                     console.log('error submit!!');
@@ -1138,12 +1306,42 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                 sortNumber(a,b) {
                     //对数组中元素，按照数字 从小到大 排序
                     return a.split("_")[0] - b.split("_")[0];
-               }
+               },
+            setSessionStore (name, content) {
+                if (!name) return
+                if (typeof content !== 'string') {
+                content = JSON.stringify(content)
+                }
+                window.sessionStorage.setItem(name, content)
+            },
+            getSessionStore (name) {
+                if (!name) return;
+                var content = window.sessionStorage.getItem(name);
+                if (typeof content == 'string') {
+                    content = JSON.parse(content)
+                }
+                return content;
+            },
+            removeSessionStore (name) {
+                if (!name) return
+                return window.sessionStorage.removeItem(name)
+            },
         },
         mounted(){
             document.getElementById('myCustom').style.display = 'block';
         },
         created(){
+            // window.sessionStorage.clear(); // 点击侧边栏-清除所有cookie
+            // 进入页面判断有是否有存储值
+            if(!this.paginationShow){
+                var storeVal = this.getSessionStore("telemarketingStoreForm");
+                var otherVal = this.getSessionStore("telemarketingOtherVal");
+                if(storeVal && otherVal){
+                    this.form = storeVal;
+                    this.$set(this.pager,"currentPage",otherVal.currentPage);
+                    this.storeId = otherVal.clueId;
+                }
+            };
     		//初始化数据列表
     		 this.initTableData();
     		//客户状态
