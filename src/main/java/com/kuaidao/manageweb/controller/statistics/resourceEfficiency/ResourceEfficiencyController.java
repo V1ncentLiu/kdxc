@@ -271,6 +271,7 @@ public class ResourceEfficiencyController {
     private JSONResult<PageBean<ResourceEfficiencyDto>> mockData() {
         List<ResourceEfficiencyDto> list = new ArrayList<>();
         ResourceEfficiencyDto resourceEfficiencyDto = new ResourceEfficiencyDto();
+        resourceEfficiencyDto.setFollowResources(1091);
         resourceEfficiencyDto.setConnectEffectiveResources(1);
         resourceEfficiencyDto.setConnectionRate(new BigDecimal(12.22));
         resourceEfficiencyDto.setConnectNotEffectiveResources(1);
