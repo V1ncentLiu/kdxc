@@ -253,14 +253,8 @@
                 <el-table-column align="center" prop="teleGorupName" label="电销组"></el-table-column>
                 <el-table-column align="center" prop="teleDirectorName" label="电销总监"></el-table-column>
                 <el-table-column align="center" prop="teleProjectId" label="电销组项目" :formatter="transformProject" width="100"></el-table-column>
-
-                
-                
-                
-                
-                
             </el-table>
-            <table-pagination :pager="pager" @change="searchTable"></table-pagination>
+            <table-pagination v-if="paginationShow" :pager="pager" @change="searchTable"></table-pagination>
         </el-row>
     </div>
 
@@ -875,6 +869,7 @@
     var customerVM = new Vue({
         el: '#clueManage',
         data: {
+            paginationShow: false,
             isShow: false,
             cusTitleName: '',//到访情况-点击查看-title客户名称
             activeName: '',
@@ -1013,8 +1008,33 @@
             formLabelWidth: '150px',
             formLabelWidth1: '120px',
             formLabelWidth2: '98px',
+            storeForm: {
+                visitStatus: '',
+                isSign: '',
+                teleGorupId: '',
+                teleSaleId: '',
+                tasteProjectId: '',
+                province: '',
+                isView: '',
+                busGroupId: '',
+                busDirectorId: '',
+                busSaleId: '',
+                cusName: '',
+                startTime: '',
+                endTime: '',
+                startReserveTime: '',
+                endReserveTime: '',
+                startAllocationTime: '',
+                endAllocationTime: '',
+                sortField: '',
+                sortType: '',
+                isTailMoney: ''
+            },
         },
         methods: {
+            clickRow(row){
+                this.$refs.multipleTable.toggleRowSelection(row)
+            },
             searchTable() {
                 var startTime = this.searchForm.startTime;
                 var endTime = this.searchForm.endTime;
@@ -1046,18 +1066,47 @@
                 param.sortType = this.searchForm.sortType;
                 param.isTailMoney = this.searchForm.isTailMoney;
                 axios.post('/business/busCustomerManager/list', param)
-                    .then(function (response) {
-                        var result = response.data;
-                        console.info(result);
-                        var table = result.data;
-                        customerVM.dataTable = table.data;
-                        customerVM.pager.total = table.total;
-                        customerVM.pager.currentPage = table.currentPage;
-                    })
-                    .catch(function (error) {
-                        console.log(error);
-                    });
+                .then(function (response) {
+                    var result = response.data;
+                    console.info(result);
+                    var table = result.data;
+                    customerVM.dataTable = table.data;
+                    customerVM.pager.total = table.total;
+                    customerVM.pager.currentPage = table.currentPage;
 
+                    // 取出存储的id
+                    if(!customerVM.paginationShow){
+                         if(customerVM.storeId){
+                             customerVM.$nextTick(function(){
+                                var storage = [];
+                                customerVM.dataTable.forEach(function(item, index){
+                                    if(item.clueId === customerVM.storeId ){
+                                        storage.push(customerVM.dataTable[index]);
+                                    }
+                                })
+                                customerVM.toggleSelection(storage);
+                            })
+                        }
+                     }else{
+                        customerVM.removeSessionStore ("busCustomerManagerStoreForm");
+                        customerVM.removeSessionStore ("busCustomerManagerOtherVal");
+                     }
+                    customerVM.paginationShow = true;
+                    customerVM.storeForm = customerVM.searchForm;
+                })
+                .catch(function (error) {
+                    console.log(error);
+                });
+
+            },
+            toggleSelection(rows) { // table select 默认选中fn
+                if (rows) {
+                    rows.forEach(row => {
+                        this.$refs.multipleTable.toggleRowSelection(row,true);
+                    });
+                } else {
+                    this.$refs.multipleTable.clearSelection();
+                }
             },
             notVisit() {
                 var rows = customerVM.multipleSelection;
@@ -1582,10 +1631,28 @@
                 }
             },
             toSignPage(row) {  // 进入签约单明细  能够 新增付款
-                window.location.href = '/businesssign/visitRecordPage?readyOnly=1&showSignButton=1&clueId=' + row.clueId + "&signId=" + row.signId;
+                var clueId=row.clueId;
+                // 存储选中信息--start
+                this.setSessionStore("busCustomerManagerStoreForm", this.storeForm);
+                var otherVal = {
+                    "currentPage": this.pager.currentPage,
+                    "clueId": clueId
+                }
+                this.setSessionStore("busCustomerManagerOtherVal", otherVal);
+                // 存储选中信息--end
+                window.location.href = '/businesssign/visitRecordPage?readyOnly=1&showSignButton=1&clueId=' + clueId + "&signId=" + row.signId;
             },
             showCustomerDetail(row, column) { // 客户详情
-                window.location.href = '/bus/BusinessCustomer/viewCustomerInfo?clueId=' + row.clueId;
+                var clueId=row.clueId;
+                // 存储选中信息--start
+                this.setSessionStore("busCustomerManagerStoreForm", this.storeForm);
+                var otherVal = {
+                    "currentPage": this.pager.currentPage,
+                    "clueId": clueId
+                }
+                this.setSessionStore("busCustomerManagerOtherVal", otherVal);
+                // 存储选中信息--end
+                window.location.href = '/bus/BusinessCustomer/viewCustomerInfo?clueId=' + clueId;
             },
             formatVisitTime(row) {
                 function dateFtt(fmt, date) { //author: meizz
@@ -1667,8 +1734,39 @@
                     this.isShow = true
                 }
             },
+            setSessionStore (name, content) {
+                if (!name) return
+                if (typeof content !== 'string') {
+                content = JSON.stringify(content)
+                }
+                window.sessionStorage.setItem(name, content)
+            },
+            getSessionStore (name) {
+                if (!name) return;
+                var content = window.sessionStorage.getItem(name);
+                if (typeof content == 'string') {
+                    content = JSON.parse(content)
+                }
+                return content;
+            },
+            removeSessionStore (name) {
+                if (!name) return
+                return window.sessionStorage.removeItem(name)
+            },
         },
         created() {
+            debugger
+            // window.sessionStorage.clear(); // 点击侧边栏-清除所有cookie
+            // 进入页面判断有是否有存储值
+            if(!this.paginationShow){
+                var storeVal = this.getSessionStore("busCustomerManagerStoreForm");
+                var otherVal = this.getSessionStore("busCustomerManagerOtherVal");
+                if(storeVal && otherVal){
+                    this.form = storeVal;
+                    this.$set(this.pager,"currentPage",otherVal.currentPage);
+                    this.storeId = otherVal.clueId;
+                }
+            };
             console.info("create method");
             this.searchTable();
 

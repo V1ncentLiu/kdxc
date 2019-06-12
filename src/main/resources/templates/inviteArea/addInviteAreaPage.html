@@ -73,7 +73,7 @@
                     </el-col>
                     <el-col :span="8" :offset="4">
                         <el-form-item label="电销组：" :label-width="formLabelWidth1" prop="telemarketingTeamIds">
-                            <el-select filterable multiple v-model="form.telemarketingTeamIds" placeholder="请选择" style="width:100%">
+                            <el-select filterable multiple v-model="form.telemarketingTeamIds" placeholder="请选择" style="width:100%" @change="changeDx">
                                 <el-option
                                     v-for="item in dxList"
                                      :key="item.id"
@@ -81,6 +81,9 @@
                                     :value="item.id">
                                 </el-option>
                             </el-select>
+                        </el-form-item>
+                        <el-form-item label="电销组业务线：" :label-width="formLabelWidth" prop="dxBusinessLine" v-if="0">
+                            <el-input v-model="form.dxBusinessLine" placeholder="业务线"></el-input>
                         </el-form-item>
                     </el-col>
                 </el-row>
@@ -124,7 +127,7 @@
         data: function() {
             return {
                 btnDisabled: false,   
-            	loading:false,
+            	  loading:false,
                 tableRadio:'',
                 dialogFormChooseRole: false,
                 dialogFormChooseOrg: false,
@@ -204,7 +207,22 @@
                   }).catch(function (error) {console.log(error);});
                 }
             },
+          changeDx(value){
+            for(var i = 0 ; i < addUserVm.dxList.length ; i++){
+              if(addUserVm.dxList[i].id == value){
+                addUserVm.form.dxBusinessLine = addUserVm.dxList[i].businessLine;
+                break;
+              }
+            }
+          },
             onSubmit(formName) {
+              if(addUserVm.form.telemarketingTeamIds.length == 0){
+                this.$message({
+                  message: '请选择电销组',
+                  type: 'warning'
+                });
+                return ;
+              }
                 this.$refs[formName].validate((valid) => {
           	       if (valid) {
        	             var formData = addUserVm.form;

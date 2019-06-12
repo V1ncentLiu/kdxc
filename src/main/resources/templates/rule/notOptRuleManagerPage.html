@@ -104,11 +104,12 @@
         </div>
         <el-row>
             <el-table 
-                ref="dataTable"
+                ref="multipleTable"
                 tooltip-effect="dark"
                 style="width: 100%"
                 border
                 :data="dataTable"
+                @row-click="clickRow"
                 @row-dblclick="rowDblClick"
                 @selection-change="handleSelectionChange" 
                 >
@@ -141,7 +142,7 @@
                 </el-table-column>
                 <el-table-column align="center" prop="status" label="状态" width="120" :formatter="transformStatus"></el-table-column>
             </el-table>
-            <table-pagination :pager="pager" @change="searchTable"></table-pagination>
+            <table-pagination v-if="paginationShow" :pager="pager" @change="searchTable"></table-pagination>
         </el-row>
     </div>
     <!-- dialog -->
@@ -240,6 +241,7 @@ var queryOrg=[[${queryOrg}]];//电销组
         el: '#optimizeClueManagement',
         data: function() {
             return {
+                paginationShow: false,
                 isShow:false,
                 dialogFormVisible: false,
                 multipleSelection: [],//选择行
@@ -282,10 +284,23 @@ var queryOrg=[[${queryOrg}]];//电销组
                     value: 0,
                     name: '无效'
                 }],
+                storeForm: {
+                    ruleName:'',
+                    projectId:'',
+                    status:'',
+                    searchStartTime:'',
+                    searchEndTime:'',
+                    teleorg:'',
+                    updateTimeBegin:'',
+                    updateTimeEnd:''
+                },
 
             }        	  
         },
         methods: {
+            clickRow(row){
+                this.$refs.multipleTable.toggleRowSelection(row)
+            },
             handleSelectionChange(val) {//选择节点的事件
                 console.log(val)
                 this.multipleSelection = val;
@@ -427,33 +442,62 @@ var queryOrg=[[${queryOrg}]];//电销组
                     });
                     return;
                 }
-              var updateTimeBegin=this.form.updateTimeBegin;
-              var updateTimeEnd=this.form.updateTimeEnd;
-              if(updateTimeEnd && updateTimeBegin>updateTimeEnd){
+                var updateTimeBegin=this.form.updateTimeBegin;
+                var updateTimeEnd=this.form.updateTimeEnd;
+                if(updateTimeEnd && updateTimeBegin>updateTimeEnd){
                 this.$message({
                   message: '最后编辑时间的结束时间不允许选择早于开始时间',
                   type: 'warning'
                 });
                 return;
-              }
+                }
                 var param =this.form;
                 param.pageSize = this.pager.pageSize;
                 param.pageNum = this.pager.currentPage;
                 console.info(param);
                 axios.post('/clueAssignRule/notOptRule/list', param)
                 .then(function (response) {
-                      var result =  response.data;
-                      console.info(result);
-                      var table=result.data;
-                      ocmVM.dataTable= table.data;
-                      ocmVM.pager.total =  table.total;
-                      ocmVM.pager.currentPage = table.currentPage;
+                        var result =  response.data;
+                        console.info(result);
+                        var table=result.data;
+                        ocmVM.dataTable= table.data;
+                        ocmVM.pager.total =  table.total;
+                        ocmVM.pager.currentPage = table.currentPage;
+
+                        // 取出存储的id
+                        if(!ocmVM.paginationShow){
+                            if(ocmVM.storeId){
+                                ocmVM.$nextTick(function(){
+                                    var storage = [];
+                                    ocmVM.dataTable.forEach(function(item, index){
+                                        if(item.id === ocmVM.storeId ){
+                                            storage.push(ocmVM.dataTable[index]);
+                                        }
+                                    })
+                                    ocmVM.toggleSelection(storage);
+                                })
+                            }
+                        }else{
+                            ocmVM.removeSessionStore ("noOptRuleManagerStoreForm");
+                            ocmVM.removeSessionStore ("noOptRuleManagerOtherVal");
+                        }
+                        ocmVM.paginationShow = true;
+                        ocmVM.storeForm = ocmVM.form;
                 })
                 .catch(function (error) {
                      console.log(error);
                 });
                 
-              },
+            },
+            toggleSelection(rows) { // table select 默认选中fn
+                if (rows) {
+                    rows.forEach(row => {
+                        this.$refs.multipleTable.toggleRowSelection(row,true);
+                    });
+                } else {
+                    this.$refs.multipleTable.clearSelection();
+                }
+            },
             rowDblClick(row, column, event){//双击查看详情
                 this.dialogFormVisible = true;
                 this.dialogForm.ruleName = row.ruleName;
@@ -473,6 +517,7 @@ var queryOrg=[[${queryOrg}]];//电销组
             },
             editFun() {
                 var rows = this.multipleSelection;
+                var clueId=rows[0].id;
                 if(rows.length!=1){
                     this.$message({
                         message: '请选择一条数据进行编辑',
@@ -480,7 +525,15 @@ var queryOrg=[[${queryOrg}]];//电销组
                     });
                     return;
                 }else{
-                	document.location.href='/clueAssignRule/notOptRule/initUpdate?id='+rows[0].id;
+                    // 存储选中信息--start
+                    this.setSessionStore("noOptRuleManagerStoreForm", this.storeForm);
+                    var otherVal = {
+                        "currentPage": this.pager.currentPage,
+                        "clueId": clueId
+                    }
+                    this.setSessionStore("noOptRuleManagerOtherVal", otherVal);
+                    // 存储选中信息--end
+                	document.location.href='/clueAssignRule/notOptRule/initUpdate?id='+clueId;
                 }                
             },
           //状态转换方法
@@ -585,32 +638,62 @@ var queryOrg=[[${queryOrg}]];//电销组
              },
           //广告位转换方法
             transformSourceType(row, column, cellValue, index) {
-          	   var text="";
-            	   if(adsenseList&&cellValue){
- 	            	   var array=cellValue.split(",");
- 	                   for(var i=0;i<array.length;i++){
- 	                	   for(var j=0;j<adsenseList.length;j++){
- 	 	                		if(array[i]==adsenseList[j].value){
- 	 	                			if(i==0){
- 		 	                			text=adsenseList[j].name;
- 	 	                			}else{
- 		 	                			text=text+","+adsenseList[j].name;
- 	 	                			}
- 	 	                		}
- 	 	                	}
+          	    var text="";
+        	    if(adsenseList&&cellValue){
+            	   var array=cellValue.split(",");
+                   for(var i=0;i<array.length;i++){
+                	   for(var j=0;j<adsenseList.length;j++){
+ 	                		if(array[i]==adsenseList[j].value){
+ 	                			if(i==0){
+	 	                			text=adsenseList[j].name;
+ 	                			}else{
+	 	                			text=text+","+adsenseList[j].name;
+ 	                			}
+ 	                		}
  	                	}
-            	    }
-                  return text;
-             },
-              toogleClick(){
+                	}
+        	    }
+                return text;
+            },
+            toogleClick(){
                 if(this.isShow){
                   this.isShow=false
                 }else{
                   this.isShow=true
                 }
-              },
+            },
+            setSessionStore (name, content) {
+                if (!name) return
+                if (typeof content !== 'string') {
+                content = JSON.stringify(content)
+                }
+                window.sessionStorage.setItem(name, content)
+            },
+            getSessionStore (name) {
+                if (!name) return;
+                var content = window.sessionStorage.getItem(name);
+                if (typeof content == 'string') {
+                    content = JSON.parse(content)
+                }
+                return content;
+            },
+            removeSessionStore (name) {
+                if (!name) return
+                return window.sessionStorage.removeItem(name)
+            },
         },
         created(){
+            // window.sessionStorage.clear(); // 点击侧边栏-清除所有cookie
+            // 进入页面判断有是否有存储值
+            if(!this.paginationShow){
+                var storeVal = this.getSessionStore("noOptRuleManagerStoreForm");
+                var otherVal = this.getSessionStore("noOptRuleManagerOtherVal");
+                if(storeVal && otherVal){
+                    this.form = storeVal;
+                    this.$set(this.pager,"currentPage",otherVal.currentPage);
+                    this.storeId = otherVal.clueId;
+                }
+            };
             console.info("create method");
             this.searchTable();
         },

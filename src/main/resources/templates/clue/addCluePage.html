@@ -204,7 +204,7 @@
                 <el-row>
                     <el-col :span="12">
                         <el-form-item label="资源项目(项目名称)：" :label-width="formLabelWidth" prop="projectId">
-                            <el-select v-model="form.projectId" placeholder="请选择" style="width: 260px;" clearable filterable>
+                            <el-select v-model="form.projectId" placeholder="请选择" style="width: 260px;" clearable filterable :disabled="projectDisabled">
                                 <el-option
                                     v-for="item in projectOptions"
                                     :key="item.id"
@@ -562,6 +562,7 @@ if(notOptList){
             return {
                 isDisabled:true,//默认不可点击  
                 sourceTypeDisabled:false,//广告位是否可选  
+                projectDisabled:false,//项目是否可选  
                 dialogFormVisible: false,//新增手机号
                 viewFormVisible: false,//查看
                 wechatVisible: false,//新增微信号
@@ -715,9 +716,9 @@ if(notOptList){
                     category: [
                         { required: true, message: '资源类别不能为空', trigger: 'change' }
                     ],
-                     projectId: [
+                     /* projectId: [
                          { required: true, message: '资源项目不能为空', trigger: 'change' }
-                     ]
+                     ] */
                 },
                 dynamicValidateForm: {//新增手机号弹窗数据
                     domains: [{
@@ -996,6 +997,13 @@ if(notOptList){
             	param.type=this.form.type;
             	param.category=this.form.category;
             	param.projectId=this.form.projectId;
+            	if(param.projectId){
+            		for(var i=0;i<projectList.length;i++){
+	                		if(param.projectId==projectList[i].id){
+	                			param.projectName=projectList[i].projectName;
+	                		}
+	                	}
+            	}
             	param.searchWord=this.form.searchWord;
             	param.messagePoint=this.form.messagePoint;
             	param.messageTime=this.form.messageTime;
@@ -1125,8 +1133,11 @@ if(notOptList){
         	  	if(opt.indexOf(value)!=-1){
         	  		this.form.sourceType="1";
         	  		this.sourceTypeDisabled=true;
+        	  		this.projectDisabled=true;
+        	  		this.form.projectId="";
         	  	}else if(notOpt.indexOf(value)!=-1){
         	  		this.sourceTypeDisabled=false;
+        	  		this.projectDisabled=false;
         	  	}
             },
             openWechat() {

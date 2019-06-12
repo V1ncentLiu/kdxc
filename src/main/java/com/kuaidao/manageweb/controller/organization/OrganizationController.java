@@ -127,9 +127,13 @@ public class OrganizationController {
     @ResponseBody
     public JSONResult<List<OrganizationRespDTO>> queryOrgByType(HttpServletRequest request,
             @RequestBody OrganizationDTO dto) {
+        UserInfoDTO user = CommUtil.getCurLoginUser();
         OrganizationQueryDTO orgDto = new OrganizationQueryDTO();
         orgDto.setOrgType(dto.getOrgType());
         orgDto.setParentId(dto.getParentId());
+        if(user.getBusinessLine() != null){
+            orgDto.setBusinessLine(user.getBusinessLine());
+        }
         JSONResult<List<OrganizationRespDTO>> orgJson =
                 organizationFeignClient.queryOrgByParam(orgDto);
         return orgJson;
