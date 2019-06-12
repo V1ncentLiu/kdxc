@@ -33,7 +33,7 @@
                             v-for="item in resourceClassArr"
                             :key="item.id"
                             :label="item.name"
-                            :value="item.id">
+                            :value="item.value">
                         </el-option>
                     </el-select>
                 </el-form-item>
@@ -43,7 +43,7 @@
                             v-for="item in mediumArr"
                             :key="item.id"
                             :label="item.name"
-                            :value="item.id">
+                            :value="item.value">
                         </el-option>
                     </el-select>
                 </el-form-item>
@@ -53,7 +53,7 @@
                             v-for="item in resourceProjectArr"
                             :key="item.id"
                             :label="item.name"
-                            :value="item.id">
+                            :value="item.value">
                         </el-option>
                     </el-select>
                 </el-form-item>
@@ -62,6 +62,103 @@
                 </div>  
             </el-form>
         </div>
+        <!-- tabs -->
+        <el-row class="tabsC">
+            <el-tabs v-model="activeName" @tab-click="handleClick">
+    		    <el-tab-pane label="资源有效" name="0">
+                    <el-table 
+                        ref="tableDataFirst"
+                        tooltip-effect="dark"
+                        style="width: 100%"
+                        border
+                        :data="tableDataFirst"
+                        v-loading="loading"
+                        :span-method="arraySpanMethod">
+                        <!-- <el-table-column type="index" label="序号" align="center" width="55" :index="indexFun"></el-table-column> -->
+                        <el-table-column prop="resourceCategoryName" align="center" label="资源类别">
+                        </el-table-column>
+                        <el-table-column prop="resourceMediumName" align="center" label="媒介">
+                        </el-table-column>
+                        <el-table-column prop="projectTypeName" align="center" label="资源项目">
+                        </el-table-column>
+                        <el-table-column prop="issuedResources" align="center" label="下发资源量">
+                        </el-table-column>
+                        <el-table-column prop="followResources" align="center" label="跟访资源量">
+                        </el-table-column>
+                        <el-table-column prop="firstResources" align="center" label="首次接通资源量">
+                        </el-table-column>
+                        <el-table-column prop="connectResources" align="center" label="接通资源量">
+                        </el-table-column>
+                        <el-table-column prop="notConnectResources" align="center" label="未接通资源量">
+                        </el-table-column>
+                        <el-table-column prop="connectEffectiveResources" align="center" label="接通有效资源量">
+                        </el-table-column>
+                        <el-table-column prop="connectNotEffectiveResources" align="center" label="接通无效资源量">
+                        </el-table-column>
+                        <el-table-column prop="notConnectEffectiveResources" align="center" label="未接通有效资源量">
+                        </el-table-column>
+                        <el-table-column prop="notConnectNotEffectiveResources" align="center" label="未接通无效资源量">
+                        </el-table-column>
+                        <el-table-column prop="followRate" align="center" label="跟访率" :formatter="percentFormat">
+                        </el-table-column>
+                        <el-table-column prop="firstRate" align="center" label="首次接通率" :formatter="percentFormat">
+                        </el-table-column>
+                        <el-table-column prop="resourceConnectRate" align="center" label="资源接通率" :formatter="percentFormat">
+                        </el-table-column>
+                        <el-table-column prop="resourceEffectiveRate" align="center" label="资源有效率" :formatter="percentFormat">
+                        </el-table-column>
+                        <el-table-column prop="connectionRate" align="center" label="接通有效率" :formatter="percentFormat">
+                        </el-table-column>
+                    </el-table>
+                    <table-pagination :pager="pager" @change="searchTable()"></table-pagination>
+    			</el-tab-pane>
+    		    <el-tab-pane label="首日资源有效" name="1">
+                    <el-table 
+                        ref="tableDataSecond"
+                        tooltip-effect="dark"
+                        style="width: 100%"
+                        border
+                        :data="tableDataSecond"
+                        v-loading="loading"
+                        :span-method="arraySpanMethod">
+                        <!-- <el-table-column type="index" label="序号" align="center" width="55" :index="indexFun"></el-table-column> -->
+                        <el-table-column prop="resourceCategoryName" align="center" label="资源类别">
+                        </el-table-column>
+                        <el-table-column prop="resourceMediumName" align="center" label="媒介">
+                        </el-table-column>
+                        <el-table-column prop="projectTypeName" align="center" label="资源项目">
+                        </el-table-column>
+                        <el-table-column prop="issuedResources" align="center" label="下发资源量">
+                        </el-table-column>
+                        <el-table-column prop="followResources" align="center" label="首日跟访资源量">
+                        </el-table-column>
+                        <el-table-column prop="connectResources" align="center" label="首日接通资源量">
+                        </el-table-column>
+                        <el-table-column prop="notConnectResources" align="center" label="首日未接通资源量">
+                        </el-table-column>
+                        <el-table-column prop="connectEffectiveResources" align="center" label="首日接通有效资源量">
+                        </el-table-column>
+                        <el-table-column prop="connectNotEffectiveResources" align="center" label="首日接通无效资源量">
+                        </el-table-column>
+                        <el-table-column prop="notConnectEffectiveResources" align="center" label="首日未接通有效资源量">
+                        </el-table-column>
+                        <el-table-column prop="notConnectNotEffectiveResources" align="center" label="首日未接通无效资源量">
+                        </el-table-column>
+                        <el-table-column prop="followRate" align="center" label="首日跟访率" :formatter="percentFormat">
+                        </el-table-column>
+                        <el-table-column prop="resourceConnectRate" align="center" label="首日资源接通率" :formatter="percentFormat">
+                        </el-table-column>
+                        <el-table-column prop="resourceEffectiveRate" align="center" label="首日资源有效率" :formatter="percentFormat">
+                        </el-table-column>
+                         <el-table-column prop="connectionRate" align="center" label="首日接通有效率" :formatter="percentFormat">
+                        </el-table-column>
+                    </el-table>
+                    <table-pagination :pager="pager" @change="searchTable()"></table-pagination>   
+                </el-tab-pane>
+    		 </el-tabs>
+        </el-row>
+        <!-- tabs -->
+        <!-- <br />
         <el-row>
             <el-table 
                 ref="tableData"
@@ -106,7 +203,7 @@
                 </el-table-column>
                 <el-table-column prop="callCount" align="center" label="接通有效率" :formatter="percentFormat">
                 </el-table-column>
-                <!--  -->
+
                 <el-table-column prop="callCount" align="center" label="首日跟访资源量">
                 </el-table-column>
                 <el-table-column prop="callCount" align="center" label="首日接通资源量">
@@ -130,16 +227,17 @@
                  <el-table-column prop="callCount" align="center" label="首日接通有效率" :formatter="percentFormat">
                 </el-table-column>
 
-                <!-- <el-table-column align="center" :key="index" :prop="item.fieldCode" :label="item.displayName" v-for="(item,key,index) in tableColums" v-if="item.fieldCode == 'orgName'">
+                <el-table-column align="center" :key="index" :prop="item.fieldCode" :label="item.displayName" v-for="(item,key,index) in tableColums" v-if="item.fieldCode == 'orgName'">
                     <template slot-scope="scope">
                         <el-button @click="gotoTeam(scope.row)" type="text" size="small">{{scope.row.orgName}}</el-button>
                     </template>
                 </el-table-column>
                 <el-table-column align="center" width="130" :key="index" :prop="item.fieldCode" :label="item.displayName" v-else>
-                </el-table-column> -->
+                </el-table-column>
             </el-table>
             <table-pagination :pager="pager" @change="searchTable()"></table-pagination>
         </el-row>
+        <br /> -->
     </div>
 </div>
 <!-- import common js-->
@@ -153,83 +251,86 @@
         font-weight: bold;
         color: #108ee9;
     }
+    .tabsC #tab-0, .tabsC #tab-1 {
+        width: 124px;
+        height: 40px;
+        padding: 0;
+        text-align: center;
+    }
+    .tabsC #tab-0 {
+        border-top-left-radius: 8px;
+    } 
+    .tabsC #tab-1 {
+        border-top-right-radius: 8px;
+    }
 </style>
 </body>
 <script th:inline="javascript">
-    // var queryOrg=[[${queryOrg}]]; // 电销组
-    // console.log(queryOrg,'电销组');
+    var resourceClassArr = [[${clueCategoryList}]]; //资源类别
+    var mediumArr = [[${mediumList}]]; //媒介集合
+    var resourceProjectArr = [[${projectList}]]; //所有项目
 
-    var resourceClassArr = [
-        { "id":"0", "name":"全部" },
-        { "id":"1", "name":"竞价" },
-        { "id":"2", "name":"联展" },
-        { "id":"3", "name":"优化" },
-        { "id":"4", "name":"信息流" },
-    ];
-    var mediumArr = [
-        { "id":"0", "name":"全部" },
-        { "id":"1", "name":"百度" },
-        { "id":"2", "name":"搜狐" },
-        { "id":"3", "name":"360" },
-        { "id":"4", "name":"搜狗" },
-    ];
-    var resourceProjectArr = [
-        { "id":"0", "name":"全部" },
-        { "id":"1", "name":"资源项目1" },
-        { "id":"2", "name":"资源项目2" },
-        { "id":"3", "name":"资源项目3" }
-    ];
+    var search_url = ["/statistics/resourceEfficiency/getResourceEfficientList","/statistics/resourceEfficiency/getFirstResourceEfficientList"];
     
     var mainDivVM = new Vue({
         el: '#maindiv',
         data: function() {
             return {
+                activeName: '0',
+
+                tableDataFirst: [],
+                tableDataSecond: [],
+
                 loading: false,
+                isDisabled: false,
+
+                startTimeEnd:'',
+                endTimeEnd:'',
+                resourceClassIdEnd: '',
+                mediumIdEnd: '',
+                resourceProjectIdEnd: '',
                 form: {
                     startTime:'',
                     endTime:'',
-                    // orgId:'',
-                    resourceClassId: "全部",
-                    mediumId: "全部",
-                    resourceProjectId: "全部",
-                },
-                export: {
-                    startTime:'',
-                    endTime:'',
-                    // orgId:'',
                     resourceClassId: "",
                     mediumId: "",
                     resourceProjectId: "",
                 },
-                tableData: [
-                    {
-                       callCount: '501' 
-                    },
-                    {
-                       callCount: '502' 
-                    },
-                    {
-                       callCount: '503' 
-                    }
-                ],
-                // tableColums: [],//表头list
-                // orgTeleArr: queryOrg, // 电销组
-                resourceClassArr: resourceClassArr,
-                mediumArr: mediumArr,
-                resourceProjectArr: resourceProjectArr,
+                export: {
+                    startTime:'',
+                    endTime:'',
+                    resourceClassId: "",
+                    mediumId: "",
+                    resourceProjectId: "",
+                },
                 pager:{ 
                     total: 0,
                     currentPage: 1,
-                    pageSize: 2
+                    pageSize: 3
                 },
+                resourceClassArr: resourceClassArr,
+                mediumArr: mediumArr,
+                resourceProjectArr: resourceProjectArr
             }             
         },
-        methods: {            
-            searchTable() { 
-                var startTime = new Date(this.form.startTime);
-                var endTime = new Date(this.form.endTime);
-                console.log(startTime,endTime);
+        methods: {
+            handleClick(tab, event) {
+                console.log(tab, event);
+                this.form.startTime = this.startTimeEnd;
+                this.form.endTime = this.endTimeEnd;
+                this.form.resourceClassId = this.resourceClassIdEnd;
+                this.form.mediumId = this.mediumIdEnd;
+                this.form.resourceProjectId = this.resourceProjectIdEnd;
+                this.searchTable(1);
+
+            },            
+            searchTable(firstPage) { 
+
+                var startTime = this.form.startTime;
+                var endTime = this.form.endTime;
                 if(endTime && startTime){
+                    startTime = new Date(this.form.startTime);
+                    endTime = new Date(this.form.endTime);
                     if(startTime>endTime){
                         this.$message({
                             message: '开始时间不能大于结束时间',
@@ -239,7 +340,7 @@
                     }
                     var date = new Date();
                     var currentDate = moment(date).format("YYYY-MM-DD 23:59");
-                    date.setMonth(date.getMonth()-5);
+                    date.setMonth(date.getMonth()-6);
                     var beforeSixMonth = moment(date).format("YYYY-MM-DD 00:00");
                     var currentDateRes = new Date(currentDate);
                     var beforeSixMonthRes = new Date(beforeSixMonth);
@@ -250,26 +351,39 @@
                         });
                         return;
                     }
+                    startTime = this.limitTime(startTime, null);
+                    endTime = this.limitTime(null, endTime);
                 }else{
                     this.$message({
-                        message: '请选择近6个月内的时间',
+                        message: '请选择起止时间',
                         type: 'warning'
                     });
                     return;
-                }
-                console.log('search');   
+                }   
                 
                 var param = {};
                 param.startTime = this.minuteFormat(startTime);
                 param.endTime = this.minuteFormat(endTime);
                 param.pageSize = this.pager.pageSize;
-                param.pageNum = this.pager.currentPage;
-                // param.orgId = this.form.orgId;
-                param.resourceClassId = this.form.resourceClassId;
-                param.mediumId = this.form.mediumId;
-                param.resourceProjectId = this.form.resourceProjectId; 
+                if(firstPage){
+                    param.pageNum = firstPage;
+                }else{
+                    param.pageNum = this.pager.currentPage;
+                }
+                param.resourceCategory = this.form.resourceClassId;
+                param.resourceMedium = this.form.mediumId;
+                param.projectType = this.form.resourceProjectId;
+
+                this.startTimeEnd = this.form.startTime;
+                this.endTimeEnd = this.form.endTime;
+                this.resourceClassIdEnd = this.form.resourceClassId;
+                this.mediumIdEnd = this.form.mediumId;
+                this.resourceProjectIdEnd = this.form.resourceProjectId;
+
                 this.loading = true; 
-                axios.post('/callrecord/teleSaleTalkTime/listTeleGroupTalkTime',param).then(function (response) { 
+                // axios.post('/statistics/resourceEfficiency/getResourceEfficientList',param).then(function (response) { 
+                axios.post( search_url[parseInt(this.activeName)] ,param).then(function (response) { 
+                    console.log( response );
                     if(!response){
                         mainDivVM.$message({
                             message: "接口调用失败",
@@ -278,7 +392,6 @@
                         return ;
                     }
                     var resobj= response.data;
-                    console.log(resobj);
                     if(!resobj){
                         mainDivVM.$message({
                             message: "接口调用失败",
@@ -296,34 +409,69 @@
                     }else if(resobj.data && resobj.data.tableData && resobj.data.totalData ){
                         var resobjData = resobj.data;    
                         var tableData = resobjData.tableData;
-                        mainDivVM.tableData = tableData.data;
-                        // 假数据
-                        // tableData.data.map( (item,index)=>{
-                        //     item.orgName = '假数据电销组' + (index + 1);
-                        //     return item;
-                        // })
-
+                        // console.log( resobj.data.totalData )
+                        /*mainDivVM.tableData = tableData.data;
                         if(tableData.data && tableData.data.length){
                             var totalData = resobjData.totalData;
                             mainDivVM.tableData.unshift(totalData);
+                        }*/
+                        if( mainDivVM.activeName=="0" ){
+                            mainDivVM.tableDataFirst = tableData.data;
+                            if(tableData.data && tableData.data.length){
+                                var totalData = resobjData.totalData[0];
+                                mainDivVM.tableDataFirst.unshift(totalData);
+                            }
+                        }else{
+                           mainDivVM.tableDataSecond = tableData.data;
+                            if(tableData.data && tableData.data.length){
+                                var totalData = resobjData.totalData[0];
+                                mainDivVM.tableDataSecond.unshift(totalData);
+                            } 
                         }
+                        
                         mainDivVM.pager.currentPage = tableData.currentPage;
                         mainDivVM.pager.total = tableData.total;
                         mainDivVM.loading = false;
+
+                        // 给导出参数赋值
                         mainDivVM.export.startTime = mainDivVM.minuteFormat(startTime);
                         mainDivVM.export.endTime = mainDivVM.minuteFormat(endTime);
-                        mainDivVM.export.orgId = mainDivVM.form.orgId;
+                        mainDivVM.export.resourceClassId = mainDivVM.form.resourceClassId;
+                        mainDivVM.export.mediumId = mainDivVM.form.mediumId;
+                        mainDivVM.export.resourceProjectId = mainDivVM.form.resourceProjectId;
                     }else{
                         mainDivVM.loading = false;
                     }  
                 }).catch(function (error) {
-                    console.log(error);
                     mainDivVM.loading = false;
                     mainDivVM.$message({
                         message: "请求失败，请稍后重试",
                         type: "error"
                     });
                 });
+            },
+            limitTime (start, end) {
+                var startTime = this.minuteFormat (start);
+                var endTime = this.minuteFormat (end);
+                var date = new Date();
+                data = this.minuteFormat (date);// 现在的时间
+                data = data.slice(0,8);
+                if(startTime){
+                    var s = startTime.slice(0,8);
+                    if(s < data){
+                        this.form.startTime = moment(start).format("YYYY-MM-DD 00:00");
+                        return this.form.startTime;
+                    }
+                    return start;
+                }
+                if(endTime){
+                    var e = endTime.slice(0,8);
+                    if(e < data){
+                        this.form.endTime = moment(end).format("YYYY-MM-DD 23:59");
+                        return this.form.endTime;                        
+                    }
+                    return end;
+                }
             },
             arraySpanMethod({ row, column, rowIndex, columnIndex }) { // 合并第一行
                 if (rowIndex === 0) {
@@ -332,19 +480,45 @@
                     } else if (columnIndex === 1) {
                         return [1, 2];
                     }*/
-                    if (columnIndex === 1) {
+                    // if (columnIndex === 0) {
+                    //     return [0,1];
+                    // } else if (columnIndex === 1) {
+                    //     return [1,3];
+                    // }else if ( columnIndex === 3) {
+                    //     return [0, 0];
+                    // }
+                    /*if (columnIndex === 1) {
                         return [1,3];
                     } else if (columnIndex === 2 || columnIndex === 3) {
                         return [0, 0];
-                    }
+                    }*/
+                     if (columnIndex === 0) {
+                             return [0, 0];
+                       } else if (columnIndex === 1) {
+                             return [1, 3];
+                       } else if (columnIndex === 2) {
+                             return [0, 0];
+                       } 
                 }
             },
+            indexFun (index) { // 表格序号
+                return index;
+            },
+            nullToZero(row, column, value, index){
+                if(value){
+                    return value;
+                }
+                return 0;
+            },
            /* gotoTeam (row) { // 页面跳转
-                var orgId = row.orgId;
-                if(orgId === "合计"){
-                    window.location.href="/statistics/teleStatement/telemarketingCallTableSum";
-                }else{
-                    window.location.href="/statistics/teleStatement/telemarketingCallTableTeam?orgId=" + orgId; 
+                var orgId = row.orgId; // 电销组id
+                var orgName = row.orgName; // 电销组name
+                var startTime = this.export.startTime;
+                var endTime = this.export.endTime;
+                if(orgId === "0" && orgName === "合计"){
+                    window.location.href="/statistics/teleStatement/telemarketingCallTableSum?orgId=" + this.export.orgId + "&startTime=" + startTime + "&endTime=" + endTime;
+                }else if(orgId){
+                    window.location.href="/statistics/teleStatement/telemarketingCallTableTeam?orgId=" + orgId + "&startTime=" + startTime + "&endTime=" + endTime; 
                 }
             },*/
             indexFun (index) { // 表格序号
@@ -380,13 +554,32 @@
                 };
                 this.tableData.unshift(total);
             },
-            percentFormat (row, column) {
+            minuteFormat (m) { // 时间格式化201905050505fn
+                if (!m) {return "";}
+                var timeStr = new Date(m);
+                var yearRes = timeStr.getFullYear();
+                var monthRea = timeStr.getMonth()+1;
+                monthRea = monthRea < 10 ?  "0" + monthRea : monthRea;
+                var dateRes = timeStr.getDate();
+                dateRes = dateRes < 10 ?  "0" + dateRes : dateRes;  
+                var hoursRes = timeStr.getHours();
+                hoursRes = hoursRes < 10 ?  "0" + hoursRes : hoursRes;  
+                var minRes = timeStr.getMinutes();
+                minRes = minRes < 10 ?  "0" + minRes : minRes;                
+                var timeRes = "" + yearRes + monthRea + dateRes + hoursRes + minRes;
+                return timeRes;
+            },
+            percentFormat (row, column) { // 百分比格式化fn
                 var percent = row[column.property];
-                percent = percent * 100 + "%";
+                if(!percent){ // 如果没有值或值为0
+                    return 0 + "%";
+                }
+                percent = (percent * 1000)/10 + "%";
                 return percent;
             },
-            timeFormat (row, column) { // 时间格式化：时分秒
+            timeFormat (row, column) { // 时间格式化：时分秒fn
                 var time = row[column.property];
+                if(!time){return "00时00分00秒";}
                 var timeResult = this.timeFun (time); 
                 return timeResult;
             },
@@ -395,17 +588,11 @@
                 var hour = Math.floor(s/3600);
                 var min = Math.floor(s/60) % 60;
                 var sec = s % 60;
-                if(hour<10){
-                    t+="0";
-                }
+                if(hour<10){t+="0";}
                 t+=hour+"时"
-                if(min < 10){
-                    t += "0";
-                }
+                if(min < 10){t += "0";}
                 t += min + "分";
-                if(sec < 10){
-                    t += "0";
-                }
+                if(sec < 10){t += "0";}
                 t += sec + "秒";
                 return t;
             },
@@ -416,7 +603,7 @@
                var endTime =today.getFullYear()+"-" + (today.getMonth()+1) + "-" + today.getDate()+" 23:59";
                this.form.startTime=startTime;
                this.form.endTime=endTime;
-               this.searchTable();
+               this.searchTable(1);
             },
             searchWeek(){ // 近七天
                  var a = new Date();
@@ -430,7 +617,7 @@
                  var endTime = new Date(d);
                  this.form.startTime=startTime.getFullYear()+"-" + (startTime.getMonth()+1) + "-" + startTime.getDate()+" 00:00";
                  this.form.endTime=endTime.getFullYear()+"-" + (endTime.getMonth()+1) + "-" + endTime.getDate()+" 23:59";
-                 this.searchTable();
+                 this.searchTable(1);
             },
             searchMonth(){ // 本月 
                 var a = new Date();
@@ -441,24 +628,24 @@
                 var f= new Date(year,month,01);
                 var c = f.valueOf();
                 var startTime= new Date(c);
-                this.form.startTime=startTime.getFullYear()+"-" + (startTime.getMonth()+1) + "-" + startTime.getDate()+" 00:00";;
+                this.form.startTime=startTime.getFullYear()+"-" + (startTime.getMonth()+1) + "-" + startTime.getDate()+" 00:00";
                 this.form.endTime=year+"-"+(month+1)+"-"+date+" 23:59";
-                this.searchTable();
+                this.searchTable(1);
             },
             exportRs(){
                 var param = {};
                 param.startTime = this.export.startTime;
-                param.endTime =  this.export.endTime;
-                param.orgId =  this.export.orgId; 
-                axios.post('/callrecord/teleSaleTalkTime/exportTeleGroupTalkTime',param,{responseType:'blob'})
+                param.endTime = this.export.endTime;
+                // param.resourceCategory =  this.export.resourceClassId; 
+                // param.resourceMedium =  this.export.mediumId; 
+                // param.projectType =  this.export.resourceProjectId; 
+                axios.post('/statistics/resourceEfficiency/exportResourceEfficiency',param,{responseType:'blob'})
                     .then(function (response) {
-                        console.log(response);
                         var data =  response.data;
                         var fileName = response.headers.filename;
                         saveAs(data,decodeURI(fileName));
                     })
                     .catch(function (error) {
-                        console.log(error);
                         mainDivVM.$message({
                             message: "导出失败，请稍后重试",
                             type: "error"
@@ -469,12 +656,20 @@
         created(){
             // 默认进入显示当天时间
             var today = new Date();
-            today.setTime(today.getTime());
-            var startTime = today.getFullYear()+"-"+ (today.getMonth()+1) + "-" + today.getDate()+" 00:00";
-            var endTime =today.getFullYear()+"-"+ (today.getMonth()+1) + "-" + today.getDate()+" 23:59";
+            var startTime = moment(today).format("YYYY-MM-DD 00:00");
+            var endTime = moment(today).format("YYYY-MM-DD 23:59");
             this.form.startTime=startTime;
-            this.form.endTime=endTime;            
-            // this.searchTable();
+            this.form.endTime=endTime; 
+            // if(curOrgId){this.isDisabled= true;}
+            this.export.startTime = this.minuteFormat(this.form.startTime);
+            this.export.endTime = this.minuteFormat(this.form.endTime);
+            this.searchTable();
+
+            /*this.startTimeEnd = this.form.startTime;
+            this.endTimeEnd = this.form.endTime;
+            this.resourceClassIdEnd = this.form.resourceClassId;
+            this.mediumIdEnd = this.form.mediumId;
+            this.resourceProjectIdEnd = this.form.resourceProjectId;*/
         },
         mounted(){
             document.getElementById('maindiv').style.display = 'block';
