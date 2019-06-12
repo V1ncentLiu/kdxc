@@ -301,9 +301,9 @@ public class ResourceEfficiencyController {
         resourceEfficiencyDto.setFirstResources(1);
         resourceEfficiencyDto.setFollowRate(new BigDecimal(15.66));
         resourceEfficiencyDto.setIssuedResources(1);
-        resourceEfficiencyDto.setProjectTypeName("项目名称");
+        resourceEfficiencyDto.setProjectTypeName("合计");
         resourceEfficiencyDto.setResourceConnectRate(new BigDecimal(1.22));
-        resourceEfficiencyDto.setResourceMediumName("媒介");
+        resourceEfficiencyDto.setResourceMediumName("合计");
         list.add(resourceEfficiencyDto);
         return new JSONResult<List<ResourceEfficiencyDto>>().success(list);
     }
