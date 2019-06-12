@@ -29,7 +29,9 @@ import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -68,8 +70,13 @@ public class ResourceEfficiencyController {
      */
     @RequestMapping("/getResourceEfficientList")
     @ResponseBody
-    public JSONResult<PageBean<ResourceEfficiencyDto>> getResourceEfficientList(@RequestBody ResourceEfficiencyQueryDto resourceEfficiencyQueryDto) throws Exception{
-        return mockData();
+    public JSONResult<Map<String,Object>> getResourceEfficientList(@RequestBody ResourceEfficiencyQueryDto resourceEfficiencyQueryDto) throws Exception{
+        PageBean<ResourceEfficiencyDto> pageData = mockData().getData();
+        List<ResourceEfficiencyDto> totalData = mockCountData().getData();
+        Map<String,Object> resMap = new HashMap<>();
+        resMap.put("totalData", totalData);
+        resMap.put("tableData", pageData);
+        return new JSONResult<Map<String,Object>>().success(resMap);
     }
 
     /**
@@ -77,25 +84,26 @@ public class ResourceEfficiencyController {
      */
     @RequestMapping("/getFirstResourceEfficientList")
     @ResponseBody
-    public JSONResult<PageBean<ResourceEfficiencyDto>> getFirstResourceEfficientList(@RequestBody ResourceEfficiencyQueryDto resourceEfficiencyQueryDto) throws Exception{
-        return mockData();
+    public JSONResult<Map<String,Object>> getFirstResourceEfficientList(@RequestBody ResourceEfficiencyQueryDto resourceEfficiencyQueryDto) throws Exception{
+        PageBean<ResourceEfficiencyDto> pageData = mockData().getData();
+        List<ResourceEfficiencyDto> totalData = mockCountData().getData();
+        Map<String,Object> resMap = new HashMap<>();
+        resMap.put("totalData", totalData);
+        resMap.put("tableData", pageData);
+        return new JSONResult<Map<String,Object>>().success(resMap);
     }
 
 
     /**
      * 获取合计数据 （资源有效）
      */
-    @RequestMapping("/getResourceEfficiencyCount")
-    @ResponseBody
-    public JSONResult<List<ResourceEfficiencyDto>> getResourceEfficiencyCount(@RequestBody ResourceEfficiencyQueryDto resourceEfficiencyQueryDto){
+    private JSONResult<List<ResourceEfficiencyDto>> getResourceEfficiencyCount(List<ResourceEfficiencyQueryDto> lists){
         return mockCountData();
     }
     /**
      * 获取合计数据 （首日资源有效）
      */
-    @RequestMapping("/getFirstResourceEfficiencyCount")
-    @ResponseBody
-    public JSONResult<List<ResourceEfficiencyDto>> getFirstResourceEfficiencyCount(@RequestBody ResourceEfficiencyQueryDto resourceEfficiencyQueryDto){
+    private JSONResult<List<ResourceEfficiencyDto>> getFirstResourceEfficiencyCount(List<ResourceEfficiencyQueryDto> lists){
         return mockCountData();
     }
 
