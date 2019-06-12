@@ -333,7 +333,7 @@
                   v-else-if="item.fieldCode == 'distributionTime'||item.fieldCode == 'updateTime'||item.fieldCode == 'createTime'||item.fieldCode == 'storeArea'"></el-table-column>
                 <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width" v-else></el-table-column>
             </el-table>
-              <table-pagination :pager="pager" @change="initTableData"></table-pagination> 
+              <table-pagination v-if="paginationShow" :pager="pager" @change="initTableData"></table-pagination> 
         </el-row>
     </div>
     <!-- dialog -->
@@ -551,6 +551,7 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
         el: '#myCustom',
         data: function() {
             return {
+                paginationShow: false,
                 btnDisabled: false,
                 searchClueDisable:true,//查询资源默认不可点击
                 searchRepeatClueDisable:true,//查询资源默认不可点击
@@ -790,7 +791,40 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                    type: [],
                 },
                 allTableColums:[],
-                tableColums:[]
+                tableColums:[],
+
+                storeForm: {
+                    isTransfer:'',
+                    cluesta:'',
+                    customerPhone:'',
+                    customerName:'',
+                    cusStatus:'',
+                    cusLeve:'',
+                    updateTimeStart:'',
+                    updateTimeEnd:'',
+                    createTimeStart:'',
+                    createTimeEnd:'',
+                    telEndTimeStart:'',
+                    telEndTimeEnd:'',
+                  distributionTimeStart:'',
+                  distributionTimeEnd:'',
+                    dayTel:'',
+                    hasInvite:'',
+                    repeatStatus:'',
+                    province:'',
+                    category:'',
+                    category:'',
+                    searchWord:'',
+                    address:'',
+                    trackingDay:'',
+                    clueId:'',
+                    qq:"",
+                    wechat:"",
+                    status:"",
+                    isCall:"",
+                    email:""
+                },
+                storeId: ''
             }             
         },
         methods: {
@@ -881,8 +915,37 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
      				mycustomVM.pager.pageSize = pageData.pageSize;
      				mycustomVM.dataTable =pageData.data;
      				mycustomVM.loading=false;
+
+                    // 取出存储的id
+                     if(!mycustomVM.paginationShow){
+                         if(mycustomVM.storeId){
+                             mycustomVM.$nextTick(function(){
+                                var storage = [];
+                                mycustomVM.dataTable.forEach(function(item, index){
+                                    if(item.clueId === mycustomVM.storeId ){
+                                        storage.push(mycustomVM.dataTable[index]);
+                                    }
+                                })
+                                mycustomVM.toggleSelection(storage);
+                            })
+                        }
+                     }else{
+                        mycustomVM.removeSessionStore ("storeForm");
+                        mycustomVM.removeSessionStore ("otherVal");
+                     }
+                    mycustomVM.paginationShow = true;
+                    mycustomVM.storeForm = mycustomVM.form;
      			})
          	},
+            toggleSelection(rows) { // table select 默认选中fn
+                if (rows) {
+                    rows.forEach(row => {
+                        this.$refs.multipleTable.toggleRowSelection(row,true);
+                    });
+                } else {
+                    this.$refs.multipleTable.clearSelection();
+                }
+            },
             toReadOnlySignPage(row,tele){  // 进入签约单明细
                 window.location.href='/businesssign/myCustomSignRecordPage?clueId='+row.clueId+"&signId="+row.signId+"&readyOnly=1&createUser="+tele.teleSaleId;
             },
@@ -893,10 +956,6 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
               	}
                	return moment(cellValue).format("YYYY-MM");
     		},
-         	//展现详情
-         	showClueDetailInfo (row, column) {
-         	  window.location.href='/tele/clueMyCustomerInfo/customerInfoReadOnly?clueId='+row.clueId;
-            },
             //展现详情
             showClueDetailInfo (row, column) {
               window.location.href='/tele/clueMyCustomerInfo/customerInfoReadOnly?clueId='+row.clueId;
@@ -1002,8 +1061,14 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
             // },
             customerEidt(row){
                 var clueId=row.clueId;
-             //客户维护界面   
-              window.location.href="/tele/clueMyCustomerInfo/customerEditInfo?clueId="+clueId; 
+                //客户维护界面   
+                this.setSessionStore("storeForm", this.storeForm);
+                var otherVal = {
+                    "currentPage": this.pager.currentPage,
+                    "clueId": clueId
+                }
+                this.setSessionStore("otherVal", otherVal);
+                window.location.href="/tele/clueMyCustomerInfo/customerEditInfo?clueId="+clueId; 
             },
             submitForm(formName) {
                 //重单提交
@@ -1251,7 +1316,26 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
              sortNumber(a,b) {
                  //对数组中元素，按照数字 从小到大 排序
                  return a.split("_")[0] - b.split("_")[0];
-               }
+               },
+            setSessionStore (name, content) {
+                if (!name) return
+                if (typeof content !== 'string') {
+                content = JSON.stringify(content)
+                }
+                window.sessionStorage.setItem(name, content)
+            },
+            getSessionStore (name) {
+                if (!name) return;
+                var content = window.sessionStorage.getItem(name);
+                if (typeof content == 'string') {
+                    content = JSON.parse(content)
+                }
+                return content;
+            },
+            removeSessionStore (name) {
+                if (!name) return
+                return window.sessionStorage.removeItem(name)
+            },
         },
         mounted(){
             document.getElementById('myCustom').style.display = 'block';
@@ -1271,6 +1355,17 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
             
         },
         created(){
+            // window.sessionStorage.clear(); // 点击侧边栏-清除所有cookie
+            // 进入页面判断有是否有存储值
+            if(!this.paginationShow){
+                var storeVal = this.getSessionStore("storeForm");
+                var otherVal = this.getSessionStore("otherVal");
+                if(storeVal && otherVal){
+                    this.form = storeVal;
+                    this.$set(this.pager,"currentPage",otherVal.currentPage);
+                    this.storeId = otherVal.clueId;
+                }
+            }
             //初始化数据列表
             this.initTableData();
             //客户状态
