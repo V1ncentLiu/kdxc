@@ -14,9 +14,9 @@ $(function(){
 			homePageVM.token = clientInfoObj.token;
 			homePageVM.loginTrClient();
 		}else if(loginClientType == "qimo"){
-			clientInfo.loginClientForm.clientType = clientInfoObj.clientType;
-			clientInfo.loginClientForm.loginClient = clientInfoObj.loginClient;
-            clientInfo.loginClientForm.bindType = clientInfoObj.bindPhoneType;
+			homePageVM.loginClientForm.clientType = clientInfoObj.clientType;
+			homePageVM.loginClientForm.loginClient = clientInfoObj.loginClient;
+			homePageVM.loginClientForm.bindType = clientInfoObj.bindPhoneType;
             homePageVM.loginQimoClient();
 		}
 	}
