@@ -408,6 +408,7 @@ public class PhoneTrafficController {
         if (callRecord != null && JSONResult.SUCCESS.equals(callRecord.getCode()) && callRecord.getData() != null) {
             request.setAttribute("callRecord", callRecord.getData());
         }
+
         ClueQueryDTO queryDTO = new ClueQueryDTO();
 
         queryDTO.setClueId(new Long(clueId));
@@ -478,6 +479,8 @@ public class PhoneTrafficController {
                 && clueFileList.getData() != null) {
             request.setAttribute("clueFileList", clueFileList.getData());
         }
+        UserInfoDTO user = CommUtil.getCurLoginUser();
+        request.setAttribute("loginUserId", user.getId());
         return "phonetraffic/readOnlyCustomerMaintenance";
     }
 
