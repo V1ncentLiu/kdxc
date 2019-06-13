@@ -65,7 +65,7 @@
                                 </el-option>
                             </el-select>
                         </el-form-item>
-                        <el-form-item label="电销事业部:">
+                        <!-- <el-form-item label="电销事业部:">
                             <el-select v-model="teleDeptId" placeholder="电销事业部" @change="showTele(1)"
                                 style="width: 100%;" clearable filterable>
                                 <el-option v-for="item in dxCauseBList" :key="item.id" :label="item.name"
@@ -79,7 +79,7 @@
                                 <el-option v-for="item in dxList" :key="item.id" :label="item.name" :value="item.id">
                                 </el-option>
                             </el-select>
-                        </el-form-item>
+                        </el-form-item> -->
                     </el-row>
 
                     <div class="mainSearchBtnBox">
@@ -143,7 +143,7 @@
                     </el-table-column>
                     <el-table-column prop="userAvgDayValidCallTime" align="center" :label="tableActive == 0 ?'接通有效率':'首日接通有效率'">
                     </el-table-column>
-                    
+                    </el-table>
                 <table-pagination :pager="pager" @change="searchTable()"></table-pagination>
             </el-row>
         </div>
@@ -152,7 +152,8 @@
     <div th:include="_footer_include :: #jsLib"></div>
 </body>
 <script th:inline="javascript">
-       var queryOrg = [[${queryOrg}]]; // 电销组
+       var resourceClassList = [[${resourceCategory}]]; // 资源类别
+       console.log(resourceClassList)
         var proSelect = [[${proSelect}]]; //项目组
 
     function List() {
@@ -222,27 +223,7 @@
                 dxBusinessList: '', //电销分公司list
                 dxCauseBList: '', //电销事业部List
                 dxList: '', //电销组List
-                resourceClassList: [{
-                        id: 1,
-                        value: 1,
-                        name: '全部'
-                    },
-                    {
-                        id: 2,
-                        value: 2,
-                        name: '联展'
-                    },
-                    {
-                        id: 3,
-                        value: 3,
-                        name: '优化'
-                    },
-                    {
-                        id: 4,
-                        value: 4,
-                        name: '信息流'
-                    },
-                ],
+                resourceClassList: resourceClassList,
                 mediumList: [{
                         id: 1,
                         value: 1,
@@ -312,7 +293,7 @@
                 tableData: [
                     
                 ],
-                orgTeleArr: queryOrg, // 电销组
+                // orgTeleArr: queryOrg, // 电销组
                 pager: {
                     total: 0,
                     currentPage: 1,
@@ -321,6 +302,10 @@
             }
         },
         methods: {
+            //tab切换
+            handleClick(){
+
+            },
             //获取媒介
             getMediumOptions() {
                 var _this = this
@@ -364,38 +349,52 @@
             toogleClick() {
                 this.isShow = !this.isShow
             },
-            searchTable() {
+            searchTable(page) {
                 var startTime = this.form.startTime;
                 var endTime = this.form.endTime;
-                if (endTime) {
-                    if (this.minuteFormat(startTime) > this.minuteFormat(endTime)) {
+                if(endTime && startTime){
+                    startTime = new Date(this.form.startTime);
+                    endTime = new Date(this.form.endTime);
+                    if(startTime>endTime){
                         this.$message({
                             message: '开始时间不能大于结束时间',
                             type: 'warning'
                         });
                         return;
                     }
-                }
-                var date = new Date();
-                var currentDate = moment(date).format("YYYY-MM-DD 23:59");
-                date.setMonth(date.getMonth() - 6);
-                var beforeSixMonth = moment(date).format("YYYY-MM-DD 00:00");
-                var currentDateRes = new Date(currentDate);
-                var beforeSixMonthRes = new Date(beforeSixMonth);
-                if (startTime < beforeSixMonthRes || endTime > currentDateRes) {
+                    var date = new Date();
+                    var currentDate = moment(date).format("YYYY-MM-DD 23:59");
+                    date.setMonth(date.getMonth()-6);
+                    var beforeSixMonth = moment(date).format("YYYY-MM-DD 00:00");
+                    var currentDateRes = new Date(currentDate);
+                    var beforeSixMonthRes = new Date(beforeSixMonth);
+                    if(startTime < beforeSixMonthRes || endTime > currentDateRes){
+                        this.$message({
+                            message: '请选择近6个月内的时间',
+                            type: 'warning'
+                        });
+                        return;
+                    }
+                    startTime = this.limitTime(startTime, null);
+                    endTime = this.limitTime(null, endTime);
+                }else{
                     this.$message({
-                        message: '请选择近6个月内的时间',
+                        message: '请选择起止时间',
                         type: 'warning'
                     });
                     return;
-                }
-
+                } 
 
                 var param = {};
                 param.startTime = this.minuteFormat(startTime);
                 param.endTime = this.minuteFormat(endTime);
                 param.pageSize = this.pager.pageSize;
-                param.pageNum = this.pager.currentPage;
+                if(page){
+                    param.pageNum = page
+                }else{
+                    param.pageNum = this.pager.currentPage;
+                }
+              
                 param.orgId = this.form.orgId; // 电销组
                 console.log(param);
                 this.loading = true;
@@ -451,6 +450,29 @@
                     });
                     mainDivVM.loading = false;
                 });
+            },
+            limitTime (start, end) {
+                var startTime = this.minuteFormat (start);
+                var endTime = this.minuteFormat (end);
+                var date = new Date();
+                data = this.minuteFormat (date);// 现在的时间
+                data = data.slice(0,8);
+                if(startTime){
+                    var s = startTime.slice(0,8);
+                    if(s < data){
+                        this.form.startTime = moment(start).format("YYYY-MM-DD 00:00");
+                        return this.form.startTime;
+                    }
+                    return start;
+                }
+                if(endTime){
+                    var e = endTime.slice(0,8);
+                    if(e < data){
+                        this.form.endTime = moment(end).format("YYYY-MM-DD 23:59");
+                        return this.form.endTime;                        
+                    }
+                    return end;
+                }
             },
             arraySpanMethod({
                 row,
