@@ -7,17 +7,19 @@ import com.kuaidao.common.constant.OrgTypeConstant;
 import com.kuaidao.common.constant.SystemCodeConstant;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
+import com.kuaidao.common.util.ExcelUtil;
 import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
 import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
 import com.kuaidao.manageweb.feign.project.ProjectInfoFeignClient;
 import com.kuaidao.manageweb.util.CommUtil;
-import com.kuaidao.stastics.dto.firstResourceAllocation.FirstResourceAllocationQueryDto;
 import com.kuaidao.stastics.dto.resourceEfficiency.ResourceEfficiencyDto;
 import com.kuaidao.stastics.dto.resourceEfficiency.ResourceEfficiencyQueryDto;
 import com.kuaidao.sys.dto.dictionary.DictionaryItemRespDTO;
 import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
 import com.kuaidao.sys.dto.organization.OrganizationRespDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -25,9 +27,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -37,6 +42,7 @@ import java.util.stream.Collectors;
 /**
  * 资源接通有效率
  */
+@Slf4j
 @Controller
 @RequestMapping("/statistics/resourceEfficiency")
 public class ResourceEfficiencyController {
@@ -100,6 +106,9 @@ public class ResourceEfficiencyController {
     private List<ResourceEfficiencyDto> getResourceEfficiencyCount(List<ResourceEfficiencyDto> lists){
         List<ResourceEfficiencyDto> totleList = new ArrayList<>();
         ResourceEfficiencyDto totalResourceEfficiency = new ResourceEfficiencyDto();
+        totalResourceEfficiency.setResourceMediumName("合计");
+        totalResourceEfficiency.setProjectTypeName("合计");
+        totalResourceEfficiency.setResourceCategoryName("合计");
         //下发资源量
         Integer issuedResources = lists.stream().mapToInt(ResourceEfficiencyDto::getIssuedResources).sum();
         //跟访资源量
@@ -150,8 +159,35 @@ public class ResourceEfficiencyController {
      *  导出资源接通有效率
      */
     @PostMapping("/exportResourceEfficiency")
-    public void exportResourceEfficiency(@RequestBody ResourceEfficiencyQueryDto resourceEfficiencyQueryDto) throws IOException {
-
+    public void exportResourceEfficiency(@RequestBody ResourceEfficiencyQueryDto resourceEfficiencyQueryDto,HttpServletResponse response) throws IOException {
+        List<List<Object>> dataList = new ArrayList<List<Object>>();
+        dataList.add(getHeadTitle());
+        List<ResourceEfficiencyDto> orderList = mockCountData().getData();
+        for(int i = 0; i<orderList.size(); i++){
+            ResourceEfficiencyDto ra = orderList.get(i);
+            List<Object> curList = new ArrayList<>();
+            curList.add(i + 1);
+            curList.add(ra.getResourceCategoryName());
+            curList.add(ra.getResourceMediumName());
+            curList.add(ra.getProjectTypeName());
+            curList.add(ra.getIssuedResources());
+            curList.add(ra.getFollowResources());
+            curList.add(ra.getFirstResources());
+            curList.add(ra.getConnectResources());
+            curList.add(ra.getNotConnectResources());
+            dataList.add(curList);
+        }
+        XSSFWorkbook wbWorkbook = ExcelUtil.creat2007Excel(dataList);
+        Long startTime = resourceEfficiencyQueryDto.getStartTime();
+        Long endTime = resourceEfficiencyQueryDto.getEndTime();
+        String name = "资源跟踪记录表" +startTime+"-"+endTime + ".xlsx";
+        response.addHeader("Content-Disposition",
+                "attachment;filename=" + new String(name.getBytes("UTF-8"), "ISO8859-1"));
+        response.addHeader("fileName", URLEncoder.encode(name, "utf-8"));
+        response.setContentType("application/octet-stream");
+        ServletOutputStream outputStream = response.getOutputStream();
+        wbWorkbook.write(outputStream);
+        outputStream.close();
     }
 
 
@@ -205,11 +241,10 @@ public class ResourceEfficiencyController {
         return null;
     }
 
-    private void buildOrgIdList(@RequestBody FirstResourceAllocationQueryDto firstResourceAllocationQueryDto) {
+    private void buildOrgIdList(@RequestBody ResourceEfficiencyDto resourceEfficiencyDto) {
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
         List<OrganizationRespDTO> orgGroupByOrgId = getOrgGroupByOrgId(curLoginUser.getOrgId(), OrgTypeConstant.DXZ);
         List<Long> orgIdList = orgGroupByOrgId.parallelStream().map(OrganizationRespDTO::getId).collect(Collectors.toList());
-        firstResourceAllocationQueryDto.setOrgIdList(orgIdList);
     }
 
     /**
@@ -236,6 +271,7 @@ public class ResourceEfficiencyController {
     private JSONResult<PageBean<ResourceEfficiencyDto>> mockData() {
         List<ResourceEfficiencyDto> list = new ArrayList<>();
         ResourceEfficiencyDto resourceEfficiencyDto = new ResourceEfficiencyDto();
+        resourceEfficiencyDto.setFollowResources(1091);
         resourceEfficiencyDto.setConnectEffectiveResources(1);
         resourceEfficiencyDto.setConnectionRate(new BigDecimal(12.22));
         resourceEfficiencyDto.setConnectNotEffectiveResources(1);
@@ -265,9 +301,9 @@ public class ResourceEfficiencyController {
         resourceEfficiencyDto.setFirstResources(1);
         resourceEfficiencyDto.setFollowRate(new BigDecimal(15.66));
         resourceEfficiencyDto.setIssuedResources(1);
-        resourceEfficiencyDto.setProjectTypeName("项目名称");
+        resourceEfficiencyDto.setProjectTypeName("合计");
         resourceEfficiencyDto.setResourceConnectRate(new BigDecimal(1.22));
-        resourceEfficiencyDto.setResourceMediumName("媒介");
+        resourceEfficiencyDto.setResourceMediumName("合计");
         list.add(resourceEfficiencyDto);
         return new JSONResult<List<ResourceEfficiencyDto>>().success(list);
     }
