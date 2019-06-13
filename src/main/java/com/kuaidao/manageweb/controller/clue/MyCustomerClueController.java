@@ -67,6 +67,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.apache.shiro.subject.Subject;
@@ -298,10 +299,13 @@ public class MyCustomerClueController {
                 && callRecord.getData() != null) {
 
             request.setAttribute("callRecord", callRecord.getData());
-            CallRecordRespDTO callRecordRespDTO = callRecord.getData().stream().max(Comparator.comparing(CallRecordRespDTO::getStartTime)).get();
-            SimpleDateFormat format =  new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-            String date = convertTimeToString(Long.valueOf(callRecordRespDTO.getStartTime())* 1000L);
-            request.setAttribute("teleEndTime",date);
+            CallRecordRespDTO callRecordRespDTO = callRecord.getData().stream().filter(a-> StringUtils.isNotBlank(a.getStartTime())).max(Comparator.comparing(CallRecordRespDTO::getStartTime)).get();
+            if(callRecordRespDTO != null){
+                String date = convertTimeToString(Long.valueOf(callRecordRespDTO.getStartTime())* 1000L);
+                request.setAttribute("teleEndTime",date);
+            }else {
+                request.setAttribute("teleEndTime",new Date());
+            }
         }else {
             request.setAttribute("teleEndTime",new Date());
         }
