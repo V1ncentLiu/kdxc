@@ -566,9 +566,9 @@ var ipManagerVM = new Vue({
 									ipManagerVM.IpconfirmBtnDisabled=false;//启用提交按钮
 							    ipManagerVM.refreshIpTableData(response);
 				        	 }});
-							}).then(function () {
+							}).catch(function (error) {
 								ipManagerVM.IpconfirmBtnDisabled=false;//启用提交按钮
-                            }); ; 
+              }); ; 
 						 
 					 });
                 } else {
@@ -816,14 +816,14 @@ var ipManagerVM = new Vue({
 							ipManagerVM.queryPackageDataList(); 
 							ipManagerVM.packgeconfirmBtnDisabled=false;//启用提交按钮
 						 }});	
-					  }).then(function () {
+					  }).catch(function () {
 						  ipManagerVM.packgeconfirmBtnDisabled=false;//启用提交按钮
-                      }); ;
-                } else {
-                    console.log('error submit!!');
-                    return false;
-                }
-            });				
+              });
+						} else {
+								console.log('error submit!!');
+								return false;
+						}
+				});				
 		},
 		updateIpPackageData(formName){
 		    this.$refs[formName].validate((valid) => {
@@ -868,12 +868,15 @@ var ipManagerVM = new Vue({
 							ipManagerVM.btnDisabled = false; 
 						  ipManagerVM.queryPackageDataList(); 
 						 }});	
-					  });
-                } else {
-                    console.log('error submit!!');
-                    return false;
-                }
-            });				
+						})
+						.catch(function(error){
+							ipManagerVM.btnDisabled = false; 
+						});
+					} else {
+							console.log('error submit!!');
+							return false;
+					}
+			});				
 		},
 		refreshIpTableData(response){
 			//修改新增Ip后刷新IP列表
