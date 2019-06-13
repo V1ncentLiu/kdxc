@@ -274,45 +274,50 @@ public class TeleGroupResourceEfficiencyController {
      */
     private JSONResult<PageBean<TeleGroupResourceEfficiencyDto>> mockData() {
         List<TeleGroupResourceEfficiencyDto> list = new ArrayList<>();
-        TeleGroupResourceEfficiencyDto teleGroupResourceEfficiencyDto = new TeleGroupResourceEfficiencyDto();
-        teleGroupResourceEfficiencyDto.setFollowResources(1091);
-        teleGroupResourceEfficiencyDto.setConnectEffectiveResources(1);
-        teleGroupResourceEfficiencyDto.setConnectionRate(new BigDecimal(12.22));
-        teleGroupResourceEfficiencyDto.setConnectNotEffectiveResources(1);
-        teleGroupResourceEfficiencyDto.setFirstRate(new BigDecimal(123.33));
-        teleGroupResourceEfficiencyDto.setFirstResources(1);
-        teleGroupResourceEfficiencyDto.setFollowRate(new BigDecimal(15.66));
-        teleGroupResourceEfficiencyDto.setIssuedResources(1);
-        teleGroupResourceEfficiencyDto.setProjectTypeName("项目名称");
-        teleGroupResourceEfficiencyDto.setResourceConnectRate(new BigDecimal(1.22));
-        teleGroupResourceEfficiencyDto.setResourceMediumName("媒介");
-        teleGroupResourceEfficiencyDto.setOrgId(1l);
-        teleGroupResourceEfficiencyDto.setOrgName("电销一组");
-        list.add(teleGroupResourceEfficiencyDto);
+        for(int i=0;i<3;i++){
+            TeleGroupResourceEfficiencyDto teleGroupResourceEfficiencyDto = new TeleGroupResourceEfficiencyDto();
+            teleGroupResourceEfficiencyDto.setFollowResources(1091);
+            teleGroupResourceEfficiencyDto.setConnectEffectiveResources(1);
+            teleGroupResourceEfficiencyDto.setConnectionRate(new BigDecimal(12.22));
+            teleGroupResourceEfficiencyDto.setConnectNotEffectiveResources(1);
+            teleGroupResourceEfficiencyDto.setFirstRate(new BigDecimal(123.33));
+            teleGroupResourceEfficiencyDto.setFirstResources(1);
+            teleGroupResourceEfficiencyDto.setFollowRate(new BigDecimal(15.66));
+            teleGroupResourceEfficiencyDto.setIssuedResources(1);
+            teleGroupResourceEfficiencyDto.setProjectTypeName("项目名称");
+            teleGroupResourceEfficiencyDto.setResourceConnectRate(new BigDecimal(1.22));
+            teleGroupResourceEfficiencyDto.setResourceMediumName("媒介");
+            teleGroupResourceEfficiencyDto.setOrgId(Long.parseLong(String.valueOf(i)));
+            teleGroupResourceEfficiencyDto.setOrgName("电销一组");
+            list.add(teleGroupResourceEfficiencyDto);
+        }
         PageBean<TeleGroupResourceEfficiencyDto> pageBean = new PageBean<>();
         pageBean.setCurrentPage(1);
         pageBean.setData(list);
-        pageBean.setPageSize(1);
-        pageBean.setTotal(1);
+        pageBean.setPageSize(3);
+        pageBean.setTotal(3);
         return  new JSONResult<PageBean<TeleGroupResourceEfficiencyDto>>().success(pageBean);
     }
 
     private JSONResult<List<TeleGroupResourceEfficiencyDto>> mockCountData() {
         List<TeleGroupResourceEfficiencyDto> list = new ArrayList<>();
-        TeleGroupResourceEfficiencyDto teleGroupResourceEfficiencyDto = new TeleGroupResourceEfficiencyDto();
-        teleGroupResourceEfficiencyDto.setConnectEffectiveResources(1);
-        teleGroupResourceEfficiencyDto.setConnectionRate(new BigDecimal(12.22));
-        teleGroupResourceEfficiencyDto.setConnectNotEffectiveResources(1);
-        teleGroupResourceEfficiencyDto.setFirstRate(new BigDecimal(123.33));
-        teleGroupResourceEfficiencyDto.setFirstResources(1);
-        teleGroupResourceEfficiencyDto.setFollowRate(new BigDecimal(15.66));
-        teleGroupResourceEfficiencyDto.setIssuedResources(1);
-        teleGroupResourceEfficiencyDto.setProjectTypeName("合计");
-        teleGroupResourceEfficiencyDto.setResourceConnectRate(new BigDecimal(1.22));
-        teleGroupResourceEfficiencyDto.setResourceMediumName("合计");
-        teleGroupResourceEfficiencyDto.setOrgId(1l);
-        teleGroupResourceEfficiencyDto.setOrgName("电销一组");
-        list.add(teleGroupResourceEfficiencyDto);
+        for(int i=0;i<3;i++){
+            TeleGroupResourceEfficiencyDto teleGroupResourceEfficiencyDto = new TeleGroupResourceEfficiencyDto();
+            teleGroupResourceEfficiencyDto.setConnectEffectiveResources(1);
+            teleGroupResourceEfficiencyDto.setConnectionRate(new BigDecimal(12.22));
+            teleGroupResourceEfficiencyDto.setConnectNotEffectiveResources(1);
+            teleGroupResourceEfficiencyDto.setFirstRate(new BigDecimal(123.33));
+            teleGroupResourceEfficiencyDto.setFirstResources(1);
+            teleGroupResourceEfficiencyDto.setFollowRate(new BigDecimal(15.66));
+            teleGroupResourceEfficiencyDto.setIssuedResources(1);
+            teleGroupResourceEfficiencyDto.setProjectTypeName("合计");
+            teleGroupResourceEfficiencyDto.setResourceConnectRate(new BigDecimal(1.22));
+            teleGroupResourceEfficiencyDto.setResourceMediumName("合计");
+            teleGroupResourceEfficiencyDto.setOrgId(Long.parseLong(String.valueOf(i)));
+            teleGroupResourceEfficiencyDto.setOrgName("电销一组");
+            list.add(teleGroupResourceEfficiencyDto);
+        }
+
         return new JSONResult<List<TeleGroupResourceEfficiencyDto>>().success(list);
     }
 
