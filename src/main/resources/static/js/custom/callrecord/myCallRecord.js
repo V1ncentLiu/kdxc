@@ -1,6 +1,7 @@
 var myCallRecordVm = new Vue({
     el: '#myCallRecordVm',
     data: {
+        audioShow:false,
         isShow:false,
     	formLabelWidth:'120px',
 	    pager:{//组织列表pager
@@ -257,9 +258,9 @@ var myCallRecordVm = new Vue({
     		
     	},
     	switchSoundBtn(id,url,callSource){
+            this.audioShow=true;
     		if(callSource=='2'){
-    			// switchSound(id,url);
-                switchSound(id);
+    			switchSound(id,url);
     			return;
     		}
     		 var param = {};
@@ -269,9 +270,7 @@ var myCallRecordVm = new Vue({
             	 var data =  response.data
                  if(data.code=='0'){
                 	 var url = data.data;
-                     // switchSound(id,url);
-                	 switchSound(id);
-                     document.getElementById('audio').src=url
+                     switchSound(id,url);
                  }else{
                 	 console.error(data);
                 	 myCallRecordVm.$message({message:data.msg,type:'error'});
