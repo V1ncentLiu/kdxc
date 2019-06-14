@@ -311,7 +311,11 @@
                 </el-table>
             </el-row>
 
-            <div class="marginB20 fs16 paddingT20">通话记录</div>
+            <div class="marginB20 fs16 paddingT20 callLogBox">
+                通话记录
+                <!-- 播放器 -->
+                <audio id="audio" src="" controls="controls" autoplay="autoplay" controlsList="nodownload" oncontextmenu="return false" v-show="audioShow"></audio>
+            </div>
             <el-row>
                 <el-table ref="multipleTable" :data="tableDataC3"
                           tooltip-effect="dark" style="width: 100%"
@@ -319,9 +323,9 @@
                           @selection-change="handleSelectionChange">
                     <el-table-column type="index" width="55" label="序号" align="center">
                     </el-table-column>
-                    <el-table-column prop="name" label="姓名" align="center">
+                    <el-table-column prop="accountName" label="姓名" align="center">
                     </el-table-column>
-                    <el-table-column prop="role" label="角色" align="center">
+                    <el-table-column prop="roleName" label="角色" align="center">
                     </el-table-column>
                     <el-table-column prop="callType" label="通话类型" align="center">
                     </el-table-column>
@@ -333,17 +337,26 @@
                     </el-table-column>
                     <el-table-column label="操作" align="center">
                         <template slot-scope="scope" v-if="scope.row.talkTime >0 ">
-                            <div style="float:left" :id="scope.row.id"
-                                 class="sound-trigger sound-trigger--type-default sound-trigger--type-click"
-                                 @click="switchSoundBtn(scope.row.id,scope.row.recordFile,scope.row.callSource)">
-                                <div class="sound-trigger__inner">
-                                    <i class="fa fa-play fa-lg"></i>
-                                </div>
-                            </div>
-                            <el-button v-if="scope.row.accountId==loginUserId" type="danger" size="small"
-                                       @click="downloadAudio(scope.row.id,scope.row.recordFile,scope.row.callSource)"><i
-                                    class="el-icon-download"></i>下载
-                            </el-button>
+                            <!--<div style="float:left" :id="scope.row.id"-->
+                                 <!--class="sound-trigger sound-trigger&#45;&#45;type-default sound-trigger&#45;&#45;type-click"-->
+                                 <!--@click="switchSoundBtn(scope.row.id,scope.row.recordFile,scope.row.callSource)">-->
+                                <!--<div class="sound-trigger__inner">-->
+                                    <!--<i class="fa fa-play fa-lg"></i>-->
+                                <!--</div>-->
+                            <!--</div>-->
+                            <!--<el-button v-if="scope.row.accountId==loginUserId" type="danger" size="small"-->
+                                       <!--@click="downloadAudio(scope.row.id,scope.row.recordFile,scope.row.callSource)"><i-->
+                                    <!--class="el-icon-download"></i>下载-->
+                            <!--</el-button>-->
+                            <a :id="scope.row.id"
+                               class="sound-trigger sound-trigger--type-default sound-trigger--type-click"
+                               @click="switchSoundBtn(scope.row.id,scope.row.recordFile,scope.row.callSource)">
+                                 <span class="sound-trigger__inner">
+                                       <i class="fa fa-play-1 fa-lg"></i>
+                                </span>
+                            </a>
+                            <a class="download_img"  v-if="scope.row.accountId==loginUserId"
+                               @click="downloadAudio(scope.row.id,scope.row.recordFile,scope.row.callSource)"></a>
                         </template>
                     </el-table-column>
                 </el-table>
@@ -516,6 +529,31 @@
         right: 0;
         top: 13px;
     }
+
+    .fa-play-1 {
+        width: 34px;
+        height: 34px;
+        display: inline-block;
+        background-image: url(/images/icon_play.png);
+        background-repeat: no-repeat;
+    }
+
+    .fa-stop-1 {
+        width: 34px;
+        height: 34px;
+        display: inline-block;
+        background-image: url(/images/icon_stop.png);
+        background-repeat: no-repeat;
+    }
+
+    .download_img {
+        width: 34px;
+        height: 34px;
+        display: inline-block;
+        background-image: url(/images/icon_download.png);
+        background-repeat: no-repeat;
+    }
+
 </style>
 
 </body>
@@ -688,6 +726,7 @@
         el: '#addCustomer',
         data: function () {
             return {
+                audioShow:false,
                 isShowPhoneButton:false,
                 vxShow:vxShow,
             	loginUserId:loginUserId,
@@ -1418,6 +1457,7 @@
                 $(".downloadMp3:eq(" + index + ") a>p").trigger("click");
             },
             switchSoundBtn(id, url, callSource) {
+                this.audioShow=true;
                 if (callSource == '2') {
                     switchSound(id, url);
                     return;
@@ -1430,7 +1470,6 @@
                         if (data.code == '0') {
                             var url = data.data;
                             switchSound(id, url);
-
                         } else {
                             console.error(data);
                             myCallRecordVm.$message({message: data.msg, type: 'error'});
@@ -1490,6 +1529,24 @@
                 }
                 return valText;
             },
+
+            formatSeconds(s) {
+                var t = "";
+                var min = Math.floor(s / 60) % 60;
+                var sec = s % 60;
+
+                if (min < 10) {
+                    t += "0";
+                }
+                t += min + ":";
+                if (sec < 10) {
+                    t += "0";
+                }
+                t += sec;
+                // t += sec.toFixed(2);
+                return t;
+            },
+
             keepCustomer() {
                 //保留客户
                 var param = {};
@@ -1740,7 +1797,8 @@
 <script th:src="@{/js/custom/call/timer.js?v=1.0.1}"></script>
 <script th:src="@{/js/custom/call/rtCall.js?v=1.0.0}"></script>
 <!-- 播放錄音 js -->
-<script th:src="@{/js/custom/callrecord/simpleAudio.js?v=1.0.0}"></script>
+<!-- <script th:src="@{/js/custom/callrecord/simpleAudio.js?v=1.0.0}"></script> -->
+<script th:src="@{/js/custom/callrecord/simpleAudio02.js?v=1.0.0}"></script>
 <script th:src="@{/js/custom/callrecord/download.js?v=1.0.0}"></script>
 <script type="text/javascript">
 

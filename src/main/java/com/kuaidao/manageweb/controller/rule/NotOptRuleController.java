@@ -3,24 +3,6 @@
  */
 package com.kuaidao.manageweb.controller.rule;
 
-import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.List;
-import javax.servlet.http.HttpServletRequest;
-import javax.validation.Valid;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.shiro.SecurityUtils;
-import org.apache.shiro.authz.annotation.RequiresPermissions;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
 import com.kuaidao.aggregation.constant.AggregationConstant;
 import com.kuaidao.aggregation.dto.project.ProjectInfoDTO;
 import com.kuaidao.aggregation.dto.rule.AssignRuleTeamDTO;
@@ -53,6 +35,26 @@ import com.kuaidao.sys.dto.role.RoleInfoDTO;
 import com.kuaidao.sys.dto.user.SysSettingDTO;
 import com.kuaidao.sys.dto.user.SysSettingReq;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
+import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import javax.servlet.http.HttpServletRequest;
+import javax.validation.Valid;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 /**
  * @author zxy
@@ -82,6 +84,7 @@ public class NotOptRuleController {
     @RequestMapping("/initRuleList")
     @RequiresPermissions("clueAssignRule:notOptRuleManager:view")
     public String initCompanyList(HttpServletRequest request) {
+        UserInfoDTO user = getUser();
         // 查询所有项目
         JSONResult<List<ProjectInfoDTO>> allProject = projectInfoFeignClient.allProject();
         request.setAttribute("projectList", allProject.getData());
@@ -94,6 +97,16 @@ public class NotOptRuleController {
         request.setAttribute("adsenseList", getDictionaryByCode(Constants.ADSENSE));
         // 查询字典媒介集合
         request.setAttribute("mediumList", getDictionaryByCode(Constants.MEDIUM));
+        // 当前人员id
+        request.setAttribute("userId", user.getId() + "");
+        OrganizationQueryDTO orgDto = new OrganizationQueryDTO();
+        orgDto.setOrgType(OrgTypeConstant.DXZ);
+        orgDto.setSystemCode(SystemCodeConstant.HUI_JU);
+        // 电销小组
+        JSONResult<List<OrganizationRespDTO>> dzList =
+            organizationFeignClient.queryOrgByParam(orgDto);
+        List<OrganizationRespDTO> data = dzList.getData();
+        request.setAttribute("queryOrg", data);
         return "rule/notOptRuleManagerPage";
     }
 
@@ -106,7 +119,9 @@ public class NotOptRuleController {
     @RequiresPermissions("clueAssignRule:notOptRuleManager:add")
     public String initCreateProject(HttpServletRequest request) {
         // 查询话务组
-        request.setAttribute("trafficList", getTrafficGroup());
+        List<OrganizationRespDTO> orgList = getTrafficGroup();
+        Collections.sort(orgList, Comparator.comparing(OrganizationRespDTO::getCreateTime).reversed());
+        request.setAttribute("trafficList", orgList);
         JSONResult<List<OrganizationDTO>> listBusinessLineOrg =
                 organizationFeignClient.listBusinessLineOrg();
         // 查询所有业务线
@@ -146,12 +161,16 @@ public class NotOptRuleController {
                 queryDTO.setBusinessLine(assignRuleTeamDTO.getBusinessLine());
                 JSONResult<List<OrganizationRespDTO>> orgList =
                         organizationFeignClient.queryOrgByParam(queryDTO);
-                assignRuleTeamDTO.setTeleOptions(orgList.getData());
+                List<OrganizationRespDTO> dxzList = orgList.getData();
+                Collections.sort(dxzList, Comparator.comparing(OrganizationRespDTO::getCreateTime).reversed());
+                assignRuleTeamDTO.setTeleOptions(dxzList);
             }
         }
         request.setAttribute("clueAssignRule", data);
         // 查询话务组
-        request.setAttribute("trafficList", getTrafficGroup());
+        List<OrganizationRespDTO> orgList = getTrafficGroup();
+        Collections.sort(orgList, Comparator.comparing(OrganizationRespDTO::getCreateTime).reversed());
+        request.setAttribute("trafficList", orgList);
         JSONResult<List<OrganizationDTO>> listBusinessLineOrg =
                 organizationFeignClient.listBusinessLineOrg();
         // 查询所有业务线
@@ -219,6 +238,7 @@ public class NotOptRuleController {
         // 插入创建人信息
         UserInfoDTO user = getUser();
         clueAssignRuleReq.setCreateUser(user.getId());
+        clueAssignRuleReq.setUpdateUser(user.getId());
         clueAssignRuleReq.setOrgId(user.getOrgId());
         // 插入类型为优化
         clueAssignRuleReq.setRuleType(AggregationConstant.RULE_TYPE.NOT_OPT);
@@ -242,7 +262,9 @@ public class NotOptRuleController {
         if (result.hasErrors()) {
             return CommonUtil.validateParam(result);
         }
-
+        // 插入修改人信息
+        UserInfoDTO user = getUser();
+        clueAssignRuleReq.setUpdateUser(user.getId());
         Long id = clueAssignRuleReq.getId();
         if (id == null) {
             return new JSONResult().fail(SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getCode(),

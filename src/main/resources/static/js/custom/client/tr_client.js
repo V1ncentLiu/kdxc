@@ -226,17 +226,18 @@ var clientVm = new Vue({
              .then(function (response) {
                  var resData = response.data;
                  if(resData.code=='0'){
-              	    clientVm.form = resData.data;                     
+                      clientVm.form = resData.data;  
+                      clientVm.confirmBtnDisabled=false;                 
                  }else{
-              	     clientVm.$message({message:'查询失败',type:'error'});
+                       clientVm.$message({message:'查询失败',type:'error'});
+                       clientVm.confirmBtnDisabled=false;
                      console.error(resData);
                  }
              
              })
              .catch(function (error) {
                   console.log(error);
-             }).then(function(){
-          	   clientVm.confirmBtnDisabled=false;//启用提交按钮
+                  clientVm.confirmBtnDisabled=false;//启用提交按钮
              });
         	 
          },
@@ -256,19 +257,20 @@ var clientVm = new Vue({
                        if(resData.code=='0'){
                     	   clientVm.cancelForm(formName);
                     	   clientVm.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
-                    		   clientVm.initClientData();
+                               clientVm.confirmBtnDisabled=false;
+                               clientVm.initClientData();
                      	    }});
                            
                        }else{
-                    	   clientVm.$message({message:'操作失败',type:'error'});
-                           console.error(resData);
+                           clientVm.$message({message:'操作失败',type:'error'});
+                           clientVm.confirmBtnDisabled=false;
+                        //    console.error(resData);
                        }
                    
                    })
                    .catch(function (error) {
-                        console.log(error);
-                   }).then(function(){
-                	   clientVm.confirmBtnDisabled=false;//启用提交按钮
+                       clientVm.confirmBtnDisabled=false;
+                       console.log(error);
                    });
                     
                  } else {

@@ -27,6 +27,9 @@
                                 </el-option>
                             </el-select>
                         </el-form-item>
+                        <el-form-item label="业务线：" :label-width="formLabelWidth" prop="businessLine" v-if="0">
+                            <el-input v-model="form.businessLine" placeholder="业务线"></el-input>
+                        </el-form-item>
                     </el-col>
                     <el-col :span="8" :offset="4">
                         <el-form-item label="签约项目：" :label-width="formLabelWidth1" prop="projectIds">
@@ -70,7 +73,7 @@
                     </el-col>
                     <el-col :span="8" :offset="4">
                         <el-form-item label="电销组：" :label-width="formLabelWidth1" prop="telemarketingTeamIds">
-                            <el-select filterable multiple v-model="form.telemarketingTeamIds" placeholder="请选择" style="width:100%">
+                            <el-select filterable multiple v-model="form.telemarketingTeamIds" placeholder="请选择" style="width:100%" @change="changeDx">
                                 <el-option
                                     v-for="item in dxList"
                                      :key="item.id"
@@ -78,6 +81,9 @@
                                     :value="item.id">
                                 </el-option>
                             </el-select>
+                        </el-form-item>
+                        <el-form-item label="电销组业务线：" :label-width="formLabelWidth" prop="dxBusinessLine" v-if="0">
+                            <el-input v-model="form.dxBusinessLine" placeholder="业务线"></el-input>
                         </el-form-item>
                     </el-col>
                 </el-row>
@@ -99,7 +105,7 @@
               
                 <el-row>
                     <el-form-item class="f-tac">
-                        <el-button type="primary" @click="onSubmit('form')" style="margin-right: 10px;">确定</el-button>
+                        <el-button type="primary" :disabled="btnDisabled" @click="onSubmit('form')" style="margin-right: 10px;">确定</el-button>
                         <a href="/invitearea/inviteAreaList"><el-button >取消</el-button></a>
                     </el-form-item>
                 </el-row>
@@ -120,7 +126,8 @@
         el: '#userManage',
         data: function() {
             return {
-            	loading:false,
+                btnDisabled: false,   
+            	  loading:false,
                 tableRadio:'',
                 dialogFormChooseRole: false,
                 dialogFormChooseOrg: false,
@@ -128,11 +135,13 @@
                 dxList:dxList,
                 projectList:projectList,
                 proviceslist:proviceslist,
+                businessLine:'',
                 form: {
                 	businessGroupId:'',
                 	provincesIds:'',
                 	telemarketingTeamIds:[],
                 	projectIds:'',
+                  businessLine:''
                     
                 },
                 rules: {
@@ -164,15 +173,17 @@
         methods: {
             setProject(value){
                 var groupName = "";
+                var businessLine ="";
                 for(var i = 0 ; i < swList.length ; i++){
                     if(swList[i].id == value){
                         groupName = swList[i].name;
+                        addUserVm.form.businessLine = swList[i].businessLine;
+                        businessLine = swList[i].businessLine;
                         break;
                     }
                 }
                 var param = {};
                 param.businessGroup = groupName;
-                debugger
                 axios.post("/invitearea/InviteProjects", param).then(function (response) {
                     var data = response.data;
                     if(data&&data.length>0){
@@ -183,9 +194,36 @@
                         addUserVm.form.projectIds = arr;
                     }
                 }).catch(function (error) {console.log(error);});
+                //根据所选商务小组所属业务线查询电销组
+              console.log("businessLine: "+businessLine);
+              addUserVm.form.telemarketingTeamIds=[];
+                if(businessLine != null){
+                  var busParam ={};
+                  busParam.businessLine = businessLine;
+                  axios.post("/invitearea/getDxOrganizations", busParam).then(function (response) {
+                    var data = response.data;
+                    addUserVm.dxList = data.data;
+                    console.log(data.data);
+                  }).catch(function (error) {console.log(error);});
+                }
             },
+          changeDx(value){
+            for(var i = 0 ; i < addUserVm.dxList.length ; i++){
+              if(addUserVm.dxList[i].id == value){
+                addUserVm.form.dxBusinessLine = addUserVm.dxList[i].businessLine;
+                break;
+              }
+            }
+          },
             onSubmit(formName) {
-            	 this.$refs[formName].validate((valid) => {
+              if(addUserVm.form.telemarketingTeamIds.length == 0){
+                this.$message({
+                  message: '请选择电销组',
+                  type: 'warning'
+                });
+                return ;
+              }
+                this.$refs[formName].validate((valid) => {
           	       if (valid) {
        	             var formData = addUserVm.form;
        	             var param={};
@@ -196,7 +234,7 @@
 	                      return item.id === param.businessGroupId;
                      });
        	             param.businessGroup  = obj.name;
-
+                     param.businessLine = formData.businessLine;
                      var teamNames ="";
                      var teamIds ="";
                      for ( var i = 0; i <formData.telemarketingTeamIds.length; i++){
@@ -260,20 +298,25 @@
 	                     // return (','+provincestrs+',').includes('选项0')item.id === param.telemarketingTeamId;
 	                  });
 	                  this.loading =true;
-	      	             console.info(param);
+                        // console.info(param);
+                        this.btnDisabled = true; 
 	      	            axios.post("/invitearea/addInviteArea", param)
 	      	            .then(function (response) {
 	      	            	console.info(response);
 	      	            	var data =response.data;
 	      	            	if(data.code!="0"){
-	      	            		addUserVm.loading =false;
+	      	            		addUserVm.loading = false;
 	      	            		addUserVm.$message(data.msg);
+                                addUserVm.btnDisabled = false; 
 	      	            	}else{
+                                addUserVm.btnDisabled = false; 
 	      	                	document.location.href='/invitearea/inviteAreaList';
 	      	            	}
 	      	            })
 	      	            .catch(function (error) {
-	      	                 console.log(error);
+                            console.log(error);
+                            addUserVm.loading = false;
+                            addUserVm.btnDisabled = false; 
 	      	            });
       	             
          	          } else {

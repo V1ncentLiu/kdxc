@@ -160,7 +160,7 @@ input[type="number"] {
 			@click.native.prevent="deleteRow(scope.$index, packUpdateIpTable)"
 			type="text">删除</el-button> </template> </el-table-column> </el-table> </el-form>
 		<div slot="footer" class="dialog-footer" style="text-align:center;">
-			<el-button type="primary" @click="updateIpPackageData('ipPackageUpdateForm')">提交</el-button>
+			<el-button type="primary" :disabled="btnDisabled" @click="updateIpPackageData('ipPackageUpdateForm')">提交</el-button>
 			<el-button @click="updateIpPackageVisible = false">取 消</el-button>			
 		</div>
 		</el-dialog> <el-dialog title="选择IP" :visible.sync="addPackageIPSelectVisible"
@@ -328,7 +328,8 @@ var ipManagerVM = new Vue({
 		multiplePackageTable:[],
 		packUpdateIpTable:[],
 		outerVisible:false,
-	    loading:false,
+		loading:false,
+		btnDisabled: false,
 	},
 	methods:{ 
 		//切换页签方法
@@ -561,12 +562,13 @@ var ipManagerVM = new Vue({
 	            	   }
 					  axios.post('/ip/ipAccess/saveIpRepository',param).then(function (response) {
 							    ipManagerVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
-							    ipManagerVM.dialogIpVisible=false;
+									ipManagerVM.dialogIpVisible=false;
+									ipManagerVM.IpconfirmBtnDisabled=false;//启用提交按钮
 							    ipManagerVM.refreshIpTableData(response);
 				        	 }});
-							}).then(function () {
+							}).catch(function (error) {
 								ipManagerVM.IpconfirmBtnDisabled=false;//启用提交按钮
-                            }); ; 
+              }); ; 
 						 
 					 });
                 } else {
@@ -786,7 +788,8 @@ var ipManagerVM = new Vue({
 							ipManagerVM.$message({
 		                        message: "接口调用失败",
 		                        type: 'error'
-		                      }); 
+													}); 
+							ipManagerVM.packgeconfirmBtnDisabled=false;//启用提交按钮
 							return ;
 						}
 						var resobj= response.data;
@@ -794,30 +797,33 @@ var ipManagerVM = new Vue({
 							ipManagerVM.$message({
 		                        message: "接口调用失败",
 		                        type: 'error'
-		                      }); 
+													}); 
+							ipManagerVM.packgeconfirmBtnDisabled=false;//启用提交按钮
 							return ;
 						} 
 						if(resobj.code!='0'){
 							ipManagerVM.$message({
 		                        message: "接口调用失败",
 		                        type: 'error'
-		                      }); 
+													}); 
+							ipManagerVM.packgeconfirmBtnDisabled=false;//启用提交按钮
 							return ;
 						}
 						ipManagerVM.addIpPackageVisible=false;
 						ipManagerVM.addPackageIPSelectVisible=false;
 						ipManagerVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
 						  ipManagerVM.ipManager="second";
-						  ipManagerVM.queryPackageDataList(); 
+							ipManagerVM.queryPackageDataList(); 
+							ipManagerVM.packgeconfirmBtnDisabled=false;//启用提交按钮
 						 }});	
-					  }).then(function () {
+					  }).catch(function () {
 						  ipManagerVM.packgeconfirmBtnDisabled=false;//启用提交按钮
-                      }); ;
-                } else {
-                    console.log('error submit!!');
-                    return false;
-                }
-            });				
+              });
+						} else {
+								console.log('error submit!!');
+								return false;
+						}
+				});				
 		},
 		updateIpPackageData(formName){
 		    this.$refs[formName].validate((valid) => {
@@ -829,12 +835,14 @@ var ipManagerVM = new Vue({
 					param.name=packageName;
 					param.ipRepositorys=savepackageIp;
 					param.id=ipManagerVM.oldPackageId;
+					ipManagerVM.btnDisabled = true; 
 					axios.post('/ip/ipAccess/updateIpPackage',param).then(function (response) {
 						if(null==response){
 							ipManagerVM.$message({
 		                        message: "接口调用失败",
 		                        type: 'error'
-		                      }); 
+													}); 
+							ipManagerVM.btnDisabled = false; 
 							return ;
 						}
 						var resobj= response.data;
@@ -842,27 +850,33 @@ var ipManagerVM = new Vue({
 							ipManagerVM.$message({
 		                        message: "接口调用失败",
 		                        type: 'error'
-		                      }); 
+													}); 
+							ipManagerVM.btnDisabled = false; 						
 							return ;
 						} 
 						if(resobj.code!='0'){
 							ipManagerVM.$message({
 		                        message: "接口调用失败",
 		                        type: 'error'
-		                      }); 
+													});
+							ipManagerVM.btnDisabled = false;  
 							return ;
 						}
 						ipManagerVM.updateIpPackageVisible=false;
 						ipManagerVM.addPackageIPSelectVisible=false;
 						ipManagerVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
+							ipManagerVM.btnDisabled = false; 
 						  ipManagerVM.queryPackageDataList(); 
 						 }});	
-					  });
-                } else {
-                    console.log('error submit!!');
-                    return false;
-                }
-            });				
+						})
+						.catch(function(error){
+							ipManagerVM.btnDisabled = false; 
+						});
+					} else {
+							console.log('error submit!!');
+							return false;
+					}
+			});				
 		},
 		refreshIpTableData(response){
 			//修改新增Ip后刷新IP列表

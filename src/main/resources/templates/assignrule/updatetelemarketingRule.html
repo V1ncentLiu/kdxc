@@ -166,7 +166,7 @@
               </el-table>
             </div>
             <div class="padding20 f-tac">            
-                <el-button type="primary" @click="submitForm('form')">确认</el-button>
+                <el-button type="primary" :disabled="btnDisabled" @click="submitForm('form')">确认</el-button>
                 <el-button @click="reBackRule" >取 消</el-button>
             </div> 
         </el-form>  
@@ -181,10 +181,11 @@
     //下拉列表电销顾问数据
     var orgUserList=[[${orgUserList}]];
     var updateRule=[[${updateRule}]];
-    var  AddRuleVM= new Vue({
+    var AddRuleVM= new Vue({ 
         el: '#addModule',
         data: function() {
             return {
+                btnDisabled: false,  
             	categoryArr:[],
             	typeArr:[],
                 form: {
@@ -310,9 +311,11 @@
                     //	param.area=area.join(",");
                   }
                    param.status=status; 
+                   AddRuleVM.btnDisabled = true; 
                    axios.post('/assignrule/teleAssignRule/updateTeleAssignRule',param)
                    .then(function (response) {
                 	   AddRuleVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
+                         AddRuleVM.btnDisabled = false; 
                 		 window.location.href="/assignrule/teleAssignRule/initteleAssignRule"; 
 		        	}});
                   });

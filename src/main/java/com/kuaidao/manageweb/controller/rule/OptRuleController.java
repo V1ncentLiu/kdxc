@@ -5,6 +5,8 @@ package com.kuaidao.manageweb.controller.rule;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
@@ -78,6 +80,7 @@ public class OptRuleController {
     @RequestMapping("/initRuleList")
     @RequiresPermissions("clueAssignRule:optRuleManager:view")
     public String initCompanyList(HttpServletRequest request) {
+        UserInfoDTO user = getUser();
         // 查询优化类资源类别集合
         request.setAttribute("clueCategoryList", getOptCategory());
         // 查询字典行业类别集合
@@ -85,6 +88,16 @@ public class OptRuleController {
                 getDictionaryByCode(Constants.INDUSTRY_CATEGORY));
         // 查询字典媒介集合
         request.setAttribute("mediumList", getDictionaryByCode(Constants.MEDIUM));
+        // 当前人员id
+        request.setAttribute("userId", user.getId() + "");
+        OrganizationQueryDTO orgDto = new OrganizationQueryDTO();
+        orgDto.setOrgType(OrgTypeConstant.DXZ);
+        orgDto.setSystemCode(SystemCodeConstant.HUI_JU);
+        // 电销小组
+        JSONResult<List<OrganizationRespDTO>> dzList =
+            organizationFeignClient.queryOrgByParam(orgDto);
+        List<OrganizationRespDTO> data = dzList.getData();
+        request.setAttribute("queryOrg", data);
         return "rule/optRuleManagerPage";
     }
 
@@ -97,7 +110,9 @@ public class OptRuleController {
     @RequiresPermissions("clueAssignRule:optRuleManager:add")
     public String initCreateProject(HttpServletRequest request) {
         // 查询话务组
-        request.setAttribute("trafficList", getTrafficGroup());
+        List<OrganizationRespDTO> orgList = getTrafficGroup();
+        Collections.sort(orgList, Comparator.comparing(OrganizationRespDTO::getCreateTime).reversed());
+        request.setAttribute("trafficList", orgList);
         JSONResult<List<OrganizationDTO>> listBusinessLineOrg =
                 organizationFeignClient.listBusinessLineOrg();
         // 查询所有业务线
@@ -134,14 +149,18 @@ public class OptRuleController {
                 queryDTO.setBusinessLine(assignRuleTeamDTO.getBusinessLine());
                 JSONResult<List<OrganizationRespDTO>> orgList =
                         organizationFeignClient.queryOrgByParam(queryDTO);
-                assignRuleTeamDTO.setTeleOptions(orgList.getData());
+                List<OrganizationRespDTO> dxzList = orgList.getData();
+                Collections.sort(dxzList, Comparator.comparing(OrganizationRespDTO::getCreateTime).reversed());
+                assignRuleTeamDTO.setTeleOptions(dxzList);
             }
         }
 
 
         request.setAttribute("clueAssignRule", data);
         // 查询话务组
-        request.setAttribute("trafficList", getTrafficGroup());
+        List<OrganizationRespDTO> orgList = getTrafficGroup();
+        Collections.sort(orgList, Comparator.comparing(OrganizationRespDTO::getCreateTime).reversed());
+        request.setAttribute("trafficList", orgList);
         JSONResult<List<OrganizationDTO>> listBusinessLineOrg =
                 organizationFeignClient.listBusinessLineOrg();
         // 查询所有业务线
@@ -205,6 +224,7 @@ public class OptRuleController {
         // 插入创建人信息
         UserInfoDTO user = getUser();
         clueAssignRuleReq.setCreateUser(user.getId());
+        clueAssignRuleReq.setUpdateUser(user.getId());
         clueAssignRuleReq.setOrgId(user.getOrgId());
         // 插入类型为优化
         clueAssignRuleReq.setRuleType(AggregationConstant.RULE_TYPE.OPT);
@@ -228,7 +248,9 @@ public class OptRuleController {
         if (result.hasErrors()) {
             return CommonUtil.validateParam(result);
         }
-
+        // 插入修改人信息
+        UserInfoDTO user = getUser();
+        clueAssignRuleReq.setUpdateUser(user.getId());
         Long id = clueAssignRuleReq.getId();
         if (id == null) {
             return new JSONResult().fail(SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getCode(),
@@ -304,6 +326,22 @@ public class OptRuleController {
     public JSONResult delete(@RequestBody IdListLongReq idList) {
 
         return clueAssignRuleFeignClient.delete(idList);
+    }
+
+    /**
+     * 复制规则
+     * 
+     * @param orgDTO
+     * @return
+     */
+    @PostMapping("/copy")
+    @ResponseBody
+    @LogRecord(description = "复制规则", operationType = OperationType.DELETE,
+            menuName = MenuEnum.OPT_RULE_MANAGEMENT)
+    public JSONResult copy(@RequestBody ClueAssignRuleReq clueAssignRuleReq) {
+        UserInfoDTO user = getUser();
+        clueAssignRuleReq.setCreateUser(user.getId());
+        return clueAssignRuleFeignClient.copy(clueAssignRuleReq);
     }
 
 

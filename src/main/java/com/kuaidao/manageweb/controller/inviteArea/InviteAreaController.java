@@ -1,28 +1,10 @@
 package com.kuaidao.manageweb.controller.inviteArea;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-import javax.servlet.http.HttpServletRequest;
-
+import com.kuaidao.aggregation.dto.invitearea.InviteAreaDTO;
 import com.kuaidao.aggregation.dto.project.CompanyInfoDTO;
 import com.kuaidao.aggregation.dto.project.CompanyInfoPageParam;
-import com.kuaidao.aggregation.dto.project.ProjectInfoPageParam;
-import com.kuaidao.manageweb.feign.project.CompanyInfoFeignClient;
-import org.apache.shiro.SecurityUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.multipart.MultipartFile;
-import com.kuaidao.aggregation.dto.invitearea.InviteAreaDTO;
 import com.kuaidao.aggregation.dto.project.ProjectInfoDTO;
+import com.kuaidao.aggregation.dto.project.ProjectInfoPageParam;
 import com.kuaidao.common.constant.OrgTypeConstant;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.constant.SystemCodeConstant;
@@ -34,12 +16,29 @@ import com.kuaidao.manageweb.constant.MenuEnum;
 import com.kuaidao.manageweb.feign.area.SysRegionFeignClient;
 import com.kuaidao.manageweb.feign.invitearea.InviteareaFeignClient;
 import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
+import com.kuaidao.manageweb.feign.project.CompanyInfoFeignClient;
 import com.kuaidao.manageweb.feign.project.ProjectInfoFeignClient;
 import com.kuaidao.manageweb.util.IdUtil;
 import com.kuaidao.sys.dto.area.SysRegionDTO;
 import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
 import com.kuaidao.sys.dto.organization.OrganizationRespDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+import javax.servlet.http.HttpServletRequest;
+import org.apache.shiro.SecurityUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * @Auther: admin
@@ -108,11 +107,15 @@ public class InviteAreaController {
      */
     @RequestMapping("/addInviteAreaPage")
     public String addInviteArea(HttpServletRequest request) {
+        UserInfoDTO userInfoDTO = getUser();
         // 获取省份
         List<SysRegionDTO> proviceslist = sysRegionFeignClient.getproviceList().getData();
         OrganizationQueryDTO orgDto = new OrganizationQueryDTO();
         orgDto.setOrgType(OrgTypeConstant.SWZ);
         orgDto.setSystemCode(SystemCodeConstant.HUI_JU);
+//        if(userInfoDTO.getBusinessLine() != null){
+//            orgDto.setBusinessLine(userInfoDTO.getBusinessLine());
+//        }
         // 商务小组
         JSONResult<List<OrganizationRespDTO>> swList =
                 organizationFeignClient.queryOrgByParam(orgDto);
@@ -135,7 +138,25 @@ public class InviteAreaController {
     }
 
     /**
-     * 添加邀约区域页面
+     * 根据业务线获取电销组
+     * @param inviteAreaDTO
+     * @return
+     */
+    @PostMapping("/getDxOrganizations")
+    @ResponseBody
+    public JSONResult<List<OrganizationRespDTO>> getDxOrganizations(@RequestBody InviteAreaDTO inviteAreaDTO){
+        Integer businessLine = inviteAreaDTO.getBusinessLine();
+        OrganizationQueryDTO orgDto = new OrganizationQueryDTO();
+        orgDto.setOrgType(OrgTypeConstant.DXZ);
+        orgDto.setSystemCode(SystemCodeConstant.HUI_JU);
+        orgDto.setBusinessLine(businessLine);
+        // 电销小组
+        JSONResult<List<OrganizationRespDTO>> dxList =
+            organizationFeignClient.queryOrgByParam(orgDto);
+        return dxList;
+    }
+    /**
+     * 修改邀约区域页面
      * 
      * @return
      */
@@ -149,18 +170,24 @@ public class InviteAreaController {
         OrganizationQueryDTO orgDto = new OrganizationQueryDTO();
         orgDto.setOrgType(OrgTypeConstant.SWZ);
         orgDto.setSystemCode(SystemCodeConstant.HUI_JU);
-        // 商务小组
-        JSONResult<List<OrganizationRespDTO>> swList =
-                organizationFeignClient.queryOrgByParam(orgDto);
-        orgDto.setOrgType(OrgTypeConstant.DXZ);
-        // 电销小组
-        JSONResult<List<OrganizationRespDTO>> dxList =
-                organizationFeignClient.queryOrgByParam(orgDto);
         // 查询项目列表
         JSONResult<List<ProjectInfoDTO>> allProject = projectInfoFeignClient.allProject();
 
         List<InviteAreaDTO> inviteAreaDTOs =
                 inviteareaFeignClient.getInviteAreaListByIds(inviteAreaDTO).getData();
+//        if(inviteAreaDTOs.get(0).getBusinessLine() != null){
+//            orgDto.setBusinessLine(inviteAreaDTOs.get(0).getBusinessLine());
+//        }
+        // 商务小组
+        JSONResult<List<OrganizationRespDTO>> swList =
+            organizationFeignClient.queryOrgByParam(orgDto);
+        orgDto.setOrgType(OrgTypeConstant.DXZ);
+        if(inviteAreaDTOs.get(0).getBusinessLine() != null){
+            orgDto.setBusinessLine(inviteAreaDTOs.get(0).getBusinessLine());
+        }
+        // 电销小组
+        JSONResult<List<OrganizationRespDTO>> dxList =
+            organizationFeignClient.queryOrgByParam(orgDto);
         int isshowBusinessGroup = 0;
         int isshowTelemarketingTeam = 0;
         int isshowprovince = 0;
@@ -239,6 +266,7 @@ public class InviteAreaController {
         request.setAttribute("swList", swList.getData());
         request.setAttribute("dxList", dxList.getData());
         request.setAttribute("proviceslist", proviceslist);
+        request.setAttribute("businessLine", inviteAreaDTOs.get(0).getBusinessLine());
         return "inviteArea/updateInviteAreaPage";
     }
 
@@ -494,5 +522,15 @@ public class InviteAreaController {
             }
         }
         return list;
+    }
+    /**
+     * 获取当前登录账号
+     *
+     * @return
+     */
+    private UserInfoDTO getUser() {
+        Object attribute = SecurityUtils.getSubject().getSession().getAttribute("user");
+        UserInfoDTO user = (UserInfoDTO) attribute;
+        return user;
     }
 }

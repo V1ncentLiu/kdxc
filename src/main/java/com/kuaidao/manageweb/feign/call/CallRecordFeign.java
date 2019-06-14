@@ -9,10 +9,11 @@ import org.springframework.cloud.netflix.feign.FeignClient;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-
+import com.alibaba.fastjson.JSONObject;
 import com.kuaidao.aggregation.dto.call.CallRecordCountDTO;
 import com.kuaidao.aggregation.dto.call.CallRecordReqDTO;
 import com.kuaidao.aggregation.dto.call.CallRecordRespDTO;
+import com.kuaidao.aggregation.dto.call.QueryPhoneLocaleDTO;
 import com.kuaidao.aggregation.dto.console.TeleConsoleReqDTO;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.IdEntity;
@@ -101,6 +102,14 @@ public interface CallRecordFeign {
      */
     @PostMapping("/recodeCallTime")
     JSONResult<Boolean> recodeCallTime(@RequestBody CallRecordReqDTO myCallRecordReqDTO);
+    
+    /**
+     * 查询手机号归属地
+    * @param queryPhoneLocaleDTO
+    * @return
+     */
+    @PostMapping("/queryPhoneLocale")
+    JSONResult<JSONObject> queryPhoneLocale(QueryPhoneLocaleDTO queryPhoneLocaleDTO);
 
 
     @Component
@@ -157,6 +166,10 @@ public interface CallRecordFeign {
         @Override
         public JSONResult<Boolean> recodeCallTime(CallRecordReqDTO myCallRecordReqDTO) {
             return fallBackError("记录拨打时间");
+        }
+        @Override
+        public JSONResult<JSONObject> queryPhoneLocale(QueryPhoneLocaleDTO queryPhoneLocaleDTO) {
+            return fallBackError("查询手机号归属地");
         }
 
     }

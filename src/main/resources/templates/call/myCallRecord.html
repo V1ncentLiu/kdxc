@@ -3,7 +3,7 @@
 <head th:include="_header_include::frag(~{::title},~{::link},~{})">
     <title>我的通话记录</title>
     <link th:href="@{'/font-awesome-4.7.0/css/font-awesome.css'}" rel="stylesheet">
-    <link th:href="@{'/css/custom/callrecord/simpleAudio.css'}" rel="stylesheet">
+    <!-- <link th:href="@{'/css/custom/callrecord/simpleAudio.css'}" rel="stylesheet"> -->
      <style>
         .trClientManage .leftBox{/*width: 200px;*/height: auto;border:1px solid #ebeef5;min-height: 480px;}
         .trClientManage .leftTitle{background:#ebeef5;text-indent: 20px;height: 40px;line-height: 40px;}
@@ -67,7 +67,11 @@
                 </div> 
             </el-form>
         </div>
-        <div class="fs16 marginB20">通话总时长：<span style="color:red">{{totalTalkTime | fomatSeconds2}}</span></div>
+        <div class="fs16 marginB20 callLogBox">
+            通话总时长：<span style="color:red">{{totalTalkTime | fomatSeconds2}}</span>
+            <!-- 播放器 -->
+            <audio style="top: 0;" id="audio" src="" controls="controls" autoplay="autoplay" controlsList="nodownload" oncontextmenu="return false" v-show="audioShow"></audio>
+        </div>
         <el-table 
             ref="multipleTable"
             tooltip-effect="dark"
@@ -75,7 +79,7 @@
             border
             :data="callRecordData" 
             >
-            <el-table-column type="index" width="50" label="序号"> </el-table-column>
+            <el-table-column align="center" type="index" width="55" label="序号"> </el-table-column>
             <el-table-column align="center" prop="customerName" label="客户姓名"></el-table-column>
             <el-table-column align="center" prop="customerPhone" label="客户电话" width="120"></el-table-column>
             <el-table-column align="center" prop="serviceTime" label="开始服务时间" width="150"></el-table-column>
@@ -86,12 +90,11 @@
             <el-table-column align="center" prop="talkTime" label="通话时长" :formatter="getTalkTimeText" width="100"></el-table-column>
             <el-table-column align="center"  label="操作" >
                 <template slot-scope="scope" v-if="scope.row.talkTime >0 ">
-                        <div style="float:left" :id="scope.row.id" class="sound-trigger sound-trigger--type-default sound-trigger--type-click" @click="switchSoundBtn(scope.row.id,scope.row.recordFile,scope.row.callSource)">
-    					    <div class="sound-trigger__inner">
-    					    <i class="fa fa-play fa-lg"></i>
-    					    </div>
-    					</div>
-                        <el-button type="danger" size="small" @click="downloadAudio(scope.row.id,scope.row.recordFile,scope.row.callSource)"><i class="el-icon-download"></i>下载</el-button>
+                        <a :id="scope.row.id" class="sound-trigger sound-trigger--type-default sound-trigger--type-click cursorP" @click="switchSoundBtn(scope.row.id,scope.row.recordFile,scope.row.callSource)">
+    					    <span class="sound-trigger__inner"><i class="fa fa-play-1 fa-lg"></i></span>
+    					</a>
+                        <!-- <el-button type="danger" size="small" @click="downloadAudio(scope.row.id,scope.row.recordFile,scope.row.callSource)"><i class="el-icon-download"></i>下载</el-button> -->
+                        <a class="download_img" @click="downloadAudio(scope.row.id,scope.row.recordFile,scope.row.callSource)"></a>
                 </template>
             </el-table-column>
             
@@ -106,7 +109,30 @@
 <script th:inline="javascript">
    
 </script>
-<script th:src="@{/js/custom/callrecord/simpleAudio.js?v=1.0.0}"></script>
+<script th:src="@{/js/custom/callrecord/myCallRecord.js?v=1.0.4}"></script><!-- <script th:src="@{/js/custom/callrecord/simpleAudio.js?v=1.0.0}"></script> -->
+<script th:src="@{/js/custom/callrecord/simpleAudio02.js?v=1.0.0}"></script>
 <script th:src="@{/js/custom/callrecord/download.js?v=1.0.0}"></script>
-<script th:src="@{/js/custom/callrecord/myCallRecord.js?v=1.0.2}"></script>
+<style>
+    .fa-play-1 {
+        width: 34px;
+        height: 34px;
+        display: inline-block;
+        background-image: url(/images/icon_play.png);
+        background-repeat: no-repeat;
+    }
+    .fa-stop-1 {
+        width: 34px;
+        height: 34px;
+        display: inline-block;
+        background-image: url(/images/icon_stop.png);
+        background-repeat: no-repeat;
+    }
+    .download_img {
+        width: 34px;
+        height: 34px;
+        display: inline-block;
+        background-image: url(/images/icon_download.png);
+        background-repeat: no-repeat;
+    }
+</style>
 </html>

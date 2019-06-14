@@ -583,7 +583,11 @@
                 </el-table>
             </el-row>
 
-            <div class="marginB20 fs16 paddingT20">通话记录</div>
+            <div class="marginB20 fs16 paddingT20 callLogBox">
+                通话记录
+                <!-- 播放器 -->
+                <audio id="audio" src="" controls="controls" autoplay="autoplay" controlsList="nodownload" oncontextmenu="return false" v-show="audioShow"></audio>
+            </div>
             <el-row>
                 <el-table ref="multipleTable" :data="tableDataC3"
                           tooltip-effect="dark" style="width: 100%"
@@ -638,8 +642,8 @@
                     <el-table-column prop="createTime" label="开始服务时间" align="center"></el-table-column>
                 </el-table>
                 <div class="padding20 f-tac">
-                    <el-button type="primary" @click="saveClue('form')">提交</el-button>
-                    <el-button type="success" v-show="showButtonToTele" @click="saveClue('form','toTele')">转电销</el-button>
+                    <el-button type="primary" :disabled="btnDisabled" @click="saveClue('form')">提交</el-button>
+                    <el-button type="success" :disabled="btnDisabled" v-show="showButtonToTele" @click="saveClue('form','toTele')">转电销</el-button>
                     <el-button @click="rebackClue">取 消</el-button>
                 </div>
         </el-form>
@@ -922,6 +926,7 @@
         el: '#addCustomer',
         data: function () {
             return {
+                audioShow:false,
             	loginUserId:loginUserId,
                 showButtonToTele:showButtonToTele,
                 customerStatusRequired:false,
@@ -938,6 +943,7 @@
                 dialogFormVisible: false,//新增手机号
                 buttonType: 'A',//添加手机号按钮形式
                 deleteShow: false,//删除新增手机号输入框
+                btnDisabled: false,
                 addBtnDisabled: false,
                 inviteBtnDisabled: false,
                 showwchatcode:'',
@@ -1366,16 +1372,25 @@
                     clue.clueIntention = clueIntention;
 
                     clue.flag = flag;
+
+                    this.btnDisabled = true;   
                     axios.post('/phonetraffic/toTele', clue)
                         .then(function (response) {
                             console.log(response.data)
                             if(response.data.code!=0&&flag=='toTele'){
                                 addCustomerVM.showMessageDialog =true;
+                                addCustomerVM.btnDisabled = false;   
                             }else  if(response.data.code!=0&&flag!='toTele'){
                                 addCustomerVM.$message({message: response.data.msg, type: 'error'});
+                                addCustomerVM.btnDisabled = false; 
                             }else{
-                                addCustomerVM.$message({message: '操作成功', type: 'success', duration: 2000, onClose: function () {window.location.href = "/phonetraffic/listPage";}});
+                                addCustomerVM.$message({message: '操作成功', type: 'success', duration: 1000, onClose: function () 
+                                {
+                                    // addCustomerVM.btnDisabled = false; 
+                                    window.location.href = "/phonetraffic/listPage";}});
                             }
+                        }).catch(function(error){
+                            addCustomerVM.btnDisabled = false; 
                         });
                 } else {
                     console.log('error submit!!');
@@ -1713,6 +1728,8 @@
                                                     addCustomerVM.tableDataC2=response.data.data;
                                                 });
                                         }});
+                                }).catch(function(){
+                                    addCustomerVM.addBtnDisabled=false;
                                 });
                         }else{
                             //如果是新增跟进记录
@@ -1727,7 +1744,9 @@
                                                     addCustomerVM.tableDataC2=response.data.data;
                                                     //新增
                                                     _this.$refs['LineRuleForm'].resetFields();
-                                                });
+                                                }).catch(function(error){
+                                                    addCustomerVM.addBtnDisabled=false;
+                                            });
                                         }});
                                 });
                         }
@@ -2014,6 +2033,8 @@
                                     // addCustomerVM.inviteBtnDisabled=false;
                                 }
                             });
+                        }).catch(function(error){
+                            addCustomerVM.inviteBtnDisabled=false;
                         });
 
                 } else {
@@ -2058,6 +2079,7 @@
                 $(".downloadMp3:eq(" + index + ") a>p").trigger("click");
             },
             switchSoundBtn(id, url, callSource) {
+                this.audioShow=true;
                 if (callSource == '2') {
                     switchSound(id, url);
                     return;
@@ -2201,7 +2223,7 @@
                 }else{
                     this.form.radioProject = "1";
                 }
-                debugger
+                // debugger
                 this.form.insideProject = intention.purInProject == null ? "" : intention.purInProject + "";
                 this.form.outsideProject = intention.purOutProject;
                 if (intention.province) {
@@ -2352,7 +2374,8 @@
 <script th:src="@{/js/custom/call/timer.js?v=1.0.1}"></script>
 <script th:src="@{/js/custom/call/rtCall.js?v=1.0.0}"></script>
 <!-- 播放錄音 js -->
-<script th:src="@{/js/custom/callrecord/simpleAudio01.js?v=1.0.0}"></script>
+<!-- <script th:src="@{/js/custom/callrecord/simpleAudio01.js?v=1.0.0}"></script> -->
+<script th:src="@{/js/custom/callrecord/simpleAudio02.js?v=1.0.0}"></script>
 <script th:src="@{/js/custom/callrecord/download.js?v=1.0.0}"></script>
 <script type="text/javascript">
 

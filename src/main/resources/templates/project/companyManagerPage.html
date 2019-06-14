@@ -224,16 +224,17 @@ var companyVM = new Vue({
                          }
                         axios.post(url, param)
                         .then(function (response) {
-                        	companyVM.submitDisabled=false;
-                            var resData = response.data;
-                            if(resData.code=='0'){
-                            	companyVM.cancelForm(formName);
-                            	companyVM.$message({message:'操作成功',type:'success',duration:1000,onClose:function(){
+                          var resData = response.data;
+                          if(resData.code=='0'){
+                            companyVM.cancelForm(formName);
+                            companyVM.$message({message:'操作成功',type:'success',duration:1000,onClose:function(){
+                                companyVM.submitDisabled=false;
                             		companyVM.searchTable();
                           	    }});
                             }else{
-                            	companyVM.$message('操作失败');
-                                console.error(resData);
+                              companyVM.$message('操作失败');
+                              companyVM.submitDisabled=false;
+                              console.error(resData);
                             }
                         })
                         .catch(function (error) {

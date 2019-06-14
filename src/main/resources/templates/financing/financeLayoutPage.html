@@ -83,6 +83,9 @@
                     </el-option>
                 </el-select>
             </el-form-item>
+            <el-form-item label="业务线：" :label-width="formLabelWidth" prop="businessLine" v-if="0">
+                <el-input v-model="form.businessLine" placeholder="业务线"></el-input>
+            </el-form-item>
             <el-form-item label="签约项目：" :label-width="formLabelWidth" prop="signProjects">
                 <el-select   filterable v-model="form.signProjects" multiple  placeholder="选择签约项目" style="width: 290px;">
                     <el-option
@@ -117,7 +120,7 @@
         </el-form>
 
         <div slot="footer" style="text-align: center" class="dialog-footer">
-            <el-button type="primary" @click="submitForm('form')">提交</el-button>
+            <el-button type="primary" :disabled="btnDisabled" @click="submitForm('form')">提交</el-button>
             <el-button @click="dialogFormVisible= false">取消</el-button>
         </div>
     </el-dialog>
@@ -139,7 +142,9 @@
    var orgVM =  new Vue({
         el: '#organizationManage',
         data: {
+            btnDisabled: false,
         	showTitle:"",
+            businessLine:"",
         	dialogBatchVisible:false,
         	confirmBtnDisabled:false,
         	formLabelWidth: '130px',
@@ -156,7 +161,8 @@
         	financeUsers:"",
         	form:{
         		busGroupId: '',
-        		financeUsers: ''
+        		financeUsers: '',
+            businessLine:''
         	},
         
             pager:{
@@ -185,23 +191,26 @@
             userChangeSelect(selVal) {
                 orgVM.cwList = cwList;
                 if (null != selVal) {
-                    var param = {};
-                    param.id = selVal;
-                    //根据商务小组id获取业务线
-                    axios.post('/organization/organization/queryOrgById', param).then(function (response) {
-                        if (null != response || response.data != null || response.data.code == '0') {
-                            var param = {};
-                            param.roleList = ["QDSJCW", "SJHZCW", "CYCW"];
-                            param.businessLine = response.data.data.businessLine;
-                            //根据业务线获取财务集合
-                            axios.post('/user/userManager/getUserInfoListByParam', param).then(function (response) {
-                                console.log(response.data.data);
-                                if (null != response || response.data != null || response.data.code == '0') {
-                                    orgVM.cwList = response.data.data;
-                                }
-                            });
-                        }
-                    });
+                  var param = {};
+                  param.id = selVal;
+                  //根据商务小组id获取业务线
+                  axios.post('/organization/organization/queryOrgById', param).then(function (response) {
+                      if (null != response || response.data != null || response.data.code == '0') {
+                          var param = {};
+                          param.roleList = ["QDSJCW", "SJHZCW", "CYCW"];
+                          param.businessLine = response.data.data.businessLine;
+                          orgVM.form.businessLine = response.data.data.businessLine;
+                          orgVM.form.financeUsers =[];
+                          console.log(response.data.data.businessLine);
+                          //根据业务线获取财务集合
+                          axios.post('/user/userManager/getUserInfoListByParam', param).then(function (response) {
+                              // console.log(response.data.data);
+                              if (null != response || response.data != null || response.data.code == '0') {
+                                  orgVM.cwList = response.data.data;
+                              }
+                          });
+                      }
+                  });
                 }
             },
         	inviteAreaListPage(){//查询按钮
@@ -214,7 +223,7 @@
                   param.busGroupId=this.busGroupId;
                  
                   axios.post('/financing/financelayout/getFinanceLayoutList',param).then(function (response) {
-                  	  console.log(response);
+                  	//   console.log(response);
                       if(null===response||response.data==null||response.data.code!='0'){
                     	  orgVM.$message({message: response.data.msg, type: 'warning'});
 	                  	  return ;
@@ -254,7 +263,7 @@
                   }
                   param.id = str;
                   axios.post('/financing/financelayout/findFinanceLayoutById',param).then(function (response) {
-                  	  console.log(response);
+                  	//   console.log(response);
                       if(null !==response && response.data !=null && response.data.code=='0'){
                     	  var financeLayout = response.data.data;
                           orgVM.form.busGroupId = financeLayout.busGroupId;
@@ -342,7 +351,7 @@
      		             var param={};
      		             param.ids=ids;
     	                 axios.post('/financing/financelayout/deleFinanceLayout',param).then(function (response) {
-    	                  	  console.log(response);
+    	                  	//   console.log(response);
     	                      if(null !==response && response.data !=null && response.data.code=='0'){
     	                    	  window.location.href="/financing/financelayout/financeLayoutPage"; 
     	                     }else{
@@ -402,6 +411,7 @@
               	} ,
              submitForm(formName) {
                     this.$refs[formName].validate((valid) => {
+                    //   debugger;
                         if (valid) {
                           var formData = this.form;
                           var param={};
@@ -434,8 +444,9 @@
                             }
                             param.signProvinces = signProvincesStrs;
                           param.busGroupId = formData.busGroupId;
+                          param.businessLine = formData.businessLine;
                           var str = "";
-                         
+
 
                           var url = "/financing/financelayout/addFinanceLayout";
                           if($("#addOrUpdate").val() ==2){
@@ -446,17 +457,20 @@
                               param.id = str;
                         	  url = "/financing/financelayout/updateFinanceLayout"
                           }
-                         
+                          this.btnDisabled = true;
                        	  axios.post(url,param).then(function (response) {
-       	                  	  console.log(response);
+       	                  	//   console.log(response);
        	                      if(null !==response && response.data !=null && response.data.code=='0'){
+                                  orgVM.btnDisabled = false; 
        	                    	  window.location.href="/financing/financelayout/financeLayoutPage"; 
        	                     }else{
-       	                    	orgVM.$message({message: response.data.msg, type: 'warning'});
+                                   orgVM.$message({message: response.data.msg, type: 'warning'});
+                                   orgVM.btnDisabled = false; 
         	                  	  	return ;
        	                     } 
        	                  }).catch(function (error) {
                                  console.log(error);
+                                 orgVM.btnDisabled = false; 
                              })
                              .then(function () {
                                // always executed

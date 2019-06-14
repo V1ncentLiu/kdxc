@@ -159,7 +159,7 @@
                 </el-form-item>
             </el-form>
             <div slot="footer" class="dialog-footer">
-                <el-button type="primary" @click="transferClue('transferForm')">提 交</el-button>
+                <el-button type="primary" :disabled="isDisabled" @click="transferClue('transferForm')">提 交</el-button>
                 <el-button  @click="transferVisible = false">取 消</el-button>
             </div>
         </template>
@@ -210,7 +210,7 @@
                 </el-form-item>
             </el-form>
             <div slot="footer" class="dialog-footer">
-                <el-button type="primary" @click="ceoClue('ceoForm')">提 交</el-button>
+                <el-button type="primary" :disabled="isDisabled" @click="ceoClue('ceoForm')">提 交</el-button>
                 <el-button  @click="ceoVisible = false">取 消</el-button>
             </div>
         </template>
@@ -341,7 +341,7 @@ var phCustomerStatusSubList=[[${phCustomerStatusSubList}]];//话务二级客户�
 var clueVM = new Vue({
         el: '#clueManage',
         data: {
-        	isDisabled:false,//默认不可点击  
+            isDisabled:false,//默认不可点击    
             isShow:false,
     		clueSearchForm: {
         		phone: '',
@@ -654,15 +654,15 @@ var clueVM = new Vue({
                               if(data.code=='0'){
                               	clueVM.$message({message:'分配成功',type:'success',duration:1500,onClose:function(){
                               		clueVM.allocationVisible = false;
+                                    clueVM.isDisabled = false;
                               		clueVM.searchTable();
-                            	  clueVM.isDisabled = false;
                           	    }});
                               }else{
-                            	  clueVM.isDisabled = false;
-                              	clueVM.$message({
-                                      message: "接口调用失败",
-                                      type: 'error'
-                                    }); 
+                                clueVM.$message({
+                                    message: "接口调用失败",
+                                    type: 'error'
+                                }); 
+                                clueVM.isDisabled = false;
                               }
                           })
                           .catch(function (error) {
@@ -715,20 +715,20 @@ var clueVM = new Vue({
                               if(data.code=='0'){
                               	clueVM.$message({message:'转移成功',type:'success',duration:1500,onClose:function(){
                               		clueVM.transferVisible = false;
-                              		clueVM.searchTable();
                               		clueVM.isDisabled = false;
+                              		clueVM.searchTable();
                           	    }});
                               }else{
-                            	  clueVM.isDisabled = false;
-                              	clueVM.$message({
-                                      message: "接口调用失败",
-                                      type: 'error'
-                                    }); 
+                                clueVM.$message({
+                                    message: "接口调用失败",
+                                    type: 'error'
+                                }); 
+                                clueVM.isDisabled = false;
                               }
                           })
                           .catch(function (error) {
                         	  clueVM.isDisabled = false;
-                            console.log(error);
+                              console.log(error);
                           })
                           .then(function () {
                           	
@@ -822,27 +822,30 @@ var clueVM = new Vue({
                    	  var idArray=id.split(",");
                    	  param.teleGroupId=idArray[0];
                    	  param.teleDirectorId=idArray[1];
-                     	  param.teleSaleId=this.ceoForm.teleSaleId;
-                         axios.post('/clue/pendingAllocation/ceoDistributionClue',param)
+                        param.teleSaleId=this.ceoForm.teleSaleId;
+                           
+                        this.isDisabled = true; 
+
+                        axios.post('/clue/pendingAllocation/ceoDistributionClue',param)
                          .then(function (response) {
                              var data =  response.data;
                              if(data.code=='0'){
-                             	clueVM.$message({message:'副总分发成功',type:'success',duration:1500,onClose:function(){
-                             		clueVM.ceoVisible = false;
+                                 clueVM.$message({message:'副总分发成功',type:'success',duration:1500,onClose:function(){
+                                    clueVM.ceoVisible = false;
+                                    clueVM.isDisabled = false; 
                              		clueVM.searchTable();
                          	    }});
                              }else{
                              	clueVM.$message({
-                                     message: "接口调用失败",
-                                     type: 'error'
-                                   }); 
+                                    message: "接口调用失败",
+                                    type: 'error'
+                                }); 
+                                clueVM.isDisabled = false; 
                              }
                          })
                          .catch(function (error) {
                            console.log(error);
-                         })
-                         .then(function () {
-                         	
+                           clueVM.isDisabled = false;
                          });
            	          } else {
            	        	console.log('数据未通过校验！');

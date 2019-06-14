@@ -517,41 +517,41 @@ var clueVM = new Vue({
             	   
             	   this.$refs[formName].validate((valid) => {
             	          if (valid) {
-            	        	  clueVM.submitDisable=true;
-            	        	  var rows = this.multipleSelection;
-	           	           	   var idList = [];
-	           	               var clueIdList = [];
-	           	               for(var i=0;i<rows.length;i++){
-	           	            	   var curRow = rows[i];
-	           	            			idList.push(curRow.id);
-	           	            			clueIdList.push(curRow.clueId);
-	           	               }
-           	            	  //分发
-           	            	  var param  = {};
-           	            	  param.type=1;
-	           	           	  param.idList=idList;
-	           	           	  param.clueIdList=clueIdList;
-	                          	  param.busSaleId=this.allocationForm.saleId;
-	                          	  param.remark=this.allocationForm.remark;
+                          var rows = this.multipleSelection;
+                          var idList = [];
+                          var clueIdList = [];
+                          for(var i=0;i<rows.length;i++){
+                            var curRow = rows[i];
+                            idList.push(curRow.id);
+                            clueIdList.push(curRow.clueId);
+                          }
+                          //分发
+                          var param  = {};
+                          param.type=1;
+                          param.idList=idList;
+                          param.clueIdList=clueIdList;
+                          param.busSaleId=this.allocationForm.saleId;
+                          param.remark=this.allocationForm.remark;
+                          clueVM.submitDisable=true;
 	                             axios.post('/business/busAllocation/busAllocationClue',param)
 	                              .then(function (response) {
 	                                  var data =  response.data;
 	                                  if(data.code=='0'){
 	                                  	clueVM.$message({message:'分发成功',type:'success',duration:1000,onClose:function(){
-			                            	clueVM.submitDisable=false;
-	                                  		clueVM.allocationVisible = false;
+                                        clueVM.allocationVisible = false;
+                                        clueVM.submitDisable=false;
 	                                  		clueVM.searchTable();
 	                              	    }});
 	                                  }else{
-			                            clueVM.submitDisable=false;
-	                                  	clueVM.$message({
-	                                          message: "接口调用失败",
-	                                          type: 'error'
-	                                        }); 
+                                      clueVM.$message({
+                                        message: "接口调用失败",
+                                        type: 'error'
+                                      }); 
+                                      clueVM.submitDisable=false;
 	                                  }
 	                              })
 	                              .catch(function (error) {
-	                            	clueVM.submitDisable=false;
+	                            	  clueVM.submitDisable=false;
 	                                console.log(error);
 	                              });
             	            //end
@@ -619,16 +619,16 @@ var clueVM = new Vue({
                                    var data =  response.data;
                                    if(data.code=='0'){
                                    	clueVM.$message({message:'外调成功',type:'success',duration:1000,onClose:function(){
-	                            	   clueVM.submitDisable=false;
-                                   		clueVM.transferVisible = false;
+                                       clueVM.transferVisible = false;
+                                       clueVM.submitDisable=false;
                                    		clueVM.searchTable();
                                	    }});
                                    }else{
-	                            	   clueVM.submitDisable=false;
-	                                   	clueVM.$message({
-	                                           message: "接口调用失败",
-	                                           type: 'error'
-	                                         }); 
+                                     clueVM.$message({
+                                       message: "接口调用失败",
+                                       type: 'error'
+                                      }); 
+                                      clueVM.submitDisable=false;
                                    }
                                })
                                .catch(function (error) {

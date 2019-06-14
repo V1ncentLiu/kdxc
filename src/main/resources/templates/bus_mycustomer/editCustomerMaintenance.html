@@ -539,7 +539,11 @@
                     </div>
                 </el-table>
             </el-row>
-            <div class="marginB20 fs16 paddingT20">通话记录</div>
+            <div class="marginB20 fs16 paddingT20 callLogBox">
+                通话记录
+                <!-- 播放器 -->
+                <audio id="audio" src="" controls="controls" autoplay="autoplay" controlsList="nodownload" oncontextmenu="return false" v-show="audioShow"></audio>
+            </div>
             <el-table ref="multipleTable" :data="tableDataC3" tooltip-effect="dark" style="width: 100%" border @selection-change="handleSelectionChange">
                 <el-table-column type="index" width="55" label="序号" align="center"></el-table-column>
                 <el-table-column prop="accountName" label="姓名" align="center"></el-table-column>
@@ -550,11 +554,11 @@
                 <el-table-column prop="talkTime" label="接通时长"  :formatter="getTalkTimeText"  align="center"></el-table-column>
                 <el-table-column label="操作" align="center">
                     <template slot-scope="scope" v-if="scope.row.talkTime >0 ">
-                        <a :id="scope.row.id" class="sound-trigger sound-trigger--type-default sound-trigger--type-click" @click="switchSoundBtn(scope.row.id,scope.row.recordFile,scope.row.callSource)">
+                        <a :id="scope.row.id" class="sound-trigger sound-trigger--type-default sound-trigger--type-click cursorP" @click="switchSoundBtn(scope.row.id,scope.row.recordFile,scope.row.callSource)">
                             <span class="sound-trigger__inner"><i class="fa fa-play-1 fa-lg"></i></span>
                         </a>
 
-                        <a  class="download_img" v-if="scope.row.accountId==loginUserId" @click="downloadAudio(scope.row.id,scope.row.recordFile,scope.row.callSource)"></a>
+                        <a  class="download_img cursorP" v-if="scope.row.accountId==loginUserId" @click="downloadAudio(scope.row.id,scope.row.recordFile,scope.row.callSource)"></a>
                     </template>
                 </el-table-column>
             </el-table>
@@ -602,7 +606,7 @@
                 </el-table>
             </el-row>
             <div class="padding20 f-tac">            
-                <el-button type="primary" @click="submitForm('form')">提交资料</el-button>
+                <el-button type="primary" :disabled="btnDisabled" @click="submitForm('form')">提交资料</el-button>
                
                 <el-button @click="rebackClue">取 消</el-button>
             </div> 
@@ -768,6 +772,8 @@ var loginUserId=[[${loginUserId}]];
         el: '#addCustomer',
         data: function() {
             return {
+                audioShow:false,//播放器默认不显示
+                btnDisabled: false,    
                 clueId:clueId,
                 loginUserId:loginUserId,
                 wechatVisible: false,//新增微信号
@@ -1000,6 +1006,8 @@ var loginUserId=[[${loginUserId}]];
             },
 
             switchSoundBtn(id,url,callSource){
+                // 播放器显示
+                this.audioShow=true;
                 if(callSource=='2'){
                     switchSound(id,url);
                     return;
@@ -1208,7 +1216,7 @@ var loginUserId=[[${loginUserId}]];
                             // 判断输入框里4个值是否重复(判断对象数组的value是否有重复值)
                             ary.push(domains[i].value);//把输入的手机号放入一个数组
                             var s = ary.join(",")+",";                            
-                            console.log(ary)
+                            // console.log(ary)
                             for(var j=0;j<ary.length;j++) {
                                 console.log(ary[j])
                                 if(ary[j]!=""){
@@ -1226,11 +1234,13 @@ var loginUserId=[[${loginUserId}]];
                         clueIntention.tradeProject=tradeProject;
                         var clue={};
               	        clue.clueId=clueId;
-                 	      clue.clueCustomer=clueCustomer;
-                 	      clue.clueIntention=clueIntention;
+                        clue.clueCustomer=clueCustomer;
+                        clue.clueIntention=clueIntention;
+                        addCustomerVM.btnDisabled = true;
                         axios.post('/tele/clueMyCustomerInfo/updateCustomerClue',clue)
                         .then(function (response) {
                      	  addCustomerVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
+                              addCustomerVM.btnDisabled = false;
                     		  window.location.href="/aggregation/businessMyCustomer/listPage"; 
     		        	}});
                       });
@@ -1917,7 +1927,7 @@ var loginUserId=[[${loginUserId}]];
  }
  
  </script>
-<script th:src="@{/js/custom/callrecord/simpleAudio01.js?v=1.0.0}"></script>
+<script th:src="@{/js/custom/callrecord/simpleAudio02.js?v=1.0.0}"></script>
 <script th:src="@{/js/custom/callrecord/download.js?v=1.0.0}"></script>
 <style>
     .el-button.is-disabled, .el-button.is-disabled:focus, .el-button.is-disabled:hover{

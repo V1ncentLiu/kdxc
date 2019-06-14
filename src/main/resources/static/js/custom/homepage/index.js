@@ -225,7 +225,8 @@ var homePageVM=new Vue({
                });
          },
          confirmLogout(){//确认退出系统
-        	 location.href="/index/logout";
+             window.sessionStorage.clear();//清除缓存
+        	 location.href="/index/logout";            
         },
         gotoHomePage(){//首页跳转
         	location.href='/login';
@@ -570,6 +571,7 @@ var homePageVM=new Vue({
         		$("#outboundCallTimeDiv").show();
         	}else{
         		$('#outboundCallTime').html("");
+        		$('#outboundPhoneLocaleArea').html("");
         		this.outboundInputPhone="";
         	}
         	this.outboundDialogMin = false;

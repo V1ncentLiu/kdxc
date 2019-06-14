@@ -42,14 +42,14 @@
         <div class="mainSearchFormBox">
 		        <el-form :inline="true" class="demo-form-inline mainSearchForm" :model="form" ref="form"> 
                 <el-form-item label="资源项目:">
-              		<el-select v-model="form.resourceProject" placeholder="资源项目" clearable >
+              		<el-select v-model="form.resourceProject" placeholder="资源项目" clearable filterable >
               		<el-option v-for="item in proSelectArr" :key="item.id"
               			:label="item.projectName" :value="item.id"> 
                   </el-option> 
                 </el-select> 
                 </el-form-item> 
                 <el-form-item label="资源专员:"> 
-                    <el-select v-model="form.resourcePerson" placeholder="资源专员" clearable > 
+                    <el-select v-model="form.resourcePerson" placeholder="资源专员" clearable filterable > 
                       <el-option v-for="item in userListArr" :key="item.id" :label="item.name" :value="item.id"></el-option> 
                   </el-select> 
                 </el-form-item> 
@@ -69,7 +69,7 @@
                       <el-input v-model="form.resourceId" placeholder="资源ID"></el-input>
                     </el-form-item> 
                     <el-form-item label="媒介:">
-                  		<el-select v-model="form.medium" placeholder="媒介" clearable > 
+                  		<el-select v-model="form.medium" placeholder="媒介" clearable filterable > 
                         <el-option v-for="item in mediumArry" :key="item.value" :label="item.name"
                   			:value="item.value"> 
                         </el-option> 
@@ -82,7 +82,7 @@
                       </el-select> 
                     </el-form-item> 
                     <el-form-item label="行业类别:">
-                  		<el-select v-model="form.industryCategory" placeholder="行业类别" clearable > 
+                  		<el-select v-model="form.industryCategory" placeholder="行业类别" clearable filterable > 
                         <el-option v-for="item in industryCategoryArr" :key="item.value" :label="item.name" :value="item.value"> 
                         </el-option> 
                       </el-select> 
@@ -127,7 +127,7 @@
             </el-form> 
         </div>
         <el-row> 
-        		<el-table ref="tableData" tooltip-effect="dark" style="width: 100%" border :data="tableData" @row-dblclick="toUpdatePage" @selection-change="handleSelectionChange">
+        		<el-table ref="multipleTable" tooltip-effect="dark" style="width: 100%" border :data="tableData" @row-click="clickRow" @row-dblclick="toUpdatePage" @selection-change="handleSelectionChange">
         		<el-table-column align="center" prop="clueId" type="selection" width="55"></el-table-column> 
         		<el-table-column align="center" type="index" label="序号" width="55"></el-table-column> 
         		<el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" 
@@ -155,11 +155,11 @@
                 :width="item.width" v-else>
     	        </el-table-column>
         		</el-table> 
-            <table-pagination :pager="pager" @change="initTableData"></table-pagination>
+            <table-pagination v-if="paginationShow" :pager="pager" @change="initTableData"></table-pagination>
     		</el-row>
     </div>
-		<!-- dialog -->
-		<el-dialog title="资源详细信息" :visible.sync="dialogFormVisible" width="870px">
+	<!-- dialog -->
+	<el-dialog title="资源详细信息" :visible.sync="dialogFormVisible" width="870px">
 		<el-form :model="dialogForm" ref="dialogForm" class="marginB20 dialogForm" >
 			<div class="fs16 marginB10">基本信息<span class="redcolor" style="padding-left: 20px;">资源ID：{{basic.id}}</span></div>
 			<div class="borderbox" style="padding:10px 0;">
@@ -256,7 +256,8 @@
 					</el-col> 
 				</el-row>
 			</div>
-		</el-form> </el-dialog>
+		</el-form> 
+	</el-dialog>
 	<!-- 自定义列 -->
 	<!-- 选择列 -->
 	<el-dialog title="自定义列" :visible.sync="dialogChooseList" class="elCheckboxGroup">
@@ -321,7 +322,7 @@
 					<el-table-column align="center" prop="categoryName" label="资源类别" width="120px"></el-table-column>
 					<el-table-column align="center" prop="sourceTypeName" label="广告位"></el-table-column>
 					<el-table-column align="center" prop="sourceName" label="媒介"></el-table-column>
-					<el-table-column align="center" prop="projectName" label="资源项目"></el-table-column>
+					<el-table-column align="center" prop="projectName" label="资源项目(项目名称)"></el-table-column>
 					<el-table-column align="center" prop="industryCategoryName" label="行业类别"></el-table-column>
 					<el-table-column align="center" prop="cusName" label="姓名"></el-table-column>
 					<el-table-column align="center" prop="phone" label="手机" width="110px"></el-table-column>
@@ -409,21 +410,22 @@ var wdrVM = new Vue({
         el: '#waitDistributResource',
         data: function() {
             return {
+            	paginationShow: false,
                 isShow:false,
                 dialogFormVisible: false,
                 phoneVisible: false,
                 wechatVisible: false,
               	fileShow:true,
                 multipleSelection: [],//选择行
-              dataNum:"",
-              exportFormVisible:false,
-              downloadButtonShow: false,
-              importFailReasonShow:false,
-              dialogBatchVisible:false,
-              confirmBtnDisabled:false,
-              addOrModifyDialogTitle:"",
-              fileList:[],//上传文件列表
-              exportdataTable:[],
+				dataNum:"",
+				exportFormVisible:false,
+				downloadButtonShow: false,
+				importFailReasonShow:false,
+				dialogBatchVisible:false,
+				confirmBtnDisabled:false,
+				addOrModifyDialogTitle:"",
+				fileList:[],//上传文件列表
+				exportdataTable:[],
                 form: {
                     starTime:'',
                     endTime:'',
@@ -471,40 +473,61 @@ var wdrVM = new Vue({
                 tableColums:[],
                 fieldFrom: {
  	               type: []
- 	             },
+ 	            },
+ 	            storeForm: {
+                    starTime:'',
+                    endTime:'',
+                    resourceProject:'',
+                    resourcePerson:'',
+                    assignFailReason:'',
+                    customName:'',
+                    resourceId:'',
+                    medium:'',
+                    resourceType:'',
+                    tradeType:'',
+                    email:'',
+                    qq:'',
+                    phone:'',
+                    isRecall:'',
+                },
+                storeId: '',
+                scrollTop: 0,
             }        	  
         },
         methods: {
-        	 initTableData(){
-                 var param = {};
-                 var pageSize = this.pager.pageSize;
-                 var pageNum = this.pager.currentPage;
-             var starTime=this.form.starTime;
-             var endTime=this.form.endTime;
-             if(starTime&&endTime&&starTime> endTime){
-                 this.$message({
-                   message: '开始时间不能大于结束时间',
-                   type: 'warning'
-                 });
-                 return;
-               }
-                 param.pageNum=pageNum;
-                 param.pageSize=pageSize;
-                 param.createTimeStart=this.form.starTime;
-                 param.createTimeEnd=this.form.endTime;
-                 param.projectId=this.form.resourceProject; 
-                 param.operationId=this.form.resourcePerson;
-                 param.cusName=this.form.customName;
-                 param.clueId=this.form.resourceId;
-                 param.assignFailReason=this.form.assignFailReason;
-                 param.source=this.form.medium;
-                 param.category=this.form.category;
-                 param.industryCategory=this.form.industryCategory;
-                 param.qq=this.form.qq;
-                 param.email=this.form.email;
-                 param.phone=this.form.phone;
-                 param.isRecall=this.form.isRecall;
-                 param.wechat = this.form.wechat;
+        	clickRow(row){
+                this.$refs.multipleTable.toggleRowSelection(row)
+            },
+        	initTableData(){
+                var param = {};
+                var pageSize = this.pager.pageSize;
+                var pageNum = this.pager.currentPage;
+             	var starTime=this.form.starTime;
+             	var endTime=this.form.endTime;
+             	if(starTime&&endTime&&starTime> endTime){
+                 	this.$message({
+                   		message: '开始时间不能大于结束时间',
+                   		type: 'warning'
+                 	});
+                 	return;
+               	}
+				param.pageNum=pageNum;
+				param.pageSize=pageSize;
+				param.createTimeStart=this.form.starTime;
+				param.createTimeEnd=this.form.endTime;
+				param.projectId=this.form.resourceProject; 
+				param.operationId=this.form.resourcePerson;
+				param.cusName=this.form.customName;
+				param.clueId=this.form.resourceId;
+				param.assignFailReason=this.form.assignFailReason;
+				param.source=this.form.medium;
+				param.category=this.form.category;
+				param.industryCategory=this.form.industryCategory;
+				param.qq=this.form.qq;
+				param.email=this.form.email;
+				param.phone=this.form.phone;
+				param.isRecall=this.form.isRecall;
+				param.wechat = this.form.wechat;
      		    axios.post('/exetend/agendaTaskManager/queryPageAgendaTask',param).then(function (response) {
      				if(!response){
      					wdrVM.$message({
@@ -532,9 +555,40 @@ var wdrVM = new Vue({
      		    	wdrVM.pager.total=pageData.total;
      		    	wdrVM.pager.currentPage = pageData.currentPage;
      		    	wdrVM.pager.pageSize = pageData.pageSize;
-     		    	wdrVM.tableData =pageData.data; 	
+     		    	wdrVM.tableData =pageData.data; 
+
+     		    	// 取出存储的id
+                    if(!wdrVM.paginationShow){
+                         if(wdrVM.storeId){
+                             wdrVM.$nextTick(function(){
+                                var storage = [];
+                                wdrVM.tableData.forEach(function(item, index){
+                                    if(item.clueId === wdrVM.storeId ){
+                                        storage.push(wdrVM.tableData[index]);
+                                    }
+                                })
+                                wdrVM.toggleSelection(storage);
+                                wdrVM.$el.querySelector('.el-table__body-wrapper').scrollTop = wdrVM.scrollTop;
+                            })
+                        }
+                    }else{
+                        wdrVM.removeSessionStore ("waitDistributStoreForm");
+                        wdrVM.removeSessionStore ("waitDistributOtherVal");
+                    }
+                    wdrVM.paginationShow = true;
+                    wdrVM.storeForm = wdrVM.form;
+
      			})
          	},
+         	toggleSelection(rows) { // table select 默认选中fn
+                if (rows) {
+                    rows.forEach(row => {
+                        this.$refs.multipleTable.toggleRowSelection(row,true);
+                    });
+                } else {
+                    this.$refs.multipleTable.clearSelection();
+                }
+            },
             handleSelectionChange(val) {//选择节点的事件
                 console.log(val)
                 this.multipleSelection = val;
@@ -604,7 +658,18 @@ var wdrVM = new Vue({
             },
             //跳转编辑页
             toUpdatePage(row) {
-              document.location.href='/exetend/agendaTaskManager/toUpdatePage?id='+row.clueId;
+            	var clueId=row.clueId;
+                // 存储选中信息--start
+                this.setSessionStore("waitDistributStoreForm", this.storeForm);
+                var otherVal = {
+                    "currentPage": this.pager.currentPage,
+                    "clueId": clueId,
+                    "scrollTop": this.$el.querySelector('.el-table__body-wrapper').scrollTop
+                }
+                this.setSessionStore("waitDistributOtherVal", otherVal);
+                // 存储选中信息--end
+
+              	document.location.href='/exetend/agendaTaskManager/toUpdatePage?id='+clueId;
             },
             editFun() {
                 var rows = this.multipleSelection;
@@ -887,65 +952,95 @@ var wdrVM = new Vue({
               wdrVM.loading=false;
             });
           },
-          submitExport(){
-            if($("#showButton").attr("data") ==2){
-              window.location.href="/exetend/agendaTaskManager/waitDistributResource";
-              return;
-            }
-            this.$alert('<center><strong>确认导入数据</strong></center>', {
-              dangerouslyUseHTMLString: true,
-              center:true
-            }).then(() => {
-              $("#showButton").html("导入中");
-              wdrVM.confirmBtnDisabled = true;
-              var param = {};
-              wdrVM.loading = true;
-              param.list = wdrVM.exportdataTable;
-              if(param.list !=null && param.list.length==0){
-                this.loading = false;
-                this.$message({message:'无要上传的数据',type:'error'});
-                return;
-              }
+	        submitExport(){
+	            if($("#showButton").attr("data") ==2){
+	              window.location.href="/exetend/agendaTaskManager/waitDistributResource";
+	              return;
+	            }
+	            this.$alert('<center><strong>确认导入数据</strong></center>', {
+	              dangerouslyUseHTMLString: true,
+	              center:true
+	            }).then(() => {
+	              $("#showButton").html("导入中");
+	              wdrVM.confirmBtnDisabled = true;
+	              var param = {};
+	              wdrVM.loading = true;
+	              param.list = wdrVM.exportdataTable;
+	              if(param.list !=null && param.list.length==0){
+	                this.loading = false;
+	                this.$message({message:'无要上传的数据',type:'error'});
+	                return;
+	              }
 
-              axios.post('/exetend/agendaTaskManager/importInvitearea',param).then(function (response) {
-                console.log(response);
-                if(null !==response && response.data !=null && response.data.code=='0'){
-                  if(response.data.data !=null  && response.data.data.length !=0){
-                    wdrVM.confirmBtnDisabled = false;
-                    $("#showButton").html("知道了");
-                    $("#showButton").attr("data",2);
-                    wdrVM.downloadButtonShow = true;
-                    wdrVM.importFailReasonShow = true;
-                    wdrVM.loading = false;
-                    wdrVM.addOrModifyDialogTitle="导入失败";
+	              axios.post('/exetend/agendaTaskManager/importInvitearea',param).then(function (response) {
+	                console.log(response);
+	                if(null !==response && response.data !=null && response.data.code=='0'){
+	                  if(response.data.data !=null  && response.data.data.length !=0){
+	                    wdrVM.confirmBtnDisabled = false;
+	                    $("#showButton").html("知道了");
+	                    $("#showButton").attr("data",2);
+	                    wdrVM.downloadButtonShow = true;
+	                    wdrVM.importFailReasonShow = true;
+	                    wdrVM.loading = false;
+	                    wdrVM.addOrModifyDialogTitle="导入失败";
 
-                    wdrVM.exportdataTable =response.data.data;
-                    wdrVM.dataNum="以下内容导入失败，请重新导入"
-                  }else{
-                    wdrVM.$message({message:'导入成功',type:'success',duration:2000,onClose:function(){
-                      wdrVM.exportFormVisible = false;
-                    }});
-                  }
+	                    wdrVM.exportdataTable =response.data.data;
+	                    wdrVM.dataNum="以下内容导入失败，请重新导入"
+	                  }else{
+	                    wdrVM.$message({message:'导入成功',type:'success',duration:2000,onClose:function(){
+	                      wdrVM.exportFormVisible = false;
+	                    }});
+	                  }
 
-                }else{
-                  alert(response.data.data.message);
-                  return ;
+	                }else{
+	                  alert(response.data.data.message);
+	                  return ;
+	                }
+	              }).catch(function (error) {
+	                console.log(error);
+	              })
+	              .then(function () {
+	                // always executed
+	              });
+	            })
+
+	        },
+	        setSessionStore (name, content) {
+                if (!name) return
+                if (typeof content !== 'string') {
+                content = JSON.stringify(content)
                 }
-              }).catch(function (error) {
-                console.log(error);
-              })
-              .then(function () {
-                // always executed
-              });
-            })
-
-          }
+                window.sessionStorage.setItem(name, content)
+            },
+            getSessionStore (name) {
+                if (!name) return;
+                var content = window.sessionStorage.getItem(name);
+                if (typeof content == 'string') {
+                    content = JSON.parse(content)
+                }
+                return content;
+            },
+            removeSessionStore (name) {
+                if (!name) return
+                return window.sessionStorage.removeItem(name)
+            },
 
         },
-        mounted(){
-            document.getElementById('waitDistributResource').style.display = 'block';
+        created(){
+            // window.sessionStorage.clear(); // 点击侧边栏-清除所有cookie
+            // 进入页面判断有是否有存储值
+            if(!this.paginationShow){
+                var storeVal = this.getSessionStore("waitDistributStoreForm");
+                var otherVal = this.getSessionStore("waitDistributOtherVal");
+                if(storeVal && otherVal){
+                    this.form = storeVal;
+                    this.$set(this.pager,"currentPage",otherVal.currentPage);
+                    this.storeId = otherVal.clueId;
+                    this.scrollTop = otherVal.scrollTop;
+                }
+            };
             this.initColumn();
-        	this.initTableData();
+        	this.initTableData();        	
             //初始化媒介
       	   var  param={};
       	   param.groupCode="medium";
@@ -966,7 +1061,11 @@ var wdrVM = new Vue({
             	  wdrVM.industryCategoryArr=response.data.data;
               }); 
              
+        },
+        mounted(){
+            document.getElementById('waitDistributResource').style.display = 'block';
         }
+
     })
     function crtTimeFtt1(val, row) {
         if (val != null) {
