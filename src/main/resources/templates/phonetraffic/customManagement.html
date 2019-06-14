@@ -123,7 +123,7 @@
                          {{scope.row.phone}}
                         <input type='hidden'>
                          <!-- <i  v-show="phoneButton" class="el-icon-phone-outline"  @click="customerEidt(scope.row.clueId)"  style="margin:0 10px;font-size: 16px;cursor: pointer;"></i> -->
-                         <img v-show="phoneButton"  th:src="@{/images/tel.png}" @click="customerEidt(scope.row.clueId)" style="margin:0 10px;width:22px;cursor: pointer;vertical-align: middle;" alt="">
+                         <img v-show="phoneButton"  th:src="@{/images/tel.png}" @click="gettelNumberIcon(scope.row.phone,scope.row.clueId)" style="margin:0 10px;width:22px;cursor: pointer;vertical-align: middle;" alt="">
                         <el-tag v-if="scope.row.tag">{{scope.row.tag}}</el-tag>
                     </template>
                 </el-table-column>
@@ -471,7 +471,13 @@ var phoneButton = false;
                     this.$refs.multipleTable.clearSelection();
                 }
             },
-            customerEidt(clueId,phone){
+            gettelNumberIcon(tel,clueId) {
+                console.log(tel)
+                console.log(clueId)
+                //外呼手机
+                var param = {};
+                param.clueId = clueId;
+                //客户维护界面   
                 // 存储选中信息--start
                 this.setSessionStore("customManagementStoreForm", this.storeForm);
                 var otherVal = {
@@ -480,7 +486,16 @@ var phoneButton = false;
                     "scrollTop": this.$el.querySelector('.el-table__body-wrapper').scrollTop
                 }
                 this.setSessionStore("customManagementOtherVal", otherVal);
-                // 存储选中信息--end
+                // 存储选中信息--end             
+                window.parent.parent.outboundCallPhone(tel, 2, clueId, function (res) {
+                    axios.post('/tele/clueMyCustomerInfo/updateCallTime', param).then(function (response) {
+                    });
+                });
+                //跳转页面
+                this.customerEidt(clueId);
+               
+            },
+            customerEidt(clueId){                
                 //客户维护界面
                 if(editflag==1){
                     window.location.href='/phonetraffic/toEditPage?clueId='+clueId;
