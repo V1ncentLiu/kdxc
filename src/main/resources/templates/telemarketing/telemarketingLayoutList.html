@@ -183,7 +183,7 @@
             </el-row>
             </el-form>
             <div slot="footer" class="dialog-footer">
-            <el-button  :disabled="confirmBtnDisabled" @click="submitExport"><span data="1" id="showButton">导入</span></el-button>
+            <el-button type="primary" :disabled="confirmBtnDisabled" @click="submitExport"><span data="1" id="showButton">导入</span></el-button>
             </div>
         </el-dialog>
 
@@ -487,16 +487,16 @@
                         	  this.$message("开始时间不能大于结束时间");
                    	         return;
                           }
+                          orgVM.btnDisabled = true; 
                           var url = "/telemarketing/addTelemarketingLayout";
                           if($("#addOrUpdate").val() ==2){
                         	  url = "/telemarketing/updateTelemarketingLayout"
                           }
-                          orgVM.btnDisabled = true; 
                        	  axios.post(url,param).then(function (response) {
        	                  	//   console.log(response);
        	                      if(null !==response && response.data !=null && response.data.code=='0'){
-                                  orgVM.btnDisabled = false; 
-       	                    	  window.location.href="/telemarketing/telemarketingLayoutList"; 
+                                window.location.href="/telemarketing/telemarketingLayoutList"; 
+                                orgVM.btnDisabled = false; 
        	                     }else{
        	                    	orgVM.$message({message: response.data.data.msg, type: 'warning'});
                                 orgVM.btnDisabled = false; 

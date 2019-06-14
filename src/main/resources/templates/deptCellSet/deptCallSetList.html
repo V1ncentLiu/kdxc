@@ -396,22 +396,22 @@
             },
             updateOne(){
                 var param = mainDivVM.update;
-                this.btnDisabled = true;  
+                this.addButtonflag = true; 
                 axios.post("/deptcallset/updateDeptcallset", param)
                     .then(function (response) {
                         // console.log(response.data);
                         if (response.data.code == 0) {
                             mainDivVM.$message({type: 'success', message: '更新成功!',duration:2000,onClose:function(){
-                                    mainDivVM.pager.pageNum = 1
+                                    mainDivVM.pager.pageNum = 1;
                                     mainDivVM.initList();
-                                    mainDivVM.btnDisabled = false; 
                                     mainDivVM.updateDialogVisible = false;
+                                    mainDivVM.addButtonflag = false; 
                                 }});
                         } else {
                             mainDivVM.$message.error(response.data.msg);
-                            mainDivVM.btnDisabled = false; 
+                            mainDivVM.addButtonflag = false; 
                         }
-                    }).catch(function (error) {mainDivVM.btnDisabled = false; console.log(error);});
+                    }).catch(function (error) {mainDivVM.addButtonflag = false; console.log(error);});
             },
             openAddDialog(){
                 mainDivVM.multipleTreeSelection = []
@@ -458,7 +458,7 @@
                 var param = this.add;
                 this.$refs['add'].validate((valid) => {
                     if (valid) {
-                        mainDivVM.addButtonflag=true
+                        mainDivVM.addButtonflag=true;
                         axios.post("/deptcallset/saveOne", param)
                             .then(function (response) {
                                 if (response.data.code == 0) {
@@ -466,11 +466,11 @@
                                             mainDivVM.pager.pageNum = 1
                                             mainDivVM.initList();
                                             mainDivVM.addDialogVisible = false;
-                                            mainDivVM.addButtonflag=false
+                                            mainDivVM.addButtonflag=false;
                                     }});
                                 } else {
-                                    mainDivVM.addButtonflag=false
                                     mainDivVM.$message.error(response.data.msg);
+                                    mainDivVM.addButtonflag=false;
                                 }
 
                             }).catch(function (error) {

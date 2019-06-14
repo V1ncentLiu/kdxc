@@ -325,7 +325,7 @@
             <div class="marginB20 fs16 paddingT20 callLogBox">
                 通话记录
                 <!-- 播放器 -->
-                <audio id="audio" src="" controls="controls" autoplay="autoplay" controlsList="nodownload" oncontextmenu="return false"></audio>
+                <audio id="audio" src="" controls="controls" autoplay="autoplay" controlsList="nodownload" oncontextmenu="return false" v-show="audioShow"></audio>
             </div>
             <el-table ref="multipleTable" :data="tableDataC3" tooltip-effect="dark" style="width: 100%" border @selection-change="handleSelectionChange">
                 <el-table-column type="index" width="55" label="序号" align="center"></el-table-column>
@@ -337,7 +337,7 @@
                 <el-table-column prop="talkTime" label="接通时长"  :formatter="getTalkTimeText"  align="center"></el-table-column>
                 <el-table-column label="操作" align="center">
                     <template slot-scope="scope" v-if="scope.row.talkTime >0 ">
-                        <a :id="scope.row.id" class="sound-trigger sound-trigger--type-default sound-trigger--type-click" @click="switchSoundBtn(scope.row.id,scope.row.recordFile,scope.row.callSource)">
+                        <a :id="scope.row.id" class="sound-trigger sound-trigger--type-default sound-trigger--type-click cursorP" @click="switchSoundBtn(scope.row.id,scope.row.recordFile,scope.row.callSource)">
                             <span class="sound-trigger__inner"><i class="fa fa-play-1 fa-lg"></i></span>
                         </a>
 
@@ -466,9 +466,6 @@
 </style>
 <!-- import Vue before Element -->
  <div th:include="_footer_include :: #jsLib"></div>
-<!-- <script th:src="@{/js/custom/callrecord/simpleAudio01.js?v=1.0.0}"></script> -->
-<script th:src="@{/js/custom/callrecord/simpleAudio02.js?v=1.0.0}"></script>
-<script th:src="@{/js/custom/callrecord/download.js?v=1.0.0}"></script>
 <script th:inline="javascript" >
 var clueId=[[${clueId}]];//资源ID
 var customer=[[${customer}]];//客户信息
@@ -637,6 +634,7 @@ function crtTimeFtt(val, row) {
         el: '#addCustomer',
         data: function() {
             return {
+                audioShow:false,//播放器默认不显示
                 dialogFormUploadImgSrc: '',
                 dialogFormUploadImg:false,
                 isDisabled:true,//默认不可点击         
@@ -743,9 +741,10 @@ function crtTimeFtt(val, row) {
                                  　　},
 
             switchSoundBtn(id,url,callSource){
+                // 播放器显示
+                this.audioShow=true;
                 if(callSource=='2'){
-                    // switchSound(id,url);
-                    switchSound(id);
+                    switchSound(id,url);
                     return;
                 }
                 var param = {};
@@ -755,9 +754,7 @@ function crtTimeFtt(val, row) {
                         var data =  response.data
                         if(data.code=='0'){
                             var url = data.data;
-                            // switchSound(id,url);
-                            switchSound(id);
-                            document.getElementById('audio').src=url
+                            switchSound(id,url);
                         }else{
                             console.error(data);
                             addCustomerVM.$message({message:data.msg,type:'error'});
@@ -1095,4 +1092,7 @@ function crtTimeFtt(val, row) {
     	}
     })
 </script>
+<!-- <script th:src="@{/js/custom/callrecord/simpleAudio01.js?v=1.0.0}"></script> -->
+<script th:src="@{/js/custom/callrecord/simpleAudio02.js?v=1.0.0}"></script>
+<script th:src="@{/js/custom/callrecord/download.js?v=1.0.0}"></script>
 </html>

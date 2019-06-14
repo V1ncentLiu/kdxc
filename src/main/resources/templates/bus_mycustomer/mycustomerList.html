@@ -159,7 +159,7 @@
                 <template slot-scope="scope">
                     <!--<el-button size="mini"  v-if="(scope.row.visitStatus == -1||scope.row.visitStatus == null)&&scope.row.visitAuditStatus==null" type="text" @click="openEditVisitRecord(scope.row)">添加到访记录</el-button>-->
                     <el-button size="mini" v-if="scope.row.visitList.length==0" type="text"
-                               @click="openEditVisitRecord(scope.row)">添加到访记录
+                               @click.stop="openEditVisitRecord(scope.row)">添加到访记录
                     </el-button>
                     <div v-else-if="scope.row.visitList.length==1" v-for="item in scope.row.visitList ">
                         <!--<el-button size="mini"  v-if="scope.row.visitStatus==0" type="text" @click="showNotVisitReason(scope.row)">未到访(原因)</el-button>-->
@@ -173,7 +173,7 @@
                                    @click="openEditVisitRecord(item)">添加到访记录
                         </el-button>
                         <el-button size="mini" v-else-if="item.isVisit==1&&item.status==1" type="text"
-                                   @click="showVisitRecord(item)">审核中
+                                   @click="showVisitRecord(item)" style="color: green">审核中
                         </el-button>
                         <el-button size="mini" v-else-if="item.isVisit==1&&item.status==0" type="text"
                                    style="color: red" @click="editRebutVisitRecord(item)">到访被驳回
@@ -184,18 +184,18 @@
                     </div>
                     <div v-else-if="scope.row.visitList.length>1" v-for="item in scope.row.visitList ">
                         <el-button size="mini" v-if="item.isVisit==0&&item.status==1" type="text"
-                                   @click="showNotVisitReason(item)">未到访(审核中)
+                                   @click.stop="showNotVisitReason(item)">未到访(审核中)
                         </el-button>
                         <!--<el-button size="mini"  v-else-if="item.isVisit==0&&item.status==0" type="text" @click="openEditVisitRecord(item)">添加到访记录</el-button>-->
                         <el-button size="mini" v-else-if="item.isVisit==0&&item.status==2" type="text"
-                                   style="color: red" @click="showNotVisitReason(item)">未到访（原因）
+                                   style="color: red" @click.stop="showNotVisitReason(item)">未到访（原因）
                         </el-button>
                         <el-button size="mini" v-else-if="item.isVisit==1&&item.status==0" type="text"
-                                   style="color: red" @click="editRebutVisitRecord(item)">到访被驳回
+                                   style="color: red" @click.stop="editRebutVisitRecord(item)">到访被驳回
                         </el-button>
                     </div>
                     <div v-if="scope.row.visitList.length>1 && scope.row.isVisitAuditStatusOne==1">
-                        <el-button size="mini" type="text" @click="showVisitRecord(scope.row)">
+                        <el-button size="mini" type="text" @click.stop="showVisitRecord(scope.row)" style="color: green">
                             审核中
                         </el-button>
                     </div>
@@ -205,7 +205,7 @@
                         </el-button>
                     </div>
                     <div v-if="scope.row.visitHisList.length>0">
-                        <el-button size="mini" type="text" @click="showHistory(scope.row)">历史到访记录</el-button>
+                        <el-button size="mini" type="text" @click.stop="showHistory(scope.row)">历史到访记录</el-button>
                     </div>
                 </template>
             </el-table-column>            
@@ -213,11 +213,11 @@
             <el-table-column prop="status" label="签约单" align="center" width="250">
                 <template slot-scope="scope">
                     <el-button size="mini" v-if="scope.row.signAuditStatus==null" type="text"
-                               @click="editSign(scope.row)">添加签约单
+                               @click.stop="editSign(scope.row)">添加签约单
                     </el-button>
                     <div v-if="scope.row.signList.length>=1" v-for="item in scope.row.signList">
                         <el-button size="mini" v-if="item.signStatus==0" type="text" style="color: red"
-                                   @click="editRebutSign(item)">
+                                   @click.stop="editRebutSign(item)">
                             <span style="color: blue">{{item.signNo}}</span><span style="color: red">（被驳回）</span>
                         </el-button>
                         <el-button size="mini" v-else-if="item.signStatus==1" type="text" style="color:#4ab65c"
@@ -1755,6 +1755,8 @@
                 allocateTime2: "",
                 isTailMoney: '',
             },
+            storeId: '',
+            scrollTop: 0,//表格滚动位置
             addVisitRecord: {
                 clueId: "",
                 companyid: "",
@@ -2386,7 +2388,8 @@
                 this.setSessionStore("myCustomerListStoreForm", this.storeForm);
                 var otherVal = {
                     "currentPage": this.pager.currentPage,
-                    "clueId": clueId
+                    "clueId": clueId,
+                    "scrollTop": this.$el.querySelector('.el-table__body-wrapper').scrollTop
                 }
                 this.setSessionStore("myCustomerListOtherVal", otherVal);
                 // 存储选中信息--end
@@ -2400,7 +2403,8 @@
                 this.setSessionStore("myCustomerListStoreForm", this.storeForm);
                 var otherVal = {
                     "currentPage": this.pager.currentPage,
-                    "clueId": clueId
+                    "clueId": clueId,
+                    "scrollTop": this.$el.querySelector('.el-table__body-wrapper').scrollTop
                 }
                 this.setSessionStore("myCustomerListOtherVal", otherVal);
                 // 存储选中信息--end
@@ -2675,7 +2679,8 @@
                 this.setSessionStore("myCustomerListStoreForm", this.storeForm);
                 var otherVal = {
                     "currentPage": this.pager.currentPage,
-                    "clueId": clueId
+                    "clueId": clueId,
+                    "scrollTop": this.$el.querySelector('.el-table__body-wrapper').scrollTop
                 }
                 this.setSessionStore("myCustomerListOtherVal", otherVal);
                 // 存储选中信息--end
@@ -3007,7 +3012,8 @@
                 this.setSessionStore("myCustomerListStoreForm", this.storeForm);
                 var otherVal = {
                     "currentPage": this.pager.currentPage,
-                    "clueId": clueId
+                    "clueId": clueId,
+                    "scrollTop": this.$el.querySelector('.el-table__body-wrapper').scrollTop
                 }
                 this.setSessionStore("myCustomerListOtherVal", otherVal);
                 // 存储选中信息--end
@@ -3019,7 +3025,8 @@
                 this.setSessionStore("myCustomerListStoreForm", this.storeForm);
                 var otherVal = {
                     "currentPage": this.pager.currentPage,
-                    "clueId": clueId
+                    "clueId": clueId,
+                    "scrollTop": this.$el.querySelector('.el-table__body-wrapper').scrollTop
                 }
                 this.setSessionStore("myCustomerListOtherVal", otherVal);
                 // 存储选中信息--end
@@ -3186,6 +3193,7 @@
                                         }
                                     })
                                     mainDivVM.toggleSelection(storage);
+                                    mainDivVM.$el.querySelector('.el-table__body-wrapper').scrollTop = mainDivVM.scrollTop;
                                 })
                             }
                          }else{
@@ -3257,9 +3265,10 @@
                 var storeVal = this.getSessionStore("myCustomerListStoreForm");
                 var otherVal = this.getSessionStore("myCustomerListOtherVal");
                 if(storeVal && otherVal){
-                    this.form = storeVal;
+                    this.queryForm = storeVal;
                     this.$set(this.pager,"currentPage",otherVal.currentPage);
                     this.storeId = otherVal.clueId;
+                    this.scrollTop = otherVal.scrollTop;
                 }
             };
             //初始化数据列表
