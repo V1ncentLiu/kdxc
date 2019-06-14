@@ -1030,6 +1030,8 @@
                 sortType: '',
                 isTailMoney: ''
             },
+            storeId: '',
+            scrollTop: 0,
         },
         methods: {
             clickRow(row){
@@ -1085,6 +1087,7 @@
                                     }
                                 })
                                 customerVM.toggleSelection(storage);
+                                customerVM.$el.querySelector('.el-table__body-wrapper').scrollTop = customerVM.scrollTop;
                             })
                         }
                      }else{
@@ -1636,7 +1639,8 @@
                 this.setSessionStore("busCustomerManagerStoreForm", this.storeForm);
                 var otherVal = {
                     "currentPage": this.pager.currentPage,
-                    "clueId": clueId
+                    "clueId": clueId,
+                    "scrollTop": this.$el.querySelector('.el-table__body-wrapper').scrollTop
                 }
                 this.setSessionStore("busCustomerManagerOtherVal", otherVal);
                 // 存储选中信息--end
@@ -1648,7 +1652,8 @@
                 this.setSessionStore("busCustomerManagerStoreForm", this.storeForm);
                 var otherVal = {
                     "currentPage": this.pager.currentPage,
-                    "clueId": clueId
+                    "clueId": clueId,
+                    "scrollTop": this.$el.querySelector('.el-table__body-wrapper').scrollTop
                 }
                 this.setSessionStore("busCustomerManagerOtherVal", otherVal);
                 // 存储选中信息--end
@@ -1761,9 +1766,10 @@
                 var storeVal = this.getSessionStore("busCustomerManagerStoreForm");
                 var otherVal = this.getSessionStore("busCustomerManagerOtherVal");
                 if(storeVal && otherVal){
-                    this.form = storeVal;
+                    this.searchForm = storeVal;
                     this.$set(this.pager,"currentPage",otherVal.currentPage);
                     this.storeId = otherVal.clueId;
+                    this.scrollTop = otherVal.scrollTop;
                 }
             };
             console.info("create method");
