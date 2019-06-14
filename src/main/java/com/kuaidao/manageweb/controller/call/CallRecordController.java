@@ -210,7 +210,9 @@ public class CallRecordController {
                     return new JSONResult().fail(SysErrorCodeEnum.ERR_NOTEXISTS_DATA.getCode(),"该电销总监下无顾问");
                 }
                 List<Long> idList = userList.parallelStream().map(user->user.getId()).collect(Collectors.toList());
+                idList.add(curLoginUser.getId());
                 myCallRecordReqDTO.setAccountIdList(idList);
+                
             }else {
                 //其他角色
                 Long teleGroupId = myCallRecordReqDTO.getTeleGroupId();
