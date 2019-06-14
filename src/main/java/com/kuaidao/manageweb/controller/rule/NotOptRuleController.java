@@ -3,6 +3,7 @@
  */
 package com.kuaidao.manageweb.controller.rule;
 
+import com.alibaba.fastjson.JSON;
 import com.kuaidao.aggregation.constant.AggregationConstant;
 import com.kuaidao.aggregation.dto.project.ProjectInfoDTO;
 import com.kuaidao.aggregation.dto.rule.AssignRuleTeamDTO;
@@ -120,10 +121,13 @@ public class NotOptRuleController {
     public String initCreateProject(HttpServletRequest request) {
         // 查询话务组
         List<OrganizationRespDTO> orgList = getTrafficGroup();
+        logger.info("orgList", JSON.toJSONString(orgList));
         Collections.sort(orgList, Comparator.comparing(OrganizationRespDTO::getCreateTime).reversed());
+        logger.info("orgList1", JSON.toJSONString(orgList));
         request.setAttribute("trafficList", orgList);
         JSONResult<List<OrganizationDTO>> listBusinessLineOrg =
                 organizationFeignClient.listBusinessLineOrg();
+        logger.info("listBusinessLineOrg", JSON.toJSONString(listBusinessLineOrg.getData()));
         // 查询所有业务线
         request.setAttribute("businessLineList", listBusinessLineOrg.getData());
         // 查询所有项目
