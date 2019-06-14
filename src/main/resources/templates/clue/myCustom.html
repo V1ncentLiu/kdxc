@@ -824,7 +824,8 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                     isCall:"",
                     email:""
                 },
-                storeId: ''
+                storeId: '',
+                scrollTop: 0,
             }             
         },
         methods: {
@@ -935,6 +936,9 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                                     }
                                 })
                                 mycustomVM.toggleSelection(storage);
+
+                                mycustomVM.$el.querySelector('.el-table__body-wrapper').scrollTop = mycustomVM.scrollTop;
+                                   
                             })
                         }
                      }else{
@@ -1082,7 +1086,8 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                 this.setSessionStore("storeForm", this.storeForm);
                 var otherVal = {
                     "currentPage": this.pager.currentPage,
-                    "clueId": clueId
+                    "clueId": clueId,
+                    "scrollTop": this.$el.querySelector('.el-table__body-wrapper').scrollTop
                 }
                 this.setSessionStore("otherVal", otherVal);
                 window.location.href="/tele/clueMyCustomerInfo/customerEditInfo?clueId="+clueId; 
@@ -1381,6 +1386,7 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                     this.form = storeVal;
                     this.$set(this.pager,"currentPage",otherVal.currentPage);
                     this.storeId = otherVal.clueId;
+                    this.scrollTop = otherVal.scrollTop;
                 }
             }
             //初始化数据列表
