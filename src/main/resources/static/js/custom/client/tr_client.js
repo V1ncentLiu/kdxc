@@ -25,6 +25,7 @@ var clientVm = new Vue({
          uploadBtnDisabled:false,
          uploadErrorDialogVisible:false,//上传失败dialog
          uploadErrorData:[],//上传失败
+         orgTreeLoading:true,
          form:{//坐席form
         	 id:'',
         	 clientNo:'',
@@ -282,10 +283,11 @@ var clientVm = new Vue({
         	 
          },
          selectOrg(){//选择组织
-        	
-        	 this.$nextTick(() => {
+        	 this.orgTreeData = [];
+        	this.orgTreeLoading = true;
+        	/* this.$nextTick(() => {
         		 clientVm.$refs.orgTree.setCheckedKeys([]);//清空tree
-        		});
+        		});*/
         	 this.orgDialogVisible=true;
         	 axios.post('/organization/organization/query',{})
              .then(function (response) {
@@ -302,6 +304,7 @@ var clientVm = new Vue({
              .catch(function (error) {
                   console.log(error);
              }).then(function(){
+            	 clientVm.orgTreeLoading = false;
             	var selectedOrgId =  clientVm.form.orgId;
             	if(selectedOrgId){
             		var array = new Array();

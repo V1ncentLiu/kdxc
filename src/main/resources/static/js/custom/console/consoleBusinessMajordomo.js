@@ -323,7 +323,7 @@ var mainDivVM = new Vue({
                     .then(function (response) {
                         var data =  response.data;
                         if(data.code=='0'){
-                            mainDivVM.$message({message:'分发成功',type:'success',duration:1000,onClose:function(){
+                            mainDivVM.$message({message:'分发成功',type:'success',duration:2000,onClose:function(){
                                 mainDivVM.allocationVisible = false;
                                 mainDivVM.searchTable();
                             }});
