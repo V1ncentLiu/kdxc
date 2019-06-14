@@ -490,6 +490,8 @@ var wdrVM = new Vue({
                     phone:'',
                     isRecall:'',
                 },
+                storeId: '',
+                scrollTop: 0,
             }        	  
         },
         methods: {
@@ -566,6 +568,7 @@ var wdrVM = new Vue({
                                     }
                                 })
                                 wdrVM.toggleSelection(storage);
+                                wdrVM.$el.querySelector('.el-table__body-wrapper').scrollTop = wdrVM.scrollTop;
                             })
                         }
                     }else{
@@ -660,7 +663,8 @@ var wdrVM = new Vue({
                 this.setSessionStore("waitDistributStoreForm", this.storeForm);
                 var otherVal = {
                     "currentPage": this.pager.currentPage,
-                    "clueId": clueId
+                    "clueId": clueId,
+                    "scrollTop": this.$el.querySelector('.el-table__body-wrapper').scrollTop
                 }
                 this.setSessionStore("waitDistributOtherVal", otherVal);
                 // 存储选中信息--end
@@ -1032,6 +1036,7 @@ var wdrVM = new Vue({
                     this.form = storeVal;
                     this.$set(this.pager,"currentPage",otherVal.currentPage);
                     this.storeId = otherVal.clueId;
+                    this.scrollTop = otherVal.scrollTop;
                 }
             };
             this.initColumn();
