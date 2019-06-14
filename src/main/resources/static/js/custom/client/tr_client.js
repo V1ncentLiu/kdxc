@@ -25,6 +25,7 @@ var clientVm = new Vue({
          uploadBtnDisabled:false,
          uploadErrorDialogVisible:false,//上传失败dialog
          uploadErrorData:[],//上传失败
+         orgTreeLoading:true,
          form:{//坐席form
         	 id:'',
         	 clientNo:'',
@@ -302,6 +303,7 @@ var clientVm = new Vue({
              .catch(function (error) {
                   console.log(error);
              }).then(function(){
+            	 clientVm.orgTreeLoading = false;
             	var selectedOrgId =  clientVm.form.orgId;
             	if(selectedOrgId){
             		var array = new Array();
