@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml"
     xmlns:th="http://www.thymeleaf.org">
 <head th:include="_header_include::frag(~{::title},~{},~{})">
-    <title>有效签约单确认</title>
+    <title>有效签约审批</title>
     <style>
     .el-form-item__label{
     	width:120px;
@@ -16,7 +16,7 @@
     <el-breadcrumb separator="/" class="elBreadcrumb marginB20" >
         <el-breadcrumb-item>Home</el-breadcrumb-item>
         <el-breadcrumb-item>判单管理</el-breadcrumb-item>
-        <el-breadcrumb-item>有效签约单确认</el-breadcrumb-item>
+        <el-breadcrumb-item>有效签约审批</el-breadcrumb-item>
     </el-breadcrumb>
     <el-row class="marginB20">
         <el-button type="primary" @click="dealButton">有效性处理</el-button>
@@ -157,7 +157,7 @@
             </el-form-item>
         </el-form>
         <div slot="footer" style="text-align: center" class="dialog-footer">
-            <el-button type="primary" @click="addbutton">提交</el-button>
+            <el-button type="primary" :disabled="btnDisabled" @click="addbutton">提交</el-button>
             <el-button @click="dialogFormVisible= false">取消</el-button>
         </div>
     </el-dialog>
@@ -177,7 +177,8 @@
     var orgVM =  new Vue({
         el: '#organizationManage',
         data: {
-          isShow:false,
+            isShow:false,
+            btnDisabled: false,
         	formLabelWidth: '150px',
         	form:{
         		dealStatus:"1"
@@ -379,17 +380,23 @@
                     	}
      		           var param={};
     		           param.ids=ids;
-    		           param.valid = this.form.dealStatus;
+                       param.valid = this.form.dealStatus;
+                       
+                       this.btnDisabled = true;  
+
     		           axios.post('/businesssign/updateBusinessSignDTOValidByIds',param).then(function (response) {
-	                  	  console.log(response);
-	                      if(null !==response && response.data !=null && response.data.code=='0'){
+                            console.log(response);
+                            if(null !==response && response.data !=null && response.data.code=='0'){
+                              orgVM.btnDisabled = false; 
 	                    	  window.location.href="/businesssign/businessSignValidPage"; 
 	                     }else{
-	                    	 alert(response.data.data.message);
+                            alert(response.data.data.message);
+                            orgVM.btnDisabled = false; 
 	                  	  	return ;
 	                     } 
 	                  }).catch(function (error) {
                        console.log(error);
+                       orgVM.btnDisabled = false; 
                    })
                    .then(function () {
                      // always executed

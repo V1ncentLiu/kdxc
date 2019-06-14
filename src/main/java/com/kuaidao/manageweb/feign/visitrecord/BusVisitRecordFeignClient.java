@@ -75,7 +75,7 @@ public interface BusVisitRecordFeignClient {
 
 		@Override
 		public JSONResult<Map> echoAppoinment(IdEntityLong idEntityLong) {
-			return fallBackError("回显邀约来访客户信息");
+			return fallBackError("回显邀约来访记录信息");
 		}
 
 		@Override

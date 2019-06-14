@@ -15,7 +15,7 @@ import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
 
 /**
- * 餐饮公司退返款
+ * 退返款申请
  * 
  * @author: zxy
  * @date: 2019年1月4日
@@ -26,7 +26,7 @@ import com.kuaidao.common.entity.PageBean;
 public interface RefundRebateFeignClient {
 
     /**
-     * 餐饮公司退返款列表
+     * 退返款申请列表
      * 
      * @param menuDTO
      * @return
@@ -79,7 +79,7 @@ public interface RefundRebateFeignClient {
         @Override
         public JSONResult<PageBean<RefundRebateListDTO>> list(
                 @RequestBody RefundRebatePageParam param) {
-            return fallBackError("餐饮公司退返款列表");
+            return fallBackError("退返款申请列表");
         }
 
         @Override

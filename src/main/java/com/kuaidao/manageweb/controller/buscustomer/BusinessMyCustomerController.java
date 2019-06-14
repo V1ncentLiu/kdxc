@@ -186,6 +186,9 @@ public class BusinessMyCustomerController {
     public JSONResult<Boolean> notVisit(@RequestBody BusMyCustomerReqDTO param) {
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
         param.setUserId(curLoginUser.getId());
+        if(curLoginUser.getBusinessLine() != null){
+            param.setBusinessLine(curLoginUser.getBusinessLine());
+        }
         return busMyCustomerFeignClient.notVisit(param);
     }
 

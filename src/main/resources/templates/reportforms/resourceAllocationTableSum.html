@@ -13,9 +13,9 @@
         <el-breadcrumb-item>资源分配表</el-breadcrumb-item>
     </el-breadcrumb>    
     <el-row class="marginB20">
-        <el-button type="primary" @click="searchYesterday">昨天</el-button>
-        <el-button type="success" @click="searchWeek">近七天</el-button>
-        <el-button type="warning" @click="searchMonth">本月</el-button>
+        <el-button type="primary" @click="searchYesterday" :disabled="btnDisabled">昨天</el-button>
+        <el-button type="success" @click="searchWeek" :disabled="btnDisabled">近七天</el-button>
+        <el-button type="warning" @click="searchMonth" :disabled="btnDisabled">本月</el-button>
         <shiro:hasPermission name="statistics:teleStatement:resourceAllocation:export">
         <el-button type="danger" @click="exportRs">导出Excel报表</el-button>
         </shiro:hasPermission>
@@ -130,7 +130,7 @@
                 pager:{
                     total: 0,
                     currentPage: 1,
-                    pageSize: 3,
+                    pageSize: 20,
                 },
             }             
         },
@@ -150,6 +150,8 @@
                 var startTime=this.form.startTime;
                 var endTime=this.form.endTime;
                 if(endTime && startTime){
+                    startTime = new Date(this.form.startTime);
+                    endTime = new Date(this.form.endTime);
                     if(startTime>endTime){
                         this.$message({
                             message: '开始时间不能大于结束时间',
@@ -159,7 +161,7 @@
                     }
                     var date = new Date();
                     var currentDate = moment(date).format("YYYY-MM-DD 23:59");
-                    date.setMonth(date.getMonth()-5);
+                    date.setMonth(date.getMonth()-6);
                     var beforeSixMonth = moment(date).format("YYYY-MM-DD 00:00");
                     var currentDateRes = new Date(currentDate);
                     var beforeSixMonthRes = new Date(beforeSixMonth);
@@ -297,30 +299,33 @@
                 }
             },
             searchYesterday(){//昨天
-               var today = new Date();
-               today.setTime(today.getTime()-24*60*60*1000);
-               var startTime = today.getFullYear()+"-" + (today.getMonth()+1) + "-" + today.getDate()+" 00:00";
-               var endTime =today.getFullYear()+"-" + (today.getMonth()+1) + "-" + today.getDate()+" 23:59";
-               this.form.startTime=startTime;
-               this.form.endTime=endTime;
-               this.searchTable(1);
+                this.btnDisabled=true;
+                var today = new Date();
+                today.setTime(today.getTime()-24*60*60*1000);
+                var startTime = today.getFullYear()+"-" + (today.getMonth()+1) + "-" + today.getDate()+" 00:00";
+                var endTime =today.getFullYear()+"-" + (today.getMonth()+1) + "-" + today.getDate()+" 23:59";
+                this.form.startTime=startTime;
+                this.form.endTime=endTime;
+                this.searchTable(1);
             },
             searchWeek(){//近七天
-                 var a = new Date();
-                 var year = a.getFullYear();
-                 var month = a.getMonth();
-                 var date = a.getDate();
-                 var b = new Date(year,month,date);
-                 var c = b.valueOf()-6*24*60*60*1000;
+                this.btnDisabled=true;
+                var a = new Date();
+                var year = a.getFullYear();
+                var month = a.getMonth();
+                var date = a.getDate();
+                var b = new Date(year,month,date);
+                var c = b.valueOf()-6*24*60*60*1000;
                 // var d = b.valueOf()+1*24*60*60*1000;
-                 var d = b.valueOf();
-                 var startTime= new Date(c);
-                 var endTime = new Date(d);
-                 this.form.startTime=startTime.getFullYear()+"-" + (startTime.getMonth()+1) + "-" + startTime.getDate()+" 00:00";
-                 this.form.endTime=endTime.getFullYear()+"-" + (endTime.getMonth()+1) + "-" + endTime.getDate()+" 23:59";
-                 this.searchTable(1);
+                var d = b.valueOf();
+                var startTime= new Date(c);
+                var endTime = new Date(d);
+                this.form.startTime=startTime.getFullYear()+"-" + (startTime.getMonth()+1) + "-" + startTime.getDate()+" 00:00";
+                this.form.endTime=endTime.getFullYear()+"-" + (endTime.getMonth()+1) + "-" + endTime.getDate()+" 23:59";
+                this.searchTable(1);
             },
             searchMonth(){//本月
+                this.btnDisabled=true;
                 var a = new Date();
                 var year = a.getFullYear();
                 var month = a.getMonth();
@@ -328,9 +333,9 @@
                 var b = new Date(year,month,date);
                 var f= new Date(year,month,01);
                 var c = f.valueOf();
-              //  var d = b.valueOf()+1*24*60*60*1000;
+                //  var d = b.valueOf()+1*24*60*60*1000;
                 var startTime= new Date(c);
-               // var endTime = new Date(d);
+                // var endTime = new Date(d);
                 this.form.startTime=startTime.getFullYear()+"-" + (startTime.getMonth()+1) + "-" + startTime.getDate()+" 00:00";;
                 this.form.endTime=year+"-"+(month+1)+"-"+date+" 23:59";
                 this.searchTable(1);
@@ -343,7 +348,7 @@
                 param.org_Id =  this.export.org_Id;//电销组
                 param.user_Id =  this.export.user_Id;//电销顾问
                 param.new_resource =  this.export.new_resource;//分配来源
-                axios.post('/statistics/teleStatement/exportResourceAllocationPersion',param,{responseType:'blob'})
+                axios.post('/statistics/teleStatement/exportResourceAllocationDayPersion',param,{responseType:'blob'})
                     .then(function (response) {
                         var data =  response.data;
                         var fileName = response.headers.filename;

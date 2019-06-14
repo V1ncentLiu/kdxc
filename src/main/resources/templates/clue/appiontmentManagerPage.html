@@ -8,7 +8,7 @@
   <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
     <el-breadcrumb-item>Home</el-breadcrumb-item>
     <el-breadcrumb-item>电销管理</el-breadcrumb-item>
-    <el-breadcrumb-item>邀约来访</el-breadcrumb-item>
+    <el-breadcrumb-item>邀约来访记录</el-breadcrumb-item>
   </el-breadcrumb>
 
   <el-row class="marginB20">
@@ -150,7 +150,7 @@
         </el-select>
       </el-form-item>
       <el-form-item label="商务总监：" :label-width="formLabelWidth" prop="busDirectorId">
-        <el-select v-model="appiontmentForm.busDirectorId" disabled placeholder="请选择" style="width: 290px;">
+        <el-select v-model="appiontmentForm.busDirectorId" disabled placehold er="请选择" style="width: 290px;">
           <el-option
               v-for="item in busDirectorOptions"
               :key="item.id"
@@ -189,7 +189,7 @@
       </el-form-item>
     </el-form>
     <div slot="footer" class="dialog-footer">
-      <el-button type="primary" @click="saveAppiontment('appiontmentForm')">确 定</el-button>
+      <el-button type="primary" :disabled="btnDisabled" @click="saveAppiontment('appiontmentForm')">确 定</el-button>
       <el-button @click="appiontmentFormVisible = false">取 消</el-button>
     </div>
   </el-dialog>
@@ -337,6 +337,7 @@
     el: '#appiontmentManage',
     data: {
       isShow:false,
+      btnDisabled: false,  
       appiontmentSearchForm: {
         startTime: '',
         endTime: '',
@@ -686,20 +687,25 @@
             var param=appiontmentVM.appiontmentForm;
             param.tasteProjectId=appiontmentVM.appiontmentForm.tasteProjectId.join(',');
             var url="/clue/appiontment/updateAppiontment";
+
+            this.btnDisabled = true;
+
             axios.post(url, param).then(function (response) {
               var resData = response.data;
               if(resData.code=='0'){
                 appiontmentVM.cancelForm(formName);
                 appiontmentVM.$message({message:'操作成功',type:'success',duration:1000,onClose:function(){
+                    appiontmentVM.btnDisabled = false; 
                     appiontmentVM.searchTable();
                   }});
               }else{
                 appiontmentVM.$message('操作失败');
-                console.error(resData);
+                appiontmentVM.btnDisabled = false; 
               }
             })
             .catch(function (error) {
               console.log(error);
+              appiontmentVM.btnDisabled = false;
             });
           } else {
             console.log('error submit!!');
@@ -741,7 +747,7 @@
           if(data.code=='0'){
             if(null!=data.data&&data.data.length>0){
               appiontmentVM.$message({
-                message: "当前选中的邀约来访客户已经填写有效的到访记录或已经提交签约单,不可取消邀约",
+                message: "当前选中的邀约来访记录已经填写有效的到访记录或已经提交签约单,不可取消邀约",
                 type: 'error'
               });
               return  ;

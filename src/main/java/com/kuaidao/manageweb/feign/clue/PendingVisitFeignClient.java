@@ -49,7 +49,7 @@ public interface PendingVisitFeignClient {
     
 
     /**
-     * 商务总监控制台 待分配邀约来访客户 
+     * 商务总监控制台 待分配邀约来访记录 
      * @param pageParam
      * @return
      */

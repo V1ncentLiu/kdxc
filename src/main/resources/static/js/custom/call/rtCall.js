@@ -14,9 +14,9 @@ $(function(){
 			homePageVM.token = clientInfoObj.token;
 			homePageVM.loginTrClient();
 		}else if(loginClientType == "qimo"){
-			clientInfo.loginClientForm.clientType = clientInfoObj.clientType;
-			clientInfo.loginClientForm.loginClient = clientInfoObj.loginClient;
-            clientInfo.loginClientForm.bindType = clientInfoObj.bindPhoneType;
+			homePageVM.loginClientForm.clientType = clientInfoObj.clientType;
+			homePageVM.loginClientForm.loginClient = clientInfoObj.loginClient;
+			homePageVM.loginClientForm.bindType = clientInfoObj.bindPhoneType;
             homePageVM.loginQimoClient();
 		}
 	}
@@ -72,18 +72,32 @@ function outboundCallPhone(outboundInputPhone,callSource,clueId,callback){
  		param.userId= homePageVM.accountId;
  		param.accountType = homePageVM.accountType;
  		param.bindType = homePageVM.loginClientForm.bindPhoneType;
+ 		homePageVM.$message({message:"外呼中",type:'success'});
  		 axios.post('/client/client/qimoOutboundCall',param)
           .then(function (response) {
               var data =  response.data;
               if(data.code=='0'){
              	  var resData = data.data;
              	  if(resData.Succeed){
-             		//10分钟后红色字体显示
-             		  intervalTimer("outboundCallTime",10,2);
-             		  homePageVM.$message({message:"外呼中",type:'success'});
-             		  if (typeof callback === 'function') {
-     		            callback();
-     		          }
+             		  if(callSource==1){
+             			 homePageVM.dialogOutboundVisible =true;
+             			 $("#outboundCallTime").html("");
+    					 $('#outboundPhoneLocaleArea').html("");
+    				 	 intervalTimer("outboundCallTime",10,2);//10分钟后红色字体显示
+    					 getPhoneLocale(outboundInputPhone,callSource);
+             		  }else if(callSource==2) {
+             			 homePageVM.tmOutboundCallDialogVisible =true;
+    					 $("#tmOutboundCallTime").html("");
+    					 $('#tmOutboundPhoneLocaleArea').html("");
+    					 intervalTimer("tmOutboundCallTime",10,2);
+    					 //查询手机号归属地
+    					 getPhoneLocale(outboundInputPhone,callSource);
+             		  }
+             	
+         		   
+         		    if (typeof callback === 'function') {
+ 		               callback();
+ 		             }
       				
              	  }else{
              		 clearTimer();//清除定时器
@@ -91,7 +105,7 @@ function outboundCallPhone(outboundInputPhone,callSource,clueId,callback){
              	  }
               }else{
             	   clearTimer();//清除定时器
-             		homePageVM.$message({message:data.msg,type:'error'});
+             		homePageVM.$message({message:"外呼失败【"+resData.Message+"】",type:'error'});
               }
           })
           .catch(function (error) {
@@ -166,19 +180,63 @@ function priviewOutbound(outboundInputPhone,callSource,clueId,callback){
 					//清空 显示时间
 					//$("#outboundCallStartTime").html("");
 					$('#outboundCallTime').html("");
+					$("#outboundPhoneLocaleArea").html();
+					//查询手机号归属地
+					getPhoneLocale(outboundInputPhone,callSource);
 				}else if(callSource==2){//电销页面外呼
 					homePageVM.tmOutboundCallDialogVisible =true;
 					$("#tmOutboundCallTime").html("");
+					$('#tmOutboundPhoneLocaleArea').html("");
+					//查询手机号归属地
+					getPhoneLocale(outboundInputPhone,callSource);
 				}
 				if (typeof callback === 'function') {
-	            callback();
-	        }
+		            callback();
+		        }
 				
 			}else{
 				console.error(token);
 				homePageVM.$message({message:"外呼失败:"+token.msg,type:'error'});
 			}
 		});
+}
+/**
+ * 查询手机号归属地
+ * @param phone 客户电话
+ * @param callSource 
+ * @returns
+ */
+function getPhoneLocale(phone,callSource){
+	 var param={phone:phone};
+	 axios.post('/call/callRecord/queryPhoneLocale',param)
+     .then(function (response) {
+         var data =  response.data;
+         if(data.code=='0'){
+    		 console.info(data);
+    		 var resData = data.data;
+    		 var result = resData.result;
+    		 if(result=="0"){
+    			 var phoneArea = resData.data;
+    			 if(callSource==1){
+    				 $('#outboundPhoneLocaleArea').html(phoneArea.province+","+phoneArea.city);
+        		 }else if(callSource==2){
+        			 $('#tmOutboundPhoneLocaleArea').html(phoneArea.province+","+phoneArea.city);
+        		 } 
+    		 }else{
+    			 console.error(resData);
+    			 homePageVM.$message({message:"查询手机归属地 "+resData.description,type:'error'});
+    		 }
+    		 
+         }else{
+        	 console.error("查询手机号归属地：%o",response);
+        	 homePageVM.$message({message:"查询手机归属地  "+data.msg,type:'error'});
+         }
+     })
+     .catch(function (error) {
+        console.log(error);
+     })
+     .then(function () {
+     });
 }
 
 

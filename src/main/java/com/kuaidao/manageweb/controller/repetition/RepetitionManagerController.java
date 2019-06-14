@@ -54,7 +54,7 @@ public class RepetitionManagerController {
     private OrganizationFeignClient organizationFeignClient;
 
     /**
-     * 3.4 客户重单列表
+     * 3.4 重单列表
      * 
      * @return
      */

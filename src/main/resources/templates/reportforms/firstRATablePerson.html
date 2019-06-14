@@ -15,8 +15,10 @@
     <el-row class="marginB20">
         <el-button type="primary" @click="searchYesterday">昨天</el-button>
         <el-button type="success" @click="searchWeek">近七天</el-button>
-        <el-button type="warning" @click="searchMonth">本月</el-button>  
-        <el-button type="danger" @click="exportRs">导出Excel报表</el-button>  
+        <el-button type="warning" @click="searchMonth">本月</el-button>
+        <shiro:hasPermission name="statistics:firstResourceAllocation:export">
+        <el-button type="danger" @click="exportRs">导出Excel报表</el-button>
+        </shiro:hasPermission>
         <el-button type="primary" style="float: right;" @click="goback()">返回</el-button>  
     </el-row>
     <div class="mainSearchBg">        
@@ -29,7 +31,7 @@
                     <el-date-picker format="yyyy-MM-dd HH:mm" v-model="form.endTime" type="datetime" value-format="yyyy-MM-dd HH:mm" placeholder="选择日期"></el-date-picker>
                 </el-form-item>
                 <el-form-item label="电销组:">  
-                    <el-select v-model="form.teleorg" placeholder="电销组" style="width: 100%;" clearable @change="currentTelSale" filterable :disabled="isDisabled">
+                    <el-select v-model="form.orgId" placeholder="电销组" style="width: 100%;" clearable @change="currentTelSale" filterable :disabled="isDisabled">
                         <el-option
                             v-for="item in orgTeleArr"
                             :key="item.id"
@@ -39,26 +41,17 @@
                     </el-select>
                 </el-form-item>
                 <el-form-item label="电销顾问:">  
-                    <el-select 
-                        v-model="form.teleSaleId" 
-                        placeholder="电销顾问" 
-                        style="width: 100%;" 
-                        filterable 
-                        multiple 
-                        clearable  >
+                    <el-select v-model="form.userId" placeholder="电销顾问" style="width: 100%;" filterable clearable>
                         <el-option
                             v-for="item in busSaleArr"
                             :key="item.id"
                             :label="item.name"
                             :value="item.id">
-                            <el-checkbox-group v-model="form.teleSaleId">
-                                <el-checkbox :label="item.id">{{item.name}}</el-checkbox>
-                            </el-checkbox-group>
                         </el-option>
                     </el-select>
                 </el-form-item>
                 <el-form-item label="话务转入:">  
-                    <el-select v-model="form.telOperatorTransferIn" placeholder="话务转入" style="width: 100%;" clearable filterable>
+                    <el-select v-model="form.isTransfer" placeholder="话务转入" style="width: 100%;" clearable filterable>
                         <el-option label="是" value="1"></el-option>
                         <el-option label="否" value="2"></el-option>
                     </el-select>
@@ -74,16 +67,17 @@
                 tooltip-effect="dark"
                 style="width: 100%"
                 border
+                v-loading="loading"
                 :data="tableData">
                 <el-table-column align="center" type="index" label="序号" width="55"></el-table-column>
                 <!-- 日期列 -->
-                <el-table-column align="center" :key="index" :prop="item.fieldCode" :label="item.displayName" v-for="(item,key,index) in tableColums" v-if="item.fieldCode == 'timeId'" :formatter="dateFormat">
+                <el-table-column align="center" :key="index" :prop="item.fieldCode" :label="item.displayName" v-for="(item,key,index) in tableColums" v-if="item.fieldCode == 'day'" :formatter="dateFormat">
                 </el-table-column>
                 <!-- 其他列 -->
                 <el-table-column align="center" :key="index" :prop="item.fieldCode" :label="item.displayName" v-else>
                 </el-table-column>
             </el-table>
-            <table-pagination :pager="pager" @change="searchTable"></table-pagination>
+            <table-pagination :pager="pager" @change="searchTable()"></table-pagination>
         </el-row>
     </div>
 </div>
@@ -91,121 +85,9 @@
 <div th:include="_footer_include :: #jsLib"></div>
 </body>
 <script th:inline="javascript">
-    var queryOrg=[[${queryOrg}]];//电销组
-    var distributionSource=[[${queryOrg}]];//分配来源
-    var fieldList=[
-        {//表头假数据
-            displayName:"日期",
-            fieldCode:"timeId",//需要改成后端返回的字段名称
-            fieldName:"日期",
-            id:"0",
-            menuCode:null,
-            menuId:null,
-            pageNum:0,
-            pageSize:0,
-            sortNum:1
-        },{
-            displayName:"电销",
-            fieldCode:"userName",
-            fieldName:"电销",
-            id:"1",
-            menuCode:null,
-            menuId:null,
-            pageNum:0,
-            pageSize:0,
-            sortNum:1
-        },{
-            displayName:"首次分配资源数",
-            fieldCode:"assignClueCount",
-            fieldName:"首次分配资源数",
-            id:"2",
-            menuCode:null,
-            menuId:null,
-            pageNum:0,
-            pageSize:0,
-            sortNum:2
-        },{
-            displayName:"联展",
-            fieldCode:"jointExhibition",
-            fieldName:"联展",
-            id:"3",
-            menuCode:null,
-            menuId:null,
-            pageNum:0,
-            pageSize:0,
-            sortNum:3
-        },{
-            displayName:"竞价",
-            fieldCode:"priceCompetition",
-            fieldName:"竞价",
-            id:"4",
-            menuCode:null,
-            menuId:null,
-            pageNum:0,
-            pageSize:0,
-            sortNum:4
-        },{
-            displayName:"优化",
-            fieldCode:"optimization",
-            fieldName:"优化",
-            id:"5",
-            menuCode:null,
-            menuId:null,
-            pageNum:0,
-            pageSize:0,
-            sortNum:5
-        },{
-            displayName:"信息流",
-            fieldCode:"informationFlow",
-            fieldName:"信息流",
-            id:"6",
-            menuCode:null,
-            menuId:null,
-            pageNum:0,
-            pageSize:0,
-            sortNum:6
-        },{
-            displayName:"官网",
-            fieldCode:"officialWebsite",
-            fieldName:"官网",
-            id:"7",
-            menuCode:null,
-            menuId:null,
-            pageNum:0,
-            pageSize:0,
-            sortNum:7
-        },{
-            displayName:"行业",
-            fieldCode:"industry",
-            fieldName:"行业",
-            id:"8",
-            menuCode:null,
-            menuId:null,
-            pageNum:0,
-            pageSize:0,
-            sortNum:8
-        },{
-            displayName:"其他",
-            fieldCode:"other",
-            fieldName:"其他",
-            id:"9",
-            menuCode:null,
-            menuId:null,
-            pageNum:0,
-            pageSize:0,
-            sortNum:9
-        },{
-            displayName:"网民未接",
-            fieldCode:"netizensMissed",
-            fieldName:"网民未接",
-            id:"10",
-            menuCode:null,
-            menuId:null,
-            pageNum:0,
-            pageSize:0,
-            sortNum:10
-        }
-    ];
+    var queryOrg=[[${saleGroupList}]];//电销组
+    var fieldList=[[${fieldList}]];//表头list
+    var parentParam=[[${fraQueryDto}]];
     var mainDivVM = new Vue({
         el: '#maindiv',
         data: function() {
@@ -220,53 +102,21 @@
                 form: {
                     startTime:'',
                     endTime:'',
-                    org_Id:'',
-                    telOperatorTransferIn: ''
+                    orgId: '',
+                    userId: '',
+                    isTransfer: ''
                 },
                 export: {
                     startTime:'',
                     endTime:'',
-                    org_Id:'',
-                    telOperatorTransferIn: ''
+                    orgId: '',
+                    userId: '',
+                    isTransfer: ''
                 },
-                tableData: [
-                {
-                        id: 1,
-                        timeId: 20190505,
-                        orgId: 1,
-                        userName: '电销1',
-                        assignClueCount: 100,
-                        jointExhibition: 100,
-                        priceCompetition: 100,
-                        optimization: 100,
-                        informationFlow: 1000,
-                        officialWebsite: 1000,
-                        industry: 1000,
-                        other: 1000,
-                        netizensMissed: 1000,
-                        // uesrId: ''
-                    },
-                    {
-                        id: 2,
-                        timeId: 20190505,
-                        orgId: 2,
-                        userName: '电销1',
-                        assignClueCount: 100,
-                        jointExhibition: 100,
-                        priceCompetition: 100,
-                        optimization: 100,
-                        informationFlow: 1000,
-                        officialWebsite: 1000,
-                        industry: 1000,
-                        other: 1000,
-                        netizensMissed: 1000,
-                        // uesrId: ''
-                    },
-                ],//表格数据
-                tableColums: [],//表头list
-                orgTeleArr:queryOrg,//电销组
-                busSaleArr:[],//创业顾问
-                
+                tableData: [],//表格数据
+                tableColums: fieldList,//表头list
+                orgTeleArr: queryOrg,//电销组
+                busSaleArr: [],//创业顾问
             }             
         },
         methods: { 
@@ -274,11 +124,16 @@
                 if(null==seleVal||seleVal==""){
                     return ;
                 }
-                param={};
+                var param={};
                 param.orgId=seleVal;
                 param.roleCode="DXCYGW";
                 axios.post('/user/userManager/listByOrgAndRole' ,param).then(function (response) {  
                     mainDivVM.busSaleArr=response.data.data;
+                }).catch(function (error) {
+                     mainDivVM.$message({
+                        message: "电销顾问请求失败，请稍后重试",
+                        type: "error"
+                    });
                 });
             },
             searchTable(firstPage) { 
@@ -296,7 +151,7 @@
                     }
                     var date = new Date();
                     var currentDate = moment(date).format("YYYY-MM-DD 23:59");
-                    date.setMonth(date.getMonth()-5);
+                    date.setMonth(date.getMonth()-6);
                     var beforeSixMonth = moment(date).format("YYYY-MM-DD 00:00");
                     var currentDateRes = new Date(currentDate);
                     var beforeSixMonthRes = new Date(beforeSixMonth);
@@ -326,50 +181,53 @@
                 }else{
                     param.pageNum = this.pager.currentPage;
                 }
-                param.orgId =  this.form.orgId;//电销组
+                param.orgId =  this.form.orgId; 
                 param.userId =  this.form.userId;
-                console.log(param);
-                // this.loading=true;
-                // axios.post('/statistics/teleStatement/getResourceAllocationPersionTable',param).then(function (response) { 
-                //     if(!response){
-                //         mainDivVM.$message({
-                //             message: "接口调用失败",
-                //             type: 'error'
-                //         });
-                //         return ;
-                //     }
-                //     var resobj= response.data;
-                //     console.log(resobj)
-                //     if(!resobj){
-                //         mainDivVM.$message({
-                //             message: "接口调用失败",
-                //             type: 'error'
-                //         });
-                //         return ;
-                //     }
-                //     if(resobj.code!='0'){
-                //         mainDivVM.$message({
-                //             message: "接口调用失败",
-                //             type: 'error'
-                //         });
-                //         return ;
-                //     }  
-                //     var resobjData=resobj.data.data          
-                //     // 表格数据渲染
-                //     mainDivVM.tableData=resobjData;
-                //     // 表头数据渲染 
-                //     mainDivVM.tableColums= fieldList;
-                //     mainDivVM.pager.currentPage= resobj.data.currentPage;
-                //     mainDivVM.pager.total= resobj.data.total;
-                //     mainDivVM.loading=false;
-                // }).catch(function (error) {
-                //     console.log(error);
-                //     mainDivVM.$message({
-                //         message: "请求失败，请稍后重试",
-                //         type: "error"
-                //     });
-                //     mainDivVM.loading = false;
-                // });     
+                param.isTransfer = this.form.isTransfer;
+                this.loading=true;
+                axios.post('/statistics/firstResourceAllocation/getFirstResourceAllocationDayPagePersion',param).then(function (response) { 
+                    if(!response){
+                        mainDivVM.loading=false;
+                        mainDivVM.$message({
+                            message: "接口调用失败",
+                            type: 'error'
+                        });
+                        return ;
+                    }
+                    var resobj= response.data;
+                    if(!resobj){
+                        mainDivVM.loading=false;
+                        mainDivVM.$message({
+                            message: "接口调用失败",
+                            type: 'error'
+                        });
+                        return ;
+                    }
+                    if(resobj.code!='0'){
+                        mainDivVM.loading = false;
+                        mainDivVM.$message({
+                            message: resobj.msg,
+                            type: 'error'
+                        });
+                        return ;
+                    }  
+                    var resobjData = resobj.data.data; 
+                    mainDivVM.tableData = resobjData;
+                    mainDivVM.pager.currentPage = resobj.data.currentPage;
+                    mainDivVM.pager.total = resobj.data.total;
+                    mainDivVM.loading = false;
+                    mainDivVM.export.startTime = mainDivVM.minuteFormat(startTime);
+                    mainDivVM.export.endTime = mainDivVM.minuteFormat(endTime);
+                    mainDivVM.export.orgId = mainDivVM.form.orgId;
+                    mainDivVM.export.userId = mainDivVM.form.userId;
+                    mainDivVM.export.isTransfer = mainDivVM.form.isTransfer;
+                }).catch(function (error) {
+                    mainDivVM.loading = false;
+                    mainDivVM.$message({
+                        message: "请求失败，请稍后重试",
+                        type: "error"
+                    });
+                });   
             },
             limitTime (start, end) {
                 var startTime = this.minuteFormat (start);
@@ -471,9 +329,9 @@
                 param.endTime =  this.export.endTime;
                 param.orgId =  this.export.orgId; 
                 param.userId =  this.export.userId; 
-                axios.post('/callrecord/teleSaleTalkTime/exportTeleGroupTalkTime',param,{responseType:'blob'})
+                param.isTransfer = this.export.isTransfer;
+                axios.post('/statistics/firstResourceAllocation/exportFirstResourceAllocationDayPagePersion',param,{responseType:'blob'})
                     .then(function (response) {
-                        console.log(response);
                         var data =  response.data;
                         var fileName = response.headers.filename;
                         saveAs(data,decodeURI(fileName));
@@ -488,14 +346,18 @@
             }
         },
         created(){      
-            var today = new Date();
-            var startTime = moment(today).format("YYYY-MM-DD 00:00");
-            var endTime = moment(today).format("YYYY-MM-DD 23:59");
-            this.form.startTime=startTime;
-            this.form.endTime=endTime; 
-
-            this.export.startTime = this.minuteFormat(this.form.startTime);
-            this.export.endTime = this.minuteFormat(this.form.endTime);    
+            this.form.startTime=this.dateTimeFormat(parentParam.startTime);
+            this.form.endTime=this.dateTimeFormat(parentParam.endTime);    
+            this.form.userId=parentParam.userId; 
+            this.form.orgId = parentParam.orgId ? parentParam.orgId.toString():"";
+            this.form.isTransfer=parentParam.isTransfer ? parentParam.isTransfer.toString():"";  
+            
+            this.export.startTime = parentParam.startTime;
+            this.export.endTime = parentParam.endTime;
+            this.export.orgId = this.form.orgId;
+            this.export.userId = this.form.userId;
+            this.export.isTransfer = this.form.isTransfer;
+            this.currentTelSale(this.export.orgId); 
             this.searchTable();
         },
         mounted(){

@@ -12,7 +12,7 @@
     <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
         <el-breadcrumb-item>Home</el-breadcrumb-item>
         <el-breadcrumb-item>财务管理</el-breadcrumb-item>
-        <el-breadcrumb-item>餐饮公司退返款</el-breadcrumb-item>
+        <el-breadcrumb-item>退返款申请</el-breadcrumb-item>
     </el-breadcrumb>
     
     <el-row class="marginB20">
@@ -407,6 +407,7 @@ var teleDeptList=[[${teleDeptList}]];//电销事业部
 var provinceList=[[${provinceList}]];//省份
 var vistitStoreTypeList=[[${vistitStoreTypeList}]];//签约店型
 var ossSignatureUrl = [[${ossUrl}]];//上传文件地址
+var payModeItem =[[${payModeItem}]];
 var clueVM = new Vue({
         el: '#clueManage',
         data: {
@@ -1035,43 +1036,39 @@ var clueVM = new Vue({
             	   this.allocationVisible = false;
                },
                allocationClue(formName){//申请退款
-            	   this.btnDisabled=true;
-            	   this.$refs[formName].validate((valid) => {
-            	          if (valid) {
-           	            	  var param  = {};
-           	            	  param.signId=this.allocationForm.signId;
-           	            	  param.reason=this.allocationForm.reason;
-           	            	  param.refundTime=this.allocationForm.refundTime;
-           	            	  param.cusAmount=this.allocationForm.cusAmount;
-           	            	  param.imgList=this.fileList;
-	                          axios.post('/financing/refundRebate/applyRefund',param)
-	                              .then(function (response) {
-	                                  var data =  response.data;
-	                                  if(data.code=='0'){
-	                                  	clueVM.$message({message:'申请成功',type:'success',duration:1000,onClose:function(){
-	                                  		clueVM.allocationVisible = false;
-	                                  		clueVM.searchTable();
-                                        this.btnDisabled=false;
-	                              	    }});
-	                                  }else{
-	                                  	clueVM.$message({
-	                                          message: "接口调用失败",
-	                                          type: 'error'
-	                                        }); 
-                                      this.btnDisabled=false;
-	                                  }
-	                              })
-	                              .catch(function (error) {
-                                  this.btnDisabled=false;
-	                                console.log(error);
-	                              })
-	                              .then(function () {
-	                              	this.btnDisabled=false;
-	                              });
+                this.$refs[formName].validate((valid) => {
+                  if (valid) {
+                    var param  = {};
+                    param.signId=this.allocationForm.signId;
+                    param.reason=this.allocationForm.reason;
+                    param.refundTime=this.allocationForm.refundTime;
+                    param.cusAmount=this.allocationForm.cusAmount;
+                    param.imgList=this.fileList;
+                    this.btnDisabled=true;
+                        axios.post('/financing/refundRebate/applyRefund',param)
+                            .then(function (response) {
+                                var data =  response.data;
+                                if(data.code=='0'){
+                                  clueVM.$message({message:'申请成功',type:'success',duration:1000,onClose:function(){
+                                    clueVM.allocationVisible = false;
+                                    clueVM.searchTable();
+                                    // clueVM.btnDisabled=false;
+                                  }});
+                                }else{
+                                  clueVM.$message({
+                                        message: "接口调用失败",
+                                        type: 'error'
+                                      }); 
+                                      clueVM.btnDisabled=false;
+                                }
+                            })
+                            .catch(function (error) {
+                              clueVM.btnDisabled=false;
+                              console.log(error);
+                            });
             	            //end
             	          } else {
             	            console.log('error submit!!');
-                          this.btnDisabled=false;
             	            return false;
             	          }
             	    });
@@ -1114,45 +1111,42 @@ var clueVM = new Vue({
             	   this.dialogFormChooseVisibleCancel();
                },
                transferClue(formName){//外调经理
-                this.btnDisabled1=true;
             	   this.$refs[formName].validate((valid) => {
-            	          if (valid) {
-                           	  //外调
-                           	  var param  = {};
-                           	  param.signId=this.transferForm.signId;
-         	            	  param.reason=this.transferForm.reason;
-         	            	  param.refundTime=this.transferForm.refundTime;
-         	            	  param.cusAmount=this.transferForm.cusAmount;
-         	            	  param.signNoList=this.transferForm.dynamicTags;
-         	            	 param.imgList=this.fileList;
-	                          axios.post('/financing/refundRebate/applyRebate',param)
-                               .then(function (response) {
-                                   var data =  response.data;
-                                   if(data.code=='0'){
-                                   	clueVM.$message({message:'申请成功',type:'success',duration:1000,onClose:function(){
-                                   		clueVM.transferVisible = false;
-                                   		clueVM.searchTable();
-                                      this.btnDisabled1=false;
-                               	    }});
-                                   }else{
-                                   	clueVM.$message({
-                                           message: "接口调用失败",
-                                           type: 'error'
-                                         }); 
-                                    this.btnDisabled1=false;
-                                   }
-                               })
-                               .catch(function (error) {
-                                 console.log(error);
-                                 this.btnDisabled1=false;
-                               })
-                               .then(function () {
-                               	  this.btnDisabled1=false;
-                               });
-            	            //end
+                      if (valid) {
+                            //外调
+                            var param  = {};
+                            param.signId=this.transferForm.signId;
+                        param.reason=this.transferForm.reason;
+                        param.refundTime=this.transferForm.refundTime;
+                        param.cusAmount=this.transferForm.cusAmount;
+                        param.signNoList=this.transferForm.dynamicTags;
+                        param.imgList=this.fileList;
+                        this.btnDisabled1=true;
+                          axios.post('/financing/refundRebate/applyRebate',param)
+                              .then(function (response) {
+                                  var data =  response.data;
+                                  if(data.code=='0'){
+                                  clueVM.$message({message:'申请成功',type:'success',duration:1000,onClose:function(){
+                                    clueVM.transferVisible = false;
+                                    clueVM.searchTable();
+                                    // clueVM.btnDisabled1=false;
+                                  }});
+                                  }else{
+                                  clueVM.$message({
+                                          message: "接口调用失败",
+                                          type: 'error'
+                                        }); 
+                                        clueVM.btnDisabled1=false;
+                                  }
+                              })
+                              .catch(function (error) {
+                                console.log(error);
+                                clueVM.btnDisabled1=false;
+                              });
+                        //end
             	          } else {
             	            console.log('error submit!!');
-                          this.btnDisabled1=false;
+                          // clueVM.btnDisabled1=false;
             	            return false;
             	          }
             	  });
@@ -1210,19 +1204,23 @@ var clueVM = new Vue({
                      return valText;
                  },
                  getPayModeText(row, column, value, index){
-                 	var valText="";
-                     if(value==1){
-                         valText="现金";
-                     }else if(value==2){
-                         valText="POS";
-                     }else if(value==3){
-                         valText="转账";
-                     }else if(value==4){
-                       valText="微信";
-                     }else if(value==5){
-                       valText="支付宝";
+                   var valText="";
+                   var vals = value.split(",");
+                   if(payModeItem){
+                     for(var j = 0 ; j < vals.length;j++  ){
+                       for(var i = 0; i < payModeItem.length ; i++){
+                         if(payModeItem[i].value == vals[j]){
+                           if(j==0){
+                             valText += payModeItem[i].name;
+                           }else{
+                             valText += ","+payModeItem[i].name;
+                           }
+
+                         }
+                       }
                      }
-                     return valText;
+                   }
+                   return valText;
                  },
                  getStatusText(row, column, value, index){
                  	   var valText="";

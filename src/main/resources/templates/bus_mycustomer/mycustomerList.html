@@ -22,7 +22,7 @@
     <el-breadcrumb separator="/" class="elBreadcrumb marginB20">
         <el-breadcrumb-item>Home</el-breadcrumb-item>
         <el-breadcrumb-item>商务管理</el-breadcrumb-item>
-        <el-breadcrumb-item>我的客户</el-breadcrumb-item>
+        <el-breadcrumb-item>我的客户（商务）</el-breadcrumb-item>
     </el-breadcrumb>
     <el-row class="marginB20">
         <el-button type="primary" @click="notVisit">标记未到访</el-button>
@@ -159,7 +159,7 @@
                 <template slot-scope="scope">
                     <!--<el-button size="mini"  v-if="(scope.row.visitStatus == -1||scope.row.visitStatus == null)&&scope.row.visitAuditStatus==null" type="text" @click="openEditVisitRecord(scope.row)">添加到访记录</el-button>-->
                     <el-button size="mini" v-if="scope.row.visitList.length==0" type="text"
-                               @click="openEditVisitRecord(scope.row)">添加到访记录
+                               @click.stop="openEditVisitRecord(scope.row)">添加到访记录
                     </el-button>
                     <div v-else-if="scope.row.visitList.length==1" v-for="item in scope.row.visitList ">
                         <!--<el-button size="mini"  v-if="scope.row.visitStatus==0" type="text" @click="showNotVisitReason(scope.row)">未到访(原因)</el-button>-->
@@ -173,7 +173,7 @@
                                    @click="openEditVisitRecord(item)">添加到访记录
                         </el-button>
                         <el-button size="mini" v-else-if="item.isVisit==1&&item.status==1" type="text"
-                                   @click="showVisitRecord(item)">审核中
+                                   @click="showVisitRecord(item)" style="color: green">审核中
                         </el-button>
                         <el-button size="mini" v-else-if="item.isVisit==1&&item.status==0" type="text"
                                    style="color: red" @click="editRebutVisitRecord(item)">到访被驳回
@@ -184,18 +184,18 @@
                     </div>
                     <div v-else-if="scope.row.visitList.length>1" v-for="item in scope.row.visitList ">
                         <el-button size="mini" v-if="item.isVisit==0&&item.status==1" type="text"
-                                   @click="showNotVisitReason(item)">未到访(审核中)
+                                   @click.stop="showNotVisitReason(item)">未到访(审核中)
                         </el-button>
                         <!--<el-button size="mini"  v-else-if="item.isVisit==0&&item.status==0" type="text" @click="openEditVisitRecord(item)">添加到访记录</el-button>-->
                         <el-button size="mini" v-else-if="item.isVisit==0&&item.status==2" type="text"
-                                   style="color: red" @click="showNotVisitReason(item)">未到访（原因）
+                                   style="color: red" @click.stop="showNotVisitReason(item)">未到访（原因）
                         </el-button>
                         <el-button size="mini" v-else-if="item.isVisit==1&&item.status==0" type="text"
-                                   style="color: red" @click="editRebutVisitRecord(item)">到访被驳回
+                                   style="color: red" @click.stop="editRebutVisitRecord(item)">到访被驳回
                         </el-button>
                     </div>
                     <div v-if="scope.row.visitList.length>1 && scope.row.isVisitAuditStatusOne==1">
-                        <el-button size="mini" type="text" @click="showVisitRecord(scope.row)">
+                        <el-button size="mini" type="text" @click.stop="showVisitRecord(scope.row)" style="color: green">
                             审核中
                         </el-button>
                     </div>
@@ -205,7 +205,7 @@
                         </el-button>
                     </div>
                     <div v-if="scope.row.visitHisList.length>0">
-                        <el-button size="mini" type="text" @click="showHistory(scope.row)">历史到访记录</el-button>
+                        <el-button size="mini" type="text" @click.stop="showHistory(scope.row)">历史到访记录</el-button>
                     </div>
                 </template>
             </el-table-column>            
@@ -213,11 +213,11 @@
             <el-table-column prop="status" label="签约单" align="center" width="250">
                 <template slot-scope="scope">
                     <el-button size="mini" v-if="scope.row.signAuditStatus==null" type="text"
-                               @click="editSign(scope.row)">添加签约单
+                               @click.stop="editSign(scope.row)">添加签约单
                     </el-button>
                     <div v-if="scope.row.signList.length>=1" v-for="item in scope.row.signList">
                         <el-button size="mini" v-if="item.signStatus==0" type="text" style="color: red"
-                                   @click="editRebutSign(item)">
+                                   @click.stop="editRebutSign(item)">
                             <span style="color: blue">{{item.signNo}}</span><span style="color: red">（被驳回）</span>
                         </el-button>
                         <el-button size="mini" v-else-if="item.signStatus==1" type="text" style="color:#4ab65c"
@@ -249,7 +249,7 @@
             <el-table-column prop="teleDirectorName" label="电销总监" align="center" width="120px"></el-table-column>
             <el-table-column prop="teleProjectName" label="电销组项目" align="center" width="180px"></el-table-column>
         </el-table>
-        <table-pagination :pager="pager" @change="initList"></table-pagination>
+        <table-pagination v-if="paginationShow" :pager="pager" @change="initList"></table-pagination>
     </div>
     <!--添加到访记录-->
     <el-dialog title="未到访原因" :visible.sync="notVisitdDialogVisible" width="70%">
@@ -909,7 +909,7 @@
                         </el-col>
                         <el-col :span="10">
                             <el-form-item label="赠送类型：" :label-width="formLabelWidth" prop="giveType">
-                                <el-select v-model="formSigning.giveType" placeholder="请选择赠送类型：" style="width:100%;">
+                                <el-select v-model="formSigning.giveType" clearable placeholder="请选择赠送类型：" style="width:100%;">
                                     <el-option
                                             v-for="item in giveTypeList"
                                             :key="item.value"
@@ -1044,13 +1044,13 @@
                             </el-form-item>
                         </el-col>
                         <el-col :span="12">
-                            <el-form-item label="付款方式：" :label-width="formLabelWidth" prop="payMode">
-                                <el-select v-model="formSigning.payMode" placeholder="请选择付款方式：" style="width:100%">
+                            <el-form-item label="付款方式：" :label-width="formLabelWidth" prop="payModes">
+                                <el-select v-model="formSigning.payModes" multiple placeholder="请选择付款方式：" style="width:100%">
                                     <el-option
                                             v-for="item in option3s"
                                             :key="item.value"
                                             :label="item.label"
-                                            :value="item.value">
+                                            :value="item.name">
                                     </el-option>
                                 </el-select>
                             </el-form-item>
@@ -1480,7 +1480,7 @@
                         </el-col>
                         <el-col :span="10">
                             <el-form-item label="赠送类型：" :label-width="formLabelWidth" prop="giveType">
-                                <el-select v-model="updateFormSigning.giveType" placeholder="请选择赠送类型："
+                                <el-select clearable v-model="updateFormSigning.giveType"  placeholder="请选择赠送类型："
                                            style="width:100%;">
                                     <el-option
                                             v-for="item in giveTypeList"
@@ -1542,14 +1542,14 @@
                             </el-form-item>
                         </el-col>
                         <el-col :span="12">
-                            <el-form-item label="付款方式：" :label-width="formLabelWidth" prop="payMode">
-                                <el-select v-model="updateFormSigning.payMode" placeholder="请选择付款方式："
+                            <el-form-item label="付款方式：" :label-width="formLabelWidth" prop="payModes">
+                                <el-select v-model="updateFormSigning.payModes" multiple placeholder="请选择付款方式："
                                            style="width:100%;">
                                     <el-option
                                             v-for="item in option3s"
                                             :key="item.value"
                                             :label="item.label"
-                                            :value="item.value">
+                                            :value="item.name">
                                     </el-option>
                                 </el-select>
                             </el-form-item>
@@ -1627,6 +1627,7 @@
     var mainDivVM = new Vue({
         el: '#mainDiv',
         data: {
+            paginationShow: false,
             giveTypeList: giveTypeList,
             isShow: false,
             loginUserId: loginUserId,
@@ -1693,7 +1694,7 @@
             }],
             visitTypeArr: [{value: 1, name: '预约来访'}, {value: 2, name: '慕名来访'}, {value: 3, name: '临时来访'}],
             option2s: [{value: 1, label: '一次性全款'}, {value: 2, label: '先付定金'}],
-            option3s: [{value: '1', label: '现金'}, {value: '2', label: 'POS'}, {value: '3', label: '转账'}, {value: '4', label: '微信'}, {value: '5', label: '支付宝'}],
+            option3s: [],
             payTypeArr: [{value: "1", label: '全款'}, {value: "2", label: '定金'}, {value: "3", label: '追加定金'}, {
                 value: "4",
                 label: '尾款'
@@ -1739,6 +1740,23 @@
                 allocateTime2: "",
                 isTailMoney: '',
             },
+            storeForm: {
+                visitStatus: "",
+                isSign: "",
+                teleGroupId: "",
+                teleSaleId: "",
+                tasteProjectId: "",
+                cusName: "",
+                reserveTime1: "",
+                reserveTime2: "",
+                appiontmentCreateTime1: "",
+                appiontmentCreateTime2: "",
+                allocateTime1: "",
+                allocateTime2: "",
+                isTailMoney: '',
+            },
+            storeId: '',
+            scrollTop: 0,//表格滚动位置
             addVisitRecord: {
                 clueId: "",
                 companyid: "",
@@ -1801,6 +1819,7 @@
                 visitNum: "",
 
                 payType: 1,
+                payModes: [],
                 payMode: '',
                 amountReceived: '',
                 amountBalance: '',
@@ -1836,6 +1855,7 @@
                 payDetailId: "",
                 payType: '1',
                 payName: '',
+                payModes: [],
                 payMode: '',
                 amountReceived: '',
                 amountBalance: '',
@@ -2029,6 +2049,15 @@
                 // ],
                 payMode: [
                     {required: true, message: '请选择付款方式', trigger: 'change'}
+                ],
+                payModes: [
+                    { required: true,validator:function(rule,value,callback){
+                            if(value.length==0){
+                                callback(new Error("请选择付款方式"));
+                            }else{
+                                callback();
+                            }
+                        }, trigger: 'change' }
                 ],
                 payName: [
                     {required: true, message: '请输入付款人姓名', trigger: 'blur'}
@@ -2337,14 +2366,15 @@
                                             mainDivVM.initList();
                                             mainDivVM.notVisitFlagDialogVisible = false;
                                             mainDivVM.addVisitRecord.clueId = "";
-                                            this.notVisitButtonAble = false;
+                                            mainDivVM.notVisitButtonAble = false;
                                         }
                                     });
                                 } else {
-                                    this.notVisitButtonAble = false;
                                     mainDivVM.$message.error(response.data.msg);
+                                	mainDivVM.notVisitButtonAble = false;
                                 }
                             }).catch(function (error) {
+                            mainDivVM.notVisitButtonAble = false;
                             console.log(error);
                         });
                     } else {
@@ -2353,11 +2383,33 @@
                 });
             },
             showCustomerDetail(row, column) { // 客户详情改成编辑（客户维护）
+                var clueId=row.clueId;
+                // 存储选中信息--start
+                this.setSessionStore("myCustomerListStoreForm", this.storeForm);
+                var otherVal = {
+                    "currentPage": this.pager.currentPage,
+                    "clueId": clueId,
+                    "scrollTop": this.$el.querySelector('.el-table__body-wrapper').scrollTop
+                }
+                this.setSessionStore("myCustomerListOtherVal", otherVal);
+                // 存储选中信息--end
+
                 // window.location.href = '/bus/BusinessCustomer/viewCustomerInfo?clueId=' + row.clueId;
-                window.location.href = '/bus/BusinessCustomer/editCustomerInfo?clueId=' + row.clueId;
+                window.location.href = '/bus/BusinessCustomer/editCustomerInfo?clueId=' + clueId;
             },
             editCustomerDetail(row, column) { // 客户维护
-                window.location.href = '/bus/BusinessCustomer/editCustomerInfo?clueId=' + row.clueId;
+                var clueId=row.clueId;
+                // 存储选中信息--start
+                this.setSessionStore("myCustomerListStoreForm", this.storeForm);
+                var otherVal = {
+                    "currentPage": this.pager.currentPage,
+                    "clueId": clueId,
+                    "scrollTop": this.$el.querySelector('.el-table__body-wrapper').scrollTop
+                }
+                this.setSessionStore("myCustomerListOtherVal", otherVal);
+                // 存储选中信息--end
+
+                window.location.href = '/bus/BusinessCustomer/editCustomerInfo?clueId=' + clueId;
             },
             currentProvince(selVal) {
                 if (!selVal) {
@@ -2451,7 +2503,8 @@
                                     mainDivVM.$message.error(response.data.msg);
                                 }
                             }).catch(function (error) {
-                            console.log(error);
+                                mainDivVM.addVisitButtonAble = false;
+                                console.log(error);
                         });
                     } else {
                         return false;
@@ -2621,7 +2674,17 @@
                 })
             },
             toVisitRecordPage(row) {
-                window.location.href = '/busVisitRecord/visitRecordPage?clueId=' + row.clueId + "&visitStatus=" + row.visitStatus + "&signAuditStatus=" + row.signAuditStatus;
+                var clueId=row.clueId;
+                // 存储选中信息--start
+                this.setSessionStore("myCustomerListStoreForm", this.storeForm);
+                var otherVal = {
+                    "currentPage": this.pager.currentPage,
+                    "clueId": clueId,
+                    "scrollTop": this.$el.querySelector('.el-table__body-wrapper').scrollTop
+                }
+                this.setSessionStore("myCustomerListOtherVal", otherVal);
+                // 存储选中信息--end
+                window.location.href = '/busVisitRecord/visitRecordPage?clueId=' + clueId + "&visitStatus=" + row.visitStatus + "&signAuditStatus=" + row.signAuditStatus;
             },
             handleClick(tab, event) {
                 console.log(tab)
@@ -2869,6 +2932,7 @@
                 // this.dialogFormSigningVisible = true;
                 this.resetForm('formSigning')
                 this.isAllMoney = false;
+                //ainDivVM.formSigning.payModes = [];
                 var param = {};
                 param.id = row.clueId;
                 axios.post('/businesssign/echo', param).then(function (response) {
@@ -2934,16 +2998,39 @@
                             }else{
                             	mainDivVM.updateFormSigning.giveType = mainDivVM.updateFormSigning.giveType + "";
                             }
+                            //
+                            var modeArr = mainDivVM.updateFormSigning.payMode.split(",");
+                            mainDivVM.updateFormSigning.payModes = mainDivVM.tansPayModeValueToName(modeArr);
                         }
                         mainDivVM.dialogUpdateFormSigningVisible = true;
                     }
                 })
             },
             toSignPage(row) {  // 进入签约单明细  能够 新增付款
-                window.location.href = '/businesssign/visitRecordPage?clueId=' + row.clueId + "&signId=" + row.signId + "&readyOnly=0";
+                var clueId=row.clueId;
+                // 存储选中信息--start
+                this.setSessionStore("myCustomerListStoreForm", this.storeForm);
+                var otherVal = {
+                    "currentPage": this.pager.currentPage,
+                    "clueId": clueId,
+                    "scrollTop": this.$el.querySelector('.el-table__body-wrapper').scrollTop
+                }
+                this.setSessionStore("myCustomerListOtherVal", otherVal);
+                // 存储选中信息--end
+                window.location.href = '/businesssign/visitRecordPage?clueId=' + clueId + "&signId=" + row.signId + "&readyOnly=0";
             },
             toReadOnlySignPage(row) {  // 进入签约单明细  能够 新增付款
-                window.location.href = '/businesssign/visitRecordPage?clueId=' + row.clueId + "&signId=" + row.signId + "&readyOnly=1";
+                var clueId=row.clueId;
+                // 存储选中信息--start
+                this.setSessionStore("myCustomerListStoreForm", this.storeForm);
+                var otherVal = {
+                    "currentPage": this.pager.currentPage,
+                    "clueId": clueId,
+                    "scrollTop": this.$el.querySelector('.el-table__body-wrapper').scrollTop
+                }
+                this.setSessionStore("myCustomerListOtherVal", otherVal);
+                // 存储选中信息--end
+                window.location.href = '/businesssign/visitRecordPage?clueId=' + clueId + "&signId=" + row.signId + "&readyOnly=1";
             },
             selectSigningType(pa1) { //是不是全款
                 // this.formSigning.amountBalance = null;
@@ -2968,10 +3055,35 @@
                 }
             },
 
+            tansPayModeNameToValue(payModes){
+                var payModeArr = [];
+                for(var i = 0 ; i < payModes.length;i++){
+                    for(var j = 0 ; j < mainDivVM.option3s.length ; j++){
+                        if(payModes[i]== mainDivVM.option3s[j].name){
+                            payModeArr.push( mainDivVM.option3s[j].value);
+                        }
+                    }
+                }
+                return payModeArr.join(",");
+            },
+
+            tansPayModeValueToName(payModes){
+                var payModeArr = [];
+                for(var i = 0 ; i < payModes.length;i++){
+                    for(var j = 0 ; j < mainDivVM.option3s.length ; j++){
+                        if(payModes[i]== mainDivVM.option3s[j].value){
+                            payModeArr.push( mainDivVM.option3s[j].name);
+                        }
+                    }
+                }
+                return payModeArr;
+            },
+
             submitForm(formName) {
                 this.formSigning.visitTime = new Date(this.formSigning.visitTime);
                 this.formSigning.payTime = new Date(this.formSigning.payTime);
                 this.formSigning.amountPerformance = this.formSigning.performanceAmount;
+                this.formSigning.payMode = mainDivVM.tansPayModeNameToValue(this.formSigning.payModes);
                 var param = this.formSigning;
                 // 设置 clueid
                 this.$refs[formName].validate((valid) => {
@@ -2998,6 +3110,7 @@
                                 }
                             }).catch(function (error) {
                             console.log(error);
+                            mainDivVM.addSignButtonAble = false;
                         });
                     } else {
                         return false;
@@ -3014,7 +3127,7 @@
                 if (param.payTime) {
                     param.payTime = new Date(param.payTime)
                 }
-
+                this.updateFormSigning.payMode = mainDivVM.tansPayModeNameToValue(this.updateFormSigning.payModes);
                 // 设置 clueid
                 this.$refs[formName].validate((valid) => {
                     if (mainDivVM.updateSignButtonAble == true) {
@@ -3038,7 +3151,8 @@
                                     mainDivVM.updateSignButtonAble = false;
                                 }
                             }).catch(function (error) {
-                            console.log(error);
+                                mainDivVM.updateSignButtonAble = false;
+                                console.log(error);
                         });
                     } else {
                         return false;
@@ -3067,8 +3181,39 @@
                         mainDivVM.pager.total = response.data.data.total;
                         mainDivVM.pager.pageSize = response.data.data.pageSize;
                         console.log(mainDivVM.tableData)
+
+                        // 取出存储的id
+                         if(!mainDivVM.paginationShow){
+                             if(mainDivVM.storeId){
+                                 mainDivVM.$nextTick(function(){
+                                    var storage = [];
+                                    mainDivVM.tableData.forEach(function(item, index){
+                                        if(item.clueId === mainDivVM.storeId ){
+                                            storage.push(mainDivVM.tableData[index]);
+                                        }
+                                    })
+                                    mainDivVM.toggleSelection(storage);
+                                    mainDivVM.$el.querySelector('.el-table__body-wrapper').scrollTop = mainDivVM.scrollTop;
+                                })
+                            }
+                         }else{
+                            mainDivVM.removeSessionStore ("myCustomerListStoreForm");
+                            mainDivVM.removeSessionStore ("myCustomerListOtherVal");
+                         }
+                        mainDivVM.paginationShow = true;
+                        mainDivVM.storeForm = mainDivVM.queryForm;
+
                     }
                 })
+            },
+            toggleSelection(rows) { // table select 默认选中fn
+                if (rows) {
+                    rows.forEach(row => {
+                        this.$refs.multipleTable.toggleRowSelection(row,true);
+                    });
+                } else {
+                    this.$refs.multipleTable.clearSelection();
+                }
             },
             number() {//添加签约单余款
                 this.formSigning.amountBalance = this.formSigning.amountBalance.replace(/[^\.\d]/g, '');
@@ -3093,14 +3238,52 @@
                     this.isShow = true
                 }
             },
+            setSessionStore (name, content) {
+                if (!name) return
+                if (typeof content !== 'string') {
+                content = JSON.stringify(content)
+                }
+                window.sessionStorage.setItem(name, content)
+            },
+            getSessionStore (name) {
+                if (!name) return;
+                var content = window.sessionStorage.getItem(name);
+                if (typeof content == 'string') {
+                    content = JSON.parse(content)
+                }
+                return content;
+            },
+            removeSessionStore (name) {
+                if (!name) return
+                return window.sessionStorage.removeItem(name)
+            },
         },
         created() {
+            // window.sessionStorage.clear(); // 点击侧边栏-清除所有cookie
+            // 进入页面判断有是否有存储值
+            if(!this.paginationShow){
+                var storeVal = this.getSessionStore("myCustomerListStoreForm");
+                var otherVal = this.getSessionStore("myCustomerListOtherVal");
+                if(storeVal && otherVal){
+                    this.queryForm = storeVal;
+                    this.$set(this.pager,"currentPage",otherVal.currentPage);
+                    this.storeId = otherVal.clueId;
+                    this.scrollTop = otherVal.scrollTop;
+                }
+            };
+            //初始化数据列表
             this.initList();
             //  到访店铺类型 vistitStoreTypeArr
             var param = {};
             param.groupCode = "vistitStoreType";
             axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode', param).then(function (response) {
                 mainDivVM.vistitStoreTypeArr = response.data.data;
+            });
+
+            param = {};
+            param.groupCode = "payMode";
+            axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode', param).then(function (response) {
+                mainDivVM.option3s = response.data.data;
             });
 
             //初始化省份
@@ -3115,6 +3298,7 @@
             axios.post('/aggregation/companyManager/listNoPage', param).then(function (response) {
                 mainDivVM.companyArr = response.data.data;
             });
+
         },
         mounted() {
             document.getElementById('mainDiv').style.display = 'block';

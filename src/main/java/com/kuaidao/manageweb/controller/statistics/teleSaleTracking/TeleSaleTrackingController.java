@@ -36,6 +36,7 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.net.URLEncoder;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -168,11 +169,12 @@ public class TeleSaleTrackingController {
             curList.add(ra.getCountResource());
             curList.add(ra.getCountClueId());
             curList.add(ra.getCountDistinctClue());
-            double dayOfPer = ra.getDayOfPer();
+            Double dayOfPer = ra.getDayOfPer();
             if(dayOfPer == 0){
-                curList.add(0);
+               curList.add(0);
             }else{
-                curList.add(ra.getDayOfPer());
+                Double abc = Math.floor(dayOfPer*100)/100;
+                curList.add(String.valueOf(abc));
             }
             dataList.add(curList);
         }
@@ -219,11 +221,12 @@ public class TeleSaleTrackingController {
             curList.add(ra.getCountResource());
             curList.add(ra.getCountClueId());
             curList.add(ra.getCountDistinctClue());
-            double dayOfPer = ra.getDayOfPer();
+            Double dayOfPer = ra.getDayOfPer();
             if(dayOfPer == 0){
                 curList.add(0);
             }else{
-                curList.add(ra.getDayOfPer());
+                Double abc = Math.floor(dayOfPer*100)/100;
+                curList.add(String.valueOf(abc));
             }
             dataList.add(curList);
         }
@@ -281,8 +284,9 @@ public class TeleSaleTrackingController {
             Double dayOfPer = ra.getDayOfPer();
             if(dayOfPer == 0){
                 curList.add(0);
-            }else {
-                curList.add(ra.getDayOfPer());
+            }else{
+                Double abc = Math.floor(dayOfPer*100)/100;
+                curList.add(String.valueOf(abc));
             }
             dataList.add(curList);
         }
@@ -523,8 +527,9 @@ public class TeleSaleTrackingController {
         Double dayOfPer = resTotal.getDayOfPer();
         if(dayOfPer == 0){
             totalList.add(0);
-        }else {
-            totalList.add(resTotal.getDayOfPer());
+        }else{
+            Double abc = Math.floor(dayOfPer*100)/100;
+            totalList.add(String.valueOf(abc));
         }
         dataList.add(totalList);
     }

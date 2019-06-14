@@ -80,7 +80,6 @@ var clientVm = new Vue({
                      })
                      .catch(function (error) {
                           console.log(error);
-                     }).then(function(){
                      });
         			 
         		 },trigger:'blur'}
@@ -128,7 +127,6 @@ var clientVm = new Vue({
                        })
                        .catch(function (error) {
                             console.log(error);
-                       }).then(function(){
                        });
         			 
         		 },trigger:'blur'}
@@ -199,7 +197,6 @@ var clientVm = new Vue({
              })
              .catch(function (error) {
                   console.log(error);
-             }).then(function(){
              });
         	 
         	 
@@ -246,8 +243,6 @@ var clientVm = new Vue({
                   })
                   .catch(function (error) {
                        console.log(error);
-                  }).then(function(){
-               	      
                   });
         	   
                  
@@ -298,8 +293,8 @@ var clientVm = new Vue({
                   	    
                   	    var userList = clientVm.userList;
                   	    var isEnabled = true;
-                  	    console.info(userList);
-                  	    console.info(clientVm.form.userId);
+                  	    // console.info(userList);
+                  	    // console.info(clientVm.form.userId);
                   	    for(var i=0;i<userList.length;i++){
                   	    	if(userList[i].id==clientVm.form.userId){
                   	    		isEnabled=false;
@@ -309,17 +304,19 @@ var clientVm = new Vue({
                   	    if(isEnabled){
                   	    	clientVm.form.userId='';
                   	    }
-                  	    
+                        clientVm.confirmBtnDisabled=false;//启用提交按钮
                      }else{
                   	     clientVm.$message({message:'查询七陌坐席失败',type:'error'});
-                         console.error(resData);
+                        //  console.error(resData);
+                         clientVm.confirmBtnDisabled=false;//启用提交按钮
                      }
                  
                  })
                  .catch(function (error) {
                       console.log(error);
+                      clientVm.confirmBtnDisabled=false;//启用提交按钮
                  }).then(function(){
-              	   clientVm.confirmBtnDisabled=false;//启用提交按钮
+              	//    clientVm.confirmBtnDisabled=false;//启用提交按钮
                  });
                  
                  clientVm.dialogFormVisible=true;
@@ -334,7 +331,6 @@ var clientVm = new Vue({
              })
              .catch(function (error) {
                   console.log(error);
-             }).then(function(){
              });
         	
 
@@ -356,19 +352,21 @@ var clientVm = new Vue({
                        if(resData.code=='0'){
                     	   clientVm.cancelForm(formName);
                     	   clientVm.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
+                               clientVm.confirmBtnDisabled=false;//启用提交按钮
                     		   clientVm.initClientData();
                      	    }});
                            
                        }else{
                     	   clientVm.$message({message:'操作失败',type:'error'});
-                           console.error(resData);
+                           clientVm.confirmBtnDisabled=false;//启用提交按钮
+                        //    console.error(resData);
                        }
-                   
                    })
                    .catch(function (error) {
+                        clientVm.confirmBtnDisabled=false;//启用提交按钮
                         console.log(error);
                    }).then(function(){
-                	   clientVm.confirmBtnDisabled=false;//启用提交按钮
+                	//    clientVm.confirmBtnDisabled=false;//启用提交按钮
                    });
                     
                  } else {
@@ -426,7 +424,6 @@ var clientVm = new Vue({
              })
              .catch(function (error) {
                   console.log(error);
-             }).then(function(){
              });
          },
          addBatchClient(){
@@ -553,8 +550,6 @@ var clientVm = new Vue({
                })
                .catch(function (error) {
                     console.log(error);
-               }).then(function(){
-            	   
                });
            },
            getIsUserStatusText(row, column, cellValue, index){//是否启用 

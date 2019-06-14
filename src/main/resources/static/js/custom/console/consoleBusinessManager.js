@@ -40,7 +40,7 @@ var mainDivVM = new Vue({
         },
         //赠送类型
         giveTypeList:giveTypeList,
-        //待处理邀约来访客户        
+        //待处理邀约来访记录        
         editableTabsValue: 0, //tabs标签
         editableTabs: [],
         suppWrap: true,
@@ -91,7 +91,7 @@ var mainDivVM = new Vue({
         visitArr:[{value:-1,name:'待处理'},{value:0,name:'未到访'},{value:1,name:'已到访'}],
         visitTypeArr:[{value:1,name:'预约来访'},{value:2,name:'慕名来访'},{value:3,name:'临时来访'}],
         option2s: [{value: 1, label: '一次性全款'},{value: 2, label: '先付定金'}],
-        option3s: [{value: '1', label: '现金'},{value: '2', label: 'POS'},{value: '3', label: '转账'},{value: '4', label: '微信'},{value: '5', label: '支付宝'}],
+        option3s:[],
         payTypeArr:[{value: "1", label: '全款'},{value: "2", label: '定金'},{value: "3", label: '追加定金'},{value: "4", label: '尾款'}],
         payTypeArr1:[{value: "1", label: '全款'},{value: "2", label: '定金'},{value: "3", label: '追加定金'},{value: "4", label: '尾款'}],
         vistitStoreTypeArr:[],
@@ -192,6 +192,7 @@ var mainDivVM = new Vue({
 
             payType:1,
             payMode:'',
+            payModes:[],
             amountReceived: '',
             amountBalance: '',
             makeUpTime:'',
@@ -226,6 +227,7 @@ var mainDivVM = new Vue({
             payType:'1',
             payName:'',
             payMode:'',
+            payModes:[],
             amountReceived: '',
             amountBalance: '',
             makeUpTime:'',
@@ -405,6 +407,15 @@ var mainDivVM = new Vue({
             payMode: [
                 { required: true, message: '请选择付款方式', trigger: 'change' }
             ],
+            payModes: [
+                { required: true,validator:function(rule,value,callback){
+                        if(value.length==0){
+                            callback(new Error("请选择付款方式"));
+                        }else{
+                            callback();
+                        }
+                    }, trigger: 'change' }
+            ],
             payName: [
                 {required: true, message: '请输入付款人姓名', trigger: 'blur'}
             ],
@@ -583,7 +594,7 @@ var mainDivVM = new Vue({
                 mainDivVM.workDay=response.data.data;
             });
         },
-        // 待处理邀约来访客户
+        // 待处理邀约来访记录
         tabClick(tab, event){
             this.updateFormSigning = this.editableTabs[tab.index].updateFormSigning;
         },
@@ -1303,6 +1314,8 @@ var mainDivVM = new Vue({
                         mainDivVM.updateFormSigning.giveType = mainDivVM.updateFormSigning.giveType+"";
                         mainDivVM.currentProvince(mainDivVM.updateFormSigning.signProvince)
                         mainDivVM.currentCity(mainDivVM.updateFormSigning.signCity)
+                        var modeArr = mainDivVM.updateFormSigning.payMode.split(",");
+                        mainDivVM.updateFormSigning.payModes = mainDivVM.tansPayModeValueToName(modeArr);
                     }
                     mainDivVM.dialogUpdateFormSigningVisible = true;
                 }
@@ -1337,9 +1350,34 @@ var mainDivVM = new Vue({
             }
         },
 
+        tansPayModeNameToValue(payModes){
+            var payModeArr = [];
+            for(var i = 0 ; i < payModes.length;i++){
+                for(var j = 0 ; j < mainDivVM.option3s.length ; j++){
+                    if(payModes[i]== mainDivVM.option3s[j].name){
+                        payModeArr.push( mainDivVM.option3s[j].value);
+                    }
+                }
+            }
+            return payModeArr.join(",");
+        },
+
+        tansPayModeValueToName(payModes){
+            var payModeArr = [];
+            for(var i = 0 ; i < payModes.length;i++){
+                for(var j = 0 ; j < mainDivVM.option3s.length ; j++){
+                    if(payModes[i]== mainDivVM.option3s[j].value){
+                        payModeArr.push( mainDivVM.option3s[j].name);
+                    }
+                }
+            }
+            return payModeArr;
+        },
+
         submitForm(formName) {                
             this.formSigning.visitTime = new Date( this.formSigning.visitTime);
             this.formSigning.payTime = new Date( this.formSigning.payTime);
+            this.formSigning.payMode = mainDivVM.tansPayModeNameToValue(this.formSigning.payModes);
             var param = this.formSigning;
             param.amountPerformance = this.formSigningAmountPerformance;
             console.log(param)
@@ -1373,6 +1411,7 @@ var mainDivVM = new Vue({
            if(param.payTime){
                param.payTime = new Date( param.payTime)
            }
+           this.updateFormSigning.payMode = mainDivVM.tansPayModeNameToValue(this.updateFormSigning.payModes);
             // 设置 clueid
             this.$refs[formName].validate((valid) => {
                 if (valid) {
@@ -1429,13 +1468,19 @@ var mainDivVM = new Vue({
     created(){        
         // 工作台
         this.initBoard();
-        // 待处理邀约来访客户
+        // 待处理邀约来访记录
         this.initList();
         //  到访店铺类型 vistitStoreTypeArr
         var param={};
         param.groupCode="vistitStoreType";
         axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {
             mainDivVM.vistitStoreTypeArr=response.data.data;
+        });
+
+        param = {};
+        param.groupCode = "payMode";
+        axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode', param).then(function (response) {
+            mainDivVM.option3s = response.data.data;
         });
 
         //初始化省份

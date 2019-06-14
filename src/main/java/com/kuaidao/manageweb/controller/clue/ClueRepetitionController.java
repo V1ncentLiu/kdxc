@@ -1,6 +1,11 @@
 package com.kuaidao.manageweb.controller.clue;
 
 
+import com.kuaidao.common.constant.DicCodeEnum;
+import com.kuaidao.common.util.CommonUtil;
+import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
+import com.kuaidao.manageweb.util.CommUtil;
+import com.kuaidao.sys.dto.dictionary.DictionaryItemRespDTO;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -64,13 +69,17 @@ public class ClueRepetitionController {
 	private OrganizationFeignClient organizationFeignClient;
 	
 	@Autowired
-    private ProjectInfoFeignClient projectInfoFeignClient;
+	private ProjectInfoFeignClient projectInfoFeignClient;
 	
 	@Autowired
-    SysRegionFeignClient sysRegionFeignClient;
+	SysRegionFeignClient sysRegionFeignClient;
 
 	@Autowired
 	BusinessSignFeignClient businessSignFeignClient;
+
+	@Autowired
+	private DictionaryItemFeignClient dictionaryItemFeignClient;
+
 	
 	 /**
      *  重单列表页面
@@ -79,9 +88,26 @@ public class ClueRepetitionController {
      */
     @RequestMapping("/queryRepeatPage")
     public String queryRepeatPage(HttpServletRequest request) {
-		return "clue/repetition/customerrePetitionList";
+			request.setAttribute("payModeItem", getDictionaryByCode(DicCodeEnum.PAYMODE.getCode()));
+			return "clue/repetition/customerrePetitionList";
     }
-    
+
+	/**
+	 * 查询字典表
+	 *
+	 * @param code
+	 * @return
+	 */
+	private List<DictionaryItemRespDTO> getDictionaryByCode(String code) {
+		JSONResult<List<DictionaryItemRespDTO>> queryDicItemsByGroupCode =
+				dictionaryItemFeignClient.queryDicItemsByGroupCode(code);
+		if (queryDicItemsByGroupCode != null
+				&& JSONResult.SUCCESS.equals(queryDicItemsByGroupCode.getCode())) {
+			return queryDicItemsByGroupCode.getData();
+		}
+		return null;
+	}
+
     /**
      * 重单列表
      * 
@@ -199,6 +225,10 @@ public class ClueRepetitionController {
     @RequestMapping("/dealPetitionList")
     @ResponseBody
     public JSONResult<PageBean<ClueRepetitionDTO>> dealPetitionList(HttpServletRequest request,@RequestBody ClueRepetitionDTO clueRepetitionDTO) {
+			UserInfoDTO userInfoDTO = getUser();
+			if(userInfoDTO.getBusinessLine() != null){
+				clueRepetitionDTO.setBusinessLine(userInfoDTO.getBusinessLine());
+			}
     	JSONResult<PageBean<ClueRepetitionDTO>> list = clueRepetitionFeignClient.dealPetitionList(clueRepetitionDTO);
     	return list;
     }
@@ -259,6 +289,10 @@ public class ClueRepetitionController {
     @RequestMapping("/businessSignDealList")
     @ResponseBody
     public JSONResult<PageBean<BusinessSignDTO>> businessSignDealList(HttpServletRequest request,@RequestBody BusinessSignDTO businessSignDTO) {
+    	UserInfoDTO user = CommUtil.getCurLoginUser();
+    	if(user.getBusinessLine() != null ){
+    		businessSignDTO.setBusinessLine(user.getBusinessLine());
+			}
     	JSONResult<PageBean<BusinessSignDTO>> list = businessSignFeignClient.businessSignDealList(businessSignDTO);
     	return list;
     }
@@ -275,6 +309,7 @@ public class ClueRepetitionController {
     	JSONResult<BusinessSignDTO> jsonResult = businessSignFeignClient.repeatPaymentDetails(businessSignDTO);
     	request.setAttribute("businessSignDetail", jsonResult.getData());
     	request.setAttribute("signId", signId);
+			request.setAttribute("payModeItem", getDictionaryByCode(DicCodeEnum.PAYMODE.getCode()));
 		return "clue/repetition/repeatPaymentDetails";
     }
 

@@ -263,29 +263,32 @@ var orgId = [[${orgId}]];//当前用户机构
                             param.orgId = 1;
                             param.orgids = this.multipleSelection;
                         }
-                        console.log(formData.type.length)
-                        console.log(formData.type)
+                        // console.log(formData.type.length)
+                        // console.log(formData.type)
                         if(formData.type.length == 2){
                             param.type = 0;
                         }else{
                             param.type = formData.type[0];
                         }
 
-                        console.log("=---P----_---P----=")
-                        console.log(param)
+                        // console.log("=---P----_---P----=")
+                        // console.log(param)
 
 
                         axios.post("/ann/publishAnn", param)
                             .then(function (response) {
                                 if(response.data.code==0){
                                     vm.$message({type: 'success',message:'提交成功',duration:2000,onClose:function(){
+                                        vm.isDisabled = false;
                                         window.location.href = '/ann/annlistPage'
                                     }});
                                 }else{
                                     vm.$message.error(response.data.msg);
+                                    vm.isDisabled = false;
                                 }
                             })
                             .catch(function (error) {
+                                vm.isDisabled = false;
                                 console.log(error);
                             });
 

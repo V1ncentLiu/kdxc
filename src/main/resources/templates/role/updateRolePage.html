@@ -185,7 +185,7 @@
                 </li>
             </ul>
             <el-form-item style="text-align: center;">
-                <el-button type="primary" @click="submitFormRole('addRoleValidateForm')">提交</el-button>
+                <el-button type="primary" :disabled="btnDisabled" @click="submitFormRole('addRoleValidateForm')">提交</el-button>
                 <el-button @click="reBackRoleInfo">取消</el-button>
             </el-form-item>
         </el-form>
@@ -254,6 +254,7 @@
          el: '#addRole',
          data: function() {
             return {
+                btnDisabled: false,
                 isDisabled: false,
                 chooseLimitCheck: [],//默认选中
                 fields: [],
@@ -387,13 +388,15 @@
                          param.id=roleInfo.id;
                          param.menuIds=menuArry;
                          param.menuFileds=fieldMap;
+                         addRoleVM.btnDisabled = true;  
                          axios.post('/role/roleManager/updateRoleInfo',param).then(function (response) {
           		           if(null==response){
           		        	 addRoleVM.$message({
                                  message: "接口调用失败",
                                  type: 'error'
                                });
-          		                 return ;
+                                addRoleVM.btnDisabled = false;   
+                                return ;
           		            }
           		            var resobj= response.data;
           		            if(null==resobj){
@@ -401,18 +404,22 @@
                                     message: "接口调用失败",
                                     type: 'error'
                                   });
-          		                 return ;
+                                addRoleVM.btnDisabled = false;   
+                                return ;
           		            } 
           		            if(resobj.code!='0'){
           		            	addRoleVM.$message({
                                     message: "接口调用失败",
                                     type: 'error'
                                   });
+                                addRoleVM.btnDisabled = false;   
           		            	return ;
-          		            }
-          		             window.location.href="/role/roleManager/initRoleInfo"; 
+                              }
+                              addRoleVM.btnDisabled = false;   
+                              window.location.href="/role/roleManager/initRoleInfo"; 
           		            })
           		            .catch(function (error) {
+                              addRoleVM.btnDisabled = false;   
           		              console.log(error);
           		            })
           		            .then(function () {

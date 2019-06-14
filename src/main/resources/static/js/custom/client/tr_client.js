@@ -25,6 +25,7 @@ var clientVm = new Vue({
          uploadBtnDisabled:false,
          uploadErrorDialogVisible:false,//上传失败dialog
          uploadErrorData:[],//上传失败
+         orgTreeLoading:true,
          form:{//坐席form
         	 id:'',
         	 clientNo:'',
@@ -226,17 +227,18 @@ var clientVm = new Vue({
              .then(function (response) {
                  var resData = response.data;
                  if(resData.code=='0'){
-              	    clientVm.form = resData.data;                     
+                      clientVm.form = resData.data;  
+                      clientVm.confirmBtnDisabled=false;                 
                  }else{
-              	     clientVm.$message({message:'查询失败',type:'error'});
+                       clientVm.$message({message:'查询失败',type:'error'});
+                       clientVm.confirmBtnDisabled=false;
                      console.error(resData);
                  }
              
              })
              .catch(function (error) {
                   console.log(error);
-             }).then(function(){
-          	   clientVm.confirmBtnDisabled=false;//启用提交按钮
+                  clientVm.confirmBtnDisabled=false;//启用提交按钮
              });
         	 
          },
@@ -256,19 +258,20 @@ var clientVm = new Vue({
                        if(resData.code=='0'){
                     	   clientVm.cancelForm(formName);
                     	   clientVm.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
-                    		   clientVm.initClientData();
+                               clientVm.confirmBtnDisabled=false;
+                               clientVm.initClientData();
                      	    }});
                            
                        }else{
-                    	   clientVm.$message({message:'操作失败',type:'error'});
-                           console.error(resData);
+                           clientVm.$message({message:'操作失败',type:'error'});
+                           clientVm.confirmBtnDisabled=false;
+                        //    console.error(resData);
                        }
                    
                    })
                    .catch(function (error) {
-                        console.log(error);
-                   }).then(function(){
-                	   clientVm.confirmBtnDisabled=false;//启用提交按钮
+                       clientVm.confirmBtnDisabled=false;
+                       console.log(error);
                    });
                     
                  } else {
@@ -280,10 +283,11 @@ var clientVm = new Vue({
         	 
          },
          selectOrg(){//选择组织
-        	
-        	 this.$nextTick(() => {
+        	 this.orgTreeData = [];
+        	this.orgTreeLoading = true;
+        	/* this.$nextTick(() => {
         		 clientVm.$refs.orgTree.setCheckedKeys([]);//清空tree
-        		});
+        		});*/
         	 this.orgDialogVisible=true;
         	 axios.post('/organization/organization/query',{})
              .then(function (response) {
@@ -300,6 +304,7 @@ var clientVm = new Vue({
              .catch(function (error) {
                   console.log(error);
              }).then(function(){
+            	 clientVm.orgTreeLoading = false;
             	var selectedOrgId =  clientVm.form.orgId;
             	if(selectedOrgId){
             		var array = new Array();

@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+import org.apache.catalina.User;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.slf4j.Logger;
@@ -89,12 +90,17 @@ public class BusPendingAllocationController {
         // 查询所有商务经理
         List<Map<String, Object>> allSaleList = getAllSaleList();
         request.setAttribute("allSaleList", allSaleList);
+
+        Integer businessLine = null;
+        if(user.getBusinessLine() !=null){
+            businessLine = user.getBusinessLine();
+        }
         // 查询组织下商务经理
         List<Integer> statusList = new ArrayList<Integer>();
         statusList.add(SysConstant.USER_STATUS_ENABLE);
         statusList.add(SysConstant.USER_STATUS_LOCK);
         List<UserInfoDTO> saleList =
-                getUserList(user.getOrgId(), RoleCodeEnum.SWJL.name(), statusList);
+                getUserList(user.getOrgId(), RoleCodeEnum.SWJL.name(), statusList,businessLine);
         request.setAttribute("busSaleList", saleList);
         // 查询所有省
         JSONResult<List<SysRegionDTO>> getproviceList = sysRegionFeignClient.getproviceList();
@@ -225,6 +231,7 @@ public class BusPendingAllocationController {
      * @return
      */
     private List<Map<String, Object>> getAllSaleList() {
+        UserInfoDTO userInfo = getUser();
         // 查询所有商务组
         OrganizationQueryDTO queryDTO = new OrganizationQueryDTO();
         queryDTO.setOrgType(OrgTypeConstant.SWZ);
@@ -240,7 +247,11 @@ public class BusPendingAllocationController {
         List<Integer> statusList = new ArrayList<Integer>();
         statusList.add(SysConstant.USER_STATUS_ENABLE);
         statusList.add(SysConstant.USER_STATUS_LOCK);
-        List<UserInfoDTO> userList = getUserList(null, RoleCodeEnum.SWJL.name(), statusList);
+        Integer businessLine = null;
+        if(userInfo.getBusinessLine() !=null){
+            businessLine = userInfo.getBusinessLine();
+        }
+        List<UserInfoDTO> userList = getUserList(null, RoleCodeEnum.SWJL.name(), statusList,businessLine);
 
         Map<Long, OrganizationRespDTO> orgMap = new HashMap<Long, OrganizationRespDTO>();
         // 生成<机构id，机构>map
@@ -277,11 +288,14 @@ public class BusPendingAllocationController {
      * @param orgDTO
      * @return
      */
-    private List<UserInfoDTO> getUserList(Long orgId, String roleCode, List<Integer> statusList) {
+    private List<UserInfoDTO> getUserList(Long orgId, String roleCode, List<Integer> statusList,Integer businessLine) {
         UserOrgRoleReq userOrgRoleReq = new UserOrgRoleReq();
         userOrgRoleReq.setOrgId(orgId);
         userOrgRoleReq.setRoleCode(roleCode);
         userOrgRoleReq.setStatusList(statusList);
+        if(businessLine !=null){
+            userOrgRoleReq.setBusinessLine(businessLine);
+        }
         JSONResult<List<UserInfoDTO>> listByOrgAndRole =
                 userInfoFeignClient.listByOrgAndRole(userOrgRoleReq);
         return listByOrgAndRole.getData();

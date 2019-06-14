@@ -258,7 +258,7 @@
                 </el-form-item>
             </el-form>
             <div slot="footer" class="dialog-footer" style="text-align:center;">
-                <el-button type="primary" @click="reconciliationConfirm('rejectform')">确定</el-button>
+                <el-button type="primary" :disabled="btnDisabled" @click="reconciliationConfirm('rejectform')">确定</el-button>
                 <el-button @click="cancelReconciliationFrom('rejectform')">取消</el-button>
             </div>
         </template>
@@ -285,7 +285,7 @@
 	          </el-form-item>
           </el-form>
         <div slot="footer" style="text-align: center" class="dialog-footer">
-            <el-button type="primary" @click="settlementConfirm('apply')">提交</el-button>
+            <el-button type="primary" :disabled="btnDisabled" @click="settlementConfirm('apply')">提交</el-button>
             <el-button @click="cancelSubmitApplyFrom('apply')">取消</el-button>
         </div>
     </el-dialog>
@@ -305,10 +305,12 @@ var projectList=[[${projectList}]];//项目
 var fieldList=[[${fieldList}]];//自定义字段
 var userFieldList=[[${userFieldList}]];//用户自定义字段
 var vistitStoreTypeList=[[${vistitStoreTypeList}]];//签约店型
+var payModeItem =[[${payModeItem}]];
 var clueVM = new Vue({
         el: '#clueManage',
         data: {
           isShow:false,
+          btnDisabled: false,
       		searchForm: {
 	       		busAreaId: '',
 	       		busGroupId: '',
@@ -416,20 +418,23 @@ var clueVM = new Vue({
               allpyrules: {
                   money: [
                       {validator:function(rule,value,callback){
-                              if(value===0){
+                              if(value==0 || value=="0"){
                                   callback();
-                              }
-                              var reg =   /^[1-9]\d*$/; 
-                              if(value ==null || value =="null" || value ==""  ){
-                                  callback(new Error("请输入结算金额"));
-                                  clueVM.apply.money =null;
-
-                              }else  if(value !=null && value !="null" && value !="" && !reg.test(value) ){
-                                  callback(new Error("请输入正整数"));
-                                  clueVM.apply.money =null;
                               }else{
-                                  callback();
+                            	  var reg =   /^[1-9]\d*$/; 
+                                  if(value ==null || value =="null" || value ==""  ){
+                                      callback(new Error("请输入结算金额"));
+                                      clueVM.apply.money =null;
+
+                                  }else  if(value !=null && value !="null" && value !="" && !reg.test(value) ){
+                                      callback(new Error("请输入正整数"));
+                                      clueVM.apply.money =null;
+                                  }else{
+                                      callback();
+                                  } 
+                            	  
                               }
+                              
                           },required: true, trigger: 'change'}
                   ],
                   isDoubt: [
@@ -599,20 +604,23 @@ var clueVM = new Vue({
                  return text;
                },
                //付款方式转换方法
-               transformPayMode(row, column, cellValue, index) {
-                 var text="";
-                 if(cellValue=="1"){
-                   text="现金"
-                 }else if(cellValue=="2"){
-                   text="POS"
-                 }else if(cellValue=="3"){
-                   text="转账"
-                 }else if(cellValue=="4"){
-                   text="微信"
-                 }else if(cellValue=="5"){
-                   text="支付宝"
+               transformPayMode(row, column, value, index) {
+                 var valText="";
+                 var vals = value.split(",");
+                 if(payModeItem){
+                   for(var j = 0 ; j < vals.length;j++  ){
+                     for(var i = 0; i < payModeItem.length ; i++){
+                       if(payModeItem[i].value == vals[j]){
+                         if(j==0){
+                           valText += payModeItem[i].name;
+                         }else{
+                           valText += ","+payModeItem[i].name;
+                         }
+                       }
+                     }
+                   }
                  }
-                 return text;
+                 return valText;
                },
                //处理状态转换方法
                transformStatus(row, column, cellValue, index) {
@@ -711,14 +719,16 @@ var clueVM = new Vue({
            	               }
            	          //对账确认
        	            	var param  = {};
-          	           	  	param.idList=idList;
+                          param.idList=idList;
           	           		param.remark = this.rejectform.remark;
           	           		param.payDetailId=rows[0].payId;
-          	           	  	axios.post('/financing/balanceaccount/rejectApply',param)
+                          this.btnDisabled = true;  
+                          axios.post('/financing/balanceaccount/rejectApply',param)
                              .then(function (response) {
                                  var data =  response.data;
                                  if(response.status==200){
                                  	clueVM.$message({message:'驳回成功',type:'success',duration:1000,onClose:function(){
+                                    clueVM.btnDisabled = false; 
                                  		window.location.href="/financing/balanceaccount/balanceAccountPage";
                              	    }});
                                  }else{
@@ -726,10 +736,16 @@ var clueVM = new Vue({
                                          message: "接口调用失败",
                                          type: 'error'
                                        }); 
+                                       clueVM.btnDisabled = false; 
                                  }
                              })
                              .catch(function (error) {
                                console.log(error);
+                               clueVM.$message({
+                                  message: "驳回失败",
+                                  type: 'error'
+                                }); 
+                               clueVM.btnDisabled = false; 
                              })
                              .then(function () {
                              	
@@ -796,41 +812,43 @@ var clueVM = new Vue({
                settlementConfirm(form) {
             	   var rows = this.multipleSelection;
             	   this.$refs[form].validate((valid) => {
-                       if (valid) {
-                    	   var idList = [];
-           	               for(var i=0;i<rows.length;i++){
-           	            	   var curRow = rows[i];
-           	            	   idList.push(curRow.accountId);
-           	               } 
-	           	           var param  = {};
-	       	           	  param.idList=idList;
-	       	           	  param.money = clueVM.apply.money;
-		       	          param.isDoubt = clueVM.apply.isDoubt;
-		       	          param.doubtRemark = clueVM.apply.doubtRemark;
-		       	       param.ratio = clueVM.ratio;
-                          axios.post('/financing/balanceaccount/settlementConfirm',param)
-                          .then(function (response) {
-                              var data =  response.data;
-                              if(response.status==200){
-                              	clueVM.$message({message:'提交对账成功',type:'success',duration:1000,onClose:function(){
-                              		window.location.href="/financing/balanceaccount/balanceAccountPage";
-                          	    }});
-                              }else{
-                              	clueVM.$message({
-                                      message: "接口调用失败",
-                                      type: 'error'
-                                    }); 
-                              }
-                          })
-                          .catch(function (error) {
-                            console.log(error);
-                          })
-                          .then(function () {
-                          	
-                          });
-                       }
-            	   })
-        
+                    if (valid) {
+                      var idList = [];
+                        for(var i=0;i<rows.length;i++){
+                          var curRow = rows[i];
+                          idList.push(curRow.accountId);
+                        } 
+                      var param  = {};
+                      param.idList=idList;
+                      param.money = clueVM.apply.money;
+                      param.isDoubt = clueVM.apply.isDoubt;
+                      param.doubtRemark = clueVM.apply.doubtRemark;
+                      param.ratio = clueVM.ratio;
+
+                      this.btnDisabled = true;
+
+                      axios.post('/financing/balanceaccount/settlementConfirm',param)
+                        .then(function (response) {
+                            var data =  response.data;
+                            if(response.status==200){
+                              clueVM.$message({message:'提交对账成功',type:'success',duration:1000,onClose:function(){
+                                clueVM.btnDisabled = false;
+                                window.location.href="/financing/balanceaccount/balanceAccountPage";
+                              }});
+                            }else{
+                              clueVM.$message({
+                                message: "接口调用失败",
+                                type: 'error'
+                              }); 
+                              clueVM.btnDisabled = false;
+                            }
+                        })
+                        .catch(function (error) {
+                          console.log(error);
+                          clueVM.btnDisabled = false;
+                        });
+                      }
+            	    })
                },
                viewDoubt(row) {
                    // 查看疑意

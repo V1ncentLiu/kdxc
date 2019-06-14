@@ -474,9 +474,10 @@ var businessLineList=[[${businessLineList}]];//业务线集合
             submitForm(form) {
                 this.$refs[form].validate((valid) => {
                     if (valid) {
+                    	var form = JSON.parse(JSON.stringify(this.form)); 
                         // 开始时间不能大约结束时间
-                        var startTime=this.form.startTime;
-                        var endTime=this.form.endTime;
+                        var startTime=form.startTime;
+                        var endTime=form.endTime;
                         if(endTime && startTime>endTime){
                             this.$message({
                                 message: '结束时间不允许选择早于开始时间',
@@ -485,7 +486,7 @@ var businessLineList=[[${businessLineList}]];//业务线集合
                             return;
                         }
                         // 不能选择重复电销组
-                        var orgIdChoose=this.form.teleRuleTeamList; 
+                        var orgIdChoose=form.teleRuleTeamList; 
                         var ary=[];                   
                         for(var i=0;i<orgIdChoose.length;i++){
                         	var split=orgIdChoose[i].orgId.split(",");
@@ -506,7 +507,7 @@ var businessLineList=[[${businessLineList}]];//业务线集合
                             }
                         }
                         // 不能选择重复话务组
-                        orgIdChoose=this.form.trafficRuleTeamList; 
+                        orgIdChoose=form.trafficRuleTeamList; 
                         var ary=[];
                         for(var i=0;i<orgIdChoose.length;i++){
                         	var split=orgIdChoose[i].orgId.split(",");
@@ -526,37 +527,38 @@ var businessLineList=[[${businessLineList}]];//业务线集合
                                 }                                
                             }
                         }
-       	            	aorVM.submitDisabled=true;
-                        var param=this.form;
-                        param.ruleName=this.form.ruleName;
-                        param.startTime=this.form.startTime;
-                        param.endTime=this.form.endTime;
-                        param.status=this.form.status;
-                        param.teleList=this.form.teleRuleTeamList;
-                        param.trafficList=this.form.trafficRuleTeamList;
-                        param.source=this.form.source.join(',');
-                        param.industryCategory=this.form.industryCategory.join(',');
+                        var param=form;
+                        param.ruleName=form.ruleName;
+                        param.startTime=form.startTime;
+                        param.endTime=form.endTime;
+                        param.status=form.status;
+                        param.teleList=form.teleRuleTeamList;
+                        param.trafficList=form.trafficRuleTeamList;
+                        param.source=form.source.join(',');
+                        param.industryCategory=form.industryCategory.join(',');
                         param.category=this.form.category.join(',');
                         param.searchWord=this.tags1.join(',');
                         param.notSearchWord=this.tags2.join(',');
                         param.province=this.tags3.join(',');
                         param.notProvince=this.tags4.join(',');
+                        aorVM.submitDisabled=true;
                         axios.post('/clueAssignRule/optRule/save', param)
 	       	            .then(function (response) {
-	       	            	aorVM.submitDisabled=false;
-	       	            	console.info(response);
+                               console.info(response);
 	       	            	var data =response.data;
 	       	            	if(data.code!="0"){
-	       	            		aorVM.$message(data.msg);
+                                aorVM.$message(data.msg);
+                                aorVM.submitDisabled=false;
 	       	            	}else{
 	       	            		aorVM.$message({message:'提交成功',type:'success',duration:1000,onClose:function(){
+                                    aorVM.submitDisabled=false;
 		       	                	document.location.href='/clueAssignRule/optRule/initRuleList';
 	                      	    }});
 	       	            	}
 	       	            })
 	       	            .catch(function (error) {
 	       	            	aorVM.submitDisabled=false;
-	       	                 console.log(error);
+                            console.log(error);
 	       	            });
                     } else {
                         console.log('error submit!!');

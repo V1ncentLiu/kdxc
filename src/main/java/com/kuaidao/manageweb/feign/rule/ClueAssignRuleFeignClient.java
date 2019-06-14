@@ -62,6 +62,15 @@ public interface ClueAssignRuleFeignClient {
     @PostMapping("/delete")
     public JSONResult delete(@RequestBody IdListLongReq idList);
 
+    /**
+     * 复制规则
+     * 
+     * @param queryDTO
+     * @return
+     */
+    @PostMapping("/copy")
+    public JSONResult copy(@RequestBody ClueAssignRuleReq clueAssignRuleReq);
+
 
     /**
      * 根据id查询资源分配规则信息
@@ -130,6 +139,11 @@ public interface ClueAssignRuleFeignClient {
         @Override
         public JSONResult delete(IdListLongReq idList) {
             return fallBackError("删除资源分配规则");
+        }
+
+        @Override
+        public JSONResult copy(ClueAssignRuleReq clueAssignRuleReq) {
+            return fallBackError("复制规则");
         }
 
 

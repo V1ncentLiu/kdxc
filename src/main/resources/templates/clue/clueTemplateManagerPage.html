@@ -27,7 +27,7 @@
         <div class="mainSearchFormBox">
             <el-form :inline="true" :model="clueTemplateSearchForm" class="demo-form-inline mainSearchForm" ref="clueTemplateSearchForm">
             	  <el-form-item label="资源项目:" label-width="55px">
-                    <el-select v-model="clueTemplateSearchForm.clueProjectId" placeholder="资源项目" clearable>
+                    <el-select v-model="clueTemplateSearchForm.clueProjectId" placeholder="资源项目" clearable filterable>
                         <el-option
                             v-for="item in projectOptions"
                             :key="item.id"
@@ -37,7 +37,7 @@
                     </el-select>
                 </el-form-item>
                 <el-form-item label="媒介:" >
-                    <el-select v-model="clueTemplateSearchForm.source" placeholder="媒介" clearable>
+                    <el-select v-model="clueTemplateSearchForm.source" placeholder="媒介" clearable filterable>
                         <el-option
                             v-for="item in sourceOptions"
                             :key="item.value"
@@ -47,7 +47,7 @@
                     </el-select>
                 </el-form-item>
                 <el-form-item label="广告位:" >
-                    <el-select v-model="clueTemplateSearchForm.sourceType" placeholder="广告位" clearable>
+                    <el-select v-model="clueTemplateSearchForm.sourceType" placeholder="广告位" clearable filterable>
                         <el-option
                             v-for="item in sourceTypeOptions"
                             :key="item.value"
@@ -108,6 +108,9 @@
     <!-- dialog -->
     <el-dialog :title="addOrModifyDialogTitle" :visible.sync="dialogFormVisible" @close="closeAddCustomFieldDialog" width="540px">
         <el-form :model="clueTemplateForm" ref="clueTemplateForm" :rules="rules">
+            <el-form-item v-show="isShowPrompt" label="" :label-width="formLabelWidth" >
+                <span style="color: red;">有相同的资源模版，请勿重复提交！</span>
+            </el-form-item>
             <el-form-item label="模板名称：" :label-width="formLabelWidth" prop="name">
                 <el-input v-model="clueTemplateForm.name" autocomplete="off"  maxlength="20" style="width: 290px;"></el-input>
             </el-form-item>
@@ -181,6 +184,7 @@ var userId=[[${userId}]];//媒介集合
 var clueTemplateVM = new Vue({
         el: '#clueTemplateManage',
         data: {
+        	isShowPrompt:false,
             isShow:false,
         		clueTemplateSearchForm: {
 	        		name: '',
@@ -260,10 +264,12 @@ var clueTemplateVM = new Vue({
 	               		this.$refs['clueTemplateForm'].resetFields();
 	               	}
                   	this.dialogFormVisible = true;
+                  	this.isShowPrompt=false;
                   	this.addOrModifyDialogTitle="新建模板";
               },
               //跳转修改模板页
               toUpdateClueTemplate() {
+            	  this.isShowPrompt=false;
             	  var rows = this.multipleSelection;
                   if(rows.length!=1){
                       this.$message({
@@ -338,6 +344,7 @@ var clueTemplateVM = new Vue({
 	               	}
                },
                saveClueTemplate(formName){//保存自定义字段
+            	  this.isShowPrompt=false;
                   this.$refs[formName].validate((valid) => {
                       if (valid) {
                     	 clueTemplateVM.submitDisabled=true;
@@ -350,21 +357,25 @@ var clueTemplateVM = new Vue({
                          }
                         axios.post(url, param)
                         .then(function (response) {
-                        	clueTemplateVM.submitDisabled=false;
                             var resData = response.data;
                             if(resData.code=='0'){
                             	clueTemplateVM.cancelForm(formName);
                             	clueTemplateVM.$message({message:'提交成功',type:'success',duration:1000,onClose:function(){
+                                    clueTemplateVM.submitDisabled=false;
                             		clueTemplateVM.searchTable();
                           	    }});
+                            }else if(resData.code=='21916'){
+                            	clueTemplateVM.isShowPrompt=true;
+                                clueTemplateVM.submitDisabled=false;
                             }else{
                             	clueTemplateVM.$message('提交失败');
+                                clueTemplateVM.submitDisabled=false;
                                 console.error(resData);
                             }
                         })
                         .catch(function (error) {
                         	clueTemplateVM.submitDisabled=false;
-                             console.log(error);
+                            console.log(error);
                         });
                          
                       } else {

@@ -172,21 +172,23 @@ var fieldMenuVM = new Vue({
                           if(resData.code=='0'){
                         	  fieldMenuVM.cancelForm(formName);
                         	  fieldMenuVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
+                                  fieldMenuVM.confirmBtnDisabled=false;//启用提交按钮
                         		  fieldMenuVM.initCustomFiledMenu();
                         	    }});
                               
                           }else{
                               fieldMenuVM.$message('操作失败');
+                              fieldMenuVM.confirmBtnDisabled=false;//启用提交按钮
                               console.error(resData);
                           }
                       
                       })
                       .catch(function (error) {
-                    	
-                           console.log(error);
+                        fieldMenuVM.confirmBtnDisabled=false;//启用提交按钮
+                        console.log(error);
                       }).then(function(){
                     		//fieldMenuVM.$refs.confirmBtn.disabled=false;
-                    		fieldMenuVM.confirmBtnDisabled=false;//启用提交按钮
+                    		// fieldMenuVM.confirmBtnDisabled=false;//启用提交按钮
                       });
                        
                     } else {

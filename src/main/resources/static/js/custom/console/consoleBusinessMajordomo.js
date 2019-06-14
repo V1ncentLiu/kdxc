@@ -28,7 +28,7 @@ var mainDivVM = new Vue({
                 // {content:'公告3公告3公告3公告3公告3公告3公告3',id:3}
             ]
         },
-        // 待分配邀约来访客户
+        // 待分配邀约来访记录
         dataTable:[],
         multipleSelection:[],
         allocationForm: {
@@ -165,12 +165,12 @@ var mainDivVM = new Vue({
                 mainDivVM.workDay=response.data.data;
             });
         },
-        // 待分配邀约来访客户
+        // 待分配邀约来访记录
         searchTable() {
             var param ={};     
             axios.post('/console/console/pendingVisitListNoPage', param)
             .then(function (response) {
-                console.log('待分配邀约来访客户')
+                console.log('待分配邀约来访记录')
                 console.log(response.data)                
                 mainDivVM.dataTable= response.data.data;
             })
@@ -323,7 +323,7 @@ var mainDivVM = new Vue({
                     .then(function (response) {
                         var data =  response.data;
                         if(data.code=='0'){
-                            mainDivVM.$message({message:'分发成功',type:'success',duration:1000,onClose:function(){
+                            mainDivVM.$message({message:'分发成功',type:'success',duration:2000,onClose:function(){
                                 mainDivVM.allocationVisible = false;
                                 mainDivVM.searchTable();
                             }});
@@ -1024,7 +1024,7 @@ var mainDivVM = new Vue({
     created(){
         // 工作台
         this.initBoard();
-        // 待分配邀约来访客户
+        // 待分配邀约来访记录
         this.searchTable();
         // 待审签约记录
         this.initSignRecordData();

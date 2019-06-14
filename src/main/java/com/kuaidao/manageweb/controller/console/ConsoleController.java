@@ -1,11 +1,13 @@
 package com.kuaidao.manageweb.controller.console;
 
 import java.time.LocalTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
-
 import javax.servlet.http.HttpServletRequest;
-
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,14 +17,18 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
-
 import com.kuaidao.aggregation.constant.AggregationConstant;
 import com.kuaidao.aggregation.constant.AggregationConstant.DelFlag;
 import com.kuaidao.aggregation.dto.busmycustomer.BusMyCustomerRespDTO;
 import com.kuaidao.aggregation.dto.busmycustomer.MyCustomerParamDTO;
 import com.kuaidao.aggregation.dto.busmycustomer.SignRecordReqDTO;
 import com.kuaidao.aggregation.dto.busmycustomer.SignRecordRespDTO;
-import com.kuaidao.aggregation.dto.clue.*;
+import com.kuaidao.aggregation.dto.clue.BusPendingAllocationDTO;
+import com.kuaidao.aggregation.dto.clue.BusPendingAllocationPageParam;
+import com.kuaidao.aggregation.dto.clue.CustomerClueDTO;
+import com.kuaidao.aggregation.dto.clue.CustomerClueQueryDTO;
+import com.kuaidao.aggregation.dto.clue.PendingAllocationClueDTO;
+import com.kuaidao.aggregation.dto.clue.PendingAllocationCluePageParam;
 import com.kuaidao.aggregation.dto.console.BusinessConsolePanelRespDTO;
 import com.kuaidao.aggregation.dto.console.BusinessConsoleReqDTO;
 import com.kuaidao.aggregation.dto.console.BusinessDirectorConsolePanelRespDTO;
@@ -132,7 +138,7 @@ public class ConsoleController {
         String roleCode = roleInfoDTO.getRoleCode();
         String path = "";
 
-       if (RoleCodeEnum.DXCYGW.name().equals(roleCode)) {
+        if (RoleCodeEnum.DXCYGW.name().equals(roleCode)) {
             // 电销顾问
             path = "console/consoleTelemarketing";
         } else if (RoleCodeEnum.DXZJ.name().equals(roleCode)) {
@@ -157,7 +163,7 @@ public class ConsoleController {
             if (JSONResult.SUCCESS.equals(proJson.getCode())) {
                 request.setAttribute("proSelect", proJson.getData());
             }
-         // 查询赠送类型集合
+            // 查询赠送类型集合
             request.setAttribute("giveTypeList", getDictionaryByCode(Constants.GIVE_TYPE));
             path = "console/consoleBusinessManager";
         } else if (RoleCodeEnum.SWZJ.name().equals(roleCode)) {
@@ -182,55 +188,40 @@ public class ConsoleController {
             path = "console/consoleBusinessMajordomo";
         }
 
-        
-        
-  /*       if(type.equals("1")) {
-            path = "console/consoleTelemarketing";
-        }else if(type.equals("2")) {
-            List<Integer> statusList = new ArrayList<Integer>();
-            statusList.add(SysConstant.USER_STATUS_ENABLE);
-            statusList.add(SysConstant.USER_STATUS_LOCK);
-            List<UserInfoDTO> userList = getUserList(orgId, RoleCodeEnum.DXCYGW.name(), statusList);
-            request.setAttribute("saleList", userList);
-            // 查询字典类别集合
-            request.setAttribute("clueCategoryList", getDictionaryByCode(Constants.CLUE_CATEGORY));
-            // 查询字典类别集合
-            request.setAttribute("clueTypeList", getDictionaryByCode(Constants.CLUE_TYPE));
-            path="console/consoleTelMajordomo";
-        }else if(type.equals("3")) {
-            // 项目
-            ProjectInfoPageParam param = new ProjectInfoPageParam();
-            JSONResult<List<ProjectInfoDTO>> proJson = projectInfoFeignClient.listNoPage(param);
-            if(JSONResult.SUCCESS.equals(proJson.getCode())){
-                request.setAttribute("proSelect", proJson.getData());
-            }
 
-            path="console/consoleBusinessManager";
-        }else if(type.equals("4")) {
-            // 查询所有商务经理
-            List<Map<String, Object>> allSaleList = getAllSaleList();
-            request.setAttribute("allSaleList", allSaleList);
-         // 查询组织下商务经理
-            List<Integer> statusList = new ArrayList<Integer>();
-            statusList.add(SysConstant.USER_STATUS_ENABLE);
-            statusList.add(SysConstant.USER_STATUS_LOCK);
-            List<UserInfoDTO> saleList =
-                    getUserList(orgId, RoleCodeEnum.SWJL.name(), statusList);
-            request.setAttribute("busSaleList", saleList);
-            // 查询所有项目
-            JSONResult<List<ProjectInfoDTO>> listNoPage =
-                    projectInfoFeignClient.listNoPage(new ProjectInfoPageParam());
-            request.setAttribute("projectList", listNoPage.getData());
-            // 查询字典选址情况集合
-            request.setAttribute("optionAddressList", getDictionaryByCode(Constants.OPTION_ADDRESS));
-            // 查询字典店铺面积集合
-            request.setAttribute("storefrontAreaList", getDictionaryByCode(Constants.STOREFRONT_AREA));
-         // 查询字典投资金额集合
-            request.setAttribute("ussmList", getDictionaryByCode(Constants.USSM));
-            
-            path="console/consoleBusinessMajordomo";
-        }*/
-         
+
+        /*
+         * if(type.equals("1")) { path = "console/consoleTelemarketing"; }else if(type.equals("2"))
+         * { List<Integer> statusList = new ArrayList<Integer>();
+         * statusList.add(SysConstant.USER_STATUS_ENABLE);
+         * statusList.add(SysConstant.USER_STATUS_LOCK); List<UserInfoDTO> userList =
+         * getUserList(orgId, RoleCodeEnum.DXCYGW.name(), statusList);
+         * request.setAttribute("saleList", userList); // 查询字典类别集合
+         * request.setAttribute("clueCategoryList", getDictionaryByCode(Constants.CLUE_CATEGORY));
+         * // 查询字典类别集合 request.setAttribute("clueTypeList",
+         * getDictionaryByCode(Constants.CLUE_TYPE)); path="console/consoleTelMajordomo"; }else
+         * if(type.equals("3")) { // 项目 ProjectInfoPageParam param = new ProjectInfoPageParam();
+         * JSONResult<List<ProjectInfoDTO>> proJson = projectInfoFeignClient.listNoPage(param);
+         * if(JSONResult.SUCCESS.equals(proJson.getCode())){ request.setAttribute("proSelect",
+         * proJson.getData()); }
+         * 
+         * path="console/consoleBusinessManager"; }else if(type.equals("4")) { // 查询所有商务经理
+         * List<Map<String, Object>> allSaleList = getAllSaleList();
+         * request.setAttribute("allSaleList", allSaleList); // 查询组织下商务经理 List<Integer> statusList =
+         * new ArrayList<Integer>(); statusList.add(SysConstant.USER_STATUS_ENABLE);
+         * statusList.add(SysConstant.USER_STATUS_LOCK); List<UserInfoDTO> saleList =
+         * getUserList(orgId, RoleCodeEnum.SWJL.name(), statusList);
+         * request.setAttribute("busSaleList", saleList); // 查询所有项目 JSONResult<List<ProjectInfoDTO>>
+         * listNoPage = projectInfoFeignClient.listNoPage(new ProjectInfoPageParam());
+         * request.setAttribute("projectList", listNoPage.getData()); // 查询字典选址情况集合
+         * request.setAttribute("optionAddressList", getDictionaryByCode(Constants.OPTION_ADDRESS));
+         * // 查询字典店铺面积集合 request.setAttribute("storefrontAreaList",
+         * getDictionaryByCode(Constants.STOREFRONT_AREA)); // 查询字典投资金额集合
+         * request.setAttribute("ussmList", getDictionaryByCode(Constants.USSM));
+         * 
+         * path="console/consoleBusinessMajordomo"; }
+         */
+
         return path;
     }
 
@@ -313,7 +304,7 @@ public class ConsoleController {
         List<Integer> sourceList = new ArrayList<Integer>();
         sourceList.add(AggregationConstant.SALE_RECEIVE_SOURCE.SOURCE3);
         reqDTO.setSourceList(sourceList);
-        //type 1：日期字段用电销的
+        // type 1：日期字段用电销的
         reqDTO.setType(1);
         reqDTO.setPhase(CluePhase.PHAE_4TH.getCode());
         return clueBasicFeignClient.countAssignClueNum(reqDTO);
@@ -355,9 +346,11 @@ public class ConsoleController {
         Date curDate = new Date();
         queryDto.setAssignTimeStart(DateUtil.getStartOrEndOfDay(curDate, LocalTime.MIN));
         queryDto.setAssignTimeEnd(DateUtil.getStartOrEndOfDay(curDate, LocalTime.MAX));
-      /*  queryDto.setTeleSale(33336666L);
-        queryDto.setAssignTimeStart(DateUtil.convert2Date("2019-01-14 00:00:00", DateUtil.ymdhms));
-        queryDto.setAssignTimeEnd(DateUtil.convert2Date("2019-04-14 00:00:00", DateUtil.ymdhms));*/
+        /*
+         * queryDto.setTeleSale(33336666L); queryDto.setAssignTimeStart(DateUtil.convert2Date(
+         * "2019-01-14 00:00:00", DateUtil.ymdhms));
+         * queryDto.setAssignTimeEnd(DateUtil.convert2Date("2019-04-14 00:00:00", DateUtil.ymdhms));
+         */
         return myCustomerFeignClient.listTodayFollowClue(queryDto);
     }
 
@@ -374,11 +367,11 @@ public class ConsoleController {
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
         reqDTO.setTeleDirectorId(curLoginUser.getId());
         reqDTO.setPhase(CluePhase.PHAE_3RD.getCode());
-   /*     Date curDate = new Date();
-        reqDTO.setEndTime(curDate);
-        reqDTO.setStartTime(DateUtil.getTodayStartTime());
-        //type 为2 表示查询时字段用电销总监的时间字段 为1 用电销顾问时间字段
-        reqDTO.setType(2);*/
+        /*
+         * Date curDate = new Date(); reqDTO.setEndTime(curDate);
+         * reqDTO.setStartTime(DateUtil.getTodayStartTime()); //type 为2 表示查询时字段用电销总监的时间字段 为1
+         * 用电销顾问时间字段 reqDTO.setType(2);
+         */
         return clueBasicFeignClient.countAssignClueNum(reqDTO);
     }
 
@@ -505,14 +498,15 @@ public class ConsoleController {
             @RequestBody PendingAllocationCluePageParam pageParam) {
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
         pageParam.setUserId(curLoginUser.getId());
+        pageParam.setOrgId(curLoginUser.getOrgId());
         return clueBasicFeignClient.listUnAssignClue(pageParam);
     }
 
 
 
     /**
-     * 商务经理 看板统计
-     * 当月到访数  当月签约数 当月二次到访数  当月二次来访签约数  未收齐尾款笔数
+     * 商务经理 看板统计 当月到访数 当月签约数 当月二次到访数 当月二次来访签约数 未收齐尾款笔数
+     * 
      * @return
      */
     @RequestMapping("/countCurMonthNum")
@@ -531,7 +525,7 @@ public class ConsoleController {
 
 
     /**
-     * 商务经理控制台 待处理邀约来访客户
+     * 商务经理控制台 待处理邀约来访记录
      * 
      * @param param
      * @return
@@ -554,16 +548,16 @@ public class ConsoleController {
             * @param businessConsoleReqDTO
             * @return
             *//*
-                * @RequestMapping("/countCurMonthSignedNum")
-                * 
-                * @ResponseBody public JSONResult<BusinessConsolePanelRespDTO>
-                * countCurMonthSignedNum(@RequestBody BusinessConsoleReqDTO businessConsoleReqDTO){
-                * UserInfoDTO curLoginUser = CommUtil.getCurLoginUser(); List<Long> accountIdList =
-                * new ArrayList<Long>(); accountIdList.add(curLoginUser.getId()); Date curDate = new
-                * Date(); businessConsoleReqDTO.setEndTime(curDate);
-                * businessConsoleReqDTO.setStartTime(DateUtil.getCurStartDate()); return
-                * signRecordFeignClient.countCurMonthSignedNum(businessConsoleReqDTO); }
-                */
+              * @RequestMapping("/countCurMonthSignedNum")
+              * 
+              * @ResponseBody public JSONResult<BusinessConsolePanelRespDTO>
+              * countCurMonthSignedNum(@RequestBody BusinessConsoleReqDTO businessConsoleReqDTO){
+              * UserInfoDTO curLoginUser = CommUtil.getCurLoginUser(); List<Long> accountIdList =
+              * new ArrayList<Long>(); accountIdList.add(curLoginUser.getId()); Date curDate = new
+              * Date(); businessConsoleReqDTO.setEndTime(curDate);
+              * businessConsoleReqDTO.setStartTime(DateUtil.getCurStartDate()); return
+              * signRecordFeignClient.countCurMonthSignedNum(businessConsoleReqDTO); }
+              */
 
 
     /**
@@ -576,7 +570,7 @@ public class ConsoleController {
     public JSONResult<BusinessDirectorConsolePanelRespDTO> countBusinessDirectorCurMonthNum(
             @RequestBody BusinessConsoleReqDTO businessConsoleReqDTO) {
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
-    
+
         List<Long> businessGroupIdList = new ArrayList<>();
         businessGroupIdList.add(curLoginUser.getOrgId());
         // reqDTO.setBusinessGroupIdList(businessGroupIdList);
@@ -612,10 +606,12 @@ public class ConsoleController {
         req.setRoleCode(RoleCodeEnum.SWJL.name());
         JSONResult<List<UserInfoDTO>> userInfoJr = userInfoFeignClient.listByOrgAndRole(req);
         if (!JSONResult.SUCCESS.equals(userInfoJr.getCode())) {
-            logger.error("countBusiDirecotorTomorrowArriveTime  userInfoFeignClient.listByOrgAndRole({}),res{{}}",req,userInfoJr);
+            logger.error(
+                    "countBusiDirecotorTomorrowArriveTime  userInfoFeignClient.listByOrgAndRole({}),res{{}}",
+                    req, userInfoJr);
             return new JSONResult<Integer>().fail(userInfoJr.getCode(), userInfoJr.getMsg());
         }
-        logger.info("countBusiDirecotorTomorrowArriveTime UserOrgRoleReq_{} {{}}",id,userInfoJr);
+        logger.info("countBusiDirecotorTomorrowArriveTime UserOrgRoleReq_{} {{}}", id, userInfoJr);
         List<UserInfoDTO> data = userInfoJr.getData();
         if (CollectionUtils.isEmpty(data)) {
             return new JSONResult<Integer>().success(0);
@@ -649,7 +645,7 @@ public class ConsoleController {
         if (roleList != null) {
             pageParam.setRoleCode(roleList.get(0).getRoleCode());
         }
-        
+
         pageParam.setDelFalg(DelFlag.NOT_DEL);
 
         JSONResult<List<BusPendingAllocationDTO>> pendingAllocationList =
@@ -670,19 +666,21 @@ public class ConsoleController {
     public JSONResult<List<VisitRecordRespDTO>> listVisitRecord(
             @RequestBody VisitRecordReqDTO visitRecordReqDTO) {
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
-        /*List<Long> busGroupIdList = new ArrayList<>();
-        busGroupIdList.add(curLoginUser.getOrgId());
-        visitRecordReqDTO.setBusGroupIdList(busGroupIdList);*/
-        
-        List<Long> accountIdList = getAccountIdList(curLoginUser.getOrgId(), RoleCodeEnum.SWJL.name());
+        /*
+         * List<Long> busGroupIdList = new ArrayList<>();
+         * busGroupIdList.add(curLoginUser.getOrgId());
+         * visitRecordReqDTO.setBusGroupIdList(busGroupIdList);
+         */
+
+        List<Long> accountIdList =
+                getAccountIdList(curLoginUser.getOrgId(), RoleCodeEnum.SWJL.name());
         if (CollectionUtils.isEmpty(accountIdList)) {
-            return new JSONResult().fail(SysErrorCodeEnum.ERR_NOTEXISTS_DATA.getCode(),
-                    "该用户下没有下属");
+            return new JSONResult().fail(SysErrorCodeEnum.ERR_NOTEXISTS_DATA.getCode(), "该用户下没有下属");
         }
         visitRecordReqDTO.setBusManagerIdList(accountIdList);
         visitRecordReqDTO.setStatus(1);
-        //待审核
-        //visitRecordReqDTO.setVisitStatus(1);
+        // 待审核
+        // visitRecordReqDTO.setVisitStatus(1);
         return visitRecordFeignClient.listVisitRecordNoPage(visitRecordReqDTO);
     }
 
@@ -756,39 +754,39 @@ public class ConsoleController {
 
         Map<Long, OrganizationRespDTO> orgMap = new HashMap<Long, OrganizationRespDTO>();
         // 生成<机构id，机构>map
-        if(CollectionUtils.isNotEmpty(groupList)) {
+        if (CollectionUtils.isNotEmpty(groupList)) {
             for (OrganizationRespDTO org : groupList) {
                 orgMap.put(org.getId(), org);
             }
         }
-      
-        if(CollectionUtils.isNotEmpty(busAreaLsit)) {
-              for (OrganizationRespDTO org : busAreaLsit) {
-                  orgMap.put(org.getId(), org);
-              }
-        }
-   
-        List<Map<String, Object>> result = new ArrayList<Map<String, Object>>();
-        // 生成结果集，匹配电销组以及电销总监
-        if(CollectionUtils.isNotEmpty(userList)) {
-            for (UserInfoDTO user : userList) {
-            Map<String, Object> resultMap = new HashMap<String, Object>();
-            OrganizationRespDTO group = orgMap.get(user.getOrgId());
-            if (group != null) {
-                OrganizationRespDTO area = orgMap.get(group.getParentId());
-                resultMap.put("id", user.getId().toString());
-                if (area != null) {
-                    resultMap.put("name",
-                            user.getName() + "(" + area.getName() + "--" + group.getName() + ")");
-                } else {
-                    resultMap.put("name", user.getName() + "(" + group.getName() + ")");
 
-                }
-                result.add(resultMap);
+        if (CollectionUtils.isNotEmpty(busAreaLsit)) {
+            for (OrganizationRespDTO org : busAreaLsit) {
+                orgMap.put(org.getId(), org);
             }
         }
+
+        List<Map<String, Object>> result = new ArrayList<Map<String, Object>>();
+        // 生成结果集，匹配电销组以及电销总监
+        if (CollectionUtils.isNotEmpty(userList)) {
+            for (UserInfoDTO user : userList) {
+                Map<String, Object> resultMap = new HashMap<String, Object>();
+                OrganizationRespDTO group = orgMap.get(user.getOrgId());
+                if (group != null) {
+                    OrganizationRespDTO area = orgMap.get(group.getParentId());
+                    resultMap.put("id", user.getId().toString());
+                    if (area != null) {
+                        resultMap.put("name", user.getName() + "(" + area.getName() + "--"
+                                + group.getName() + ")");
+                    } else {
+                        resultMap.put("name", user.getName() + "(" + group.getName() + ")");
+
+                    }
+                    result.add(resultMap);
+                }
+            }
         }
-  
+
         return result;
     }
 
@@ -816,8 +814,8 @@ public class ConsoleController {
         }
 
         Date createTime = data.getCreateTime();
-        int diffDay = DateUtil.diffDay(createTime, new Date())+1;
-        return new JSONResult<String>().success(diffDay+"");
+        int diffDay = DateUtil.diffDay(createTime, new Date()) + 1;
+        return new JSONResult<String>().success(diffDay + "");
 
     }
 

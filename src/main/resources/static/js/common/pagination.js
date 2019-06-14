@@ -1,14 +1,21 @@
 var paginationTempate= '<div>' 
      +  '<el-pagination @size-change="handleSizeChange" background  '
      +  '        @current-change="handleCurrentChange" :current-page="pager.currentPage" '
-     +  '       :page-sizes="[3, 20, 50, 100]" :page-size="pager.pageSize" '
+     +  '       :page-sizes="papernum" :page-size="pager.pageSize" '
      +  '           layout="total, sizes, prev, pager, next, jumper" :total="pager.total"> '
      +  '       </el-pagination>'
      +'</div>'
 
 Vue.component('table-pagination',{
     template:paginationTempate,
-    props:['pager'],
+    // props:['pager'],
+    props:{
+      pager: Object,
+      papernum: {
+        type: Array,
+        default: () => [20, 50, 100]
+      },
+    },
     computed: {
        total() {
           return this.pager.total;
