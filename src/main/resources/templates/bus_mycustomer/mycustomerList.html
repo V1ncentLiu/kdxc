@@ -159,7 +159,7 @@
                 <template slot-scope="scope">
                     <!--<el-button size="mini"  v-if="(scope.row.visitStatus == -1||scope.row.visitStatus == null)&&scope.row.visitAuditStatus==null" type="text" @click="openEditVisitRecord(scope.row)">添加到访记录</el-button>-->
                     <el-button size="mini" v-if="scope.row.visitList.length==0" type="text"
-                               @click="openEditVisitRecord(scope.row)">添加到访记录
+                               @click.stop="openEditVisitRecord(scope.row)">添加到访记录
                     </el-button>
                     <div v-else-if="scope.row.visitList.length==1" v-for="item in scope.row.visitList ">
                         <!--<el-button size="mini"  v-if="scope.row.visitStatus==0" type="text" @click="showNotVisitReason(scope.row)">未到访(原因)</el-button>-->
@@ -1755,6 +1755,8 @@
                 allocateTime2: "",
                 isTailMoney: '',
             },
+            storeId: '',
+            scrollTop: 0,//表格滚动位置
             addVisitRecord: {
                 clueId: "",
                 companyid: "",
@@ -2386,7 +2388,8 @@
                 this.setSessionStore("myCustomerListStoreForm", this.storeForm);
                 var otherVal = {
                     "currentPage": this.pager.currentPage,
-                    "clueId": clueId
+                    "clueId": clueId,
+                    "scrollTop": this.$el.querySelector('.el-table__body-wrapper').scrollTop
                 }
                 this.setSessionStore("myCustomerListOtherVal", otherVal);
                 // 存储选中信息--end
@@ -2400,7 +2403,8 @@
                 this.setSessionStore("myCustomerListStoreForm", this.storeForm);
                 var otherVal = {
                     "currentPage": this.pager.currentPage,
-                    "clueId": clueId
+                    "clueId": clueId,
+                    "scrollTop": this.$el.querySelector('.el-table__body-wrapper').scrollTop
                 }
                 this.setSessionStore("myCustomerListOtherVal", otherVal);
                 // 存储选中信息--end
@@ -2675,7 +2679,8 @@
                 this.setSessionStore("myCustomerListStoreForm", this.storeForm);
                 var otherVal = {
                     "currentPage": this.pager.currentPage,
-                    "clueId": clueId
+                    "clueId": clueId,
+                    "scrollTop": this.$el.querySelector('.el-table__body-wrapper').scrollTop
                 }
                 this.setSessionStore("myCustomerListOtherVal", otherVal);
                 // 存储选中信息--end
@@ -3007,7 +3012,8 @@
                 this.setSessionStore("myCustomerListStoreForm", this.storeForm);
                 var otherVal = {
                     "currentPage": this.pager.currentPage,
-                    "clueId": clueId
+                    "clueId": clueId,
+                    "scrollTop": this.$el.querySelector('.el-table__body-wrapper').scrollTop
                 }
                 this.setSessionStore("myCustomerListOtherVal", otherVal);
                 // 存储选中信息--end
@@ -3019,7 +3025,8 @@
                 this.setSessionStore("myCustomerListStoreForm", this.storeForm);
                 var otherVal = {
                     "currentPage": this.pager.currentPage,
-                    "clueId": clueId
+                    "clueId": clueId,
+                    "scrollTop": this.$el.querySelector('.el-table__body-wrapper').scrollTop
                 }
                 this.setSessionStore("myCustomerListOtherVal", otherVal);
                 // 存储选中信息--end
@@ -3186,6 +3193,7 @@
                                         }
                                     })
                                     mainDivVM.toggleSelection(storage);
+                                    mainDivVM.$el.querySelector('.el-table__body-wrapper').scrollTop = mainDivVM.scrollTop;
                                 })
                             }
                          }else{
@@ -3257,9 +3265,10 @@
                 var storeVal = this.getSessionStore("myCustomerListStoreForm");
                 var otherVal = this.getSessionStore("myCustomerListOtherVal");
                 if(storeVal && otherVal){
-                    this.form = storeVal;
+                    this.queryForm = storeVal;
                     this.$set(this.pager,"currentPage",otherVal.currentPage);
                     this.storeId = otherVal.clueId;
+                    this.scrollTop = otherVal.scrollTop;
                 }
             };
             //初始化数据列表
