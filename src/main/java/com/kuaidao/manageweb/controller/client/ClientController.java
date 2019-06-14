@@ -339,15 +339,18 @@ public class ClientController {
                  // 坐席号
                     rowDto.setClientNo(value);
                 } else if (j == 1) {
-                 // 点小组
-                    rowDto.setOrgName(value);
+                 //坐席归属地
+                    rowDto.setAttribution(value);
                 } else if (j == 2) {
-                 // 绑定电话
-                    rowDto.setBindPhone(value);
+                    // 电销组
+                    rowDto.setOrgName(value);
                 } else if (j == 3) {
+                    // 绑定电话
+                    rowDto.setBindPhone(value);
+                } else if (j == 4) {
                     // 回显号
                     rowDto.setDisplayPhone(value);
-                } else if (j == 4) {
+                } else if (j == 5) {
                     // 回呼号码
                     rowDto.setCallbackPhone(value);
                 }

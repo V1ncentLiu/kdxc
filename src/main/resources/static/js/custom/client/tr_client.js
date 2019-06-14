@@ -28,6 +28,7 @@ var clientVm = new Vue({
          form:{//坐席form
         	 id:'',
         	 clientNo:'',
+             attribution:'',
         	 bindPhone:'',
         	 displayPhone:'',
         	 orgId:'',
