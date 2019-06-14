@@ -139,6 +139,11 @@ public class ExtendClueDistributionedTaskController {
                     idList.add(userInfoDTO.getId());
                 }
             }
+            // 自己组织内的人
+            List<UserInfoDTO> userList = getUserList(user.getOrgId(), null, null);
+            for (UserInfoDTO userInfoDTO : userList) {
+                idList.add(userInfoDTO.getId());
+            }
         } else if (RoleCodeEnum.GLY.name().equals(roleInfoDTO.getRoleCode())) {
             idList = null;
         } else {
@@ -201,6 +206,11 @@ public class ExtendClueDistributionedTaskController {
                     idList.add(userInfoDTO.getId());
                 }
             }
+            // 自己组织内的人
+            List<UserInfoDTO> userList = getUserList(user.getOrgId(), null, null);
+            for (UserInfoDTO userInfoDTO : userList) {
+                idList.add(userInfoDTO.getId());
+            }
         } else if (RoleCodeEnum.GLY.name().equals(roleInfoDTO.getRoleCode())) {
             idList = null;
         }
@@ -241,10 +251,10 @@ public class ExtendClueDistributionedTaskController {
                 curList.add(taskDTO.getTeleDirectorName()); // 电销组总监
                 curList.add(taskDTO.getTeleGorupName()); // 电销组
                 String flag = null;
-                if(taskDTO.getIsRepeatPhone()!=null){
-                    if(taskDTO.getIsRepeatPhone()==0){
+                if (taskDTO.getIsRepeatPhone() != null) {
+                    if (taskDTO.getIsRepeatPhone() == 0) {
                         flag = "否";
-                    }else{
+                    } else {
                         flag = "是";
                     }
                 }
@@ -313,6 +323,11 @@ public class ExtendClueDistributionedTaskController {
                     idList.add(userInfoDTO.getId());
                 }
             }
+            // 自己组织内的人
+            List<UserInfoDTO> userList = getUserList(user.getOrgId(), null, null);
+            for (UserInfoDTO userInfoDTO : userList) {
+                idList.add(userInfoDTO.getId());
+            }
         } else if (RoleCodeEnum.GLY.name().equals(roleInfoDTO.getRoleCode())) {
             idList = null;
         }
@@ -343,19 +358,19 @@ public class ExtendClueDistributionedTaskController {
                 curList.add(taskDTO.getTeleSaleName()); // 电销顾问
                 // 这两个要进行转换
                 String isCall = null;
-                if(taskDTO.getIsCall()!=null){
-                    if(taskDTO.getIsCall()==1){
+                if (taskDTO.getIsCall() != null) {
+                    if (taskDTO.getIsCall() == 1) {
                         isCall = "是";
-                    }else{
+                    } else {
                         isCall = "否";
                     }
                 }
                 curList.add(isCall); // 是否接通
                 String status = null;
-                if(taskDTO.getStatus()!=null){
-                    if(taskDTO.getStatus()==1){
+                if (taskDTO.getStatus() != null) {
+                    if (taskDTO.getStatus() == 1) {
                         status = "是";
-                    }else{
+                    } else {
                         status = "否";
                     }
                 }
