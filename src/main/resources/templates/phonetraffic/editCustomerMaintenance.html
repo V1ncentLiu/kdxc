@@ -18,7 +18,7 @@
     <el-row class="borderbox">
         <div class="inforTitle">维护客户</div>
         <el-form :model="form" :rules="rules" ref="form" class="padding20">
-            <div class="marginB20 fs16 paddingT20">资源信息</div>
+            <div class="marginB20 fs16 paddingT20">资源信息 <span style="padding-left: 20px; color: red;">资源ID{{clueId}}  </span> </div>
             <div class="borderbox padding20">
                 <el-row>
                     <el-col :span="8">
@@ -39,25 +39,25 @@
                         </el-form-item>
                     </el-col>
                 </el-row>
-                <el-row>
-                    <el-col :span="8">
-                        <el-form-item
-                                label="广告位：" :label-width="formLabelWidth">
-                            <el-button
-                                    type="text" disabled>{{clueBase.sourceTypeName}}
-                            </el-button>
-                        </el-form-item>
-                    </el-col>
-                    <el-col
-                            :span="8">
-                        <el-form-item label="媒介："
-                                      :label-width="formLabelWidth">
-                            <el-button type="text"
-                                       disabled>{{clueBase.sourceName}}
-                            </el-button>
-                        </el-form-item>
-                    </el-col>
-                </el-row>
+                <!--<el-row>-->
+                    <!--<el-col :span="8">-->
+                        <!--<el-form-item-->
+                                <!--label="广告位：" :label-width="formLabelWidth">-->
+                            <!--<el-button-->
+                                    <!--type="text" disabled>{{clueBase.sourceTypeName}}-->
+                            <!--</el-button>-->
+                        <!--</el-form-item>-->
+                    <!--</el-col>-->
+                    <!--<el-col-->
+                            <!--:span="8">-->
+                        <!--<el-form-item label="媒介："-->
+                                      <!--:label-width="formLabelWidth">-->
+                            <!--<el-button type="text"-->
+                                       <!--disabled>{{clueBase.sourceName}}-->
+                            <!--</el-button>-->
+                        <!--</el-form-item>-->
+                    <!--</el-col>-->
+                <!--</el-row>-->
                 <el-row>
                     <el-col :span="8">
                         <el-form-item
@@ -441,9 +441,9 @@
             <div class="marginB20 fs16 paddingT20">跟进记录</div>
             <el-row class="marginB10">
                 <el-col :span="16" class="paddingTB">
-                    <el-button
-                            size="small" type="danger" @click="deteleTracking">删除
-                    </el-button>
+                    <!--<el-button-->
+                            <!--size="small" type="danger" @click="deteleTracking">删除-->
+                    <!--</el-button>-->
                     <el-button
                             size="small" type="primary" @click="editRecord">编辑
                     </el-button>
@@ -451,7 +451,7 @@
                 <el-col
                         :span="4" :offset="4" class="f-tar">
                     <el-button size="small"
-                               type="primary" @click="lineFormShowFun">添加
+                               type="primary" @click="lineFormShowFun"><span v-if="lineFormShow">取消添加</span><span v-else>添加</span>
                     </el-button> <!-- <el-button size="small" type="primary" @click="addRecord">添加</el-button> -->
                 </el-col>
             </el-row>
@@ -515,7 +515,7 @@
                                     class="paddingL55">
                                 <el-form-item prop="callTime">
                                     <el-date-picker v-model="formInline.callTime" type="datetime"
-                                                    size="mini" placeholder="选择日期时间"></el-date-picker>
+                                                    size="mini" placeholder="选择日期时间"  :default-value="timeDefaultShow" :picker-options="expireTimeOption"></el-date-picker>
                                 </el-form-item>
                                 <el-form-item
                                         label="" size="mini">
@@ -571,12 +571,12 @@
                                             format="yyyy-MM-dd HH:mm" size="mini" placeholder="选择日期时间">
                                     </el-date-picker>
                                 </el-form-item>
-                                <el-form-item class="lineInherit">
-                                    <el-button
-                                            type="primary" size="mini" @click="onConfirmAdd" :disabled="addBtnDisabled">
-                                        确认添加
-                                    </el-button>
-                                </el-form-item>
+                                <!--<el-form-item class="lineInherit">-->
+                                    <!--<el-button-->
+                                            <!--type="primary" size="mini" @click="onConfirmAdd" :disabled="addBtnDisabled">-->
+                                        <!--确认添加-->
+                                    <!--</el-button>-->
+                                <!--</el-form-item>-->
                             </el-row>
                         </el-form>
                     </div>
@@ -642,7 +642,7 @@
                     <el-table-column prop="createTime" label="开始服务时间" align="center"></el-table-column>
                 </el-table>
                 <div class="padding20 f-tac">
-                    <el-button type="primary" :disabled="btnDisabled" @click="saveClue('form')">提交</el-button>
+                    <el-button type="primary" :disabled="btnDisabled" @click="saveClue('form')">仅保存</el-button>
                     <el-button type="success" :disabled="btnDisabled" v-show="showButtonToTele" @click="saveClue('form','toTele')">转电销</el-button>
                     <el-button @click="rebackClue">取 消</el-button>
                 </div>
@@ -916,7 +916,7 @@
     var ossUrl = [[${ossUrl}]];
     var callRecord = [[${callRecord}]];//通话记录
     var loginUserId=[[${loginUserId}]];
-
+    var teleEndTime = [[${teleEndTime}]];
     var showButtonToTele = true;
     if(base.phCustomerStatus==4||base.phase>2){
         showButtonToTele = false;
@@ -927,7 +927,15 @@
         data: function () {
             return {
                 audioShow:false,
-            	loginUserId:loginUserId,
+                expireTimeOption: {
+                    disabledDate(date) { //disabledDate 文档上：设置禁用状态，参数为当前日期，要求返回 Boolean
+                        return date.getTime() <= Date.now() - 8.64e7 || date.getTime() >= Date.now();
+                    }
+                },
+                clueId: clueId,
+                teleEndTime:teleEndTime,
+                timeDefaultShow:new Date(),
+                loginUserId:loginUserId,
                 showButtonToTele:showButtonToTele,
                 customerStatusRequired:false,
                 isShowTip: false,//是否显示释放公有池提示信息
@@ -1003,12 +1011,12 @@
                     customerName: [
                         {required: true, message: '客户姓名不能为空', trigger: 'change'}
                     ],
-                    province: [
-                        {required: true, message: '开店区域省份不能为空', trigger: 'change'}
-                    ],
-                    city: [
-                        {required: true, message: '开店区域城市不能为空', trigger: 'change'}
-                    ],
+                    // province: [
+                    //     {required: true, message: '开店区域省份不能为空', trigger: 'change'}
+                    // ],
+                    // city: [
+                    //     {required: true, message: '开店区域城市不能为空', trigger: 'change'}
+                    // ],
                     customerAge:[
                         { validator:function(rule,value,callback){
                                 var reg =  /^[1-9]+[0-9]*]*$/ ;
@@ -1125,7 +1133,7 @@
                 lineFormShow: false,
                 formInline: {
                     id: '',
-                    callTime: '',
+                    callTime: teleEndTime,
                     customerStatus: '1',
                     isCall: '',
                     resourceStatus: '',
@@ -1141,7 +1149,11 @@
         },
         methods: {
             lineFormShowFun(){
-                this.lineFormShow=true
+                if(this.lineFormShow){
+                    this.lineFormShow = false
+                }else{
+                    this.lineFormShow = true
+                }
                 // 跟进记录初始化
                 this.$refs.LineRuleForm.resetFields(); //移除校验结果并重置字段值
                 this.formInline.customerStatus='';
@@ -1208,19 +1220,26 @@
             },
 
             saveClue(form,flag){
+                // if (this.lineFormShow) { // 如果存在编辑/新增操作 进行跟进记录校验
+                //     this.$refs['LineRuleForm'].validate((error) => {
+                //         valid = error;
+                //     });
+                // }
 
-
-                if( this.form.radioProject == 1){ // 内部项目
-                    if(!this.form.insideProject){
-                        this.$message.error('请填写意向项目');
-                        return false;
-                    }
-                }else  if( this.form.radioProject == 2){ // 外部项目
-                    if(!this.form.outsideProject){
-                        this.$message.error('请填写意向项目');
-                        return false;
+                if(flag=="toTele"){ // 仅保存时候不需要对 意向项目进行必填验证
+                    if( this.form.radioProject == 1){ // 内部项目
+                        if(!this.form.insideProject){
+                            this.$message.error('请填写意向项目');
+                            return false;
+                        }
+                    }else  if( this.form.radioProject == 2){ // 外部项目
+                        if(!this.form.outsideProject){
+                            this.$message.error('请填写意向项目');
+                            return false;
+                        }
                     }
                 }
+
                 // 客户状态 == 不跟进 提示： 不跟进客户将被释放
                 var trackRow = addCustomerVM.tableDataC2[addCustomerVM.tableDataC2.length-1];
 
@@ -1579,184 +1598,46 @@
                 // isEdit = true;
             },
             onConfirmAdd(index ,row) {
-                var _this = this;
+                var flag = false;
                 this.$refs['LineRuleForm'].validate((valid) => {
-                    if (valid) {
-                        //start
-                        //跟进记录保存
-                        var param={};
-                        param.clueId=clueId;
-                        var callTime=this.formInline.callTime;
-                        if(typeof(callTime)=='string'){
-                            param.callTime=new Date(Date.parse(callTime.replace(/-/g, "/")));
-                        }else{
-                            param.callTime=this.formInline.callTime;
-                        }
+                    flag = valid;
+                })
 
-                        param.customerStatus=this.formInline.customerStatus;
-                        param.isCall=this.formInline.isCall;
-                        param.resourceStatus=this.formInline.resourceStatus;
-                        param.focusPoint=this.formInline.focusPoint;
-                        // param.visitStatus=this.formInline.visitStatus;
-                        var nextVisitTime=this.formInline.nextVisitTime;
-                        if(typeof(nextVisitTime)=='string'){
-                            param.nextVisitTime=new Date(Date.parse(nextVisitTime.replace(/-/g, "/")));
-                        }else{
-                            param.nextVisitTime=this.formInline.nextVisitTime;
-                        }
-
-                        if(this.formInline.customerStatus=='3'||this.formInline.customerStatus=='2'){//如果选择的是不跟进/跟进在传此字段
-                            param.customerStatusSub=this.formInline.customerStatusSub;
-                        }
-
-                        this.addBtnDisabled=true;
-                        /*               if(param.customerStatus=='3'&&param.customerStatusSub=='1'){
-                                             this.$confirm("客户不跟进空号将释放废弃池，我的客户列表将消失", '提示', {
-                                                 confirmButtonText: '确定',
-                                                 cancelButtonText: '取消',
-                                                 type: 'warning'
-                                             }).then(() => {
-                                                 //如果是编辑跟进记录
-                                                 if( isEdit){
-                                                     param.id=this.formInline.id;
-                                                     axios.post('/tele/clueMyCustomerInfo/updateClueTracking',param)
-                                                     .then(function (response) {
-                                                         addCustomerVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
-                                                           axios.post('/tele/clueMyCustomerInfo/findClueTracking',param)
-                                                        .then(function (response) {
-                                                            isEdit=false;
-                                                            addCustomerVM.lineFormShow=false;
-                                                            addCustomerVM.addBtnDisabled=false;
-                                                         addCustomerVM.tableDataC2=response.data.data;
-                                                         window.location.href = "/tele/clueMyCustomerInfo/initmyCustomer";
-                                                         });
-                                                      }});
-                                                     });
-                                                 }else{
-                                                     //如果是新增跟进记录
-                                                     axios.post('/tele/clueMyCustomerInfo/saveClueTracking',param)
-                                                     .then(function (response) {
-                                                         addCustomerVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
-                                                           axios.post('/tele/clueMyCustomerInfo/findClueTracking',param)
-                                                        .then(function (response) {
-                                                            addCustomerVM.lineFormShow=false;
-                                                              addCustomerVM.addBtnDisabled=false;
-                                                             addCustomerVM.tableDataC2=response.data.data;
-                                                            window.location.href = "/tele/clueMyCustomerInfo/initmyCustomer";
-                                                             //新增
-                                                             _this.$refs['LineRuleForm'].resetFields();
-                                                         });
-                                                      }});
-                                                   });
-                                               }
-                                               //end
-                                             }).catch(() => {
-                                                 addCustomerVM.addBtnDisabled=false;
-                                                 this.$message({
-                                                     type: 'info',
-                                                     message: '已取消操作'
-                                                 });
-                                             });
-
-
-
-
-                                      }else if(param.customerStatus=='3'){
-                                          this.$confirm("客户不跟进将释放公有池，我的客户列表将消失", '提示', {
-                                              confirmButtonText: '确定',
-                                              cancelButtonText: '取消',
-                                              type: 'warning'
-                                          }).then(() => {
-
-                                              //如果是编辑跟进记录
-                                              if( isEdit){
-                                                  param.id=this.formInline.id;
-                                                  axios.post('/tele/clueMyCustomerInfo/updateClueTracking',param)
-                                                  .then(function (response) {
-                                                      addCustomerVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
-                                                        axios.post('/tele/clueMyCustomerInfo/findClueTracking',param)
-                                                     .then(function (response) {
-                                                         isEdit=false;
-                                                        addCustomerVM.lineFormShow=false;
-                                                        addCustomerVM.addBtnDisabled=false;
-                                                          addCustomerVM.tableDataC2=response.data.data;
-                                                       window.location.href = "/tele/clueMyCustomerInfo/initmyCustomer";
-                                                      });
-                                                   }});
-                                                  });
-                                              }else{
-                                                  //如果是新增跟进记录
-                                                  axios.post('/tele/clueMyCustomerInfo/saveClueTracking',param)
-                                                  .then(function (response) {
-                                                      addCustomerVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
-                                                        axios.post('/tele/clueMyCustomerInfo/findClueTracking',param)
-                                                     .then(function (response) {
-                                                         addCustomerVM.lineFormShow=false;
-                                                           addCustomerVM.addBtnDisabled=false;
-                                                          addCustomerVM.tableDataC2=response.data.data;
-                                                          //新增
-                                                          _this.$refs['LineRuleForm'].resetFields();
-                                                        window.location.href = "/tele/clueMyCustomerInfo/initmyCustomer";
-
-                                                      });
-                                                   }});
-                                                });
-                                              }
-                                            //end
-
-                                          }).catch(() => {
-                                              addCustomerVM.addBtnDisabled=false;
-                                              this.$message({
-                                                  type: 'info',
-                                                  message: '已取消操作'
-                                              });
-                                          });
-
-                                      }else{ */
-                        //如果是编辑跟进记录
-                        if( isEdit){
-                            param.id=this.formInline.id;
-                            param.stage = 1; // 新增时候指明当前跟进记录为话务
-                            axios.post('/tele/clueMyCustomerInfo/updateClueTracking',param)
-                                .then(function (response) {
-                                    addCustomerVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
-                                            axios.post('/tele/clueMyCustomerInfo/findClueTracking',param)
-                                                .then(function (response) {
-                                                    isEdit=false;
-                                                    addCustomerVM.lineFormShow=false;
-                                                    addCustomerVM.addBtnDisabled=false;
-                                                    addCustomerVM.tableDataC2=response.data.data;
-                                                });
-                                        }});
-                                }).catch(function(){
-                                    addCustomerVM.addBtnDisabled=false;
-                                });
-                        }else{
-                            //如果是新增跟进记录
-                            param.stage = 1; // 新增时候指明当前跟进记录为话务
-                            axios.post('/tele/clueMyCustomerInfo/saveClueTracking',param)
-                                .then(function (response) {
-                                    addCustomerVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
-                                            axios.post('/tele/clueMyCustomerInfo/findClueTracking',param)
-                                                .then(function (response) {
-                                                    addCustomerVM.lineFormShow=false;
-                                                    addCustomerVM.addBtnDisabled=false;
-                                                    addCustomerVM.tableDataC2=response.data.data;
-                                                    //新增
-                                                    _this.$refs['LineRuleForm'].resetFields();
-                                                }).catch(function(error){
-                                                    addCustomerVM.addBtnDisabled=false;
-                                            });
-                                        }});
-                                });
-                        }
-                        // }
-                        //end
+                if (!flag) {
+                    return null;
+                }
+                //跟进记录保存
+                var param = {};
+                param.clueId = clueId;
+                var callTime = this.formInline.callTime;
+                if (typeof(callTime) == 'string') {
+                    param.callTime = new Date(Date.parse(callTime.replace(/-/g, "/")));
+                } else {
+                    param.callTime = this.formInline.callTime;
+                }
+                param.customerStatus = this.formInline.customerStatus;
+                param.isCall = this.formInline.isCall;
+                param.resourceStatus = this.formInline.resourceStatus;
+                param.focusPoint = this.formInline.focusPoint;
+                param.visitStatus = this.formInline.visitStatus;
+                if (this.formInline.nextVisitTime) {
+                    var nextVisitTime = this.formInline.nextVisitTime;
+                    if (typeof(nextVisitTime) == 'string') {
+                        param.nextVisitTime = new Date(Date.parse(nextVisitTime.replace(/-/g, "/")));
                     } else {
-                        console.log('error submit!!');
-                        return false;
+                        param.nextVisitTime = this.formInline.nextVisitTime;
                     }
-                });
+                }
+                if (this.formInline.customerStatus == '3') {//如果选择的是不跟进在传此字段
+                    param.customerStatusSub = this.formInline.customerStatusSub;
+                }
+                param.stage = 2;
+                // 如果是编辑跟进记录
+                if (isEdit) {
+                    param.id = this.formInline.id;
+                } else {
+                }
+                return param;
             },
             deteleClueFile() {
                 //删除上传文件
@@ -1905,142 +1786,6 @@
                 axios.post('/area/sysregion/querySysRegionByParam', param).then(function (response) {
                     addCustomerVM.districtArr = response.data.data.data;
                 });
-            },
-            //邀约来访
-            inviteCustomer(form) {
-                var valid = true;
-                this.$refs[form].validateField(["customerName", "province", "city"], (error) => {
-                    if (error) {
-                        valid = false;
-                    }
-                });
-                if (valid) {
-
-                    var clueCustomer = {};
-                    //客户姓名
-                    var customerName = this.form.customerName;
-                    clueCustomer.cusName = customerName;
-                    //手机号
-                    var customerPhone = this.form.customerPhone;
-                    clueCustomer.phone = customerPhone;
-                    //性别
-                    var customerSex = this.form.customerSex;
-                    clueCustomer.sex = customerSex;
-                    //微信
-                    var ishasWx = this.form.ishasWx;
-                    clueCustomer.wechat = ishasWx;
-                    //餐饮经验
-                    var experience = this.form.experience;
-                    clueCustomer.hasExperience = experience;
-                    //年龄
-                    var customerAge = this.form.customerAge;
-                    clueCustomer.age = customerAge;
-                    //职业
-                    var customerJob = this.form.customerJob;
-                    clueCustomer.profession = customerJob;
-                    //合伙人
-                    var customerPartner = this.form.customerPartner;
-                    clueCustomer.partnerType = customerPartner;
-                    //选址情况
-                    var address = this.form.address;
-                    clueCustomer.hasAddress = address;
-                    //开店紧迫性
-                    var urgency = this.form.urgency;
-                    clueCustomer.urgentDate = urgency;
-                    //客户级别
-                    var customerLevel = this.form.customerLevel;
-                    clueCustomer.cusLevel = customerLevel;
-                    //QQ
-                    var qq = this.form.qq;
-                    clueCustomer.qq = qq;
-                    //email
-                    var email = this.form.customerEmail;
-                    clueCustomer.email = email;
-                    //餐饮经验
-                    var experience = this.form.cateringType;
-                    clueCustomer.experience = experience;
-                    //合伙人姓名电话
-                    var partnerNamePhone = this.form.customerPartnerDetail;
-                    clueCustomer.partnerNamePhone = partnerNamePhone;
-                    //出资人
-                    var investors = this.form.sponsor;
-                    clueCustomer.investors = investors;
-                    //出资人姓名电话
-                    var investorsNamePhone = this.form.sponsorOther;
-                    clueCustomer.investorsNamePhone = investorsNamePhone;
-                    //决策人
-                    var decide = this.form.decisionMaker;
-                    clueCustomer.decide = decide;
-                    //决策人姓名电话
-                    var decideNamePhone = this.form.decisionMakerOther;
-                    clueCustomer.decideNamePhone = decideNamePhone;
-                    var phoneArr = this.dynamicValidateForm.domains;
-                    if (phoneArr.length > 0) {
-                        for (var i = 0; i < phoneArr.length; i++) {
-                            if (i == 0) {
-                                clueCustomer.phone2 = phoneArr[i].value;
-                            }
-                            if (i == 1) {
-                                clueCustomer.phone3 = phoneArr[i].value;
-                            }
-                            if (i == 2) {
-                                clueCustomer.phone4 = phoneArr[i].value;
-                            }
-                            if (i == 3) {
-                                clueCustomer.phone5 = phoneArr[i].value;
-                            }
-                        }
-                    }
-                    //----投资意向---//
-                    var clueIntention = {};
-                    //投资金额
-                    var money = this.form.money;
-                    clueIntention.advanceAmount = money;
-                    //店面大小
-                    var area = this.form.area;
-                    clueIntention.area = area;
-                    //意向品类
-                    var intentionCategory = this.form.intentionCategory;
-                    clueIntention.purType = intentionCategory;
-                    //意向项目
-                    var radioProject = this.form.radioProject;
-                    clueIntention.purProjectType = radioProject;
-                    //意向内部项目
-                    var insideProject = this.form.insideProject;
-                    clueIntention.purInProject = insideProject;
-                    //意向外部项目
-                    var outsideProject = this.form.outsideProject;
-                    clueIntention.purOutProject = outsideProject;
-                    //省
-                    var province = this.form.province;
-                    clueIntention.province = province;
-                    //市
-                    var city = this.form.city;
-                    clueIntention.city = city
-                    //区县
-                    var district = this.form.district;
-                    clueIntention.district = district;
-                    var clue = {};
-                    clue.clueId = clueId;
-                    clue.clueCustomer = clueCustomer;
-                    clue.clueIntention = clueIntention;
-                    this.inviteBtnDisabled = true;
-                    axios.post('/tele/clueMyCustomerInfo/updateCustomerClue', clue)
-                        .then(function (response) {
-                            addCustomerVM.$message({
-                                message: '操作成功', type: 'success', duration: 2000, onClose: function () {
-                                    window.location.href = "/tele/clueMyCustomerInfo/inviteCustomer?clueId=" + clueId + "&cusName=" + addCustomerVM.form.customerName + "&cusPhone=" + addCustomerVM.form.customerPhone;
-                                    // addCustomerVM.inviteBtnDisabled=false;
-                                }
-                            });
-                        }).catch(function(error){
-                            addCustomerVM.inviteBtnDisabled=false;
-                        });
-
-                } else {
-                    console.log('error submit!!');
-                    return false;
-                }
             },
             handleOperateFn(index, row) { //上传资源"查看图片,下载录音"
                 if (row.fileType == 'mp3') {
@@ -2331,7 +2076,13 @@
             param = {};
             param.groupCode = "PhCustomerStatus";
             axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode', param).then(function (response) {
-                addCustomerVM.cusStatusArr = response.data.data;
+
+                var arr = response.data.data;
+                for(var i = 0 ; i < arr.length ; i++){
+                    if(arr[i].name!='未联系'&&arr[i].name!='转电销'){
+                        addCustomerVM.cusStatusArr.push(arr[i]);
+                    }
+                }
             });
 
             //客户状态

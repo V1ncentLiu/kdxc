@@ -40,7 +40,7 @@
                     </el-select>
                 </el-form-item>
                 <el-form-item label="话务专员:">
-                    <el-select v-model="form.operatorId" placeholder="话务专员" clearable >
+                    <el-select v-model="form.operatorId" placeholder="话务专员" clearable  filterable>
                         <el-option
                                 v-for="item in userArr"
                                 :key="item.id"
@@ -50,7 +50,7 @@
                     </el-select>
                 </el-form-item>
                 <el-form-item label="资源项目:">
-                    <el-select v-model="form.projectId" placeholder="资源项目" clearable >
+                    <el-select v-model="form.projectId" placeholder="资源项目" clearable filterable>
                         <el-option
                                 v-for="item in proArr"
                                 :key="item.id"
@@ -75,7 +75,7 @@
                 </el-form-item>
                 <el-row v-show="isShow">
                     <el-form-item label="媒介:">
-                        <el-select v-model="form.source" placeholder="媒介" clearable >
+                        <el-select v-model="form.source" placeholder="媒介" clearable filterable>
                             <el-option
                                     v-for="item in mediumArr"
                                     :key="item.value"
@@ -767,8 +767,14 @@ var phoneButton = false;
     		//客户状态
            var param={};
             param.groupCode="PhCustomerStatus";
-            axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {  
-            	customerManVM.cusStatusArr=response.data.data;
+            axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {
+                var arr =  response.data.data;
+
+                for(var i =0 ; i < arr.length ;i++){
+                    if(arr[i].name != '不跟进'){
+                        customerManVM.cusStatusArr.push(arr[i])
+                    }
+                }
              });
 
             //客户媒介
