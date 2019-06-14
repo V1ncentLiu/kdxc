@@ -127,6 +127,24 @@ public class OrganizationController {
     @ResponseBody
     public JSONResult<List<OrganizationRespDTO>> queryOrgByType(HttpServletRequest request,
             @RequestBody OrganizationDTO dto) {
+        OrganizationQueryDTO orgDto = new OrganizationQueryDTO();
+        orgDto.setOrgType(dto.getOrgType());
+        orgDto.setParentId(dto.getParentId());
+        JSONResult<List<OrganizationRespDTO>> orgJson =
+                organizationFeignClient.queryOrgByParam(orgDto);
+        return orgJson;
+    }
+    /**
+     * 根据业务线查询机构类型数据
+     *
+     * @param request
+     * @param dto
+     * @return
+     */
+    @RequestMapping("/queryOrgByTypeAndBusinessLine")
+    @ResponseBody
+    public JSONResult<List<OrganizationRespDTO>> queryOrgByTypeAndBusinessLine(HttpServletRequest request,
+        @RequestBody OrganizationDTO dto) {
         UserInfoDTO user = CommUtil.getCurLoginUser();
         OrganizationQueryDTO orgDto = new OrganizationQueryDTO();
         orgDto.setOrgType(dto.getOrgType());
@@ -135,10 +153,9 @@ public class OrganizationController {
             orgDto.setBusinessLine(user.getBusinessLine());
         }
         JSONResult<List<OrganizationRespDTO>> orgJson =
-                organizationFeignClient.queryOrgByParam(orgDto);
+            organizationFeignClient.queryOrgByParam(orgDto);
         return orgJson;
     }
-
     /**
      * 保存或更新组织机构信息
      * 
