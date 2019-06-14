@@ -44,6 +44,10 @@ import com.kuaidao.sys.dto.role.RoleInfoDTO;
 import com.kuaidao.sys.dto.role.RoleQueryDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import com.kuaidao.sys.dto.user.UserInfoPageParam;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.slf4j.Logger;
@@ -318,6 +322,15 @@ public class PhoneTrafficController {
         // 资源通话记录
         if (callRecord != null && JSONResult.SUCCESS.equals(callRecord.getCode()) && callRecord.getData() != null) {
             request.setAttribute("callRecord", callRecord.getData());
+            CallRecordRespDTO callRecordRespDTO = callRecord.getData().stream().filter(a-> StringUtils.isNotBlank(a.getStartTime())).max(Comparator.comparing(CallRecordRespDTO::getStartTime)).get();
+            if(callRecordRespDTO != null){
+                String date = convertTimeToString(Long.valueOf(callRecordRespDTO.getStartTime())* 1000L);
+                request.setAttribute("teleEndTime",date);
+            }else {
+                request.setAttribute("teleEndTime",new Date());
+            }
+        }else {
+            request.setAttribute("teleEndTime",new Date());
         }
         ClueQueryDTO queryDTO = new ClueQueryDTO();
 
@@ -576,4 +589,8 @@ public class PhoneTrafficController {
         return list;
     }
 
+    public static String convertTimeToString(Long time){
+        DateTimeFormatter ftf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        return ftf.format(LocalDateTime.ofInstant(Instant.ofEpochMilli(time), ZoneId.systemDefault()));
+    }
 }
