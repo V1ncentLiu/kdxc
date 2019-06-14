@@ -30,13 +30,13 @@
                         <el-select v-model="form.resourceId" placeholder="资源类别" style="width: 100%;" clearable
                             filterable>
                             <el-option v-for="item in resourceClassList" :key="item.id" :label="item.name"
-                                :value="item.id">
+                                :value="item.value">
                             </el-option>
                         </el-select>
                     </el-form-item>
                     <el-form-item label="媒介:">
                         <el-select v-model="form.mediumId" placeholder="媒介" style="width: 100%;" clearable filterable>
-                            <el-option v-for="item in mediumList" :key="item.id" :label="item.name" :value="item.id">
+                            <el-option v-for="item in mediumList" :key="item.id" :label="item.name" :value="item.value">
                             </el-option>
                         </el-select>
                     </el-form-item>
@@ -81,18 +81,17 @@
                             </el-select>
                         </el-form-item>
                     </el-row>
-
-                    <div class="mainSearchBtnBox">
-                        <el-button icon="el-icon-search" type="primary" @click="searchTable()" class="searchBtn">搜索
-                        </el-button>
-                        <span style="color: #5c6be8;cursor: pointer;margin:0 10px;" @click="toogleClick"><span
-                                v-if="isShow">收起</span><span v-else>展开更多</span><i
-                                :class="{'greycolor paddingL6 el-icon-arrow-up':isShow,'greycolor paddingL6 el-icon-arrow-down':!isShow}"></i></span>
-                    </div>
                 </el-form>
+                <div class="mainSearchBtnBox">
+                    <el-button icon="el-icon-search" type="primary" @click="searchTable()" class="searchBtn">搜索
+                    </el-button>
+                    <span style="color: #5c6be8;cursor: pointer;margin:0 10px;" @click="toogleClick"><span
+                            v-if="isShow">收起</span><span v-else>展开更多</span><i
+                            :class="{'greycolor paddingL6 el-icon-arrow-up':isShow,'greycolor paddingL6 el-icon-arrow-down':!isShow}"></i></span>
+                </div>
             </div>
             <el-row class="marginB20">
-                <el-tabs type="card" v-model="tableActive" @tab-click="handleClick()" >
+                <el-tabs type="card" v-model="tableActive" @tab-click="handleClick('tab')" >
                     <el-tab-pane label="资源有效" name="0"></el-tab-pane>
                     <el-tab-pane label="首日资源有效" name="1"></el-tab-pane>
                 </el-tabs>
@@ -140,7 +139,7 @@
                     <el-table-column prop="connectionRate" align="center" :label="tableActive == 0 ?'接通有效率':'首日接通有效率'" :formatter="percentFormat">
                     </el-table-column>
                     </el-table>
-                <table-pagination :pager="pager" @change="searchTable()"></table-pagination>
+                <table-pagination :pager="pager" @change="handleClick('page')"></table-pagination>
             </el-row>
         </div>
     </div>
@@ -148,7 +147,7 @@
     <div th:include="_footer_include :: #jsLib"></div>
 </body>
 <script th:inline="javascript">
-       var resourceClassList = [[${clueCategoryList}]]; // 资源类别
+        var resourceClassList = [[${clueCategoryList}]]; // 资源类别
         var mediumList = [[${mediumList}]]; //媒介
         var resourceItemList = [[${projectList}]]; //资源项目
         var saleGroupList = [[${saleGroupList}]]; //电销组
@@ -160,7 +159,6 @@
             //根据当前数组的长度插入新的数据
             this.dataStore[this.length()] = data;
         }
-
         this.length = function () {
             //获得数组的长度
             var length = this.dataStore.length;
@@ -214,17 +212,12 @@
         el: '#maindiv',
         data: function () {
             return {
-                tableActive:0,
-                // teleCompanyId: '', //电销分公司id
-                // teleDeptId: '', //电销事业部id
-                
-                isDisabled:false,
-                // dxBusinessList: '', //电销分公司list
-                // dxCauseBList: '', //电销事业部List
+                tableActive:0,//tab切换
+                isDisabled:false,//是否禁用电销组
                 saleGroupList: saleGroupList, //电销组List
-                resourceClassList: resourceClassList,
-                mediumList: mediumList,
-                resourceItemList:resourceItemList,
+                resourceClassList: resourceClassList,//资源类别List
+                mediumList: mediumList,//媒介List
+                resourceItemList:resourceItemList,//资源项目
                 isShow: false,
                 loading: false,
                 form: {
@@ -240,10 +233,7 @@
                     endTime: '',
                     orgId: ''
                 },
-                tableData: [
-                    
-                ],
-                // orgTeleArr: queryOrg, // 电销组
+                tableData: [],
                 pager: {
                     total: 0,
                     currentPage: 1,
@@ -258,28 +248,22 @@
             }
         },
         methods: {
-            //tab切换
-            handleClick(){
+
+            //tab、分页切换
+            handleClick(type){
                 this.form.startTime = this.startTimeEnd;
                 this.form.endTime = this.endTimeEnd;
                 this.form.resourceId = this.resourceClassIdEnd;
                 this.form.mediumId = this.mediumIdEnd;
                 this.form.resourceProjectId = this.resourceProjectIdEnd;
                 this.form.teleGorupId = this.orgIdEnd
-                this.searchTable(1);
+                if(type =='tab'){
+                    this.searchTable(1);
+                }else{
+                    this.searchTable();
+                }
             },
-            //获取媒介
-            getMediumOptions() {
-                var _this = this
-                axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode', {
-                    groupCode: 'medium'
-                }).then(function (response) {
-                    if (response.data.code == '0') {
-                        _this.mediumList = response.data.data
-                       
-                    }
-                });
-            },
+            
             //电销联动
             showTele(type) {
                 var param = {};
@@ -473,15 +457,7 @@
             }
                
             },
-            gotoTeam(row) { // 页面跳转
-                var orgId = row.orgId;
-                if (orgId === "合计") {
-                    window.location.href = "/statistics/teleStatement/telemarketingCallTableSum";
-                } else {
-                    window.location.href = "/statistics/teleStatement/telemarketingCallTableTeam?orgId=" +
-                        orgId;
-                }
-            },
+           
             indexFun(index) { // 表格序号
                 return index;
             },
@@ -502,6 +478,7 @@
                 var timeRes = "" + yearRes + monthRea + dateRes + hoursRes + minRes;
                 return timeRes;
             },
+            //根据id将合计插入对应id上边
             summaryFun( totalData,tableData) {
                 var list = new List();
                 for (var i = 0; i < tableData.length; i++) {
@@ -514,22 +491,18 @@
                         }
                     }
                 }
-
                 var arr = []
                 list.forEach(function (data) {
                     arr.push(data)
                 });
                 mainDivVM.tableData = this.repeatArr(arr)
-                
-
-
             },
             //去重
             repeatArr(arr) {
                 var x = new Set(arr);
                 return [...x];
             },
-
+            //白分比格式话
             percentFormat(row, column) {
                 var percent = row[column.property];
                 if(!percent){ // 如果没有值或值为0
@@ -598,10 +571,11 @@
                 this.form.endTime=year+"-"+(month+1)+"-"+date+" 23:59";
                 this.searchTable(1);
             },
+            //导出
             exportRs() {
                 var param = {};
-                param.startTime = this.startTimeEnd;
-                param.endTime = this.endTimeEnd;
+                param.startTime =  this.minuteFormat(this.startTimeEnd);
+                param.endTime =  this.minuteFormat(this.endTimeEnd);
                 param.resourceCategory = this.resourceClassIdEnd;
                 param.resourceMedium =  this.mediumIdEnd;
                 param.projectType =  this.resourceProjectIdEnd;
@@ -622,8 +596,6 @@
             }
         },
         created() {
-            this.getMediumOptions() //媒介
-            // this.showTele(0) //电销筛选联动
             // 默认进入显示当天时间
             var today = new Date();
             today.setTime(today.getTime());
