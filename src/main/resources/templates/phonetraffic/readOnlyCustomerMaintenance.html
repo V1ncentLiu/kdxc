@@ -145,10 +145,18 @@
                             </el-button>
                         </el-form-item>
                     </el-col>
+                    <!--<el-col :span="8">-->
+                        <!--<el-form-item label="微信：" :label-width="formLabelWidth" >-->
+                            <!--<el-button type="text" disabled>{{form.ishasWx}}</el-button>-->
+                            <!--<span v-show="vxShow" style="padding-left: 5px;color: rgb(0, 114, 255);cursor: pointer;" @click="dialogFormImg = true">查看二维码</span>-->
+                        <!--</el-form-item>-->
+                    <!--</el-col>-->
                     <el-col :span="8">
-                        <el-form-item label="微信：" :label-width="formLabelWidth" >
-                            <el-button type="text" disabled>{{form.ishasWx}}</el-button>
-                            <span v-show="vxShow" style="padding-left: 5px;color: rgb(0, 114, 255);cursor: pointer;" @click="dialogFormImg = true">查看二维码</span>
+                        <el-form-item label="微信：" prop="wechat" :label-width="formLabelWidth">
+                            <el-button type="text" disabled>{{form.wechat}}</el-button>
+                            <span v-if="form.wechat2 || form.wechatUrl">
+                                <span @click="openWechat" style="padding-left: 5px; color: rgb(0, 114, 255); cursor: pointer;">查看多个微信/二维码</span>
+                            </span>
                         </el-form-item>
                     </el-col>
                 </el-row>
@@ -401,8 +409,7 @@
     <!-- dialog -->
     <el-dialog title="二维码" :visible.sync="dialogFormImg">
         <div class="padding20" style="text-align: center;">
-            <img :src="showwchatcode" alt=""
-                 style="width: 250px; height: 250px;">
+            <img :src="showwchatcode" alt="" style="width: 250px; height: 250px;">
         </div>
     </el-dialog>
     <!-- 上传资源dialog -->
@@ -412,6 +419,22 @@
                  style="width: 250px; height: 250px;">
         </div>
     </el-dialog>
+
+    <!-- dialog -->
+    <el-dialog title="查看微信" :visible.sync="wechatVisible" width="540px">
+        <template>
+            <el-form :model="wechatForm" ref="wechatForm" >
+                <el-form-item label="微信2：" :label-width="formLabelWidth1" >
+                    <!--<el-input v-model="wechatForm.wechat2" placeholder="" maxLength="20" disabled style="width: 290px;"></el-input>-->
+                    <el-button type="text" disabled style="color: #1e2746;">{{wechatForm.wechat2}}</el-button>
+                </el-form-item>
+                <el-form-item label="微信二维码" :label-width="formLabelWidth1" >
+                    <img v-show="wechatForm.wechatUrl!=''" :src="wechatForm.wechatUrl" width="290px" style="border-radius:6px;">
+                </el-form-item>
+            </el-form>
+        </template>
+    </el-dialog>
+
 </div>
 <link rel="stylesheet" href="/css/common/uploadStyle.css">
 <style type="text/css">
@@ -626,7 +649,9 @@
             phone4:"",
             phone5:"",
             customerSex:"",
-            ishasWx:"",
+            wechat:"",
+            wechat2:'',
+            wechatUrl:'',
             experience:"",
             customerAge:"",
             customerJob:"",
@@ -668,7 +693,9 @@
             phone4:customer.phone4,
             phone5:customer.phone5,
             customerSex:customer.sex,
-            ishasWx:customer.wechat,
+            wechat:customer.wechat,
+            wechat2:customer.wechat2,
+            wechatUrl:customer.wechatCode,
             experience:customer.hasExperience,
             customerAge:customer.age,
             customerJob:customer.profession,
@@ -728,6 +755,7 @@
             return {
                 audioShow:false,
                 isShowPhoneButton:false,
+                wechatVisible: false,//查看微信号
                 vxShow:vxShow,
                 clueId:clueId,
             	  loginUserId:loginUserId,
@@ -765,7 +793,13 @@
                 districtArr: [],
                 showTipInfo: '',
                 proSelect: proSelect,
+                wechatForm: {
+                    wechat2:'',
+                    wechatUrl:'',
+                    fileList:[]
+                },
                 formLabelWidth: '120px',
+                formLabelWidth1: '140px',
                 rules: {
                     customerName: [
                         {required: true, message: '客户姓名不能为空', trigger: 'blur'}
@@ -1452,11 +1486,19 @@
                     $("audio").get(index).pause();
                 }
             },
+
+            openWechat() {
+                this.wechatVisible = true
+                this.wechatForm.wechat2=this.form.wechat2;
+                this.wechatForm.wechatUrl=this.form.wechatUrl;
+            },
+
             handleDownload(index, row) { //通话记录下载btn
                 console.log(index, row);
                 $(".downloadMp3:eq(" + index + ") a").prop("download", "true");
                 $(".downloadMp3:eq(" + index + ") a>p").trigger("click");
             },
+
             switchSoundBtn(id, url, callSource) {
                 this.audioShow=true;
                 if (callSource == '2') {
