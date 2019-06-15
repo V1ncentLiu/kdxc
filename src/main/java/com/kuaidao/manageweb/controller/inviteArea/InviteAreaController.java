@@ -426,12 +426,14 @@ public class InviteAreaController {
                 } else {
                     islegal = false;
                 }
+                Integer busLine = null;//标记商务组所在业务线
                 if (islegal && inviteAreaDTO2.getBusinessGroup() != null) {
                     islegal = false;
                     for (OrganizationRespDTO organizationRespDTO : swList.getData()) {
                         if (organizationRespDTO.getName()
                                 .equals(inviteAreaDTO2.getBusinessGroup().trim())) {
                             inviteAreaDTO2.setBusinessGroupId(organizationRespDTO.getId());
+                            busLine = organizationRespDTO.getBusinessLine();
                             islegal = true;
                             break;
                         }
@@ -439,17 +441,25 @@ public class InviteAreaController {
                 } else {
                     islegal = false;
                 }
+                Integer telLine = null;//标记电销组所在业务线
                 if (islegal && inviteAreaDTO2.getTelemarketingTeam() != null) {
                     islegal = false;
                     for (OrganizationRespDTO organizationRespDTO : dxList.getData()) {
                         if (organizationRespDTO.getName().equals(inviteAreaDTO2.getTelemarketingTeam().trim())) {
                             inviteAreaDTO2.setTelemarketingTeamId(""+organizationRespDTO.getId());
+                            telLine = organizationRespDTO.getBusinessLine();
                             islegal = true;
                             break;
                         }
                     }
                 } else {
                     islegal = false;
+                }
+                //商务组与电销组若非同一业务线则导入不成功
+                if (busLine != null && telLine != null) {
+                    if(Integer.compare(busLine,telLine) != 0){
+                        islegal = false;
+                    }
                 }
 
                 if (islegal && inviteAreaDTO2.getProjects() != null) {

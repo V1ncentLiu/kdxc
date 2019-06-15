@@ -13,6 +13,8 @@ import com.kuaidao.aggregation.dto.financing.ReconciliationConfirmReq;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 /**
  * 对账结算确认
@@ -74,6 +76,16 @@ public interface ReconciliationConfirmFeignClient {
     @PostMapping("/rejectApply")
     public JSONResult<Void> rejectApply(@RequestBody ReconciliationConfirmReq req);
     /**
+     *根据对账申请表id获取已对账的佣金之和
+     * @author: Fanjd
+     * @param accountId 对账申请表主键
+     * @return: com.kuaidao.common.entity.JSONResult<java.lang.Void>
+     * @Date: 2019/6/14 18:25
+     * @since: 1.0.0
+     **/
+    @PostMapping("/getConfirmCommission")
+    JSONResult<BigDecimal> getConfirmCommission(@RequestParam("accountId") Long accountId);
+    /**
      * 对账、申请
      * 
      * @param idEntity
@@ -129,9 +141,13 @@ public interface ReconciliationConfirmFeignClient {
             return fallBackError("对账驳回");
         }
 
+        @Override
+        public JSONResult<BigDecimal> getConfirmCommission(Long accountId) {
+            return fallBackError("根据对账申请id获取已确认的对账佣金错误");
+        }
 
 
-		@Override
+        @Override
 		public JSONResult<Void> applyConfirm(ReconciliationConfirmReq req) {
 			 return fallBackError("对账申请");
 		}
