@@ -162,14 +162,16 @@
                             </el-select>
                         </el-form-item>
                     </el-col>
-                    <el-col
-                            :span="8">
-                        <el-form-item label="微信："
-                                      :label-width="formLabelWidth">
-                            <el-input
-                                    v-model="form.ishasWx" autocomplete="off" style="width: 60%;"
-                                    maxLength="20"></el-input>
-                            <span v-show="vxshow" style="padding-left: 5px; color: rgb(0, 114, 255); cursor: pointer;" @click="dialogFormImg = true">查看二维码</span></el-form-item>
+                    <el-col :span="16">
+                        <el-form-item label="微信：" prop="wechat" :label-width="formLabelWidth">
+                            <el-input v-model="form.wechat" autocomplete="off" style="width: 200px;margin-right: 10px;" maxLength="20"></el-input>
+                            <span v-if="form.wechat2 || form.wechatUrl">
+                                <span @click="openWechat" style="padding-left: 5px; color: rgb(0, 114, 255); cursor: pointer;">查看多个微信/二维码</span>
+                            </span>
+                            <span v-else=""> <!-- vxshow -->
+                                <el-button type="primary"  @click="openWechat"><i class="el-icon-plus"></i>微信/二维码</el-button>
+                            </span>
+                        </el-form-item>
                     </el-col>
                 </el-row>
                 <el-row>
@@ -688,6 +690,48 @@
                  style="width: 250px; height: 250px;">
         </div>
     </el-dialog>
+
+    <!-- dialog -->
+    <el-dialog title="添加微信" :visible.sync="wechatVisible" width="540px">
+        <template>
+            <el-form :model="wechatForm" ref="wechatForm" >
+                <el-form-item label="微信2：" :label-width="formLabelWidth1" >
+                    <el-input v-model="wechatForm.wechat2" placeholder="" maxLength="20" style="width: 290px;"></el-input>
+                </el-form-item>
+                <el-form-item label="添加微信二维码：" :label-width="formLabelWidth1" prop="fileList">
+                    <el-upload
+                        class="upload-demo"
+                        :action="uploadOssHost"
+                        ref="refundApplyImgUpload"
+                        :on-preview="handlePreview"
+                        :on-remove="handleRemove"
+                        :on-success="handleSuccess"
+                        :on-error="handleError"
+                        :before-upload="handleBefore"
+                        accept=".jpg,.png"
+                        multiple
+                        :data="uploadParamData"
+                        :limit='1'
+                        :on-change="selectFile"
+                        :on-exceed="handleExceed"
+                        :auto-upload="false"
+                        :file-list="fileList">
+                        <el-button slot="trigger" size="small" type="primary">选择图片</el-button>
+                        <el-button style="margin-left: 10px;" size="small" type="success" @click="submitUpload">上传</el-button>
+                        <div slot="tip" class="el-upload__tip">只能上传jpg/png文件，且不超过2MB</div>
+                    </el-upload>
+                </el-form-item>
+                <el-form-item label="" :label-width="formLabelWidth1" >
+                    <img v-show="wechatForm.wechatUrl!=''" :src="wechatForm.wechatUrl" width="290px" style="border-radius:6px;">
+                </el-form-item>
+            </el-form>
+            <div slot="footer" class="dialog-footer">
+                <el-button type="primary" @click="wechatSumbit()">提 交</el-button>
+                <el-button  @click="wechatVisible=false">取 消</el-button>
+            </div>
+        </template>
+    </el-dialog>
+
     <!-- 上传资源dialog -->
     <el-dialog title="查看图片" :visible.sync="dialogFormUploadImg">
         <div class="padding20" style="text-align: center;">
@@ -944,6 +988,7 @@
                 isshowPhone: false,
                 isShowTip: false,//是否显示释放公有池提示信息
                 isShowBtn: false,//是否显示保留客户按钮
+                wechatVisible: false,//新增微信号
                 radio: '1',
                 radio1: '1',
                 dialogFormUploadImg: false, //上传资源图片弹框
@@ -974,7 +1019,9 @@
                     decisionMakerOther: '',//其它决策人的姓名及联系方式
                     customerPartnerDetail: '',//合伙人姓名及联系方式
                     customerSex: '',
-                    ishasWx: '',
+                    wechat:'',
+                    wechat2:'',
+                    wechatUrl:'',
                     experience: '0',
                     customerAge: '',
                     customerJob: '',
@@ -992,6 +1039,23 @@
                     city: '',
                     district: '',
                 },
+                wechatForm: {
+                    wechat2:'',
+                    wechatUrl:'',
+                    fileList:[]
+                },
+                uploadParamData: {
+                    key:'22',
+                    policy:'',
+                    OSSAccessKeyId:'',
+                    success_action_status : '200', //让服务端返回200,不然，默认会返回204
+                    signature:'',
+                    'x:params':'',
+                    'realName':''
+                },
+                uploadOssHost:'',
+                ossUrl:ossUrl,
+                limit:1,
                 clueBase: base,
                 categoryArr: [],
                 typeArr: [],
@@ -1012,6 +1076,7 @@
                 districtArr: [],
                 proSelect: proSelect,
                 formLabelWidth: '120px',
+                formLabelWidth1: '140px',
                 rules: {
                     customerName: [
                         {required: true, message: '客户姓名不能为空', trigger: 'change'}
@@ -1138,7 +1203,7 @@
                 lineFormShow: false,
                 formInline: {
                     id: '',
-                    callTime: teleEndTime,
+                    callTime: '',
                     customerStatus: '1',
                     isCall: '',
                     resourceStatus: '',
@@ -1162,8 +1227,41 @@
                 // 跟进记录初始化
                 this.$refs.LineRuleForm.resetFields(); //移除校验结果并重置字段值
                 this.formInline.customerStatus='';
+                this.formInline.callTime = new Date(teleEndTime);
                 // this.formInline.visitStatus='';
             },
+
+            getUploadParam(){
+                var signUrl = this.ossUrl+"?serviceType=aggregation";
+                var param={};
+
+                axios.get(signUrl, param)
+                .then(function (response) {
+                    // console.info(response);
+                    var respData= response.data;
+                    var host = respData.host;
+                    var params={};
+                    var new_multipart_params = {
+                        dir:respData.dir,
+                        'policy': respData.policy,
+                        'OSSAccessKeyId': respData.accessid,
+                        'success_action_status' : '200', //让服务端返回200,不然，默认会返回204
+                        'signature': respData.signature,
+                        'x:params':params,//自定义编码，basse64编码后的字符串,
+                        'realName':''
+                    };
+                    addCustomerVM.uploadParamData= new_multipart_params;
+                    addCustomerVM.uploadOssHost = host;
+                })
+                .catch(function (error) {
+                    console.log(error);
+                });
+            },
+            selectFile(file, fileList){
+                addCustomerVM.uploadParamData.key= addCustomerVM.uploadParamData.dir+addCustomerVM.random_string(10)+addCustomerVM.get_suffix(file.name),
+                    addCustomerVM.uploadParamData.realName= file.name
+            },
+
             gettelNumberIcon(tel) {
                 //外呼手机
                 var param = {};
@@ -1225,12 +1323,6 @@
             },
 
             saveClue(form,flag){
-                // if (this.lineFormShow) { // 如果存在编辑/新增操作 进行跟进记录校验
-                //     this.$refs['LineRuleForm'].validate((error) => {
-                //         valid = error;
-                //     });
-                // }
-
                 if(flag=="toTele"){ // 仅保存时候不需要对 意向项目进行必填验证
                     if( this.form.radioProject == 1){ // 内部项目
                         if(!this.form.insideProject){
@@ -1244,10 +1336,9 @@
                         }
                     }
                 }
-
                 // 客户状态 == 不跟进 提示： 不跟进客户将被释放
-                var trackRow = addCustomerVM.tableDataC2[addCustomerVM.tableDataC2.length-1];
-
+                // var trackRow = addCustomerVM.tableDataC2[addCustomerVM.tableDataC2.length-1];
+                var trackRow = this.onConfirmAdd();
                 if(trackRow){
                     if(trackRow.customerStatus==1&&flag=="toTele"){
                         this.$message({message: '未联系客户不可转电销组！', type: 'warning'});
@@ -1264,9 +1355,14 @@
                             param.customerStatusSub = trackRow.customerStatusSub;
                             axios.post('/phonetraffic/release', param)
                                 .then(function (response) {
-                                    addCustomerVM.$message({message: '释放成功', type: 'success', duration: 2000, onClose: function () {window.location.href = "/phonetraffic/listPage";}});
+                                    addCustomerVM.$message({message: '释放成功', type: 'success', duration: 2000, onClose: function () {
+                                                //  window.location.href = "/phonetraffic/listPage";
+                                                //  保存数据
+                                            addCustomerVM.submitForm(form,flag,1); // 直接进行跳转，不进行保存
+                                    }});
                                 });
                         }).catch(() => {});
+
                     }else{
                         addCustomerVM.submitForm(form,flag);
                     }
@@ -1275,8 +1371,127 @@
                 }
 
             },
-            submitForm(form,flag) {
 
+            getCustomer(){
+                var clueCustomer = {};
+                var customerName = this.form.customerName;
+                clueCustomer.cusName = customerName;
+                //手机号
+                var customerPhone = this.form.customerPhone;
+                if(this.form.phone){
+                    clueCustomer.phone = this.form.phone
+                } else {
+                    clueCustomer.phone = this.form.customerPhone;
+                }
+                //性别
+                var customerSex = this.form.customerSex;
+                clueCustomer.sex = customerSex;
+                //微信
+                var wechat = this.form.wechat;
+                clueCustomer.wechat = wechat;
+                //微信2
+                var wechat2 = this.form.wechat2;
+                clueCustomer.wechat2 = wechat2;
+                //微信二维码
+                var wechatUrl = this.form.wechatUrl;
+                clueCustomer.wechatCode = wechatUrl;
+                //餐饮经验
+                var experience = this.form.experience;
+                clueCustomer.hasExperience = experience;
+                //年龄
+                var customerAge = this.form.customerAge;
+                clueCustomer.age = customerAge;
+                //职业
+                var customerJob = this.form.customerJob;
+                clueCustomer.profession = customerJob;
+                //合伙人
+                var customerPartner = this.form.customerPartner;
+                clueCustomer.partnerType = customerPartner;
+                //选址情况
+                var address = this.form.address;
+                clueCustomer.hasAddress = address;
+                //开店紧迫性
+                var urgency = this.form.urgency;
+                clueCustomer.urgentDate = urgency;
+                //客户级别
+                var customerLevel = this.form.customerLevel;
+                clueCustomer.cusLevel = customerLevel;
+                //QQ
+                var qq = this.form.qq;
+                clueCustomer.qq = qq;
+                //email
+                var email = this.form.customerEmail;
+                clueCustomer.email = email;
+                //餐饮经验
+                var experience = this.form.cateringType;
+                clueCustomer.experience = experience;
+                //合伙人姓名电话
+                var partnerNamePhone = this.form.customerPartnerDetail;
+                clueCustomer.partnerNamePhone = partnerNamePhone;
+                //出资人
+                var investors = this.form.sponsor;
+                clueCustomer.investors = investors;
+                //出资人姓名电话
+                var investorsNamePhone = this.form.sponsorOther;
+                clueCustomer.investorsNamePhone = investorsNamePhone;
+                //决策人
+                var decide = this.form.decisionMaker;
+                clueCustomer.decide = decide;
+                //决策人姓名电话
+                var decideNamePhone = this.form.decisionMakerOther;
+                clueCustomer.decideNamePhone = decideNamePhone;
+                var phoneArr = this.dynamicValidateForm.domains;
+                if (phoneArr.length > 0) {
+                    for (var i = 0; i < phoneArr.length; i++) {
+                        if (i == 0) {
+                            clueCustomer.phone2 = phoneArr[i].value;
+                        }
+                        if (i == 1) {
+                            clueCustomer.phone3 = phoneArr[i].value;
+                        }
+                        if (i == 2) {
+                            clueCustomer.phone4 = phoneArr[i].value;
+                        }
+                        if (i == 3) {
+                            clueCustomer.phone5 = phoneArr[i].value;
+                        }
+                    }
+                }
+                return clueCustomer;
+            },
+            getIntention(){
+                var clueIntention = {};
+                //投资金额
+                var money = this.form.money;
+                clueIntention.advanceAmount = money;
+                //店面大小
+                var area = this.form.area;
+                clueIntention.area = area;
+                //意向品类
+                var intentionCategory = this.form.intentionCategory;
+                clueIntention.purType = intentionCategory;
+                //意向项目
+                var radioProject = this.form.radioProject;
+                clueIntention.purProjectType = radioProject;
+                //意向内部项目
+                var insideProject = this.form.insideProject;
+                clueIntention.purInProject = insideProject;
+                //意向外部项目
+                var outsideProject = this.form.outsideProject;
+                clueIntention.purOutProject = outsideProject;
+                //省
+                var province = this.form.province;
+                clueIntention.province = province;
+                //市
+                var city = this.form.city;
+                clueIntention.city = city
+                //区县
+                var district = this.form.district;
+                clueIntention.district = district;
+
+                return clueIntention;
+            },
+            submitForm(form,flag,skip){
                 var valid = true;
                 this.$refs[form].validateField(["customerEmail", "callTime",
                     "focusPoint", "isCall", "resourceStatus", "nextVisitTime"], (error) => {
@@ -1285,126 +1500,15 @@
                     }
                 });
                 if (valid) {
-                    //----客户基本信息---//
-                    var clueCustomer = {};
-                    //客户姓名
-                    var customerName = this.form.customerName;
-                    clueCustomer.cusName = customerName;
-                    //手机号
-                    var customerPhone = this.form.customerPhone;
-                    if(this.form.phone){
-                        clueCustomer.phone = this.form.phone
-                    } else {
-                        clueCustomer.phone = this.form.customerPhone;
-                    }
-                    //性别
-                    var customerSex = this.form.customerSex;
-                    clueCustomer.sex = customerSex;
-                    //微信
-                    var ishasWx = this.form.ishasWx;
-                    clueCustomer.wechat = ishasWx;
-                    //餐饮经验
-                    var experience = this.form.experience;
-                    clueCustomer.hasExperience = experience;
-                    //年龄
-                    var customerAge = this.form.customerAge;
-                    clueCustomer.age = customerAge;
-                    //职业
-                    var customerJob = this.form.customerJob;
-                    clueCustomer.profession = customerJob;
-                    //合伙人
-                    var customerPartner = this.form.customerPartner;
-                    clueCustomer.partnerType = customerPartner;
-                    //选址情况
-                    var address = this.form.address;
-                    clueCustomer.hasAddress = address;
-                    //开店紧迫性
-                    var urgency = this.form.urgency;
-                    clueCustomer.urgentDate = urgency;
-                    //客户级别
-                    var customerLevel = this.form.customerLevel;
-                    clueCustomer.cusLevel = customerLevel;
-                    //QQ
-                    var qq = this.form.qq;
-                    clueCustomer.qq = qq;
-                    //email
-                    var email = this.form.customerEmail;
-                    clueCustomer.email = email;
-                    //餐饮经验
-                    var experience = this.form.cateringType;
-                    clueCustomer.experience = experience;
-                    //合伙人姓名电话
-                    var partnerNamePhone = this.form.customerPartnerDetail;
-                    clueCustomer.partnerNamePhone = partnerNamePhone;
-                    //出资人
-                    var investors = this.form.sponsor;
-                    clueCustomer.investors = investors;
-                    //出资人姓名电话
-                    var investorsNamePhone = this.form.sponsorOther;
-                    clueCustomer.investorsNamePhone = investorsNamePhone;
-                    //决策人
-                    var decide = this.form.decisionMaker;
-                    clueCustomer.decide = decide;
-                    //决策人姓名电话
-                    var decideNamePhone = this.form.decisionMakerOther;
-                    clueCustomer.decideNamePhone = decideNamePhone;
-                    var phoneArr = this.dynamicValidateForm.domains;
-                    if (phoneArr.length > 0) {
-                        for (var i = 0; i < phoneArr.length; i++) {
-                            if (i == 0) {
-                                clueCustomer.phone2 = phoneArr[i].value;
-                            }
-                            if (i == 1) {
-                                clueCustomer.phone3 = phoneArr[i].value;
-                            }
-                            if (i == 2) {
-                                clueCustomer.phone4 = phoneArr[i].value;
-                            }
-                            if (i == 3) {
-                                clueCustomer.phone5 = phoneArr[i].value;
-                            }
-                        }
-                    }
-                    //----投资意向---//
-                    var clueIntention = {};
-                    //投资金额
-                    var money = this.form.money;
-                    clueIntention.advanceAmount = money;
-                    //店面大小
-                    var area = this.form.area;
-                    clueIntention.area = area;
-                    //意向品类
-                    var intentionCategory = this.form.intentionCategory;
-                    clueIntention.purType = intentionCategory;
-                    //意向项目
-                    var radioProject = this.form.radioProject;
-                    clueIntention.purProjectType = radioProject;
-                    //意向内部项目
-                    var insideProject = this.form.insideProject;
-                    clueIntention.purInProject = insideProject;
-                    //意向外部项目
-                    var outsideProject = this.form.outsideProject;
-                    clueIntention.purOutProject = outsideProject;
-                    //省
-                    var province = this.form.province;
-                    clueIntention.province = province;
-                    //市
-                    var city = this.form.city;
-                    clueIntention.city = city
-                    //区县
-                    var district = this.form.district;
-                    clueIntention.district = district;
                     var clue = {};
                     clue.clueId = clueId;
-                    clue.clueCustomer = clueCustomer;
-                    clue.clueIntention = clueIntention;
-
+                    clue.clueCustomer =  this.getCustomer();
+                    clue.clueIntention = this.getIntention();
+                    clue.tracking = this.onConfirmAdd();
                     clue.flag = flag;
-
-                    this.btnDisabled = true;   
+                    this.btnDisabled = true;
                     axios.post('/phonetraffic/toTele', clue)
                         .then(function (response) {
-                            console.log(response.data)
                             if(response.data.code!=0&&flag=='toTele'){
                                 addCustomerVM.showMessageDialog =true;
                                 addCustomerVM.btnDisabled = false;   
@@ -1412,10 +1516,11 @@
                                 addCustomerVM.$message({message: response.data.msg, type: 'error'});
                                 addCustomerVM.btnDisabled = false; 
                             }else{
-                                addCustomerVM.$message({message: '操作成功', type: 'success', duration: 1000, onClose: function () 
-                                {
-                                    // addCustomerVM.btnDisabled = false; 
-                                    window.location.href = "/phonetraffic/listPage";}});
+                                if(skip==1){
+                                    window.location.href = "/phonetraffic/listPage";
+                                }else{
+                                    addCustomerVM.$message({message: '操作成功', type: 'success', duration: 1000, onClose: function () {window.location.href = "/phonetraffic/listPage";}});
+                                }
                             }
                         }).catch(function(error){
                             addCustomerVM.btnDisabled = false; 
@@ -1570,7 +1675,75 @@
                 this.multipleTrackingSelection = val;
             },
 
-
+            openWechat() {
+                this.wechatVisible = true
+                this.wechatForm.wechat2=this.form.wechat2;
+                this.wechatForm.wechatUrl=this.form.wechatUrl;
+            },
+            wechatSumbit() {
+                this.form.wechat2=this.wechatForm.wechat2;
+                this.form.wechatUrl=this.wechatForm.wechatUrl;
+                addCustomerVM.$message({ message: "提交成功", type: 'success' });
+                this.wechatVisible = false;
+            },
+            submitUpload(){
+                //this.customUpload();
+                this.$refs.refundApplyImgUpload.submit();
+            },
+            handlePreview(file){
+            },
+            handleRemove(file,fileList){
+                this.fileList=[];
+                this.wechatForm.fileList=[];
+            },
+            handleExceed(files, fileList) {
+                //this.$message.warning(`当前限制选择 3 个文件，本次选择了 ${files.length} 个文件，共选择了 ${files.length + fileList.length} 个文件`);
+            },
+            handleSuccess(response, file, fileList){
+                console.info(fileList);
+                console.info(addCustomerVM.fileList);
+                var realName = file.name;
+                var randomName = addCustomerVM.uploadParamData.key;
+                var imgUrl =  addCustomerVM.uploadOssHost+"/"+randomName;
+                this.wechatForm.wechatUrl=imgUrl;
+                this.wechatForm.fileList.push(realName);
+                this.fileList=[];
+                this.wechatForm.fileList=[];
+            },
+            handleError(err, file, fileList){
+                console.info(err);
+            },
+            random_string(len) {
+                len = len || 32;
+                var chars = 'ABCDEFGHJKMNPQRSTWXYZabcdefhijkmnprstwxyz2345678';
+                var maxPos = chars.length;
+                var pwd = '';
+                for (i = 0; i < len; i++) {
+                    pwd += chars.charAt(Math.floor(Math.random() * maxPos));
+                }
+                return pwd;
+            },
+            get_suffix(filename) {
+                var pos = filename.lastIndexOf('.')
+                suffix = ''
+                if (pos != -1) {
+                    suffix = filename.substring(pos);
+                }
+                return suffix;
+            },
+            handleBefore(file){
+                var isTextComputer = file.type === 'image/png' || file.type==='image/jpeg';
+                if(!isTextComputer){
+                    this.fileList=[];
+                    this.$message.error('文件格式错误');
+                    return false;
+                }
+                if(file.size>2*1024*1024){
+                    this.fileList=[];
+                    this.$message.error('图片最大为2MB');
+                    return false;
+                }
+            },
             editRecord() {
                 //编辑跟进记录
                 var rows = this.multipleTrackingSelection;
@@ -1585,7 +1758,7 @@
                 }
                 this.lineFormShow = true;
                 this.formInline.id=rows[0].id;
-                this.formInline.callTime=rows[0].callTime;
+                this.formInline.callTime = rows[0].callTime;
                 this.formInline.customerStatus=rows[0].customerStatus;;
                 this.formInline.isCall=rows[0].isCall+"";
                 // this.formInline.resourceStatus=rows[0].resourceStatus+"";
@@ -1624,6 +1797,7 @@
                 } else {
                     param.callTime = this.formInline.callTime;
                 }
+
                 param.customerStatus = this.formInline.customerStatus;
                 param.isCall = this.formInline.isCall;
                 param.resourceStatus = this.formInline.resourceStatus;
@@ -1901,7 +2075,9 @@
                 this.form.customerPhone = customer.phone;
                 this.form.customerPhone2 = customer.phone2;
                 this.form.customerSex = customer.sex == null ? "" : customer.sex + "";
-                this.form.ishasWx = customer.wechat;
+                this.form.wechat = customer.wechat;
+                this.form.wechat2 = customer.wechat2;
+                this.form.wechatUrl = customer.wechatCode;
                 this.form.experience = customer.hasExperience == null ? "" : customer.hasExperience + "";
                 this.form.customerAge = customer.age;
                 this.form.customerJob = customer.profession == null ? "" : customer.profession + "";
@@ -2005,6 +2181,7 @@
         },
         created() {
             //初始资源类别数据
+            this.getUploadParam();
             var param = {};
             param.groupCode = "clueCategory";
             axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode', param).then(function (response) {
