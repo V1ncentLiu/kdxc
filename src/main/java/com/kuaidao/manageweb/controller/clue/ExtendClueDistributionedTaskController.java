@@ -9,35 +9,52 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import com.kuaidao.aggregation.dto.clue.ClueDTO;
 import com.kuaidao.aggregation.dto.clue.ClueDistributionedTaskDTO;
 import com.kuaidao.aggregation.dto.clue.ClueDistributionedTaskQueryDTO;
+import com.kuaidao.aggregation.dto.clue.ClueQueryDTO;
+import com.kuaidao.aggregation.dto.clue.PushClueReq;
 import com.kuaidao.aggregation.dto.project.ProjectInfoDTO;
 import com.kuaidao.common.constant.BusinessLineConstant;
+import com.kuaidao.common.constant.DicCodeEnum;
 import com.kuaidao.common.constant.RoleCodeEnum;
 import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.common.util.DateUtil;
 import com.kuaidao.common.util.ExcelUtil;
+import com.kuaidao.manageweb.config.LogRecord;
+import com.kuaidao.manageweb.config.LogRecord.OperationType;
+import com.kuaidao.manageweb.constant.MenuEnum;
 import com.kuaidao.manageweb.feign.clue.ExtendClueFeignClient;
+import com.kuaidao.manageweb.feign.clue.MyCustomerFeignClient;
 import com.kuaidao.manageweb.feign.customfield.CustomFieldFeignClient;
+import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
 import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
 import com.kuaidao.manageweb.feign.project.ProjectInfoFeignClient;
+import com.kuaidao.manageweb.feign.user.SysSettingFeignClient;
 import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
+import com.kuaidao.sys.constant.SysConstant;
 import com.kuaidao.sys.dto.customfield.CustomFieldQueryDTO;
 import com.kuaidao.sys.dto.customfield.QueryFieldByRoleAndMenuReq;
 import com.kuaidao.sys.dto.customfield.QueryFieldByUserAndMenuReq;
 import com.kuaidao.sys.dto.customfield.UserFieldDTO;
+import com.kuaidao.sys.dto.dictionary.DictionaryItemRespDTO;
 import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
 import com.kuaidao.sys.dto.organization.OrganizationRespDTO;
 import com.kuaidao.sys.dto.role.RoleInfoDTO;
+import com.kuaidao.sys.dto.user.SysSettingDTO;
+import com.kuaidao.sys.dto.user.SysSettingReq;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import com.kuaidao.sys.dto.user.UserOrgRoleReq;
 
@@ -55,6 +72,14 @@ public class ExtendClueDistributionedTaskController {
     private CustomFieldFeignClient customFieldFeignClient;
     @Autowired
     private OrganizationFeignClient organizationFeignClient;
+    @Autowired
+    private MyCustomerFeignClient myCustomerFeignClient;
+    @Autowired
+    private DictionaryItemFeignClient dictionaryItemFeignClient;
+    @Autowired
+    private SysSettingFeignClient sysSettingFeignClient;
+    @Value("${oss.url.directUpload}")
+    private String ossUrl;
 
     /**
      * 初始化已审核列表数据
@@ -155,6 +180,73 @@ public class ExtendClueDistributionedTaskController {
         JSONResult<PageBean<ClueDistributionedTaskDTO>> pageBeanJSONResult =
                 extendClueFeignClient.queryPageDistributionedTask(queryDto);
         return pageBeanJSONResult;
+    }
+
+    /**
+     * 跳转编辑资源
+     * 
+     * @param request
+     * @param model
+     * @return
+     */
+    @RequestMapping("/toUpdatePage")
+    @RequiresPermissions("waitDistributResource:edit")
+    public String toUpdatePage(@RequestParam long id, HttpServletRequest request, Model model) {
+        ClueQueryDTO queryDTO = new ClueQueryDTO();
+
+        queryDTO.setClueId(id);
+
+        JSONResult<ClueDTO> clueInfo = myCustomerFeignClient.findClueInfo(queryDTO);
+
+        request.setAttribute("clueInfo", clueInfo.getData());
+
+        // 查询所有项目
+        JSONResult<List<ProjectInfoDTO>> allProject = projectInfoFeignClient.allProject();
+        request.setAttribute("projectList", allProject.getData());
+        // 查询字典资源类别集合
+        request.setAttribute("clueCategoryList",
+                getDictionaryByCode(DicCodeEnum.CLUECATEGORY.getCode()));
+        // 查询字典资源类型集合
+        request.setAttribute("clueTypeList", getDictionaryByCode(DicCodeEnum.CLUETYPE.getCode()));
+        // 查询字典广告位集合
+        request.setAttribute("adsenseList", getDictionaryByCode(DicCodeEnum.ADENSE.getCode()));
+        // 查询字典媒介集合
+        request.setAttribute("mediumList", getDictionaryByCode(DicCodeEnum.MEDIUM.getCode()));
+        // 查询字典行业类别集合
+        request.setAttribute("industryCategoryList",
+                getDictionaryByCode(DicCodeEnum.INDUSTRYCATEGORY.getCode()));
+        // 查询字典账户名称集合
+        request.setAttribute("accountNameList",
+                getDictionaryByCode(DicCodeEnum.ACCOUNT_NAME.getCode()));
+        request.setAttribute("ossUrl", ossUrl);
+        // 系统参数优化资源类别
+        String optList = getSysSetting(SysConstant.OPT_CATEGORY);
+        request.setAttribute("optList", optList);
+        // 系统参数非优化资源类别
+        String notOptList = getSysSetting(SysConstant.NOPT_CATEGORY);
+        request.setAttribute("notOptList", notOptList);
+        return "clue/distributedUpdateClue";
+    }
+
+    /**
+     * 编辑资源
+     * 
+     * @param request
+     * @param clueId
+     * @return
+     */
+    @RequestMapping("/distributedUpdateClue")
+    @RequiresPermissions("waitDistributResource:edit")
+    @ResponseBody
+    @LogRecord(description = "编辑资源", operationType = OperationType.UPDATE,
+            menuName = MenuEnum.WAIT_DISTRIBUT_RESOURCE)
+    public JSONResult<String> updateClue(HttpServletRequest request,
+            @RequestBody PushClueReq pushClueReq) {
+        UserInfoDTO user = getUser();
+        pushClueReq.setUpdateUser(user.getId());
+        JSONResult<String> clueInfo = extendClueFeignClient.distributedUpdateClue(pushClueReq);
+
+        return clueInfo;
     }
 
     /**
@@ -523,5 +615,37 @@ public class ExtendClueDistributionedTaskController {
                 organizationFeignClient.queryOrgByParam(queryDTO);
         List<OrganizationRespDTO> data = queryOrgByParam.getData();
         return data;
+    }
+
+    /**
+     * 查询字典表
+     *
+     * @param code
+     * @return
+     */
+    private List<DictionaryItemRespDTO> getDictionaryByCode(String code) {
+        JSONResult<List<DictionaryItemRespDTO>> queryDicItemsByGroupCode =
+                dictionaryItemFeignClient.queryDicItemsByGroupCode(code);
+        if (queryDicItemsByGroupCode != null
+                && JSONResult.SUCCESS.equals(queryDicItemsByGroupCode.getCode())) {
+            return queryDicItemsByGroupCode.getData();
+        }
+        return null;
+    }
+
+    /**
+     * 查询系统参数
+     * 
+     * @param code
+     * @return
+     */
+    private String getSysSetting(String code) {
+        SysSettingReq sysSettingReq = new SysSettingReq();
+        sysSettingReq.setCode(code);
+        JSONResult<SysSettingDTO> byCode = sysSettingFeignClient.getByCode(sysSettingReq);
+        if (byCode != null && JSONResult.SUCCESS.equals(byCode.getCode())) {
+            return byCode.getData().getValue();
+        }
+        return null;
     }
 }

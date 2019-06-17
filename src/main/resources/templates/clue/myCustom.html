@@ -266,8 +266,19 @@
                 @row-click="clickRow"
                 >
                 <el-table-column align="center" type="selection"  prop="clueId"  @selection-change="handleSelectionChange" width="55"></el-table-column>
+
+                <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" width="250"
+                                 v-for="(item,key,index) in tableColums" v-if="item.fieldCode == 'cusName'">
+                    <template slot-scope="scope">
+                        {{scope.row.cusName}}
+                        <span v-if="scope.row.inputType ==1">
+                            <input type='hidden'><img th:src="@{/images/self_build.png}"  style="margin:0 10px;width:22px;cursor: pointer;vertical-align: middle;" alt="">
+                        </span>
+                    </template>
+                </el-table-column>
+
                 <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" width="220"
-                 v-for="(item,key,index) in tableColums" v-if="item.fieldCode == 'phone'">
+                  v-else-if="item.fieldCode == 'phone'">
                    <!--  <template slot-scope="scope">{{scope.row.phone}}<input type='hidden'><img th:src="@{/images/tel.png}" @click="customerEidt(scope.row.clueId)" style="margin:0 10px;width:22px;cursor: pointer;vertical-align: middle;" alt=""><el-tag v-if="scope.row.tag">{{scope.row.tag}}</el-tag></template> -->
                     <template slot-scope="scope">
                       {{scope.row.phone}}
