@@ -43,7 +43,7 @@ public class Constants {
     // 类别字典Code
     public static String PROJECT_CATEGORY = "project_category";
     // 店型字典Code
-    public static String PROJECT_SHOPTYPE = "vistitStoreType"; //project_shopType
+    public static String PROJECT_SHOPTYPE = "vistitStoreType"; // project_shopType
     // 项目归属字典Code
     public static String PROJECT_ATTRIBUTIVE = "project_attributive";
     // 广告位字典Code
@@ -79,4 +79,12 @@ public class Constants {
     // 优化类资源导入模板列数
     public static Integer OPTIMIZE = 21;
 
+    /**
+     * 不带走资源
+     ***/
+    public static Integer NOT_TAKE_AWAY_CLUE = 0;
+    /**
+     * 带走资源
+     ***/
+    public static Integer TAKE_AWAY_CLUE = 1;
 }

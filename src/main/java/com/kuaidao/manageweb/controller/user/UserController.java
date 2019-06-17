@@ -5,11 +5,17 @@ package com.kuaidao.manageweb.controller.user;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
-
+import com.kuaidao.aggregation.dto.clue.ClueRelateDTO;
+import com.kuaidao.aggregation.dto.clue.ClueRelateReq;
+import com.kuaidao.aggregation.dto.clue.CustomerClueDTO;
+import com.kuaidao.aggregation.dto.clue.CustomerClueQueryDTO;
+import com.kuaidao.common.constant.*;
+import com.kuaidao.manageweb.feign.clue.ClueRelateFeignClient;
+import com.kuaidao.manageweb.feign.clue.MyCustomerFeignClient;
+import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
@@ -22,9 +28,6 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-
-import com.kuaidao.common.constant.DicCodeEnum;
-import com.kuaidao.common.constant.SysErrorCodeEnum;
 import com.kuaidao.common.entity.IdEntityLong;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
@@ -73,10 +76,14 @@ public class UserController {
     private AmqpTemplate amqpTemplate;
     @Autowired
     private StringRedisTemplate redisTemplate;
+    @Autowired
+    private MyCustomerFeignClient myCustomerFeignClient;
+    @Autowired
+    private ClueRelateFeignClient clueRelateFeignClient;
 
     /***
      * 用户列表页
-     * 
+     *
      * @return
      */
     @RequestMapping("/initUserList")
@@ -96,8 +103,7 @@ public class UserController {
         // 查询组织机构树
         JSONResult<List<TreeData>> treeJsonRes = organizationFeignClient.query();
         // 查询组织机构树
-        if (treeJsonRes != null && JSONResult.SUCCESS.equals(treeJsonRes.getCode())
-                && treeJsonRes.getData() != null) {
+        if (treeJsonRes != null && JSONResult.SUCCESS.equals(treeJsonRes.getCode()) && treeJsonRes.getData() != null) {
             request.setAttribute("orgData", treeJsonRes.getData());
         } else {
             logger.error("query organization tree,res{{}}", treeJsonRes);
@@ -106,21 +112,20 @@ public class UserController {
     }
 
     /**
-     * 
-     * 
+     *
+     *
      * @param request
      * @return
      */
 
     @RequestMapping("/listByOrgAndRole")
     @ResponseBody
-    public JSONResult<List<UserInfoDTO>> listByOrgAndRole(HttpServletRequest request,
-            @RequestBody UserOrgRoleReq req) {
+    public JSONResult<List<UserInfoDTO>> listByOrgAndRole(HttpServletRequest request, @RequestBody UserOrgRoleReq req) {
         UserInfoDTO userInfoDTO = getUser();
         UserOrgRoleReq userRole = new UserOrgRoleReq();
         userRole.setOrgId(req.getOrgId());
         userRole.setRoleCode(req.getRoleCode());
-        if(userInfoDTO.getBusinessLine() != null){
+        if (userInfoDTO.getBusinessLine() != null) {
             userRole.setBusinessLine(userInfoDTO.getBusinessLine());
         }
         return userInfoFeignClient.listByOrgAndRole(userRole);
@@ -128,7 +133,7 @@ public class UserController {
 
     /***
      * 新增用户页
-     * 
+     *
      * @return
      */
     @RequestMapping("/initCreateUser")
@@ -137,8 +142,7 @@ public class UserController {
 
         // 查询组织机构树
         JSONResult<List<TreeData>> treeJsonRes = organizationFeignClient.query();
-        if (treeJsonRes != null && JSONResult.SUCCESS.equals(treeJsonRes.getCode())
-                && treeJsonRes.getData() != null) {
+        if (treeJsonRes != null && JSONResult.SUCCESS.equals(treeJsonRes.getCode()) && treeJsonRes.getData() != null) {
             request.setAttribute("orgData", treeJsonRes.getData());
         } else {
             logger.error("query organization tree,res{{}}", treeJsonRes);
@@ -147,10 +151,8 @@ public class UserController {
         JSONResult<List<RoleInfoDTO>> list = userInfoFeignClient.roleList(new RoleQueryDTO());
         request.setAttribute("roleList", list.getData());
         // 查询字典业务线集合
-        JSONResult<List<OrganizationDTO>> listBusinessLineOrg =
-                organizationFeignClient.listBusinessLineOrg();
-        List<DictionaryItemRespDTO> clueCategoryList =
-                getDictionaryByCode(DicCodeEnum.CLUECATEGORY.getCode());
+        JSONResult<List<OrganizationDTO>> listBusinessLineOrg = organizationFeignClient.listBusinessLineOrg();
+        List<DictionaryItemRespDTO> clueCategoryList = getDictionaryByCode(DicCodeEnum.CLUECATEGORY.getCode());
         List<Map<String, Object>> dataList = new ArrayList<Map<String, Object>>();
         for (OrganizationDTO organizationDTO : listBusinessLineOrg.getData()) {
             Map<String, Object> map = new HashMap<String, Object>();
@@ -179,7 +181,7 @@ public class UserController {
 
     /***
      * 编辑用户页
-     * 
+     *
      * @return
      */
     @RequestMapping("/initUpdateUser")
@@ -191,8 +193,7 @@ public class UserController {
         UserInfoDTO user = jsonResult.getData();
         request.setAttribute("user", user);
         // 查询组织机构树
-        if (treeJsonRes != null && JSONResult.SUCCESS.equals(treeJsonRes.getCode())
-                && treeJsonRes.getData() != null) {
+        if (treeJsonRes != null && JSONResult.SUCCESS.equals(treeJsonRes.getCode()) && treeJsonRes.getData() != null) {
             request.setAttribute("orgData", treeJsonRes.getData());
         } else {
             logger.error("query organization tree,res{{}}", treeJsonRes);
@@ -203,17 +204,14 @@ public class UserController {
         request.setAttribute("roleList", list.getData());
         // 查询字典业务线集合
         // 查询字典业务线集合
-        JSONResult<List<OrganizationDTO>> listBusinessLineOrg =
-                organizationFeignClient.listBusinessLineOrg();
-        List<DictionaryItemRespDTO> clueCategoryList =
-                getDictionaryByCode(DicCodeEnum.CLUECATEGORY.getCode());
+        JSONResult<List<OrganizationDTO>> listBusinessLineOrg = organizationFeignClient.listBusinessLineOrg();
+        List<DictionaryItemRespDTO> clueCategoryList = getDictionaryByCode(DicCodeEnum.CLUECATEGORY.getCode());
         List<Map<String, Object>> dataList = new ArrayList<Map<String, Object>>();
 
         List<UserDataAuthReq> userDataAuthList = user.getUserDataAuthList();
         Map<String, String> authMap = new HashMap<String, String>();
         for (UserDataAuthReq userDataAuthReq : userDataAuthList) {
-            if (userDataAuthReq.getBusinessLine() != null
-                    && StringUtils.isNotBlank(userDataAuthReq.getDicValue())) {
+            if (userDataAuthReq.getBusinessLine() != null && StringUtils.isNotBlank(userDataAuthReq.getDicValue())) {
                 authMap.put(userDataAuthReq.getBusinessLine() + "", userDataAuthReq.getDicValue());
             }
         }
@@ -250,14 +248,13 @@ public class UserController {
 
     /***
      * 用户列表
-     * 
+     *
      * @return
      */
     @PostMapping("/list")
     @ResponseBody
     @RequiresPermissions("sys:userManager:view")
-    public JSONResult<PageBean<UserInfoDTO>> queryRoleList(
-            @RequestBody UserInfoPageParam userInfoPageParam, HttpServletRequest request,
+    public JSONResult<PageBean<UserInfoDTO>> queryRoleList(@RequestBody UserInfoPageParam userInfoPageParam, HttpServletRequest request,
             HttpServletResponse response) {
 
         JSONResult<PageBean<UserInfoDTO>> list = userInfoFeignClient.list(userInfoPageParam);
@@ -267,7 +264,7 @@ public class UserController {
 
     /**
      * 保存用户
-     * 
+     *
      * @param orgDTO
      * @return
      * @throws InvocationTargetException
@@ -276,8 +273,7 @@ public class UserController {
     @PostMapping("/saveUser")
     @ResponseBody
     @RequiresPermissions("sys:userManager:add")
-    @LogRecord(description = "新增用户", operationType = OperationType.INSERT,
-            menuName = MenuEnum.USER_MANAGEMENT)
+    @LogRecord(description = "新增用户", operationType = OperationType.INSERT, menuName = MenuEnum.USER_MANAGEMENT)
     public JSONResult saveMenu(@Valid @RequestBody UserInfoReq userInfoReq, BindingResult result) {
         if (result.hasErrors()) {
             return CommonUtil.validateParam(result);
@@ -288,17 +284,15 @@ public class UserController {
 
     /**
      * 修改用户信息
-     * 
-     * @param orgDTO
+     *
+     * @param userInfoReq
      * @return
      */
     @PostMapping("/updateUser")
     @ResponseBody
     @RequiresPermissions("sys:userManager:edit")
-    @LogRecord(description = "修改用户信息", operationType = OperationType.UPDATE,
-            menuName = MenuEnum.USER_MANAGEMENT)
-    public JSONResult updateMenu(@Valid @RequestBody UserInfoReq userInfoReq,
-            BindingResult result) {
+    @LogRecord(description = "修改用户信息", operationType = OperationType.UPDATE, menuName = MenuEnum.USER_MANAGEMENT)
+    public JSONResult updateMenu(@Valid @RequestBody UserInfoReq userInfoReq, BindingResult result) {
 
         if (result.hasErrors()) {
             return CommonUtil.validateParam(result);
@@ -306,26 +300,46 @@ public class UserController {
 
         Long id = userInfoReq.getId();
         if (id == null) {
-            return new JSONResult().fail(SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getCode(),
-                    SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getMessage());
+            return new JSONResult().fail(SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getCode(), SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getMessage());
         }
+        // 是否带走资源校验
+        if (userInfoReq.getTakeAwayClueShow()) {
+            // 不带走资源判断当前电销顾问手里有没有资源（我的客户列表是否有数据）
+            if (Constants.NOT_TAKE_AWAY_CLUE.equals(userInfoReq.getTakeAwayClue())) {
+                // 获取我的客户列表
+                CustomerClueQueryDTO dto = new CustomerClueQueryDTO();
+                dto.setTeleSale(userInfoReq.getId());
+                JSONResult<PageBean<CustomerClueDTO>> jsonResult = myCustomerFeignClient.findTeleClueInfo(dto);
+                boolean flag = jsonResult != null && JSONResult.SUCCESS.equals(jsonResult.getCode()) && jsonResult.getData() != null
+                        && jsonResult.getData().getPageSizes() > 0;
+                if (flag) {
+                    return new JSONResult().fail(SysErrorCodeEnum.ERR_EXISTS_CLUE_FAIL.getCode(), SysErrorCodeEnum.ERR_EXISTS_CLUE_FAIL.getMessage());
+                }
 
+            }
+            // 带走资源将原属于本电销顾问的资源带着一起流转到此电销顾问新调整的所属组中。旧的组电销总监看不到此资源，新的组电销总监可以查看到此资源
+            if (Constants.TAKE_AWAY_CLUE.equals(userInfoReq.getTakeAwayClue())) {
+                ClueRelateReq clueRelateReq = getTeleSaleOrg(userInfoReq.getOrgId());
+                clueRelateReq.setTeleSaleId(userInfoReq.getId());
+                // 更新电销顾问电销组组织相关信息
+                clueRelateFeignClient.updateClueRelateByTeleSaleId(clueRelateReq);
+
+            }
+        }
         return userInfoFeignClient.update(userInfoReq);
     }
 
     /**
      * 禁用
-     * 
+     *
      * @param orgDTO
      * @return
      */
     @PostMapping("/updateStatusEnable")
     @ResponseBody
     @RequiresPermissions("sys:userManager:edit")
-    @LogRecord(description = "禁用", operationType = OperationType.DISABLE,
-            menuName = MenuEnum.USER_MANAGEMENT)
-    public JSONResult updateStatusEnable(@Valid @RequestBody UserInfoReq userInfoReq,
-            BindingResult result) {
+    @LogRecord(description = "禁用", operationType = OperationType.DISABLE, menuName = MenuEnum.USER_MANAGEMENT)
+    public JSONResult updateStatusEnable(@Valid @RequestBody UserInfoReq userInfoReq, BindingResult result) {
 
         if (result.hasErrors()) {
             return CommonUtil.validateParam(result);
@@ -333,8 +347,7 @@ public class UserController {
 
         Long id = userInfoReq.getId();
         if (id == null) {
-            return new JSONResult().fail(SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getCode(),
-                    SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getMessage());
+            return new JSONResult().fail(SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getCode(), SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getMessage());
         }
         IdEntityLong entityLong = new IdEntityLong();
         entityLong.setId(id);
@@ -358,17 +371,15 @@ public class UserController {
 
     /**
      * 启用
-     * 
+     *
      * @param orgDTO
      * @return
      */
     @PostMapping("/updateStatusDisable")
     @ResponseBody
     @RequiresPermissions("sys:userManager:edit")
-    @LogRecord(description = "启用", operationType = OperationType.ENABLE,
-            menuName = MenuEnum.USER_MANAGEMENT)
-    public JSONResult updateStatusDisable(@Valid @RequestBody UserInfoReq userInfoReq,
-            BindingResult result) {
+    @LogRecord(description = "启用", operationType = OperationType.ENABLE, menuName = MenuEnum.USER_MANAGEMENT)
+    public JSONResult updateStatusDisable(@Valid @RequestBody UserInfoReq userInfoReq, BindingResult result) {
 
         if (result.hasErrors()) {
             return CommonUtil.validateParam(result);
@@ -376,8 +387,7 @@ public class UserController {
 
         Long id = userInfoReq.getId();
         if (id == null) {
-            return new JSONResult().fail(SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getCode(),
-                    SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getMessage());
+            return new JSONResult().fail(SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getCode(), SysErrorCodeEnum.ERR_ILLEGAL_PARAM.getMessage());
         }
         if (2 == userInfoReq.getStatus()) {
             userInfoReq.setDisableTime(new Date());
@@ -387,16 +397,14 @@ public class UserController {
 
     /**
      * 修改密码
-     * 
+     *
      * @param orgDTO
      * @return
      */
     @PostMapping("/updatePassword")
     @ResponseBody
-    @LogRecord(description = "修改密码", operationType = OperationType.UPDATE,
-            menuName = MenuEnum.UPDATE_PASSWORD)
-    public JSONResult updateMenu(@Valid @RequestBody UpdateUserPasswordReq updateUserPasswordReq,
-            BindingResult result) {
+    @LogRecord(description = "修改密码", operationType = OperationType.UPDATE, menuName = MenuEnum.UPDATE_PASSWORD)
+    public JSONResult updateMenu(@Valid @RequestBody UpdateUserPasswordReq updateUserPasswordReq, BindingResult result) {
 
         if (result.hasErrors()) {
             return CommonUtil.validateParam(result);
@@ -407,8 +415,7 @@ public class UserController {
         UserInfoDTO data = jsonResult.getData();
         if (JSONResult.SUCCESS.equals(jsonResult.getCode()) && data != null) {
             // 判断密码是否正确
-            if (data.getPassword().equals(MD5Util.StringToMd5(MD5Util
-                    .StringToMd5(updateUserPasswordReq.getOldPassword() + data.getSalt())))) {
+            if (data.getPassword().equals(MD5Util.StringToMd5(MD5Util.StringToMd5(updateUserPasswordReq.getOldPassword() + data.getSalt())))) {
                 UserInfoReq userInfoReq = new UserInfoReq();
                 userInfoReq.setId(id);
                 userInfoReq.setPassword(updateUserPasswordReq.getNewPassword());
@@ -434,15 +441,14 @@ public class UserController {
                         UserErrorCodeEnum.ERR_WRONG_PHONE_PASSWORD.getMessage());
             }
         } else {
-            return new JSONResult().fail(UserErrorCodeEnum.ERR_ACCOUNT_NOT_EXIST.getCode(),
-                    UserErrorCodeEnum.ERR_ACCOUNT_NOT_EXIST.getMessage());
+            return new JSONResult().fail(UserErrorCodeEnum.ERR_ACCOUNT_NOT_EXIST.getCode(), UserErrorCodeEnum.ERR_ACCOUNT_NOT_EXIST.getMessage());
         }
 
     }
 
     /**
      * 查询用户信息
-     * 
+     *
      * @param orgDTO
      * @return
      */
@@ -455,18 +461,15 @@ public class UserController {
 
     /**
      * 修改密码安全设置
-     * 
+     *
      * @param orgDTO
      * @return
      */
     @PostMapping("/updatePasswordSetting")
     @ResponseBody
     @RequiresPermissions("sys:userManager:edit")
-    @LogRecord(description = "修改密码安全设置", operationType = OperationType.UPDATE,
-            menuName = MenuEnum.USER_MANAGEMENT)
-    public JSONResult updatePasswordSetting(
-            @Valid @RequestBody UpdatePasswordSettingReq updatePasswordSettingReq,
-            BindingResult result) {
+    @LogRecord(description = "修改密码安全设置", operationType = OperationType.UPDATE, menuName = MenuEnum.USER_MANAGEMENT)
+    public JSONResult updatePasswordSetting(@Valid @RequestBody UpdatePasswordSettingReq updatePasswordSettingReq, BindingResult result) {
 
         if (result.hasErrors()) {
             return CommonUtil.validateParam(result);
@@ -497,7 +500,7 @@ public class UserController {
 
     /**
      * 查询系统参数
-     * 
+     *
      * @param code
      * @return
      */
@@ -527,6 +530,7 @@ public class UserController {
 
     /**
      * 根据条件查询用户集合
+     * 
      * @param
      * @author: Fanjd
      * @return:
@@ -535,22 +539,21 @@ public class UserController {
      **/
     @PostMapping("/getUserInfoListByParam")
     @ResponseBody
-    public JSONResult<List<UserInfoDTO>> getUserInfoListByParam(@RequestBody  UserOrgRoleReq reqDTO) {
+    public JSONResult<List<UserInfoDTO>> getUserInfoListByParam(@RequestBody UserOrgRoleReq reqDTO) {
         JSONResult<List<UserInfoDTO>> jsonResult = userInfoFeignClient.getUserInfoListByParam(reqDTO);
         return jsonResult;
     }
+
     /**
      * 首页 修改密码
-     * 
+     *
      * @param orgDTO
      * @return
      */
     @PostMapping("/updatePwd")
     @ResponseBody
-    @LogRecord(description = "首页-修改密码", operationType = OperationType.UPDATE,
-            menuName = MenuEnum.UPDATE_PASSWORD)
-    public JSONResult updatePwd(@Valid @RequestBody UpdateUserPasswordReq updateUserPasswordReq,
-            BindingResult result) {
+    @LogRecord(description = "首页-修改密码", operationType = OperationType.UPDATE, menuName = MenuEnum.UPDATE_PASSWORD)
+    public JSONResult updatePwd(@Valid @RequestBody UpdateUserPasswordReq updateUserPasswordReq, BindingResult result) {
 
         if (result.hasErrors()) {
             return CommonUtil.validateParam(result);
@@ -564,8 +567,7 @@ public class UserController {
         UserInfoDTO data = jsonResult.getData();
         if (JSONResult.SUCCESS.equals(jsonResult.getCode()) && data != null) {
             // 判断密码是否正确
-            if (data.getPassword().equals(MD5Util.StringToMd5(MD5Util
-                    .StringToMd5(updateUserPasswordReq.getOldPassword() + data.getSalt())))) {
+            if (data.getPassword().equals(MD5Util.StringToMd5(MD5Util.StringToMd5(updateUserPasswordReq.getOldPassword() + data.getSalt())))) {
                 UserInfoReq userInfoReq = new UserInfoReq();
                 userInfoReq.setId(id);
                 userInfoReq.setPassword(updateUserPasswordReq.getNewPassword());
@@ -585,31 +587,28 @@ public class UserController {
                 }
                 return updatePwdRes;
             } else {
-                return new JSONResult().fail(UserErrorCodeEnum.ERR_WRONG_PHONE_PASSWORD.getCode(),
-                        "当前密码错误，请重新输入");
+                return new JSONResult().fail(UserErrorCodeEnum.ERR_WRONG_PHONE_PASSWORD.getCode(), "当前密码错误，请重新输入");
             }
         } else {
-            return new JSONResult().fail(UserErrorCodeEnum.ERR_ACCOUNT_NOT_EXIST.getCode(),
-                    UserErrorCodeEnum.ERR_ACCOUNT_NOT_EXIST.getMessage());
+            return new JSONResult().fail(UserErrorCodeEnum.ERR_ACCOUNT_NOT_EXIST.getCode(), UserErrorCodeEnum.ERR_ACCOUNT_NOT_EXIST.getMessage());
         }
 
     }
 
     /**
      * 查询字典表
-     * 
+     *
      * @param code
      * @return
      */
     private List<DictionaryItemRespDTO> getDictionaryByCode(String code) {
-        JSONResult<List<DictionaryItemRespDTO>> queryDicItemsByGroupCode =
-                dictionaryItemFeignClient.queryDicItemsByGroupCode(code);
-        if (queryDicItemsByGroupCode != null
-                && JSONResult.SUCCESS.equals(queryDicItemsByGroupCode.getCode())) {
+        JSONResult<List<DictionaryItemRespDTO>> queryDicItemsByGroupCode = dictionaryItemFeignClient.queryDicItemsByGroupCode(code);
+        if (queryDicItemsByGroupCode != null && JSONResult.SUCCESS.equals(queryDicItemsByGroupCode.getCode())) {
             return queryDicItemsByGroupCode.getData();
         }
         return null;
     }
+
     /**
      * 获取当前登录账号
      *
@@ -620,4 +619,70 @@ public class UserController {
         UserInfoDTO user = (UserInfoDTO) attribute;
         return user;
     }
+
+    /**
+     * 获取创业顾问所在电销组的其他组织信息
+     * 
+     * @author: Fanjd
+     * @param orgId 电销组ID
+     * @return: com.kuaidao.aggregation.dto.clue.ClueRelateDTO
+     * @Date: 2019/6/17 15:22
+     * @since: 1.0.0
+     **/
+    private ClueRelateReq getTeleSaleOrg(Long orgId) {
+        // 电销关联数据
+        ClueRelateReq releateReq = new ClueRelateReq();
+        // 电销组id
+        releateReq.setTeleGorupId(orgId);
+        UserOrgRoleReq userRole = new UserOrgRoleReq();
+        userRole.setRoleCode(RoleCodeEnum.DXZJ.name());
+        userRole.setOrgId(orgId);
+        JSONResult<List<UserInfoDTO>> userInfoJson = userInfoFeignClient.listByOrgAndRole(userRole);
+        if (userInfoJson != null && JSONResult.SUCCESS.equals(userInfoJson.getCode()) && userInfoJson.getData() != null
+                && userInfoJson.getData().size() > 0) {
+            // 电销总监
+            releateReq.setTeleDirectorId(userInfoJson.getData().get(0).getId());
+        }
+
+        // 查询用户的上级
+        OrganizationQueryDTO orgDto = new OrganizationQueryDTO();
+        orgDto.setId(orgId);
+        orgDto.setSystemCode(SystemCodeConstant.HUI_JU);
+        JSONResult<List<OrganizationDTO>> orgJson = organizationFeignClient.listParentsUntilOrg(orgDto);
+        if (orgJson != null && JSONResult.SUCCESS.equals(orgJson.getCode()) && orgJson.getData() != null && orgJson.getData().size() > 0) {
+            for (OrganizationDTO org : orgJson.getData()) {
+                if (null != org.getOrgType() && org.getOrgType().equals(OrgTypeConstant.DZSYB)) {
+                    // 电销事业部
+                    releateReq.setTeleDeptId(org.getId());
+                    UserOrgRoleReq userRoleInfo = new UserOrgRoleReq();
+                    userRoleInfo.setRoleCode(RoleCodeEnum.DXFZ.name());
+                    userRoleInfo.setOrgId(org.getId());
+                    JSONResult<List<UserInfoDTO>> ceoUserInfoJson = userInfoFeignClient.listByOrgAndRole(userRoleInfo);
+                    if (ceoUserInfoJson.getCode().equals(JSONResult.SUCCESS) && null != ceoUserInfoJson.getData()
+                            && ceoUserInfoJson.getData().size() > 0) {
+                        // 电销副总
+                        releateReq.setTeleCeoId(ceoUserInfoJson.getData().get(0).getId());
+                    }
+
+                }
+                if (null != org.getOrgType() && org.getOrgType().equals(OrgTypeConstant.DXFGS)) {
+                    UserOrgRoleReq userRoleInfo = new UserOrgRoleReq();
+                    userRoleInfo.setRoleCode(RoleCodeEnum.DXZJL.name());
+                    userRoleInfo.setOrgId(org.getId());
+                    JSONResult<List<UserInfoDTO>> ceoUserInfoJson = userInfoFeignClient.listByOrgAndRole(userRoleInfo);
+                    if (ceoUserInfoJson.getCode().equals(JSONResult.SUCCESS) && null != ceoUserInfoJson.getData()
+                            && ceoUserInfoJson.getData().size() > 0) {
+                        // 电销总经理
+                        releateReq.setTeleManagerId(ceoUserInfoJson.getData().get(0).getId());
+                    }
+                    // 电销分公司
+                    releateReq.setTeleCompanyId(org.getId());
+                }
+
+            }
+
+        }
+        return releateReq;
+    }
+
 }

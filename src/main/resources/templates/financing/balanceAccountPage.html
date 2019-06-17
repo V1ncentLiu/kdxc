@@ -283,6 +283,12 @@
 	          </el-form-item>
 	          <el-form-item label="佣金："  :label-width="formLabelWidth1"><span style="color: red;">{{commissionMoney}}</span>
 	          </el-form-item>
+            <div v-if="lowestCommissionShow">
+                <el-form-item label="保底服务费：" :label-width="formLabelWidth1"><span style="color: red;">{{lowestCommission}}</span>
+                </el-form-item>
+                <el-form-item label="已对账确认佣金：" :label-width="formLabelWidth1"><span style="color: red;">{{confirmCommission}}</span>
+                </el-form-item>
+            </div>
           </el-form>
         <div slot="footer" style="text-align: center" class="dialog-footer">
             <el-button type="primary" :disabled="btnDisabled" @click="settlementConfirm('apply')">提交</el-button>
@@ -310,6 +316,7 @@ var clueVM = new Vue({
         el: '#clueManage',
         data: {
           isShow:false,
+            lowestCommissionShow: false,
           btnDisabled: false,
       		searchForm: {
 	       		busAreaId: '',
@@ -331,6 +338,7 @@ var clueVM = new Vue({
 	       		statementNo: '',
 	       		signNo: ''
             },
+            confirmCommission:"",
             doubtRemarkShow:false,
             backRemarks:"",
             backVisable:false,
@@ -774,6 +782,21 @@ var clueVM = new Vue({
             	   var statementNo = rows[0].statementNo;
             	   var payTime = rows[0].payTime;
             	   var msg = "";
+            	   var lowestCommissionStr = rows[0].lowestCommissionStr;
+                   if ((rows[0].payType == "全款" || rows[0].payType == "尾款") && lowestCommissionStr != "") {
+                       var accountId = rows[0].accountId;
+                       var parmMap = {};
+                       parmMap.accountId = accountId;
+                       this.lowestCommissionShow = true;
+                       this.lowestCommission = lowestCommissionStr;
+                       //根据签约id获取已对账确认的佣金
+                       axios.post('/financing/balanceaccount/getConfirmCommission', parmMap).then(function (response) {
+                           if (null != response || response.data != null || response.data.code == '0') {
+                               clueVM.confirmCommission = response.data.data;
+                           }
+                       });
+                   }
+
             	   if(status =="驳回商务"){
             		   msg = "该申请处于驳回商务状态，不允许提交对账"
             	   }else if(status =="已结算"){
@@ -926,8 +949,21 @@ var clueVM = new Vue({
                   saveNotVisit(){
                 	  
                   },
-                  repeatApplyNumber(){//输入手机号才显示查询资源按钮
-                      this.commissionMoney = this.apply.money*this.ratio/100;
+                  repeatApplyNumber(){
+        	          //保底服务费
+                      var lowestCommission =this.lowestCommission;
+                      //已对账确认佣金
+                      var confirmCommission  = this.confirmCommission;
+                      var  commissionMoney = this.apply.money*this.ratio/100;
+                      var sum  = commissionMoney + confirmCommission;
+                      //如果已提交确认的佣金+ 此次结算金额算出来的佣金小于保底服务费 则佣金为保底服务费
+                      //否则佣金等于结算金额*结算比例
+                      if(lowestCommission > sum){
+                          this.commissionMoney = lowestCommission;
+                      }else{
+                          this.commissionMoney = commissionMoney;
+                      }
+
              		},
                 toogleClick(){
                     if(this.isShow){
@@ -937,11 +973,13 @@ var clueVM = new Vue({
                     }          
                 },
                 closeSubmitApplyDialog(){//关闭提交对账确认
+                    clueVM.lowestCommissionShow = false;
                     // 点击关闭 数据重置
                     this.$refs['apply'].resetFields();
                 },
                 cancelSubmitApplyFrom(formName){//提交对账确认取消
                     this.submitApplyVisible= false;
+                    clueVM.lowestCommissionShow = false;
                     // 点击取消 数据重置
                     this.$refs[formName].resetFields();
                 },

@@ -63,8 +63,8 @@ public interface ExtendClueFeignClient {
      *
      * @return
      */
-    @RequestMapping(method = RequestMethod.POST, value = "/updateClue")
-    public JSONResult<String> updateClue(@RequestBody PushClueReq pushClueReq);
+    @RequestMapping(method = RequestMethod.POST, value = "/distributedUpdateClue")
+    public JSONResult<String> distributedUpdateClue(@RequestBody PushClueReq pushClueReq);
 
     /**
      * 撤回资源
@@ -134,7 +134,7 @@ public interface ExtendClueFeignClient {
         }
 
         @Override
-        public JSONResult<String> updateClue(@RequestBody PushClueReq pushClueReq) {
+        public JSONResult<String> distributedUpdateClue(@RequestBody PushClueReq pushClueReq) {
             // TODO Auto-generated method stub
             return fallBackError("编辑资源");
         }
