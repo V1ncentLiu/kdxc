@@ -17,6 +17,8 @@ import com.kuaidao.aggregation.dto.clue.CustomerClueQueryDTO;
 import com.kuaidao.aggregation.dto.clue.ReleaseClueDTO;
 import com.kuaidao.aggregation.dto.clue.RepeatClueDTO;
 import com.kuaidao.aggregation.dto.clue.RepeatClueQueryDTO;
+import com.kuaidao.aggregation.dto.clue.RepeatClueRecordDTO;
+import com.kuaidao.aggregation.dto.clue.RepeatClueRecordQueryDTO;
 import com.kuaidao.aggregation.dto.clue.RepeatClueSaveDTO;
 import com.kuaidao.aggregation.dto.clueappiont.ClueAppiontmentDTO;
 import com.kuaidao.aggregation.dto.project.ProjectInfoDTO;
@@ -38,6 +40,7 @@ import com.kuaidao.manageweb.feign.call.CallRecordFeign;
 import com.kuaidao.manageweb.feign.circulation.CirculationFeignClient;
 import com.kuaidao.manageweb.feign.clue.ClueBasicFeignClient;
 import com.kuaidao.manageweb.feign.clue.MyCustomerFeignClient;
+import com.kuaidao.manageweb.feign.clue.RepeatClueRecordFeignClient;
 import com.kuaidao.manageweb.feign.customfield.CustomFieldFeignClient;
 import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
 import com.kuaidao.manageweb.feign.project.ProjectInfoFeignClient;
@@ -115,6 +118,9 @@ public class MyCustomerClueController {
 
     @Autowired
     private ClueBasicFeignClient clueBasicFeignClient;
+
+    @Autowired
+    private RepeatClueRecordFeignClient repeatClueRecordFeignClient;
 
     @Value("${oss.url.directUpload}")
     private String ossUrl;
@@ -333,6 +339,11 @@ public class MyCustomerClueController {
             } else {
                 request.setAttribute("customer", new ArrayList());
             }
+            if (null != clueInfo.getData().getClueRelate()) {
+                request.setAttribute("teleSaleId", clueInfo.getData().getClueRelate().getTeleSaleId());
+            } else {
+                request.setAttribute("teleSaleId", 0);
+            }
             if (null != clueInfo.getData().getClueIntention()) {
                 request.setAttribute("intention", clueInfo.getData().getClueIntention());
             } else {
@@ -382,6 +393,16 @@ public class MyCustomerClueController {
             request.setAttribute("clueFileList", clueFileList.getData());
         }
         request.setAttribute("loginUserId", user.getId());
+        RepeatClueRecordQueryDTO recordQueryDTO = new RepeatClueRecordQueryDTO();
+        recordQueryDTO.setClueId(Long.valueOf(clueId));
+        JSONResult<List<RepeatClueRecordDTO>> repeatJson = repeatClueRecordFeignClient.queryList(recordQueryDTO);
+        if (repeatJson != null && repeatJson.SUCCESS.equals(repeatJson.getCode())
+            && repeatJson.getData() != null && repeatJson.getData().size() > 0) {
+            request.setAttribute("repeatClueList", repeatJson.getData());
+            request.setAttribute("repeatClueStatus", 1);
+        }else {
+            request.setAttribute("repeatClueStatus", 0);
+        }
         return "clue/addCustomerMaintenance";
     }
 
@@ -506,6 +527,17 @@ public class MyCustomerClueController {
         }
         request.setAttribute("commonPool", commonPool);
         request.setAttribute("loginUserId", user.getId());
+
+        RepeatClueRecordQueryDTO recordQueryDTO = new RepeatClueRecordQueryDTO();
+        recordQueryDTO.setClueId(Long.valueOf(clueId));
+        JSONResult<List<RepeatClueRecordDTO>> repeatJson = repeatClueRecordFeignClient.queryList(recordQueryDTO);
+        if (repeatJson != null && repeatJson.SUCCESS.equals(repeatJson.getCode())
+            && repeatJson.getData() != null && repeatJson.getData().size() > 0) {
+            request.setAttribute("repeatClueList", repeatJson.getData());
+            request.setAttribute("repeatClueStatus", 1);
+        }else {
+            request.setAttribute("repeatClueStatus", 0);
+        }
         return "clue/CustomerMaintenanceReadOnly";
     }
 
