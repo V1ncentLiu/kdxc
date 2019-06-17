@@ -144,36 +144,36 @@
                 <el-row>
                     <el-col :span="12">
                         <el-form-item label="资源类型：" :label-width="formLabelWidth" prop="type">
-                            {{form.type}}
+                            {{form.typeName}}
                         </el-form-item>
                     </el-col>
                     <el-col :span="12">
                         <el-form-item label="资源类别：" :label-width="formLabelWidth" prop="category" >
-                            {{form.category}}
+                            {{form.categoryName}}
                         </el-form-item>
                     </el-col>
                 </el-row>
                 <el-row>
                     <el-col :span="12">
                         <el-form-item label="广告位：" :label-width="formLabelWidth" prop="sourceType">
-                            {{form.sourceType}}
+                            {{form.sourceTypeName}}
                         </el-form-item>
                     </el-col>
                     <el-col :span="12">
                         <el-form-item label="媒介：" :label-width="formLabelWidth" prop="source">
-                            {{form.source}}
+                            {{form.sourceName}}
                         </el-form-item>
                     </el-col>
                 </el-row>
                 <el-row>
                     <el-col :span="12">
                         <el-form-item label="资源项目(项目名称)：" :label-width="formLabelWidth" prop="projectId">
-                            {{form.projectId}}
+                            {{form.projectName}}
                         </el-form-item>
                     </el-col>
                     <el-col :span="12">
                         <el-form-item label="行业类别：" :label-width="formLabelWidth">
-                            {{form.industryCategory}}
+                            {{form.industryCategoryName}}
                         </el-form-item>
                     </el-col>
                 </el-row>
@@ -204,7 +204,7 @@
                 <el-row>
                   <el-col :span="12">
                     <el-form-item label="账户名称：" :label-width="formLabelWidth">
-                      {{form.accountName}}
+                      {{form.accountNameName}}
                     </el-form-item>
                   </el-col>
                 </el-row>
@@ -514,14 +514,21 @@ if(notOptList){
                 	reserveTime:'',
                 	remark:'',
                 	source:'',
+                	sourceName:'',
                 	sourceType:'',
+                	sourceTypeName:'',
                 	type:'',
+                	typeName:'',
                 	category:'',
+                	categoryName:'',
                 	projectId:'',
+                	projectName:'',
                 	searchWord:'',
                 	accountName:'',
+                	accountNameName:'',
                 	urlAddress:'',
                 	industryCategory:'',
+                	industryCategoryName:'',
                 	messagePoint:'',
                 	messageTime:'',
                   province:'',
@@ -634,21 +641,6 @@ if(notOptList){
                              
                          }, trigger: 'change'}
                     ],
-                    source: [
-                        { required: true, message: '媒介不能为空', trigger: 'change' }
-                    ],
-                    sourceType: [
-                        { required: true, message: '广告位不能为空', trigger: 'change' }
-                    ],
-                    type: [
-                        { required: true, message: '资源类型不能为空', trigger: 'change' }
-                    ],
-                    category: [
-                        { required: true, message: '资源类别不能为空', trigger: 'change' }
-                    ],
-                 /*    projectId: [
-                       { required: true, message: '资源项目不能为空', trigger: 'change' }
-                    ] */
                 },
                 dynamicValidateForm: {//新增手机号弹窗数据
                     domains: [{
@@ -941,7 +933,7 @@ if(notOptList){
                   }
                 }
               addClueVM.confirmBtnDisabled=true;//禁用提交按钮
-              axios.post('/exetend/agendaTaskManager/distributedUpdateClue',param)
+              axios.post('/exetend/distributionedTaskManager/distributedUpdateClue',param)
               .then(function (response) {
                   if(!response||!response.data){
                       addClueVM.$message({
@@ -971,7 +963,7 @@ if(notOptList){
                       cancelButtonText: '取消',
                       type: 'warning'
                   }).then(() => {
-	            	  window.location.href="/exetend/agendaTaskManager/waitDistributResource"; 
+	            	  window.location.href="/exetend/distributionedTaskManager/initDistributiveResource"; 
                   }).catch(() => {
                       this.$message({
                           type: 'info',
@@ -1353,6 +1345,68 @@ if(notOptList){
 	            this.form.clueReceiveId=clueInfo.clueReceive.id;
 	            this.form.accountName=clueInfo.clueReceive.accountName;
 	        	this.form.urlAddress=clueInfo.clueReceive.urlAddress;
+            }
+         // 资源类型
+            if(this.form.type){
+                for(var i=0;i<clueTypeList.length;i++){
+                    if(this.form.type==clueTypeList[i].value){
+                        this.form.typeName=clueTypeList[i].name;
+                    }
+                }
+            }
+            // 资源类别
+            if(this.form.category){
+                for(var i=0;i<clueCategoryList.length;i++){
+                    if(this.form.category==clueCategoryList[i].value){
+                        this.form.categoryName=clueCategoryList[i].name;
+                    }
+                }
+            }               
+            // 广告位
+            if(this.form.sourceType){
+                for(var i=0;i<adsenseList.length;i++){
+                    if(this.form.sourceType==adsenseList[i].value){
+                        this.form.sourceTypeName=adsenseList[i].name;
+                    }
+                }
+            }
+            // 媒介
+            if(this.form.source){
+                for(var i=0;i<mediumList.length;i++){
+                    if(this.form.source==mediumList[i].value){
+                        this.form.sourceName=mediumList[i].name;
+                    }
+                }
+            }                        
+            //资源项目
+            if(this.form.projectId){
+                for(var i=0;i<projectList.length;i++){
+                    if(this.form.projectId==projectList[i].id){
+                        this.form.projectName=projectList[i].projectName;
+                    }
+                }
+            }else{
+            	this.form.projectIdName="";
+            }
+            // 行业类别
+            if(this.form.industryCategory){
+                for(var i=0;i<industryCategoryList.length;i++){
+                    if(this.form.industryCategory==industryCategoryList[i].value){
+                        this.form.industryCategoryName=industryCategoryList[i].name;
+                    }
+                }
+            }else{
+            	this.form.industryCategoryName="";
+            }
+            // 账户名称
+            if(this.form.accountName){
+                for(var i=0;i<accountNameList.length;i++){
+                    if(this.form.accountName==accountNameList[i].value){
+                        this.form.accountNameName=accountNameList[i].name;
+                    }
+                }
+            }else{
+            	this.form.accountNameName="";
             }
          },
         created(){
