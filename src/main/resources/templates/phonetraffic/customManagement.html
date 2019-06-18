@@ -115,7 +115,7 @@
             </el-form>
         </div>
         <el-row>
-            <el-table  ref="multipleTable" tooltip-effect="dark" border @selection-change="handleSelectionChange" style="width: 100%"  :data="dataTable" @row-dblclick="showClueDetailInfo">
+            <el-table  ref="multipleTable" tooltip-effect="dark" border @selection-change="handleSelectionChange" style="width: 100%"  :data="dataTable" @row-dblclick="customerEidt1">
                 <el-table-column align="center" type="selection" label="全选" width="50" prop="clueId"></el-table-column>
     	        <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width"
     	         v-for="(item,key,index) in tableColums" v-if="item.fieldCode == 'phone'">
@@ -496,6 +496,22 @@ var phoneButton = false;
                
             },
             customerEidt(clueId){                
+                //客户维护界面
+                if(editflag==1){
+                    window.location.href='/phonetraffic/toEditPage?clueId='+clueId;
+                }
+            },
+            customerEidt1(row){  
+                var clueId=row.clueId;
+                // 存储选中信息--start
+                this.setSessionStore("customManagementStoreForm", this.storeForm);
+                var otherVal = {
+                    "currentPage": this.pager.currentPage,
+                    "clueId": clueId,
+                    "scrollTop": this.$el.querySelector('.el-table__body-wrapper').scrollTop
+                }
+                this.setSessionStore("customManagementOtherVal", otherVal);
+                // 存储选中信息--end               
                 //客户维护界面
                 if(editflag==1){
                     window.location.href='/phonetraffic/toEditPage?clueId='+clueId;
