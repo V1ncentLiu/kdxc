@@ -53,8 +53,6 @@ public class ResourceEfficiencyController {
     @Autowired
     private ProjectInfoFeignClient projectInfoFeignClient;
     @Autowired
-    private OrganizationFeignClient organizationFeignClient;
-    @Autowired
     private ResourceEfficiencyFeignClient resourceEfficiencyFeignClient;
 
     /**
@@ -182,30 +180,6 @@ public class ResourceEfficiencyController {
         }
         return null;
     }
-
-    private void buildOrgIdList(@RequestBody ResourceEfficiencyDto resourceEfficiencyDto) {
-        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
-        List<OrganizationRespDTO> orgGroupByOrgId = getOrgGroupByOrgId(curLoginUser.getOrgId(), OrgTypeConstant.DXZ);
-        List<Long> orgIdList = orgGroupByOrgId.parallelStream().map(OrganizationRespDTO::getId).collect(Collectors.toList());
-    }
-
-    /**
-     * 获取当前 orgId 下的 电销组
-     * @param orgId
-     * @param orgType
-     * @return
-     */
-    private List<OrganizationRespDTO> getOrgGroupByOrgId(Long orgId,Integer orgType) {
-        // 电销组
-        OrganizationQueryDTO busGroupReqDTO = new OrganizationQueryDTO();
-        busGroupReqDTO.setSystemCode(SystemCodeConstant.HUI_JU);
-        busGroupReqDTO.setParentId(orgId);
-        busGroupReqDTO.setOrgType(orgType);
-        JSONResult<List<OrganizationRespDTO>> orgJr = organizationFeignClient.queryOrgByParam(busGroupReqDTO);
-        return orgJr.getData();
-    }
-
-
     /**
      * mock数据
      * @return
