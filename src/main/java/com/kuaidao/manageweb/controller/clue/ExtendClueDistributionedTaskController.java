@@ -9,7 +9,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.shiro.SecurityUtils;
-import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
@@ -190,7 +189,6 @@ public class ExtendClueDistributionedTaskController {
      * @return
      */
     @RequestMapping("/toUpdatePage")
-    @RequiresPermissions("waitDistributResource:edit")
     public String toUpdatePage(@RequestParam long id, HttpServletRequest request, Model model) {
         ClueQueryDTO queryDTO = new ClueQueryDTO();
 
