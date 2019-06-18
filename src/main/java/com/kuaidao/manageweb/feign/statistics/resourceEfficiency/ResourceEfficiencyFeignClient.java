@@ -24,6 +24,12 @@ public interface ResourceEfficiencyFeignClient {
     @PostMapping("/getResourceEfficientList")
     JSONResult<List<ResourceEfficiencyDto>> getResourceEfficientList(@RequestBody ResourceEfficiencyQueryDto resourceEfficiencyQueryDto);
 
+    @PostMapping("/getFirstResourceEfficientPageList")
+    JSONResult<Map<String,Object>> getFirstResourceEfficientPageList(@RequestBody ResourceEfficiencyQueryDto resourceEfficiencyQueryDto);
+
+    @PostMapping("/getFirstResourceEfficientList")
+    JSONResult<List<ResourceEfficiencyDto>> getFirstResourceEfficientList(@RequestBody ResourceEfficiencyQueryDto resourceEfficiencyQueryDto);
+
     @Component
     class HystrixClientFallback implements ResourceEfficiencyFeignClient {
 
@@ -43,6 +49,16 @@ public interface ResourceEfficiencyFeignClient {
         @Override
         public JSONResult<List<ResourceEfficiencyDto>> getResourceEfficientList(ResourceEfficiencyQueryDto resourceEfficiencyQueryDto) {
             return fallBackError("查询资源接通有效率失败");
+        }
+
+        @Override
+        public JSONResult<Map<String, Object>> getFirstResourceEfficientPageList(ResourceEfficiencyQueryDto resourceEfficiencyQueryDto) {
+            return fallBackError("分页查询首日资源接通有效率失败");
+        }
+
+        @Override
+        public JSONResult<List<ResourceEfficiencyDto>> getFirstResourceEfficientList(ResourceEfficiencyQueryDto resourceEfficiencyQueryDto) {
+            return fallBackError("查询首日资源接通有效率失败");
         }
     }
 }

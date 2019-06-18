@@ -87,12 +87,7 @@ public class ResourceEfficiencyController {
     @RequestMapping("/getFirstResourceEfficientList")
     @ResponseBody
     public JSONResult<Map<String,Object>> getFirstResourceEfficientList(@RequestBody ResourceEfficiencyQueryDto resourceEfficiencyQueryDto) throws Exception{
-        PageBean<ResourceEfficiencyDto> pageData = mockData().getData();
-        List<ResourceEfficiencyDto> totalData = mockCountData().getData();
-        Map<String,Object> resMap = new HashMap<>();
-        resMap.put("totalData", totalData);
-        resMap.put("tableData", pageData);
-        return new JSONResult<Map<String,Object>>().success(resMap);
+        return resourceEfficiencyFeignClient.getFirstResourceEfficientPageList(resourceEfficiencyQueryDto);
     }
     /**
      *
