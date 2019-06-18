@@ -403,9 +403,14 @@
                 <img th:src="@{/images/icon_arrow.png}" alt="" class="f-fr">
                 <span class="f-fr">进入我的客户资源</span>
             </div>
-        </div> 
+            <div class="rightbox f-fr">
+                <el-button type="primary" @click="notVisit">标记未到访</el-button>
+                <!--<span class="f-fr">标记未到访&nbsp;&nbsp;&nbsp;&nbsp;</span>-->
+            </div>
+        </div>
         <el-row class="mainWhiteBg mainWhitePadding">
-            <el-table border :data="tableData" tooltip-effect="dark" style="width:100%"  ref="multipleTable" @row-dblclick="showCustomerDetail">
+            <el-table border :data="tableData" tooltip-effect="dark" style="width:100%"  ref="multipleTable" @row-dblclick="showCustomerDetail" @selection-change="handleSelectionChange">
+                <el-table-column type="selection" width="55" prop="clueId"></el-table-column>
                 <el-table-column prop="xh" label="序号" width="60" type="index" align="center"></el-table-column>
                 <el-table-column prop="reserveTime" label="邀约来访时间" sortable align="center"  width="180px"></el-table-column>
                 <el-table-column prop="cusName" label="客户姓名" align="center" width="120">
@@ -1762,6 +1767,25 @@
             <el-button @click="dialogUpdateFormSigningVisible = false">取 消</el-button>
           </div>
        </template>
+    </el-dialog>
+    <!--标记未到访-->
+    <el-dialog title="提示" :visible.sync="notVisitFlagDialogVisible" width="540px">
+        <template>
+            <el-form :model="notVisitFlag" ref="notVisitFlag" :rules="notVisitFlagRules">
+                <el-form-item>
+                    <!--<el-button type="text" disabled style="color: #1e2746; width:100px; word-wrap:break-word; word-break:normal;">{{notVisitFlag.str}}</el-button>-->
+                    <span style="display:block;color: #1e2746; width:100%; word-wrap:break-word; word-break:normal;"><span style="color:red;">* </span>{{notVisitFlag.str}}</span>
+                </el-form-item>
+                <el-form-item label=""  prop="notVisitReason">
+                    <el-input type="textarea" v-model="notVisitFlag.notVisitReason" maxlength="100" :rows="3"
+                              placeholder="请输入内容(限制100字)"></el-input>
+                </el-form-item>
+            </el-form>
+            <div slot="footer" class="dialog-footer">
+                <el-button type="primary" @click="saveNotVisit" :disabled="notVisitButtonAble">确定</el-button>
+                <el-button @click="notVisitFlagDialogVisible = false">取消</el-button>
+            </div>
+        </template>
     </el-dialog>
 </div>
 <!-- import common js-->
