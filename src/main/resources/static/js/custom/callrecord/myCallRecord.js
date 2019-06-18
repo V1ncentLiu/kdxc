@@ -1,6 +1,3 @@
-var userId = [[${userId}]]+"";
-var roleCode = [[${roleCode}]];
-var orgId = [[${orgId}]]+"";
 var myCallRecordVm = new Vue({
     el: '#myCallRecordVm',
     data: {
