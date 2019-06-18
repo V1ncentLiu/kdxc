@@ -535,7 +535,7 @@
                                 <el-form-item label="" size="mini" prop="customerStatusSub">
                                     <el-select
                                             v-model="formInline.customerStatusSub" placeholder="客户状态"
-                                            :disabled="substatus"
+                                            v-show="!substatus"
                                             :required="customerStatusRequired">
                                         <el-option v-for="item in customerStatusSubArr" :key="item.value"
                                                    :label="item.name" :value="item.value"></el-option>
@@ -549,27 +549,12 @@
                                                 label="是" value="1"></el-option>
                                         <el-option label="否" value="0"></el-option>
                                     </el-select>
-                                </el-form-item> <!--
-                                  <el-form-item label="" size="mini" prop="resourceStatus">
-                                    <el-select v-model="formInline.resourceStatus" placeholder="无效资源">
-                                      <el-option label="无效资源" value="0"></el-option>
-                                      <el-option label="有效资源" value="1"></el-option>
-                                    </el-select>
-                                  </el-form-item>
-                                  -->
+                                </el-form-item>
                                 <el-form-item label="" size="mini"
                                               prop="focusPoint">
                                     <el-input
                                             v-model="formInline.focusPoint" size="mini" placeholder="客户关注点"></el-input>
                                 </el-form-item>
-                                <!--<el-form-item label="" size="mini">-->
-                                    <!--<el-select-->
-                                            <!--v-model="formInline.visitStatus" placeholder="是否继续回访">-->
-                                        <!--<el-option-->
-                                                <!--label="是" value="1"></el-option>-->
-                                        <!--<el-option label="否" value="0"></el-option>-->
-                                    <!--</el-select>-->
-                                <!--</el-form-item>-->
                                 <el-form-item prop="nextVisitTime">
                                     <el-date-picker
                                             v-model="formInline.nextVisitTime" type="datetime"
@@ -1298,6 +1283,7 @@
                             }
                         }
                          // = this.customerStatusSubArr1.slice(2)
+                        this.substatus = true;
                     }else if(selVal == '3'){
                         // this.customerStatusSubArr = this.customerStatusSubArr1.slice(0,2)
                         this.customerStatusSubArr = [];
@@ -1306,9 +1292,8 @@
                                 this.customerStatusSubArr.push(this.customerStatusSubArr1[i])
                             }
                         }
+                        this.substatus = false;
                     }
-
-                    this.substatus = false;
                 } else {
                     this.substatus = true;
                 }
@@ -1493,12 +1478,22 @@
             },
             submitForm(form,flag,skip){
                 var valid = true;
-                this.$refs[form].validateField(["customerEmail", "callTime",
-                    "focusPoint", "isCall", "resourceStatus", "nextVisitTime"], (error) => {
-                    if (error) {
-                        valid = false;
+                //跟进记录校验
+                if (this.lineFormShow) { // 如果存在编辑/新增操作 进行跟进记录校验
+                    this.$refs['LineRuleForm'].validate((error) => {
+                        valid = error;
+                    });
+                }
+
+                if (valid) {
+                    if (valid) {
+                        this.$refs[form].validateField(["phone","customerName"], (error) => {
+                            if (error) {
+                                valid = false;
+                            }
+                        });
                     }
-                });
+                }
                 if (valid) {
                     var clue = {};
                     clue.clueId = clueId;
