@@ -14,6 +14,7 @@ import com.kuaidao.aggregation.dto.project.ProjectInfoPageParam;
 import com.kuaidao.aggregation.dto.tracking.TrackingReqDTO;
 import com.kuaidao.aggregation.dto.tracking.TrackingRespDTO;
 import com.kuaidao.common.constant.CluePhase;
+import com.kuaidao.common.constant.PhTraCustomerStatusEnum;
 import com.kuaidao.common.constant.RoleCodeEnum;
 import com.kuaidao.common.constant.StageContant;
 import com.kuaidao.common.entity.JSONResult;
@@ -342,6 +343,7 @@ public class PhoneTrafficController {
 
         JSONResult<ClueDTO> clueInfo = myCustomerFeignClient.findClueInfo(queryDTO);
 
+
         // 维护的资源数据
         if (clueInfo != null && JSONResult.SUCCESS.equals(clueInfo.getCode()) && clueInfo.getData() != null) {
 
@@ -378,9 +380,17 @@ public class PhoneTrafficController {
         circDto.setClueId(new Long(clueId));
         circDto.setStage(StageContant.STAGE_PHONE_TRAFFIC);
         JSONResult<List<CirculationRespDTO>> circulationList = circulationFeignClient.queryList(circDto);
+
+        ClueBasicDTO clueBasic = clueInfo.getData().getClueBasic();
         if (circulationList != null && circulationList.SUCCESS.equals(circulationList.getCode())
                 && circulationList.getData() != null) {
-            request.setAttribute("circulationList", circulationList.getData());
+
+            List<CirculationRespDTO> data = circulationList.getData();
+            JSONResult<List<CirculationRespDTO>> cDxcygwList = getCDxcygwList(clueBasic);
+            if(JSONResult.SUCCESS.equals(cDxcygwList.getCode())&&cDxcygwList !=null){
+                data.addAll(cDxcygwList.getData());
+            }
+            request.setAttribute("circulationList", data);
         } else {
             request.setAttribute("circulationList", new ArrayList());
         }
@@ -407,6 +417,29 @@ public class PhoneTrafficController {
         return "phonetraffic/editCustomerMaintenance";
     }
 
+
+    private JSONResult<List<CirculationRespDTO>>  getCDxcygwList(ClueBasicDTO clueBasic ){
+        JSONResult<List<CirculationRespDTO>> jsonResult = null;
+        Integer phtraCustomerStatus = clueBasic.getPhtraCustomerStatus();
+        if(phtraCustomerStatus == Integer.valueOf(PhTraCustomerStatusEnum.STATUS__4TH.getCode())){
+            // 如果== 转电销
+            CirculationReqDTO circDto = new CirculationReqDTO();
+            circDto.setClueId(new Long(clueBasic.getId()));
+            circDto.setStage(StageContant.STAGE_TELE);
+            // 获取电销创业顾问 RoleID
+            RoleQueryDTO queryDTO1 = new RoleQueryDTO();
+            queryDTO1.setRoleCode(RoleCodeEnum.DXCYGW.name());
+            JSONResult<List<RoleInfoDTO>> listJSONResult = roleManagerFeignClient
+                .qeuryRoleByName(queryDTO1);
+            if(JSONResult.SUCCESS.equals(listJSONResult.getCode())&&listJSONResult.getData()!=null){
+                List<RoleInfoDTO> data = listJSONResult.getData();
+                circDto.setRoleId(data.get(0).getId());
+                jsonResult = circulationFeignClient
+                    .queryList(circDto);
+            }
+        }
+        return jsonResult;
+    }
 
     /**
      * 跳转 编辑资源页面
@@ -468,9 +501,16 @@ public class PhoneTrafficController {
         circDto.setClueId(new Long(clueId));
         circDto.setStage(StageContant.STAGE_PHONE_TRAFFIC);
         JSONResult<List<CirculationRespDTO>> circulationList = circulationFeignClient.queryList(circDto);
+
+        ClueBasicDTO clueBasic = clueInfo.getData().getClueBasic();
         if (circulationList != null && circulationList.SUCCESS.equals(circulationList.getCode())
                 && circulationList.getData() != null) {
-            request.setAttribute("circulationList", circulationList.getData());
+            List<CirculationRespDTO> data = circulationList.getData();
+            JSONResult<List<CirculationRespDTO>> cDxcygwList = getCDxcygwList(clueBasic);
+            if(JSONResult.SUCCESS.equals(cDxcygwList.getCode())&&cDxcygwList !=null){
+                data.addAll(cDxcygwList.getData());
+            }
+            request.setAttribute("circulationList", data);
         } else {
             request.setAttribute("circulationList", new ArrayList());
         }
