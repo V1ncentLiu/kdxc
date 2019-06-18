@@ -236,7 +236,6 @@ public class ExtendClueDistributionedTaskController {
      * @return
      */
     @RequestMapping("/distributedUpdateClue")
-    @RequiresPermissions("waitDistributResource:edit")
     @ResponseBody
     @LogRecord(description = "编辑资源", operationType = OperationType.UPDATE,
             menuName = MenuEnum.WAIT_DISTRIBUT_RESOURCE)
