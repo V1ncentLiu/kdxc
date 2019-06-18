@@ -19,9 +19,11 @@
     <el-row class="borderbox">
         <!--<div class="inforTitle">维护客户</div>-->
         <el-form :model="form" :rules="rules" ref="form" class="padding20">
-            <div class="marginB20 fs16 paddingT20">资源信息 <span style="padding-left: 20px; color: red;">资源ID{{clueId}}  </span> 
+            <div class="marginB20 fs16 paddingT20">资源信息 <span style="padding-left: 20px; color: red;">资源ID{{clueId}}  </span>
                 <span v-show="isShowTip" style="padding-left: 20px; color: red;">{{showTipInfo}}</span>
                 <el-button v-show="isShowBtn" type="primary" @click="keepCustomer" style="margin-left: 10px;">保留客户
+                </el-button>
+                <el-button v-show="repeatStatus" type="primary" @click="repeatClueCustomers" style="margin-left: 10px;">重复资源信息
                 </el-button>
             </div>
 
@@ -549,12 +551,20 @@
                     :rules="{
                        required: true, message: '手机号不能为空', trigger: 'blur',
                 }">
-                <el-input v-model="domain.value" maxLength="11" @keyup.native="phoneNumber"
-                          style="width: 200px;margin-right: 10px;"></el-input>
-                <el-button type="danger" @click.prevent="removeDomain(domain)" v-show="deleteShow">删除</el-button>
+                <div v-if="editPhone == 0">
+                    <el-input  v-model="domain.value" disabled  maxLength="11" @keyup.native="phoneNumber"style="width: 200px;margin-right: 10px;"></el-input>
+                    <img th:src="@{/images/icon_tele2.png}" @click="gettelNumberIcon(domain.value)"style="margin:0 10px;width:31px;cursor: pointer;vertical-align: middle;" alt="">
+                </div>
+                <div v-else-if="editPhone == 1">
+                    <el-input  v-model="domain.value" maxLength="11" @keyup.native="phoneNumber"style="width: 200px;margin-right: 10px;"></el-input>
+                    <el-button type="danger" @click.prevent="removeDomain(domain)" v-show="deleteShow">删除</el-button>
+                    <img th:src="@{/images/icon_tele2.png}" @click="gettelNumberIcon(domain.value)"style="margin:0 10px;width:31px;cursor: pointer;vertical-align: middle;" alt="">
+                </div>
+
+
+
                 <!-- <i class="el-icon-phone-outline telNumberIcon" @click="gettelNumberIcon(domain.value)"></i> -->
-                <img th:src="@{/images/icon_tele2.png}" @click="gettelNumberIcon(domain.value)"
-                     style="margin:0 10px;width:31px;cursor: pointer;vertical-align: middle;" alt="">
+
             </el-form-item>
         </el-form>
         <div slot="footer" class="f-tac">
@@ -609,6 +619,92 @@
             <img :src="dialogFormUploadImgSrc" alt=""
                  style="width: 250px; height: 250px;">
         </div>
+    </el-dialog>
+    <el-dialog title="重复资源信息" :visible.sync="dialogFormVisible1" width="870px">
+        <el-form :model="dialogForm" ref="dialogForm" class="marginB10 dialogForm" v-for="item in repeatClueList" height="600">
+            <div class="fs16 redcolor marginB20">重复时间：{{formatTimeFn(item.discoverTime)}}</div>
+            <div class="borderbox padding10">
+                <el-row>
+                    <el-col :span="12">
+                        <el-form-item label="客户姓名：" :label-width="formLabelWidth">{{item.clueDTO.clueCustomer.cusName}}</el-form-item>
+                    </el-col>
+                    <el-col :span="12">
+                        <el-form-item label="手机号：" :label-width="formLabelWidth" >{{getPhones(item.clueDTO.clueCustomer)}}</el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="12">
+                        <el-form-item label="微信：" :label-width="formLabelWidth">
+                        {{item.clueDTO.clueCustomer.wechat}}<span @click="lookWechat(item.clueDTO.clueCustomer)" v-if="(item.clueDTO.clueCustomer.wechat2 !=null && item.clueDTO.clueCustomer.wechat2 !='')||(item.clueDTO.clueCustomer.wechatCode !=null && item.clueDTO.clueCustomer.wechatCode !='')" style="color: rgb(0, 114, 255); cursor: pointer;">查看更多</span>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="12">
+                        <el-form-item label="邮箱：" :label-width="formLabelWidth">
+                        {{item.clueDTO.clueCustomer.email}}
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="12">
+                        <el-form-item label="QQ：" :label-width="formLabelWidth">
+                        {{item.clueDTO.clueCustomer.qq}}
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="12">
+                        <el-form-item label="资源类型：" :label-width="formLabelWidth">
+                            {{item.clueDTO.clueBasic.typeName}}
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="12">
+                        <el-form-item label="留言时间：" :label-width="formLabelWidth">
+                        {{formatTimeFn(item.clueDTO.clueBasic.messageTime)}}
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="12">
+                        <el-form-item label="资源类别：" :label-width="formLabelWidth">
+                            {{item.clueDTO.clueBasic.categoryName}}
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="12">
+                        <el-form-item label="搜索词：" :label-width="formLabelWidth">
+                            {{item.clueDTO.clueBasic.searchWord}}
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="12">
+                        <el-form-item label="留言重点：" :label-width="formLabelWidth">
+                            {{item.clueDTO.clueBasic.messagePoint}}
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="12">
+                        <el-form-item label="地域信息：" :label-width="formLabelWidth">
+                        {{item.clueDTO.clueIntention.address}}
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="12">
+                        <el-form-item label="备注：" :label-width="formLabelWidth">
+                            {{item.clueDTO.clueBasic.remark}}
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+            </div>
+        </el-form>
+    </el-dialog>
+    <el-dialog title="查看微信/二维码" :visible.sync="repeatWechatVisible">
+        <el-form :model="repeatWeDialogForm" ref="repeatWeDialogForm">
+            <!--展示phone2  phone3  phone4 phone5-->
+            <el-form-item  label="微信2：" :label-width="formLabelWidth"  >
+                <el-button type="text" disabled>{{repeatCustomer.wechat2}}</el-button>
+            </el-form-item>
+            <el-form-item  label="图片二维码：" :label-width="formLabelWidth"  >
+                <img v-show="repeatCustomer.wechatCode!=''"  :src="repeatCustomer.wechatCode">
+            </el-form-item>
+        </el-form>
     </el-dialog>
 </div>
 <link rel="stylesheet" href="/css/common/uploadStyle.css">
@@ -839,7 +935,18 @@
     var ossUrl = [[${ossUrl}]];//上传文件地址
     var callRecord = [[${callRecord}]];//通话记录
     var loginUserId = [[${loginUserId}]];
+    var teleSaleId = [[${teleSaleId}]];
     var teleEndTime = [[${teleEndTime}]];
+    var repeatClueList = [[${repeatClueList}]];
+    var repeatClueStatus = [[${repeatClueStatus}]];
+    var repeatStatus =false;
+    var editPhone = 1;
+    if(repeatClueStatus == 1 ){
+      repeatStatus = true;
+    }
+    if(loginUserId == teleSaleId){
+      editPhone = 0;
+    }
     var addCustomerVM = new Vue({
         el: '#addCustomer',
         data: function () {
@@ -850,10 +957,18 @@
                       return date.getTime() <= Date.now() - 8.64e7 || date.getTime() >= Date.now();
                     }
                   },
+                editPhone:editPhone,
+                repeatWeDialogForm:{},
+                repeatCustomer:{},
+                repeatWechatVisible:false,
+                dialogFormVisible1: false,
+                repeatStatus:repeatStatus,
+                repeatClueList:repeatClueList,
                 teleEndTime:teleEndTime,
                 timeDefaultShow:new Date(),
                 clueId: clueId,
                 loginUserId: loginUserId,
+                teleSaleId: teleSaleId,
                 customerStatusRequired: false,
                 wechatVisible: false,//新增微信号
                 isShowTip: false,//是否显示释放公有池提示信息
@@ -1117,6 +1232,31 @@
             }
         },
         methods: {
+          getPhones(cus){
+            var phones = '';
+            phones = cus.phone;
+            if(cus.phone2 != null){
+              phones = phones +","+cus.phone2;
+            }
+            if(cus.phone3 != null){
+              phones = phones +","+cus.phone3;
+            }
+            if(cus.phone4 != null){
+              phones = phones +",\n"+cus.phone4;
+            }
+            if(cus.phone4 != null){
+              phones = phones +","+cus.phone4;
+            }
+            return phones;
+          },
+          lookWechat(val){
+            addCustomerVM.repeatCustomer = {};
+            addCustomerVM.repeatWechatVisible =true;
+            addCustomerVM.repeatCustomer = val;
+          },
+          repeatClueCustomers(){
+            addCustomerVM.dialogFormVisible1 =true;
+          },
        	customerPartnerChange(){
        		this.form.customerPartnerDetail =null;
        	},
