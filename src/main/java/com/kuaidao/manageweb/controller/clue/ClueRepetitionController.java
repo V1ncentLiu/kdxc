@@ -88,7 +88,12 @@ public class ClueRepetitionController {
      */
     @RequestMapping("/queryRepeatPage")
     public String queryRepeatPage(HttpServletRequest request) {
+			UserInfoDTO user = getUser();
+			List<RoleInfoDTO> roleList = user.getRoleList();
 			request.setAttribute("payModeItem", getDictionaryByCode(DicCodeEnum.PAYMODE.getCode()));
+			request.setAttribute("userId", user.getId());
+			request.setAttribute("roleCode", roleList.get(0).getRoleCode());
+			request.setAttribute("orgId", user.getOrgId());
 			return "clue/repetition/customerrePetitionList";
     }
 
