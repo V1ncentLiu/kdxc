@@ -1211,7 +1211,7 @@
                 lineFormShow: false,
                 formInline: {
                     id: '',
-                    callTime: teleEndTime,
+                    callTime: '',
                     customerStatus: '1',
                     isCall: '',
                     resourceStatus: '',
@@ -1309,6 +1309,7 @@
                 this.$refs.LineRuleForm.resetFields(); //移除校验结果并重置字段值
                 this.formInline.customerStatus = '';
                 this.formInline.visitStatus = "1";
+                this.formInline.callTime =new Date(teleEndTime);
 
             },
             gettelNumberIcon(tel) {
@@ -1565,14 +1566,33 @@
                     clue.clueCustomer = clueCustomer;
                     clue.clueIntention = clueIntention;
                     clue.tracking = tracking;
-                    axios.post('/tele/clueMyCustomerInfo/updateCustomerClue', clue)
-                        .then(function (response) {
-                            addCustomerVM.$message({
-                                message: '操作成功', type: 'success', duration: 2000, onClose: function () {
-                                    window.location.href = "/tele/clueMyCustomerInfo/initmyCustomer";
-                                }
-                            });
+                  if (this.formInline.customerStatus == '3') {//如果选择的是不跟进则弹出弹窗
+                    this.saveDisabled = false;
+                    this.$confirm('选择不跟进，此资源将释放。', '提示', {
+                      confirmButtonText: '确定',
+                      cancelButtonText: '取消',
+                      type: 'warning'
+                    }).then(() => {
+                      this.saveDisabled = true;
+                      axios.post('/tele/clueMyCustomerInfo/updateCustomerClue', clue)
+                      .then(function (response) {
+                        addCustomerVM.$message({
+                          message: '操作成功', type: 'success', duration: 2000, onClose: function () {
+                            window.location.href = "/tele/clueMyCustomerInfo/initmyCustomer";
+                          }
                         });
+                      });
+                    })
+                  } else {
+                    axios.post('/tele/clueMyCustomerInfo/updateCustomerClue', clue)
+                    .then(function (response) {
+                      addCustomerVM.$message({
+                        message: '操作成功', type: 'success', duration: 2000, onClose: function () {
+                          window.location.href = "/tele/clueMyCustomerInfo/initmyCustomer";
+                        }
+                      });
+                    });
+                  }
                 } else {
                     console.log('error submit!!');
                     return false;
@@ -2445,15 +2465,16 @@
           phoneArr.push(phone5);
         }
         if (phoneArr.length < 1) {
-          var phone5 = {};
-          phone5.value = "";
-          phone5.key = Date.now();
-          if(editPhone == 1){
-            phone5.edit = 0;
-          }else {
-            phone5.edit = 1;
-          }
-          phoneArr.push(phone5);
+          var phone2 = {};
+          phone2.value = "";
+          phone2.key = Date.now();
+          // if(editPhone == 1){
+          //   phone2.edit = 0;
+          // }else {
+          //   phone2.edit = 1;
+          // }
+          phone2.edit = 0;
+          phoneArr.push(phone2);
         }
         this.dynamicValidateForm.domains = phoneArr;
         console.log(phoneArr)
