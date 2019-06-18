@@ -211,12 +211,12 @@
         </div>
         <el-row>
             <el-table
-                ref="tableData"
+                ref="multipleTable"
                 tooltip-effect="dark"
                 style="width: 100%"
                 border
                 :data="tableData"
-                @row-dblclick="rowDblClick"
+                @row-dblclick="toUpdatePage"
                 @selection-change="handleSelectionChange"
                 >
                 <el-table-column align="center" prop="clueId" type="selection" width="55"></el-table-column> 
@@ -255,7 +255,7 @@
         		</el-table-column>
                 <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width" v-else></el-table-column>
             </el-table>
-            <table-pagination :pager="pager" @change="initTableData"></table-pagination>
+            <table-pagination v-if="paginationShow" :pager="pager" @change="initTableData"></table-pagination>
         </el-row>
     </div>
     <!-- dialog -->
@@ -382,6 +382,7 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
         el: '#optimizeClueManagement',
         data: function() {
             return {
+                paginationShow: false,
                 isShow:false,
                 dialogFormVisible: false,
                 dialogChooseList: false,
@@ -444,7 +445,31 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                 tableData:[],
                 customer:'',
                 basic:'',
-
+                storeForm: {
+                    starTime:'',
+                    endTime:'',
+                    starTime1:'',
+                    endTime1:'',
+                    telemarketingBranch:'',
+                    businessUnit:'',
+                    telemarketingItem:'',
+                    resourceProject:'',
+                    medium:'',
+                    resourceType:'',
+                    tradeType:'',
+                    resourceStage:'',
+                    resourcePerson:'',
+                    phone:'',
+                    clueId:'',
+                    isCall:"",
+                    status:"",
+                    firstCall:"",
+                    qq:"",
+                    wechat:"",
+                    email:""
+                },
+                storeId: '',
+                scrollTop: 0,
             }
         },
         methods: {
@@ -560,10 +585,52 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
     		    	ocmVM.pager.currentPage = pageData.currentPage;
     		    	ocmVM.pager.pageSize = pageData.pageSize;
     		    	ocmVM.tableData =pageData.data;
+
+                    // 取出存储的id
+                     if(!ocmVM.paginationShow){
+                         if(ocmVM.storeId){
+                             ocmVM.$nextTick(function(){
+                                var storage = [];
+                                ocmVM.tableData.forEach(function(item, index){
+                                    if(item.clueId === ocmVM.storeId ){
+                                        storage.push(ocmVM.tableData[index]);
+                                    }
+                                })
+                                ocmVM.toggleSelection(storage);
+                                ocmVM.$el.querySelector('.el-table__body-wrapper').scrollTop = ocmVM.scrollTop;
+                            })
+                        }
+                     }else{
+                        ocmVM.removeSessionStore ("distributiveResourceStoreForm");
+                        ocmVM.removeSessionStore ("distributiveResourceOtherVal");
+                     }
+                    ocmVM.paginationShow = true;
+                    ocmVM.storeForm = ocmVM.form;
     			})
         	},
-
-
+            toggleSelection(rows) { // table select 默认选中fn
+                if (rows) {
+                    rows.forEach(row => {
+                        this.$refs.multipleTable.toggleRowSelection(row,true);
+                    });
+                } else {
+                    this.$refs.multipleTable.clearSelection();
+                }
+            },
+        	//跳转编辑页
+            toUpdatePage(row) {
+            	var clueId=row.clueId;
+                // 存储选中信息--start
+                this.setSessionStore("distributiveResourceStoreForm", this.storeForm);
+                var otherVal = {
+                    "currentPage": this.pager.currentPage,
+                    "clueId": clueId,
+                    "scrollTop": this.$el.querySelector('.el-table__body-wrapper').scrollTop
+                }
+                this.setSessionStore("distributiveResourceOtherVal", otherVal);
+                // 存储选中信息--end
+              	document.location.href='/exetend/distributionedTaskManager/toUpdatePage?id='+clueId;
+            },
             rowDblClick(row, column, event){
         	  //双击查看详情
         	  var  param={};
@@ -849,10 +916,43 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                     });
                 }                
             },
+            setSessionStore (name, content) {
+                if (!name) return
+                if (typeof content !== 'string') {
+                content = JSON.stringify(content)
+                }
+                window.sessionStorage.setItem(name, content)
+            },
+            getSessionStore (name) {
+                if (!name) return;
+                var content = window.sessionStorage.getItem(name);
+                if (typeof content == 'string') {
+                    content = JSON.parse(content)
+                }
+                return content;
+            },
+            removeSessionStore (name) {
+                if (!name) return
+                return window.sessionStorage.removeItem(name)
+            },
         },
         mounted(){
 
         	document.getElementById('optimizeClueManagement').style.display = 'block';
+        },
+        created(){
+            // window.sessionStorage.clear(); // 点击侧边栏-清除所有cookie
+            // 进入页面判断有是否有存储值
+            if(!this.paginationShow){
+                var storeVal = this.getSessionStore("distributiveResourceStoreForm");
+                var otherVal = this.getSessionStore("distributiveResourceOtherVal");
+                if(storeVal && otherVal){
+                    this.form = storeVal;
+                    this.$set(this.pager,"currentPage",otherVal.currentPage);
+                    this.storeId = otherVal.clueId;
+                    this.scrollTop = otherVal.scrollTop;
+                }
+            }
         	this.initColumn();
          	this.initTableData();
             var  param={};

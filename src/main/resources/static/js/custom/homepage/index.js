@@ -559,6 +559,7 @@ var homePageVM=new Vue({
                         //homePageVM.$refs.loginClientForm.clearValidate();
                         
          	        }else{
+         	        	console.info(result);
          	        	homePageVM.$message({message:"退出失败",type:'error'});
          	        }
          	    });

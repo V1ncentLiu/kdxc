@@ -29,6 +29,7 @@ var clientVm = new Vue({
          form:{//坐席form
         	 id:'',
         	 clientNo:'',
+             attribution:'',
         	 bindPhone:'',
         	 displayPhone:'',
         	 orgId:'',
@@ -283,10 +284,11 @@ var clientVm = new Vue({
         	 
          },
          selectOrg(){//选择组织
-        	
-        	 this.$nextTick(() => {
+        	 this.orgTreeData = [];
+        	this.orgTreeLoading = true;
+        	/* this.$nextTick(() => {
         		 clientVm.$refs.orgTree.setCheckedKeys([]);//清空tree
-        		});
+        		});*/
         	 this.orgDialogVisible=true;
         	 axios.post('/organization/organization/query',{})
              .then(function (response) {

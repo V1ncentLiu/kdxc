@@ -14,6 +14,7 @@ import com.kuaidao.aggregation.dto.project.ProjectInfoPageParam;
 import com.kuaidao.aggregation.dto.tracking.TrackingReqDTO;
 import com.kuaidao.aggregation.dto.tracking.TrackingRespDTO;
 import com.kuaidao.common.constant.CluePhase;
+import com.kuaidao.common.constant.PhTraCustomerStatusEnum;
 import com.kuaidao.common.constant.RoleCodeEnum;
 import com.kuaidao.common.constant.StageContant;
 import com.kuaidao.common.entity.JSONResult;
@@ -44,6 +45,10 @@ import com.kuaidao.sys.dto.role.RoleInfoDTO;
 import com.kuaidao.sys.dto.role.RoleQueryDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import com.kuaidao.sys.dto.user.UserInfoPageParam;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.slf4j.Logger;
@@ -318,6 +323,15 @@ public class PhoneTrafficController {
         // 资源通话记录
         if (callRecord != null && JSONResult.SUCCESS.equals(callRecord.getCode()) && callRecord.getData() != null) {
             request.setAttribute("callRecord", callRecord.getData());
+            CallRecordRespDTO callRecordRespDTO = callRecord.getData().stream().filter(a-> StringUtils.isNotBlank(a.getStartTime())).max(Comparator.comparing(CallRecordRespDTO::getStartTime)).get();
+            if(callRecordRespDTO != null){
+                String date = convertTimeToString(Long.valueOf(callRecordRespDTO.getStartTime())* 1000L);
+                request.setAttribute("teleEndTime",date);
+            }else {
+                request.setAttribute("teleEndTime",new Date());
+            }
+        }else {
+            request.setAttribute("teleEndTime",new Date());
         }
         ClueQueryDTO queryDTO = new ClueQueryDTO();
 
@@ -328,6 +342,7 @@ public class PhoneTrafficController {
         request.setAttribute("ossUrl", ossUrl);
 
         JSONResult<ClueDTO> clueInfo = myCustomerFeignClient.findClueInfo(queryDTO);
+
 
         // 维护的资源数据
         if (clueInfo != null && JSONResult.SUCCESS.equals(clueInfo.getCode()) && clueInfo.getData() != null) {
@@ -365,9 +380,17 @@ public class PhoneTrafficController {
         circDto.setClueId(new Long(clueId));
         circDto.setStage(StageContant.STAGE_PHONE_TRAFFIC);
         JSONResult<List<CirculationRespDTO>> circulationList = circulationFeignClient.queryList(circDto);
+
+        ClueBasicDTO clueBasic = clueInfo.getData().getClueBasic();
         if (circulationList != null && circulationList.SUCCESS.equals(circulationList.getCode())
                 && circulationList.getData() != null) {
-            request.setAttribute("circulationList", circulationList.getData());
+
+            List<CirculationRespDTO> data = circulationList.getData();
+            JSONResult<List<CirculationRespDTO>> cDxcygwList = getCDxcygwList(clueBasic);
+            if(cDxcygwList !=null&&JSONResult.SUCCESS.equals(cDxcygwList.getCode())){
+                data.addAll(cDxcygwList.getData());
+            }
+            request.setAttribute("circulationList", data);
         } else {
             request.setAttribute("circulationList", new ArrayList());
         }
@@ -394,6 +417,30 @@ public class PhoneTrafficController {
         return "phonetraffic/editCustomerMaintenance";
     }
 
+
+    private  JSONResult<List<CirculationRespDTO>> getCDxcygwList(ClueBasicDTO clueBasic ){
+        JSONResult<List<CirculationRespDTO>> jsonResult = null;
+        Integer phtraCustomerStatus = clueBasic.getPhCustomerStatus();
+        if(phtraCustomerStatus == Integer.valueOf(PhTraCustomerStatusEnum.STATUS__4TH.getCode())){
+            // 如果== 转电销
+            CirculationReqDTO circDto = new CirculationReqDTO();
+            circDto.setClueId(new Long(clueBasic.getId()));
+            circDto.setStage(StageContant.STAGE_TELE);
+            // 获取电销创业顾问 RoleID
+            RoleQueryDTO queryDTO1 = new RoleQueryDTO();
+            queryDTO1.setRoleCode(RoleCodeEnum.DXCYGW.name());
+            JSONResult<List<RoleInfoDTO>> listJSONResult = roleManagerFeignClient
+                .qeuryRoleByName(queryDTO1);
+            if(JSONResult.SUCCESS.equals(listJSONResult.getCode())&&listJSONResult.getData()!=null){
+                List<RoleInfoDTO> data = listJSONResult.getData();
+                circDto.setRoleId(data.get(0).getId());
+                jsonResult = circulationFeignClient
+                    .queryList(circDto);
+
+            }
+        }
+        return jsonResult;
+    }
 
     /**
      * 跳转 编辑资源页面
@@ -455,9 +502,16 @@ public class PhoneTrafficController {
         circDto.setClueId(new Long(clueId));
         circDto.setStage(StageContant.STAGE_PHONE_TRAFFIC);
         JSONResult<List<CirculationRespDTO>> circulationList = circulationFeignClient.queryList(circDto);
+
+        ClueBasicDTO clueBasic = clueInfo.getData().getClueBasic();
         if (circulationList != null && circulationList.SUCCESS.equals(circulationList.getCode())
                 && circulationList.getData() != null) {
-            request.setAttribute("circulationList", circulationList.getData());
+            List<CirculationRespDTO> data = circulationList.getData();
+            JSONResult<List<CirculationRespDTO>> cDxcygwList = getCDxcygwList(clueBasic);
+            if(cDxcygwList !=null&&JSONResult.SUCCESS.equals(cDxcygwList.getCode())){
+                data.addAll(cDxcygwList.getData());
+            }
+            request.setAttribute("circulationList", data);
         } else {
             request.setAttribute("circulationList", new ArrayList());
         }
@@ -576,4 +630,8 @@ public class PhoneTrafficController {
         return list;
     }
 
+    public static String convertTimeToString(Long time){
+        DateTimeFormatter ftf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        return ftf.format(LocalDateTime.ofInstant(Instant.ofEpochMilli(time), ZoneId.systemDefault()));
+    }
 }

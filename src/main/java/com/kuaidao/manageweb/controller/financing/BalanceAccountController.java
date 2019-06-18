@@ -21,10 +21,7 @@ import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 import com.kuaidao.aggregation.constant.AggregationConstant;
 import com.kuaidao.aggregation.dto.financing.ReconciliationConfirmDTO;
@@ -107,28 +104,22 @@ public class BalanceAccountController {
     public String balanceAccountPage(HttpServletRequest request) {
         UserInfoDTO user = getUser();
         // 查询所有商务大区
-        List<OrganizationRespDTO> busAreaList =
-                getOrgList(null, OrgTypeConstant.SWDQ, user.getBusinessLine());
+        List<OrganizationRespDTO> busAreaList = getOrgList(null, OrgTypeConstant.SWDQ, user.getBusinessLine());
         request.setAttribute("busAreaList", busAreaList);
         // 查询所有商务组
-        List<OrganizationRespDTO> busGroupList =
-                getOrgList(null, OrgTypeConstant.SWZ, user.getBusinessLine());
+        List<OrganizationRespDTO> busGroupList = getOrgList(null, OrgTypeConstant.SWZ, user.getBusinessLine());
         request.setAttribute("busGroupList", busGroupList);
         // 查询所有电销事业部
-        List<OrganizationRespDTO> teleDeptList =
-                getOrgList(null, OrgTypeConstant.DZSYB, user.getBusinessLine());
+        List<OrganizationRespDTO> teleDeptList = getOrgList(null, OrgTypeConstant.DZSYB, user.getBusinessLine());
         request.setAttribute("teleDeptList", teleDeptList);
         // 查询所有电销组
-        List<OrganizationRespDTO> teleGroupList =
-                getOrgList(null, OrgTypeConstant.DXZ, user.getBusinessLine());
+        List<OrganizationRespDTO> teleGroupList = getOrgList(null, OrgTypeConstant.DXZ, user.getBusinessLine());
         request.setAttribute("teleGroupList", teleGroupList);
         // 查询所有商务经理
-        List<UserInfoDTO> busSaleList =
-                getUserList(null, RoleCodeEnum.SWJL.name(), null, user.getBusinessLine());
+        List<UserInfoDTO> busSaleList = getUserList(null, RoleCodeEnum.SWJL.name(), null, user.getBusinessLine());
         request.setAttribute("busSaleList", busSaleList);
         // 查询所有电销创业顾问
-        List<UserInfoDTO> teleSaleList =
-                getUserList(null, RoleCodeEnum.DXCYGW.name(), null, user.getBusinessLine());
+        List<UserInfoDTO> teleSaleList = getUserList(null, RoleCodeEnum.DXCYGW.name(), null, user.getBusinessLine());
         request.setAttribute("teleSaleList", teleSaleList);
 
         // 查询所有项目
@@ -141,8 +132,7 @@ public class BalanceAccountController {
         QueryFieldByRoleAndMenuReq queryFieldByRoleAndMenuReq = new QueryFieldByRoleAndMenuReq();
         queryFieldByRoleAndMenuReq.setMenuCode("financing:balanceaccountManager");
         queryFieldByRoleAndMenuReq.setId(user.getRoleList().get(0).getId());
-        JSONResult<List<CustomFieldQueryDTO>> queryFieldByRoleAndMenu =
-                customFieldFeignClient.queryFieldByRoleAndMenu(queryFieldByRoleAndMenuReq);
+        JSONResult<List<CustomFieldQueryDTO>> queryFieldByRoleAndMenu = customFieldFeignClient.queryFieldByRoleAndMenu(queryFieldByRoleAndMenuReq);
         request.setAttribute("fieldList", queryFieldByRoleAndMenu.getData());
 
         // 根据用户查询页面字段
@@ -150,12 +140,10 @@ public class BalanceAccountController {
         queryFieldByUserAndMenuReq.setId(user.getId());
         queryFieldByUserAndMenuReq.setRoleId(user.getRoleList().get(0).getId());
         queryFieldByUserAndMenuReq.setMenuCode("financing:balanceaccountManager");
-        JSONResult<List<UserFieldDTO>> queryFieldByUserAndMenu =
-                customFieldFeignClient.queryFieldByUserAndMenu(queryFieldByUserAndMenuReq);
+        JSONResult<List<UserFieldDTO>> queryFieldByUserAndMenu = customFieldFeignClient.queryFieldByUserAndMenu(queryFieldByUserAndMenuReq);
         request.setAttribute("userFieldList", queryFieldByUserAndMenu.getData());
         // 查询签约店型集合
-        request.setAttribute("vistitStoreTypeList",
-                getDictionaryByCode(DicCodeEnum.VISITSTORETYPE.getCode()));
+        request.setAttribute("vistitStoreTypeList", getDictionaryByCode(DicCodeEnum.VISITSTORETYPE.getCode()));
         request.setAttribute("payModeItem", getDictionaryByCode(DicCodeEnum.PAYMODE.getCode()));
         return "financing/balanceAccountPage";
     }
@@ -168,8 +156,8 @@ public class BalanceAccountController {
     @PostMapping("/applyList")
     @ResponseBody
     @RequiresPermissions("financing:balanceaccountManager:view")
-    public JSONResult<PageBean<ReconciliationConfirmDTO>> appayList(
-            @RequestBody ReconciliationConfirmPageParam pageParam, HttpServletRequest request) {
+    public JSONResult<PageBean<ReconciliationConfirmDTO>> appayList(@RequestBody ReconciliationConfirmPageParam pageParam,
+            HttpServletRequest request) {
         UserInfoDTO user = getUser();
         // 插入当前用户、角色信息
         pageParam.setUserId(user.getId());
@@ -179,8 +167,7 @@ public class BalanceAccountController {
             pageParam.setRoleCode(roleList.get(0).getRoleCode());
         }
         pageParam.setBusinessLine(user.getBusinessLine());
-        JSONResult<PageBean<ReconciliationConfirmDTO>> list =
-                reconciliationConfirmFeignClient.applyList(pageParam);
+        JSONResult<PageBean<ReconciliationConfirmDTO>> list = reconciliationConfirmFeignClient.applyList(pageParam);
         return list;
     }
 
@@ -192,10 +179,8 @@ public class BalanceAccountController {
     @PostMapping("/rejectApply")
     @ResponseBody
     // @RequiresPermissions("financing:balanceaccountManager:rejectApply")
-    @LogRecord(description = "驳回", operationType = OperationType.UPDATE,
-            menuName = MenuEnum.REFUNDREBATEAPPLY_MANAGER)
-    public JSONResult<Void> rejectApply(@RequestBody ReconciliationConfirmReq req,
-            HttpServletRequest request) {
+    @LogRecord(description = "驳回", operationType = OperationType.UPDATE, menuName = MenuEnum.REFUNDREBATEAPPLY_MANAGER)
+    public JSONResult<Void> rejectApply(@RequestBody ReconciliationConfirmReq req, HttpServletRequest request) {
         req.setStatus(AggregationConstant.RECONCILIATION_STATUS.STATUS_1);
         JSONResult<Void> reconciliationConfirm = reconciliationConfirmFeignClient.rejectApply(req);
         return reconciliationConfirm;
@@ -209,21 +194,33 @@ public class BalanceAccountController {
     @PostMapping("/settlementConfirm")
     @ResponseBody
     // @RequiresPermissions("financing:reconciliationConfirmManager:settlementConfirm")
-    @LogRecord(description = "结算申请", operationType = OperationType.UPDATE,
-            menuName = MenuEnum.RECONCILIATIONCONFIRM_MANAGER)
-    public JSONResult<Void> settlementConfirm(@RequestBody ReconciliationConfirmReq req,
-            HttpServletRequest request) {
+    @LogRecord(description = "结算申请", operationType = OperationType.UPDATE, menuName = MenuEnum.RECONCILIATIONCONFIRM_MANAGER)
+    public JSONResult<Void> settlementConfirm(@RequestBody ReconciliationConfirmReq req, HttpServletRequest request) {
         UserInfoDTO user = getUser();
         // 插入当前用户、角色信息
         req.setCommitUser(user.getId());
         req.setCommitTime(new Date());
         BigDecimal bigDecimal = new BigDecimal(req.getMoney());
-        req.setCommissionMoney(
-                bigDecimal.multiply(new BigDecimal(req.getRatio())).divide(new BigDecimal(100)));
+        req.setCommissionMoney(bigDecimal.multiply(new BigDecimal(req.getRatio())).divide(new BigDecimal(100)));
         req.setStatus(AggregationConstant.RECONCILIATION_STATUS.STATUS_2);
-        JSONResult<Void> reconciliationConfirm =
-                reconciliationConfirmFeignClient.applyConfirm(req);
+        JSONResult<Void> reconciliationConfirm = reconciliationConfirmFeignClient.applyConfirm(req);
         return reconciliationConfirm;
+    }
+
+    /**
+     * 根据对账申请表id获取已对账的佣金之和
+     * 
+     * @author: Fanjd
+     * @param accountId 对账申请表主键
+     * @return: com.kuaidao.common.entity.JSONResult<java.lang.Void>
+     * @Date: 2019/6/14 18:25
+     * @since: 1.0.0
+     **/
+    @ResponseBody
+    @PostMapping("/getConfirmCommission")
+    public JSONResult<BigDecimal> getConfirmCommission(@RequestBody ReconciliationConfirmReq reconciliationConfirmReq) {
+        JSONResult<BigDecimal> sumConfirmCommission = reconciliationConfirmFeignClient.getConfirmCommission(reconciliationConfirmReq.getAccountId());
+        return sumConfirmCommission;
     }
 
     /**
@@ -242,15 +239,13 @@ public class BalanceAccountController {
      * 
      * @return
      */
-    private List<UserInfoDTO> getUserList(Long orgId, String roleCode, List<Integer> statusList,
-            Integer businessLine) {
+    private List<UserInfoDTO> getUserList(Long orgId, String roleCode, List<Integer> statusList, Integer businessLine) {
         UserOrgRoleReq userOrgRoleReq = new UserOrgRoleReq();
         userOrgRoleReq.setOrgId(orgId);
         userOrgRoleReq.setRoleCode(roleCode);
         userOrgRoleReq.setStatusList(statusList);
         userOrgRoleReq.setBusinessLine(businessLine);
-        JSONResult<List<UserInfoDTO>> listByOrgAndRole =
-                userInfoFeignClient.listByOrgAndRole(userOrgRoleReq);
+        JSONResult<List<UserInfoDTO>> listByOrgAndRole = userInfoFeignClient.listByOrgAndRole(userOrgRoleReq);
         return listByOrgAndRole.getData();
     }
 
@@ -259,15 +254,13 @@ public class BalanceAccountController {
      * 
      * @return
      */
-    private List<OrganizationRespDTO> getOrgList(Long parentId, Integer type,
-            Integer businessLine) {
+    private List<OrganizationRespDTO> getOrgList(Long parentId, Integer type, Integer businessLine) {
         OrganizationQueryDTO queryDTO = new OrganizationQueryDTO();
         queryDTO.setParentId(parentId);
         queryDTO.setOrgType(type);
         queryDTO.setBusinessLine(businessLine);
         // 查询所有组织
-        JSONResult<List<OrganizationRespDTO>> queryOrgByParam =
-                organizationFeignClient.queryOrgByParam(queryDTO);
+        JSONResult<List<OrganizationRespDTO>> queryOrgByParam = organizationFeignClient.queryOrgByParam(queryDTO);
         List<OrganizationRespDTO> data = queryOrgByParam.getData();
         return data;
     }
@@ -279,10 +272,8 @@ public class BalanceAccountController {
      * @return
      */
     private List<DictionaryItemRespDTO> getDictionaryByCode(String code) {
-        JSONResult<List<DictionaryItemRespDTO>> queryDicItemsByGroupCode =
-                dictionaryItemFeignClient.queryDicItemsByGroupCode(code);
-        if (queryDicItemsByGroupCode != null
-                && JSONResult.SUCCESS.equals(queryDicItemsByGroupCode.getCode())) {
+        JSONResult<List<DictionaryItemRespDTO>> queryDicItemsByGroupCode = dictionaryItemFeignClient.queryDicItemsByGroupCode(code);
+        if (queryDicItemsByGroupCode != null && JSONResult.SUCCESS.equals(queryDicItemsByGroupCode.getCode())) {
             return queryDicItemsByGroupCode.getData();
         }
         return null;
@@ -295,20 +286,16 @@ public class BalanceAccountController {
      * @throws Exception
      */
     @RequestMapping("/downBalanceAccount")
-    public ModelAndView downBalanceAccount(HttpServletRequest request, HttpServletResponse response)
-            throws Exception {
+    public ModelAndView downBalanceAccount(HttpServletRequest request, HttpServletResponse response) throws Exception {
         PayDetailAccountDTO queryDTO = new PayDetailAccountDTO();
         queryDTO.setPayDetailId(Long.parseLong(request.getParameter("payDetailId")));
-        JSONResult<PayDetailAccountDTO> jsonResult =
-                balanceAccountApplyClient.getPayDetailById(queryDTO);
+        JSONResult<PayDetailAccountDTO> jsonResult = balanceAccountApplyClient.getPayDetailById(queryDTO);
         Map dataMap = new HashMap<>();
         if (JSONResult.SUCCESS.equals(jsonResult.getCode()) && jsonResult.getData() != null) {
-            List<DictionaryItemRespDTO> dictionaryItemRespDTOs =
-                    getDictionaryByCode(DicCodeEnum.VISITSTORETYPE.getCode());
+            List<DictionaryItemRespDTO> dictionaryItemRespDTOs = getDictionaryByCode(DicCodeEnum.VISITSTORETYPE.getCode());
             List<DictionaryItemRespDTO> giveTypeDTOs = getDictionaryByCode(Constants.GIVE_TYPE);
 
-            List<DictionaryItemRespDTO> payModeItem =
-                getDictionaryByCode(DicCodeEnum.PAYMODE.getCode());
+            List<DictionaryItemRespDTO> payModeItem = getDictionaryByCode(DicCodeEnum.PAYMODE.getCode());
 
 
             PayDetailAccountDTO accountDTO = jsonResult.getData();
@@ -326,8 +313,7 @@ public class BalanceAccountController {
             // 去字典表查询赠送类型
             if (giveTypeDTOs != null && giveTypeDTOs.size() > 0) {
                 for (DictionaryItemRespDTO dictionaryItemRespDTO : giveTypeDTOs) {
-                    if (accountDTO.getGiveType() != null && dictionaryItemRespDTO.getValue()
-                            .equals(accountDTO.getGiveType().toString())) {
+                    if (accountDTO.getGiveType() != null && dictionaryItemRespDTO.getValue().equals(accountDTO.getGiveType().toString())) {
                         dataMap.put("giveTypeName", dictionaryItemRespDTO.getName());
                     }
                 }
@@ -336,8 +322,7 @@ public class BalanceAccountController {
             // 去字典表查询赠送类型
             if (giveTypeDTOs != null && giveTypeDTOs.size() > 0) {
                 for (DictionaryItemRespDTO dictionaryItemRespDTO : giveTypeDTOs) {
-                    if (accountDTO.getGiveType() != null && dictionaryItemRespDTO.getValue()
-                        .equals(accountDTO.getGiveType().toString())) {
+                    if (accountDTO.getGiveType() != null && dictionaryItemRespDTO.getValue().equals(accountDTO.getGiveType().toString())) {
                         dataMap.put("giveTypeName", dictionaryItemRespDTO.getName());
                     }
                 }
@@ -346,28 +331,28 @@ public class BalanceAccountController {
             String payMode1 = accountDTO.getPayMode();
             String[] split = payMode1.split(",");
             String payMode = "";
-            for(int i = 0 ; i < split.length ; i++){
-                for(DictionaryItemRespDTO item : payModeItem){
-                    if(item.getValue().equals(split[i])){
-                        if(i==0){
+            for (int i = 0; i < split.length; i++) {
+                for (DictionaryItemRespDTO item : payModeItem) {
+                    if (item.getValue().equals(split[i])) {
+                        if (i == 0) {
                             payMode = item.getName();
-                        }else{
-                            payMode = payMode +","+ item.getName();
+                        } else {
+                            payMode = payMode + "," + item.getName();
                         }
                     }
                 }
             }
-//            if (accountDTO.getPayMode() == 1) {
-//                payMode = "现金";
-//            } else if (accountDTO.getPayMode() == 2) {
-//                payMode = "POS";
-//            } else if (accountDTO.getPayMode() == 3) {
-//                payMode = "转账";
-//            } else if (accountDTO.getPayMode() == 4) {
-//                payMode = "微信";
-//            } else if (accountDTO.getPayMode() == 5) {
-//                payMode = "支付宝";
-//            }
+            // if (accountDTO.getPayMode() == 1) {
+            // payMode = "现金";
+            // } else if (accountDTO.getPayMode() == 2) {
+            // payMode = "POS";
+            // } else if (accountDTO.getPayMode() == 3) {
+            // payMode = "转账";
+            // } else if (accountDTO.getPayMode() == 4) {
+            // payMode = "微信";
+            // } else if (accountDTO.getPayMode() == 5) {
+            // payMode = "支付宝";
+            // }
 
 
             String payType = "";
@@ -384,49 +369,32 @@ public class BalanceAccountController {
             dataMap.put("year", createTime.substring(0, 4));
             dataMap.put("month", createTime.substring(5, 7));
             dataMap.put("day", createTime.substring(8, 10));
-            dataMap.put("statementNo",
-                    accountDTO.getStatementNo() == null ? "" : (accountDTO.getStatementNo() + ""));
-            dataMap.put("cueName",
-                    accountDTO.getCusName() == null ? "" : (accountDTO.getCusName() + ""));
+            dataMap.put("statementNo", accountDTO.getStatementNo() == null ? "" : (accountDTO.getStatementNo() + ""));
+            dataMap.put("cueName", accountDTO.getCusName() == null ? "" : (accountDTO.getCusName() + ""));
             dataMap.put("phone", accountDTO.getPhone() == null ? "" : (accountDTO.getPhone() + ""));
-            dataMap.put("idCard",
-                    accountDTO.getIdCard() == null ? "" : (accountDTO.getIdCard() + ""));
-            dataMap.put("projectName",
-                    accountDTO.getProjectName() == null ? "" : (accountDTO.getProjectName() + ""));
-            dataMap.put("area", accountDTO.getSignProvince() + accountDTO.getSignCity()
-                    + accountDTO.getSignDictrict());
-            dataMap.put("companyName",
-                    accountDTO.getCompanyName() == null ? "" : (accountDTO.getCompanyName() + ""));
+            dataMap.put("idCard", accountDTO.getIdCard() == null ? "" : (accountDTO.getIdCard() + ""));
+            dataMap.put("projectName", accountDTO.getProjectName() == null ? "" : (accountDTO.getProjectName() + ""));
+            dataMap.put("area", accountDTO.getSignProvince() + accountDTO.getSignCity() + accountDTO.getSignDictrict());
+            dataMap.put("companyName", accountDTO.getCompanyName() == null ? "" : (accountDTO.getCompanyName() + ""));
             dataMap.put("payMode", payMode);
             dataMap.put("payType", payType);
-            dataMap.put("received",
-                    accountDTO.getAmountReceived() == null ? "" : accountDTO.getAmountReceived());
-            dataMap.put("businessManager", accountDTO.getBusinessManagerName() == null ? ""
-                    : (accountDTO.getBusinessManagerName() + ""));
-            dataMap.put("busarea",
-                    accountDTO.getBusAreaName() == null ? "" : accountDTO.getBusAreaName());
-            dataMap.put("dept",
-                    accountDTO.getTeleDeptName() == null ? "" : accountDTO.getTeleDeptName());
-            dataMap.put("group",
-                    accountDTO.getTeleGorupName() == null ? "" : accountDTO.getTeleGorupName());
-            dataMap.put("sale",
-                    accountDTO.getTeleSaleName() == null ? "" : accountDTO.getTeleSaleName());
-            dataMap.put("receivable", accountDTO.getSignAmountReceivable() == null ? ""
-                    : accountDTO.getSignAmountReceivable());
+            dataMap.put("received", accountDTO.getAmountReceived() == null ? "" : accountDTO.getAmountReceived());
+            dataMap.put("businessManager", accountDTO.getBusinessManagerName() == null ? "" : (accountDTO.getBusinessManagerName() + ""));
+            dataMap.put("busarea", accountDTO.getBusAreaName() == null ? "" : accountDTO.getBusAreaName());
+            dataMap.put("dept", accountDTO.getTeleDeptName() == null ? "" : accountDTO.getTeleDeptName());
+            dataMap.put("group", accountDTO.getTeleGorupName() == null ? "" : accountDTO.getTeleGorupName());
+            dataMap.put("sale", accountDTO.getTeleSaleName() == null ? "" : accountDTO.getTeleSaleName());
+            dataMap.put("receivable", accountDTO.getSignAmountReceivable() == null ? "" : accountDTO.getSignAmountReceivable());
             // if (accountDTO.getPayType() == 1 || accountDTO.getPayType() == 2) {
             dataMap.put("toll", accountDTO.getFirstToll() == null ? "" : accountDTO.getFirstToll());
-            dataMap.put("preferent", accountDTO.getPreferentialAmount() == null ? ""
-                    : accountDTO.getPreferentialAmount());
+            dataMap.put("preferent", accountDTO.getPreferentialAmount() == null ? "" : accountDTO.getPreferentialAmount());
             /*
              * } else { dataMap.put("toll", ""); dataMap.put("preferent", ""); }
              */
-            dataMap.put("settle",
-                    accountDTO.getSettlementMoney() == null ? "" : accountDTO.getSettlementMoney());
+            dataMap.put("settle", accountDTO.getSettlementMoney() == null ? "" : accountDTO.getSettlementMoney());
 
-            dataMap.put("amount", accountDTO.getAmountPerformance() == null ? ""
-                    : accountDTO.getAmountPerformance());
-            dataMap.put("giveAmount",
-                    accountDTO.getGiveAmount() == null ? "" : accountDTO.getGiveAmount());
+            dataMap.put("amount", accountDTO.getAmountPerformance() == null ? "" : accountDTO.getAmountPerformance());
+            dataMap.put("giveAmount", accountDTO.getGiveAmount() == null ? "" : accountDTO.getGiveAmount());
         }
         File file = createDoc(dataMap);
         response.setContentType("text/html;charset=utf-8");
@@ -437,8 +405,7 @@ public class BalanceAccountController {
         try {
             long fileLength = file.length();
             response.setContentType("application/msword");
-            response.setHeader("Content-disposition", "attachment; filename="
-                    + URLEncoder.encode(dataMap.get("statementNo") + ".doc", "utf-8"));
+            response.setHeader("Content-disposition", "attachment; filename=" + URLEncoder.encode(dataMap.get("statementNo") + ".doc", "utf-8"));
             response.setHeader("Content-Length", String.valueOf(fileLength));
             bis = new BufferedInputStream(new FileInputStream(file));
             bos = new BufferedOutputStream(response.getOutputStream());
@@ -455,8 +422,7 @@ public class BalanceAccountController {
             if (bos != null)
                 bos.close();
             File directory = new File("");
-            boolean success = (new File(directory.getCanonicalPath() + "/"
-                    + dataMap.get("statementNo").toString() + ".doc")).delete();
+            boolean success = (new File(directory.getCanonicalPath() + "/" + dataMap.get("statementNo").toString() + ".doc")).delete();
         }
         return null;
     }
@@ -475,8 +441,7 @@ public class BalanceAccountController {
             t = configuration.getTemplate("balanceaccount.ftl");
             t.setEncoding("UTF-8");
 
-            Writer out =
-                    new BufferedWriter(new OutputStreamWriter(new FileOutputStream(name), "UTF-8"));
+            Writer out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(name), "UTF-8"));
             t.process(dataMap, out);
             out.close();
         } catch (Exception e) {
@@ -495,15 +460,12 @@ public class BalanceAccountController {
     public String settleAccounts(HttpServletRequest request) {
         PayDetailAccountDTO queryDTO = new PayDetailAccountDTO();
         queryDTO.setPayDetailId(Long.parseLong(request.getParameter("payDetailId")));
-        JSONResult<PayDetailAccountDTO> jsonResult =
-                balanceAccountApplyClient.getPayDetailById(queryDTO);
+        JSONResult<PayDetailAccountDTO> jsonResult = balanceAccountApplyClient.getPayDetailById(queryDTO);
         Map dataMap = new HashMap<>();
         PayDetailAccountDTO accountDTO = new PayDetailAccountDTO();
         if (JSONResult.SUCCESS.equals(jsonResult.getCode()) && jsonResult.getData() != null) {
-            List<DictionaryItemRespDTO> dictionaryItemRespDTOs =
-                    getDictionaryByCode(DicCodeEnum.VISITSTORETYPE.getCode());
-            List<DictionaryItemRespDTO> payModeItem =
-                getDictionaryByCode(DicCodeEnum.PAYMODE.getCode());
+            List<DictionaryItemRespDTO> dictionaryItemRespDTOs = getDictionaryByCode(DicCodeEnum.VISITSTORETYPE.getCode());
+            List<DictionaryItemRespDTO> payModeItem = getDictionaryByCode(DicCodeEnum.PAYMODE.getCode());
 
             accountDTO = jsonResult.getData();
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -521,8 +483,7 @@ public class BalanceAccountController {
             // 去字典表查询赠送类型
             if (giveTypeDTOs != null && giveTypeDTOs.size() > 0) {
                 for (DictionaryItemRespDTO dictionaryItemRespDTO : giveTypeDTOs) {
-                    if (accountDTO.getGiveType() != null && dictionaryItemRespDTO.getValue()
-                            .equals(accountDTO.getGiveType().toString())) {
+                    if (accountDTO.getGiveType() != null && dictionaryItemRespDTO.getValue().equals(accountDTO.getGiveType().toString())) {
                         accountDTO.setGiveTypeName(dictionaryItemRespDTO.getName());
                     }
                 }
@@ -531,29 +492,29 @@ public class BalanceAccountController {
             String payMode1 = accountDTO.getPayMode();
             String[] split = payMode1.split(",");
             String payMode = "";
-            for(int i = 0 ; i < split.length ; i++){
-                for(DictionaryItemRespDTO item : payModeItem){
-                    if(item.getValue().equals(split[i])){
-                        if(i==0){
+            for (int i = 0; i < split.length; i++) {
+                for (DictionaryItemRespDTO item : payModeItem) {
+                    if (item.getValue().equals(split[i])) {
+                        if (i == 0) {
                             payMode = item.getName();
-                        }else{
-                            payMode = payMode +","+ item.getName();
+                        } else {
+                            payMode = payMode + "," + item.getName();
                         }
                     }
                 }
             }
-//            String payMode = "";
-//            if (accountDTO.getPayMode() == 1) {
-//                payMode = "现金";
-//            } else if (accountDTO.getPayMode() == 2) {
-//                payMode = "POS";
-//            } else if (accountDTO.getPayMode() == 3) {
-//                payMode = "转账";
-//            } else if (accountDTO.getPayMode() == 4) {
-//                payMode = "微信";
-//            } else if (accountDTO.getPayMode() == 5) {
-//                payMode = "支付宝";
-//            }
+            // String payMode = "";
+            // if (accountDTO.getPayMode() == 1) {
+            // payMode = "现金";
+            // } else if (accountDTO.getPayMode() == 2) {
+            // payMode = "POS";
+            // } else if (accountDTO.getPayMode() == 3) {
+            // payMode = "转账";
+            // } else if (accountDTO.getPayMode() == 4) {
+            // payMode = "微信";
+            // } else if (accountDTO.getPayMode() == 5) {
+            // payMode = "支付宝";
+            // }
             accountDTO.setPayModes(payMode);
             String payType = "";
             if (accountDTO.getPayType() == 1) {
@@ -572,10 +533,10 @@ public class BalanceAccountController {
             accountDTO.setDay(createTime.substring(8, 10));
             accountDTO.setMonth(createTime.substring(5, 7));
             accountDTO.setYear(createTime.substring(0, 4));
-            /*if (accountDTO.getPayType() != 1 && accountDTO.getPayType() != 2) {
-                accountDTO.setFirstToll(null);
-            	accountDTO.setPreferentialAmount(null);
-            }*/
+            /*
+             * if (accountDTO.getPayType() != 1 && accountDTO.getPayType() != 2) {
+             * accountDTO.setFirstToll(null); accountDTO.setPreferentialAmount(null); }
+             */
         }
         request.setAttribute("accountDTO", accountDTO);
         return "financing/settleAccountsPage";

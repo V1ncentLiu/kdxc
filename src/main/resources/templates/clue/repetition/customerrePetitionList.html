@@ -64,7 +64,14 @@
              <el-table-column align="center" prop="id" type="selection" width="55"></el-table-column> 
              <!-- <el-table-column prop="date" label="全选" width="180"></el-table-column>  -->
             <el-table-column align="center" type="index" prop="id" label="序号" width="55"></el-table-column>
-            <el-table-column align="center" prop="cusName" label="客户姓名"></el-table-column>
+            <el-table-column align="center" prop="cusName" label="客户姓名">
+                <template slot-scope="scope">
+                    {{scope.row.cusName}}
+                    <span v-if="scope.row.inputType ==1">
+                        <input type='hidden'><img th:src="@{/images/self_build.png}"  style="margin:0 10px;width:22px;cursor: pointer;vertical-align: middle;" alt="">
+                    </span>
+                </template>
+            </el-table-column>
             <el-table-column align="center" prop="cusPhone" label="客户手机号"></el-table-column>
             <el-table-column prop="" label="重复手机号资源"  align="center" show-overflow-tooltip>
             	<template slot-scope="scope">
@@ -231,6 +238,9 @@
 <div th:include="_footer_include :: #jsLib"></div>
 <script th:inline="javascript">
     var payModeItem =[[${payModeItem}]];
+    var userId = [[${userId}]];
+    var roleCode = [[${roleCode}]];
+    var orgId = [[${orgId}]];
 
     var orgVM =  new Vue({
         el: '#organizationManage',
@@ -314,6 +324,18 @@
               	}
                	return moment(date).format("YYYY-MM-DD HH:mm:ss");
     		},
+          transCusPhone(row) {
+            var text="";
+            if((roleCode =='DXCYGW' && row.teleSaleIds.indexOf(userId) == -1 )
+                ||  (roleCode =='DXZJ' && row.teleGorupIds.indexOf(orgId) == -1)
+                ||  (roleCode =='DXFZ' && row.teleDeptIds.indexOf(orgId) == -1)
+                || row.phase ==7 || row.phase == 8){
+              text ="***"
+            }else{
+              text = row.cusPhone;
+            }
+            return text;
+          },
         	queryRepeatPage(){//查询按钮
           	  var param = {}; 
           	  var pageSize = this.pager.pageSize;
@@ -334,6 +356,13 @@
                           });
 	                  	  return ;
                    }else{
+                      var result =  response.data;
+                      console.info(result);
+                      var table=result.data;
+                      var data= table.data;
+                      for(var i=0;i<data.length;i++){
+                        data[i].cusPhone=orgVM.transCusPhone(data[i]);
+                      }
                   	 orgVM.dataTable = response.data.data.data; 
                   	 orgVM.pager.currentPage= response.data.data.currentPage;
                   	 orgVM.pager.total= response.data.data.total;

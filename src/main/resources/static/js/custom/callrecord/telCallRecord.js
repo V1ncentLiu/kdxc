@@ -52,6 +52,15 @@ var myCallRecordVm = new Vue({
         
     },
     methods:{
+      transCusPhone(row) {
+        var text="";
+        if((roleCode =='DXZJ' && orgId !=(row.teleGorupId+"")) || row.phase ==7 || row.phase == 8){
+          text ="***"
+        }else{
+          text = row.customerPhone;
+        }
+        return text;
+      },
     	initCallRecordData(){
     		 var startTime = this.searchForm.startTime;
     		 var endTime = this.searchForm.endTime;
@@ -112,6 +121,9 @@ var myCallRecordVm = new Vue({
                 	 
                  	var resData = data.data;
                  	var callRecordData = resData.data;
+                   for(var i=0;i<callRecordData.length;i++){
+                     callRecordData[i].customerPhone=myCallRecordVm.transCusPhone(callRecordData[i]);
+                   }
                  	myCallRecordVm.callRecordData= callRecordData.data;
                  	myCallRecordVm.totalTalkTime = resData.totalTalkTime;
                   //3.分页组件

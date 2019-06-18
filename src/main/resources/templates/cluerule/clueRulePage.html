@@ -53,6 +53,13 @@
                 <el-form-item label="时间内不走任何规则限制。"></el-form-item>
             </el-row>
             <el-row>
+               <!--  <el-checkbox v-model="checked3" class="marginR10 paddingT8"></el-checkbox> -->
+                    <el-form-item label="客户释放到公有池，提前释放提醒时间为提前" style="margin-bottom: 0" prop="number13">    
+                        <el-input v-model="form.number13" placeholder="0-10以内整数" maxLength="2" type="number" min="0" max="10"></el-input>
+                    </el-form-item>
+                <el-form-item label="小时。" style="margin-bottom: 0"></el-form-item>
+            </el-row>
+            <el-row>
                 <el-checkbox v-model="checked2" class="marginR10 paddingT8"></el-checkbox><el-form-item label="自动释放规则"></el-form-item>
             </el-row>
             <div class="borderbox padding20">
@@ -221,13 +228,7 @@
                         <td colspan="4">恭喜顾客签约成功，坐等奖励</td>
                     </tr>
                 </table>
-                <el-row>
-                    <el-checkbox v-model="checked3" class="marginR10 paddingT8"></el-checkbox>
-                        <el-form-item label="客户自动释放到公有池，提前释放提醒时间为提前" style="margin-bottom: 0" prop="number13">    
-                            <el-input v-model="form.number13" placeholder="0-10以内整数" maxLength="2" type="number" min="0" max="10"></el-input>
-                        </el-form-item>
-                    <el-form-item label="小时。" style="margin-bottom: 0"></el-form-item>
-                </el-row>
+          
             </div>
             <div class="fs16 marginB20 paddingT20">客户强制回收</div>
             <div class="borderbox padding20">
@@ -657,7 +658,7 @@
                     // 0-10以内整数
                     number13:[
                         { validator:function(rule,value,callback){   
-                            if(releaseRuleVM.checked3==true){
+                           /*  if(releaseRuleVM.checked3==true){ */
                                 if(value.length!=0){
                                     if(/^[0-9]*$/.test(value) == false || value > 10){
                                         callback(new Error("请输入0-10以内整数"));
@@ -670,7 +671,7 @@
                                     return
                                 }
                                 
-                            }
+                           // }
                             callback();
                         }, trigger: 'blur'}
                     ],
@@ -1027,6 +1028,7 @@
                                   dismissionTeleRule.id=dismissionId;
                                   dismissionTeleRule.isEnabled=dismissionTeleRuleIsEnabled;
                                   dismissionTeleRule.businessLine=businessLine;
+                                  dismissionTeleRule.remindTime = form.number13;
                                   forceRuleList.push(dismissionTeleRule);
                                   isDismissionBl=true;
                         	  }
@@ -1038,6 +1040,7 @@
                               dismissionTeleRule.businessLine=businessLine;
                               dismissionTeleRule.days=form.number14;
                               dismissionTeleRule.recycleType=1;
+                              dismissionTeleRule.remindTime = form.number13;
                               isDismissionBl=true;
                               forceRuleList.push(dismissionTeleRule);
                           }
@@ -1051,6 +1054,7 @@
                                   teleRule.id=teleForceRuleId;
                                   teleRule.isEnabled=isTeleForceRuleIsEnabled;
                                   teleRule.businessLine=businessLine;
+                                  teleRule.remindTime = form.number13;
                                   forceRuleList.push(teleRule);
                                   isTeleForceRule = true;
                         	  }
@@ -1061,6 +1065,7 @@
                               teleRule.isEnabled=isTeleForceRuleIsEnabled;
                               teleRule.businessLine=businessLine;
                               teleRule.days=form.number15;
+                              teleRule.remindTime = form.number13;
                               teleRule.recycleType=2;
                               forceRuleList.push(teleRule);
                               isTeleForceRule = true;
@@ -1358,11 +1363,18 @@
                         		releaseRuleVM.form.id5=forceRecycleRule.id;
                         		releaseRuleVM.checked4=forceRecycleRule.isEnabled==0?false:true;
                         		releaseRuleVM.form.number14=forceRecycleRule.days;
+                        		
                         	}else if(type==2){
                         		releaseRuleVM.form.id6=forceRecycleRule.id;
                                 releaseRuleVM.checked5=forceRecycleRule.isEnabled==0?false:true;
                                 releaseRuleVM.form.number15=forceRecycleRule.days;
                         	}
+                        	if(forceRecycleRule.remindTime){
+                                //提醒时间
+                                if(!releaseRuleVM.form.number13){
+                                    releaseRuleVM.form.number13 = forceRecycleRule.remindTime;
+                                }
+                            }
                         }
                         //公有池
                         var publicPoolReceiveRuleList = resData.publicPoolReceiveRuleList;

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html xmlns:th="http://www.w3.org/1999/xhtml">
 <head th:include="_header_include::frag(~{::title},~{::style},~{})">
     <title>维护客户</title>
     <meta charset="UTF-8">
@@ -22,6 +22,8 @@
             <div class="marginB20 fs16 paddingT20">资源信息 <span style="padding-left: 20px; color: red;">资源ID{{clueId}}  </span>
                 <span v-show="isShowTip" style="padding-left: 20px; color: red;">{{showTipInfo}}</span>
                 <el-button v-show="isShowBtn" type="primary" @click="keepCustomer" style="margin-left: 10px;">保留客户
+                </el-button>
+                <el-button v-show="repeatStatus" type="primary" @click="repeatClueCustomers" style="margin-left: 10px;">重复资源信息
                 </el-button>
             </div>
 
@@ -549,12 +551,25 @@
                 :rules="{
                        required: true, message: '手机号不能为空', trigger: 'blur',
                 }">
-                <el-input v-model="domain.value" maxLength="11" @keyup.native="phoneNumber"
-                          style="width: 200px;margin-right: 10px;"></el-input>
-                <el-button type="danger" @click.prevent="removeDomain(domain)" v-show="deleteShow">删除</el-button>
+                <div v-if="editPhone == 0 && domain.edit ==1">
+                    <el-input  v-model="domain.value" disabled  maxLength="11" @keyup.native="phoneNumber"style="width: 200px;margin-right: 10px;"></el-input>
+                    <img th:src="@{/images/icon_tele2.png}" @click="gettelNumberIcon(domain.value)"style="margin:0 10px;width:31px;cursor: pointer;vertical-align: middle;" alt="">
+                </div>
+                <div v-if="editPhone == 0 && domain.edit ==0">
+                    <el-input  v-model="domain.value"  maxLength="11" @keyup.native="phoneNumber"style="width: 200px;margin-right: 10px;"></el-input>
+                    <el-button type="danger" @click.prevent="removeDomain(domain)" v-show="deleteShow">删除</el-button>
+                    <img th:src="@{/images/icon_tele2.png}" @click="gettelNumberIcon(domain.value)"style="margin:0 10px;width:31px;cursor: pointer;vertical-align: middle;" alt="">
+                </div>
+                <div v-else-if="editPhone == 1">
+                    <el-input  v-model="domain.value" maxLength="11" @keyup.native="phoneNumber"style="width: 200px;margin-right: 10px;"></el-input>
+                    <el-button type="danger" @click.prevent="removeDomain(domain)" v-show="deleteShow">删除</el-button>
+                    <img th:src="@{/images/icon_tele2.png}" @click="gettelNumberIcon(domain.value)"style="margin:0 10px;width:31px;cursor: pointer;vertical-align: middle;" alt="">
+                </div>
+
+
+
                 <!-- <i class="el-icon-phone-outline telNumberIcon" @click="gettelNumberIcon(domain.value)"></i> -->
-                <img th:src="@{/images/icon_tele2.png}" @click="gettelNumberIcon(domain.value)"
-                     style="margin:0 10px;width:31px;cursor: pointer;vertical-align: middle;" alt="">
+
             </el-form-item>
         </el-form>
         <div slot="footer" class="f-tac">
@@ -609,6 +624,92 @@
             <img :src="dialogFormUploadImgSrc" alt=""
                  style="width: 250px; height: 250px;">
         </div>
+    </el-dialog>
+    <el-dialog title="重复资源信息" :visible.sync="dialogFormVisible1" width="870px">
+        <el-form :model="dialogForm" ref="dialogForm" class="marginB10 dialogForm" v-for="item in repeatClueList" height="600">
+            <div class="fs16 redcolor marginB20">重复时间：{{formatTimeFn(item.discoverTime)}}</div>
+            <div class="borderbox padding10">
+                <el-row>
+                    <el-col :span="12">
+                        <el-form-item label="客户姓名：" :label-width="formLabelWidth">{{item.clueDTO.clueCustomer.cusName}}</el-form-item>
+                    </el-col>
+                    <el-col :span="12">
+                        <el-form-item label="手机号：" :label-width="formLabelWidth" >{{getPhones(item.clueDTO.clueCustomer)}}</el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="12">
+                        <el-form-item label="微信：" :label-width="formLabelWidth">
+                        {{item.clueDTO.clueCustomer.wechat}}<span @click="lookWechat(item.clueDTO.clueCustomer)" v-if="(item.clueDTO.clueCustomer.wechat2 !=null && item.clueDTO.clueCustomer.wechat2 !='')||(item.clueDTO.clueCustomer.wechatCode !=null && item.clueDTO.clueCustomer.wechatCode !='')" style="color: rgb(0, 114, 255); cursor: pointer;">查看更多</span>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="12">
+                        <el-form-item label="邮箱：" :label-width="formLabelWidth">
+                        {{item.clueDTO.clueCustomer.email}}
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="12">
+                        <el-form-item label="QQ：" :label-width="formLabelWidth">
+                        {{item.clueDTO.clueCustomer.qq}}
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="12">
+                        <el-form-item label="资源类型：" :label-width="formLabelWidth">
+                            {{item.clueDTO.clueBasic.typeName}}
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="12">
+                        <el-form-item label="留言时间：" :label-width="formLabelWidth">
+                        {{formatTimeFn(item.clueDTO.clueBasic.messageTime)}}
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="12">
+                        <el-form-item label="资源类别：" :label-width="formLabelWidth">
+                            {{item.clueDTO.clueBasic.categoryName}}
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="12">
+                        <el-form-item label="搜索词：" :label-width="formLabelWidth">
+                            {{item.clueDTO.clueBasic.searchWord}}
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="12">
+                        <el-form-item label="留言重点：" :label-width="formLabelWidth">
+                            {{item.clueDTO.clueBasic.messagePoint}}
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="12">
+                        <el-form-item label="地域信息：" :label-width="formLabelWidth">
+                        {{item.clueDTO.clueIntention.address}}
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="12">
+                        <el-form-item label="备注：" :label-width="formLabelWidth">
+                            {{item.clueDTO.clueBasic.remark}}
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+            </div>
+        </el-form>
+    </el-dialog>
+    <el-dialog title="查看微信/二维码" :visible.sync="repeatWechatVisible">
+        <el-form :model="repeatWeDialogForm" ref="repeatWeDialogForm">
+            <!--展示phone2  phone3  phone4 phone5-->
+            <el-form-item  label="微信2：" :label-width="formLabelWidth"  >
+                <el-button type="text" disabled>{{repeatCustomer.wechat2}}</el-button>
+            </el-form-item>
+            <el-form-item  label="图片二维码：" :label-width="formLabelWidth"  >
+                <img v-show="repeatCustomer.wechatCode!=''"  :src="repeatCustomer.wechatCode">
+            </el-form-item>
+        </el-form>
     </el-dialog>
 </div>
 <link rel="stylesheet" href="/css/common/uploadStyle.css">
@@ -839,7 +940,18 @@
   var ossUrl = [[${ossUrl}]];//上传文件地址
   var callRecord = [[${callRecord}]];//通话记录
   var loginUserId = [[${loginUserId}]];
+    var teleSaleId = [[${teleSaleId}]];
   var teleEndTime = [[${teleEndTime}]];
+    var repeatClueList = [[${repeatClueList}]];
+    var repeatClueStatus = [[${repeatClueStatus}]];
+    var repeatStatus =false;
+    var editPhone = 1;
+    if(repeatClueStatus == 1 ){
+      repeatStatus = true;
+    }
+    if(loginUserId == teleSaleId){
+      editPhone = 0;
+    }
   var addCustomerVM = new Vue({
     el: '#addCustomer',
     data: function () {
@@ -850,10 +962,18 @@
             return date.getTime() <= Date.now() - 8.64e7 || date.getTime() >= Date.now();
           }
         },
+        editPhone:editPhone,
+        repeatWeDialogForm:{},
+        repeatCustomer:{},
+        repeatWechatVisible:false,
+        dialogFormVisible1: false,
+        repeatStatus:repeatStatus,
+        repeatClueList:repeatClueList,
         teleEndTime:teleEndTime,
         timeDefaultShow:new Date(),
         clueId: clueId,
         loginUserId: loginUserId,
+                teleSaleId: teleSaleId,
         customerStatusRequired: false,
         wechatVisible: false,//新增微信号
         isShowTip: false,//是否显示释放公有池提示信息
@@ -864,717 +984,767 @@
         dialogFormUploadImgSrc: '', //上传资源图片弹框
 //                showwchatcode:'',
 //                wxshow:false,
-        insideProjectShow: true,//内部项目默认显示
-        outsideProjectShow: false,//外部项目默认不显示
-        dialogFormImg: false,
-        substatus: true,
-        dialogFormVisible: false,//新增手机号
-        buttonType: 'A',//添加手机号按钮形式
-        deleteShow: false,//删除新增手机号输入框
-        addBtnDisabled: false,
-        inviteBtnDisabled: false,
-        saveDisabled: false,
-        isshowPhone: false,
-        domainShow: false,//默认不显示输入同行品牌名称
-        form: {
-          domains: [],
-          phone: "",
-          radioSelect: '0',//是否考虑同行业
-          radioProject: '1', //意向项目单选默认选项
-          customerName: '',
-          customerPhone: '',
-          customerPhone2: '',
-          customerEmail: '', //邮箱
-          cateringType: '',//曾经从事餐饮类型
-          sponsor: '1', //出资人
-          sponsorOther: '',//其它出资人的姓名及联系方式
-          decisionMaker: '1',//决策人
-          decisionMakerOther: '',//其它决策人的姓名及联系方式
-          customerPartnerDetail: '',//合伙人姓名及联系方式
-          customerSex: '',
-          wechat:'',
-          wechat2:'',
-          wechatUrl:'',
-          experience: '0',
-          customerAge: '',
-          customerJob: '',
-          customerPartner: '0',
-          address: '',
-          urgency: '',
-          customerLevel: '',
-          qq: '',
-          money: '',
-          area: '',
-          intentionCategory: '',
-          insideProject: '',
-          outsideProject: '',
-          province: '',
-          city: '',
-          district: '',
-        },
-        wechatForm: {
-          wechat2:'',
-          wechatUrl:'',
-          fileList:[]
-        },
-        clueBase: base,
-        intention:intention,
-        categoryArr: [],
-        typeArr: [],
-        mediumArry: [],
-        adsenseArr: [],
-        CateringExperienceArr: [],
-        occupationArr: [],
-        partnerArr: [],
-        optionAddressArr: [],
-        customerLevelArr: [],
-        IntentionalCategoryArr: [],
-        ussmArr: [],
-        StorefrontAreaArr: [],
-        customerStatusSubArr: [],
-        provinceArr: [],
-        cityArr: [],
-        districtArr: [],
-        showTipInfo: '',
-        proSelect: [],
-        formLabelWidth: '120px',
-        formLabelWidth1: '140px',
-        rules: {
-          customerName: [
-            {required: true, message: '客户姓名不能为空', trigger: 'blur'}
-          ],
-          province: [
-            {required: true, message: '开店区域省份不能为空', trigger: 'blur'}
-          ],
-          city: [
-            {required: true, message: '开店区域城市不能为空', trigger: 'blur'}
-          ],
-          phone: [
+                insideProjectShow: true,//内部项目默认显示
+                outsideProjectShow: false,//外部项目默认不显示
+                dialogFormImg: false,
+                substatus: true,
+                dialogFormVisible: false,//新增手机号
+                buttonType: 'A',//添加手机号按钮形式
+                deleteShow: false,//删除新增手机号输入框
+                addBtnDisabled: false,
+                inviteBtnDisabled: false,
+                saveDisabled: false,
+                isshowPhone: false,
+                domainShow: false,//默认不显示输入同行品牌名称
+                form: {
+                    domains: [],
+                    phone: "",
+                    radioSelect: '0',//是否考虑同行业
+                    radioProject: '1', //意向项目单选默认选项
+                    customerName: '',
+                    customerPhone: '',
+                    customerPhone2: '',
+                    customerEmail: '', //邮箱
+                    cateringType: '',//曾经从事餐饮类型
+                    sponsor: '1', //出资人
+                    sponsorOther: '',//其它出资人的姓名及联系方式
+                    decisionMaker: '1',//决策人
+                    decisionMakerOther: '',//其它决策人的姓名及联系方式
+                    customerPartnerDetail: '',//合伙人姓名及联系方式
+                    customerSex: '',
+                    wechat:'',
+                    wechat2:'',
+                    wechatUrl:'',
+                    experience: '0',
+                    customerAge: '',
+                    customerJob: '',
+                    customerPartner: '0',
+                    address: '',
+                    urgency: '',
+                    customerLevel: '',
+                    qq: '',
+                    money: '',
+                    area: '',
+                    intentionCategory: '',
+                    insideProject: '',
+                    outsideProject: '',
+                    province: '',
+                    city: '',
+                    district: '',
+                },
+              wechatForm: {
+                wechat2:'',
+                wechatUrl:'',
+                fileList:[]
+              },
+                clueBase: base,
+                intention:intention,
+                categoryArr: [],
+                typeArr: [],
+                mediumArry: [],
+                adsenseArr: [],
+                CateringExperienceArr: [],
+                occupationArr: [],
+                partnerArr: [],
+                optionAddressArr: [],
+                customerLevelArr: [],
+                IntentionalCategoryArr: [],
+                ussmArr: [],
+                StorefrontAreaArr: [],
+                customerStatusSubArr: [],
+                provinceArr: [],
+                cityArr: [],
+                districtArr: [],
+                showTipInfo: '',
+                proSelect: [],
+                formLabelWidth: '120px',
+              formLabelWidth1: '140px',
+                rules: {
+                    customerName: [
+                        {required: true, message: '客户姓名不能为空', trigger: 'blur'}
+                    ],
+                    province: [
+                        {required: true, message: '开店区域省份不能为空', trigger: 'blur'}
+                    ],
+                    city: [
+                        {required: true, message: '开店区域城市不能为空', trigger: 'blur'}
+                    ],
+                    phone: [
 
-            {
-              validator: function (rule, value, callback) {
-                if ((value == null && value == "null") || addCustomerVM.isshowPhone) {
-                  if (value == null && value == "null") {
-                    callback(new Error("手机号不能为空"));
-                  } else if (value.length < 11) {
-                    callback(new Error("手机号位数为11位"));
-                  }
+                        {
+                            validator: function (rule, value, callback) {
+                                if ((value == null && value == "null") || addCustomerVM.isshowPhone) {
+                                    if (value == null && value == "null") {
+                                        callback(new Error("手机号不能为空"));
+                                    } else if (value.length < 11) {
+                                        callback(new Error("手机号位数为11位"));
+                                    }
 
-                  addCustomerVM.form.customerAge = null;
-                } else {
-                  callback();
-                }
+                                    addCustomerVM.form.customerAge = null;
+                                } else {
+                                    callback();
+                                }
 
-              }, required: true, trigger: 'change'
+                            }, required: true, trigger: 'change'
+                        }
+                    ],
+
+                    customerAge: [
+                        {
+                            validator: function (rule, value, callback) {
+                                var reg = /^[1-9]+[0-9]*]*$/;
+                                if (value != null && value != "null" && value != "" && !reg.test(value)) {
+                                    callback(new Error("请输入正整数"));
+                                    addCustomerVM.form.customerAge = null;
+                                } else {
+                                    callback();
+                                }
+
+                            }, trigger: 'change'
+                        }
+                    ],
+                    customerPhone: [
+                        /* { required: true, message: '手机号不能为空', trigger: 'blur' },
+                        { validator:function(rule,value,callback){
+                            if(/^[0-9]*$/.test(value) == false){
+                               callback(new Error("请输入数字"));
+                            }else{
+                               callback();
+                            }
+                            callback();
+                        }, trigger: 'blur'} */
+                    ],
+                    customerEmail: {
+                        validator: function (rule, value, callback) {
+                            if (value && (/^([a-zA-Z0-9_-])+@([a-zA-Z0-9_-])+((\.[a-zA-Z0-9_-]{2,3}){1,2})$/.test(value) == false)) {
+                                callback(new Error("请输入正确的邮箱格式"));
+                            } else {
+                                callback();
+                            }
+                            callback();
+                        }, trigger: 'blur'
+                    },
+                    /*跟踪记录验证*/
+                    callTime: [
+                        {required: true, message: '请选择拨打时间', trigger: 'change'}
+                    ],
+                    // customerStatusSub: [
+                    //     {required: true, message: '请选择客户状态', trigger: 'change'}
+                    // ],
+                    customerStatusSub: {
+                        validator: function (rule, value, callback) {
+                            console.log(value);
+                            console.log(value);
+                            if (!addCustomerVM.substatus) {//客户状态是否可选，false表示可选
+                                if (!value) {
+                                    addCustomerVM.customerStatusRequired = true //验证启用
+                                    callback(new Error("请选择客户状态"));
+                                } else {
+                                    callback();
+                                }
+                            } else {
+                                addCustomerVM.customerStatusRequired = false //验证不启用
+                                callback();
+                            }
+                            callback();
+                        }, trigger: 'change'
+                    },
+                    focusPoint: [
+                        {required: true, message: '请填写客户关注点', trigger: 'blur'}
+                    ],
+                    // nextVisitTime: [
+                    //     {required: true, message: '请选择下次回访时间', trigger: 'blur'}
+                    // ],
+                    isCall: [
+                        {required: true, message: '请选择是否接通', trigger: 'change'}
+                    ],
+                    resourceStatus: [
+                        {required: true, message: '请选择资源是否有效', trigger: 'change'}
+                    ],
+                    // nextVisitTime: [
+                    //     {required: true, message: '请选择下次回访时间', trigger: 'change'}
+                    // ]
+                },
+                dynamicValidateForm: {//新增手机号弹窗数据
+                    domains: [{
+                        value: '',
+                        key: Date.now(),
+                        edit:1,
+                    }]
+                },
+                statusOptions: [{
+                    value: '0',
+                    label: '推广列表'
+                }, {
+                    value: '1',
+                    label: '电销列表'
+                }],
+                optsex: [{
+                    value: '1',
+                    label: '男'
+                }, {
+                    value: '2',
+                    label: '女'
+                }],
+                options1: [{
+                    value: '0',
+                    label: '电销组'
+                }, {
+                    value: '1',
+                    label: '媒介'
+                }],
+                dialogForm: {
+                    phoneNum: ''
+                },
+                dialogRules: {
+                    phoneNum: [
+                        {required: true, message: '请输入手机号码', trigger: 'blur'}
+                    ]
+                },
+                multipleSelection: [],//上传资料
+                multipleTrackingSelection: [],
+                multipleFileSelection: [],
+                fileList: [],
+                cusStatusArr: [],
+                tableDataC1: clueFileList,//文件记录
+                dialingTime: '',//跟进记录
+                lineFormShow: false,
+                formInline: {
+                    id: '',
+                    callTime: '',
+                    customerStatus: '1',
+                    isCall: '',
+                    resourceStatus: '',
+                    focusPoint: '',
+                    visitStatus: '1',
+                    nextVisitTime: '',
+                    customerStatusSub: '',
+                },
+              uploadOssHost:'',
+              uploadParamData: {
+                key:'22',
+                policy:'',
+                OSSAccessKeyId:'',
+                success_action_status : '200', //让服务端返回200,不然，默认会返回204
+                signature:'',
+                'x:params':'',
+                'realName':''
+              },
+              ossUrl:ossUrl,
+              limit:1,
+              tableDataC2: trackingList,//跟进记录
+              tableDataC3: callRecord,  //通话记录
+              tableDataC4: circulationList//流转记录
             }
-          ],
-
-          customerAge: [
-            {
-              validator: function (rule, value, callback) {
-                var reg = /^[1-9]+[0-9]*]*$/;
-                if (value != null && value != "null" && value != "" && !reg.test(value)) {
-                  callback(new Error("请输入正整数"));
-                  addCustomerVM.form.customerAge = null;
-                } else {
-                  callback();
-                }
-
-              }, trigger: 'change'
+        },
+        methods: {
+          getPhones(cus){
+            var phones = '';
+            phones = cus.phone;
+            if(cus.phone2 != null){
+              phones = phones +","+cus.phone2;
             }
-          ],
-          customerPhone: [
-            /* { required: true, message: '手机号不能为空', trigger: 'blur' },
-            { validator:function(rule,value,callback){
-                if(/^[0-9]*$/.test(value) == false){
-                   callback(new Error("请输入数字"));
+            if(cus.phone3 != null){
+              phones = phones +","+cus.phone3;
+            }
+            if(cus.phone4 != null){
+              phones = phones +",\n"+cus.phone4;
+            }
+            if(cus.phone4 != null){
+              phones = phones +","+cus.phone4;
+            }
+            return phones;
+          },
+          lookWechat(val){
+            addCustomerVM.repeatCustomer = {};
+            addCustomerVM.repeatWechatVisible =true;
+            addCustomerVM.repeatCustomer = val;
+          },
+          repeatClueCustomers(){
+            addCustomerVM.dialogFormVisible1 =true;
+          },
+       	customerPartnerChange(){
+       		this.form.customerPartnerDetail =null;
+       	},
+          experienceChange(){
+        	  this.form.cateringType = null;
+          },
+          getUploadParam(){
+            var signUrl = this.ossUrl+"?serviceType=aggregation";
+            var param={};
+
+            axios.get(signUrl, param)
+            .then(function (response) {
+              // console.info(response);
+              var respData= response.data;
+              var host = respData.host;
+              var params={};
+              var new_multipart_params = {
+                dir:respData.dir,
+                'policy': respData.policy,
+                'OSSAccessKeyId': respData.accessid,
+                'success_action_status' : '200', //让服务端返回200,不然，默认会返回204
+                'signature': respData.signature,
+                'x:params':params,//自定义编码，basse64编码后的字符串,
+                'realName':''
+              };
+              addCustomerVM.uploadParamData= new_multipart_params;
+              addCustomerVM.uploadOssHost = host;
+            })
+            .catch(function (error) {
+              console.log(error);
+            });
+          },
+          selectFile(file, fileList){
+            addCustomerVM.uploadParamData.key= addCustomerVM.uploadParamData.dir+addCustomerVM.random_string(10)+addCustomerVM.get_suffix(file.name),
+                addCustomerVM.uploadParamData.realName= file.name
+          },
+            lineFormShowFun() {
+                if(this.lineFormShow){
+                    this.lineFormShow = false
                 }else{
-                   callback();
-                }
-                callback();
-            }, trigger: 'blur'} */
-          ],
-          customerEmail: {
-            validator: function (rule, value, callback) {
-              if (value && (/^([a-zA-Z0-9_-])+@([a-zA-Z0-9_-])+((\.[a-zA-Z0-9_-]{2,3}){1,2})$/.test(value) == false)) {
-                callback(new Error("请输入正确的邮箱格式"));
-              } else {
-                callback();
-              }
-              callback();
-            }, trigger: 'blur'
-          },
-          /*跟踪记录验证*/
-          callTime: [
-            {required: true, message: '请选择拨打时间', trigger: 'change'}
-          ],
-          // customerStatusSub: [
-          //     {required: true, message: '请选择客户状态', trigger: 'change'}
-          // ],
-          customerStatusSub: {
-            validator: function (rule, value, callback) {
-              console.log(value);
-              console.log(value);
-              if (!addCustomerVM.substatus) {//客户状态是否可选，false表示可选
-                if (!value) {
-                  addCustomerVM.customerStatusRequired = true //验证启用
-                  callback(new Error("请选择客户状态"));
-                } else {
-                  callback();
-                }
-              } else {
-                addCustomerVM.customerStatusRequired = false //验证不启用
-                callback();
-              }
-              callback();
-            }, trigger: 'change'
-          },
-          focusPoint: [
-            {required: true, message: '请填写客户关注点', trigger: 'blur'}
-          ],
-          // nextVisitTime: [
-          //     {required: true, message: '请选择下次回访时间', trigger: 'blur'}
-          // ],
-          isCall: [
-            {required: true, message: '请选择是否接通', trigger: 'change'}
-          ],
-          resourceStatus: [
-            {required: true, message: '请选择资源是否有效', trigger: 'change'}
-          ],
-          // nextVisitTime: [
-          //     {required: true, message: '请选择下次回访时间', trigger: 'change'}
-          // ]
-        },
-        dynamicValidateForm: {//新增手机号弹窗数据
-          domains: [{
-            value: '',
-            key: Date.now()
-          }]
-        },
-        statusOptions: [{
-          value: '0',
-          label: '推广列表'
-        }, {
-          value: '1',
-          label: '电销列表'
-        }],
-        optsex: [{
-          value: '1',
-          label: '男'
-        }, {
-          value: '2',
-          label: '女'
-        }],
-        options1: [{
-          value: '0',
-          label: '电销组'
-        }, {
-          value: '1',
-          label: '媒介'
-        }],
-        dialogForm: {
-          phoneNum: ''
-        },
-        dialogRules: {
-          phoneNum: [
-            {required: true, message: '请输入手机号码', trigger: 'blur'}
-          ]
-        },
-        multipleSelection: [],//上传资料
-        multipleTrackingSelection: [],
-        multipleFileSelection: [],
-        fileList: [],
-        cusStatusArr: [],
-        tableDataC1: clueFileList,//文件记录
-        dialingTime: '',//跟进记录
-        lineFormShow: false,
-        formInline: {
-          id: '',
-          callTime: '',
-          customerStatus: '1',
-          isCall: '',
-          resourceStatus: '',
-          focusPoint: '',
-          visitStatus: '1',
-          nextVisitTime: '',
-          customerStatusSub: '',
-        },
-        uploadOssHost:'',
-        uploadParamData: {
-          key:'22',
-          policy:'',
-          OSSAccessKeyId:'',
-          success_action_status : '200', //让服务端返回200,不然，默认会返回204
-          signature:'',
-          'x:params':'',
-          'realName':''
-        },
-        ossUrl:ossUrl,
-        limit:1,
-        tableDataC2: trackingList,//跟进记录
-        tableDataC3: callRecord,  //通话记录
-        tableDataC4: circulationList//流转记录
-      }
-    },
-    methods: {
-      customerPartnerChange(){
-        this.form.customerPartnerDetail =null;
-      },
-      experienceChange(){
-        this.form.cateringType = null;
-      },
-      getUploadParam(){
-        var signUrl = this.ossUrl+"?serviceType=aggregation";
-        var param={};
+                    this.lineFormShow = true
+                }                
+                // 跟进记录初始化
+                this.$refs.LineRuleForm.resetFields(); //移除校验结果并重置字段值
+                this.formInline.customerStatus = '';
+                this.formInline.visitStatus = "1";
+                this.formInline.callTime =new Date(teleEndTime);
 
-        axios.get(signUrl, param)
-        .then(function (response) {
-          // console.info(response);
-          var respData= response.data;
-          var host = respData.host;
-          var params={};
-          var new_multipart_params = {
-            dir:respData.dir,
-            'policy': respData.policy,
-            'OSSAccessKeyId': respData.accessid,
-            'success_action_status' : '200', //让服务端返回200,不然，默认会返回204
-            'signature': respData.signature,
-            'x:params':params,//自定义编码，basse64编码后的字符串,
-            'realName':''
-          };
-          addCustomerVM.uploadParamData= new_multipart_params;
-          addCustomerVM.uploadOssHost = host;
-        })
-        .catch(function (error) {
-          console.log(error);
-        });
-      },
-      selectFile(file, fileList){
-        addCustomerVM.uploadParamData.key= addCustomerVM.uploadParamData.dir+addCustomerVM.random_string(10)+addCustomerVM.get_suffix(file.name),
-            addCustomerVM.uploadParamData.realName= file.name
-      },
-      lineFormShowFun() {
-        if(this.lineFormShow){
-          this.lineFormShow = false
-        }else{
-          this.lineFormShow = true
-        }
-        // 跟进记录初始化
-        this.$refs.LineRuleForm.resetFields(); //移除校验结果并重置字段值
-        this.formInline.customerStatus = '';
-        this.formInline.visitStatus = "1";
-        this.formInline.callTime = new Date(teleEndTime);
-      },
-      gettelNumberIcon(tel) {
-        //外呼手机
-        var param = {};
-        param.clueId = clueId;
-        window.parent.parent.outboundCallPhone(tel, 2, clueId, function (res) {
-          axios.post('/tele/clueMyCustomerInfo/updateCallTime', param).then(function (response) {
-          });
-        });
-      },
-      formatTimeFn(date) {
-        if (null == date) {
-          return "";
-        }
-        var dateNew = new Date(date);
-        var year = dateNew.getFullYear()
-        var month = dateNew.getMonth() + 1
-        var day = dateNew.getDate()
-        var hour = dateNew.getHours()
-        var minute = dateNew.getMinutes()
-        var second = dateNew.getSeconds()
-        return year + "-" + this.formatNumberFn(month) + "-" + this.formatNumberFn(day) + " " + this.formatNumberFn(hour) + ":" + this.formatNumberFn(minute) + ":" + this.formatNumberFn(second);
-      },
-      formatNumberFn(n) {
-        n = n.toString()
-        return n[1] ? n : '0' + n
-      },
-      customerStatusChange(selVal) {
-        if (selVal == '3') {
-          this.substatus = false;
-          // $(".paddingL55 .lineForm_customerStatus").css("width","210px");
-        } else {
-          this.substatus = true;
-          // $(".paddingL55 .lineForm_customerStatus").css("width","420px");
-        }
-      },
-      projectChangeSelect(selVal) {
-        var param = {};
-        param.category = selVal;
-        this.form.insideProject = null;
-        axios.post('/aggregation/projectManager/listNoPage', param).then(function (response) {
-          addCustomerVM.proSelect = response.data.data;
-        });
-      },
-      // 是否同行业
-      professionChange() {
-        if (this.form.radioSelect == "0") {//否
-          this.domainShow = false
-        } else if (this.form.radioSelect == "1") {//是
-          this.domainShow = true
-        }
-      },
-      addProjectDomain() {
-        if (this.form.domains.length > 2) {
-          this.$message({
-            message: '最多输入三个品牌',
-            type: 'warning'
-          });
-        } else {
-          this.form.domains.push({
-            value: '',
-            key: Date.now()
-          });
-        }
-      },
-      removeProjectDomain(item) {//移除
-        var index = this.form.domains.indexOf(item)
-        if (index !== -1) {
-          this.form.domains.splice(index, 1)
-        }
-      },
-      submitForm(form) {
-        var valid = true;
-        //跟进记录校验
-        if (this.lineFormShow) { // 如果存在编辑/新增操作 进行跟进记录校验
-          this.$refs['LineRuleForm'].validate((error) => {
-            valid = error;
-          });
-        }
-        if (valid) {
-          if (valid) {
-            this.$refs[form].validateField(["phone"], (error) => {
-              if (error) {
-                valid = false;
-              }
-            });
-          }
-        }
-
-        if (valid) {
-          this.saveDisabled = true;
-          //----客户基本信息---//
-          var clueCustomer = {};
-          //客户姓名
-          var customerName = this.form.customerName;
-          clueCustomer.cusName = customerName;
-          //手机号
-          if (this.form.phone != null && this.form.phone != '') {
-            clueCustomer.phone = this.form.phone
-          } else {
-            clueCustomer.phone = this.form.customerPhone;
-          }
-          //性别
-          var customerSex = this.form.customerSex;
-          clueCustomer.sex = customerSex;
-          //微信
-          var wechat = this.form.wechat;
-          clueCustomer.wechat = wechat;
-          //微信2
-          var wechat2 = this.form.wechat2;
-          clueCustomer.wechat2 = wechat2;
-          //微信二维码
-          var wechatUrl = this.form.wechatUrl;
-          clueCustomer.wechatCode = wechatUrl;
-          //餐饮经验
-          var experience = this.form.experience;
-          clueCustomer.hasExperience = experience;
-          //年龄
-          var customerAge = this.form.customerAge;
-          clueCustomer.age = customerAge;
-          //职业
-          var customerJob = this.form.customerJob;
-          clueCustomer.profession = customerJob;
-          //合伙人
-          var customerPartner = this.form.customerPartner;
-          clueCustomer.partnerType = customerPartner;
-          //选址情况
-          var address = this.form.address;
-          clueCustomer.hasAddress = address;
-          //开店紧迫性
-          var urgency = this.form.urgency;
-          clueCustomer.urgentDate = urgency;
-          //客户级别
-          var customerLevel = this.form.customerLevel;
-          clueCustomer.cusLevel = customerLevel;
-          //QQ
-          var qq = this.form.qq;
-          clueCustomer.qq = qq;
-          //email
-          var email = this.form.customerEmail;
-          clueCustomer.email = email;
-          //餐饮经验
-          var experience = this.form.cateringType;
-          clueCustomer.experience = experience;
-          //合伙人姓名电话
-          var partnerNamePhone = this.form.customerPartnerDetail;
-          clueCustomer.partnerNamePhone = partnerNamePhone;
-          //出资人
-          var investors = this.form.sponsor;
-          clueCustomer.investors = investors;
-          //出资人姓名电话
-          var investorsNamePhone = this.form.sponsorOther;
-          clueCustomer.investorsNamePhone = investorsNamePhone;
-          //决策人
-          var decide = this.form.decisionMaker;
-          clueCustomer.decide = decide;
-          //决策人姓名电话
-          var decideNamePhone = this.form.decisionMakerOther;
-          clueCustomer.decideNamePhone = decideNamePhone;
-          var phoneArr = this.dynamicValidateForm.domains;
-          if (phoneArr.length > 0) {
-            for (var i = 0; i < phoneArr.length; i++) {
-              if (i == 0) {
-                clueCustomer.phone2 = phoneArr[i].value;
-                if (clueCustomer.phone2) {
-                  clueCustomer.phone2CreateTime = phoneArr[i].key;
-                }
-              }
-              if (i == 1) {
-                clueCustomer.phone3 = phoneArr[i].value;
-                clueCustomer.phone3CreateTime = phoneArr[i].key;
-              }
-              if (i == 2) {
-                clueCustomer.phone4 = phoneArr[i].value;
-                clueCustomer.phone4CreateTime = phoneArr[i].key;
-              }
-              if (i == 3) {
-                clueCustomer.phone5 = phoneArr[i].value;
-                clueCustomer.phone5CreateTime = phoneArr[i].key;
-              }
-            }
-          }
-          //----投资意向---//
-          var clueIntention = {};
-          //投资金额
-          var money = this.form.money;
-          clueIntention.advanceAmount = money;
-          //店面大小
-          var area = this.form.area;
-          clueIntention.area = area;
-          //意向品类
-          var intentionCategory = this.form.intentionCategory;
-          clueIntention.purType = intentionCategory;
-          //意向项目
-          var radioProject = this.form.radioProject;
-          clueIntention.purProjectType = radioProject;
-          //意向内部项目
-          var insideProject = this.form.insideProject;
-          clueIntention.purInProject = insideProject;
-          //意向外部项目
-          var outsideProject = this.form.outsideProject;
-          clueIntention.purOutProject = outsideProject;
-          //是否考虑同行
-          var radioSelect = this.form.radioSelect;
-          clueIntention.istrade = radioSelect;
-          //同行业项目
-          var domains = this.form.domains;
-          var ary = [];
-          for (var i = 0; i < domains.length; i++) {
-            // 判断输入框里4个值是否重复(判断对象数组的value是否有重复值)
-            ary.push(domains[i].value);//把输入的品牌名称放入一个数组
-            var s = ary.join(",") + ",";
-            for (var j = 0; j < ary.length; j++) {
-              console.log(ary[j])
-              if (ary[j] != "") {
-                if (s.replace(ary[j] + ",", "").indexOf(ary[j] + ",") > -1) {
-                  this.$message({
-                    message: '请不要输入相同品牌',
-                    type: 'warning'
-                  });
-                  return;
-                }
-              }
-            }
-          }
-          var  tradeProject = ary.join(',');
-          clueIntention.tradeProject=tradeProject;
-          //省
-          var province = this.form.province;
-          clueIntention.province = province;
-          //市
-          var city = this.form.city;
-          //区县
-          var district = this.form.district;
-          if(province){
-            clueIntention.city = city
-            if(city){
-              clueIntention.district = district;
-            }else{
-              clueIntention.district=""
-            }
-          }else{
-            clueIntention.city = ""
-            clueIntention.district=""
-          }
-
-          // ---------------------  以上为客户的基本信息 ---------------
-          // ---------------------  下面的事儿跟跟进记录的保存/修改 ---------------------
-          var tracking = {};
-          tracking = this.onConfirmAdd();
-          var clue = {};
-          clue.clueId = clueId;
-          clue.clueCustomer = clueCustomer;
-          clue.clueIntention = clueIntention;
-          clue.tracking = tracking;
-          axios.post('/tele/clueMyCustomerInfo/updateCustomerClue', clue)
-          .then(function (response) {
-            addCustomerVM.$message({
-              message: '操作成功', type: 'success', duration: 2000, onClose: function () {
-                window.location.href = "/tele/clueMyCustomerInfo/initmyCustomer";
-              }
-            });
-          });
-        } else {
-          console.log('error submit!!');
-          return false;
-        }
-      },
-      rebackClue() {
-        window.location.href = "/tele/clueMyCustomerInfo/initmyCustomer";
-      },
-      submitDialogForm(formName) {
-        this.$refs[formName].validate((valid) => {
-          if (valid) {
-            var domains = this.dynamicValidateForm.domains;
-            var customerPhone = this.form.customerPhone;
-            var ary = [];
-            console.log(domains)
-            for (var i = 0; i < domains.length; i++) {
-              // 判断弹框里的值是否与页面的手机号1重复
-              if (domains[i].value == customerPhone) {
-                this.$message({
-                  message: '请不要提交重复手机号',
-                  type: 'warning'
-                });
-                return;
-              }
-              // 判断输入框里4个值是否重复(判断对象数组的value是否有重复值)
-              ary.push(domains[i].value);//把输入的手机号放入一个数组
-              var s = ary.join(",") + ",";
-              console.log(ary)
-              for (var j = 0; j < ary.length; j++) {
-                console.log(ary[j])
-                if (ary[j] != "") {
-                  if (("," + s.replace(ary[j] + ",", "")).indexOf("," + ary[j] + ",") > -1) {
-                    this.$message({
-                      message: '请不要提交重复手机号',
-                      type: 'warning'
+            },
+            gettelNumberIcon(tel) {
+                //外呼手机
+                var param = {};
+                param.clueId = clueId;
+                window.parent.parent.outboundCallPhone(tel, 2, clueId, function (res) {
+                    axios.post('/tele/clueMyCustomerInfo/updateCallTime', param).then(function (response) {
                     });
-                    return;
-                  }
+                });
+            },
+            formatTimeFn(date) {
+                if (null == date) {
+                    return "";
+                }
+                var dateNew = new Date(date);
+                var year = dateNew.getFullYear()
+                var month = dateNew.getMonth() + 1
+                var day = dateNew.getDate()
+                var hour = dateNew.getHours()
+                var minute = dateNew.getMinutes()
+                var second = dateNew.getSeconds()
+                return year + "-" + this.formatNumberFn(month) + "-" + this.formatNumberFn(day) + " " + this.formatNumberFn(hour) + ":" + this.formatNumberFn(minute) + ":" + this.formatNumberFn(second);
+            },
+            formatNumberFn(n) {
+                n = n.toString()
+                return n[1] ? n : '0' + n
+            },
+            customerStatusChange(selVal) {
+                if (selVal == '3') {
+                    this.substatus = false;
+                    // $(".paddingL55 .lineForm_customerStatus").css("width","210px");
+                } else {
+                    this.substatus = true;
+                    // $(".paddingL55 .lineForm_customerStatus").css("width","420px");
+                }
+            },
+            projectChangeSelect(selVal) {
+                var param = {};
+                param.category = selVal;
+                this.form.insideProject = null;
+                axios.post('/aggregation/projectManager/listNoPage', param).then(function (response) {
+                    addCustomerVM.proSelect = response.data.data;
+                });
+            },
+            // 是否同行业
+            professionChange() {
+                if (this.form.radioSelect == "0") {//否
+                    this.domainShow = false
+                } else if (this.form.radioSelect == "1") {//是
+                    this.domainShow = true
+                }
+            },
+            addProjectDomain() {
+                if (this.form.domains.length > 2) {
+                    this.$message({
+                        message: '最多输入三个品牌',
+                        type: 'warning'
+                    });
+                } else {
+                    this.form.domains.push({
+                        value: '',
+                        key: Date.now()
+                    });
+                }
+            },
+            removeProjectDomain(item) {//移除
+                var index = this.form.domains.indexOf(item)
+                if (index !== -1) {
+                    this.form.domains.splice(index, 1)
+                }
+            },
+            submitForm(form) {
+                var valid = true;
+                //跟进记录校验
+                if (this.lineFormShow) { // 如果存在编辑/新增操作 进行跟进记录校验
+                    this.$refs['LineRuleForm'].validate((error) => {
+                        valid = error;
+                    });
+                }
+                if (valid) {
+                    if (valid) {
+                        this.$refs[form].validateField(["phone"], (error) => {
+                            if (error) {
+                                valid = false;
+                            }
+                        });
+                    }
                 }
 
-              }
-              // 如果输入的是非数字
-              if (/^[0-9]*$/.test(domains[i].value) == false) {
-                this.$message({
-                  message: '请输入数字',
-                  type: 'warning'
+                if (valid) {
+                    this.saveDisabled = true;
+                    //----客户基本信息---//
+                    var clueCustomer = {};
+                    //客户姓名
+                    var customerName = this.form.customerName;
+                    clueCustomer.cusName = customerName;
+                    //手机号
+                    if (this.form.phone != null && this.form.phone != '') {
+                        clueCustomer.phone = this.form.phone
+                    } else {
+                        clueCustomer.phone = this.form.customerPhone;
+                    }
+                    //性别
+                    var customerSex = this.form.customerSex;
+                    clueCustomer.sex = customerSex;
+                    //微信
+                    var wechat = this.form.wechat;
+                    clueCustomer.wechat = wechat;
+                    //微信2
+                    var wechat2 = this.form.wechat2;
+                    clueCustomer.wechat2 = wechat2;
+                    //微信二维码
+                    var wechatUrl = this.form.wechatUrl;
+                    clueCustomer.wechatCode = wechatUrl;
+                    //餐饮经验
+                    var experience = this.form.experience;
+                    clueCustomer.hasExperience = experience;
+                    //年龄
+                    var customerAge = this.form.customerAge;
+                    clueCustomer.age = customerAge;
+                    //职业
+                    var customerJob = this.form.customerJob;
+                    clueCustomer.profession = customerJob;
+                    //合伙人
+                    var customerPartner = this.form.customerPartner;
+                    clueCustomer.partnerType = customerPartner;
+                    //选址情况
+                    var address = this.form.address;
+                    clueCustomer.hasAddress = address;
+                    //开店紧迫性
+                    var urgency = this.form.urgency;
+                    clueCustomer.urgentDate = urgency;
+                    //客户级别
+                    var customerLevel = this.form.customerLevel;
+                    clueCustomer.cusLevel = customerLevel;
+                    //QQ
+                    var qq = this.form.qq;
+                    clueCustomer.qq = qq;
+                    //email
+                    var email = this.form.customerEmail;
+                    clueCustomer.email = email;
+                    //餐饮经验
+                    var experience = this.form.cateringType;
+                    clueCustomer.experience = experience;
+                    //合伙人姓名电话
+                    var partnerNamePhone = this.form.customerPartnerDetail;
+                    clueCustomer.partnerNamePhone = partnerNamePhone;
+                    //出资人
+                    var investors = this.form.sponsor;
+                    clueCustomer.investors = investors;
+                    //出资人姓名电话
+                    var investorsNamePhone = this.form.sponsorOther;
+                    clueCustomer.investorsNamePhone = investorsNamePhone;
+                    //决策人
+                    var decide = this.form.decisionMaker;
+                    clueCustomer.decide = decide;
+                    //决策人姓名电话
+                    var decideNamePhone = this.form.decisionMakerOther;
+                    clueCustomer.decideNamePhone = decideNamePhone;
+                    var phoneArr = this.dynamicValidateForm.domains;
+                    if (phoneArr.length > 0) {
+                        for (var i = 0; i < phoneArr.length; i++) {
+                            if (i == 0) {
+                                clueCustomer.phone2 = phoneArr[i].value;
+                                if (clueCustomer.phone2) {
+                                    clueCustomer.phone2CreateTime = phoneArr[i].key;
+                                }
+                            }
+                            if (i == 1) {
+                                clueCustomer.phone3 = phoneArr[i].value;
+                                clueCustomer.phone3CreateTime = phoneArr[i].key;
+                            }
+                            if (i == 2) {
+                                clueCustomer.phone4 = phoneArr[i].value;
+                                clueCustomer.phone4CreateTime = phoneArr[i].key;
+                            }
+                            if (i == 3) {
+                                clueCustomer.phone5 = phoneArr[i].value;
+                                clueCustomer.phone5CreateTime = phoneArr[i].key;
+                            }
+                        }
+                    }
+                    //----投资意向---//
+                    var clueIntention = {};
+                    //投资金额
+                    var money = this.form.money;
+                    clueIntention.advanceAmount = money;
+                    //店面大小
+                    var area = this.form.area;
+                    clueIntention.area = area;
+                    //意向品类
+                    var intentionCategory = this.form.intentionCategory;
+                    clueIntention.purType = intentionCategory;
+                    //意向项目
+                    var radioProject = this.form.radioProject;
+                    clueIntention.purProjectType = radioProject;
+                    //意向内部项目
+                    var insideProject = this.form.insideProject;
+                    clueIntention.purInProject = insideProject;
+                    //意向外部项目
+                    var outsideProject = this.form.outsideProject;
+                    clueIntention.purOutProject = outsideProject;
+                    //是否考虑同行
+                    var radioSelect = this.form.radioSelect;
+                    clueIntention.istrade = radioSelect;
+                    //同行业项目
+                    var domains = this.form.domains;
+                    var ary = [];
+                    for (var i = 0; i < domains.length; i++) {
+                        // 判断输入框里4个值是否重复(判断对象数组的value是否有重复值)
+                        ary.push(domains[i].value);//把输入的品牌名称放入一个数组
+                        var s = ary.join(",") + ",";
+                        for (var j = 0; j < ary.length; j++) {
+                            console.log(ary[j])
+                            if (ary[j] != "") {
+                                if (s.replace(ary[j] + ",", "").indexOf(ary[j] + ",") > -1) {
+                                    this.$message({
+                                        message: '请不要输入相同品牌',
+                                        type: 'warning'
+                                    });
+                                    return;
+                                }
+                            }
+                        }
+                    }
+                    var  tradeProject = ary.join(',');
+                    clueIntention.tradeProject=tradeProject;
+                    //省
+                    var province = this.form.province;
+                    clueIntention.province = province;
+                    //市
+                    var city = this.form.city; 
+                    //区县
+                    var district = this.form.district;
+                    if(province){
+                        clueIntention.city = city
+                        if(city){
+                            clueIntention.district = district;
+                        }else{
+                            clueIntention.district=""
+                        }
+                    }else{
+                        clueIntention.city = ""
+                        clueIntention.district=""
+                    }                   
+
+                    // ---------------------  以上为客户的基本信息 ---------------
+                    // ---------------------  下面的事儿跟跟进记录的保存/修改 ---------------------
+                    var tracking = {};
+                    tracking = this.onConfirmAdd();
+                    var clue = {};
+                    clue.clueId = clueId;
+                    clue.clueCustomer = clueCustomer;
+                    clue.clueIntention = clueIntention;
+                    clue.tracking = tracking;
+                  if (this.formInline.customerStatus == '3') {//如果选择的是不跟进则弹出弹窗
+                    this.saveDisabled = false;
+                    this.$confirm('选择不跟进，此资源将释放。', '提示', {
+                      confirmButtonText: '确定',
+                      cancelButtonText: '取消',
+                      type: 'warning'
+                    }).then(() => {
+                      this.saveDisabled = true;
+                      axios.post('/tele/clueMyCustomerInfo/updateCustomerClue', clue)
+                      .then(function (response) {
+                        addCustomerVM.$message({
+                          message: '操作成功', type: 'success', duration: 2000, onClose: function () {
+                            window.location.href = "/tele/clueMyCustomerInfo/initmyCustomer";
+                          }
+                        });
+                      });
+                    })
+                  } else {
+                    axios.post('/tele/clueMyCustomerInfo/updateCustomerClue', clue)
+                    .then(function (response) {
+                      addCustomerVM.$message({
+                        message: '操作成功', type: 'success', duration: 2000, onClose: function () {
+                          window.location.href = "/tele/clueMyCustomerInfo/initmyCustomer";
+                        }
+                      });
+                    });
+                  }
+                } else {
+                    console.log('error submit!!');
+                    return false;
+                }
+            },
+            rebackClue() {
+                window.location.href = "/tele/clueMyCustomerInfo/initmyCustomer";
+            },
+            submitDialogForm(formName) {
+                this.$refs[formName].validate((valid) => {
+                    if (valid) {
+                        var domains = this.dynamicValidateForm.domains;
+                        var customerPhone = this.form.customerPhone;
+                        var ary = [];
+                        console.log(domains)
+                        for (var i = 0; i < domains.length; i++) {
+                            // 判断弹框里的值是否与页面的手机号1重复
+                            if (domains[i].value == customerPhone) {
+                                this.$message({
+                                    message: '请不要提交重复手机号',
+                                    type: 'warning'
+                                });
+                                return;
+                            }
+                            // 判断输入框里4个值是否重复(判断对象数组的value是否有重复值)
+                            ary.push(domains[i].value);//把输入的手机号放入一个数组
+                            var s = ary.join(",") + ",";
+                            console.log(ary)
+                            for (var j = 0; j < ary.length; j++) {
+                                console.log(ary[j])
+                                if (ary[j] != "") {
+                                    if (("," + s.replace(ary[j] + ",", "")).indexOf("," + ary[j] + ",") > -1) {
+                                        this.$message({
+                                            message: '请不要提交重复手机号',
+                                            type: 'warning'
+                                        });
+                                        return;
+                                    }
+                                }
+
+                            }
+                            // 如果输入的是非数字
+                            if (/^[0-9]*$/.test(domains[i].value) == false) {
+                                this.$message({
+                                    message: '请输入数字',
+                                    type: 'warning'
+                                });
+                                return;
+                            }
+
+                        }
+                        // 按钮变化
+                        this.buttonType = 'B';
+                        console.log('submit!!');
+                        // 关闭弹窗
+                        this.dialogFormVisible = false;
+                    } else {
+                        console.log('error submit!!');
+                        return false;
+                    }
                 });
-                return;
-              }
+            },
+            removeDomain(item) {
+                var index = this.dynamicValidateForm.domains.indexOf(item);
+                var itemLength = this.dynamicValidateForm.domains.length;
+                if (index !== -1) {
+                    this.dynamicValidateForm.domains.splice(index, 1)
+                }
+                if (itemLength == 2) {
+                    // 删除按钮不显示
+                    this.deleteShow = false;
+                }
+            },
+            addDomain(item) {
+                var itemLength = this.dynamicValidateForm.domains.length;
+                if (itemLength < 4) {
+                    this.dynamicValidateForm.domains.push({
+                        value: '',
+                        key: Date.now(),
+                        edit:0
+                    });
+                } else {
+                    this.$message({
+                        message: '最多添加5个手机号',
+                        type: 'warning'
+                    });
+                }
+                if (itemLength > 0) {
+                    // 显示删除按钮
+                    this.deleteShow = true;
+                }
+            },
+            clearDialog() {
+                console.log('清空')
 
-            }
-            // 按钮变化
-            this.buttonType = 'B';
-            console.log('submit!!');
-            // 关闭弹窗
-            this.dialogFormVisible = false;
-          } else {
-            console.log('error submit!!');
-            return false;
-          }
-        });
-      },
-      removeDomain(item) {
-        var index = this.dynamicValidateForm.domains.indexOf(item);
-        var itemLength = this.dynamicValidateForm.domains.length;
-        if (index !== -1) {
-          this.dynamicValidateForm.domains.splice(index, 1)
-        }
-        if (itemLength == 2) {
-          // 删除按钮不显示
-          this.deleteShow = false;
-        }
-      },
-      addDomain(item) {
-        var itemLength = this.dynamicValidateForm.domains.length;
-        if (itemLength < 4) {
-          this.dynamicValidateForm.domains.push({
-            value: '',
-            key: Date.now()
-          });
-        } else {
-          this.$message({
-            message: '最多添加5个手机号',
-            type: 'warning'
-          });
-        }
-        if (itemLength > 0) {
-          // 显示删除按钮
-          this.deleteShow = true;
-        }
-      },
-      clearDialog() {
-        console.log('清空')
-
-        // 1、数据清空
-        var domains = this.dynamicValidateForm.domains
-        for (var i = 0; i < domains.length; i++) {
-          domains[i].value = ""
-          domains[i].key = ""
-        }
-        // 2、重置表单
-        this.$refs['dynamicValidateForm'].resetFields()
-        // 3、关闭弹窗
-        this.dialogFormVisible = false;
-        // 4、按钮变化
-        this.buttonType = 'A';
-      },
-      number() {
-        this.form.customerPhone = this.form.customerPhone.replace(/[^\.\d]/g, '');
-        this.form.customerPhone = this.form.customerPhone.replace('.', '');
-      },
-      phoneNumber() {
-        var domains = this.dynamicValidateForm.domains;
-        for (var i = 0; i < domains.length; i++) {
-          domains[i].value = domains[i].value.replace(/[^\.\d]/g, '');
-          domains[i].value = domains[i].value.replace('.', '');
-        }
-      },
-      qqnumber() {
-        this.form.qq = this.form.qq.replace(/[^\.\d]/g, '');
-        this.form.qq = this.form.qq.replace('.', '');
-      },
-      agenumber() {
-        /* this.form.customerAge = this.form.customerAge.replace(/[^\.\d]/g, '');
-        this.form.customerAge = this.form.customerAge.replace('.', ''); */
-      },
-      // 单选切换
-      projectChange() {
-        if (this.form.radioProject == "1") {//内部项目
-          this.insideProjectShow = true;
-          this.outsideProjectShow = false;
-          this.form.outsideProject = null;
-        } else if (this.form.radioProject == "2") {//外部项目
-          this.insideProjectShow = false;
-          this.outsideProjectShow = true;
-          this.form.insideProject =null;
-        }
-      },
-      handleSelectionChange(val) {
-        this.multipleSelection = val;
-      },
-      handleFileSelectionChange(val) {
-        //上传资料
-        this.multipleFileSelection = val;
-      },
-      handleTrackingSelection(val) {
-        this.multipleTrackingSelection = val;
-      },
+                // 1、数据清空
+                var domains = this.dynamicValidateForm.domains
+                for (var i = 0; i < domains.length; i++) {
+                    domains[i].value = ""
+                    domains[i].key = ""
+                }
+                // 2、重置表单
+                this.$refs['dynamicValidateForm'].resetFields()
+                // 3、关闭弹窗
+                this.dialogFormVisible = false;
+                // 4、按钮变化
+                this.buttonType = 'A';
+            },
+            number() {
+                this.form.customerPhone = this.form.customerPhone.replace(/[^\.\d]/g, '');
+                this.form.customerPhone = this.form.customerPhone.replace('.', '');
+            },
+            phoneNumber() {
+            debugger;
+                var domains = this.dynamicValidateForm.domains;
+                console.log('domains.length:'+domains.length);
+                for (var i = 0; i < domains.length; i++) {
+                  domains[i].value = domains[i].value.replace(/[^\.\d]/g, '');
+                  domains[i].value = domains[i].value.replace('.', '');
+                  console.log('domains['+i+'].edit:' + domains[i].edit);
+                }
+            },
+            qqnumber() {
+                this.form.qq = this.form.qq.replace(/[^\.\d]/g, '');
+                this.form.qq = this.form.qq.replace('.', '');
+            },
+            agenumber() {
+                /* this.form.customerAge = this.form.customerAge.replace(/[^\.\d]/g, '');
+                this.form.customerAge = this.form.customerAge.replace('.', ''); */
+            },
+            // 单选切换
+            projectChange() {
+                if (this.form.radioProject == "1") {//内部项目
+                    this.insideProjectShow = true;
+                    this.outsideProjectShow = false;
+                    this.form.outsideProject = null;
+                } else if (this.form.radioProject == "2") {//外部项目
+                    this.insideProjectShow = false;
+                    this.outsideProjectShow = true;
+                    this.form.insideProject =null;
+                }
+            },
+            handleSelectionChange(val) {
+                this.multipleSelection = val;
+            },
+            handleFileSelectionChange(val) {
+                //上传资料
+                this.multipleFileSelection = val;
+            },
+            handleTrackingSelection(val) {
+                this.multipleTrackingSelection = val;
+            },
 
 
       editRecord() {
@@ -1660,19 +1830,11 @@
           param.customerStatusSub = this.formInline.customerStatusSub;
         }
         param.stage = 2;
-        // this.addBtnDisabled=true;
-        // 如果是编辑跟进记录
         if (isEdit) {
           param.id = this.formInline.id;
         } else {
         }
         return param;
-        // }
-        //end
-        // }else {
-        //   return false;
-        // }
-        // });
       },
       deteleClueFile() {
         //删除上传文件
@@ -1802,9 +1964,13 @@
       },
       formatSeconds(s) {
         var t = "";
+        var hour = Math.floor(s/3600);
         var min = Math.floor(s / 60) % 60;
         var sec = s % 60;
-
+        if(hour<10){
+        	t+="0";
+        }
+        t+=hour+":";
         if (min < 10) {
           t += "0";
         }
@@ -2249,17 +2415,28 @@
         this.form.sponsorOther = customer.investorsNamePhone;
         this.form.decisionMaker = customer.decide == null ? "" : customer.decide + "";
         this.form.decisionMakerOther = customer.decideNamePhone;
+        debugger;
         var phoneArr = [];
         if (customer.phone2) {
           var phone2 = {};
           phone2.value = customer.phone2;
           phone2.key = customer.phone2CreateTime;
+          if(editPhone == 1){
+            phone2.edit = 0;
+          }else {
+            phone2.edit = 1;
+          }
           phoneArr.push(phone2);
         }
         if (customer.phone3) {
           var phone3 = {};
           phone3.value = customer.phone3;
           phone3.key = customer.phone3CreateTime;
+          if(editPhone == 1){
+            phone3.edit = 0;
+          }else {
+            phone3.edit = 1;
+          }
           phoneArr.push(phone3);
 
         }
@@ -2268,6 +2445,11 @@
           var phone4 = {};
           phone4.value = customer.phone4;
           phone4.key = customer.phone4CreateTime;
+          if(editPhone == 1){
+            phone4.edit = 0;
+          }else {
+            phone4.edit = 1;
+          }
           phoneArr.push(phone4);
 
         }
@@ -2275,13 +2457,24 @@
           var phone5 = {};
           phone5.value = customer.phone5;
           phone5.key = customer.phone5CreateTime;
+          if(editPhone == 1){
+            phone5.edit = 0;
+          }else {
+            phone5.edit = 1;
+          }
           phoneArr.push(phone5);
         }
         if (phoneArr.length < 1) {
-          var phone5 = {};
-          phone5.value = "";
-          phone5.key = Date.now();
-          phoneArr.push(phone5);
+          var phone2 = {};
+          phone2.value = "";
+          phone2.key = Date.now();
+          // if(editPhone == 1){
+          //   phone2.edit = 0;
+          // }else {
+          //   phone2.edit = 1;
+          // }
+          phone2.edit = 0;
+          phoneArr.push(phone2);
         }
         this.dynamicValidateForm.domains = phoneArr;
         console.log(phoneArr)
@@ -2441,7 +2634,7 @@
       //意向品类
       param = {};
       param.groupCode = "project_category";
-      axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode', param).then(function (response) {
+      axios.post('/dictionary/DictionaryItem/dicItemsByGroupCodeSort', param).then(function (response) {
         addCustomerVM.IntentionalCategoryArr = response.data.data;
       });
       //投资金额

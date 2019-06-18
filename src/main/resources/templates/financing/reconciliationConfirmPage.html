@@ -22,6 +22,7 @@
     		<shiro:hasPermission name="financing:reconciliationConfirmManager:settlement">
 		        <el-button type="warning" @click="settlementConfirm">结算确认</el-button>
 		    </shiro:hasPermission>
+		    <el-button type="success" @click="down">下载结算单</el-button>
 	  </el-row>
     <div class="mainSearchBg">        
         <div class="mainSearchFormBox">
@@ -174,6 +175,18 @@
                             	查看疑意
                             </el-button>
                         </div>
+                    </template>
+    	        </el-table-column>
+    	        <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width"
+    	         v-else-if="item.fieldCode == 'statementNo'">
+    	               <template slot-scope="scope">
+    	               <div v-if="scope.row.status !='驳回商务' && scope.row.status !='待处理' && scope.row.status !='未提交对账'">
+    	               	<a :href="'/financing/balanceaccount/settleAccounts?payDetailId='+scope.row.payId+''" target="_blank" class="blueColorBtn">{{scope.row.statementNo}} </a>
+    	               </div>
+    	           <div v-else-if="scope.row.status =='驳回商务' || scope.row.status =='待处理'  || scope.row.status =='未提交对账'">
+    	               	<a style="color:#222">{{scope.row.statementNo}} </a>
+    	               </div>
+    	               
                     </template>
     	        </el-table-column>
                 <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width"
@@ -763,6 +776,31 @@ var clueVM = new Vue({
                     }else{
                         this.isShow=true
                     }          
+                },
+                down(){
+             	   var rows = this.multipleSelection;
+             	   if(rows.length ==0){
+                        this.$message({
+                           message: '请选择数据',
+                           type: 'warning'
+                         });
+                        return;
+                    } else if(rows.length>1){
+                        this.$message({
+                           message: '请选择一条数据进行下载结算单',
+                           type: 'warning'
+                         });
+                        return;
+                    } 
+             	   var status = rows[0].status;
+             	   if(status =="待处理" || status =="驳回商务" ){
+             		   this.$message({
+                            message: "未提交对账不允许下载结算单",
+                            type: 'warning'
+                          });
+                         return;
+             	   }
+             	   window.location.href="/financing/balanceaccount/downBalanceAccount?payDetailId="+rows[0].payId;
                 },
         },
         created(){
