@@ -387,7 +387,7 @@ public class PhoneTrafficController {
 
             List<CirculationRespDTO> data = circulationList.getData();
             JSONResult<List<CirculationRespDTO>> cDxcygwList = getCDxcygwList(clueBasic);
-            if(JSONResult.SUCCESS.equals(cDxcygwList.getCode())&&cDxcygwList !=null){
+            if(cDxcygwList !=null&&JSONResult.SUCCESS.equals(cDxcygwList.getCode())){
                 data.addAll(cDxcygwList.getData());
             }
             request.setAttribute("circulationList", data);
@@ -418,9 +418,9 @@ public class PhoneTrafficController {
     }
 
 
-    private JSONResult<List<CirculationRespDTO>>  getCDxcygwList(ClueBasicDTO clueBasic ){
+    private  JSONResult<List<CirculationRespDTO>> getCDxcygwList(ClueBasicDTO clueBasic ){
         JSONResult<List<CirculationRespDTO>> jsonResult = null;
-        Integer phtraCustomerStatus = clueBasic.getPhtraCustomerStatus();
+        Integer phtraCustomerStatus = clueBasic.getPhCustomerStatus();
         if(phtraCustomerStatus == Integer.valueOf(PhTraCustomerStatusEnum.STATUS__4TH.getCode())){
             // 如果== 转电销
             CirculationReqDTO circDto = new CirculationReqDTO();
@@ -436,6 +436,7 @@ public class PhoneTrafficController {
                 circDto.setRoleId(data.get(0).getId());
                 jsonResult = circulationFeignClient
                     .queryList(circDto);
+
             }
         }
         return jsonResult;
@@ -507,7 +508,7 @@ public class PhoneTrafficController {
                 && circulationList.getData() != null) {
             List<CirculationRespDTO> data = circulationList.getData();
             JSONResult<List<CirculationRespDTO>> cDxcygwList = getCDxcygwList(clueBasic);
-            if(JSONResult.SUCCESS.equals(cDxcygwList.getCode())&&cDxcygwList !=null){
+            if(cDxcygwList !=null&&JSONResult.SUCCESS.equals(cDxcygwList.getCode())){
                 data.addAll(cDxcygwList.getData());
             }
             request.setAttribute("circulationList", data);
