@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html xmlns:th="http://www.w3.org/1999/xhtml">
 <head th:include="_header_include::frag(~{::title},~{::style},~{})">
     <title>维护客户</title>
     <meta charset="UTF-8">
@@ -551,8 +551,13 @@
                 :rules="{
                        required: true, message: '手机号不能为空', trigger: 'blur',
                 }">
-                <div v-if="editPhone == 0">
+                <div v-if="editPhone == 0 && domain.edit ==1">
                     <el-input  v-model="domain.value" disabled  maxLength="11" @keyup.native="phoneNumber"style="width: 200px;margin-right: 10px;"></el-input>
+                    <img th:src="@{/images/icon_tele2.png}" @click="gettelNumberIcon(domain.value)"style="margin:0 10px;width:31px;cursor: pointer;vertical-align: middle;" alt="">
+                </div>
+                <div v-if="editPhone == 0 && domain.edit ==0">
+                    <el-input  v-model="domain.value"  maxLength="11" @keyup.native="phoneNumber"style="width: 200px;margin-right: 10px;"></el-input>
+                    <el-button type="danger" @click.prevent="removeDomain(domain)" v-show="deleteShow">删除</el-button>
                     <img th:src="@{/images/icon_tele2.png}" @click="gettelNumberIcon(domain.value)"style="margin:0 10px;width:31px;cursor: pointer;vertical-align: middle;" alt="">
                 </div>
                 <div v-else-if="editPhone == 1">
@@ -957,13 +962,13 @@
             return date.getTime() <= Date.now() - 8.64e7 || date.getTime() >= Date.now();
           }
         },
-                editPhone:editPhone,
-                repeatWeDialogForm:{},
-                repeatCustomer:{},
-                repeatWechatVisible:false,
-                dialogFormVisible1: false,
-                repeatStatus:repeatStatus,
-                repeatClueList:repeatClueList,
+        editPhone:editPhone,
+        repeatWeDialogForm:{},
+        repeatCustomer:{},
+        repeatWechatVisible:false,
+        dialogFormVisible1: false,
+        repeatStatus:repeatStatus,
+        repeatClueList:repeatClueList,
         teleEndTime:teleEndTime,
         timeDefaultShow:new Date(),
         clueId: clueId,
@@ -1163,7 +1168,8 @@
                 dynamicValidateForm: {//新增手机号弹窗数据
                     domains: [{
                         value: '',
-                        key: Date.now()
+                        key: Date.now(),
+                        edit:1,
                     }]
                 },
                 statusOptions: [{
@@ -1645,7 +1651,8 @@
                 if (itemLength < 4) {
                     this.dynamicValidateForm.domains.push({
                         value: '',
-                        key: Date.now()
+                        key: Date.now(),
+                        edit:0
                     });
                 } else {
                     this.$message({
@@ -1679,10 +1686,13 @@
                 this.form.customerPhone = this.form.customerPhone.replace('.', '');
             },
             phoneNumber() {
+            debugger;
                 var domains = this.dynamicValidateForm.domains;
+                console.log('domains.length:'+domains.length);
                 for (var i = 0; i < domains.length; i++) {
-                    domains[i].value = domains[i].value.replace(/[^\.\d]/g, '');
-                    domains[i].value = domains[i].value.replace('.', '');
+                  domains[i].value = domains[i].value.replace(/[^\.\d]/g, '');
+                  domains[i].value = domains[i].value.replace('.', '');
+                  console.log('domains['+i+'].edit:' + domains[i].edit);
                 }
             },
             qqnumber() {
@@ -2385,17 +2395,28 @@
         this.form.sponsorOther = customer.investorsNamePhone;
         this.form.decisionMaker = customer.decide == null ? "" : customer.decide + "";
         this.form.decisionMakerOther = customer.decideNamePhone;
+        debugger;
         var phoneArr = [];
         if (customer.phone2) {
           var phone2 = {};
           phone2.value = customer.phone2;
           phone2.key = customer.phone2CreateTime;
+          if(editPhone == 1){
+            phone2.edit = 0;
+          }else {
+            phone2.edit = 1;
+          }
           phoneArr.push(phone2);
         }
         if (customer.phone3) {
           var phone3 = {};
           phone3.value = customer.phone3;
           phone3.key = customer.phone3CreateTime;
+          if(editPhone == 1){
+            phone3.edit = 0;
+          }else {
+            phone3.edit = 1;
+          }
           phoneArr.push(phone3);
 
         }
@@ -2404,6 +2425,11 @@
           var phone4 = {};
           phone4.value = customer.phone4;
           phone4.key = customer.phone4CreateTime;
+          if(editPhone == 1){
+            phone4.edit = 0;
+          }else {
+            phone4.edit = 1;
+          }
           phoneArr.push(phone4);
 
         }
@@ -2411,12 +2437,22 @@
           var phone5 = {};
           phone5.value = customer.phone5;
           phone5.key = customer.phone5CreateTime;
+          if(editPhone == 1){
+            phone5.edit = 0;
+          }else {
+            phone5.edit = 1;
+          }
           phoneArr.push(phone5);
         }
         if (phoneArr.length < 1) {
           var phone5 = {};
           phone5.value = "";
           phone5.key = Date.now();
+          if(editPhone == 1){
+            phone5.edit = 0;
+          }else {
+            phone5.edit = 1;
+          }
           phoneArr.push(phone5);
         }
         this.dynamicValidateForm.domains = phoneArr;
@@ -2577,7 +2613,7 @@
       //意向品类
       param = {};
       param.groupCode = "project_category";
-      axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode', param).then(function (response) {
+      axios.post('/dictionary/DictionaryItem/dicItemsByGroupCodeSort', param).then(function (response) {
         addCustomerVM.IntentionalCategoryArr = response.data.data;
       });
       //投资金额
