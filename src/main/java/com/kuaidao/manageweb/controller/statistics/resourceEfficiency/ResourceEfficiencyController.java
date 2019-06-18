@@ -11,6 +11,7 @@ import com.kuaidao.common.util.ExcelUtil;
 import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
 import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
 import com.kuaidao.manageweb.feign.project.ProjectInfoFeignClient;
+import com.kuaidao.manageweb.feign.statistics.resourceEfficiency.ResourceEfficiencyFeignClient;
 import com.kuaidao.manageweb.util.CommUtil;
 import com.kuaidao.stastics.dto.resourceEfficiency.ResourceEfficiencyDto;
 import com.kuaidao.stastics.dto.resourceEfficiency.ResourceEfficiencyQueryDto;
@@ -53,6 +54,8 @@ public class ResourceEfficiencyController {
     private ProjectInfoFeignClient projectInfoFeignClient;
     @Autowired
     private OrganizationFeignClient organizationFeignClient;
+    @Autowired
+    private ResourceEfficiencyFeignClient resourceEfficiencyFeignClient;
 
     /**
      *资源接通有效率表
@@ -77,12 +80,7 @@ public class ResourceEfficiencyController {
     @RequestMapping("/getResourceEfficientList")
     @ResponseBody
     public JSONResult<Map<String,Object>> getResourceEfficientList(@RequestBody ResourceEfficiencyQueryDto resourceEfficiencyQueryDto) throws Exception{
-        PageBean<ResourceEfficiencyDto> pageData = mockData().getData();
-        List<ResourceEfficiencyDto> totalData = mockCountData().getData();
-        Map<String,Object> resMap = new HashMap<>();
-        resMap.put("totalData", totalData);
-        resMap.put("tableData", pageData);
-        return new JSONResult<Map<String,Object>>().success(resMap);
+        return resourceEfficiencyFeignClient.getResourceEfficientPageList(resourceEfficiencyQueryDto);
     }
 
     /**
@@ -97,62 +95,6 @@ public class ResourceEfficiencyController {
         resMap.put("totalData", totalData);
         resMap.put("tableData", pageData);
         return new JSONResult<Map<String,Object>>().success(resMap);
-    }
-
-
-    /**
-     * 获取合计数据
-     */
-    private List<ResourceEfficiencyDto> getResourceEfficiencyCount(List<ResourceEfficiencyDto> lists){
-        List<ResourceEfficiencyDto> totleList = new ArrayList<>();
-        ResourceEfficiencyDto totalResourceEfficiency = new ResourceEfficiencyDto();
-        totalResourceEfficiency.setResourceMediumName("合计");
-        totalResourceEfficiency.setProjectTypeName("合计");
-        totalResourceEfficiency.setResourceCategoryName("合计");
-        //下发资源量
-        Integer issuedResources = lists.stream().mapToInt(ResourceEfficiencyDto::getIssuedResources).sum();
-        //跟访资源量
-        Integer followResources = lists.stream().mapToInt(ResourceEfficiencyDto::getFollowResources).sum();
-        //首次接通资源量
-        Integer firstResources = lists.stream().mapToInt(ResourceEfficiencyDto::getFirstResources).sum();
-        //接通资源量
-        Integer connectResources = lists.stream().mapToInt(ResourceEfficiencyDto::getConnectResources).sum();
-        //未接通资源量
-        Integer notConnectResources = lists.stream().mapToInt(ResourceEfficiencyDto::getNotConnectResources).sum();
-        //接通有效资源量
-        Integer connectEffectiveResources = lists.stream().mapToInt(ResourceEfficiencyDto::getConnectEffectiveResources).sum();
-        //接通无效资源量
-        Integer connectNotEffectiveResources = lists.stream().mapToInt(ResourceEfficiencyDto::getConnectNotEffectiveResources).sum();
-        //未接通有效资源量
-        Integer notConnectEffectiveResources = lists.stream().mapToInt(ResourceEfficiencyDto::getNotConnectEffectiveResources).sum();
-        //未接通无效资源量
-        Integer notConnectNotEffectiveResources = lists.stream().mapToInt(ResourceEfficiencyDto::getNotConnectNotEffectiveResources).sum();
-        //跟访率
-        BigDecimal followRate = lists.stream() .map(ResourceEfficiencyDto::getFollowRate).reduce(BigDecimal.ZERO,BigDecimal::add);
-        //首次接通率
-        BigDecimal firstRate = lists.stream() .map(ResourceEfficiencyDto::getFirstRate).reduce(BigDecimal.ZERO,BigDecimal::add);
-        //资源接通率
-        BigDecimal resourceConnectRate = lists.stream() .map(ResourceEfficiencyDto::getResourceConnectRate).reduce(BigDecimal.ZERO,BigDecimal::add);
-        //资源有效率
-        BigDecimal resourceEffectiveRate = lists.stream() .map(ResourceEfficiencyDto::getResourceEffectiveRate).reduce(BigDecimal.ZERO,BigDecimal::add);
-        //接通有效率
-        BigDecimal connectionRate = lists.stream() .map(ResourceEfficiencyDto::getConnectionRate).reduce(BigDecimal.ZERO,BigDecimal::add);
-        totalResourceEfficiency.setIssuedResources(issuedResources);
-        totalResourceEfficiency.setFollowResources(followResources);
-        totalResourceEfficiency.setFirstResources(firstResources);
-        totalResourceEfficiency.setConnectResources(connectResources);
-        totalResourceEfficiency.setNotConnectResources(notConnectResources);
-        totalResourceEfficiency.setConnectEffectiveResources(connectEffectiveResources);
-        totalResourceEfficiency.setConnectNotEffectiveResources(connectNotEffectiveResources);
-        totalResourceEfficiency.setNotConnectEffectiveResources(notConnectEffectiveResources);
-        totalResourceEfficiency.setNotConnectNotEffectiveResources(notConnectNotEffectiveResources);
-        totalResourceEfficiency.setFollowRate(followRate);
-        totalResourceEfficiency.setFirstRate(firstRate);
-        totalResourceEfficiency.setResourceConnectRate(resourceConnectRate);
-        totalResourceEfficiency.setResourceEffectiveRate(resourceEffectiveRate);
-        totalResourceEfficiency.setConnectionRate(connectionRate);
-        totleList.add(totalResourceEfficiency);
-        return totleList;
     }
     /**
      *
