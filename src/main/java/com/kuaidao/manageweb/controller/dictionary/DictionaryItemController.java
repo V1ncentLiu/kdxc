@@ -53,14 +53,27 @@ public class DictionaryItemController {
     public JSONResult<List<DictionaryItemRespDTO>> itemsByGroupCode(@RequestBody DictionaryItemQueryDTO queryDTO) {
         JSONResult<List<DictionaryItemRespDTO>> result = new JSONResult<>();
         result = dictionaryItemFeignClient.queryDicItemsByGroupCode(queryDTO.getGroupCode());
+        return result;
+    }
+
+    /**
+     * 字典结果集根据中文排序
+     * 
+     * @param queryDTO
+     * @return
+     */
+    @ResponseBody
+    @PostMapping("/dicItemsByGroupCodeSort")
+    public JSONResult<List<DictionaryItemRespDTO>> itemsByGroupCodeSort(@RequestBody DictionaryItemQueryDTO queryDTO) {
+        JSONResult<List<DictionaryItemRespDTO>> result = new JSONResult<>();
+        result = dictionaryItemFeignClient.queryDicItemsByGroupCode(queryDTO.getGroupCode());
         if (result.getCode().equals(JSONResult.SUCCESS)) {
-            //对结果集进行排序
+            // 对结果集进行排序
             List<DictionaryItemRespDTO> resultList = SortUtils.sortList(result.getData(), "name");
             result.setData(resultList);
         }
         return result;
     }
-
     @PostMapping("/queryTeleMyCusCustomerStatus")
     @ResponseBody
     public JSONResult<List<DictionaryItemRespDTO>> queryTeleMyCusCustomerStatus(@RequestBody DictionaryItemQueryDTO queryDTO){
