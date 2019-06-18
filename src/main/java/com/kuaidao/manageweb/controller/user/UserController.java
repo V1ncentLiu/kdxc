@@ -80,6 +80,10 @@ public class UserController {
     private MyCustomerFeignClient myCustomerFeignClient;
     @Autowired
     private ClueRelateFeignClient clueRelateFeignClient;
+    /** 默认起始页 **/
+    private static final int PAGE_NUMBER = 1;
+    /** 默认分页条数 **/
+    private static final int PAGE_SIZE = 100;
 
     /***
      * 用户列表页
@@ -308,6 +312,8 @@ public class UserController {
             if (Constants.NOT_TAKE_AWAY_CLUE.equals(userInfoReq.getTakeAwayClue())) {
                 // 获取我的客户列表
                 CustomerClueQueryDTO dto = new CustomerClueQueryDTO();
+                dto.setPageNum(PAGE_NUMBER);
+                dto.setPageSize(PAGE_SIZE);
                 dto.setTeleSale(userInfoReq.getId());
                 JSONResult<PageBean<CustomerClueDTO>> jsonResult = myCustomerFeignClient.findTeleClueInfo(dto);
                 boolean flag = jsonResult != null && JSONResult.SUCCESS.equals(jsonResult.getCode()) && jsonResult.getData() != null
