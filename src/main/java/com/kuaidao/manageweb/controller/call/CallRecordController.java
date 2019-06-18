@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -72,7 +73,13 @@ public class CallRecordController {
      */
     @RequiresPermissions("aggregation:myCallRecord:view")
     @RequestMapping("/myCallRecord")
-    public String myCallRecord() {
+    public String myCallRecord(HttpServletRequest request) {
+        Object attribute = SecurityUtils.getSubject().getSession().getAttribute("user");
+        UserInfoDTO user = (UserInfoDTO) attribute;
+        List<RoleInfoDTO> roleList = user.getRoleList();
+        request.setAttribute("userId", user.getId().toString());
+        request.setAttribute("roleCode", roleList.get(0).getRoleCode());
+        request.setAttribute("orgId", user.getOrgId().toString());
         return "call/myCallRecord";
     }
     
@@ -98,6 +105,9 @@ public class CallRecordController {
                 request.setAttribute("teleGroupList",getTeleGroupByBusinessLine(businessLine));
             }
         }
+        request.setAttribute("userId", curLoginUser.getId().toString());
+        request.setAttribute("roleCode", roleList.get(0).getRoleCode());
+        request.setAttribute("orgId", curLoginUser.getOrgId().toString());
      
         return "call/telCallRecord";
     }

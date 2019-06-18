@@ -1,3 +1,6 @@
+var userId = [[${userId}]]+"";
+var roleCode = [[${roleCode}]];
+var orgId = [[${orgId}]]+"";
 var myCallRecordVm = new Vue({
     el: '#myCallRecordVm',
     data: {
@@ -42,6 +45,15 @@ var myCallRecordVm = new Vue({
         }
     },
     methods:{
+      transCusPhone(row) {
+        var text="";
+        if((roleCode =='DXCYGW' && (row.teleSaleId+"") != userId) ||  (roleCode =='DXZJ' && orgId !=(row.teleGorupId+"")) || row.phase ==7 || row.phase == 8){
+          text ="***"
+        }else{
+          text = row.customerPhone;
+        }
+        return text;
+      },
     	initCallRecordData(){
     		 var startTime = this.searchForm.startTime;
     		 var endTime = this.searchForm.endTime;
@@ -73,6 +85,9 @@ var myCallRecordVm = new Vue({
                  if(data.code=='0'){
                  	var resData = data.data;
                  	var callRecordData = resData.data;
+                   for(var i=0;i<callRecordData.length;i++){
+                     callRecordData[i].customerPhone=myCallRecordVm.transCusPhone(callRecordData[i]);
+                   }
                  	myCallRecordVm.callRecordData= callRecordData.data;
                   //3.分页组件
                  	myCallRecordVm.pager.total= callRecordData.total;
