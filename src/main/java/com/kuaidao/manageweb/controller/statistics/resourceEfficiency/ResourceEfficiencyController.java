@@ -1,24 +1,18 @@
 package com.kuaidao.manageweb.controller.statistics.resourceEfficiency;
 
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.kuaidao.aggregation.dto.project.ProjectInfoDTO;
 import com.kuaidao.common.constant.DicCodeEnum;
-import com.kuaidao.common.constant.OrgTypeConstant;
-import com.kuaidao.common.constant.SystemCodeConstant;
 import com.kuaidao.common.entity.JSONResult;
-import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.common.util.ExcelUtil;
 import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
-import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
 import com.kuaidao.manageweb.feign.project.ProjectInfoFeignClient;
 import com.kuaidao.manageweb.feign.statistics.resourceEfficiency.ResourceEfficiencyFeignClient;
-import com.kuaidao.manageweb.util.CommUtil;
-import com.kuaidao.stastics.dto.resourceEfficiency.ResourceEfficiencyDto;
+import com.kuaidao.stastics.dto.resourceEfficiency.ResourceEfficiencyAllDataDto;
 import com.kuaidao.stastics.dto.resourceEfficiency.ResourceEfficiencyQueryDto;
 import com.kuaidao.sys.dto.dictionary.DictionaryItemRespDTO;
-import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
-import com.kuaidao.sys.dto.organization.OrganizationRespDTO;
-import com.kuaidao.sys.dto.user.UserInfoDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,13 +26,10 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.net.URLEncoder;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * 资源接通有效率
@@ -97,9 +88,12 @@ public class ResourceEfficiencyController {
     public void exportResourceEfficiency(@RequestBody ResourceEfficiencyQueryDto resourceEfficiencyQueryDto,HttpServletResponse response) throws IOException {
         List<List<Object>> dataList = new ArrayList<List<Object>>();
         dataList.add(getHeadTitle());
-        List<ResourceEfficiencyDto> orderList = mockCountData().getData();
+        JSONResult<Map<String, Object>> result = resourceEfficiencyFeignClient.getAllResourceEfficientList(resourceEfficiencyQueryDto);
+        Map<String, Object> dataMap = result.getData();
+        String listTxt = JSONArray.toJSONString(dataMap.get("allListData"));
+        List<ResourceEfficiencyAllDataDto> orderList = JSON.parseArray(listTxt, ResourceEfficiencyAllDataDto.class);
         for(int i = 0; i<orderList.size(); i++){
-            ResourceEfficiencyDto ra = orderList.get(i);
+            ResourceEfficiencyAllDataDto ra = orderList.get(i);
             List<Object> curList = new ArrayList<>();
             curList.add(i + 1);
             curList.add(ra.getResourceCategoryName());
@@ -110,6 +104,26 @@ public class ResourceEfficiencyController {
             curList.add(ra.getFirstResources());
             curList.add(ra.getConnectResources());
             curList.add(ra.getNotConnectResources());
+            curList.add(ra.getConnectEffectiveResources());
+            curList.add(ra.getConnectNotEffectiveResources());
+            curList.add(ra.getNotConnectEffectiveResources());
+            curList.add(ra.getNotConnectNotEffectiveResources());
+            curList.add(ra.getFollowRate());
+            curList.add(ra.getFirstRate());
+            curList.add(ra.getResourceConnectRate());
+            curList.add(ra.getResourceEffectiveRate());
+            curList.add(ra.getConnectionRate());
+            curList.add(ra.getFirstDayFollowResources());
+            curList.add(ra.getFirstDayConnectResources());
+            curList.add(ra.getFirstDayNotConnectResources());
+            curList.add(ra.getFirstDayConnectEffectiveResources());
+            curList.add(ra.getFirstDayConnectNotEffectiveResources());
+            curList.add(ra.getFirstDayNotConnectEffectiveResources());
+            curList.add(ra.getFirstDayNotConnectNotEffectiveResources());
+            curList.add(ra.getFirstDayFollowRate());
+            curList.add(ra.getFirstDayResourceConnectRate());
+            curList.add(ra.getFirstDayResourceEffectiveRate());
+            curList.add(ra.getFirstDayConnectionRate());
             dataList.add(curList);
         }
         XSSFWorkbook wbWorkbook = ExcelUtil.creat2007Excel(dataList);
@@ -128,6 +142,7 @@ public class ResourceEfficiencyController {
 
     private List<Object> getHeadTitle() {
         List<Object> headTitleList = new ArrayList<>();
+        headTitleList.add("序号");
         headTitleList.add("资源类别");
         headTitleList.add("媒介");
         headTitleList.add("资源项目");
@@ -174,49 +189,6 @@ public class ResourceEfficiencyController {
             return queryDicItemsByGroupCode.getData();
         }
         return null;
-    }
-    /**
-     * mock数据
-     * @return
-     */
-    private JSONResult<PageBean<ResourceEfficiencyDto>> mockData() {
-        List<ResourceEfficiencyDto> list = new ArrayList<>();
-        ResourceEfficiencyDto resourceEfficiencyDto = new ResourceEfficiencyDto();
-        resourceEfficiencyDto.setFollowResources(1091);
-        resourceEfficiencyDto.setConnectEffectiveResources(1);
-        resourceEfficiencyDto.setConnectionRate(new BigDecimal(12.22));
-        resourceEfficiencyDto.setConnectNotEffectiveResources(1);
-        resourceEfficiencyDto.setFirstRate(new BigDecimal(123.33));
-        resourceEfficiencyDto.setFirstResources(1);
-        resourceEfficiencyDto.setFollowRate(new BigDecimal(15.66));
-        resourceEfficiencyDto.setIssuedResources(1);
-        resourceEfficiencyDto.setProjectTypeName("项目名称");
-        resourceEfficiencyDto.setResourceConnectRate(new BigDecimal(1.22));
-        resourceEfficiencyDto.setResourceMediumName("媒介");
-        list.add(resourceEfficiencyDto);
-        PageBean<ResourceEfficiencyDto> pageBean = new PageBean<>();
-        pageBean.setCurrentPage(1);
-        pageBean.setData(list);
-        pageBean.setPageSize(1);
-        pageBean.setTotal(1);
-        return  new JSONResult<PageBean<ResourceEfficiencyDto>>().success(pageBean);
-    }
-
-    private JSONResult<List<ResourceEfficiencyDto>> mockCountData() {
-        List<ResourceEfficiencyDto> list = new ArrayList<>();
-        ResourceEfficiencyDto resourceEfficiencyDto = new ResourceEfficiencyDto();
-        resourceEfficiencyDto.setConnectEffectiveResources(1);
-        resourceEfficiencyDto.setConnectionRate(new BigDecimal(12.22));
-        resourceEfficiencyDto.setConnectNotEffectiveResources(1);
-        resourceEfficiencyDto.setFirstRate(new BigDecimal(123.33));
-        resourceEfficiencyDto.setFirstResources(1);
-        resourceEfficiencyDto.setFollowRate(new BigDecimal(15.66));
-        resourceEfficiencyDto.setIssuedResources(1);
-        resourceEfficiencyDto.setProjectTypeName("合计");
-        resourceEfficiencyDto.setResourceConnectRate(new BigDecimal(1.22));
-        resourceEfficiencyDto.setResourceMediumName("合计");
-        list.add(resourceEfficiencyDto);
-        return new JSONResult<List<ResourceEfficiencyDto>>().success(list);
     }
 
 }
