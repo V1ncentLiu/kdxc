@@ -1626,18 +1626,19 @@
         <template>
             <el-form :model="editRebutNoVisit" ref="editRebutNoVisit">
                 <div class="borderbox padding20 marginB20">
-                    <p class="marginB10"><span>驳回时间：{{rejectTime}}</span></p>
-                    <p class="marginB10"><span>驳回人员：{{rejectUser}}</span></p>
-                    <p style="overflow: hidden;color: red;"><span style="float: left;width: 70px;">驳回原因：</span><span style="float: left;    width: 385px;">{{rejectReason}}</span></p>
+                    <p class="marginB10" v-if="showVisitId"><span>主键：{{editRebutNoVisit.id}}</span></p>
+                    <p class="marginB10"><span>驳回时间：{{editRebutNoVisit.rejectTime}}</span></p>
+                    <p class="marginB10"><span>驳回人员：{{editRebutNoVisit.rejectUser}}</span></p>
+                    <p style="overflow: hidden;color: red;"><span style="float: left;width: 70px;">驳回原因：</span><span style="float: left;    width: 385px;">{{editRebutNoVisit.rejectReason}}</span></p>
                 </div>
-                <p class="marginB10">标记未到访时间：{{notVisitTime}}</p>
+                <p class="marginB10">标记未到访时间：{{editRebutNoVisit.notVisitTime}}</p>
                 <p class="marginB10">未到访原因：</p>
                 <el-form-item label="">
                     <el-input type="textarea" v-model="notVisitFlag.notVisitReason" maxlength="100" :rows="3"></el-input>
                 </el-form-item>
             </el-form>
             <div slot="footer" class="dialog-footer">
-                <el-button type="primary" @click="">添加到访记录</el-button>
+                <el-button type="primary" @click="updateRejectNotVisit('editRebutNoVisit')" :disabled="updateRejectNotVisitButtonAble>保存</el-button>
             </div>
         </template>
     </el-dialog>
@@ -1658,6 +1659,7 @@
         el: '#mainDiv',
         data: {
             editRebutNoVisitDialog:false,//编辑驳回未到访弹窗
+            showVisitId:false,
             editRebutNoVisit:{},
             paginationShow: false,
             giveTypeList: giveTypeList,
@@ -1675,6 +1677,7 @@
             addSignButtonAble: false,
             updateSignButtonAble: false,
             updateVisitButtonAble: false,
+            updateRejectNotVisitButtonAble:false,
             tabIndex: 2,
             shouAddVisitButton: false,
             updateVisitRecordDialogVisible: false,
@@ -1756,6 +1759,15 @@
                 notVisitReason: "",
                 createUserName:"",
                 notVisitTime:""
+            },
+            editRebutNoVisit:{
+                id: "",
+                rejectTime: "",
+                rejectUser: "",
+                rejectReason: "",
+                notVisitTime: "",
+                notVisitReason: ""
+
             },
             queryForm: {
                 visitStatus: "",
@@ -2681,7 +2693,7 @@
                     mainDivVM.notVisitFlag.notVisitTime = response.data.data.createTime
                 });
             },
-            //查看被驳回的未到访
+            //查看驳回未到访
             rejectNotVisit(row){
                 this.editRebutNoVisitDialog = true;
                 var param = {};
@@ -2693,12 +2705,16 @@
                         }
                         return false;
                     } else {
-                        this.rejectTime = response.data.data.createTime;
-
+                        mainDivVM.editRebutNoVisit.id = response.data.data.id;
+                        mainDivVM.editRebutNoVisit.rejectTime = response.data.data.rebutTime;
+                        mainDivVM.editRebutNoVisit.rejectUser = response.data.data.createUserName;
+                        mainDivVM.editRebutNoVisit.rejectReason = response.data.data.rebutReason;
+                        mainDivVM.editRebutNoVisit.notVisitTime = response.data.data.createTime;
                     }
 
                 })
             },
+
             showVisitRecord(row) {
                 // 展示到访记录
                 this.showVisitAduitDialogVisible = true;
@@ -2722,6 +2738,40 @@
                     }
 
                 })
+            },
+            //编辑驳回未到访
+            updateRejectNotVisit(form){
+                debugger;
+                var param = {};
+                this.$refs[formName].validate((valid) => {
+                    if (mainDivVM.updateRejectNotVisitButtonAble == true) {
+                        return;
+                    }
+                    if (valid) {
+                        mainDivVM.updateRejectNotVisitButtonAble = true;
+                        axios.post("/businesssign/update", param)
+                            .then(function (response) {
+                                if (response.data.code == 0) {
+                                    mainDivVM.$message({
+                                        type: 'success', message: '签约单更新成功!', duration: 2000, onClose: function () {
+                                            mainDivVM.pager.pageNum = 1
+                                            mainDivVM.initList();
+                                            mainDivVM.dialogUpdateFormSigningVisible = false;
+                                            mainDivVM.updateSignButtonAble = false;
+                                        }
+                                    });
+                                } else {
+                                    mainDivVM.$message.error(response.data.msg);
+                                    mainDivVM.updateRejectNotVisitButtonAble = false;
+                                }
+                            }).catch(function (error) {
+                            mainDivVM.updateRejectNotVisitButtonAble = false;
+                            console.log(error);
+                        });
+                    } else {
+                        return false;
+                    }
+                });
             },
             toVisitRecordPage(row) {
                 var clueId=row.clueId;
