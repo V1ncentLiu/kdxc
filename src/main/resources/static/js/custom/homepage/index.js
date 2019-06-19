@@ -263,12 +263,12 @@ var homePageVM=new Vue({
         			this.loginClientForm.clientType=1;
         			this.dialogLogoutClientVisible  = true;
         		}else{
-        			/* if (this.$refs.loginClientForm !==undefined) {
+        			 if (this.$refs.loginClientForm !==undefined) {
         				  this.$refs.loginClientForm.resetFields();
         				 this.$refs.loginClientForm.clearValidate(function(){
         					 
         				 });
-        			 }*/
+        			 }
         		/*	if(!this.dialogLoginClientVisible){
         				this.loginClientForm.clientType=1;//设置默认选中天润坐席
                 		this.loginClientForm.bindPhoneType=1;
