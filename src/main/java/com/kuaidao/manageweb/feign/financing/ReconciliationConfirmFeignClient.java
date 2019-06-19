@@ -84,7 +84,7 @@ public interface ReconciliationConfirmFeignClient {
      * @since: 1.0.0
      **/
     @PostMapping("/getConfirmCommission")
-    JSONResult<BigDecimal> getConfirmCommission(@RequestParam("accountId") Long accountId);
+    JSONResult<BigDecimal> getConfirmCommission(@RequestParam("signId") Long signId);
     /**
      * 对账、申请
      * 

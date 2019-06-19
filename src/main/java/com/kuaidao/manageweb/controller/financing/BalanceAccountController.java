@@ -219,7 +219,7 @@ public class BalanceAccountController {
     @ResponseBody
     @PostMapping("/getConfirmCommission")
     public JSONResult<BigDecimal> getConfirmCommission(@RequestBody ReconciliationConfirmReq reconciliationConfirmReq) {
-        JSONResult<BigDecimal> sumConfirmCommission = reconciliationConfirmFeignClient.getConfirmCommission(reconciliationConfirmReq.getAccountId());
+        JSONResult<BigDecimal> sumConfirmCommission = reconciliationConfirmFeignClient.getConfirmCommission(reconciliationConfirmReq.getSignId());
         return sumConfirmCommission;
     }
 
