@@ -239,6 +239,7 @@ public class BusinessCustomerController {
         appiontmentFeignClient.updateView(req);
         UserInfoDTO user = getUser();
         request.setAttribute("loginUserId", user.getId());
+        request.setAttribute("ossUrl", ossUrl);
         return "bus_mycustomer/viewCustomerMainenance";
     }
 
