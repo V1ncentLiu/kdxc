@@ -3,6 +3,7 @@
  */
 package com.kuaidao.manageweb.controller.financing;
 
+import com.kuaidao.manageweb.constant.Constants;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -96,6 +97,7 @@ public class RefundRebateManagerController {
                 getDictionaryByCode(DicCodeEnum.VISITSTORETYPE.getCode()));
         request.setAttribute("ossUrl", ossUrl);
         request.setAttribute("payModeItem", getDictionaryByCode(DicCodeEnum.PAYMODE.getCode()));
+        request.setAttribute("giveTypeList", getDictionaryByCode(Constants.GIVE_TYPE));
         return "financing/refundRebateManagerPage";
     }
 

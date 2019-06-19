@@ -1,6 +1,7 @@
 package com.kuaidao.manageweb.controller.sign;
 
 import com.kuaidao.common.constant.*;
+import com.kuaidao.manageweb.constant.Constants;
 import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
 import com.kuaidao.sys.dto.dictionary.DictionaryItemRespDTO;
 import java.util.ArrayList;
@@ -110,6 +111,7 @@ public class SignRecordController {
          */
         // request.setAttribute("teleSaleList",teleSaleList);
         request.setAttribute("payModeItem", getDictionaryByCode(DicCodeEnum.PAYMODE.getCode()));
+        request.setAttribute("giveTypeList", getDictionaryByCode(Constants.GIVE_TYPE));
         return "signrecord/signRecord";
     }
 
