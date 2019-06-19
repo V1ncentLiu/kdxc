@@ -34,34 +34,34 @@
                     </el-form-item>
                 </el-col>
                 <el-col :span="8">
-                    <el-form-item label="路费(元)：" :label-width="formLabelWidth">
-                         {{firstToll}}
-                    </el-form-item>
-                </el-col>
-            </el-row>
-            <el-row>
-                <el-col :span="8">
                     <el-form-item label="客户姓名：" :label-width="formLabelWidth">
                         {{customerName}}
                     </el-form-item>
                 </el-col>
-                <el-col :span="8">
-                    <el-form-item label="优惠金额(元)：" :label-width="formLabelWidth">
-                         {{preferentialAmount}}
-                    </el-form-item>
-                </el-col>
             </el-row>
+            <!--<el-row>-->
+                <!--<el-col :span="8">-->
+                    <!--<el-form-item label="路费(元)：" :label-width="formLabelWidth">-->
+                        <!--{{firstToll}}-->
+                    <!--</el-form-item>-->
+                <!--</el-col>-->
+                <!--<el-col :span="8">-->
+                    <!--<el-form-item label="优惠金额(元)：" :label-width="formLabelWidth">-->
+                         <!--{{preferentialAmount}}-->
+                    <!--</el-form-item>-->
+                <!--</el-col>-->
+            <!--</el-row>-->
             <el-row>
-                <el-col :span="8">
+                <el-col :span="16">
                     <el-form-item label="重单申请备注：" :label-width="formLabelWidth">
                          {{remarks}}
                     </el-form-item>
                 </el-col>
-                <el-col :span="8">
-                    <el-form-item label="赠送金额(元)：" :label-width="formLabelWidth">
-                         {{giveAmount}}
-                    </el-form-item>
-                </el-col>
+                <!--<el-col :span="8">-->
+                    <!--<el-form-item label="赠送金额(元)：" :label-width="formLabelWidth">-->
+                         <!--{{giveAmount}}-->
+                    <!--</el-form-item>-->
+                <!--</el-col>-->
             </el-row>
             <el-row>
                 <el-col :span="8">
@@ -81,8 +81,12 @@
         <el-table-column align="center" prop="payType" label="付款类型" :formatter="paytype"></el-table-column>
         <el-table-column align="center" prop="payTime" label="付款时间" :formatter="dateFormat"></el-table-column>
         <el-table-column align="center" prop="amountReceived" label="实收金额"></el-table-column>
-        <el-table-column align="center" prop="amountPerformance" label="业绩金额"></el-table-column>      
-        <el-table-column align="center" prop="amountBalance" label="余款金额"></el-table-column>      
+        <el-table-column align="center" prop="preferentialAmount" label="优惠金额" width="150"></el-table-column>
+        <el-table-column align="center" prop="firstToll" label="路费" width="150"></el-table-column>
+        <el-table-column align="center" prop="giveAmount" label="赠送金额" width="150"></el-table-column>
+        <el-table-column align="center" prop="giveType" label="赠送类型" width="150" :formatter="transGiveType"></el-table-column>
+        <el-table-column align="center" prop="amountPerformance" label="业绩金额"></el-table-column>
+        <el-table-column align="center" prop="amountBalance" label="余款金额"></el-table-column>
         <el-table-column align="center" prop="makeUpTime" label="预计余款补齐时间" :formatter="dateFormat"></el-table-column>      
         <el-table-column align="center" prop="repeatRatios" label="分配比例"></el-table-column>      
         <el-table-column align="center" prop="userNames" label="重单人员"></el-table-column>  
@@ -126,6 +130,7 @@
 <script th:inline="javascript">
 	var businessSignDetail=[[${businessSignDetail}]];
   var payModeItem =[[${payModeItem}]];
+  var giveTypeList =[[${giveTypeList}]];
 	var signId = [[${signId}]];
 	var orgVM =  new Vue({
         el: '#repeatPaymentDetails',
@@ -271,8 +276,18 @@
               	}
                	return moment(date).format("YYYY-MM-DD HH:mm:ss");
     		},
-    		
-    		transPayMode(row, column, value, index) {
+
+        transGiveType(row, column, value, index) {
+            var text="";
+            for(var i=0;i<giveTypeList.length;i++) {
+                if(giveTypeList[i].value ==value){
+                    text = giveTypeList[i].name;
+                }
+            }
+            return text;
+        },
+
+        transPayMode(row, column, value, index) {
             var valText="";
             var vals = value.split(",");
             if(payModeItem){
