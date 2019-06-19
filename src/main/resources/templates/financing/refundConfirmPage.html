@@ -214,9 +214,9 @@
                 </el-table-column>
                 <el-table-column align="center" prop="signShopType" label="签约店型" :formatter="getSignShopTypeText" width="100"></el-table-column>
                 <el-table-column align="center" prop="amountReceivable" label="应收金额"></el-table-column>
-                <el-table-column align="center" prop="firstToll" label="路费"></el-table-column>
-                <el-table-column align="center" prop="preferentialAmount" label="优惠金额"></el-table-column>
-                <el-table-column align="center" prop="giveAmount" label="赠送金额"></el-table-column>
+                <!--<el-table-column align="center" prop="firstToll" label="路费"></el-table-column>-->
+                <!--<el-table-column align="center" prop="preferentialAmount" label="优惠金额"></el-table-column>-->
+                <!--<el-table-column align="center" prop="giveAmount" label="赠送金额"></el-table-column>-->
                 <el-table-column align="center" prop="idCard" label="客户身份证号"></el-table-column>
                 <el-table-column align="center" prop="phone" label="手机号"></el-table-column>
                 <el-table-column align="center" prop="signProvince" label="签约省份" width="110"></el-table-column>
@@ -348,6 +348,10 @@
             <el-table-column align="center" prop="payMode" label="付款方式" :formatter="getPayModeText"></el-table-column>
             <el-table-column align="center" prop="payTime" label="付款时间" :formatter="getTimeText"></el-table-column>
             <el-table-column align="center" prop="amountReceived" label="实收金额"></el-table-column>
+            <el-table-column align="center" prop="preferentialAmount" label="优惠金额" width="150"></el-table-column>
+            <el-table-column align="center" prop="firstToll" label="路费" width="150"></el-table-column>
+            <el-table-column align="center" prop="giveAmount" label="赠送金额" width="150"></el-table-column>
+            <el-table-column align="center" prop="giveType" label="赠送类型" width="150" :formatter="transGiveType"></el-table-column>
             <el-table-column align="center" prop="amountPerformance" label="业绩金额"></el-table-column>
             <el-table-column align="center" prop="accountStatus" label="结算状态" :formatter="transformStatus"></el-table-column>
             <el-table-column align="center" prop="money" label="结算金额"></el-table-column>
@@ -363,6 +367,7 @@
   var ossUrl = [[${ossUrl}]];
   var businessLine = [[${businessLine}]];//业务线
   var payModeItem =[[${payModeItem}]];
+  var giveTypeList =[[${giveTypeList}]];
 </script>
 <script th:src="@{/js/custom/callrecord/download.js?v=1.0.0}"></script>
 <script>    
@@ -1094,6 +1099,15 @@
                  }
                  return valText;
              },
+            transGiveType(row, column, value, index) {
+                var text="";
+                for(var i=0;i<giveTypeList.length;i++) {
+                    if(giveTypeList[i].value ==value){
+                        text = giveTypeList[i].name;
+                    }
+                }
+                return text;
+            },
              getTimeText(row, column, value, index){
                  var valText="";
                  if(value){
