@@ -387,8 +387,15 @@
                 }
             	this.dialogFormVisible = true;
         		 var str = "";
+            var text="";
                  for ( var i = 0; i <rows.length; i++){
                	  str = rows[i].id
+                   if((roleCode =='DXCYGW' && rows[i].teleSaleIds.indexOf(userId) == -1 )
+                       ||  (roleCode =='DXZJ' && rows[i].teleGorupIds.indexOf(orgId) == -1)
+                       ||  (roleCode =='DXFZ' && rows[i].teleDeptIds.indexOf(orgId) == -1)
+                       || rows[i].phase ==7 || rows[i].phase == 8){
+                     text ="***"
+                   }
                  }
         		var param={};
 		        param.id=str;
@@ -397,7 +404,11 @@
                   	  
                       if(null !==response && response.data !=null && response.data.code=='0'){
                     	  var clueRepetitionDTO = response.data.data;
-                    	  orgVM.cusPhoneId = clueRepetitionDTO.cusPhone;
+                    	  if(text == "***") {
+                          orgVM.cusPhoneId = text;
+                        } else {
+                          orgVM.cusPhoneId = clueRepetitionDTO.cusPhone;
+                        }
                     	  orgVM.remarkId = clueRepetitionDTO.remark;
                     	  orgVM.dealRemarkId = clueRepetitionDTO.dealRemark;
                     	  if(clueRepetitionDTO.status ==0){
