@@ -297,7 +297,7 @@ public class UserController {
     @RequiresPermissions("sys:userManager:edit")
     @LogRecord(description = "修改用户信息", operationType = OperationType.UPDATE, menuName = MenuEnum.USER_MANAGEMENT)
     public JSONResult updateMenu(@Valid @RequestBody UserInfoReq userInfoReq, BindingResult result) {
-
+        long  start  = System.currentTimeMillis();
         if (result.hasErrors()) {
             return CommonUtil.validateParam(result);
         }
@@ -308,6 +308,7 @@ public class UserController {
         }
         // 是否带走资源校验
         if (userInfoReq.getTakeAwayClueShow()) {
+            long  start1  = System.currentTimeMillis();
             // 不带走资源判断当前电销顾问手里有没有资源（我的客户列表是否有数据）
             if (Constants.NOT_TAKE_AWAY_CLUE.equals(userInfoReq.getTakeAwayClue())) {
                 // 获取我的客户列表
@@ -331,8 +332,11 @@ public class UserController {
                 clueRelateFeignClient.updateClueRelateByTeleSaleId(clueRelateReq);
 
             }
+            logger.info("修改资源所属组织共耗时：{}",System.currentTimeMillis()-start1);
         }
-        return userInfoFeignClient.update(userInfoReq);
+        JSONResult<String> jsonResult = userInfoFeignClient.update(userInfoReq);
+        logger.info("修改用户共耗时：{}",System.currentTimeMillis()-start);
+        return jsonResult;
     }
 
     /**

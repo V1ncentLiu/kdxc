@@ -85,7 +85,7 @@
                         </el-select>
                     </el-form-item>
                     <el-form-item label="资源项目:">
-                        <el-select v-model="form.resourceProject" placeholder="资源项目" clearable >
+                        <el-select v-model="form.resourceProject" placeholder="资源项目" clearable filterable>
                             <el-option
                                 v-for="item in proSelectArr"
                                 :key="item.id"
@@ -95,7 +95,7 @@
                         </el-select>
                     </el-form-item>
                     <el-form-item label="媒介:">
-                        <el-select v-model="form.medium" placeholder="媒介" clearable >
+                        <el-select v-model="form.medium" placeholder="媒介" clearable filterable>
                             <el-option
                                 v-for="item in mediumArry"
                                 :key="item.value"
@@ -119,7 +119,7 @@
                         </el-date-picker>
                     </el-form-item>                     
                     <el-form-item label="资源类别:">
-                        <el-select v-model="form.resourceType" placeholder="资源类别" clearable >
+                        <el-select v-model="form.resourceType" placeholder="资源类别" clearable filterable>
                             <el-option
                                 v-for="item in categoryArr"
                                 :key="item.value"
@@ -129,7 +129,7 @@
                         </el-select>
                     </el-form-item>
                     <el-form-item label="行业类别:">
-                        <el-select v-model="form.tradeType" placeholder="行业类别" clearable>
+                        <el-select v-model="form.tradeType" placeholder="行业类别" clearable filterable>
                             <el-option
                                 v-for="item in industryCategoryArr"
                                 :key="item.value"
@@ -139,7 +139,7 @@
                         </el-select>
                     </el-form-item>
                     <el-form-item label="资源阶段:">
-                        <el-select v-model="form.resourceStage" placeholder="资源阶段" clearable >
+                        <el-select v-model="form.resourceStage" placeholder="资源阶段" clearable filterable>
                             <el-option
                                 v-for="item in phaseArr"
                                 :key="item.value"
@@ -347,7 +347,7 @@
 	  <el-form :model="fieldFrom">	    
 		  <el-form-item label="" prop="type">
 		    <el-checkbox-group v-model="fieldFrom.type">
-		      <el-checkbox :label="item.sortNum+'_'+item.fieldCode+'_'+item.displayName+'_'+item.id"  name="type" :key="item.fieldCode"  v-for="(item,index) in  allTableColums ">
+		      <el-checkbox :label="item.sortNum+'_'+item.fieldCode+'_'+item.displayName+'_'+item.id+'_'+item.width"  name="type" :key="item.fieldCode"  v-for="(item,index) in  allTableColums ">
 		          {{item.displayName}}
 		      </el-checkbox>
 		     </el-checkbox-group>
@@ -757,6 +757,7 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
            		var obj = {};
            		obj.fieldCode=itemArr[1];
            		obj.displayName=itemArr[2];
+           		obj.width=itemArr[4];
            		customerShowColun.push(obj);
            		idList.push(itemArr[3])
            	}
@@ -781,14 +782,14 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
            	if(userFieldList.length!=0){
            		var type=[];
                	for(var i=0;i<userFieldList.length;i++){
-               		type.push(userFieldList[i].sortNum+'_'+userFieldList[i].fieldCode+'_'+userFieldList[i].displayName+'_'+userFieldList[i].fieldId)
+               		type.push(userFieldList[i].sortNum+'_'+userFieldList[i].fieldCode+'_'+userFieldList[i].displayName+'_'+userFieldList[i].fieldId+'_'+userFieldList[i].width)
                 }
               	this.fieldFrom.type = type;
               	this.confirmColumn();
            	}else{
            		var type=[];
                  	for(var i=0;i<fieldList.length;i++){
-                 		type.push(fieldList[i].sortNum+'_'+fieldList[i].fieldCode+'_'+fieldList[i].displayName+'_'+fieldList[i].id)
+                 		type.push(fieldList[i].sortNum+'_'+fieldList[i].fieldCode+'_'+fieldList[i].displayName+'_'+fieldList[i].id+'_'+fieldList[i].width)
                 	}
 	              	this.fieldFrom.type = type;
 	              	this.confirmColumn();

@@ -121,8 +121,9 @@ var myCallRecordVm = new Vue({
                 	 
                  	var resData = data.data;
                  	var callRecordData = resData.data;
-                   for(var i=0;i<callRecordData.length;i++){
-                     callRecordData[i].customerPhone=myCallRecordVm.transCusPhone(callRecordData[i]);
+                 	var callRecordDataData = callRecordData.data;
+                   for(var i=0;i<callRecordDataData.length;i++){
+                     callRecordDataData[i].customerPhone=myCallRecordVm.transCusPhone(callRecordDataData[i]);
                    }
                  	myCallRecordVm.callRecordData= callRecordData.data;
                  	myCallRecordVm.totalTalkTime = resData.totalTalkTime;

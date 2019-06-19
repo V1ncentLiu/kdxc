@@ -231,7 +231,7 @@
 	    
 		  <el-form-item label="" prop="type">
 		    <el-checkbox-group v-model="form.type">
-		      <el-checkbox :label="item.sortNum+'_'+item.fieldCode+'_'+item.displayName+'_'+item.id"  name="type" :key="item.fieldCode"  v-for="(item,index) in  allTableColums ">
+		      <el-checkbox :label="item.sortNum+'_'+item.fieldCode+'_'+item.displayName+'_'+item.id+'_'+item.width"  name="type" :key="item.fieldCode"  v-for="(item,index) in  allTableColums ">
 		          {{item.displayName}}
 		      </el-checkbox>
 		  
@@ -784,9 +784,9 @@ var clueVM = new Vue({
             	   var msg = "";
             	   var lowestCommissionStr = rows[0].lowestCommissionStr;
                    if ((rows[0].payType == "全款" || rows[0].payType == "尾款") && lowestCommissionStr != "") {
-                       var accountId = rows[0].accountId;
+                       var signId = rows[0].signId;
                        var parmMap = {};
-                       parmMap.accountId = accountId;
+                       parmMap.signId = signId;
                        this.lowestCommissionShow = true;
                        this.lowestCommission = lowestCommissionStr;
                        //根据签约id获取已对账确认的佣金
@@ -904,6 +904,7 @@ var clueVM = new Vue({
                  		var obj = {};
                  		obj.fieldCode=itemArr[1];
                  		obj.displayName=itemArr[2];
+                 		obj.width=itemArr[4];
                  		customerShowColun.push(obj);
                  		idList.push(itemArr[3])
                  	}
@@ -928,14 +929,14 @@ var clueVM = new Vue({
                  	if(userFieldList.length!=0){
                  		var type=[];
                      	for(var i=0;i<userFieldList.length;i++){
-                     		type.push(userFieldList[i].sortNum+'_'+userFieldList[i].fieldCode+'_'+userFieldList[i].displayName+'_'+userFieldList[i].fieldId)
+                     		type.push(userFieldList[i].sortNum+'_'+userFieldList[i].fieldCode+'_'+userFieldList[i].displayName+'_'+userFieldList[i].fieldId+'_'+userFieldList[i].width)
                     	}
    	              	this.form.type = type;
    	              	this.confirmColumn();
                  	}else{
                  		var type=[];
                      	for(var i=0;i<fieldList.length;i++){
-                     		type.push(fieldList[i].sortNum+'_'+fieldList[i].fieldCode+'_'+fieldList[i].displayName+'_'+fieldList[i].id)
+                     		type.push(fieldList[i].sortNum+'_'+fieldList[i].fieldCode+'_'+fieldList[i].displayName+'_'+fieldList[i].id+'_'+fieldList[i].width)
                     	}
    	              	this.form.type = type;
    	              	this.confirmColumn();
@@ -951,15 +952,15 @@ var clueVM = new Vue({
                   },
                   repeatApplyNumber(){
         	          //保底服务费
-                      var lowestCommission =this.lowestCommission;
+                      var lowestCommission =  parseInt(this.lowestCommission);
                       //已对账确认佣金
                       var confirmCommission  = this.confirmCommission;
                       var  commissionMoney = this.apply.money*this.ratio/100;
                       var sum  = commissionMoney + confirmCommission;
-                      //如果已提交确认的佣金+ 此次结算金额算出来的佣金小于保底服务费 则佣金为保底服务费
+                      //如果已提交确认的佣金+ 此次结算金额算出来的佣金小于保底服务费 则佣金=保底服务费-已对账的佣金
                       //否则佣金等于结算金额*结算比例
                       if(lowestCommission > sum){
-                          this.commissionMoney = lowestCommission;
+                          this.commissionMoney = lowestCommission - confirmCommission;
                       }else{
                           this.commissionMoney = commissionMoney;
                       }

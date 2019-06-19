@@ -955,7 +955,7 @@ public class MyCustomerClueController {
             JSONResult<UserInfoDTO> userInfo = userInfoFeignClient.get(id);
             if (userInfo != null && userInfo.SUCCESS.equals(userInfo.getCode())
                     && userInfo.getData() != null) {
-                dto.setRepeatOrgId(userInfo.getData().getId());
+                dto.setRepeatOrgId(userInfo.getData().getOrgId());
             }
         }
         return myCustomerFeignClient.saveRepeatClue(dto);
