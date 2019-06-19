@@ -217,6 +217,14 @@ public interface ClientFeignClient {
     @PostMapping("/axbOutCall")
     JSONResult<String> axbOutCall(TrAxbOutCallReqDTO trAxbOutCallReqDTO);
     
+    /**
+     * 天润坐席退出
+    * @param trAxbOutCallReqDTO
+    * @return
+     */
+    @PostMapping("/trClientLogout")
+    JSONResult trClientLogout(TrAxbOutCallReqDTO trAxbOutCallReqDTO);
+    
 	@Component
 	static class HystrixClientFallback implements ClientFeignClient {
 
@@ -343,7 +351,11 @@ public interface ClientFeignClient {
             return fallBackError("天润外呼");
         }
 
+        @Override
+        public JSONResult trClientLogout(TrAxbOutCallReqDTO trAxbOutCallReqDTO) {
+            return fallBackError("天润坐席退出");
+        }
+
 	}
-   
 
 }
