@@ -952,15 +952,15 @@ var clueVM = new Vue({
                   },
                   repeatApplyNumber(){
         	          //保底服务费
-                      var lowestCommission =this.lowestCommission;
+                      var lowestCommission =  parseInt(this.lowestCommission);
                       //已对账确认佣金
                       var confirmCommission  = this.confirmCommission;
                       var  commissionMoney = this.apply.money*this.ratio/100;
                       var sum  = commissionMoney + confirmCommission;
-                      //如果已提交确认的佣金+ 此次结算金额算出来的佣金小于保底服务费 则佣金为保底服务费
+                      //如果已提交确认的佣金+ 此次结算金额算出来的佣金小于保底服务费 则佣金=保底服务费-已对账的佣金
                       //否则佣金等于结算金额*结算比例
                       if(lowestCommission > sum){
-                          this.commissionMoney = lowestCommission;
+                          this.commissionMoney = lowestCommission - confirmCommission;
                       }else{
                           this.commissionMoney = commissionMoney;
                       }
