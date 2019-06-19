@@ -74,9 +74,11 @@
                         </el-form-item>
                     </el-col>
                     <el-col :span="8">
-                        <el-form-item label="微信：" :label-width="formLabelWidth" >
-                            <el-button type="text" disabled>{{form.ishasWx}}</el-button>
-                           <span v-show="showWchatFlag" style="padding-left: 5px;color: rgb(0, 114, 255);cursor: pointer;" @click="dialogFormImg = true">查看二维码</span>
+                        <el-form-item label="微信：" prop="wechat" :label-width="formLabelWidth">
+                            <el-button type="text" disabled>{{form.wechat}}</el-button>
+                            <span v-if="form.wechat2 || form.wechatUrl">
+                                <span @click="openWechat" style="padding-left: 5px; color: rgb(0, 114, 255); cursor: pointer;">查看多个微信/二维码</span>
+                            </span>
                         </el-form-item>
                     </el-col>
                 </el-row>
@@ -416,6 +418,19 @@
             <img :src="dialogFormUploadImgSrc" alt="" style="width: 250px;height: 250px;">
         </div>
     </el-dialog>
+    <!-- dialog -->
+    <el-dialog title="查看微信" :visible.sync="wechatVisible" width="540px">
+        <template>
+            <el-form :model="wechatForm" ref="wechatForm" >
+                <el-form-item label="微信2：" :label-width="formLabelWidth1" >
+                    <el-input v-model="wechatForm.wechat2" placeholder="" maxLength="20" style="width: 290px;"></el-input>
+                </el-form-item>
+                <el-form-item label="" :label-width="formLabelWidth1" >
+                    <img v-show="wechatForm.wechatUrl!=''" :src="wechatForm.wechatUrl" width="290px" style="border-radius:6px;">
+                </el-form-item>
+            </el-form>
+        </template>
+    </el-dialog>
 </div>
 </body>
 <style type="text/css">
@@ -479,6 +494,7 @@ var callRecord=[[${callRecord}]];//上传文件
 var loginUserId=[[${loginUserId}]];
 var isEdit=false;
 var vform;
+var ossUrl = [[${ossUrl}]];//上传文件地址
 if(proSelect==null){
     proSelect = []
 }
@@ -496,7 +512,9 @@ if(customer==null){
             customerName:"",
             customerPhone:"",
             customerSex:"",
-            ishasWx:"",
+            wechat:'',
+            wechat2:'',
+            wechatUrl:'',
             experience:"",
             customerAge:"",
             customerJob:"",
@@ -529,7 +547,9 @@ if(customer==null){
         customerName:customer.cusName,
         customerPhone:customer.linkPhone,
         customerSex:customer.sex==null?"":customer.sex,
-        ishasWx:customer.wechat,
+        wechat:customer.wechat,
+        wechat2:customer.wechat2,
+        wechatUrl:customer.wechatCode,
         experience:customer.hasExperience==null?"":customer.hasExperience,
         customerAge:customer.age,
         customerJob:customer.profession==null?"":customer.profession,
@@ -637,15 +657,17 @@ function crtTimeFtt(val, row) {
                 audioShow:false,//播放器默认不显示
                 dialogFormUploadImgSrc: '',
                 dialogFormUploadImg:false,
-                isDisabled:true,//默认不可点击         
+                isDisabled:true,//默认不可点击
+                wechatVisible: false,//查看微信号
                 radioProject:'',
                 dialogFormVisible: false,
                 dialogFormImg:false,
                 showwchatcode:showwchatcode,
-                showWchatFlag:showWchatFlag,
+//                showWchatFlag:showWchatFlag,
                 showUrgency:showUrgency,
                 form:vform,
                 clueBase:base,
+                intention:intention,
                 categoryArr:[],
                 typeArr:[],
                 mediumArry:[],
@@ -662,7 +684,13 @@ function crtTimeFtt(val, row) {
                 cityArr:[],
                 districtArr:[],
                 proSelect:proSelect,
+                wechatForm: {
+                    wechat2:'',
+                    wechatUrl:'',
+                    fileList:[]
+                },
                 formLabelWidth: '150px',
+                formLabelWidth1: '140px',
                 rules:{
                     // customerName: [
                     //     { required: true, message: '客户姓名不能为空', trigger: 'blur' }
@@ -713,6 +741,18 @@ function crtTimeFtt(val, row) {
                 	visitStatus:'',
                 	nextVisitTime:'',
                 },
+              uploadOssHost:'',
+              uploadParamData: {
+                key:'22',
+                policy:'',
+                OSSAccessKeyId:'',
+                success_action_status : '200', //让服务端返回200,不然，默认会返回204
+                signature:'',
+                'x:params':'',
+                'realName':''
+              },
+              ossUrl:ossUrl,
+              limit:1,
                 tableDataC1: clueFileList,//文件记录
                 tableDataC2: trackingList,//跟进记录
                 tableDataC3: callRecord,  //通话记录
@@ -720,6 +760,32 @@ function crtTimeFtt(val, row) {
             }             
         },
         methods: {
+          getUploadParam(){
+            var signUrl = this.ossUrl+"?serviceType=aggregation";
+            var param={};
+
+            axios.get(signUrl, param)
+            .then(function (response) {
+              // console.info(response);
+              var respData= response.data;
+              var host = respData.host;
+              var params={};
+              var new_multipart_params = {
+                dir:respData.dir,
+                'policy': respData.policy,
+                'OSSAccessKeyId': respData.accessid,
+                'success_action_status' : '200', //让服务端返回200,不然，默认会返回204
+                'signature': respData.signature,
+                'x:params':params,//自定义编码，basse64编码后的字符串,
+                'realName':''
+              };
+              addCustomerVM.uploadParamData= new_multipart_params;
+              addCustomerVM.uploadOssHost = host;
+            })
+            .catch(function (error) {
+              console.log(error);
+            });
+          },
              rebackClue(){
             	 window.location.href="/tele/clueMyCustomerInfo/initmyCustomer"; 	
             },
@@ -933,6 +999,11 @@ function crtTimeFtt(val, row) {
                 $(".downloadMp3:eq("+index+") a").prop("download","true");
                 $(".downloadMp3:eq("+index+") a>p").trigger("click");
             },
+          openWechat() {
+            this.wechatVisible = true
+            this.wechatForm.wechat2=this.form.wechat2;
+            this.wechatForm.wechatUrl=this.form.wechatUrl;
+          },
             formatTimeFn(date) {
                 if (!date) {
                     return "";
