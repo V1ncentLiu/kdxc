@@ -2708,18 +2708,18 @@
                         mainDivVM.editRebutNoVisit.rejectUser = response.data.data.createUserName;
                         mainDivVM.editRebutNoVisit.rejectReason = response.data.data.rebutReason;
                         mainDivVM.editRebutNoVisit.notVisitTime = response.data.data.createTime;
+                        mainDivVM.notVisitFlag.notVisitReason = response.data.data.notVisitReason;
                     }
 
                 })
             },
             //编辑驳回未到访
             updateRejectNotVisit(formName){
-                var  rejectReason = mainDivVM.notVisitFlag.notVisitReason;
-                if(null != rejectReason && rejectReason != ""){
+                var  notVisitReason = mainDivVM.notVisitFlag.notVisitReason;
+                if(null != notVisitReason && notVisitReason != ""){
                     var param = {};
                     param.id = mainDivVM.editRebutNoVisit.id;
-                    param.rebutReason = rejectReason ;
-                    param.status = 1;
+                    param.notVisitReason = notVisitReason ;
                     this.$refs[formName].validate((valid) => {
                         if (mainDivVM.updateRejectNotVisitButtonAble == true) {
                             return;
@@ -2730,8 +2730,9 @@
                                 .then(function (response) {
                                     if (response.data.code == 0) {
                                         mainDivVM.$message({
-                                            type: 'success', message: '未到访波比更新成功!', duration: 2000, onClose: function () {
+                                            type: 'success', message: '未到访原因更新成功!', duration: 1000, onClose: function () {
                                                 mainDivVM.editRebutNoVisitDialog = false;
+                                                mainDivVM.initList();
                                             }
                                         });
                                     } else {
@@ -2754,8 +2755,8 @@
             },
             //关闭编辑驳回未到访
             closeEditRebutNoVisitDialog(){
-                // 点击关闭 数据重置
-                mainDivVM.notVisitFlag.notVisitReason= "";
+                // 隐藏
+                this.editRebutNoVisitDialog = false;
             },
             showVisitRecord(row) {
                 // 展示到访记录
