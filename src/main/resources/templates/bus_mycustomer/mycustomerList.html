@@ -194,6 +194,11 @@
                                    style="color: red" @click.stop="editRebutVisitRecord(item)">到访被驳回
                         </el-button>
                     </div>
+                    <div v-if="scope.row.rejectVisitList.length>0" v-for="item in scope.row.rejectVisitList ">
+                        <el-button size="mini" type="text" @click.stop="rejectNotVisit(item)" style="color: green">
+                            <span style="color: red">未到访(被驳回)</span>
+                        </el-button>
+                    </div>
                     <div v-if="scope.row.visitList.length>1 && scope.row.isVisitAuditStatusOne==1">
                         <el-button size="mini" type="text" @click.stop="showVisitRecord(scope.row)" style="color: green">
                             审核中
@@ -1322,14 +1327,19 @@
             <!--</el-tab-pane>-->
             <!--</el-tabs>-->
             <el-form :model="updateFormSigning" :rules="rules" ref="updateFormSigning">
-                <el-form-item label="驳回时间：" :label-width="formLabelWidth">
-                    <el-button size="mini" type="text" style="font-size: 17px;color: #1e2746">
-                        {{updateFormSigning.rebutTime}}
-                    </el-button>
-                </el-form-item>
-                <el-form-item label="驳回原因：" :label-width="formLabelWidth">
-                    <span style="color: red; width:60%; word-wrap: break-word; word-break:break-all; ">{{updateFormSigning.rebutReason}}</span>
-                </el-form-item>
+                <div class="borderbox padding20 marginB20">
+                    <!-- <el-form-item label="驳回时间：" :label-width="formLabelWidth">
+                        <el-button size="mini" type="text" style="font-size: 17px;color: #1e2746">
+                            {{updateFormSigning.rebutTime}}
+                        </el-button>
+                    </el-form-item>
+                    <el-form-item label="驳回原因：" :label-width="formLabelWidth">
+                        <span style="color: red; width:60%; word-wrap: break-word; word-break:break-all; ">{{updateFormSigning.rebutReason}}</span>
+                    </el-form-item> -->
+                    <p class="marginB10"><span>驳回时间：{{updateFormSigning.rebutTime}}</span></p>
+                    <p class="marginB10"><span>驳回人员：</span></p>
+                    <p style="overflow: hidden;color: red;"><span style="float: left;width: 70px;">驳回原因：</span><span style="float: left;    width: 385px;">{{updateFormSigning.rebutReason}}</span></p>
+                </div> 
                 <div class="paddB20">签约单信息</div>
                 <div>
                     <el-row>
@@ -1614,12 +1624,12 @@
         <template>
             <el-form :model="editRebutNoVisit" ref="editRebutNoVisit">
                 <div class="borderbox padding20 marginB20">
-                    <p class="marginB10"><span>驳回时间：</span></p>
-                    <p class="marginB10"><span>驳回人员：</span></p>
-                    <p style="overflow: hidden;color: red;"><span style="float: left;width: 70px;">驳回原因：</span><span style="float: left;    width: 385px;">原因原因原因原因原因原因原因原因原因原因原因原因原因原因原因原因原因原因原因原因原因原因原因</span></p>
+                    <p class="marginB10"><span>驳回时间：{{rejectTime}}</span></p>
+                    <p class="marginB10"><span>驳回人员：{{rejectUser}}</span></p>
+                    <p style="overflow: hidden;color: red;"><span style="float: left;width: 70px;">驳回原因：</span><span style="float: left;    width: 385px;">{{rejectReason}}</span></p>
                 </div>
-                <p class="marginB10">标记未到访时间：</p>
-                <p class="marginB10">未到访原因：</p>                
+                <p class="marginB10">标记未到访时间：{{notVisitTime}}</p>
+                <p class="marginB10">未到访原因：</p>
                 <el-form-item label="">
                     <el-input type="textarea" v-model="notVisitFlag.notVisitReason" maxlength="100" :rows="3"></el-input>
                 </el-form-item>
@@ -2668,6 +2678,24 @@
                     mainDivVM.notVisitFlag.createUserName = response.data.data.createUserName
                     mainDivVM.notVisitFlag.notVisitTime = response.data.data.createTime
                 });
+            },
+            //查看被驳回的未到访
+            rejectNotVisit(row){
+                this.editRebutNoVisitDialog = true;
+                var param = {};
+                param.id = row.id
+                axios.post('/busVisitRecord/one', param).then(function (response) {
+                    if (null === response || response.data == null || response.data.code != '0') {
+                        if (response.data.code != '0') {
+                            mainDivVM.$message({message: response.data.msg, type: 'warning'});
+                        }
+                        return false;
+                    } else {
+                        this.rejectTime = response.data.data.createTime;
+
+                    }
+
+                })
             },
             showVisitRecord(row) {
                 // 展示到访记录
