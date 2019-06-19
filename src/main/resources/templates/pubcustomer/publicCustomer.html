@@ -368,6 +368,7 @@
     var mainDivVM = new Vue({
         el: '#mainDiv',
         data: {
+          oldPage:1,
             isShow:false,
         	loading:false,
             dialogChooseList: false,
@@ -793,6 +794,18 @@
                 param.pageSize = this.pager.pageSize;
                 param.pageNum =  this.pager.currentPage;
                 console.log(param)
+                  if(param.pageNum > 5000){
+                    axios.post('','').then(function (response) {
+                      ocmVM.pager.currentPage = ocmVM.oldPage;
+                    })
+                    this.$message({
+                      message: '查询不能大于5000页，如有需要，请根据搜索条件进行查询。',
+                      type: 'warning'
+                    });
+                    return;
+                  }else {
+                    this.oldPage = param.pageNum;
+                  }
                 axios.post('/aggregation/publiccustomer/queryPage',param).then(function (response) {
                     if(null===response||response.data==null||response.data.code!='0'){
                         if(response.data.code!='0'){

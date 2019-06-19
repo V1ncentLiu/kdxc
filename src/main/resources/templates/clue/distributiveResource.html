@@ -382,6 +382,7 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
         el: '#optimizeClueManagement',
         data: function() {
             return {
+                oldPage:1,
                 paginationShow: false,
                 isShow:false,
                 dialogFormVisible: false,
@@ -536,6 +537,18 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                 param.wechat = this.form.wechat;
                 var starTime=this.form.starTime;
                 var endTime=this.form.endTime;
+                if(pageNum > 5000){
+                  axios.post('','').then(function (response) {
+                    ocmVM.pager.currentPage = ocmVM.oldPage;
+                  })
+                  this.$message({
+                    message: '查询不能大于5000页，如有需要，请根据搜索条件进行查询。',
+                    type: 'warning'
+                  });
+                  return;
+                }else {
+                  this.oldPage = pageNum;
+                }
                 if(endTime){
                     if(starTime>endTime){
                         this.$message({
