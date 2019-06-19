@@ -1620,7 +1620,7 @@
         </template>
     </el-dialog>
     <!--添加到访记录-->
-    <el-dialog title="编辑驳回未到访" :visible.sync="editRebutNoVisitDialog" width="540px">
+    <el-dialog title="编辑驳回未到访" :visible.sync="editRebutNoVisitDialog" width="540px" @close="closeEditRebutNoVisitDialog">
         <template>
             <el-form :model="editRebutNoVisit" ref="editRebutNoVisit">
                 <div class="borderbox padding20 marginB20">
@@ -1636,7 +1636,7 @@
                 </el-form-item>
             </el-form>
             <div slot="footer" class="dialog-footer">
-                <el-button type="primary" @click="updateRejectNotVisit('editRebutNoVisit')" :disabled="updateRejectNotVisitButtonAble>保存</el-button>
+                <el-button type="primary" @click="updateRejectNotVisit('editRebutNoVisit')" :disabled="updateRejectNotVisitButtonAble">保存</el-button>
             </div>
         </template>
     </el-dialog>
@@ -2712,7 +2712,51 @@
 
                 })
             },
+            //编辑驳回未到访
+            updateRejectNotVisit(formName){
+                var  rejectReason = mainDivVM.notVisitFlag.notVisitReason;
+                if(null != rejectReason && rejectReason != ""){
+                    var param = {};
+                    param.id = mainDivVM.editRebutNoVisit.id;
+                    param.rebutReason = rejectReason ;
+                    param.status = 1;
+                    this.$refs[formName].validate((valid) => {
+                        if (mainDivVM.updateRejectNotVisitButtonAble == true) {
+                            return;
+                        }
+                        if (valid) {
+                            mainDivVM.updateRejectNotVisitButtonAble = true;
+                            axios.post("/busVisitRecord/update", param)
+                                .then(function (response) {
+                                    if (response.data.code == 0) {
+                                        mainDivVM.$message({
+                                            type: 'success', message: '未到访波比更新成功!', duration: 2000, onClose: function () {
+                                                mainDivVM.editRebutNoVisitDialog = false;
+                                            }
+                                        });
+                                    } else {
+                                        mainDivVM.$message.error(response.data.msg);
+                                        mainDivVM.updateRejectNotVisitButtonAble = false;
+                                    }
+                                }).catch(function (error) {
+                                mainDivVM.updateRejectNotVisitButtonAble = false;
+                                console.log(error);
+                            });
+                        } else {
+                            return false;
+                        }
+                    });
+                }else{
+                    // 隐藏
+                    this.editRebutNoVisitDialog = false;
+                }
 
+            },
+            //关闭编辑驳回未到访
+            closeEditRebutNoVisitDialog(){
+                // 点击关闭 数据重置
+                mainDivVM.notVisitFlag.notVisitReason= "";
+            },
             showVisitRecord(row) {
                 // 展示到访记录
                 this.showVisitAduitDialogVisible = true;
@@ -2737,40 +2781,7 @@
 
                 })
             },
-            //编辑驳回未到访
-            updateRejectNotVisit(form){
-                debugger;
-                var param = {};
-                this.$refs[formName].validate((valid) => {
-                    if (mainDivVM.updateRejectNotVisitButtonAble == true) {
-                        return;
-                    }
-                    if (valid) {
-                        mainDivVM.updateRejectNotVisitButtonAble = true;
-                        axios.post("/businesssign/update", param)
-                            .then(function (response) {
-                                if (response.data.code == 0) {
-                                    mainDivVM.$message({
-                                        type: 'success', message: '签约单更新成功!', duration: 2000, onClose: function () {
-                                            mainDivVM.pager.pageNum = 1
-                                            mainDivVM.initList();
-                                            mainDivVM.dialogUpdateFormSigningVisible = false;
-                                            mainDivVM.updateSignButtonAble = false;
-                                        }
-                                    });
-                                } else {
-                                    mainDivVM.$message.error(response.data.msg);
-                                    mainDivVM.updateRejectNotVisitButtonAble = false;
-                                }
-                            }).catch(function (error) {
-                            mainDivVM.updateRejectNotVisitButtonAble = false;
-                            console.log(error);
-                        });
-                    } else {
-                        return false;
-                    }
-                });
-            },
+
             toVisitRecordPage(row) {
                 var clueId=row.clueId;
                 // 存储选中信息--start
