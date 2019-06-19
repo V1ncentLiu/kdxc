@@ -536,7 +536,7 @@ var TOOLBAR = (function () {
     }
 }*/
 function handleState(token) {
-	console.log(token);
+	console.log("handleState:%o",token);
     var stateShow = token.state;
     switch (token.state) {
         case '离线':
@@ -691,10 +691,10 @@ function handleKickout (token) {
     if (token.code == "0") {
         /*typeButton.buttonDisabled();
         $("#statusImg").css({"backgroundPosition": "0px 0px"});*/
-        $('#status').text("离线");
+       /* $('#status').text("离线");
         clearInterval(document.getElementById('cnoTime').setIntervalCnoTimeId);
         document.getElementById('cnoTime').innerHTML = "";
-        window.parent.cbKickout(token);
+        window.parent.cbKickout(token);*/
     }
 }
 

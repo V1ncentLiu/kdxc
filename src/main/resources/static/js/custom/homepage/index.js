@@ -537,10 +537,11 @@ var homePageVM=new Vue({
                    // always executed
                  });
         	}else if(this.isTrClient){//天润
-        		 var params = {};
+        		/* var params = {};
          	    params.logoutMode = 1;
          	    params.removeBinding = 1;
          	    CTILink.Agent.logout(params, function(result) {
+         	    	console.info("logout:%o",result);
          	        if (result.code == 0) {
          	      	    homePageVM.dialogLogoutClientVisible =false;
                         homePageVM.isQimoClient=false;
@@ -562,9 +563,48 @@ var homePageVM=new Vue({
          	        	console.info(result);
          	        	homePageVM.$message({message:"退出失败",type:'error'});
          	        }
-         	    });
+         	    });*/
         		
+         	   this.trClientLogout();
         	}
+        },
+        trClientLogout(){
+        	 var cno = homePageVM.loginClientForm.cno;
+        	 var param = {cno:cno};
+        	 
+        	 axios.post('/client/client/trClientLogout', param)
+             .then(function (response) {
+                 var resData = response.data;
+                 console.info(resData);
+                 if(resData.code=='0'){
+                	 homePageVM.dialogLogoutClientVisible =false;
+                     homePageVM.isQimoClient=false;
+                     homePageVM.isTrClient=false;
+                     homePageVM.callTitle="呼叫中心";
+                    // sessionStorage.removeItem("loginClient");
+                   //  sessionStorage.removeItem("accountId");
+                     localStorage.removeItem("clientInfo");
+                     homePageVM.$message({message:"退出成功",type:'success'});
+                     
+                     homePageVM.loginClientForm.clientType=1;//设置默认选中天润坐席
+                     homePageVM.loginClientForm.bindPhoneType=1;
+                     homePageVM.loginClientForm.cno='';
+                     homePageVM.loginClientForm.bindPhone='';
+                     homePageVM.loginClientForm.loginClient='';
+                     //homePageVM.$refs.loginClientForm.clearValidate();
+                 }else{
+                	 homePageVM.$message({message:'退出失败：'+resData.msg,type:'error'});
+              	     console.error(resData);
+                 }
+             
+             })
+             .catch(function (error) {
+                  console.log(error);
+             }).then(function(){
+          	      
+             });
+        	 
+        	 
         },
         openOutboundDialog(){//打开主动外呼diaolog 
         	this.dialogOutboundVisible = true;
@@ -722,7 +762,7 @@ var homePageVM=new Vue({
     							homePageVM.$message({message:"登陆失败，该坐席号不属于您的归属部门",type:'error'});
     						}
     					}else{
-    						homePageVM.$message({message:data.msg+"(验证)",type:'error'});
+    						homePageVM.$message({message:data.msg+"(验证坐席号归属部门)",type:'error'});
     					}
     				},  
     				error: function() {     
