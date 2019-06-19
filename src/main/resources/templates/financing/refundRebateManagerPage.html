@@ -333,6 +333,12 @@
             <el-table-column align="center" prop="payMode" label="付款方式" :formatter="getPayModeText"></el-table-column>
             <el-table-column align="center" prop="payTime" label="付款时间" :formatter="getTimeText"></el-table-column>
             <el-table-column align="center" prop="amountReceived" label="实收金额"></el-table-column>
+
+            <el-table-column align="center" prop="preferentialAmount" label="优惠金额" width="150"></el-table-column>
+            <el-table-column align="center" prop="firstToll" label="路费" width="150"></el-table-column>
+            <el-table-column align="center" prop="giveAmount" label="赠送金额" width="150"></el-table-column>
+            <el-table-column align="center" prop="giveType" label="赠送类型" width="150" :formatter="transGiveType"></el-table-column>
+
             <el-table-column align="center" prop="amountPerformance" label="业绩金额"></el-table-column>
             <el-table-column align="center" prop="accountStatus" label="结算状态" :formatter="transformStatus"></el-table-column>
             <el-table-column align="center" prop="money" label="结算金额"></el-table-column>
@@ -408,6 +414,7 @@ var provinceList=[[${provinceList}]];//省份
 var vistitStoreTypeList=[[${vistitStoreTypeList}]];//签约店型
 var ossSignatureUrl = [[${ossUrl}]];//上传文件地址
 var payModeItem =[[${payModeItem}]];
+var giveTypeList =[[${giveTypeList}]];
 var clueVM = new Vue({
         el: '#clueManage',
         data: {
@@ -1203,6 +1210,17 @@ var clueVM = new Vue({
                      }
                      return valText;
                  },
+
+                transGiveType(row, column, value, index) {
+                  var text="";
+                  for(var i=0;i<giveTypeList.length;i++) {
+                    if(giveTypeList[i].value ==value){
+                      text = giveTypeList[i].name;
+                    }
+                  }
+                  return text;
+                },
+
                  getPayModeText(row, column, value, index){
                    var valText="";
                    var vals = value.split(",");

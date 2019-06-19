@@ -610,17 +610,6 @@ public class BusinessSignController {
     paramDTO.setSignId(Long.valueOf(signId));
     JSONResult<BusSignRespDTO> busSign = queryOne(paramDTO);
 
-    // tab页面显示逻辑
-    // SignRecordReqDTO recordReqDTO = new SignRecordReqDTO();
-    // recordReqDTO.setClueId(Long.valueOf(clueId));
-    // if("1".equals(readyOnly)){
-    // recordReqDTO.setStatus(0); // 审核中
-    // }else{
-    // recordReqDTO.setStatus(1); // 查看到访记录
-    // }
-    // JSONResult<List<BusSignRespDTO>> resSignListJson = querySignList(recordReqDTO);
-    // List<BusSignRespDTO> data = resSignListJson.getData();
-    // BusSignRespDTO sign = data.get(0);
     BusSignRespDTO sign = busSign.getData();
     List<BusSignRespDTO> signData = new ArrayList();
     signData.add(sign);
