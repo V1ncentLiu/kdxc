@@ -313,12 +313,10 @@ public class UserController {
             if (Constants.NOT_TAKE_AWAY_CLUE.equals(userInfoReq.getTakeAwayClue())) {
                 // 获取我的客户列表
                 CustomerClueQueryDTO dto = new CustomerClueQueryDTO();
-                dto.setPageNum(PAGE_NUMBER);
-                dto.setPageSize(PAGE_SIZE);
                 dto.setTeleSale(userInfoReq.getId());
-                JSONResult<PageBean<CustomerClueDTO>> jsonResult = myCustomerFeignClient.findTeleClueInfo(dto);
+                JSONResult<Integer> jsonResult = myCustomerFeignClient.getUnAssignCustomerNum(dto);
                 boolean flag = jsonResult != null && JSONResult.SUCCESS.equals(jsonResult.getCode()) && jsonResult.getData() != null
-                        && jsonResult.getData().getPageSizes() > 0;
+                        && jsonResult.getData() > 0;
                 if (flag) {
                     return new JSONResult().fail(SysErrorCodeEnum.ERR_EXISTS_CLUE_FAIL.getCode(), SysErrorCodeEnum.ERR_EXISTS_CLUE_FAIL.getMessage());
                 }
