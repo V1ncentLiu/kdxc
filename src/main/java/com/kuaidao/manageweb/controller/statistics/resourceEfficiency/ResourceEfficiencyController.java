@@ -10,9 +10,12 @@ import com.kuaidao.common.util.ExcelUtil;
 import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
 import com.kuaidao.manageweb.feign.project.ProjectInfoFeignClient;
 import com.kuaidao.manageweb.feign.statistics.resourceEfficiency.ResourceEfficiencyFeignClient;
+import com.kuaidao.manageweb.util.CommUtil;
 import com.kuaidao.stastics.dto.resourceEfficiency.ResourceEfficiencyAllDataDto;
 import com.kuaidao.stastics.dto.resourceEfficiency.ResourceEfficiencyQueryDto;
 import com.kuaidao.sys.dto.dictionary.DictionaryItemRespDTO;
+import com.kuaidao.sys.dto.user.UserDataAuthReq;
+import com.kuaidao.sys.dto.user.UserInfoDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +31,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -69,6 +73,7 @@ public class ResourceEfficiencyController {
     @RequestMapping("/getResourceEfficientList")
     @ResponseBody
     public JSONResult<Map<String,Object>> getResourceEfficientList(@RequestBody ResourceEfficiencyQueryDto resourceEfficiencyQueryDto) throws Exception{
+        initAuth(resourceEfficiencyQueryDto);
         return resourceEfficiencyFeignClient.getResourceEfficientPageList(resourceEfficiencyQueryDto);
     }
 
@@ -78,6 +83,7 @@ public class ResourceEfficiencyController {
     @RequestMapping("/getFirstResourceEfficientList")
     @ResponseBody
     public JSONResult<Map<String,Object>> getFirstResourceEfficientList(@RequestBody ResourceEfficiencyQueryDto resourceEfficiencyQueryDto) throws Exception{
+        initAuth(resourceEfficiencyQueryDto);
         return resourceEfficiencyFeignClient.getFirstResourceEfficientPageList(resourceEfficiencyQueryDto);
     }
     /**
@@ -86,6 +92,7 @@ public class ResourceEfficiencyController {
      */
     @PostMapping("/exportResourceEfficiency")
     public void exportResourceEfficiency(@RequestBody ResourceEfficiencyQueryDto resourceEfficiencyQueryDto,HttpServletResponse response) throws IOException {
+        initAuth(resourceEfficiencyQueryDto);
         List<List<Object>> dataList = new ArrayList<List<Object>>();
         dataList.add(getHeadTitle());
         JSONResult<Map<String, Object>> result = resourceEfficiencyFeignClient.getAllResourceEfficientList(resourceEfficiencyQueryDto);
@@ -212,11 +219,8 @@ public class ResourceEfficiencyController {
         curList.add(ra.getFirstDayConnectionRate());
         dataList.add(curList);
     }
-
-
     /**
      * 查询字典表
-     *
      * @param code
      * @return
      */
@@ -228,6 +232,17 @@ public class ResourceEfficiencyController {
             return queryDicItemsByGroupCode.getData();
         }
         return null;
+    }
+    public void initAuth(ResourceEfficiencyQueryDto resourceEfficiencyQueryDto){
+        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+        List<UserDataAuthReq> userDataAuthList = curLoginUser.getUserDataAuthList();
+        Map<Integer,String> map = new HashMap<>();
+        if(null != userDataAuthList && userDataAuthList.size() > 0){
+            for(UserDataAuthReq udar : userDataAuthList){
+                map.put(udar.getBusinessLine(),udar.getDicValue());
+            }
+            resourceEfficiencyQueryDto.setBusinessLineMap(map);
+        }
     }
 
 }
