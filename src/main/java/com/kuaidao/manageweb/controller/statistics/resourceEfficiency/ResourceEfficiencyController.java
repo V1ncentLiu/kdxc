@@ -92,6 +92,11 @@ public class ResourceEfficiencyController {
         Map<String, Object> dataMap = result.getData();
         String listTxt = JSONArray.toJSONString(dataMap.get("allListData"));
         List<ResourceEfficiencyAllDataDto> orderList = JSON.parseArray(listTxt, ResourceEfficiencyAllDataDto.class);
+        String totalDataStr = JSON.toJSONString(dataMap.get("totalData"));
+        //合计
+        ResourceEfficiencyAllDataDto sumReadd = JSON.parseObject(totalDataStr, ResourceEfficiencyAllDataDto.class);
+        //添加合计头
+        addTotalTexportData(sumReadd,dataList);
         for(int i = 0; i<orderList.size(); i++){
             ResourceEfficiencyAllDataDto ra = orderList.get(i);
             List<Object> curList = new ArrayList<>();
@@ -129,7 +134,7 @@ public class ResourceEfficiencyController {
         XSSFWorkbook wbWorkbook = ExcelUtil.creat2007Excel(dataList);
         Long startTime = resourceEfficiencyQueryDto.getStartTime();
         Long endTime = resourceEfficiencyQueryDto.getEndTime();
-        String name = "资源跟踪记录表" +startTime+"-"+endTime + ".xlsx";
+        String name = "资源接通有效率表" +startTime+"-"+endTime + ".xlsx";
         response.addHeader("Content-Disposition",
                 "attachment;filename=" + new String(name.getBytes("UTF-8"), "ISO8859-1"));
         response.addHeader("fileName", URLEncoder.encode(name, "utf-8"));
@@ -172,6 +177,40 @@ public class ResourceEfficiencyController {
         headTitleList.add("首日资源有效率");
         headTitleList.add("首日接通有效率");
         return headTitleList;
+    }
+
+    private void addTotalTexportData(ResourceEfficiencyAllDataDto ra, List<List<Object>> dataList) {
+        List<Object> curList = new ArrayList<>();
+        curList.add("");
+        curList.add("");
+        curList.add("合计");
+        curList.add("");
+        curList.add(ra.getIssuedResources());
+        curList.add(ra.getFollowResources());
+        curList.add(ra.getFirstResources());
+        curList.add(ra.getConnectResources());
+        curList.add(ra.getNotConnectResources());
+        curList.add(ra.getConnectEffectiveResources());
+        curList.add(ra.getConnectNotEffectiveResources());
+        curList.add(ra.getNotConnectEffectiveResources());
+        curList.add(ra.getNotConnectNotEffectiveResources());
+        curList.add(ra.getFollowRate());
+        curList.add(ra.getFirstRate());
+        curList.add(ra.getResourceConnectRate());
+        curList.add(ra.getResourceEffectiveRate());
+        curList.add(ra.getConnectionRate());
+        curList.add(ra.getFirstDayFollowResources());
+        curList.add(ra.getFirstDayConnectResources());
+        curList.add(ra.getFirstDayNotConnectResources());
+        curList.add(ra.getFirstDayConnectEffectiveResources());
+        curList.add(ra.getFirstDayConnectNotEffectiveResources());
+        curList.add(ra.getFirstDayNotConnectEffectiveResources());
+        curList.add(ra.getFirstDayNotConnectNotEffectiveResources());
+        curList.add(ra.getFirstDayFollowRate());
+        curList.add(ra.getFirstDayResourceConnectRate());
+        curList.add(ra.getFirstDayResourceEffectiveRate());
+        curList.add(ra.getFirstDayConnectionRate());
+        dataList.add(curList);
     }
 
 
