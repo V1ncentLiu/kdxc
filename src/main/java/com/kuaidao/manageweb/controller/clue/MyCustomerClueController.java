@@ -412,8 +412,10 @@ public class MyCustomerClueController {
             @RequestParam(required = false) String commonPool) {
         UserInfoDTO user = getUser();
         List<Long> accountList = new ArrayList<Long>();
+        String role = null;
         if (null != user.getRoleList() && user.getRoleList().size() > 0) {
             String roleCode = user.getRoleList().get(0).getRoleCode();
+            role = roleCode;
             if (null != roleCode) {
                 if (roleCode.equals(RoleCodeEnum.GLY.name())) {
                     // 管理员查看所有
@@ -532,7 +534,11 @@ public class MyCustomerClueController {
         }else {
             request.setAttribute("repeatClueStatus", 0);
         }
-        return "clue/CustomerMaintenanceReadOnly";
+        if(StringUtils.isNotBlank(role)&& role.equals(RoleCodeEnum.DXZJ.name())){
+            return "clue/editBasicCustomerMaintenance";
+        }else {
+            return "clue/CustomerMaintenanceReadOnly";
+        }
     }
 
     /**
@@ -1088,18 +1094,40 @@ public class MyCustomerClueController {
     }
 
     /**
-     * 维护资源提交
+     * 维护资源(基本信息)提交
      * 
      * @param request
      * @param dto
      * @return
      */
-    @RequestMapping("/updateCustomerClue")
+    @RequestMapping("/updateCustomerBasicInfoClue")
+    @ResponseBody
+    @LogRecord(description = "维护资源(基本信息)提交", operationType = OperationType.UPDATE,
+            menuName = MenuEnum.CUSTOMER_INFO)
+    public JSONResult<String> updateCustomerBasicInfoClue(HttpServletRequest request,
+            @RequestBody ClueDTO dto) {
+
+        Subject subject = SecurityUtils.getSubject();
+        UserInfoDTO user = (UserInfoDTO) subject.getSession().getAttribute("user");
+        if (null != user) {
+            dto.setUpdateUser(user.getId());
+            dto.setOrg(user.getOrgId());
+        }
+        return myCustomerFeignClient.updateCustomerBasicInfoClue(dto);
+    }
+    /**
+     * 维护资源提交
+     *
+     * @param request
+     * @param dto
+     * @return
+     */
+    @RequestMapping("/updateCustomerClueBasic")
     @ResponseBody
     @LogRecord(description = "维护客户资源提交", operationType = OperationType.UPDATE,
-            menuName = MenuEnum.CUSTOMER_INFO)
-    public JSONResult<String> updateCustomerClue(HttpServletRequest request,
-            @RequestBody ClueDTO dto) {
+        menuName = MenuEnum.CUSTOMER_INFO)
+    public JSONResult<String> updateCustomerClueBasic(HttpServletRequest request,
+        @RequestBody ClueDTO dto) {
 
         Subject subject = SecurityUtils.getSubject();
         UserInfoDTO user = (UserInfoDTO) subject.getSession().getAttribute("user");
@@ -1109,7 +1137,6 @@ public class MyCustomerClueController {
         }
         return myCustomerFeignClient.updateCustomerClue(dto);
     }
-
     /**
      * 保留客户资源
      * 
