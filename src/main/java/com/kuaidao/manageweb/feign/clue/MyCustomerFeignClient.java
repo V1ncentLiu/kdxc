@@ -55,7 +55,14 @@ public interface MyCustomerFeignClient {
      */
     @RequestMapping(method = RequestMethod.POST, value = "/updateCustomerClue")
     JSONResult<String> updateCustomerClue(ClueDTO dto);
-
+    /**
+     * 客户资源(基本信息)维护
+     *
+     * @param dto
+     * @return
+     */
+    @RequestMapping(method = RequestMethod.POST, value = "/updateCustomerBasicInfoClue")
+    JSONResult<String> updateCustomerBasicInfoClue(ClueDTO dto);
     /**
      * 我的客户资源维护查询
      * 
@@ -190,7 +197,11 @@ public interface MyCustomerFeignClient {
             // TODO Auto-generated method stub
             return fallBackError("维护资源数据失败");
         }
-
+        @Override
+        public JSONResult<String> updateCustomerBasicInfoClue(ClueDTO dto) {
+            // TODO Auto-generated method stub
+            return fallBackError("维护资源(基本信息)数据失败");
+        }
         @Override
         public JSONResult<String> uploadClueFile(ClueFileDTO dto) {
             // TODO Auto-generated method stub

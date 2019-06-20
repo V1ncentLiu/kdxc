@@ -3,6 +3,7 @@
  */
 package com.kuaidao.manageweb.controller.financing;
 
+import com.kuaidao.manageweb.constant.Constants;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -119,6 +120,7 @@ public class ReconciliationConfirmController {
                 customFieldFeignClient.queryFieldByUserAndMenu(queryFieldByUserAndMenuReq);
         request.setAttribute("userFieldList", queryFieldByUserAndMenu.getData());
         request.setAttribute("payModeItem", getDictionaryByCode(DicCodeEnum.PAYMODE.getCode()));
+        request.setAttribute("giveTypeList", getDictionaryByCode(Constants.GIVE_TYPE));
         return "financing/reconciliationConfirmPage";
     }
 
