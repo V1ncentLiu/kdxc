@@ -29,6 +29,7 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -120,11 +121,11 @@ public class ResourceEfficiencyController {
             curList.add(ra.getConnectNotEffectiveResources());
             curList.add(ra.getNotConnectEffectiveResources());
             curList.add(ra.getNotConnectNotEffectiveResources());
-            curList.add(ra.getFollowRate());
-            curList.add(ra.getFirstRate());
-            curList.add(ra.getResourceConnectRate());
-            curList.add(ra.getResourceEffectiveRate());
-            curList.add(ra.getConnectionRate());
+            curList.add(formatPercent(ra.getFollowRate()));
+            curList.add(formatPercent(ra.getFirstRate()));
+            curList.add(formatPercent(ra.getResourceConnectRate()));
+            curList.add(formatPercent(ra.getResourceEffectiveRate()));
+            curList.add(formatPercent(ra.getConnectionRate()));
             curList.add(ra.getFirstDayFollowResources());
             curList.add(ra.getFirstDayConnectResources());
             curList.add(ra.getFirstDayNotConnectResources());
@@ -132,10 +133,10 @@ public class ResourceEfficiencyController {
             curList.add(ra.getFirstDayConnectNotEffectiveResources());
             curList.add(ra.getFirstDayNotConnectEffectiveResources());
             curList.add(ra.getFirstDayNotConnectNotEffectiveResources());
-            curList.add(ra.getFirstDayFollowRate());
-            curList.add(ra.getFirstDayResourceConnectRate());
-            curList.add(ra.getFirstDayResourceEffectiveRate());
-            curList.add(ra.getFirstDayConnectionRate());
+            curList.add(formatPercent(ra.getFirstDayFollowRate()));
+            curList.add(formatPercent(ra.getFirstDayResourceConnectRate()));
+            curList.add(formatPercent(ra.getFirstDayResourceEffectiveRate()));
+            curList.add(formatPercent(ra.getFirstDayConnectionRate()));
             dataList.add(curList);
         }
         XSSFWorkbook wbWorkbook = ExcelUtil.creat2007Excel(dataList);
@@ -201,11 +202,11 @@ public class ResourceEfficiencyController {
         curList.add(ra.getConnectNotEffectiveResources());
         curList.add(ra.getNotConnectEffectiveResources());
         curList.add(ra.getNotConnectNotEffectiveResources());
-        curList.add(ra.getFollowRate());
-        curList.add(ra.getFirstRate());
-        curList.add(ra.getResourceConnectRate());
-        curList.add(ra.getResourceEffectiveRate());
-        curList.add(ra.getConnectionRate());
+        curList.add(formatPercent(ra.getFollowRate()));
+        curList.add(formatPercent(ra.getFirstRate()));
+        curList.add(formatPercent(ra.getResourceConnectRate()));
+        curList.add(formatPercent(ra.getResourceEffectiveRate()));
+        curList.add(formatPercent(ra.getConnectionRate()));
         curList.add(ra.getFirstDayFollowResources());
         curList.add(ra.getFirstDayConnectResources());
         curList.add(ra.getFirstDayNotConnectResources());
@@ -213,10 +214,10 @@ public class ResourceEfficiencyController {
         curList.add(ra.getFirstDayConnectNotEffectiveResources());
         curList.add(ra.getFirstDayNotConnectEffectiveResources());
         curList.add(ra.getFirstDayNotConnectNotEffectiveResources());
-        curList.add(ra.getFirstDayFollowRate());
-        curList.add(ra.getFirstDayResourceConnectRate());
-        curList.add(ra.getFirstDayResourceEffectiveRate());
-        curList.add(ra.getFirstDayConnectionRate());
+        curList.add(formatPercent(ra.getFirstDayFollowRate()));
+        curList.add(formatPercent(ra.getFirstDayResourceConnectRate()));
+        curList.add(formatPercent(ra.getFirstDayResourceEffectiveRate()));
+        curList.add(formatPercent(ra.getFirstDayConnectionRate()));
         dataList.add(curList);
     }
     /**
@@ -243,6 +244,18 @@ public class ResourceEfficiencyController {
             }
             resourceEfficiencyQueryDto.setBusinessLineMap(map);
         }
+    }
+
+    /**
+     * 百分比格式化
+     */
+    private String formatPercent(BigDecimal callPercent) {
+        if(callPercent!=null) {
+            callPercent = callPercent.multiply(new BigDecimal(100));
+        }else {
+            callPercent = BigDecimal.ZERO;
+        }
+        return callPercent+"%";
     }
 
 }
