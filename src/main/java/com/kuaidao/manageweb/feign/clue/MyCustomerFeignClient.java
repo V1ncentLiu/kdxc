@@ -30,7 +30,14 @@ public interface MyCustomerFeignClient {
 
     @RequestMapping(method = RequestMethod.POST, value = "/findTeleClueInfo")
     JSONResult<PageBean<CustomerClueDTO>> findTeleClueInfo(CustomerClueQueryDTO queryDTO);
-
+    /**
+     * 查询未分配的我的客户数
+     *
+     * @param queryDto
+     * @return
+     */
+    @RequestMapping("/getUnAssignCustomerNum")
+    JSONResult<Integer> getUnAssignCustomerNum( CustomerClueQueryDTO queryDto);
     /**
      * 我的客户创建数据
      * 
@@ -168,7 +175,10 @@ public interface MyCustomerFeignClient {
             // TODO Auto-generated method stub
             return fallBackError("分页查询资源数据失败");
         }
-
+        @Override
+       public JSONResult<Integer> getUnAssignCustomerNum( CustomerClueQueryDTO queryDto){
+            return fallBackError("获取未分配客户数失败");
+        }
         @Override
         public JSONResult<String> createCustomerClue(ClueDTO dto) {
             // TODO Auto-generated method stub
