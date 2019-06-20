@@ -1,6 +1,9 @@
 var mainDivVM = new Vue({
     el: '#mainDiv',
     data: {
+      notVisitButtonAble: false,
+        multipleSelection: [],
+        notVisitFlagDialogVisible: false,//标记未到访弹窗
         // 工作台
         activeName:'1',
         activeName2:'1',
@@ -534,6 +537,88 @@ var mainDivVM = new Vue({
         }
     },
     methods: {
+      saveNotVisit() {
+        var param = this.notVisitFlag;
+        // 设置 clueid
+        if (mainDivVM.notVisitButtonAble == true) {
+          return;
+        }
+        this.$refs['notVisitFlag'].validate((valid) => {
+          if (valid) {
+            mainDivVM.notVisitButtonAble = true;
+            axios.post("/aggregation/businessMyCustomer/notVisit", param)
+            .then(function (response) {
+              if (response.data.code == 0) {
+                mainDivVM.$message({
+                  type: 'success', message: '标记成功!', duration: 2000, onClose: function () {
+                    mainDivVM.pager.pageNum = 1
+                    mainDivVM.initList();
+                    mainDivVM.notVisitFlagDialogVisible = false;
+                    mainDivVM.notVisitButtonAble = false;
+                  }
+                });
+              } else {
+                mainDivVM.$message.error(response.data.msg);
+                mainDivVM.notVisitButtonAble = false;
+              }
+            }).catch(function (error) {
+              mainDivVM.notVisitButtonAble = false;
+              console.log(error);
+            });
+          } else {
+            return false;
+          }
+        });
+      },
+      handleSelectionChange(val) {
+        this.multipleSelection = val;
+      },
+      notVisit() {//标记未到访
+        this.resetForm("notVisitFlag")
+        var rows = mainDivVM.multipleSelection;
+        if (rows.length == 0) {
+          this.$message({message: '请选择数据', type: 'warning'});
+          return false;
+        } else {
+          var names = "";
+          var rowIds = [];
+          for (var i = 0; i < rows.length; i++) {
+            // if(rows[i].visitStatus==0||rows[i].visitStatus==1||rows[i].visitStatus==2||rows[i].visitStatus==3){
+            //     this.$message({message: '勾选数据中，包含了已到访或是已标记的客户', type: 'warning'});
+            //     return false;
+            // }
+            names = names + '【' + rows[i].cusName + '】';
+            rowIds.push(rows[i].clueId);
+          }
+          var str = '请填写客户姓名' + names + '未到访的原因?';
+          this.notVisitFlag.clueIds = rowIds;
+          this.notVisitFlag.str = str;
+          this.notVisitFlag.notVisitReason = "";
+          this.notVisitFlag.notVisitUser="";
+          this.notVisitFlag.notVisitTime="";
+          this.notVisitFlagDialogVisible = true;
+        }
+      },
+      initList() {
+        var param = this.queryForm;
+        param.pageSize = this.pager.pageSize;
+        param.pageNum = this.pager.currentPage;
+        axios.post('/aggregation/businessMyCustomer/queryPage', param).then(function (response) {
+          if (null === response || response.data == null || response.data.code != '0') {
+            if (response.data.code != '0') {
+              mainDivVM.$message({message: response.data.msg, type: 'warning'});
+            }
+            return false;
+          } else {
+            mainDivVM.tableData = response.data.data.data;
+            mainDivVM.pager.currentPage = response.data.data.currentPage;
+            mainDivVM.pager.total = response.data.data.total;
+            mainDivVM.pager.pageSize = response.data.data.pageSize;
+            console.log(mainDivVM.tableData)
+
+          }
+        })
+      },
         gotoBusinessMyCustomer(){//跳转我的客户
             window.location.href="/aggregation/businessMyCustomer/listPage"; 
         },

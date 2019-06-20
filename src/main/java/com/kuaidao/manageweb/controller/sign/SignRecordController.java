@@ -1,6 +1,7 @@
 package com.kuaidao.manageweb.controller.sign;
 
-import com.kuaidao.common.constant.DicCodeEnum;
+import com.kuaidao.common.constant.*;
+import com.kuaidao.manageweb.constant.Constants;
 import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
 import com.kuaidao.sys.dto.dictionary.DictionaryItemRespDTO;
 import java.util.ArrayList;
@@ -30,9 +31,6 @@ import com.kuaidao.aggregation.dto.financing.RefundRebateDTO;
 import com.kuaidao.aggregation.dto.project.ProjectInfoDTO;
 import com.kuaidao.aggregation.dto.sign.PayDetailDTO;
 import com.kuaidao.aggregation.dto.visitrecord.BusVisitRecordRespDTO;
-import com.kuaidao.common.constant.RoleCodeEnum;
-import com.kuaidao.common.constant.SysErrorCodeEnum;
-import com.kuaidao.common.constant.SystemCodeConstant;
 import com.kuaidao.common.entity.IdListLongReq;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
@@ -113,6 +111,7 @@ public class SignRecordController {
          */
         // request.setAttribute("teleSaleList",teleSaleList);
         request.setAttribute("payModeItem", getDictionaryByCode(DicCodeEnum.PAYMODE.getCode()));
+        request.setAttribute("giveTypeList", getDictionaryByCode(Constants.GIVE_TYPE));
         return "signrecord/signRecord";
     }
 
@@ -206,9 +205,10 @@ public class SignRecordController {
         List<RoleInfoDTO> roleList = curLoginUser.getRoleList();
         RoleInfoDTO roleInfoDTO = roleList.get(0);
         String roleCode = roleInfoDTO.getRoleCode();
-        if (RoleCodeEnum.SWDQZJ.name().equals(roleCode)
-                || RoleCodeEnum.SWZJ.name().equals(roleCode)) {
-            Long businessManagerId = reqDTO.getBusinessManagerId();
+        Long businessGroupId = reqDTO.getBusinessGroupId();
+        List<Long> businessGroupIdList = new ArrayList<>();
+        if (RoleCodeEnum.SWDQZJ.name().equals(roleCode)) {
+            /*Long businessManagerId = reqDTO.getBusinessManagerId();
             if (businessManagerId != null) {
                 List<Long> businessManagerIdList = new ArrayList<>();
                 businessManagerIdList.add(businessManagerId);
@@ -220,8 +220,35 @@ public class SignRecordController {
                             "该用户下没有下属");
                 }
                 reqDTO.setBusinessManagerIdList(accountIdList);
+            }*/
+            //商务经理外调，发起外调的商务总监进行审核,根据组id查询
+            if (businessGroupId != null) {
+                businessGroupIdList.add(businessGroupId);
+                reqDTO.setBusinessGroupIdList(businessGroupIdList);
+            } else {
+                // 查询下级所有商务组
+                OrganizationQueryDTO queryDTO = new OrganizationQueryDTO();
+                queryDTO.setParentId(orgId);
+                queryDTO.setOrgType(OrgTypeConstant.SWZ);
+                JSONResult<List<OrganizationRespDTO>> queryOrgByParam =
+                        organizationFeignClient.queryOrgByParam(queryDTO);
+                List<OrganizationRespDTO> data = queryOrgByParam.getData();
+                if (CollectionUtils.isEmpty(data)) {
+                    return new JSONResult().fail(SysErrorCodeEnum.ERR_NOTEXISTS_DATA.getCode(),
+                            "该用户下没有下属");
+                }
+                businessGroupIdList = data.stream().map(OrganizationRespDTO::getId).collect(Collectors.toList());
+                reqDTO.setBusinessGroupIdList(businessGroupIdList);
             }
 
+        } else if (RoleCodeEnum.SWZJ.name().equals(roleCode)) {
+            List<Long> accountIdList = getAccountIdList(orgId, RoleCodeEnum.SWJL.name());
+            if (CollectionUtils.isEmpty(accountIdList)) {
+                return new JSONResult().fail(SysErrorCodeEnum.ERR_NOTEXISTS_DATA.getCode(),
+                        "该用户下没有下属");
+            }
+            businessGroupIdList.add(orgId);
+            reqDTO.setBusinessGroupIdList(businessGroupIdList);
         } else {
             return new JSONResult().fail(SysErrorCodeEnum.ERR_NOTEXISTS_DATA.getCode(), "角色没有权限");
         }
@@ -309,6 +336,8 @@ public class SignRecordController {
         if (result.hasErrors()) {
             return CommonUtil.validateParam(result);
         }
+        UserInfoDTO user = CommUtil.getCurLoginUser();
+        reqDTO.setUserId(user.getId());
         reqDTO.setStatus(AggregationConstant.SIGN_ORDER_STATUS.REJECT);
         return signRecordFeignClient.rejectSignOrder(reqDTO);
     }
