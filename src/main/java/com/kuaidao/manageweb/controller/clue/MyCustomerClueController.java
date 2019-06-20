@@ -1122,11 +1122,11 @@ public class MyCustomerClueController {
      * @param dto
      * @return
      */
-    @RequestMapping("/updateCustomerClueBasic")
+    @RequestMapping("/updateCustomerClue")
     @ResponseBody
     @LogRecord(description = "维护客户资源提交", operationType = OperationType.UPDATE,
         menuName = MenuEnum.CUSTOMER_INFO)
-    public JSONResult<String> updateCustomerClueBasic(HttpServletRequest request,
+    public JSONResult<String> updateCustomerClue(HttpServletRequest request,
         @RequestBody ClueDTO dto) {
 
         Subject subject = SecurityUtils.getSubject();
