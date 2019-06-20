@@ -17,6 +17,8 @@ import java.util.List;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import com.kuaidao.manageweb.util.CommUtil;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -178,9 +180,10 @@ public class BalanceAccountController {
      */
     @PostMapping("/rejectApply")
     @ResponseBody
-    // @RequiresPermissions("financing:balanceaccountManager:rejectApply")
     @LogRecord(description = "驳回", operationType = OperationType.UPDATE, menuName = MenuEnum.REFUNDREBATEAPPLY_MANAGER)
     public JSONResult<Void> rejectApply(@RequestBody ReconciliationConfirmReq req, HttpServletRequest request) {
+        UserInfoDTO user = CommUtil.getCurLoginUser();
+        req.setCommitUser(user.getId());
         req.setStatus(AggregationConstant.RECONCILIATION_STATUS.STATUS_1);
         JSONResult<Void> reconciliationConfirm = reconciliationConfirmFeignClient.rejectApply(req);
         return reconciliationConfirm;

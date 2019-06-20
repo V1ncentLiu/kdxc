@@ -1,6 +1,7 @@
 package com.kuaidao.manageweb.controller.financing;
 
 import com.kuaidao.common.constant.DicCodeEnum;
+import com.kuaidao.manageweb.constant.Constants;
 import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
 import com.kuaidao.sys.dto.dictionary.DictionaryItemRespDTO;
 import java.util.ArrayList;
@@ -101,6 +102,7 @@ public class RefundController {
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
         request.setAttribute("businessLine", curLoginUser.getBusinessLine());
         request.setAttribute("payModeItem", getDictionaryByCode(DicCodeEnum.PAYMODE.getCode()));
+        request.setAttribute("giveTypeList", getDictionaryByCode(Constants.GIVE_TYPE));
         return "financing/refundApplyPage";
     }
 
@@ -115,6 +117,7 @@ public class RefundController {
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
         request.setAttribute("businessLine", curLoginUser.getBusinessLine());
         request.setAttribute("payModeItem", getDictionaryByCode(DicCodeEnum.PAYMODE.getCode()));
+        request.setAttribute("giveTypeList", getDictionaryByCode(Constants.GIVE_TYPE));
         return "financing/refundConfirmPage";
     }
 
@@ -130,6 +133,7 @@ public class RefundController {
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
         request.setAttribute("businessLine", curLoginUser.getBusinessLine());
         request.setAttribute("payModeItem", getDictionaryByCode(DicCodeEnum.PAYMODE.getCode()));
+        request.setAttribute("giveTypeList", getDictionaryByCode(Constants.GIVE_TYPE));
         return "financing/rebateApplyPage";
     }
 
@@ -144,6 +148,7 @@ public class RefundController {
         UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
         request.setAttribute("businessLine", curLoginUser.getBusinessLine());
         request.setAttribute("payModeItem", getDictionaryByCode(DicCodeEnum.PAYMODE.getCode()));
+        request.setAttribute("giveTypeList", getDictionaryByCode(Constants.GIVE_TYPE));
         return "financing/rebateConfirmPage";
     }
 
