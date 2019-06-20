@@ -31,7 +31,7 @@
                 <el-row>
                     <el-col :span="12">
                         <el-form-item label="姓名：" :label-width="formLabelWidth1" prop="name">
-                            <el-input v-model="form.name" maxlength="30" autocomplete="off"></el-input>
+                            <el-input v-model.trim="form.name" maxlength="30" autocomplete="off"></el-input>
                         </el-form-item>
                     </el-col>
                     <el-col :span="12">
@@ -219,7 +219,7 @@ var addUserVm= new Vue({
                         { required: true, message: '姓名不能为空', trigger: 'blur' },
                         {  max: 30, message: '最大30个字符', trigger: 'blur' },
                         { validator:function(rule,value,callback){
-                            if(/^[A-Za-z0-9\u4e00-\u9fa5]+$/.test(value) == false){
+                            if(/^[A-Za-z0-9\u4e00-\u9fa5\d-\s]+$/.test(value) == false){
                                callback(new Error("请输入汉字、字母或数字"));
                             }else{
                                callback();
@@ -339,6 +339,7 @@ var addUserVm= new Vue({
             	document.location.href='/user/userManager/initUserList';
             },
             onSubmit(formName) {
+                debugger
                 //  console.info(this.dataTableCheckbox);
             	 this.$refs[formName].validate((valid) => {
           	       if (valid) {
