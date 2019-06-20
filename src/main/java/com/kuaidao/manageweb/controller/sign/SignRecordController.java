@@ -336,6 +336,8 @@ public class SignRecordController {
         if (result.hasErrors()) {
             return CommonUtil.validateParam(result);
         }
+        UserInfoDTO user = CommUtil.getCurLoginUser();
+        reqDTO.setUserId(user.getId());
         reqDTO.setStatus(AggregationConstant.SIGN_ORDER_STATUS.REJECT);
         return signRecordFeignClient.rejectSignOrder(reqDTO);
     }
