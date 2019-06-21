@@ -200,13 +200,16 @@ public class BusinessVisitRecordController {
         JSONResult<BusVisitRecordRespDTO> jsonResult = visitRecordFeignClient.queryOne(idEntityLong);
         if (JSONResult.SUCCESS.equals(jsonResult.getCode()) && jsonResult.getData() != null) {
             busVisitRecordRespDTO =    jsonResult.getData();
-            IdEntityLong idEntityLongUser = new IdEntityLong();
-            idEntityLongUser.setId(Long.parseLong(busVisitRecordRespDTO.getCreateUser()));
-            JSONResult<UserInfoDTO> userInfoReslust = userInfoFeignClient.get(idEntityLongUser);
-            if (JSONResult.SUCCESS.equals(userInfoReslust.getCode()) && userInfoReslust.getData() != null) {
-                //转换用户名
-                busVisitRecordRespDTO.setCreateUserName(userInfoReslust.getData().getName());
+            if (null  !=busVisitRecordRespDTO.getAuditPerson()) {
+                IdEntityLong idEntityLongUser = new IdEntityLong();
+                idEntityLongUser.setId(busVisitRecordRespDTO.getAuditPerson());
+                JSONResult<UserInfoDTO> userInfoReslust = userInfoFeignClient.get(idEntityLongUser);
+                if (JSONResult.SUCCESS.equals(userInfoReslust.getCode()) && userInfoReslust.getData() != null) {
+                    //转换用户名
+                    busVisitRecordRespDTO.setAuditPersonName(userInfoReslust.getData().getName());
+                }
             }
+
         }
         return new JSONResult<BusVisitRecordRespDTO>().success(busVisitRecordRespDTO);
     }
