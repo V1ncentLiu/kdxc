@@ -22,7 +22,7 @@
         <el-button type="primary" @click="OpenRejectVisitRecordDialog">驳回</el-button>
         </shiro:hasPermission>
         <shiro:hasPermission name=" aggregation:visitRecord:pass">
-            <el-button type="success" @click="pass">审核通过</el-button>
+            <el-button type="success" :disabled="btnDisabled1" @click="pass">审核通过</el-button>
         </shiro:hasPermission>
     </el-row>
     <div class="mainSearchBg">
@@ -232,7 +232,8 @@
         el: '#customerVisitRecord',
         data: function() {
             return {
-                btnDisabled: false,  
+                btnDisabled: false,
+                btnDisabled1: false,
                 isShow:false,
             	activeName: 'first',//tabs:到访记录
             	loading:true,
@@ -415,29 +416,28 @@
                 }
             	
                 this.$confirm('确定将客户姓名'+title+' 到访记录审核通过吗？', '提示', {
-                    confirmButtonText: '确定',
-                    cancelButtonText: '取消',
-                    type: 'warning'
+                    confirmButtonText: '确定', cancelButtonText: '取消', type: 'warning'
                 }).then(() => {
+                    this.btnDisabled1 = true;
+                    console.log("..................1111");
                     var param={};
                     param.idList = idArr;
-                   
                     axios.post('/visit/visitRecord/passAuditSignOrder', param)
                     .then(function (response) {
+                        console.log("..................3333");
                         var resData = response.data;
                         if(resData.code=='0'){
                         	customerVisitRecordVm.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
                         		customerVisitRecordVm.initCustomerVisitRecord();
-                        		customerVisitRecordVm.dialogFormVisible = false;
                         	}});
                         }else{
-                        	customerVisitRecordVm.$message({message:resData.msg,type:'error'});
-                            console.error(resData);
+                            customerVisitRecordVm.btnDisabled1 = false;
+                        	  customerVisitRecordVm.$message({message:resData.msg,type:'error'});
                         }
-                    
                     })
                     .catch(function (error) {
-                         console.log(error);
+                        customerVisitRecordVm.btnDisabled1 = false;
+                        console.log(error);
                     }).then(function(){
                     });
                 }).catch(() => {
@@ -486,6 +486,7 @@
                       console.log(error);
                  }).then(function(){
                      customerVisitRecordVm.loading=false;
+                     customerVisitRecordVm.btnDisabled1 = false;
                  });
             	
             },
