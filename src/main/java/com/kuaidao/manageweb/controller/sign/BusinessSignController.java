@@ -7,19 +7,12 @@ import com.kuaidao.aggregation.dto.paydetail.PayDetailReqDTO;
 import com.kuaidao.aggregation.dto.paydetail.PayDetailRespDTO;
 import com.kuaidao.aggregation.dto.project.CompanyInfoDTO;
 import com.kuaidao.aggregation.dto.project.ProjectInfoDTO;
-import com.kuaidao.aggregation.dto.sign.BusSignInsertOrUpdateDTO;
-import com.kuaidao.aggregation.dto.sign.BusSignRespDTO;
-import com.kuaidao.aggregation.dto.sign.BusinessSignDTO;
-import com.kuaidao.aggregation.dto.sign.PayDetailDTO;
-import com.kuaidao.aggregation.dto.sign.SignParamDTO;
+import com.kuaidao.aggregation.dto.sign.*;
 import com.kuaidao.aggregation.dto.visitrecord.BusVisitRecordRespDTO;
 import com.kuaidao.common.constant.DicCodeEnum;
 import com.kuaidao.common.constant.OrgTypeConstant;
 import com.kuaidao.common.constant.SystemCodeConstant;
-import com.kuaidao.common.entity.IdEntityLong;
-import com.kuaidao.common.entity.IdListLongReq;
-import com.kuaidao.common.entity.JSONResult;
-import com.kuaidao.common.entity.PageBean;
+import com.kuaidao.common.entity.*;
 import com.kuaidao.common.util.CommonUtil;
 import com.kuaidao.manageweb.config.LogRecord;
 import com.kuaidao.manageweb.config.LogRecord.OperationType;
@@ -44,11 +37,8 @@ import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
 import com.kuaidao.sys.dto.organization.OrganizationRespDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import org.apache.commons.lang3.StringUtils;
@@ -234,26 +224,37 @@ public class BusinessSignController {
    * 查询明细
    */
   @RequestMapping("/one")
-  @ResponseBody
-  public JSONResult<BusSignRespDTO> queryOne(@RequestBody SignParamDTO param) throws Exception {
+    @ResponseBody
+    public JSONResult<BusSignRespDTO> queryOne(@RequestBody SignParamDTO param) throws Exception {
 
-    IdEntityLong idEntityLong = new IdEntityLong();
-    idEntityLong.setId(param.getSignId());
-    JSONResult<BusSignRespDTO> res = businessSignFeignClient.queryOne(idEntityLong);
-    if (JSONResult.SUCCESS.equals(res.getCode())) {
-      BusSignRespDTO data = res.getData();
-      IdEntityLong idLong = new IdEntityLong();
-      idLong.setId(param.getClueId());
-      String linkPhone = linkPhone(idLong);
-      data.setPhone(linkPhone);
-      if(data.getGiveType() ==null) {
-    	  data.setGiveType(-1);
-      }
-      res.setData(data);
-      data.setPerformanceAmount(data.getAmountPerformance());
+        IdEntityLong idEntityLong = new IdEntityLong();
+        idEntityLong.setId(param.getSignId());
+        JSONResult<BusSignRespDTO> res = businessSignFeignClient.queryOne(idEntityLong);
+        if (JSONResult.SUCCESS.equals(res.getCode())) {
+            BusSignRespDTO data = res.getData();
+            // 转换驳回记录里用户信息
+            List<SignRejectRecordDto> list = data.getSignRejectRecordList();
+            if (list != null && !list.isEmpty()) {
+                Set<Long> idSet = list.stream().map(SignRejectRecordDto::getCreateUser).collect(Collectors.toSet());
+                List<Long> idList = new ArrayList<>();
+                idList.addAll(idSet);
+                IdListLongReq idListReq = new IdListLongReq();
+                idListReq.setIdList(idList);
+
+
+            }
+            IdEntityLong idLong = new IdEntityLong();
+            idLong.setId(param.getClueId());
+            String linkPhone = linkPhone(idLong);
+            data.setPhone(linkPhone);
+            if (data.getGiveType() == null) {
+                data.setGiveType(-1);
+            }
+            res.setData(data);
+            data.setPerformanceAmount(data.getAmountPerformance());
+        }
+        return res;
     }
-    return res;
-  }
 
   /**
    * 查询签约单 不分页
