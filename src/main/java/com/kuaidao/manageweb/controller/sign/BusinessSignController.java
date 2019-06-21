@@ -238,6 +238,7 @@ public class BusinessSignController {
             List<SignRejectRecordDto> rejectRecordList = data.getSignRejectRecordList();
             if (rejectRecordList != null && !rejectRecordList.isEmpty()) {
                 handleRejectUserName(rejectRecordList);
+              logger.info("签约单驳回转换姓名之后的结果:{}",rejectRecordList);
                 data.setSignRejectRecordList(rejectRecordList);
             }
             IdEntityLong idLong = new IdEntityLong();
@@ -744,6 +745,7 @@ public class BusinessSignController {
         JSONResult<List<UserInfoDTO>> userResult = userInfoFeignClient.listById(idListReq);
         if (JSONResult.SUCCESS.equals(userResult.getCode())) {
             List<UserInfoDTO> userList = userResult.getData();
+          logger.info("根据用户id集合获取用户,id集合:{},查询结果集合:{}",idListReq,userList);
             Map<Long, UserInfoDTO> userMap = userList.stream().collect(Collectors.toMap(UserInfoDTO::getId, a -> a, (k1, k2) -> k1));
             for (SignRejectRecordDto dto : rejectRecordList) {
                 UserInfoDTO userInfoDTO = userMap.get(dto.getCreateUser());
