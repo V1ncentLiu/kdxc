@@ -286,7 +286,7 @@ public class VisitRecordController {
     /**
      * 查询 客户到访记录
      * 
-     * @param visitRecordReqDTO
+     * @param visitNoRecordReqDTO
      * @return
      */
     @RequiresPermissions("aggregation:visitRecord:view")
@@ -402,6 +402,8 @@ public class VisitRecordController {
         if (result.hasErrors()) {
             return CommonUtil.validateParam(result);
         }
+        UserInfoDTO userInfo = CommUtil.getCurLoginUser();
+        reqDTO.setAuditPerson(userInfo.getId());
         reqDTO.setStatus(AggregationConstant.VISIT_RECORD_STATUS.REJECT);
         return visitRecordFeignClient.rejectVisitRecord(reqDTO);
     }
