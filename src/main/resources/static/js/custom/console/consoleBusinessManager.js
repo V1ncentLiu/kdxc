@@ -784,29 +784,6 @@ var mainDivVM = new Vue({
                 this.isAllMoney = false;
             }
         },
-        notVisit(){
-            var rows = mainDivVM.multipleSelection;
-            if(rows.length==0){
-                this.$message({message: '请选择数据', type: 'warning'});
-                return false;
-            }else{
-                var names = "";
-                var rowIds = [];
-                for(var i=0;i<rows.length;i++){
-                    if(rows[i].visitStatus==0||rows[i].visitStatus==1||rows[i].visitStatus==2||rows[i].visitStatus==3){
-                        this.$message({message: '勾选数据中，包含了已到访或是已标记的客户', type: 'warning'});
-                        return false;
-                    }
-                    names = names + '【'+rows[i].cusName+'】';
-                    rowIds.push(rows[i].clueId);
-                }
-                var str = '确定要将此'+names+'标记为未到访吗?';
-                this.notVisitFlag.clueIds = rowIds;
-                this.notVisitFlag.str  = str;
-                this.notVisitFlag.notVisitReason = "";
-                this.notVisitFlagDialogVisible = true;
-            }
-        },
         saveNotVisit(){
             var param = this.notVisitFlag;
             // 设置 clueid

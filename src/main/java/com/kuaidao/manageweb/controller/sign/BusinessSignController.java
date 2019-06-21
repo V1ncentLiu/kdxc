@@ -7,19 +7,12 @@ import com.kuaidao.aggregation.dto.paydetail.PayDetailReqDTO;
 import com.kuaidao.aggregation.dto.paydetail.PayDetailRespDTO;
 import com.kuaidao.aggregation.dto.project.CompanyInfoDTO;
 import com.kuaidao.aggregation.dto.project.ProjectInfoDTO;
-import com.kuaidao.aggregation.dto.sign.BusSignInsertOrUpdateDTO;
-import com.kuaidao.aggregation.dto.sign.BusSignRespDTO;
-import com.kuaidao.aggregation.dto.sign.BusinessSignDTO;
-import com.kuaidao.aggregation.dto.sign.PayDetailDTO;
-import com.kuaidao.aggregation.dto.sign.SignParamDTO;
+import com.kuaidao.aggregation.dto.sign.*;
 import com.kuaidao.aggregation.dto.visitrecord.BusVisitRecordRespDTO;
 import com.kuaidao.common.constant.DicCodeEnum;
 import com.kuaidao.common.constant.OrgTypeConstant;
 import com.kuaidao.common.constant.SystemCodeConstant;
-import com.kuaidao.common.entity.IdEntityLong;
-import com.kuaidao.common.entity.IdListLongReq;
-import com.kuaidao.common.entity.JSONResult;
-import com.kuaidao.common.entity.PageBean;
+import com.kuaidao.common.entity.*;
 import com.kuaidao.common.util.CommonUtil;
 import com.kuaidao.manageweb.config.LogRecord;
 import com.kuaidao.manageweb.config.LogRecord.OperationType;
@@ -36,6 +29,7 @@ import com.kuaidao.manageweb.feign.paydetail.PayDetailFeignClient;
 import com.kuaidao.manageweb.feign.project.CompanyInfoFeignClient;
 import com.kuaidao.manageweb.feign.project.ProjectInfoFeignClient;
 import com.kuaidao.manageweb.feign.sign.BusinessSignFeignClient;
+import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
 import com.kuaidao.manageweb.feign.visitrecord.BusVisitRecordFeignClient;
 import com.kuaidao.manageweb.util.CommUtil;
 import com.kuaidao.sys.dto.area.SysRegionDTO;
@@ -44,11 +38,8 @@ import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
 import com.kuaidao.sys.dto.organization.OrganizationRespDTO;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import org.apache.commons.lang3.StringUtils;
@@ -74,26 +65,27 @@ import org.springframework.web.bind.annotation.ResponseBody;
 public class BusinessSignController {
 
   private static Logger logger = LoggerFactory.getLogger(BusinessSignController.class);
-  @Autowired
-  InviteareaFeignClient inviteareaFeignClient;
-  @Autowired
-  BusinessSignFeignClient businessSignFeignClient;
-  @Autowired
-  SysRegionFeignClient sysRegionFeignClient;
-  @Autowired
-  private OrganizationFeignClient organizationFeignClient;
-  @Autowired
-  private ProjectInfoFeignClient projectInfoFeignClient;
-  @Autowired
-  private ClueBasicFeignClient clueBasicFeignClient;
-  @Autowired
-  private ClueCustomerFeignClient clueCustomerFeignClient;
-  @Autowired
-  private RefundFeignClient refundFeignClient;
+    @Autowired
+    InviteareaFeignClient inviteareaFeignClient;
+    @Autowired
+    BusinessSignFeignClient businessSignFeignClient;
+    @Autowired
+    SysRegionFeignClient sysRegionFeignClient;
+    @Autowired
+    private OrganizationFeignClient organizationFeignClient;
+    @Autowired
+    private ProjectInfoFeignClient projectInfoFeignClient;
+    @Autowired
+    private ClueBasicFeignClient clueBasicFeignClient;
+    @Autowired
+    private ClueCustomerFeignClient clueCustomerFeignClient;
+    @Autowired
+    private RefundFeignClient refundFeignClient;
 
-  @Autowired
-  CompanyInfoFeignClient companyInfoFeignClient;
-
+    @Autowired
+    private CompanyInfoFeignClient companyInfoFeignClient;
+    @Autowired
+    private UserInfoFeignClient userInfoFeignClient;
 
 
   @Autowired
@@ -230,30 +222,37 @@ public class BusinessSignController {
     return businessSignFeignClient.updateSign(dto);
   }
 
-  /**
-   * 查询明细
-   */
-  @RequestMapping("/one")
-  @ResponseBody
-  public JSONResult<BusSignRespDTO> queryOne(@RequestBody SignParamDTO param) throws Exception {
+    /**
+     * 查询明细
+     */
+    @RequestMapping("/one")
+    @ResponseBody
+    public JSONResult<BusSignRespDTO> queryOne(@RequestBody SignParamDTO param) throws Exception {
 
-    IdEntityLong idEntityLong = new IdEntityLong();
-    idEntityLong.setId(param.getSignId());
-    JSONResult<BusSignRespDTO> res = businessSignFeignClient.queryOne(idEntityLong);
-    if (JSONResult.SUCCESS.equals(res.getCode())) {
-      BusSignRespDTO data = res.getData();
-      IdEntityLong idLong = new IdEntityLong();
-      idLong.setId(param.getClueId());
-      String linkPhone = linkPhone(idLong);
-      data.setPhone(linkPhone);
-      if(data.getGiveType() ==null) {
-    	  data.setGiveType(-1);
-      }
-      res.setData(data);
-      data.setPerformanceAmount(data.getAmountPerformance());
+        IdEntityLong idEntityLong = new IdEntityLong();
+        idEntityLong.setId(param.getSignId());
+        JSONResult<BusSignRespDTO> res = businessSignFeignClient.queryOne(idEntityLong);
+        if (JSONResult.SUCCESS.equals(res.getCode())) {
+            BusSignRespDTO data = res.getData();
+            // 转换驳回记录里用户信息
+            List<SignRejectRecordDto> rejectRecordList = data.getSignRejectRecordList();
+            if (rejectRecordList != null && !rejectRecordList.isEmpty()) {
+                handleRejectUserName(rejectRecordList);
+              logger.info("签约单驳回转换姓名之后的结果:{}",rejectRecordList);
+                data.setSignRejectRecordList(rejectRecordList);
+            }
+            IdEntityLong idLong = new IdEntityLong();
+            idLong.setId(param.getClueId());
+            String linkPhone = linkPhone(idLong);
+            data.setPhone(linkPhone);
+            if (data.getGiveType() == null) {
+                data.setGiveType(-1);
+            }
+            res.setData(data);
+            data.setPerformanceAmount(data.getAmountPerformance());
+        }
+        return res;
     }
-    return res;
-  }
 
   /**
    * 查询签约单 不分页
@@ -728,15 +727,31 @@ public class BusinessSignController {
         return user;
     }
 
+    /**
+     * 处理驳回人员姓名
+     * 
+     * @author: Fanjd
+     * @param rejectRecordList 驳回记录
+     * @return: void
+     * @Date: 2019/6/21 10:08
+     * @since: 1.0.0
+     **/
+    private void handleRejectUserName(List<SignRejectRecordDto> rejectRecordList) {
+        Set<Long> idSet = rejectRecordList.stream().map(SignRejectRecordDto::getCreateUser).collect(Collectors.toSet());
+        List<Long> idList = new ArrayList<>();
+        idList.addAll(idSet);
+        IdListLongReq idListReq = new IdListLongReq();
+        idListReq.setIdList(idList);
+        JSONResult<List<UserInfoDTO>> userResult = userInfoFeignClient.listById(idListReq);
+        if (JSONResult.SUCCESS.equals(userResult.getCode())) {
+            List<UserInfoDTO> userList = userResult.getData();
+          logger.info("根据用户id集合获取用户,id集合:{},查询结果集合:{}",idListReq,userList);
+            Map<Long, UserInfoDTO> userMap = userList.stream().collect(Collectors.toMap(UserInfoDTO::getId, a -> a, (k1, k2) -> k1));
+            for (SignRejectRecordDto dto : rejectRecordList) {
+                UserInfoDTO userInfoDTO = userMap.get(dto.getCreateUser());
+                dto.setCreateUserName(userInfoDTO.getName());
+            }
 
-//    /**
-//     * 获取当前登录账号
-//     *
-//     * @return
-//     */
-//    private UserInfoDTO getUser() {
-//        Object attribute = SecurityUtils.getSubject().getSession().getAttribute("user");
-//        UserInfoDTO user = (UserInfoDTO) attribute;
-//        return user;
-//    }
+        }
+    }
 }

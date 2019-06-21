@@ -71,7 +71,7 @@
                         </el-select>
                     </el-form-item>
                     <el-form-item label="品尝项目:">
-                        <el-select v-model="queryForm.tasteProjectId" clearable placeholder="品尝项目">
+                        <el-select v-model="queryForm.tasteProjectId" clearable placeholder="品尝项目" filterable>
                             <el-option v-for="item in tasteProArr" :key="item.id" :label="item.projectName"
                                        :value="item.id"></el-option>
                         </el-select>
@@ -1336,9 +1336,9 @@
                     <el-form-item label="驳回原因：" :label-width="formLabelWidth">
                         <span style="color: red; width:60%; word-wrap: break-word; word-break:break-all; ">{{updateFormSigning.rebutReason}}</span>
                     </el-form-item> -->
-                    <p class="marginB10"><span>驳回时间：</span><span v-if="item.rebutTime">{{item.createTime}}</span></p>
-                    <p class="marginB10"><span>驳回人员：</span><span v-if="item.rebutTime">{{item.createUser}}</span></p>
-                    <p style="overflow: hidden;color: red;"><span style="float: left;width: 70px;">驳回原因：</span><span style="float: left;width: 385px;" v-if="item.rebutReason">{{item.rebutReason}}</span></p>
+                    <p class="marginB10"><span>驳回时间：</span><span v-if="item.createTime">{{item.createTime}}</span></p>
+                    <p class="marginB10"><span>驳回人员：</span><span v-if="item.createUserName">{{item.createUserName}}</span></p>
+                    <p style="overflow: hidden;color: red;"><span style="float: left;width: 70px;">驳回原因：</span><span style="float: left;width: 385px;" v-if="item.rejectReason">{{item.rejectReason}}</span></p>
                 </div> 
                 <div class="paddB20">签约单信息</div>
                 <div>
@@ -1559,7 +1559,7 @@
                     <el-row>
                         <el-col :span="12">
                             <el-form-item label="优惠金额：" :label-width="formLabelWidth" prop="preferentialAmount">
-                                <el-input :disabled="notEditRebutSign" v-model="updateFormSigning.preferentialAmount"
+                                <el-input v-model="updateFormSigning.preferentialAmount"
                                           type="number" min="0" oninput="if(value.length>10)value=value.slice(0,10)"
                                           onkeypress="return(/[\d]/.test(String.fromCharCode(event.keyCode)))"
                                           autocomplete="off" maxLength="10" style="width: 80%;"></el-input>
@@ -1568,7 +1568,7 @@
                         </el-col>
                         <el-col :span="12">
                             <el-form-item label="路费（报首次）：" :label-width="formLabelWidth" prop="firstToll">
-                                <el-input :disabled="notEditRebutSign" @input="updateFormSigningAmountPerformance"
+                                <el-input  @input="updateFormSigningAmountPerformance"
                                           v-model="updateFormSigning.firstToll" type="number" min="0"
                                           oninput="if(value.length>10)value=value.slice(0,10)"
                                           onkeypress="return(/[\d]/.test(String.fromCharCode(event.keyCode)))"
@@ -1580,7 +1580,7 @@
                     <el-row>
                         <el-col :span="12">
                             <el-form-item label="赠送金额：" :label-width="formLabelWidth" prop="giveAmount">
-                                <el-input :disabled="notEditRebutSign" placeholder="填写售价，非成本价"
+                                <el-input  placeholder="填写售价，非成本价"
                                           v-model="updateFormSigning.giveAmount" type="number" min="0"
                                           oninput="if(value.length>10)value=value.slice(0,10)"
                                           onkeypress="return(/[\d]/.test(String.fromCharCode(event.keyCode)))"
@@ -2706,7 +2706,7 @@
                     } else {
                         mainDivVM.editRebutNoVisit.id = response.data.data.id;
                         mainDivVM.editRebutNoVisit.rejectTime = response.data.data.rebutTime;
-                        mainDivVM.editRebutNoVisit.rejectUser = response.data.data.createUserName;
+                        mainDivVM.editRebutNoVisit.rejectUser = response.data.data.auditPersonName;
                         mainDivVM.editRebutNoVisit.rejectReason = response.data.data.rebutReason;
                         mainDivVM.editRebutNoVisit.notVisitTime = response.data.data.createTime;
                         mainDivVM.notVisitFlag.notVisitReason = response.data.data.notVisitReason;
