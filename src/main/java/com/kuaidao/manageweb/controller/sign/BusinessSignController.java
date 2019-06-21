@@ -747,7 +747,7 @@ public class BusinessSignController {
             Map<Long, UserInfoDTO> userMap = userList.stream().collect(Collectors.toMap(UserInfoDTO::getId, a -> a, (k1, k2) -> k1));
             for (SignRejectRecordDto dto : rejectRecordList) {
                 UserInfoDTO userInfoDTO = userMap.get(dto.getCreateUser());
-                dto.setCreateUserName(userInfoDTO.getUsername());
+                dto.setCreateUserName(userInfoDTO.getRoleName());
             }
 
         }
