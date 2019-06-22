@@ -442,6 +442,11 @@
                             <el-button size="mini"  v-else-if="item.isVisit==1&&item.status==0" type="text" style="color: red" @click="editRebutVisitRecord(item)">到访被驳回</el-button>
                             <!--<el-button size="mini"  v-else-if="item.isVisit==1&&item.status==2" type="text" @click="toVisitRecordPage(item )">查看到访记录</el-button>-->
                         </div>
+                        <div v-if="scope.row.rejectVisitList.length>0" v-for="item in scope.row.rejectVisitList ">
+                            <el-button size="mini" type="text" @click.stop="rejectNotVisit(item)" style="color: green">
+                                <span style="color: red">未到访(被驳回)</span>
+                            </el-button>
+                        </div>
                         <div v-if="scope.row.visitList.length>1 && scope.row.isVisitAuditStatusOne==1">
                             <el-button size="mini" type="text" @click="showVisitRecord(scope.row)" style="color: green">
                                 审核中
@@ -1788,6 +1793,27 @@
             <div slot="footer" class="dialog-footer">
                 <el-button type="primary" @click="saveNotVisit" :disabled="notVisitButtonAble">确定</el-button>
                 <el-button @click="notVisitFlagDialogVisible = false">取消</el-button>
+            </div>
+        </template>
+    </el-dialog>
+    <!--编辑驳回未到访-->
+    <el-dialog title="编辑驳回未到访" :visible.sync="editRebutNoVisitDialog" width="540px" @close="closeEditRebutNoVisitDialog">
+        <template>
+            <el-form :model="editRebutNoVisit" ref="editRebutNoVisit">
+                <div class="borderbox padding20 marginB20">
+                    <p class="marginB10" v-if="showVisitId"><span>主键：{{editRebutNoVisit.id}}</span></p>
+                    <p class="marginB10"><span>驳回时间：{{editRebutNoVisit.rejectTime}}</span></p>
+                    <p class="marginB10"><span>驳回人员：{{editRebutNoVisit.rejectUser}}</span></p>
+                    <p style="overflow: hidden;color: red;"><span style="float: left;width: 70px;">驳回原因：</span><span style="float: left;    width: 385px;">{{editRebutNoVisit.rejectReason}}</span></p>
+                </div>
+                <p class="marginB10">标记未到访时间：{{editRebutNoVisit.notVisitTime}}</p>
+                <p class="marginB10">未到访原因：</p>
+                <el-form-item label="">
+                    <el-input type="textarea" v-model="notVisitFlag.notVisitReason" maxlength="100" :rows="3"></el-input>
+                </el-form-item>
+            </el-form>
+            <div slot="footer" class="dialog-footer">
+                <el-button type="primary" @click="updateRejectNotVisit('editRebutNoVisit')" :disabled="updateRejectNotVisitButtonAble">保存</el-button>
             </div>
         </template>
     </el-dialog>
