@@ -249,7 +249,8 @@ var mainDivVM = new Vue({
             makeUpTime:'',
             payTime: '',
             amountPerformance:'',
-            remarks: '' //备注
+            remarks: '', //备注
+            signRejectRecordList:[]//签约单驳回
         },
         pager:{
             total: 0,
@@ -1050,17 +1051,17 @@ var mainDivVM = new Vue({
                     }
                     return false;
                 } else {
-                   /* mainDivVM.editRebutNoVisit.id = response.data.data.id;
+                    mainDivVM.editRebutNoVisit.id = response.data.data.id;
                     mainDivVM.editRebutNoVisit.rejectTime = response.data.data.rebutTime;
                     mainDivVM.editRebutNoVisit.rejectUser = response.data.data.auditPersonName;
                     mainDivVM.editRebutNoVisit.rejectReason = response.data.data.rebutReason;
                     mainDivVM.editRebutNoVisit.notVisitTime = response.data.data.createTime;
-                    mainDivVM.notVisitFlag.notVisitReason = response.data.data.notVisitReason;*/
+                    mainDivVM.notVisitFlag.notVisitReason = response.data.data.notVisitReason;
                 }
 
             })
         },
-//编辑驳回未到访
+       //编辑驳回未到访
         updateRejectNotVisit(formName){
             var  notVisitReason = mainDivVM.notVisitFlag.notVisitReason;
             if(null != notVisitReason && notVisitReason != ""){
@@ -1080,6 +1081,7 @@ var mainDivVM = new Vue({
                                         type: 'success', message: '未到访原因更新成功!', duration: 1000, onClose: function () {
                                             mainDivVM.editRebutNoVisitDialog = false;
                                             mainDivVM.initList();
+                                            mainDivVM.updateRejectNotVisitButtonAble = false;
                                         }
                                     });
                                 } else {
