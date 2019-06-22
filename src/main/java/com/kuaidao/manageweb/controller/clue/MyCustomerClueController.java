@@ -1,5 +1,30 @@
 package com.kuaidao.manageweb.controller.clue;
 
+import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
+import javax.servlet.http.HttpServletRequest;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
+import org.apache.shiro.subject.Subject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import com.kuaidao.aggregation.constant.ClueCirculationConstant;
 import com.kuaidao.aggregation.dto.call.CallRecordReqDTO;
 import com.kuaidao.aggregation.dto.call.CallRecordRespDTO;
@@ -59,31 +84,6 @@ import com.kuaidao.sys.dto.user.SysSettingDTO;
 import com.kuaidao.sys.dto.user.SysSettingReq;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import com.kuaidao.sys.dto.user.UserOrgRoleReq;
-import java.text.SimpleDateFormat;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.List;
-import java.util.stream.Collectors;
-import javax.servlet.http.HttpServletRequest;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.shiro.SecurityUtils;
-import org.apache.shiro.authz.annotation.RequiresPermissions;
-import org.apache.shiro.subject.Subject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
 @RequestMapping("/tele/clueMyCustomerInfo")
@@ -167,7 +167,7 @@ public class MyCustomerClueController {
     @ResponseBody
     public JSONResult<PageBean<CustomerClueDTO>> findTeleClueInfo(HttpServletRequest request,
             @RequestBody CustomerClueQueryDTO dto) {
-        long time1 = new Date().getTime();
+        long time1 = System.currentTimeMillis();
         java.text.SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
         if (null != dto && null != dto.getDayTel()) {
             // 当日拨打电话
@@ -203,7 +203,7 @@ public class MyCustomerClueController {
 
         JSONResult<PageBean<CustomerClueDTO>> jsonResult =
                 myCustomerFeignClient.findTeleClueInfo(dto);
-        long time2 = new Date().getTime();
+        long time2 = System.currentTimeMillis();
         logger.info("我的客户列表查询时间：" + (time2 - time1));
         return jsonResult;
     }
@@ -253,6 +253,7 @@ public class MyCustomerClueController {
         }
         return myCustomerFeignClient.releaseClue(dto);
     }
+
     /**
      * 维护客户资源数据
      * 
@@ -262,7 +263,7 @@ public class MyCustomerClueController {
      */
     @RequestMapping("/customerEditInfo")
     public String customerEditInfo(HttpServletRequest request, @RequestParam String clueId) {
-        logger.info("customerEditInfo_clueId {{}}",clueId);
+        logger.info("customerEditInfo_clueId {{}}", clueId);
         UserInfoDTO user = getUser();
         List<Long> accountList = new ArrayList<Long>();
         if (null != user.getRoleList() && user.getRoleList().size() > 0) {
@@ -305,15 +306,18 @@ public class MyCustomerClueController {
                 && callRecord.getData() != null) {
 
             request.setAttribute("callRecord", callRecord.getData());
-            CallRecordRespDTO callRecordRespDTO = callRecord.getData().stream().filter(a-> StringUtils.isNotBlank(a.getStartTime())).max(Comparator.comparing(CallRecordRespDTO::getStartTime)).get();
-            if(callRecordRespDTO != null){
-                String date = convertTimeToString(Long.valueOf(callRecordRespDTO.getStartTime())* 1000L);
-                request.setAttribute("teleEndTime",date);
-            }else {
-                request.setAttribute("teleEndTime",new Date());
+            CallRecordRespDTO callRecordRespDTO = callRecord.getData().stream()
+                    .filter(a -> StringUtils.isNotBlank(a.getStartTime()))
+                    .max(Comparator.comparing(CallRecordRespDTO::getStartTime)).get();
+            if (callRecordRespDTO != null) {
+                String date =
+                        convertTimeToString(Long.valueOf(callRecordRespDTO.getStartTime()) * 1000L);
+                request.setAttribute("teleEndTime", date);
+            } else {
+                request.setAttribute("teleEndTime", new Date());
             }
-        }else {
-            request.setAttribute("teleEndTime",new Date());
+        } else {
+            request.setAttribute("teleEndTime", new Date());
         }
         ClueQueryDTO queryDTO = new ClueQueryDTO();
 
@@ -340,7 +344,8 @@ public class MyCustomerClueController {
                 request.setAttribute("customer", new ArrayList());
             }
             if (null != clueInfo.getData().getClueRelate()) {
-                request.setAttribute("teleSaleId", clueInfo.getData().getClueRelate().getTeleSaleId());
+                request.setAttribute("teleSaleId",
+                        clueInfo.getData().getClueRelate().getTeleSaleId());
             } else {
                 request.setAttribute("teleSaleId", 0);
             }
@@ -353,7 +358,7 @@ public class MyCustomerClueController {
 
         dto.setClueId(new Long(clueId));
         JSONResult<List<TrackingRespDTO>> trackingList = trackingFeignClient.queryList(dto);
-        if (trackingList != null && trackingList.SUCCESS.equals(trackingList.getCode())
+        if (trackingList != null && JSONResult.SUCCESS.equals(trackingList.getCode())
                 && trackingList.getData() != null) {
             request.setAttribute("trackingList", trackingList.getData());
         } else {
@@ -365,7 +370,7 @@ public class MyCustomerClueController {
         circDto.setClueId(new Long(clueId));
         JSONResult<List<CirculationRespDTO>> circulationList =
                 circulationFeignClient.queryList(circDto);
-        if (circulationList != null && circulationList.SUCCESS.equals(circulationList.getCode())
+        if (circulationList != null && JSONResult.SUCCESS.equals(circulationList.getCode())
                 && circulationList.getData() != null) {
             request.setAttribute("circulationList", circulationList.getData());
         } else {
@@ -382,19 +387,20 @@ public class MyCustomerClueController {
 
         fileDto.setClueId(new Long(clueId));
         JSONResult<List<ClueFileDTO>> clueFileList = myCustomerFeignClient.findClueFile(fileDto);
-        if (clueFileList != null && clueFileList.SUCCESS.equals(clueFileList.getCode())
+        if (clueFileList != null && JSONResult.SUCCESS.equals(clueFileList.getCode())
                 && clueFileList.getData() != null) {
             request.setAttribute("clueFileList", clueFileList.getData());
         }
         request.setAttribute("loginUserId", user.getId());
         RepeatClueRecordQueryDTO recordQueryDTO = new RepeatClueRecordQueryDTO();
         recordQueryDTO.setClueId(Long.valueOf(clueId));
-        JSONResult<List<RepeatClueRecordDTO>> repeatJson = repeatClueRecordFeignClient.queryList(recordQueryDTO);
-        if (repeatJson != null && repeatJson.SUCCESS.equals(repeatJson.getCode())
-            && repeatJson.getData() != null && repeatJson.getData().size() > 0) {
+        JSONResult<List<RepeatClueRecordDTO>> repeatJson =
+                repeatClueRecordFeignClient.queryList(recordQueryDTO);
+        if (repeatJson != null && JSONResult.SUCCESS.equals(repeatJson.getCode())
+                && repeatJson.getData() != null && repeatJson.getData().size() > 0) {
             request.setAttribute("repeatClueList", repeatJson.getData());
             request.setAttribute("repeatClueStatus", 1);
-        }else {
+        } else {
             request.setAttribute("repeatClueStatus", 0);
         }
         return "clue/addCustomerMaintenance";
@@ -487,7 +493,7 @@ public class MyCustomerClueController {
         TrackingReqDTO dto = new TrackingReqDTO();
         dto.setClueId(new Long(clueId));
         JSONResult<List<TrackingRespDTO>> trackingList = trackingFeignClient.queryList(dto);
-        if (trackingList != null && trackingList.SUCCESS.equals(trackingList.getCode())
+        if (trackingList != null && JSONResult.SUCCESS.equals(trackingList.getCode())
                 && trackingList.getData() != null) {
             request.setAttribute("trackingList", trackingList.getData());
         } else {
@@ -500,7 +506,7 @@ public class MyCustomerClueController {
         JSONResult<List<CirculationRespDTO>> circulationList =
                 circulationFeignClient.queryList(circDto);
         logger.error("流转记录返回值：" + circulationList);
-        if (circulationList != null && circulationList.SUCCESS.equals(circulationList.getCode())
+        if (circulationList != null && JSONResult.SUCCESS.equals(circulationList.getCode())
                 && circulationList.getData() != null) {
             request.setAttribute("circulationList", circulationList.getData());
         } else {
@@ -517,7 +523,7 @@ public class MyCustomerClueController {
         // 获取已上传的文件数据
         fileDto.setClueId(new Long(clueId));
         JSONResult<List<ClueFileDTO>> clueFileList = myCustomerFeignClient.findClueFile(fileDto);
-        if (clueFileList != null && clueFileList.SUCCESS.equals(clueFileList.getCode())
+        if (clueFileList != null && JSONResult.SUCCESS.equals(clueFileList.getCode())
                 && clueFileList.getData() != null) {
             request.setAttribute("clueFileList", clueFileList.getData());
         }
@@ -526,17 +532,18 @@ public class MyCustomerClueController {
 
         RepeatClueRecordQueryDTO recordQueryDTO = new RepeatClueRecordQueryDTO();
         recordQueryDTO.setClueId(Long.valueOf(clueId));
-        JSONResult<List<RepeatClueRecordDTO>> repeatJson = repeatClueRecordFeignClient.queryList(recordQueryDTO);
-        if (repeatJson != null && repeatJson.SUCCESS.equals(repeatJson.getCode())
-            && repeatJson.getData() != null && repeatJson.getData().size() > 0) {
+        JSONResult<List<RepeatClueRecordDTO>> repeatJson =
+                repeatClueRecordFeignClient.queryList(recordQueryDTO);
+        if (repeatJson != null && JSONResult.SUCCESS.equals(repeatJson.getCode())
+                && repeatJson.getData() != null && repeatJson.getData().size() > 0) {
             request.setAttribute("repeatClueList", repeatJson.getData());
             request.setAttribute("repeatClueStatus", 1);
-        }else {
+        } else {
             request.setAttribute("repeatClueStatus", 0);
         }
-        if(StringUtils.isNotBlank(role)&& role.equals(RoleCodeEnum.DXZJ.name())){
+        if (StringUtils.isNotBlank(role) && role.equals(RoleCodeEnum.DXZJ.name())) {
             return "clue/editBasicCustomerMaintenance";
-        }else {
+        } else {
             return "clue/CustomerMaintenanceReadOnly";
         }
     }
@@ -747,7 +754,8 @@ public class MyCustomerClueController {
         request.setAttribute("clueId", clueId);
         request.setAttribute("cusName", cusName);
         request.setAttribute("cusPhone", cusPhone);
-        JSONResult<Integer> result = clueBasicFeignClient.getIsInviteLetterById(Long.valueOf(clueId));
+        JSONResult<Integer> result =
+                clueBasicFeignClient.getIsInviteLetterById(Long.valueOf(clueId));
         if (result.getCode().equals(JSONResult.SUCCESS)) {
             request.setAttribute("isInviteLetter", result.getData());
         }
@@ -869,7 +877,7 @@ public class MyCustomerClueController {
             dto.setOrgId(user.getOrgId());
             dto.setUserId(user.getId());
         }
-        if(user.getBusinessLine() != null){
+        if (user.getBusinessLine() != null) {
             dto.setBusinessLine(user.getBusinessLine());
         }
         if (null != dto.getRepeatUserId() && null != dto.getApplyUserId()) {
@@ -879,7 +887,7 @@ public class MyCustomerClueController {
             idList.add(dto.getApplyUserId());
             idListLongReq.setIdList(idList);
             JSONResult<List<UserInfoDTO>> userInfo = userInfoFeignClient.listById(idListLongReq);
-            if (userInfo != null && userInfo.SUCCESS.equals(userInfo.getCode())
+            if (userInfo != null && JSONResult.SUCCESS.equals(userInfo.getCode())
                     && userInfo.getData() != null) {
                 for (UserInfoDTO userInfoDTO : userInfo.getData()) {
                     if (userInfoDTO.getId().longValue() == dto.getRepeatUserId()) {
@@ -925,7 +933,7 @@ public class MyCustomerClueController {
         status.add(3);
         userRole.setRoleCode(RoleCodeEnum.DXCYGW.name());
         userRole.setStatusList(status);
-        if(user.getBusinessLine() != null ){
+        if (user.getBusinessLine() != null) {
             userRole.setBusinessLine(user.getBusinessLine());
         }
         return userInfoFeignClient.listByOrgAndRole(userRole);
@@ -951,7 +959,7 @@ public class MyCustomerClueController {
         if (null != user) {
             dto.setOrgId(user.getOrgId());
             dto.setUserId(user.getId());
-            if(user.getBusinessLine() != null){
+            if (user.getBusinessLine() != null) {
                 dto.setBusinessLine(user.getBusinessLine());
             }
         }
@@ -959,7 +967,7 @@ public class MyCustomerClueController {
             IdEntityLong id = new IdEntityLong();
             id.setId(dto.getRepeatUserId());
             JSONResult<UserInfoDTO> userInfo = userInfoFeignClient.get(id);
-            if (userInfo != null && userInfo.SUCCESS.equals(userInfo.getCode())
+            if (userInfo != null && JSONResult.SUCCESS.equals(userInfo.getCode())
                     && userInfo.getData() != null) {
                 dto.setRepeatOrgId(userInfo.getData().getOrgId());
             }
@@ -995,7 +1003,7 @@ public class MyCustomerClueController {
                     basic.setCreateUser(user.getId());
                     basic.setCreateTime(new Date());
                 }
-                if(user.getBusinessLine() != null){
+                if (user.getBusinessLine() != null) {
                     basic.setBusinessLine(user.getBusinessLine());
                 }
                 dto.setClueBasic(basic);
@@ -1115,6 +1123,7 @@ public class MyCustomerClueController {
         }
         return myCustomerFeignClient.updateCustomerBasicInfoClue(dto);
     }
+
     /**
      * 维护资源提交
      *
@@ -1125,9 +1134,9 @@ public class MyCustomerClueController {
     @RequestMapping("/updateCustomerClue")
     @ResponseBody
     @LogRecord(description = "维护客户资源提交", operationType = OperationType.UPDATE,
-        menuName = MenuEnum.CUSTOMER_INFO)
+            menuName = MenuEnum.CUSTOMER_INFO)
     public JSONResult<String> updateCustomerClue(HttpServletRequest request,
-        @RequestBody ClueDTO dto) {
+            @RequestBody ClueDTO dto) {
 
         Subject subject = SecurityUtils.getSubject();
         UserInfoDTO user = (UserInfoDTO) subject.getSession().getAttribute("user");
@@ -1137,6 +1146,7 @@ public class MyCustomerClueController {
         }
         return myCustomerFeignClient.updateCustomerClue(dto);
     }
+
     /**
      * 保留客户资源
      * 
@@ -1177,8 +1187,10 @@ public class MyCustomerClueController {
         }
         return null;
     }
-    public static String convertTimeToString(Long time){
+
+    public static String convertTimeToString(Long time) {
         DateTimeFormatter ftf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        return ftf.format(LocalDateTime.ofInstant(Instant.ofEpochMilli(time),ZoneId.systemDefault()));
+        return ftf.format(
+                LocalDateTime.ofInstant(Instant.ofEpochMilli(time), ZoneId.systemDefault()));
     }
 }
