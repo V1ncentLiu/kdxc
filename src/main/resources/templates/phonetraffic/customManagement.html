@@ -40,7 +40,7 @@
                     </el-select>
                 </el-form-item>
                 <el-form-item label="话务专员:">
-                    <el-select v-model="form.operatorId" placeholder="话务专员" clearable >
+                    <el-select v-model="form.operatorId" placeholder="话务专员" clearable  filterable>
                         <el-option
                                 v-for="item in userArr"
                                 :key="item.id"
@@ -50,7 +50,7 @@
                     </el-select>
                 </el-form-item>
                 <el-form-item label="资源项目:">
-                    <el-select v-model="form.projectId" placeholder="资源项目" clearable >
+                    <el-select v-model="form.projectId" placeholder="资源项目" clearable filterable>
                         <el-option
                                 v-for="item in proArr"
                                 :key="item.id"
@@ -75,7 +75,7 @@
                 </el-form-item>
                 <el-row v-show="isShow">
                     <el-form-item label="媒介:">
-                        <el-select v-model="form.source" placeholder="媒介" clearable >
+                        <el-select v-model="form.source" placeholder="媒介" clearable filterable>
                             <el-option
                                     v-for="item in mediumArr"
                                     :key="item.value"
@@ -115,7 +115,7 @@
             </el-form>
         </div>
         <el-row>
-            <el-table  ref="multipleTable" tooltip-effect="dark" border @selection-change="handleSelectionChange" style="width: 100%"  :data="dataTable" @row-dblclick="showClueDetailInfo">
+            <el-table  ref="multipleTable" tooltip-effect="dark" border @selection-change="handleSelectionChange" style="width: 100%"  :data="dataTable" @row-dblclick="customerEidt1">
                 <el-table-column align="center" type="selection" label="全选" width="50" prop="clueId"></el-table-column>
     	        <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width"
     	         v-for="(item,key,index) in tableColums" v-if="item.fieldCode == 'phone'">
@@ -123,7 +123,7 @@
                          {{scope.row.phone}}
                         <input type='hidden'>
                          <!-- <i  v-show="phoneButton" class="el-icon-phone-outline"  @click="customerEidt(scope.row.clueId)"  style="margin:0 10px;font-size: 16px;cursor: pointer;"></i> -->
-                         <img v-show="phoneButton"  th:src="@{/images/tel.png}" @click="customerEidt(scope.row.clueId)" style="margin:0 10px;width:22px;cursor: pointer;vertical-align: middle;" alt="">
+                         <img v-show="phoneButton"  th:src="@{/images/tel.png}" @click="gettelNumberIcon(scope.row.phone,scope.row.clueId)" style="margin:0 10px;width:22px;cursor: pointer;vertical-align: middle;" alt="">
                         <el-tag v-if="scope.row.tag">{{scope.row.tag}}</el-tag>
                     </template>
                 </el-table-column>
@@ -158,7 +158,7 @@
                 <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" width="250px"  v-else-if="item.fieldCode == 'createTime'"></el-table-column>
                 <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="(item.width)+'px'"  v-else></el-table-column>
             </el-table>
-             <table-pagination :pager="pager" @change="initTableData"></table-pagination> 
+             <table-pagination v-if="paginationShow" :pager="pager" @change="initTableData"></table-pagination> 
         </el-row>
     </div>
     <!-- 跟进记录 -->
@@ -287,7 +287,7 @@
                 <el-checkbox-group v-model="form.type">
                     	<span>
                     	</span>
-                    <el-checkbox :label="item.sortNum+'_'+item.fieldCode+'_'+item.displayName+'_'+item.id"   name="type" :key="item.fieldCode"  v-for="(item,index) in  allTableColums ">
+                    <el-checkbox :label="item.sortNum+'_'+item.fieldCode+'_'+item.displayName+'_'+item.id+'_'+item.width"   name="type" :key="item.fieldCode"  v-for="(item,index) in  allTableColums ">
                         {{item.displayName}}
                     </el-checkbox>
 
@@ -312,14 +312,15 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
 var editflag=[[${editflag}]];//可编辑标志
 
 var phoneButton = false;
-    // editflag = 1
-    if(editflag == 1){
+     editflag = 1
+     if(editflag == 1){
         phoneButton = true;
-    }
+     }
   var  customerManVM=new Vue({
         el: '#myCustom',
         data: function() {
             return {
+                paginationShow: false,
                 isShow:false,
                 btnDisabled: false, 
                 phoneButton:phoneButton,
@@ -399,11 +400,25 @@ var phoneButton = false;
                 },
                 allTableColums:[],
                 tableColums:[],
+                storeForm: {
+                    defineColumn:"phone",
+                    defineValue:"",
+                    createTime1:"",
+                    createTime2:"",
+                    source:"",
+                    cusStatus:"",
+                    projectId:"",
+                    operatorId:"",
+                    dealStatus:"0",
+                    type: [],
+                },
+                storeId: '',
+                scrollTop: 0,
             }        	  
         },
         methods: {
         	//初始化页面
-        	 initTableData(){
+        	initTableData(){
                 var param = {};
                 param=this.form
                 param.pageNum=this.pager.currentPage ;
@@ -423,11 +438,81 @@ var phoneButton = false;
                             customerManVM.pager.currentPage = pageData.currentPage;
                             customerManVM.pager.pageSize = pageData.pageSize;
                             customerManVM.dataTable =pageData.data;
+
+                        // 取出存储的id
+                         if(!customerManVM.paginationShow){
+                             if(customerManVM.storeId){
+                                 customerManVM.$nextTick(function(){
+                                    var storage = [];
+                                    customerManVM.dataTable.forEach(function(item, index){
+                                        if(item.clueId === customerManVM.storeId ){
+                                            storage.push(customerManVM.dataTable[index]);
                         }
+                                    })
+                                    customerManVM.toggleSelection(storage);
+                                    customerManVM.$el.querySelector('.el-table__body-wrapper').scrollTop = customerManVM.scrollTop;
+                                })
+                            }
+                         }else{
+                            customerManVM.removeSessionStore ("customManagementStoreForm");
+                            customerManVM.removeSessionStore ("customManagementOtherVal");
+                         }
+                        customerManVM.paginationShow = true;
+                        customerManVM.storeForm = customerManVM.form;
+
                     }
      			})
          	},
-            customerEidt(clueId,phone){
+            toggleSelection(rows) { // table select 默认选中fn
+                if (rows) {
+                    rows.forEach(row => {
+                        this.$refs.multipleTable.toggleRowSelection(row,true);
+                    });
+                } else {
+                    this.$refs.multipleTable.clearSelection();
+                }
+            },
+            gettelNumberIcon(tel,clueId) {
+                console.log(tel)
+                console.log(clueId)
+                //外呼手机
+                var param = {};
+                param.clueId = clueId;
+                //客户维护界面   
+                // 存储选中信息--start
+                this.setSessionStore("customManagementStoreForm", this.storeForm);
+                var otherVal = {
+                    "currentPage": this.pager.currentPage,
+                    "clueId": clueId,
+                    "scrollTop": this.$el.querySelector('.el-table__body-wrapper').scrollTop
+                }
+                this.setSessionStore("customManagementOtherVal", otherVal);
+                // 存储选中信息--end             
+                window.parent.parent.outboundCallPhone(tel, 2, clueId, function (res) {
+                    axios.post('/tele/clueMyCustomerInfo/updateCallTime', param).then(function (response) {
+                    });
+                });
+                //跳转页面
+                this.customerEidt(clueId);
+               
+            },
+            customerEidt(clueId){                
+                //客户维护界面
+                if(editflag==1){
+                    window.location.href='/phonetraffic/toEditPage?clueId='+clueId;
+                }
+            },
+            customerEidt1(row){  
+                var clueId=row.clueId;
+                // 存储选中信息--start
+                this.setSessionStore("customManagementStoreForm", this.storeForm);
+                var otherVal = {
+                    "currentPage": this.pager.currentPage,
+                    "clueId": clueId,
+                    "scrollTop": this.$el.querySelector('.el-table__body-wrapper').scrollTop
+                }
+                this.setSessionStore("customManagementOtherVal", otherVal);
+                // 存储选中信息--end               
                 //客户维护界面
                 if(editflag==1){
                     window.location.href='/phonetraffic/toEditPage?clueId='+clueId;
@@ -666,7 +751,17 @@ var phoneButton = false;
             },
           	//展现详情
          	showClueDetailInfo (row) {
-         	    window.location.href='/phonetraffic/toReadyOnlyPage?clueId='+row.clueId;
+                var clueId=row.clueId;
+                // 存储选中信息--start
+                this.setSessionStore("customManagementStoreForm", this.storeForm);
+                var otherVal = {
+                    "currentPage": this.pager.currentPage,
+                    "clueId": clueId,
+                    "scrollTop": this.$el.querySelector('.el-table__body-wrapper').scrollTop
+                }
+                this.setSessionStore("customManagementOtherVal", otherVal);
+                // 存储选中信息--end
+         	    window.location.href='/phonetraffic/toReadyOnlyPage?clueId='+clueId;
             },
             //编辑客户详情
             editClueDetailInfo (clueId) {
@@ -721,6 +816,7 @@ var phoneButton = false;
                     var obj = {};
                     obj.fieldCode=itemArr[1];
                     obj.displayName=itemArr[2];
+                    obj.width=itemArr[4];
                     customerShowColun.push(obj);
                     idList.push(itemArr[3])
                 }
@@ -737,43 +833,80 @@ var phoneButton = false;
                     });
                 }
             },
-                initColumn(){
-                    //初始化table 列 和 用户自定义列
-                    this.allTableColums = fieldList;
-                    if(userFieldList.length!=0){
-                        var type=[];
-                        for(var i=0;i<userFieldList.length;i++){
-                            type.push(userFieldList[i].sortNum+'_'+userFieldList[i].fieldCode+'_'+userFieldList[i].displayName+'_'+userFieldList[i].fieldId)
-                        }
-                        this.form.type = type;
-                        this.confirmColumn();
-                    }else{
-                        var type=[];
-                        for(var i=0;i<fieldList.length;i++){
-                            type.push(fieldList[i].sortNum+'_'+fieldList[i].fieldCode+'_'+fieldList[i].displayName+'_'+fieldList[i].id)
-                        }
-                        this.form.type = type;
-                        this.confirmColumn();
+            initColumn(){
+                //初始化table 列 和 用户自定义列
+                this.allTableColums = fieldList;
+                if(userFieldList.length!=0){
+                    var type=[];
+                    for(var i=0;i<userFieldList.length;i++){
+                        type.push(userFieldList[i].sortNum+'_'+userFieldList[i].fieldCode+'_'+userFieldList[i].displayName+'_'+userFieldList[i].fieldId+'_'+userFieldList[i].width)
                     }
+                    this.form.type = type;
+                    this.confirmColumn();
+                }else{
+                    var type=[];
+                    for(var i=0;i<fieldList.length;i++){
+                        type.push(fieldList[i].sortNum+'_'+fieldList[i].fieldCode+'_'+fieldList[i].displayName+'_'+fieldList[i].id+'_'+fieldList[i].width)
+                    }
+                    this.form.type = type;
+                    this.confirmColumn();
+                }
 
-                },
+            },
 
-                sortNumber(a,b) {
-                    //对数组中元素，按照数字 从小到大 排序
-                    return a.split("_")[0] - b.split("_")[0];
-               }
+            sortNumber(a,b) {
+                //对数组中元素，按照数字 从小到大 排序
+                return a.split("_")[0] - b.split("_")[0];
+            },
+            setSessionStore (name, content) {
+                if (!name) return
+                if (typeof content !== 'string') {
+                content = JSON.stringify(content)
+                }
+                window.sessionStorage.setItem(name, content)
+            },
+            getSessionStore (name) {
+                if (!name) return;
+                var content = window.sessionStorage.getItem(name);
+                if (typeof content == 'string') {
+                    content = JSON.parse(content)
+                }
+                return content;
+            },
+            removeSessionStore (name) {
+                if (!name) return
+                return window.sessionStorage.removeItem(name)
+            },
         },
         mounted(){
             document.getElementById('myCustom').style.display = 'block';
         },
         created(){
+            // window.sessionStorage.clear(); // 点击侧边栏-清除所有cookie
+            // 进入页面判断有是否有存储值
+            if(!this.paginationShow){
+                var storeVal = this.getSessionStore("customManagementStoreForm");
+                var otherVal = this.getSessionStore("customManagementOtherVal");
+                if(storeVal && otherVal){
+                    this.form = storeVal;
+                    this.$set(this.pager,"currentPage",otherVal.currentPage);
+                    this.storeId = otherVal.clueId;
+                    this.scrollTop = otherVal.scrollTop;
+                }
+            }
     		//初始化数据列表
-    		 this.initTableData();
+    		this.initTableData();
     		//客户状态
-           var param={};
+            var param={};
             param.groupCode="PhCustomerStatus";
-            axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {  
-            	customerManVM.cusStatusArr=response.data.data;
+            axios.post('/dictionary/DictionaryItem/dicItemsByGroupCode',param).then(function (response) {
+                var arr =  response.data.data;
+
+                for(var i =0 ; i < arr.length ;i++){
+                    if(arr[i].name != '不跟进'){
+                        customerManVM.cusStatusArr.push(arr[i])
+                    }
+                }
              });
 
             //客户媒介

@@ -49,6 +49,7 @@ import com.kuaidao.manageweb.feign.financing.ReconciliationConfirmFeignClient;
 import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
 import com.kuaidao.manageweb.feign.project.ProjectInfoFeignClient;
 import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
+import com.kuaidao.manageweb.util.CommUtil;
 import com.kuaidao.sys.dto.area.SysRegionDTO;
 import com.kuaidao.sys.dto.customfield.CustomFieldQueryDTO;
 import com.kuaidao.sys.dto.customfield.QueryFieldByRoleAndMenuReq;
@@ -191,11 +192,12 @@ public class BalanceAccountController {
      */
     @PostMapping("/rejectApply")
     @ResponseBody
-    // @RequiresPermissions("financing:balanceaccountManager:rejectApply")
     @LogRecord(description = "驳回", operationType = OperationType.UPDATE,
             menuName = MenuEnum.REFUNDREBATEAPPLY_MANAGER)
     public JSONResult<Void> rejectApply(@RequestBody ReconciliationConfirmReq req,
             HttpServletRequest request) {
+        UserInfoDTO user = CommUtil.getCurLoginUser();
+        req.setCommitUser(user.getId());
         req.setStatus(AggregationConstant.RECONCILIATION_STATUS.STATUS_1);
         JSONResult<Void> reconciliationConfirm = reconciliationConfirmFeignClient.rejectApply(req);
         return reconciliationConfirm;
@@ -221,9 +223,26 @@ public class BalanceAccountController {
         req.setCommissionMoney(
                 bigDecimal.multiply(new BigDecimal(req.getRatio())).divide(new BigDecimal(100)));
         req.setStatus(AggregationConstant.RECONCILIATION_STATUS.STATUS_2);
-        JSONResult<Void> reconciliationConfirm =
-                reconciliationConfirmFeignClient.applyConfirm(req);
+        JSONResult<Void> reconciliationConfirm = reconciliationConfirmFeignClient.applyConfirm(req);
         return reconciliationConfirm;
+    }
+
+    /**
+     * 根据对账申请表id获取已对账的佣金之和
+     * 
+     * @author: Fanjd
+     * @param accountId 对账申请表主键
+     * @return: com.kuaidao.common.entity.JSONResult<java.lang.Void>
+     * @Date: 2019/6/14 18:25
+     * @since: 1.0.0
+     **/
+    @ResponseBody
+    @PostMapping("/getConfirmCommission")
+    public JSONResult<BigDecimal> getConfirmCommission(
+            @RequestBody ReconciliationConfirmReq reconciliationConfirmReq) {
+        JSONResult<BigDecimal> sumConfirmCommission = reconciliationConfirmFeignClient
+                .getConfirmCommission(reconciliationConfirmReq.getSignId());
+        return sumConfirmCommission;
     }
 
     /**
@@ -308,7 +327,7 @@ public class BalanceAccountController {
             List<DictionaryItemRespDTO> giveTypeDTOs = getDictionaryByCode(Constants.GIVE_TYPE);
 
             List<DictionaryItemRespDTO> payModeItem =
-                getDictionaryByCode(DicCodeEnum.PAYMODE.getCode());
+                    getDictionaryByCode(DicCodeEnum.PAYMODE.getCode());
 
 
             PayDetailAccountDTO accountDTO = jsonResult.getData();
@@ -337,7 +356,7 @@ public class BalanceAccountController {
             if (giveTypeDTOs != null && giveTypeDTOs.size() > 0) {
                 for (DictionaryItemRespDTO dictionaryItemRespDTO : giveTypeDTOs) {
                     if (accountDTO.getGiveType() != null && dictionaryItemRespDTO.getValue()
-                        .equals(accountDTO.getGiveType().toString())) {
+                            .equals(accountDTO.getGiveType().toString())) {
                         dataMap.put("giveTypeName", dictionaryItemRespDTO.getName());
                     }
                 }
@@ -346,28 +365,28 @@ public class BalanceAccountController {
             String payMode1 = accountDTO.getPayMode();
             String[] split = payMode1.split(",");
             String payMode = "";
-            for(int i = 0 ; i < split.length ; i++){
-                for(DictionaryItemRespDTO item : payModeItem){
-                    if(item.getValue().equals(split[i])){
-                        if(i==0){
+            for (int i = 0; i < split.length; i++) {
+                for (DictionaryItemRespDTO item : payModeItem) {
+                    if (item.getValue().equals(split[i])) {
+                        if (i == 0) {
                             payMode = item.getName();
-                        }else{
-                            payMode = payMode +","+ item.getName();
+                        } else {
+                            payMode = payMode + "," + item.getName();
                         }
                     }
                 }
             }
-//            if (accountDTO.getPayMode() == 1) {
-//                payMode = "现金";
-//            } else if (accountDTO.getPayMode() == 2) {
-//                payMode = "POS";
-//            } else if (accountDTO.getPayMode() == 3) {
-//                payMode = "转账";
-//            } else if (accountDTO.getPayMode() == 4) {
-//                payMode = "微信";
-//            } else if (accountDTO.getPayMode() == 5) {
-//                payMode = "支付宝";
-//            }
+            // if (accountDTO.getPayMode() == 1) {
+            // payMode = "现金";
+            // } else if (accountDTO.getPayMode() == 2) {
+            // payMode = "POS";
+            // } else if (accountDTO.getPayMode() == 3) {
+            // payMode = "转账";
+            // } else if (accountDTO.getPayMode() == 4) {
+            // payMode = "微信";
+            // } else if (accountDTO.getPayMode() == 5) {
+            // payMode = "支付宝";
+            // }
 
 
             String payType = "";
@@ -450,10 +469,12 @@ public class BalanceAccountController {
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            if (bis != null)
+            if (bis != null) {
                 bis.close();
-            if (bos != null)
+            }
+            if (bos != null) {
                 bos.close();
+            }
             File directory = new File("");
             boolean success = (new File(directory.getCanonicalPath() + "/"
                     + dataMap.get("statementNo").toString() + ".doc")).delete();
@@ -503,7 +524,7 @@ public class BalanceAccountController {
             List<DictionaryItemRespDTO> dictionaryItemRespDTOs =
                     getDictionaryByCode(DicCodeEnum.VISITSTORETYPE.getCode());
             List<DictionaryItemRespDTO> payModeItem =
-                getDictionaryByCode(DicCodeEnum.PAYMODE.getCode());
+                    getDictionaryByCode(DicCodeEnum.PAYMODE.getCode());
 
             accountDTO = jsonResult.getData();
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -531,29 +552,29 @@ public class BalanceAccountController {
             String payMode1 = accountDTO.getPayMode();
             String[] split = payMode1.split(",");
             String payMode = "";
-            for(int i = 0 ; i < split.length ; i++){
-                for(DictionaryItemRespDTO item : payModeItem){
-                    if(item.getValue().equals(split[i])){
-                        if(i==0){
+            for (int i = 0; i < split.length; i++) {
+                for (DictionaryItemRespDTO item : payModeItem) {
+                    if (item.getValue().equals(split[i])) {
+                        if (i == 0) {
                             payMode = item.getName();
-                        }else{
-                            payMode = payMode +","+ item.getName();
+                        } else {
+                            payMode = payMode + "," + item.getName();
                         }
                     }
                 }
             }
-//            String payMode = "";
-//            if (accountDTO.getPayMode() == 1) {
-//                payMode = "现金";
-//            } else if (accountDTO.getPayMode() == 2) {
-//                payMode = "POS";
-//            } else if (accountDTO.getPayMode() == 3) {
-//                payMode = "转账";
-//            } else if (accountDTO.getPayMode() == 4) {
-//                payMode = "微信";
-//            } else if (accountDTO.getPayMode() == 5) {
-//                payMode = "支付宝";
-//            }
+            // String payMode = "";
+            // if (accountDTO.getPayMode() == 1) {
+            // payMode = "现金";
+            // } else if (accountDTO.getPayMode() == 2) {
+            // payMode = "POS";
+            // } else if (accountDTO.getPayMode() == 3) {
+            // payMode = "转账";
+            // } else if (accountDTO.getPayMode() == 4) {
+            // payMode = "微信";
+            // } else if (accountDTO.getPayMode() == 5) {
+            // payMode = "支付宝";
+            // }
             accountDTO.setPayModes(payMode);
             String payType = "";
             if (accountDTO.getPayType() == 1) {
@@ -572,10 +593,10 @@ public class BalanceAccountController {
             accountDTO.setDay(createTime.substring(8, 10));
             accountDTO.setMonth(createTime.substring(5, 7));
             accountDTO.setYear(createTime.substring(0, 4));
-            /*if (accountDTO.getPayType() != 1 && accountDTO.getPayType() != 2) {
-                accountDTO.setFirstToll(null);
-            	accountDTO.setPreferentialAmount(null);
-            }*/
+            /*
+             * if (accountDTO.getPayType() != 1 && accountDTO.getPayType() != 2) {
+             * accountDTO.setFirstToll(null); accountDTO.setPreferentialAmount(null); }
+             */
         }
         request.setAttribute("accountDTO", accountDTO);
         return "financing/settleAccountsPage";

@@ -3,7 +3,6 @@ package com.kuaidao.manageweb.controller.buscustomer;
 import java.util.ArrayList;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
-
 import org.apache.shiro.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -22,7 +21,6 @@ import com.kuaidao.aggregation.dto.project.ProjectInfoDTO;
 import com.kuaidao.aggregation.dto.tracking.TrackingReqDTO;
 import com.kuaidao.aggregation.dto.tracking.TrackingRespDTO;
 import com.kuaidao.common.entity.JSONResult;
-import com.kuaidao.common.entity.PageBean;
 import com.kuaidao.manageweb.feign.call.CallRecordFeign;
 import com.kuaidao.manageweb.feign.circulation.CirculationFeignClient;
 import com.kuaidao.manageweb.feign.clue.AppiontmentFeignClient;
@@ -79,7 +77,7 @@ public class BusinessCustomerController {
         JSONResult<List<CallRecordRespDTO>> callRecord =
                 callRecordFeign.listTmCallReacordByParamsNoPage(call);
         // 资源通话记录
-        if (callRecord != null && callRecord.SUCCESS.equals(callRecord.getCode())
+        if (callRecord != null && JSONResult.SUCCESS.equals(callRecord.getCode())
                 && callRecord.getData() != null) {
 
             request.setAttribute("callRecord", callRecord.getData());
@@ -95,7 +93,7 @@ public class BusinessCustomerController {
         JSONResult<ClueDTO> clueInfo = myCustomerFeignClient.findClueInfo(queryDTO);
 
         // 维护的资源数据
-        if (clueInfo != null && clueInfo.SUCCESS.equals(clueInfo.getCode())
+        if (clueInfo != null && JSONResult.SUCCESS.equals(clueInfo.getCode())
                 && clueInfo.getData() != null) {
 
             if (null != clueInfo.getData().getClueCustomer()) {
@@ -112,7 +110,7 @@ public class BusinessCustomerController {
         TrackingReqDTO dto = new TrackingReqDTO();
         dto.setClueId(new Long(clueId));
         JSONResult<List<TrackingRespDTO>> trackingList = trackingFeignClient.queryList(dto);
-        if (trackingList != null && trackingList.SUCCESS.equals(trackingList.getCode())
+        if (trackingList != null && JSONResult.SUCCESS.equals(trackingList.getCode())
                 && trackingList.getData() != null) {
             request.setAttribute("trackingList", trackingList.getData());
         }
@@ -122,7 +120,7 @@ public class BusinessCustomerController {
         circDto.setClueId(new Long(clueId));
         JSONResult<List<CirculationRespDTO>> circulationList =
                 circulationFeignClient.queryList(circDto);
-        if (circulationList != null && circulationList.SUCCESS.equals(circulationList.getCode())
+        if (circulationList != null && JSONResult.SUCCESS.equals(circulationList.getCode())
                 && circulationList.getData() != null) {
             request.setAttribute("circulationList", circulationList.getData());
         }
@@ -136,12 +134,12 @@ public class BusinessCustomerController {
         ClueQueryDTO fileDto = new ClueQueryDTO();
         fileDto.setClueId(new Long(clueId));
         JSONResult<List<ClueFileDTO>> clueFileList = myCustomerFeignClient.findClueFile(fileDto);
-        if (clueFileList != null && clueFileList.SUCCESS.equals(clueFileList.getCode())
+        if (clueFileList != null && JSONResult.SUCCESS.equals(clueFileList.getCode())
                 && clueFileList.getData() != null) {
             request.setAttribute("clueFileList", clueFileList.getData());
         }
 
-        //点击查看
+        // 点击查看
         ClueAppiontmentReq req = new ClueAppiontmentReq();
         req.setClueId(new Long(clueId));
         appiontmentFeignClient.updateView(req);
@@ -161,7 +159,7 @@ public class BusinessCustomerController {
         JSONResult<List<CallRecordRespDTO>> callRecord =
                 callRecordFeign.listTmCallReacordByParamsNoPage(call);
         // 资源通话记录
-        if (callRecord != null && callRecord.SUCCESS.equals(callRecord.getCode())
+        if (callRecord != null && JSONResult.SUCCESS.equals(callRecord.getCode())
                 && callRecord.getData() != null) {
             request.setAttribute("callRecord", callRecord.getData());
         } else {
@@ -176,7 +174,7 @@ public class BusinessCustomerController {
         JSONResult<ClueDTO> clueInfo = myCustomerFeignClient.findClueInfo(queryDTO);
 
         // 维护的资源数据
-        if (clueInfo != null && clueInfo.SUCCESS.equals(clueInfo.getCode())
+        if (clueInfo != null && JSONResult.SUCCESS.equals(clueInfo.getCode())
                 && clueInfo.getData() != null) {
 
             if (null != clueInfo.getData().getClueCustomer()) {
@@ -199,7 +197,7 @@ public class BusinessCustomerController {
         TrackingReqDTO dto = new TrackingReqDTO();
         dto.setClueId(new Long(clueId));
         JSONResult<List<TrackingRespDTO>> trackingList = trackingFeignClient.queryList(dto);
-        if (trackingList != null && trackingList.SUCCESS.equals(trackingList.getCode())
+        if (trackingList != null && JSONResult.SUCCESS.equals(trackingList.getCode())
                 && trackingList.getData() != null) {
 
             request.setAttribute("trackingList", trackingList.getData());
@@ -212,7 +210,7 @@ public class BusinessCustomerController {
         circDto.setClueId(new Long(clueId));
         JSONResult<List<CirculationRespDTO>> circulationList =
                 circulationFeignClient.queryList(circDto);
-        if (circulationList != null && circulationList.SUCCESS.equals(circulationList.getCode())
+        if (circulationList != null && JSONResult.SUCCESS.equals(circulationList.getCode())
                 && circulationList.getData() != null) {
             request.setAttribute("circulationList", circulationList.getData());
         } else {
@@ -229,7 +227,7 @@ public class BusinessCustomerController {
         ClueQueryDTO fileDto = new ClueQueryDTO();
         fileDto.setClueId(new Long(clueId));
         JSONResult<List<ClueFileDTO>> clueFileList = myCustomerFeignClient.findClueFile(fileDto);
-        if (clueFileList != null && clueFileList.SUCCESS.equals(clueFileList.getCode())
+        if (clueFileList != null && JSONResult.SUCCESS.equals(clueFileList.getCode())
                 && clueFileList.getData() != null) {
             request.setAttribute("clueFileList", clueFileList.getData());
         }
@@ -239,6 +237,7 @@ public class BusinessCustomerController {
         appiontmentFeignClient.updateView(req);
         UserInfoDTO user = getUser();
         request.setAttribute("loginUserId", user.getId());
+        request.setAttribute("ossUrl", ossUrl);
         return "bus_mycustomer/viewCustomerMainenance";
     }
 

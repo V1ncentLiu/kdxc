@@ -107,7 +107,7 @@ public interface UserInfoFeignClient {
     @PostMapping("/listByOrgAndRole")
     JSONResult<List<UserInfoDTO>> listByOrgAndRole(@RequestBody UserOrgRoleReq userOrgRoleReq);
 
-    @RequestMapping(method = RequestMethod.POST, value = "/sys/userInfo/listById")
+    @RequestMapping(method = RequestMethod.POST, value = "/listById")
     public JSONResult<List<UserInfoDTO>> listById(@RequestBody IdListLongReq idList);
 
     @Component

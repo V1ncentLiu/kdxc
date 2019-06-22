@@ -122,7 +122,14 @@
                  <el-table-column align="center" prop="repeatId" type="selection" width="55"></el-table-column> 
                  <!-- <el-table-column prop="date" label="全选" width="180"></el-table-column>  -->
                 <el-table-column align="center" type="index" prop="id" label="序号" width="55"></el-table-column>
-                <el-table-column align="center" prop="cusName" label="客户姓名"></el-table-column>
+                <el-table-column align="center" prop="cusName" label="客户姓名">
+                    <template slot-scope="scope">
+                        {{scope.row.cusName}}
+                        <span v-if="scope.row.inputType ==1">
+                            <input type='hidden'><img th:src="@{/images/self_build.png}"  style="margin:0 10px;width:22px;cursor: pointer;vertical-align: middle;" alt="">
+                        </span>
+                    </template>
+                </el-table-column>
                 <el-table-column align="center" prop="cusPhone" label="客户手机号"></el-table-column>
                 <el-table-column align="center" prop="isSign" label="是否签约" :formatter="transSignStatus"></el-table-column>
                 <el-table-column align="center" prop="signTime" label="签约时间" :formatter="dateFormat"></el-table-column>
@@ -231,7 +238,7 @@
             </el-row>
             <el-row>
                 <el-form-item label="申请重单手机号：" :label-width="formLabelWidth" prop="phone">
-                    <el-input v-model="repeatApplyForm.phone" placeholder="输入手机号后带出下面的资源列表" style="width: 60%;" @keyup.native="repeatApplyNumber" maxLength="11"></el-input>
+                    <el-input v-model="repeatApplyForm.phone" placeholder="输入手机号后带出下面的资源列表" style="width: 60%;" @keyup.native="repeatApplyNumber" maxLength="15"></el-input>
                     <el-button type="primary" @click="searchClue" :disabled="searchClueDisable">查询资源</el-button>
                 </el-form-item>
             </el-row>
@@ -261,7 +268,7 @@
             </el-row>
             <el-row>
                 <el-form-item label="重单手机号：" :label-width="formLabelWidth" prop="repeatPhone">
-                    <el-input v-model="repeatApplyForm.repeatPhone" placeholder="输入手机号后带出下面的资源列表" style="width: 60%;" @keyup.native="repeatApplyRepeatNumber" maxLength="11"></el-input>
+                    <el-input v-model="repeatApplyForm.repeatPhone" placeholder="输入手机号后带出下面的资源列表" style="width: 60%;" @keyup.native="repeatApplyRepeatNumber" maxLength="15"></el-input>
                     <el-button type="primary" @click="searchRepeatClue" :disabled="searchRepeatClueDisable">查询资源</el-button>
                 </el-form-item>
             </el-row>

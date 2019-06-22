@@ -22,6 +22,7 @@
     		<shiro:hasPermission name="financing:reconciliationConfirmManager:settlement">
 		        <el-button type="warning" @click="settlementConfirm">结算确认</el-button>
 		    </shiro:hasPermission>
+		    <el-button type="success" @click="down">下载结算单</el-button>
 	  </el-row>
     <div class="mainSearchBg">        
         <div class="mainSearchFormBox">
@@ -176,6 +177,18 @@
                         </div>
                     </template>
     	        </el-table-column>
+    	        <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width"
+    	         v-else-if="item.fieldCode == 'statementNo'">
+    	               <template slot-scope="scope">
+    	               <div v-if="scope.row.status !='驳回商务'  && scope.row.status !='未提交对账'">
+    	               	<a :href="'/financing/balanceaccount/settleAccounts?payDetailId='+scope.row.payId+''" target="_blank" class="blueColorBtn">{{scope.row.statementNo}} </a>
+    	               </div>
+    	           <div v-else-if="scope.row.status =='驳回商务' || scope.row.status =='未提交对账'">
+    	               	<a style="color:#222">{{scope.row.statementNo}} </a>
+    	               </div>
+    	               
+                    </template>
+    	        </el-table-column>
                 <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width"
     	         	v-else>
     	        </el-table-column>
@@ -199,7 +212,7 @@
 	  <el-form :model="form">	    
 		  <el-form-item label="" prop="type">
 		    <el-checkbox-group v-model="form.type">
-		      <el-checkbox :label="item.sortNum+'_'+item.fieldCode+'_'+item.displayName+'_'+item.id"  name="type" :key="item.fieldCode"  v-for="(item,index) in  allTableColums ">
+		      <el-checkbox :label="item.sortNum+'_'+item.fieldCode+'_'+item.displayName+'_'+item.id+'_'+item.width"  name="type" :key="item.fieldCode"  v-for="(item,index) in  allTableColums ">
 		          {{item.displayName}}
 		      </el-checkbox>		  
 		     </el-checkbox-group>
@@ -223,6 +236,7 @@ var fieldList=[[${fieldList}]];//自定义字段
 var userFieldList=[[${userFieldList}]];//用户自定义字段
 var vistitStoreTypeList=[[${vistitStoreTypeList}]];//签约店型
 var payModeItem =[[${payModeItem}]];
+var giveTypeList =[[${giveTypeList}]];
 var clueVM = new Vue({
         el: '#clueManage',
         data: {
@@ -463,6 +477,16 @@ var clueVM = new Vue({
 								 }
 								 return valText;
                },
+
+							transGiveType(row, column, value, index) {
+								var text="";
+								for(var i=0;i<giveTypeList.length;i++) {
+									if(giveTypeList[i].value ==value){
+										text = giveTypeList[i].name;
+									}
+								}
+								return text;
+							},
                //处理状态转换方法
                transformStatus(row, column, cellValue, index) {
                  var text="";
@@ -715,6 +739,7 @@ var clueVM = new Vue({
                  		var obj = {};
                  		obj.fieldCode=itemArr[1];
                  		obj.displayName=itemArr[2];
+                 		obj.width=itemArr[4];
                  		customerShowColun.push(obj);
                  		idList.push(itemArr[3])
                  	}
@@ -739,14 +764,14 @@ var clueVM = new Vue({
                  	if(userFieldList.length!=0){
                  		var type=[];
                      	for(var i=0;i<userFieldList.length;i++){
-                     		type.push(userFieldList[i].sortNum+'_'+userFieldList[i].fieldCode+'_'+userFieldList[i].displayName+'_'+userFieldList[i].fieldId)
+                     		type.push(userFieldList[i].sortNum+'_'+userFieldList[i].fieldCode+'_'+userFieldList[i].displayName+'_'+userFieldList[i].fieldId+'_'+userFieldList[i].width)
                     	}
    	              	this.form.type = type;
    	              	this.confirmColumn();
                  	}else{
                  		var type=[];
                      	for(var i=0;i<fieldList.length;i++){
-                     		type.push(fieldList[i].sortNum+'_'+fieldList[i].fieldCode+'_'+fieldList[i].displayName+'_'+fieldList[i].id)
+                     		type.push(fieldList[i].sortNum+'_'+fieldList[i].fieldCode+'_'+fieldList[i].displayName+'_'+fieldList[i].id+'_'+fieldList[i].width)
                     	}
    	              	this.form.type = type;
    	              	this.confirmColumn();
@@ -763,6 +788,31 @@ var clueVM = new Vue({
                     }else{
                         this.isShow=true
                     }          
+                },
+                down(){
+             	   var rows = this.multipleSelection;
+             	   if(rows.length ==0){
+                        this.$message({
+                           message: '请选择数据',
+                           type: 'warning'
+                         });
+                        return;
+                    } else if(rows.length>1){
+                        this.$message({
+                           message: '请选择一条数据进行下载结算单',
+                           type: 'warning'
+                         });
+                        return;
+                    } 
+             	   var status = rows[0].status;
+             	   if( status =="驳回商务" || status =="未提交对账" ){
+             		   this.$message({
+                            message: "未提交对账不允许下载结算单",
+                            type: 'warning'
+                          });
+                         return;
+             	   }
+             	   window.location.href="/financing/balanceaccount/downBalanceAccount?payDetailId="+rows[0].payId;
                 },
         },
         created(){

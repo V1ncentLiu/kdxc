@@ -201,7 +201,7 @@
             <el-form :model="form">
                 <el-form-item label="" prop="type">
                     <el-checkbox-group v-model="form.type">
-                        <el-checkbox :label="item.sortNum+'_'+item.fieldCode+'_'+item.displayName+'_'+item.id"  name="type" :key="item.fieldCode"  v-for="(item,index) in  allTableColums ">
+                        <el-checkbox :label="item.sortNum+'_'+item.fieldCode+'_'+item.displayName+'_'+item.id+'_'+item.width"  name="type" :key="item.fieldCode"  v-for="(item,index) in  allTableColums ">
                             {{item.displayName}}
                         </el-checkbox>
                     </el-checkbox-group>
@@ -368,6 +368,7 @@
     var mainDivVM = new Vue({
         el: '#mainDiv',
         data: {
+          oldPage:1,
             isShow:false,
         	loading:false,
             dialogChooseList: false,
@@ -584,6 +585,7 @@
                     var obj = {};
                     obj.fieldCode=itemArr[1];
                     obj.displayName=itemArr[2];
+                    obj.width=itemArr[4];
                     customerShowColun.push(obj);
                     idList.push(itemArr[3])
                 }
@@ -605,14 +607,14 @@
                 if(userFieldList.length!=0){
                     var type=[];
                     for(var i=0;i<userFieldList.length;i++){
-                        type.push(userFieldList[i].sortNum+'_'+userFieldList[i].fieldCode+'_'+userFieldList[i].displayName+'_'+userFieldList[i].fieldId)
+                        type.push(userFieldList[i].sortNum+'_'+userFieldList[i].fieldCode+'_'+userFieldList[i].displayName+'_'+userFieldList[i].fieldId+'_'+userFieldList[i].width)
                     }
                     this.form.type = type;
                     this.confirmColumn();
                 }else{
                     var type=[];
                     for(var i=0;i<fieldList.length;i++){
-                        type.push(fieldList[i].sortNum+'_'+fieldList[i].fieldCode+'_'+fieldList[i].displayName+'_'+fieldList[i].id)
+                        type.push(fieldList[i].sortNum+'_'+fieldList[i].fieldCode+'_'+fieldList[i].displayName+'_'+fieldList[i].id+'_'+fieldList[i].width)
                     }
                     this.form.type = type;
                     this.confirmColumn();
@@ -793,6 +795,18 @@
                 param.pageSize = this.pager.pageSize;
                 param.pageNum =  this.pager.currentPage;
                 console.log(param)
+                  if(param.pageNum > 5000){
+                    axios.post('','').then(function (response) {
+                      ocmVM.pager.currentPage = ocmVM.oldPage;
+                    })
+                    this.$message({
+                      message: '查询不能大于5000页，如有需要，请根据搜索条件进行查询。',
+                      type: 'warning'
+                    });
+                    return;
+                  }else {
+                    this.oldPage = param.pageNum;
+                  }
                 axios.post('/aggregation/publiccustomer/queryPage',param).then(function (response) {
                     if(null===response||response.data==null||response.data.code!='0'){
                         if(response.data.code!='0'){

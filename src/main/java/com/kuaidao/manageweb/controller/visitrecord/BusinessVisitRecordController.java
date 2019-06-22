@@ -1,6 +1,5 @@
 package com.kuaidao.manageweb.controller.visitrecord;
 
-import com.kuaidao.aggregation.dto.clue.ClueBasicDTO;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -14,11 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import com.kuaidao.aggregation.constant.AggregationConstant;
 import com.kuaidao.aggregation.dto.project.CompanyInfoDTO;
@@ -32,6 +27,7 @@ import com.kuaidao.manageweb.config.LogRecord.OperationType;
 import com.kuaidao.manageweb.constant.MenuEnum;
 import com.kuaidao.manageweb.feign.project.CompanyInfoFeignClient;
 import com.kuaidao.manageweb.feign.project.ProjectInfoFeignClient;
+import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
 import com.kuaidao.manageweb.feign.visit.VisitRecordFeignClient;
 import com.kuaidao.manageweb.feign.visitrecord.BusVisitRecordFeignClient;
 import com.kuaidao.manageweb.util.CommUtil;
@@ -59,7 +55,8 @@ public class BusinessVisitRecordController {
 
     @Autowired
     private CompanyInfoFeignClient companyInfoFeignClient;
-
+    @Autowired
+    private UserInfoFeignClient userInfoFeignClient;
 
     @RequestMapping("/listPage")
     public String listPage(HttpServletRequest request, @RequestParam String clueId) {
@@ -197,9 +194,24 @@ public class BusinessVisitRecordController {
      */
     @RequestMapping("/one")
     @ResponseBody
-    public JSONResult<BusVisitRecordRespDTO> queryOne(@RequestBody IdEntityLong idEntityLong)
-            throws Exception {
-        return visitRecordFeignClient.queryOne(idEntityLong);
+    public JSONResult<BusVisitRecordRespDTO> queryOne(@RequestBody IdEntityLong idEntityLong) throws Exception {
+        BusVisitRecordRespDTO  busVisitRecordRespDTO = new BusVisitRecordRespDTO();
+        //获取到访记录
+        JSONResult<BusVisitRecordRespDTO> jsonResult = visitRecordFeignClient.queryOne(idEntityLong);
+        if (JSONResult.SUCCESS.equals(jsonResult.getCode()) && jsonResult.getData() != null) {
+            busVisitRecordRespDTO =    jsonResult.getData();
+            if (null  !=busVisitRecordRespDTO.getAuditPerson()) {
+                IdEntityLong idEntityLongUser = new IdEntityLong();
+                idEntityLongUser.setId(busVisitRecordRespDTO.getAuditPerson());
+                JSONResult<UserInfoDTO> userInfoReslust = userInfoFeignClient.get(idEntityLongUser);
+                if (JSONResult.SUCCESS.equals(userInfoReslust.getCode()) && userInfoReslust.getData() != null) {
+                    //转换用户名
+                    busVisitRecordRespDTO.setAuditPersonName(userInfoReslust.getData().getName());
+                }
+            }
+
+        }
+        return new JSONResult<BusVisitRecordRespDTO>().success(busVisitRecordRespDTO);
     }
 
     /**

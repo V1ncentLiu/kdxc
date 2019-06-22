@@ -3,6 +3,7 @@ package com.kuaidao.manageweb.controller.clue;
 
 import com.kuaidao.common.constant.DicCodeEnum;
 import com.kuaidao.common.util.CommonUtil;
+import com.kuaidao.manageweb.constant.Constants;
 import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
 import com.kuaidao.manageweb.util.CommUtil;
 import com.kuaidao.sys.dto.dictionary.DictionaryItemRespDTO;
@@ -88,7 +89,12 @@ public class ClueRepetitionController {
      */
     @RequestMapping("/queryRepeatPage")
     public String queryRepeatPage(HttpServletRequest request) {
+			UserInfoDTO user = getUser();
+			List<RoleInfoDTO> roleList = user.getRoleList();
 			request.setAttribute("payModeItem", getDictionaryByCode(DicCodeEnum.PAYMODE.getCode()));
+			request.setAttribute("userId", user.getId().toString());
+			request.setAttribute("roleCode", roleList.get(0).getRoleCode());
+			request.setAttribute("orgId", user.getOrgId().toString());
 			return "clue/repetition/customerrePetitionList";
     }
 
@@ -310,6 +316,7 @@ public class ClueRepetitionController {
     	request.setAttribute("businessSignDetail", jsonResult.getData());
     	request.setAttribute("signId", signId);
 			request.setAttribute("payModeItem", getDictionaryByCode(DicCodeEnum.PAYMODE.getCode()));
+			request.setAttribute("giveTypeList", getDictionaryByCode(Constants.GIVE_TYPE));
 		return "clue/repetition/repeatPaymentDetails";
     }
 

@@ -27,6 +27,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
+import com.itextpdf.text.pdf.PdfStructTreeController.returnType;
 import com.kuaidao.aggregation.dto.client.AddOrUpdateQimoClientDTO;
 import com.kuaidao.aggregation.dto.client.AddOrUpdateTrClientDTO;
 import com.kuaidao.aggregation.dto.client.ClientLoginReCordDTO;
@@ -339,15 +340,18 @@ public class ClientController {
                  // 坐席号
                     rowDto.setClientNo(value);
                 } else if (j == 1) {
-                 // 点小组
-                    rowDto.setOrgName(value);
+                 //坐席归属地
+                    rowDto.setAttribution(value);
                 } else if (j == 2) {
-                 // 绑定电话
-                    rowDto.setBindPhone(value);
+                    // 电销组
+                    rowDto.setOrgName(value);
                 } else if (j == 3) {
+                    // 绑定电话
+                    rowDto.setBindPhone(value);
+                } else if (j == 4) {
                     // 回显号
                     rowDto.setDisplayPhone(value);
-                } else if (j == 4) {
+                } else if (j == 5) {
                     // 回呼号码
                     rowDto.setCallbackPhone(value);
                 }
@@ -551,15 +555,17 @@ public class ClientController {
                     rowDto.setLoginClient(value);
                 } else if (j == 2) {// 坐席编号
                     rowDto.setClientNo(value);
-                } else if (j == 3) {// 账号编号
+                } else if (j == 3) {// 坐席归属地
+                    rowDto.setAttribution(value);
+                } else if (j == 4) {// 账号编号
                     rowDto.setAccountNo(value);
-                } else if (j == 4) {// 秘钥
+                } else if (j == 5) {// 秘钥
                     rowDto.setSecretKey(value);
-                } else if (j == 5) {
-                    rowDto.setPhone1(value);
                 } else if (j == 6) {
-                    rowDto.setPhone2(value);
+                    rowDto.setPhone1(value);
                 } else if (j == 7) {
+                    rowDto.setPhone2(value);
+                } else if (j == 8) {
                     rowDto.setProxyurl(value);
                 }
             }
@@ -798,6 +804,26 @@ public class ClientController {
         }
         
         return new JSONResult<Boolean>().success(isBelongToSelf);
-}
+    }
+    
+    /**
+     * 天润坐席退出
+    * @param trAxbOutCallReqDTO
+    * @return
+     */
+    @PostMapping("/trClientLogout")
+    @ResponseBody
+    @LogRecord(description = "天润坐席退出", operationType = OperationType.LOGINOUT,
+    menuName = MenuEnum.TR_CLIENT_MANAGEMENT)
+    public JSONResult trClientLogout(@RequestBody TrAxbOutCallReqDTO trAxbOutCallReqDTO) {
+        String cno = trAxbOutCallReqDTO.getCno();
+        if(StringUtils.isBlank(cno)) {
+            return CommonUtil.getParamIllegalJSONResult();
+        }
+            
+        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+        trAxbOutCallReqDTO.setOrgId(curLoginUser.getOrgId());
+        return clientFeignClient.trClientLogout(trAxbOutCallReqDTO);
+    }
 
 }

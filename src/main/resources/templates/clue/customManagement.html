@@ -276,9 +276,18 @@
         </div>    
         <el-row>
             <el-table  ref="multipleTable" tooltip-effect="dark" border @selection-change="handleSelectionChange" style="width: 100%"  :data="dataTable" @row-dblclick="showClueDetailInfo1">
-                <el-table-column align="center" type="selection" label="全选" width="50"></el-table-column>
-    	        <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width"
-    	         v-for="(item,key,index) in tableColums" v-if="item.fieldCode == 'phone'">
+                <el-table-column align="center" type="selection" label="全选" width="55"></el-table-column>
+                <el-table-column align="center" type="index" label="序号" width="55"></el-table-column>
+                <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width" v-for="(item,key,index) in tableColums" v-if="item.fieldCode == 'cusName'">
+                    <template slot-scope="scope">
+                        {{scope.row.cusName}}
+                        <span v-if="scope.row.inputType ==1">
+                            <input type='hidden'><img th:src="@{/images/self_build.png}"  style="margin:0 10px;width:22px;cursor: pointer;vertical-align: middle;" alt="">
+                        </span>
+                    </template>
+                </el-table-column>
+
+    	        <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width" v-else-if="item.fieldCode == 'phone'">
     	             <template slot-scope="scope" >
                           <span class="blueColorBtn" @click="showClueDetailInfo(scope.row.clueId)">{{scope.row.phone}}</span>
                         <input type='hidden'>
@@ -286,7 +295,7 @@
                         <el-tag v-if="scope.row.tag">{{scope.row.tag}}</el-tag>
                     </template>
                 </el-table-column>
-                <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" width="220" v-else-if="item.fieldCode == 'customerStatusName'">
+                <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width" v-else-if="item.fieldCode == 'customerStatusName'">
                     <template slot-scope="scope">
                         {{scope.row.customerStatusName}}
                         <div v-if="scope.row.signList.length >=1"  v-for="it in scope.row.signList">
@@ -304,15 +313,10 @@
                         </div>
                     </template>
                 </el-table-column>
-                  <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width" 
-                  v-else-if="item.fieldCode == 'sex'">
+                  <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width" v-else-if="item.fieldCode == 'sex'">
                        <template slot-scope="scope">
-                          <div v-if="scope.row.sex === 1">
-                                                                                           男
-                          </div>
-                          <div v-else-if="scope.row.sex ===2">
-                          	女
-                          </div>
+                          <div v-if="scope.row.sex === 1">男</div>
+                          <div v-else-if="scope.row.sex ===2">女</div>
                        </template>
                 </el-table-column>
                 <el-table-column :prop="item.fieldCode" :key="item.fieldCode" :label="item.displayName" :width="item.width" align="center" v-else-if="item.fieldCode == 'repeatPhones'">
@@ -322,8 +326,7 @@
                       </div>
                     </template>
                 </el-table-column>
-                <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width" 
-                  v-else-if="item.fieldCode == 'assignTime'">
+                <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width" v-else-if="item.fieldCode == 'assignTime'">
                        <template slot-scope="scope">
                            <div v-if="scope.row.teleReceiveSource == 1 || scope.row.teleReceiveSource == 2 || scope.row.teleReceiveSource == 5"> 
                                 {{scope.row.teleReceiveTime}}
@@ -342,8 +345,7 @@
                         <div v-else-if="scope.row.status ==1">是</div>
                     </template>
                 </el-table-column>
-                <el-table-column align="center" sortable  :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" width="250px"
-                                 v-else-if="item.fieldCode == 'createTime'||item.fieldCode == 'storeArea'"></el-table-column>
+                <el-table-column align="center" sortable  :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width" v-else-if="item.fieldCode == 'createTime'||item.fieldCode == 'storeArea'"></el-table-column>
                 <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width"  v-else>
     	        </el-table-column>
     	        
@@ -569,7 +571,7 @@
                     <el-checkbox-group v-model="form1.type">
                     	<span>
                     	</span>
-                        <el-checkbox :label="item.sortNum+'_'+item.fieldCode+'_'+item.displayName+'_'+item.id"   name="type" :key="item.fieldCode"  v-for="(item,index) in  allTableColums ">
+                        <el-checkbox :label="item.sortNum+'_'+item.fieldCode+'_'+item.displayName+'_'+item.id+'_'+item.width"   name="type" :key="item.fieldCode"  v-for="(item,index) in  allTableColums ">
                             {{item.displayName}}
                         </el-checkbox>
 
@@ -1301,6 +1303,7 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                     var obj = {};
                     obj.fieldCode=itemArr[1];
                     obj.displayName=itemArr[2];
+                    obj.width=itemArr[4];
                     customerShowColun.push(obj);
                     idList.push(itemArr[3])
                 }
@@ -1322,14 +1325,14 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
               	if(userFieldList.length!=0){
               		var type=[];
                   	for(var i=0;i<userFieldList.length;i++){
-                  		type.push(userFieldList[i].sortNum+'_'+userFieldList[i].fieldCode+'_'+userFieldList[i].displayName+'_'+userFieldList[i].fieldId)
+                  		type.push(userFieldList[i].sortNum+'_'+userFieldList[i].fieldCode+'_'+userFieldList[i].displayName+'_'+userFieldList[i].fieldId+'_'+userFieldList[i].width)
                  	}
 	              	this.form1.type = type;
 	              	this.confirmColumn();
               	}else{
               		var type=[];
                   	for(var i=0;i<fieldList.length;i++){
-                  		type.push(fieldList[i].sortNum+'_'+fieldList[i].fieldCode+'_'+fieldList[i].displayName+'_'+fieldList[i].id)
+                  		type.push(fieldList[i].sortNum+'_'+fieldList[i].fieldCode+'_'+fieldList[i].displayName+'_'+fieldList[i].id+'_'+fieldList[i].width)
                  	}
 	              	this.form1.type = type;
 	              	this.confirmColumn();

@@ -93,7 +93,7 @@ var myCallRecordVm = new Vue({
     	getStartTimeText(row, column, value, index){
     		var valText="";
     		if(value){
-    			valText =  moment.unix(value).format("YYYY-MM-DD HH:MM:SS");
+    			valText =  moment.unix(Number(value)).format("YYYY-MM-DD HH:mm:ss");
     		}
     		return valText;
     	},

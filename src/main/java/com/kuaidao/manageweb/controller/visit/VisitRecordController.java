@@ -230,9 +230,10 @@ public class VisitRecordController {
         List<RoleInfoDTO> roleList = curLoginUser.getRoleList();
         RoleInfoDTO roleInfoDTO = roleList.get(0);
         String roleCode = roleInfoDTO.getRoleCode();
-        if (RoleCodeEnum.SWDQZJ.name().equals(roleCode)
-                || RoleCodeEnum.SWZJ.name().equals(roleCode)) {
-            Long busManagerId = visitRecordReqDTO.getBusManagerId();
+        Long busGroupId = visitRecordReqDTO.getBusGroupId();
+        List<Long> busGroupIdList = new ArrayList<>();
+        if (RoleCodeEnum.SWDQZJ.name().equals(roleCode)) {
+            /*Long busManagerId = visitRecordReqDTO.getBusManagerId();
             if (busManagerId == null) {
                 List<Long> accountIdList = getAccountIdList(orgId, RoleCodeEnum.SWJL.name());
                 if (CollectionUtils.isEmpty(accountIdList)) {
@@ -244,8 +245,37 @@ public class VisitRecordController {
                 List<Long> busManagerIdList = new ArrayList<>();
                 busManagerIdList.add(busManagerId);
                 visitRecordReqDTO.setBusManagerIdList(busManagerIdList);
+            }*/
+
+            //商务经理外调，发起外调的商务总监进行审核,根据组id查询
+            if (busGroupId == null) {
+                // 查询下级所有商务组
+                OrganizationQueryDTO queryDTO = new OrganizationQueryDTO();
+                queryDTO.setParentId(orgId);
+                queryDTO.setOrgType(OrgTypeConstant.SWZ);
+                JSONResult<List<OrganizationRespDTO>> queryOrgByParam =
+                        organizationFeignClient.queryOrgByParam(queryDTO);
+                List<OrganizationRespDTO> data = queryOrgByParam.getData();
+                if (CollectionUtils.isEmpty(data)) {
+                    return new JSONResult().fail(SysErrorCodeEnum.ERR_NOTEXISTS_DATA.getCode(),
+                            "该用户下没有下属");
+                }
+                busGroupIdList = data.stream().map(OrganizationRespDTO::getId).collect(Collectors.toList());
+                visitRecordReqDTO.setBusGroupIdList(busGroupIdList);
+            } else {
+                busGroupIdList.add(busGroupId);
+                visitRecordReqDTO.setBusGroupIdList(busGroupIdList);
             }
 
+        } else if (RoleCodeEnum.SWZJ.name().equals(roleCode)) {
+            //商务经理外调，发起外调的商务总监进行审核,根据组id查询
+            List<Long> accountIdList = getAccountIdList(orgId, RoleCodeEnum.SWJL.name());
+            if (CollectionUtils.isEmpty(accountIdList)) {
+                return new JSONResult().fail(SysErrorCodeEnum.ERR_NOTEXISTS_DATA.getCode(),
+                        "该用户下没有下属");
+            }
+            busGroupIdList.add(orgId);
+            visitRecordReqDTO.setBusGroupIdList(busGroupIdList);
         } else {
             return new JSONResult().fail(SysErrorCodeEnum.ERR_NOTEXISTS_DATA.getCode(), "角色没有权限");
         }
@@ -256,7 +286,7 @@ public class VisitRecordController {
     /**
      * 查询 客户到访记录
      * 
-     * @param visitRecordReqDTO
+     * @param visitNoRecordReqDTO
      * @return
      */
     @RequiresPermissions("aggregation:visitRecord:view")
@@ -372,6 +402,8 @@ public class VisitRecordController {
         if (result.hasErrors()) {
             return CommonUtil.validateParam(result);
         }
+        UserInfoDTO userInfo = CommUtil.getCurLoginUser();
+        reqDTO.setAuditPerson(userInfo.getId());
         reqDTO.setStatus(AggregationConstant.VISIT_RECORD_STATUS.REJECT);
         return visitRecordFeignClient.rejectVisitRecord(reqDTO);
     }

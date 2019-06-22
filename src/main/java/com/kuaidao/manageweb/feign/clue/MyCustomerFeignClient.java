@@ -30,7 +30,14 @@ public interface MyCustomerFeignClient {
 
     @RequestMapping(method = RequestMethod.POST, value = "/findTeleClueInfo")
     JSONResult<PageBean<CustomerClueDTO>> findTeleClueInfo(CustomerClueQueryDTO queryDTO);
-
+    /**
+     * 查询未分配的我的客户数
+     *
+     * @param queryDto
+     * @return
+     */
+    @RequestMapping("/getUnAssignCustomerNum")
+    JSONResult<Integer> getUnAssignCustomerNum( CustomerClueQueryDTO queryDto);
     /**
      * 我的客户创建数据
      * 
@@ -48,7 +55,14 @@ public interface MyCustomerFeignClient {
      */
     @RequestMapping(method = RequestMethod.POST, value = "/updateCustomerClue")
     JSONResult<String> updateCustomerClue(ClueDTO dto);
-
+    /**
+     * 客户资源(基本信息)维护
+     *
+     * @param dto
+     * @return
+     */
+    @RequestMapping(method = RequestMethod.POST, value = "/updateCustomerBasicInfoClue")
+    JSONResult<String> updateCustomerBasicInfoClue(ClueDTO dto);
     /**
      * 我的客户资源维护查询
      * 
@@ -168,7 +182,10 @@ public interface MyCustomerFeignClient {
             // TODO Auto-generated method stub
             return fallBackError("分页查询资源数据失败");
         }
-
+        @Override
+       public JSONResult<Integer> getUnAssignCustomerNum( CustomerClueQueryDTO queryDto){
+            return fallBackError("获取未分配客户数失败");
+        }
         @Override
         public JSONResult<String> createCustomerClue(ClueDTO dto) {
             // TODO Auto-generated method stub
@@ -180,7 +197,11 @@ public interface MyCustomerFeignClient {
             // TODO Auto-generated method stub
             return fallBackError("维护资源数据失败");
         }
-
+        @Override
+        public JSONResult<String> updateCustomerBasicInfoClue(ClueDTO dto) {
+            // TODO Auto-generated method stub
+            return fallBackError("维护资源(基本信息)数据失败");
+        }
         @Override
         public JSONResult<String> uploadClueFile(ClueFileDTO dto) {
             // TODO Auto-generated method stub

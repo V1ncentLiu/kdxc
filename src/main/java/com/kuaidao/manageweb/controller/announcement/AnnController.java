@@ -73,8 +73,9 @@ public class AnnController {
     @ResponseBody
     public JSONResult saveAnn(@Valid @RequestBody AnnouncementAddAndUpdateDTO dto,
             BindingResult result) {
-        if (result.hasErrors())
+        if (result.hasErrors()) {
             return validateParam(result);
+        }
 
         Subject subject = SecurityUtils.getSubject();
         UserInfoDTO user = (UserInfoDTO) subject.getSession().getAttribute("user");

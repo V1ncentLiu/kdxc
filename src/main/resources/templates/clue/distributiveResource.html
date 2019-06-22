@@ -85,7 +85,7 @@
                         </el-select>
                     </el-form-item>
                     <el-form-item label="资源项目:">
-                        <el-select v-model="form.resourceProject" placeholder="资源项目" clearable >
+                        <el-select v-model="form.resourceProject" placeholder="资源项目" clearable filterable>
                             <el-option
                                 v-for="item in proSelectArr"
                                 :key="item.id"
@@ -95,7 +95,7 @@
                         </el-select>
                     </el-form-item>
                     <el-form-item label="媒介:">
-                        <el-select v-model="form.medium" placeholder="媒介" clearable >
+                        <el-select v-model="form.medium" placeholder="媒介" clearable filterable>
                             <el-option
                                 v-for="item in mediumArry"
                                 :key="item.value"
@@ -119,7 +119,7 @@
                         </el-date-picker>
                     </el-form-item>                     
                     <el-form-item label="资源类别:">
-                        <el-select v-model="form.resourceType" placeholder="资源类别" clearable >
+                        <el-select v-model="form.resourceType" placeholder="资源类别" clearable filterable>
                             <el-option
                                 v-for="item in categoryArr"
                                 :key="item.value"
@@ -129,7 +129,7 @@
                         </el-select>
                     </el-form-item>
                     <el-form-item label="行业类别:">
-                        <el-select v-model="form.tradeType" placeholder="行业类别" clearable>
+                        <el-select v-model="form.tradeType" placeholder="行业类别" clearable filterable>
                             <el-option
                                 v-for="item in industryCategoryArr"
                                 :key="item.value"
@@ -139,7 +139,7 @@
                         </el-select>
                     </el-form-item>
                     <el-form-item label="资源阶段:">
-                        <el-select v-model="form.resourceStage" placeholder="资源阶段" clearable >
+                        <el-select v-model="form.resourceStage" placeholder="资源阶段" clearable filterable>
                             <el-option
                                 v-for="item in phaseArr"
                                 :key="item.value"
@@ -211,12 +211,12 @@
         </div>
         <el-row>
             <el-table
-                ref="tableData"
+                ref="multipleTable"
                 tooltip-effect="dark"
                 style="width: 100%"
                 border
                 :data="tableData"
-                @row-dblclick="rowDblClick"
+                @row-dblclick="toUpdatePage"
                 @selection-change="handleSelectionChange"
                 >
                 <el-table-column align="center" prop="clueId" type="selection" width="55"></el-table-column> 
@@ -255,7 +255,7 @@
         		</el-table-column>
                 <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width" v-else></el-table-column>
             </el-table>
-            <table-pagination :pager="pager" @change="initTableData"></table-pagination>
+            <table-pagination v-if="paginationShow" :pager="pager" @change="initTableData"></table-pagination>
         </el-row>
     </div>
     <!-- dialog -->
@@ -347,7 +347,7 @@
 	  <el-form :model="fieldFrom">	    
 		  <el-form-item label="" prop="type">
 		    <el-checkbox-group v-model="fieldFrom.type">
-		      <el-checkbox :label="item.sortNum+'_'+item.fieldCode+'_'+item.displayName+'_'+item.id"  name="type" :key="item.fieldCode"  v-for="(item,index) in  allTableColums ">
+		      <el-checkbox :label="item.sortNum+'_'+item.fieldCode+'_'+item.displayName+'_'+item.id+'_'+item.width"  name="type" :key="item.fieldCode"  v-for="(item,index) in  allTableColums ">
 		          {{item.displayName}}
 		      </el-checkbox>
 		     </el-checkbox-group>
@@ -382,6 +382,8 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
         el: '#optimizeClueManagement',
         data: function() {
             return {
+                oldPage:1,
+                paginationShow: false,
                 isShow:false,
                 dialogFormVisible: false,
                 dialogChooseList: false,
@@ -444,7 +446,31 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                 tableData:[],
                 customer:'',
                 basic:'',
-
+                storeForm: {
+                    starTime:'',
+                    endTime:'',
+                    starTime1:'',
+                    endTime1:'',
+                    telemarketingBranch:'',
+                    businessUnit:'',
+                    telemarketingItem:'',
+                    resourceProject:'',
+                    medium:'',
+                    resourceType:'',
+                    tradeType:'',
+                    resourceStage:'',
+                    resourcePerson:'',
+                    phone:'',
+                    clueId:'',
+                    isCall:"",
+                    status:"",
+                    firstCall:"",
+                    qq:"",
+                    wechat:"",
+                    email:""
+                },
+                storeId: '',
+                scrollTop: 0,
             }
         },
         methods: {
@@ -511,6 +537,18 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                 param.wechat = this.form.wechat;
                 var starTime=this.form.starTime;
                 var endTime=this.form.endTime;
+                if(pageNum > 5000){
+                  axios.post('','').then(function (response) {
+                    ocmVM.pager.currentPage = ocmVM.oldPage;
+                  })
+                  this.$message({
+                    message: '查询不能大于5000页，如有需要，请根据搜索条件进行查询。',
+                    type: 'warning'
+                  });
+                  return;
+                }else {
+                  this.oldPage = pageNum;
+                }
                 if(endTime){
                     if(starTime>endTime){
                         this.$message({
@@ -560,10 +598,52 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
     		    	ocmVM.pager.currentPage = pageData.currentPage;
     		    	ocmVM.pager.pageSize = pageData.pageSize;
     		    	ocmVM.tableData =pageData.data;
+
+                    // 取出存储的id
+                     if(!ocmVM.paginationShow){
+                         if(ocmVM.storeId){
+                             ocmVM.$nextTick(function(){
+                                var storage = [];
+                                ocmVM.tableData.forEach(function(item, index){
+                                    if(item.clueId === ocmVM.storeId ){
+                                        storage.push(ocmVM.tableData[index]);
+                                    }
+                                })
+                                ocmVM.toggleSelection(storage);
+                                ocmVM.$el.querySelector('.el-table__body-wrapper').scrollTop = ocmVM.scrollTop;
+                            })
+                        }
+                     }else{
+                        ocmVM.removeSessionStore ("distributiveResourceStoreForm");
+                        ocmVM.removeSessionStore ("distributiveResourceOtherVal");
+                     }
+                    ocmVM.paginationShow = true;
+                    ocmVM.storeForm = ocmVM.form;
     			})
         	},
-
-
+            toggleSelection(rows) { // table select 默认选中fn
+                if (rows) {
+                    rows.forEach(row => {
+                        this.$refs.multipleTable.toggleRowSelection(row,true);
+                    });
+                } else {
+                    this.$refs.multipleTable.clearSelection();
+                }
+            },
+        	//跳转编辑页
+            toUpdatePage(row) {
+            	var clueId=row.clueId;
+                // 存储选中信息--start
+                this.setSessionStore("distributiveResourceStoreForm", this.storeForm);
+                var otherVal = {
+                    "currentPage": this.pager.currentPage,
+                    "clueId": clueId,
+                    "scrollTop": this.$el.querySelector('.el-table__body-wrapper').scrollTop
+                }
+                this.setSessionStore("distributiveResourceOtherVal", otherVal);
+                // 存储选中信息--end
+              	document.location.href='/exetend/distributionedTaskManager/toUpdatePage?id='+clueId;
+            },
             rowDblClick(row, column, event){
         	  //双击查看详情
         	  var  param={};
@@ -690,6 +770,7 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
            		var obj = {};
            		obj.fieldCode=itemArr[1];
            		obj.displayName=itemArr[2];
+           		obj.width=itemArr[4];
            		customerShowColun.push(obj);
            		idList.push(itemArr[3])
            	}
@@ -714,14 +795,14 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
            	if(userFieldList.length!=0){
            		var type=[];
                	for(var i=0;i<userFieldList.length;i++){
-               		type.push(userFieldList[i].sortNum+'_'+userFieldList[i].fieldCode+'_'+userFieldList[i].displayName+'_'+userFieldList[i].fieldId)
+               		type.push(userFieldList[i].sortNum+'_'+userFieldList[i].fieldCode+'_'+userFieldList[i].displayName+'_'+userFieldList[i].fieldId+'_'+userFieldList[i].width)
                 }
               	this.fieldFrom.type = type;
               	this.confirmColumn();
            	}else{
            		var type=[];
                  	for(var i=0;i<fieldList.length;i++){
-                 		type.push(fieldList[i].sortNum+'_'+fieldList[i].fieldCode+'_'+fieldList[i].displayName+'_'+fieldList[i].id)
+                 		type.push(fieldList[i].sortNum+'_'+fieldList[i].fieldCode+'_'+fieldList[i].displayName+'_'+fieldList[i].id+'_'+fieldList[i].width)
                 	}
 	              	this.fieldFrom.type = type;
 	              	this.confirmColumn();
@@ -849,10 +930,43 @@ var userFieldList=[[${userFieldList}]];//用户自定义字段
                     });
                 }                
             },
+            setSessionStore (name, content) {
+                if (!name) return
+                if (typeof content !== 'string') {
+                content = JSON.stringify(content)
+                }
+                window.sessionStorage.setItem(name, content)
+            },
+            getSessionStore (name) {
+                if (!name) return;
+                var content = window.sessionStorage.getItem(name);
+                if (typeof content == 'string') {
+                    content = JSON.parse(content)
+                }
+                return content;
+            },
+            removeSessionStore (name) {
+                if (!name) return
+                return window.sessionStorage.removeItem(name)
+            },
         },
         mounted(){
 
         	document.getElementById('optimizeClueManagement').style.display = 'block';
+        },
+        created(){
+            // window.sessionStorage.clear(); // 点击侧边栏-清除所有cookie
+            // 进入页面判断有是否有存储值
+            if(!this.paginationShow){
+                var storeVal = this.getSessionStore("distributiveResourceStoreForm");
+                var otherVal = this.getSessionStore("distributiveResourceOtherVal");
+                if(storeVal && otherVal){
+                    this.form = storeVal;
+                    this.$set(this.pager,"currentPage",otherVal.currentPage);
+                    this.storeId = otherVal.clueId;
+                    this.scrollTop = otherVal.scrollTop;
+                }
+            }
         	this.initColumn();
          	this.initTableData();
             var  param={};

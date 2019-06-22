@@ -28,7 +28,7 @@
                 <el-row>
                     <el-col :span="12">
                         <el-form-item label="姓名：" :label-width="formLabelWidth1" prop="name">
-                            <el-input v-model="form.name" maxlength="30" autocomplete="off"></el-input>
+                            <el-input v-model.trim="form.name" maxlength="30" autocomplete="off"></el-input>
                         </el-form-item>
                     </el-col>
                     <el-col :span="12">
@@ -70,14 +70,14 @@
                         </el-form-item>
                     </el-col>
                 </el-row>
-                <!--<el-row v-show="isShow">-->
-                    <!--<el-col :span="6">-->
-                        <!--<el-form-item  label="用户资源处理：" :label-width="formLabelWidth1">-->
-                            <!--<el-radio v-model="statusRadio" label="0">不带资源走</el-radio>-->
-                            <!--<el-radio v-model="statusRadio" label="1">带资源走</el-radio>-->
-                        <!--</el-form-item>-->
-                    <!--</el-col>-->
-                <!--</el-row>-->
+                <el-row v-show="isShow">
+                    <el-col :span="12">
+                        <el-form-item  label="用户资源处理：" :label-width="formLabelWidth1">
+                            <el-radio v-model="statusRadio" label="0">不带资源走</el-radio>
+                            <el-radio v-model="statusRadio" label="1">带资源走</el-radio>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
                 <el-row v-show="isAuth">
                     <p class="fs16 marginB20">设定查看已分发资源数据权限：</p>
                     <el-table 
@@ -128,7 +128,7 @@
             >
             <el-table-column align="center" width="55" label="选择">
                 <template scope="scope">
-                    <el-radio :label="scope.row.id" v-model="tableRadio"  @change="selectRole(scope.row.id,scope.row.roleName)">&nbsp;</el-radio>
+                    <el-radio :label="scope.row.id" v-model="tableRadio"  @change="selectRole(scope.row.id,scope.row.roleName,scope.row.roleCode)">&nbsp;</el-radio>
                 </template>
             </el-table-column>
             <el-table-column align="center" prop="roleName" label="角色名称"></el-table-column>
@@ -173,15 +173,17 @@ var roleList=[[${roleList}]];//当前字段所属的菜单组
 var user=[[${user}]];//当前字段所属的菜单组
 var roleId="";
 var roleName="";
-if(user.roleList&&user.roleList.length>0){
-	roleId=user.roleList[0].id;
-	roleName=user.roleList[0].roleName;
+var roleCode = "";
+if (user.roleList && user.roleList.length > 0) {
+    roleId = user.roleList[0].id;
+    roleName = user.roleList[0].roleName;
+    roleCode = user.roleList[0].roleCode;
 }
 var updateUserVm= new Vue({
         el: '#userManage',
         data: function() {
             return {
-                btnDisabled: false,  
+                btnDisabled: false,
                 statusRadio:'0',
                 isShow:false,
                 tableRadio:roleId,
@@ -194,6 +196,7 @@ var updateUserVm= new Vue({
                     phone: user.phone,
                     roleId: roleId,
                     roleName: roleName,
+                    roleCode: roleCode,
                     orgId: user.orgId,
                     orgName: user.orgName,
                     status: user.status
@@ -203,7 +206,7 @@ var updateUserVm= new Vue({
                       { required: true, message: '姓名不能为空', trigger: 'blur' },
                       {  max: 30, message: '最大30个字符', trigger: 'blur' },
                       { validator:function(rule,value,callback){
-                            if(/^[A-Za-z0-9\u4e00-\u9fa5]+$/.test(value) == false){
+                            if(/^[A-Za-z0-9\u4e00-\u9fa5\d-\s]+$/.test(value) == false){
                                callback(new Error("请输入汉字、字母或数字"));
                             }else{
                                callback();
@@ -282,15 +285,29 @@ var updateUserVm= new Vue({
                 console.log(val)
             },
           //选择角色
-            selectRole(id,name){
+            selectRole(id,name,roleCode){
             	updateUserVm.form.roleId=id;
             	updateUserVm.form.roleName=name;
+                updateUserVm.form.roleCode=roleCode;
             	updateUserVm.dialogFormChooseRole=false;
+                var roleCode = updateUserVm.form.roleCode;
+            	if(roleCode != "DXCYGW"){
+                    updateUserVm.isShow = false;
+                }
             },
             //选择机构
             clickOrgNode(data,node,obj){//点击左侧节点
-                	updateUserVm.form.orgId=data.id;
-                	updateUserVm.form.orgName=data.label;
+                var oldOrgId = user.orgId;
+                var newOrgId = data.id;
+                updateUserVm.form.orgId = data.id;
+                updateUserVm.form.orgName = data.label;
+                var roleCode = updateUserVm.form.roleCode;
+                if (oldOrgId != newOrgId && roleCode == "DXCYGW") {
+                    updateUserVm.isShow = true;
+                } else {
+                    updateUserVm.isShow = false;
+                }
+
                 	var param = {};
                     param.id = data.id;
                     //根据id获取数据
@@ -308,7 +325,6 @@ var updateUserVm= new Vue({
                        
                     })
                 	updateUserVm.dialogFormChooseOrg=false;
-                	updateUserVm.isShow=true;
             },
             //返回
             goBack(){//点击左侧节点
@@ -317,15 +333,18 @@ var updateUserVm= new Vue({
             onSubmit(formName) {
             	 this.$refs[formName].validate((valid) => {
           	       if (valid) {
-       	             var formData = updateUserVm.form;
-       	             var param={};
-       	             param.id= user.id;
-       	             param.name= formData.name;
-       	             param.username= formData.username;
-       	             param.password = formData.password;
-       	             param.phone = formData.phone;
-       	             param.status = formData.status;
-       	             param.orgId = formData.orgId;
+                       var formData = updateUserVm.form;
+                       var param = {};
+                       param.id = user.id;
+                       param.name = formData.name;
+                       param.username = formData.username;
+                       param.password = formData.password;
+                       param.phone = formData.phone;
+                       param.status = formData.status;
+                       param.orgId = formData.orgId;
+                       param.takeAwayClue = updateUserVm.statusRadio;
+                       param.takeAwayClueShow = updateUserVm.isShow;
+                       debugger;
        	          if(this.isAuth){
 	       	             var list = [];
 	       	             var dataTableCheckbox=this.dataTableCheckbox;
@@ -350,7 +369,11 @@ var updateUserVm= new Vue({
        	            	// console.info(response);
        	            	var data =response.data;
        	            	if(data.code!="0"){
-                            updateUserVm.$message('修改失败');
+                            var message = "修改失败";
+                            if (data.code = '100011') {
+                                message = data.msg;
+                            }
+                            updateUserVm.$message(message);
                             updateUserVm.btnDisabled = false;
        	            	}else{
                             updateUserVm.$message('修改成功');

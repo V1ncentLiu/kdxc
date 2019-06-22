@@ -62,7 +62,7 @@
         </el-form-item>
         <el-row v-show="isShow">
           <el-form-item label="品尝项目:" class="formItem"  prop="projectId">
-            <el-select v-model="appiontmentSearchForm.projectId" clearable placeholder="品尝项目">
+            <el-select v-model="appiontmentSearchForm.projectId" clearable placeholder="品尝项目" filterable>
               <el-option
                   v-for="item in projectOptions"
                   :key="item.id"
@@ -113,6 +113,15 @@
               <el-button @click="recordClick(scope.row)" type="text" size="small">点击查看</el-button>
             </div>
             <div v-else>无</div>
+          </template>
+        </el-table-column>
+        <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" width="item.width"
+                         v-else-if="item.fieldCode == 'cusName'">
+          <template slot-scope="scope">
+            {{scope.row.cusName}}
+            <span v-if="scope.row.inputType ==1">
+                <input type='hidden'><img th:src="@{/images/self_build.png}"  style="margin:0 10px;width:22px;cursor: pointer;vertical-align: middle;" alt="">
+            </span>
           </template>
         </el-table-column>
         <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width"
@@ -166,6 +175,7 @@
               placeholder="品尝项目"
               style="width: 290px;"
               multiple
+              filterable
           >
             <el-option
                 v-for="item in  projectOptions"
@@ -291,7 +301,7 @@
     <el-form :model="form">
       <el-form-item label="" prop="type">
         <el-checkbox-group v-model="form.type">
-          <el-checkbox :label="item.sortNum+'_'+item.fieldCode+'_'+item.displayName+'_'+item.id"  name="type" :key="item.fieldCode"  v-for="(item,index) in  allTableColums ">
+          <el-checkbox :label="item.sortNum+'_'+item.fieldCode+'_'+item.displayName+'_'+item.id+'_'+item.width"  name="type" :key="item.fieldCode"  v-for="(item,index) in  allTableColums ">
             {{item.displayName}}
           </el-checkbox>
         </el-checkbox-group>
@@ -1028,6 +1038,7 @@
           var obj = {};
           obj.fieldCode=itemArr[1];
           obj.displayName=itemArr[2];
+          obj.width=itemArr[4];
           customerShowColun.push(obj);
           idList.push(itemArr[3])
         }
@@ -1052,14 +1063,14 @@
         if(userFieldList.length!=0){
           var type=[];
           for(var i=0;i<userFieldList.length;i++){
-            type.push(userFieldList[i].sortNum+'_'+userFieldList[i].fieldCode+'_'+userFieldList[i].displayName+'_'+userFieldList[i].fieldId)
+            type.push(userFieldList[i].sortNum+'_'+userFieldList[i].fieldCode+'_'+userFieldList[i].displayName+'_'+userFieldList[i].fieldId+'_'+userFieldList[i].width)
           }
           this.form.type = type;
           this.confirmColumn();
         }else{
           var type=[];
           for(var i=0;i<fieldList.length;i++){
-            type.push(fieldList[i].sortNum+'_'+fieldList[i].fieldCode+'_'+fieldList[i].displayName+'_'+fieldList[i].id)
+            type.push(fieldList[i].sortNum+'_'+fieldList[i].fieldCode+'_'+fieldList[i].displayName+'_'+fieldList[i].id+'_'+fieldList[i].width)
           }
           this.form.type = type;
           this.confirmColumn();
