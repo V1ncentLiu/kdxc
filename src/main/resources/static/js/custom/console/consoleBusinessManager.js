@@ -3,6 +3,7 @@ var mainDivVM = new Vue({
     data: {
         notVisitButtonAble: false,
         editRebutNoVisitDialog:false,//编辑驳回未到访弹窗
+        showVisitId:false,
         editRebutNoVisit:{},
         multipleSelection: [],
         notVisitFlagDialogVisible: false,//标记未到访弹窗
