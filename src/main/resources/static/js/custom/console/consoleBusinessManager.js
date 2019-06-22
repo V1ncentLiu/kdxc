@@ -1081,6 +1081,7 @@ var mainDivVM = new Vue({
                                         type: 'success', message: '未到访原因更新成功!', duration: 1000, onClose: function () {
                                             mainDivVM.editRebutNoVisitDialog = false;
                                             mainDivVM.initList();
+                                            mainDivVM.updateRejectNotVisitButtonAble = false;
                                         }
                                     });
                                 } else {
