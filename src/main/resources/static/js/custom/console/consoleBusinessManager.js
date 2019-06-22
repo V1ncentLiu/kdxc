@@ -1059,6 +1059,11 @@ var mainDivVM = new Vue({
 
             })
         },
+        //关闭编辑驳回未到访
+        closeEditRebutNoVisitDialog(){
+            // 隐藏
+            this.editRebutNoVisitDialog = false;
+        },
         showVisitRecord(row){
             // 展示到访记录
             this.showVisitAduitDialogVisible = true;
