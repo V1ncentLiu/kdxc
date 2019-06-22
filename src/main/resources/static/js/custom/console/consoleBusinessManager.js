@@ -1,7 +1,9 @@
 var mainDivVM = new Vue({
     el: '#mainDiv',
     data: {
-      notVisitButtonAble: false,
+        notVisitButtonAble: false,
+        editRebutNoVisitDialog:false,//编辑驳回未到访弹窗
+        editRebutNoVisit:{},
         multipleSelection: [],
         notVisitFlagDialogVisible: false,//标记未到访弹窗
         // 工作台
@@ -117,6 +119,15 @@ var mainDivVM = new Vue({
             notVisitReason: "",
             createUserName:"",
             notVisitTime:""
+        },
+        editRebutNoVisit:{
+            id: "",
+            rejectTime: "",
+            rejectUser: "",
+            rejectReason: "",
+            notVisitTime: "",
+            notVisitReason: ""
+
         },
         queryForm:{
             visitStatus:"",
@@ -1024,6 +1035,28 @@ var mainDivVM = new Vue({
                 mainDivVM.notVisitFlag.createUserName = response.data.data.createUserName
                 mainDivVM.notVisitFlag.notVisitTime = response.data.data.createTime
             });
+        },
+        //查看驳回未到访
+        rejectNotVisit(row){
+            this.editRebutNoVisitDialog = true;
+            var param = {};
+            param.id = row.id
+            axios.post('/busVisitRecord/one', param).then(function (response) {
+                if (null === response || response.data == null || response.data.code != '0') {
+                    if (response.data.code != '0') {
+                        mainDivVM.$message({message: response.data.msg, type: 'warning'});
+                    }
+                    return false;
+                } else {
+                   /* mainDivVM.editRebutNoVisit.id = response.data.data.id;
+                    mainDivVM.editRebutNoVisit.rejectTime = response.data.data.rebutTime;
+                    mainDivVM.editRebutNoVisit.rejectUser = response.data.data.auditPersonName;
+                    mainDivVM.editRebutNoVisit.rejectReason = response.data.data.rebutReason;
+                    mainDivVM.editRebutNoVisit.notVisitTime = response.data.data.createTime;
+                    mainDivVM.notVisitFlag.notVisitReason = response.data.data.notVisitReason;*/
+                }
+
+            })
         },
         showVisitRecord(row){
             // 展示到访记录
