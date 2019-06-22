@@ -60,6 +60,7 @@ var mainDivVM = new Vue({
         showVisitAduitDialogVisible:false,
         dialogFormSigningVisible:false,
         dialogUpdateFormSigningVisible:false,
+        updateRejectNotVisitButtonAble:false,
         existsSign:false,
         curSignStatus:"",
         isAllMoney: false,
@@ -1058,6 +1059,46 @@ var mainDivVM = new Vue({
                 }
 
             })
+        },
+//编辑驳回未到访
+        updateRejectNotVisit(formName){
+            var  notVisitReason = mainDivVM.notVisitFlag.notVisitReason;
+            if(null != notVisitReason && notVisitReason != ""){
+                var param = {};
+                param.id = mainDivVM.editRebutNoVisit.id;
+                param.notVisitReason = notVisitReason ;
+                this.$refs[formName].validate((valid) => {
+                    if (mainDivVM.updateRejectNotVisitButtonAble == true) {
+                        return;
+                    }
+                    if (valid) {
+                        mainDivVM.updateRejectNotVisitButtonAble = true;
+                        axios.post("/busVisitRecord/update", param)
+                            .then(function (response) {
+                                if (response.data.code == 0) {
+                                    mainDivVM.$message({
+                                        type: 'success', message: '未到访原因更新成功!', duration: 1000, onClose: function () {
+                                            mainDivVM.editRebutNoVisitDialog = false;
+                                            mainDivVM.initList();
+                                        }
+                                    });
+                                } else {
+                                    mainDivVM.$message.error(response.data.msg);
+                                    mainDivVM.updateRejectNotVisitButtonAble = false;
+                                }
+                            }).catch(function (error) {
+                            mainDivVM.updateRejectNotVisitButtonAble = false;
+                            console.log(error);
+                        });
+                    } else {
+                        return false;
+                    }
+                });
+            }else{
+                // 隐藏
+                this.editRebutNoVisitDialog = false;
+            }
+
         },
         //关闭编辑驳回未到访
         closeEditRebutNoVisitDialog(){
