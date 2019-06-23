@@ -282,7 +282,7 @@ public class RepetitionManagerController {
                 } else if (islegal && format.parse(telemarketingLayoutDTO2.getBeginTime())
                         .getTime() > format.parse(telemarketingLayoutDTO2.getEndTime()).getTime()) {
                     islegal = false;
-                } else if (islegal && new Date().getTime() > format
+                } else if (islegal && System.currentTimeMillis() > format
                         .parse(telemarketingLayoutDTO2.getEndTime()).getTime()) {
                     islegal = false;
                 }

@@ -442,6 +442,11 @@
                             <el-button size="mini"  v-else-if="item.isVisit==1&&item.status==0" type="text" style="color: red" @click="editRebutVisitRecord(item)">到访被驳回</el-button>
                             <!--<el-button size="mini"  v-else-if="item.isVisit==1&&item.status==2" type="text" @click="toVisitRecordPage(item )">查看到访记录</el-button>-->
                         </div>
+                        <div v-if="scope.row.rejectVisitList.length>0" v-for="item in scope.row.rejectVisitList ">
+                            <el-button size="mini" type="text" @click.stop="rejectNotVisit(item)" style="color: green">
+                                <span style="color: red">未到访(被驳回)</span>
+                            </el-button>
+                        </div>
                         <div v-if="scope.row.visitList.length>1 && scope.row.isVisitAuditStatusOne==1">
                             <el-button size="mini" type="text" @click="showVisitRecord(scope.row)" style="color: green">
                                 审核中
@@ -458,12 +463,12 @@
                         </div>
                     </template>
                 </el-table-column>
-                <el-table-column  prop="status" label="签约明细" align="center" width="170">
+                <el-table-column  prop="status" label="签约明细" align="center" width="190">
                     <template slot-scope="scope">
                         <el-button size="mini"  v-if="scope.row.signAuditStatus==null" type="text" @click="editSign(scope.row)">添加签约单</el-button>
                         <div  v-else-if="scope.row.signList.length==1"  v-for="item in scope.row.signList ">
                             <el-button size="mini"  v-if="item.signStatus==0" type="text"  style="color: red" @click="editRebutSign(item)">被驳回</el-button>
-                            <el-button size="mini"  v-else-if="item.signStatus==1" type="text" style="color:chartreuse" @click="toReadOnlySignPage(item)">审核中</el-button>
+                            <el-button size="mini"  v-else-if="item.signStatus==1" type="text" style="color: green;" @click="toReadOnlySignPage(item)">审核中</el-button>
                             <el-button size="mini"  v-else-if="item.signStatus==2" type="text" @click="toSignPage(item)">查看签约单</el-button>
                         </div>
                         <div  v-else-if="scope.row.signList.length>1"   v-for="item in scope.row.signList">
@@ -1530,18 +1535,13 @@
 
     <el-dialog title="编辑签约单" width="70%" :visible.sync="dialogUpdateFormSigningVisible">
         <template>
-         <!--<el-tabs v-model="editableTabsValue" type="card" @tab-click="tabClick">-->
-              <!--<el-tab-pane :key="item.name" v-for="(item, index) in editableTabs" :label="item.title" :name="item.name">-->
-              <!--</el-tab-pane>-->
-         <!--</el-tabs>-->
           <el-form :model="updateFormSigning" :rules="rules" ref="updateFormSigning" >
-            <el-form-item label="驳回时间："  :label-width="formLabelWidth">
-                <el-button size="mini"  type="text" style = "font-size: 17px;color: #1e2746">{{updateFormSigning.rebutTime}}</el-button>
-            </el-form-item>
-            <el-form-item label="驳回原因："  :label-width="formLabelWidth">
-                <span style="color: red; width:60%; word-wrap: break-word; word-break:break-all; ">{{updateFormSigning.rebutReason}}</span>
-            </el-form-item>
-            <div class="paddB20">签约单信息</div>
+              <div class="borderbox padding20 marginB20" v-for="item in updateFormSigning.signRejectRecordList">
+                  <p class="marginB10"><span>驳回时间：</span><span v-if="item.createTime">{{item.createTime}}</span></p>
+                  <p class="marginB10"><span>驳回人员：</span><span v-if="item.createUserName">{{item.createUserName}}</span></p>
+                  <p style="overflow: hidden;color: red;"><span style="float: left;width: 70px;">驳回原因：</span><span style="float: left;width: 385px;" v-if="item.rejectReason">{{item.rejectReason}}</span></p>
+              </div>
+              <div class="paddB20">签约单信息</div>
             <div>
                 <el-row>
                     <el-col :span="10">
@@ -1788,6 +1788,27 @@
             <div slot="footer" class="dialog-footer">
                 <el-button type="primary" @click="saveNotVisit" :disabled="notVisitButtonAble">确定</el-button>
                 <el-button @click="notVisitFlagDialogVisible = false">取消</el-button>
+            </div>
+        </template>
+    </el-dialog>
+    <!--编辑驳回未到访-->
+    <el-dialog title="编辑驳回未到访" :visible.sync="editRebutNoVisitDialog" width="540px" @close="closeEditRebutNoVisitDialog">
+        <template>
+            <el-form :model="editRebutNoVisit" ref="editRebutNoVisit">
+                <div class="borderbox padding20 marginB20">
+                    <p class="marginB10" v-if="showVisitId"><span>主键：{{editRebutNoVisit.id}}</span></p>
+                    <p class="marginB10"><span>驳回时间：{{editRebutNoVisit.rejectTime}}</span></p>
+                    <p class="marginB10"><span>驳回人员：{{editRebutNoVisit.rejectUser}}</span></p>
+                    <p style="overflow: hidden;color: red;"><span style="float: left;width: 70px;">驳回原因：</span><span style="float: left;    width: 385px;">{{editRebutNoVisit.rejectReason}}</span></p>
+                </div>
+                <p class="marginB10">标记未到访时间：{{editRebutNoVisit.notVisitTime}}</p>
+                <p class="marginB10">未到访原因：</p>
+                <el-form-item label="">
+                    <el-input type="textarea" v-model="notVisitFlag.notVisitReason" maxlength="100" :rows="3"></el-input>
+                </el-form-item>
+            </el-form>
+            <div slot="footer" class="dialog-footer">
+                <el-button type="primary" @click="updateRejectNotVisit('editRebutNoVisit')" :disabled="updateRejectNotVisitButtonAble">保存</el-button>
             </div>
         </template>
     </el-dialog>

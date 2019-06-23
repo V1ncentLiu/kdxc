@@ -1,7 +1,10 @@
 var mainDivVM = new Vue({
     el: '#mainDiv',
     data: {
-      notVisitButtonAble: false,
+        notVisitButtonAble: false,
+        editRebutNoVisitDialog:false,//编辑驳回未到访弹窗
+        showVisitId:false,
+        editRebutNoVisit:{},
         multipleSelection: [],
         notVisitFlagDialogVisible: false,//标记未到访弹窗
         // 工作台
@@ -57,6 +60,7 @@ var mainDivVM = new Vue({
         showVisitAduitDialogVisible:false,
         dialogFormSigningVisible:false,
         dialogUpdateFormSigningVisible:false,
+        updateRejectNotVisitButtonAble:false,
         existsSign:false,
         curSignStatus:"",
         isAllMoney: false,
@@ -117,6 +121,15 @@ var mainDivVM = new Vue({
             notVisitReason: "",
             createUserName:"",
             notVisitTime:""
+        },
+        editRebutNoVisit:{
+            id: "",
+            rejectTime: "",
+            rejectUser: "",
+            rejectReason: "",
+            notVisitTime: "",
+            notVisitReason: ""
+
         },
         queryForm:{
             visitStatus:"",
@@ -236,7 +249,8 @@ var mainDivVM = new Vue({
             makeUpTime:'',
             payTime: '',
             amountPerformance:'',
-            remarks: '' //备注
+            remarks: '', //备注
+            signRejectRecordList:[]//签约单驳回
         },
         pager:{
             total: 0,
@@ -1024,6 +1038,74 @@ var mainDivVM = new Vue({
                 mainDivVM.notVisitFlag.createUserName = response.data.data.createUserName
                 mainDivVM.notVisitFlag.notVisitTime = response.data.data.createTime
             });
+        },
+        //查看驳回未到访
+        rejectNotVisit(row){
+            this.editRebutNoVisitDialog = true;
+            var param = {};
+            param.id = row.id
+            axios.post('/busVisitRecord/one', param).then(function (response) {
+                if (null === response || response.data == null || response.data.code != '0') {
+                    if (response.data.code != '0') {
+                        mainDivVM.$message({message: response.data.msg, type: 'warning'});
+                    }
+                    return false;
+                } else {
+                    mainDivVM.editRebutNoVisit.id = response.data.data.id;
+                    mainDivVM.editRebutNoVisit.rejectTime = response.data.data.rebutTime;
+                    mainDivVM.editRebutNoVisit.rejectUser = response.data.data.auditPersonName;
+                    mainDivVM.editRebutNoVisit.rejectReason = response.data.data.rebutReason;
+                    mainDivVM.editRebutNoVisit.notVisitTime = response.data.data.createTime;
+                    mainDivVM.notVisitFlag.notVisitReason = response.data.data.notVisitReason;
+                }
+
+            })
+        },
+       //编辑驳回未到访
+        updateRejectNotVisit(formName){
+            var  notVisitReason = mainDivVM.notVisitFlag.notVisitReason;
+            if(null != notVisitReason && notVisitReason != ""){
+                var param = {};
+                param.id = mainDivVM.editRebutNoVisit.id;
+                param.notVisitReason = notVisitReason ;
+                this.$refs[formName].validate((valid) => {
+                    if (mainDivVM.updateRejectNotVisitButtonAble == true) {
+                        return;
+                    }
+                    if (valid) {
+                        mainDivVM.updateRejectNotVisitButtonAble = true;
+                        axios.post("/busVisitRecord/update", param)
+                            .then(function (response) {
+                                if (response.data.code == 0) {
+                                    mainDivVM.$message({
+                                        type: 'success', message: '未到访原因更新成功!', duration: 1000, onClose: function () {
+                                            mainDivVM.editRebutNoVisitDialog = false;
+                                            mainDivVM.initList();
+                                            mainDivVM.updateRejectNotVisitButtonAble = false;
+                                        }
+                                    });
+                                } else {
+                                    mainDivVM.$message.error(response.data.msg);
+                                    mainDivVM.updateRejectNotVisitButtonAble = false;
+                                }
+                            }).catch(function (error) {
+                            mainDivVM.updateRejectNotVisitButtonAble = false;
+                            console.log(error);
+                        });
+                    } else {
+                        return false;
+                    }
+                });
+            }else{
+                // 隐藏
+                this.editRebutNoVisitDialog = false;
+            }
+
+        },
+        //关闭编辑驳回未到访
+        closeEditRebutNoVisitDialog(){
+            // 隐藏
+            this.editRebutNoVisitDialog = false;
         },
         showVisitRecord(row){
             // 展示到访记录
