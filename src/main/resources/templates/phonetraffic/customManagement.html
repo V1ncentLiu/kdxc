@@ -430,41 +430,36 @@ var phoneButton = false;
                             message: response.data.msg,
                             type: 'warning'
                         });
-                    }else {
-                    var resobj = response.data;
-                    var pageData = resobj.data;
-                    if (pageData) {
-                        customerManVM.pager.total = pageData.total;
+                    }else{
+                        var resobj= response.data;
+                        var pageData=resobj.data;
+                        customerManVM.pager.total=pageData.total;
                         customerManVM.pager.currentPage = pageData.currentPage;
                         customerManVM.pager.pageSize = pageData.pageSize;
-                        customerManVM.dataTable = pageData.data;
-
-                        // 取出存储的id
-                        if (!customerManVM.paginationShow) {
-                            if (customerManVM.storeId) {
-                                customerManVM.$nextTick(function () {
+                        customerManVM.dataTable =pageData.data;
+                         if(!customerManVM.paginationShow){
+                             if(customerManVM.storeId){
+                                 customerManVM.$nextTick(function(){
                                     var storage = [];
-                                    customerManVM.dataTable.forEach(function (item, index) {
-                                        if (item.clueId === customerManVM.storeId) {
+                                    customerManVM.dataTable.forEach(function(item, index){
+                                        if(item.clueId === customerManVM.storeId ){
                                             storage.push(customerManVM.dataTable[index]);
                                         }
                                     })
                                     customerManVM.toggleSelection(storage);
-                                    customerManVM.$el.querySelector(
-                                        '.el-table__body-wrapper').scrollTop = customerManVM.scrollTop;
+                                    customerManVM.$el.querySelector('.el-table__body-wrapper').scrollTop = customerManVM.scrollTop;
                                 })
 
                             }
-                        } else {
-                            customerManVM.removeSessionStore("customManagementStoreForm");
-                            customerManVM.removeSessionStore("customManagementOtherVal");
-                        }
+                         }else{
+                            customerManVM.removeSessionStore ("customManagementStoreForm");
+                            customerManVM.removeSessionStore ("customManagementOtherVal");
+                         }
                         customerManVM.paginationShow = true;
                         customerManVM.storeForm = customerManVM.form;
 
                     }
-                }
-            })
+     			})
          	},
             toggleSelection(rows) { // table select 默认选中fn
                 if (rows) {
@@ -697,7 +692,6 @@ var phoneButton = false;
                    var  param={};
                    param.idList=idArr;
                    param.operatorId=operatorId;
-                   console.log(param)
                    this.allocateFormVisible = false; 
 
                    this.btnDisabled = true; 
@@ -813,7 +807,6 @@ var phoneButton = false;
                 customerColumn.sort(this.sortNumber);//对选择的列排序
                 var idList=[];
                 for(var i=0;i<customerColumn.length;i++){
-                    console.log(curItem)
                     var curItem = customerColumn[i];
                     var itemArr = curItem.split("_");
                     var obj = {};
@@ -828,7 +821,6 @@ var phoneButton = false;
                 param.fieldIdList = idList;
                 param.menuCode = "aggregation:PhoneTraffic";
                 if(idList.length!=0){
-                    console.log(param)
                     axios.post('/customfield/customField/saveUserField', param)
                         .then(function (response) {
                         }).catch(function (error) {
