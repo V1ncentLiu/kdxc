@@ -2,6 +2,7 @@
 var mainDivVM = new Vue({
     el: '#mainDiv',
     data: {
+        btnDisabled: false,
         dataTable:[],
         pager:{
             total: 0,
@@ -298,12 +299,14 @@ var mainDivVM = new Vue({
                     var param  = {};
                     param.idList=rowIds;
                     param.teleSaleId=this.allocationForm.saleId;
+                    this.btnDisabled = true; 
                     axios.post('/clue/pendingAllocation/allocationClue',param)
                     .then(function (response) {
                         var data =  response.data;
                         if(data.code=='0'){
                             mainDivVM.$message({message:'分配成功',type:'success',duration:2000,onClose:function(){
                                 mainDivVM.allocationVisible = false;
+                                mainDivVM.btnDisabled = false; 
                                 mainDivVM.searchTable();
                             }});
                         }else{
@@ -311,9 +314,11 @@ var mainDivVM = new Vue({
                                 message: "接口调用失败",
                                 type: 'error'
                             }); 
+                            mainDivVM.btnDisabled = false; 
                         }
                     })
                     .catch(function (error) {
+                        mainDivVM.btnDisabled = false; 
                         console.log(error);
                     })
                     .then(function () {
