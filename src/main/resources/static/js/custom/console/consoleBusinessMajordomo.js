@@ -556,18 +556,30 @@ var mainDivVM = new Vue({
         },
         getPayModeText(row, column, value, index){
             var valText="";
-            if(value==1){
-                valText="现金";
-            }else if(value==2){
-                valText="POS";
-            }else if(value==3){
-                valText="转账";
-            }else if(value==4){
-                valText="微信";
-            }else if(value==5){
-                valText="支付宝";
+            var vals = value.split(",");
+            if(payModeItem){
+                for(var j = 0 ; j < vals.length;j++  ){
+                    for(var i = 0; i < payModeItem.length ; i++){
+                        if(payModeItem[i].value == vals[j]){
+                            if(j==0){
+                                valText += payModeItem[i].name;
+                            }else{
+                                valText += ","+payModeItem[i].name;
+                            }
+                        }
+                    }
+                }
             }
             return valText;
+        },
+        transGiveType(row, column, value, index) {
+            var text="";
+            for(var i=0;i<giveTypeList.length;i++) {
+                if(giveTypeList[i].value ==value){
+                    text = giveTypeList[i].name;
+                }
+            }
+            return text;
         },
         getStatusText(row, column, value, index){
                var valText="";
