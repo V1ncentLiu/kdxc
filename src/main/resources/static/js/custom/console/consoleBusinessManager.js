@@ -1455,7 +1455,12 @@ var mainDivVM = new Vue({
                             mainDivVM.payTypeSelect = true;
                             mainDivVM.payTypeArr = mainDivVM.payTypeArr1.slice(0,2)
                         }
-                        mainDivVM.updateFormSigning.giveType = mainDivVM.updateFormSigning.giveType+"";
+                        if(mainDivVM.updateFormSigning.giveType !=-1){
+                        	mainDivVM.updateFormSigning.giveType = mainDivVM.updateFormSigning.giveType+"";
+                        }else{
+                        	mainDivVM.updateFormSigning.giveType = null;
+                        }
+                        
                         mainDivVM.currentProvince(mainDivVM.updateFormSigning.signProvince)
                         mainDivVM.currentCity(mainDivVM.updateFormSigning.signCity)
                         var modeArr = mainDivVM.updateFormSigning.payMode.split(",");
@@ -1554,6 +1559,9 @@ var mainDivVM = new Vue({
             }
            if(param.payTime){
                param.payTime = new Date( param.payTime)
+           }
+           if(param.giveType ==null || param.giveType ==""){
+        	   param.giveType=-1;  
            }
            this.updateFormSigning.payMode = mainDivVM.tansPayModeNameToValue(this.updateFormSigning.payModes);
             // 设置 clueid

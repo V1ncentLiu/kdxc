@@ -1,5 +1,6 @@
 package com.kuaidao.manageweb.controller.console;
 
+import com.kuaidao.common.constant.DicCodeEnum;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Date;
@@ -185,6 +186,8 @@ public class ConsoleController {
                     getDictionaryByCode(Constants.STOREFRONT_AREA));
             // 查询字典投资金额集合
             request.setAttribute("ussmList", getDictionaryByCode(Constants.USSM));
+            request.setAttribute("payModeItem", getDictionaryByCode(DicCodeEnum.PAYMODE.getCode()));
+            request.setAttribute("giveTypeList", getDictionaryByCode(Constants.GIVE_TYPE));
             path = "console/consoleBusinessMajordomo";
         }
 
