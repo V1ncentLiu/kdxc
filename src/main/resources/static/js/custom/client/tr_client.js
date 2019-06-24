@@ -403,7 +403,7 @@ var clientVm = new Vue({
            },
            submitUploadClient(){//上传坐席
     
-               this.$confirm('', '确认导入数据', {
+               this.$confirm('提示','确认导入数据', {
             	   showCancelButton:false,
             	   closeOnClickModal:false,
                    confirmButtonText: '确认',
