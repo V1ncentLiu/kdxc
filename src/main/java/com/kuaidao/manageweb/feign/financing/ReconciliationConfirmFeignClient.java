@@ -78,7 +78,7 @@ public interface ReconciliationConfirmFeignClient {
     /**
      *根据对账申请表id获取已对账的佣金之和
      * @author: Fanjd
-     * @param accountId 对账申请表主键
+     * @param signId  签约单id
      * @return: com.kuaidao.common.entity.JSONResult<java.lang.Void>
      * @Date: 2019/6/14 18:25
      * @since: 1.0.0
