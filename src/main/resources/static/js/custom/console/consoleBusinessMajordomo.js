@@ -1,6 +1,7 @@
 var mainDivVM = new Vue({
     el: '#mainDiv',
     data: {
+        btnDisabled: false,
         // 工作台
         activeName:'1',
         activeName2:'1',
@@ -326,6 +327,7 @@ var mainDivVM = new Vue({
                         if(data.code=='0'){
                             mainDivVM.$message({message:'分发成功',type:'success',duration:2500,onClose:function(){
                                 mainDivVM.allocationVisible = false;
+                                mainDivVM.confirmBtnDisabled=false;
                                 mainDivVM.searchTable();
                             }});
                         }else{
@@ -333,13 +335,12 @@ var mainDivVM = new Vue({
                                 message: "接口调用失败",
                                 type: 'error'
                             }); 
+                            mainDivVM.confirmBtnDisabled=false;
                         }
                     })
                     .catch(function (error) {
-                    console.log(error);
-                    })
-                    .then(function () {   
-                    	mainDivVM.confirmBtnDisabled=false;
+                      console.log(error);
+                      mainDivVM.confirmBtnDisabled=false;
                     });
                 } else {
                     console.log('error submit!!');
@@ -632,6 +633,7 @@ var mainDivVM = new Vue({
                     
                     param.idList = idArr;
                     param.rebutReason = this.dialogForm.reason;
+                    this.btnDisabled = true;
                     axios.post('/sign/signRecord/rejectSignOrder', param)
                     .then(function (response) {
                         var resData = response.data;
@@ -641,17 +643,20 @@ var mainDivVM = new Vue({
                             mainDivVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
                                 mainDivVM.initSignRecordData();
                                 mainDivVM.recordDialog = false;
+                                mainDivVM.btnDisabled = false; 
                                 // 待审批到访记录也刷新列表
                                 mainDivVM.initCustomerVisitRecord();
                             }});
                         }else{
                             mainDivVM.$message({message:resData.msg,type:'error'});
+                            mainDivVM.btnDisabled = false; 
                             console.error(resData);
                         }
                     
                     })
                     .catch(function (error) {
-                         console.log(error);
+                        console.log(error);
+                        mainDivVM.btnDisabled = false; 
                     }).then(function(){
                     });
 
@@ -866,6 +871,7 @@ var mainDivVM = new Vue({
                     }
                     param.idList = idArr;
                     param.rebutReason = this.dialogForm.reason;
+                    this.btnDisabled = true; 
                     axios.post('/visit/visitRecord/rejectVisitRecord', param)
                     .then(function (response) {
                         var resData = response.data;
@@ -873,15 +879,18 @@ var mainDivVM = new Vue({
                             mainDivVM.dialogForm.reason='';
                             mainDivVM.dialogFormVisibleVisit = false;
                             mainDivVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
+                                mainDivVM.btnDisabled = false; 
                                 mainDivVM.initCustomerVisitRecord();
                             }});
                         }else{
                             mainDivVM.$message({message:resData.msg,type:'error'});
+                            mainDivVM.btnDisabled = false; 
                             console.error(resData);
                         }                    
                     })
                     .catch(function (error) {
-                         console.log(error);
+                        console.log(error);
+                        mainDivVM.btnDisabled = false; 
                     }).then(function(){
                     });
                 } else {
@@ -1009,6 +1018,7 @@ var mainDivVM = new Vue({
                     param.idList = idArr;
                     param.rebutReason = this.dialogForm.reason;
                     param.type = 2;//标记是未到访记录
+                    this.btnDisabled = true; 
                     axios.post('/visit/visitRecord/rejectVisitRecord', param)
                     .then(function (response) {
                         var resData = response.data;
@@ -1016,15 +1026,18 @@ var mainDivVM = new Vue({
                             mainDivVM.dialogForm.reason='';
                             mainDivVM.dialogFormVisibleUnVisit = false;
                             mainDivVM.$message({message:'操作成功',type:'success',duration:2000,onClose:function(){
+                                mainDivVM.btnDisabled = false; 
                                 mainDivVM.initCustomerUnVisitRecord();
                             }});
                         }else{
                             mainDivVM.$message({message:resData.msg,type:'error'});
+                            mainDivVM.btnDisabled = false; 
                             console.error(resData);
                         }                    
                     })
                     .catch(function (error) {
-                         console.log(error);
+                        console.log(error);
+                        mainDivVM.btnDisabled = false; 
                     }).then(function(){
                     });
                 } else {
