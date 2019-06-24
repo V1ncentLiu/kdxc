@@ -540,6 +540,18 @@ var mainDivVM = new Vue({
             }
             return valText;
         },
+
+        transVisitNum(row, column, cellValue, index) {
+          var text = "";
+          if (cellValue == "1") {
+            text = "首次到访"
+          } else if (cellValue == "2") {
+            text = "二次到访"
+          } else {
+            text = this.toChinesNum(cellValue) + "次到访"
+          }
+          return text;
+        },
         getSignShopTypeText(row, column, value, index){
             var valText="";
             if (value == 1) {
