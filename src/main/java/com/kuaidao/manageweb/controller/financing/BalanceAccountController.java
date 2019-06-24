@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -363,19 +364,22 @@ public class BalanceAccountController {
             }
 
             String payMode1 = accountDTO.getPayMode();
-            String[] split = payMode1.split(",");
             String payMode = "";
-            for (int i = 0; i < split.length; i++) {
-                for (DictionaryItemRespDTO item : payModeItem) {
-                    if (item.getValue().equals(split[i])) {
-                        if (i == 0) {
-                            payMode = item.getName();
-                        } else {
-                            payMode = payMode + "," + item.getName();
+            if(StringUtils.isNotBlank(payMode1)){
+                String[] split = payMode1.split(",");
+                for (int i = 0; i < split.length; i++) {
+                    for (DictionaryItemRespDTO item : payModeItem) {
+                        if (item.getValue().equals(split[i])) {
+                            if (i == 0) {
+                                payMode = item.getName();
+                            } else {
+                                payMode = payMode + "," + item.getName();
+                            }
                         }
                     }
                 }
             }
+
             // if (accountDTO.getPayMode() == 1) {
             // payMode = "现金";
             // } else if (accountDTO.getPayMode() == 2) {
@@ -550,19 +554,22 @@ public class BalanceAccountController {
             }
 
             String payMode1 = accountDTO.getPayMode();
-            String[] split = payMode1.split(",");
             String payMode = "";
-            for (int i = 0; i < split.length; i++) {
-                for (DictionaryItemRespDTO item : payModeItem) {
-                    if (item.getValue().equals(split[i])) {
-                        if (i == 0) {
-                            payMode = item.getName();
-                        } else {
-                            payMode = payMode + "," + item.getName();
+            if(StringUtils.isNotBlank(payMode1)){
+                String[] split = payMode1.split(",");
+                for (int i = 0; i < split.length; i++) {
+                    for (DictionaryItemRespDTO item : payModeItem) {
+                        if (item.getValue().equals(split[i])) {
+                            if (i == 0) {
+                                payMode = item.getName();
+                            } else {
+                                payMode = payMode + "," + item.getName();
+                            }
                         }
                     }
                 }
             }
+
             // String payMode = "";
             // if (accountDTO.getPayMode() == 1) {
             // payMode = "现金";
