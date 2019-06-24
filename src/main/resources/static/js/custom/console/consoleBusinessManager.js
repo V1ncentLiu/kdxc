@@ -820,7 +820,9 @@ var mainDivVM = new Vue({
             });
         },
         showCustomerDetail(row, column){ // 客户详情
-            window.location.href='/bus/BusinessCustomer/viewCustomerInfo?clueId='+row.clueId;
+            //window.location.href='/bus/BusinessCustomer/viewCustomerInfo?clueId='+row.clueId;
+          var clueId=row.clueId;
+          window.location.href = '/bus/BusinessCustomer/editCustomerInfo?clueId=' + clueId;
         },
         editCustomerDetail(row, column){ // 客户维护
             window.location.href='/bus/BusinessCustomer/editCustomerInfo?clueId='+row.clueId;
