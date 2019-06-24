@@ -232,17 +232,15 @@ public class BalanceAccountController {
      * 根据对账申请表id获取已对账的佣金之和
      * 
      * @author: Fanjd
-     * @param accountId 对账申请表主键
+     * @param reconciliationConfirmReq 请求实体
      * @return: com.kuaidao.common.entity.JSONResult<java.lang.Void>
      * @Date: 2019/6/14 18:25
      * @since: 1.0.0
      **/
     @ResponseBody
     @PostMapping("/getConfirmCommission")
-    public JSONResult<BigDecimal> getConfirmCommission(
-            @RequestBody ReconciliationConfirmReq reconciliationConfirmReq) {
-        JSONResult<BigDecimal> sumConfirmCommission = reconciliationConfirmFeignClient
-                .getConfirmCommission(reconciliationConfirmReq.getSignId());
+    public JSONResult<BigDecimal> getConfirmCommission(@RequestBody ReconciliationConfirmReq reconciliationConfirmReq) {
+        JSONResult<BigDecimal> sumConfirmCommission = reconciliationConfirmFeignClient.getConfirmCommission(reconciliationConfirmReq.getSignId());
         return sumConfirmCommission;
     }
 
