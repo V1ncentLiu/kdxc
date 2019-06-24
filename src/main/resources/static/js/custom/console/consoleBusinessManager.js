@@ -1,6 +1,7 @@
 var mainDivVM = new Vue({
     el: '#mainDiv',
     data: {
+        btnDisabled: false,
         notVisitButtonAble: false,
         editRebutNoVisitDialog:false,//编辑驳回未到访弹窗
         showVisitId:false,
@@ -820,7 +821,9 @@ var mainDivVM = new Vue({
             });
         },
         showCustomerDetail(row, column){ // 客户详情
-            window.location.href='/bus/BusinessCustomer/viewCustomerInfo?clueId='+row.clueId;
+            //window.location.href='/bus/BusinessCustomer/viewCustomerInfo?clueId='+row.clueId;
+          var clueId=row.clueId;
+          window.location.href = '/bus/BusinessCustomer/editCustomerInfo?clueId=' + clueId;
         },
         editCustomerDetail(row, column){ // 客户维护
             window.location.href='/bus/BusinessCustomer/editCustomerInfo?clueId='+row.clueId;
@@ -896,6 +899,7 @@ var mainDivVM = new Vue({
             // 设置 clueid
             this.$refs['addVisitRecord'].validate((valid) => {
                 if (valid) {
+                    this.btnDisabled = true; 
                     axios.post("/busVisitRecord/insert", param)
                         .then(function (response) {
                             if (response.data.code == 0) {
@@ -904,11 +908,13 @@ var mainDivVM = new Vue({
                                         mainDivVM.initList();
                                         mainDivVM.addVisitRecordDialogVisible = false;
                                         mainDivVM.addVisitRecord.clueId = "";
+                                        mainDivVM.btnDisabled = false; 
                                     }});
                             } else {
                                 mainDivVM.$message.error(response.data.msg);
+                                mainDivVM.btnDisabled = false; 
                             }
-                        }).catch(function (error) {console.log(error);});
+                        }).catch(function (error) {mainDivVM.btnDisabled = false; console.log(error);});
                 } else {return false;}
             });
         },
@@ -944,7 +950,7 @@ var mainDivVM = new Vue({
                     if(param.vistitTime){
                         param.vistitTime = new Date(param.vistitTime)
                     }
-
+                    this.btnDisabled = true;  
                     axios.post("/busVisitRecord/update", param)
                         .then(function (response) {
                             if (response.data.code == 0) {
@@ -954,11 +960,13 @@ var mainDivVM = new Vue({
                                         mainDivVM.updateVisitRecordDialogVisible = false;
                                         mainDivVM.updateVisitRecord.clueId = "";
                                         mainDivVM.updateVisitRecord.id = "";
+                                        mainDivVM.btnDisabled = false; 
                                     }});
                             } else {
                                 mainDivVM.$message.error(response.data.msg);
+                                mainDivVM.btnDisabled = false; 
                             }
-                        }).catch(function (error) {console.log(error);});
+                        }).catch(function (error) {mainDivVM.btnDisabled = false; console.log(error);});
                 } else {return false;}
             });
         },
@@ -1533,6 +1541,7 @@ var mainDivVM = new Vue({
             // 设置 clueid
             this.$refs[formName].validate((valid) => {
                 if (valid) {
+                    this.btnDisabled = true;
                     axios.post("/businesssign/insert", param)
                         .then(function (response) {
                             if (response.data.code == 0) {
@@ -1541,11 +1550,13 @@ var mainDivVM = new Vue({
                                         mainDivVM.initList();
                                         mainDivVM.dialogFormSigningVisible = false;
                                         mainDivVM.formSigning.clueId = "";
+                                        mainDivVM.btnDisabled = false; 
                                     }});
                             } else {
                                 mainDivVM.$message.error(response.data.msg);
+                                mainDivVM.btnDisabled = false; 
                             }
-                        }).catch(function (error) {console.log(error);});
+                        }).catch(function (error) {mainDivVM.btnDisabled = false; console.log(error);});
                 } else {return false;}
             });
         },
@@ -1567,6 +1578,7 @@ var mainDivVM = new Vue({
             // 设置 clueid
             this.$refs[formName].validate((valid) => {
                 if (valid) {
+                    this.btnDisabled = true; 
                     axios.post("/businesssign/update", param)
                         .then(function (response) {
                             if (response.data.code == 0) {
@@ -1574,11 +1586,13 @@ var mainDivVM = new Vue({
                                         mainDivVM.pager.pageNum = 1
                                         mainDivVM.initList();
                                         mainDivVM.dialogUpdateFormSigningVisible = false;
+                                        mainDivVM.btnDisabled = false; 
                                     }});
                             } else {
                                 mainDivVM.$message.error(response.data.msg);
+                                mainDivVM.btnDisabled = false; 
                             }
-                        }).catch(function (error) {console.log(error);});
+                        }).catch(function (error) {mainDivVM.btnDisabled = false; console.log(error);});
                 } else {return false;}
             });
         },
