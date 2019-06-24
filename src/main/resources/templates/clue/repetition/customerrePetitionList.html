@@ -534,12 +534,22 @@
               },
               repeatPhonesClick(row) {//重复手机号按钮点击
                   console.log(row);
-                  this.repeatPhonesDialog=true;
                   this.dailogTitleType=row.clueId;
                   var param ={};
                   param.id = row.clueId;
                   param.clueId = row.clueId;
                   param.cusPhone = row.cusPhone;
+                if((roleCode =='DXCYGW' && row.teleSaleIds.indexOf(userId) == -1 )
+                    ||  (roleCode =='DXZJ' && row.teleGorupIds.indexOf(orgId) == -1)
+                    ||  (roleCode =='DXFZ' && row.teleDeptIds.indexOf(orgId) == -1)
+                    || row.phase ==7 || row.phase == 8){
+                  this.$message({
+                    message: "当前资源已释放到公有池，不允许进行重复手机号资源的查看",
+                    type: 'error'
+                  });
+                  return;
+                }
+                this.repeatPhonesDialog=true;
                   axios.post('/clue/appiontment/repeatPhoneMap', param).then(function (response) {
                       var map = response.data.data;
                       debugger
