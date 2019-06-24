@@ -1622,7 +1622,7 @@
     <!--添加到访记录-->
     <el-dialog title="编辑驳回未到访" :visible.sync="editRebutNoVisitDialog" width="540px" @close="closeEditRebutNoVisitDialog">
         <template>
-            <el-form :model="editRebutNoVisit" ref="editRebutNoVisit">
+            <el-form :model="editRebutNoVisit" ref="editRebutNoVisit" :rules="editRebutNoVisitRules">
                 <div class="borderbox padding20 marginB20">
                     <p class="marginB10" v-if="showVisitId"><span>主键：{{editRebutNoVisit.id}}</span></p>
                     <p class="marginB10"><span>驳回时间：{{editRebutNoVisit.rejectTime}}</span></p>
@@ -1631,7 +1631,7 @@
                 </div>
                 <p class="marginB10">标记未到访时间：{{editRebutNoVisit.notVisitTime}}</p>
                 <p class="marginB10">未到访原因：</p>
-                <el-form-item label="">
+                <el-form-item label="" prop="notVisitReason">
                     <el-input type="textarea" v-model="notVisitFlag.notVisitReason" maxlength="100" :rows="3"></el-input>
                 </el-form-item>
             </el-form>
@@ -2228,6 +2228,11 @@
                     }
                 ]
             },
+            editRebutNoVisitRules:{
+                notVisitReason: [
+                    {required: true, message: '请输入未到访原因', trigger: 'blur'}
+                ],
+            }
         },
         methods: {
             clickRow(row){
