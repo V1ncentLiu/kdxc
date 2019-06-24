@@ -556,7 +556,10 @@ var mainDivVM = new Vue({
             return valText;
         },
         getPayModeText(row, column, value, index){
-            var valText="";
+           var  valText = ""
+            if(!value){
+                return valText;
+            }
             var vals = value.split(",");
             if(payModeItem){
                 for(var j = 0 ; j < vals.length;j++  ){
