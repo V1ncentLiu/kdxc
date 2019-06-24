@@ -13,6 +13,7 @@ import com.kuaidao.common.util.ExcelUtil;
 import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
 import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
 import com.kuaidao.manageweb.feign.project.ProjectInfoFeignClient;
+import com.kuaidao.manageweb.feign.statistics.callrecord.ClueConnectValidRateFeignClient;
 import com.kuaidao.manageweb.util.CommUtil;
 import com.kuaidao.stastics.dto.firstResourceAllocation.FirstResourceAllocationQueryDto;
 import com.kuaidao.stastics.dto.resourceEfficiency.ResourceEfficiencyDto;
@@ -24,6 +25,7 @@ import com.kuaidao.sys.dto.organization.OrganizationDTO;
 import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
 import com.kuaidao.sys.dto.organization.OrganizationRespDTO;
 import com.kuaidao.sys.dto.role.RoleInfoDTO;
+import com.kuaidao.sys.dto.user.UserDataAuthReq;
 import com.kuaidao.sys.dto.user.UserInfoDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -59,6 +61,9 @@ public class TeleGroupResourceEfficiencyController {
     private ProjectInfoFeignClient projectInfoFeignClient;
     @Autowired
     private OrganizationFeignClient organizationFeignClient;
+    
+    @Autowired
+    ClueConnectValidRateFeignClient clueConnectValidRateFeignClient;
 
     /**
      *电销组资源接通有效率表
@@ -83,17 +88,20 @@ public class TeleGroupResourceEfficiencyController {
     }
 
     /**
-     * 获取电销组资源有效率列表(资源有效)
+     * 获取电销组资源有效率列表(非首日资源有效)
      */
     @RequestMapping("/getResourceConectTelEfficientList")
     @ResponseBody
     public JSONResult<Map<String,Object>> getResourceConectTelEfficientList(@RequestBody TeleGroupResourceEfficiencyQueryDto teleGroupResourceEfficiencyQueryDto) throws Exception{
-        PageBean<TeleGroupResourceEfficiencyDto> pageData = mockData().getData();
+   /*     PageBean<TeleGroupResourceEfficiencyDto> pageData = mockData().getData();
         List<TeleGroupResourceEfficiencyDto> totalData = mockCountData().getData();
         Map<String,Object> resMap = new HashMap<>();
         resMap.put("totalData", totalData);
         resMap.put("tableData", pageData);
-        return new JSONResult<Map<String,Object>>().success(resMap);
+        return new JSONResult<Map<String,Object>>().success(resMap);*/
+        initAuth(teleGroupResourceEfficiencyQueryDto);
+        JSONResult<Map<String, Object>> nonFirstClueValidListJr = clueConnectValidRateFeignClient.nonFirstClueValidList(teleGroupResourceEfficiencyQueryDto);
+        return nonFirstClueValidListJr;
     }
 
     /**
@@ -102,12 +110,14 @@ public class TeleGroupResourceEfficiencyController {
     @RequestMapping("/getFirstResourceConectTelEfficientList")
     @ResponseBody
     public JSONResult<Map<String,Object>> getFirstResourceConectTelEfficientList(@RequestBody TeleGroupResourceEfficiencyQueryDto teleGroupResourceEfficiencyQueryDto) throws Exception{
-        PageBean<TeleGroupResourceEfficiencyDto> pageData = mockData().getData();
+        /*PageBean<TeleGroupResourceEfficiencyDto> pageData = mockData().getData();
         List<TeleGroupResourceEfficiencyDto> totalData = mockCountData().getData();
         Map<String,Object> resMap = new HashMap<>();
         resMap.put("totalData", totalData);
         resMap.put("tableData", pageData);
-        return new JSONResult<Map<String,Object>>().success(resMap);
+        return new JSONResult<Map<String,Object>>().success(resMap);*/
+        JSONResult<Map<String, Object>> firstClueValidListJr = clueConnectValidRateFeignClient.firstClueValidList(teleGroupResourceEfficiencyQueryDto);
+        return firstClueValidListJr;
     }
 
 
@@ -319,6 +329,18 @@ public class TeleGroupResourceEfficiencyController {
         }
 
         return new JSONResult<List<TeleGroupResourceEfficiencyDto>>().success(list);
+    }
+    
+    public void initAuth(TeleGroupResourceEfficiencyQueryDto resourceEfficiencyQueryDto){
+        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+        List<UserDataAuthReq> userDataAuthList = curLoginUser.getUserDataAuthList();
+        Map<Integer,String> map = new HashMap<>();
+        if(null != userDataAuthList && userDataAuthList.size() > 0){
+            for(UserDataAuthReq udar : userDataAuthList){
+                map.put(udar.getBusinessLine(),udar.getDicValue());
+            }
+            resourceEfficiencyQueryDto.setBusinessLineMap(map);
+        }
     }
 
 }
