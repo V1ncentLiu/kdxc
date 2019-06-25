@@ -180,8 +180,8 @@ public class TeleGroupResourceEfficiencyController {
     * @param curDto
      */
     private void setFirstClueValidField(List<Object> curList,TeleGroupResourceEfficiencyAllDto curDto) {
-        curList.add(curDto.getFirstFollowResources());
-        curList.add(curDto.getFirstConnectResources());
+        curList.add(CommUtil.nullIntegerToZero(curDto.getFirstFollowResources()));
+        curList.add(CommUtil.nullIntegerToZero(curDto.getFirstConnectResources()));
         //首日未接通资源量 
         curList.add(CommUtil.nullIntegerToZero(curDto.getFirstNotConnectResources()));
         curList.add(CommUtil.nullIntegerToZero(curDto.getFirstConnectEffectiveResources()));
