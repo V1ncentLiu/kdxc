@@ -9,6 +9,7 @@ import com.kuaidao.common.constant.SystemCodeConstant;
 import com.kuaidao.common.entity.IdEntity;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
+import com.kuaidao.common.util.CommonUtil;
 import com.kuaidao.common.util.ExcelUtil;
 import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
 import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
@@ -18,6 +19,7 @@ import com.kuaidao.manageweb.util.CommUtil;
 import com.kuaidao.stastics.dto.firstResourceAllocation.FirstResourceAllocationQueryDto;
 import com.kuaidao.stastics.dto.resourceEfficiency.ResourceEfficiencyDto;
 import com.kuaidao.stastics.dto.resourceEfficiency.ResourceEfficiencyQueryDto;
+import com.kuaidao.stastics.dto.teleGroupResourceEfficiency.TeleGroupResourceEfficiencyAllDto;
 import com.kuaidao.stastics.dto.teleGroupResourceEfficiency.TeleGroupResourceEfficiencyDto;
 import com.kuaidao.stastics.dto.teleGroupResourceEfficiency.TeleGroupResourceEfficiencyQueryDto;
 import com.kuaidao.sys.dto.dictionary.DictionaryItemRespDTO;
@@ -39,6 +41,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.forwardedUrl;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.net.URLEncoder;
@@ -126,8 +129,8 @@ public class TeleGroupResourceEfficiencyController {
      *  导出电销组资源接通有效率
      */
     @PostMapping("/exportResourceTelEfficiency")
-    public void exportResourceTelEfficiency(@RequestBody ResourceEfficiencyQueryDto resourceEfficiencyQueryDto, HttpServletResponse response) throws IOException {
-        List<List<Object>> dataList = new ArrayList<List<Object>>();
+    public void exportResourceTelEfficiency(@RequestBody TeleGroupResourceEfficiencyQueryDto queryDto, HttpServletResponse response) throws IOException {
+    /*    List<List<Object>> dataList = new ArrayList<List<Object>>();
         dataList.add(getHeadTitle());
         List<TeleGroupResourceEfficiencyDto> orderList = mockCountData().getData();
         for(int i = 0; i<orderList.size(); i++){
@@ -143,11 +146,29 @@ public class TeleGroupResourceEfficiencyController {
             curList.add(ra.getConnectResources());
             curList.add(ra.getNotConnectResources());
             dataList.add(curList);
+        }*/
+        initAuth(queryDto);
+        
+        JSONResult<List<TeleGroupResourceEfficiencyAllDto>> dataJR  = clueConnectValidRateFeignClient.getAllClueValidList(queryDto);
+        List<TeleGroupResourceEfficiencyAllDto> groupValidList = dataJR.getData();
+        List<List<Object>> dataList = new ArrayList<List<Object>>();
+        dataList.add(getHeadTitle());
+        for (int i=0;i<groupValidList.size();i++) {
+            TeleGroupResourceEfficiencyAllDto curDto = groupValidList.get(i);
+            List<Object> curList = new ArrayList<>();
+            curList.add(i + 1);
+            //设置 非首日属性
+            setNonFirstClueValidField(curList,curDto);
+            //设置 首日属性
+            setFirstClueValidField(curList,curDto);
+            dataList.add(curList);
         }
+       
+        
         XSSFWorkbook wbWorkbook = ExcelUtil.creat2007Excel(dataList);
-        Long startTime = resourceEfficiencyQueryDto.getStartTime();
-        Long endTime = resourceEfficiencyQueryDto.getEndTime();
-        String name = "电销组资源跟踪记录表" +startTime+"-"+endTime + ".xlsx";
+        Long startTime = queryDto.getStartTime();
+        Long endTime = queryDto.getEndTime();
+        String name = "电销组资源接通有效率表" +startTime+"-"+endTime + ".xlsx";
         response.addHeader("Content-Disposition",
                 "attachment;filename=" + new String(name.getBytes("UTF-8"), "ISO8859-1"));
         response.addHeader("fileName", URLEncoder.encode(name, "utf-8"));
@@ -155,6 +176,67 @@ public class TeleGroupResourceEfficiencyController {
         ServletOutputStream outputStream = response.getOutputStream();
         wbWorkbook.write(outputStream);
         outputStream.close();
+    }
+
+    /**
+     * 导出 设置 首日 属性
+    * @param curList
+    * @param curDto
+     */
+    private void setFirstClueValidField(List<Object> curList,TeleGroupResourceEfficiencyAllDto curDto) {
+        curList.add(curDto.getFirstFollowResources());
+        curList.add(curDto.getFirstConnectResources());
+        //首日未接通资源量 
+        curList.add(CommUtil.nullIntegerToZero(curDto.getFirstNotConnectResources()));
+        curList.add(CommUtil.nullIntegerToZero(curDto.getFirstConnectEffectiveResources()));
+        curList.add(CommUtil.nullIntegerToZero(curDto.getFirstConnectNotEffectiveResources()));
+        curList.add(CommUtil.nullIntegerToZero(curDto.getFirstNotConnectEffectiveResources()));
+        curList.add(CommUtil.nullIntegerToZero(curDto.getFirstNotConnectNotEffectiveResources()));
+        curList.add(formatPercent(curDto.getFirstFollowRate()));
+        curList.add(formatPercent(curDto.getFirstResourceConnectRate()));
+        curList.add(formatPercent(curDto.getFirstResourceConnectRate()));
+        curList.add(formatPercent(curDto.getFirstResourceEffectiveRate()));
+        curList.add(formatPercent(curDto.getFirstConnectionRate()));
+    }
+
+    /**
+     * 导出 设置非首日属性
+    * @param curList
+    * @param curDto
+     */
+    private void setNonFirstClueValidField(List<Object> curList,TeleGroupResourceEfficiencyAllDto curDto) {
+        curList.add(curDto.getOrgName());
+        curList.add(curDto.getResourceCategoryName());
+        curList.add(curDto.getResourceMediumName());
+        curList.add(curDto.getProjectTypeName());
+        curList.add(CommUtil.nullIntegerToZero(curDto.getIssuedResources()));
+        curList.add(CommUtil.nullIntegerToZero(curDto.getFollowResources()));
+        curList.add(CommUtil.nullIntegerToZero(curDto.getFirstResources()));
+        curList.add(CommUtil.nullIntegerToZero(curDto.getConnectResources()));
+        curList.add(CommUtil.nullIntegerToZero(curDto.getNotConnectResources()));
+        curList.add(CommUtil.nullIntegerToZero(curDto.getConnectEffectiveResources()));
+        curList.add(CommUtil.nullIntegerToZero(curDto.getConnectNotEffectiveResources()));
+        curList.add(CommUtil.nullIntegerToZero(curDto.getNotConnectEffectiveResources()));
+        curList.add(CommUtil.nullIntegerToZero(curDto.getNotConnectNotEffectiveResources()));
+        curList.add(formatPercent(curDto.getFollowRate()));
+        curList.add(formatPercent(curDto.getFirstRate()));
+        curList.add(formatPercent(curDto.getResourceConnectRate()));
+        curList.add(formatPercent(curDto.getResourceEffectiveRate()));
+        curList.add(formatPercent(curDto.getConnectionRate()));
+    }
+
+    /**
+     * 格式化 
+    * @param callPercent
+    * @return
+     */
+    private String formatPercent(BigDecimal callPercent) {
+        if(callPercent!=null) {
+            callPercent = callPercent.multiply(new BigDecimal(100));
+        }else {
+            callPercent = BigDecimal.ZERO;
+        }
+       return callPercent+"%"; 
     }
 
     /**
