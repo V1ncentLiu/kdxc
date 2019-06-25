@@ -93,14 +93,10 @@
             </div>
             <el-row class="marginB20">
                 <el-tabs type="card" v-model="tableActive" @tab-click="handleClick('tab')">
-                    <el-tab-pane label="资源有效" name="0"></el-tab-pane>
-                    <el-tab-pane label="首日资源有效" name="1"></el-tab-pane>
-                </el-tabs>
-            </el-row>
-            <el-row>
-                <el-table ref="tableData" tooltip-effect="dark" style="width: 100%" border :data="tableData"
+                    <el-tab-pane label="资源有效" name="0">
+                        <el-table  ref="tableData" tooltip-effect="dark" style="width: 100%" border :data="tableData"
                     v-loading="loading" :span-method="arraySpanMethod">
-                    <el-table-column prop="orgName" align="center" label="电销组">
+                    <el-table-column  prop="orgName" align="center" label="电销组">
                     </el-table-column>
                     <el-table-column prop="resourceCategoryName" align="center" label="资源类别">
                         <template slot-scope="scope">
@@ -113,44 +109,98 @@
                     </el-table-column>
                     <el-table-column prop="issuedResources" align="center" label="下发资源量">
                     </el-table-column>
-                    <el-table-column prop="followResources" align="center" :label="tableActive == 0 ?'跟访资源量':'首日跟访资源量'">
+                    <el-table-column prop="followResources" align="center" label="跟访资源量">
                     </el-table-column>
-                    <el-table-column prop="firstResources" align="center"
-                        :label="tableActive == 0 ?'首次接通资源量':'首日接通资源量'">
+                    <el-table-column prop="firstResources" align="center" label="首次接通资源量">
                     </el-table-column>
-                    <el-table-column prop="connectResources" align="center" label="接通资源量" v-if='tableActive == 0'>
+                    <el-table-column prop="connectResources" align="center" label="接通资源量">
                     </el-table-column>
                     <el-table-column prop="notConnectResources" align="center"
-                        :label="tableActive == 0 ?'未接通资源量':'首日未接通资源量'">
+                        label="未接通资源量">
                     </el-table-column>
                     <el-table-column prop="connectEffectiveResources" align="center"
-                        :label="tableActive == 0 ?'接通有效资源量':'首日接通有效资源量'">
+                        label="接通有效资源量">
                     </el-table-column>
                     <el-table-column prop="connectNotEffectiveResources" align="center"
-                        :label="tableActive == 0 ?'接通无效资源量':'首日接通无效资源量'">
+                        label="接通无效资源量">
                     </el-table-column>
                     <el-table-column prop="notConnectEffectiveResources" align="center"
-                        :label="tableActive == 0 ?'未接通有效资源量':'首日未接通有效资源量'">
+                        label="未接通有效资源量">
                     </el-table-column>
                     <el-table-column prop="notConnectNotEffectiveResources" align="center"
-                        :label="tableActive == 0 ?'未接通无效资源量':'首日未接通无效资源量'">
+                        label="未接通无效资源量">
                     </el-table-column>
-                    <el-table-column prop="followRate" align="center" :label="tableActive == 0 ?'跟访率':'首日跟访率'"
+                    <el-table-column prop="followRate" align="center" label="跟访率"
                         :formatter="percentFormat">
                     </el-table-column>
-                    <el-table-column prop="firstRate" align="center" label="首次接通率" v-if='tableActive == 0'
+                    <el-table-column prop="firstRate" align="center" label="首次接通率" 
                         :formatter="percentFormat">
                     </el-table-column>
                     <el-table-column prop="resourceConnectRate" align="center"
-                        :label="tableActive == 0 ?'资源接通率':'首日资源接通率'" :formatter="percentFormat">
+                        label="资源接通率" :formatter="percentFormat">
                     </el-table-column>
                     <el-table-column prop="resourceEffectiveRate" align="center"
-                        :label="tableActive == 0 ?'资源有效率':'首日资源有效率'" :formatter="percentFormat">
+                        label="资源有效率" :formatter="percentFormat">
                     </el-table-column>
-                    <el-table-column prop="connectionRate" align="center" :label="tableActive == 0 ?'接通有效率':'首日接通有效率'"
+                    <el-table-column prop="connectionRate" align="center" label="接通有效率"
                         :formatter="percentFormat">
                     </el-table-column>
                 </el-table>
+                    </el-tab-pane>
+                    <el-tab-pane label="首日资源有效" name="1">
+                        <el-table  ref="tableData" tooltip-effect="dark" style="width: 100%" border :data="tableData"
+                        v-loading="loading" :span-method="arraySpanMethod">
+                        <el-table-column  prop="orgName" align="center" label="电销组">
+                        </el-table-column>
+                        <el-table-column prop="resourceCategoryName" align="center" label="资源类别">
+                            <template slot-scope="scope">
+                                {{scope.row.total == ''?scope.row.resourceCategoryName:scope.row.total}}
+                            </template>
+                        </el-table-column>
+                        <el-table-column prop="resourceMediumName" align="center" label="媒介">
+                        </el-table-column>
+                        <el-table-column prop="projectTypeName" align="center" label="资源项目">
+                        </el-table-column>
+                        <el-table-column prop="issuedResources" align="center" label="下发资源量">
+                        </el-table-column>
+                        <el-table-column prop="followResources" align="center" label="首日跟访资源量">
+                        </el-table-column>
+                        <el-table-column prop="firstResources" align="center"
+                            label="首日接通资源量">
+                        </el-table-column>
+                        <el-table-column prop="notConnectResources" align="center"
+                            label="首日未接通资源量">
+                        </el-table-column>
+                        <el-table-column prop="connectEffectiveResources" align="center"
+                            label="首日接通有效资源量">
+                        </el-table-column>
+                        <el-table-column prop="connectNotEffectiveResources" align="center"
+                            label="首日接通无效资源量">
+                        </el-table-column>
+                        <el-table-column prop="notConnectEffectiveResources" align="center"
+                            label="首日未接通有效资源量">
+                        </el-table-column>
+                        <el-table-column prop="notConnectNotEffectiveResources" align="center"
+                            label="首日未接通无效资源量">
+                        </el-table-column>
+                        <el-table-column prop="followRate" align="center" label="首日跟访率"
+                            :formatter="percentFormat">
+                        </el-table-column>
+                        <el-table-column prop="resourceConnectRate" align="center"
+                            label="首日资源接通率" :formatter="percentFormat">
+                        </el-table-column>
+                        <el-table-column prop="resourceEffectiveRate" align="center"
+                            label="首日资源有效率" :formatter="percentFormat">
+                        </el-table-column>
+                        <el-table-column prop="connectionRate" align="center" label="首日接通有效率"
+                            :formatter="percentFormat">
+                        </el-table-column>
+                    </el-table>
+                    </el-tab-pane>
+                </el-tabs>
+            </el-row>
+            <el-row>
+               
                 <table-pagination :pager="pager" @change="handleClick('page')"></table-pagination>
             </el-row>
         </div>
@@ -158,6 +208,9 @@
     <!-- import common js-->
     <div th:include="_footer_include :: #jsLib"></div>
 </body>
+<style>
+
+</style>
 <script th:inline="javascript">
      var resourceClassList = [[${clueCategoryList}]]; // 资源类别
         var mediumList = [[${mediumList}]]; //媒介
@@ -293,35 +346,6 @@
                     this.searchTable();
                 }
             },
-
-            //电销联动
-            showTele(type) {
-                var param = {};
-                if (type == 1) {
-                    param.orgType = "1";
-                    param.parentId = mainDivVM.teleDeptId;
-                } else if (type == 7) {
-                    param.orgType = "7";
-                    param.parentId = mainDivVM.teleCompanyId;
-                } else if (type == 0) {
-                    param.orgType = "8";
-                }
-                axios.post('/organization/organization/queryOrgByType', param).then(function (response) {
-                        console.log(response);
-                        if (type == 1) {
-                            mainDivVM.dxList = response.data.data;
-                        } else if (type == 7) {
-                            mainDivVM.dxCauseBList = response.data.data;
-                        } else {
-                            mainDivVM.dxBusinessList = response.data.data;
-                        }
-                    }).catch(function (error) {
-                        console.log(error);
-                    })
-                    .then(function () {
-                        // always executed
-                    });
-            },
             toogleClick() {
                 this.isShow = !this.isShow
             },
@@ -406,206 +430,222 @@
                             type: 'error'
                         });
                         return;
-                    } else if (resobj.data && resobj.data.tableData && resobj.data.totalData) {
+                    } 
+                    else if (resobj.data && resobj.data.tableData && resobj.data.totalData) {
                         var resobjData = resobj.data;
                         var tableData = resobjData.tableData;
-                        tableData.data = [
-		   {
-		   	 "connectEffectiveResources": 1,
-			 "connectNotEffectiveResources": 1,
-			 "connectionRate": 12.22,
-			 "firstRate": 123.33,
-			 "firstResources": 1,
-			 "followRate": 15.66,
-			 "followResources": 1091,
-			 "issuedResources": 1,
-			 "projectTypeName": "项目名称",
-			 "resourceConnectRate": 1.22,
-			 "resourceMediumName": "百度",
-			 "resourceCategoryName": "竞价",
-             "orgId": "0"
-		   },
-		   {
-		   	 "connectEffectiveResources": 1,
-			 "connectNotEffectiveResources": 1,
-			 "connectionRate": 12.22,
-			 "firstRate": 123.33,
-			 "firstResources": 1,
-			 "followRate": 15.66,
-			 "followResources": 1091,
-			 "issuedResources": 1,
-			 "projectTypeName": "项目名称",
-			 "resourceConnectRate": 1.22,
-			 "resourceMediumName": "百度",
-			 "resourceCategoryName": "竞价",
-             "orgId": "0"
-		   },
-		   {
-		   	 "connectEffectiveResources": 1,
-			 "connectNotEffectiveResources": 1,
-			 "connectionRate": 12.22,
-			 "firstRate": 123.33,
-			 "firstResources": 1,
-			 "followRate": 15.66,
-			 "followResources": 1091,
-			 "issuedResources": 1,
-			 "projectTypeName": "项目名称",
-			 "resourceConnectRate": 1.22,
-			 "resourceMediumName": "百度",
-			 "resourceCategoryName": "竞价",
-             "orgId": "0"
-		   },
-		   {
-		   	 "connectEffectiveResources": 1,
-			 "connectNotEffectiveResources": 1,
-			 "connectionRate": 12.22,
-			 "firstRate": 123.33,
-			 "firstResources": 1,
-			 "followRate": 15.66,
-			 "followResources": 1091,
-			 "issuedResources": 1,
-			 "projectTypeName": "项目名称",
-			 "resourceConnectRate": 1.22,
-			 "resourceMediumName": "百度",
-			 "resourceCategoryName": "竞价",
-             "orgId": "0"
-		   },
-		   {
-		   	 "connectEffectiveResources": 1,
-			 "connectNotEffectiveResources": 1,
-			 "connectionRate": 12.22,
-			 "firstRate": 123.33,
-			 "firstResources": 1,
-			 "followRate": 15.66,
-			 "followResources": 1091,
-			 "issuedResources": 1,
-			 "projectTypeName": "项目名称",
-			 "resourceConnectRate": 1.22,
-			 "resourceMediumName": "360",
-			 "resourceCategoryName": "竞价",
-             "orgId": "0"
-		   },
-           {
-		   	 "connectEffectiveResources": 1,
-			 "connectNotEffectiveResources": 1,
-			 "connectionRate": 12.22,
-			 "firstRate": 123.33,
-			 "firstResources": 1,
-			 "followRate": 15.66,
-			 "followResources": 1091,
-			 "issuedResources": 1,
-			 "projectTypeName": "项目名称",
-			 "resourceConnectRate": 1.22,
-			 "resourceMediumName": "360",
-			 "resourceCategoryName": "联展",
-             "orgId": "0"
-		   },
-           {
-		   	 "connectEffectiveResources": 1,
-			 "connectNotEffectiveResources": 1,
-			 "connectionRate": 12.22,
-			 "firstRate": 123.33,
-			 "firstResources": 1,
-			 "followRate": 15.66,
-			 "followResources": 1091,
-			 "issuedResources": 1,
-			 "projectTypeName": "项目名称",
-			 "resourceConnectRate": 1.22,
-			 "resourceMediumName": "360",
-			 "resourceCategoryName": "123",
-             "orgId": "0"
-		   },
-		   {
-		   	 "connectEffectiveResources": 1,
-			 "connectNotEffectiveResources": 1,
-			 "connectionRate": 12.22,
-			 "firstRate": 123.33,
-			 "firstResources": 1,
-			 "followRate": 15.66,
-			 "followResources": 1091,
-			 "issuedResources": 1,
-			 "projectTypeName": "项目名称",
-			 "resourceConnectRate": 1.22,
-			 "resourceMediumName": "360",
-			 "resourceCategoryName": "竞价",
-             "orgId": "1"
-		   },
-		   {
-		   	 "connectEffectiveResources": 1,
-			 "connectNotEffectiveResources": 1,
-			 "connectionRate": 12.22,
-			 "firstRate": 123.33,
-			 "firstResources": 1,
-			 "followRate": 15.66,
-			 "followResources": 1091,
-			 "issuedResources": 1,
-			 "projectTypeName": "项目名称",
-			 "resourceConnectRate": 1.22,
-			 "resourceMediumName": "360",
-			 "resourceCategoryName": "竞价",
-             "orgId": "1"
-		   },
-		   {
-		   	 "connectEffectiveResources": 1,
-			 "connectNotEffectiveResources": 1,
-			 "connectionRate": 12.22,
-			 "firstRate": 123.33,
-			 "firstResources": 1,
-			 "followRate": 15.66,
-			 "followResources": 1091,
-			 "issuedResources": 1,
-			 "projectTypeName": "项目名称",
-			 "resourceConnectRate": 1.22,
-			 "resourceMediumName": "78",
-			 "resourceCategoryName": "联展",
-             "orgId": "1"
-		   },
-		   {
-		   	"connectEffectiveResources": 2,
-			 "connectNotEffectiveResources": 1,
-			 "connectionRate": 12.22,
-			 "firstRate": 123.33,
-			 "firstResources": 1,
-			 "followRate": 15.66,
-			 "followResources": 1091,
-			 "issuedResources": 1,
-			 "projectTypeName": "项目名称",
-			 "resourceConnectRate": 1.22,
-			 "resourceMediumName": "78",
-			 "resourceCategoryName": "联展",
-             "orgId": "1"
-		   },
-		     {
-		   	"connectEffectiveResources": 2,
-			 "connectNotEffectiveResources": 1,
-			 "connectionRate": 12.22,
-			 "firstRate": 123.33,
-			 "firstResources": 1,
-			 "followRate": 15.66,
-			 "followResources": 1091,
-			 "issuedResources": 1,
-			 "projectTypeName": "项目名称",
-			 "resourceConnectRate": 1.22,
-			 "resourceMediumName": "78",
-			 "resourceCategoryName": "联展1",
-             "orgId": "1"
-		   },
-		   {
-		   	"connectEffectiveResources": 2,
-			 "connectNotEffectiveResources": 1,
-			 "connectionRate": 12.22,
-			 "firstRate": 123.33,
-			 "firstResources": 1,
-			 "followRate": 15.66,
-			 "followResources": 1091,
-			 "issuedResources": 1,
-			 "projectTypeName": "项目名称",
-			 "resourceConnectRate": 1.22,
-			 "resourceMediumName": "781",
-			 "resourceCategoryName": "联展2",
-             "orgId": "2"
-		   }
-		];
+        //                 tableData.data = [
+		//    {
+		//    	 "connectEffectiveResources": 1,
+		// 	 "connectNotEffectiveResources": 1,
+		// 	 "connectionRate": 12.22,
+		// 	 "firstRate": 123.33,
+		// 	 "firstResources": 1,
+		// 	 "followRate": 15.66,
+		// 	 "followResources": 1091,
+		// 	 "issuedResources": 1,
+		// 	 "projectTypeName": "项目1",
+		// 	 "resourceConnectRate": 1.22,
+		// 	 "resourceMediumName": "百度",
+		// 	 "resourceCategoryName": "竞价",
+        //      "orgId": "0"
+		//    },
+		//    {
+		//    	 "connectEffectiveResources": 1,
+		// 	 "connectNotEffectiveResources": 1,
+		// 	 "connectionRate": 12.22,
+		// 	 "firstRate": 123.33,
+		// 	 "firstResources": 1,
+		// 	 "followRate": 15.66,
+		// 	 "followResources": 1091,
+		// 	 "issuedResources": 1,
+		// 	 "projectTypeName": "项目2",
+		// 	 "resourceConnectRate": 1.22,
+		// 	 "resourceMediumName": "百度",
+		// 	 "resourceCategoryName": "竞价",
+        //      "orgId": "0"
+		//    },
+		//    {
+		//    	 "connectEffectiveResources": 1,
+		// 	 "connectNotEffectiveResources": 1,
+		// 	 "connectionRate": 12.22,
+		// 	 "firstRate": 123.33,
+		// 	 "firstResources": 1,
+		// 	 "followRate": 15.66,
+		// 	 "followResources": 1091,
+		// 	 "issuedResources": 1,
+		// 	 "projectTypeName": "项目1",
+		// 	 "resourceConnectRate": 1.22,
+		// 	 "resourceMediumName": "360",
+		// 	 "resourceCategoryName": "竞价",
+        //      "orgId": "0"
+		//    },
+		//    {
+		//    	 "connectEffectiveResources": 1,
+		// 	 "connectNotEffectiveResources": 1,
+		// 	 "connectionRate": 12.22,
+		// 	 "firstRate": 123.33,
+		// 	 "firstResources": 1,
+		// 	 "followRate": 15.66,
+		// 	 "followResources": 1091,
+		// 	 "issuedResources": 1,
+		// 	 "projectTypeName": "项目名称",
+		// 	 "resourceConnectRate": 1.22,
+		// 	 "resourceMediumName": "搜狐",
+		// 	 "resourceCategoryName": "竞价",
+        //      "orgId": "0"
+		//    },
+		//    {
+		//    	 "connectEffectiveResources": 1,
+		// 	 "connectNotEffectiveResources": 1,
+		// 	 "connectionRate": 12.22,
+		// 	 "firstRate": 123.33,
+		// 	 "firstResources": 1,
+		// 	 "followRate": 15.66,
+		// 	 "followResources": 1091,
+		// 	 "issuedResources": 1,
+		// 	 "projectTypeName": "项目名称",
+		// 	 "resourceConnectRate": 1.22,
+		// 	 "resourceMediumName": "360",
+		// 	 "resourceCategoryName": "竞价",
+        //      "orgId": "0"
+		//    },
+        //    {
+		//    	 "connectEffectiveResources": 1,
+		// 	 "connectNotEffectiveResources": 1,
+		// 	 "connectionRate": 12.22,
+		// 	 "firstRate": 123.33,
+		// 	 "firstResources": 1,
+		// 	 "followRate": 15.66,
+		// 	 "followResources": 1091,
+		// 	 "issuedResources": 1,
+		// 	 "projectTypeName": "项目名称",
+		// 	 "resourceConnectRate": 1.22,
+		// 	 "resourceMediumName": "360",
+		// 	 "resourceCategoryName": "联展",
+        //      "orgId": "0"
+		//    },
+        //    {
+		//    	 "connectEffectiveResources": 1,
+		// 	 "connectNotEffectiveResources": 1,
+		// 	 "connectionRate": 12.22,
+		// 	 "firstRate": 123.33,
+		// 	 "firstResources": 1,
+		// 	 "followRate": 15.66,
+		// 	 "followResources": 1091,
+		// 	 "issuedResources": 1,
+		// 	 "projectTypeName": "项目名称",
+		// 	 "resourceConnectRate": 1.22,
+		// 	 "resourceMediumName": "360",
+		// 	 "resourceCategoryName": "123",
+        //      "orgId": "0"
+		//    },
+		//    {
+		//    	 "connectEffectiveResources": 1,
+		// 	 "connectNotEffectiveResources": 1,
+		// 	 "connectionRate": 12.22,
+		// 	 "firstRate": 123.33,
+		// 	 "firstResources": 1,
+		// 	 "followRate": 15.66,
+		// 	 "followResources": 1091,
+		// 	 "issuedResources": 1,
+		// 	 "projectTypeName": "项目名称",
+		// 	 "resourceConnectRate": 1.22,
+		// 	 "resourceMediumName": "360",
+		// 	 "resourceCategoryName": "竞价",
+        //      "orgId": "1"
+		//    },
+		//    {
+		//    	 "connectEffectiveResources": 1,
+		// 	 "connectNotEffectiveResources": 1,
+		// 	 "connectionRate": 12.22,
+		// 	 "firstRate": 123.33,
+		// 	 "firstResources": 1,
+		// 	 "followRate": 15.66,
+		// 	 "followResources": 1091,
+		// 	 "issuedResources": 1,
+		// 	 "projectTypeName": "项目名称",
+		// 	 "resourceConnectRate": 1.22,
+		// 	 "resourceMediumName": "360",
+		// 	 "resourceCategoryName": "竞价",
+        //      "orgId": "1"
+		//    },
+		//    {
+		//    	 "connectEffectiveResources": 1,
+		// 	 "connectNotEffectiveResources": 1,
+		// 	 "connectionRate": 12.22,
+		// 	 "firstRate": 123.33,
+		// 	 "firstResources": 1,
+		// 	 "followRate": 15.66,
+		// 	 "followResources": 1091,
+		// 	 "issuedResources": 1,
+		// 	 "projectTypeName": "项目名称",
+		// 	 "resourceConnectRate": 1.22,
+		// 	 "resourceMediumName": "78",
+		// 	 "resourceCategoryName": "联展",
+        //      "orgId": "1"
+		//    },
+		//    {
+		//    	"connectEffectiveResources": 2,
+		// 	 "connectNotEffectiveResources": 1,
+		// 	 "connectionRate": 12.22,
+		// 	 "firstRate": 123.33,
+		// 	 "firstResources": 1,
+		// 	 "followRate": 15.66,
+		// 	 "followResources": 1091,
+		// 	 "issuedResources": 1,
+		// 	 "projectTypeName": "项目名称",
+		// 	 "resourceConnectRate": 1.22,
+		// 	 "resourceMediumName": "78",
+		// 	 "resourceCategoryName": "联展",
+        //      "orgId": "1"
+		//    },
+		//      {
+		//    	"connectEffectiveResources": 2,
+		// 	 "connectNotEffectiveResources": 1,
+		// 	 "connectionRate": 12.22,
+		// 	 "firstRate": 123.33,
+		// 	 "firstResources": 1,
+		// 	 "followRate": 15.66,
+		// 	 "followResources": 1091,
+		// 	 "issuedResources": 1,
+		// 	 "projectTypeName": "项目名称",
+		// 	 "resourceConnectRate": 1.22,
+		// 	 "resourceMediumName": "78",
+		// 	 "resourceCategoryName": "联展1",
+        //      "orgId": "1"
+		//    },
+		//    {
+		//    	"connectEffectiveResources": 2,
+		// 	 "connectNotEffectiveResources": 1,
+		// 	 "connectionRate": 12.22,
+		// 	 "firstRate": 123.33,
+		// 	 "firstResources": 1,
+		// 	 "followRate": 15.66,
+		// 	 "followResources": 1091,
+		// 	 "issuedResources": 1,
+		// 	 "projectTypeName": "项目名称",
+		// 	 "resourceConnectRate": 1.22,
+		// 	 "resourceMediumName": "781",
+		// 	 "resourceCategoryName": "联展2",
+        //      "orgId": "2"
+		//    },
+        //    {
+		//    	"connectEffectiveResources": 2,
+		// 	 "connectNotEffectiveResources": 1,
+		// 	 "connectionRate": 12.22,
+		// 	 "firstRate": 123.33,
+		// 	 "firstResources": 1,
+		// 	 "followRate": 15.66,
+		// 	 "followResources": 1091,
+		// 	 "issuedResources": 1,
+		// 	 "projectTypeName": "项目名称",
+		// 	 "resourceConnectRate": 1.22,
+		// 	 "resourceMediumName": "781",
+		// 	 "resourceCategoryName": "联展2",
+        //      "orgId": "2"
+		//    }
+		// ];
                         for (var i = 0; i < resobjData.totalData.length; i++) {
                             Vue.set(resobjData.totalData[i], 'total', '合计')
                         }
@@ -615,25 +655,17 @@
                         }
                        
                         mainDivVM.summaryFun(resobjData.totalData, mainDivVM.formatTreeList(tableData.data))
-
                         mainDivVM.pager.currentPage = tableData.currentPage;
                         mainDivVM.pager.total = tableData.total;
                         mainDivVM.loading = false;
 
                         //重新赋值
-
                         mainDivVM.startTimeEnd = mainDivVM.form.startTime;
                         mainDivVM.endTimeEnd = mainDivVM.form.endTime;
                         mainDivVM.resourceClassIdEnd = mainDivVM.form.resourceId;
                         mainDivVM.mediumIdEnd = mainDivVM.form.mediumId;
                         mainDivVM.resourceProjectIdEnd = mainDivVM.form.resourceProjectId;
                         mainDivVM.orgIdEnd = mainDivVM.form.teleGorupId
-                        // 给导出参数赋值
-                        // mainDivVM.export.startTime = mainDivVM.minuteFormat(startTime);
-                        // mainDivVM.export.endTime = mainDivVM.minuteFormat(endTime);
-                        // mainDivVM.export.resourceClassId = mainDivVM.form.resourceId;
-                        // mainDivVM.export.mediumId = mainDivVM.form.mediumId;
-                        // mainDivVM.export.resourceProjectId = mainDivVM.form.resourceProjectId;
                     } else {
                         mainDivVM.loading = false;
                     }
