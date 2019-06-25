@@ -125,6 +125,7 @@ public class InviteAreaController {
                 organizationFeignClient.queryOrgByParam(orgDto);
         // 查询项目列表
         JSONResult<List<ProjectInfoDTO>> allProject = projectInfoFeignClient.allProject();
+        List<ProjectInfoDTO> projectInfoDTOList = allProject.getData();
         //
         SysRegionDTO sysRegionDTO = new SysRegionDTO();
         sysRegionDTO.setId(0L);
