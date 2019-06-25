@@ -1000,20 +1000,25 @@
                     { required: true, message: '请选择签约店型', trigger: 'change' }
                 ],
                 amountReceivable: [
-                    { required: true,validator:function(rule,value,callback){
-                                var reg =  /^[0-9]+[0-9]*]*$/ ;
-                                if(value ==null || value =="null" || value ==""  ){
-                                    callback(new Error("请输入应收金额"));
-                                    mainDivVM.formSigning.amountReceivable =null;
+                    {required: true, message: '请输入应收金额', trigger: 'blur'},
+                    {
+                        validator: function (rule, value, callback) {
+                            if (value === 0) {
+                                callback();
+                            }
+                            var reg = /^[0-9]+[0-9]*]*$/;
+                            if (value == null || value == "null" || value == "") {
+                                callback(new Error("请输入应收金额"));
+                                mainDivVM.formSigning.amountReceivable = null;
 
-                                }else  if(value !=null && value !="null" && value !="" && !reg.test(value) ){
-                                    callback(new Error("请输入正整数"));
-                                    mainDivVM.formSigning.amountReceivable =null;
-                                }else{
-                                    callback();
-                                }
-
-                            }, trigger: 'change'}
+                            } else if (value != null && value != "null" && value != "" && !reg.test(value)) {
+                                callback(new Error("请输入正整数"));
+                                mainDivVM.formSigning.amountReceivable = null;
+                            } else {
+                                callback();
+                            }
+                        }, trigger: 'change'
+                    }
                 ],
                 signType: [
                     { required: true, message: '请选择签约类型', trigger: 'change' }
@@ -1369,7 +1374,6 @@
                 this.shouAddVisitButton = false;
                 axios.post('/businesssign/echo',param).then(function (response) {
                     mainDivVM.formSigning = response.data.data;
-                    mainDivVM.formSigning.clueId=vclueId;
                     mainDivVM.dialogFormSigningVisible = true;
                     mainDivVM.currentProvince(mainDivVM.formSigning.signProvince)
                     mainDivVM.currentCity(mainDivVM.formSigning.signCity)
