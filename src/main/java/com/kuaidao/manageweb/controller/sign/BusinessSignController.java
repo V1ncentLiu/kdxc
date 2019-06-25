@@ -235,6 +235,10 @@ public class BusinessSignController {
         JSONResult<BusSignRespDTO> res = businessSignFeignClient.queryOne(idEntityLong);
         if (JSONResult.SUCCESS.equals(res.getCode())) {
             BusSignRespDTO data = res.getData();
+            // 這段是為了顯示
+            // data.setSignProjectId(this.getProjectId());
+
+
             // 转换驳回记录里用户信息
             List<SignRejectRecordDto> rejectRecordList = data.getSignRejectRecordList();
             if (rejectRecordList != null && !rejectRecordList.isEmpty()) {
@@ -352,7 +356,9 @@ public class BusinessSignController {
           String tasteProjectId = (String) data.get("tasteProjectId");
           String[] split = tasteProjectId.split(",");
           if (split.length > 0 && !"".equals(split[0])) {
-            signDTO.setSignProjectId(Long.valueOf(split[0]));
+//            signDTO.setSignProjectId();
+            Long signProjectId =Long.valueOf(split[0]);
+            signDTO.setSignProjectId(getProjectId(proJson,signProjectId));
           }
           signDTO.setSignProvince((String) data.get("signProvince"));
           signDTO.setSignCity((String) data.get("signCity"));
