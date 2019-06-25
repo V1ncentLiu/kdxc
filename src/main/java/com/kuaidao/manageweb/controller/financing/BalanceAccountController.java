@@ -221,8 +221,7 @@ public class BalanceAccountController {
         req.setCommitUser(user.getId());
         req.setCommitTime(new Date());
         BigDecimal bigDecimal = new BigDecimal(req.getMoney());
-        req.setCommissionMoney(
-                bigDecimal.multiply(new BigDecimal(req.getRatio())).divide(new BigDecimal(100)));
+       // req.setCommissionMoney(bigDecimal.multiply(new BigDecimal(req.getRatio())).divide(new BigDecimal(100)));
         req.setStatus(AggregationConstant.RECONCILIATION_STATUS.STATUS_2);
         JSONResult<Void> reconciliationConfirm = reconciliationConfirmFeignClient.applyConfirm(req);
         return reconciliationConfirm;
