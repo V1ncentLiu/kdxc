@@ -126,6 +126,12 @@ public class BusinessMyCustomerController {
             request.setAttribute("proSelect", proJson.getData());
         }
 
+        // 项目
+        JSONResult<List<ProjectInfoDTO>> proallJson = projectInfoFeignClient.allProject();
+        if (JSONResult.SUCCESS.equals(proJson.getCode())) {
+            request.setAttribute("proAllSelect", proallJson.getData());
+        }
+
         JSONResult<List<CompanyInfoDTO>> listJSONResult = companyInfoFeignClient.allCompany();
         if (JSONResult.SUCCESS.equals(listJSONResult.getCode())) {
             request.setAttribute("companySelect", proJson.getData());
