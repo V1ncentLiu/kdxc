@@ -52,7 +52,7 @@
                         <el-option
                             v-for="item in resourceProjectArr"
                             :key="item.id"
-                            :label="item.name"
+                            :label="item.projectName"
                             :value="item.id">
                         </el-option>
                     </el-select>
@@ -64,7 +64,7 @@
         </div>
         <!-- tabs -->
         <el-row class="tabsC">
-            <el-tabs v-model="activeName" @tab-click="handleClick">
+            <el-tabs v-model="activeName" @tab-click="handleClick('tab')">
     		    <el-tab-pane label="资源有效" name="0">
                     <el-table 
                         ref="tableDataFirst"
@@ -110,7 +110,7 @@
                         <el-table-column prop="connectionRate" align="center" label="接通有效率" :formatter="percentFormat">
                         </el-table-column>
                     </el-table>
-                    <table-pagination :pager="pager" @change="searchTable()"></table-pagination>
+                    <table-pagination :pager="pager" @change="handleClick('page')"></table-pagination>
     			</el-tab-pane>
     		    <el-tab-pane label="首日资源有效" name="1">
                     <el-table 
@@ -153,7 +153,7 @@
                          <el-table-column prop="connectionRate" align="center" label="首日接通有效率" :formatter="percentFormat">
                         </el-table-column>
                     </el-table>
-                    <table-pagination :pager="pager" @change="searchTable()"></table-pagination>   
+                    <table-pagination :pager="pager" @change="handleClick('page')"></table-pagination>   
                 </el-tab-pane>
     		 </el-tabs>
         </el-row>
@@ -234,14 +234,33 @@
             }             
         },
         methods: {
-            handleClick(tab, event) {
-                console.log(tab, event);
+       	   	formatTreeList(dataArr) {
+                for(var j = 0; j < dataArr.length;j++){
+                    for(var k = j+1 ; k < dataArr.length;k++){
+                        if(dataArr[j].resourceCategoryName == dataArr[k].resourceCategoryName){
+                            dataArr[k].resourceCategoryName = ''
+                            if(dataArr[j].resourceMediumName == dataArr[k].resourceMediumName){
+                                dataArr[k].resourceMediumName = ''
+                            }
+                        }
+
+                    }
+                }
+                return dataArr;
+            },
+            handleClick(tab) {
+                //console.log(tab, event);
                 this.form.startTime = this.startTimeEnd;
                 this.form.endTime = this.endTimeEnd;
                 this.form.resourceClassId = this.resourceClassIdEnd;
                 this.form.mediumId = this.mediumIdEnd;
                 this.form.resourceProjectId = this.resourceProjectIdEnd;
-                this.searchTable(1);
+                //this.searchTable(1);
+                if( tab=='tab' ){
+                    this.searchTable(1);
+                }else{
+                    this.searchTable();
+                }
 
             },            
             searchTable(firstPage) { 
@@ -294,16 +313,16 @@
                 param.resourceMedium = this.form.mediumId;
                 param.projectType = this.form.resourceProjectId;
 
-                this.startTimeEnd = this.form.startTime;
+                /* this.startTimeEnd = this.form.startTime;
                 this.endTimeEnd = this.form.endTime;
                 this.resourceClassIdEnd = this.form.resourceClassId;
                 this.mediumIdEnd = this.form.mediumId;
-                this.resourceProjectIdEnd = this.form.resourceProjectId;
+                this.resourceProjectIdEnd = this.form.resourceProjectId; */
 
                 this.loading = true; 
                 // axios.post('/statistics/resourceEfficiency/getResourceEfficientList',param).then(function (response) { 
                 axios.post( search_url[parseInt(this.activeName)] ,param).then(function (response) { 
-                    console.log( response );
+                    //console.log( response );
                     if(!response){
                         mainDivVM.$message({
                             message: "接口调用失败",
@@ -335,14 +354,213 @@
                             var totalData = resobjData.totalData;
                             mainDivVM.tableData.unshift(totalData);
                         }*/
+                        /*tableData.data = [
+                               		   {
+                               		   	 "connectEffectiveResources": 1,
+                               			 "connectNotEffectiveResources": 1,
+                               			 "connectionRate": 12.22,
+                               			 "firstRate": 123.33,
+                               			 "firstResources": 1,
+                               			 "followRate": 15.66,
+                               			 "followResources": 1091,
+                               			 "issuedResources": 1,
+                               			 "projectTypeName": "项目名称",
+                               			 "resourceConnectRate": 1.22,
+                               			 "resourceMediumName": "百度",
+                               			 "resourceCategoryName": "竞价",
+                                            "orgId": "0"
+                               		   },
+                               		   {
+                               		   	 "connectEffectiveResources": 1,
+                               			 "connectNotEffectiveResources": 1,
+                               			 "connectionRate": 12.22,
+                               			 "firstRate": 123.33,
+                               			 "firstResources": 1,
+                               			 "followRate": 15.66,
+                               			 "followResources": 1091,
+                               			 "issuedResources": 1,
+                               			 "projectTypeName": "项目名称",
+                               			 "resourceConnectRate": 1.22,
+                               			 "resourceMediumName": "百度",
+                               			 "resourceCategoryName": "竞价",
+                                            "orgId": "0"
+                               		   },
+                               		   {
+                               		   	 "connectEffectiveResources": 1,
+                               			 "connectNotEffectiveResources": 1,
+                               			 "connectionRate": 12.22,
+                               			 "firstRate": 123.33,
+                               			 "firstResources": 1,
+                               			 "followRate": 15.66,
+                               			 "followResources": 1091,
+                               			 "issuedResources": 1,
+                               			 "projectTypeName": "项目名称",
+                               			 "resourceConnectRate": 1.22,
+                               			 "resourceMediumName": "百度",
+                               			 "resourceCategoryName": "竞价",
+                                            "orgId": "0"
+                               		   },
+                               		   {
+                               		   	 "connectEffectiveResources": 1,
+                               			 "connectNotEffectiveResources": 1,
+                               			 "connectionRate": 12.22,
+                               			 "firstRate": 123.33,
+                               			 "firstResources": 1,
+                               			 "followRate": 15.66,
+                               			 "followResources": 1091,
+                               			 "issuedResources": 1,
+                               			 "projectTypeName": "项目名称",
+                               			 "resourceConnectRate": 1.22,
+                               			 "resourceMediumName": "百度",
+                               			 "resourceCategoryName": "竞价",
+                                            "orgId": "0"
+                               		   },
+                               		   {
+                               		   	 "connectEffectiveResources": 1,
+                               			 "connectNotEffectiveResources": 1,
+                               			 "connectionRate": 12.22,
+                               			 "firstRate": 123.33,
+                               			 "firstResources": 1,
+                               			 "followRate": 15.66,
+                               			 "followResources": 1091,
+                               			 "issuedResources": 1,
+                               			 "projectTypeName": "项目名称",
+                               			 "resourceConnectRate": 1.22,
+                               			 "resourceMediumName": "360",
+                               			 "resourceCategoryName": "竞价",
+                                            "orgId": "0"
+                               		   },
+                                          {
+                               		   	 "connectEffectiveResources": 1,
+                               			 "connectNotEffectiveResources": 1,
+                               			 "connectionRate": 12.22,
+                               			 "firstRate": 123.33,
+                               			 "firstResources": 1,
+                               			 "followRate": 15.66,
+                               			 "followResources": 1091,
+                               			 "issuedResources": 1,
+                               			 "projectTypeName": "项目名称",
+                               			 "resourceConnectRate": 1.22,
+                               			 "resourceMediumName": "3601",
+                               			 "resourceCategoryName": "竞价",
+                                            "orgId": "0"
+                               		   },
+                                          {
+                               		   	 "connectEffectiveResources": 1,
+                               			 "connectNotEffectiveResources": 1,
+                               			 "connectionRate": 12.22,
+                               			 "firstRate": 123.33,
+                               			 "firstResources": 1,
+                               			 "followRate": 15.66,
+                               			 "followResources": 1091,
+                               			 "issuedResources": 1,
+                               			 "projectTypeName": "项目名称",
+                               			 "resourceConnectRate": 1.22,
+                               			 "resourceMediumName": "360",
+                               			 "resourceCategoryName": "123",
+                                            "orgId": "0"
+                               		   },
+                               		   {
+                               		   	 "connectEffectiveResources": 1,
+                               			 "connectNotEffectiveResources": 1,
+                               			 "connectionRate": 12.22,
+                               			 "firstRate": 123.33,
+                               			 "firstResources": 1,
+                               			 "followRate": 15.66,
+                               			 "followResources": 1091,
+                               			 "issuedResources": 1,
+                               			 "projectTypeName": "项目名称",
+                               			 "resourceConnectRate": 1.22,
+                               			 "resourceMediumName": "360",
+                               			 "resourceCategoryName": "竞价",
+                                            "orgId": "1"
+                               		   },
+                               		   {
+                               		   	 "connectEffectiveResources": 1,
+                               			 "connectNotEffectiveResources": 1,
+                               			 "connectionRate": 12.22,
+                               			 "firstRate": 123.33,
+                               			 "firstResources": 1,
+                               			 "followRate": 15.66,
+                               			 "followResources": 1091,
+                               			 "issuedResources": 1,
+                               			 "projectTypeName": "项目名称",
+                               			 "resourceConnectRate": 1.22,
+                               			 "resourceMediumName": "360",
+                               			 "resourceCategoryName": "竞价",
+                                            "orgId": "1"
+                               		   },
+                               		   {
+                               		   	 "connectEffectiveResources": 1,
+                               			 "connectNotEffectiveResources": 1,
+                               			 "connectionRate": 12.22,
+                               			 "firstRate": 123.33,
+                               			 "firstResources": 1,
+                               			 "followRate": 15.66,
+                               			 "followResources": 1091,
+                               			 "issuedResources": 1,
+                               			 "projectTypeName": "项目名称",
+                               			 "resourceConnectRate": 1.22,
+                               			 "resourceMediumName": "78",
+                               			 "resourceCategoryName": "联展",
+                                            "orgId": "1"
+                               		   },
+                               		   {
+                               		   	"connectEffectiveResources": 2,
+                               			 "connectNotEffectiveResources": 1,
+                               			 "connectionRate": 12.22,
+                               			 "firstRate": 123.33,
+                               			 "firstResources": 1,
+                               			 "followRate": 15.66,
+                               			 "followResources": 1091,
+                               			 "issuedResources": 1,
+                               			 "projectTypeName": "项目名称",
+                               			 "resourceConnectRate": 1.22,
+                               			 "resourceMediumName": "78",
+                               			 "resourceCategoryName": "联展",
+                                            "orgId": "1"
+                               		   },
+                               		     {
+                               		   	"connectEffectiveResources": 2,
+                               			 "connectNotEffectiveResources": 1,
+                               			 "connectionRate": 12.22,
+                               			 "firstRate": 123.33,
+                               			 "firstResources": 1,
+                               			 "followRate": 15.66,
+                               			 "followResources": 1091,
+                               			 "issuedResources": 1,
+                               			 "projectTypeName": "项目名称",
+                               			 "resourceConnectRate": 1.22,
+                               			 "resourceMediumName": "78",
+                               			 "resourceCategoryName": "联展1",
+                                            "orgId": "1"
+                               		   },
+                               		   {
+                               		   	"connectEffectiveResources": 2,
+                               			 "connectNotEffectiveResources": 1,
+                               			 "connectionRate": 12.22,
+                               			 "firstRate": 123.33,
+                               			 "firstResources": 1,
+                               			 "followRate": 15.66,
+                               			 "followResources": 1091,
+                               			 "issuedResources": 1,
+                               			 "projectTypeName": "项目名称",
+                               			 "resourceConnectRate": 1.22,
+                               			 "resourceMediumName": "781",
+                               			 "resourceCategoryName": "联展2",
+                                            "orgId": "2"
+                               		   }
+                               		];*/
                         if( mainDivVM.activeName=="0" ){
-                            mainDivVM.tableDataFirst = tableData.data;
+                            mainDivVM.tableDataFirst = mainDivVM.formatTreeList(tableData.data);
+                            // mainDivVM.tableDataFirst = tableData.data;
                             if(tableData.data && tableData.data.length){
                                 var totalData = resobjData.totalData[0];
                                 mainDivVM.tableDataFirst.unshift(totalData);
                             }
                         }else{
-                           mainDivVM.tableDataSecond = tableData.data;
+                           mainDivVM.tableDataSecond = mainDivVM.formatTreeList(tableData.data);
+                           // mainDivVM.tableDataSecond = tableData.data;
                             if(tableData.data && tableData.data.length){
                                 var totalData = resobjData.totalData[0];
                                 mainDivVM.tableDataSecond.unshift(totalData);
@@ -359,6 +577,12 @@
                         mainDivVM.export.resourceClassId = mainDivVM.form.resourceClassId;
                         mainDivVM.export.mediumId = mainDivVM.form.mediumId;
                         mainDivVM.export.resourceProjectId = mainDivVM.form.resourceProjectId;
+                        
+                        mainDivVM.startTimeEnd = mainDivVM.form.startTime;
+                        mainDivVM.endTimeEnd = mainDivVM.form.endTime;
+                        mainDivVM.resourceClassIdEnd = mainDivVM.form.resourceClassId;
+                        mainDivVM.mediumIdEnd = mainDivVM.form.mediumId;
+                        mainDivVM.resourceProjectIdEnd = mainDivVM.form.resourceProjectId;
                     }else{
                         mainDivVM.loading = false;
                     }  
