@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.Map;
 
-@FeignClient(name = "statstics-service-wyp", path = "/statstics/resourceEfficiency", fallback = ResourceEfficiencyFeignClient.HystrixClientFallback.class)
+@FeignClient(name = "statstics-service", path = "/statstics/resourceEfficiency", fallback = ResourceEfficiencyFeignClient.HystrixClientFallback.class)
 public interface ResourceEfficiencyFeignClient {
 
     @PostMapping("/getResourceEfficientPageList")
