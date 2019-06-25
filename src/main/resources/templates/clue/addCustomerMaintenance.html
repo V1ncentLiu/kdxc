@@ -319,58 +319,6 @@
                     </el-col>
                 </el-row>
             </div>
-            <div class="marginB20 fs16 paddingT20">上传资料</div>
-            <el-row class="marginB10">
-                <el-col :span="8">
-                    <el-button size="small" type="danger" @click="deteleClueFile">删除</el-button>
-                    <el-button type="text" disabled>只允许上传图片／音频文件。</el-button>
-                </el-col>
-                <el-col :span="5"
-                        class="f-fr">
-                    <form name=theform v-show="false">
-                        <input type="radio" name="myradio" value="local_name" checked=true/>上传文件名字保持本地文件名字 <input
-                        type="radio" name="myradio" value="random_name"/>上传文件名字是随机文件名 <br/>上传到指定目录:<input
-                        type="text" id='dirname' placeholder="如果不填，默认是上传到根目录" size=50>
-                    </form>
-                    <div id="container" style="text-align:right;">
-                        <a id="selectfiles" href="javascript:void(0);" class='btn'>选择文件</a>
-                        <a id="postfiles" href="javascript:void(0);" onclick="clueUploadFile()" class='btn'>开始上传</a>
-                    </div>
-                    <div id="ossfile">你的浏览器不支持flash,Silverlight或者HTML5！</div>
-                    <span v-show="false">上传到指定目录:<input type="text" id='dirname' placeholder="如果不填，默认是上传到根目录" size=50><pre
-                        id="console"></pre></span>
-                </el-col>
-            </el-row>
-            <el-row>
-                <el-table ref="multipleTable" :data="tableDataC1"
-                          tooltip-effect="dark" style="width: 100%"
-                          border
-                          @selection-change="handleFileSelectionChange">
-                    <el-table-column type="selection" prop="id" width="55" @selection-change="handleFileSelectionChange"
-                                     align="center">
-                    </el-table-column>
-                    <el-table-column prop="uploadUserName" label="上传人姓名" align="center">
-                    </el-table-column>
-                    <el-table-column prop="uploadTime" label="上传时间" align="center">
-                    </el-table-column>
-                    <el-table-column prop="fileName" label="文件名称" align="center">
-                    </el-table-column>
-                    <el-table-column label="操作" align="center">
-                        <template slot-scope="scope">
-                            <el-button size="mini" type="text" @click="handleOperateFn(scope.$index, scope.row)">
-                                {{scope.row.fileType
-                                =="mp3"? '下载录音':'查看图片'}}
-                            </el-button>
-                        </template>
-                    </el-table-column>
-                    <el-table-column prop="delStatus" label="删除状态" align="center">
-                        <template slot-scope="scope">
-                            <div v-if="scope.row.delStatus === 0">未删除</div>
-                            <div v-else-if="scope.row.delStatus ===1" class="redcolor">已删除</div>
-                        </template>
-                    </el-table-column>
-                </el-table>
-            </el-row>
             <div class="marginB20 fs16 paddingT20">跟进记录</div>
             <el-row class="marginB10">
                 <el-col :span="16">
@@ -528,12 +476,66 @@
                     <el-table-column prop="createTime" label="开始服务时间" align="center">
                     </el-table-column>
                 </el-table>
-                <div class="padding20 f-tac">
-                    <el-button type="primary" :disabled="saveDisabled" @click="submitForm('form')">保存客户信息</el-button>
-                    <el-button type="success" :disabled="inviteBtnDisabled" @click="inviteCustomer('form')">邀约来访
-                    </el-button>
-                    <el-button @click="rebackClue">取 消</el-button>
-                </div>
+            </el-row>
+
+            <div class="marginB20 fs16 paddingT20">上传资料</div>
+            <el-row class="marginB10">
+                <el-col :span="8">
+                    <el-button size="small" type="danger" @click="deteleClueFile">删除</el-button>
+                    <el-button type="text" disabled>只允许上传图片／音频文件。</el-button>
+                </el-col>
+                <el-col :span="5"
+                        class="f-fr">
+                    <form name=theform v-show="false">
+                        <input type="radio" name="myradio" value="local_name" checked=true/>上传文件名字保持本地文件名字 <input
+                        type="radio" name="myradio" value="random_name"/>上传文件名字是随机文件名 <br/>上传到指定目录:<input
+                        type="text" id='dirname' placeholder="如果不填，默认是上传到根目录" size=50>
+                    </form>
+                    <div id="container" style="text-align:right;">
+                        <a id="selectfiles" href="javascript:void(0);" class='btn'>选择文件</a>
+                        <a id="postfiles" href="javascript:void(0);" onclick="clueUploadFile()" class='btn'>开始上传</a>
+                    </div>
+                    <div id="ossfile">你的浏览器不支持flash,Silverlight或者HTML5！</div>
+                    <span v-show="false">上传到指定目录:<input type="text" id='dirname' placeholder="如果不填，默认是上传到根目录" size=50><pre
+                        id="console"></pre></span>
+                </el-col>
+            </el-row>
+            <el-row>
+                <el-table ref="multipleTable" :data="tableDataC1"
+                          tooltip-effect="dark" style="width: 100%"
+                          border
+                          @selection-change="handleFileSelectionChange">
+                    <el-table-column type="selection" prop="id" width="55" @selection-change="handleFileSelectionChange"
+                                     align="center">
+                    </el-table-column>
+                    <el-table-column prop="uploadUserName" label="上传人姓名" align="center">
+                    </el-table-column>
+                    <el-table-column prop="uploadTime" label="上传时间" align="center">
+                    </el-table-column>
+                    <el-table-column prop="fileName" label="文件名称" align="center">
+                    </el-table-column>
+                    <el-table-column label="操作" align="center">
+                        <template slot-scope="scope">
+                            <el-button size="mini" type="text" @click="handleOperateFn(scope.$index, scope.row)">
+                                {{scope.row.fileType
+                                =="mp3"? '下载录音':'查看图片'}}
+                            </el-button>
+                        </template>
+                    </el-table-column>
+                    <el-table-column prop="delStatus" label="删除状态" align="center">
+                        <template slot-scope="scope">
+                            <div v-if="scope.row.delStatus === 0">未删除</div>
+                            <div v-else-if="scope.row.delStatus ===1" class="redcolor">已删除</div>
+                        </template>
+                    </el-table-column>
+                </el-table>
+            </el-row>
+            <div class="padding20 f-tac">
+                <el-button type="primary" :disabled="saveDisabled" @click="submitForm('form')">保存客户信息</el-button>
+                <el-button type="success" :disabled="inviteBtnDisabled" @click="inviteCustomer('form')">邀约来访
+                </el-button>
+                <el-button @click="rebackClue">取 消</el-button>
+            </div>
         </el-form>
     </el-row>
 
@@ -1606,7 +1608,8 @@
                     .then(function (response) {
                       addCustomerVM.$message({
                         message: '操作成功', type: 'success', duration: 2000, onClose: function () {
-                          window.location.href = "/tele/clueMyCustomerInfo/initmyCustomer";
+                          // window.location.href = "/tele/clueMyCustomerInfo/initmyCustomer";
+                          addCustomerVM.saveDisabled = false;
                         }
                       });
                     });
