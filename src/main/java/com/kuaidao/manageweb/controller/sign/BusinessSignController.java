@@ -7,6 +7,7 @@ import com.kuaidao.aggregation.dto.paydetail.PayDetailReqDTO;
 import com.kuaidao.aggregation.dto.paydetail.PayDetailRespDTO;
 import com.kuaidao.aggregation.dto.project.CompanyInfoDTO;
 import com.kuaidao.aggregation.dto.project.ProjectInfoDTO;
+import com.kuaidao.aggregation.dto.project.ProjectInfoPageParam;
 import com.kuaidao.aggregation.dto.sign.*;
 import com.kuaidao.aggregation.dto.visitrecord.BusVisitRecordRespDTO;
 import com.kuaidao.common.constant.DicCodeEnum;
@@ -368,6 +369,7 @@ public class BusinessSignController {
     signDTO.setVisitType(1);
     signDTO.setRebutReason(null);
     signDTO.setRebutTime(null);
+    signDTO.setAmountReceived(null);
     return new JSONResult<BusSignRespDTO>().success(signDTO);
   }
 
@@ -538,8 +540,11 @@ public class BusinessSignController {
         request.setAttribute("refundData", refundRebateList);
       }
     }
+
     // 项目
-    JSONResult<List<ProjectInfoDTO>> proJson = projectInfoFeignClient.allProject();
+    ProjectInfoPageParam param = new ProjectInfoPageParam();
+    param.setIsNotSign(-1);
+    JSONResult<List<ProjectInfoDTO>> proJson = projectInfoFeignClient.listNoPage(param);
     if (JSONResult.SUCCESS.equals(proJson.getCode())) {
       request.setAttribute("proSelect", proJson.getData());
     }
@@ -676,7 +681,9 @@ public class BusinessSignController {
     }
 
     // 项目
-    JSONResult<List<ProjectInfoDTO>> proJson = projectInfoFeignClient.allProject();
+    ProjectInfoPageParam param = new ProjectInfoPageParam();
+    param.setIsNotSign(-1);
+    JSONResult<List<ProjectInfoDTO>> proJson = projectInfoFeignClient.listNoPage(param);
     if (JSONResult.SUCCESS.equals(proJson.getCode())) {
       request.setAttribute("proSelect", proJson.getData());
     }
