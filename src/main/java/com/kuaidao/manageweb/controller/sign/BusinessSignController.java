@@ -297,13 +297,20 @@ public class BusinessSignController {
     // 查询最新一次签约记录
     JSONResult<BusSignRespDTO> maxNewOne1 = businessSignFeignClient.findMaxNewOne(idEntityLong);
 
+    // 查詢當前使用項目
+    // 项目
+    ProjectInfoPageParam param = new ProjectInfoPageParam();
+    param.setIsNotSign(-1);
+    JSONResult<List<ProjectInfoDTO>> proJson = projectInfoFeignClient.listNoPage(param);
+
     boolean signFlag = true;
     if (JSONResult.SUCCESS.equals(maxNewOne.getCode())) {
       BusSignRespDTO data = maxNewOne1.getData();
       if(data!=null){
         signDTO.setIdCard(data.getIdCard());
         signDTO.setSignCompanyId(data.getSignCompanyId());
-        signDTO.setSignProjectId(data.getSignProjectId());
+        Long signProjectId = data.getSignProjectId();
+        signDTO.setSignProjectId(getProjectId(proJson,signProjectId));
         signDTO.setSignProvince(data.getSignProvince());
         signDTO.setSignCity(data.getSignCity());
         signDTO.setSignDictrict(data.getSignDictrict());
@@ -322,7 +329,8 @@ public class BusinessSignController {
       if (data != null) {
         if(signFlag){
           signDTO.setSignCompanyId(data.getCompanyid());
-          signDTO.setSignProjectId(data.getProjectId());
+          Long signProjectId = data.getProjectId();
+          signDTO.setSignProjectId(getProjectId(proJson,signProjectId));
           signDTO.setSignProvince(data.getSignProvince());
           signDTO.setSignCity(data.getSignCity());
           signDTO.setSignDictrict(data.getSignDistrict());
@@ -372,6 +380,27 @@ public class BusinessSignController {
     signDTO.setAmountReceived(null);
     return new JSONResult<BusSignRespDTO>().success(signDTO);
   }
+
+
+  private Long getProjectId( JSONResult<List<ProjectInfoDTO>> proJson , Long signProjectId){
+
+    Long res =null;
+    boolean flag = false;
+    if (JSONResult.SUCCESS.equals(proJson.getCode())) {
+      List<ProjectInfoDTO> data1 = proJson.getData();
+      for(ProjectInfoDTO projectInfo:data1){
+        if(projectInfo.getId().equals(signProjectId)){
+          flag = true;
+          break;
+        }
+      }
+    }
+    if(flag){
+      res = signProjectId;
+    }
+    return res;
+  }
+
 
   /**
    * 添加签约单时，到访记录回显
