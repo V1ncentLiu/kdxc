@@ -221,8 +221,7 @@ public class BalanceAccountController {
         req.setCommitUser(user.getId());
         req.setCommitTime(new Date());
         BigDecimal bigDecimal = new BigDecimal(req.getMoney());
-        req.setCommissionMoney(
-                bigDecimal.multiply(new BigDecimal(req.getRatio())).divide(new BigDecimal(100)));
+       // req.setCommissionMoney(bigDecimal.multiply(new BigDecimal(req.getRatio())).divide(new BigDecimal(100)));
         req.setStatus(AggregationConstant.RECONCILIATION_STATUS.STATUS_2);
         JSONResult<Void> reconciliationConfirm = reconciliationConfirmFeignClient.applyConfirm(req);
         return reconciliationConfirm;
@@ -232,17 +231,15 @@ public class BalanceAccountController {
      * 根据对账申请表id获取已对账的佣金之和
      * 
      * @author: Fanjd
-     * @param accountId 对账申请表主键
+     * @param reconciliationConfirmReq 请求实体
      * @return: com.kuaidao.common.entity.JSONResult<java.lang.Void>
      * @Date: 2019/6/14 18:25
      * @since: 1.0.0
      **/
     @ResponseBody
     @PostMapping("/getConfirmCommission")
-    public JSONResult<BigDecimal> getConfirmCommission(
-            @RequestBody ReconciliationConfirmReq reconciliationConfirmReq) {
-        JSONResult<BigDecimal> sumConfirmCommission = reconciliationConfirmFeignClient
-                .getConfirmCommission(reconciliationConfirmReq.getSignId());
+    public JSONResult<BigDecimal> getConfirmCommission(@RequestBody ReconciliationConfirmReq reconciliationConfirmReq) {
+        JSONResult<BigDecimal> sumConfirmCommission = reconciliationConfirmFeignClient.getConfirmCommission(reconciliationConfirmReq.getSignId());
         return sumConfirmCommission;
     }
 
