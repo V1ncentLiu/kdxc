@@ -28,7 +28,6 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.SecurityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -127,11 +126,6 @@ public class InviteAreaController {
         // 查询项目列表
         JSONResult<List<ProjectInfoDTO>> allProject = projectInfoFeignClient.allProject();
         List<ProjectInfoDTO> projectInfoDTOList = allProject.getData();
-        for(ProjectInfoDTO infoDTO : projectInfoDTOList){
-            if(StringUtils.isNotBlank(infoDTO.getGroupName())){
-                infoDTO.setProjectName(infoDTO.getProjectName()+"("+infoDTO.getGroupName()+")");
-            }
-        }
         //
         SysRegionDTO sysRegionDTO = new SysRegionDTO();
         sysRegionDTO.setId(0L);
@@ -248,11 +242,6 @@ public class InviteAreaController {
         request.setAttribute("checkbusinessGroupId", inviteAreaDTOs.get(0).getBusinessGroupId().toString());
         String[] split = inviteAreaDTOs.get(0).getProjectIds().split(",");
         List<ProjectInfoDTO> data = allProject.getData();
-        for(ProjectInfoDTO infoDTO : data){
-            if(StringUtils.isNotBlank(infoDTO.getGroupName())){
-                infoDTO.setProjectName(infoDTO.getProjectName()+"("+infoDTO.getGroupName()+")");
-            }
-        }
         List<String> list = new ArrayList<>();
         if(data!=null){
             for(int i =0 ; i <split.length ; i++){
