@@ -109,6 +109,12 @@ public class PendingAllocationController {
             List<Map<String, Object>> saleGroupList = getSaleGroupList(user.getOrgId(), user);
             request.setAttribute("orgList", saleGroupList);
             request.setAttribute("saleGroupList", saleGroupList);
+        } else if (roleList != null
+                && RoleCodeEnum.DXZJL.name().equals(roleList.get(0).getRoleCode())) {
+            // 如果当前登录的为电销总经理,查询所有下属电销组
+            List<Map<String, Object>> saleGroupList = getSaleGroupList(user.getOrgId(), user);
+            request.setAttribute("orgList", saleGroupList);
+            request.setAttribute("saleGroupList", saleGroupList);
         }
         // 查询所有信息流分配规则
         InfoAssignQueryDTO infoAssignQueryDTO = new InfoAssignQueryDTO();
