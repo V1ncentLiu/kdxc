@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
-
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.apache.shiro.subject.Subject;
@@ -20,7 +19,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
-
 import com.kuaidao.aggregation.dto.clue.AllocationClueReq;
 import com.kuaidao.aggregation.dto.clue.CustomerManagerDTO;
 import com.kuaidao.aggregation.dto.clue.CustomerManagerQueryDTO;
@@ -68,7 +66,7 @@ public class CustomerManagerController {
 
     @Autowired
     private ClueBasicFeignClient clueBasicFeignClient;
-    
+
     @RequiresPermissions("customerManager:view")
     @RequestMapping("/initcustomerManager")
     public String initmyCustomer(HttpServletRequest request, Model model) {
@@ -99,6 +97,20 @@ public class CustomerManagerController {
 
         } else if (roleList != null
                 && RoleCodeEnum.DXFZ.name().equals(roleList.get(0).getRoleCode())) {
+            List<Map<String, Object>> saleGroupList = getSaleGroupList(user.getOrgId());
+            request.setAttribute("saleGroupList", saleGroupList);
+            // 如果是电销副总展现事业部下所有组
+            Long orgId = user.getOrgId();
+            OrganizationQueryDTO organizationQueryDTO = new OrganizationQueryDTO();
+            organizationQueryDTO.setParentId(orgId);
+            organizationQueryDTO.setOrgType(OrgTypeConstant.DXZ);
+            // 查询下级电销组(查询使用)
+            JSONResult<List<OrganizationDTO>> listDescenDantByParentId =
+                    organizationFeignClient.listDescenDantByParentId(organizationQueryDTO);
+            List<OrganizationDTO> data = listDescenDantByParentId.getData();
+            request.setAttribute("queryOrg", data);
+        } else if (roleList != null
+                && RoleCodeEnum.DXZJL.name().equals(roleList.get(0).getRoleCode())) {
             List<Map<String, Object>> saleGroupList = getSaleGroupList(user.getOrgId());
             request.setAttribute("saleGroupList", saleGroupList);
             // 如果是电销副总展现事业部下所有组
@@ -257,6 +269,7 @@ public class CustomerManagerController {
         }
         return result;
     }
+
     /**
      * 转移资源
      * 
