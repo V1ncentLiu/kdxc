@@ -38,6 +38,16 @@
                 <el-form-item label="客户姓名:" prop="cusName">
                     <el-input v-model="clueSearchForm.cusName" placeholder="客户姓名" class="input-with-select"></el-input>
                 </el-form-item>
+                <el-form-item label="电销组:" prop="teleGorupId">
+                    <el-select v-model="clueSearchForm.teleGorupId" clearable placeholder="电销组" style="width: 100%;">
+                      <el-option
+                	      v-for="item in teleGorupOptions"
+                	      :key="item.id"
+                	      :label="item.name"
+                	      :value="item.id">
+                	  </el-option>
+                    </el-select>
+                </el-form-item>
                 <el-form-item label="资源类型:" prop="type">
                     <el-select v-model="clueSearchForm.type" clearable placeholder="资源类型" style="width: 100%;">
                       <el-option
@@ -97,6 +107,7 @@
         <el-row>
             <el-table  ref="multipleTable" tooltip-effect="dark" border @selection-change="handleSelectionChange" @row-click="clickRow" @row-dblclick="showClueDetailInfo" style="width: 100%"  :data="dataTable" key="multipleTable">
                 <el-table-column align="center" type="selection" label="全选" width="50"></el-table-column>
+                <el-table-column align="center" type="index" label="序号" width="55"></el-table-column> 
     	        <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width"
     	         v-for="(item,key,index) in tableColums" v-if="item.fieldCode == 'releaseNum'">
     	               <template slot-scope="scope">
@@ -336,6 +347,7 @@
 <div th:include="_footer_include :: #jsLib"></div>
 </body>
 <script th:inline="javascript">
+var teleGorupList=[[${teleGorupList}]];//电销组查询筛选条件
 var orgList=[[${orgList}]];//电销组
 var saleList=[[${saleList}]];//电销顾问
 var saleGroupList=[[${saleGroupList}]];//同事业部下电销组
@@ -358,6 +370,7 @@ var clueVM = new Vue({
         		phone: '',
         		cusName: '',
         		category: '',
+        		teleGorupId: '',
         		type: '',
         		startTime: '',
         		endTime: '',
@@ -433,6 +446,7 @@ var clueVM = new Vue({
             orgOptions:orgList,
             saleOptions:saleList,
             ruleOptions:ruleList,
+            teleGorupOptions:teleGorupList,
             saleGroupOptions:saleGroupList,
             categoryOptions:clueCategoryList,
             typeOptions:clueTypeList,
@@ -477,6 +491,7 @@ var clueVM = new Vue({
                 param.pageNum = this.pager.currentPage;
                 param.startTime = this.clueSearchForm.startTime;
                 param.endTime = this.clueSearchForm.endTime;
+                param.teleGorupId = this.clueSearchForm.teleGorupId;
                 param.messagePoint = this.clueSearchForm.messagePoint;
                 param.searchWord = this.clueSearchForm.searchWord;
                 param.address = this.clueSearchForm.address;
