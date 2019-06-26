@@ -269,7 +269,9 @@ public class TeleGroupResourceEfficiencyController {
         // 电销组
         OrganizationQueryDTO busGroupReqDTO = new OrganizationQueryDTO();
         busGroupReqDTO.setSystemCode(SystemCodeConstant.HUI_JU);
-        busGroupReqDTO.setParentId(orgId);
+        if(orgId!=null) {
+            busGroupReqDTO.setParentId(orgId);
+        }
         busGroupReqDTO.setOrgType(orgType);
         JSONResult<List<OrganizationRespDTO>> orgJr = organizationFeignClient.queryOrgByParam(busGroupReqDTO);
         return orgJr.getData();
@@ -294,7 +296,7 @@ public class TeleGroupResourceEfficiencyController {
                 teleGroupList.add(organizationRespDTO);
             }
         }else {
-            teleGroupList =  getOrgGroupByOrgId(curLoginUser.getOrgId(),OrgTypeConstant.DXZ);
+            teleGroupList =  getOrgGroupByOrgId(null,OrgTypeConstant.DXZ);
         }
         OrganizationQueryDTO organizationQueryDTO  = new OrganizationQueryDTO();
         organizationQueryDTO.setParentId(curLoginUser.getOrgId());
