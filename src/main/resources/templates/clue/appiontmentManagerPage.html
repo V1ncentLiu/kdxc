@@ -32,6 +32,16 @@
         <el-form-item label="客户姓名:" class="formItem" prop="cusName">
           <el-input v-model="appiontmentSearchForm.cusName" placeholder="请输入客户姓名" class="input-with-select"></el-input>
         </el-form-item>
+        <!-- <el-form-item label="电销事业部:" class="formItem"  prop="teleDeptId">
+          <el-select v-model="appiontmentSearchForm.teleDeptId" clearable @change="getSaleList" placeholder="电销事业部" filterable>
+            <el-option
+                v-for="item in teleDeptOptions"
+                :key="item.id"
+                :label="item.name"
+                :value="item.id">
+            </el-option>
+          </el-select>
+        </el-form-item> -->
         <el-form-item label="电销组:" class="formItem"  prop="teleGorupId">
           <el-select v-model="appiontmentSearchForm.teleGorupId" clearable @change="getSaleList" placeholder="电销组" filterable>
             <el-option
@@ -333,6 +343,7 @@
 <div th:include="_footer_include :: #jsLib"></div>
 </body>
 <script th:inline="javascript">
+  var deptList=[[${deptList}]];//电销事业部
   var orgList=[[${orgList}]];//电销组
   var userList=[[${userList}]];//电销顾问
   var projectList=[[${projectList}]];//品尝项目
@@ -350,6 +361,7 @@
       appiontmentSearchForm: {
         startTime: '',
         endTime: '',
+        teleDeptId: '',
         teleGorupId: '',
         teleSaleId: '',
         projectId: '',
@@ -398,6 +410,7 @@
       phone3:'',
       phone4:'',
       phone5:'',
+      teleDeptOptions:deptList,
       teleGorupOptions:orgList,
       teleSaleOptions:userList,
       projectOptions:projectList,
@@ -456,6 +469,7 @@
         param.pageSize = this.pager.pageSize;
         param.pageNum = this.pager.currentPage;
         param.teleGorupId = this.appiontmentSearchForm.teleGorupId;
+        param.teleDeptId = this.appiontmentSearchForm.teleDeptId;
         param.teleSaleId = this.appiontmentSearchForm.teleSaleId;
         param.tasteProjectId = this.appiontmentSearchForm.projectId;
         param.cusName = this.appiontmentSearchForm.cusName;
