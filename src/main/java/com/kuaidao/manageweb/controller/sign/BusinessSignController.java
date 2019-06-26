@@ -7,6 +7,7 @@ import com.kuaidao.aggregation.dto.paydetail.PayDetailReqDTO;
 import com.kuaidao.aggregation.dto.paydetail.PayDetailRespDTO;
 import com.kuaidao.aggregation.dto.project.CompanyInfoDTO;
 import com.kuaidao.aggregation.dto.project.ProjectInfoDTO;
+import com.kuaidao.aggregation.dto.project.ProjectInfoPageParam;
 import com.kuaidao.aggregation.dto.sign.*;
 import com.kuaidao.aggregation.dto.visitrecord.BusVisitRecordRespDTO;
 import com.kuaidao.common.constant.DicCodeEnum;
@@ -234,6 +235,10 @@ public class BusinessSignController {
         JSONResult<BusSignRespDTO> res = businessSignFeignClient.queryOne(idEntityLong);
         if (JSONResult.SUCCESS.equals(res.getCode())) {
             BusSignRespDTO data = res.getData();
+            // 這段是為了顯示
+            // data.setSignProjectId(this.getProjectId());
+
+
             // 转换驳回记录里用户信息
             List<SignRejectRecordDto> rejectRecordList = data.getSignRejectRecordList();
             if (rejectRecordList != null && !rejectRecordList.isEmpty()) {
@@ -296,13 +301,20 @@ public class BusinessSignController {
     // 查询最新一次签约记录
     JSONResult<BusSignRespDTO> maxNewOne1 = businessSignFeignClient.findMaxNewOne(idEntityLong);
 
+    // 查詢當前使用項目
+    // 项目
+    ProjectInfoPageParam param = new ProjectInfoPageParam();
+    param.setIsNotSign(-1);
+    JSONResult<List<ProjectInfoDTO>> proJson = projectInfoFeignClient.listNoPage(param);
+
     boolean signFlag = true;
     if (JSONResult.SUCCESS.equals(maxNewOne.getCode())) {
       BusSignRespDTO data = maxNewOne1.getData();
       if(data!=null){
         signDTO.setIdCard(data.getIdCard());
         signDTO.setSignCompanyId(data.getSignCompanyId());
-        signDTO.setSignProjectId(data.getSignProjectId());
+        Long signProjectId = data.getSignProjectId();
+        signDTO.setSignProjectId(getProjectId(proJson,signProjectId));
         signDTO.setSignProvince(data.getSignProvince());
         signDTO.setSignCity(data.getSignCity());
         signDTO.setSignDictrict(data.getSignDictrict());
@@ -321,7 +333,8 @@ public class BusinessSignController {
       if (data != null) {
         if(signFlag){
           signDTO.setSignCompanyId(data.getCompanyid());
-          signDTO.setSignProjectId(data.getProjectId());
+          Long signProjectId = data.getProjectId();
+          signDTO.setSignProjectId(getProjectId(proJson,signProjectId));
           signDTO.setSignProvince(data.getSignProvince());
           signDTO.setSignCity(data.getSignCity());
           signDTO.setSignDictrict(data.getSignDistrict());
@@ -343,7 +356,9 @@ public class BusinessSignController {
           String tasteProjectId = (String) data.get("tasteProjectId");
           String[] split = tasteProjectId.split(",");
           if (split.length > 0 && !"".equals(split[0])) {
-            signDTO.setSignProjectId(Long.valueOf(split[0]));
+//            signDTO.setSignProjectId();
+            Long signProjectId =Long.valueOf(split[0]);
+            signDTO.setSignProjectId(getProjectId(proJson,signProjectId));
           }
           signDTO.setSignProvince((String) data.get("signProvince"));
           signDTO.setSignCity((String) data.get("signCity"));
@@ -368,8 +383,30 @@ public class BusinessSignController {
     signDTO.setVisitType(1);
     signDTO.setRebutReason(null);
     signDTO.setRebutTime(null);
+    signDTO.setAmountReceived(null);
     return new JSONResult<BusSignRespDTO>().success(signDTO);
   }
+
+
+  private Long getProjectId( JSONResult<List<ProjectInfoDTO>> proJson , Long signProjectId){
+
+    Long res =null;
+    boolean flag = false;
+    if (JSONResult.SUCCESS.equals(proJson.getCode())) {
+      List<ProjectInfoDTO> data1 = proJson.getData();
+      for(ProjectInfoDTO projectInfo:data1){
+        if(projectInfo.getId().equals(signProjectId)){
+          flag = true;
+          break;
+        }
+      }
+    }
+    if(flag){
+      res = signProjectId;
+    }
+    return res;
+  }
+
 
   /**
    * 添加签约单时，到访记录回显
@@ -538,8 +575,11 @@ public class BusinessSignController {
         request.setAttribute("refundData", refundRebateList);
       }
     }
+
     // 项目
-    JSONResult<List<ProjectInfoDTO>> proJson = projectInfoFeignClient.allProject();
+    ProjectInfoPageParam param = new ProjectInfoPageParam();
+    param.setIsNotSign(-1);
+    JSONResult<List<ProjectInfoDTO>> proJson = projectInfoFeignClient.listNoPage(param);
     if (JSONResult.SUCCESS.equals(proJson.getCode())) {
       request.setAttribute("proSelect", proJson.getData());
     }
@@ -676,7 +716,9 @@ public class BusinessSignController {
     }
 
     // 项目
-    JSONResult<List<ProjectInfoDTO>> proJson = projectInfoFeignClient.allProject();
+    ProjectInfoPageParam param = new ProjectInfoPageParam();
+    param.setIsNotSign(-1);
+    JSONResult<List<ProjectInfoDTO>> proJson = projectInfoFeignClient.listNoPage(param);
     if (JSONResult.SUCCESS.equals(proJson.getCode())) {
       request.setAttribute("proSelect", proJson.getData());
     }

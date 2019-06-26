@@ -112,6 +112,20 @@ public class InvalidCustomerResources {
                 }
                 dxcygwList = dxcygws(dxzIdsList);
                 dxzjsList = dxzjs(dxzIdsList);
+            } else if (RoleCodeEnum.DXZJL.name().equals(roleList.get(0).getRoleCode())) {
+                // 电销副总:查看分公司下的全部电销组
+                OrganizationQueryDTO orgDto = new OrganizationQueryDTO();
+                orgDto.setParentId(user.getOrgId());
+                orgDto.setSystemCode(SystemCodeConstant.HUI_JU);
+                orgDto.setOrgType(OrgTypeConstant.DXZ);
+                JSONResult<List<OrganizationDTO>> dzList =
+                        organizationFeignClient.listDescenDantByParentId(orgDto);
+                dxzList = dzList.getData();
+                for (OrganizationDTO organizationDTO : dzList.getData()) {
+                    dxzIdsList.add(organizationDTO.getId());
+                }
+                dxcygwList = dxcygws(dxzIdsList);
+                dxzjsList = dxzjs(dxzIdsList);
             } else if (RoleCodeEnum.DXZJ.name().equals(roleList.get(0).getRoleCode())) {
                 // 电销总监:查看所在电销组
                 // IdEntity idEntity = new IdEntity();
@@ -181,6 +195,18 @@ public class InvalidCustomerResources {
 
             } else if (RoleCodeEnum.DXFZ.name().equals(roleList.get(0).getRoleCode())) {
                 // 电销副总:查看事业部下的全部电销组
+                OrganizationQueryDTO orgDto = new OrganizationQueryDTO();
+                orgDto.setParentId(user.getOrgId());
+                orgDto.setSystemCode(SystemCodeConstant.HUI_JU);
+                orgDto.setOrgType(OrgTypeConstant.DXZ);
+                JSONResult<List<OrganizationDTO>> dzList =
+                        organizationFeignClient.listDescenDantByParentId(orgDto);
+                List<OrganizationDTO> datas = dzList.getData();
+                for (OrganizationDTO organizationDTO : datas) {
+                    dxzList.add(organizationDTO.getId());
+                }
+            } else if (RoleCodeEnum.DXZJL.name().equals(roleList.get(0).getRoleCode())) {
+                // 电销总经理:查看分公司下的全部电销组
                 OrganizationQueryDTO orgDto = new OrganizationQueryDTO();
                 orgDto.setParentId(user.getOrgId());
                 orgDto.setSystemCode(SystemCodeConstant.HUI_JU);

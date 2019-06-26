@@ -1,5 +1,7 @@
 package com.kuaidao.manageweb.controller.buscustomer;
 
+import com.kuaidao.aggregation.constant.AggregationConstant;
+import com.kuaidao.aggregation.dto.project.ProjectInfoPageParam;
 import com.kuaidao.manageweb.config.LogRecord;
 import com.kuaidao.manageweb.config.LogRecord.OperationType;
 import com.kuaidao.manageweb.constant.MenuEnum;
@@ -117,9 +119,17 @@ public class BusinessMyCustomerController {
         }
 
         // 项目
-        JSONResult<List<ProjectInfoDTO>> proJson = projectInfoFeignClient.allProject();
+        ProjectInfoPageParam param = new ProjectInfoPageParam();
+        param.setIsNotSign(-1);
+        JSONResult<List<ProjectInfoDTO>> proJson = projectInfoFeignClient.listNoPage(param);
         if (JSONResult.SUCCESS.equals(proJson.getCode())) {
             request.setAttribute("proSelect", proJson.getData());
+        }
+
+        // 项目
+        JSONResult<List<ProjectInfoDTO>> proallJson = projectInfoFeignClient.allProject();
+        if (JSONResult.SUCCESS.equals(proJson.getCode())) {
+            request.setAttribute("proAllSelect", proallJson.getData());
         }
 
         JSONResult<List<CompanyInfoDTO>> listJSONResult = companyInfoFeignClient.allCompany();

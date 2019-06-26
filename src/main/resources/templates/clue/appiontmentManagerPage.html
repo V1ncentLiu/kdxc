@@ -32,6 +32,16 @@
         <el-form-item label="客户姓名:" class="formItem" prop="cusName">
           <el-input v-model="appiontmentSearchForm.cusName" placeholder="请输入客户姓名" class="input-with-select"></el-input>
         </el-form-item>
+        <!-- <el-form-item label="电销事业部:" class="formItem"  prop="teleDeptId">
+          <el-select v-model="appiontmentSearchForm.teleDeptId" clearable @change="getSaleList" placeholder="电销事业部" filterable>
+            <el-option
+                v-for="item in teleDeptOptions"
+                :key="item.id"
+                :label="item.name"
+                :value="item.id">
+            </el-option>
+          </el-select>
+        </el-form-item> -->
         <el-form-item label="电销组:" class="formItem"  prop="teleGorupId">
           <el-select v-model="appiontmentSearchForm.teleGorupId" clearable @change="getSaleList" placeholder="电销组" filterable>
             <el-option
@@ -99,7 +109,7 @@
                  style="width: 100%"  :data="dataTable" >
         <el-table-column align="center" type="selection" label="全选" width="55"></el-table-column>
         <el-table-column align="center" type="index" width="55" label="序号"></el-table-column>
-        <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" width="120" v-for="(item,key,index) in tableColums" v-if="item.fieldCode == 'isRepeatPhone'">
+        <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width" v-for="(item,key,index) in tableColums" v-if="item.fieldCode == 'isRepeatPhone'">
           <template slot-scope="scope">
             <div v-if="scope.row.isRepeatPhone === 1">
               <el-button @click="repeatPhonesClick(scope.row)" type="text" size="small">点击查看</el-button>
@@ -107,7 +117,7 @@
     	                    <div v-else></div>
           </template>
         </el-table-column>
-        <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" width="80" v-else-if="item.fieldCode == 'isTrack'">
+        <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width" v-else-if="item.fieldCode == 'isTrack'">
           <template slot-scope="scope">
             <div v-if="scope.row.isTrack === 1">
               <el-button @click="recordClick(scope.row)" type="text" size="small">点击查看</el-button>
@@ -115,8 +125,7 @@
             <div v-else>无</div>
           </template>
         </el-table-column>
-        <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" width="item.width"
-                         v-else-if="item.fieldCode == 'cusName'">
+        <el-table-column align="center" :key="item.fieldCode" :prop="item.fieldCode" :label="item.displayName" :width="item.width" v-else-if="item.fieldCode == 'cusName'">
           <template slot-scope="scope">
             {{scope.row.cusName}}
             <span v-if="scope.row.inputType ==1">
@@ -334,6 +343,7 @@
 <div th:include="_footer_include :: #jsLib"></div>
 </body>
 <script th:inline="javascript">
+  var deptList=[[${deptList}]];//电销事业部
   var orgList=[[${orgList}]];//电销组
   var userList=[[${userList}]];//电销顾问
   var projectList=[[${projectList}]];//品尝项目
@@ -351,6 +361,7 @@
       appiontmentSearchForm: {
         startTime: '',
         endTime: '',
+        teleDeptId: '',
         teleGorupId: '',
         teleSaleId: '',
         projectId: '',
@@ -399,6 +410,7 @@
       phone3:'',
       phone4:'',
       phone5:'',
+      teleDeptOptions:deptList,
       teleGorupOptions:orgList,
       teleSaleOptions:userList,
       projectOptions:projectList,
@@ -457,6 +469,7 @@
         param.pageSize = this.pager.pageSize;
         param.pageNum = this.pager.currentPage;
         param.teleGorupId = this.appiontmentSearchForm.teleGorupId;
+        param.teleDeptId = this.appiontmentSearchForm.teleDeptId;
         param.teleSaleId = this.appiontmentSearchForm.teleSaleId;
         param.tasteProjectId = this.appiontmentSearchForm.projectId;
         param.cusName = this.appiontmentSearchForm.cusName;

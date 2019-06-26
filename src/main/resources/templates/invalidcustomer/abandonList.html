@@ -26,10 +26,10 @@
                     <el-input v-model="queryForm.cusName" placeholder="客户姓名" maxLength="11"></el-input>
                 </el-form-item>
                 <el-form-item label="手机号:">
-                    <el-input v-model="queryForm.phone" placeholder="手机号" maxLength="11" @keyup.native="number"></el-input>
+                    <el-input v-model="queryForm.phone" placeholder="手机号" maxLength="11"></el-input>
                 </el-form-item>
                 <el-form-item label="媒介:">
-                    <el-select v-model="queryForm.source" placeholder="媒介" clearable>
+                    <el-select v-model="queryForm.source" placeholder="媒介" clearable filterable>
                         <el-option
                             v-for="item in mediumArr"
                             :key="item.value"
@@ -54,7 +54,7 @@
                 </el-form-item>
                 <el-row v-show="isShow">
                     <el-form-item label="资源专员:">
-                        <el-select v-model="queryForm.zyzyId" placeholder="资源专员" clearable>
+                        <el-select v-model="queryForm.zyzyId" placeholder="资源专员" clearable filterable>
                             <el-option
                                 v-for="item in zyzyArr"
                                 :key="item.id"
@@ -74,7 +74,7 @@
                         </el-select>
                     </el-form-item>
                     <el-form-item label="资源类别:">
-                        <el-select v-model="queryForm.category" placeholder="资源类别" clearable>
+                        <el-select v-model="queryForm.category" placeholder="资源类别" clearable filterable>
                             <el-option
                                 v-for="item in categoryArr"
                                 :key="item.value"
@@ -94,7 +94,7 @@
                         </el-select>
                     </el-form-item>
                     <el-form-item label="资源项目:">
-                        <el-select v-model="queryForm.projectId" placeholder="资源项目" clearable>
+                        <el-select v-model="queryForm.projectId" placeholder="资源项目" clearable filterable>
                             <el-option
                                 v-for="item in proArr"
                                 :key="item.id"
@@ -224,7 +224,7 @@
             mediumArr:[],
             zyzyArr:zyzyList,
             proArr:proSelect,
-            abandonReasonArr:[{value:"1",name:"重复资源"},{value:"2",name:"空号无效释放"},{value:"3",name:"全部"}],
+            abandonReasonArr:[{value:"1",name:"重复资源"},{value:"2",name:"不跟进-空号"},{value:"3",name:"撤回废弃"},{value:"4",name:"留言接口废弃"}],
             queryForm:{
                 starTime:'',
                 endTime:'',
@@ -340,6 +340,7 @@
               	
               },
             initList(){
+                console.log(this.queryForm)
                 var param = this.queryForm;
                 param.pageSize = this.pager.pageSize;
                 param.pageNum =  this.pager.currentPage;
