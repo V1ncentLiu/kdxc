@@ -104,6 +104,20 @@ public class AppiontmentController {
                     organizationFeignClient.listDescenDantByParentId(organizationQueryDTO);
             request.setAttribute("orgList", listDescenDantByParentId.getData());
         } else if (roleList != null
+                && RoleCodeEnum.DXZJL.name().equals(roleList.get(0).getRoleCode())) {
+            // 如果当前登录的为电销总经理,查询所有下属电销组
+            OrganizationQueryDTO organizationQueryDTO = new OrganizationQueryDTO();
+            organizationQueryDTO.setParentId(user.getOrgId());
+            organizationQueryDTO.setOrgType(OrgTypeConstant.DXZ);
+            JSONResult<List<OrganizationDTO>> listDescenDantByParentId =
+                    organizationFeignClient.listDescenDantByParentId(organizationQueryDTO);
+            request.setAttribute("orgList", listDescenDantByParentId.getData());
+            // 如果当前登录的为电销总经理,查询所有下属事业部
+            organizationQueryDTO.setOrgType(OrgTypeConstant.DZSYB);
+            JSONResult<List<OrganizationDTO>> deptList =
+                    organizationFeignClient.listDescenDantByParentId(organizationQueryDTO);
+            request.setAttribute("deptList", deptList.getData());
+        } else if (roleList != null
                 && RoleCodeEnum.GLY.name().equals(roleList.get(0).getRoleCode())) {
             // 管理员查询所有电销组
             OrganizationQueryDTO queryDTO = new OrganizationQueryDTO();
@@ -275,7 +289,7 @@ public class AppiontmentController {
     public JSONResult deleteAppiontment(@RequestBody IdListLongReq idList) {
         UserInfoDTO user = getUser();
         Long loginUserId = user.getId();
-        return appiontmentFeignClient.delete(idList,loginUserId);
+        return appiontmentFeignClient.delete(idList, loginUserId);
     }
 
     /***
