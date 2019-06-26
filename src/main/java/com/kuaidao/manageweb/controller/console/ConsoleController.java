@@ -9,6 +9,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
+
+import com.kuaidao.dashboard.dto.bussale.BusGroupDTO;
+import com.kuaidao.manageweb.feign.busgroup.BusGroupDashboardFeignClient;
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -124,6 +127,8 @@ public class ConsoleController {
 
     @Autowired
     private DictionaryItemFeignClient dictionaryItemFeignClient;
+    @Autowired
+    private BusGroupDashboardFeignClient busGroupDashboardFeignClient;
 
     /***
      * 跳转控制台页面
@@ -931,5 +936,24 @@ public class ConsoleController {
             return idList;
         }
         return null;
+    }
+
+    /**
+     * 获取日维度的看板计数
+     *
+     */
+    @PostMapping("/busGroupDayQuery")
+    @ResponseBody
+    public JSONResult<BusGroupDTO> busGroupDayQuery() {
+        UserInfoDTO curLoginUser = CommUtil.getCurLoginUser();
+        Map map = new HashMap();
+        map.put("busDirectorId",curLoginUser.getId());
+        map.put("flag", 1);
+        JSONResult<BusGroupDTO> jsonResult = busGroupDashboardFeignClient.busGroupDataQuery(map);
+        if (!JSONResult.SUCCESS.equals(jsonResult.getCode())) {
+            return new JSONResult<BusGroupDTO>().fail(jsonResult.getCode(), jsonResult.getMsg());
+        }
+        BusGroupDTO data = jsonResult.getData();
+        return new JSONResult<BusGroupDTO>().success(data);
     }
 }
