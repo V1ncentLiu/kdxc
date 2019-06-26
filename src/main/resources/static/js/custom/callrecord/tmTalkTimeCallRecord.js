@@ -1,6 +1,7 @@
 var myCallRecordVm = new Vue({
     el: '#myCallRecordVm',
     data: {
+      teleGroupList:teleGroupList,
     	formLabelWidth:'120px',
 	    pager:{//组织列表pager
           total: 0,
@@ -28,9 +29,33 @@ var myCallRecordVm = new Vue({
         	endTime:'',
         	accoutName:'',
       
-        }
+        },
+      tmList:[]
     },
     methods:{
+      changeTeleGroup(selectedValue){
+        this.tmList=[];
+        if(!selectedValue){
+          return;
+        }
+        var param ={};
+        param.id = selectedValue;
+        axios.post('/organization/organization/queryTeleSaleByOrgId', param)
+        .then(function (response) {
+          var result =  response.data;
+          var table=result.data;
+          myCallRecordVm.tmList= table;
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
+      },
+      clearTeleGroupList(selectedValue){
+        this.teleGroupList= [];
+        this.tmList=[];
+        this.searchForm.accountId='';
+        this.searchForm.teleGroupId='';
+      },
     	initCallRecordData(){
     		 var startTime = this.searchForm.startTime;
     		 var endTime = this.searchForm.endTime;
@@ -44,6 +69,14 @@ var myCallRecordVm = new Vue({
                  return;
              }
     		 var param = this.searchForm;
+          var accountId =this.searchForm.accountId;
+          if(accountId){
+            var accountIdArr = new Array();
+            accountIdArr.push(accountId);
+            param.accountIdList=accountIdArr;
+          }else{
+            param.accountIdList=[];
+          }
         	 param.pageNum=this.pager.currentPage;
         	 param.pageSize=this.pager.pageSize;
         	 axios.post('/call/callRecord/listAllTmCallTalkTime',param)
