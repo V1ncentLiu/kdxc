@@ -230,7 +230,6 @@ public class ExtendClueDistributionedTaskController {
      * 编辑资源
      * 
      * @param request
-     * @param clueId
      * @return
      */
     @RequestMapping("/distributedUpdateClue")
@@ -442,6 +441,11 @@ public class ExtendClueDistributionedTaskController {
                 curList.add(taskDTO.getSourceName()); // 媒介
                 curList.add(taskDTO.getProjectName()); // 资源项目
                 curList.add(taskDTO.getPhone()); // 手机号
+
+                curList.add(taskDTO.getPhone2());
+                curList.add(taskDTO.getQq());
+                curList.add(taskDTO.getWechat());
+
                 curList.add(taskDTO.getSearchWord()); // 搜索词
                 curList.add(taskDTO.getTeleGorupName()); // 电销组
                 curList.add(taskDTO.getTeleSaleName()); // 电销顾问
@@ -498,6 +502,9 @@ public class ExtendClueDistributionedTaskController {
         headTitleList.add("媒介");
         headTitleList.add("资源项目");
         headTitleList.add("手机号");
+        headTitleList.add("手机号2");
+        headTitleList.add("QQ");
+        headTitleList.add("微信");
         headTitleList.add("搜索词");
         headTitleList.add("电销组");
         headTitleList.add("电销顾问");

@@ -8,14 +8,6 @@ import java.util.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
-import com.kuaidao.aggregation.dto.clue.ClueRelateDTO;
-import com.kuaidao.aggregation.dto.clue.ClueRelateReq;
-import com.kuaidao.aggregation.dto.clue.CustomerClueDTO;
-import com.kuaidao.aggregation.dto.clue.CustomerClueQueryDTO;
-import com.kuaidao.common.constant.*;
-import com.kuaidao.manageweb.feign.clue.ClueRelateFeignClient;
-import com.kuaidao.manageweb.feign.clue.MyCustomerFeignClient;
-import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
@@ -28,6 +20,10 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import com.kuaidao.aggregation.dto.changeorg.ChangeOrgRecordReqDto;
+import com.kuaidao.aggregation.dto.clue.ClueRelateReq;
+import com.kuaidao.aggregation.dto.clue.CustomerClueQueryDTO;
+import com.kuaidao.common.constant.*;
 import com.kuaidao.common.entity.IdEntityLong;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
@@ -39,15 +35,21 @@ import com.kuaidao.manageweb.config.LogRecord.OperationType;
 import com.kuaidao.manageweb.constant.Constants;
 import com.kuaidao.manageweb.constant.MenuEnum;
 import com.kuaidao.manageweb.entity.UpdatePasswordSettingReq;
+import com.kuaidao.manageweb.feign.changeorg.ChangeOrgFeignClient;
+import com.kuaidao.manageweb.feign.clue.ClueRelateFeignClient;
+import com.kuaidao.manageweb.feign.clue.MyCustomerFeignClient;
 import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
 import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
 import com.kuaidao.manageweb.feign.role.RoleManagerFeignClient;
 import com.kuaidao.manageweb.feign.user.SysSettingFeignClient;
 import com.kuaidao.manageweb.feign.user.UserInfoFeignClient;
+import com.kuaidao.manageweb.util.CommUtil;
+import com.kuaidao.manageweb.util.IdUtil;
 import com.kuaidao.sys.constant.SysConstant;
 import com.kuaidao.sys.constant.UserErrorCodeEnum;
 import com.kuaidao.sys.dto.dictionary.DictionaryItemRespDTO;
 import com.kuaidao.sys.dto.organization.OrganizationDTO;
+import com.kuaidao.sys.dto.organization.OrganizationQueryDTO;
 import com.kuaidao.sys.dto.role.RoleInfoDTO;
 import com.kuaidao.sys.dto.role.RoleQueryDTO;
 import com.kuaidao.sys.dto.user.*;
@@ -80,10 +82,8 @@ public class UserController {
     private MyCustomerFeignClient myCustomerFeignClient;
     @Autowired
     private ClueRelateFeignClient clueRelateFeignClient;
-    /** 默认起始页 **/
-    private static final int PAGE_NUMBER = 1;
-    /** 默认分页条数 **/
-    private static final int PAGE_SIZE = 100;
+    @Autowired
+    private ChangeOrgFeignClient changeOrgFeignClient;
 
     /***
      * 用户列表页
@@ -297,7 +297,7 @@ public class UserController {
     @RequiresPermissions("sys:userManager:edit")
     @LogRecord(description = "修改用户信息", operationType = OperationType.UPDATE, menuName = MenuEnum.USER_MANAGEMENT)
     public JSONResult updateMenu(@Valid @RequestBody UserInfoReq userInfoReq, BindingResult result) {
-        long  start  = System.currentTimeMillis();
+        long start = System.currentTimeMillis();
         if (result.hasErrors()) {
             return CommonUtil.validateParam(result);
         }
@@ -308,7 +308,7 @@ public class UserController {
         }
         // 是否带走资源校验
         if (userInfoReq.getTakeAwayClueShow()) {
-            long  start1  = System.currentTimeMillis();
+            long start1 = System.currentTimeMillis();
             // 不带走资源判断当前电销顾问手里有没有资源（我的客户列表是否有数据）
             if (Constants.NOT_TAKE_AWAY_CLUE.equals(userInfoReq.getTakeAwayClue())) {
                 // 获取我的客户列表
@@ -328,12 +328,27 @@ public class UserController {
                 clueRelateReq.setTeleSaleId(userInfoReq.getId());
                 // 更新电销顾问电销组组织相关信息
                 clueRelateFeignClient.updateClueRelateByTeleSaleId(clueRelateReq);
+                // 添加换组记录
+                ChangeOrgRecordReqDto changeOrgRecordReqDto =  ChangeOrgRecordReqDto.newBuilder()
+                                    //主键
+                                    .id(IdUtil.getUUID())
+                                    //用户id
+                                    .userId(userInfoReq.getId())
+                                    //换组之后组织
+                                    .newOrgId(userInfoReq.getOrgId())
+                                    //换组之前组织
+                                     .oldOrgId(userInfoReq.getOldOrgId())
+                                    //创建人
+                                    .createUser(CommUtil.getCurLoginUser().getId())
+                                    //创建时间
+                                    .createTime(new Date()).build();
+                changeOrgFeignClient.insert(changeOrgRecordReqDto);
 
             }
-            logger.info("修改资源所属组织共耗时：{}",System.currentTimeMillis()-start1);
+            logger.info("修改资源所属组织共耗时：{}", System.currentTimeMillis() - start1);
         }
         JSONResult<String> jsonResult = userInfoFeignClient.update(userInfoReq);
-        logger.info("修改用户共耗时：{}",System.currentTimeMillis()-start);
+        logger.info("修改用户共耗时：{}", System.currentTimeMillis() - start);
         return jsonResult;
     }
 
