@@ -325,6 +325,7 @@ public class TeleGroupResourceEfficiencyController {
 
     private List<Object> getHeadTitle() {
         List<Object> headTitleList = new ArrayList<>();
+        headTitleList.add("序号");
         headTitleList.add("电销组");
         headTitleList.add("资源类别");
         headTitleList.add("媒介");
