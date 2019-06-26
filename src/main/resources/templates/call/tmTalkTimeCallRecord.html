@@ -27,9 +27,29 @@
     <div class="mainSearchBg">        
         <div class="mainSearchFormBox">
             <el-form :inline="true" class="demo-form-inline mainSearchForm" >
-                <el-form-item label="电销顾问:" label-width="55px">
-                    <el-input placeholder="电销顾问"  v-model="searchForm.accoutName"></el-input>
+                <el-form-item label="电销组:">
+                    <el-select v-model="searchForm.teleGroupId" placeholder="电销组" value-key="id" clearable @change="changeTeleGroup" @clear="clearTeleGroupList">
+                        <el-option
+                            v-for="item in teleGroupList"
+                            :key="item.id"
+                            :label="item.name"
+                            :value="item.id">
+                        </el-option>
+                    </el-select>
                 </el-form-item>
+                <el-form-item label="电销顾问:">
+                    <el-select v-model="searchForm.accountId" placeholder="电销顾问" value-key="id" clearable>
+                        <el-option
+                            v-for="item in tmList"
+                            :key="item.id"
+                            :label="item.name"
+                            :value="item.id">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <!--<el-form-item label="电销顾问:" label-width="55px">-->
+                    <!--<el-input placeholder="电销顾问"  v-model="searchForm.accoutName"></el-input>-->
+                <!--</el-form-item>-->
                 <el-form-item label="通话时间段:">
                     <el-date-picker v-model="searchForm.startTime" type="date" placeholder="选择开始日期"  value-format=" yyyy-MM-dd HH:mm:ss" format="yyyy-MM-dd HH:mm:ss"></el-date-picker>
                 </el-form-item>
@@ -63,7 +83,7 @@
 <!-- import common js-->
 <div th:include="_footer_include :: #jsLib"></div>
 <script th:inline="javascript">
-   
+  var teleGroupList = [[${teleGroupList}]];
 </script>
 
 <!-- 当前页面的js -->
