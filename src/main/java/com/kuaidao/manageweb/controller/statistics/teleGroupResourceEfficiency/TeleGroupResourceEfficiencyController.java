@@ -115,6 +115,7 @@ public class TeleGroupResourceEfficiencyController {
         resMap.put("totalData", totalData);
         resMap.put("tableData", pageData);
         return new JSONResult<Map<String,Object>>().success(resMap);*/
+        initAuth(teleGroupResourceEfficiencyQueryDto);
         JSONResult<Map<String, Object>> firstClueValidListJr = clueConnectValidRateFeignClient.firstClueValidList(teleGroupResourceEfficiencyQueryDto);
         return firstClueValidListJr;
     }
