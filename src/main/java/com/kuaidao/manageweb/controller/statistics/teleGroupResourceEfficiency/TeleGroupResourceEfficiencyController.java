@@ -9,6 +9,7 @@ import com.kuaidao.common.constant.SystemCodeConstant;
 import com.kuaidao.common.entity.IdEntity;
 import com.kuaidao.common.entity.JSONResult;
 import com.kuaidao.common.entity.PageBean;
+import com.kuaidao.common.util.CommonUtil;
 import com.kuaidao.common.util.ExcelUtil;
 import com.kuaidao.manageweb.feign.dictionary.DictionaryItemFeignClient;
 import com.kuaidao.manageweb.feign.organization.OrganizationFeignClient;
@@ -150,14 +151,22 @@ public class TeleGroupResourceEfficiencyController {
         List<TeleGroupResourceEfficiencyAllDto> groupValidList = dataJR.getData();
         List<List<Object>> dataList = new ArrayList<List<Object>>();
         dataList.add(getHeadTitle());
+        String curOrgName = "";
+        String curCategoryType = "";
+        String curMedia = "";
+        String curProjectName = "";
         for (int i=0;i<groupValidList.size();i++) {
             TeleGroupResourceEfficiencyAllDto curDto = groupValidList.get(i);
             List<Object> curList = new ArrayList<>();
             curList.add(i + 1);
             //设置 非首日属性
-            setNonFirstClueValidField(curList,curDto);
+            setNonFirstClueValidField(curList,curDto,curOrgName,curCategoryType,curMedia,curProjectName);
             //设置 首日属性
             setFirstClueValidField(curList,curDto);
+            curOrgName = curDto.getOrgName();
+            curCategoryType = curDto.getResourceCategoryName();
+            curMedia = curDto.getResourceMediumName();
+            curProjectName = curDto.getProjectTypeName();
             dataList.add(curList);
         }
        
@@ -191,7 +200,6 @@ public class TeleGroupResourceEfficiencyController {
         curList.add(CommUtil.nullIntegerToZero(curDto.getFirstNotConnectNotEffectiveResources()));
         curList.add(formatPercent(curDto.getFirstFollowRate()));
         curList.add(formatPercent(curDto.getFirstResourceConnectRate()));
-        curList.add(formatPercent(curDto.getFirstResourceConnectRate()));
         curList.add(formatPercent(curDto.getFirstResourceEffectiveRate()));
         curList.add(formatPercent(curDto.getFirstConnectionRate()));
     }
@@ -201,11 +209,30 @@ public class TeleGroupResourceEfficiencyController {
     * @param curList
     * @param curDto
      */
-    private void setNonFirstClueValidField(List<Object> curList,TeleGroupResourceEfficiencyAllDto curDto) {
-        curList.add(curDto.getOrgName());
-        curList.add(curDto.getResourceCategoryName());
-        curList.add(curDto.getResourceMediumName());
-        curList.add(curDto.getProjectTypeName());
+    private void setNonFirstClueValidField(List<Object> curList,TeleGroupResourceEfficiencyAllDto curDto,String curOrgName
+            , String curCategoryType,String curMedia, String curProjectName) {
+        String orgName = curDto.getOrgName();
+        if(CommonUtil.isNotBlank(curOrgName) && curOrgName.equals(orgName)) {
+            orgName = "";
+        }
+        curList.add(orgName);
+        
+        String resourceCategoryName = curDto.getResourceCategoryName();
+        if(CommonUtil.isNotBlank(curCategoryType) && curCategoryType.equals(resourceCategoryName)) {
+            resourceCategoryName="";
+        }
+        curList.add(resourceCategoryName);
+        
+        String resourceMediumName = curDto.getResourceMediumName();
+        if(CommonUtil.isNotBlank(curMedia) && curMedia.equals(resourceMediumName)) {
+            resourceMediumName="";
+        }
+        curList.add(resourceMediumName);
+        String projectTypeName = curDto.getProjectTypeName();
+        if(CommonUtil.isNotBlank(curProjectName) && curProjectName.equals(projectTypeName)) {
+            projectTypeName ="";
+        }
+        curList.add(projectTypeName);
         curList.add(CommUtil.nullIntegerToZero(curDto.getIssuedResources()));
         curList.add(CommUtil.nullIntegerToZero(curDto.getFollowResources()));
         curList.add(CommUtil.nullIntegerToZero(curDto.getFirstResources()));
@@ -269,7 +296,9 @@ public class TeleGroupResourceEfficiencyController {
         // 电销组
         OrganizationQueryDTO busGroupReqDTO = new OrganizationQueryDTO();
         busGroupReqDTO.setSystemCode(SystemCodeConstant.HUI_JU);
-        busGroupReqDTO.setParentId(orgId);
+        if(orgId!=null) {
+            busGroupReqDTO.setParentId(orgId);
+        }
         busGroupReqDTO.setOrgType(orgType);
         JSONResult<List<OrganizationRespDTO>> orgJr = organizationFeignClient.queryOrgByParam(busGroupReqDTO);
         return orgJr.getData();
@@ -294,7 +323,7 @@ public class TeleGroupResourceEfficiencyController {
                 teleGroupList.add(organizationRespDTO);
             }
         }else {
-            teleGroupList =  getOrgGroupByOrgId(curLoginUser.getOrgId(),OrgTypeConstant.DXZ);
+            teleGroupList =  getOrgGroupByOrgId(null,OrgTypeConstant.DXZ);
         }
         OrganizationQueryDTO organizationQueryDTO  = new OrganizationQueryDTO();
         organizationQueryDTO.setParentId(curLoginUser.getOrgId());
@@ -325,6 +354,7 @@ public class TeleGroupResourceEfficiencyController {
 
     private List<Object> getHeadTitle() {
         List<Object> headTitleList = new ArrayList<>();
+        headTitleList.add("序号");
         headTitleList.add("电销组");
         headTitleList.add("资源类别");
         headTitleList.add("媒介");
