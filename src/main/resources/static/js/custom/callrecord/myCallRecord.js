@@ -235,10 +235,6 @@ var myCallRecordVm = new Vue({
             this.initCallRecordData();
     	},
     	downloadAudio(id,url,callSource){
-    		if(callSource=='2'){
-    			location.href=url;
-    			return;
-    		}
     		 var param = {};
     		 param.id=id;
     	   	 axios.post('/call/callRecord/getRecordFile',param)
