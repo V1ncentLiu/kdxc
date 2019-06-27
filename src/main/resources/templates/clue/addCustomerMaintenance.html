@@ -87,14 +87,13 @@
                             </el-select>
                         </el-form-item>
                     </el-col>
-                    <el-col :span="8">
+                    <!-- <el-col :span="8">
                         <el-form-item label="手机号：" prop="phone" :label-width="formLabelWidth">
                             <a>
                                 <el-input v-model="form.phone" maxLength="11"
                                             @keyup.native="phoneNumber" style="width: 300px;margin-right: 10px;"
                                             v-show="isshowPhone"></el-input>
                                 {{form.customerPhone}}
-                                <!-- <i class="el-icon-phone-outline" @click="gettelNumberIcon(form.customerPhone)"></i> -->
                                 <img th:src="@{/images/tel.png}" @click="gettelNumberIcon(form.customerPhone)"
                                         style="margin:0 5px;width:22px;cursor: pointer;vertical-align: middle;" alt="">
                             </a>
@@ -108,9 +107,41 @@
                                     v-else-if="form.customerPhone2 !=null && form.customerPhone2 !=''">查看多个手机号</span></span>
                             </span>
                         </el-form-item>
+                    </el-col> -->                
+                    <!-- 手机号 -->
+                    <el-col :span="8">
+                        <el-form-item label="手机号：" prop="phone" :label-width="formLabelWidth">
+                            <el-input v-model="form.phone" maxLength="11" @keyup.native="phoneNumber" style="width: 80%;" v-show="isshowPhone"></el-input>
+                            <span style="height: 36px;display: block;float: left;">{{form.customerPhone}}</span>
+                            <img th:src="@{/images/tel.png}" @click="gettelNumberIcon(form.customerPhone)" style="margin:0 5px;width:25px;cursor: pointer;vertical-align: middle;" alt="">
+                            <el-button type="primary" size="mini" @click="showAddDomain" v-if="showAddDomainBtn"><i class="el-icon-plus"></i></el-button>
+                        </el-form-item>
                     </el-col>
-                </el-row>
-                <el-row>
+                    <el-form :model="dynamicValidateForm" ref="dynamicValidateForm" v-show="phoneShow">
+                        <el-form-item
+                            style="float: left;width: 33.3333%;"
+                            :label-width="formLabelWidth"
+                            v-for="(domain, index) in dynamicValidateForm.domains"
+                            :label="'手机号' + (parseInt(index)+2) + '：'" 
+                            :key="domain.key"
+                            :prop="'domains.' + index + '.value'"
+                            >
+                            <div v-if="editPhone == 0 && domain.edit ==1">
+                                <el-input  v-model="domain.value" disabled maxLength="11" @keyup.native="phoneNumber" style="width: 75%;margin-right: 10px;"></el-input>
+                                <img th:src="@{/images/tel.png}" @click="gettelNumberIcon(domain.value)" style="width:25px;cursor: pointer;vertical-align: middle;" alt="">
+                            </div>
+                            <div v-if="editPhone == 0 && domain.edit ==0">
+                                <el-input  v-model="domain.value" maxLength="11" @keyup.native="phoneNumber" style="width: 75%;margin-right: 10px;"></el-input>
+                                <img th:src="@{/images/tel.png}" @click="gettelNumberIcon(domain.value)" style="width:25px;cursor: pointer;vertical-align: middle;" alt="">
+                            </div>
+                            <div v-else-if="editPhone == 1">
+                                <el-input  v-model="domain.value" maxLength="11" @keyup.native="phoneNumber" style="width: 75%;margin-right: 10px;"></el-input>
+                                <img th:src="@{/images/tel.png}" @click="gettelNumberIcon(domain.value)" style="width:25px;cursor: pointer;vertical-align: middle;" alt="">
+                            </div>
+                        </el-form-item>
+                        <el-button type="primary" size="mini" @click="addDomain"><i class="el-icon-plus"></i></el-button>
+                    </el-form>
+                    <!-- 手机号结束 -->
                     <el-col :span="8">
                         <el-form-item label="QQ：" :label-width="formLabelWidth">
                             <el-input v-model="form.qq" autocomplete="off" maxLength="20" @keyup.native="qqnumber"></el-input>
@@ -118,13 +149,11 @@
                     </el-col>
                     <el-col :span="8">
                         <el-form-item label="微信：" prop="wechat" :label-width="formLabelWidth">
-                            <el-input v-model="form.wechat" autocomplete="off" style="width: 200px;margin-right: 10px;" maxLength="20"></el-input>
+                            <el-input v-model="form.wechat" autocomplete="off" maxLength="20"></el-input>
                             <span v-if="form.wechat2 || form.wechatUrl">
                                 <span @click="openWechat" style="padding-left: 5px; color: rgb(0, 114, 255); cursor: pointer;">查看多个微信/二维码</span>
                             </span>
-                            <span v-else="">
-	                           <el-button type="primary"  @click="openWechat"><i class="el-icon-plus"></i>微信/二维码</el-button>
-                            </span>
+	                        <el-button type="primary" size="mini" @click="openWechat"><i class="el-icon-plus"></i>微信/二维码</el-button>
                         </el-form-item>
                     </el-col>
                     <el-col :span="8">
@@ -134,8 +163,6 @@
                                       maxLength="30"></el-input>
                         </el-form-item>
                     </el-col>
-                </el-row>
-                <el-row>
                     <el-col :span="8">
                         <el-form-item label="性别：" :label-width="formLabelWidth">
                             <el-select v-model="form.customerSex" placeholder="请选择" style="width: 100%;" clearable>
@@ -155,8 +182,6 @@
                             </el-select>
                         </el-form-item>
                     </el-col>
-                </el-row>
-                <el-row>
                     <el-col :span="8">
                         <el-form-item label="选址情况：" :label-width="formLabelWidth">
                             <el-select v-model="form.address" placeholder="请选择" style="width: 100%;" clearable>
@@ -950,6 +975,8 @@
     el: '#addCustomer',
     data: function () {
       return {
+        showAddDomainBtn:true,
+        phoneShow:false,//手机号2默认不显示
         audioShow:false,//播放器默认不显示
         expireTimeOption: {
           disabledDate(date) { //disabledDate 文档上：设置禁用状态，参数为当前日期，要求返回 Boolean
@@ -1232,6 +1259,10 @@
             }
         },
         methods: {
+            showAddDomain(){//点击添加手机号
+                this.showAddDomainBtn=false;
+                this.phoneShow=true;
+            },
           getPhones(cus){
             var phones = '';
             phones = cus.phone;
@@ -1678,6 +1709,7 @@
                 }
             },
             addDomain(item) {
+                this.phoneShow=true;//显示手机号2
                 var itemLength = this.dynamicValidateForm.domains.length;
                 if (itemLength < 4) {
                     this.dynamicValidateForm.domains.push({
@@ -2491,6 +2523,9 @@
         console.log(phoneArr)
         if (phoneArr.length > 0) {
           this.buttonType = 'B';//按钮状态
+          this.showAddDomainBtn=false;//点击增加手机号组按钮
+          this.phoneShow=true;//增加手机号组显示
+
         } else {
           this.buttonType = 'A';//按钮状态
         }
