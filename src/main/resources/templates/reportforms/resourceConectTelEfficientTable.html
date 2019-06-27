@@ -84,7 +84,7 @@
                     </el-row>
                 </el-form>
                 <div class="mainSearchBtnBox">
-                    <el-button icon="el-icon-search" type="primary" @click="searchTable()" class="searchBtn">搜索
+                    <el-button icon="el-icon-search" type="primary" @click="searchTable(1)" class="searchBtn">搜索
                     </el-button>
                     <span style="color: #5c6be8;cursor: pointer;margin:0 10px;" @click="toogleClick"><span
                             v-if="isShow">收起</span><span v-else>展开更多</span><i
@@ -188,6 +188,7 @@
                         </template>
                     </el-table-column>
                 </el-table>
+                    <table-pagination :pager="pager" :papernum="[3, 5, 10]" @change="handleClick('page')"></table-pagination>
                     </el-tab-pane>
                     <el-tab-pane label="首日资源有效" name="1">
                         <el-table  ref="tableData" tooltip-effect="dark" style="width: 100%" border :data="tableData"
@@ -218,10 +219,10 @@
                               <span :class="{'act':scope.row.total != ''}">{{scope.row.followResources}}</span>
                             </template>
                         </el-table-column>
-                        <el-table-column prop="firstResources" align="center"
+                        <el-table-column prop="connectResources" align="center"
                             label="首日接通资源量">
                             <template slot-scope="scope">
-                                <span :class="{'act':scope.row.total != ''}">{{scope.row.firstResources}}</span>
+                                <span :class="{'act':scope.row.total != ''}">{{scope.row.connectResources}}</span>
                             </template>
                         </el-table-column>
                         <el-table-column prop="notConnectResources" align="center"
@@ -279,13 +280,13 @@
                             </template>
                         </el-table-column>
                     </el-table>
+                    <table-pagination :pager="pager" :papernum="[3, 5, 10]" @change="handleClick('page')"></table-pagination>
                     </el-tab-pane>
                 </el-tabs>
             </el-row>
-            <el-row>
-               
-                <table-pagination :pager="pager" @change="handleClick('page')"></table-pagination>
-            </el-row>
+            <!-- <el-row>
+                <table-pagination :pager="pager" :papernum="[3, 5, 10]" @change="handleClick('page')"></table-pagination>
+            </el-row> -->
         </div>
     </div>
     <!-- import common js-->
@@ -294,15 +295,14 @@
 <style>
   .act{
     font-weight: bold;
-    /* color:#000; */
   }
 </style>
 <script th:inline="javascript">
-     var resourceClassList = [[${clueCategoryList}]]; // 资源类别
-        var mediumList = [[${mediumList}]]; //媒介
-        var resourceItemList = [[${projectList}]]; //资源项目
-        var saleGroupList = [[${saleGroupList}]]; //电销组
-        var orgId = [[${curOrgId}]]; //电销组id
+    var resourceClassList = [[${clueCategoryList}]]; // 资源类别
+    var mediumList = [[${mediumList}]]; //媒介
+    var resourceItemList = [[${projectList}]]; //资源项目
+    var saleGroupList = [[${saleGroupList}]]; //电销组
+    var orgId = [[${curOrgId}]]; //电销组id
 
     function List() {
         this.dataStore = [];
@@ -397,7 +397,7 @@
                 pager: {
                     total: 0,
                     currentPage: 1,
-                    pageSize: 20
+                    pageSize: 3
                 },
                 startTimeEnd: '',
                 endTimeEnd: '',
@@ -434,7 +434,7 @@
                 this.form.resourceId = this.resourceClassIdEnd;
                 this.form.mediumId = this.mediumIdEnd;
                 this.form.resourceProjectId = this.resourceProjectIdEnd;
-                this.form.teleGorupId = this.orgIdEnd
+                this.form.teleGorupId = this.orgIdEnd;
                 if (type == 'tab') {
                     this.searchTable(1);
                 } else {
@@ -504,6 +504,7 @@
                 }
                 axios.post(url, param).then(function (response) {
                     if (!response) {
+                        mainDivVM.loading = false;
                         mainDivVM.$message({
                             message: "接口调用失败",
                             type: 'error'
@@ -512,6 +513,7 @@
                     }
                     var resobj = response.data;
                     if (!resobj) {
+                        mainDivVM.loading = false;
                         mainDivVM.$message({
                             message: "接口调用失败",
                             type: 'error'
@@ -525,20 +527,23 @@
                             type: 'error'
                         });
                         return;
-                    } 
-                    else if (resobj.data && resobj.data.tableData && resobj.data.totalData) {
+                    }else if (resobj.data && resobj.data.tableData) {
                         var resobjData = resobj.data;
                         var tableData = resobjData.tableData;
+                        if( tableData.data.length && resobj.data.totalData ){
+                            for (var i = 0; i < resobjData.totalData.length; i++) {
+                                Vue.set(resobjData.totalData[i], 'total', '合计')
+                            }
+                            for (var j = 0; j < tableData.data.length; j++) {
+                                Vue.set(tableData.data[j], 'total', '')
+                                Vue.set(tableData.data[j], 'orgName', '')
+                            }
+                           
+                            mainDivVM.summaryFun(resobjData.totalData, mainDivVM.formatTreeList(tableData.data))
+                        }else{
+                            mainDivVM.tableData = tableData.data;
+                        }
         
-                        for (var i = 0; i < resobjData.totalData.length; i++) {
-                            Vue.set(resobjData.totalData[i], 'total', '合计')
-                        }
-                        for (var j = 0; j < tableData.data.length; j++) {
-                            Vue.set(tableData.data[j], 'total', '')
-                            Vue.set(tableData.data[j], 'orgName', '')
-                        }
-                       
-                        mainDivVM.summaryFun(resobjData.totalData, mainDivVM.formatTreeList(tableData.data))
                         mainDivVM.pager.currentPage = tableData.currentPage;
                         mainDivVM.pager.total = tableData.total;
                         mainDivVM.loading = false;
