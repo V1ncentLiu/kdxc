@@ -303,7 +303,7 @@ public class CallRecordController {
                     if (businessLine == null) {
                         return new JSONResult<Map<String, Object>>().success(null);
                     }
-                    List<UserInfoDTO> userInfoList = getTeleSaleByBusinessLine(businessLine);
+                    List<UserInfoDTO> userInfoList = getTeleSaleByOrgId(curLoginUser.getOrgId());
                     if (CollectionUtils.isEmpty(userInfoList)) {
                         return new JSONResult<Map<String, Object>>().success(null);
                     }
@@ -398,11 +398,11 @@ public class CallRecordController {
                 myCallRecordReqDTO.setAccountIdList(idList);
 
             }else {
-                Integer businessLine = curLoginUser.getBusinessLine();
-                if(businessLine==null) {
-                    return new JSONResult<Map<String,Object>>().success(null);
-                }
-                List<UserInfoDTO>  userInfoList  = getTeleSaleByBusinessLine(businessLine);
+//                Integer businessLine = curLoginUser.getBusinessLine();
+//                if(businessLine==null) {
+//                    return new JSONResult<Map<String,Object>>().success(null);
+//                }
+                List<UserInfoDTO>  userInfoList  = getTeleSaleByOrgId(curLoginUser.getOrgId());
                 if (CollectionUtils.isEmpty(userInfoList)) {
                     return new JSONResult<Map<String,Object>>().success(null);
                 }
